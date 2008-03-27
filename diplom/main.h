@@ -1,0 +1,17 @@
+/////////////////////////////////////////////////////////////////////////////
+// Name:        main.h
+// Purpose:     main window
+// Author:      Ralph Schurade
+// Modified by:
+// Created:     03/27/08
+// RCS-ID:      
+// Copyright:   
+// Licence:     
+/////////////////////////////////////////////////////////////////////////////
+
+// Define a new application
+class MyApp: public wxApp
+{
+  public:
+    bool OnInit(void);
+};

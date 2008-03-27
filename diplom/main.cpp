@@ -1,0 +1,65 @@
+/////////////////////////////////////////////////////////////////////////////
+// Name:        main.cpp
+// Purpose:     main window
+// Author:      Ralph Schurade
+// Modified by:
+// Created:     03/27/08
+// RCS-ID:      
+// Copyright:   
+// Licence:     
+/////////////////////////////////////////////////////////////////////////////
+
+#include "wx/wx.h"
+#include "wx/mdi.h"
+#include "wx/laywin.h"
+
+#include "main.h"
+#include "mainFrame.h"
+
+MainFrame *frame = NULL;
+
+IMPLEMENT_APP(MyApp)
+
+// Initialise this in OnInit, not statically
+bool MyApp::OnInit(void)
+{
+  // Create the main frame window
+
+  frame = new MainFrame(NULL, wxID_ANY, _T("Sash Demo"), wxPoint(0, 0), wxSize(500, 400),
+                      wxDEFAULT_FRAME_STYLE |
+                      wxNO_FULL_REPAINT_ON_RESIZE |
+                      wxHSCROLL | wxVSCROLL);
+
+  // Give it an icon (this is ignored in MDI mode: uses resources)
+#ifdef __WXMSW__
+  frame->SetIcon(wxIcon(_T("sashtest_icn")));
+#endif
+
+  // Make a menubar
+  wxMenu *file_menu = new wxMenu;
+
+  file_menu->Append(SASHTEST_NEW_WINDOW, _T("&New window"));
+  file_menu->Append(SASHTEST_TOGGLE_WINDOW, _T("&Toggle window"));
+  file_menu->Append(SASHTEST_QUIT, _T("&Exit"));
+
+  wxMenu *help_menu = new wxMenu;
+  help_menu->Append(SASHTEST_ABOUT, _T("&About"));
+
+  wxMenuBar *menu_bar = new wxMenuBar;
+
+  menu_bar->Append(file_menu, _T("&File"));
+  menu_bar->Append(help_menu, _T("&Help"));
+
+  // Associate the menu bar with the frame
+  frame->SetMenuBar(menu_bar);
+
+  frame->CreateStatusBar();
+
+  frame->Show(true);
+
+  SetTopWindow(frame);
+
+  return true;
+}
+
+
