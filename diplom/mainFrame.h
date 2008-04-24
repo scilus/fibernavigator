@@ -1,10 +1,18 @@
 #ifndef MAINFRAME_H_
 #define MAINFRAME_H_
 
+#include "MyGLCanvas.h"
+#include "theDataset.h"
+
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
 {
-  public:
+	
+private:
+	TheDataset *dataset;
+
+	
+public:
 
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
 
@@ -12,28 +20,46 @@ class MainFrame: public wxMDIParentFrame
     void OnAbout(wxCommandEvent& event);
     void OnNewWindow(wxCommandEvent& event);
     void OnQuit(wxCommandEvent& event);
+    void OnLoad(wxCommandEvent& event);
     void OnToggleWindow(wxCommandEvent& event);
     void OnSashDrag(wxSashEvent& event);
 
-protected:
-    wxSashLayoutWindow* m_topWindow;
+public:
+    wxSashLayoutWindow* m_leftWindow;
+    wxSashLayoutWindow* m_rightWindow;
     wxSashLayoutWindow* m_leftWindow1;
-    wxSashLayoutWindow* m_leftWindow2;
-    wxSashLayoutWindow* m_bottomWindow;
+    wxSashLayoutWindow* m_rightWindow1;
+    wxSashLayoutWindow* m_topLeftWindow;
+    wxSashLayoutWindow* m_topRightWindow;
+    wxSashLayoutWindow* m_bottomLeftWindow;
+    wxSashLayoutWindow* m_bottomRightWindow;
+    
+    MyGLCanvas* m_gl1;
+    MyGLCanvas* m_gl2;
+    MyGLCanvas* m_gl3;
+    MyGLCanvas* m_gl4;
+    
+    wxTextCtrl* m_textWindow;
+    wxPanel* m_panel1;
+    wxStaticBitmap* m_statBitmap1;
 
 DECLARE_EVENT_TABLE()
 };
 
-#define SASHTEST_QUIT        wxID_EXIT
-#define SASHTEST_NEW_WINDOW  2
-#define SASHTEST_REFRESH     3
-#define SASHTEST_ABOUT       wxID_ABOUT
-#define SASHTEST_TOGGLE_WINDOW 6
+#define VIEWER_QUIT        wxID_EXIT
+#define VIEWER_NEW_WINDOW  2
+#define VIEWER_REFRESH     3
+#define VIEWER_ABOUT       wxID_ABOUT
+#define VIEWER_LOAD		4
 
-#define ID_WINDOW_TOP       100
-#define ID_WINDOW_LEFT1     101
-#define ID_WINDOW_LEFT2     102
-#define ID_WINDOW_BOTTOM    103
+#define ID_WINDOW_LEFT    	100
+#define ID_WINDOW_RIGHT  	101
+#define ID_WINDOW_LEFT1   	102
+#define ID_WINDOW_RIGHT1  	103
+#define ID_WINDOW_LEFT_TOP   	104
+#define ID_WINDOW_RIGHT_TOP  	105
+#define ID_WINDOW_LEFT_BOTTOM   	106
+#define ID_WINDOW_RIGHT_BOTTOM  	107
 
 
 #endif /*MAINFRAME_H_*/

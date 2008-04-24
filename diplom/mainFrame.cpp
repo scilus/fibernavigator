@@ -1,20 +1,18 @@
 #include "wx/wx.h"
 #include "wx/laywin.h"
-
-#include "myChild.h"
-#include "myCanvas.h"
+#include "wx/filedlg.h"
+#include "wx/statbmp.h"
 
 #include "mainFrame.h"
 
 int winNumber = 1;
 
 BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
-    EVT_MENU(SASHTEST_ABOUT, MainFrame::OnAbout)
-    EVT_MENU(SASHTEST_NEW_WINDOW, MainFrame::OnNewWindow)
+    EVT_MENU(VIEWER_ABOUT, MainFrame::OnAbout)
     EVT_SIZE(MainFrame::OnSize)
-    EVT_MENU(SASHTEST_QUIT, MainFrame::OnQuit)
-    EVT_MENU(SASHTEST_TOGGLE_WINDOW, MainFrame::OnToggleWindow)
-    EVT_SASH_DRAGGED_RANGE(ID_WINDOW_TOP, ID_WINDOW_BOTTOM, MainFrame::OnSashDrag)
+    EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
+    EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
+    EVT_SASH_DRAGGED_RANGE(ID_WINDOW_LEFT, ID_WINDOW_RIGHT, MainFrame::OnSashDrag)
 END_EVENT_TABLE()
 
 
@@ -23,89 +21,159 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     const long style):
   wxMDIParentFrame(parent, id, title, pos, size, style)
 {
-  // Create some dummy layout windows
+	// A window to the left of the client window
+	wxSashLayoutWindow* win = new wxSashLayoutWindow(this, ID_WINDOW_LEFT,
+		                               wxDefaultPosition, wxSize(200, 30),
+		                               wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+	win->SetDefaultSize(wxSize(200, 1000));
+	win->SetOrientation(wxLAYOUT_VERTICAL);
+	win->SetAlignment(wxLAYOUT_LEFT);
+	win->SetBackgroundColour(wxColour(0, 255, 0));
+	win->SetSashVisible(wxSASH_RIGHT, true);
+	win->SetExtraBorderSize(10);
+	
+	m_textWindow = new wxTextCtrl(win, wxID_ANY, wxEmptyString, 
+			  wxDefaultPosition, wxDefaultSize,
+			  wxTE_MULTILINE|wxSUNKEN_BORDER);
+	
+	m_textWindow->SetValue(_T("Stats"));
+	m_leftWindow = win;
+	
+	// Main Window
+	win = new wxSashLayoutWindow(this, ID_WINDOW_RIGHT, 
+			  wxDefaultPosition, wxSize(200, 30),
+			  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+	
+	win->SetDefaultSize(wxSize(1000, 1000));
+	win->SetOrientation(wxLAYOUT_VERTICAL);
+	win->SetAlignment(wxLAYOUT_LEFT);
+	win->SetBackgroundColour(wxColour(0, 0, 0));
+	m_rightWindow = win;
 
-  // A window like a toolbar
-  wxSashLayoutWindow* win =
-      new wxSashLayoutWindow(this, ID_WINDOW_TOP,
-                             wxDefaultPosition, wxSize(200, 30),
-                             wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+  // main window left side 
+    win = new wxSashLayoutWindow(m_rightWindow, ID_WINDOW_LEFT1, 
+  		  wxDefaultPosition, wxSize(200, 30),
+  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 
-  win->SetDefaultSize(wxSize(1000, 30));
-  win->SetOrientation(wxLAYOUT_HORIZONTAL);
-  win->SetAlignment(wxLAYOUT_TOP);
-  win->SetBackgroundColour(wxColour(255, 0, 0));
-  win->SetSashVisible(wxSASH_BOTTOM, true);
+    win->SetDefaultSize(wxSize(300, 600));
+    win->SetOrientation(wxLAYOUT_VERTICAL);
+    win->SetAlignment(wxLAYOUT_LEFT);
+    win->SetBackgroundColour(wxColour(0, 0, 0));
+    m_leftWindow1 = win;
 
-  m_topWindow = win;
+    // main window right side 
+    win = new wxSashLayoutWindow(m_rightWindow, ID_WINDOW_RIGHT1, 
+      		  wxDefaultPosition, wxSize(200, 30),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 
-  // A window like a statusbar
-  win = new wxSashLayoutWindow(this, ID_WINDOW_BOTTOM,
-                               wxDefaultPosition, wxSize(200, 30),
-                               wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-  win->SetDefaultSize(wxSize(1000, 30));
-  win->SetOrientation(wxLAYOUT_HORIZONTAL);
-  win->SetAlignment(wxLAYOUT_BOTTOM);
-  win->SetBackgroundColour(wxColour(0, 0, 255));
-  win->SetSashVisible(wxSASH_TOP, true);
+    win->SetDefaultSize(wxSize(300, 600));
+    win->SetOrientation(wxLAYOUT_VERTICAL);
+    win->SetAlignment(wxLAYOUT_RIGHT);
+    win->SetBackgroundColour(wxColour(0, 0, 0));
+    m_rightWindow1 = win;
 
-  m_bottomWindow = win;
+    // widgte window top left 
+    win = new wxSashLayoutWindow(m_leftWindow1, ID_WINDOW_LEFT_TOP, 
+      		  wxDefaultPosition, wxSize(200, 30),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetSashVisible(wxSASH_RIGHT, true);
+    win->SetSashVisible(wxSASH_BOTTOM, true);
+    win->SetDefaultSize(wxSize(300, 300));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_TOP);
+    win->SetBackgroundColour(wxColour(255, 0, 0));
+    m_topLeftWindow = win;
 
-  // A window to the left of the client window
-  win = new wxSashLayoutWindow(this, ID_WINDOW_LEFT1,
-                               wxDefaultPosition, wxSize(200, 30),
-                               wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-  win->SetDefaultSize(wxSize(120, 1000));
-  win->SetOrientation(wxLAYOUT_VERTICAL);
-  win->SetAlignment(wxLAYOUT_LEFT);
-  win->SetBackgroundColour(wxColour(0, 255, 0));
-  win->SetSashVisible(wxSASH_RIGHT, true);
-  win->SetExtraBorderSize(10);
+    // widgte window bottom left 
+    win = new wxSashLayoutWindow(m_leftWindow1, ID_WINDOW_LEFT_BOTTOM, 
+      		  wxDefaultPosition, wxSize(200, 30),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetSashVisible(wxSASH_RIGHT, true);
+    win->SetDefaultSize(wxSize(300, 300));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_BOTTOM);
+    win->SetBackgroundColour(wxColour(255, 255, 0));
+    m_bottomLeftWindow = win;
+    
 
-  wxTextCtrl* textWindow = new wxTextCtrl(win, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-        wxTE_MULTILINE|wxSUNKEN_BORDER);
-//        wxTE_MULTILINE|wxNO_BORDER);
-  textWindow->SetValue(_T("A help window"));
+    // widgte window top right 
+    win = new wxSashLayoutWindow(m_rightWindow1, ID_WINDOW_LEFT_TOP, 
+      		  wxDefaultPosition, wxSize(200, 30),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetSashVisible(wxSASH_BOTTOM, true);
+    win->SetDefaultSize(wxSize(300, 300));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_TOP);
+    win->SetBackgroundColour(wxColour(255, 0, 255));
+    m_topRightWindow = win;
 
-  m_leftWindow1 = win;
+    // widgte window bottom left 
+    win = new wxSashLayoutWindow(m_rightWindow1, ID_WINDOW_LEFT_BOTTOM, 
+      		  wxDefaultPosition, wxSize(200, 30),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 
-  // Another window to the left of the client window
-  win = new wxSashLayoutWindow(this, ID_WINDOW_LEFT2,
-                               wxDefaultPosition, wxSize(200, 30),
-                               wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-  win->SetDefaultSize(wxSize(120, 1000));
-  win->SetOrientation(wxLAYOUT_VERTICAL);
-  win->SetAlignment(wxLAYOUT_LEFT);
-  win->SetBackgroundColour(wxColour(0, 255, 255));
-  win->SetSashVisible(wxSASH_RIGHT, true);
+    win->SetDefaultSize(wxSize(300, 300));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_BOTTOM);
+    win->SetBackgroundColour(wxColour(0, 255, 255));
+    m_bottomRightWindow = win;
 
-  m_leftWindow2 = win;
+#ifdef __WXMSW__
+    int *gl_attrib = NULL;
+#else
+    int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
+        WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
+        WX_GL_DOUBLEBUFFER,
+#  if defined(__WXMAC__) || defined(__WXCOCOA__)
+        GL_NONE };
+#  else
+        None };
+#  endif
+#endif
+    
+  	m_panel1 = new wxPanel(m_topLeftWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, _T("Panel 1") );
+    //m_gl1 = new MyGLCanvas(m_topLeftWindow, wxID_ANY, wxDefaultPosition,
+    //	        wxDefaultSize, 0, _T("MyGLCanvas"));
+    m_gl2 = new MyGLCanvas(m_topRightWindow, wxID_ANY, wxDefaultPosition,
+        	        wxDefaultSize, 0, _T("MyGLCanvas"));
+    m_gl3 = new MyGLCanvas(m_bottomLeftWindow, wxID_ANY, wxDefaultPosition,
+        	        wxDefaultSize, 0, _T("MyGLCanvas"));
 }
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-      Close(true);
+	Close(true);
+}
+
+void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
+{
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("Header files (*.hea)|*.hea|*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		wxString path = dialog.GetPath();
+		dataset = new TheDataset();
+		if (!dataset->load(path)) 
+		{
+			wxMessageBox(wxT("Fehler"),  wxT(""), wxNO_DEFAULT|wxYES_NO|wxCANCEL|wxICON_INFORMATION, NULL);
+		}
+		else 
+		{ 
+			wxImage tmpbitmap1 =  *dataset->getXSlize(dataset->getRows()/2);
+			m_statBitmap1 = new wxStaticBitmap(m_panel1, wxID_STATIC, tmpbitmap1);
+			m_gl2->generateTexture(dataset->getYSlize(dataset->getColumns()/2));
+			m_gl3->generateTexture(dataset->getZSlize(dataset->getFrames()/2));
+		}
+		m_textWindow->SetValue(dataset->getInfoString());
+	}
 }
 
 void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
       (void)wxMessageBox(_T("wxWidgets 2.0 Sash Demo\nAuthor: Julian Smart (c) 1998"), _T("About Sash Demo"));
-}
-
-void MainFrame::OnToggleWindow(wxCommandEvent& WXUNUSED(event))
-{
-    if (m_leftWindow1->IsShown())
-    {
-        m_leftWindow1->Show(false);
-    }
-    else
-    {
-        m_leftWindow1->Show(true);
-    }
-#if wxUSE_MDI_ARCHITECTURE
-    wxLayoutAlgorithm layout;
-    layout.LayoutMDIFrame(this);
-#endif // wxUSE_MDI_ARCHITECTURE
 }
 
 void MainFrame::OnSashDrag(wxSashEvent& event)
@@ -115,26 +183,22 @@ void MainFrame::OnSashDrag(wxSashEvent& event)
 
     switch (event.GetId())
     {
-        case ID_WINDOW_TOP:
-        {
-            m_topWindow->SetDefaultSize(wxSize(1000, event.GetDragRect().height));
-            break;
-        }
-        case ID_WINDOW_LEFT1:
-        {
-            m_leftWindow1->SetDefaultSize(wxSize(event.GetDragRect().width, 1000));
-            break;
-        }
-        case ID_WINDOW_LEFT2:
-        {
-            m_leftWindow2->SetDefaultSize(wxSize(event.GetDragRect().width, 1000));
-            break;
-        }
-        case ID_WINDOW_BOTTOM:
-        {
-            m_bottomWindow->SetDefaultSize(wxSize(1000, event.GetDragRect().height));
-            break;
-        }
+    		case ID_WINDOW_LEFT:
+            {
+    	  if (m_leftWindow != 0)
+    		  m_leftWindow->SetDefaultSize(wxSize(event.GetDragRect().width, GetSize().GetHeight()));
+    	  if (m_rightWindow != 0)
+    	    m_rightWindow->SetDefaultSize(wxSize(GetSize().GetWidth() - event.GetDragRect().width, GetSize().GetHeight()));
+                break;
+            }
+            case ID_WINDOW_RIGHT:
+            {
+    	  if (m_rightWindow != 0)
+      	    m_rightWindow->SetDefaultSize(wxSize(event.GetDragRect().width, GetSize().GetHeight()));
+    	  if (m_leftWindow != 0)
+    	    m_leftWindow->SetDefaultSize(wxSize(GetSize().GetWidth() - event.GetDragRect().width, GetSize().GetHeight()));
+                break;
+            }
     }
 
 #if wxUSE_MDI_ARCHITECTURE
@@ -146,62 +210,7 @@ void MainFrame::OnSashDrag(wxSashEvent& event)
     GetClientWindow()->Refresh();
 }
 
-void MainFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event))
-{
-      // Make another frame, containing a canvas
-      MyChild *subframe = new MyChild(this, _T("Canvas Frame"),
-                                      wxPoint(10, 10), wxSize(300, 300),
-                                      wxDEFAULT_FRAME_STYLE |
-                                      wxNO_FULL_REPAINT_ON_RESIZE);
 
-      subframe->SetTitle(wxString::Format(_T("Canvas Frame %d"), winNumber));
-      winNumber ++;
-
-      // Give it an icon (this is ignored in MDI mode: uses resources)
-#ifdef __WXMSW__
-      subframe->SetIcon(wxIcon(_T("sashtest_icn")));
-#endif
-
-#if wxUSE_STATUSBAR
-      // Give it a status line
-      subframe->CreateStatusBar();
-#endif // wxUSE_STATUSBAR
-
-      // Make a menubar
-      wxMenu *file_menu = new wxMenu;
-
-      file_menu->Append(SASHTEST_NEW_WINDOW, _T("&New window"));
-      file_menu->Append(SASHTEST_CHILD_QUIT, _T("&Close child"));
-      file_menu->Append(SASHTEST_QUIT, _T("&Exit"));
-
-      wxMenu *option_menu = new wxMenu;
-
-      // Dummy option
-      option_menu->Append(SASHTEST_REFRESH, _T("&Refresh picture"));
-
-      wxMenu *help_menu = new wxMenu;
-      help_menu->Append(SASHTEST_ABOUT, _T("&About"));
-
-      wxMenuBar *menu_bar = new wxMenuBar;
-
-      menu_bar->Append(file_menu, _T("&File"));
-      menu_bar->Append(option_menu, _T("&Options"));
-      menu_bar->Append(help_menu, _T("&Help"));
-
-      // Associate the menu bar with the frame
-      subframe->SetMenuBar(menu_bar);
-
-      int width, height;
-      subframe->GetClientSize(&width, &height);
-      MyCanvas *canvas = new MyCanvas(subframe, wxPoint(0, 0), wxSize(width, height));
-      canvas->SetCursor(wxCursor(wxCURSOR_PENCIL));
-      subframe->canvas = canvas;
-
-      // Give it scrollbars
-      canvas->SetScrollbars(20, 20, 50, 50);
-
-      subframe->Show(true);
-}
 
 void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
@@ -209,5 +218,6 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
     wxLayoutAlgorithm layout;
     layout.LayoutMDIFrame(this);
 #endif // wxUSE_MDI_ARCHITECTURE
+    GetClientWindow()->Refresh();
 }
 

@@ -1,0 +1,13 @@
+V-data 2 {
+	image: image {
+		data: 0
+		length: 1003284
+		nbands: 93
+		nframes: 93
+		nrows: 116
+		ncolumns: 93
+		repn: ubyte
+		voxel: "1 1 1"
+	}
+}
+
