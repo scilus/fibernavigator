@@ -3,11 +3,7 @@
 
 static GLfloat xrot;
 static GLfloat yrot;
-
-GLboolean smooth = GL_TRUE;
-GLboolean lighting = GL_TRUE;
-GLboolean use_vertex_arrays = GL_FALSE;
-
+static GLuint texName;
 
 BEGIN_EVENT_TABLE(MyGLCanvas, wxGLCanvas)
     EVT_SIZE(MyGLCanvas::OnSize)
@@ -22,21 +18,42 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id,
     : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name )
 {
     m_init = false;
+    m_texture_loaded = false;
+    
 }
 
-
-void MyGLCanvas::Init(void)
+void MyGLCanvas::init()
 {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0.0, 6.0, 0.0, 6.0, -1.0, 1.0);
+	
+	glShadeModel(GL_FLAT);
+	glEnable(GL_DEPTH_TEST);
+	
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glGenTextures(1, &texName);
+	glBindTexture(GL_TEXTURE_2D, texName);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+	glTexImage2D(GL_TEXTURE_2D, 
+			0, 
+			GL_RGBA, 
+			m_image->GetWidth(), 
+			m_image->GetHeight(), 
+			0, 
+			GL_RGB, 
+			GL_UNSIGNED_BYTE, 
+			m_image->GetData());
+	
 }
 
 
 void MyGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 {
-    Render();
+    render();
+	//display();
 }
 
 void MyGLCanvas::OnSize(wxSizeEvent& event)
@@ -98,9 +115,10 @@ void MyGLCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
     // Do nothing, to avoid flashing.
 }
 
-void MyGLCanvas::Render()
+void MyGLCanvas::render()
 {
-    wxPaintDC dc(this);
+	if (!m_texture_loaded) return;
+	wxPaintDC dc(this);
 
 #ifndef __WXMOTIF__
     if (!GetContext()) return;
@@ -110,7 +128,7 @@ void MyGLCanvas::Render()
     // Init OpenGL once, but after SetCurrent
     if (!m_init)
     {
-        Init();
+        init();
         m_init = true;
     }
      /* clear color and depth buffers */
@@ -118,32 +136,25 @@ void MyGLCanvas::Render()
 
     glColor3f(1.0, 1.0, 1.0);
     
-    glBegin(GL_POLYGON);
-    	glVertex2f(1.0,1.0);
-    	glVertex2f(4.0,1.0);
-    	glVertex2f(4.0,4.0);
-    	glVertex2f(1.0,4.0);
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glBindTexture(GL_TEXTURE_2D, texName);
+	
+    glBegin(GL_QUADS);
+    	glTexCoord2f(0.0, 0.0); glVertex3f(0.0,0.0,0.0);
+    	glTexCoord2f(0.0, 1.0); glVertex3f(0.0,6.0,0.0);
+    	glTexCoord2f(1.0, 1.0); glVertex3f(6.0,6.0,0.0);
+    	glTexCoord2f(1.0, 0.0); glVertex3f(6.0,0.0,0.0);
     glEnd();
-    
-    glFlush();
+
+	glFlush();
+    glDisable(GL_TEXTURE_2D);
     SwapBuffers();
 }
 
-void MyGLCanvas::generateTexture(wxImage *image)
+
+void MyGLCanvas::setTextureImage(wxImage *image)
 {
-	unsigned char *imageData = image->GetData();
-	int width = image->GetWidth();
-	int height = image->GetHeight();
-	GLubyte texImage[width][height][4];
-	for (int x = 0 ; x < width ; ++x)
-	{
-		for (int y = 0 ; y < height ; ++y)
-		{
-			texImage[x][y][0] = (GLubyte) imageData[x*y];
-			texImage[x][y][1] = (GLubyte) imageData[x*y+1];
-			texImage[x][y][2] = (GLubyte) imageData[x*y+2];
-			texImage[x][y][3] = (GLubyte) 255;
-		}
-	}
-	
+	this->m_image = image;
+	m_texture_loaded = true;	
 }

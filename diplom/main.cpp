@@ -25,7 +25,7 @@ bool MyApp::OnInit(void)
 {
   // Create the main frame window
 
-  frame = new MainFrame(NULL, wxID_ANY, _T("Viewer"), wxPoint(0, 0), wxSize(800, 600),
+  frame = new MainFrame(NULL, wxID_ANY, _T("Viewer"), wxPoint(0, 0), wxSize(1024, 768),
                       wxDEFAULT_FRAME_STYLE |
                       wxNO_FULL_REPAINT_ON_RESIZE |
                       wxHSCROLL | wxVSCROLL);
@@ -52,9 +52,7 @@ bool MyApp::OnInit(void)
     
   frame->CreateStatusBar();
 
-  frame->m_gl1->Init();
-  
-  frame->Show(true);
+   frame->Show(true);
   
   wxImage::AddHandler(new wxPNGHandler);
   

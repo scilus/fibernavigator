@@ -160,8 +160,7 @@ wxImage* TheDataset::getZSlize(int z)
 		imageData[pos+2] = this->data[x];
 		pos += 3;
 	}
-	
-	wxImage *image = new wxImage(this->columns, this->rows,  imageData, false);
+	wxImage *image = new wxImage(this->columns, this->rows, imageData, false);
 	image->SaveFile(wxT("zimage.png"), wxBITMAP_TYPE_PNG);
 	return image;
 }

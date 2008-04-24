@@ -23,8 +23,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 {
 	// A window to the left of the client window
 	wxSashLayoutWindow* win = new wxSashLayoutWindow(this, ID_WINDOW_LEFT,
-		                               wxDefaultPosition, wxSize(200, 30),
-		                               wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+                               wxDefaultPosition, wxSize(200, 30),
+                               wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 	win->SetDefaultSize(wxSize(200, 1000));
 	win->SetOrientation(wxLAYOUT_VERTICAL);
 	win->SetAlignment(wxLAYOUT_LEFT);
@@ -35,88 +35,76 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	m_textWindow = new wxTextCtrl(win, wxID_ANY, wxEmptyString, 
 			  wxDefaultPosition, wxDefaultSize,
 			  wxTE_MULTILINE|wxSUNKEN_BORDER);
-	
 	m_textWindow->SetValue(_T("Stats"));
 	m_leftWindow = win;
 	
 	// Main Window
 	win = new wxSashLayoutWindow(this, ID_WINDOW_RIGHT, 
-			  wxDefaultPosition, wxSize(200, 30),
-			  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-	
+		  wxDefaultPosition, wxSize(200, 30),
+		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 	win->SetDefaultSize(wxSize(1000, 1000));
 	win->SetOrientation(wxLAYOUT_VERTICAL);
 	win->SetAlignment(wxLAYOUT_LEFT);
-	win->SetBackgroundColour(wxColour(0, 0, 0));
-	m_rightWindow = win;
+	win->SetBackgroundColour(wxColour(0,0,0));
+	m_mainWindow = win;
 
-  // main window left side 
-    win = new wxSashLayoutWindow(m_rightWindow, ID_WINDOW_LEFT1, 
+  // navigation window with three sub windows for gl widgets 
+    win = new wxSashLayoutWindow(m_mainWindow, ID_WINDOW_LEFT1, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-
-    win->SetDefaultSize(wxSize(300, 600));
+    win->SetDefaultSize(wxSize(255, 1000));
     win->SetOrientation(wxLAYOUT_VERTICAL);
     win->SetAlignment(wxLAYOUT_LEFT);
     win->SetBackgroundColour(wxColour(0, 0, 0));
-    m_leftWindow1 = win;
+    m_navWindow = win;
 
-    // main window right side 
-    win = new wxSashLayoutWindow(m_rightWindow, ID_WINDOW_RIGHT1, 
-      		  wxDefaultPosition, wxSize(200, 30),
-      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-
-    win->SetDefaultSize(wxSize(300, 600));
-    win->SetOrientation(wxLAYOUT_VERTICAL);
+    // main window right side, holds the big gl widget
+    win = new wxSashLayoutWindow(m_mainWindow, ID_WINDOW_RIGHT1, 
+  		  wxDefaultPosition, wxSize(200, 30),
+  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(700, 1000));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_RIGHT);
-    win->SetBackgroundColour(wxColour(0, 0, 0));
-    m_rightWindow1 = win;
-
-    // widgte window top left 
-    win = new wxSashLayoutWindow(m_leftWindow1, ID_WINDOW_LEFT_TOP, 
-      		  wxDefaultPosition, wxSize(200, 30),
-      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetSashVisible(wxSASH_RIGHT, true);
-    win->SetSashVisible(wxSASH_BOTTOM, true);
-    win->SetDefaultSize(wxSize(300, 300));
-    win->SetOrientation(wxLAYOUT_HORIZONTAL);
-    win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(255, 0, 0));
-    m_topLeftWindow = win;
-
-    // widgte window bottom left 
-    win = new wxSashLayoutWindow(m_leftWindow1, ID_WINDOW_LEFT_BOTTOM, 
-      		  wxDefaultPosition, wxSize(200, 30),
-      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetSashVisible(wxSASH_RIGHT, true);
-    win->SetDefaultSize(wxSize(300, 300));
-    win->SetOrientation(wxLAYOUT_HORIZONTAL);
-    win->SetAlignment(wxLAYOUT_BOTTOM);
     win->SetBackgroundColour(wxColour(255, 255, 0));
-    m_bottomLeftWindow = win;
-    
+    m_rightWindow = win;
 
-    // widgte window top right 
-    win = new wxSashLayoutWindow(m_rightWindow1, ID_WINDOW_LEFT_TOP, 
-      		  wxDefaultPosition, wxSize(200, 30),
-      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetSashVisible(wxSASH_BOTTOM, true);
-    win->SetDefaultSize(wxSize(300, 300));
+    win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_LEFT_TOP, 
+  		  wxDefaultPosition, wxSize(200, 30),
+  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+	win->SetDefaultSize(wxSize(255, 255));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(255, 0, 255));
-    m_topRightWindow = win;
-
-    // widgte window bottom left 
-    win = new wxSashLayoutWindow(m_rightWindow1, ID_WINDOW_LEFT_BOTTOM, 
-      		  wxDefaultPosition, wxSize(200, 30),
-      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-
-    win->SetDefaultSize(wxSize(300, 300));
+    win->SetBackgroundColour(wxColour(128, 0, 0));
+    m_navWindow1 = win;
+        
+    win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_LEFT_TOP, 
+  		  wxDefaultPosition, wxSize(200, 30),
+  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(255, 510));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_BOTTOM);
-    win->SetBackgroundColour(wxColour(0, 255, 255));
-    m_bottomRightWindow = win;
+    win->SetBackgroundColour(wxColour(0, 128, 0));
+    m_navWindow2 = win;
+
+    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_MIDDLE, 
+  		  wxDefaultPosition, wxSize(200, 30),
+  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(255, 255));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_TOP);
+    win->SetBackgroundColour(wxColour(0, 255, 0));
+    m_middleNavWindow = win;
+    
+    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_BOTTOM, 
+  		  wxDefaultPosition, wxSize(200, 30),
+  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(255, 255));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_BOTTOM);
+    win->SetBackgroundColour(wxColour(255, 0, 0));
+    m_bottomNavWindow = win;
+
+    
 
 #ifdef __WXMSW__
     int *gl_attrib = NULL;
@@ -131,13 +119,14 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 #  endif
 #endif
     
-  	m_panel1 = new wxPanel(m_topLeftWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, _T("Panel 1") );
-    //m_gl1 = new MyGLCanvas(m_topLeftWindow, wxID_ANY, wxDefaultPosition,
-    //	        wxDefaultSize, 0, _T("MyGLCanvas"));
-    m_gl2 = new MyGLCanvas(m_topRightWindow, wxID_ANY, wxDefaultPosition,
+  	
+    m_gl1 = new MyGLCanvas(m_navWindow1, wxID_ANY, wxDefaultPosition,
+    	        wxDefaultSize, 0, _T("MyGLCanvas"));
+    m_gl2 = new MyGLCanvas(m_middleNavWindow, wxID_ANY, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("MyGLCanvas"));
-    m_gl3 = new MyGLCanvas(m_bottomLeftWindow, wxID_ANY, wxDefaultPosition,
-        	        wxDefaultSize, 0, _T("MyGLCanvas"));
+    m_gl3 = new MyGLCanvas(m_bottomNavWindow, wxID_ANY, wxDefaultPosition,
+       	        wxDefaultSize, 0, _T("MyGLCanvas"));
+    
 }
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -162,10 +151,9 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		}
 		else 
 		{ 
-			wxImage tmpbitmap1 =  *dataset->getXSlize(dataset->getRows()/2);
-			m_statBitmap1 = new wxStaticBitmap(m_panel1, wxID_STATIC, tmpbitmap1);
-			m_gl2->generateTexture(dataset->getYSlize(dataset->getColumns()/2));
-			m_gl3->generateTexture(dataset->getZSlize(dataset->getFrames()/2));
+			m_gl1->setTextureImage(dataset->getXSlize(dataset->getColumns()/2));
+			m_gl2->setTextureImage(dataset->getYSlize(dataset->getColumns()/2));
+			m_gl3->setTextureImage(dataset->getZSlize(dataset->getFrames()/2));
 		}
 		m_textWindow->SetValue(dataset->getInfoString());
 	}

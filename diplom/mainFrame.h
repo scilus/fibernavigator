@@ -26,18 +26,22 @@ public:
 
 public:
     wxSashLayoutWindow* m_leftWindow;
+    wxSashLayoutWindow* m_mainWindow;
+    wxSashLayoutWindow* m_navWindow;
     wxSashLayoutWindow* m_rightWindow;
-    wxSashLayoutWindow* m_leftWindow1;
-    wxSashLayoutWindow* m_rightWindow1;
-    wxSashLayoutWindow* m_topLeftWindow;
-    wxSashLayoutWindow* m_topRightWindow;
-    wxSashLayoutWindow* m_bottomLeftWindow;
-    wxSashLayoutWindow* m_bottomRightWindow;
+    wxSashLayoutWindow* m_navWindow1;
+    wxSashLayoutWindow* m_navWindow2;
+    
+    wxSashLayoutWindow* m_topNavWindow;
+    wxSashLayoutWindow* m_middleNavWindow;
+    wxSashLayoutWindow* m_bottomNavWindow;
+    wxSashLayoutWindow* m_rightWindow2;
+    
     
     MyGLCanvas* m_gl1;
     MyGLCanvas* m_gl2;
     MyGLCanvas* m_gl3;
-    MyGLCanvas* m_gl4;
+
     
     wxTextCtrl* m_textWindow;
     wxPanel* m_panel1;
@@ -56,8 +60,9 @@ DECLARE_EVENT_TABLE()
 #define ID_WINDOW_RIGHT  	101
 #define ID_WINDOW_LEFT1   	102
 #define ID_WINDOW_RIGHT1  	103
-#define ID_WINDOW_LEFT_TOP   	104
-#define ID_WINDOW_RIGHT_TOP  	105
+
+#define ID_WINDOW_LEFT_TOP   		104
+#define ID_WINDOW_LEFT_MIDDLE  	105
 #define ID_WINDOW_LEFT_BOTTOM   	106
 #define ID_WINDOW_RIGHT_BOTTOM  	107
 

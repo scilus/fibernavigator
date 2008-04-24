@@ -21,7 +21,8 @@ public:
          const wxPoint& pos = wxDefaultPosition,
          const wxSize& size = wxDefaultSize,
          long style = 0, const wxString& name = _T("TestGLCanvas") );
-    bool   m_init;
+    bool	m_init;
+    bool	m_texture_loaded;
 
    ~MyGLCanvas(){};
 
@@ -30,13 +31,15 @@ public:
     void OnEraseBackground(wxEraseEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
-    void Init();
-    void Render();
-    void generateTexture(wxImage*);
+    void init();
+    void render();
+    void setTextureImage(wxImage*);
     
+   
     DECLARE_EVENT_TABLE()
 private:
-	
+	 wxImage *m_image;
+	//GLuint texName;
 };
 
 #endif /*MYGLCANVAS_H_*/
