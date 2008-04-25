@@ -119,10 +119,9 @@ wxImage* TheDataset::getXSlize(int x)
 	}
 	
 	wxImage *image = new wxImage(this->rows, this->frames, imageData, false);
-	wxImage *image1 = &image->Rescale(this->rows*2, this->frames*2);
-	image1->SaveFile(wxT("ximage.png"), wxBITMAP_TYPE_PNG);
-	
-	return image;
+	image->SaveFile(wxT("ximage.png"), wxBITMAP_TYPE_PNG);
+
+	return new wxImage(image->Mirror(false));
 }
 
 wxImage* TheDataset::getYSlize(int y)
