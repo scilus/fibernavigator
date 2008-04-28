@@ -13,6 +13,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include "theDataset.h"
 
 class NavigationCanvas: public wxGLCanvas
 {
@@ -33,14 +34,23 @@ public:
     void OnMouseEvent(wxMouseEvent& event);
     void init();
     void render();
-    void setTextureImage(wxImage*);
+    void setDataset(TheDataset*, int);
     
+    void setxSlize(int);
+    void setySlize(int);
+    void setzSlize(int);
    
     DECLARE_EVENT_TABLE()
 private:
 	 wxImage *m_image;
 	 float m_xOffset;
 	 float m_yOffset;
+	 float m_zOffset;
+	 int m_xSlize;
+	 int m_ySlize;
+	 int m_zSlize;
+	 TheDataset *m_dataset;
+	 int m_view;
 };
 
 #endif /*NAVIGATIONCANVAS_H_*/

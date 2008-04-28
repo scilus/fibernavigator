@@ -72,7 +72,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_LEFT_TOP, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-	win->SetDefaultSize(wxSize(255, 255));
+	win->SetDefaultSize(wxSize(255, 510));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(0, 0, 0));
@@ -80,33 +80,50 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_LEFT_TOP, 
   		  wxDefaultPosition, wxSize(200, 30),
-  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(255, 510));
+  		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(255, 255));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_BOTTOM);
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_navWindow2 = win;
 
-    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_MIDDLE, 
+    win = new wxSashLayoutWindow(m_navWindow1, ID_WINDOW_LEFT_MIDDLE, 
   		  wxDefaultPosition, wxSize(200, 30),
-  		wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+  		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(255, 255));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(0, 255, 0));
+    win->SetBackgroundColour(wxColour(0, 0, 0));
+    m_topNavWindow = win;
+    
+    win = new wxSashLayoutWindow(m_navWindow1, ID_WINDOW_LEFT_BOTTOM, 
+  		  wxDefaultPosition, wxSize(200, 30),
+  		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(255, 255));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_TOP);
+    win->SetBackgroundColour(wxColour(0, 0, 0));
     m_middleNavWindow = win;
-    
-    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_BOTTOM, 
-  		  wxDefaultPosition, wxSize(200, 30),
-  		wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(255, 255));
-    win->SetOrientation(wxLAYOUT_HORIZONTAL);
-    win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(255, 0, 0));
-    m_bottomNavWindow = win;
 
+    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_BOTTOM, 
+     		  wxDefaultPosition, wxSize(200, 30),
+     		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+       win->SetDefaultSize(wxSize(255, 255));
+       win->SetOrientation(wxLAYOUT_HORIZONTAL);
+       win->SetAlignment(wxLAYOUT_TOP);
+       win->SetBackgroundColour(wxColour(0, 0, 0));
+    m_bottomNavWindow = win;
+       
+    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_BOTTOM, 
+      		  wxDefaultPosition, wxSize(200, 30),
+       		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+          win->SetDefaultSize(wxSize(255, 10));
+          win->SetOrientation(wxLAYOUT_HORIZONTAL);
+          win->SetAlignment(wxLAYOUT_TOP);
+          win->SetBackgroundColour(wxColour(255, 255, 255));
     
-    m_gl1 = new NavigationCanvas(m_navWindow1, wxID_ANY, wxDefaultPosition,
+      
+    m_gl1 = new NavigationCanvas(m_topNavWindow, wxID_ANY, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("MyGLCanvas"));
     m_gl2 = new NavigationCanvas(m_middleNavWindow, wxID_ANY, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("MyGLCanvas"));
@@ -137,9 +154,15 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		}
 		else 
 		{ 
+			
+			m_gl1->setDataset(dataset, 0);
+			m_gl2->setDataset(dataset, 1);
+			m_gl3->setDataset(dataset, 2);
+			/*
 			m_gl1->setTextureImage(dataset->getXSlize(dataset->getColumns()/2));
 			m_gl2->setTextureImage(dataset->getYSlize(dataset->getColumns()/2));
 			m_gl3->setTextureImage(dataset->getZSlize(dataset->getFrames()/2));
+			*/
 		}
 		m_textWindow->SetValue(dataset->getInfoString());
 	}
@@ -184,8 +207,6 @@ void MainFrame::OnSashDrag(wxSashEvent& event)
     GetClientWindow()->Refresh();
 }
 
-
-
 void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
 #if wxUSE_MDI_ARCHITECTURE
@@ -193,5 +214,6 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
     layout.LayoutMDIFrame(this);
 #endif // wxUSE_MDI_ARCHITECTURE
     GetClientWindow()->Refresh();
+    this->Refresh();
 }
 

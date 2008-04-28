@@ -34,9 +34,7 @@ public:
 	double getZVoxel();
 	
 	wxString getInfoString();
-	wxImage* getXSlize(int);
-	wxImage* getYSlize(int);
-	wxImage* getZSlize(int);
+	wxUint8* getData();
 	
 };
 

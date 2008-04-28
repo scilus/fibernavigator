@@ -99,72 +99,6 @@ bool TheDataset::load(wxString filename)
 	return flag;
 }
 
-wxImage* TheDataset::getXSlize(int x)
-{
-	int nSize = this->rows * this->columns;
-	int pos = 0;
-	int v = 0;
-	unsigned char *imageData = new unsigned char[nSize*3];
-	
-	for ( int z = 0 ; z < this->frames ; ++z )
-	{
-		for ( int y = 0 ; y < this->rows ; ++y )
-		{
-			v = y * this->columns + z*nSize + x;
-			imageData[pos] = this->data[v];
-			imageData[pos+1] = this->data[v];
-			imageData[pos+2] = this->data[v];
-			pos += 3;
-		}
-	}
-	
-	wxImage *image = new wxImage(this->rows, this->frames, imageData, false);
-	image->SaveFile(wxT("ximage.png"), wxBITMAP_TYPE_PNG);
-
-	return new wxImage(image->Mirror(false));
-}
-
-wxImage* TheDataset::getYSlize(int y)
-{
-	int nSize = this->rows * this->columns;
-	int pos = 0;
-	int v = 0;
-	unsigned char *imageData = new unsigned char[nSize*3];
-	for ( int z = 0 ; z < this->frames ; ++z )
-	{
-		for ( int x = 0 ; x < this->columns ; ++x )
-		{
-			v = x + z*nSize + y*this->columns;
-			imageData[pos] = this->data[v];
-			imageData[pos+1] = this->data[v];
-			imageData[pos+2] = this->data[v];
-			pos += 3;
-		}
-	}
-	
-	wxImage *image = new wxImage(this->columns, this->frames,  imageData, false);
-	image->SaveFile(wxT("yimage.png"), wxBITMAP_TYPE_PNG);
-	return new wxImage(image->Mirror(false));
-}
-
-wxImage* TheDataset::getZSlize(int z)
-{
-	int nSize = this->rows * this->columns;
-	int pos = 0;
-	unsigned char *imageData = new unsigned char[nSize*3];
-	for (int x = nSize*z ; x < (nSize*z) + nSize; ++x)
-	{
-		imageData[pos] = this->data[x];
-		imageData[pos+1] = this->data[x];
-		imageData[pos+2] = this->data[x];
-		pos += 3;
-	}
-	wxImage *image = new wxImage(this->columns, this->rows, imageData, false);
-	image->SaveFile(wxT("zimage.png"), wxBITMAP_TYPE_PNG);
-	return new wxImage(image->Mirror(false));
-}
-
-
 /* getter methods */
 int TheDataset::getLength()
 {
@@ -201,6 +135,11 @@ double TheDataset::getYVoxel()
 double TheDataset::getZVoxel()
 {
 	return this->zVoxel;
+}
+
+wxUint8* TheDataset::getData()
+{
+	return this->data;
 }
 
 wxString TheDataset::getInfoString()

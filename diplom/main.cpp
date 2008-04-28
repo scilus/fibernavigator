@@ -25,7 +25,7 @@ bool MyApp::OnInit(void)
 {
   // Create the main frame window
 
-  frame = new MainFrame(NULL, wxID_ANY, _T("Viewer"), wxPoint(0, 0), wxSize(1200, 800),
+  frame = new MainFrame(NULL, wxID_ANY, _T("Viewer"), wxPoint(0, 0), wxSize(1200, 820),
                       wxDEFAULT_FRAME_STYLE |
                       wxHSCROLL | wxVSCROLL);
 
