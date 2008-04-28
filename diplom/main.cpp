@@ -25,9 +25,8 @@ bool MyApp::OnInit(void)
 {
   // Create the main frame window
 
-  frame = new MainFrame(NULL, wxID_ANY, _T("Viewer"), wxPoint(0, 0), wxSize(1024, 768),
+  frame = new MainFrame(NULL, wxID_ANY, _T("Viewer"), wxPoint(0, 0), wxSize(1200, 800),
                       wxDEFAULT_FRAME_STYLE |
-                      wxNO_FULL_REPAINT_ON_RESIZE |
                       wxHSCROLL | wxVSCROLL);
 
   // Give it an icon (this is ignored in MDI mode: uses resources)

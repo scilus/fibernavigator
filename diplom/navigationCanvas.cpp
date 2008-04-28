@@ -1,19 +1,19 @@
 
-#include "MyGLCanvas.h"
+#include "navigationCanvas.h"
 
 static GLfloat xrot;
 static GLfloat yrot;
 static GLuint texName;
 
-BEGIN_EVENT_TABLE(MyGLCanvas, wxGLCanvas)
-    EVT_SIZE(MyGLCanvas::OnSize)
-    EVT_PAINT(MyGLCanvas::OnPaint)
-    EVT_CHAR(MyGLCanvas::OnChar)
-    EVT_MOUSE_EVENTS(MyGLCanvas::OnMouseEvent)
-    EVT_ERASE_BACKGROUND(MyGLCanvas::OnEraseBackground)
+BEGIN_EVENT_TABLE(NavigationCanvas, wxGLCanvas)
+    EVT_SIZE(NavigationCanvas::OnSize)
+    EVT_PAINT(NavigationCanvas::OnPaint)
+    EVT_CHAR(NavigationCanvas::OnChar)
+    EVT_MOUSE_EVENTS(NavigationCanvas::OnMouseEvent)
+    EVT_ERASE_BACKGROUND(NavigationCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
-MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id,
+NavigationCanvas::NavigationCanvas(wxWindow *parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name )
 {
@@ -22,7 +22,7 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id,
     
 }
 
-void MyGLCanvas::init()
+void NavigationCanvas::init()
 {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
@@ -50,13 +50,13 @@ void MyGLCanvas::init()
 }
 
 
-void MyGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
+void NavigationCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 {
     render();
 	//display();
 }
 
-void MyGLCanvas::OnSize(wxSizeEvent& event)
+void NavigationCanvas::OnSize(wxSizeEvent& event)
 {
     // this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize(event);
@@ -73,7 +73,7 @@ void MyGLCanvas::OnSize(wxSizeEvent& event)
     }
 }
 
-void MyGLCanvas::OnChar(wxKeyEvent& event)
+void NavigationCanvas::OnChar(wxKeyEvent& event)
 {
     switch( event.GetKeyCode() )
     {
@@ -85,7 +85,7 @@ void MyGLCanvas::OnChar(wxKeyEvent& event)
     }
 }
 
-void MyGLCanvas::OnMouseEvent(wxMouseEvent& event)
+void NavigationCanvas::OnMouseEvent(wxMouseEvent& event)
 {
     static int dragging = 0;
     static float last_x, last_y;
@@ -110,12 +110,12 @@ void MyGLCanvas::OnMouseEvent(wxMouseEvent& event)
 
 }
 
-void MyGLCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
+void NavigationCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
 {
     // Do nothing, to avoid flashing.
 }
 
-void MyGLCanvas::render()
+void NavigationCanvas::render()
 {
 	if (!m_texture_loaded) return;
 	wxPaintDC dc(this);
@@ -153,7 +153,7 @@ void MyGLCanvas::render()
 }
 
 
-void MyGLCanvas::setTextureImage(wxImage *image)
+void NavigationCanvas::setTextureImage(wxImage *image)
 {
 	this->m_image = image;
 	m_texture_loaded = true;	

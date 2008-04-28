@@ -1,5 +1,5 @@
-#ifndef MYGLCANVAS_H_
-#define MYGLCANVAS_H_
+#ifndef NAVIGATIONCANVAS_H_
+#define NAVIGATIONCANVAS_H_
 
 #include "wx/wxprec.h"
 
@@ -14,17 +14,17 @@
 #include <GL/glu.h>
 
 
-class MyGLCanvas: public wxGLCanvas
+class NavigationCanvas: public wxGLCanvas
 {
 public:
-    MyGLCanvas( wxWindow *parent, wxWindowID id = wxID_ANY,
+	NavigationCanvas( wxWindow *parent, wxWindowID id = wxID_ANY,
          const wxPoint& pos = wxDefaultPosition,
          const wxSize& size = wxDefaultSize,
          long style = 0, const wxString& name = _T("TestGLCanvas") );
     bool	m_init;
     bool	m_texture_loaded;
 
-   ~MyGLCanvas(){};
+   ~NavigationCanvas(){};
 
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
@@ -39,7 +39,6 @@ public:
     DECLARE_EVENT_TABLE()
 private:
 	 wxImage *m_image;
-	//GLuint texName;
 };
 
-#endif /*MYGLCANVAS_H_*/
+#endif /*NAVIGATIONCANVAS_H_*/

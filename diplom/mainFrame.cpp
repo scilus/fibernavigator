@@ -25,11 +25,12 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	wxSashLayoutWindow* win = new wxSashLayoutWindow(this, ID_WINDOW_LEFT,
                                wxDefaultPosition, wxSize(200, 30),
                                wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-	win->SetDefaultSize(wxSize(200, 1000));
+	win->SetDefaultSize(wxSize(200, 1020));
 	win->SetOrientation(wxLAYOUT_VERTICAL);
 	win->SetAlignment(wxLAYOUT_LEFT);
 	win->SetBackgroundColour(wxColour(0, 255, 0));
-	win->SetSashVisible(wxSASH_RIGHT, true);
+	win->SetSashVisible(wxSASH_RIGHT, false);
+	
 	win->SetExtraBorderSize(10);
 	
 	m_textWindow = new wxTextCtrl(win, wxID_ANY, wxEmptyString, 
@@ -42,7 +43,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	win = new wxSashLayoutWindow(this, ID_WINDOW_RIGHT, 
 		  wxDefaultPosition, wxSize(200, 30),
 		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-	win->SetDefaultSize(wxSize(1000, 1000));
+	win->SetDefaultSize(wxSize(1020, 765));
 	win->SetOrientation(wxLAYOUT_VERTICAL);
 	win->SetAlignment(wxLAYOUT_LEFT);
 	win->SetBackgroundColour(wxColour(0,0,0));
@@ -52,7 +53,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(m_mainWindow, ID_WINDOW_LEFT1, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(255, 1000));
+    win->SetDefaultSize(wxSize(255, 765));
     win->SetOrientation(wxLAYOUT_VERTICAL);
     win->SetAlignment(wxLAYOUT_LEFT);
     win->SetBackgroundColour(wxColour(0, 0, 0));
@@ -62,19 +63,19 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(m_mainWindow, ID_WINDOW_RIGHT1, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(700, 1000));
+    win->SetDefaultSize(wxSize(765, 765));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_RIGHT);
-    win->SetBackgroundColour(wxColour(255, 255, 0));
+    win->SetBackgroundColour(wxColour(180, 180, 180));
     m_rightWindow = win;
 
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_LEFT_TOP, 
   		  wxDefaultPosition, wxSize(200, 30),
-  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+  		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 	win->SetDefaultSize(wxSize(255, 255));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(128, 0, 0));
+    win->SetBackgroundColour(wxColour(0, 0, 0));
     m_navWindow1 = win;
         
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_LEFT_TOP, 
@@ -83,12 +84,12 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetDefaultSize(wxSize(255, 510));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_BOTTOM);
-    win->SetBackgroundColour(wxColour(0, 128, 0));
+    win->SetBackgroundColour(wxColour(0, 0, 0));
     m_navWindow2 = win;
 
     win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_MIDDLE, 
   		  wxDefaultPosition, wxSize(200, 30),
-  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+  		wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(255, 255));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
@@ -97,34 +98,19 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     
     win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_BOTTOM, 
   		  wxDefaultPosition, wxSize(200, 30),
-  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+  		wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(255, 255));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
-    win->SetAlignment(wxLAYOUT_BOTTOM);
+    win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(255, 0, 0));
     m_bottomNavWindow = win;
 
     
-
-#ifdef __WXMSW__
-    int *gl_attrib = NULL;
-#else
-    int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
-        WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
-        WX_GL_DOUBLEBUFFER,
-#  if defined(__WXMAC__) || defined(__WXCOCOA__)
-        GL_NONE };
-#  else
-        None };
-#  endif
-#endif
-    
-  	
-    m_gl1 = new MyGLCanvas(m_navWindow1, wxID_ANY, wxDefaultPosition,
+    m_gl1 = new NavigationCanvas(m_navWindow1, wxID_ANY, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("MyGLCanvas"));
-    m_gl2 = new MyGLCanvas(m_middleNavWindow, wxID_ANY, wxDefaultPosition,
+    m_gl2 = new NavigationCanvas(m_middleNavWindow, wxID_ANY, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("MyGLCanvas"));
-    m_gl3 = new MyGLCanvas(m_bottomNavWindow, wxID_ANY, wxDefaultPosition,
+    m_gl3 = new NavigationCanvas(m_bottomNavWindow, wxID_ANY, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("MyGLCanvas"));
     
 }

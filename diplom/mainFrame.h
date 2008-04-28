@@ -1,7 +1,7 @@
 #ifndef MAINFRAME_H_
 #define MAINFRAME_H_
 
-#include "MyGLCanvas.h"
+#include "navigationCanvas.h"
 #include "theDataset.h"
 
 // Define a new frame
@@ -38,9 +38,9 @@ public:
     wxSashLayoutWindow* m_rightWindow2;
     
     
-    MyGLCanvas* m_gl1;
-    MyGLCanvas* m_gl2;
-    MyGLCanvas* m_gl3;
+    NavigationCanvas* m_gl1;
+    NavigationCanvas* m_gl2;
+    NavigationCanvas* m_gl3;
 
     
     wxTextCtrl* m_textWindow;
