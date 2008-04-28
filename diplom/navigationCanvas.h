@@ -39,6 +39,8 @@ public:
     DECLARE_EVENT_TABLE()
 private:
 	 wxImage *m_image;
+	 float m_xOffset;
+	 float m_yOffset;
 };
 
 #endif /*NAVIGATIONCANVAS_H_*/

@@ -27,7 +27,7 @@ void NavigationCanvas::init()
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0.0, 6.0, 0.0, 6.0, -1.0, 1.0);
+	glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
 	
 	glShadeModel(GL_FLAT);
 	glEnable(GL_DEPTH_TEST);
@@ -37,6 +37,8 @@ void NavigationCanvas::init()
 	glBindTexture(GL_TEXTURE_2D, texName);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexImage2D(GL_TEXTURE_2D, 
 			0, 
 			GL_RGBA, 
@@ -141,10 +143,10 @@ void NavigationCanvas::render()
 	glBindTexture(GL_TEXTURE_2D, texName);
 	
     glBegin(GL_QUADS);
-    	glTexCoord2f(0.0, 0.0); glVertex3f(0.0,0.0,0.0);
-    	glTexCoord2f(0.0, 1.0); glVertex3f(0.0,6.0,0.0);
-    	glTexCoord2f(1.0, 1.0); glVertex3f(6.0,6.0,0.0);
-    	glTexCoord2f(1.0, 0.0); glVertex3f(6.0,0.0,0.0);
+    	glTexCoord2f(0.0 - m_xOffset, 0.0 - m_yOffset); glVertex3f(0.0,0.0,0.0);
+    	glTexCoord2f(0.0 - m_xOffset, 1.0 + m_yOffset); glVertex3f(0.0,1.0,0.0);
+    	glTexCoord2f(1.0 + m_xOffset, 1.0 + m_yOffset); glVertex3f(1.0,1.0,0.0);
+    	glTexCoord2f(1.0 + m_xOffset, 0.0 - m_yOffset); glVertex3f(1.0,0.0,0.0);
     glEnd();
 
 	glFlush();
@@ -156,5 +158,8 @@ void NavigationCanvas::render()
 void NavigationCanvas::setTextureImage(wxImage *image)
 {
 	this->m_image = image;
+	float ratio = (float)image->GetWidth()/(float)image->GetHeight();
+	m_xOffset = (wxMax (0, 1.0 - ratio))/2.0;
+	m_yOffset = (wxMax (0, ratio - 1.0))/2.0;
 	m_texture_loaded = true;	
 }

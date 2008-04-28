@@ -144,7 +144,7 @@ wxImage* TheDataset::getYSlize(int y)
 	
 	wxImage *image = new wxImage(this->columns, this->frames,  imageData, false);
 	image->SaveFile(wxT("yimage.png"), wxBITMAP_TYPE_PNG);
-	return image;
+	return new wxImage(image->Mirror(false));
 }
 
 wxImage* TheDataset::getZSlize(int z)
@@ -161,7 +161,7 @@ wxImage* TheDataset::getZSlize(int z)
 	}
 	wxImage *image = new wxImage(this->columns, this->rows, imageData, false);
 	image->SaveFile(wxT("zimage.png"), wxBITMAP_TYPE_PNG);
-	return image;
+	return new wxImage(image->Mirror(false));
 }
 
 
