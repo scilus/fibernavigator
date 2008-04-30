@@ -1,8 +1,6 @@
 
 #include "navigationCanvas.h"
 
-static GLfloat xrot;
-static GLfloat yrot;
 static GLuint texName;
 
 BEGIN_EVENT_TABLE(NavigationCanvas, wxGLCanvas)
@@ -91,27 +89,8 @@ void NavigationCanvas::OnChar(wxKeyEvent& event)
 
 void NavigationCanvas::OnMouseEvent(wxMouseEvent& event)
 {
-    static int dragging = 0;
-    static float last_x, last_y;
-
-    if(event.LeftIsDown())
-    {
-        if(!dragging)
-        {
-            dragging = 1;
-        }
-        else
-        {
-            yrot += (event.GetX() - last_x)*1.0;
-            xrot += (event.GetY() - last_y)*1.0;
-            Refresh(false);
-        }
-        last_x = event.GetX();
-        last_y = event.GetY();
-    }
-    else
-        dragging = 0;
-
+	event.ResumePropagation (wxEVENT_PROPAGATE_MAX); 
+    event.Skip();
 }
 
 void NavigationCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
@@ -148,10 +127,10 @@ void NavigationCanvas::render()
 	{
 	case 0:
 		glBegin(GL_QUADS);
-        	glTexCoord3f(0.0 - m_xOffset, 0.0 - m_yOffset, 0.5); glVertex3f(0.0,0.0,0.0);
-        	glTexCoord3f(0.0 - m_xOffset, 1.0 + m_yOffset, 0.5); glVertex3f(0.0,1.0,0.0);
-        	glTexCoord3f(1.0 + m_xOffset, 1.0 + m_yOffset, 0.5); glVertex3f(1.0,1.0,0.0);
-        	glTexCoord3f(1.0 + m_xOffset, 0.0 - m_yOffset, 0.5); glVertex3f(1.0,0.0,0.0);
+        	glTexCoord3f(1.0 + m_xOffset, 1.0 + m_yOffset, 0.5); glVertex3f(0.0,0.0,0.0);
+        	glTexCoord3f(1.0 + m_xOffset, 0.0 - m_yOffset, 0.5); glVertex3f(0.0,1.0,0.0);
+        	glTexCoord3f(0.0 - m_xOffset, 0.0 - m_yOffset, 0.5); glVertex3f(1.0,1.0,0.0);
+        	glTexCoord3f(0.0 - m_xOffset, 1.0 + m_yOffset, 0.5); glVertex3f(1.0,0.0,0.0);
 		glEnd();
 		break;
 	case 1:
@@ -183,7 +162,7 @@ void NavigationCanvas::setDataset(TheDataset *dataset, int view)
 {
 	this->m_dataset = dataset;
 	this->m_view = view;
-	float ratio;
+	float ratio = 1.0;
 	switch (view)
 	{
 		case 0:

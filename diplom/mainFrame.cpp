@@ -12,7 +12,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_SIZE(MainFrame::OnSize)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
-    EVT_SASH_DRAGGED_RANGE(ID_WINDOW_LEFT, ID_WINDOW_RIGHT, MainFrame::OnSashDrag)
+    EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
 END_EVENT_TABLE()
 
 
@@ -50,7 +50,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	m_mainWindow = win;
 
   // navigation window with three sub windows for gl widgets 
-    win = new wxSashLayoutWindow(m_mainWindow, ID_WINDOW_LEFT1, 
+    win = new wxSashLayoutWindow(m_mainWindow, ID_WINDOW_NAV_MAIN, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(255, 765));
@@ -69,7 +69,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(180, 180, 180));
     m_rightWindow = win;
 
-    win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_LEFT_TOP, 
+    win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV1, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 	win->SetDefaultSize(wxSize(255, 510));
@@ -78,7 +78,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_navWindow1 = win;
         
-    win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_LEFT_TOP, 
+    win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV2, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(255, 255));
@@ -87,7 +87,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_navWindow2 = win;
 
-    win = new wxSashLayoutWindow(m_navWindow1, ID_WINDOW_LEFT_MIDDLE, 
+    win = new wxSashLayoutWindow(m_navWindow1, ID_WINDOW_NAV_X, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(255, 255));
@@ -96,7 +96,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_topNavWindow = win;
     
-    win = new wxSashLayoutWindow(m_navWindow1, ID_WINDOW_LEFT_BOTTOM, 
+    win = new wxSashLayoutWindow(m_navWindow1, ID_WINDOW_NAV_Y, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(255, 255));
@@ -105,7 +105,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_middleNavWindow = win;
 
-    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_BOTTOM, 
+    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_NAV_Z, 
      		  wxDefaultPosition, wxSize(200, 30),
      		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
        win->SetDefaultSize(wxSize(255, 255));
@@ -114,7 +114,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
        win->SetBackgroundColour(wxColour(0, 0, 0));
     m_bottomNavWindow = win;
        
-    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_LEFT_BOTTOM, 
+    win = new wxSashLayoutWindow(m_navWindow2, ID_WINDOW_NAV3, 
       		  wxDefaultPosition, wxSize(200, 30),
        		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
           win->SetDefaultSize(wxSize(255, 10));
@@ -123,12 +123,16 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
           win->SetBackgroundColour(wxColour(255, 255, 255));
     
       
-    m_gl1 = new NavigationCanvas(m_topNavWindow, wxID_ANY, wxDefaultPosition,
+    m_gl1 = new NavigationCanvas(m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("MyGLCanvas"));
-    m_gl2 = new NavigationCanvas(m_middleNavWindow, wxID_ANY, wxDefaultPosition,
+    m_gl2 = new NavigationCanvas(m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("MyGLCanvas"));
-    m_gl3 = new NavigationCanvas(m_bottomNavWindow, wxID_ANY, wxDefaultPosition,
+    m_gl3 = new NavigationCanvas(m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("MyGLCanvas"));
+    
+    m_xclick = 0;
+    m_yclick = 0;
+    m_zclick = 0;
     
 }
 
@@ -147,24 +151,23 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxString path = dialog.GetPath();
-		dataset = new TheDataset();
-		if (!dataset->load(path)) 
+		m_dataset = new TheDataset();
+		if (!m_dataset->load(path)) 
 		{
 			wxMessageBox(wxT("Fehler"),  wxT(""), wxNO_DEFAULT|wxYES_NO|wxCANCEL|wxICON_INFORMATION, NULL);
 		}
 		else 
 		{ 
 			
-			m_gl1->setDataset(dataset, 0);
-			m_gl2->setDataset(dataset, 1);
-			m_gl3->setDataset(dataset, 2);
-			/*
-			m_gl1->setTextureImage(dataset->getXSlize(dataset->getColumns()/2));
-			m_gl2->setTextureImage(dataset->getYSlize(dataset->getColumns()/2));
-			m_gl3->setTextureImage(dataset->getZSlize(dataset->getFrames()/2));
-			*/
+			m_gl1->setDataset(m_dataset, 0);
+			m_gl2->setDataset(m_dataset, 1);
+			m_gl3->setDataset(m_dataset, 2);
+			
 		}
-		m_textWindow->SetValue(dataset->getInfoString());
+		m_textWindow->SetValue(m_dataset->getInfoString());
+		m_xclick = m_dataset->getColumns()/2;
+		m_yclick = m_dataset->getRows()/2;
+		m_zclick = m_dataset->getFrames()/2;
 	}
 }
 
@@ -205,6 +208,35 @@ void MainFrame::OnSashDrag(wxSashEvent& event)
 
     // Leaves bits of itself behind sometimes
     GetClientWindow()->Refresh();
+}
+
+void MainFrame::OnMouseEvent(wxMouseEvent& event)
+{
+	wxBell();
+	wxPoint pt = event.GetPosition();
+	m_yclick = pt.x;
+	m_zclick = pt.y;
+	switch (event.GetId())
+	    {
+	    	case ID_GL_NAV_X:
+	    		m_yclick = pt.x;
+	    		m_zclick = pt.y;
+	    		break;
+	    	case ID_GL_NAV_Y:
+	    		m_xclick = pt.x;
+	    		m_zclick = pt.y;
+	    		break;
+	    	case ID_GL_NAV_Z:
+	    		m_xclick = pt.x;
+	    		m_yclick = pt.y;
+	    		break;
+	    }
+	
+	wxString click = wxString::Format(wxT("\n\n\nx click: %d\ny click: %d\nz click: %d\n"),m_xclick, m_yclick, m_zclick); 
+	if (m_dataset != NULL)
+		m_textWindow->SetValue(m_dataset->getInfoString() + click);
+	
+	this->Refresh();
 }
 
 void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))

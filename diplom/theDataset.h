@@ -4,17 +4,17 @@
 class TheDataset
 {
 private:
-	int length;
-	int bands;
-	int frames;
-	int rows;
-	int columns;
-	wxString repn;
-	double xVoxel;
-	double yVoxel;
-	double zVoxel;
+	int m_length;
+	int m_bands;
+	int m_frames;
+	int m_rows;
+	int m_columns;
+	wxString m_repn;
+	double m_xVoxel;
+	double m_yVoxel;
+	double m_zVoxel;
 
-	wxUint8 *data;
+	wxUint8 *m_data;
 	
 public:
 	TheDataset();
