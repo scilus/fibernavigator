@@ -28,7 +28,7 @@ void MainCanvas::init()
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho( -0.6, 0.6, -0.6, 0.6, -2.0, 2.0 );
+	glOrtho( -0.52, 0.52, -0.52, 0.52, -2.0, 2.0 );
 	
 	glShadeModel(GL_FLAT);
 	glEnable(GL_DEPTH_TEST);
@@ -57,6 +57,9 @@ void MainCanvas::init()
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
 	m_zSlize = 0.5;
+	m_xTexture = 0.5;
+	m_yTexture = 0.5;
+	m_zTexture = 0.5;
 }
 
 
@@ -121,16 +124,23 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 void MainCanvas::updateView(int dir, float slize)
 {
+	float ratio;
 	switch (dir)
 	{
 	case 0:
 		m_xSlize = slize;
+		ratio = (float)m_dataset->getColumns()/(float)m_dataset->getRows();
+		if ( ratio > 0.0) 
+			m_xTexture = (m_xSlize / ratio) + (1.0 - (1.0/ratio))/2.0;
 		break;
 	case 1:
 		m_ySlize = slize;
 		break;
 	case 2:
 		m_zSlize = slize;
+		ratio = (float)m_dataset->getFrames()/(float)m_dataset->getRows();
+		if ( ratio > 0.0) 
+			m_zTexture = (m_zSlize / ratio) + (1.0 - (1.0/ratio))/2.0;
 		break;
 	}
 	
@@ -172,41 +182,22 @@ void MainCanvas::render()
 	glBindTexture(GL_TEXTURE_3D, texName);
 	glBegin(GL_QUADS);
 	
-    	glTexCoord3f(0.0 + m_xOffset, 0.0 + m_yOffset, 1.0 - m_zSlize); glVertex3f(-0.5, -0.5, m_zSlize -0.5);
-    	glTexCoord3f(0.0 + m_xOffset, 1.0 - m_yOffset, 1.0 - m_zSlize); glVertex3f(-0.5, 0.5, m_zSlize -0.5);
-    	glTexCoord3f(1.0 - m_xOffset, 1.0 - m_yOffset, 1.0 - m_zSlize); glVertex3f(0.5, 0.5, m_zSlize -0.5);
-    	glTexCoord3f(1.0 - m_xOffset, 0.0 + m_yOffset, 1.0 - m_zSlize); glVertex3f(0.5, -0.5, m_zSlize -0.5);
+    	glTexCoord3f(0.0 - m_xOffset0, 0.0 - m_yOffset0, m_zTexture); glVertex3f(-0.5, -0.5, m_zSlize -0.5);
+    	glTexCoord3f(0.0 - m_xOffset0, 1.0 + m_yOffset0, m_zTexture); glVertex3f(-0.5, 0.5, m_zSlize -0.5);
+    	glTexCoord3f(1.0 + m_xOffset0, 1.0 + m_yOffset0, m_zTexture); glVertex3f(0.5, 0.5, m_zSlize -0.5);
+    	glTexCoord3f(1.0 + m_xOffset0, 0.0 - m_yOffset0, m_zTexture); glVertex3f(0.5, -0.5, m_zSlize -0.5);
   
-    	glTexCoord3f(1.0 + m_xOffset, m_ySlize, 0.0 - m_yOffset); glVertex3f(0.5, m_ySlize -0.5, 0.5);
-    	glTexCoord3f(1.0 + m_xOffset, m_ySlize, 1.0 + m_yOffset); glVertex3f(0.5, m_ySlize -0.5, -0.5);
-    	glTexCoord3f(0.0 - m_xOffset, m_ySlize, 1.0 + m_yOffset); glVertex3f(-0.5, m_ySlize -0.5, -0.5);
-    	glTexCoord3f(0.0 - m_xOffset, m_ySlize, 0.0 - m_yOffset); glVertex3f(-0.5, m_ySlize -0.5, 0.5);
+    	glTexCoord3f(0.0 - m_xOffset1, m_ySlize, 0.0 - m_yOffset1); glVertex3f(-0.5, m_ySlize -0.5, -0.5);
+    	glTexCoord3f(0.0 - m_xOffset1, m_ySlize, 1.0 + m_yOffset1); glVertex3f(-0.5, m_ySlize -0.5, 0.5);
+    	glTexCoord3f(1.0 + m_xOffset1, m_ySlize, 1.0 + m_yOffset1); glVertex3f(0.5, m_ySlize -0.5, 0.5);
+    	glTexCoord3f(1.0 + m_xOffset1, m_ySlize, 0.0 - m_yOffset1); glVertex3f(0.5, m_ySlize -0.5, -0.5);
     	
-    	glTexCoord3f(m_xSlize, 0.0 - m_xOffset, 1.0 + m_yOffset); glVertex3f(m_xSlize -0.5, -0.5, -0.5);
-    	glTexCoord3f(m_xSlize, 0.0 - m_xOffset, 0.0 - m_yOffset); glVertex3f(m_xSlize -0.5, -0.5, 0.5);
-    	glTexCoord3f(m_xSlize, 1.0 + m_xOffset, 0.0 - m_yOffset); glVertex3f(m_xSlize -0.5, 0.5, 0.5);
-    	glTexCoord3f(m_xSlize, 1.0 + m_xOffset, 1.0 + m_yOffset); glVertex3f(m_xSlize -0.5, 0.5, -0.5);
+    	glTexCoord3f(m_xTexture, 0.0 - m_xOffset2, 0.0 - m_yOffset2); glVertex3f(m_xSlize -0.5, -0.5, -0.5);
+    	glTexCoord3f(m_xTexture, 0.0 - m_xOffset2, 1.0 + m_yOffset2); glVertex3f(m_xSlize -0.5, -0.5, 0.5);
+    	glTexCoord3f(m_xTexture, 1.0 + m_xOffset2, 1.0 + m_yOffset2); glVertex3f(m_xSlize -0.5, 0.5, 0.5);
+    	glTexCoord3f(m_xTexture, 1.0 + m_xOffset2, 0.0 - m_yOffset2); glVertex3f(m_xSlize -0.5, 0.5, -0.5);
 	glEnd();
 	glDisable(GL_TEXTURE_3D);
-	
-/* This will be a border around the quads
-	glBegin(GL_QUADS);
-		glVertex3f(-0.5, -0.5, m_Slize -0.5);
-	    glVertex3f(-0.5, 0.5, m_Slize -0.5);
-	    glVertex3f(0.5, 0.5, m_Slize -0.5);
-	    glVertex3f(0.5, -0.5, m_Slize -0.5);
-	  
-	    glVertex3f(0.5, m_Slize -0.5, 0.5);
-	    glVertex3f(0.5, m_Slize -0.5, -0.5);
-	    glVertex3f(-0.5, m_Slize -0.5, -0.5);
-	    glVertex3f(-0.5, m_Slize -0.5, 0.5);
-	    
-	    glVertex3f(m_Slize -0.5, -0.5, -0.5);
-	    glVertex3f(m_Slize -0.5, -0.5, 0.5);
-	    glVertex3f(m_Slize -0.5, 0.5, 0.5);
-	    glVertex3f(m_Slize -0.5, 0.5, -0.5);
-	glEnd();
-*/
 	
 	glPopMatrix();
 	
@@ -217,15 +208,28 @@ void MainCanvas::render()
 
 void MainCanvas::setDataset(TheDataset *dataset)
 {
-	this->m_dataset = dataset;
+	m_dataset = dataset;
+		
+	float xSize = (float)dataset->getColumns();
+	float ySize = (float)dataset->getRows();
+	float zSize = (float)dataset->getFrames();
 	
-	float ratio = 1.0;
-	ratio = (float)dataset->getColumns()/(float)dataset->getRows();
-	//ratio = (float)dataset->getColumns()/(float)dataset->getFrames();
-	//ratio = (float)dataset->getRows()/(float)dataset->getFrames();
+	float ratio0 = xSize/ySize;
+	float ratio1 = xSize/zSize;
+	float ratio2 = ySize/zSize;
 
-	m_xOffset = 0.0; //(wxMax (0, 1.0 - ratio))/2.0;
-	m_yOffset = 0.0; //(wxMax (0, ratio - 1.0))/2.0;
+	m_xOffset0 = (wxMax (0, 1.0 - ratio0))/2.0;
+	m_yOffset0 = (wxMax (0, ratio0 - 1.0))/2.0;
+	m_xOffset1 = (wxMax (0, 1.0 - ratio1))/2.0;
+	m_yOffset1 = (wxMax (0, ratio1 - 1.0))/2.0;
+	m_xOffset2 = (wxMax (0, 1.0 - ratio2))/2.0;
+	m_yOffset2 = (wxMax (0, ratio2 - 1.0))/2.0;
+	
+	m_xOffset0 = wxMax(m_xOffset0, m_xOffset1);
+	m_xOffset1 = wxMax(m_xOffset0, m_xOffset1);
+	
+	m_yOffset1 = wxMax(m_yOffset1, m_yOffset2);
+	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);
 
 	m_texture_loaded = true;
 }

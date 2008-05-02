@@ -41,12 +41,18 @@ public:
 
 private:
 	 wxImage *m_image;
-	 float m_xOffset;
-	 float m_yOffset;
-	 float m_zOffset;
+	 float m_xOffset0;
+	 float m_yOffset0;
+	 float m_xOffset1;
+	 float m_yOffset1;
+	 float m_xOffset2;
+	 float m_yOffset2;
 	 float m_xSlize;
 	 float m_ySlize;
 	 float m_zSlize;
+	 float m_xTexture;
+	 float m_yTexture;
+	 float m_zTexture;
 	 TheDataset *m_dataset;
 	  wxPoint m_clicked;
 };

@@ -41,9 +41,12 @@ public:
 
 private:
 	 wxImage *m_image;
-	 float m_xOffset;
-	 float m_yOffset;
-	 float m_zOffset;
+	 float m_xOffset0;
+ 	 float m_yOffset0;
+ 	 float m_xOffset1;
+ 	 float m_yOffset1;
+ 	 float m_xOffset2;
+ 	 float m_yOffset2;
 	 float m_Slize;
 	 TheDataset *m_dataset;
 	 int m_view;

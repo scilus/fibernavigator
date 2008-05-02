@@ -145,26 +145,26 @@ void NavigationCanvas::render()
 	{
 	case 0:
 		glBegin(GL_QUADS);
-        	glTexCoord3f(1.0 + m_xOffset, 1.0 + m_yOffset, m_Slize); glVertex3f(0.0,0.0,0.0);
-        	glTexCoord3f(1.0 + m_xOffset, 0.0 - m_yOffset, m_Slize); glVertex3f(0.0,1.0,0.0);
-        	glTexCoord3f(0.0 - m_xOffset, 0.0 - m_yOffset, m_Slize); glVertex3f(1.0,1.0,0.0);
-        	glTexCoord3f(0.0 - m_xOffset, 1.0 + m_yOffset, m_Slize); glVertex3f(1.0,0.0,0.0);
+        	glTexCoord3f(1.0 + m_xOffset0, 1.0 + m_yOffset0, m_Slize); glVertex3f(0.0,0.0,0.0);
+        	glTexCoord3f(1.0 + m_xOffset0, 0.0 - m_yOffset0, m_Slize); glVertex3f(0.0,1.0,0.0);
+        	glTexCoord3f(0.0 - m_xOffset0, 0.0 - m_yOffset0, m_Slize); glVertex3f(1.0,1.0,0.0);
+        	glTexCoord3f(0.0 - m_xOffset0, 1.0 + m_yOffset0, m_Slize); glVertex3f(1.0,0.0,0.0);
 		glEnd();
 		break;
 	case 1:
 		glBegin(GL_QUADS);
-	    	glTexCoord3f(0.0 - m_xOffset, m_Slize, 0.0 - m_yOffset); glVertex3f(1.0,1.0,0.0);
-	    	glTexCoord3f(0.0 - m_xOffset, m_Slize, 1.0 + m_yOffset); glVertex3f(1.0,0.0,0.0);
-	    	glTexCoord3f(1.0 + m_xOffset, m_Slize, 1.0 + m_yOffset); glVertex3f(0.0,0.0,0.0);
-	    	glTexCoord3f(1.0 + m_xOffset, m_Slize, 0.0 - m_yOffset); glVertex3f(0.0,1.0,0.0);
+	    	glTexCoord3f(0.0 - m_xOffset1, m_Slize, 0.0 - m_yOffset1); glVertex3f(1.0,1.0,0.0);
+	    	glTexCoord3f(0.0 - m_xOffset1, m_Slize, 1.0 + m_yOffset1); glVertex3f(1.0,0.0,0.0);
+	    	glTexCoord3f(1.0 + m_xOffset1, m_Slize, 1.0 + m_yOffset1); glVertex3f(0.0,0.0,0.0);
+	    	glTexCoord3f(1.0 + m_xOffset1, m_Slize, 0.0 - m_yOffset1); glVertex3f(0.0,1.0,0.0);
 	    glEnd();
 		break;
 	case 2:
 		glBegin(GL_QUADS);
-        	glTexCoord3f(m_Slize, 0.0 - m_xOffset, 1.0 + m_yOffset); glVertex3f(0.0,0.0,0.0);
-        	glTexCoord3f(m_Slize, 0.0 - m_xOffset, 0.0 - m_yOffset); glVertex3f(0.0,1.0,0.0);
-        	glTexCoord3f(m_Slize, 1.0 + m_xOffset, 0.0 - m_yOffset); glVertex3f(1.0,1.0,0.0);
-        	glTexCoord3f(m_Slize, 1.0 + m_xOffset, 1.0 + m_yOffset); glVertex3f(1.0,0.0,0.0);
+        	glTexCoord3f(m_Slize, 0.0 - m_xOffset2, 1.0 + m_yOffset2); glVertex3f(0.0,0.0,0.0);
+        	glTexCoord3f(m_Slize, 0.0 - m_xOffset2, 0.0 - m_yOffset2); glVertex3f(0.0,1.0,0.0);
+        	glTexCoord3f(m_Slize, 1.0 + m_xOffset2, 0.0 - m_yOffset2); glVertex3f(1.0,1.0,0.0);
+        	glTexCoord3f(m_Slize, 1.0 + m_xOffset2, 1.0 + m_yOffset2); glVertex3f(1.0,0.0,0.0);
 		glEnd();
 		break;
 	}
@@ -191,22 +191,28 @@ void NavigationCanvas::setDataset(TheDataset *dataset, int view)
 {
 	this->m_dataset = dataset;
 	this->m_view = view;
-	float ratio = 1.0;
-	switch (view)
-	{
-		case 0:
-			ratio = (float)dataset->getColumns()/(float)dataset->getRows();
-			break;
-		case 1:
-			ratio = (float)dataset->getColumns()/(float)dataset->getFrames();
-			break;
-		case 2:
-			ratio = (float)dataset->getRows()/(float)dataset->getFrames();
-			break;
-	}
-	m_xOffset = (wxMax (0, 1.0 - ratio))/2.0;
-	m_yOffset = (wxMax (0, ratio - 1.0))/2.0;
+	
+	float xSize = (float)dataset->getColumns();
+	float ySize = (float)dataset->getRows();
+	float zSize = (float)dataset->getFrames();
+	
+	float ratio0 = xSize/ySize;
+	float ratio1 = xSize/zSize;
+	float ratio2 = ySize/zSize;
 
+	m_xOffset0 = (wxMax (0, 1.0 - ratio0))/2.0;
+	m_yOffset0 = (wxMax (0, ratio0 - 1.0))/2.0;
+	m_xOffset1 = (wxMax (0, 1.0 - ratio1))/2.0;
+	m_yOffset1 = (wxMax (0, ratio1 - 1.0))/2.0;
+	m_xOffset2 = (wxMax (0, 1.0 - ratio2))/2.0;
+	m_yOffset2 = (wxMax (0, ratio2 - 1.0))/2.0;
+	
+	m_xOffset0 = wxMax(m_xOffset0, m_xOffset1);
+	m_xOffset1 = wxMax(m_xOffset0, m_xOffset1);
+	
+	m_yOffset1 = wxMax(m_yOffset1, m_yOffset2);
+	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);
+	
 	m_texture_loaded = true;
 }
 

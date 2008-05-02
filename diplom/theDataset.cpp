@@ -102,44 +102,44 @@ bool TheDataset::load(wxString filename)
 /* getter methods */
 int TheDataset::getLength()
 {
-	return this->m_length;
+	return m_length;
 }
 int TheDataset::getBands()
 {
-	return this->m_bands;
+	return m_bands;
 }
 int TheDataset::getFrames()
 {
-	return this->m_frames;
+	return m_frames;
 }
 int TheDataset::getRows()
 {
-	return this->m_rows;
+	return m_rows;
 }
 int TheDataset::getColumns()
 {
-	return this->m_columns;
+	return m_columns;
 }
 wxString TheDataset::getRpn()
 {
-	return this->m_repn;
+	return m_repn;
 }
 double TheDataset::getXVoxel()
 {
-	return this->m_xVoxel;
+	return m_xVoxel;
 }
 double TheDataset::getYVoxel()
 {
-	return this->m_yVoxel;
+	return m_yVoxel;
 }
 double TheDataset::getZVoxel()
 {
-	return this->m_zVoxel;
+	return m_zVoxel;
 }
 
 wxUint8* TheDataset::getData()
 {
-	return this->m_data;
+	return m_data;
 }
 
 wxString TheDataset::getInfoString()
