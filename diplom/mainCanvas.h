@@ -54,6 +54,7 @@ private:
 	 float m_yTexture;
 	 float m_zTexture;
 	 TheDataset *m_dataset;
+	 wxUint8 *m_texture;
 	  wxPoint m_clicked;
 };
 
