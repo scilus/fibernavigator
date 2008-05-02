@@ -50,11 +50,9 @@ bool MyApp::OnInit(void)
   frame->SetMenuBar(menu_bar);
     
   frame->CreateStatusBar();
-
-   frame->Show(true);
   
-  wxImage::AddHandler(new wxPNGHandler);
-  
+  frame->Show(true);
+ 
   SetTopWindow(frame);
 
   return true;

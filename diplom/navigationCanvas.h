@@ -21,7 +21,7 @@ public:
 	NavigationCanvas( wxWindow *parent, wxWindowID id = wxID_ANY,
          const wxPoint& pos = wxDefaultPosition,
          const wxSize& size = wxDefaultSize,
-         long style = 0, const wxString& name = _T("TestGLCanvas") );
+         long style = 0, const wxString& name = _T("GLCanvas") );
     bool	m_init;
     bool	m_texture_loaded;
 
@@ -32,25 +32,23 @@ public:
     void OnEraseBackground(wxEraseEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
+    void updateView(wxPoint, float);
     void init();
     void render();
     void setDataset(TheDataset*, int);
+    wxPoint getMousePos();
     
-    void setxSlize(int);
-    void setySlize(int);
-    void setzSlize(int);
-   
     DECLARE_EVENT_TABLE()
+
 private:
 	 wxImage *m_image;
 	 float m_xOffset;
 	 float m_yOffset;
 	 float m_zOffset;
-	 int m_xSlize;
-	 int m_ySlize;
-	 int m_zSlize;
+	 float m_Slize;
 	 TheDataset *m_dataset;
 	 int m_view;
+	 wxPoint m_clicked;
 };
 
 #endif /*NAVIGATIONCANVAS_H_*/

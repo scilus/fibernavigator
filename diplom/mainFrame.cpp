@@ -7,12 +7,18 @@
 
 int winNumber = 1;
 
+DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
+//DEFINE_EVENT_TYPE(wxEVT_MY_EVENT)
+   
 BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_ABOUT, MainFrame::OnAbout)
     EVT_SIZE(MainFrame::OnSize)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
+    EVT_COMMAND(ID_GL_NAV_X, wxEVT_MY_EVENT, MainFrame::OnGLEvent)
+    EVT_COMMAND(ID_GL_NAV_Y, wxEVT_MY_EVENT, MainFrame::OnGLEvent)
+	EVT_COMMAND(ID_GL_NAV_Z, wxEVT_MY_EVENT, MainFrame::OnGLEvent)
 END_EVENT_TABLE()
 
 
@@ -44,14 +50,14 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(this, ID_WINDOW_NAV_MAIN, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(255, 765));
+    win->SetDefaultSize(wxSize(NAV_SIZE, 765));
     win->SetOrientation(wxLAYOUT_VERTICAL);
     win->SetAlignment(wxLAYOUT_LEFT);
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_navWindow = win;
 
     // main window right side, holds the big gl widget
-    win = new wxSashLayoutWindow(this, ID_WINDOW_RIGHT1, 
+    win = new wxSashLayoutWindow(this, ID_WINDOW_RIGHT, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(765, 765));
@@ -63,7 +69,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV_X, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(255, 255));
+    win->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(0, 0, 0));
@@ -72,7 +78,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV_Y, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(255, 255));
+    win->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(0, 0, 0));
@@ -81,7 +87,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV_Z, 
      		  wxDefaultPosition, wxSize(200, 30),
      		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-       win->SetDefaultSize(wxSize(255, 255));
+       win->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
        win->SetOrientation(wxLAYOUT_HORIZONTAL);
        win->SetAlignment(wxLAYOUT_TOP);
        win->SetBackgroundColour(wxColour(0, 0, 0));
@@ -91,18 +97,20 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV3, 
       		  wxDefaultPosition, wxSize(200, 30),
        		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-          win->SetDefaultSize(wxSize(255, 10));
+          win->SetDefaultSize(wxSize(NAV_SIZE, 10));
           win->SetOrientation(wxLAYOUT_HORIZONTAL);
           win->SetAlignment(wxLAYOUT_TOP);
           win->SetBackgroundColour(wxColour(255, 255, 255));
     
       
-    m_gl1 = new NavigationCanvas(m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
+    m_gl0 = new NavigationCanvas(m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("MyGLCanvas"));
-    m_gl2 = new NavigationCanvas(m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
+    m_gl1 = new NavigationCanvas(m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("MyGLCanvas"));
-    m_gl3 = new NavigationCanvas(m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
+    m_gl2 = new NavigationCanvas(m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("MyGLCanvas"));
+    
+    
     
     m_xclick = 0;
     m_yclick = 0;
@@ -133,9 +141,9 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		else 
 		{ 
 			
-			m_gl1->setDataset(m_dataset, 0);
-			m_gl2->setDataset(m_dataset, 1);
-			m_gl3->setDataset(m_dataset, 2);
+			m_gl0->setDataset(m_dataset, 0);
+			m_gl1->setDataset(m_dataset, 1);
+			m_gl2->setDataset(m_dataset, 2);
 			
 		}
 		m_textWindow->SetValue(m_dataset->getInfoString());
@@ -184,32 +192,49 @@ void MainFrame::OnSashDrag(wxSashEvent& event)
     GetClientWindow()->Refresh();
 }
 
+void MainFrame::OnGLEvent( wxCommandEvent &event )
+{
+	wxPoint pos, newpos;
+	
+	switch (event.GetInt())
+	{
+	case 0:
+		pos = m_gl0->getMousePos();
+		newpos = m_gl1->getMousePos();
+		newpos.x = pos.x;
+		m_gl1->updateView(newpos, (float)pos.y/NAV_SIZE);
+		
+		
+		newpos = m_gl2->getMousePos();
+		newpos.x = pos.y;
+		m_gl2->updateView(newpos, (float)pos.x/NAV_SIZE);
+
+		break;
+	case 1:
+		pos = m_gl1->getMousePos();
+		newpos = m_gl0->getMousePos();
+		newpos.x = pos.x;
+		m_gl0->updateView(newpos, (float)pos.y/NAV_SIZE);
+		newpos = m_gl2->getMousePos();
+		newpos.y = pos.y;
+		m_gl2->updateView(newpos, (float)pos.x/NAV_SIZE);
+		break;
+	case 2:
+		pos = m_gl2->getMousePos();
+		newpos = m_gl0->getMousePos();
+		newpos.y = pos.x;
+		m_gl0->updateView(newpos, (float)pos.y/NAV_SIZE);
+		newpos = m_gl1->getMousePos();
+		newpos.y = pos.y;
+		m_gl1->updateView(newpos, (float)pos.x/NAV_SIZE);
+		break;
+	}
+	
+}
+
 void MainFrame::OnMouseEvent(wxMouseEvent& event)
 {
-	//wxBell();
-	wxPoint pt = event.GetPosition();
-	m_yclick = pt.x;
-	m_zclick = pt.y;
-	switch (event.GetId())
-	    {
-	    	case ID_GL_NAV_X:
-	    		m_yclick = pt.x;
-	    		m_zclick = pt.y;
-	    		break;
-	    	case ID_GL_NAV_Y:
-	    		m_xclick = pt.x;
-	    		m_zclick = pt.y;
-	    		break;
-	    	case ID_GL_NAV_Z:
-	    		m_xclick = pt.x;
-	    		m_yclick = pt.y;
-	    		break;
-	    }
-	
-	wxString click = wxString::Format(wxT("\n\n\nx click: %d\ny click: %d\nz click: %d\n"),m_xclick, m_yclick, m_zclick); 
-	if (m_dataset != NULL)
-		m_textWindow->SetValue(m_dataset->getInfoString() + click);
-	
+		
 	this->Refresh();
 }
 

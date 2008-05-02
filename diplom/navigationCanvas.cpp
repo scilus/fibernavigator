@@ -3,6 +3,9 @@
 
 static GLuint texName;
 
+DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
+DEFINE_EVENT_TYPE(wxEVT_MY_EVENT)
+
 BEGIN_EVENT_TABLE(NavigationCanvas, wxGLCanvas)
     EVT_SIZE(NavigationCanvas::OnSize)
     EVT_PAINT(NavigationCanvas::OnPaint)
@@ -17,7 +20,6 @@ NavigationCanvas::NavigationCanvas(wxWindow *parent, wxWindowID id,
 {
     m_init = false;
     m_texture_loaded = false;
-    
 }
 
 void NavigationCanvas::init()
@@ -49,13 +51,14 @@ void NavigationCanvas::init()
 			GL_UNSIGNED_BYTE, 
 			m_dataset->getData());
 	
+	m_clicked = wxPoint(this->m_width/2, this->m_height/2);
+	m_Slize = 0.5;
 }
 
 
 void NavigationCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 {
     render();
-	//display();
 }
 
 void NavigationCanvas::OnSize(wxSizeEvent& event)
@@ -89,8 +92,24 @@ void NavigationCanvas::OnChar(wxKeyEvent& event)
 
 void NavigationCanvas::OnMouseEvent(wxMouseEvent& event)
 {
-	event.ResumePropagation (wxEVENT_PROPAGATE_MAX); 
-    event.Skip();
+	if (event.LeftUp() || event.Dragging()) 
+	{
+		m_clicked = event.GetPosition();
+	
+		render();
+	
+		wxCommandEvent event1( wxEVT_MY_EVENT, GetId() );
+		event1.SetEventObject( (wxObject*) new wxPoint( event.GetPosition()) );
+		event1.SetInt(m_view);
+		GetEventHandler()->ProcessEvent( event1 );
+	}
+}
+
+void NavigationCanvas::updateView(wxPoint pos, float slize)
+{
+	m_clicked = pos;
+	m_Slize = slize;
+	render();
 }
 
 void NavigationCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
@@ -127,34 +146,45 @@ void NavigationCanvas::render()
 	{
 	case 0:
 		glBegin(GL_QUADS);
-        	glTexCoord3f(1.0 + m_xOffset, 1.0 + m_yOffset, 0.5); glVertex3f(0.0,0.0,0.0);
-        	glTexCoord3f(1.0 + m_xOffset, 0.0 - m_yOffset, 0.5); glVertex3f(0.0,1.0,0.0);
-        	glTexCoord3f(0.0 - m_xOffset, 0.0 - m_yOffset, 0.5); glVertex3f(1.0,1.0,0.0);
-        	glTexCoord3f(0.0 - m_xOffset, 1.0 + m_yOffset, 0.5); glVertex3f(1.0,0.0,0.0);
+        	glTexCoord3f(1.0 + m_xOffset, 1.0 + m_yOffset, m_Slize); glVertex3f(0.0,0.0,0.0);
+        	glTexCoord3f(1.0 + m_xOffset, 0.0 - m_yOffset, m_Slize); glVertex3f(0.0,1.0,0.0);
+        	glTexCoord3f(0.0 - m_xOffset, 0.0 - m_yOffset, m_Slize); glVertex3f(1.0,1.0,0.0);
+        	glTexCoord3f(0.0 - m_xOffset, 1.0 + m_yOffset, m_Slize); glVertex3f(1.0,0.0,0.0);
 		glEnd();
 		break;
 	case 1:
 		glBegin(GL_QUADS);
-	    	glTexCoord3f(0.0 - m_xOffset, 0.5, 0.0 - m_yOffset); glVertex3f(1.0,1.0,0.0);
-	    	glTexCoord3f(0.0 - m_xOffset, 0.5, 1.0 + m_yOffset); glVertex3f(1.0,0.0,0.0);
-	    	glTexCoord3f(1.0 + m_xOffset, 0.5, 1.0 + m_yOffset); glVertex3f(0.0,0.0,0.0);
-	    	glTexCoord3f(1.0 + m_xOffset, 0.5, 0.0 - m_yOffset); glVertex3f(0.0,1.0,0.0);
+	    	glTexCoord3f(0.0 - m_xOffset, m_Slize, 0.0 - m_yOffset); glVertex3f(1.0,1.0,0.0);
+	    	glTexCoord3f(0.0 - m_xOffset, m_Slize, 1.0 + m_yOffset); glVertex3f(1.0,0.0,0.0);
+	    	glTexCoord3f(1.0 + m_xOffset, m_Slize, 1.0 + m_yOffset); glVertex3f(0.0,0.0,0.0);
+	    	glTexCoord3f(1.0 + m_xOffset, m_Slize, 0.0 - m_yOffset); glVertex3f(0.0,1.0,0.0);
 	    glEnd();
 		break;
 	case 2:
 		glBegin(GL_QUADS);
-        	glTexCoord3f(0.5, 0.0 - m_xOffset, 1.0 + m_yOffset); glVertex3f(0.0,0.0,0.0);
-        	glTexCoord3f(0.5, 0.0 - m_xOffset, 0.0 - m_yOffset); glVertex3f(0.0,1.0,0.0);
-        	glTexCoord3f(0.5, 1.0 + m_xOffset, 0.0 - m_yOffset); glVertex3f(1.0,1.0,0.0);
-        	glTexCoord3f(0.5, 1.0 + m_xOffset, 1.0 + m_yOffset); glVertex3f(1.0,0.0,0.0);
+        	glTexCoord3f(m_Slize, 0.0 - m_xOffset, 1.0 + m_yOffset); glVertex3f(0.0,0.0,0.0);
+        	glTexCoord3f(m_Slize, 0.0 - m_xOffset, 0.0 - m_yOffset); glVertex3f(0.0,1.0,0.0);
+        	glTexCoord3f(m_Slize, 1.0 + m_xOffset, 0.0 - m_yOffset); glVertex3f(1.0,1.0,0.0);
+        	glTexCoord3f(m_Slize, 1.0 + m_xOffset, 1.0 + m_yOffset); glVertex3f(1.0,0.0,0.0);
 		glEnd();
 		break;
 	}
+	glDisable(GL_TEXTURE_3D);
 	
+	float xline = (float)m_clicked.x/(float)this->m_width;
+	float yline = 1.0 - (float)m_clicked.y/(float)this->m_height;
     
+	glColor3f(1.0, 0.0, 0.0);
+	glBegin (GL_LINES);
+		glVertex3f (0.0, yline, 0.1);
+		glVertex3f (1.0, yline, 0.1);
+		glVertex3f (xline, 0.0, 0.1);
+		glVertex3f (xline, 1.0, 0.1);
+	glEnd();
+	glColor3f(1.0, 1.0, 1.0);
         
 	glFlush();
-    glDisable(GL_TEXTURE_3D);
+    
     SwapBuffers();
 }
 
@@ -181,17 +211,9 @@ void NavigationCanvas::setDataset(TheDataset *dataset, int view)
 	m_texture_loaded = true;
 }
 
-void NavigationCanvas::setxSlize(int x)
+wxPoint NavigationCanvas::getMousePos()
 {
-	this->m_xSlize = x;
+	return m_clicked;
 }
 
-void NavigationCanvas::setySlize(int y)
-{
-	this->m_ySlize = y;
-}
 
-void NavigationCanvas::setzSlize(int z)
-{
-	this->m_zSlize = z;
-}

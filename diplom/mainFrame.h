@@ -24,6 +24,7 @@ public:
     void OnToggleWindow(wxCommandEvent& event);
     void OnSashDrag(wxSashEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
+    void OnGLEvent(wxCommandEvent &event);
 
 public:
     int m_xclick;
@@ -40,11 +41,10 @@ private:
     wxSashLayoutWindow* m_topNavWindow;
     wxSashLayoutWindow* m_middleNavWindow;
     wxSashLayoutWindow* m_bottomNavWindow;
-   
-    
+
+    NavigationCanvas* m_gl0;
     NavigationCanvas* m_gl1;
     NavigationCanvas* m_gl2;
-    NavigationCanvas* m_gl3;
     
     wxTextCtrl* m_textWindow;
     wxPanel* m_panel1;
@@ -64,12 +64,12 @@ DECLARE_EVENT_TABLE()
 #define ID_WINDOW_NAV_X 	105
 #define ID_WINDOW_NAV_Y  	106
 #define ID_WINDOW_NAV_Z   	107
-
-#define ID_WINDOW_RIGHT1  	108
-#define ID_WINDOW_NAV3  	109
+#define ID_WINDOW_NAV3  	108
 
 #define ID_GL_NAV_X 	110
 #define ID_GL_NAV_Y  	111
 #define ID_GL_NAV_Z   	112
+
+#define NAV_SIZE 255
 
 #endif /*MAINFRAME_H_*/
