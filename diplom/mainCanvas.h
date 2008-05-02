@@ -1,5 +1,5 @@
-#ifndef NAVIGATIONCANVAS_H_
-#define NAVIGATIONCANVAS_H_
+#ifndef MAINCANVAS_H_
+#define MAINCANVAS_H_
 
 #include "wx/wxprec.h"
 
@@ -14,27 +14,27 @@
 
 #include "theDataset.h"
 
-class NavigationCanvas: public wxGLCanvas
+class MainCanvas: public wxGLCanvas
 {
 public:
-	NavigationCanvas( wxWindow *parent, wxWindowID id = wxID_ANY,
+	MainCanvas( wxWindow *parent, wxWindowID id = wxID_ANY,
          const wxPoint& pos = wxDefaultPosition,
          const wxSize& size = wxDefaultSize,
          long style = 0, const wxString& name = _T("GLCanvas") );
     bool	m_init;
     bool	m_texture_loaded;
 
-   ~NavigationCanvas(){};
+   ~MainCanvas(){};
 
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
-    void updateView(wxPoint, float);
+    void updateView(int, float);
     void init();
     void render();
-    void setDataset(TheDataset*, int);
+    void setDataset(TheDataset*);
     wxPoint getMousePos();
     
     DECLARE_EVENT_TABLE()
@@ -44,10 +44,11 @@ private:
 	 float m_xOffset;
 	 float m_yOffset;
 	 float m_zOffset;
-	 float m_Slize;
+	 float m_xSlize;
+	 float m_ySlize;
+	 float m_zSlize;
 	 TheDataset *m_dataset;
-	 int m_view;
-	 wxPoint m_clicked;
+	  wxPoint m_clicked;
 };
 
-#endif /*NAVIGATIONCANVAS_H_*/
+#endif /*MAINCANVAS_H_*/

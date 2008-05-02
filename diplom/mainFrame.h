@@ -2,6 +2,7 @@
 #define MAINFRAME_H_
 
 #include "navigationCanvas.h"
+#include "mainCanvas.h"
 #include "theDataset.h"
 
 // Define a new frame
@@ -45,6 +46,7 @@ private:
     NavigationCanvas* m_gl0;
     NavigationCanvas* m_gl1;
     NavigationCanvas* m_gl2;
+    MainCanvas* m_mainGL;
     
     wxTextCtrl* m_textWindow;
     wxPanel* m_panel1;
@@ -69,6 +71,7 @@ DECLARE_EVENT_TABLE()
 #define ID_GL_NAV_X 	110
 #define ID_GL_NAV_Y  	111
 #define ID_GL_NAV_Z   	112
+#define ID_GL_MAIN		113
 
 #define NAV_SIZE 255
 

@@ -1,4 +1,3 @@
-
 #include "navigationCanvas.h"
 
 static GLuint texName;

@@ -8,7 +8,6 @@
 int winNumber = 1;
 
 DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
-//DEFINE_EVENT_TYPE(wxEVT_MY_EVENT)
    
 BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_ABOUT, MainFrame::OnAbout)
@@ -104,11 +103,13 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     
       
     m_gl0 = new NavigationCanvas(m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
-    	        wxDefaultSize, 0, _T("MyGLCanvas"));
+    	        wxDefaultSize, 0, _T("NavGLCanvasX"));
     m_gl1 = new NavigationCanvas(m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
-        	        wxDefaultSize, 0, _T("MyGLCanvas"));
+        	        wxDefaultSize, 0, _T("NavGLCanvasY"));
     m_gl2 = new NavigationCanvas(m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
-       	        wxDefaultSize, 0, _T("MyGLCanvas"));
+       	        wxDefaultSize, 0, _T("NavGLCanvasZ"));
+    m_mainGL = new MainCanvas(m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
+    			wxDefaultSize, 0, _T("MainGLCanvas"));
     
     
     
@@ -144,6 +145,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 			m_gl0->setDataset(m_dataset, 0);
 			m_gl1->setDataset(m_dataset, 1);
 			m_gl2->setDataset(m_dataset, 2);
+			m_mainGL->setDataset(m_dataset);
 			
 		}
 		m_textWindow->SetValue(m_dataset->getInfoString());
@@ -203,12 +205,11 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		newpos = m_gl1->getMousePos();
 		newpos.x = pos.x;
 		m_gl1->updateView(newpos, (float)pos.y/NAV_SIZE);
-		
-		
 		newpos = m_gl2->getMousePos();
 		newpos.x = pos.y;
 		m_gl2->updateView(newpos, (float)pos.x/NAV_SIZE);
-
+		m_mainGL->updateView(0, (float)pos.x/NAV_SIZE);
+		m_mainGL->updateView(1, (float)pos.y/NAV_SIZE);
 		break;
 	case 1:
 		pos = m_gl1->getMousePos();
@@ -218,6 +219,8 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		newpos = m_gl2->getMousePos();
 		newpos.y = pos.y;
 		m_gl2->updateView(newpos, (float)pos.x/NAV_SIZE);
+		m_mainGL->updateView(0, (float)pos.x/NAV_SIZE);
+		m_mainGL->updateView(2, (float)pos.y/NAV_SIZE);
 		break;
 	case 2:
 		pos = m_gl2->getMousePos();
@@ -227,6 +230,8 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		newpos = m_gl1->getMousePos();
 		newpos.y = pos.y;
 		m_gl1->updateView(newpos, (float)pos.x/NAV_SIZE);
+		m_mainGL->updateView(1, (float)pos.x/NAV_SIZE);
+		m_mainGL->updateView(2, (float)pos.y/NAV_SIZE);
 		break;
 	}
 	
