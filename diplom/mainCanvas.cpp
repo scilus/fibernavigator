@@ -36,11 +36,14 @@ void MainCanvas::init()
 	
 	
 	glShadeModel(GL_FLAT);
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DOUBLEBUFFER);
-	
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	glAlphaFunc(GL_GREATER,0.1f); // adjust your prefered threshold here
+	glEnable(GL_ALPHA_TEST);
+
 	
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 	glGenTextures(1, &texName);
@@ -194,12 +197,14 @@ void MainCanvas::render()
     	glTexCoord3f(m_xTexture, 0.0 - m_xOffset2, 1.0 + m_yOffset2); glVertex3f(m_xSlize -0.5, -0.5, 0.5);
     	glTexCoord3f(m_xTexture, 1.0 + m_xOffset2, 1.0 + m_yOffset2); glVertex3f(m_xSlize -0.5, 0.5, 0.5);
     	glTexCoord3f(m_xTexture, 1.0 + m_xOffset2, 0.0 - m_yOffset2); glVertex3f(m_xSlize -0.5, 0.5, -0.5);
-
+    glEnd();
+    glBegin(GL_QUADS);
     	glTexCoord3f(0.0 - m_xOffset1, m_ySlize, 0.0 - m_yOffset1); glVertex3f(-0.5, m_ySlize -0.5, -0.5);
     	glTexCoord3f(0.0 - m_xOffset1, m_ySlize, 1.0 + m_yOffset1); glVertex3f(-0.5, m_ySlize -0.5, 0.5);
     	glTexCoord3f(1.0 + m_xOffset1, m_ySlize, 1.0 + m_yOffset1); glVertex3f(0.5, m_ySlize -0.5, 0.5);
     	glTexCoord3f(1.0 + m_xOffset1, m_ySlize, 0.0 - m_yOffset1); glVertex3f(0.5, m_ySlize -0.5, -0.5);
-
+    glEnd();
+    glBegin(GL_QUADS);
     	glTexCoord3f(0.0 - m_xOffset0, 0.0 - m_yOffset0, m_zTexture); glVertex3f(-0.5, -0.5, m_zSlize -0.5);
     	glTexCoord3f(0.0 - m_xOffset0, 1.0 + m_yOffset0, m_zTexture); glVertex3f(-0.5, 0.5, m_zSlize -0.5);
     	glTexCoord3f(1.0 + m_xOffset0, 1.0 + m_yOffset0, m_zTexture); glVertex3f(0.5, 0.5, m_zSlize -0.5);
