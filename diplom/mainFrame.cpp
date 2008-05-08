@@ -275,7 +275,8 @@ void MainFrame::OnXSliderMoved(wxCommandEvent& event)
 	 int newX = (int)((float)(m_xclick/(float)m_dataset->getColumns()) * NAV_GL_SIZE);
 	 m_gl0->updateView(wxPoint(newX, pos.y), NULL);
 	 m_gl1->updateView(wxPoint(newX, pos.y), NULL);
-	 m_gl2->updateView(m_gl2->getMousePos(), (float)m_xclick/NAV_GL_SIZE);
+	 m_gl2->updateView(m_gl2->getMousePos(), (float)m_xclick/(float)m_dataset->getFrames());
+	 m_mainGL->updateView(0, (float)pos.x/NAV_GL_SIZE);
 }
 
 void MainFrame::OnYSliderMoved(wxCommandEvent& event)
@@ -286,6 +287,8 @@ void MainFrame::OnYSliderMoved(wxCommandEvent& event)
 	m_gl0->updateView(wxPoint(pos.x, newY), NULL);
 	pos = m_gl2->getMousePos();
 	m_gl2->updateView(wxPoint(newY, pos.y), NULL);
+	m_gl1->updateView(m_gl1->getMousePos(), (float)m_yclick/(float)m_dataset->getRows());
+	m_mainGL->updateView(1, (float)pos.x/NAV_GL_SIZE);
 }
 
 void MainFrame::OnZSliderMoved(wxCommandEvent& event)
@@ -296,4 +299,7 @@ void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 	m_gl1->updateView(wxPoint(pos.x, newZ), NULL);
 	pos = m_gl2->getMousePos();
 	m_gl2->updateView(wxPoint(pos.x, newZ), NULL);
+	m_gl0->updateView(m_gl0->getMousePos(), (float)m_zclick/(float)m_dataset->getColumns());
+	m_mainGL->updateView(2, (float)pos.y/NAV_GL_SIZE);
+	
 }
