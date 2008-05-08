@@ -51,6 +51,7 @@ private:
 	 TheDataset *m_dataset;
 	 int m_view;
 	 wxPoint m_clicked;
+	 wxSize m_oldSize;
 };
 
 #endif /*NAVIGATIONCANVAS_H_*/

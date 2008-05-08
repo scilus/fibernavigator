@@ -49,9 +49,6 @@ void NavigationCanvas::init()
 			GL_LUMINANCE, 
 			GL_UNSIGNED_BYTE, 
 			m_dataset->getData());
-	
-	m_clicked = wxPoint(this->m_width/2, this->m_height/2);
-	m_Slize = 0.5;
 }
 
 
@@ -62,6 +59,13 @@ void NavigationCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void NavigationCanvas::OnSize(wxSizeEvent& event)
 {
+	if (m_texture_loaded)
+	{
+		wxSize newSize = this->GetSize();
+		m_clicked.x = (int)((float)m_clicked.x * ((float)newSize.x / (float)m_oldSize.x));
+		m_clicked.y = (int)((float)m_clicked.y * ((float)newSize.y / (float)m_oldSize.y));
+		m_oldSize = newSize;
+	}
     // this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize(event);
 
@@ -107,7 +111,8 @@ void NavigationCanvas::OnMouseEvent(wxMouseEvent& event)
 void NavigationCanvas::updateView(wxPoint pos, float slize)
 {
 	m_clicked = pos;
-	m_Slize = slize;
+	if (slize != NULL)
+		m_Slize = slize;
 	render();
 }
 
@@ -212,6 +217,10 @@ void NavigationCanvas::setDataset(TheDataset *dataset, int view)
 	
 	m_yOffset1 = wxMax(m_yOffset1, m_yOffset2);
 	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);
+	
+	m_clicked = wxPoint(this->m_width/2, this->m_height/2);
+	m_Slize = 0.5;
+	m_oldSize = this->GetSize();
 	
 	m_texture_loaded = true;
 }

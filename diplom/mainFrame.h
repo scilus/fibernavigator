@@ -26,6 +26,9 @@ public:
     void OnSashDrag(wxSashEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
     void OnGLEvent(wxCommandEvent &event);
+    void OnXSliderMoved(wxCommandEvent& event);
+    void OnYSliderMoved(wxCommandEvent& event);
+    void OnZSliderMoved(wxCommandEvent& event);
 
 public:
     int m_xclick;
@@ -42,6 +45,11 @@ private:
     wxSashLayoutWindow* m_topNavWindow;
     wxSashLayoutWindow* m_middleNavWindow;
     wxSashLayoutWindow* m_bottomNavWindow;
+    wxSashLayoutWindow* m_extraNavWindow;
+    
+    wxSlider* m_xSlider;
+    wxSlider* m_ySlider;
+    wxSlider* m_zSlider;
 
     NavigationCanvas* m_gl0;
     NavigationCanvas* m_gl1;
@@ -51,6 +59,9 @@ private:
     wxTextCtrl* m_textWindow;
     wxPanel* m_panel1;
     wxStaticBitmap* m_statBitmap1;
+    
+    int NAV_SIZE;
+    int NAV_GL_SIZE;
 
 DECLARE_EVENT_TABLE()
 };
@@ -73,6 +84,8 @@ DECLARE_EVENT_TABLE()
 #define ID_GL_NAV_Z   	112
 #define ID_GL_MAIN		113
 
-#define NAV_SIZE 255
+#define ID_X_SLIDER 115
+#define ID_Y_SLIDER 116
+#define ID_Z_SLIDER 117
 
 #endif /*MAINFRAME_H_*/
