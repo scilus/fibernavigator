@@ -111,8 +111,31 @@ void NavigationCanvas::OnMouseEvent(wxMouseEvent& event)
 void NavigationCanvas::updateView(wxPoint pos, float slize)
 {
 	m_clicked = pos;
+	float ratio;
 	if (slize != NULL)
-		m_Slize = slize;
+	{
+		switch (m_view)
+		{
+		case 0:
+			ratio = (float)m_dataset->getFrames()/(float)m_dataset->getRows();
+			if ( ratio > 0.0) 
+				m_Slize = (slize / ratio) + (1.0 - (1.0/ratio))/2.0;
+			else
+				m_Slize = slize;
+			break;
+		case 1:
+			m_Slize = slize;
+			break;
+		case 2:
+			ratio = (float)m_dataset->getColumns()/(float)m_dataset->getRows();
+			if ( ratio > 0.0) 
+				m_Slize = (slize / ratio) + (1.0 - (1.0/ratio))/2.0;
+			else
+				m_Slize = slize;
+			break;
+		}
+	}
+	
 	render();
 }
 
