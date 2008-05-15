@@ -61,14 +61,37 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_navWindow = win;
 
     // main window right side, holds the big gl widget
-    win = new wxSashLayoutWindow(this, ID_WINDOW_RIGHT, 
+    win = new wxSashLayoutWindow(this, ID_WINDOW_RIGHT_HOLDER, 
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(765, 765));
+    win->SetMinSize(wxSize(100,100));
+    win->SetMaxSize(wxSize(2000,2000));
     win->SetOrientation(wxLAYOUT_VERTICAL);
     win->SetAlignment(wxLAYOUT_LEFT);
+    win->SetBackgroundColour(wxColour(0, 0, 0));
+    m_rightWindowHolder = win;
+    
+    // main window right side, holds the big gl widget
+    win = new wxSashLayoutWindow(m_rightWindowHolder, ID_WINDOW_RIGHT, 
+  		  wxDefaultPosition, wxSize(200, 30),
+  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(700, 700));
+    win->SetMinSize(wxSize(100,100));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(180, 180, 180));
     m_rightWindow = win;
+    
+    // extra window right side, prevent scaling of the main gl widget
+    win = new wxSashLayoutWindow(m_rightWindowHolder, ID_WINDOW_EXTRA_RIGHT, 
+  		  wxDefaultPosition, wxSize(765, 765),
+  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(765, 1));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_BOTTOM);
+    win->SetBackgroundColour(wxColour(0, 0, 0));
+    m_extraRightWindow = win;
 
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV_X, 
   		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
@@ -112,15 +135,48 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     
     m_ySlider = new wxSlider(m_extraNavWindow, ID_Y_SLIDER, 50, 0, 100, wxPoint(0,m_xSlider->GetSize().y), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
     m_zSlider = new wxSlider(m_extraNavWindow, ID_Z_SLIDER, 50, 0, 100, wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-      
+   
+    m_xSlider->SetMinSize(wxSize(1, -1));
+    m_ySlider->SetMinSize(wxSize(1, -1));
+    m_zSlider->SetMinSize(wxSize(1, -1));
+    
+    GLboolean doubleBuffer = GL_TRUE;
+    
+	#ifdef __WXMSW__
+    	int *gl_attrib = NULL;
+	#else
+    int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
+        WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
+        WX_GL_DOUBLEBUFFER,
+	#if defined(__WXMAC__) || defined(__WXCOCOA__)
+        GL_NONE };
+	#else
+        None };
+	#endif
+	#endif
+
+    if(!doubleBuffer)
+    {
+        printf("don't have double buffer, disabling\n");
+	#ifdef __WXGTK__
+        gl_attrib[9] = None;
+	#endif
+        doubleBuffer = GL_FALSE;
+    }
+    
+    
+    
+    
+    
+    
     m_gl0 = new NavigationCanvas(m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
-    	        wxDefaultSize, 0, _T("NavGLCanvasX"));
+    	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib);
     m_gl1 = new NavigationCanvas(m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
-        	        wxDefaultSize, 0, _T("NavGLCanvasY"));
+        	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib);
     m_gl2 = new NavigationCanvas(m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
-       	        wxDefaultSize, 0, _T("NavGLCanvasZ"));
+       	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
     m_mainGL = new MainCanvas(m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
-    			wxDefaultSize, 0, _T("MainGLCanvas"));
+    			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
     
     
     
@@ -251,13 +307,37 @@ void MainFrame::OnMouseEvent(wxMouseEvent& event)
 
 void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
-	int height = this->GetSize().GetHeight();
+	/* resize the navigation widgets */
+	int height = this->GetClientSize().y;
 	NAV_SIZE = wxMin(255, height/4);
+	NAV_GL_SIZE = NAV_SIZE-4;
 	m_navWindow->SetDefaultSize(wxSize(NAV_SIZE, height));
 	m_topNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_middleNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_bottomNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_extraNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
+	
+	/* resize sliders */
+	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+	
+	/* resize main gl window */
+	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x), 
+			this->GetClientSize().y);
+	m_rightWindow->SetSize(wxSize(mainSize, mainSize));
+	
+	/* reposition the selection crosshairs */
+	if (m_dataset)
+	{
+		int newX = (int)((float)(m_xclick/(float)m_dataset->getColumns()) * NAV_GL_SIZE);
+		int newY = (int)((float)(m_yclick/(float)m_dataset->getRows()) * NAV_GL_SIZE);
+		int newZ = (int)((float)(m_zclick/(float)m_dataset->getFrames()) * NAV_GL_SIZE);
+	
+		m_gl0->updateView(wxPoint(newX, newY), NULL);
+		m_gl1->updateView(wxPoint(newY, newZ), NULL);
+		m_gl2->updateView(wxPoint(newX, newZ), NULL);
+	} 
 	
 #if wxUSE_MDI_ARCHITECTURE
     wxLayoutAlgorithm layout;
@@ -270,6 +350,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 
 void MainFrame::OnXSliderMoved(wxCommandEvent& event)
 {
+	if (!m_dataset) return;
 	 m_xclick = m_xSlider->GetValue();
 	 wxPoint pos = m_gl0->getMousePos();
 	 int newX = (int)((float)(m_xclick/(float)m_dataset->getColumns()) * NAV_GL_SIZE);
@@ -281,6 +362,7 @@ void MainFrame::OnXSliderMoved(wxCommandEvent& event)
 
 void MainFrame::OnYSliderMoved(wxCommandEvent& event)
 {
+	if (!m_dataset) return;
 	m_yclick = m_ySlider->GetValue();
 	wxPoint pos = m_gl0->getMousePos();
 	int newY = (int)((float)(m_yclick/(float)m_dataset->getRows()) * NAV_GL_SIZE);
@@ -293,6 +375,7 @@ void MainFrame::OnYSliderMoved(wxCommandEvent& event)
 
 void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 {
+	if (!m_dataset) return;
 	m_zclick = m_zSlider->GetValue();
 	wxPoint pos = m_gl1->getMousePos();
 	int newZ = (int)((float)(m_zclick/(float)m_dataset->getFrames()) * NAV_GL_SIZE);

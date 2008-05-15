@@ -9,7 +9,7 @@
 
 TheDataset::TheDataset()
 {
-	
+	is_loaded = false;
 }
 
 bool TheDataset::load(wxString filename)
@@ -86,16 +86,20 @@ bool TheDataset::load(wxString filename)
 		{
 			wxFileOffset nSize = dataFile.Length();
 			if (nSize == wxInvalidOffset) return false;
-			m_data = new wxUint8[nSize];
+			m_data = new double[nSize];
+			
 			if (dataFile.Read(m_data, (size_t) nSize) != nSize)
 			{
 				delete[] m_data;
 				return false;
 			}
 			else flag = true;
+			
+			
 		}
 		
 	}
+	is_loaded = flag;
 	return flag;
 }
 
@@ -137,14 +141,14 @@ double TheDataset::getZVoxel()
 	return m_zVoxel;
 }
 
-wxUint8* TheDataset::getData()
+double* TheDataset::getData()
 {
 	return m_data;
 }
 
 wxString TheDataset::getInfoString()
 {
-	if (m_data == NULL) return wxT("");
+	if (!is_loaded) return wxT("");
 	wxString infoString1, infoString2;
 	infoString1.Empty();
 	infoString2.Empty();

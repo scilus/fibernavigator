@@ -16,8 +16,8 @@ BEGIN_EVENT_TABLE(MainCanvas, wxGLCanvas)
 END_EVENT_TABLE()
 
 MainCanvas::MainCanvas(wxWindow *parent, wxWindowID id,
-    const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-    : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name )
+    const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib)
+    : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name, gl_attrib )
 {
     m_init = false;
     m_texture_loaded = false;
@@ -61,7 +61,7 @@ void MainCanvas::init()
 			m_dataset->getFrames(),
 			0, 
 			GL_LUMINANCE_ALPHA, 
-			GL_UNSIGNED_BYTE,
+			GL_DOUBLE,
 			m_texture);
 			//m_dataset->getData());
 	
@@ -223,14 +223,14 @@ void MainCanvas::setDataset(TheDataset *dataset)
 {
 	m_dataset = dataset;
 	
-	wxUint8 *temp = m_dataset->getData();
+	double *temp = m_dataset->getData();
 	int size = m_dataset->getLength();
-	m_texture = new wxUint8[size *2];
+	m_texture = new double[size *2];
 	
 	for (int i = 0 ; i < size; ++i)
 	{
 		m_texture[2*i] = temp[i];
-		m_texture[(2*i)+1] =  temp[i] == 0 ? 0 : 255;
+		m_texture[(2*i)+1] =  temp[i] == 0.0 ? 0 : 255;
 	}
 	
 		

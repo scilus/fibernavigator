@@ -40,7 +40,9 @@ private:
     wxSashLayoutWindow* m_leftWindow;
     wxSashLayoutWindow* m_mainWindow;
     wxSashLayoutWindow* m_navWindow;
+    wxSashLayoutWindow* m_rightWindowHolder;
     wxSashLayoutWindow* m_rightWindow;
+    wxSashLayoutWindow* m_extraRightWindow;
 
     wxSashLayoutWindow* m_topNavWindow;
     wxSashLayoutWindow* m_middleNavWindow;
@@ -73,6 +75,8 @@ DECLARE_EVENT_TABLE()
 #define ID_WINDOW_LEFT    	100
 #define ID_WINDOW_RIGHT  	101
 #define ID_WINDOW_NAV_MAIN 102
+#define ID_WINDOW_EXTRA_RIGHT  	103
+#define ID_WINDOW_RIGHT_HOLDER  	104
 
 #define ID_WINDOW_NAV_X 	105
 #define ID_WINDOW_NAV_Y  	106

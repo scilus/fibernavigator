@@ -18,9 +18,10 @@ class MainCanvas: public wxGLCanvas
 {
 public:
 	MainCanvas( wxWindow *parent, wxWindowID id = wxID_ANY,
-         const wxPoint& pos = wxDefaultPosition,
-         const wxSize& size = wxDefaultSize,
-         long style = 0, const wxString& name = _T("GLCanvas") );
+    const wxPoint& pos = wxDefaultPosition,
+    const wxSize& size = wxDefaultSize,
+    long style = 0, const wxString& name = _T("GLCanvas"),
+    int* gl_attrib = NULL);
     bool	m_init;
     bool	m_texture_loaded;
 
@@ -54,8 +55,8 @@ private:
 	 float m_yTexture;
 	 float m_zTexture;
 	 TheDataset *m_dataset;
-	 wxUint8 *m_texture;
-	  wxPoint m_clicked;
+	 double *m_texture;
+	 wxPoint m_clicked;
 };
 
 #endif /*MAINCANVAS_H_*/

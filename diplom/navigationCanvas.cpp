@@ -14,8 +14,8 @@ BEGIN_EVENT_TABLE(NavigationCanvas, wxGLCanvas)
 END_EVENT_TABLE()
 
 NavigationCanvas::NavigationCanvas(wxWindow *parent, wxWindowID id,
-    const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-    : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name )
+    const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib)
+    : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name, gl_attrib )
 {
     m_init = false;
     m_texture_loaded = false;
@@ -59,6 +59,7 @@ void NavigationCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void NavigationCanvas::OnSize(wxSizeEvent& event)
 {
+	/*
 	if (m_texture_loaded)
 	{
 		wxSize newSize = this->GetSize();
@@ -66,6 +67,7 @@ void NavigationCanvas::OnSize(wxSizeEvent& event)
 		m_clicked.y = (int)((float)m_clicked.y * ((float)newSize.y / (float)m_oldSize.y));
 		m_oldSize = newSize;
 	}
+	*/
     // this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize(event);
 
@@ -173,18 +175,18 @@ void NavigationCanvas::render()
 	{
 	case 0:
 		glBegin(GL_QUADS);
-        	glTexCoord3f(1.0 + m_xOffset0, 1.0 + m_yOffset0, m_Slize); glVertex3f(0.0,0.0,0.0);
-        	glTexCoord3f(1.0 + m_xOffset0, 0.0 - m_yOffset0, m_Slize); glVertex3f(0.0,1.0,0.0);
-        	glTexCoord3f(0.0 - m_xOffset0, 0.0 - m_yOffset0, m_Slize); glVertex3f(1.0,1.0,0.0);
-        	glTexCoord3f(0.0 - m_xOffset0, 1.0 + m_yOffset0, m_Slize); glVertex3f(1.0,0.0,0.0);
+        	glTexCoord3f(0.0 - m_xOffset0, 1.0 + m_yOffset0, m_Slize); glVertex3f(0.0,0.0,0.0);
+        	glTexCoord3f(0.0 - m_xOffset0, 0.0 - m_yOffset0, m_Slize); glVertex3f(0.0,1.0,0.0);
+        	glTexCoord3f(1.0 + m_xOffset0, 0.0 - m_yOffset0, m_Slize); glVertex3f(1.0,1.0,0.0);
+        	glTexCoord3f(1.0 + m_xOffset0, 1.0 + m_yOffset0, m_Slize); glVertex3f(1.0,0.0,0.0);
 		glEnd();
 		break;
 	case 1:
 		glBegin(GL_QUADS);
-	    	glTexCoord3f(0.0 - m_xOffset1, m_Slize, 0.0 - m_yOffset1); glVertex3f(1.0,1.0,0.0);
-	    	glTexCoord3f(0.0 - m_xOffset1, m_Slize, 1.0 + m_yOffset1); glVertex3f(1.0,0.0,0.0);
-	    	glTexCoord3f(1.0 + m_xOffset1, m_Slize, 1.0 + m_yOffset1); glVertex3f(0.0,0.0,0.0);
-	    	glTexCoord3f(1.0 + m_xOffset1, m_Slize, 0.0 - m_yOffset1); glVertex3f(0.0,1.0,0.0);
+	    	glTexCoord3f(1.0 + m_xOffset1, m_Slize, 0.0 - m_yOffset1); glVertex3f(1.0,1.0,0.0);
+	    	glTexCoord3f(1.0 + m_xOffset1, m_Slize, 1.0 + m_yOffset1); glVertex3f(1.0,0.0,0.0);
+	    	glTexCoord3f(0.0 - m_xOffset1, m_Slize, 1.0 + m_yOffset1); glVertex3f(0.0,0.0,0.0);
+	    	glTexCoord3f(0.0 - m_xOffset1, m_Slize, 0.0 - m_yOffset1); glVertex3f(0.0,1.0,0.0);
 	    glEnd();
 		break;
 	case 2:

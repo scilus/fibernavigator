@@ -18,9 +18,10 @@ class NavigationCanvas: public wxGLCanvas
 {
 public:
 	NavigationCanvas( wxWindow *parent, wxWindowID id = wxID_ANY,
-         const wxPoint& pos = wxDefaultPosition,
-         const wxSize& size = wxDefaultSize,
-         long style = 0, const wxString& name = _T("GLCanvas") );
+	const wxPoint& pos = wxDefaultPosition,
+	const wxSize& size = wxDefaultSize,
+	long style = 0, const wxString& name = _T("GLCanvas"),
+	int* gl_attrib = NULL);
     bool	m_init;
     bool	m_texture_loaded;
 
@@ -40,7 +41,7 @@ public:
     DECLARE_EVENT_TABLE()
 
 private:
-	 wxImage *m_image;
+	 //wxImage *m_image;
 	 float m_xOffset0;
  	 float m_yOffset0;
  	 float m_xOffset1;

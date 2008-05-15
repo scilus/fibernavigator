@@ -13,8 +13,10 @@ private:
 	double m_xVoxel;
 	double m_yVoxel;
 	double m_zVoxel;
+	bool is_loaded;
 
-	wxUint8 *m_data;
+	double *m_data;
+	
 	
 public:
 	TheDataset();
@@ -34,7 +36,7 @@ public:
 	double getZVoxel();
 	
 	wxString getInfoString();
-	wxUint8* getData();
+	double* getData();
 	
 };
 

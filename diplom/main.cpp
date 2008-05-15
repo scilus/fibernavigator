@@ -13,8 +13,12 @@
 #include "wx/mdi.h"
 #include "wx/laywin.h"
 
+#include "fileopen.xpm"
+
 #include "main.h"
 #include "mainFrame.h"
+
+
 
 MainFrame *frame = NULL;
 
@@ -34,6 +38,7 @@ bool MyApp::OnInit(void)
   frame->SetIcon(wxIcon(_T("sashtest_icn")));
 #endif
 
+  frame->SetMinSize(wxSize(800,600));
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
   file_menu->Append(VIEWER_LOAD, _T("&Load"));
@@ -50,6 +55,12 @@ bool MyApp::OnInit(void)
   frame->SetMenuBar(menu_bar);
     
   frame->CreateStatusBar();
+  
+  wxToolBar* toolBar = new wxToolBar( frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxNO_BORDER);
+  wxBitmap bmpOpen (fileopen_xpm);
+  toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
+  toolBar->Realize();
+  frame->SetToolBar(toolBar);
   
   frame->Show(true);
  
