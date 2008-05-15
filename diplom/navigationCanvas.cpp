@@ -47,7 +47,7 @@ void NavigationCanvas::init()
 			m_dataset->getFrames(),
 			0, 
 			GL_LUMINANCE, 
-			GL_UNSIGNED_BYTE, 
+			GL_FLOAT, 
 			m_dataset->getData());
 }
 
@@ -248,6 +248,7 @@ void NavigationCanvas::setDataset(TheDataset *dataset, int view)
 	m_oldSize = this->GetSize();
 	
 	m_texture_loaded = true;
+	m_init = false;
 }
 
 wxPoint NavigationCanvas::getMousePos()

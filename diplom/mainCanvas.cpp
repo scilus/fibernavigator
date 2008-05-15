@@ -61,7 +61,7 @@ void MainCanvas::init()
 			m_dataset->getFrames(),
 			0, 
 			GL_LUMINANCE_ALPHA, 
-			GL_DOUBLE,
+			GL_FLOAT,
 			m_texture);
 			//m_dataset->getData());
 	
@@ -223,14 +223,14 @@ void MainCanvas::setDataset(TheDataset *dataset)
 {
 	m_dataset = dataset;
 	
-	double *temp = m_dataset->getData();
+	float *temp = m_dataset->getData();
 	int size = m_dataset->getLength();
-	m_texture = new double[size *2];
+	m_texture = new float[size *2];
 	
 	for (int i = 0 ; i < size; ++i)
 	{
 		m_texture[2*i] = temp[i];
-		m_texture[(2*i)+1] =  temp[i] == 0.0 ? 0 : 255;
+		m_texture[(2*i)+1] =  temp[i] == 0.0 ? 0 : 1;
 	}
 	
 		
@@ -256,6 +256,7 @@ void MainCanvas::setDataset(TheDataset *dataset)
 	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);
 
 	m_texture_loaded = true;
+	m_init = false;
 }
 
 wxPoint MainCanvas::getMousePos()

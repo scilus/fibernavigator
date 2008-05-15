@@ -3,6 +3,8 @@
 #include "wx/textfile.h"
 #include "wx/file.h"
 #include "wx/image.h"
+#include "wx/wfstream.h"
+#include "wx/datstrm.h"
 
 #include "theDataset.h"
 
@@ -78,6 +80,9 @@ bool TheDataset::load(wxString filename)
 		}
 	}
 	headerFile.Close();
+	int mode = -1;
+	if (m_repn.Cmp(wxT("ubyte")) == 0) mode = 1;
+	if (m_repn.Cmp(wxT("float")) == 0) mode = 2;
 	if (flag)
 	{
 		flag = false;
@@ -86,18 +91,49 @@ bool TheDataset::load(wxString filename)
 		{
 			wxFileOffset nSize = dataFile.Length();
 			if (nSize == wxInvalidOffset) return false;
-			m_data = new double[nSize];
-			
-			if (dataFile.Read(m_data, (size_t) nSize) != nSize)
+			m_data = new float[nSize];
+
+			//wxMessageBox(wxString::Format(wxT("%d"), sizeof(buffer)),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+			switch (mode)
 			{
-				delete[] m_data;
-				return false;
+			case 1: {
+				wxUint8 *buffer = new wxUint8[nSize];
+				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
+				{
+					dataFile.Close();
+					delete[] buffer;
+					return false;
+				}
+				else flag = true;
+				for (int i = 0 ; i < nSize ; ++i)
+				{
+					m_data[i] = (float)buffer[i] / 255.0;
+				}
+			} break;
+			case 2: {
+				/*
+				wxFileInputStream input(filename.BeforeLast('.')+ wxT(".ima"));
+				wxDataInputStream store(input);
+				float f;
+				for (int i = 0 ; i < nSize/4 ;  ++i)
+				{
+					store >> f; 
+					m_data[i] = f;
+				}
+				flag = true;
+				*/
+				
+				if (dataFile.Read(m_data, (size_t) nSize) != nSize)
+				{
+					dataFile.Close();
+					delete[] m_data;
+					return false;
+				}
+				else flag = true;
+			} break;
 			}
-			else flag = true;
-			
-			
 		}
-		
+		dataFile.Close();
 	}
 	is_loaded = flag;
 	return flag;
@@ -141,7 +177,7 @@ double TheDataset::getZVoxel()
 	return m_zVoxel;
 }
 
-double* TheDataset::getData()
+float* TheDataset::getData()
 {
 	return m_data;
 }

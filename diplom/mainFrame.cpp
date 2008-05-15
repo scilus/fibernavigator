@@ -204,7 +204,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_dataset = new TheDataset();
 		if (!m_dataset->load(path)) 
 		{
-			wxMessageBox(wxT("Fehler"),  wxT(""), wxNO_DEFAULT|wxYES_NO|wxCANCEL|wxICON_INFORMATION, NULL);
+			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 		}
 		else 
 		{ 

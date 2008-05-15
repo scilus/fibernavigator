@@ -15,7 +15,7 @@ private:
 	double m_zVoxel;
 	bool is_loaded;
 
-	double *m_data;
+	float *m_data;
 	
 	
 public:
@@ -36,7 +36,7 @@ public:
 	double getZVoxel();
 	
 	wxString getInfoString();
-	double* getData();
+	float* getData();
 	
 };
 
