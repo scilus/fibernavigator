@@ -82,7 +82,8 @@ bool TheDataset::load(wxString filename)
 	headerFile.Close();
 	int mode = -1;
 	if (m_repn.Cmp(wxT("ubyte")) == 0) mode = 1;
-	if (m_repn.Cmp(wxT("float")) == 0) mode = 2;
+	if (m_repn.Cmp(wxT("short")) == 0) mode = 2;
+	if (m_repn.Cmp(wxT("float")) == 0) mode = 3;
 	if (flag)
 	{
 		flag = false;
@@ -111,6 +112,20 @@ bool TheDataset::load(wxString filename)
 				}
 			} break;
 			case 2: {
+				wxUint16 *buffer = new wxUint16[nSize];
+				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
+				{
+					dataFile.Close();
+					delete[] buffer;
+					return false;
+				}
+				else flag = true;
+				for (int i = 0 ; i < nSize ; ++i)
+				{
+					m_data[i] = (float)buffer[i]/65536.0;
+				}
+			} break;
+			case 3: {
 				/*
 				wxFileInputStream input(filename.BeforeLast('.')+ wxT(".ima"));
 				wxDataInputStream store(input);

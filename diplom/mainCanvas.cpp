@@ -230,7 +230,7 @@ void MainCanvas::setDataset(TheDataset *dataset)
 	for (int i = 0 ; i < size; ++i)
 	{
 		m_texture[2*i] = temp[i];
-		m_texture[(2*i)+1] =  temp[i] == 0.0 ? 0 : 1;
+		m_texture[(2*i)+1] =  temp[i] < 0.05 ? 0 : 255;
 	}
 	
 		
