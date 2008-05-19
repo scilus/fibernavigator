@@ -22,7 +22,8 @@ private:
 	double m_yVoxel;
 	double m_zVoxel;
 	bool is_loaded;
-
+	float m_highest_value;
+	
 	float *m_data;
 	
 	
@@ -42,6 +43,7 @@ public:
 	double getXVoxel();
 	double getYVoxel();
 	double getZVoxel();
+	float getHighestValue();
 	
 	wxString getInfoString();
 	float* getData();

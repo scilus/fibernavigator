@@ -100,8 +100,9 @@ bool TheDataset::load(wxString filename)
 				else flag = true;
 				for (int i = 0 ; i < nSize ; ++i)
 				{
-					m_data[i] = (float)buffer[i] / 255.0;
+					m_data[i] = (float)buffer[i];
 				}
+				m_highest_value = 255.0; 
 			} break;
 			case 2: {
 				wxUint16 *buffer = new wxUint16[nSize];
@@ -114,22 +115,11 @@ bool TheDataset::load(wxString filename)
 				else flag = true;
 				for (int i = 0 ; i < nSize ; ++i)
 				{
-					m_data[i] = (float)buffer[i]/65536.0;
+					m_data[i] = (float)buffer[i];
 				}
+				m_highest_value = 65536.0;
 			} break;
 			case 3: {
-				/*
-				wxFileInputStream input(filename.BeforeLast('.')+ wxT(".ima"));
-				wxDataInputStream store(input);
-				float f;
-				for (int i = 0 ; i < nSize/4 ;  ++i)
-				{
-					store >> f; 
-					m_data[i] = f;
-				}
-				flag = true;
-				*/
-				
 				if (dataFile.Read(m_data, (size_t) nSize) != nSize)
 				{
 					dataFile.Close();
@@ -137,6 +127,7 @@ bool TheDataset::load(wxString filename)
 					return false;
 				}
 				else flag = true;
+				m_highest_value = 1.0;
 			} break;
 			}
 		}
@@ -200,3 +191,9 @@ wxString TheDataset::getInfoString()
 	infoString2 = wxString::Format(wxT("\nx Voxel: %.2f\ny Voxel: %.2f\nz Voxel: %.2f"), this->m_xVoxel, this->m_yVoxel, this->m_zVoxel);
 	return infoString1 + infoString2;
 }
+
+float TheDataset::getHighestValue()
+{
+	return m_highest_value;
+}	
+	

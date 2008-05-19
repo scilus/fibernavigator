@@ -1,6 +1,5 @@
 #include "mainCanvas.h"
 
-static GLuint tex1;
 static GLfloat xrot;
 static GLfloat yrot;
 
@@ -26,49 +25,11 @@ MainCanvas::MainCanvas(TheScene *scene, wxWindow *parent, wxWindowID id,
 
 void MainCanvas::init()
 {
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glFrustum( -0.52, 0.52, -0.52, 0.52, 5.0, 25.0 );
-	
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef( 0.0, 0.0, -6.0 );
-	
-	
-	glShadeModel(GL_FLAT);
-	glEnable(GL_DOUBLEBUFFER);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
-	glAlphaFunc(GL_GREATER,0.1f); // adjust your prefered threshold here
-	glEnable(GL_ALPHA_TEST);
-
-	if (m_scene->tex1_loaded)
-	{
-		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glGenTextures(1, &tex1);
-		glBindTexture(GL_TEXTURE_3D, tex1);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		glTexImage3D(GL_TEXTURE_3D, 
-				0, 
-				GL_LUMINANCE_ALPHA, 
-				m_scene->m_dataset->getColumns(), 
-				m_scene->m_dataset->getRows(),
-				m_scene->m_dataset->getFrames(),
-				0, 
-				GL_LUMINANCE_ALPHA, 
-				GL_FLOAT,
-				m_scene->m_texture);
-	}		
+	m_scene->initMainGL();		
 	
 	m_clicked = wxPoint(this->m_width/2, this->m_height/2);
 	
+	m_init = true;
 }
 
 
@@ -129,12 +90,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 	    dragging = 0;
 }
 
-void MainCanvas::updateView(int dir, float slize)
-{
-	m_scene->updateView(dir, slize);
-	render();
-}
-
 void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
 {
     // Do nothing, to avoid flashing.
@@ -142,7 +97,7 @@ void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
 
 void MainCanvas::render()
 {
-	if (!m_scene->tex1_loaded) return;
+	if (m_scene->nothing_loaded) return;
 	wxPaintDC dc(this);
 
 #ifndef __WXMOTIF__
@@ -154,7 +109,6 @@ void MainCanvas::render()
     if (!m_init)
     {
         init();
-        m_init = true;
     }
      /* clear color and depth buffers */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -165,16 +119,9 @@ void MainCanvas::render()
     glRotatef( yrot, 0.0f, 1.0f, 0.0f );
     glRotatef( xrot, 1.0f, 0.0f, 0.0f );
     
-    glEnable(GL_TEXTURE_3D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glBindTexture(GL_TEXTURE_3D, tex1);
-	
     m_scene->renderScene();
     
-    glDisable(GL_TEXTURE_3D);
-	
-	
-	glPopMatrix();
+    glPopMatrix();
 	
 	glFlush();
     

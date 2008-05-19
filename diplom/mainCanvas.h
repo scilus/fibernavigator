@@ -41,7 +41,6 @@ public:
     DECLARE_EVENT_TABLE()
 
 private:
-	 
 	 TheScene *m_scene;
 	 wxPoint m_clicked;
 };

@@ -13,17 +13,17 @@
 #include <GL/glu.h>
 
 #include "theDataset.h"
+#include "theScene.h"
 
 class NavigationCanvas: public wxGLCanvas
 {
 public:
-	NavigationCanvas( wxWindow *parent, wxWindowID id = wxID_ANY,
+	NavigationCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID id = wxID_ANY,
 	const wxPoint& pos = wxDefaultPosition,
 	const wxSize& size = wxDefaultSize,
 	long style = 0, const wxString& name = _T("GLCanvas"),
 	int* gl_attrib = NULL);
     bool	m_init;
-    bool	m_texture_loaded;
 
    ~NavigationCanvas(){};
 
@@ -32,10 +32,9 @@ public:
     void OnEraseBackground(wxEraseEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
-    void updateView(wxPoint, float);
     void init();
     void render();
-    void setDataset(TheDataset*, int);
+    void setScene(TheScene*, int);
     wxPoint getMousePos();
     
     DECLARE_EVENT_TABLE()
@@ -49,7 +48,7 @@ private:
  	 float m_xOffset2;
  	 float m_yOffset2;
 	 float m_Slize;
-	 TheDataset *m_dataset;
+	 TheScene *m_scene;
 	 int m_view;
 	 wxPoint m_clicked;
 	 wxSize m_oldSize;

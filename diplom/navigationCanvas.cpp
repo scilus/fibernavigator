@@ -1,7 +1,5 @@
 #include "navigationCanvas.h"
 
-static GLuint texName;
-
 DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_MY_EVENT)
 
@@ -13,42 +11,18 @@ BEGIN_EVENT_TABLE(NavigationCanvas, wxGLCanvas)
     EVT_ERASE_BACKGROUND(NavigationCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
-NavigationCanvas::NavigationCanvas(wxWindow *parent, wxWindowID id,
+NavigationCanvas::NavigationCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib)
     : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name, gl_attrib )
 {
+	m_scene = scene;
+	m_view = view;
     m_init = false;
-    m_texture_loaded = false;
 }
 
 void NavigationCanvas::init()
 {
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
-	
-	glShadeModel(GL_FLAT);
-	glEnable(GL_DEPTH_TEST);
-	
-	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glGenTextures(1, &texName);
-	glBindTexture(GL_TEXTURE_3D, texName);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-	glTexImage3D(GL_TEXTURE_3D, 
-			0, 
-			GL_RGB, 
-			m_dataset->getColumns(), 
-			m_dataset->getRows(),
-			m_dataset->getFrames(),
-			0, 
-			GL_LUMINANCE, 
-			GL_FLOAT, 
-			m_dataset->getData());
+	m_scene->initNavGL();
 }
 
 
@@ -59,16 +33,7 @@ void NavigationCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void NavigationCanvas::OnSize(wxSizeEvent& event)
 {
-	/*
-	if (m_texture_loaded)
-	{
-		wxSize newSize = this->GetSize();
-		m_clicked.x = (int)((float)m_clicked.x * ((float)newSize.x / (float)m_oldSize.x));
-		m_clicked.y = (int)((float)m_clicked.y * ((float)newSize.y / (float)m_oldSize.y));
-		m_oldSize = newSize;
-	}
-	*/
-    // this is also necessary to update the context on some platforms
+	// this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize(event);
 
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
@@ -97,12 +62,10 @@ void NavigationCanvas::OnChar(wxKeyEvent& event)
 
 void NavigationCanvas::OnMouseEvent(wxMouseEvent& event)
 {
+	m_clicked = event.GetPosition();
+	
 	if (event.LeftUp() || event.Dragging()) 
 	{
-		m_clicked = event.GetPosition();
-	
-		render();
-	
 		wxCommandEvent event1( wxEVT_MY_EVENT, GetId() );
 		event1.SetEventObject( (wxObject*) new wxPoint( event.GetPosition()) );
 		event1.SetInt(m_view);
@@ -110,36 +73,6 @@ void NavigationCanvas::OnMouseEvent(wxMouseEvent& event)
 	}
 }
 
-void NavigationCanvas::updateView(wxPoint pos, float slize)
-{
-	m_clicked = pos;
-	float ratio;
-	if (slize != NULL)
-	{
-		switch (m_view)
-		{
-		case 0:
-			ratio = (float)m_dataset->getFrames()/(float)m_dataset->getRows();
-			if ( ratio > 0.0) 
-				m_Slize = (slize / ratio) + (1.0 - (1.0/ratio))/2.0;
-			else
-				m_Slize = slize;
-			break;
-		case 1:
-			m_Slize = slize;
-			break;
-		case 2:
-			ratio = (float)m_dataset->getColumns()/(float)m_dataset->getRows();
-			if ( ratio > 0.0) 
-				m_Slize = (slize / ratio) + (1.0 - (1.0/ratio))/2.0;
-			else
-				m_Slize = slize;
-			break;
-		}
-	}
-	
-	render();
-}
 
 void NavigationCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
 {
@@ -148,7 +81,7 @@ void NavigationCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
 
 void NavigationCanvas::render()
 {
-	if (!m_texture_loaded) return;
+	if (m_scene->nothing_loaded) return;
 	wxPaintDC dc(this);
 
 #ifndef __WXMOTIF__
@@ -167,87 +100,17 @@ void NavigationCanvas::render()
 
     glColor3f(1.0, 1.0, 1.0);
     
-	glEnable(GL_TEXTURE_3D);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_3D, texName);
-	
-	switch (m_view)
-	{
-	case 0:
-		glBegin(GL_QUADS);
-        	glTexCoord3f(0.0 - m_xOffset0, 1.0 + m_yOffset0, m_Slize); glVertex3f(0.0,0.0,0.0);
-        	glTexCoord3f(0.0 - m_xOffset0, 0.0 - m_yOffset0, m_Slize); glVertex3f(0.0,1.0,0.0);
-        	glTexCoord3f(1.0 + m_xOffset0, 0.0 - m_yOffset0, m_Slize); glVertex3f(1.0,1.0,0.0);
-        	glTexCoord3f(1.0 + m_xOffset0, 1.0 + m_yOffset0, m_Slize); glVertex3f(1.0,0.0,0.0);
-		glEnd();
-		break;
-	case 1:
-		glBegin(GL_QUADS);
-	    	glTexCoord3f(1.0 + m_xOffset1, m_Slize, 0.0 - m_yOffset1); glVertex3f(1.0,1.0,0.0);
-	    	glTexCoord3f(1.0 + m_xOffset1, m_Slize, 1.0 + m_yOffset1); glVertex3f(1.0,0.0,0.0);
-	    	glTexCoord3f(0.0 - m_xOffset1, m_Slize, 1.0 + m_yOffset1); glVertex3f(0.0,0.0,0.0);
-	    	glTexCoord3f(0.0 - m_xOffset1, m_Slize, 0.0 - m_yOffset1); glVertex3f(0.0,1.0,0.0);
-	    glEnd();
-		break;
-	case 2:
-		glBegin(GL_QUADS);
-        	glTexCoord3f(m_Slize, 0.0 - m_xOffset2, 1.0 + m_yOffset2); glVertex3f(0.0,0.0,0.0);
-        	glTexCoord3f(m_Slize, 0.0 - m_xOffset2, 0.0 - m_yOffset2); glVertex3f(0.0,1.0,0.0);
-        	glTexCoord3f(m_Slize, 1.0 + m_xOffset2, 0.0 - m_yOffset2); glVertex3f(1.0,1.0,0.0);
-        	glTexCoord3f(m_Slize, 1.0 + m_xOffset2, 1.0 + m_yOffset2); glVertex3f(1.0,0.0,0.0);
-		glEnd();
-		break;
-	}
-	glDisable(GL_TEXTURE_3D);
-	
-	float xline = (float)m_clicked.x/(float)this->m_width;
-	float yline = 1.0 - (float)m_clicked.y/(float)this->m_height;
-    
-	glColor3f(1.0, 0.0, 0.0);
-	glBegin (GL_LINES);
-		glVertex3f (0.0, yline, 0.1);
-		glVertex3f (1.0, yline, 0.1);
-		glVertex3f (xline, 0.0, 0.1);
-		glVertex3f (xline, 1.0, 0.1);
-	glEnd();
-	glColor3f(1.0, 1.0, 1.0);
+	m_scene->renderNavView(m_view);
         
 	glFlush();
     
     SwapBuffers();
 }
 
-void NavigationCanvas::setDataset(TheDataset *dataset, int view)
+void NavigationCanvas::setScene(TheScene *scene, int view)
 {
-	this->m_dataset = dataset;
+	this->m_scene = scene;
 	this->m_view = view;
-	
-	float xSize = (float)dataset->getColumns();
-	float ySize = (float)dataset->getRows();
-	float zSize = (float)dataset->getFrames();
-	
-	float ratio0 = xSize/ySize;
-	float ratio1 = xSize/zSize;
-	float ratio2 = ySize/zSize;
-
-	m_xOffset0 = (wxMax (0, 1.0 - ratio0))/2.0;
-	m_yOffset0 = (wxMax (0, ratio0 - 1.0))/2.0;
-	m_xOffset1 = (wxMax (0, 1.0 - ratio1))/2.0;
-	m_yOffset1 = (wxMax (0, ratio1 - 1.0))/2.0;
-	m_xOffset2 = (wxMax (0, 1.0 - ratio2))/2.0;
-	m_yOffset2 = (wxMax (0, ratio2 - 1.0))/2.0;
-	
-	m_xOffset0 = wxMax(m_xOffset0, m_xOffset1);
-	m_xOffset1 = wxMax(m_xOffset0, m_xOffset1);
-	
-	m_yOffset1 = wxMax(m_yOffset1, m_yOffset2);
-	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);
-	
-	m_clicked = wxPoint(this->m_width/2, this->m_height/2);
-	m_Slize = 0.5;
-	m_oldSize = this->GetSize();
-	
-	m_texture_loaded = true;
 	m_init = false;
 }
 

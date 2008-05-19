@@ -3,26 +3,40 @@
 
 #include "theDataset.h"
 
-
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 class TheScene {
 
 public:
-	float *m_texture;
-	TheDataset* m_dataset;
-	bool tex1_loaded;
+	bool nothing_loaded;
 	
 	TheScene();
 	~TheScene() {};
 	
+	void initMainGL();
+	void initNavGL();
+	
 	void setDataset(TheDataset*);
 	
 	void renderScene();
+	void renderNavView(int);
 	
-	void updateView(int, float);
+	void updateView(float, float, float);
 	
 		
 private:
+	GLuint tex1;
+	GLuint tex2;
+	bool tex1_loaded;
+	float *m_texture_head;
+	TheDataset* m_dataset;
+		
+	
+	float m_xSize;
+	float m_ySize;
+	float m_zSize;
+	
 	float m_xOffset0;
 	float m_yOffset0;
 	float m_xOffset1;
@@ -35,6 +49,10 @@ private:
 	float m_xTexture;
 	float m_yTexture;
 	float m_zTexture;
+	
+	float m_xclick;
+	float m_yclick;
+	float m_zclick;
 	
 	void renderXSlize();
 	void renderYSlize();

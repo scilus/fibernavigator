@@ -30,6 +30,7 @@ public:
     void OnXSliderMoved(wxCommandEvent& event);
     void OnYSliderMoved(wxCommandEvent& event);
     void OnZSliderMoved(wxCommandEvent& event);
+    void refreshAllGLWidgets();
 
 public:
     int m_xclick;
