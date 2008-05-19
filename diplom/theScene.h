@@ -49,6 +49,9 @@ private:
 	float m_xTexture;
 	float m_yTexture;
 	float m_zTexture;
+	float m_ratio0;
+	float m_ratio1;
+	float m_ratio2;
 	
 	float m_xclick;
 	float m_yclick;
