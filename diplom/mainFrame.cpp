@@ -164,21 +164,16 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         doubleBuffer = GL_FALSE;
     }
     
-    
-    
-    
-    
-    
+    m_scene = new TheScene();
+
     m_gl0 = new NavigationCanvas(m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib);
     m_gl1 = new NavigationCanvas(m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib);
     m_gl2 = new NavigationCanvas(m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
-    m_mainGL = new MainCanvas(m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
+    m_mainGL = new MainCanvas(m_scene, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
     			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
-    
-    
     
     m_xclick = 0;
     m_yclick = 0;
@@ -202,6 +197,8 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	{
 		wxString path = dialog.GetPath();
 		m_dataset = new TheDataset();
+		
+		
 		if (!m_dataset->load(path)) 
 		{
 			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
@@ -212,7 +209,8 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 			m_gl0->setDataset(m_dataset, 0);
 			m_gl1->setDataset(m_dataset, 1);
 			m_gl2->setDataset(m_dataset, 2);
-			m_mainGL->setDataset(m_dataset);
+			m_scene->setDataset(m_dataset);
+			m_mainGL->setScene(m_scene);
 			
 		}
 		m_textWindow->SetValue(m_dataset->getInfoString());

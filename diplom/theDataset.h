@@ -1,6 +1,14 @@
 #ifndef THEDATASET_H_
 #define THEDATASET_H_
 
+#include "wx/wx.h"
+#include "wx/laywin.h"
+#include "wx/textfile.h"
+#include "wx/file.h"
+#include "wx/image.h"
+#include "wx/wfstream.h"
+#include "wx/datstrm.h"
+
 class TheDataset
 {
 private:

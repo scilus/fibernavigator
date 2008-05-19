@@ -4,6 +4,7 @@
 #include "navigationCanvas.h"
 #include "mainCanvas.h"
 #include "theDataset.h"
+#include "theScene.h"
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
@@ -11,7 +12,7 @@ class MainFrame: public wxMDIParentFrame
 	
 private:
 	TheDataset *m_dataset;
-
+	TheScene *m_scene;
 	
 public:
 
