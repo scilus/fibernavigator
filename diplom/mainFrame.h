@@ -33,11 +33,7 @@ public:
     void refreshAllGLWidgets();
 
 public:
-    int m_xclick;
-    int m_yclick;
-    int m_zclick;
-
-	
+    	
 private:
     wxSashLayoutWindow* m_leftWindow;
     wxSashLayoutWindow* m_mainWindow;

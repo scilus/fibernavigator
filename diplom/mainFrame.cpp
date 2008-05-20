@@ -174,12 +174,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib);
     m_gl2 = new NavigationCanvas(m_scene, 2, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
-    
-    
-    m_xclick = 0;
-    m_yclick = 0;
-    m_zclick = 0;
-    
 }
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -207,18 +201,20 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		else 
 		{ 
 			m_scene->setDataset(m_dataset);
+			m_mainGL->m_init = false;
+			m_gl0->m_init = false;
+			m_gl1->m_init = false;
+			m_gl2->m_init = false;
 		}
 		m_textWindow->SetValue(m_dataset->getInfoString());
-		m_xclick = m_dataset->getColumns()/2;
-		m_yclick = m_dataset->getRows()/2;
-		m_zclick = m_dataset->getFrames()/2;
+		
 		m_xSlider->SetMax(m_dataset->getColumns());
-		m_xSlider->SetValue(m_xclick);
+		m_xSlider->SetValue(m_dataset->getColumns()/2);
 		m_ySlider->SetMax(m_dataset->getRows());
-		m_ySlider->SetValue(m_yclick);
+		m_ySlider->SetValue( m_dataset->getRows()/2);
 		m_zSlider->SetMax(m_dataset->getFrames());
-		m_zSlider->SetValue(m_zclick);
-		m_scene->updateView(m_xclick, m_yclick, m_zclick);
+		m_zSlider->SetValue( m_dataset->getFrames()/2);
+		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		refreshAllGLWidgets();
 	}
 }
@@ -247,29 +243,21 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	{
 	case 0:
 		pos = m_gl0->getMousePos();
-		m_xclick = (int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getColumns());
-		m_yclick = (int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getRows());
-		m_xSlider->SetValue(m_xclick);
-		m_ySlider->SetValue(m_yclick);
-		m_scene->updateView(m_xclick, m_yclick, m_zclick);
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getColumns()));
+		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getRows()));
 		break;
 	case 1:
 		pos = m_gl1->getMousePos();
-		m_xclick = (int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getColumns());
-		m_zclick = (int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getFrames());
-		m_xSlider->SetValue(m_xclick);
-		m_zSlider->SetValue(m_zclick);
-		m_scene->updateView(m_xclick, m_yclick, m_zclick);
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getColumns()));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getFrames()));
 		break;
 	case 2:
 		pos = m_gl2->getMousePos();
-		m_yclick = (int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getRows());
-		m_zclick = (int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getFrames());
-		m_ySlider->SetValue(m_yclick);
-		m_zSlider->SetValue(m_zclick);
-		m_scene->updateView(m_xclick, m_yclick, m_zclick);
+		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getRows()));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getFrames()));
 		break;
 	}
+	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
@@ -301,7 +289,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 			this->GetClientSize().y);
 	m_rightWindow->SetSize(wxSize(mainSize, mainSize));
 	
-	m_scene->updateView(m_xclick, m_yclick, m_zclick);
+	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	 
 	
 #if wxUSE_MDI_ARCHITECTURE
@@ -316,24 +304,21 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 void MainFrame::OnXSliderMoved(wxCommandEvent& event)
 {
 	if (!m_dataset) return;
-	 m_xclick = m_xSlider->GetValue();
-	 m_scene->updateView(m_xclick, m_yclick, m_zclick);
+	 m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	 refreshAllGLWidgets();
 }
 
 void MainFrame::OnYSliderMoved(wxCommandEvent& event)
 {
 	if (!m_dataset) return;
-	m_yclick = m_ySlider->GetValue();
-	m_scene->updateView(m_xclick, m_yclick, m_zclick);
+	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 {
 	if (!m_dataset) return;
-	m_zclick = m_zSlider->GetValue();
-	m_scene->updateView(m_xclick, m_yclick, m_zclick);
+	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 

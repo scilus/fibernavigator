@@ -53,10 +53,6 @@ private:
 	float m_ratio1;
 	float m_ratio2;
 	
-	float m_xclick;
-	float m_yclick;
-	float m_zclick;
-	
 	void renderXSlize();
 	void renderYSlize();
 	void renderZSlize();
