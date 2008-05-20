@@ -30,6 +30,7 @@ public:
     void OnXSliderMoved(wxCommandEvent& event);
     void OnYSliderMoved(wxCommandEvent& event);
     void OnZSliderMoved(wxCommandEvent& event);
+    void OnTSliderMoved(wxCommandEvent& event);
     void refreshAllGLWidgets();
     void OnToggleView1(wxCommandEvent& event);
     void OnToggleView2(wxCommandEvent& event);
@@ -53,6 +54,7 @@ private:
     wxSlider* m_xSlider;
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
+    wxSlider* m_tSlider;
 
     NavigationCanvas* m_gl0;
     NavigationCanvas* m_gl1;
@@ -96,5 +98,6 @@ DECLARE_EVENT_TABLE()
 #define ID_X_SLIDER 115
 #define ID_Y_SLIDER 116
 #define ID_Z_SLIDER 117
+#define ID_T_SLIDER 118
 
 #endif /*MAINFRAME_H_*/

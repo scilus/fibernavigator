@@ -23,6 +23,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_SLIDER(ID_X_SLIDER, MainFrame::OnXSliderMoved)
 	EVT_SLIDER(ID_Y_SLIDER, MainFrame::OnYSliderMoved)
 	EVT_SLIDER(ID_Z_SLIDER, MainFrame::OnZSliderMoved)
+	EVT_SLIDER(ID_T_SLIDER, MainFrame::OnTSliderMoved)
 	/* click on toolbar button to toggle one of the 3 panes in the
 	 * main GL window */ 
 	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
@@ -138,14 +139,21 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_extraNavWindow = win;
    
 
-    m_xSlider = new wxSlider(m_extraNavWindow, ID_X_SLIDER, 50, 0, 100, wxPoint(0,0), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-    
-    m_ySlider = new wxSlider(m_extraNavWindow, ID_Y_SLIDER, 50, 0, 100, wxPoint(0,m_xSlider->GetSize().y), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-    m_zSlider = new wxSlider(m_extraNavWindow, ID_Z_SLIDER, 50, 0, 100, wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+    m_xSlider = new wxSlider(m_extraNavWindow, ID_X_SLIDER, 50, 0, 100, wxPoint(0,0), 
+    		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+    m_ySlider = new wxSlider(m_extraNavWindow, ID_Y_SLIDER, 50, 0, 100, wxPoint(0,m_xSlider->GetSize().y), 
+    		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+    m_zSlider = new wxSlider(m_extraNavWindow, ID_Z_SLIDER, 50, 0, 100, 
+    		wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y), 
+    		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+    m_tSlider = new wxSlider(m_extraNavWindow, ID_T_SLIDER, 10, 0, 100, 
+    		wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y + m_zSlider->GetSize().y), 
+    		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
    
     m_xSlider->SetMinSize(wxSize(1, -1));
     m_ySlider->SetMinSize(wxSize(1, -1));
     m_zSlider->SetMinSize(wxSize(1, -1));
+    m_tSlider->SetMinSize(wxSize(1, -1));
     
     GLboolean doubleBuffer = GL_TRUE;
     
@@ -290,6 +298,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+	m_tSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	
 	/* resize main gl window */
 	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x), 
@@ -327,6 +336,14 @@ void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 	if (!m_dataset) return;
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
+}
+
+void MainFrame::OnTSliderMoved(wxCommandEvent& event)
+{
+	if (!m_dataset) return;
+	m_scene->updateBlendThreshold(2.0/(float)m_tSlider->GetValue());
+	m_mainGL->m_init = false;
+	m_mainGL->render();
 }
 
 void MainFrame::refreshAllGLWidgets()

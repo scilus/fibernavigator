@@ -7,6 +7,7 @@
 TheScene::TheScene()
 {
 	nothing_loaded = true;
+	m_blendThreshold = 0.1;
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
 	m_zSlize = 0.5;
@@ -35,7 +36,7 @@ void TheScene::initMainGL()
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	glAlphaFunc(GL_GREATER,0.1f); // adjust your prefered threshold here
+	glAlphaFunc(GL_GREATER,m_blendThreshold); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
 
 	if (m_tex1_loaded)
@@ -113,7 +114,7 @@ void TheScene::setDataset(TheDataset *dataset)
 	for (int i = 0 ; i < size; ++i)
 	{
 		m_texture_head[2*i] = temp[i]/div;
-		m_texture_head[(2*i)+1] =  temp[i] < 0.05 ? 0 : 255;
+		m_texture_head[(2*i)+1] =  temp[i] /div;
 	}
 		
 	m_xSize = (float)dataset->getColumns();
@@ -266,4 +267,9 @@ void TheScene::updateView(float x, float y, float z)
 	
 	if ( m_ratio0 < 1.0) m_zTexture = (m_zTexture / m_ratio0) + (1.0 - (1.0/m_ratio0))/2.0;
 	if ( m_ratio2 > 1.0) m_xTexture = (m_xTexture *m_ratio2) + (1.0 - (m_ratio2))/2.0;
+}
+
+void TheScene::updateBlendThreshold(float threshold)
+{
+	m_blendThreshold = threshold;
 }

@@ -24,6 +24,7 @@ public:
 	
 	void renderScene();
 	void renderNavView(int);
+	void updateBlendThreshold(float);
 	
 	void updateView(float, float, float);
 	
@@ -34,6 +35,7 @@ private:
 	bool m_tex1_loaded;
 	float *m_texture_head;
 	TheDataset* m_dataset;
+	float m_blendThreshold;
 	
 	float m_xSize;
 	float m_ySize;
