@@ -42,15 +42,13 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	
 	// A window to the left of the client window
 	wxSashLayoutWindow* win = new wxSashLayoutWindow(this, ID_WINDOW_LEFT,
-                               wxDefaultPosition, wxSize(200, 30),
+                               wxDefaultPosition, wxSize(150, 30),
                                wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-	win->SetDefaultSize(wxSize(200, 1020));
+	win->SetDefaultSize(wxSize(150, 1020));
 	win->SetOrientation(wxLAYOUT_VERTICAL);
 	win->SetAlignment(wxLAYOUT_LEFT);
 	win->SetBackgroundColour(wxColour(0, 255, 0));
 	win->SetSashVisible(wxSASH_RIGHT, false);
-	
-	win->SetExtraBorderSize(10);
 	
 	m_textWindow = new wxTextCtrl(win, wxID_ANY, wxEmptyString, 
 			  wxDefaultPosition, wxDefaultSize,
@@ -83,7 +81,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     // main window right side, holds the big gl widget
     win = new wxSashLayoutWindow(m_rightWindowHolder, ID_WINDOW_RIGHT, 
   		  wxDefaultPosition, wxSize(200, 30),
-  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+  		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(700, 700));
     win->SetMinSize(wxSize(100,100));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
@@ -98,7 +96,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetDefaultSize(wxSize(765, 1));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_BOTTOM);
-    win->SetBackgroundColour(wxColour(0, 0, 0));
+    win->SetBackgroundColour(wxColour(255, 255, 255));
     m_extraRightWindow = win;
 
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV_X, 
@@ -288,6 +286,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	int height = this->GetClientSize().y;
 	NAV_SIZE = wxMin(255, height/4);
 	NAV_GL_SIZE = NAV_SIZE-4;
+	
 	m_navWindow->SetDefaultSize(wxSize(NAV_SIZE, height));
 	m_topNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_middleNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
@@ -303,10 +302,10 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	/* resize main gl window */
 	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x), 
 			this->GetClientSize().y);
-	m_rightWindow->SetSize(wxSize(mainSize, mainSize));
+	m_rightWindowHolder->SetDefaultSize(wxSize(mainSize, mainSize));
+	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
 	
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-	 
 	
 #if wxUSE_MDI_ARCHITECTURE
     wxLayoutAlgorithm layout;
