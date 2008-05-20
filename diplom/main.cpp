@@ -14,6 +14,9 @@
 #include "wx/laywin.h"
 
 #include "fileopen.xpm"
+#include "view1.xpm"
+#include "view2.xpm"
+#include "view3.xpm"
 
 #include "main.h"
 #include "mainFrame.h"
@@ -58,7 +61,14 @@ bool MyApp::OnInit(void)
   
   wxToolBar* toolBar = new wxToolBar( frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxNO_BORDER);
   wxBitmap bmpOpen (fileopen_xpm);
+  wxBitmap bmpView1 (view1_xpm);
+  wxBitmap bmpView2 (view2_xpm);
+  wxBitmap bmpView3 (view3_xpm);
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
+  toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_TOGGLEVIEW1, bmpView1, wxT("Toggle View 1"));
+  toolBar->AddTool(VIEWER_TOGGLEVIEW2, bmpView2, wxT("Toggle View 2"));
+  toolBar->AddTool(VIEWER_TOGGLEVIEW3, bmpView3, wxT("Toggle View 3"));
   toolBar->Realize();
   frame->SetToolBar(toolBar);
   

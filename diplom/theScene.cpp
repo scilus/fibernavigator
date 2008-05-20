@@ -13,6 +13,9 @@ TheScene::TheScene()
 	m_xTexture = 0.5;
 	m_yTexture = 0.5;
 	m_zTexture = 0.5;
+	m_showXSlize = true;
+	m_showYSlize = true;
+	m_showZSlize = true;
 }
 
 void TheScene::initMainGL()
@@ -35,11 +38,11 @@ void TheScene::initMainGL()
 	glAlphaFunc(GL_GREATER,0.1f); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
 
-	if (tex1_loaded)
+	if (m_tex1_loaded)
 	{
 		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glGenTextures(1, &tex1);
-		glBindTexture(GL_TEXTURE_3D, tex1);
+		glGenTextures(1, &m_tex1);
+		glBindTexture(GL_TEXTURE_3D, m_tex1);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -74,11 +77,11 @@ void TheScene::initNavGL()
 	glAlphaFunc(GL_GREATER,0.1f); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
 	
-	if (tex1_loaded)
+	if (m_tex1_loaded)
 		{
 			glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-			glGenTextures(1, &tex2);
-			glBindTexture(GL_TEXTURE_3D, tex2);
+			glGenTextures(1, &m_tex2);
+			glBindTexture(GL_TEXTURE_3D, m_tex2);
 			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -134,15 +137,15 @@ void TheScene::setDataset(TheDataset *dataset)
 	m_yOffset1 = wxMax(m_yOffset1, m_yOffset2);
 	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);
 	
-	tex1_loaded = true;
+	m_tex1_loaded = true;
 	nothing_loaded = false;
 }
 
 void TheScene::renderScene()
 {
-	renderXSlize();
-	renderYSlize();
-	renderZSlize();
+	if (m_showXSlize) renderXSlize();
+	if (m_showYSlize) renderYSlize();
+	if (m_showZSlize) renderZSlize();
 }
 
 
@@ -150,7 +153,7 @@ void TheScene::renderXSlize()
 {
 	glEnable(GL_TEXTURE_3D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_3D, tex1);
+	glBindTexture(GL_TEXTURE_3D, m_tex1);
 	
 	glBegin(GL_QUADS);
 		glTexCoord3f(m_xTexture, 0.0 - m_xOffset2, 0.0 - m_yOffset2); glVertex3f(m_xSlize -0.5, -0.5, -0.5);
@@ -166,7 +169,7 @@ void TheScene::renderYSlize()
 {
 	glEnable(GL_TEXTURE_3D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_3D, tex1);
+	glBindTexture(GL_TEXTURE_3D, m_tex1);
 	
 	glBegin(GL_QUADS);
     	glTexCoord3f(0.0 - m_xOffset1, m_yTexture, 0.0 - m_yOffset1); glVertex3f(-0.5, m_ySlize -0.5, -0.5);
@@ -182,7 +185,7 @@ void TheScene::renderZSlize()
 {
 	glEnable(GL_TEXTURE_3D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_3D, tex1);
+	glBindTexture(GL_TEXTURE_3D, m_tex1);
 	
 	glBegin(GL_QUADS);
     	glTexCoord3f(0.0 - m_xOffset0, 0.0 - m_yOffset0, m_zTexture); glVertex3f(-0.5, -0.5, m_zSlize -0.5);
@@ -201,7 +204,7 @@ void TheScene::renderNavView(int view)
 	
 	glEnable(GL_TEXTURE_3D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_3D, tex2);
+	glBindTexture(GL_TEXTURE_3D, m_tex2);
 	
 	switch (view)
 	{

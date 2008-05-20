@@ -7,7 +7,7 @@
 
 int winNumber = 1;
 
-DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
+DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
    
 BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_ABOUT, MainFrame::OnAbout)
@@ -15,12 +15,19 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
-    EVT_COMMAND(ID_GL_NAV_X, wxEVT_MY_EVENT, MainFrame::OnGLEvent)
-    EVT_COMMAND(ID_GL_NAV_Y, wxEVT_MY_EVENT, MainFrame::OnGLEvent)
-	EVT_COMMAND(ID_GL_NAV_Z, wxEVT_MY_EVENT, MainFrame::OnGLEvent)
+    /* mouse click in one of the three navigation windows */
+    EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
+    EVT_COMMAND(ID_GL_NAV_Y, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
+	EVT_COMMAND(ID_GL_NAV_Z, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
+	/* slize selection slider moved */
 	EVT_SLIDER(ID_X_SLIDER, MainFrame::OnXSliderMoved)
 	EVT_SLIDER(ID_Y_SLIDER, MainFrame::OnYSliderMoved)
 	EVT_SLIDER(ID_Z_SLIDER, MainFrame::OnZSliderMoved)
+	/* click on toolbar button to toggle one of the 3 panes in the
+	 * main GL window */ 
+	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
+	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
+	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
 END_EVENT_TABLE()
 
 
@@ -327,5 +334,26 @@ void MainFrame::refreshAllGLWidgets()
 	m_gl0->render();
 	m_gl1->render();
 	m_gl2->render();
+	m_mainGL->render();
+}
+
+void MainFrame::OnToggleView1(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	m_scene->m_showXSlize = !m_scene->m_showXSlize;
+	m_mainGL->render();
+}
+
+void MainFrame::OnToggleView2(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	m_scene->m_showYSlize = !m_scene->m_showYSlize;
+	m_mainGL->render();
+}
+
+void MainFrame::OnToggleView3(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	m_scene->m_showZSlize = !m_scene->m_showZSlize;
 	m_mainGL->render();
 }

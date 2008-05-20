@@ -1,7 +1,7 @@
 #include "navigationCanvas.h"
 
-DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
-DEFINE_EVENT_TYPE(wxEVT_MY_EVENT)
+DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
+DEFINE_EVENT_TYPE(wxEVT_NAVGL_EVENT)
 
 BEGIN_EVENT_TABLE(NavigationCanvas, wxGLCanvas)
     EVT_SIZE(NavigationCanvas::OnSize)
@@ -66,7 +66,7 @@ void NavigationCanvas::OnMouseEvent(wxMouseEvent& event)
 	
 	if (event.LeftUp() || event.Dragging()) 
 	{
-		wxCommandEvent event1( wxEVT_MY_EVENT, GetId() );
+		wxCommandEvent event1( wxEVT_NAVGL_EVENT, GetId() );
 		event1.SetEventObject( (wxObject*) new wxPoint( event.GetPosition()) );
 		event1.SetInt(m_view);
 		GetEventHandler()->ProcessEvent( event1 );

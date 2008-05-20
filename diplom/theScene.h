@@ -10,6 +10,9 @@ class TheScene {
 
 public:
 	bool nothing_loaded;
+	bool m_showXSlize;
+	bool m_showYSlize;
+	bool m_showZSlize;
 	
 	TheScene();
 	~TheScene() {};
@@ -26,12 +29,11 @@ public:
 	
 		
 private:
-	GLuint tex1;
-	GLuint tex2;
-	bool tex1_loaded;
+	GLuint m_tex1;
+	GLuint m_tex2;
+	bool m_tex1_loaded;
 	float *m_texture_head;
 	TheDataset* m_dataset;
-		
 	
 	float m_xSize;
 	float m_ySize;

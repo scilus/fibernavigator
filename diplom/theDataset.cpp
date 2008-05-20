@@ -137,49 +137,6 @@ bool TheDataset::load(wxString filename)
 	return flag;
 }
 
-/* getter methods */
-int TheDataset::getLength()
-{
-	return m_length;
-}
-int TheDataset::getBands()
-{
-	return m_bands;
-}
-int TheDataset::getFrames()
-{
-	return m_frames;
-}
-int TheDataset::getRows()
-{
-	return m_rows;
-}
-int TheDataset::getColumns()
-{
-	return m_columns;
-}
-wxString TheDataset::getRpn()
-{
-	return m_repn;
-}
-double TheDataset::getXVoxel()
-{
-	return m_xVoxel;
-}
-double TheDataset::getYVoxel()
-{
-	return m_yVoxel;
-}
-double TheDataset::getZVoxel()
-{
-	return m_zVoxel;
-}
-
-float* TheDataset::getData()
-{
-	return m_data;
-}
-
 wxString TheDataset::getInfoString()
 {
 	if (!is_loaded) return wxT("");
@@ -191,9 +148,3 @@ wxString TheDataset::getInfoString()
 	infoString2 = wxString::Format(wxT("\nx Voxel: %.2f\ny Voxel: %.2f\nz Voxel: %.2f"), this->m_xVoxel, this->m_yVoxel, this->m_zVoxel);
 	return infoString1 + infoString2;
 }
-
-float TheDataset::getHighestValue()
-{
-	return m_highest_value;
-}	
-	

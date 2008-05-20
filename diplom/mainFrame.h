@@ -31,6 +31,9 @@ public:
     void OnYSliderMoved(wxCommandEvent& event);
     void OnZSliderMoved(wxCommandEvent& event);
     void refreshAllGLWidgets();
+    void OnToggleView1(wxCommandEvent& event);
+    void OnToggleView2(wxCommandEvent& event);
+    void OnToggleView3(wxCommandEvent& event);
 
 public:
     	
@@ -69,6 +72,10 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_QUIT        wxID_EXIT
 #define VIEWER_ABOUT       wxID_ABOUT
 #define VIEWER_LOAD		4
+#define VIEWER_TOGGLEVIEW1 11
+#define VIEWER_TOGGLEVIEW2 12
+#define VIEWER_TOGGLEVIEW3 13
+
 
 #define ID_WINDOW_LEFT    	100
 #define ID_WINDOW_RIGHT  	101

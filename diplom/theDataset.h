@@ -22,32 +22,29 @@ private:
 	double m_yVoxel;
 	double m_zVoxel;
 	bool is_loaded;
-	float m_highest_value;
-	
 	float *m_data;
 	
+	float m_highest_value;
 	
 public:
 	TheDataset();
 	~TheDataset(){};
 	
 	bool load(wxString filename);
+	wxString getInfoString();
 	
 	/* getter methods*/
-	int getLength();
-	int getBands();
-	int getFrames();
-	int getRows();
-	int getColumns();
-	wxString getRpn();
-	double getXVoxel();
-	double getYVoxel();
-	double getZVoxel();
-	float getHighestValue();
-	
-	wxString getInfoString();
-	float* getData();
-	
+	int getLength() {return m_length;};
+	int getBands() {return m_bands;};
+	int getFrames() {return m_frames;};
+	int getRows() {return m_rows;};
+	int getColumns() {return m_columns;};
+	wxString getRpn() {return m_repn;};
+	double getXVoxel() {return m_xVoxel;};
+	double getYVoxel() {return m_yVoxel;};;
+	double getZVoxel() {return m_zVoxel;};;
+	float getHighestValue() {return m_highest_value;};
+	float* getData() {return m_data;};
 };
 
 #endif /*THEDATASET_H_*/
