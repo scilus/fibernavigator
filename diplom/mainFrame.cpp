@@ -207,7 +207,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_dataset = new TheDataset();
 		
 		
-		if (!m_dataset->load(path)) 
+		if (!m_dataset->loadHead(path)) 
 		{
 			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 		}
@@ -219,14 +219,14 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 			m_gl1->m_init = false;
 			m_gl2->m_init = false;
 		}
-		m_textWindow->SetValue(m_dataset->getInfoString());
+		m_textWindow->SetValue(m_dataset->m_headInfo->getInfoString());
 		
-		m_xSlider->SetMax(m_dataset->getColumns());
-		m_xSlider->SetValue(m_dataset->getColumns()/2);
-		m_ySlider->SetMax(m_dataset->getRows());
-		m_ySlider->SetValue( m_dataset->getRows()/2);
-		m_zSlider->SetMax(m_dataset->getFrames());
-		m_zSlider->SetValue( m_dataset->getFrames()/2);
+		m_xSlider->SetMax(m_dataset->m_headInfo->getColumns());
+		m_xSlider->SetValue(m_dataset->m_headInfo->getColumns()/2);
+		m_ySlider->SetMax(m_dataset->m_headInfo->getRows());
+		m_ySlider->SetValue( m_dataset->m_headInfo->getRows()/2);
+		m_zSlider->SetMax(m_dataset->m_headInfo->getFrames());
+		m_zSlider->SetValue( m_dataset->m_headInfo->getFrames()/2);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		refreshAllGLWidgets();
 	}
@@ -256,18 +256,18 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	{
 	case 0:
 		pos = m_gl0->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getColumns()));
-		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getRows()));
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_headInfo->getColumns()));
+		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_headInfo->getRows()));
 		break;
 	case 1:
 		pos = m_gl1->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getColumns()));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getFrames()));
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_headInfo->getColumns()));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_headInfo->getFrames()));
 		break;
 	case 2:
 		pos = m_gl2->getMousePos();
-		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->getRows()));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->getFrames()));
+		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_headInfo->getRows()));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_headInfo->getFrames()));
 		break;
 	}
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());

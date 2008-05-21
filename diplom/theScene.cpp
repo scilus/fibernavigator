@@ -52,9 +52,9 @@ void TheScene::initMainGL()
 		glTexImage3D(GL_TEXTURE_3D, 
 				0, 
 				GL_LUMINANCE_ALPHA, 
-				m_dataset->getColumns(), 
-				m_dataset->getRows(),
-				m_dataset->getFrames(),
+				m_dataset->m_headInfo->getColumns(), 
+				m_dataset->m_headInfo->getRows(),
+				m_dataset->m_headInfo->getFrames(),
 				0, 
 				GL_LUMINANCE_ALPHA, 
 				GL_FLOAT,
@@ -91,9 +91,9 @@ void TheScene::initNavGL()
 			glTexImage3D(GL_TEXTURE_3D, 
 					0, 
 					GL_LUMINANCE_ALPHA, 
-					m_dataset->getColumns(), 
-					m_dataset->getRows(),
-					m_dataset->getFrames(),
+					m_dataset->m_headInfo->getColumns(), 
+					m_dataset->m_headInfo->getRows(),
+					m_dataset->m_headInfo->getFrames(),
 					0, 
 					GL_LUMINANCE_ALPHA, 
 					GL_FLOAT,
@@ -106,10 +106,10 @@ void TheScene::setDataset(TheDataset *dataset)
 	m_dataset = dataset;
 	
 	float *temp = m_dataset->getData();
-	int size = m_dataset->getLength();
+	int size = m_dataset->m_headInfo->getLength();
 	m_texture_head = new float[size *2];
 	
-	float div = m_dataset->getHighestValue();
+	float div = m_dataset->m_headInfo->getHighestValue();
 	
 	for (int i = 0 ; i < size; ++i)
 	{
@@ -117,9 +117,9 @@ void TheScene::setDataset(TheDataset *dataset)
 		m_texture_head[(2*i)+1] =  temp[i] /div;
 	}
 		
-	m_xSize = (float)dataset->getColumns();
-	m_ySize = (float)dataset->getRows();
-	m_zSize = (float)dataset->getFrames();
+	m_xSize = (float)dataset->m_headInfo->getColumns();
+	m_ySize = (float)dataset->m_headInfo->getRows();
+	m_zSize = (float)dataset->m_headInfo->getFrames();
 	
 	m_ratio0 = m_xSize/m_ySize;
 	m_ratio1 = m_xSize/m_zSize;
