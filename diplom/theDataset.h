@@ -28,7 +28,7 @@ public:
 	
 	/* getter methods*/
 	
-	float* getData() {return m_headData;};
+	float* getHeadData() {return m_headData;};
 };
 
 #endif /*THEDATASET_H_*/

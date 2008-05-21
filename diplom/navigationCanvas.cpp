@@ -18,11 +18,18 @@ NavigationCanvas::NavigationCanvas(TheScene *scene, int view, wxWindow *parent, 
 	m_scene = scene;
 	m_view = view;
     m_init = false;
+    m_texturesAssigned = false;
 }
 
 void NavigationCanvas::init()
 {
 	m_scene->initNavGL();
+	
+	if (!m_texturesAssigned)
+	{
+		m_scene->assignTextures();
+		m_texturesAssigned = true;
+	}
 }
 
 
@@ -95,6 +102,7 @@ void NavigationCanvas::render()
         init();
         m_init = true;
     }
+    
      /* clear color and depth buffers */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -119,4 +127,9 @@ wxPoint NavigationCanvas::getMousePos()
 	return m_clicked;
 }
 
+void NavigationCanvas::invalidate()
+{
+	m_init = false;
+	m_texturesAssigned = false;
+}
 

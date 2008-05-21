@@ -75,6 +75,8 @@ bool MyApp::OnInit(void)
   frame->Show(true);
  
   SetTopWindow(frame);
+  
+  frame->loadStandard();
 
   return true;
 }

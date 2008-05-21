@@ -26,10 +26,12 @@ MainCanvas::MainCanvas(TheScene *scene, wxWindow *parent, wxWindowID id,
 void MainCanvas::init()
 {
 	m_scene->initMainGL();		
-	
-	m_clicked = wxPoint(this->m_width/2, this->m_height/2);
-	
 	m_init = true;
+	if (!m_texturesAssigned)
+	{
+		m_scene->assignTextures();
+		m_texturesAssigned = true;
+	}
 }
 
 
@@ -128,12 +130,13 @@ void MainCanvas::render()
     SwapBuffers();
 }
 
-wxPoint MainCanvas::getMousePos()
-{
-	return m_clicked;
-}
-
 void MainCanvas::setScene(TheScene *scene)
 {
 	m_scene = scene;
+}
+
+void MainCanvas::invalidate()
+{
+	m_init = false;
+	m_texturesAssigned = false;
 }

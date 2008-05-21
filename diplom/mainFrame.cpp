@@ -144,7 +144,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_zSlider = new wxSlider(m_extraNavWindow, ID_Z_SLIDER, 50, 0, 100, 
     		wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y), 
     		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-    m_tSlider = new wxSlider(m_extraNavWindow, ID_T_SLIDER, 10, 0, 100, 
+    m_tSlider = new wxSlider(m_extraNavWindow, ID_T_SLIDER, 10, 1, 100, 
     		wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y + m_zSlider->GetSize().y), 
     		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
    
@@ -205,8 +205,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	{
 		wxString path = dialog.GetPath();
 		m_dataset = new TheDataset();
-		
-		
+				
 		if (!m_dataset->loadHead(path)) 
 		{
 			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
@@ -214,18 +213,18 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		else 
 		{ 
 			m_scene->setDataset(m_dataset);
-			m_mainGL->m_init = false;
-			m_gl0->m_init = false;
-			m_gl1->m_init = false;
-			m_gl2->m_init = false;
+			m_mainGL->invalidate();
+			m_gl0->invalidate();
+			m_gl1->invalidate();
+			m_gl2->invalidate();
 		}
 		m_textWindow->SetValue(m_dataset->m_headInfo->getInfoString());
 		
-		m_xSlider->SetMax(m_dataset->m_headInfo->getColumns());
+		m_xSlider->SetMax(m_dataset->m_headInfo->getColumns()-1);
 		m_xSlider->SetValue(m_dataset->m_headInfo->getColumns()/2);
-		m_ySlider->SetMax(m_dataset->m_headInfo->getRows());
+		m_ySlider->SetMax(m_dataset->m_headInfo->getRows()-1);
 		m_ySlider->SetValue( m_dataset->m_headInfo->getRows()/2);
-		m_zSlider->SetMax(m_dataset->m_headInfo->getFrames());
+		m_zSlider->SetMax(m_dataset->m_headInfo->getFrames()-1);
 		m_zSlider->SetValue( m_dataset->m_headInfo->getFrames()/2);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		refreshAllGLWidgets();
@@ -340,7 +339,7 @@ void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 {
 	if (!m_dataset) return;
-	m_scene->updateBlendThreshold(2.0/(float)m_tSlider->GetValue());
+	m_scene->updateBlendThreshold(3.0/(float)m_tSlider->GetValue());
 	m_mainGL->m_init = false;
 	m_mainGL->render();
 }
@@ -372,4 +371,26 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 	if (!m_scene) return;
 	m_scene->m_showZSlize = !m_scene->m_showZSlize;
 	m_mainGL->render();
+}
+
+void MainFrame::loadStandard()
+{
+	m_dataset = new TheDataset();
+	m_dataset->loadHead(wxT("/home/ralph/bin/devel/workspace/diplom/t1.hea"));
+
+	m_scene->setDataset(m_dataset);
+	m_mainGL->invalidate();
+	m_gl0->invalidate();
+	m_gl1->invalidate();
+	m_gl2->invalidate();
+	m_textWindow->SetValue(m_dataset->m_headInfo->getInfoString());
+	
+	m_xSlider->SetMax(m_dataset->m_headInfo->getColumns()-1);
+	m_xSlider->SetValue(m_dataset->m_headInfo->getColumns()/2);
+	m_ySlider->SetMax(m_dataset->m_headInfo->getRows()-1);
+	m_ySlider->SetValue( m_dataset->m_headInfo->getRows()/2);
+	m_zSlider->SetMax(m_dataset->m_headInfo->getFrames()-1);
+	m_zSlider->SetValue( m_dataset->m_headInfo->getFrames()/2);
+	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	refreshAllGLWidgets();
 }

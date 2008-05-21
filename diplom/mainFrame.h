@@ -35,6 +35,8 @@ public:
     void OnToggleView1(wxCommandEvent& event);
     void OnToggleView2(wxCommandEvent& event);
     void OnToggleView3(wxCommandEvent& event);
+    
+    void loadStandard();
 
 public:
     	

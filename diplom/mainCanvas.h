@@ -17,15 +17,16 @@
 class MainCanvas: public wxGLCanvas
 {
 public:
-	bool	m_init;
-   
+	
     MainCanvas(TheScene*, wxWindow *parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = _T("GLCanvas"),
         int* gl_attrib = NULL);
    ~MainCanvas(){};
-
+   
+   	bool	m_init;
+   	
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
@@ -35,14 +36,15 @@ public:
     void init();
     void render();
     void setScene(TheScene*);
-    
-    wxPoint getMousePos();
+    void invalidate();
     
     DECLARE_EVENT_TABLE()
 
 private:
-	 TheScene *m_scene;
-	 wxPoint m_clicked;
+	 TheScene 	*m_scene;
+	 wxPoint 	m_clicked;
+	 bool 		m_texturesAssigned;
+	 
 };
 
 #endif /*MAINCANVAS_H_*/

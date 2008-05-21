@@ -23,7 +23,7 @@ public:
 	const wxSize& size = wxDefaultSize,
 	long style = 0, const wxString& name = _T("GLCanvas"),
 	int* gl_attrib = NULL);
-    bool	m_init;
+    
 
    ~NavigationCanvas(){};
 
@@ -36,22 +36,25 @@ public:
     void render();
     void setScene(TheScene*, int);
     wxPoint getMousePos();
+    void invalidate();
     
     DECLARE_EVENT_TABLE()
 
 private:
-	 //wxImage *m_image;
-	 float m_xOffset0;
- 	 float m_yOffset0;
- 	 float m_xOffset1;
- 	 float m_yOffset1;
- 	 float m_xOffset2;
- 	 float m_yOffset2;
-	 float m_Slize;
-	 TheScene *m_scene;
-	 int m_view;
-	 wxPoint m_clicked;
-	 wxSize m_oldSize;
+	bool		m_init;
+	bool 		m_texturesAssigned;
+	
+	float 		m_xOffset0;
+ 	float 		m_yOffset0;
+ 	float 		m_xOffset1;
+ 	float 		m_yOffset1;
+ 	float 		m_xOffset2;
+ 	float 		m_yOffset2;
+	float 		m_Slize;
+	TheScene 	*m_scene;
+	int 		m_view;
+	wxPoint m_clicked;
+	wxSize m_oldSize;
 };
 
 #endif /*NAVIGATIONCANVAS_H_*/

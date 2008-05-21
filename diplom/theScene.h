@@ -19,6 +19,7 @@ public:
 	
 	void initMainGL();
 	void initNavGL();
+	void assignTextures();
 	
 	void setDataset(TheDataset*);
 	
@@ -31,8 +32,8 @@ public:
 		
 private:
 	GLuint m_tex1;
-	GLuint m_tex2;
 	bool m_tex1_loaded;
+	
 	float *m_texture_head;
 	TheDataset* m_dataset;
 	float m_blendThreshold;
@@ -50,12 +51,15 @@ private:
 	float m_xSlize;
 	float m_ySlize;
 	float m_zSlize;
-	float m_xTexture;
-	float m_yTexture;
-	float m_zTexture;
+
 	float m_ratio0;
 	float m_ratio1;
 	float m_ratio2;
+
+	float m_xLine;
+	float m_yLine;
+	float m_zLine;
+	
 	
 	void renderXSlize();
 	void renderYSlize();
