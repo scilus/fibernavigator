@@ -2,14 +2,13 @@
 #define THESCENE_H_
 
 #include "theDataset.h"
-
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include "GLSL/GLSLShaderProgram.h"
 
 class TheScene {
 
 public:
 	bool nothing_loaded;
+
 	bool m_showXSlize;
 	bool m_showYSlize;
 	bool m_showZSlize;
@@ -20,6 +19,7 @@ public:
 	void initMainGL();
 	void initNavGL();
 	void assignTextures();
+	void initShaders();
 	
 	void setDataset(TheDataset*);
 	
@@ -33,6 +33,8 @@ public:
 private:
 	GLuint m_tex1;
 	bool m_tex1_loaded;
+	
+	FGLSLShaderProgram *m_textureShader; 
 	
 	float *m_texture_head;
 	TheDataset* m_dataset;
@@ -60,7 +62,7 @@ private:
 	float m_yLine;
 	float m_zLine;
 	
-	
+	void bindTextures();
 	void renderXSlize();
 	void renderYSlize();
 	void renderZSlize();

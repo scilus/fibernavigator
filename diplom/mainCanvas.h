@@ -9,8 +9,6 @@
 
 #include "wx/math.h"
 #include "wx/glcanvas.h"
-#include <GL/gl.h>
-#include <GL/glu.h>
 
 #include "theScene.h"
 

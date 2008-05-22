@@ -1,0 +1,76 @@
+#include "GLSLShader.h"
+
+
+
+GLSLShader::GLSLShader(GLenum target)
+{
+  m_target = target;
+  m_shaderID = 0;
+  m_shaderID = glCreateShader(target);
+}
+
+GLSLShader::~GLSLShader()
+{
+  destroy();
+}
+
+void GLSLShader::bind() const
+{
+  
+}
+
+void GLSLShader::release() const
+{
+
+}
+
+void GLSLShader::destroy()
+{
+
+}
+
+bool GLSLShader::loadCode(const GLchar** source)
+{
+	glShaderSource (m_shaderID, 1, source, NULL);
+	glCompileShader(m_shaderID);
+	GLint compiled;
+	glGetShaderiv (m_shaderID, GL_COMPILE_STATUS, &compiled);
+	if (!compiled) {
+		printCompilerLog(m_shaderID);
+		return false;
+	}
+	return true;
+}
+
+
+GLuint GLSLShader::getShaderID() const
+{
+  return m_shaderID;
+}
+
+void GLSLShader::setShaderID(GLuint shaderID)
+{
+  m_shaderID = shaderID;
+}
+
+
+void GLSLShader::printCompilerLog(GLuint shader)
+{
+	int infologLen = 0;
+	int charsWritten = 0;
+	GLchar *infoLog;
+	
+	glGetShaderiv (shader, GL_INFO_LOG_LENGTH, &infologLen);
+	if (infologLen > 0)
+	{
+		infoLog = (GLchar*) malloc (infologLen);
+		glGetShaderInfoLog(shader, infologLen, &charsWritten, infoLog);
+		printf("InfoLog:\n%s\n\n", infoLog);
+		free (infoLog);
+	}
+}
+
+void GLSLShader::printCode() const
+{
+ 
+}
