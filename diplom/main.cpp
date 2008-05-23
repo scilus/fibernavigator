@@ -17,6 +17,8 @@
 #include "view1.xpm"
 #include "view2.xpm"
 #include "view3.xpm"
+#include "toggleData1.xpm"
+#include "toggleRGB.xpm"
 
 #include "main.h"
 #include "mainFrame.h"
@@ -45,6 +47,8 @@ bool MyApp::OnInit(void)
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
   file_menu->Append(VIEWER_LOAD, _T("&Load"));
+  file_menu->Append(VIEWER_LOAD_DATA1, _T("&Load Data 1"));
+  file_menu->Append(VIEWER_LOAD_DATARGB, _T("&Load Data RGB"));
   file_menu->Append(VIEWER_QUIT, _T("&Exit"));
 
   wxMenu *help_menu = new wxMenu;
@@ -64,11 +68,17 @@ bool MyApp::OnInit(void)
   wxBitmap bmpView1 (view1_xpm);
   wxBitmap bmpView2 (view2_xpm);
   wxBitmap bmpView3 (view3_xpm);
+  wxBitmap bmpToggleOverlay (toggle_data1_xpm);
+  wxBitmap bmpToggleRGB (toggle_rgb_xpm);
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_TOGGLEVIEW1, bmpView1, wxT("Toggle View 1"));
   toolBar->AddTool(VIEWER_TOGGLEVIEW2, bmpView2, wxT("Toggle View 2"));
   toolBar->AddTool(VIEWER_TOGGLEVIEW3, bmpView3, wxT("Toggle View 3"));
+  toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_TOGGLE_OVERLAY, bmpToggleOverlay, wxT("Toggle Overlay"));
+  toolBar->AddTool(VIEWER_TOGGLE_RGB, bmpToggleRGB, wxT("Toggle RGB"));
+  toolBar->AddSeparator();
   toolBar->Realize();
   frame->SetToolBar(toolBar);
   

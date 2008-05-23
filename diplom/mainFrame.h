@@ -15,32 +15,37 @@ private:
 	TheScene *m_scene;
 	
 public:
-
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
 
-    void OnSize(wxSizeEvent& event);
+    void loadStandard();
+
+private:
+	void OnSize(wxSizeEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnNewWindow(wxCommandEvent& event);
     void OnQuit(wxCommandEvent& event);
-    void OnLoad(wxCommandEvent& event);
+    
+	void OnLoad(wxCommandEvent& event);
+    void OnLoadData1(wxCommandEvent& event);
+    void OnLoadDataRGB(wxCommandEvent& event);
     void OnToggleWindow(wxCommandEvent& event);
-    void OnSashDrag(wxSashEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
     void OnGLEvent(wxCommandEvent &event);
-    void OnXSliderMoved(wxCommandEvent& event);
+    
+	void OnXSliderMoved(wxCommandEvent& event);
     void OnYSliderMoved(wxCommandEvent& event);
     void OnZSliderMoved(wxCommandEvent& event);
     void OnTSliderMoved(wxCommandEvent& event);
-    void refreshAllGLWidgets();
+    
     void OnToggleView1(wxCommandEvent& event);
     void OnToggleView2(wxCommandEvent& event);
     void OnToggleView3(wxCommandEvent& event);
+    void OnToggleOverlay(wxCommandEvent& event);
+    void OnToggleRGB(wxCommandEvent& event);
     
-    void loadStandard();
-
-public:
-    	
-private:
+    void refreshAllGLWidgets();
+    void updateInfoString();
+	
     wxSashLayoutWindow* m_leftWindow;
     wxSashLayoutWindow* m_mainWindow;
     wxSashLayoutWindow* m_navWindow;
@@ -73,12 +78,16 @@ private:
 DECLARE_EVENT_TABLE()
 };
 
-#define VIEWER_QUIT        wxID_EXIT
-#define VIEWER_ABOUT       wxID_ABOUT
-#define VIEWER_LOAD		4
-#define VIEWER_TOGGLEVIEW1 11
-#define VIEWER_TOGGLEVIEW2 12
-#define VIEWER_TOGGLEVIEW3 13
+#define VIEWER_QUIT        	wxID_EXIT
+#define VIEWER_ABOUT       	wxID_ABOUT
+#define VIEWER_LOAD			4
+#define VIEWER_LOAD_DATA1		5
+#define VIEWER_LOAD_DATARGB	6
+#define VIEWER_TOGGLEVIEW1 	11
+#define VIEWER_TOGGLEVIEW2 	12
+#define VIEWER_TOGGLEVIEW3 	13
+#define VIEWER_TOGGLE_OVERLAY	14
+#define VIEWER_TOGGLE_RGB		15
 
 
 #define ID_WINDOW_LEFT    	100

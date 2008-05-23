@@ -5,7 +5,7 @@
 TheScene::TheScene()
 {
 	nothing_loaded = true;
-	m_tex1_loaded = false;
+
 	m_blendThreshold = 0.1;
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
@@ -13,6 +13,8 @@ TheScene::TheScene()
 	m_showXSlize = true;
 	m_showYSlize = true;
 	m_showZSlize = true;
+	m_showData1 = false;
+	m_showRGB = false;
 	m_textureShader = 0;
 }
 
@@ -54,12 +56,12 @@ void TheScene::initNavGL()
 
 void TheScene::assignTextures ()
 {
-	if (m_tex1_loaded)
+	if (m_dataset->headIsLoaded())
 	{
-		glDeleteTextures(1, &m_tex1);
+		glDeleteTextures(1, &m_headTex);
 		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glGenTextures(1, &m_tex1);
-		glBindTexture(GL_TEXTURE_3D, m_tex1);
+		glGenTextures(1, &m_headTex);
+		glBindTexture(GL_TEXTURE_3D, m_headTex);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -72,9 +74,55 @@ void TheScene::assignTextures ()
 				m_dataset->m_headInfo->getRows(),
 				m_dataset->m_headInfo->getFrames(),
 				0, 
-				GL_RGBA, 
+				GL_LUMINANCE_ALPHA, 
 				GL_FLOAT,
-				m_texture_head);
+				m_dataset->getDataHead());
+	}
+	
+	if (m_dataset->overlayIsLoaded())
+	{
+		glDeleteTextures(1, &m_overlayTex);
+		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+		glGenTextures(1, &m_overlayTex);
+		glBindTexture(GL_TEXTURE_3D, m_overlayTex);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+		glTexImage3D(GL_TEXTURE_3D, 
+				0, 
+				GL_RGBA, 
+				m_dataset->m_headInfo->getColumns(), 
+				m_dataset->m_headInfo->getRows(),
+				m_dataset->m_headInfo->getFrames(),
+				0, 
+				GL_LUMINANCE, 
+				GL_FLOAT,
+				m_dataset->getDataOverlay());
+	}
+	
+	if (m_dataset->rgbIsLoaded())
+	{
+		glDeleteTextures(1, &m_rgbTex);
+		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+		glGenTextures(1, &m_rgbTex);
+		glBindTexture(GL_TEXTURE_3D, m_rgbTex);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+		glTexImage3D(GL_TEXTURE_3D, 
+				0, 
+				GL_RGBA, 
+				m_dataset->m_headInfo->getColumns(), 
+				m_dataset->m_headInfo->getRows(),
+				m_dataset->m_headInfo->getFrames(),
+				0, 
+				GL_RGB, 
+				GL_FLOAT,
+				m_dataset->getDataRGB());
 	}
 }
 
@@ -82,20 +130,6 @@ void TheScene::setDataset(TheDataset *dataset)
 {
 	m_dataset = dataset;
 	
-	float *temp = m_dataset->getHeadData();
-	int size = m_dataset->m_headInfo->getLength();
-	m_texture_head = new float[size *4];
-	
-	float div = m_dataset->m_headInfo->getHighestValue();
-	
-	for (int i = 0 ; i < size; ++i)
-	{
-		m_texture_head[4*i] = temp[i]/div;
-		m_texture_head[(4*i)+1] =  temp[i] /div;
-		m_texture_head[(4*i)+2] =  temp[i] /div;
-		m_texture_head[(4*i)+3] =  temp[i] /div;
-	}
-		
 	m_xSize = (float)dataset->m_headInfo->getColumns();
 	m_ySize = (float)dataset->m_headInfo->getRows();
 	m_zSize = (float)dataset->m_headInfo->getFrames();
@@ -126,7 +160,6 @@ void TheScene::setDataset(TheDataset *dataset)
 	m_yOffset1 = wxMax(m_yOffset1, m_yOffset2);
 	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);
 	
-	m_tex1_loaded = true;
 	nothing_loaded = false;
 }
 
@@ -139,6 +172,7 @@ void TheScene::initShaders()
 	
 	const GLchar* vShaderSource[] = {
 		"varying vec3 TexCoord;"
+		""
 		"void main()"
 		"{"
 		"	TexCoord = gl_MultiTexCoord0.xyz;"
@@ -149,12 +183,22 @@ void TheScene::initShaders()
 	
 	const GLchar* fShaderSource[] = {
 		"uniform sampler3D HeadTexture;"
+		"uniform sampler3D Data1Texture;"
+		"uniform sampler3D RGBTexture;"
+		"uniform bool showData1;"
+		"uniform bool showRGB;"
+		""
 		"varying vec3 TexCoord;"
+		""
 		"void main()"
 		"{"
 		"	vec4 col;"
 		"	col = texture3D(HeadTexture, TexCoord);"
-		"	col[0] = 1.0;"
+		"	if (showData1)"
+		"		col[0] = clamp(col[0] + texture3D(Data1Texture, TexCoord).r, 0.0, 1.0);"
+		"	if (showRGB)"
+		"		col = texture3D(RGBTexture, TexCoord);"
+		"		col.a = texture3D(HeadTexture, TexCoord).a;"
 		"	gl_FragColor = col;"
 		"}"
 	};
@@ -182,10 +226,34 @@ void TheScene::bindTextures()
 	glEnable(GL_TEXTURE_3D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_3D, m_tex1);
+	glBindTexture(GL_TEXTURE_3D, m_headTex);
 	
 	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "HeadTexture");
-	glUniform1i (texLoc, 0);	
+	glUniform1i (texLoc, 0);
+	
+	if (m_dataset->overlayIsLoaded())
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_3D, m_overlayTex);
+		
+		GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "Data1Texture");
+		glUniform1i (texLoc, 1);
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showData1");
+		glUniform1i (texLoc, m_showData1);
+	}
+	
+	if (m_dataset->rgbIsLoaded())
+	{
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_3D, m_rgbTex);
+		
+		GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "RGBTexture");
+		glUniform1i (texLoc, 2);
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showRGB");
+		glUniform1i (texLoc, m_showRGB);
+	}
+	
+		
 }
 
 void TheScene::renderXSlize()
@@ -225,7 +293,7 @@ void TheScene::renderNavView(int view)
 	
 	glEnable(GL_TEXTURE_3D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_3D, m_tex1);
+	glBindTexture(GL_TEXTURE_3D, m_headTex);
 	
 	switch (view)
 	{

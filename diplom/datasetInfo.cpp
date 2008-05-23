@@ -87,11 +87,11 @@ bool DatasetInfo::load(wxString filename)
 
 wxString DatasetInfo::getInfoString()
 {
-	if (!is_loaded) return wxT("");
+	if (!is_loaded) return wxT("not loaded");
 	wxString infoString1, infoString2;
 	infoString1.Empty();
 	infoString2.Empty();
-	infoString1 = wxString::Format(wxT("Info:\nLength: %d\nBands: %d\nFrames: %d\nRows: %d\nColumns: %d\nRepn: "), 
+	infoString1 = wxString::Format(wxT("Length: %d\nBands: %d\nFrames: %d\nRows: %d\nColumns: %d\nRepn: "), 
 			this->m_length, this->m_bands, this->m_frames, this->m_rows, this->m_columns) + this->m_repn;
 	infoString2 = wxString::Format(wxT("\nx Voxel: %.2f\ny Voxel: %.2f\nz Voxel: %.2f"), this->m_xVoxel, this->m_yVoxel, this->m_zVoxel);
 	return infoString1 + infoString2;

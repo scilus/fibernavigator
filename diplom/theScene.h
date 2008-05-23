@@ -12,6 +12,8 @@ public:
 	bool m_showXSlize;
 	bool m_showYSlize;
 	bool m_showZSlize;
+	bool m_showData1;
+	bool m_showRGB;
 	
 	TheScene();
 	~TheScene() {};
@@ -31,12 +33,12 @@ public:
 	
 		
 private:
-	GLuint m_tex1;
-	bool m_tex1_loaded;
+	GLuint m_headTex;
+	GLuint m_overlayTex;
+	GLuint m_rgbTex;
 	
 	FGLSLShaderProgram *m_textureShader; 
 	
-	float *m_texture_head;
 	TheDataset* m_dataset;
 	float m_blendThreshold;
 	

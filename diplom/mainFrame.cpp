@@ -5,8 +5,6 @@
 
 #include "mainFrame.h"
 
-int winNumber = 1;
-
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
    
 BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
@@ -14,6 +12,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_SIZE(MainFrame::OnSize)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
+    EVT_MENU(VIEWER_LOAD_DATA1, MainFrame::OnLoadData1)
+    EVT_MENU(VIEWER_LOAD_DATARGB, MainFrame::OnLoadDataRGB)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
     /* mouse click in one of the three navigation windows */
     EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
@@ -29,6 +29,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
 	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
+	/* click on toolbar button to toggle display of additional info */
+	EVT_MENU(VIEWER_TOGGLE_OVERLAY, MainFrame::OnToggleOverlay)
+	EVT_MENU(VIEWER_TOGGLE_RGB, MainFrame::OnToggleRGB)
 END_EVENT_TABLE()
 
 
@@ -144,7 +147,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_zSlider = new wxSlider(m_extraNavWindow, ID_Z_SLIDER, 50, 0, 100, 
     		wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y), 
     		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-    m_tSlider = new wxSlider(m_extraNavWindow, ID_T_SLIDER, 10, 1, 100, 
+    m_tSlider = new wxSlider(m_extraNavWindow, ID_T_SLIDER, 30, 1, 100, 
     		wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y + m_zSlider->GetSize().y), 
     		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
    
@@ -178,6 +181,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     }
     
     m_scene = new TheScene();
+    m_dataset = new TheDataset();
 
     m_mainGL = new MainCanvas(m_scene, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
@@ -204,7 +208,6 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxString path = dialog.GetPath();
-		m_dataset = new TheDataset();
 				
 		if (!m_dataset->loadHead(path)) 
 		{
@@ -218,7 +221,8 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 			m_gl1->invalidate();
 			m_gl2->invalidate();
 		}
-		m_textWindow->SetValue(m_dataset->m_headInfo->getInfoString());
+		
+		updateInfoString();
 		
 		m_xSlider->SetMax(m_dataset->m_headInfo->getColumns()-1);
 		m_xSlider->SetValue(m_dataset->m_headInfo->getColumns()/2);
@@ -231,20 +235,71 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	}
 }
 
-void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnLoadData1(wxCommandEvent& WXUNUSED(event))
 {
-      (void)wxMessageBox(_T("wxWidgets 2.0 Sash Demo\nAuthor: Julian Smart (c) 1998"), _T("About Sash Demo"));
+	if (!m_dataset->headIsLoaded()) return;
+	
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("Header files (*.hea)|*.hea|*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		wxString path = dialog.GetPath();
+				
+		if (!m_dataset->loadOverlay(path)) 
+		{
+			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+		}
+		else 
+		{ 
+			m_mainGL->invalidate();
+			m_gl0->invalidate();
+			m_gl1->invalidate();
+			m_gl2->invalidate();
+		}
+		
+		updateInfoString();
+		
+		refreshAllGLWidgets();
+	}
 }
 
-void MainFrame::OnSashDrag(wxSashEvent& event)
+void MainFrame::OnLoadDataRGB(wxCommandEvent& WXUNUSED(event))
 {
-#if wxUSE_MDI_ARCHITECTURE
-    wxLayoutAlgorithm layout;
-    layout.LayoutMDIFrame(this);
-#endif // wxUSE_MDI_ARCHITECTURE
+	if (!m_dataset->headIsLoaded()) return;
+	
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("Header files (*.hea)|*.hea|*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		wxString path = dialog.GetPath();
+				
+		if (!m_dataset->loadRGB(path)) 
+		{
+			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+		}
+		else 
+		{ 
+			m_mainGL->invalidate();
+			m_gl0->invalidate();
+			m_gl1->invalidate();
+			m_gl2->invalidate();
+		}
+		
+		updateInfoString();
+		
+		refreshAllGLWidgets();
+	}
+}
 
-    // Leaves bits of itself behind sometimes
-    GetClientWindow()->Refresh();
+void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+{
+      (void)wxMessageBox(_T("Viewer\nAuthor: Ralph Schurade (c) 2008"), _T("About Viewer"));
 }
 
 void MainFrame::OnGLEvent( wxCommandEvent &event )
@@ -352,6 +407,16 @@ void MainFrame::refreshAllGLWidgets()
 	m_mainGL->render();
 }
 
+void MainFrame::updateInfoString()
+{
+	m_textWindow->SetValue( wxT("\n\nHead:\n") 
+		+ m_dataset->m_headInfo->getInfoString() 
+		+ wxT("\n\nOverlay:\n") 
+		+ m_dataset->m_overlayInfo->getInfoString()
+		+ wxT("\n\nRGB:\n")
+		+ m_dataset->m_rgbInfo->getInfoString());
+}
+
 void MainFrame::OnToggleView1(wxCommandEvent& event)
 {
 	if (!m_scene) return;
@@ -373,17 +438,35 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 	m_mainGL->render();
 }
 
+void MainFrame::OnToggleOverlay(wxCommandEvent& event)
+{
+	if (!m_scene || !m_dataset->overlayIsLoaded()) return;
+	m_scene->m_showData1 = !m_scene->m_showData1;
+	m_mainGL->render();
+}
+
+void MainFrame::OnToggleRGB(wxCommandEvent& event)
+{
+	if (!m_scene || !m_dataset->rgbIsLoaded()) return;
+	m_scene->m_showRGB = !m_scene->m_showRGB;
+	m_mainGL->render();
+}
+
+
+
 void MainFrame::loadStandard()
 {
-	m_dataset = new TheDataset();
-	m_dataset->loadHead(wxT("/home/ralph/bin/devel/workspace/diplom/t1.hea"));
-
+	m_dataset->loadHead(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
+	m_dataset->loadOverlay(wxT("/home/ralph/bin/devel/workspace/diplom/data/float.hea"));
+	m_dataset->loadRGB(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
+	
 	m_scene->setDataset(m_dataset);
 	m_mainGL->invalidate();
 	m_gl0->invalidate();
 	m_gl1->invalidate();
 	m_gl2->invalidate();
-	m_textWindow->SetValue(m_dataset->m_headInfo->getInfoString());
+	
+	updateInfoString();
 	
 	m_xSlider->SetMax(m_dataset->m_headInfo->getColumns()-1);
 	m_xSlider->SetValue(m_dataset->m_headInfo->getColumns()/2);
