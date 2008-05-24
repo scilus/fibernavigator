@@ -133,24 +133,14 @@ bool TheDataset::loadOverlay(wxString filename)
 			} break;
 			case 3: {
 				m_dataOverlay = new float[nSize/4];
-				
-				wxFileInputStream input(filename.BeforeLast('.') + wxT(".ima"));
-				if (!input.Ok())
-					return false;
-				wxDataInputStream data( input );
-				//data.BigEndianOrdered(true);
-				
-				float max = 0;
-				int count = 0;
-				
-				while (!input.Eof())
+				if (dataFile.Read(m_dataOverlay, (size_t) nSize) != nSize)
 				{
-					data >> m_dataOverlay[count];
-					max = wxMax(max, m_dataOverlay[count]);
-					++count;
+					dataFile.Close();
+					delete[] m_dataOverlay;
+					return false;
 				}
-				printf("\nmax: %f count: %d\n", max, count);
-
+				else flag = true;
+				m_overlayInfo->setHighestValue(1.0);
 			} break;
 			}
 		}
