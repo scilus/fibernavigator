@@ -35,32 +35,35 @@ bool DatasetInfo::load(wxString filename)
 			sLine = headerFile.GetLine(i);
 			sLabel = sLine.BeforeLast(' ');
 			sValue = sLine.AfterLast(' ');
+			sLabel.Trim(false);
+			sLabel.Trim();
 			if (sLabel.Contains(wxT("length:"))) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				this->m_length = (int)lTmpValue;
 			}
-			if (sLabel.Contains(wxT("nbands:"))) 
+			if (sLabel == wxT("nbands:")) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				this->m_bands = (int)lTmpValue;
 			}
-			if (sLabel.Contains(wxT("nframes:"))) 
+			if (sLabel == wxT("nframes:")) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				this->m_frames = (int)lTmpValue;
 			}
-			if (sLabel.Contains(wxT("nrows:"))) 
+			if (sLabel == wxT("nrows:")) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				this->m_rows = (int)lTmpValue;
 			}
-			if (sLabel.Contains(wxT("ncolumns:"))) 
+			if (sLabel == wxT("ncolumns:")) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				this->m_columns = (int)lTmpValue;
 			}
-			if (sLabel.Contains(wxT("repn:"))) 
+			if (sLabel == wxT("repn:"))
+			//if (sLabel.Contains(wxT("repn:"))) 
 			{
 				this->m_repn = sValue;
 			}

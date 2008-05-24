@@ -42,6 +42,24 @@ bool GLSLShader::loadCode(const GLchar** source)
 	return true;
 }
 
+bool GLSLShader::loadCode(wxString filename)
+{
+	if (!loadFromFile(filename)) return false;
+	
+	char temp[m_codeString.Length()]; 
+	strcpy(temp, (const char*)m_codeString.mb_str(wxConvUTF8));
+	const char* code = temp;
+
+	glShaderSource (m_shaderID, 1, &code, NULL);
+	glCompileShader(m_shaderID);
+	GLint compiled;
+	glGetShaderiv (m_shaderID, GL_COMPILE_STATUS, &compiled);
+	if (!compiled) {
+		printCompilerLog(m_shaderID);
+		return false;
+	}
+	return true;
+}
 
 GLuint GLSLShader::getShaderID() const
 {
@@ -72,5 +90,21 @@ void GLSLShader::printCompilerLog(GLuint shader)
 
 void GLSLShader::printCode() const
 {
- 
+	
+}
+
+bool GLSLShader::loadFromFile(wxString fileName)
+{
+	wxTextFile file;
+	m_codeString = wxT("");
+	if (file.Open(fileName))
+	{
+		size_t i;
+		for (i = 0 ; i < file.GetLineCount() ; ++i)
+		{
+			m_codeString += file.GetLine(i);
+		}
+		return true;
+	}
+	return false;
 }

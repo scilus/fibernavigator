@@ -19,6 +19,8 @@ class GLSLShader
     void destroy();
    
     bool loadCode (const GLchar**);
+    bool loadCode (wxString);
+    bool loadFromFile(wxString);
 
     //bool loadProgram(const std::string &programString) const;
 
@@ -29,7 +31,8 @@ class GLSLShader
   private:
     GLenum	m_target;
     GLuint	m_shaderID;
-    wxString codeString;
+    wxString m_codeString;
+    const char* m_code;
 
     void printCompilerLog(GLuint) ;
     void printCode() const;

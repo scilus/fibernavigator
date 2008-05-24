@@ -96,12 +96,11 @@ bool TheDataset::loadOverlay(wxString filename)
 		{
 			wxFileOffset nSize = dataFile.Length();
 			if (nSize == wxInvalidOffset) return false;
-			m_dataOverlay = new float[nSize];
-
 			
 			switch (m_overlayInfo->getMode())
 			{
 			case 1: {
+				m_dataOverlay = new float[nSize];
 				wxUint8 *buffer = new wxUint8[nSize];
 				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
 				{
@@ -117,6 +116,7 @@ bool TheDataset::loadOverlay(wxString filename)
 				m_overlayInfo->setHighestValue(255.0); 
 			} break;
 			case 2: {
+				m_dataOverlay = new float[nSize/2];
 				wxUint16 *buffer = new wxUint16[nSize];
 				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
 				{
@@ -132,14 +132,25 @@ bool TheDataset::loadOverlay(wxString filename)
 				m_overlayInfo->setHighestValue(65536.0); 
 			} break;
 			case 3: {
-				if (dataFile.Read(m_dataOverlay, (size_t) nSize) != nSize)
-				{
-					dataFile.Close();
-					delete[] m_dataOverlay;
+				m_dataOverlay = new float[nSize/4];
+				
+				wxFileInputStream input(filename.BeforeLast('.') + wxT(".ima"));
+				if (!input.Ok())
 					return false;
+				wxDataInputStream data( input );
+				//data.BigEndianOrdered(true);
+				
+				float max = 0;
+				int count = 0;
+				
+				while (!input.Eof())
+				{
+					data >> m_dataOverlay[count];
+					max = wxMax(max, m_dataOverlay[count]);
+					++count;
 				}
-				else flag = true;
-				m_overlayInfo->setHighestValue(1.0);
+				printf("\nmax: %f count: %d\n", max, count);
+
 			} break;
 			}
 		}

@@ -366,8 +366,8 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
     layout.LayoutMDIFrame(this);
 #endif // wxUSE_MDI_ARCHITECTURE
 
-    GetClientWindow()->Refresh();
-    this->Refresh();
+    GetClientWindow()->Update();
+    this->Update();
 }
 
 void MainFrame::OnXSliderMoved(wxCommandEvent& event)
@@ -441,7 +441,7 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 void MainFrame::OnToggleOverlay(wxCommandEvent& event)
 {
 	if (!m_scene || !m_dataset->overlayIsLoaded()) return;
-	m_scene->m_showData1 = !m_scene->m_showData1;
+	m_scene->m_showOverlay = !m_scene->m_showOverlay;
 	m_mainGL->render();
 }
 
@@ -457,7 +457,7 @@ void MainFrame::OnToggleRGB(wxCommandEvent& event)
 void MainFrame::loadStandard()
 {
 	m_dataset->loadHead(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
-	m_dataset->loadOverlay(wxT("/home/ralph/bin/devel/workspace/diplom/data/float.hea"));
+	m_dataset->loadOverlay(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
 	m_dataset->loadRGB(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
 	
 	m_scene->setDataset(m_dataset);

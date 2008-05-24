@@ -13,7 +13,7 @@ TheScene::TheScene()
 	m_showXSlize = true;
 	m_showYSlize = true;
 	m_showZSlize = true;
-	m_showData1 = false;
+	m_showOverlay = false;
 	m_showRGB = false;
 	m_textureShader = 0;
 }
@@ -92,7 +92,7 @@ void TheScene::assignTextures ()
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
 		glTexImage3D(GL_TEXTURE_3D, 
 				0, 
-				GL_RGBA, 
+				GL_RGB, 
 				m_dataset->m_headInfo->getColumns(), 
 				m_dataset->m_headInfo->getRows(),
 				m_dataset->m_headInfo->getFrames(),
@@ -167,47 +167,16 @@ void TheScene::initShaders()
 {
 	if (m_textureShader) return;
 	printf("initializing shader\n");
+
 	GLSLShader *vShader = new GLSLShader(GL_VERTEX_SHADER);
 	GLSLShader *fShader = new GLSLShader(GL_FRAGMENT_SHADER);
 	
-	const GLchar* vShaderSource[] = {
-		"varying vec3 TexCoord;"
-		""
-		"void main()"
-		"{"
-		"	TexCoord = gl_MultiTexCoord0.xyz;"
-		"	gl_Position = ftransform();"
-		"}"
-	};
-	vShader->loadCode(vShaderSource);
-	
-	const GLchar* fShaderSource[] = {
-		"uniform sampler3D HeadTexture;"
-		"uniform sampler3D Data1Texture;"
-		"uniform sampler3D RGBTexture;"
-		"uniform bool showData1;"
-		"uniform bool showRGB;"
-		""
-		"varying vec3 TexCoord;"
-		""
-		"void main()"
-		"{"
-		"	vec4 col;"
-		"	col = texture3D(HeadTexture, TexCoord);"
-		"	if (showData1)"
-		"		col[0] = clamp(col[0] + texture3D(Data1Texture, TexCoord).r, 0.0, 1.0);"
-		"	if (showRGB)"
-		"		col = texture3D(RGBTexture, TexCoord);"
-		"		col.a = texture3D(HeadTexture, TexCoord).a;"
-		"	gl_FragColor = col;"
-		"}"
-	};
-	fShader->loadCode(fShaderSource);
+	vShader->loadCode(wxT("/home/ralph/bin/devel/workspace/diplom/GLSL/v1.glsl"));
+	fShader->loadCode(wxT("/home/ralph/bin/devel/workspace/diplom/GLSL/f1.glsl"));
 	
 	m_textureShader = new FGLSLShaderProgram();
 	m_textureShader->link(vShader, fShader);
 	m_textureShader->bind();
-	
 }
 
 void TheScene::renderScene()
@@ -236,10 +205,10 @@ void TheScene::bindTextures()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_3D, m_overlayTex);
 		
-		GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "Data1Texture");
+		GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "OverlayTexture");
 		glUniform1i (texLoc, 1);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showData1");
-		glUniform1i (texLoc, m_showData1);
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showOverlay");
+		glUniform1i (texLoc, m_showOverlay);
 	}
 	
 	if (m_dataset->rgbIsLoaded())
