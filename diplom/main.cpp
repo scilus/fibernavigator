@@ -48,7 +48,7 @@ bool MyApp::OnInit(void)
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
   file_menu->Append(VIEWER_LOAD, _T("&Load"));
-  file_menu->Append(VIEWER_LOAD_DATA1, _T("&Load Data 1"));
+  file_menu->Append(VIEWER_LOAD_DATA1, _T("&Load Overlay"));
   file_menu->Append(VIEWER_LOAD_DATARGB, _T("&Load Data RGB"));
   file_menu->Append(VIEWER_QUIT, _T("&Exit"));
 
