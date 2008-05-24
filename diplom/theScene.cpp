@@ -34,9 +34,7 @@ void TheScene::initMainGL()
 	glEnable(GL_DEPTH_TEST);
 	
 	glAlphaFunc(GL_GREATER,m_blendThreshold); // adjust your prefered threshold here
-	glEnable(GL_ALPHA_TEST);
-	
-	initShaders();
+	glEnable(GL_ALPHA_TEST);	
 }
 
 void TheScene::initNavGL()
@@ -165,7 +163,10 @@ void TheScene::setDataset(TheDataset *dataset)
 
 void TheScene::initShaders()
 {
-	if (m_textureShader) return;
+	if (m_textureShader)
+	{
+		delete m_textureShader;
+	}
 	printf("initializing shader\n");
 
 	GLSLShader *vShader = new GLSLShader(GL_VERTEX_SHADER);

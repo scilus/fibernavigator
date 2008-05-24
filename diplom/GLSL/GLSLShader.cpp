@@ -1,7 +1,5 @@
 #include "GLSLShader.h"
 
-
-
 GLSLShader::GLSLShader(GLenum target)
 {
   m_target = target;

@@ -23,15 +23,15 @@ void FGLSLShaderProgram::link( GLSLShader *vertex, GLSLShader *fragment)
 	m_fragment = fragment;
 	glAttachShader(m_shaderProgram, m_vertex->getShaderID());
 	glAttachShader(m_shaderProgram, m_fragment->getShaderID());
-	//glDeleteShader( m_vertex->getShaderID());
-	//glDeleteShader( m_fragment->getShaderID());
+	glDeleteShader( m_vertex->getShaderID());
+	glDeleteShader( m_fragment->getShaderID());
 	glLinkProgram(m_shaderProgram);
 	printCompilerLog(m_shaderProgram);
 }
 
 void FGLSLShaderProgram::unlink()
 {
-
+	glDeleteProgram(m_shaderProgram);
 }
 
 void FGLSLShaderProgram::bind()

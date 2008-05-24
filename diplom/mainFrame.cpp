@@ -32,6 +32,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	/* click on toolbar button to toggle display of additional info */
 	EVT_MENU(VIEWER_TOGGLE_OVERLAY, MainFrame::OnToggleOverlay)
 	EVT_MENU(VIEWER_TOGGLE_RGB, MainFrame::OnToggleRGB)
+	/* click on reload shaders button */
+	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
 END_EVENT_TABLE()
 
 
@@ -475,5 +477,11 @@ void MainFrame::loadStandard()
 	m_zSlider->SetMax(m_dataset->m_headInfo->getFrames()-1);
 	m_zSlider->SetValue( m_dataset->m_headInfo->getFrames()/2);
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnReloadShaders(wxCommandEvent& event)
+{
+	m_mainGL->invalidate();
 	refreshAllGLWidgets();
 }

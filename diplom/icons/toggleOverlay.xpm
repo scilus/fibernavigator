@@ -1,5 +1,5 @@
 /* XPM */
-static char * toggle_data1_xpm[] = {
+static char * toggle_overlay_xpm[] = {
 "16 16 2 1",
 " 	c None s None",
 ".	c red",

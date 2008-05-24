@@ -30,7 +30,9 @@ void MainCanvas::init()
 	if (!m_texturesAssigned)
 	{
 		m_scene->assignTextures();
+		m_scene->initShaders();
 		m_texturesAssigned = true;
+		
 	}
 }
 

@@ -13,12 +13,13 @@
 #include "wx/mdi.h"
 #include "wx/laywin.h"
 
-#include "fileopen.xpm"
-#include "view1.xpm"
-#include "view2.xpm"
-#include "view3.xpm"
-#include "toggleData1.xpm"
-#include "toggleRGB.xpm"
+#include "icons/fileopen.xpm"
+#include "icons/view1.xpm"
+#include "icons/view2.xpm"
+#include "icons/view3.xpm"
+#include "icons/toggleOverlay.xpm"
+#include "icons/toggleRGB.xpm"
+#include "icons/mini_cat.xpm"
 
 #include "main.h"
 #include "mainFrame.h"
@@ -68,8 +69,9 @@ bool MyApp::OnInit(void)
   wxBitmap bmpView1 (view1_xpm);
   wxBitmap bmpView2 (view2_xpm);
   wxBitmap bmpView3 (view3_xpm);
-  wxBitmap bmpToggleOverlay (toggle_data1_xpm);
+  wxBitmap bmpToggleOverlay (toggle_overlay_xpm);
   wxBitmap bmpToggleRGB (toggle_rgb_xpm);
+  wxBitmap bmpMiniCat (mini_cat_xpm);
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_TOGGLEVIEW1, bmpView1, wxT("Toggle View 1"));
@@ -79,6 +81,7 @@ bool MyApp::OnInit(void)
   toolBar->AddTool(VIEWER_TOGGLE_OVERLAY, bmpToggleOverlay, wxT("Toggle Overlay"));
   toolBar->AddTool(VIEWER_TOGGLE_RGB, bmpToggleRGB, wxT("Toggle RGB"));
   toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
   toolBar->Realize();
   frame->SetToolBar(toolBar);
   
