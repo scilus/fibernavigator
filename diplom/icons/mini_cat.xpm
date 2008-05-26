@@ -1,5 +1,5 @@
 /* XPM */
-static char * mini_cat_xpm[] = {
+const char * mini_cat_xpm[] = {
 /* width height ncolors cpp [x_hot y_hot] */
 "16 16 4 1 0 0",
 /* colors */

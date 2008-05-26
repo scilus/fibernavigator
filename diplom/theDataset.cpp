@@ -71,7 +71,7 @@ bool TheDataset::loadHead(wxString filename)
 					wxDataInputStream data( input );
 					                               
 					float temp;
-					float max;
+					float max = 0.0;
 	
 					for (int i = 0 ; i < nSize/2 ; ++ i)
 					{

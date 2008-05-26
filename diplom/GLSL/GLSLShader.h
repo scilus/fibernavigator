@@ -26,8 +26,7 @@ class GLSLShader
 
     GLuint getShaderID() const;
     void setShaderID(GLuint programID);
-
-    
+ 
   private:
     GLenum	m_target;
     GLuint	m_shaderID;
