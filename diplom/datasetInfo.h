@@ -1,7 +1,12 @@
 #ifndef DATASETINFO_H_
 #define DATASETINFO_H_
 
+#include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif
+
 #include "wx/laywin.h"
 #include "wx/textfile.h"
 #include "wx/file.h"

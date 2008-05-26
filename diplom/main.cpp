@@ -9,7 +9,12 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
+#include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif
+
 #include "wx/mdi.h"
 #include "wx/laywin.h"
 
