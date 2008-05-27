@@ -4,13 +4,14 @@ GLSLShader::GLSLShader(GLenum target)
 {
   m_target = target;
   m_shaderID = 0;
-  if (glewIsSupported ("glCreateShader"))
+  
+  if (target)
   {
 	  m_shaderID = glCreateShader(target);
-	  
   }
   else 
 	  printf("shader not supported\n");
+	 
 }
 
 GLSLShader::~GLSLShader()
