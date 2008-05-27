@@ -198,14 +198,14 @@ void TheScene::initShaders()
 	m_textureShader->bind();
 }
 
-void TheScene::renderScene()
+void TheScene::renderScene(int view)
 {
 	bindTextures();
-		
+
 	if (m_showXSlize) renderXSlize();
 	if (m_showYSlize) renderYSlize();
 	if (m_showZSlize) renderZSlize();
-	
+
 	glDisable(GL_TEXTURE_3D);
 }
 
@@ -279,13 +279,11 @@ void TheScene::renderNavView(int view)
 	float xline = 0.5;
 	float yline = 0.5;
 	
-	glEnable(GL_TEXTURE_3D);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_3D, m_headTex);
+	bindTextures();
 	
 	switch (view)
 	{
-		case 0:
+		case axial:
 			glBegin(GL_QUADS);
 	        	glTexCoord3f(0.0, 1.0 , m_zSlize); glVertex3f(0.0 + m_xOffset0, 0.0 + m_yOffset0, 0.0);
 	        	glTexCoord3f(0.0, 0.0 , m_zSlize); glVertex3f(0.0 + m_xOffset0, 1.0 - m_yOffset0, 0.0);
@@ -296,7 +294,7 @@ void TheScene::renderNavView(int view)
 			yline = 1.0 - m_yLine;
 			
 			break;
-		case 1:
+		case coronal:
 			glBegin(GL_QUADS);
 		    	glTexCoord3f(1.0, m_ySlize, 0.0); glVertex3f(1.0 - m_xOffset1,1.0 - m_xOffset1, 0.0);
 		    	glTexCoord3f(1.0, m_ySlize, 1.0); glVertex3f(1.0 - m_xOffset1,0.0 + m_xOffset1, 0.0);
@@ -307,7 +305,7 @@ void TheScene::renderNavView(int view)
 		    yline = 1.0 - m_zLine;
 		    
 			break;
-		case 2:
+		case sagittal:
 			glBegin(GL_QUADS);
 	        	glTexCoord3f(m_xSlize, 0.0, 1.0); glVertex3f(0.0 + m_xOffset2,0.0 + m_yOffset2, 0.0);
 	        	glTexCoord3f(m_xSlize, 0.0, 0.0); glVertex3f(0.0 + m_xOffset2,1.0 - m_yOffset2, 0.0);

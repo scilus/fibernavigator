@@ -2,7 +2,6 @@
 #define MAINFRAME_H_
 
 #include "theScene.h"
-#include "navigationCanvas.h"
 #include "mainCanvas.h"
 #include "theDataset.h"
 
@@ -64,9 +63,9 @@ private:
     wxSlider* m_zSlider;
     wxSlider* m_tSlider;
 
-    NavigationCanvas* m_gl0;
-    NavigationCanvas* m_gl1;
-    NavigationCanvas* m_gl2;
+    MainCanvas* m_gl0;
+    MainCanvas* m_gl1;
+    MainCanvas* m_gl2;
     MainCanvas* m_mainGL;
     
     wxTextCtrl* m_textWindow;

@@ -213,13 +213,13 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_scene = new TheScene();
     m_dataset = new TheDataset();
 
-    m_mainGL = new MainCanvas(m_scene, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
+    m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
-    m_gl0 = new NavigationCanvas(m_scene, 0, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
+    m_gl0 = new MainCanvas(m_scene, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib);
-    m_gl1 = new NavigationCanvas(m_scene, 1, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
+    m_gl1 = new MainCanvas(m_scene, coronal, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib);
-    m_gl2 = new NavigationCanvas(m_scene, 2, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
+    m_gl2 = new MainCanvas(m_scene, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
 }
 
@@ -410,14 +410,14 @@ void MainFrame::OnToggleOverlay(wxCommandEvent& event)
 {
 	if (!m_scene || !m_dataset->overlayIsLoaded()) return;
 	m_scene->m_showOverlay = !m_scene->m_showOverlay;
-	m_mainGL->render();
+	refreshAllGLWidgets();
 }
 
 void MainFrame::OnToggleRGB(wxCommandEvent& event)
 {
 	if (!m_scene || !m_dataset->rgbIsLoaded()) return;
 	m_scene->m_showRGB = !m_scene->m_showRGB;
-	m_mainGL->render();
+	refreshAllGLWidgets();
 }
 
 

@@ -11,6 +11,13 @@
 
 #include "GLSL/GLSLShaderProgram.h"
 
+enum {
+	axial,
+	coronal,
+	sagittal,
+	mainView
+};
+
 class TheScene {
 
 public:
@@ -32,7 +39,7 @@ public:
 	
 	void setDataset(TheDataset*);
 	
-	void renderScene();
+	void renderScene(int);
 	void renderNavView(int);
 	void updateBlendThreshold(float);
 	
