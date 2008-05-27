@@ -1,0 +1,83 @@
+
+
+
+
+
+-L/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib 
+-L/usr/openwin/lib   
+
+-pthread 
+
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_gtk2u_richtext-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_gtk2u_aui-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_gtk2u_xrc-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_gtk2u_qa-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_gtk2u_html-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_gtk2u_adv-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_gtk2u_core-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_baseu_xml-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_baseu_net-2.8.a 
+/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib/libwx_baseu-2.8.a 
+
+-lgtk-x11-2.0 
+-lgdk-x11-2.0 
+-latk-1.0 
+-lgdk_pixbuf-2.0 
+-lfontconfig 
+-lXext 
+-lXrender 
+-lXi 
+-lXrandr 
+-lXcursor 
+-lXfixes 
+-lpango-1.0 
+-lX11 
+-lgobject-2.0 
+-lgmodule-2.0 
+-lgthread-2.0 
+-lglib-2.0 
+-lXinerama 
+-lSM 
+-lpng 
+-lexpat 
+-lwxregexu-2.8 
+-lwxtiff-2.8
+-lwxjpeg-2.8 
+-lz 
+-ldl 
+-lm
+g++ -o sashtest  sashtest_sashtest.o  
+
+-pthread   
+-L/usr/openwin/lib     
+-L/home/raid2/schurade/wxGTK-2.8.7/build_gtk_static-unicode/lib    
+-lz -ldl -lm 
+-lwx_gtk2u_adv-2.8  
+-lwx_gtk2u_html-2.8  
+-lwx_baseu_xml-2.8 -lexpat -lwx_gtk2u_core-2.8  -lwx_baseu-2.8   -lwxtiff-2.8 -lwxjpeg-2.8  
+-lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lm -lfontconfig -lXext -lXrender 
+-lXinerama -lXi -lXrandr -lXcursor -lXfixes -lpango-1.0 -lX11 -lgobject-2.0 -lgmodule-2.0 -ldl 
+-lgthread-2.0 -lglib-2.0 -lXinerama -lSM -lpng -lz   -lwxregexu-2.8    
+-lz -ldl -lm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

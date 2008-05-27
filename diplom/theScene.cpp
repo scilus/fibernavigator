@@ -186,12 +186,18 @@ void TheScene::initShaders()
 	GLSLShader *vShader = new GLSLShader(GL_VERTEX_SHADER);
 	GLSLShader *fShader = new GLSLShader(GL_FRAGMENT_SHADER);
 	
+	printf("debug shader 1\n");
+	
 	vShader->loadCode(wxT("/home/ralph/bin/devel/workspace/diplom/GLSL/v1.glsl"));
 	fShader->loadCode(wxT("/home/ralph/bin/devel/workspace/diplom/GLSL/f1.glsl"));
+	
+	printf("debug shader 2\n");
 	
 	m_textureShader = new FGLSLShaderProgram();
 	m_textureShader->link(vShader, fShader);
 	m_textureShader->bind();
+	
+	printf("debug shader 3\n");
 }
 
 void TheScene::renderScene()

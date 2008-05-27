@@ -1,3 +1,5 @@
+#include "mainFrame.h"
+
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
@@ -7,8 +9,6 @@
 #include "wx/laywin.h"
 #include "wx/filedlg.h"
 #include "wx/statbmp.h"
-
-#include "mainFrame.h"
 
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
    
@@ -367,12 +367,13 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
 	
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-	
+
+/*	
 #if wxUSE_MDI_ARCHITECTURE
     wxLayoutAlgorithm layout;
     layout.LayoutMDIFrame(this);
 #endif // wxUSE_MDI_ARCHITECTURE
-
+*/
     GetClientWindow()->Update();
     this->Update();
 }
