@@ -1,5 +1,9 @@
 #include "theScene.h"
-
+/**
+ * axial
+ * coronal
+ * sagittal
+ */
 TheScene::TheScene()
 {
 	nothing_loaded = true;
@@ -127,7 +131,7 @@ void TheScene::assignTextures ()
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
 		glTexImage3D(GL_TEXTURE_3D, 
 				0, 
-				GL_RGBA, 
+				GL_RGB, 
 				m_dataset->m_headInfo->getColumns(), 
 				m_dataset->m_headInfo->getRows(),
 				m_dataset->m_headInfo->getFrames(),

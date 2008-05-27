@@ -29,7 +29,7 @@ bool TheDataset::loadHead(wxString filename)
 		delete m_dataRGB;
 	}
 	
-	bool flag =m_headInfo->load(filename);
+	bool flag = m_headInfo->load(filename);
 
 	if (flag)
 	{

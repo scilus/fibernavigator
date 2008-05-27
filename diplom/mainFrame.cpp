@@ -481,6 +481,7 @@ void MainFrame::loadStandard()
 	m_ySlider->SetValue( m_dataset->m_headInfo->getRows()/2);
 	m_zSlider->SetMax(m_dataset->m_headInfo->getFrames()-1);
 	m_zSlider->SetValue( m_dataset->m_headInfo->getFrames()/2);
+	
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
