@@ -44,6 +44,7 @@ public:
 	void updateBlendThreshold(float);
 	
 	void updateView(float, float, float);
+	void releaseTextures();
 	
 		
 private:

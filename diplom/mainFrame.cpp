@@ -17,6 +17,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_SIZE(MainFrame::OnSize)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
+    EVT_MENU(VIEWER_NEW, MainFrame::OnNew)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
     /* mouse click in one of the three navigation windows */
     EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
@@ -451,4 +452,18 @@ void MainFrame::OnReloadShaders(wxCommandEvent& event)
 {
 	m_mainGL->invalidate();
 	refreshAllGLWidgets();
+}
+
+void MainFrame::OnNew(wxCommandEvent& event)
+{
+	free (m_dataset);
+	m_dataset = new TheDataset();
+	updateInfoString();
+	m_scene->releaseTextures();
+	free (m_scene);
+	m_scene = new TheScene();
+	m_mainGL->setScene(m_scene);
+	m_gl0->setScene(m_scene);
+	m_gl1->setScene(m_scene);
+	m_gl2->setScene(m_scene);
 }

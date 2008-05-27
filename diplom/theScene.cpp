@@ -146,9 +146,9 @@ void TheScene::setDataset(TheDataset *dataset)
 {
 	m_dataset = dataset;
 	
-	m_xSize = (float)dataset->m_headInfo->getColumns();
-	m_ySize = (float)dataset->m_headInfo->getRows();
-	m_zSize = (float)dataset->m_headInfo->getFrames();
+	m_xSize = (float)dataset->m_columns;
+	m_ySize = (float)dataset->m_rows;
+	m_zSize = (float)dataset->m_frames;
 	
 	m_ratio0 = m_xSize/m_ySize;
 	m_ratio1 = m_xSize/m_zSize;
@@ -350,4 +350,22 @@ void TheScene::updateView(float x, float y, float z)
 void TheScene::updateBlendThreshold(float threshold)
 {
 	m_blendThreshold = threshold;
+}
+
+void TheScene::releaseTextures()
+{
+	if (m_dataset->headIsLoaded())
+	{
+		glDeleteTextures(1, &m_headTex);
+	}
+	
+	if (m_dataset->overlayIsLoaded())
+	{
+		glDeleteTextures(1, &m_overlayTex);
+	}
+	
+	if (m_dataset->rgbIsLoaded())
+	{
+		glDeleteTextures(1, &m_rgbTex);
+	}
 }
