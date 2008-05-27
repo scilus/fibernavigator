@@ -89,6 +89,13 @@ bool MyApp::OnInit(void)
   toolBar->AddTool(VIEWER_TOGGLE_RGB, bmpToggleRGB, wxT("Toggle RGB"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
+  toolBar->AddSeparator();
+  wxSlider *tSlider = new wxSlider(toolBar, ID_T_SLIDER, 30, 1, 100, 
+      		wxPoint(0,0), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+  frame->setTSlider(tSlider);
+  toolBar->AddControl(tSlider);
+  
+  
   toolBar->Realize();
   frame->SetToolBar(toolBar);
   

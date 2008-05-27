@@ -18,6 +18,7 @@ private:
 public:
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
 
+    void setTSlider(wxSlider *slider) {m_tSlider = slider;};
     void loadStandard();
 
 private:
@@ -59,10 +60,6 @@ private:
     wxSashLayoutWindow* m_middleNavWindow;
     wxSashLayoutWindow* m_bottomNavWindow;
     wxSashLayoutWindow* m_extraNavWindow;
-    
-    wxSashLayoutWindow* m_topSliderWindow;
-	wxSashLayoutWindow* m_middleSliderWindow;
-    wxSashLayoutWindow* m_bottomSliderWindow;
     
     wxSlider* m_xSlider;
     wxSlider* m_ySlider;
