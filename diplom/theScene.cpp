@@ -1,11 +1,5 @@
 #include "theScene.h"
 
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
-
 TheScene::TheScene()
 {
 	nothing_loaded = true;
@@ -24,6 +18,14 @@ TheScene::TheScene()
 
 void TheScene::initMainGL()
 {
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+	  /* Problem: glewInit failed, something is seriously wrong. */
+	  printf("Error: %s\n", glewGetErrorString(err));
+	}
+	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+	
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -43,6 +45,14 @@ void TheScene::initMainGL()
 
 void TheScene::initNavGL()
 {
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+	  /* Problem: glewInit failed, something is seriously wrong. */
+	  printf("Error: %s\n", glewGetErrorString(err));
+	}
+	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+		
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

@@ -1,10 +1,11 @@
 #ifndef MAINFRAME_H_
 #define MAINFRAME_H_
 
+#include "theScene.h"
 #include "navigationCanvas.h"
 #include "mainCanvas.h"
 #include "theDataset.h"
-#include "theScene.h"
+
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame

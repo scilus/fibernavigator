@@ -542,7 +542,7 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.2081567952" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
-<listOptionValue builtIn="false" value="GL_GLEXT_PROTOTYPES"/>
+<listOptionValue builtIn="false" value="GL_GLEXT_PROTOTYPES1"/>
 <listOptionValue builtIn="false" value="WX_PRECOMP"/>
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
 <listOptionValue builtIn="false" value="__WXGTK__"/>
@@ -567,24 +567,24 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.2054217847" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
 <option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.exe.release.option.optimization.level.670685762" name="Optimization Level" superClass="gnu.c.compiler.exe.release.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.exe.release.option.debugging.level.355806002" name="Debug Level" superClass="gnu.c.compiler.exe.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-<option id="gnu.c.compiler.option.preprocessor.nostdinc.1652100093" superClass="gnu.c.compiler.option.preprocessor.nostdinc"/>
-<option id="gnu.c.compiler.option.preprocessor.preprocess.2041888991" superClass="gnu.c.compiler.option.preprocessor.preprocess"/>
-<option id="gnu.c.compiler.option.preprocessor.def.symbols.497259193" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
-<option id="gnu.c.compiler.option.preprocessor.undef.symbol.1922907136" superClass="gnu.c.compiler.option.preprocessor.undef.symbol"/>
-<option id="gnu.c.compiler.option.include.paths.1943968884" superClass="gnu.c.compiler.option.include.paths"/>
-<option id="gnu.c.compiler.option.optimization.flags.1476498601" superClass="gnu.c.compiler.option.optimization.flags"/>
-<option id="gnu.c.compiler.option.debugging.other.1239870660" superClass="gnu.c.compiler.option.debugging.other"/>
-<option id="gnu.c.compiler.option.debugging.gprof.353462208" superClass="gnu.c.compiler.option.debugging.gprof"/>
-<option id="gnu.c.compiler.option.debugging.prof.1696574065" superClass="gnu.c.compiler.option.debugging.prof"/>
-<option id="gnu.c.compiler.option.warnings.syntax.229160976" superClass="gnu.c.compiler.option.warnings.syntax"/>
-<option id="gnu.c.compiler.option.warnings.pedantic.226855733" superClass="gnu.c.compiler.option.warnings.pedantic"/>
-<option id="gnu.c.compiler.option.warnings.pedantic.error.1568108720" superClass="gnu.c.compiler.option.warnings.pedantic.error"/>
-<option id="gnu.c.compiler.option.warnings.nowarn.1426364482" superClass="gnu.c.compiler.option.warnings.nowarn"/>
-<option id="gnu.c.compiler.option.warnings.allwarn.1992999742" superClass="gnu.c.compiler.option.warnings.allwarn"/>
-<option id="gnu.c.compiler.option.warnings.toerrors.1842869897" superClass="gnu.c.compiler.option.warnings.toerrors"/>
-<option id="gnu.c.compiler.option.misc.other.801445696" superClass="gnu.c.compiler.option.misc.other"/>
-<option id="gnu.c.compiler.option.misc.verbose.262572609" superClass="gnu.c.compiler.option.misc.verbose"/>
-<option id="gnu.c.compiler.option.misc.ansi.955699281" superClass="gnu.c.compiler.option.misc.ansi"/>
+<option id="gnu.c.compiler.option.preprocessor.nostdinc.1652100093" name="Do not search system directories (-nostdinc)" superClass="gnu.c.compiler.option.preprocessor.nostdinc"/>
+<option id="gnu.c.compiler.option.preprocessor.preprocess.2041888991" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess"/>
+<option id="gnu.c.compiler.option.preprocessor.def.symbols.497259193" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
+<option id="gnu.c.compiler.option.preprocessor.undef.symbol.1922907136" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol"/>
+<option id="gnu.c.compiler.option.include.paths.1943968884" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
+<option id="gnu.c.compiler.option.optimization.flags.1476498601" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags"/>
+<option id="gnu.c.compiler.option.debugging.other.1239870660" name="Other debugging flags" superClass="gnu.c.compiler.option.debugging.other"/>
+<option id="gnu.c.compiler.option.debugging.gprof.353462208" name="Generate gprof information (-pg)" superClass="gnu.c.compiler.option.debugging.gprof"/>
+<option id="gnu.c.compiler.option.debugging.prof.1696574065" name="Generate prof information (-p)" superClass="gnu.c.compiler.option.debugging.prof"/>
+<option id="gnu.c.compiler.option.warnings.syntax.229160976" name="Check syntax only (-fsyntax-only)" superClass="gnu.c.compiler.option.warnings.syntax"/>
+<option id="gnu.c.compiler.option.warnings.pedantic.226855733" name="Pedantic (-pedantic)" superClass="gnu.c.compiler.option.warnings.pedantic"/>
+<option id="gnu.c.compiler.option.warnings.pedantic.error.1568108720" name="Pedantic warnings as errors (-pedantic-errors)" superClass="gnu.c.compiler.option.warnings.pedantic.error"/>
+<option id="gnu.c.compiler.option.warnings.nowarn.1426364482" name="Inhibit all warnings (-w)" superClass="gnu.c.compiler.option.warnings.nowarn"/>
+<option id="gnu.c.compiler.option.warnings.allwarn.1992999742" name="All warnings (-Wall)" superClass="gnu.c.compiler.option.warnings.allwarn"/>
+<option id="gnu.c.compiler.option.warnings.toerrors.1842869897" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors"/>
+<option id="gnu.c.compiler.option.misc.other.801445696" name="Other flags" superClass="gnu.c.compiler.option.misc.other"/>
+<option id="gnu.c.compiler.option.misc.verbose.262572609" name="Verbose (-v)" superClass="gnu.c.compiler.option.misc.verbose"/>
+<option id="gnu.c.compiler.option.misc.ansi.955699281" name="Support ANSI programs (-ansi)" superClass="gnu.c.compiler.option.misc.ansi"/>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1902426654" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1896265984" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
@@ -595,10 +595,11 @@
 <listOptionValue builtIn="false" value="/usr/lib64"/>
 </option>
 <option id="gnu.cpp.link.option.libs.936090213" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-<listOptionValue builtIn="false" value="wx_gtk2u-2.8"/>
-<listOptionValue builtIn="false" value="wx_gtk2u_gl-2.8"/>
+<listOptionValue builtIn="false" value="GLEW"/>
 <listOptionValue builtIn="false" value="GL"/>
 <listOptionValue builtIn="false" value="GLU"/>
+<listOptionValue builtIn="false" value="wx_gtk2u-2.8"/>
+<listOptionValue builtIn="false" value="wx_gtk2u_gl-2.8"/>
 </option>
 <option id="gnu.cpp.link.option.nostart.636349384" name="Do not use standard start files (-nostartfiles)" superClass="gnu.cpp.link.option.nostart"/>
 <option id="gnu.cpp.link.option.nodeflibs.628918464" name="Do not use default libraries (-nodefaultlibs)" superClass="gnu.cpp.link.option.nodeflibs"/>

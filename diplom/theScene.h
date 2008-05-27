@@ -1,7 +1,14 @@
 #ifndef THESCENE_H_
 #define THESCENE_H_
 
+#include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
 #include "theDataset.h"
+
 #include "GLSL/GLSLShaderProgram.h"
 
 class TheScene {

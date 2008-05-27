@@ -7,11 +7,13 @@
 #include "wx/wx.h"
 #endif
 
+#include "theScene.h"
+
 #include "wx/math.h"
 #include "wx/glcanvas.h"
 
 #include "theDataset.h"
-#include "theScene.h"
+
 
 class NavigationCanvas: public wxGLCanvas
 {

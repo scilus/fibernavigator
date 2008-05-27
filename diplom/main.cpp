@@ -15,6 +15,10 @@
 #include "wx/wx.h"
 #endif
 
+#include <GL/glew.h>
+#include "theScene.h"
+
+
 #include "wx/mdi.h"
 #include "wx/laywin.h"
 
@@ -28,8 +32,6 @@
 
 #include "main.h"
 #include "mainFrame.h"
-
-
 
 MainFrame *frame = NULL;
 
