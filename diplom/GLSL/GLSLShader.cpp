@@ -49,7 +49,11 @@ bool GLSLShader::loadCode(const GLchar** source)
 
 bool GLSLShader::loadCode(wxString filename)
 {
-	if (!loadFromFile(filename)) return false;
+	if (!loadFromFile(filename)) 
+	{
+		printf("ERROR: Shader file not found!\n");
+		return false;
+	}
 	
 	char temp[m_codeString.Length()]; 
 	strcpy(temp, (const char*)m_codeString.mb_str(wxConvUTF8));
