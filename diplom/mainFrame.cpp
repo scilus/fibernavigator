@@ -118,6 +118,18 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_topNavWindow = win;
     
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+      		  wxDefaultPosition, wxSize(NAV_SIZE, 20),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+        win->SetDefaultSize(wxSize(NAV_SIZE, 20));
+        win->SetOrientation(wxLAYOUT_HORIZONTAL);
+        win->SetAlignment(wxLAYOUT_TOP);
+        win->SetBackgroundColour(wxColour(255, 255, 255));
+    m_topSliderWindow = win;
+    
+    m_zSlider = new wxSlider(m_topSliderWindow, ID_Z_SLIDER, 50, 0, 100, 
+        		wxPoint(0, 0), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV_Y, 
   		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
@@ -127,6 +139,18 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_middleNavWindow = win;
 
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+      		  wxDefaultPosition, wxSize(NAV_SIZE, 20),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+        win->SetDefaultSize(wxSize(NAV_SIZE, 20));
+        win->SetOrientation(wxLAYOUT_HORIZONTAL);
+        win->SetAlignment(wxLAYOUT_TOP);
+        win->SetBackgroundColour(wxColour(255, 255, 255));
+    m_middleSliderWindow = win;
+    
+    m_ySlider = new wxSlider(m_middleSliderWindow, ID_Y_SLIDER, 50, 0, 100, wxPoint(0,0), 
+        		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV_Z, 
      		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
      		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
@@ -135,7 +159,19 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
        win->SetAlignment(wxLAYOUT_TOP);
        win->SetBackgroundColour(wxColour(0, 0, 0));
     m_bottomNavWindow = win;
-      
+    
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+      		  wxDefaultPosition, wxSize(NAV_SIZE, 20),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+        win->SetDefaultSize(wxSize(NAV_SIZE, 20));
+        win->SetOrientation(wxLAYOUT_HORIZONTAL);
+        win->SetAlignment(wxLAYOUT_TOP);
+        win->SetBackgroundColour(wxColour(255, 255, 255));
+    m_bottomSliderWindow = win;
+    
+    m_xSlider = new wxSlider(m_bottomSliderWindow, ID_X_SLIDER, 50, 0, 100, wxPoint(0,0), 
+            		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    
     // extra window to avoid scaling of the bottom gl widget when resizing
     win = new wxSashLayoutWindow(m_navWindow, ID_WINDOW_NAV3, 
       		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
@@ -147,13 +183,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_extraNavWindow = win;
    
 
-    m_xSlider = new wxSlider(m_extraNavWindow, ID_X_SLIDER, 50, 0, 100, wxPoint(0,0), 
-    		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-    m_ySlider = new wxSlider(m_extraNavWindow, ID_Y_SLIDER, 50, 0, 100, wxPoint(0,m_xSlider->GetSize().y), 
-    		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-    m_zSlider = new wxSlider(m_extraNavWindow, ID_Z_SLIDER, 50, 0, 100, 
-    		wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y), 
-    		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+    
+    
+    
     m_tSlider = new wxSlider(m_extraNavWindow, ID_T_SLIDER, 30, 1, 100, 
     		wxPoint(0,m_xSlider->GetSize().y + m_ySlider->GetSize().y + m_zSlider->GetSize().y), 
     		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);

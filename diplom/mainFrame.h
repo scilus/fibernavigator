@@ -60,6 +60,10 @@ private:
     wxSashLayoutWindow* m_bottomNavWindow;
     wxSashLayoutWindow* m_extraNavWindow;
     
+    wxSashLayoutWindow* m_topSliderWindow;
+	wxSashLayoutWindow* m_middleSliderWindow;
+    wxSashLayoutWindow* m_bottomSliderWindow;
+    
     wxSlider* m_xSlider;
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
