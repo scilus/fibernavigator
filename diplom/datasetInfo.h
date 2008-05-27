@@ -13,9 +13,16 @@
 #include "wx/wfstream.h"
 #include "wx/datstrm.h"
 
+enum DatasetType {
+		Head_byte,
+		Head_short,
+		Overlay,
+		RGB,
+		ERROR
+};
+
 class DatasetInfo
 {
-
 private:
 	int m_length;
 	int m_bands;
@@ -49,6 +56,8 @@ public:
 	double getYVoxel() {return m_yVoxel;};;
 	double getZVoxel() {return m_zVoxel;};;
 	float getHighestValue() {return m_highest_value;};
+	
+	
 	
 };
 #endif /*DATASETINFO_H_*/

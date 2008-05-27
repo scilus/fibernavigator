@@ -32,13 +32,11 @@ public:
 	DatasetInfo *m_overlayInfo;
 	DatasetInfo *m_rgbInfo;
 	
+	
 	TheDataset();
 	~TheDataset(){};
 	
-	bool loadHead(wxString);
-	bool loadOverlay(wxString);
-	bool loadRGB(wxString);
-	
+	bool load(wxString);
 	
 	/* getter methods*/
 	bool headIsLoaded() {return m_headLoaded;};
@@ -49,6 +47,10 @@ public:
 	float* getDataHead() {return m_dataHead;};
 	float* getDataOverlay() {return m_dataOverlay;};
 	float* getDataRGB() {return m_dataRGB;};
+	
+	int m_rows;
+	int m_columns;
+	int m_frames;
 };
 
 #endif /*THEDATASET_H_*/

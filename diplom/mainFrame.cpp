@@ -17,8 +17,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_SIZE(MainFrame::OnSize)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
-    EVT_MENU(VIEWER_LOAD_DATA1, MainFrame::OnLoadData1)
-    EVT_MENU(VIEWER_LOAD_DATARGB, MainFrame::OnLoadDataRGB)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
     /* mouse click in one of the three navigation windows */
     EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
@@ -241,7 +239,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	{
 		wxString path = dialog.GetPath();
 				
-		if (!m_dataset->loadHead(path)) 
+		if (!m_dataset->load(path)) 
 		{
 			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 		}
@@ -263,68 +261,6 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_zSlider->SetMax(m_dataset->m_headInfo->getFrames()-1);
 		m_zSlider->SetValue( m_dataset->m_headInfo->getFrames()/2);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-		refreshAllGLWidgets();
-	}
-}
-
-void MainFrame::OnLoadData1(wxCommandEvent& WXUNUSED(event))
-{
-	if (!m_dataset->headIsLoaded()) return;
-	
-	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Header files (*.hea)|*.hea|*.*|*.*");
-	wxString defaultDir = wxEmptyString;
-	wxString defaultFilename = wxEmptyString;
-	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
-	if (dialog.ShowModal() == wxID_OK)
-	{
-		wxString path = dialog.GetPath();
-				
-		if (!m_dataset->loadOverlay(path)) 
-		{
-			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-		}
-		else 
-		{ 
-			m_mainGL->invalidate();
-			m_gl0->invalidate();
-			m_gl1->invalidate();
-			m_gl2->invalidate();
-		}
-		
-		updateInfoString();
-		
-		refreshAllGLWidgets();
-	}
-}
-
-void MainFrame::OnLoadDataRGB(wxCommandEvent& WXUNUSED(event))
-{
-	if (!m_dataset->headIsLoaded()) return;
-	
-	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Header files (*.hea)|*.hea|*.*|*.*");
-	wxString defaultDir = wxEmptyString;
-	wxString defaultFilename = wxEmptyString;
-	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
-	if (dialog.ShowModal() == wxID_OK)
-	{
-		wxString path = dialog.GetPath();
-				
-		if (!m_dataset->loadRGB(path)) 
-		{
-			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-		}
-		else 
-		{ 
-			m_mainGL->invalidate();
-			m_gl0->invalidate();
-			m_gl1->invalidate();
-			m_gl2->invalidate();
-		}
-		
-		updateInfoString();
-		
 		refreshAllGLWidgets();
 	}
 }
@@ -488,9 +424,9 @@ void MainFrame::OnToggleRGB(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	m_dataset->loadHead(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
-	m_dataset->loadOverlay(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
-	m_dataset->loadRGB(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
+	m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
+	m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
+	m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
 	
 	m_scene->setDataset(m_dataset);
 	m_mainGL->invalidate();

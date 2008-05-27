@@ -102,10 +102,17 @@ wxString DatasetInfo::getInfoString()
 
 int DatasetInfo::getMode()
 {
-	if (m_repn.Cmp(wxT("ubyte")) == 0) return 1;
-	if (m_repn.Cmp(wxT("short")) == 0) return 2;
-	if (m_repn.Cmp(wxT("float")) == 0) return 3;
-	return 0;
+	if (m_repn.Cmp(wxT("ubyte")) == 0)
+	{
+		if (m_bands / m_frames == 1)
+			return Head_byte;
+		else if (m_bands / m_frames == 3)
+			return RGB;
+		else return ERROR;
+	}
+	if (m_repn.Cmp(wxT("short")) == 0) return Head_short;
+	if (m_repn.Cmp(wxT("float")) == 0) return Overlay;
+	return ERROR;
 }
 
 void DatasetInfo::setHighestValue(float value)
