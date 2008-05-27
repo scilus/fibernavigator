@@ -368,12 +368,11 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 
-/*	
 #if wxUSE_MDI_ARCHITECTURE
     wxLayoutAlgorithm layout;
     layout.LayoutMDIFrame(this);
 #endif // wxUSE_MDI_ARCHITECTURE
-*/
+
     GetClientWindow()->Update();
     this->Update();
 }
