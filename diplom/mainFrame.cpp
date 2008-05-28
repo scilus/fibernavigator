@@ -251,12 +251,12 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		
 		updateInfoString();
 		
-		m_xSlider->SetMax(m_dataset->m_headInfo->getColumns()-1);
-		m_xSlider->SetValue(m_dataset->m_headInfo->getColumns()/2);
-		m_ySlider->SetMax(m_dataset->m_headInfo->getRows()-1);
-		m_ySlider->SetValue( m_dataset->m_headInfo->getRows()/2);
-		m_zSlider->SetMax(m_dataset->m_headInfo->getFrames()-1);
-		m_zSlider->SetValue( m_dataset->m_headInfo->getFrames()/2);
+		m_xSlider->SetMax(m_dataset->m_columns-1);
+		m_xSlider->SetValue(m_dataset->m_columns/2);
+		m_ySlider->SetMax(m_dataset->m_rows-1);
+		m_ySlider->SetValue( m_dataset->m_rows/2);
+		m_zSlider->SetMax(m_dataset->m_frames-1);
+		m_zSlider->SetValue( m_dataset->m_frames/2);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		refreshAllGLWidgets();
 	}
@@ -275,18 +275,18 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	{
 	case 0:
 		pos = m_gl0->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_headInfo->getColumns()));
-		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_headInfo->getRows()));
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_columns));
+		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_rows));
 		break;
 	case 1:
 		pos = m_gl1->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_headInfo->getColumns()));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_headInfo->getFrames()));
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_columns));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_frames));
 		break;
 	case 2:
 		pos = m_gl2->getMousePos();
-		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_headInfo->getRows()));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_headInfo->getFrames()));
+		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_rows));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_frames));
 		break;
 	}
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
@@ -360,7 +360,6 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 {
 	if (!m_dataset) return;
 	m_scene->updateBlendThreshold((float)m_tSlider->GetValue()/100.0);
-	m_mainGL->m_init = false;
 	m_mainGL->render();
 }
 
@@ -374,12 +373,19 @@ void MainFrame::refreshAllGLWidgets()
 
 void MainFrame::updateInfoString()
 {
-	m_textWindow->SetValue( wxT("\n\nHead:\n") 
-		+ m_dataset->m_headInfo->getInfoString() 
-		+ wxT("\n\nOverlay:\n") 
-		+ m_dataset->m_overlayInfo->getInfoString()
-		+ wxT("\n\nRGB:\n")
-		+ m_dataset->m_rgbInfo->getInfoString());
+	m_textWindow->SetValue( wxT("") );
+	if (m_dataset->m_dsList->size() == 0) return;
+		
+	DatasetList::iterator iter;
+	wxString newString = wxT("");
+	for (iter = m_dataset->m_dsList->begin() ; iter != m_dataset->m_dsList->end() ; ++iter)
+	{
+		DatasetInfo *info = *iter;
+		newString += info->getInfoString();
+		newString += wxT("\n\n");
+	}
+	m_textWindow->SetValue( newString );
+
 }
 
 void MainFrame::OnToggleView1(wxCommandEvent& event)
@@ -405,14 +411,14 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 
 void MainFrame::OnToggleOverlay(wxCommandEvent& event)
 {
-	if (!m_scene || !m_dataset->overlayIsLoaded()) return;
+	//if (!m_scene || !m_dataset->overlayIsLoaded()) return;
 	m_scene->m_showOverlay = !m_scene->m_showOverlay;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnToggleRGB(wxCommandEvent& event)
 {
-	if (!m_scene || !m_dataset->rgbIsLoaded()) return;
+	//if (!m_scene || !m_dataset->rgbIsLoaded()) return;
 	m_scene->m_showRGB = !m_scene->m_showRGB;
 	refreshAllGLWidgets();
 }
@@ -422,8 +428,8 @@ void MainFrame::OnToggleRGB(wxCommandEvent& event)
 void MainFrame::loadStandard()
 {
 	m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
-	m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
-	m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
+	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
+	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
 	
 	m_scene->setDataset(m_dataset);
 	m_mainGL->invalidate();
@@ -433,12 +439,12 @@ void MainFrame::loadStandard()
 	
 	updateInfoString();
 	
-	m_xSlider->SetMax(m_dataset->m_headInfo->getColumns()-1);
-	m_xSlider->SetValue(m_dataset->m_headInfo->getColumns()/2);
-	m_ySlider->SetMax(m_dataset->m_headInfo->getRows()-1);
-	m_ySlider->SetValue( m_dataset->m_headInfo->getRows()/2);
-	m_zSlider->SetMax(m_dataset->m_headInfo->getFrames()-1);
-	m_zSlider->SetValue( m_dataset->m_headInfo->getFrames()/2);
+	m_xSlider->SetMax(m_dataset->m_columns - 1);
+	m_xSlider->SetValue(m_dataset->m_columns / 2);
+	m_ySlider->SetMax(m_dataset->m_rows - 1);
+	m_ySlider->SetValue( m_dataset->m_rows / 2);
+	m_zSlider->SetMax(m_dataset->m_frames - 1);
+	m_zSlider->SetValue( m_dataset->m_frames / 2);
 	
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
@@ -454,7 +460,6 @@ void MainFrame::OnNew(wxCommandEvent& event)
 {
 	free (m_dataset);
 	m_dataset = new TheDataset();
-	updateInfoString();
 	m_scene->releaseTextures();
 	free (m_scene);
 	m_scene = new TheScene();
@@ -462,4 +467,5 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_gl0->setScene(m_scene);
 	m_gl1->setScene(m_scene);
 	m_gl2->setScene(m_scene);
+	updateInfoString();
 }

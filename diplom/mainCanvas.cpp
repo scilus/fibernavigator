@@ -59,9 +59,11 @@ void MainCanvas::OnSize(wxSizeEvent& event)
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
     int w, h;
     GetClientSize(&w, &h);
+    /*
 #ifndef __WXMOTIF__
     if (GetContext())
 #endif
+*/
     {
         SetCurrent();
         glViewport(0, 0, (GLint) w, (GLint) h);

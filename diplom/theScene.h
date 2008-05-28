@@ -48,9 +48,8 @@ public:
 	
 		
 private:
-	GLuint m_headTex;
-	GLuint m_overlayTex;
-	GLuint m_rgbTex;
+	GLuint *m_texNames;
+	int m_countTextures;
 	
 	FGLSLShaderProgram *m_textureShader; 
 	

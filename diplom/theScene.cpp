@@ -1,12 +1,11 @@
 #include "theScene.h"
-/**
- * axial
- * coronal
- * sagittal
- */
+
 TheScene::TheScene()
 {
 	nothing_loaded = true;
+
+	m_texNames = new GLuint[10];
+	m_countTextures = 0;
 
 	m_blendThreshold = 0.1;
 	m_xSlize = 0.5;
@@ -43,8 +42,10 @@ void TheScene::initMainGL()
 	glEnable(GL_DOUBLEBUFFER);
 	glEnable(GL_DEPTH_TEST);
 	
-	glAlphaFunc(GL_GREATER,m_blendThreshold); // adjust your prefered threshold here
-	glEnable(GL_ALPHA_TEST);	
+	glAlphaFunc(GL_GREATER, 0.01); // adjust your prefered threshold here
+	glEnable(GL_ALPHA_TEST);
+	
+	
 }
 
 void TheScene::initNavGL()
@@ -65,81 +66,32 @@ void TheScene::initNavGL()
 	glShadeModel(GL_FLAT);
 	glEnable(GL_DOUBLEBUFFER);
 	glEnable(GL_DEPTH_TEST);
-	
-	glAlphaFunc(GL_GREATER,0.1f); // adjust your prefered threshold here
-	glEnable(GL_ALPHA_TEST);
 }
 
 void TheScene::assignTextures ()
 {
-	if (m_dataset->headIsLoaded())
-	{
-		glDeleteTextures(1, &m_headTex);
-		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glGenTextures(1, &m_headTex);
-		glBindTexture(GL_TEXTURE_3D, m_headTex);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-		glTexImage3D(GL_TEXTURE_3D, 
-				0, 
-				GL_RGBA, 
-				m_dataset->m_headInfo->getColumns(), 
-				m_dataset->m_headInfo->getRows(),
-				m_dataset->m_headInfo->getFrames(),
-				0, 
-				GL_LUMINANCE_ALPHA, 
-				GL_FLOAT,
-				m_dataset->getDataHead());
-	}
+	if (m_dataset->m_dsList->size() == 0) return;
 	
-	if (m_dataset->overlayIsLoaded())
-	{
-		glDeleteTextures(1, &m_overlayTex);
-		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glGenTextures(1, &m_overlayTex);
-		glBindTexture(GL_TEXTURE_3D, m_overlayTex);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-		glTexImage3D(GL_TEXTURE_3D, 
-				0, 
-				GL_RGB, 
-				m_dataset->m_headInfo->getColumns(), 
-				m_dataset->m_headInfo->getRows(),
-				m_dataset->m_headInfo->getFrames(),
-				0, 
-				GL_LUMINANCE, 
-				GL_FLOAT,
-				m_dataset->getDataOverlay());
-	}
+	DatasetList::iterator iter;
+	int i = 0;
 	
-	if (m_dataset->rgbIsLoaded())
+	glGenTextures(m_dataset->m_dsList->size(), m_texNames);
+	
+	for (iter = m_dataset->m_dsList->begin() ; iter != m_dataset->m_dsList->end() ; ++iter)
 	{
-		glDeleteTextures(1, &m_rgbTex);
-		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glGenTextures(1, &m_rgbTex);
-		glBindTexture(GL_TEXTURE_3D, m_rgbTex);
+		DatasetInfo *info = *iter;
+		
+		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-		glTexImage3D(GL_TEXTURE_3D, 
-				0, 
-				GL_RGB, 
-				m_dataset->m_headInfo->getColumns(), 
-				m_dataset->m_headInfo->getRows(),
-				m_dataset->m_headInfo->getFrames(),
-				0, 
-				GL_RGB, 
-				GL_FLOAT,
-				m_dataset->getDataRGB());
+		info->generateTexture();
+		++i;
+		printf("assigned texture: %d\n", i);
 	}
+	m_countTextures = i;
 }
 
 void TheScene::setDataset(TheDataset *dataset)
@@ -213,35 +165,38 @@ void TheScene::bindTextures()
 {
 	glEnable(GL_TEXTURE_3D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_3D, m_headTex);
 	
-	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "HeadTexture");
+	
+	for (int i = 0 ; i < m_countTextures ; ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
+	}
+
+	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "blendThreshold");
+	glUniform1f (texLoc, m_blendThreshold);
+
+	
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex0");
 	glUniform1i (texLoc, 0);
-	
-	if (m_dataset->overlayIsLoaded())
-	{
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_3D, m_overlayTex);
-		
-		GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "OverlayTexture");
-		glUniform1i (texLoc, 1);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showOverlay");
-		glUniform1i (texLoc, m_showOverlay);
-	}
-	
-	if (m_dataset->rgbIsLoaded())
-	{
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_3D, m_rgbTex);
-		
-		GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "RGBTexture");
-		glUniform1i (texLoc, 2);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showRGB");
-		glUniform1i (texLoc, m_showRGB);
-	}
-	
-		
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex1");
+	glUniform1i (texLoc, 1);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex2");
+	glUniform1i (texLoc, 2);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex3");
+	glUniform1i (texLoc, 3);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex4");
+	glUniform1i (texLoc, 4);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex5");
+	glUniform1i (texLoc, 5);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex6");
+	glUniform1i (texLoc, 6);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex7");
+	glUniform1i (texLoc, 7);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex8");
+	glUniform1i (texLoc, 8);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex9");
+	glUniform1i (texLoc, 9);
 }
 
 void TheScene::renderXSlize()
@@ -354,18 +309,5 @@ void TheScene::updateBlendThreshold(float threshold)
 
 void TheScene::releaseTextures()
 {
-	if (m_dataset->headIsLoaded())
-	{
-		glDeleteTextures(1, &m_headTex);
-	}
-	
-	if (m_dataset->overlayIsLoaded())
-	{
-		glDeleteTextures(1, &m_overlayTex);
-	}
-	
-	if (m_dataset->rgbIsLoaded())
-	{
-		glDeleteTextures(1, &m_rgbTex);
-	}
+
 }

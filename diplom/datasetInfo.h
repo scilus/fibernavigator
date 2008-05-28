@@ -38,13 +38,21 @@ private:
 	bool is_loaded;
 	float m_highest_value;
 
+	
+	
+	
 public:	
+	wxUint8 *m_byteDataset;
+	wxUint8 *m_rgbDataset;
+	float *m_floatDataset;
+	
 	DatasetInfo();
 	~DatasetInfo(){};
 	
 	bool load(wxString filename);
 	
 	wxString getInfoString();
+	void generateTexture();
 	
 	void setHighestValue(float value) {m_highest_value = value;};
 	
@@ -59,5 +67,9 @@ public:
 	double getYVoxel() {return m_yVoxel;};;
 	double getZVoxel() {return m_zVoxel;};;
 	float getHighestValue() {return m_highest_value;};	
+
 };
+
+WX_DECLARE_LIST(DatasetInfo, DatasetList);
+
 #endif /*DATASETINFO_H_*/

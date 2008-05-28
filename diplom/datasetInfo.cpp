@@ -1,4 +1,5 @@
 #include "datasetInfo.h"
+#include <GL/glew.h>
 
 DatasetInfo::DatasetInfo()
 {
@@ -101,6 +102,52 @@ bool DatasetInfo::load(wxString filename)
 	is_loaded = flag;
 	return flag;
 }
+
+void DatasetInfo::generateTexture()
+{
+	switch (m_type)
+	{
+	case Head_byte:
+		glTexImage3D(GL_TEXTURE_3D, 
+			0, 
+			GL_RGBA, 
+			m_columns, 
+			m_rows,
+			m_frames,
+			0, 
+			GL_LUMINANCE, 
+			GL_UNSIGNED_BYTE,
+			m_byteDataset);
+		break;
+	case Overlay:
+		glTexImage3D(GL_TEXTURE_3D, 
+			0, 
+			GL_RGB, 
+			m_columns, 
+			m_rows,
+			m_frames,			
+			0, 
+			GL_LUMINANCE, 
+			GL_FLOAT,
+			m_floatDataset);
+		break;
+	case RGB:
+		glTexImage3D(GL_TEXTURE_3D, 
+			0, 
+			GL_RGBA, 
+			m_columns, 
+			m_rows,
+			m_frames,
+			0, 
+			GL_RGB, 
+			GL_UNSIGNED_BYTE,
+			m_rgbDataset);
+		break;
+	default:
+		break;
+	}
+}
+
 
 wxString DatasetInfo::getInfoString()
 {
