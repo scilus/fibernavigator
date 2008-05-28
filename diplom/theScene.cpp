@@ -42,10 +42,8 @@ void TheScene::initMainGL()
 	glEnable(GL_DOUBLEBUFFER);
 	glEnable(GL_DEPTH_TEST);
 	
-	glAlphaFunc(GL_GREATER, 0.01); // adjust your prefered threshold here
+	glAlphaFunc(GL_GREATER, 0.001); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
-	
-	
 }
 
 void TheScene::initNavGL()

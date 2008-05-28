@@ -232,7 +232,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxString path = dialog.GetPath();
-				
+		
 		if (!m_dataset->load(path)) 
 		{
 			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);

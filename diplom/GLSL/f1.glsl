@@ -17,7 +17,7 @@ void main()
 {
 	vec4 col;
 	col = texture3D(tex0, TexCoord);
-	col.a = clamp (texture3D(tex0, TexCoord).r - blendThreshold, 0.0, 1.0);
+	col.a = clamp ((col.r + col.g + col.b)/3.0 - blendThreshold, 0.0, 1.0);
 		
 	gl_FragColor = col;
 }

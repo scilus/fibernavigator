@@ -22,6 +22,8 @@ bool DatasetInfo::load(wxString filename)
 	// check file extension
 	wxString ext = filename.substr(filename.Length()-3,3);
 	if (ext != wxT("hea")) return false;
+	m_name = filename.AfterLast('/');
+	m_name = m_name.BeforeLast('.');
 	// read header file
 	wxTextFile headerFile;
 	bool flag = false;
@@ -158,5 +160,5 @@ wxString DatasetInfo::getInfoString()
 	infoString1 = wxString::Format(wxT("Length: %d\nBands: %d\nFrames: %d\nRows: %d\nColumns: %d\nRepn: "), 
 			this->m_length, this->m_bands, this->m_frames, this->m_rows, this->m_columns) + this->m_repn;
 	infoString2 = wxString::Format(wxT("\nx Voxel: %.2f\ny Voxel: %.2f\nz Voxel: %.2f"), this->m_xVoxel, this->m_yVoxel, this->m_zVoxel);
-	return infoString1;
+	return m_name + wxT(":\n") + infoString1;
 }

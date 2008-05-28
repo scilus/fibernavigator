@@ -37,7 +37,7 @@ private:
 	double m_zVoxel;
 	bool is_loaded;
 	float m_highest_value;
-
+	wxString m_name;
 	
 	
 	
