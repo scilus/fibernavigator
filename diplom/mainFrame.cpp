@@ -248,11 +248,11 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		
 		updateInfoString();
 		
-		m_xSlider->SetMax(m_dataset->m_columns-1);
+		m_xSlider->SetMax(wxMax(1,m_dataset->m_columns-1));
 		m_xSlider->SetValue(m_dataset->m_columns/2);
-		m_ySlider->SetMax(m_dataset->m_rows-1);
+		m_ySlider->SetMax(wxMax(1,m_dataset->m_rows-1));
 		m_ySlider->SetValue( m_dataset->m_rows/2);
-		m_zSlider->SetMax(m_dataset->m_frames-1);
+		m_zSlider->SetMax(wxMax(1,m_dataset->m_frames-1));
 		m_zSlider->SetValue( m_dataset->m_frames/2);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		refreshAllGLWidgets();
@@ -408,6 +408,7 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
+	return;
 	m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
 	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
 	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
@@ -419,13 +420,6 @@ void MainFrame::loadStandard()
 	m_gl2->invalidate();
 	
 	updateInfoString();
-	
-	m_xSlider->SetMax(m_dataset->m_columns - 1);
-	m_xSlider->SetValue(m_dataset->m_columns / 2);
-	m_ySlider->SetMax(m_dataset->m_rows - 1);
-	m_ySlider->SetValue( m_dataset->m_rows / 2);
-	m_zSlider->SetMax(m_dataset->m_frames - 1);
-	m_zSlider->SetValue( m_dataset->m_frames / 2);
 	
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();

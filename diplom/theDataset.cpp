@@ -16,6 +16,11 @@ bool TheDataset::load(wxString filename)
 {
 	DatasetInfo *info = new DatasetInfo();
 	bool flag = info->load(filename);
+	if (!flag)
+	{
+		printf("ERROR while trying to load data file\nheader file corrupt!\n");
+		return false;
+	}
 	
 	if (m_rows == 0)
 	{
