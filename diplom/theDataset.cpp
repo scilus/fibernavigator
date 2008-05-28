@@ -10,6 +10,7 @@ TheDataset::TheDataset()
 	m_columns = 0;
 	m_frames = 0;
 	m_dsList = new DatasetList();
+	m_lastError = wxT("");
 }
 
 bool TheDataset::load(wxString filename)
@@ -18,7 +19,8 @@ bool TheDataset::load(wxString filename)
 	bool flag = info->load(filename);
 	if (!flag)
 	{
-		printf("ERROR while trying to load data file\nheader file corrupt!\n");
+		printf("ERROR couldn't load header file\n");
+		m_lastError = wxT("couldn't load header file");
 		return false;
 	}
 	
@@ -26,7 +28,8 @@ bool TheDataset::load(wxString filename)
 	{
 		if ( info->getRows() <= 0 || info->getColumns() <= 0 || info->getFrames() <= 0 )
 		{
-			printf("ERROR while trying to load data file\nheader file corrupt!\n");
+			printf("ERROR couldn't parse header file\n");
+			m_lastError = wxT("couldn't parse header file");
 			return false;
 		}
 		m_rows = info->getRows();
@@ -37,7 +40,8 @@ bool TheDataset::load(wxString filename)
 	{
 		if ( info->getRows() != m_rows || info->getColumns() != m_columns || info->getFrames() != m_frames )
 		{
-			printf("ERROR while trying to load data file\ndimensions of loaded files must be the same!\n");
+			printf("ERROR dimensions of loaded files must be the same!\n");
+			m_lastError = wxT("dimensions of loaded files must be the same");
 			return false;
 		}
 	}
@@ -135,7 +139,8 @@ bool TheDataset::load(wxString filename)
 			
 			case ERROR:
 			default:
-				printf("ERROR while trying to load data file\ndata file corrupt!\n");
+				printf("ERROR unsupported data file format\n");
+				m_lastError = wxT("unsupported data file format");
 				return false;
 			}
 		}

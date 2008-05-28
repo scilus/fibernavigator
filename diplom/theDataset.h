@@ -34,6 +34,7 @@ public:
 	int m_rows;
 	int m_columns;
 	int m_frames;
+	wxString m_lastError;
 };
 
 #endif /*THEDATASET_H_*/

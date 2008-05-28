@@ -6,9 +6,9 @@ DatasetInfo::DatasetInfo()
 	m_type = not_initialized;
 	m_length = 0;
 	m_bands = 0;
-	m_frames = 100;
-	m_rows = 100;
-	m_columns = 100;
+	m_frames = 0;
+	m_rows = 0;
+	m_columns = 0;
 	m_repn = wxT("");
 	m_xVoxel = 0.0;
 	m_yVoxel = 0.0;

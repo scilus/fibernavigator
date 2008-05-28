@@ -264,10 +264,14 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		
 		if (!m_dataset->load(path)) 
 		{
-			wxMessageBox(wxT("Fehler"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+			wxMessageBox(wxT("ERROR\n") + m_dataset->m_lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+			m_statusBar->SetStatusText(wxT("ERROR"),1);
+			m_statusBar->SetStatusText(m_dataset->m_lastError,2);
 		}
 		else 
 		{ 
+			m_statusBar->SetStatusText(wxT("Ready"),1);
+			m_statusBar->SetStatusText(dialog.GetFilename() + wxT(" loaded"),2);
 			m_scene->setDataset(m_dataset);
 			m_mainGL->invalidate();
 			m_gl0->invalidate();
