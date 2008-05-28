@@ -272,7 +272,7 @@ void TheScene::renderNavView(int view)
 	
 	glDisable(GL_TEXTURE_3D);
 	
-	glUseProgram(0);
+	m_textureShader->release();
 	
 	glColor3f(1.0, 0.0, 0.0);
 	glBegin (GL_LINES);

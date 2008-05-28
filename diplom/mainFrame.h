@@ -5,7 +5,6 @@
 #include "mainCanvas.h"
 #include "theDataset.h"
 
-
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
 {
@@ -68,6 +67,8 @@ private:
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
     wxSlider* m_tSlider;
+    
+    wxListCtrl* m_datasetListCtrl; 
     
     wxStatusBar* m_statusBar;
 

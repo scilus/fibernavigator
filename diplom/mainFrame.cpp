@@ -9,6 +9,10 @@
 #include "wx/laywin.h"
 #include "wx/filedlg.h"
 #include "wx/statbmp.h"
+#include "wx/listctrl.h"
+#include "wx/imaglist.h"
+
+#include "icons/eyes.xpm"
 
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
    
@@ -68,7 +72,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win = new wxSashLayoutWindow(m_leftWindowHolder, wxID_ANY, 
           		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
           		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(150 + NAV_SIZE, -1));
+    win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(0, 0, 0));
@@ -209,6 +213,30 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_zSlider->SetMinSize(wxSize(1, -1));
     
     
+    m_datasetListCtrl = new wxListCtrl(m_leftWindowBottom, wxID_ANY, wxDefaultPosition, 
+    		m_leftWindowBottom->GetClientSize(), wxLC_REPORT|wxLC_SINGLE_SEL);
+    
+    wxImageList* imageList = new wxImageList(16,16);
+    imageList->Add(wxIcon(eyes_xpm));
+    m_datasetListCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
+    
+    
+    wxListItem itemCol;
+    itemCol.SetText(wxT("Show"));
+    m_datasetListCtrl->InsertColumn(0, itemCol);
+    m_datasetListCtrl->SetColumnWidth(0, 40);
+    
+    itemCol.SetText(wxT("Name"));
+    itemCol.SetAlign(wxLIST_FORMAT_CENTRE);
+    m_datasetListCtrl->InsertColumn(1, itemCol);
+    m_datasetListCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x);
+
+    itemCol.SetText(wxT("Threshold"));
+    itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
+    m_datasetListCtrl->InsertColumn(2, itemCol);
+    m_datasetListCtrl->SetColumnWidth(2, 50);
+	
+    
     GLboolean doubleBuffer = GL_TRUE;
     
 	#ifdef __WXMSW__
@@ -267,18 +295,17 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 			wxMessageBox(wxT("ERROR\n") + m_dataset->m_lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 			m_statusBar->SetStatusText(wxT("ERROR"),1);
 			m_statusBar->SetStatusText(m_dataset->m_lastError,2);
+			return;
 		}
-		else 
-		{ 
-			m_statusBar->SetStatusText(wxT("Ready"),1);
-			m_statusBar->SetStatusText(dialog.GetFilename() + wxT(" loaded"),2);
-			m_scene->setDataset(m_dataset);
-			m_mainGL->invalidate();
-			m_gl0->invalidate();
-			m_gl1->invalidate();
-			m_gl2->invalidate();
-		}
-		
+		 
+		m_statusBar->SetStatusText(wxT("Ready"),1);
+		m_statusBar->SetStatusText(dialog.GetFilename() + wxT(" loaded"),2);
+		m_scene->setDataset(m_dataset);
+		m_mainGL->invalidate();
+		m_gl0->invalidate();
+		m_gl1->invalidate();
+		m_gl2->invalidate();
+
 		updateInfoString();
 		
 		m_xSlider->SetMax(wxMax(1,m_dataset->m_columns-1));
@@ -289,6 +316,10 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_zSlider->SetValue( m_dataset->m_frames/2);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		refreshAllGLWidgets();
+
+		int i = m_datasetListCtrl->GetItemCount();
+		m_datasetListCtrl->InsertItem(i, wxT(""), 0);
+		m_datasetListCtrl->SetItem(i, 1, dialog.GetFilename());
 	}
 }
 
