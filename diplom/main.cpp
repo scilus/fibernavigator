@@ -26,8 +26,6 @@
 #include "icons/view1.xpm"
 #include "icons/view2.xpm"
 #include "icons/view3.xpm"
-#include "icons/toggleOverlay.xpm"
-#include "icons/toggleRGB.xpm"
 #include "icons/mini_cat.xpm"
 #include "icons/new.xpm"
 #include "icons/quit.xpm"
@@ -76,8 +74,6 @@ bool MyApp::OnInit(void)
   wxBitmap bmpView1 (view1_xpm);
   wxBitmap bmpView2 (view2_xpm);
   wxBitmap bmpView3 (view3_xpm);
-  wxBitmap bmpToggleOverlay (toggle_overlay_xpm);
-  wxBitmap bmpToggleRGB (toggle_rgb_xpm);
   wxBitmap bmpMiniCat (mini_cat_xpm);
   wxBitmap bmpNew (new_xpm);
   wxBitmap bmpQuit (quit_xpm);
@@ -85,12 +81,9 @@ bool MyApp::OnInit(void)
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
   toolBar->AddSeparator();
-  toolBar->AddTool(VIEWER_TOGGLEVIEW1, bmpView1, wxT("Toggle View 1"));
-  toolBar->AddTool(VIEWER_TOGGLEVIEW2, bmpView2, wxT("Toggle View 2"));
-  toolBar->AddTool(VIEWER_TOGGLEVIEW3, bmpView3, wxT("Toggle View 3"));
-  toolBar->AddSeparator();
-  toolBar->AddTool(VIEWER_TOGGLE_OVERLAY, bmpToggleOverlay, wxT("Toggle Overlay"));
-  toolBar->AddTool(VIEWER_TOGGLE_RGB, bmpToggleRGB, wxT("Toggle RGB"));
+  toolBar->AddTool(VIEWER_TOGGLEVIEW1, bmpView1, wxT("Toggle Axial"));
+  toolBar->AddTool(VIEWER_TOGGLEVIEW2, bmpView2, wxT("Toggle Coronal"));
+  toolBar->AddTool(VIEWER_TOGGLEVIEW3, bmpView3, wxT("Toggle Sagittal"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
   toolBar->AddSeparator();

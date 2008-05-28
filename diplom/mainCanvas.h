@@ -43,6 +43,10 @@ private:
 	 wxPoint 	m_clicked;
 	 bool 		m_texturesAssigned;
 	 int 		m_view;
+	 int		m_XPos;
+	 int		m_YPos;
+	 GLfloat 	m_xrot;
+	 GLfloat 	m_yrot;
 	 
 };
 

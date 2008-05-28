@@ -33,9 +33,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
 	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
-	/* click on toolbar button to toggle display of additional info */
-	EVT_MENU(VIEWER_TOGGLE_OVERLAY, MainFrame::OnToggleOverlay)
-	EVT_MENU(VIEWER_TOGGLE_RGB, MainFrame::OnToggleRGB)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
 END_EVENT_TABLE()
@@ -391,7 +388,7 @@ void MainFrame::updateInfoString()
 void MainFrame::OnToggleView1(wxCommandEvent& event)
 {
 	if (!m_scene) return;
-	m_scene->m_showXSlize = !m_scene->m_showXSlize;
+	m_scene->m_showZSlize = !m_scene->m_showZSlize;
 	m_mainGL->render();
 }
 
@@ -405,25 +402,9 @@ void MainFrame::OnToggleView2(wxCommandEvent& event)
 void MainFrame::OnToggleView3(wxCommandEvent& event)
 {
 	if (!m_scene) return;
-	m_scene->m_showZSlize = !m_scene->m_showZSlize;
+	m_scene->m_showXSlize = !m_scene->m_showXSlize;
 	m_mainGL->render();
 }
-
-void MainFrame::OnToggleOverlay(wxCommandEvent& event)
-{
-	//if (!m_scene || !m_dataset->overlayIsLoaded()) return;
-	m_scene->m_showOverlay = !m_scene->m_showOverlay;
-	refreshAllGLWidgets();
-}
-
-void MainFrame::OnToggleRGB(wxCommandEvent& event)
-{
-	//if (!m_scene || !m_dataset->rgbIsLoaded()) return;
-	m_scene->m_showRGB = !m_scene->m_showRGB;
-	refreshAllGLWidgets();
-}
-
-
 
 void MainFrame::loadStandard()
 {
@@ -453,6 +434,9 @@ void MainFrame::loadStandard()
 void MainFrame::OnReloadShaders(wxCommandEvent& event)
 {
 	m_mainGL->invalidate();
+	m_gl0->invalidate();
+	m_gl1->invalidate();
+	m_gl2->invalidate();
 	refreshAllGLWidgets();
 }
 

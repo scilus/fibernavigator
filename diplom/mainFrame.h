@@ -40,8 +40,6 @@ private:
     void OnToggleView1(wxCommandEvent& event);
     void OnToggleView2(wxCommandEvent& event);
     void OnToggleView3(wxCommandEvent& event);
-    void OnToggleOverlay(wxCommandEvent& event);
-    void OnToggleRGB(wxCommandEvent& event);
     void OnReloadShaders(wxCommandEvent& event);
     
     void refreshAllGLWidgets();
@@ -86,8 +84,6 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_TOGGLEVIEW1 		11
 #define VIEWER_TOGGLEVIEW2 		12
 #define VIEWER_TOGGLEVIEW3 		13
-#define VIEWER_TOGGLE_OVERLAY	14
-#define VIEWER_TOGGLE_RGB		15
 #define VIEWER_RELOAD_SHADER	16
 
 

@@ -1,8 +1,5 @@
 #include "mainCanvas.h"
 
-static GLfloat xrot;
-static GLfloat yrot;
-
 //DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_NAVGL_EVENT)
@@ -22,6 +19,8 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_init = false;
 	m_view = view;
 	m_texturesAssigned = false;
+	m_XPos = 0;
+	m_YPos = 0;
 	
 }
 
@@ -76,7 +75,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 	{
 		case mainView: {
 			static int dragging = 0;
-			static float last_x, last_y;
 			
 			if(event.LeftIsDown())
 			{
@@ -86,12 +84,12 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			    }
 			    else
 			    {
-			        yrot += (event.GetX() - last_x)*1.0;
-			        xrot += (event.GetY() - last_y)*1.0;
+			        m_yrot += (event.GetX() - m_XPos);
+			        m_xrot += (event.GetY() - m_YPos);
 			        Refresh(false);
 			    }
-			    last_x = event.GetX();
-			    last_y = event.GetY();
+			    m_XPos = event.GetX();
+			    m_YPos = event.GetY();
 			}
 			else
 			    dragging = 0;
@@ -144,8 +142,8 @@ void MainCanvas::render()
     {
     case mainView: {
 	    glPushMatrix();
-	    glRotatef( yrot, 0.0f, 1.0f, 0.0f );
-	    glRotatef( xrot, 1.0f, 0.0f, 0.0f );
+	    glRotatef( m_yrot, 0.0f, 1.0f, 0.0f );
+	    glRotatef( m_xrot, 1.0f, 0.0f, 0.0f );
 	    m_scene->renderScene(m_view);
 	    glPopMatrix();
     }
