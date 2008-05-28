@@ -42,7 +42,7 @@ void FGLSLShaderProgram::bind()
 
 void FGLSLShaderProgram::release()
 {
-
+	glUseProgram(m_shaderProgram);
 }
 
 void FGLSLShaderProgram::printCompilerLog(GLuint program)

@@ -313,7 +313,6 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
-	//m_tSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	
 	/* resize main gl window */
 	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x), 

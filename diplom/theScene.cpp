@@ -42,7 +42,7 @@ void TheScene::initMainGL()
 	glEnable(GL_DOUBLEBUFFER);
 	glEnable(GL_DEPTH_TEST);
 	
-	glAlphaFunc(GL_GREATER, 0.001); // adjust your prefered threshold here
+	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
 }
 
@@ -272,6 +272,8 @@ void TheScene::renderNavView(int view)
 	
 	glDisable(GL_TEXTURE_3D);
 	
+	glUseProgram(0);
+	
 	glColor3f(1.0, 0.0, 0.0);
 	glBegin (GL_LINES);
 		glVertex3f (0.0, yline, 0.1);
@@ -281,6 +283,7 @@ void TheScene::renderNavView(int view)
 	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 	
+	m_textureShader->bind();
 }
 
 

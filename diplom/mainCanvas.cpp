@@ -146,6 +146,7 @@ void MainCanvas::render()
 	    glRotatef( m_xrot, 1.0f, 0.0f, 0.0f );
 	    m_scene->renderScene(m_view);
 	    glPopMatrix();
+	    break;
     }
     default:
     	m_scene->renderNavView(m_view);
