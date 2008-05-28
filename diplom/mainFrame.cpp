@@ -316,12 +316,12 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		break;
 	}
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	updateStatusBar();
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnMouseEvent(wxMouseEvent& event)
-{
-		
+{	
 	this->Refresh();
 }
 
@@ -392,6 +392,7 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 
 void MainFrame::refreshAllGLWidgets()
 {
+	updateStatusBar();
 	m_gl0->render();
 	m_gl1->render();
 	m_gl2->render();
@@ -483,4 +484,11 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_gl1->setScene(m_scene);
 	m_gl2->setScene(m_scene);
 	updateInfoString();
+}
+
+void MainFrame::updateStatusBar()
+{
+	wxString sbString0;
+	sbString0 = wxString::Format(wxT("Axial: %d Coronal: %d Sagittal: %d"),m_zSlider->GetValue(), m_ySlider->GetValue(), m_xSlider->GetValue()); 
+	m_statusBar->SetStatusText(sbString0,0);
 }

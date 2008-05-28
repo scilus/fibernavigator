@@ -18,6 +18,7 @@ public:
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
 
     void setTSlider(wxSlider *slider) {m_tSlider = slider;};
+    void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
     void loadStandard();
 
 private:
@@ -44,6 +45,7 @@ private:
     
     void refreshAllGLWidgets();
     void updateInfoString();
+    void updateStatusBar();
 	
     wxSashLayoutWindow* m_leftWindowHolder;
     wxSashLayoutWindow* m_leftWindowTop;
@@ -66,6 +68,8 @@ private:
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
     wxSlider* m_tSlider;
+    
+    wxStatusBar* m_statusBar;
 
     MainCanvas* m_gl0;
     MainCanvas* m_gl1;
