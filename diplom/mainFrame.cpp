@@ -178,14 +178,10 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
           win->SetBackgroundColour(wxColour(255, 255, 255));
     m_extraNavWindow = win;
    
-    /*
-    m_tSlider = new wxSlider(m_extraNavWindow, ID_T_SLIDER, 30, 1, 100, 
-    		wxPoint(0,0), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-   */
     m_xSlider->SetMinSize(wxSize(1, -1));
     m_ySlider->SetMinSize(wxSize(1, -1));
     m_zSlider->SetMinSize(wxSize(1, -1));
-    //m_tSlider->SetMinSize(wxSize(1, -1));
+    
     
     GLboolean doubleBuffer = GL_TRUE;
     

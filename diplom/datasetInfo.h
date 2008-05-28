@@ -14,11 +14,12 @@
 #include "wx/datstrm.h"
 
 enum DatasetType {
-		Head_byte,
-		Head_short,
-		Overlay,
-		RGB,
-		ERROR
+	ERROR = -1,
+	not_initialized = 0,
+	Head_byte,
+	Head_short,
+	Overlay,
+	RGB,		
 };
 
 class DatasetInfo
@@ -29,6 +30,7 @@ private:
 	int m_frames;
 	int m_rows;
 	int m_columns;
+	int m_type;
 	wxString m_repn;
 	double m_xVoxel;
 	double m_yVoxel;
@@ -43,9 +45,10 @@ public:
 	bool load(wxString filename);
 	
 	wxString getInfoString();
-	int getMode();
-	void setHighestValue(float);
 	
+	void setHighestValue(float value) {m_highest_value = value;};
+	
+	int getType() {return m_type;};
 	int getLength() {return m_length;};
 	int getBands() {return m_bands;};
 	int getFrames() {return m_frames;};
@@ -55,9 +58,6 @@ public:
 	double getXVoxel() {return m_xVoxel;};
 	double getYVoxel() {return m_yVoxel;};;
 	double getZVoxel() {return m_zVoxel;};;
-	float getHighestValue() {return m_highest_value;};
-	
-	
-	
+	float getHighestValue() {return m_highest_value;};	
 };
 #endif /*DATASETINFO_H_*/

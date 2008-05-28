@@ -2,6 +2,7 @@
 
 DatasetInfo::DatasetInfo()
 {
+	m_type = not_initialized;
 	m_length = 0;
 	m_bands = 0;
 	m_frames = 100;
@@ -40,32 +41,32 @@ bool DatasetInfo::load(wxString filename)
 			if (sLabel.Contains(wxT("length:"))) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
-				this->m_length = (int)lTmpValue;
+				m_length = (int)lTmpValue;
 			}
 			if (sLabel == wxT("nbands:")) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
-				this->m_bands = (int)lTmpValue;
+				m_bands = (int)lTmpValue;
 			}
 			if (sLabel == wxT("nframes:")) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
-				this->m_frames = (int)lTmpValue;
+				m_frames = (int)lTmpValue;
 			}
 			if (sLabel == wxT("nrows:")) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
-				this->m_rows = (int)lTmpValue;
+				m_rows = (int)lTmpValue;
 			}
 			if (sLabel == wxT("ncolumns:")) 
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
-				this->m_columns = (int)lTmpValue;
+				m_columns = (int)lTmpValue;
 			}
 			if (sLabel == wxT("repn:"))
 			//if (sLabel.Contains(wxT("repn:"))) 
 			{
-				this->m_repn = sValue;
+				m_repn = sValue;
 			}
 			if (sLabel.Contains(wxT("voxel:"))) 
 			{
@@ -73,17 +74,30 @@ bool DatasetInfo::load(wxString filename)
 				sValue = sLine.AfterLast(':');
 				sValue = sValue.BeforeLast('\"');
 				sNumber = sValue.AfterLast(' ');
-				flag = sNumber.ToDouble(&this->m_zVoxel); 
+				flag = sNumber.ToDouble(&m_zVoxel); 
 				sValue = sValue.BeforeLast(' ');
 				sNumber = sValue.AfterLast(' ');
-				flag = sNumber.ToDouble(&this->m_yVoxel);
+				flag = sNumber.ToDouble(&m_yVoxel);
 				sValue = sValue.BeforeLast(' ');
 				sNumber = sValue.AfterLast('\"');
-				flag = sNumber.ToDouble(&this->m_xVoxel);
+				flag = sNumber.ToDouble(&m_xVoxel);
 			}
 		}
 	}
 	headerFile.Close();
+	
+	if (m_repn.Cmp(wxT("ubyte")) == 0)
+	{
+		if (m_bands / m_frames == 1)
+			m_type = Head_byte;
+		else if (m_bands / m_frames == 3)
+			m_type = RGB;
+		else m_type = ERROR;
+	}
+	else if (m_repn.Cmp(wxT("short")) == 0) m_type = Head_short;
+	else if (m_repn.Cmp(wxT("float")) == 0) m_type = Overlay;
+	else m_type = ERROR;
+	
 	is_loaded = flag;
 	return flag;
 }
@@ -98,24 +112,4 @@ wxString DatasetInfo::getInfoString()
 			this->m_length, this->m_bands, this->m_frames, this->m_rows, this->m_columns) + this->m_repn;
 	infoString2 = wxString::Format(wxT("\nx Voxel: %.2f\ny Voxel: %.2f\nz Voxel: %.2f"), this->m_xVoxel, this->m_yVoxel, this->m_zVoxel);
 	return infoString1 + infoString2;
-}
-
-int DatasetInfo::getMode()
-{
-	if (m_repn.Cmp(wxT("ubyte")) == 0)
-	{
-		if (m_bands / m_frames == 1)
-			return Head_byte;
-		else if (m_bands / m_frames == 3)
-			return RGB;
-		else return ERROR;
-	}
-	if (m_repn.Cmp(wxT("short")) == 0) return Head_short;
-	if (m_repn.Cmp(wxT("float")) == 0) return Overlay;
-	return ERROR;
-}
-
-void DatasetInfo::setHighestValue(float value)
-{
-	m_highest_value = value;
 }

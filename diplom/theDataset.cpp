@@ -49,7 +49,7 @@ bool TheDataset::load(wxString filename)
 			wxFileOffset nSize = dataFile.Length();
 			if (nSize == wxInvalidOffset) return false;
 			
-			switch (info->getMode())
+			switch (info->getType())
 			{
 			case Head_byte: {
 				wxUint8 *buffer = new wxUint8[nSize];
