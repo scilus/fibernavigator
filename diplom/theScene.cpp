@@ -78,28 +78,22 @@ void TheScene::initNavGL()
 
 void TheScene::assignTextures ()
 {
-	if (m_dataset->m_dsList->size() == 0) return;
+	m_countTextures = m_dataset->m_dsList->size();
+	if (m_countTextures == 0) return;
 	
-	DatasetList::iterator iter;
-	int i = 0;
 	glDeleteTextures(10, m_texNames);
 	
-	glGenTextures(m_dataset->m_dsList->size(), m_texNames);
+	int i = 0;
 	
-	for (iter = m_dataset->m_dsList->begin() ; iter != m_dataset->m_dsList->end() ; ++iter)
+	wxDatasetListNode *node = m_dataset->m_dsList->GetFirst();
+	while (node)
 	{
-		DatasetInfo *info = *iter;
-		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
+		glBindTexture(GL_TEXTURE_3D, m_texNames[i++]);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-		info->generateTexture();
-		++i;
-		printf("assigned texture: %d\n", i);
+		node->GetData()->generateTexture();
+		node = node->GetNext();
 	}
-	m_countTextures = i;
 }
 
 void TheScene::setDataset(TheDataset *dataset)
@@ -163,6 +157,7 @@ void TheScene::renderScene(int view)
 	if (m_dataset->m_dsList->size() == 0) return;
 	
 	bindTextures();
+	setShaderVars();
 
 	if (m_showXSlize) renderXSlize();
 	if (m_showYSlize) renderYSlize();
@@ -182,31 +177,61 @@ void TheScene::bindTextures()
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 	}
+}
 
-	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "blendThreshold");
-	glUniform1f (texLoc, m_blendThreshold);
-
+void TheScene::setShaderVars()
+{
+	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "countTextures");
+	glUniform1i (texLoc, m_countTextures);
+		
 	
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex0");
-	glUniform1i (texLoc, 0);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex1");
-	glUniform1i (texLoc, 1);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex2");
-	glUniform1i (texLoc, 2);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex3");
-	glUniform1i (texLoc, 3);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex4");
-	glUniform1i (texLoc, 4);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex5");
-	glUniform1i (texLoc, 5);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex6");
-	glUniform1i (texLoc, 6);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex7");
-	glUniform1i (texLoc, 7);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex8");
-	glUniform1i (texLoc, 8);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex9");
-	glUniform1i (texLoc, 9);
+	switch (m_countTextures)
+	{
+	case 10:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex9");
+		glUniform1i (texLoc, 9);
+	case 9:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex8");
+		glUniform1i (texLoc, 8);
+	case 8:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex7");
+		glUniform1i (texLoc, 7);
+	case 7:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex6");
+		glUniform1i (texLoc, 6);
+	case 6:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex5");
+		glUniform1i (texLoc, 5);
+	case 5:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex4");
+		glUniform1i (texLoc, 4);
+	case 4:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex3");
+		glUniform1i (texLoc, 3);
+	case 3:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex2");
+		glUniform1i (texLoc, 2);
+	case 2:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex1");
+		glUniform1i (texLoc, 1);
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex1");
+		glUniform1i (texLoc, m_dataset->getShow(1));
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex1");
+		glUniform1f (texLoc, m_dataset->getThreshold(1));
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex1");
+		glUniform1i (texLoc, m_dataset->getType(1));
+	case 1:
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex0");
+		glUniform1i (texLoc, 0);
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex0");
+		glUniform1i (texLoc, m_dataset->getShow(0));
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex0");
+		glUniform1f (texLoc, m_dataset->getThreshold(0));
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex0");
+		glUniform1i (texLoc, m_dataset->getType(0));
+	case 0:
+	default:
+	;}	
 }
 
 void TheScene::renderXSlize()
@@ -247,6 +272,7 @@ void TheScene::renderNavView(int view)
 	float yline = 0.5;
 	
 	bindTextures();
+	setShaderVars();
 	
 	switch (view)
 	{

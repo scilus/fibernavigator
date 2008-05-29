@@ -78,6 +78,7 @@ private:
 	float m_zLine;
 	
 	void bindTextures();
+	void setShaderVars();
 	void renderXSlize();
 	void renderYSlize();
 	void renderZSlize();

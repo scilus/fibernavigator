@@ -445,11 +445,13 @@ void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 {
 	if (!m_dataset) return;
-	m_scene->updateBlendThreshold((float)m_tSlider->GetValue()/100.0);
-	m_mainGL->render();
+	float threshold = (float)m_tSlider->GetValue()/100.0;
+	m_scene->updateBlendThreshold(threshold);
 	
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-	m_datasetListCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), (float)m_tSlider->GetValue()/100.0 ));
+	m_datasetListCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
+	m_dataset->setThreshold(item, threshold);
+	m_mainGL->render();
 }
 
 void MainFrame::refreshAllGLWidgets()
@@ -564,17 +566,22 @@ void MainFrame::updateStatusBar()
 
 void MainFrame::OnActivateListItem(wxListEvent& event)
 {
-	//int item = event.GetIndex();
-	//printf("List item activated: %d Column: %d\n", item, col);	
-}
-
-void MainFrame::OnSelectListItem(wxListEvent& event)
-{
 	int item = event.GetIndex();
 	int col = m_datasetListCtrl->getColClicked();
-
-	if (col == 3)
+	switch (col)
 	{
+	case 0:
+		if (m_dataset->toggleShow(item))
+		{
+			m_datasetListCtrl->SetItem(item, 0, wxT(""), 0);
+		}
+		else
+		{
+			m_datasetListCtrl->SetItem(item, 0, wxT(""), 1);
+		}
+		refreshAllGLWidgets();
+		break;
+	case 3:
 		m_dataset->removeNode(item);
 		updateInfoString();
 		m_mainGL->invalidate();
@@ -583,5 +590,14 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 		m_gl2->invalidate();
 		refreshAllGLWidgets();
 		m_datasetListCtrl->DeleteItem(item);
+		break;
+	default:
+		break;
 	}
+}
+
+void MainFrame::OnSelectListItem(wxListEvent& event)
+{
+	int item = event.GetIndex();
+	m_tSlider->SetValue((int)(m_dataset->getThreshold(item) * 100));
 }

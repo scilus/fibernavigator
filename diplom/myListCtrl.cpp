@@ -23,7 +23,5 @@ void MyListCtrl::OnLeftClick(wxMouseEvent& event)
 
 int MyListCtrl::getColClicked()
 {
-	int c = m_col_clicked;
-	m_col_clicked = -1;
-	return c;
+	return m_col_clicked;
 }

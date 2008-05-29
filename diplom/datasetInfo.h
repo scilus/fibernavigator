@@ -38,6 +38,8 @@ private:
 	bool is_loaded;
 	float m_highest_value;
 	wxString m_name;
+	float m_threshold;
+	bool m_show;
 	
 	
 	
@@ -55,6 +57,8 @@ public:
 	void generateTexture();
 	
 	void setHighestValue(float value) {m_highest_value = value;};
+	void setThreshold(float value) {m_threshold = value;};
+	bool toggleShow() {m_show = !m_show; return m_show;};
 	
 	int getType() {return m_type;};
 	int getLength() {return m_length;};
@@ -66,7 +70,9 @@ public:
 	double getXVoxel() {return m_xVoxel;};
 	double getYVoxel() {return m_yVoxel;};;
 	double getZVoxel() {return m_zVoxel;};;
-	float getHighestValue() {return m_highest_value;};	
+	float getHighestValue() {return m_highest_value;};
+	float getThreshold() {return m_threshold;};
+	bool getShow() {return m_show;};
 
 };
 

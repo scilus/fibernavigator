@@ -152,8 +152,44 @@ int TheDataset::load(wxString filename)
 	return -1;
 }
 
-bool TheDataset::removeNode(int item)
+void TheDataset::removeNode(int item)
 {
+	if (item > m_dsList->size()) return;
 	wxDatasetListNode *node = m_dsList->Item(item);
 	m_dsList->DeleteNode(node);
+}
+
+void TheDataset::setThreshold(int item, float value)
+{
+	if (item > m_dsList->size()) return;
+	wxDatasetListNode *node = m_dsList->Item(item);
+	node->GetData()->setThreshold(value);
+}
+
+float TheDataset::getThreshold(int item)
+{
+	if (item > m_dsList->size()) return 0.0;
+	wxDatasetListNode *node = m_dsList->Item(item);
+	return node->GetData()->getThreshold();
+}
+
+bool TheDataset::toggleShow(int item)
+{
+	if (item > m_dsList->size()) return false;
+	wxDatasetListNode *node = m_dsList->Item(item);
+	return node->GetData()->toggleShow();
+}
+
+bool TheDataset::getShow(int item)
+{
+	if (item > m_dsList->size()) return false;
+	wxDatasetListNode *node = m_dsList->Item(item);
+	return node->GetData()->getShow();
+}
+
+int TheDataset::getType(int item)
+{
+	if (item > m_dsList->size()) return false;
+	wxDatasetListNode *node = m_dsList->Item(item);
+	return node->GetData()->getType();
 }
