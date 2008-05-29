@@ -4,6 +4,7 @@
 #include "theScene.h"
 #include "mainCanvas.h"
 #include "theDataset.h"
+#include "myListCtrl.h"
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
@@ -42,6 +43,9 @@ private:
     void OnToggleView3(wxCommandEvent& event);
     void OnReloadShaders(wxCommandEvent& event);
     
+    void OnActivateListItem(wxListEvent& event);
+    void OnSelectListItem(wxListEvent& event);
+    
     void refreshAllGLWidgets();
     void updateInfoString();
     void updateStatusBar();
@@ -68,7 +72,7 @@ private:
     wxSlider* m_zSlider;
     wxSlider* m_tSlider;
     
-    wxListCtrl* m_datasetListCtrl; 
+    MyListCtrl* m_datasetListCtrl; 
     
     wxStatusBar* m_statusBar;
 
@@ -99,6 +103,8 @@ DECLARE_EVENT_TABLE()
 #define ID_GL_NAV_Y  	121
 #define ID_GL_NAV_Z   	122
 #define ID_GL_MAIN		123
+
+#define LIST_CTRL		130
 
 #define ID_X_SLIDER 201
 #define ID_Y_SLIDER 202

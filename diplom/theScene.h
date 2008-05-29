@@ -30,7 +30,7 @@ public:
 	bool m_showRGB;
 	
 	TheScene();
-	~TheScene() {};
+	~TheScene();
 	
 	void initMainGL();
 	void initNavGL();

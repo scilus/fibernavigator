@@ -13,24 +13,22 @@ TheDataset::TheDataset()
 	m_lastError = wxT("");
 }
 
-bool TheDataset::load(wxString filename)
+int TheDataset::load(wxString filename)
 {
 	DatasetInfo *info = new DatasetInfo();
-	bool flag = info->load(filename);
+	bool flag = info->load(filename); 
 	if (!flag)
 	{
-		printf("ERROR couldn't load header file\n");
 		m_lastError = wxT("couldn't load header file");
-		return false;
+		return -1;
 	}
 	
 	if (m_dsList->size() == 0)
 	{
 		if ( info->getRows() <= 0 || info->getColumns() <= 0 || info->getFrames() <= 0 )
 		{
-			printf("ERROR couldn't parse header file\n");
 			m_lastError = wxT("couldn't parse header file");
-			return false;
+			return -1;
 		}
 		m_rows = info->getRows();
 		m_columns = info->getColumns();
@@ -40,9 +38,8 @@ bool TheDataset::load(wxString filename)
 	{
 		if ( info->getRows() != m_rows || info->getColumns() != m_columns || info->getFrames() != m_frames )
 		{
-			printf("ERROR dimensions of loaded files must be the same!\n");
 			m_lastError = wxT("dimensions of loaded files must be the same");
-			return false;
+			return -1;
 		}
 	}
 	
@@ -53,23 +50,19 @@ bool TheDataset::load(wxString filename)
 		if (dataFile.Open(filename.BeforeLast('.')+ wxT(".ima")))
 		{
 			wxFileOffset nSize = dataFile.Length();
-			if (nSize == wxInvalidOffset) return false;
+			if (nSize == wxInvalidOffset) return -1;
 			
 			switch (info->getType())
 			{
 			case Head_byte: {
-				
 				info->m_byteDataset = new wxUint8[nSize];
 				if (dataFile.Read(info->m_byteDataset, (size_t) nSize) != nSize)
 				{
 					dataFile.Close();
 					delete[] info->m_byteDataset;
-					return false;
+					return -1;
 				}
-				else flag = true;
-				m_dsList->Append(info);
-				
-				
+				flag = true;
 			} break;
 
 			case Head_short: {
@@ -104,10 +97,9 @@ bool TheDataset::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] info->m_floatDataset;
-					return false;
+					return -1;
 				}
-				else flag = true;
-				m_dsList->Append(info);
+				flag = true;
 			} break;
 			
 			case RGB: {
@@ -117,9 +109,9 @@ bool TheDataset::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] buffer;
-					return false;
+					return -1;
 				}
-				else flag = true;
+				flag = true;
 
 				int offset = info->getColumns() * info->getRows() ;
 				int startslize = 0;
@@ -134,17 +126,22 @@ bool TheDataset::load(wxString filename)
 						info->m_rgbDataset[startslize + 3*j + 2] = buffer[startslize + 2*offset + j];
 					}
 				}
-				m_dsList->Append(info);
 			} break;
 			
 			case ERROR:
 			default:
-				printf("ERROR unsupported data file format\n");
 				m_lastError = wxT("unsupported data file format");
-				return false;
+				return -1;
 			}
 		}
 		dataFile.Close();
 	}
-	return flag;
+	
+	if (flag)
+	{
+		m_dsList->Append(info);
+
+		return m_dsList->GetCount();
+	}
+	return -1;
 }

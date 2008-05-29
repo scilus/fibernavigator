@@ -17,6 +17,18 @@ TheScene::TheScene()
 	m_showOverlay = false;
 	m_showRGB = false;
 	m_textureShader = 0;
+	
+	m_xOffset0 = 0.0;
+	m_yOffset0 = 0.0;
+	m_xOffset1 = 0.0;
+	m_yOffset1 = 0.0;
+	m_xOffset2 = 0.0;
+	m_yOffset2 = 0.0;
+}
+
+TheScene::~TheScene()
+{
+	glDeleteTextures(10, m_texNames);
 }
 
 void TheScene::initMainGL()
@@ -72,13 +84,13 @@ void TheScene::assignTextures ()
 	
 	DatasetList::iterator iter;
 	int i = 0;
+	glDeleteTextures(10, m_texNames);
 	
 	glGenTextures(m_dataset->m_dsList->size(), m_texNames);
 	
 	for (iter = m_dataset->m_dsList->begin() ; iter != m_dataset->m_dsList->end() ; ++iter)
 	{
 		DatasetInfo *info = *iter;
-		
 		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
@@ -99,6 +111,8 @@ void TheScene::setDataset(TheDataset *dataset)
 	m_xSize = (float)dataset->m_columns;
 	m_ySize = (float)dataset->m_rows;
 	m_zSize = (float)dataset->m_frames;
+	
+	
 	
 	m_ratio0 = m_xSize/m_ySize;
 	m_ratio1 = m_xSize/m_zSize;
@@ -310,5 +324,5 @@ void TheScene::updateBlendThreshold(float threshold)
 
 void TheScene::releaseTextures()
 {
-
+	glDeleteTextures(10, m_texNames);
 }

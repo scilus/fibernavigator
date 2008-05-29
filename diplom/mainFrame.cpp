@@ -9,8 +9,8 @@
 #include "wx/laywin.h"
 #include "wx/filedlg.h"
 #include "wx/statbmp.h"
-#include "wx/listctrl.h"
-#include "wx/imaglist.h"
+//#include "wx/listctrl.h"
+//#include "wx/imaglist.h"
 
 #include "icons/eyes.xpm"
 #include "icons/delete.xpm"
@@ -40,6 +40,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
+	/* listctrl events */
+	EVT_LIST_ITEM_ACTIVATED(LIST_CTRL, MainFrame::OnActivateListItem)
+	EVT_LIST_ITEM_SELECTED(LIST_CTRL, MainFrame::OnSelectListItem)
 END_EVENT_TABLE()
 
 
@@ -216,7 +219,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
     
     
-    m_datasetListCtrl = new wxListCtrl(m_leftWindowBottom, wxID_ANY, wxDefaultPosition, 
+    m_datasetListCtrl = new MyListCtrl(m_leftWindowBottom, LIST_CTRL, wxDefaultPosition, 
     		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
     
     wxImageList* imageList = new wxImageList(16,16);
@@ -292,8 +295,8 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxString path = dialog.GetPath();
-		
-		if (!m_dataset->load(path)) 
+		int dsPos = m_dataset->load(path); 
+		if ( dsPos == -1) 
 		{
 			wxMessageBox(wxT("ERROR\n") + m_dataset->m_lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 			m_statusBar->SetStatusText(wxT("ERROR"),1);
@@ -301,13 +304,19 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 			return;
 		}
 		 
+		int i = m_datasetListCtrl->GetItemCount();
+		m_datasetListCtrl->InsertItem(i, wxT(""), 0);
+		m_datasetListCtrl->SetItem(i, 1, dialog.GetFilename());
+		m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
+		m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
+		m_datasetListCtrl->SetItemData(i, dsPos);
+		m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		
+				
 		m_statusBar->SetStatusText(wxT("Ready"),1);
 		m_statusBar->SetStatusText(dialog.GetFilename() + wxT(" loaded"),2);
-		m_scene->setDataset(m_dataset);
-		m_mainGL->invalidate();
-		m_gl0->invalidate();
-		m_gl1->invalidate();
-		m_gl2->invalidate();
+		
+		
 
 		updateInfoString();
 		
@@ -317,13 +326,16 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_ySlider->SetValue( m_dataset->m_rows/2);
 		m_zSlider->SetMax(wxMax(2,m_dataset->m_frames-1));
 		m_zSlider->SetValue( m_dataset->m_frames/2);
-		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-		refreshAllGLWidgets();
-
-		int i = m_datasetListCtrl->GetItemCount();
-		m_datasetListCtrl->InsertItem(i, wxT(""), 0);
-		m_datasetListCtrl->SetItem(i, 1, dialog.GetFilename());
+		m_tSlider->SetValue(10);
 		
+		m_scene->setDataset(m_dataset);
+		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+		
+		m_mainGL->invalidate();
+		m_gl0->invalidate();
+		m_gl1->invalidate();
+		m_gl2->invalidate();
+		refreshAllGLWidgets();
 	}
 }
 
@@ -385,7 +397,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 
-	printf ("test: %d\n",m_leftWindowBottom->GetClientSize().y);
+	/* resize list ctrl widget */
 	m_datasetListCtrl->SetSize(0,0, m_leftWindowBottom->GetClientSize().x, m_leftWindowBottom->GetClientSize().y);
 	m_datasetListCtrl->SetColumnWidth(0, 20);
 	m_datasetListCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x - 140);
@@ -435,6 +447,9 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 	if (!m_dataset) return;
 	m_scene->updateBlendThreshold((float)m_tSlider->GetValue()/100.0);
 	m_mainGL->render();
+	
+	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	m_datasetListCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), (float)m_tSlider->GetValue()/100.0 ));
 }
 
 void MainFrame::refreshAllGLWidgets()
@@ -541,4 +556,21 @@ void MainFrame::updateStatusBar()
 	wxString sbString0 = wxT("");
 	sbString0 = wxString::Format(wxT("Axial: %d Coronal: %d Sagittal: %d"),m_zSlider->GetValue(), m_ySlider->GetValue(), m_xSlider->GetValue()); 
 	m_statusBar->SetStatusText(sbString0,0);
+}
+
+void MainFrame::OnActivateListItem(wxListEvent& event)
+{
+	int item = event.GetIndex();
+	//printf("List item activated: %d Column: %d\n", item, col);	
+}
+
+void MainFrame::OnSelectListItem(wxListEvent& event)
+{
+	int item = event.GetIndex();
+	int col = m_datasetListCtrl->getColClicked();
+	
+	if (col == 3)
+	{
+		m_datasetListCtrl->DeleteItem(item);
+	}
 }

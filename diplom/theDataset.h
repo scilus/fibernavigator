@@ -27,7 +27,7 @@ public:
 	TheDataset();
 	~TheDataset(){};
 	
-	bool load(wxString);
+	int load(wxString);
 	
 	DatasetList *m_dsList;
 	
