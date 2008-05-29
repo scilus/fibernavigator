@@ -13,6 +13,7 @@
 #include "wx/imaglist.h"
 
 #include "icons/eyes.xpm"
+#include "icons/delete.xpm"
 
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
    
@@ -212,14 +213,16 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_ySlider->SetMinSize(wxSize(1, -1));
     m_zSlider->SetMinSize(wxSize(1, -1));
     
+
+    
     
     m_datasetListCtrl = new wxListCtrl(m_leftWindowBottom, wxID_ANY, wxDefaultPosition, 
-    		m_leftWindowBottom->GetClientSize(), wxLC_REPORT|wxLC_SINGLE_SEL);
+    		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
     
     wxImageList* imageList = new wxImageList(16,16);
     imageList->Add(wxIcon(eyes_xpm));
+    imageList->Add(wxIcon(delete_xpm));
     m_datasetListCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
-    
     
     wxListItem itemCol;
     itemCol.SetText(wxT(""));
@@ -232,6 +235,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     itemCol.SetText(wxT("Threshold"));
     itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
     m_datasetListCtrl->InsertColumn(2, itemCol);
+    
+    itemCol.SetText(wxT(""));
+    m_datasetListCtrl->InsertColumn(3, itemCol);
         
     GLboolean doubleBuffer = GL_TRUE;
     
@@ -367,6 +373,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	
 	m_leftWindowHolder->SetDefaultSize(wxSize(150 + NAV_SIZE, height));
 	m_leftWindowTop->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
+	m_leftWindowBottom->SetDefaultSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
 	m_navWindow->SetDefaultSize(wxSize(NAV_SIZE, height));
 	m_topNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_middleNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
@@ -377,10 +384,13 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
-	
-	m_datasetListCtrl->SetColumnWidth(0, 30);
-	m_datasetListCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x - 110);
+
+	printf ("test: %d\n",m_leftWindowBottom->GetClientSize().y);
+	m_datasetListCtrl->SetSize(0,0, m_leftWindowBottom->GetClientSize().x, m_leftWindowBottom->GetClientSize().y);
+	m_datasetListCtrl->SetColumnWidth(0, 20);
+	m_datasetListCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x - 140);
 	m_datasetListCtrl->SetColumnWidth(2, 80);
+	m_datasetListCtrl->SetColumnWidth(3, 20);
 	
 	/* resize main gl window */
 	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x), 
@@ -522,6 +532,7 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_gl1->setScene(m_scene);
 	m_gl2->setScene(m_scene);
 	updateInfoString();
+	m_datasetListCtrl->DeleteAllItems();
 	
 }
 
