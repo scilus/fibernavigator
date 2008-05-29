@@ -120,7 +120,7 @@ void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
 
 void MainCanvas::render()
 {
-	if (m_scene->nothing_loaded) return;
+	//if (m_scene->getDataset()->m_dsList->size() == 0) return;
 	wxPaintDC dc(this);
 
 #ifndef __WXMOTIF__

@@ -13,6 +13,13 @@ TheDataset::TheDataset()
 	m_lastError = wxT("");
 }
 
+TheDataset::~TheDataset()
+{
+	m_dsList->DeleteContents(true);
+	m_dsList->clear();
+	free (m_dsList);
+}
+
 int TheDataset::load(wxString filename)
 {
 	DatasetInfo *info = new DatasetInfo();
@@ -140,8 +147,13 @@ int TheDataset::load(wxString filename)
 	if (flag)
 	{
 		m_dsList->Append(info);
-
 		return m_dsList->GetCount();
 	}
 	return -1;
+}
+
+bool TheDataset::removeNode(int item)
+{
+	wxDatasetListNode *node = m_dsList->Item(item);
+	m_dsList->DeleteNode(node);
 }

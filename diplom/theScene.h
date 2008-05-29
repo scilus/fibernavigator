@@ -21,8 +21,6 @@ enum {
 class TheScene {
 
 public:
-	bool nothing_loaded;
-
 	bool m_showXSlize;
 	bool m_showYSlize;
 	bool m_showZSlize;
@@ -42,6 +40,7 @@ public:
 	void renderScene(int);
 	void renderNavView(int);
 	void updateBlendThreshold(float);
+	TheDataset* getDataset() {return m_dataset;};
 	
 	void updateView(float, float, float);
 	void releaseTextures();

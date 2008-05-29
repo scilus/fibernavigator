@@ -2,8 +2,6 @@
 
 TheScene::TheScene()
 {
-	nothing_loaded = true;
-
 	m_texNames = new GLuint[10];
 	m_countTextures = 0;
 
@@ -138,9 +136,7 @@ void TheScene::setDataset(TheDataset *dataset)
 	m_xOffset1 = wxMax(m_xOffset0, m_xOffset1);
 	
 	m_yOffset1 = wxMax(m_yOffset1, m_yOffset2);
-	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);
-	
-	nothing_loaded = false;
+	m_yOffset2 = wxMax(m_yOffset1, m_yOffset2);	
 }
 
 void TheScene::initShaders()
@@ -164,6 +160,8 @@ void TheScene::initShaders()
 
 void TheScene::renderScene(int view)
 {
+	if (m_dataset->m_dsList->size() == 0) return;
+	
 	bindTextures();
 
 	if (m_showXSlize) renderXSlize();
@@ -243,6 +241,8 @@ void TheScene::renderZSlize()
 
 void TheScene::renderNavView(int view)
 {
+	if (m_dataset->m_dsList->size() == 0) return;
+	
 	float xline = 0.5;
 	float yline = 0.5;
 	

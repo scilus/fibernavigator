@@ -25,9 +25,10 @@ private:
 	
 public:
 	TheDataset();
-	~TheDataset(){};
+	~TheDataset();
 	
 	int load(wxString);
+	bool removeNode(int);
 	
 	DatasetList *m_dsList;
 	

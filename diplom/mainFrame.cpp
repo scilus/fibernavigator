@@ -464,7 +464,11 @@ void MainFrame::refreshAllGLWidgets()
 void MainFrame::updateInfoString()
 {
 	m_textWindow->SetValue( wxT("") );
-	if (m_dataset->m_dsList->size() == 0) return;
+	if (m_dataset->m_dsList->size() == 0) 
+	{
+		m_textWindow->SetValue( wxT("Nothing loaded") );
+		return;
+	}
 		
 	DatasetList::iterator iter;
 	wxString newString = wxT("");
@@ -560,7 +564,7 @@ void MainFrame::updateStatusBar()
 
 void MainFrame::OnActivateListItem(wxListEvent& event)
 {
-	int item = event.GetIndex();
+	//int item = event.GetIndex();
 	//printf("List item activated: %d Column: %d\n", item, col);	
 }
 
@@ -568,9 +572,16 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 {
 	int item = event.GetIndex();
 	int col = m_datasetListCtrl->getColClicked();
-	
+
 	if (col == 3)
 	{
+		m_dataset->removeNode(item);
+		updateInfoString();
+		m_mainGL->invalidate();
+		m_gl0->invalidate();
+		m_gl1->invalidate();
+		m_gl2->invalidate();
+		refreshAllGLWidgets();
 		m_datasetListCtrl->DeleteItem(item);
 	}
 }
