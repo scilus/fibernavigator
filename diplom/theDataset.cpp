@@ -6,9 +6,9 @@ WX_DEFINE_LIST(DatasetList);
 
 TheDataset::TheDataset()
 {
-	m_rows = 0;
-	m_columns = 0;
-	m_frames = 0;
+	m_rows = 1;
+	m_columns = 1;
+	m_frames = 1;
 	m_dsList = new DatasetList();
 	m_lastError = wxT("");
 }
@@ -24,7 +24,7 @@ bool TheDataset::load(wxString filename)
 		return false;
 	}
 	
-	if (m_rows == 0)
+	if (m_dsList->size() == 0)
 	{
 		if ( info->getRows() <= 0 || info->getColumns() <= 0 || info->getFrames() <= 0 )
 		{

@@ -222,21 +222,17 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     
     
     wxListItem itemCol;
-    itemCol.SetText(wxT("Show"));
+    itemCol.SetText(wxT(""));
     m_datasetListCtrl->InsertColumn(0, itemCol);
-    m_datasetListCtrl->SetColumnWidth(0, 40);
-    
+        
     itemCol.SetText(wxT("Name"));
     itemCol.SetAlign(wxLIST_FORMAT_CENTRE);
     m_datasetListCtrl->InsertColumn(1, itemCol);
-    m_datasetListCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x);
-
+    
     itemCol.SetText(wxT("Threshold"));
     itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
     m_datasetListCtrl->InsertColumn(2, itemCol);
-    m_datasetListCtrl->SetColumnWidth(2, 50);
-	
-    
+        
     GLboolean doubleBuffer = GL_TRUE;
     
 	#ifdef __WXMSW__
@@ -263,6 +259,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     
     m_scene = new TheScene();
     m_dataset = new TheDataset();
+    m_scene->setDataset(m_dataset);
 
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
@@ -308,11 +305,11 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 
 		updateInfoString();
 		
-		m_xSlider->SetMax(wxMax(1,m_dataset->m_columns-1));
+		m_xSlider->SetMax(wxMax(2,m_dataset->m_columns-1));
 		m_xSlider->SetValue(m_dataset->m_columns/2);
-		m_ySlider->SetMax(wxMax(1,m_dataset->m_rows-1));
+		m_ySlider->SetMax(wxMax(2,m_dataset->m_rows-1));
 		m_ySlider->SetValue( m_dataset->m_rows/2);
-		m_zSlider->SetMax(wxMax(1,m_dataset->m_frames-1));
+		m_zSlider->SetMax(wxMax(2,m_dataset->m_frames-1));
 		m_zSlider->SetValue( m_dataset->m_frames/2);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		refreshAllGLWidgets();
@@ -320,6 +317,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		int i = m_datasetListCtrl->GetItemCount();
 		m_datasetListCtrl->InsertItem(i, wxT(""), 0);
 		m_datasetListCtrl->SetItem(i, 1, dialog.GetFilename());
+		
 	}
 }
 
@@ -379,6 +377,10 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+	
+	m_datasetListCtrl->SetColumnWidth(0, 30);
+	m_datasetListCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x - 110);
+	m_datasetListCtrl->SetColumnWidth(2, 80);
 	
 	/* resize main gl window */
 	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x), 
@@ -474,17 +476,18 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
+	return;
+	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
 	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
 	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
 	
 	m_scene->setDataset(m_dataset);
 	
-	m_xSlider->SetMax(wxMax(1,m_dataset->m_columns-1));
+	m_xSlider->SetMax(wxMax(2,m_dataset->m_columns-1));
 	m_xSlider->SetValue(m_dataset->m_columns/2);
-	m_ySlider->SetMax(wxMax(1,m_dataset->m_rows-1));
+	m_ySlider->SetMax(wxMax(2,m_dataset->m_rows-1));
 	m_ySlider->SetValue( m_dataset->m_rows/2);
-	m_zSlider->SetMax(wxMax(1,m_dataset->m_frames-1));
+	m_zSlider->SetMax(wxMax(2,m_dataset->m_frames-1));
 	m_zSlider->SetValue( m_dataset->m_frames/2);
 		
 	m_mainGL->invalidate();
@@ -519,11 +522,12 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_gl1->setScene(m_scene);
 	m_gl2->setScene(m_scene);
 	updateInfoString();
+	
 }
 
 void MainFrame::updateStatusBar()
 {
-	wxString sbString0;
+	wxString sbString0 = wxT("");
 	sbString0 = wxString::Format(wxT("Axial: %d Coronal: %d Sagittal: %d"),m_zSlider->GetValue(), m_ySlider->GetValue(), m_xSlider->GetValue()); 
 	m_statusBar->SetStatusText(sbString0,0);
 }
