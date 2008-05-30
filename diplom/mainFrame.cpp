@@ -45,7 +45,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_BUTTON(ID_BUTTON_DOWN, MainFrame::OnListItemDown)
 END_EVENT_TABLE()
 
-
 // Define my frame constructor
 MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size,
     const long style):
@@ -297,14 +296,20 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_scene->setDataset(m_dataset);
     m_scene->setDataListCtrl(m_datasetListCtrl);
 
+    
+    
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
     m_gl0 = new MainCanvas(m_scene, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib);
+    
     m_gl1 = new MainCanvas(m_scene, coronal, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib);
     m_gl2 = new MainCanvas(m_scene, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
+    
+    m_scene->setMainGLContext(new wxGLContext(m_mainGL));
+    m_scene->setNavGLContext(new wxGLContext(m_gl0));
 }
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -471,9 +476,9 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 {
 	if (!m_dataset) return;
 	float threshold = (float)m_tSlider->GetValue()/100.0;
-	m_scene->updateBlendThreshold(threshold);
-	
+		
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
 	m_datasetListCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
 	DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(item);
 	info->setThreshold(threshold);
@@ -600,6 +605,9 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_scene = new TheScene();
 	m_scene->setDataset(m_dataset);
 	m_scene->setDataListCtrl(m_datasetListCtrl);
+	m_scene->setMainGLContext(new wxGLContext(m_mainGL));
+	m_scene->setNavGLContext(new wxGLContext(m_gl0));
+	    
 	m_mainGL->setScene(m_scene);
 	m_gl0->setScene(m_scene);
 	m_gl1->setScene(m_scene);

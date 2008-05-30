@@ -41,7 +41,6 @@ public:
 private:
 	 TheScene 	*m_scene;
 	 wxPoint 	m_clicked;
-	 bool 		m_texturesAssigned;
 	 int 		m_view;
 	 int		m_XPos;
 	 int		m_YPos;

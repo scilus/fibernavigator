@@ -10,6 +10,7 @@
 #include "theDataset.h"
 
 #include "GLSL/GLSLShaderProgram.h"
+#include "wx/glcanvas.h"
 
 enum {
 	axial,
@@ -37,25 +38,32 @@ public:
 	
 	void setDataset(TheDataset*);
 	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
+	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
+	wxGLContext* getMainGLContext() {return m_mainGLContext;};
+	void setNavGLContext(wxGLContext* context) {m_navGLContext = context;};
+	wxGLContext* getNavGLContext() {return m_navGLContext;};
+	
 	
 	void renderScene(int);
 	void renderNavView(int);
-	void updateBlendThreshold(float);
 	TheDataset* getDataset() {return m_dataset;};
 	
 	void updateView(float, float, float);
 	void releaseTextures();
 	
+	bool m_mainTexAssigned;
+	bool m_navTexAssigned;
+		
 		
 private:
-	GLuint *m_texNames;
 	int m_countTextures;
-	
+	GLuint *m_texNames;
 	FGLSLShaderProgram *m_textureShader; 
 	
 	TheDataset* m_dataset;
 	wxListCtrl* m_listctrl;
-	float m_blendThreshold;
+	wxGLContext* m_mainGLContext;
+	wxGLContext* m_navGLContext;
 	
 	float m_xSize;
 	float m_ySize;

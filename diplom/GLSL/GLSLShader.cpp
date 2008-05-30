@@ -12,7 +12,7 @@ GLSLShader::GLSLShader(GLenum target)
   }
   else 
   {
-	  printf("shader not supported\n");
+	  //printf("shader not supported\n");
   }
 	 
 }

@@ -13,15 +13,14 @@ END_EVENT_TABLE()
 
 MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib)
-    : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name, gl_attrib )
+    : wxGLCanvas(parent, id, gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name )
+//: wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name, gl_attrib )
 {
 	m_scene = scene;
 	m_init = false;
 	m_view = view;
-	m_texturesAssigned = false;
 	m_XPos = 0;
 	m_YPos = 0;
-	
 }
 
 void MainCanvas::init()
@@ -30,18 +29,22 @@ void MainCanvas::init()
 	{
 	case mainView:
 		m_scene->initMainGL();
+		if (!m_scene->m_mainTexAssigned)
+		{
+			m_scene->assignTextures();
+			m_scene->m_mainTexAssigned = true;
+		}
 		break;
 	default:
 		m_scene->initNavGL();
+		if (!m_scene->m_navTexAssigned)
+		{
+			m_scene->assignTextures();
+			m_scene->m_navTexAssigned = true;
+		}
 	}
-			
+	m_scene->initShaders();
 	m_init = true;
-	if (!m_texturesAssigned)
-	{
-		m_scene->assignTextures();
-		m_scene->initShaders();
-		m_texturesAssigned = true;	
-	}
 }
 
 
@@ -120,10 +123,9 @@ void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
 
 void MainCanvas::render()
 {
-	//if (m_scene->getDataset()->m_dsList->size() == 0) return;
 	wxPaintDC dc(this);
 
-    SetCurrent();
+    SetCurrent((m_view == mainView) ? *m_scene->getMainGLContext() : *m_scene->getNavGLContext());
     // Init OpenGL once, but after SetCurrent
     if (!m_init)
     {
@@ -159,6 +161,6 @@ void MainCanvas::setScene(TheScene *scene)
 
 void MainCanvas::invalidate()
 {
+	(m_view == mainView) ? m_scene->m_mainTexAssigned = false : m_scene->m_navTexAssigned = false;
 	m_init = false;
-	m_texturesAssigned = false;
 }

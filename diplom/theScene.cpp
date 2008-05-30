@@ -1,11 +1,14 @@
 #include "theScene.h"
 
+
+
 TheScene::TheScene()
 {
-	m_texNames = new GLuint[10];
 	m_countTextures = 0;
-
-	m_blendThreshold = 0.1;
+	
+	m_mainTexAssigned = false;
+	m_navTexAssigned = false;
+	m_texNames = new GLuint[10];
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
 	m_zSlize = 0.5;
@@ -78,6 +81,7 @@ void TheScene::initNavGL()
 
 void TheScene::assignTextures ()
 {
+	printf("assign textures\n");
 	m_countTextures = m_listctrl->GetItemCount();
 	if (m_countTextures == 0) return;
 	
@@ -347,11 +351,6 @@ void TheScene::updateView(float x, float y, float z)
 	if ( m_ratio2 > 1.0) m_zLine = ( m_zSlize / m_ratio2 ) + ( 1.0 - (1.0/m_ratio2) ) / 2.0;
 	if ( m_ratio1 < 1.0) m_zLine = ( m_zSlize * m_ratio1 ) + ( 1.0 - m_ratio1 ) / 2.0;
 	if ( m_ratio1 > 1.0) m_xLine = ( m_xSlize / m_ratio1 ) + ( 1.0 - (1.0/m_ratio1) ) / 2.0;
-}
-
-void TheScene::updateBlendThreshold(float threshold)
-{
-	m_blendThreshold = threshold;
 }
 
 void TheScene::releaseTextures()
