@@ -8,6 +8,8 @@ TheScene::TheScene()
 	
 	m_mainTexAssigned = false;
 	m_navTexAssigned = false;
+	m_mainGLContext = 0;
+	m_navGLContext = 0;
 	m_texNames = new GLuint[10];
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;

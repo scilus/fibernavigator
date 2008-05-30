@@ -61,15 +61,25 @@ void MainCanvas::OnSize(wxSizeEvent& event)
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
     int w, h;
     GetClientSize(&w, &h);
-    /*
-#ifndef __WXMOTIF__
-    if (GetContext())
-#endif
-*/
     {
-        SetCurrent();
+    	switch (m_view)
+    	{
+    	case mainView:
+    		if (!m_scene->m_mainTexAssigned)
+    			SetCurrent();
+    		else
+    			SetCurrent(*m_scene->getMainGLContext());
+    		break;
+    	default:
+    		if (!m_scene->m_navTexAssigned)
+    			SetCurrent();
+    		else
+    			SetCurrent(*m_scene->getNavGLContext());
+    		break;
+    	}
         glViewport(0, 0, (GLint) w, (GLint) h);
     }
+    
 }
 
 void MainCanvas::OnMouseEvent(wxMouseEvent& event)
