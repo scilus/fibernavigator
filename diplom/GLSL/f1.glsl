@@ -46,6 +46,28 @@ uniform int typeTex9;
 
 varying vec3 TexCoord;
 
+vec3 defaultColorMap( float value )
+{
+    value *= 5.0;
+	vec3 color;
+	
+	if( value < 0.0 )
+		color = vec3( 0.0, 0.0, 0.0 );
+    else if( value < 1.0 )
+		color = vec3( 0.0, value, 1.0 );
+	else if( value < 2.0 )
+		color = vec3( 0.0, 1.0, 2.0-value );
+    else if( value < 3.0 )
+		color =  vec3( value-2.0, 1.0, 0.0 );
+    else if( value < 4.0 )
+		color = vec3( 1.0, 4.0-value, 0.0 );
+    else if( value <= 5.0 )
+		color = vec3( 1.0, 0.0, value-4.0 );
+    else 
+		color =  vec3( 1.0, 0.0, 1.0 );
+	return color;
+}
+
 void main()
 {
 	vec4 col = vec4(0);
@@ -62,10 +84,10 @@ void main()
 		if (typeTex1 == 3)
 		{
 			col1.r = clamp( texture3D(tex1, TexCoord).r, 0.0, 1.0);
-			col1.gb = vec2(col1.r / 2.0);
+			
 			if (col1.r - thresholdTex1 > 0.0)
 			{
-				col.rgb = col1.rgb;
+				col.rgb = defaultColorMap( col1.r);
 			}
 		}	
 		if (typeTex1 == 4)
@@ -86,10 +108,10 @@ void main()
 		if (typeTex2 == 3)
 		{
 			col1.r = clamp( texture3D(tex2, TexCoord).r, 0.0, 1.0);
-			col1.gb = vec2(col1.r / 2.0);
+			
 			if (col1.r - thresholdTex2 > 0.0)
 			{
-				col.rgb = col1.rgb;
+				col.rgb = defaultColorMap( col1.r);
 			}
 		}	
 		if (typeTex2 == 4)
