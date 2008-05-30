@@ -546,13 +546,14 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_scene->releaseTextures();
 	free (m_scene);
 	m_scene = new TheScene();
+	m_scene->setDataset(m_dataset);
 	m_mainGL->setScene(m_scene);
 	m_gl0->setScene(m_scene);
 	m_gl1->setScene(m_scene);
 	m_gl2->setScene(m_scene);
 	updateInfoString();
 	m_datasetListCtrl->DeleteAllItems();
-	
+	refreshAllGLWidgets();
 }
 
 void MainFrame::updateStatusBar()

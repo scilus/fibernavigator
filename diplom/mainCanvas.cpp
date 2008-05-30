@@ -123,10 +123,6 @@ void MainCanvas::render()
 	//if (m_scene->getDataset()->m_dsList->size() == 0) return;
 	wxPaintDC dc(this);
 
-#ifndef __WXMOTIF__
-    if (!GetContext()) return;
-#endif
-
     SetCurrent();
     // Init OpenGL once, but after SetCurrent
     if (!m_init)

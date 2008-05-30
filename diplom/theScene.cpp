@@ -185,7 +185,6 @@ void TheScene::setShaderVars()
 	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "countTextures");
 	glUniform1i (texLoc, m_countTextures);
 		
-	
 	switch (m_countTextures)
 	{
 	case 10:
