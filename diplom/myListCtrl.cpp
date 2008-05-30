@@ -1,5 +1,5 @@
 #include "myListCtrl.h"
-
+#include "datasetInfo.h"
 BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
 	EVT_LEFT_DOWN(MyListCtrl::OnLeftClick)
 END_EVENT_TABLE()
@@ -24,4 +24,32 @@ void MyListCtrl::OnLeftClick(wxMouseEvent& event)
 int MyListCtrl::getColClicked()
 {
 	return m_col_clicked;
+}
+
+void MyListCtrl::swap(long a, long b)
+{
+	DatasetInfo *infoA = (DatasetInfo*) this->GetItemData(a);
+	DatasetInfo *infoB = (DatasetInfo*) this->GetItemData(b);
+	
+	this->SetItem(a, 0, wxT(""), infoB->getShow() ? 0 : 1);
+	this->SetItem(a, 1, infoB->getName());
+	this->SetItem(a, 2, wxString::Format(wxT("%.2f"), infoB->getThreshold()));
+	this->SetItemData(a, (long)infoB);
+	
+	this->SetItem(b, 0, wxT(""), infoA->getShow() ? 0 : 1);
+	this->SetItem(b, 1, infoA->getName());
+	this->SetItem(b, 2, wxString::Format(wxT("%.2f"), infoA->getThreshold()));
+	this->SetItemData(b, (long)infoA);
+}
+
+void MyListCtrl::moveItemUp(long item)
+{
+	if (item == 0) return;
+	swap (item - 1, item);
+}
+
+void MyListCtrl::moveItemDown(long item)
+{
+	if (item == this->GetItemCount() - 1) return;
+	swap (item, item +1);
 }

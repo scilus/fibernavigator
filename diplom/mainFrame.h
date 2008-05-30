@@ -45,8 +45,11 @@ private:
     
     void OnActivateListItem(wxListEvent& event);
     void OnSelectListItem(wxListEvent& event);
+    void OnListItemUp(wxCommandEvent& event);
+    void OnListItemDown(wxCommandEvent& event);
     
     void refreshAllGLWidgets();
+    void renewAllGLWidgets();
     void updateInfoString();
     void updateStatusBar();
 	

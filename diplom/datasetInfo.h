@@ -73,6 +73,7 @@ public:
 	float getHighestValue() {return m_highest_value;};
 	float getThreshold() {return m_threshold;};
 	bool getShow() {return m_show;};
+	wxString getName() {return m_name;};
 
 };
 

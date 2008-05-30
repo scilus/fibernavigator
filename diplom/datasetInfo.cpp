@@ -25,7 +25,7 @@ bool DatasetInfo::load(wxString filename)
 	wxString ext = filename.substr(filename.Length()-3,3);
 	if (ext != wxT("hea")) return false;
 	m_name = filename.AfterLast('/');
-	m_name = m_name.BeforeLast('.');
+	//m_name = m_name.BeforeLast('.');
 	// read header file
 	wxTextFile headerFile;
 	bool flag = false;

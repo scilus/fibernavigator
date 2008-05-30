@@ -41,6 +41,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	/* listctrl events */
 	EVT_LIST_ITEM_ACTIVATED(LIST_CTRL, MainFrame::OnActivateListItem)
 	EVT_LIST_ITEM_SELECTED(LIST_CTRL, MainFrame::OnSelectListItem)
+	EVT_BUTTON(ID_BUTTON_UP, MainFrame::OnListItemUp)
+	EVT_BUTTON(ID_BUTTON_DOWN, MainFrame::OnListItemDown)
 END_EVENT_TABLE()
 
 
@@ -356,11 +358,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_scene->setDataset(m_dataset);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		
-		m_mainGL->invalidate();
-		m_gl0->invalidate();
-		m_gl1->invalidate();
-		m_gl2->invalidate();
-		refreshAllGLWidgets();
+		renewAllGLWidgets();
 	}
 }
 
@@ -491,6 +489,15 @@ void MainFrame::refreshAllGLWidgets()
 	m_mainGL->render();
 }
 
+void MainFrame::renewAllGLWidgets()
+{
+	m_mainGL->invalidate();
+	m_gl0->invalidate();
+	m_gl1->invalidate();
+	m_gl2->invalidate();
+	refreshAllGLWidgets();
+}
+
 void MainFrame::updateInfoString()
 {
 	m_textWindow->SetValue( wxT("") );
@@ -536,10 +543,32 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	return;
-	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
-	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
-	//m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
+	//return;
+	DatasetInfo *info;
+	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
+	int i = m_datasetListCtrl->GetItemCount();
+	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
+	m_datasetListCtrl->SetItem(i, 1, wxT("t1_1mm.hea"));
+	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
+	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
+	m_datasetListCtrl->SetItemData(i, (long)info);
+	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
+	 i = m_datasetListCtrl->GetItemCount();
+	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
+	m_datasetListCtrl->SetItem(i, 1, wxT("overlay_swap.hea"));
+	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
+	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
+	m_datasetListCtrl->SetItemData(i, (long)info);
+	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
+	i = m_datasetListCtrl->GetItemCount();
+	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
+	m_datasetListCtrl->SetItem(i, 1, wxT("rgb.hea"));
+	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
+	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
+	m_datasetListCtrl->SetItemData(i, (long)info);
+	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	
 	m_scene->setDataset(m_dataset);
 	
@@ -550,40 +579,32 @@ void MainFrame::loadStandard()
 	m_zSlider->SetMax(wxMax(2,m_dataset->m_frames-1));
 	m_zSlider->SetValue( m_dataset->m_frames/2);
 		
-	m_mainGL->invalidate();
-	m_gl0->invalidate();
-	m_gl1->invalidate();
-	m_gl2->invalidate();
-	
-	updateInfoString();
-	
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-	refreshAllGLWidgets();
+	
+	renewAllGLWidgets();
+	
 }
 
 void MainFrame::OnReloadShaders(wxCommandEvent& event)
 {
-	m_mainGL->invalidate();
-	m_gl0->invalidate();
-	m_gl1->invalidate();
-	m_gl2->invalidate();
-	refreshAllGLWidgets();
+	renewAllGLWidgets();
 }
 
 void MainFrame::OnNew(wxCommandEvent& event)
 {
+	m_datasetListCtrl->DeleteAllItems();
 	free (m_dataset);
 	m_dataset = new TheDataset();
 	m_scene->releaseTextures();
 	free (m_scene);
 	m_scene = new TheScene();
 	m_scene->setDataset(m_dataset);
+	m_scene->setDataListCtrl(m_datasetListCtrl);
 	m_mainGL->setScene(m_scene);
 	m_gl0->setScene(m_scene);
 	m_gl1->setScene(m_scene);
 	m_gl2->setScene(m_scene);
 	updateInfoString();
-	m_datasetListCtrl->DeleteAllItems();
 	refreshAllGLWidgets();
 }
 
@@ -614,12 +635,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		break;
 	case 3:
 		m_datasetListCtrl->DeleteItem(item);
-		updateInfoString();
-		m_mainGL->invalidate();
-		m_gl0->invalidate();
-		m_gl1->invalidate();
-		m_gl2->invalidate();
-		refreshAllGLWidgets();
+		renewAllGLWidgets();
 		break;
 	default:
 		break;
@@ -630,5 +646,22 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 {
 	int item = event.GetIndex();
 	DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(item);
-	m_tSlider->SetValue((int)info->getThreshold());
+	m_tSlider->SetValue((int)(info->getThreshold()*100));
 }
+
+void MainFrame::OnListItemUp(wxCommandEvent& event)
+{
+	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	m_datasetListCtrl->moveItemUp(item);
+	renewAllGLWidgets();
+}
+    
+void MainFrame::OnListItemDown(wxCommandEvent& event)
+{
+	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	m_datasetListCtrl->moveItemDown(item);
+	renewAllGLWidgets();
+}
+
+
+

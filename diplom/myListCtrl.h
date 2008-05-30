@@ -23,9 +23,12 @@ public:
    
         void OnLeftClick(wxMouseEvent& event);
         int getColClicked();
+        void moveItemUp(long);
+        void moveItemDown(long);
         
 private:
 	int  m_col_clicked;
+	void swap(long, long);
    
    DECLARE_EVENT_TABLE()
 };
