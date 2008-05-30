@@ -78,22 +78,19 @@ void TheScene::initNavGL()
 
 void TheScene::assignTextures ()
 {
-	m_countTextures = m_dataset->m_dsList->size();
+	m_countTextures = m_listctrl->GetItemCount();
 	if (m_countTextures == 0) return;
 	
 	glDeleteTextures(10, m_texNames);
 	
-	int i = 0;
-	
-	wxDatasetListNode *node = m_dataset->m_dsList->GetFirst();
-	while (node)
+	for (int i = 0 ; i < m_countTextures ; ++i)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_3D, m_texNames[i++]);
+		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-		node->GetData()->generateTexture();
-		node = node->GetNext();
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		info->generateTexture();
 	}
 }
 
@@ -155,7 +152,7 @@ void TheScene::initShaders()
 
 void TheScene::renderScene(int view)
 {
-	if (m_dataset->m_dsList->size() == 0) return;
+	if (m_listctrl->GetItemCount() == 0) return;
 	
 	bindTextures();
 	setShaderVars();
@@ -184,7 +181,7 @@ void TheScene::setShaderVars()
 {
 	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "countTextures");
 	glUniform1i (texLoc, m_countTextures);
-		
+	DatasetInfo* info;
 	switch (m_countTextures)
 	{
 	case 10:
@@ -209,32 +206,35 @@ void TheScene::setShaderVars()
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex3");
 		glUniform1i (texLoc, 3);
 	case 3:
+		info = (DatasetInfo*)m_listctrl->GetItemData(2);
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex2");
 		glUniform1i (texLoc, 2);
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex2");
-		glUniform1i (texLoc, m_dataset->getShow(2));
+		glUniform1i (texLoc, info->getShow());
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex2");
-		glUniform1f (texLoc, m_dataset->getThreshold(2));
+		glUniform1f (texLoc, info->getThreshold());
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex2");
-		glUniform1i (texLoc, m_dataset->getType(2));
+		glUniform1i (texLoc, info->getType());
 	case 2:
+		info = (DatasetInfo*)m_listctrl->GetItemData(1);
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex1");
 		glUniform1i (texLoc, 1);
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex1");
-		glUniform1i (texLoc, m_dataset->getShow(1));
+		glUniform1i (texLoc, info->getShow());
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex1");
-		glUniform1f (texLoc, m_dataset->getThreshold(1));
+		glUniform1f (texLoc, info->getThreshold());
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex1");
-		glUniform1i (texLoc, m_dataset->getType(1));
+		glUniform1i (texLoc, info->getType());
 	case 1:
+		info = (DatasetInfo*)m_listctrl->GetItemData(0);
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex0");
 		glUniform1i (texLoc, 0);
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex0");
-		glUniform1i (texLoc, m_dataset->getShow(0));
+		glUniform1i (texLoc, info->getShow());
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex0");
-		glUniform1f (texLoc, m_dataset->getThreshold(0));
+		glUniform1f (texLoc, info->getThreshold());
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex0");
-		glUniform1i (texLoc, m_dataset->getType(0));
+		glUniform1i (texLoc, info->getType());
 	case 0:
 	default:
 	;}	
@@ -272,7 +272,7 @@ void TheScene::renderZSlize()
 
 void TheScene::renderNavView(int view)
 {
-	if (m_dataset->m_dsList->size() == 0) return;
+	if (m_listctrl->GetItemCount() == 0) return;
 	
 	float xline = 0.5;
 	float yline = 0.5;

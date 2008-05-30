@@ -27,16 +27,8 @@ public:
 	TheDataset();
 	~TheDataset();
 	
-	int load(wxString);
-	void removeNode(int);
-	void setThreshold(int, float);
-	float getThreshold(int);
-	int getType(int);
-	bool toggleShow(int);
-	bool getShow(int);
-	
-	DatasetList *m_dsList;
-	
+	DatasetInfo* load(wxString);
+		
 	int m_rows;
 	int m_columns;
 	int m_frames;

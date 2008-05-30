@@ -9,33 +9,30 @@ TheDataset::TheDataset()
 	m_rows = 1;
 	m_columns = 1;
 	m_frames = 1;
-	m_dsList = new DatasetList();
 	m_lastError = wxT("");
 }
 
 TheDataset::~TheDataset()
 {
-	m_dsList->DeleteContents(true);
-	m_dsList->clear();
-	free (m_dsList);
+	
 }
 
-int TheDataset::load(wxString filename)
+DatasetInfo* TheDataset::load(wxString filename)
 {
 	DatasetInfo *info = new DatasetInfo();
 	bool flag = info->load(filename); 
 	if (!flag)
 	{
 		m_lastError = wxT("couldn't load header file");
-		return -1;
+		return NULL;
 	}
 	
-	if (m_dsList->size() == 0)
+	if ((m_rows + m_columns + m_frames) == 3)
 	{
 		if ( info->getRows() <= 0 || info->getColumns() <= 0 || info->getFrames() <= 0 )
 		{
 			m_lastError = wxT("couldn't parse header file");
-			return -1;
+			return NULL;
 		}
 		m_rows = info->getRows();
 		m_columns = info->getColumns();
@@ -46,7 +43,7 @@ int TheDataset::load(wxString filename)
 		if ( info->getRows() != m_rows || info->getColumns() != m_columns || info->getFrames() != m_frames )
 		{
 			m_lastError = wxT("dimensions of loaded files must be the same");
-			return -1;
+			return NULL;
 		}
 	}
 	
@@ -57,7 +54,7 @@ int TheDataset::load(wxString filename)
 		if (dataFile.Open(filename.BeforeLast('.')+ wxT(".ima")))
 		{
 			wxFileOffset nSize = dataFile.Length();
-			if (nSize == wxInvalidOffset) return -1;
+			if (nSize == wxInvalidOffset) return NULL;
 			
 			switch (info->getType())
 			{
@@ -67,7 +64,7 @@ int TheDataset::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] info->m_byteDataset;
-					return -1;
+					return NULL;
 				}
 				flag = true;
 			} break;
@@ -104,7 +101,7 @@ int TheDataset::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] info->m_floatDataset;
-					return -1;
+					return NULL;
 				}
 				flag = true;
 			} break;
@@ -116,7 +113,7 @@ int TheDataset::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] buffer;
-					return -1;
+					return NULL;
 				}
 				flag = true;
 
@@ -138,7 +135,7 @@ int TheDataset::load(wxString filename)
 			case ERROR:
 			default:
 				m_lastError = wxT("unsupported data file format");
-				return -1;
+				return NULL;
 			}
 		}
 		dataFile.Close();
@@ -146,50 +143,8 @@ int TheDataset::load(wxString filename)
 	
 	if (flag)
 	{
-		m_dsList->Append(info);
-		return m_dsList->GetCount();
+		return info;
 	}
-	return -1;
+	return NULL;
 }
 
-void TheDataset::removeNode(int item)
-{
-	if (item > m_dsList->size()) return;
-	wxDatasetListNode *node = m_dsList->Item(item);
-	m_dsList->DeleteNode(node);
-}
-
-void TheDataset::setThreshold(int item, float value)
-{
-	if (item > m_dsList->size()) return;
-	wxDatasetListNode *node = m_dsList->Item(item);
-	node->GetData()->setThreshold(value);
-}
-
-float TheDataset::getThreshold(int item)
-{
-	if (item > m_dsList->size()) return 0.0;
-	wxDatasetListNode *node = m_dsList->Item(item);
-	return node->GetData()->getThreshold();
-}
-
-bool TheDataset::toggleShow(int item)
-{
-	if (item > m_dsList->size()) return false;
-	wxDatasetListNode *node = m_dsList->Item(item);
-	return node->GetData()->toggleShow();
-}
-
-bool TheDataset::getShow(int item)
-{
-	if (item > m_dsList->size()) return false;
-	wxDatasetListNode *node = m_dsList->Item(item);
-	return node->GetData()->getShow();
-}
-
-int TheDataset::getType(int item)
-{
-	if (item > m_dsList->size()) return false;
-	wxDatasetListNode *node = m_dsList->Item(item);
-	return node->GetData()->getType();
-}

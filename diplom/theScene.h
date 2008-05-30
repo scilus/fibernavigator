@@ -36,6 +36,7 @@ public:
 	void initShaders();
 	
 	void setDataset(TheDataset*);
+	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
 	
 	void renderScene(int);
 	void renderNavView(int);
@@ -53,6 +54,7 @@ private:
 	FGLSLShaderProgram *m_textureShader; 
 	
 	TheDataset* m_dataset;
+	wxListCtrl* m_listctrl;
 	float m_blendThreshold;
 	
 	float m_xSize;

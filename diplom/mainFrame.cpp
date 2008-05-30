@@ -293,6 +293,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_scene = new TheScene();
     m_dataset = new TheDataset();
     m_scene->setDataset(m_dataset);
+    m_scene->setDataListCtrl(m_datasetListCtrl);
 
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
@@ -319,8 +320,8 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxString path = dialog.GetPath();
-		int dsPos = m_dataset->load(path); 
-		if ( dsPos == -1) 
+		DatasetInfo *info = m_dataset->load(path); 
+		if ( info == NULL) 
 		{
 			wxMessageBox(wxT("ERROR\n") + m_dataset->m_lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 			m_statusBar->SetStatusText(wxT("ERROR"),1);
@@ -333,7 +334,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_datasetListCtrl->SetItem(i, 1, dialog.GetFilename());
 		m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
 		m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
-		m_datasetListCtrl->SetItemData(i, dsPos);
+		m_datasetListCtrl->SetItemData(i, (long)info);
 		m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 		
 				
@@ -476,7 +477,8 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 	
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	m_datasetListCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
-	m_dataset->setThreshold(item, threshold);
+	DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(item);
+	info->setThreshold(threshold);
 	refreshAllGLWidgets();
 }
 
@@ -492,20 +494,21 @@ void MainFrame::refreshAllGLWidgets()
 void MainFrame::updateInfoString()
 {
 	m_textWindow->SetValue( wxT("") );
-	if (m_dataset->m_dsList->size() == 0) 
+	if (m_datasetListCtrl->GetItemCount() == 0) 
 	{
 		m_textWindow->SetValue( wxT("Nothing loaded") );
 		return;
 	}
 		
-	DatasetList::iterator iter;
 	wxString newString = wxT("");
-	for (iter = m_dataset->m_dsList->begin() ; iter != m_dataset->m_dsList->end() ; ++iter)
+	
+	for (int i = 0 ; i < m_datasetListCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo *info = *iter;
+		DatasetInfo* info = (DatasetInfo*)m_datasetListCtrl->GetItemData(i);
 		newString += info->getInfoString();
 		newString += wxT("\n\n");
 	}
+	
 	m_textWindow->SetValue( newString );
 
 }
@@ -594,11 +597,12 @@ void MainFrame::updateStatusBar()
 void MainFrame::OnActivateListItem(wxListEvent& event)
 {
 	int item = event.GetIndex();
+	DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(item);
 	int col = m_datasetListCtrl->getColClicked();
 	switch (col)
 	{
 	case 0:
-		if (m_dataset->toggleShow(item))
+		if (info->toggleShow())
 		{
 			m_datasetListCtrl->SetItem(item, 0, wxT(""), 0);
 		}
@@ -609,14 +613,13 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		refreshAllGLWidgets();
 		break;
 	case 3:
-		m_dataset->removeNode(item);
+		m_datasetListCtrl->DeleteItem(item);
 		updateInfoString();
 		m_mainGL->invalidate();
 		m_gl0->invalidate();
 		m_gl1->invalidate();
 		m_gl2->invalidate();
 		refreshAllGLWidgets();
-		m_datasetListCtrl->DeleteItem(item);
 		break;
 	default:
 		break;
@@ -626,5 +629,6 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 void MainFrame::OnSelectListItem(wxListEvent& event)
 {
 	int item = event.GetIndex();
-	m_tSlider->SetValue((int)(m_dataset->getThreshold(item) * 100));
+	DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(item);
+	m_tSlider->SetValue((int)info->getThreshold());
 }
