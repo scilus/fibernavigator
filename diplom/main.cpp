@@ -85,10 +85,6 @@ bool MyApp::OnInit(void)
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
   toolBar->AddSeparator();
-  wxSlider *tSlider = new wxSlider(toolBar, ID_T_SLIDER, 30, 0, 100, 
-      		wxPoint(0,0), wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-  frame->setTSlider(tSlider);
-  toolBar->AddControl(tSlider);
   
   toolBar->Realize();
   frame->SetToolBar(toolBar);

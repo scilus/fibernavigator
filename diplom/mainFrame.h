@@ -53,6 +53,8 @@ private:
     wxSashLayoutWindow* m_leftWindowHolder;
     wxSashLayoutWindow* m_leftWindowTop;
     wxSashLayoutWindow* m_leftWindowBottom;
+    wxSashLayoutWindow* m_leftWindowBottom1;
+    wxSashLayoutWindow* m_leftWindowBottom2;
     wxSashLayoutWindow* m_leftWindow;
     wxSashLayoutWindow* m_mainWindow;
     wxSashLayoutWindow* m_navWindow;
@@ -110,5 +112,8 @@ DECLARE_EVENT_TABLE()
 #define ID_Y_SLIDER 202
 #define ID_Z_SLIDER 203
 #define ID_T_SLIDER 204
+
+#define ID_BUTTON_UP 	211
+#define ID_BUTTON_DOWN 212
 
 #endif /*MAINFRAME_H_*/

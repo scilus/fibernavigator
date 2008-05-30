@@ -80,6 +80,32 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_leftWindowBottom = win;
     
+    win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY, 
+      		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_TOP);
+    win->SetBackgroundColour(wxColour(255, 0, 0));
+    m_leftWindowBottom1 = win;
+    
+    win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY, 
+      		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
+      		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+    win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
+    win->SetOrientation(wxLAYOUT_HORIZONTAL);
+    win->SetAlignment(wxLAYOUT_TOP);
+    win->SetBackgroundColour(wxColour(255, 255, 255));
+    m_leftWindowBottom2 = win;
+    
+    wxButton *button = new wxButton(m_leftWindowBottom2, ID_BUTTON_UP, wxT("up"), wxPoint(0,2), wxSize(50,19));
+    button->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
+    button = new wxButton(m_leftWindowBottom2, ID_BUTTON_DOWN, wxT("down"), wxPoint(50,2), wxSize(50,19));
+    button->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
+
+    m_tSlider = new wxSlider(m_leftWindowBottom2, ID_T_SLIDER, 30, 0, 100, 
+        		wxPoint(100,1), wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+
     
     win = new wxSashLayoutWindow(m_leftWindowTop, wxID_ANY,
                                wxDefaultPosition, wxSize(150, 30),
@@ -217,7 +243,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
     
     
-    m_datasetListCtrl = new MyListCtrl(m_leftWindowBottom, LIST_CTRL, wxDefaultPosition, 
+    m_datasetListCtrl = new MyListCtrl(m_leftWindowBottom1, LIST_CTRL, wxDefaultPosition, 
     		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
     
     wxImageList* imageList = new wxImageList(16,16);
@@ -384,6 +410,8 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_leftWindowHolder->SetDefaultSize(wxSize(150 + NAV_SIZE, height));
 	m_leftWindowTop->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
 	m_leftWindowBottom->SetDefaultSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
+	m_leftWindowBottom1->SetDefaultSize(wxSize(150 + NAV_SIZE, m_leftWindowBottom->GetClientSize().y - 20));
+	m_leftWindowBottom2->SetDefaultSize(wxSize(150 + NAV_SIZE, 20));
 	m_navWindow->SetDefaultSize(wxSize(NAV_SIZE, height));
 	m_topNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_middleNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
