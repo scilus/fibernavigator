@@ -580,7 +580,7 @@ void MainFrame::loadStandard()
 	m_zSlider->SetValue( m_dataset->m_frames/2);
 		
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-	
+	updateInfoString();
 	renewAllGLWidgets();
 	
 }
