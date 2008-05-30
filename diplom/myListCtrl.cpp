@@ -46,10 +46,12 @@ void MyListCtrl::moveItemUp(long item)
 {
 	if (item == 0) return;
 	swap (item - 1, item);
+	this->SetItemState(item - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
 void MyListCtrl::moveItemDown(long item)
 {
 	if (item == this->GetItemCount() - 1) return;
 	swap (item, item +1);
+	this->SetItemState(item + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
