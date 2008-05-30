@@ -88,6 +88,7 @@ void TheScene::assignTextures ()
 	wxDatasetListNode *node = m_dataset->m_dsList->GetFirst();
 	while (node)
 	{
+		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_3D, m_texNames[i++]);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
@@ -211,6 +212,12 @@ void TheScene::setShaderVars()
 	case 3:
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex2");
 		glUniform1i (texLoc, 2);
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex2");
+		glUniform1i (texLoc, m_dataset->getShow(2));
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex2");
+		glUniform1f (texLoc, m_dataset->getThreshold(2));
+		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex2");
+		glUniform1i (texLoc, m_dataset->getType(2));
 	case 2:
 		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex1");
 		glUniform1i (texLoc, 1);

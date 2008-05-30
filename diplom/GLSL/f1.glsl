@@ -61,20 +61,44 @@ void main()
 	{
 		if (typeTex1 == 3)
 		{
-			col1.r = clamp( texture3D(tex1, TexCoord).r - thresholdTex1, 0.0, 1.0);
-			col1.bg = vec2(0.0, 0.0);
-			if (col1.r >0.0)
+			col1.r = clamp( texture3D(tex1, TexCoord).r, 0.0, 1.0);
+			col1.bg = vec2(col1.r / 2.0);
+			if (col1.r - thresholdTex1 > 0.0)
 			{
 				col.rgb = col1.rgb;
 			}
 		}	
 		if (typeTex1 == 4)
 		{
-			col1.r = clamp( texture3D(tex1, TexCoord).r - thresholdTex1, 0.0, 1.0);
-			col1.g = clamp( texture3D(tex1, TexCoord).g - thresholdTex1, 0.0, 1.0);
-			col1.b = clamp( texture3D(tex1, TexCoord).b - thresholdTex1, 0.0, 1.0);
+			col1.r = clamp( texture3D(tex1, TexCoord).r , 0.0, 1.0);
+			col1.g = clamp( texture3D(tex1, TexCoord).g, 0.0, 1.0);
+			col1.b = clamp( texture3D(tex1, TexCoord).b, 0.0, 1.0);
 			
-			if (col1.r + col1.g + col1.b > 0.0)
+			if ( ((col1.r + col1.g + col1.b) / 3.0 - thresholdTex1) > 0.0)
+			{
+				col.rgb = col1.rgb;
+			}
+		}
+	}
+	
+	if (showTex2)
+	{
+		if (typeTex2 == 3)
+		{
+			col1.r = clamp( texture3D(tex2, TexCoord).r, 0.0, 1.0);
+			col1.bg = vec2(0.0, 0.0);
+			if (col1.r - thresholdTex2 > 0.0)
+			{
+				col.rgb = col1.rgb;
+			}
+		}	
+		if (typeTex2 == 4)
+		{
+			col1.r = clamp( texture3D(tex2, TexCoord).r , 0.0, 1.0);
+			col1.g = clamp( texture3D(tex2, TexCoord).g, 0.0, 1.0);
+			col1.b = clamp( texture3D(tex2, TexCoord).b, 0.0, 1.0);
+			
+			if ( ((col1.r + col1.g + col1.b) / 3.0 - thresholdTex2) > 0.0)
 			{
 				col.rgb = col1.rgb;
 			}

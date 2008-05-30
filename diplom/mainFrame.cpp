@@ -9,8 +9,6 @@
 #include "wx/laywin.h"
 #include "wx/filedlg.h"
 #include "wx/statbmp.h"
-//#include "wx/listctrl.h"
-//#include "wx/imaglist.h"
 
 #include "icons/eyes.xpm"
 #include "icons/delete.xpm"
@@ -451,7 +449,7 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	m_datasetListCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
 	m_dataset->setThreshold(item, threshold);
-	m_mainGL->render();
+	refreshAllGLWidgets();
 }
 
 void MainFrame::refreshAllGLWidgets()
