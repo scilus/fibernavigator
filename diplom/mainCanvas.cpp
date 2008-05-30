@@ -161,6 +161,17 @@ void MainCanvas::setScene(TheScene *scene)
 
 void MainCanvas::invalidate()
 {
-	(m_view == mainView) ? m_scene->m_mainTexAssigned = false : m_scene->m_navTexAssigned = false;
+	if (m_view == mainView)
+	{
+		SetCurrent(*m_scene->getMainGLContext());
+		m_scene->releaseTextures();
+		m_scene->m_mainTexAssigned = false;
+	}
+	else 
+	{
+		SetCurrent(*m_scene->getNavGLContext());
+		m_scene->releaseTextures();
+		m_scene->m_navTexAssigned = false;
+	}
 	m_init = false;
 }

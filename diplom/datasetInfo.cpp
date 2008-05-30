@@ -19,6 +19,24 @@ DatasetInfo::DatasetInfo()
 	m_show = true;
 }
 
+DatasetInfo::~DatasetInfo()
+{
+	switch (m_type)
+		{
+		case Head_byte:
+			delete m_byteDataset;
+			break;
+		case Overlay:
+			delete m_floatDataset;
+			break;
+		case RGB:
+			delete m_rgbDataset;
+			break;
+		default:
+			break;
+		}
+}
+
 bool DatasetInfo::load(wxString filename)
 {
 	// check file extension

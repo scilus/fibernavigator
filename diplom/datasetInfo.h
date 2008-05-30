@@ -49,7 +49,7 @@ public:
 	float *m_floatDataset;
 	
 	DatasetInfo();
-	~DatasetInfo(){};
+	~DatasetInfo();
 	
 	bool load(wxString filename);
 	

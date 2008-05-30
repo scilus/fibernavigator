@@ -488,6 +488,7 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 void MainFrame::refreshAllGLWidgets()
 {
 	updateStatusBar();
+	updateInfoString();
 	m_gl0->render();
 	m_gl1->render();
 	m_gl2->render();
@@ -598,10 +599,10 @@ void MainFrame::OnReloadShaders(wxCommandEvent& event)
 void MainFrame::OnNew(wxCommandEvent& event)
 {
 	m_datasetListCtrl->DeleteAllItems();
-	free (m_dataset);
+	delete m_dataset;
 	m_dataset = new TheDataset();
 	m_scene->releaseTextures();
-	free (m_scene);
+	delete m_scene;
 	m_scene = new TheScene();
 	m_scene->setDataset(m_dataset);
 	m_scene->setDataListCtrl(m_datasetListCtrl);
@@ -642,6 +643,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		refreshAllGLWidgets();
 		break;
 	case 3:
+		delete info;
 		m_datasetListCtrl->DeleteItem(item);
 		renewAllGLWidgets();
 		break;
@@ -653,6 +655,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 void MainFrame::OnSelectListItem(wxListEvent& event)
 {
 	int item = event.GetIndex();
+	if (item == -1) return;
 	DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(item);
 	m_tSlider->SetValue((int)(info->getThreshold()*100));
 }
@@ -660,6 +663,7 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 void MainFrame::OnListItemUp(wxCommandEvent& event)
 {
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
 	m_datasetListCtrl->moveItemUp(item);
 	renewAllGLWidgets();
 }
@@ -667,6 +671,7 @@ void MainFrame::OnListItemUp(wxCommandEvent& event)
 void MainFrame::OnListItemDown(wxCommandEvent& event)
 {
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
 	m_datasetListCtrl->moveItemDown(item);
 	renewAllGLWidgets();
 }
