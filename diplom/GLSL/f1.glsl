@@ -84,7 +84,7 @@ void main()
 				col.rgb = defaultColorMap( col1.r);
 			}
 		}	
-		if (typeTex0 == 1 || typeTex0 == 4)
+		if (typeTex0 == 1 || typeTex0 == 2 || typeTex0 == 4)
 		{
 			col1.r = clamp( texture3D(tex0, TexCoord).r , 0.0, 1.0);
 			col1.g = clamp( texture3D(tex0, TexCoord).g, 0.0, 1.0);
@@ -109,7 +109,7 @@ void main()
 				col.rgb = defaultColorMap( col1.r);
 			}
 		}	
-		if (typeTex1 == 1 || typeTex1 == 4)
+		if (typeTex1 == 1 || typeTex1 == 2 || typeTex1 == 4)
 		{
 			col1.r = clamp( texture3D(tex1, TexCoord).r , 0.0, 1.0);
 			col1.g = clamp( texture3D(tex1, TexCoord).g, 0.0, 1.0);
@@ -134,7 +134,7 @@ void main()
 				col.rgb = defaultColorMap( col1.r);
 			}
 		}	
-		if (typeTex2 == 1 || typeTex2 == 4)
+		if (typeTex2 == 1 || typeTex2 == 2 || typeTex2 == 4)
 		{
 			col1.r = clamp( texture3D(tex2, TexCoord).r , 0.0, 1.0);
 			col1.g = clamp( texture3D(tex2, TexCoord).g, 0.0, 1.0);

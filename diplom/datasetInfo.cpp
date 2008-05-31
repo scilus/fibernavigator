@@ -26,6 +26,9 @@ DatasetInfo::~DatasetInfo()
 		case Head_byte:
 			delete m_byteDataset;
 			break;
+		case Head_short:
+			delete m_shortDataset;
+			break;
 		case Overlay:
 			delete m_floatDataset;
 			break;
@@ -111,10 +114,13 @@ bool DatasetInfo::load(wxString filename)
 	
 	if (m_repn.Cmp(wxT("ubyte")) == 0)
 	{
-		if (m_bands / m_frames == 1)
+		if (m_bands / m_frames == 1) {
+			printf("huhu\n");
 			m_type = Head_byte;
-		else if (m_bands / m_frames == 3)
+		}
+		else if (m_bands / m_frames == 3) {
 			m_type = RGB;
+		}
 		else m_type = ERROR;
 	}
 	else if (m_repn.Cmp(wxT("short")) == 0) m_type = Head_short;
@@ -141,10 +147,22 @@ void DatasetInfo::generateTexture()
 			GL_UNSIGNED_BYTE,
 			m_byteDataset);
 		break;
+	case Head_short:
+		glTexImage3D(GL_TEXTURE_3D, 
+			0, 
+			GL_RGBA, 
+			m_columns, 
+			m_rows,
+			m_frames,
+			0, 
+			GL_LUMINANCE, 
+			GL_UNSIGNED_SHORT,
+			m_shortDataset);
+		break;
 	case Overlay:
 		glTexImage3D(GL_TEXTURE_3D, 
 			0, 
-			GL_RGB, 
+			GL_RGBA, 
 			m_columns, 
 			m_rows,
 			m_frames,			
@@ -178,8 +196,8 @@ wxString DatasetInfo::getInfoString()
 	infoString1.Empty();
 	infoString2.Empty();
 	infoString3.Empty();
-	infoString1 = wxString::Format(wxT("Length: %d\nBands: %d\nFrames: %d\nRows: %d\nColumns: %d\nRepn: "), 
-			this->m_length, this->m_bands, this->m_frames, this->m_rows, this->m_columns) + this->m_repn;
-	infoString2 = wxString::Format(wxT("\nx Voxel: %.2f\ny Voxel: %.2f\nz Voxel: %.2f"), this->m_xVoxel, this->m_yVoxel, this->m_zVoxel);
+	infoString1 = wxString::Format(wxT("Length: %d\nBands: %d\nFrames: %d\nRows: %d\nColumns: %d\nTyp: %d\nRepn: "), 
+			m_length, m_bands, m_frames, m_rows, m_columns, m_type) + m_repn;
+	infoString2 = wxString::Format(wxT("\nx Voxel: %.2f\ny Voxel: %.2f\nz Voxel: %.2f"), m_xVoxel, m_yVoxel, m_zVoxel);
 	return m_name + wxT(":\n") + infoString1;
 }

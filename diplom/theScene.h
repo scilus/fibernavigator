@@ -26,8 +26,6 @@ public:
 	bool m_showXSlize;
 	bool m_showYSlize;
 	bool m_showZSlize;
-	bool m_showOverlay;
-	bool m_showRGB;
 	
 	TheScene();
 	~TheScene();

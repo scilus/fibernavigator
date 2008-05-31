@@ -17,8 +17,6 @@ TheScene::TheScene()
 	m_showXSlize = true;
 	m_showYSlize = true;
 	m_showZSlize = true;
-	m_showOverlay = false;
-	m_showRGB = false;
 	m_textureShader = 0;
 	
 	m_xOffset0 = 0.0;
@@ -126,11 +124,13 @@ void TheScene::setDataset(TheDataset *dataset)
 	}
 	else
 		m_xOffset0 = (1.0 - m_ratio0) / 2.0;
+	
 	if (m_ratio1 > 1.0) {
 		m_yOffset1 = (1.0 - (1.0 / m_ratio1)) / 2.0; 
 	}
 	else
 		m_xOffset1 = (1.0 - m_ratio1) / 2.0;
+	
 	if (m_ratio2 > 1.0) {
 		m_yOffset2 = (1.0 - (1.0 / m_ratio2)) / 2.0; 
 	}
@@ -308,10 +308,10 @@ void TheScene::renderNavView(int view)
 			break;
 		case coronal:
 			glBegin(GL_QUADS);
-		    	glTexCoord3f(1.0, m_ySlize, 0.0); glVertex3f(1.0 - m_xOffset1,1.0 - m_xOffset1, 0.0);
-		    	glTexCoord3f(1.0, m_ySlize, 1.0); glVertex3f(1.0 - m_xOffset1,0.0 + m_xOffset1, 0.0);
-		    	glTexCoord3f(0.0, m_ySlize, 1.0); glVertex3f(0.0 + m_xOffset1,0.0 + m_xOffset1, 0.0);
-		    	glTexCoord3f(0.0, m_ySlize, 0.0); glVertex3f(0.0 + m_xOffset1,1.0 - m_xOffset1, 0.0);
+		    	glTexCoord3f(1.0, m_ySlize, 0.0); glVertex3f(1.0 - m_xOffset1,1.0 - m_yOffset1, 0.0);
+		    	glTexCoord3f(1.0, m_ySlize, 1.0); glVertex3f(1.0 - m_xOffset1,0.0 + m_yOffset1, 0.0);
+		    	glTexCoord3f(0.0, m_ySlize, 1.0); glVertex3f(0.0 + m_xOffset1,0.0 + m_yOffset1, 0.0);
+		    	glTexCoord3f(0.0, m_ySlize, 0.0); glVertex3f(0.0 + m_xOffset1,1.0 - m_yOffset1, 0.0);
 		    glEnd();
 		    xline = m_xLine;
 		    yline = 1.0 - m_zLine;
@@ -358,7 +358,7 @@ void TheScene::updateView(float x, float y, float z)
 	
 	if ( m_ratio0 < 1.0) m_xLine = ( m_xSlize * m_ratio0 ) + ( 1.0 - m_ratio0 ) / 2.0;
 	if ( m_ratio2 > 1.0) m_zLine = ( m_zSlize / m_ratio2 ) + ( 1.0 - (1.0/m_ratio2) ) / 2.0;
-	if ( m_ratio1 < 1.0) m_zLine = ( m_zSlize * m_ratio1 ) + ( 1.0 - m_ratio1 ) / 2.0;
+	//if ( m_ratio1 < 1.0) m_zLine = ( m_zSlize * m_ratio1 ) + ( 1.0 - m_ratio1 ) / 2.0;
 	if ( m_ratio1 > 1.0) m_xLine = ( m_xSlize / m_ratio1 ) + ( 1.0 - (1.0/m_ratio1) ) / 2.0;
 }
 

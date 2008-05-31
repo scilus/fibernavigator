@@ -34,9 +34,6 @@ DatasetInfo* TheDataset::load(wxString filename)
 			m_lastError = wxT("couldn't parse header file");
 			return NULL;
 		}
-		m_rows = info->getRows();
-		m_columns = info->getColumns();
-		m_frames = info->getFrames();
 	}
 	else
 	{
@@ -70,30 +67,21 @@ DatasetInfo* TheDataset::load(wxString filename)
 			} break;
 
 			case Head_short: {
-				/*
-				m_dataHead = new float[nSize];
-				wxFileInputStream input(filename.BeforeLast('.') + wxT(".ima"));
-				if (!input.Ok()) return false;
-				wxDataInputStream data( input );
-				float temp;
-				float max = 0.0;
-				for (int i = 0 ; i < nSize/2 ; ++ i)
-				{
-					temp =  data.Read16();
-				    m_dataHead[2*i] = temp;
-				    m_dataHead[2*i + 1] = temp;
-				    max = wxMax(max, (float)temp);
-				}
-				for (int i = 0 ; i < nSize/2 ; ++ i)
-				{
-				    m_dataHead[2*i] /= max;
-				    m_dataHead[2*i + 1] /= max;
-				}
-				m_headLoaded = flag;
-				m_headInfo = info;
-				flag = true;
-				*/
-			} break;
+				info->m_shortDataset = new wxUint16[nSize/2];
+					if (dataFile.Read(info->m_shortDataset, (size_t) nSize) != nSize)
+					{
+						dataFile.Close();
+						delete[] info->m_shortDataset;
+						return NULL;
+					}
+					flag = true;
+					wxUint16 max = 0;
+					for ( int i = 0 ; i < sizeof(info->m_shortDataset) ; ++i)
+					{
+						max = wxMax(max, info->m_shortDataset[i]);
+					}
+					printf("max: %d\n", max);
+				} break;
 			
 			case Overlay: {
 				info->m_floatDataset = new float[nSize/4];
@@ -143,6 +131,9 @@ DatasetInfo* TheDataset::load(wxString filename)
 	
 	if (flag)
 	{
+		m_rows = info->getRows();
+		m_columns = info->getColumns();
+		m_frames = info->getFrames();
 		return info;
 	}
 	return NULL;

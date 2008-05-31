@@ -45,6 +45,7 @@ private:
 	
 public:	
 	wxUint8 *m_byteDataset;
+	wxUint16 *m_shortDataset;
 	wxUint8 *m_rgbDataset;
 	float *m_floatDataset;
 	
