@@ -100,6 +100,13 @@ void TheScene::assignTextures ()
 	}
 }
 
+void TheScene::swapTextures(int a, int b)
+{
+	GLuint temp = m_texNames[a];
+	m_texNames[a] = m_texNames[b];
+	m_texNames[b] = temp;
+}
+
 void TheScene::setDataset(TheDataset *dataset)
 {
 	m_dataset = dataset;

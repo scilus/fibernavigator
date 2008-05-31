@@ -34,6 +34,7 @@ public:
 	void initMainGL();
 	void initNavGL();
 	void assignTextures();
+	void swapTextures(int, int);
 	void initShaders();
 	
 	void setDataset(TheDataset*);

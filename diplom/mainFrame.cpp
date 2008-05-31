@@ -488,7 +488,6 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 void MainFrame::refreshAllGLWidgets()
 {
 	updateStatusBar();
-	updateInfoString();
 	m_gl0->render();
 	m_gl1->render();
 	m_gl2->render();
@@ -502,6 +501,7 @@ void MainFrame::renewAllGLWidgets()
 	m_gl1->invalidate();
 	m_gl2->invalidate();
 	refreshAllGLWidgets();
+	updateInfoString();
 }
 
 void MainFrame::updateInfoString()
@@ -665,7 +665,8 @@ void MainFrame::OnListItemUp(wxCommandEvent& event)
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
 	m_datasetListCtrl->moveItemUp(item);
-	renewAllGLWidgets();
+	if (item > 0) m_scene->swapTextures(item, item -1);
+	refreshAllGLWidgets();
 }
     
 void MainFrame::OnListItemDown(wxCommandEvent& event)
@@ -673,7 +674,8 @@ void MainFrame::OnListItemDown(wxCommandEvent& event)
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
 	m_datasetListCtrl->moveItemDown(item);
-	renewAllGLWidgets();
+	if (item < m_datasetListCtrl->GetItemCount() - 1) m_scene->swapTextures(item, item + 1);
+	refreshAllGLWidgets();
 }
 
 
