@@ -378,21 +378,23 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	
 	switch (event.GetInt())
 	{
-	case 0:
+	case axial:
 		pos = m_gl0->getMousePos();
 		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_columns));
 		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_rows));
 		break;
-	case 1:
+	case coronal:
 		pos = m_gl1->getMousePos();
 		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_columns));
 		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_frames));
 		break;
-	case 2:
+	case sagittal:
 		pos = m_gl2->getMousePos();
 		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_rows));
 		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_frames));
 		break;
+	case mainView:
+		printf("main gl mouse event\n");
 	}
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	updateStatusBar();

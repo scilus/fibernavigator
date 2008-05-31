@@ -21,6 +21,26 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_view = view;
 	m_XPos = 0;
 	m_YPos = 0;
+	
+	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,				// NEW: Final Transform
+	                       0.0f,  1.0f,  0.0f,  0.0f,
+	                       0.0f,  0.0f,  1.0f,  0.0f,
+	                       0.0f,  0.0f,  0.0f,  1.0f };
+	m_transform = m_transform1;
+		   
+	Matrix3fT idMat = {  1.0f,  0.0f,  0.0f,					// NEW: Last Rotation
+	                   0.0f,  1.0f,  0.0f,
+	                   0.0f,  0.0f,  1.0f };
+
+	m_thisRot = idMat;
+	m_lastRot = idMat;
+	m_isClicked  = false;										// NEW: Clicking The Mouse?
+	m_isRClicked = false;										// NEW: Clicking The Right Mouse Button?
+	m_isDragging = false;					                    // NEW: Dragging The Mouse?
+	m_arcBall = new ArcBallT(640.0f, 480.0f); 
+	
+	
+
 }
 
 void MainCanvas::init()
@@ -61,64 +81,69 @@ void MainCanvas::OnSize(wxSizeEvent& event)
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
     int w, h;
     GetClientSize(&w, &h);
-    {
-    	switch (m_view)
-    	{
-    	case mainView:
-    		if (!m_scene->m_mainTexAssigned)
-    			SetCurrent();
-    		else
-    			SetCurrent(*m_scene->getMainGLContext());
-    		break;
-    	default:
-    		if (!m_scene->m_navTexAssigned)
-    			SetCurrent();
-    		else
-    			SetCurrent(*m_scene->getNavGLContext());
-    		break;
-    	}
-        glViewport(0, 0, (GLint) w, (GLint) h);
-    }
     
+	switch (m_view)
+	{
+	case mainView:
+		if (!m_scene->m_mainTexAssigned)
+			SetCurrent();
+		else
+			SetCurrent(*m_scene->getMainGLContext());
+		break;
+	default:
+		if (!m_scene->m_navTexAssigned)
+			SetCurrent();
+		else
+			SetCurrent(*m_scene->getNavGLContext());
+		break;
+	}
+    glViewport(0, 0, (GLint) w, (GLint) h);
+    m_arcBall->setBounds((GLfloat)w, (GLfloat)h);    
 }
 
 void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 {
+	wxCommandEvent event1( wxEVT_NAVGL_EVENT, GetId() );
+	event1.SetInt(m_view);
+	
 	switch (m_view)
 	{
 		case mainView: {
-			static int dragging = 0;
-			
+			m_mousePt.s.X = event.GetPosition().x;
+			m_mousePt.s.Y = event.GetPosition().y;
 			if(event.LeftIsDown())
 			{
-			    if(!dragging)
+				if (!m_isDragging)												// Not Dragging
 			    {
-			        dragging = 1;
+			      	m_isDragging = true;										// Prepare For Dragging
+					m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
+					m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
 			    }
 			    else
 			    {
-			        m_yrot += (event.GetX() - m_XPos);
-			        m_xrot += (event.GetY() - m_YPos);
-			        Refresh(false);
+		            Quat4fT     ThisQuat;
+
+		            m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
+		            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
+		            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
+		            Matrix4fSetRotationFromMatrix3f(&m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
+		            Refresh(false);
 			    }
-			    m_XPos = event.GetX();
-			    m_YPos = event.GetY();
 			}
-			else
-			    dragging = 0;
+			else 
+				m_isDragging = false;
+			
 		} break;
 		
-		default: {
+		default: 
 			m_clicked = event.GetPosition();
 			if (event.LeftUp() || event.Dragging()) 
 			{
-				wxCommandEvent event1( wxEVT_NAVGL_EVENT, GetId() );
 				event1.SetEventObject( (wxObject*) new wxPoint( event.GetPosition()) );
-				event1.SetInt(m_view);
 				GetEventHandler()->ProcessEvent( event1 );
 			}
-		}
 	}
+	
 }
 
 wxPoint MainCanvas::getMousePos()
@@ -149,11 +174,10 @@ void MainCanvas::render()
     switch (m_view)
     {
     case mainView: {
-	    glPushMatrix();
-	    glRotatef( m_yrot, 0.0f, 1.0f, 0.0f );
-	    glRotatef( m_xrot, 1.0f, 0.0f, 0.0f );
+    	glPushMatrix();													// NEW: Prepare Dynamic Transform
+	    glMultMatrixf(m_transform.M);										// NEW: Apply Dynamic Transform
 	    m_scene->renderScene(m_view);
-	    glPopMatrix();
+	    glPopMatrix();	
 	    break;
     }
     default:

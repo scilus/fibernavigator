@@ -10,6 +10,7 @@
 #include "theDataset.h"
 
 #include "GLSL/GLSLShaderProgram.h"
+#include "ArcBall.h"
 #include "wx/glcanvas.h"
 
 enum {
