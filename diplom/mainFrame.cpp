@@ -105,7 +105,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     button->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
 
     m_tSlider = new wxSlider(m_leftWindowBottom2, ID_T_SLIDER, 30, 0, 100, 
-        		wxPoint(100,1), wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+        		wxPoint(100,2), wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
     
     win = new wxSashLayoutWindow(m_leftWindowTop, wxID_ANY,

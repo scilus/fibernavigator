@@ -75,8 +75,27 @@ void main()
 	
 	if (showTex0)
 	{
-		col = texture3D(tex0, TexCoord);
-		col.a = clamp ((col.r + col.g + col.b)/3.0 - thresholdTex0, 0.0, 1.0);	
+		if ( typeTex0 == 3 )
+		{
+			col1.r = clamp( texture3D(tex0, TexCoord).r, 0.0, 1.0);
+			
+			if (col1.r - thresholdTex0 > 0.0)
+			{
+				col.rgb = defaultColorMap( col1.r);
+			}
+		}	
+		if (typeTex0 == 1 || typeTex0 == 4)
+		{
+			col1.r = clamp( texture3D(tex0, TexCoord).r , 0.0, 1.0);
+			col1.g = clamp( texture3D(tex0, TexCoord).g, 0.0, 1.0);
+			col1.b = clamp( texture3D(tex0, TexCoord).b, 0.0, 1.0);
+			
+			if ( ((col1.r + col1.g + col1.b) / 3.0 - thresholdTex0) > 0.0)
+			{
+				col.rgb = col1.rgb;
+			}
+		}
+		col.a = clamp ((col.r + col.g + col.b)/3.0 - thresholdTex0, 0.0, 1.0);
 	}
 	
 	if (showTex1)
@@ -90,7 +109,7 @@ void main()
 				col.rgb = defaultColorMap( col1.r);
 			}
 		}	
-		if (typeTex1 == 4)
+		if (typeTex1 == 1 || typeTex1 == 4)
 		{
 			col1.r = clamp( texture3D(tex1, TexCoord).r , 0.0, 1.0);
 			col1.g = clamp( texture3D(tex1, TexCoord).g, 0.0, 1.0);
@@ -101,6 +120,7 @@ void main()
 				col.rgb = col1.rgb;
 			}
 		}
+		col.a = max(col.a, clamp ((col.r + col.g + col.b)/3.0 - thresholdTex1, 0.0, 1.0));
 	}
 	
 	if (showTex2)
@@ -114,7 +134,7 @@ void main()
 				col.rgb = defaultColorMap( col1.r);
 			}
 		}	
-		if (typeTex2 == 4)
+		if (typeTex2 == 1 || typeTex2 == 4)
 		{
 			col1.r = clamp( texture3D(tex2, TexCoord).r , 0.0, 1.0);
 			col1.g = clamp( texture3D(tex2, TexCoord).g, 0.0, 1.0);
@@ -125,6 +145,7 @@ void main()
 				col.rgb = col1.rgb;
 			}
 		}
+		col.a = max(col.a, clamp ((col.r + col.g + col.b)/3.0 - thresholdTex2, 0.0, 1.0));	
 	}
 		
 	gl_FragColor = col;
