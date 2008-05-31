@@ -22,25 +22,31 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_XPos = 0;
 	m_YPos = 0;
 	
-	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,				// NEW: Final Transform
+	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
 	                       0.0f,  0.0f,  1.0f,  0.0f,
 	                       0.0f,  0.0f,  0.0f,  1.0f };
+	/*
+	Matrix4fT m_transform2   = {-0.62f,  0.25f,  -0.75f,  0.0f,
+		                       	 0.78f,  0.32f,  -0.54f,  0.0f,
+		                        -0.11f, -0.91f,  -0.39f,  0.0f,
+		                         0.0f,   0.0f,     0.0f,  1.0f };
+	*/
 	m_transform = m_transform1;
 		   
-	Matrix3fT idMat = {  1.0f,  0.0f,  0.0f,					// NEW: Last Rotation
-	                   0.0f,  1.0f,  0.0f,
-	                   0.0f,  0.0f,  1.0f };
-
+	Matrix3fT idMat = {  1.0f,  0.0f,  0.0f,
+	                     0.0f,  1.0f,  0.0f,
+	                     0.0f,  0.0f,  1.0f };
+	/*
+	Matrix3fT lastRot1   = {  -0.62f,  0.25f,  -0.75f,
+			                   0.78f,  0.32f,  -0.54f,
+			                  -0.11f, -0.91f,  -0.39f};
+	*/
 	m_thisRot = idMat;
 	m_lastRot = idMat;
-	m_isClicked  = false;										// NEW: Clicking The Mouse?
-	m_isRClicked = false;										// NEW: Clicking The Right Mouse Button?
-	m_isDragging = false;					                    // NEW: Dragging The Mouse?
+	
+	m_isDragging = true;					                    // NEW: Dragging The Mouse?
 	m_arcBall = new ArcBallT(640.0f, 480.0f); 
-	
-	
-
 }
 
 void MainCanvas::init()
@@ -111,11 +117,36 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		case mainView: {
 			m_mousePt.s.X = event.GetPosition().x;
 			m_mousePt.s.Y = event.GetPosition().y;
+			
+			if (event.RightIsDown())												// If Right Mouse Clicked, Reset All Rotations
+		    {
+				printf("\n%.2f : %.2f : %.2f\n", m_transform.s.XX, m_transform.s.XY, m_transform.s.XZ );
+				printf("%.2f : %.2f : %.2f\n", m_transform.s.YX, m_transform.s.YY, m_transform.s.YZ);
+				printf("%.2f : %.2f : %.2f\n", m_transform.s.ZX, m_transform.s.ZY, m_transform.s.ZZ);
+				
+				printf("\n%.2f : %.2f : %.2f\n", m_lastRot.s.XX, m_lastRot.s.XY, m_lastRot.s.XZ );
+				printf("%.2f : %.2f : %.2f\n", m_lastRot.s.YX, m_lastRot.s.YY, m_lastRot.s.YZ);
+				printf("%.2f : %.2f : %.2f\n", m_lastRot.s.ZX, m_lastRot.s.ZY, m_lastRot.s.ZZ);
+				
+				printf("\n%.2f : %.2f : %.2f\n", m_thisRot.s.XX, m_thisRot.s.XY, m_thisRot.s.XZ );
+				printf("%.2f : %.2f : %.2f\n", m_thisRot.s.YX, m_thisRot.s.YY, m_thisRot.s.YZ);
+				printf("%.2f : %.2f : %.2f\n", m_thisRot.s.ZX, m_thisRot.s.ZY, m_thisRot.s.ZZ);
+				
+				/*
+				Matrix3fSetZero(&m_lastRot);
+				Matrix3fSetIdentity(&m_lastRot);								// Reset Rotation
+				Matrix3fSetZero(&m_thisRot);
+				Matrix3fSetIdentity(&m_thisRot);								// Reset Rotation
+		        Matrix4fSetRotationFromMatrix3f(&m_transform, &m_thisRot);		// Reset Rotation
+		        Refresh(false);
+		        */
+		    }
+			
 			if(event.LeftIsDown())
 			{
 				if (!m_isDragging)												// Not Dragging
 			    {
-			      	m_isDragging = true;										// Prepare For Dragging
+					m_isDragging = true;										// Prepare For Dragging
 					m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
 					m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
 			    }

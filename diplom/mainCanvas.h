@@ -50,8 +50,7 @@ private:
 	 Matrix4fT m_transform;
 	 Matrix3fT m_lastRot;  
 	 Matrix3fT m_thisRot ; 
-	 bool m_isClicked;
-	 bool m_isRClicked;
+
 	 bool m_isDragging;
 	 ArcBallT   *m_arcBall;
 	 Point2fT    m_mousePt;
