@@ -491,6 +491,8 @@ void MainFrame::refreshAllGLWidgets()
 {
 	m_mainGL->render();
 	m_gl0->render();
+	// TODO why do i need to call it twice?
+	m_gl0->render();
 	m_gl1->render();
 	m_gl2->render();
 	updateStatusBar();
@@ -601,16 +603,16 @@ void MainFrame::OnReloadShaders(wxCommandEvent& event)
 void MainFrame::OnNew(wxCommandEvent& event)
 {
 	m_datasetListCtrl->DeleteAllItems();
+	m_mainGL->invalidate();
 	delete m_dataset;
 	m_dataset = new TheDataset();
-	m_scene->releaseTextures();
 	delete m_scene;
 	m_scene = new TheScene();
 	m_scene->setDataset(m_dataset);
 	m_scene->setDataListCtrl(m_datasetListCtrl);
 	m_scene->setMainGLContext(new wxGLContext(m_mainGL));
-	m_scene->setNavGLContext(new wxGLContext(m_gl0));
-	    
+	m_scene->setNavGLContext(new wxGLContext(m_gl0, m_scene->getMainGLContext()));
+
 	m_mainGL->setScene(m_scene);
 	m_gl0->setScene(m_scene);
 	m_gl1->setScene(m_scene);

@@ -333,7 +333,6 @@ void TheScene::renderNavView(int view)
 	
 	glDisable(GL_TEXTURE_3D);
 	
-
 	m_textureShader->release();
 	
 	glColor3f(1.0, 0.0, 0.0);

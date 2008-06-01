@@ -206,8 +206,10 @@ void MainCanvas::setScene(TheScene *scene)
 
 void MainCanvas::invalidate()
 {
-	SetCurrent(*m_scene->getMainGLContext());
-	m_scene->releaseTextures();
-	m_scene->m_texAssigned = false;
+	if (m_scene->m_texAssigned) {
+		SetCurrent(*m_scene->getMainGLContext());
+		m_scene->releaseTextures();
+		m_scene->m_texAssigned = false;
+	}
 	m_init = false;
 }
