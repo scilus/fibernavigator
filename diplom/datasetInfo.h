@@ -78,6 +78,4 @@ public:
 
 };
 
-WX_DECLARE_LIST(DatasetInfo, DatasetList);
-
 #endif /*DATASETINFO_H_*/

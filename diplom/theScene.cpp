@@ -1,7 +1,5 @@
 #include "theScene.h"
 
-
-
 TheScene::TheScene()
 {
 	m_countTextures = 0;
@@ -32,7 +30,7 @@ TheScene::~TheScene()
 	glDeleteTextures(10, m_texNames);
 }
 
-void TheScene::initMainGL()
+void TheScene::initGL(int view)
 {
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -40,43 +38,51 @@ void TheScene::initMainGL()
 	  /* Problem: glewInit failed, something is seriously wrong. */
 	  printf("Error: %s\n", glewGetErrorString(err));
 	}
+	(view == mainView) ? printf("Main View: ") : printf("Nav View: %d ", view);
 	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-	
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glFrustum( -0.52, 0.52, -0.52, 0.52, 5.0, 25.0 );
-	
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef( 0.0, 0.0, -6.0 );
-	
-	glShadeModel(GL_FLAT);
-	glEnable(GL_DOUBLEBUFFER);
-	glEnable(GL_DEPTH_TEST);
-	
-	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
-	glEnable(GL_ALPHA_TEST);
-}
 
-void TheScene::initNavGL()
-{
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
+	switch (view)
 	{
-	  /* Problem: glewInit failed, something is seriously wrong. */
-	  printf("Error: %s\n", glewGetErrorString(err));
-	}
-	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+	case mainView:
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glFrustum( -0.52, 0.52, -0.52, 0.52, 5.0, 25.0 );
 		
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
-	
-	glShadeModel(GL_FLAT);
-	glEnable(GL_DOUBLEBUFFER);
-	glEnable(GL_DEPTH_TEST);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef( 0.0, 0.0, -6.0 );
+		
+		glShadeModel(GL_FLAT);
+		glEnable(GL_DOUBLEBUFFER);
+		glEnable(GL_DEPTH_TEST);
+		
+		glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
+		glEnable(GL_ALPHA_TEST);
+		
+		if (!m_mainTexAssigned) {
+			assignTextures();
+			m_mainTexAssigned = true;
+			initShaders();
+		}
+		break;
+	default:
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
+		
+		glShadeModel(GL_FLAT);
+		glEnable(GL_DOUBLEBUFFER);
+		glEnable(GL_DEPTH_TEST);
+			
+		if (!m_navTexAssigned) {
+			assignTextures();
+			m_navTexAssigned = true;
+			initShaders();
+		}
+		break;
+	}	
 }
 
 void TheScene::assignTextures ()

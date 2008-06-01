@@ -679,6 +679,3 @@ void MainFrame::OnListItemDown(wxCommandEvent& event)
 	if (item < m_datasetListCtrl->GetItemCount() - 1) m_scene->swapTextures(item, item + 1);
 	refreshAllGLWidgets();
 }
-
-
-

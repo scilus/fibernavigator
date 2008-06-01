@@ -17,7 +17,7 @@ FGLSLShaderProgram::~FGLSLShaderProgram()
   m_shaderProgram = 0;
 }
 
-void FGLSLShaderProgram::link( GLSLShader *vertex, GLSLShader *fragment)
+bool FGLSLShaderProgram::link( GLSLShader *vertex, GLSLShader *fragment)
 {
 	m_vertex = vertex;
 	m_fragment = fragment;
@@ -26,7 +26,13 @@ void FGLSLShaderProgram::link( GLSLShader *vertex, GLSLShader *fragment)
 	glDeleteShader( m_vertex->getShaderID());
 	glDeleteShader( m_fragment->getShaderID());
 	glLinkProgram(m_shaderProgram);
-	printCompilerLog(m_shaderProgram);
+	GLint linked;
+	glGetProgramiv (m_shaderProgram, GL_LINK_STATUS, &linked);
+	if (!linked) {
+		printCompilerLog(m_shaderProgram);
+		return false;
+	}
+	return true;
 }
 
 void FGLSLShaderProgram::unlink()

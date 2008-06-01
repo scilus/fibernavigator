@@ -30,8 +30,7 @@ public:
 	TheScene();
 	~TheScene();
 	
-	void initMainGL();
-	void initNavGL();
+	void initGL(int);
 	void assignTextures();
 	void swapTextures(int, int);
 	void initShaders();

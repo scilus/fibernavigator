@@ -51,25 +51,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 
 void MainCanvas::init()
 {
-	switch (m_view)
-	{
-	case mainView:
-		m_scene->initMainGL();
-		if (!m_scene->m_mainTexAssigned)
-		{
-			m_scene->assignTextures();
-			m_scene->m_mainTexAssigned = true;
-		}
-		break;
-	default:
-		m_scene->initNavGL();
-		if (!m_scene->m_navTexAssigned)
-		{
-			m_scene->assignTextures();
-			m_scene->m_navTexAssigned = true;
-		}
-	}
-	m_scene->initShaders();
+	m_scene->initGL(m_view);
 	m_init = true;
 }
 

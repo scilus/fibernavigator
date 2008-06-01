@@ -46,7 +46,6 @@ bool DatasetInfo::load(wxString filename)
 	wxString ext = filename.substr(filename.Length()-3,3);
 	if (ext != wxT("hea")) return false;
 	m_name = filename.AfterLast('/');
-	//m_name = m_name.BeforeLast('.');
 	// read header file
 	wxTextFile headerFile;
 	bool flag = false;
@@ -115,7 +114,6 @@ bool DatasetInfo::load(wxString filename)
 	if (m_repn.Cmp(wxT("ubyte")) == 0)
 	{
 		if (m_bands / m_frames == 1) {
-			printf("huhu\n");
 			m_type = Head_byte;
 		}
 		else if (m_bands / m_frames == 3) {

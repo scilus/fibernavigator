@@ -19,7 +19,7 @@ public:
     /**
      * link a vertex and a fragement program to the shader
      */
-    void link( GLSLShader*, GLSLShader*);
+    bool link( GLSLShader*, GLSLShader*);
 
     /**
     * unlink
