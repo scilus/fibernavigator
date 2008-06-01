@@ -42,10 +42,6 @@ private:
 	 TheScene 	*m_scene;
 	 wxPoint 	m_clicked;
 	 int 		m_view;
-	 int		m_XPos;
-	 int		m_YPos;
-	 GLfloat 	m_xrot;
-	 GLfloat 	m_yrot;
 	 
 	 Matrix4fT m_transform;
 	 Matrix3fT m_lastRot;  

@@ -14,13 +14,10 @@ END_EVENT_TABLE()
 MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib)
     : wxGLCanvas(parent, id, gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name )
-//: wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name, gl_attrib )
 {
 	m_scene = scene;
 	m_init = false;
 	m_view = view;
-	m_XPos = 0;
-	m_YPos = 0;
 	
 	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
@@ -102,15 +99,16 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			
 			if (event.RightIsDown())												// If Right Mouse Clicked, Reset All Rotations
 		    {
-				printf("\n%.2f : %.2f : %.2f\n", m_transform.s.XX, m_transform.s.XY, m_transform.s.XZ );
+				printf("Transformation Matrix:\n");
+				printf("%.2f : %.2f : %.2f\n", m_transform.s.XX, m_transform.s.XY, m_transform.s.XZ );
 				printf("%.2f : %.2f : %.2f\n", m_transform.s.YX, m_transform.s.YY, m_transform.s.YZ);
 				printf("%.2f : %.2f : %.2f\n", m_transform.s.ZX, m_transform.s.ZY, m_transform.s.ZZ);
-				
-				printf("\n%.2f : %.2f : %.2f\n", m_lastRot.s.XX, m_lastRot.s.XY, m_lastRot.s.XZ );
+				printf("Last Rot:\n");
+				printf("%.2f : %.2f : %.2f\n", m_lastRot.s.XX, m_lastRot.s.XY, m_lastRot.s.XZ );
 				printf("%.2f : %.2f : %.2f\n", m_lastRot.s.YX, m_lastRot.s.YY, m_lastRot.s.YZ);
 				printf("%.2f : %.2f : %.2f\n", m_lastRot.s.ZX, m_lastRot.s.ZY, m_lastRot.s.ZZ);
-				
-				printf("\n%.2f : %.2f : %.2f\n", m_thisRot.s.XX, m_thisRot.s.XY, m_thisRot.s.XZ );
+				printf("This Rot:\n");
+				printf("%.2f : %.2f : %.2f\n", m_thisRot.s.XX, m_thisRot.s.XY, m_thisRot.s.XZ );
 				printf("%.2f : %.2f : %.2f\n", m_thisRot.s.YX, m_thisRot.s.YY, m_thisRot.s.YZ);
 				printf("%.2f : %.2f : %.2f\n", m_thisRot.s.ZX, m_thisRot.s.ZY, m_thisRot.s.ZZ);
 				

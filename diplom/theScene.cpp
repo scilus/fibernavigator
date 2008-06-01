@@ -63,7 +63,6 @@ void TheScene::initGL(int view)
 		if (!m_mainTexAssigned) {
 			assignTextures();
 			m_mainTexAssigned = true;
-			initShaders();
 		}
 		break;
 	default:
@@ -79,10 +78,10 @@ void TheScene::initGL(int view)
 		if (!m_navTexAssigned) {
 			assignTextures();
 			m_navTexAssigned = true;
-			initShaders();
 		}
 		break;
 	}	
+	initShaders();
 }
 
 void TheScene::assignTextures ()
@@ -169,33 +168,6 @@ void TheScene::initShaders()
 	m_textureShader->bind();
 }
 
-void TheScene::renderScene(int view)
-{
-	if (m_listctrl->GetItemCount() == 0) return;
-	
-	bindTextures();
-	setShaderVars();
-
-	if (m_showXSlize) renderXSlize();
-	if (m_showYSlize) renderYSlize();
-	if (m_showZSlize) renderZSlize();
-
-	glDisable(GL_TEXTURE_3D);
-}
-
-void TheScene::bindTextures()
-{
-	glEnable(GL_TEXTURE_3D);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	
-	
-	for (int i = 0 ; i < m_countTextures ; ++i)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
-	}
-}
-
 void TheScene::setShaderVars()
 {
 	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "countTextures");
@@ -258,6 +230,35 @@ void TheScene::setShaderVars()
 	default:
 	;}	
 }
+
+void TheScene::renderScene(int view)
+{
+	if (m_listctrl->GetItemCount() == 0) return;
+	
+	bindTextures();
+	setShaderVars();
+
+	if (m_showXSlize) renderXSlize();
+	if (m_showYSlize) renderYSlize();
+	if (m_showZSlize) renderZSlize();
+
+	glDisable(GL_TEXTURE_3D);
+}
+
+void TheScene::bindTextures()
+{
+	glEnable(GL_TEXTURE_3D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	
+	
+	for (int i = 0 ; i < m_countTextures ; ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
+	}
+}
+
+
 
 void TheScene::renderXSlize()
 {
@@ -364,7 +365,6 @@ void TheScene::updateView(float x, float y, float z)
 	
 	if ( m_ratio0 < 1.0) m_xLine = ( m_xSlize * m_ratio0 ) + ( 1.0 - m_ratio0 ) / 2.0;
 	if ( m_ratio2 > 1.0) m_zLine = ( m_zSlize / m_ratio2 ) + ( 1.0 - (1.0/m_ratio2) ) / 2.0;
-	//if ( m_ratio1 < 1.0) m_zLine = ( m_zSlize * m_ratio1 ) + ( 1.0 - m_ratio1 ) / 2.0;
 	if ( m_ratio1 > 1.0) m_xLine = ( m_xSlize / m_ratio1 ) + ( 1.0 - (1.0/m_ratio1) ) / 2.0;
 }
 
