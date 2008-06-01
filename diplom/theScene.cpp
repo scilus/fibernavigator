@@ -48,6 +48,12 @@ void TheScene::initGL(int view)
 	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
 	
+	if (!m_mainTexAssigned && view == mainView) {
+		assignTextures();
+		initShaders();
+		m_mainTexAssigned = true;
+	}
+	
 	switch (view)
 	{
 	case mainView:
@@ -60,10 +66,7 @@ void TheScene::initGL(int view)
 		glLoadIdentity();
 		glTranslatef( 0.0, 0.0, -6.0 );
 		
-		if (!m_mainTexAssigned) {
-			assignTextures();
-			m_mainTexAssigned = true;
-		}
+		
 		break;
 	default:
 		glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -71,13 +74,9 @@ void TheScene::initGL(int view)
 		glLoadIdentity();
 		glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
 		
-		if (!m_navTexAssigned) {
-			assignTextures();
-			m_navTexAssigned = true;
-		}
 		break;
 	}	
-	initShaders();
+	
 }
 
 void TheScene::assignTextures ()
@@ -334,6 +333,7 @@ void TheScene::renderNavView(int view)
 	
 	glDisable(GL_TEXTURE_3D);
 	
+
 	m_textureShader->release();
 	
 	glColor3f(1.0, 0.0, 0.0);

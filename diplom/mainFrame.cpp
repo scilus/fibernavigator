@@ -309,7 +309,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
     
     m_scene->setMainGLContext(new wxGLContext(m_mainGL));
-    m_scene->setNavGLContext(new wxGLContext(m_gl0));
+    m_scene->setNavGLContext(new wxGLContext(m_gl0, m_scene->getMainGLContext()));
 }
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -489,11 +489,11 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 
 void MainFrame::refreshAllGLWidgets()
 {
-	updateStatusBar();
+	m_mainGL->render();
 	m_gl0->render();
 	m_gl1->render();
 	m_gl2->render();
-	m_mainGL->render();
+	updateStatusBar();
 }
 
 void MainFrame::renewAllGLWidgets()
@@ -551,7 +551,7 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	//return;
+	return;
 	DatasetInfo *info;
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
 	int i = m_datasetListCtrl->GetItemCount();
