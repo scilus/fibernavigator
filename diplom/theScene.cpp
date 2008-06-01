@@ -41,6 +41,13 @@ void TheScene::initGL(int view)
 	(view == mainView) ? printf("Main View: ") : printf("Nav View: %d ", view);
 	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
+	glShadeModel(GL_FLAT);
+	glEnable(GL_DOUBLEBUFFER);
+	glEnable(GL_DEPTH_TEST);
+	
+	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
+	glEnable(GL_ALPHA_TEST);
+	
 	switch (view)
 	{
 	case mainView:
@@ -53,13 +60,6 @@ void TheScene::initGL(int view)
 		glLoadIdentity();
 		glTranslatef( 0.0, 0.0, -6.0 );
 		
-		glShadeModel(GL_FLAT);
-		glEnable(GL_DOUBLEBUFFER);
-		glEnable(GL_DEPTH_TEST);
-		
-		glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
-		glEnable(GL_ALPHA_TEST);
-		
 		if (!m_mainTexAssigned) {
 			assignTextures();
 			m_mainTexAssigned = true;
@@ -71,10 +71,6 @@ void TheScene::initGL(int view)
 		glLoadIdentity();
 		glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
 		
-		glShadeModel(GL_FLAT);
-		glEnable(GL_DOUBLEBUFFER);
-		glEnable(GL_DEPTH_TEST);
-			
 		if (!m_navTexAssigned) {
 			assignTextures();
 			m_navTexAssigned = true;
