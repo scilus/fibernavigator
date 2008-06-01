@@ -70,13 +70,13 @@ void MainCanvas::OnSize(wxSizeEvent& event)
 	switch (m_view)
 	{
 	case mainView:
-		if (!m_scene->m_mainTexAssigned)
+		if (!m_scene->m_texAssigned)
 			SetCurrent();
 		else
 			SetCurrent(*m_scene->getMainGLContext());
 		break;
 	default:
-		if (!m_scene->m_navTexAssigned)
+		if (!m_scene->m_texAssigned)
 			SetCurrent();
 		else
 			SetCurrent(*m_scene->getNavGLContext());
@@ -206,17 +206,8 @@ void MainCanvas::setScene(TheScene *scene)
 
 void MainCanvas::invalidate()
 {
-	if (m_view == mainView)
-	{
-		SetCurrent(*m_scene->getMainGLContext());
-		m_scene->releaseTextures();
-		m_scene->m_mainTexAssigned = false;
-	}
-	else 
-	{
-		SetCurrent(*m_scene->getNavGLContext());
-		m_scene->releaseTextures();
-		m_scene->m_navTexAssigned = false;
-	}
+	SetCurrent(*m_scene->getMainGLContext());
+	m_scene->releaseTextures();
+	m_scene->m_texAssigned = false;
 	m_init = false;
 }

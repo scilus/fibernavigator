@@ -4,8 +4,8 @@ TheScene::TheScene()
 {
 	m_countTextures = 0;
 	
-	m_mainTexAssigned = false;
-	m_navTexAssigned = false;
+	m_texAssigned = false;
+	
 	m_mainGLContext = 0;
 	m_navGLContext = 0;
 	m_texNames = new GLuint[10];
@@ -48,10 +48,10 @@ void TheScene::initGL(int view)
 	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
 	
-	if (!m_mainTexAssigned && view == mainView) {
+	if (!m_texAssigned && view == mainView) {
 		assignTextures();
 		initShaders();
-		m_mainTexAssigned = true;
+		m_texAssigned = true;
 	}
 	
 	switch (view)

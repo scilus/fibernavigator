@@ -50,8 +50,8 @@ public:
 	void updateView(float, float, float);
 	void releaseTextures();
 	
-	bool m_mainTexAssigned;
-	bool m_navTexAssigned;
+	bool m_texAssigned;
+	
 		
 		
 private:
