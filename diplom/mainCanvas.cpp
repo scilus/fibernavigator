@@ -160,8 +160,7 @@ void MainCanvas::render()
 {
 	wxPaintDC dc(this);
 
-    //SetCurrent((m_view == mainView) ? *m_scene->getMainGLContext() : *m_scene->getNavGLContext());
-	SetCurrent(*m_scene->getMainGLContext());
+    SetCurrent(*m_scene->getMainGLContext());
 	
 	int w, h;
     GetClientSize(&w, &h);

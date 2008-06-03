@@ -227,7 +227,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_xSlider = new wxSlider(win, ID_X_SLIDER, 50, 0, 100, wxPoint(0,0), 
             		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     
-
     // extra window to avoid scaling of the bottom gl widget when resizing
     win = new wxSashLayoutWindow(m_navWindow,wxID_ANY, 
       		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
@@ -241,9 +240,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_xSlider->SetMinSize(wxSize(1, -1));
     m_ySlider->SetMinSize(wxSize(1, -1));
     m_zSlider->SetMinSize(wxSize(1, -1));
-    
-
-    
     
     m_datasetListCtrl = new MyListCtrl(m_leftWindowBottom1, LIST_CTRL, wxDefaultPosition, 
     		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
@@ -296,8 +292,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_dataset = new TheDataset();
     m_scene->setDataset(m_dataset);
     m_scene->setDataListCtrl(m_datasetListCtrl);
-
-    
     
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
@@ -310,7 +304,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
     
     m_scene->setMainGLContext(new wxGLContext(m_mainGL));
-    //m_scene->setNavGLContext(new wxGLContext(m_gl0, m_scene->getMainGLContext()));
 }
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -345,12 +338,9 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_datasetListCtrl->SetItemData(i, (long)info);
 		m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 		
-				
 		m_statusBar->SetStatusText(wxT("Ready"),1);
 		m_statusBar->SetStatusText(dialog.GetFilename() + wxT(" loaded"),2);
 		
-		
-
 		updateInfoString();
 		
 		m_xSlider->SetMax(wxMax(2,m_dataset->m_columns-1));
@@ -492,8 +482,6 @@ void MainFrame::refreshAllGLWidgets()
 {
 	m_mainGL->render();
 	m_gl0->render();
-	// TODO why do i need to call it twice?
-	m_gl0->render();
 	m_gl1->render();
 	m_gl2->render();
 	updateStatusBar();
@@ -613,8 +601,7 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_scene->setDataset(m_dataset);
 	m_scene->setDataListCtrl(m_datasetListCtrl);
 	m_scene->setMainGLContext(new wxGLContext(m_mainGL));
-	//m_scene->setNavGLContext(new wxGLContext(m_gl0, m_scene->getMainGLContext()));
-
+	
 	m_mainGL->setScene(m_scene);
 	m_gl0->setScene(m_scene);
 	m_gl1->setScene(m_scene);

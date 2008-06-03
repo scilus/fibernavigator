@@ -7,7 +7,6 @@ TheScene::TheScene()
 	m_texAssigned = false;
 	
 	m_mainGLContext = 0;
-	//m_navGLContext = 0;
 	m_texNames = new GLuint[10];
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
@@ -95,11 +94,6 @@ void TheScene::setDataset(TheDataset *dataset)
 	m_xSize = (float)dataset->m_columns;
 	m_ySize = (float)dataset->m_rows;
 	m_zSize = (float)dataset->m_frames;
-	/*
-	m_ratio0 = m_xSize/m_ySize;
-	m_ratio1 = m_xSize/m_zSize;
-	m_ratio2 = m_ySize/m_zSize;
-	*/
 }
 
 void TheScene::initShaders()
@@ -322,7 +316,6 @@ void TheScene::renderNavView(int view)
 	glColor3f(1.0, 1.0, 1.0);
 
 	m_textureShader->bind();
-	
 }
 
 
@@ -331,16 +324,6 @@ void TheScene::updateView(float x, float y, float z)
 	m_xSlize = x;
 	m_ySlize = y;
 	m_zSlize = z;
-	
-	/*
-	m_xLine = m_xSlize/m_xSize;
-	m_yLine = m_ySlize/m_ySize;
-	m_zLine = m_zSlize/m_zSize;
-	
-	if ( m_ratio0 < 1.0) m_xLine = ( (m_xSlize/m_xSize) * m_ratio0 ) + ( 1.0 - m_ratio0 ) / 2.0;
-	if ( m_ratio2 > 1.0) m_zLine = ( (m_zSlize/m_zSize) / m_ratio2 ) + ( 1.0 - (1.0/m_ratio2) ) / 2.0;
-	if ( m_ratio1 > 1.0) m_xLine = ( (m_xSlize/m_xSize) / m_ratio1 ) + ( 1.0 - (1.0/m_ratio1) ) / 2.0;
-	*/
 }
 
 void TheScene::releaseTextures()
