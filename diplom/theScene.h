@@ -26,6 +26,7 @@ public:
 	bool m_showXSlize;
 	bool m_showYSlize;
 	bool m_showZSlize;
+	bool m_showMesh;
 	
 	TheScene();
 	~TheScene();
@@ -45,6 +46,7 @@ public:
 	
 	void renderScene(int);
 	void renderNavView(int);
+	void renderMesh();
 	TheDataset* getDataset() {return m_dataset;};
 	
 	void updateView(float, float, float);
@@ -58,11 +60,11 @@ private:
 	int m_countTextures;
 	GLuint *m_texNames;
 	FGLSLShaderProgram *m_textureShader; 
+	FGLSLShaderProgram *m_meshShader;
 	
 	TheDataset* m_dataset;
 	wxListCtrl* m_listctrl;
 	wxGLContext* m_mainGLContext;
-	//wxGLContext* m_navGLContext;
 	
 	float m_xSize;
 	float m_ySize;
@@ -87,7 +89,8 @@ private:
 	float m_zLine;
 	
 	void bindTextures();
-	void setShaderVars();
+	void setTextureShaderVars();
+	void setMeshShaderVars();
 	void renderXSlize();
 	void renderYSlize();
 	void renderZSlize();

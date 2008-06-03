@@ -14,7 +14,9 @@ TheScene::TheScene()
 	m_showXSlize = true;
 	m_showYSlize = true;
 	m_showZSlize = true;
+	m_showMesh = true;
 	m_textureShader = 0;
+	m_meshShader = 0;
 	
 	m_xOffset0 = 0.0;
 	m_yOffset0 = 0.0;
@@ -102,7 +104,7 @@ void TheScene::initShaders()
 	{
 		delete m_textureShader;
 	}
-	printf("initializing shader\n");
+	printf("initializing  texture shader\n");
 
 	GLSLShader *vShader = new GLSLShader(GL_VERTEX_SHADER);
 	GLSLShader *fShader = new GLSLShader(GL_FRAGMENT_SHADER);
@@ -113,10 +115,28 @@ void TheScene::initShaders()
 	m_textureShader = new FGLSLShaderProgram();
 	m_textureShader->link(vShader, fShader);
 	m_textureShader->bind();
+	
+	if (m_meshShader)
+	{
+		delete m_meshShader;
+	}
+	printf("initializing mesh shader\n");
+
+	GLSLShader *vShader1 = new GLSLShader(GL_VERTEX_SHADER);
+	GLSLShader *fShader1 = new GLSLShader(GL_FRAGMENT_SHADER);
+	
+	vShader1->loadCode(wxT("GLSL/v2.glsl"));
+	fShader1->loadCode(wxT("GLSL/f2.glsl"));
+	
+	m_meshShader = new FGLSLShaderProgram();
+	m_meshShader->link(vShader, fShader);
+	//m_meshShader->bind();
 }
 
-void TheScene::setShaderVars()
+void TheScene::setTextureShaderVars()
 {
+	m_textureShader->bind();
+	
 	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "countTextures");
 	glUniform1i (texLoc, m_countTextures);
 	DatasetInfo* info;
@@ -178,17 +198,39 @@ void TheScene::setShaderVars()
 	;}	
 }
 
+void TheScene::setMeshShaderVars()
+{
+	m_meshShader->bind();
+	
+	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "dimX");
+	glUniform1i (texLoc, m_dataset->m_columns);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "dimY");
+	glUniform1i (texLoc, m_dataset->m_rows);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "dimZ");
+	glUniform1i (texLoc, m_dataset->m_frames);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex0");
+	glUniform1i (texLoc, 0);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showMesh");
+	glUniform1i (texLoc, m_showMesh);
+}
+
 void TheScene::renderScene(int view)
 {
 	if (m_listctrl->GetItemCount() == 0) return;
 	
 	bindTextures();
-	setShaderVars();
+	setTextureShaderVars();
 
 	if (m_showXSlize) renderXSlize();
 	if (m_showYSlize) renderYSlize();
 	if (m_showZSlize) renderZSlize();
 
+	setMeshShaderVars();
+	if (m_dataset->meshLoaded)
+	{
+		renderMesh();
+	}
+	
 	glDisable(GL_TEXTURE_3D);
 }
 
@@ -204,8 +246,6 @@ void TheScene::bindTextures()
 		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 	}
 }
-
-
 
 void TheScene::renderXSlize()
 {
@@ -246,12 +286,55 @@ void TheScene::renderZSlize()
     glEnd();
 }
 
+void TheScene::renderMesh()
+{
+	m_textureShader->release();
+	//m_meshShader->bind();
+
+	glColor3f(1.0, 1.0, 1.0);
+	
+	int x = m_dataset->m_columns/2;
+	int y = m_dataset->m_rows/2;
+	int z = m_dataset->m_frames/2;
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_TRIANGLES);
+	
+	for ( int i = 0 ; i < m_dataset->m_mesh->getCountPolygons() ; ++i)
+	{
+		polygon p = m_dataset->m_mesh->m_polygonArray[i];
+		glNormal3f( 	m_dataset->m_mesh->m_vertexArray[p.v1].nx, 
+						m_dataset->m_mesh->m_vertexArray[p.v1].ny,
+						m_dataset->m_mesh->m_vertexArray[p.v1].nz);
+		glVertex3f( 	m_dataset->m_mesh->m_vertexArray[p.v1].x - x, 
+				     	m_dataset->m_mesh->m_vertexArray[p.v1].y - y, 
+				     	m_dataset->m_mesh->m_vertexArray[p.v1].z - z);
+		glNormal3f( 	m_dataset->m_mesh->m_vertexArray[p.v2].nx, 
+						m_dataset->m_mesh->m_vertexArray[p.v2].ny,
+						m_dataset->m_mesh->m_vertexArray[p.v2].nz);
+		glVertex3f(	m_dataset->m_mesh->m_vertexArray[p.v2].x - x, 
+						m_dataset->m_mesh->m_vertexArray[p.v2].y - y, 
+						m_dataset->m_mesh->m_vertexArray[p.v2].z - z);
+		glNormal3f( 	m_dataset->m_mesh->m_vertexArray[p.v3].nx, 
+						m_dataset->m_mesh->m_vertexArray[p.v3].ny,
+						m_dataset->m_mesh->m_vertexArray[p.v3].nz);
+		glVertex3f(	m_dataset->m_mesh->m_vertexArray[p.v3].x - x, 
+						m_dataset->m_mesh->m_vertexArray[p.v3].y - y, 
+						m_dataset->m_mesh->m_vertexArray[p.v3].z - z);
+	}
+	
+	glEnd();
+	
+	//m_meshShader->release();
+	//m_textureShader->bind();
+}
+
 void TheScene::renderNavView(int view)
 {
 	if (m_listctrl->GetItemCount() == 0) return;
 	
 	bindTextures();
-	setShaderVars();
+	setTextureShaderVars();
 	
 	float xline = 0;
 	float yline = 0;
