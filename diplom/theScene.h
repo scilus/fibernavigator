@@ -39,8 +39,8 @@ public:
 	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
-	void setNavGLContext(wxGLContext* context) {m_navGLContext = context;};
-	wxGLContext* getNavGLContext() {return m_navGLContext;};
+	//void setNavGLContext(wxGLContext* context) {m_navGLContext = context;};
+	//wxGLContext* getNavGLContext() {return m_navGLContext;};
 	
 	
 	void renderScene(int);
@@ -62,7 +62,7 @@ private:
 	TheDataset* m_dataset;
 	wxListCtrl* m_listctrl;
 	wxGLContext* m_mainGLContext;
-	wxGLContext* m_navGLContext;
+	//wxGLContext* m_navGLContext;
 	
 	float m_xSize;
 	float m_ySize;

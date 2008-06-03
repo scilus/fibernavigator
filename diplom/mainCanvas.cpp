@@ -60,29 +60,18 @@ void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void MainCanvas::OnSize(wxSizeEvent& event)
 {
-    // this is also necessary to update the context on some platforms
-    wxGLCanvas::OnSize(event);
+    if (!m_scene->m_texAssigned)
+    		SetCurrent();
+	else
+		SetCurrent(*m_scene->getMainGLContext());
 
+	// this is also necessary to update the context on some platforms
+    wxGLCanvas::OnSize(event);
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
     int w, h;
     GetClientSize(&w, &h);
-    
-	switch (m_view)
-	{
-	case mainView:
-		if (!m_scene->m_texAssigned)
-			SetCurrent();
-		else
-			SetCurrent(*m_scene->getMainGLContext());
-		break;
-	default:
-		if (!m_scene->m_texAssigned)
-			SetCurrent();
-		else
-			SetCurrent(*m_scene->getNavGLContext());
-		break;
-	}
     glViewport(0, 0, (GLint) w, (GLint) h);
+    
     m_arcBall->setBounds((GLfloat)w, (GLfloat)h);    
 }
 
@@ -171,7 +160,13 @@ void MainCanvas::render()
 {
 	wxPaintDC dc(this);
 
-    SetCurrent((m_view == mainView) ? *m_scene->getMainGLContext() : *m_scene->getNavGLContext());
+    //SetCurrent((m_view == mainView) ? *m_scene->getMainGLContext() : *m_scene->getNavGLContext());
+	SetCurrent(*m_scene->getMainGLContext());
+	
+	int w, h;
+    GetClientSize(&w, &h);
+    glViewport(0, 0, (GLint) w, (GLint) h);
+	
     // Init OpenGL once, but after SetCurrent
     if (!m_init)
     {

@@ -55,6 +55,7 @@ bool MyApp::OnInit(void)
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
   file_menu->Append(VIEWER_LOAD, _T("&Load"));
+  file_menu->Append(VIEWER_LOAD_MESH, _T("&Load Mesh"));
   file_menu->Append(VIEWER_QUIT, _T("&Exit"));
 
   wxMenu *help_menu = new wxMenu;

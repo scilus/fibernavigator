@@ -28,6 +28,7 @@ private:
     void OnQuit(wxCommandEvent& event);
     
 	void OnLoad(wxCommandEvent& event);
+	void OnLoadMesh(wxCommandEvent& event);
 	void OnNew(wxCommandEvent& event);
     void OnToggleWindow(wxCommandEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
@@ -97,8 +98,9 @@ DECLARE_EVENT_TABLE()
 
 #define VIEWER_QUIT        	wxID_EXIT
 #define VIEWER_ABOUT       	wxID_ABOUT
-#define VIEWER_LOAD				4
-#define VIEWER_NEW					5
+#define VIEWER_NEW					4
+#define VIEWER_LOAD				5
+#define VIEWER_LOAD_MESH			6
 #define VIEWER_TOGGLEVIEW1 		11
 #define VIEWER_TOGGLEVIEW2 		12
 #define VIEWER_TOGGLEVIEW3 		13

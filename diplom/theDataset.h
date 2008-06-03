@@ -15,8 +15,7 @@
 #include "wx/datstrm.h"
 
 #include "datasetInfo.h"
-
-
+#include "mesh.h"
 
 class TheDataset
 {
@@ -28,6 +27,7 @@ public:
 	~TheDataset();
 	
 	DatasetInfo* load(wxString);
+	Mesh* loadMesh(wxString);
 		
 	int m_rows;
 	int m_columns;

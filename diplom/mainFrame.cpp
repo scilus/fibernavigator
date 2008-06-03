@@ -19,8 +19,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_ABOUT, MainFrame::OnAbout)
     EVT_SIZE(MainFrame::OnSize)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
-    EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
     EVT_MENU(VIEWER_NEW, MainFrame::OnNew)
+    EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
+    EVT_MENU(VIEWER_LOAD_MESH, MainFrame::OnLoadMesh)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
     /* mouse click in one of the three navigation windows */
     EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
@@ -309,7 +310,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
     
     m_scene->setMainGLContext(new wxGLContext(m_mainGL));
-    m_scene->setNavGLContext(new wxGLContext(m_gl0, m_scene->getMainGLContext()));
+    //m_scene->setNavGLContext(new wxGLContext(m_gl0, m_scene->getMainGLContext()));
 }
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -553,7 +554,7 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	return;
+	//return;
 	DatasetInfo *info;
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
 	int i = m_datasetListCtrl->GetItemCount();
@@ -563,6 +564,7 @@ void MainFrame::loadStandard()
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
 	m_datasetListCtrl->SetItemData(i, (long)info);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	/*
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
 	 i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
@@ -579,7 +581,7 @@ void MainFrame::loadStandard()
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
 	m_datasetListCtrl->SetItemData(i, (long)info);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
+	*/
 	m_scene->setDataset(m_dataset);
 	
 	m_xSlider->SetMax(wxMax(2,m_dataset->m_columns-1));
@@ -611,7 +613,7 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_scene->setDataset(m_dataset);
 	m_scene->setDataListCtrl(m_datasetListCtrl);
 	m_scene->setMainGLContext(new wxGLContext(m_mainGL));
-	m_scene->setNavGLContext(new wxGLContext(m_gl0, m_scene->getMainGLContext()));
+	//m_scene->setNavGLContext(new wxGLContext(m_gl0, m_scene->getMainGLContext()));
 
 	m_mainGL->setScene(m_scene);
 	m_gl0->setScene(m_scene);
@@ -680,4 +682,25 @@ void MainFrame::OnListItemDown(wxCommandEvent& event)
 	m_datasetListCtrl->moveItemDown(item);
 	if (item < m_datasetListCtrl->GetItemCount() - 1) m_scene->swapTextures(item, item + 1);
 	refreshAllGLWidgets();
+}
+
+void MainFrame::OnLoadMesh(wxCommandEvent& event)
+{
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("Mesh files (*.mesh)|*.mesh|*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		wxString path = dialog.GetPath();
+		Mesh *mesh = m_dataset->loadMesh(path); 
+		if ( mesh == NULL) 
+		{
+			wxMessageBox(wxT("ERROR\n") + m_dataset->m_lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+			m_statusBar->SetStatusText(wxT("ERROR"),1);
+			m_statusBar->SetStatusText(m_dataset->m_lastError,2);
+			return;
+		}
+	}
 }
