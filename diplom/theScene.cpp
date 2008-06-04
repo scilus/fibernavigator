@@ -239,7 +239,7 @@ void TheScene::renderScene(int view)
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
 		if (info->getType() == Mesh_ && info->getShow())
 		{
-			renderMesh(info->m_mesh);
+			renderMesh(info);
 		}
 	}
 	
@@ -323,12 +323,15 @@ void TheScene::makeLights()
 	glShadeModel(GL_SMOOTH);
 }
 
-void TheScene::renderMesh(Mesh *mesh)
+void TheScene::renderMesh(DatasetInfo *info)
 {
 	m_textureShader->release();
 	//m_meshShader->bind();
 	
-	glColor3f(0.6, 0.4, 0.4);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
+	//glColor3f(0.6, 0.4, 0.4);
+	colorMap(info->getThreshold());
 	
 	int x = m_dataset->m_columns/2;
 	int y = m_dataset->m_rows/2;
@@ -338,34 +341,36 @@ void TheScene::renderMesh(Mesh *mesh)
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_TRIANGLES);
 	
-	for ( int i = 0 ; i < mesh->getCountPolygons() ; ++i)
+	for ( int i = 0 ; i < info->m_mesh->getCountPolygons() ; ++i)
 	{
-		polygon p = mesh->m_polygonArray[i];
+		polygon p = info->m_mesh->m_polygonArray[i];
 
-		glNormal3f( 	mesh->m_vertexArray[p.v1].nx, 
-						mesh->m_vertexArray[p.v1].ny,
-						mesh->m_vertexArray[p.v1].nz);
-		glVertex3f( 	mesh->m_vertexArray[p.v1].x - x, 
-				     	mesh->m_vertexArray[p.v1].y - y, 
-				     	mesh->m_vertexArray[p.v1].z - z);
+		glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
+						info->m_mesh->m_vertexArray[p.v1].ny,
+						info->m_mesh->m_vertexArray[p.v1].nz);
+		glVertex3f( 	info->m_mesh->m_vertexArray[p.v1].x - x, 
+						info->m_mesh->m_vertexArray[p.v1].y - y, 
+						info->m_mesh->m_vertexArray[p.v1].z - z);
 	
-		glNormal3f( 	mesh->m_vertexArray[p.v2].nx, 
-						mesh->m_vertexArray[p.v2].ny,
-						mesh->m_vertexArray[p.v2].nz);
-		glVertex3f(	mesh->m_vertexArray[p.v2].x - x, 
-						mesh->m_vertexArray[p.v2].y - y, 
-						mesh->m_vertexArray[p.v2].z - z);
+		glNormal3f( 	info->m_mesh->m_vertexArray[p.v2].nx, 
+						info->m_mesh->m_vertexArray[p.v2].ny,
+						info->m_mesh->m_vertexArray[p.v2].nz);
+		glVertex3f(	info->m_mesh->m_vertexArray[p.v2].x - x, 
+						info->m_mesh->m_vertexArray[p.v2].y - y, 
+						info->m_mesh->m_vertexArray[p.v2].z - z);
 
-		glNormal3f( 	mesh->m_vertexArray[p.v3].nx, 
-						mesh->m_vertexArray[p.v3].ny,
-						mesh->m_vertexArray[p.v3].nz);
-		glVertex3f(	mesh->m_vertexArray[p.v3].x - x, 
-						mesh->m_vertexArray[p.v3].y - y, 
-						mesh->m_vertexArray[p.v3].z - z);
+		glNormal3f( 	info->m_mesh->m_vertexArray[p.v3].nx, 
+						info->m_mesh->m_vertexArray[p.v3].ny,
+						info->m_mesh->m_vertexArray[p.v3].nz);
+		glVertex3f(	info->m_mesh->m_vertexArray[p.v3].x - x, 
+						info->m_mesh->m_vertexArray[p.v3].y - y, 
+						info->m_mesh->m_vertexArray[p.v3].z - z);
 	}
 	
 	glEnd();
 	glPopAttrib();
+	
+	glDisable(GL_COLOR_MATERIAL);
 	
 	//m_meshShader->release();
 	m_textureShader->bind();
@@ -454,4 +459,24 @@ void TheScene::updateView(float x, float y, float z)
 void TheScene::releaseTextures()
 {
 	glDeleteTextures(10, m_texNames);
+}
+
+void TheScene::colorMap(float value)
+{
+    value *= 5.0;
+	
+	if( value < 0.0 )
+		glColor3f( 0.0, 0.0, 0.0 );
+    else if( value < 1.0 )
+    	glColor3f( 0.0, value, 1.0 );
+	else if( value < 2.0 )
+		glColor3f( 0.0, 1.0, 2.0-value );
+    else if( value < 3.0 )
+    	glColor3f( value-2.0, 1.0, 0.0 );
+    else if( value < 4.0 )
+    	glColor3f( 1.0, 4.0-value, 0.0 );
+    else if( value <= 5.0 )
+    	glColor3f( 1.0, 0.0, value-4.0 );
+    else 
+    	glColor3f( 1.0, 0.0, 1.0 );
 }

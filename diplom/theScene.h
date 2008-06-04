@@ -47,7 +47,8 @@ public:
 	void renderScene(int);
 	void renderNavView(int);
 	void makeLights();
-	void renderMesh(Mesh*);
+	void renderMesh(DatasetInfo*);
+	void colorMap(float);
 	TheDataset* getDataset() {return m_dataset;};
 	
 	void updateView(float, float, float);
