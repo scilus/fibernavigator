@@ -61,12 +61,12 @@ public:
 	polygon* m_polygonArray;
 	
 private:
-	int m_filetype;
-	int m_countVerts;
-	int m_countNormals;
-	int m_countTimeSteps;
-	int m_countPolygons;
-	int m_polygonDim;
+	uint m_filetype;
+	uint m_countVerts;
+	uint m_countNormals;
+	uint m_countTimeSteps;
+	uint m_countPolygons;
+	uint m_polygonDim;
 	
 };
 

@@ -21,7 +21,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
     EVT_MENU(VIEWER_NEW, MainFrame::OnNew)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
-    EVT_MENU(VIEWER_LOAD_MESH, MainFrame::OnLoadMesh)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
     /* mouse click in one of the three navigation windows */
     EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
@@ -314,7 +313,7 @@ void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 {
 	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Header files (*.hea)|*.hea|*.*|*.*");
+	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|*.*|*.*");
 	wxString defaultDir = wxEmptyString;
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
@@ -671,25 +670,4 @@ void MainFrame::OnListItemDown(wxCommandEvent& event)
 	m_datasetListCtrl->moveItemDown(item);
 	if (item < m_datasetListCtrl->GetItemCount() - 1) m_scene->swapTextures(item, item + 1);
 	refreshAllGLWidgets();
-}
-
-void MainFrame::OnLoadMesh(wxCommandEvent& event)
-{
-	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Mesh files (*.mesh)|*.mesh|*.*|*.*");
-	wxString defaultDir = wxEmptyString;
-	wxString defaultFilename = wxEmptyString;
-	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
-	if (dialog.ShowModal() == wxID_OK)
-	{
-		wxString path = dialog.GetPath();
-		Mesh *mesh = m_dataset->loadMesh(path); 
-		if ( mesh == NULL) 
-		{
-			wxMessageBox(wxT("ERROR\n") + m_dataset->m_lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-			m_statusBar->SetStatusText(wxT("ERROR"),1);
-			m_statusBar->SetStatusText(m_dataset->m_lastError,2);
-			return;
-		}
-	}
 }

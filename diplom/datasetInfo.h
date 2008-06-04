@@ -13,13 +13,16 @@
 #include "wx/wfstream.h"
 #include "wx/datstrm.h"
 
+#include "mesh.h"
+
 enum DatasetType {
 	ERROR = -1,
 	not_initialized = 0,
 	Head_byte,
 	Head_short,
 	Overlay,
-	RGB,		
+	RGB,
+	Mesh_,
 };
 
 class DatasetInfo
@@ -48,6 +51,7 @@ public:
 	wxUint16 *m_shortDataset;
 	wxUint8 *m_rgbDataset;
 	float *m_floatDataset;
+	Mesh* m_mesh;
 	
 	DatasetInfo();
 	~DatasetInfo();
@@ -59,6 +63,8 @@ public:
 	
 	void setHighestValue(float value) {m_highest_value = value;};
 	void setThreshold(float value) {m_threshold = value;};
+	void setType(int type) {m_type = type;};
+	void setName(wxString name) {m_name = name;};
 	bool toggleShow() {m_show = !m_show; return m_show;};
 	
 	int getType() {return m_type;};

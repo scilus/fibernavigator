@@ -46,7 +46,8 @@ public:
 	
 	void renderScene(int);
 	void renderNavView(int);
-	void renderMesh();
+	void makeLights();
+	void renderMesh(Mesh*);
 	TheDataset* getDataset() {return m_dataset;};
 	
 	void updateView(float, float, float);

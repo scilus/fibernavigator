@@ -42,9 +42,6 @@ DatasetInfo::~DatasetInfo()
 
 bool DatasetInfo::load(wxString filename)
 {
-	// check file extension
-	wxString ext = filename.substr(filename.Length()-3,3);
-	if (ext != wxT("hea")) return false;
 	m_name = filename.AfterLast('/');
 	// read header file
 	wxTextFile headerFile;

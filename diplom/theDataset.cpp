@@ -6,7 +6,6 @@ TheDataset::TheDataset()
 	m_columns = 1;
 	m_frames = 1;
 	m_lastError = wxT("");
-	meshLoaded = false;
 }
 
 TheDataset::~TheDataset()
@@ -16,6 +15,17 @@ TheDataset::~TheDataset()
 
 DatasetInfo* TheDataset::load(wxString filename)
 {
+	// check file extension
+	wxString ext = filename.AfterLast('.');
+	if (ext == wxT("mesh")) {
+		DatasetInfo *info = new DatasetInfo();
+		info->m_mesh = loadMesh(filename);
+		info->setType(Mesh_);
+		info->setName(filename.AfterLast('/'));
+		return info;
+	}
+	if (ext != wxT("hea")) return false;
+	
 	DatasetInfo *info = new DatasetInfo();
 	bool flag = info->load(filename); 
 	if (!flag)
@@ -140,7 +150,7 @@ Mesh* TheDataset::loadMesh(wxString filename)
 {
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
-	m_mesh = new Mesh();
+	Mesh *mesh = new Mesh();
 	
 	if (dataFile.Open(filename))
 	{
@@ -156,7 +166,7 @@ Mesh* TheDataset::loadMesh(wxString filename)
 	}
 	if (buffer[0] == 'a')
 	{
-		m_mesh->setFiletype(ascii);
+		mesh->setFiletype(ascii);
 		// ascii file, maybe later
 		return NULL;
 	}
@@ -167,35 +177,32 @@ Mesh* TheDataset::loadMesh(wxString filename)
 		for (int i = 0; i < 9; ++i)
 			filetype[i] = buffer[i];
 		filetype[9] = 0;
-		printf("Mesh file type: %s\n", filetype);
+		
 		wxString type(filetype, wxConvUTF8);
 		if (type == wxT("binarABCD")) {
-			m_mesh->setFiletype(binaryBE);
+			mesh->setFiletype(binaryBE);
 			//big endian, maybe later
 			return NULL;
 		}
-		if (type == wxT("binarDCBA")) {
-			m_mesh->setFiletype(binaryLE);
+		else if (type == wxT("binarDCBA")) {
+			mesh->setFiletype(binaryLE);
 		}
-		int polygonDim = buffer[17];
-		printf ("Polygon Dimension: %d\n", polygonDim);
-		m_mesh->setPolygonDim(polygonDim);
-		int timeSteps = buffer[21];
-		printf ("Time steps: %d\n", timeSteps);
-		int time = buffer[25];
-		printf ("Time: %d\n", time);
+		else return NULL;
+
+		mesh->setPolygonDim(buffer[17]);
+
 		int fp = 29;
 		converterByteToINT32 c;
 		converterByteToFoat f;
-		float maxV = 0;
-		
+				
 		c.b[0] = buffer[fp];
 		c.b[1] = buffer[fp+1];
 		c.b[2] = buffer[fp+2];
 		c.b[3] = buffer[fp+3];
-		printf ("number of vertices: %d\n", c.i);
-		m_mesh->setCountVerts(c.i);
-		m_mesh->m_vertexArray = new vertex[c.i];
+		// number of vertices
+		mesh->setCountVerts(c.i);
+		
+		mesh->m_vertexArray = new vertex[c.i];
 		fp += 4;
 		for (uint i = 0 ; i < c.i ; ++i)
 		{
@@ -203,35 +210,30 @@ Mesh* TheDataset::loadMesh(wxString filename)
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			m_mesh->m_vertexArray[i].x = f.f;
-			maxV = wxMax(f.f, maxV);
+			mesh->m_vertexArray[i].x = f.f;
 			fp += 4;
 			f.b[0] = buffer[fp];
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			m_mesh->m_vertexArray[i].y = f.f;
-			maxV = wxMax(f.f, maxV);
+			mesh->m_vertexArray[i].y = f.f;
 			fp += 4;
 			f.b[0] = buffer[fp];
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			m_mesh->m_vertexArray[i].z = f.f;
-			//printf("%f, %f, %f\n", m_mesh->m_vertexArray[i].x, m_mesh->m_vertexArray[i].y, m_mesh->m_vertexArray[i].z);
-			maxV = wxMax(f.f, maxV);
+			mesh->m_vertexArray[i].z = f.f;
 			fp += 4;
 		}
-		printf("max Vertex value: %f\n", maxV);
 		
 		c.b[0] = buffer[fp];
 		c.b[1] = buffer[fp+1];
 		c.b[2] = buffer[fp+2];
 		c.b[3] = buffer[fp+3];
-		printf ("number of normals: %d\n", c.i);
-		m_mesh->setCountNormals(c.i);
+		
+		mesh->setCountNormals(c.i);
 		fp += 4;
-		if (c.i == m_mesh->getCountVerts())
+		if (c.i == mesh->getCountVerts())
 		{
 			for (uint i = 0 ; i < c.i ; ++i)
 			{
@@ -239,69 +241,55 @@ Mesh* TheDataset::loadMesh(wxString filename)
 				f.b[1] = buffer[fp+1];
 				f.b[2] = buffer[fp+2];
 				f.b[3] = buffer[fp+3];
-				m_mesh->m_vertexArray[i].nx = f.f;
+				mesh->m_vertexArray[i].nx = f.f;
 				fp += 4;
 				f.b[0] = buffer[fp];
 				f.b[1] = buffer[fp+1];
 				f.b[2] = buffer[fp+2];
 				f.b[3] = buffer[fp+3];
-				m_mesh->m_vertexArray[i].ny = f.f;
+				mesh->m_vertexArray[i].ny = f.f;
 				fp += 4;
 				f.b[0] = buffer[fp];
 				f.b[1] = buffer[fp+1];
 				f.b[2] = buffer[fp+2];
 				f.b[3] = buffer[fp+3];
-				m_mesh->m_vertexArray[i].nz = f.f;
+				mesh->m_vertexArray[i].nz = f.f;
 				fp += 4;
 			}
 		}
 		
-		c.b[0] = buffer[fp];
-		c.b[1] = buffer[fp+1];
-		c.b[2] = buffer[fp+2];
-		c.b[3] = buffer[fp+3];
-		printf ("texture: %d\n", c.i);
 		fp += 4;
 		
 		c.b[0] = buffer[fp];
 		c.b[1] = buffer[fp+1];
 		c.b[2] = buffer[fp+2];
 		c.b[3] = buffer[fp+3];
-		printf ("number of polygons: %d\n", c.i);
-		int maxI = 0;
-		m_mesh->setCountPolygons(c.i);
-		m_mesh->m_polygonArray = new polygon[c.i];
+		mesh->setCountPolygons(c.i);
+		
+		mesh->m_polygonArray = new polygon[c.i];
 		fp += 4;
-		for (uint i = 0 ; i < m_mesh->getCountPolygons() ; ++i)
+		for (uint i = 0 ; i < mesh->getCountPolygons() ; ++i)
 		{
 			c.b[0] = buffer[fp];
 			c.b[1] = buffer[fp+1];
 			c.b[2] = buffer[fp+2];
 			c.b[3] = buffer[fp+3];
-			m_mesh->m_polygonArray[i].v1 = c.i;
-			maxI = wxMax(maxI, c.i);
+			mesh->m_polygonArray[i].v1 = c.i;
 			fp += 4;
 			c.b[0] = buffer[fp];
 			c.b[1] = buffer[fp+1];
 			c.b[2] = buffer[fp+2];
 			c.b[3] = buffer[fp+3];
-			m_mesh->m_polygonArray[i].v2 = c.i;
-			maxI = wxMax(maxI, c.i);
+			mesh->m_polygonArray[i].v2 = c.i;
 			fp += 4;
 			c.b[0] = buffer[fp];
 			c.b[1] = buffer[fp+1];
 			c.b[2] = buffer[fp+2];
 			c.b[3] = buffer[fp+3];
-			m_mesh->m_polygonArray[i].v3 = c.i;
-			maxI = wxMax(maxI, c.i);
+			mesh->m_polygonArray[i].v3 = c.i;
 			fp += 4;
-			//printf("%d, %d, %d\n", m_mesh->m_polygonArray[i].v1, m_mesh->m_polygonArray[i].v2, m_mesh->m_polygonArray[i].v3);
-		}
-		printf("max Vertex used: %d\n", maxI);
-		printf("nSize: %d  fp: %d\n", nSize, fp);
+		}		
 	}
-	meshLoaded = true;
-	return m_mesh;
-	
+	return mesh;
 }
 

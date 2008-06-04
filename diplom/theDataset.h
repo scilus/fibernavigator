@@ -33,8 +33,6 @@ public:
 	int m_columns;
 	int m_frames;
 	wxString m_lastError;
-	Mesh* m_mesh;
-	bool meshLoaded;
 };
 
 #endif /*THEDATASET_H_*/
