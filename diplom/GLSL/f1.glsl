@@ -147,6 +147,6 @@ void main()
 		}
 		col.a = max(col.a, clamp ((col.r + col.g + col.b)/3.0 - thresholdTex2, 0.0, 1.0));	
 	}
-		
+	
 	gl_FragColor = col;
 }

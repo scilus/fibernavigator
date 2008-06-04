@@ -544,6 +544,7 @@ void MainFrame::loadStandard()
 {
 	//return;
 	DatasetInfo *info;
+	/*
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
 	int i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
@@ -552,7 +553,7 @@ void MainFrame::loadStandard()
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
 	m_datasetListCtrl->SetItemData(i, (long)info);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	/*
+	
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
 	 i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
@@ -561,15 +562,16 @@ void MainFrame::loadStandard()
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
 	m_datasetListCtrl->SetItemData(i, (long)info);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	*/
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
-	i = m_datasetListCtrl->GetItemCount();
+	int i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
 	m_datasetListCtrl->SetItem(i, 1, wxT("rgb.hea"));
 	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
 	m_datasetListCtrl->SetItemData(i, (long)info);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	*/
+	
 	m_scene->setDataset(m_dataset);
 	
 	m_xSlider->SetMax(wxMax(2,m_dataset->m_columns-1));

@@ -46,6 +46,9 @@ void TheScene::initGL(int view)
 	glEnable(GL_DOUBLEBUFFER);
 	glEnable(GL_DEPTH_TEST);
 	
+	GLfloat lmodel_ambient[] = {0.2, 0.2, 0.2, 1.0};
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+	
 	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
 	
@@ -116,6 +119,7 @@ void TheScene::initShaders()
 	m_textureShader->link(vShader, fShader);
 	m_textureShader->bind();
 	
+	/*
 	if (m_meshShader)
 	{
 		delete m_meshShader;
@@ -131,6 +135,7 @@ void TheScene::initShaders()
 	m_meshShader = new FGLSLShaderProgram();
 	m_meshShader->link(vShader, fShader);
 	//m_meshShader->bind();
+	 */
 }
 
 void TheScene::setTextureShaderVars()
@@ -225,13 +230,15 @@ void TheScene::renderScene(int view)
 	if (m_showYSlize) renderYSlize();
 	if (m_showZSlize) renderZSlize();
 
-	setMeshShaderVars();
+	glDisable(GL_TEXTURE_3D);
+	
+	//setMeshShaderVars();
 	if (m_dataset->meshLoaded)
 	{
 		renderMesh();
 	}
 	
-	glDisable(GL_TEXTURE_3D);
+	
 }
 
 void TheScene::bindTextures()
@@ -290,31 +297,57 @@ void TheScene::renderMesh()
 {
 	m_textureShader->release();
 	//m_meshShader->bind();
-
-	glColor3f(1.0, 1.0, 1.0);
+	
+	GLfloat  light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat  light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	
+	GLfloat light_position0[] = { 1.0, 0.0, 0.0, 0.0 };
+	GLfloat light_position1[] = { -1.0, 0.0, 0.0, 0.0 };
+	
+	glLightfv (GL_LIGHT0, GL_AMBIENT, light_ambient);
+	glLightfv (GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	glLightfv (GL_LIGHT0, GL_SPECULAR, light_specular);
+	glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
+	
+	glLightfv (GL_LIGHT1, GL_AMBIENT, light_ambient);
+	glLightfv (GL_LIGHT1, GL_DIFFUSE, light_diffuse);
+	glLightfv (GL_LIGHT1, GL_SPECULAR, light_specular);
+	glLightfv (GL_LIGHT1, GL_POSITION, light_position1);
+	
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glShadeModel(GL_SMOOTH);
+	
+	glColor3f(0.6, 0.4, 0.4);
 	
 	int x = m_dataset->m_columns/2;
 	int y = m_dataset->m_rows/2;
 	int z = m_dataset->m_frames/2;
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPushAttrib(GL_POLYGON_BIT);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_TRIANGLES);
 	
 	for ( int i = 0 ; i < m_dataset->m_mesh->getCountPolygons() ; ++i)
 	{
 		polygon p = m_dataset->m_mesh->m_polygonArray[i];
+
 		glNormal3f( 	m_dataset->m_mesh->m_vertexArray[p.v1].nx, 
 						m_dataset->m_mesh->m_vertexArray[p.v1].ny,
 						m_dataset->m_mesh->m_vertexArray[p.v1].nz);
 		glVertex3f( 	m_dataset->m_mesh->m_vertexArray[p.v1].x - x, 
 				     	m_dataset->m_mesh->m_vertexArray[p.v1].y - y, 
 				     	m_dataset->m_mesh->m_vertexArray[p.v1].z - z);
+	
 		glNormal3f( 	m_dataset->m_mesh->m_vertexArray[p.v2].nx, 
 						m_dataset->m_mesh->m_vertexArray[p.v2].ny,
 						m_dataset->m_mesh->m_vertexArray[p.v2].nz);
 		glVertex3f(	m_dataset->m_mesh->m_vertexArray[p.v2].x - x, 
 						m_dataset->m_mesh->m_vertexArray[p.v2].y - y, 
 						m_dataset->m_mesh->m_vertexArray[p.v2].z - z);
+
 		glNormal3f( 	m_dataset->m_mesh->m_vertexArray[p.v3].nx, 
 						m_dataset->m_mesh->m_vertexArray[p.v3].ny,
 						m_dataset->m_mesh->m_vertexArray[p.v3].nz);
@@ -324,9 +357,11 @@ void TheScene::renderMesh()
 	}
 	
 	glEnd();
+	glPopAttrib();
 	
+	glDisable(GL_LIGHTING);
 	//m_meshShader->release();
-	//m_textureShader->bind();
+	m_textureShader->bind();
 }
 
 void TheScene::renderNavView(int view)
