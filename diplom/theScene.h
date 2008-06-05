@@ -44,10 +44,10 @@ public:
 	//wxGLContext* getNavGLContext() {return m_navGLContext;};
 	
 	
-	void renderScene(int);
+	void renderScene(int, int);
 	void renderNavView(int);
 	void makeLights();
-	void renderMesh(DatasetInfo*);
+	void renderMesh(DatasetInfo*, int);
 	void colorMap(float);
 	TheDataset* getDataset() {return m_dataset;};
 	

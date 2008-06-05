@@ -219,7 +219,7 @@ void TheScene::setMeshShaderVars()
 	glUniform1i (texLoc, m_showMesh);
 }
 
-void TheScene::renderScene(int view)
+void TheScene::renderScene(int view, int quadrant)
 {
 	if (m_listctrl->GetItemCount() == 0) return;
 	
@@ -239,7 +239,7 @@ void TheScene::renderScene(int view)
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
 		if (info->getType() == Mesh_ && info->getShow())
 		{
-			renderMesh(info);
+			renderMesh(info, quadrant);
 		}
 	}
 	
@@ -323,14 +323,13 @@ void TheScene::makeLights()
 	glShadeModel(GL_SMOOTH);
 }
 
-void TheScene::renderMesh(DatasetInfo *info)
+void TheScene::renderMesh(DatasetInfo *info, int quadrant)
 {
 	m_textureShader->release();
 	//m_meshShader->bind();
 	
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_DIFFUSE);
-	//glColor3f(0.6, 0.4, 0.4);
 	colorMap(info->getThreshold());
 	
 	int x = m_dataset->m_columns/2;
@@ -338,13 +337,45 @@ void TheScene::renderMesh(DatasetInfo *info)
 	int z = m_dataset->m_frames/2;
 
 	glPushAttrib(GL_POLYGON_BIT);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	glBegin(GL_TRIANGLES);
 	
 	for ( int i = 0 ; i < info->m_mesh->getCountPolygons() ; ++i)
 	{
 		polygon p = info->m_mesh->m_polygonArray[i];
 
+		if (quadrant == 1 &&
+			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
+			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
+			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
+		if (quadrant == 2 &&
+			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
+			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
+			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
+		if (quadrant == 3 &&
+			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
+			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
+			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
+		if (quadrant == 4 &&
+			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
+			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
+			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
+		if (quadrant == 5 &&
+			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
+			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
+			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
+		if (quadrant == 6 &&
+			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
+			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
+			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
+		if (quadrant == 7 &&
+			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
+			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
+			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
+		if (quadrant == 8 &&
+			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
+			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
+			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
 		glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
 						info->m_mesh->m_vertexArray[p.v1].ny,
 						info->m_mesh->m_vertexArray[p.v1].nz);
@@ -366,7 +397,7 @@ void TheScene::renderMesh(DatasetInfo *info)
 						info->m_mesh->m_vertexArray[p.v3].y - y, 
 						info->m_mesh->m_vertexArray[p.v3].z - z);
 	}
-	
+
 	glEnd();
 	glPopAttrib();
 	

@@ -18,6 +18,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_scene = scene;
 	m_init = false;
 	m_view = view;
+	m_quadrant = 1;
 	
 	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
@@ -88,20 +89,12 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			
 			if (event.RightIsDown())												// If Right Mouse Clicked, Reset All Rotations
 		    {
+				/*
 				printf("Transformation Matrix:\n");
-				printf("%.2f : %.2f : %.2f\n", m_transform.s.XX, m_transform.s.XY, m_transform.s.XZ );
+				printf("%.2f : %.2f : %.2f\n", m_transform.s.XX, m_transform.s.XY, m_transform.s.XZ);
 				printf("%.2f : %.2f : %.2f\n", m_transform.s.YX, m_transform.s.YY, m_transform.s.YZ);
 				printf("%.2f : %.2f : %.2f\n", m_transform.s.ZX, m_transform.s.ZY, m_transform.s.ZZ);
-				printf("Last Rot:\n");
-				printf("%.2f : %.2f : %.2f\n", m_lastRot.s.XX, m_lastRot.s.XY, m_lastRot.s.XZ );
-				printf("%.2f : %.2f : %.2f\n", m_lastRot.s.YX, m_lastRot.s.YY, m_lastRot.s.YZ);
-				printf("%.2f : %.2f : %.2f\n", m_lastRot.s.ZX, m_lastRot.s.ZY, m_lastRot.s.ZZ);
-				printf("This Rot:\n");
-				printf("%.2f : %.2f : %.2f\n", m_thisRot.s.XX, m_thisRot.s.XY, m_thisRot.s.XZ );
-				printf("%.2f : %.2f : %.2f\n", m_thisRot.s.YX, m_thisRot.s.YY, m_thisRot.s.YZ);
-				printf("%.2f : %.2f : %.2f\n", m_thisRot.s.ZX, m_thisRot.s.ZY, m_thisRot.s.ZZ);
 				
-				/*
 				Matrix3fSetZero(&m_lastRot);
 				Matrix3fSetIdentity(&m_lastRot);								// Reset Rotation
 				Matrix3fSetZero(&m_thisRot);
@@ -129,9 +122,54 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		            Matrix4fSetRotationFromMatrix3f(&m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
 		            Refresh(false);
 			    }
+				
+				float *dots = new float[8];
+				Vector3fT v1 = {0,0,1};
+				Vector3fT v2 = {1,1,1};
+				Vector3fT view;
+				
+				Vector3fMultMat4(&view, &v1, &m_transform);
+				dots[0] = Vector3fDot(&v2, &view);
+				
+				v2.s.Z = -1;
+				dots[1] = Vector3fDot(&v2, &view);
+				
+				v2.s.Y = -1;
+				dots[2] = Vector3fDot(&v2, &view);
+				
+				v2.s.Z = 1;
+				dots[3] = Vector3fDot(&v2, &view);
+				
+				v2.s.X = -1;
+				dots[4] = Vector3fDot(&v2, &view);
+				
+				v2.s.Z = -1;
+				dots[5] = Vector3fDot(&v2, &view);
+				
+				v2.s.Y = 1;
+				dots[6] = Vector3fDot(&v2, &view);
+				
+				v2.s.Z = 1;
+				dots[7] = Vector3fDot(&v2, &view);
+				
+				float max = 0.0;
+				int quadrant = 0;
+				for (int i = 0 ; i < 8 ; ++i)
+				{
+					if (dots[i] > max) 
+					{
+						max = dots[i];
+						quadrant = i+1;
+					}
+				}
+				m_quadrant = quadrant;
+				printf("quadrant: %d\n", m_quadrant);
 			}
 			else 
 				m_isDragging = false;
+			
+			
+			
 			
 		} break;
 		
@@ -181,7 +219,7 @@ void MainCanvas::render()
     case mainView: {
     	glPushMatrix();													// NEW: Prepare Dynamic Transform
 	    glMultMatrixf(m_transform.M);										// NEW: Apply Dynamic Transform
-	    m_scene->renderScene(m_view);
+	    m_scene->renderScene(m_view, m_quadrant);
 	    glPopMatrix();	
 	    break;
     }

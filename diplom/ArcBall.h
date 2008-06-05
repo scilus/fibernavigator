@@ -170,6 +170,16 @@
                 (NewObj->s.Z * v1->s.Z);
     }
 
+    inline 
+    static void Vector3fMultMat4(Vector3fT* NewObj, const Vector3fT* v, const Matrix4fT* m)
+    {
+    	Vector3fT Result;
+    	Result.s.X = v->s.X * m->s.XX + v->s.Y * m->s.XY + v->s.Z * m->s.XZ;
+    	Result.s.Y = v->s.X * m->s.YX + v->s.Y * m->s.YY + v->s.Z * m->s.YZ;
+    	Result.s.Z = v->s.X * m->s.ZX + v->s.Y * m->s.ZY + v->s.Z * m->s.ZZ;
+    	*NewObj = Result;
+    }
+    
     /**
       * Returns the squared length of this vector.
       * @return the squared length of this vector
