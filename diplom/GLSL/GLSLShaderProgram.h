@@ -40,6 +40,11 @@ public:
      * get program object
      */
     GLuint getProgramObject();
+    
+    void setUniInt(const GLchar*, int);
+    void setUniFloat(const GLchar*, float);
+    void setAttribFloat(const GLchar*, float);
+    
 
 private:
     GLuint m_shaderProgram;

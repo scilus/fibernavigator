@@ -1,5 +1,3 @@
-uniform int countTextures;
-
 uniform sampler3D tex0;
 uniform sampler3D tex1;
 uniform sampler3D tex2;
@@ -70,7 +68,7 @@ vec3 defaultColorMap( float value )
 
 void main()
 {
-	vec4 col = vec4(0);
+	vec4 col = vec4(0.0, 0.0, 0.0, 1.0);
 	vec4 col1;
 	
 	if (showTex2)

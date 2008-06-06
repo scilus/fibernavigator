@@ -1,10 +1,6 @@
 #ifndef _GLSLSHADER_H_
 #define _GLSLSHADER_H_
 
-/*
-#include <GL/gl.h>
-#include <GL/glu.h>
-*/
 #include <GL/glew.h>
 
 #include "wx/wxprec.h"

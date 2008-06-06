@@ -87,6 +87,19 @@ void TheScene::assignTextures ()
 	}
 }
 
+void TheScene::bindTextures()
+{
+	glEnable(GL_TEXTURE_3D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	
+	
+	for (int i = 0 ; i < m_countTextures ; ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
+	}
+}
+
 void TheScene::swapTextures(int a, int b)
 {
 	GLuint temp = m_texNames[a];
@@ -94,13 +107,9 @@ void TheScene::swapTextures(int a, int b)
 	m_texNames[b] = temp;
 }
 
-void TheScene::setDataset(TheDataset *dataset)
+void TheScene::releaseTextures()
 {
-	m_dataset = dataset;
-	
-	m_xSize = (float)dataset->m_columns;
-	m_ySize = (float)dataset->m_rows;
-	m_zSize = (float)dataset->m_frames;
+	glDeleteTextures(10, m_texNames);
 }
 
 void TheScene::initShaders()
@@ -121,6 +130,7 @@ void TheScene::initShaders()
 	m_textureShader->link(vShader, fShader);
 	m_textureShader->bind();
 	
+
 	if (m_meshShader)
 	{
 		delete m_meshShader;
@@ -134,71 +144,50 @@ void TheScene::initShaders()
 	fShader1->loadCode(wxT("GLSL/f2.glsl"));
 	
 	m_meshShader = new FGLSLShaderProgram();
-	m_meshShader->link(vShader, fShader);
+	m_meshShader->link(vShader1, fShader1);
 	m_meshShader->bind();
-	
 }
 
 void TheScene::setTextureShaderVars()
 {
 	m_textureShader->bind();
-	
-	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "countTextures");
-	glUniform1i (texLoc, m_countTextures);
+
 	DatasetInfo* info;
 	switch (m_countTextures)
 	{
 	case 10:
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex9");
-		glUniform1i (texLoc, 9);
+		m_textureShader->setUniInt("tex9", 9);
 	case 9:
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex8");
-		glUniform1i (texLoc, 8);
+		m_textureShader->setUniInt("tex8", 8);
 	case 8:
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex7");
-		glUniform1i (texLoc, 7);
+		m_textureShader->setUniInt("tex7", 7);
 	case 7:
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex6");
-		glUniform1i (texLoc, 6);
+		m_textureShader->setUniInt("tex6", 6);
 	case 6:
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex5");
-		glUniform1i (texLoc, 5);
+		m_textureShader->setUniInt("tex5", 5);
 	case 5:
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex4");
-		glUniform1i (texLoc, 4);
+		m_textureShader->setUniInt("tex4", 4);
 	case 4:
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex3");
-		glUniform1i (texLoc, 3);
+		m_textureShader->setUniInt("tex3", 3);
 	case 3:
 		info = (DatasetInfo*)m_listctrl->GetItemData(2);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex2");
-		glUniform1i (texLoc, 2);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex2");
-		glUniform1i (texLoc, info->getShow());
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex2");
-		glUniform1f (texLoc, info->getThreshold());
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex2");
-		glUniform1i (texLoc, info->getType());
+		m_textureShader->setUniInt("tex2", 2);
+		m_textureShader->setUniInt("showTex2", info->getShow());
+		m_textureShader->setUniFloat("thresholdTex2",  info->getThreshold());
+		m_textureShader->setUniInt("typeTex2", info->getType());
 	case 2:
 		info = (DatasetInfo*)m_listctrl->GetItemData(1);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex1");
-		glUniform1i (texLoc, 1);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex1");
-		glUniform1i (texLoc, info->getShow());
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex1");
-		glUniform1f (texLoc, info->getThreshold());
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex1");
-		glUniform1i (texLoc, info->getType());
+		m_textureShader->setUniInt("tex1", 1);
+		m_textureShader->setUniInt("showTex1", info->getShow());
+		m_textureShader->setUniFloat("thresholdTex1",  info->getThreshold());
+		m_textureShader->setUniInt("typeTex1", info->getType());
 	case 1:
 		info = (DatasetInfo*)m_listctrl->GetItemData(0);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex0");
-		glUniform1i (texLoc, 0);
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showTex0");
-		glUniform1i (texLoc, info->getShow());
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "thresholdTex0");
-		glUniform1f (texLoc, info->getThreshold());
-		texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "typeTex0");
-		glUniform1i (texLoc, info->getType());
+		m_textureShader->setUniInt("tex0", 0);
+		m_textureShader->setUniInt("showTex0", info->getShow());
+		m_textureShader->setUniFloat("thresholdTex0",  info->getThreshold());
+		m_textureShader->setUniInt("typeTex0", info->getType());
+		
 	case 0:
 	default:
 	;}	
@@ -207,21 +196,20 @@ void TheScene::setTextureShaderVars()
 void TheScene::setMeshShaderVars()
 {
 	m_meshShader->bind();
-	
-	GLint texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "dimX");
-	glUniform1i (texLoc, m_dataset->m_columns);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "dimY");
-	glUniform1i (texLoc, m_dataset->m_rows);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "dimZ");
-	glUniform1i (texLoc, m_dataset->m_frames);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "quadrant");
-	glUniform1i (texLoc, m_quadrant);
-	
+	/*
+	m_meshShader->setAttribFloat("dimX", m_dataset->m_columns);
+	m_meshShader->setAttribFloat("dimY", m_dataset->m_rows);
+	m_meshShader->setAttribFloat("dimZ", m_dataset->m_frames);
+	m_meshShader->setAttribFloat("quadrant", m_quadrant);
+	*/
 }
 
 void TheScene::renderScene(int view, int quadrant)
 {
 	if (m_listctrl->GetItemCount() == 0) return;
+	
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	
 	m_quadrant = quadrant;
 	bindTextures();
 	setTextureShaderVars();
@@ -230,33 +218,16 @@ void TheScene::renderScene(int view, int quadrant)
 	if (m_showYSlize) renderYSlize();
 	if (m_showZSlize) renderZSlize();
 
+	glPopAttrib();
+	
 	glDisable(GL_TEXTURE_3D);
+	m_textureShader->release();
 	
-	makeLights();
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	
-	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
-	{
-		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
-		if (info->getType() == Mesh_ && info->getShow())
-		{
-			renderMesh(info);
-		}
-	}
+	renderMesh();
 	
-	glDisable(GL_LIGHTING);
-}
-
-void TheScene::bindTextures()
-{
-	glEnable(GL_TEXTURE_3D);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	
-	
-	for (int i = 0 ; i < m_countTextures ; ++i)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
-	}
+	glPopAttrib();
 }
 
 void TheScene::renderXSlize()
@@ -323,88 +294,94 @@ void TheScene::makeLights()
 	glShadeModel(GL_SMOOTH);
 }
 
-void TheScene::renderMesh(DatasetInfo *info)
+void TheScene::renderMesh()
 {
-	m_textureShader->release();
-	
-	//setMeshShaderVars();
+	makeLights();
+
+	setMeshShaderVars();
 	
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_DIFFUSE);
-	colorMap(info->getThreshold());
 	
 	int x = m_dataset->m_columns/2;
 	int y = m_dataset->m_rows/2;
 	int z = m_dataset->m_frames/2;
-
-	glBegin(GL_TRIANGLES);
 	
-	for ( int i = 0 ; i < info->m_mesh->getCountPolygons() ; ++i)
+	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
-		polygon p = info->m_mesh->m_polygonArray[i];
+		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		colorMap(info->getThreshold());
 		
-		if (m_quadrant == 1 &&
-			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
-			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue; 
-		if (m_quadrant == 2 &&
-			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
-			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-		if (m_quadrant == 3 &&
-			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
-			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-		if (m_quadrant == 4 &&
-			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
-			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-		if (m_quadrant == 5 &&
-			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
-			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-		if (m_quadrant == 6 &&
-			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
-			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-		if (m_quadrant == 7 &&
-			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
-			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-		if (m_quadrant == 8 &&
-			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
-			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
+		if (info->getType() == Mesh_ && info->getShow())
+		{
+			//m_meshShader->setUniFloat("mainColor", info->getThreshold());
+			glBegin(GL_TRIANGLES);
+			
+			for ( int i = 0 ; i < info->m_mesh->getCountPolygons() ; ++i)
+			{
+				polygon p = info->m_mesh->m_polygonArray[i];
+				
+				if (m_quadrant == 1 &&
+					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
+					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
+					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue; 
+				if (m_quadrant == 2 &&
+					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
+					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
+					info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
+				if (m_quadrant == 3 &&
+					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
+					info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
+					info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
+				if (m_quadrant == 4 &&
+					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
+					info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
+					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
+				if (m_quadrant == 5 &&
+					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
+					info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
+					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
+				if (m_quadrant == 6 &&
+					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
+					info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
+					info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
+				if (m_quadrant == 7 &&
+					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
+					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
+					info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
+				if (m_quadrant == 8 &&
+					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
+					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
+					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
+				
+			
+				glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
+								info->m_mesh->m_vertexArray[p.v1].ny,
+								info->m_mesh->m_vertexArray[p.v1].nz);
+				glVertex3f( 	info->m_mesh->m_vertexArray[p.v1].x - x, 
+								info->m_mesh->m_vertexArray[p.v1].y - y, 
+								info->m_mesh->m_vertexArray[p.v1].z - z);
+				
+				glNormal3f( 	info->m_mesh->m_vertexArray[p.v2].nx, 
+								info->m_mesh->m_vertexArray[p.v2].ny,
+								info->m_mesh->m_vertexArray[p.v2].nz);
+				glVertex3f(	info->m_mesh->m_vertexArray[p.v2].x - x, 
+								info->m_mesh->m_vertexArray[p.v2].y - y, 
+								info->m_mesh->m_vertexArray[p.v2].z - z);
 		
-	
-		glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
-						info->m_mesh->m_vertexArray[p.v1].ny,
-						info->m_mesh->m_vertexArray[p.v1].nz);
-		glVertex3f( 	info->m_mesh->m_vertexArray[p.v1].x - x, 
-						info->m_mesh->m_vertexArray[p.v1].y - y, 
-						info->m_mesh->m_vertexArray[p.v1].z - z);
-		
-		glNormal3f( 	info->m_mesh->m_vertexArray[p.v2].nx, 
-						info->m_mesh->m_vertexArray[p.v2].ny,
-						info->m_mesh->m_vertexArray[p.v2].nz);
-		glVertex3f(	info->m_mesh->m_vertexArray[p.v2].x - x, 
-						info->m_mesh->m_vertexArray[p.v2].y - y, 
-						info->m_mesh->m_vertexArray[p.v2].z - z);
-
-		glNormal3f( 	info->m_mesh->m_vertexArray[p.v3].nx, 
-						info->m_mesh->m_vertexArray[p.v3].ny,
-						info->m_mesh->m_vertexArray[p.v3].nz);
-		glVertex3f(	info->m_mesh->m_vertexArray[p.v3].x - x, 
-						info->m_mesh->m_vertexArray[p.v3].y - y, 
-						info->m_mesh->m_vertexArray[p.v3].z - z);
+				glNormal3f( 	info->m_mesh->m_vertexArray[p.v3].nx, 
+								info->m_mesh->m_vertexArray[p.v3].ny,
+								info->m_mesh->m_vertexArray[p.v3].nz);
+				glVertex3f(	info->m_mesh->m_vertexArray[p.v3].x - x, 
+								info->m_mesh->m_vertexArray[p.v3].y - y, 
+								info->m_mesh->m_vertexArray[p.v3].z - z);
+			}
+			glEnd();
+		}
 	}
-
-	glEnd();
-	
+	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
 	
-	m_meshShader->release();
-	m_textureShader->bind();
 }
 
 void TheScene::renderNavView(int view)
@@ -466,9 +443,10 @@ void TheScene::renderNavView(int view)
 	glDisable(GL_TEXTURE_3D);
 	
 	m_textureShader->release();
+	//m_meshShader->bind();
 
-	glColor3f(1.0, 0.0, 0.0);
 	glBegin (GL_LINES);
+	glColor3f(1.0, 0.0, 0.0);
 		glVertex3f (-border, yline, border);
 		glVertex3f ( border, yline, border);
 		glVertex3f (xline, -border, border);
@@ -485,11 +463,6 @@ void TheScene::updateView(float x, float y, float z)
 	m_xSlize = x;
 	m_ySlize = y;
 	m_zSlize = z;
-}
-
-void TheScene::releaseTextures()
-{
-	glDeleteTextures(10, m_texNames);
 }
 
 void TheScene::colorMap(float value)
@@ -510,4 +483,13 @@ void TheScene::colorMap(float value)
     	glColor3f( 1.0, 0.0, value-4.0 );
     else 
     	glColor3f( 1.0, 0.0, 1.0 );
+}
+
+void TheScene::setDataset(TheDataset *dataset)
+{
+	m_dataset = dataset;
+	
+	m_xSize = (float)dataset->m_columns;
+	m_ySize = (float)dataset->m_rows;
+	m_zSize = (float)dataset->m_frames;
 }

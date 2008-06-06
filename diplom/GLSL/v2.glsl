@@ -1,47 +1,11 @@
-uniform int dimX;
-uniform int dimY;
-uniform int dimZ;
-uniform int quadrant;
+varying vec3 N;
+varying vec3 v;
 
-varying int discardIt;
+void main(void)  
+{     
+   v = vec3(gl_ModelViewMatrix * gl_Vertex);       
+   N = normalize(gl_NormalMatrix * gl_Normal);
 
-void main()
-{
-	vec4 pos = gl_Vertex;
-	discardIt = 0;
-	
-	if (quadrant == 1 &&
-		pos.x > dimX &&
-		pos.y > dimY &&
-		pos.z > dimZ) discardIt = 1; 
-	if (quadrant == 2 &&
-		pos.x > dimX &&
-		pos.y > dimY &&
-		pos.z < dimZ) discardIt = 1;
-	if (quadrant == 3 &&
-		pos.x > dimX &&
-		pos.y < dimY &&
-		pos.z < dimZ) discardIt = 1;
-	if (quadrant == 4 &&
-		pos.x > dimX &&
-		pos.y < dimY &&
-		pos.z > dimZ) discardIt = 1;
-	if (quadrant == 5 &&
-		pos.x < dimX &&
-		pos.y < dimY &&
-		pos.z > dimZ) discardIt = 1;
-	if (quadrant == 6 &&
-		pos.x < dimX &&
-		pos.y < dimY &&
-		pos.z < dimZ) discardIt = 1;
-	if (quadrant == 7 &&
-		pos.x < dimX &&
-		pos.y > dimY &&
-		pos.z < dimZ) discardIt = 1;
-	if (quadrant == 8 &&
-		pos.x < dimX &&
-		pos.y > dimY &&
-		pos.z > dimZ) discardIt = 1;
-		
-	gl_Position = ftransform();
+   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;  
 }
+          

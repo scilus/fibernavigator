@@ -186,6 +186,7 @@ void DatasetInfo::generateTexture()
 
 wxString DatasetInfo::getInfoString()
 {
+	if (m_type == Mesh_) return wxT("Mesh File");
 	if (!is_loaded) return wxT("not loaded");
 	wxString infoString1, infoString2, infoString3;
 	infoString1.Empty();

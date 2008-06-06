@@ -32,27 +32,27 @@ public:
 	~TheScene();
 	
 	void initGL(int);
+	
 	void assignTextures();
 	void swapTextures(int, int);
+	void releaseTextures();
+	
 	void initShaders();
 	
 	void setDataset(TheDataset*);
 	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
-	//void setNavGLContext(wxGLContext* context) {m_navGLContext = context;};
-	//wxGLContext* getNavGLContext() {return m_navGLContext;};
-	
 	
 	void renderScene(int, int);
 	void renderNavView(int);
 	void makeLights();
-	void renderMesh(DatasetInfo*);
+	void renderMesh();
 	void colorMap(float);
 	TheDataset* getDataset() {return m_dataset;};
 	
 	void updateView(float, float, float);
-	void releaseTextures();
+	
 	
 	bool m_texAssigned;
 	
