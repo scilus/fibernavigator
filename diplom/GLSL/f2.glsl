@@ -1,6 +1,8 @@
-/**
- * TwoSidedLighting.frag
- */
+uniform int sector;
+uniform int cutX;
+uniform int cutY;
+uniform int cutZ;
+
 varying vec3 normal;
 varying vec3 vertex;
 
@@ -127,6 +129,43 @@ void calculateLighting(in int numLights, in vec3 N, in vec3 V, in float shinines
         }
     }
 }
+
+void testCut()
+{
+	if (sector == 1 &&
+		vertex.x > cutX &&
+		vertex.y > cutY &&
+		vertex.z > cutZ) discard; 
+	if (sector == 2 &&
+		vertex.x > cutX &&
+		vertex.y > cutY &&
+		vertex.z < cutZ) discard;
+	if (sector == 3 &&
+		vertex.x > cutX &&
+		vertex.y < cutY &&
+		vertex.z < cutZ) discard;
+	if (sector == 4 &&
+		vertex.x > cutX &&
+		vertex.y < cutY &&
+		vertex.z > cutZ) discard;
+	if (sector == 5 &&
+		vertex.x < cutX &&
+		vertex.y < cutY &&
+		vertex.z > cutZ) discard;
+	if (sector == 6 &&
+		vertex.x < cutX &&
+		vertex.y < cutY &&
+		vertex.z < cutZ) discard;
+	if (sector == 7 &&
+		vertex.x < cutX &&
+		vertex.y > cutY &&
+		vertex.z < cutZ) discard;
+	if (sector == 8 &&
+		vertex.x < cutX &&
+		vertex.y > cutY &&
+		vertex.z > cutZ) discard;
+}
+
  
 void main()
 {
@@ -152,6 +191,8 @@ void main()
                  (specular * gl_FrontMaterial.specular);
   
     color = clamp(color, 0.0, 1.0);
+    
+    testCut();
     
     gl_FragColor = color;
 }

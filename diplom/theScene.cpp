@@ -196,12 +196,12 @@ void TheScene::setTextureShaderVars()
 void TheScene::setMeshShaderVars()
 {
 	m_meshShader->bind();
-	/*
-	m_meshShader->setAttribFloat("dimX", m_dataset->m_columns);
-	m_meshShader->setAttribFloat("dimY", m_dataset->m_rows);
-	m_meshShader->setAttribFloat("dimZ", m_dataset->m_frames);
-	m_meshShader->setAttribFloat("quadrant", m_quadrant);
-	*/
+	
+	m_meshShader->setUniInt("cutX", (int)(m_xSlize - m_xSize/2.0));
+	m_meshShader->setUniInt("cutY", (int)(m_ySlize - m_ySize/2.0));
+	m_meshShader->setUniInt("cutZ", (int)(m_zSlize - m_zSize/2.0));
+	m_meshShader->setUniInt("sector", m_quadrant);
+	
 }
 
 void TheScene::renderScene(int view, int quadrant)
@@ -320,41 +320,7 @@ void TheScene::renderMesh()
 			for ( int i = 0 ; i < info->m_mesh->getCountPolygons() ; ++i)
 			{
 				polygon p = info->m_mesh->m_polygonArray[i];
-				/*
-				if (m_quadrant == 1 &&
-					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
-					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue; 
-				if (m_quadrant == 2 &&
-					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
-					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-					info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-				if (m_quadrant == 3 &&
-					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
-					info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
-					info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-				if (m_quadrant == 4 &&
-					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
-					info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
-					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-				if (m_quadrant == 5 &&
-					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
-					info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
-					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-				if (m_quadrant == 6 &&
-					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
-					info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
-					info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-				if (m_quadrant == 7 &&
-					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
-					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-					info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-				if (m_quadrant == 8 &&
-					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
-					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-				*/
-			
+				
 				glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
 								info->m_mesh->m_vertexArray[p.v1].ny,
 								info->m_mesh->m_vertexArray[p.v1].nz);

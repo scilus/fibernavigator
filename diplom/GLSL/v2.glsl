@@ -1,6 +1,3 @@
-/**
- * \file Lighting.vert
- */
 varying vec3 normal;
 varying vec3 vertex;
 

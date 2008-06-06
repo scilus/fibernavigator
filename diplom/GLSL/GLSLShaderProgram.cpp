@@ -76,23 +76,23 @@ GLuint FGLSLShaderProgram::getProgramObject()
 void FGLSLShaderProgram::setUniInt(const GLchar* name, int value)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
-	if (texLoc == -1)
-		printf("No such uniform named \"%s\"\n", name);
+	//if (texLoc == -1)
+	//	printf("No such uniform named \"%s\"\n", name);
 	glUniform1i (texLoc, value);
 }
 
 void FGLSLShaderProgram::setUniFloat(const GLchar* name, float value)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
-	if (texLoc == -1)
-		printf("No such uniform named \"%s\"\n", name);
+	//if (texLoc == -1)
+	//	printf("No such uniform named \"%s\"\n", name);
 	glUniform1f (texLoc, value);
 }
 
 void FGLSLShaderProgram::setAttribFloat(const GLchar* name, float value)
 {
 	GLint attrib = glGetAttribLocation (m_shaderProgram, name);
-	if (attrib == -1)
-		printf("No such attribute named \"%s\"\n", name);
+	//if (attrib == -1)
+	//	printf("No such attribute named \"%s\"\n", name);
 	glVertexAttrib1f (attrib, value);
 }

@@ -86,10 +86,6 @@ private:
 	float m_ratio1;
 	float m_ratio2;
 
-	float m_xLine;
-	float m_yLine;
-	float m_zLine;
-	
 	int m_quadrant;
 	
 	void bindTextures();
