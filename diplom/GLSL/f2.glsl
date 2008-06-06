@@ -1,34 +1,157 @@
-varying vec3 vN;
-varying vec3 v; 
+/**
+ * TwoSidedLighting.frag
+ */
+varying vec3 normal;
+varying vec3 vertex;
 
-#define MAX_LIGHTS 2 
+const vec4 AMBIENT_BLACK = vec4(0.0, 0.0, 0.0, 1.0);
+const vec4 DEFAULT_BLACK = vec4(0.0, 0.0, 0.0, 0.0);
 
-void main (void) 
-{ 
-   vec3 N = normalize(vN);
-   vec4 finalColor = vec4(0.0, 0.0, 0.0, 0.0);
+bool isLightEnabled(in int i)
+{
+    /* A separate variable is used to get
+    // rid of a linker error.*/
+    bool enabled = true;
    
-   for (int i=0;i<MAX_LIGHTS;i++)
-   {
-      vec3 L = normalize(gl_LightSource[i].position.xyz - v); 
-      vec3 E = normalize(-v); // we are in Eye Coordinates, so EyePos is (0,0,0) 
-      vec3 R = normalize(-reflect(L,N)); 
-   
-      //calculate Ambient Term: 
-      vec4 Iamb = gl_FrontLightProduct[i].ambient; 
+    /* If all the colors of the Light are set
+    // to BLACK then we know we don't need to bother
+    // doing a lighting calculation on it. */
+    if ((gl_LightSource[i].ambient  == AMBIENT_BLACK) &&
+        (gl_LightSource[i].diffuse  == DEFAULT_BLACK) &&
+        (gl_LightSource[i].specular == DEFAULT_BLACK))
+        enabled = false;
+       
+    return(enabled);
+}
 
-      //calculate Diffuse Term: 
-      vec4 Idiff = gl_FrontLightProduct[i].diffuse * max(dot(N,L), 0.0);
-      Idiff = clamp(Idiff, 0.0, 1.0); 
+float calculateAttenuation(in int i, in float dist)
+{
+    return(1.0 / (gl_LightSource[i].constantAttenuation +
+                  gl_LightSource[i].linearAttenuation * dist +
+                  gl_LightSource[i].quadraticAttenuation * dist * dist));
+}
+
+void directionalLight(in int i, in vec3 normal, in float shininess,
+                      inout vec4 ambient, inout vec4 diffuse, inout vec4 specular)
+{
+	float nDotVP;
+	float nDotHV;
+	float pf;
+	
+	nDotVP = max(0.0, dot(normal, normalize(vec3(gl_LightSource[i].position))));
+	nDotHV = max(0.0, dot(normal, vec3(gl_LightSource[i].halfVector)));
+	
+	if (nDotVP == 0.0)
+		pf = 0.0;
+	else
+		pf = pow(nDotHV, gl_FrontMaterial.shininess);
+	
+	ambient += gl_LightSource[i].ambient;
+	diffuse += gl_LightSource[i].diffuse * nDotVP;
+	specular += vec4(0.0); /*gl_LightSource[i].specular * pf;*/     
+    
+}
+
+void pointLight(in int i, in vec3 N, in vec3 V, in float shininess,
+                inout vec4 ambient, inout vec4 diffuse, inout vec4 specular)
+{
+    vec3 D = gl_LightSource[i].position.xyz - V;
+    vec3 L = normalize(D);
+
+    float dist = length(D);
+    float attenuation = calculateAttenuation(i, dist);
+
+    float nDotL = dot(N,L);
+
+    if (nDotL > 0.0)
+    {   
+        vec3 E = normalize(-V);
+        vec3 R = reflect(-L, N);
+       
+        float pf = pow(max(dot(R,E), 0.0), shininess);
+
+        diffuse  += gl_LightSource[i].diffuse  * attenuation * nDotL;
+        specular += gl_LightSource[i].specular * attenuation * pf;
+    }
    
-      // calculate Specular Term:
-      vec4 Ispec = gl_FrontLightProduct[i].specular 
-             * pow(max(dot(R,E),0.0),0.3*gl_FrontMaterial.shininess);
-      Ispec = clamp(Ispec, 0.0, 1.0); 
+    ambient  += gl_LightSource[i].ambient * attenuation;
+}
+
+void spotLight(in int i, in vec3 N, in vec3 V, in float shininess,
+               inout vec4 ambient, inout vec4 diffuse, inout vec4 specular)
+{
+    vec3 D = gl_LightSource[i].position.xyz - V;
+    vec3 L = normalize(D);
+
+    float dist = length(D);
+    float attenuation = calculateAttenuation(i, dist);
+
+    float nDotL = dot(N,L);
+
+    if (nDotL > 0.0)
+    {   
+        float spotEffect = dot(normalize(gl_LightSource[i].spotDirection), -L);
+       
+        if (spotEffect > gl_LightSource[i].spotCosCutoff)
+        {
+            attenuation *=  pow(spotEffect, gl_LightSource[i].spotExponent);
+
+            vec3 E = normalize(-V);
+            vec3 R = reflect(-L, N);
+       
+            float pf = pow(max(dot(R,E), 0.0), shininess);
+
+            diffuse  += gl_LightSource[i].diffuse  * attenuation * nDotL;
+            specular += gl_LightSource[i].specular * attenuation * pf;
+        }
+    }
    
-      finalColor += Iamb + Idiff + Ispec;
-   }
+    ambient  += gl_LightSource[i].ambient * attenuation;
+}
+
+void calculateLighting(in int numLights, in vec3 N, in vec3 V, in float shininess,
+                       inout vec4 ambient, inout vec4 diffuse, inout vec4 specular)
+{
+    /* Just loop through each light, and if its enabled add
+    // its contributions to the color of the pixel. */
+    for (int i = 0; i < numLights; i++)
+    {
+        if (isLightEnabled(i))
+        {
+            if (gl_LightSource[i].position.w == 0.0)
+                directionalLight(i, N, shininess, ambient, diffuse, specular);
+            else if (gl_LightSource[i].spotCutoff == 180.0)
+                pointLight(i, N, V, shininess, ambient, diffuse, specular);
+            else
+                 spotLight(i, N, V, shininess, ambient, diffuse, specular);
+        }
+    }
+}
+ 
+void main()
+{
+	/* Normalize the normal. A varying variable CANNOT
+    // be modified by a fragment shader. So a new variable
+    // needs to be created. */
+    vec3 n = normal;
    
-   // write Total Color: 
-   gl_FragColor = gl_FrontLightModelProduct.sceneColor + finalColor; 
+    vec4 ambient  = vec4(0.0);
+    vec4 diffuse  = vec4(0.0);
+    vec4 specular = vec4(0.0);
+
+    /* In this case the built in uniform gl_MaxLights is used
+    // to denote the number of lights. A better option may be passing
+    // in the number of lights as a uniform or replacing the current
+    // value with a smaller value. */
+    calculateLighting(gl_MaxLights, -n, vertex, gl_FrontMaterial.shininess,
+                      ambient, diffuse, specular);
+   
+    vec4 color = gl_FrontLightModelProduct.sceneColor  +
+                 (ambient  * gl_FrontMaterial.ambient) +
+                 (diffuse  * gl_FrontMaterial.diffuse) +
+                 (specular * gl_FrontMaterial.specular);
+  
+    color = clamp(color, 0.0, 1.0);
+    
+    gl_FragColor = color;
 }

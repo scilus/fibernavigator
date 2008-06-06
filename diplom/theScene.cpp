@@ -320,7 +320,7 @@ void TheScene::renderMesh()
 			for ( int i = 0 ; i < info->m_mesh->getCountPolygons() ; ++i)
 			{
 				polygon p = info->m_mesh->m_polygonArray[i];
-				
+				/*
 				if (m_quadrant == 1 &&
 					info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
 					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
@@ -353,7 +353,7 @@ void TheScene::renderMesh()
 					info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
 					info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
 					info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-				
+				*/
 			
 				glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
 								info->m_mesh->m_vertexArray[p.v1].ny,
