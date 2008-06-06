@@ -120,7 +120,8 @@ void main()
 				col.rgb = col1.rgb;
 			}
 		}
-		col.a = max(col.a, clamp ((col.r + col.g + col.b)/3.0 - thresholdTex1, 0.0, 1.0));
+		
+		col.a = max(col.a, clamp ((col.r + col.g + col.b)/3.0 - thresholdTex1, 0.0, 1.0));		
 	}
 	
 	if (showTex0)

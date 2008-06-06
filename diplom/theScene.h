@@ -47,7 +47,7 @@ public:
 	void renderScene(int, int);
 	void renderNavView(int);
 	void makeLights();
-	void renderMesh(DatasetInfo*, int);
+	void renderMesh(DatasetInfo*);
 	void colorMap(float);
 	TheDataset* getDataset() {return m_dataset;};
 	
@@ -89,6 +89,8 @@ private:
 	float m_xLine;
 	float m_yLine;
 	float m_zLine;
+	
+	int m_quadrant;
 	
 	void bindTextures();
 	void setTextureShaderVars();

@@ -43,6 +43,7 @@ void FGLSLShaderProgram::unlink()
 void FGLSLShaderProgram::bind()
 {
 	glUseProgram(m_shaderProgram);
+	//printf("using shader: %d\n", m_shaderProgram);
 }
 
 void FGLSLShaderProgram::release()

@@ -24,6 +24,8 @@ TheScene::TheScene()
 	m_yOffset1 = 0.0;
 	m_xOffset2 = 0.0;
 	m_yOffset2 = 0.0;
+	
+	m_quadrant = 1;
 }
 
 TheScene::~TheScene()
@@ -119,7 +121,6 @@ void TheScene::initShaders()
 	m_textureShader->link(vShader, fShader);
 	m_textureShader->bind();
 	
-	/*
 	if (m_meshShader)
 	{
 		delete m_meshShader;
@@ -134,8 +135,8 @@ void TheScene::initShaders()
 	
 	m_meshShader = new FGLSLShaderProgram();
 	m_meshShader->link(vShader, fShader);
-	//m_meshShader->bind();
-	 */
+	m_meshShader->bind();
+	
 }
 
 void TheScene::setTextureShaderVars()
@@ -213,16 +214,15 @@ void TheScene::setMeshShaderVars()
 	glUniform1i (texLoc, m_dataset->m_rows);
 	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "dimZ");
 	glUniform1i (texLoc, m_dataset->m_frames);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "tex0");
-	glUniform1i (texLoc, 0);
-	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "showMesh");
-	glUniform1i (texLoc, m_showMesh);
+	texLoc = glGetUniformLocation (m_textureShader->getProgramObject(), "quadrant");
+	glUniform1i (texLoc, m_quadrant);
+	
 }
 
 void TheScene::renderScene(int view, int quadrant)
 {
 	if (m_listctrl->GetItemCount() == 0) return;
-	
+	m_quadrant = quadrant;
 	bindTextures();
 	setTextureShaderVars();
 
@@ -239,7 +239,7 @@ void TheScene::renderScene(int view, int quadrant)
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
 		if (info->getType() == Mesh_ && info->getShow())
 		{
-			renderMesh(info, quadrant);
+			renderMesh(info);
 		}
 	}
 	
@@ -323,10 +323,11 @@ void TheScene::makeLights()
 	glShadeModel(GL_SMOOTH);
 }
 
-void TheScene::renderMesh(DatasetInfo *info, int quadrant)
+void TheScene::renderMesh(DatasetInfo *info)
 {
 	m_textureShader->release();
-	//m_meshShader->bind();
+	
+	//setMeshShaderVars();
 	
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_DIFFUSE);
@@ -336,53 +337,53 @@ void TheScene::renderMesh(DatasetInfo *info, int quadrant)
 	int y = m_dataset->m_rows/2;
 	int z = m_dataset->m_frames/2;
 
-	glPushAttrib(GL_POLYGON_BIT);
-
 	glBegin(GL_TRIANGLES);
 	
 	for ( int i = 0 ; i < info->m_mesh->getCountPolygons() ; ++i)
 	{
 		polygon p = info->m_mesh->m_polygonArray[i];
-
-		if (quadrant == 1 &&
+		
+		if (m_quadrant == 1 &&
 			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
 			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
-			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-		if (quadrant == 2 &&
+			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue; 
+		if (m_quadrant == 2 &&
 			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
 			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
 			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-		if (quadrant == 3 &&
+		if (m_quadrant == 3 &&
 			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
 			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
 			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-		if (quadrant == 4 &&
+		if (m_quadrant == 4 &&
 			info->m_mesh->m_vertexArray[p.v1].x > m_xSlize &&
 			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
 			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-		if (quadrant == 5 &&
+		if (m_quadrant == 5 &&
 			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
 			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
 			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
-		if (quadrant == 6 &&
+		if (m_quadrant == 6 &&
 			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
 			info->m_mesh->m_vertexArray[p.v1].y < m_ySlize &&
 			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-		if (quadrant == 7 &&
+		if (m_quadrant == 7 &&
 			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
 			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
 			info->m_mesh->m_vertexArray[p.v1].z < m_zSlize) continue;
-		if (quadrant == 8 &&
+		if (m_quadrant == 8 &&
 			info->m_mesh->m_vertexArray[p.v1].x < m_xSlize &&
 			info->m_mesh->m_vertexArray[p.v1].y > m_ySlize &&
 			info->m_mesh->m_vertexArray[p.v1].z > m_zSlize) continue;
+		
+	
 		glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
 						info->m_mesh->m_vertexArray[p.v1].ny,
 						info->m_mesh->m_vertexArray[p.v1].nz);
 		glVertex3f( 	info->m_mesh->m_vertexArray[p.v1].x - x, 
 						info->m_mesh->m_vertexArray[p.v1].y - y, 
 						info->m_mesh->m_vertexArray[p.v1].z - z);
-	
+		
 		glNormal3f( 	info->m_mesh->m_vertexArray[p.v2].nx, 
 						info->m_mesh->m_vertexArray[p.v2].ny,
 						info->m_mesh->m_vertexArray[p.v2].nz);
@@ -399,11 +400,10 @@ void TheScene::renderMesh(DatasetInfo *info, int quadrant)
 	}
 
 	glEnd();
-	glPopAttrib();
 	
 	glDisable(GL_COLOR_MATERIAL);
 	
-	//m_meshShader->release();
+	m_meshShader->release();
 	m_textureShader->bind();
 }
 

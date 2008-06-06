@@ -163,7 +163,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					}
 				}
 				m_quadrant = quadrant;
-				printf("quadrant: %d\n", m_quadrant);
 			}
 			else 
 				m_isDragging = false;

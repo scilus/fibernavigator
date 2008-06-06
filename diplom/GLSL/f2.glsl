@@ -1,12 +1,11 @@
-uniform sampler3D tex0;
-uniform bool showMesh;
+uniform int dimX;
+uniform int dimY;
+uniform int dimZ;
+uniform int quadrant;
 
-varying vec3 TexCoord;
+varying bool discardIt;
 
 void main()
 {
-	vec4 col;
-	col = vec4(1.0);
-	
-	gl_FragColor = col;
+	gl_FragColor = vec4(0.6);
 }
