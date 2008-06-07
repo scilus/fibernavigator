@@ -43,7 +43,7 @@ private:
 	wxString m_name;
 	float m_threshold;
 	bool m_show;
-	
+	bool m_showFS; // show front sector for meshs
 	
 	
 public:	
@@ -66,6 +66,7 @@ public:
 	void setType(int type) {m_type = type;};
 	void setName(wxString name) {m_name = name;};
 	bool toggleShow() {m_show = !m_show; return m_show;};
+	bool toggleShowFS() {m_showFS = !m_showFS; return m_showFS;};
 	
 	int getType() {return m_type;};
 	int getLength() {return m_length;};
@@ -80,6 +81,7 @@ public:
 	float getHighestValue() {return m_highest_value;};
 	float getThreshold() {return m_threshold;};
 	bool getShow() {return m_show;};
+	bool getShowFS() {return m_showFS;};
 	wxString getName() {return m_name;};
 
 };

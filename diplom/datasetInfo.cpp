@@ -17,6 +17,7 @@ DatasetInfo::DatasetInfo()
 	m_highest_value = 1.0;
 	m_threshold = 0.10;
 	m_show = true;
+	m_showFS = true;
 }
 
 DatasetInfo::~DatasetInfo()

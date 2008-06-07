@@ -2,12 +2,45 @@ uniform int sector;
 uniform int cutX;
 uniform int cutY;
 uniform int cutZ;
+uniform int dimX;
+uniform int dimY;
+uniform int dimZ;
 
+uniform bool showFS;
+
+uniform sampler3D tex0;
+uniform bool show0;
+uniform float threshold0;
+uniform int type0;
+
+varying vec3 TexCoord;
 varying vec3 normal;
 varying vec3 vertex;
 
 const vec4 AMBIENT_BLACK = vec4(0.0, 0.0, 0.0, 1.0);
 const vec4 DEFAULT_BLACK = vec4(0.0, 0.0, 0.0, 0.0);
+
+vec3 defaultColorMap( float value )
+{
+    value *= 5.0;
+	vec3 color;
+	
+	if( value < 0.0 )
+		color = vec3( 0.0, 0.0, 0.0 );
+    else if( value < 1.0 )
+		color = vec3( 0.0, value, 1.0 );
+	else if( value < 2.0 )
+		color = vec3( 0.0, 1.0, 2.0-value );
+    else if( value < 3.0 )
+		color =  vec3( value-2.0, 1.0, 0.0 );
+    else if( value < 4.0 )
+		color = vec3( 1.0, 4.0-value, 0.0 );
+    else if( value <= 5.0 )
+		color = vec3( 1.0, 0.0, value-4.0 );
+    else 
+		color =  vec3( 1.0, 0.0, 1.0 );
+	return color;
+}
 
 bool isLightEnabled(in int i)
 {
@@ -192,7 +225,21 @@ void main()
   
     color = clamp(color, 0.0, 1.0);
     
-    testCut();
+    vec3 v = TexCoord;
+    v.x = (v.x + dimX/2) / (float)dimX;
+    v.y = (v.y + dimY/2) / (float)dimY;
+    v.z = (v.z + dimZ/2) / (float)dimZ;
     
-    gl_FragColor = color;
+    if (!showFS)
+    	testCut();
+    
+    vec4 col1 = vec4(0.0);
+    col1.r = clamp( texture3D(tex0, v).r , 0.0, 1.0);
+	col1.g = clamp( texture3D(tex0, v).g, 0.0, 1.0);
+	col1.b = clamp( texture3D(tex0, v).b, 0.0, 1.0);
+	if (type0 == 3)
+		col1.rgb = defaultColorMap( col1.r);
+	col1.a = 1.0;
+    
+    gl_FragColor = col1;
 }

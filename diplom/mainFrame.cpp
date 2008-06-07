@@ -644,6 +644,12 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		}
 		refreshAllGLWidgets();
 		break;
+	case 1:
+		if (info->getType() == Mesh_)
+		{
+			info->toggleShowFS();
+		}
+		break;
 	case 3:
 		delete info;
 		m_datasetListCtrl->DeleteItem(item);
@@ -652,6 +658,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 	default:
 		break;
 	}
+	refreshAllGLWidgets();
 }
 
 void MainFrame::OnSelectListItem(wxListEvent& event)

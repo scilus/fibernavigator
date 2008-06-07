@@ -166,27 +166,35 @@ void TheScene::setTextureShaderVars()
 	case 6:
 		m_textureShader->setUniInt("tex5", 5);
 	case 5:
+		info = (DatasetInfo*)m_listctrl->GetItemData(4);
 		m_textureShader->setUniInt("tex4", 4);
+		m_textureShader->setUniInt("show4", info->getShow());
+		m_textureShader->setUniFloat("threshold4",  info->getThreshold());
+		m_textureShader->setUniInt("type4", info->getType());
 	case 4:
+		info = (DatasetInfo*)m_listctrl->GetItemData(3);
 		m_textureShader->setUniInt("tex3", 3);
+		m_textureShader->setUniInt("show3", info->getShow());
+		m_textureShader->setUniFloat("threshold3",  info->getThreshold());
+		m_textureShader->setUniInt("type3", info->getType());
 	case 3:
 		info = (DatasetInfo*)m_listctrl->GetItemData(2);
 		m_textureShader->setUniInt("tex2", 2);
-		m_textureShader->setUniInt("showTex2", info->getShow());
-		m_textureShader->setUniFloat("thresholdTex2",  info->getThreshold());
-		m_textureShader->setUniInt("typeTex2", info->getType());
+		m_textureShader->setUniInt("show2", info->getShow());
+		m_textureShader->setUniFloat("threshold2",  info->getThreshold());
+		m_textureShader->setUniInt("type2", info->getType());
 	case 2:
 		info = (DatasetInfo*)m_listctrl->GetItemData(1);
 		m_textureShader->setUniInt("tex1", 1);
-		m_textureShader->setUniInt("showTex1", info->getShow());
-		m_textureShader->setUniFloat("thresholdTex1",  info->getThreshold());
-		m_textureShader->setUniInt("typeTex1", info->getType());
+		m_textureShader->setUniInt("show1", info->getShow());
+		m_textureShader->setUniFloat("threshold1",  info->getThreshold());
+		m_textureShader->setUniInt("type1", info->getType());
 	case 1:
 		info = (DatasetInfo*)m_listctrl->GetItemData(0);
 		m_textureShader->setUniInt("tex0", 0);
-		m_textureShader->setUniInt("showTex0", info->getShow());
-		m_textureShader->setUniFloat("thresholdTex0",  info->getThreshold());
-		m_textureShader->setUniInt("typeTex0", info->getType());
+		m_textureShader->setUniInt("show0", info->getShow());
+		m_textureShader->setUniFloat("threshold0",  info->getThreshold());
+		m_textureShader->setUniInt("type0", info->getType());
 		
 	case 0:
 	default:
@@ -197,11 +205,36 @@ void TheScene::setMeshShaderVars()
 {
 	m_meshShader->bind();
 	
+	m_meshShader->setUniInt("dimX", m_dataset->m_columns);
+	m_meshShader->setUniInt("dimY", m_dataset->m_rows);
+	m_meshShader->setUniInt("dimZ", m_dataset->m_frames);
 	m_meshShader->setUniInt("cutX", (int)(m_xSlize - m_xSize/2.0));
 	m_meshShader->setUniInt("cutY", (int)(m_ySlize - m_ySize/2.0));
 	m_meshShader->setUniInt("cutZ", (int)(m_zSlize - m_zSize/2.0));
 	m_meshShader->setUniInt("sector", m_quadrant);
 	
+	DatasetInfo* info;
+	
+	switch (m_countTextures)
+	{
+	case 10:
+	case 9:
+	case 8:
+	case 7:
+	case 6:
+	case 5:
+	case 4:
+	case 3:
+	case 2:
+	case 1:
+	info = (DatasetInfo*)m_listctrl->GetItemData(0);
+	m_meshShader->setUniInt("tex0", 0);
+	m_meshShader->setUniInt("show0", info->getShow());
+	m_meshShader->setUniFloat("threshold0",  info->getThreshold());
+	m_meshShader->setUniInt("type0", info->getType());
+	case 0:
+	default:
+	;}
 }
 
 void TheScene::renderScene(int view, int quadrant)
@@ -220,7 +253,7 @@ void TheScene::renderScene(int view, int quadrant)
 
 	glPopAttrib();
 	
-	glDisable(GL_TEXTURE_3D);
+	//glDisable(GL_TEXTURE_3D);
 	m_textureShader->release();
 	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -311,6 +344,7 @@ void TheScene::renderMesh()
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
 		colorMap(info->getThreshold());
+		m_meshShader->setUniInt("showFS", info->getShowFS());
 		
 		if (info->getType() == Mesh_ && info->getShow())
 		{
