@@ -43,7 +43,9 @@ private:
 	wxString m_name;
 	float m_threshold;
 	bool m_show;
-	bool m_showFS; // show front sector for meshs
+	bool m_showFS;	// show front sector for meshs
+	bool m_useTex; 	// color mesh with textures loaded, 
+					// if false use colormap on threshold value
 	
 	
 public:	
@@ -67,6 +69,7 @@ public:
 	void setName(wxString name) {m_name = name;};
 	bool toggleShow() {m_show = !m_show; return m_show;};
 	bool toggleShowFS() {m_showFS = !m_showFS; return m_showFS;};
+	bool toggleUseTex() {m_useTex = !m_useTex; return m_useTex;};
 	
 	int getType() {return m_type;};
 	int getLength() {return m_length;};
@@ -82,6 +85,7 @@ public:
 	float getThreshold() {return m_threshold;};
 	bool getShow() {return m_show;};
 	bool getShowFS() {return m_showFS;};
+	bool getUseTex() {return m_useTex;};
 	wxString getName() {return m_name;};
 
 };

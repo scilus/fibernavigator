@@ -18,6 +18,7 @@ DatasetInfo::DatasetInfo()
 	m_threshold = 0.10;
 	m_show = true;
 	m_showFS = true;
+	m_useTex = true;
 }
 
 DatasetInfo::~DatasetInfo()

@@ -223,15 +223,35 @@ void TheScene::setMeshShaderVars()
 	case 7:
 	case 6:
 	case 5:
+		info = (DatasetInfo*)m_listctrl->GetItemData(4);
+		m_meshShader->setUniInt("tex4", 4);
+		m_meshShader->setUniInt("show4", info->getShow());
+		m_meshShader->setUniFloat("threshold4",  info->getThreshold());
+		m_meshShader->setUniInt("type4", info->getType());
 	case 4:
+		info = (DatasetInfo*)m_listctrl->GetItemData(3);
+		m_meshShader->setUniInt("tex3", 3);
+		m_meshShader->setUniInt("show3", info->getShow());
+		m_meshShader->setUniFloat("threshold3",  info->getThreshold());
+		m_meshShader->setUniInt("type3", info->getType());
 	case 3:
+		info = (DatasetInfo*)m_listctrl->GetItemData(2);
+		m_meshShader->setUniInt("tex2", 2);
+		m_meshShader->setUniInt("show2", info->getShow());
+		m_meshShader->setUniFloat("threshold2",  info->getThreshold());
+		m_meshShader->setUniInt("type2", info->getType());
 	case 2:
+		info = (DatasetInfo*)m_listctrl->GetItemData(1);
+		m_meshShader->setUniInt("tex1", 1);
+		m_meshShader->setUniInt("show1", info->getShow());
+		m_meshShader->setUniFloat("threshold1",  info->getThreshold());
+		m_meshShader->setUniInt("type1", info->getType());
 	case 1:
-	info = (DatasetInfo*)m_listctrl->GetItemData(0);
-	m_meshShader->setUniInt("tex0", 0);
-	m_meshShader->setUniInt("show0", info->getShow());
-	m_meshShader->setUniFloat("threshold0",  info->getThreshold());
-	m_meshShader->setUniInt("type0", info->getType());
+		info = (DatasetInfo*)m_listctrl->GetItemData(0);
+		m_meshShader->setUniInt("tex0", 0);
+		m_meshShader->setUniInt("show0", info->getShow());
+		m_meshShader->setUniFloat("threshold0",  info->getThreshold());
+		m_meshShader->setUniInt("type0", info->getType());
 	case 0:
 	default:
 	;}
@@ -343,8 +363,10 @@ void TheScene::renderMesh()
 	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
-		colorMap(info->getThreshold());
+		float c = (float)info->getThreshold();
+		glColor3f(c,c,c);
 		m_meshShader->setUniInt("showFS", info->getShowFS());
+		m_meshShader->setUniInt("useTex", info->getUseTex());
 		
 		if (info->getType() == Mesh_ && info->getShow())
 		{

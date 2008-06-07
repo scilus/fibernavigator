@@ -650,6 +650,12 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 			info->toggleShowFS();
 		}
 		break;
+	case 2:
+		if (info->getType() == Mesh_)
+		{
+			info->toggleUseTex();
+		}
+		break;
 	case 3:
 		delete info;
 		m_datasetListCtrl->DeleteItem(item);

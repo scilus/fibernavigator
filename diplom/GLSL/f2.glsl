@@ -1,17 +1,22 @@
 uniform int sector;
-uniform int cutX;
-uniform int cutY;
-uniform int cutZ;
-uniform int dimX;
-uniform int dimY;
-uniform int dimZ;
+uniform int cutX, cutY, cutZ;
+uniform int dimX, dimY, dimZ;
 
 uniform bool showFS;
+uniform bool useTex;
 
-uniform sampler3D tex0;
-uniform bool show0;
-uniform float threshold0;
-uniform int type0;
+uniform sampler3D tex0, tex1, tex2, tex3, tex4;
+uniform sampler3D tex5, tex6, tex7, tex8, tex9;
+
+uniform bool show0, show1, show2, show3, show4;
+uniform bool show5, show6, show7, show8, show9;
+
+uniform float threshold0, threshold1, threshold2, threshold3;
+uniform float threshold4, threshold5, threshold6, threshold7;
+uniform float threshold8, threshold9;
+
+uniform int type0, type1, type2, type3, type4;
+uniform int type5, type6, type7, type8, type9;
 
 varying vec3 TexCoord;
 varying vec3 normal;
@@ -163,7 +168,7 @@ void calculateLighting(in int numLights, in vec3 N, in vec3 V, in float shinines
     }
 }
 
-void testCut()
+void cutFrontSector()
 {
 	if (sector == 1 &&
 		vertex.x > cutX &&
@@ -199,9 +204,39 @@ void testCut()
 		vertex.z > cutZ) discard;
 }
 
+void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v)
+{
+	vec3 col1;
+	if (type == 3)
+	{
+		col1.r = clamp( texture3D(tex, v).r, 0.0, 1.0);
+		
+		if (col1.r - threshold > 0.0)
+		{
+			color.rgb = defaultColorMap( col1.r);
+		}
+	}	
+	if (type == 1 || type == 2 || type == 4)
+	{
+		col1.r = clamp( texture3D(tex, v).r, 0.0, 1.0);
+		col1.g = clamp( texture3D(tex, v).g, 0.0, 1.0);
+		col1.b = clamp( texture3D(tex, v).b, 0.0, 1.0);
+		
+		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold) > 0.0)
+		{
+			color.rgb = col1.rgb;
+		}
+	}
+}
+
  
 void main()
 {
+	vec4 color = vec4(0.0);
+	
+	if (!showFS)
+    	cutFrontSector();
+	
 	/* Normalize the normal. A varying variable CANNOT
     // be modified by a fragment shader. So a new variable
     // needs to be created. */
@@ -218,28 +253,34 @@ void main()
     calculateLighting(gl_MaxLights, -n, vertex, gl_FrontMaterial.shininess,
                       ambient, diffuse, specular);
    
-    vec4 color = gl_FrontLightModelProduct.sceneColor  +
-                 (ambient  * gl_FrontMaterial.ambient) +
-                 (diffuse  * gl_FrontMaterial.diffuse) +
-                 (specular * gl_FrontMaterial.specular);
+    color = gl_FrontLightModelProduct.sceneColor  +
+              (ambient  * gl_FrontMaterial.ambient) +
+              (diffuse  * gl_FrontMaterial.diffuse) +
+              (specular * gl_FrontMaterial.specular);
   
     color = clamp(color, 0.0, 1.0);
+
+    if (useTex)
+    {
+	    vec3 v = TexCoord;
+	    v.x = (v.x + dimX/2) / (float)dimX;
+	    v.y = (v.y + dimY/2) / (float)dimY;
+	    v.z = (v.z + dimZ/2) / (float)dimZ;
+	    
+	    if (show9) lookupTex(color, type9, tex9, threshold9, v);
+	    if (show8) lookupTex(color, type8, tex8, threshold8, v);
+		if (show7) lookupTex(color, type7, tex7, threshold7, v);
+		if (show6) lookupTex(color, type6, tex6, threshold6, v);
+		if (show5) lookupTex(color, type5, tex5, threshold5, v);
+		if (show4) lookupTex(color, type4, tex4, threshold4, v);
+		if (show3) lookupTex(color, type3, tex3, threshold3, v);
+	    if (show2) lookupTex(color, type2, tex2, threshold2, v);
+	    if (show1) lookupTex(color, type1, tex1, threshold1, v);
+		if (show0) lookupTex(color, type0, tex0, threshold0, v);
+		color.a = 1.0;	
+    }
     
-    vec3 v = TexCoord;
-    v.x = (v.x + dimX/2) / (float)dimX;
-    v.y = (v.y + dimY/2) / (float)dimY;
-    v.z = (v.z + dimZ/2) / (float)dimZ;
-    
-    if (!showFS)
-    	testCut();
-    
-    vec4 col1 = vec4(0.0);
-    col1.r = clamp( texture3D(tex0, v).r , 0.0, 1.0);
-	col1.g = clamp( texture3D(tex0, v).g, 0.0, 1.0);
-	col1.b = clamp( texture3D(tex0, v).b, 0.0, 1.0);
-	if (type0 == 3)
-		col1.rgb = defaultColorMap( col1.r);
-	col1.a = 1.0;
-    
-    gl_FragColor = col1;
+   
+   
+    gl_FragColor = color;
 }
