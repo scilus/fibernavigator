@@ -353,7 +353,9 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_scene->setDataset(m_dataset);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		
-		renewAllGLWidgets();
+		m_scene->addTexture();
+		refreshAllGLWidgets();
+		//renewAllGLWidgets();
 	}
 }
 
@@ -479,10 +481,10 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 
 void MainFrame::refreshAllGLWidgets()
 {
-	m_mainGL->render();
 	m_gl0->render();
 	m_gl1->render();
 	m_gl2->render();
+	m_mainGL->render();
 	updateStatusBar();
 }
 

@@ -71,20 +71,41 @@ void TheScene::initGL(int view)
 void TheScene::assignTextures ()
 {
 	printf("assign textures\n");
+	glDeleteTextures(10, m_texNames);
 	m_countTextures = m_listctrl->GetItemCount();
+	
 	if (m_countTextures == 0) return;
 	
-	glDeleteTextures(10, m_texNames);
 	
 	for (int i = 0 ; i < m_countTextures ; ++i)
 	{
+		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		if(info->getType() == Mesh_)
+		{
+			m_texNames[i] = makeCallList(info);
+		}
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
 		info->generateTexture();
 	}
+}
+
+void TheScene::addTexture()
+{
+	m_countTextures = m_listctrl->GetItemCount();
+	if (m_countTextures == 0) return;
+	DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(m_countTextures - 1);
+	if(info->getType() == Mesh_)
+	{
+		m_texNames[m_countTextures -1] = makeCallList(info);
+	}
+	glActiveTexture(GL_TEXTURE0 + m_countTextures -1);
+	glBindTexture(GL_TEXTURE_3D, m_texNames[m_countTextures -1]);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	info->generateTexture();
 }
 
 void TheScene::bindTextures()
@@ -110,6 +131,48 @@ void TheScene::swapTextures(int a, int b)
 void TheScene::releaseTextures()
 {
 	glDeleteTextures(10, m_texNames);
+}
+
+GLuint TheScene::makeCallList(DatasetInfo *info)
+{
+	int x = m_dataset->m_columns/2;
+	int y = m_dataset->m_rows/2;
+	int z = m_dataset->m_frames/2;
+	
+	GLuint mesh = glGenLists(1);
+	glNewList (mesh, GL_COMPILE);
+	glBegin(GL_TRIANGLES);
+				
+	for ( int j = 0 ; j < info->m_mesh->getCountPolygons() ; ++j)
+	{
+		polygon p = info->m_mesh->m_polygonArray[j];
+		
+		glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
+						info->m_mesh->m_vertexArray[p.v1].ny,
+						info->m_mesh->m_vertexArray[p.v1].nz);
+		glVertex3f( 	info->m_mesh->m_vertexArray[p.v1].x - x, 
+						info->m_mesh->m_vertexArray[p.v1].y - y, 
+						info->m_mesh->m_vertexArray[p.v1].z - z);
+		
+		glNormal3f( 	info->m_mesh->m_vertexArray[p.v2].nx, 
+						info->m_mesh->m_vertexArray[p.v2].ny,
+						info->m_mesh->m_vertexArray[p.v2].nz);
+		glVertex3f(	info->m_mesh->m_vertexArray[p.v2].x - x, 
+						info->m_mesh->m_vertexArray[p.v2].y - y, 
+						info->m_mesh->m_vertexArray[p.v2].z - z);
+
+		glNormal3f( 	info->m_mesh->m_vertexArray[p.v3].nx, 
+						info->m_mesh->m_vertexArray[p.v3].ny,
+						info->m_mesh->m_vertexArray[p.v3].nz);
+		glVertex3f(	info->m_mesh->m_vertexArray[p.v3].x - x, 
+						info->m_mesh->m_vertexArray[p.v3].y - y, 
+						info->m_mesh->m_vertexArray[p.v3].z - z);
+	}
+	glEnd();
+	
+	glEndList();
+	
+	return mesh;
 }
 
 void TheScene::initShaders()
@@ -156,15 +219,35 @@ void TheScene::setTextureShaderVars()
 	switch (m_countTextures)
 	{
 	case 10:
+		info = (DatasetInfo*)m_listctrl->GetItemData(9);
 		m_textureShader->setUniInt("tex9", 9);
+		m_textureShader->setUniInt("show9", info->getShow());
+		m_textureShader->setUniFloat("threshold9",  info->getThreshold());
+		m_textureShader->setUniInt("type9", info->getType());
 	case 9:
+		info = (DatasetInfo*)m_listctrl->GetItemData(8);
 		m_textureShader->setUniInt("tex8", 8);
+		m_textureShader->setUniInt("show8", info->getShow());
+		m_textureShader->setUniFloat("threshold8",  info->getThreshold());
+		m_textureShader->setUniInt("type8", info->getType());
 	case 8:
+		info = (DatasetInfo*)m_listctrl->GetItemData(7);
 		m_textureShader->setUniInt("tex7", 7);
+		m_textureShader->setUniInt("show7", info->getShow());
+		m_textureShader->setUniFloat("threshold7",  info->getThreshold());
+		m_textureShader->setUniInt("type7", info->getType());
 	case 7:
+		info = (DatasetInfo*)m_listctrl->GetItemData(6);
 		m_textureShader->setUniInt("tex6", 6);
+		m_textureShader->setUniInt("show6", info->getShow());
+		m_textureShader->setUniFloat("threshold6",  info->getThreshold());
+		m_textureShader->setUniInt("type6", info->getType());
 	case 6:
+		info = (DatasetInfo*)m_listctrl->GetItemData(5);
 		m_textureShader->setUniInt("tex5", 5);
+		m_textureShader->setUniInt("show5", info->getShow());
+		m_textureShader->setUniFloat("threshold5",  info->getThreshold());
+		m_textureShader->setUniInt("type5", info->getType());
 	case 5:
 		info = (DatasetInfo*)m_listctrl->GetItemData(4);
 		m_textureShader->setUniInt("tex4", 4);
@@ -218,10 +301,35 @@ void TheScene::setMeshShaderVars()
 	switch (m_countTextures)
 	{
 	case 10:
+		info = (DatasetInfo*)m_listctrl->GetItemData(9);
+		m_meshShader->setUniInt("tex9", 9);
+		m_meshShader->setUniInt("show9", info->getShow());
+		m_meshShader->setUniFloat("threshold9",  info->getThreshold());
+		m_meshShader->setUniInt("type9", info->getType());
 	case 9:
+		info = (DatasetInfo*)m_listctrl->GetItemData(8);
+		m_meshShader->setUniInt("tex8", 8);
+		m_meshShader->setUniInt("show8", info->getShow());
+		m_meshShader->setUniFloat("threshold8",  info->getThreshold());
+		m_meshShader->setUniInt("type8", info->getType());
 	case 8:
+		info = (DatasetInfo*)m_listctrl->GetItemData(7);
+		m_meshShader->setUniInt("tex7", 7);
+		m_meshShader->setUniInt("show7", info->getShow());
+		m_meshShader->setUniFloat("threshold7",  info->getThreshold());
+		m_meshShader->setUniInt("type7", info->getType());
 	case 7:
+		info = (DatasetInfo*)m_listctrl->GetItemData(6);
+		m_meshShader->setUniInt("tex6", 6);
+		m_meshShader->setUniInt("show6", info->getShow());
+		m_meshShader->setUniFloat("threshold6",  info->getThreshold());
+		m_meshShader->setUniInt("type6", info->getType());
 	case 6:
+		info = (DatasetInfo*)m_listctrl->GetItemData(5);
+		m_meshShader->setUniInt("tex5", 5);
+		m_meshShader->setUniInt("show5", info->getShow());
+		m_meshShader->setUniFloat("threshold5",  info->getThreshold());
+		m_meshShader->setUniInt("type5", info->getType());
 	case 5:
 		info = (DatasetInfo*)m_listctrl->GetItemData(4);
 		m_meshShader->setUniInt("tex4", 4);
@@ -273,7 +381,6 @@ void TheScene::renderScene(int view, int quadrant)
 
 	glPopAttrib();
 	
-	//glDisable(GL_TEXTURE_3D);
 	m_textureShader->release();
 	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -356,10 +463,6 @@ void TheScene::renderMesh()
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 	
-	int x = m_dataset->m_columns/2;
-	int y = m_dataset->m_rows/2;
-	int z = m_dataset->m_frames/2;
-	
 	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
@@ -370,40 +473,13 @@ void TheScene::renderMesh()
 		
 		if (info->getType() == Mesh_ && info->getShow())
 		{
-			//m_meshShader->setUniFloat("mainColor", info->getThreshold());
-			glBegin(GL_TRIANGLES);
-			
-			for ( int i = 0 ; i < info->m_mesh->getCountPolygons() ; ++i)
-			{
-				polygon p = info->m_mesh->m_polygonArray[i];
-				
-				glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
-								info->m_mesh->m_vertexArray[p.v1].ny,
-								info->m_mesh->m_vertexArray[p.v1].nz);
-				glVertex3f( 	info->m_mesh->m_vertexArray[p.v1].x - x, 
-								info->m_mesh->m_vertexArray[p.v1].y - y, 
-								info->m_mesh->m_vertexArray[p.v1].z - z);
-				
-				glNormal3f( 	info->m_mesh->m_vertexArray[p.v2].nx, 
-								info->m_mesh->m_vertexArray[p.v2].ny,
-								info->m_mesh->m_vertexArray[p.v2].nz);
-				glVertex3f(	info->m_mesh->m_vertexArray[p.v2].x - x, 
-								info->m_mesh->m_vertexArray[p.v2].y - y, 
-								info->m_mesh->m_vertexArray[p.v2].z - z);
-		
-				glNormal3f( 	info->m_mesh->m_vertexArray[p.v3].nx, 
-								info->m_mesh->m_vertexArray[p.v3].ny,
-								info->m_mesh->m_vertexArray[p.v3].nz);
-				glVertex3f(	info->m_mesh->m_vertexArray[p.v3].x - x, 
-								info->m_mesh->m_vertexArray[p.v3].y - y, 
-								info->m_mesh->m_vertexArray[p.v3].z - z);
-			}
-			glEnd();
+			glCallList(m_texNames[i]);
 		}
 	}
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
 	
+	m_meshShader->release();
 }
 
 void TheScene::renderNavView(int view)
@@ -465,10 +541,9 @@ void TheScene::renderNavView(int view)
 	glDisable(GL_TEXTURE_3D);
 	
 	m_textureShader->release();
-	//m_meshShader->bind();
-
-	glBegin (GL_LINES);
+	
 	glColor3f(1.0, 0.0, 0.0);
+	glBegin (GL_LINES);
 		glVertex3f (-border, yline, border);
 		glVertex3f ( border, yline, border);
 		glVertex3f (xline, -border, border);

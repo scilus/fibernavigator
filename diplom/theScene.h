@@ -34,8 +34,10 @@ public:
 	void initGL(int);
 	
 	void assignTextures();
+	void addTexture();
 	void swapTextures(int, int);
 	void releaseTextures();
+	GLuint makeCallList(DatasetInfo*);
 	
 	void initShaders();
 	
