@@ -312,6 +312,13 @@ void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 {
+	if (m_datasetListCtrl->GetItemCount() > 9)
+	{
+		wxMessageBox(wxT("ERROR\nCan't load any more files.\nDelete some first.\n"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+		m_statusBar->SetStatusText(wxT("ERROR"),1);
+		m_statusBar->SetStatusText(m_dataset->m_lastError,2);
+		return;
+	}
 	wxString caption = wxT("Choose a file");
 	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|*.*|*.*");
 	wxString defaultDir = wxEmptyString;
