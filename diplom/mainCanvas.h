@@ -50,9 +50,6 @@ private:
 	 bool m_isDragging;
 	 ArcBallT   *m_arcBall;
 	 Point2fT    m_mousePt;
-	 int m_quadrant;
-
-	 
 };
 
 #endif /*MAINCANVAS_H_*/

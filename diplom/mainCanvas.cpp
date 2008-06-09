@@ -18,7 +18,6 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_scene = scene;
 	m_init = false;
 	m_view = view;
-	m_quadrant = 1;
 	
 	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
@@ -120,7 +119,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
 		            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
 		            Matrix4fSetRotationFromMatrix3f(&m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
-		            Refresh(false);
 			    }
 				
 				float *dots = new float[8];
@@ -162,23 +160,26 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						quadrant = i+1;
 					}
 				}
-				m_quadrant = quadrant;
+				m_scene->setQuadrant(quadrant);
+				m_scene->setLightPos(view);
+				
+				Refresh(false);
 			}
 			else 
 				m_isDragging = false;
-			
-			
-			
-			
 		} break;
 		
-		default: 
+		case axial:
+		case coronal:
+		case sagittal:
 			m_clicked = event.GetPosition();
 			if (event.LeftUp() || event.Dragging()) 
 			{
 				event1.SetEventObject( (wxObject*) new wxPoint( event.GetPosition()) );
 				GetEventHandler()->ProcessEvent( event1 );
 			}
+			break;
+		default: ;
 	}
 	
 }
@@ -218,7 +219,7 @@ void MainCanvas::render()
     case mainView: {
     	glPushMatrix();													// NEW: Prepare Dynamic Transform
 	    glMultMatrixf(m_transform.M);										// NEW: Apply Dynamic Transform
-	    m_scene->renderScene(m_view, m_quadrant);
+	    m_scene->renderScene();
 	    glPopMatrix();	
 	    break;
     }

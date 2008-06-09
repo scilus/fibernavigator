@@ -45,8 +45,10 @@ public:
 	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
+	void setLightPos(Vector3fT value) {m_lightPos = value;};
+	void setQuadrant(int quadrant) {m_quadrant = quadrant;};
 	
-	void renderScene(int, int);
+	void renderScene();
 	void renderNavView(int);
 	void makeLights();
 	void renderMesh();
@@ -89,6 +91,7 @@ private:
 	float m_ratio2;
 
 	int m_quadrant;
+	Vector3fT m_lightPos;
 	
 	void bindTextures();
 	void setTextureShaderVars();

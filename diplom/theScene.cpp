@@ -26,6 +26,8 @@ TheScene::TheScene()
 	m_yOffset2 = 0.0;
 	
 	m_quadrant = 1;
+	Vector3fT v1 = {0,0,1};
+	m_lightPos = v1;
 }
 
 TheScene::~TheScene()
@@ -365,13 +367,12 @@ void TheScene::setMeshShaderVars()
 	;}
 }
 
-void TheScene::renderScene(int view, int quadrant)
+void TheScene::renderScene()
 {
 	if (m_listctrl->GetItemCount() == 0) return;
 	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	
-	m_quadrant = quadrant;
 	bindTextures();
 	setTextureShaderVars();
 
@@ -435,22 +436,15 @@ void TheScene::makeLights()
 	GLfloat  light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 	
-	GLfloat light_position0[] = { 1.0, 0.0, 0.0, 0.0 };
-	GLfloat light_position1[] = { -1.0, 0.0, 0.0, 0.0 };
+	GLfloat light_position0[] = { -m_lightPos.s.X, -m_lightPos.s.Y, -m_lightPos.s.Z, 0.0};
 	
 	glLightfv (GL_LIGHT0, GL_AMBIENT, light_ambient);
 	glLightfv (GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	glLightfv (GL_LIGHT0, GL_SPECULAR, light_specular);
 	glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
-	
-	glLightfv (GL_LIGHT1, GL_AMBIENT, light_ambient);
-	glLightfv (GL_LIGHT1, GL_DIFFUSE, light_diffuse);
-	glLightfv (GL_LIGHT1, GL_SPECULAR, light_specular);
-	glLightfv (GL_LIGHT1, GL_POSITION, light_position1);
-	
+
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
 	glShadeModel(GL_SMOOTH);
 }
 
