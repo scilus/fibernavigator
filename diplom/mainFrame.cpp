@@ -663,13 +663,19 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 	case 1:
 		if (info->getType() == Mesh_)
 		{
-			info->toggleShowFS();
+			if (!info->toggleShowFS())
+				m_datasetListCtrl->SetItem(item, 1, info->getName() + wxT("*"));
+			else
+				m_datasetListCtrl->SetItem(item, 1, info->getName());
 		}
 		break;
 	case 2:
 		if (info->getType() == Mesh_)
 		{
-			info->toggleUseTex();
+			if (!info->toggleUseTex())
+				m_datasetListCtrl->SetItem(item, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );
+			else
+				m_datasetListCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), info->getThreshold() ));
 		}
 		break;
 	case 3:
