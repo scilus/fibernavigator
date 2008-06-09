@@ -360,9 +360,17 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		m_scene->setDataset(m_dataset);
 		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		
-		m_scene->addTexture();
-		refreshAllGLWidgets();
-		//renewAllGLWidgets();
+		if (m_datasetListCtrl->GetItemCount() == 1)
+		{
+			m_scene->assignTextures();
+			renewAllGLWidgets();
+		}
+		else
+		{
+			m_scene->addTexture();
+			refreshAllGLWidgets();
+		}
+		
 	}
 }
 
@@ -550,9 +558,8 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	return;
 	DatasetInfo *info;
-	/*
+	
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
 	int i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
@@ -563,23 +570,23 @@ void MainFrame::loadStandard()
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
-	 i = m_datasetListCtrl->GetItemCount();
+	i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
 	m_datasetListCtrl->SetItem(i, 1, wxT("overlay_swap.hea"));
 	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
 	m_datasetListCtrl->SetItemData(i, (long)info);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	*/
+	
 	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
-	int i = m_datasetListCtrl->GetItemCount();
+	i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
 	m_datasetListCtrl->SetItem(i, 1, wxT("rgb.hea"));
 	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
 	m_datasetListCtrl->SetItemData(i, (long)info);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/mesh/s1_Rwhite.mesh"));
+	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/s1_Rwhite.mesh"));
 	i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
 	m_datasetListCtrl->SetItem(i, 1, wxT("s1_Rwhite.mesh"));
@@ -689,6 +696,7 @@ void MainFrame::OnListItemUp(wxCommandEvent& event)
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
 	m_datasetListCtrl->moveItemUp(item);
+	m_datasetListCtrl->EnsureVisible(item);
 	if (item > 0) m_scene->swapTextures(item, item -1);
 	refreshAllGLWidgets();
 }
@@ -698,6 +706,7 @@ void MainFrame::OnListItemDown(wxCommandEvent& event)
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
 	m_datasetListCtrl->moveItemDown(item);
+	m_datasetListCtrl->EnsureVisible(item);
 	if (item < m_datasetListCtrl->GetItemCount() - 1) m_scene->swapTextures(item, item + 1);
 	refreshAllGLWidgets();
 }
