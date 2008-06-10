@@ -17,6 +17,7 @@ TheScene::TheScene()
 	m_showMesh = true;
 	m_textureShader = 0;
 	m_meshShader = 0;
+	m_curveShader = 0;
 	
 	m_xOffset0 = 0.0;
 	m_yOffset0 = 0.0;
@@ -185,6 +186,22 @@ void TheScene::initShaders()
 	m_meshShader = new FGLSLShaderProgram();
 	m_meshShader->link(vShader1, fShader1);
 	m_meshShader->bind();
+	
+	if (m_curveShader)
+	{
+		delete m_curveShader;
+	}
+	printf("initializing curves shader\n");
+
+	GLSLShader *vShader2 = new GLSLShader(GL_VERTEX_SHADER);
+	GLSLShader *fShader2 = new GLSLShader(GL_FRAGMENT_SHADER);
+	
+	vShader2->loadCode(wxT("GLSL/v3.glsl"));
+	fShader2->loadCode(wxT("GLSL/f3.glsl"));
+	
+	m_curveShader = new FGLSLShaderProgram();
+	m_curveShader->link(vShader2, fShader2);
+	m_curveShader->bind();
 }
 
 void TheScene::setTextureShaderVars()
@@ -458,18 +475,20 @@ void TheScene::renderMesh()
 
 void TheScene::renderCurves()
 {
+	m_curveShader->bind();
 	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
 		
-		//m_meshShader->setUniInt("showFS", info->getShowFS());
-		//m_meshShader->setUniInt("useTex", info->getUseTex());
+		m_curveShader->setUniInt("useNormals", info->getShowFS());
+		//m_curveShader->setUniInt("useNormals", info->getUseTex());
 		
 		if (info->getType() == Curves_ && info->getShow())
 		{
 			glCallList(m_texNames[i]);
 		}
 	}
+	m_curveShader->release();
 }
 
 void TheScene::renderNavView(int view)

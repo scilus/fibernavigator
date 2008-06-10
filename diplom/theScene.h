@@ -68,6 +68,7 @@ private:
 	GLuint *m_texNames;
 	FGLSLShaderProgram *m_textureShader; 
 	FGLSLShaderProgram *m_meshShader;
+	FGLSLShaderProgram *m_curveShader;
 	
 	TheDataset* m_dataset;
 	wxListCtrl* m_listctrl;

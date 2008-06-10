@@ -661,7 +661,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		refreshAllGLWidgets();
 		break;
 	case 1:
-		if (info->getType() == Mesh_)
+		if (info->getType() >= Mesh_)
 		{
 			if (!info->toggleShowFS())
 				m_datasetListCtrl->SetItem(item, 1, info->getName() + wxT("*"));
@@ -670,7 +670,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		}
 		break;
 	case 2:
-		if (info->getType() == Mesh_)
+		if (info->getType() >= Mesh_)
 		{
 			if (!info->toggleUseTex())
 				m_datasetListCtrl->SetItem(item, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );

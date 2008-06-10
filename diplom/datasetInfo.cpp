@@ -229,18 +229,39 @@ void DatasetInfo::generateGeometry(int x, int y, int z)
 		float y2 = m_curves->getPoints()[pc + m_curves->getPointsPerLine(i)*3 - 2];
 		float z2 = m_curves->getPoints()[pc + m_curves->getPointsPerLine(i)*3 - 1];
 		
-		float r = (x1/x) - (x2/x);
-		float g = (y1/y) - (y2/y);
-		float b = (z1/z) - (z2/z);
+		float r = (x1) - (x2);
+		float g = (y1) - (y2);
+		float b = (z1) - (z2);
 		if (r < 0.0) r *= -1.0 ;
 		if (g < 0.0) g *= -1.0 ;
 		if (b < 0.0) b *= -1.0 ;
-		printf("%.4f : %.4f : %.4f\n", r,g,b);
+		float norm = sqrt(r*r + g*g + b*b);
+		r *= 1.0/norm;
+		g *= 1.0/norm;
+		b *= 1.0/norm;
 		
 		glBegin(GL_LINE_STRIP);
 		glColor3f(r,g,b);
+		float lastx, lasty, lastz;
+		lastx = lasty = lastz = 0.0;
+		
+		
 		for (int j = 0; j < m_curves->getPointsPerLine(i) ; ++j )
 		{
+			float r = lastx - m_curves->getPoints()[pc];
+			float g = lasty - m_curves->getPoints()[pc+1];
+			float b = lastz - m_curves->getPoints()[pc+2];
+			lastx = m_curves->getPoints()[pc];
+			lasty = m_curves->getPoints()[pc+1];
+			lastz = m_curves->getPoints()[pc+2];
+			if (r < 0.0) r *= -1.0 ;
+			if (g < 0.0) g *= -1.0 ;
+			if (b < 0.0) b *= -1.0 ;
+			float norm = sqrt(r*r + g*g + b*b);
+			r *= 1.0/norm;
+			g *= 1.0/norm;
+			b *= 1.0/norm;
+			glNormal3f(r,g,b);
 			glVertex3f ( m_curves->getPoints()[pc++]-x, m_curves->getPoints()[pc++]-y, m_curves->getPoints()[pc++]-z);
 		}
 		
