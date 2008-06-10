@@ -185,6 +185,72 @@ void DatasetInfo::generateTexture()
 	}
 }
 
+void DatasetInfo::generateGeometry(int x, int y, int z)
+{
+	switch (m_type)
+	{
+	case Mesh_: {
+		glBegin(GL_TRIANGLES);
+			for ( int j = 0 ; j < m_mesh->getCountPolygons() ; ++j)
+			{
+				polygon p = m_mesh->m_polygonArray[j];
+				
+				glNormal3f( 	m_mesh->m_vertexArray[p.v1].nx, 
+								m_mesh->m_vertexArray[p.v1].ny,
+								m_mesh->m_vertexArray[p.v1].nz);
+				glVertex3f( 	m_mesh->m_vertexArray[p.v1].x - x, 
+								m_mesh->m_vertexArray[p.v1].y - y, 
+								m_mesh->m_vertexArray[p.v1].z - z);
+				
+				glNormal3f( 	m_mesh->m_vertexArray[p.v2].nx, 
+								m_mesh->m_vertexArray[p.v2].ny,
+								m_mesh->m_vertexArray[p.v2].nz);
+				glVertex3f(		m_mesh->m_vertexArray[p.v2].x - x, 
+								m_mesh->m_vertexArray[p.v2].y - y, 
+								m_mesh->m_vertexArray[p.v2].z - z);
+
+				glNormal3f( 	m_mesh->m_vertexArray[p.v3].nx, 
+								m_mesh->m_vertexArray[p.v3].ny,
+								m_mesh->m_vertexArray[p.v3].nz);
+				glVertex3f(		m_mesh->m_vertexArray[p.v3].x - x, 
+								m_mesh->m_vertexArray[p.v3].y - y, 
+								m_mesh->m_vertexArray[p.v3].z - z);
+			}
+			glEnd();
+	} break;
+	case Curves_: {
+		int pc = 0;
+		for ( int i = 0 ; i < m_curves->getCountLines() ; ++i )
+		{
+		float x1 = m_curves->getPoints()[pc];
+		float y1 = m_curves->getPoints()[pc+1];
+		float z1 = m_curves->getPoints()[pc+2];
+		float x2 = m_curves->getPoints()[pc + m_curves->getPointsPerLine(i)*3 - 3];
+		float y2 = m_curves->getPoints()[pc + m_curves->getPointsPerLine(i)*3 - 2];
+		float z2 = m_curves->getPoints()[pc + m_curves->getPointsPerLine(i)*3 - 1];
+		
+		float r = (x1/x) - (x2/x);
+		float g = (y1/y) - (y2/y);
+		float b = (z1/z) - (z2/z);
+		if (r < 0.0) r *= -1.0 ;
+		if (g < 0.0) g *= -1.0 ;
+		if (b < 0.0) b *= -1.0 ;
+		printf("%.4f : %.4f : %.4f\n", r,g,b);
+		
+		glBegin(GL_LINE_STRIP);
+		glColor3f(r,g,b);
+		for (int j = 0; j < m_curves->getPointsPerLine(i) ; ++j )
+		{
+			glVertex3f ( m_curves->getPoints()[pc++]-x, m_curves->getPoints()[pc++]-y, m_curves->getPoints()[pc++]-z);
+		}
+		
+		glEnd();
+		}
+	} break;
+	default:;
+	}
+	
+}
 
 wxString DatasetInfo::getInfoString()
 {

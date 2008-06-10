@@ -14,6 +14,7 @@
 #include "wx/datstrm.h"
 
 #include "mesh.h"
+#include "curves.h"
 
 enum DatasetType {
 	ERROR = -1,
@@ -23,6 +24,7 @@ enum DatasetType {
 	Overlay,
 	RGB,
 	Mesh_,
+	Curves_,
 };
 
 class DatasetInfo
@@ -54,6 +56,7 @@ public:
 	wxUint8 *m_rgbDataset;
 	float *m_floatDataset;
 	Mesh* m_mesh;
+	Curves* m_curves;
 	
 	DatasetInfo();
 	~DatasetInfo();
@@ -62,6 +65,7 @@ public:
 	
 	wxString getInfoString();
 	void generateTexture();
+	void generateGeometry(int, int, int);
 	
 	void setHighestValue(float value) {m_highest_value = value;};
 	void setThreshold(float value) {m_threshold = value;};

@@ -99,7 +99,7 @@ void TheScene::addTexture()
 	m_countTextures = m_listctrl->GetItemCount();
 	if (m_countTextures == 0) return;
 	DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(m_countTextures - 1);
-	if(info->getType() == Mesh_)
+	if(info->getType() >= Mesh_)
 	{
 		m_texNames[m_countTextures -1] = makeCallList(info);
 	}
@@ -143,34 +143,8 @@ GLuint TheScene::makeCallList(DatasetInfo *info)
 	
 	GLuint mesh = glGenLists(1);
 	glNewList (mesh, GL_COMPILE);
-	glBegin(GL_TRIANGLES);
-				
-	for ( int j = 0 ; j < info->m_mesh->getCountPolygons() ; ++j)
-	{
-		polygon p = info->m_mesh->m_polygonArray[j];
-		
-		glNormal3f( 	info->m_mesh->m_vertexArray[p.v1].nx, 
-						info->m_mesh->m_vertexArray[p.v1].ny,
-						info->m_mesh->m_vertexArray[p.v1].nz);
-		glVertex3f( 	info->m_mesh->m_vertexArray[p.v1].x - x, 
-						info->m_mesh->m_vertexArray[p.v1].y - y, 
-						info->m_mesh->m_vertexArray[p.v1].z - z);
-		
-		glNormal3f( 	info->m_mesh->m_vertexArray[p.v2].nx, 
-						info->m_mesh->m_vertexArray[p.v2].ny,
-						info->m_mesh->m_vertexArray[p.v2].nz);
-		glVertex3f(	info->m_mesh->m_vertexArray[p.v2].x - x, 
-						info->m_mesh->m_vertexArray[p.v2].y - y, 
-						info->m_mesh->m_vertexArray[p.v2].z - z);
-
-		glNormal3f( 	info->m_mesh->m_vertexArray[p.v3].nx, 
-						info->m_mesh->m_vertexArray[p.v3].ny,
-						info->m_mesh->m_vertexArray[p.v3].nz);
-		glVertex3f(	info->m_mesh->m_vertexArray[p.v3].x - x, 
-						info->m_mesh->m_vertexArray[p.v3].y - y, 
-						info->m_mesh->m_vertexArray[p.v3].z - z);
-	}
-	glEnd();
+	
+	info->generateGeometry(x,y,z);
 	
 	glEndList();
 	
@@ -389,6 +363,12 @@ void TheScene::renderScene()
 	renderMesh();
 	
 	glPopAttrib();
+	
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+		
+	renderCurves();
+		
+	glPopAttrib();
 }
 
 void TheScene::renderXSlize()
@@ -474,6 +454,22 @@ void TheScene::renderMesh()
 	glDisable(GL_COLOR_MATERIAL);
 	
 	m_meshShader->release();
+}
+
+void TheScene::renderCurves()
+{
+	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		
+		//m_meshShader->setUniInt("showFS", info->getShowFS());
+		//m_meshShader->setUniInt("useTex", info->getUseTex());
+		
+		if (info->getType() == Curves_ && info->getShow())
+		{
+			glCallList(m_texNames[i]);
+		}
+	}
 }
 
 void TheScene::renderNavView(int view)

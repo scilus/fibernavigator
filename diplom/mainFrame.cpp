@@ -320,7 +320,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 		return;
 	}
 	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|*.*|*.*");
+	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers ASCII (*.curves)|*.curves|*.*|*.*");
 	wxString defaultDir = wxEmptyString;
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);

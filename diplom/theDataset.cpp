@@ -24,7 +24,14 @@ DatasetInfo* TheDataset::load(wxString filename)
 		info->setName(filename.AfterLast('/'));
 		return info;
 	}
-	if (ext != wxT("hea")) return false;
+	else if (ext == wxT("curves")) {
+		DatasetInfo *info = new DatasetInfo();
+		info->m_curves = loadCurves(filename);
+		info->setType(Curves_);
+		info->setName(filename.AfterLast('/'));
+		return info;
+	}
+	else if (ext != wxT("hea")) return false;
 	
 	DatasetInfo *info = new DatasetInfo();
 	bool flag = info->load(filename); 
@@ -293,3 +300,45 @@ Mesh* TheDataset::loadMesh(wxString filename)
 	return mesh;
 }
 
+Curves* TheDataset::loadCurves(wxString filename)
+{
+	wxFileInputStream input (filename);
+	wxTextInputStream text (input);
+	text.SetStringSeparators(wxT("(,) "));
+	int countLines, countPoints;
+	float x,y,z;
+	
+	text >> countLines; // read first byte, count lines
+	Curves* curves = new Curves(countLines);
+
+	float* lines[countLines]; 
+	
+	int totalPoints = 0;
+	for (int i = 0 ; i < countLines ; ++i)
+	{
+		text >> countPoints;
+		curves->setPointsPerLine(i, countPoints);
+		totalPoints += countPoints;
+		lines[i] = new float[countPoints*3];
+		
+		for (int j = 0 ; j < countPoints ; ++j)
+		{
+			text >> x;
+			lines[i][j*3] = x;
+			text >> y;
+			lines[i][j*3 +1] = y;
+			text >> z;
+			lines[i][j*3 +2] = z;
+		}
+		text >> countPoints;
+	}
+	
+	curves->m_points = new float[totalPoints*3];
+	int pc = 0;
+	for (int i = 0 ; i < countLines ; ++i) {
+		for (int j = 0 ; j < curves->getPointsPerLine(i)*3; ++j) {
+			curves->m_points[pc++] = lines[i][j];
+		}
+	}
+	return curves;
+}

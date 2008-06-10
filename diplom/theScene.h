@@ -52,6 +52,7 @@ public:
 	void renderNavView(int);
 	void makeLights();
 	void renderMesh();
+	void renderCurves();
 	void colorMap(float);
 	TheDataset* getDataset() {return m_dataset;};
 	

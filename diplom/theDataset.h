@@ -13,6 +13,7 @@
 #include "wx/image.h"
 #include "wx/wfstream.h"
 #include "wx/datstrm.h"
+#include "wx/txtstrm.h"
 
 #include "datasetInfo.h"
 #include "mesh.h"
@@ -28,6 +29,7 @@ public:
 	
 	DatasetInfo* load(wxString);
 	Mesh* loadMesh(wxString);
+	Curves* loadCurves(wxString);
 		
 	int m_rows;
 	int m_columns;
