@@ -31,6 +31,13 @@ DatasetInfo* TheDataset::load(wxString filename)
 		info->setName(filename.AfterLast('/'));
 		return info;
 	}
+	else if (ext == wxT("fib")) {
+		DatasetInfo *info = new DatasetInfo();
+		info->m_curves = loadVTK(filename);
+		info->setType(Curves_);
+		info->setName(filename.AfterLast('/'));
+		return info;
+	}
 	else if (ext != wxT("hea")) return false;
 	
 	DatasetInfo *info = new DatasetInfo();
@@ -310,7 +317,6 @@ Curves* TheDataset::loadCurves(wxString filename)
 	
 	text >> countLines; // read first byte, count lines
 	Curves* curves = new Curves(countLines);
-
 	float* lines[countLines]; 
 	
 	int totalPoints = 0;
@@ -339,6 +345,132 @@ Curves* TheDataset::loadCurves(wxString filename)
 		for (int j = 0 ; j < curves->getPointsPerLine(i)*3; ++j) {
 			curves->m_points[pc++] = lines[i][j];
 		}
+	}
+	return curves;
+}
+
+Curves* TheDataset::loadVTK(wxString filename)
+{
+	wxFile dataFile;
+	wxFileOffset nSize = 0;
+	//Curves *curves = new Curves();
+	
+	if (dataFile.Open(filename))
+	{
+		 nSize = dataFile.Length();
+		if (nSize == wxInvalidOffset) return NULL;
+	}
+	wxUint8* buffer = new wxUint8[nSize];
+	if (dataFile.Read(buffer, (size_t) nSize) != nSize)
+	{
+		dataFile.Close();
+		delete[] buffer;
+		return NULL;
+	}
+	char* temp = new char[256];
+	int i = 0;
+	int j = 0;
+	while (buffer[i] != '\n') {
+		temp[j] = buffer[i];
+		++i;
+		++j;
+	}
+	++i;
+	temp[j] = 0;
+	j = 0;
+	while (buffer[i] != '\n') {
+		temp[j] = buffer[i];
+		++i;
+		++j;
+	}
+	++i;
+	temp[j] = 0;
+	j = 0;
+	while (buffer[i] != '\n') {
+		temp[j] = buffer[i];
+		++i;
+		++j;
+	}
+	++i;
+	temp[j] = 0;
+	wxString type(temp, wxConvUTF8);
+	if (type == wxT("ASCII")) {
+		//ASCII file, maybe later
+		return NULL;
+	}
+	
+	if (type != wxT("BINARY")) {
+		//somethingn else, don't what to do
+		return NULL;
+	}
+	
+	j = 0;
+	while (buffer[i] != '\n') {
+		temp[j] = buffer[i];
+		++i;
+		++j;
+	}
+	++i;
+	temp[j] = 0;
+	j = 0;
+	while (buffer[i] != '\n') {
+		temp[j] = buffer[i];
+		++i;
+		++j;
+	}
+	++i;
+	temp[j] = 0;
+	wxString points(temp, wxConvUTF8);
+	points = points.AfterFirst(' ');
+	points = points.BeforeFirst(' ');
+	long tempValue;
+	if(!points.ToLong(&tempValue, 10)) return NULL; //can't read point count
+	int countPoints = (int)tempValue;
+	printf("Points: %d\n",countPoints);
+	
+	int pc = i; 
+	
+	i += (12 * countPoints) +1;
+	j = 0;
+	while (buffer[i] != '\n') {
+		temp[j] = buffer[i];
+		++i;
+		++j;
+	}
+	++i;
+	temp[j] = 0;
+	printf("%s\n", temp);
+	
+	wxString linesC(temp, wxConvUTF8);
+	linesC = linesC.AfterFirst(' ');
+	linesC = linesC.BeforeFirst(' ');
+	if(!linesC.ToLong(&tempValue, 10)) return NULL; //can't read point count
+	int countLines = (int)tempValue;
+	printf("Lines: %d\n",countLines);
+	int lc = i;
+
+	converterByteToINT32 c;
+	converterByteToFoat f;
+	
+	Curves* curves = new Curves(countLines);
+	curves->m_points = new float[countPoints*3];
+	
+	for (i = 0 ; i < countPoints*3 ; ++i)
+	{
+		f.b[3] = buffer[pc++];
+		f.b[2] = buffer[pc++];
+		f.b[1] = buffer[pc++];
+		f.b[0] = buffer[pc++];
+		curves->m_points[i] = f.f;
+	}
+	for (i = 0 ; i < countLines ; ++i)
+	{
+		c.b[3] = buffer[lc++];
+		c.b[2] = buffer[lc++];
+		c.b[1] = buffer[lc++];
+		c.b[0] = buffer[lc++];
+		curves->setPointsPerLine(i, c.i);
+		lc += c.i * 4;
 	}
 	return curves;
 }

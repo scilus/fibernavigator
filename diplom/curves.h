@@ -7,6 +7,12 @@
 #include "wx/wx.h"
 #endif
 
+enum CurveFileType {
+	asciiCurve,
+	asciiVTK,
+	binaryVTK,
+};
+
 class Curves
 {
 public:
@@ -23,7 +29,6 @@ public:
 private:
 	int m_lines;
 	int *m_pointsPerLine;
-	
 };
 
 #endif /*CURVES_H_*/

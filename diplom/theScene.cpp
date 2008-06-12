@@ -83,14 +83,20 @@ void TheScene::assignTextures ()
 	for (int i = 0 ; i < m_countTextures ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
-		if(info->getType() == Mesh_)
+		if(info->getType() >= Mesh_)
 		{
 			m_texNames[i] = makeCallList(info);
+			return;
 		}
 		glActiveTexture(GL_TEXTURE0 + i);
+		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+		glGenTextures(1, &m_texNames[i]);
 		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
 		info->generateTexture();
 	}
 }
@@ -103,11 +109,17 @@ void TheScene::addTexture()
 	if(info->getType() >= Mesh_)
 	{
 		m_texNames[m_countTextures -1] = makeCallList(info);
+		return;
 	}
 	glActiveTexture(GL_TEXTURE0 + m_countTextures -1);
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glGenTextures(1, &m_texNames[m_countTextures -1]);
 	glBindTexture(GL_TEXTURE_3D, m_texNames[m_countTextures -1]);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
 	info->generateTexture();
 }
 
@@ -119,8 +131,11 @@ void TheScene::bindTextures()
 	
 	for (int i = 0 ; i < m_countTextures ; ++i)
 	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
+		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		if (info->getType() < Mesh_) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
+		}
 	}
 }
 

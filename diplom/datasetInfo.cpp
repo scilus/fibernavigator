@@ -26,16 +26,16 @@ DatasetInfo::~DatasetInfo()
 	switch (m_type)
 		{
 		case Head_byte:
-			delete m_byteDataset;
+			delete[] m_byteDataset;
 			break;
 		case Head_short:
-			delete m_shortDataset;
+			delete[] m_shortDataset;
 			break;
 		case Overlay:
-			delete m_floatDataset;
+			delete[] m_floatDataset;
 			break;
 		case RGB:
-			delete m_rgbDataset;
+			delete[] m_rgbDataset;
 			break;
 		default:
 			break;
@@ -136,7 +136,7 @@ void DatasetInfo::generateTexture()
 		glTexImage3D(GL_TEXTURE_3D, 
 			0, 
 			GL_RGBA, 
-			m_columns, 
+			m_columns,
 			m_rows,
 			m_frames,
 			0, 
@@ -185,7 +185,7 @@ void DatasetInfo::generateTexture()
 	}
 }
 
-void DatasetInfo::generateGeometry(int x, int y, int z)
+void DatasetInfo::generateGeometry(int xOff, int yOff, int zOff)
 {
 	switch (m_type)
 	{
@@ -198,23 +198,23 @@ void DatasetInfo::generateGeometry(int x, int y, int z)
 				glNormal3f( 	m_mesh->m_vertexArray[p.v1].nx, 
 								m_mesh->m_vertexArray[p.v1].ny,
 								m_mesh->m_vertexArray[p.v1].nz);
-				glVertex3f( 	m_mesh->m_vertexArray[p.v1].x - x, 
-								m_mesh->m_vertexArray[p.v1].y - y, 
-								m_mesh->m_vertexArray[p.v1].z - z);
+				glVertex3f( 	m_mesh->m_vertexArray[p.v1].x - xOff, 
+								m_mesh->m_vertexArray[p.v1].y - yOff, 
+								m_mesh->m_vertexArray[p.v1].z - zOff);
 				
 				glNormal3f( 	m_mesh->m_vertexArray[p.v2].nx, 
 								m_mesh->m_vertexArray[p.v2].ny,
 								m_mesh->m_vertexArray[p.v2].nz);
-				glVertex3f(		m_mesh->m_vertexArray[p.v2].x - x, 
-								m_mesh->m_vertexArray[p.v2].y - y, 
-								m_mesh->m_vertexArray[p.v2].z - z);
+				glVertex3f(		m_mesh->m_vertexArray[p.v2].x - xOff, 
+								m_mesh->m_vertexArray[p.v2].y - yOff, 
+								m_mesh->m_vertexArray[p.v2].z - zOff);
 
 				glNormal3f( 	m_mesh->m_vertexArray[p.v3].nx, 
 								m_mesh->m_vertexArray[p.v3].ny,
 								m_mesh->m_vertexArray[p.v3].nz);
-				glVertex3f(		m_mesh->m_vertexArray[p.v3].x - x, 
-								m_mesh->m_vertexArray[p.v3].y - y, 
-								m_mesh->m_vertexArray[p.v3].z - z);
+				glVertex3f(		m_mesh->m_vertexArray[p.v3].x - xOff, 
+								m_mesh->m_vertexArray[p.v3].y - yOff, 
+								m_mesh->m_vertexArray[p.v3].z - zOff);
 			}
 			glEnd();
 	} break;
@@ -248,12 +248,15 @@ void DatasetInfo::generateGeometry(int x, int y, int z)
 		
 		for (int j = 0; j < m_curves->getPointsPerLine(i) ; ++j )
 		{
-			float r = lastx - m_curves->getPoints()[pc];
-			float g = lasty - m_curves->getPoints()[pc+1];
-			float b = lastz - m_curves->getPoints()[pc+2];
-			lastx = m_curves->getPoints()[pc];
-			lasty = m_curves->getPoints()[pc+1];
-			lastz = m_curves->getPoints()[pc+2];
+			float x = m_curves->getPoints()[pc];
+			float y = m_curves->getPoints()[pc+1];
+			float z = m_curves->getPoints()[pc+2];
+			float r = lastx - x;
+			float g = lasty - y;
+			float b = lastz - z;
+			lastx = x;
+			lasty = y;
+			lastz = z;
 			if (r < 0.0) r *= -1.0 ;
 			if (g < 0.0) g *= -1.0 ;
 			if (b < 0.0) b *= -1.0 ;
@@ -262,7 +265,8 @@ void DatasetInfo::generateGeometry(int x, int y, int z)
 			g *= 1.0/norm;
 			b *= 1.0/norm;
 			glNormal3f(r,g,b);
-			glVertex3f ( m_curves->getPoints()[pc++]-x, m_curves->getPoints()[pc++]-y, m_curves->getPoints()[pc++]-z);
+			glVertex3f ( x-xOff, y-yOff, z-zOff);
+			pc +=3;
 		}
 		
 		glEnd();
