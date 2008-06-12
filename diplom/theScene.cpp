@@ -495,7 +495,7 @@ void TheScene::renderCurves()
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
 		
-		m_curveShader->setUniInt("useNormals", info->getShowFS());
+		m_curveShader->setUniInt("useNormals", !info->getShowFS());
 		//m_curveShader->setUniInt("useNormals", info->getUseTex());
 		
 		if (info->getType() == Curves_ && info->getShow())

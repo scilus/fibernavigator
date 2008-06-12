@@ -19,16 +19,25 @@ public:
 	Curves(int);
 	~Curves();
 	void setPointsPerLine(int line, int value) {m_pointsPerLine[line] = value;};
-	int getPointsPerLine(int line) {return m_pointsPerLine[line];};
-	void setPoints(float* points) {m_points = points;}; 
-	float* getPoints() {return m_points;};
-	int getCountLines() {return m_lines;};
+	int getPointsPerLine(int);
+	void setPoints(float* points) {m_pointArray = points;}; 
+	float* getPoints() {return m_pointArray;};
+	int getCountLines() {return m_lineCount;};
+	void toggleEndianess();
 	
-	float *m_points;
+	float *m_pointArray;
+	int* m_lineArray;
+	wxUint8 *m_colorArray;
+	
+	int m_lengthPoints;
+	int m_lengthLines;
 
 private:
-	int m_lines;
+	void calculatePointsPerLine();
+	
+	int m_lineCount;
 	int *m_pointsPerLine;
+	bool m_pointsPerLineCalculated;
 };
 
 #endif /*CURVES_H_*/

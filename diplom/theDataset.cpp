@@ -309,6 +309,7 @@ Mesh* TheDataset::loadMesh(wxString filename)
 
 Curves* TheDataset::loadCurves(wxString filename)
 {
+	/*
 	wxFileInputStream input (filename);
 	wxTextInputStream text (input);
 	text.SetStringSeparators(wxT("(,) "));
@@ -347,45 +348,35 @@ Curves* TheDataset::loadCurves(wxString filename)
 		}
 	}
 	return curves;
+	*/
 }
 
 Curves* TheDataset::loadVTK(wxString filename)
 {
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
-	//Curves *curves = new Curves();
-	
+		
 	if (dataFile.Open(filename))
 	{
-		 nSize = dataFile.Length();
+		nSize = dataFile.Length();
 		if (nSize == wxInvalidOffset) return NULL;
 	}
-	wxUint8* buffer = new wxUint8[nSize];
-	if (dataFile.Read(buffer, (size_t) nSize) != nSize)
-	{
-		dataFile.Close();
-		delete[] buffer;
-		return NULL;
-	}
+	
+	wxUint8* buffer = new wxUint8[255];
+	dataFile.Read(buffer, (size_t) 255);
+	
+	
 	char* temp = new char[256];
 	int i = 0;
 	int j = 0;
 	while (buffer[i] != '\n') {
-		temp[j] = buffer[i];
 		++i;
-		++j;
 	}
 	++i;
-	temp[j] = 0;
-	j = 0;
 	while (buffer[i] != '\n') {
-		temp[j] = buffer[i];
 		++i;
-		++j;
 	}
 	++i;
-	temp[j] = 0;
-	j = 0;
 	while (buffer[i] != '\n') {
 		temp[j] = buffer[i];
 		++i;
@@ -406,13 +397,9 @@ Curves* TheDataset::loadVTK(wxString filename)
 	
 	j = 0;
 	while (buffer[i] != '\n') {
-		temp[j] = buffer[i];
 		++i;
-		++j;
 	}
 	++i;
-	temp[j] = 0;
-	j = 0;
 	while (buffer[i] != '\n') {
 		temp[j] = buffer[i];
 		++i;
@@ -432,45 +419,70 @@ Curves* TheDataset::loadVTK(wxString filename)
 	
 	i += (12 * countPoints) +1;
 	j = 0;
-	while (buffer[i] != '\n') {
-		temp[j] = buffer[i];
+	printf ("goto: %d\n", i);
+	dataFile.Seek(i);
+	dataFile.Read(buffer, (size_t) 255);
+	while (buffer[j] != '\n') {
+		temp[j] = buffer[j];
 		++i;
 		++j;
 	}
 	++i;
 	temp[j] = 0;
-	printf("%s\n", temp);
 	
-	wxString linesC(temp, wxConvUTF8);
-	linesC = linesC.AfterFirst(' ');
-	linesC = linesC.BeforeFirst(' ');
-	if(!linesC.ToLong(&tempValue, 10)) return NULL; //can't read point count
+	wxString sLines(temp, wxConvUTF8);
+	wxString sLengthLines = sLines.AfterLast(' ');
+	if(!sLengthLines.ToLong(&tempValue, 10)) return NULL; //can't read size of lines array
+	int lengthLines = (int(tempValue));
+	sLines = sLines.AfterFirst(' ');
+	sLines = sLines.BeforeFirst(' ');
+	if(!sLines.ToLong(&tempValue, 10)) return NULL; //can't read lines
 	int countLines = (int)tempValue;
-	printf("Lines: %d\n",countLines);
+	printf("Lines: %d Length: %d\n",countLines, lengthLines);
 	int lc = i;
+	
+	i += (lengthLines*4) +1;
+	printf ("goto: %d\n", i);
+	dataFile.Seek(i);
+	dataFile.Read(buffer, (size_t) 255);
+	j = 0;
+	int k = 0;
+	// TODO test if there's really a color array;
+	while (buffer[k] != '\n') {
+		++i;
+		++k;
+	}
+	++k;
+	++i;
+	while (buffer[k] != '\n') {
+		temp[j] = buffer[k];
+		++i;
+		++j;
+		++k;
+	}
+	++i;
+	temp[j] = 0;
+	int cc = i;
 
-	converterByteToINT32 c;
-	converterByteToFoat f;
-	
 	Curves* curves = new Curves(countLines);
-	curves->m_points = new float[countPoints*3];
+	curves->m_pointArray = new float[countPoints*3];
+	curves->m_colorArray = new wxUint8[countPoints*3];
+	curves->m_lineArray = new int[lengthLines*4];
+	curves->m_lengthPoints = countPoints*3;
+	curves->m_lengthLines = lengthLines;
+
+	dataFile.Seek(pc);
+	dataFile.Read(curves->m_pointArray, (size_t) countPoints*12);
+	dataFile.Seek(lc);
+	dataFile.Read(curves->m_lineArray, (size_t) lengthLines*4);
 	
-	for (i = 0 ; i < countPoints*3 ; ++i)
-	{
-		f.b[3] = buffer[pc++];
-		f.b[2] = buffer[pc++];
-		f.b[1] = buffer[pc++];
-		f.b[0] = buffer[pc++];
-		curves->m_points[i] = f.f;
-	}
-	for (i = 0 ; i < countLines ; ++i)
-	{
-		c.b[3] = buffer[lc++];
-		c.b[2] = buffer[lc++];
-		c.b[1] = buffer[lc++];
-		c.b[0] = buffer[lc++];
-		curves->setPointsPerLine(i, c.i);
-		lc += c.i * 4;
-	}
+	/* we don't use the color per point but rather calculate a color for
+	 * the whole line, by taking the vector between start and end point
+	 * 
+	dataFile.Seek(cc);
+	dataFile.Read(curves->m_colorArray, (size_t) countPoints*3);
+	*/
+	curves->toggleEndianess();
+	printf("read all\n");
 	return curves;
 }
