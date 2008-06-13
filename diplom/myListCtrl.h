@@ -8,7 +8,18 @@
 #endif
 
 #include "wx/listctrl.h"
+#include "wx/treectrl.h"
 #include "wx/imaglist.h"
+#include "datasetInfo.h"
+
+class MyTreeItemData : public wxTreeItemData
+{
+public:
+	MyTreeItemData (DatasetInfo* info) : m_dsInfo(info) {}
+		DatasetInfo* getInfo() {return m_dsInfo;};
+private:
+	DatasetInfo *m_dsInfo;
+};
 
 class MyListCtrl : public wxListCtrl
 {

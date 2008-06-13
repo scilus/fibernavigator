@@ -12,6 +12,7 @@
 #include "wx/file.h"
 #include "wx/wfstream.h"
 #include "wx/datstrm.h"
+#include "wx/treectrl.h"
 
 #include "mesh.h"
 #include "curves.h"
@@ -57,6 +58,8 @@ public:
 	float *m_floatDataset;
 	Mesh* m_mesh;
 	Curves* m_curves;
+	wxTreeItemId m_treeId;
+	
 	
 	DatasetInfo();
 	~DatasetInfo();

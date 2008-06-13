@@ -37,12 +37,14 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
-	/* listctrl events */
+	/* list ctrl events */
 	EVT_LIST_ITEM_ACTIVATED(LIST_CTRL, MainFrame::OnActivateListItem)
 	EVT_LIST_ITEM_SELECTED(LIST_CTRL, MainFrame::OnSelectListItem)
 	EVT_BUTTON(ID_BUTTON_UP, MainFrame::OnListItemUp)
 	EVT_BUTTON(ID_BUTTON_DOWN, MainFrame::OnListItemDown)
 	EVT_SLIDER(ID_T_SLIDER, MainFrame::OnTSliderMoved)
+	/* tree ctrl events */
+	EVT_TREE_SEL_CHANGED(TREE_CTRL, MainFrame::OnSelectTreeItem)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -260,22 +262,20 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     itemCol.SetText(wxT(""));
     m_datasetListCtrl->InsertColumn(3, itemCol);
         
-    m_treeWidget = new wxTreeCtrl(m_leftWindow, wxID_ANY, wxPoint(0, 0), wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE);
+    m_treeWidget = new wxTreeCtrl(m_leftWindow, TREE_CTRL, wxPoint(0, 0), 
+    		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
     m_treeWidget->AssignImageList(imageList);
     
-    m_tRootId = m_treeWidget->AddRoot(wxT("Root"), 0,0, new wxTreeItemData());
-    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"),1,1, new wxTreeItemData());
-    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"),1,1, new wxTreeItemData());
-	    m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"),1,1, new wxTreeItemData());
-	    m_tCoronalId  = m_treeWidget->AppendItem(m_tPlanesId, wxT("coronal"),1,1, new wxTreeItemData());
-	    m_tSagittalId = m_treeWidget->AppendItem(m_tPlanesId, wxT("sagittal"),1,1, new wxTreeItemData());
-    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("datasets"),1,1, new wxTreeItemData());
-    	m_tHeadId    = m_treeWidget->AppendItem(m_tDatasetId, wxT("head"),1,1, new wxTreeItemData());
-    	m_tRGBId     = m_treeWidget->AppendItem(m_tDatasetId, wxT("rgb"),1,1, new wxTreeItemData());
-    	m_tOverlayId = m_treeWidget->AppendItem(m_tDatasetId, wxT("overlay"),1,1, new wxTreeItemData());
-    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"),1,1, new wxTreeItemData());
-    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"),1,1, new wxTreeItemData());
-   
+    m_tRootId = m_treeWidget->AddRoot(wxT("Root"));
+    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"));
+	    m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"));
+	    m_tCoronalId  = m_treeWidget->AppendItem(m_tPlanesId, wxT("coronal"));
+	    m_tSagittalId = m_treeWidget->AppendItem(m_tPlanesId, wxT("sagittal"));
+    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("datasets"));
+    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"));
+    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"));
+    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"));
+    
     /*
      * Set OpenGL attributes 
      */
@@ -389,12 +389,62 @@ void MainFrame::load(bool showLoadDialog, wxString path)
 	{
 		m_scene->assignTextures();
 		renewAllGLWidgets();
+		updateTreeDims();
+		updateTreeDS(i);
 	}
 	else
 	{
 		m_scene->addTexture();
 		refreshAllGLWidgets();
+		updateTreeDS(i);
 	}
+}
+
+void MainFrame::updateTreeDims()
+{
+	m_treeWidget->DeleteChildren(m_tAxialId);
+	m_treeWidget->DeleteChildren(m_tCoronalId);
+	m_treeWidget->DeleteChildren(m_tSagittalId);
+	m_treeWidget->AppendItem(m_tAxialId, wxString::Format(wxT("%d rows"), TheDataset::rows));
+	m_treeWidget->AppendItem(m_tAxialId, wxString::Format(wxT("%d columns"), TheDataset::columns));
+	m_treeWidget->AppendItem(m_tCoronalId, wxString::Format(wxT("%d columns"), TheDataset::columns));
+	m_treeWidget->AppendItem(m_tCoronalId, wxString::Format(wxT("%d frames"), TheDataset::frames));
+	m_treeWidget->AppendItem(m_tSagittalId, wxString::Format(wxT("%d rows"), TheDataset::rows));
+	m_treeWidget->AppendItem(m_tSagittalId, wxString::Format(wxT("%d frames"), TheDataset::frames));
+}
+
+void MainFrame::updateTreeDS(int i)
+{
+	//m_treeWidget->DeleteChildren(m_tDatasetId);
+	//m_treeWidget->DeleteChildren(m_tMeshId);
+	//m_treeWidget->DeleteChildren(m_tFiberId);
+
+	DatasetInfo* info = (DatasetInfo*)m_datasetListCtrl->GetItemData(i);
+	switch (info->getType())
+	{
+	case Head_byte:
+	case Head_short:
+		info->m_treeId = m_treeWidget->AppendItem(m_tDatasetId, info->getName(), 
+				-1, -1, new MyTreeItemData(info));
+		break;
+	case Overlay:
+		info->m_treeId = m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
+				-1, -1, new MyTreeItemData(info));
+		break;
+	case RGB:
+		info->m_treeId = m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
+				-1, -1, new MyTreeItemData(info));
+		break;
+	case Mesh_:
+		info->m_treeId = m_treeWidget->AppendItem(m_tMeshId, info->getName(),
+				-1, -1, new MyTreeItemData(info));
+		break;
+	case Curves_:
+		info->m_treeId = m_treeWidget->AppendItem(m_tFiberId, info->getName(),
+				-1, -1, new MyTreeItemData(info));
+		break;
+	}
+	
 }
 
 void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
@@ -639,6 +689,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		}
 		break;
 	case 3:
+		m_treeWidget->Delete(info->m_treeId);
 		delete info;
 		m_datasetListCtrl->DeleteItem(item);
 		renewAllGLWidgets();
@@ -655,6 +706,8 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	if (item == -1) return;
 	DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(item);
 	m_tSlider->SetValue((int)(info->getThreshold()*100));
+	m_treeWidget->SelectItem(info->m_treeId);
+	m_treeWidget->EnsureVisible(info->m_treeId);
 }
 
 void MainFrame::OnListItemUp(wxCommandEvent& event)
@@ -675,4 +728,19 @@ void MainFrame::OnListItemDown(wxCommandEvent& event)
 	m_datasetListCtrl->EnsureVisible(item);
 	if (item < m_datasetListCtrl->GetItemCount() - 1) m_scene->swapTextures(item, item + 1);
 	refreshAllGLWidgets();
+}
+
+void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
+{
+	wxTreeItemId treeid = m_treeWidget->GetSelection();
+	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);
+	if (!data) return;
+	for (int i = 0 ; i < m_datasetListCtrl->GetItemCount(); ++i)
+	{
+		DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(i);
+		if (info->m_treeId == treeid)
+		{
+			m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		}
+	}
 }

@@ -444,8 +444,8 @@ void TheScene::renderZSlize()
 
 void TheScene::makeLights()
 {
-	GLfloat  light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat  light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 	
 	GLfloat light_position0[] = { -m_lightPos.s.X, -m_lightPos.s.Y, -m_lightPos.s.Z, 0.0};

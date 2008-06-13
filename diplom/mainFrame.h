@@ -44,7 +44,11 @@ private:
     void OnListItemUp(wxCommandEvent& event);
     void OnListItemDown(wxCommandEvent& event);
     
+    void OnSelectTreeItem(wxTreeEvent& event);
+    
     void load(bool, wxString);
+    void updateTreeDims();
+    void updateTreeDS(int);
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
     void updateInfoString();
@@ -121,6 +125,7 @@ DECLARE_EVENT_TABLE()
 #define ID_GL_MAIN		123
 
 #define LIST_CTRL		130
+#define TREE_CTRL		131
 
 #define ID_X_SLIDER 201
 #define ID_Y_SLIDER 202
