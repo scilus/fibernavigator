@@ -41,7 +41,6 @@ public:
 	
 	void initShaders();
 	
-	void setDataset(TheDataset*);
 	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
@@ -54,7 +53,6 @@ public:
 	void renderMesh();
 	void renderCurves();
 	void colorMap(float);
-	TheDataset* getDataset() {return m_dataset;};
 	
 	void updateView(float, float, float);
 	
@@ -70,13 +68,8 @@ private:
 	FGLSLShaderProgram *m_meshShader;
 	FGLSLShaderProgram *m_curveShader;
 	
-	TheDataset* m_dataset;
 	wxListCtrl* m_listctrl;
 	wxGLContext* m_mainGLContext;
-	
-	float m_xSize;
-	float m_ySize;
-	float m_zSize;
 	
 	float m_xOffset0;
 	float m_yOffset0;

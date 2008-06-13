@@ -5,15 +5,11 @@
 #include "mainCanvas.h"
 #include "theDataset.h"
 #include "myListCtrl.h"
+#include "wx/treectrl.h"
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
 {
-	
-private:
-	TheDataset *m_dataset;
-	TheScene *m_scene;
-	
 public:
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
 
@@ -48,11 +44,14 @@ private:
     void OnListItemUp(wxCommandEvent& event);
     void OnListItemDown(wxCommandEvent& event);
     
+    void load(bool, wxString);
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
     void updateInfoString();
     void updateStatusBar();
 	
+    TheScene *m_scene;
+    
     wxSashLayoutWindow* m_leftWindowHolder;
     wxSashLayoutWindow* m_leftWindowTop;
     wxSashLayoutWindow* m_leftWindowBottom;
@@ -86,8 +85,20 @@ private:
     MainCanvas* m_gl2;
     MainCanvas* m_mainGL;
     
-    wxTextCtrl* m_textWindow;
-    wxPanel* m_panel1;
+    wxTreeCtrl* m_treeWidget;
+    
+    wxTreeItemId m_tRootId;
+    wxTreeItemId m_tPointId;
+    wxTreeItemId m_tPlanesId;
+    wxTreeItemId m_tAxialId;
+    wxTreeItemId m_tCoronalId;
+    wxTreeItemId m_tSagittalId;
+    wxTreeItemId m_tDatasetId;
+    wxTreeItemId m_tHeadId;
+    wxTreeItemId m_tRGBId;
+    wxTreeItemId m_tOverlayId;
+    wxTreeItemId m_tMeshId;
+    wxTreeItemId m_tFiberId;
     
     int NAV_SIZE;
     int NAV_GL_SIZE;

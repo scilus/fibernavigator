@@ -63,7 +63,7 @@ void TheScene::initGL(int view)
 		m_texAssigned = true;
 	}
 	
-	float maxLength = (float)wxMax(m_dataset->m_columns, wxMax(m_dataset->m_rows, m_dataset->m_frames));
+	float maxLength = (float)wxMax(TheDataset::columns, wxMax(TheDataset::rows, TheDataset::frames));
 	float view1 = maxLength/2.0;
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
@@ -153,9 +153,9 @@ void TheScene::releaseTextures()
 
 GLuint TheScene::makeCallList(DatasetInfo *info)
 {
-	int x = m_dataset->m_columns/2;
-	int y = m_dataset->m_rows/2;
-	int z = m_dataset->m_frames/2;
+	int x = TheDataset::columns/2;
+	int y = TheDataset::rows/2;
+	int z = TheDataset::frames/2;
 	
 	GLuint mesh = glGenLists(1);
 	glNewList (mesh, GL_COMPILE);
@@ -296,12 +296,12 @@ void TheScene::setMeshShaderVars()
 {
 	m_meshShader->bind();
 	
-	m_meshShader->setUniInt("dimX", m_dataset->m_columns);
-	m_meshShader->setUniInt("dimY", m_dataset->m_rows);
-	m_meshShader->setUniInt("dimZ", m_dataset->m_frames);
-	m_meshShader->setUniInt("cutX", (int)(m_xSlize - m_xSize/2.0));
-	m_meshShader->setUniInt("cutY", (int)(m_ySlize - m_ySize/2.0));
-	m_meshShader->setUniInt("cutZ", (int)(m_zSlize - m_zSize/2.0));
+	m_meshShader->setUniInt("dimX", TheDataset::columns);
+	m_meshShader->setUniInt("dimY", TheDataset::rows);
+	m_meshShader->setUniInt("dimZ", TheDataset::frames);
+	m_meshShader->setUniInt("cutX", (int)(m_xSlize - TheDataset::columns/2.0));
+	m_meshShader->setUniInt("cutY", (int)(m_ySlize - TheDataset::rows/2.0));
+	m_meshShader->setUniInt("cutZ", (int)(m_zSlize - TheDataset::frames/2.0));
 	m_meshShader->setUniInt("sector", m_quadrant);
 	
 	DatasetInfo* info;
@@ -405,40 +405,40 @@ void TheScene::renderScene()
 
 void TheScene::renderXSlize()
 {
-	int x = m_xSlize - m_dataset->m_columns/2;
-	int y = m_dataset->m_rows/2;
-	int z = m_dataset->m_frames/2;
+	int x = m_xSlize - TheDataset::columns/2;
+	int y = TheDataset::rows/2;
+	int z = TheDataset::frames/2;
 	glBegin(GL_QUADS);
-		glTexCoord3f(m_xSlize/m_xSize, 0.0, 0.0); glVertex3i(x, -y, -z);
-    	glTexCoord3f(m_xSlize/m_xSize, 0.0, 1.0); glVertex3i(x, -y,  z);
-    	glTexCoord3f(m_xSlize/m_xSize, 1.0, 1.0); glVertex3i(x,  y,  z);
-    	glTexCoord3f(m_xSlize/m_xSize, 1.0, 0.0); glVertex3i(x,  y, -z);
+		glTexCoord3f(m_xSlize/(float)TheDataset::columns, 0.0, 0.0); glVertex3i(x, -y, -z);
+    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 0.0, 1.0); glVertex3i(x, -y,  z);
+    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 1.0); glVertex3i(x,  y,  z);
+    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 0.0); glVertex3i(x,  y, -z);
     glEnd();
 }
 
 void TheScene::renderYSlize()
 {
-	int x = m_dataset->m_columns/2;
-	int y = m_ySlize - m_dataset->m_rows/2;
-	int z = m_dataset->m_frames/2;
+	int x = TheDataset::columns/2;
+	int y = m_ySlize - TheDataset::rows/2;
+	int z = TheDataset::frames/2;
 	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, m_ySlize/m_ySize, 0.0); glVertex3i(-x, y, -z);
-    	glTexCoord3f(0.0, m_ySlize/m_ySize, 1.0); glVertex3i(-x, y,  z);
-    	glTexCoord3f(1.0, m_ySlize/m_ySize, 1.0); glVertex3i( x, y,  z);
-    	glTexCoord3f(1.0, m_ySlize/m_ySize, 0.0); glVertex3i( x, y, -z);
+		glTexCoord3f(0.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3i(-x, y, -z);
+    	glTexCoord3f(0.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3i(-x, y,  z);
+    	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3i( x, y,  z);
+    	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3i( x, y, -z);
     glEnd();
 }
 
 void TheScene::renderZSlize()
 {
-	int x = m_dataset->m_columns/2;
-	int y = m_dataset->m_rows/2;
-	int z = m_zSlize - m_dataset->m_frames/2;
+	int x = TheDataset::columns/2;
+	int y = TheDataset::rows/2;
+	int z = m_zSlize - TheDataset::frames/2;
 	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, 0.0, m_zSlize/m_zSize); glVertex3i(-x, -y, z);
-    	glTexCoord3f(0.0, 1.0, m_zSlize/m_zSize); glVertex3i(-x,  y, z);
-    	glTexCoord3f(1.0, 1.0, m_zSlize/m_zSize); glVertex3i( x,  y, z);
-    	glTexCoord3f(1.0, 0.0, m_zSlize/m_zSize); glVertex3i( x, -y, z);
+		glTexCoord3f(0.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3i(-x, -y, z);
+    	glTexCoord3f(0.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3i(-x,  y, z);
+    	glTexCoord3f(1.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3i( x,  y, z);
+    	glTexCoord3f(1.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3i( x, -y, z);
     glEnd();
 }
 
@@ -516,49 +516,49 @@ void TheScene::renderNavView(int view)
 	float xline = 0;
 	float yline = 0;
 	
-	float border = (float)wxMax(m_dataset->m_columns, wxMax(m_dataset->m_rows, m_dataset->m_frames))/2.0;
+	float border = (float)wxMax(TheDataset::columns, wxMax(TheDataset::rows, TheDataset::frames))/2.0;
 	
-	int x = m_dataset->m_columns/2;
-	int y = m_dataset->m_rows/2;
-	int z = m_dataset->m_frames/2;
+	int x = TheDataset::columns/2;
+	int y = TheDataset::rows/2;
+	int z = TheDataset::frames/2;
 	
-	int xs = m_xSlize - m_dataset->m_columns/2;
-	int ys = m_ySlize - m_dataset->m_rows/2;
-	int zs = m_zSlize - m_dataset->m_frames/2;
+	int xs = m_xSlize - TheDataset::columns/2;
+	int ys = m_ySlize - TheDataset::rows/2;
+	int zs = m_zSlize - TheDataset::frames/2;
 	
 	switch (view)
 	{
 		case axial: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, 1.0, m_zSlize/m_zSize); glVertex3f(-x, -y, zs);
-		    	glTexCoord3f(0.0, 0.0, m_zSlize/m_zSize); glVertex3f(-x,  y, zs);
-		    	glTexCoord3f(1.0, 0.0, m_zSlize/m_zSize); glVertex3f( x,  y, zs);
-		    	glTexCoord3f(1.0, 1.0, m_zSlize/m_zSize); glVertex3f( x, -y, zs);
+				glTexCoord3f(0.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3f(-x, -y, zs);
+		    	glTexCoord3f(0.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3f(-x,  y, zs);
+		    	glTexCoord3f(1.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3f( x,  y, zs);
+		    	glTexCoord3f(1.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3f( x, -y, zs);
 			glEnd();
-			xline = m_xSlize - m_xSize/2.0;
-			yline = m_ySize/2.0 - m_ySlize;
+			xline = m_xSlize - (float)TheDataset::columns/2.0;
+			yline = (float)TheDataset::rows/2.0 - m_ySlize;
 		} break;
 		
 		case coronal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, m_ySlize/m_ySize, 1.0); glVertex3f( -x, -z, ys);
-		    	glTexCoord3f(0.0, m_ySlize/m_ySize, 0.0); glVertex3f( -x,  z, ys);
-		    	glTexCoord3f(1.0, m_ySlize/m_ySize, 0.0); glVertex3f(  x,  z, ys);
-		    	glTexCoord3f(1.0, m_ySlize/m_ySize, 1.0); glVertex3f(  x, -z, ys);
+				glTexCoord3f(0.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3f( -x, -z, ys);
+		    	glTexCoord3f(0.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3f( -x,  z, ys);
+		    	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3f(  x,  z, ys);
+		    	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3f(  x, -z, ys);
 		    glEnd();
-		    xline = m_xSlize - m_xSize/2.0;
-		    yline = m_zSize/2.0 - m_zSlize;
+		    xline = m_xSlize - (float)TheDataset::columns/2.0;
+		    yline = (float)TheDataset::frames/2.0 - m_zSlize;
 		} break;
 		
 		case sagittal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(m_xSlize/m_xSize, 0.0, 1.0); glVertex3f(-y, -z, xs);
-		    	glTexCoord3f(m_xSlize/m_xSize, 0.0, 0.0); glVertex3f(-y,  z, xs);
-		    	glTexCoord3f(m_xSlize/m_xSize, 1.0, 0.0); glVertex3f( y,  z, xs);
-		    	glTexCoord3f(m_xSlize/m_xSize, 1.0, 1.0); glVertex3f( y, -z, xs);
+				glTexCoord3f(m_xSlize/(float)TheDataset::columns, 0.0, 1.0); glVertex3f(-y, -z, xs);
+		    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 0.0, 0.0); glVertex3f(-y,  z, xs);
+		    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 0.0); glVertex3f( y,  z, xs);
+		    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 1.0); glVertex3f( y, -z, xs);
 			glEnd();
-			xline = m_ySlize - m_ySize/2.0;
-			yline = m_zSize/2.0 - m_zSlize;
+			xline = m_ySlize - (float)TheDataset::rows/2.0;
+			yline = (float)TheDataset::frames/2.0 - m_zSlize;
 		} break;
 	}	
 	
@@ -606,11 +606,3 @@ void TheScene::colorMap(float value)
     	glColor3f( 1.0, 0.0, 1.0 );
 }
 
-void TheScene::setDataset(TheDataset *dataset)
-{
-	m_dataset = dataset;
-	
-	m_xSize = (float)dataset->m_columns;
-	m_ySize = (float)dataset->m_rows;
-	m_zSize = (float)dataset->m_frames;
-}

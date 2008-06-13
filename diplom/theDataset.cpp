@@ -1,17 +1,9 @@
 #include "theDataset.h"
 
-TheDataset::TheDataset()
-{
-	m_rows = 1;
-	m_columns = 1;
-	m_frames = 1;
-	m_lastError = wxT("");
-}
-
-TheDataset::~TheDataset()
-{
-	
-}
+int TheDataset::rows = 1;
+int TheDataset::columns = 1;
+int TheDataset::frames = 1;
+wxString TheDataset::lastError = wxT("");
 
 DatasetInfo* TheDataset::load(wxString filename)
 {
@@ -25,11 +17,15 @@ DatasetInfo* TheDataset::load(wxString filename)
 		return info;
 	}
 	else if (ext == wxT("curves")) {
+		return false;
+		/* TODO fix the loading of this file type according to the
+		 * changes for the .fib files
 		DatasetInfo *info = new DatasetInfo();
 		info->m_curves = loadCurves(filename);
 		info->setType(Curves_);
 		info->setName(filename.AfterLast('/'));
 		return info;
+		*/
 	}
 	else if (ext == wxT("fib")) {
 		DatasetInfo *info = new DatasetInfo();
@@ -44,23 +40,23 @@ DatasetInfo* TheDataset::load(wxString filename)
 	bool flag = info->load(filename); 
 	if (!flag)
 	{
-		m_lastError = wxT("couldn't load header file");
+		lastError = wxT("couldn't load header file");
 		return NULL;
 	}
 	
-	if ((m_rows + m_columns + m_frames) == 3)
+	if ((rows + columns + frames) == 3)
 	{
 		if ( info->getRows() <= 0 || info->getColumns() <= 0 || info->getFrames() <= 0 )
 		{
-			m_lastError = wxT("couldn't parse header file");
+			lastError = wxT("couldn't parse header file");
 			return NULL;
 		}
 	}
 	else
 	{
-		if ( info->getRows() != m_rows || info->getColumns() != m_columns || info->getFrames() != m_frames )
+		if ( info->getRows() != rows || info->getColumns() != columns || info->getFrames() != frames )
 		{
-			m_lastError = wxT("dimensions of loaded files must be the same");
+			lastError = wxT("dimensions of loaded files must be the same");
 			return NULL;
 		}
 	}
@@ -143,7 +139,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 			
 			case ERROR:
 			default:
-				m_lastError = wxT("unsupported data file format");
+				lastError = wxT("unsupported data file format");
 				return NULL;
 			}
 		}
@@ -152,9 +148,9 @@ DatasetInfo* TheDataset::load(wxString filename)
 	
 	if (flag)
 	{
-		m_rows = info->getRows();
-		m_columns = info->getColumns();
-		m_frames = info->getFrames();
+		rows = info->getRows();
+		columns = info->getColumns();
+		frames = info->getFrames();
 		return info;
 	}
 	return NULL;

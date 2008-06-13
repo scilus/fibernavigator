@@ -26,18 +26,18 @@ private:
 	
 	
 public:
-	TheDataset();
-	~TheDataset();
+	//TheDataset();
+	//~TheDataset();
 	
-	DatasetInfo* load(wxString);
-	Mesh* loadMesh(wxString);
-	Curves* loadCurves(wxString);
-	Curves* loadVTK(wxString);
-		
-	int m_rows;
-	int m_columns;
-	int m_frames;
-	wxString m_lastError;
+	static DatasetInfo* load(wxString);
+	static Mesh* loadMesh(wxString);
+	static Curves* loadCurves(wxString);
+	static Curves* loadVTK(wxString);
+	
+	static int rows;
+	static int columns;
+	static int frames;
+	static wxString lastError;
 };
 
 #endif /*THEDATASET_H_*/

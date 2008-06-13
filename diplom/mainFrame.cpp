@@ -30,7 +30,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_SLIDER(ID_X_SLIDER, MainFrame::OnXSliderMoved)
 	EVT_SLIDER(ID_Y_SLIDER, MainFrame::OnYSliderMoved)
 	EVT_SLIDER(ID_Z_SLIDER, MainFrame::OnZSliderMoved)
-	EVT_SLIDER(ID_T_SLIDER, MainFrame::OnTSliderMoved)
 	/* click on toolbar button to toggle one of the 3 panes in the
 	 * main GL window */ 
 	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
@@ -43,6 +42,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_LIST_ITEM_SELECTED(LIST_CTRL, MainFrame::OnSelectListItem)
 	EVT_BUTTON(ID_BUTTON_UP, MainFrame::OnListItemUp)
 	EVT_BUTTON(ID_BUTTON_DOWN, MainFrame::OnListItemDown)
+	EVT_SLIDER(ID_T_SLIDER, MainFrame::OnTSliderMoved)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -63,6 +63,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_leftWindowHolder = win;
 	
+    // Window to hold the tree widget and nav windows
     win = new wxSashLayoutWindow(m_leftWindowHolder, wxID_ANY, 
       		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
       		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
@@ -72,6 +73,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_leftWindowTop = win; 
     
+    // Window to hold the list ctrl widget
     win = new wxSashLayoutWindow(m_leftWindowHolder, wxID_ANY, 
           		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
           		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
@@ -87,7 +89,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(255, 0, 0));
+    win->SetBackgroundColour(wxColour(0, 0, 0));
     m_leftWindowBottom1 = win;
     
     win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY, 
@@ -114,13 +116,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	win->SetDefaultSize(wxSize(150, 3*NAV_SIZE));
 	win->SetOrientation(wxLAYOUT_VERTICAL);
 	win->SetAlignment(wxLAYOUT_LEFT);
-	win->SetBackgroundColour(wxColour(0, 255, 0));
+	win->SetBackgroundColour(wxColour(255, 255, 255));
 	win->SetSashVisible(wxSASH_RIGHT, false);
-	
-	m_textWindow = new wxTextCtrl(win, wxID_ANY, wxEmptyString, 
-			  wxDefaultPosition, wxDefaultSize,
-			  wxTE_MULTILINE|wxSUNKEN_BORDER);
-	m_textWindow->SetValue(_T("Info"));
 	m_leftWindow = win;
 	
 	// navigation window with three sub windows for gl widgets 
@@ -263,9 +260,27 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     itemCol.SetText(wxT(""));
     m_datasetListCtrl->InsertColumn(3, itemCol);
         
-    GLboolean doubleBuffer = GL_TRUE;
+    m_treeWidget = new wxTreeCtrl(m_leftWindow, wxID_ANY, wxPoint(0, 0), wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE);
+    m_treeWidget->AssignImageList(imageList);
     
-	#ifdef __WXMSW__
+    m_tRootId = m_treeWidget->AddRoot(wxT("Root"), 0,0, new wxTreeItemData());
+    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"),1,1, new wxTreeItemData());
+    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"),1,1, new wxTreeItemData());
+	    m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"),1,1, new wxTreeItemData());
+	    m_tCoronalId  = m_treeWidget->AppendItem(m_tPlanesId, wxT("coronal"),1,1, new wxTreeItemData());
+	    m_tSagittalId = m_treeWidget->AppendItem(m_tPlanesId, wxT("sagittal"),1,1, new wxTreeItemData());
+    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("datasets"),1,1, new wxTreeItemData());
+    	m_tHeadId    = m_treeWidget->AppendItem(m_tDatasetId, wxT("head"),1,1, new wxTreeItemData());
+    	m_tRGBId     = m_treeWidget->AppendItem(m_tDatasetId, wxT("rgb"),1,1, new wxTreeItemData());
+    	m_tOverlayId = m_treeWidget->AppendItem(m_tDatasetId, wxT("overlay"),1,1, new wxTreeItemData());
+    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"),1,1, new wxTreeItemData());
+    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"),1,1, new wxTreeItemData());
+   
+    /*
+     * Set OpenGL attributes 
+     */
+    GLboolean doubleBuffer = GL_TRUE;
+    #ifdef __WXMSW__
     	int *gl_attrib = NULL;
 	#else
     int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
@@ -277,7 +292,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         None };
 	#endif
 	#endif
-
     if(!doubleBuffer)
     {
         printf("don't have double buffer, disabling\n");
@@ -288,8 +302,11 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     }
     
     m_scene = new TheScene();
-    m_dataset = new TheDataset();
-    m_scene->setDataset(m_dataset);
+    TheDataset::columns = 1;
+    TheDataset::rows = 1;
+    TheDataset::frames = 1;
+    TheDataset::lastError = wxT("");
+    
     m_scene->setDataListCtrl(m_datasetListCtrl);
     
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
@@ -312,65 +329,71 @@ void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 {
+	load(true, wxT(""));
+}
+
+void MainFrame::load(bool showLoadDialog, wxString path)
+{
 	if (m_datasetListCtrl->GetItemCount() > 9)
 	{
 		wxMessageBox(wxT("ERROR\nCan't load any more files.\nDelete some first.\n"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 		m_statusBar->SetStatusText(wxT("ERROR"),1);
-		m_statusBar->SetStatusText(m_dataset->m_lastError,2);
+		m_statusBar->SetStatusText(TheDataset::lastError,2);
 		return;
 	}
-	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers ASCII (*.curves)|*.curves|*.*|*.*");
-	wxString defaultDir = wxEmptyString;
-	wxString defaultFilename = wxEmptyString;
-	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
-	if (dialog.ShowModal() == wxID_OK)
+	
+	if (showLoadDialog)
 	{
-		wxString path = dialog.GetPath();
-		DatasetInfo *info = m_dataset->load(path); 
-		if ( info == NULL) 
+		wxString caption = wxT("Choose a file");
+		wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib|*.*|*.*");
+		wxString defaultDir = wxEmptyString;
+		wxString defaultFilename = wxEmptyString;
+		wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+		if (dialog.ShowModal() == wxID_OK)
 		{
-			wxMessageBox(wxT("ERROR\n") + m_dataset->m_lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-			m_statusBar->SetStatusText(wxT("ERROR"),1);
-			m_statusBar->SetStatusText(m_dataset->m_lastError,2);
-			return;
+			path = dialog.GetPath();
 		}
-		 
-		int i = m_datasetListCtrl->GetItemCount();
-		m_datasetListCtrl->InsertItem(i, wxT(""), 0);
-		m_datasetListCtrl->SetItem(i, 1, dialog.GetFilename());
-		m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
-		m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
-		m_datasetListCtrl->SetItemData(i, (long)info);
-		m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	}
+
+	DatasetInfo *info = TheDataset::load(path); 
+	if ( info == NULL) 
+	{
+		wxMessageBox(wxT("ERROR\n") + TheDataset::lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+		m_statusBar->SetStatusText(wxT("ERROR"),1);
+		m_statusBar->SetStatusText(TheDataset::lastError,2);
+		return;
+	}
+	 
+	int i = m_datasetListCtrl->GetItemCount();
+	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
+	m_datasetListCtrl->SetItem(i, 1, info->getName());
+	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
+	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
+	m_datasetListCtrl->SetItemData(i, (long)info);
+	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	
+	m_statusBar->SetStatusText(wxT("Ready"),1);
+	m_statusBar->SetStatusText(info->getName() + wxT(" loaded"),2);
 		
-		m_statusBar->SetStatusText(wxT("Ready"),1);
-		m_statusBar->SetStatusText(dialog.GetFilename() + wxT(" loaded"),2);
+	m_xSlider->SetMax(wxMax(2,TheDataset::columns-1));
+	m_xSlider->SetValue(TheDataset::columns/2);
+	m_ySlider->SetMax(wxMax(2,TheDataset::rows-1));
+	m_ySlider->SetValue( TheDataset::rows/2);
+	m_zSlider->SetMax(wxMax(2,TheDataset::frames-1));
+	m_zSlider->SetValue( TheDataset::frames/2);
+	m_tSlider->SetValue(10);
+	
+	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 		
-		updateInfoString();
-		
-		m_xSlider->SetMax(wxMax(2,m_dataset->m_columns-1));
-		m_xSlider->SetValue(m_dataset->m_columns/2);
-		m_ySlider->SetMax(wxMax(2,m_dataset->m_rows-1));
-		m_ySlider->SetValue( m_dataset->m_rows/2);
-		m_zSlider->SetMax(wxMax(2,m_dataset->m_frames-1));
-		m_zSlider->SetValue( m_dataset->m_frames/2);
-		m_tSlider->SetValue(10);
-		
-		m_scene->setDataset(m_dataset);
-		m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-		
-		if (m_datasetListCtrl->GetItemCount() == 1)
-		{
-			m_scene->assignTextures();
-			renewAllGLWidgets();
-		}
-		else
-		{
-			m_scene->addTexture();
-			refreshAllGLWidgets();
-		}
-		
+	if (m_datasetListCtrl->GetItemCount() == 1)
+	{
+		m_scene->assignTextures();
+		renewAllGLWidgets();
+	}
+	else
+	{
+		m_scene->addTexture();
+		refreshAllGLWidgets();
 	}
 }
 
@@ -387,18 +410,18 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	{
 	case axial:
 		pos = m_gl0->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_columns));
-		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_rows));
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*TheDataset::columns));
+		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::rows));
 		break;
 	case coronal:
 		pos = m_gl1->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_columns));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_frames));
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*TheDataset::columns));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::frames));
 		break;
 	case sagittal:
 		pos = m_gl2->getMousePos();
-		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dataset->m_rows));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dataset->m_frames));
+		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*TheDataset::rows));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::frames));
 		break;
 	case mainView:
 		printf("main gl mouse event\n");
@@ -462,28 +485,24 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 
 void MainFrame::OnXSliderMoved(wxCommandEvent& event)
 {
-	if (!m_dataset) return;
 	 m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	 refreshAllGLWidgets();
 }
 
 void MainFrame::OnYSliderMoved(wxCommandEvent& event)
 {
-	if (!m_dataset) return;
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 {
-	if (!m_dataset) return;
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 {
-	if (!m_dataset) return;
 	float threshold = (float)m_tSlider->GetValue()/100.0;
 		
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
@@ -515,24 +534,7 @@ void MainFrame::renewAllGLWidgets()
 
 void MainFrame::updateInfoString()
 {
-	m_textWindow->SetValue( wxT("") );
-	if (m_datasetListCtrl->GetItemCount() == 0) 
-	{
-		m_textWindow->SetValue( wxT("Nothing loaded") );
-		return;
-	}
-		
-	wxString newString = wxT("");
 	
-	for (int i = 0 ; i < m_datasetListCtrl->GetItemCount() ; ++i)
-	{
-		DatasetInfo* info = (DatasetInfo*)m_datasetListCtrl->GetItemData(i);
-		newString += info->getInfoString();
-		newString += wxT("\n\n");
-	}
-	
-	m_textWindow->SetValue( newString );
-
 }
 
 void MainFrame::OnToggleView1(wxCommandEvent& event)
@@ -558,56 +560,10 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	DatasetInfo *info;
-	
-	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
-	int i = m_datasetListCtrl->GetItemCount();
-	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
-	m_datasetListCtrl->SetItem(i, 1, wxT("t1_1mm.hea"));
-	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
-	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
-	m_datasetListCtrl->SetItemData(i, (long)info);
-	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
-	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
-	i = m_datasetListCtrl->GetItemCount();
-	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
-	m_datasetListCtrl->SetItem(i, 1, wxT("overlay_swap.hea"));
-	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
-	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
-	m_datasetListCtrl->SetItemData(i, (long)info);
-	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
-	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
-	i = m_datasetListCtrl->GetItemCount();
-	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
-	m_datasetListCtrl->SetItem(i, 1, wxT("rgb.hea"));
-	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
-	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
-	m_datasetListCtrl->SetItemData(i, (long)info);
-	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	info = m_dataset->load(wxT("/home/ralph/bin/devel/workspace/diplom/data/s1_Rwhite.mesh"));
-	i = m_datasetListCtrl->GetItemCount();
-	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
-	m_datasetListCtrl->SetItem(i, 1, wxT("s1_Rwhite.mesh"));
-	m_datasetListCtrl->SetItem(i, 2, wxT("0.10"));
-	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
-	m_datasetListCtrl->SetItemData(i, (long)info);
-	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
-	m_scene->setDataset(m_dataset);
-	
-	m_xSlider->SetMax(wxMax(2,m_dataset->m_columns-1));
-	m_xSlider->SetValue(m_dataset->m_columns/2);
-	m_ySlider->SetMax(wxMax(2,m_dataset->m_rows-1));
-	m_ySlider->SetValue( m_dataset->m_rows/2);
-	m_zSlider->SetMax(wxMax(2,m_dataset->m_frames-1));
-	m_zSlider->SetValue( m_dataset->m_frames/2);
-		
-	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-	updateInfoString();
-	renewAllGLWidgets();
-	
+	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
+	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
+	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
+	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/s1_Rwhite.mesh"));
 }
 
 void MainFrame::OnReloadShaders(wxCommandEvent& event)
@@ -619,11 +575,15 @@ void MainFrame::OnNew(wxCommandEvent& event)
 {
 	m_datasetListCtrl->DeleteAllItems();
 	m_mainGL->invalidate();
-	delete m_dataset;
-	m_dataset = new TheDataset();
+	
+	TheDataset::columns = 1;
+    TheDataset::rows = 1;
+    TheDataset::frames = 1;
+    TheDataset::lastError = wxT("");
+
 	delete m_scene;
 	m_scene = new TheScene();
-	m_scene->setDataset(m_dataset);
+	
 	m_scene->setDataListCtrl(m_datasetListCtrl);
 	m_scene->setMainGLContext(new wxGLContext(m_mainGL));
 	
