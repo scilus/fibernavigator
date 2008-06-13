@@ -39,8 +39,8 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 			                   0.78f,  0.32f,  -0.54f,
 			                  -0.11f, -0.91f,  -0.39f};
 	*/
-	m_thisRot = idMat;
-	m_lastRot = idMat;
+	m_thisRot =idMat;
+	m_lastRot =idMat;
 	
 	m_isDragging = true;					                    // NEW: Dragging The Mouse?
 	m_arcBall = new ArcBallT(640.0f, 480.0f); 

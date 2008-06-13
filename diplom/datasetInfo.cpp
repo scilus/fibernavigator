@@ -37,6 +37,12 @@ DatasetInfo::~DatasetInfo()
 		case RGB:
 			delete[] m_rgbDataset;
 			break;
+		case Mesh_:
+			delete m_mesh;
+			break;
+		case Curves_:
+			delete m_curves;
+			break;
 		default:
 			break;
 		}
@@ -245,7 +251,9 @@ void DatasetInfo::generateGeometry(int xOff, int yOff, int zOff)
 			
 			glBegin(GL_LINE_STRIP);
 			glColor3f(r,g,b);
-						
+			xOff = 52;
+			yOff = 70;
+			zOff = 42;
 			for (int j = 0; j < m_curves->getPointsPerLine(i) ; ++j )
 			{
 				x = m_curves->m_pointArray[pc];

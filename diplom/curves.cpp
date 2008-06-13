@@ -7,6 +7,13 @@ Curves::Curves(int lines)
 	m_pointsPerLineCalculated = false;
 }
 
+Curves::~Curves()
+{
+	delete[] m_pointsPerLine;
+	delete[] m_pointArray;
+	delete[] m_lineArray;
+}
+
 int Curves::getPointsPerLine(int line) 
 {
 	if (!m_pointsPerLineCalculated) calculatePointsPerLine();
