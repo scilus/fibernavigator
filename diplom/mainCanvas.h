@@ -12,6 +12,7 @@
 #include "wx/math.h"
 #include "wx/glcanvas.h"
 
+
 class MainCanvas: public wxGLCanvas
 {
 public:
@@ -35,6 +36,8 @@ public:
     void render();
     void setScene(TheScene*);
     void invalidate();
+    void renderTestRay();
+    bool testBB(float, float, float, float, float, float);
     
     DECLARE_EVENT_TABLE()
 
@@ -43,11 +46,18 @@ private:
 	 wxPoint 	m_clicked;
 	 int 		m_view;
 	 
+	 GLdouble m_pos1X, m_pos1Y, m_pos1Z;
+	 GLdouble m_pos2X, m_pos2Y, m_pos2Z;
+	 float m_tmin, m_tmax;
+	 
 	 Matrix4fT m_transform;
 	 Matrix3fT m_lastRot;  
 	 Matrix3fT m_thisRot ; 
 
 	 bool m_isDragging;
+	 bool m_isrDragging;
+	 bool m_rclick;
+	 
 	 ArcBallT   *m_arcBall;
 	 Point2fT    m_mousePt;
 };

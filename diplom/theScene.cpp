@@ -381,7 +381,7 @@ void TheScene::renderScene()
 	
 	bindTextures();
 	setTextureShaderVars();
-
+	
 	if (m_showXSlize) renderXSlize();
 	if (m_showYSlize) renderYSlize();
 	if (m_showZSlize) renderZSlize();
@@ -605,4 +605,3 @@ void TheScene::colorMap(float value)
     else 
     	glColor3f( 1.0, 0.0, 1.0 );
 }
-

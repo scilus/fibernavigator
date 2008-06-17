@@ -18,6 +18,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_scene = scene;
 	m_init = false;
 	m_view = view;
+	m_rclick = false;
 	
 	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
@@ -42,7 +43,8 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_thisRot =idMat;
 	m_lastRot =idMat;
 	
-	m_isDragging = true;					                    // NEW: Dragging The Mouse?
+	m_isDragging = false;					                    // NEW: Dragging The Mouse?
+	m_isrDragging = false;
 	m_arcBall = new ArcBallT(640.0f, 480.0f); 
 }
 
@@ -88,20 +90,52 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			
 			if (event.RightIsDown())												// If Right Mouse Clicked, Reset All Rotations
 		    {
-				/*
-				printf("Transformation Matrix:\n");
-				printf("%.2f : %.2f : %.2f\n", m_transform.s.XX, m_transform.s.XY, m_transform.s.XZ);
-				printf("%.2f : %.2f : %.2f\n", m_transform.s.YX, m_transform.s.YY, m_transform.s.YZ);
-				printf("%.2f : %.2f : %.2f\n", m_transform.s.ZX, m_transform.s.ZY, m_transform.s.ZZ);
+				if (!m_isrDragging)												// Not Dragging
+			    {
+					m_isDragging = true;										// Prepare For Dragging
+					m_clicked = wxPoint(event.GetPosition());
+					m_rclick = true;
+					
+					glPushMatrix();
+					glMultMatrixf(m_transform.M);	
+					GLint viewport[4];
+					GLdouble modelview[16];
+					GLdouble projection[16];
+					GLfloat winX, winY;
 				
-				Matrix3fSetZero(&m_lastRot);
-				Matrix3fSetIdentity(&m_lastRot);								// Reset Rotation
-				Matrix3fSetZero(&m_thisRot);
-				Matrix3fSetIdentity(&m_thisRot);								// Reset Rotation
-		        Matrix4fSetRotationFromMatrix3f(&m_transform, &m_thisRot);		// Reset Rotation
-		        Refresh(false);
-		        */
+					glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+					glGetDoublev( GL_PROJECTION_MATRIX, projection );
+					glGetIntegerv( GL_VIEWPORT, viewport );
+				
+					winX = (float)m_clicked.x;
+					winY = (float)viewport[3] - (float)m_clicked.y;
+					
+					gluUnProject( winX, winY, 0, modelview, projection, viewport, &m_pos1X, &m_pos1Y, &m_pos1Z);
+					gluUnProject( winX, winY, 1, modelview, projection, viewport, &m_pos2X, &m_pos2Y, &m_pos2Z);
+					glPopMatrix();
+					
+					float x = (float)TheDataset::columns/2;
+					float y = (float)TheDataset::rows/2;
+					float z = (float)TheDataset::frames/2;
+					
+					float xx = m_scene->m_xSlize - x;
+					float yy = m_scene->m_ySlize - y;
+					float zz = m_scene->m_zSlize - z;
+					float tsagittal, taxial, tcoronal;
+					tsagittal = taxial = tcoronal = 0;
+					
+					if (testBB(xx, -y, -z, xx, y, z)) tsagittal = m_tmin;
+					if (testBB(-x, yy, -z, x, yy, z)) tcoronal = m_tmin;
+					if (testBB(-x, -y, zz, x, y, zz)) taxial = m_tmin;
+					
+					printf("axial: %.4f  coronal: %.4f  sagittal: %.4f\n", taxial, tcoronal, tsagittal);
+			    }
+				
+				Refresh(false);
 		    }
+			else {
+				m_isrDragging = false;
+			}
 			
 			if(event.LeftIsDown())
 			{
@@ -184,6 +218,47 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 	
 }
 
+bool MainCanvas::testBB(float bx1, float by1, float bz1, float bx2, float by2, float bz2)
+{
+	float tymin, tymax, tzmin, tzmax;
+	float dirx = m_pos2X - m_pos1X;
+	if (dirx >= 0) {
+		m_tmin = ( bx1 - m_pos1X)/dirx;
+		m_tmax = ( bx2 - m_pos1X)/dirx;
+	}
+	else {
+		m_tmin = ( bx2 - m_pos1X)/dirx;
+		m_tmax = ( bx1 - m_pos1X)/dirx;
+	}
+	float diry = m_pos2Y - m_pos1Y;
+	if (diry >= 0) {
+		tymin = ( by1 - m_pos1Y)/diry;
+		tymax = ( by2 - m_pos1Y)/diry;
+	}
+	else {
+		tymin = ( by2 - m_pos1Y)/diry;
+		tymax = ( by1 - m_pos1Y)/diry;
+	}
+	if ( (m_tmin > tymax) || (tymin > m_tmax)) return false;
+	if (tymin > m_tmin) m_tmin = tymin;
+	if (tymax < m_tmax) m_tmax = tymax;
+	float dirz = m_pos2Z - m_pos1Z;
+	if (dirz >= 0) {
+		tzmin = ( bz1 - m_pos1Z)/dirz;
+		tzmax = ( bz2 - m_pos1Z)/dirz;
+	}
+	else {
+		tzmin = ( bz2 - m_pos1Z)/dirz;
+		tzmax = ( bz1 - m_pos1Z)/dirz;
+	}
+	if ( (m_tmin > tzmax) || (tzmin > m_tmax)) return false;
+	if (tzmin > m_tmin) m_tmin = tzmin;
+	if (tzmax < m_tmax) m_tmax = tzmax;
+	
+	if (m_tmin > m_tmax) return false;
+	return true;
+}
+
 wxPoint MainCanvas::getMousePos()
 {
 	return m_clicked;
@@ -217,9 +292,13 @@ void MainCanvas::render()
     switch (m_view)
     {
     case mainView: {
-    	glPushMatrix();													// NEW: Prepare Dynamic Transform
-	    glMultMatrixf(m_transform.M);										// NEW: Apply Dynamic Transform
-	    m_scene->renderScene();
+    	glPushMatrix();	
+    	glMultMatrixf(m_transform.M);										// NEW: Apply Dynamic Transform
+    	m_scene->renderScene();
+    	
+    	renderTestRay();
+    		
+    	
 	    glPopMatrix();	
 	    break;
     }
@@ -228,7 +307,7 @@ void MainCanvas::render()
     }
 	glFlush();
     
-    SwapBuffers();
+	SwapBuffers();
 }
 
 void MainCanvas::setScene(TheScene *scene)
@@ -245,3 +324,13 @@ void MainCanvas::invalidate()
 	}
 	m_init = false;
 }
+
+
+void MainCanvas::renderTestRay()
+{
+	glBegin(GL_LINES);
+		glVertex3f(m_pos1X, m_pos1Y, m_pos1Z);
+		glVertex3f(m_pos2X, m_pos2Y, m_pos2Z);
+	glEnd();
+}
+

@@ -56,10 +56,11 @@ public:
 	
 	void updateView(float, float, float);
 	
-	
 	bool m_texAssigned;
 	
-		
+	float m_xSlize;
+	float m_ySlize;
+	float m_zSlize;	
 		
 private:
 	int m_countTextures;
@@ -77,10 +78,7 @@ private:
 	float m_yOffset1;
 	float m_xOffset2;
 	float m_yOffset2;
-	float m_xSlize;
-	float m_ySlize;
-	float m_zSlize;
-
+	
 	float m_ratio0;
 	float m_ratio1;
 	float m_ratio2;
