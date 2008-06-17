@@ -14,7 +14,7 @@
 #include "wx/glcanvas.h"
 
 enum {
-	axial,
+	axial =1,
 	coronal,
 	sagittal,
 	mainView
@@ -27,6 +27,7 @@ public:
 	bool m_showYSlize;
 	bool m_showZSlize;
 	bool m_showMesh;
+	bool m_showSelBox;
 	
 	TheScene();
 	~TheScene();
@@ -53,6 +54,9 @@ public:
 	void renderMesh();
 	void renderCurves();
 	void colorMap(float);
+	
+	void drawSphere(float, float, float, float);
+	void drawSelectionBox();
 	
 	void updateView(float, float, float);
 	
@@ -85,6 +89,9 @@ private:
 
 	int m_quadrant;
 	Vector3fT m_lightPos;
+	
+	Vector3fT m_selBoxCenter;
+	Vector3fT m_selBoxSize;
 	
 	void bindTextures();
 	void setTextureShaderVars();

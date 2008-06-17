@@ -18,8 +18,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_scene = scene;
 	m_init = false;
 	m_view = view;
-	m_rclick = false;
-	
+		
 	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
 	                       0.0f,  0.0f,  1.0f,  0.0f,
@@ -81,56 +80,47 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 {
 	wxCommandEvent event1( wxEVT_NAVGL_EVENT, GetId() );
 	event1.SetInt(m_view);
-	
+	int clickX = event.GetPosition().x;
+	int clickY = event.GetPosition().y;
 	switch (m_view)
 	{
 		case mainView: {
-			m_mousePt.s.X = event.GetPosition().x;
-			m_mousePt.s.Y = event.GetPosition().y;
+			m_mousePt.s.X = clickX;
+			m_mousePt.s.Y = clickY;
 			
 			if (event.RightIsDown())												// If Right Mouse Clicked, Reset All Rotations
 		    {
 				if (!m_isrDragging)												// Not Dragging
 			    {
-					m_isDragging = true;										// Prepare For Dragging
-					m_clicked = wxPoint(event.GetPosition());
-					m_rclick = true;
-					
-					glPushMatrix();
-					glMultMatrixf(m_transform.M);	
-					GLint viewport[4];
-					GLdouble modelview[16];
-					GLdouble projection[16];
-					GLfloat winX, winY;
-				
-					glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-					glGetDoublev( GL_PROJECTION_MATRIX, projection );
-					glGetIntegerv( GL_VIEWPORT, viewport );
-				
-					winX = (float)m_clicked.x;
-					winY = (float)viewport[3] - (float)m_clicked.y;
-					
-					gluUnProject( winX, winY, 0, modelview, projection, viewport, &m_pos1X, &m_pos1Y, &m_pos1Z);
-					gluUnProject( winX, winY, 1, modelview, projection, viewport, &m_pos2X, &m_pos2Y, &m_pos2Z);
-					glPopMatrix();
-					
-					float x = (float)TheDataset::columns/2;
-					float y = (float)TheDataset::rows/2;
-					float z = (float)TheDataset::frames/2;
-					
-					float xx = m_scene->m_xSlize - x;
-					float yy = m_scene->m_ySlize - y;
-					float zz = m_scene->m_zSlize - z;
-					float tsagittal, taxial, tcoronal;
-					tsagittal = taxial = tcoronal = 0;
-					
-					if (testBB(xx, -y, -z, xx, y, z)) tsagittal = m_tmin;
-					if (testBB(-x, yy, -z, x, yy, z)) tcoronal = m_tmin;
-					if (testBB(-x, -y, zz, x, y, zz)) taxial = m_tmin;
-					
-					printf("axial: %.4f  coronal: %.4f  sagittal: %.4f\n", taxial, tcoronal, tsagittal);
+					m_isrDragging = true;										// Prepare For Dragging
+					m_lastPos = event.GetPosition();
+					m_picked = pick(event.GetPosition());
 			    }
-				
+				else {
+					if (event.Dragging()) 
+					{
+						int xDrag = m_lastPos.x - clickX;
+						int yDrag = -(m_lastPos.y - clickY);
+						GetEventHandler()->ProcessEvent( event1 );
+						m_lastPos = event.GetPosition();
+						Vector3fT v1 = {0,0,0};
+						switch (m_picked) {
+						case axial: 
+							v1.s.X = 1.0;
+							break;
+						case coronal:
+							v1.s.Y = 1.0;
+							break;
+						case sagittal: 
+							v1.s.Z = 1.0;
+							break;
+						}
+						Vector3fT v2;
+						Vector3fMultMat4(&v2, &v1, &m_transform);
+						if (xDrag == 0 && yDrag == 0) m_delta = 0;
+						else m_delta = ((xDrag * xDrag)+(yDrag * yDrag))/((v2.s.X*xDrag)+(v2.s.Y*yDrag));
+					}
+				}
 				Refresh(false);
 		    }
 			else {
@@ -209,13 +199,74 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			m_clicked = event.GetPosition();
 			if (event.LeftUp() || event.Dragging()) 
 			{
-				event1.SetEventObject( (wxObject*) new wxPoint( event.GetPosition()) );
+				//event1.SetEventObject( (wxObject*) new wxPoint( event.GetPosition()) );
 				GetEventHandler()->ProcessEvent( event1 );
 			}
 			break;
 		default: ;
 	}
 	
+}
+
+int MainCanvas::pick(wxPoint click)
+{
+	glPushMatrix();
+	glMultMatrixf(m_transform.M);	
+	GLint viewport[4];
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLfloat winX, winY;
+
+	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+	glGetDoublev( GL_PROJECTION_MATRIX, projection );
+	glGetIntegerv( GL_VIEWPORT, viewport );
+
+	winX = (float)click.x;
+	winY = (float)viewport[3] - (float)click.y;
+	
+	gluUnProject( winX, winY, 0, modelview, projection, viewport, &m_pos1X, &m_pos1Y, &m_pos1Z);
+	gluUnProject( winX, winY, 1, modelview, projection, viewport, &m_pos2X, &m_pos2Y, &m_pos2Z);
+	glPopMatrix();
+	
+	float x = (float)TheDataset::columns/2;
+	float y = (float)TheDataset::rows/2;
+	float z = (float)TheDataset::frames/2;
+	
+	float xx = m_scene->m_xSlize - x;
+	float yy = m_scene->m_ySlize - y;
+	float zz = m_scene->m_zSlize - z;
+	
+	m_tpicked = 0;
+	int picked = 0;
+	if (testBB(-x, -y, zz, x, y, zz)) {
+		m_tpicked = m_tmin;
+		picked = axial;
+	}
+	if (testBB(-x, yy, -z, x, yy, z)) {
+		if (picked == 0) {
+			picked = coronal;
+			m_tpicked = m_tmin;
+		}
+		else {
+			if (m_tmin < m_tpicked) {
+				picked = coronal;
+				m_tpicked = m_tmin;
+			}
+		}
+	}
+	if (testBB(xx, -y, -z, xx, y, z)) {
+		if (picked == 0) {
+			picked = sagittal;
+			m_tpicked = m_tmin;
+		}
+		else {
+			if (m_tmin < m_tpicked) {
+				picked = sagittal;
+				m_tpicked = m_tmin;
+			}
+		}
+	}
+	return picked;
 }
 
 bool MainCanvas::testBB(float bx1, float by1, float bz1, float bx2, float by2, float bz2)
@@ -257,11 +308,6 @@ bool MainCanvas::testBB(float bx1, float by1, float bz1, float bx2, float by2, f
 	
 	if (m_tmin > m_tmax) return false;
 	return true;
-}
-
-wxPoint MainCanvas::getMousePos()
-{
-	return m_clicked;
 }
 
 void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
@@ -332,5 +378,7 @@ void MainCanvas::renderTestRay()
 		glVertex3f(m_pos1X, m_pos1Y, m_pos1Z);
 		glVertex3f(m_pos2X, m_pos2Y, m_pos2Z);
 	glEnd();
+	Vector3fT dir = {m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z};
+	m_scene->drawSphere(m_pos1X + m_tpicked*dir.s.X, m_pos1Y + m_tpicked*dir.s.Y, m_pos1Z + m_tpicked*dir.s.Z, 3.0);
 }
 

@@ -26,6 +26,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
     EVT_COMMAND(ID_GL_NAV_Y, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
 	EVT_COMMAND(ID_GL_NAV_Z, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
+	EVT_COMMAND(ID_GL_MAIN, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
 	/* slize selection slider moved */
 	EVT_SLIDER(ID_X_SLIDER, MainFrame::OnXSliderMoved)
 	EVT_SLIDER(ID_Y_SLIDER, MainFrame::OnYSliderMoved)
@@ -301,12 +302,12 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         doubleBuffer = GL_FALSE;
     }
     
-    m_scene = new TheScene();
+    
     TheDataset::columns = 1;
     TheDataset::rows = 1;
     TheDataset::frames = 1;
     TheDataset::lastError = wxT("");
-    
+    m_scene = new TheScene();
     m_scene->setDataListCtrl(m_datasetListCtrl);
     
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
@@ -474,7 +475,19 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::frames));
 		break;
 	case mainView:
-		printf("main gl mouse event\n");
+		int delta = wxMax(wxMin((int)m_mainGL->getDelta(),1),-1);
+		switch (m_mainGL->getPicked())
+		{
+		case axial:
+			m_zSlider->SetValue(wxMin(wxMax(m_zSlider->GetValue() + delta, 0), m_zSlider->GetMax()));
+			break;
+		case coronal:
+			m_ySlider->SetValue(wxMin(wxMax(m_ySlider->GetValue() + delta, 0), m_ySlider->GetMax()));
+			break;
+		case sagittal:
+			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta, 0), m_xSlider->GetMax()));
+			break;
+		}
 	}
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	updateStatusBar();

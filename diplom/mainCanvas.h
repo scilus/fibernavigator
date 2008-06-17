@@ -30,34 +30,40 @@ public:
     void OnSize(wxSizeEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
-    wxPoint getMousePos();
+    wxPoint getMousePos() {return m_clicked;};
+    float getDelta() {return m_delta;};
+    int getPicked() {return m_picked;};
     void updateView(int, float);
     void init();
     void render();
     void setScene(TheScene*);
     void invalidate();
     void renderTestRay();
+    int pick(wxPoint);
     bool testBB(float, float, float, float, float, float);
     
     DECLARE_EVENT_TABLE()
 
 private:
+	 int 		m_view;			// identifier of gl widget
 	 TheScene 	*m_scene;
-	 wxPoint 	m_clicked;
-	 int 		m_view;
+	 wxPoint 	m_clicked;		// last clicked point 
+	 wxPoint	m_lastPos;		// last position to calculate right mouse dragging
+	 float 		m_delta;
 	 
-	 GLdouble m_pos1X, m_pos1Y, m_pos1Z;
-	 GLdouble m_pos2X, m_pos2Y, m_pos2Z;
-	 float m_tmin, m_tmax;
+	 int 		m_picked;
 	 
-	 Matrix4fT m_transform;
-	 Matrix3fT m_lastRot;  
-	 Matrix3fT m_thisRot ; 
-
+	 GLdouble m_pos1X, m_pos1Y, m_pos1Z;	// point of origin for picking
+	 GLdouble m_pos2X, m_pos2Y, m_pos2Z;	// distant point for picking
+	 float m_tmin, m_tmax, m_tpicked;		// distance variables for bb test
+	
 	 bool m_isDragging;
 	 bool m_isrDragging;
-	 bool m_rclick;
 	 
+	 Matrix4fT m_transform;		// transformation matrix of current view
+	 Matrix3fT m_lastRot;  		
+	 Matrix3fT m_thisRot ; 
+
 	 ArcBallT   *m_arcBall;
 	 Point2fT    m_mousePt;
 };

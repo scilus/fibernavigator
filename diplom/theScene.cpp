@@ -15,6 +15,7 @@ TheScene::TheScene()
 	m_showYSlize = true;
 	m_showZSlize = true;
 	m_showMesh = true;
+	m_showSelBox = true;
 	m_textureShader = 0;
 	m_meshShader = 0;
 	m_curveShader = 0;
@@ -29,6 +30,10 @@ TheScene::TheScene()
 	m_quadrant = 1;
 	Vector3fT v1 = {0,0,1};
 	m_lightPos = v1;
+	Vector3fT v2 = {0,0,0};
+	m_selBoxCenter = v2;
+	Vector3fT v3 = {TheDataset::columns,TheDataset::rows, TheDataset::frames};
+	m_selBoxSize = v3;
 }
 
 TheScene::~TheScene()
@@ -99,6 +104,9 @@ void TheScene::assignTextures ()
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
 		info->generateTexture();
 	}
+	
+	Vector3fT v3 = {TheDataset::columns/2,TheDataset::rows/2, TheDataset::frames/2};
+	m_selBoxSize = v3;
 }
 
 void TheScene::addTexture()
@@ -401,6 +409,13 @@ void TheScene::renderScene()
 	renderCurves();
 		
 	glPopAttrib();
+	
+	if (m_showSelBox) {
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		drawSelectionBox();
+		glPopAttrib();
+	}
+	
 }
 
 void TheScene::renderXSlize()
@@ -604,4 +619,68 @@ void TheScene::colorMap(float value)
     	glColor3f( 1.0, 0.0, value-4.0 );
     else 
     	glColor3f( 1.0, 0.0, 1.0 );
+}
+
+void TheScene::drawSphere(float x, float y, float z, float r)
+{
+	glPushMatrix();
+	glTranslatef(x,y,z);
+	GLUquadricObj *quadric = gluNewQuadric();
+	gluQuadricNormals(quadric, GLU_SMOOTH);
+	gluSphere(quadric, r, 32, 32);
+	glPopMatrix();
+}
+
+void TheScene::drawSelectionBox()
+{
+	float cx = m_selBoxCenter.s.X;
+	float cy = m_selBoxCenter.s.Y;
+	float cz = m_selBoxCenter.s.Z;
+	float mx = cx - m_selBoxSize.s.X/2;
+	float px = cx + m_selBoxSize.s.X/2;
+	float my = cy - m_selBoxSize.s.Y/2;
+	float py = cy + m_selBoxSize.s.Y/2;
+	float mz = cz - m_selBoxSize.s.Z/2;
+	float pz = cz + m_selBoxSize.s.Z/2;
+	
+	glColor3f(1.0, 0.0, 0.0);
+	drawSphere(cx, cy, cz, 3.0);
+	drawSphere(mx, cy, cz, 3.0);
+	drawSphere(px, cy, cz, 3.0);
+	drawSphere(cx, my, cz, 3.0);
+	drawSphere(cx, py, cz, 3.0);
+	drawSphere(cx, cy, mz, 3.0);
+	drawSphere(cx, cy, pz, 3.0);
+	glColor3f(0.0, 1.0, 1.0);
+	glLineWidth(2.0);
+	glBegin(GL_LINES);
+		glVertex3f(mx, cy, cz);
+		glVertex3f(px, cy, cz);
+		glVertex3f(cx, my, cz);
+		glVertex3f(cx, py, cz);
+		glVertex3f(cx, cy, mz);
+		glVertex3f(cx, cy, pz);
+		glVertex3f(px, py, pz);
+		glVertex3f(px, py, mz);
+		glVertex3f(mx, py, pz);
+		glVertex3f(mx, py, mz);
+		glVertex3f(mx, my, pz);
+		glVertex3f(mx, my, mz);
+		glVertex3f(px, my, pz);
+		glVertex3f(px, my, mz);
+	glEnd();
+	glBegin(GL_LINE_STRIP);
+		glVertex3f( px, py, pz );
+		glVertex3f( mx, py, pz );
+		glVertex3f( mx, my, pz );
+		glVertex3f( px, my, pz );
+		glVertex3f( px, py, pz );
+	glEnd();
+	glBegin(GL_LINE_STRIP);
+		glVertex3f( px, py, mz );
+		glVertex3f( mx, py, mz );
+		glVertex3f( mx, my, mz );
+		glVertex3f( px, my, mz );
+		glVertex3f( px, py, mz );
+	glEnd();
 }
