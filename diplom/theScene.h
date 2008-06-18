@@ -23,9 +23,9 @@ enum {
 class TheScene {
 
 public:
-	bool m_showXSlize;
-	bool m_showYSlize;
-	bool m_showZSlize;
+	bool m_showSagittal;
+	bool m_showCoronal;
+	bool m_showAxial;
 	bool m_showMesh;
 	bool m_showSelBox;
 	
@@ -65,6 +65,8 @@ public:
 	float m_xSlize;
 	float m_ySlize;
 	float m_zSlize;	
+	Vector3fT m_selBoxCenter;
+	Vector3fT m_selBoxSize;
 		
 private:
 	int m_countTextures;
@@ -89,9 +91,6 @@ private:
 
 	int m_quadrant;
 	Vector3fT m_lightPos;
-	
-	Vector3fT m_selBoxCenter;
-	Vector3fT m_selBoxSize;
 	
 	void bindTextures();
 	void setTextureShaderVars();

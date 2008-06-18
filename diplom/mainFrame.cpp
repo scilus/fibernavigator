@@ -603,21 +603,21 @@ void MainFrame::updateInfoString()
 void MainFrame::OnToggleView1(wxCommandEvent& event)
 {
 	if (!m_scene) return;
-	m_scene->m_showZSlize = !m_scene->m_showZSlize;
+	m_scene->m_showAxial = !m_scene->m_showAxial;
 	m_mainGL->render();
 }
 
 void MainFrame::OnToggleView2(wxCommandEvent& event)
 {
 	if (!m_scene) return;
-	m_scene->m_showYSlize = !m_scene->m_showYSlize;
+	m_scene->m_showCoronal = !m_scene->m_showCoronal;
 	m_mainGL->render();
 }
 
 void MainFrame::OnToggleView3(wxCommandEvent& event)
 {
 	if (!m_scene) return;
-	m_scene->m_showXSlize = !m_scene->m_showXSlize;
+	m_scene->m_showSagittal = !m_scene->m_showSagittal;
 	m_mainGL->render();
 }
 

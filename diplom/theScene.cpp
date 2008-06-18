@@ -11,9 +11,9 @@ TheScene::TheScene()
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
 	m_zSlize = 0.5;
-	m_showXSlize = true;
-	m_showYSlize = true;
-	m_showZSlize = true;
+	m_showSagittal = true;
+	m_showCoronal = true;
+	m_showAxial = true;
 	m_showMesh = true;
 	m_showSelBox = true;
 	m_textureShader = 0;
@@ -390,9 +390,9 @@ void TheScene::renderScene()
 	bindTextures();
 	setTextureShaderVars();
 	
-	if (m_showXSlize) renderXSlize();
-	if (m_showYSlize) renderYSlize();
-	if (m_showZSlize) renderZSlize();
+	if (m_showSagittal) renderXSlize();
+	if (m_showCoronal) renderYSlize();
+	if (m_showAxial) renderZSlize();
 
 	glPopAttrib();
 	

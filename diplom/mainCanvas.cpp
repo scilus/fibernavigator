@@ -100,7 +100,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					if (event.Dragging()) 
 					{
 						int xDrag = m_lastPos.x - clickX;
-						int yDrag = -(m_lastPos.y - clickY);
+						int yDrag = (m_lastPos.y - clickY);
 						GetEventHandler()->ProcessEvent( event1 );
 						m_lastPos = event.GetPosition();
 						Vector3fT v1 = {0,0,0};
@@ -236,36 +236,49 @@ int MainCanvas::pick(wxPoint click)
 	float yy = m_scene->m_ySlize - y;
 	float zz = m_scene->m_zSlize - z;
 	
+	/**
+	 * check if one of the 3 planes is picked
+	 */
 	m_tpicked = 0;
 	int picked = 0;
-	if (testBB(-x, -y, zz, x, y, zz)) {
-		m_tpicked = m_tmin;
-		picked = axial;
-	}
-	if (testBB(-x, yy, -z, x, yy, z)) {
-		if (picked == 0) {
-			picked = coronal;
+	if (m_scene->m_showAxial) {
+		if (testBB(-x, -y, zz, x, y, zz)) {
 			m_tpicked = m_tmin;
+			picked = axial;
 		}
-		else {
-			if (m_tmin < m_tpicked) {
+	}
+	if (m_scene->m_showCoronal) {
+		if (testBB(-x, yy, -z, x, yy, z)) {
+			if (picked == 0) {
 				picked = coronal;
 				m_tpicked = m_tmin;
 			}
-		}
-	}
-	if (testBB(xx, -y, -z, xx, y, z)) {
-		if (picked == 0) {
-			picked = sagittal;
-			m_tpicked = m_tmin;
-		}
-		else {
-			if (m_tmin < m_tpicked) {
-				picked = sagittal;
-				m_tpicked = m_tmin;
+			else {
+				if (m_tmin < m_tpicked) {
+					picked = coronal;
+					m_tpicked = m_tmin;
+				}
 			}
 		}
 	}
+	if (m_scene->m_showSagittal) {
+		if (testBB(xx, -y, -z, xx, y, z)) {
+			if (picked == 0) {
+				picked = sagittal;
+				m_tpicked = m_tmin;
+			}
+			else {
+				if (m_tmin < m_tpicked) {
+					picked = sagittal;
+					m_tpicked = m_tmin;
+				}
+			}
+		}
+	}
+	/*
+	 * check for hits with the selection box sizers
+	 */
+	
 	return picked;
 }
 
