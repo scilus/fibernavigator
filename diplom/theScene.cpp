@@ -647,8 +647,10 @@ void TheScene::drawSelectionBox()
 	drawSphere(cx, cy, cz, 3.0);
 	drawSphere(mx, cy, cz, 3.0);
 	drawSphere(px, cy, cz, 3.0);
+	glColor3f(0.0, 1.0, 0.0);
 	drawSphere(cx, my, cz, 3.0);
 	drawSphere(cx, py, cz, 3.0);
+	glColor3f(0.0, 0.0, 1.0);
 	drawSphere(cx, cy, mz, 3.0);
 	drawSphere(cx, cy, pz, 3.0);
 	glColor3f(0.0, 1.0, 1.0);

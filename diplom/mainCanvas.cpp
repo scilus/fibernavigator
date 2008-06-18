@@ -97,28 +97,73 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_picked = pick(event.GetPosition());
 			    }
 				else {
-					if (event.Dragging()) 
+					if (event.Dragging() && m_picked < 10) 
 					{
 						int xDrag = m_lastPos.x - clickX;
 						int yDrag = (m_lastPos.y - clickY);
 						GetEventHandler()->ProcessEvent( event1 );
-						m_lastPos = event.GetPosition();
-						Vector3fT v1 = {0,0,0};
+						
+						Vector3fT n = {0,0,0};
 						switch (m_picked) {
 						case axial: 
-							v1.s.X = 1.0;
+							n.s.X = 1.0;
 							break;
 						case coronal:
-							v1.s.Y = 1.0;
+							n.s.Y = 1.0;
 							break;
 						case sagittal: 
-							v1.s.Z = 1.0;
+							n.s.Z = 1.0;
 							break;
 						}
-						Vector3fT v2;
-						Vector3fMultMat4(&v2, &v1, &m_transform);
 						if (xDrag == 0 && yDrag == 0) m_delta = 0;
-						else m_delta = ((xDrag * xDrag)+(yDrag * yDrag))/((v2.s.X*xDrag)+(v2.s.Y*yDrag));
+						else {
+							m_delta =  getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n );
+						}
+						m_lastPos = event.GetPosition();
+					}
+					else if (event.Dragging() && m_picked == 10)
+					{
+						printf("move box\n");
+					}
+					else if (event.Dragging() && m_picked > 10)
+					{
+						Vector3fT  n= {0,0,0};
+						float delta = 0;
+						switch (m_picked)
+						{
+						case 11:
+							n.s.X = -1.0;
+							break;
+						case 12:
+							n.s.X = 1.0;
+							break;
+						case 13:
+							n.s.Y = -1.0;
+							break;
+						case 14:
+							n.s.Y = 1.0;
+							break;
+						case 15:
+							n.s.Z = -1.0;
+							break;
+						case 16:
+							n.s.Z = 1.0;
+							break;
+						default:;
+						}
+						delta =  wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),1),-1);
+						if (m_picked == 11 || m_picked == 12) {
+							float newX = m_scene->m_selBoxSize.s.X + (delta);
+							m_scene->m_selBoxSize.s.X = wxMin(wxMax(newX, 5),TheDataset::columns);
+						}
+						if (m_picked == 13 || m_picked == 14) {
+							float newY = m_scene->m_selBoxSize.s.Y + (delta);
+							m_scene->m_selBoxSize.s.Y = wxMin(wxMax(newY, 5),TheDataset::rows);
+						}
+						if (m_picked == 15 || m_picked == 16) {
+							float newZ = m_scene->m_selBoxSize.s.Z + (delta);
+							m_scene->m_selBoxSize.s.Z = wxMin(wxMax(newZ, 5),TheDataset::frames);
+						}
 					}
 				}
 				Refresh(false);
@@ -206,6 +251,38 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		default: ;
 	}
 	
+}
+
+float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
+{
+	Vector3fT vs = mapMouse2World(x1, y1); 
+	Vector3fT ve = mapMouse2World(x2, y2);
+	Vector3fT dir = {ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z};
+	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
+	float nb = ((dir.s.X * n.s.X) + (dir.s.Y * n.s.Y) + (dir.s.Z * n.s.Z));
+	return bb/nb;
+}
+
+Vector3fT MainCanvas::mapMouse2World(int x, int y)
+{
+	glPushMatrix();
+	glMultMatrixf(m_transform.M);	
+	GLint viewport[4];
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLfloat winX, winY;
+
+	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+	glGetDoublev( GL_PROJECTION_MATRIX, projection );
+	glGetIntegerv( GL_VIEWPORT, viewport );
+
+	winX = (float)x;
+	winY = (float)viewport[3] - (float)y;
+	GLdouble posX, posY, posZ;
+	gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX, &posY, &posZ);
+	glPopMatrix();
+	Vector3fT v = {posX, posY, posZ};
+	return v;
 }
 
 int MainCanvas::pick(wxPoint click)

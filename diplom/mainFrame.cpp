@@ -476,7 +476,8 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::frames));
 		break;
 	case mainView:
-		int delta = wxMax(wxMin((int)m_mainGL->getDelta(),1),-1);
+		int delta = wxMax(wxMin((int)m_mainGL->getDelta(),2),-2);
+		
 		switch (m_mainGL->getPicked())
 		{
 		case axial:
@@ -634,7 +635,7 @@ void MainFrame::loadStandard()
 	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
 	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
 	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
-	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/s1_Rwhite.mesh"));
+	//load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/s1_Rwhite.mesh"));
 }
 
 void MainFrame::OnReloadShaders(wxCommandEvent& event)
