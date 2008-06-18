@@ -19,8 +19,6 @@
 
 #include <GL/glew.h>
 
-#include "math.h"                                               // Needed for sqrtf
-
 #include "ArcBall.h"                                            // ArcBall header
 
 //Arcball sphere constants:

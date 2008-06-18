@@ -20,6 +20,8 @@
 #ifndef _ArcBall_h
 #define _ArcBall_h
 
+#include "math.h"                                               // Needed for sqrtf
+
 // 8<--Snip here if you have your own math types/funcs-->8 
 
 

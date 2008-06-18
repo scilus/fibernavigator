@@ -11,6 +11,7 @@
 
 #include "wx/math.h"
 #include "wx/glcanvas.h"
+#include "boundingBox.h"
 
 
 class MainCanvas: public wxGLCanvas
@@ -40,7 +41,6 @@ public:
     void invalidate();
     void renderTestRay();
     int pick(wxPoint);
-    bool testBB(float, float, float, float, float, float);
     
     DECLARE_EVENT_TABLE()
 
@@ -55,7 +55,7 @@ private:
 	 
 	 GLdouble m_pos1X, m_pos1Y, m_pos1Z;	// point of origin for picking
 	 GLdouble m_pos2X, m_pos2Y, m_pos2Z;	// distant point for picking
-	 float m_tmin, m_tmax, m_tpicked;		// distance variables for bb test
+	 float m_tpicked;		// distance variables for bb test
 	
 	 bool m_isDragging;
 	 bool m_isrDragging;

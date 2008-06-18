@@ -227,50 +227,62 @@ int MainCanvas::pick(wxPoint click)
 	gluUnProject( winX, winY, 0, modelview, projection, viewport, &m_pos1X, &m_pos1Y, &m_pos1Z);
 	gluUnProject( winX, winY, 1, modelview, projection, viewport, &m_pos2X, &m_pos2Y, &m_pos2Z);
 	glPopMatrix();
+	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
+	BoundingBox *bb = new BoundingBox(0,0,0, TheDataset::columns, TheDataset::rows, TheDataset::frames);
 	
-	float x = (float)TheDataset::columns/2;
-	float y = (float)TheDataset::rows/2;
-	float z = (float)TheDataset::frames/2;
-	
-	float xx = m_scene->m_xSlize - x;
-	float yy = m_scene->m_ySlize - y;
-	float zz = m_scene->m_zSlize - z;
+	float xx = m_scene->m_xSlize - TheDataset::columns/2;
+	float yy = m_scene->m_ySlize - TheDataset::rows/2;
+	float zz = m_scene->m_zSlize - TheDataset::frames/2;
 	
 	/**
 	 * check if one of the 3 planes is picked
 	 */
 	m_tpicked = 0;
 	int picked = 0;
+	hitResult hr;
 	if (m_scene->m_showAxial) {
-		if (testBB(-x, -y, zz, x, y, zz)) {
-			m_tpicked = m_tmin;
+		bb->setSizeZ(0);
+		bb->setCenterZ(zz);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
+			m_tpicked = hr.tmin;
 			picked = axial;
 		}
+		bb->setSizeZ(TheDataset::frames);
+		bb->setCenterZ(0);
 	}
 	if (m_scene->m_showCoronal) {
-		if (testBB(-x, yy, -z, x, yy, z)) {
+		bb->setSizeY(0);
+		bb->setCenterY(yy);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
 			if (picked == 0) {
 				picked = coronal;
-				m_tpicked = m_tmin;
+				m_tpicked = hr.tmin;
 			}
 			else {
-				if (m_tmin < m_tpicked) {
+				if (hr.tmin < m_tpicked) {
 					picked = coronal;
-					m_tpicked = m_tmin;
+					m_tpicked = hr.tmin;
 				}
 			}
 		}
+		bb->setSizeY(TheDataset::rows);
+		bb->setCenterY(0);
 	}
 	if (m_scene->m_showSagittal) {
-		if (testBB(xx, -y, -z, xx, y, z)) {
+		bb->setSizeX(0);
+		bb->setCenterX(xx);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
 			if (picked == 0) {
 				picked = sagittal;
-				m_tpicked = m_tmin;
+				m_tpicked = hr.tmin;
 			}
 			else {
-				if (m_tmin < m_tpicked) {
+				if (hr.tmin < m_tpicked) {
 					picked = sagittal;
-					m_tpicked = m_tmin;
+					m_tpicked = hr.tmin;
 				}
 			}
 		}
@@ -278,49 +290,115 @@ int MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with the selection box sizers
 	 */
-	
-	return picked;
-}
+	if (m_scene->m_showSelBox) {
+		float cx = m_scene->getSelBoxCenter().s.X;
+		float cy = m_scene->getSelBoxCenter().s.Y;
+		float cz = m_scene->getSelBoxCenter().s.Z;
+		float sx = m_scene->getSelBoxSize().s.X/2;
+		float sy = m_scene->getSelBoxSize().s.Y/2;
+		float sz = m_scene->getSelBoxSize().s.Z/2;
 
-bool MainCanvas::testBB(float bx1, float by1, float bz1, float bx2, float by2, float bz2)
-{
-	float tymin, tymax, tzmin, tzmax;
-	float dirx = m_pos2X - m_pos1X;
-	if (dirx >= 0) {
-		m_tmin = ( bx1 - m_pos1X)/dirx;
-		m_tmax = ( bx2 - m_pos1X)/dirx;
+		bb = new BoundingBox(cx, cy, cz, 3, 3, 3);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
+			if (picked == 0) {
+				picked = 10;
+				m_tpicked = hr.tmin;
+			}
+			else {
+				if (hr.tmin < m_tpicked) {
+					picked = 10;
+					m_tpicked = hr.tmin;
+				}
+			}
+		}
+		bb->setCenter(cx - sx, cy, cz);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
+			if (picked == 0) {
+				picked = 11;
+				m_tpicked = hr.tmin;
+			}
+			else {
+				if (hr.tmin < m_tpicked) {
+					picked = 11;
+					m_tpicked = hr.tmin;
+				}
+			}
+		}
+		bb->setCenter(cx + sx, cy, cz);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
+			if (picked == 0) {
+				picked = 12;
+				m_tpicked = hr.tmin;
+			}
+			else {
+				if (hr.tmin < m_tpicked) {
+					picked = 12;
+					m_tpicked = hr.tmin;
+				}
+			}
+		}
+		bb->setCenter(cx, cy - sy, cz);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
+			if (picked == 0) {
+				picked = 13;
+				m_tpicked = hr.tmin;
+			}
+			else {
+				if (hr.tmin < m_tpicked) {
+					picked = 13;
+					m_tpicked = hr.tmin;
+				}
+			}
+		}
+		bb->setCenter(cx, cy + sy, cz);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
+			if (picked == 0) {
+				picked = 14;
+				m_tpicked = hr.tmin;
+			}
+			else {
+				if (hr.tmin < m_tpicked) {
+					picked = 14;
+					m_tpicked = hr.tmin;
+				}
+			}
+		}
+		bb->setCenter(cx, cy, cz - sz);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
+			if (picked == 0) {
+				picked = 15;
+				m_tpicked = hr.tmin;
+			}
+			else {
+				if (hr.tmin < m_tpicked) {
+					picked = 15;
+					m_tpicked = hr.tmin;
+				}
+			}
+		}
+		bb->setCenter(cx, cy, cz + sz);
+		hr = bb->hitTest(ray);
+		if (hr.hit) {
+			if (picked == 0) {
+				picked = 16;
+				m_tpicked = hr.tmin;
+			}
+			else {
+				if (hr.tmin < m_tpicked) {
+					picked = 16;
+					m_tpicked = hr.tmin;
+				}
+			}
+
+		}
 	}
-	else {
-		m_tmin = ( bx2 - m_pos1X)/dirx;
-		m_tmax = ( bx1 - m_pos1X)/dirx;
-	}
-	float diry = m_pos2Y - m_pos1Y;
-	if (diry >= 0) {
-		tymin = ( by1 - m_pos1Y)/diry;
-		tymax = ( by2 - m_pos1Y)/diry;
-	}
-	else {
-		tymin = ( by2 - m_pos1Y)/diry;
-		tymax = ( by1 - m_pos1Y)/diry;
-	}
-	if ( (m_tmin > tymax) || (tymin > m_tmax)) return false;
-	if (tymin > m_tmin) m_tmin = tymin;
-	if (tymax < m_tmax) m_tmax = tymax;
-	float dirz = m_pos2Z - m_pos1Z;
-	if (dirz >= 0) {
-		tzmin = ( bz1 - m_pos1Z)/dirz;
-		tzmax = ( bz2 - m_pos1Z)/dirz;
-	}
-	else {
-		tzmin = ( bz2 - m_pos1Z)/dirz;
-		tzmax = ( bz1 - m_pos1Z)/dirz;
-	}
-	if ( (m_tmin > tzmax) || (tzmin > m_tmax)) return false;
-	if (tzmin > m_tmin) m_tmin = tzmin;
-	if (tzmax < m_tmax) m_tmax = tzmax;
-	
-	if (m_tmin > m_tmax) return false;
-	return true;
+	return picked;
 }
 
 void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )

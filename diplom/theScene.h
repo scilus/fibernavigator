@@ -60,13 +60,14 @@ public:
 	
 	void updateView(float, float, float);
 	
+	Vector3fT getSelBoxCenter () {return m_selBoxCenter;};
+	Vector3fT getSelBoxSize () {return m_selBoxSize;};
+	
 	bool m_texAssigned;
 	
 	float m_xSlize;
 	float m_ySlize;
 	float m_zSlize;	
-	Vector3fT m_selBoxCenter;
-	Vector3fT m_selBoxSize;
 		
 private:
 	int m_countTextures;
@@ -91,6 +92,8 @@ private:
 
 	int m_quadrant;
 	Vector3fT m_lightPos;
+	Vector3fT m_selBoxCenter;
+	Vector3fT m_selBoxSize;
 	
 	void bindTextures();
 	void setTextureShaderVars();
