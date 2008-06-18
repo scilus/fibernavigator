@@ -37,6 +37,7 @@ private:
     void OnToggleView1(wxCommandEvent& event);
     void OnToggleView2(wxCommandEvent& event);
     void OnToggleView3(wxCommandEvent& event);
+    void OnToggleSelBox(wxCommandEvent& event);
     void OnReloadShaders(wxCommandEvent& event);
     
     void OnActivateListItem(wxListEvent& event);
@@ -118,6 +119,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_TOGGLEVIEW2 		12
 #define VIEWER_TOGGLEVIEW3 		13
 #define VIEWER_RELOAD_SHADER		16
+#define VIEWER_TOGGLE_SELBOX		17
 
 #define ID_GL_NAV_X 	120
 #define ID_GL_NAV_Y  	121

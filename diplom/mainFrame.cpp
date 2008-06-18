@@ -36,6 +36,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
 	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
+	EVT_MENU(VIEWER_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
 	/* list ctrl events */
@@ -618,6 +619,13 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 {
 	if (!m_scene) return;
 	m_scene->m_showSagittal = !m_scene->m_showSagittal;
+	m_mainGL->render();
+}
+
+void MainFrame::OnToggleSelBox(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	m_scene->m_showSelBox = !m_scene->m_showSelBox;
 	m_mainGL->render();
 }
 
