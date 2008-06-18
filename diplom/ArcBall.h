@@ -20,6 +20,12 @@
 #ifndef _ArcBall_h
 #define _ArcBall_h
 
+#include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
 #include "math.h"                                               // Needed for sqrtf
 
 // 8<--Snip here if you have your own math types/funcs-->8 
@@ -409,6 +415,9 @@
         Matrix4fSetRotationScaleFromMatrix3f(NewObj, m1);
         Matrix4fMulRotationScale(NewObj, scale);
     }
+    
+    inline
+    static float clamp(float v, float min, float max) {return wxMax(wxMin(v, max), min);}; 
 
 // 8<--Snip here if you have your own math types/funcs-->8 
 

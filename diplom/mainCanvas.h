@@ -42,6 +42,7 @@ public:
     void renderTestRay();
     int pick(wxPoint);
     Vector3fT mapMouse2World(int, int);
+    Vector3fT mapMouse2WorldBack(int, int);
     float getAxisParallelMovement(int, int, int, int, Vector3fT);
     
     DECLARE_EVENT_TABLE()

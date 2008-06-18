@@ -44,6 +44,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	
 	m_isDragging = false;					                    // NEW: Dragging The Mouse?
 	m_isrDragging = false;
+	m_delta = 0;
 	m_arcBall = new ArcBallT(640.0f, 480.0f); 
 }
 
@@ -85,10 +86,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 	switch (m_view)
 	{
 		case mainView: {
-			m_mousePt.s.X = clickX;
-			m_mousePt.s.Y = clickY;
-			
-			if (event.RightIsDown())												// If Right Mouse Clicked, Reset All Rotations
+			if (event.RightIsDown())											
 		    {
 				if (!m_isrDragging)												// Not Dragging
 			    {
@@ -117,13 +115,23 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						}
 						if (xDrag == 0 && yDrag == 0) m_delta = 0;
 						else {
-							m_delta =  getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n );
+							m_delta = 0;
+							float delta =  wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),1),-1);
+							if ( delta < -0.5)
+								m_delta =  -1;
+							else if (delta > 0.5)
+								m_delta = 1;
 						}
-						m_lastPos = event.GetPosition();
 					}
 					else if (event.Dragging() && m_picked == 10)
 					{
-						printf("move box\n");
+						Vector3fT vs = mapMouse2World(clickX, clickY);
+						Vector3fT ve = mapMouse2WorldBack(clickX, clickY);
+						Vector3fT dir = {ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z};
+
+						m_scene->m_selBoxCenter.s.X = vs.s.X + dir.s.X * m_tpicked;
+						m_scene->m_selBoxCenter.s.Y = vs.s.Y + dir.s.Y * m_tpicked;
+						m_scene->m_selBoxCenter.s.Z = vs.s.Z + dir.s.Z * m_tpicked;
 					}
 					else if (event.Dragging() && m_picked > 10)
 					{
@@ -166,6 +174,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						}
 					}
 				}
+				m_lastPos = event.GetPosition();
 				Refresh(false);
 		    }
 			else {
@@ -174,6 +183,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			
 			if(event.LeftIsDown())
 			{
+				m_mousePt.s.X = clickX;
+				m_mousePt.s.Y = clickY;
 				if (!m_isDragging)												// Not Dragging
 			    {
 					m_isDragging = true;										// Prepare For Dragging
@@ -280,6 +291,28 @@ Vector3fT MainCanvas::mapMouse2World(int x, int y)
 	winY = (float)viewport[3] - (float)y;
 	GLdouble posX, posY, posZ;
 	gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX, &posY, &posZ);
+	glPopMatrix();
+	Vector3fT v = {posX, posY, posZ};
+	return v;
+}
+
+Vector3fT MainCanvas::mapMouse2WorldBack(int x, int y)
+{
+	glPushMatrix();
+	glMultMatrixf(m_transform.M);	
+	GLint viewport[4];
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLfloat winX, winY;
+
+	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+	glGetDoublev( GL_PROJECTION_MATRIX, projection );
+	glGetIntegerv( GL_VIEWPORT, viewport );
+
+	winX = (float)x;
+	winY = (float)viewport[3] - (float)y;
+	GLdouble posX, posY, posZ;
+	gluUnProject( winX, winY, 1, modelview, projection, viewport, &posX, &posY, &posZ);
 	glPopMatrix();
 	Vector3fT v = {posX, posY, posZ};
 	return v;

@@ -476,7 +476,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::frames));
 		break;
 	case mainView:
-		int delta = wxMax(wxMin((int)m_mainGL->getDelta(),2),-2);
+		int delta = m_mainGL->getDelta();
 		
 		switch (m_mainGL->getPicked())
 		{
