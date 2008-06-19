@@ -211,66 +211,41 @@ void DatasetInfo::generateGeometry(int xOff, int yOff, int zOff)
 				glNormal3f( 	m_mesh->m_vertexArray[p.v2].nx, 
 								m_mesh->m_vertexArray[p.v2].ny,
 								m_mesh->m_vertexArray[p.v2].nz);
-				glVertex3f(		m_mesh->m_vertexArray[p.v2].x - xOff, 
+				glVertex3f(	m_mesh->m_vertexArray[p.v2].x - xOff, 
 								m_mesh->m_vertexArray[p.v2].y - yOff, 
 								m_mesh->m_vertexArray[p.v2].z - zOff);
 
 				glNormal3f( 	m_mesh->m_vertexArray[p.v3].nx, 
 								m_mesh->m_vertexArray[p.v3].ny,
 								m_mesh->m_vertexArray[p.v3].nz);
-				glVertex3f(		m_mesh->m_vertexArray[p.v3].x - xOff, 
+				glVertex3f(	m_mesh->m_vertexArray[p.v3].x - xOff, 
 								m_mesh->m_vertexArray[p.v3].y - yOff, 
 								m_mesh->m_vertexArray[p.v3].z - zOff);
 			}
 			glEnd();
 	} break;
-	case Curves_: {
-		int pc = 0;
-		float r,g,b,x,y,z;
-		float x1,x2,y1,y2,z1,z2;
-		
-		for ( int i = 0 ; i < m_curves->getCountLines() ; ++i )
-		{
-			x1 = m_curves->m_pointArray[pc];
-			y1 = m_curves->m_pointArray[pc+1];
-			z1 = m_curves->m_pointArray[pc+2];
-			x2 = m_curves->m_pointArray[pc + m_curves->getPointsPerLine(i)*3 - 3];
-			y2 = m_curves->m_pointArray[pc + m_curves->getPointsPerLine(i)*3 - 2];
-			z2 = m_curves->m_pointArray[pc + m_curves->getPointsPerLine(i)*3 - 1];
-			
-			r = (x1) - (x2);
-			g = (y1) - (y2);
-			b = (z1) - (z2);
-			if (r < 0.0) r *= -1.0 ;
-			if (g < 0.0) g *= -1.0 ;
-			if (b < 0.0) b *= -1.0 ;
-			float norm = sqrt(r*r + g*g + b*b);
-			r *= 1.0/norm;
-			g *= 1.0/norm;
-			b *= 1.0/norm;
-			
-			glBegin(GL_LINE_STRIP);
-			glColor3f(r,g,b);
-			xOff = 52;
-			yOff = 70;
-			zOff = 42;
-			for (int j = 0; j < m_curves->getPointsPerLine(i) ; ++j )
-			{
-				x = m_curves->m_pointArray[pc];
-				y = m_curves->m_pointArray[pc+1];
-				z = m_curves->m_pointArray[pc+2];
-				
-				glVertex3f ( xOff-x, yOff- y, zOff-z);
-				pc +=3;
-			}
-			glEnd();
-		}
-		printf("created call list\n");
-	} break;
 	default:;
 	}
-	
+	printf("created call list\n");
 }
+
+void DatasetInfo::drawFibers()
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, m_curves->m_pointArray);
+	glColorPointer (3, GL_UNSIGNED_BYTE, 0, m_curves->m_colorArray);
+	
+	int pc = 0;
+	
+	for ( int i = 0 ; i < m_curves->getCountLines() ; ++i )
+	{
+		glDrawArrays(GL_LINE_STRIP, pc, m_curves->getPointsPerLine(i));
+		pc += m_curves->getPointsPerLine(i);
+	}
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 
 wxString DatasetInfo::getInfoString()
 {

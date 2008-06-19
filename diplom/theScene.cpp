@@ -88,7 +88,7 @@ void TheScene::assignTextures ()
 	for (int i = 0 ; i < m_countTextures ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
-		if(info->getType() >= Mesh_)
+		if(info->getType() == Mesh_)
 		{
 			m_texNames[i] = makeCallList(info);
 			return;
@@ -114,7 +114,7 @@ void TheScene::addTexture()
 	m_countTextures = m_listctrl->GetItemCount();
 	if (m_countTextures == 0) return;
 	DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(m_countTextures - 1);
-	if(info->getType() >= Mesh_)
+	if(info->getType() == Mesh_)
 	{
 		m_texNames[m_countTextures -1] = makeCallList(info);
 		return;
@@ -505,6 +505,7 @@ void TheScene::renderMesh()
 
 void TheScene::renderCurves()
 {
+
 	m_curveShader->bind();
 	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
@@ -512,11 +513,11 @@ void TheScene::renderCurves()
 		
 		m_curveShader->setUniInt("useNormals", !info->getShowFS());
 		//m_curveShader->setUniInt("useNormals", info->getUseTex());
-		
 		if (info->getType() == Curves_ && info->getShow())
 		{
-			glCallList(m_texNames[i]);
+			info->drawFibers();
 		}
+		
 	}
 	m_curveShader->release();
 }

@@ -69,6 +69,7 @@ public:
 	wxString getInfoString();
 	void generateTexture();
 	void generateGeometry(int, int, int);
+	void drawFibers();
 	
 	void setHighestValue(float value) {m_highest_value = value;};
 	void setThreshold(float value) {m_threshold = value;};

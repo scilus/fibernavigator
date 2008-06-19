@@ -411,6 +411,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	int countPoints = (int)tempValue;
 	printf("Points: %d\n",countPoints);
 	
+	// start position of the point array in the file
 	int pc = i; 
 	
 	i += (12 * countPoints) +1;
@@ -435,6 +436,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	if(!sLines.ToLong(&tempValue, 10)) return NULL; //can't read lines
 	int countLines = (int)tempValue;
 	printf("Lines: %d Length: %d\n",countLines, lengthLines);
+	// start postion of the line array in the file
 	int lc = i;
 	
 	i += (lengthLines*4) +1;
@@ -471,14 +473,22 @@ Curves* TheDataset::loadVTK(wxString filename)
 	dataFile.Read(curves->m_pointArray, (size_t) countPoints*12);
 	dataFile.Seek(lc);
 	dataFile.Read(curves->m_lineArray, (size_t) lengthLines*4);
-	
-	/* we don't use the color per point but rather calculate a color for
-	 * the whole line, by taking the vector between start and end point
-	 * 
 	dataFile.Seek(cc);
 	dataFile.Read(curves->m_colorArray, (size_t) countPoints*3);
-	*/
+	printf("toggle Endianess\n");
 	curves->toggleEndianess();
+	printf("move vertices\n");
+	int xOff = columns/2;
+	int yOff = rows/2;
+	int zOff = frames/2;
+	for (int i = 0; i < countPoints * 3 ; ++i) {
+		curves->m_pointArray[i] = xOff - curves->m_pointArray[i];
+		++i;
+		curves->m_pointArray[i] = curves->m_pointArray[i] - yOff;
+		++i;
+		curves->m_pointArray[i] = zOff - curves->m_pointArray[i];
+	}
 	printf("read all\n");
+	
 	return curves;
 }
