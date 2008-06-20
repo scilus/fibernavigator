@@ -238,11 +238,10 @@ void DatasetInfo::drawFibers()
 	glColorPointer (3, GL_FLOAT, 0, m_curves->m_colorArray);
 	glNormalPointer (GL_FLOAT, 0, m_curves->m_normalArray);
 	
-	int pc = 0;
-	
 	for ( int i = 0 ; i < m_curves->getLineCount() ; ++i )
 	{
-		glDrawArrays(GL_LINE_STRIP, m_curves->getStartIndexForLine(i), m_curves->getPointsPerLine(i));
+		if (m_curves->m_activeLines[i] == 1)
+			glDrawArrays(GL_LINE_STRIP, m_curves->getStartIndexForLine(i), m_curves->getPointsPerLine(i));
 	}
 	
 	glDisableClientState(GL_VERTEX_ARRAY);

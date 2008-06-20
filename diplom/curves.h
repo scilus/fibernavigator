@@ -7,6 +7,8 @@
 #include "wx/wx.h"
 #endif
 
+#include "GL/glew.h"
+#include "ArcBall.h"
 #include "KdTree.h"
 
 enum CurveFileType {
@@ -20,13 +22,16 @@ class Curves
 public:
 	Curves(int, int);
 	~Curves();
-	void setPointsPerLine(int line, int value) {m_pointsPerLine[line] = value;};
 	int getPointsPerLine(int);
 	int getStartIndexForLine(int);
+	int getLineForPoint(int);
 	void setPoints(float* points) {m_pointArray = points;}; 
 	float* getPoints() {return m_pointArray;};
 	int getLineCount() {return m_lineCount;};
 	int getPointCount() {return m_pointCount;};
+	void calculateLinePointers();
+	void updateLinesShown(Vector3fT, Vector3fT);
+	void boxTest(int, int, int);
 	
 	void toggleEndianess();
 	void createColorArray();
@@ -36,18 +41,23 @@ public:
 	int* m_lineArray;
 	float *m_colorArray;
 	float *m_normalArray;
+	wxUint8 *m_activeLines;
 	
 	int m_lengthPoints;
 	int m_lengthLines;
 
 private:
-	void calculatePointsPerLine();
+	
 	
 	int m_lineCount;
 	int m_pointCount;
-	int *m_pointsPerLine;
-	bool m_pointsPerLineCalculated;
+	int *m_linePointers;
+	int *m_reverse; 
+	
 	KdTree *m_kdTree;
+	
+	float *m_boxMin;
+	float *m_boxMax;
 };
 
 #endif /*CURVES_H_*/

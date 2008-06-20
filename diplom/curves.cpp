@@ -1,49 +1,74 @@
 #include "curves.h"
 
+
 Curves::Curves(int lines, int points)
 {
 	m_lineCount = lines;
 	m_pointCount = points;
-	m_pointsPerLine = new int[lines*2];
-	m_pointsPerLineCalculated = false;
+	m_linePointers = new int[lines+1];
+	m_reverse = new int[points/128];
+	m_linePointers[lines] = points;
+	m_activeLines = new wxUint8[lines];
+	for (int i = 0; i < lines ; ++i)
+	{
+		m_activeLines[i] = 0;
+	}
 }
 
 Curves::~Curves()
 {
-	delete[] m_pointsPerLine;
+	delete[] m_linePointers;
 	delete[] m_pointArray;
 	delete[] m_lineArray;
 	delete[] m_colorArray;
 	delete[] m_normalArray;
+	delete[] m_reverse;
 }
 
 int Curves::getPointsPerLine(int line) 
 {
-	if (!m_pointsPerLineCalculated) calculatePointsPerLine();
-	return m_pointsPerLine[line*2];
+	return (m_linePointers[line+1] - m_linePointers[line]) ;
 }
 
 int Curves::getStartIndexForLine(int line) 
 {
-	if (!m_pointsPerLineCalculated) calculatePointsPerLine();
-	return m_pointsPerLine[line*2+1];
+	return m_linePointers[line];
 }
 
 
-void Curves::calculatePointsPerLine()
+void Curves::calculateLinePointers()
 {
+	printf("calculate line pointers\n");
 	int pc = 0;
 	int lc = 0;
 	int tc = 0;
 	for (int i = 0 ; i < m_lineCount ; ++i)
 	{
+		m_linePointers[i] = tc;
 		lc = m_lineArray[pc];
-		m_pointsPerLine[2*i] = lc;
-		m_pointsPerLine[2*i+1] = tc;
 		tc += lc;
 		pc += (lc + 1);
 	}
-	m_pointsPerLineCalculated = true;
+	
+	lc = 0;
+	pc = 0;
+	
+	int i = 0;
+	while ( i < m_pointCount-128 )
+	{
+		m_reverse[pc++] = lc;
+		i += 128;
+		while ( getStartIndexForLine(lc) < i) ++lc;
+	}
+	
+}
+
+int Curves::getLineForPoint(int point)
+{
+	int l1 = m_reverse[point / 128];
+	while (getStartIndexForLine(l1 +1) < point) ++l1;
+	return l1;
+	 
 }
 
 void Curves::toggleEndianess()
@@ -138,4 +163,49 @@ void Curves::createColorArray()
 void Curves::buildkDTree()
 {
 	m_kdTree = new KdTree(m_pointCount, m_pointArray);
+}
+
+void Curves::updateLinesShown(Vector3fT vpos, Vector3fT vsize)
+{
+	for (int i = 0; i < m_lineCount ; ++i)
+	{
+		m_activeLines[i] = 0;
+	}
+	m_boxMin = new float[3];
+	m_boxMax = new float[3];
+	m_boxMin[0] = vpos.s.X - vsize.s.X/2;
+	m_boxMax[0] = vpos.s.X + vsize.s.X/2;
+	m_boxMin[1] = vpos.s.Y - vsize.s.Y/2;
+	m_boxMax[1] = vpos.s.Y + vsize.s.Y/2;
+	m_boxMin[2] = vpos.s.Z - vsize.s.Z/2;
+	m_boxMax[2] = vpos.s.Z + vsize.s.Z/2;
+	boxTest(0, m_pointCount-1, 0);
+}
+
+void Curves::boxTest(int left, int right, int axis)
+{
+	if (left > right) return;
+	int root = left + ((right-left)/2);
+	if (m_activeLines[getLineForPoint(root)] == 1) return;
+	
+	if (m_pointArray[m_kdTree->m_tree[root]*3 + axis] < m_boxMin[axis]) {
+		axis = (axis+1) % 3;
+		boxTest(left, root -1, axis);
+	}
+	else if (m_pointArray[m_kdTree->m_tree[root]*3 + axis] > m_boxMax[axis]) {
+		axis = (axis+1) % 3;
+		boxTest(root+1, right, axis);
+	}
+	else {
+		if (	m_pointArray[m_kdTree->m_tree[root]*3 + axis] < m_boxMax[axis] &&
+				m_pointArray[m_kdTree->m_tree[root]*3 + axis] > m_boxMin[axis] &&
+				m_pointArray[m_kdTree->m_tree[root]*3 + axis] < m_boxMax[axis] &&
+				m_pointArray[m_kdTree->m_tree[root]*3 + axis] > m_boxMin[axis] )
+		{
+			m_activeLines[getLineForPoint(root)] = 1;
+		}
+		axis = (axis+1) % 3;
+		boxTest(left, root -1, axis);
+		boxTest(root+1, right, axis);
+	}
 }

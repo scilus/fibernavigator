@@ -482,6 +482,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	*/
 	
 	curves->toggleEndianess();
+	curves->calculateLinePointers();
 	printf("move vertices\n");
 	int xOff = columns/2;
 	int yOff = rows/2;

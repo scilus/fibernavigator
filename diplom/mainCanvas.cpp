@@ -132,6 +132,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						m_scene->m_selBoxCenter.s.X = vs.s.X + dir.s.X * m_tpicked;
 						m_scene->m_selBoxCenter.s.Y = vs.s.Y + dir.s.Y * m_tpicked;
 						m_scene->m_selBoxCenter.s.Z = vs.s.Z + dir.s.Z * m_tpicked;
+						m_scene->m_selBoxChanged = true;
 					}
 					else if (event.Dragging() && m_picked > 10)
 					{
@@ -172,6 +173,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 							float newZ = m_scene->m_selBoxSize.s.Z + (delta);
 							m_scene->m_selBoxSize.s.Z = wxMin(wxMax(newZ, 5),TheDataset::frames);
 						}
+						m_scene->m_selBoxChanged = true;
 					}
 				}
 				m_lastPos = event.GetPosition();

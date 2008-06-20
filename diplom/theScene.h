@@ -70,6 +70,7 @@ public:
 	float m_zSlize;	
 	Vector3fT m_selBoxCenter;
 	Vector3fT m_selBoxSize;
+	bool m_selBoxChanged;
 		
 private:
 	int m_countTextures;

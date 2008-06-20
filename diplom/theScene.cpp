@@ -32,8 +32,9 @@ TheScene::TheScene()
 	m_lightPos = v1;
 	Vector3fT v2 = {0,0,0};
 	m_selBoxCenter = v2;
-	Vector3fT v3 = {TheDataset::columns,TheDataset::rows, TheDataset::frames};
+	Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
 	m_selBoxSize = v3;
+	m_selBoxChanged = false;
 }
 
 TheScene::~TheScene()
@@ -105,7 +106,7 @@ void TheScene::assignTextures ()
 		info->generateTexture();
 	}
 	
-	Vector3fT v3 = {TheDataset::columns/2,TheDataset::rows/2, TheDataset::frames/2};
+	Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
 	m_selBoxSize = v3;
 }
 
@@ -515,6 +516,11 @@ void TheScene::renderCurves()
 		//m_curveShader->setUniInt("useNormals", info->getUseTex());
 		if (info->getType() == Curves_ && info->getShow())
 		{
+			if (m_selBoxChanged)
+			{
+				info->m_curves->updateLinesShown(m_selBoxCenter, m_selBoxSize);
+				m_selBoxChanged = false;
+			}
 			info->drawFibers();
 		}
 		

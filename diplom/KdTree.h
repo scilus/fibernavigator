@@ -7,29 +7,19 @@
 #include "wx/wx.h"
 #endif
 
-class TreeNode {
-	TreeNode(int index) {m_index = index ;};
-	
-	wxUint32 m_index;
-	TreeNode *m_leftChild;
-	TreeNode *m_rightChild;
-};
-
-
 class KdTree {
 public:
 	KdTree(int, float*);
+	~KdTree();
 	void sort(int, int);
-	void quickSort(int, int, int);
+	void quicksort(int, int, int);
 	int quicksortSplit(int ,int ,int);
-	TreeNode buildTree(int, int, int);
+	void *buildTree(int, int, int);
+	
+	wxUint32 *m_tree;
 	
 private:
-	wxUint32 *m_sortedXArray;
-	wxUint32 *m_sortedYArray;
-	wxUint32 *m_sortedZArray;
-	wxUint32 *m_sortedArray;
-	
+	wxUint32 m_root;
 	float *m_pointArray;
 };
 
