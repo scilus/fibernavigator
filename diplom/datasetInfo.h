@@ -66,7 +66,6 @@ public:
 	
 	bool load(wxString filename);
 	
-	wxString getInfoString();
 	void generateTexture();
 	void generateGeometry(int, int, int);
 	void drawFibers();

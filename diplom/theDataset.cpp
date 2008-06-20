@@ -462,9 +462,10 @@ Curves* TheDataset::loadVTK(wxString filename)
 	temp[j] = 0;
 	int cc = i;
 
-	Curves* curves = new Curves(countLines);
+	Curves* curves = new Curves(countLines, countPoints);
 	curves->m_pointArray = new float[countPoints*3];
-	curves->m_colorArray = new wxUint8[countPoints*3];
+	curves->m_colorArray = new float[countPoints*3];
+	curves->m_normalArray = new float[countPoints*3];
 	curves->m_lineArray = new int[lengthLines*4];
 	curves->m_lengthPoints = countPoints*3;
 	curves->m_lengthLines = lengthLines;
@@ -473,9 +474,13 @@ Curves* TheDataset::loadVTK(wxString filename)
 	dataFile.Read(curves->m_pointArray, (size_t) countPoints*12);
 	dataFile.Seek(lc);
 	dataFile.Read(curves->m_lineArray, (size_t) lengthLines*4);
+	/*
+	 * we don't use the color info saved here but calculate our own
+	 *
 	dataFile.Seek(cc);
 	dataFile.Read(curves->m_colorArray, (size_t) countPoints*3);
-	printf("toggle Endianess\n");
+	*/
+	
 	curves->toggleEndianess();
 	printf("move vertices\n");
 	int xOff = columns/2;
@@ -488,6 +493,9 @@ Curves* TheDataset::loadVTK(wxString filename)
 		++i;
 		curves->m_pointArray[i] = zOff - curves->m_pointArray[i];
 	}
+	curves->createColorArray();
+
+	curves->buildkDTree();
 	printf("read all\n");
 	
 	return curves;

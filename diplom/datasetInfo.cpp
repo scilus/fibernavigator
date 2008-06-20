@@ -232,31 +232,20 @@ void DatasetInfo::generateGeometry(int xOff, int yOff, int zOff)
 void DatasetInfo::drawFibers()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, m_curves->m_pointArray);
-	glColorPointer (3, GL_UNSIGNED_BYTE, 0, m_curves->m_colorArray);
+	glColorPointer (3, GL_FLOAT, 0, m_curves->m_colorArray);
+	glNormalPointer (GL_FLOAT, 0, m_curves->m_normalArray);
 	
 	int pc = 0;
 	
-	for ( int i = 0 ; i < m_curves->getCountLines() ; ++i )
+	for ( int i = 0 ; i < m_curves->getLineCount() ; ++i )
 	{
-		glDrawArrays(GL_LINE_STRIP, pc, m_curves->getPointsPerLine(i));
-		pc += m_curves->getPointsPerLine(i);
+		glDrawArrays(GL_LINE_STRIP, m_curves->getStartIndexForLine(i), m_curves->getPointsPerLine(i));
 	}
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-
-wxString DatasetInfo::getInfoString()
-{
-	if (m_type == Mesh_) return wxT("Mesh File");
-	if (!is_loaded) return wxT("not loaded");
-	wxString infoString1, infoString2, infoString3;
-	infoString1.Empty();
-	infoString2.Empty();
-	infoString3.Empty();
-	infoString1 = wxString::Format(wxT("Length: %d\nBands: %d\nFrames: %d\nRows: %d\nColumns: %d\nTyp: %d\nRepn: "), 
-			m_length, m_bands, m_frames, m_rows, m_columns, m_type) + m_repn;
-	infoString2 = wxString::Format(wxT("\nx Voxel: %.2f\ny Voxel: %.2f\nz Voxel: %.2f"), m_xVoxel, m_yVoxel, m_zVoxel);
-	return m_name + wxT(":\n") + infoString1;
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
 }
