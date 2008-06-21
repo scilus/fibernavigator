@@ -1,14 +1,17 @@
 #include "KdTree.h"
+#include "theDataset.h"
 
 KdTree::KdTree(int size, float *pointArray)
 {
-	printf ("build kd tree\n");
+	TheDataset::printTime();
+	printf ("build kd tree...\n");
 	m_pointArray = pointArray;
 	m_tree = new wxUint32[size];
 	for (int i = 0 ; i < size ;  ++i)
 		m_tree[i] = i;
 	buildTree(0,size-1, 0);
-	//printf("root node: %.4f %.4f %.4f\n", m_pointArray[3*m_tree[(size-1)/2]], m_pointArray[3*m_tree[(size-1)/2]+1], m_pointArray[3*m_tree[(size-1)/2]+2]);
+	TheDataset::printTime();
+	printf ("tree finished\n");
 }
 
 KdTree::~KdTree()

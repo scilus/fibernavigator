@@ -36,6 +36,7 @@ public:
 	void toggleEndianess();
 	void createColorArray();
 	void buildkDTree();
+	void freeArrays() {delete[] m_colorArray; delete[] m_normalArray;};
 	
 	float *m_pointArray;
 	int* m_lineArray;

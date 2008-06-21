@@ -633,8 +633,8 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 void MainFrame::loadStandard()
 {
 	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
-	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
-	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
+	//load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
+	//load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
 	//load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/s1_Rwhite.mesh"));
 	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/dwi_188_1_7.fib"));
 }

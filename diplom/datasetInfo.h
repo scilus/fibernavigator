@@ -49,7 +49,7 @@ private:
 	bool m_showFS;	// show front sector for meshs
 	bool m_useTex; 	// color mesh with textures loaded, 
 					// if false use colormap on threshold value
-	
+	GLuint *m_bufferObjects;
 	
 public:	
 	wxUint8 *m_byteDataset;
@@ -70,6 +70,7 @@ public:
 	void generateGeometry(int, int, int);
 	void drawFibers();
 	void drawkdTree();
+	void initializeBuffer();
 	
 	void setHighestValue(float value) {m_highest_value = value;};
 	void setThreshold(float value) {m_threshold = value;};

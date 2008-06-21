@@ -32,6 +32,8 @@ DatasetInfo* TheDataset::load(wxString filename)
 		info->m_curves = loadVTK(filename);
 		info->setType(Curves_);
 		info->setName(filename.AfterLast('/'));
+		info->initializeBuffer();
+		info->m_curves->buildkDTree();
 		return info;
 	}
 	else if (ext != wxT("hea")) return false;
@@ -349,6 +351,8 @@ Curves* TheDataset::loadCurves(wxString filename)
 
 Curves* TheDataset::loadVTK(wxString filename)
 {
+	printTime();
+	printf("start loading vtk file\n");
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
 		
@@ -387,7 +391,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	}
 	
 	if (type != wxT("BINARY")) {
-		//somethingn else, don't what to do
+		//somethingn else, don't know what to do
 		return NULL;
 	}
 	
@@ -409,14 +413,12 @@ Curves* TheDataset::loadVTK(wxString filename)
 	long tempValue;
 	if(!points.ToLong(&tempValue, 10)) return NULL; //can't read point count
 	int countPoints = (int)tempValue;
-	printf("Points: %d\n",countPoints);
 	
 	// start position of the point array in the file
 	int pc = i; 
 	
 	i += (12 * countPoints) +1;
 	j = 0;
-	//printf ("goto: %d\n", i);
 	dataFile.Seek(i);
 	dataFile.Read(buffer, (size_t) 255);
 	while (buffer[j] != '\n') {
@@ -435,12 +437,10 @@ Curves* TheDataset::loadVTK(wxString filename)
 	sLines = sLines.BeforeFirst(' ');
 	if(!sLines.ToLong(&tempValue, 10)) return NULL; //can't read lines
 	int countLines = (int)tempValue;
-	printf("Lines: %d\n",countLines);
 	// start postion of the line array in the file
 	int lc = i;
 	
 	i += (lengthLines*4) +1;
-	//printf ("goto: %d\n", i);
 	dataFile.Seek(i);
 	dataFile.Read(buffer, (size_t) 255);
 	j = 0;
@@ -482,7 +482,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	*/
 	
 	curves->toggleEndianess();
-	
+	printTime();
 	printf("move vertices\n");
 	int xOff = columns/2;
 	int yOff = rows/2;
@@ -496,9 +496,13 @@ Curves* TheDataset::loadVTK(wxString filename)
 	}
 	curves->calculateLinePointers();
 	curves->createColorArray();
-	
-	curves->buildkDTree();
+	printTime();
 	printf("read all\n");
-	
 	return curves;
+}
+
+void TheDataset::printTime()
+{
+	wxDateTime dt = wxDateTime::Now();
+	printf("[%d:%d:%d] ",dt.GetHour(), dt.GetMinute(), dt.GetSecond());
 }

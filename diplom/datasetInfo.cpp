@@ -19,6 +19,8 @@ DatasetInfo::DatasetInfo()
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;
+	m_bufferObjects = new GLuint[3];
+
 }
 
 DatasetInfo::~DatasetInfo()
@@ -234,9 +236,12 @@ void DatasetInfo::drawFibers()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, m_curves->m_pointArray);
-	glColorPointer (3, GL_FLOAT, 0, m_curves->m_colorArray);
-	glNormalPointer (GL_FLOAT, 0, m_curves->m_normalArray);
+	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
+	glVertexPointer(3, GL_FLOAT, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+	glColorPointer (3, GL_FLOAT, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+	glNormalPointer (GL_FLOAT, 0, 0);
 	
 	for ( int i = 0 ; i < m_curves->getLineCount() ; ++i )
 	{
@@ -249,4 +254,15 @@ void DatasetInfo::drawFibers()
 	glDisableClientState(GL_NORMAL_ARRAY);
 }
 
+void DatasetInfo::initializeBuffer()
+{
+	glGenBuffers(3, m_bufferObjects);
+	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_curves->getPointCount()*3, m_curves->m_pointArray, GL_STATIC_DRAW );
+	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_curves->getPointCount()*3, m_curves->m_colorArray, GL_STATIC_DRAW );
+	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_curves->getPointCount()*3, m_curves->m_normalArray, GL_STATIC_DRAW );
+	m_curves->freeArrays();
+}
 

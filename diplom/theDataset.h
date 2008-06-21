@@ -34,6 +34,8 @@ public:
 	static Curves* loadCurves(wxString);
 	static Curves* loadVTK(wxString);
 	
+	static void printTime();
+	
 	static int rows;
 	static int columns;
 	static int frames;

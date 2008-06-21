@@ -1,4 +1,5 @@
 #include "curves.h"
+#include "theDataset.h"
 
 
 Curves::Curves(int lines, int points)
@@ -20,8 +21,8 @@ Curves::~Curves()
 	delete[] m_linePointers;
 	delete[] m_pointArray;
 	delete[] m_lineArray;
-	delete[] m_colorArray;
-	delete[] m_normalArray;
+	//delete[] m_colorArray;
+	//delete[] m_normalArray;
 	delete[] m_reverse;
 }
 
@@ -38,6 +39,7 @@ int Curves::getStartIndexForLine(int line)
 
 void Curves::calculateLinePointers()
 {
+	TheDataset::printTime();
 	printf("calculate line pointers\n");
 	int pc = 0;
 	int lc = 0;
@@ -68,6 +70,7 @@ int Curves::getLineForPoint(int point)
 
 void Curves::toggleEndianess()
 {
+	TheDataset::printTime();
 	printf("toggle Endianess\n");
 	
 	wxUint8 *pointbytes = (wxUint8*)m_pointArray;
@@ -96,6 +99,7 @@ void Curves::toggleEndianess()
 
 void Curves::createColorArray()
 {
+	TheDataset::printTime();
 	printf("create color arrays\n");
 
 	int pc = 0;
