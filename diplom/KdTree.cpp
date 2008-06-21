@@ -18,14 +18,12 @@ KdTree::~KdTree()
 
 void KdTree::quicksort(int left, int right, int pos)
 {
-	//if ((right - left) > 2)
-	if (right > left)
+	if ((right - left) > 2)
 	{
 		int div = quicksortSplit(left, right, pos);
 		quicksort(left, div-1, pos);
 		quicksort(div+1, right, pos);
 	}
-	/*
 	else {
 		switch (right-left)
 		{
@@ -62,7 +60,6 @@ void KdTree::quicksort(int left, int right, int pos)
 			return;
 		}
 	}
-	*/
 }
 
 int KdTree::quicksortSplit(int left, int right, int pos)

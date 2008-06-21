@@ -53,7 +53,6 @@ private:
 	int m_pointCount;
 	int *m_linePointers;
 	int *m_reverse; 
-	int m_linesShown;
 	KdTree *m_kdTree;
 	
 	float *m_boxMin;

@@ -174,15 +174,10 @@ void Curves::updateLinesShown(Vector3fT vpos, Vector3fT vsize)
 	m_boxMax[1] = vpos.s.Y + vsize.s.Y/2;
 	m_boxMin[2] = vpos.s.Z - vsize.s.Z/2;
 	m_boxMax[2] = vpos.s.Z + vsize.s.Z/2;
-	/*
-	printf("root node: %.4f %.4f %.4f\n", m_pointArray[3*m_kdTree->m_tree[(m_pointCount-1)/2]], 
-			m_pointArray[3*m_kdTree->m_tree[(m_pointCount-1)/2]+1], 
-			m_pointArray[3*m_kdTree->m_tree[(m_pointCount-1)/2]+2]);
-			*/
-	m_linesShown = 0;
+	
 	boxTest(0, m_pointCount-1, 0);	
-	printf("%d lines shown\n", m_linesShown);
-	printf("%.4f, %.4f, %.4f    %.4f, %.4f %.4f\n", m_boxMin[0], m_boxMin[1], m_boxMin[2], m_boxMax[0], m_boxMax[1], m_boxMax[2]);
+	
+	
 }
 
 void Curves::boxTest(int left, int right, int axis)
@@ -193,10 +188,10 @@ void Curves::boxTest(int left, int right, int axis)
 	int pointIndex = m_kdTree->m_tree[root]*3;
 	
 	if (m_pointArray[pointIndex + axis] < m_boxMin[axis]) {
-		boxTest(left, root -1, axis1);
+		boxTest(root +1, right, axis1);
 	}
 	else if (m_pointArray[pointIndex + axis] > m_boxMax[axis]) {
-		boxTest(root+1, right, axis1);
+		boxTest(left, root-1, axis1);
 	}
 	else {
 		int axis2 = (axis+2) % 3;
@@ -206,7 +201,6 @@ void Curves::boxTest(int left, int right, int axis)
 				m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )
 		{
 			m_activeLines[getLineForPoint(m_kdTree->m_tree[root])] = 1;
-			++m_linesShown;
 		}
 		boxTest(left, root -1, axis1);
 		boxTest(root+1, right, axis1);
