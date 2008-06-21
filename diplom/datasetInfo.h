@@ -69,6 +69,7 @@ public:
 	void generateTexture();
 	void generateGeometry(int, int, int);
 	void drawFibers();
+	void drawkdTree();
 	
 	void setHighestValue(float value) {m_highest_value = value;};
 	void setThreshold(float value) {m_threshold = value;};

@@ -14,7 +14,7 @@ public:
 	void sort(int, int);
 	void quicksort(int, int, int);
 	int quicksortSplit(int ,int ,int);
-	void *buildTree(int, int, int);
+	void buildTree(int, int, int);
 	
 	wxUint32 *m_tree;
 	

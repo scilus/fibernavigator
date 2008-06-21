@@ -6,8 +6,8 @@ Curves::Curves(int lines, int points)
 	m_lineCount = lines;
 	m_pointCount = points;
 	m_linePointers = new int[lines+1];
-	m_reverse = new int[points/128];
 	m_linePointers[lines] = points;
+	m_reverse = new int[points];
 	m_activeLines = new wxUint8[lines];
 	for (int i = 0; i < lines ; ++i)
 	{
@@ -53,22 +53,17 @@ void Curves::calculateLinePointers()
 	lc = 0;
 	pc = 0;
 	
-	int i = 0;
-	while ( i < m_pointCount-128 )
-	{
-		m_reverse[pc++] = lc;
-		i += 128;
-		while ( getStartIndexForLine(lc) < i) ++lc;
-	}
 	
+	for ( int i = 0 ; i < m_pointCount ; ++i)
+	{
+		if ( i == m_linePointers[lc+1]) ++lc;
+		m_reverse[i] = lc;
+	}
 }
 
 int Curves::getLineForPoint(int point)
 {
-	int l1 = m_reverse[point / 128];
-	while (getStartIndexForLine(l1 +1) < point) ++l1;
-	return l1;
-	 
+	return m_reverse[point];
 }
 
 void Curves::toggleEndianess()
@@ -179,33 +174,41 @@ void Curves::updateLinesShown(Vector3fT vpos, Vector3fT vsize)
 	m_boxMax[1] = vpos.s.Y + vsize.s.Y/2;
 	m_boxMin[2] = vpos.s.Z - vsize.s.Z/2;
 	m_boxMax[2] = vpos.s.Z + vsize.s.Z/2;
-	boxTest(0, m_pointCount-1, 0);
+	/*
+	printf("root node: %.4f %.4f %.4f\n", m_pointArray[3*m_kdTree->m_tree[(m_pointCount-1)/2]], 
+			m_pointArray[3*m_kdTree->m_tree[(m_pointCount-1)/2]+1], 
+			m_pointArray[3*m_kdTree->m_tree[(m_pointCount-1)/2]+2]);
+			*/
+	m_linesShown = 0;
+	boxTest(0, m_pointCount-1, 0);	
+	printf("%d lines shown\n", m_linesShown);
+	printf("%.4f, %.4f, %.4f    %.4f, %.4f %.4f\n", m_boxMin[0], m_boxMin[1], m_boxMin[2], m_boxMax[0], m_boxMax[1], m_boxMax[2]);
 }
 
 void Curves::boxTest(int left, int right, int axis)
 {
 	if (left > right) return;
 	int root = left + ((right-left)/2);
-	if (m_activeLines[getLineForPoint(root)] == 1) return;
+	int axis1 = (axis+1) % 3;
+	int pointIndex = m_kdTree->m_tree[root]*3;
 	
-	if (m_pointArray[m_kdTree->m_tree[root]*3 + axis] < m_boxMin[axis]) {
-		axis = (axis+1) % 3;
-		boxTest(left, root -1, axis);
+	if (m_pointArray[pointIndex + axis] < m_boxMin[axis]) {
+		boxTest(left, root -1, axis1);
 	}
-	else if (m_pointArray[m_kdTree->m_tree[root]*3 + axis] > m_boxMax[axis]) {
-		axis = (axis+1) % 3;
-		boxTest(root+1, right, axis);
+	else if (m_pointArray[pointIndex + axis] > m_boxMax[axis]) {
+		boxTest(root+1, right, axis1);
 	}
 	else {
-		if (	m_pointArray[m_kdTree->m_tree[root]*3 + axis] < m_boxMax[axis] &&
-				m_pointArray[m_kdTree->m_tree[root]*3 + axis] > m_boxMin[axis] &&
-				m_pointArray[m_kdTree->m_tree[root]*3 + axis] < m_boxMax[axis] &&
-				m_pointArray[m_kdTree->m_tree[root]*3 + axis] > m_boxMin[axis] )
+		int axis2 = (axis+2) % 3;
+		if (	m_pointArray[pointIndex + axis1] <= m_boxMax[axis1] &&
+				m_pointArray[pointIndex + axis1] >= m_boxMin[axis1] &&
+				m_pointArray[pointIndex + axis2] <= m_boxMax[axis2] &&
+				m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )
 		{
-			m_activeLines[getLineForPoint(root)] = 1;
+			m_activeLines[getLineForPoint(m_kdTree->m_tree[root])] = 1;
+			++m_linesShown;
 		}
-		axis = (axis+1) % 3;
-		boxTest(left, root -1, axis);
-		boxTest(root+1, right, axis);
+		boxTest(left, root -1, axis1);
+		boxTest(root+1, right, axis1);
 	}
 }

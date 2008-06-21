@@ -416,7 +416,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	
 	i += (12 * countPoints) +1;
 	j = 0;
-	printf ("goto: %d\n", i);
+	//printf ("goto: %d\n", i);
 	dataFile.Seek(i);
 	dataFile.Read(buffer, (size_t) 255);
 	while (buffer[j] != '\n') {
@@ -435,12 +435,12 @@ Curves* TheDataset::loadVTK(wxString filename)
 	sLines = sLines.BeforeFirst(' ');
 	if(!sLines.ToLong(&tempValue, 10)) return NULL; //can't read lines
 	int countLines = (int)tempValue;
-	printf("Lines: %d Length: %d\n",countLines, lengthLines);
+	printf("Lines: %d\n",countLines);
 	// start postion of the line array in the file
 	int lc = i;
 	
 	i += (lengthLines*4) +1;
-	printf ("goto: %d\n", i);
+	//printf ("goto: %d\n", i);
 	dataFile.Seek(i);
 	dataFile.Read(buffer, (size_t) 255);
 	j = 0;
@@ -482,7 +482,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	*/
 	
 	curves->toggleEndianess();
-	curves->calculateLinePointers();
+	
 	printf("move vertices\n");
 	int xOff = columns/2;
 	int yOff = rows/2;
@@ -494,8 +494,9 @@ Curves* TheDataset::loadVTK(wxString filename)
 		++i;
 		curves->m_pointArray[i] = zOff - curves->m_pointArray[i];
 	}
+	curves->calculateLinePointers();
 	curves->createColorArray();
-
+	
 	curves->buildkDTree();
 	printf("read all\n");
 	

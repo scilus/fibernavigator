@@ -30,11 +30,11 @@ TheScene::TheScene()
 	m_quadrant = 1;
 	Vector3fT v1 = {0,0,1};
 	m_lightPos = v1;
-	Vector3fT v2 = {0,0,0};
+	Vector3fT v2 = {-3,-5,19};
 	m_selBoxCenter = v2;
 	Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
 	m_selBoxSize = v3;
-	m_selBoxChanged = false;
+	m_selBoxChanged = true;
 }
 
 TheScene::~TheScene()

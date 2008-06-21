@@ -248,3 +248,5 @@ void DatasetInfo::drawFibers()
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 }
+
+
