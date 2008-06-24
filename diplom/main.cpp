@@ -85,7 +85,7 @@ bool MyApp::OnInit(void)
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
   toolBar->AddSeparator();
-  toolBar->AddTool(VIEWER_TOGGLE_SELBOX, bmpMiniCat, wxT("Toggle Selection Box"));
+  toolBar->AddTool(VIEWER_NEW_SELBOX, bmpMiniCat, wxT("Toggle Selection Box"));
   toolBar->AddSeparator();
   
   toolBar->Realize();

@@ -36,7 +36,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
 	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
-	EVT_MENU(VIEWER_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
+	EVT_MENU(VIEWER_NEW_SELBOX, MainFrame::OnNewSelBox)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
 	/* list ctrl events */
@@ -277,6 +277,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"));
     m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"));
     m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"));
+    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"));
     
     /*
      * Set OpenGL attributes 
@@ -310,7 +311,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     TheDataset::lastError = wxT("");
     m_scene = new TheScene();
     m_scene->setDataListCtrl(m_datasetListCtrl);
-    
+    m_scene->setTreeCtrl(m_treeWidget, m_tSelBoxId);
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
     m_gl0 = new MainCanvas(m_scene, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
@@ -417,10 +418,6 @@ void MainFrame::updateTreeDims()
 
 void MainFrame::updateTreeDS(int i)
 {
-	//m_treeWidget->DeleteChildren(m_tDatasetId);
-	//m_treeWidget->DeleteChildren(m_tMeshId);
-	//m_treeWidget->DeleteChildren(m_tFiberId);
-
 	DatasetInfo* info = (DatasetInfo*)m_datasetListCtrl->GetItemData(i);
 	switch (info->getType())
 	{
@@ -626,8 +623,17 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 {
 	if (!m_scene) return;
-	m_scene->m_selBox->toggleShow();
-	m_mainGL->render();
+}
+
+void MainFrame::OnNewSelBox(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	Vector3fT v2 = {m_xSlider->GetValue()-TheDataset::columns/2,
+			m_ySlider->GetValue()-TheDataset::rows/2,
+			m_zSlider->GetValue()-TheDataset::frames/2};
+	Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
+	SelectionBox *selBox = new SelectionBox(v2, v3);
+	m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
 }
 
 void MainFrame::loadStandard()

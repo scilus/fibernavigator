@@ -1,4 +1,5 @@
 #include "theScene.h"
+#include "myListCtrl.h"
 
 TheScene::TheScene()
 {
@@ -30,9 +31,6 @@ TheScene::TheScene()
 	Vector3fT v1 = {0,0,1};
 	m_lightPos = v1;
 
-	Vector3fT v2 = {-3,-5,19};
-	Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
-	m_selBox = new SelectionBox(v2, v3);
 	m_selBoxChanged = true;
 }
 
@@ -105,8 +103,6 @@ void TheScene::assignTextures ()
 		info->generateTexture();
 	}
 	
-	Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
-	m_selBox->setSize(v3);
 }
 
 void TheScene::addTexture()
@@ -410,12 +406,27 @@ void TheScene::renderScene()
 		
 	glPopAttrib();
 	
+	/*
 	if (m_selBox->getShow()) {
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		m_selBox->draw();
 		glPopAttrib();
 	}
+	*/
 	
+	int countboxes = m_treectrl->GetChildrenCount(m_tselboxes);
+	wxTreeItemId id;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countboxes ; ++i)
+	{
+		id = m_treectrl->GetNextChild(m_tselboxes, cookie);
+		if (id.IsOk()) {
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treectrl->GetItemData(id))->getData();
+			box->draw();
+			glPopAttrib();
+		}
+	}
 }
 
 void TheScene::renderXSlize()
@@ -517,7 +528,18 @@ void TheScene::renderCurves()
 		{
 			if (m_selBoxChanged)
 			{
-				info->m_curves->updateLinesShown(m_selBox->getCenter(), m_selBox->getSize());
+				info->m_curves->resetLinesShown();
+				int countboxes = m_treectrl->GetChildrenCount(m_tselboxes);
+				wxTreeItemId id;
+				wxTreeItemIdValue cookie = 0;
+				for (int i = 0 ; i < countboxes ; ++i)
+				{
+					id = m_treectrl->GetNextChild(m_tselboxes, cookie);
+					if (id.IsOk()) {
+						SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treectrl->GetItemData(id))->getData();
+						info->m_curves->updateLinesShown(box->getCenter(), box->getSize());
+					}
+				}
 				m_selBoxChanged = false;
 			}
 			info->drawFibers();

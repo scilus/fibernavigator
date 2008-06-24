@@ -1,4 +1,5 @@
 #include "mainCanvas.h"
+#include "myListCtrl.h"
 #include "wx/utils.h"
 
 //DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
@@ -344,9 +345,18 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with the selection box sizers
 	 */
-	hitResult hr1 = m_scene->m_selBox->hitTest(ray);
-
-	if (hr1.hit && (hr1.tmin < hr.tmin)) return hr1;
+	int countboxes = m_scene->m_treectrl->GetChildrenCount(m_scene->m_tselboxes);
+	wxTreeItemId id;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countboxes ; ++i)
+	{
+		id = m_scene->m_treectrl->GetNextChild(m_scene->m_tselboxes, cookie);
+		if (id.IsOk()) {
+			SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_scene->m_treectrl->GetItemData(id))->getData();
+			hitResult hr1 = box->hitTest(ray);
+			if (hr1.hit && (hr1.tmin < hr.tmin)) hr = hr1;
+		}
+	}
 	return hr;
 }
 
@@ -381,7 +391,7 @@ void MainCanvas::render()
     	glPushMatrix();	
     	glMultMatrixf(TheDataset::m_transform.M);										// NEW: Apply Dynamic Transform
     	m_scene->renderScene();
-    	renderTestRay();
+    	//renderTestRay();
 	    glPopMatrix();	
 	    break;
     }

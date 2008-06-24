@@ -164,12 +164,16 @@ void Curves::buildkDTree()
 	m_kdTree = new KdTree(m_pointCount, m_pointArray);
 }
 
-void Curves::updateLinesShown(Vector3fT vpos, Vector3fT vsize)
+void Curves::resetLinesShown()
 {
 	for (int i = 0; i < m_lineCount ; ++i)
 	{
 		m_activeLines[i] = 0;
 	}
+}
+
+void Curves::updateLinesShown(Vector3fT vpos, Vector3fT vsize)
+{
 	m_boxMin = new float[3];
 	m_boxMax = new float[3];
 	m_boxMin[0] = vpos.s.X - vsize.s.X/2;

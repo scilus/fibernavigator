@@ -30,6 +30,8 @@ public:
 	int getLineCount() {return m_lineCount;};
 	int getPointCount() {return m_pointCount;};
 	void calculateLinePointers();
+	
+	void resetLinesShown();
 	void updateLinesShown(Vector3fT, Vector3fT);
 	void boxTest(int, int, int);
 	

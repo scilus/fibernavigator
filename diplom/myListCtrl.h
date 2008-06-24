@@ -15,10 +15,10 @@
 class MyTreeItemData : public wxTreeItemData
 {
 public:
-	MyTreeItemData (DatasetInfo* info) : m_dsInfo(info) {}
-		DatasetInfo* getInfo() {return m_dsInfo;};
+	MyTreeItemData (void* data) : m_data(data) {}
+		void* getData() {return m_data;};
 private:
-	DatasetInfo *m_dsInfo;
+	void* m_data;
 };
 
 class MyListCtrl : public wxListCtrl

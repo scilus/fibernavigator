@@ -43,6 +43,7 @@ public:
 	void initShaders();
 	
 	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
+	void setTreeCtrl(wxTreeCtrl* ctrl, wxTreeItemId id) {m_treectrl = ctrl; m_tselboxes = id;};
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
 	void setLightPos(Vector3fT value) {m_lightPos = value;};
@@ -66,8 +67,9 @@ public:
 	float m_zSlize;
 	
 	bool m_selBoxChanged;
-	SelectionBox *m_selBox;
-		
+	wxTreeCtrl* m_treectrl;
+	wxTreeItemId m_tselboxes;
+	
 private:
 	int m_countTextures;
 	GLuint *m_texNames;
