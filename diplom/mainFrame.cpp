@@ -634,6 +634,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 	Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
 	SelectionBox *selBox = new SelectionBox(v2, v3);
 	m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
+	m_scene->m_selBoxChanged = true;
 }
 
 void MainFrame::loadStandard()

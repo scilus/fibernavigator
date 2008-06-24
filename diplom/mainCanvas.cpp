@@ -354,7 +354,9 @@ hitResult MainCanvas::pick(wxPoint click)
 		if (id.IsOk()) {
 			SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_scene->m_treectrl->GetItemData(id))->getData();
 			hitResult hr1 = box->hitTest(ray);
-			if (hr1.hit && (hr1.tmin < hr.tmin)) hr = hr1;
+			if (hr1.hit && !hr.hit) hr = hr1;
+			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
+			
 		}
 	}
 	return hr;
