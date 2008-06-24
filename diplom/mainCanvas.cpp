@@ -1,4 +1,5 @@
 #include "mainCanvas.h"
+#include "wx/utils.h"
 
 //DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
@@ -29,7 +30,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 		                        -0.11f, -0.91f,  -0.39f,  0.0f,
 		                         0.0f,   0.0f,     0.0f,  1.0f };
 	*/
-	m_transform = m_transform1;
+	TheDataset::m_transform = m_transform1;
 		   
 	Matrix3fT idMat = {  1.0f,  0.0f,  0.0f,
 	                     0.0f,  1.0f,  0.0f,
@@ -92,17 +93,21 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			    {
 					m_isrDragging = true;										// Prepare For Dragging
 					m_lastPos = event.GetPosition();
-					m_picked = pick(event.GetPosition());
+					m_hr = pick(event.GetPosition());
+					if (wxGetKeyState(WXK_CONTROL) && (m_hr.picked > 10)) {
+						((SelectionBox*)m_hr.object)->setPicked(10);
+						m_hr.picked = 10;
+					}
 			    }
 				else {
-					if (event.Dragging() && m_picked < 10) 
+					if (event.Dragging() && m_hr.picked < 10) 
 					{
 						int xDrag = m_lastPos.x - clickX;
 						int yDrag = (m_lastPos.y - clickY);
 						GetEventHandler()->ProcessEvent( event1 );
 						
 						Vector3fT n = {0,0,0};
-						switch (m_picked) {
+						switch (m_hr.picked) {
 						case axial: 
 							n.s.X = 1.0;
 							break;
@@ -123,56 +128,9 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 								m_delta = 1;
 						}
 					}
-					else if (event.Dragging() && m_picked == 10)
+					else if (event.Dragging() && m_hr.picked >= 10)
 					{
-						Vector3fT vs = mapMouse2World(clickX, clickY);
-						Vector3fT ve = mapMouse2WorldBack(clickX, clickY);
-						Vector3fT dir = {ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z};
-
-						m_scene->m_selBoxCenter.s.X = vs.s.X + dir.s.X * m_tpicked;
-						m_scene->m_selBoxCenter.s.Y = vs.s.Y + dir.s.Y * m_tpicked;
-						m_scene->m_selBoxCenter.s.Z = vs.s.Z + dir.s.Z * m_tpicked;
-						m_scene->m_selBoxChanged = true;
-					}
-					else if (event.Dragging() && m_picked > 10)
-					{
-						Vector3fT  n= {0,0,0};
-						float delta = 0;
-						switch (m_picked)
-						{
-						case 11:
-							n.s.X = -1.0;
-							break;
-						case 12:
-							n.s.X = 1.0;
-							break;
-						case 13:
-							n.s.Y = -1.0;
-							break;
-						case 14:
-							n.s.Y = 1.0;
-							break;
-						case 15:
-							n.s.Z = -1.0;
-							break;
-						case 16:
-							n.s.Z = 1.0;
-							break;
-						default:;
-						}
-						delta =  wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),1),-1);
-						if (m_picked == 11 || m_picked == 12) {
-							float newX = m_scene->m_selBoxSize.s.X + (delta);
-							m_scene->m_selBoxSize.s.X = wxMin(wxMax(newX, 5),TheDataset::columns);
-						}
-						if (m_picked == 13 || m_picked == 14) {
-							float newY = m_scene->m_selBoxSize.s.Y + (delta);
-							m_scene->m_selBoxSize.s.Y = wxMin(wxMax(newY, 5),TheDataset::rows);
-						}
-						if (m_picked == 15 || m_picked == 16) {
-							float newZ = m_scene->m_selBoxSize.s.Z + (delta);
-							m_scene->m_selBoxSize.s.Z = wxMin(wxMax(newZ, 5),TheDataset::frames);
-						}
+						((SelectionBox*)m_hr.object)->processDrag(event.GetPosition(), m_lastPos);
 						m_scene->m_selBoxChanged = true;
 					}
 				}
@@ -200,7 +158,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		            m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
 		            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
 		            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
-		            Matrix4fSetRotationFromMatrix3f(&m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
+		            Matrix4fSetRotationFromMatrix3f(&TheDataset::m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
 			    }
 				
 				float *dots = new float[8];
@@ -208,7 +166,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				Vector3fT v2 = {1,1,1};
 				Vector3fT view;
 				
-				Vector3fMultMat4(&view, &v1, &m_transform);
+				Vector3fMultMat4(&view, &v1, &TheDataset::m_transform);
 				dots[0] = Vector3fDot(&v2, &view);
 				
 				v2.s.Z = -1;
@@ -279,7 +237,7 @@ float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector
 Vector3fT MainCanvas::mapMouse2World(int x, int y)
 {
 	glPushMatrix();
-	glMultMatrixf(m_transform.M);	
+	glMultMatrixf(TheDataset::m_transform.M);	
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -298,32 +256,11 @@ Vector3fT MainCanvas::mapMouse2World(int x, int y)
 	return v;
 }
 
-Vector3fT MainCanvas::mapMouse2WorldBack(int x, int y)
+
+hitResult MainCanvas::pick(wxPoint click)
 {
 	glPushMatrix();
-	glMultMatrixf(m_transform.M);	
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
-	GLfloat winX, winY;
-
-	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-	glGetDoublev( GL_PROJECTION_MATRIX, projection );
-	glGetIntegerv( GL_VIEWPORT, viewport );
-
-	winX = (float)x;
-	winY = (float)viewport[3] - (float)y;
-	GLdouble posX, posY, posZ;
-	gluUnProject( winX, winY, 1, modelview, projection, viewport, &posX, &posY, &posZ);
-	glPopMatrix();
-	Vector3fT v = {posX, posY, posZ};
-	return v;
-}
-
-int MainCanvas::pick(wxPoint click)
-{
-	glPushMatrix();
-	glMultMatrixf(m_transform.M);	
+	glMultMatrixf(TheDataset::m_transform.M);	
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -349,7 +286,7 @@ int MainCanvas::pick(wxPoint click)
 	/**
 	 * check if one of the 3 planes is picked
 	 */
-	m_tpicked = 0;
+	float tpicked = 0;
 	int picked = 0;
 	hitResult hr;
 	if (m_scene->m_showAxial) {
@@ -357,7 +294,7 @@ int MainCanvas::pick(wxPoint click)
 		bb->setCenterZ(zz);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
-			m_tpicked = hr.tmin;
+			tpicked = hr.tmin;
 			picked = axial;
 		}
 		bb->setSizeZ(TheDataset::frames);
@@ -370,12 +307,12 @@ int MainCanvas::pick(wxPoint click)
 		if (hr.hit) {
 			if (picked == 0) {
 				picked = coronal;
-				m_tpicked = hr.tmin;
+				tpicked = hr.tmin;
 			}
 			else {
-				if (hr.tmin < m_tpicked) {
+				if (hr.tmin < tpicked) {
 					picked = coronal;
-					m_tpicked = hr.tmin;
+					tpicked = hr.tmin;
 				}
 			}
 		}
@@ -389,128 +326,28 @@ int MainCanvas::pick(wxPoint click)
 		if (hr.hit) {
 			if (picked == 0) {
 				picked = sagittal;
-				m_tpicked = hr.tmin;
+				tpicked = hr.tmin;
 			}
 			else {
-				if (hr.tmin < m_tpicked) {
+				if (hr.tmin < tpicked) {
 					picked = sagittal;
-					m_tpicked = hr.tmin;
+					tpicked = hr.tmin;
 				}
 			}
 		}
 	}
+	if (hr.hit) {
+		hr.tmin = tpicked;
+		hr.picked = picked;
+	}
+	 
 	/*
 	 * check for hits with the selection box sizers
 	 */
-	if (m_scene->m_showSelBox) {
-		float cx = m_scene->getSelBoxCenter().s.X;
-		float cy = m_scene->getSelBoxCenter().s.Y;
-		float cz = m_scene->getSelBoxCenter().s.Z;
-		float sx = m_scene->getSelBoxSize().s.X/2;
-		float sy = m_scene->getSelBoxSize().s.Y/2;
-		float sz = m_scene->getSelBoxSize().s.Z/2;
+	hitResult hr1 = m_scene->m_selBox->hitTest(ray);
 
-		bb = new BoundingBox(cx, cy, cz, 3, 3, 3);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 10;
-				m_tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < m_tpicked) {
-					picked = 10;
-					m_tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx - sx, cy, cz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 11;
-				m_tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < m_tpicked) {
-					picked = 11;
-					m_tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx + sx, cy, cz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 12;
-				m_tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < m_tpicked) {
-					picked = 12;
-					m_tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx, cy - sy, cz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 13;
-				m_tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < m_tpicked) {
-					picked = 13;
-					m_tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx, cy + sy, cz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 14;
-				m_tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < m_tpicked) {
-					picked = 14;
-					m_tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx, cy, cz - sz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 15;
-				m_tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < m_tpicked) {
-					picked = 15;
-					m_tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx, cy, cz + sz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 16;
-				m_tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < m_tpicked) {
-					picked = 16;
-					m_tpicked = hr.tmin;
-				}
-			}
-
-		}
-	}
-	return picked;
+	if (hr1.hit && (hr1.tmin < hr.tmin)) return hr1;
+	return hr;
 }
 
 void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
@@ -542,9 +379,9 @@ void MainCanvas::render()
     {
     case mainView: {
     	glPushMatrix();	
-    	glMultMatrixf(m_transform.M);										// NEW: Apply Dynamic Transform
+    	glMultMatrixf(TheDataset::m_transform.M);										// NEW: Apply Dynamic Transform
     	m_scene->renderScene();
-    	//renderTestRay();
+    	renderTestRay();
 	    glPopMatrix();	
 	    break;
     }
@@ -579,6 +416,6 @@ void MainCanvas::renderTestRay()
 		glVertex3f(m_pos2X, m_pos2Y, m_pos2Z);
 	glEnd();
 	Vector3fT dir = {m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z};
-	m_scene->drawSphere(m_pos1X + m_tpicked*dir.s.X, m_pos1Y + m_tpicked*dir.s.Y, m_pos1Z + m_tpicked*dir.s.Z, 3.0);
+	m_scene->drawSphere(m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z, 3.0);
 }
 

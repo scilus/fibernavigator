@@ -13,7 +13,6 @@
 #include "wx/glcanvas.h"
 #include "boundingBox.h"
 
-
 class MainCanvas: public wxGLCanvas
 {
 public:
@@ -33,18 +32,17 @@ public:
     void OnMouseEvent(wxMouseEvent& event);
     wxPoint getMousePos() {return m_clicked;};
     float getDelta() {return m_delta;};
-    int getPicked() {return m_picked;};
+    int getPicked() {return m_hr.picked;};
     void updateView(int, float);
     void init();
     void render();
     void setScene(TheScene*);
     void invalidate();
     void renderTestRay();
-    int pick(wxPoint);
+    hitResult pick(wxPoint);
     Vector3fT mapMouse2World(int, int);
-    Vector3fT mapMouse2WorldBack(int, int);
     float getAxisParallelMovement(int, int, int, int, Vector3fT);
-    
+        
     DECLARE_EVENT_TABLE()
 
 private:
@@ -53,17 +51,16 @@ private:
 	 wxPoint 	m_clicked;		// last clicked point 
 	 wxPoint	m_lastPos;		// last position to calculate right mouse dragging
 	 float 		m_delta;
-	 
-	 int 		m_picked;
+	 hitResult  m_hr;
+
 	 
 	 GLdouble m_pos1X, m_pos1Y, m_pos1Z;	// point of origin for picking
 	 GLdouble m_pos2X, m_pos2Y, m_pos2Z;	// distant point for picking
-	 float m_tpicked;		// distance variables for bb test
 	
 	 bool m_isDragging;
 	 bool m_isrDragging;
 	 
-	 Matrix4fT m_transform;		// transformation matrix of current view
+	 //Matrix4fT m_transform;		// transformation matrix of current view
 	 Matrix3fT m_lastRot;  		
 	 Matrix3fT m_thisRot ; 
 

@@ -11,6 +11,7 @@
 
 #include "GLSL/GLSLShaderProgram.h"
 #include "ArcBall.h"
+#include "selectionBox.h"
 #include "wx/glcanvas.h"
 
 enum {
@@ -27,7 +28,6 @@ public:
 	bool m_showCoronal;
 	bool m_showAxial;
 	bool m_showMesh;
-	bool m_showSelBox;
 	
 	TheScene();
 	~TheScene();
@@ -56,21 +56,17 @@ public:
 	void colorMap(float);
 	
 	void drawSphere(float, float, float, float);
-	void drawSelectionBox();
 	
 	void updateView(float, float, float);
-	
-	Vector3fT getSelBoxCenter () {return m_selBoxCenter;};
-	Vector3fT getSelBoxSize () {return m_selBoxSize;};
 	
 	bool m_texAssigned;
 	
 	float m_xSlize;
 	float m_ySlize;
-	float m_zSlize;	
-	Vector3fT m_selBoxCenter;
-	Vector3fT m_selBoxSize;
+	float m_zSlize;
+	
 	bool m_selBoxChanged;
+	SelectionBox *m_selBox;
 		
 private:
 	int m_countTextures;

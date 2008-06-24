@@ -13,7 +13,7 @@ enum MeshFileType {
 	binaryBE,
 };
 
-typedef struct vertex {
+struct vertex {
 	float x;
 	float y;
 	float z;
@@ -22,7 +22,7 @@ typedef struct vertex {
 	float nz;
 };
 
-typedef struct polygon {
+struct polygon {
 	int v1;
 	int v2;
 	int v3;

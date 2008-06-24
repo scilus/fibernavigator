@@ -626,7 +626,7 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 {
 	if (!m_scene) return;
-	m_scene->m_showSelBox = !m_scene->m_showSelBox;
+	m_scene->m_selBox->toggleShow();
 	m_mainGL->render();
 }
 

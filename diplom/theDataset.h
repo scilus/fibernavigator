@@ -15,10 +15,9 @@
 #include "wx/datstrm.h"
 #include "wx/txtstrm.h"
 
-
-
 #include "datasetInfo.h"
 #include "mesh.h"
+#include "ArcBall.h"
 
 class TheDataset
 {
@@ -39,6 +38,7 @@ public:
 	static int rows;
 	static int columns;
 	static int frames;
+	static Matrix4fT m_transform;
 	static wxString lastError;
 };
 

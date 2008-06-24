@@ -5,9 +5,11 @@
 #include "ArcBall.h"
 
 
-typedef struct hitResult {
+struct hitResult {
 	bool hit;
 	float tmin;
+	int picked;
+	void* object;
 };
 
 class Ray {
