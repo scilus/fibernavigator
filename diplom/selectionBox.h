@@ -10,12 +10,15 @@
 #include "GL/glew.h"
 #include "ArcBall.h"
 #include "boundingBox.h"
+#include <vector>
 
 class MainCanvas;
+class Curves;
 
 class SelectionBox {
 public:
-	SelectionBox(Vector3fT, Vector3fT);
+	SelectionBox(Vector3fT, Vector3fT, int);
+	SelectionBox(SelectionBox*);
 	~SelectionBox() {};
 	
 	void draw();
@@ -25,13 +28,17 @@ public:
 	bool toggleShow() {return m_show = !m_show;};
 	bool getShow() {return m_show;};
 	
-	void setCenter(Vector3fT c) { m_center = c;};
+	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
 	Vector3fT getCenter() {return m_center;};
-	void setSize(Vector3fT v) {m_size = v;};
+	void setSize(Vector3fT v) {m_size = v;m_dirty = true;};
 	Vector3fT getSize() {return m_size;};
 	void setPicked(int s) {m_hr.picked = s;};
-	
-	
+	bool isDirty() {return m_dirty;};
+	void setDirty() {m_dirty = true;};
+	void notDirty() {m_dirty = false;};
+
+	std::vector<bool>m_inBox;
+	int m_lines;
 	
 private:
 	void drawSphere(float, float, float, float);
@@ -48,6 +55,7 @@ private:
 	
 	float m_handleRadius;
 	bool m_show;
+	bool m_dirty;
 };
 
 #endif /*SELECTIONBOX_H_*/

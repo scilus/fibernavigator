@@ -406,24 +406,13 @@ void TheScene::renderScene()
 		
 	glPopAttrib();
 	
-	/*
-	if (m_selBox->getShow()) {
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		m_selBox->draw();
-		glPopAttrib();
-	}
-	*/
-	
-	int countboxes = m_treectrl->GetChildrenCount(m_tselboxes);
-	wxTreeItemId id;
-	wxTreeItemIdValue cookie = 0;
-	for (int i = 0 ; i < countboxes ; ++i)
+	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
+	for (uint i = 0 ; i < boxes.size() ; ++i)
 	{
-		id = m_treectrl->GetNextChild(m_tselboxes, cookie);
-		if (id.IsOk()) {
+		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		{
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
-			SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treectrl->GetItemData(id))->getData();
-			box->draw();
+			boxes[i][j]->draw();
 			glPopAttrib();
 		}
 	}
@@ -528,23 +517,11 @@ void TheScene::renderCurves()
 		{
 			if (m_selBoxChanged)
 			{
-				info->m_curves->resetLinesShown();
-				int countboxes = m_treectrl->GetChildrenCount(m_tselboxes);
-				wxTreeItemId id;
-				wxTreeItemIdValue cookie = 0;
-				for (int i = 0 ; i < countboxes ; ++i)
-				{
-					id = m_treectrl->GetNextChild(m_tselboxes, cookie);
-					if (id.IsOk()) {
-						SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treectrl->GetItemData(id))->getData();
-						info->m_curves->updateLinesShown(box->getCenter(), box->getSize());
-					}
-				}
+				info->m_curves->updateLinesShown(getSelectionBoxes());
 				m_selBoxChanged = false;
 			}
 			info->drawFibers();
-		}
-		
+		}		
 	}
 	m_curveShader->release();
 }
@@ -657,4 +634,31 @@ void TheScene::drawSphere(float x, float y, float z, float r)
 	gluQuadricNormals(quadric, GLU_SMOOTH);
 	gluSphere(quadric, r, 32, 32);
 	glPopMatrix();
+}
+
+std::vector<std::vector<SelectionBox*> > TheScene::getSelectionBoxes()
+{
+	std::vector<std::vector<SelectionBox*> > boxes;
+	int countboxes = m_treeWidget->GetChildrenCount(m_tSelBoxId, false);
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countboxes ; ++i)
+	{
+		std::vector<SelectionBox*> b;
+		id = m_treeWidget->GetNextChild(m_tSelBoxId, cookie);
+		if (id.IsOk()) {
+			b.push_back((SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData());
+			int childboxes = m_treeWidget->GetChildrenCount(id);
+			wxTreeItemIdValue childcookie = 0;
+			for (int i = 0 ; i < childboxes ; ++i)
+			{
+				childid = m_treeWidget->GetNextChild(id, childcookie);
+				if (childid.IsOk()) {
+					b.push_back((SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(childid))->getData());
+				}
+			}
+		}
+		boxes.push_back(b);
+	}
+	return boxes;	
 }

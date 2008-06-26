@@ -9,10 +9,10 @@ Curves::Curves(int lines, int points)
 	m_linePointers = new int[lines+1];
 	m_linePointers[lines] = points;
 	m_reverse = new int[points];
-	m_activeLines = new wxUint8[lines];
+	m_inBox.resize(lines, sizeof(bool));
 	for (int i = 0; i < lines ; ++i)
 	{
-		m_activeLines[i] = 0;
+		m_inBox[i] = 0;
 	}
 }
 
@@ -21,8 +21,6 @@ Curves::~Curves()
 	delete[] m_linePointers;
 	delete[] m_pointArray;
 	delete[] m_lineArray;
-	//delete[] m_colorArray;
-	//delete[] m_normalArray;
 	delete[] m_reverse;
 }
 
@@ -168,12 +166,49 @@ void Curves::resetLinesShown()
 {
 	for (int i = 0; i < m_lineCount ; ++i)
 	{
-		m_activeLines[i] = 0;
+		m_inBox[i] = 0;
 	}
 }
 
-void Curves::updateLinesShown(Vector3fT vpos, Vector3fT vsize)
+void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 {
+	for (uint i = 0 ; i != boxes.size() ; ++i)
+	{
+		bool dirty = false;
+		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		{
+			if (boxes[i][j]->isDirty()) dirty = true; 
+		}
+		if (dirty)
+		{
+			boxes[i][0]->m_inBox = getLinesShown(boxes[i][0]);
+			boxes[i][0]->notDirty();
+
+			for (uint j = 1 ; j < boxes[i].size() ; ++j)
+			{
+				if  (boxes[i][j]->isDirty()) {
+					boxes[i][j]->m_inBox = getLinesShown(boxes[i][j]);
+					boxes[i][j]->notDirty();
+				}
+				for (int k = 0 ; k <m_lineCount ; ++k)
+					boxes[i][0]->m_inBox[k] = boxes[i][0]->m_inBox[k] & boxes[i][j]->m_inBox[k];  
+			}
+
+		}
+	}
+	resetLinesShown();
+	for (uint i = 0 ; i < boxes.size() ; ++i)
+	{
+		for (int k = 0 ; k <m_lineCount ; ++k)
+			m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBox[k];
+	}
+}
+
+std::vector<bool> Curves::getLinesShown(SelectionBox* box)
+{
+	Vector3fT vpos = box->getCenter();
+	Vector3fT vsize = box->getSize();
+	resetLinesShown();
 	m_boxMin = new float[3];
 	m_boxMax = new float[3];
 	m_boxMin[0] = vpos.s.X - vsize.s.X/2;
@@ -182,10 +217,9 @@ void Curves::updateLinesShown(Vector3fT vpos, Vector3fT vsize)
 	m_boxMax[1] = vpos.s.Y + vsize.s.Y/2;
 	m_boxMin[2] = vpos.s.Z - vsize.s.Z/2;
 	m_boxMax[2] = vpos.s.Z + vsize.s.Z/2;
-	
-	boxTest(0, m_pointCount-1, 0);	
-	
-	
+
+	boxTest(0, m_pointCount-1, 0);
+	return m_inBox;
 }
 
 void Curves::boxTest(int left, int right, int axis)
@@ -208,7 +242,7 @@ void Curves::boxTest(int left, int right, int axis)
 				m_pointArray[pointIndex + axis2] <= m_boxMax[axis2] &&
 				m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )
 		{
-			m_activeLines[getLineForPoint(m_kdTree->m_tree[root])] = 1;
+			m_inBox[getLineForPoint(m_kdTree->m_tree[root])] = 1;
 		}
 		boxTest(left, root -1, axis1);
 		boxTest(root+1, right, axis1);

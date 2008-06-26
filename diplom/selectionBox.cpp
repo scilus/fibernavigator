@@ -1,13 +1,36 @@
 #include "selectionBox.h"
 #include "theDataset.h"
+#include "curves.h"
 
-SelectionBox::SelectionBox(Vector3fT center, Vector3fT size)
+SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, int lines)
 {
 	m_center = center;
 	m_size = size;
 	m_show = true;
+	m_dirty = true;
+	m_handleRadius = 3.0;	
+	m_lines = lines;
+	m_inBox.resize(lines, sizeof(bool));
+	for (int i = 0; i < lines ; ++i)
+	{
+		m_inBox[i] = 0;
+	}
+}
+
+SelectionBox::SelectionBox(SelectionBox *box)
+{
+	m_center = box->getCenter();
+	m_size = box->getSize();
+	m_show = true;
+	m_dirty = true;
 	
 	m_handleRadius = 3.0;
+	m_lines = box->m_lines;
+	m_inBox.resize(m_lines, sizeof(bool));
+	for (int i = 0; i < m_lines ; ++i)
+	{
+		m_inBox[i] = 0;
+	}
 }
 
 void SelectionBox::draw()
@@ -274,7 +297,8 @@ void SelectionBox::drag(wxPoint click)
 
 	m_center.s.X = vs.s.X + dir.s.X * m_hr.tmin;
 	m_center.s.Y = vs.s.Y + dir.s.Y * m_hr.tmin;
-	m_center.s.Z = vs.s.Z + dir.s.Z * m_hr.tmin;	
+	m_center.s.Z = vs.s.Z + dir.s.Z * m_hr.tmin;
+	m_dirty = true;
 }
 
 void SelectionBox::resize(wxPoint click, wxPoint lastPos)
@@ -316,4 +340,5 @@ void SelectionBox::resize(wxPoint click, wxPoint lastPos)
 		float newZ = m_size.s.Z + (delta);
 		m_size.s.Z = wxMin(wxMax(newZ, 1),TheDataset::frames);
 	}
+	m_dirty = true;
 }

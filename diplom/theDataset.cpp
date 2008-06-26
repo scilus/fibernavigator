@@ -284,7 +284,7 @@ Mesh* TheDataset::loadMesh(wxString filename)
 		
 		mesh->m_polygonArray = new polygon[c.i];
 		fp += 4;
-		for (uint i = 0 ; i < mesh->getCountPolygons() ; ++i)
+		for (int i = 0 ; i < mesh->getCountPolygons() ; ++i)
 		{
 			c.b[0] = buffer[fp];
 			c.b[1] = buffer[fp+1];

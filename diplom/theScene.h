@@ -43,11 +43,12 @@ public:
 	void initShaders();
 	
 	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
-	void setTreeCtrl(wxTreeCtrl* ctrl, wxTreeItemId id) {m_treectrl = ctrl; m_tselboxes = id;};
+	void setTreeCtrl(wxTreeCtrl* ctrl, wxTreeItemId id) {m_treeWidget = ctrl; m_tSelBoxId = id;};
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
 	void setLightPos(Vector3fT value) {m_lightPos = value;};
 	void setQuadrant(int quadrant) {m_quadrant = quadrant;};
+	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	
 	void renderScene();
 	void renderNavView(int);
@@ -67,8 +68,8 @@ public:
 	float m_zSlize;
 	
 	bool m_selBoxChanged;
-	wxTreeCtrl* m_treectrl;
-	wxTreeItemId m_tselboxes;
+	wxTreeCtrl* m_treeWidget;
+	wxTreeItemId m_tSelBoxId;
 	
 private:
 	int m_countTextures;
@@ -101,6 +102,7 @@ private:
 	void renderXSlize();
 	void renderYSlize();
 	void renderZSlize();
+	 
 };
 
 #endif /*THESCENE_H_*/

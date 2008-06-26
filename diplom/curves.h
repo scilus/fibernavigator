@@ -10,6 +10,8 @@
 #include "GL/glew.h"
 #include "ArcBall.h"
 #include "KdTree.h"
+#include "selectionBox.h"
+#include <vector>
 
 enum CurveFileType {
 	asciiCurve,
@@ -32,7 +34,8 @@ public:
 	void calculateLinePointers();
 	
 	void resetLinesShown();
-	void updateLinesShown(Vector3fT, Vector3fT);
+	std::vector<bool> getLinesShown(SelectionBox*);
+	void updateLinesShown(std::vector<std::vector<SelectionBox*> >);
 	void boxTest(int, int, int);
 	
 	void toggleEndianess();
@@ -44,7 +47,7 @@ public:
 	int* m_lineArray;
 	float *m_colorArray;
 	float *m_normalArray;
-	wxUint8 *m_activeLines;
+	std::vector<bool>m_inBox;
 	
 	int m_lengthPoints;
 	int m_lengthLines;

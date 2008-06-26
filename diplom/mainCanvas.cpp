@@ -345,18 +345,14 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with the selection box sizers
 	 */
-	int countboxes = m_scene->m_treectrl->GetChildrenCount(m_scene->m_tselboxes);
-	wxTreeItemId id;
-	wxTreeItemIdValue cookie = 0;
-	for (int i = 0 ; i < countboxes ; ++i)
+	std::vector<std::vector<SelectionBox*> > boxes = m_scene->getSelectionBoxes();
+	for (uint i = 0 ; i < boxes.size() ; ++i)
 	{
-		id = m_scene->m_treectrl->GetNextChild(m_scene->m_tselboxes, cookie);
-		if (id.IsOk()) {
-			SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_scene->m_treectrl->GetItemData(id))->getData();
-			hitResult hr1 = box->hitTest(ray);
+		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		{
+			hitResult hr1 = boxes[i][j]->hitTest(ray);
 			if (hr1.hit && !hr.hit) hr = hr1;
 			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
-			
 		}
 	}
 	return hr;
