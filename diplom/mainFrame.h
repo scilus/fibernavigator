@@ -40,7 +40,6 @@ private:
     void OnToggleView3(wxCommandEvent& event);
     void OnToggleSelBox(wxCommandEvent& event);
     void OnNewSelBox(wxCommandEvent& event);
-    void OnNewAndSelBox(wxCommandEvent& event);
     void OnToggleSelBoxes(wxCommandEvent& event);
     
     void OnReloadShaders(wxCommandEvent& event);
@@ -127,7 +126,6 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_TOGGLEVIEW3 		13
 #define VIEWER_RELOAD_SHADER		16
 #define VIEWER_NEW_SELBOX			17
-#define VIEWER_NEW_ANDSELBOX		18
 #define VIEWER_RENDER_SELBOXES		19
 
 #define ID_GL_NAV_X 	120

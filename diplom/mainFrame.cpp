@@ -38,7 +38,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
 	EVT_MENU(VIEWER_NEW_SELBOX, MainFrame::OnNewSelBox)
-	EVT_MENU(VIEWER_NEW_ANDSELBOX, MainFrame::OnNewAndSelBox)
 	EVT_MENU(VIEWER_RENDER_SELBOXES, MainFrame::OnToggleSelBoxes)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
@@ -633,22 +632,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 {
 	if (!m_scene) return;
 	if (m_treeWidget->GetChildrenCount(m_tFiberId) == 0) return;
-	wxTreeItemIdValue cookie = 0;
-	DatasetInfo *fibers = (DatasetInfo*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
-	int lines = fibers->m_curves->getLineCount();
 	
-	Vector3fT v2 = {m_xSlider->GetValue()-TheDataset::columns/2,
-			m_ySlider->GetValue()-TheDataset::rows/2,
-			m_zSlider->GetValue()-TheDataset::frames/2};
-	Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
-	SelectionBox *selBox = new SelectionBox(v2, v3, lines);
-	m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
-	m_scene->m_selBoxChanged = true;
-}
-
-void MainFrame::OnNewAndSelBox(wxCommandEvent& event)
-{
-	if (!m_scene) return;
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
@@ -657,8 +641,19 @@ void MainFrame::OnNewAndSelBox(wxCommandEvent& event)
 		SelectionBox *selbox = new SelectionBox(box);
 		m_treeWidget->AppendItem(tBoxId, wxT("box"),-1, -1, new MyTreeItemData(selbox));
 	}
-	// duplicate box
-	// add box as child to that box in tree
+	else
+	{
+		wxTreeItemIdValue cookie = 0;
+		DatasetInfo *fibers = (DatasetInfo*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
+		int lines = fibers->m_curves->getLineCount();
+		
+		Vector3fT v2 = {m_xSlider->GetValue()-TheDataset::columns/2,
+				m_ySlider->GetValue()-TheDataset::rows/2,
+				m_zSlider->GetValue()-TheDataset::frames/2};
+		Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
+		SelectionBox *selBox = new SelectionBox(v2, v3, lines);
+		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
+	}
 	m_scene->m_selBoxChanged = true;
 }
 
