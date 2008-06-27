@@ -87,6 +87,7 @@ bool MyApp::OnInit(void)
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_NEW_SELBOX, bmpMiniCat, wxT("New Selection Box"));
   toolBar->AddTool(VIEWER_NEW_ANDSELBOX, bmpMiniCat, wxT("New AND Selection Box"));
+  toolBar->AddTool(VIEWER_RENDER_SELBOXES, bmpMiniCat, wxT("Toggle Selection Boxes"));
   toolBar->AddSeparator();
   
   toolBar->Realize();

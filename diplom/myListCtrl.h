@@ -21,6 +21,21 @@ private:
 	void* m_data;
 };
 
+class MyTreeCtrl : public wxTreeCtrl
+{
+public:
+	MyTreeCtrl(wxWindow *parent,
+            const wxWindowID id,
+            const wxPoint& pos,
+            const wxSize& size,
+            long style) 
+	: wxTreeCtrl(parent, id, pos, size, style) {};
+private:
+	void OnChar(wxKeyEvent& event);
+
+	DECLARE_EVENT_TABLE()
+};
+
 class MyListCtrl : public wxListCtrl
 {
 public:

@@ -16,6 +16,7 @@ TheScene::TheScene()
 	m_showCoronal = true;
 	m_showAxial = true;
 	m_showMesh = true;
+	m_showBoxes = true;
 	m_textureShader = 0;
 	m_meshShader = 0;
 	m_curveShader = 0;
@@ -406,14 +407,17 @@ void TheScene::renderScene()
 		
 	glPopAttrib();
 	
-	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
-	for (uint i = 0 ; i < boxes.size() ; ++i)
+	if (m_showBoxes)
 	{
-		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
+		for (uint i = 0 ; i < boxes.size() ; ++i)
 		{
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
-			boxes[i][j]->draw();
-			glPopAttrib();
+			for (uint j = 0 ; j < boxes[i].size() ; ++j)
+			{
+				glPushAttrib(GL_ALL_ATTRIB_BITS);
+				boxes[i][j]->draw();
+				glPopAttrib();
+			}
 		}
 	}
 }

@@ -28,6 +28,7 @@ public:
 	bool m_showCoronal;
 	bool m_showAxial;
 	bool m_showMesh;
+	bool m_showBoxes;
 	
 	TheScene();
 	~TheScene();
@@ -49,6 +50,7 @@ public:
 	void setLightPos(Vector3fT value) {m_lightPos = value;};
 	void setQuadrant(int quadrant) {m_quadrant = quadrant;};
 	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
+	void toggleBoxes() {m_showBoxes = !m_showBoxes;};
 	
 	void renderScene();
 	void renderNavView(int);

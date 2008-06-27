@@ -13,6 +13,7 @@
 #include "icons/eyes.xpm"
 #include "icons/delete.xpm"
 
+DECLARE_EVENT_TYPE(wxEVT_TREE_EVENT, -1)
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
    
 BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
@@ -38,6 +39,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
 	EVT_MENU(VIEWER_NEW_SELBOX, MainFrame::OnNewSelBox)
 	EVT_MENU(VIEWER_NEW_ANDSELBOX, MainFrame::OnNewAndSelBox)
+	EVT_MENU(VIEWER_RENDER_SELBOXES, MainFrame::OnToggleSelBoxes)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
 	/* list ctrl events */
@@ -48,6 +50,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_SLIDER(ID_T_SLIDER, MainFrame::OnTSliderMoved)
 	/* tree ctrl events */
 	EVT_TREE_SEL_CHANGED(TREE_CTRL, MainFrame::OnSelectTreeItem)
+	EVT_COMMAND(TREE_CTRL, wxEVT_TREE_EVENT, MainFrame::OnTreeEvent)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -265,7 +268,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     itemCol.SetText(wxT(""));
     m_datasetListCtrl->InsertColumn(3, itemCol);
         
-    m_treeWidget = new wxTreeCtrl(m_leftWindow, TREE_CTRL, wxPoint(0, 0), 
+    m_treeWidget = new MyTreeCtrl(m_leftWindow, TREE_CTRL, wxPoint(0, 0), 
     		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
     m_treeWidget->AssignImageList(imageList);
     
@@ -659,6 +662,13 @@ void MainFrame::OnNewAndSelBox(wxCommandEvent& event)
 	m_scene->m_selBoxChanged = true;
 }
 
+void MainFrame::OnToggleSelBoxes(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	m_scene->toggleBoxes();
+	refreshAllGLWidgets();
+}
+
 void MainFrame::loadStandard()
 {
 	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
@@ -796,3 +806,11 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
 		}
 	}
 }
+
+void MainFrame::OnTreeEvent(wxCommandEvent& event)
+{
+	m_scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
+}
+
+

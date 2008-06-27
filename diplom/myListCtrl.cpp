@@ -1,5 +1,6 @@
 #include "myListCtrl.h"
 #include "datasetInfo.h"
+#include "mainFrame.h"
 BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
 	EVT_LEFT_DOWN(MyListCtrl::OnLeftClick)
 END_EVENT_TABLE()
@@ -55,3 +56,33 @@ void MyListCtrl::moveItemDown(long item)
 	swap (item, item +1);
 	this->SetItemState(item + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
+
+DECLARE_EVENT_TYPE(wxEVT_TREE_EVENT, -1)
+DEFINE_EVENT_TYPE(wxEVT_TREE_EVENT)
+
+BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
+	EVT_CHAR(MyTreeCtrl::OnChar)
+END_EVENT_TABLE()
+
+void MyTreeCtrl::OnChar(wxKeyEvent& event)
+{
+	switch( event.GetKeyCode() )
+    {
+    case WXK_DELETE: {
+    	wxTreeItemId treeid = this->GetSelection();
+		MyTreeItemData *data = (MyTreeItemData*)this->GetItemData(treeid);
+		if (!data) return;
+		if (this->GetItemText(treeid) == wxT("box")) {
+			this->Delete(treeid);
+			wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );
+			GetEventHandler()->ProcessEvent( event1 );
+			//m_scene->m_selBoxChanged = true;
+		}
+    } break;
+    default:
+	    event.Skip();
+	    return;
+    }
+    Refresh(false);
+}
+

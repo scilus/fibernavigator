@@ -2,7 +2,6 @@
 #include "myListCtrl.h"
 #include "wx/utils.h"
 
-//DECLARE_EVENT_TYPE(wxEVT_MY_EVENT, -1)
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_NAVGL_EVENT)
 

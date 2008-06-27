@@ -16,6 +16,7 @@ public:
     void setTSlider(wxSlider *slider) {m_tSlider = slider;};
     void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
     void loadStandard();
+    TheScene* getScene() {return m_scene;};
 
 private:
 	void OnSize(wxSizeEvent& event);
@@ -40,6 +41,8 @@ private:
     void OnToggleSelBox(wxCommandEvent& event);
     void OnNewSelBox(wxCommandEvent& event);
     void OnNewAndSelBox(wxCommandEvent& event);
+    void OnToggleSelBoxes(wxCommandEvent& event);
+    
     void OnReloadShaders(wxCommandEvent& event);
     
     void OnActivateListItem(wxListEvent& event);
@@ -48,6 +51,7 @@ private:
     void OnListItemDown(wxCommandEvent& event);
     
     void OnSelectTreeItem(wxTreeEvent& event);
+    void OnTreeEvent(wxCommandEvent& event);
     
     void load(bool, wxString);
     void updateTreeDims();
@@ -124,6 +128,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_RELOAD_SHADER		16
 #define VIEWER_NEW_SELBOX			17
 #define VIEWER_NEW_ANDSELBOX		18
+#define VIEWER_RENDER_SELBOXES		19
 
 #define ID_GL_NAV_X 	120
 #define ID_GL_NAV_Y  	121
