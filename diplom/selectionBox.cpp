@@ -53,14 +53,20 @@ void SelectionBox::draw()
 	drawSphere(cx, cy, cz, m_handleRadius);
 	drawSphere(mx - m_handleRadius, cy, cz, m_handleRadius);
 	drawSphere(px + m_handleRadius, cy, cz, m_handleRadius);
-	glColor3f(0.0, 1.0, 0.0);
 	drawSphere(cx, my - m_handleRadius, cz, m_handleRadius);
 	drawSphere(cx, py + m_handleRadius, cz, m_handleRadius);
-	glColor3f(0.0, 0.0, 1.0);
 	drawSphere(cx, cy, mz - m_handleRadius, m_handleRadius);
 	drawSphere(cx, cy, pz + m_handleRadius, m_handleRadius);
-	glColor3f(0.0, 1.0, 1.0);
-	glLineWidth(2.0);
+	if ( m_isTop )
+		glColor3f(0.0, 1.0, 1.0);
+	else {
+		if ( !m_isAND )
+			glColor3f(0.0, 1.0, 0.0);
+		else
+			glColor3f(1.0, 0.0, 0.0);
+	}
+		
+	//glLineWidth(2.0);
 	glBegin(GL_LINES);
 		glVertex3f(mx, cy, cz);
 		glVertex3f(px, cy, cz);

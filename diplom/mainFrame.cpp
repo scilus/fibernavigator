@@ -633,8 +633,9 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
 	{
 		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
-		SelectionBox *selbox = new SelectionBox(box);
-		m_treeWidget->AppendItem(tBoxId, wxT("box"),-1, -1, new MyTreeItemData(selbox));
+		SelectionBox *selBox = new SelectionBox(box);
+		selBox->m_isTop = false;
+		m_treeWidget->AppendItem(tBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
 	}
 	else
 	{
@@ -647,6 +648,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 				m_zSlider->GetValue()-TheDataset::frames/2};
 		Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
 		SelectionBox *selBox = new SelectionBox(v2, v3, lines);
+		selBox->m_isTop = true;
 		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
 	}
 	m_scene->m_selBoxChanged = true;

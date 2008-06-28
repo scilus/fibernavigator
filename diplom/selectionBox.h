@@ -41,6 +41,7 @@ public:
 	std::vector<bool>m_inBox;
 	int m_lines;
 	bool m_isAND;
+	bool m_isTop;
 	
 private:
 	void drawSphere(float, float, float, float);
