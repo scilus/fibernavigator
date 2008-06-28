@@ -50,6 +50,7 @@ private:
     void OnListItemDown(wxCommandEvent& event);
     
     void OnSelectTreeItem(wxTreeEvent& event);
+    void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
     
     void load(bool, wxString);
@@ -57,7 +58,6 @@ private:
     void updateTreeDS(int);
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
-    void updateInfoString();
     void updateStatusBar();
 	
     TheScene *m_scene;

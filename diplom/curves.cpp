@@ -191,7 +191,8 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 					boxes[i][j]->notDirty();
 				}
 				for (int k = 0 ; k <m_lineCount ; ++k)
-					boxes[i][0]->m_inBox[k] = boxes[i][0]->m_inBox[k] & boxes[i][j]->m_inBox[k];  
+					boxes[i][0]->m_inBox[k] = boxes[i][0]->m_inBox[k] & ( (boxes[i][j]->m_inBox[k] | boxes[i][j]->m_isAND) &
+																			!(boxes[i][j]->m_inBox[k] & boxes[i][j]->m_isAND));  
 			}
 
 		}

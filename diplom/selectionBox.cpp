@@ -8,6 +8,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, int lines)
 	m_size = size;
 	m_show = true;
 	m_dirty = true;
+	m_isAND = true;
 	m_handleRadius = 3.0;	
 	m_lines = lines;
 	m_inBox.resize(lines, sizeof(bool));

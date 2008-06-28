@@ -49,6 +49,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_SLIDER(ID_T_SLIDER, MainFrame::OnTSliderMoved)
 	/* tree ctrl events */
 	EVT_TREE_SEL_CHANGED(TREE_CTRL, MainFrame::OnSelectTreeItem)
+	EVT_TREE_ITEM_ACTIVATED(TREE_CTRL, MainFrame::OnActivateTreeItem)
 	EVT_COMMAND(TREE_CTRL, wxEVT_TREE_EVENT, MainFrame::OnTreeEvent)
 END_EVENT_TABLE()
 
@@ -594,12 +595,6 @@ void MainFrame::renewAllGLWidgets()
 	m_gl1->invalidate();
 	m_gl2->invalidate();
 	refreshAllGLWidgets();
-	updateInfoString();
-}
-
-void MainFrame::updateInfoString()
-{
-	
 }
 
 void MainFrame::OnToggleView1(wxCommandEvent& event)
@@ -655,6 +650,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
 	}
 	m_scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
 }
 
 void MainFrame::OnToggleSelBoxes(wxCommandEvent& event)
@@ -698,7 +694,6 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_gl0->setScene(m_scene);
 	m_gl1->setScene(m_scene);
 	m_gl2->setScene(m_scene);
-	updateInfoString();
 	refreshAllGLWidgets();
 }
 
@@ -800,6 +795,23 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
 			m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 		}
 	}
+}
+
+void MainFrame::OnActivateTreeItem(wxTreeEvent& event)
+{
+	wxTreeItemId treeid = m_treeWidget->GetSelection();
+	wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
+	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);
+	if (!data) return;
+	if (m_treeWidget->GetItemText(treeid) == wxT("box")) {
+		if (m_treeWidget->GetItemText(parentid) == wxT("box"))
+		{
+			((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData()))->toggleAND();
+			((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(parentid))->getData()))->setDirty();
+		}
+	}
+	m_scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
 }
 
 void MainFrame::OnTreeEvent(wxCommandEvent& event)

@@ -1,6 +1,7 @@
 #include "myListCtrl.h"
 #include "datasetInfo.h"
 #include "mainFrame.h"
+#include "selectionBox.h"
 BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
 	EVT_LEFT_DOWN(MyListCtrl::OnLeftClick)
 END_EVENT_TABLE()
@@ -70,13 +71,17 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
     {
     case WXK_DELETE: {
     	wxTreeItemId treeid = this->GetSelection();
+    	wxTreeItemId parentid = this->GetItemParent(treeid);
 		MyTreeItemData *data = (MyTreeItemData*)this->GetItemData(treeid);
 		if (!data) return;
 		if (this->GetItemText(treeid) == wxT("box")) {
+			if (this->GetItemText(parentid) == wxT("box"))
+			{
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(parentid))->getData()))->setDirty();
+			}
 			this->Delete(treeid);
 			wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );
 			GetEventHandler()->ProcessEvent( event1 );
-			//m_scene->m_selBoxChanged = true;
 		}
     } break;
     default:

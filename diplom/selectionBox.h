@@ -26,6 +26,7 @@ public:
 	void processDrag(wxPoint click, wxPoint lastPos);
 	
 	bool toggleShow() {return m_show = !m_show;};
+	bool toggleAND() {return m_isAND = !m_isAND;};
 	bool getShow() {return m_show;};
 	
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
@@ -39,6 +40,7 @@ public:
 
 	std::vector<bool>m_inBox;
 	int m_lines;
+	bool m_isAND;
 	
 private:
 	void drawSphere(float, float, float, float);
@@ -56,6 +58,7 @@ private:
 	float m_handleRadius;
 	bool m_show;
 	bool m_dirty;
+	
 };
 
 #endif /*SELECTIONBOX_H_*/
