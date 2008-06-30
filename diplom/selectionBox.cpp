@@ -22,6 +22,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 {
 	m_center = box->getCenter();
 	m_size = box->getSize();
+	m_isAND = false;
 	m_show = true;
 	m_dirty = true;
 	

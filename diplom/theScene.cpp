@@ -474,7 +474,7 @@ void TheScene::setupLights()
 {
 	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
 	GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1.0 };
-	GLfloat light_specular[] = { 0.8, 0.8, 0.8, 1.0 };
+	GLfloat light_specular[] = { 0.4, 0.4, 0.4, 1.0 };
 	GLfloat specref[] = { 1.0, 1.0, 1.0, 1.0};
 	
 	GLfloat light_position0[] = { -m_lightPos.s.X, -m_lightPos.s.Y, -m_lightPos.s.Z, 0.0};
