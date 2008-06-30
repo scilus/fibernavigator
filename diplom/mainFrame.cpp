@@ -405,6 +405,8 @@ void MainFrame::load(bool showLoadDialog, wxString path)
 		refreshAllGLWidgets();
 		updateTreeDS(i);
 	}
+	wxCommandEvent e;
+	if ( info->getType() == Curves_) OnNewSelBox(e);
 }
 
 void MainFrame::updateTreeDims()

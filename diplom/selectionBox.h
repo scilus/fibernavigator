@@ -21,7 +21,8 @@ public:
 	SelectionBox(SelectionBox*);
 	~SelectionBox() {};
 	
-	void draw();
+	void drawHandles();
+	void drawFrame();
 	hitResult hitTest(Ray *ray);
 	void processDrag(wxPoint click, wxPoint lastPos);
 	

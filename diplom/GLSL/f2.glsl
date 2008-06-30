@@ -20,7 +20,8 @@ uniform int type5, type6, type7, type8, type9;
 
 varying vec3 TexCoord;
 varying vec3 normal;
-varying vec3 vertex;
+varying vec4 vertex;
+varying vec4 half;
 
 const vec4 AMBIENT_BLACK = vec4(0.0, 0.0, 0.0, 1.0);
 const vec4 DEFAULT_BLACK = vec4(0.0, 0.0, 0.0, 0.0);
@@ -78,8 +79,11 @@ void directionalLight(in int i, in vec3 normal, in float shininess,
 	float nDotHV;
 	float pf;
 	
+	vec3 L = normalize (gl_LightSource[i].position - vertex.xyz);
+	vec3 H = normalize (L+ half.xyz); 
+
 	nDotVP = max(0.0, dot(normal, normalize(vec3(gl_LightSource[i].position))));
-	nDotHV = max(0.0, dot(normal, vec3(gl_LightSource[i].halfVector)));
+	nDotHV = max(0.0, dot(normal, H));
 	
 	if (nDotVP == 0.0)
 		pf = 0.0;
@@ -88,7 +92,7 @@ void directionalLight(in int i, in vec3 normal, in float shininess,
 	
 	ambient += gl_LightSource[i].ambient;
 	diffuse += gl_LightSource[i].diffuse * nDotVP;
-	specular += vec4(0.0); /*gl_LightSource[i].specular * pf;*/     
+	specular += gl_LightSource[i].specular * pf;     
     
 }
 

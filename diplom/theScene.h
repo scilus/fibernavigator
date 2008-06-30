@@ -54,7 +54,8 @@ public:
 	
 	void renderScene();
 	void renderNavView(int);
-	void makeLights();
+	void setupLights();
+	void switchOffLights();
 	void renderMesh();
 	void renderCurves();
 	void colorMap(float);

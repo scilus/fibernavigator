@@ -55,8 +55,8 @@ void TheScene::initGL(int view)
 	glEnable(GL_DOUBLEBUFFER);
 	glEnable(GL_DEPTH_TEST);
 	
-	GLfloat lmodel_ambient[] = {0.2, 0.2, 0.2, 1.0};
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+	//GLfloat lmodel_ambient[] = {0.2, 0.2, 0.2, 1.0};
+	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 	
 	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
@@ -299,8 +299,6 @@ void TheScene::setTextureShaderVars()
 
 void TheScene::setMeshShaderVars()
 {
-	m_meshShader->bind();
-	
 	m_meshShader->setUniInt("dimX", TheDataset::columns);
 	m_meshShader->setUniInt("dimY", TheDataset::rows);
 	m_meshShader->setUniInt("dimZ", TheDataset::frames);
@@ -396,17 +394,15 @@ void TheScene::renderScene()
 	m_textureShader->release();
 	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	
-	renderMesh();
-	
+		renderCurves();
 	glPopAttrib();
 	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-		
-	renderCurves();
-		
+		setupLights();
+		renderMesh();
+		switchOffLights();
 	glPopAttrib();
-	
+		
 	if (m_showBoxes)
 	{
 		std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
@@ -415,11 +411,24 @@ void TheScene::renderScene()
 			for (uint j = 0 ; j < boxes[i].size() ; ++j)
 			{
 				glPushAttrib(GL_ALL_ATTRIB_BITS);
-				boxes[i][j]->draw();
+			
+				setupLights();
+				m_meshShader->bind();
+				setMeshShaderVars();
+				m_meshShader->setUniInt("showFS", true);
+				m_meshShader->setUniInt("useTex", false);
+				
+				boxes[i][j]->drawHandles();
+				switchOffLights();
+				
+				m_meshShader->release();
+				boxes[i][j]->drawFrame();
 				glPopAttrib();
 			}
 		}
 	}
+	
+	
 }
 
 void TheScene::renderXSlize()
@@ -461,11 +470,12 @@ void TheScene::renderZSlize()
     glEnd();
 }
 
-void TheScene::makeLights()
+void TheScene::setupLights()
 {
 	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1.0 };
+	GLfloat light_specular[] = { 0.8, 0.8, 0.8, 1.0 };
+	GLfloat specref[] = { 1.0, 1.0, 1.0, 1.0};
 	
 	GLfloat light_position0[] = { -m_lightPos.s.X, -m_lightPos.s.Y, -m_lightPos.s.Z, 0.0};
 	
@@ -477,16 +487,23 @@ void TheScene::makeLights()
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glShadeModel(GL_SMOOTH);
+	
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specref);
+	glMateriali(GL_FRONT, GL_SHININESS, 32);
+}
+
+void TheScene::switchOffLights()
+{
+	glDisable(GL_LIGHTING);
+	glDisable(GL_COLOR_MATERIAL);
 }
 
 void TheScene::renderMesh()
 {
-	makeLights();
-
+	m_meshShader->bind();
 	setMeshShaderVars();
-	
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 	
 	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
@@ -501,9 +518,6 @@ void TheScene::renderMesh()
 			glCallList(m_texNames[i]);
 		}
 	}
-	glDisable(GL_LIGHTING);
-	glDisable(GL_COLOR_MATERIAL);
-	
 	m_meshShader->release();
 }
 

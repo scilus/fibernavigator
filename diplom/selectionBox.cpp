@@ -34,8 +34,9 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	}
 }
 
-void SelectionBox::draw()
+void SelectionBox::drawHandles()
 {
+	m_handleRadius = 2.0 + Vector3fLength(&m_size)/50.0;
 	float cx = m_center.s.X;
 	float cy = m_center.s.Y;
 	float cz = m_center.s.Z;
@@ -46,9 +47,6 @@ void SelectionBox::draw()
 	mz = wxMin(cz - m_size.s.Z/2, cz - m_handleRadius);
 	pz = wxMax(cz + m_size.s.Z/2, cz + m_handleRadius);
 	
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_DIFFUSE);
-	
 	glColor3f(1.0, 0.0, 0.0);
 	drawSphere(cx, cy, cz, m_handleRadius);
 	drawSphere(mx - m_handleRadius, cy, cz, m_handleRadius);
@@ -57,6 +55,14 @@ void SelectionBox::draw()
 	drawSphere(cx, py + m_handleRadius, cz, m_handleRadius);
 	drawSphere(cx, cy, mz - m_handleRadius, m_handleRadius);
 	drawSphere(cx, cy, pz + m_handleRadius, m_handleRadius);
+	
+}
+
+void SelectionBox::drawFrame()
+{
+	float cx = m_center.s.X;
+	float cy = m_center.s.Y;
+	float cz = m_center.s.Z;
 	if ( m_isTop )
 		glColor3f(0.0, 1.0, 1.0);
 	else {
@@ -65,7 +71,6 @@ void SelectionBox::draw()
 		else
 			glColor3f(1.0, 0.0, 0.0);
 	}
-		
 	//glLineWidth(2.0);
 	glBegin(GL_LINES);
 		glVertex3f(mx, cy, cz);
@@ -97,8 +102,6 @@ void SelectionBox::draw()
 		glVertex3f( px, my, mz );
 		glVertex3f( px, py, mz );
 	glEnd();
-	
-	glDisable(GL_COLOR_MATERIAL);
 }
 
 void SelectionBox::drawSphere(float x, float y, float z, float r)
