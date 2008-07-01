@@ -1,5 +1,6 @@
 #include "theScene.h"
 #include "myListCtrl.h"
+#include "point.h"
 
 TheScene::TheScene()
 {
@@ -17,6 +18,7 @@ TheScene::TheScene()
 	m_showAxial = true;
 	m_showMesh = true;
 	m_showBoxes = true;
+	m_pointMode = false;
 	m_textureShader = 0;
 	m_meshShader = 0;
 	m_curveShader = 0;
@@ -405,29 +407,12 @@ void TheScene::renderScene()
 		
 	if (m_showBoxes)
 	{
-		std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
-		for (uint i = 0 ; i < boxes.size() ; ++i)
-		{
-			for (uint j = 0 ; j < boxes[i].size() ; ++j)
-			{
-				glPushAttrib(GL_ALL_ATTRIB_BITS);
-			
-				setupLights();
-				m_meshShader->bind();
-				setMeshShaderVars();
-				m_meshShader->setUniInt("showFS", true);
-				m_meshShader->setUniInt("useTex", false);
-				
-				boxes[i][j]->drawHandles();
-				switchOffLights();
-				
-				m_meshShader->release();
-				boxes[i][j]->drawFrame();
-				glPopAttrib();
-			}
-		}
+		drawSelectionBoxes();
 	}
-	
+	if (m_pointMode)
+	{
+		drawPoints();
+	}
 	
 }
 
@@ -475,7 +460,7 @@ void TheScene::setupLights()
 	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
 	GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1.0 };
 	GLfloat light_specular[] = { 0.4, 0.4, 0.4, 1.0 };
-	GLfloat specref[] = { 1.0, 1.0, 1.0, 1.0};
+	GLfloat specref[] = { 0.5, 0.5, 0.5, 0.5};
 	
 	GLfloat light_position0[] = { -m_lightPos.s.X, -m_lightPos.s.Y, -m_lightPos.s.Z, 0.0};
 	
@@ -678,4 +663,56 @@ std::vector<std::vector<SelectionBox*> > TheScene::getSelectionBoxes()
 		boxes.push_back(b);
 	}
 	return boxes;	
+}
+
+void TheScene::drawSelectionBoxes()
+{
+	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
+	for (uint i = 0 ; i < boxes.size() ; ++i)
+	{
+		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		{
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+		
+			setupLights();
+			m_meshShader->bind();
+			setMeshShaderVars();
+			m_meshShader->setUniInt("showFS", true);
+			m_meshShader->setUniInt("useTex", false);
+			
+			boxes[i][j]->drawHandles();
+			switchOffLights();
+			
+			m_meshShader->release();
+			boxes[i][j]->drawFrame();
+			glPopAttrib();
+		}
+	}
+}
+
+void TheScene::drawPoints()
+{
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+			
+	setupLights();
+	m_meshShader->bind();
+	setMeshShaderVars();
+	m_meshShader->setUniInt("showFS", true);
+	m_meshShader->setUniInt("useTex", false);
+	
+	
+	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countPoints ; ++i)
+	{
+		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData();
+		point->draw();
+	}
+	
+	switchOffLights();
+	m_meshShader->release();
+	glPopAttrib();
+				
 }

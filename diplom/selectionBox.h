@@ -39,17 +39,20 @@ public:
 	void setDirty() {m_dirty = true;};
 	void notDirty() {m_dirty = false;};
 
+	static Vector3fT mapMouse2World(int, int);
+	static Vector3fT mapMouse2WorldBack(int, int);
+	
 	std::vector<bool>m_inBox;
 	int m_lines;
 	bool m_isAND;
 	bool m_isTop;
+	bool m_isActive;
 	
 private:
 	void drawSphere(float, float, float, float);
 	void drag(wxPoint click);
 	void resize(wxPoint click, wxPoint lastPos);
-	Vector3fT mapMouse2World(int, int);
-	Vector3fT mapMouse2WorldBack(int, int);
+	
 	float getAxisParallelMovement(int, int, int, int, Vector3fT);
 	
 	Vector3fT m_center;

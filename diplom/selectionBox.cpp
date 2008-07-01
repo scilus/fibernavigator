@@ -9,6 +9,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, int lines)
 	m_show = true;
 	m_dirty = true;
 	m_isAND = true;
+	m_isActive = true;
 	m_handleRadius = 3.0;	
 	m_lines = lines;
 	m_inBox.resize(lines, sizeof(bool));
@@ -23,6 +24,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	m_center = box->getCenter();
 	m_size = box->getSize();
 	m_isAND = false;
+	m_isActive = true;
 	m_show = true;
 	m_dirty = true;
 	

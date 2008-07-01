@@ -29,6 +29,8 @@
 #include "icons/mini_cat.xpm"
 #include "icons/new.xpm"
 #include "icons/quit.xpm"
+#include "icons/toggleselbox.xpm"
+#include "icons/gball.xpm"
 
 #include "main.h"
 #include "mainFrame.h"
@@ -75,6 +77,8 @@ bool MyApp::OnInit(void)
   wxBitmap bmpMiniCat (mini_cat_xpm);
   wxBitmap bmpNew (new_xpm);
   wxBitmap bmpQuit (quit_xpm);
+  wxBitmap bmpGBALL (gball_xpm);
+  wxBitmap bmpHideSelbox (toggleselbox_xpm);
   toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
@@ -87,6 +91,9 @@ bool MyApp::OnInit(void)
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_NEW_SELBOX, bmpMiniCat, wxT("New Selection Box"));
   toolBar->AddTool(VIEWER_RENDER_SELBOXES, bmpMiniCat, wxT("Toggle Selection Boxes"));
+  toolBar->AddTool(VIEWER_TOGGLE_SELBOX, bmpHideSelbox , wxT("Toggle activation status of selection box"));
+  toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
   toolBar->AddSeparator();
   
   toolBar->Realize();

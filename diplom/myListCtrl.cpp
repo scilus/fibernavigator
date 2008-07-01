@@ -74,7 +74,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
     	wxTreeItemId parentid = this->GetItemParent(treeid);
 		MyTreeItemData *data = (MyTreeItemData*)this->GetItemData(treeid);
 		if (!data) return;
-		if (this->GetItemText(treeid) == wxT("box")) {
+		if (this->GetItemText(treeid) == wxT("box") || this->GetItemText(treeid) == wxT("point")) {
 			if (this->GetItemText(parentid) == wxT("box"))
 			{
 				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(parentid))->getData()))->setDirty();

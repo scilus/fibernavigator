@@ -190,18 +190,21 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 					boxes[i][j]->m_inBox = getLinesShown(boxes[i][j]);
 					boxes[i][j]->notDirty();
 				}
-				for (int k = 0 ; k <m_lineCount ; ++k)
+				if ( boxes[i][j]->m_isActive) {
+					for (int k = 0 ; k <m_lineCount ; ++k)
 					boxes[i][0]->m_inBox[k] = boxes[i][0]->m_inBox[k] & ( (boxes[i][j]->m_inBox[k] | boxes[i][j]->m_isAND) &
-																			!(boxes[i][j]->m_inBox[k] & boxes[i][j]->m_isAND));  
+																			!(boxes[i][j]->m_inBox[k] & boxes[i][j]->m_isAND));
+				}
 			}
-
 		}
 	}
 	resetLinesShown();
 	for (uint i = 0 ; i < boxes.size() ; ++i)
 	{
-		for (int k = 0 ; k <m_lineCount ; ++k)
-			m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBox[k];
+		if ( boxes[i][0]->m_isActive) {
+			for (int k = 0 ; k <m_lineCount ; ++k)
+				m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBox[k];
+		}
 	}
 }
 

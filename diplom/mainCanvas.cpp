@@ -1,6 +1,7 @@
 #include "mainCanvas.h"
 #include "myListCtrl.h"
 #include "wx/utils.h"
+#include "point.h"
 
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_NAVGL_EVENT)
@@ -128,10 +129,14 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 								m_delta = 1;
 						}
 					}
-					else if (event.Dragging() && m_hr.picked >= 10)
+					else if (event.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20)
 					{
 						((SelectionBox*)m_hr.object)->processDrag(event.GetPosition(), m_lastPos);
 						m_scene->m_selBoxChanged = true;
+					}
+					else if (event.Dragging() && m_hr.picked == 20)
+					{
+						((Point*)m_hr.object)->drag(event.GetPosition());
 					}
 				}
 				m_lastPos = event.GetPosition();
@@ -145,65 +150,74 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			{
 				m_mousePt.s.X = clickX;
 				m_mousePt.s.Y = clickY;
-				if (!m_isDragging)												// Not Dragging
-			    {
-					m_isDragging = true;										// Prepare For Dragging
-					m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
-					m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
-			    }
-			    else
-			    {
-		            Quat4fT     ThisQuat;
-
-		            m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
-		            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
-		            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
-		            Matrix4fSetRotationFromMatrix3f(&TheDataset::m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
-			    }
-				
-				float *dots = new float[8];
-				Vector3fT v1 = {0,0,1};
-				Vector3fT v2 = {1,1,1};
-				Vector3fT view;
-				
-				Vector3fMultMat4(&view, &v1, &TheDataset::m_transform);
-				dots[0] = Vector3fDot(&v2, &view);
-				
-				v2.s.Z = -1;
-				dots[1] = Vector3fDot(&v2, &view);
-				
-				v2.s.Y = -1;
-				dots[2] = Vector3fDot(&v2, &view);
-				
-				v2.s.Z = 1;
-				dots[3] = Vector3fDot(&v2, &view);
-				
-				v2.s.X = -1;
-				dots[4] = Vector3fDot(&v2, &view);
-				
-				v2.s.Z = -1;
-				dots[5] = Vector3fDot(&v2, &view);
-				
-				v2.s.Y = 1;
-				dots[6] = Vector3fDot(&v2, &view);
-				
-				v2.s.Z = 1;
-				dots[7] = Vector3fDot(&v2, &view);
-				
-				float max = 0.0;
-				int quadrant = 0;
-				for (int i = 0 ; i < 8 ; ++i)
-				{
-					if (dots[i] > max) 
-					{
-						max = dots[i];
-						quadrant = i+1;
+				if (m_scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
+					m_hr = pick(event.GetPosition());
+					if (m_hr.hit && (m_hr.picked <= sagittal)) {
+						m_hr.picked = 20;
+						GetEventHandler()->ProcessEvent( event1 );
 					}
 				}
-				m_scene->setQuadrant(quadrant);
-				m_scene->setLightPos(view);
+				else {
+					if (!m_isDragging)												// Not Dragging
+				    {
+						m_isDragging = true;										// Prepare For Dragging
+						m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
+						m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
+				    }
+				    else
+				    {
+			            Quat4fT     ThisQuat;
+	
+			            m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
+			            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
+			            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
+			            Matrix4fSetRotationFromMatrix3f(&TheDataset::m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
+				    }
 				
-				Refresh(false);
+					float *dots = new float[8];
+					Vector3fT v1 = {0,0,1};
+					Vector3fT v2 = {1,1,1};
+					Vector3fT view;
+					
+					Vector3fMultMat4(&view, &v1, &TheDataset::m_transform);
+					dots[0] = Vector3fDot(&v2, &view);
+					
+					v2.s.Z = -1;
+					dots[1] = Vector3fDot(&v2, &view);
+					
+					v2.s.Y = -1;
+					dots[2] = Vector3fDot(&v2, &view);
+					
+					v2.s.Z = 1;
+					dots[3] = Vector3fDot(&v2, &view);
+					
+					v2.s.X = -1;
+					dots[4] = Vector3fDot(&v2, &view);
+					
+					v2.s.Z = -1;
+					dots[5] = Vector3fDot(&v2, &view);
+					
+					v2.s.Y = 1;
+					dots[6] = Vector3fDot(&v2, &view);
+					
+					v2.s.Z = 1;
+					dots[7] = Vector3fDot(&v2, &view);
+					
+					float max = 0.0;
+					int quadrant = 0;
+					for (int i = 0 ; i < 8 ; ++i)
+					{
+						if (dots[i] > max) 
+						{
+							max = dots[i];
+							quadrant = i+1;
+						}
+					}
+					m_scene->setQuadrant(quadrant);
+					m_scene->setLightPos(view);
+					
+					Refresh(false);
+				}
 			}
 			else 
 				m_isDragging = false;
@@ -215,7 +229,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			m_clicked = event.GetPosition();
 			if (event.LeftUp() || event.Dragging()) 
 			{
-				//event1.SetEventObject( (wxObject*) new wxPoint( event.GetPosition()) );
 				GetEventHandler()->ProcessEvent( event1 );
 			}
 			break;
@@ -354,7 +367,24 @@ hitResult MainCanvas::pick(wxPoint click)
 			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
 		}
 	}
+	
+	if (m_scene->getPointMode()) {
+		int countPoints = m_scene->m_treeWidget->GetChildrenCount(m_scene->m_tPointId, true);
+		wxTreeItemId id, childid;
+		wxTreeItemIdValue cookie = 0;
+		for (int i = 0 ; i < countPoints ; ++i)
+		{
+			id = m_scene->m_treeWidget->GetNextChild(m_scene->m_tPointId, cookie);
+			Point *point = (Point*)((MyTreeItemData*)m_scene->m_treeWidget->GetItemData(id))->getData();
+			hitResult hr1 = point->hitTest(ray);
+			if (hr1.hit && !hr.hit) hr = hr1;
+			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
+		}
+	}
+	
 	return hr;
+	
+	
 }
 
 void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
@@ -426,3 +456,9 @@ void MainCanvas::renderTestRay()
 	m_scene->drawSphere(m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z, 3.0);
 }
 
+Vector3fT MainCanvas::getEventCenter()
+{
+	Vector3fT dir = {m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z};
+	Vector3fT center = {m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z};
+	return center;
+}

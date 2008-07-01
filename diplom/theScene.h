@@ -44,13 +44,15 @@ public:
 	void initShaders();
 	
 	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
-	void setTreeCtrl(wxTreeCtrl* ctrl, wxTreeItemId id) {m_treeWidget = ctrl; m_tSelBoxId = id;};
+	void setTreeCtrl(wxTreeCtrl* ctrl, wxTreeItemId sid, wxTreeItemId pid) {m_treeWidget = ctrl; m_tSelBoxId = sid;m_tPointId = pid;};
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
 	void setLightPos(Vector3fT value) {m_lightPos = value;};
 	void setQuadrant(int quadrant) {m_quadrant = quadrant;};
 	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	void toggleBoxes() {m_showBoxes = !m_showBoxes;};
+	bool togglePointMode() {return m_pointMode = !m_pointMode;};
+	bool getPointMode() {return m_pointMode;};
 	
 	void renderScene();
 	void renderNavView(int);
@@ -58,6 +60,10 @@ public:
 	void switchOffLights();
 	void renderMesh();
 	void renderCurves();
+	void drawSelectionBoxes();
+	void drawPoints();
+	
+	
 	void colorMap(float);
 	
 	void drawSphere(float, float, float, float);
@@ -73,6 +79,7 @@ public:
 	bool m_selBoxChanged;
 	wxTreeCtrl* m_treeWidget;
 	wxTreeItemId m_tSelBoxId;
+	wxTreeItemId m_tPointId;
 	
 private:
 	int m_countTextures;
@@ -98,6 +105,7 @@ private:
 	int m_quadrant;
 	Vector3fT m_lightPos;
 	
+	bool m_pointMode;
 	
 	void bindTextures();
 	void setTextureShaderVars();

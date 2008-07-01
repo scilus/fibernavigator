@@ -10,6 +10,8 @@
 #include "wx/filedlg.h"
 #include "wx/statbmp.h"
 
+#include "point.h"
+
 #include "icons/eyes.xpm"
 #include "icons/delete.xpm"
 
@@ -38,7 +40,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
 	EVT_MENU(VIEWER_NEW_SELBOX, MainFrame::OnNewSelBox)
-	EVT_MENU(VIEWER_RENDER_SELBOXES, MainFrame::OnToggleSelBoxes)
+	EVT_MENU(VIEWER_RENDER_SELBOXES, MainFrame::OnHideSelBoxes)
+	EVT_MENU(VIEWER_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
 	/* list ctrl events */
@@ -51,6 +54,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_TREE_SEL_CHANGED(TREE_CTRL, MainFrame::OnSelectTreeItem)
 	EVT_TREE_ITEM_ACTIVATED(TREE_CTRL, MainFrame::OnActivateTreeItem)
 	EVT_COMMAND(TREE_CTRL, wxEVT_TREE_EVENT, MainFrame::OnTreeEvent)
+	/* toggle drawing of points */
+	EVT_MENU(VIEWER_DRAW_POINTS, MainFrame::OnTogglePointMode)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -315,7 +320,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     TheDataset::lastError = wxT("");
     m_scene = new TheScene();
     m_scene->setDataListCtrl(m_datasetListCtrl);
-    m_scene->setTreeCtrl(m_treeWidget, m_tSelBoxId);
+    m_scene->setTreeCtrl(m_treeWidget, m_tSelBoxId, m_tPointId);
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
     m_gl0 = new MainCanvas(m_scene, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
@@ -492,6 +497,9 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		case sagittal:
 			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta, 0), m_xSlider->GetMax()));
 			break;
+		case 20:
+			Point *point = new Point(m_mainGL->getEventCenter());
+			m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
 		}
 	}
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
@@ -623,6 +631,19 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 {
 	if (!m_scene) return;
+	if (m_treeWidget->GetChildrenCount(m_tFiberId) == 0) return;
+		
+	// check if selection box selected
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+	if (m_treeWidget->GetItemText(tBoxId) == wxT("box"))
+	{
+		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
+		m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
+		box->m_isActive = !box->m_isActive;
+		box->setDirty();
+	}
+	m_scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
 }
 
 void MainFrame::OnNewSelBox(wxCommandEvent& event)
@@ -639,7 +660,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 		selBox->m_isTop = false;
 		Vector3fT c = {selBox->getCenter().s.X + 5, selBox->getCenter().s.Y + 5, selBox->getCenter().s.Z + 5};
 		selBox->setCenter(c);
-		m_treeWidget->AppendItem(tBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
+		m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 	}
 	else
 	{
@@ -653,13 +674,13 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 		Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
 		SelectionBox *selBox = new SelectionBox(v2, v3, lines);
 		selBox->m_isTop = true;
-		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),-1, -1, new MyTreeItemData(selBox));
+		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 	}
 	m_scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnToggleSelBoxes(wxCommandEvent& event)
+void MainFrame::OnHideSelBoxes(wxCommandEvent& event)
 {
 	if (!m_scene) return;
 	m_scene->toggleBoxes();
@@ -826,4 +847,10 @@ void MainFrame::OnTreeEvent(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
+void MainFrame::OnTogglePointMode(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	m_scene->togglePointMode();
+	refreshAllGLWidgets();
+}
 
