@@ -13,9 +13,10 @@ public:
 	~KdTree();
 	void sort(int, int);
 	void buildTree(int, int, int);
-	
+	void buildTreeP(int, int, int);
+
 	wxUint32 *m_tree;
-	
+
 private:
 	wxUint32 m_root;
 	float *m_pointArray;

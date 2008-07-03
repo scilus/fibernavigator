@@ -1,6 +1,7 @@
 #include "KdTree.h"
 #include "theDataset.h"
 
+#include <omp.h>
 #include <algorithm>
 
 KdTree::KdTree(int size, float *pointArray)
@@ -80,6 +81,27 @@ void KdTree::buildTree(int left, int right, int axis)
     std::nth_element( begin, nth, end, lessy( m_pointArray, axis ) );
 
     int median = div;
-    buildTree(left, median-1, (axis+1)%3);
-    buildTree(median+1, right, (axis+1)%3);
+#pragma omp sections nowait
+    {
+#pragma omp section
+    buildTreeP(left, median-1, (axis+1)%3);
+#pragma omp section
+    buildTreeP(median+1, right, (axis+1)%3);
+    }
+}
+
+
+void KdTree::buildTreeP(int left, int right, int axis)
+{
+    if (left >= right) return;
+
+    int div = ( left+right )/2;
+    iter begin( m_tree, left );
+    iter end( m_tree, right );
+    iter nth( m_tree, div );
+    std::nth_element( begin, nth, end, lessy( m_pointArray, axis ) );
+
+    int median = div;
+    buildTreeP(left, median-1, (axis+1)%3);
+    buildTreeP(median+1, right, (axis+1)%3);
 }

@@ -17,7 +17,7 @@
 
 DECLARE_EVENT_TYPE(wxEVT_TREE_EVENT, -1)
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
-   
+
 BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_ABOUT, MainFrame::OnAbout)
     EVT_SIZE(MainFrame::OnSize)
@@ -35,7 +35,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_SLIDER(ID_Y_SLIDER, MainFrame::OnYSliderMoved)
 	EVT_SLIDER(ID_Z_SLIDER, MainFrame::OnZSliderMoved)
 	/* click on toolbar button to toggle one of the 3 panes in the
-	 * main GL window */ 
+	 * main GL window */
 	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
 	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
 	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
@@ -65,9 +65,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 {
 	NAV_SIZE = wxMin(255,size.y/4);
 	NAV_GL_SIZE = NAV_SIZE - 4;
-	
+
 	// A window to the left of the client window
-	wxSashLayoutWindow* win = new wxSashLayoutWindow(this, wxID_ANY, 
+	wxSashLayoutWindow* win = new wxSashLayoutWindow(this, wxID_ANY,
 	  		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE*4),
 	  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, 1020));
@@ -75,19 +75,19 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetAlignment(wxLAYOUT_LEFT);
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_leftWindowHolder = win;
-	
+
     // Window to hold the tree widget and nav windows
-    win = new wxSashLayoutWindow(m_leftWindowHolder, wxID_ANY, 
+    win = new wxSashLayoutWindow(m_leftWindowHolder, wxID_ANY,
       		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
       		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, 3*NAV_SIZE + 60));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(0, 0, 0));
-    m_leftWindowTop = win; 
-    
+    m_leftWindowTop = win;
+
     // Window to hold the list ctrl widget
-    win = new wxSashLayoutWindow(m_leftWindowHolder, wxID_ANY, 
+    win = new wxSashLayoutWindow(m_leftWindowHolder, wxID_ANY,
           		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
           		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
@@ -95,8 +95,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_leftWindowBottom = win;
-    
-    win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY, 
+
+    win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY,
       		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
       		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
@@ -104,8 +104,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_leftWindowBottom1 = win;
-    
-    win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY, 
+
+    win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY,
       		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
       		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
@@ -113,16 +113,16 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(255, 255, 255));
     m_leftWindowBottom2 = win;
-    
+
     wxButton *button = new wxButton(m_leftWindowBottom2, ID_BUTTON_UP, wxT("up"), wxPoint(0,2), wxSize(50,19));
     button->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
     button = new wxButton(m_leftWindowBottom2, ID_BUTTON_DOWN, wxT("down"), wxPoint(50,2), wxSize(50,19));
     button->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
 
-    m_tSlider = new wxSlider(m_leftWindowBottom2, ID_T_SLIDER, 30, 0, 100, 
+    m_tSlider = new wxSlider(m_leftWindowBottom2, ID_T_SLIDER, 30, 0, 100,
         		wxPoint(100,2), wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
-    
+
     win = new wxSashLayoutWindow(m_leftWindowTop, wxID_ANY,
                                wxDefaultPosition, wxSize(150, 30),
                                wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
@@ -132,9 +132,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	win->SetBackgroundColour(wxColour(255, 255, 255));
 	win->SetSashVisible(wxSASH_RIGHT, false);
 	m_leftWindow = win;
-	
-	// navigation window with three sub windows for gl widgets 
-    win = new wxSashLayoutWindow(m_leftWindowTop, wxID_ANY, 
+
+	// navigation window with three sub windows for gl widgets
+    win = new wxSashLayoutWindow(m_leftWindowTop, wxID_ANY,
   		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE*4),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE*4));
@@ -144,7 +144,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_navWindow = win;
 
     // main window right side, holds the big gl widget
-    win = new wxSashLayoutWindow(this, wxID_ANY, 
+    win = new wxSashLayoutWindow(this, wxID_ANY,
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(765, 765));
@@ -154,9 +154,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetAlignment(wxLAYOUT_LEFT);
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_rightWindowHolder = win;
-    
+
     // main window right side, holds the big gl widget
-    win = new wxSashLayoutWindow(m_rightWindowHolder, wxID_ANY, 
+    win = new wxSashLayoutWindow(m_rightWindowHolder, wxID_ANY,
   		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(700, 700));
@@ -165,9 +165,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(180, 180, 180));
     m_rightWindow = win;
-    
+
     // extra window right side, prevent scaling of the main gl widget
-    win = new wxSashLayoutWindow(m_rightWindowHolder, wxID_ANY, 
+    win = new wxSashLayoutWindow(m_rightWindowHolder, wxID_ANY,
   		  wxDefaultPosition, wxSize(765, 765),
   		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(765, 1));
@@ -176,7 +176,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(255, 255, 255));
     m_extraRightWindow = win;
 
-    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY,
   		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
@@ -184,19 +184,19 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_topNavWindow = win;
-    
-    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY,
       		  wxDefaultPosition, wxSize(NAV_SIZE, 20),
       		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
         win->SetDefaultSize(wxSize(NAV_SIZE, 20));
         win->SetOrientation(wxLAYOUT_HORIZONTAL);
         win->SetAlignment(wxLAYOUT_TOP);
         win->SetBackgroundColour(wxColour(255, 255, 255));
-    
-    m_zSlider = new wxSlider(win, ID_Z_SLIDER, 50, 0, 100, 
+
+    m_zSlider = new wxSlider(win, ID_Z_SLIDER, 50, 0, 100,
         		wxPoint(0, 0), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    
-    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY,
   		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
@@ -205,18 +205,18 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(0, 0, 0));
     m_middleNavWindow = win;
 
-    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY,
       		  wxDefaultPosition, wxSize(NAV_SIZE, 20),
       		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
         win->SetDefaultSize(wxSize(NAV_SIZE, 20));
         win->SetOrientation(wxLAYOUT_HORIZONTAL);
         win->SetAlignment(wxLAYOUT_TOP);
         win->SetBackgroundColour(wxColour(255, 255, 255));
-    
-    m_ySlider = new wxSlider(win, ID_Y_SLIDER, 50, 0, 100, wxPoint(0,0), 
+
+    m_ySlider = new wxSlider(win, ID_Y_SLIDER, 50, 0, 100, wxPoint(0,0),
         		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    
-    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY,
      		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
      		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
        win->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
@@ -224,20 +224,20 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
        win->SetAlignment(wxLAYOUT_TOP);
        win->SetBackgroundColour(wxColour(0, 0, 0));
     m_bottomNavWindow = win;
-    
-    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY, 
+
+    win = new wxSashLayoutWindow(m_navWindow, wxID_ANY,
       		  wxDefaultPosition, wxSize(NAV_SIZE, 20),
       		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
         win->SetDefaultSize(wxSize(NAV_SIZE, 20));
         win->SetOrientation(wxLAYOUT_HORIZONTAL);
         win->SetAlignment(wxLAYOUT_TOP);
         win->SetBackgroundColour(wxColour(255, 255, 255));
-    
-    m_xSlider = new wxSlider(win, ID_X_SLIDER, 50, 0, 100, wxPoint(0,0), 
+
+    m_xSlider = new wxSlider(win, ID_X_SLIDER, 50, 0, 100, wxPoint(0,0),
             		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    
+
     // extra window to avoid scaling of the bottom gl widget when resizing
-    win = new wxSashLayoutWindow(m_navWindow,wxID_ANY, 
+    win = new wxSashLayoutWindow(m_navWindow,wxID_ANY,
       		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
        		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
           //win->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
@@ -249,34 +249,34 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_xSlider->SetMinSize(wxSize(1, -1));
     m_ySlider->SetMinSize(wxSize(1, -1));
     m_zSlider->SetMinSize(wxSize(1, -1));
-    
-    m_datasetListCtrl = new MyListCtrl(m_leftWindowBottom1, LIST_CTRL, wxDefaultPosition, 
+
+    m_datasetListCtrl = new MyListCtrl(m_leftWindowBottom1, LIST_CTRL, wxDefaultPosition,
     		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
-    
+
     wxImageList* imageList = new wxImageList(16,16);
     imageList->Add(wxIcon(eyes_xpm));
     imageList->Add(wxIcon(delete_xpm));
     m_datasetListCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
-    
+
     wxListItem itemCol;
     itemCol.SetText(wxT(""));
     m_datasetListCtrl->InsertColumn(0, itemCol);
-        
+
     itemCol.SetText(wxT("Name"));
     itemCol.SetAlign(wxLIST_FORMAT_CENTRE);
     m_datasetListCtrl->InsertColumn(1, itemCol);
-    
+
     itemCol.SetText(wxT("Threshold"));
     itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
     m_datasetListCtrl->InsertColumn(2, itemCol);
-    
+
     itemCol.SetText(wxT(""));
     m_datasetListCtrl->InsertColumn(3, itemCol);
-        
-    m_treeWidget = new MyTreeCtrl(m_leftWindow, TREE_CTRL, wxPoint(0, 0), 
+
+    m_treeWidget = new MyTreeCtrl(m_leftWindow, TREE_CTRL, wxPoint(0, 0),
     		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
     m_treeWidget->AssignImageList(imageList);
-    
+
     m_tRootId = m_treeWidget->AddRoot(wxT("Root"));
     m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"));
 	    m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"));
@@ -287,9 +287,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"));
     m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"));
     m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"));
-    
+
     /*
-     * Set OpenGL attributes 
+     * Set OpenGL attributes
      */
     GLboolean doubleBuffer = GL_TRUE;
     #ifdef __WXMSW__
@@ -312,8 +312,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	#endif
         doubleBuffer = GL_FALSE;
     }
-    
-    
+
+
     TheDataset::columns = 1;
     TheDataset::rows = 1;
     TheDataset::frames = 1;
@@ -325,12 +325,12 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
     m_gl0 = new MainCanvas(m_scene, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib);
-    
+
     m_gl1 = new MainCanvas(m_scene, coronal, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib);
     m_gl2 = new MainCanvas(m_scene, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
-    
+
     m_scene->setMainGLContext(new wxGLContext(m_mainGL));
 }
 
@@ -353,7 +353,7 @@ void MainFrame::load(bool showLoadDialog, wxString path)
 		m_statusBar->SetStatusText(TheDataset::lastError,2);
 		return;
 	}
-	
+
 	if (showLoadDialog)
 	{
 		wxString caption = wxT("Choose a file");
@@ -367,15 +367,15 @@ void MainFrame::load(bool showLoadDialog, wxString path)
 		}
 	}
 
-	DatasetInfo *info = TheDataset::load(path); 
-	if ( info == NULL) 
+	DatasetInfo *info = TheDataset::load(path);
+	if ( info == NULL)
 	{
 		wxMessageBox(wxT("ERROR\n") + TheDataset::lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 		m_statusBar->SetStatusText(wxT("ERROR"),1);
 		m_statusBar->SetStatusText(TheDataset::lastError,2);
 		return;
 	}
-	 
+
 	int i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
 	m_datasetListCtrl->SetItem(i, 1, info->getName());
@@ -383,10 +383,10 @@ void MainFrame::load(bool showLoadDialog, wxString path)
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
 	m_datasetListCtrl->SetItemData(i, (long)info);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
+
 	m_statusBar->SetStatusText(wxT("Ready"),1);
 	m_statusBar->SetStatusText(info->getName() + wxT(" loaded"),2);
-		
+
 	m_xSlider->SetMax(wxMax(2,TheDataset::columns-1));
 	m_xSlider->SetValue(TheDataset::columns/2);
 	m_ySlider->SetMax(wxMax(2,TheDataset::rows-1));
@@ -394,9 +394,9 @@ void MainFrame::load(bool showLoadDialog, wxString path)
 	m_zSlider->SetMax(wxMax(2,TheDataset::frames-1));
 	m_zSlider->SetValue( TheDataset::frames/2);
 	m_tSlider->SetValue(10);
-	
+
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-		
+
 	if (m_datasetListCtrl->GetItemCount() == 1)
 	{
 		m_scene->assignTextures();
@@ -434,7 +434,7 @@ void MainFrame::updateTreeDS(int i)
 	{
 	case Head_byte:
 	case Head_short:
-		info->m_treeId = m_treeWidget->AppendItem(m_tDatasetId, info->getName(), 
+		info->m_treeId = m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
 				-1, -1, new MyTreeItemData(info));
 		break;
 	case Overlay:
@@ -454,7 +454,7 @@ void MainFrame::updateTreeDS(int i)
 				-1, -1, new MyTreeItemData(info));
 		break;
 	}
-	
+
 }
 
 void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
@@ -465,7 +465,7 @@ void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnGLEvent( wxCommandEvent &event )
 {
 	wxPoint pos, newpos;
-	
+
 	switch (event.GetInt())
 	{
 	case axial:
@@ -485,7 +485,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		break;
 	case mainView:
 		int delta = m_mainGL->getDelta();
-		
+
 		switch (m_mainGL->getPicked())
 		{
 		case axial:
@@ -508,7 +508,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 }
 
 void MainFrame::OnMouseEvent(wxMouseEvent& event)
-{	
+{
 	this->Refresh();
 }
 
@@ -518,7 +518,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	int height = this->GetClientSize().y;
 	NAV_SIZE = wxMin(255, height/4);
 	NAV_GL_SIZE = NAV_SIZE-4;
-	
+
 	m_leftWindowHolder->SetDefaultSize(wxSize(150 + NAV_SIZE, height));
 	m_leftWindowTop->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
 	m_leftWindowBottom->SetDefaultSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
@@ -529,7 +529,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_middleNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_bottomNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_extraNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
-	
+
 	/* resize sliders */
 	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
@@ -541,13 +541,13 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_datasetListCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x - 140);
 	m_datasetListCtrl->SetColumnWidth(2, 80);
 	m_datasetListCtrl->SetColumnWidth(3, 20);
-	
+
 	/* resize main gl window */
-	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x), 
+	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x),
 			this->GetClientSize().y);
 	m_rightWindowHolder->SetDefaultSize(wxSize(mainSize, mainSize));
 	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
-	
+
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 
 #if wxUSE_MDI_ARCHITECTURE
@@ -580,7 +580,7 @@ void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 {
 	float threshold = (float)m_tSlider->GetValue()/100.0;
-		
+
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
 	m_datasetListCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
@@ -632,7 +632,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 {
 	if (!m_scene) return;
 	if (m_treeWidget->GetChildrenCount(m_tFiberId) == 0) return;
-		
+
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 	if (m_treeWidget->GetItemText(tBoxId) == wxT("box"))
@@ -650,7 +650,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 {
 	if (!m_scene) return;
 	if (m_treeWidget->GetChildrenCount(m_tFiberId) == 0) return;
-	
+
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
@@ -667,7 +667,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 		wxTreeItemIdValue cookie = 0;
 		DatasetInfo *fibers = (DatasetInfo*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
 		int lines = fibers->m_curves->getLineCount();
-		
+
 		Vector3fT v2 = {m_xSlider->GetValue()-TheDataset::columns/2,
 				m_ySlider->GetValue()-TheDataset::rows/2,
 				m_zSlider->GetValue()-TheDataset::frames/2};
@@ -689,11 +689,11 @@ void MainFrame::OnHideSelBoxes(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/t1_1mm.hea"));
-	//load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/overlay_swap.hea"));
-	//load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/rgb.hea"));
-	//load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/s1_Rwhite.mesh"));
-	load(false, wxT("/home/ralph/bin/devel/workspace/diplom/data/dwi_188_1_7.fib"));
+	//load(false, wxT("/home/ralph/workspace/diplom/data/t1_1mm.hea"));
+	//load(false, wxT("/home/ralph/workspace/diplom/data/overlay_swap.hea"));
+	//load(false, wxT("/home/ralph/workspace/diplom/data/rgb.hea"));
+	//load(false, wxT("/home/ralph/workspace/diplom/data/s1_Rwhite.mesh"));
+	//load(false, wxT("/home/ralph/workspace/diplom/data/dwi_188_1_7.fib"));
 }
 
 void MainFrame::OnReloadShaders(wxCommandEvent& event)
@@ -705,7 +705,7 @@ void MainFrame::OnNew(wxCommandEvent& event)
 {
 	m_datasetListCtrl->DeleteAllItems();
 	m_mainGL->invalidate();
-	
+
 	TheDataset::columns = 1;
     TheDataset::rows = 1;
     TheDataset::frames = 1;
@@ -713,10 +713,10 @@ void MainFrame::OnNew(wxCommandEvent& event)
 
 	delete m_scene;
 	m_scene = new TheScene();
-	
+
 	m_scene->setDataListCtrl(m_datasetListCtrl);
 	m_scene->setMainGLContext(new wxGLContext(m_mainGL));
-	
+
 	m_mainGL->setScene(m_scene);
 	m_gl0->setScene(m_scene);
 	m_gl1->setScene(m_scene);
@@ -727,7 +727,7 @@ void MainFrame::OnNew(wxCommandEvent& event)
 void MainFrame::updateStatusBar()
 {
 	wxString sbString0 = wxT("");
-	sbString0 = wxString::Format(wxT("Axial: %d Coronal: %d Sagittal: %d"),m_zSlider->GetValue(), m_ySlider->GetValue(), m_xSlider->GetValue()); 
+	sbString0 = wxString::Format(wxT("Axial: %d Coronal: %d Sagittal: %d"),m_zSlider->GetValue(), m_ySlider->GetValue(), m_xSlider->GetValue());
 	m_statusBar->SetStatusText(sbString0,0);
 }
 
@@ -798,7 +798,7 @@ void MainFrame::OnListItemUp(wxCommandEvent& event)
 	if (item > 0) m_scene->swapTextures(item, item -1);
 	refreshAllGLWidgets();
 }
-    
+
 void MainFrame::OnListItemDown(wxCommandEvent& event)
 {
 	long item = m_datasetListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
