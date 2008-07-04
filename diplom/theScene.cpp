@@ -1,6 +1,7 @@
 #include "theScene.h"
 #include "myListCtrl.h"
 #include "point.h"
+#include "surface.h"
 
 TheScene::TheScene()
 {
@@ -700,8 +701,9 @@ void TheScene::drawPoints()
 	m_meshShader->setUniInt("showFS", true);
 	m_meshShader->setUniInt("useTex", false);
 
-
+	std::vector< std::vector< double > > givenPoints;
 	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
+
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	for (int i = 0 ; i < countPoints ; ++i)
@@ -709,10 +711,18 @@ void TheScene::drawPoints()
 		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
 		Point *point = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData();
 		point->draw();
+		std::vector< double > p;
+		p.push_back(point->getCenter().s.X);
+		p.push_back(point->getCenter().s.Y);
+		p.push_back(point->getCenter().s.Z);
+		givenPoints.push_back(p);
 	}
-
 	switchOffLights();
 	m_meshShader->release();
+
+	Surface *surf = new Surface();
+	surf->execute(givenPoints);
+
 	glPopAttrib();
 
 }

@@ -2,6 +2,9 @@
 #include "math.h"
 #include "Fantom/FMatrix.hh"
 #include "Fantom/FBSplineSurface.hh"
+
+#include "GL/glew.h"
+
 Surface::Surface()
 {
 	m_radius = 3.0;
@@ -126,14 +129,11 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
   return;
 }
 
-void Surface::execute ()
+void Surface::execute (std::vector< std::vector< double > > givenPoints)
 {
-		std::vector< std::vector< double > > givenPoints;
+
 		std::vector< std::vector< double > > deBoorPoints;
 		std::vector< std::vector< double > > splinePoints;
-
-		//loadPointsFromFile("/u/oesterling/shk/FAnToM/visAlgos/Testy/pointsSurface", givenPoints);
-		//loadPointsFromFile(fileName.c_str(), givenPoints);
 
 		FTensor myTensor = getCovarianceMatrix(givenPoints);
 
@@ -231,7 +231,6 @@ void Surface::execute ()
 				vertices.push_back((z+1) * renderpointsPerCol + x + 1);
 			}
 		}
-
 		/*
 		shared_ptr< FCellDefinitions3DTriangulation > cellDefinitions(new FCellDefinitions3DTriangulation( splinePoints.size(), "grid", vertices, true ));
 
@@ -242,5 +241,17 @@ void Surface::execute ()
 
 		theDataSet->addTensorField( tensorField );
 		*/
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glColor3f(1.0, 0.2, 0.2);
+		glBegin (GL_TRIANGLES);
+		for (uint i = 0 ; i < vertices.size() ; ++i)
+		{
+			std::vector< double > p = splinePoints[vertices[i]];
+			double x = p[0];
+			double y = p[1];
+			double z = p[2];
+			glVertex3f(x,y,z);
+		}
+		glEnd();
 }
 

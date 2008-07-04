@@ -10,7 +10,7 @@ public:
 	Surface();
 	~Surface() {};
 
-	void execute();
+	void execute(std::vector< std::vector< double > > givenPoints);
 
 private:
 

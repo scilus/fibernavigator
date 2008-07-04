@@ -1,0 +1,559 @@
+//---------------------------------------------------------------------------
+//
+// Project:   FAnToM
+// Module:    $RCSfile: FMatrix.icc,v $
+// Language:  C++
+// Date:      $Date: 2004/03/17 10:23:24 $
+// Author:    $Author: hlawit $
+// Version:   $Revision: 1.17 $
+//
+//--------------------------------------------------------------------------- 
+
+#ifndef __FMatrix_icc_defined
+#define __FMatrix_icc_defined
+
+#include <cmath>
+#include "FException.hh"
+#include "FRefArray.hh"
+#include "FTensor.hh"
+
+#include <ctype.h>
+
+#ifdef OUTLINE
+#define inline
+#endif
+
+//---------------------------------------------------------------------------
+
+inline FMatrix::FMatrix()
+{
+  dimy = 0;
+  dimx = 0;
+  sizeOfArray=0;
+  comp = 0;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix::FMatrix(const FMatrix& m)
+{
+  dimx = m.dimx;
+  dimy = m.dimy;  
+  unsigned int s = dimx*dimy;
+
+  comp = new double[s];
+  sizeOfArray = s;
+  for(unsigned int i=0; i<s; i++)
+    comp[i] = m.comp[i];
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix::FMatrix(const FTensor& m) 
+{
+  dimx = dimy = m.getDimension();
+  comp = new double[dimx*dimy];
+  sizeOfArray = dimx*dimy;
+
+  for(unsigned int i=0; i<dimx; i++)
+    for(unsigned int j=0; j<dimy; j++)
+      comp[i*dimx + j] = m(i,j);
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix::FMatrix(positive m, positive n)
+{
+  dimy=m; dimx=n; 
+  comp = new double[m*n];
+  sizeOfArray = m*n;
+  memset(comp, 0, sizeOfArray*sizeof(double));
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix::FMatrix(positive m, positive n, const double ref[])
+{ 
+  dimy=m; dimx=n; 
+  comp = new double[m*n];
+  sizeOfArray = m*n;
+
+  for(unsigned int i=0; i<(m*n); i++)
+    comp[i] = ref[i];
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix::FMatrix(positive m)
+{ 
+  dimy=dimx=m; 
+  comp = new double[m*m];
+  sizeOfArray = m*m;
+  memset(comp, 0, sizeOfArray*sizeof(double));
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix::~FMatrix()
+{
+  if (comp)
+    delete[] comp;
+}
+
+//---------------------------------------------------------------------------
+
+inline double FMatrix::normSquare( void ) const
+{
+  double sum=0;
+  for(unsigned int i=0; i< sizeOfArray; ++i)
+    sum+=comp[i];
+  return sum;
+}
+
+//---------------------------------------------------------------------------
+
+inline double FMatrix::norm( void ) const
+{
+  return sqrt(normSquare());
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix FMatrix::operator *(const double& lamda) const
+{
+  positive i;
+  FMatrix result(*this);  //copy of self
+  
+  for( i=0; i<sizeOfArray; i++ )
+    result.comp[i] *= lamda; // multiply all entries by value...
+
+  return result;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix& FMatrix::operator *=(const double& lamda)
+{
+  for( positive i=0; i<sizeOfArray; i++ )
+    comp[i] *= lamda; // multiply all entries by value...
+
+  return *this;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix operator*(const double &lamda, const FMatrix &m)
+{
+  positive i;
+  FMatrix result(m);  //copy of matrix
+  
+  for( i=0; i<m.sizeOfArray; i++ )
+    result.comp[i] *= lamda; // multiply all entries by value...
+
+  return result;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix& FMatrix::mult (const double &lamda, FMatrix& d) const
+{
+  positive i;
+  for( i=0; i<sizeOfArray; i++ )
+    d[i] = comp[i]*lamda; // multiply all vectors by value...
+
+  return d;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix FMatrix::operator+(const FMatrix &m) const
+{
+  FMatrix result(*this);
+  for( positive i=0; i<sizeOfArray; i++ )
+    result[i] += m[i];  // addition based on the contained vectors
+  
+  return result;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix& FMatrix::operator+=(const FMatrix &m)
+{
+  for( positive i=0; i<sizeOfArray; i++ )
+    comp[i] += m[i];  // addition based on the contained vectors
+  
+  return *this;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix& FMatrix::plus(const FMatrix &m, FMatrix& d) const
+{
+  positive i;
+  for( i=0; i<sizeOfArray; i++ )
+    d[i] = comp[i] + m[i];
+  return d;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix FMatrix::operator-(const FMatrix &m) const
+{
+  FMatrix result(*this);
+  for( positive i=0; i<sizeOfArray; i++ )
+    result[i] -= m[i];  // addition based on the contained vectors
+  
+  return result;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix FMatrix::operator-(void) const
+{
+  FMatrix result(*this);
+  for( positive i=0; i<sizeOfArray; i++ )
+    result[i] = -result[i];  // addition based on the contained vectors
+  
+  return result;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix& FMatrix::operator-=(const FMatrix &m)
+{
+  for( positive i=0; i<sizeOfArray; i++ )
+    comp[i] -= m[i];  // addition based on the contained vectors
+  
+  return *this;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix& FMatrix::minus(const FMatrix &m, FMatrix& d) const
+{
+  positive i;
+  for( i=0; i<sizeOfArray; i++ )
+    d[i] = comp[i] - m[i];
+  return d;
+}
+
+//---------------------------------------------------------------------------
+
+inline const double& FMatrix::operator () (positive m, positive n) const
+{
+  return comp[m*dimx+n];
+}
+
+//---------------------------------------------------------------------------
+
+inline double& FMatrix::operator () (positive m, positive n)
+{
+  return comp[m*dimx+n];
+}
+
+//---------------------------------------------------------------------------
+
+inline const double& FMatrix::operator[](positive m) const
+{
+  return comp[m];
+}
+//---------------------------------------------------------------------------
+
+inline double& FMatrix::operator[](positive m)
+{
+  return comp[m];
+}
+
+
+//---------------------------------------------------------------------------
+
+inline FMatrix& FMatrix::operator=(const FMatrix& m)
+{
+  dimx = m.dimx;
+  dimy = m.dimy;
+
+  // both matrices match ? -> just copy elements
+  if(m.sizeOfArray!=sizeOfArray)
+    {
+      sizeOfArray=m.sizeOfArray;
+      delete[] comp;
+      comp = new double[sizeOfArray]; 
+    }
+
+  memcpy( comp, m.comp, sizeOfArray * sizeof (double));
+  return *this;
+}
+
+//---------------------------------------------------------------------------
+
+inline positive FMatrix::getDimensionX(void) const
+{
+  return ( dimx );
+}
+
+//---------------------------------------------------------------------------
+
+inline positive FMatrix::getDimensionY(void) const // Number of row-vectors in matrix
+{
+  return ( dimy );
+}
+
+//---------------------------------------------------------------------------
+
+inline unsigned int FMatrix::size(void) const
+{
+  return sizeOfArray;
+}
+
+//---------------------------------------------------------------------
+
+// bobach
+inline FMatrix FMatrix::transposed(void) const
+{
+  FMatrix result(dimx, dimy);
+
+  for (positive i=0; i<dimy; i++)
+    for (positive j=0; j<dimx; j++)
+      result.comp[j*dimy+i]=comp[i*dimx+j];
+
+  return result;
+}
+
+//---------------------------------------------------------------------------
+  
+// bobach
+inline FMatrix& FMatrix::transpose(void)
+{
+  double *tmp = new double[sizeOfArray];
+  double *src, *dst;
+
+  for (positive i=0; i<dimy; i++)
+    {
+      dst=&tmp[i];
+      src=&comp[i*dimx];
+      for (positive j=0; j<dimx; j++)
+      {
+        (*dst) = (*src);
+        dst += dimy; src ++;
+      }
+    }
+  
+  positive t=dimx;
+  dimx=dimy;
+  dimy=t;
+  
+  delete [] comp;
+  comp=tmp;
+
+  return *this;
+}
+
+//---------------------------------------------------------------------------
+
+inline FArray& operator*=(FArray& v, const FMatrix &m)
+{
+  positive i,j;
+  double *dst, *src;
+
+  positive newSize = m.getDimensionX();
+  
+  double* result = new double[newSize];
+  memset(result, 0, newSize*sizeof(double));
+
+  dst=&result[0];
+  for ( i=0; i<newSize; i++)
+    {
+      src=&m.comp[i];
+      for ( j=0; j<v.getDimension(); j++)
+        {
+          (*dst)+=v.comp[j]*(*src);
+          src += m.dimx;
+        }
+      dst++;
+      
+    }
+
+  
+  delete[] v.comp;
+  v.comp = result;
+  
+  v.sizeOfArray = newSize;
+  
+  return v;
+}
+
+//---------------------------------------------------------------------------
+
+inline FArray operator*(const FArray& v, const FMatrix &m)
+{
+  positive i,j;
+  double *dst, *src;
+
+  positive newSize = m.dimx;
+  
+  FVector result(newSize); // should be initialized to zero
+
+  dst=&result.comp[0];
+  for ( i=0; i<m.dimx; i++)
+    {
+      src=&m.comp[i];
+      *dst=0;
+      for ( j=0; j<m.dimy; j++)
+        {
+          (*dst)+=v.comp[j]*(*src);
+          src += m.dimx;
+        }
+      dst++;
+    }
+  return result;
+}
+
+//---------------------------------------------------------------------------
+
+inline void FMatrix::setRow( positive i, const FArray &values )
+{
+  for ( unsigned int x=0; x< dimx; ++x )
+  {
+    comp[ dimx*i+x ] = values[ x ];
+  }
+}
+
+//---------------------------------------------------------------------------
+
+inline void FMatrix::setColumn( positive i, const FArray &values )
+{
+  for ( unsigned int x=0; x< dimy; ++x )
+  {
+    comp[ i+dimx*x ] = values[ x ];
+  }
+}
+
+//---------------------------------------------------------------------------
+
+inline FArray FMatrix::getColumn( positive c ) const //< slow!
+{
+  FArray a( dimy );
+  for ( unsigned int i=0; i< dimy; ++i )
+  {
+    a[ i ] = comp[ c+dimx*i ];
+  }
+  return a;
+}
+
+//---------------------------------------------------------------------------
+
+inline FMatrix& FMatrix::setSubMatrix( unsigned int j, unsigned int i, const FMatrix &sub)
+{
+  for(unsigned int jj = 0; jj < sub.getDimensionY(); ++jj)
+  {
+      unsigned int row = j+jj;
+      unsigned int thisindex = row*this->getDimensionX()+i;
+      unsigned int thatindex = jj*sub.getDimensionX();
+      memcpy( &comp[thisindex], &sub.comp[thatindex], sub.getDimensionX() * sizeof (double));
+  }
+ 
+  return *this;
+}
+
+
+inline void FMatrix::getSubMatrix( FMatrix &sub, unsigned int i, unsigned int j)
+{
+  for(unsigned int jj = 0; jj < sub.getDimensionY(); ++jj)
+  {
+      unsigned int row = j+jj;
+      unsigned int thisindex = row*this->getDimensionX()+i;
+      unsigned int thatindex = jj*sub.getDimensionX();
+      memcpy( &sub.comp[thatindex], &comp[thisindex],  sub.getDimensionX() * sizeof (double));
+  }
+//  return *this;
+}
+
+#define SIGNUM(a) ((a>=0)?1:-1)
+// S(Matrix ^k) < delta mit S(A) = \sum _{j,j=1, j!=j}^n A_{i,j}
+inline void FMatrix::cyclicJacobi(FMatrix &v, const double epsSquare, unsigned int nbIter)
+{
+  const unsigned int n = getDimensionX();
+  FMatrix& a = (*this);
+
+  const double delta= 1e-5;
+
+  // set v to diagonal matrix
+  v.resize(n,n);
+  for(unsigned int i=0; i< n; ++i)
+  {
+    for(unsigned int j=0; j<n; ++j )
+    {
+      v(i,j) = 0;
+    }
+    v(i,i) = 1;
+  }
+
+  for(unsigned int iter=0; iter < nbIter; ++iter)
+  {
+//cycle:
+    double sum = 0;
+    for( unsigned int i=1; i<n; ++i) // yes 1
+      for( unsigned int j=0; j<i; ++j)
+        sum += (*this)(i,j)*(*this)(i,j);
+
+//test:
+    if( 2*sum < epsSquare ) break; // goto stop;
+    
+    double theta;
+    double t;
+    for( unsigned int p=0; p<n-1; ++p)
+    {
+      for(unsigned int q=p+1; q<n; ++q)
+      {
+        if( fabs((*this)(p,q)) >= delta*sum )
+        {
+          theta =( (*this)(q,q)-(*this)(p,p))/(2*(*this)(q,p));
+          t = 1;
+          if( fabs(theta) > delta )
+          {
+            t=1.0/(theta+SIGNUM(theta)*sqrt(theta*theta+1));
+          } // ?
+          double c=1.0/sqrt(1+t*t);
+          double s=c*t;
+          double r=s/(1.0+c);
+          (*this)(p,p)-= t*a(q,p);
+          (*this)(q,q)+= t*a(q,p);
+          (*this)(q,p)=0;
+
+          double g,h;
+          for(unsigned int j=0; j<p; ++j)
+          {
+            g=a(q,j)+r*a(p,j); h=a(p,j)-r*a(q,j);
+            (*this)(p,j) -=s*g; (*this)(q,j)+=s*h;
+          }
+
+          for(unsigned int i=p+1;i<q; ++i)
+          {
+            g=a(q,i)+r*a(i,p); h= a(i,p)-r*a(q,i);
+            a(i,p)-=s*g; a(q,i)+=s*h;
+          }
+
+          for(unsigned int i=q+1; i<n; ++i)
+          {
+            g=a(i,q)+r*a(i,p); h= a(i,p)-r*a(i,q);
+            a(i,p)-=s*g; a(i,q)+= s*h;
+          }
+
+          for(unsigned int i=0; i<n; ++i)
+          {
+            g=v(i,q)+r*v(i,p); h=v(i,p)-r*v(i,q);
+            v(i,p)-=s*g; v(i,q)+=s*h;
+          }
+        }
+      }
+      //goto cycle;
+    }
+  }
+//stop:
+}
+#undef SIGNUM
+
+
+#undef inline
+
+#endif // __FMatrix_icc_defined
