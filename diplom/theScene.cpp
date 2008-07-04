@@ -718,8 +718,12 @@ void TheScene::drawPoints()
 		givenPoints.push_back(p);
 	}
 	switchOffLights();
-
+	m_meshShader->release();
+	glPopAttrib();
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	m_meshShader->bind();
 	m_meshShader->setUniInt("useTex", true);
+	glColor3f(1.0, 1.0, 1.0);
 	Surface *surf = new Surface();
 	surf->execute(givenPoints);
 

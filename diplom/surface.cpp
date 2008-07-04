@@ -132,126 +132,115 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 void Surface::execute (std::vector< std::vector< double > > givenPoints)
 {
 
-		std::vector< std::vector< double > > deBoorPoints;
-		std::vector< std::vector< double > > splinePoints;
+	std::vector< std::vector< double > > deBoorPoints;
+	std::vector< std::vector< double > > splinePoints;
 
-		FTensor myTensor = getCovarianceMatrix(givenPoints);
+	FTensor myTensor = getCovarianceMatrix(givenPoints);
 
-		FArray eigenValues(3);
-		FArray eigenVectors[3];
-		eigenVectors[0] = FArray(3);
-		eigenVectors[1] = FArray(3);
-		eigenVectors[2] = FArray(3);
+	FArray eigenValues(3);
+	FArray eigenVectors[3];
+	eigenVectors[0] = FArray(3);
+	eigenVectors[1] = FArray(3);
+	eigenVectors[2] = FArray(3);
 
-		myTensor.getEigenSystem(eigenValues, eigenVectors);
+	myTensor.getEigenSystem(eigenValues, eigenVectors);
 
-		eigenVectors[0].normalize();
-		eigenVectors[1].normalize();
-		eigenVectors[2].normalize();
+	eigenVectors[0].normalize();
+	eigenVectors[1].normalize();
+	eigenVectors[2].normalize();
 
-		FTensor::sortEigenvectors(eigenValues, eigenVectors);
+	FTensor::sortEigenvectors(eigenValues, eigenVectors);
 
-		FMatrix transMatrix = FMatrix(3,3);
-		transMatrix(0,0) = eigenVectors[1][0];
-		transMatrix(0,1) = eigenVectors[1][1];
-		transMatrix(0,2) = eigenVectors[1][2];
+	FMatrix transMatrix = FMatrix(3,3);
+	transMatrix(0,0) = eigenVectors[1][0];
+	transMatrix(0,1) = eigenVectors[1][1];
+	transMatrix(0,2) = eigenVectors[1][2];
 
-		transMatrix(1,0) = eigenVectors[2][0];
-		transMatrix(1,1) = eigenVectors[2][1];
-		transMatrix(1,2) = eigenVectors[2][2];
+	transMatrix(1,0) = eigenVectors[2][0];
+	transMatrix(1,1) = eigenVectors[2][1];
+	transMatrix(1,2) = eigenVectors[2][2];
 
-		transMatrix(2,0) = eigenVectors[0][0];
-		transMatrix(2,1) = eigenVectors[0][1];
-		transMatrix(2,2) = eigenVectors[0][2];
+	transMatrix(2,0) = eigenVectors[0][0];
+	transMatrix(2,1) = eigenVectors[0][1];
+	transMatrix(2,2) = eigenVectors[0][2];
 
-		std::vector< std::vector< double > >::iterator pointsIt;
+	std::vector< std::vector< double > >::iterator pointsIt;
 
-		//translate and orientate given points to origin
-		for( pointsIt = givenPoints.begin(); pointsIt != givenPoints.end(); pointsIt++)
+	//translate and orientate given points to origin
+	for( pointsIt = givenPoints.begin(); pointsIt != givenPoints.end(); pointsIt++)
+	{
+		(*pointsIt)[0] -= m_xAverage;
+		(*pointsIt)[1] -= m_yAverage;
+		(*pointsIt)[2] -= m_zAverage;
+
+		FArray dmy(*pointsIt);
+
+		FVector result = transMatrix * dmy;
+		(*pointsIt)[0] = result[0];
+		(*pointsIt)[1] = result[1];
+		(*pointsIt)[2] = result[2];
+	}
+
+	//get de Boor points using shepard's method
+	getSplineSurfaceDeBoorPoints(givenPoints, deBoorPoints, m_numDeBoorRows, m_numDeBoorCols);
+
+	//translate and orientate de Boor points back
+	transMatrix.invert();
+	for( pointsIt = deBoorPoints.begin(); pointsIt != deBoorPoints.end(); pointsIt++)
+	{
+		FArray dmy(*pointsIt);
+
+		FVector result = transMatrix * dmy;
+		(*pointsIt)[0] = result[0];
+		(*pointsIt)[1] = result[1];
+		(*pointsIt)[2] = result[2];
+
+		(*pointsIt)[0] += m_xAverage;
+		(*pointsIt)[1] += m_yAverage;
+		(*pointsIt)[2] += m_zAverage;
+	}
+
+	FBSplineSurface splineSurface(m_order, m_order, deBoorPoints, m_numDeBoorCols, m_numDeBoorRows);
+
+	splineSurface.samplePoints(splinePoints, m_sampleRateT, m_sampleRateU);
+
+	std::vector< double > positions;
+	for( std::vector< std::vector< double > >::iterator posIt = splinePoints.begin(); posIt != splinePoints.end(); posIt++)
+	{
+		positions.push_back((*posIt)[0]);
+		positions.push_back((*posIt)[1]);
+		positions.push_back((*posIt)[2]);
+	}
+
+	//shared_ptr< FPositionSet > positionSet( new FPositionSet3DArbitrary( positions ));
+	std::vector< int > vertices;
+
+	int renderpointsPerCol = splineSurface.getNumSamplePointsU();
+	int renderpointsPerRow = splineSurface.getNumSamplePointsT();
+
+	for(int z = 0; z < renderpointsPerCol - 1; z++)
+	{
+		for(int x = 0; x < renderpointsPerRow - 1; x++)
 		{
-			(*pointsIt)[0] -= m_xAverage;
-			(*pointsIt)[1] -= m_yAverage;
-			(*pointsIt)[2] -= m_zAverage;
+			vertices.push_back(z * renderpointsPerCol + x);
+			vertices.push_back(z * renderpointsPerCol + x + 1);
+			vertices.push_back((z+1) * renderpointsPerCol + x);
 
-			FArray dmy(*pointsIt);
-
-			FVector result = transMatrix * dmy;
-			(*pointsIt)[0] = result[0];
-			(*pointsIt)[1] = result[1];
-			(*pointsIt)[2] = result[2];
+			vertices.push_back((z+1) * renderpointsPerCol + x);
+			vertices.push_back(z * renderpointsPerCol + x + 1);
+			vertices.push_back((z+1) * renderpointsPerCol + x + 1);
 		}
+	}
 
-		//get de Boor points using shepard's method
-		getSplineSurfaceDeBoorPoints(givenPoints, deBoorPoints, m_numDeBoorRows, m_numDeBoorCols);
-
-		//translate and orientate de Boor points back
-		transMatrix.invert();
-		for( pointsIt = deBoorPoints.begin(); pointsIt != deBoorPoints.end(); pointsIt++)
-		{
-			FArray dmy(*pointsIt);
-
-			FVector result = transMatrix * dmy;
-			(*pointsIt)[0] = result[0];
-			(*pointsIt)[1] = result[1];
-			(*pointsIt)[2] = result[2];
-
-			(*pointsIt)[0] += m_xAverage;
-			(*pointsIt)[1] += m_yAverage;
-			(*pointsIt)[2] += m_zAverage;
-		}
-
-		FBSplineSurface splineSurface(m_order, m_order, deBoorPoints, m_numDeBoorCols, m_numDeBoorRows);
-
-		splineSurface.samplePoints(splinePoints, m_sampleRateT, m_sampleRateU);
-
-		std::vector< double > positions;
-		for( std::vector< std::vector< double > >::iterator posIt = splinePoints.begin(); posIt != splinePoints.end(); posIt++)
-		{
-			positions.push_back((*posIt)[0]);
-			positions.push_back((*posIt)[1]);
-			positions.push_back((*posIt)[2]);
-		}
-
-		//shared_ptr< FPositionSet > positionSet( new FPositionSet3DArbitrary( positions ));
-		std::vector< int > vertices;
-
-		int renderpointsPerCol = splineSurface.getNumSamplePointsU();
-		int renderpointsPerRow = splineSurface.getNumSamplePointsT();
-
-		for(int z = 0; z < renderpointsPerCol - 1; z++)
-		{
-			for(int x = 0; x < renderpointsPerRow - 1; x++)
-			{
-				vertices.push_back(z * renderpointsPerCol + x);
-				vertices.push_back(z * renderpointsPerCol + x + 1);
-				vertices.push_back((z+1) * renderpointsPerCol + x);
-
-				vertices.push_back((z+1) * renderpointsPerCol + x);
-				vertices.push_back(z * renderpointsPerCol + x + 1);
-				vertices.push_back((z+1) * renderpointsPerCol + x + 1);
-			}
-		}
-		/*
-		shared_ptr< FCellDefinitions3DTriangulation > cellDefinitions(new FCellDefinitions3DTriangulation( splinePoints.size(), "grid", vertices, true ));
-
-		shared_ptr<FGrid> grid = FGrid::constructSuitableGrid( "grid", cellDefinitions, positionSet );
-
-		shared_ptr< FTensorSet > tensorSet(new  FTensorSet(1, 0, shared_ptr<FDummyArray>( new FDummyArray(0., splinePoints.size())), "surface tensor set"));
-		shared_ptr<FTensorField> tensorField( new FTensorField("surface", tensorSet, grid, false));
-
-		theDataSet->addTensorField( tensorField );
-		*/
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//glColor3f(1.0, 0.2, 0.2);
-		glBegin (GL_TRIANGLES);
-		for (uint i = 0 ; i < vertices.size() ; ++i)
-		{
-			std::vector< double > p = splinePoints[vertices[i]];
-			double x = p[0];
-			double y = p[1];
-			double z = p[2];
-			glVertex3f(x,y,z);
-		}
-		glEnd();
+	glBegin (GL_TRIANGLES);
+	for (uint i = 0 ; i < vertices.size() ; ++i)
+	{
+		std::vector< double > p = splinePoints[vertices[i]];
+		double x = p[0];
+		double y = p[1];
+		double z = p[2];
+		glVertex3f(x,y,z);
+	}
+	glEnd();
 }
 
