@@ -2,6 +2,7 @@
 #include "math.h"
 #include "Fantom/FMatrix.hh"
 #include "Fantom/FBSplineSurface.hh"
+#include "surface.h"
 
 #include "GL/glew.h"
 

@@ -1,7 +1,6 @@
 #include "theScene.h"
 #include "myListCtrl.h"
 #include "point.h"
-#include "surface.h"
 
 TheScene::TheScene()
 {
@@ -415,6 +414,9 @@ void TheScene::renderScene()
 		drawPoints();
 	}
 
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+		renderSurface();
+	glPopAttrib();
 }
 
 void TheScene::renderXSlize()
@@ -509,7 +511,6 @@ void TheScene::renderMesh()
 
 void TheScene::renderCurves()
 {
-
 	m_curveShader->bind();
 	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
@@ -527,6 +528,27 @@ void TheScene::renderCurves()
 		}
 	}
 	m_curveShader->release();
+}
+
+void TheScene::renderSurface()
+{
+	m_meshShader->bind();
+	setMeshShaderVars();
+
+	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		float c = (float)info->getThreshold();
+		glColor3f(c,c,c);
+		m_meshShader->setUniInt("showFS", info->getShowFS());
+		m_meshShader->setUniInt("useTex", info->getUseTex());
+
+		if (info->getType() == Surface_ && info->getShow())
+		{
+			info->drawSurface(m_treeWidget, m_tPointId);
+		}
+	}
+	m_meshShader->release();
 }
 
 void TheScene::renderNavView(int view)
@@ -720,14 +742,4 @@ void TheScene::drawPoints()
 	switchOffLights();
 	m_meshShader->release();
 	glPopAttrib();
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	m_meshShader->bind();
-	m_meshShader->setUniInt("useTex", true);
-	glColor3f(1.0, 1.0, 1.0);
-	Surface *surf = new Surface();
-	surf->execute(givenPoints);
-
-	m_meshShader->release();
-	glPopAttrib();
-
 }

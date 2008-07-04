@@ -56,6 +56,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_COMMAND(TREE_CTRL, wxEVT_TREE_EVENT, MainFrame::OnTreeEvent)
 	/* toggle drawing of points */
 	EVT_MENU(VIEWER_DRAW_POINTS, MainFrame::OnTogglePointMode)
+	EVT_MENU(VIEWER_NEW_SURFACE, MainFrame::OnNewSurface)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -877,4 +878,26 @@ void MainFrame::OnTogglePointMode(wxCommandEvent& event)
 	m_scene->togglePointMode();
 	refreshAllGLWidgets();
 }
+
+void MainFrame::OnNewSurface(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	DatasetInfo *info = new DatasetInfo();
+	Surface *surface = new Surface();
+	info->m_surface = surface;
+	info->setType(Surface_);
+	info->setThreshold(0.5);
+	info->setName(wxT("spline surface"));
+
+	int i = m_datasetListCtrl->GetItemCount();
+	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
+	m_datasetListCtrl->SetItem(i, 1, info->getName());
+	m_datasetListCtrl->SetItem(i, 2, wxT("0.50"));
+	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
+	m_datasetListCtrl->SetItemData(i, (long)info);
+	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
+	refreshAllGLWidgets();
+}
+
 

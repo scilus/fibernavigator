@@ -16,6 +16,7 @@
 
 #include "mesh.h"
 #include "curves.h"
+#include "surface.h"
 
 enum DatasetType {
 	ERROR = -1,
@@ -26,6 +27,7 @@ enum DatasetType {
 	RGB,
 	Mesh_,
 	Curves_,
+	Surface_,
 };
 
 class DatasetInfo
@@ -47,31 +49,32 @@ private:
 	float m_threshold;
 	bool m_show;
 	bool m_showFS;	// show front sector for meshs
-	bool m_useTex; 	// color mesh with textures loaded, 
+	bool m_useTex; 	// color mesh with textures loaded,
 					// if false use colormap on threshold value
 	GLuint *m_bufferObjects;
-	
-public:	
+
+public:
 	wxUint8 *m_byteDataset;
 	wxUint16 *m_shortDataset;
 	wxUint8 *m_rgbDataset;
 	float *m_floatDataset;
 	Mesh* m_mesh;
 	Curves* m_curves;
+	Surface* m_surface;
 	wxTreeItemId m_treeId;
-	
-	
+
+
 	DatasetInfo();
 	~DatasetInfo();
-	
+
 	bool load(wxString filename);
-	
+
 	void generateTexture();
 	void generateGeometry(int, int, int);
 	void drawFibers();
-	void drawkdTree();
+	void drawSurface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId);
 	void initializeBuffer();
-	
+
 	void setHighestValue(float value) {m_highest_value = value;};
 	void setThreshold(float value) {m_threshold = value;};
 	void setType(int type) {m_type = type;};
@@ -79,7 +82,7 @@ public:
 	bool toggleShow() {m_show = !m_show; return m_show;};
 	bool toggleShowFS() {m_showFS = !m_showFS; return m_showFS;};
 	bool toggleUseTex() {m_useTex = !m_useTex; return m_useTex;};
-	
+
 	int getType() {return m_type;};
 	int getLength() {return m_length;};
 	int getBands() {return m_bands;};

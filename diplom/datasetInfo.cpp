@@ -1,5 +1,7 @@
 #include "datasetInfo.h"
 #include <GL/glew.h>
+#include "point.h"
+#include "myListCtrl.h"
 
 DatasetInfo::DatasetInfo()
 {
@@ -70,43 +72,43 @@ bool DatasetInfo::load(wxString filename)
 			sValue = sLine.AfterLast(' ');
 			sLabel.Trim(false);
 			sLabel.Trim();
-			if (sLabel.Contains(wxT("length:"))) 
+			if (sLabel.Contains(wxT("length:")))
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				m_length = (int)lTmpValue;
 			}
-			if (sLabel == wxT("nbands:")) 
+			if (sLabel == wxT("nbands:"))
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				m_bands = (int)lTmpValue;
 			}
-			if (sLabel == wxT("nframes:")) 
+			if (sLabel == wxT("nframes:"))
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				m_frames = (int)lTmpValue;
 			}
-			if (sLabel == wxT("nrows:")) 
+			if (sLabel == wxT("nrows:"))
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				m_rows = (int)lTmpValue;
 			}
-			if (sLabel == wxT("ncolumns:")) 
+			if (sLabel == wxT("ncolumns:"))
 			{
 				flag = sValue.ToLong(&lTmpValue, 10);
 				m_columns = (int)lTmpValue;
 			}
 			if (sLabel == wxT("repn:"))
-			//if (sLabel.Contains(wxT("repn:"))) 
+			//if (sLabel.Contains(wxT("repn:")))
 			{
 				m_repn = sValue;
 			}
-			if (sLabel.Contains(wxT("voxel:"))) 
+			if (sLabel.Contains(wxT("voxel:")))
 			{
 				wxString sNumber;
 				sValue = sLine.AfterLast(':');
 				sValue = sValue.BeforeLast('\"');
 				sNumber = sValue.AfterLast(' ');
-				flag = sNumber.ToDouble(&m_zVoxel); 
+				flag = sNumber.ToDouble(&m_zVoxel);
 				sValue = sValue.BeforeLast(' ');
 				sNumber = sValue.AfterLast(' ');
 				flag = sNumber.ToDouble(&m_yVoxel);
@@ -117,7 +119,7 @@ bool DatasetInfo::load(wxString filename)
 		}
 	}
 	headerFile.Close();
-	
+
 	if (m_repn.Cmp(wxT("ubyte")) == 0)
 	{
 		if (m_bands / m_frames == 1) {
@@ -131,7 +133,7 @@ bool DatasetInfo::load(wxString filename)
 	else if (m_repn.Cmp(wxT("short")) == 0) m_type = Head_short;
 	else if (m_repn.Cmp(wxT("float")) == 0) m_type = Overlay;
 	else m_type = ERROR;
-	
+
 	is_loaded = flag;
 	return flag;
 }
@@ -141,50 +143,50 @@ void DatasetInfo::generateTexture()
 	switch (m_type)
 	{
 	case Head_byte:
-		glTexImage3D(GL_TEXTURE_3D, 
-			0, 
-			GL_RGBA, 
+		glTexImage3D(GL_TEXTURE_3D,
+			0,
+			GL_RGBA,
 			m_columns,
 			m_rows,
 			m_frames,
-			0, 
-			GL_LUMINANCE, 
+			0,
+			GL_LUMINANCE,
 			GL_UNSIGNED_BYTE,
 			m_byteDataset);
 		break;
 	case Head_short:
-		glTexImage3D(GL_TEXTURE_3D, 
-			0, 
-			GL_RGBA, 
-			m_columns, 
+		glTexImage3D(GL_TEXTURE_3D,
+			0,
+			GL_RGBA,
+			m_columns,
 			m_rows,
 			m_frames,
-			0, 
-			GL_LUMINANCE, 
+			0,
+			GL_LUMINANCE,
 			GL_UNSIGNED_SHORT,
 			m_shortDataset);
 		break;
 	case Overlay:
-		glTexImage3D(GL_TEXTURE_3D, 
-			0, 
-			GL_RGBA, 
-			m_columns, 
+		glTexImage3D(GL_TEXTURE_3D,
+			0,
+			GL_RGBA,
+			m_columns,
 			m_rows,
-			m_frames,			
-			0, 
-			GL_LUMINANCE, 
+			m_frames,
+			0,
+			GL_LUMINANCE,
 			GL_FLOAT,
 			m_floatDataset);
 		break;
 	case RGB:
-		glTexImage3D(GL_TEXTURE_3D, 
-			0, 
-			GL_RGBA, 
-			m_columns, 
+		glTexImage3D(GL_TEXTURE_3D,
+			0,
+			GL_RGBA,
+			m_columns,
 			m_rows,
 			m_frames,
-			0, 
-			GL_RGB, 
+			0,
+			GL_RGB,
 			GL_UNSIGNED_BYTE,
 			m_rgbDataset);
 		break;
@@ -202,26 +204,26 @@ void DatasetInfo::generateGeometry(int xOff, int yOff, int zOff)
 			for ( int j = 0 ; j < m_mesh->getCountPolygons() ; ++j)
 			{
 				polygon p = m_mesh->m_polygonArray[j];
-				
-				glNormal3f( 	m_mesh->m_vertexArray[p.v1].nx, 
+
+				glNormal3f( 	m_mesh->m_vertexArray[p.v1].nx,
 								m_mesh->m_vertexArray[p.v1].ny,
 								m_mesh->m_vertexArray[p.v1].nz);
-				glVertex3f( 	m_mesh->m_vertexArray[p.v1].x - xOff, 
-								m_mesh->m_vertexArray[p.v1].y - yOff, 
+				glVertex3f( 	m_mesh->m_vertexArray[p.v1].x - xOff,
+								m_mesh->m_vertexArray[p.v1].y - yOff,
 								m_mesh->m_vertexArray[p.v1].z - zOff);
-				
-				glNormal3f( 	m_mesh->m_vertexArray[p.v2].nx, 
+
+				glNormal3f( 	m_mesh->m_vertexArray[p.v2].nx,
 								m_mesh->m_vertexArray[p.v2].ny,
 								m_mesh->m_vertexArray[p.v2].nz);
-				glVertex3f(	m_mesh->m_vertexArray[p.v2].x - xOff, 
-								m_mesh->m_vertexArray[p.v2].y - yOff, 
+				glVertex3f(	m_mesh->m_vertexArray[p.v2].x - xOff,
+								m_mesh->m_vertexArray[p.v2].y - yOff,
 								m_mesh->m_vertexArray[p.v2].z - zOff);
 
-				glNormal3f( 	m_mesh->m_vertexArray[p.v3].nx, 
+				glNormal3f( 	m_mesh->m_vertexArray[p.v3].nx,
 								m_mesh->m_vertexArray[p.v3].ny,
 								m_mesh->m_vertexArray[p.v3].nz);
-				glVertex3f(	m_mesh->m_vertexArray[p.v3].x - xOff, 
-								m_mesh->m_vertexArray[p.v3].y - yOff, 
+				glVertex3f(	m_mesh->m_vertexArray[p.v3].x - xOff,
+								m_mesh->m_vertexArray[p.v3].y - yOff,
 								m_mesh->m_vertexArray[p.v3].z - zOff);
 			}
 			glEnd();
@@ -264,3 +266,23 @@ void DatasetInfo::initializeBuffer()
 	m_curves->freeArrays();
 }
 
+void DatasetInfo::drawSurface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId)
+{
+	std::vector< std::vector< double > > givenPoints;
+	int countPoints = treeWidget->GetChildrenCount(tPointId, true);
+
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countPoints ; ++i)
+	{
+		id = treeWidget->GetNextChild(tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)treeWidget->GetItemData(id))->getData();
+		std::vector< double > p;
+		p.push_back(point->getCenter().s.X);
+		p.push_back(point->getCenter().s.Y);
+		p.push_back(point->getCenter().s.Z);
+		givenPoints.push_back(p);
+	}
+
+	m_surface->execute(givenPoints);
+}

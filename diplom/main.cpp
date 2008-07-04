@@ -4,9 +4,9 @@
 // Author:      Ralph Schurade
 // Modified by:
 // Created:     03/27/08
-// RCS-ID:      
-// Copyright:   
-// Licence:     
+// RCS-ID:
+// Copyright:
+// Licence:
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -30,6 +30,7 @@
 #include "icons/new.xpm"
 #include "icons/quit.xpm"
 #include "icons/toggleselbox.xpm"
+#include "icons/toggleSurface.xpm"
 #include "icons/gball.xpm"
 
 #include "main.h"
@@ -68,7 +69,7 @@ bool MyApp::OnInit(void)
 
   // Associate the menu bar with the frame
   frame->SetMenuBar(menu_bar);
-     
+
   wxToolBar* toolBar = new wxToolBar( frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxNO_BORDER);
   wxBitmap bmpOpen (fileopen_xpm);
   wxBitmap bmpView1 (view1_xpm);
@@ -79,6 +80,7 @@ bool MyApp::OnInit(void)
   wxBitmap bmpQuit (quit_xpm);
   wxBitmap bmpGBALL (gball_xpm);
   wxBitmap bmpHideSelbox (toggleselbox_xpm);
+  wxBitmap bmpNewSurface (toggle_surface_xpm);
   toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
@@ -94,21 +96,22 @@ bool MyApp::OnInit(void)
   toolBar->AddTool(VIEWER_TOGGLE_SELBOX, bmpHideSelbox , wxT("Toggle activation status of selection box"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
+  toolBar->AddTool(VIEWER_NEW_SURFACE, bmpNewSurface, wxT("New Spline Surface"));
   toolBar->AddSeparator();
-  
+
   toolBar->Realize();
   frame->SetToolBar(toolBar);
-  
+
   wxStatusBar* statusBar = new wxStatusBar(frame, wxID_ANY, wxST_SIZEGRIP);
   frame->SetStatusBar(statusBar);
   int widths[] = {220, 150, -1};
   statusBar->SetFieldsCount(WXSIZEOF(widths), widths);
   frame->setMStatusBar(statusBar);
-    
+
   frame->Show(true);
- 
+
   SetTopWindow(frame);
-  
+
   frame->loadStandard();
 
   return true;
