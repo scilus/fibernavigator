@@ -1,7 +1,7 @@
 #include "surface.h"
-
-/*
-
+#include "math.h"
+#include "Fantom/FMatrix.hh"
+#include "Fantom/FBSplineSurface.hh"
 Surface::Surface()
 {
 	m_radius = 3.0;
@@ -15,20 +15,20 @@ Surface::Surface()
 FTensor Surface::getCovarianceMatrix(std::vector< std::vector< double > > points)
 {
 	FTensor result(3,2,true);
-	xAverage = 0, yAverage = 0, zAverage = 0;
+	m_xAverage = m_yAverage = m_zAverage = 0;
 
 	std::vector< std::vector< double > >::iterator pointsIt;
 	for( pointsIt = points.begin(); pointsIt != points.end(); pointsIt++)
 	{
 		std::vector< double > dmy = *pointsIt;
-		xAverage += dmy[0];
-		yAverage += dmy[1];
-		zAverage += dmy[2];
+		m_xAverage += dmy[0];
+		m_yAverage += dmy[1];
+		m_zAverage += dmy[2];
 	}
 
-	xAverage /= points.size();
-	yAverage /= points.size();
-	zAverage /= points.size();
+	m_xAverage /= points.size();
+	m_yAverage /= points.size();
+	m_zAverage /= points.size();
 
 	/*
     	 /        \
@@ -37,18 +37,18 @@ FTensor Surface::getCovarianceMatrix(std::vector< std::vector< double > > points
    		| ZX ZY ZZ |
     	 \        /
 	 */
-/*	for( pointsIt = points.begin(); pointsIt != points.end(); pointsIt++)
+	for( pointsIt = points.begin(); pointsIt != points.end(); pointsIt++)
 	{
 		std::vector< double > dmy = *pointsIt;
 
-		result(0,0) += (dmy[0] - xAverage) * (dmy[0] - xAverage); //XX
-		result(0,1) += (dmy[0] - xAverage) * (dmy[1] - yAverage); //XY
-		result(0,2) += (dmy[0] - xAverage) * (dmy[2] - zAverage); //XZ
+		result(0,0) += (dmy[0] - m_xAverage) * (dmy[0] - m_xAverage); //XX
+		result(0,1) += (dmy[0] - m_xAverage) * (dmy[1] - m_yAverage); //XY
+		result(0,2) += (dmy[0] - m_xAverage) * (dmy[2] - m_zAverage); //XZ
 
-		result(1,1) += (dmy[1] - yAverage) * (dmy[1] - yAverage); //YY
-		result(1,2) += (dmy[1] - yAverage) * (dmy[2] - zAverage); //YZ
+		result(1,1) += (dmy[1] - m_yAverage) * (dmy[1] - m_yAverage); //YY
+		result(1,2) += (dmy[1] - m_yAverage) * (dmy[2] - m_zAverage); //YZ
 
-		result(2,2) += (dmy[2] - zAverage) * (dmy[2] - zAverage); //ZZ
+		result(2,2) += (dmy[2] - m_zAverage) * (dmy[2] - m_zAverage); //ZZ
 	}
 
 	result(1,0) = result(0,1);
@@ -105,13 +105,13 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 
 				double xi; //greek alphabet
 
-				if( thisPoint.distance(dmyArray) < radius)
-					xi = 1 - thisPoint.distance(dmyArray) / radius;
+				if( thisPoint.distance(dmyArray) < m_radius)
+					xi = 1 - thisPoint.distance(dmyArray) / m_radius;
 				else
 					xi = 0;
 
-				numerator += (pow(xi, my) * dmy1[1]);
-				denominator += (pow(xi, my));
+				numerator += (pow(xi, m_my) * dmy1[1]);
+				denominator += (pow(xi, m_my));
 			}
 			if( denominator == 0)
 				y = 0;
@@ -128,15 +128,12 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 
 void Surface::execute ()
 {
-	try
-	{
-
 		std::vector< std::vector< double > > givenPoints;
 		std::vector< std::vector< double > > deBoorPoints;
 		std::vector< std::vector< double > > splinePoints;
 
 		//loadPointsFromFile("/u/oesterling/shk/FAnToM/visAlgos/Testy/pointsSurface", givenPoints);
-		loadPointsFromFile(fileName.c_str(), givenPoints);
+		//loadPointsFromFile(fileName.c_str(), givenPoints);
 
 		FTensor myTensor = getCovarianceMatrix(givenPoints);
 
@@ -172,9 +169,9 @@ void Surface::execute ()
 		//translate and orientate given points to origin
 		for( pointsIt = givenPoints.begin(); pointsIt != givenPoints.end(); pointsIt++)
 		{
-			(*pointsIt)[0] -= xAverage;
-			(*pointsIt)[1] -= yAverage;
-			(*pointsIt)[2] -= zAverage;
+			(*pointsIt)[0] -= m_xAverage;
+			(*pointsIt)[1] -= m_yAverage;
+			(*pointsIt)[2] -= m_zAverage;
 
 			FArray dmy(*pointsIt);
 
@@ -185,7 +182,7 @@ void Surface::execute ()
 		}
 
 		//get de Boor points using shepard's method
-		getSplineSurfaceDeBoorPoints(givenPoints, deBoorPoints, numDeBoorRows, numDeBoorCols);
+		getSplineSurfaceDeBoorPoints(givenPoints, deBoorPoints, m_numDeBoorRows, m_numDeBoorCols);
 
 		//translate and orientate de Boor points back
 		transMatrix.invert();
@@ -198,14 +195,14 @@ void Surface::execute ()
 			(*pointsIt)[1] = result[1];
 			(*pointsIt)[2] = result[2];
 
-			(*pointsIt)[0] += xAverage;
-			(*pointsIt)[1] += yAverage;
-			(*pointsIt)[2] += zAverage;
+			(*pointsIt)[0] += m_xAverage;
+			(*pointsIt)[1] += m_yAverage;
+			(*pointsIt)[2] += m_zAverage;
 		}
 
-		FBSplineSurface splineSurface(order, order, deBoorPoints, numDeBoorCols, numDeBoorRows);
+		FBSplineSurface splineSurface(m_order, m_order, deBoorPoints, m_numDeBoorCols, m_numDeBoorRows);
 
-		splineSurface.samplePoints(splinePoints, sampleRateT, sampleRateU);
+		splineSurface.samplePoints(splinePoints, m_sampleRateT, m_sampleRateU);
 
 		std::vector< double > positions;
 		for( std::vector< std::vector< double > >::iterator posIt = splinePoints.begin(); posIt != splinePoints.end(); posIt++)
@@ -215,8 +212,8 @@ void Surface::execute ()
 			positions.push_back((*posIt)[2]);
 		}
 
-		shared_ptr< FPositionSet > positionSet( new FPositionSet3DArbitrary( positions ));
-		std::vector< FIndex > vertices;
+		//shared_ptr< FPositionSet > positionSet( new FPositionSet3DArbitrary( positions ));
+		std::vector< int > vertices;
 
 		int renderpointsPerCol = splineSurface.getNumSamplePointsU();
 		int renderpointsPerRow = splineSurface.getNumSamplePointsT();
@@ -235,6 +232,7 @@ void Surface::execute ()
 			}
 		}
 
+		/*
 		shared_ptr< FCellDefinitions3DTriangulation > cellDefinitions(new FCellDefinitions3DTriangulation( splinePoints.size(), "grid", vertices, true ));
 
 		shared_ptr<FGrid> grid = FGrid::constructSuitableGrid( "grid", cellDefinitions, positionSet );
@@ -243,8 +241,6 @@ void Surface::execute ()
 		shared_ptr<FTensorField> tensorField( new FTensorField("surface", tensorSet, grid, false));
 
 		theDataSet->addTensorField( tensorField );
-
-	}
-	CATCH_N_RETHROW( FException );
+		*/
 }
-*/
+

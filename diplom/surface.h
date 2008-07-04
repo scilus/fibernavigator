@@ -2,6 +2,7 @@
 #define SURFACE_H_
 
 #include <vector>
+#include "Fantom/FTensor.hh"
 
 class Surface {
 
@@ -12,7 +13,7 @@ public:
 	void execute();
 
 private:
-	/*
+
 	FTensor getCovarianceMatrix(std::vector< std::vector< double > > points);
 	void getSplineSurfaceDeBoorPoints(  std::vector< std::vector< double > > &givenPoints,
 										    std::vector< std::vector< double > > &deBoorPoints,
@@ -28,7 +29,7 @@ private:
 	double m_xAverage;
 	double m_yAverage;
 	double m_zAverage;
-	*/
+
 };
 
 
