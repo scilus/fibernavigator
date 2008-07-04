@@ -718,11 +718,12 @@ void TheScene::drawPoints()
 		givenPoints.push_back(p);
 	}
 	switchOffLights();
-	m_meshShader->release();
 
+	m_meshShader->setUniInt("useTex", true);
 	Surface *surf = new Surface();
 	surf->execute(givenPoints);
 
+	m_meshShader->release();
 	glPopAttrib();
 
 }
