@@ -23,47 +23,49 @@ private:
     void OnAbout(wxCommandEvent& event);
     void OnNewWindow(wxCommandEvent& event);
     void OnQuit(wxCommandEvent& event);
-    
+
 	void OnLoad(wxCommandEvent& event);
 	void OnNew(wxCommandEvent& event);
     void OnToggleWindow(wxCommandEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
     void OnGLEvent(wxCommandEvent &event);
-    
+
 	void OnXSliderMoved(wxCommandEvent& event);
     void OnYSliderMoved(wxCommandEvent& event);
     void OnZSliderMoved(wxCommandEvent& event);
     void OnTSliderMoved(wxCommandEvent& event);
-    
+
     void OnToggleView1(wxCommandEvent& event);
     void OnToggleView2(wxCommandEvent& event);
     void OnToggleView3(wxCommandEvent& event);
     void OnToggleSelBox(wxCommandEvent& event);
     void OnNewSelBox(wxCommandEvent& event);
     void OnHideSelBoxes(wxCommandEvent& event);
-    
+
     void OnTogglePointMode(wxCommandEvent& event);
-    
+
     void OnReloadShaders(wxCommandEvent& event);
-    
+
     void OnActivateListItem(wxListEvent& event);
     void OnSelectListItem(wxListEvent& event);
     void OnListItemUp(wxCommandEvent& event);
     void OnListItemDown(wxCommandEvent& event);
-    
+
     void OnSelectTreeItem(wxTreeEvent& event);
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
-    
-    void load(bool, wxString);
+
+    void load(wxString);
+    void load();
+    void load(int);
     void updateTreeDims();
     void updateTreeDS(int);
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
     void updateStatusBar();
-	
+
     TheScene *m_scene;
-    
+
     wxSashLayoutWindow* m_leftWindowHolder;
     wxSashLayoutWindow* m_leftWindowTop;
     wxSashLayoutWindow* m_leftWindowBottom;
@@ -76,29 +78,29 @@ private:
     wxSashLayoutWindow* m_rightWindow;
     wxSashLayoutWindow* m_extraRightWindow;
 
-   
-    
+
+
     wxSashLayoutWindow* m_topNavWindow;
     wxSashLayoutWindow* m_middleNavWindow;
     wxSashLayoutWindow* m_bottomNavWindow;
     wxSashLayoutWindow* m_extraNavWindow;
-    
+
     wxSlider* m_xSlider;
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
     wxSlider* m_tSlider;
-    
-    MyListCtrl* m_datasetListCtrl; 
-    
+
+    MyListCtrl* m_datasetListCtrl;
+
     wxStatusBar* m_statusBar;
 
     MainCanvas* m_gl0;
     MainCanvas* m_gl1;
     MainCanvas* m_gl2;
     MainCanvas* m_mainGL;
-    
+
     wxTreeCtrl* m_treeWidget;
-    
+
     wxTreeItemId m_tRootId;
     wxTreeItemId m_tPointId;
     wxTreeItemId m_tPlanesId;
@@ -112,7 +114,7 @@ private:
     wxTreeItemId m_tMeshId;
     wxTreeItemId m_tFiberId;
     wxTreeItemId m_tSelBoxId;
-    
+
     int NAV_SIZE;
     int NAV_GL_SIZE;
 

@@ -341,10 +341,37 @@ void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 {
-	load(true, wxT(""));
+	load();
 }
 
-void MainFrame::load(bool showLoadDialog, wxString path)
+void MainFrame::load()
+{
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib|*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		load(dialog.GetPath());
+	}
+}
+
+void MainFrame::load(int index)
+{
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib|*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+	dialog.SetFilterIndex(index);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		load(dialog.GetPath());
+	}
+}
+
+void MainFrame::load(wxString path)
 {
 	if (m_datasetListCtrl->GetItemCount() > 9)
 	{
@@ -354,20 +381,8 @@ void MainFrame::load(bool showLoadDialog, wxString path)
 		return;
 	}
 
-	if (showLoadDialog)
-	{
-		wxString caption = wxT("Choose a file");
-		wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib|*.*|*.*");
-		wxString defaultDir = wxEmptyString;
-		wxString defaultFilename = wxEmptyString;
-		wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
-		if (dialog.ShowModal() == wxID_OK)
-		{
-			path = dialog.GetPath();
-		}
-	}
-
 	DatasetInfo *info = TheDataset::load(path);
+
 	if ( info == NULL)
 	{
 		wxMessageBox(wxT("ERROR\n") + TheDataset::lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
@@ -651,6 +666,10 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 	if (!m_scene) return;
 	if (m_treeWidget->GetChildrenCount(m_tFiberId) == 0) return;
 
+	Vector3fT v2 = {m_xSlider->GetValue()-TheDataset::columns/2,
+					m_ySlider->GetValue()-TheDataset::rows/2,
+					m_zSlider->GetValue()-TheDataset::frames/2};
+
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
@@ -658,8 +677,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
 		SelectionBox *selBox = new SelectionBox(box);
 		selBox->m_isTop = false;
-		Vector3fT c = {selBox->getCenter().s.X + 5, selBox->getCenter().s.Y + 5, selBox->getCenter().s.Z + 5};
-		selBox->setCenter(c);
+		selBox->setCenter(v2);
 		m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 	}
 	else
@@ -667,10 +685,6 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 		wxTreeItemIdValue cookie = 0;
 		DatasetInfo *fibers = (DatasetInfo*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
 		int lines = fibers->m_curves->getLineCount();
-
-		Vector3fT v2 = {m_xSlider->GetValue()-TheDataset::columns/2,
-				m_ySlider->GetValue()-TheDataset::rows/2,
-				m_zSlider->GetValue()-TheDataset::frames/2};
 		Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
 		SelectionBox *selBox = new SelectionBox(v2, v3, lines);
 		selBox->m_isTop = true;
@@ -689,11 +703,11 @@ void MainFrame::OnHideSelBoxes(wxCommandEvent& event)
 
 void MainFrame::loadStandard()
 {
-	//load(false, wxT("/home/ralph/workspace/diplom/data/t1_1mm.hea"));
-	//load(false, wxT("/home/ralph/workspace/diplom/data/overlay_swap.hea"));
-	//load(false, wxT("/home/ralph/workspace/diplom/data/rgb.hea"));
-	//load(false, wxT("/home/ralph/workspace/diplom/data/s1_Rwhite.mesh"));
-	//load(false, wxT("/home/ralph/workspace/diplom/data/dwi_188_1_7.fib"));
+	load(wxT("/home/ralph/workspace/diplom/data/t1_1mm.hea"));
+	//load(wxT("/home/ralph/workspace/diplom/data/overlay_swap.hea"));
+	//load(wxT("/home/ralph/workspace/diplom/data/rgb.hea"));
+	//load(wxT("/home/ralph/workspace/diplom/data/s1_Rwhite.mesh"));
+	//load(wxT("/home/ralph/workspace/diplom/data/dwi_188_1_7.fib"));
 }
 
 void MainFrame::OnReloadShaders(wxCommandEvent& event)
@@ -827,6 +841,16 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
 void MainFrame::OnActivateTreeItem(wxTreeEvent& event)
 {
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
+	/* open load dialog */
+	if (m_treeWidget->GetItemText(treeid) == wxT("datasets")) {
+		load(0);
+	}
+	else if (m_treeWidget->GetItemText(treeid) == wxT("meshes")) {
+			load(1);
+	}
+	else if (m_treeWidget->GetItemText(treeid) == wxT("fibers")) {
+			load(2);
+	}
 	wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);
 	if (!data) return;

@@ -21,7 +21,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 		return info;
 	}
 	else if (ext == wxT("curves")) {
-		return false;
+		return NULL;
 		/* TODO fix the loading of this file type according to the
 		 * changes for the .fib files
 		DatasetInfo *info = new DatasetInfo();
@@ -40,16 +40,16 @@ DatasetInfo* TheDataset::load(wxString filename)
 		info->m_curves->buildkDTree();
 		return info;
 	}
-	else if (ext != wxT("hea")) return false;
-	
+	else if (ext != wxT("hea")) return NULL;
+
 	DatasetInfo *info = new DatasetInfo();
-	bool flag = info->load(filename); 
+	bool flag = info->load(filename);
 	if (!flag)
 	{
 		lastError = wxT("couldn't load header file");
 		return NULL;
 	}
-	
+
 	if ((rows + columns + frames) == 3)
 	{
 		if ( info->getRows() <= 0 || info->getColumns() <= 0 || info->getFrames() <= 0 )
@@ -66,7 +66,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 			return NULL;
 		}
 	}
-	
+
 	if (flag)
 	{
 		flag = false;
@@ -75,7 +75,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 		{
 			wxFileOffset nSize = dataFile.Length();
 			if (nSize == wxInvalidOffset) return NULL;
-			
+
 			switch (info->getType())
 			{
 			case Head_byte: {
@@ -105,7 +105,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 					}
 					printf("max: %d\n", max);
 				} break;
-			
+
 			case Overlay: {
 				info->m_floatDataset = new float[nSize/4];
 				if (dataFile.Read(info->m_floatDataset, (size_t) nSize) != nSize)
@@ -116,7 +116,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 				}
 				flag = true;
 			} break;
-			
+
 			case RGB: {
 				wxUint8 *buffer = new wxUint8[nSize];
 				info->m_rgbDataset = new wxUint8[nSize];
@@ -130,7 +130,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 
 				int offset = info->getColumns() * info->getRows() ;
 				int startslize = 0;
-				
+
 				for (int i = 0 ; i < info->getFrames() ; ++i)
 				{
 					startslize = i * offset * 3;
@@ -142,7 +142,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 					}
 				}
 			} break;
-			
+
 			case ERROR:
 			default:
 				lastError = wxT("unsupported data file format");
@@ -151,7 +151,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 		}
 		dataFile.Close();
 	}
-	
+
 	if (flag)
 	{
 		rows = info->getRows();
@@ -167,7 +167,7 @@ Mesh* TheDataset::loadMesh(wxString filename)
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
 	Mesh *mesh = new Mesh();
-	
+
 	if (dataFile.Open(filename))
 	{
 		 nSize = dataFile.Length();
@@ -193,7 +193,7 @@ Mesh* TheDataset::loadMesh(wxString filename)
 		for (int i = 0; i < 9; ++i)
 			filetype[i] = buffer[i];
 		filetype[9] = 0;
-		
+
 		wxString type(filetype, wxConvUTF8);
 		if (type == wxT("binarABCD")) {
 			mesh->setFiletype(binaryBE);
@@ -210,14 +210,14 @@ Mesh* TheDataset::loadMesh(wxString filename)
 		int fp = 29;
 		converterByteToINT32 c;
 		converterByteToFoat f;
-				
+
 		c.b[0] = buffer[fp];
 		c.b[1] = buffer[fp+1];
 		c.b[2] = buffer[fp+2];
 		c.b[3] = buffer[fp+3];
 		// number of vertices
 		mesh->setCountVerts(c.i);
-		
+
 		mesh->m_vertexArray = new vertex[c.i];
 		fp += 4;
 		for (uint i = 0 ; i < c.i ; ++i)
@@ -241,12 +241,12 @@ Mesh* TheDataset::loadMesh(wxString filename)
 			mesh->m_vertexArray[i].z = f.f;
 			fp += 4;
 		}
-		
+
 		c.b[0] = buffer[fp];
 		c.b[1] = buffer[fp+1];
 		c.b[2] = buffer[fp+2];
 		c.b[3] = buffer[fp+3];
-		
+
 		mesh->setCountNormals(c.i);
 		fp += 4;
 		if (c.i == mesh->getCountVerts())
@@ -273,15 +273,15 @@ Mesh* TheDataset::loadMesh(wxString filename)
 				fp += 4;
 			}
 		}
-		
+
 		fp += 4;
-		
+
 		c.b[0] = buffer[fp];
 		c.b[1] = buffer[fp+1];
 		c.b[2] = buffer[fp+2];
 		c.b[3] = buffer[fp+3];
 		mesh->setCountPolygons(c.i);
-		
+
 		mesh->m_polygonArray = new polygon[c.i];
 		fp += 4;
 		for (int i = 0 ; i < mesh->getCountPolygons() ; ++i)
@@ -304,7 +304,7 @@ Mesh* TheDataset::loadMesh(wxString filename)
 			c.b[3] = buffer[fp+3];
 			mesh->m_polygonArray[i].v3 = c.i;
 			fp += 4;
-		}		
+		}
 	}
 	return mesh;
 }
@@ -317,11 +317,11 @@ Curves* TheDataset::loadCurves(wxString filename)
 	text.SetStringSeparators(wxT("(,) "));
 	int countLines, countPoints;
 	float x,y,z;
-	
+
 	text >> countLines; // read first byte, count lines
 	Curves* curves = new Curves(countLines);
-	float* lines[countLines]; 
-	
+	float* lines[countLines];
+
 	int totalPoints = 0;
 	for (int i = 0 ; i < countLines ; ++i)
 	{
@@ -329,7 +329,7 @@ Curves* TheDataset::loadCurves(wxString filename)
 		curves->setPointsPerLine(i, countPoints);
 		totalPoints += countPoints;
 		lines[i] = new float[countPoints*3];
-		
+
 		for (int j = 0 ; j < countPoints ; ++j)
 		{
 			text >> x;
@@ -341,7 +341,7 @@ Curves* TheDataset::loadCurves(wxString filename)
 		}
 		text >> countPoints;
 	}
-	
+
 	curves->m_points = new float[totalPoints*3];
 	int pc = 0;
 	for (int i = 0 ; i < countLines ; ++i) {
@@ -359,17 +359,17 @@ Curves* TheDataset::loadVTK(wxString filename)
 	printf("start loading vtk file\n");
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
-		
+
 	if (dataFile.Open(filename))
 	{
 		nSize = dataFile.Length();
 		if (nSize == wxInvalidOffset) return NULL;
 	}
-	
+
 	wxUint8* buffer = new wxUint8[255];
 	dataFile.Read(buffer, (size_t) 255);
-	
-	
+
+
 	char* temp = new char[256];
 	int i = 0;
 	int j = 0;
@@ -393,12 +393,12 @@ Curves* TheDataset::loadVTK(wxString filename)
 		//ASCII file, maybe later
 		return NULL;
 	}
-	
+
 	if (type != wxT("BINARY")) {
 		//somethingn else, don't know what to do
 		return NULL;
 	}
-	
+
 	j = 0;
 	while (buffer[i] != '\n') {
 		++i;
@@ -417,10 +417,10 @@ Curves* TheDataset::loadVTK(wxString filename)
 	long tempValue;
 	if(!points.ToLong(&tempValue, 10)) return NULL; //can't read point count
 	int countPoints = (int)tempValue;
-	
+
 	// start position of the point array in the file
-	int pc = i; 
-	
+	int pc = i;
+
 	i += (12 * countPoints) +1;
 	j = 0;
 	dataFile.Seek(i);
@@ -432,7 +432,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	}
 	++i;
 	temp[j] = 0;
-	
+
 	wxString sLines(temp, wxConvUTF8);
 	wxString sLengthLines = sLines.AfterLast(' ');
 	if(!sLengthLines.ToLong(&tempValue, 10)) return NULL; //can't read size of lines array
@@ -443,7 +443,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	int countLines = (int)tempValue;
 	// start postion of the line array in the file
 	int lc = i;
-	
+
 	i += (lengthLines*4) +1;
 	dataFile.Seek(i);
 	dataFile.Read(buffer, (size_t) 255);
@@ -484,7 +484,7 @@ Curves* TheDataset::loadVTK(wxString filename)
 	dataFile.Seek(cc);
 	dataFile.Read(curves->m_colorArray, (size_t) countPoints*3);
 	*/
-	
+
 	curves->toggleEndianess();
 	printTime();
 	printf("move vertices\n");
