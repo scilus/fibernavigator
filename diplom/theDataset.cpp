@@ -3,6 +3,8 @@
 int TheDataset::rows = 1;
 int TheDataset::columns = 1;
 int TheDataset::frames = 1;
+bool TheDataset::dimensions_set = false;
+
 Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
 								        0.0f,  1.0f,  0.0f,  0.0f,
 								        0.0f,  0.0f,  1.0f,  0.0f,
@@ -50,7 +52,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 		return NULL;
 	}
 
-	if ((rows + columns + frames) == 3)
+	if (!TheDataset::dimensions_set)
 	{
 		if ( info->getRows() <= 0 || info->getColumns() <= 0 || info->getFrames() <= 0 )
 		{
@@ -157,6 +159,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 		rows = info->getRows();
 		columns = info->getColumns();
 		frames = info->getFrames();
+		dimensions_set = true;
 		return info;
 	}
 	return NULL;
@@ -508,5 +511,5 @@ Curves* TheDataset::loadVTK(wxString filename)
 void TheDataset::printTime()
 {
 	wxDateTime dt = wxDateTime::Now();
-	printf("[%d:%d:%d] ",dt.GetHour(), dt.GetMinute(), dt.GetSecond());
+	printf("[%02d:%02d:%02d] ",dt.GetHour(), dt.GetMinute(), dt.GetSecond());
 }

@@ -22,24 +22,25 @@
 class TheDataset
 {
 private:
-	
-	
+
+
 public:
 	//TheDataset();
 	//~TheDataset();
-	
+
 	static DatasetInfo* load(wxString);
 	static Mesh* loadMesh(wxString);
 	static Curves* loadCurves(wxString);
 	static Curves* loadVTK(wxString);
-	
+
 	static void printTime();
-	
+
 	static int rows;
 	static int columns;
 	static int frames;
 	static Matrix4fT m_transform;
 	static wxString lastError;
+	static bool dimensions_set;
 };
 
 #endif /*THEDATASET_H_*/
