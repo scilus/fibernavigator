@@ -487,8 +487,6 @@ inline FArray& FArray::normalize()
 
 inline FArray FArray::normalized() const
 {
-  unsigned int i;
-  double length = norm();
   FArray ret(*this);
   ret.normalize();
   return ret;

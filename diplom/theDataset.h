@@ -37,8 +37,9 @@ public:
 	static int frames;
 	static Matrix4fT m_transform;
 	static wxString lastError;
-	static bool dimensions_set;
+	static bool anatomy_loaded;
 	static bool fibers_loaded;
+	static wxString lastPath;
 };
 
 #endif /*THEDATASET_H_*/

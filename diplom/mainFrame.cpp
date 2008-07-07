@@ -353,8 +353,11 @@ void MainFrame::load()
 	wxString defaultDir = wxEmptyString;
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+	dialog.SetFilterIndex(3);
+	dialog.SetDirectory(TheDataset::lastPath);
 	if (dialog.ShowModal() == wxID_OK)
 	{
+		TheDataset::lastPath = dialog.GetDirectory();
 		load(dialog.GetPath());
 	}
 }
@@ -367,8 +370,10 @@ void MainFrame::load(int index)
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
 	dialog.SetFilterIndex(index);
+	dialog.SetDirectory(TheDataset::lastPath);
 	if (dialog.ShowModal() == wxID_OK)
 	{
+		TheDataset::lastPath = dialog.GetDirectory();
 		load(dialog.GetPath());
 	}
 }
@@ -668,9 +673,9 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 	if (!m_scene) return;
 	if (m_treeWidget->GetChildrenCount(m_tFiberId) == 0) return;
 
-	Vector3fT v2 = {m_xSlider->GetValue()-TheDataset::columns/2,
+	Vector3fT v2 = {{m_xSlider->GetValue()-TheDataset::columns/2,
 					m_ySlider->GetValue()-TheDataset::rows/2,
-					m_zSlider->GetValue()-TheDataset::frames/2};
+					m_zSlider->GetValue()-TheDataset::frames/2}};
 
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
@@ -687,7 +692,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 		wxTreeItemIdValue cookie = 0;
 		Curves *curves = (Curves*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
 		int lines = curves->getLineCount();
-		Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
+		Vector3fT v3 = {{TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8}};
 		SelectionBox *selBox = new SelectionBox(v2, v3, lines);
 		selBox->m_isTop = true;
 		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
@@ -719,12 +724,21 @@ void MainFrame::OnReloadShaders(wxCommandEvent& event)
 
 void MainFrame::OnNew(wxCommandEvent& event)
 {
+	for (int i = 0 ; i < m_datasetListCtrl->GetItemCount(); ++i)
+	{
+		DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(i);
+		m_treeWidget->Delete(info->getTreeId());
+		delete info;
+	}
+
 	m_datasetListCtrl->DeleteAllItems();
 	m_mainGL->invalidate();
 
 	TheDataset::columns = 1;
     TheDataset::rows = 1;
     TheDataset::frames = 1;
+    TheDataset::anatomy_loaded = false;
+    TheDataset::fibers_loaded = false;
     TheDataset::lastError = wxT("");
 
 	delete m_scene;

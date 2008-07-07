@@ -59,22 +59,22 @@ public:
 	void setCountPolygons(int value) {m_countPolygons = value;};
 	void setPolygonDim(int value) {m_polygonDim = value;};
 
-	int getFiletype() {return m_filetype;};
-	int getCountVerts() {return m_countVerts;};
-	int getCountNormals() {return m_countNormals;};
-	int getCountPolygons() {return m_countPolygons;};
-	int getPolygonDim() {return m_polygonDim;};
+	unsigned int getFiletype() {return m_filetype;};
+	unsigned int getCountVerts() {return m_countVerts;};
+	unsigned int getCountNormals() {return m_countNormals;};
+	unsigned int getCountPolygons() {return m_countPolygons;};
+	unsigned int getPolygonDim() {return m_polygonDim;};
 
 	vertex* m_vertexArray;
 	polygon* m_polygonArray;
 
 private:
-	uint m_filetype;
-	uint m_countVerts;
-	uint m_countNormals;
-	uint m_countTimeSteps;
-	uint m_countPolygons;
-	uint m_polygonDim;
+	unsigned int m_filetype;
+	unsigned int m_countVerts;
+	unsigned int m_countNormals;
+	unsigned int m_countTimeSteps;
+	unsigned int m_countPolygons;
+	unsigned int m_polygonDim;
 
 };
 

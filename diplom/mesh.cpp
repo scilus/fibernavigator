@@ -38,20 +38,20 @@ bool Mesh::load(wxString filename)
 	if (dataFile.Open(filename))
 	{
 		 nSize = dataFile.Length();
-		if (nSize == wxInvalidOffset) return NULL;
+		if (nSize == wxInvalidOffset) return false;
 	}
 	wxUint8* buffer = new wxUint8[nSize];
 	if (dataFile.Read(buffer, (size_t) nSize) != nSize)
 	{
 		dataFile.Close();
 		delete[] buffer;
-		return NULL;
+		return false;
 	}
 	if (buffer[0] == 'a')
 	{
 		setFiletype(ascii);
 		// ascii file, maybe later
-		return NULL;
+		return false;
 	}
 	if (buffer [0] == 'b')
 	{
@@ -65,12 +65,12 @@ bool Mesh::load(wxString filename)
 		if (type == wxT("binarABCD")) {
 			setFiletype(binaryBE);
 			//big endian, maybe later
-			return NULL;
+			return false;
 		}
 		else if (type == wxT("binarDCBA")) {
 			setFiletype(binaryLE);
 		}
-		else return NULL;
+		else return false;
 
 		setPolygonDim(buffer[17]);
 
@@ -118,7 +118,7 @@ bool Mesh::load(wxString filename)
 		fp += 4;
 		if (c.i == getCountVerts())
 		{
-			for (uint i = 0 ; i < c.i ; ++i)
+			for (unsigned int i = 0 ; i < c.i ; ++i)
 			{
 				f.b[0] = buffer[fp];
 				f.b[1] = buffer[fp+1];
@@ -151,7 +151,7 @@ bool Mesh::load(wxString filename)
 
 		m_polygonArray = new polygon[c.i];
 		fp += 4;
-		for (int i = 0 ; i < getCountPolygons() ; ++i)
+		for (unsigned int i = 0 ; i < getCountPolygons() ; ++i)
 		{
 			c.b[0] = buffer[fp];
 			c.b[1] = buffer[fp+1];
@@ -175,6 +175,7 @@ bool Mesh::load(wxString filename)
 	}
 	m_name = filename.AfterLast('/');
 	m_type = Mesh_;
+	return true;
 }
 
 void Mesh::generateGeometry()
@@ -184,7 +185,7 @@ void Mesh::generateGeometry()
 	int zOff = TheDataset::frames/2;
 
 	glBegin(GL_TRIANGLES);
-		for ( int j = 0 ; j < m_countPolygons ; ++j)
+		for (unsigned int j = 0 ; j < m_countPolygons ; ++j)
 		{
 			polygon p = m_polygonArray[j];
 

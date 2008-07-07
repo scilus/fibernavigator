@@ -20,7 +20,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	m_scene = scene;
 	m_init = false;
 	m_view = view;
-		
+
 	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
 	                       0.0f,  0.0f,  1.0f,  0.0f,
@@ -32,7 +32,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 		                         0.0f,   0.0f,     0.0f,  1.0f };
 	*/
 	TheDataset::m_transform = m_transform1;
-		   
+
 	Matrix3fT idMat = {  1.0f,  0.0f,  0.0f,
 	                     0.0f,  1.0f,  0.0f,
 	                     0.0f,  0.0f,  1.0f };
@@ -43,11 +43,11 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	*/
 	m_thisRot =idMat;
 	m_lastRot =idMat;
-	
+
 	m_isDragging = false;					                    // NEW: Dragging The Mouse?
 	m_isrDragging = false;
 	m_delta = 0;
-	m_arcBall = new ArcBallT(640.0f, 480.0f); 
+	m_arcBall = new ArcBallT(640.0f, 480.0f);
 }
 
 void MainCanvas::init()
@@ -75,8 +75,8 @@ void MainCanvas::OnSize(wxSizeEvent& event)
     int w, h;
     GetClientSize(&w, &h);
     glViewport(0, 0, (GLint) w, (GLint) h);
-    
-    m_arcBall->setBounds((GLfloat)w, (GLfloat)h);    
+
+    m_arcBall->setBounds((GLfloat)w, (GLfloat)h);
 }
 
 void MainCanvas::OnMouseEvent(wxMouseEvent& event)
@@ -88,7 +88,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 	switch (m_view)
 	{
 		case mainView: {
-			if (event.RightIsDown())											
+			if (event.RightIsDown())
 		    {
 				if (!m_isrDragging)												// Not Dragging
 			    {
@@ -101,21 +101,21 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					}
 			    }
 				else {
-					if (event.Dragging() && m_hr.picked < 10) 
+					if (event.Dragging() && m_hr.picked < 10)
 					{
 						int xDrag = m_lastPos.x - clickX;
 						int yDrag = (m_lastPos.y - clickY);
 						GetEventHandler()->ProcessEvent( event1 );
-						
+
 						Vector3fT n = {0,0,0};
 						switch (m_hr.picked) {
-						case axial: 
+						case axial:
 							n.s.X = 1.0;
 							break;
 						case coronal:
 							n.s.Y = 1.0;
 							break;
-						case sagittal: 
+						case sagittal:
 							n.s.Z = 1.0;
 							break;
 						}
@@ -145,7 +145,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			else {
 				m_isrDragging = false;
 			}
-			
+
 			if(event.LeftIsDown())
 			{
 				m_mousePt.s.X = clickX;
@@ -167,47 +167,47 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				    else
 				    {
 			            Quat4fT     ThisQuat;
-	
+
 			            m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
 			            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
 			            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
 			            Matrix4fSetRotationFromMatrix3f(&TheDataset::m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
 				    }
-				
+
 					float *dots = new float[8];
 					Vector3fT v1 = {0,0,1};
 					Vector3fT v2 = {1,1,1};
 					Vector3fT view;
-					
+
 					Vector3fMultMat4(&view, &v1, &TheDataset::m_transform);
 					dots[0] = Vector3fDot(&v2, &view);
-					
+
 					v2.s.Z = -1;
 					dots[1] = Vector3fDot(&v2, &view);
-					
+
 					v2.s.Y = -1;
 					dots[2] = Vector3fDot(&v2, &view);
-					
+
 					v2.s.Z = 1;
 					dots[3] = Vector3fDot(&v2, &view);
-					
+
 					v2.s.X = -1;
 					dots[4] = Vector3fDot(&v2, &view);
-					
+
 					v2.s.Z = -1;
 					dots[5] = Vector3fDot(&v2, &view);
-					
+
 					v2.s.Y = 1;
 					dots[6] = Vector3fDot(&v2, &view);
-					
+
 					v2.s.Z = 1;
 					dots[7] = Vector3fDot(&v2, &view);
-					
+
 					float max = 0.0;
 					int quadrant = 0;
 					for (int i = 0 ; i < 8 ; ++i)
 					{
-						if (dots[i] > max) 
+						if (dots[i] > max)
 						{
 							max = dots[i];
 							quadrant = i+1;
@@ -215,31 +215,31 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					}
 					m_scene->setQuadrant(quadrant);
 					m_scene->setLightPos(view);
-					
+
 					Refresh(false);
 				}
 			}
-			else 
+			else
 				m_isDragging = false;
 		} break;
-		
+
 		case axial:
 		case coronal:
 		case sagittal:
 			m_clicked = event.GetPosition();
-			if (event.LeftUp() || event.Dragging()) 
+			if (event.LeftUp() || event.Dragging())
 			{
 				GetEventHandler()->ProcessEvent( event1 );
 			}
 			break;
 		default: ;
 	}
-	
+
 }
 
 float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
 {
-	Vector3fT vs = mapMouse2World(x1, y1); 
+	Vector3fT vs = mapMouse2World(x1, y1);
 	Vector3fT ve = mapMouse2World(x2, y2);
 	Vector3fT dir = {ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z};
 	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
@@ -250,7 +250,7 @@ float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector
 Vector3fT MainCanvas::mapMouse2World(int x, int y)
 {
 	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);	
+	glMultMatrixf(TheDataset::m_transform.M);
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -273,7 +273,7 @@ Vector3fT MainCanvas::mapMouse2World(int x, int y)
 hitResult MainCanvas::pick(wxPoint click)
 {
 	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);	
+	glMultMatrixf(TheDataset::m_transform.M);
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -285,17 +285,17 @@ hitResult MainCanvas::pick(wxPoint click)
 
 	winX = (float)click.x;
 	winY = (float)viewport[3] - (float)click.y;
-	
+
 	gluUnProject( winX, winY, 0, modelview, projection, viewport, &m_pos1X, &m_pos1Y, &m_pos1Z);
 	gluUnProject( winX, winY, 1, modelview, projection, viewport, &m_pos2X, &m_pos2Y, &m_pos2Z);
 	glPopMatrix();
 	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
 	BoundingBox *bb = new BoundingBox(0,0,0, TheDataset::columns, TheDataset::rows, TheDataset::frames);
-	
+
 	float xx = m_scene->m_xSlize - TheDataset::columns/2;
 	float yy = m_scene->m_ySlize - TheDataset::rows/2;
 	float zz = m_scene->m_zSlize - TheDataset::frames/2;
-	
+
 	/**
 	 * check if one of the 3 planes is picked
 	 */
@@ -353,7 +353,7 @@ hitResult MainCanvas::pick(wxPoint click)
 		hr.tmin = tpicked;
 		hr.picked = picked;
 	}
-	 
+
 	/*
 	 * check for hits with the selection box sizers
 	 */
@@ -367,7 +367,7 @@ hitResult MainCanvas::pick(wxPoint click)
 			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
 		}
 	}
-	
+
 	if (m_scene->getPointMode()) {
 		int countPoints = m_scene->m_treeWidget->GetChildrenCount(m_scene->m_tPointId, true);
 		wxTreeItemId id, childid;
@@ -381,10 +381,10 @@ hitResult MainCanvas::pick(wxPoint click)
 			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
 		}
 	}
-	
+
 	return hr;
-	
-	
+
+
 }
 
 void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
@@ -397,11 +397,11 @@ void MainCanvas::render()
 	wxPaintDC dc(this);
 
     SetCurrent(*m_scene->getMainGLContext());
-	
+
 	int w, h;
     GetClientSize(&w, &h);
     glViewport(0, 0, (GLint) w, (GLint) h);
-	
+
     // Init OpenGL once, but after SetCurrent
     if (!m_init)
     {
@@ -411,22 +411,22 @@ void MainCanvas::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glColor3f(1.0, 1.0, 1.0);
-    
+
     switch (m_view)
     {
     case mainView: {
-    	glPushMatrix();	
+    	glPushMatrix();
     	glMultMatrixf(TheDataset::m_transform.M);										// NEW: Apply Dynamic Transform
     	m_scene->renderScene();
     	//renderTestRay();
-	    glPopMatrix();	
+	    glPopMatrix();
 	    break;
     }
     default:
     	m_scene->renderNavView(m_view);
     }
 	glFlush();
-    
+
 	SwapBuffers();
 }
 

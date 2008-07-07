@@ -5,7 +5,7 @@
 int TheDataset::rows = 1;
 int TheDataset::columns = 1;
 int TheDataset::frames = 1;
-bool TheDataset::dimensions_set = false;
+bool TheDataset::anatomy_loaded = false;
 bool TheDataset::fibers_loaded = false;
 
 Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
@@ -13,23 +13,23 @@ Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
 								        0.0f,  0.0f,  1.0f,  0.0f,
 								        0.0f,  0.0f,  0.0f,  1.0f };
 wxString TheDataset::lastError = wxT("");
+wxString TheDataset::lastPath = wxT("");
 
 DatasetInfo* TheDataset::load(wxString filename)
 {
 	// check file extension
 	wxString ext = filename.AfterLast('.');
 	if (ext == wxT("mesh")) {
-		if (!dimensions_set) {
+		if (!anatomy_loaded) {
 			lastError = wxT("no anatomy file loaded");
 			return false;
 		}
 		Mesh *mesh = new Mesh();
-		bool flag = mesh->load(filename);
 		return mesh;
 	}
 
 	else if (ext == wxT("fib")) {
-		if (!dimensions_set) {
+		if (!anatomy_loaded) {
 			lastError = wxT("no anatomy file loaded");
 			return false;
 		}
@@ -52,7 +52,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 		rows = anatomy->getRows();
 		columns = anatomy->getColumns();
 		frames = anatomy->getFrames();
-		dimensions_set = true;
+		anatomy_loaded = true;
 		return anatomy;
 	}
 	else
@@ -61,7 +61,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 		return NULL;
 	}
 
-	if (!TheDataset::dimensions_set)
+	if (!TheDataset::anatomy_loaded)
 	{
 		if ( anatomy->getRows() <= 0 || anatomy->getColumns() <= 0 || anatomy->getFrames() <= 0 )
 		{

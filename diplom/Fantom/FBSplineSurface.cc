@@ -7,7 +7,7 @@
 // Author:    $Author: oesterling $
 // Version:   $Revision: $
 //
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 #include "FBSplineSurface.hh"
 #include "FBSpline.hh"
@@ -21,36 +21,36 @@ FBSplineSurface::FBSplineSurface(int order1, int order2, std::vector< std::vecto
   this->deBoorPoints = deBoorPoints;
   this->numDeBoorPoints1 = numDeBoorPoints1;
   this->numDeBoorPoints2 = numDeBoorPoints2;
-  
+
   //define a normalized knotVector1
   int n = this->numDeBoorPoints1;
   int k = this->order1;
   for( int i = 0; i < (n + k); i++)
   {
-    int tempKnot;
+    int tempKnot = 0;
     if( i < k)
       tempKnot = k - 1;
     if( (i >= k) && (i < n))
       tempKnot = i;
     if( i >= n)
       tempKnot = n;
-      
+
     knots1.push_back(tempKnot);
   }
-  
+
   //define a normalized knotVector2
   n = this->numDeBoorPoints2;
   k = this->order2;
   for( int i = 0; i < (n + k); i++)
   {
-    int tempKnot;
+    int tempKnot = 0;
     if( i < k)
       tempKnot = k - 1;
     if( (i >= k) && (i < n))
       tempKnot = i;
     if( i >= n)
       tempKnot = n;
-      
+
     knots2.push_back(tempKnot);
   }
 }
@@ -92,25 +92,25 @@ FArray FBSplineSurface::f(double _t, double _u)
  (knots2)|  |  |  |  |  |  |  |  |  |
          |_____________x____________|
   */
-  
+
   std::vector< std::vector< double > > uSplineDeBoorPoints;
-  
+
   for(int row = 0; row < numDeBoorPoints2; row++)
   {
     std::vector< std::vector< double > > tSplineDeBoorPoints;
-    
+
     for(int col = 0; col < numDeBoorPoints1; col++)
       tSplineDeBoorPoints.push_back(this->deBoorPoints[row * numDeBoorPoints1 + col]);
-    
+
     FBSpline tSpline(order1, tSplineDeBoorPoints);
     FArray dmyArray = tSpline.f(_t);
-    
+
     std::vector< double > dmyVector;
     dmyArray.getCoordinates(dmyVector);
-    
+
     uSplineDeBoorPoints.push_back(dmyVector);
   }
-  
+
   FBSpline uSpline(order2, uSplineDeBoorPoints);
   return uSpline.f(_u);
 }
@@ -159,7 +159,7 @@ int FBSplineSurface::getNumSamplePointsU()
 {
   return numSamplePointsU;
 }
-    
+
 void FBSplineSurface::setDeBoorPoints(std::vector< std::vector< double > > deBoorPoints, int numDeBoorPoints1, int numDeBoorPoints2)
 {
   this->deBoorPoints = deBoorPoints;
@@ -193,8 +193,8 @@ void FBSplineSurface::samplePoints(std::vector< std::vector< double > > &points,
   double currentU = knots2[0];
   double deltaT = tResolution;
   double deltaU = uResolution;
-  
-  
+
+
   int stepsT = numSamplePointsT = (int)((knots1[knots1.size() - 1] - knots1[0]) / deltaT + 1);
   int stepT = 0;
   int stepsU = numSamplePointsU = (int)((knots2[knots2.size() - 1] - knots2[0]) / deltaU + 1);
@@ -206,13 +206,13 @@ void FBSplineSurface::samplePoints(std::vector< std::vector< double > > &points,
     for( stepT = 0; stepT < stepsT; stepT++)
     {
       std::vector< double > dmy;
-      
-      currentT = knots1[0] + stepT * deltaT;  
+
+      currentT = knots1[0] + stepT * deltaT;
       FArray samplePoint = this->f(currentT, currentU);
       samplePoint.getCoordinates(dmy);
       points.push_back(dmy);
     }
   }
-  
+
   return;
 }
