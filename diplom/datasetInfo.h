@@ -7,16 +7,10 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/laywin.h"
-#include "wx/textfile.h"
-#include "wx/file.h"
-#include "wx/wfstream.h"
-#include "wx/datstrm.h"
 #include "wx/treectrl.h"
 
-#include "mesh.h"
-#include "curves.h"
-#include "surface.h"
+#include <GL/glew.h>
+
 
 enum DatasetType {
 	ERROR = -1,
@@ -32,7 +26,47 @@ enum DatasetType {
 
 class DatasetInfo
 {
-private:
+public:
+	DatasetInfo() {};
+	virtual ~DatasetInfo() {};
+
+	virtual bool load(wxString filename)=0;
+	virtual void draw()=0;
+	virtual void generateTexture()=0;
+	virtual void generateGeometry()=0;
+	virtual void initializeBuffer()=0;
+
+	wxTreeItemId getTreeId() const {return m_treeId;};
+    void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
+	wxString getName() {return m_name;};
+	void setName(wxString name) {m_name = name;};
+	int getType() {return m_type;};
+	void setType(int type) {m_type = type;};
+	float getHighestValue() {return m_highest_value;};
+	void setHighestValue(float value) {m_highest_value = value;};
+	float getThreshold() {return m_threshold;};
+	void setThreshold(float value) {m_threshold = value;};
+
+	int getLength() {return m_length;};
+	int getBands() {return m_bands;};
+	int getFrames() {return m_frames;};
+	int getRows() {return m_rows;};
+	int getColumns() {return m_columns;};
+
+	wxString getRpn() {return m_repn;};
+	double getXVoxel() {return m_xVoxel;};
+	double getYVoxel() {return m_yVoxel;};
+	double getZVoxel() {return m_zVoxel;};
+
+	bool toggleShow() {m_show = !m_show; return m_show;};
+	bool toggleShowFS() {m_showFS = !m_showFS; return m_showFS;};
+	bool toggleUseTex() {m_useTex = !m_useTex; return m_useTex;};
+	bool getShow() {return m_show;};
+	bool getShowFS() {return m_showFS;};
+	bool getUseTex() {return m_useTex;};
+
+
+protected:
 	int m_length;
 	int m_bands;
 	int m_frames;
@@ -47,59 +81,13 @@ private:
 	float m_highest_value;
 	wxString m_name;
 	float m_threshold;
+	wxTreeItemId m_treeId;
+
 	bool m_show;
 	bool m_showFS;	// show front sector for meshs
 	bool m_useTex; 	// color mesh with textures loaded,
 					// if false use colormap on threshold value
 	GLuint *m_bufferObjects;
-
-public:
-	wxUint8 *m_byteDataset;
-	wxUint16 *m_shortDataset;
-	wxUint8 *m_rgbDataset;
-	float *m_floatDataset;
-	Mesh* m_mesh;
-	Curves* m_curves;
-	Surface* m_surface;
-	wxTreeItemId m_treeId;
-
-
-	DatasetInfo();
-	~DatasetInfo();
-
-	bool load(wxString filename);
-
-	void generateTexture();
-	void generateGeometry(int, int, int);
-	void drawFibers();
-	void drawSurface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId);
-	void initializeBuffer();
-
-	void setHighestValue(float value) {m_highest_value = value;};
-	void setThreshold(float value) {m_threshold = value;};
-	void setType(int type) {m_type = type;};
-	void setName(wxString name) {m_name = name;};
-	bool toggleShow() {m_show = !m_show; return m_show;};
-	bool toggleShowFS() {m_showFS = !m_showFS; return m_showFS;};
-	bool toggleUseTex() {m_useTex = !m_useTex; return m_useTex;};
-
-	int getType() {return m_type;};
-	int getLength() {return m_length;};
-	int getBands() {return m_bands;};
-	int getFrames() {return m_frames;};
-	int getRows() {return m_rows;};
-	int getColumns() {return m_columns;};
-	wxString getRpn() {return m_repn;};
-	double getXVoxel() {return m_xVoxel;};
-	double getYVoxel() {return m_yVoxel;};;
-	double getZVoxel() {return m_zVoxel;};;
-	float getHighestValue() {return m_highest_value;};
-	float getThreshold() {return m_threshold;};
-	bool getShow() {return m_show;};
-	bool getShowFS() {return m_showFS;};
-	bool getUseTex() {return m_useTex;};
-	wxString getName() {return m_name;};
-
 };
 
 #endif /*DATASETINFO_H_*/

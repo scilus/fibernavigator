@@ -14,6 +14,7 @@
 #include "selectionBox.h"
 #include "wx/glcanvas.h"
 #include "surface.h"
+#include "myListCtrl.h"
 
 enum {
 	axial =1,

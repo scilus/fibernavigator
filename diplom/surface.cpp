@@ -3,17 +3,30 @@
 #include "Fantom/FMatrix.hh"
 #include "Fantom/FBSplineSurface.hh"
 #include "surface.h"
+#include "point.h"
+#include "myListCtrl.h"
 
 #include "GL/glew.h"
 
-Surface::Surface()
+Surface::Surface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId)
 {
+	m_treeWidget = treeWidget;
+	m_tPointId = tPointId;
+
 	m_radius = 3.0;
 	m_my = 2.0;
 	m_numDeBoorRows = 8;
 	m_numDeBoorCols = 8;
 	m_order = 4;
 	m_sampleRateT = m_sampleRateU = 0.2;
+
+	m_show = true;
+	m_showFS = true;
+	m_useTex = true;
+
+	m_type = Surface_;
+	m_threshold = 0.5;
+	m_name = wxT("spline surface");
 }
 
 FTensor Surface::getCovarianceMatrix(std::vector< std::vector< double > > points)
@@ -245,3 +258,24 @@ void Surface::execute (std::vector< std::vector< double > > givenPoints)
 	glEnd();
 }
 
+void Surface::draw()
+{
+	std::vector< std::vector< double > > givenPoints;
+	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
+
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countPoints ; ++i)
+	{
+		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData();
+
+		std::vector< double > p;
+		p.push_back(point->getCenter().s.X);
+		p.push_back(point->getCenter().s.Y);
+		p.push_back(point->getCenter().s.Z);
+		givenPoints.push_back(p);
+	}
+
+	execute(givenPoints);
+}

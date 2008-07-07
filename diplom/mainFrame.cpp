@@ -11,6 +11,7 @@
 #include "wx/statbmp.h"
 
 #include "point.h"
+#include "curves.h"
 
 #include "icons/eyes.xpm"
 #include "icons/delete.xpm"
@@ -450,24 +451,24 @@ void MainFrame::updateTreeDS(int i)
 	{
 	case Head_byte:
 	case Head_short:
-		info->m_treeId = m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
-				-1, -1, new MyTreeItemData(info));
+		info->setTreeId(m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
+				-1, -1, new MyTreeItemData(info)));
 		break;
 	case Overlay:
-		info->m_treeId = m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
-				-1, -1, new MyTreeItemData(info));
+		info->setTreeId(m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
+				-1, -1, new MyTreeItemData(info)));
 		break;
 	case RGB:
-		info->m_treeId = m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
-				-1, -1, new MyTreeItemData(info));
+		info->setTreeId(m_treeWidget->AppendItem(m_tDatasetId, info->getName(),
+				-1, -1, new MyTreeItemData(info)));
 		break;
 	case Mesh_:
-		info->m_treeId = m_treeWidget->AppendItem(m_tMeshId, info->getName(),
-				-1, -1, new MyTreeItemData(info));
+		info->setTreeId(m_treeWidget->AppendItem(m_tMeshId, info->getName(),
+				-1, -1, new MyTreeItemData(info)));
 		break;
 	case Curves_:
-		info->m_treeId = m_treeWidget->AppendItem(m_tFiberId, info->getName(),
-				-1, -1, new MyTreeItemData(info));
+		info->setTreeId(m_treeWidget->AppendItem(m_tFiberId, info->getName(),
+				-1, -1, new MyTreeItemData(info)));
 		break;
 	}
 
@@ -684,8 +685,8 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 	else
 	{
 		wxTreeItemIdValue cookie = 0;
-		DatasetInfo *fibers = (DatasetInfo*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
-		int lines = fibers->m_curves->getLineCount();
+		Curves *curves = (Curves*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
+		int lines = curves->getLineCount();
 		Vector3fT v3 = {TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8};
 		SelectionBox *selBox = new SelectionBox(v2, v3, lines);
 		selBox->m_isTop = true;
@@ -783,7 +784,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		}
 		break;
 	case 3:
-		m_treeWidget->Delete(info->m_treeId);
+		m_treeWidget->Delete(info->getTreeId());
 		delete info;
 		m_datasetListCtrl->DeleteItem(item);
 		renewAllGLWidgets();
@@ -800,8 +801,8 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	if (item == -1) return;
 	DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(item);
 	m_tSlider->SetValue((int)(info->getThreshold()*100));
-	m_treeWidget->SelectItem(info->m_treeId);
-	m_treeWidget->EnsureVisible(info->m_treeId);
+	m_treeWidget->SelectItem(info->getTreeId());
+	m_treeWidget->EnsureVisible(info->getTreeId());
 }
 
 void MainFrame::OnListItemUp(wxCommandEvent& event)
@@ -832,7 +833,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
 	for (int i = 0 ; i < m_datasetListCtrl->GetItemCount(); ++i)
 	{
 		DatasetInfo *info = (DatasetInfo*) m_datasetListCtrl->GetItemData(i);
-		if (info->m_treeId == treeid)
+		if (info->getTreeId() == treeid)
 		{
 			m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 		}
@@ -882,19 +883,14 @@ void MainFrame::OnTogglePointMode(wxCommandEvent& event)
 void MainFrame::OnNewSurface(wxCommandEvent& event)
 {
 	if (!m_scene) return;
-	DatasetInfo *info = new DatasetInfo();
-	Surface *surface = new Surface();
-	info->m_surface = surface;
-	info->setType(Surface_);
-	info->setThreshold(0.5);
-	info->setName(wxT("spline surface"));
+	Surface *surface = new Surface(m_treeWidget, m_tPointId);
 
 	int i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);
-	m_datasetListCtrl->SetItem(i, 1, info->getName());
+	m_datasetListCtrl->SetItem(i, 1, surface->getName());
 	m_datasetListCtrl->SetItem(i, 2, wxT("0.50"));
 	m_datasetListCtrl->SetItem(i, 3, wxT(""), 1);
-	m_datasetListCtrl->SetItemData(i, (long)info);
+	m_datasetListCtrl->SetItemData(i, (long)surface);
 	m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
 	refreshAllGLWidgets();

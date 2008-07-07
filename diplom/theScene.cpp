@@ -1,6 +1,7 @@
 #include "theScene.h"
 #include "myListCtrl.h"
 #include "point.h"
+#include "curves.h"
 
 TheScene::TheScene()
 {
@@ -160,14 +161,10 @@ void TheScene::releaseTextures()
 
 GLuint TheScene::makeCallList(DatasetInfo *info)
 {
-	int x = TheDataset::columns/2;
-	int y = TheDataset::rows/2;
-	int z = TheDataset::frames/2;
-
 	GLuint mesh = glGenLists(1);
 	glNewList (mesh, GL_COMPILE);
 
-	info->generateGeometry(x,y,z);
+	info->generateGeometry();
 
 	glEndList();
 
@@ -496,13 +493,13 @@ void TheScene::renderMesh()
 	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
-		float c = (float)info->getThreshold();
-		glColor3f(c,c,c);
-		m_meshShader->setUniInt("showFS", info->getShowFS());
-		m_meshShader->setUniInt("useTex", info->getUseTex());
-
 		if (info->getType() == Mesh_ && info->getShow())
 		{
+			float c = (float)info->getThreshold();
+			glColor3f(c,c,c);
+			m_meshShader->setUniInt("showFS", info->getShowFS());
+			m_meshShader->setUniInt("useTex", info->getUseTex());
+
 			glCallList(m_texNames[i]);
 		}
 	}
@@ -521,10 +518,10 @@ void TheScene::renderCurves()
 		{
 			if (m_selBoxChanged)
 			{
-				info->m_curves->updateLinesShown(getSelectionBoxes());
+				((Curves*)info)->updateLinesShown(getSelectionBoxes());
 				m_selBoxChanged = false;
 			}
-			info->drawFibers();
+			info->draw();
 		}
 	}
 	m_curveShader->release();
@@ -538,14 +535,14 @@ void TheScene::renderSurface()
 	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
-		float c = (float)info->getThreshold();
-		glColor3f(c,c,c);
-		m_meshShader->setUniInt("showFS", info->getShowFS());
-		m_meshShader->setUniInt("useTex", info->getUseTex());
-
 		if (info->getType() == Surface_ && info->getShow())
 		{
-			info->drawSurface(m_treeWidget, m_tPointId);
+			float c = (float)info->getThreshold();
+			glColor3f(c,c,c);
+			m_meshShader->setUniInt("showFS", info->getShowFS());
+			m_meshShader->setUniInt("useTex", info->getUseTex());
+
+			info->draw();
 		}
 	}
 	m_meshShader->release();

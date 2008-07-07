@@ -1,6 +1,8 @@
 #ifndef MESH_H_
 #define MESH_H_
 
+#include "datasetInfo.h"
+
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
@@ -39,18 +41,24 @@ union converterByteToFoat {
 };
 
 
-class Mesh {
-	
+class Mesh : public DatasetInfo {
+
 public:
 	Mesh();
 	~Mesh();
-	
+
+	bool load(wxString filename);
+	void draw() {};
+	void generateTexture() {};
+	void generateGeometry() ;
+	void initializeBuffer() {};
+
 	void setFiletype(int value) {m_filetype = value;};
 	void setCountVerts(int value) {m_countVerts = value;};
 	void setCountNormals(int value) {m_countNormals = value;};
 	void setCountPolygons(int value) {m_countPolygons = value;};
 	void setPolygonDim(int value) {m_polygonDim = value;};
-	
+
 	int getFiletype() {return m_filetype;};
 	int getCountVerts() {return m_countVerts;};
 	int getCountNormals() {return m_countNormals;};
@@ -59,7 +67,7 @@ public:
 
 	vertex* m_vertexArray;
 	polygon* m_polygonArray;
-	
+
 private:
 	uint m_filetype;
 	uint m_countVerts;
@@ -67,7 +75,7 @@ private:
 	uint m_countTimeSteps;
 	uint m_countPolygons;
 	uint m_polygonDim;
-	
+
 };
 
 #endif /*MESH_H_*/

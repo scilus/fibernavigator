@@ -1,14 +1,22 @@
 #ifndef SURFACE_H_
 #define SURFACE_H_
 
+#include "datasetInfo.h"
+
 #include <vector>
 #include "Fantom/FTensor.hh"
 
-class Surface {
+class Surface : public DatasetInfo{
 
 public:
-	Surface();
+	Surface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId);
 	~Surface() {};
+
+	bool load(wxString filename) {};
+	void draw();
+	void generateTexture() {};
+	void generateGeometry() {};
+	void initializeBuffer() {};
 
 	void execute(std::vector< std::vector< double > > givenPoints);
 
@@ -29,6 +37,9 @@ private:
 	double m_xAverage;
 	double m_yAverage;
 	double m_zAverage;
+
+	wxTreeCtrl* m_treeWidget;
+	wxTreeItemId m_tPointId;
 
 };
 
