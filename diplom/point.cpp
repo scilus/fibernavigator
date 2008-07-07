@@ -28,7 +28,7 @@ void Point::drag(wxPoint click)
 {
 	Vector3fT vs = SelectionBox::mapMouse2World(click.x, click.y);
 	Vector3fT ve = SelectionBox::mapMouse2WorldBack(click.x, click.y);
-	Vector3fT dir = {ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z};
+	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 
 	m_center.s.X = vs.s.X + dir.s.X * m_hr.tmin;
 	m_center.s.Y = vs.s.Y + dir.s.Y * m_hr.tmin;
@@ -39,11 +39,11 @@ void Point::drag(wxPoint click)
 hitResult Point::hitTest(Ray *ray)
 {
 	hitResult hr;
-	
+
 	float cx = m_center.s.X;
 	float cy = m_center.s.Y;
 	float cz = m_center.s.Z;
-	
+
 	BoundingBox *bb = new BoundingBox(cx, cy, cz, 6, 6, 6);
 	hr = bb->hitTest(ray);
 

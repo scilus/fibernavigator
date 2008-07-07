@@ -33,9 +33,9 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 	*/
 	TheDataset::m_transform = m_transform1;
 
-	Matrix3fT idMat = {  1.0f,  0.0f,  0.0f,
+	Matrix3fT idMat = {{  1.0f,  0.0f,  0.0f,
 	                     0.0f,  1.0f,  0.0f,
-	                     0.0f,  0.0f,  1.0f };
+	                     0.0f,  0.0f,  1.0f }};
 	/*
 	Matrix3fT lastRot1   = {  -0.62f,  0.25f,  -0.75f,
 			                   0.78f,  0.32f,  -0.54f,
@@ -107,7 +107,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						int yDrag = (m_lastPos.y - clickY);
 						GetEventHandler()->ProcessEvent( event1 );
 
-						Vector3fT n = {0,0,0};
+						Vector3fT n = {{0,0,0}};
 						switch (m_hr.picked) {
 						case axial:
 							n.s.X = 1.0;
@@ -175,8 +175,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				    }
 
 					float *dots = new float[8];
-					Vector3fT v1 = {0,0,1};
-					Vector3fT v2 = {1,1,1};
+					Vector3fT v1 = {{0,0,1}};
+					Vector3fT v2 = {{1,1,1}};
 					Vector3fT view;
 
 					Vector3fMultMat4(&view, &v1, &TheDataset::m_transform);
@@ -241,7 +241,7 @@ float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector
 {
 	Vector3fT vs = mapMouse2World(x1, y1);
 	Vector3fT ve = mapMouse2World(x2, y2);
-	Vector3fT dir = {ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z};
+	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
 	float nb = ((dir.s.X * n.s.X) + (dir.s.Y * n.s.Y) + (dir.s.Z * n.s.Z));
 	return bb/nb;
@@ -265,7 +265,7 @@ Vector3fT MainCanvas::mapMouse2World(int x, int y)
 	GLdouble posX, posY, posZ;
 	gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX, &posY, &posZ);
 	glPopMatrix();
-	Vector3fT v = {posX, posY, posZ};
+	Vector3fT v = {{posX, posY, posZ}};
 	return v;
 }
 
@@ -452,13 +452,13 @@ void MainCanvas::renderTestRay()
 		glVertex3f(m_pos1X, m_pos1Y, m_pos1Z);
 		glVertex3f(m_pos2X, m_pos2Y, m_pos2Z);
 	glEnd();
-	Vector3fT dir = {m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z};
+	Vector3fT dir = {{m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z}};
 	m_scene->drawSphere(m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z, 3.0);
 }
 
 Vector3fT MainCanvas::getEventCenter()
 {
-	Vector3fT dir = {m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z};
-	Vector3fT center = {m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z};
+	Vector3fT dir = {{m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z}};
+	Vector3fT center = {{m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z}};
 	return center;
 }

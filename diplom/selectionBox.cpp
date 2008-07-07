@@ -10,7 +10,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, int lines)
 	m_dirty = true;
 	m_isAND = true;
 	m_isActive = true;
-	m_handleRadius = 3.0;	
+	m_handleRadius = 3.0;
 	m_lines = lines;
 	m_inBox.resize(lines, sizeof(bool));
 	for (int i = 0; i < lines ; ++i)
@@ -27,7 +27,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	m_isActive = true;
 	m_show = true;
 	m_dirty = true;
-	
+
 	m_handleRadius = 3.0;
 	m_lines = box->m_lines;
 	m_inBox.resize(m_lines, sizeof(bool));
@@ -49,7 +49,7 @@ void SelectionBox::drawHandles()
 	py = wxMax(cy + m_size.s.Y/2, cy + m_handleRadius);
 	mz = wxMin(cz - m_size.s.Z/2, cz - m_handleRadius);
 	pz = wxMax(cz + m_size.s.Z/2, cz + m_handleRadius);
-	
+
 	glColor3f(1.0, 0.0, 0.0);
 	drawSphere(cx, cy, cz, m_handleRadius);
 	drawSphere(mx - m_handleRadius, cy, cz, m_handleRadius);
@@ -58,7 +58,7 @@ void SelectionBox::drawHandles()
 	drawSphere(cx, py + m_handleRadius, cz, m_handleRadius);
 	drawSphere(cx, cy, mz - m_handleRadius, m_handleRadius);
 	drawSphere(cx, cy, pz + m_handleRadius, m_handleRadius);
-	
+
 }
 
 void SelectionBox::drawFrame()
@@ -133,7 +133,7 @@ hitResult SelectionBox::hitTest(Ray *ray)
 			if (picked == 0) {
 				picked = 10;
 				tpicked = hr.tmin;
-				
+
 			}
 			else {
 				if (hr.tmin < tpicked) {
@@ -239,9 +239,9 @@ hitResult SelectionBox::hitTest(Ray *ray)
 
 float SelectionBox::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
 {
-	Vector3fT vs = mapMouse2World(x1, y1); 
+	Vector3fT vs = mapMouse2World(x1, y1);
 	Vector3fT ve = mapMouse2World(x2, y2);
-	Vector3fT dir = {ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z};
+	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
 	float nb = ((dir.s.X * n.s.X) + (dir.s.Y * n.s.Y) + (dir.s.Z * n.s.Z));
 	return bb/nb;
@@ -250,7 +250,7 @@ float SelectionBox::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vect
 Vector3fT SelectionBox::mapMouse2World(int x, int y)
 {
 	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);	
+	glMultMatrixf(TheDataset::m_transform.M);
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -265,14 +265,14 @@ Vector3fT SelectionBox::mapMouse2World(int x, int y)
 	GLdouble posX, posY, posZ;
 	gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX, &posY, &posZ);
 	glPopMatrix();
-	Vector3fT v = {posX, posY, posZ};
+	Vector3fT v = {{posX, posY, posZ}};
 	return v;
 }
 
 Vector3fT SelectionBox::mapMouse2WorldBack(int x, int y)
 {
 	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);	
+	glMultMatrixf(TheDataset::m_transform.M);
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -287,7 +287,7 @@ Vector3fT SelectionBox::mapMouse2WorldBack(int x, int y)
 	GLdouble posX, posY, posZ;
 	gluUnProject( winX, winY, 1, modelview, projection, viewport, &posX, &posY, &posZ);
 	glPopMatrix();
-	Vector3fT v = {posX, posY, posZ};
+	Vector3fT v = {{posX, posY, posZ}};
 	return v;
 }
 
@@ -306,7 +306,7 @@ void SelectionBox::drag(wxPoint click)
 {
 	Vector3fT vs = mapMouse2World(click.x, click.y);
 	Vector3fT ve = mapMouse2WorldBack(click.x, click.y);
-	Vector3fT dir = {ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z};
+	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 
 	m_center.s.X = vs.s.X + dir.s.X * m_hr.tmin;
 	m_center.s.Y = vs.s.Y + dir.s.Y * m_hr.tmin;
@@ -316,7 +316,7 @@ void SelectionBox::drag(wxPoint click)
 
 void SelectionBox::resize(wxPoint click, wxPoint lastPos)
 {
-	Vector3fT  n= {0,0,0};
+	Vector3fT  n= {{0,0,0}};
 	float delta = 0;
 	switch (m_hr.picked)
 	{

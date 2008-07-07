@@ -32,7 +32,7 @@ TheScene::TheScene()
 	m_yOffset2 = 0.0;
 
 	m_quadrant = 1;
-	Vector3fT v1 = {0,0,1};
+	Vector3fT v1 = {{0,0,1}};
 	m_lightPos = v1;
 
 	m_selBoxChanged = true;
