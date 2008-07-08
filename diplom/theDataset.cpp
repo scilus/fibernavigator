@@ -25,6 +25,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 			return false;
 		}
 		Mesh *mesh = new Mesh();
+		mesh->load(filename);
 		return mesh;
 	}
 
