@@ -18,6 +18,8 @@
 #include "datasetInfo.h"
 #include "mesh.h"
 #include "ArcBall.h"
+#include <vector>
+#include "selectionBox.h"
 
 class TheDataset
 {
@@ -26,7 +28,9 @@ private:
 
 public:
 	static DatasetInfo* load(wxString);
+	static void save(wxString);
 	static void printTime();
+	static std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 
 	static int rows;
 	static int columns;

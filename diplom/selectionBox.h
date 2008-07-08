@@ -20,16 +20,16 @@ public:
 	SelectionBox(Vector3fT, Vector3fT, int);
 	SelectionBox(SelectionBox*);
 	~SelectionBox() {};
-	
+
 	void drawHandles();
 	void drawFrame();
 	hitResult hitTest(Ray *ray);
 	void processDrag(wxPoint click, wxPoint lastPos);
-	
+
 	bool toggleShow() {return m_show = !m_show;};
-	bool toggleAND() {return m_isAND = !m_isAND;};
+	bool toggleNOT() {return m_isNOT = !m_isNOT;};
 	bool getShow() {return m_show;};
-	
+
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
 	Vector3fT getCenter() {return m_center;};
 	void setSize(Vector3fT v) {m_size = v;m_dirty = true;};
@@ -41,29 +41,29 @@ public:
 
 	static Vector3fT mapMouse2World(int, int);
 	static Vector3fT mapMouse2WorldBack(int, int);
-	
+
 	std::vector<bool>m_inBox;
 	int m_lines;
-	bool m_isAND;
+	bool m_isNOT;
 	bool m_isTop;
 	bool m_isActive;
-	
+
 private:
 	void drawSphere(float, float, float, float);
 	void drag(wxPoint click);
 	void resize(wxPoint click, wxPoint lastPos);
-	
+
 	float getAxisParallelMovement(int, int, int, int, Vector3fT);
-	
+
 	Vector3fT m_center;
 	Vector3fT m_size;
 	hitResult m_hr;
 	float mx, px, my, py, mz, pz;
-	
+
 	float m_handleRadius;
 	bool m_show;
 	bool m_dirty;
-	
+
 };
 
 #endif /*SELECTIONBOX_H_*/

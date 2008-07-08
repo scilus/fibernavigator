@@ -25,6 +25,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_QUIT, MainFrame::OnQuit)
     EVT_MENU(VIEWER_NEW, MainFrame::OnNew)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
+    EVT_MENU(VIEWER_SAVE, MainFrame::OnSave)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
     /* mouse click in one of the three navigation windows */
     EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
@@ -441,6 +442,23 @@ void MainFrame::load(wxString path)
 	wxCommandEvent e;
 	if ( info->getType() == Curves_) OnNewSelBox(e);
 }
+
+void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
+{
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("Viewer files (*.yav)|*.yav||*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
+	dialog.SetFilterIndex(0);
+	dialog.SetDirectory(TheDataset::lastPath);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		TheDataset::lastPath = dialog.GetDirectory();
+		TheDataset::save(dialog.GetPath());
+	}
+}
+
 
 void MainFrame::updateTreeDims()
 {
@@ -894,7 +912,7 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& event)
 	if (m_treeWidget->GetItemText(treeid) == wxT("box")) {
 		if (m_treeWidget->GetItemText(parentid) == wxT("box"))
 		{
-			((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData()))->toggleAND();
+			((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData()))->toggleNOT();
 			((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(parentid))->getData()))->setDirty();
 		}
 	}

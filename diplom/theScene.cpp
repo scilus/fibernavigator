@@ -524,7 +524,7 @@ void TheScene::renderCurves()
 		{
 			if (m_selBoxChanged)
 			{
-				((Curves*)info)->updateLinesShown(getSelectionBoxes());
+				((Curves*)info)->updateLinesShown(TheDataset::getSelectionBoxes());
 				m_selBoxChanged = false;
 			}
 			info->draw();
@@ -664,36 +664,11 @@ void TheScene::drawSphere(float x, float y, float z, float r)
 	glPopMatrix();
 }
 
-std::vector<std::vector<SelectionBox*> > TheScene::getSelectionBoxes()
-{
-	std::vector<std::vector<SelectionBox*> > boxes;
-	int countboxes = TheDataset::treeWidget->GetChildrenCount(TheDataset::tSelBoxId, false);
-	wxTreeItemId id, childid;
-	wxTreeItemIdValue cookie = 0;
-	for (int i = 0 ; i < countboxes ; ++i)
-	{
-		std::vector<SelectionBox*> b;
-		id = TheDataset::treeWidget->GetNextChild(TheDataset::tSelBoxId, cookie);
-		if (id.IsOk()) {
-			b.push_back((SelectionBox*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(id))->getData());
-			int childboxes = TheDataset::treeWidget->GetChildrenCount(id);
-			wxTreeItemIdValue childcookie = 0;
-			for (int i = 0 ; i < childboxes ; ++i)
-			{
-				childid = TheDataset::treeWidget->GetNextChild(id, childcookie);
-				if (childid.IsOk()) {
-					b.push_back((SelectionBox*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(childid))->getData());
-				}
-			}
-		}
-		boxes.push_back(b);
-	}
-	return boxes;
-}
+
 
 void TheScene::drawSelectionBoxes()
 {
-	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
+	std::vector<std::vector<SelectionBox*> > boxes = TheDataset::getSelectionBoxes();
 	for (uint i = 0 ; i < boxes.size() ; ++i)
 	{
 		for (uint j = 0 ; j < boxes[i].size() ; ++j)

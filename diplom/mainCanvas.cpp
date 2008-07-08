@@ -359,7 +359,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	 */
 	if (m_scene->m_showBoxes)
 	{
-		std::vector<std::vector<SelectionBox*> > boxes = m_scene->getSelectionBoxes();
+		std::vector<std::vector<SelectionBox*> > boxes = TheDataset::getSelectionBoxes();
 		for (uint i = 0 ; i < boxes.size() ; ++i)
 		{
 			for (uint j = 0 ; j < boxes[i].size() ; ++j)

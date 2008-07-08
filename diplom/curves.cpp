@@ -372,8 +372,8 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 				}
 				if ( boxes[i][j]->m_isActive) {
 					for (int k = 0 ; k <m_lineCount ; ++k)
-					boxes[i][0]->m_inBox[k] = boxes[i][0]->m_inBox[k] & ( (boxes[i][j]->m_inBox[k] | boxes[i][j]->m_isAND) &
-																			!(boxes[i][j]->m_inBox[k] & boxes[i][j]->m_isAND));
+					boxes[i][0]->m_inBox[k] = boxes[i][0]->m_inBox[k] & ( (boxes[i][j]->m_inBox[k] | boxes[i][j]->m_isNOT) &
+																			!(boxes[i][j]->m_inBox[k] & boxes[i][j]->m_isNOT));
 				}
 			}
 		}

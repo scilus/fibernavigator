@@ -8,7 +8,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, int lines)
 	m_size = size;
 	m_show = true;
 	m_dirty = true;
-	m_isAND = true;
+	m_isNOT = true;
 	m_isActive = true;
 	m_handleRadius = 3.0;
 	m_lines = lines;
@@ -23,7 +23,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 {
 	m_center = box->getCenter();
 	m_size = box->getSize();
-	m_isAND = false;
+	m_isNOT = false;
 	m_isActive = true;
 	m_show = true;
 	m_dirty = true;
@@ -69,7 +69,7 @@ void SelectionBox::drawFrame()
 	if ( m_isTop )
 		glColor3f(0.0, 1.0, 1.0);
 	else {
-		if ( !m_isAND )
+		if ( !m_isNOT )
 			glColor3f(0.0, 1.0, 0.0);
 		else
 			glColor3f(1.0, 0.0, 0.0);

@@ -50,7 +50,6 @@ public:
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
 	void setLightPos(Vector3fT value) {m_lightPos = value;};
 	void setQuadrant(int quadrant) {m_quadrant = quadrant;};
-	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	void toggleBoxes() {m_showBoxes = !m_showBoxes;};
 	bool togglePointMode() {return m_pointMode = !m_pointMode;};
 	bool getPointMode() {return m_pointMode;};
