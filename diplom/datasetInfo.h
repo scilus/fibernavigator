@@ -37,7 +37,7 @@ public:
 	virtual void initializeBuffer()=0;
 
 	wxTreeItemId getTreeId() const {return m_treeId;};
-    void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
+    void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;m_hasTreeId = true;};
 	wxString getName() {return m_name;};
 	void setName(wxString name) {m_name = name;};
 	int getType() {return m_type;};
@@ -64,6 +64,7 @@ public:
 	bool getShow() {return m_show;};
 	bool getShowFS() {return m_showFS;};
 	bool getUseTex() {return m_useTex;};
+	bool hasTreeId() {return m_hasTreeId;};
 
 
 protected:
@@ -83,6 +84,7 @@ protected:
 	float m_threshold;
 	wxTreeItemId m_treeId;
 
+	bool m_hasTreeId;
 	bool m_show;
 	bool m_showFS;	// show front sector for meshs
 	bool m_useTex; 	// color mesh with textures loaded,

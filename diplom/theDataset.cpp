@@ -7,6 +7,7 @@ int TheDataset::columns = 1;
 int TheDataset::frames = 1;
 bool TheDataset::anatomy_loaded = false;
 bool TheDataset::fibers_loaded = false;
+bool TheDataset::surface_loaded = false;
 
 Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
 								        0.0f,  1.0f,  0.0f,  0.0f,
@@ -25,8 +26,9 @@ DatasetInfo* TheDataset::load(wxString filename)
 			return false;
 		}
 		Mesh *mesh = new Mesh();
-		mesh->load(filename);
-		return mesh;
+		if (mesh->load(filename))
+			return mesh;
+		return false;
 	}
 
 	else if (ext == wxT("fib")) {
@@ -39,8 +41,9 @@ DatasetInfo* TheDataset::load(wxString filename)
 			return false;
 		}
 		Curves *curves = new Curves();
-		curves->load(filename);
-		return curves;
+		if (curves->load(filename))
+			return curves;
+		return false;
 	}
 
 	else if (ext != wxT("hea")) return NULL;
@@ -78,7 +81,6 @@ DatasetInfo* TheDataset::load(wxString filename)
 			return NULL;
 		}
 	}
-
 	return NULL;
 }
 

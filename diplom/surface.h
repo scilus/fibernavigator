@@ -10,7 +10,7 @@ class Surface : public DatasetInfo{
 
 public:
 	Surface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId);
-	~Surface() {};
+	~Surface();
 
 	bool load(wxString filename) {return false;};
 	void draw();

@@ -5,6 +5,7 @@
 #include "surface.h"
 #include "point.h"
 #include "myListCtrl.h"
+#include "theDataset.h"
 
 #include "GL/glew.h"
 
@@ -25,8 +26,15 @@ Surface::Surface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId)
 	m_useTex = true;
 
 	m_type = Surface_;
+	m_hasTreeId = false;
 	m_threshold = 0.5;
 	m_name = wxT("spline surface");
+	TheDataset::surface_loaded = true;
+}
+
+Surface::~Surface()
+{
+	TheDataset::surface_loaded = false;
 }
 
 FTensor Surface::getCovarianceMatrix(std::vector< std::vector< double > > points)

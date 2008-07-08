@@ -798,7 +798,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		}
 		break;
 	case 3:
-		m_treeWidget->Delete(info->getTreeId());
+		if (info->hasTreeId()) m_treeWidget->Delete(info->getTreeId());
 		delete info;
 		m_datasetListCtrl->DeleteItem(item);
 		renewAllGLWidgets();
@@ -896,7 +896,7 @@ void MainFrame::OnTogglePointMode(wxCommandEvent& event)
 
 void MainFrame::OnNewSurface(wxCommandEvent& event)
 {
-	if (!m_scene) return;
+	if (!m_scene || TheDataset::surface_loaded) return;
 	Surface *surface = new Surface(m_treeWidget, m_tPointId);
 
 	int i = m_datasetListCtrl->GetItemCount();

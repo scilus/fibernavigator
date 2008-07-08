@@ -39,6 +39,7 @@ public:
 	static wxString lastError;
 	static bool anatomy_loaded;
 	static bool fibers_loaded;
+	static bool surface_loaded;
 	static wxString lastPath;
 };
 
