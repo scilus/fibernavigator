@@ -17,7 +17,7 @@ class Curves;
 
 class SelectionBox {
 public:
-	SelectionBox(Vector3fT, Vector3fT, int);
+	SelectionBox(Vector3fT, Vector3fT);
 	SelectionBox(SelectionBox*);
 	~SelectionBox() {};
 
@@ -43,7 +43,7 @@ public:
 	static Vector3fT mapMouse2WorldBack(int, int);
 
 	std::vector<bool>m_inBox;
-	int m_lines;
+
 	bool m_isNOT;
 	bool m_isTop;
 	bool m_isActive;

@@ -394,6 +394,18 @@ void MainFrame::load(wxString path)
 		m_statusBar->SetStatusText(TheDataset::lastError,2);
 		return;
 	}
+	wxString ext = path.AfterLast('.');
+	if (ext == wxT("yav")) {
+		if (!TheDataset::loadSettings(path)) {
+			wxMessageBox(wxT("ERROR\n") + TheDataset::lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+			m_statusBar->SetStatusText(wxT("ERROR"),1);
+			m_statusBar->SetStatusText(TheDataset::lastError,2);
+			return;
+		}
+		m_scene->m_selBoxChanged = true;
+		refreshAllGLWidgets();
+		return;
+	}
 
 	DatasetInfo *info = TheDataset::load(path);
 
@@ -722,11 +734,8 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 	}
 	else
 	{
-		wxTreeItemIdValue cookie = 0;
-		Curves *curves = (Curves*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
-		int lines = curves->getLineCount();
 		Vector3fT v3 = {{TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8}};
-		SelectionBox *selBox = new SelectionBox(v2, v3, lines);
+		SelectionBox *selBox = new SelectionBox(v2, v3);
 		selBox->m_isTop = true;
 		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 	}

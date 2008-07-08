@@ -14,6 +14,7 @@
 class Point {
 public:
 	Point(Vector3fT);
+	Point( double, double, double);
 	~Point() {};
 
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};

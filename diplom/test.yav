@@ -8,12 +8,12 @@
         <point x="5.999999" y="41.874706" z="-35.780537"/>
         <point x="6.000003" y="-26.854948" z="-35.242615"/>
     </points>
-    <selection boxes>
-        <master box>
+    <selection_boxes>
+        <master_box>
             <size x="20.000000" y="25.000000" z="20.000000"/>
             <center x="42.940281" y="-37.026176" z="11.550842"/>
-        </master box>
-        <master box>
+        </master_box>
+        <master_box>
             <box type="NOT">
                 <size x="20.000000" y="25.000000" z="30.703630"/>
                 <center x="6.000000" y="0.000000" z="0.000000"/>
@@ -24,6 +24,6 @@
             </box>
             <size x="20.000000" y="25.000000" z="30.703630"/>
             <center x="-37.325130" y="51.373207" z="-41.087601"/>
-        </master box>
-    </selection boxes>
+        </master_box>
+    </selection_boxes>
 </scene>

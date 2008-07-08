@@ -149,6 +149,7 @@ bool Curves::load(wxString filename)
 	//int cc = i;
 
 	m_lineCount = countLines;
+	TheDataset::countFibers = m_lineCount;
 	m_pointCount = countPoints;
 	m_linePointers = new int[countLines+1];
 	m_linePointers[countLines] = countPoints;

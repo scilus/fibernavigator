@@ -8,6 +8,13 @@ Point::Point(Vector3fT center)
 	m_selected = false;
 }
 
+Point::Point(double x, double y, double z)
+{
+	Vector3fT center = {{x,y,z}};
+	m_center = center;
+	m_dirty = true;
+	m_selected = false;
+}
 
 void Point::draw()
 {

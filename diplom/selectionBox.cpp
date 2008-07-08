@@ -2,7 +2,7 @@
 #include "theDataset.h"
 #include "curves.h"
 
-SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, int lines)
+SelectionBox::SelectionBox(Vector3fT center, Vector3fT size)
 {
 	m_center = center;
 	m_size = size;
@@ -11,9 +11,8 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, int lines)
 	m_isNOT = true;
 	m_isActive = true;
 	m_handleRadius = 3.0;
-	m_lines = lines;
-	m_inBox.resize(lines, sizeof(bool));
-	for (int i = 0; i < lines ; ++i)
+	m_inBox.resize(TheDataset::countFibers, sizeof(bool));
+	for (int i = 0; i < TheDataset::countFibers ; ++i)
 	{
 		m_inBox[i] = 0;
 	}
@@ -29,9 +28,8 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	m_dirty = true;
 
 	m_handleRadius = 3.0;
-	m_lines = box->m_lines;
-	m_inBox.resize(m_lines, sizeof(bool));
-	for (int i = 0; i < m_lines ; ++i)
+	m_inBox.resize(TheDataset::countFibers, sizeof(bool));
+	for (int i = 0; i < TheDataset::countFibers ; ++i)
 	{
 		m_inBox[i] = 0;
 	}

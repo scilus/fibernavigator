@@ -28,13 +28,16 @@ private:
 
 public:
 	static DatasetInfo* load(wxString);
+	static bool loadSettings(wxString);
 	static void save(wxString);
 	static void printTime();
+	static void printwxT(wxString);
 	static std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 
 	static int rows;
 	static int columns;
 	static int frames;
+	static unsigned int countFibers;
 	static Matrix4fT m_transform;
 	static wxString lastError;
 	static bool anatomy_loaded;
