@@ -9,11 +9,8 @@
 
 #include "GL/glew.h"
 
-Surface::Surface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId)
+Surface::Surface()
 {
-	m_treeWidget = treeWidget;
-	m_tPointId = tPointId;
-
 	m_radius = 30.0;
 	m_my = 2.0;
 	m_numDeBoorRows = 8;
@@ -269,15 +266,15 @@ void Surface::execute (std::vector< std::vector< double > > givenPoints)
 void Surface::draw()
 {
 	std::vector< std::vector< double > > givenPoints;
-	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
+	int countPoints = TheDataset::treeWidget->GetChildrenCount(TheDataset::tPointId, true);
 	if (countPoints == 0) return;
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
-		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData();
+		id = TheDataset::treeWidget->GetNextChild(TheDataset::tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(id))->getData();
 
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);

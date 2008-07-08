@@ -83,14 +83,14 @@ void TheScene::assignTextures ()
 {
 	printf("assign textures\n");
 	glDeleteTextures(10, m_texNames);
-	m_countTextures = m_listctrl->GetItemCount();
+	m_countTextures = TheDataset::listCtrl->GetItemCount();
 
 	if (m_countTextures == 0) return;
 
 
 	for (int i = 0 ; i < m_countTextures ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(i);
 		if(info->getType() == Mesh_)
 		{
 			m_texNames[i] = makeCallList(info);
@@ -112,9 +112,9 @@ void TheScene::assignTextures ()
 
 void TheScene::addTexture()
 {
-	m_countTextures = m_listctrl->GetItemCount();
+	m_countTextures = TheDataset::listCtrl->GetItemCount();
 	if (m_countTextures == 0) return;
-	DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(m_countTextures - 1);
+	DatasetInfo* info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(m_countTextures - 1);
 	if(info->getType() == Mesh_)
 	{
 		m_texNames[m_countTextures -1] = makeCallList(info);
@@ -140,7 +140,7 @@ void TheScene::bindTextures()
 
 	for (int i = 0 ; i < m_countTextures ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(i);
 		if (info->getType() < Mesh_) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
@@ -232,61 +232,61 @@ void TheScene::setTextureShaderVars()
 	switch (m_countTextures)
 	{
 	case 10:
-		info = (DatasetInfo*)m_listctrl->GetItemData(9);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(9);
 		m_textureShader->setUniInt("tex9", 9);
 		m_textureShader->setUniInt("show9", info->getShow());
 		m_textureShader->setUniFloat("threshold9",  info->getThreshold());
 		m_textureShader->setUniInt("type9", info->getType());
 	case 9:
-		info = (DatasetInfo*)m_listctrl->GetItemData(8);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(8);
 		m_textureShader->setUniInt("tex8", 8);
 		m_textureShader->setUniInt("show8", info->getShow());
 		m_textureShader->setUniFloat("threshold8",  info->getThreshold());
 		m_textureShader->setUniInt("type8", info->getType());
 	case 8:
-		info = (DatasetInfo*)m_listctrl->GetItemData(7);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(7);
 		m_textureShader->setUniInt("tex7", 7);
 		m_textureShader->setUniInt("show7", info->getShow());
 		m_textureShader->setUniFloat("threshold7",  info->getThreshold());
 		m_textureShader->setUniInt("type7", info->getType());
 	case 7:
-		info = (DatasetInfo*)m_listctrl->GetItemData(6);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(6);
 		m_textureShader->setUniInt("tex6", 6);
 		m_textureShader->setUniInt("show6", info->getShow());
 		m_textureShader->setUniFloat("threshold6",  info->getThreshold());
 		m_textureShader->setUniInt("type6", info->getType());
 	case 6:
-		info = (DatasetInfo*)m_listctrl->GetItemData(5);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(5);
 		m_textureShader->setUniInt("tex5", 5);
 		m_textureShader->setUniInt("show5", info->getShow());
 		m_textureShader->setUniFloat("threshold5",  info->getThreshold());
 		m_textureShader->setUniInt("type5", info->getType());
 	case 5:
-		info = (DatasetInfo*)m_listctrl->GetItemData(4);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(4);
 		m_textureShader->setUniInt("tex4", 4);
 		m_textureShader->setUniInt("show4", info->getShow());
 		m_textureShader->setUniFloat("threshold4",  info->getThreshold());
 		m_textureShader->setUniInt("type4", info->getType());
 	case 4:
-		info = (DatasetInfo*)m_listctrl->GetItemData(3);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(3);
 		m_textureShader->setUniInt("tex3", 3);
 		m_textureShader->setUniInt("show3", info->getShow());
 		m_textureShader->setUniFloat("threshold3",  info->getThreshold());
 		m_textureShader->setUniInt("type3", info->getType());
 	case 3:
-		info = (DatasetInfo*)m_listctrl->GetItemData(2);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(2);
 		m_textureShader->setUniInt("tex2", 2);
 		m_textureShader->setUniInt("show2", info->getShow());
 		m_textureShader->setUniFloat("threshold2",  info->getThreshold());
 		m_textureShader->setUniInt("type2", info->getType());
 	case 2:
-		info = (DatasetInfo*)m_listctrl->GetItemData(1);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(1);
 		m_textureShader->setUniInt("tex1", 1);
 		m_textureShader->setUniInt("show1", info->getShow());
 		m_textureShader->setUniFloat("threshold1",  info->getThreshold());
 		m_textureShader->setUniInt("type1", info->getType());
 	case 1:
-		info = (DatasetInfo*)m_listctrl->GetItemData(0);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(0);
 		m_textureShader->setUniInt("tex0", 0);
 		m_textureShader->setUniInt("show0", info->getShow());
 		m_textureShader->setUniFloat("threshold0",  info->getThreshold());
@@ -312,61 +312,61 @@ void TheScene::setMeshShaderVars()
 	switch (m_countTextures)
 	{
 	case 10:
-		info = (DatasetInfo*)m_listctrl->GetItemData(9);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(9);
 		m_meshShader->setUniInt("tex9", 9);
 		m_meshShader->setUniInt("show9", info->getShow());
 		m_meshShader->setUniFloat("threshold9",  info->getThreshold());
 		m_meshShader->setUniInt("type9", info->getType());
 	case 9:
-		info = (DatasetInfo*)m_listctrl->GetItemData(8);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(8);
 		m_meshShader->setUniInt("tex8", 8);
 		m_meshShader->setUniInt("show8", info->getShow());
 		m_meshShader->setUniFloat("threshold8",  info->getThreshold());
 		m_meshShader->setUniInt("type8", info->getType());
 	case 8:
-		info = (DatasetInfo*)m_listctrl->GetItemData(7);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(7);
 		m_meshShader->setUniInt("tex7", 7);
 		m_meshShader->setUniInt("show7", info->getShow());
 		m_meshShader->setUniFloat("threshold7",  info->getThreshold());
 		m_meshShader->setUniInt("type7", info->getType());
 	case 7:
-		info = (DatasetInfo*)m_listctrl->GetItemData(6);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(6);
 		m_meshShader->setUniInt("tex6", 6);
 		m_meshShader->setUniInt("show6", info->getShow());
 		m_meshShader->setUniFloat("threshold6",  info->getThreshold());
 		m_meshShader->setUniInt("type6", info->getType());
 	case 6:
-		info = (DatasetInfo*)m_listctrl->GetItemData(5);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(5);
 		m_meshShader->setUniInt("tex5", 5);
 		m_meshShader->setUniInt("show5", info->getShow());
 		m_meshShader->setUniFloat("threshold5",  info->getThreshold());
 		m_meshShader->setUniInt("type5", info->getType());
 	case 5:
-		info = (DatasetInfo*)m_listctrl->GetItemData(4);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(4);
 		m_meshShader->setUniInt("tex4", 4);
 		m_meshShader->setUniInt("show4", info->getShow());
 		m_meshShader->setUniFloat("threshold4",  info->getThreshold());
 		m_meshShader->setUniInt("type4", info->getType());
 	case 4:
-		info = (DatasetInfo*)m_listctrl->GetItemData(3);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(3);
 		m_meshShader->setUniInt("tex3", 3);
 		m_meshShader->setUniInt("show3", info->getShow());
 		m_meshShader->setUniFloat("threshold3",  info->getThreshold());
 		m_meshShader->setUniInt("type3", info->getType());
 	case 3:
-		info = (DatasetInfo*)m_listctrl->GetItemData(2);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(2);
 		m_meshShader->setUniInt("tex2", 2);
 		m_meshShader->setUniInt("show2", info->getShow());
 		m_meshShader->setUniFloat("threshold2",  info->getThreshold());
 		m_meshShader->setUniInt("type2", info->getType());
 	case 2:
-		info = (DatasetInfo*)m_listctrl->GetItemData(1);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(1);
 		m_meshShader->setUniInt("tex1", 1);
 		m_meshShader->setUniInt("show1", info->getShow());
 		m_meshShader->setUniFloat("threshold1",  info->getThreshold());
 		m_meshShader->setUniInt("type1", info->getType());
 	case 1:
-		info = (DatasetInfo*)m_listctrl->GetItemData(0);
+		info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(0);
 		m_meshShader->setUniInt("tex0", 0);
 		m_meshShader->setUniInt("show0", info->getShow());
 		m_meshShader->setUniFloat("threshold0",  info->getThreshold());
@@ -378,7 +378,7 @@ void TheScene::setMeshShaderVars()
 
 void TheScene::renderScene()
 {
-	if (m_listctrl->GetItemCount() == 0) return;
+	if (TheDataset::listCtrl->GetItemCount() == 0) return;
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -496,9 +496,9 @@ void TheScene::renderMesh()
 	m_meshShader->bind();
 	setMeshShaderVars();
 
-	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < TheDataset::listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(i);
 		if (info->getType() == Mesh_ && info->getShow())
 		{
 			float c = (float)info->getThreshold();
@@ -515,9 +515,9 @@ void TheScene::renderMesh()
 void TheScene::renderCurves()
 {
 	m_curveShader->bind();
-	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < TheDataset::listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(i);
 
 		m_curveShader->setUniInt("useNormals", !info->getShowFS());
 		if (info->getType() == Curves_ && info->getShow())
@@ -538,9 +538,9 @@ void TheScene::renderSurface()
 	m_meshShader->bind();
 	setMeshShaderVars();
 
-	for (int i = 0 ; i < m_listctrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < TheDataset::listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)m_listctrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)TheDataset::listCtrl->GetItemData(i);
 		if (info->getType() == Surface_ && info->getShow())
 		{
 			float c = (float)info->getThreshold();
@@ -556,7 +556,7 @@ void TheScene::renderSurface()
 
 void TheScene::renderNavView(int view)
 {
-	if (m_listctrl->GetItemCount() == 0) return;
+	if (TheDataset::listCtrl->GetItemCount() == 0) return;
 
 	bindTextures();
 	setTextureShaderVars();
@@ -667,22 +667,22 @@ void TheScene::drawSphere(float x, float y, float z, float r)
 std::vector<std::vector<SelectionBox*> > TheScene::getSelectionBoxes()
 {
 	std::vector<std::vector<SelectionBox*> > boxes;
-	int countboxes = m_treeWidget->GetChildrenCount(m_tSelBoxId, false);
+	int countboxes = TheDataset::treeWidget->GetChildrenCount(TheDataset::tSelBoxId, false);
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	for (int i = 0 ; i < countboxes ; ++i)
 	{
 		std::vector<SelectionBox*> b;
-		id = m_treeWidget->GetNextChild(m_tSelBoxId, cookie);
+		id = TheDataset::treeWidget->GetNextChild(TheDataset::tSelBoxId, cookie);
 		if (id.IsOk()) {
-			b.push_back((SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData());
-			int childboxes = m_treeWidget->GetChildrenCount(id);
+			b.push_back((SelectionBox*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(id))->getData());
+			int childboxes = TheDataset::treeWidget->GetChildrenCount(id);
 			wxTreeItemIdValue childcookie = 0;
 			for (int i = 0 ; i < childboxes ; ++i)
 			{
-				childid = m_treeWidget->GetNextChild(id, childcookie);
+				childid = TheDataset::treeWidget->GetNextChild(id, childcookie);
 				if (childid.IsOk()) {
-					b.push_back((SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(childid))->getData());
+					b.push_back((SelectionBox*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(childid))->getData());
 				}
 			}
 		}
@@ -727,14 +727,14 @@ void TheScene::drawPoints()
 	m_meshShader->setUniInt("useTex", false);
 
 	std::vector< std::vector< double > > givenPoints;
-	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
+	int countPoints = TheDataset::treeWidget->GetChildrenCount(TheDataset::tPointId, true);
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
-		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData();
+		id = TheDataset::treeWidget->GetNextChild(TheDataset::tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(id))->getData();
 		point->draw();
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);

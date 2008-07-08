@@ -374,13 +374,13 @@ hitResult MainCanvas::pick(wxPoint click)
 	 * check for hits with points for spline surface
 	 */
 	if (m_scene->getPointMode()) {
-		int countPoints = m_scene->m_treeWidget->GetChildrenCount(m_scene->m_tPointId, true);
+		int countPoints = TheDataset::treeWidget->GetChildrenCount(TheDataset::tPointId, true);
 		wxTreeItemId id, childid;
 		wxTreeItemIdValue cookie = 0;
 		for (int i = 0 ; i < countPoints ; ++i)
 		{
-			id = m_scene->m_treeWidget->GetNextChild(m_scene->m_tPointId, cookie);
-			Point *point = (Point*)((MyTreeItemData*)m_scene->m_treeWidget->GetItemData(id))->getData();
+			id = TheDataset::treeWidget->GetNextChild(TheDataset::tPointId, cookie);
+			Point *point = (Point*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(id))->getData();
 			hitResult hr1 = point->hitTest(ray);
 			if (hr1.hit && !hr.hit) hr = hr1;
 			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;

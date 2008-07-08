@@ -25,11 +25,7 @@ private:
 
 
 public:
-	//TheDataset();
-	//~TheDataset();
-
 	static DatasetInfo* load(wxString);
-
 	static void printTime();
 
 	static int rows;
@@ -41,6 +37,11 @@ public:
 	static bool fibers_loaded;
 	static bool surface_loaded;
 	static wxString lastPath;
+
+	static wxTreeCtrl* treeWidget;
+	static wxTreeItemId tSelBoxId;
+	static wxTreeItemId tPointId;
+	static wxListCtrl* listCtrl;
 };
 
 #endif /*THEDATASET_H_*/

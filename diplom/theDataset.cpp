@@ -9,6 +9,11 @@ bool TheDataset::anatomy_loaded = false;
 bool TheDataset::fibers_loaded = false;
 bool TheDataset::surface_loaded = false;
 
+wxTreeCtrl* TheDataset::treeWidget = NULL;
+wxTreeItemId TheDataset::tSelBoxId = NULL;
+wxTreeItemId TheDataset::tPointId = NULL;
+wxListCtrl* TheDataset::listCtrl = NULL;
+
 Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
 								        0.0f,  1.0f,  0.0f,  0.0f,
 								        0.0f,  0.0f,  1.0f,  0.0f,

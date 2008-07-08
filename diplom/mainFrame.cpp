@@ -321,9 +321,14 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     TheDataset::rows = 1;
     TheDataset::frames = 1;
     TheDataset::lastError = wxT("");
+
+    TheDataset::listCtrl = m_datasetListCtrl;
+    TheDataset::treeWidget = m_treeWidget;
+    TheDataset::tSelBoxId = m_tSelBoxId;
+    TheDataset::tPointId = m_tPointId;
+
     m_scene = new TheScene();
-    m_scene->setDataListCtrl(m_datasetListCtrl);
-    m_scene->setTreeCtrl(m_treeWidget, m_tSelBoxId, m_tPointId);
+
     m_mainGL = new MainCanvas(m_scene, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
     m_gl0 = new MainCanvas(m_scene, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
@@ -754,7 +759,6 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	delete m_scene;
 	m_scene = new TheScene();
 
-	m_scene->setDataListCtrl(m_datasetListCtrl);
 	m_scene->setMainGLContext(new wxGLContext(m_mainGL));
 
 	m_mainGL->setScene(m_scene);
@@ -914,7 +918,7 @@ void MainFrame::OnTogglePointMode(wxCommandEvent& event)
 void MainFrame::OnNewSurface(wxCommandEvent& event)
 {
 	if (!m_scene || TheDataset::surface_loaded) return;
-	Surface *surface = new Surface(m_treeWidget, m_tPointId);
+	Surface *surface = new Surface();
 
 	int i = m_datasetListCtrl->GetItemCount();
 	m_datasetListCtrl->InsertItem(i, wxT(""), 0);

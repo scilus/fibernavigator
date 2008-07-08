@@ -9,7 +9,7 @@
 class Surface : public DatasetInfo{
 
 public:
-	Surface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId);
+	Surface();
 	~Surface();
 
 	bool load(wxString filename) {return false;};
@@ -37,10 +37,6 @@ private:
 	double m_xAverage;
 	double m_yAverage;
 	double m_zAverage;
-
-	wxTreeCtrl* m_treeWidget;
-	wxTreeItemId m_tPointId;
-
 };
 
 

@@ -46,8 +46,6 @@ public:
 
 	void initShaders();
 
-	void setDataListCtrl(wxListCtrl* value) {m_listctrl = value;};
-	void setTreeCtrl(wxTreeCtrl* ctrl, wxTreeItemId sid, wxTreeItemId pid) {m_treeWidget = ctrl; m_tSelBoxId = sid;m_tPointId = pid;};
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
 	void setLightPos(Vector3fT value) {m_lightPos = value;};
@@ -81,9 +79,7 @@ public:
 	float m_zSlize;
 
 	bool m_selBoxChanged;
-	wxTreeCtrl* m_treeWidget;
-	wxTreeItemId m_tSelBoxId;
-	wxTreeItemId m_tPointId;
+
 
 private:
 	int m_countTextures;
@@ -92,7 +88,6 @@ private:
 	FGLSLShaderProgram *m_meshShader;
 	FGLSLShaderProgram *m_curveShader;
 
-	wxListCtrl* m_listctrl;
 	wxGLContext* m_mainGLContext;
 
 	float m_xOffset0;
