@@ -521,7 +521,9 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 			break;
 		case 20:
 			Point *point = new Point(m_mainGL->getEventCenter());
-			m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+			wxTreeItemId pId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+			m_treeWidget->EnsureVisible(pId);
+			m_treeWidget->SelectItem(pId);
 		}
 	}
 	m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());

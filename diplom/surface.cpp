@@ -14,7 +14,7 @@ Surface::Surface(wxTreeCtrl* treeWidget, wxTreeItemId tPointId)
 	m_treeWidget = treeWidget;
 	m_tPointId = tPointId;
 
-	m_radius = 3.0;
+	m_radius = 30.0;
 	m_my = 2.0;
 	m_numDeBoorRows = 8;
 	m_numDeBoorCols = 8;
