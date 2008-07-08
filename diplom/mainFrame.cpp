@@ -854,6 +854,13 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
 			m_datasetListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 		}
 	}
+	if (m_treeWidget->GetItemText(treeid) == wxT("point"))
+	{
+		if (m_lastSelectedPoint) m_lastSelectedPoint->unselect();
+		m_lastSelectedPoint = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData();
+		m_lastSelectedPoint->select();
+	}
+	refreshAllGLWidgets();
 }
 
 void MainFrame::OnActivateTreeItem(wxTreeEvent& event)

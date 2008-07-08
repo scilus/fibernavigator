@@ -15,17 +15,20 @@ class Point {
 public:
 	Point(Vector3fT);
 	~Point() {};
-	
+
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
 	Vector3fT getCenter() {return m_center;};
 	void draw();
-	
+
 	hitResult hitTest(Ray *ray);
 	void drag(wxPoint click);
-	
+	void select() {m_selected = true;};
+	void unselect() {m_selected = false;};
+
 private:
 	Vector3fT m_center;
 	bool m_dirty;
+	bool m_selected;
 	hitResult m_hr;
 	void drawSphere(float, float, float, float);
 };

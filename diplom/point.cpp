@@ -5,12 +5,16 @@ Point::Point(Vector3fT center)
 {
 	m_center = center;
 	m_dirty = true;
+	m_selected = false;
 }
 
 
 void Point::draw()
 {
-	glColor3f(0.0, 0.8, 0.8);
+	if (m_selected)
+		glColor3f(1.0, 0.8, 0.0);
+	else
+		glColor3f(0.0, 0.8, 0.8);
 	drawSphere(m_center.s.X, m_center.s.Y, m_center.s.Z, 2);
 }
 

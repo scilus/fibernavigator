@@ -6,6 +6,7 @@
 #include "theDataset.h"
 #include "myListCtrl.h"
 #include "wx/treectrl.h"
+#include "point.h"
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
@@ -53,6 +54,7 @@ private:
     void OnListItemDown(wxCommandEvent& event);
 
     void OnSelectTreeItem(wxTreeEvent& event);
+    void OnUnSelectTreeItem(wxTreeEvent& event);
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
 
@@ -118,6 +120,8 @@ private:
 
     int NAV_SIZE;
     int NAV_GL_SIZE;
+
+    Point* m_lastSelectedPoint;
 
 DECLARE_EVENT_TABLE()
 };
