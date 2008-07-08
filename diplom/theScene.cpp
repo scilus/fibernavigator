@@ -20,6 +20,7 @@ TheScene::TheScene()
 	m_showMesh = true;
 	m_showBoxes = true;
 	m_pointMode = false;
+	m_blendAlpha = false;
 	m_textureShader = 0;
 	m_meshShader = 0;
 	m_curveShader = 0;
@@ -380,6 +381,11 @@ void TheScene::renderScene()
 	if (m_listctrl->GetItemCount() == 0) return;
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+	if (m_blendAlpha)
+		glDisable(GL_ALPHA_TEST);
+	else
+		glEnable(GL_ALPHA_TEST);
 
 	bindTextures();
 	setTextureShaderVars();

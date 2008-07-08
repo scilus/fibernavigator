@@ -37,9 +37,10 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_SLIDER(ID_Z_SLIDER, MainFrame::OnZSliderMoved)
 	/* click on toolbar button to toggle one of the 3 panes in the
 	 * main GL window */
-	EVT_MENU(VIEWER_TOGGLEVIEW1, MainFrame::OnToggleView1)
-	EVT_MENU(VIEWER_TOGGLEVIEW2, MainFrame::OnToggleView2)
-	EVT_MENU(VIEWER_TOGGLEVIEW3, MainFrame::OnToggleView3)
+	EVT_MENU(VIEWER_TOGGLE_AXIAL, MainFrame::OnToggleView1)
+	EVT_MENU(VIEWER_TOGGLE_CORONAL, MainFrame::OnToggleView2)
+	EVT_MENU(VIEWER_TOGGLE_SAGITTAL, MainFrame::OnToggleView3)
+	EVT_MENU(VIEWER_TOGGLE_ALPHA, MainFrame::OnToggleAlpha)
 	EVT_MENU(VIEWER_NEW_SELBOX, MainFrame::OnNewSelBox)
 	EVT_MENU(VIEWER_RENDER_SELBOXES, MainFrame::OnHideSelBoxes)
 	EVT_MENU(VIEWER_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
@@ -649,6 +650,13 @@ void MainFrame::OnToggleView3(wxCommandEvent& event)
 {
 	if (!m_scene) return;
 	m_scene->m_showSagittal = !m_scene->m_showSagittal;
+	m_mainGL->render();
+}
+
+void MainFrame::OnToggleAlpha(wxCommandEvent& event)
+{
+	if (!m_scene) return;
+	m_scene->m_blendAlpha = !m_scene->m_blendAlpha;
 	m_mainGL->render();
 }
 

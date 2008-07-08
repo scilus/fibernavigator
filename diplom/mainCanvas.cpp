@@ -357,17 +357,22 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with the selection box sizers
 	 */
-	std::vector<std::vector<SelectionBox*> > boxes = m_scene->getSelectionBoxes();
-	for (uint i = 0 ; i < boxes.size() ; ++i)
+	if (m_scene->m_showBoxes)
 	{
-		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		std::vector<std::vector<SelectionBox*> > boxes = m_scene->getSelectionBoxes();
+		for (uint i = 0 ; i < boxes.size() ; ++i)
 		{
-			hitResult hr1 = boxes[i][j]->hitTest(ray);
-			if (hr1.hit && !hr.hit) hr = hr1;
-			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
+			for (uint j = 0 ; j < boxes[i].size() ; ++j)
+			{
+				hitResult hr1 = boxes[i][j]->hitTest(ray);
+				if (hr1.hit && !hr.hit) hr = hr1;
+				else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
+			}
 		}
 	}
-
+	/*
+	 * check for hits with points for spline surface
+	 */
 	if (m_scene->getPointMode()) {
 		int countPoints = m_scene->m_treeWidget->GetChildrenCount(m_scene->m_tPointId, true);
 		wxTreeItemId id, childid;

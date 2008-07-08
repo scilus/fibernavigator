@@ -270,6 +270,7 @@ void Surface::draw()
 {
 	std::vector< std::vector< double > > givenPoints;
 	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
+	if (countPoints == 0) return;
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;

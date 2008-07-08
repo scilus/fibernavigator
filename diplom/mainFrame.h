@@ -39,6 +39,7 @@ private:
     void OnToggleView1(wxCommandEvent& event);
     void OnToggleView2(wxCommandEvent& event);
     void OnToggleView3(wxCommandEvent& event);
+    void OnToggleAlpha(wxCommandEvent& event);
     void OnToggleSelBox(wxCommandEvent& event);
     void OnNewSelBox(wxCommandEvent& event);
     void OnHideSelBoxes(wxCommandEvent& event);
@@ -130,9 +131,10 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_ABOUT       	wxID_ABOUT
 #define VIEWER_NEW					4
 #define VIEWER_LOAD				5
-#define VIEWER_TOGGLEVIEW1 		11
-#define VIEWER_TOGGLEVIEW2 		12
-#define VIEWER_TOGGLEVIEW3 		13
+#define VIEWER_TOGGLE_AXIAL 		11
+#define VIEWER_TOGGLE_CORONAL 		12
+#define VIEWER_TOGGLE_SAGITTAL 		13
+#define VIEWER_TOGGLE_ALPHA 		14
 #define VIEWER_RELOAD_SHADER		16
 #define VIEWER_NEW_SELBOX			17
 #define VIEWER_RENDER_SELBOXES		19

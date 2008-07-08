@@ -31,6 +31,7 @@ public:
 	bool m_showAxial;
 	bool m_showMesh;
 	bool m_showBoxes;
+	bool m_blendAlpha;
 
 	TheScene();
 	~TheScene();
