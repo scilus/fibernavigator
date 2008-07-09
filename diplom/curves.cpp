@@ -197,6 +197,7 @@ bool Curves::load(wxString filename)
 	printf("read all\n");
 
 	m_type = Curves_;
+	m_fullPath = filename;
 	m_name = filename.AfterLast('/');
 	initializeBuffer();
 	buildkDTree();

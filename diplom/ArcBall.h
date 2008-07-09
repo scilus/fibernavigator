@@ -28,7 +28,7 @@
 
 #include "math.h"                                               // Needed for sqrtf
 
-// 8<--Snip here if you have your own math types/funcs-->8 
+// 8<--Snip here if you have your own math types/funcs-->8
 
 
 //Math types derived from the KempoApi tMath library
@@ -36,89 +36,89 @@
     {
         struct
         {
-            GLfloat X, Y;
+            float X, Y;
         } s;
 
-        GLfloat T[2];
-    } Tuple2fT;      //A generic 2-element tuple that is represented by single-precision floating point x,y coordinates. 
+        float T[2];
+    } Tuple2fT;      //A generic 2-element tuple that is represented by single-precision floating point x,y coordinates.
 
     typedef union Tuple3f_t
     {
         struct
         {
-            GLfloat X, Y, Z;
+            float X, Y, Z;
         } s;
 
-        GLfloat T[3];
-    } Tuple3fT;      //A generic 3-element tuple that is represented by single precision-floating point x,y,z coordinates. 
+        float T[3];
+    } Tuple3fT;      //A generic 3-element tuple that is represented by single precision-floating point x,y,z coordinates.
 
     typedef union Tuple4f_t
     {
         struct
         {
-            GLfloat X, Y, Z, W;
+            float X, Y, Z, W;
         } s;
 
-        GLfloat T[4];
-    } Tuple4fT;      //A 4-element tuple represented by single-precision floating point x,y,z,w coordinates. 
+        float T[4];
+    } Tuple4fT;      //A 4-element tuple represented by single-precision floating point x,y,z,w coordinates.
 
     typedef union Matrix3f_t
     {
             struct
             {
                 //column major
-                union { GLfloat M00; GLfloat XX; GLfloat SX; };  //XAxis.X and Scale X
-                union { GLfloat M10; GLfloat XY;             };  //XAxis.Y
-                union { GLfloat M20; GLfloat XZ;             };  //XAxis.Z
-                union { GLfloat M01; GLfloat YX;             };  //YAxis.X
-                union { GLfloat M11; GLfloat YY; GLfloat SY; };  //YAxis.Y and Scale Y
-                union { GLfloat M21; GLfloat YZ;             };  //YAxis.Z
-                union { GLfloat M02; GLfloat ZX;             };  //ZAxis.X
-                union { GLfloat M12; GLfloat ZY;             };  //ZAxis.Y
-                union { GLfloat M22; GLfloat ZZ; GLfloat SZ; };  //ZAxis.Z and Scale Z
+                union { float M00; float XX; float SX; };  //XAxis.X and Scale X
+                union { float M10; float XY;             };  //XAxis.Y
+                union { float M20; float XZ;             };  //XAxis.Z
+                union { float M01; float YX;             };  //YAxis.X
+                union { float M11; float YY; float SY; };  //YAxis.Y and Scale Y
+                union { float M21; float YZ;             };  //YAxis.Z
+                union { float M02; float ZX;             };  //ZAxis.X
+                union { float M12; float ZY;             };  //ZAxis.Y
+                union { float M22; float ZZ; float SZ; };  //ZAxis.Z and Scale Z
             } s;
-            GLfloat M[9];
-    } Matrix3fT;     //A single precision floating point 3 by 3 matrix. 
+            float M[9];
+    } Matrix3fT;     //A single precision floating point 3 by 3 matrix.
 
     typedef union Matrix4f_t
     {
             struct
             {
                 //column major
-                union { GLfloat M00; GLfloat XX; GLfloat SX; };  //XAxis.X and Scale X
-                union { GLfloat M10; GLfloat XY;             };  //XAxis.Y
-                union { GLfloat M20; GLfloat XZ;             };  //XAxis.Z
-                union { GLfloat M30; GLfloat XW;             };  //XAxis.W
-                union { GLfloat M01; GLfloat YX;             };  //YAxis.X
-                union { GLfloat M11; GLfloat YY; GLfloat SY; };  //YAxis.Y and Scale Y
-                union { GLfloat M21; GLfloat YZ;             };  //YAxis.Z
-                union { GLfloat M31; GLfloat YW;             };  //YAxis.W
-                union { GLfloat M02; GLfloat ZX;             };  //ZAxis.X
-                union { GLfloat M12; GLfloat ZY;             };  //ZAxis.Y
-                union { GLfloat M22; GLfloat ZZ; GLfloat SZ; };  //ZAxis.Z and Scale Z
-                union { GLfloat M32; GLfloat ZW;             };  //ZAxis.W
-                union { GLfloat M03; GLfloat TX;             };  //Trans.X
-                union { GLfloat M13; GLfloat TY;             };  //Trans.Y
-                union { GLfloat M23; GLfloat TZ;             };  //Trans.Z
-                union { GLfloat M33; GLfloat TW; GLfloat SW; };  //Trans.W and Scale W
+                union { float M00; float XX; float SX; };  //XAxis.X and Scale X
+                union { float M10; float XY;             };  //XAxis.Y
+                union { float M20; float XZ;             };  //XAxis.Z
+                union { float M30; float XW;             };  //XAxis.W
+                union { float M01; float YX;             };  //YAxis.X
+                union { float M11; float YY; float SY; };  //YAxis.Y and Scale Y
+                union { float M21; float YZ;             };  //YAxis.Z
+                union { float M31; float YW;             };  //YAxis.W
+                union { float M02; float ZX;             };  //ZAxis.X
+                union { float M12; float ZY;             };  //ZAxis.Y
+                union { float M22; float ZZ; float SZ; };  //ZAxis.Z and Scale Z
+                union { float M32; float ZW;             };  //ZAxis.W
+                union { float M03; float TX;             };  //Trans.X
+                union { float M13; float TY;             };  //Trans.Y
+                union { float M23; float TZ;             };  //Trans.Z
+                union { float M33; float TW; float SW; };  //Trans.W and Scale W
             } s;
-            GLfloat M[16];
-    } Matrix4fT;     //A single precision floating point 4 by 4 matrix. 
+            float M[16];
+    } Matrix4fT;     //A single precision floating point 4 by 4 matrix.
 
 
 //"Inherited" types
-#define Point2fT    Tuple2fT   //A 2 element point that is represented by single precision floating point x,y coordinates. 
+#define Point2fT    Tuple2fT   //A 2 element point that is represented by single precision floating point x,y coordinates.
 
-#define Quat4fT     Tuple4fT   //A 4 element unit quaternion represented by single precision floating point x,y,z,w coordinates. 
+#define Quat4fT     Tuple4fT   //A 4 element unit quaternion represented by single precision floating point x,y,z,w coordinates.
 
-#define Vector2fT   Tuple2fT   //A 2-element vector that is represented by single-precision floating point x,y coordinates. 
-#define Vector3fT   Tuple3fT   //A 3-element vector that is represented by single-precision floating point x,y,z coordinates. 
+#define Vector2fT   Tuple2fT   //A 2-element vector that is represented by single-precision floating point x,y coordinates.
+#define Vector3fT   Tuple3fT   //A 3-element vector that is represented by single-precision floating point x,y,z coordinates.
 
 //Custom math, or speed overrides
 #define FuncSqrt    sqrtf
 
 //utility macros
-//assuming IEEE-754(GLfloat), which i believe has max precision of 7 bits
+//assuming IEEE-754(float), which i believe has max precision of 7 bits
 # define Epsilon 1.0e-5
 
 //Math functions
@@ -171,14 +171,14 @@
       * @param  v1 the other vector
       */
     inline
-    static GLfloat Vector3fDot(const Vector3fT* NewObj, const Vector3fT* v1)
+    static float Vector3fDot(const Vector3fT* NewObj, const Vector3fT* v1)
     {
         return  (NewObj->s.X * v1->s.X) +
                 (NewObj->s.Y * v1->s.Y) +
                 (NewObj->s.Z * v1->s.Z);
     }
 
-    inline 
+    inline
     static void Vector3fMultMat4(Vector3fT* NewObj, const Vector3fT* v, const Matrix4fT* m)
     {
     	Vector3fT Result;
@@ -187,13 +187,13 @@
     	Result.s.Z = v->s.X * m->s.ZX + v->s.Y * m->s.ZY + v->s.Z * m->s.ZZ;
     	*NewObj = Result;
     }
-    
+
     /**
       * Returns the squared length of this vector.
       * @return the squared length of this vector
       */
     inline
-    static GLfloat Vector3fLengthSquared(const Vector3fT* NewObj)
+    static float Vector3fLengthSquared(const Vector3fT* NewObj)
     {
         return  (NewObj->s.X * NewObj->s.X) +
                 (NewObj->s.Y * NewObj->s.Y) +
@@ -205,7 +205,7 @@
       * @return the length of this vector
       */
     inline
-    static GLfloat Vector3fLength(const Vector3fT* NewObj)
+    static float Vector3fLength(const Vector3fT* NewObj)
     {
         return FuncSqrt(Vector3fLengthSquared(NewObj));
     }
@@ -213,8 +213,8 @@
     inline
     static void Matrix3fSetZero(Matrix3fT* NewObj)
     {
-        NewObj->s.M00 = NewObj->s.M01 = NewObj->s.M02 = 
-        NewObj->s.M10 = NewObj->s.M11 = NewObj->s.M12 = 
+        NewObj->s.M00 = NewObj->s.M01 = NewObj->s.M02 =
+        NewObj->s.M10 = NewObj->s.M11 = NewObj->s.M12 =
         NewObj->s.M20 = NewObj->s.M21 = NewObj->s.M22 = 0.0f;
     }
 
@@ -225,25 +225,25 @@
     static void Matrix3fSetIdentity(Matrix3fT* NewObj)
     {
         //then set diagonal as 1
-        NewObj->s.M00 = 
-        NewObj->s.M11 = 
+        NewObj->s.M00 =
+        NewObj->s.M11 =
         NewObj->s.M22 = 1.0f;
     }
 
     /**
       * Sets the value of this matrix to the matrix conversion of the
-      * quaternion argument. 
-      * @param q1 the quaternion to be converted 
+      * quaternion argument.
+      * @param q1 the quaternion to be converted
       */
     //$hack this can be optimized some(if s == 0)
     inline
     static void Matrix3fSetRotationFromQuat4f(Matrix3fT* NewObj, const Quat4fT* q1)
     {
-        GLfloat n, s;
-        GLfloat xs, ys, zs;
-        GLfloat wx, wy, wz;
-        GLfloat xx, xy, xz;
-        GLfloat yy, yz, zz;
+        float n, s;
+        float xs, ys, zs;
+        float wx, wy, wz;
+        float xx, xy, xz;
+        float yy, yz, zz;
 
         n = (q1->s.X * q1->s.X) + (q1->s.Y * q1->s.Y) + (q1->s.Z * q1->s.Z) + (q1->s.W * q1->s.W);
         s = (n > 0.0f) ? (2.0f / n) : 0.0f;
@@ -260,8 +260,8 @@
 
     /**
      * Sets the value of this matrix to the result of multiplying itself
-     * with matrix m1. 
-     * @param m1 the other matrix 
+     * with matrix m1.
+     * @param m1 the other matrix
      */
     inline
     static void Matrix3fMulMatrix3f(Matrix3fT* NewObj, const Matrix3fT* m1)
@@ -301,16 +301,16 @@
       * @return scale factor
       */
     inline
-    static GLfloat Matrix4fSVD(const Matrix4fT* NewObj, Matrix3fT* rot3, Matrix4fT* rot4)
+    static float Matrix4fSVD(const Matrix4fT* NewObj, Matrix3fT* rot3, Matrix4fT* rot4)
     {
-        GLfloat s, n;
+        float s, n;
 
         // this is a simple svd.
         // Not complete but fast and reasonable.
         // See comment in Matrix3d.
 
         s = FuncSqrt(
-                ( (NewObj->s.XX * NewObj->s.XX) + (NewObj->s.XY * NewObj->s.XY) + (NewObj->s.XZ * NewObj->s.XZ) + 
+                ( (NewObj->s.XX * NewObj->s.XX) + (NewObj->s.XY * NewObj->s.XY) + (NewObj->s.XZ * NewObj->s.XZ) +
                   (NewObj->s.YX * NewObj->s.YX) + (NewObj->s.YY * NewObj->s.YY) + (NewObj->s.YZ * NewObj->s.YZ) +
                   (NewObj->s.ZX * NewObj->s.ZX) + (NewObj->s.ZY * NewObj->s.ZY) + (NewObj->s.ZZ * NewObj->s.ZZ) ) / 3.0f );
 
@@ -388,7 +388,7 @@
     }
 
     inline
-    static void Matrix4fMulRotationScale(Matrix4fT* NewObj, GLfloat scale)
+    static void Matrix4fMulRotationScale(Matrix4fT* NewObj, float scale)
     {
         NewObj->s.XX *= scale; NewObj->s.YX *= scale; NewObj->s.ZX *= scale;
         NewObj->s.XY *= scale; NewObj->s.YY *= scale; NewObj->s.ZY *= scale;
@@ -408,18 +408,18 @@
     inline
     static void Matrix4fSetRotationFromMatrix3f(Matrix4fT* NewObj, const Matrix3fT* m1)
     {
-        GLfloat scale;
+        float scale;
 
         scale = Matrix4fSVD(NewObj, NULL, NULL);
 
         Matrix4fSetRotationScaleFromMatrix3f(NewObj, m1);
         Matrix4fMulRotationScale(NewObj, scale);
     }
-    
-    inline
-    static float clamp(float v, float min, float max) {return wxMax(wxMin(v, max), min);}; 
 
-// 8<--Snip here if you have your own math types/funcs-->8 
+    inline
+    static float clamp(float v, float min, float max) {return wxMax(wxMin(v, max), min);};
+
+// 8<--Snip here if you have your own math types/funcs-->8
 
     typedef class ArcBall_t
     {
@@ -429,12 +429,12 @@
 
         public:
             //Create/Destroy
-                    ArcBall_t(GLfloat NewWidth, GLfloat NewHeight);
+                    ArcBall_t(float NewWidth, float NewHeight);
                    ~ArcBall_t() { /* nothing to do */ };
 
             //Set new bounds
             inline
-            void    setBounds(GLfloat NewWidth, GLfloat NewHeight)
+            void    setBounds(float NewWidth, float NewHeight)
             {
                 //Set adjustment factor for width/height
                 this->AdjustWidth  = 1.0f / ((NewWidth  - 1.0f) * 0.5f);
@@ -450,8 +450,8 @@
         protected:
             Vector3fT   StVec;          //Saved click vector
             Vector3fT   EnVec;          //Saved drag vector
-            GLfloat     AdjustWidth;    //Mouse bounds width
-            GLfloat     AdjustHeight;   //Mouse bounds height
+            float     AdjustWidth;    //Mouse bounds width
+            float     AdjustHeight;   //Mouse bounds height
 
     } ArcBallT;
 

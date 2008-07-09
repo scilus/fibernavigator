@@ -15,12 +15,7 @@
 #include "wx/wx.h"
 #endif
 
-#include <GL/glew.h>
-#include "theScene.h"
-
-
 #include "wx/mdi.h"
-#include "wx/laywin.h"
 
 #include "icons/fileopen.xpm"
 #include "icons/view1.xpm"
@@ -35,6 +30,7 @@
 
 #include "main.h"
 #include "mainFrame.h"
+#include "theDataset.h"
 
 MainFrame *frame = NULL;
 
@@ -113,8 +109,6 @@ bool MyApp::OnInit(void)
   frame->Show(true);
 
   SetTopWindow(frame);
-
-  frame->loadStandard();
 
   return true;
 }

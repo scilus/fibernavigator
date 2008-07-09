@@ -39,6 +39,7 @@ public:
 	wxTreeItemId getTreeId() const {return m_treeId;};
     void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;m_hasTreeId = true;};
 	wxString getName() {return m_name;};
+	wxString getPath() {return m_fullPath;};
 	void setName(wxString name) {m_name = name;};
 	int getType() {return m_type;};
 	void setType(int type) {m_type = type;};
@@ -81,6 +82,7 @@ protected:
 	bool is_loaded;
 	float m_highest_value;
 	wxString m_name;
+	wxString m_fullPath;
 	float m_threshold;
 	wxTreeItemId m_treeId;
 

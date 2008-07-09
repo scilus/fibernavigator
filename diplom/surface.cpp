@@ -266,15 +266,15 @@ void Surface::execute (std::vector< std::vector< double > > givenPoints)
 void Surface::draw()
 {
 	std::vector< std::vector< double > > givenPoints;
-	int countPoints = TheDataset::treeWidget->GetChildrenCount(TheDataset::tPointId, true);
+	int countPoints = TheDataset::mainFrame->m_treeWidget->GetChildrenCount(TheDataset::mainFrame->m_tPointId, true);
 	if (countPoints == 0) return;
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
-		id = TheDataset::treeWidget->GetNextChild(TheDataset::tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(id))->getData();
+		id = TheDataset::mainFrame->m_treeWidget->GetNextChild(TheDataset::mainFrame->m_tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)TheDataset::mainFrame->m_treeWidget->GetItemData(id))->getData();
 
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);

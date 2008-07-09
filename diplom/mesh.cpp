@@ -173,6 +173,7 @@ bool Mesh::load(wxString filename)
 			fp += 4;
 		}
 	}
+	m_fullPath = filename;
 	m_name = filename.AfterLast('/');
 	m_type = Mesh_;
 	return true;

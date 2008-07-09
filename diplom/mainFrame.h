@@ -3,10 +3,12 @@
 
 #include "theScene.h"
 #include "mainCanvas.h"
-#include "theDataset.h"
+
 #include "myListCtrl.h"
 #include "wx/treectrl.h"
+#include "wx/laywin.h"
 #include "point.h"
+
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
@@ -16,8 +18,9 @@ public:
 
     void setTSlider(wxSlider *slider) {m_tSlider = slider;};
     void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
-    void loadStandard();
-    TheScene* getScene() {return m_scene;};
+
+    void refreshAllGLWidgets();
+    void renewAllGLWidgets();
 
 private:
 	void OnSize(wxSizeEvent& event);
@@ -63,13 +66,8 @@ private:
     void load(wxString);
     void load();
     void load(int);
-    void updateTreeDims();
-    void updateTreeDS(int);
-    void refreshAllGLWidgets();
-    void renewAllGLWidgets();
-    void updateStatusBar();
 
-    TheScene *m_scene;
+    void updateStatusBar();
 
     wxSashLayoutWindow* m_leftWindowHolder;
     wxSashLayoutWindow* m_leftWindowTop;
@@ -82,48 +80,45 @@ private:
     wxSashLayoutWindow* m_rightWindowHolder;
     wxSashLayoutWindow* m_rightWindow;
     wxSashLayoutWindow* m_extraRightWindow;
-
-
-
     wxSashLayoutWindow* m_topNavWindow;
     wxSashLayoutWindow* m_middleNavWindow;
     wxSashLayoutWindow* m_bottomNavWindow;
     wxSashLayoutWindow* m_extraNavWindow;
-
-    wxSlider* m_xSlider;
-    wxSlider* m_ySlider;
-    wxSlider* m_zSlider;
-    wxSlider* m_tSlider;
-
-    MyListCtrl* m_datasetListCtrl;
-
-    wxStatusBar* m_statusBar;
 
     MainCanvas* m_gl0;
     MainCanvas* m_gl1;
     MainCanvas* m_gl2;
     MainCanvas* m_mainGL;
 
-    wxTreeCtrl* m_treeWidget;
-
-    wxTreeItemId m_tRootId;
-    wxTreeItemId m_tPointId;
-    wxTreeItemId m_tPlanesId;
-    wxTreeItemId m_tAxialId;
-    wxTreeItemId m_tCoronalId;
-    wxTreeItemId m_tSagittalId;
-    wxTreeItemId m_tDatasetId;
-    wxTreeItemId m_tHeadId;
-    wxTreeItemId m_tRGBId;
-    wxTreeItemId m_tOverlayId;
-    wxTreeItemId m_tMeshId;
-    wxTreeItemId m_tFiberId;
-    wxTreeItemId m_tSelBoxId;
-
     int NAV_SIZE;
     int NAV_GL_SIZE;
 
     Point* m_lastSelectedPoint;
+
+public:
+	TheScene *m_scene;
+
+    wxSlider* m_xSlider;
+    wxSlider* m_ySlider;
+    wxSlider* m_zSlider;
+    wxSlider* m_tSlider;
+
+	wxStatusBar* m_statusBar;
+	MyListCtrl* m_listCtrl;
+	wxTreeCtrl* m_treeWidget;
+	wxTreeItemId m_tRootId;
+	wxTreeItemId m_tPointId;
+	wxTreeItemId m_tPlanesId;
+	wxTreeItemId m_tAxialId;
+	wxTreeItemId m_tCoronalId;
+	wxTreeItemId m_tSagittalId;
+	wxTreeItemId m_tDatasetId;
+	wxTreeItemId m_tHeadId;
+	wxTreeItemId m_tRGBId;
+	wxTreeItemId m_tOverlayId;
+	wxTreeItemId m_tMeshId;
+	wxTreeItemId m_tFiberId;
+	wxTreeItemId m_tSelBoxId;
 
 DECLARE_EVENT_TABLE()
 };

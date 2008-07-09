@@ -7,8 +7,6 @@
 #include "wx/wx.h"
 #endif
 
-#include "theDataset.h"
-
 #include "GLSL/GLSLShaderProgram.h"
 #include "ArcBall.h"
 #include "selectionBox.h"

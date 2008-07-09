@@ -2,6 +2,7 @@
 #include "myListCtrl.h"
 #include "wx/utils.h"
 #include "point.h"
+#include "theDataset.h"
 
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_NAVGL_EVENT)
@@ -374,13 +375,13 @@ hitResult MainCanvas::pick(wxPoint click)
 	 * check for hits with points for spline surface
 	 */
 	if (m_scene->getPointMode()) {
-		int countPoints = TheDataset::treeWidget->GetChildrenCount(TheDataset::tPointId, true);
+		int countPoints = TheDataset::mainFrame->m_treeWidget->GetChildrenCount(TheDataset::mainFrame->m_tPointId, true);
 		wxTreeItemId id, childid;
 		wxTreeItemIdValue cookie = 0;
 		for (int i = 0 ; i < countPoints ; ++i)
 		{
-			id = TheDataset::treeWidget->GetNextChild(TheDataset::tPointId, cookie);
-			Point *point = (Point*)((MyTreeItemData*)TheDataset::treeWidget->GetItemData(id))->getData();
+			id = TheDataset::mainFrame->m_treeWidget->GetNextChild(TheDataset::mainFrame->m_tPointId, cookie);
+			Point *point = (Point*)((MyTreeItemData*)TheDataset::mainFrame->m_treeWidget->GetItemData(id))->getData();
 			hitResult hr1 = point->hitTest(ray);
 			if (hr1.hit && !hr.hit) hr = hr1;
 			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;

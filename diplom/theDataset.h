@@ -7,7 +7,6 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/laywin.h"
 #include "wx/textfile.h"
 #include "wx/file.h"
 #include "wx/image.h"
@@ -15,24 +14,27 @@
 #include "wx/datstrm.h"
 #include "wx/txtstrm.h"
 
-#include "datasetInfo.h"
-#include "mesh.h"
-#include "ArcBall.h"
 #include <vector>
-#include "selectionBox.h"
+#include "ArcBall.h"
+
+#include "datasetInfo.h"
+
+#include "mainFrame.h"
 
 class TheDataset
 {
 private:
 
-
 public:
 	static DatasetInfo* load(wxString);
+	static void finishLoading(DatasetInfo*);
 	static bool loadSettings(wxString);
 	static void save(wxString);
 	static void printTime();
 	static void printwxT(wxString);
 	static std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
+	static void updateTreeDims();
+	static void updateTreeDS(int);
 
 	static int rows;
 	static int columns;
@@ -45,10 +47,7 @@ public:
 	static bool surface_loaded;
 	static wxString lastPath;
 
-	static wxTreeCtrl* treeWidget;
-	static wxTreeItemId tSelBoxId;
-	static wxTreeItemId tPointId;
-	static wxListCtrl* listCtrl;
+	static MainFrame* mainFrame;
 };
 
 #endif /*THEDATASET_H_*/
