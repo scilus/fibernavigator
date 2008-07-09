@@ -9,10 +9,9 @@
 
 #include "GLSL/GLSLShaderProgram.h"
 #include "ArcBall.h"
-#include "selectionBox.h"
+#include "datasetInfo.h"
+
 #include "wx/glcanvas.h"
-#include "surface.h"
-#include "myListCtrl.h"
 
 enum {
 	axial =1,

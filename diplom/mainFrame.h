@@ -2,13 +2,13 @@
 #define MAINFRAME_H_
 
 #include "theScene.h"
-#include "mainCanvas.h"
 
+#include "mainCanvas.h"
 #include "myListCtrl.h"
 #include "wx/treectrl.h"
 #include "wx/laywin.h"
-#include "point.h"
 
+#include "point.h"
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame

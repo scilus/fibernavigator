@@ -16,16 +16,16 @@
 class MainCanvas: public wxGLCanvas
 {
 public:
-	
+
     MainCanvas(TheScene*, int,  wxWindow*, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = _T("GLCanvas"),
         int* gl_attrib = NULL);
    ~MainCanvas(){};
-   
+
    	bool	m_init;
-   	
+
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
@@ -43,27 +43,27 @@ public:
     Vector3fT mapMouse2World(int, int);
     float getAxisParallelMovement(int, int, int, int, Vector3fT);
     Vector3fT getEventCenter();
-        
+
     DECLARE_EVENT_TABLE()
 
 private:
 	 int 		m_view;			// identifier of gl widget
 	 TheScene 	*m_scene;
-	 wxPoint 	m_clicked;		// last clicked point 
+	 wxPoint 	m_clicked;		// last clicked point
 	 wxPoint	m_lastPos;		// last position to calculate right mouse dragging
 	 float 		m_delta;
 	 hitResult  m_hr;
 
-	 
+
 	 GLdouble m_pos1X, m_pos1Y, m_pos1Z;	// point of origin for picking
 	 GLdouble m_pos2X, m_pos2Y, m_pos2Z;	// distant point for picking
-	
+
 	 bool m_isDragging;
 	 bool m_isrDragging;
-	 
+
 	 //Matrix4fT m_transform;		// transformation matrix of current view
-	 Matrix3fT m_lastRot;  		
-	 Matrix3fT m_thisRot ; 
+	 Matrix3fT m_lastRot;
+	 Matrix3fT m_thisRot ;
 
 	 ArcBallT   *m_arcBall;
 	 Point2fT    m_mousePt;

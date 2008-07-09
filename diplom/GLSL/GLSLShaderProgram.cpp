@@ -1,5 +1,4 @@
 #include "GLSLShaderProgram.h"
-#include "GLSLShader.h"
 
 FGLSLShaderProgram::FGLSLShaderProgram()
 {
@@ -57,7 +56,7 @@ void FGLSLShaderProgram::printCompilerLog(GLuint program)
 	int infologLen = 0;
 	int charsWritten = 0;
 	GLchar *infoLog;
-	
+
 	glGetProgramiv (program, GL_INFO_LOG_LENGTH, &infologLen);
 	if (infologLen > 0)
 	{

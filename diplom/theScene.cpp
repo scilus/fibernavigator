@@ -3,6 +3,9 @@
 #include "point.h"
 #include "curves.h"
 #include "theDataset.h"
+#include "surface.h"
+#include "selectionBox.h"
+
 
 TheScene::TheScene()
 {

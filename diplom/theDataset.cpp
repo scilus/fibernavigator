@@ -4,7 +4,6 @@
 #include "curves.h"
 #include "point.h"
 #include "mesh.h"
-#include "selectionBox.h"
 #include "myListCtrl.h"
 #include "wx/xml/xml.h"
 

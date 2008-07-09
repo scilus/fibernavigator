@@ -13,6 +13,7 @@
 #include "theDataset.h"
 #include "point.h"
 #include "curves.h"
+#include "surface.h"
 
 #include "icons/eyes.xpm"
 #include "icons/delete.xpm"

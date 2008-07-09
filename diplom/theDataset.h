@@ -18,6 +18,7 @@
 #include "ArcBall.h"
 
 #include "datasetInfo.h"
+#include "selectionBox.h"
 
 #include "mainFrame.h"
 
