@@ -7,10 +7,13 @@
 #include "wx/wx.h"
 #endif
 
-class KdTree {
+class KdTree : public wxThread{
 public:
 	KdTree(int, float*);
 	~KdTree();
+
+	virtual void *Entry();
+
 	void sort(int, int);
 	void buildTree(int, int, int);
 	void buildTreeP(int, int, int);
@@ -18,6 +21,7 @@ public:
 	wxUint32 *m_tree;
 
 private:
+	int m_size;
 	wxUint32 m_root;
 	float *m_pointArray;
 };

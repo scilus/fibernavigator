@@ -4,17 +4,13 @@
 #include <omp.h>
 #include <algorithm>
 
-KdTree::KdTree(int size, float *pointArray)
+KdTree::KdTree(int size, float *pointArray) : wxThread(wxTHREAD_JOINABLE)
 {
-	TheDataset::printTime();
-	printf ("build kd tree...\n");
+	m_size = size;
 	m_pointArray = pointArray;
 	m_tree = new wxUint32[size];
 	for (int i = 0 ; i < size ;  ++i)
 		m_tree[i] = i;
-	buildTree(0,size-1, 0);
-	TheDataset::printTime();
-	printf ("tree finished\n");
 }
 
 KdTree::~KdTree()
@@ -22,6 +18,16 @@ KdTree::~KdTree()
 	delete[] m_tree;
 }
 
+void* KdTree::Entry()
+{
+	TheDataset::printTime();
+	printf ("build kd tree...\n");
+	buildTreeP(0,m_size-1, 0);
+	TheDataset::printTime();
+	printf ("tree finished\n");
+	TheDataset::fibers_loaded = true;
+	return NULL;
+}
 
 struct iter
 {

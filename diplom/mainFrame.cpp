@@ -576,8 +576,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 
 void MainFrame::OnNewSelBox(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
-	if (m_treeWidget->GetChildrenCount(m_tFiberId) == 0) return;
+	if (!TheDataset::m_scene || !TheDataset::fibers_loaded) return;
 
 	Vector3fT v2 = {{m_xSlider->GetValue()-TheDataset::columns/2,
 					m_ySlider->GetValue()-TheDataset::rows/2,
