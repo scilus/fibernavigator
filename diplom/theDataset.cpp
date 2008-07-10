@@ -28,6 +28,13 @@ wxString TheDataset::lastPath = wxT("");
 
 bool TheDataset::load(int index, wxString filename)
 {
+	if (mainFrame->m_listCtrl->GetItemCount() > 9)
+	{
+		lastError = wxT("ERROR\nCan't load any more files.\nDelete some first.\n");
+		return false;
+	}
+
+
 	if (index >= 0)
 	{
 		wxString caption = wxT("Choose a file");

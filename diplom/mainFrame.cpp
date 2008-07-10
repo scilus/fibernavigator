@@ -351,14 +351,6 @@ void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 {
-	if (m_listCtrl->GetItemCount() > 9)
-	{
-		wxMessageBox(wxT("ERROR\nCan't load any more files.\nDelete some first.\n"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-		m_statusBar->SetStatusText(wxT("ERROR"),1);
-		m_statusBar->SetStatusText(TheDataset::lastError,2);
-		return;
-	}
-
 	if ( !TheDataset::load(0) )
 	{
 		wxMessageBox(wxT("ERROR\n") + TheDataset::lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
