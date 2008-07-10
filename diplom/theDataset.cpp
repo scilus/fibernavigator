@@ -232,7 +232,7 @@ bool TheDataset::loadSettings(wxString filename)
 			}
 		}
 
-		else if (child->GetName() == wxT("selection_boxes") && TheDataset::fibers_loaded)
+		else if (child->GetName() == wxT("selection_boxes") /*&& TheDataset::fibers_loaded*/)
 		{
 			wxXmlNode *mbNode = child->GetChildren();
 			while (mbNode) {
