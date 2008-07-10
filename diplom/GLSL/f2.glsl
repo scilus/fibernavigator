@@ -257,13 +257,8 @@ void main()
     calculateLighting(gl_MaxLights, -n, vertex, gl_FrontMaterial.shininess,
                       ambient, diffuse, specular);
    
-    color = gl_FrontLightModelProduct.sceneColor  +
-              (ambient  * gl_FrontMaterial.ambient) +
-              (diffuse  * gl_FrontMaterial.diffuse) +
-              (specular * gl_FrontMaterial.specular);
-  
-    color = clamp(color, 0.0, 1.0);
-
+   vec4 tmpColor = vec4(0.0); 
+ 
     if (useTex)
     {
 	    vec3 v = TexCoord;
@@ -271,20 +266,29 @@ void main()
 	    v.y = (v.y + dimY/2) / (float)dimY;
 	    v.z = (v.z + dimZ/2) / (float)dimZ;
 	    
-	    if (show9) lookupTex(color, type9, tex9, threshold9, v);
-	    if (show8) lookupTex(color, type8, tex8, threshold8, v);
-		if (show7) lookupTex(color, type7, tex7, threshold7, v);
-		if (show6) lookupTex(color, type6, tex6, threshold6, v);
-		if (show5) lookupTex(color, type5, tex5, threshold5, v);
-		if (show4) lookupTex(color, type4, tex4, threshold4, v);
-		if (show3) lookupTex(color, type3, tex3, threshold3, v);
-	    if (show2) lookupTex(color, type2, tex2, threshold2, v);
-	    if (show1) lookupTex(color, type1, tex1, threshold1, v);
-		if (show0) lookupTex(color, type0, tex0, threshold0, v);
-		color.a = 1.0;	
+	    if (show9) lookupTex(tmpColor, type9, tex9, threshold9, v);
+	    if (show8) lookupTex(tmpColor, type8, tex8, threshold8, v);
+		if (show7) lookupTex(tmpColor, type7, tex7, threshold7, v);
+		if (show6) lookupTex(tmpColor, type6, tex6, threshold6, v);
+		if (show5) lookupTex(tmpColor, type5, tex5, threshold5, v);
+		if (show4) lookupTex(tmpColor, type4, tex4, threshold4, v);
+		if (show3) lookupTex(tmpColor, type3, tex3, threshold3, v);
+	    if (show2) lookupTex(tmpColor, type2, tex2, threshold2, v);
+	    if (show1) lookupTex(tmpColor, type1, tex1, threshold1, v);
+		if (show0) lookupTex(tmpColor, type0, tex0, threshold0, v);
+		tmpColor.a = 1.0;	
     }
-    
-   
+    else
+    {
+   		tmpColor = gl_FrontLightModelProduct.sceneColor;
+   	} 
+  
+   color =   tmpColor +
+              (ambient  * gl_FrontMaterial.ambient) +
+              (diffuse  * gl_FrontMaterial.diffuse) +
+              (specular * gl_FrontMaterial.specular);
+  
+    color = clamp(color, 0.0, 1.0);
    
     gl_FragColor = color;
 }
