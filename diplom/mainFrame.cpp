@@ -351,43 +351,6 @@ void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 {
-	load();
-}
-
-void MainFrame::load()
-{
-	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib|*.*|*.*");
-	wxString defaultDir = wxEmptyString;
-	wxString defaultFilename = wxEmptyString;
-	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
-	dialog.SetFilterIndex(3);
-	dialog.SetDirectory(TheDataset::lastPath);
-	if (dialog.ShowModal() == wxID_OK)
-	{
-		TheDataset::lastPath = dialog.GetDirectory();
-		load(dialog.GetPath());
-	}
-}
-
-void MainFrame::load(int index)
-{
-	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib|*.*|*.*");
-	wxString defaultDir = wxEmptyString;
-	wxString defaultFilename = wxEmptyString;
-	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
-	dialog.SetFilterIndex(index);
-	dialog.SetDirectory(TheDataset::lastPath);
-	if (dialog.ShowModal() == wxID_OK)
-	{
-		TheDataset::lastPath = dialog.GetDirectory();
-		load(dialog.GetPath());
-	}
-}
-
-void MainFrame::load(wxString path)
-{
 	if (m_listCtrl->GetItemCount() > 9)
 	{
 		wxMessageBox(wxT("ERROR\nCan't load any more files.\nDelete some first.\n"),  wxT(""), wxOK|wxICON_INFORMATION, NULL);
@@ -395,31 +358,14 @@ void MainFrame::load(wxString path)
 		m_statusBar->SetStatusText(TheDataset::lastError,2);
 		return;
 	}
-	wxString ext = path.AfterLast('.');
-	if (ext == wxT("yav")) {
-		if (!TheDataset::loadSettings(path)) {
-			wxMessageBox(wxT("ERROR\n") + TheDataset::lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-			m_statusBar->SetStatusText(wxT("ERROR"),1);
-			m_statusBar->SetStatusText(TheDataset::lastError,2);
-			return;
-		}
-		TheDataset::m_scene->m_selBoxChanged = true;
-		refreshAllGLWidgets();
-		return;
-	}
 
-	DatasetInfo *info = TheDataset::load(path);
-
-	if ( info == NULL)
+	if ( !TheDataset::load(0) )
 	{
 		wxMessageBox(wxT("ERROR\n") + TheDataset::lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 		m_statusBar->SetStatusText(wxT("ERROR"),1);
 		m_statusBar->SetStatusText(TheDataset::lastError,2);
 		return;
 	}
-
-	wxCommandEvent e;
-	if ( info->getType() == Curves_) OnNewSelBox(e);
 }
 
 void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
@@ -817,13 +763,13 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& event)
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
 	/* open load dialog */
 	if (m_treeWidget->GetItemText(treeid) == wxT("datasets")) {
-		load(0);
+		TheDataset::load(1);
 	}
 	else if (m_treeWidget->GetItemText(treeid) == wxT("meshes")) {
-			load(1);
+		TheDataset::load(2);
 	}
 	else if (m_treeWidget->GetItemText(treeid) == wxT("fibers")) {
-			load(2);
+		TheDataset::load(3);
 	}
 	wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);

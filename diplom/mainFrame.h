@@ -59,10 +59,6 @@ private:
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
 
-    void load(wxString);
-    void load();
-    void load(int);
-
     void updateStatusBar();
 
     wxSashLayoutWindow* m_leftWindowHolder;

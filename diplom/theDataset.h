@@ -29,7 +29,7 @@ class TheDataset
 private:
 
 public:
-	static DatasetInfo* load(wxString);
+	static bool load(int index = 0, wxString filename = wxT(""));
 	static void finishLoading(DatasetInfo*);
 	static bool loadSettings(wxString);
 	static void save(wxString);

@@ -26,11 +26,37 @@ Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
 wxString TheDataset::lastError = wxT("");
 wxString TheDataset::lastPath = wxT("");
 
-DatasetInfo* TheDataset::load(wxString filename)
+bool TheDataset::load(int index, wxString filename)
 {
+	if (index >= 0)
+	{
+		wxString caption = wxT("Choose a file");
+		wxString wildcard = wxT("*.*|*.*|Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
+		wxString defaultDir = wxEmptyString;
+		wxString defaultFilename = wxEmptyString;
+		wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
+		dialog.SetFilterIndex(index);
+		dialog.SetDirectory(TheDataset::lastPath);
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			lastPath = dialog.GetDirectory();
+			filename = dialog.GetPath();
+		}
+		else return false;
+	}
 	// check file extension
 	wxString ext = filename.AfterLast('.');
-	if (ext == wxT("hea"))
+
+	if (ext == wxT("yav")) {
+		if (!TheDataset::loadSettings(filename)) {
+			return false;
+		}
+		TheDataset::m_scene->m_selBoxChanged = true;
+		mainFrame->refreshAllGLWidgets();
+		return true ;
+	}
+
+	else if (ext == wxT("hea"))
 	{
 		Anatomy *anatomy = new Anatomy();
 		if (anatomy->load(filename))
@@ -40,7 +66,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 			frames = anatomy->getFrames();
 			anatomy_loaded = true;
 			finishLoading(anatomy);
-			return anatomy;
+			return true;
 		}
 		else {
 			if (!TheDataset::anatomy_loaded)
@@ -48,7 +74,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 				if ( anatomy->getRows() <= 0 || anatomy->getColumns() <= 0 || anatomy->getFrames() <= 0 )
 				{
 					lastError = wxT("couldn't parse header file");
-					return NULL;
+					return false;
 				}
 			}
 			else
@@ -56,11 +82,11 @@ DatasetInfo* TheDataset::load(wxString filename)
 				if ( anatomy->getRows() != rows || anatomy->getColumns() != columns || anatomy->getFrames() != frames )
 				{
 					lastError = wxT("dimensions of loaded files must be the same");
-					return NULL;
+					return false;
 				}
 			}
 			lastError = wxT("couldn't load anatomy file");
-			return NULL;
+			return false;
 		}
 	}
 
@@ -72,7 +98,7 @@ DatasetInfo* TheDataset::load(wxString filename)
 		Mesh *mesh = new Mesh();
 		if (mesh->load(filename)) {
 			finishLoading(mesh);
-			return mesh;
+			return true;
 		}
 		return false;
 	}
@@ -89,13 +115,13 @@ DatasetInfo* TheDataset::load(wxString filename)
 		Curves *curves = new Curves();
 		if (curves->load(filename)) {
 			finishLoading(curves);
-			return curves;
+			return true;
 		}
 		return false;
 	}
 
 	lastError = wxT("unsupported file format");
-	return NULL;
+	return false;
 }
 
 void TheDataset::finishLoading(DatasetInfo *info)
@@ -135,6 +161,8 @@ void TheDataset::finishLoading(DatasetInfo *info)
 		mainFrame->refreshAllGLWidgets();
 		updateTreeDS(i);
 	}
+
+
 }
 
 bool TheDataset::loadSettings(wxString filename)
@@ -173,7 +201,7 @@ bool TheDataset::loadSettings(wxString filename)
 		{
 			wxXmlNode *datasetnode = child->GetChildren();
 			while (datasetnode) {
-				load(datasetnode->GetNodeContent());
+				load(-1, datasetnode->GetNodeContent());
 
 				datasetnode = datasetnode->GetNext();
 			}
