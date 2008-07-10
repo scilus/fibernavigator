@@ -1,14 +1,10 @@
 #ifndef MAINFRAME_H_
 #define MAINFRAME_H_
 
-#include "theScene.h"
-
 #include "mainCanvas.h"
 #include "myListCtrl.h"
 #include "wx/treectrl.h"
 #include "wx/laywin.h"
-
-#include "point.h"
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
@@ -93,12 +89,10 @@ private:
     int NAV_SIZE;
     int NAV_GL_SIZE;
 
-    Point* m_lastSelectedPoint;
+
 
 public:
-	TheScene *m_scene;
-
-    wxSlider* m_xSlider;
+	wxSlider* m_xSlider;
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
     wxSlider* m_tSlider;

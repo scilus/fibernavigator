@@ -21,6 +21,8 @@
 #include "selectionBox.h"
 
 #include "mainFrame.h"
+#include "theScene.h"
+#include "point.h"
 
 class TheDataset
 {
@@ -49,6 +51,8 @@ public:
 	static wxString lastPath;
 
 	static MainFrame* mainFrame;
+	static Point* m_lastSelectedPoint;
+	static TheScene* m_scene;
 };
 
 #endif /*THEDATASET_H_*/

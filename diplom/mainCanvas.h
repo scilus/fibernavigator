@@ -8,16 +8,16 @@
 #endif
 
 #include "theScene.h"
-
-#include "wx/math.h"
 #include "wx/glcanvas.h"
+
 #include "boundingBox.h"
+#include "wx/math.h"
 
 class MainCanvas: public wxGLCanvas
 {
 public:
 
-    MainCanvas(TheScene*, int,  wxWindow*, wxWindowID id = wxID_ANY,
+    MainCanvas(int,  wxWindow*, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = _T("GLCanvas"),
@@ -36,7 +36,6 @@ public:
     void updateView(int, float);
     void init();
     void render();
-    void setScene(TheScene*);
     void invalidate();
     void renderTestRay();
     hitResult pick(wxPoint);
@@ -48,7 +47,6 @@ public:
 
 private:
 	 int 		m_view;			// identifier of gl widget
-	 TheScene 	*m_scene;
 	 wxPoint 	m_clicked;		// last clicked point
 	 wxPoint	m_lastPos;		// last position to calculate right mouse dragging
 	 float 		m_delta;

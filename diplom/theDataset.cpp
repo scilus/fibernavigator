@@ -16,6 +16,8 @@ bool TheDataset::fibers_loaded = false;
 bool TheDataset::surface_loaded = false;
 
 MainFrame* TheDataset::mainFrame = NULL;
+Point* TheDataset::m_lastSelectedPoint = NULL;
+TheScene* TheDataset::m_scene = NULL;
 
 Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
 								        0.0f,  1.0f,  0.0f,  0.0f,
@@ -118,18 +120,18 @@ void TheDataset::finishLoading(DatasetInfo *info)
 		mainFrame->m_zSlider->SetMax(wxMax(2,TheDataset::frames-1));
 		mainFrame->m_zSlider->SetValue( TheDataset::frames/2);
 		mainFrame->m_tSlider->SetValue(10);
-		mainFrame->m_scene->updateView(mainFrame->m_xSlider->GetValue(),
+		m_scene->updateView(mainFrame->m_xSlider->GetValue(),
 										mainFrame->m_ySlider->GetValue(),
 										mainFrame->m_zSlider->GetValue());
 
-		mainFrame->m_scene->assignTextures();
+		m_scene->assignTextures();
 		mainFrame->renewAllGLWidgets();
 		updateTreeDims();
 		updateTreeDS(i);
 	}
 	else
 	{
-		mainFrame->m_scene->addTexture();
+		m_scene->addTexture();
 		mainFrame->refreshAllGLWidgets();
 		updateTreeDS(i);
 	}
@@ -171,7 +173,7 @@ bool TheDataset::loadSettings(wxString filename)
 		{
 			wxXmlNode *datasetnode = child->GetChildren();
 			while (datasetnode) {
-				DatasetInfo *info = TheDataset::load(datasetnode->GetNodeContent());
+				load(datasetnode->GetNodeContent());
 
 				datasetnode = datasetnode->GetNext();
 			}
@@ -344,7 +346,7 @@ void TheDataset::save(wxString filename)
 		if (info->getType() != Surface_)
 		{
 			wxXmlNode *datasetnode = new wxXmlNode(data, wxXML_ELEMENT_NODE, wxT("dataset"));
-			wxXmlNode *pathnode = new wxXmlNode(datasetnode, wxXML_TEXT_NODE, wxT("path"), info->getPath());
+			new wxXmlNode(datasetnode, wxXML_TEXT_NODE, wxT("path"), info->getPath());
 		}
 	}
 	wxXmlDocument doc;

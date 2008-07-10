@@ -1,6 +1,8 @@
 #include "mainCanvas.h"
+
 #include "myListCtrl.h"
 #include "wx/utils.h"
+
 #include "point.h"
 #include "theDataset.h"
 
@@ -14,11 +16,10 @@ BEGIN_EVENT_TABLE(MainCanvas, wxGLCanvas)
     EVT_ERASE_BACKGROUND(MainCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
-MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID id,
+MainCanvas::MainCanvas(int view, wxWindow *parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib)
     : wxGLCanvas(parent, id, gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name )
 {
-	m_scene = scene;
 	m_init = false;
 	m_view = view;
 
@@ -53,7 +54,7 @@ MainCanvas::MainCanvas(TheScene *scene, int view, wxWindow *parent, wxWindowID i
 
 void MainCanvas::init()
 {
-	m_scene->initGL(m_view);
+	TheDataset::m_scene->initGL(m_view);
 	m_init = true;
 }
 
@@ -65,10 +66,10 @@ void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void MainCanvas::OnSize(wxSizeEvent& event)
 {
-    if (!m_scene->m_texAssigned)
+    if (!TheDataset::m_scene->m_texAssigned)
     		SetCurrent();
 	else
-		SetCurrent(*m_scene->getMainGLContext());
+		SetCurrent(*TheDataset::m_scene->getMainGLContext());
 
 	// this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize(event);
@@ -133,7 +134,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					else if (event.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20)
 					{
 						((SelectionBox*)m_hr.object)->processDrag(event.GetPosition(), m_lastPos);
-						m_scene->m_selBoxChanged = true;
+						TheDataset::m_scene->m_selBoxChanged = true;
 					}
 					else if (event.Dragging() && m_hr.picked == 20)
 					{
@@ -151,7 +152,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			{
 				m_mousePt.s.X = clickX;
 				m_mousePt.s.Y = clickY;
-				if (m_scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
+				if (TheDataset::m_scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
 					m_hr = pick(event.GetPosition());
 					if (m_hr.hit && (m_hr.picked <= sagittal)) {
 						m_hr.picked = 20;
@@ -214,8 +215,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 							quadrant = i+1;
 						}
 					}
-					m_scene->setQuadrant(quadrant);
-					m_scene->setLightPos(view);
+					TheDataset::m_scene->setQuadrant(quadrant);
+					TheDataset::m_scene->setLightPos(view);
 
 					Refresh(false);
 				}
@@ -293,9 +294,9 @@ hitResult MainCanvas::pick(wxPoint click)
 	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
 	BoundingBox *bb = new BoundingBox(0,0,0, TheDataset::columns, TheDataset::rows, TheDataset::frames);
 
-	float xx = m_scene->m_xSlize - TheDataset::columns/2;
-	float yy = m_scene->m_ySlize - TheDataset::rows/2;
-	float zz = m_scene->m_zSlize - TheDataset::frames/2;
+	float xx = TheDataset::m_scene->m_xSlize - TheDataset::columns/2;
+	float yy = TheDataset::m_scene->m_ySlize - TheDataset::rows/2;
+	float zz = TheDataset::m_scene->m_zSlize - TheDataset::frames/2;
 
 	/**
 	 * check if one of the 3 planes is picked
@@ -303,7 +304,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	float tpicked = 0;
 	int picked = 0;
 	hitResult hr;
-	if (m_scene->m_showAxial) {
+	if (TheDataset::m_scene->m_showAxial) {
 		bb->setSizeZ(0);
 		bb->setCenterZ(zz);
 		hr = bb->hitTest(ray);
@@ -314,7 +315,7 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setSizeZ(TheDataset::frames);
 		bb->setCenterZ(0);
 	}
-	if (m_scene->m_showCoronal) {
+	if (TheDataset::m_scene->m_showCoronal) {
 		bb->setSizeY(0);
 		bb->setCenterY(yy);
 		hr = bb->hitTest(ray);
@@ -333,7 +334,7 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setSizeY(TheDataset::rows);
 		bb->setCenterY(0);
 	}
-	if (m_scene->m_showSagittal) {
+	if (TheDataset::m_scene->m_showSagittal) {
 		bb->setSizeX(0);
 		bb->setCenterX(xx);
 		hr = bb->hitTest(ray);
@@ -358,7 +359,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with the selection box sizers
 	 */
-	if (m_scene->m_showBoxes)
+	if (TheDataset::m_scene->m_showBoxes)
 	{
 		std::vector<std::vector<SelectionBox*> > boxes = TheDataset::getSelectionBoxes();
 		for (uint i = 0 ; i < boxes.size() ; ++i)
@@ -374,7 +375,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with points for spline surface
 	 */
-	if (m_scene->getPointMode()) {
+	if (TheDataset::m_scene->getPointMode()) {
 		int countPoints = TheDataset::mainFrame->m_treeWidget->GetChildrenCount(TheDataset::mainFrame->m_tPointId, true);
 		wxTreeItemId id, childid;
 		wxTreeItemIdValue cookie = 0;
@@ -402,7 +403,7 @@ void MainCanvas::render()
 {
 	wxPaintDC dc(this);
 
-    SetCurrent(*m_scene->getMainGLContext());
+    SetCurrent(*TheDataset::m_scene->getMainGLContext());
 
 	int w, h;
     GetClientSize(&w, &h);
@@ -423,30 +424,25 @@ void MainCanvas::render()
     case mainView: {
     	glPushMatrix();
     	glMultMatrixf(TheDataset::m_transform.M);										// NEW: Apply Dynamic Transform
-    	m_scene->renderScene();
+    	TheDataset::m_scene->renderScene();
     	//renderTestRay();
 	    glPopMatrix();
 	    break;
     }
     default:
-    	m_scene->renderNavView(m_view);
+    	TheDataset::m_scene->renderNavView(m_view);
     }
 	glFlush();
 
 	SwapBuffers();
 }
 
-void MainCanvas::setScene(TheScene *scene)
-{
-	m_scene = scene;
-}
-
 void MainCanvas::invalidate()
 {
-	if (m_scene->m_texAssigned) {
-		SetCurrent(*m_scene->getMainGLContext());
-		m_scene->releaseTextures();
-		m_scene->m_texAssigned = false;
+	if (TheDataset::m_scene->m_texAssigned) {
+		SetCurrent(*TheDataset::m_scene->getMainGLContext());
+		TheDataset::m_scene->releaseTextures();
+		TheDataset::m_scene->m_texAssigned = false;
 	}
 	m_init = false;
 }
@@ -459,7 +455,7 @@ void MainCanvas::renderTestRay()
 		glVertex3f(m_pos2X, m_pos2Y, m_pos2Z);
 	glEnd();
 	Vector3fT dir = {{m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z}};
-	m_scene->drawSphere(m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z, 3.0);
+	TheDataset::m_scene->drawSphere(m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z, 3.0);
 }
 
 Vector3fT MainCanvas::getEventCenter()
