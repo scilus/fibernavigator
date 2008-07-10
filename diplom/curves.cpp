@@ -200,7 +200,9 @@ bool Curves::load(wxString filename)
 	m_fullPath = filename;
 	m_name = filename.AfterLast('/');
 	initializeBuffer();
-	buildkDTree();
+
+	m_kdTree = new KdTree(m_pointCount, m_pointArray);
+
 	return true;
 }
 
@@ -336,13 +338,6 @@ void Curves::createColorArray()
         }
     }
 
-}
-
-void Curves::buildkDTree()
-{
-	m_kdTree = new KdTree(m_pointCount, m_pointArray);
-	m_kdTree->Create();
-	m_kdTree->Run();
 }
 
 void Curves::resetLinesShown()

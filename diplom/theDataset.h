@@ -38,6 +38,7 @@ public:
 	static std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	static void updateTreeDims();
 	static void updateTreeDS(int);
+	static void kdTreeThreadFinished();
 
 	static int rows;
 	static int columns;
@@ -49,6 +50,7 @@ public:
 	static bool fibers_loaded;
 	static bool surface_loaded;
 	static wxString lastPath;
+	static int threadsActive;
 
 	static MainFrame* mainFrame;
 	static Point* m_lastSelectedPoint;

@@ -11,6 +11,7 @@ int TheDataset::rows = 1;
 int TheDataset::columns = 1;
 int TheDataset::frames = 1;
 unsigned int TheDataset::countFibers = 0;
+int TheDataset::threadsActive = 0;
 bool TheDataset::anatomy_loaded = false;
 bool TheDataset::fibers_loaded = false;
 bool TheDataset::surface_loaded = false;
@@ -469,4 +470,13 @@ void TheDataset::updateTreeDS(int i)
 				-1, -1, new MyTreeItemData(info)));
 		break;
 	}
+}
+
+void TheDataset::kdTreeThreadFinished()
+{
+	threadsActive--;
+	if (threadsActive > 0) return;
+	printTime();
+	printf ("tree finished\n");
+	fibers_loaded = true;
 }
