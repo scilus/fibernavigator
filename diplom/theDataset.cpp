@@ -479,4 +479,16 @@ void TheDataset::kdTreeThreadFinished()
 	printTime();
 	printf ("tree finished\n");
 	fibers_loaded = true;
+
+	Vector3fT vc = {{mainFrame->m_xSlider->GetValue()-columns/2,
+			mainFrame->m_ySlider->GetValue()-rows/2,
+			mainFrame->m_zSlider->GetValue()-frames/2}};
+
+	Vector3fT vs = {{columns/8, rows/8, frames/8}};
+			SelectionBox *selBox = new SelectionBox(vc, vs);
+			selBox->m_isTop = true;
+			mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+
+	m_scene->m_selBoxChanged = true;
+	mainFrame->refreshAllGLWidgets();
 }

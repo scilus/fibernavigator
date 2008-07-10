@@ -71,8 +71,8 @@ void* KdTreeThread::Entry()
 {
 	TheDataset::threadsActive++;
 	buildTree(m_left, m_right, m_axis);
-	TheDataset::printTime();
-	printf ("thread %d finished\n", this->GetId());
+	//TheDataset::printTime();
+	//printf ("thread %d finished\n", this->GetId());
 	TheDataset::kdTreeThreadFinished();
 	return NULL;
 }
