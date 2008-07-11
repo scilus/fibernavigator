@@ -34,9 +34,9 @@ MainCanvas::MainCanvas(int view, wxWindow *parent, wxWindowID id,
 	                     0.0f,  1.0f,  0.0f,
 	                     0.0f,  0.0f,  1.0f }};
 
-	Matrix3fT lastRot1   = {   -0.651098 ,  0.373922 , -0.660495,
+	Matrix3fT lastRot1   = {{   -0.651098 ,  0.373922 , -0.660495,
 								0.758753 ,  0.298796 , -0.578805,
-							   -0.019075 , -0.878011 , -0.478259};
+							   -0.019075 , -0.878011 , -0.478259}};
 
 	m_thisRot =idMat;
 	m_lastRot =lastRot1;
