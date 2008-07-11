@@ -27,24 +27,22 @@ MainCanvas::MainCanvas(int view, wxWindow *parent, wxWindowID id,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
 	                       0.0f,  0.0f,  1.0f,  0.0f,
 	                       0.0f,  0.0f,  0.0f,  1.0f };
-	/*
-	Matrix4fT m_transform2   = {-0.62f,  0.25f,  -0.75f,  0.0f,
-		                       	 0.78f,  0.32f,  -0.54f,  0.0f,
-		                        -0.11f, -0.91f,  -0.39f,  0.0f,
-		                         0.0f,   0.0f,     0.0f,  1.0f };
-	*/
+
 	TheDataset::m_transform = m_transform1;
 
 	Matrix3fT idMat = {{  1.0f,  0.0f,  0.0f,
 	                     0.0f,  1.0f,  0.0f,
 	                     0.0f,  0.0f,  1.0f }};
-	/*
-	Matrix3fT lastRot1   = {  -0.62f,  0.25f,  -0.75f,
-			                   0.78f,  0.32f,  -0.54f,
-			                  -0.11f, -0.91f,  -0.39f};
-	*/
+
+	Matrix3fT lastRot1   = {   -0.651098 ,  0.373922 , -0.660495,
+								0.758753 ,  0.298796 , -0.578805,
+							   -0.019075 , -0.878011 , -0.478259};
+
 	m_thisRot =idMat;
-	m_lastRot =idMat;
+	m_lastRot =lastRot1;
+
+	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
+	Matrix4fSetRotationFromMatrix3f(&TheDataset::m_transform, &m_lastRot);
 
 	m_isDragging = false;					                    // NEW: Dragging The Mouse?
 	m_isrDragging = false;
@@ -165,6 +163,11 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						m_isDragging = true;										// Prepare For Dragging
 						m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
 						m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
+						if (wxGetKeyState(WXK_CONTROL)) {
+							printf("%f , %f , %f,\n", m_lastRot.s.M00, m_lastRot.s.M10, m_lastRot.s.M20);
+							printf("%f , %f , %f,\n", m_lastRot.s.M01, m_lastRot.s.M11, m_lastRot.s.M21);
+							printf("%f , %f , %f,\n", m_lastRot.s.M02, m_lastRot.s.M12, m_lastRot.s.M22);
+						}
 				    }
 				    else
 				    {
