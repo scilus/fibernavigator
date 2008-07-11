@@ -59,6 +59,8 @@ private:
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
 
+    void OnKdTreeThreadFinished(wxCommandEvent& event);
+
     void updateStatusBar();
 
     wxSashLayoutWindow* m_leftWindowHolder;
@@ -129,7 +131,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_DRAW_POINTS			21
 #define VIEWER_NEW_SURFACE			22
 
-#define ID_KDTREE_FINISHED			50
+#define KDTREE_EVENT			50
 
 #define ID_GL_NAV_X 	120
 #define ID_GL_NAV_Y  	121

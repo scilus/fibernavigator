@@ -472,6 +472,14 @@ void TheDataset::updateTreeDS(int i)
 	}
 }
 
+void TheDataset::kdTreeThreadFinished()
+{
+	threadsActive--;
+	if (threadsActive > 0) return;
+
+	treeFinished();
+}
+
 void TheDataset::treeFinished()
 {
 	printTime();

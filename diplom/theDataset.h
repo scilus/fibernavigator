@@ -38,6 +38,7 @@ public:
 	static std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	static void updateTreeDims();
 	static void updateTreeDS(int);
+	static void kdTreeThreadFinished();
 	static void treeFinished();
 
 	static int rows;

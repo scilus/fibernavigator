@@ -64,6 +64,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	/* toggle drawing of points */
 	EVT_MENU(VIEWER_DRAW_POINTS, MainFrame::OnTogglePointMode)
 	EVT_MENU(VIEWER_NEW_SURFACE, MainFrame::OnNewSurface)
+	/* KDTREE thread finished */
+	EVT_MENU(KDTREE_EVENT, MainFrame::OnKdTreeThreadFinished)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -805,4 +807,8 @@ void MainFrame::OnNewSurface(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
+void MainFrame::OnKdTreeThreadFinished(wxCommandEvent& event)
+{
+	TheDataset::kdTreeThreadFinished();
+}
 
