@@ -472,10 +472,8 @@ void TheDataset::updateTreeDS(int i)
 	}
 }
 
-void TheDataset::kdTreeThreadFinished()
+void TheDataset::treeFinished()
 {
-	threadsActive--;
-	if (threadsActive > 0) return;
 	printTime();
 	printf ("tree finished\n");
 	fibers_loaded = true;

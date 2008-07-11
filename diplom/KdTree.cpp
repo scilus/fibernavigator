@@ -35,22 +35,26 @@ KdTree::KdTree(int size, float *pointArray)
 		iter nth( m_tree, rootRight );
 		std::nth_element( begin, nth, end, lessy( m_pointArray, 1 ) );
 	}
+	wxMutex mutex;
+	wxCondition condition(mutex);
+	mutex.Lock();
 
-	KdTreeThread *thread1 = new KdTreeThread(m_pointArray, m_tree, 0, rootLeft-1, 2);
-	thread1->Create();
+
+	KdTreeThread *thread1 = new KdTreeThread(&mutex, &condition, m_pointArray, m_tree, 0, rootLeft-1, 2);
 	thread1->Run();
 
-	KdTreeThread *thread2 = new KdTreeThread(m_pointArray, m_tree, rootLeft+1, root-1, 2);
-	thread2->Create();
+	KdTreeThread *thread2 = new KdTreeThread(&mutex, &condition, m_pointArray, m_tree, rootLeft+1, root-1, 2);
 	thread2->Run();
 
-	KdTreeThread *thread3 = new KdTreeThread(m_pointArray, m_tree, root+1, rootRight-1, 2);
-	thread3->Create();
+	KdTreeThread *thread3 = new KdTreeThread(&mutex, &condition, m_pointArray, m_tree, root+1, rootRight-1, 2);
 	thread3->Run();
 
-	KdTreeThread *thread4 = new KdTreeThread(m_pointArray, m_tree, rootRight+1, size-1, 2);
-	thread4->Create();
+	KdTreeThread *thread4 = new KdTreeThread(&mutex, &condition, m_pointArray, m_tree, rootRight+1, size-1, 2);
 	thread4->Run();
+
+	condition.Wait();
+
+	TheDataset::treeFinished();
 }
 
 KdTree::~KdTree()
@@ -58,22 +62,25 @@ KdTree::~KdTree()
 	delete[] m_tree;
 }
 
-KdTreeThread::KdTreeThread(float *pointArray, wxUint32 *tree, int left, int right, int axis) //: wxThread(wxTHREAD_JOINABLE)
+KdTreeThread::KdTreeThread(wxMutex *mutex, wxCondition *condition, float *pointArray, wxUint32 *tree, int left, int right, int axis)
+	: wxThread(wxTHREAD_JOINABLE)
 {
+	m_mutex = mutex;
+	m_condition = condition;
 	m_pointArray = pointArray;
 	m_tree = tree;
 	m_left = left;
 	m_right = right;
 	m_axis = axis;
+
+	Create();
 }
 
 void* KdTreeThread::Entry()
 {
-	TheDataset::threadsActive++;
 	buildTree(m_left, m_right, m_axis);
-	//TheDataset::printTime();
-	//printf ("thread %d finished\n", this->GetId());
-	TheDataset::kdTreeThreadFinished();
+	wxMutexLocker lock(*m_mutex);
+	m_condition->Broadcast();
 	return NULL;
 }
 

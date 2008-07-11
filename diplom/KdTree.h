@@ -57,7 +57,7 @@ struct lessy
 class KdTreeThread : public wxThread {
 
 public:
-	KdTreeThread(float*, wxUint32*, int, int, int );
+	KdTreeThread(wxMutex*, wxCondition*, float*, wxUint32*, int, int, int );
 
 	void buildTree(int, int, int);
 	virtual void *Entry();
@@ -67,7 +67,9 @@ public:
 	int m_left;
 	int m_right;
 	int m_axis;
-
+private:
+	wxMutex *m_mutex;
+	wxCondition *m_condition;
 };
 
 class KdTree {
@@ -75,7 +77,6 @@ public:
 	KdTree(int, float*);
 	~KdTree();
 
-	//void sort(int, int);
 	wxUint32 *m_tree;
 
 private:
@@ -83,5 +84,6 @@ private:
 	wxUint32 m_root;
 	float *m_pointArray;
 };
+
 
 #endif /*KDTREE_H_*/
