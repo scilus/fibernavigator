@@ -36,6 +36,7 @@ public:
 	static void printTime();
 	static void printwxT(wxString);
 	static std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
+	static void updateAllSelectionBoxes();
 	static void updateTreeDims();
 	static void updateTreeDS(int);
 	static void kdTreeThreadFinished();

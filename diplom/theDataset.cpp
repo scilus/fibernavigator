@@ -122,6 +122,16 @@ bool TheDataset::load(int index, wxString filename)
 		}
 		Curves *curves = new Curves();
 		if (curves->load(filename)) {
+			if (index != -1) {
+				Vector3fT vc = {{mainFrame->m_xSlider->GetValue()-columns/2,
+							mainFrame->m_ySlider->GetValue()-rows/2,
+							mainFrame->m_zSlider->GetValue()-frames/2}};
+
+				Vector3fT vs = {{columns/8, rows/8, frames/8}};
+						SelectionBox *selBox = new SelectionBox(vc, vs);
+						selBox->m_isTop = true;
+						mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+			}
 			finishLoading(curves);
 			return true;
 		}
@@ -485,16 +495,15 @@ void TheDataset::treeFinished()
 	printTime();
 	printf ("tree finished\n");
 	fibers_loaded = true;
-
-	Vector3fT vc = {{mainFrame->m_xSlider->GetValue()-columns/2,
-			mainFrame->m_ySlider->GetValue()-rows/2,
-			mainFrame->m_zSlider->GetValue()-frames/2}};
-
-	Vector3fT vs = {{columns/8, rows/8, frames/8}};
-			SelectionBox *selBox = new SelectionBox(vc, vs);
-			selBox->m_isTop = true;
-			mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
-
+	updateAllSelectionBoxes();
 	m_scene->m_selBoxChanged = true;
 	mainFrame->refreshAllGLWidgets();
+}
+
+void TheDataset::updateAllSelectionBoxes()
+{
+	std::vector<std::vector<SelectionBox*> > boxes = TheDataset::getSelectionBoxes();
+	for (uint i = 0 ; i < boxes.size() ; ++i)
+		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+			boxes[i][j]->setDirty();
 }

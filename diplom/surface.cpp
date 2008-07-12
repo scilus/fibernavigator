@@ -323,8 +323,9 @@ void Surface::draw()
 	{
 		execute();
 	}
+	if (TheDataset::m_scene->getPointMode())
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin (GL_TRIANGLES);
 	for (uint i = 0 ; i < m_vertices.size() ; ++i)
 	{

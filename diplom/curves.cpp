@@ -512,7 +512,8 @@ void Curves::barycenterTest(int left, int right, int axis)
 	}
 	else {
 		int axis2 = (axis+2) % 3;
-		if (	m_pointArray[pointIndex + axis1] <= m_boxMax[axis1] &&
+		if (	m_inBox[getLineForPoint(m_kdTree->m_tree[root])] == 1 &&
+				m_pointArray[pointIndex + axis1] <= m_boxMax[axis1] &&
 				m_pointArray[pointIndex + axis1] >= m_boxMin[axis1] &&
 				m_pointArray[pointIndex + axis2] <= m_boxMax[axis2] &&
 				m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )

@@ -2,6 +2,7 @@
 #include "datasetInfo.h"
 #include "mainFrame.h"
 #include "selectionBox.h"
+
 BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
 	EVT_LEFT_DOWN(MyListCtrl::OnLeftClick)
 END_EVENT_TABLE()
@@ -19,7 +20,7 @@ void MyListCtrl::OnLeftClick(wxMouseEvent& event)
 		if (x <= sizeX) break;
 	}
 	m_col_clicked = col;
-	
+
 	event.Skip();
 }
 
@@ -32,12 +33,12 @@ void MyListCtrl::swap(long a, long b)
 {
 	DatasetInfo *infoA = (DatasetInfo*) this->GetItemData(a);
 	DatasetInfo *infoB = (DatasetInfo*) this->GetItemData(b);
-	
+
 	this->SetItem(a, 0, wxT(""), infoB->getShow() ? 0 : 1);
 	this->SetItem(a, 1, infoB->getName());
 	this->SetItem(a, 2, wxString::Format(wxT("%.2f"), infoB->getThreshold()));
 	this->SetItemData(a, (long)infoB);
-	
+
 	this->SetItem(b, 0, wxT(""), infoA->getShow() ? 0 : 1);
 	this->SetItem(b, 1, infoA->getName());
 	this->SetItem(b, 2, wxString::Format(wxT("%.2f"), infoA->getThreshold()));
@@ -67,12 +68,15 @@ END_EVENT_TABLE()
 
 void MyTreeCtrl::OnChar(wxKeyEvent& event)
 {
+	wxTreeItemId treeid = this->GetSelection();
+	wxTreeItemId parentid = this->GetItemParent(treeid);
+	MyTreeItemData *data;
+
 	switch( event.GetKeyCode() )
     {
     case WXK_DELETE: {
-    	wxTreeItemId treeid = this->GetSelection();
-    	wxTreeItemId parentid = this->GetItemParent(treeid);
-		MyTreeItemData *data = (MyTreeItemData*)this->GetItemData(treeid);
+
+		data = (MyTreeItemData*)this->GetItemData(treeid);
 		if (!data) return;
 		if (this->GetItemText(treeid) == wxT("box") || this->GetItemText(treeid) == wxT("point")) {
 			if (this->GetItemText(parentid) == wxT("box"))
@@ -84,6 +88,61 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 			GetEventHandler()->ProcessEvent( event1 );
 		}
     } break;
+    case WXK_LEFT:
+    	if (this->GetItemText(treeid) == wxT("box"))
+    	{
+    		 if (wxGetKeyState(WXK_CONTROL))
+    			 ((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeLeft();
+    		 else
+    			 ((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveLeft();
+    	}
+    	break;
+    case WXK_RIGHT:
+		if (this->GetItemText(treeid) == wxT("box"))
+		{
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeRight();
+			else
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveRight();
+		}
+		break;
+    case WXK_UP:
+		if (this->GetItemText(treeid) == wxT("box"))
+		{
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeForward();
+			else
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveForward();
+		}
+		break;
+    case WXK_DOWN:
+		if (this->GetItemText(treeid) == wxT("box"))
+		{
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeBack();
+			else
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveBack();
+		}
+		break;
+    case WXK_PAGEUP:
+		if (this->GetItemText(treeid) == wxT("box"))
+		{
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeUp();
+			else
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveUp();
+		}
+		break;
+    case WXK_PAGEDOWN:
+		if (this->GetItemText(treeid) == wxT("box"))
+		{
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeDown();
+			else
+				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveDown();
+		}
+		break;
+
     default:
 	    event.Skip();
 	    return;

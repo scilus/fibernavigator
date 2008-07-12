@@ -412,7 +412,7 @@ void TheScene::renderScene()
 		switchOffLights();
 	glPopAttrib();
 
-	if (m_showBoxes)
+	if (m_showBoxes && TheDataset::fibers_loaded)
 	{
 		drawSelectionBoxes();
 	}

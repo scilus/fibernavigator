@@ -39,6 +39,23 @@ public:
 	void setDirty() {m_dirty = true;};
 	void notDirty() {m_dirty = false;};
 
+	void moveLeft();
+	void moveRight();
+	void moveForward();
+	void moveBack();
+	void moveUp();
+	void moveDown();
+
+	void resizeLeft();
+	void resizeRight();
+	void resizeForward();
+	void resizeBack();
+	void resizeUp();
+	void resizeDown();
+
+	void update();
+
+
 	static Vector3fT mapMouse2World(int, int);
 	static Vector3fT mapMouse2WorldBack(int, int);
 

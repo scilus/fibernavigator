@@ -41,12 +41,12 @@ void SelectionBox::drawHandles()
 	float cx = m_center.s.X;
 	float cy = m_center.s.Y;
 	float cz = m_center.s.Z;
-	mx = wxMin(cx - m_size.s.X/2, cx - m_handleRadius);
-	px = wxMax(cx + m_size.s.X/2, cx + m_handleRadius);
-	my = wxMin(cy - m_size.s.Y/2, cy - m_handleRadius);
-	py = wxMax(cy + m_size.s.Y/2, cy + m_handleRadius);
-	mz = wxMin(cz - m_size.s.Z/2, cz - m_handleRadius);
-	pz = wxMax(cz + m_size.s.Z/2, cz + m_handleRadius);
+	mx = cx - m_size.s.X/2;
+	px = cx + m_size.s.X/2;
+	my = cy - m_size.s.Y/2;
+	py = cy + m_size.s.Y/2;
+	mz = cz - m_size.s.Z/2;
+	pz = cz + m_size.s.Z/2;
 
 	glColor3f(1.0, 0.0, 0.0);
 	drawSphere(cx, cy, cz, m_handleRadius);
@@ -352,4 +352,95 @@ void SelectionBox::resize(wxPoint click, wxPoint lastPos)
 		m_size.s.Z = wxMin(wxMax(newZ, 1),TheDataset::frames);
 	}
 	m_dirty = true;
+}
+
+void SelectionBox::moveLeft()
+{
+	if ( m_center.s.X < -TheDataset::columns/2 ) return;
+	m_center.s.X -= 1.0;
+	update();
+}
+
+void SelectionBox::moveRight()
+{
+	if ( m_center.s.X > TheDataset::columns/2 ) return;
+	m_center.s.X += 1.0;
+	update();
+}
+
+void SelectionBox::moveForward()
+{
+	if ( m_center.s.Y < -TheDataset::rows/2 ) return;
+	m_center.s.Y -= 1.0;
+	update();
+}
+
+void SelectionBox::moveBack()
+{
+	if ( m_center.s.Y > TheDataset::rows/2 ) return;
+	m_center.s.Y += 1.0;
+	update();
+}
+
+void SelectionBox::moveUp()
+{
+	if ( m_center.s.Z < -TheDataset::frames/2 ) return;
+	m_center.s.Z -= 1.0;
+	update();
+}
+
+void SelectionBox::moveDown()
+{
+	if ( m_center.s.Z > TheDataset::frames/2 ) return;
+	m_center.s.Z += 1.0;
+	update();
+}
+
+void SelectionBox::resizeLeft()
+{
+	if ( m_size.s.X < 2 ) return;
+	m_size.s.X -= 1.0;
+	update();
+}
+
+void SelectionBox::resizeRight()
+{
+	if ( m_size.s.X > TheDataset::columns ) return;
+	m_size.s.X += 1.0;
+	update();
+}
+
+void SelectionBox::resizeBack()
+{
+	if ( m_size.s.Y < 2 ) return;
+	m_size.s.Y -= 1.0;
+	update();
+}
+
+void SelectionBox::resizeForward()
+{
+	if ( m_size.s.Y > TheDataset::rows ) return;
+	m_size.s.Y += 1.0;
+	update();
+}
+
+void SelectionBox::resizeDown()
+{
+	if ( m_size.s.Z < 2 ) return;
+	m_size.s.Z -= 1.0;
+	update();
+}
+
+void SelectionBox::resizeUp()
+{
+	if ( m_size.s.Z > TheDataset::frames ) return;
+	m_size.s.Z += 1.0;
+	update();
+}
+
+void SelectionBox::update()
+{
+	m_dirty = true;
+	TheDataset::m_scene->m_selBoxChanged = true;
+	TheDataset::mainFrame->refreshAllGLWidgets();
 }
