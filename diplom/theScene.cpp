@@ -408,6 +408,7 @@ void TheScene::renderScene()
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 		setupLights();
 		renderMesh();
+		renderSurface();
 		switchOffLights();
 	glPopAttrib();
 
@@ -420,9 +421,11 @@ void TheScene::renderScene()
 		drawPoints();
 	}
 
+	/*
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 		renderSurface();
 	glPopAttrib();
+	*/
 }
 
 void TheScene::renderXSlize()

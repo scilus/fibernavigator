@@ -1,11 +1,13 @@
 #include "point.h"
 #include "selectionBox.h"
+#include "theDataset.h"
 
 Point::Point(Vector3fT center)
 {
 	m_center = center;
 	m_dirty = true;
 	m_selected = false;
+	TheDataset::surface_isDirty = true;
 }
 
 Point::Point(double x, double y, double z)
@@ -14,6 +16,12 @@ Point::Point(double x, double y, double z)
 	m_center = center;
 	m_dirty = true;
 	m_selected = false;
+	TheDataset::surface_isDirty = true;
+}
+
+Point::~Point()
+{
+	TheDataset::surface_isDirty = true;
 }
 
 void Point::draw()
@@ -45,6 +53,7 @@ void Point::drag(wxPoint click)
 	m_center.s.Y = vs.s.Y + dir.s.Y * m_hr.tmin;
 	m_center.s.Z = vs.s.Z + dir.s.Z * m_hr.tmin;
 	m_dirty = true;
+	TheDataset::surface_isDirty = true;
 }
 
 hitResult Point::hitTest(Ray *ray)

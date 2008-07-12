@@ -14,6 +14,7 @@
 #include "KdTree.h"
 #include "selectionBox.h"
 #include <vector>
+#include "Fantom/FVector.hh"
 
 enum CurveFileType {
 	asciiCurve,
@@ -47,6 +48,9 @@ public:
 	void updateLinesShown(std::vector<std::vector<SelectionBox*> >);
 	void boxTest(int, int, int);
 
+	FVector getBarycenter(FVector);
+	void barycenterTest(int, int, int);
+
 	void toggleEndianess();
 	void createColorArray();
 	void freeArrays() {delete[] m_colorArray; delete[] m_normalArray;};
@@ -71,6 +75,9 @@ private:
 
 	float *m_boxMin;
 	float *m_boxMax;
+
+	int m_count;
+	FVector m_barycenter;
 };
 
 #endif /*CURVES_H_*/

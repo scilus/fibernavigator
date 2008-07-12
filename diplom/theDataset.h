@@ -50,12 +50,14 @@ public:
 	static bool anatomy_loaded;
 	static bool fibers_loaded;
 	static bool surface_loaded;
+	static bool surface_isDirty;
 	static wxString lastPath;
 	static int threadsActive;
 
 	static MainFrame* mainFrame;
 	static Point* m_lastSelectedPoint;
 	static TheScene* m_scene;
+
 };
 
 #define ID_KDTREE_FINISHED	50

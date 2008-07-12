@@ -46,6 +46,7 @@ private:
 
     void OnTogglePointMode(wxCommandEvent& event);
     void OnNewSurface(wxCommandEvent& event);
+    void OnNewSurface2(wxCommandEvent& event);
 
     void OnReloadShaders(wxCommandEvent& event);
 
@@ -130,6 +131,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_TOGGLE_SELBOX		20
 #define VIEWER_DRAW_POINTS			21
 #define VIEWER_NEW_SURFACE			22
+#define VIEWER_NEW_SURFACE2			23
 
 #define KDTREE_EVENT			50
 

@@ -406,7 +406,9 @@ std::vector<bool> Curves::getLinesShown(SelectionBox* box)
 
 void Curves::boxTest(int left, int right, int axis)
 {
+	// abort condition
 	if (left > right) return;
+
 	int root = left + ((right-left)/2);
 	int axis1 = (axis+1) % 3;
 	int pointIndex = m_kdTree->m_tree[root]*3;
@@ -464,4 +466,63 @@ void Curves::draw()
 	glDisableClientState(GL_NORMAL_ARRAY);
 }
 
+FVector Curves::getBarycenter(FVector box)
+{
+	m_boxMin = new float[3];
+	m_boxMax = new float[3];
+	m_boxMin[0] = box[0] - box[3]/2;
+	m_boxMax[0] = box[0] + box[3]/2;
+	m_boxMin[1] = box[1] - box[4]/2;
+	m_boxMax[1] = box[1] + box[4]/2;
+	m_boxMin[2] = box[2] - box[5]/2;
+	m_boxMax[2] = box[2] + box[5]/2;
+	m_barycenter.clear();
+	m_barycenter.resize(3, false);
+	m_count = 0;
 
+	barycenterTest(0, m_pointCount-1, 0);
+	if (m_count > 0) {
+	m_barycenter[0] /= m_count;
+	m_barycenter[1] /= m_count;
+	m_barycenter[2] /= m_count;
+	}
+	else {
+		m_barycenter[0] = box[0];
+		m_barycenter[1] = box[1];
+		m_barycenter[2] = box[2];
+
+	}
+	return m_barycenter;
+}
+
+void Curves::barycenterTest(int left, int right, int axis)
+{
+	// abort condition
+	if (left > right) return;
+
+	int root = left + ((right-left)/2);
+	int axis1 = (axis+1) % 3;
+	int pointIndex = m_kdTree->m_tree[root]*3;
+
+	if (m_pointArray[pointIndex + axis] < m_boxMin[axis]) {
+		barycenterTest(root +1, right, axis1);
+	}
+	else if (m_pointArray[pointIndex + axis] > m_boxMax[axis]) {
+		barycenterTest(left, root-1, axis1);
+	}
+	else {
+		int axis2 = (axis+2) % 3;
+		if (	m_pointArray[pointIndex + axis1] <= m_boxMax[axis1] &&
+				m_pointArray[pointIndex + axis1] >= m_boxMin[axis1] &&
+				m_pointArray[pointIndex + axis2] <= m_boxMax[axis2] &&
+				m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )
+		{
+			m_barycenter[0] += m_pointArray[m_kdTree->m_tree[root]*3];
+			m_barycenter[1] += m_pointArray[m_kdTree->m_tree[root]*3+1];
+			m_barycenter[2] += m_pointArray[m_kdTree->m_tree[root]*3+2];
+			m_count++;
+		}
+		barycenterTest(left, root -1, axis1);
+		barycenterTest(root+1, right, axis1);
+	}
+}

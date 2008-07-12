@@ -95,6 +95,7 @@ bool MyApp::OnInit(void)
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
   toolBar->AddTool(VIEWER_NEW_SURFACE, bmpNewSurface, wxT("New Spline Surface"));
+  toolBar->AddTool(VIEWER_NEW_SURFACE2, bmpNewSurface, wxT("New Spline Surface"));
   toolBar->AddSeparator();
 
   toolBar->Realize();

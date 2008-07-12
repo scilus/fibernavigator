@@ -12,9 +12,9 @@
 Surface::Surface()
 {
 	m_radius = 30.0;
-	m_my = 2.0;
-	m_numDeBoorRows = 8;
-	m_numDeBoorCols = 8;
+	m_my = 8.0;
+	m_numDeBoorRows = 12;
+	m_numDeBoorCols = 12;
 	m_order = 4;
 	m_sampleRateT = m_sampleRateU = 0.2;
 
@@ -27,6 +27,7 @@ Surface::Surface()
 	m_threshold = 0.5;
 	m_name = wxT("spline surface");
 	TheDataset::surface_loaded = true;
+	execute();
 }
 
 Surface::~Surface()
@@ -106,8 +107,8 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 	double dZ = (zMax - zMin) / (numRows - 1);
 
 
-	for( int row = 0; row < numRows; row++)
-		for( int col = 0; col < numCols; col++)
+	for( int row = 0; row < numRows; ++row)
+		for( int col = 0; col < numCols; ++col)
 		{
 			std::vector< double > dmy;
 			double x = xMin + dX * col;
@@ -148,11 +149,29 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
   return;
 }
 
-void Surface::execute (std::vector< std::vector< double > > givenPoints)
+void Surface::execute ()
 {
+	std::vector< std::vector< double > > givenPoints;
+	int countPoints = TheDataset::mainFrame->m_treeWidget->GetChildrenCount(TheDataset::mainFrame->m_tPointId, true);
+	if (countPoints == 0) return;
+
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countPoints ; ++i)
+	{
+		id = TheDataset::mainFrame->m_treeWidget->GetNextChild(TheDataset::mainFrame->m_tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)TheDataset::mainFrame->m_treeWidget->GetItemData(id))->getData();
+
+		std::vector< double > p;
+		p.push_back(point->getCenter().s.X);
+		p.push_back(point->getCenter().s.Y);
+		p.push_back(point->getCenter().s.Z);
+		givenPoints.push_back(p);
+	}
 
 	std::vector< std::vector< double > > deBoorPoints;
-	std::vector< std::vector< double > > splinePoints;
+	m_splinePoints.clear();
+	m_vertices.clear();
 
 	FTensor myTensor = getCovarianceMatrix(givenPoints);
 
@@ -221,18 +240,15 @@ void Surface::execute (std::vector< std::vector< double > > givenPoints)
 
 	FBSplineSurface splineSurface(m_order, m_order, deBoorPoints, m_numDeBoorCols, m_numDeBoorRows);
 
-	splineSurface.samplePoints(splinePoints, m_sampleRateT, m_sampleRateU);
+	splineSurface.samplePoints(m_splinePoints, m_sampleRateT, m_sampleRateU);
 
 	std::vector< double > positions;
-	for( std::vector< std::vector< double > >::iterator posIt = splinePoints.begin(); posIt != splinePoints.end(); posIt++)
+	for( std::vector< std::vector< double > >::iterator posIt = m_splinePoints.begin(); posIt != m_splinePoints.end(); posIt++)
 	{
 		positions.push_back((*posIt)[0]);
 		positions.push_back((*posIt)[1]);
 		positions.push_back((*posIt)[2]);
 	}
-
-	//shared_ptr< FPositionSet > positionSet( new FPositionSet3DArbitrary( positions ));
-	std::vector< int > vertices;
 
 	int renderpointsPerCol = splineSurface.getNumSamplePointsU();
 	int renderpointsPerRow = splineSurface.getNumSamplePointsT();
@@ -241,47 +257,81 @@ void Surface::execute (std::vector< std::vector< double > > givenPoints)
 	{
 		for(int x = 0; x < renderpointsPerRow - 1; x++)
 		{
-			vertices.push_back(z * renderpointsPerCol + x);
-			vertices.push_back(z * renderpointsPerCol + x + 1);
-			vertices.push_back((z+1) * renderpointsPerCol + x);
+			m_vertices.push_back(z * renderpointsPerCol + x);
+			m_vertices.push_back(z * renderpointsPerCol + x + 1);
+			m_vertices.push_back((z+1) * renderpointsPerCol + x);
 
-			vertices.push_back((z+1) * renderpointsPerCol + x);
-			vertices.push_back(z * renderpointsPerCol + x + 1);
-			vertices.push_back((z+1) * renderpointsPerCol + x + 1);
+			m_vertices.push_back((z+1) * renderpointsPerCol + x);
+			m_vertices.push_back(z * renderpointsPerCol + x + 1);
+			m_vertices.push_back((z+1) * renderpointsPerCol + x + 1);
 		}
 	}
 
-	glBegin (GL_TRIANGLES);
-	for (uint i = 0 ; i < vertices.size() ; ++i)
+	getNormalsForVertices();
+
+	TheDataset::surface_isDirty = false;
+}
+
+FVector Surface::getNormalForTriangle(const FVector* p1, const FVector* p2, const FVector* p3)
+{
+	FVector a = *p2 - *p1;
+	FVector b = *p3 - *p1;
+	FVector n = a.crossProduct(b);
+	return n.normalize();
+}
+
+void Surface::getNormalsForVertices()
+{
+	m_normals.clear();
+	int numPoints = 46*46;
+	std::vector< FVector > triangleNormals;
+	std::vector< std::vector<int> >triangleRef(numPoints, std::vector<int>(0,0));
+
+	for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
 	{
-		std::vector< double > p = splinePoints[vertices[i]];
-		double x = p[0];
-		double y = p[1];
-		double z = p[2];
-		glVertex3f(x,y,z);
+		std::vector< double > p = m_splinePoints[m_vertices[i]];
+		FVector p1(p[0], p[1], p[2]);
+		triangleRef[m_vertices[i]].push_back(triangleNormals.size());
+		++i;
+		p = m_splinePoints[m_vertices[i]];
+		FVector p2(p[0], p[1], p[2]);
+		triangleRef[m_vertices[i]].push_back(triangleNormals.size());
+		++i;
+		p = m_splinePoints[m_vertices[i]];
+		FVector p3(p[0], p[1], p[2]);
+		triangleRef[m_vertices[i]].push_back(triangleNormals.size());
+		FVector n = getNormalForTriangle(&p1, &p2, &p3);
+		triangleNormals.push_back(n);
 	}
-	glEnd();
+
+	for (int i = 0 ; i < numPoints ; ++i )
+	{
+		FVector tmp(0.0,0.0,0.0);
+		for ( unsigned int j = 0 ; j < triangleRef[i].size() ; ++j)
+		{
+			 tmp += triangleNormals[triangleRef[i][j]];
+		}
+
+		FVector n( tmp[0] / triangleRef[i].size(), tmp[1] / triangleRef[i].size(), tmp[2] / triangleRef[i].size());
+		m_normals.push_back(n);
+	}
 }
 
 void Surface::draw()
 {
-	std::vector< std::vector< double > > givenPoints;
-	int countPoints = TheDataset::mainFrame->m_treeWidget->GetChildrenCount(TheDataset::mainFrame->m_tPointId, true);
-	if (countPoints == 0) return;
-
-	wxTreeItemId id, childid;
-	wxTreeItemIdValue cookie = 0;
-	for (int i = 0 ; i < countPoints ; ++i)
+	if (TheDataset::surface_isDirty)
 	{
-		id = TheDataset::mainFrame->m_treeWidget->GetNextChild(TheDataset::mainFrame->m_tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)TheDataset::mainFrame->m_treeWidget->GetItemData(id))->getData();
-
-		std::vector< double > p;
-		p.push_back(point->getCenter().s.X);
-		p.push_back(point->getCenter().s.Y);
-		p.push_back(point->getCenter().s.Z);
-		givenPoints.push_back(p);
+		execute();
 	}
 
-	execute(givenPoints);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin (GL_TRIANGLES);
+	for (uint i = 0 ; i < m_vertices.size() ; ++i)
+	{
+		std::vector< double > p = m_splinePoints[m_vertices[i]];
+		FVector n = m_normals[m_vertices[i]];
+		glNormal3f(n[0], n[1], n[2]);
+		glVertex3f(p[0], p[1], p[2]);
+	}
+	glEnd();
 }

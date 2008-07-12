@@ -15,6 +15,7 @@ int TheDataset::threadsActive = 0;
 bool TheDataset::anatomy_loaded = false;
 bool TheDataset::fibers_loaded = false;
 bool TheDataset::surface_loaded = false;
+bool TheDataset::surface_isDirty = true;
 
 MainFrame* TheDataset::mainFrame = NULL;
 Point* TheDataset::m_lastSelectedPoint = NULL;
@@ -34,7 +35,6 @@ bool TheDataset::load(int index, wxString filename)
 		lastError = wxT("ERROR\nCan't load any more files.\nDelete some first.\n");
 		return false;
 	}
-
 
 	if (index >= 0)
 	{
@@ -443,7 +443,7 @@ void TheDataset::updateTreeDims()
 	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSagittalId, wxString::Format(wxT("%d frames"), TheDataset::frames));
 }
 
-void TheDataset::updateTreeDS(int i)
+void TheDataset::updateTreeDS(const int i)
 {
 	DatasetInfo* info = (DatasetInfo*)mainFrame->m_listCtrl->GetItemData(i);
 	switch (info->getType())
