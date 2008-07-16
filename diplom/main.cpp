@@ -27,6 +27,7 @@
 #include "icons/toggleselbox.xpm"
 #include "icons/toggleSurface.xpm"
 #include "icons/gball.xpm"
+#include "icons/toggleRGB.xpm"
 
 #include "main.h"
 #include "mainFrame.h"
@@ -78,6 +79,7 @@ bool MyApp::OnInit(void)
   wxBitmap bmpGBALL (gball_xpm);
   wxBitmap bmpHideSelbox (toggleselbox_xpm);
   wxBitmap bmpNewSurface (toggle_surface_xpm);
+  wxBitmap bmpAssignColor (toggle_rgb_xpm);
   toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
@@ -96,6 +98,8 @@ bool MyApp::OnInit(void)
   toolBar->AddTool(VIEWER_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
   toolBar->AddTool(VIEWER_NEW_SURFACE, bmpNewSurface, wxT("New Spline Surface"));
   toolBar->AddTool(VIEWER_NEW_SURFACE2, bmpNewSurface, wxT("New Spline Surface"));
+  toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
   toolBar->AddSeparator();
 
   toolBar->Realize();

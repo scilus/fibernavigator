@@ -375,6 +375,36 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 				}
 			}
 		}
+		if (boxes[i][0]->colorChanged())
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+			float *colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+			wxColour col = boxes[i][0]->getColor();
+			TheDataset::printwxT(col.GetAsString());
+			printf("\n");
+
+			for ( int l = 0 ; l < m_lineCount ; ++l )
+			{
+				if (boxes[i][0]->m_inBox[l])
+				{
+					unsigned int pc = getStartIndexForLine(l)*3;
+
+					for (int j = 0; j < getPointsPerLine(l) ; ++j )
+					{
+						colorData[pc] = ((float)col.Red())/255.0;
+						colorData[pc+1] = ((float)col.Green())/255.0;
+						colorData[pc+2] = ((float)col.Blue())/255.0;
+						pc += 3;
+					}
+				}
+			}
+
+
+
+
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+			boxes[i][0]->setColorChanged(false);
+		}
 	}
 	resetLinesShown();
 	for (uint i = 0 ; i < boxes.size() ; ++i)
@@ -443,6 +473,7 @@ void Curves::initializeBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_normalArray, GL_STATIC_DRAW );
 	freeArrays();
+
 }
 
 void Curves::draw()

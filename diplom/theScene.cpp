@@ -37,7 +37,7 @@ TheScene::TheScene()
 	m_yOffset2 = 0.0;
 
 	m_quadrant = 1;
-	Vector3fT v1 = {{0,0,1}};
+	Vector3fT v1 = {{1.0,1.0,1.0}};
 	m_lightPos = v1;
 
 	m_selBoxChanged = true;
@@ -486,9 +486,9 @@ void TheScene::setupLights()
 	glShadeModel(GL_SMOOTH);
 
 	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_DIFFUSE);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, specref);
-	glMateriali(GL_FRONT, GL_SHININESS, 32);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specref);
+	glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 32);
 }
 
 void TheScene::switchOffLights()

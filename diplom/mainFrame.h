@@ -60,6 +60,8 @@ private:
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
 
+    void OnAssignColor(wxCommandEvent& event);
+
     void OnKdTreeThreadFinished(wxCommandEvent& event);
 
     void updateStatusBar();
@@ -132,6 +134,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_DRAW_POINTS			21
 #define VIEWER_NEW_SURFACE			22
 #define VIEWER_NEW_SURFACE2			23
+#define VIEWER_ASSIGN_COLOR			24
 
 #define KDTREE_EVENT			50
 

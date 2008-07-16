@@ -38,6 +38,9 @@ public:
 	bool isDirty() {return m_dirty;};
 	void setDirty() {m_dirty = true;};
 	void notDirty() {m_dirty = false;};
+	bool colorChanged() {return m_colorChanged;};
+	wxColour getColor() {return m_color;};
+	void setColorChanged(bool v) {m_colorChanged = v;};
 
 	void moveLeft();
 	void moveRight();
@@ -52,6 +55,8 @@ public:
 	void resizeBack();
 	void resizeUp();
 	void resizeDown();
+
+	void setColor(wxColour);
 
 	void update();
 
@@ -80,6 +85,8 @@ private:
 	float m_handleRadius;
 	bool m_show;
 	bool m_dirty;
+	bool m_colorChanged;
+	wxColour m_color;
 
 };
 

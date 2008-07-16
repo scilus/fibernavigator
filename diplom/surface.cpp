@@ -323,6 +323,7 @@ void Surface::draw()
 	{
 		execute();
 	}
+
 	if (TheDataset::m_scene->getPointMode())
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

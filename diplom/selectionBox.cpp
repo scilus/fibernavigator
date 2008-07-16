@@ -10,6 +10,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size)
 	m_dirty = true;
 	m_isNOT = true;
 	m_isActive = true;
+	m_colorChanged = false;
 	m_handleRadius = 3.0;
 	m_inBox.resize(TheDataset::countFibers, sizeof(bool));
 	for (int i = 0; i < TheDataset::countFibers ; ++i)
@@ -26,6 +27,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	m_isActive = true;
 	m_show = true;
 	m_dirty = true;
+	m_colorChanged = false;
 
 	m_handleRadius = 3.0;
 	m_inBox.resize(TheDataset::countFibers, sizeof(bool));
@@ -443,4 +445,12 @@ void SelectionBox::update()
 	m_dirty = true;
 	TheDataset::m_scene->m_selBoxChanged = true;
 	TheDataset::mainFrame->refreshAllGLWidgets();
+}
+
+void SelectionBox::setColor(wxColour color)
+{
+	if (!m_isTop) return;
+	m_color = color;
+	m_colorChanged = true;
+	update();
 }

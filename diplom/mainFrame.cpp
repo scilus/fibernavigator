@@ -9,6 +9,7 @@
 #include "wx/laywin.h"
 #include "wx/filedlg.h"
 #include "wx/statbmp.h"
+#include "wx/colordlg.h"
 
 #include "theScene.h"
 #include "theDataset.h"
@@ -67,6 +68,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_NEW_SURFACE2, MainFrame::OnNewSurface2)
 	/* KDTREE thread finished */
 	EVT_MENU(KDTREE_EVENT, MainFrame::OnKdTreeThreadFinished)
+	/* Button Assign Color pressed */
+	EVT_MENU(VIEWER_ASSIGN_COLOR, MainFrame::OnAssignColor)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -566,8 +569,7 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& event)
 
 void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
-	if (m_treeWidget->GetChildrenCount(m_tFiberId) == 0) return;
+	if (!TheDataset::m_scene || !TheDataset::fibers_loaded) return;
 
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
@@ -817,50 +819,90 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 {
 	if (!TheDataset::m_scene || TheDataset::surface_loaded) return;
 
-		// delete all points
-		m_treeWidget->DeleteChildren(m_tPointId);
-		// create points
+	// delete all points
+	m_treeWidget->DeleteChildren(m_tPointId);
+	// create points
 
-		int y = TheDataset::rows/2;
-		int z = TheDataset::frames/2;
-		int xs = m_xSlider->GetValue() - TheDataset::columns/2;
+	int y = TheDataset::rows/2;
+	int z = TheDataset::frames/2;
+	int xs = m_xSlider->GetValue() - TheDataset::columns/2;
 
-		if (!TheDataset::fibers_loaded)
-	        {
-	                refreshAllGLWidgets();
-	                return;
-	        }
-
-	        Curves *fibers;
-	        wxTreeItemIdValue cookie = 0;
-	        fibers = (Curves*)((MyTreeItemData*)
-	                                m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
-
-		for ( int i = 0 ; i < 11 ; ++i)
-			for ( int j = 0 ; j < 11 ; ++j ) {
-				int yy = (TheDataset::rows/10)*i;
-				int zz = (TheDataset::frames/10)*j;
-				FVector bc = fibers->getBarycenter(FVector(xs, yy - y, zz - z, 25.0, 5.0, 5.0));
-		                // create the point
-				m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(bc[0], bc[1], bc[2])));
-			}
-
-		Surface *surface = new Surface();
-
-		int i = m_listCtrl->GetItemCount();
-		m_listCtrl->InsertItem(i, wxT(""), 0);
-		m_listCtrl->SetItem(i, 1, surface->getName());
-		m_listCtrl->SetItem(i, 2, wxT("0.50"));
-		m_listCtrl->SetItem(i, 3, wxT(""), 1);
-		m_listCtrl->SetItemData(i, (long)surface);
-		m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-
-		if (!TheDataset::fibers_loaded)
+	if (!TheDataset::fibers_loaded)
 		{
-			refreshAllGLWidgets();
-			return;
+				refreshAllGLWidgets();
+				return;
 		}
 
+		Curves *fibers;
+		wxTreeItemIdValue cookie = 0;
+		fibers = (Curves*)((MyTreeItemData*)
+								m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
+
+	for ( int i = 0 ; i < 11 ; ++i)
+		for ( int j = 0 ; j < 11 ; ++j ) {
+			int yy = (TheDataset::rows/10)*i;
+			int zz = (TheDataset::frames/10)*j;
+			FVector bc = fibers->getBarycenter(FVector(xs, yy - y, zz - z, 25.0, 5.0, 5.0));
+					// create the point
+			m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(bc[0], bc[1], bc[2])));
+		}
+
+	Surface *surface = new Surface();
+
+	int i = m_listCtrl->GetItemCount();
+	m_listCtrl->InsertItem(i, wxT(""), 0);
+	m_listCtrl->SetItem(i, 1, surface->getName());
+	m_listCtrl->SetItem(i, 2, wxT("0.50"));
+	m_listCtrl->SetItem(i, 3, wxT(""), 1);
+	m_listCtrl->SetItemData(i, (long)surface);
+	m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
+	if (!TheDataset::fibers_loaded)
+	{
 		refreshAllGLWidgets();
+		return;
+	}
+
+	refreshAllGLWidgets();
 }
 
+void MainFrame::OnAssignColor(wxCommandEvent& event)
+{
+	if (!TheDataset::m_scene) return;
+
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+
+	wxColourData colorData;
+
+	for ( int i = 0; i < 16 ; ++i)
+	{
+		wxColour color(i*16, i*16, i*16);
+		colorData.SetCustomColour(i, color);
+	}
+	wxColourDialog dialog(this, &colorData);
+	wxColour col;
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		wxColourData retData = dialog.GetColourData();
+		col = retData.GetColour();
+	}
+	else return;
+
+	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
+	{
+		SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
+		box->setColor(col);
+		box->setDirty();
+	}
+	else
+	{
+		if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("box"))
+		{
+			SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetItemParent(tBoxId)))->getData();
+			box->setColor(col);
+			box->setDirty();
+		}
+	}
+	TheDataset::m_scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
+}
