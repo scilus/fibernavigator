@@ -7,11 +7,9 @@
 // Author:    $Author: oesterling $
 // Version:   $Revision: $
 //
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 #include "FBSpline.hh"
-
-#include <iostream>
 
 using namespace std;
 
@@ -20,7 +18,7 @@ FBSpline::FBSpline(int order, std::vector< std::vector< double > > deBoorPoints)
   this->deBoorPoints = deBoorPoints;
   int n = this->deBoorPoints.size();
   int k = this->order = order;
-  
+
   //define a normalized knotVector
   for( int i = 0; i < (n + k); i++)
   {
@@ -31,10 +29,10 @@ FBSpline::FBSpline(int order, std::vector< std::vector< double > > deBoorPoints)
       tempKnot = i;
     if( i >= n)
       tempKnot = n;
-      
+
     knots.push_back(tempKnot);
   }
-  
+
 }
 
 FBSpline::FBSpline(int order, std::vector< std::vector< double > > deBoorPoints, std::vector<double> knots)
@@ -52,19 +50,19 @@ FArray FBSpline::f(double _t)
 {
   FArray result;
   unsigned int r = 0, i;
-  
+
   if( _t < knots[0])
     _t = knots[0];
-  
+
   if( _t > knots[ knots.size() - 1])
     _t = knots[ knots.size() - 1];
-  
+
   t = _t; // set current paramter _t as class variable
 
   for(i = 0; i < knots.size(); i++) // -1 ?
     if(knots[i] > _t)
       break;
-      
+
   r = i - 1;
 
   if( _t == knots[ knots.size() - 1])
@@ -75,7 +73,7 @@ FArray FBSpline::f(double _t)
     r = i;
   }
 
-  result = controlPoint_i_j(r, order - 1); 
+  result = controlPoint_i_j(r, order - 1);
 
   return result;
 }
@@ -109,19 +107,18 @@ void FBSpline::setOrder(int order)
 {
   this->order = order;
 }
-    
+
 void FBSpline::samplePoints(std::vector< std::vector< double > > &points, double resolution)
 {
   double deltaT = resolution;
   double currentT = knots[0];
-  
+
   int steps = (int)((knots[knots.size() - 1] - knots[0]) / deltaT + 1);
-  
+
   for( int step = 0; step < steps; step++)
   {
     std::vector< double > dmy;
     currentT = knots[0] + step * deltaT;
-    cout << currentT << endl;
     FArray samplePoint = f(currentT);
     samplePoint.getCoordinates(dmy);
     points.push_back(dmy);
@@ -146,7 +143,7 @@ FArray FBSpline::controlPoint_i_j(int _i, int _j)
       return result;
    }
    double bufferedAlpha = getAlpha_i_j(_i, _j);
-  
+
    result = (1 - bufferedAlpha) * controlPoint_i_j(_i - 1, _j - 1) +
              bufferedAlpha * controlPoint_i_j(_i, _j - 1);
 

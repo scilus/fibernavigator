@@ -817,64 +817,50 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 {
 	if (!TheDataset::m_scene || TheDataset::surface_loaded) return;
 
-	// delete all points
-	m_treeWidget->DeleteChildren(m_tPointId);
-	// create points
+		// delete all points
+		m_treeWidget->DeleteChildren(m_tPointId);
+		// create points
 
-	int y = TheDataset::rows/2;
-	int z = TheDataset::frames/2;
+		int y = TheDataset::rows/2;
+		int z = TheDataset::frames/2;
+		int xs = m_xSlider->GetValue() - TheDataset::columns/2;
 
-	int xs = m_xSlider->GetValue() - TheDataset::columns/2;
+		if (!TheDataset::fibers_loaded)
+	        {
+	                refreshAllGLWidgets();
+	                return;
+	        }
 
+	        Curves *fibers;
+	        wxTreeItemIdValue cookie = 0;
+	        fibers = (Curves*)((MyTreeItemData*)
+	                                m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
 
-	m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(xs, -y+5, -z+5)));
-	m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(xs, -y+5, z-5)));
-	m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(xs, y-5, -z+5)));
-	m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(xs, y-5, z-5)));
-
-	Surface *surface = new Surface();
-
-	int i = m_listCtrl->GetItemCount();
-	m_listCtrl->InsertItem(i, wxT(""), 0);
-	m_listCtrl->SetItem(i, 1, surface->getName());
-	m_listCtrl->SetItem(i, 2, wxT("0.50"));
-	m_listCtrl->SetItem(i, 3, wxT(""), 1);
-	m_listCtrl->SetItemData(i, (long)surface);
-	m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-
-	if (!TheDataset::fibers_loaded)
-	{
-		refreshAllGLWidgets();
-		return;
-	}
-
-	Curves *fibers;
-	wxTreeItemIdValue cookie = 0;
-	fibers = (Curves*)((MyTreeItemData*)
-				m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
-
-	std::vector< std::vector< double > > splinePoints = surface->getSplinePoints();
-
-	for ( int i = 0 ; i < 46 ; ++i )
-	{
-		for ( int j = 0 ; j < 46 ; ++j )
-		{
-			if ( ((i % 5) == 0) && ((j % 5) == 0)) {
-				// get location of vertice
-				std::vector< double > p = splinePoints[ i*46 + j ];
-				//get barycenter of closest lines
-				FVector bc = fibers->getBarycenter(FVector(p[0], p[1], p[2], 25.0, 5.0, 5.0));
-				// create the point
-				Point *newPoint = new Point(bc[0], bc[1], bc[2]);
-				//printf ("%f : %f : %f\n", bc[0], bc[1], bc[2]);
-				//Point *newPoint = new Point(p[0], p[1], p[2]);
-				// append point to tree widget
-				m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(newPoint));
+		for ( int i = 0 ; i < 11 ; ++i)
+			for ( int j = 0 ; j < 11 ; ++j ) {
+				int yy = (TheDataset::rows/10)*i;
+				int zz = (TheDataset::frames/10)*j;
+				FVector bc = fibers->getBarycenter(FVector(xs, yy - y, zz - z, 25.0, 5.0, 5.0));
+		                // create the point
+				m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(bc[0], bc[1], bc[2])));
 			}
 
-		}
-	}
+		Surface *surface = new Surface();
 
-	refreshAllGLWidgets();
+		int i = m_listCtrl->GetItemCount();
+		m_listCtrl->InsertItem(i, wxT(""), 0);
+		m_listCtrl->SetItem(i, 1, surface->getName());
+		m_listCtrl->SetItem(i, 2, wxT("0.50"));
+		m_listCtrl->SetItem(i, 3, wxT(""), 1);
+		m_listCtrl->SetItemData(i, (long)surface);
+		m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
+		if (!TheDataset::fibers_loaded)
+		{
+			refreshAllGLWidgets();
+			return;
+		}
+
+		refreshAllGLWidgets();
 }
 
