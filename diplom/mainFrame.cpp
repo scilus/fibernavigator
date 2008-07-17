@@ -368,7 +368,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnKdTreeThreadFinished(wxCommandEvent& event)
 {
-	TheDataset::kdTreeThreadFinished();
+	TheDataset::treeFinished();
 }
 
 void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))

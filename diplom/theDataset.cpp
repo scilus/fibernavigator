@@ -16,6 +16,7 @@ bool TheDataset::anatomy_loaded = false;
 bool TheDataset::fibers_loaded = false;
 bool TheDataset::surface_loaded = false;
 bool TheDataset::surface_isDirty = true;
+bool TheDataset::useVBO = true;
 
 MainFrame* TheDataset::mainFrame = NULL;
 Point* TheDataset::m_lastSelectedPoint = NULL;
@@ -27,6 +28,7 @@ Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
 								        0.0f,  0.0f,  0.0f,  1.0f };
 wxString TheDataset::lastError = wxT("");
 wxString TheDataset::lastPath = wxT("");
+GLenum TheDataset::lastGLError = GL_NO_ERROR;
 
 bool TheDataset::load(int index, wxString filename)
 {
@@ -482,16 +484,10 @@ void TheDataset::updateTreeDS(const int i)
 	}
 }
 
-void TheDataset::kdTreeThreadFinished()
+void TheDataset::treeFinished()
 {
 	threadsActive--;
 	if (threadsActive > 0) return;
-
-	treeFinished();
-}
-
-void TheDataset::treeFinished()
-{
 	printTime();
 	printf ("tree finished\n");
 	fibers_loaded = true;
@@ -506,4 +502,17 @@ void TheDataset::updateAllSelectionBoxes()
 	for (uint i = 0 ; i < boxes.size() ; ++i)
 		for (uint j = 0 ; j < boxes[i].size() ; ++j)
 			boxes[i][j]->setDirty();
+}
+
+bool TheDataset::GLError()
+{
+	lastGLError = glGetError();
+	if (lastGLError == GL_NO_ERROR) return false;
+	return true;
+}
+
+void TheDataset::printGLError(wxString function)
+{
+	printwxT(function);
+	printf(" : ERROR: %s\n", gluErrorString(lastGLError));
 }

@@ -468,10 +468,13 @@ void Curves::initializeBuffer()
 	glGenBuffers(3, m_bufferObjects);
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_pointArray, GL_STATIC_DRAW );
+	TheDataset::GLError();
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_colorArray, GL_STATIC_DRAW );
+	TheDataset::GLError();
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_normalArray, GL_STATIC_DRAW );
+	TheDataset::GLError();
 	freeArrays();
 
 }

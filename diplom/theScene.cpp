@@ -60,11 +60,7 @@ void TheScene::initGL(int view)
 	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 	glShadeModel(GL_FLAT);
-	glEnable(GL_DOUBLEBUFFER);
 	glEnable(GL_DEPTH_TEST);
-
-	//GLfloat lmodel_ambient[] = {0.2, 0.2, 0.2, 1.0};
-	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
 	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
 	glEnable(GL_ALPHA_TEST);
@@ -81,6 +77,8 @@ void TheScene::initGL(int view)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-view1, view1, -view1, view1, -(view1 + 5) , view1 + 5);
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("init"));
 }
 
 void TheScene::assignTextures ()
@@ -111,6 +109,7 @@ void TheScene::assignTextures ()
 		info->generateTexture();
 	}
 
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("assign textures"));
 }
 
 void TheScene::addTexture()
@@ -133,6 +132,8 @@ void TheScene::addTexture()
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
 	info->generateTexture();
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("add texture"));
 }
 
 void TheScene::bindTextures()
@@ -149,6 +150,8 @@ void TheScene::bindTextures()
 			glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 		}
 	}
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("bind textures"));
 }
 
 void TheScene::swapTextures(int a, int b)
@@ -173,6 +176,8 @@ GLuint TheScene::makeCallList(DatasetInfo *info)
 	glEndList();
 
 	return mesh;
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("make call list"));
 }
 
 void TheScene::initShaders()
@@ -193,6 +198,8 @@ void TheScene::initShaders()
 	m_textureShader->link(vShader, fShader);
 	m_textureShader->bind();
 
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("setup shader 1"));
+
 
 	if (m_meshShader)
 	{
@@ -210,6 +217,8 @@ void TheScene::initShaders()
 	m_meshShader->link(vShader1, fShader1);
 	m_meshShader->bind();
 
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("setup shader 2"));
+
 	if (m_curveShader)
 	{
 		delete m_curveShader;
@@ -225,6 +234,8 @@ void TheScene::initShaders()
 	m_curveShader = new FGLSLShaderProgram();
 	m_curveShader->link(vShader2, fShader2);
 	m_curveShader->bind();
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("setup shader 3"));
 }
 
 void TheScene::setTextureShaderVars()
@@ -421,11 +432,7 @@ void TheScene::renderScene()
 		drawPoints();
 	}
 
-	/*
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-		renderSurface();
-	glPopAttrib();
-	*/
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render"));
 }
 
 void TheScene::renderXSlize()
@@ -439,6 +446,8 @@ void TheScene::renderXSlize()
     	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 1.0); glVertex3i(x,  y,  z);
     	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 0.0); glVertex3i(x,  y, -z);
     glEnd();
+
+    if (TheDataset::GLError()) TheDataset::printGLError(wxT("render X slize"));
 }
 
 void TheScene::renderYSlize()
@@ -452,6 +461,8 @@ void TheScene::renderYSlize()
     	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3i( x, y,  z);
     	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3i( x, y, -z);
     glEnd();
+
+    if (TheDataset::GLError()) TheDataset::printGLError(wxT("render Y slize"));
 }
 
 void TheScene::renderZSlize()
@@ -465,6 +476,8 @@ void TheScene::renderZSlize()
     	glTexCoord3f(1.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3i( x,  y, z);
     	glTexCoord3f(1.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3i( x, -y, z);
     glEnd();
+
+    if (TheDataset::GLError()) TheDataset::printGLError(wxT("render Z slize"));
 }
 
 void TheScene::setupLights()
@@ -489,6 +502,8 @@ void TheScene::setupLights()
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specref);
 	glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 32);
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("setup lights"));
 }
 
 void TheScene::switchOffLights()
@@ -516,6 +531,8 @@ void TheScene::renderMesh()
 		}
 	}
 	m_meshShader->release();
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw mesh"));
 }
 
 void TheScene::renderCurves()
@@ -537,6 +554,8 @@ void TheScene::renderCurves()
 		}
 	}
 	m_curveShader->release();
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw fibers"));
 }
 
 void TheScene::renderSurface()
@@ -558,6 +577,8 @@ void TheScene::renderSurface()
 		}
 	}
 	m_meshShader->release();
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw surface"));
 }
 
 void TheScene::renderNavView(int view)
@@ -630,6 +651,8 @@ void TheScene::renderNavView(int view)
 	glColor3f(1.0, 1.0, 1.0);
 
 	m_textureShader->bind();
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render nav view"));
 }
 
 
@@ -668,6 +691,8 @@ void TheScene::drawSphere(float x, float y, float z, float r)
 	gluQuadricNormals(quadric, GLU_SMOOTH);
 	gluSphere(quadric, r, 32, 32);
 	glPopMatrix();
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw sphere"));
 }
 
 
@@ -695,6 +720,8 @@ void TheScene::drawSelectionBoxes()
 			glPopAttrib();
 		}
 	}
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw selection boxes"));
 }
 
 void TheScene::drawPoints()
@@ -726,4 +753,6 @@ void TheScene::drawPoints()
 	switchOffLights();
 	m_meshShader->release();
 	glPopAttrib();
+
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw points"));
 }
