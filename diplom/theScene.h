@@ -39,7 +39,7 @@ public:
 	void addTexture();
 	void swapTextures(int, int);
 	void releaseTextures();
-	GLuint makeCallList(DatasetInfo*);
+	GLuint makeDisplayList(DatasetInfo*);
 
 	void initShaders();
 
@@ -70,8 +70,9 @@ public:
 
 private:
 	int m_countTextures;
+	int m_countDisplayLists;
 	GLuint *m_texNames;
-	GLuint *m_callLists;
+	GLuint *m_displayLists;
 	FGLSLShaderProgram *m_textureShader;
 	FGLSLShaderProgram *m_meshShader;
 	FGLSLShaderProgram *m_curveShader;

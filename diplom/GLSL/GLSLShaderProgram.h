@@ -25,7 +25,7 @@ public:
     * unlink
     */
     void unlink();
-    
+
     /**
      * Bind a program, so it is used for opengl rendering
      */
@@ -35,16 +35,18 @@ public:
      * Release the program, so it is no longer used for rendering
      */
     void release();
-    
+
     /**
      * get program object
      */
     GLuint getProgramObject();
-    
+
     void setUniInt(const GLchar*, int);
     void setUniFloat(const GLchar*, float);
+    void setUniArrayInt(const GLchar*, int*, int);
+    void setUniArrayFloat(const GLchar*, float*, int);
     void setAttribFloat(const GLchar*, float);
-    
+
 
 private:
     GLuint m_shaderProgram;
@@ -52,8 +54,8 @@ private:
     GLSLShader * m_fragment;
 
 private:
-  
-	void printCompilerLog(GLuint); 
+
+	void printCompilerLog(GLuint);
 };
 
 #endif

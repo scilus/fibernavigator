@@ -15,7 +15,7 @@ TheScene::TheScene()
 
 	m_mainGLContext = 0;
 	m_texNames = new GLuint[10];
-	m_callLists = new GLuint[10];
+	m_displayLists = new GLuint[10];
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
 	m_zSlize = 0.5;
@@ -80,30 +80,36 @@ void TheScene::initGL(int view)
 
 void TheScene::assignTextures ()
 {
-	printf("assign textures\n");
+	printf("assign textures and generate display lists\n");
 	glDeleteTextures(10, m_texNames);
 
-	m_countTextures = TheDataset::mainFrame->m_listCtrl->GetItemCount();
-	if (m_countTextures == 0) return;
+	m_countTextures = 0;
+	m_countDisplayLists = 0;
 
-	for (int i = 0 ; i < m_countTextures ; ++i)
+	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
-		if(info->getType() == Mesh_)
+
+		if(info->getType() < Mesh_)
 		{
-			m_texNames[i] = makeCallList(info);
-			return;
+			glActiveTexture(GL_TEXTURE0 + m_countTextures);
+			glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+			glGenTextures(1, &m_texNames[m_countTextures]);
+			glBindTexture(GL_TEXTURE_3D, m_texNames[m_countTextures]);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+			info->generateTexture();
+
+			m_countTextures++;
 		}
-		glActiveTexture(GL_TEXTURE0 + i);
-		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glGenTextures(1, &m_texNames[i]);
-		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		info->generateTexture();
+		else if (info->getType() == Mesh_)
+		{
+			m_displayLists[m_countDisplayLists] = makeDisplayList(info);
+			m_countDisplayLists++;
+		}
 	}
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("assign textures"));
@@ -111,24 +117,32 @@ void TheScene::assignTextures ()
 
 void TheScene::addTexture()
 {
-	m_countTextures = TheDataset::mainFrame->m_listCtrl->GetItemCount();
-	if (m_countTextures == 0) return;
-	DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(m_countTextures - 1);
-	if(info->getType() == Mesh_)
+	if (TheDataset::mainFrame->m_listCtrl->GetItemCount() == 0) return;
+	DatasetInfo* info =
+		(DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(TheDataset::mainFrame->m_listCtrl->GetItemCount() - 1);
+
+	if(info->getType() < Mesh_)
 	{
-		m_texNames[m_countTextures -1] = makeCallList(info);
-		return;
+		glActiveTexture(GL_TEXTURE0 + m_countTextures);
+		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+		glGenTextures(1, &m_texNames[m_countTextures]);
+		glBindTexture(GL_TEXTURE_3D, m_texNames[m_countTextures]);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		info->generateTexture();
+
+		m_countTextures++;
 	}
-	glActiveTexture(GL_TEXTURE0 + m_countTextures -1);
-	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glGenTextures(1, &m_texNames[m_countTextures -1]);
-	glBindTexture(GL_TEXTURE_3D, m_texNames[m_countTextures -1]);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-	info->generateTexture();
+	else if (info->getType() == Mesh_)
+	{
+		m_displayLists[m_countDisplayLists] = makeDisplayList(info);
+		m_countDisplayLists++;
+	}
+
+
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("add texture"));
 }
@@ -138,14 +152,10 @@ void TheScene::bindTextures()
 	glEnable(GL_TEXTURE_3D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-
 	for (int i = 0 ; i < m_countTextures ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() < Mesh_) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
-		}
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_3D, m_texNames[i]);
 	}
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("bind textures"));
@@ -153,9 +163,14 @@ void TheScene::bindTextures()
 
 void TheScene::swapTextures(int a, int b)
 {
-	GLuint temp = m_texNames[a];
-	m_texNames[a] = m_texNames[b];
-	m_texNames[b] = temp;
+	DatasetInfo* infoA = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(a);
+	DatasetInfo* infoB = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(b);
+
+	if ( (infoA->getType() < Mesh_) && (infoB->getType() < Mesh_)) {
+		GLuint temp = m_texNames[a];
+		m_texNames[a] = m_texNames[b];
+		m_texNames[b] = temp;
+	}
 }
 
 void TheScene::releaseTextures()
@@ -163,18 +178,16 @@ void TheScene::releaseTextures()
 	glDeleteTextures(10, m_texNames);
 }
 
-GLuint TheScene::makeCallList(DatasetInfo *info)
+GLuint TheScene::makeDisplayList(DatasetInfo *info)
 {
 	GLuint mesh = glGenLists(1);
 	glNewList (mesh, GL_COMPILE);
-
 	info->generateGeometry();
-
 	glEndList();
 
-	return mesh;
-
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("make call list"));
+
+	return mesh;
 }
 
 void TheScene::initShaders()
@@ -237,73 +250,28 @@ void TheScene::initShaders()
 
 void TheScene::setTextureShaderVars()
 {
-	DatasetInfo* info;
-	switch (m_countTextures)
+	int* tex = new int[m_countTextures];
+	int* show = new int[m_countTextures];
+	float* threshold = new float[m_countTextures];
+	int* type = new int[m_countTextures];
+	int c = 0;
+	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
-	case 10:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(9);
-		m_textureShader->setUniInt("tex9", 9);
-		m_textureShader->setUniInt("show9", info->getShow());
-		m_textureShader->setUniFloat("threshold9",  info->getThreshold());
-		m_textureShader->setUniInt("type9", info->getType());
-	case 9:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(8);
-		m_textureShader->setUniInt("tex8", 8);
-		m_textureShader->setUniInt("show8", info->getShow());
-		m_textureShader->setUniFloat("threshold8",  info->getThreshold());
-		m_textureShader->setUniInt("type8", info->getType());
-	case 8:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(7);
-		m_textureShader->setUniInt("tex7", 7);
-		m_textureShader->setUniInt("show7", info->getShow());
-		m_textureShader->setUniFloat("threshold7",  info->getThreshold());
-		m_textureShader->setUniInt("type7", info->getType());
-	case 7:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(6);
-		m_textureShader->setUniInt("tex6", 6);
-		m_textureShader->setUniInt("show6", info->getShow());
-		m_textureShader->setUniFloat("threshold6",  info->getThreshold());
-		m_textureShader->setUniInt("type6", info->getType());
-	case 6:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(5);
-		m_textureShader->setUniInt("tex5", 5);
-		m_textureShader->setUniInt("show5", info->getShow());
-		m_textureShader->setUniFloat("threshold5",  info->getThreshold());
-		m_textureShader->setUniInt("type5", info->getType());
-	case 5:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(4);
-		m_textureShader->setUniInt("tex4", 4);
-		m_textureShader->setUniInt("show4", info->getShow());
-		m_textureShader->setUniFloat("threshold4",  info->getThreshold());
-		m_textureShader->setUniInt("type4", info->getType());
-	case 4:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(3);
-		m_textureShader->setUniInt("tex3", 3);
-		m_textureShader->setUniInt("show3", info->getShow());
-		m_textureShader->setUniFloat("threshold3",  info->getThreshold());
-		m_textureShader->setUniInt("type3", info->getType());
-	case 3:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(2);
-		m_textureShader->setUniInt("tex2", 2);
-		m_textureShader->setUniInt("show2", info->getShow());
-		m_textureShader->setUniFloat("threshold2",  info->getThreshold());
-		m_textureShader->setUniInt("type2", info->getType());
-	case 2:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(1);
-		m_textureShader->setUniInt("tex1", 1);
-		m_textureShader->setUniInt("show1", info->getShow());
-		m_textureShader->setUniFloat("threshold1",  info->getThreshold());
-		m_textureShader->setUniInt("type1", info->getType());
-	case 1:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(0);
-		m_textureShader->setUniInt("tex0", 0);
-		m_textureShader->setUniInt("show0", info->getShow());
-		m_textureShader->setUniFloat("threshold0",  info->getThreshold());
-		m_textureShader->setUniInt("type0", info->getType());
+		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
+		if(info->getType() < Mesh_) {
+			tex[c] = c;
+			show[c] = info->getShow();
+			threshold[c] = info->getThreshold();
+			type[c] = info->getType();
+			++c;
+		}
+	}
 
-	case 0:
-	default:
-	;}
+	m_textureShader->setUniArrayInt("tex", tex, m_countTextures);
+	m_textureShader->setUniArrayInt("show", show, m_countTextures);
+	m_textureShader->setUniArrayInt("type", type, m_countTextures);
+	m_textureShader->setUniArrayFloat("threshold", threshold, m_countTextures);
+	m_textureShader->setUniInt("countTextures", m_countTextures);
 }
 
 void TheScene::setMeshShaderVars()
@@ -316,73 +284,29 @@ void TheScene::setMeshShaderVars()
 	m_meshShader->setUniInt("cutZ", (int)(m_zSlize - TheDataset::frames/2.0));
 	m_meshShader->setUniInt("sector", m_quadrant);
 
-	DatasetInfo* info;
-
-	switch (m_countTextures)
+	int* tex = new int[m_countTextures];
+	int* show = new int[m_countTextures];
+	float* threshold = new float[m_countTextures];
+	int* type = new int[m_countTextures];
+	int c = 0;
+	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
-	case 10:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(9);
-		m_meshShader->setUniInt("tex9", 9);
-		m_meshShader->setUniInt("show9", info->getShow());
-		m_meshShader->setUniFloat("threshold9",  info->getThreshold());
-		m_meshShader->setUniInt("type9", info->getType());
-	case 9:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(8);
-		m_meshShader->setUniInt("tex8", 8);
-		m_meshShader->setUniInt("show8", info->getShow());
-		m_meshShader->setUniFloat("threshold8",  info->getThreshold());
-		m_meshShader->setUniInt("type8", info->getType());
-	case 8:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(7);
-		m_meshShader->setUniInt("tex7", 7);
-		m_meshShader->setUniInt("show7", info->getShow());
-		m_meshShader->setUniFloat("threshold7",  info->getThreshold());
-		m_meshShader->setUniInt("type7", info->getType());
-	case 7:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(6);
-		m_meshShader->setUniInt("tex6", 6);
-		m_meshShader->setUniInt("show6", info->getShow());
-		m_meshShader->setUniFloat("threshold6",  info->getThreshold());
-		m_meshShader->setUniInt("type6", info->getType());
-	case 6:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(5);
-		m_meshShader->setUniInt("tex5", 5);
-		m_meshShader->setUniInt("show5", info->getShow());
-		m_meshShader->setUniFloat("threshold5",  info->getThreshold());
-		m_meshShader->setUniInt("type5", info->getType());
-	case 5:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(4);
-		m_meshShader->setUniInt("tex4", 4);
-		m_meshShader->setUniInt("show4", info->getShow());
-		m_meshShader->setUniFloat("threshold4",  info->getThreshold());
-		m_meshShader->setUniInt("type4", info->getType());
-	case 4:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(3);
-		m_meshShader->setUniInt("tex3", 3);
-		m_meshShader->setUniInt("show3", info->getShow());
-		m_meshShader->setUniFloat("threshold3",  info->getThreshold());
-		m_meshShader->setUniInt("type3", info->getType());
-	case 3:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(2);
-		m_meshShader->setUniInt("tex2", 2);
-		m_meshShader->setUniInt("show2", info->getShow());
-		m_meshShader->setUniFloat("threshold2",  info->getThreshold());
-		m_meshShader->setUniInt("type2", info->getType());
-	case 2:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(1);
-		m_meshShader->setUniInt("tex1", 1);
-		m_meshShader->setUniInt("show1", info->getShow());
-		m_meshShader->setUniFloat("threshold1",  info->getThreshold());
-		m_meshShader->setUniInt("type1", info->getType());
-	case 1:
-		info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(0);
-		m_meshShader->setUniInt("tex0", 0);
-		m_meshShader->setUniInt("show0", info->getShow());
-		m_meshShader->setUniFloat("threshold0",  info->getThreshold());
-		m_meshShader->setUniInt("type0", info->getType());
-	case 0:
-	default:
-	;}
+		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
+		if(info->getType() < Mesh_) {
+			tex[c] = c;
+			show[c] = info->getShow();
+			threshold[c] = info->getThreshold();
+			type[c] = info->getType();
+			++c;
+		}
+	}
+
+	m_meshShader->setUniArrayInt("tex", tex, m_countTextures);
+	m_meshShader->setUniArrayInt("show", show, m_countTextures);
+	m_meshShader->setUniArrayInt("type", type, m_countTextures);
+	m_meshShader->setUniArrayFloat("threshold", threshold, m_countTextures);
+	m_meshShader->setUniInt("countTextures", m_countTextures);
+
 }
 
 void TheScene::renderScene()
@@ -515,22 +439,29 @@ void TheScene::switchOffLights()
 
 void TheScene::renderMesh()
 {
+	if (m_countDisplayLists == 0) return;
+
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 	m_meshShader->bind();
 	setMeshShaderVars();
 
+	int index = 0;
+
 	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == Mesh_ && info->getShow())
+		if (info->getType() == Mesh_)
 		{
-			float c = (float)info->getThreshold();
-			glColor3f(c,c,c);
-			m_meshShader->setUniInt("showFS", info->getShowFS());
-			m_meshShader->setUniInt("useTex", info->getUseTex());
+			if (info->getShow()) {
+				float c = (float)info->getThreshold();
+				glColor3f(c,c,c);
+				m_meshShader->setUniInt("showFS", info->getShowFS());
+				m_meshShader->setUniInt("useTex", info->getUseTex());
 
-			glCallList(m_texNames[i]);
+				glCallList(m_displayLists[index]);
+			}
+			index++;
 		}
 	}
 	m_meshShader->release();

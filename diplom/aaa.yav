@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scene>
+    <anatomy frames="160" columns="160" rows="200"/>
+    <data>
+        <dataset>/home/ralph/workspace/diplom/data/t1_1mm.hea</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/t2_1mm.hea</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/rgb.hea</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/overlay_swap.hea</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/s1_head.mesh</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/s1_Lhemi.mesh</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/s1_Lwhite.mesh</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/s1_Rhemi.mesh</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/s1_Rwhite.mesh</dataset>
+        <dataset>/home/ralph/workspace/diplom/data/dwi_188_1_7.fib</dataset>
+    </data>
+    <points/>
+    <selection_boxes>
+        <master_box>
+            <size x="20.000000" y="25.000000" z="20.000000"/>
+            <center x="0.000000" y="0.000000" z="0.000000"/>
+        </master_box>
+    </selection_boxes>
+</scene>

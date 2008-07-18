@@ -1,15 +1,8 @@
-uniform sampler3D tex0, tex1, tex2, tex3, tex4;
-uniform sampler3D tex5, tex6, tex7, tex8, tex9;
-
-uniform bool show0, show1, show2, show3, show4;
-uniform bool show5, show6, show7, show8, show9;
-
-uniform float threshold0, threshold1, threshold2, threshold3;
-uniform float threshold4, threshold5, threshold6, threshold7;
-uniform float threshold8, threshold9;
-
-uniform int type0, type1, type2, type3, type4;
-uniform int type5, type6, type7, type8, type9;
+uniform sampler3D tex[10];
+uniform bool show[10];
+uniform float threshold[10];
+uniform int type[10];
+uniform int countTextures;
 
 varying vec3 TexCoord;
 
@@ -66,17 +59,11 @@ void main()
 {
 	vec4 col = vec4(0.0, 0.0, 0.0, 0.0);
 	
-	if (show9) lookupTex(col, type9, tex9, threshold9);
-	if (show8) lookupTex(col, type8, tex8, threshold8);
-	if (show7) lookupTex(col, type7, tex7, threshold7);
-	if (show6) lookupTex(col, type6, tex6, threshold6);
-	if (show5) lookupTex(col, type5, tex5, threshold5);
-	if (show4) lookupTex(col, type4, tex4, threshold4);
-	if (show3) lookupTex(col, type3, tex3, threshold3);
-	if (show2) lookupTex(col, type2, tex2, threshold2);
-	if (show1) lookupTex(col, type1, tex1, threshold1);
-	if (show0) lookupTex(col, type0, tex0, threshold0);
-	
+	for (int i = 9 ; i > -1 ; i--)
+	{
+		if (show[i]) lookupTex(col, type[i], tex[i], threshold[i]);
+	}
+
 	col = clamp(col, 0.0, 1.0);
 	gl_FragColor = col;
 }

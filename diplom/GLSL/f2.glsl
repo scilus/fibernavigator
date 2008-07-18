@@ -5,18 +5,11 @@ uniform int dimX, dimY, dimZ;
 uniform bool showFS;
 uniform bool useTex;
 
-uniform sampler3D tex0, tex1, tex2, tex3, tex4;
-uniform sampler3D tex5, tex6, tex7, tex8, tex9;
-
-uniform bool show0, show1, show2, show3, show4;
-uniform bool show5, show6, show7, show8, show9;
-
-uniform float threshold0, threshold1, threshold2, threshold3;
-uniform float threshold4, threshold5, threshold6, threshold7;
-uniform float threshold8, threshold9;
-
-uniform int type0, type1, type2, type3, type4;
-uniform int type5, type6, type7, type8, type9;
+uniform sampler3D tex[10];
+uniform bool show[10];
+uniform float threshold[10];
+uniform int type[10];
+uniform int countTextures;
 
 varying vec3 TexCoord;
 varying vec3 normal;
@@ -266,16 +259,12 @@ void main()
 	    v.y = (v.y + dimY/2) / (float)dimY;
 	    v.z = (v.z + dimZ/2) / (float)dimZ;
 	    
-	    if (show9) lookupTex(tmpColor, type9, tex9, threshold9, v);
-	    if (show8) lookupTex(tmpColor, type8, tex8, threshold8, v);
-		if (show7) lookupTex(tmpColor, type7, tex7, threshold7, v);
-		if (show6) lookupTex(tmpColor, type6, tex6, threshold6, v);
-		if (show5) lookupTex(tmpColor, type5, tex5, threshold5, v);
-		if (show4) lookupTex(tmpColor, type4, tex4, threshold4, v);
-		if (show3) lookupTex(tmpColor, type3, tex3, threshold3, v);
-	    if (show2) lookupTex(tmpColor, type2, tex2, threshold2, v);
-	    if (show1) lookupTex(tmpColor, type1, tex1, threshold1, v);
-		if (show0) lookupTex(tmpColor, type0, tex0, threshold0, v);
+	    for (int i = 9 ; i > -1 ; i--)
+		{
+			if (show[i]) lookupTex(tmpColor, type[i], tex[i], threshold[i], v);
+		}
+		
+		
 		tmpColor.a = 1.0;	
     }
     else
