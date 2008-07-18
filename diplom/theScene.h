@@ -107,7 +107,7 @@ private:
 
 	void renderSlizes();
 	void renderMesh();
-	void renderCurves();
+	void renderFibers();
 	void renderSurface();
 
 	void drawSelectionBoxes();

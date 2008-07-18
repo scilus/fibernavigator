@@ -315,7 +315,7 @@ void TheScene::renderScene()
 
 	renderSlizes();
 
-	renderCurves();
+	renderFibers();
 
 	setupLights();
 	renderMesh();
@@ -471,10 +471,11 @@ void TheScene::renderMesh()
 	glPopAttrib();
 }
 
-void TheScene::renderCurves()
+void TheScene::renderFibers()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+	glEnable(GL_BLEND);
 	m_curveShader->bind();
 	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{

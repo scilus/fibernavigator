@@ -21,6 +21,10 @@
 #include "icons/view1.xpm"
 #include "icons/view2.xpm"
 #include "icons/view3.xpm"
+#include "icons/axial.xpm"
+#include "icons/cor.xpm"
+#include "icons/sag.xpm"
+#include "icons/box.xpm"
 #include "icons/mini_cat.xpm"
 #include "icons/new.xpm"
 #include "icons/quit.xpm"
@@ -70,6 +74,10 @@ bool MyApp::OnInit(void)
 
   wxToolBar* toolBar = new wxToolBar( frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxNO_BORDER);
   wxBitmap bmpOpen (fileopen_xpm);
+  wxBitmap bmpAxial (axial_xpm);
+  wxBitmap bmpCor (cor_xpm);
+  wxBitmap bmpSag (sag_xpm);
+  wxBitmap bmpBox (box_xpm);
   wxBitmap bmpView1 (view1_xpm);
   wxBitmap bmpView2 (view2_xpm);
   wxBitmap bmpView3 (view3_xpm);
@@ -84,14 +92,14 @@ bool MyApp::OnInit(void)
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
   toolBar->AddSeparator();
-  toolBar->AddTool(VIEWER_TOGGLE_AXIAL, bmpView1, wxT("Toggle Axial"));
-  toolBar->AddTool(VIEWER_TOGGLE_CORONAL, bmpView2, wxT("Toggle Coronal"));
-  toolBar->AddTool(VIEWER_TOGGLE_SAGITTAL, bmpView3, wxT("Toggle Sagittal"));
+  toolBar->AddTool(VIEWER_TOGGLE_AXIAL, bmpAxial, wxT("Toggle Axial"));
+  toolBar->AddTool(VIEWER_TOGGLE_CORONAL, bmpCor, wxT("Toggle Coronal"));
+  toolBar->AddTool(VIEWER_TOGGLE_SAGITTAL, bmpSag, wxT("Toggle Sagittal"));
   toolBar->AddTool(VIEWER_TOGGLE_ALPHA, bmpNewSurface, wxT("Toggle alpha blending"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
   toolBar->AddSeparator();
-  toolBar->AddTool(VIEWER_NEW_SELBOX, bmpMiniCat, wxT("New Selection Box"));
+  toolBar->AddTool(VIEWER_NEW_SELBOX, bmpBox, wxT("New Selection Box"));
   toolBar->AddTool(VIEWER_RENDER_SELBOXES, bmpMiniCat, wxT("Toggle Selection Boxes"));
   toolBar->AddTool(VIEWER_TOGGLE_SELBOX, bmpHideSelbox , wxT("Toggle activation status of selection box"));
   toolBar->AddSeparator();
