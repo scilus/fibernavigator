@@ -15,6 +15,7 @@ TheScene::TheScene()
 
 	m_mainGLContext = 0;
 	m_texNames = new GLuint[10];
+	m_callLists = new GLuint[10];
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
 	m_zSlize = 0.5;
@@ -59,11 +60,7 @@ void TheScene::initGL(int view)
 	(view == mainView) ? printf("Main View: ") : printf("Nav View: %d ", view);
 	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-	glShadeModel(GL_FLAT);
 	glEnable(GL_DEPTH_TEST);
-
-	glAlphaFunc(GL_GREATER, 0.0000001); // adjust your prefered threshold here
-	glEnable(GL_ALPHA_TEST);
 
 	if (!m_texAssigned) {
 		assignTextures();
@@ -240,8 +237,6 @@ void TheScene::initShaders()
 
 void TheScene::setTextureShaderVars()
 {
-	m_textureShader->bind();
-
 	DatasetInfo* info;
 	switch (m_countTextures)
 	{
@@ -394,34 +389,14 @@ void TheScene::renderScene()
 {
 	if (TheDataset::mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	renderSlizes();
 
-	if (m_blendAlpha)
-		glDisable(GL_ALPHA_TEST);
-	else
-		glEnable(GL_ALPHA_TEST);
+	renderCurves();
 
-	bindTextures();
-	setTextureShaderVars();
-
-	if (m_showSagittal) renderXSlize();
-	if (m_showCoronal) renderYSlize();
-	if (m_showAxial) renderZSlize();
-
-	glPopAttrib();
-
-	m_textureShader->release();
-
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-		renderCurves();
-	glPopAttrib();
-
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-		setupLights();
-		renderMesh();
-		renderSurface();
-		switchOffLights();
-	glPopAttrib();
+	setupLights();
+	renderMesh();
+	renderSurface();
+	switchOffLights();
 
 	if (m_showBoxes && TheDataset::fibers_loaded)
 	{
@@ -434,6 +409,32 @@ void TheScene::renderScene()
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render"));
 }
+
+void TheScene::renderSlizes()
+{
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+	if (m_blendAlpha)
+		glDisable(GL_ALPHA_TEST);
+	else
+		glEnable(GL_ALPHA_TEST);
+
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0000001);
+
+	bindTextures();
+	m_textureShader->bind();
+	setTextureShaderVars();
+
+	if (m_showSagittal) renderXSlize();
+	if (m_showCoronal) renderYSlize();
+	if (m_showAxial) renderZSlize();
+
+	m_textureShader->release();
+
+	glPopAttrib();
+}
+
 
 void TheScene::renderXSlize()
 {
@@ -514,6 +515,8 @@ void TheScene::switchOffLights()
 
 void TheScene::renderMesh()
 {
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
 	m_meshShader->bind();
 	setMeshShaderVars();
 
@@ -533,10 +536,14 @@ void TheScene::renderMesh()
 	m_meshShader->release();
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw mesh"));
+
+	glPopAttrib();
 }
 
 void TheScene::renderCurves()
 {
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
 	m_curveShader->bind();
 	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
@@ -556,10 +563,14 @@ void TheScene::renderCurves()
 	m_curveShader->release();
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw fibers"));
+
+	glPopAttrib();
 }
 
 void TheScene::renderSurface()
 {
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
 	m_meshShader->bind();
 	setMeshShaderVars();
 
@@ -579,13 +590,21 @@ void TheScene::renderSurface()
 	m_meshShader->release();
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw surface"));
+
+	glPopAttrib();
 }
 
 void TheScene::renderNavView(int view)
 {
 	if (TheDataset::mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0000001);
+
 	bindTextures();
+	m_textureShader->bind();
 	setTextureShaderVars();
 
 	float xline = 0;
@@ -650,7 +669,7 @@ void TheScene::renderNavView(int view)
 	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 
-	m_textureShader->bind();
+	glPopAttrib();
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render nav view"));
 }

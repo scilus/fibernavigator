@@ -380,8 +380,6 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 			glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
 			float *colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
 			wxColour col = boxes[i][0]->getColor();
-			TheDataset::printwxT(col.GetAsString());
-			printf("\n");
 
 			for ( int l = 0 ; l < m_lineCount ; ++l )
 			{
@@ -468,13 +466,13 @@ void Curves::initializeBuffer()
 	glGenBuffers(3, m_bufferObjects);
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_pointArray, GL_STATIC_DRAW );
-	TheDataset::GLError();
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("initialue vbo points"));
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_colorArray, GL_STATIC_DRAW );
-	TheDataset::GLError();
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("initialue vbo colors"));
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_normalArray, GL_STATIC_DRAW );
-	TheDataset::GLError();
+	if (TheDataset::GLError()) TheDataset::printGLError(wxT("initialue vbo normals"));
 	freeArrays();
 
 }

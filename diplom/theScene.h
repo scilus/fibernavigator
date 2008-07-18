@@ -53,18 +53,9 @@ public:
 
 	void renderScene();
 	void renderNavView(int);
-	void setupLights();
-	void switchOffLights();
-	void renderMesh();
-	void renderCurves();
-	void renderSurface();
-	void drawSelectionBoxes();
-	void drawPoints();
-
-
-	void colorMap(float);
 
 	void drawSphere(float, float, float, float);
+
 
 	void updateView(float, float, float);
 
@@ -80,6 +71,7 @@ public:
 private:
 	int m_countTextures;
 	GLuint *m_texNames;
+	GLuint *m_callLists;
 	FGLSLShaderProgram *m_textureShader;
 	FGLSLShaderProgram *m_meshShader;
 	FGLSLShaderProgram *m_curveShader;
@@ -108,6 +100,22 @@ private:
 	void renderXSlize();
 	void renderYSlize();
 	void renderZSlize();
+
+	void setupLights();
+	void switchOffLights();
+
+	void renderSlizes();
+	void renderMesh();
+	void renderCurves();
+	void renderSurface();
+
+	void drawSelectionBoxes();
+	void drawPoints();
+
+
+	void colorMap(float);
+
+
 
 };
 
