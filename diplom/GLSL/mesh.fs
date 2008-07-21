@@ -5,7 +5,7 @@ uniform int dimX, dimY, dimZ;
 uniform bool showFS;
 uniform bool useTex;
 
-uniform sampler3D tex[10];
+uniform sampler3D texes[10];
 uniform bool show[10];
 uniform float threshold[10];
 uniform int type[10];
@@ -261,7 +261,7 @@ void main()
 	    
 	    for (int i = 9 ; i > -1 ; i--)
 		{
-			if (show[i]) lookupTex(tmpColor, type[i], tex[i], threshold[i], v);
+			if (show[i]) lookupTex(tmpColor, type[i], texes[i], threshold[i], v);
 		}
 		
 		

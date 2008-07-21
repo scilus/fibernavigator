@@ -176,6 +176,9 @@ bool Mesh::load(wxString filename)
 	m_fullPath = filename;
 	m_name = filename.AfterLast('/');
 	m_type = Mesh_;
+
+	generateGeometry();
+
 	return true;
 }
 
@@ -184,6 +187,9 @@ void Mesh::generateGeometry()
 	int xOff = TheDataset::columns/2;
 	int yOff = TheDataset::rows/2;
 	int zOff = TheDataset::frames/2;
+
+	GLuint dl = glGenLists(1);
+	glNewList (dl, GL_COMPILE);
 
 	glBegin(GL_TRIANGLES);
 		for (unsigned int j = 0 ; j < m_countPolygons ; ++j)
@@ -212,4 +218,7 @@ void Mesh::generateGeometry()
 							m_vertexArray[p.v3].z - zOff);
 		}
 	glEnd();
+
+	glEndList();
+	m_displayList = dl;
 }

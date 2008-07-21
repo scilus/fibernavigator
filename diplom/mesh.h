@@ -53,17 +53,17 @@ public:
 	void generateGeometry() ;
 	void initializeBuffer() {};
 
-	void setFiletype(int value) {m_filetype = value;};
-	void setCountVerts(int value) {m_countVerts = value;};
-	void setCountNormals(int value) {m_countNormals = value;};
-	void setCountPolygons(int value) {m_countPolygons = value;};
-	void setPolygonDim(int value) {m_polygonDim = value;};
+	void setFiletype(int value) 	  {m_filetype = value;};
+	void setCountVerts(int value) 	  {m_countVerts = value;};
+	void setCountNormals(int value)   {m_countNormals = value;};
+	void setCountPolygons(int value)  {m_countPolygons = value;};
+	void setPolygonDim(int value) 	  {m_polygonDim = value;};
 
-	unsigned int getFiletype() {return m_filetype;};
-	unsigned int getCountVerts() {return m_countVerts;};
-	unsigned int getCountNormals() {return m_countNormals;};
+	unsigned int getFiletype() 		{return m_filetype;};
+	unsigned int getCountVerts() 	{return m_countVerts;};
+	unsigned int getCountNormals() 	{return m_countNormals;};
 	unsigned int getCountPolygons() {return m_countPolygons;};
-	unsigned int getPolygonDim() {return m_polygonDim;};
+	unsigned int getPolygonDim() 	{return m_polygonDim;};
 
 	vertex* m_vertexArray;
 	polygon* m_polygonArray;
@@ -75,7 +75,6 @@ private:
 	unsigned int m_countTimeSteps;
 	unsigned int m_countPolygons;
 	unsigned int m_polygonDim;
-
 };
 
 #endif /*MESH_H_*/

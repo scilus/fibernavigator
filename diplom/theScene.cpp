@@ -15,7 +15,6 @@ TheScene::TheScene()
 
 	m_mainGLContext = 0;
 	m_texNames = new GLuint[10];
-	m_displayLists = new GLuint[10];
 	m_xSlize = 0.5;
 	m_ySlize = 0.5;
 	m_zSlize = 0.5;
@@ -84,7 +83,6 @@ void TheScene::assignTextures ()
 	glDeleteTextures(10, m_texNames);
 
 	m_countTextures = 0;
-	m_countDisplayLists = 0;
 
 	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
@@ -104,11 +102,6 @@ void TheScene::assignTextures ()
 			info->generateTexture();
 
 			m_countTextures++;
-		}
-		else if (info->getType() == Mesh_)
-		{
-			m_displayLists[m_countDisplayLists] = makeDisplayList(info);
-			m_countDisplayLists++;
 		}
 	}
 
@@ -136,13 +129,6 @@ void TheScene::addTexture()
 
 		m_countTextures++;
 	}
-	else if (info->getType() == Mesh_)
-	{
-		m_displayLists[m_countDisplayLists] = makeDisplayList(info);
-		m_countDisplayLists++;
-	}
-
-
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("add texture"));
 }
@@ -176,18 +162,6 @@ void TheScene::swapTextures(int a, int b)
 void TheScene::releaseTextures()
 {
 	glDeleteTextures(10, m_texNames);
-}
-
-GLuint TheScene::makeDisplayList(DatasetInfo *info)
-{
-	GLuint mesh = glGenLists(1);
-	glNewList (mesh, GL_COMPILE);
-	info->generateGeometry();
-	glEndList();
-
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("make call list"));
-
-	return mesh;
 }
 
 void TheScene::initShaders()
@@ -267,7 +241,7 @@ void TheScene::setTextureShaderVars()
 		}
 	}
 
-	m_textureShader->setUniArrayInt("tex", tex, m_countTextures);
+	m_textureShader->setUniArrayInt("texes", tex, m_countTextures);
 	m_textureShader->setUniArrayInt("show", show, m_countTextures);
 	m_textureShader->setUniArrayInt("type", type, m_countTextures);
 	m_textureShader->setUniArrayFloat("threshold", threshold, m_countTextures);
@@ -301,7 +275,7 @@ void TheScene::setMeshShaderVars()
 		}
 	}
 
-	m_meshShader->setUniArrayInt("tex", tex, m_countTextures);
+	m_meshShader->setUniArrayInt("texes", tex, m_countTextures);
 	m_meshShader->setUniArrayInt("show", show, m_countTextures);
 	m_meshShader->setUniArrayInt("type", type, m_countTextures);
 	m_meshShader->setUniArrayFloat("threshold", threshold, m_countTextures);
@@ -315,8 +289,6 @@ void TheScene::renderScene()
 
 	renderSlizes();
 
-	renderFibers();
-
 	setupLights();
 	renderMesh();
 	renderSurface();
@@ -324,6 +296,7 @@ void TheScene::renderScene()
 
 	if (m_showBoxes && TheDataset::fibers_loaded)
 	{
+		renderFibers();
 		drawSelectionBoxes();
 	}
 	if (m_pointMode)
@@ -439,14 +412,11 @@ void TheScene::switchOffLights()
 
 void TheScene::renderMesh()
 {
-	if (m_countDisplayLists == 0) return;
-
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+	bindTextures();
 	m_meshShader->bind();
 	setMeshShaderVars();
-
-	int index = 0;
 
 	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
@@ -459,9 +429,8 @@ void TheScene::renderMesh()
 				m_meshShader->setUniInt("showFS", info->getShowFS());
 				m_meshShader->setUniInt("useTex", info->getUseTex());
 
-				glCallList(m_displayLists[index]);
+				glCallList(info->getDisplayList());
 			}
-			index++;
 		}
 	}
 	m_meshShader->release();

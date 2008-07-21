@@ -67,6 +67,8 @@ public:
 	bool getUseTex() {return m_useTex;};
 	bool hasTreeId() {return m_hasTreeId;};
 
+	void setDisplayList(GLuint value) {m_displayList = value;};
+	GLuint getDisplayList() {return m_displayList;};
 
 protected:
 	int m_length;
@@ -85,6 +87,7 @@ protected:
 	wxString m_fullPath;
 	float m_threshold;
 	wxTreeItemId m_treeId;
+	GLuint m_displayList;
 
 	bool m_hasTreeId;
 	bool m_show;
