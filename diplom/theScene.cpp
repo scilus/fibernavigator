@@ -201,8 +201,8 @@ void TheScene::initShaders()
 	GLSLShader *vShader = new GLSLShader(GL_VERTEX_SHADER);
 	GLSLShader *fShader = new GLSLShader(GL_FRAGMENT_SHADER);
 
-	vShader->loadCode(wxT("GLSL/v1.glsl"));
-	fShader->loadCode(wxT("GLSL/f1.glsl"));
+	vShader->loadCode(wxT("GLSL/anatomy.vs"));
+	fShader->loadCode(wxT("GLSL/anatomy.fs"));
 
 	m_textureShader = new FGLSLShaderProgram();
 	m_textureShader->link(vShader, fShader);
@@ -220,8 +220,8 @@ void TheScene::initShaders()
 	GLSLShader *vShader1 = new GLSLShader(GL_VERTEX_SHADER);
 	GLSLShader *fShader1 = new GLSLShader(GL_FRAGMENT_SHADER);
 
-	vShader1->loadCode(wxT("GLSL/v2.glsl"));
-	fShader1->loadCode(wxT("GLSL/f2.glsl"));
+	vShader1->loadCode(wxT("GLSL/mesh.vs"));
+	fShader1->loadCode(wxT("GLSL/mesh.fs"));
 
 	m_meshShader = new FGLSLShaderProgram();
 	m_meshShader->link(vShader1, fShader1);
@@ -238,8 +238,8 @@ void TheScene::initShaders()
 	GLSLShader *vShader2 = new GLSLShader(GL_VERTEX_SHADER);
 	GLSLShader *fShader2 = new GLSLShader(GL_FRAGMENT_SHADER);
 
-	vShader2->loadCode(wxT("GLSL/v3.glsl"));
-	fShader2->loadCode(wxT("GLSL/f3.glsl"));
+	vShader2->loadCode(wxT("GLSL/fibers.vs"));
+	fShader2->loadCode(wxT("GLSL/fibers.fs"));
 
 	m_curveShader = new FGLSLShaderProgram();
 	m_curveShader->link(vShader2, fShader2);
