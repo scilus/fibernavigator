@@ -44,6 +44,8 @@ Anatomy::~Anatomy() {
 		delete[] m_rgbDataset;
 		break;
 	}
+	const GLuint* tex = &m_GLuint;
+	glDeleteTextures(1, tex);
 }
 
 bool Anatomy::load(wxString filename)
@@ -209,6 +211,8 @@ bool Anatomy::load(wxString filename)
 		dataFile.Close();
 	}
 
+	if (flag) generateTexture();
+
 	is_loaded = flag;
 
 	return flag;
@@ -216,6 +220,15 @@ bool Anatomy::load(wxString filename)
 
 void Anatomy::generateTexture()
 {
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glGenTextures(1, &m_GLuint);
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+
 	switch (m_type)
 	{
 	case Head_byte:

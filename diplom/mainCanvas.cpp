@@ -444,7 +444,7 @@ void MainCanvas::invalidate()
 {
 	if (TheDataset::m_scene->m_texAssigned) {
 		SetCurrent(*TheDataset::m_scene->getMainGLContext());
-		TheDataset::m_scene->releaseTextures();
+		//TheDataset::m_scene->releaseTextures();
 		TheDataset::m_scene->m_texAssigned = false;
 	}
 	m_init = false;

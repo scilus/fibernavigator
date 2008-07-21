@@ -699,7 +699,6 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		if (info->hasTreeId()) m_treeWidget->Delete(info->getTreeId());
 		delete info;
 		m_listCtrl->DeleteItem(item);
-		renewAllGLWidgets();
 		break;
 	default:
 		break;
@@ -723,7 +722,6 @@ void MainFrame::OnListItemUp(wxCommandEvent& event)
 	if (item == -1) return;
 	m_listCtrl->moveItemUp(item);
 	m_listCtrl->EnsureVisible(item);
-	if (item > 0) TheDataset::m_scene->swapTextures(item, item -1);
 	refreshAllGLWidgets();
 }
 
@@ -733,7 +731,6 @@ void MainFrame::OnListItemDown(wxCommandEvent& event)
 	if (item == -1) return;
 	m_listCtrl->moveItemDown(item);
 	m_listCtrl->EnsureVisible(item);
-	if (item < m_listCtrl->GetItemCount() - 1) TheDataset::m_scene->swapTextures(item, item + 1);
 	refreshAllGLWidgets();
 }
 

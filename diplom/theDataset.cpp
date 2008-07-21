@@ -170,14 +170,12 @@ void TheDataset::finishLoading(DatasetInfo *info)
 										mainFrame->m_ySlider->GetValue(),
 										mainFrame->m_zSlider->GetValue());
 
-		m_scene->assignTextures();
 		mainFrame->renewAllGLWidgets();
 		updateTreeDims();
 		updateTreeDS(i);
 	}
 	else
 	{
-		m_scene->addTexture();
 		mainFrame->refreshAllGLWidgets();
 		updateTreeDS(i);
 	}

@@ -35,11 +35,6 @@ public:
 
 	void initGL(int);
 
-	void assignTextures();
-	void addTexture();
-	void swapTextures(int, int);
-	void releaseTextures();
-
 	void initShaders();
 
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
@@ -68,8 +63,6 @@ public:
 
 
 private:
-	int m_countTextures;
-	GLuint *m_texNames;
 	FGLSLShaderProgram *m_textureShader;
 	FGLSLShaderProgram *m_meshShader;
 	FGLSLShaderProgram *m_curveShader;
@@ -110,11 +103,7 @@ private:
 	void drawSelectionBoxes();
 	void drawPoints();
 
-
 	void colorMap(float);
-
-
-
 };
 
 #endif /*THESCENE_H_*/

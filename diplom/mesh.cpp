@@ -220,5 +220,5 @@ void Mesh::generateGeometry()
 	glEnd();
 
 	glEndList();
-	m_displayList = dl;
+	m_GLuint = dl;
 }
