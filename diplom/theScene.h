@@ -50,8 +50,11 @@ public:
 
 	void drawSphere(float, float, float, float);
 
-
-	void updateView(float, float, float);
+	void updateView(float x, float y, float z) {
+		m_xSlize = x;
+		m_ySlize = y;
+		m_zSlize = z;
+	};
 
 	bool m_texAssigned;
 
@@ -102,8 +105,6 @@ private:
 
 	void drawSelectionBoxes();
 	void drawPoints();
-
-	void colorMap(float);
 };
 
 #endif /*THESCENE_H_*/

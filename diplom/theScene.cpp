@@ -90,7 +90,6 @@ void TheScene::bindTextures()
 			c++;
 		}
 	}
-
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("bind textures"));
 }
 
@@ -212,7 +211,6 @@ void TheScene::setMeshShaderVars()
 	m_meshShader->setUniArrayInt("type", type, c);
 	m_meshShader->setUniArrayFloat("threshold", threshold, c);
 	m_meshShader->setUniInt("countTextures", c);
-
 }
 
 void TheScene::renderScene()
@@ -221,10 +219,8 @@ void TheScene::renderScene()
 
 	renderSlizes();
 
-	setupLights();
 	renderMesh();
 	renderSurface();
-	switchOffLights();
 
 	if (m_showBoxes && TheDataset::fibers_loaded)
 	{
@@ -345,6 +341,8 @@ void TheScene::renderMesh()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+	setupLights();
+
 	bindTextures();
 	m_meshShader->bind();
 	setMeshShaderVars();
@@ -365,6 +363,8 @@ void TheScene::renderMesh()
 		}
 	}
 	m_meshShader->release();
+
+	switchOffLights();
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw mesh"));
 
@@ -403,6 +403,8 @@ void TheScene::renderSurface()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+	setupLights();
+
 	m_meshShader->bind();
 	setMeshShaderVars();
 
@@ -420,6 +422,8 @@ void TheScene::renderSurface()
 		}
 	}
 	m_meshShader->release();
+
+	switchOffLights();
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw surface"));
 
@@ -492,6 +496,8 @@ void TheScene::renderNavView(int view)
 
 	m_textureShader->release();
 
+	glPopAttrib();
+
 	glColor3f(1.0, 0.0, 0.0);
 	glBegin (GL_LINES);
 		glVertex3f (-border, yline, border);
@@ -501,37 +507,9 @@ void TheScene::renderNavView(int view)
 	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 
-	glPopAttrib();
+
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render nav view"));
-}
-
-
-void TheScene::updateView(float x, float y, float z)
-{
-	m_xSlize = x;
-	m_ySlize = y;
-	m_zSlize = z;
-}
-
-void TheScene::colorMap(float value)
-{
-    value *= 5.0;
-
-	if( value < 0.0 )
-		glColor3f( 0.0, 0.0, 0.0 );
-    else if( value < 1.0 )
-    	glColor3f( 0.0, value, 1.0 );
-	else if( value < 2.0 )
-		glColor3f( 0.0, 1.0, 2.0-value );
-    else if( value < 3.0 )
-    	glColor3f( value-2.0, 1.0, 0.0 );
-    else if( value < 4.0 )
-    	glColor3f( 1.0, 4.0-value, 0.0 );
-    else if( value <= 5.0 )
-    	glColor3f( 1.0, 0.0, value-4.0 );
-    else
-    	glColor3f( 1.0, 0.0, 1.0 );
 }
 
 void TheScene::drawSphere(float x, float y, float z, float r)
