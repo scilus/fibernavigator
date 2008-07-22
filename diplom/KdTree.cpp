@@ -1,7 +1,7 @@
 #include "KdTree.h"
 #include "theDataset.h"
 
-#include <omp.h>
+//#include <omp.h>
 #include <algorithm>
 
 KdTree::KdTree(int size, float *pointArray)
