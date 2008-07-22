@@ -1,6 +1,7 @@
 file( GLOB _srcs "*.cpp" )
 
 file( GLOB _srcs2 "GLSL/*.cpp" )
+file( GLOB _srcs3 "Fantom/*.cc" )
 PROJECT( ralph )
 # # at least it is not defined when compiling on my mac
 # #  add_definitions( -D__WXMAC__ )
@@ -11,6 +12,7 @@ PROJECT( ralph )
   #set( wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES} wx_mac_gl-2.8 )
   #LIST( SRC APPEND ${_srcs})
   #LIST( SRC APPEND ${_srcs2})
+  #LIST( SRC APPEND ${_srcs3})
 
 option( BUILD_OPTION_OPENMP "use openmp parallelization" OFF)
 
@@ -21,7 +23,7 @@ endif(BUILD_OPTION_OPENMP)
 INCLUDE( ${wxWidgets_USE_FILE} )
 INCLUDE_DIRECTORIES( ${wxWidgets_INCLUDE_DIRS} )
 ADD_DEFINITIONS( `wx-config --cppflags` )
-add_executable( main MACOSX_BUNDLE ${_srcs} ${_srcs2} )
+add_executable( main MACOSX_BUNDLE ${_srcs} ${_srcs2} ${_srcs3} )
 #target_link_libraries( main `wx-config --libs` )
 target_link_libraries( main -lGL -lGLU -lGLEW )
 target_link_libraries( main ${wxWidgets_LIBRARIES} )
