@@ -11,7 +11,7 @@
         <dataset>/home/ralph/workspace/diplom/data/s1_Lwhite.mesh</dataset>
     </data>
     <points>
-        <point x="0.000003" y="-76.885849" z="-70.809563"/>
+        <point x="0.000003" y="-76.885849" z="-70"/>
         <point x="0.000001" y="79.046951" z="-69.766373"/>
         <point x="-66.656212" y="-74.686745" z="0.000000"/>
         <point x="-67.025406" y="76.232712" z="0.000002"/>
