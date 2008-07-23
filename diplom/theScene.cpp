@@ -507,8 +507,6 @@ void TheScene::renderNavView(int view)
 	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 
-
-
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render nav view"));
 }
 

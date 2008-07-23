@@ -377,8 +377,16 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 		}
 		if (boxes[i][0]->colorChanged())
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-			float *colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+			float *colorData;
+			if (TheDataset::useVBO)
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+				colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+			}
+			else
+			{
+				colorData = m_colorArray;
+			}
 			wxColour col = boxes[i][0]->getColor();
 
 			for ( int l = 0 ; l < m_lineCount ; ++l )
@@ -396,11 +404,10 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 					}
 				}
 			}
-
-
-
-
-			glUnmapBuffer(GL_ARRAY_BUFFER);
+			if (TheDataset::useVBO)
+			{
+				glUnmapBuffer(GL_ARRAY_BUFFER);
+			}
 			boxes[i][0]->setColorChanged(false);
 		}
 	}
@@ -463,18 +470,46 @@ void Curves::boxTest(int left, int right, int axis)
 
 void Curves::initializeBuffer()
 {
+	if (!TheDataset::useVBO) return;
+	bool isOK = true;
 	glGenBuffers(3, m_bufferObjects);
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_pointArray, GL_STATIC_DRAW );
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("initialue vbo points"));
-	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_colorArray, GL_STATIC_DRAW );
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("initialue vbo colors"));
-	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_normalArray, GL_STATIC_DRAW );
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("initialue vbo normals"));
-	freeArrays();
-
+	if (TheDataset::GLError())
+	{
+		TheDataset::printGLError(wxT("initialue vbo points"));
+		isOK = false;
+	}
+	if (isOK)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_colorArray, GL_STATIC_DRAW );
+		if (TheDataset::GLError())
+		{
+			TheDataset::printGLError(wxT("initialue vbo colors"));
+			isOK = false;
+		}
+	}
+	if (isOK)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_normalArray, GL_STATIC_DRAW );
+		if (TheDataset::GLError())
+		{
+			TheDataset::printGLError(wxT("initialue vbo normals"));
+			isOK = false;
+		}
+	}
+	TheDataset::useVBO = isOK;
+	if (isOK)
+	{
+		freeArrays();
+	}
+	else
+	{
+		printf("ERROR: Not enough memory on your gfx card. Using vertex arrays.\n");
+		glDeleteBuffers(3, m_bufferObjects);
+	}
 }
 
 void Curves::draw()
@@ -482,17 +517,29 @@ void Curves::draw()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
-	glVertexPointer(3, GL_FLOAT, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-	glColorPointer (3, GL_FLOAT, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-	glNormalPointer (GL_FLOAT, 0, 0);
+
+	if (!TheDataset::useVBO)
+	{
+	    glVertexPointer(3, GL_FLOAT, 0, m_pointArray);
+	    glColorPointer (3, GL_FLOAT, 0, m_colorArray);
+	    glNormalPointer (GL_FLOAT, 0, m_normalArray);
+	}
+	else
+	{
+	    glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
+	    glVertexPointer(3, GL_FLOAT, 0, 0);
+	    glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+	    glColorPointer (3, GL_FLOAT, 0, 0);
+	    glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+	    glNormalPointer (GL_FLOAT, 0, 0);
+	}
+
 	for ( int i = 0 ; i < m_lineCount ; ++i )
 	{
 		if (m_inBox[i] == 1)
 			glDrawArrays(GL_LINE_STRIP, getStartIndexForLine(i), getPointsPerLine(i));
 	}
+
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
