@@ -5,6 +5,7 @@
 #include "theDataset.h"
 #include "surface.h"
 #include "selectionBox.h"
+#include "AnatomyHelper.h"
 
 
 TheScene::TheScene()
@@ -12,12 +13,6 @@ TheScene::TheScene()
 	m_texAssigned = false;
 
 	m_mainGLContext = 0;
-	m_xSlize = 0.5;
-	m_ySlize = 0.5;
-	m_zSlize = 0.5;
-	m_showSagittal = true;
-	m_showCoronal = true;
-	m_showAxial = true;
 	m_showMesh = true;
 	m_showBoxes = true;
 	m_pointMode = false;
@@ -33,9 +28,10 @@ TheScene::TheScene()
 	m_xOffset2 = 0.0;
 	m_yOffset2 = 0.0;
 
-	m_quadrant = 1;
 	Vector3fT v1 = {{1.0,1.0,1.0}};
 	m_lightPos = v1;
+
+	TheDataset::anatomyHelper = new AnatomyHelper();
 
 	m_selBoxChanged = true;
 }
@@ -184,10 +180,10 @@ void TheScene::setMeshShaderVars()
 	m_meshShader->setUniInt("dimX", TheDataset::columns);
 	m_meshShader->setUniInt("dimY", TheDataset::rows);
 	m_meshShader->setUniInt("dimZ", TheDataset::frames);
-	m_meshShader->setUniInt("cutX", (int)(m_xSlize - TheDataset::columns/2.0));
-	m_meshShader->setUniInt("cutY", (int)(m_ySlize - TheDataset::rows/2.0));
-	m_meshShader->setUniInt("cutZ", (int)(m_zSlize - TheDataset::frames/2.0));
-	m_meshShader->setUniInt("sector", m_quadrant);
+	m_meshShader->setUniInt("cutX", (int)(TheDataset::xSlize - TheDataset::columns/2.0));
+	m_meshShader->setUniInt("cutY", (int)(TheDataset::ySlize - TheDataset::rows/2.0));
+	m_meshShader->setUniInt("cutZ", (int)(TheDataset::zSlize - TheDataset::frames/2.0));
+	m_meshShader->setUniInt("sector", TheDataset::quadrant);
 
 	int* tex = new int[10];
 	int* show = new int[10];
@@ -238,71 +234,28 @@ void TheScene::renderScene()
 void TheScene::renderSlizes()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-
+	/*
 	if (m_blendAlpha)
 		glDisable(GL_ALPHA_TEST);
 	else
 		glEnable(GL_ALPHA_TEST);
+	*/
+	glAlphaFunc(GL_GREATER, 0.0001);
 
-	glAlphaFunc(GL_GREATER, 0.0000001);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	bindTextures();
 	m_textureShader->bind();
 	setTextureShaderVars();
 
-	if (m_showSagittal) renderXSlize();
-	if (m_showCoronal) renderYSlize();
-	if (m_showAxial) renderZSlize();
+	TheDataset::anatomyHelper->renderMain();
+
+	glDisable(GL_BLEND);
 
 	m_textureShader->release();
 
 	glPopAttrib();
-}
-
-
-void TheScene::renderXSlize()
-{
-	int x = m_xSlize - TheDataset::columns/2;
-	int y = TheDataset::rows/2;
-	int z = TheDataset::frames/2;
-	glBegin(GL_QUADS);
-		glTexCoord3f(m_xSlize/(float)TheDataset::columns, 0.0, 0.0); glVertex3i(x, -y, -z);
-    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 0.0, 1.0); glVertex3i(x, -y,  z);
-    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 1.0); glVertex3i(x,  y,  z);
-    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 0.0); glVertex3i(x,  y, -z);
-    glEnd();
-
-    if (TheDataset::GLError()) TheDataset::printGLError(wxT("render X slize"));
-}
-
-void TheScene::renderYSlize()
-{
-	int x = TheDataset::columns/2;
-	int y = m_ySlize - TheDataset::rows/2;
-	int z = TheDataset::frames/2;
-	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3i(-x, y, -z);
-    	glTexCoord3f(0.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3i(-x, y,  z);
-    	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3i( x, y,  z);
-    	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3i( x, y, -z);
-    glEnd();
-
-    if (TheDataset::GLError()) TheDataset::printGLError(wxT("render Y slize"));
-}
-
-void TheScene::renderZSlize()
-{
-	int x = TheDataset::columns/2;
-	int y = TheDataset::rows/2;
-	int z = m_zSlize - TheDataset::frames/2;
-	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3i(-x, -y, z);
-    	glTexCoord3f(0.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3i(-x,  y, z);
-    	glTexCoord3f(1.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3i( x,  y, z);
-    	glTexCoord3f(1.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3i( x, -y, z);
-    glEnd();
-
-    if (TheDataset::GLError()) TheDataset::printGLError(wxT("render Z slize"));
 }
 
 void TheScene::setupLights()
@@ -434,78 +387,7 @@ void TheScene::renderNavView(int view)
 {
 	if (TheDataset::mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0000001);
-
-	bindTextures();
-	m_textureShader->bind();
-	setTextureShaderVars();
-
-	float xline = 0;
-	float yline = 0;
-
-	float border = (float)wxMax(TheDataset::columns, wxMax(TheDataset::rows, TheDataset::frames))/2.0;
-
-	int x = TheDataset::columns/2;
-	int y = TheDataset::rows/2;
-	int z = TheDataset::frames/2;
-
-	int xs = m_xSlize - TheDataset::columns/2;
-	int ys = m_ySlize - TheDataset::rows/2;
-	int zs = m_zSlize - TheDataset::frames/2;
-
-	switch (view)
-	{
-		case axial: {
-			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3f(-x, -y, zs);
-		    	glTexCoord3f(0.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3f(-x,  y, zs);
-		    	glTexCoord3f(1.0, 0.0, m_zSlize/(float)TheDataset::frames); glVertex3f( x,  y, zs);
-		    	glTexCoord3f(1.0, 1.0, m_zSlize/(float)TheDataset::frames); glVertex3f( x, -y, zs);
-			glEnd();
-			xline = m_xSlize - (float)TheDataset::columns/2.0;
-			yline = (float)TheDataset::rows/2.0 - m_ySlize;
-		} break;
-
-		case coronal: {
-			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3f( -x, -z, ys);
-		    	glTexCoord3f(0.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3f( -x,  z, ys);
-		    	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 0.0); glVertex3f(  x,  z, ys);
-		    	glTexCoord3f(1.0, m_ySlize/(float)TheDataset::rows, 1.0); glVertex3f(  x, -z, ys);
-		    glEnd();
-		    xline = m_xSlize - (float)TheDataset::columns/2.0;
-		    yline = (float)TheDataset::frames/2.0 - m_zSlize;
-		} break;
-
-		case sagittal: {
-			glBegin(GL_QUADS);
-				glTexCoord3f(m_xSlize/(float)TheDataset::columns, 0.0, 1.0); glVertex3f(-y, -z, xs);
-		    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 0.0, 0.0); glVertex3f(-y,  z, xs);
-		    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 0.0); glVertex3f( y,  z, xs);
-		    	glTexCoord3f(m_xSlize/(float)TheDataset::columns, 1.0, 1.0); glVertex3f( y, -z, xs);
-			glEnd();
-			xline = m_ySlize - (float)TheDataset::rows/2.0;
-			yline = (float)TheDataset::frames/2.0 - m_zSlize;
-		} break;
-	}
-
-	glDisable(GL_TEXTURE_3D);
-
-	m_textureShader->release();
-
-	glPopAttrib();
-
-	glColor3f(1.0, 0.0, 0.0);
-	glBegin (GL_LINES);
-		glVertex3f (-border, yline, border);
-		glVertex3f ( border, yline, border);
-		glVertex3f (xline, -border, border);
-		glVertex3f (xline,  border, border);
-	glEnd();
-	glColor3f(1.0, 1.0, 1.0);
+	TheDataset::anatomyHelper->renderNav(view, m_textureShader);
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render nav view"));
 }

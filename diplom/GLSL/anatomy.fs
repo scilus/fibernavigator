@@ -51,7 +51,8 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 			col.rgb = col1.rgb;
 		}
 	}
-	col.a += clamp ((col.r + col.g + col.b)/3.0 - threshold, 0.0, 1.0);
+	/*col.a += clamp ((col.r + col.g + col.b)/3.0 - threshold, 0.0, 1.0);*/
+	col.a += clamp ((col.r + col.g + col.b) - threshold, 0.0, 1.0);
 }
 
 

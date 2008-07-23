@@ -36,9 +36,9 @@ private:
     void OnZSliderMoved(wxCommandEvent& event);
     void OnTSliderMoved(wxCommandEvent& event);
 
-    void OnToggleView1(wxCommandEvent& event);
-    void OnToggleView2(wxCommandEvent& event);
-    void OnToggleView3(wxCommandEvent& event);
+    void OnToggleAxial(wxCommandEvent& event);
+    void OnToggleCoronal(wxCommandEvent& event);
+    void OnToggleSagittal(wxCommandEvent& event);
     void OnToggleAlpha(wxCommandEvent& event);
     void OnToggleSelBox(wxCommandEvent& event);
     void OnNewSelBox(wxCommandEvent& event);

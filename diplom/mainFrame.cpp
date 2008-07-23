@@ -43,9 +43,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_SLIDER(ID_Z_SLIDER, MainFrame::OnZSliderMoved)
 	/* click on toolbar button to toggle one of the 3 panes in the
 	 * main GL window */
-	EVT_MENU(VIEWER_TOGGLE_AXIAL, MainFrame::OnToggleView1)
-	EVT_MENU(VIEWER_TOGGLE_CORONAL, MainFrame::OnToggleView2)
-	EVT_MENU(VIEWER_TOGGLE_SAGITTAL, MainFrame::OnToggleView3)
+	EVT_MENU(VIEWER_TOGGLE_AXIAL, MainFrame::OnToggleAxial)
+	EVT_MENU(VIEWER_TOGGLE_CORONAL, MainFrame::OnToggleCoronal)
+	EVT_MENU(VIEWER_TOGGLE_SAGITTAL, MainFrame::OnToggleSagittal)
 	EVT_MENU(VIEWER_TOGGLE_ALPHA, MainFrame::OnToggleAlpha)
 	EVT_MENU(VIEWER_NEW_SELBOX, MainFrame::OnNewSelBox)
 	EVT_MENU(VIEWER_RENDER_SELBOXES, MainFrame::OnHideSelBoxes)
@@ -434,7 +434,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 			m_treeWidget->SelectItem(pId);
 		}
 	}
-	TheDataset::m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	updateStatusBar();
 	refreshAllGLWidgets();
 }
@@ -480,7 +480,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_rightWindowHolder->SetDefaultSize(wxSize(mainSize, mainSize));
 	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
 
-	TheDataset::m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 
 #if wxUSE_MDI_ARCHITECTURE
     wxLayoutAlgorithm layout;
@@ -493,19 +493,19 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 
 void MainFrame::OnXSliderMoved(wxCommandEvent& event)
 {
-	 TheDataset::m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	 TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	 refreshAllGLWidgets();
 }
 
 void MainFrame::OnYSliderMoved(wxCommandEvent& event)
 {
-	TheDataset::m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 {
-	TheDataset::m_scene->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
@@ -539,24 +539,24 @@ void MainFrame::renewAllGLWidgets()
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnToggleView1(wxCommandEvent& event)
+void MainFrame::OnToggleAxial(wxCommandEvent& event)
 {
 	if (!TheDataset::m_scene) return;
-	TheDataset::m_scene->m_showAxial = !TheDataset::m_scene->m_showAxial;
+	TheDataset::showAxial = !TheDataset::showAxial;
 	m_mainGL->render();
 }
 
-void MainFrame::OnToggleView2(wxCommandEvent& event)
+void MainFrame::OnToggleCoronal(wxCommandEvent& event)
 {
 	if (!TheDataset::m_scene) return;
-	TheDataset::m_scene->m_showCoronal = !TheDataset::m_scene->m_showCoronal;
+	TheDataset::showCoronal = !TheDataset::showCoronal;
 	m_mainGL->render();
 }
 
-void MainFrame::OnToggleView3(wxCommandEvent& event)
+void MainFrame::OnToggleSagittal(wxCommandEvent& event)
 {
 	if (!TheDataset::m_scene) return;
-	TheDataset::m_scene->m_showSagittal = !TheDataset::m_scene->m_showSagittal;
+	TheDataset::showSagittal = !TheDataset::showSagittal;
 	m_mainGL->render();
 }
 

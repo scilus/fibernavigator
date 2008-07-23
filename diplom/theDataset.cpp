@@ -18,9 +18,19 @@ bool TheDataset::surface_loaded = false;
 bool TheDataset::surface_isDirty = true;
 bool TheDataset::useVBO = true;
 
+bool TheDataset::showSagittal = true;
+bool TheDataset::showCoronal = true;
+bool TheDataset::showAxial = true;
+float TheDataset::xSlize = 0.5;
+float TheDataset::ySlize = 0.5;
+float TheDataset::zSlize = 0.5;
+int TheDataset::quadrant = 6;
+
+
 MainFrame* TheDataset::mainFrame = NULL;
 Point* TheDataset::m_lastSelectedPoint = NULL;
 TheScene* TheDataset::m_scene = NULL;
+AnatomyHelper* TheDataset::anatomyHelper = NULL;
 
 Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
 								        0.0f,  1.0f,  0.0f,  0.0f,
@@ -166,7 +176,7 @@ void TheDataset::finishLoading(DatasetInfo *info)
 		mainFrame->m_zSlider->SetMax(wxMax(2,TheDataset::frames-1));
 		mainFrame->m_zSlider->SetValue( TheDataset::frames/2);
 		mainFrame->m_tSlider->SetValue(10);
-		m_scene->updateView(mainFrame->m_xSlider->GetValue(),
+		updateView(mainFrame->m_xSlider->GetValue(),
 										mainFrame->m_ySlider->GetValue(),
 										mainFrame->m_zSlider->GetValue());
 

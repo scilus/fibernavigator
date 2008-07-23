@@ -218,7 +218,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 							quadrant = i+1;
 						}
 					}
-					TheDataset::m_scene->setQuadrant(quadrant);
+					TheDataset::quadrant = quadrant;
 					TheDataset::m_scene->setLightPos(view);
 
 					Refresh(false);
@@ -297,9 +297,9 @@ hitResult MainCanvas::pick(wxPoint click)
 	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
 	BoundingBox *bb = new BoundingBox(0,0,0, TheDataset::columns, TheDataset::rows, TheDataset::frames);
 
-	float xx = TheDataset::m_scene->m_xSlize - TheDataset::columns/2;
-	float yy = TheDataset::m_scene->m_ySlize - TheDataset::rows/2;
-	float zz = TheDataset::m_scene->m_zSlize - TheDataset::frames/2;
+	float xx = TheDataset::xSlize - TheDataset::columns/2;
+	float yy = TheDataset::ySlize - TheDataset::rows/2;
+	float zz = TheDataset::zSlize - TheDataset::frames/2;
 
 	/**
 	 * check if one of the 3 planes is picked
@@ -307,7 +307,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	float tpicked = 0;
 	int picked = 0;
 	hitResult hr;
-	if (TheDataset::m_scene->m_showAxial) {
+	if (TheDataset::showAxial) {
 		bb->setSizeZ(0);
 		bb->setCenterZ(zz);
 		hr = bb->hitTest(ray);
@@ -318,7 +318,7 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setSizeZ(TheDataset::frames);
 		bb->setCenterZ(0);
 	}
-	if (TheDataset::m_scene->m_showCoronal) {
+	if (TheDataset::showCoronal) {
 		bb->setSizeY(0);
 		bb->setCenterY(yy);
 		hr = bb->hitTest(ray);
@@ -337,7 +337,7 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setSizeY(TheDataset::rows);
 		bb->setCenterY(0);
 	}
-	if (TheDataset::m_scene->m_showSagittal) {
+	if (TheDataset::showSagittal) {
 		bb->setSizeX(0);
 		bb->setCenterX(xx);
 		hr = bb->hitTest(ray);

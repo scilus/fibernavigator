@@ -24,6 +24,8 @@
 #include "theScene.h"
 #include "point.h"
 
+#include "AnatomyHelper.h"
+
 class TheDataset
 {
 private:
@@ -55,6 +57,12 @@ public:
 	static bool GLError();
 	static void printGLError(wxString function = wxT(""));
 
+	static void updateView(float x, float y, float z) {
+		xSlize = x;
+		ySlize = y;
+		zSlize = z;
+	};
+
 
 	static int rows;
 	static int columns;
@@ -74,7 +82,15 @@ public:
 	static MainFrame* mainFrame;
 	static Point* m_lastSelectedPoint;
 	static TheScene* m_scene;
+	static AnatomyHelper* anatomyHelper;
 
+	static bool showSagittal;
+	static bool showCoronal;
+	static bool showAxial;
+	static float xSlize;
+	static float ySlize;
+	static float zSlize;
+	static int quadrant;
 
 
 };
