@@ -213,8 +213,6 @@ void TheScene::renderScene()
 {
 	if (TheDataset::mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
-	renderSlizes();
-
 	renderMesh();
 	renderSurface();
 
@@ -228,21 +226,20 @@ void TheScene::renderScene()
 		drawPoints();
 	}
 
+	renderSlizes();
+
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render"));
 }
 
 void TheScene::renderSlizes()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	/*
-	if (m_blendAlpha)
-		glDisable(GL_ALPHA_TEST);
-	else
-		glEnable(GL_ALPHA_TEST);
-	*/
-	glAlphaFunc(GL_GREATER, 0.0001);
 
-	glEnable(GL_BLEND);
+	if (m_blendAlpha)
+		glDisable(GL_BLEND);
+	else
+		glEnable(GL_BLEND);
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	bindTextures();
