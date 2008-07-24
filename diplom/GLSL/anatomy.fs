@@ -30,7 +30,7 @@ vec3 defaultColorMap( float value )
 
 void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold)
 {
-	vec3 col1;
+	vec3 col1 = vec3(0.0);
 	if (type == 3)
 	{
 		col1.r = clamp( texture3D(tex, TexCoord).r, 0.0, 1.0);
@@ -40,6 +40,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 			col.rgb = defaultColorMap( col1.r);
 		}
 	}	
+	
 	if (type == 1 || type == 2 || type == 4)
 	{
 		col1.r = clamp( texture3D(tex, TexCoord).r, 0.0, 1.0);
@@ -50,9 +51,10 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 		{
 			col.rgb = col1.rgb;
 		}
+		col.a += clamp (( (col.r*3.0) + (col.g*3.0) + (col.b*3.0) ), 0.0, 1.0) - threshold;
 	}
 	/*col.a += clamp ((col.r + col.g + col.b)/3.0 - threshold, 0.0, 1.0);*/
-	col.a += clamp ((col.r + col.g + col.b) - threshold, 0.0, 1.0);
+	
 }
 
 
