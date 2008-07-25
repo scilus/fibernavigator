@@ -28,7 +28,7 @@ TheScene::TheScene()
 	m_xOffset2 = 0.0;
 	m_yOffset2 = 0.0;
 
-	Vector3fT v1 = {{1.0,1.0,1.0}};
+	Vector3fT v1 = {{ 1.0, 1.0, 1.0}};
 	m_lightPos = v1;
 
 	TheDataset::anatomyHelper = new AnatomyHelper();
@@ -331,13 +331,14 @@ void TheScene::renderFibers()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	m_curveShader->bind();
 	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
 
 		if (info->getType() == Curves_ && info->getShow())
 		{
+			m_curveShader->bind();
+
 			GLint viewport[4];
 			glGetIntegerv( GL_VIEWPORT, viewport );
 			Vector3fT tmp = TheDataset::mapMouse2World(viewport[2], viewport[3]);
@@ -356,11 +357,12 @@ void TheScene::renderFibers()
 				m_selBoxChanged = false;
 			}
 			info->draw();
+
+			m_curveShader->release();
+
+			switchOffLights();
 		}
 	}
-	m_curveShader->release();
-
-	switchOffLights();
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw fibers"));
 

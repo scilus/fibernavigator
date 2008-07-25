@@ -34,7 +34,7 @@ void main()
 
    if (!useNormals)
 		tmpColor = vec4(color1, 1.0);
-	else
+   else
 		tmpColor = vec4(color2, 1.0);
 
    /* tmpColor = gl_FrontLightModelProduct.sceneColor; */
@@ -44,7 +44,7 @@ void main()
 			  (ambient  * gl_FrontMaterial.ambient) +
 			  (diffuse  * gl_FrontMaterial.diffuse/2.0);
 
-	color = clamp(color, 0.0, 1.0);
+   color = clamp(color, 0.0, 1.0);
 
-	gl_FragColor = color;
+   gl_FragColor = color;
 }

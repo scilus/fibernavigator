@@ -99,8 +99,6 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 
 void main()
 {
-	vec4 color = vec4(0.0);
-
 	if (!showFS)
     	cutFrontSector();
 
@@ -120,7 +118,7 @@ void main()
     calculateLighting(gl_MaxLights, -n, vertex, gl_FrontMaterial.shininess,
                       ambient, diffuse, specular);
 
-   vec4 tmpColor = vec4(0.0);
+   vec4 color = vec4(0.0);
 
     if (useTex)
     {
@@ -131,18 +129,18 @@ void main()
 
 	    for (int i = 9 ; i > -1 ; i--)
 		{
-			if (show[i]) lookupTex(tmpColor, type[i], texes[i], threshold[i], v);
+			if (show[i]) lookupTex(color, type[i], texes[i], threshold[i], v);
 		}
 
 
-		tmpColor.a = 1.0;
+		color.a = 1.0;
     }
     else
     {
-   		tmpColor = gl_FrontLightModelProduct.sceneColor;
+   		color = gl_FrontLightModelProduct.sceneColor;
    	}
 
-   color =   tmpColor +
+   color =   color +
               (ambient  * gl_FrontMaterial.ambient) +
               (diffuse  * gl_FrontMaterial.diffuse) +
               (specular * gl_FrontMaterial.specular);
