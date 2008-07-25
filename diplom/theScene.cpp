@@ -49,8 +49,8 @@ void TheScene::initGL(int view)
 	  /* Problem: glewInit failed, something is seriously wrong. */
 	  printf("Error: %s\n", glewGetErrorString(err));
 	}
-	(view == mainView) ? printf("Main View: ") : printf("Nav View: %d ", view);
-	printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+	if (view == mainView)
+		printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -93,6 +93,11 @@ void TheScene::bindTextures()
 
 void TheScene::initShaders()
 {
+	wxString vShaderModules;
+	TheDataset::loadTextFile(&vShaderModules, wxT("GLSL/lighting.vs"));
+	wxString fShaderModules;
+	TheDataset::loadTextFile(&fShaderModules, wxT("GLSL/lighting.fs"));
+
 	if (m_textureShader)
 	{
 		delete m_textureShader;
@@ -121,8 +126,8 @@ void TheScene::initShaders()
 	GLSLShader *vShader1 = new GLSLShader(GL_VERTEX_SHADER);
 	GLSLShader *fShader1 = new GLSLShader(GL_FRAGMENT_SHADER);
 
-	vShader1->loadCode(wxT("GLSL/mesh.vs"));
-	fShader1->loadCode(wxT("GLSL/mesh.fs"));
+	vShader1->loadCode(wxT("GLSL/mesh.vs"), vShaderModules);
+	fShader1->loadCode(wxT("GLSL/mesh.fs"), fShaderModules);
 
 	m_meshShader = new FGLSLShaderProgram();
 	m_meshShader->link(vShader1, fShader1);

@@ -34,6 +34,7 @@ public:
 	static bool load(int index = 0, wxString filename = wxT(""));
 	static void finishLoading(DatasetInfo*);
 	static bool loadSettings(wxString);
+	static bool loadTextFile(wxString*, wxString);
 	static void save(wxString);
 
 	static std::vector<std::vector<SelectionBox*> > getSelectionBoxes();

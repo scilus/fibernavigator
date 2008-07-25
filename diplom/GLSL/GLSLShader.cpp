@@ -5,16 +5,16 @@ GLSLShader::GLSLShader(GLenum target)
   m_target = target;
   m_shaderID = 0;
   m_shaderID = glCreateShader(target);
-  
+
   if (glewIsSupported("GL_VERTEX_SHADER"))
   {
 	  //m_shaderID = glCreateShader(target);
   }
-  else 
+  else
   {
 	  //printf("shader not supported\n");
   }
-	 
+
 }
 
 GLSLShader::~GLSLShader()
@@ -24,7 +24,7 @@ GLSLShader::~GLSLShader()
 
 void GLSLShader::bind() const
 {
-  
+
 }
 
 void GLSLShader::release() const
@@ -50,16 +50,19 @@ bool GLSLShader::loadCode(const GLchar** source)
 	return true;
 }
 
-bool GLSLShader::loadCode(wxString filename)
+bool GLSLShader::loadCode(wxString filename, wxString modules)
 {
-	if (!loadFromFile(filename)) 
+	wxString codeString;
+	if (!loadFromFile(&codeString, filename))
 	{
 		printf("ERROR: Shader file not found!\n");
 		return false;
 	}
-	
-	char temp[m_codeString.Length()]; 
-	strcpy(temp, (const char*)m_codeString.mb_str(wxConvUTF8));
+	codeString = modules + wxT(" ") + codeString;
+
+
+	char temp[codeString.Length()];
+	strcpy(temp, (const char*)codeString.mb_str(wxConvUTF8));
 	const char* code = temp;
 
 	glShaderSource (m_shaderID, 1, &code, NULL);
@@ -89,7 +92,7 @@ void GLSLShader::printCompilerLog(GLuint shader)
 	int infologLen = 0;
 	int charsWritten = 0;
 	GLchar *infoLog;
-	
+
 	glGetShaderiv (shader, GL_INFO_LOG_LENGTH, &infologLen);
 	if (infologLen > 0)
 	{
@@ -102,19 +105,19 @@ void GLSLShader::printCompilerLog(GLuint shader)
 
 void GLSLShader::printCode() const
 {
-	
+
 }
 
-bool GLSLShader::loadFromFile(wxString fileName)
+bool GLSLShader::loadFromFile(wxString* code, wxString fileName)
 {
 	wxTextFile file;
-	m_codeString = wxT("");
+	*code = wxT("");
 	if (file.Open(fileName))
 	{
 		size_t i;
 		for (i = 0 ; i < file.GetLineCount() ; ++i)
 		{
-			m_codeString += file.GetLine(i);
+			*code += file.GetLine(i);
 		}
 		return true;
 	}

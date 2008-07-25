@@ -21,20 +21,19 @@ class GLSLShader
     void release() const;
 
     void destroy();
-   
+
     bool loadCode (const GLchar**);
-    bool loadCode (wxString);
-    bool loadFromFile(wxString);
+    bool loadCode (wxString, wxString modules = wxT(""));
+    bool loadFromFile(wxString*, wxString);
 
     //bool loadProgram(const std::string &programString) const;
 
     GLuint getShaderID() const;
     void setShaderID(GLuint programID);
- 
+
   private:
     GLenum	m_target;
     GLuint	m_shaderID;
-    wxString m_codeString;
     const char* m_code;
 
     void printCompilerLog(GLuint) ;

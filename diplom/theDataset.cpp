@@ -524,3 +524,19 @@ void TheDataset::printGLError(wxString function)
 	printwxT(function);
 	printf(" : ERROR: %s\n", gluErrorString(lastGLError));
 }
+
+bool TheDataset::loadTextFile(wxString* string, wxString filename)
+{
+	wxTextFile file;
+	*string = wxT("");
+	if (file.Open(filename))
+	{
+		size_t i;
+		for (i = 0 ; i < file.GetLineCount() ; ++i)
+		{
+			*string += file.GetLine(i);
+		}
+		return true;
+	}
+	return false;
+}
