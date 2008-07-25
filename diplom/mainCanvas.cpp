@@ -244,36 +244,13 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
 {
-	Vector3fT vs = mapMouse2World(x1, y1);
-	Vector3fT ve = mapMouse2World(x2, y2);
+	Vector3fT vs = TheDataset::mapMouse2World(x1, y1);
+	Vector3fT ve = TheDataset::mapMouse2World(x2, y2);
 	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
 	float nb = ((dir.s.X * n.s.X) + (dir.s.Y * n.s.Y) + (dir.s.Z * n.s.Z));
 	return bb/nb;
 }
-
-Vector3fT MainCanvas::mapMouse2World(int x, int y)
-{
-	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
-	GLfloat winX, winY;
-
-	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-	glGetDoublev( GL_PROJECTION_MATRIX, projection );
-	glGetIntegerv( GL_VIEWPORT, viewport );
-
-	winX = (float)x;
-	winY = (float)viewport[3] - (float)y;
-	GLdouble posX, posY, posZ;
-	gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX, &posY, &posZ);
-	glPopMatrix();
-	Vector3fT v = {{posX, posY, posZ}};
-	return v;
-}
-
 
 hitResult MainCanvas::pick(wxPoint click)
 {

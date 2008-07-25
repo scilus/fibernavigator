@@ -512,6 +512,28 @@ void TheDataset::updateAllSelectionBoxes()
 			boxes[i][j]->setDirty();
 }
 
+Vector3fT TheDataset::mapMouse2World(int x, int y)
+{
+	glPushMatrix();
+	glMultMatrixf(TheDataset::m_transform.M);
+	GLint viewport[4];
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLfloat winX, winY;
+
+	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+	glGetDoublev( GL_PROJECTION_MATRIX, projection );
+	glGetIntegerv( GL_VIEWPORT, viewport );
+
+	winX = (float)x;
+	winY = (float)viewport[3] - (float)y;
+	GLdouble posX, posY, posZ;
+	gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX, &posY, &posZ);
+	glPopMatrix();
+	Vector3fT v = {{posX, posY, posZ}};
+	return v;
+}
+
 bool TheDataset::GLError()
 {
 	lastGLError = glGetError();

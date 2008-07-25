@@ -39,7 +39,6 @@ public:
     void invalidate();
     void renderTestRay();
     hitResult pick(wxPoint);
-    Vector3fT mapMouse2World(int, int);
     float getAxisParallelMovement(int, int, int, int, Vector3fT);
     Vector3fT getEventCenter();
 

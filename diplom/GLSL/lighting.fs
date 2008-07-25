@@ -1,6 +1,6 @@
 varying vec3 normal;
 varying vec4 vertex;
-varying vec4 half;
+varying vec3 half;
 
 const vec4 AMBIENT_BLACK = vec4(0.0, 0.0, 0.0, 1.0);
 const vec4 DEFAULT_BLACK = vec4(0.0, 0.0, 0.0, 0.0);

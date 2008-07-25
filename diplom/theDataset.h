@@ -39,6 +39,7 @@ public:
 
 	static std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	static void updateAllSelectionBoxes();
+	static Vector3fT mapMouse2World(int, int);
 	static void updateTreeDims();
 	static void updateTreeDS(int);
 

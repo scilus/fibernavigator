@@ -144,8 +144,8 @@ void TheScene::initShaders()
 	GLSLShader *vShader2 = new GLSLShader(GL_VERTEX_SHADER);
 	GLSLShader *fShader2 = new GLSLShader(GL_FRAGMENT_SHADER);
 
-	vShader2->loadCode(wxT("GLSL/fibers.vs"));
-	fShader2->loadCode(wxT("GLSL/fibers.fs"));
+	vShader2->loadCode(wxT("GLSL/fibers.vs"),vShaderModules);
+	fShader2->loadCode(wxT("GLSL/fibers.fs"),fShaderModules);
 
 	m_curveShader = new FGLSLShaderProgram();
 	m_curveShader->link(vShader2, fShader2);
@@ -221,9 +221,10 @@ void TheScene::renderScene()
 	renderMesh();
 	renderSurface();
 
+	renderFibers();
+
 	if (m_showBoxes && TheDataset::fibers_loaded)
 	{
-		renderFibers();
 		drawSelectionBoxes();
 	}
 	if (m_pointMode)
@@ -330,15 +331,25 @@ void TheScene::renderFibers()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	glEnable(GL_BLEND);
 	m_curveShader->bind();
 	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
 
-		m_curveShader->setUniInt("useNormals", !info->getShowFS());
 		if (info->getType() == Curves_ && info->getShow())
 		{
+			GLint viewport[4];
+			glGetIntegerv( GL_VIEWPORT, viewport );
+			Vector3fT tmp = TheDataset::mapMouse2World(viewport[2], viewport[3]);
+			float n = sqrt((tmp.s.X * tmp.s.X) +  (tmp.s.Y * tmp.s.Y) + ( tmp.s.Z  * tmp.s.Z));
+			float cam[] = {tmp.s.X/n, tmp.s.Y/n, tmp.s.Z/n};
+
+			setupLights();
+
+			m_curveShader->setUniInt("useNormals", !info->getShowFS());
+			//printf("%f, %f, %f\n", cam[0], cam[1], cam[2]);
+			m_curveShader->setUniArrayFloat("cam", cam, 3);
+
 			if (m_selBoxChanged)
 			{
 				((Curves*)info)->updateLinesShown(TheDataset::getSelectionBoxes());
@@ -348,6 +359,8 @@ void TheScene::renderFibers()
 		}
 	}
 	m_curveShader->release();
+
+	switchOffLights();
 
 	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw fibers"));
 
