@@ -347,7 +347,6 @@ void TheScene::renderFibers()
 
 			setupLights();
 
-			m_curveShader->setUniInt("useNormals", !info->getShowFS());
 			//printf("%f, %f, %f\n", cam[0], cam[1], cam[2]);
 			m_curveShader->setUniArrayFloat("cam", cam, 3);
 

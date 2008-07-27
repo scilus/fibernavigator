@@ -1,7 +1,4 @@
 varying vec3 color1;
-varying vec3 color2;
-uniform bool useNormals;
-
 uniform float cam[3];
 
 void main()
@@ -29,16 +26,9 @@ void main()
 	calculateLighting(gl_MaxLights, -n, vertex, gl_FrontMaterial.shininess,
 					  ambient, diffuse, specular);
 
-   vec4 tmpColor = vec4(0.0);
-
-
-   if (!useNormals)
-		tmpColor = vec4(color1, 1.0);
-   else
-		tmpColor = vec4(color2, 1.0);
+	vec4 tmpColor = vec4(color1, 1.0);
 
    /* tmpColor = gl_FrontLightModelProduct.sceneColor; */
-
 
    color =   tmpColor +
 			  (ambient  * gl_FrontMaterial.ambient) +

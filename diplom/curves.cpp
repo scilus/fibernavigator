@@ -521,15 +521,25 @@ void Curves::draw()
 	if (!TheDataset::useVBO)
 	{
 	    glVertexPointer(3, GL_FLOAT, 0, m_pointArray);
-	    glColorPointer (3, GL_FLOAT, 0, m_colorArray);
+	    if (m_showFS)
+	    	glColorPointer (3, GL_FLOAT, 0, m_colorArray);
+	    else
+	    	glColorPointer (3, GL_FLOAT, 0, m_normalArray);
 	    glNormalPointer (GL_FLOAT, 0, m_normalArray);
 	}
 	else
 	{
 	    glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
 	    glVertexPointer(3, GL_FLOAT, 0, 0);
-	    glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-	    glColorPointer (3, GL_FLOAT, 0, 0);
+	    if (m_showFS) {
+			glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+			glColorPointer (3, GL_FLOAT, 0, 0);
+	    }
+	    else {
+	    	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+	    	glColorPointer (3, GL_FLOAT, 0, 0);
+	    }
+
 	    glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
 	    glNormalPointer (GL_FLOAT, 0, 0);
 	}

@@ -37,7 +37,7 @@ void directionalLight(in int i, in vec3 normal, in float shininess,
 	float pf;
 
 	vec3 L = normalize (gl_LightSource[i].position - vertex.xyz);
-	vec3 H = normalize (L+ half.xyz);
+	vec3 H = normalize (L + half.xyz);
 
 	nDotVP = max(0.0, dot(normal, normalize(vec3(gl_LightSource[i].position))));
 	nDotHV = max(0.0, dot(normal, H));
