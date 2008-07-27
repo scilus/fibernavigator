@@ -222,12 +222,15 @@ void TheScene::renderScene()
 	renderMesh();
 	renderSurface();
 
-	renderFibers();
-
-	if (m_showBoxes && m_dh->fibers_loaded)
+	if (m_dh->fibers_loaded)
 	{
-		drawSelectionBoxes();
+		renderFibers();
+		if (m_showBoxes )
+		{
+			drawSelectionBoxes();
+		}
 	}
+
 	if (m_pointMode)
 	{
 		drawPoints();
