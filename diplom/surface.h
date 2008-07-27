@@ -5,11 +5,14 @@
 
 #include <vector>
 #include "Fantom/FTensor.hh"
+#include "DatasetHelper.h"
+
+class DatasetHelper;
 
 class Surface : public DatasetInfo{
 
 public:
-	Surface();
+	Surface(DatasetHelper*);
 	~Surface();
 
 	bool load(wxString filename) {return false;};
@@ -43,6 +46,8 @@ private:
 	std::vector< std::vector< double > > m_splinePoints;
 	std::vector< int > m_vertices;
 	std::vector< FVector >m_normals;
+
+	DatasetHelper* m_dh;
 };
 
 

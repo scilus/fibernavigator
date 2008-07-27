@@ -5,12 +5,12 @@
 #include "surface.h"
 #include "point.h"
 #include "myListCtrl.h"
-#include "theDataset.h"
 
 #include "GL/glew.h"
 
-Surface::Surface()
+Surface::Surface(DatasetHelper* dh)
 {
+	m_dh = dh;
 	m_radius = 30.0;
 	m_my = 8.0;
 	m_numDeBoorRows = 12;
@@ -26,13 +26,13 @@ Surface::Surface()
 	m_hasTreeId = false;
 	m_threshold = 0.5;
 	m_name = wxT("spline surface");
-	TheDataset::surface_loaded = true;
+	m_dh->surface_loaded = true;
 	execute();
 }
 
 Surface::~Surface()
 {
-	TheDataset::surface_loaded = false;
+	m_dh->surface_loaded = false;
 }
 
 FTensor Surface::getCovarianceMatrix(std::vector< std::vector< double > > points)
@@ -152,15 +152,15 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 void Surface::execute ()
 {
 	std::vector< std::vector< double > > givenPoints;
-	int countPoints = TheDataset::mainFrame->m_treeWidget->GetChildrenCount(TheDataset::mainFrame->m_tPointId, true);
+	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
 	if (countPoints == 0) return;
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
-		id = TheDataset::mainFrame->m_treeWidget->GetNextChild(TheDataset::mainFrame->m_tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)TheDataset::mainFrame->m_treeWidget->GetItemData(id))->getData();
+		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
 
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);
@@ -269,7 +269,7 @@ void Surface::execute ()
 
 	getNormalsForVertices();
 
-	TheDataset::surface_isDirty = false;
+	m_dh->surface_isDirty = false;
 }
 
 FVector Surface::getNormalForTriangle(const FVector* p1, const FVector* p2, const FVector* p3)
@@ -319,12 +319,12 @@ void Surface::getNormalsForVertices()
 
 void Surface::draw()
 {
-	if (TheDataset::surface_isDirty)
+	if (m_dh->surface_isDirty)
 	{
 		execute();
 	}
 
-	if (TheDataset::m_scene->getPointMode())
+	if (m_dh->scene->getPointMode())
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glBegin (GL_TRIANGLES);

@@ -1,9 +1,8 @@
 #include "curves.h"
-#include "theDataset.h"
 
-
-Curves::Curves()
+Curves::Curves(DatasetHelper* dh)
 {
+	m_dh = dh;
 	m_type = not_initialized;
 	m_length = 0;
 	m_bands = 0;
@@ -31,12 +30,12 @@ Curves::~Curves()
 	delete[] m_reverse;
 	delete m_kdTree;
 	glDeleteBuffers(3, m_bufferObjects);
-	TheDataset::fibers_loaded = false;
+	m_dh->fibers_loaded = false;
 }
 
 bool Curves::load(wxString filename)
 {
-	TheDataset::printTime();
+	m_dh->printTime();
 	printf("start loading vtk file\n");
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
@@ -149,7 +148,7 @@ bool Curves::load(wxString filename)
 	//int cc = i;
 
 	m_lineCount = countLines;
-	TheDataset::countFibers = m_lineCount;
+	m_dh->countFibers = m_lineCount;
 	m_pointCount = countPoints;
 	m_linePointers = new int[countLines+1];
 	m_linePointers[countLines] = countPoints;
@@ -179,11 +178,11 @@ bool Curves::load(wxString filename)
 	*/
 
 	toggleEndianess();
-	TheDataset::printTime();
+	m_dh->printTime();
 	printf("move vertices\n");
-	int xOff = TheDataset::columns/2;
-	int yOff = TheDataset::rows/2;
-	int zOff = TheDataset::frames/2;
+	int xOff = m_dh->columns/2;
+	int yOff = m_dh->rows/2;
+	int zOff = m_dh->frames/2;
 	for (int i = 0; i < countPoints * 3 ; ++i) {
 		m_pointArray[i] = xOff - m_pointArray[i];
 		++i;
@@ -193,7 +192,7 @@ bool Curves::load(wxString filename)
 	}
 	calculateLinePointers();
 	createColorArray();
-	TheDataset::printTime();
+	m_dh->printTime();
 	printf("read all\n");
 
 	m_type = Curves_;
@@ -201,7 +200,7 @@ bool Curves::load(wxString filename)
 	m_name = filename.AfterLast('/');
 	initializeBuffer();
 
-	m_kdTree = new KdTree(m_pointCount, m_pointArray);
+	m_kdTree = new KdTree(m_pointCount, m_pointArray, m_dh);
 
 	return true;
 }
@@ -220,7 +219,7 @@ int Curves::getStartIndexForLine(int line)
 
 void Curves::calculateLinePointers()
 {
-	TheDataset::printTime();
+	m_dh->printTime();
 	printf("calculate line pointers\n");
 	int pc = 0;
 	int lc = 0;
@@ -251,7 +250,7 @@ int Curves::getLineForPoint(int point)
 
 void Curves::toggleEndianess()
 {
-	TheDataset::printTime();
+	m_dh->printTime();
 	printf("toggle Endianess\n");
 
 	wxUint8 *pointbytes = (wxUint8*)m_pointArray;
@@ -280,7 +279,7 @@ void Curves::toggleEndianess()
 
 void Curves::createColorArray()
 {
-	TheDataset::printTime();
+	m_dh->printTime();
 	printf("create color arrays\n");
 
 	int pc = 0;
@@ -378,7 +377,7 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 		if (boxes[i][0]->colorChanged())
 		{
 			float *colorData;
-			if (TheDataset::useVBO)
+			if (m_dh->useVBO)
 			{
 				glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
 				colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
@@ -404,7 +403,7 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 					}
 				}
 			}
-			if (TheDataset::useVBO)
+			if (m_dh->useVBO)
 			{
 				glUnmapBuffer(GL_ARRAY_BUFFER);
 			}
@@ -470,23 +469,23 @@ void Curves::boxTest(int left, int right, int axis)
 
 void Curves::initializeBuffer()
 {
-	if (!TheDataset::useVBO) return;
+	if (!m_dh->useVBO) return;
 	bool isOK = true;
 	glGenBuffers(3, m_bufferObjects);
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_pointArray, GL_STATIC_DRAW );
-	if (TheDataset::GLError())
+	if (m_dh->GLError())
 	{
-		TheDataset::printGLError(wxT("initialue vbo points"));
+		m_dh->printGLError(wxT("initialue vbo points"));
 		isOK = false;
 	}
 	if (isOK)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_colorArray, GL_STATIC_DRAW );
-		if (TheDataset::GLError())
+		if (m_dh->GLError())
 		{
-			TheDataset::printGLError(wxT("initialue vbo colors"));
+			m_dh->printGLError(wxT("initialue vbo colors"));
 			isOK = false;
 		}
 	}
@@ -494,13 +493,13 @@ void Curves::initializeBuffer()
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_normalArray, GL_STATIC_DRAW );
-		if (TheDataset::GLError())
+		if (m_dh->GLError())
 		{
-			TheDataset::printGLError(wxT("initialue vbo normals"));
+			m_dh->printGLError(wxT("initialue vbo normals"));
 			isOK = false;
 		}
 	}
-	TheDataset::useVBO = isOK;
+	m_dh->useVBO = isOK;
 	if (isOK)
 	{
 		freeArrays();
@@ -518,7 +517,7 @@ void Curves::draw()
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 
-	if (!TheDataset::useVBO)
+	if (!m_dh->useVBO)
 	{
 	    glVertexPointer(3, GL_FLOAT, 0, m_pointArray);
 	    if (m_showFS)

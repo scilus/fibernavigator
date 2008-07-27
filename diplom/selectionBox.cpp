@@ -1,9 +1,9 @@
 #include "selectionBox.h"
-#include "theDataset.h"
 #include "curves.h"
 
-SelectionBox::SelectionBox(Vector3fT center, Vector3fT size)
+SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 {
+	m_dh = dh;
 	m_center = center;
 	m_size = size;
 	m_show = true;
@@ -12,8 +12,8 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size)
 	m_isActive = true;
 	m_colorChanged = false;
 	m_handleRadius = 3.0;
-	m_inBox.resize(TheDataset::countFibers, sizeof(bool));
-	for (int i = 0; i < TheDataset::countFibers ; ++i)
+	m_inBox.resize(m_dh->countFibers, sizeof(bool));
+	for (int i = 0; i < m_dh->countFibers ; ++i)
 	{
 		m_inBox[i] = 0;
 	}
@@ -21,6 +21,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size)
 
 SelectionBox::SelectionBox(SelectionBox *box)
 {
+	m_dh = box->m_dh;
 	m_center = box->getCenter();
 	m_size = box->getSize();
 	m_isNOT = false;
@@ -30,8 +31,8 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	m_colorChanged = false;
 
 	m_handleRadius = 3.0;
-	m_inBox.resize(TheDataset::countFibers, sizeof(bool));
-	for (int i = 0; i < TheDataset::countFibers ; ++i)
+	m_inBox.resize(m_dh->countFibers, sizeof(bool));
+	for (int i = 0; i < m_dh->countFibers ; ++i)
 	{
 		m_inBox[i] = 0;
 	}
@@ -239,58 +240,13 @@ hitResult SelectionBox::hitTest(Ray *ray)
 
 float SelectionBox::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
 {
-	Vector3fT vs = mapMouse2World(x1, y1);
-	Vector3fT ve = mapMouse2World(x2, y2);
+	Vector3fT vs = m_dh->mapMouse2World(x1, y1);
+	Vector3fT ve = m_dh->mapMouse2World(x2, y2);
 	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
 	float nb = ((dir.s.X * n.s.X) + (dir.s.Y * n.s.Y) + (dir.s.Z * n.s.Z));
 	return bb/nb;
 }
-
-Vector3fT SelectionBox::mapMouse2World(int x, int y)
-{
-	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
-	GLfloat winX, winY;
-
-	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-	glGetDoublev( GL_PROJECTION_MATRIX, projection );
-	glGetIntegerv( GL_VIEWPORT, viewport );
-
-	winX = (float)x;
-	winY = (float)viewport[3] - (float)y;
-	GLdouble posX, posY, posZ;
-	gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX, &posY, &posZ);
-	glPopMatrix();
-	Vector3fT v = {{posX, posY, posZ}};
-	return v;
-}
-
-Vector3fT SelectionBox::mapMouse2WorldBack(int x, int y)
-{
-	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
-	GLfloat winX, winY;
-
-	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-	glGetDoublev( GL_PROJECTION_MATRIX, projection );
-	glGetIntegerv( GL_VIEWPORT, viewport );
-
-	winX = (float)x;
-	winY = (float)viewport[3] - (float)y;
-	GLdouble posX, posY, posZ;
-	gluUnProject( winX, winY, 1, modelview, projection, viewport, &posX, &posY, &posZ);
-	glPopMatrix();
-	Vector3fT v = {{posX, posY, posZ}};
-	return v;
-}
-
 
 void SelectionBox::processDrag(wxPoint click, wxPoint lastPos)
 {
@@ -304,8 +260,8 @@ void SelectionBox::processDrag(wxPoint click, wxPoint lastPos)
 
 void SelectionBox::drag(wxPoint click)
 {
-	Vector3fT vs = mapMouse2World(click.x, click.y);
-	Vector3fT ve = mapMouse2WorldBack(click.x, click.y);
+	Vector3fT vs = m_dh->mapMouse2World(click.x, click.y);
+	Vector3fT ve = m_dh->mapMouse2WorldBack(click.x, click.y);
 	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 
 	m_center.s.X = vs.s.X + dir.s.X * m_hr.tmin;
@@ -343,57 +299,57 @@ void SelectionBox::resize(wxPoint click, wxPoint lastPos)
 	delta =  wxMax(wxMin(getAxisParallelMovement(lastPos.x, lastPos.y, click.x, click.y, n ),1),-1);
 	if (m_hr.picked == 11 || m_hr.picked == 12) {
 		float newX = m_size.s.X + (delta);
-		m_size.s.X = wxMin(wxMax(newX, 1),TheDataset::columns);
+		m_size.s.X = wxMin(wxMax(newX, 1),m_dh->columns);
 	}
 	if (m_hr.picked == 13 || m_hr.picked == 14) {
 		float newY = m_size.s.Y + (delta);
-		m_size.s.Y = wxMin(wxMax(newY, 1),TheDataset::rows);
+		m_size.s.Y = wxMin(wxMax(newY, 1),m_dh->rows);
 	}
 	if (m_hr.picked == 15 || m_hr.picked == 16) {
 		float newZ = m_size.s.Z + (delta);
-		m_size.s.Z = wxMin(wxMax(newZ, 1),TheDataset::frames);
+		m_size.s.Z = wxMin(wxMax(newZ, 1),m_dh->frames);
 	}
 	m_dirty = true;
 }
 
 void SelectionBox::moveLeft()
 {
-	if ( m_center.s.X < -TheDataset::columns/2 ) return;
+	if ( m_center.s.X < -m_dh->columns/2 ) return;
 	m_center.s.X -= 1.0;
 	update();
 }
 
 void SelectionBox::moveRight()
 {
-	if ( m_center.s.X > TheDataset::columns/2 ) return;
+	if ( m_center.s.X > m_dh->columns/2 ) return;
 	m_center.s.X += 1.0;
 	update();
 }
 
 void SelectionBox::moveForward()
 {
-	if ( m_center.s.Y < -TheDataset::rows/2 ) return;
+	if ( m_center.s.Y < -m_dh->rows/2 ) return;
 	m_center.s.Y -= 1.0;
 	update();
 }
 
 void SelectionBox::moveBack()
 {
-	if ( m_center.s.Y > TheDataset::rows/2 ) return;
+	if ( m_center.s.Y > m_dh->rows/2 ) return;
 	m_center.s.Y += 1.0;
 	update();
 }
 
 void SelectionBox::moveUp()
 {
-	if ( m_center.s.Z < -TheDataset::frames/2 ) return;
+	if ( m_center.s.Z < -m_dh->frames/2 ) return;
 	m_center.s.Z -= 1.0;
 	update();
 }
 
 void SelectionBox::moveDown()
 {
-	if ( m_center.s.Z > TheDataset::frames/2 ) return;
+	if ( m_center.s.Z > m_dh->frames/2 ) return;
 	m_center.s.Z += 1.0;
 	update();
 }
@@ -407,7 +363,7 @@ void SelectionBox::resizeLeft()
 
 void SelectionBox::resizeRight()
 {
-	if ( m_size.s.X > TheDataset::columns ) return;
+	if ( m_size.s.X > m_dh->columns ) return;
 	m_size.s.X += 1.0;
 	update();
 }
@@ -421,7 +377,7 @@ void SelectionBox::resizeBack()
 
 void SelectionBox::resizeForward()
 {
-	if ( m_size.s.Y > TheDataset::rows ) return;
+	if ( m_size.s.Y > m_dh->rows ) return;
 	m_size.s.Y += 1.0;
 	update();
 }
@@ -435,7 +391,7 @@ void SelectionBox::resizeDown()
 
 void SelectionBox::resizeUp()
 {
-	if ( m_size.s.Z > TheDataset::frames ) return;
+	if ( m_size.s.Z > m_dh->frames ) return;
 	m_size.s.Z += 1.0;
 	update();
 }
@@ -443,8 +399,8 @@ void SelectionBox::resizeUp()
 void SelectionBox::update()
 {
 	m_dirty = true;
-	TheDataset::m_scene->m_selBoxChanged = true;
-	TheDataset::mainFrame->refreshAllGLWidgets();
+	m_dh->scene->m_selBoxChanged = true;
+	m_dh->mainFrame->refreshAllGLWidgets();
 }
 
 void SelectionBox::setColor(wxColour color)

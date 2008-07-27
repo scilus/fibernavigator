@@ -13,7 +13,7 @@
 class Anatomy: public DatasetInfo {
 
 public:
-	Anatomy();
+	Anatomy(DatasetHelper*);
 	virtual ~Anatomy();
 
 	bool load(wxString filename);

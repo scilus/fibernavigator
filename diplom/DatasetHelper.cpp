@@ -1,4 +1,10 @@
-#include "theDataset.h"
+/*
+ * DatasetHelper.cpp
+ *
+ *  Created on: 27.07.2008
+ *      Author: ralph
+ */
+#include "DatasetHelper.h"
 
 #include "Anatomy.h"
 #include "curves.h"
@@ -7,40 +13,48 @@
 #include "myListCtrl.h"
 #include "wx/xml/xml.h"
 
-int TheDataset::rows = 1;
-int TheDataset::columns = 1;
-int TheDataset::frames = 1;
-unsigned int TheDataset::countFibers = 0;
-int TheDataset::threadsActive = 0;
-bool TheDataset::anatomy_loaded = false;
-bool TheDataset::fibers_loaded = false;
-bool TheDataset::surface_loaded = false;
-bool TheDataset::surface_isDirty = true;
-bool TheDataset::useVBO = true;
+DatasetHelper::DatasetHelper(MainFrame* mf) {
+	mainFrame = mf;
 
-bool TheDataset::showSagittal = true;
-bool TheDataset::showCoronal = true;
-bool TheDataset::showAxial = true;
-float TheDataset::xSlize = 0.5;
-float TheDataset::ySlize = 0.5;
-float TheDataset::zSlize = 0.5;
-int TheDataset::quadrant = 6;
+	rows = 1;
+	columns = 1;
+	frames = 1;
+	countFibers = 0;
+	threadsActive = 0;
+	anatomy_loaded = false;
+	fibers_loaded = false;
+	surface_loaded = false;
+	surface_isDirty = true;
+	useVBO = true;
 
+	showSagittal = true;
+	showCoronal = true;
+	showAxial = true;
+	xSlize = 0.5;
+	ySlize = 0.5;
+	zSlize = 0.5;
+	quadrant = 6;
 
-MainFrame* TheDataset::mainFrame = NULL;
-Point* TheDataset::m_lastSelectedPoint = NULL;
-TheScene* TheDataset::m_scene = NULL;
-AnatomyHelper* TheDataset::anatomyHelper = NULL;
+	lastSelectedPoint = NULL;
+	scene = NULL;
+	anatomyHelper = NULL;
 
-Matrix4fT TheDataset::m_transform = {  1.0f,  0.0f,  0.0f,  0.0f,
-								        0.0f,  1.0f,  0.0f,  0.0f,
-								        0.0f,  0.0f,  1.0f,  0.0f,
-								        0.0f,  0.0f,  0.0f,  1.0f };
-wxString TheDataset::lastError = wxT("");
-wxString TheDataset::lastPath = wxT("");
-GLenum TheDataset::lastGLError = GL_NO_ERROR;
+	Matrix4fT m ={  1.0f,  0.0f,  0.0f,  0.0f,
+			        0.0f,  1.0f,  0.0f,  0.0f,
+			        0.0f,  0.0f,  1.0f,  0.0f,
+					0.0f,  0.0f,  0.0f,  1.0f };
+	m_transform = m;
+	lastError = wxT("");
+	lastPath = wxT("");
+	lastGLError = GL_NO_ERROR;
 
-bool TheDataset::load(int index, wxString filename)
+}
+
+DatasetHelper::~DatasetHelper() {
+	// TODO Auto-generated destructor stub
+}
+
+bool DatasetHelper::load(int index, wxString filename)
 {
 	if (mainFrame->m_listCtrl->GetItemCount() > 9)
 	{
@@ -56,7 +70,7 @@ bool TheDataset::load(int index, wxString filename)
 		wxString defaultFilename = wxEmptyString;
 		wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename, wildcard, wxOPEN);
 		dialog.SetFilterIndex(index);
-		dialog.SetDirectory(TheDataset::lastPath);
+		dialog.SetDirectory(lastPath);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			lastPath = dialog.GetDirectory();
@@ -68,17 +82,17 @@ bool TheDataset::load(int index, wxString filename)
 	wxString ext = filename.AfterLast('.');
 
 	if (ext == wxT("yav")) {
-		if (!TheDataset::loadSettings(filename)) {
+		if (!loadSettings(filename)) {
 			return false;
 		}
-		TheDataset::m_scene->m_selBoxChanged = true;
+		scene->m_selBoxChanged = true;
 		mainFrame->refreshAllGLWidgets();
 		return true ;
 	}
 
 	else if (ext == wxT("hea"))
 	{
-		Anatomy *anatomy = new Anatomy();
+		Anatomy *anatomy = new Anatomy(this);
 		if (anatomy->load(filename))
 		{
 			rows = anatomy->getRows();
@@ -89,7 +103,7 @@ bool TheDataset::load(int index, wxString filename)
 			return true;
 		}
 		else {
-			if (!TheDataset::anatomy_loaded)
+			if (!anatomy_loaded)
 			{
 				if ( anatomy->getRows() <= 0 || anatomy->getColumns() <= 0 || anatomy->getFrames() <= 0 )
 				{
@@ -115,7 +129,7 @@ bool TheDataset::load(int index, wxString filename)
 			lastError = wxT("no anatomy file loaded");
 			return false;
 		}
-		Mesh *mesh = new Mesh();
+		Mesh *mesh = new Mesh(this);
 		if (mesh->load(filename)) {
 			finishLoading(mesh);
 			return true;
@@ -132,7 +146,7 @@ bool TheDataset::load(int index, wxString filename)
 			lastError = wxT("fibers already loaded");
 			return false;
 		}
-		Curves *curves = new Curves();
+		Curves *curves = new Curves(this);
 		if (curves->load(filename)) {
 			if (index != -1) {
 				Vector3fT vc = {{mainFrame->m_xSlider->GetValue()-columns/2,
@@ -140,7 +154,7 @@ bool TheDataset::load(int index, wxString filename)
 							mainFrame->m_zSlider->GetValue()-frames/2}};
 
 				Vector3fT vs = {{columns/8, rows/8, frames/8}};
-						SelectionBox *selBox = new SelectionBox(vc, vs);
+						SelectionBox *selBox = new SelectionBox(vc, vs, this);
 						selBox->m_isTop = true;
 						mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 			}
@@ -154,7 +168,7 @@ bool TheDataset::load(int index, wxString filename)
 	return false;
 }
 
-void TheDataset::finishLoading(DatasetInfo *info)
+void DatasetHelper::finishLoading(DatasetInfo *info)
 {
 	int i = mainFrame->m_listCtrl->GetItemCount();
 	mainFrame->m_listCtrl->InsertItem(i, wxT(""), 0);
@@ -169,12 +183,12 @@ void TheDataset::finishLoading(DatasetInfo *info)
 
 	if (mainFrame->m_listCtrl->GetItemCount() == 1)
 	{
-		mainFrame->m_xSlider->SetMax(wxMax(2,TheDataset::columns-1));
-		mainFrame->m_xSlider->SetValue(TheDataset::columns/2);
-		mainFrame->m_ySlider->SetMax(wxMax(2,TheDataset::rows-1));
-		mainFrame->m_ySlider->SetValue( TheDataset::rows/2);
-		mainFrame->m_zSlider->SetMax(wxMax(2,TheDataset::frames-1));
-		mainFrame->m_zSlider->SetValue( TheDataset::frames/2);
+		mainFrame->m_xSlider->SetMax(wxMax(2,columns-1));
+		mainFrame->m_xSlider->SetValue(columns/2);
+		mainFrame->m_ySlider->SetMax(wxMax(2,rows-1));
+		mainFrame->m_ySlider->SetValue( rows/2);
+		mainFrame->m_zSlider->SetMax(wxMax(2,frames-1));
+		mainFrame->m_zSlider->SetValue( frames/2);
 		mainFrame->m_tSlider->SetValue(10);
 		updateView(mainFrame->m_xSlider->GetValue(),
 										mainFrame->m_ySlider->GetValue(),
@@ -193,7 +207,7 @@ void TheDataset::finishLoading(DatasetInfo *info)
 
 }
 
-bool TheDataset::loadSettings(wxString filename)
+bool DatasetHelper::loadSettings(wxString filename)
 {
 	wxXmlDocument doc;
 	if (!doc.Load(filename))
@@ -246,7 +260,7 @@ bool TheDataset::loadSettings(wxString filename)
 				sx.ToDouble(&_x);
 				sy.ToDouble(&_y);
 				sz.ToDouble(&_z);
-				Point *point = new Point(_x, _y, _z);
+				Point *point = new Point(_x, _y, _z, this);
 				mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
 				pNode = pNode->GetNext();
 			}
@@ -285,7 +299,7 @@ bool TheDataset::loadSettings(wxString filename)
 						}
 						Vector3fT _vc = {{_cx, _cy, _cz }};
 						Vector3fT _vs = {{_ix, _iy, _iz }};
-						SelectionBox *selBox = new SelectionBox(_vc, _vs);
+						SelectionBox *selBox = new SelectionBox(_vc, _vs, this);
 						selBox->m_isTop = false;
 						selBox->m_isNOT = (_type == wxT("NOT"));
 						vboxes.push_back(selBox);
@@ -310,7 +324,7 @@ bool TheDataset::loadSettings(wxString filename)
 				}
 				Vector3fT vc = {{cx, cy, cz }};
 				Vector3fT vs = {{ix, iy, iz }};
-				SelectionBox *selBox = new SelectionBox(vc, vs);
+				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->m_isTop = true;
 				wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 				for (unsigned int i = 0 ; i < vboxes.size() ; ++i) {
@@ -325,7 +339,7 @@ bool TheDataset::loadSettings(wxString filename)
 	return true;
 }
 
-void TheDataset::save(wxString filename)
+void DatasetHelper::save(wxString filename)
 {
 	wxXmlNode *root = new wxXmlNode(NULL, wxXML_ELEMENT_NODE, wxT("scene"));
 	wxXmlNode *nodeboxes = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("selection_boxes"));
@@ -410,13 +424,13 @@ void TheDataset::save(wxString filename)
 	doc.Save(filename, 2);
 }
 
-void TheDataset::printTime()
+void DatasetHelper::printTime()
 {
 	wxDateTime dt = wxDateTime::Now();
 	printf("[%02d:%02d:%02d] ",dt.GetHour(), dt.GetMinute(), dt.GetSecond());
 }
 
-std::vector<std::vector<SelectionBox*> > TheDataset::getSelectionBoxes()
+std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 {
 	std::vector<std::vector<SelectionBox*> > boxes;
 	int countboxes = mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tSelBoxId, false);
@@ -443,27 +457,27 @@ std::vector<std::vector<SelectionBox*> > TheDataset::getSelectionBoxes()
 	return boxes;
 }
 
-void TheDataset::printwxT(wxString string)
+void DatasetHelper::printwxT(wxString string)
 {
 	char cstring[string.length()];
 	strcpy(cstring, (const char*)string.mb_str(wxConvUTF8));
 	printf("%s", cstring);
 }
 
-void TheDataset::updateTreeDims()
+void DatasetHelper::updateTreeDims()
 {
 	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tAxialId);
 	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tCoronalId);
 	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tSagittalId);
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tAxialId, wxString::Format(wxT("%d rows"), TheDataset::rows));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tAxialId, wxString::Format(wxT("%d columns"), TheDataset::columns));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tCoronalId, wxString::Format(wxT("%d columns"), TheDataset::columns));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tCoronalId, wxString::Format(wxT("%d frames"), TheDataset::frames));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSagittalId, wxString::Format(wxT("%d rows"), TheDataset::rows));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSagittalId, wxString::Format(wxT("%d frames"), TheDataset::frames));
+	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tAxialId, wxString::Format(wxT("%d rows"), rows));
+	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tAxialId, wxString::Format(wxT("%d columns"), columns));
+	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tCoronalId, wxString::Format(wxT("%d columns"), columns));
+	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tCoronalId, wxString::Format(wxT("%d frames"), frames));
+	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSagittalId, wxString::Format(wxT("%d rows"), rows));
+	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSagittalId, wxString::Format(wxT("%d frames"), frames));
 }
 
-void TheDataset::updateTreeDS(const int i)
+void DatasetHelper::updateTreeDS(const int i)
 {
 	DatasetInfo* info = (DatasetInfo*)mainFrame->m_listCtrl->GetItemData(i);
 	switch (info->getType())
@@ -492,7 +506,7 @@ void TheDataset::updateTreeDS(const int i)
 	}
 }
 
-void TheDataset::treeFinished()
+void DatasetHelper::treeFinished()
 {
 	threadsActive--;
 	if (threadsActive > 0) return;
@@ -500,22 +514,22 @@ void TheDataset::treeFinished()
 	printf ("tree finished\n");
 	fibers_loaded = true;
 	updateAllSelectionBoxes();
-	m_scene->m_selBoxChanged = true;
+	scene->m_selBoxChanged = true;
 	mainFrame->refreshAllGLWidgets();
 }
 
-void TheDataset::updateAllSelectionBoxes()
+void DatasetHelper::updateAllSelectionBoxes()
 {
-	std::vector<std::vector<SelectionBox*> > boxes = TheDataset::getSelectionBoxes();
+	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
 	for (uint i = 0 ; i < boxes.size() ; ++i)
 		for (uint j = 0 ; j < boxes[i].size() ; ++j)
 			boxes[i][j]->setDirty();
 }
 
-Vector3fT TheDataset::mapMouse2World(int x, int y)
+Vector3fT DatasetHelper::mapMouse2World(int x, int y)
 {
 	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);
+	glMultMatrixf(m_transform.M);
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -534,20 +548,42 @@ Vector3fT TheDataset::mapMouse2World(int x, int y)
 	return v;
 }
 
-bool TheDataset::GLError()
+Vector3fT DatasetHelper::mapMouse2WorldBack(int x, int y)
+{
+	glPushMatrix();
+	glMultMatrixf(m_transform.M);
+	GLint viewport[4];
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLfloat winX, winY;
+
+	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+	glGetDoublev( GL_PROJECTION_MATRIX, projection );
+	glGetIntegerv( GL_VIEWPORT, viewport );
+
+	winX = (float)x;
+	winY = (float)viewport[3] - (float)y;
+	GLdouble posX, posY, posZ;
+	gluUnProject( winX, winY, 1, modelview, projection, viewport, &posX, &posY, &posZ);
+	glPopMatrix();
+	Vector3fT v = {{posX, posY, posZ}};
+	return v;
+}
+
+bool DatasetHelper::GLError()
 {
 	lastGLError = glGetError();
 	if (lastGLError == GL_NO_ERROR) return false;
 	return true;
 }
 
-void TheDataset::printGLError(wxString function)
+void DatasetHelper::printGLError(wxString function)
 {
 	printwxT(function);
 	printf(" : ERROR: %s\n", gluErrorString(lastGLError));
 }
 
-bool TheDataset::loadTextFile(wxString* string, wxString filename)
+bool DatasetHelper::loadTextFile(wxString* string, wxString filename)
 {
 	wxTextFile file;
 	*string = wxT("");

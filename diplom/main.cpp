@@ -35,7 +35,6 @@
 
 #include "main.h"
 #include "mainFrame.h"
-#include "theDataset.h"
 
 MainFrame *frame = NULL;
 

@@ -2,6 +2,7 @@
 #define MESH_H_
 
 #include "datasetInfo.h"
+#include "DatasetHelper.h"
 
 #include "wx/wxprec.h"
 
@@ -44,7 +45,7 @@ union converterByteToFoat {
 class Mesh : public DatasetInfo {
 
 public:
-	Mesh();
+	Mesh(DatasetHelper*);
 	~Mesh();
 
 	bool load(wxString filename);

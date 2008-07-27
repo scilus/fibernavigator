@@ -1,27 +1,28 @@
 #include "point.h"
 #include "selectionBox.h"
-#include "theDataset.h"
 
-Point::Point(Vector3fT center)
+Point::Point(Vector3fT center, DatasetHelper* dh)
 {
+	m_dh = dh;
 	m_center = center;
 	m_dirty = true;
 	m_selected = false;
-	TheDataset::surface_isDirty = true;
+	m_dh->surface_isDirty = true;
 }
 
-Point::Point(double x, double y, double z)
+Point::Point(double x, double y, double z, DatasetHelper* dh)
 {
 	Vector3fT center = {{x,y,z}};
+	m_dh = dh;
 	m_center = center;
 	m_dirty = true;
 	m_selected = false;
-	TheDataset::surface_isDirty = true;
+	m_dh->surface_isDirty = true;
 }
 
 Point::~Point()
 {
-	TheDataset::surface_isDirty = true;
+	m_dh->surface_isDirty = true;
 }
 
 void Point::draw()
@@ -45,15 +46,15 @@ void Point::drawSphere(float x, float y, float z, float r)
 
 void Point::drag(wxPoint click)
 {
-	Vector3fT vs = SelectionBox::mapMouse2World(click.x, click.y);
-	Vector3fT ve = SelectionBox::mapMouse2WorldBack(click.x, click.y);
+	Vector3fT vs = m_dh->mapMouse2World(click.x, click.y);
+	Vector3fT ve = m_dh->mapMouse2WorldBack(click.x, click.y);
 	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 
 	m_center.s.X = vs.s.X + dir.s.X * m_hr.tmin;
 	m_center.s.Y = vs.s.Y + dir.s.Y * m_hr.tmin;
 	m_center.s.Z = vs.s.Z + dir.s.Z * m_hr.tmin;
 	m_dirty = true;
-	TheDataset::surface_isDirty = true;
+	m_dh->surface_isDirty = true;
 }
 
 hitResult Point::hitTest(Ray *ray)

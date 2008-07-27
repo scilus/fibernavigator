@@ -5,6 +5,10 @@
 #include "myListCtrl.h"
 #include "wx/treectrl.h"
 #include "wx/laywin.h"
+#include "DatasetHelper.h"
+
+class DatasetHelper;
+class MyListCtrl;
 
 // Define a new frame
 class MainFrame: public wxMDIParentFrame
@@ -90,8 +94,6 @@ private:
     int NAV_SIZE;
     int NAV_GL_SIZE;
 
-
-
 public:
 	wxSlider* m_xSlider;
     wxSlider* m_ySlider;
@@ -114,6 +116,8 @@ public:
 	wxTreeItemId m_tMeshId;
 	wxTreeItemId m_tFiberId;
 	wxTreeItemId m_tSelBoxId;
+
+	DatasetHelper* m_dh;
 
 DECLARE_EVENT_TABLE()
 };

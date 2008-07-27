@@ -4,14 +4,12 @@
  *  Created on: 23.07.2008
  *      Author: ralph
  */
-
 #include "AnatomyHelper.h"
-#include "theDataset.h"
 
 #include "GL/glew.h"
 
-AnatomyHelper::AnatomyHelper() {
-
+AnatomyHelper::AnatomyHelper(DatasetHelper* dh) {
+	m_dh = dh;
 }
 
 AnatomyHelper::~AnatomyHelper() {
@@ -22,9 +20,9 @@ void AnatomyHelper::renderNav(int view, FGLSLShaderProgram *shader)
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	TheDataset::m_scene->bindTextures();
+	m_dh->scene->bindTextures();
 	shader->bind();
-	TheDataset::m_scene->setTextureShaderVars();
+	m_dh->scene->setTextureShaderVars();
 
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0000001);
@@ -32,49 +30,49 @@ void AnatomyHelper::renderNav(int view, FGLSLShaderProgram *shader)
 	float xline = 0;
 	float yline = 0;
 
-	float border = (float)wxMax(TheDataset::columns, wxMax(TheDataset::rows, TheDataset::frames))/2.0;
+	float border = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames))/2.0;
 
-	int x = TheDataset::columns/2;
-	int y = TheDataset::rows/2;
-	int z = TheDataset::frames/2;
+	int x = m_dh->columns/2;
+	int y = m_dh->rows/2;
+	int z = m_dh->frames/2;
 
-	int xs = TheDataset::xSlize - TheDataset::columns/2;
-	int ys = TheDataset::ySlize - TheDataset::rows/2;
-	int zs = TheDataset::zSlize - TheDataset::frames/2;
+	int xs = m_dh->xSlize - m_dh->columns/2;
+	int ys = m_dh->ySlize - m_dh->rows/2;
+	int zs = m_dh->zSlize - m_dh->frames/2;
 
 	switch (view)
 	{
 		case axial: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, 1.0, TheDataset::zSlize/(float)TheDataset::frames); glVertex3f(-x, -y, zs);
-		    	glTexCoord3f(0.0, 0.0, TheDataset::zSlize/(float)TheDataset::frames); glVertex3f(-x,  y, zs);
-		    	glTexCoord3f(1.0, 0.0, TheDataset::zSlize/(float)TheDataset::frames); glVertex3f( x,  y, zs);
-		    	glTexCoord3f(1.0, 1.0, TheDataset::zSlize/(float)TheDataset::frames); glVertex3f( x, -y, zs);
+				glTexCoord3f(0.0, 1.0, m_dh->zSlize/(float)m_dh->frames); glVertex3f(-x, -y, zs);
+		    	glTexCoord3f(0.0, 0.0, m_dh->zSlize/(float)m_dh->frames); glVertex3f(-x,  y, zs);
+		    	glTexCoord3f(1.0, 0.0, m_dh->zSlize/(float)m_dh->frames); glVertex3f( x,  y, zs);
+		    	glTexCoord3f(1.0, 1.0, m_dh->zSlize/(float)m_dh->frames); glVertex3f( x, -y, zs);
 			glEnd();
-			xline = TheDataset::xSlize - (float)TheDataset::columns/2.0;
-			yline = (float)TheDataset::rows/2.0 - TheDataset::ySlize;
+			xline = m_dh->xSlize - (float)m_dh->columns/2.0;
+			yline = (float)m_dh->rows/2.0 - m_dh->ySlize;
 		} break;
 
 		case coronal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, TheDataset::ySlize/(float)TheDataset::rows, 1.0); glVertex3f( -x, -z, ys);
-		    	glTexCoord3f(0.0, TheDataset::ySlize/(float)TheDataset::rows, 0.0); glVertex3f( -x,  z, ys);
-		    	glTexCoord3f(1.0, TheDataset::ySlize/(float)TheDataset::rows, 0.0); glVertex3f(  x,  z, ys);
-		    	glTexCoord3f(1.0, TheDataset::ySlize/(float)TheDataset::rows, 1.0); glVertex3f(  x, -z, ys);
+				glTexCoord3f(0.0, m_dh->ySlize/(float)m_dh->rows, 1.0); glVertex3f( -x, -z, ys);
+		    	glTexCoord3f(0.0, m_dh->ySlize/(float)m_dh->rows, 0.0); glVertex3f( -x,  z, ys);
+		    	glTexCoord3f(1.0, m_dh->ySlize/(float)m_dh->rows, 0.0); glVertex3f(  x,  z, ys);
+		    	glTexCoord3f(1.0, m_dh->ySlize/(float)m_dh->rows, 1.0); glVertex3f(  x, -z, ys);
 		    glEnd();
-		    xline = TheDataset::xSlize - (float)TheDataset::columns/2.0;
-		    yline = (float)TheDataset::frames/2.0 - TheDataset::zSlize;
+		    xline = m_dh->xSlize - (float)m_dh->columns/2.0;
+		    yline = (float)m_dh->frames/2.0 - m_dh->zSlize;
 		} break;
 
 		case sagittal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(TheDataset::xSlize/(float)TheDataset::columns, 0.0, 1.0); glVertex3f(-y, -z, xs);
-		    	glTexCoord3f(TheDataset::xSlize/(float)TheDataset::columns, 0.0, 0.0); glVertex3f(-y,  z, xs);
-		    	glTexCoord3f(TheDataset::xSlize/(float)TheDataset::columns, 1.0, 0.0); glVertex3f( y,  z, xs);
-		    	glTexCoord3f(TheDataset::xSlize/(float)TheDataset::columns, 1.0, 1.0); glVertex3f( y, -z, xs);
+				glTexCoord3f(m_dh->xSlize/(float)m_dh->columns, 0.0, 1.0); glVertex3f(-y, -z, xs);
+		    	glTexCoord3f(m_dh->xSlize/(float)m_dh->columns, 0.0, 0.0); glVertex3f(-y,  z, xs);
+		    	glTexCoord3f(m_dh->xSlize/(float)m_dh->columns, 1.0, 0.0); glVertex3f( y,  z, xs);
+		    	glTexCoord3f(m_dh->xSlize/(float)m_dh->columns, 1.0, 1.0); glVertex3f( y, -z, xs);
 			glEnd();
-			xline = TheDataset::ySlize - (float)TheDataset::rows/2.0;
-			yline = (float)TheDataset::frames/2.0 - TheDataset::zSlize;
+			xline = m_dh->ySlize - (float)m_dh->rows/2.0;
+			yline = (float)m_dh->frames/2.0 - m_dh->zSlize;
 		} break;
 	}
 
@@ -94,19 +92,19 @@ void AnatomyHelper::renderNav(int view, FGLSLShaderProgram *shader)
 
 void AnatomyHelper::renderMain()
 {
-	x = TheDataset::xSlize - TheDataset::columns/2;
-	y = TheDataset::ySlize - TheDataset::rows/2;
-	z = TheDataset::zSlize - TheDataset::frames/2;
+	x = m_dh->xSlize - m_dh->columns/2;
+	y = m_dh->ySlize - m_dh->rows/2;
+	z = m_dh->zSlize - m_dh->frames/2;
 
-	xc = TheDataset::xSlize/(float)TheDataset::columns;
-	yc = TheDataset::ySlize/(float)TheDataset::rows;
-	zc = TheDataset::zSlize/(float)TheDataset::frames;
+	xc = m_dh->xSlize/(float)m_dh->columns;
+	yc = m_dh->ySlize/(float)m_dh->rows;
+	zc = m_dh->zSlize/(float)m_dh->frames;
 
-	xb = TheDataset::columns/2;
-	yb = TheDataset::rows/2;
-	zb = TheDataset::frames/2;
+	xb = m_dh->columns/2;
+	yb = m_dh->rows/2;
+	zb = m_dh->frames/2;
 
-	switch (TheDataset::quadrant)
+	switch (m_dh->quadrant)
 	{
 	case 1:
 		renderS1();
@@ -225,7 +223,7 @@ void AnatomyHelper::renderMain()
 
 void AnatomyHelper::renderA1()
 {
-	if (!TheDataset::showAxial) return;
+	if (!m_dh->showAxial) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(0.0, 0.0, zc); glVertex3i(-xb, -yb, z);
 		glTexCoord3f(0.0, yc, zc); glVertex3i(-xb,  y, z);
@@ -236,7 +234,7 @@ void AnatomyHelper::renderA1()
 
 void AnatomyHelper::renderA2()
 {
-	if (!TheDataset::showAxial) return;
+	if (!m_dh->showAxial) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(0.0, yc, zc); glVertex3i(-xb, y, z);
 		glTexCoord3f(0.0, 1.0, zc); glVertex3i(-xb,  yb, z);
@@ -247,7 +245,7 @@ void AnatomyHelper::renderA2()
 
 void AnatomyHelper::renderA3()
 {
-	if (!TheDataset::showAxial) return;
+	if (!m_dh->showAxial) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(xc, 0, zc); glVertex3i(x, -yb, z);
 		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
@@ -258,7 +256,7 @@ void AnatomyHelper::renderA3()
 
 void AnatomyHelper::renderA4()
 {
-	if (!TheDataset::showAxial) return;
+	if (!m_dh->showAxial) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
 		glTexCoord3f(xc, 1.0, zc); glVertex3i(x, yb, z);
@@ -270,7 +268,7 @@ void AnatomyHelper::renderA4()
 
 void AnatomyHelper::renderC1()
 {
-	if (!TheDataset::showCoronal) return;
+	if (!m_dh->showCoronal) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(0.0, yc, 0.0); glVertex3i(-xb, y, -zb);
 		glTexCoord3f(0.0, yc, zc); glVertex3i(-xb, y,  z);
@@ -281,7 +279,7 @@ void AnatomyHelper::renderC1()
 
 void AnatomyHelper::renderC2()
 {
-	if (!TheDataset::showCoronal) return;
+	if (!m_dh->showCoronal) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(0.0, yc, zc); glVertex3i(-xb, y, z);
 		glTexCoord3f(0.0, yc, 1.0); glVertex3i(-xb, y,  zb);
@@ -292,7 +290,7 @@ void AnatomyHelper::renderC2()
 
 void AnatomyHelper::renderC3()
 {
-	if (!TheDataset::showCoronal) return;
+	if (!m_dh->showCoronal) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(xc, yc, 0); glVertex3i(x, y, -zb);
 		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
@@ -303,7 +301,7 @@ void AnatomyHelper::renderC3()
 
 void AnatomyHelper::renderC4()
 {
-	if (!TheDataset::showCoronal) return;
+	if (!m_dh->showCoronal) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
 		glTexCoord3f(xc, yc, 1.0); glVertex3i(x, y, zb);
@@ -315,7 +313,7 @@ void AnatomyHelper::renderC4()
 
 void AnatomyHelper::renderS1()
 {
-	if (!TheDataset::showSagittal) return;
+	if (!m_dh->showSagittal) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(xc, 0.0, 0.0); glVertex3i(x, -yb, -zb);
 		glTexCoord3f(xc, 0.0, zc); glVertex3i(x, -yb,  z);
@@ -326,7 +324,7 @@ void AnatomyHelper::renderS1()
 
 void AnatomyHelper::renderS2()
 {
-	if (!TheDataset::showSagittal) return;
+	if (!m_dh->showSagittal) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(xc, 0.0, zc); glVertex3i(x, -yb, z);
 		glTexCoord3f(xc, 0.0, 1.0); glVertex3i(x, -yb,  zb);
@@ -337,7 +335,7 @@ void AnatomyHelper::renderS2()
 
 void AnatomyHelper::renderS3()
 {
-	if (!TheDataset::showSagittal) return;
+	if (!m_dh->showSagittal) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(xc, yc, 0); glVertex3i(x, y, -zb);
 		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
@@ -348,7 +346,7 @@ void AnatomyHelper::renderS3()
 
 void AnatomyHelper::renderS4()
 {
-	if (!TheDataset::showSagittal) return;
+	if (!m_dh->showSagittal) return;
 	glBegin(GL_QUADS);
 		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
 		glTexCoord3f(xc, yc, 1.0); glVertex3i(x, y, zb);

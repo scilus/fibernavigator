@@ -9,10 +9,13 @@
 #define ANATOMYHELPER_H_
 
 #include "GLSL/GLSLShaderProgram.h"
+#include "DatasetHelper.h"
+
+class DatasetHelper;
 
 class AnatomyHelper {
 public:
-	AnatomyHelper();
+	AnatomyHelper(DatasetHelper*);
 	virtual ~AnatomyHelper();
 
 	void renderMain();
@@ -44,6 +47,8 @@ private:
 	float xc;
 	float yc;
 	float zc;
+
+	DatasetHelper* m_dh;
 };
 
 #endif /* ANATOMYHELPER_H_ */

@@ -8,16 +8,20 @@
 #endif
 
 #include "theScene.h"
+#include "mainFrame.h"
 #include "wx/glcanvas.h"
 
 #include "boundingBox.h"
+#include "DatasetHelper.h"
 #include "wx/math.h"
+
+class DatasetHelper;
 
 class MainCanvas: public wxGLCanvas
 {
 public:
 
-    MainCanvas(int,  wxWindow*, wxWindowID id = wxID_ANY,
+    MainCanvas(DatasetHelper*, int,  wxWindow*, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = _T("GLCanvas"),
@@ -64,6 +68,8 @@ private:
 
 	 ArcBallT   *m_arcBall;
 	 Point2fT    m_mousePt;
+
+	 DatasetHelper* m_dh;;
 };
 
 #endif /*MAINCANVAS_H_*/

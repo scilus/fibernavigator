@@ -2,14 +2,15 @@
 #include "myListCtrl.h"
 #include "point.h"
 #include "curves.h"
-#include "theDataset.h"
 #include "surface.h"
 #include "selectionBox.h"
 #include "AnatomyHelper.h"
 
 
-TheScene::TheScene()
+TheScene::TheScene(DatasetHelper* dh)
 {
+	m_dh = dh;
+
 	m_texAssigned = false;
 
 	m_mainGLContext = 0;
@@ -31,7 +32,7 @@ TheScene::TheScene()
 	Vector3fT v1 = {{ 1.0, 1.0, 1.0}};
 	m_lightPos = v1;
 
-	TheDataset::anatomyHelper = new AnatomyHelper();
+	m_dh->anatomyHelper = new AnatomyHelper(m_dh);
 
 	m_selBoxChanged = true;
 }
@@ -59,14 +60,14 @@ void TheScene::initGL(int view)
 		m_texAssigned = true;
 	}
 
-	float maxLength = (float)wxMax(TheDataset::columns, wxMax(TheDataset::rows, TheDataset::frames));
+	float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
 	float view1 = maxLength/2.0;
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-view1, view1, -view1, view1, -(view1 + 5) , view1 + 5);
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("init"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("init"));
 }
 
 void TheScene::bindTextures()
@@ -76,9 +77,9 @@ void TheScene::bindTextures()
 
 	int c = 0;
 
-	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if (info->getType() < Mesh_)
 		{
 			glActiveTexture(GL_TEXTURE0 + c);
@@ -86,7 +87,7 @@ void TheScene::bindTextures()
 			c++;
 		}
 	}
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("bind textures"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("bind textures"));
 }
 
 
@@ -94,9 +95,9 @@ void TheScene::bindTextures()
 void TheScene::initShaders()
 {
 	wxString vShaderModules;
-	TheDataset::loadTextFile(&vShaderModules, wxT("GLSL/lighting.vs"));
+	m_dh->loadTextFile(&vShaderModules, wxT("GLSL/lighting.vs"));
 	wxString fShaderModules;
-	TheDataset::loadTextFile(&fShaderModules, wxT("GLSL/lighting.fs"));
+	m_dh->loadTextFile(&fShaderModules, wxT("GLSL/lighting.fs"));
 
 	if (m_textureShader)
 	{
@@ -114,7 +115,7 @@ void TheScene::initShaders()
 	m_textureShader->link(vShader, fShader);
 	m_textureShader->bind();
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("setup shader 1"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 1"));
 
 
 	if (m_meshShader)
@@ -133,7 +134,7 @@ void TheScene::initShaders()
 	m_meshShader->link(vShader1, fShader1);
 	m_meshShader->bind();
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("setup shader 2"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 2"));
 
 	if (m_curveShader)
 	{
@@ -151,7 +152,7 @@ void TheScene::initShaders()
 	m_curveShader->link(vShader2, fShader2);
 	m_curveShader->bind();
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("setup shader 3"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 3"));
 }
 
 void TheScene::setTextureShaderVars()
@@ -161,9 +162,9 @@ void TheScene::setTextureShaderVars()
 	float* threshold = new float[10];
 	int* type = new int[10];
 	int c = 0;
-	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if(info->getType() < Mesh_) {
 			tex[c] = c;
 			show[c] = info->getShow();
@@ -182,22 +183,22 @@ void TheScene::setTextureShaderVars()
 
 void TheScene::setMeshShaderVars()
 {
-	m_meshShader->setUniInt("dimX", TheDataset::columns);
-	m_meshShader->setUniInt("dimY", TheDataset::rows);
-	m_meshShader->setUniInt("dimZ", TheDataset::frames);
-	m_meshShader->setUniInt("cutX", (int)(TheDataset::xSlize - TheDataset::columns/2.0));
-	m_meshShader->setUniInt("cutY", (int)(TheDataset::ySlize - TheDataset::rows/2.0));
-	m_meshShader->setUniInt("cutZ", (int)(TheDataset::zSlize - TheDataset::frames/2.0));
-	m_meshShader->setUniInt("sector", TheDataset::quadrant);
+	m_meshShader->setUniInt("dimX", m_dh->columns);
+	m_meshShader->setUniInt("dimY", m_dh->rows);
+	m_meshShader->setUniInt("dimZ", m_dh->frames);
+	m_meshShader->setUniInt("cutX", (int)(m_dh->xSlize - m_dh->columns/2.0));
+	m_meshShader->setUniInt("cutY", (int)(m_dh->ySlize - m_dh->rows/2.0));
+	m_meshShader->setUniInt("cutZ", (int)(m_dh->zSlize - m_dh->frames/2.0));
+	m_meshShader->setUniInt("sector", m_dh->quadrant);
 
 	int* tex = new int[10];
 	int* show = new int[10];
 	float* threshold = new float[10];
 	int* type = new int[10];
 	int c = 0;
-	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if(info->getType() < Mesh_) {
 			tex[c] = c;
 			show[c] = info->getShow();
@@ -216,14 +217,14 @@ void TheScene::setMeshShaderVars()
 
 void TheScene::renderScene()
 {
-	if (TheDataset::mainFrame->m_listCtrl->GetItemCount() == 0) return;
+	if (m_dh->mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
 	renderMesh();
 	renderSurface();
 
 	renderFibers();
 
-	if (m_showBoxes && TheDataset::fibers_loaded)
+	if (m_showBoxes && m_dh->fibers_loaded)
 	{
 		drawSelectionBoxes();
 	}
@@ -234,7 +235,7 @@ void TheScene::renderScene()
 
 	renderSlizes();
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("render"));
 }
 
 void TheScene::renderSlizes()
@@ -252,7 +253,7 @@ void TheScene::renderSlizes()
 	m_textureShader->bind();
 	setTextureShaderVars();
 
-	TheDataset::anatomyHelper->renderMain();
+	m_dh->anatomyHelper->renderMain();
 
 	glDisable(GL_BLEND);
 
@@ -284,7 +285,7 @@ void TheScene::setupLights()
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specref);
 	glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 32);
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("setup lights"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup lights"));
 }
 
 void TheScene::switchOffLights()
@@ -303,9 +304,9 @@ void TheScene::renderMesh()
 	m_meshShader->bind();
 	setMeshShaderVars();
 
-	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if (info->getType() == Mesh_)
 		{
 			if (info->getShow()) {
@@ -322,7 +323,7 @@ void TheScene::renderMesh()
 
 	switchOffLights();
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw mesh"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("draw mesh"));
 
 	glPopAttrib();
 }
@@ -331,9 +332,9 @@ void TheScene::renderFibers()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 
 		if (info->getType() == Curves_ && info->getShow())
 		{
@@ -341,7 +342,7 @@ void TheScene::renderFibers()
 
 			GLint viewport[4];
 			glGetIntegerv( GL_VIEWPORT, viewport );
-			Vector3fT tmp = TheDataset::mapMouse2World(viewport[2], viewport[3]);
+			Vector3fT tmp = m_dh->mapMouse2World(viewport[2], viewport[3]);
 			float n = sqrt((tmp.s.X * tmp.s.X) +  (tmp.s.Y * tmp.s.Y) + ( tmp.s.Z  * tmp.s.Z));
 			float cam[] = {tmp.s.X/n, tmp.s.Y/n, tmp.s.Z/n};
 
@@ -352,7 +353,7 @@ void TheScene::renderFibers()
 
 			if (m_selBoxChanged)
 			{
-				((Curves*)info)->updateLinesShown(TheDataset::getSelectionBoxes());
+				((Curves*)info)->updateLinesShown(m_dh->getSelectionBoxes());
 				m_selBoxChanged = false;
 			}
 			info->draw();
@@ -363,7 +364,7 @@ void TheScene::renderFibers()
 		}
 	}
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw fibers"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("draw fibers"));
 
 	glPopAttrib();
 }
@@ -377,9 +378,9 @@ void TheScene::renderSurface()
 	m_meshShader->bind();
 	setMeshShaderVars();
 
-	for (int i = 0 ; i < TheDataset::mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)TheDataset::mainFrame->m_listCtrl->GetItemData(i);
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if (info->getType() == Surface_ && info->getShow())
 		{
 			float c = (float)info->getThreshold();
@@ -394,18 +395,18 @@ void TheScene::renderSurface()
 
 	switchOffLights();
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw surface"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
 
 	glPopAttrib();
 }
 
 void TheScene::renderNavView(int view)
 {
-	if (TheDataset::mainFrame->m_listCtrl->GetItemCount() == 0) return;
+	if (m_dh->mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
-	TheDataset::anatomyHelper->renderNav(view, m_textureShader);
+	m_dh->anatomyHelper->renderNav(view, m_textureShader);
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("render nav view"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("render nav view"));
 }
 
 void TheScene::drawSphere(float x, float y, float z, float r)
@@ -417,14 +418,14 @@ void TheScene::drawSphere(float x, float y, float z, float r)
 	gluSphere(quadric, r, 32, 32);
 	glPopMatrix();
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw sphere"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("draw sphere"));
 }
 
 
 
 void TheScene::drawSelectionBoxes()
 {
-	std::vector<std::vector<SelectionBox*> > boxes = TheDataset::getSelectionBoxes();
+	std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
 	for (uint i = 0 ; i < boxes.size() ; ++i)
 	{
 		for (uint j = 0 ; j < boxes[i].size() ; ++j)
@@ -446,7 +447,7 @@ void TheScene::drawSelectionBoxes()
 		}
 	}
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw selection boxes"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("draw selection boxes"));
 }
 
 void TheScene::drawPoints()
@@ -460,14 +461,14 @@ void TheScene::drawPoints()
 	m_meshShader->setUniInt("useTex", false);
 
 	std::vector< std::vector< double > > givenPoints;
-	int countPoints = TheDataset::mainFrame->m_treeWidget->GetChildrenCount(TheDataset::mainFrame->m_tPointId, true);
+	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
-		id = TheDataset::mainFrame->m_treeWidget->GetNextChild(TheDataset::mainFrame->m_tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)TheDataset::mainFrame->m_treeWidget->GetItemData(id))->getData();
+		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
+		Point *point = (Point*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
 		point->draw();
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);
@@ -479,5 +480,5 @@ void TheScene::drawPoints()
 	m_meshShader->release();
 	glPopAttrib();
 
-	if (TheDataset::GLError()) TheDataset::printGLError(wxT("draw points"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("draw points"));
 }

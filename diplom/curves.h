@@ -25,7 +25,7 @@ enum CurveFileType {
 class Curves : public DatasetInfo
 {
 public:
-	Curves();
+	Curves(DatasetHelper*);
 	~Curves();
 
 	bool load(wxString filename);

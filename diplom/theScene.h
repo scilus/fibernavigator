@@ -10,6 +10,7 @@
 #include "GLSL/GLSLShaderProgram.h"
 #include "ArcBall.h"
 #include "datasetInfo.h"
+#include "DatasetHelper.h"
 
 #include "wx/glcanvas.h"
 
@@ -20,6 +21,8 @@ enum {
 	mainView
 };
 
+class DatasetHelper;
+
 class TheScene {
 
 public:
@@ -27,7 +30,7 @@ public:
 	bool m_showBoxes;
 	bool m_blendAlpha;
 
-	TheScene();
+	TheScene(DatasetHelper*);
 	~TheScene();
 
 	void initGL(int);
@@ -58,6 +61,8 @@ private:
 	FGLSLShaderProgram *m_curveShader;
 
 	wxGLContext* m_mainGLContext;
+
+	DatasetHelper* m_dh;
 
 	float m_xOffset0;
 	float m_yOffset0;

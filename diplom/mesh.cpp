@@ -2,10 +2,10 @@
 
 #include "wx/wfstream.h"
 #include "wx/datstrm.h"
-#include "theDataset.h"
 
-Mesh::Mesh()
+Mesh::Mesh(DatasetHelper* dh)
 {
+	m_dh = dh;
 	m_type = not_initialized;
 	m_length = 0;
 	m_bands = 0;
@@ -184,9 +184,9 @@ bool Mesh::load(wxString filename)
 
 void Mesh::generateGeometry()
 {
-	int xOff = TheDataset::columns/2;
-	int yOff = TheDataset::rows/2;
-	int zOff = TheDataset::frames/2;
+	int xOff = m_dh->columns/2;
+	int yOff = m_dh->rows/2;
+	int zOff = m_dh->frames/2;
 
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);

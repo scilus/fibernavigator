@@ -1,17 +1,16 @@
 #include "KdTree.h"
-#include "theDataset.h"
 
-//#include <omp.h>
 #include <algorithm>
 
-KdTree::KdTree(int size, float *pointArray)
+KdTree::KdTree(int size, float *pointArray, DatasetHelper* dh)
 {
+	m_dh = dh;
 	m_size = size;
 	m_pointArray = pointArray;
 	m_tree = new wxUint32[size];
 	for (int i = 0 ; i < size ;  ++i)
 		m_tree[i] = i;
-	TheDataset::printTime();
+	dh->printTime();
 	printf ("build kd tree...\n");
 
 	int root = ( size - 1 )/2;
@@ -35,18 +34,18 @@ KdTree::KdTree(int size, float *pointArray)
 		iter nth( m_tree, rootRight );
 		std::nth_element( begin, nth, end, lessy( m_pointArray, 1 ) );
 	}
-	TheDataset::threadsActive = 4;
+	dh->threadsActive = 4;
 
-	KdTreeThread *thread1 = new KdTreeThread(m_pointArray, m_tree, 0, rootLeft-1, 2);
+	KdTreeThread *thread1 = new KdTreeThread(m_pointArray, m_tree, 0, rootLeft-1, 2, m_dh);
 	thread1->Run();
 
-	KdTreeThread *thread2 = new KdTreeThread(m_pointArray, m_tree, rootLeft+1, root-1, 2);
+	KdTreeThread *thread2 = new KdTreeThread(m_pointArray, m_tree, rootLeft+1, root-1, 2, m_dh);
 	thread2->Run();
 
-	KdTreeThread *thread3 = new KdTreeThread(m_pointArray, m_tree, root+1, rootRight-1, 2);
+	KdTreeThread *thread3 = new KdTreeThread(m_pointArray, m_tree, root+1, rootRight-1, 2, m_dh);
 	thread3->Run();
 
-	KdTreeThread *thread4 = new KdTreeThread(m_pointArray, m_tree, rootRight+1, size-1, 2);
+	KdTreeThread *thread4 = new KdTreeThread(m_pointArray, m_tree, rootRight+1, size-1, 2, m_dh);
 	thread4->Run();
 }
 
@@ -55,13 +54,14 @@ KdTree::~KdTree()
 	delete[] m_tree;
 }
 
-KdTreeThread::KdTreeThread(float *pointArray, wxUint32 *tree, int left, int right, int axis)
+KdTreeThread::KdTreeThread(float *pointArray, wxUint32 *tree, int left, int right, int axis, DatasetHelper* dh)
 {
 	m_pointArray = pointArray;
 	m_tree = tree;
 	m_left = left;
 	m_right = right;
 	m_axis = axis;
+	m_dh = dh;
 
 	Create();
 }
@@ -71,7 +71,7 @@ void* KdTreeThread::Entry()
 	buildTree(m_left, m_right, m_axis);
 
 	wxCommandEvent event( wxEVT_COMMAND_MENU_SELECTED, KDTREE_EVENT );
-    wxPostEvent( TheDataset::mainFrame, event );
+    wxPostEvent( m_dh->mainFrame, event );
 
 	return NULL;
 }

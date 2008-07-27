@@ -10,11 +10,14 @@
 #include "GL/glew.h"
 #include "ArcBall.h"
 #include "boundingBox.h"
+#include "DatasetHelper.h"
+
+class DatasetHelper;
 
 class Point {
 public:
-	Point(Vector3fT);
-	Point( double, double, double);
+	Point(Vector3fT, DatasetHelper*);
+	Point( double, double, double, DatasetHelper*);
 	~Point();
 
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
@@ -27,6 +30,7 @@ public:
 	void unselect() {m_selected = false;};
 
 private:
+	DatasetHelper* m_dh;
 	Vector3fT m_center;
 	bool m_dirty;
 	bool m_selected;

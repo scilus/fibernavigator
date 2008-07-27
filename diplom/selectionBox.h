@@ -11,13 +11,15 @@
 #include "ArcBall.h"
 #include "boundingBox.h"
 #include <vector>
+#include "DatasetHelper.h"
 
 class MainCanvas;
 class Curves;
+class DatasetHelper;
 
 class SelectionBox {
 public:
-	SelectionBox(Vector3fT, Vector3fT);
+	SelectionBox(Vector3fT, Vector3fT, DatasetHelper*);
 	SelectionBox(SelectionBox*);
 	~SelectionBox() {};
 
@@ -60,15 +62,13 @@ public:
 
 	void update();
 
-
-	static Vector3fT mapMouse2World(int, int);
-	static Vector3fT mapMouse2WorldBack(int, int);
-
 	std::vector<bool>m_inBox;
 
 	bool m_isNOT;
 	bool m_isTop;
 	bool m_isActive;
+
+	DatasetHelper* m_dh;
 
 private:
 	void drawSphere(float, float, float, float);

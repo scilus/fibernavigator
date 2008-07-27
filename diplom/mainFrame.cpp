@@ -12,7 +12,6 @@
 #include "wx/colordlg.h"
 
 #include "theScene.h"
-#include "theDataset.h"
 
 #include "point.h"
 #include "curves.h"
@@ -327,26 +326,27 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         doubleBuffer = GL_FALSE;
     }
 
+    m_dh = new DatasetHelper(this);
 
-    TheDataset::columns = 1;
-    TheDataset::rows = 1;
-    TheDataset::frames = 1;
-    TheDataset::lastError = wxT("");
+    m_dh->scene = new TheScene(m_dh);
 
-    TheDataset::m_scene = new TheScene();
-    TheDataset::mainFrame = this;
+    m_dh->columns = 1;
+    m_dh->rows = 1;
+    m_dh->frames = 1;
+    m_dh->lastError = wxT("");
 
-    m_mainGL = new MainCanvas(mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
+
+    m_mainGL = new MainCanvas(m_dh, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
-    m_gl0 = new MainCanvas(axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
+    m_gl0 = new MainCanvas(m_dh, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
     	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib);
 
-    m_gl1 = new MainCanvas(coronal, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
+    m_gl1 = new MainCanvas(m_dh, coronal, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
         	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib);
-    m_gl2 = new MainCanvas(sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
+    m_gl2 = new MainCanvas(m_dh, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
 
-    TheDataset::m_scene->setMainGLContext(new wxGLContext(m_mainGL));
+    m_dh->scene->setMainGLContext(new wxGLContext(m_mainGL));
 
 }
 
@@ -357,18 +357,18 @@ void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 {
-	if ( !TheDataset::load(0) )
+	if ( !m_dh->load(0) )
 	{
-		wxMessageBox(wxT("ERROR\n") + TheDataset::lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+		wxMessageBox(wxT("ERROR\n") + m_dh->lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
 		m_statusBar->SetStatusText(wxT("ERROR"),1);
-		m_statusBar->SetStatusText(TheDataset::lastError,2);
+		m_statusBar->SetStatusText(m_dh->lastError,2);
 		return;
 	}
 }
 
 void MainFrame::OnKdTreeThreadFinished(wxCommandEvent& event)
 {
-	TheDataset::treeFinished();
+	m_dh->treeFinished();
 }
 
 void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
@@ -379,11 +379,11 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
 	dialog.SetFilterIndex(0);
-	dialog.SetDirectory(TheDataset::lastPath);
+	dialog.SetDirectory(m_dh->lastPath);
 	if (dialog.ShowModal() == wxID_OK)
 	{
-		TheDataset::lastPath = dialog.GetDirectory();
-		TheDataset::save(dialog.GetPath());
+		m_dh->lastPath = dialog.GetDirectory();
+		m_dh->save(dialog.GetPath());
 	}
 }
 
@@ -400,18 +400,18 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	{
 	case axial:
 		pos = m_gl0->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*TheDataset::columns));
-		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::rows));
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dh->columns));
+		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dh->rows));
 		break;
 	case coronal:
 		pos = m_gl1->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*TheDataset::columns));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::frames));
+		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dh->columns));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dh->frames));
 		break;
 	case sagittal:
 		pos = m_gl2->getMousePos();
-		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*TheDataset::rows));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*TheDataset::frames));
+		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dh->rows));
+		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dh->frames));
 		break;
 	case mainView:
 		int delta = m_mainGL->getDelta();
@@ -428,13 +428,13 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta, 0), m_xSlider->GetMax()));
 			break;
 		case 20:
-			Point *point = new Point(m_mainGL->getEventCenter());
+			Point *point = new Point(m_mainGL->getEventCenter(), m_dh);
 			wxTreeItemId pId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
 			m_treeWidget->EnsureVisible(pId);
 			m_treeWidget->SelectItem(pId);
 		}
 	}
-	TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	updateStatusBar();
 	refreshAllGLWidgets();
 }
@@ -480,7 +480,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_rightWindowHolder->SetDefaultSize(wxSize(mainSize, mainSize));
 	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
 
-	TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 
 #if wxUSE_MDI_ARCHITECTURE
     wxLayoutAlgorithm layout;
@@ -493,19 +493,19 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 
 void MainFrame::OnXSliderMoved(wxCommandEvent& event)
 {
-	 TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	 m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	 refreshAllGLWidgets();
 }
 
 void MainFrame::OnYSliderMoved(wxCommandEvent& event)
 {
-	TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnZSliderMoved(wxCommandEvent& event)
 {
-	TheDataset::updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
@@ -541,35 +541,35 @@ void MainFrame::renewAllGLWidgets()
 
 void MainFrame::OnToggleAxial(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
-	TheDataset::showAxial = !TheDataset::showAxial;
+	if (!m_dh->scene) return;
+	m_dh->showAxial = !m_dh->showAxial;
 	m_mainGL->render();
 }
 
 void MainFrame::OnToggleCoronal(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
-	TheDataset::showCoronal = !TheDataset::showCoronal;
+	if (!m_dh->scene) return;
+	m_dh->showCoronal = !m_dh->showCoronal;
 	m_mainGL->render();
 }
 
 void MainFrame::OnToggleSagittal(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
-	TheDataset::showSagittal = !TheDataset::showSagittal;
+	if (!m_dh->scene) return;
+	m_dh->showSagittal = !m_dh->showSagittal;
 	m_mainGL->render();
 }
 
 void MainFrame::OnToggleAlpha(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
-	TheDataset::m_scene->m_blendAlpha = !TheDataset::m_scene->m_blendAlpha;
+	if (!m_dh->scene) return;
+	m_dh->scene->m_blendAlpha = !m_dh->scene->m_blendAlpha;
 	m_mainGL->render();
 }
 
 void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene || !TheDataset::fibers_loaded) return;
+	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
@@ -580,17 +580,17 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 		box->m_isActive = !box->m_isActive;
 		box->setDirty();
 	}
-	TheDataset::m_scene->m_selBoxChanged = true;
+	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnNewSelBox(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene || !TheDataset::fibers_loaded) return;
+	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
-	Vector3fT v2 = {{m_xSlider->GetValue()-TheDataset::columns/2,
-					m_ySlider->GetValue()-TheDataset::rows/2,
-					m_zSlider->GetValue()-TheDataset::frames/2}};
+	Vector3fT v2 = {{m_xSlider->GetValue()-m_dh->columns/2,
+					m_ySlider->GetValue()-m_dh->rows/2,
+					m_zSlider->GetValue()-m_dh->frames/2}};
 
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
@@ -604,19 +604,19 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 	}
 	else
 	{
-		Vector3fT v3 = {{TheDataset::columns/8,TheDataset::rows/8, TheDataset::frames/8}};
-		SelectionBox *selBox = new SelectionBox(v2, v3);
+		Vector3fT v3 = {{m_dh->columns/8,m_dh->rows/8, m_dh->frames/8}};
+		SelectionBox *selBox = new SelectionBox(v2, v3, m_dh);
 		selBox->m_isTop = true;
 		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 	}
-	TheDataset::m_scene->m_selBoxChanged = true;
+	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnHideSelBoxes(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
-	TheDataset::m_scene->toggleBoxes();
+	if (!m_dh->scene) return;
+	m_dh->scene->toggleBoxes();
 	refreshAllGLWidgets();
 }
 
@@ -637,17 +637,17 @@ void MainFrame::OnNew(wxCommandEvent& event)
 	m_listCtrl->DeleteAllItems();
 	m_mainGL->invalidate();
 
-	TheDataset::columns = 1;
-    TheDataset::rows = 1;
-    TheDataset::frames = 1;
-    TheDataset::anatomy_loaded = false;
-    TheDataset::fibers_loaded = false;
-    TheDataset::lastError = wxT("");
+	m_dh->columns = 1;
+    m_dh->rows = 1;
+    m_dh->frames = 1;
+    m_dh->anatomy_loaded = false;
+    m_dh->fibers_loaded = false;
+    m_dh->lastError = wxT("");
 
-	delete TheDataset::m_scene;
-	TheDataset::m_scene = new TheScene();
+	delete m_dh->scene;
+	m_dh->scene = new TheScene(m_dh);
 
-	TheDataset::m_scene->setMainGLContext(new wxGLContext(m_mainGL));
+	m_dh->scene->setMainGLContext(new wxGLContext(m_mainGL));
 
 	refreshAllGLWidgets();
 }
@@ -749,9 +749,9 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
 	}
 	if (m_treeWidget->GetItemText(treeid) == wxT("point"))
 	{
-		if (TheDataset::m_lastSelectedPoint) TheDataset::m_lastSelectedPoint->unselect();
-		TheDataset::m_lastSelectedPoint = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData();
-		TheDataset::m_lastSelectedPoint->select();
+		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
+		m_dh->lastSelectedPoint = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData();
+		m_dh->lastSelectedPoint->select();
 	}
 	refreshAllGLWidgets();
 }
@@ -761,13 +761,13 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& event)
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
 	/* open load dialog */
 	if (m_treeWidget->GetItemText(treeid) == wxT("datasets")) {
-		TheDataset::load(1);
+		m_dh->load(1);
 	}
 	else if (m_treeWidget->GetItemText(treeid) == wxT("meshes")) {
-		TheDataset::load(2);
+		m_dh->load(2);
 	}
 	else if (m_treeWidget->GetItemText(treeid) == wxT("fibers")) {
-		TheDataset::load(3);
+		m_dh->load(3);
 	}
 	wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);
@@ -779,27 +779,27 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& event)
 			((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(parentid))->getData()))->setDirty();
 		}
 	}
-	TheDataset::m_scene->m_selBoxChanged = true;
+	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnTreeEvent(wxCommandEvent& event)
 {
-	TheDataset::m_scene->m_selBoxChanged = true;
+	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnTogglePointMode(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
-	TheDataset::m_scene->togglePointMode();
+	if (!m_dh->scene) return;
+	m_dh->scene->togglePointMode();
 	refreshAllGLWidgets();
 }
 
 void MainFrame::OnNewSurface(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene || TheDataset::surface_loaded) return;
-	Surface *surface = new Surface();
+	if (!m_dh->scene || m_dh->surface_loaded) return;
+	Surface *surface = new Surface(m_dh);
 
 	int i = m_listCtrl->GetItemCount();
 	m_listCtrl->InsertItem(i, wxT(""), 0);
@@ -814,17 +814,17 @@ void MainFrame::OnNewSurface(wxCommandEvent& event)
 
 void MainFrame::OnNewSurface2(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene || TheDataset::surface_loaded) return;
+	if (!m_dh->scene || m_dh->surface_loaded) return;
 
 	// delete all points
 	m_treeWidget->DeleteChildren(m_tPointId);
 	// create points
 
-	int y = TheDataset::rows/2;
-	int z = TheDataset::frames/2;
-	int xs = m_xSlider->GetValue() - TheDataset::columns/2;
+	int y = m_dh->rows/2;
+	int z = m_dh->frames/2;
+	int xs = m_xSlider->GetValue() - m_dh->columns/2;
 
-	if (!TheDataset::fibers_loaded)
+	if (!m_dh->fibers_loaded)
 		{
 				refreshAllGLWidgets();
 				return;
@@ -837,14 +837,14 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 
 	for ( int i = 0 ; i < 11 ; ++i)
 		for ( int j = 0 ; j < 11 ; ++j ) {
-			int yy = (TheDataset::rows/10)*i;
-			int zz = (TheDataset::frames/10)*j;
+			int yy = (m_dh->rows/10)*i;
+			int zz = (m_dh->frames/10)*j;
 			FVector bc = fibers->getBarycenter(FVector(xs, yy - y, zz - z, 25.0, 5.0, 5.0));
 					// create the point
-			m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(bc[0], bc[1], bc[2])));
+			m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(bc[0], bc[1], bc[2], m_dh)));
 		}
 
-	Surface *surface = new Surface();
+	Surface *surface = new Surface(m_dh);
 
 	int i = m_listCtrl->GetItemCount();
 	m_listCtrl->InsertItem(i, wxT(""), 0);
@@ -854,7 +854,7 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 	m_listCtrl->SetItemData(i, (long)surface);
 	m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-	if (!TheDataset::fibers_loaded)
+	if (!m_dh->fibers_loaded)
 	{
 		refreshAllGLWidgets();
 		return;
@@ -865,7 +865,7 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 
 void MainFrame::OnAssignColor(wxCommandEvent& event)
 {
-	if (!TheDataset::m_scene) return;
+	if (!m_dh->scene) return;
 
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 
@@ -900,6 +900,6 @@ void MainFrame::OnAssignColor(wxCommandEvent& event)
 			box->setDirty();
 		}
 	}
-	TheDataset::m_scene->m_selBoxChanged = true;
+	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }

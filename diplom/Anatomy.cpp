@@ -10,7 +10,8 @@
 #include "wx/textfile.h"
 #include <GL/glew.h>
 
-Anatomy::Anatomy() {
+Anatomy::Anatomy(DatasetHelper* dh) {
+	m_dh = dh;
 	m_type = not_initialized;
 	m_length = 0;
 	m_bands = 0;

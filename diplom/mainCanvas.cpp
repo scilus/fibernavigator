@@ -4,7 +4,6 @@
 #include "wx/utils.h"
 
 #include "point.h"
-#include "theDataset.h"
 
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_NAVGL_EVENT)
@@ -16,19 +15,20 @@ BEGIN_EVENT_TABLE(MainCanvas, wxGLCanvas)
     EVT_ERASE_BACKGROUND(MainCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
-MainCanvas::MainCanvas(int view, wxWindow *parent, wxWindowID id,
+MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib)
     : wxGLCanvas(parent, id, gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name )
 {
 	m_init = false;
 	m_view = view;
+	m_dh = dh;
 
 	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
 	                       0.0f,  1.0f,  0.0f,  0.0f,
 	                       0.0f,  0.0f,  1.0f,  0.0f,
 	                       0.0f,  0.0f,  0.0f,  1.0f };
 
-	TheDataset::m_transform = m_transform1;
+	m_dh->m_transform = m_transform1;
 
 	Matrix3fT idMat = {{  1.0f,  0.0f,  0.0f,
 	                     0.0f,  1.0f,  0.0f,
@@ -42,7 +42,7 @@ MainCanvas::MainCanvas(int view, wxWindow *parent, wxWindowID id,
 	m_lastRot =lastRot1;
 
 	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
-	Matrix4fSetRotationFromMatrix3f(&TheDataset::m_transform, &m_lastRot);
+	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
 
 	m_isDragging = false;					                    // NEW: Dragging The Mouse?
 	m_isrDragging = false;
@@ -52,7 +52,7 @@ MainCanvas::MainCanvas(int view, wxWindow *parent, wxWindowID id,
 
 void MainCanvas::init()
 {
-	TheDataset::m_scene->initGL(m_view);
+	m_dh->scene->initGL(m_view);
 	m_init = true;
 }
 
@@ -64,10 +64,10 @@ void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void MainCanvas::OnSize(wxSizeEvent& event)
 {
-    if (!TheDataset::m_scene->m_texAssigned)
+    if (!m_dh->scene->m_texAssigned)
     		SetCurrent();
 	else
-		SetCurrent(*TheDataset::m_scene->getMainGLContext());
+		SetCurrent(*m_dh->scene->getMainGLContext());
 
 	// this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize(event);
@@ -132,7 +132,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					else if (event.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20)
 					{
 						((SelectionBox*)m_hr.object)->processDrag(event.GetPosition(), m_lastPos);
-						TheDataset::m_scene->m_selBoxChanged = true;
+						m_dh->scene->m_selBoxChanged = true;
 					}
 					else if (event.Dragging() && m_hr.picked == 20)
 					{
@@ -150,7 +150,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			{
 				m_mousePt.s.X = clickX;
 				m_mousePt.s.Y = clickY;
-				if (TheDataset::m_scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
+				if (m_dh->scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
 					m_hr = pick(event.GetPosition());
 					if (m_hr.hit && (m_hr.picked <= sagittal)) {
 						m_hr.picked = 20;
@@ -176,7 +176,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			            m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
 			            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
 			            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
-			            Matrix4fSetRotationFromMatrix3f(&TheDataset::m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
+			            Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
 				    }
 
 					float *dots = new float[8];
@@ -184,7 +184,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					Vector3fT v2 = {{1,1,1}};
 					Vector3fT view;
 
-					Vector3fMultMat4(&view, &v1, &TheDataset::m_transform);
+					Vector3fMultMat4(&view, &v1, &m_dh->m_transform);
 					dots[0] = Vector3fDot(&v2, &view);
 
 					v2.s.Z = -1;
@@ -218,8 +218,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 							quadrant = i+1;
 						}
 					}
-					TheDataset::quadrant = quadrant;
-					TheDataset::m_scene->setLightPos(view);
+					m_dh->quadrant = quadrant;
+					m_dh->scene->setLightPos(view);
 
 					Refresh(false);
 				}
@@ -244,8 +244,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
 {
-	Vector3fT vs = TheDataset::mapMouse2World(x1, y1);
-	Vector3fT ve = TheDataset::mapMouse2World(x2, y2);
+	Vector3fT vs = m_dh->mapMouse2World(x1, y1);
+	Vector3fT ve = m_dh->mapMouse2World(x2, y2);
 	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
 	float nb = ((dir.s.X * n.s.X) + (dir.s.Y * n.s.Y) + (dir.s.Z * n.s.Z));
@@ -255,7 +255,7 @@ float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector
 hitResult MainCanvas::pick(wxPoint click)
 {
 	glPushMatrix();
-	glMultMatrixf(TheDataset::m_transform.M);
+	glMultMatrixf(m_dh->m_transform.M);
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -272,11 +272,11 @@ hitResult MainCanvas::pick(wxPoint click)
 	gluUnProject( winX, winY, 1, modelview, projection, viewport, &m_pos2X, &m_pos2Y, &m_pos2Z);
 	glPopMatrix();
 	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
-	BoundingBox *bb = new BoundingBox(0,0,0, TheDataset::columns, TheDataset::rows, TheDataset::frames);
+	BoundingBox *bb = new BoundingBox(0,0,0, m_dh->columns, m_dh->rows, m_dh->frames);
 
-	float xx = TheDataset::xSlize - TheDataset::columns/2;
-	float yy = TheDataset::ySlize - TheDataset::rows/2;
-	float zz = TheDataset::zSlize - TheDataset::frames/2;
+	float xx = m_dh->xSlize - m_dh->columns/2;
+	float yy = m_dh->ySlize - m_dh->rows/2;
+	float zz = m_dh->zSlize - m_dh->frames/2;
 
 	/**
 	 * check if one of the 3 planes is picked
@@ -284,7 +284,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	float tpicked = 0;
 	int picked = 0;
 	hitResult hr;
-	if (TheDataset::showAxial) {
+	if (m_dh->showAxial) {
 		bb->setSizeZ(0);
 		bb->setCenterZ(zz);
 		hr = bb->hitTest(ray);
@@ -292,10 +292,10 @@ hitResult MainCanvas::pick(wxPoint click)
 			tpicked = hr.tmin;
 			picked = axial;
 		}
-		bb->setSizeZ(TheDataset::frames);
+		bb->setSizeZ(m_dh->frames);
 		bb->setCenterZ(0);
 	}
-	if (TheDataset::showCoronal) {
+	if (m_dh->showCoronal) {
 		bb->setSizeY(0);
 		bb->setCenterY(yy);
 		hr = bb->hitTest(ray);
@@ -311,10 +311,10 @@ hitResult MainCanvas::pick(wxPoint click)
 				}
 			}
 		}
-		bb->setSizeY(TheDataset::rows);
+		bb->setSizeY(m_dh->rows);
 		bb->setCenterY(0);
 	}
-	if (TheDataset::showSagittal) {
+	if (m_dh->showSagittal) {
 		bb->setSizeX(0);
 		bb->setCenterX(xx);
 		hr = bb->hitTest(ray);
@@ -339,9 +339,9 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with the selection box sizers
 	 */
-	if (TheDataset::m_scene->m_showBoxes)
+	if (m_dh->scene->m_showBoxes)
 	{
-		std::vector<std::vector<SelectionBox*> > boxes = TheDataset::getSelectionBoxes();
+		std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
 		for (uint i = 0 ; i < boxes.size() ; ++i)
 		{
 			for (uint j = 0 ; j < boxes[i].size() ; ++j)
@@ -355,14 +355,14 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with points for spline surface
 	 */
-	if (TheDataset::m_scene->getPointMode()) {
-		int countPoints = TheDataset::mainFrame->m_treeWidget->GetChildrenCount(TheDataset::mainFrame->m_tPointId, true);
+	if (m_dh->scene->getPointMode()) {
+		int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
 		wxTreeItemId id, childid;
 		wxTreeItemIdValue cookie = 0;
 		for (int i = 0 ; i < countPoints ; ++i)
 		{
-			id = TheDataset::mainFrame->m_treeWidget->GetNextChild(TheDataset::mainFrame->m_tPointId, cookie);
-			Point *point = (Point*)((MyTreeItemData*)TheDataset::mainFrame->m_treeWidget->GetItemData(id))->getData();
+			id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
+			Point *point = (Point*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
 			hitResult hr1 = point->hitTest(ray);
 			if (hr1.hit && !hr.hit) hr = hr1;
 			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
@@ -383,7 +383,7 @@ void MainCanvas::render()
 {
 	wxPaintDC dc(this);
 
-    SetCurrent(*TheDataset::m_scene->getMainGLContext());
+    SetCurrent(*m_dh->scene->getMainGLContext());
 
 	int w, h;
     GetClientSize(&w, &h);
@@ -403,14 +403,14 @@ void MainCanvas::render()
     {
     case mainView: {
     	glPushMatrix();
-    	glMultMatrixf(TheDataset::m_transform.M);										// NEW: Apply Dynamic Transform
-    	TheDataset::m_scene->renderScene();
+    	glMultMatrixf(m_dh->m_transform.M);										// NEW: Apply Dynamic Transform
+    	m_dh->scene->renderScene();
     	//renderTestRay();
 	    glPopMatrix();
 	    break;
     }
     default:
-    	TheDataset::m_scene->renderNavView(m_view);
+    	m_dh->scene->renderNavView(m_view);
     }
 	glFlush();
 
@@ -419,10 +419,10 @@ void MainCanvas::render()
 
 void MainCanvas::invalidate()
 {
-	if (TheDataset::m_scene->m_texAssigned) {
-		SetCurrent(*TheDataset::m_scene->getMainGLContext());
-		//TheDataset::m_scene->releaseTextures();
-		TheDataset::m_scene->m_texAssigned = false;
+	if (m_dh->scene->m_texAssigned) {
+		SetCurrent(*m_dh->scene->getMainGLContext());
+		//m_dh->scene->releaseTextures();
+		m_dh->scene->m_texAssigned = false;
 	}
 	m_init = false;
 }
@@ -435,7 +435,7 @@ void MainCanvas::renderTestRay()
 		glVertex3f(m_pos2X, m_pos2Y, m_pos2Z);
 	glEnd();
 	Vector3fT dir = {{m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z}};
-	TheDataset::m_scene->drawSphere(m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z, 3.0);
+	m_dh->scene->drawSphere(m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z, 3.0);
 }
 
 Vector3fT MainCanvas::getEventCenter()

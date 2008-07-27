@@ -8,6 +8,7 @@
 #endif
 
 #include "wx/treectrl.h"
+#include "DatasetHelper.h"
 
 #include <GL/glew.h>
 
@@ -23,6 +24,8 @@ enum DatasetType {
 	Curves_,
 	Surface_,
 };
+
+class DatasetHelper;
 
 class DatasetInfo
 {
@@ -71,6 +74,8 @@ public:
 	GLuint getGLuint() {return m_GLuint;};
 
 protected:
+	DatasetHelper* m_dh;
+
 	int m_length;
 	int m_bands;
 	int m_frames;
