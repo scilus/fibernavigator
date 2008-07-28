@@ -352,6 +352,13 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
+	printf("closing\n");
+	delete m_dh;
+	delete m_mainGL;
+	delete m_gl0;
+	delete m_gl1;
+	delete m_gl2;
+	printf("closing2\n");
 	Close(true);
 }
 

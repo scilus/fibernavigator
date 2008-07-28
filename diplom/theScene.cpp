@@ -39,7 +39,11 @@ TheScene::TheScene(DatasetHelper* dh)
 
 TheScene::~TheScene()
 {
-
+	delete m_textureShader;
+	delete m_meshShader;
+	delete m_curveShader;
+	delete m_mainGLContext;
+	printf("scene destructor done\n");
 }
 
 void TheScene::initGL(int view)
