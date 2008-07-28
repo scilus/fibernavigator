@@ -22,7 +22,7 @@ void AnatomyHelper::renderNav(int view, FGLSLShaderProgram *shader)
 
 	m_dh->scene->bindTextures();
 	shader->bind();
-	m_dh->scene->setTextureShaderVars();
+	m_dh->shaderHelper->setTextureShaderVars();
 
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0000001);

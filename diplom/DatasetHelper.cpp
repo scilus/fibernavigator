@@ -38,6 +38,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	lastSelectedPoint = NULL;
 	scene = NULL;
 	anatomyHelper = NULL;
+	shaderHelper = NULL;
 
 	Matrix4fT m ={  1.0f,  0.0f,  0.0f,  0.0f,
 			        0.0f,  1.0f,  0.0f,  0.0f,

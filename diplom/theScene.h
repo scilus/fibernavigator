@@ -7,7 +7,6 @@
 #include "wx/wx.h"
 #endif
 
-#include "GLSL/GLSLShaderProgram.h"
 #include "ArcBall.h"
 #include "datasetInfo.h"
 #include "DatasetHelper.h"
@@ -26,7 +25,6 @@ class DatasetHelper;
 class TheScene {
 
 public:
-	bool m_showMesh;
 	bool m_showBoxes;
 	bool m_blendAlpha;
 
@@ -35,9 +33,7 @@ public:
 
 	void initGL(int);
 
-	void initShaders();
 	void bindTextures();
-	void setTextureShaderVars();
 
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
@@ -56,34 +52,16 @@ public:
 
 
 private:
-	FGLSLShaderProgram *m_textureShader;
-	FGLSLShaderProgram *m_meshShader;
-	FGLSLShaderProgram *m_curveShader;
-
 	wxGLContext* m_mainGLContext;
 
 	DatasetHelper* m_dh;
-
-	float m_xOffset0;
-	float m_yOffset0;
-	float m_xOffset1;
-	float m_yOffset1;
-	float m_xOffset2;
-	float m_yOffset2;
-
-	float m_ratio0;
-	float m_ratio1;
-	float m_ratio2;
 
 	Vector3fT m_lightPos;
 
 	bool m_pointMode;
 
-
-	void setMeshShaderVars();
-
-	void setupLights();
-	void switchOffLights();
+	void lightsOn();
+	void lightsOff();
 
 	void renderSlizes();
 	void renderMesh();

@@ -14,34 +14,19 @@ TheScene::TheScene(DatasetHelper* dh)
 	m_texAssigned = false;
 
 	m_mainGLContext = 0;
-	m_showMesh = true;
 	m_showBoxes = true;
 	m_pointMode = false;
 	m_blendAlpha = false;
-	m_textureShader = 0;
-	m_meshShader = 0;
-	m_curveShader = 0;
-
-	m_xOffset0 = 0.0;
-	m_yOffset0 = 0.0;
-	m_xOffset1 = 0.0;
-	m_yOffset1 = 0.0;
-	m_xOffset2 = 0.0;
-	m_yOffset2 = 0.0;
 
 	Vector3fT v1 = {{ 1.0, 1.0, 1.0}};
 	m_lightPos = v1;
 
 	m_dh->anatomyHelper = new AnatomyHelper(m_dh);
-
 	m_selBoxChanged = true;
 }
 
 TheScene::~TheScene()
 {
-	delete m_textureShader;
-	delete m_meshShader;
-	delete m_curveShader;
 	delete m_mainGLContext;
 	printf("scene destructor done\n");
 }
@@ -60,7 +45,7 @@ void TheScene::initGL(int view)
 	glEnable(GL_DEPTH_TEST);
 
 	if (!m_texAssigned) {
-		initShaders();
+		m_dh->shaderHelper = new ShaderHelper(m_dh);
 		m_texAssigned = true;
 	}
 
@@ -94,131 +79,6 @@ void TheScene::bindTextures()
 	if (m_dh->GLError()) m_dh->printGLError(wxT("bind textures"));
 }
 
-
-
-void TheScene::initShaders()
-{
-	wxString vShaderModules;
-	m_dh->loadTextFile(&vShaderModules, wxT("GLSL/lighting.vs"));
-	wxString fShaderModules;
-	m_dh->loadTextFile(&fShaderModules, wxT("GLSL/lighting.fs"));
-
-	if (m_textureShader)
-	{
-		delete m_textureShader;
-	}
-	printf("initializing  texture shader\n");
-
-	GLSLShader *vShader = new GLSLShader(GL_VERTEX_SHADER);
-	GLSLShader *fShader = new GLSLShader(GL_FRAGMENT_SHADER);
-
-	vShader->loadCode(wxT("GLSL/anatomy.vs"));
-	fShader->loadCode(wxT("GLSL/anatomy.fs"));
-
-	m_textureShader = new FGLSLShaderProgram();
-	m_textureShader->link(vShader, fShader);
-	m_textureShader->bind();
-
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 1"));
-
-
-	if (m_meshShader)
-	{
-		delete m_meshShader;
-	}
-	printf("initializing mesh shader\n");
-
-	GLSLShader *vShader1 = new GLSLShader(GL_VERTEX_SHADER);
-	GLSLShader *fShader1 = new GLSLShader(GL_FRAGMENT_SHADER);
-
-	vShader1->loadCode(wxT("GLSL/mesh.vs"), vShaderModules);
-	fShader1->loadCode(wxT("GLSL/mesh.fs"), fShaderModules);
-
-	m_meshShader = new FGLSLShaderProgram();
-	m_meshShader->link(vShader1, fShader1);
-	m_meshShader->bind();
-
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 2"));
-
-	if (m_curveShader)
-	{
-		delete m_curveShader;
-	}
-	printf("initializing curves shader\n");
-
-	GLSLShader *vShader2 = new GLSLShader(GL_VERTEX_SHADER);
-	GLSLShader *fShader2 = new GLSLShader(GL_FRAGMENT_SHADER);
-
-	vShader2->loadCode(wxT("GLSL/fibers.vs"),vShaderModules);
-	fShader2->loadCode(wxT("GLSL/fibers.fs"),fShaderModules);
-
-	m_curveShader = new FGLSLShaderProgram();
-	m_curveShader->link(vShader2, fShader2);
-	m_curveShader->bind();
-
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 3"));
-}
-
-void TheScene::setTextureShaderVars()
-{
-	int* tex = new int[10];
-	int* show = new int[10];
-	float* threshold = new float[10];
-	int* type = new int[10];
-	int c = 0;
-	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
-	{
-		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if(info->getType() < Mesh_) {
-			tex[c] = c;
-			show[c] = info->getShow();
-			threshold[c] = info->getThreshold();
-			type[c] = info->getType();
-			++c;
-		}
-	}
-
-	m_textureShader->setUniArrayInt("texes", tex, c);
-	m_textureShader->setUniArrayInt("show", show, c);
-	m_textureShader->setUniArrayInt("type", type, c);
-	m_textureShader->setUniArrayFloat("threshold", threshold, c);
-	m_textureShader->setUniInt("countTextures", c);
-}
-
-void TheScene::setMeshShaderVars()
-{
-	m_meshShader->setUniInt("dimX", m_dh->columns);
-	m_meshShader->setUniInt("dimY", m_dh->rows);
-	m_meshShader->setUniInt("dimZ", m_dh->frames);
-	m_meshShader->setUniInt("cutX", (int)(m_dh->xSlize - m_dh->columns/2.0));
-	m_meshShader->setUniInt("cutY", (int)(m_dh->ySlize - m_dh->rows/2.0));
-	m_meshShader->setUniInt("cutZ", (int)(m_dh->zSlize - m_dh->frames/2.0));
-	m_meshShader->setUniInt("sector", m_dh->quadrant);
-
-	int* tex = new int[10];
-	int* show = new int[10];
-	float* threshold = new float[10];
-	int* type = new int[10];
-	int c = 0;
-	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
-	{
-		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if(info->getType() < Mesh_) {
-			tex[c] = c;
-			show[c] = info->getShow();
-			threshold[c] = info->getThreshold();
-			type[c] = info->getType();
-			++c;
-		}
-	}
-
-	m_meshShader->setUniArrayInt("texes", tex, c);
-	m_meshShader->setUniArrayInt("show", show, c);
-	m_meshShader->setUniArrayInt("type", type, c);
-	m_meshShader->setUniArrayFloat("threshold", threshold, c);
-	m_meshShader->setUniInt("countTextures", c);
-}
-
 void TheScene::renderScene()
 {
 	if (m_dh->mainFrame->m_listCtrl->GetItemCount() == 0) return;
@@ -242,7 +102,7 @@ void TheScene::renderScene()
 
 	renderSlizes();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("render"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("render scene"));
 }
 
 void TheScene::renderSlizes()
@@ -257,19 +117,19 @@ void TheScene::renderSlizes()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	bindTextures();
-	m_textureShader->bind();
-	setTextureShaderVars();
+	m_dh->shaderHelper->m_textureShader->bind();
+	m_dh->shaderHelper->setTextureShaderVars();
 
 	m_dh->anatomyHelper->renderMain();
 
 	glDisable(GL_BLEND);
 
-	m_textureShader->release();
+	m_dh->shaderHelper->m_textureShader->release();
 
 	glPopAttrib();
 }
 
-void TheScene::setupLights()
+void TheScene::lightsOn()
 {
 	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
 	GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1.0 };
@@ -295,7 +155,7 @@ void TheScene::setupLights()
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup lights"));
 }
 
-void TheScene::switchOffLights()
+void TheScene::lightsOff()
 {
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
@@ -305,11 +165,11 @@ void TheScene::renderMesh()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	setupLights();
+	lightsOn();
 
 	bindTextures();
-	m_meshShader->bind();
-	setMeshShaderVars();
+	m_dh->shaderHelper->m_meshShader->bind();
+	m_dh->shaderHelper->setMeshShaderVars();
 
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
@@ -319,16 +179,16 @@ void TheScene::renderMesh()
 			if (info->getShow()) {
 				float c = (float)info->getThreshold();
 				glColor3f(c,c,c);
-				m_meshShader->setUniInt("showFS", info->getShowFS());
-				m_meshShader->setUniInt("useTex", info->getUseTex());
+				m_dh->shaderHelper->m_meshShader->setUniInt("showFS", info->getShowFS());
+				m_dh->shaderHelper->m_meshShader->setUniInt("useTex", info->getUseTex());
 
 				glCallList(info->getGLuint());
 			}
 		}
 	}
-	m_meshShader->release();
+	m_dh->shaderHelper->m_meshShader->release();
 
-	switchOffLights();
+	lightsOff();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("draw mesh"));
 
@@ -345,7 +205,7 @@ void TheScene::renderFibers()
 
 		if (info->getType() == Curves_ && info->getShow())
 		{
-			m_curveShader->bind();
+			m_dh->shaderHelper->m_curveShader->bind();
 
 			GLint viewport[4];
 			glGetIntegerv( GL_VIEWPORT, viewport );
@@ -353,10 +213,10 @@ void TheScene::renderFibers()
 			float n = sqrt((tmp.s.X * tmp.s.X) +  (tmp.s.Y * tmp.s.Y) + ( tmp.s.Z  * tmp.s.Z));
 			float cam[] = {tmp.s.X/n, tmp.s.Y/n, tmp.s.Z/n};
 
-			setupLights();
+			lightsOn();
 
 			//printf("%f, %f, %f\n", cam[0], cam[1], cam[2]);
-			m_curveShader->setUniArrayFloat("cam", cam, 3);
+			m_dh->shaderHelper->m_curveShader->setUniArrayFloat("cam", cam, 3);
 
 			if (m_selBoxChanged)
 			{
@@ -365,9 +225,9 @@ void TheScene::renderFibers()
 			}
 			info->draw();
 
-			m_curveShader->release();
+			m_dh->shaderHelper->m_curveShader->release();
 
-			switchOffLights();
+			lightsOff();
 		}
 	}
 
@@ -380,10 +240,10 @@ void TheScene::renderSurface()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	setupLights();
+	lightsOn();
 
-	m_meshShader->bind();
-	setMeshShaderVars();
+	m_dh->shaderHelper->m_meshShader->bind();
+	m_dh->shaderHelper->setMeshShaderVars();
 
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
@@ -392,15 +252,15 @@ void TheScene::renderSurface()
 		{
 			float c = (float)info->getThreshold();
 			glColor3f(c,c,c);
-			m_meshShader->setUniInt("showFS", info->getShowFS());
-			m_meshShader->setUniInt("useTex", info->getUseTex());
+			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", info->getShowFS());
+			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", info->getUseTex());
 
 			info->draw();
 		}
 	}
-	m_meshShader->release();
+	m_dh->shaderHelper->m_meshShader->release();
 
-	switchOffLights();
+	lightsOff();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
 
@@ -411,7 +271,7 @@ void TheScene::renderNavView(int view)
 {
 	if (m_dh->mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
-	m_dh->anatomyHelper->renderNav(view, m_textureShader);
+	m_dh->anatomyHelper->renderNav(view, m_dh->shaderHelper->m_textureShader);
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("render nav view"));
 }
@@ -439,16 +299,16 @@ void TheScene::drawSelectionBoxes()
 		{
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-			setupLights();
-			m_meshShader->bind();
-			setMeshShaderVars();
-			m_meshShader->setUniInt("showFS", true);
-			m_meshShader->setUniInt("useTex", false);
+			lightsOn();
+			m_dh->shaderHelper->m_meshShader->bind();
+			m_dh->shaderHelper->setMeshShaderVars();
+			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", true);
+			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
 
 			boxes[i][j]->drawHandles();
-			switchOffLights();
+			lightsOff();
 
-			m_meshShader->release();
+			m_dh->shaderHelper->m_meshShader->release();
 			boxes[i][j]->drawFrame();
 			glPopAttrib();
 		}
@@ -461,11 +321,11 @@ void TheScene::drawPoints()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	setupLights();
-	m_meshShader->bind();
-	setMeshShaderVars();
-	m_meshShader->setUniInt("showFS", true);
-	m_meshShader->setUniInt("useTex", false);
+	lightsOn();
+	m_dh->shaderHelper->m_meshShader->bind();
+	m_dh->shaderHelper->setMeshShaderVars();
+	m_dh->shaderHelper->m_meshShader->setUniInt("showFS", true);
+	m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
 
 	std::vector< std::vector< double > > givenPoints;
 	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
@@ -483,8 +343,8 @@ void TheScene::drawPoints()
 		p.push_back(point->getCenter().s.Z);
 		givenPoints.push_back(p);
 	}
-	switchOffLights();
-	m_meshShader->release();
+	lightsOff();
+	m_dh->shaderHelper->m_meshShader->release();
 	glPopAttrib();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("draw points"));

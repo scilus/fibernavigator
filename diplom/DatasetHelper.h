@@ -31,11 +31,13 @@
 #include "splinePoint.h"
 
 #include "AnatomyHelper.h"
+#include "ShaderHelper.h"
 
 class MainFrame;
 class DatasetInfo;
 class TheScene;
 class AnatomyHelper;
+class ShaderHelper;
 class SplinePoint;
 class SelectionBox;
 
@@ -98,6 +100,7 @@ public:
 	MainFrame* mainFrame;
 	TheScene* scene;
 	AnatomyHelper* anatomyHelper;
+	ShaderHelper* shaderHelper;
 
 	bool showSagittal;
 	bool showCoronal;
