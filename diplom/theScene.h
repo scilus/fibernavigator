@@ -37,7 +37,7 @@ public:
 
 	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
-	void setLightPos(Vector3fT value) {m_lightPos = value;};
+
 	void toggleBoxes() {m_showBoxes = !m_showBoxes;};
 	bool togglePointMode() {return m_pointMode = !m_pointMode;};
 	bool getPointMode() {return m_pointMode;};
@@ -55,8 +55,6 @@ private:
 	wxGLContext* m_mainGLContext;
 
 	DatasetHelper* m_dh;
-
-	Vector3fT m_lightPos;
 
 	bool m_pointMode;
 

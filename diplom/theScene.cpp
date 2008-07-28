@@ -18,9 +18,6 @@ TheScene::TheScene(DatasetHelper* dh)
 	m_pointMode = false;
 	m_blendAlpha = false;
 
-	Vector3fT v1 = {{ 1.0, 1.0, 1.0}};
-	m_lightPos = v1;
-
 	m_dh->anatomyHelper = new AnatomyHelper(m_dh);
 	m_selBoxChanged = true;
 }
@@ -136,7 +133,7 @@ void TheScene::lightsOn()
 	GLfloat light_specular[] = { 0.4, 0.4, 0.4, 1.0 };
 	GLfloat specref[] = { 0.5, 0.5, 0.5, 0.5};
 
-	GLfloat light_position0[] = { -m_lightPos.s.X, -m_lightPos.s.Y, -m_lightPos.s.Z, 0.0};
+	GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
 
 	glLightfv (GL_LIGHT0, GL_AMBIENT, light_ambient);
 	glLightfv (GL_LIGHT0, GL_DIFFUSE, light_diffuse);

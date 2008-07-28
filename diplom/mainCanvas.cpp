@@ -219,7 +219,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						}
 					}
 					m_dh->quadrant = quadrant;
-					m_dh->scene->setLightPos(view);
 
 					Refresh(false);
 				}
