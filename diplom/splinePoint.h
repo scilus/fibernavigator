@@ -14,11 +14,11 @@
 
 class DatasetHelper;
 
-class Point {
+class SplinePoint {
 public:
-	Point(Vector3fT, DatasetHelper*);
-	Point( double, double, double, DatasetHelper*);
-	~Point();
+	SplinePoint(Vector3fT, DatasetHelper*);
+	SplinePoint( double, double, double, DatasetHelper*);
+	~SplinePoint();
 
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
 	Vector3fT getCenter() {return m_center;};

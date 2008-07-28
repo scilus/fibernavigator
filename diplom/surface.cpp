@@ -3,7 +3,7 @@
 #include "Fantom/FMatrix.hh"
 #include "Fantom/FBSplineSurface.hh"
 #include "surface.h"
-#include "point.h"
+#include "splinePoint.h"
 #include "myListCtrl.h"
 
 #include "GL/glew.h"
@@ -160,7 +160,7 @@ void Surface::execute ()
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
+		SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
 
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);

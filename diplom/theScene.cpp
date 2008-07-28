@@ -1,6 +1,6 @@
 #include "theScene.h"
 #include "myListCtrl.h"
-#include "point.h"
+#include "splinePoint.h"
 #include "curves.h"
 #include "surface.h"
 #include "selectionBox.h"
@@ -471,7 +471,7 @@ void TheScene::drawPoints()
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
+		SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
 		point->draw();
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);

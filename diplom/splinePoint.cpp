@@ -1,7 +1,7 @@
-#include "point.h"
+#include "splinePoint.h"
 #include "selectionBox.h"
 
-Point::Point(Vector3fT center, DatasetHelper* dh)
+SplinePoint::SplinePoint(Vector3fT center, DatasetHelper* dh)
 {
 	m_dh = dh;
 	m_center = center;
@@ -10,7 +10,7 @@ Point::Point(Vector3fT center, DatasetHelper* dh)
 	m_dh->surface_isDirty = true;
 }
 
-Point::Point(double x, double y, double z, DatasetHelper* dh)
+SplinePoint::SplinePoint(double x, double y, double z, DatasetHelper* dh)
 {
 	Vector3fT center = {{x,y,z}};
 	m_dh = dh;
@@ -20,12 +20,12 @@ Point::Point(double x, double y, double z, DatasetHelper* dh)
 	m_dh->surface_isDirty = true;
 }
 
-Point::~Point()
+SplinePoint::~SplinePoint()
 {
 	m_dh->surface_isDirty = true;
 }
 
-void Point::draw()
+void SplinePoint::draw()
 {
 	if (m_selected)
 		glColor3f(1.0, 0.8, 0.0);
@@ -34,7 +34,7 @@ void Point::draw()
 	drawSphere(m_center.s.X, m_center.s.Y, m_center.s.Z, 2);
 }
 
-void Point::drawSphere(float x, float y, float z, float r)
+void SplinePoint::drawSphere(float x, float y, float z, float r)
 {
 	glPushMatrix();
 	glTranslatef(x,y,z);
@@ -44,7 +44,7 @@ void Point::drawSphere(float x, float y, float z, float r)
 	glPopMatrix();
 }
 
-void Point::drag(wxPoint click)
+void SplinePoint::drag(wxPoint click)
 {
 	Vector3fT vs = m_dh->mapMouse2World(click.x, click.y);
 	Vector3fT ve = m_dh->mapMouse2WorldBack(click.x, click.y);
@@ -57,7 +57,7 @@ void Point::drag(wxPoint click)
 	m_dh->surface_isDirty = true;
 }
 
-hitResult Point::hitTest(Ray *ray)
+hitResult SplinePoint::hitTest(Ray *ray)
 {
 	hitResult hr;
 

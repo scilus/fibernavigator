@@ -28,7 +28,7 @@
 
 #include "mainFrame.h"
 #include "theScene.h"
-#include "point.h"
+#include "splinePoint.h"
 
 #include "AnatomyHelper.h"
 
@@ -36,7 +36,7 @@ class MainFrame;
 class DatasetInfo;
 class TheScene;
 class AnatomyHelper;
-class Point;
+class SplinePoint;
 class SelectionBox;
 
 class DatasetHelper {
@@ -94,7 +94,7 @@ public:
 	wxString lastPath;
 	int threadsActive;
 
-	Point* lastSelectedPoint;
+	SplinePoint* lastSelectedPoint;
 	MainFrame* mainFrame;
 	TheScene* scene;
 	AnatomyHelper* anatomyHelper;

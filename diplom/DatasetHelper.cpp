@@ -8,7 +8,7 @@
 
 #include "Anatomy.h"
 #include "curves.h"
-#include "point.h"
+#include "splinePoint.h"
 #include "mesh.h"
 #include "myListCtrl.h"
 #include "wx/xml/xml.h"
@@ -260,7 +260,7 @@ bool DatasetHelper::loadSettings(wxString filename)
 				sx.ToDouble(&_x);
 				sy.ToDouble(&_y);
 				sz.ToDouble(&_z);
-				Point *point = new Point(_x, _y, _z, this);
+				SplinePoint *point = new SplinePoint(_x, _y, _z, this);
 				mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
 				pNode = pNode->GetNext();
 			}
@@ -359,7 +359,7 @@ void DatasetHelper::save(wxString filename)
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
 		id = mainFrame->m_treeWidget->GetNextChild(mainFrame->m_tPointId, cookie);
-		Point *point = (Point*)((MyTreeItemData*)mainFrame->m_treeWidget->GetItemData(id))->getData();
+		SplinePoint *point = (SplinePoint*)((MyTreeItemData*)mainFrame->m_treeWidget->GetItemData(id))->getData();
 		wxXmlNode *pointnode = new wxXmlNode(nodepoints, wxXML_ELEMENT_NODE, wxT("point"));
 
 		wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), point->getCenter().s.Z));

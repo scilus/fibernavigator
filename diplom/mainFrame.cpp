@@ -13,7 +13,7 @@
 
 #include "theScene.h"
 
-#include "point.h"
+#include "splinePoint.h"
 #include "curves.h"
 #include "surface.h"
 
@@ -428,7 +428,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta, 0), m_xSlider->GetMax()));
 			break;
 		case 20:
-			Point *point = new Point(m_mainGL->getEventCenter(), m_dh);
+			SplinePoint *point = new SplinePoint(m_mainGL->getEventCenter(), m_dh);
 			wxTreeItemId pId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
 			m_treeWidget->EnsureVisible(pId);
 			m_treeWidget->SelectItem(pId);
@@ -750,7 +750,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
 	if (m_treeWidget->GetItemText(treeid) == wxT("point"))
 	{
 		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
-		m_dh->lastSelectedPoint = (Point*)((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData();
+		m_dh->lastSelectedPoint = (SplinePoint*)((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData();
 		m_dh->lastSelectedPoint->select();
 	}
 	refreshAllGLWidgets();
@@ -841,7 +841,7 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 			int zz = (m_dh->frames/10)*j;
 			FVector bc = fibers->getBarycenter(FVector(xs, yy - y, zz - z, 25.0, 5.0, 5.0));
 					// create the point
-			m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new Point(bc[0], bc[1], bc[2], m_dh)));
+			m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new SplinePoint(bc[0], bc[1], bc[2], m_dh)));
 		}
 
 	Surface *surface = new Surface(m_dh);

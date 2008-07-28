@@ -3,7 +3,7 @@
 #include "myListCtrl.h"
 #include "wx/utils.h"
 
-#include "point.h"
+#include "splinePoint.h"
 
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_NAVGL_EVENT)
@@ -136,7 +136,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					}
 					else if (event.Dragging() && m_hr.picked == 20)
 					{
-						((Point*)m_hr.object)->drag(event.GetPosition());
+						((SplinePoint*)m_hr.object)->drag(event.GetPosition());
 					}
 				}
 				m_lastPos = event.GetPosition();
@@ -362,7 +362,7 @@ hitResult MainCanvas::pick(wxPoint click)
 		for (int i = 0 ; i < countPoints ; ++i)
 		{
 			id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
-			Point *point = (Point*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
+			SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
 			hitResult hr1 = point->hitTest(ray);
 			if (hr1.hit && !hr.hit) hr = hr1;
 			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
