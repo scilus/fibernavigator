@@ -78,7 +78,7 @@ bool Shader::compile(GLuint* shaderId, wxString codeString)
 	return true;
 }
 
-bool Shader::loadCode(wxString filename, wxString modules)
+bool Shader::loadCode(wxString filename)
 {
 	wxString codeStringVS;
 	wxString codeStringFS;

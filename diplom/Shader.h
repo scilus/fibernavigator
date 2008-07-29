@@ -78,7 +78,7 @@ private:
 	void printwxT(wxString);
 
 
-	bool loadCode (wxString, wxString modules = wxT(""));
+	bool loadCode (wxString);
 	bool loadFromFile(wxString*, wxString);
 };
 
