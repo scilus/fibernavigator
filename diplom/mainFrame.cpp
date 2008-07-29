@@ -331,12 +331,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
     m_dh->scene = new TheScene(m_dh);
 
-    m_dh->columns = 1;
-    m_dh->rows = 1;
-    m_dh->frames = 1;
-    m_dh->lastError = wxT("");
-
-
     m_mainGL = new MainCanvas(m_dh, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
     m_gl0 = new MainCanvas(m_dh, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
@@ -353,13 +347,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-	printf("closing\n");
 	delete m_dh;
-	delete m_mainGL;
-	delete m_gl0;
-	delete m_gl1;
-	delete m_gl2;
-	printf("closing2\n");
 	Close(true);
 }
 
@@ -403,24 +391,38 @@ void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnGLEvent( wxCommandEvent &event )
 {
 	wxPoint pos, newpos;
+	float max = wxMax(m_dh->rows, wxMax(m_dh->columns, m_dh->frames));
+
 
 	switch (event.GetInt())
 	{
-	case axial:
+	case axial: {
 		pos = m_gl0->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dh->columns));
-		m_ySlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dh->rows));
+		float x = ((float)pos.x/NAV_GL_SIZE) * max;
+		float y = ((float)pos.y/NAV_GL_SIZE) * max;
+
+		m_xSlider->SetValue( x - (max - m_dh->columns)/2.0 );
+		m_ySlider->SetValue( y - (max - m_dh->rows)/2.0);
 		break;
-	case coronal:
+	}
+	case coronal: {
 		pos = m_gl1->getMousePos();
-		m_xSlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dh->columns));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dh->frames));
+		float x = ((float)pos.x/NAV_GL_SIZE) * max;
+		float y = ((float)pos.y/NAV_GL_SIZE) * max;
+
+		m_xSlider->SetValue( x - (max - m_dh->columns)/2.0 );
+		m_zSlider->SetValue( y - (max - m_dh->frames)/2.0);
 		break;
-	case sagittal:
+	}
+	case sagittal: {
 		pos = m_gl2->getMousePos();
-		m_ySlider->SetValue((int)(((float)pos.x/NAV_GL_SIZE)*m_dh->rows));
-		m_zSlider->SetValue((int)(((float)pos.y/NAV_GL_SIZE)*m_dh->frames));
+		float x = ((float)pos.x/NAV_GL_SIZE) * max;
+		float y = ((float)pos.y/NAV_GL_SIZE) * max;
+
+		m_ySlider->SetValue( x - (max - m_dh->rows)/2.0 );
+		m_zSlider->SetValue( y - (max - m_dh->frames)/2.0 );
 		break;
+	}
 	case mainView:
 		int delta = m_mainGL->getDelta();
 
