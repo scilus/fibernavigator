@@ -32,7 +32,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 
 	m_handleRadius = 3.0;
 	m_inBox.resize(m_dh->countFibers, sizeof(bool));
-	for (int i = 0; i < m_dh->countFibers ; ++i)
+	for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
 	{
 		m_inBox[i] = 0;
 	}
@@ -67,46 +67,182 @@ void SelectionBox::drawFrame()
 	float cx = m_center.s.X;
 	float cy = m_center.s.Y;
 	float cz = m_center.s.Z;
+	mx = cx - m_size.s.X/2;
+	px = cx + m_size.s.X/2;
+	my = cy - m_size.s.Y/2;
+	py = cy + m_size.s.Y/2;
+	mz = cz - m_size.s.Z/2;
+	pz = cz + m_size.s.Z/2;
+
 	if ( m_isTop )
-		glColor3f(0.0, 1.0, 1.0);
+		glColor4f(0.0, 1.0, 1.0, 0.2);
 	else {
 		if ( !m_isNOT )
-			glColor3f(0.0, 1.0, 0.0);
+			glColor4f(0.0, 1.0, 0.0, 0.2);
 		else
-			glColor3f(1.0, 0.0, 0.0);
+			glColor4f(1.0, 0.0, 0.0, 0.2);
 	}
-	//glLineWidth(2.0);
-	glBegin(GL_LINES);
-		glVertex3f(mx, cy, cz);
-		glVertex3f(px, cy, cz);
-		glVertex3f(cx, my, cz);
-		glVertex3f(cx, py, cz);
-		glVertex3f(cx, cy, mz);
-		glVertex3f(cx, cy, pz);
-		glVertex3f(px, py, pz);
-		glVertex3f(px, py, mz);
-		glVertex3f(mx, py, pz);
-		glVertex3f(mx, py, mz);
-		glVertex3f(mx, my, pz);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_QUADS);
 		glVertex3f(mx, my, mz);
-		glVertex3f(px, my, pz);
+		glVertex3f(mx, py, mz);
+		glVertex3f(mx, py, pz);
+		glVertex3f(mx, my, pz);
 		glVertex3f(px, my, mz);
+		glVertex3f(px, py, mz);
+		glVertex3f(px, py, pz);
+		glVertex3f(px, my, pz);
+
+		glVertex3f(mx, my, mz);
+		glVertex3f(px, my, mz);
+		glVertex3f(px, my, pz);
+		glVertex3f(mx, my, pz);
+		glVertex3f(mx, py, mz);
+		glVertex3f(px, py, mz);
+		glVertex3f(px, py, pz);
+		glVertex3f(mx, py, pz);
+
+		glVertex3f(mx, my, mz);
+		glVertex3f(mx, py, mz);
+		glVertex3f(px, py, mz);
+		glVertex3f(px, my, mz);
+		glVertex3f(mx, my, pz);
+		glVertex3f(mx, py, pz);
+		glVertex3f(px, py, pz);
+		glVertex3f(px, my, pz);
 	glEnd();
-	glBegin(GL_LINE_STRIP);
-		glVertex3f( px, py, pz );
-		glVertex3f( mx, py, pz );
-		glVertex3f( mx, my, pz );
-		glVertex3f( px, my, pz );
-		glVertex3f( px, py, pz );
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glBegin(GL_QUADS);
+		switch (m_dh->quadrant)
+		{
+		case 2:
+			draw2();
+			draw4();
+			draw5();
+			draw1();
+			draw3();
+			draw6();
+			break;
+		case 3:
+			draw2();
+			draw3();
+			draw5();
+			draw1();
+			draw4();
+			draw6();
+			break;
+		case 6:
+			draw1();
+			draw3();
+			draw5();
+			draw2();
+			draw4();
+			draw6();
+			break;
+		case 7:
+			draw1();
+			draw4();
+			draw5();
+			draw2();
+			draw3();
+			draw6();
+			break;
+		case 1:
+			draw2();
+			draw4();
+			draw6();
+			draw1();
+			draw3();
+			draw5();
+			break;
+		case 4:
+			draw2();
+			draw3();
+			draw6();
+			draw1();
+			draw4();
+			draw5();
+			break;
+		case 5:
+			draw1();
+			draw3();
+			draw6();
+			draw2();
+			draw4();
+			draw5();
+			break;
+		case 8:
+			draw1();
+			draw4();
+			draw6();
+			draw2();
+			draw3();
+			draw5();
+			break;
+		}
+
 	glEnd();
-	glBegin(GL_LINE_STRIP);
-		glVertex3f( px, py, mz );
-		glVertex3f( mx, py, mz );
-		glVertex3f( mx, my, mz );
-		glVertex3f( px, my, mz );
-		glVertex3f( px, py, mz );
-	glEnd();
+
+	glDisable(GL_BLEND);
+
+
+
+
 }
+
+void SelectionBox::draw1()
+{
+	glVertex3f(px, my, mz);
+	glVertex3f(px, py, mz);
+	glVertex3f(px, py, pz);
+	glVertex3f(px, my, pz);
+}
+
+void SelectionBox::draw2()
+{
+	glVertex3f(mx, my, mz);
+	glVertex3f(mx, py, mz);
+	glVertex3f(mx, py, pz);
+	glVertex3f(mx, my, pz);
+}
+
+void SelectionBox::draw3()
+{
+	glVertex3f(mx, py, mz);
+	glVertex3f(px, py, mz);
+	glVertex3f(px, py, pz);
+	glVertex3f(mx, py, pz);
+}
+
+void SelectionBox::draw4()
+{
+	glVertex3f(mx, my, mz);
+	glVertex3f(px, my, mz);
+	glVertex3f(px, my, pz);
+	glVertex3f(mx, my, pz);
+}
+
+void SelectionBox::draw5()
+{
+	glVertex3f(mx, my, pz);
+	glVertex3f(mx, py, pz);
+	glVertex3f(px, py, pz);
+	glVertex3f(px, my, pz);
+}
+
+void SelectionBox::draw6()
+{
+	glVertex3f(mx, my, mz);
+	glVertex3f(mx, py, mz);
+	glVertex3f(px, py, mz);
+	glVertex3f(px, my, mz);
+}
+
 
 void SelectionBox::drawSphere(float x, float y, float z, float r)
 {

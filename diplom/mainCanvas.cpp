@@ -99,6 +99,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						((SelectionBox*)m_hr.object)->setPicked(10);
 						m_hr.picked = 10;
 					}
+					printf("%d\n", m_dh->quadrant);
 			    }
 				else {
 					if (event.Dragging() && m_hr.picked < 10)

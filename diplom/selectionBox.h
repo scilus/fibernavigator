@@ -44,6 +44,13 @@ public:
 	wxColour getColor() {return m_color;};
 	void setColorChanged(bool v) {m_colorChanged = v;};
 
+	void draw1();
+	void draw2();
+	void draw3();
+	void draw4();
+	void draw5();
+	void draw6();
+
 	void moveLeft();
 	void moveRight();
 	void moveForward();

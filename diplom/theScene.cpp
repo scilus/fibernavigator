@@ -292,12 +292,8 @@ void TheScene::drawSelectionBoxes()
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 			lightsOn();
-			m_dh->shaderHelper->m_meshShader->bind();
-			m_dh->shaderHelper->setMeshShaderVars();
-			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", true);
-			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
 
-			boxes[i][j]->drawHandles();
+			//boxes[i][j]->drawHandles();
 			lightsOff();
 
 			m_dh->shaderHelper->m_meshShader->release();
