@@ -111,7 +111,14 @@ bool Shader::loadFromFile(wxString* code, wxString fileName)
 		size_t i;
 		for (i = 0 ; i < file.GetLineCount() ; ++i)
 		{
-			*code += file.GetLine(i);
+			if (file.GetLine(i).BeforeFirst(' ') == wxT("#include"))
+			{
+				wxString include = wxT("");
+				loadFromFile(&include, file.GetLine(i).AfterFirst(' '));
+				*code += include;
+			}
+			else
+				*code += file.GetLine(i);
 		}
 		return true;
 	}
@@ -148,6 +155,13 @@ void Shader::printProgramLog(GLuint program)
 		printf("Program Log:\n%s\n\n", infoLog);
 		free (infoLog);
 	}
+}
+
+void Shader::printwxT(wxString string)
+{
+	char cstring[string.length()];
+	strcpy(cstring, (const char*)string.mb_str(wxConvUTF8));
+	printf("%s", cstring);
 }
 
 void Shader::setUniInt(const GLchar* name, int value)

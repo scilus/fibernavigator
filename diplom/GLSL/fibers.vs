@@ -1,3 +1,5 @@
+#include GLSL/lighting.vs
+
 varying vec3 color1;
 
 void main()

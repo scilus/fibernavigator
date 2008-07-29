@@ -1,3 +1,5 @@
+#include GLSL/lighting.vs
+
 varying vec3 TexCoord;
 
 void main()

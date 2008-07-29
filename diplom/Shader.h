@@ -75,6 +75,7 @@ private:
 
 	void printCompilerLog(GLuint);
 	void printProgramLog(GLuint);
+	void printwxT(wxString);
 
 
 	bool loadCode (wxString, wxString modules = wxT(""));

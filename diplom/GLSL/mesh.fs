@@ -1,3 +1,5 @@
+#include GLSL/lighting.fs
+
 uniform int sector;
 uniform int cutX, cutY, cutZ;
 uniform int dimX, dimY, dimZ;
