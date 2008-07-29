@@ -69,6 +69,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(KDTREE_EVENT, MainFrame::OnKdTreeThreadFinished)
 	/* Button Assign Color pressed */
 	EVT_MENU(VIEWER_ASSIGN_COLOR, MainFrame::OnAssignColor)
+	EVT_MENU(VIEWER_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -908,5 +909,11 @@ void MainFrame::OnAssignColor(wxCommandEvent& event)
 		}
 	}
 	m_dh->scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnToggleLighting(wxCommandEvent& event)
+{
+	m_dh->lighting = !m_dh->lighting;
 	refreshAllGLWidgets();
 }

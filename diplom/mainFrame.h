@@ -65,6 +65,7 @@ private:
     void OnTreeEvent(wxCommandEvent& event);
 
     void OnAssignColor(wxCommandEvent& event);
+    void OnToggleLighting(wxCommandEvent& event);
 
     void OnKdTreeThreadFinished(wxCommandEvent& event);
 
@@ -139,6 +140,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_NEW_SURFACE			22
 #define VIEWER_NEW_SURFACE2			23
 #define VIEWER_ASSIGN_COLOR			24
+#define VIEWER_TOGGLE_LIGHTING		25
 
 #define KDTREE_EVENT			50
 

@@ -8,7 +8,8 @@
 #ifndef SHADERHELPER_H_
 #define SHADERHELPER_H_
 
-#include "GLSL/GLSLShaderProgram.h"
+//#include "GLSL/GLSLShaderProgram.h"
+#include "Shader.h"
 #include "DatasetHelper.h"
 
 class ShaderHelper {
@@ -19,9 +20,9 @@ public:
 	void setTextureShaderVars();
 	void setMeshShaderVars();
 
-	FGLSLShaderProgram *m_textureShader;
-	FGLSLShaderProgram *m_meshShader;
-	FGLSLShaderProgram *m_curveShader;
+	Shader *m_textureShader;
+	Shader *m_meshShader;
+	Shader *m_curveShader;
 
 private:
 	DatasetHelper* m_dh;

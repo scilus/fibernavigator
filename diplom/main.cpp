@@ -27,6 +27,7 @@
 #include "icons/box.xpm"
 #include "icons/mini_cat.xpm"
 #include "icons/new.xpm"
+#include "icons/exp.xpm"
 #include "icons/quit.xpm"
 #include "icons/toggleselbox.xpm"
 #include "icons/toggleSurface.xpm"
@@ -87,6 +88,7 @@ bool MyApp::OnInit(void)
   wxBitmap bmpHideSelbox (toggleselbox_xpm);
   wxBitmap bmpNewSurface (toggle_surface_xpm);
   wxBitmap bmpAssignColor (toggle_rgb_xpm);
+  wxBitmap bmpLighting (exp_xpm);
   toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
@@ -107,6 +109,8 @@ bool MyApp::OnInit(void)
   toolBar->AddTool(VIEWER_NEW_SURFACE2, bmpNewSurface, wxT("New Spline Surface"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
+  toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_TOGGLE_LIGHTING, bmpLighting, wxT("Toggle Lighting"));
   toolBar->AddSeparator();
 
   toolBar->Realize();

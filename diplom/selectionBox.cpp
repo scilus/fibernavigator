@@ -267,6 +267,7 @@ void SelectionBox::drag(wxPoint click)
 	m_center.s.X = vs.s.X + dir.s.X * m_hr.tmin;
 	m_center.s.Y = vs.s.Y + dir.s.Y * m_hr.tmin;
 	m_center.s.Z = vs.s.Z + dir.s.Z * m_hr.tmin;
+
 	m_dirty = true;
 }
 

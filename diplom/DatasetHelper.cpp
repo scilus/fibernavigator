@@ -26,6 +26,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	surface_loaded = false;
 	surface_isDirty = true;
 	useVBO = true;
+	lighting = false;
 
 	showSagittal = true;
 	showCoronal = true;

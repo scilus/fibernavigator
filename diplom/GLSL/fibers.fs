@@ -1,5 +1,4 @@
 varying vec3 color1;
-uniform float cam[3];
 
 void main()
 {
@@ -9,11 +8,7 @@ void main()
 	// be modified by a fragment shader. So a new variable
 	// needs to be created. */
 
-	vec3 c = vec3(cam[0], cam[1], cam[2]);
-	vec3 c1 = normalize(gl_NormalMatrix * c);
-	vec3 c2 = cross(normal,c);
-
-	vec3 n = c2;
+	vec3 n = normal;
 
 	vec4 ambient  = vec4(0.0);
 	vec4 diffuse  = vec4(0.0);

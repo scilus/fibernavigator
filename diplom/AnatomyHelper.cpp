@@ -16,7 +16,7 @@ AnatomyHelper::~AnatomyHelper() {
 	// TODO Auto-generated destructor stub
 }
 
-void AnatomyHelper::renderNav(int view, FGLSLShaderProgram *shader)
+void AnatomyHelper::renderNav(int view, Shader *shader)
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 

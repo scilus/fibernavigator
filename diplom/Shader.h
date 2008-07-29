@@ -1,25 +1,39 @@
-#ifndef GLSL_SHADERPROGRAM_H
-#define GLSL_SHADERPROGRAM_H
+/*
+ * Shader.h
+ *
+ *  Created on: 29.07.2008
+ *      Author: ralph
+ */
 
-#include "GLSLShader.h"
+#ifndef SHADER_H_
+#define SHADER_H_
 
-class FGLSLShaderProgram
-{
+#include <GL/glew.h>
+
+#include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
+#include "wx/textfile.h"
+
+class Shader {
 public:
     /**
      * Create an empty shader object
      */
-    FGLSLShaderProgram();
+    Shader(wxString);
 
     /**
      * Destroy shader object, unlinks it, if needed
      */
-    ~FGLSLShaderProgram();
+    ~Shader();
 
     /**
      * link a vertex and a fragement program to the shader
      */
-    bool link( GLSLShader*, GLSLShader*);
+    bool link();
 
     /**
     * unlink
@@ -39,7 +53,8 @@ public:
     /**
      * get program object
      */
-    GLuint getProgramObject();
+    GLuint getProgramObject() {return m_shaderProgram;};
+
 
     void setUniInt(const GLchar*, int);
     void setUniFloat(const GLchar*, float);
@@ -50,13 +65,20 @@ public:
 
 private:
     GLuint m_shaderProgram;
-    GLSLShader *m_vertex;
-    GLSLShader * m_fragment;
+    GLuint m_vertex;
+    GLuint m_fragment;
 
-private:
+    /**
+     * compile a vertex or fragment shader program
+     */
+    bool compile(GLuint*, wxString);
 
 	void printCompilerLog(GLuint);
+	void printProgramLog(GLuint);
+
+
+	bool loadCode (wxString, wxString modules = wxT(""));
+	bool loadFromFile(wxString*, wxString);
 };
 
-#endif
-
+#endif /* SHADER_H_ */

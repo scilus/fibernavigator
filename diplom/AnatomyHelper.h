@@ -8,7 +8,7 @@
 #ifndef ANATOMYHELPER_H_
 #define ANATOMYHELPER_H_
 
-#include "GLSL/GLSLShaderProgram.h"
+#include "Shader.h"
 #include "DatasetHelper.h"
 
 class DatasetHelper;
@@ -19,7 +19,7 @@ public:
 	virtual ~AnatomyHelper();
 
 	void renderMain();
-	void renderNav(int, FGLSLShaderProgram*);
+	void renderNav(int, Shader*);
 
 	void render() {};
 

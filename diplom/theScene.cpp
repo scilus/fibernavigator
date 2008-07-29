@@ -202,18 +202,13 @@ void TheScene::renderFibers()
 
 		if (info->getType() == Curves_ && info->getShow())
 		{
-			m_dh->shaderHelper->m_curveShader->bind();
+			lightsOff();
 
-			GLint viewport[4];
-			glGetIntegerv( GL_VIEWPORT, viewport );
-			Vector3fT tmp = m_dh->mapMouse2World(viewport[2], viewport[3]);
-			float n = sqrt((tmp.s.X * tmp.s.X) +  (tmp.s.Y * tmp.s.Y) + ( tmp.s.Z  * tmp.s.Z));
-			float cam[] = {tmp.s.X/n, tmp.s.Y/n, tmp.s.Z/n};
-
-			lightsOn();
-
-			//printf("%f, %f, %f\n", cam[0], cam[1], cam[2]);
-			m_dh->shaderHelper->m_curveShader->setUniArrayFloat("cam", cam, 3);
+			if (m_dh->lighting)
+			{
+				lightsOn();
+				//m_dh->shaderHelper->m_curveShader->bind();
+			}
 
 			if (m_selBoxChanged)
 			{
@@ -222,7 +217,7 @@ void TheScene::renderFibers()
 			}
 			info->draw();
 
-			m_dh->shaderHelper->m_curveShader->release();
+			//m_dh->shaderHelper->m_curveShader->release();
 
 			lightsOff();
 		}

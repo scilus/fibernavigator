@@ -85,6 +85,7 @@ public:
 	int columns;
 	int frames;
 	bool useVBO;
+	bool lighting;
 	unsigned int countFibers;
 	Matrix4fT m_transform;
 	wxString lastError;

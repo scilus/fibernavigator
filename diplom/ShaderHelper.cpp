@@ -9,22 +9,15 @@
 
 ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh = dh;
-
+	/*
 	wxString vShaderModules;
 	m_dh->loadTextFile(&vShaderModules, wxT("GLSL/lighting.vs"));
 	wxString fShaderModules;
 	m_dh->loadTextFile(&fShaderModules, wxT("GLSL/lighting.fs"));
-
+*/
 	printf("initializing  texture shader\n");
 
-	GLSLShader *vShader = new GLSLShader(GL_VERTEX_SHADER);
-	GLSLShader *fShader = new GLSLShader(GL_FRAGMENT_SHADER);
-
-	vShader->loadCode(wxT("GLSL/anatomy.vs"));
-	fShader->loadCode(wxT("GLSL/anatomy.fs"));
-
-	m_textureShader = new FGLSLShaderProgram();
-	m_textureShader->link(vShader, fShader);
+	m_textureShader = new Shader(wxT("GLSL/anatomy"));
 	m_textureShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 1"));
@@ -32,14 +25,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 
 	printf("initializing mesh shader\n");
 
-	GLSLShader *vShader1 = new GLSLShader(GL_VERTEX_SHADER);
-	GLSLShader *fShader1 = new GLSLShader(GL_FRAGMENT_SHADER);
-
-	vShader1->loadCode(wxT("GLSL/mesh.vs"), vShaderModules);
-	fShader1->loadCode(wxT("GLSL/mesh.fs"), fShaderModules);
-
-	m_meshShader = new FGLSLShaderProgram();
-	m_meshShader->link(vShader1, fShader1);
+	m_meshShader = new Shader(wxT("GLSL/mesh"));
 	m_meshShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 2"));
@@ -47,14 +33,8 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 
 	printf("initializing curves shader\n");
 
-	GLSLShader *vShader2 = new GLSLShader(GL_VERTEX_SHADER);
-	GLSLShader *fShader2 = new GLSLShader(GL_FRAGMENT_SHADER);
 
-	vShader2->loadCode(wxT("GLSL/fibers.vs"),vShaderModules);
-	fShader2->loadCode(wxT("GLSL/fibers.fs"),fShaderModules);
-
-	m_curveShader = new FGLSLShaderProgram();
-	m_curveShader->link(vShader2, fShader2);
+	m_curveShader = new Shader(wxT("GLSL/fibers"));
 	m_curveShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 3"));
