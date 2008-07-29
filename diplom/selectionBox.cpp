@@ -38,31 +38,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	}
 }
 
-void SelectionBox::drawHandles()
-{
-	m_handleRadius = 2.0 + Vector3fLength(&m_size)/50.0;
-	float cx = m_center.s.X;
-	float cy = m_center.s.Y;
-	float cz = m_center.s.Z;
-	mx = cx - m_size.s.X/2;
-	px = cx + m_size.s.X/2;
-	my = cy - m_size.s.Y/2;
-	py = cy + m_size.s.Y/2;
-	mz = cz - m_size.s.Z/2;
-	pz = cz + m_size.s.Z/2;
-
-	glColor3f(1.0, 0.0, 0.0);
-	drawSphere(cx, cy, cz, m_handleRadius);
-	drawSphere(mx - m_handleRadius, cy, cz, m_handleRadius);
-	drawSphere(px + m_handleRadius, cy, cz, m_handleRadius);
-	drawSphere(cx, my - m_handleRadius, cz, m_handleRadius);
-	drawSphere(cx, py + m_handleRadius, cz, m_handleRadius);
-	drawSphere(cx, cy, mz - m_handleRadius, m_handleRadius);
-	drawSphere(cx, cy, pz + m_handleRadius, m_handleRadius);
-
-}
-
-void SelectionBox::drawFrame()
+void SelectionBox::draw()
 {
 	float cx = m_center.s.X;
 	float cy = m_center.s.Y;
@@ -258,13 +234,10 @@ hitResult SelectionBox::hitTest(Ray *ray)
 {
 	hitResult hr;
 	if (m_show) {
-		float cx = m_center.s.X;
-		float cy = m_center.s.Y;
-		float cz = m_center.s.Z;
 		float tpicked = 0;
 		int picked = 0;
 
-		BoundingBox *bb = new BoundingBox(cx, cy, cz, 6, 6, 6);
+		BoundingBox *bb = new BoundingBox(m_center, m_size);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
 			if (picked == 0) {
@@ -275,90 +248,6 @@ hitResult SelectionBox::hitTest(Ray *ray)
 			else {
 				if (hr.tmin < tpicked) {
 					picked = 10;
-					tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(mx - m_handleRadius, cy, cz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 11;
-				tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < tpicked) {
-					picked = 11;
-					tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(px + m_handleRadius, cy, cz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 12;
-				tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < tpicked) {
-					picked = 12;
-					tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx, my - m_handleRadius, cz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 13;
-				tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < tpicked) {
-					picked = 13;
-					tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx, py + m_handleRadius, cz);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 14;
-				tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < tpicked) {
-					picked = 14;
-					tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx, cy, mz - m_handleRadius);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 15;
-				tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < tpicked) {
-					picked = 15;
-					tpicked = hr.tmin;
-				}
-			}
-		}
-		bb->setCenter(cx, cy, pz + m_handleRadius);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 16;
-				tpicked = hr.tmin;
-			}
-			else {
-				if (hr.tmin < tpicked) {
-					picked = 16;
 					tpicked = hr.tmin;
 				}
 			}
@@ -387,22 +276,34 @@ float SelectionBox::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vect
 void SelectionBox::processDrag(wxPoint click, wxPoint lastPos)
 {
 	if (m_hr.picked == 10) {
-		drag(click);
+		drag(click, lastPos);
 	}
 	else {
 		resize(click, lastPos);
 	}
 }
 
-void SelectionBox::drag(wxPoint click)
+void SelectionBox::drag(wxPoint click, wxPoint lastPos)
 {
+	//printf("(%d,%d) (%d,%d)\n", lastPos.x, lastPos.y, click.x, click.y );
 	Vector3fT vs = m_dh->mapMouse2World(click.x, click.y);
 	Vector3fT ve = m_dh->mapMouse2WorldBack(click.x, click.y);
 	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
 
-	m_center.s.X = vs.s.X + dir.s.X * m_hr.tmin;
-	m_center.s.Y = vs.s.Y + dir.s.Y * m_hr.tmin;
-	m_center.s.Z = vs.s.Z + dir.s.Z * m_hr.tmin;
+	Vector3fT vs2 = m_dh->mapMouse2World(lastPos.x, lastPos.y);
+	Vector3fT ve2 = m_dh->mapMouse2WorldBack(lastPos.x, lastPos.y);
+	Vector3fT dir2 = {{ve2.s.X - vs2.s.X, ve2.s.Y - vs2.s.Y, ve2.s.Z - vs2.s.Z}};
+
+	Vector3fT change =
+		{{(vs.s.X + dir.s.X * m_hr.tmin) - (vs2.s.X + dir2.s.X * m_hr.tmin),
+		  (vs.s.Y + dir.s.Y * m_hr.tmin) - (vs2.s.Y + dir2.s.Y * m_hr.tmin),
+		  (vs.s.Z + dir.s.Z * m_hr.tmin) - (vs2.s.Z + dir2.s.Z * m_hr.tmin)}};
+
+
+
+	m_center.s.X += change.s.X;
+	m_center.s.Y += change.s.Y;
+	m_center.s.Z += change.s.Z;
 
 	m_dirty = true;
 }

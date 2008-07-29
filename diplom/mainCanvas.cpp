@@ -95,11 +95,13 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_isrDragging = true;										// Prepare For Dragging
 					m_lastPos = event.GetPosition();
 					m_hr = pick(event.GetPosition());
+					/*
 					if (wxGetKeyState(WXK_CONTROL) && (m_hr.picked > 10)) {
 						((SelectionBox*)m_hr.object)->setPicked(10);
 						m_hr.picked = 10;
 					}
-					printf("%d\n", m_dh->quadrant);
+					*/
+					//printf("%d\n", m_dh->quadrant);
 			    }
 				else {
 					if (event.Dragging() && m_hr.picked < 10)
@@ -405,7 +407,7 @@ void MainCanvas::render()
     	glPushMatrix();
     	glMultMatrixf(m_dh->m_transform.M);										// NEW: Apply Dynamic Transform
     	m_dh->scene->renderScene();
-    	//renderTestRay();
+    	renderTestRay();
 	    glPopMatrix();
 	    break;
     }

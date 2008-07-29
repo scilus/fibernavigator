@@ -291,13 +291,8 @@ void TheScene::drawSelectionBoxes()
 		{
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-			lightsOn();
+			boxes[i][j]->draw();
 
-			//boxes[i][j]->drawHandles();
-			lightsOff();
-
-			m_dh->shaderHelper->m_meshShader->release();
-			boxes[i][j]->drawFrame();
 			glPopAttrib();
 		}
 	}

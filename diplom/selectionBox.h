@@ -23,8 +23,7 @@ public:
 	SelectionBox(SelectionBox*);
 	~SelectionBox() {};
 
-	void drawHandles();
-	void drawFrame();
+	void draw();
 	hitResult hitTest(Ray *ray);
 	void processDrag(wxPoint click, wxPoint lastPos);
 
@@ -79,7 +78,7 @@ public:
 
 private:
 	void drawSphere(float, float, float, float);
-	void drag(wxPoint click);
+	void drag(wxPoint click, wxPoint lastPos);
 	void resize(wxPoint click, wxPoint lastPos);
 
 	float getAxisParallelMovement(int, int, int, int, Vector3fT);
