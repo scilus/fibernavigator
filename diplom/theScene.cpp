@@ -86,9 +86,12 @@ void TheScene::renderScene()
 	if (m_dh->fibers_loaded)
 	{
 		renderFibers();
-		if (m_showBoxes )
+		if (m_dh->fibers_loaded)
 		{
-			drawSelectionBoxes();
+			if (m_showBoxes )
+			{
+				drawSelectionBoxes();
+			}
 		}
 	}
 
