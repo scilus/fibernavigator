@@ -113,13 +113,13 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						Vector3fT n = {{0,0,0}};
 						switch (m_hr.picked) {
 						case axial:
-							n.s.X = 1.0;
+							n.s.Z = 1.0;
 							break;
 						case coronal:
 							n.s.Y = 1.0;
 							break;
 						case sagittal:
-							n.s.Z = 1.0;
+							n.s.X = 1.0;
 							break;
 						}
 						if (xDrag == 0 && yDrag == 0) m_delta = 0;
