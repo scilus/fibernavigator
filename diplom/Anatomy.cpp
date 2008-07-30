@@ -130,11 +130,11 @@ bool Anatomy::load(wxString filename)
 		else if (m_bands / m_frames == 3) {
 			m_type = RGB;
 		}
-		else m_type = ERROR;
+		else m_type = TERROR;
 	}
 	else if (m_repn.Cmp(wxT("short")) == 0) m_type = Head_short;
 	else if (m_repn.Cmp(wxT("float")) == 0) m_type = Overlay;
-	else m_type = ERROR;
+	else m_type = TERROR;
 
 	if (flag)
 	{
