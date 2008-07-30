@@ -328,7 +328,7 @@ void Surface::draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glBegin (GL_TRIANGLES);
-	for (uint i = 0 ; i < m_vertices.size() ; ++i)
+	for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
 	{
 		std::vector< double > p = m_splinePoints[m_vertices[i]];
 		FVector n = m_normals[m_vertices[i]];

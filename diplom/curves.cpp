@@ -349,10 +349,10 @@ void Curves::resetLinesShown()
 
 void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 {
-	for (uint i = 0 ; i != boxes.size() ; ++i)
+	for (unsigned int i = 0 ; i != boxes.size() ; ++i)
 	{
 		bool dirty = false;
-		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
 		{
 			if (boxes[i][j]->isDirty()) dirty = true;
 		}
@@ -361,7 +361,7 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 			boxes[i][0]->m_inBox = getLinesShown(boxes[i][0]);
 			boxes[i][0]->notDirty();
 
-			for (uint j = 1 ; j < boxes[i].size() ; ++j)
+			for (unsigned int j = 1 ; j < boxes[i].size() ; ++j)
 			{
 				if  (boxes[i][j]->isDirty()) {
 					boxes[i][j]->m_inBox = getLinesShown(boxes[i][j]);
@@ -411,7 +411,7 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 		}
 	}
 	resetLinesShown();
-	for (uint i = 0 ; i < boxes.size() ; ++i)
+	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
 		if ( boxes[i][0]->m_isActive) {
 			for (int k = 0 ; k <m_lineCount ; ++k)

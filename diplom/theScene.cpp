@@ -288,9 +288,9 @@ void TheScene::drawSphere(float x, float y, float z, float r)
 void TheScene::drawSelectionBoxes()
 {
 	std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
-	for (uint i = 0 ; i < boxes.size() ; ++i)
+	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
-		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
 		{
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 

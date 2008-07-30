@@ -377,9 +377,9 @@ void DatasetHelper::save(wxString filename)
 	}
 	wxXmlNode *masterbox;
 	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
-	for (uint i = 0 ; i < boxes.size() ; ++i)
+	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
-		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
 		{
 			if (j == 0)
 			{
@@ -529,8 +529,8 @@ void DatasetHelper::treeFinished()
 void DatasetHelper::updateAllSelectionBoxes()
 {
 	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
-	for (uint i = 0 ; i < boxes.size() ; ++i)
-		for (uint j = 0 ; j < boxes[i].size() ; ++j)
+	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
+		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
 			boxes[i][j]->setDirty();
 }
 

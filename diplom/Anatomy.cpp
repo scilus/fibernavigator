@@ -164,7 +164,7 @@ bool Anatomy::load(wxString filename)
 					}
 					flag = true;
 					wxUint16 max = 0;
-					for ( uint i = 0 ; i < sizeof(m_shortDataset) ; ++i)
+					for ( unsigned int i = 0 ; i < sizeof(m_shortDataset) ; ++i)
 					{
 						max = wxMax(max, m_shortDataset[i]);
 					}

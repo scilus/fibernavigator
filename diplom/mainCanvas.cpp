@@ -344,9 +344,9 @@ hitResult MainCanvas::pick(wxPoint click)
 	if (m_dh->scene->m_showBoxes)
 	{
 		std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
-		for (uint i = 0 ; i < boxes.size() ; ++i)
+		for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 		{
-			for (uint j = 0 ; j < boxes[i].size() ; ++j)
+			for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
 			{
 				hitResult hr1 = boxes[i][j]->hitTest(ray);
 				if (hr1.hit && !hr.hit) hr = hr1;

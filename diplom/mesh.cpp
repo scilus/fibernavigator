@@ -87,7 +87,7 @@ bool Mesh::load(wxString filename)
 
 		m_vertexArray = new vertex[c.i];
 		fp += 4;
-		for (uint i = 0 ; i < c.i ; ++i)
+		for (unsigned int i = 0 ; i < c.i ; ++i)
 		{
 			f.b[0] = buffer[fp];
 			f.b[1] = buffer[fp+1];
