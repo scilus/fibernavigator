@@ -236,6 +236,10 @@ hitResult SelectionBox::hitTest(Ray *ray)
 	if (m_show) {
 		float tpicked = 0;
 		int picked = 0;
+		float cx = m_center.s.X;
+        float cy = m_center.s.Y;
+        float cz = m_center.s.Z;
+
 
 		BoundingBox *bb = new BoundingBox(m_center, m_size);
 		hr = bb->hitTest(ray);
@@ -251,6 +255,100 @@ hitResult SelectionBox::hitTest(Ray *ray)
 					tpicked = hr.tmin;
 				}
 			}
+		}
+		if (wxGetKeyState(WXK_CONTROL))
+		{
+			bb->setCenter(mx - 1 , cy, cz);
+			bb->setSize(m_size);
+			bb->setSizeX(1);
+			hr = bb->hitTest(ray);
+			if (hr.hit) {
+					if (picked == 0) {
+							picked = 11;
+							tpicked = hr.tmin;
+					}
+					else {
+							if (hr.tmin < tpicked) {
+									picked = 11;
+									tpicked = hr.tmin;
+							}
+					}
+			}
+			bb->setCenter(px + 1, cy, cz);
+			hr = bb->hitTest(ray);
+			if (hr.hit) {
+					if (picked == 0) {
+							picked = 12;
+							tpicked = hr.tmin;
+					}
+					else {
+							if (hr.tmin < tpicked) {
+									picked = 12;
+									tpicked = hr.tmin;
+							}
+					}
+			}
+			bb->setCenter(cx, my - 1, cz);
+			bb->setSize(m_size);
+			bb->setSizeY(1);
+			hr = bb->hitTest(ray);
+			if (hr.hit) {
+					if (picked == 0) {
+							picked = 13;
+							tpicked = hr.tmin;
+					}
+					else {
+							if (hr.tmin < tpicked) {
+									picked = 13;
+									tpicked = hr.tmin;
+							}
+					}
+			}
+			bb->setCenter(cx, py + 1, cz);
+			hr = bb->hitTest(ray);
+			if (hr.hit) {
+					if (picked == 0) {
+							picked = 14;
+							tpicked = hr.tmin;
+					}
+					else {
+							if (hr.tmin < tpicked) {
+									picked = 14;
+									tpicked = hr.tmin;
+							}
+					}
+			}
+			bb->setCenter(cx, cy, mz - 1);
+			bb->setSize(m_size);
+			bb->setSizeZ(1);
+			hr = bb->hitTest(ray);
+			if (hr.hit) {
+					if (picked == 0) {
+							picked = 15;
+							tpicked = hr.tmin;
+					}
+					else {
+							if (hr.tmin < tpicked) {
+									picked = 15;
+									tpicked = hr.tmin;
+							}
+					}
+			}
+			bb->setCenter(cx, cy, pz + 1);
+			hr = bb->hitTest(ray);
+			if (hr.hit) {
+					if (picked == 0) {
+							picked = 16;
+							tpicked = hr.tmin;
+					}
+					else {
+							if (hr.tmin < tpicked) {
+									picked = 16;
+									tpicked = hr.tmin;
+							}
+					}
+			}
+
 		}
 		if (picked != 0) {
 			hr.hit = true;

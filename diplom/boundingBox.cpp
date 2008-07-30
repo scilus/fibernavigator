@@ -56,6 +56,18 @@ void BoundingBox::setCenter(Vector3fT c)
 	setCenter(c.s.X, c.s.Y, c.s.Z);
 }
 
+void BoundingBox::setSize(float x, float y, float z)
+{
+	setSizeX(x);
+	setSizeY(y);
+	setSizeZ(z);
+}
+
+void BoundingBox::setSize(Vector3fT c)
+{
+	setSize(c.s.X, c.s.Y, c.s.Z);
+}
+
 hitResult BoundingBox::hitTest(Ray *ray)
 {
 	hitResult hr = {false, 0};

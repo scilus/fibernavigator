@@ -407,7 +407,7 @@ void MainCanvas::render()
     	glPushMatrix();
     	glMultMatrixf(m_dh->m_transform.M);										// NEW: Apply Dynamic Transform
     	m_dh->scene->renderScene();
-    	renderTestRay();
+    	//renderTestRay();
 	    glPopMatrix();
 	    break;
     }
