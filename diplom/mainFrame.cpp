@@ -207,6 +207,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         win->SetAlignment(wxLAYOUT_TOP);
         win->SetBackgroundColour(wxColour(255, 255, 255));
 
+	m_zSliderHolder = win;
     m_zSlider = new wxSlider(win, ID_Z_SLIDER, 50, 0, 100,
         		wxPoint(0, 0), wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
@@ -226,7 +227,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         win->SetOrientation(wxLAYOUT_HORIZONTAL);
         win->SetAlignment(wxLAYOUT_TOP);
         win->SetBackgroundColour(wxColour(255, 255, 255));
-
+	m_ySliderHolder = win;
     m_ySlider = new wxSlider(win, ID_Y_SLIDER, 50, 0, 100, wxPoint(0,0),
         		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
@@ -247,6 +248,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         win->SetAlignment(wxLAYOUT_TOP);
         win->SetBackgroundColour(wxColour(255, 255, 255));
 
+	m_xSliderHolder = win;
     m_xSlider = new wxSlider(win, ID_X_SLIDER, 50, 0, 100, wxPoint(0,0),
             		wxSize(NAV_SIZE, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
@@ -343,6 +345,67 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
     m_dh->scene->setMainGLContext(new wxGLContext(m_mainGL));
 
+}
+
+void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
+{
+	/* resize the navigation widgets */
+	int height = this->GetClientSize().y;
+	NAV_SIZE = wxMin(255, height/4);
+	NAV_GL_SIZE = NAV_SIZE-4;
+
+	m_leftWindowHolder->SetDefaultSize(wxSize(150 + NAV_SIZE, height));
+	m_leftWindowTop->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
+	m_leftWindowBottom->SetDefaultSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
+	m_leftWindowBottom1->SetDefaultSize(wxSize(150 + NAV_SIZE, m_leftWindowBottom->GetClientSize().y - 20));
+	m_leftWindowBottom2->SetDefaultSize(wxSize(150 + NAV_SIZE, 20));
+	m_navWindow->SetDefaultSize(wxSize(NAV_SIZE, height));
+	m_topNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
+	m_middleNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
+	m_bottomNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
+	m_extraNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
+#ifdef __WXMSW__
+	int posY = m_topNavWindow->GetSize().GetY();
+	m_zSliderHolder->SetPosition(wxPoint(0, posY));
+	posY += m_zSliderHolder->GetSize().GetY();
+	m_middleNavWindow->SetPosition(wxPoint(0, posY));
+	posY += m_middleNavWindow->GetSize().GetY();
+	m_ySliderHolder->SetPosition(wxPoint(0, posY));
+	posY += m_ySliderHolder->GetSize().GetY();
+	m_bottomNavWindow->SetPosition(wxPoint(0, posY));
+	posY += m_bottomNavWindow->GetSize().GetY();
+	m_xSliderHolder->SetPosition(wxPoint(0, posY));
+	m_gl0->SetSize(m_topNavWindow->GetClientSize());
+	m_gl1->SetSize(m_middleNavWindow->GetClientSize());
+	m_gl2->SetSize(m_bottomNavWindow->GetClientSize());
+#endif
+	/* resize sliders */
+	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+
+	/* resize list ctrl widget */
+	m_listCtrl->SetSize(0,0, m_leftWindowBottom->GetClientSize().x, m_leftWindowBottom->GetClientSize().y);
+	m_listCtrl->SetColumnWidth(0, 20);
+	m_listCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x - 140);
+	m_listCtrl->SetColumnWidth(2, 80);
+	m_listCtrl->SetColumnWidth(3, 20);
+
+	/* resize main gl window */
+	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x),
+			this->GetClientSize().y);
+	m_rightWindowHolder->SetDefaultSize(wxSize(mainSize, mainSize));
+	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
+
+	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
+
+#if wxUSE_MDI_ARCHITECTURE
+    wxLayoutAlgorithm layout;
+    layout.LayoutMDIFrame(this);
+#endif // wxUSE_MDI_ARCHITECTURE
+
+    GetClientWindow()->Update();
+    this->Update();
 }
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -454,52 +517,7 @@ void MainFrame::OnMouseEvent(wxMouseEvent& event)
 	this->Refresh();
 }
 
-void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
-{
-	/* resize the navigation widgets */
-	int height = this->GetClientSize().y;
-	NAV_SIZE = wxMin(255, height/4);
-	NAV_GL_SIZE = NAV_SIZE-4;
 
-	m_leftWindowHolder->SetDefaultSize(wxSize(150 + NAV_SIZE, height));
-	m_leftWindowTop->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
-	m_leftWindowBottom->SetDefaultSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
-	m_leftWindowBottom1->SetDefaultSize(wxSize(150 + NAV_SIZE, m_leftWindowBottom->GetClientSize().y - 20));
-	m_leftWindowBottom2->SetDefaultSize(wxSize(150 + NAV_SIZE, 20));
-	m_navWindow->SetDefaultSize(wxSize(NAV_SIZE, height));
-	m_topNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
-	m_middleNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
-	m_bottomNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
-	m_extraNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
-
-	/* resize sliders */
-	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
-	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
-	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
-
-	/* resize list ctrl widget */
-	m_listCtrl->SetSize(0,0, m_leftWindowBottom->GetClientSize().x, m_leftWindowBottom->GetClientSize().y);
-	m_listCtrl->SetColumnWidth(0, 20);
-	m_listCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x - 140);
-	m_listCtrl->SetColumnWidth(2, 80);
-	m_listCtrl->SetColumnWidth(3, 20);
-
-	/* resize main gl window */
-	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x),
-			this->GetClientSize().y);
-	m_rightWindowHolder->SetDefaultSize(wxSize(mainSize, mainSize));
-	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
-
-	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
-
-#if wxUSE_MDI_ARCHITECTURE
-    wxLayoutAlgorithm layout;
-    layout.LayoutMDIFrame(this);
-#endif // wxUSE_MDI_ARCHITECTURE
-
-    GetClientWindow()->Update();
-    this->Update();
-}
 
 void MainFrame::OnXSliderMoved(wxCommandEvent& event)
 {
