@@ -7,9 +7,9 @@
 // Author:    $Author: garth $
 // Version:   $Revision: 1.1 $
 //
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-#include "FRefArray.hh"
+#include "FRefArray.h"
 
 #ifdef OUTLINE
 #include "FRefArray.icc"

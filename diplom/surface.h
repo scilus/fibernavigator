@@ -4,7 +4,7 @@
 #include "datasetInfo.h"
 
 #include <vector>
-#include "Fantom/FTensor.hh"
+#include "Fantom/FTensor.h"
 #include "DatasetHelper.h"
 
 class DatasetHelper;

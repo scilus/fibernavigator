@@ -7,7 +7,7 @@
 // Author:    $Author: garth $
 // Version:   $Revision: 1.11 $
 //
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 #ifndef __FMath_hh
 #define __FMath_hh
@@ -15,14 +15,14 @@
 #include <complex>
 #include <cstdlib>
 
-#include "FMatrix.hh"
+#include "FMatrix.h"
 
 using namespace std;
 //===========================================================================
 
-/** 
+/**
  * FMath provides numerical routines such as
- * Gauss-Jordan, lower/upper decomposition, ...  under construction 
+ * Gauss-Jordan, lower/upper decomposition, ...  under construction
  */
 namespace FMath
 {
@@ -64,7 +64,7 @@ namespace FMath
    */
   int QuadraticEquation(double a, double b, double c, std::complex<double> x[2]);
 
-  /** 
+  /**
    *\par Description:
    *Solves the cubic equation a*x^3 + b*x^2 + c*x + d = 0 and returns the
    *number of found roots..
@@ -80,8 +80,8 @@ namespace FMath
    *  number of roots
    */
   int CubicEquation(double a3, double a2, double a1, double a0, std::complex<double> x[3]);
-  
-  /** 
+
+  /**
    *\par Description:
    *  Solves the eigensystem with 2x2-matrix A.
    *\pre
@@ -113,10 +113,10 @@ namespace FMath
    *  given function that evaluates derivatives and Jacobian
    *  matrix of the considered scalar function.
    */
-  void mnewt(int ntrial, FVector& x, double tolx, double tolf, 
+  void mnewt(int ntrial, FVector& x, double tolx, double tolf,
              void (*usrfun)(FVector, FVector, FMatrix));
-  
-  /** 
+
+  /**
    *\par Description:
    * Solves an equation system using the second step of the
    * lower/upper decomposition method.
@@ -135,7 +135,7 @@ namespace FMath
    */
   void Lubacksb(const FMatrix& a, FVector& b, positive* indx);
 
-  /** 
+  /**
    *\par Description:
    * Performs the l/u-decomposition for the given matrix.
    *\pre
@@ -152,21 +152,21 @@ namespace FMath
    */
   void Ludecomp(FMatrix& a, positive* indx, double& d);
 
-  /** 
+  /**
    * Produce Jordan canonical form.
    * \par Description:
    * produces the jordan canonical form of the given matrix.
    * \pre
-   
+
    * \param m
    *  matrix to put in jordan form.
    * \param d
    *  matrix to store the result in.
    */
   void jordanCanonicalForm( const FMatrix& m, FMatrix& d, vector< complex <double> > & eValues, double zeroTolerance= 1.0e-6);
-  
 
-  /** 
+
+  /**
    * \par Description:
    * This procedure takes a tetrahedron defined by 4 points and a
    * plane defined by a point and a normal vector ( n*x-p = 0 )
@@ -183,7 +183,7 @@ namespace FMath
                                    const FPosition& p,
                                    vector<FPosition>& result);
 
-  /** 
+  /**
    * \par Description:
    * This procedure takes a tetrahedron defined by 4 points and a
    * plane defined by a point and a normal vector ( n*x-p = 0 )
@@ -213,7 +213,7 @@ namespace FMath
    * \param x, y
    * real and complex part of the data to be transformed. Must both be of size n
    */
-  void inPlaceRadix2DitDft(unsigned int n, unsigned int m, vector<double>& x, vector<double>& y); 
+  void inPlaceRadix2DitDft(unsigned int n, unsigned int m, vector<double>& x, vector<double>& y);
 }
 
 

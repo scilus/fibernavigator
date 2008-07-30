@@ -14,7 +14,7 @@
 
 #include <iosfwd>
 #include <iostream>
-#include "FException.hh"
+#include "FException.h"
 
 #include <vector>
 

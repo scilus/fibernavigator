@@ -12,9 +12,9 @@
 #ifndef __FTensor_hh
 #define __FTensor_hh
 
-#include "stdAliases.hh"
-#include "FArray.hh"
-#include "FMultiIndex.hh"
+#include "stdAliases.h"
+#include "FArray.h"
+#include "FMultiIndex.h"
 
 #include <vector>
 
@@ -22,7 +22,7 @@ class FRefTensor;
 
 //===========================================================================
 
-#include "FVector.hh"
+#include "FVector.h"
 // class FMatrix;
 
 /**

@@ -9,9 +9,9 @@
 //
 //---------------------------------------------------------------------------
 
-#include "FTensor.hh"
+#include "FTensor.h"
 #include <iostream>
-#include "binio.hh"
+#include "binio.h"
 
 #include <cmath>
 

@@ -16,8 +16,8 @@
 //---------------------------------------------------------------------------
 
 #include <string.h>
-#include "FMatrix.hh"
-#include "FException.hh"
+#include "FMatrix.h"
+#include "FException.h"
 
 inline FRefArray::FRefArray()
 {

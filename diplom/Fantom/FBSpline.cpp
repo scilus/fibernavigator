@@ -9,7 +9,7 @@
 //
 //---------------------------------------------------------------------------
 
-#include "FBSpline.hh"
+#include "FBSpline.h"
 
 using namespace std;
 

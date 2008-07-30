@@ -1,4 +1,4 @@
-#include "FMultiIndex.hh"
+#include "FMultiIndex.h"
 
 std::ostream& operator<<(std::ostream& os, const FMultiIndex& mi)
 {

@@ -7,14 +7,14 @@
 // Author:    $Author: wiebel $
 // Version:   $Revision: 1.9 $
 //
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-#include "FException.hh"
+#include "FException.h"
 #include <iostream>
 
 using namespace std;
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 std::ostream& operator<<( std::ostream& out, const FException& e )
 {
@@ -23,7 +23,7 @@ std::ostream& operator<<( std::ostream& out, const FException& e )
     return out;
 }
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 void FException::print( std::ostream& out ) const
 {
@@ -34,7 +34,7 @@ void FException::print( std::ostream& out ) const
 	out << "trace: " << *i << std::endl;
 }
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 std::string FException::getMessage() const
 {
@@ -47,7 +47,7 @@ std::string FException::getMessage() const
   return out;
 }
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 void FException::addTraceMessage( const std::string& s )
 {

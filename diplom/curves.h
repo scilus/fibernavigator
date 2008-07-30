@@ -14,7 +14,7 @@
 #include "KdTree.h"
 #include "selectionBox.h"
 #include <vector>
-#include "Fantom/FVector.hh"
+#include "Fantom/FVector.h"
 
 enum CurveFileType {
 	asciiCurve,

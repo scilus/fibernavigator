@@ -9,9 +9,9 @@
 //
 //---------------------------------------------------------------------------
 
-#include "FMath.hh"
-#include "FException.hh"
-#include "FVector.hh"
+#include "FMath.h"
+#include "FException.h"
+#include "FVector.h"
 
 #include <iostream>
 #include <cmath>

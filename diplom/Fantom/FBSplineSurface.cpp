@@ -9,8 +9,8 @@
 //
 //---------------------------------------------------------------------------
 
-#include "FBSplineSurface.hh"
-#include "FBSpline.hh"
+#include "FBSplineSurface.h"
+#include "FBSpline.h"
 
 #include <iostream>
 

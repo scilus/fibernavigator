@@ -13,7 +13,7 @@
 #define FBSPLINESURFACE_HH
 
 #include <vector>
-#include "FArray.hh"
+#include "FArray.h"
 
 
 /**

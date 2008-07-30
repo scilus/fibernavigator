@@ -11,7 +11,7 @@
 #undef inline
 
 #include <string>
-#include "FException.hh"
+#include "FException.h"
 #include <ctype.h>
 #include <cmath>
 #include <cstring> // memcpy

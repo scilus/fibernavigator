@@ -7,7 +7,7 @@
 // Author:    $Author: hlawit $
 // Version:   $Revision: 1.23 $
 //
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 #ifndef __FMatrix_hh
 #define __FMatrix_hh
@@ -16,18 +16,18 @@
 #include <complex>
 #include <iosfwd>
 
-#include "FArray.hh"
+#include "FArray.h"
 //#include "FRefArray.hh"
 class FRefArray;
 class FTensor;
 
 //===========================================================================
 
-/** 
+/**
  * The FMatrix class provides an implementation of an NxM-Matrix.
  * To put it in other words, the matrix consists of N columns and M rows.
  */
-class FMatrix 
+class FMatrix
 {
 public:
 
@@ -76,7 +76,7 @@ public:
   /** Destructor. */
   ~FMatrix();
 
-  /** 
+  /**
    * compute the squared 2-norm
    */
   double normSquare( void ) const;
@@ -87,7 +87,7 @@ public:
    * use normSquare if you want it faster
    */
   double norm( void ) const;
-  
+
   /** Inversion of a matrix
    *   Operation on the Object Itself only works with MxM matrices.
    * \return
@@ -110,7 +110,7 @@ public:
    *   FMatrixSingularException
    */
   friend FMatrix invert(const FMatrix& A);
-  
+
   /** Transposition of a matrix
    *   Returns the transposed self
    * \return
@@ -126,7 +126,7 @@ public:
   FMatrix& transpose(void);
 
   /** Resizing of matrix
-   *   depending on the keepvalues flag fills new space with zero or 
+   *   depending on the keepvalues flag fills new space with zero or
    *   undefined values
    * \param
    *   m number or rows
@@ -199,7 +199,7 @@ public:
    * dim or current dimensions if dim == 0
    */
   void makeDiagonal(const double& d, positive dim = 0);
-  
+
   /**
    * Efficient method to convert an FArray into a matrix.
    * \pre
@@ -224,12 +224,12 @@ public:
    */
   void tridiagonalize(FVector& d, FVector& e);
 
-  /** 
+  /**
    * Tridiagonalized QL algorithm with implicit shifts.
    * This algorithm determines the eigenvectors and -values
    * of a tridiagonalized FMatrix.
    * \pre
-   * ::tridiagonalize() has been called. (and its preconditions 
+   * ::tridiagonalize() has been called. (and its preconditions
    * are satisfied)
    * \post
    * Matrix now contains eigenvectors (as columns).
@@ -248,7 +248,7 @@ public:
    * Matrix is real and symmetric (square with arbitrary size).
    *\post
    * Matrix now contains eigenvectors (as columns).
-   * vals and vectors have been resized to match the 
+   * vals and vectors have been resized to match the
    * size of the matrix
    *\param
    * vals FVector to store Eigenvalues in.
@@ -281,7 +281,7 @@ public:
    */
   void getEigenValues( std::vector< std::complex<double> >& values) const;
 
-  
+
   /** Gauss-Jordan Solver
    *\pre
    * Matrix is quadratic.
@@ -300,17 +300,17 @@ public:
    */
   FVector& gaussJ( FVector& rightside );
 
-  /** 
+  /**
    * Cyclic Jacobi Algorithm
    *
    * Compute eigenvectors and eigenvalues of a symmetric Matrix A
    * - quadratic convergence
    * - 2* sizeof(A) memory consumtion ( need to store A and V )
-   * 
+   *
    * \pre
    * A has to be symmetric
    * S(A^(k)) < \delta, S(A) = sum_{i,j=0, i!=j}^n a_{i,j}^2
-   * 
+   *
    * \post
    * Diagonal elements of A^(k) are the approximated eigenvalues
    * Column vectors of V_k = V_{k-1}U_k are approximated corresponding eigenvectors
@@ -329,10 +329,10 @@ public:
 
   ///  Undocumented.
   FMatrix& mult(const FMatrix &m, FMatrix &d) const;
-  
+
   /** Matrix by Vector multiplication (binary).
    */
-  FVector operator*(const FVector& v) const; 
+  FVector operator*(const FVector& v) const;
 
   ///  Undocumented.
   FVector& mult(const FVector &m, FVector &d) const;
@@ -340,7 +340,7 @@ public:
   FVector& mult(const FTensor &m, FVector &d) const;
 
   FTensor& mult(const FTensor &m, FTensor &d) const;
-  
+
   /** Matrix by double multiplication (binary).
    *   Multiplication of a Matrix by a Matrix.
    */
@@ -368,7 +368,7 @@ public:
   FMatrix& operator-=(const FMatrix &m);
   ///  Undocumented.
   FMatrix& minus(const FMatrix &m, FMatrix& d) const;
-  
+
   ///  Undocumented.
   double& operator()(positive i, positive j);
   ///  Undocumented.
@@ -417,10 +417,10 @@ public:
   friend FVector operator*(const FVector &v, const FMatrix& m);
   friend FMatrix operator*(const double &lamda, const FMatrix& m);
   friend FVector& operator*=(FVector& v, const FMatrix& matrix);
- 
+
   ///  Undocumented.
-  bool solveSingularSystem(FVector& b, FVector& x, 
-          std::vector<FVector>& nullspace, 
+  bool solveSingularSystem(FVector& b, FVector& x,
+          std::vector<FVector>& nullspace,
           std::vector<FVector>& range, double zeroTresholdEpsilon = 1.0e-6) const;
 
   /** Size reporter.
@@ -433,8 +433,8 @@ public:
    * \post
    * *this replaced by the matrix U of decomposition
    */
-  void svdcmp(FVector& w, FMatrix& v); 
-  
+  void svdcmp(FVector& w, FMatrix& v);
+
   /**
    *  used by solveSingularSystem()
    */
@@ -483,7 +483,7 @@ public:
   //
   // Functions to create 3x3 and 4x4 rotation matrices
   //
-  
+
   /**
    * Create a right handed 3x3 rotation matrix rotating theta degrees around FVector
    */
@@ -502,7 +502,7 @@ public:
   static FMatrix rot4LH( const FVector& axis, double angle );
 
 
-  
+
 private:
   double* comp;  // pointer to memory holding the entries
   unsigned int sizeOfArray; // the amount of currently allocated doubles

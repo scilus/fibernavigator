@@ -14,11 +14,11 @@
 
 #include <cstdio>
 
-#include "FException.hh"
+#include "FException.h"
 
-#include "FMatrix.hh"
+#include "FMatrix.h"
 
-#include "FtQLiAlgorithm.hh"
+#include "FtQLiAlgorithm.h"
 
 #ifdef OUTLINE
 #define inline

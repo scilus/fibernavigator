@@ -13,12 +13,12 @@
 
 using namespace std;
 
-#include "FArray.hh"
-#include "FString.hh"
-#include "FException.hh"
-#include "FMatrix.hh"
+#include "FArray.h"
+#include "FString.h"
+#include "FException.h"
+#include "FMatrix.h"
 
-#include "binio.hh"
+#include "binio.h"
 
 #ifdef OUTLINE
 #include "FArray.icc"

@@ -17,14 +17,14 @@
 #include <cmath>
 #include <complex>
 
-#include "FMatrix.hh"
-#include "FMath.hh"
-#include "FVector.hh"
-#include "FTensor.hh"
-#include "FString.hh"
-#include "FException.hh"
+#include "FMatrix.h"
+#include "FMath.h"
+#include "FVector.h"
+#include "FTensor.h"
+#include "FString.h"
+#include "FException.h"
 
-#include "FtQLiAlgorithm.hh"
+#include "FtQLiAlgorithm.h"
 
 static double maxarg1,maxarg2;
 #define FMAX(a,b) (maxarg1=(a),maxarg2=(b),(maxarg1) > (maxarg2) ? (maxarg1) : (maxarg2))

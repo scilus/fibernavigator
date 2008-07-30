@@ -13,9 +13,9 @@
 #define __FMatrix_icc_defined
 
 #include <cmath>
-#include "FException.hh"
-#include "FRefArray.hh"
-#include "FTensor.hh"
+#include "FException.h"
+#include "FRefArray.h"
+#include "FTensor.h"
 
 #include <ctype.h>
 

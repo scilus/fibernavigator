@@ -7,12 +7,12 @@
 // Author:    $Author: garth $
 // Version:   $Revision: 1.1 $
 //
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 #ifndef __FRefArray_hh
 #define __FRefArray_hh
 
-#include "FArray.hh"
+#include "FArray.h"
 /**
  *provides a reference on a FPosition
  */
@@ -26,7 +26,7 @@ public:
 
   /**
    *Copy constructor
-   *doesn't copy the components of the Tensor, 
+   *doesn't copy the components of the Tensor,
    *but only the pointer on them
    */
   FRefArray(FArray&);
@@ -47,11 +47,11 @@ public:
    *holding the Components of the referenced Tensor
    */
   FRefArray(const int Dimension, double*Comp=0);
-  
+
   /**
    *sets the pointer on a new set in FRefArray
    *\param Comp: pointer on a valid array of doubles(or NIL)
-   *\pre 
+   *\pre
    *Comp has at least Dimension entries
    *\post
    *none
@@ -75,6 +75,6 @@ public:
 #ifndef OUTLINE
 #include "FRefArray.icc"
 #endif
-//=========================================================================== 
+//===========================================================================
 
 #endif // __FRefArray_hh
