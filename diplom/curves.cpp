@@ -197,7 +197,11 @@ bool Curves::load(wxString filename)
 
 	m_type = Curves_;
 	m_fullPath = filename;
+#ifdef __WXMSW__
+	m_name = filename.AfterLast('\\');
+#else
 	m_name = filename.AfterLast('/');
+#endif
 	initializeBuffer();
 
 	m_kdTree = new KdTree(m_pointCount, m_pointArray, m_dh);

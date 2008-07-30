@@ -52,7 +52,11 @@ Anatomy::~Anatomy() {
 bool Anatomy::load(wxString filename)
 {
 	m_fullPath = filename;
+#ifdef __WXMSW__
+	m_name = filename.AfterLast('\\');
+#else
 	m_name = filename.AfterLast('/');
+#endif
 	// read header file
 	wxTextFile headerFile;
 	bool flag = false;

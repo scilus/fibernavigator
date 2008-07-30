@@ -174,7 +174,11 @@ bool Mesh::load(wxString filename)
 		}
 	}
 	m_fullPath = filename;
+#ifdef __WXMSW__
+	m_name = filename.AfterLast('\\');
+#else
 	m_name = filename.AfterLast('/');
+#endif
 	m_type = Mesh_;
 
 	generateGeometry();
