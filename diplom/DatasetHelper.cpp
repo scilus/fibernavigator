@@ -161,7 +161,8 @@ bool DatasetHelper::load(int index, wxString filename)
 				Vector3fT vs = {{columns/8, rows/8, frames/8}};
 						SelectionBox *selBox = new SelectionBox(vc, vs, this);
 						selBox->m_isTop = true;
-						mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+						wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+						mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 			}
 			finishLoading(curves);
 			return true;
@@ -332,8 +333,10 @@ bool DatasetHelper::loadSettings(wxString filename)
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->m_isTop = true;
 				wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+				mainFrame->m_treeWidget->EnsureVisible(boxId);
 				for (unsigned int i = 0 ; i < vboxes.size() ; ++i) {
-					mainFrame->m_treeWidget->AppendItem(boxId, wxT("box"), 0, -1, new MyTreeItemData(vboxes[i]));
+					wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(boxId, wxT("box"), 0, -1, new MyTreeItemData(vboxes[i]));
+					mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				}
 				mbNode = mbNode->GetNext();
 

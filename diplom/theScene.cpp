@@ -83,6 +83,11 @@ void TheScene::renderScene()
 	renderMesh();
 	renderSurface();
 
+	if (m_pointMode)
+	{
+		drawPoints();
+	}
+
 	if (m_dh->fibers_loaded)
 	{
 		renderFibers();
@@ -93,11 +98,6 @@ void TheScene::renderScene()
 				drawSelectionBoxes();
 			}
 		}
-	}
-
-	if (m_pointMode)
-	{
-		drawPoints();
 	}
 
 	renderSlizes();

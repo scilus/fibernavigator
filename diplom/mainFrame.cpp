@@ -610,7 +610,8 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 		SelectionBox *selBox = new SelectionBox(box);
 		selBox->m_isTop = false;
 		selBox->setCenter(v2);
-		m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+		m_treeWidget->EnsureVisible(tNewBoxId);
 	}
 	else
 	{
