@@ -63,7 +63,8 @@ void Shader::release()
 
 bool Shader::compile(GLuint* shaderId, wxString codeString)
 {
-	char temp[codeString.Length()];
+	char *temp;
+	temp = (char*) malloc(codeString.Length());
 	strcpy(temp, (const char*)codeString.mb_str(wxConvUTF8));
 	const char* code = temp;
 
@@ -159,7 +160,8 @@ void Shader::printProgramLog(GLuint program)
 
 void Shader::printwxT(wxString string)
 {
-	char cstring[string.length()];
+	char* cstring;
+	cstring = (char*)malloc(string.length());
 	strcpy(cstring, (const char*)string.mb_str(wxConvUTF8));
 	printf("%s", cstring);
 }

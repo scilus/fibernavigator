@@ -467,7 +467,8 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 
 void DatasetHelper::printwxT(wxString string)
 {
-	char cstring[string.length()];
+	char* cstring;
+	cstring = (char*)malloc(string.length());
 	strcpy(cstring, (const char*)string.mb_str(wxConvUTF8));
 	printf("%s", cstring);
 }

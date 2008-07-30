@@ -14,7 +14,7 @@
 
 
 enum DatasetType {
-	ERROR = -1,
+	TERROR = -1,
 	not_initialized = 0,
 	Head_byte,
 	Head_short,
