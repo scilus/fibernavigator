@@ -95,14 +95,16 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_isrDragging = true;										// Prepare For Dragging
 					m_lastPos = event.GetPosition();
 					m_hr = pick(event.GetPosition());
-					/*
-					if (wxGetKeyState(WXK_CONTROL) && (m_hr.picked > 10)) {
-						((SelectionBox*)m_hr.object)->setPicked(10);
-						m_hr.picked = 10;
+
+					if (m_hr.picked == 20)
+					{
+						((SplinePoint*)m_hr.object)->select();
 					}
-					*/
-					//printf("%d\n", m_dh->quadrant);
-			    }
+					else if (m_hr.picked >= 10 && m_hr.picked < 20)
+					{
+						((SelectionBox*)m_hr.object)->select();
+					}
+				}
 				else {
 					if (event.Dragging() && m_hr.picked < 10)
 					{

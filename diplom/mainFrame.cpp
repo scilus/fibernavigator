@@ -505,6 +505,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 			wxTreeItemId pId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
 			m_treeWidget->EnsureVisible(pId);
 			m_treeWidget->SelectItem(pId);
+			point->setTreeId(pId);
 		}
 	}
 	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
@@ -621,27 +622,29 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 {
 	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
-	Vector3fT v2 = {{m_xSlider->GetValue()-m_dh->columns/2,
+	Vector3fT vc = {{m_xSlider->GetValue()-m_dh->columns/2,
 					m_ySlider->GetValue()-m_dh->rows/2,
 					m_zSlider->GetValue()-m_dh->frames/2}};
+	Vector3fT vs = {{m_dh->columns/8,m_dh->rows/8, m_dh->frames/8}};
+	SelectionBox *selBox = new SelectionBox(vc, vs, m_dh);
 
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
 	{
-		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
-		SelectionBox *selBox = new SelectionBox(box);
+		// box is under another box
 		selBox->m_isTop = false;
-		selBox->setCenter(v2);
+
 		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 		m_treeWidget->EnsureVisible(tNewBoxId);
+		selBox->setTreeId(tNewBoxId);
 	}
 	else
 	{
-		Vector3fT v3 = {{m_dh->columns/8,m_dh->rows/8, m_dh->frames/8}};
-		SelectionBox *selBox = new SelectionBox(v2, v3, m_dh);
-		selBox->m_isTop = true;
-		m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+		// box is top
+		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+		m_treeWidget->EnsureVisible(tNewBoxId);
+		selBox->setTreeId(tNewBoxId);
 	}
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
@@ -877,17 +880,20 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 			// create the point
 			SplinePoint *point = new SplinePoint(xs, yy-y, zz-z, m_dh);
 
-			if (i == 0 || i == 10 || j == 0 || j == 10)
-				m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+			if (i == 0 || i == 10 || j == 0 || j == 10) {
+				wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+				m_treeWidget->EnsureVisible(tId);
+				point->setTreeId(tId);
+			}
 			else
 			{
-				if (fibers->getBarycenter(point))
-					m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+				if (fibers->getBarycenter(point)) {
+					wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+					m_treeWidget->EnsureVisible(tId);
+					point->setTreeId(tId);
+				}
 			}
 		}
-
-
-
 
 	Surface *surface = new Surface(m_dh);
 

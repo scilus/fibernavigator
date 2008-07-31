@@ -8,9 +8,11 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	m_size = size;
 	m_show = true;
 	m_dirty = true;
+	m_isTop = true;
 	m_isNOT = true;
 	m_isActive = true;
 	m_colorChanged = false;
+	m_treeId = NULL;
 	m_handleRadius = 3.0;
 	m_inBox.resize(m_dh->countFibers, sizeof(bool));
 	for (int i = 0; i < m_dh->countFibers ; ++i)
@@ -35,6 +37,15 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
 	{
 		m_inBox[i] = 0;
+	}
+}
+
+void SelectionBox::select()
+{
+	if (m_treeId)
+	{
+		m_dh->mainFrame->m_treeWidget->SelectItem(m_treeId);
+		m_dh->mainFrame->m_treeWidget->EnsureVisible(m_treeId);
 	}
 }
 

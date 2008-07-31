@@ -29,7 +29,7 @@ public:
 	void move(float);
 
 
-	void select() {m_selected = true;};
+	void select();
 	void unselect() {m_selected = false;};
 	float X() {return m_center.s.X;};
 	float Y() {return m_center.s.Y;};
@@ -39,6 +39,7 @@ public:
 	void setZ(float z) {m_center.s.Z = z;};
 	void setOffsetVector (Vector3fT vec) {m_offsetVector = vec;};
 	Vector3fT getOffsetVector() {return m_offsetVector;};
+	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
 
 private:
 	DatasetHelper* m_dh;
@@ -51,6 +52,7 @@ private:
 	bool m_selected;
 	hitResult m_hr;
 	void drawSphere(float, float, float, float);
+	wxTreeItemId m_treeId;
 };
 
 #endif /*POINT_H_*/

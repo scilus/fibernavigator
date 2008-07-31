@@ -42,6 +42,7 @@ public:
 	bool colorChanged() {return m_colorChanged;};
 	wxColour getColor() {return m_color;};
 	void setColorChanged(bool v) {m_colorChanged = v;};
+	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
 
 	void draw1();
 	void draw2();
@@ -67,6 +68,7 @@ public:
 	void setColor(wxColour);
 
 	void update();
+	void select();
 
 	std::vector<bool>m_inBox;
 
@@ -93,6 +95,7 @@ private:
 	bool m_dirty;
 	bool m_colorChanged;
 	wxColour m_color;
+	wxTreeItemId m_treeId;
 
 };
 

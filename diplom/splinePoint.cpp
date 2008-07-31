@@ -10,6 +10,7 @@ SplinePoint::SplinePoint(Vector3fT center, DatasetHelper* dh)
 	m_dirty = true;
 	m_selected = false;
 	m_dh->surface_isDirty = true;
+	m_treeId = NULL;
 }
 
 SplinePoint::SplinePoint(double x, double y, double z, DatasetHelper* dh)
@@ -86,4 +87,15 @@ void SplinePoint::move(float w)
 	m_center.s.X = m_origin.s.X + m_offsetVector.s.X * w;
 	m_center.s.Y = m_origin.s.Y + m_offsetVector.s.Y * w;
 	m_center.s.Z = m_origin.s.Z + m_offsetVector.s.Z * w;
+}
+
+
+void SplinePoint::select()
+{
+	m_selected = true;
+	if (m_treeId)
+	{
+		m_dh->mainFrame->m_treeWidget->SelectItem(m_treeId);
+		m_dh->mainFrame->m_treeWidget->EnsureVisible(m_treeId);
+	}
 }

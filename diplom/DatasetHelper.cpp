@@ -163,6 +163,7 @@ bool DatasetHelper::load(int index, wxString filename)
 						selBox->m_isTop = true;
 						wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
 						mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
+						selBox->setTreeId(tNewBoxId);
 			}
 			finishLoading(curves);
 			return true;
