@@ -15,6 +15,7 @@
 #include "selectionBox.h"
 #include <vector>
 #include "Fantom/FVector.h"
+#include "splinePoint.h"
 
 enum CurveFileType {
 	asciiCurve,
@@ -48,7 +49,7 @@ public:
 	void updateLinesShown(std::vector<std::vector<SelectionBox*> >);
 	void boxTest(int, int, int);
 
-	FVector getBarycenter(FVector);
+	bool getBarycenter(SplinePoint*);
 	void barycenterTest(int, int, int);
 
 	void toggleEndianess();

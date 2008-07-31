@@ -546,6 +546,11 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& event)
 	m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
 	info->setThreshold(threshold);
+	if (info->getType() == Surface_)
+	{
+		Surface* s = (Surface*) m_listCtrl->GetItemData(item);
+		s->movePoints();
+	}
 	refreshAllGLWidgets();
 }
 
@@ -845,33 +850,44 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 {
 	if (!m_dh->scene || m_dh->surface_loaded) return;
 
-	// delete all points
-	m_treeWidget->DeleteChildren(m_tPointId);
-	// create points
+	if (!m_dh->fibers_loaded)
+	{
+		refreshAllGLWidgets();
+		return;
+	}
 
 	int y = m_dh->rows/2;
 	int z = m_dh->frames/2;
 	int xs = m_xSlider->GetValue() - m_dh->columns/2;
 
-	if (!m_dh->fibers_loaded)
-		{
-				refreshAllGLWidgets();
-				return;
-		}
-
-		Curves *fibers;
-		wxTreeItemIdValue cookie = 0;
-		fibers = (Curves*)((MyTreeItemData*)
-								m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
+	//delete all existing points
+	m_treeWidget->DeleteChildren(m_tPointId);
+	Curves *fibers;
+	wxTreeItemIdValue cookie = 0;
+	fibers = (Curves*)((MyTreeItemData*)
+						m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
 
 	for ( int i = 0 ; i < 11 ; ++i)
-		for ( int j = 0 ; j < 11 ; ++j ) {
+		for ( int j = 0 ; j < 11 ; ++j )
+		{
+
 			int yy = (m_dh->rows/10)*i;
 			int zz = (m_dh->frames/10)*j;
-			FVector bc = fibers->getBarycenter(FVector(xs, yy - y, zz - z, 25.0, 5.0, 5.0));
-					// create the point
-			m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(new SplinePoint(bc[0], bc[1], bc[2], m_dh)));
+
+			// create the point
+			SplinePoint *point = new SplinePoint(xs, yy-y, zz-z, m_dh);
+
+			if (i == 0 || i == 10 || j == 0 || j == 10)
+				m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+			else
+			{
+				if (fibers->getBarycenter(point))
+					m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+			}
 		}
+
+
+
 
 	Surface *surface = new Surface(m_dh);
 
@@ -914,6 +930,15 @@ void MainFrame::OnAssignColor(wxCommandEvent& event)
 	}
 	else return;
 
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() == Mesh_ )
+		{
+			info->setColor(col);
+		}
+	}
 	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
 	{
 		SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();

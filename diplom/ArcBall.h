@@ -231,6 +231,15 @@
     }
 
     /**
+     * Sets this Vector3 to zero
+     */
+    inline
+    static void Vector3fSetZero(Vector3fT* NewObj)
+    {
+    	NewObj->s.X = NewObj->s.Y = NewObj->s.Z = 0.0;
+    }
+
+    /**
       * Sets the value of this matrix to the matrix conversion of the
       * quaternion argument.
       * @param q1 the quaternion to be converted

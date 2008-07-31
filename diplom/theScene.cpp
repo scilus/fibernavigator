@@ -177,8 +177,8 @@ void TheScene::renderMesh()
 		if (info->getType() == Mesh_)
 		{
 			if (info->getShow()) {
-				float c = (float)info->getThreshold();
-				glColor3f(c,c,c);
+				wxColor c = info->getColor();
+				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
 				m_dh->shaderHelper->m_meshShader->setUniInt("showFS", info->getShowFS());
 				m_dh->shaderHelper->m_meshShader->setUniInt("useTex", info->getUseTex());
 
@@ -245,10 +245,9 @@ void TheScene::renderSurface()
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if (info->getType() == Surface_ && info->getShow())
 		{
-			float c = (float)info->getThreshold();
-			glColor3f(c,c,c);
-			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", info->getShowFS());
-			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", info->getUseTex());
+			glColor3f(0.1, 0.1, 0.1);
+			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", 1);
+			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", 1);
 
 			info->draw();
 		}

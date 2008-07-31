@@ -558,33 +558,47 @@ void Curves::draw()
 	glDisableClientState(GL_NORMAL_ARRAY);
 }
 
-FVector Curves::getBarycenter(FVector box)
+bool Curves::getBarycenter(SplinePoint* point)
 {
+	// number of fibers needed to keep a point
+	int threshold = 20;
+	// multiplier for moving the point towards the barycenter
+
 	m_boxMin = new float[3];
 	m_boxMax = new float[3];
-	m_boxMin[0] = box[0] - box[3]/2;
-	m_boxMax[0] = box[0] + box[3]/2;
-	m_boxMin[1] = box[1] - box[4]/2;
-	m_boxMax[1] = box[1] + box[4]/2;
-	m_boxMin[2] = box[2] - box[5]/2;
-	m_boxMax[2] = box[2] + box[5]/2;
+	m_boxMin[0] = point->X() - 25.0/2;
+	m_boxMax[0] = point->X() + 25.0/2;
+	m_boxMin[1] = point->Y() - 5.0/2;
+	m_boxMax[1] = point->Y() + 5.0/2;
+	m_boxMin[2] = point->Z() - 5.0/2;
+	m_boxMax[2] = point->Z() + 5.0/2;
 	m_barycenter.clear();
 	m_barycenter.resize(3, false);
 	m_count = 0;
 
 	barycenterTest(0, m_pointCount-1, 0);
-	if (m_count > 0) {
-	m_barycenter[0] /= m_count;
-	m_barycenter[1] /= m_count;
-	m_barycenter[2] /= m_count;
+	if (m_count > threshold) {
+		m_barycenter[0] /= m_count;
+		m_barycenter[1] /= m_count;
+		m_barycenter[2] /= m_count;
+
+		float x1 = ( m_barycenter[0] - point->X() );
+		float y1 = ( m_barycenter[1] - point->Y() );
+		float z1 = ( m_barycenter[2] - point->Z() );
+
+		Vector3fT v = {{x1, y1, z1}};
+		point->setOffsetVector(v);
+
+		point->setX(point->X() + x1);
+		point->setY(point->Y() + y1);
+		point->setZ(point->Z() + z1);
+		return true;
 	}
 	else {
-		m_barycenter[0] = box[0];
-		m_barycenter[1] = box[1];
-		m_barycenter[2] = box[2];
+		return false;
 
 	}
-	return m_barycenter;
+
 }
 
 void Curves::barycenterTest(int left, int right, int axis)

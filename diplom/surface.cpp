@@ -337,3 +337,18 @@ void Surface::draw()
 	}
 	glEnd();
 }
+
+void Surface::movePoints()
+{
+	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
+
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countPoints ; ++i)
+	{
+		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
+		SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
+		point->move(2.0 * m_threshold);
+	}
+	execute();
+}

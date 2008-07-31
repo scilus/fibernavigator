@@ -21,6 +21,8 @@ public:
 	void generateGeometry() {};
 	void initializeBuffer() {};
 
+	void movePoints();
+
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
 
 private:

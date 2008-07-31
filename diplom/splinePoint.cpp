@@ -3,8 +3,10 @@
 
 SplinePoint::SplinePoint(Vector3fT center, DatasetHelper* dh)
 {
-	m_dh = dh;
 	m_center = center;
+	m_origin = center;
+	Vector3fSetZero(&m_offsetVector);
+	m_dh = dh;
 	m_dirty = true;
 	m_selected = false;
 	m_dh->surface_isDirty = true;
@@ -12,9 +14,12 @@ SplinePoint::SplinePoint(Vector3fT center, DatasetHelper* dh)
 
 SplinePoint::SplinePoint(double x, double y, double z, DatasetHelper* dh)
 {
+
 	Vector3fT center = {{x,y,z}};
-	m_dh = dh;
 	m_center = center;
+	m_origin = center;
+	m_dh = dh;
+	Vector3fSetZero(&m_offsetVector);
 	m_dirty = true;
 	m_selected = false;
 	m_dh->surface_isDirty = true;
@@ -74,4 +79,11 @@ hitResult SplinePoint::hitTest(Ray *ray)
 	}
 	m_hr = hr;
 	return hr;
+}
+
+void SplinePoint::move(float w)
+{
+	m_center.s.X = m_origin.s.X + m_offsetVector.s.X * w;
+	m_center.s.Y = m_origin.s.Y + m_offsetVector.s.Y * w;
+	m_center.s.Z = m_origin.s.Z + m_offsetVector.s.Z * w;
 }

@@ -72,6 +72,8 @@ public:
 
 	void setGLuint(GLuint value) {m_GLuint = value;};
 	GLuint getGLuint() {return m_GLuint;};
+	void setColor(wxColour color) {m_color = color;};
+	wxColour getColor() {return m_color;};
 
 protected:
 	DatasetHelper* m_dh;
@@ -92,6 +94,8 @@ protected:
 	wxString m_fullPath;
 	float m_threshold;
 	wxTreeItemId m_treeId;
+
+	wxColour m_color;
 	GLuint m_GLuint;
 
 	bool m_hasTreeId;

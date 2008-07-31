@@ -26,12 +26,27 @@ public:
 
 	hitResult hitTest(Ray *ray);
 	void drag(wxPoint click);
+	void move(float);
+
+
 	void select() {m_selected = true;};
 	void unselect() {m_selected = false;};
+	float X() {return m_center.s.X;};
+	float Y() {return m_center.s.Y;};
+	float Z() {return m_center.s.Z;};
+	void setX(float x) {m_center.s.X = x;};
+	void setY(float y) {m_center.s.Y = y;};
+	void setZ(float z) {m_center.s.Z = z;};
+	void setOffsetVector (Vector3fT vec) {m_offsetVector = vec;};
+	Vector3fT getOffsetVector() {return m_offsetVector;};
 
 private:
 	DatasetHelper* m_dh;
 	Vector3fT m_center;
+
+	Vector3fT m_offsetVector;
+	Vector3fT m_origin;
+
 	bool m_dirty;
 	bool m_selected;
 	hitResult m_hr;

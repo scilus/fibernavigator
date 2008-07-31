@@ -134,18 +134,22 @@ void main()
 			if (show[i]) lookupTex(color, type[i], texes[i], threshold[i], v);
 		}
 
+	    color.a = 1.0;
 
-		color.a = 1.0;
+	    color =   color +
+				  (ambient  * gl_FrontMaterial.ambient) +
+				  (diffuse  * gl_FrontMaterial.diffuse) +
+				  (specular * gl_FrontMaterial.specular);
     }
     else
     {
-   		color = gl_FrontLightModelProduct.sceneColor;
+   		color = gl_FrontLightModelProduct.sceneColor +
+				  (ambient  * gl_FrontMaterial.ambient) +
+				  (diffuse  * gl_FrontMaterial.diffuse) +
+				  (specular * gl_FrontMaterial.specular);
    	}
 
-   color =   color +
-              (ambient  * gl_FrontMaterial.ambient) +
-              (diffuse  * gl_FrontMaterial.diffuse) +
-              (specular * gl_FrontMaterial.specular);
+
 
     color = clamp(color, 0.0, 1.0);
 
