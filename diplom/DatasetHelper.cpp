@@ -277,10 +277,12 @@ bool DatasetHelper::loadSettings(wxString filename)
 				wxXmlNode *bNode = mbNode->GetChildren();
 				std::vector<SelectionBox*>vboxes;
 				double cx, cy, cz, ix, iy, iz;
+				double _cx, _cy, _cz, _ix, _iy, _iz;
+				cx = cy = cz = ix = iy = iz =
+				_cx = _cy = _cz = _ix = _iy = _iz = 0.0;
 				while (bNode) {
 					if (bNode->GetName() == wxT("box")) {
 						wxXmlNode *cNode = bNode->GetChildren();
-						double _cx, _cy, _cz, _ix, _iy, _iz;
 						wxString _type = bNode->GetPropVal(wxT("type"), wxT("AND"));
 						while (cNode) {
 							if (cNode->GetName() == wxT("size")) {

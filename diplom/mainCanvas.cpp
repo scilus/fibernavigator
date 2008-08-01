@@ -26,9 +26,9 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 	Matrix4fSetIdentity(&m_dh->m_transform);
 
 	Matrix3fSetIdentity(&m_thisRot);
-	m_lastRot.M[0] = -0.651098; m_lastRot.M[1] =  0.373922 ;m_lastRot.M[2] = -0.660495;
-	m_lastRot.M[3] =  0.758753; m_lastRot.M[4] =  0.298796; m_lastRot.M[5] = -0.578805;
-	m_lastRot.M[6] = -0.019075; m_lastRot.M[7] = -0.878011; m_lastRot.M[8] = -0.478259;
+	m_lastRot.M[0] = -0.651098f; m_lastRot.M[1] =  0.373922f; m_lastRot.M[2] = -0.660495f;
+	m_lastRot.M[3] =  0.758753f; m_lastRot.M[4] =  0.298796f; m_lastRot.M[5] = -0.578805f;
+	m_lastRot.M[6] = -0.019075f; m_lastRot.M[7] = -0.878011f; m_lastRot.M[8] = -0.478259f;
 
 	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
 	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);

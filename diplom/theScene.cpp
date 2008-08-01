@@ -132,8 +132,8 @@ void TheScene::renderSlizes()
 void TheScene::lightsOn()
 {
 	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1.0 };
-	GLfloat light_specular[] = { 0.4, 0.4, 0.4, 1.0 };
+	GLfloat light_diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	GLfloat light_specular[] = { 0.4f, 0.4f, 0.4f, 1.0f };
 	GLfloat specref[] = { 0.5, 0.5, 0.5, 0.5};
 
 	GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
@@ -245,7 +245,7 @@ void TheScene::renderSurface()
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if (info->getType() == Surface_ && info->getShow())
 		{
-			glColor3f(0.1, 0.1, 0.1);
+			glColor3f(0.1f, 0.1f, 0.1f);
 			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", 1);
 			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", 1);
 

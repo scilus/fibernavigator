@@ -18,7 +18,7 @@ Mesh::Mesh(DatasetHelper* dh)
 	m_zVoxel = 0.0;
 	is_loaded = false;
 	m_highest_value = 1.0;
-	m_threshold = 0.10;
+	m_threshold = 0.10f;
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;

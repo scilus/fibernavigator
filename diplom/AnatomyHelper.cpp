@@ -25,7 +25,7 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 	m_dh->shaderHelper->setTextureShaderVars();
 
 	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0000001);
+	glAlphaFunc(GL_GREATER, 0.0001f);
 
 	float xline = 0;
 	float yline = 0;

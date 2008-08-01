@@ -425,7 +425,7 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	}
 }
 
-void MainFrame::OnKdTreeThreadFinished(wxCommandEvent& event)
+void MainFrame::OnKdTreeThreadFinished(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->treeFinished();
 }
@@ -513,32 +513,32 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnMouseEvent(wxMouseEvent& event)
+void MainFrame::OnMouseEvent(wxMouseEvent& WXUNUSED(event))
 {
 	this->Refresh();
 }
 
 
 
-void MainFrame::OnXSliderMoved(wxCommandEvent& event)
+void MainFrame::OnXSliderMoved(wxCommandEvent& WXUNUSED(event))
 {
 	 m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	 refreshAllGLWidgets();
 }
 
-void MainFrame::OnYSliderMoved(wxCommandEvent& event)
+void MainFrame::OnYSliderMoved(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnZSliderMoved(wxCommandEvent& event)
+void MainFrame::OnZSliderMoved(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnTSliderMoved(wxCommandEvent& event)
+void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 {
 	float threshold = (float)m_tSlider->GetValue()/100.0;
 
@@ -573,35 +573,35 @@ void MainFrame::renewAllGLWidgets()
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnToggleAxial(wxCommandEvent& event)
+void MainFrame::OnToggleAxial(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 	m_dh->showAxial = !m_dh->showAxial;
 	m_mainGL->render();
 }
 
-void MainFrame::OnToggleCoronal(wxCommandEvent& event)
+void MainFrame::OnToggleCoronal(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 	m_dh->showCoronal = !m_dh->showCoronal;
 	m_mainGL->render();
 }
 
-void MainFrame::OnToggleSagittal(wxCommandEvent& event)
+void MainFrame::OnToggleSagittal(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 	m_dh->showSagittal = !m_dh->showSagittal;
 	m_mainGL->render();
 }
 
-void MainFrame::OnToggleAlpha(wxCommandEvent& event)
+void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 	m_dh->scene->m_blendAlpha = !m_dh->scene->m_blendAlpha;
 	m_mainGL->render();
 }
 
-void MainFrame::OnToggleSelBox(wxCommandEvent& event)
+void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
@@ -618,7 +618,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnNewSelBox(wxCommandEvent& event)
+void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
@@ -650,19 +650,19 @@ void MainFrame::OnNewSelBox(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnHideSelBoxes(wxCommandEvent& event)
+void MainFrame::OnHideSelBoxes(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 	m_dh->scene->toggleBoxes();
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnReloadShaders(wxCommandEvent& event)
+void MainFrame::OnReloadShaders(wxCommandEvent& WXUNUSED(event))
 {
 	renewAllGLWidgets();
 }
 
-void MainFrame::OnNew(wxCommandEvent& event)
+void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
 {
 	for (int i = 0 ; i < m_listCtrl->GetItemCount(); ++i)
 	{
@@ -753,7 +753,7 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	m_treeWidget->EnsureVisible(info->getTreeId());
 }
 
-void MainFrame::OnListItemUp(wxCommandEvent& event)
+void MainFrame::OnListItemUp(wxCommandEvent& WXUNUSED(event))
 {
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
@@ -762,7 +762,7 @@ void MainFrame::OnListItemUp(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnListItemDown(wxCommandEvent& event)
+void MainFrame::OnListItemDown(wxCommandEvent& WXUNUSED(event))
 {
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
@@ -771,7 +771,7 @@ void MainFrame::OnListItemDown(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
+void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 {
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
 	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);
@@ -793,7 +793,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnActivateTreeItem(wxTreeEvent& event)
+void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 {
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
 	/* open load dialog */
@@ -820,20 +820,20 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnTreeEvent(wxCommandEvent& event)
+void MainFrame::OnTreeEvent(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnTogglePointMode(wxCommandEvent& event)
+void MainFrame::OnTogglePointMode(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 	m_dh->scene->togglePointMode();
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnNewSurface(wxCommandEvent& event)
+void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || m_dh->surface_loaded) return;
 	Surface *surface = new Surface(m_dh);
@@ -849,7 +849,7 @@ void MainFrame::OnNewSurface(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnNewSurface2(wxCommandEvent& event)
+void MainFrame::OnNewSurface2(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || m_dh->surface_loaded) return;
 
@@ -914,7 +914,7 @@ void MainFrame::OnNewSurface2(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnAssignColor(wxCommandEvent& event)
+void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 
@@ -964,7 +964,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnToggleLighting(wxCommandEvent& event)
+void MainFrame::OnToggleLighting(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->lighting = !m_dh->lighting;
 	refreshAllGLWidgets();

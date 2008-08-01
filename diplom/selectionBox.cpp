@@ -62,12 +62,12 @@ void SelectionBox::draw()
 	pz = cz + m_size.s.Z/2;
 
 	if ( m_isTop )
-		glColor4f(0.0, 1.0, 1.0, 0.2);
+		glColor4f(0.0f, 1.0f, 1.0f, 0.2f);
 	else {
 		if ( !m_isNOT )
-			glColor4f(0.0, 1.0, 0.0, 0.2);
+			glColor4f(0.0f, 1.0f, 0.0f, 0.2f);
 		else
-			glColor4f(1.0, 0.0, 0.0, 0.2);
+			glColor4f(1.0f, 0.0f, 0.0f, 0.2f);
 	}
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_QUADS);

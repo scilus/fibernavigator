@@ -34,9 +34,9 @@ SplinePoint::~SplinePoint()
 void SplinePoint::draw()
 {
 	if (m_selected)
-		glColor3f(1.0, 0.8, 0.0);
+		glColor3f(1.0f, 0.8f, 0.0f);
 	else
-		glColor3f(0.0, 0.8, 0.8);
+		glColor3f(0.0f, 0.8f, 0.8f);
 	drawSphere(m_center.s.X, m_center.s.Y, m_center.s.Z, 2);
 }
 
