@@ -224,11 +224,35 @@
     inline
     static void Matrix3fSetIdentity(Matrix3fT* NewObj)
     {
+    	Matrix3fSetZero(NewObj);
         //then set diagonal as 1
         NewObj->s.M00 =
         NewObj->s.M11 =
         NewObj->s.M22 = 1.0f;
     }
+
+    inline
+	static void Matrix4fSetZero(Matrix4fT* NewObj)
+	{
+		NewObj->s.M00 = NewObj->s.M01 = NewObj->s.M02 = NewObj->s.M03 =
+		NewObj->s.M10 = NewObj->s.M11 = NewObj->s.M12 = NewObj->s.M13 =
+		NewObj->s.M20 = NewObj->s.M21 = NewObj->s.M22 = NewObj->s.M23 =
+		NewObj->s.M30 = NewObj->s.M31 = NewObj->s.M32 = NewObj->s.M33 =	0.0f;
+	}
+
+	/**
+	 * Sets this Matrix4 to identity.
+	 */
+	inline
+	static void Matrix4fSetIdentity(Matrix4fT* NewObj)
+	{
+		Matrix4fSetZero(NewObj);
+		//then set diagonal as 1
+		NewObj->s.M00 =
+		NewObj->s.M11 =
+		NewObj->s.M22 =
+		NewObj->s.M33 = 1.0f;
+	}
 
     /**
      * Sets this Vector3 to zero

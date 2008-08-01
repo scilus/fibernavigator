@@ -41,11 +41,8 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	anatomyHelper = NULL;
 	shaderHelper = NULL;
 
-	Matrix4fT m ={  1.0f,  0.0f,  0.0f,  0.0f,
-			        0.0f,  1.0f,  0.0f,  0.0f,
-			        0.0f,  0.0f,  1.0f,  0.0f,
-					0.0f,  0.0f,  0.0f,  1.0f };
-	m_transform = m;
+	Matrix4fSetIdentity(&m_transform);
+
 	lastError = wxT("");
 	lastPath = wxT("");
 	lastGLError = GL_NO_ERROR;
@@ -376,15 +373,15 @@ void DatasetHelper::save(wxString filename)
 		wxXmlProperty *propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), point->getCenter().s.X), propy);
 		pointnode->AddProperty(propx);
 	}
-	wxXmlNode *masterbox;
+
 	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
 	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
+		wxXmlNode *masterbox = new wxXmlNode(nodeboxes, wxXML_ELEMENT_NODE, wxT("master_box"));
 		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
 		{
 			if (j == 0)
 			{
-				masterbox = new wxXmlNode(nodeboxes, wxXML_ELEMENT_NODE, wxT("master_box"));
 				wxXmlNode *center = new wxXmlNode(masterbox, wxXML_ELEMENT_NODE, wxT("center"));
 				wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), boxes[i][j]->getCenter().s.Z));
 				wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), boxes[i][j]->getCenter().s.Y), propz);

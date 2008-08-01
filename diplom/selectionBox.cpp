@@ -15,7 +15,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	m_treeId = NULL;
 	m_handleRadius = 3.0;
 	m_inBox.resize(m_dh->countFibers, sizeof(bool));
-	for (int i = 0; i < m_dh->countFibers ; ++i)
+	for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
 	{
 		m_inBox[i] = 0;
 	}

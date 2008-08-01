@@ -23,23 +23,12 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 	m_view = view;
 	m_dh = dh;
 
-	Matrix4fT m_transform1   = {  1.0f,  0.0f,  0.0f,  0.0f,
-	                       0.0f,  1.0f,  0.0f,  0.0f,
-	                       0.0f,  0.0f,  1.0f,  0.0f,
-	                       0.0f,  0.0f,  0.0f,  1.0f };
+	Matrix4fSetIdentity(&m_dh->m_transform);
 
-	m_dh->m_transform = m_transform1;
-
-	Matrix3fT idMat = {{  1.0f,  0.0f,  0.0f,
-	                     0.0f,  1.0f,  0.0f,
-	                     0.0f,  0.0f,  1.0f }};
-
-	Matrix3fT lastRot1   = {{   -0.651098 ,  0.373922 , -0.660495,
-								0.758753 ,  0.298796 , -0.578805,
-							   -0.019075 , -0.878011 , -0.478259}};
-
-	m_thisRot =idMat;
-	m_lastRot =lastRot1;
+	Matrix3fSetIdentity(&m_thisRot);
+	m_lastRot.M[0] = -0.651098; m_lastRot.M[1] =  0.373922 ;m_lastRot.M[2] = -0.660495;
+	m_lastRot.M[3] =  0.758753; m_lastRot.M[4] =  0.298796; m_lastRot.M[5] = -0.578805;
+	m_lastRot.M[6] = -0.019075; m_lastRot.M[7] = -0.878011; m_lastRot.M[8] = -0.478259;
 
 	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
 	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
