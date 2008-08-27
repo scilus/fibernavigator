@@ -1,7 +1,7 @@
 file( GLOB _srcs "*.cpp" )
 
 file( GLOB _srcs2 "GLSL/*.cpp" )
-file( GLOB _srcs3 "Fantom/*.cc" )
+file( GLOB _srcs3 "Fantom/*.cpp" )
 PROJECT( ralph )
 # # at least it is not defined when compiling on my mac
 # #  add_definitions( -D__WXMAC__ )
