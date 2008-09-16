@@ -23,6 +23,15 @@ enum DatasetType {
 	Mesh_,
 	Curves_,
 	Surface_,
+	MasterBox,
+	ChildBox,
+	SPoint,
+	Label_planes,
+	Label_datasets,
+	Label_meshes,
+	Label_fibers,
+	Label_points,
+	Label_selBoxes,
 };
 
 class DatasetHelper;

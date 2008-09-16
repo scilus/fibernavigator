@@ -15,10 +15,12 @@
 class MyTreeItemData : public wxTreeItemData
 {
 public:
-	MyTreeItemData (void* data) : m_data(data) {}
+	MyTreeItemData (void* data, int type) : m_data(data), m_type(type) {}
 		void* getData() {return m_data;};
+		int getType() {return m_type;};
 private:
 	void* m_data;
+	int m_type;
 };
 
 class MyTreeCtrl : public wxTreeCtrl
@@ -28,7 +30,7 @@ public:
             const wxWindowID id,
             const wxPoint& pos,
             const wxSize& size,
-            long style) 
+            long style)
 	: wxTreeCtrl(parent, id, pos, size, style) {};
 private:
 	void OnChar(wxKeyEvent& event);
@@ -45,17 +47,17 @@ public:
                const wxSize& size,
                long style)
         : wxListCtrl(parent, id, pos, size, style) {};
-        
-   
+
+
         void OnLeftClick(wxMouseEvent& event);
         int getColClicked();
         void moveItemUp(long);
         void moveItemDown(long);
-        
+
 private:
 	int  m_col_clicked;
 	void swap(long, long);
-   
+
    DECLARE_EVENT_TABLE()
 };
 

@@ -290,19 +290,19 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_listCtrl->InsertColumn(3, itemCol);
 
     m_treeWidget = new MyTreeCtrl(m_leftWindow, TREE_CTRL, wxPoint(0, 0),
-    		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
+    		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_EDIT_LABELS);
     m_treeWidget->AssignImageList(imageList);
 
     m_tRootId = m_treeWidget->AddRoot(wxT("Root"));
-    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"));
+    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"), -1, -1, new MyTreeItemData(0, Label_planes));
 	    m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"));
 	    m_tCoronalId  = m_treeWidget->AppendItem(m_tPlanesId, wxT("coronal"));
 	    m_tSagittalId = m_treeWidget->AppendItem(m_tPlanesId, wxT("sagittal"));
-    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("datasets"));
-    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"));
-    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"));
-    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"));
-    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"));
+    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("datasets"), -1, -1, new MyTreeItemData(0, Label_datasets));
+    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"), -1, -1, new MyTreeItemData(0, Label_meshes));
+    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"), -1, -1, new MyTreeItemData(0, Label_fibers));
+    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"), -1, -1, new MyTreeItemData(0, Label_points));
+    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"), -1, -1, new MyTreeItemData(0, Label_selBoxes));
 
     /*
      * Set OpenGL attributes
@@ -502,7 +502,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 			break;
 		case 20:
 			SplinePoint *point = new SplinePoint(m_mainGL->getEventCenter(), m_dh);
-			wxTreeItemId pId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+			wxTreeItemId pId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point, SPoint));
 			m_treeWidget->EnsureVisible(pId);
 			m_treeWidget->SelectItem(pId);
 			point->setTreeId(pId);
@@ -607,7 +607,9 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
-	if (m_treeWidget->GetItemText(tBoxId) == wxT("box"))
+
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == ChildBox ||
+			((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
 	{
 		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
 		m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
@@ -630,19 +632,19 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
-	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
 	{
 		// box is under another box
 		selBox->m_isTop = false;
 
-		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox, ChildBox));
 		m_treeWidget->EnsureVisible(tNewBoxId);
 		selBox->setTreeId(tNewBoxId);
 	}
 	else
 	{
 		// box is top
-		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox, MasterBox));
 		m_treeWidget->EnsureVisible(tNewBoxId);
 		selBox->setTreeId(tNewBoxId);
 	}
@@ -784,7 +786,8 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 			m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 		}
 	}
-	if (m_treeWidget->GetItemText(treeid) == wxT("point"))
+
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == SPoint)
 	{
 		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
 		m_dh->lastSelectedPoint = (SplinePoint*)((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData();
@@ -797,24 +800,25 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 {
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
 	/* open load dialog */
-	if (m_treeWidget->GetItemText(treeid) == wxT("datasets")) {
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == Label_datasets)
+	{
 		m_dh->load(1);
 	}
-	else if (m_treeWidget->GetItemText(treeid) == wxT("meshes")) {
+	else if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == Label_meshes)
+	{
 		m_dh->load(2);
 	}
-	else if (m_treeWidget->GetItemText(treeid) == wxT("fibers")) {
+	else if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == Label_fibers)
+	{
 		m_dh->load(3);
 	}
 	wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);
 	if (!data) return;
-	if (m_treeWidget->GetItemText(treeid) == wxT("box")) {
-		if (m_treeWidget->GetItemText(parentid) == wxT("box"))
-		{
-			((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData()))->toggleNOT();
-			((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(parentid))->getData()))->setDirty();
-		}
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == ChildBox)
+	{
+		((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData()))->toggleNOT();
+		((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(parentid))->getData()))->setDirty();
 	}
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
@@ -881,14 +885,14 @@ void MainFrame::OnNewSurface2(wxCommandEvent& WXUNUSED(event))
 			SplinePoint *point = new SplinePoint(xs, yy-y, zz-z, m_dh);
 
 			if (i == 0 || i == 10 || j == 0 || j == 10) {
-				wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+				wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point, SPoint));
 				m_treeWidget->EnsureVisible(tId);
 				point->setTreeId(tId);
 			}
 			else
 			{
 				if (fibers->getBarycenter(point)) {
-					wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+					wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point, SPoint));
 					m_treeWidget->EnsureVisible(tId);
 					point->setTreeId(tId);
 				}
@@ -945,7 +949,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 			info->setColor(col);
 		}
 	}
-	if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("selection boxes"))
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
 	{
 		SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
 		box->setColor(col);
@@ -953,7 +957,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 	}
 	else
 	{
-		if (m_treeWidget->GetItemText(m_treeWidget->GetItemParent(tBoxId)) == wxT("box"))
+		if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == ChildBox)
 		{
 			SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(m_treeWidget->GetItemParent(tBoxId)))->getData();
 			box->setColor(col);

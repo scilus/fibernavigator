@@ -158,7 +158,7 @@ bool DatasetHelper::load(int index, wxString filename)
 				Vector3fT vs = {{columns/8, rows/8, frames/8}};
 						SelectionBox *selBox = new SelectionBox(vc, vs, this);
 						selBox->m_isTop = true;
-						wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+						wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox, MasterBox));
 						mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 						selBox->setTreeId(tNewBoxId);
 			}
@@ -265,7 +265,7 @@ bool DatasetHelper::loadSettings(wxString filename)
 				sy.ToDouble(&_y);
 				sz.ToDouble(&_z);
 				SplinePoint *point = new SplinePoint(_x, _y, _z, this);
-				mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point));
+				mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point, SPoint));
 				pNode = pNode->GetNext();
 			}
 		}
@@ -332,10 +332,10 @@ bool DatasetHelper::loadSettings(wxString filename)
 				Vector3fT vs = {{ix, iy, iz }};
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->m_isTop = true;
-				wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox));
+				wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox, MasterBox));
 				mainFrame->m_treeWidget->EnsureVisible(boxId);
 				for (unsigned int i = 0 ; i < vboxes.size() ; ++i) {
-					wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(boxId, wxT("box"), 0, -1, new MyTreeItemData(vboxes[i]));
+					wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(boxId, wxT("box"), 0, -1, new MyTreeItemData(vboxes[i], ChildBox));
 					mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				}
 				mbNode = mbNode->GetNext();
@@ -494,23 +494,23 @@ void DatasetHelper::updateTreeDS(const int i)
 	case Head_byte:
 	case Head_short:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(mainFrame->m_tDatasetId, info->getName(),
-				-1, -1, new MyTreeItemData(info)));
+				-1, -1, new MyTreeItemData(info, Head_byte)));
 		break;
 	case Overlay:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(mainFrame->m_tDatasetId, info->getName(),
-				-1, -1, new MyTreeItemData(info)));
+				-1, -1, new MyTreeItemData(info, Overlay)));
 		break;
 	case RGB:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(mainFrame->m_tDatasetId, info->getName(),
-				-1, -1, new MyTreeItemData(info)));
+				-1, -1, new MyTreeItemData(info, RGB)));
 		break;
 	case Mesh_:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(mainFrame->m_tMeshId, info->getName(),
-				-1, -1, new MyTreeItemData(info)));
+				-1, -1, new MyTreeItemData(info, Mesh_)));
 		break;
 	case Curves_:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(mainFrame->m_tFiberId, info->getName(),
-				-1, -1, new MyTreeItemData(info)));
+				-1, -1, new MyTreeItemData(info, Curves_)));
 		break;
 	}
 }
