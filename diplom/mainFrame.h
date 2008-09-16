@@ -63,6 +63,7 @@ private:
     void OnUnSelectTreeItem(wxTreeEvent& event);
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
+    void OnTreeLabelEdit(wxTreeEvent& event);
 
     void OnAssignColor(wxCommandEvent& event);
     void OnToggleLighting(wxCommandEvent& event);

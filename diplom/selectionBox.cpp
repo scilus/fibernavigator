@@ -19,6 +19,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	{
 		m_inBox[i] = 0;
 	}
+	m_name = wxT("box");
 }
 
 SelectionBox::SelectionBox(SelectionBox *box)
@@ -31,7 +32,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	m_show = true;
 	m_dirty = true;
 	m_colorChanged = false;
-
+	m_name = box->getName();
 	m_handleRadius = 3.0;
 	m_inBox.resize(m_dh->countFibers, sizeof(bool));
 	for (unsigned int i = 0; i < m_dh->countFibers ; ++i)

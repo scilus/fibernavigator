@@ -61,6 +61,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_TREE_SEL_CHANGED(TREE_CTRL, MainFrame::OnSelectTreeItem)
 	EVT_TREE_ITEM_ACTIVATED(TREE_CTRL, MainFrame::OnActivateTreeItem)
 	EVT_COMMAND(TREE_CTRL, wxEVT_TREE_EVENT, MainFrame::OnTreeEvent)
+	EVT_TREE_END_LABEL_EDIT(TREE_CTRL, MainFrame::OnTreeLabelEdit)
 	/* toggle drawing of points */
 	EVT_MENU(VIEWER_DRAW_POINTS, MainFrame::OnTogglePointMode)
 	EVT_MENU(VIEWER_NEW_SURFACE, MainFrame::OnNewSurface)
@@ -829,6 +830,17 @@ void MainFrame::OnTreeEvent(wxCommandEvent& WXUNUSED(event))
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
+
+void MainFrame::OnTreeLabelEdit(wxTreeEvent& event)
+{
+	wxTreeItemId treeid = event.GetItem();
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == ChildBox ||
+				((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == MasterBox)
+	{
+		((SelectionBox*) (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData()))->setName(event.GetLabel());
+	}
+}
+
 
 void MainFrame::OnTogglePointMode(wxCommandEvent& WXUNUSED(event))
 {

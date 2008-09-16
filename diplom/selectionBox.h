@@ -43,6 +43,8 @@ public:
 	wxColour getColor() {return m_color;};
 	void setColorChanged(bool v) {m_colorChanged = v;};
 	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
+	wxString getName() {return m_name;};
+	void setName(wxString name) {m_name = name;};
 
 	void draw1();
 	void draw2();
@@ -89,6 +91,7 @@ private:
 	Vector3fT m_size;
 	hitResult m_hr;
 	float mx, px, my, py, mz, pz;
+	wxString m_name;
 
 	float m_handleRadius;
 	bool m_show;

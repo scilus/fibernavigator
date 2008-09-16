@@ -276,6 +276,7 @@ bool DatasetHelper::loadSettings(wxString filename)
 			while (mbNode) {
 				wxXmlNode *bNode = mbNode->GetChildren();
 				std::vector<SelectionBox*>vboxes;
+				wxString _name;
 				double cx, cy, cz, ix, iy, iz;
 				double _cx, _cy, _cz, _ix, _iy, _iz;
 				cx = cy = cz = ix = iy = iz =
@@ -301,6 +302,9 @@ bool DatasetHelper::loadSettings(wxString filename)
 								sy.ToDouble(&_cy);
 								sz.ToDouble(&_cz);
 							}
+							else if (cNode->GetName() == wxT("name")) {
+								_name = cNode->GetPropVal(wxT("string"), wxT("box"));
+							}
 							cNode = cNode->GetNext();
 						}
 						Vector3fT _vc = {{_cx, _cy, _cz }};
@@ -308,6 +312,7 @@ bool DatasetHelper::loadSettings(wxString filename)
 						SelectionBox *selBox = new SelectionBox(_vc, _vs, this);
 						selBox->m_isTop = false;
 						selBox->m_isNOT = (_type == wxT("NOT"));
+						selBox->setName(_name);
 						vboxes.push_back(selBox);
 					}
 					else if (bNode->GetName() == wxT("size")) {
@@ -326,16 +331,20 @@ bool DatasetHelper::loadSettings(wxString filename)
 						sy.ToDouble(&cy);
 						sz.ToDouble(&cz);
 					}
+					else if (bNode->GetName() == wxT("name")) {
+						_name = bNode->GetPropVal(wxT("string"), wxT("box"));
+					}
 					bNode = bNode->GetNext();
 				}
 				Vector3fT vc = {{cx, cy, cz }};
 				Vector3fT vs = {{ix, iy, iz }};
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->m_isTop = true;
-				wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, wxT("box"),0, -1, new MyTreeItemData(selBox, MasterBox));
+				selBox->setName(_name);
+				wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, selBox->getName(),0, -1, new MyTreeItemData(selBox, MasterBox));
 				mainFrame->m_treeWidget->EnsureVisible(boxId);
 				for (unsigned int i = 0 ; i < vboxes.size() ; ++i) {
-					wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(boxId, wxT("box"), 0, -1, new MyTreeItemData(vboxes[i], ChildBox));
+					wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(boxId, vboxes[i]->getName(), 0, -1, new MyTreeItemData(vboxes[i], ChildBox));
 					mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				}
 				mbNode = mbNode->GetNext();
@@ -384,6 +393,9 @@ void DatasetHelper::save(wxString filename)
 		{
 			if (j == 0)
 			{
+				wxXmlNode *name = new wxXmlNode(masterbox, wxXML_ELEMENT_NODE, wxT("name"));
+				wxXmlProperty *propname = new wxXmlProperty(wxT("string"), boxes[i][j]->getName());
+				name->AddProperty(propname);
 				wxXmlNode *center = new wxXmlNode(masterbox, wxXML_ELEMENT_NODE, wxT("center"));
 				wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), boxes[i][j]->getCenter().s.Z));
 				wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), boxes[i][j]->getCenter().s.Y), propz);
@@ -400,6 +412,7 @@ void DatasetHelper::save(wxString filename)
 				wxXmlNode *box = new wxXmlNode(masterbox, wxXML_ELEMENT_NODE, wxT("box"));
 				wxXmlProperty *proptype = new wxXmlProperty(wxT("type"), (boxes[i][j]->m_isNOT) ? wxT("NOT") : wxT("AND"));
 				box->AddProperty(proptype);
+
 				wxXmlNode *center = new wxXmlNode(box, wxXML_ELEMENT_NODE, wxT("center"));
 				wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), boxes[i][j]->getCenter().s.Z));
 				wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), boxes[i][j]->getCenter().s.Y), propz);
@@ -410,6 +423,10 @@ void DatasetHelper::save(wxString filename)
 				propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), boxes[i][j]->getSize().s.Y), propz);
 				propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), boxes[i][j]->getSize().s.X), propy);
 				size->AddProperty(propx);
+
+				wxXmlNode *name = new wxXmlNode(box, wxXML_ELEMENT_NODE, wxT("name"));
+				wxXmlProperty *propname = new wxXmlProperty(wxT("string"), boxes[i][j]->getName());
+				name->AddProperty(propname);
 
 			}
 		}
