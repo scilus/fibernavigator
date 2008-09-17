@@ -46,6 +46,8 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	lastError = wxT("");
 	lastPath = wxT("");
 	lastGLError = GL_NO_ERROR;
+	
+	fibersInverted = false;
 
 }
 

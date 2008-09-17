@@ -58,6 +58,7 @@ public:
 	Vector3fT mapMouse2WorldBack(int, int);
 	void updateTreeDims();
 	void updateTreeDS(int);
+	bool invertFibers() {fibersInverted = !fibersInverted; return fibersInverted;};
 
 	/*
 	 * Called from MainFrame when a kdTree thread signals it's finished
@@ -110,6 +111,7 @@ public:
 	float ySlize;
 	float zSlize;
 	int quadrant;
+	bool fibersInverted;
 
 
 private:

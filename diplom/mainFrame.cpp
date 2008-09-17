@@ -71,6 +71,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	/* Button Assign Color pressed */
 	EVT_MENU(VIEWER_ASSIGN_COLOR, MainFrame::OnAssignColor)
 	EVT_MENU(VIEWER_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
+	EVT_MENU(VIEWER_INVERT_FIBERS, MainFrame::OnInvertFibers)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -987,5 +988,12 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnToggleLighting(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->lighting = !m_dh->lighting;
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnInvertFibers(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->invertFibers();
+	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }

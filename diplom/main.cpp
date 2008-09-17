@@ -112,6 +112,8 @@ bool MyApp::OnInit(void)
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_TOGGLE_LIGHTING, bmpLighting, wxT("Toggle Lighting"));
   toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));
+  toolBar->AddSeparator();
 
   toolBar->Realize();
   frame->SetToolBar(toolBar);

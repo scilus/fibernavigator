@@ -422,6 +422,13 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 				m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBox[k];
 		}
 	}
+	if (m_dh->fibersInverted)
+	{
+		for (int k = 0 ; k <m_lineCount ; ++k)
+		{
+			m_inBox[k] = !m_inBox[k];
+		}
+	}
 }
 
 std::vector<bool> Curves::getLinesShown(SelectionBox* box)

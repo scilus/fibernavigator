@@ -9,7 +9,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	m_show = true;
 	m_dirty = true;
 	m_isTop = true;
-	m_isNOT = true;
+	m_isNOT = false;
 	m_isActive = true;
 	m_colorChanged = false;
 	m_treeId = NULL;
