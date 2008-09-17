@@ -632,7 +632,10 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 	SelectionBox *selBox = new SelectionBox(vc, vs, m_dh);
 
 	// check if selection box selected
+
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+
+
 	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
 	{
 		// box is under another box
@@ -649,6 +652,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 		m_treeWidget->EnsureVisible(tNewBoxId);
 		selBox->setTreeId(tNewBoxId);
 	}
+
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }

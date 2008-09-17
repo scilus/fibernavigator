@@ -129,36 +129,42 @@ void TheScene::renderSlizes()
 	glPopAttrib();
 }
 
-void TheScene::lightsOn()
+void TheScene::renderSurface()
 {
-	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat light_diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-	GLfloat light_specular[] = { 0.4f, 0.4f, 0.4f, 1.0f };
-	GLfloat specref[] = { 0.5, 0.5, 0.5, 0.5};
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
+	if (m_blendAlpha)
+		glDisable(GL_BLEND);
+	else
+		glEnable(GL_BLEND);
 
-	glLightfv (GL_LIGHT0, GL_AMBIENT, light_ambient);
-	glLightfv (GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	glLightfv (GL_LIGHT0, GL_SPECULAR, light_specular);
-	glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glShadeModel(GL_SMOOTH);
+	lightsOn();
 
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specref);
-	glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 32);
+	bindTextures();
+	m_dh->shaderHelper->m_meshShader->bind();
+	m_dh->shaderHelper->setMeshShaderVars();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup lights"));
-}
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() == Surface_ && info->getShow())
+		{
+			glColor3f(0.1f, 0.1f, 0.1f);
+			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", 1);
+			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", 1);
 
-void TheScene::lightsOff()
-{
-	glDisable(GL_LIGHTING);
-	glDisable(GL_COLOR_MATERIAL);
+			info->draw();
+		}
+	}
+	m_dh->shaderHelper->m_meshShader->release();
+
+	lightsOff();
+
+	if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
+
+	glPopAttrib();
 }
 
 void TheScene::renderMesh()
@@ -231,35 +237,38 @@ void TheScene::renderFibers()
 	glPopAttrib();
 }
 
-void TheScene::renderSurface()
+void TheScene::lightsOn()
 {
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light_diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	GLfloat light_specular[] = { 0.4f, 0.4f, 0.4f, 1.0f };
+	GLfloat specref[] = { 0.5, 0.5, 0.5, 0.5};
 
-	lightsOn();
+	GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
 
-	m_dh->shaderHelper->m_meshShader->bind();
-	m_dh->shaderHelper->setMeshShaderVars();
+	glLightfv (GL_LIGHT0, GL_AMBIENT, light_ambient);
+	glLightfv (GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	glLightfv (GL_LIGHT0, GL_SPECULAR, light_specular);
+	glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
 
-	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
-	{
-		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == Surface_ && info->getShow())
-		{
-			glColor3f(0.1f, 0.1f, 0.1f);
-			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", 1);
-			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", 1);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glShadeModel(GL_SMOOTH);
 
-			info->draw();
-		}
-	}
-	m_dh->shaderHelper->m_meshShader->release();
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specref);
+	glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 32);
 
-	lightsOff();
-
-	if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
-
-	glPopAttrib();
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup lights"));
 }
+
+void TheScene::lightsOff()
+{
+	glDisable(GL_LIGHTING);
+	glDisable(GL_COLOR_MATERIAL);
+}
+
 
 void TheScene::renderNavView(int view)
 {

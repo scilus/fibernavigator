@@ -89,9 +89,9 @@ bool MyApp::OnInit(void)
   wxBitmap bmpNewSurface (toggle_surface_xpm);
   wxBitmap bmpAssignColor (toggle_rgb_xpm);
   wxBitmap bmpLighting (exp_xpm);
-  toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
+  //toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
-  toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
+  //toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_TOGGLE_AXIAL, bmpAxial, wxT("Toggle Axial"));
   toolBar->AddTool(VIEWER_TOGGLE_CORONAL, bmpCor, wxT("Toggle Coronal"));
