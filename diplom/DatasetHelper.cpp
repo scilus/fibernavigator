@@ -10,6 +10,8 @@
 #include "curves.h"
 #include "splinePoint.h"
 #include "mesh.h"
+#include "KdTree.h"
+#include "surface.h"
 #include "myListCtrl.h"
 #include "wx/xml/xml.h"
 
@@ -46,7 +48,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	lastError = wxT("");
 	lastPath = wxT("");
 	lastGLError = GL_NO_ERROR;
-	
+
 	fibersInverted = false;
 
 }
@@ -176,13 +178,13 @@ bool DatasetHelper::load(int index, wxString filename)
 
 void DatasetHelper::finishLoading(DatasetInfo *info)
 {
-	int i = mainFrame->m_listCtrl->GetItemCount();
-	mainFrame->m_listCtrl->InsertItem(i, wxT(""), 0);
-	mainFrame->m_listCtrl->SetItem(i, 1, info->getName());
-	mainFrame->m_listCtrl->SetItem(i, 2, wxT("0.10"));
-	mainFrame->m_listCtrl->SetItem(i, 3, wxT(""), 1);
-	mainFrame->m_listCtrl->SetItemData(i, (long)info);
-	mainFrame->m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	//int i = mainFrame->m_listCtrl->GetItemCount();
+	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+	mainFrame->m_listCtrl->SetItem(0, 1, info->getName());
+	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.10"));
+	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
+	mainFrame->m_listCtrl->SetItemData(0, (long)info);
+	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
 	mainFrame->m_statusBar->SetStatusText(wxT("Ready"),1);
 	mainFrame->m_statusBar->SetStatusText(info->getName() + wxT(" loaded"),2);
@@ -202,12 +204,12 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 
 		mainFrame->renewAllGLWidgets();
 		updateTreeDims();
-		updateTreeDS(i);
+		updateTreeDS(0);
 	}
 	else
 	{
 		mainFrame->refreshAllGLWidgets();
-		updateTreeDS(i);
+		updateTreeDS(0);
 	}
 
 
@@ -625,4 +627,46 @@ bool DatasetHelper::loadTextFile(wxString* string, wxString filename)
 		return true;
 	}
 	return false;
+}
+
+void DatasetHelper::createCutMesh()
+{
+	// check for spline surface  and anatomy - quit if not present
+	if (!surface_loaded || !anatomy_loaded) return;
+	// get top most anatomy dataset
+	DatasetInfo* info;
+	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		info = (DatasetInfo*)mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() < Mesh_) break;
+	}
+
+	Anatomy* newAnatomy = new Anatomy( *((Anatomy*)info) );
+	newAnatomy->setName(newAnatomy->getName() + wxT("(copy)"));
+	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+	mainFrame->m_listCtrl->SetItem(0, 1, newAnatomy->getName());
+	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.10"));
+	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
+	mainFrame->m_listCtrl->SetItemData(0, (long)newAnatomy);
+	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
+	mainFrame->m_statusBar->SetStatusText(wxT("Ready"),1);
+	mainFrame->m_statusBar->SetStatusText(info->getName() + wxT(" loaded"),2);
+	updateTreeDS(0);
+	mainFrame->refreshAllGLWidgets();
+
+	// get the surface vertices
+	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		info = (DatasetInfo*)mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() == Surface_ ) break;
+	}
+
+	newAnatomy->cutSurface( ((Surface*)info)->getVertices(), ((Surface*)info)->getSplinePoints() );
+
+	// subtract cut off area from anatomy
+
+	// create iso surface on remaining anatomy
+
+	// profit
 }

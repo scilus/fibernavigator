@@ -321,7 +321,6 @@ void TheScene::drawPoints()
 	m_dh->shaderHelper->m_meshShader->setUniInt("showFS", true);
 	m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
 
-	std::vector< std::vector< double > > givenPoints;
 	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
 
 	wxTreeItemId id, childid;
@@ -331,11 +330,6 @@ void TheScene::drawPoints()
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
 		SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
 		point->draw();
-		std::vector< double > p;
-		p.push_back(point->getCenter().s.X);
-		p.push_back(point->getCenter().s.Y);
-		p.push_back(point->getCenter().s.Z);
-		givenPoints.push_back(p);
 	}
 	lightsOff();
 	m_dh->shaderHelper->m_meshShader->release();

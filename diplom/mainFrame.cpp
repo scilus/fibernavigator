@@ -72,6 +72,10 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_ASSIGN_COLOR, MainFrame::OnAssignColor)
 	EVT_MENU(VIEWER_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
 	EVT_MENU(VIEWER_INVERT_FIBERS, MainFrame::OnInvertFibers)
+	EVT_MENU(VIEWER_CUT_ANATOMY, MainFrame::OnCutAnatomy)
+	EVT_MENU(VIEWER_MOVE_POINTS1, MainFrame::OnMovePoints1)
+	EVT_MENU(VIEWER_MOVE_POINTS2, MainFrame::OnMovePoints2)
+
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -902,7 +906,7 @@ void MainFrame::OnNewSurface2(wxCommandEvent& WXUNUSED(event))
 			SplinePoint *point = new SplinePoint(xs, yy-y, zz-z, m_dh);
 
 			if (i == 0 || i == 10 || j == 0 || j == 10) {
-				wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point, SPoint));
+				wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("border point"),-1, -1, new MyTreeItemData(point, BPoint));
 				m_treeWidget->EnsureVisible(tId);
 				point->setTreeId(tId);
 			}
@@ -995,5 +999,52 @@ void MainFrame::OnInvertFibers(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->invertFibers();
 	m_dh->scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnCutAnatomy(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->createCutMesh();
+
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnMovePoints1(wxCommandEvent& event)
+{
+	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
+
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countPoints ; ++i)
+	{
+		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
+		MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(id);
+		if (data->getType() == BPoint)
+		{
+			SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData();
+			point->setX(point->X() + 5.0);
+		}
+	}
+	m_dh->surface_isDirty = true;
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnMovePoints2(wxCommandEvent& event)
+{
+	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
+
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	for (int i = 0 ; i < countPoints ; ++i)
+	{
+		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
+		MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(id);
+		if (data->getType() == BPoint)
+		{
+			SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_treeWidget->GetItemData(id))->getData();
+			point->setX(point->X() - 5.0);
+		}
+	}
+	m_dh->surface_isDirty = true;
 	refreshAllGLWidgets();
 }

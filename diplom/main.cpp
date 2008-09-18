@@ -106,7 +106,7 @@ bool MyApp::OnInit(void)
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
   toolBar->AddTool(VIEWER_NEW_SURFACE, bmpNewSurface, wxT("New Spline Surface"));
-  toolBar->AddTool(VIEWER_NEW_SURFACE2, bmpNewSurface, wxT("New Spline Surface"));
+  toolBar->AddTool(VIEWER_NEW_SURFACE2, bmpNewSurface, wxT("New Spline Surface on Fiber Selection"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
   toolBar->AddSeparator();
@@ -114,6 +114,12 @@ bool MyApp::OnInit(void)
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));
   toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_CUT_ANATOMY, bmpMiniCat, wxT("Cut anatomy at spline surface"));
+  toolBar->AddSeparator();
+  toolBar->AddTool(VIEWER_MOVE_POINTS1, bmpView1, wxT("Move border points of spline surface"));
+  toolBar->AddTool(VIEWER_MOVE_POINTS2, bmpView3, wxT("Move border points of spline surface"));
+  toolBar->AddSeparator();
+
 
   toolBar->Realize();
   frame->SetToolBar(toolBar);

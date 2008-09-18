@@ -78,7 +78,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 	switch( event.GetKeyCode() )
     {
     case WXK_DELETE: {
-		if (data->getType() == MasterBox || data->getType() == ChildBox || data->getType() == SPoint) {
+		if (data->getType() == MasterBox || data->getType() == ChildBox || data->getType() == SPoint || data->getType() == BPoint) {
 			if (data->getType() == ChildBox)
 			{
 				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(parentid))->getData()))->setDirty();

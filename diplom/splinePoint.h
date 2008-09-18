@@ -20,7 +20,7 @@ public:
 	SplinePoint( double, double, double, DatasetHelper*);
 	~SplinePoint();
 
-	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
+	void setCenter(Vector3fT c) { m_center = c;};
 	Vector3fT getCenter() {return m_center;};
 	void draw();
 
@@ -34,7 +34,7 @@ public:
 	float X() {return m_center.s.X;};
 	float Y() {return m_center.s.Y;};
 	float Z() {return m_center.s.Z;};
-	void setX(float x) {m_center.s.X = x;};
+	void setX(float x);
 	void setY(float y) {m_center.s.Y = y;};
 	void setZ(float z) {m_center.s.Z = z;};
 	void setOffsetVector (Vector3fT vec) {m_offsetVector = vec;};
@@ -48,7 +48,6 @@ private:
 	Vector3fT m_offsetVector;
 	Vector3fT m_origin;
 
-	bool m_dirty;
 	bool m_selected;
 	hitResult m_hr;
 	void drawSphere(float, float, float, float);

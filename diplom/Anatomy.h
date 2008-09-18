@@ -9,6 +9,8 @@
 #define ANATOMY_H_
 
 #include "datasetInfo.h"
+#include "surface.h"
+
 
 class Anatomy: public DatasetInfo {
 
@@ -21,6 +23,11 @@ public:
 	void generateTexture();
 	void generateGeometry() {};
 	void initializeBuffer() {};
+
+	void cutSurface(std::vector< int >, std::vector< std::vector< double > >);
+	bool isInsideTriangle(double, double, double, double, double, double, double, double);
+	int getValueForPoint(double, double, double, double, double, double, double, double);
+	void cutRestOfLine(int, int, int);
 
 private:
 	wxUint8 *m_byteDataset;

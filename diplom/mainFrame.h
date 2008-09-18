@@ -67,8 +67,12 @@ private:
 
     void OnAssignColor(wxCommandEvent& event);
     void OnToggleLighting(wxCommandEvent& event);
-	
+
 	void OnInvertFibers(wxCommandEvent& event);
+	void OnCutAnatomy(wxCommandEvent& event);
+
+	void OnMovePoints1(wxCommandEvent& event);
+	void OnMovePoints2(wxCommandEvent& event);
 
     void OnKdTreeThreadFinished(wxCommandEvent& event);
 
@@ -149,6 +153,9 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_ASSIGN_COLOR			24
 #define VIEWER_TOGGLE_LIGHTING		25
 #define VIEWER_INVERT_FIBERS		26
+#define VIEWER_CUT_ANATOMY			27
+#define VIEWER_MOVE_POINTS1 		28
+#define VIEWER_MOVE_POINTS2 		29
 
 #define KDTREE_EVENT			50
 

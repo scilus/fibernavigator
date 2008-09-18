@@ -23,6 +23,7 @@ public:
 
 	void movePoints();
 
+	std::vector< int >getVertices() {return m_vertices;};
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
 
 private:

@@ -289,3 +289,83 @@ void Anatomy::generateTexture()
 	}
 }
 
+void Anatomy::cutSurface(std::vector< int > vertices, std::vector< std::vector< double > > splinePoints)
+{
+	int xOff = m_columns/2;
+	int yOff = m_rows/2;
+	int zOff = m_frames/2;
+
+	for ( unsigned int i = 0 ; i < splinePoints.size() ; ++i)
+	{
+		std::vector< double > p = splinePoints[i];
+		p[0] += xOff;
+		p[1] += yOff;
+		p[2] += zOff;
+		splinePoints[i] = p;
+	}
+
+
+
+
+}
+
+bool Anatomy::isInsideTriangle(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3)
+{
+	FVector A(x1, y1);
+	FVector B(x2, y2);
+	FVector C(x3, y3);
+	FVector P(x,y);
+	// Compute vectors
+	FVector v0 = C - A;
+	FVector v1 = B - A;
+	FVector v2 = P - A;
+
+	// Compute dot products
+	double dot00 = v0 *v0;
+	double dot01 = v0 * v1;
+	double dot02 = v0 * v2;
+	double dot11 = v1 * v1;
+	double dot12 = v1 * v2;
+
+	// Compute barycentric coordinates
+	double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+	double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+	double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+	// Check if point is in triangle
+	return (u > 0) && (v > 0) && (u + v < 1);
+}
+
+int Anatomy::getValueForPoint(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3)
+{
+	return 100;
+}
+
+void Anatomy::cutRestOfLine(int x1, int y, int z)
+{
+	switch (m_type)
+	{
+		case Head_byte: {
+			for (int x = x1 ; x < m_columns ; ++x)
+				m_byteDataset[x + y*m_columns + z*m_columns*m_rows ] = 0;
+			break;
+		}
+		case Head_short: {
+			for (int x = x1; x < m_columns ; ++x)
+				m_shortDataset[x + y*m_columns + z*m_columns*m_rows ] = 0;
+			break;
+		}
+		case Overlay: {
+			for (int x = x1 ; x < m_columns ; ++x)
+				m_floatDataset[x + y*m_columns + z*m_columns*m_rows ] = 0;
+			break;
+		}
+		case RGB: {
+			for (int x = x1 ; x < m_columns ; ++x)
+				m_rgbDataset[x + y*m_columns + z*m_columns*m_rows ] = 0;
+			break;
+		}
+		default:
+			break;
+	}
+}
