@@ -72,14 +72,14 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 	wxTreeItemId parentid = this->GetItemParent(treeid);
 	MyTreeItemData *data;
 
+	data = (MyTreeItemData*)this->GetItemData(treeid);
+	if (!data) return;
+
 	switch( event.GetKeyCode() )
     {
     case WXK_DELETE: {
-
-		data = (MyTreeItemData*)this->GetItemData(treeid);
-		if (!data) return;
-		if (this->GetItemText(treeid) == wxT("box") || this->GetItemText(treeid) == wxT("point")) {
-			if (this->GetItemText(parentid) == wxT("box"))
+		if (data->getType() == MasterBox || data->getType() == ChildBox || data->getType() == SPoint) {
+			if (data->getType() == ChildBox)
 			{
 				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(parentid))->getData()))->setDirty();
 			}
@@ -89,7 +89,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 		}
     } break;
     case WXK_LEFT:
-    	if (this->GetItemText(treeid) == wxT("box"))
+    	if (data->getType() == MasterBox || data->getType() == ChildBox)
     	{
     		 if (wxGetKeyState(WXK_CONTROL))
     			 ((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeLeft();
@@ -98,7 +98,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
     	}
     	break;
     case WXK_RIGHT:
-		if (this->GetItemText(treeid) == wxT("box"))
+		if (data->getType() == MasterBox || data->getType() == ChildBox)
 		{
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeRight();
@@ -107,7 +107,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 		}
 		break;
     case WXK_UP:
-		if (this->GetItemText(treeid) == wxT("box"))
+		if (data->getType() == MasterBox || data->getType() == ChildBox)
 		{
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeForward();
@@ -116,7 +116,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 		}
 		break;
     case WXK_DOWN:
-		if (this->GetItemText(treeid) == wxT("box"))
+		if (data->getType() == MasterBox || data->getType() == ChildBox)
 		{
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeBack();
@@ -125,7 +125,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 		}
 		break;
     case WXK_PAGEUP:
-		if (this->GetItemText(treeid) == wxT("box"))
+		if (data->getType() == MasterBox || data->getType() == ChildBox)
 		{
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeUp();
@@ -134,7 +134,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 		}
 		break;
     case WXK_PAGEDOWN:
-		if (this->GetItemText(treeid) == wxT("box"))
+		if (data->getType() == MasterBox || data->getType() == ChildBox)
 		{
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeDown();
