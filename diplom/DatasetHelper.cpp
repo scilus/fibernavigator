@@ -650,19 +650,10 @@ void DatasetHelper::createCutMesh()
 	mainFrame->m_listCtrl->SetItemData(0, (long)newAnatomy);
 	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-	mainFrame->m_statusBar->SetStatusText(wxT("Ready"),1);
-	mainFrame->m_statusBar->SetStatusText(info->getName() + wxT(" loaded"),2);
 	updateTreeDS(0);
 	mainFrame->refreshAllGLWidgets();
 
-	// get the surface vertices
-	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
-	{
-		info = (DatasetInfo*)mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == Surface_ ) break;
-	}
-
-	newAnatomy->cutSurface( ((Surface*)info)->getVertices(), ((Surface*)info)->getSplinePoints() );
+	newAnatomy->cutSurface();
 
 	// subtract cut off area from anatomy
 

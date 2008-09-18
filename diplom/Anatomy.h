@@ -24,9 +24,8 @@ public:
 	void generateGeometry() {};
 	void initializeBuffer() {};
 
-	void cutSurface(std::vector< int >, std::vector< std::vector< double > >);
+	void cutSurface();
 	bool isInsideTriangle(double, double, double, double, double, double, double, double);
-	int getValueForPoint(double, double, double, double, double, double, double, double);
 	void cutRestOfLine(int, int, int);
 
 private:

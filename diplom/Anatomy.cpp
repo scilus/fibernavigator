@@ -289,12 +289,15 @@ void Anatomy::generateTexture()
 	}
 }
 
-void Anatomy::cutSurface(std::vector< int > vertices, std::vector< std::vector< double > > splinePoints)
+void Anatomy::cutSurface()
 {
+	Surface* s = new Surface(m_dh);
+	s->setSetSampleRate(0.025);
+
 	int xOff = m_columns/2;
 	int yOff = m_rows/2;
 	int zOff = m_frames/2;
-
+	std::vector< std::vector< double > > splinePoints = s->getSplinePoints();
 	for ( unsigned int i = 0 ; i < splinePoints.size() ; ++i)
 	{
 		std::vector< double > p = splinePoints[i];
@@ -305,8 +308,41 @@ void Anatomy::cutSurface(std::vector< int > vertices, std::vector< std::vector< 
 	}
 
 
+	std::vector<int>mask(m_rows*m_frames, m_columns);
+	switch (m_type)
+	{
+		case Head_byte: {
+			for ( unsigned int i = 0 ; i < splinePoints.size() ; ++i)
+			{
+				std::vector< double > p = splinePoints[i];
+				if (p[0] < 0 || p[0] > m_columns - 1 || p[1] < 0 || p[1] > m_rows -1 || p[2] < 0 || p[2] > m_frames -1) continue;
 
-
+				if (mask[(int)p[1] + m_rows*(int)p[2]] > (int)p[0])
+					mask[(int)p[1] + m_rows*(int)p[2]] = (int)p[0];
+			}
+			for ( int y = 0; y < m_rows ; ++y)
+				for ( int z = 0 ; z < m_frames ; ++z)
+				{
+					for (int x = mask[y + z*m_rows] - 1  ; x > 0 ; --x)
+					{
+						m_byteDataset[x + y * m_columns + z * m_columns * m_rows] = 0;
+					}
+				}
+			break;
+		}
+		case Head_short: {
+			break;
+		}
+		case Overlay: {
+			break;
+		}
+		case RGB: {
+			break;
+		}
+		default:
+			break;
+	}
+	generateTexture();
 }
 
 bool Anatomy::isInsideTriangle(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3)
@@ -334,11 +370,6 @@ bool Anatomy::isInsideTriangle(double x, double y, double x1, double y1, double 
 
 	// Check if point is in triangle
 	return (u > 0) && (v > 0) && (u + v < 1);
-}
-
-int Anatomy::getValueForPoint(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3)
-{
-	return 100;
 }
 
 void Anatomy::cutRestOfLine(int x1, int y, int z)

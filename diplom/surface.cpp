@@ -27,6 +27,7 @@ Surface::Surface(DatasetHelper* dh)
 	m_threshold = 0.5;
 	m_name = wxT("spline surface");
 	m_dh->surface_loaded = true;
+	m_numPoints = 0;
 	execute();
 }
 
@@ -238,11 +239,13 @@ void Surface::execute ()
 		(*pointsIt)[2] += m_zAverage;
 	}
 
+
 	FBSplineSurface splineSurface(m_order, m_order, deBoorPoints, m_numDeBoorCols, m_numDeBoorRows);
 
 	splineSurface.samplePoints(m_splinePoints, m_sampleRateT, m_sampleRateU);
 
 	std::vector< double > positions;
+
 	for( std::vector< std::vector< double > >::iterator posIt = m_splinePoints.begin(); posIt != m_splinePoints.end(); posIt++)
 	{
 		positions.push_back((*posIt)[0]);
@@ -252,7 +255,8 @@ void Surface::execute ()
 
 	int renderpointsPerCol = splineSurface.getNumSamplePointsU();
 	int renderpointsPerRow = splineSurface.getNumSamplePointsT();
-
+	m_numPoints = splineSurface.getNumSamplePointsU()*splineSurface.getNumSamplePointsT();
+	printf("%d : %d\n", renderpointsPerCol, renderpointsPerRow);
 	for(int z = 0; z < renderpointsPerCol - 1; z++)
 	{
 		for(int x = 0; x < renderpointsPerRow - 1; x++)
@@ -266,7 +270,6 @@ void Surface::execute ()
 			m_vertices.push_back((z+1) * renderpointsPerCol + x + 1);
 		}
 	}
-
 	getNormalsForVertices();
 
 	m_dh->surface_isDirty = false;
@@ -283,9 +286,9 @@ FVector Surface::getNormalForTriangle(const FVector* p1, const FVector* p2, cons
 void Surface::getNormalsForVertices()
 {
 	m_normals.clear();
-	int numPoints = 46*46;
+
 	std::vector< FVector > triangleNormals;
-	std::vector< std::vector<int> >triangleRef(numPoints, std::vector<int>(0,0));
+	std::vector< std::vector<int> >triangleRef(m_numPoints, std::vector<int>(0,0));
 
 	for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
 	{
@@ -304,7 +307,7 @@ void Surface::getNormalsForVertices()
 		triangleNormals.push_back(n);
 	}
 
-	for (int i = 0 ; i < numPoints ; ++i )
+	for (int i = 0 ; i < m_numPoints ; ++i )
 	{
 		FVector tmp(0.0,0.0,0.0);
 		for ( unsigned int j = 0 ; j < triangleRef[i].size() ; ++j)

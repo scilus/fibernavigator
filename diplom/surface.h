@@ -25,6 +25,7 @@ public:
 
 	std::vector< int >getVertices() {return m_vertices;};
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
+	void setSetSampleRate(float r) {m_sampleRateT = m_sampleRateU = r; execute();};
 
 private:
 	void execute();
@@ -49,6 +50,7 @@ private:
 	std::vector< std::vector< double > > m_splinePoints;
 	std::vector< int > m_vertices;
 	std::vector< FVector >m_normals;
+	int m_numPoints;
 
 	DatasetHelper* m_dh;
 };
