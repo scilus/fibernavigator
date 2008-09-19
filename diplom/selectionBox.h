@@ -99,6 +99,8 @@ private:
 	bool m_colorChanged;
 	wxColour m_color;
 	wxTreeItemId m_treeId;
+	
+	int m_stepSize;
 
 };
 

@@ -14,6 +14,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	m_colorChanged = false;
 	m_treeId = NULL;
 	m_handleRadius = 3.0;
+	m_stepSize = 9;
 	m_inBox.resize(m_dh->countFibers, sizeof(bool));
 	for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
 	{
@@ -34,6 +35,7 @@ SelectionBox::SelectionBox(SelectionBox *box)
 	m_colorChanged = false;
 	m_name = box->getName();
 	m_handleRadius = 3.0;
+	m_stepSize = 9;
 	m_inBox.resize(m_dh->countFibers, sizeof(bool));
 	for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
 	{
@@ -466,6 +468,7 @@ void SelectionBox::moveLeft()
 {
 	if ( m_center.s.X < -m_dh->columns/2 ) return;
 	m_center.s.X -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.s.X -= m_stepSize;
 	update();
 }
 
@@ -473,6 +476,7 @@ void SelectionBox::moveRight()
 {
 	if ( m_center.s.X > m_dh->columns/2 ) return;
 	m_center.s.X += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.s.X += m_stepSize;
 	update();
 }
 
@@ -480,6 +484,7 @@ void SelectionBox::moveForward()
 {
 	if ( m_center.s.Y < -m_dh->rows/2 ) return;
 	m_center.s.Y -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Y -= m_stepSize;
 	update();
 }
 
@@ -487,6 +492,7 @@ void SelectionBox::moveBack()
 {
 	if ( m_center.s.Y > m_dh->rows/2 ) return;
 	m_center.s.Y += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Y += m_stepSize;
 	update();
 }
 
@@ -494,6 +500,7 @@ void SelectionBox::moveUp()
 {
 	if ( m_center.s.Z < -m_dh->frames/2 ) return;
 	m_center.s.Z -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Z -= m_stepSize;
 	update();
 }
 
@@ -501,6 +508,7 @@ void SelectionBox::moveDown()
 {
 	if ( m_center.s.Z > m_dh->frames/2 ) return;
 	m_center.s.Z += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Z += m_stepSize;
 	update();
 }
 
@@ -508,6 +516,7 @@ void SelectionBox::resizeLeft()
 {
 	if ( m_size.s.X < 2 ) return;
 	m_size.s.X -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.X -= m_stepSize;
 	update();
 }
 
@@ -515,6 +524,7 @@ void SelectionBox::resizeRight()
 {
 	if ( m_size.s.X > m_dh->columns ) return;
 	m_size.s.X += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.X += m_stepSize;
 	update();
 }
 
@@ -522,6 +532,7 @@ void SelectionBox::resizeBack()
 {
 	if ( m_size.s.Y < 2 ) return;
 	m_size.s.Y -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Y -= m_stepSize;
 	update();
 }
 
@@ -529,6 +540,7 @@ void SelectionBox::resizeForward()
 {
 	if ( m_size.s.Y > m_dh->rows ) return;
 	m_size.s.Y += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Y += m_stepSize;
 	update();
 }
 
@@ -536,6 +548,7 @@ void SelectionBox::resizeDown()
 {
 	if ( m_size.s.Z < 2 ) return;
 	m_size.s.Z -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Z -= m_stepSize;
 	update();
 }
 
@@ -543,6 +556,7 @@ void SelectionBox::resizeUp()
 {
 	if ( m_size.s.Z > m_dh->frames ) return;
 	m_size.s.Z += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Z += m_stepSize;
 	update();
 }
 
