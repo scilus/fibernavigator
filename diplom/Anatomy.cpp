@@ -323,7 +323,9 @@ void Anatomy::cutSurface()
 			for ( int y = 0; y < m_rows ; ++y)
 				for ( int z = 0 ; z < m_frames ; ++z)
 				{
-					for (int x = mask[y + z*m_rows] - 1  ; x > 0 ; --x)
+					// distance = start of the cut
+					int distance = -2;
+					for (int x = mask[y + z*m_rows] - distance  ; x > 0 ; --x)
 					{
 						m_byteDataset[x + y * m_columns + z * m_columns * m_rows] = 0;
 					}

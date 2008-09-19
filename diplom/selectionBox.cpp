@@ -52,6 +52,8 @@ void SelectionBox::select()
 
 void SelectionBox::draw()
 {
+	if (!m_isActive) return;
+
 	float cx = m_center.s.X;
 	float cy = m_center.s.Y;
 	float cz = m_center.s.Z;
@@ -245,7 +247,7 @@ void SelectionBox::drawSphere(float x, float y, float z, float r)
 hitResult SelectionBox::hitTest(Ray *ray)
 {
 	hitResult hr;
-	if (m_show) {
+	if (m_show && m_isActive) {
 		float tpicked = 0;
 		int picked = 0;
 		float cx = m_center.s.X;

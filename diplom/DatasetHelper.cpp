@@ -347,9 +347,11 @@ bool DatasetHelper::loadSettings(wxString filename)
 				selBox->setName(_name);
 				wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSelBoxId, selBox->getName(),0, -1, new MyTreeItemData(selBox, MasterBox));
 				mainFrame->m_treeWidget->EnsureVisible(boxId);
+				selBox->setTreeId(boxId);
 				for (unsigned int i = 0 ; i < vboxes.size() ; ++i) {
 					wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(boxId, vboxes[i]->getName(), 0, -1, new MyTreeItemData(vboxes[i], ChildBox));
 					mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
+					vboxes[i]->setTreeId(tNewBoxId);
 				}
 				mbNode = mbNode->GetNext();
 
