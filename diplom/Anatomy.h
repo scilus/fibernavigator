@@ -25,8 +25,11 @@ public:
 	void initializeBuffer() {};
 
 	void cutSurface();
-	bool isInsideTriangle(double, double, double, double, double, double, double, double);
-	void cutRestOfLine(int, int, int);
+
+	wxUint8* getByteDataset();
+
+	//bool isInsideTriangle(double, double, double, double, double, double, double, double);
+	//void cutRestOfLine(int, int, int);
 
 private:
 	wxUint8 *m_byteDataset;

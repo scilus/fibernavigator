@@ -9,12 +9,7 @@
 
 ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh = dh;
-	/*
-	wxString vShaderModules;
-	m_dh->loadTextFile(&vShaderModules, wxT("GLSL/lighting.vs"));
-	wxString fShaderModules;
-	m_dh->loadTextFile(&fShaderModules, wxT("GLSL/lighting.fs"));
-*/
+
 	printf("initializing  texture shader\n");
 
 	m_textureShader = new Shader(wxT("GLSL/anatomy"));

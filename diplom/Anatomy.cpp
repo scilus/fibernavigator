@@ -347,6 +347,16 @@ void Anatomy::cutSurface()
 	generateTexture();
 }
 
+wxUint8* Anatomy::getByteDataset()
+{
+	if (m_type == Head_byte)
+	{
+		return m_byteDataset;
+	}
+	else
+		return NULL;
+}
+/*
 bool Anatomy::isInsideTriangle(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3)
 {
 	FVector A(x1, y1);
@@ -402,3 +412,4 @@ void Anatomy::cutRestOfLine(int x1, int y, int z)
 			break;
 	}
 }
+*/

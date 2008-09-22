@@ -23,6 +23,7 @@ enum DatasetType {
 	Mesh_,
 	Curves_,
 	Surface_,
+	IsoSurface_,
 	MasterBox,
 	ChildBox,
 	SPoint,

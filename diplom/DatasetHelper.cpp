@@ -15,6 +15,8 @@
 #include "myListCtrl.h"
 #include "wx/xml/xml.h"
 
+#include "IsoSurface/CIsoSurface.h"
+
 DatasetHelper::DatasetHelper(MainFrame* mf) {
 	mainFrame = mf;
 
@@ -657,6 +659,27 @@ void DatasetHelper::createCutMesh()
 
 	newAnatomy->cutSurface();
 
+	CIsoSurface *isosurf = new CIsoSurface(this);
+	isosurf->GenerateSurface(newAnatomy->getByteDataset(), 10, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);
+
+	if (isosurf->IsSurfaceValid())
+	{
+		printf("surface is valid\n");
+		isosurf->generateGeometry();
+		isosurf->setName(wxT("iso surface"));
+
+		mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+		mainFrame->m_listCtrl->SetItem(0, 1, isosurf->getName());
+		mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.10"));
+		mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
+		mainFrame->m_listCtrl->SetItemData(0, (long)isosurf);
+		mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
+	}
+	else
+	{
+		printf("surface is not valid\n");
+	}
 	// subtract cut off area from anatomy
 
 	// create iso surface on remaining anatomy

@@ -180,7 +180,7 @@ void TheScene::renderMesh()
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == Mesh_)
+		if (info->getType() == Mesh_ || info->getType() == IsoSurface_)
 		{
 			if (info->getShow()) {
 				wxColor c = info->getColor();
