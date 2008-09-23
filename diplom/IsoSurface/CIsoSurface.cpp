@@ -778,5 +778,10 @@ void CIsoSurface::generateGeometry()
 
 	glEndList();
 	m_GLuint = dl;
+}
 
+void CIsoSurface::GenerateWithThreshold()
+{
+	GenerateSurface(m_ptScalarField, 255*m_threshold, m_dh->columns-1, m_dh->rows-1, m_dh->frames-1, 1.0, 1.0, 1.0);
+	generateGeometry();
 }

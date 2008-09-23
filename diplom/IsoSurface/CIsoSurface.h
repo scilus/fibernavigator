@@ -49,6 +49,8 @@ public:
 	void generateGeometry() ;
 	void initializeBuffer() {};
 
+	void GenerateWithThreshold();
+
 	// Generates the isosurface from the scalar field contained in the
 	// buffer ptScalarField[].
 	void GenerateSurface(const wxUint8* ptScalarField, wxUint8 tIsoLevel, unsigned int nCellsX, unsigned int nCellsY,  unsigned int nCellsZ, float fCellLengthX, float fCellLengthY, float fCellLengthZ);

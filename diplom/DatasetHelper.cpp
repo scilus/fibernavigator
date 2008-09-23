@@ -660,7 +660,7 @@ void DatasetHelper::createCutMesh()
 	newAnatomy->cutSurface();
 
 	CIsoSurface *isosurf = new CIsoSurface(this);
-	isosurf->GenerateSurface(newAnatomy->getByteDataset(), 10, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);
+	isosurf->GenerateSurface(newAnatomy->getByteDataset(), 50, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);
 
 	if (isosurf->IsSurfaceValid())
 	{

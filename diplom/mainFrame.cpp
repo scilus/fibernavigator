@@ -16,6 +16,7 @@
 #include "splinePoint.h"
 #include "curves.h"
 #include "surface.h"
+#include "IsoSurface/CIsoSurface.h"
 
 #include "icons/eyes.xpm"
 #include "icons/delete.xpm"
@@ -557,6 +558,11 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 	{
 		Surface* s = (Surface*) m_listCtrl->GetItemData(item);
 		s->movePoints();
+	}
+	if (info->getType() == IsoSurface_)
+	{
+		CIsoSurface* s = (CIsoSurface*) m_listCtrl->GetItemData(item);
+		s->GenerateWithThreshold();
 	}
 	refreshAllGLWidgets();
 }
