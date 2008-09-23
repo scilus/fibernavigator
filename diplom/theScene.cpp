@@ -244,7 +244,11 @@ void TheScene::lightsOn()
 	GLfloat light_specular[] = { 0.4f, 0.4f, 0.4f, 1.0f };
 	GLfloat specref[] = { 0.5, 0.5, 0.5, 0.5};
 
-	GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
+	Vector3fT v1 = {{0,0,-1}};
+	Vector3fT l;
+	Vector3fMultMat4(&l, &v1, &m_dh->m_transform);
+
+	GLfloat light_position0[] = { l.s.X, l.s.Y, l.s.Z, 0.0};
 
 	glLightfv (GL_LIGHT0, GL_AMBIENT, light_ambient);
 	glLightfv (GL_LIGHT0, GL_DIFFUSE, light_diffuse);
