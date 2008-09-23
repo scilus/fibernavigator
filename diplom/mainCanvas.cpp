@@ -23,9 +23,9 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 	m_view = view;
 	m_dh = dh;
 
-	m_lastRot.M[0] = -0.651098f; m_lastRot.M[1] =  0.373922f; m_lastRot.M[2] = -0.660495f;
-	m_lastRot.M[3] =  0.758753f; m_lastRot.M[4] =  0.298796f; m_lastRot.M[5] = -0.578805f;
-	m_lastRot.M[6] = -0.019075f; m_lastRot.M[7] = -0.878011f; m_lastRot.M[8] = -0.478259f;
+	m_lastRot.M[0] = -0.67698019742965698242f; m_lastRot.M[1] =  0.48420974612236022949f; m_lastRot.M[2] = -0.55429106950759887695;
+	m_lastRot.M[3] =  0.73480975627899169922f; m_lastRot.M[4] =  0.40184235572814941406f; m_lastRot.M[5] = -0.54642277956008911133f;
+	m_lastRot.M[6] = -0.04184586182236671448f; m_lastRot.M[7] = -0.77721565961837768555f; m_lastRot.M[8] = -0.62784034013748168945f;
 
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	Matrix3fSetIdentity(&m_thisRot);
@@ -162,9 +162,9 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
 						m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
 						if (wxGetKeyState(WXK_CONTROL)) {
-							printf("%.10f , %.10f , %.10f,\n", m_lastRot.s.M00, m_lastRot.s.M10, m_lastRot.s.M20);
-							printf("%.10f , %.10f , %.10f,\n", m_lastRot.s.M01, m_lastRot.s.M11, m_lastRot.s.M21);
-							printf("%.10f , %.10f , %.10f,\n", m_lastRot.s.M02, m_lastRot.s.M12, m_lastRot.s.M22);
+							printf("%.20f , %.20f , %.20f,\n", m_lastRot.s.M00, m_lastRot.s.M10, m_lastRot.s.M20);
+							printf("%.20f , %.20f , %.20f,\n", m_lastRot.s.M01, m_lastRot.s.M11, m_lastRot.s.M21);
+							printf("%.20f , %.20f , %.20f,\n", m_lastRot.s.M02, m_lastRot.s.M12, m_lastRot.s.M22);
 						}
 				    }
 				    else
@@ -177,47 +177,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 			            Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
 				    }
 
-					float *dots = new float[8];
-					Vector3fT v1 = {{0,0,1}};
-					Vector3fT v2 = {{1,1,1}};
-					Vector3fT view;
 
-					Vector3fMultMat4(&view, &v1, &m_dh->m_transform);
-					dots[0] = Vector3fDot(&v2, &view);
-
-					v2.s.Z = -1;
-					dots[1] = Vector3fDot(&v2, &view);
-
-					v2.s.Y = -1;
-					dots[2] = Vector3fDot(&v2, &view);
-
-					v2.s.Z = 1;
-					dots[3] = Vector3fDot(&v2, &view);
-
-					v2.s.X = -1;
-					dots[4] = Vector3fDot(&v2, &view);
-
-					v2.s.Z = -1;
-					dots[5] = Vector3fDot(&v2, &view);
-
-					v2.s.Y = 1;
-					dots[6] = Vector3fDot(&v2, &view);
-
-					v2.s.Z = 1;
-					dots[7] = Vector3fDot(&v2, &view);
-
-					float max = 0.0;
-					int quadrant = 0;
-					for (int i = 0 ; i < 8 ; ++i)
-					{
-						if (dots[i] > max)
-						{
-							max = dots[i];
-							quadrant = i+1;
-						}
-					}
-					m_dh->quadrant = quadrant;
-
+					updateView();
 					Refresh(false);
 				}
 			}
@@ -237,6 +198,50 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		default: ;
 	}
 
+}
+
+void MainCanvas::updateView()
+{
+	float *dots = new float[8];
+	Vector3fT v1 = {{0,0,1}};
+	Vector3fT v2 = {{1,1,1}};
+	Vector3fT view;
+
+	Vector3fMultMat4(&view, &v1, &m_dh->m_transform);
+	dots[0] = Vector3fDot(&v2, &view);
+
+	v2.s.Z = -1;
+	dots[1] = Vector3fDot(&v2, &view);
+
+	v2.s.Y = -1;
+	dots[2] = Vector3fDot(&v2, &view);
+
+	v2.s.Z = 1;
+	dots[3] = Vector3fDot(&v2, &view);
+
+	v2.s.X = -1;
+	dots[4] = Vector3fDot(&v2, &view);
+
+	v2.s.Z = -1;
+	dots[5] = Vector3fDot(&v2, &view);
+
+	v2.s.Y = 1;
+	dots[6] = Vector3fDot(&v2, &view);
+
+	v2.s.Z = 1;
+	dots[7] = Vector3fDot(&v2, &view);
+
+	float max = 0.0;
+	int quadrant = 0;
+	for (int i = 0 ; i < 8 ; ++i)
+	{
+		if (dots[i] > max)
+		{
+			max = dots[i];
+			quadrant = i+1;
+		}
+	}
+	m_dh->quadrant = quadrant;
 }
 
 float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
@@ -458,4 +463,5 @@ void MainCanvas::setRotation()
 	Matrix3fSetIdentity(&m_thisRot);
 	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
 	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
+	updateView();
 }

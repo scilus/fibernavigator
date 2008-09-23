@@ -37,7 +37,7 @@ public:
     wxPoint getMousePos() {return m_clicked;};
     float getDelta() {return m_delta;};
     int getPicked() {return m_hr.picked;};
-    void updateView(int, float);
+    void updateView();
     void init();
     void render();
     void invalidate();

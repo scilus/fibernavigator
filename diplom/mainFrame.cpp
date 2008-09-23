@@ -43,9 +43,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_SLIDER(ID_Z_SLIDER, MainFrame::OnZSliderMoved)
 	/* click on toolbar button to toggle one of the 3 panes in the
 	 * main GL window */
-	EVT_MENU(VIEWER_TOGGLE_AXIAL, MainFrame::OnToggleAxial)
-	EVT_MENU(VIEWER_TOGGLE_CORONAL, MainFrame::OnToggleCoronal)
-	EVT_MENU(VIEWER_TOGGLE_SAGITTAL, MainFrame::OnToggleSagittal)
+	EVT_MENU(VIEWER_BUTTON_AXIAL, MainFrame::OnButtonAxial)
+	EVT_MENU(VIEWER_BUTTON_CORONAL, MainFrame::OnButtonCoronal)
+	EVT_MENU(VIEWER_BUTTON_SAGITTAL, MainFrame::OnButtonSagittal)
 	EVT_MENU(VIEWER_TOGGLE_ALPHA, MainFrame::OnToggleAlpha)
 	EVT_MENU(VIEWER_NEW_SELBOX, MainFrame::OnNewSelBox)
 	EVT_MENU(VIEWER_RENDER_SELBOXES, MainFrame::OnHideSelBoxes)
@@ -585,31 +585,112 @@ void MainFrame::renewAllGLWidgets()
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnToggleAxial(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnButtonAxial(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
-	m_dh->showAxial = !m_dh->showAxial;
+
+	if ( wxGetKeyState(WXK_CONTROL) )
+	{
+		Matrix4fSetIdentity(&m_dh->m_transform);
+		m_dh->m_transform.s.M11 = -1.0;
+		m_dh->m_transform.s.M22 = -1.0;
+		m_mainGL->setRotation();
+	}
+	else if ( wxGetKeyState(WXK_SHIFT) )
+	{
+		printf("huhu\n");
+		Matrix4fSetIdentity(&m_dh->m_transform);
+		m_dh->m_transform.s.M11 = -1.0;
+		m_dh->m_transform.s.M00 = -1.0;
+		m_mainGL->setRotation();
+	}
+	else
+		m_dh->showAxial = !m_dh->showAxial;
+
 	m_mainGL->render();
 }
 
-void MainFrame::OnToggleCoronal(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnButtonCoronal(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
-	m_dh->showCoronal = !m_dh->showCoronal;
+	if ( wxGetKeyState(WXK_CONTROL) )
+	{
+		Matrix4fSetIdentity(&m_dh->m_transform);
+		m_dh->m_transform.s.M11 = 0.0;
+		m_dh->m_transform.s.M12 = -1.0;
+		m_dh->m_transform.s.M21 = 1.0;
+		m_dh->m_transform.s.M22 = 0.0;
+		m_mainGL->setRotation();
+	}
+	else if ( wxGetKeyState(WXK_SHIFT) )
+	{
+		Matrix4fSetIdentity(&m_dh->m_transform);
+		m_dh->m_transform.s.M00 = -1.0;
+		m_dh->m_transform.s.M11 = 0.0;
+		m_dh->m_transform.s.M22 = 0.0;
+		m_dh->m_transform.s.M12 = -1.0;
+		m_dh->m_transform.s.M21 = -1.0;
+		m_mainGL->setRotation();
+	}
+	else
+		m_dh->showCoronal = !m_dh->showCoronal;
+
 	m_mainGL->render();
 }
 
-void MainFrame::OnToggleSagittal(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnButtonSagittal(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
-	m_dh->showSagittal = !m_dh->showSagittal;
+
+	if ( wxGetKeyState(WXK_CONTROL) )
+	{
+		Matrix4fSetIdentity(&m_dh->m_transform);
+		m_dh->m_transform.s.M00 = 0.0;
+		m_dh->m_transform.s.M11 = 0.0;
+		m_dh->m_transform.s.M22 = 0.0;
+		m_dh->m_transform.s.M20 = -1.0;
+		m_dh->m_transform.s.M01 = 1.0;
+		m_dh->m_transform.s.M12 = -1.0;
+		m_mainGL->setRotation();
+	}
+	else if ( wxGetKeyState(WXK_SHIFT) )
+	{
+		Matrix4fSetIdentity(&m_dh->m_transform);
+		m_dh->m_transform.s.M00 = 0.0;
+		m_dh->m_transform.s.M11 = 0.0;
+		m_dh->m_transform.s.M22 = 0.0;
+		m_dh->m_transform.s.M20 = 1.0;
+		m_dh->m_transform.s.M01 = -1.0;
+		m_dh->m_transform.s.M12 = -1.0;
+		m_mainGL->setRotation();
+	}
+	else
+		m_dh->showSagittal = !m_dh->showSagittal;
+
 	m_mainGL->render();
 }
 
 void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
-	m_dh->scene->m_blendAlpha = !m_dh->scene->m_blendAlpha;
+	if ( wxGetKeyState(WXK_CONTROL) )
+	{
+		Matrix4fSetIdentity(&m_dh->m_transform);
+
+		m_dh->m_transform.s.M00 = -0.67698019742965698242f;
+		m_dh->m_transform.s.M10 =  0.48420974612236022949f;
+		m_dh->m_transform.s.M20 = -0.55429106950759887695;
+		m_dh->m_transform.s.M01 =  0.73480975627899169922f;
+		m_dh->m_transform.s.M11 =  0.40184235572814941406f;
+		m_dh->m_transform.s.M21 = -0.54642277956008911133f;
+		m_dh->m_transform.s.M02 = -0.04184586182236671448f;
+		m_dh->m_transform.s.M12 = -0.77721565961837768555f;
+		m_dh->m_transform.s.M22 = -0.62784034013748168945f;
+		m_mainGL->setRotation();
+	}
+	else
+		m_dh->scene->m_blendAlpha = !m_dh->scene->m_blendAlpha;
+
 	m_mainGL->render();
 }
 

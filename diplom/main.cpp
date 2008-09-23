@@ -93,9 +93,9 @@ bool MyApp::OnInit(void)
   toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
   //toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
   toolBar->AddSeparator();
-  toolBar->AddTool(VIEWER_TOGGLE_AXIAL, bmpAxial, wxT("Toggle Axial"));
-  toolBar->AddTool(VIEWER_TOGGLE_CORONAL, bmpCor, wxT("Toggle Coronal"));
-  toolBar->AddTool(VIEWER_TOGGLE_SAGITTAL, bmpSag, wxT("Toggle Sagittal"));
+  toolBar->AddTool(VIEWER_BUTTON_AXIAL, bmpAxial, wxT("Axial"));
+  toolBar->AddTool(VIEWER_BUTTON_CORONAL, bmpCor, wxT("Coronal"));
+  toolBar->AddTool(VIEWER_BUTTON_SAGITTAL, bmpSag, wxT("Sagittal"));
   toolBar->AddTool(VIEWER_TOGGLE_ALPHA, bmpNewSurface, wxT("Toggle alpha blending"));
   toolBar->AddSeparator();
   toolBar->AddTool(VIEWER_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));

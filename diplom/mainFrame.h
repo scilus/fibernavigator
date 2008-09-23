@@ -40,9 +40,9 @@ private:
     void OnZSliderMoved(wxCommandEvent& event);
     void OnTSliderMoved(wxCommandEvent& event);
 
-    void OnToggleAxial(wxCommandEvent& event);
-    void OnToggleCoronal(wxCommandEvent& event);
-    void OnToggleSagittal(wxCommandEvent& event);
+    void OnButtonAxial(wxCommandEvent& event);
+    void OnButtonCoronal(wxCommandEvent& event);
+    void OnButtonSagittal(wxCommandEvent& event);
     void OnToggleAlpha(wxCommandEvent& event);
     void OnToggleSelBox(wxCommandEvent& event);
     void OnNewSelBox(wxCommandEvent& event);
@@ -140,9 +140,9 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_NEW					4
 #define VIEWER_LOAD					5
 #define VIEWER_SAVE					6
-#define VIEWER_TOGGLE_AXIAL 		11
-#define VIEWER_TOGGLE_CORONAL 		12
-#define VIEWER_TOGGLE_SAGITTAL 		13
+#define VIEWER_BUTTON_AXIAL 		11
+#define VIEWER_BUTTON_CORONAL 		12
+#define VIEWER_BUTTON_SAGITTAL 		13
 #define VIEWER_TOGGLE_ALPHA 		14
 #define VIEWER_RELOAD_SHADER		16
 #define VIEWER_NEW_SELBOX			17
