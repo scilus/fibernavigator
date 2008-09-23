@@ -20,7 +20,6 @@ class DatasetHelper;
 class SelectionBox {
 public:
 	SelectionBox(Vector3fT, Vector3fT, DatasetHelper*);
-	SelectionBox(SelectionBox*);
 	~SelectionBox() {};
 
 	void draw();
@@ -30,6 +29,7 @@ public:
 	bool toggleShow() {return m_show = !m_show;};
 	bool toggleNOT() {return m_isNOT = !m_isNOT;};
 	bool getShow() {return m_show;};
+	void unselect() {m_isSelected = false;};
 
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
 	Vector3fT getCenter() {return m_center;};
@@ -77,6 +77,7 @@ public:
 	bool m_isNOT;
 	bool m_isTop;
 	bool m_isActive;
+	bool m_isSelected;
 
 	DatasetHelper* m_dh;
 
@@ -99,7 +100,7 @@ private:
 	bool m_colorChanged;
 	wxColour m_color;
 	wxTreeItemId m_treeId;
-	
+
 	int m_stepSize;
 
 };

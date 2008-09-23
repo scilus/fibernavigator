@@ -103,6 +103,7 @@ public:
 	int threadsActive;
 
 	SplinePoint* lastSelectedPoint;
+	SelectionBox* lastSelectedBox;
 	MainFrame* mainFrame;
 	TheScene* scene;
 	AnatomyHelper* anatomyHelper;

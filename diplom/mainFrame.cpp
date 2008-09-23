@@ -890,6 +890,14 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 		m_dh->lastSelectedPoint = (SplinePoint*)((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData();
 		m_dh->lastSelectedPoint->select();
 	}
+
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == ChildBox ||
+			((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == MasterBox )
+	{
+		if (m_dh->lastSelectedBox) m_dh->lastSelectedBox->unselect();
+		m_dh->lastSelectedBox = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getData();
+		m_dh->lastSelectedBox->select();
+	}
 	refreshAllGLWidgets();
 }
 

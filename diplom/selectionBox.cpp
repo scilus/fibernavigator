@@ -11,6 +11,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	m_isTop = true;
 	m_isNOT = false;
 	m_isActive = true;
+	m_isSelected = false;
 	m_colorChanged = false;
 	m_treeId = NULL;
 	m_handleRadius = 3.0;
@@ -23,32 +24,13 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	m_name = wxT("box");
 }
 
-SelectionBox::SelectionBox(SelectionBox *box)
-{
-	m_dh = box->m_dh;
-	m_center = box->getCenter();
-	m_size = box->getSize();
-	m_isNOT = false;
-	m_isActive = true;
-	m_show = true;
-	m_dirty = true;
-	m_colorChanged = false;
-	m_name = box->getName();
-	m_handleRadius = 3.0;
-	m_stepSize = 9;
-	m_inBox.resize(m_dh->countFibers, sizeof(bool));
-	for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
-	{
-		m_inBox[i] = 0;
-	}
-}
-
 void SelectionBox::select()
 {
 	if (m_treeId)
 	{
 		m_dh->mainFrame->m_treeWidget->SelectItem(m_treeId);
 		m_dh->mainFrame->m_treeWidget->EnsureVisible(m_treeId);
+		m_isSelected = true;
 	}
 }
 
@@ -66,14 +48,36 @@ void SelectionBox::draw()
 	mz = cz - m_size.s.Z/2;
 	pz = cz + m_size.s.Z/2;
 
+	GLfloat c[] = { 0.5, 0.5, 0.5, 0.5};
+
 	if ( m_isTop )
-		glColor4f(0.0f, 1.0f, 1.0f, 0.2f);
+	{
+		c[0] = 0.0f;
+		c[1] = 1.0f;
+		c[2] = 1.0f;
+		c[3] = 0.2f;
+	}
 	else {
 		if ( !m_isNOT )
-			glColor4f(0.0f, 1.0f, 0.0f, 0.2f);
+		{
+			c[0] = 0.0f;
+			c[1] = 1.0f;
+			c[2] = 0.0f;
+			c[3] = 0.2f;
+		}
 		else
-			glColor4f(1.0f, 0.0f, 0.0f, 0.2f);
+		{
+			c[0] = 1.0f;
+			c[1] = 0.0f;
+			c[2] = 0.0f;
+			c[3] = 0.2f;
+		}
 	}
+	if (m_isSelected)
+	{
+		c[3] = 0.4f;
+	}
+	glColor4f(c[0], c[1], c[2], c[3]);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_QUADS);
 		glVertex3f(mx, my, mz);

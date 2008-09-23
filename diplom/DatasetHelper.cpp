@@ -41,6 +41,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	quadrant = 6;
 
 	lastSelectedPoint = NULL;
+	lastSelectedBox = NULL;
 	scene = NULL;
 	anatomyHelper = NULL;
 	shaderHelper = NULL;
