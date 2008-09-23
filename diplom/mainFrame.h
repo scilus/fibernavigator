@@ -101,12 +101,13 @@ private:
     MainCanvas* m_gl0;
     MainCanvas* m_gl1;
     MainCanvas* m_gl2;
-    MainCanvas* m_mainGL;
 
     int NAV_SIZE;
     int NAV_GL_SIZE;
 
 public:
+	MainCanvas* m_mainGL;
+
 	wxSlider* m_xSlider;
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;

@@ -23,17 +23,16 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 	m_view = view;
 	m_dh = dh;
 
-	Matrix4fSetIdentity(&m_dh->m_transform);
-
-	Matrix3fSetIdentity(&m_thisRot);
 	m_lastRot.M[0] = -0.651098f; m_lastRot.M[1] =  0.373922f; m_lastRot.M[2] = -0.660495f;
 	m_lastRot.M[3] =  0.758753f; m_lastRot.M[4] =  0.298796f; m_lastRot.M[5] = -0.578805f;
 	m_lastRot.M[6] = -0.019075f; m_lastRot.M[7] = -0.878011f; m_lastRot.M[8] = -0.478259f;
 
+	Matrix4fSetIdentity(&m_dh->m_transform);
+	Matrix3fSetIdentity(&m_thisRot);
 	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
 	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
 
-	m_isDragging = false;					                    // NEW: Dragging The Mouse?
+	m_isDragging = false;
 	m_isrDragging = false;
 	m_delta = 0;
 	m_arcBall = new ArcBallT(640.0f, 480.0f);
@@ -163,9 +162,9 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
 						m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
 						if (wxGetKeyState(WXK_CONTROL)) {
-							printf("%f , %f , %f,\n", m_lastRot.s.M00, m_lastRot.s.M10, m_lastRot.s.M20);
-							printf("%f , %f , %f,\n", m_lastRot.s.M01, m_lastRot.s.M11, m_lastRot.s.M21);
-							printf("%f , %f , %f,\n", m_lastRot.s.M02, m_lastRot.s.M12, m_lastRot.s.M22);
+							printf("%.10f , %.10f , %.10f,\n", m_lastRot.s.M00, m_lastRot.s.M10, m_lastRot.s.M20);
+							printf("%.10f , %.10f , %.10f,\n", m_lastRot.s.M01, m_lastRot.s.M11, m_lastRot.s.M21);
+							printf("%.10f , %.10f , %.10f,\n", m_lastRot.s.M02, m_lastRot.s.M12, m_lastRot.s.M22);
 						}
 				    }
 				    else
@@ -441,4 +440,22 @@ Vector3fT MainCanvas::getEventCenter()
 	Vector3fT dir = {{m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z}};
 	Vector3fT center = {{m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z}};
 	return center;
+}
+
+void MainCanvas::setRotation()
+{
+	m_lastRot.s.M00 = m_dh->m_transform.s.M00;
+	m_lastRot.s.M01 = m_dh->m_transform.s.M01;
+	m_lastRot.s.M02 = m_dh->m_transform.s.M02;
+	m_lastRot.s.M10 = m_dh->m_transform.s.M10;
+	m_lastRot.s.M11 = m_dh->m_transform.s.M11;
+	m_lastRot.s.M12 = m_dh->m_transform.s.M12;
+	m_lastRot.s.M20 = m_dh->m_transform.s.M20;
+	m_lastRot.s.M21 = m_dh->m_transform.s.M21;
+	m_lastRot.s.M22 = m_dh->m_transform.s.M22;
+
+	Matrix4fSetIdentity(&m_dh->m_transform);
+	Matrix3fSetIdentity(&m_thisRot);
+	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
+	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
 }

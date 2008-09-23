@@ -1015,6 +1015,9 @@ void MainFrame::OnCutAnatomy(wxCommandEvent& WXUNUSED(event))
 	refreshAllGLWidgets();
 }
 
+/*
+ * Moves all boundary points in one direction
+ */
 void MainFrame::OnMovePoints1(wxCommandEvent& event)
 {
 	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
@@ -1035,6 +1038,9 @@ void MainFrame::OnMovePoints1(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
+/*
+ * Moves all boundary points in one direction
+ */
 void MainFrame::OnMovePoints2(wxCommandEvent& event)
 {
 	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);

@@ -13,7 +13,7 @@
 #include "KdTree.h"
 #include "surface.h"
 #include "myListCtrl.h"
-#include "wx/xml/xml.h"
+
 
 #include "IsoSurface/CIsoSurface.h"
 
@@ -219,6 +219,12 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 
 bool DatasetHelper::loadSettings(wxString filename)
 {
+	/*
+	 * Variables to store the slice postions in, have to be set after loading
+	 * the anatomy files
+	 */
+	long xp, yp, zp;
+
 	wxXmlDocument doc;
 	if (!doc.Load(filename))
 	    return false;
@@ -247,6 +253,53 @@ bool DatasetHelper::loadSettings(wxString filename)
 				updateTreeDims();
 				anatomy_loaded = true;
 			}
+			xp = rows/2;
+			yp = columns/2;
+			zp = frames/2;
+		}
+
+		else if (child->GetName() == wxT("position"))
+		{
+			wxString xPos = child->GetPropVal(wxT("x"), wxT("1"));
+			wxString yPos = child->GetPropVal(wxT("y"), wxT("1"));
+			wxString zPos = child->GetPropVal(wxT("z"), wxT("1"));
+			xPos.ToLong(&xp, 10);
+			yPos.ToLong(&yp, 10);
+			zPos.ToLong(&zp, 10);
+		}
+
+		else if (child->GetName() == wxT("rotation"))
+		{
+			wxString sM00 = child->GetPropVal(wxT("M00"), wxT("1"));
+			wxString sM01 = child->GetPropVal(wxT("M01"), wxT("1"));
+			wxString sM02 = child->GetPropVal(wxT("M02"), wxT("1"));
+			wxString sM10 = child->GetPropVal(wxT("M10"), wxT("1"));
+			wxString sM11 = child->GetPropVal(wxT("M11"), wxT("1"));
+			wxString sM12 = child->GetPropVal(wxT("M12"), wxT("1"));
+			wxString sM20 = child->GetPropVal(wxT("M20"), wxT("1"));
+			wxString sM21 = child->GetPropVal(wxT("M21"), wxT("1"));
+			wxString sM22 = child->GetPropVal(wxT("M22"), wxT("1"));
+			double M00, M01, M02, M10, M11, M12, M20, M21, M22;
+			sM00.ToDouble(&M00);
+			sM01.ToDouble(&M01);
+			sM02.ToDouble(&M02);
+			sM10.ToDouble(&M10);
+			sM11.ToDouble(&M11);
+			sM12.ToDouble(&M12);
+			sM20.ToDouble(&M20);
+			sM21.ToDouble(&M21);
+			sM22.ToDouble(&M22);
+			Matrix4fSetIdentity(&m_transform);
+			m_transform.s.M00 = M00;
+			m_transform.s.M01 = M01;
+			m_transform.s.M02 = M02;
+			m_transform.s.M10 = M10;
+			m_transform.s.M11 = M11;
+			m_transform.s.M12 = M12;
+			m_transform.s.M20 = M20;
+			m_transform.s.M21 = M21;
+			m_transform.s.M22 = M22;
+			mainFrame->m_mainGL->setRotation();
 		}
 
 		else if (child->GetName() == wxT("data"))
@@ -361,6 +414,11 @@ bool DatasetHelper::loadSettings(wxString filename)
 		}
 		child = child->GetNext();
 	}
+	mainFrame->m_xSlider->SetValue(xp);
+	mainFrame->m_ySlider->SetValue(yp);
+	mainFrame->m_zSlider->SetValue(zp);
+	updateView(xp, yp, zp);
+
 	return true;
 }
 
@@ -371,7 +429,8 @@ void DatasetHelper::save(wxString filename)
 	wxXmlNode *nodepoints = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("points"));
 	wxXmlNode *data = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("data"));
 	wxXmlNode *anatomy = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("anatomy"));
-
+	wxXmlNode *anatomyPos = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("position"));
+	wxXmlNode *anatomyRot = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("rotation"));
 
 	wxXmlProperty *prop1 = new wxXmlProperty(wxT("rows"), wxString::Format(wxT("%d"), rows));
 	wxXmlProperty *prop2 = new wxXmlProperty(wxT("columns"), wxString::Format(wxT("%d"), columns), prop1);
@@ -452,6 +511,23 @@ void DatasetHelper::save(wxString filename)
 			new wxXmlNode(datasetnode, wxXML_TEXT_NODE, wxT("path"), info->getPath());
 		}
 	}
+
+	wxXmlProperty *propPosX = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%d"), mainFrame->m_xSlider->GetValue()));
+	wxXmlProperty *propPosY = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%d"), mainFrame->m_ySlider->GetValue()), propPosX);
+	wxXmlProperty *propPosZ = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%d"), mainFrame->m_zSlider->GetValue()), propPosY);
+	anatomyPos->AddProperty(propPosZ);
+
+	wxXmlProperty *rot00 = new wxXmlProperty(wxT("M00"), wxString::Format(wxT("%.15f"), m_transform.s.M00));
+	wxXmlProperty *rot01 = new wxXmlProperty(wxT("M01"), wxString::Format(wxT("%.15f"), m_transform.s.M01), rot00);
+	wxXmlProperty *rot02 = new wxXmlProperty(wxT("M02"), wxString::Format(wxT("%.15f"), m_transform.s.M02), rot01);
+	wxXmlProperty *rot10 = new wxXmlProperty(wxT("M10"), wxString::Format(wxT("%.15f"), m_transform.s.M10), rot02);
+	wxXmlProperty *rot11 = new wxXmlProperty(wxT("M11"), wxString::Format(wxT("%.15f"), m_transform.s.M11), rot10);
+	wxXmlProperty *rot12 = new wxXmlProperty(wxT("M12"), wxString::Format(wxT("%.15f"), m_transform.s.M12), rot11);
+	wxXmlProperty *rot20 = new wxXmlProperty(wxT("M20"), wxString::Format(wxT("%.15f"), m_transform.s.M20), rot12);
+	wxXmlProperty *rot21 = new wxXmlProperty(wxT("M21"), wxString::Format(wxT("%.15f"), m_transform.s.M21), rot20);
+	wxXmlProperty *rot22 = new wxXmlProperty(wxT("M22"), wxString::Format(wxT("%.15f"), m_transform.s.M22), rot21);
+	anatomyRot->AddProperty(rot22);
+
 	wxXmlDocument doc;
 	doc.SetRoot(root);
 	doc.Save(filename, 2);

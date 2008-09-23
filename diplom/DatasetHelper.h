@@ -19,6 +19,7 @@
 #include "wx/wfstream.h"
 #include "wx/datstrm.h"
 #include "wx/txtstrm.h"
+#include "wx/xml/xml.h"
 
 #include <vector>
 #include "ArcBall.h"
@@ -50,6 +51,8 @@ public:
 	void finishLoading(DatasetInfo*);
 	bool loadSettings(wxString);
 	bool loadTextFile(wxString*, wxString);
+
+	//! Saves the current scene to an xml file
 	void save(wxString);
 
 	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();

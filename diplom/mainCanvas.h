@@ -45,6 +45,7 @@ public:
     hitResult pick(wxPoint);
     float getAxisParallelMovement(int, int, int, int, Vector3fT);
     Vector3fT getEventCenter();
+    void setRotation();
 
     DECLARE_EVENT_TABLE()
 
