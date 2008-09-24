@@ -133,13 +133,6 @@ void TheScene::renderSurface()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	if (m_blendAlpha)
-		glDisable(GL_BLEND);
-	else
-		glEnable(GL_BLEND);
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	lightsOn();
 
 	bindTextures();
@@ -216,6 +209,8 @@ void TheScene::renderFibers()
 			if (m_dh->lighting)
 			{
 				lightsOn();
+				GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
+				glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
 				//m_dh->shaderHelper->m_curveShader->bind();
 			}
 

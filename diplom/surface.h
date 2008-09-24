@@ -36,6 +36,9 @@ private:
 	FVector getNormalForTriangle(const FVector*, const FVector*, const FVector*);
 	void getNormalsForVertices();
 
+	double m_sampleRateNormal;
+	double m_sampleRateDragging;
+
 	double m_radius;
 	double m_my;
 	int m_numDeBoorRows;

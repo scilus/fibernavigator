@@ -32,8 +32,6 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
 	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
 
-	m_isDragging = false;
-	m_isrDragging = false;
 	m_delta = 0;
 	m_arcBall = new ArcBallT(640.0f, 480.0f);
 }
@@ -78,9 +76,9 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		case mainView: {
 			if (event.RightIsDown())
 		    {
-				if (!m_isrDragging)												// Not Dragging
+				if (!m_dh->m_isrDragging)												// Not Dragging
 			    {
-					m_isrDragging = true;										// Prepare For Dragging
+					m_dh->m_isrDragging = true;										// Prepare For Dragging
 					m_lastPos = event.GetPosition();
 					m_hr = pick(event.GetPosition());
 
@@ -141,7 +139,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				Refresh(false);
 		    }
 			else {
-				m_isrDragging = false;
+				m_dh->m_isrDragging = false;
 			}
 
 			if(event.LeftIsDown())
@@ -156,9 +154,9 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					}
 				}
 				else {
-					if (!m_isDragging)												// Not Dragging
+					if (!m_dh->m_isDragging)												// Not Dragging
 				    {
-						m_isDragging = true;										// Prepare For Dragging
+						m_dh->m_isDragging = true;										// Prepare For Dragging
 						m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
 						m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
 						if (wxGetKeyState(WXK_CONTROL)) {
@@ -182,7 +180,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				}
 			}
 			else
-				m_isDragging = false;
+				m_dh->m_isDragging = false;
 		} break;
 
 		case axial:

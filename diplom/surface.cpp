@@ -16,7 +16,11 @@ Surface::Surface(DatasetHelper* dh)
 	m_numDeBoorRows = 12;
 	m_numDeBoorCols = 12;
 	m_order = 4;
-	m_sampleRateT = m_sampleRateU = 0.2;
+
+	m_sampleRateNormal = 0.2;
+	m_sampleRateDragging = 0.5;
+
+	m_sampleRateT = m_sampleRateU = m_sampleRateNormal;
 
 	m_show = true;
 	m_showFS = true;
@@ -322,13 +326,22 @@ void Surface::getNormalsForVertices()
 
 void Surface::draw()
 {
+	if (!m_dh->m_isrDragging && m_sampleRateT == m_sampleRateDragging)
+	{
+		m_sampleRateT = m_sampleRateU = m_sampleRateNormal;
+		execute();
+	}
+
 	if (m_dh->surface_isDirty)
 	{
+		if (m_dh->m_isrDragging) m_sampleRateT = m_sampleRateU = m_sampleRateDragging;
 		execute();
 	}
 
 	if (m_dh->scene->getPointMode())
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glBegin (GL_TRIANGLES);
 	for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)

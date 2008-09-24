@@ -152,6 +152,7 @@ void main()
 
 
     color = clamp(color, 0.0, 1.0);
+    if (color.rgb == vec3(0.0)) discard;
 
     gl_FragColor = color;
 }

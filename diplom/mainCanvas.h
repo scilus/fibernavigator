@@ -63,9 +63,6 @@ private:
 	 GLdouble m_pos1X, m_pos1Y, m_pos1Z;	// point of origin for picking
 	 GLdouble m_pos2X, m_pos2Y, m_pos2Z;	// distant point for picking
 
-	 bool m_isDragging;
-	 bool m_isrDragging;
-
 	 //Matrix4fT m_transform;		// transformation matrix of current view
 	 Matrix3fT m_lastRot;
 	 Matrix3fT m_thisRot ;

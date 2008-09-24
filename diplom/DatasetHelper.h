@@ -118,6 +118,8 @@ public:
 	int quadrant;
 	bool fibersInverted;
 
+	bool m_isDragging;
+	bool m_isrDragging;
 
 private:
 

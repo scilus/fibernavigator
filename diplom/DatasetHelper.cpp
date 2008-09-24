@@ -54,6 +54,9 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 	fibersInverted = false;
 
+	m_isDragging = false;
+	m_isrDragging = false;
+
 }
 
 DatasetHelper::~DatasetHelper() {
