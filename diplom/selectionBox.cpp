@@ -520,7 +520,7 @@ void SelectionBox::resizeLeft()
 {
 	if ( m_size.s.X < 2 ) return;
 	m_size.s.X -= 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.X -= m_stepSize;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.X = wxMax(1 ,m_size.s.X - m_stepSize);
 	update();
 }
 
@@ -536,7 +536,7 @@ void SelectionBox::resizeBack()
 {
 	if ( m_size.s.Y < 2 ) return;
 	m_size.s.Y -= 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Y -= m_stepSize;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Y = wxMax(1, m_size.s.Y - m_stepSize);
 	update();
 }
 
@@ -552,7 +552,7 @@ void SelectionBox::resizeDown()
 {
 	if ( m_size.s.Z < 2 ) return;
 	m_size.s.Z -= 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Z -= m_stepSize;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Z = wxMax(1, m_size.s.Z - m_stepSize);
 	update();
 }
 
