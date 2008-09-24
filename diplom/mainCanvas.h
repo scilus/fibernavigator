@@ -14,6 +14,7 @@
 #include "boundingBox.h"
 #include "DatasetHelper.h"
 #include "wx/math.h"
+#include "Fantom/FVector.h"
 
 class DatasetHelper;
 
@@ -46,6 +47,8 @@ public:
     float getAxisParallelMovement(int, int, int, int, Vector3fT);
     Vector3fT getEventCenter();
     void setRotation();
+    void orthonormalize();
+    double scalar(FVector, FVector);
 
     DECLARE_EVENT_TABLE()
 

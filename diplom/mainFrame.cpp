@@ -598,7 +598,6 @@ void MainFrame::OnButtonAxial(wxCommandEvent& WXUNUSED(event))
 	}
 	else if ( wxGetKeyState(WXK_SHIFT) )
 	{
-		printf("huhu\n");
 		Matrix4fSetIdentity(&m_dh->m_transform);
 		m_dh->m_transform.s.M11 = -1.0;
 		m_dh->m_transform.s.M00 = -1.0;

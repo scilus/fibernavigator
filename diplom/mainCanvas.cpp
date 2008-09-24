@@ -169,14 +169,13 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				    }
 				    else
 				    {
+				    	orthonormalize();
 			            Quat4fT     ThisQuat;
-
 			            m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
 			            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
 			            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
 			            Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
 				    }
-
 
 					updateView();
 					Refresh(false);
@@ -459,9 +458,38 @@ void MainCanvas::setRotation()
 	m_lastRot.s.M21 = m_dh->m_transform.s.M21;
 	m_lastRot.s.M22 = m_dh->m_transform.s.M22;
 
+	orthonormalize();
+
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	Matrix3fSetIdentity(&m_thisRot);
 	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
 	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
 	updateView();
+}
+
+void MainCanvas::orthonormalize()
+{
+	FVector v1 = FVector(m_lastRot.s.M00, m_lastRot.s.M01, m_lastRot.s.M02);
+	FVector v2 = FVector(m_lastRot.s.M10, m_lastRot.s.M11, m_lastRot.s.M12);
+	FVector v3 = FVector(m_lastRot.s.M20, m_lastRot.s.M21, m_lastRot.s.M22);
+
+	FVector u1 = v1;
+	FVector u2 = v2 - ( ( scalar(v2, u1)/ scalar(u1,u1) ) * u1 );
+	FVector u3 = v3 - ( ( scalar(v3, u1)/ scalar(u1,u1) ) * u1 ) - ( ( scalar(v3, u2)/ scalar(u2,u2) ) * u2 );
+
+	m_lastRot.s.M00 = u1[0];
+	m_lastRot.s.M01 = u1[1];
+	m_lastRot.s.M02 = u1[2];
+	m_lastRot.s.M10 = u2[0];
+	m_lastRot.s.M11 = u2[1];
+	m_lastRot.s.M12 = u2[2];
+	m_lastRot.s.M20 = u3[0];
+	m_lastRot.s.M21 = u3[1];
+	m_lastRot.s.M22 = u3[2];
+
+}
+
+double MainCanvas::scalar(FVector v1, FVector v2)
+{
+	return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
 }
