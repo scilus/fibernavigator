@@ -719,28 +719,22 @@ void DatasetHelper::createCutMesh()
 	if (!surface_loaded || !anatomy_loaded) return;
 	// get top most anatomy dataset
 	DatasetInfo* info;
+	Anatomy* anatomy;
+	bool flag = false;
 	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		info = (DatasetInfo*)mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() < Mesh_) break;
+		if (info->getType() == Head_byte) {
+			anatomy = (Anatomy*)info;
+			flag = true;
+			break;
+		}
 	}
+	if (!flag) return;
 
-	Anatomy* newAnatomy = new Anatomy( *((Anatomy*)info) );
-	newAnatomy->setName(newAnatomy->getName() + wxT("(copy)"));
-	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
-	mainFrame->m_listCtrl->SetItem(0, 1, newAnatomy->getName());
-	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.10"));
-	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
-	mainFrame->m_listCtrl->SetItemData(0, (long)newAnatomy);
-	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-
-	updateTreeDS(0);
-	mainFrame->refreshAllGLWidgets();
-
-	//newAnatomy->cutSurface();
 
 	CIsoSurface *isosurf = new CIsoSurface(this);
-	isosurf->GenerateSurface(newAnatomy->getByteDataset(), 50, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);
+	isosurf->GenerateSurface(anatomy->getByteDataset(), 50, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);
 
 	if (isosurf->IsSurfaceValid())
 	{
@@ -760,9 +754,4 @@ void DatasetHelper::createCutMesh()
 	{
 		printf("surface is not valid\n");
 	}
-	// subtract cut off area from anatomy
-
-	// create iso surface on remaining anatomy
-
-	// profit
 }

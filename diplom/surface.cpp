@@ -275,7 +275,7 @@ void Surface::execute ()
 	}
 	getNormalsForVertices();
 
-	createCutTexture(&splineSurface);
+	createCutTexture(splineSurface.getNumSamplePointsU(), splineSurface.getNumSamplePointsT());
 
 	m_dh->surface_isDirty = false;
 }
@@ -370,10 +370,8 @@ void Surface::movePoints()
 	execute();
 }
 
-void Surface::createCutTexture(FBSplineSurface* splineSurface)
+void Surface::createCutTexture(int xDim, int yDim)
 {
-	int xDim = splineSurface->getNumSamplePointsU();
-	int yDim = splineSurface->getNumSamplePointsT();
 	float* cutTex;
 	cutTex = new float[xDim*yDim];
 
@@ -382,7 +380,7 @@ void Surface::createCutTexture(FBSplineSurface* splineSurface)
 		for ( int y = 0 ; y < yDim ; ++y)
 		{
 			std::vector< double > p = m_splinePoints[x + y*xDim];
-			cutTex[x + y*xDim] = (p[0] + (m_dh->columns/2.0)) / (float)m_dh->columns;
+			cutTex[y + (xDim-1-x)*yDim] = (p[0] + (m_dh->columns/2.0)) / (float)m_dh->columns;
 		}
 	}
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);

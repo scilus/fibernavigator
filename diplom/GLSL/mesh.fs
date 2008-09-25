@@ -134,7 +134,11 @@ void main()
 			if (show[i]) lookupTex(color, type[i], texes[i], threshold[i], v);
 		}
 
+	    if (color.rgb == vec3(0.0)) discard;
+
 	    color.a = 1.0;
+
+
 
 	    color =   color +
 				  (ambient  * gl_FrontMaterial.ambient) +
@@ -149,10 +153,7 @@ void main()
 				  (specular * gl_FrontMaterial.specular);
    	}
 
-
-
     color = clamp(color, 0.0, 1.0);
-    if (color.rgb == vec3(0.0)) discard;
 
     gl_FragColor = color;
 }

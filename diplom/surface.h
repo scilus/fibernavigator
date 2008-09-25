@@ -21,7 +21,7 @@ public:
 	void generateTexture() {};
 	void generateGeometry() {};
 	void initializeBuffer() {};
-	void createCutTexture(FBSplineSurface* splineSurface);
+	void createCutTexture(int, int);
 
 	void movePoints();
 
