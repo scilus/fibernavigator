@@ -64,7 +64,8 @@ private:
 	void renderSlizes();
 	void renderMesh();
 	void renderFibers();
-	void renderSurface();
+	void renderSplineSurface();
+	void renderIsoSurface();
 
 	void drawSelectionBoxes();
 	void drawPoints();

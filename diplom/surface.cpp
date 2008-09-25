@@ -1,7 +1,6 @@
 #include "surface.h"
 #include "math.h"
 #include "Fantom/FMatrix.h"
-#include "Fantom/FBSplineSurface.h"
 #include "surface.h"
 #include "splinePoint.h"
 #include "myListCtrl.h"
@@ -276,6 +275,8 @@ void Surface::execute ()
 	}
 	getNormalsForVertices();
 
+	createCutTexture(&splineSurface);
+
 	m_dh->surface_isDirty = false;
 }
 
@@ -367,4 +368,32 @@ void Surface::movePoints()
 		point->move(2.0 * m_threshold);
 	}
 	execute();
+}
+
+void Surface::createCutTexture(FBSplineSurface* splineSurface)
+{
+	int xDim = splineSurface->getNumSamplePointsU();
+	int yDim = splineSurface->getNumSamplePointsT();
+	float* cutTex;
+	cutTex = new float[xDim*yDim];
+
+	for ( int x = 0 ; x < xDim ; ++x )
+	{
+		for ( int y = 0 ; y < yDim ; ++y)
+		{
+			std::vector< double > p = m_splinePoints[x + y*xDim];
+			cutTex[x + y*xDim] = (p[0] + (m_dh->columns/2.0)) / (float)m_dh->columns;
+		}
+	}
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glGenTextures(1, &m_GLuint);
+	glBindTexture(GL_TEXTURE_2D, m_GLuint);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+
+	glTexImage2D(GL_TEXTURE_2D,	0, GL_RGB, xDim, yDim, 0, GL_LUMINANCE, GL_FLOAT, cutTex);
+
 }

@@ -737,7 +737,7 @@ void DatasetHelper::createCutMesh()
 	updateTreeDS(0);
 	mainFrame->refreshAllGLWidgets();
 
-	newAnatomy->cutSurface();
+	//newAnatomy->cutSurface();
 
 	CIsoSurface *isosurf = new CIsoSurface(this);
 	isosurf->GenerateSurface(newAnatomy->getByteDataset(), 50, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);

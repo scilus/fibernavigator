@@ -5,6 +5,7 @@
 
 #include <vector>
 #include "Fantom/FTensor.h"
+#include "Fantom/FBSplineSurface.h"
 #include "DatasetHelper.h"
 
 class DatasetHelper;
@@ -20,6 +21,7 @@ public:
 	void generateTexture() {};
 	void generateGeometry() {};
 	void initializeBuffer() {};
+	void createCutTexture(FBSplineSurface* splineSurface);
 
 	void movePoints();
 

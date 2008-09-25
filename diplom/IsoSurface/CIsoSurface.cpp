@@ -772,7 +772,6 @@ void CIsoSurface::generateGeometry()
 			glNormal3f( m_pvec3dNormals[id2][0], m_pvec3dNormals[id2][1], m_pvec3dNormals[id2][2]);
 			glVertex3f( m_ppt3dVertices[id2][0] - xOff, m_ppt3dVertices[id2][1] - yOff, m_ppt3dVertices[id2][2] - zOff);
 
-
 		}
 	glEnd();
 

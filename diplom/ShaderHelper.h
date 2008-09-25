@@ -19,10 +19,12 @@ public:
 
 	void setTextureShaderVars();
 	void setMeshShaderVars();
+	void setIsoShaderVars();
 
 	Shader *m_textureShader;
 	Shader *m_meshShader;
 	Shader *m_curveShader;
+	Shader *m_isoShader;
 
 private:
 	DatasetHelper* m_dh;

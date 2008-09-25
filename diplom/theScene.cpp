@@ -25,6 +25,7 @@ TheScene::TheScene(DatasetHelper* dh)
 TheScene::~TheScene()
 {
 	delete m_mainGLContext;
+	m_dh->printTime();
 	printf("scene destructor done\n");
 }
 
@@ -33,10 +34,12 @@ void TheScene::initGL(int view)
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
-	  /* Problem: glewInit failed, something is seriously wrong. */
-	  printf("Error: %s\n", glewGetErrorString(err));
+		/* Problem: glewInit failed, something is seriously wrong. */
+		m_dh->printTime();
+		printf("Error: %s\n", glewGetErrorString(err));
 	}
 	if (view == mainView)
+		m_dh->printTime();
 		printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 	glEnable(GL_DEPTH_TEST);
@@ -81,7 +84,10 @@ void TheScene::renderScene()
 	if (m_dh->mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
 	renderMesh();
-	renderSurface();
+
+	renderIsoSurface();
+
+	renderSplineSurface();
 
 	if (m_pointMode)
 	{
@@ -129,35 +135,37 @@ void TheScene::renderSlizes()
 	glPopAttrib();
 }
 
-void TheScene::renderSurface()
+void TheScene::renderSplineSurface()
 {
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-	lightsOn();
-
-	bindTextures();
-	m_dh->shaderHelper->m_meshShader->bind();
-	m_dh->shaderHelper->setMeshShaderVars();
-
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if (info->getType() == Surface_ && info->getShow())
 		{
+
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+			lightsOn();
+
+			bindTextures();
+			m_dh->shaderHelper->m_meshShader->bind();
+			m_dh->shaderHelper->setMeshShaderVars();
+
 			glColor3f(0.1f, 0.1f, 0.1f);
 			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", 1);
 			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", 1);
 
 			info->draw();
+
+			m_dh->shaderHelper->m_meshShader->release();
+
+			lightsOff();
+
+			if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
+
+			glPopAttrib();
 		}
 	}
-	m_dh->shaderHelper->m_meshShader->release();
-
-	lightsOff();
-
-	if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
-
-	glPopAttrib();
 }
 
 void TheScene::renderMesh()
@@ -173,7 +181,7 @@ void TheScene::renderMesh()
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == Mesh_ || info->getType() == IsoSurface_)
+		if (info->getType() == Mesh_)
 		{
 			if (info->getShow()) {
 				wxColor c = info->getColor();
@@ -192,6 +200,41 @@ void TheScene::renderMesh()
 	if (m_dh->GLError()) m_dh->printGLError(wxT("draw mesh"));
 
 	glPopAttrib();
+}
+
+void TheScene::renderIsoSurface()
+{
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() == IsoSurface_)
+		{
+			if (info->getShow()) {
+				glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+				lightsOn();
+
+				bindTextures();
+				m_dh->shaderHelper->m_isoShader->bind();
+				m_dh->shaderHelper->setIsoShaderVars();
+
+				wxColor c = info->getColor();
+				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
+				m_dh->shaderHelper->m_isoShader->setUniInt("showFS", info->getShowFS());
+				m_dh->shaderHelper->m_isoShader->setUniInt("useTex", info->getUseTex());
+
+				glCallList(info->getGLuint());
+
+				m_dh->shaderHelper->m_isoShader->release();
+
+				lightsOff();
+
+				if (m_dh->GLError()) {m_dh->printTime(); m_dh->printGLError(wxT("draw iso surface"));}
+
+				glPopAttrib();
+			}
+		}
+	}
 }
 
 void TheScene::renderFibers()
