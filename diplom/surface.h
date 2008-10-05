@@ -7,6 +7,7 @@
 #include "Fantom/FTensor.h"
 #include "Fantom/FBSplineSurface.h"
 #include "DatasetHelper.h"
+#include "KdTree.h"
 
 class DatasetHelper;
 
@@ -38,6 +39,9 @@ private:
 	FVector getNormalForTriangle(const FVector*, const FVector*, const FVector*);
 	void getNormalsForVertices();
 
+	float getXValue(int y , int z, int numPoints);
+	void boxTest(int left, int right, int axis);
+
 	double m_sampleRateNormal;
 	double m_sampleRateDragging;
 
@@ -56,7 +60,13 @@ private:
 	std::vector< int > m_vertices;
 	std::vector< FVector >m_normals;
 	int m_numPoints;
+	float *m_boxMin;
+	float *m_boxMax;
+	float* m_pointArray;
+	float m_xValue;
+	int m_count;
 
+	KdTree *m_kdTree;
 	DatasetHelper* m_dh;
 };
 

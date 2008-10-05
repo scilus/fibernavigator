@@ -370,19 +370,38 @@ void Surface::movePoints()
 	execute();
 }
 
-void Surface::createCutTexture(int xDim, int yDim)
+void Surface::createCutTexture(int xPoints, int yPoints)
 {
+	int xDim = m_dh->rows / 4;
+	int yDim = m_dh->frames / 4;
+	int numPoints = xPoints*yPoints;
+
+	m_pointArray= new float[numPoints*3];
+	for (int i = 0 ; i < numPoints ; ++i )
+	{
+		FVector p = m_splinePoints[i];
+		m_pointArray[3*i] = p[0];
+		m_pointArray[3*i+1] = p[1];
+		m_pointArray[3*i+2] = p[2];
+	}
+	m_kdTree = new KdTree(xPoints*yPoints, m_pointArray);
+
 	float* cutTex;
 	cutTex = new float[xDim*yDim];
+	int xOff = m_dh->rows/2;
+	int yOff = m_dh->frames/2;
 
 	for ( int x = 0 ; x < xDim ; ++x )
 	{
 		for ( int y = 0 ; y < yDim ; ++y)
 		{
-			std::vector< double > p = m_splinePoints[x + y*xDim];
-			cutTex[y + (xDim-1-x)*yDim] = (p[0] + (m_dh->columns/2.0)) / (float)m_dh->columns;
+			//cutTex[y + (xDim-1-x)*yDim] =
+			cutTex[x + y*xDim] =
+				(getXValue(x*4 - xOff, y*4 - yOff, numPoints)  + (m_dh->columns/2.0)) / (float)m_dh->columns;
+
 		}
 	}
+
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 	glGenTextures(1, &m_GLuint);
 	glBindTexture(GL_TEXTURE_2D, m_GLuint);
@@ -394,4 +413,57 @@ void Surface::createCutTexture(int xDim, int yDim)
 
 	glTexImage2D(GL_TEXTURE_2D,	0, GL_RGB, xDim, yDim, 0, GL_LUMINANCE, GL_FLOAT, cutTex);
 
+}
+
+float Surface::getXValue(int y, int z, int numPoints)
+{
+	m_boxMin = new float[3];
+	m_boxMax = new float[3];
+	m_boxMin[0] = - m_dh->columns / 2;
+	m_boxMax[0] = m_dh->columns / 2;;
+	m_boxMin[1] = y - 5;
+	m_boxMax[1] = y + 5;
+	m_boxMin[2] = z - 5;
+	m_boxMax[2] = z + 5;
+
+	m_xValue = 0.0;
+	m_count = 0;
+	boxTest(0, numPoints-1, 0);
+	if (m_count > 0)
+		return m_xValue / m_count;
+	else {
+		printf("no point found\n");
+		return 0.0;
+	}
+}
+
+
+void Surface::boxTest(int left, int right, int axis)
+{
+	// abort condition
+	if (left > right) return;
+
+	int root = left + ((right-left)/2);
+	int axis1 = (axis+1) % 3;
+	int pointIndex = m_kdTree->m_tree[root]*3;
+
+	if (m_pointArray[pointIndex + axis] < m_boxMin[axis]) {
+		boxTest(root +1, right, axis1);
+	}
+	else if (m_pointArray[pointIndex + axis] > m_boxMax[axis]) {
+		boxTest(left, root-1, axis1);
+	}
+	else {
+		int axis2 = (axis+2) % 3;
+		if (	m_pointArray[pointIndex + axis1] <= m_boxMax[axis1] &&
+				m_pointArray[pointIndex + axis1] >= m_boxMin[axis1] &&
+				m_pointArray[pointIndex + axis2] <= m_boxMax[axis2] &&
+				m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )
+		{
+			m_xValue += m_pointArray[pointIndex];
+			++m_count;
+		}
+		boxTest(left, root -1, axis1);
+		boxTest(root+1, right, axis1);
+	}
 }

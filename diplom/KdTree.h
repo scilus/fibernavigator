@@ -74,12 +74,14 @@ public:
 class KdTree {
 public:
 	KdTree(int, float*, DatasetHelper*);
+	KdTree(int, float*);
 	~KdTree();
 
 	wxUint32 *m_tree;
 	DatasetHelper* m_dh;
 
 private:
+	void buildTree(int, int, int);
 	int m_size;
 	wxUint32 m_root;
 	float *m_pointArray;

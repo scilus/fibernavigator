@@ -49,10 +49,36 @@ KdTree::KdTree(int size, float *pointArray, DatasetHelper* dh)
 	thread4->Run();
 }
 
+KdTree::KdTree(int size, float *pointArray)
+{
+	m_size = size;
+	m_pointArray = pointArray;
+	m_tree = new wxUint32[size];
+	for (int i = 0 ; i < size ;  ++i)
+		m_tree[i] = i;
+	buildTree(0, size-1, 0);
+}
+
 KdTree::~KdTree()
 {
 	delete[] m_tree;
 }
+
+void KdTree::buildTree(int left, int right, int axis)
+{
+	if (left >= right) return;
+
+	int div = ( left+right )/2;
+	iter begin( m_tree, left );
+	iter end( m_tree, right );
+	iter nth( m_tree, div );
+	std::nth_element( begin, nth, end, lessy( m_pointArray, axis ) );
+
+	buildTree(left, div-1, (axis+1)%3);
+	buildTree(div+1, right, (axis+1)%3);
+}
+
+
 
 KdTreeThread::KdTreeThread(float *pointArray, wxUint32 *tree, int left, int right, int axis, DatasetHelper* dh)
 {
