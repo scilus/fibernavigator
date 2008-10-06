@@ -384,8 +384,8 @@ void Surface::movePoints()
 
 void Surface::createCutTexture(int xPoints, int yPoints)
 {
-	int xDim = m_dh->rows / 4;
-	int yDim = m_dh->frames / 4;
+	int xDim = m_dh->rows;
+	int yDim = m_dh->frames;
 	int numPoints = xPoints*yPoints;
 
 	m_pointArray= new float[numPoints*3];
@@ -409,7 +409,7 @@ void Surface::createCutTexture(int xPoints, int yPoints)
 		{
 			//cutTex[y + (xDim-1-x)*yDim] =
 			cutTex[x + y*xDim] =
-				(getXValue(x*4 - xOff, y*4 - yOff, numPoints)  + (m_dh->columns/2.0)) / (float)m_dh->columns;
+				(getXValue(x - xOff, y - yOff, numPoints)  + (m_dh->columns/2.0)) / (float)m_dh->columns;
 
 		}
 	}
