@@ -259,7 +259,7 @@ void Surface::execute ()
 	int renderpointsPerCol = splineSurface.getNumSamplePointsU();
 	int renderpointsPerRow = splineSurface.getNumSamplePointsT();
 	m_numPoints = splineSurface.getNumSamplePointsU()*splineSurface.getNumSamplePointsT();
-	printf("%d : %d\n", renderpointsPerCol, renderpointsPerRow);
+
 	for(int z = 0; z < renderpointsPerCol - 1; z++)
 	{
 		for(int x = 0; x < renderpointsPerRow - 1; x++)
@@ -421,10 +421,10 @@ float Surface::getXValue(int y, int z, int numPoints)
 	m_boxMax = new float[3];
 	m_boxMin[0] = - m_dh->columns / 2;
 	m_boxMax[0] = m_dh->columns / 2;;
-	m_boxMin[1] = y - 5;
-	m_boxMax[1] = y + 5;
-	m_boxMin[2] = z - 5;
-	m_boxMax[2] = z + 5;
+	m_boxMin[1] = y - 3;
+	m_boxMax[1] = y + 3;
+	m_boxMin[2] = z - 3;
+	m_boxMax[2] = z + 3;
 
 	m_xValue = 0.0;
 	m_count = 0;
@@ -432,8 +432,17 @@ float Surface::getXValue(int y, int z, int numPoints)
 	if (m_count > 0)
 		return m_xValue / m_count;
 	else {
-		printf("no point found\n");
-		return 0.0;
+		for (int i = 0 ; i < 3 ; ++i)
+		{
+			m_boxMin[1] -= 5;
+			m_boxMax[1] += 5;
+			m_boxMin[2] -= 5;
+			m_boxMax[2] += 5;
+			boxTest(0, numPoints-1, 0);
+			if (m_count > 0)
+				return m_xValue / m_count;
+		}
+		return m_dh->columns / 2;
 	}
 }
 

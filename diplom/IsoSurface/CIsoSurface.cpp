@@ -752,7 +752,7 @@ void CIsoSurface::generateGeometry()
 	int yOff = m_dh->rows/2;
 	int zOff = m_dh->frames/2;
 
-	printf("%d vertices : %d  normals: %d triangles\n", m_nVertices, m_nNormals, m_nTriangles);
+	//printf("%d vertices : %d  normals: %d triangles\n", m_nVertices, m_nNormals, m_nTriangles);
 
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
