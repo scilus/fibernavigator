@@ -37,7 +37,6 @@ private:
 										    std::vector< std::vector< double > > &deBoorPoints,
 										    int numRows, int numCols);
 	FVector getNormalForTriangle(const FVector*, const FVector*, const FVector*);
-	void getNormalsForVertices();
 
 	float getXValue(int y , int z, int numPoints);
 	void boxTest(int left, int right, int axis);
