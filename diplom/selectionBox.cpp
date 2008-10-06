@@ -30,6 +30,7 @@ void SelectionBox::select()
 	{
 		m_dh->mainFrame->m_treeWidget->SelectItem(m_treeId);
 		m_dh->mainFrame->m_treeWidget->EnsureVisible(m_treeId);
+		m_dh->mainFrame->m_treeWidget->SetFocus();
 		m_isSelected = true;
 	}
 }
