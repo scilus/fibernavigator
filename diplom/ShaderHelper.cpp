@@ -144,7 +144,7 @@ void ShaderHelper::setIsoShaderVars()
 		}
 	}
 
-	if (cutTex != 0)
+	if (cutTex != 0 && m_dh->surface_loaded)
 	{
 		glActiveTexture(GL_TEXTURE0 + c);
 		glBindTexture(GL_TEXTURE_2D, cutTex);

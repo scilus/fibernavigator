@@ -138,12 +138,7 @@ void main()
 
 	    color.a = 1.0;
 
-
-
-	    color =   color +
-				  (ambient  * gl_FrontMaterial.ambient) +
-				  (diffuse  * gl_FrontMaterial.diffuse) +
-				  (specular * gl_FrontMaterial.specular);
+	    color = color + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
     }
     else
     {

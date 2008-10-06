@@ -222,6 +222,10 @@ void TheScene::renderIsoSurface()
 				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
 				m_dh->shaderHelper->m_isoShader->setUniInt("showFS", info->getShowFS());
 				m_dh->shaderHelper->m_isoShader->setUniInt("useTex", info->getUseTex());
+				if (m_dh->surface_loaded)
+					m_dh->shaderHelper->m_isoShader->setUniInt("cutAtSurface", true);
+				else
+					m_dh->shaderHelper->m_isoShader->setUniInt("cutAtSurface", false);
 
 				glCallList(info->getGLuint());
 

@@ -716,7 +716,7 @@ bool DatasetHelper::loadTextFile(wxString* string, wxString filename)
 void DatasetHelper::createCutMesh()
 {
 	// check for spline surface  and anatomy - quit if not present
-	if (!surface_loaded || !anatomy_loaded) return;
+	if (!anatomy_loaded) return;
 	// get top most anatomy dataset
 	DatasetInfo* info;
 	Anatomy* anatomy;
@@ -731,7 +731,6 @@ void DatasetHelper::createCutMesh()
 		}
 	}
 	if (!flag) return;
-
 
 	CIsoSurface *isosurf = new CIsoSurface(this);
 	isosurf->GenerateSurface(anatomy->getByteDataset(), 50, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);

@@ -6,6 +6,7 @@ uniform int dimX, dimY, dimZ;
 
 uniform bool showFS;
 uniform bool useTex;
+uniform bool cutAtSurface;
 
 uniform sampler3D texes[10];
 uniform sampler2D cutTex;
@@ -100,7 +101,8 @@ void main() {
 	if (!showFS)
 		cutFrontSector();
 
-	cutAtSplineSurface();
+	if (cutAtSurface)
+		cutAtSplineSurface();
 
 
 	/* Normalize the normal. A varying variable CANNOT
@@ -134,9 +136,7 @@ void main() {
 
 		color.a = 1.0;
 
-		color = color + (ambient * gl_FrontMaterial.ambient) + (diffuse
-				* gl_FrontMaterial.diffuse) + (specular
-				* gl_FrontMaterial.specular);
+		color = color + (ambient * color) + (diffuse * color) + (specular * color);
 	} else {
 		color = gl_FrontLightModelProduct.sceneColor + (ambient
 				* gl_FrontMaterial.ambient) + (diffuse
