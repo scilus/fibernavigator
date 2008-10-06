@@ -320,7 +320,7 @@ void Surface::getNormalsForVertices()
 			 tmp += triangleNormals[triangleRef[i][j]];
 		}
 
-		FVector n( tmp[0] / triangleRef[i].size(), tmp[1] / triangleRef[i].size(), tmp[2] / triangleRef[i].size());
+		FVector n( -tmp[0] / triangleRef[i].size(), -tmp[1] / triangleRef[i].size(), -tmp[2] / triangleRef[i].size());
 		m_normals.push_back(n);
 	}
 }
