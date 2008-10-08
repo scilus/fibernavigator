@@ -430,7 +430,9 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-	Close(true);
+	wxMessageDialog dialog(NULL, wxT("Really Quit?"), wxT("Really Quit?"), wxNO_DEFAULT|wxYES_NO|wxICON_INFORMATION);
+	if (dialog.ShowModal() == wxID_YES)
+		Close(true);
 }
 
 void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))

@@ -60,12 +60,31 @@ bool MyApp::OnInit(void) {
 	file_menu->Append(VIEWER_SAVE, _T("&Save"));
 	file_menu->Append(VIEWER_QUIT, _T("&Exit"));
 
+	wxMenu *view_menu = new wxMenu;
+	view_menu->Append(VIEWER_VIEW_LEFT, _T("&left"));
+	view_menu->Append(VIEWER_VIEW_RIGHT, _T("&right"));
+	view_menu->Append(VIEWER_VIEW_FRONT, _T("&front"));
+	view_menu->Append(VIEWER_VIEW_BACK, _T("&back"));
+	view_menu->Append(VIEWER_VIEW_TOP, _T("&top"));
+	view_menu->Append(VIEWER_VIEW_DOWN, _T("&down"));
+
+	wxMenu *voi_menu = new wxMenu;
+
+	wxMenu *surf_menu = new wxMenu;
+
+	wxMenu *options_menu = new wxMenu;
+
+
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(VIEWER_ABOUT, _T("&About"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, _T("&File"));
-	menu_bar->Append(help_menu, _T("&Help"));
+	menu_bar->Append(view_menu, _T("&View"));
+	menu_bar->Append(voi_menu, _T("&VOI"));
+	menu_bar->Append(surf_menu, _T("&Spline Surface"));
+	menu_bar->Append(options_menu, _T("&Options"));
+	menu_bar->Append(help_menu, _T("&help"));
 
 	// Associate the menu bar with the frame
 	frame->SetMenuBar(menu_bar);
