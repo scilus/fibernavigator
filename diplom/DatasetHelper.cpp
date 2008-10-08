@@ -739,7 +739,7 @@ void DatasetHelper::createIsoSurface()
 	if (!flag) return;
 
 	CIsoSurface *isosurf = new CIsoSurface(this);
-	isosurf->GenerateSurface(anatomy->getByteDataset(), 50, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);
+	isosurf->GenerateSurface(anatomy->getByteDataset(), 100, columns-1, rows-1, frames-1, 1.0, 1.0, 1.0);
 
 	if (isosurf->IsSurfaceValid())
 	{
@@ -749,7 +749,7 @@ void DatasetHelper::createIsoSurface()
 
 		mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
 		mainFrame->m_listCtrl->SetItem(0, 1, isosurf->getName());
-		mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.20"));
+		mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.40"));
 		mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
 		mainFrame->m_listCtrl->SetItemData(0, (long)isosurf);
 		mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
