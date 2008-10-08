@@ -76,6 +76,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_CUT_ANATOMY, MainFrame::OnCutAnatomy)
 	EVT_MENU(VIEWER_MOVE_POINTS1, MainFrame::OnMovePoints1)
 	EVT_MENU(VIEWER_MOVE_POINTS2, MainFrame::OnMovePoints2)
+	EVT_MENU(VIEWER_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
 
 END_EVENT_TABLE()
 
@@ -1149,5 +1150,11 @@ void MainFrame::OnMovePoints2(wxCommandEvent& event)
 		}
 	}
 	m_dh->surface_isDirty = true;
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnToggleTextureFiltering(wxCommandEvent& event)
+{
+	m_dh->useLinearFiltering = !m_dh->useLinearFiltering;
 	refreshAllGLWidgets();
 }

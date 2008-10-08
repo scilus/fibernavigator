@@ -73,6 +73,16 @@ void TheScene::bindTextures()
 		{
 			glActiveTexture(GL_TEXTURE0 + c);
 			glBindTexture(GL_TEXTURE_3D, info->getGLuint());
+			if(m_dh->useLinearFiltering)
+			{
+				glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			}
+			else
+			{
+				glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			}
 			c++;
 		}
 	}

@@ -74,6 +74,8 @@ private:
 	void OnMovePoints1(wxCommandEvent& event);
 	void OnMovePoints2(wxCommandEvent& event);
 
+	void OnToggleTextureFiltering(wxCommandEvent& event);
+
     void OnKdTreeThreadFinished(wxCommandEvent& event);
 
     void updateStatusBar();
@@ -157,6 +159,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_CUT_ANATOMY			27
 #define VIEWER_MOVE_POINTS1 		28
 #define VIEWER_MOVE_POINTS2 		29
+#define VIEWER_TOGGLE_TEXTURE_FILTERING		30
 
 #define KDTREE_EVENT			50
 

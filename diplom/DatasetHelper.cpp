@@ -57,6 +57,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_isDragging = false;
 	m_isrDragging = false;
 
+	useLinearFiltering = true;
 }
 
 DatasetHelper::~DatasetHelper() {
@@ -187,7 +188,7 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 	//int i = mainFrame->m_listCtrl->GetItemCount();
 	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
 	mainFrame->m_listCtrl->SetItem(0, 1, info->getName());
-	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.10"));
+	mainFrame->m_listCtrl->SetItem(0, 2, wxString::Format(wxT("%.2f"), info->getThreshold()));
 	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
 	mainFrame->m_listCtrl->SetItemData(0, (long)info);
 	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);

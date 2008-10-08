@@ -121,6 +121,8 @@ public:
 	bool m_isDragging;
 	bool m_isrDragging;
 
+	bool useLinearFiltering;
+
 private:
 
 };
