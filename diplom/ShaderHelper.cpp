@@ -16,7 +16,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_textureShader = new Shader(wxT("GLSL/anatomy"));
 	m_textureShader->bind();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 1"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup anatomy shader"));
 
 	m_dh->printTime();
 	printf("initializing mesh shader\n");
@@ -24,7 +24,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_meshShader = new Shader(wxT("GLSL/mesh"));
 	m_meshShader->bind();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 2"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup mesh shader"));
 
 	m_dh->printTime();
 	printf("initializing curves shader\n");
@@ -33,7 +33,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_curveShader = new Shader(wxT("GLSL/fibers"));
 	m_curveShader->bind();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 3"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fiber shader"));
 
 	m_dh->printTime();
 	printf("initializing iso shader\n");
@@ -41,7 +41,15 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_isoShader = new Shader(wxT("GLSL/isoSurf"));
 	m_isoShader->bind();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup shader 4"));
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup iso surface shader"));
+
+	m_dh->printTime();
+	printf("initializing spline surface shader\n");
+
+	m_splineSurfShader = new Shader(wxT("GLSL/splineSurf"));
+	m_splineSurfShader->bind();
+
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup spline surface shader"));
 
 }
 
@@ -110,6 +118,36 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniArrayInt("type", type, c);
 	m_meshShader->setUniArrayFloat("threshold", threshold, c);
 	m_meshShader->setUniInt("countTextures", c);
+}
+
+void ShaderHelper::setSplineSurfaceShaderVars()
+{
+	m_splineSurfShader->setUniInt("dimX", m_dh->columns);
+	m_splineSurfShader->setUniInt("dimY", m_dh->rows);
+	m_splineSurfShader->setUniInt("dimZ", m_dh->frames);
+
+	int* tex = new int[10];
+	int* show = new int[10];
+	float* threshold = new float[10];
+	int* type = new int[10];
+	int c = 0;
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+		if(info->getType() < Mesh_) {
+			tex[c] = c;
+			show[c] = info->getShow();
+			threshold[c] = info->getThreshold();
+			type[c] = info->getType();
+			++c;
+		}
+	}
+
+	m_splineSurfShader->setUniArrayInt("texes", tex, c);
+	m_splineSurfShader->setUniArrayInt("show", show, c);
+	m_splineSurfShader->setUniArrayInt("type", type, c);
+	m_splineSurfShader->setUniArrayFloat("threshold", threshold, c);
+	m_splineSurfShader->setUniInt("countTextures", c);
 }
 
 void ShaderHelper::setIsoShaderVars()

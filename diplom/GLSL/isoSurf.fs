@@ -90,7 +90,7 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 		col1.g = clamp( texture3D(tex, v).g, 0.0, 1.0);
 		col1.b = clamp( texture3D(tex, v).b, 0.0, 1.0);
 
-		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold)> 0.0)
+		if (color.rgb == vec3(0.0))
 		{
 			color.rgb = col1.rgb;
 		}
@@ -137,7 +137,10 @@ void main() {
 		color.a = 1.0;
 
 		color = color + (ambient * color) + (diffuse * color) + (specular * color);
-	} else {
+	}
+
+	if (color.rgb == vec3(0.0))
+	{
 		color = gl_FrontLightModelProduct.sceneColor + (ambient
 				* gl_FrontMaterial.ambient) + (diffuse
 				* gl_FrontMaterial.diffuse) + (specular

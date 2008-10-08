@@ -22,7 +22,7 @@ Mesh::Mesh(DatasetHelper* dh)
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;
-	m_color = wxColour(30,30,30);
+	m_color = wxColour(230,230,230);
 }
 
 Mesh::~Mesh()

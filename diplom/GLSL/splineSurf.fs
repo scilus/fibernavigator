@@ -1,11 +1,6 @@
 #include GLSL/lighting.fs
 
-uniform int sector;
-uniform int cutX, cutY, cutZ;
 uniform int dimX, dimY, dimZ;
-
-uniform bool showFS;
-uniform bool useTex;
 
 uniform sampler3D texes[10];
 uniform bool show[10];
@@ -37,42 +32,6 @@ vec3 defaultColorMap( float value )
 	return color;
 }
 
-void cutFrontSector()
-{
-	if (sector == 1 &&
-		vertex.x > cutX &&
-		vertex.y > cutY &&
-		vertex.z > cutZ) discard;
-	if (sector == 2 &&
-		vertex.x > cutX &&
-		vertex.y > cutY &&
-		vertex.z < cutZ) discard;
-	if (sector == 3 &&
-		vertex.x > cutX &&
-		vertex.y < cutY &&
-		vertex.z < cutZ) discard;
-	if (sector == 4 &&
-		vertex.x > cutX &&
-		vertex.y < cutY &&
-		vertex.z > cutZ) discard;
-	if (sector == 5 &&
-		vertex.x < cutX &&
-		vertex.y < cutY &&
-		vertex.z > cutZ) discard;
-	if (sector == 6 &&
-		vertex.x < cutX &&
-		vertex.y < cutY &&
-		vertex.z < cutZ) discard;
-	if (sector == 7 &&
-		vertex.x < cutX &&
-		vertex.y > cutY &&
-		vertex.z < cutZ) discard;
-	if (sector == 8 &&
-		vertex.x < cutX &&
-		vertex.y > cutY &&
-		vertex.z > cutZ) discard;
-}
-
 void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v)
 {
 	vec3 col1;
@@ -101,9 +60,6 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 
 void main()
 {
-	if (!showFS)
-    	cutFrontSector();
-
 	/* Normalize the normal. A varying variable CANNOT
     // be modified by a fragment shader. So a new variable
     // needs to be created. */
@@ -122,30 +78,21 @@ void main()
 
    vec4 color = vec4(0.0);
 
-    if (useTex)
-    {
-	    vec3 v = TexCoord;
-	    v.x = (v.x + dimX/2) / (float)dimX;
-	    v.y = (v.y + dimY/2) / (float)dimY;
-	    v.z = (v.z + dimZ/2) / (float)dimZ;
+	vec3 v = TexCoord;
+	v.x = (v.x + dimX/2) / (float)dimX;
+	v.y = (v.y + dimY/2) / (float)dimY;
+	v.z = (v.z + dimZ/2) / (float)dimZ;
 
-	    for (int i = 9 ; i > -1 ; i--)
-		{
-			if (show[i]) lookupTex(color, type[i], texes[i], threshold[i], v);
-		}
+	for (int i = 9 ; i > -1 ; i--)
+	{
+		if (show[i]) lookupTex(color, type[i], texes[i], threshold[i], v);
+	}
 
-	    color.a = 1.0;
+	if (color.rgb == vec3(0.0)) discard;
 
-	    color = color + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
-    }
+	color.a = 1.0;
 
-    if (color.rgb == vec3(0.0))
-    {
-   		color = gl_FrontLightModelProduct.sceneColor +
-				  (ambient  * gl_FrontMaterial.ambient) +
-				  (diffuse  * gl_FrontMaterial.diffuse) +
-				  (specular * gl_FrontMaterial.specular);
-   	}
+	color = color + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
 
     color = clamp(color, 0.0, 1.0);
 

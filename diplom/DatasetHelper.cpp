@@ -715,7 +715,7 @@ bool DatasetHelper::loadTextFile(wxString* string, wxString filename)
 
 void DatasetHelper::createCutMesh()
 {
-	// check for spline surface  and anatomy - quit if not present
+	// check anatomy - quit if not present
 	if (!anatomy_loaded) return;
 	// get top most anatomy dataset
 	DatasetInfo* info;
@@ -743,7 +743,7 @@ void DatasetHelper::createCutMesh()
 
 		mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
 		mainFrame->m_listCtrl->SetItem(0, 1, isosurf->getName());
-		mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.10"));
+		mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.20"));
 		mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
 		mainFrame->m_listCtrl->SetItemData(0, (long)isosurf);
 		mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);

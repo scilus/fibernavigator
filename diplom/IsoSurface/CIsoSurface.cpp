@@ -307,11 +307,11 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh)
 {
 	m_dh = dh;
 	m_type = IsoSurface_;
-	m_threshold = 0.10f;
+	m_threshold = 0.20f;
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;
-	m_color = wxColour(30,30,30);
+	m_color = wxColour(230,230,230);
 
 	m_fCellLengthX = 0;
 	m_fCellLengthY = 0;
@@ -326,7 +326,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh)
 	m_piTriangleIndices = NULL;
 	m_pvec3dNormals = NULL;
 	m_ptScalarField = NULL;
-	m_tIsoLevel = 0;
+	m_tIsoLevel = 50;
 	m_bValidSurface = false;
 }
 

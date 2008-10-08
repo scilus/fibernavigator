@@ -1062,6 +1062,9 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 		if (info->getType() == Mesh_ || info->getType() == IsoSurface_)
 		{
 			info->setColor(col);
+			m_dh->scene->m_selBoxChanged = true;
+			refreshAllGLWidgets();
+			return;
 		}
 	}
 	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)

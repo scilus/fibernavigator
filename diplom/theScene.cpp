@@ -5,7 +5,7 @@
 #include "surface.h"
 #include "selectionBox.h"
 #include "AnatomyHelper.h"
-
+#include "lic/FgeImageSpaceLIC.h"
 
 TheScene::TheScene(DatasetHelper* dh)
 {
@@ -116,11 +116,15 @@ void TheScene::renderSlizes()
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 	if (m_blendAlpha)
-		glDisable(GL_BLEND);
+		glDisable(GL_ALPHA_TEST);
+		//glDisable(GL_BLEND);
 	else
-		glEnable(GL_BLEND);
+		glEnable(GL_ALPHA_TEST);
+		//glEnable(GL_BLEND);
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glAlphaFunc(GL_GREATER, 0.001); // adjust your prefered threshold here
+
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	bindTextures();
 	m_dh->shaderHelper->m_textureShader->bind();
@@ -148,16 +152,14 @@ void TheScene::renderSplineSurface()
 			lightsOn();
 
 			bindTextures();
-			m_dh->shaderHelper->m_meshShader->bind();
-			m_dh->shaderHelper->setMeshShaderVars();
+			m_dh->shaderHelper->m_splineSurfShader->bind();
+			m_dh->shaderHelper->setSplineSurfaceShaderVars();
 
 			glColor3f(0.1f, 0.1f, 0.1f);
-			m_dh->shaderHelper->m_meshShader->setUniInt("showFS", 1);
-			m_dh->shaderHelper->m_meshShader->setUniInt("useTex", 1);
 
 			info->draw();
 
-			m_dh->shaderHelper->m_meshShader->release();
+			m_dh->shaderHelper->m_splineSurfShader->release();
 
 			lightsOff();
 
