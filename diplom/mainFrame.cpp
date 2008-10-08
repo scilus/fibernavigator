@@ -572,7 +572,7 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 		Surface* s = (Surface*) m_listCtrl->GetItemData(item);
 		s->movePoints();
 	}
-	if (info->getType() == IsoSurface_)
+	if (info->getType() == IsoSurface_ &&  !wxGetKeyState(WXK_SHIFT))
 	{
 		CIsoSurface* s = (CIsoSurface*) m_listCtrl->GetItemData(item);
 		s->GenerateWithThreshold();

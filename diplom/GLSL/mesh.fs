@@ -90,10 +90,9 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 		col1.g = clamp( texture3D(tex, v).g, 0.0, 1.0);
 		col1.b = clamp( texture3D(tex, v).b, 0.0, 1.0);
 
-		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold) > 0.0)
-		{
-			color.rgb = col1.rgb;
-		}
+
+		color.rgb = col1.rgb;
+
 	}
 }
 
