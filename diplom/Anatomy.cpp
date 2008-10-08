@@ -24,7 +24,7 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	m_zVoxel = 0.0;
 	is_loaded = false;
 	m_highest_value = 1.0;
-	m_threshold = 0.10f;
+	m_threshold = 0.00f;
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;
@@ -228,8 +228,8 @@ void Anatomy::generateTexture()
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 	glGenTextures(1, &m_GLuint);
 	glBindTexture(GL_TEXTURE_3D, m_GLuint);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
