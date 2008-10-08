@@ -125,7 +125,7 @@ bool MyApp::OnInit(void) {
 
 	wxStatusBar* statusBar = new wxStatusBar(frame, wxID_ANY, wxST_SIZEGRIP);
 	frame->SetStatusBar(statusBar);
-	int widths[] = { 220, 150, -1 };
+	int widths[] = { 250, 150, -1 };
 	statusBar->SetFieldsCount(WXSIZEOF(widths), widths);
 	frame->setMStatusBar(statusBar);
 

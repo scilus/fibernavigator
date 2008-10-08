@@ -1,0 +1,70 @@
+fasern abspeichern
+
+boxen mit koordinaten und größe und 
+verschieben der box mit koordinatenkreuz, 
+ausblenden einzelner boxen
+auschalten der boxen mit dem faserbuendel
+
+keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
+
+alpha blending und neues beleuchtungschema (farbe-licht)
+
+commandozeile und laden der shader : offnen einer szene und/oder liste
+windows portierung
+quit  - mit rueckfrag
+
+overlay file zur fiber selection ( alle voxel > threshold bilden zur faserauswahl )
+
+
+benutzer menus und buttons
+
+file
+	- load
+	- save
+	- new iso surface
+view
+volume of interest VOI
+	- new
+	- toggle selection
+	- invert
+	- toggle AND/OR
+	- delete
+	
+spline surface
+	- new
+	- point mode
+	- delete
+	- move left/right
+
+options
+	- color 
+	- toggle lighting
+	- invert fibers
+	- toggle texture filtering
+	- fiber coloring local/global
+	- color map
+help
+	- keyboard shortcuts
+
+
+abspeichern der farben
+zoom und schift
+
+quit  - mit rueckfrag
+schnitt eines belibigen meshes mit der spline surface
+
+
+background and threshold
+
+exclusivitaet ( eine faser nicht gleichzeitig in mehreren boxen )
+
+laden anderer bild und mesh formate ( *.nii, *.v )
+
+faked tubes
+
+tastaturbuffer und test und evtl kleine anpassungen fuer ein laptop computer
+
+ROI aus overlay und selection der fasern, die durch die roi gehen.
+
+fasern durchsichtig ( gewichtet mit overlay )
+

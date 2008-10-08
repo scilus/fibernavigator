@@ -87,6 +87,7 @@ private:
 	void resize(wxPoint click, wxPoint lastPos);
 
 	float getAxisParallelMovement(int, int, int, int, Vector3fT);
+	void updateStatusBar();
 
 	Vector3fT m_center;
 	Vector3fT m_size;

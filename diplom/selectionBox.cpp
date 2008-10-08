@@ -32,6 +32,7 @@ void SelectionBox::select()
 		m_dh->mainFrame->m_treeWidget->EnsureVisible(m_treeId);
 		m_dh->mainFrame->m_treeWidget->SetFocus();
 		m_isSelected = true;
+		updateStatusBar();
 	}
 }
 
@@ -418,12 +419,11 @@ void SelectionBox::drag(wxPoint click, wxPoint lastPos)
 		  (vs.s.Y + dir.s.Y * m_hr.tmin) - (vs2.s.Y + dir2.s.Y * m_hr.tmin),
 		  (vs.s.Z + dir.s.Z * m_hr.tmin) - (vs2.s.Z + dir2.s.Z * m_hr.tmin)}};
 
-
-
 	m_center.s.X += change.s.X;
 	m_center.s.Y += change.s.Y;
 	m_center.s.Z += change.s.Z;
 
+	updateStatusBar();
 	m_dirty = true;
 }
 
@@ -466,6 +466,7 @@ void SelectionBox::resize(wxPoint click, wxPoint lastPos)
 		float newZ = m_size.s.Z + (delta);
 		m_size.s.Z = wxMin(wxMax(newZ, 1),m_dh->frames);
 	}
+	updateStatusBar();
 	m_dirty = true;
 }
 
@@ -567,6 +568,7 @@ void SelectionBox::resizeUp()
 
 void SelectionBox::update()
 {
+	updateStatusBar();
 	m_dirty = true;
 	m_dh->scene->m_selBoxChanged = true;
 	m_dh->mainFrame->refreshAllGLWidgets();
@@ -578,4 +580,12 @@ void SelectionBox::setColor(wxColour color)
 	m_color = color;
 	m_colorChanged = true;
 	update();
+}
+
+void SelectionBox::updateStatusBar()
+{
+	m_dh->mainFrame->m_statusBar->SetStatusText(wxT("Selection Box"),1);
+	m_dh->mainFrame->m_statusBar->SetStatusText(wxString::Format(wxT("Position %.2f, %.2f, %.2f  Size: %.0f, %.0f, %.0f"),
+			m_center.s.X, m_center.s.Y, m_center.s.Z, m_size.s.X, m_size.s.Y, m_size.s.Z),2);
+
 }
