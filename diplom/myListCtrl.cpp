@@ -66,6 +66,7 @@ BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
 	EVT_CHAR(MyTreeCtrl::OnChar)
 END_EVENT_TABLE()
 
+
 void MyTreeCtrl::OnChar(wxKeyEvent& event)
 {
 	wxTreeItemId treeid = this->GetSelection();

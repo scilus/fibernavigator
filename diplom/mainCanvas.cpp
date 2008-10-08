@@ -36,6 +36,26 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 	m_arcBall = new ArcBallT(640.0f, 480.0f);
 }
 
+MainCanvas::~MainCanvas()
+{
+#ifdef DEBUG
+	switch(m_view) {
+	case mainView :
+		printf("execute main canvas destructor: main view\n");
+		break;
+	case axial:
+		printf("execute main canvas destructor: axial view\n");
+		break;
+	case coronal:
+		printf("execute main canvas destructor: coronal view\n");
+		break;
+	case sagittal:
+		printf("execute main canvas destructor: sagittal view\n");
+		break;
+	}
+#endif
+}
+
 void MainCanvas::init()
 {
 	m_dh->scene->initGL(m_view);

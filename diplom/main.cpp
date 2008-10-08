@@ -70,10 +70,7 @@ bool MyApp::OnInit(void) {
 	// Associate the menu bar with the frame
 	frame->SetMenuBar(menu_bar);
 
-	wxToolBar
-			* toolBar =
-					new wxToolBar(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL
-							| wxNO_BORDER);
+	wxToolBar* toolBar = new wxToolBar(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL | wxNO_BORDER);
 	wxBitmap bmpOpen(fileopen_xpm);
 	wxBitmap bmpAxial(axial_xpm);
 	wxBitmap bmpCor(cor_xpm);

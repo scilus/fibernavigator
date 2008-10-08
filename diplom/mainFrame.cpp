@@ -299,7 +299,10 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
     m_treeWidget = new MyTreeCtrl(m_leftWindow, TREE_CTRL, wxPoint(0, 0),
     		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_EDIT_LABELS);
-    m_treeWidget->AssignImageList(imageList);
+    wxImageList* tImageList = new wxImageList(16,16);
+    tImageList->Add(wxIcon(eyes_xpm));
+    tImageList->Add(wxIcon(delete_xpm));
+    m_treeWidget->AssignImageList(tImageList);
 
     m_tRootId = m_treeWidget->AddRoot(wxT("Root"));
     m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"), -1, -1, new MyTreeItemData(0, Label_planes));
@@ -352,6 +355,15 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
        	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
 
     m_dh->scene->setMainGLContext(new wxGLContext(m_mainGL));
+
+}
+
+MainFrame::~MainFrame()
+{
+#ifdef DEBUG
+	printf("main frame destructor\n");
+#endif
+	delete m_dh;
 
 }
 
@@ -418,7 +430,6 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 
 void MainFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-	delete m_dh;
 	Close(true);
 }
 
@@ -570,19 +581,19 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::refreshAllGLWidgets()
 {
-	m_gl0->render();
-	m_gl1->render();
-	m_gl2->render();
-	m_mainGL->render();
+	if (m_gl0) m_gl0->render();
+	if (m_gl1) m_gl1->render();
+	if (m_gl2) m_gl2->render();
+	if (m_mainGL) m_mainGL->render();
 	updateStatusBar();
 }
 
 void MainFrame::renewAllGLWidgets()
 {
-	m_mainGL->invalidate();
-	m_gl0->invalidate();
-	m_gl1->invalidate();
-	m_gl2->invalidate();
+	if (m_mainGL) m_mainGL->invalidate();
+	if (m_gl0) m_gl0->invalidate();
+	if (m_gl1) m_gl1->invalidate();
+	if (m_gl2) m_gl2->invalidate();
 	refreshAllGLWidgets();
 }
 
@@ -1103,7 +1114,6 @@ void MainFrame::OnInvertFibers(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnCutAnatomy(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->createCutMesh();
-
 	refreshAllGLWidgets();
 }
 

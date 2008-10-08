@@ -9,43 +9,43 @@
 
 ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh = dh;
-
+#ifdef DEBUG
 	m_dh->printTime();
-	printf("initializing  texture shader\n");
-
+	printf("initializing texture shader\n");
+#endif
 	m_textureShader = new Shader(wxT("GLSL/anatomy"));
 	m_textureShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup anatomy shader"));
-
+#ifdef DEBUG
 	m_dh->printTime();
 	printf("initializing mesh shader\n");
-
+#endif
 	m_meshShader = new Shader(wxT("GLSL/mesh"));
 	m_meshShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup mesh shader"));
-
+#ifdef DEBUG
 	m_dh->printTime();
 	printf("initializing curves shader\n");
-
+#endif
 
 	m_curveShader = new Shader(wxT("GLSL/fibers"));
 	m_curveShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fiber shader"));
-
+#ifdef DEBUG
 	m_dh->printTime();
 	printf("initializing iso shader\n");
-
+#endif
 	m_isoShader = new Shader(wxT("GLSL/isoSurf"));
 	m_isoShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup iso surface shader"));
-
+#ifdef DEBUG
 	m_dh->printTime();
 	printf("initializing spline surface shader\n");
-
+#endif
 	m_splineSurfShader = new Shader(wxT("GLSL/splineSurf"));
 	m_splineSurfShader->bind();
 
@@ -54,11 +54,14 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 }
 
 ShaderHelper::~ShaderHelper() {
+	printf("execute shader helper destructor\n");
 	delete m_textureShader;
 	delete m_meshShader;
 	delete m_curveShader;
 	delete m_isoShader;
+	printf("shader helper destructor done\n");
 }
+
 
 void ShaderHelper::setTextureShaderVars()
 {

@@ -27,7 +27,7 @@ public:
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = _T("GLCanvas"),
         int* gl_attrib = NULL);
-   ~MainCanvas(){};
+   ~MainCanvas();
 
    	bool	m_init;
 

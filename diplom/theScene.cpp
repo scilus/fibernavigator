@@ -24,9 +24,13 @@ TheScene::TheScene(DatasetHelper* dh)
 
 TheScene::~TheScene()
 {
-	delete m_mainGLContext;
-	m_dh->printTime();
+#ifdef DEBUG
+	printf("execute scene destructor\n");
+#endif
+	if (m_mainGLContext) delete m_mainGLContext;
+#ifdef DEBUG
 	printf("scene destructor done\n");
+#endif
 }
 
 void TheScene::initGL(int view)
@@ -38,10 +42,10 @@ void TheScene::initGL(int view)
 		m_dh->printTime();
 		printf("Error: %s\n", glewGetErrorString(err));
 	}
-	if (view == mainView)
+	if (view == mainView) {
 		m_dh->printTime();
 		printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-
+	}
 	glEnable(GL_DEPTH_TEST);
 
 	if (!m_texAssigned) {
@@ -104,6 +108,8 @@ void TheScene::renderScene()
 		drawPoints();
 	}
 
+	renderSlizes();
+
 	if (m_dh->fibers_loaded)
 	{
 		renderFibers();
@@ -115,8 +121,6 @@ void TheScene::renderScene()
 			}
 		}
 	}
-
-	renderSlizes();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("render scene"));
 }

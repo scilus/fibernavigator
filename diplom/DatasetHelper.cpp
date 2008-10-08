@@ -61,10 +61,15 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 }
 
 DatasetHelper::~DatasetHelper() {
-	delete scene;
-	delete anatomyHelper;
-	delete lastSelectedPoint;
+#ifdef DEBUG
+	printf("execute dataset helper destructor\n");
+#endif
+	if (scene)	delete scene;
+	if (anatomyHelper) delete anatomyHelper;
+	if (lastSelectedPoint) delete lastSelectedPoint;
+#ifdef DEBUG
 	printf("dataset helper destructor done\n");
+#endif
 }
 
 bool DatasetHelper::load(int index, wxString filename)

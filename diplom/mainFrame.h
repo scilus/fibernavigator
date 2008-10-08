@@ -15,7 +15,7 @@ class MainFrame: public wxMDIParentFrame
 {
 public:
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
-
+    ~MainFrame();
     void setTSlider(wxSlider *slider) {m_tSlider = slider;};
     void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
 
