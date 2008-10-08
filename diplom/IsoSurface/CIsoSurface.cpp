@@ -754,6 +754,7 @@ void CIsoSurface::generateGeometry()
 
 	//printf("%d vertices : %d  normals: %d triangles\n", m_nVertices, m_nNormals, m_nTriangles);
 
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 

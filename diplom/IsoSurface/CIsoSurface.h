@@ -43,7 +43,7 @@ public:
 	CIsoSurface(DatasetHelper*);
 	~CIsoSurface();
 
-	bool load(wxString filename) {};
+	bool load(wxString filename) {return false;};
 	void draw() {};
 	void generateTexture() {};
 	void generateGeometry() ;
