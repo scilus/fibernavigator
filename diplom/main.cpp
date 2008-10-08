@@ -56,6 +56,7 @@ bool MyApp::OnInit(void) {
 	frame->SetMinSize(wxSize(800, 600));
 	// Make a menubar
 	wxMenu *file_menu = new wxMenu;
+	file_menu->Append(VIEWER_NEW_ISOSURF, _T("&New IsoSurface"));
 	file_menu->Append(VIEWER_LOAD, _T("&Load"));
 	file_menu->Append(VIEWER_SAVE, _T("&Save"));
 	file_menu->Append(VIEWER_QUIT, _T("&Exit"));
@@ -69,11 +70,16 @@ bool MyApp::OnInit(void) {
 	view_menu->Append(VIEWER_VIEW_DOWN, _T("&down"));
 
 	wxMenu *voi_menu = new wxMenu;
+	voi_menu->Append(VIEWER_NEW_SELBOX, _T("&New"));
 
 	wxMenu *surf_menu = new wxMenu;
+	surf_menu->Append(VIEWER_NEW_SURFACE, _T("&New"));
 
 	wxMenu *options_menu = new wxMenu;
-
+	options_menu->Append(VIEWER_ASSIGN_COLOR, _T("&Assign Color"));
+	options_menu->Append(VIEWER_TOGGLE_LIGHTING, _T("&Toggle Lighting"));
+	options_menu->Append(VIEWER_INVERT_FIBERS, _T("&Invert Fiber Selection"));
+	options_menu->Append(VIEWER_TOGGLE_TEXTURE_FILTERING, _T("&Toggle Texture Mode"));
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(VIEWER_ABOUT, _T("&About"));
@@ -123,7 +129,6 @@ bool MyApp::OnInit(void) {
 	toolBar->AddSeparator();
 	toolBar->AddTool(VIEWER_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
 	toolBar->AddTool(VIEWER_NEW_SURFACE, bmpNewSurface, wxT("New Spline Surface"));
-	toolBar->AddTool(VIEWER_NEW_SURFACE2, bmpNewSurface, wxT("New Spline Surface on Fiber Selection"));
 	toolBar->AddSeparator();
 	toolBar->AddTool(VIEWER_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
 	toolBar->AddSeparator();
@@ -131,7 +136,7 @@ bool MyApp::OnInit(void) {
 	toolBar->AddSeparator();
 	toolBar->AddTool(VIEWER_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_CUT_ANATOMY, bmpMiniCat, wxT("Cut anatomy at spline surface"));
+	toolBar->AddTool(VIEWER_NEW_ISOSURF, bmpMiniCat, wxT("New Iso Surface "));
 	toolBar->AddSeparator();
 	toolBar->AddTool(VIEWER_MOVE_POINTS1, bmpView1, wxT("Move border points of spline surface"));
 	toolBar->AddTool(VIEWER_MOVE_POINTS2, bmpView3, wxT("Move border points of spline surface"));

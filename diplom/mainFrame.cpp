@@ -66,14 +66,13 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	/* toggle drawing of points */
 	EVT_MENU(VIEWER_DRAW_POINTS, MainFrame::OnTogglePointMode)
 	EVT_MENU(VIEWER_NEW_SURFACE, MainFrame::OnNewSurface)
-	EVT_MENU(VIEWER_NEW_SURFACE2, MainFrame::OnNewSurface2)
 	/* KDTREE thread finished */
 	EVT_MENU(KDTREE_EVENT, MainFrame::OnKdTreeThreadFinished)
 	/* Button Assign Color pressed */
 	EVT_MENU(VIEWER_ASSIGN_COLOR, MainFrame::OnAssignColor)
 	EVT_MENU(VIEWER_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
 	EVT_MENU(VIEWER_INVERT_FIBERS, MainFrame::OnInvertFibers)
-	EVT_MENU(VIEWER_CUT_ANATOMY, MainFrame::OnCutAnatomy)
+	EVT_MENU(VIEWER_NEW_ISOSURF, MainFrame::OnNewIsoSurface)
 	EVT_MENU(VIEWER_MOVE_POINTS1, MainFrame::OnMovePoints1)
 	EVT_MENU(VIEWER_MOVE_POINTS2, MainFrame::OnMovePoints2)
 	EVT_MENU(VIEWER_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
@@ -969,22 +968,6 @@ void MainFrame::OnTogglePointMode(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || m_dh->surface_loaded) return;
-	Surface *surface = new Surface(m_dh);
-
-	int i = m_listCtrl->GetItemCount();
-	m_listCtrl->InsertItem(i, wxT(""), 0);
-	m_listCtrl->SetItem(i, 1, surface->getName());
-	m_listCtrl->SetItem(i, 2, wxT("0.50"));
-	m_listCtrl->SetItem(i, 3, wxT(""), 1);
-	m_listCtrl->SetItemData(i, (long)surface);
-	m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-
-	refreshAllGLWidgets();
-}
-
-void MainFrame::OnNewSurface2(wxCommandEvent& WXUNUSED(event))
-{
-	if (!m_dh->scene || m_dh->surface_loaded) return;
 
 	if (!m_dh->fibers_loaded)
 	{
@@ -1037,12 +1020,6 @@ void MainFrame::OnNewSurface2(wxCommandEvent& WXUNUSED(event))
 	m_listCtrl->SetItem(i, 3, wxT(""), 1);
 	m_listCtrl->SetItemData(i, (long)surface);
 	m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-
-	if (!m_dh->fibers_loaded)
-	{
-		refreshAllGLWidgets();
-		return;
-	}
 
 	refreshAllGLWidgets();
 }
@@ -1113,9 +1090,9 @@ void MainFrame::OnInvertFibers(wxCommandEvent& WXUNUSED(event))
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnCutAnatomy(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnNewIsoSurface(wxCommandEvent& WXUNUSED(event))
 {
-	m_dh->createCutMesh();
+	m_dh->createIsoSurface();
 	refreshAllGLWidgets();
 }
 

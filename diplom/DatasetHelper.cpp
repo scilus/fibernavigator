@@ -719,7 +719,7 @@ bool DatasetHelper::loadTextFile(wxString* string, wxString filename)
 	return false;
 }
 
-void DatasetHelper::createCutMesh()
+void DatasetHelper::createIsoSurface()
 {
 	// check anatomy - quit if not present
 	if (!anatomy_loaded) return;

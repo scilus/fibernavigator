@@ -63,7 +63,7 @@ public:
 	void updateTreeDS(int);
 	bool invertFibers() {fibersInverted = !fibersInverted; return fibersInverted;};
 
-	void createCutMesh();
+	void createIsoSurface();
 	/*
 	 * Called from MainFrame when a kdTree thread signals it's finished
 	 */
