@@ -189,6 +189,7 @@ void TheScene::renderMesh()
 	lightsOn();
 
 	bindTextures();
+
 	m_dh->shaderHelper->m_meshShader->bind();
 	m_dh->shaderHelper->setMeshShaderVars();
 

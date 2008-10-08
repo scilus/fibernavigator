@@ -112,6 +112,7 @@ void ShaderHelper::setMeshShaderVars()
 			cutTex = info->getGLuint();
 		}
 	}
+
 	if (cutTex != 0 && m_dh->surface_loaded)
 	{
 		glActiveTexture(GL_TEXTURE0 + c);
@@ -120,9 +121,9 @@ void ShaderHelper::setMeshShaderVars()
 		show[c] = false;
 		threshold[c] = 0;
 		type[c] = 5;
+		m_meshShader->setUniInt("cutTex", c);
 		++c;
 	}
-	m_meshShader->setUniInt("cutTex", c-1);
 
 	m_meshShader->setUniArrayInt("texes", tex, c);
 	m_meshShader->setUniArrayInt("show", show, c);

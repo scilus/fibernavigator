@@ -303,7 +303,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     tImageList->Add(wxIcon(delete_xpm));
     m_treeWidget->AssignImageList(tImageList);
 
-    m_tRootId = m_treeWidget->AddRoot(wxT("Root"));
+    m_tRootId = m_treeWidget->AddRoot(wxT("Root"), -1, -1, new MyTreeItemData(0, Label_datasets) );
     m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"), -1, -1, new MyTreeItemData(0, Label_planes));
 	    m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"));
 	    m_tCoronalId  = m_treeWidget->AppendItem(m_tPlanesId, wxT("coronal"));
@@ -736,9 +736,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 	SelectionBox *selBox = new SelectionBox(vc, vs, m_dh);
 
 	// check if selection box selected
-
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
-
 
 	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
 	{
