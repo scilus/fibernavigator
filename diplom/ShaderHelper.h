@@ -19,13 +19,11 @@ public:
 
 	void setTextureShaderVars();
 	void setMeshShaderVars();
-	void setIsoShaderVars();
 	void setSplineSurfaceShaderVars();
 
 	Shader *m_textureShader;
 	Shader *m_meshShader;
 	Shader *m_curveShader;
-	Shader *m_isoShader;
 	Shader *m_splineSurfShader;
 
 private:

@@ -99,8 +99,6 @@ void TheScene::renderScene()
 
 	renderMesh();
 
-	renderIsoSurface();
-
 	renderSplineSurface();
 
 	if (m_pointMode)
@@ -197,13 +195,18 @@ void TheScene::renderMesh()
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == Mesh_)
+		if (info->getType() == Mesh_ || info->getType() == IsoSurface_)
 		{
 			if (info->getShow()) {
 				wxColor c = info->getColor();
 				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
 				m_dh->shaderHelper->m_meshShader->setUniInt("showFS", info->getShowFS());
 				m_dh->shaderHelper->m_meshShader->setUniInt("useTex", info->getUseTex());
+
+				if (m_dh->surface_loaded)
+					m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", true);
+				else
+					m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", false);
 
 				glCallList(info->getGLuint());
 			}
@@ -216,45 +219,6 @@ void TheScene::renderMesh()
 	if (m_dh->GLError()) m_dh->printGLError(wxT("draw mesh"));
 
 	glPopAttrib();
-}
-
-void TheScene::renderIsoSurface()
-{
-	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
-	{
-		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == IsoSurface_)
-		{
-			if (info->getShow()) {
-				glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-				lightsOn();
-
-				bindTextures();
-				m_dh->shaderHelper->m_isoShader->bind();
-				m_dh->shaderHelper->setIsoShaderVars();
-
-				wxColor c = info->getColor();
-				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
-				m_dh->shaderHelper->m_isoShader->setUniInt("showFS", info->getShowFS());
-				m_dh->shaderHelper->m_isoShader->setUniInt("useTex", info->getUseTex());
-				if (m_dh->surface_loaded)
-					m_dh->shaderHelper->m_isoShader->setUniInt("cutAtSurface", true);
-				else
-					m_dh->shaderHelper->m_isoShader->setUniInt("cutAtSurface", false);
-
-				glCallList(info->getGLuint());
-
-				m_dh->shaderHelper->m_isoShader->release();
-
-				lightsOff();
-
-				if (m_dh->GLError()) {m_dh->printTime(); m_dh->printGLError(wxT("draw iso surface"));}
-
-				glPopAttrib();
-			}
-		}
-	}
 }
 
 void TheScene::renderFibers()
