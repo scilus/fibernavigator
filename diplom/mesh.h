@@ -31,17 +31,6 @@ struct polygon {
 	int v3;
 };
 
-union converterByteToINT32 {
-	wxUint8 b[4];
-	wxUint32 i;
-};
-
-union converterByteToFoat {
-	wxUint8 b[4];
-	float f;
-};
-
-
 class Mesh : public DatasetInfo {
 
 public:

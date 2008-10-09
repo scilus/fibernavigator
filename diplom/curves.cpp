@@ -1,5 +1,8 @@
 #include "curves.h"
 
+#include <iostream>
+#include <fstream>
+
 Curves::Curves(DatasetHelper* dh)
 {
 	m_dh = dh;
@@ -146,6 +149,11 @@ bool Curves::load(wxString filename)
 	temp[j] = 0;
 
 	//int cc = i;
+
+#ifdef DEBUG
+	printf("loading %d points\n", countPoints);
+	printf("and %d lines\n", countLines);
+#endif
 
 	m_lineCount = countLines;
 	m_dh->countFibers = m_lineCount;
@@ -640,3 +648,139 @@ void Curves::barycenterTest(int left, int right, int axis)
 		barycenterTest(root+1, right, axis1);
 	}
 }
+
+void Curves::saveSelection(SelectionBox* box, const wxString filename)
+{
+	std::vector<float>pointsToSave;
+	std::vector<int>linesToSave;
+	std::vector<float>colorsToSave;
+	int pointIndex = 0;
+	int countLines = 0;
+
+	int xOff = m_dh->columns/2;
+	int yOff = m_dh->rows/2;
+	int zOff = m_dh->frames/2;
+
+	wxColour col = box->getColor();
+	float redVal = ((float)col.Red())/255.0;
+	float greenVal = ((float)col.Green())/255.0;
+	float blueVal = ((float)col.Blue())/255.0;
+
+	for ( int l = 0 ; l < m_lineCount ; ++l )
+	{
+		if (box->m_inBox[l])
+		{
+			unsigned int pc = getStartIndexForLine(l)*3;
+
+			linesToSave.push_back(getPointsPerLine(l));
+
+			for (int j = 0; j < getPointsPerLine(l) ; ++j )
+			{
+				pointsToSave.push_back(xOff - m_pointArray[pc]);
+				++pc;
+				pointsToSave.push_back(m_pointArray[pc] + yOff);
+				++pc;
+				pointsToSave.push_back(zOff - m_pointArray[pc]);
+				++pc;
+
+				linesToSave.push_back(pointIndex);
+				++pointIndex;
+
+				colorsToSave.push_back(redVal);
+				colorsToSave.push_back(greenVal);
+				colorsToSave.push_back(blueVal);
+			}
+			++countLines;
+		}
+	}
+
+	converterByteINT32 c;
+	converterByteFloat f;
+
+	std::ofstream myfile;
+	std::vector<char>vBuffer;
+
+	std::string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
+	header1 += intToString(pointsToSave.size()/3);
+	header1 +=  " float\n";
+
+	for (unsigned int i = 0 ; i < header1.size() ; ++i)
+	{
+		vBuffer.push_back(header1[i]);
+	}
+
+	for (unsigned int i = 0 ; i < pointsToSave.size() ; ++i)
+	{
+		f.f = pointsToSave[i];
+		vBuffer.push_back(f.b[3]);
+		vBuffer.push_back(f.b[2]);
+		vBuffer.push_back(f.b[1]);
+		vBuffer.push_back(f.b[0]);
+	}
+
+	vBuffer.push_back('\n');
+	std::string header2 = "LINES " + intToString(countLines) + " " + intToString(linesToSave.size()) + "\n";
+
+	for (unsigned int i = 0 ; i < header2.size() ; ++i)
+	{
+		vBuffer.push_back(header2[i]);
+	}
+
+	for (unsigned int i = 0 ; i < linesToSave.size() ; ++i)
+	{
+		c.i = linesToSave[i];
+		vBuffer.push_back(c.b[3]);
+		vBuffer.push_back(c.b[2]);
+		vBuffer.push_back(c.b[1]);
+		vBuffer.push_back(c.b[0]);
+	}
+
+	vBuffer.push_back('\n');
+
+	std::string header3 = "CELL_DATA 0\n";
+	header3 += "COLOR_SCALARS scalars 3\n";
+
+	for (unsigned int i = 0 ; i < header3.size() ; ++i)
+	{
+		vBuffer.push_back(header3[i]);
+	}
+
+	for (unsigned int i = 0 ; i < colorsToSave.size() ; ++i)
+	{
+		f.f = colorsToSave[i];
+		vBuffer.push_back(f.b[0]);
+		vBuffer.push_back(f.b[1]);
+		vBuffer.push_back(f.b[2]);
+		vBuffer.push_back(f.b[3]);
+	}
+
+	vBuffer.push_back('\n');
+
+	// finally put the buffer vector into a char* array
+	char * buffer;
+	buffer = new char [vBuffer.size()];
+
+	for (unsigned int i = 0 ; i < vBuffer.size() ; ++i)
+	{
+		buffer[i] = vBuffer[i];
+	}
+
+	char* fn;
+	fn = (char*)malloc(filename.length());
+	strcpy(fn, (const char*)filename.mb_str(wxConvUTF8));
+
+	myfile.open ( fn, std::ios::binary);
+	myfile.write(buffer, vBuffer.size());
+
+	myfile.close();
+
+
+}
+
+std::string Curves::intToString(int number)
+{
+	std::stringstream out;
+	out << number;
+	return out.str();
+}
+

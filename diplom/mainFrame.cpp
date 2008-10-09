@@ -31,6 +31,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(VIEWER_NEW, MainFrame::OnNew)
     EVT_MENU(VIEWER_LOAD, MainFrame::OnLoad)
     EVT_MENU(VIEWER_SAVE, MainFrame::OnSave)
+    EVT_MENU(VIEWER_SAVE_FIBERS, MainFrame::OnSaveFibers)
     EVT_MOUSE_EVENTS(MainFrame::OnMouseEvent)
     /* mouse click in one of the three navigation windows */
     EVT_COMMAND(ID_GL_NAV_X, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
@@ -465,6 +466,42 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 		m_dh->save(dialog.GetPath());
 	}
 }
+
+void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
+{
+	if (!m_dh->fibers_loaded) return;
+	SelectionBox *box;
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
+	{
+		box = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
+
+	}
+	else
+	{
+		wxMessageBox(wxT("ERROR\n\nno master selection box selected") ,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+		return;
+	}
+
+	Curves *fibers;
+	wxTreeItemIdValue cookie = 0;
+	fibers = (Curves*)((MyTreeItemData*)
+				m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
+
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("fiber files (*.fib)|*.fib||*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
+	dialog.SetFilterIndex(0);
+	dialog.SetDirectory(m_dh->lastPath);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		m_dh->lastPath = dialog.GetDirectory();
+		fibers->saveSelection(box, dialog.GetPath());
+	}
+}
+
 
 void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
@@ -1026,8 +1063,6 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 
-	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
-
 	wxColourData colorData;
 
 	for ( int i = 0; i < 16 ; ++i)
@@ -1056,6 +1091,8 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 			return;
 		}
 	}
+
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
 	{
 		SelectionBox *box = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();

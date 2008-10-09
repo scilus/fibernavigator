@@ -58,7 +58,8 @@ bool MyApp::OnInit(void) {
 	wxMenu *file_menu = new wxMenu;
 	file_menu->Append(VIEWER_NEW_ISOSURF, _T("&New IsoSurface"));
 	file_menu->Append(VIEWER_LOAD, _T("&Load"));
-	file_menu->Append(VIEWER_SAVE, _T("&Save"));
+	file_menu->Append(VIEWER_SAVE, _T("&Save Current Scene"));
+	file_menu->Append(VIEWER_SAVE_FIBERS, _T("&Save Selected Fibers"));
 	file_menu->Append(VIEWER_QUIT, _T("&Exit"));
 
 	wxMenu *view_menu = new wxMenu;

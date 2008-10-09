@@ -30,6 +30,7 @@ private:
 
 	void OnLoad(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
+	void OnSaveFibers(wxCommandEvent& event);
 	void OnNew(wxCommandEvent& event);
     void OnToggleWindow(wxCommandEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
@@ -141,6 +142,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_NEW					4
 #define VIEWER_LOAD					5
 #define VIEWER_SAVE					6
+#define VIEWER_SAVE_FIBERS			7
 #define VIEWER_BUTTON_AXIAL 		11
 #define VIEWER_BUTTON_CORONAL 		12
 #define VIEWER_BUTTON_SAGITTAL 		13

@@ -56,6 +56,8 @@ public:
 	void createColorArray();
 	void freeArrays() {delete[] m_colorArray; delete[] m_normalArray;};
 
+	void saveSelection(SelectionBox* box, const wxString filename);
+
 	float *m_pointArray;
 	int* m_lineArray;
 	float *m_colorArray;
@@ -66,7 +68,7 @@ public:
 	int m_lengthLines;
 
 private:
-
+	std::string intToString(int number);
 
 	int m_lineCount;
 	int m_pointCount;

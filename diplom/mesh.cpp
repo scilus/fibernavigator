@@ -76,8 +76,8 @@ bool Mesh::load(wxString filename)
 		setPolygonDim(buffer[17]);
 
 		int fp = 29;
-		converterByteToINT32 c;
-		converterByteToFoat f;
+		converterByteINT32 c;
+		converterByteFloat f;
 
 		c.b[0] = buffer[fp];
 		c.b[1] = buffer[fp+1];

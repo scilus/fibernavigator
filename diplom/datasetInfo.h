@@ -36,6 +36,16 @@ enum DatasetType {
 	Label_selBoxes,
 };
 
+union converterByteINT32 {
+	wxUint8 b[4];
+	wxUint32 i;
+};
+
+union converterByteFloat {
+	wxUint8 b[4];
+	float f;
+};
+
 class DatasetHelper;
 
 class DatasetInfo
