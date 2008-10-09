@@ -1,5 +1,3 @@
-fasern abspeichern
-
   
 verschieben der box mit koordinatenkreuz, 
 ausblenden einzelner boxen
@@ -73,6 +71,10 @@ fasern durchsichtig ( gewichtet mit overlay )
 
 quit  - mit rueckfrag
 
-schnitt eines belibigen meshes mit der spline surface
+schnitt eines beliebigen meshes mit der spline surface
 
 boxen mit koordinaten und groesse
+
+09.10.2008
+
+fasern abspeichern

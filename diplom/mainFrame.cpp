@@ -1065,11 +1065,25 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 
 	wxColourData colorData;
 
-	for ( int i = 0; i < 16 ; ++i)
+	for ( int i = 0; i < 10 ; ++i)
 	{
-		wxColour color(i*16, i*16, i*16);
+		wxColour color(i*28, i*28, i*28);
 		colorData.SetCustomColour(i, color);
 	}
+	int i = 10;
+	wxColour color(255, 0, 0);
+	colorData.SetCustomColour(i++, color);
+	wxColour color1(0, 255, 0);
+	colorData.SetCustomColour(i++, color1);
+	wxColour color2(0, 0, 255);
+	colorData.SetCustomColour(i++, color2);
+	wxColour color3(255, 255, 0);
+	colorData.SetCustomColour(i++, color3);
+	wxColour color4(255, 0, 255);
+	colorData.SetCustomColour(i++, color4);
+	wxColour color5(0, 255, 255);
+	colorData.SetCustomColour(i++, color5);
+
 	wxColourDialog dialog(this, &colorData);
 	wxColour col;
 	if (dialog.ShowModal() == wxID_OK)
