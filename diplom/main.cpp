@@ -64,10 +64,10 @@ bool MyApp::OnInit(void) {
 	wxMenu *view_menu = new wxMenu;
 	view_menu->Append(VIEWER_VIEW_LEFT, _T("&left"));
 	view_menu->Append(VIEWER_VIEW_RIGHT, _T("&right"));
-	view_menu->Append(VIEWER_VIEW_FRONT, _T("&front"));
-	view_menu->Append(VIEWER_VIEW_BACK, _T("&back"));
-	view_menu->Append(VIEWER_VIEW_TOP, _T("&top"));
-	view_menu->Append(VIEWER_VIEW_DOWN, _T("&down"));
+	view_menu->Append(VIEWER_VIEW_FRONT, _T("&anterior"));
+	view_menu->Append(VIEWER_VIEW_BACK, _T("&posterior"));
+	view_menu->Append(VIEWER_VIEW_TOP, _T("&superior"));
+	view_menu->Append(VIEWER_VIEW_DOWN, _T("&inferior"));
 
 	wxMenu *voi_menu = new wxMenu;
 	voi_menu->Append(VIEWER_NEW_SELBOX, _T("&New"));
