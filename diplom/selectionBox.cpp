@@ -473,7 +473,7 @@ void SelectionBox::resize(wxPoint click, wxPoint lastPos)
 void SelectionBox::moveLeft()
 {
 	if ( m_center.s.X < -m_dh->columns/2 ) return;
-	m_center.s.X -= 1.0;
+	m_center.s.X = (int)m_center.s.X - 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.s.X -= m_stepSize;
 	update();
 }
@@ -481,7 +481,7 @@ void SelectionBox::moveLeft()
 void SelectionBox::moveRight()
 {
 	if ( m_center.s.X > m_dh->columns/2 ) return;
-	m_center.s.X += 1.0;
+		m_center.s.X = (int)m_center.s.X + 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.s.X += m_stepSize;
 	update();
 }
@@ -489,7 +489,7 @@ void SelectionBox::moveRight()
 void SelectionBox::moveForward()
 {
 	if ( m_center.s.Y < -m_dh->rows/2 ) return;
-	m_center.s.Y -= 1.0;
+	m_center.s.Y = (int)m_center.s.Y - 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Y -= m_stepSize;
 	update();
 }
@@ -497,7 +497,7 @@ void SelectionBox::moveForward()
 void SelectionBox::moveBack()
 {
 	if ( m_center.s.Y > m_dh->rows/2 ) return;
-	m_center.s.Y += 1.0;
+	m_center.s.Y = (int)m_center.s.Y + 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Y += m_stepSize;
 	update();
 }
@@ -505,7 +505,7 @@ void SelectionBox::moveBack()
 void SelectionBox::moveUp()
 {
 	if ( m_center.s.Z < -m_dh->frames/2 ) return;
-	m_center.s.Z -= 1.0;
+	m_center.s.Z = (int)m_center.s.Z - 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Z -= m_stepSize;
 	update();
 }
@@ -513,7 +513,7 @@ void SelectionBox::moveUp()
 void SelectionBox::moveDown()
 {
 	if ( m_center.s.Z > m_dh->frames/2 ) return;
-	m_center.s.Z += 1.0;
+	m_center.s.Z = (int)m_center.s.Z + 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Z += m_stepSize;
 	update();
 }
@@ -586,6 +586,6 @@ void SelectionBox::updateStatusBar()
 {
 	m_dh->mainFrame->m_statusBar->SetStatusText(wxT("Selection Box"),1);
 	m_dh->mainFrame->m_statusBar->SetStatusText(wxString::Format(wxT("Position %.2f, %.2f, %.2f  Size: %.0f, %.0f, %.0f"),
-			m_center.s.X, m_center.s.Y, m_center.s.Z, m_size.s.X, m_size.s.Y, m_size.s.Z),2);
+			m_center.s.X + m_dh->columns/2, m_center.s.Y + m_dh->rows/2, m_center.s.Z + m_dh->frames/2, m_size.s.X, m_size.s.Y, m_size.s.Z),2);
 
 }
