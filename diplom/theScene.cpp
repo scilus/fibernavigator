@@ -5,11 +5,11 @@
 #include "surface.h"
 #include "selectionBox.h"
 #include "AnatomyHelper.h"
-#include "lic/FgeImageSpaceLIC.h"
 
 TheScene::TheScene(DatasetHelper* dh)
 {
 	m_dh = dh;
+	m_lic = new FgeImageSpaceLIC();
 
 	m_texAssigned = false;
 
@@ -158,24 +158,30 @@ void TheScene::renderSplineSurface()
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if (info->getType() == Surface_ && info->getShow())
 		{
-
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-			lightsOn();
+			if (m_dh->vectors_loaded && m_dh->use_lic)
+			{
+				m_lic->render(info);
+			}
+			else
+			{
+				lightsOn();
 
-			bindTextures();
-			m_dh->shaderHelper->m_splineSurfShader->bind();
-			m_dh->shaderHelper->setSplineSurfaceShaderVars();
+				bindTextures();
+				m_dh->shaderHelper->m_splineSurfShader->bind();
+				m_dh->shaderHelper->setSplineSurfaceShaderVars();
 
-			glColor3f(0.1f, 0.1f, 0.1f);
+				glColor3f(0.1f, 0.1f, 0.1f);
 
-			info->draw();
+				info->draw();
 
-			m_dh->shaderHelper->m_splineSurfShader->release();
+				m_dh->shaderHelper->m_splineSurfShader->release();
 
-			lightsOff();
+				lightsOff();
 
-			if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
+				if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
+			}
 
 			glPopAttrib();
 		}

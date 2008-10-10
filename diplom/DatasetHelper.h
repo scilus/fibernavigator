@@ -89,6 +89,9 @@ public:
 	int rows;
 	int columns;
 	int frames;
+	float xOff;
+	float yOff;
+	float zOff;
 	bool useVBO;
 	bool lighting;
 	unsigned int countFibers;
@@ -97,6 +100,8 @@ public:
 	GLenum lastGLError;
 	bool anatomy_loaded;
 	bool fibers_loaded;
+	bool vectors_loaded;
+	bool use_lic;
 	bool surface_loaded;
 	bool surface_isDirty;
 	wxString lastPath;

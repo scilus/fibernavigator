@@ -23,12 +23,18 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	rows = 1;
 	columns = 1;
 	frames = 1;
+	xOff = 0;
+	yOff = 0;
+	zOff = 0;
 	countFibers = 0;
 	threadsActive = 0;
 	anatomy_loaded = false;
 	fibers_loaded = false;
 	surface_loaded = false;
+	vectors_loaded = false;
 	surface_isDirty = true;
+
+	use_lic = false;
 	useVBO = true;
 	lighting = false;
 
@@ -116,6 +122,9 @@ bool DatasetHelper::load(int index, wxString filename)
 			rows = anatomy->getRows();
 			columns = anatomy->getColumns();
 			frames = anatomy->getFrames();
+			xOff = columns/2.0;
+			yOff = rows/2.0;
+			zOff = frames/2.0;
 			anatomy_loaded = true;
 			finishLoading(anatomy);
 			return true;
@@ -263,8 +272,8 @@ bool DatasetHelper::loadSettings(wxString filename)
 				updateTreeDims();
 				anatomy_loaded = true;
 			}
-			xp = rows/2;
-			yp = columns/2;
+			xp = columns/2;
+			yp = rows/2;
 			zp = frames/2;
 		}
 

@@ -183,7 +183,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_glh->printTime();
 	printf("initializing  LIC texture shader\n");
 
-	m_transformShader = new Shader(wxT("../GLSL/transform"));
+	m_transformShader = new Shader(wxT("GLSL/transform"));
 	m_transformShader->bind();
 
 	if (m_glh->GLError())
@@ -198,7 +198,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_glh->printTime();
 	printf("initializing  LIC edge shader\n");
 
-	m_edgeShader = new Shader(wxT("../GLSL/edge"));
+	m_edgeShader = new Shader(wxT("GLSL/edgedetection"));
 	m_edgeShader->bind();
 
 	if (m_glh->GLError())
@@ -213,7 +213,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_glh->printTime();
 	printf("initializing  LIC advection shader\n");
 
-	m_advectionShader = new Shader(wxT("../GLSL/advection"));
+	m_advectionShader = new Shader(wxT("GLSL/advection"));
 	m_advectionShader->bind();
 
 	if (m_glh->GLError())
@@ -228,7 +228,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_glh->printTime();
 	printf("initializing  LIC clipping shader\n");
 
-	m_clippingShader = new Shader(wxT("../GLSL/clipping"));
+	m_clippingShader = new Shader(wxT("GLSL/clipping"));
 	m_clippingShader->bind();
 
 	if (m_glh->GLError())
@@ -237,7 +237,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_clippingShader->release();
 }
 
-void FgeImageSpaceLIC::render() {
+void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	// to later on restore status quo
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -316,6 +316,7 @@ void FgeImageSpaceLIC::render() {
 
 	// render -> the shader does all the work for us
 	// TODO FgeGeometry::render();
+	info->draw();
 
 	m_transformShader->release();
 
@@ -416,7 +417,8 @@ void FgeImageSpaceLIC::render() {
 	// use advection shader now
 	m_advectionShader->bind();
 	// TODO advectionShader.setDefaultUniforms();
-	int time = 5000;
+	wxDateTime dt = wxDateTime::Now();
+	int time = dt.GetMillisecond();
 	m_advectionShader->setUniInt("fantom_time", time);
 
 	// set texture unit numbers
@@ -544,7 +546,6 @@ void FgeImageSpaceLIC::render() {
 	// make it repaint and repaint all the time!!!
 	//GLint time = advectionShader.getUniformLocation( "fantom_time" );
 	//  if ( time != -1 )
-
 }
 
 /**

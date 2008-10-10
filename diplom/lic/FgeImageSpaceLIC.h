@@ -18,11 +18,12 @@
 
 #include "../Shader.h"
 #include "../GLHelper.h"
+#include "../datasetInfo.h"
 
 #include <vector>
 #include <string>
 
-
+class DatasetInfo;
 
 /** This class implements an Image Space Based LIC Algorithm as described in
 
@@ -36,7 +37,7 @@ class  FgeImageSpaceLIC
 
     virtual void initiate();
 
-    virtual void render();
+    virtual void render(DatasetInfo* info);
 
     //! sets the minima and maxima used for scaling the color values.
     void setMinMax(float minX, float minY, float minZ,

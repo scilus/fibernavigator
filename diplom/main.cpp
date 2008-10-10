@@ -57,9 +57,12 @@ bool MyApp::OnInit(void) {
 	// Make a menubar
 	wxMenu *file_menu = new wxMenu;
 	file_menu->Append(VIEWER_NEW_ISOSURF, _T("&New IsoSurface"));
+	file_menu->AppendSeparator();
 	file_menu->Append(VIEWER_LOAD, _T("&Load"));
+	file_menu->AppendSeparator();
 	file_menu->Append(VIEWER_SAVE, _T("&Save Current Scene"));
 	file_menu->Append(VIEWER_SAVE_FIBERS, _T("&Save Selected Fibers"));
+	file_menu->AppendSeparator();
 	file_menu->Append(VIEWER_QUIT, _T("&Exit"));
 
 	wxMenu *view_menu = new wxMenu;
@@ -72,14 +75,19 @@ bool MyApp::OnInit(void) {
 
 	wxMenu *voi_menu = new wxMenu;
 	voi_menu->Append(VIEWER_NEW_SELBOX, _T("&New"));
+	voi_menu->AppendSeparator();
 
 	wxMenu *surf_menu = new wxMenu;
 	surf_menu->Append(VIEWER_NEW_SURFACE, _T("&New"));
+	surf_menu->AppendSeparator();
+	surf_menu->Append(VIEWER_TOGGLE_LIC, _T("&Toggle Lic"));
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(VIEWER_ASSIGN_COLOR, _T("&Assign Color"));
+	options_menu->AppendSeparator();
 	options_menu->Append(VIEWER_TOGGLE_LIGHTING, _T("&Toggle Lighting"));
 	options_menu->Append(VIEWER_INVERT_FIBERS, _T("&Invert Fiber Selection"));
+	options_menu->AppendSeparator();
 	options_menu->Append(VIEWER_TOGGLE_TEXTURE_FILTERING, _T("&Toggle Texture Mode"));
 
 	wxMenu *help_menu = new wxMenu;

@@ -67,6 +67,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	/* toggle drawing of points */
 	EVT_MENU(VIEWER_DRAW_POINTS, MainFrame::OnTogglePointMode)
 	EVT_MENU(VIEWER_NEW_SURFACE, MainFrame::OnNewSurface)
+	EVT_MENU(VIEWER_TOGGLE_LIC, MainFrame::OnToggleLIC)
 	/* KDTREE thread finished */
 	EVT_MENU(KDTREE_EVENT, MainFrame::OnKdTreeThreadFinished)
 	/* Button Assign Color pressed */
@@ -1196,3 +1197,10 @@ void MainFrame::OnToggleTextureFiltering(wxCommandEvent& event)
 	m_dh->useLinearFiltering = !m_dh->useLinearFiltering;
 	refreshAllGLWidgets();
 }
+
+void MainFrame::OnToggleLIC(wxCommandEvent& event)
+{
+	m_dh->use_lic = !m_dh->use_lic;
+	refreshAllGLWidgets();
+}
+

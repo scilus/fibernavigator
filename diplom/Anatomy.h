@@ -24,9 +24,8 @@ public:
 	void generateGeometry() {};
 	void initializeBuffer() {};
 
-	void cutSurface();
-
 	wxUint8* getByteDataset();
+	float* getFloatDataset();
 
 	//bool isInsideTriangle(double, double, double, double, double, double, double, double);
 	//void cutRestOfLine(int, int, int);

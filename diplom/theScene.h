@@ -11,6 +11,8 @@
 #include "datasetInfo.h"
 #include "DatasetHelper.h"
 
+#include "lic/FgeImageSpaceLIC.h"
+
 #include "wx/glcanvas.h"
 
 enum {
@@ -21,6 +23,7 @@ enum {
 };
 
 class DatasetHelper;
+class FgeImageSpaceLIC;
 
 class TheScene {
 
@@ -55,6 +58,7 @@ private:
 	wxGLContext* m_mainGLContext;
 
 	DatasetHelper* m_dh;
+	FgeImageSpaceLIC* m_lic;
 
 	bool m_pointMode;
 

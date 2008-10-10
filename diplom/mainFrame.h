@@ -29,6 +29,7 @@ private:
     void OnQuit(wxCommandEvent& event);
 
 	void OnLoad(wxCommandEvent& event);
+	void OnLoadVectors(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
 	void OnSaveFibers(wxCommandEvent& event);
 	void OnNew(wxCommandEvent& event);
@@ -67,6 +68,7 @@ private:
 
     void OnAssignColor(wxCommandEvent& event);
     void OnToggleLighting(wxCommandEvent& event);
+    void OnToggleLIC(wxCommandEvent& event);
 
 	void OnInvertFibers(wxCommandEvent& event);
 	void OnNewIsoSurface(wxCommandEvent& event);
@@ -141,8 +143,8 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_ABOUT       	wxID_ABOUT
 #define VIEWER_NEW					4
 #define VIEWER_LOAD					5
-#define VIEWER_SAVE					6
-#define VIEWER_SAVE_FIBERS			7
+#define VIEWER_SAVE					7
+#define VIEWER_SAVE_FIBERS			8
 #define VIEWER_BUTTON_AXIAL 		11
 #define VIEWER_BUTTON_CORONAL 		12
 #define VIEWER_BUTTON_SAGITTAL 		13
@@ -160,6 +162,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_MOVE_POINTS1 		28
 #define VIEWER_MOVE_POINTS2 		29
 #define VIEWER_TOGGLE_TEXTURE_FILTERING		30
+#define VIEWER_TOGGLE_LIC			31
 
 #define VIEWER_VIEW_LEFT		200
 #define VIEWER_VIEW_RIGHT		201

@@ -21,6 +21,7 @@ enum DatasetType {
 	Overlay,
 	RGB,
 	Mesh_,
+	Vectors_,
 	Curves_,
 	Surface_,
 	IsoSurface_,
