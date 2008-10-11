@@ -1,5 +1,5 @@
 #include "selectionBox.h"
-#include "curves.h"
+#include "fibers.h"
 
 SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 {

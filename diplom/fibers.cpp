@@ -1,9 +1,9 @@
-#include "curves.h"
+#include "fibers.h"
 
 #include <iostream>
 #include <fstream>
 
-Curves::Curves(DatasetHelper* dh)
+Fibers::Fibers(DatasetHelper* dh)
 {
 	m_dh = dh;
 	m_type = not_initialized;
@@ -25,7 +25,7 @@ Curves::Curves(DatasetHelper* dh)
 	m_bufferObjects = new GLuint[3];
 }
 
-Curves::~Curves()
+Fibers::~Fibers()
 {
 	delete[] m_linePointers;
 	delete[] m_pointArray;
@@ -36,7 +36,7 @@ Curves::~Curves()
 	m_dh->fibers_loaded = false;
 }
 
-bool Curves::load(wxString filename)
+bool Fibers::load(wxString filename)
 {
 	m_dh->printTime();
 	printf("start loading vtk file\n");
@@ -203,7 +203,7 @@ bool Curves::load(wxString filename)
 	m_dh->printTime();
 	printf("read all\n");
 
-	m_type = Curves_;
+	m_type = Fibers_;
 	m_fullPath = filename;
 #ifdef __WXMSW__
 	m_name = filename.AfterLast('\\');
@@ -218,18 +218,18 @@ bool Curves::load(wxString filename)
 }
 
 
-int Curves::getPointsPerLine(int line)
+int Fibers::getPointsPerLine(int line)
 {
 	return (m_linePointers[line+1] - m_linePointers[line]) ;
 }
 
-int Curves::getStartIndexForLine(int line)
+int Fibers::getStartIndexForLine(int line)
 {
 	return m_linePointers[line];
 }
 
 
-void Curves::calculateLinePointers()
+void Fibers::calculateLinePointers()
 {
 	m_dh->printTime();
 	printf("calculate line pointers\n");
@@ -255,12 +255,12 @@ void Curves::calculateLinePointers()
 	}
 }
 
-int Curves::getLineForPoint(int point)
+int Fibers::getLineForPoint(int point)
 {
 	return m_reverse[point];
 }
 
-void Curves::toggleEndianess()
+void Fibers::toggleEndianess()
 {
 	m_dh->printTime();
 	printf("toggle Endianess\n");
@@ -289,7 +289,7 @@ void Curves::toggleEndianess()
 	}
 }
 
-void Curves::createColorArray()
+void Fibers::createColorArray()
 {
 	m_dh->printTime();
 	printf("create color arrays\n");
@@ -351,7 +351,7 @@ void Curves::createColorArray()
 
 }
 
-void Curves::resetLinesShown()
+void Fibers::resetLinesShown()
 {
 	for (int i = 0; i < m_lineCount ; ++i)
 	{
@@ -359,7 +359,7 @@ void Curves::resetLinesShown()
 	}
 }
 
-void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
+void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 {
 	for (unsigned int i = 0 ; i != boxes.size() ; ++i)
 	{
@@ -439,7 +439,7 @@ void Curves::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 	}
 }
 
-std::vector<bool> Curves::getLinesShown(SelectionBox* box)
+std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
 {
 	Vector3fT vpos = box->getCenter();
 	Vector3fT vsize = box->getSize();
@@ -457,7 +457,7 @@ std::vector<bool> Curves::getLinesShown(SelectionBox* box)
 	return m_inBox;
 }
 
-void Curves::boxTest(int left, int right, int axis)
+void Fibers::boxTest(int left, int right, int axis)
 {
 	// abort condition
 	if (left > right) return;
@@ -486,7 +486,7 @@ void Curves::boxTest(int left, int right, int axis)
 	}
 }
 
-void Curves::initializeBuffer()
+void Fibers::initializeBuffer()
 {
 	if (!m_dh->useVBO) return;
 	bool isOK = true;
@@ -530,7 +530,7 @@ void Curves::initializeBuffer()
 	}
 }
 
-void Curves::draw()
+void Fibers::draw()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -573,7 +573,7 @@ void Curves::draw()
 	glDisableClientState(GL_NORMAL_ARRAY);
 }
 
-bool Curves::getBarycenter(SplinePoint* point)
+bool Fibers::getBarycenter(SplinePoint* point)
 {
 	// number of fibers needed to keep a point
 	int threshold = 20;
@@ -616,7 +616,7 @@ bool Curves::getBarycenter(SplinePoint* point)
 
 }
 
-void Curves::barycenterTest(int left, int right, int axis)
+void Fibers::barycenterTest(int left, int right, int axis)
 {
 	// abort condition
 	if (left > right) return;
@@ -649,7 +649,7 @@ void Curves::barycenterTest(int left, int right, int axis)
 	}
 }
 
-void Curves::saveSelection(SelectionBox* box, const wxString filename)
+void Fibers::saveSelection(SelectionBox* box, const wxString filename)
 {
 	std::vector<float>pointsToSave;
 	std::vector<int>linesToSave;
@@ -777,7 +777,7 @@ void Curves::saveSelection(SelectionBox* box, const wxString filename)
 
 }
 
-std::string Curves::intToString(int number)
+std::string Fibers::intToString(int number)
 {
 	std::stringstream out;
 	out << number;

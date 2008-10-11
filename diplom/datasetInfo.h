@@ -22,7 +22,7 @@ enum DatasetType {
 	RGB,
 	Mesh_,
 	Vectors_,
-	Curves_,
+	Fibers_,
 	Surface_,
 	IsoSurface_,
 	MasterBox,

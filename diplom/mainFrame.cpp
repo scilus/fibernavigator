@@ -14,7 +14,7 @@
 #include "theScene.h"
 
 #include "splinePoint.h"
-#include "curves.h"
+#include "fibers.h"
 #include "surface.h"
 #include "IsoSurface/CIsoSurface.h"
 
@@ -484,9 +484,9 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
 		return;
 	}
 
-	Curves *fibers;
+	Fibers *fibers;
 	wxTreeItemIdValue cookie = 0;
-	fibers = (Curves*)((MyTreeItemData*)
+	fibers = (Fibers*)((MyTreeItemData*)
 				m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
 
 	wxString caption = wxT("Choose a file");
@@ -1039,9 +1039,9 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 
 	//delete all existing points
 	m_treeWidget->DeleteChildren(m_tPointId);
-	Curves *fibers;
+	Fibers *fibers;
 	wxTreeItemIdValue cookie = 0;
-	fibers = (Curves*)((MyTreeItemData*)
+	fibers = (Fibers*)((MyTreeItemData*)
 						m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
 
 	for ( int i = 0 ; i < 11 ; ++i)

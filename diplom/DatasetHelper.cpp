@@ -7,7 +7,7 @@
 #include "DatasetHelper.h"
 
 #include "Anatomy.h"
-#include "curves.h"
+#include "fibers.h"
 #include "splinePoint.h"
 #include "mesh.h"
 #include "KdTree.h"
@@ -173,8 +173,8 @@ bool DatasetHelper::load(int index, wxString filename)
 			lastError = wxT("fibers already loaded");
 			return false;
 		}
-		Curves *curves = new Curves(this);
-		if (curves->load(filename)) {
+		Fibers *fibers = new Fibers(this);
+		if (fibers->load(filename)) {
 			if (index != -1) {
 				Vector3fT vc = {{mainFrame->m_xSlider->GetValue()-columns/2,
 							mainFrame->m_ySlider->GetValue()-rows/2,
@@ -187,7 +187,7 @@ bool DatasetHelper::load(int index, wxString filename)
 						mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 						selBox->setTreeId(tNewBoxId);
 			}
-			finishLoading(curves);
+			finishLoading(fibers);
 			return true;
 		}
 		return false;
@@ -628,9 +628,9 @@ void DatasetHelper::updateTreeDS(const int i)
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(mainFrame->m_tMeshId, info->getName(),
 				-1, -1, new MyTreeItemData(info, Mesh_)));
 		break;
-	case Curves_:
+	case Fibers_:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(mainFrame->m_tFiberId, info->getName(),
-				-1, -1, new MyTreeItemData(info, Curves_)));
+				-1, -1, new MyTreeItemData(info, Fibers_)));
 		break;
 	}
 }

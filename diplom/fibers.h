@@ -17,17 +17,17 @@
 #include "Fantom/FVector.h"
 #include "splinePoint.h"
 
-enum CurveFileType {
-	asciiCurve,
+enum FiberFileType {
+	asciiFiber,
 	asciiVTK,
 	binaryVTK,
 };
 
-class Curves : public DatasetInfo
+class Fibers : public DatasetInfo
 {
 public:
-	Curves(DatasetHelper*);
-	~Curves();
+	Fibers(DatasetHelper*);
+	~Fibers();
 
 	bool load(wxString filename);
 	void draw();

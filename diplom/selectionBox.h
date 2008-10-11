@@ -14,7 +14,6 @@
 #include "DatasetHelper.h"
 
 class MainCanvas;
-class Curves;
 class DatasetHelper;
 
 class SelectionBox {

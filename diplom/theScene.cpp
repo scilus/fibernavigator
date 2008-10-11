@@ -1,7 +1,7 @@
 #include "theScene.h"
 #include "myListCtrl.h"
 #include "splinePoint.h"
-#include "curves.h"
+#include "fibers.h"
 #include "surface.h"
 #include "selectionBox.h"
 #include "AnatomyHelper.h"
@@ -236,7 +236,7 @@ void TheScene::renderFibers()
 	{
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 
-		if (info->getType() == Curves_ && info->getShow())
+		if (info->getType() == Fibers_ && info->getShow())
 		{
 			lightsOff();
 
@@ -250,7 +250,7 @@ void TheScene::renderFibers()
 
 			if (m_selBoxChanged)
 			{
-				((Curves*)info)->updateLinesShown(m_dh->getSelectionBoxes());
+				((Fibers*)info)->updateLinesShown(m_dh->getSelectionBoxes());
 				m_selBoxChanged = false;
 			}
 			info->draw();
