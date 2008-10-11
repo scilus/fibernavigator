@@ -751,14 +751,36 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	// check if selection box selected
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 
-	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == ChildBox ||
-			((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
+	{
+		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
+		box->m_isActive = !box->m_isActive;
+		m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
+		box->setDirty();
+
+		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
+		wxTreeItemIdValue childcookie = 0;
+		for (int i = 0 ; i < childboxes ; ++i)
+		{
+			wxTreeItemId childId = m_treeWidget->GetNextChild(tBoxId, childcookie);
+			if (childId.IsOk()) {
+				SelectionBox *childBox = ((SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(childId))->getData());
+				childBox->m_isActive = box->m_isActive;
+				m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
+				childBox->setDirty();
+			}
+		}
+	}
+
+	else if ( ((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == ChildBox )
 	{
 		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
 		m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
 		box->m_isActive = !box->m_isActive;
 		box->setDirty();
 	}
+
+
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }

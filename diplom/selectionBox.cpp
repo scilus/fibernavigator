@@ -38,7 +38,7 @@ void SelectionBox::select()
 
 void SelectionBox::draw()
 {
-	if (!m_isActive) return;
+	if (!m_isActive || !m_show) return;
 
 	float cx = m_center.s.X;
 	float cy = m_center.s.Y;
