@@ -47,6 +47,7 @@ private:
     void OnButtonSagittal(wxCommandEvent& event);
     void OnToggleAlpha(wxCommandEvent& event);
     void OnToggleSelBox(wxCommandEvent& event);
+    void OnToggleShowBox(wxCommandEvent& event);
     void OnNewSelBox(wxCommandEvent& event);
     void OnHideSelBoxes(wxCommandEvent& event);
 
@@ -150,19 +151,22 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_BUTTON_SAGITTAL 		13
 #define VIEWER_TOGGLE_ALPHA 		14
 #define VIEWER_RELOAD_SHADER		16
-#define VIEWER_NEW_SELBOX			17
-#define VIEWER_RENDER_SELBOXES		19
-#define VIEWER_TOGGLE_SELBOX		20
-#define VIEWER_DRAW_POINTS			21
-#define VIEWER_NEW_SURFACE			22
-#define VIEWER_ASSIGN_COLOR			24
-#define VIEWER_TOGGLE_LIGHTING		25
-#define VIEWER_INVERT_FIBERS		26
-#define VIEWER_NEW_ISOSURF			27
-#define VIEWER_MOVE_POINTS1 		28
-#define VIEWER_MOVE_POINTS2 		29
-#define VIEWER_TOGGLE_TEXTURE_FILTERING		30
-#define VIEWER_TOGGLE_LIC			31
+
+#define VIEWER_NEW_SELBOX			20
+#define VIEWER_RENDER_SELBOXES		21
+#define VIEWER_TOGGLE_SELBOX		22
+#define VIEWER_TOGGLE_SHOWBOX		23
+
+#define VIEWER_DRAW_POINTS			30
+#define VIEWER_NEW_SURFACE			31
+#define VIEWER_ASSIGN_COLOR			32
+#define VIEWER_TOGGLE_LIGHTING		33
+#define VIEWER_INVERT_FIBERS		34
+#define VIEWER_NEW_ISOSURF			35
+#define VIEWER_MOVE_POINTS1 		36
+#define VIEWER_MOVE_POINTS2 		37
+#define VIEWER_TOGGLE_TEXTURE_FILTERING		38
+#define VIEWER_TOGGLE_LIC			39
 
 #define VIEWER_VIEW_LEFT		200
 #define VIEWER_VIEW_RIGHT		201

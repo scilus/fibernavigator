@@ -6,7 +6,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	m_dh = dh;
 	m_center = center;
 	m_size = size;
-	m_show = true;
+	m_isVisible = true;
 	m_dirty = true;
 	m_isTop = true;
 	m_isNOT = false;
@@ -38,7 +38,7 @@ void SelectionBox::select()
 
 void SelectionBox::draw()
 {
-	if (!m_isActive || !m_show) return;
+	if (!m_isActive || !m_isVisible) return;
 
 	float cx = m_center.s.X;
 	float cy = m_center.s.Y;
@@ -255,7 +255,7 @@ void SelectionBox::drawSphere(float x, float y, float z, float r)
 hitResult SelectionBox::hitTest(Ray *ray)
 {
 	hitResult hr;
-	if (m_show && m_isActive) {
+	if (m_isVisible && m_isActive) {
 		float tpicked = 0;
 		int picked = 0;
 		float cx = m_center.s.X;

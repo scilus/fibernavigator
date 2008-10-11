@@ -51,6 +51,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_NEW_SELBOX, MainFrame::OnNewSelBox)
 	EVT_MENU(VIEWER_RENDER_SELBOXES, MainFrame::OnHideSelBoxes)
 	EVT_MENU(VIEWER_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
+	EVT_MENU(VIEWER_TOGGLE_SHOWBOX, MainFrame::OnToggleShowBox)
 	/* click on reload shaders button */
 	EVT_MENU(VIEWER_RELOAD_SHADER, MainFrame::OnReloadShaders)
 	/* list ctrl events */
@@ -780,6 +781,45 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 		box->setDirty();
 	}
 
+	m_dh->scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
+{
+	if (!m_dh->scene || !m_dh->fibers_loaded) return;
+
+	// check if selection box selected
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+
+	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
+	{
+		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
+		box->m_isVisible = !box->m_isVisible;
+		//m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
+		box->setDirty();
+
+		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
+		wxTreeItemIdValue childcookie = 0;
+		for (int i = 0 ; i < childboxes ; ++i)
+		{
+			wxTreeItemId childId = m_treeWidget->GetNextChild(tBoxId, childcookie);
+			if (childId.IsOk()) {
+				SelectionBox *childBox = ((SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(childId))->getData());
+				childBox->m_isVisible = box->m_isVisible;
+				//m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
+				childBox->setDirty();
+			}
+		}
+	}
+
+	else if ( ((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == ChildBox )
+	{
+		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
+		m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
+		box->m_isVisible = !box->m_isVisible;
+		box->setDirty();
+	}
 
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();

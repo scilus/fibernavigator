@@ -25,9 +25,9 @@ public:
 	hitResult hitTest(Ray *ray);
 	void processDrag(wxPoint click, wxPoint lastPos);
 
-	bool toggleShow() {return m_show = !m_show;};
+	bool toggleShow() {return m_isVisible = !m_isVisible;};
 	bool toggleNOT() {return m_isNOT = !m_isNOT;};
-	bool getShow() {return m_show;};
+	bool getShow() {return m_isVisible;};
 	void unselect() {m_isSelected = false;};
 
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
@@ -76,6 +76,7 @@ public:
 	bool m_isNOT;
 	bool m_isTop;
 	bool m_isActive;
+	bool m_isVisible;
 	bool m_isSelected;
 
 	DatasetHelper* m_dh;
@@ -95,7 +96,6 @@ private:
 	wxString m_name;
 
 	float m_handleRadius;
-	bool m_show;
 	bool m_dirty;
 	bool m_colorChanged;
 	wxColour m_color;

@@ -76,6 +76,8 @@ bool MyApp::OnInit(void) {
 	wxMenu *voi_menu = new wxMenu;
 	voi_menu->Append(VIEWER_NEW_SELBOX, _T("&New"));
 	voi_menu->AppendSeparator();
+	voi_menu->Append(VIEWER_TOGGLE_SELBOX, _T("&toggle activation"));
+	voi_menu->Append(VIEWER_TOGGLE_SHOWBOX, _T("&toggle visibility"));
 
 	wxMenu *surf_menu = new wxMenu;
 	surf_menu->Append(VIEWER_NEW_SURFACE, _T("&New"));
