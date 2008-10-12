@@ -87,6 +87,10 @@ public:
 	bool toggleShow() {m_show = !m_show; return m_show;};
 	bool toggleShowFS() {m_showFS = !m_showFS; return m_showFS;};
 	bool toggleUseTex() {m_useTex = !m_useTex; return m_useTex;};
+
+	void setShow(bool v) {m_show = v;};
+	void setShowFS(bool v) {m_showFS = v;};
+	void setuseTex(bool v) {m_useTex = v;};
 	bool getShow() {return m_show;};
 	bool getShowFS() {return m_showFS;};
 	bool getUseTex() {return m_useTex;};

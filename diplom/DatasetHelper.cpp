@@ -80,7 +80,7 @@ DatasetHelper::~DatasetHelper() {
 #endif
 }
 
-bool DatasetHelper::load(int index, wxString filename) {
+bool DatasetHelper::load(int index, wxString filename, float threshold, bool active, bool showFS, bool useTex) {
 	if (mainFrame->m_listCtrl->GetItemCount() > 9) {
 		lastError = wxT("ERROR\nCan't load any more files.\nDelete some first.\n");
 		return false;
@@ -134,6 +134,11 @@ bool DatasetHelper::load(int index, wxString filename) {
 			yOff = rows / 2.0;
 			zOff = frames / 2.0;
 			anatomy_loaded = true;
+
+			anatomy->setThreshold(threshold);
+			anatomy->setShow(active);
+			anatomy->setShowFS(showFS);
+			anatomy->setuseTex(useTex);
 			finishLoading(anatomy);
 			return true;
 		} else {
@@ -162,6 +167,10 @@ bool DatasetHelper::load(int index, wxString filename) {
 		}
 		Mesh *mesh = new Mesh(this);
 		if (mesh->load(filename)) {
+			mesh->setThreshold(threshold);
+			mesh->setShow(active);
+			mesh->setShowFS(showFS);
+			mesh->setuseTex(useTex);
 			finishLoading(mesh);
 			return true;
 		}
@@ -193,6 +202,10 @@ bool DatasetHelper::load(int index, wxString filename) {
 				mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				selBox->setTreeId(tNewBoxId);
 			}
+			fibers->setThreshold(threshold);
+			fibers->setShow(active);
+			fibers->setShowFS(showFS);
+			fibers->setuseTex(useTex);
 			finishLoading(fibers);
 			return true;
 		}
@@ -203,15 +216,27 @@ bool DatasetHelper::load(int index, wxString filename) {
 	return false;
 }
 
-void DatasetHelper::finishLoading(DatasetInfo *info) {
-	//int i = mainFrame->m_listCtrl->GetItemCount();
+void DatasetHelper::finishLoading(DatasetInfo *info)
+{
 	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
-	mainFrame->m_listCtrl->SetItem(0, 1, info->getName());
-	mainFrame->m_listCtrl->SetItem(0, 2, wxString::Format(wxT("%.2f"), info->getThreshold()));
+	if (info->getShow())
+		mainFrame->m_listCtrl->SetItem(0, 0, wxT(""), 0);
+	else
+		mainFrame->m_listCtrl->SetItem(0, 0, wxT(""), 1);
+
+	if (!info->getShowFS())
+		mainFrame->m_listCtrl->SetItem(0, 1, info->getName() + wxT("*"));
+	else
+		mainFrame->m_listCtrl->SetItem(0, 1, info->getName());
+
+	if (!info->getUseTex())
+		mainFrame->m_listCtrl->SetItem(0, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );
+	else
+		mainFrame->m_listCtrl->SetItem(0, 2, wxString::Format(wxT("%.2f"), info->getThreshold() ));
+
 	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
 	mainFrame->m_listCtrl->SetItemData(0, (long) info);
-	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
-			wxLIST_STATE_SELECTED);
+	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
 	mainFrame->m_statusBar->SetStatusText(wxT("Ready"), 1);
 	mainFrame->m_statusBar->SetStatusText(info->getName() + wxT(" loaded"), 2);
@@ -238,7 +263,8 @@ void DatasetHelper::finishLoading(DatasetInfo *info) {
 
 }
 
-bool DatasetHelper::loadScene(wxString filename) {
+bool DatasetHelper::loadScene(wxString filename)
+{
 	/*
 	 * Variables to store the slice postions in, have to be set after loading
 	 * the anatomy files
@@ -272,9 +298,6 @@ bool DatasetHelper::loadScene(wxString filename) {
 				updateTreeDims();
 				anatomy_loaded = true;
 			}
-			xp = columns / 2;
-			yp = rows / 2;
-			zp = frames / 2;
 		}
 
 		else if (child->GetName() == wxT("position")) {
@@ -289,8 +312,29 @@ bool DatasetHelper::loadScene(wxString filename) {
 		else if (child->GetName() == wxT("data")) {
 			wxXmlNode *datasetnode = child->GetChildren();
 			while (datasetnode) {
-				load(-1, datasetnode->GetNodeContent());
+				wxXmlNode *nodes = datasetnode->GetChildren();
+				// initialize to mute compiler
+				bool active = true;
+				bool useTex = true;
+				bool showFS = true;
+				double threshold;
+				wxString path;
 
+				while (nodes) {
+					if ( nodes->GetName() == _T("status") )
+					{
+						active = ( nodes->GetPropVal(_T("active"), _T("yes")) == _T("yes") );
+						useTex = ( nodes->GetPropVal(_T("useTex"), _T("yes")) == _T("yes") );
+						showFS = ( nodes->GetPropVal(_T("showFS"), _T("yes")) == _T("yes") );
+						(nodes->GetPropVal(wxT("threshold"), wxT("0.0"))).ToDouble(&threshold);
+					}
+					else if ( nodes->GetName() == _T("path") )
+					{
+						path = nodes->GetNodeContent();
+					}
+					nodes = nodes->GetNext();
+				}
+				load(-1, path, threshold, active, showFS, useTex);
 				datasetnode = datasetnode->GetNext();
 			}
 		}
@@ -361,8 +405,8 @@ bool DatasetHelper::loadScene(wxString filename) {
 				Vector3fT vs = { { _ix, _iy, _iz } };
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->setName(_name);
-				selBox->m_isActive = (_active == _T("yes")) ? true : false;
-				selBox->m_isVisible = (_visible == _T("yes")) ? true : false;
+				selBox->m_isActive = ( _active == _T("yes") ) ;
+				selBox->m_isVisible = ( _visible == _T("yes") ) ;
 
 				if (_type == wxT("MASTER")) {
 					selBox->m_isTop = true;
@@ -375,7 +419,7 @@ bool DatasetHelper::loadScene(wxString filename) {
 
 				} else {
 					selBox->m_isTop = false;
-					selBox->m_isNOT = (_type == _T("NOT")) ? true : false;
+					selBox->m_isNOT = ( _type == _T("NOT") ) ;
 					wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(
 							currentMasterId, selBox->getName(), 0, -1,
 							new MyTreeItemData(selBox, ChildBox));
@@ -388,6 +432,7 @@ bool DatasetHelper::loadScene(wxString filename) {
 		}
 		child = child->GetNext();
 	}
+
 	mainFrame->m_xSlider->SetValue(xp);
 	mainFrame->m_ySlider->SetValue(yp);
 	mainFrame->m_zSlider->SetValue(zp);
@@ -396,7 +441,8 @@ bool DatasetHelper::loadScene(wxString filename) {
 	return true;
 }
 
-bool DatasetHelper::loadSceneOld(wxString filename) {
+bool DatasetHelper::loadSceneOld(wxString filename)
+{
 	/*
 	 * Variables to store the slice postions in, have to be set after loading
 	 * the anatomy files
@@ -561,7 +607,8 @@ bool DatasetHelper::loadSceneOld(wxString filename) {
 	return true;
 }
 
-void DatasetHelper::save(wxString filename) {
+void DatasetHelper::save(wxString filename)
+{
 	wxXmlNode *root = new wxXmlNode(NULL, wxXML_ELEMENT_NODE, wxT("scene"));
 	wxXmlNode *nodeboxes = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("selection_boxes"));
 	wxXmlNode *nodepoints = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("points"));
@@ -574,19 +621,14 @@ void DatasetHelper::save(wxString filename) {
 	wxXmlProperty *prop3 = new wxXmlProperty(wxT("frames"), wxString::Format(wxT("%d"), frames), prop2);
 	anatomy->AddProperty(prop3);
 
-	int countPoints = mainFrame->m_treeWidget->GetChildrenCount(
-			mainFrame->m_tPointId, true);
+	int countPoints = mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tPointId, true);
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	for (int i = 0; i < countPoints; ++i) {
-		id = mainFrame->m_treeWidget->GetNextChild(mainFrame->m_tPointId,
-				cookie);
-		SplinePoint
-				*point =
-						(SplinePoint*) ((MyTreeItemData*) mainFrame->m_treeWidget->GetItemData(
-								id))->getData();
-		wxXmlNode *pointnode =
-				new wxXmlNode(nodepoints, wxXML_ELEMENT_NODE, wxT("point"));
+	for (int i = 0; i < countPoints; ++i)
+	{
+		id = mainFrame->m_treeWidget->GetNextChild(mainFrame->m_tPointId, cookie);
+		SplinePoint	*point = (SplinePoint*) ((MyTreeItemData*) mainFrame->m_treeWidget->GetItemData(id))->getData();
+		wxXmlNode *pointnode =	new wxXmlNode(nodepoints, wxXML_ELEMENT_NODE, wxT("point"));
 
 		wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), point->getCenter().s.Z));
 		wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), point->getCenter().s.Y), propz);
@@ -600,11 +642,13 @@ void DatasetHelper::save(wxString filename) {
 		for (unsigned int j = boxes[i - 1].size(); j > 0; --j) {
 			wxXmlNode *box = new wxXmlNode(nodeboxes, wxXML_ELEMENT_NODE, wxT("box"));
 			currentBox = boxes[i - 1][j - 1];
+
 			wxXmlNode *center = new wxXmlNode(box, wxXML_ELEMENT_NODE, wxT("center"));
 			wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), currentBox->getCenter().s.Z));
 			wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), currentBox->getCenter().s.Y), propz);
 			wxXmlProperty *propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), currentBox->getCenter().s.X), propy);
 			center->AddProperty(propx);
+
 			wxXmlNode *size = new wxXmlNode(box, wxXML_ELEMENT_NODE, wxT("size"));
 			propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), currentBox->getSize().s.Z));
 			propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), currentBox->getSize().s.Y), propz);
@@ -631,13 +675,22 @@ void DatasetHelper::save(wxString filename) {
 	if (countTextures == 0)
 		return;
 
-	for (int i = countTextures; i > 0; --i) {
-		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i
-				- 1);
-		if (info->getType() != Surface_) {
-			wxXmlNode *datasetnode =
-					new wxXmlNode(data, wxXML_ELEMENT_NODE, wxT("dataset"));
-			new wxXmlNode(datasetnode, wxXML_TEXT_NODE, wxT("path"), info->getPath());
+	for (int i = 0 ; i < countTextures ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() < Surface_)
+		{
+			wxXmlNode *datasetnode = new wxXmlNode(data, wxXML_ELEMENT_NODE, wxT("dataset"));
+
+			wxXmlNode *pathnode = new wxXmlNode(datasetnode, wxXML_ELEMENT_NODE, wxT("path"));
+			new wxXmlNode(pathnode, wxXML_TEXT_NODE, wxT("path"), info->getPath());
+
+			wxXmlNode *statusNode = new wxXmlNode(datasetnode, wxXML_ELEMENT_NODE, wxT("status"));
+			wxXmlProperty *propT = new wxXmlProperty(wxT("threshold"), wxString::Format(wxT("%.2f"), info->getThreshold()));
+			wxXmlProperty *propA = new wxXmlProperty(wxT("active"), info->getShow() ? _T("yes") : _T("no"), propT);
+			wxXmlProperty *propF = new wxXmlProperty(wxT("showFS"), info->getShowFS() ? _T("yes") : _T("no"), propA);
+			wxXmlProperty *propU = new wxXmlProperty(wxT("useTex"), info->getUseTex() ? _T("yes") : _T("no"), propF);
+			statusNode->AddProperty(propU);
 		}
 	}
 
@@ -651,12 +704,14 @@ void DatasetHelper::save(wxString filename) {
 	doc.Save(filename, 2);
 }
 
-void DatasetHelper::printTime() {
+void DatasetHelper::printTime()
+{
 	wxDateTime dt = wxDateTime::Now();
 	printf("[%02d:%02d:%02d] ", dt.GetHour(), dt.GetMinute(), dt.GetSecond());
 }
 
-std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes() {
+std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
+{
 	std::vector<std::vector<SelectionBox*> > boxes;
 
 	int countboxes = mainFrame->m_treeWidget->GetChildrenCount(
@@ -688,14 +743,16 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes() {
 	return boxes;
 }
 
-void DatasetHelper::printwxT(wxString string) {
+void DatasetHelper::printwxT(wxString string)
+{
 	char* cstring;
 	cstring = (char*) malloc(string.length());
 	strcpy(cstring, (const char*) string.mb_str(wxConvUTF8));
 	printf("%s", cstring);
 }
 
-void DatasetHelper::updateTreeDims() {
+void DatasetHelper::updateTreeDims()
+{
 	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tAxialId);
 	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tCoronalId);
 	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tSagittalId);
@@ -715,7 +772,8 @@ void DatasetHelper::updateTreeDims() {
 			wxString::Format(wxT("%d frames"), frames));
 }
 
-void DatasetHelper::updateTreeDS(const int i) {
+void DatasetHelper::updateTreeDS(const int i)
+{
 	DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
 	switch (info->getType()) {
 	case Head_byte:
@@ -747,7 +805,8 @@ void DatasetHelper::updateTreeDS(const int i) {
 	}
 }
 
-void DatasetHelper::treeFinished() {
+void DatasetHelper::treeFinished()
+{
 	threadsActive--;
 	if (threadsActive > 0)
 		return;
@@ -766,7 +825,8 @@ void DatasetHelper::updateAllSelectionBoxes() {
 			boxes[i][j]->setDirty();
 }
 
-Vector3fT DatasetHelper::mapMouse2World(int x, int y) {
+Vector3fT DatasetHelper::mapMouse2World(int x, int y)
+{
 	glPushMatrix();
 	glMultMatrixf(m_transform.M);
 	GLint viewport[4];
@@ -788,7 +848,8 @@ Vector3fT DatasetHelper::mapMouse2World(int x, int y) {
 	return v;
 }
 
-Vector3fT DatasetHelper::mapMouse2WorldBack(int x, int y) {
+Vector3fT DatasetHelper::mapMouse2WorldBack(int x, int y)
+{
 	glPushMatrix();
 	glMultMatrixf(m_transform.M);
 	GLint viewport[4];
