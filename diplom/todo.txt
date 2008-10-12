@@ -1,17 +1,13 @@
   
 verschieben der box mit koordinatenkreuz, 
-ausblenden einzelner boxen
-auschalten der boxen mit dem faserbuendel
 
 keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
 
 alpha blending und neues beleuchtungschema (farbe-licht)
 
 commandozeile und laden der shader : offnen einer szene und/oder liste
+
 windows portierung
-
-overlay file zur fiber selection ( alle voxel > threshold bilden zur faserauswahl )
-
 
 benutzer menus und buttons
 
@@ -78,3 +74,9 @@ boxen mit koordinaten und groesse
 09.10.2008
 
 fasern abspeichern
+
+11.10.2008
+
+ausblenden einzelner boxen
+
+auschalten der boxen mit dem faserbuendel

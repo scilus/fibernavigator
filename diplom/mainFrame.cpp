@@ -456,7 +456,7 @@ void MainFrame::OnKdTreeThreadFinished(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
 	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Viewer files (*.yav)|*.yav||*.*|*.*");
+	wxString wildcard = wxT("Scene files (*.scn)|*.scn||*.*|*.*");
 	wxString defaultDir = wxEmptyString;
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
@@ -816,7 +816,7 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	else if ( ((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == ChildBox )
 	{
 		SelectionBox *box =  (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
-		m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
+		//m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
 		box->m_isVisible = !box->m_isVisible;
 		box->setDirty();
 	}

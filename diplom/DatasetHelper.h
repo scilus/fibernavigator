@@ -49,7 +49,8 @@ public:
 
 	bool load(int index = 0, wxString filename = wxT(""));
 	void finishLoading(DatasetInfo*);
-	bool loadSettings(wxString);
+	bool loadScene(wxString);
+	bool loadSceneOld(wxString);
 	bool loadTextFile(wxString*, wxString);
 
 	//! Saves the current scene to an xml file

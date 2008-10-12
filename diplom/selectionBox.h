@@ -73,8 +73,8 @@ public:
 
 	std::vector<bool>m_inBox;
 
-	bool m_isNOT;
 	bool m_isTop;
+	bool m_isNOT;
 	bool m_isActive;
 	bool m_isVisible;
 	bool m_isSelected;
