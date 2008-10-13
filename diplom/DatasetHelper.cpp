@@ -103,6 +103,13 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		} else
 			return false;
 	}
+
+	// check if dataset is already loaded and ignore it if yes
+	if (fileNameExists(filename))
+	{
+		lastError = wxT("dataset already loaded");
+		return false;
+	}
 	// check file extension
 	wxString ext = filename.AfterLast('.');
 
@@ -260,6 +267,24 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 		mainFrame->refreshAllGLWidgets();
 		updateTreeDS(0);
 	}
+
+}
+
+bool DatasetHelper::fileNameExists(wxString filename)
+{
+	int countDatasets = mainFrame->m_listCtrl->GetItemCount();
+	if (countDatasets == 0)
+		return false;
+
+	for (int i = 0 ; i < countDatasets ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getPath() == filename)
+		{
+			return true;
+		}
+	}
+	return false;
 
 }
 

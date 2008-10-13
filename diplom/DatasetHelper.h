@@ -53,6 +53,7 @@ public:
 	bool loadScene(wxString);
 	bool loadSceneOld(wxString);
 	bool loadTextFile(wxString*, wxString);
+	bool fileNameExists(wxString filename);
 
 	//! Saves the current scene to an xml file
 	void save(wxString);
