@@ -17,7 +17,7 @@ Surface::Surface(DatasetHelper* dh)
 	m_numDeBoorCols = 12;
 	m_order = 4;
 
-	m_sampleRateNormal = 0.2;
+	m_sampleRateNormal = 0.1;
 	m_sampleRateDragging = 0.5;
 
 	m_sampleRateT = m_sampleRateU = m_sampleRateNormal;

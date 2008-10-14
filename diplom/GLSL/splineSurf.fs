@@ -92,7 +92,7 @@ void main()
 
 	color.a = 1.0;
 
-	color = color + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
+	color = color * 0.8 + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
 
     color = clamp(color, 0.0, 1.0);
 
