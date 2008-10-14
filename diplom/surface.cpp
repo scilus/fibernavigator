@@ -362,7 +362,7 @@ void Surface::draw()
 		{
 			std::vector< double > p = m_splinePoints[m_vertices[i]];
 			FVector n = m_normals[m_vertices[i]];
-			glNormal3f(n[0], n[1], n[2]);
+			glNormal3f(m_dh->normalDirection*n[0], m_dh->normalDirection*n[1], m_dh->normalDirection*n[2]);
 			glVertex3f(p[0], p[1], p[2]);
 
 			int x = wxMax(0, wxMin((int)p[0] + m_dh->xOff, m_dh->columns));
@@ -383,7 +383,7 @@ void Surface::draw()
 		{
 			std::vector< double > p = m_splinePoints[m_vertices[i]];
 			FVector n = m_normals[m_vertices[i]];
-			glNormal3f(n[0], n[1], n[2]);
+			glNormal3f(m_dh->normalDirection*n[0], m_dh->normalDirection*n[1], m_dh->normalDirection*n[2]);
 			glVertex3f(p[0], p[1], p[2]);
 		}
 		glEnd();

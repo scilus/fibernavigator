@@ -129,6 +129,8 @@ public:
 	bool m_isDragging;
 	bool m_isrDragging;
 
+	float normalDirection;
+
 	bool useLinearFiltering;
 
 private:

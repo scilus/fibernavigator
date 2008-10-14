@@ -69,6 +69,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(VIEWER_DRAW_POINTS, MainFrame::OnTogglePointMode)
 	EVT_MENU(VIEWER_NEW_SURFACE, MainFrame::OnNewSurface)
 	EVT_MENU(VIEWER_TOGGLE_LIC, MainFrame::OnToggleLIC)
+	EVT_MENU(VIEWER_TOGGLE_NORMAL, MainFrame::OnToggleNormal)
 	/* KDTREE thread finished */
 	EVT_MENU(KDTREE_EVENT, MainFrame::OnKdTreeThreadFinished)
 	/* Button Assign Color pressed */
@@ -1266,3 +1267,8 @@ void MainFrame::OnToggleLIC(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
+void MainFrame::OnToggleNormal(wxCommandEvent& event)
+{
+	m_dh->normalDirection *= -1.0;
+	refreshAllGLWidgets();
+}

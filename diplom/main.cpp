@@ -83,6 +83,7 @@ bool MyApp::OnInit(void) {
 	surf_menu->Append(VIEWER_NEW_SURFACE, _T("&New"));
 	surf_menu->AppendSeparator();
 	surf_menu->Append(VIEWER_TOGGLE_LIC, _T("&Toggle Lic"));
+	surf_menu->Append(VIEWER_TOGGLE_NORMAL, _T("&Toggle Normal Direction"));
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(VIEWER_ASSIGN_COLOR, _T("&Assign Color"));

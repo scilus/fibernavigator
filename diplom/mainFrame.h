@@ -70,6 +70,7 @@ private:
     void OnAssignColor(wxCommandEvent& event);
     void OnToggleLighting(wxCommandEvent& event);
     void OnToggleLIC(wxCommandEvent& event);
+    void OnToggleNormal(wxCommandEvent& event);
 
 	void OnInvertFibers(wxCommandEvent& event);
 	void OnNewIsoSurface(wxCommandEvent& event);
@@ -167,6 +168,7 @@ DECLARE_EVENT_TABLE()
 #define VIEWER_MOVE_POINTS2 		37
 #define VIEWER_TOGGLE_TEXTURE_FILTERING		38
 #define VIEWER_TOGGLE_LIC			39
+#define VIEWER_TOGGLE_NORMAL		40
 
 #define VIEWER_VIEW_LEFT		200
 #define VIEWER_VIEW_RIGHT		201
