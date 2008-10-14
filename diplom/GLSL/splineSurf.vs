@@ -6,19 +6,11 @@ uniform sampler3D texes[10];
 uniform int type[10];
 uniform int dimX, dimY, dimZ;
 
-void lookupTex(inout float greyVal, in int type, in sampler3D tex, in vec3 v)
-{
-	if (type == 1)
-	{
-		greyVal = clamp( texture3D(tex, v).r, 0.0, 1.0);
-	}
-}
-
 void main()
 {
 	prepareLight();
 
-	float greyVal = 0.0;
+	float greyVal = 0.5;
 
 	vec3 v = gl_Vertex;
 	v.x = (v.x + dimX/2) / (float)dimX;
