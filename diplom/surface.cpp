@@ -261,10 +261,10 @@ void Surface::execute ()
 	int renderpointsPerRow = splineSurface.getNumSamplePointsT();
 	m_numPoints = splineSurface.getNumSamplePointsU()*splineSurface.getNumSamplePointsT();
 
-	int pi0, pi1, pi2;
+	int pi0, pi1, pi2, pi3;
 	m_normals.clear();
-	std::vector< FVector > triangleNormals;
-	std::vector< std::vector<int> >triangleRef(m_numPoints, std::vector<int>(0,0));
+	std::vector< FVector > quadNormals;
+	std::vector< std::vector<int> >quadRef(m_numPoints, std::vector<int>(0,0));
 	std::vector< double > p;
 
 	for(int z = 0; z < renderpointsPerCol - 1; z++)
@@ -274,54 +274,39 @@ void Surface::execute ()
 			pi0 = z * renderpointsPerCol + x;
 			pi1 = z * renderpointsPerCol + x + 1;
 			pi2 = (z+1) * renderpointsPerCol + x;
+			pi3 = (z+1) * renderpointsPerCol + x + 1;
+
 			m_vertices.push_back(pi0);
-			m_vertices.push_back(pi1);
 			m_vertices.push_back(pi2);
+			m_vertices.push_back(pi3);
+			m_vertices.push_back(pi1);
 
 			p = m_splinePoints[pi0];
 			FVector p1(p[0], p[1], p[2]);
-			triangleRef[pi0].push_back(triangleNormals.size());
+			quadRef[pi0].push_back(quadNormals.size());
 			p = m_splinePoints[pi1];
 			FVector p2(p[0], p[1], p[2]);
-			triangleRef[pi1].push_back(triangleNormals.size());
+			quadRef[pi1].push_back(quadNormals.size());
 			p = m_splinePoints[pi2];
 			FVector p3(p[0], p[1], p[2]);
-			triangleRef[pi2].push_back(triangleNormals.size());
-			FVector n1 = getNormalForTriangle(&p1, &p2, &p3);
-			triangleNormals.push_back(n1);
-
-
-			pi0 = (z+1) * renderpointsPerCol + x;
-			pi1 = z * renderpointsPerCol + x + 1;
-			pi2 = (z+1) * renderpointsPerCol + x + 1;
-			m_vertices.push_back(pi0);
-			m_vertices.push_back(pi1);
-			m_vertices.push_back(pi2);
-
-			p = m_splinePoints[pi0];
+			quadRef[pi2].push_back(quadNormals.size());
+			p = m_splinePoints[pi3];
 			FVector p4(p[0], p[1], p[2]);
-			triangleRef[pi0].push_back(triangleNormals.size());
-			p = m_splinePoints[pi1];
-			FVector p5(p[0], p[1], p[2]);
-			triangleRef[pi1].push_back(triangleNormals.size());
-			p = m_splinePoints[pi2];
-			FVector p6(p[0], p[1], p[2]);
-			triangleRef[pi2].push_back(triangleNormals.size());
-			FVector n2 = getNormalForTriangle(&p4, &p5, &p6);
-			triangleNormals.push_back(n2);
-
+			quadRef[pi3].push_back(quadNormals.size());
+			FVector n1 = getNormalForQuad(&p1, &p2, &p3, &p4);
+			quadNormals.push_back(n1);
 		}
 	}
 
 	for (int i = 0 ; i < m_numPoints ; ++i )
 	{
 		FVector tmp(0.0,0.0,0.0);
-		for ( unsigned int j = 0 ; j < triangleRef[i].size() ; ++j)
+		for ( unsigned int j = 0 ; j < quadRef[i].size() ; ++j)
 		{
-			 tmp += triangleNormals[triangleRef[i][j]];
+			 tmp += quadNormals[quadRef[i][j]];
 		}
 
-		FVector n( -tmp[0] / triangleRef[i].size(), -tmp[1] / triangleRef[i].size(), -tmp[2] / triangleRef[i].size());
+		FVector n( tmp[0] / quadRef[i].size(), tmp[1] / quadRef[i].size(), tmp[2] / quadRef[i].size());
 		m_normals.push_back(n);
 	}
 
@@ -330,7 +315,7 @@ void Surface::execute ()
 	m_dh->surface_isDirty = false;
 }
 
-FVector Surface::getNormalForTriangle(const FVector* p1, const FVector* p2, const FVector* p3)
+FVector Surface::getNormalForQuad(const FVector* p1, const FVector* p2, const FVector* p3, const FVector* p4)
 {
 	FVector a = *p2 - *p1;
 	FVector b = *p3 - *p1;
@@ -372,7 +357,7 @@ void Surface::draw()
 				vectorField = anatomy->getFloatDataset();
 			}
 		}
-		glBegin (GL_TRIANGLES);
+		glBegin (GL_QUADS);
 		for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
 		{
 			std::vector< double > p = m_splinePoints[m_vertices[i]];
@@ -393,7 +378,7 @@ void Surface::draw()
 
 	else
 	{
-		glBegin (GL_TRIANGLES);
+		glBegin (GL_QUADS);
 		for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
 		{
 			std::vector< double > p = m_splinePoints[m_vertices[i]];
