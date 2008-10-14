@@ -14,7 +14,7 @@ void main()
 
 	vec4 newVert = gl_Vertex;
 
-	for (int j = 0 ; j < 3 ; ++j)
+	for (int j = 0 ; j < 10 ; ++j)
 	{
 		vec3 v = newVert.xyz;
 		v.x = (v.x + dimX/2) / (float)dimX;
@@ -30,7 +30,7 @@ void main()
 		}
 		vec3 offset = (greyVal - 0.5) * gl_Normal;
 
-		newVert.xyz  += 4 * offset;
+		newVert.xyz  += offset;
 	}
 
 	TexCoord = newVert;
