@@ -85,22 +85,26 @@ void main()
 	v.y = (v.y + dimY/2) / (float)dimY;
 	v.z = (v.z + dimZ/2) / (float)dimZ;
 
-	for (int i = 9 ; i > -1 ; i--)
+	if (useTex)
 	{
-		if (show[i]) lookupTex(color, type[i], texes[i], threshold[i], v);
+		for (int i = 9 ; i > -1 ; i--)
+		{
+			if (show[i]) lookupTex(color, type[i], texes[i], threshold[i], v);
+		}
+
+		if (color.rgb == vec3(0.0)) discard;
+
+		color.a = 1.0;
+
+		color = color * 0.8 + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
 	}
-
-	if (color.rgb == vec3(0.0)) discard;
-
-	color.a = 1.0;
-
-	color = color * 0.8 + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
-	if ( !useTex)
+	else
 	{
 		color = myColor
 				+ (ambient * gl_FrontMaterial.ambient)
 				+ (diffuse * gl_FrontMaterial.diffuse)
 				+ (specular * gl_FrontMaterial.specular);
+		if (color.rgb == vec3(0.0)) discard;
 	}
 	color = clamp(color, 0.0, 1.0);
 
