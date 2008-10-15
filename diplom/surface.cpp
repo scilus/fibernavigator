@@ -313,7 +313,7 @@ void Surface::execute ()
 		m_normals.push_back(n);
 	}
 
-	createCutTexture(splineSurface.getNumSamplePointsU(), splineSurface.getNumSamplePointsT());
+	createCutTexture();
 
 	m_dh->surface_isDirty = false;
 }
@@ -393,11 +393,11 @@ void Surface::movePoints()
 	execute();
 }
 
-void Surface::createCutTexture(int xPoints, int yPoints)
+void Surface::createCutTexture()
 {
 	int xDim = m_dh->rows;
 	int yDim = m_dh->frames;
-	int numPoints = xPoints*yPoints;
+	int numPoints = m_renderpointsPerCol * m_renderpointsPerRow;
 
 	m_pointArray= new float[numPoints*3];
 	for (int i = 0 ; i < numPoints ; ++i )
@@ -407,7 +407,7 @@ void Surface::createCutTexture(int xPoints, int yPoints)
 		m_pointArray[3*i+1] = p[1];
 		m_pointArray[3*i+2] = p[2];
 	}
-	m_kdTree = new KdTree(xPoints*yPoints, m_pointArray);
+	m_kdTree = new KdTree(numPoints, m_pointArray);
 
 	float* cutTex;
 	cutTex = new float[xDim*yDim];

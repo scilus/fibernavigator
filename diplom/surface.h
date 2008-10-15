@@ -22,7 +22,7 @@ public:
 	void generateTexture() {};
 	void generateGeometry() {};
 	void initializeBuffer() {};
-	void createCutTexture(int, int);
+	void createCutTexture();
 
 	void movePoints();
 

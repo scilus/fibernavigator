@@ -29,9 +29,9 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
 	minX = 0.0;
 	minY = 0.0;
 	minZ = 0.0;
-	maxX = 0.0;
-	maxY = 0.0;
-	maxZ = 0.0;
+	maxX = 1.0;
+	maxY = 1.0;
+	maxZ = 1.0;
 
 	// init the shaders
 	scheduledReloadShaders = true;
@@ -42,7 +42,7 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
 	// blend factor default
 	noiseBlend = 0.2;
 	// blend factor of colormap
-	colormapBlend = 0.2;
+	colormapBlend = 0.6;
 
 	// default scaler
 	tensorAdvectionScale = 2.0;
@@ -277,7 +277,7 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	 * this but we just want to use 4 texture units during advection -> so we use this way.
 	 */
 
-	//  fbo.setClearColor(zeroTensor);
+	//fbo.setClearColor(0.0, 0.0, 0.0);
 	fbo.activate();
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -325,8 +325,9 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 
 	fbo.deactivate();
 
-	const unsigned int colorCodedTensors = 1; // the id's of the color coded texture and the depth texture
 	const unsigned int geometryDepth = 1;
+	const unsigned int colorCodedTensors = 1; // the id's of the color coded texture and the depth texture
+
 
 	// restore matrix stuff
 	glPopMatrix();
@@ -440,7 +441,8 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	m_advectionShader->setUniFloat("tensorAdvectionScale", tensorAdvectionScale);
 
 	// animation flag
-	m_advectionShader->setUniFloat("advectionAnimation", advectionAnimation ? 1.0 : 0.0);
+	//m_advectionShader->setUniFloat("advectionAnimation", advectionAnimation ? 1.0 : 0.0);
+	m_advectionShader->setUniFloat("advectionAnimation", 1.0 );
 
 	m_advectionShader->release();
 
@@ -538,10 +540,10 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 
 	m_clippingShader->release();
 
-	m_dh->mainFrame->m_gl0->testRender(fbo.getDepthTexID(geometryDepth));
+	//m_dh->mainFrame->m_gl0->testRender(fbo.getDepthTexID(geometryDepth));
 	//m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(advectedImage1));
-	m_dh->mainFrame->m_gl2->testRender(fbo.getTexID(advectedImage2));
-	m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(edgeImage));
+	//m_dh->mainFrame->m_gl2->testRender(fbo.getTexID(advectedImage2));
+	//m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(edgeImage));
 	//m_dh->mainFrame->m_gl2->testRender(fbo.getTexID(colorCodedTensors));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////

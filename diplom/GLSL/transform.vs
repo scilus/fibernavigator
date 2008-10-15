@@ -81,7 +81,7 @@ void main()
   /* map to [0,1] */
   tensor.x = tensor.x * 0.5 + 0.5;
   tensor.y = tensor.y * 0.5 + 0.5;
-  tensor.z = 0.0; /*tensor.z * 0.5 + 0.5; */
+  tensor.z = tensor.z * 0.5 + 0.5;
 
 
   /* pass the color to the fragment shader */
