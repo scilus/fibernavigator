@@ -36,5 +36,5 @@ void main()
 
 	TexCoord = newVert;
 	myColor = gl_Color;
-    gl_Position = gl_ModelViewProjectionMatrix * newVert;
+	gl_Position = gl_ModelViewProjectionMatrix * newVert;
 }

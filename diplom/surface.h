@@ -41,8 +41,7 @@ private:
 	float getXValue(int y , int z, int numPoints);
 	void boxTest(int left, int right, int axis);
 
-	double m_sampleRateNormal;
-	double m_sampleRateDragging;
+	void overSamplePoints();
 
 	double m_radius;
 	double m_my;
@@ -58,6 +57,9 @@ private:
 	std::vector< std::vector< double > > m_splinePoints;
 	std::vector< int > m_vertices;
 	std::vector< FVector >m_normals;
+
+	int m_renderpointsPerCol;
+	int m_renderpointsPerRow;
 	int m_numPoints;
 	float *m_boxMin;
 	float *m_boxMax;

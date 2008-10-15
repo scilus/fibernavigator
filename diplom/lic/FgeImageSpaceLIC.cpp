@@ -37,7 +37,7 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
 	scheduledReloadShaders = true;
 
 	// 2 iterations by default
-	iterations = 2;
+	iterations = 20;
 
 	// blend factor default
 	noiseBlend = 0.2;
@@ -539,9 +539,10 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	m_clippingShader->release();
 
 	m_dh->mainFrame->m_gl0->testRender(fbo.getDepthTexID(geometryDepth));
-	//m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(colorCodedTensors));
-	m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(advectedImage1));
-	m_dh->mainFrame->m_gl2->testRender(fbo.getTexID(edgeImage));
+	//m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(advectedImage1));
+	m_dh->mainFrame->m_gl2->testRender(fbo.getTexID(advectedImage2));
+	m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(edgeImage));
+	//m_dh->mainFrame->m_gl2->testRender(fbo.getTexID(colorCodedTensors));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// RESTORE STATUS QUO

@@ -17,10 +17,7 @@ Surface::Surface(DatasetHelper* dh)
 	m_numDeBoorCols = 12;
 	m_order = 4;
 
-	m_sampleRateNormal = 0.1;
-	m_sampleRateDragging = 0.5;
-
-	m_sampleRateT = m_sampleRateU = m_sampleRateNormal;
+	m_sampleRateT = m_sampleRateU = 0.5;
 
 	m_show = true;
 	m_showFS = true;
@@ -257,24 +254,30 @@ void Surface::execute ()
 		positions.push_back((*posIt)[2]);
 	}
 
-	int renderpointsPerCol = splineSurface.getNumSamplePointsU();
-	int renderpointsPerRow = splineSurface.getNumSamplePointsT();
-	m_numPoints = splineSurface.getNumSamplePointsU()*splineSurface.getNumSamplePointsT();
+	m_renderpointsPerCol = splineSurface.getNumSamplePointsU();
+	m_renderpointsPerRow = splineSurface.getNumSamplePointsT();
+
 
 	int pi0, pi1, pi2, pi3;
 	m_normals.clear();
 	std::vector< FVector > quadNormals;
+
+	// TODO
+	for (int i = 0 ; i < 4 ; ++i)
+		overSamplePoints();
+
+	m_numPoints = m_renderpointsPerRow * m_renderpointsPerCol;
 	std::vector< std::vector<int> >quadRef(m_numPoints, std::vector<int>(0,0));
 	std::vector< double > p;
 
-	for(int z = 0; z < renderpointsPerCol - 1; z++)
+	for(int z = 0; z < m_renderpointsPerCol - 1; z++)
 	{
-		for(int x = 0; x < renderpointsPerRow - 1; x++)
+		for(int x = 0; x < m_renderpointsPerRow - 1; x++)
 		{
-			pi0 = z * renderpointsPerCol + x;
-			pi1 = z * renderpointsPerCol + x + 1;
-			pi2 = (z+1) * renderpointsPerCol + x;
-			pi3 = (z+1) * renderpointsPerCol + x + 1;
+			pi0 = z * m_renderpointsPerRow + x;
+			pi1 = z * m_renderpointsPerRow + x + 1;
+			pi2 = (z+1) * m_renderpointsPerRow + x;
+			pi3 = (z+1) * m_renderpointsPerRow + x + 1;
 
 			m_vertices.push_back(pi0);
 			m_vertices.push_back(pi2);
@@ -325,15 +328,8 @@ FVector Surface::getNormalForQuad(const FVector* p1, const FVector* p2, const FV
 
 void Surface::draw()
 {
-	if (!m_dh->m_isrDragging && m_sampleRateT == m_sampleRateDragging)
-	{
-		m_sampleRateT = m_sampleRateU = m_sampleRateNormal;
-		execute();
-	}
-
 	if (m_dh->surface_isDirty)
 	{
-		if (m_dh->m_isrDragging) m_sampleRateT = m_sampleRateU = m_sampleRateDragging;
 		execute();
 	}
 
@@ -473,7 +469,6 @@ float Surface::getXValue(int y, int z, int numPoints)
 	}
 }
 
-
 void Surface::boxTest(int left, int right, int axis)
 {
 	// abort condition
@@ -502,4 +497,78 @@ void Surface::boxTest(int left, int right, int axis)
 		boxTest(left, root -1, axis1);
 		boxTest(root+1, right, axis1);
 	}
+}
+
+void Surface::overSamplePoints()
+{
+	std::vector< std::vector< double > > tempPoints = m_splinePoints;
+	m_splinePoints.clear();
+
+	int pi0, pi1, pi2, pi3;
+
+	m_numPoints = m_renderpointsPerRow * m_renderpointsPerCol;
+	std::vector< std::vector<int> >quadRef(m_numPoints, std::vector<int>(0,0));
+	std::vector< double > p;
+	FVector p1, p2, p3, p4;
+
+	for(int z = 0 ; z < m_renderpointsPerCol - 1; z++)
+	{
+		for(int x = 0 ; x < m_renderpointsPerRow - 1 ; x++)
+		{
+			pi0 = z * m_renderpointsPerRow + x;
+			pi1 = z * m_renderpointsPerRow + x + 1;
+
+			p1 = tempPoints[pi0];
+			p2 = tempPoints[pi1];
+
+			m_splinePoints.push_back(p1);
+
+			FVector p5( (p1[0] + p2[0]) / 2.0 , (p1[1] + p2[1]) / 2.0 , (p1[2] + p2[2]) / 2.0);
+
+			m_splinePoints.push_back(p5);
+		}
+		m_splinePoints.push_back(p2);
+
+		for(int x = 0 ; x < m_renderpointsPerRow - 1 ; x++)
+		{
+			pi0 = z * m_renderpointsPerRow + x;
+			pi1 = z * m_renderpointsPerRow + x + 1;
+			pi2 = (z+1) * m_renderpointsPerRow + x;
+			pi3 = (z+1) * m_renderpointsPerRow + x + 1;
+
+			p1 = tempPoints[pi0];
+			p2 = tempPoints[pi1];
+			p3 = tempPoints[pi2];
+			p4 = tempPoints[pi3];
+
+			FVector p5( (p1[0] + p3[0]) / 2.0 , (p1[1] + p3[1]) / 2.0 , (p1[2] + p3[2]) / 2.0);
+			m_splinePoints.push_back(p5);
+
+			FVector p6( (p1[0] + p2[0] + p3[0] + p4[0]) / 4.0 , (p1[1] + p2[1] + p3[1] + p4[1]) / 4.0 , (p1[2] + p2[2] + p3[2] + p4[2]) / 4.0);
+			m_splinePoints.push_back(p6);
+
+		}
+		FVector p7( (p2[0] + p4[0]) / 2.0 , (p2[1] + p4[1]) / 2.0 , (p2[2] + p4[2]) / 2.0);
+		m_splinePoints.push_back(p7);
+
+	}
+
+	for(int x = 0 ; x < m_renderpointsPerRow - 1 ; x++)
+	{
+		pi0 = (m_renderpointsPerCol - 1) * m_renderpointsPerRow + x;
+		pi1 = (m_renderpointsPerCol - 1) * m_renderpointsPerRow + x + 1;
+
+		p1 = tempPoints[pi0];
+		p2 = tempPoints[pi1];
+
+		m_splinePoints.push_back(p1);
+
+		FVector p5( (p1[0] + p2[0]) / 2.0 , (p1[1] + p2[1]) / 2.0 , (p1[2] + p2[2]) / 2.0);
+
+		m_splinePoints.push_back(p5);
+	}
+	m_splinePoints.push_back(p2);
+
+	m_renderpointsPerRow = m_renderpointsPerRow * 2 - 1;
+	m_renderpointsPerCol = m_renderpointsPerCol * 2 - 1;
 }

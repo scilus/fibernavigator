@@ -41,7 +41,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 		}
 	}
 
-	if (type == 1 || type == 2 || type == 4)
+	else
 	{
 		col1.r = clamp( texture3D(tex, TexCoord).r, 0.0, 1.0);
 		col1.g = clamp( texture3D(tex, TexCoord).g, 0.0, 1.0);

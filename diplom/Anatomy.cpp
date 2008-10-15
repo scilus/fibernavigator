@@ -228,9 +228,9 @@ bool Anatomy::load(wxString filename)
 					startslize = i * offset * 3;
 					for (int j = 0 ; j < offset ; ++j)
 					{
-						m_floatDataset[startslize + 3*j] = buffer[startslize + j];
-						m_floatDataset[startslize + 3*j + 1] = buffer[startslize + offset + j];
-						m_floatDataset[startslize + 3*j + 2] = buffer[startslize + 2*offset + j];
+						m_floatDataset[startslize + 3 * j] = buffer[startslize + j];
+						m_floatDataset[startslize + 3 * j + 1] = buffer[startslize + offset + j];
+						m_floatDataset[startslize + 3 * j + 2] = buffer[startslize + 2*offset + j];
 					}
 				}
 

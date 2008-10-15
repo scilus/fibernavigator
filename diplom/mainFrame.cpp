@@ -1161,7 +1161,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 	if (item != -1)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
-		if (info->getType() == Mesh_ || info->getType() == IsoSurface_)
+		if (info->getType() == Mesh_ || info->getType() == IsoSurface_ || info->getType() == Surface_ )
 		{
 			info->setColor(col);
 			m_dh->scene->m_selBoxChanged = true;
