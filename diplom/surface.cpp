@@ -342,10 +342,11 @@ void Surface::draw()
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	if (m_dh->vectors_loaded && m_dh->use_lic)
+	float* vectorField = 0;
+	Anatomy* anatomy;
+
+	if (m_dh->vectors_loaded)
 	{
-		float* vectorField = 0;
-		Anatomy* anatomy;
 		//get pointer to vector field
 		for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 		{
@@ -357,37 +358,27 @@ void Surface::draw()
 				vectorField = anatomy->getFloatDataset();
 			}
 		}
-		glBegin (GL_QUADS);
-		for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
+	}
+
+	glBegin (GL_QUADS);
+	for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
+	{
+		std::vector< double > p = m_splinePoints[m_vertices[i]];
+		FVector n = m_normals[m_vertices[i]];
+		glNormal3f(m_dh->normalDirection*n[0], m_dh->normalDirection*n[1], m_dh->normalDirection*n[2]);
+		glVertex3f(p[0], p[1], p[2]);
+
+		int x = wxMax(0, wxMin((int)p[0] + m_dh->xOff, m_dh->columns));
+		int y = wxMax(0, wxMin((int)p[1] + m_dh->yOff, m_dh->rows));
+		int z = wxMax(0, wxMin((int)p[2] + m_dh->zOff, m_dh->frames));
+
+		if (m_dh->vectors_loaded)
 		{
-			std::vector< double > p = m_splinePoints[m_vertices[i]];
-			FVector n = m_normals[m_vertices[i]];
-			glNormal3f(m_dh->normalDirection*n[0], m_dh->normalDirection*n[1], m_dh->normalDirection*n[2]);
-			glVertex3f(p[0], p[1], p[2]);
-
-			int x = wxMax(0, wxMin((int)p[0] + m_dh->xOff, m_dh->columns));
-			int y = wxMax(0, wxMin((int)p[1] + m_dh->yOff, m_dh->rows));
-			int z = wxMax(0, wxMin((int)p[2] + m_dh->zOff, m_dh->frames));
-
 			int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows)*3;
 			glColor3f(vectorField[index], vectorField[index+1], vectorField[index+2]);
 		}
-		glEnd();
-
 	}
-
-	else
-	{
-		glBegin (GL_QUADS);
-		for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
-		{
-			std::vector< double > p = m_splinePoints[m_vertices[i]];
-			FVector n = m_normals[m_vertices[i]];
-			glNormal3f(m_dh->normalDirection*n[0], m_dh->normalDirection*n[1], m_dh->normalDirection*n[2]);
-			glVertex3f(p[0], p[1], p[2]);
-		}
-		glEnd();
-	}
+	glEnd();
 
 }
 

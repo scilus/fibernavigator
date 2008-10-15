@@ -9,7 +9,7 @@
 TheScene::TheScene(DatasetHelper* dh)
 {
 	m_dh = dh;
-	m_lic = new FgeImageSpaceLIC();
+	m_lic = new FgeImageSpaceLIC(m_dh);
 
 	m_texAssigned = false;
 
@@ -172,7 +172,9 @@ void TheScene::renderSplineSurface()
 				m_dh->shaderHelper->m_splineSurfShader->bind();
 				m_dh->shaderHelper->setSplineSurfaceShaderVars();
 
-				glColor3f(0.1f, 0.1f, 0.1f);
+				wxColor c = info->getColor();
+				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
+				m_dh->shaderHelper->m_splineSurfShader->setUniInt("useTex", info->getUseTex());
 
 				info->draw();
 

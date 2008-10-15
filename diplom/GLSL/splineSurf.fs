@@ -7,8 +7,10 @@ uniform bool show[10];
 uniform float threshold[10];
 uniform int type[10];
 uniform int countTextures;
+uniform bool useTex;
 
 varying vec3 TexCoord;
+varying vec4 myColor;
 
 vec3 defaultColorMap( float value )
 {
@@ -93,8 +95,14 @@ void main()
 	color.a = 1.0;
 
 	color = color * 0.8 + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
-
-    color = clamp(color, 0.0, 1.0);
+	if ( !useTex)
+	{
+		color = myColor
+				+ (ambient * gl_FrontMaterial.ambient)
+				+ (diffuse * gl_FrontMaterial.diffuse)
+				+ (specular * gl_FrontMaterial.specular);
+	}
+	color = clamp(color, 0.0, 1.0);
 
     gl_FragColor = color;
 }

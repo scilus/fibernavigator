@@ -1,6 +1,7 @@
 #include GLSL/lighting.vs
 
 varying vec3 TexCoord;
+varying vec4 myColor;
 
 uniform sampler3D texes[10];
 uniform int type[10];
@@ -14,7 +15,7 @@ void main()
 
 	vec4 newVert = gl_Vertex;
 
-	for (int j = 0 ; j < 10 ; ++j)
+	for (int j = 0 ; j < 6 ; ++j)
 	{
 		vec3 v = newVert.xyz;
 		v.x = (v.x + dimX/2) / (float)dimX;
@@ -30,9 +31,10 @@ void main()
 		}
 		vec3 offset = (greyVal - 0.5) * gl_Normal;
 
-		newVert.xyz  += offset;
+		newVert.xyz  += 2 * offset;
 	}
 
 	TexCoord = newVert;
+	myColor = gl_Color;
     gl_Position = gl_ModelViewProjectionMatrix * newVert;
 }

@@ -22,7 +22,10 @@
 
 using namespace std;
 
-FgeImageSpaceLIC::FgeImageSpaceLIC() {
+FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
+
+	m_dh = dh;
+
 	minX = 0.0;
 	minY = 0.0;
 	minZ = 0.0;
@@ -527,12 +530,18 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	texIdList.push_back(fbo.getTexID(colorCodedTensors)); // color coded tensor image
 	texIdList.push_back(fbo.getTexID(edgeImage)); // edge detection image
 
+
 	fbo.renderArbitraryTextures(texIdList, fbo.getTextureWidth(),
 			fbo.getTextureHeight(), fbo.getTextureAreaWidth() - frameSize,
 			fbo.getTextureAreaHeight() - frameSize, -frameSize / 2, -frameSize
 					/ 2);
 
 	m_clippingShader->release();
+
+	m_dh->mainFrame->m_gl0->testRender(fbo.getDepthTexID(geometryDepth));
+	//m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(colorCodedTensors));
+	m_dh->mainFrame->m_gl1->testRender(fbo.getTexID(advectedImage1));
+	m_dh->mainFrame->m_gl2->testRender(fbo.getTexID(edgeImage));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// RESTORE STATUS QUO

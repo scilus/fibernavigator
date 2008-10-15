@@ -19,6 +19,7 @@
 #include "../Shader.h"
 #include "../GLHelper.h"
 #include "../datasetInfo.h"
+#include "../DatasetHelper.h"
 
 #include <vector>
 #include <string>
@@ -32,7 +33,7 @@ class DatasetInfo;
 class  FgeImageSpaceLIC
 {
   public:
-    FgeImageSpaceLIC();
+    FgeImageSpaceLIC(DatasetHelper* dh);
     virtual ~FgeImageSpaceLIC();
 
     virtual void initiate();
@@ -75,6 +76,8 @@ class  FgeImageSpaceLIC
 
 
   private:
+
+	DatasetHelper* m_dh;
 
     float minX, minY, minZ, maxX, maxY, maxZ;
 

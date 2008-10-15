@@ -511,3 +511,58 @@ double MainCanvas::scalar(FVector v1, FVector v2)
 {
 	return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
 }
+
+void MainCanvas::testRender(GLuint tex)
+{
+	wxPaintDC dc(this);
+
+	SetCurrent(*m_dh->scene->getMainGLContext());
+
+	int w, h;
+	GetClientSize(&w, &h);
+	glViewport(0, 0, (GLint) w, (GLint) h);
+
+	/* clear color and depth buffers */
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glColor3f(1.0, 1.0, 1.0);
+
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0001f);
+
+	glEnable(GL_TEXTURE_2D);
+
+	// bind texture
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	// setup wrapping
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// we do not want linear/mip mapped texture filters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	// texture environment
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	int x = m_dh->columns/2;
+	int y = m_dh->rows/2;
+
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0, 1.0); glVertex3f(-x, -y, 0);
+		glTexCoord2f(0.0, 0.0); glVertex3f(-x,  y, 0);
+		glTexCoord2f(1.0, 0.0); glVertex3f( x,  y, 0);
+		glTexCoord2f(1.0, 1.0); glVertex3f( x, -y, 0);
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+
+	glPopAttrib();
+
+	glFlush();
+
+	SwapBuffers();
+}

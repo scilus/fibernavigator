@@ -50,6 +50,8 @@ public:
     void orthonormalize();
     double scalar(FVector, FVector);
 
+    void testRender(GLuint tex);
+
     DECLARE_EVENT_TABLE()
 
 private:
