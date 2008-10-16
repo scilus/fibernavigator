@@ -119,7 +119,22 @@ bool Shader::loadFromFile(wxString* code, wxString fileName)
 				*code += include;
 			}
 			else
-				*code += file.GetLine(i);
+			{
+				wxString line = file.GetLine(i);
+				for (unsigned int j = 0 ; j < line.Length() ; ++j )
+				{
+					if (line.GetChar(j) == '/' && line.GetChar(j+1) == '/')
+					{
+						for (unsigned int k = j ; k < line.Length() ; ++k )
+						{
+							if (line.GetChar(k) == '*' && line.GetChar(k+1) == '/')
+								*code += _T("*/");
+						}
+						break;
+					}
+					*code += line.GetChar(j);
+				}
+			}
 		}
 		return true;
 	}
