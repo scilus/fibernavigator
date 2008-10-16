@@ -18,7 +18,6 @@ uniform float threshold[10];
 uniform int type[10];
 uniform int countTextures;
 
-
 void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v)
 {
 	vec3 col1;

@@ -402,7 +402,13 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 		delete noiseTexture;
 		noiseTexture = NULL;
 	}
-
+	/*
+	// rebuild the noise texture every render pass
+	if (noiseTexture) {
+		delete noiseTexture;
+		noiseTexture = NULL;
+	}
+*/
 	// build noise texture with proper size
 	if (!noiseTexture) {
 #ifndef NODEBUG
