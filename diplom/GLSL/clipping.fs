@@ -53,7 +53,7 @@ void main()
   if (depth.r >= 0.99)
     discard;/*/    gl_FragColor=vec4(0.0, 0.0, 0.0, 1.0); */
   else
-    gl_FragColor=((1.0 - colormapBlend) * image) + (colormapBlend * tensor) + edge; /*/ +edge? yes the shader clamps it to 0-1 */
+    gl_FragColor=((1.0 - colormapBlend) * image) + (colormapBlend * tensor); /*+ edge;  +edge? yes the shader clamps it to 0-1 */
 
   gl_FragDepth=depth.r;
 }

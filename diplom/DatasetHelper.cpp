@@ -33,6 +33,8 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	vectors_loaded = false;
 	surface_isDirty = true;
 
+
+	scheduledReloadShaders = true;
 	use_lic = false;
 	useVBO = true;
 	lighting = false;

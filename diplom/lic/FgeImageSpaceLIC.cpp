@@ -34,7 +34,7 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
 	maxZ = 1.0;
 
 	// init the shaders
-	scheduledReloadShaders = true;
+	m_dh->scheduledReloadShaders = true;
 
 	// 2 iterations by default
 	iterations = 20;
@@ -255,9 +255,9 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
 	// if reload is scheduled -> reload
-	if (scheduledReloadShaders)
+	if (m_dh->scheduledReloadShaders)
 		reloadShaders();
-	scheduledReloadShaders = false;
+	m_dh->scheduledReloadShaders = false;
 
 	// initialize Framebuffer for offscreen rendering ( calculates proper texture sizes for us )
 	FgeOffscreen fbo(viewport[2] + frameSize, viewport[3] + frameSize, true);
@@ -277,7 +277,7 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	 * this but we just want to use 4 texture units during advection -> so we use this way.
 	 */
 
-	//fbo.setClearColor(0.0, 0.0, 0.0);
+	fbo.setClearColor(0.0, 0.0, 0.0);
 	fbo.activate();
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -316,6 +316,31 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	m_transformShader->setUniFloat("maxY", maxY);
 	m_transformShader->setUniFloat("minZ", minZ);
 	m_transformShader->setUniFloat("maxZ", maxZ);
+
+
+	m_transformShader->setUniInt("dimX", m_dh->columns);
+	m_transformShader->setUniInt("dimY", m_dh->rows);
+	m_transformShader->setUniInt("dimZ", m_dh->frames);
+
+	int* tex = new int[10];
+	float* threshold = new float[10];
+	int* type = new int[10];
+	int c = 0;
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+		if(info->getType() < Mesh_) {
+			tex[c] = c;
+			threshold[c] = info->getThreshold();
+			type[c] = info->getType();
+			++c;
+		}
+	}
+
+	m_transformShader->setUniArrayInt("texes", tex, c);
+	m_transformShader->setUniArrayInt("type", type, c);
+	m_transformShader->setUniArrayFloat("threshold", threshold, c);
+	m_transformShader->setUniInt("countTextures", c);
 
 	// render -> the shader does all the work for us
 	// TODO FgeGeometry::render();
@@ -532,6 +557,8 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	texIdList.push_back(fbo.getTexID(colorCodedTensors)); // color coded tensor image
 	texIdList.push_back(fbo.getTexID(edgeImage)); // edge detection image
 
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	fbo.renderArbitraryTextures(texIdList, fbo.getTextureWidth(),
 			fbo.getTextureHeight(), fbo.getTextureAreaWidth() - frameSize,

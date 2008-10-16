@@ -869,6 +869,7 @@ void MainFrame::OnHideSelBoxes(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnReloadShaders(wxCommandEvent& WXUNUSED(event))
 {
+	m_dh->scheduledReloadShaders = true;
 	renewAllGLWidgets();
 }
 

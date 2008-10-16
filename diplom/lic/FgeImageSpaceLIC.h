@@ -93,10 +93,6 @@ class  FgeImageSpaceLIC
     //! the clipping shader program
     Shader* m_clippingShader;
 
-
-    //! if set the shaders will be reloaded during next render() call
-    bool scheduledReloadShaders;
-
     //! reloads and binds the shaders. also dumps errors
     void reloadShaders();
 

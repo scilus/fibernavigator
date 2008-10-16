@@ -104,6 +104,10 @@ public:
 	bool anatomy_loaded;
 	bool fibers_loaded;
 	bool vectors_loaded;
+
+	//! if set the shaders will be reloaded during next render() call
+	bool scheduledReloadShaders;
+
 	bool use_lic;
 	bool surface_loaded;
 	bool surface_isDirty;

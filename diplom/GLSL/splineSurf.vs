@@ -13,11 +13,9 @@ void main()
 
 	float greyVal = 0.5;
 
-	vec4 newVert = gl_Vertex;
-
 	for (int j = 0 ; j < 6 ; ++j)
 	{
-		vec3 v = newVert.xyz;
+		vec3 v = gl_Vertex.xyz;
 		v.x = (v.x + dimX/2) / (float)dimX;
 		v.y = (v.y + dimY/2) / (float)dimY;
 		v.z = (v.z + dimZ/2) / (float)dimZ;
@@ -31,10 +29,10 @@ void main()
 		}
 		vec3 offset = (greyVal - 0.5) * gl_Normal;
 
-		newVert.xyz  += 2 * offset;
+		gl_Vertex.xyz  += 2 * offset;
 	}
 
-	TexCoord = newVert;
+	TexCoord = gl_Vertex;
 	myColor = gl_Color;
-	gl_Position = gl_ModelViewProjectionMatrix * newVert;
+	gl_Position = ftransform();
 }
