@@ -1271,5 +1271,6 @@ void MainFrame::OnToggleLIC(wxCommandEvent& event)
 void MainFrame::OnToggleNormal(wxCommandEvent& event)
 {
 	m_dh->normalDirection *= -1.0;
+	m_dh->surface_isDirty = true;
 	refreshAllGLWidgets();
 }

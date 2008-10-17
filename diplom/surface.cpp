@@ -269,35 +269,59 @@ void Surface::execute ()
 
 	m_numPoints = m_renderpointsPerRow * m_renderpointsPerCol;
 	std::vector< std::vector<int> >quadRef(m_numPoints, std::vector<int>(0,0));
-	std::vector< double > p;
+	std::vector< double > p, n;
+
+	float* vectorField = 0;
+	Anatomy* anatomy;
+
+	if (m_dh->vectors_loaded)
+	{
+		//get pointer to vector field
+		for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+		{
+			DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+
+			if (info->getType() == Vectors_ )
+			{
+				anatomy = (Anatomy*)info;
+				vectorField = anatomy->getFloatDataset();
+			}
+		}
+		m_colorArray = new GLfloat[m_splinePoints.size()*3];
+	}
+
 
 	for(int z = 0; z < m_renderpointsPerCol - 1; z++)
 	{
 		for(int x = 0; x < m_renderpointsPerRow - 1; x++)
 		{
 			pi0 = z * m_renderpointsPerRow + x;
-			pi1 = z * m_renderpointsPerRow + x + 1;
-			pi2 = (z+1) * m_renderpointsPerRow + x;
-			pi3 = (z+1) * m_renderpointsPerRow + x + 1;
+			pi1 = (z+1) * m_renderpointsPerRow + x;
+			pi2 = (z+1) * m_renderpointsPerRow + x + 1;
+			pi3 = z * m_renderpointsPerRow + x + 1;
 
 			m_vertices.push_back(pi0);
+			m_vertices.push_back(pi1);
 			m_vertices.push_back(pi2);
 			m_vertices.push_back(pi3);
-			m_vertices.push_back(pi1);
 
 			p = m_splinePoints[pi0];
-			FVector p1(p[0], p[1], p[2]);
+			FVector p0(p[0], p[1], p[2]);
 			quadRef[pi0].push_back(quadNormals.size());
+
 			p = m_splinePoints[pi1];
-			FVector p2(p[0], p[1], p[2]);
+			FVector p1(p[0], p[1], p[2]);
 			quadRef[pi1].push_back(quadNormals.size());
+
 			p = m_splinePoints[pi2];
-			FVector p3(p[0], p[1], p[2]);
+			FVector p2(p[0], p[1], p[2]);
 			quadRef[pi2].push_back(quadNormals.size());
+
 			p = m_splinePoints[pi3];
-			FVector p4(p[0], p[1], p[2]);
+			FVector p3(p[0], p[1], p[2]);
 			quadRef[pi3].push_back(quadNormals.size());
-			FVector n1 = getNormalForQuad(&p1, &p2, &p3, &p4);
+
+			FVector n1 = getNormalForQuad(&p0, &p1, &p2, &p3);
 			quadNormals.push_back(n1);
 		}
 	}
@@ -309,12 +333,47 @@ void Surface::execute ()
 		{
 			 tmp += quadNormals[quadRef[i][j]];
 		}
-
-		FVector n( tmp[0] / quadRef[i].size(), tmp[1] / quadRef[i].size(), tmp[2] / quadRef[i].size());
+		FVector n( tmp[0] / quadRef[i].size() * m_dh->normalDirection,
+				tmp[1] / quadRef[i].size() * m_dh->normalDirection,
+				tmp[2] / quadRef[i].size() * m_dh->normalDirection);
 		m_normals.push_back(n);
 	}
 
 	createCutTexture();
+
+	m_vertexArray = new GLfloat[m_splinePoints.size()*3];
+	m_normalArray = new GLfloat[m_splinePoints.size()*3];
+
+	int x,y,z;
+	for (unsigned int i = 0 ; i < m_splinePoints.size() ; ++i)
+	{
+		p = m_splinePoints[i];
+		m_vertexArray[ 3 * i    ] = p[0];
+		m_vertexArray[ 3 * i + 1] = p[1];
+		m_vertexArray[ 3 * i + 2] = p[2];
+		n = m_normals[i];
+		m_normalArray[ 3 * i    ] = n[0];
+		m_normalArray[ 3 * i + 1] = n[1];
+		m_normalArray[ 3 * i + 2] = n[2];
+
+		x = wxMax(0, wxMin((int)p[0] + m_dh->xOff, m_dh->columns));
+		y = wxMax(0, wxMin((int)p[1] + m_dh->yOff, m_dh->rows));
+		z = wxMax(0, wxMin((int)p[2] + m_dh->zOff, m_dh->frames));
+
+		if (m_dh->vectors_loaded)
+		{
+			int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows)*3;
+			m_colorArray[ 3 * i    ] = vectorField[ index];
+			m_colorArray[ 3 * i + 1] = vectorField[ index + 1 ];
+			m_colorArray[ 3 * i + 2] = vectorField[ index + 2 ];
+		}
+	}
+
+	m_indexArray = new GLuint[m_vertices.size()];
+	for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
+	{
+		m_indexArray[i] = m_vertices[i];
+	}
 
 	m_dh->surface_isDirty = false;
 }
@@ -338,44 +397,42 @@ void Surface::draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+/*
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
 
-	float* vectorField = 0;
-	Anatomy* anatomy;
+	glVertexPointer(3, GL_FLOAT, 0, m_vertexArray);
+	glNormalPointer (GL_FLOAT, 0, m_normalArray);
 
 	if (m_dh->vectors_loaded)
+		glColorPointer (3, GL_FLOAT, 0, m_colorArray);
+	else
+		glColorPointer (3, GL_FLOAT, 0, m_normalArray);
+
+	glColor3f(0.1, 0.1, 0.1);
+
+	int numQuads = (m_renderpointsPerCol - 1) * (m_renderpointsPerRow - 1);
+	glDrawElements(GL_QUADS, numQuads*4, GL_UNSIGNED_INT, m_indexArray);
+*/
+	// TODO i have no clue why the draw arrays don't work
+	// apparently everything is ok, as this rendering pass shows
+
+	int numQuads = (m_renderpointsPerCol - 1) * (m_renderpointsPerRow - 1);
+	glBegin(GL_QUADS);
+	for (int i = 0 ; i < numQuads*4 ; ++i)
 	{
-		//get pointer to vector field
-		for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
-		{
-			DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-
-			if (info->getType() == Vectors_ )
-			{
-				anatomy = (Anatomy*)info;
-				vectorField = anatomy->getFloatDataset();
-			}
-		}
-	}
-
-	glBegin (GL_QUADS);
-	for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
-	{
-		std::vector< double > p = m_splinePoints[m_vertices[i]];
-		FVector n = m_normals[m_vertices[i]];
-		glNormal3f(m_dh->normalDirection*n[0], m_dh->normalDirection*n[1], m_dh->normalDirection*n[2]);
-		glVertex3f(p[0], p[1], p[2]);
-
-		int x = wxMax(0, wxMin((int)p[0] + m_dh->xOff, m_dh->columns));
-		int y = wxMax(0, wxMin((int)p[1] + m_dh->yOff, m_dh->rows));
-		int z = wxMax(0, wxMin((int)p[2] + m_dh->zOff, m_dh->frames));
-
-		if (m_dh->vectors_loaded)
-		{
-			int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows)*3;
-			glColor3f(vectorField[index], vectorField[index+1], vectorField[index+2]);
-		}
+		glNormal3f(m_normalArray[m_indexArray[i]*3], m_normalArray[m_indexArray[i]*3+1], m_normalArray[m_indexArray[i]*3+2]);
+		glColor3f(m_colorArray[m_indexArray[i]*3], m_colorArray[m_indexArray[i]*3+1], m_colorArray[m_indexArray[i]*3+2]);
+		glVertex3f(m_vertexArray[m_indexArray[i]*3], m_vertexArray[m_indexArray[i]*3+1], m_vertexArray[m_indexArray[i]*3+2]);
 	}
 	glEnd();
+
+	/*
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	*/
 
 }
 
