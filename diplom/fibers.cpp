@@ -23,6 +23,7 @@ Fibers::Fibers(DatasetHelper* dh)
 	m_showFS = true;
 	m_useTex = true;
 	m_bufferObjects = new GLuint[3];
+	m_hasTreeId = false;
 }
 
 Fibers::~Fibers()
@@ -495,7 +496,7 @@ void Fibers::initializeBuffer()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_pointArray, GL_STATIC_DRAW );
 	if (m_dh->GLError())
 	{
-		m_dh->printGLError(wxT("initialue vbo points"));
+		m_dh->printGLError(wxT("initialize vbo points"));
 		isOK = false;
 	}
 	if (isOK)
@@ -504,7 +505,7 @@ void Fibers::initializeBuffer()
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_colorArray, GL_STATIC_DRAW );
 		if (m_dh->GLError())
 		{
-			m_dh->printGLError(wxT("initialue vbo colors"));
+			m_dh->printGLError(wxT("initialize vbo colors"));
 			isOK = false;
 		}
 	}
@@ -514,7 +515,7 @@ void Fibers::initializeBuffer()
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_normalArray, GL_STATIC_DRAW );
 		if (m_dh->GLError())
 		{
-			m_dh->printGLError(wxT("initialue vbo normals"));
+			m_dh->printGLError(wxT("initialize vbo normals"));
 			isOK = false;
 		}
 	}

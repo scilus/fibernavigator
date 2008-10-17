@@ -312,6 +312,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh)
 	m_showFS = true;
 	m_useTex = true;
 	m_color = wxColour(230,230,230);
+	m_hasTreeId = false;
 
 	m_fCellLengthX = 0;
 	m_fCellLengthY = 0;

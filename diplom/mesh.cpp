@@ -23,6 +23,7 @@ Mesh::Mesh(DatasetHelper* dh)
 	m_showFS = true;
 	m_useTex = true;
 	m_color = wxColour(230,230,230);
+	m_hasTreeId = false;
 }
 
 Mesh::~Mesh()

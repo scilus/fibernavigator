@@ -28,6 +28,7 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;
+	m_hasTreeId = false;
 }
 
 Anatomy::~Anatomy() {

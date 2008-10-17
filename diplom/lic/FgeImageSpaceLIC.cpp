@@ -278,6 +278,8 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	 */
 
 	fbo.setClearColor(0.0, 0.0, 0.0);
+	//unsigned int list[] = { 1,2 };
+	//fbo.activate(2, list );
 	fbo.activate();
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -343,7 +345,6 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	m_transformShader->setUniInt("countTextures", c);
 
 	// render -> the shader does all the work for us
-	// TODO FgeGeometry::render();
 	info->draw();
 
 	m_transformShader->release();
@@ -363,7 +364,6 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	//
 	// use generated Texture for edgedetection
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	// TODO kann vielleicht weg
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// PASS 2a -- apply edge detection filter
@@ -451,7 +451,7 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 
 	// use advection shader now
 	m_advectionShader->bind();
-	// TODO advectionShader.setDefaultUniforms();
+
 	wxDateTime dt = wxDateTime::Now();
 	int time = dt.GetMillisecond();
 	m_advectionShader->setUniInt("fantom_time", time);
@@ -485,7 +485,6 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	vector<GLuint> texIdList;
 	texIdList.push_back(fbo.getTexID(colorCodedTensors)); // color coded tensor image
 	texIdList.push_back(noiseTexture->getId()); // noise image
-	// TODO vielleicht weg
 	texIdList.push_back(fbo.getTexID(edgeImage)); // edges
 	if (previousAdvectedTexture)
 		texIdList.push_back(previousAdvectedTexture->getId());// start with old advection texture
