@@ -94,6 +94,7 @@ void main() {
 	vec2 advectedPosition1 = gl_TexCoord[3].st - (tensorAdvectionScale * vec2(
 			tensor.x / textureSizeW, tensor.y / textureSizeH));
 	vec4 advectedNoise1 = texture2D(tex3, advectedPosition1);
+
 	vec2 advectedPosition2 = gl_TexCoord[3].st + (tensorAdvectionScale * vec2(
 			tensor.x / textureSizeW, tensor.y / textureSizeH));
 	vec4 advectedNoise2 = texture2D(tex3, advectedPosition2);

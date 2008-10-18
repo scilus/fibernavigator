@@ -87,6 +87,4 @@ private:
 	float *m_pointArray;
 };
 
-#define KDTREE_EVENT 50
-
 #endif /*KDTREE_H_*/

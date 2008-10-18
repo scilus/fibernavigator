@@ -56,45 +56,46 @@ bool MyApp::OnInit(void) {
 	frame->SetMinSize(wxSize(800, 600));
 	// Make a menubar
 	wxMenu *file_menu = new wxMenu;
-	file_menu->Append(VIEWER_NEW_ISOSURF, _T("&New IsoSurface"));
+	file_menu->Append(MENU_FILE_NEW_ISOSURF, _T("&New IsoSurface"));
 	file_menu->AppendSeparator();
-	file_menu->Append(VIEWER_LOAD, _T("&Load"));
+	file_menu->Append(MENU_FILE_LOAD, _T("&Load"));
+	file_menu->Append(MENU_FILE_RELOAD_SHADER, _T("&Reload Shader"));
 	file_menu->AppendSeparator();
-	file_menu->Append(VIEWER_SAVE, _T("&Save Current Scene"));
-	file_menu->Append(VIEWER_SAVE_FIBERS, _T("&Save Selected Fibers"));
+	file_menu->Append(MENU_FILE_SAVE, _T("&Save Current Scene"));
+	file_menu->Append(MENU_FILE_SAVE_FIBERS, _T("&Save Selected Fibers"));
 	file_menu->AppendSeparator();
-	file_menu->Append(VIEWER_QUIT, _T("&Exit"));
+	file_menu->Append(MENU_FILE_QUIT, _T("&Exit"));
 
 	wxMenu *view_menu = new wxMenu;
-	view_menu->Append(VIEWER_VIEW_LEFT, _T("&left"));
-	view_menu->Append(VIEWER_VIEW_RIGHT, _T("&right"));
-	view_menu->Append(VIEWER_VIEW_FRONT, _T("&anterior"));
-	view_menu->Append(VIEWER_VIEW_BACK, _T("&posterior"));
-	view_menu->Append(VIEWER_VIEW_TOP, _T("&superior"));
-	view_menu->Append(VIEWER_VIEW_DOWN, _T("&inferior"));
+	view_menu->Append(MENU_VIEW_LEFT, _T("&left"));
+	view_menu->Append(MENU_VIEW_RIGHT, _T("&right"));
+	view_menu->Append(MENU_VIEW_FRONT, _T("&anterior"));
+	view_menu->Append(MENU_VIEW_BACK, _T("&posterior"));
+	view_menu->Append(MENU_VIEW_TOP, _T("&superior"));
+	view_menu->Append(MENU_VIEW_BOTTOM, _T("&inferior"));
 
 	wxMenu *voi_menu = new wxMenu;
-	voi_menu->Append(VIEWER_NEW_SELBOX, _T("&New"));
+	voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("&New"));
 	voi_menu->AppendSeparator();
-	voi_menu->Append(VIEWER_TOGGLE_SELBOX, _T("&toggle activation"));
-	voi_menu->Append(VIEWER_TOGGLE_SHOWBOX, _T("&toggle visibility"));
+	voi_menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("&toggle activation"));
+	voi_menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("&toggle visibility"));
 
 	wxMenu *surf_menu = new wxMenu;
-	surf_menu->Append(VIEWER_NEW_SURFACE, _T("&New"));
+	surf_menu->Append(MENU_SPLINESURF_NEW, _T("&New"));
 	surf_menu->AppendSeparator();
-	surf_menu->Append(VIEWER_TOGGLE_LIC, _T("&Toggle Lic"));
-	surf_menu->Append(VIEWER_TOGGLE_NORMAL, _T("&Toggle Normal Direction"));
+	surf_menu->Append(MENU_SPLINESURF_TOGGLE_LIC, _T("&Toggle Lic"));
+	surf_menu->Append(MENU_SPLINESURF_TOGGLE_NORMAL, _T("&Toggle Normal Direction"));
 
 	wxMenu *options_menu = new wxMenu;
-	options_menu->Append(VIEWER_ASSIGN_COLOR, _T("&Assign Color"));
+	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("&Assign Color"));
 	options_menu->AppendSeparator();
-	options_menu->Append(VIEWER_TOGGLE_LIGHTING, _T("&Toggle Lighting"));
-	options_menu->Append(VIEWER_INVERT_FIBERS, _T("&Invert Fiber Selection"));
+	options_menu->Append(MENU_OPTIONS_TOGGLE_LIGHTING, _T("&Toggle Lighting"));
+	options_menu->Append(MENU_OPTIONS_INVERT_FIBERS, _T("&Invert Fiber Selection"));
 	options_menu->AppendSeparator();
-	options_menu->Append(VIEWER_TOGGLE_TEXTURE_FILTERING, _T("&Toggle Texture Mode"));
+	options_menu->Append(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("&Toggle Texture Mode"));
 
 	wxMenu *help_menu = new wxMenu;
-	help_menu->Append(VIEWER_ABOUT, _T("&About"));
+	help_menu->Append(MENU_HELP_ABOUT, _T("&About"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, _T("&File"));
@@ -102,7 +103,7 @@ bool MyApp::OnInit(void) {
 	menu_bar->Append(voi_menu, _T("&VOI"));
 	menu_bar->Append(surf_menu, _T("&Spline Surface"));
 	menu_bar->Append(options_menu, _T("&Options"));
-	menu_bar->Append(help_menu, _T("&help"));
+	menu_bar->Append(help_menu, _T("&Help"));
 
 	// Associate the menu bar with the frame
 	frame->SetMenuBar(menu_bar);
@@ -125,35 +126,35 @@ bool MyApp::OnInit(void) {
 	wxBitmap bmpAssignColor(toggle_rgb_xpm);
 	wxBitmap bmpLighting(exp_xpm);
 	//toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
-	toolBar->AddTool(VIEWER_LOAD, bmpOpen, wxT("Open"));
+	toolBar->AddTool(MENU_FILE_LOAD, bmpOpen, wxT("Open"));
 	//toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_BUTTON_AXIAL, bmpAxial, wxT("Axial"));
-	toolBar->AddTool(VIEWER_BUTTON_CORONAL, bmpCor, wxT("Coronal"));
-	toolBar->AddTool(VIEWER_BUTTON_SAGITTAL, bmpSag, wxT("Sagittal"));
-	toolBar->AddTool(VIEWER_TOGGLE_ALPHA, bmpNewSurface, wxT("Toggle alpha blending"));
+	toolBar->AddTool(BUTTON_AXIAL, bmpAxial, wxT("Axial"));
+	toolBar->AddTool(BUTTON_CORONAL, bmpCor, wxT("Coronal"));
+	toolBar->AddTool(BUTTON_SAGITTAL, bmpSag, wxT("Sagittal"));
+	toolBar->AddTool(BUTTON_TOGGLE_ALPHA, bmpNewSurface, wxT("Toggle alpha blending"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
+	toolBar->AddTool(MENU_FILE_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_NEW_SELBOX, bmpBox, wxT("New Selection Box"));
-	toolBar->AddTool(VIEWER_RENDER_SELBOXES, bmpMiniCat, wxT("Toggle Selection Boxes"));
-	toolBar->AddTool(VIEWER_TOGGLE_SELBOX, bmpHideSelbox, wxT("Toggle activation status of selection box"));
+	toolBar->AddTool(MENU_VOI_NEW_SELBOX, bmpBox, wxT("New Selection Box"));
+	toolBar->AddTool(MENU_VOI_RENDER_SELBOXES, bmpMiniCat, wxT("Toggle Selection Boxes"));
+	toolBar->AddTool(MENU_VOI_TOGGLE_SELBOX, bmpHideSelbox, wxT("Toggle activation status of selection box"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
-	toolBar->AddTool(VIEWER_NEW_SURFACE, bmpNewSurface, wxT("New Spline Surface"));
+	toolBar->AddTool(MENU_SPLINESURF_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
+	toolBar->AddTool(MENU_SPLINESURF_NEW, bmpNewSurface, wxT("New Spline Surface"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
+	toolBar->AddTool(MENU_OPTIONS_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_TOGGLE_LIGHTING, bmpLighting, wxT("Toggle Lighting"));
+	toolBar->AddTool(MENU_OPTIONS_TOGGLE_LIGHTING, bmpLighting, wxT("Toggle Lighting"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));
+	toolBar->AddTool(MENU_OPTIONS_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_NEW_ISOSURF, bmpMiniCat, wxT("New Iso Surface "));
+	toolBar->AddTool(MENU_FILE_NEW_ISOSURF, bmpMiniCat, wxT("New Iso Surface "));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_MOVE_POINTS1, bmpView1, wxT("Move border points of spline surface"));
-	toolBar->AddTool(VIEWER_MOVE_POINTS2, bmpView3, wxT("Move border points of spline surface"));
+	toolBar->AddTool(BUTTON_MOVE_POINTS1, bmpView1, wxT("Move border points of spline surface"));
+	toolBar->AddTool(BUTTON_MOVE_POINTS2, bmpView3, wxT("Move border points of spline surface"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(VIEWER_TOGGLE_TEXTURE_FILTERING, bmpView3, wxT("toggle texture filtering"));
+	toolBar->AddTool(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, bmpView3, wxT("toggle texture filtering"));
 	toolBar->AddSeparator();
 
 	toolBar->Realize();

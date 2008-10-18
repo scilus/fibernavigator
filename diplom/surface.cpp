@@ -287,7 +287,7 @@ void Surface::execute ()
 				vectorField = anatomy->getFloatDataset();
 			}
 		}
-		m_colorArray = new GLfloat[m_splinePoints.size()*3];
+		m_colorArray = new float[m_splinePoints.size()*3];
 	}
 
 
@@ -341,8 +341,8 @@ void Surface::execute ()
 
 	createCutTexture();
 
-	m_vertexArray = new GLfloat[m_splinePoints.size()*3];
-	m_normalArray = new GLfloat[m_splinePoints.size()*3];
+	m_vertexArray = new float[m_splinePoints.size()*3];
+	m_normalArray = new float[m_splinePoints.size()*3];
 
 	int x,y,z;
 	for (unsigned int i = 0 ; i < m_splinePoints.size() ; ++i)
@@ -369,7 +369,7 @@ void Surface::execute ()
 		}
 	}
 
-	m_indexArray = new GLuint[m_vertices.size()];
+	m_indexArray = new unsigned int [m_vertices.size()];
 	for (unsigned int i = 0 ; i < m_vertices.size() ; ++i)
 	{
 		m_indexArray[i] = m_vertices[i];
@@ -397,43 +397,61 @@ void Surface::draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-/*
+
+	// TODO i have no clue why the draw arrays don't work
+	// apparently everything is ok, as this rendering pass shows
+#if 1
+	int numQuads = (m_renderpointsPerCol - 1) * (m_renderpointsPerRow - 1);
+	int i0, i1, i2;
+	glBegin(GL_QUADS);
+	if (m_dh->vectors_loaded)
+	{
+		for (int i = 0 ; i < numQuads*4 ; ++i)
+		{
+			i0 = m_indexArray[i]*3;
+			i1 = m_indexArray[i]*3+1;
+			i2 = m_indexArray[i]*3+2;
+			glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
+			glColor3f(m_colorArray[i0], m_colorArray[i1], m_colorArray[i2]);
+			glVertex3f(m_vertexArray[i0], m_vertexArray[i1], m_vertexArray[i2]);
+		}
+	}
+	else
+	{
+		for (int i = 0 ; i < numQuads*4 ; ++i)
+		{
+			i0 = m_indexArray[i]*3;
+			i1 = m_indexArray[i]*3+1;
+			i2 = m_indexArray[i]*3+2;
+			glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
+			glVertex3f(m_vertexArray[i0], m_vertexArray[i1], m_vertexArray[i2]);
+		}
+	}
+	glEnd();
+#else
+
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 
 	glVertexPointer(3, GL_FLOAT, 0, m_vertexArray);
 	glNormalPointer (GL_FLOAT, 0, m_normalArray);
 
 	if (m_dh->vectors_loaded)
+	{
+		glEnableClientState(GL_COLOR_ARRAY);
 		glColorPointer (3, GL_FLOAT, 0, m_colorArray);
-	else
-		glColorPointer (3, GL_FLOAT, 0, m_normalArray);
+	}
 
 	glColor3f(0.1, 0.1, 0.1);
 
 	int numQuads = (m_renderpointsPerCol - 1) * (m_renderpointsPerRow - 1);
 	glDrawElements(GL_QUADS, numQuads*4, GL_UNSIGNED_INT, m_indexArray);
-*/
-	// TODO i have no clue why the draw arrays don't work
-	// apparently everything is ok, as this rendering pass shows
 
-	int numQuads = (m_renderpointsPerCol - 1) * (m_renderpointsPerRow - 1);
-	glBegin(GL_QUADS);
-	for (int i = 0 ; i < numQuads*4 ; ++i)
-	{
-		glNormal3f(m_normalArray[m_indexArray[i]*3], m_normalArray[m_indexArray[i]*3+1], m_normalArray[m_indexArray[i]*3+2]);
-		glColor3f(m_colorArray[m_indexArray[i]*3], m_colorArray[m_indexArray[i]*3+1], m_colorArray[m_indexArray[i]*3+2]);
-		glVertex3f(m_vertexArray[m_indexArray[i]*3], m_vertexArray[m_indexArray[i]*3+1], m_vertexArray[m_indexArray[i]*3+2]);
-	}
-	glEnd();
-
-	/*
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
-	*/
 
+#endif
 }
 
 void Surface::movePoints()

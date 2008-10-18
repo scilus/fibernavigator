@@ -451,7 +451,7 @@ void CIsoSurface::GenerateSurface(const wxUint8* ptScalarField, wxUint8 tIsoLeve
 							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 						}
 
-					for (unsigned int i = 0; m_triTable[tableIndex][i] != -1; i += 3) {
+					for (int i = 0; m_triTable[tableIndex][i] != -1; i += 3) {
 						TRIANGLE triangle;
 						unsigned int pointID0, pointID1, pointID2;
 						pointID0 = GetEdgeID(x, y, z, m_triTable[tableIndex][i]);

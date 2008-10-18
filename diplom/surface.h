@@ -43,10 +43,10 @@ private:
 
 	void overSamplePoints();
 
-	GLfloat* m_vertexArray;
-	GLfloat* m_normalArray;
-	GLfloat* m_colorArray;
-	GLuint* m_indexArray;
+	float* m_vertexArray;
+	float* m_normalArray;
+	float* m_colorArray;
+	unsigned int* m_indexArray;
 
 	double m_radius;
 	double m_my;

@@ -23,17 +23,45 @@ public:
     void renewAllGLWidgets();
 
 private:
-	void OnSize(wxSizeEvent& event);
-    void OnAbout(wxCommandEvent& event);
-    void OnNewWindow(wxCommandEvent& event);
-    void OnQuit(wxCommandEvent& event);
-
+	/*
+	 * Menu Functions
+	 */
+	// File
+	void OnNewIsoSurface(wxCommandEvent& event);
 	void OnLoad(wxCommandEvent& event);
-	void OnLoadVectors(wxCommandEvent& event);
+	void OnReloadShaders(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
 	void OnSaveFibers(wxCommandEvent& event);
-	void OnNew(wxCommandEvent& event);
-    void OnToggleWindow(wxCommandEvent& event);
+	void OnQuit(wxCommandEvent& event);
+	// View
+	void OnMenuViewLeft(wxCommandEvent& event);
+	void OnMenuViewRight(wxCommandEvent& event);
+	void OnMenuViewTop(wxCommandEvent& event);
+	void OnMenuViewBottom(wxCommandEvent& event);
+	void OnMenuViewFront(wxCommandEvent& event);
+	void OnMenuViewBack(wxCommandEvent& event);
+	// Voi
+    void OnToggleSelBox(wxCommandEvent& event);
+    void OnToggleShowBox(wxCommandEvent& event);
+    void OnNewSelBox(wxCommandEvent& event);
+    void OnHideSelBoxes(wxCommandEvent& event);
+	// Spline Surface
+	void OnNewSurface(wxCommandEvent& event);
+	void OnToggleNormal(wxCommandEvent& event);
+	void OnTogglePointMode(wxCommandEvent& event);
+	void OnToggleLIC(wxCommandEvent& event);
+	// Options
+	void OnAssignColor(wxCommandEvent& event);
+    void OnToggleLighting(wxCommandEvent& event);
+    void OnInvertFibers(wxCommandEvent& event);
+	void OnToggleTextureFiltering(wxCommandEvent& event);
+	// Help
+	void OnAbout(wxCommandEvent& event);
+
+	/*
+	 * Window Functions
+	 */
+	void OnSize(wxSizeEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
     void OnGLEvent(wxCommandEvent &event);
 
@@ -42,46 +70,37 @@ private:
     void OnZSliderMoved(wxCommandEvent& event);
     void OnTSliderMoved(wxCommandEvent& event);
 
+    /*
+     * Button functions
+     */
     void OnButtonAxial(wxCommandEvent& event);
     void OnButtonCoronal(wxCommandEvent& event);
     void OnButtonSagittal(wxCommandEvent& event);
     void OnToggleAlpha(wxCommandEvent& event);
-    void OnToggleSelBox(wxCommandEvent& event);
-    void OnToggleShowBox(wxCommandEvent& event);
-    void OnNewSelBox(wxCommandEvent& event);
-    void OnHideSelBoxes(wxCommandEvent& event);
+    void OnMovePoints1(wxCommandEvent& event);
+    void OnMovePoints2(wxCommandEvent& event);
 
-    void OnTogglePointMode(wxCommandEvent& event);
-    void OnNewSurface(wxCommandEvent& event);
-
-    void OnReloadShaders(wxCommandEvent& event);
-
+    /*
+     * List widget event functions
+     */
     void OnActivateListItem(wxListEvent& event);
     void OnSelectListItem(wxListEvent& event);
     void OnListItemUp(wxCommandEvent& event);
     void OnListItemDown(wxCommandEvent& event);
 
+    /*
+     * Tree widget event functions
+     */
     void OnSelectTreeItem(wxTreeEvent& event);
     void OnUnSelectTreeItem(wxTreeEvent& event);
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
     void OnTreeLabelEdit(wxTreeEvent& event);
 
-    void OnAssignColor(wxCommandEvent& event);
-    void OnToggleLighting(wxCommandEvent& event);
-    void OnToggleLIC(wxCommandEvent& event);
-    void OnToggleNormal(wxCommandEvent& event);
-
-	void OnInvertFibers(wxCommandEvent& event);
-	void OnNewIsoSurface(wxCommandEvent& event);
-
-	void OnMovePoints1(wxCommandEvent& event);
-	void OnMovePoints2(wxCommandEvent& event);
-
-	void OnToggleTextureFiltering(wxCommandEvent& event);
-
+    /*
+     * System functions
+     */
     void OnKdTreeThreadFinished(wxCommandEvent& event);
-
     void updateStatusBar();
 
     wxSashLayoutWindow* m_leftWindowHolder;
@@ -140,60 +159,69 @@ public:
 DECLARE_EVENT_TABLE()
 };
 
-#define VIEWER_QUIT        	wxID_EXIT
-#define VIEWER_ABOUT       	wxID_ABOUT
-#define VIEWER_NEW					4
-#define VIEWER_LOAD					5
-#define VIEWER_SAVE					7
-#define VIEWER_SAVE_FIBERS			8
-#define VIEWER_BUTTON_AXIAL 		11
-#define VIEWER_BUTTON_CORONAL 		12
-#define VIEWER_BUTTON_SAGITTAL 		13
-#define VIEWER_TOGGLE_ALPHA 		14
-#define VIEWER_RELOAD_SHADER		16
+/*
+ * Defines for Menu Events
+ */
+//Menu File
+#define MENU_FILE_NEW_ISOSURF						100
+#define MENU_FILE_LOAD								101
+#define MENU_FILE_RELOAD_SHADER						102
+#define MENU_FILE_SAVE								103
+#define MENU_FILE_SAVE_FIBERS						104
+#define MENU_FILE_QUIT        						wxID_EXIT
+// Menu View
+#define MENU_VIEW_LEFT								120
+#define MENU_VIEW_RIGHT								121
+#define MENU_VIEW_FRONT								122
+#define MENU_VIEW_BACK								123
+#define MENU_VIEW_TOP								124
+#define MENU_VIEW_BOTTOM							125
+// Menu Voi
+#define MENU_VOI_NEW_SELBOX							130
+#define MENU_VOI_RENDER_SELBOXES					131
+#define MENU_VOI_TOGGLE_SELBOX						132
+#define MENU_VOI_TOGGLE_SHOWBOX						133
+// Menu Spline Surface
+#define MENU_SPLINESURF_DRAW_POINTS					140
+#define MENU_SPLINESURF_NEW							141
+#define MENU_SPLINESURF_TOGGLE_LIC					142
+#define MENU_SPLINESURF_TOGGLE_NORMAL				143
+// Menu Options
+#define MENU_OPTIONS_ASSIGN_COLOR					150
+#define MENU_OPTIONS_TOGGLE_LIGHTING				151
+#define MENU_OPTIONS_INVERT_FIBERS					152
+#define MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING		153
+// Menu Help
+#define MENU_HELP_ABOUT       						wxID_ABOUT
+/*
+ * Defines for Buttons, will move into Menus eventually
+ */
+#define BUTTON_AXIAL						 		200
+#define BUTTON_CORONAL 								201
+#define BUTTON_SAGITTAL 							202
+#define BUTTON_TOGGLE_ALPHA 						203
+#define BUTTON_MOVE_POINTS1 						204
+#define BUTTON_MOVE_POINTS2 						205
 
-#define VIEWER_NEW_SELBOX			20
-#define VIEWER_RENDER_SELBOXES		21
-#define VIEWER_TOGGLE_SELBOX		22
-#define VIEWER_TOGGLE_SHOWBOX		23
+/*
+ * Defines for interface items and other events
+ */
+#define KDTREE_EVENT				300
 
-#define VIEWER_DRAW_POINTS			30
-#define VIEWER_NEW_SURFACE			31
-#define VIEWER_ASSIGN_COLOR			32
-#define VIEWER_TOGGLE_LIGHTING		33
-#define VIEWER_INVERT_FIBERS		34
-#define VIEWER_NEW_ISOSURF			35
-#define VIEWER_MOVE_POINTS1 		36
-#define VIEWER_MOVE_POINTS2 		37
-#define VIEWER_TOGGLE_TEXTURE_FILTERING		38
-#define VIEWER_TOGGLE_LIC			39
-#define VIEWER_TOGGLE_NORMAL		40
+#define ID_GL_NAV_X 				310
+#define ID_GL_NAV_Y  				311
+#define ID_GL_NAV_Z   				312
+#define ID_GL_MAIN					313
 
-#define VIEWER_VIEW_LEFT		200
-#define VIEWER_VIEW_RIGHT		201
-#define VIEWER_VIEW_FRONT		202
-#define VIEWER_VIEW_BACK		203
-#define VIEWER_VIEW_TOP			204
-#define VIEWER_VIEW_DOWN		205
+#define ID_LIST_CTRL				320
+#define ID_TREE_CTRL				321
 
+#define ID_X_SLIDER 				330
+#define ID_Y_SLIDER 				331
+#define ID_Z_SLIDER 				332
+#define ID_T_SLIDER					333
 
-
-#define KDTREE_EVENT			50
-
-#define ID_GL_NAV_X 	120
-#define ID_GL_NAV_Y  	121
-#define ID_GL_NAV_Z   	122
-#define ID_GL_MAIN		123
-
-#define LIST_CTRL		130
-#define TREE_CTRL		131
-
-#define ID_X_SLIDER 201
-#define ID_Y_SLIDER 202
-#define ID_Z_SLIDER 203
-#define ID_T_SLIDER 204
-
-#define ID_BUTTON_UP 	211
-#define ID_BUTTON_DOWN 212
+#define ID_BUTTON_UP 				340
+#define ID_BUTTON_DOWN 				341
 
 #endif /*MAINFRAME_H_*/

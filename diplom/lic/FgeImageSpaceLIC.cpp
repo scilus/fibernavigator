@@ -37,12 +37,12 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
 	m_dh->scheduledReloadShaders = true;
 
 	// 2 iterations by default
-	iterations = 20;
+	iterations = 4;
 
 	// blend factor default
 	noiseBlend = 0.2;
 	// blend factor of colormap
-	colormapBlend = 0.6;
+	colormapBlend = 0.3;
 
 	// default scaler
 	tensorAdvectionScale = 2.0;

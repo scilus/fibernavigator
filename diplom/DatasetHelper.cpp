@@ -64,7 +64,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_isDragging = false;
 	m_isrDragging = false;
 
-	normalDirection = 1.0;
+	normalDirection = -1.0;
 
 	useLinearFiltering = true;
 }
@@ -964,4 +964,5 @@ void DatasetHelper::createIsoSurface() {
 	} else {
 		printf("surface is not valid\n");
 	}
+	mainFrame->refreshAllGLWidgets();
 }

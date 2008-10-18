@@ -483,6 +483,7 @@ void MainCanvas::setRotation()
 	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
 	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
 	updateView();
+	m_dh->mainFrame->refreshAllGLWidgets();
 }
 
 void MainCanvas::orthonormalize()
