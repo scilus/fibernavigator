@@ -56,46 +56,46 @@ bool MyApp::OnInit(void) {
 	frame->SetMinSize(wxSize(800, 600));
 	// Make a menubar
 	wxMenu *file_menu = new wxMenu;
-	file_menu->Append(MENU_FILE_NEW_ISOSURF, _T("&New IsoSurface"));
+	file_menu->Append(MENU_FILE_NEW_ISOSURF, _T("New IsoSurface"));
 	file_menu->AppendSeparator();
-	file_menu->Append(MENU_FILE_LOAD, _T("&Load"));
-	file_menu->Append(MENU_FILE_RELOAD_SHADER, _T("&Reload Shader"));
+	file_menu->Append(MENU_FILE_LOAD, _T("Load"));
+	file_menu->Append(MENU_FILE_RELOAD_SHADER, _T("Reload Shader"));
 	file_menu->AppendSeparator();
-	file_menu->Append(MENU_FILE_SAVE, _T("&Save Current Scene"));
-	file_menu->Append(MENU_FILE_SAVE_FIBERS, _T("&Save Selected Fibers"));
+	file_menu->Append(MENU_FILE_SAVE, _T("Save Current Scene"));
+	file_menu->Append(MENU_FILE_SAVE_FIBERS, _T("Save Selected Fibers"));
 	file_menu->AppendSeparator();
-	file_menu->Append(MENU_FILE_QUIT, _T("&Exit"));
+	file_menu->Append(MENU_FILE_QUIT, _T("Exit"));
 
 	wxMenu *view_menu = new wxMenu;
-	view_menu->Append(MENU_VIEW_LEFT, _T("&left"));
-	view_menu->Append(MENU_VIEW_RIGHT, _T("&right"));
-	view_menu->Append(MENU_VIEW_FRONT, _T("&anterior"));
-	view_menu->Append(MENU_VIEW_BACK, _T("&posterior"));
-	view_menu->Append(MENU_VIEW_TOP, _T("&superior"));
-	view_menu->Append(MENU_VIEW_BOTTOM, _T("&inferior"));
+	view_menu->Append(MENU_VIEW_LEFT, _T("left"));
+	view_menu->Append(MENU_VIEW_RIGHT, _T("right"));
+	view_menu->Append(MENU_VIEW_FRONT, _T("anterior"));
+	view_menu->Append(MENU_VIEW_BACK, _T("posterior"));
+	view_menu->Append(MENU_VIEW_TOP, _T("superior"));
+	view_menu->Append(MENU_VIEW_BOTTOM, _T("inferior"));
 
 	wxMenu *voi_menu = new wxMenu;
-	voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("&New"));
+	voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New"));
 	voi_menu->AppendSeparator();
-	voi_menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("&toggle activation"));
-	voi_menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("&toggle visibility"));
+	voi_menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("toggle activation"));
+	voi_menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("toggle visibility"));
 
 	wxMenu *surf_menu = new wxMenu;
-	surf_menu->Append(MENU_SPLINESURF_NEW, _T("&New"));
+	surf_menu->Append(MENU_SPLINESURF_NEW, _T("New"));
 	surf_menu->AppendSeparator();
-	surf_menu->Append(MENU_SPLINESURF_TOGGLE_LIC, _T("&Toggle Lic"));
-	surf_menu->Append(MENU_SPLINESURF_TOGGLE_NORMAL, _T("&Toggle Normal Direction"));
+	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_LIC, _T("Toggle Lic"));
+	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_NORMAL, _T("Toggle Normal Direction"));
 
 	wxMenu *options_menu = new wxMenu;
-	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("&Assign Color"));
+	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("Assign Color"));
 	options_menu->AppendSeparator();
-	options_menu->Append(MENU_OPTIONS_TOGGLE_LIGHTING, _T("&Toggle Lighting"));
-	options_menu->Append(MENU_OPTIONS_INVERT_FIBERS, _T("&Invert Fiber Selection"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
 	options_menu->AppendSeparator();
-	options_menu->Append(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("&Toggle Texture Mode"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
 
 	wxMenu *help_menu = new wxMenu;
-	help_menu->Append(MENU_HELP_ABOUT, _T("&About"));
+	help_menu->Append(MENU_HELP_ABOUT, _T("About"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, _T("&File"));

@@ -246,9 +246,12 @@ void TheScene::renderFibers()
 			if (m_dh->lighting)
 			{
 				lightsOn();
+				bindTextures();
 				GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
 				glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
-				//m_dh->shaderHelper->m_curveShader->bind();
+
+				m_dh->shaderHelper->m_fiberShader->bind();
+				m_dh->shaderHelper->setFiberShaderVars();
 			}
 
 			if (m_selBoxChanged)
@@ -258,7 +261,7 @@ void TheScene::renderFibers()
 			}
 			info->draw();
 
-			//m_dh->shaderHelper->m_curveShader->release();
+			m_dh->shaderHelper->m_fiberShader->release();
 
 			lightsOff();
 		}

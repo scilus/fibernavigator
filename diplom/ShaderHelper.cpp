@@ -27,11 +27,11 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup mesh shader"));
 #ifdef DEBUG
 	m_dh->printTime();
-	printf("initializing curves shader\n");
+	printf("initializing fiber shader\n");
 #endif
 
-	m_curveShader = new Shader(wxT("GLSL/fibers"));
-	m_curveShader->bind();
+	m_fiberShader = new Shader(wxT("GLSL/fibers"));
+	m_fiberShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fiber shader"));
 
@@ -50,7 +50,7 @@ ShaderHelper::~ShaderHelper() {
 	printf("execute shader helper destructor\n");
 	delete m_textureShader;
 	delete m_meshShader;
-	delete m_curveShader;
+	delete m_fiberShader;
 	printf("shader helper destructor done\n");
 }
 
@@ -130,6 +130,36 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniArrayInt("type", type, c);
 	m_meshShader->setUniArrayFloat("threshold", threshold, c);
 	m_meshShader->setUniInt("countTextures", c);
+}
+
+void ShaderHelper::setFiberShaderVars()
+{
+	m_fiberShader->setUniInt("dimX", m_dh->columns);
+	m_fiberShader->setUniInt("dimY", m_dh->rows);
+	m_fiberShader->setUniInt("dimZ", m_dh->frames);
+
+	int* tex = new int[10];
+	int* show = new int[10];
+	float* threshold = new float[10];
+	int* type = new int[10];
+	int c = 0;
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+		if(info->getType() < Mesh_) {
+			tex[c] = c;
+			show[c] = info->getShow();
+			threshold[c] = info->getThreshold();
+			type[c] = info->getType();
+			++c;
+		}
+	}
+
+	m_fiberShader->setUniArrayInt("texes", tex, c);
+	m_fiberShader->setUniArrayInt("show", show, c);
+	m_fiberShader->setUniArrayInt("type", type, c);
+	m_fiberShader->setUniArrayFloat("threshold", threshold, c);
+	m_fiberShader->setUniInt("countTextures", c);
 }
 
 void ShaderHelper::setSplineSurfaceShaderVars()
