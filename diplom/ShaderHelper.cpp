@@ -138,28 +138,31 @@ void ShaderHelper::setFiberShaderVars()
 	m_fiberShader->setUniInt("dimY", m_dh->rows);
 	m_fiberShader->setUniInt("dimZ", m_dh->frames);
 
-	int* tex = new int[10];
-	int* show = new int[10];
-	float* threshold = new float[10];
-	int* type = new int[10];
+	int tex = 0;
+	int show = 0;
+	float threshold = 0;
+	int type = 0;
+
 	int c = 0;
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if(info->getType() < Mesh_) {
-			tex[c] = c;
-			show[c] = info->getShow();
-			threshold[c] = info->getThreshold();
-			type[c] = info->getType();
+		if(info->getType() < Mesh_)
+		{
+			if(info->getType() == Overlay) {
+				tex = c;
+				show = info->getShow();
+				threshold = info->getThreshold();
+				type = info->getType();
+			}
 			++c;
 		}
 	}
 
-	m_fiberShader->setUniArrayInt("texes", tex, c);
-	m_fiberShader->setUniArrayInt("show", show, c);
-	m_fiberShader->setUniArrayInt("type", type, c);
-	m_fiberShader->setUniArrayFloat("threshold", threshold, c);
-	m_fiberShader->setUniInt("countTextures", c);
+	m_fiberShader->setUniInt("tex", tex);
+	m_fiberShader->setUniInt("show", show);
+	m_fiberShader->setUniInt("type", type);
+	m_fiberShader->setUniFloat("threshold", threshold);
 }
 
 void ShaderHelper::setSplineSurfaceShaderVars()

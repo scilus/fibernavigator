@@ -1,17 +1,23 @@
 #include GLSL/lighting.fs
 
-varying vec3 color1;
 varying vec3 TexCoord;
+varying vec4 color1;
 
 uniform int dimX, dimY, dimZ;
-uniform sampler3D texes[10];
-uniform bool show[10];
-uniform float threshold[10];
-uniform int type[10];
-uniform int countTextures;
+uniform sampler3D tex;
+uniform bool show;
+uniform float threshold;
+uniform int type;
+uniform bool useTex;
 
-void lookupTex( in sampler3D tex, in float threshold, in vec3 v)
+
+void lookupTex()
 {
+	vec3 v = TexCoord;
+	v.x = (v.x + dimX / 2) / (float) dimX;
+	v.y = (v.y + dimY / 2) / (float) dimY;
+	v.z = (v.z + dimZ / 2) / (float) dimZ;
+
 	vec3 col1;
 	col1.r = clamp( texture3D(tex, v).r, 0.0, 1.0);
 
@@ -24,15 +30,9 @@ void lookupTex( in sampler3D tex, in float threshold, in vec3 v)
 
 void main()
 {
-	vec3 v = TexCoord;
-	v.x = (v.x + dimX / 2) / (float) dimX;
-	v.y = (v.y + dimY / 2) / (float) dimY;
-	v.z = (v.z + dimZ / 2) / (float) dimZ;
+	if (type == 3 && useTex )
+		lookupTex();
 
-	for (int i = 9; i > -1; i--) {
-		if (type[i] == 3 && show[i])
-			lookupTex(texes[i], threshold[i], v);
-	}
 
 	vec4 color = vec4(0.0);
 
@@ -53,13 +53,12 @@ void main()
 	calculateLighting(gl_MaxLights, -n, vertex, gl_FrontMaterial.shininess,
 					  ambient, diffuse, specular);
 
-	vec4 tmpColor = vec4(color1, 1.0);
 
-   //tmpColor = gl_FrontLightModelProduct.sceneColor;
+	//color = color1 + (ambient * color1) + (diffuse * color1) + (specular * color1);
 
-	color = tmpColor + (ambient * tmpColor / 2.0) + (diffuse * tmpColor /2.0) + (specular * tmpColor / 2.0);
-
-   //color =   tmpColor + (ambient  * gl_FrontMaterial.ambient) + (diffuse  * gl_FrontMaterial.diffuse/2.0);
+   color =   color1 + (ambient  * gl_FrontMaterial.ambient)
+				    + (diffuse  * gl_FrontMaterial.diffuse)
+				    + (gl_FrontMaterial.specular * color1);
 
    color = clamp(color, 0.0, 1.0);
 
