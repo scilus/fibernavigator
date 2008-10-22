@@ -258,12 +258,12 @@ void TheScene::renderFibers()
 				*/
 			}
 
-			if (info->getUseTex())
+			if (!info->getUseTex())
 			{
 				bindTextures();
 				m_dh->shaderHelper->m_fiberShader->bind();
 				m_dh->shaderHelper->setFiberShaderVars();
-				m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", info->getUseTex());
+				m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", !info->getUseTex());
 			}
 
 			if (m_selBoxChanged)
