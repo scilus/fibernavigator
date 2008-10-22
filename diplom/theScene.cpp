@@ -246,15 +246,25 @@ void TheScene::renderFibers()
 			if (m_dh->lighting)
 			{
 				lightsOn();
+				GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
+				glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
+				/*
+				Vector3fT v1 = {{1.0,1.0,1.0}};
+				Vector3fT l;
+				Vector3fMultMat4(&l, &v1, &m_dh->m_transform);
+
+				GLfloat light_position0[] = { l.s.X, l.s.Y, l.s.Z, 0.0};
+				glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
+				*/
 			}
 
-			bindTextures();
-			GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
-			glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
-
-			m_dh->shaderHelper->m_fiberShader->bind();
-			m_dh->shaderHelper->setFiberShaderVars();
-			m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", info->getUseTex());
+			if (info->getUseTex())
+			{
+				bindTextures();
+				m_dh->shaderHelper->m_fiberShader->bind();
+				m_dh->shaderHelper->setFiberShaderVars();
+				m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", info->getUseTex());
+			}
 
 			if (m_selBoxChanged)
 			{
