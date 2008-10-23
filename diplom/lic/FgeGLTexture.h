@@ -12,6 +12,10 @@
 #define FgeGLTexture_hh
 
 #include <GL/glew.h>
+
+#ifdef __WXMSW__
+	#include "stdio.h"
+#endif
 /**
  * A class for Fge internal handling of textures that is much more lightweight compared to
  * FgeTexture
@@ -21,7 +25,7 @@ class FgeGLTexture
   public:
     FgeGLTexture( GLenum target = GL_TEXTURE_2D, int width=512, int height=512, bool depth=false, GLint type=GL_UNSIGNED_BYTE, GLvoid* data=NULL);
 
-    ~FgeGLTexture();
+	~FgeGLTexture();
 
     void initialize();
 

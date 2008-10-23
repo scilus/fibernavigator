@@ -184,7 +184,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\curves.cpp"
+				RelativePath=".\IsoSurface\CIsoSurface.cpp"
 				>
 			</File>
 			<File
@@ -208,6 +208,30 @@
 				>
 			</File>
 			<File
+				RelativePath=".\lic\FgeFramebufferObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeGLTexture.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeImageSpaceLIC.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeOffscreen.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeRenderbuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fibers.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Fantom\FMath.cpp"
 				>
 			</File>
@@ -225,6 +249,10 @@
 			</File>
 			<File
 				RelativePath=".\Fantom\FTensor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GLHelper.cpp"
 				>
 			</File>
 			<File
@@ -275,6 +303,10 @@
 				RelativePath=".\theScene.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\IsoSurface\Vectors.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -302,7 +334,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\curves.h"
+				RelativePath=".\IsoSurface\CIsoSurface.h"
 				>
 			</File>
 			<File
@@ -327,6 +359,30 @@
 			</File>
 			<File
 				RelativePath=".\Fantom\FException.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeFramebufferObject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeGLTexture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeImageSpaceLIC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeOffscreen.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FgeRenderbuffer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\fibers.h"
 				>
 			</File>
 			<File
@@ -359,6 +415,10 @@
 			</File>
 			<File
 				RelativePath=".\Fantom\FVector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GLHelper.h"
 				>
 			</File>
 			<File
@@ -413,6 +473,10 @@
 				RelativePath=".\theScene.h"
 				>
 			</File>
+			<File
+				RelativePath=".\IsoSurface\Vectors.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -425,11 +489,51 @@
 			>
 		</File>
 		<File
+			RelativePath=".\GLSL\advection.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\advection.vs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\anatomy.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\anatomy.vs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\clipping.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\clipping.vs"
+			>
+		</File>
+		<File
 			RelativePath=".\CMakeLists.txt"
 			>
 		</File>
 		<File
+			RelativePath=".\GLSL\edgedetection.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\edgedetection.vs"
+			>
+		</File>
+		<File
 			RelativePath=".\Fantom\FArray.icc"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\fibers.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\fibers.vs"
 			>
 		</File>
 		<File
@@ -442,6 +546,38 @@
 		</File>
 		<File
 			RelativePath=".\Fantom\FTensor.icc"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\lighting.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\lighting.vs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\mesh.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\mesh.vs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\splineSurf.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\splineSurf.vs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\transform.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\transform.vs"
 			>
 		</File>
 	</Files>

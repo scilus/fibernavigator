@@ -418,15 +418,25 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 #endif
 
 		// generate white noise texture
+#ifdef __WXMSW__
+		srand(time(0));
+#else
 		srand48(time(0));
+#endif
 		unsigned char *randomLuminance =
 				new unsigned char[fbo.getTextureWidth()
 						* fbo.getTextureHeight()];
+#ifdef __WXMSW__
+		for (unsigned int x = 0; x < fbo.getTextureWidth(); x++)
+			for (unsigned int y = 0; y < fbo.getTextureHeight(); y++)
+				randomLuminance[(y * fbo.getTextureWidth()) + x]
+						= (unsigned char) (255.0 * rand());
+#else
 		for (unsigned int x = 0; x < fbo.getTextureWidth(); x++)
 			for (unsigned int y = 0; y < fbo.getTextureHeight(); y++)
 				randomLuminance[(y * fbo.getTextureWidth()) + x]
 						= (unsigned char) (255.0 * drand48());
-
+#endif
 		// create texture
 		noiseTexture
 				= new FgeGLTexture(GL_TEXTURE_2D, fbo.getTextureWidth(), fbo.getTextureHeight());
