@@ -41,7 +41,6 @@ help
 
 
 abspeichern der farben
-zoom und schift
 
 background and threshold
 
@@ -84,3 +83,7 @@ auschalten der boxen mit dem faserbuendel
 12.10.2008
 
 speichern aller einstellungen der scene
+
+26.10
+
+zoom und schift

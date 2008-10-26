@@ -58,7 +58,7 @@ void TheScene::initGL(int view)
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho( 0, view1, 0, view1, 0 - 200, view1 + 200);
+	glOrtho( 0, view1, 0, view1, -3000, 3000);
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("init"));
 }

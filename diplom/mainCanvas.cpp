@@ -94,6 +94,34 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 	switch (m_view)
 	{
 		case mainView: {
+			// TODO marker
+			if (event.MiddleIsDown())
+			{
+				if (!m_dh->m_ismDragging)
+				{
+					m_dh->m_ismDragging = true;
+					m_lastPos = event.GetPosition();
+				}
+				else
+				{
+					int xDrag = m_lastPos.x - clickX;
+					int yDrag = (m_lastPos.y - clickY);
+					m_lastPos = event.GetPosition();
+					m_dh->moveScene(xDrag, yDrag);
+					Refresh(false);
+				}
+			}
+			else
+			{
+				m_dh->m_ismDragging = false;
+			}
+
+			if (event.GetWheelDelta() != 0)
+			{
+				m_dh->changeZoom(event.GetWheelRotation());
+				Refresh(false);
+			}
+
 			if (event.RightIsDown())
 		    {
 				if (!m_dh->m_isrDragging)												// Not Dragging
@@ -426,9 +454,11 @@ void MainCanvas::render()
     switch (m_view)
     {
     case mainView: {
+    	// TODO marker
     	glPushMatrix();
     	float max = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames))/2.0;
-    	glTranslatef(max, max, max);
+    	glTranslatef(max + m_dh->xMove, max + m_dh->yMove, max);
+    	glScalef(m_dh->zoom, m_dh->zoom, m_dh->zoom);
     	glMultMatrixf(m_dh->m_transform.M);
     	glTranslatef(-m_dh->columns/2.0, -m_dh->rows/2.0, -m_dh->frames/2.0);
     	m_dh->scene->renderScene();

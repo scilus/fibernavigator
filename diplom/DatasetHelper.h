@@ -89,6 +89,9 @@ public:
 		zSlize = z;
 	};
 
+	void changeZoom(int z);
+	void moveScene(int x, int y);
+
 	int rows;
 	int columns;
 	int frames;
@@ -129,6 +132,11 @@ public:
 
 	bool m_isDragging;
 	bool m_isrDragging;
+	bool m_ismDragging;
+
+	float zoom;
+	int xMove;
+	int yMove;
 
 	float normalDirection;
 

@@ -44,6 +44,10 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	zSlize = 0.5;
 	quadrant = 6;
 
+	zoom = 1;
+	xMove = 0;
+	yMove = 0;
+
 	lastSelectedPoint = NULL;
 	lastSelectedBox = NULL;
 	scene = NULL;
@@ -60,6 +64,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 	m_isDragging = false;
 	m_isrDragging = false;
+	m_ismDragging = false;
 
 	normalDirection = -1.0;
 
@@ -967,4 +972,15 @@ void DatasetHelper::createIsoSurface() {
 		printf("surface is not valid\n");
 	}
 	mainFrame->refreshAllGLWidgets();
+}
+
+void DatasetHelper::changeZoom(int z)
+{
+	z >= 0 ? zoom = wxMin(10, zoom+0.1) : zoom = wxMax(1, zoom-0.1);
+}
+
+void DatasetHelper::moveScene(int x, int y)
+{
+	xMove = xMove - x;
+	yMove = yMove + y;
 }
