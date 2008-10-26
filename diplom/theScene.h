@@ -16,7 +16,7 @@
 #include "wx/glcanvas.h"
 
 enum {
-	axial =1,
+	axial = 1,
 	coronal,
 	sagittal,
 	mainView

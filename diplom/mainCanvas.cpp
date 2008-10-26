@@ -94,7 +94,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 	switch (m_view)
 	{
 		case mainView: {
-			// TODO marker
 			if (event.MiddleIsDown())
 			{
 				if (!m_dh->m_ismDragging)
@@ -330,11 +329,12 @@ hitResult MainCanvas::pick(wxPoint click)
 	/**
 	 * check if one of the 3 planes is picked
 	 */
+	// TODO its still bugged dammit
 	float tpicked = 0;
 	int picked = 0;
 	hitResult hr;
 	if (m_dh->showAxial) {
-		bb->setSizeZ(0);
+		bb->setSizeZ(0.01);
 		bb->setCenterZ(zz);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
@@ -344,8 +344,9 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setSizeZ(m_dh->frames);
 		bb->setCenterZ(m_dh->frames/2);
 	}
+
 	if (m_dh->showCoronal) {
-		bb->setSizeY(0);
+		bb->setSizeY(0.01);
 		bb->setCenterY(yy);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
@@ -354,6 +355,7 @@ hitResult MainCanvas::pick(wxPoint click)
 				tpicked = hr.tmin;
 			}
 			else {
+
 				if (hr.tmin < tpicked) {
 					picked = coronal;
 					tpicked = hr.tmin;
@@ -363,6 +365,7 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setSizeY(m_dh->rows);
 		bb->setCenterY(m_dh->rows/2);
 	}
+
 	if (m_dh->showSagittal) {
 		bb->setSizeX(0.01);
 		bb->setCenterX(xx);
@@ -380,7 +383,7 @@ hitResult MainCanvas::pick(wxPoint click)
 			}
 		}
 	}
-	if (hr.hit) {
+	if (picked != 0) {
 		hr.tmin = tpicked;
 		hr.picked = picked;
 	}
@@ -480,6 +483,8 @@ void MainCanvas::invalidate()
 
 void MainCanvas::renderTestRay()
 {
+	if (m_hr.tmin == 0)
+		glColor3f(1.0, 0.0, 0.0);
 	glBegin(GL_LINES);
 		glVertex3f(m_pos1X, m_pos1Y, m_pos1Z);
 		glVertex3f(m_pos2X, m_pos2Y, m_pos2Z);
