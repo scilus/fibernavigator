@@ -61,13 +61,13 @@ void cutAtSplineSurface()
 {
 	vec3 u = TexCoord;
 	/*u.x = (u.x + dimX / 2) / (float) dimX;*/
-	u.y = (u.y + dimY / 2) / (float) dimY;
-	u.z = (u.z + dimZ / 2) / (float) dimZ;
+	u.y = (u.y) / (float) dimY;
+	u.z = (u.z) / (float) dimZ;
 
 	for (int i = 9; i > -1; i--) {
 		if (type[i] == 5)
 		{
-			if (vertex.x < (texture2D(cutTex, u.yz).r * dimX) - dimX/2) discard;
+			if (vertex.x < (texture2D(cutTex, u.yz).r * dimX)) discard;
 		}
 	}
 }

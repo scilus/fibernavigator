@@ -10,7 +10,7 @@ uniform int dimX, dimY, dimZ;
 void main()
 {
 	prepareLight();
-
+/*
 	float greyVal = 0.5;
 
 	for (int j = 0 ; j < 6 ; ++j)
@@ -31,7 +31,7 @@ void main()
 
 		gl_Vertex.xyz  += 2 * offset;
 	}
-
+*/
 	TexCoord = gl_Vertex;
 	myColor = gl_Color;
 	gl_Position = ftransform();

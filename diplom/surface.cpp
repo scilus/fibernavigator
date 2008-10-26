@@ -487,16 +487,12 @@ void Surface::createCutTexture()
 
 	float* cutTex;
 	cutTex = new float[xDim*yDim];
-	int xOff = m_dh->rows/2;
-	int yOff = m_dh->frames/2;
 
 	for ( int x = 0 ; x < xDim ; ++x )
 	{
 		for ( int y = 0 ; y < yDim ; ++y)
 		{
-			//cutTex[y + (xDim-1-x)*yDim] =
-			cutTex[x + y*xDim] =
-				(getXValue(x - xOff, y - yOff, numPoints)  + (m_dh->columns/2.0)) / (float)m_dh->columns;
+			cutTex[x + y*xDim] = getXValue(x, y, numPoints) / (float) m_dh->columns;
 
 		}
 	}
@@ -518,8 +514,8 @@ float Surface::getXValue(int y, int z, int numPoints)
 {
 	m_boxMin = new float[3];
 	m_boxMax = new float[3];
-	m_boxMin[0] = - m_dh->columns / 2;
-	m_boxMax[0] = m_dh->columns / 2;;
+	m_boxMin[0] = 0;
+	m_boxMax[0] = m_dh->columns;
 	m_boxMin[1] = y - 3;
 	m_boxMax[1] = y + 3;
 	m_boxMin[2] = z - 3;
