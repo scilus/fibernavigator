@@ -142,8 +142,6 @@ public:
 
 	float normalDirection;
 
-	bool useLinearFiltering;
-
 private:
 
 };

@@ -67,8 +67,6 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_ismDragging = false;
 
 	normalDirection = -1.0;
-
-	useLinearFiltering = true;
 }
 
 DatasetHelper::~DatasetHelper() {

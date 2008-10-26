@@ -828,7 +828,18 @@ void MainFrame::OnToggleNormal(wxCommandEvent& event)
  ****************************************************************************************************/
 void MainFrame::OnToggleTextureFiltering(wxCommandEvent& event)
 {
-	m_dh->useLinearFiltering = !m_dh->useLinearFiltering;
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() < Mesh_ )
+		{
+			if (!info->toggleShowFS())
+				m_listCtrl->SetItem(item, 1, info->getName() + wxT("*"));
+			else
+				m_listCtrl->SetItem(item, 1, info->getName());
+		}
+	}
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -1115,13 +1126,10 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		refreshAllGLWidgets();
 		break;
 	case 1:
-		if (info->getType() >= Mesh_)
-		{
-			if (!info->toggleShowFS())
-				m_listCtrl->SetItem(item, 1, info->getName() + wxT("*"));
-			else
-				m_listCtrl->SetItem(item, 1, info->getName());
-		}
+		if (!info->toggleShowFS())
+			m_listCtrl->SetItem(item, 1, info->getName() + wxT("*"));
+		else
+			m_listCtrl->SetItem(item, 1, info->getName());
 		break;
 	case 2:
 		if (info->getType() >= Mesh_)
