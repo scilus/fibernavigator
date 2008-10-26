@@ -21,10 +21,17 @@
 #include "icons/view1.xpm"
 #include "icons/view2.xpm"
 #include "icons/view3.xpm"
+#ifdef __WXMSW__
+#include "icons/axialw.xpm"
+#include "icons/corw.xpm"
+#include "icons/sagw.xpm"
+#include "icons/boxw.xpm"
+#else
 #include "icons/axial.xpm"
 #include "icons/cor.xpm"
 #include "icons/sag.xpm"
 #include "icons/box.xpm"
+#endif
 #include "icons/mini_cat.xpm"
 #include "icons/new.xpm"
 #include "icons/exp.xpm"
@@ -123,7 +130,7 @@ bool MyApp::OnInit(void) {
 	wxBitmap bmpGBALL(gball_xpm);
 	wxBitmap bmpHideSelbox(toggleselbox_xpm);
 	wxBitmap bmpNewSurface(toggle_surface_xpm);
-	wxBitmap bmpAssignColor(toggle_rgb_xpm);
+	wxBitmap bmpAssignColor(toggleRGB_xpm);
 	wxBitmap bmpLighting(exp_xpm);
 	//toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
 	toolBar->AddTool(MENU_FILE_LOAD, bmpOpen, wxT("Open"));
