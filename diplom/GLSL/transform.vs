@@ -41,13 +41,14 @@ uniform int dimX, dimY, dimZ;
  /////////////////////////////////////////////////////////////////////////////////////////////
 void main() {
 
+	/*
 	float greyVal = 0.5;
 
 	for (int j = 0; j < 6; ++j) {
 		vec3 v = gl_Vertex.xyz;
-		v.x = (v.x + dimX / 2) / (float) dimX;
-		v.y = (v.y + dimY / 2) / (float) dimY;
-		v.z = (v.z + dimZ / 2) / (float) dimZ;
+		v.x = (v.x) / (float) dimX;
+		v.y = (v.y) / (float) dimY;
+		v.z = (v.z) / (float) dimZ;
 
 		for (int i = 9; i > -1; i--) {
 			if (type[i] == 1) {
@@ -58,7 +59,7 @@ void main() {
 
 		gl_Vertex.xyz += 2 * offset;
 	}
-
+*/
 	TexCoord = gl_Vertex;
 
 	vec4 tensor = gl_Color;
