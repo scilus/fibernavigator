@@ -188,17 +188,15 @@ bool Fibers::load(wxString filename)
 
 	toggleEndianess();
 	m_dh->printTime();
+
 	printf("move vertices\n");
-	int xOff = m_dh->columns/2;
-	int yOff = m_dh->rows/2;
-	int zOff = m_dh->frames/2;
+
 	for (int i = 0; i < countPoints * 3 ; ++i) {
-		m_pointArray[i] = xOff - m_pointArray[i];
-		++i;
-		m_pointArray[i] = m_pointArray[i] - yOff;
-		++i;
-		m_pointArray[i] = zOff - m_pointArray[i];
+		m_pointArray[i] = m_dh->columns - m_pointArray[i];
+		i += 2;
+		m_pointArray[i] = m_dh->frames - m_pointArray[i];
 	}
+
 	calculateLinePointers();
 	createColorArray();
 	m_dh->printTime();
@@ -658,10 +656,6 @@ void Fibers::saveSelection(SelectionBox* box, const wxString filename)
 	int pointIndex = 0;
 	int countLines = 0;
 
-	int xOff = m_dh->columns/2;
-	int yOff = m_dh->rows/2;
-	int zOff = m_dh->frames/2;
-
 	wxColour col = box->getColor();
 	float redVal = ((float)col.Red())/255.0;
 	float greenVal = ((float)col.Green())/255.0;
@@ -677,11 +671,11 @@ void Fibers::saveSelection(SelectionBox* box, const wxString filename)
 
 			for (int j = 0; j < getPointsPerLine(l) ; ++j )
 			{
-				pointsToSave.push_back(xOff - m_pointArray[pc]);
+				pointsToSave.push_back(m_dh->columns - m_pointArray[pc]);
 				++pc;
-				pointsToSave.push_back(m_pointArray[pc] + yOff);
+				pointsToSave.push_back(m_pointArray[pc]);
 				++pc;
-				pointsToSave.push_back(zOff - m_pointArray[pc]);
+				pointsToSave.push_back(m_dh->columns - m_pointArray[pc]);
 				++pc;
 
 				linesToSave.push_back(pointIndex);

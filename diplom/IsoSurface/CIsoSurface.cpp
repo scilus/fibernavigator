@@ -749,9 +749,9 @@ void CIsoSurface::CalculateNormals()
 
 void CIsoSurface::generateGeometry()
 {
-	float xOff = m_dh->columns/2 - 0.5f;
-	float yOff = m_dh->rows/2 - 0.5f;
-	float zOff = m_dh->frames/2 - 0.5f;
+	float xOff = -0.5f;
+	float yOff = -0.5f;
+	float zOff = -0.5f;
 
 	//printf("%d vertices : %d  normals: %d triangles\n", m_nVertices, m_nNormals, m_nTriangles);
 

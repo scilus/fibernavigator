@@ -274,7 +274,12 @@ float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector
 hitResult MainCanvas::pick(wxPoint click)
 {
 	glPushMatrix();
+
+	float max = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames))/2.0;
+	glTranslatef(max, max, max);
 	glMultMatrixf(m_dh->m_transform.M);
+	glTranslatef(-m_dh->columns/2.0, -m_dh->rows/2.0, -m_dh->frames/2.0);
+
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -291,11 +296,11 @@ hitResult MainCanvas::pick(wxPoint click)
 	gluUnProject( winX, winY, 1, modelview, projection, viewport, &m_pos2X, &m_pos2Y, &m_pos2Z);
 	glPopMatrix();
 	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
-	BoundingBox *bb = new BoundingBox(0,0,0, m_dh->columns, m_dh->rows, m_dh->frames);
+	BoundingBox *bb = new BoundingBox(m_dh->columns/2, m_dh->rows/2, m_dh->frames/2, m_dh->columns, m_dh->rows, m_dh->frames);
 
-	float xx = m_dh->xSlize - m_dh->columns/2;
-	float yy = m_dh->ySlize - m_dh->rows/2;
-	float zz = m_dh->zSlize - m_dh->frames/2;
+	float xx = m_dh->xSlize;
+	float yy = m_dh->ySlize;
+	float zz = m_dh->zSlize;
 
 	/**
 	 * check if one of the 3 planes is picked
@@ -312,7 +317,7 @@ hitResult MainCanvas::pick(wxPoint click)
 			picked = axial;
 		}
 		bb->setSizeZ(m_dh->frames);
-		bb->setCenterZ(0);
+		bb->setCenterZ(m_dh->frames/2);
 	}
 	if (m_dh->showCoronal) {
 		bb->setSizeY(0);
@@ -331,10 +336,10 @@ hitResult MainCanvas::pick(wxPoint click)
 			}
 		}
 		bb->setSizeY(m_dh->rows);
-		bb->setCenterY(0);
+		bb->setCenterY(m_dh->rows/2);
 	}
 	if (m_dh->showSagittal) {
-		bb->setSizeX(0);
+		bb->setSizeX(0.01);
 		bb->setCenterX(xx);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
@@ -422,7 +427,10 @@ void MainCanvas::render()
     {
     case mainView: {
     	glPushMatrix();
-    	glMultMatrixf(m_dh->m_transform.M);										// NEW: Apply Dynamic Transform
+    	float max = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames))/2.0;
+    	glTranslatef(max, max, max);
+    	glMultMatrixf(m_dh->m_transform.M);
+    	glTranslatef(-m_dh->columns/2.0, -m_dh->rows/2.0, -m_dh->frames/2.0);
     	m_dh->scene->renderScene();
     	//renderTestRay();
 	    glPopMatrix();
@@ -549,14 +557,14 @@ void MainCanvas::testRender(GLuint tex)
 	// texture environment
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	int x = m_dh->columns/2;
-	int y = m_dh->rows/2;
+	int x = m_dh->columns;
+	int y = m_dh->rows;
 
 	glBegin(GL_QUADS);
-		glTexCoord2f(0.0, 1.0); glVertex3f(-x, -y, 0);
-		glTexCoord2f(0.0, 0.0); glVertex3f(-x,  y, 0);
-		glTexCoord2f(1.0, 0.0); glVertex3f( x,  y, 0);
-		glTexCoord2f(1.0, 1.0); glVertex3f( x, -y, 0);
+		glTexCoord2f(0.0, 1.0); glVertex3f( 0, 0, 0);
+		glTexCoord2f(0.0, 0.0); glVertex3f( 0, y, 0);
+		glTexCoord2f(1.0, 0.0); glVertex3f( x, y, 0);
+		glTexCoord2f(1.0, 1.0); glVertex3f( x, 0, 0);
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);

@@ -356,9 +356,9 @@ void Surface::execute ()
 		m_normalArray[ 3 * i + 1] = n[1];
 		m_normalArray[ 3 * i + 2] = n[2];
 
-		x = wxMax(0, wxMin((int)p[0] + m_dh->xOff, m_dh->columns));
-		y = wxMax(0, wxMin((int)p[1] + m_dh->yOff, m_dh->rows));
-		z = wxMax(0, wxMin((int)p[2] + m_dh->zOff, m_dh->frames));
+		x = (int)p[0];
+		y = (int)p[1];
+		z = (int)p[2];
 
 		if (m_dh->vectors_loaded)
 		{

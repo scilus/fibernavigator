@@ -89,7 +89,7 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 		col1.r = clamp( texture3D(tex, v).r, 0.0, 1.0);
 		col1.g = clamp( texture3D(tex, v).g, 0.0, 1.0);
 		col1.b = clamp( texture3D(tex, v).b, 0.0, 1.0);
-		
+
 		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold) > 0.0)
 		{
 			color.rgb = col1.rgb;
@@ -125,9 +125,9 @@ void main() {
 
 	if (useTex) {
 		vec3 v = TexCoord;
-		v.x = (v.x + dimX / 2) / (float) dimX;
-		v.y = (v.y + dimY / 2) / (float) dimY;
-		v.z = (v.z + dimZ / 2) / (float) dimZ;
+		v.x = (v.x) / (float) dimX;
+		v.y = (v.y) / (float) dimY;
+		v.z = (v.z) / (float) dimZ;
 
 		for (int i = 9; i > -1; i--) {
 			if (show[i])

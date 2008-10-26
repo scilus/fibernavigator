@@ -81,9 +81,9 @@ void main()
    vec4 color = vec4(0.0);
 
 	vec3 v = TexCoord;
-	v.x = (v.x + dimX/2) / (float)dimX;
-	v.y = (v.y + dimY/2) / (float)dimY;
-	v.z = (v.z + dimZ/2) / (float)dimZ;
+	v.x = (v.x) / (float)dimX;
+	v.y = (v.y) / (float)dimY;
+	v.z = (v.z) / (float)dimZ;
 
 	if (useTex)
 	{

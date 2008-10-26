@@ -92,9 +92,6 @@ public:
 	int rows;
 	int columns;
 	int frames;
-	float xOff;
-	float yOff;
-	float zOff;
 	bool useVBO;
 	bool lighting;
 	unsigned int countFibers;

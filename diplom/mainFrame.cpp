@@ -677,9 +677,9 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
-	Vector3fT vc = {{m_xSlider->GetValue()-m_dh->columns/2,
-					m_ySlider->GetValue()-m_dh->rows/2,
-					m_zSlider->GetValue()-m_dh->frames/2}};
+	Vector3fT vc = {{m_xSlider->GetValue(),
+					m_ySlider->GetValue(),
+					m_zSlider->GetValue()}};
 	Vector3fT vs = {{m_dh->columns/8,m_dh->rows/8, m_dh->frames/8}};
 	SelectionBox *selBox = new SelectionBox(vc, vs, m_dh);
 
@@ -737,9 +737,7 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 		return;
 	}
 
-	int y = m_dh->rows/2;
-	int z = m_dh->frames/2;
-	int xs = m_xSlider->GetValue() - m_dh->columns/2;
+	int xs = m_xSlider->GetValue();
 
 	//delete all existing points
 	m_treeWidget->DeleteChildren(m_tPointId);
@@ -756,7 +754,7 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 			int zz = (m_dh->frames/10)*j;
 
 			// create the point
-			SplinePoint *point = new SplinePoint(xs, yy-y, zz-z, m_dh);
+			SplinePoint *point = new SplinePoint(xs, yy, zz, m_dh);
 
 			if (i == 0 || i == 10 || j == 0 || j == 10) {
 				wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("boundary point"),-1, -1, new MyTreeItemData(point, BPoint));

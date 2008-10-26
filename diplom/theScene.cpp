@@ -54,11 +54,11 @@ void TheScene::initGL(int view)
 	}
 
 	float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
-	float view1 = maxLength/2.0;
+	float view1 = maxLength;
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-view1, view1, -view1, view1, -(view1 + 5) , view1 + 5);
+	glOrtho( 0, view1, 0, view1, 0 - 200, view1 + 200);
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("init"));
 }

@@ -22,9 +22,6 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	rows = 1;
 	columns = 1;
 	frames = 1;
-	xOff = 0;
-	yOff = 0;
-	zOff = 0;
 	countFibers = 0;
 	threadsActive = 0;
 	anatomy_loaded = false;
@@ -141,9 +138,6 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 			rows = anatomy->getRows();
 			columns = anatomy->getColumns();
 			frames = anatomy->getFrames();
-			xOff = columns / 2.0;
-			yOff = rows / 2.0;
-			zOff = frames / 2.0;
 			anatomy_loaded = true;
 
 			anatomy->setThreshold(threshold);
@@ -200,9 +194,9 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		Fibers *fibers = new Fibers(this);
 		if (fibers->load(filename)) {
 			if (index != -1) {
-				Vector3fT vc = { { mainFrame->m_xSlider->GetValue() - columns
-						/ 2, mainFrame->m_ySlider->GetValue() - rows / 2,
-						mainFrame->m_zSlider->GetValue() - frames / 2 } };
+				Vector3fT vc = { { mainFrame->m_xSlider->GetValue(),
+						mainFrame->m_ySlider->GetValue() ,
+						mainFrame->m_zSlider->GetValue() } };
 
 				Vector3fT vs = { { columns / 8, rows / 8, frames / 8 } };
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
@@ -857,7 +851,11 @@ void DatasetHelper::updateAllSelectionBoxes() {
 Vector3fT DatasetHelper::mapMouse2World(int x, int y)
 {
 	glPushMatrix();
-	glMultMatrixf(m_transform.M);
+	float max = (float)wxMax(columns, wxMax(rows, frames))/2.0;
+   	glTranslatef(max, max, max);
+   	glMultMatrixf(m_transform.M);
+   	glTranslatef(-columns/2.0, -rows/2.0, -frames/2.0);
+
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -880,7 +878,11 @@ Vector3fT DatasetHelper::mapMouse2World(int x, int y)
 Vector3fT DatasetHelper::mapMouse2WorldBack(int x, int y)
 {
 	glPushMatrix();
-	glMultMatrixf(m_transform.M);
+	float max = (float)wxMax(columns, wxMax(rows, frames))/2.0;
+   	glTranslatef(max, max, max);
+   	glMultMatrixf(m_transform.M);
+   	glTranslatef(-columns/2.0, -rows/2.0, -frames/2.0);
+
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];

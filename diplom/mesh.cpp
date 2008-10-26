@@ -190,10 +190,6 @@ bool Mesh::load(wxString filename)
 
 void Mesh::generateGeometry()
 {
-	int xOff = m_dh->columns/2;
-	int yOff = m_dh->rows/2;
-	int zOff = m_dh->frames/2;
-
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
@@ -205,23 +201,23 @@ void Mesh::generateGeometry()
 			glNormal3f( 	m_vertexArray[p.v1].nx,
 							m_vertexArray[p.v1].ny,
 							m_vertexArray[p.v1].nz);
-			glVertex3f( 	m_vertexArray[p.v1].x - xOff,
-							m_vertexArray[p.v1].y - yOff,
-							m_vertexArray[p.v1].z - zOff);
+			glVertex3f( 	m_vertexArray[p.v1].x,
+							m_vertexArray[p.v1].y,
+							m_vertexArray[p.v1].z);
 
 			glNormal3f( 	m_vertexArray[p.v2].nx,
 							m_vertexArray[p.v2].ny,
 							m_vertexArray[p.v2].nz);
-			glVertex3f(		m_vertexArray[p.v2].x - xOff,
-							m_vertexArray[p.v2].y - yOff,
-							m_vertexArray[p.v2].z - zOff);
+			glVertex3f(		m_vertexArray[p.v2].x,
+							m_vertexArray[p.v2].y,
+							m_vertexArray[p.v2].z);
 
 			glNormal3f( 	m_vertexArray[p.v3].nx,
 							m_vertexArray[p.v3].ny,
 							m_vertexArray[p.v3].nz);
-			glVertex3f(		m_vertexArray[p.v3].x - xOff,
-							m_vertexArray[p.v3].y - yOff,
-							m_vertexArray[p.v3].z - zOff);
+			glVertex3f(		m_vertexArray[p.v3].x,
+							m_vertexArray[p.v3].y,
+							m_vertexArray[p.v3].z);
 		}
 	glEnd();
 

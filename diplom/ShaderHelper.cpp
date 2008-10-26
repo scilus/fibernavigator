@@ -86,9 +86,9 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniInt("dimX", m_dh->columns);
 	m_meshShader->setUniInt("dimY", m_dh->rows);
 	m_meshShader->setUniInt("dimZ", m_dh->frames);
-	m_meshShader->setUniInt("cutX", (int)(m_dh->xSlize - m_dh->columns/2.0));
-	m_meshShader->setUniInt("cutY", (int)(m_dh->ySlize - m_dh->rows/2.0));
-	m_meshShader->setUniInt("cutZ", (int)(m_dh->zSlize - m_dh->frames/2.0));
+	m_meshShader->setUniInt("cutX", (int)m_dh->xSlize);
+	m_meshShader->setUniInt("cutY", (int)m_dh->ySlize);
+	m_meshShader->setUniInt("cutZ", (int)m_dh->zSlize);
 	m_meshShader->setUniInt("sector", m_dh->quadrant);
 
 	int* tex = new int[10];
