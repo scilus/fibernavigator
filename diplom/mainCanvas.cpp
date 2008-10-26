@@ -303,10 +303,7 @@ hitResult MainCanvas::pick(wxPoint click)
 {
 	glPushMatrix();
 
-	float max = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames))/2.0;
-	glTranslatef(max, max, max);
-	glMultMatrixf(m_dh->m_transform.M);
-	glTranslatef(-m_dh->columns/2.0, -m_dh->rows/2.0, -m_dh->frames/2.0);
+	m_dh->doMatrixManipulation();
 
 	GLint viewport[4];
 	GLdouble modelview[16];
@@ -456,11 +453,7 @@ void MainCanvas::render()
     case mainView: {
     	// TODO marker
     	glPushMatrix();
-    	float max = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames))/2.0;
-    	glTranslatef(max + m_dh->xMove, max + m_dh->yMove, max);
-    	glScalef(m_dh->zoom, m_dh->zoom, m_dh->zoom);
-    	glMultMatrixf(m_dh->m_transform.M);
-    	glTranslatef(-m_dh->columns/2.0, -m_dh->rows/2.0, -m_dh->frames/2.0);
+    	m_dh->doMatrixManipulation();
     	m_dh->scene->renderScene();
     	//renderTestRay();
 	    glPopMatrix();

@@ -92,6 +92,8 @@ public:
 	void changeZoom(int z);
 	void moveScene(int x, int y);
 
+	void doMatrixManipulation();
+
 	int rows;
 	int columns;
 	int frames;

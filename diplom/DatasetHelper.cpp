@@ -856,10 +856,7 @@ void DatasetHelper::updateAllSelectionBoxes() {
 Vector3fT DatasetHelper::mapMouse2World(int x, int y)
 {
 	glPushMatrix();
-	float max = (float)wxMax(columns, wxMax(rows, frames))/2.0;
-   	glTranslatef(max, max, max);
-   	glMultMatrixf(m_transform.M);
-   	glTranslatef(-columns/2.0, -rows/2.0, -frames/2.0);
+	doMatrixManipulation();
 
 	GLint viewport[4];
 	GLdouble modelview[16];
@@ -883,10 +880,7 @@ Vector3fT DatasetHelper::mapMouse2World(int x, int y)
 Vector3fT DatasetHelper::mapMouse2WorldBack(int x, int y)
 {
 	glPushMatrix();
-	float max = (float)wxMax(columns, wxMax(rows, frames))/2.0;
-   	glTranslatef(max, max, max);
-   	glMultMatrixf(m_transform.M);
-   	glTranslatef(-columns/2.0, -rows/2.0, -frames/2.0);
+	doMatrixManipulation();
 
 	GLint viewport[4];
 	GLdouble modelview[16];
@@ -983,4 +977,13 @@ void DatasetHelper::moveScene(int x, int y)
 {
 	xMove = xMove - x;
 	yMove = yMove + y;
+}
+
+void DatasetHelper::doMatrixManipulation()
+{
+	float max = (float)wxMax(columns, wxMax(rows, frames))/2.0;
+	glTranslatef(max + xMove, max + yMove, max);
+	glScalef(zoom, zoom, zoom);
+	glMultMatrixf(m_transform.M);
+	glTranslatef(-columns/2.0, -rows/2.0, -frames/2.0);
 }
