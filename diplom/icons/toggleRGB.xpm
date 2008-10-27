@@ -1,5 +1,5 @@
 /* XPM */
-const char * toggle_rgb_xpm[] = {
+const char * toggleRGB_xpm[] = {
 "16 16 12 1",
 " 	s None	c None",
 ".	c tan",
