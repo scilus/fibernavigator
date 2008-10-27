@@ -648,22 +648,23 @@ void Fibers::barycenterTest(int left, int right, int axis)
 	}
 }
 
-void Fibers::saveSelection(SelectionBox* box, const wxString filename)
+void Fibers::save(wxString filename)
 {
+	if (filename.AfterLast('.') != _T("fib"))
+		filename += _T(".fib");
 	std::vector<float>pointsToSave;
 	std::vector<int>linesToSave;
 	std::vector<float>colorsToSave;
 	int pointIndex = 0;
 	int countLines = 0;
 
-	wxColour col = box->getColor();
-	float redVal = ((float)col.Red())/255.0;
-	float greenVal = ((float)col.Green())/255.0;
-	float blueVal = ((float)col.Blue())/255.0;
+	float redVal = 0.5f;
+	float greenVal = 0.5;
+	float blueVal = 0.5f;
 
 	for ( int l = 0 ; l < m_lineCount ; ++l )
 	{
-		if (box->m_inBox[l])
+		if (m_inBox[l])
 		{
 			unsigned int pc = getStartIndexForLine(l)*3;
 
@@ -768,8 +769,6 @@ void Fibers::saveSelection(SelectionBox* box, const wxString filename)
 	myfile.write(buffer, vBuffer.size());
 
 	myfile.close();
-
-
 }
 
 std::string Fibers::intToString(int number)

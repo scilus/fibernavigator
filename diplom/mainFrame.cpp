@@ -487,18 +487,6 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->fibers_loaded) return;
-	SelectionBox *box;
-	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
-	if (((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getType() == MasterBox)
-	{
-		box = (SelectionBox*)((MyTreeItemData*)m_treeWidget->GetItemData(tBoxId))->getData();
-
-	}
-	else
-	{
-		wxMessageBox(wxT("ERROR\n\nno master selection box selected") ,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-		return;
-	}
 
 	Fibers *fibers;
 	wxTreeItemIdValue cookie = 0;
@@ -515,7 +503,7 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		m_dh->lastPath = dialog.GetDirectory();
-		fibers->saveSelection(box, dialog.GetPath());
+		fibers->save(dialog.GetPath());
 	}
 }
 

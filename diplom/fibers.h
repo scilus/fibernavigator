@@ -56,7 +56,7 @@ public:
 	void createColorArray();
 	void freeArrays() {delete[] m_colorArray; delete[] m_normalArray;};
 
-	void saveSelection(SelectionBox* box, const wxString filename);
+	void save(wxString filename);
 
 	float *m_pointArray;
 	int* m_lineArray;
