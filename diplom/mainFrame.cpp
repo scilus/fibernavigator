@@ -41,6 +41,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_MENU(MENU_FILE_SAVE_FIBERS, MainFrame::OnSaveFibers)
     EVT_MENU(MENU_FILE_QUIT, MainFrame::OnQuit)
 	// Menu View
+    EVT_MENU(MENU_VIEW_RESET, MainFrame::OnMenuViewReset)
     EVT_MENU(MENU_VIEW_LEFT, MainFrame::OnMenuViewLeft)
 	EVT_MENU(MENU_VIEW_RIGHT, MainFrame::OnMenuViewRight)
 	EVT_MENU(MENU_VIEW_TOP, MainFrame::OnMenuViewTop)
@@ -513,6 +514,13 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
  * Sets the main GL widget to some standard positions
  *
  ****************************************************************************************************/
+void MainFrame::OnMenuViewReset(wxCommandEvent& event)
+{
+	m_dh->zoom = 1;
+	m_dh->xMove = 0;
+	m_dh->yMove = 0;
+	refreshAllGLWidgets();
+}
 void MainFrame::OnMenuViewLeft(wxCommandEvent& event)
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);

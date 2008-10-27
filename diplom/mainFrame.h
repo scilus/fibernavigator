@@ -34,6 +34,7 @@ private:
 	void OnSaveFibers(wxCommandEvent& event);
 	void OnQuit(wxCommandEvent& event);
 	// View
+	void OnMenuViewReset(wxCommandEvent& event);
 	void OnMenuViewLeft(wxCommandEvent& event);
 	void OnMenuViewRight(wxCommandEvent& event);
 	void OnMenuViewTop(wxCommandEvent& event);
@@ -176,6 +177,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_VIEW_BACK								123
 #define MENU_VIEW_TOP								124
 #define MENU_VIEW_BOTTOM							125
+#define MENU_VIEW_RESET								126
 // Menu Voi
 #define MENU_VOI_NEW_SELBOX							130
 #define MENU_VOI_RENDER_SELBOXES					131

@@ -74,10 +74,12 @@ bool MyApp::OnInit(void) {
 	file_menu->Append(MENU_FILE_QUIT, _T("Exit"));
 
 	wxMenu *view_menu = new wxMenu;
+	view_menu->Append(MENU_VIEW_RESET, _T("reset"));
+	view_menu->AppendSeparator();
 	view_menu->Append(MENU_VIEW_LEFT, _T("left"));
 	view_menu->Append(MENU_VIEW_RIGHT, _T("right"));
-	view_menu->Append(MENU_VIEW_FRONT, _T("anterior"));
-	view_menu->Append(MENU_VIEW_BACK, _T("posterior"));
+	view_menu->Append(MENU_VIEW_FRONT, _T("posterior"));
+	view_menu->Append(MENU_VIEW_BACK, _T("anterior"));
 	view_menu->Append(MENU_VIEW_TOP, _T("superior"));
 	view_menu->Append(MENU_VIEW_BOTTOM, _T("inferior"));
 
