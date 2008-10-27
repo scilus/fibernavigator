@@ -121,6 +121,8 @@ bool Shader::loadFromFile(wxString* code, wxString fileName)
 			else
 			{
 				wxString line = file.GetLine(i);
+				line.Trim();
+				line.Trim(true);
 				for (unsigned int j = 0 ; j < line.Length() ; ++j )
 				{
 					if (line.GetChar(j) == '/' && line.GetChar(j+1) == '/')
