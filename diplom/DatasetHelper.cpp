@@ -798,7 +798,8 @@ void DatasetHelper::createIsoSurface() {
 
 void DatasetHelper::changeZoom(int z)
 {
-	z >= 0 ? zoom = wxMin(10, zoom+0.1) : zoom = wxMax(1, zoom-0.1);
+	float delta = ((int)zoom)*0.1f;
+	z >= 0 ? zoom = wxMin(10, zoom+delta) : zoom = wxMax(1, zoom-delta);
 }
 
 void DatasetHelper::moveScene(int x, int y)
