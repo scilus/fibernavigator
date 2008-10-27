@@ -247,7 +247,7 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 		mainFrame->m_ySlider->SetValue(rows / 2);
 		mainFrame->m_zSlider->SetMax(wxMax(2,frames-1));
 		mainFrame->m_zSlider->SetValue(frames / 2);
-		mainFrame->m_tSlider->SetValue(10);
+		mainFrame->m_tSlider->SetValue(0);
 		updateView(mainFrame->m_xSlider->GetValue(),
 				mainFrame->m_ySlider->GetValue(),
 				mainFrame->m_zSlider->GetValue());
