@@ -228,10 +228,10 @@ void AnatomyHelper::renderA1()
 {
 	if (!m_dh->showAxial) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, 0.0, zc); glVertex3i(0, 0, z);
-		glTexCoord3f(0.0, yc, zc); glVertex3i(0,  y, z);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x,  y, z);
-		glTexCoord3f(xc, 0.0,zc); glVertex3i(x, 0, z);
+		glTexCoord3f(0.0, 0.0, zc); glVertex3f(0, 0, z + 0.5f);
+		glTexCoord3f(0.0, yc, zc);  glVertex3f(0, y, z + 0.5f);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x, y, z + 0.5f);
+		glTexCoord3f(xc, 0.0,zc);   glVertex3f(x, 0, z + 0.5f);
 	glEnd();
 }
 
@@ -239,10 +239,10 @@ void AnatomyHelper::renderA2()
 {
 	if (!m_dh->showAxial) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, yc, zc); glVertex3i(0, y, z);
-		glTexCoord3f(0.0, 1.0, zc); glVertex3i(0,  yb, z);
-		glTexCoord3f(xc, 1.0, zc); glVertex3i(x,  yb, z);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
+		glTexCoord3f(0.0, yc, zc);  glVertex3f(0, y,  z + 0.5f);
+		glTexCoord3f(0.0, 1.0, zc); glVertex3f(0, yb, z + 0.5f);
+		glTexCoord3f(xc, 1.0, zc);  glVertex3f(x, yb, z + 0.5f);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x, y,  z + 0.5f);
 	glEnd();
 }
 
@@ -250,10 +250,10 @@ void AnatomyHelper::renderA3()
 {
 	if (!m_dh->showAxial) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(xc, 0, zc); glVertex3i(x, 0, z);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
-		glTexCoord3f(1.0, yc, zc); glVertex3i(xb,  y, z);
-		glTexCoord3f(1.0, 0, zc); glVertex3i(xb, 0, z);
+		glTexCoord3f(xc, 0, zc);   glVertex3f(x,  0, z + 0.5f);
+		glTexCoord3f(xc, yc, zc);  glVertex3f(x,  y, z + 0.5f);
+		glTexCoord3f(1.0, yc, zc); glVertex3f(xb, y, z + 0.5f);
+		glTexCoord3f(1.0, 0, zc);  glVertex3f(xb, 0, z + 0.5f);
 	glEnd();
 }
 
@@ -261,10 +261,10 @@ void AnatomyHelper::renderA4()
 {
 	if (!m_dh->showAxial) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
-		glTexCoord3f(xc, 1.0, zc); glVertex3i(x, yb, z);
-		glTexCoord3f(1.0, 1.0, zc); glVertex3i(xb, yb, z);
-		glTexCoord3f(1.0, yc, zc); glVertex3i(xb, y, z);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x,  y,  z + 0.5f);
+		glTexCoord3f(xc, 1.0, zc);  glVertex3f(x,  yb, z + 0.5f);
+		glTexCoord3f(1.0, 1.0, zc); glVertex3f(xb, yb, z + 0.5f);
+		glTexCoord3f(1.0, yc, zc);  glVertex3f(xb, y,  z + 0.5f);
 	glEnd();
 
 }
@@ -273,10 +273,10 @@ void AnatomyHelper::renderC1()
 {
 	if (!m_dh->showCoronal) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, yc, 0.0); glVertex3i(0, y, 0);
-		glTexCoord3f(0.0, yc, zc); glVertex3i(0, y,  z);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x,  y,  z);
-		glTexCoord3f(xc, yc, 0.0); glVertex3i(x,  y, 0);
+		glTexCoord3f(0.0, yc, 0.0); glVertex3f(0, y + 0.5f, 0);
+		glTexCoord3f(0.0, yc, zc);  glVertex3f(0, y + 0.5f, z);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x, y + 0.5f, z);
+		glTexCoord3f(xc, yc, 0.0);  glVertex3f(x, y + 0.5f, 0);
 	glEnd();
 }
 
@@ -284,10 +284,10 @@ void AnatomyHelper::renderC2()
 {
 	if (!m_dh->showCoronal) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, yc, zc); glVertex3i(0, y, z);
-		glTexCoord3f(0.0, yc, 1.0); glVertex3i(0, y,  zb);
-		glTexCoord3f(xc, yc, 1.0); glVertex3i(x,  y,  zb);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x,  y, z);
+		glTexCoord3f(0.0, yc, zc);  glVertex3f(0, y + 0.5f, z);
+		glTexCoord3f(0.0, yc, 1.0); glVertex3f(0, y + 0.5f, zb);
+		glTexCoord3f(xc, yc, 1.0);  glVertex3f(x, y + 0.5f, zb);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x, y + 0.5f, z);
 	glEnd();
 }
 
@@ -295,10 +295,10 @@ void AnatomyHelper::renderC3()
 {
 	if (!m_dh->showCoronal) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(xc, yc, 0); glVertex3i(x, y, 0);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
-		glTexCoord3f(1.0, yc, zc); glVertex3i(xb, y,  z);
-		glTexCoord3f(1.0, yc, 0); glVertex3i(xb, y, 0);
+		glTexCoord3f(xc, yc, 0);   glVertex3f(x,  y + 0.5f, 0);
+		glTexCoord3f(xc, yc, zc);  glVertex3f(x,  y + 0.5f, z);
+		glTexCoord3f(1.0, yc, zc); glVertex3f(xb, y + 0.5f, z);
+		glTexCoord3f(1.0, yc, 0);  glVertex3f(xb, y + 0.5f, 0);
 	glEnd();
 }
 
@@ -306,10 +306,10 @@ void AnatomyHelper::renderC4()
 {
 	if (!m_dh->showCoronal) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
-		glTexCoord3f(xc, yc, 1.0); glVertex3i(x, y, zb);
-		glTexCoord3f(1.0, yc, 1.0); glVertex3i(xb, y, zb);
-		glTexCoord3f(1.0, yc, zc); glVertex3i(xb, y, z);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x,  y + 0.5f, z);
+		glTexCoord3f(xc, yc, 1.0);  glVertex3f(x,  y + 0.5f, zb);
+		glTexCoord3f(1.0, yc, 1.0); glVertex3f(xb, y + 0.5f, zb);
+		glTexCoord3f(1.0, yc, zc);  glVertex3f(xb, y + 0.5f, z);
 	glEnd();
 
 }
@@ -318,10 +318,10 @@ void AnatomyHelper::renderS1()
 {
 	if (!m_dh->showSagittal) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(xc, 0.0, 0.0); glVertex3i(x, 0, 0);
-		glTexCoord3f(xc, 0.0, zc); glVertex3i(x, 0,  z);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x,  y,  z);
-		glTexCoord3f(xc, yc, 0.0); glVertex3i(x,  y, 0);
+		glTexCoord3f(xc, 0.0, 0.0); glVertex3f(x + 0.5f, 0, 0);
+		glTexCoord3f(xc, 0.0, zc);  glVertex3f(x + 0.5f, 0, z);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x + 0.5f, y, z);
+		glTexCoord3f(xc, yc, 0.0);  glVertex3f(x + 0.5f, y, 0);
 	glEnd();
 }
 
@@ -329,10 +329,10 @@ void AnatomyHelper::renderS2()
 {
 	if (!m_dh->showSagittal) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(xc, 0.0, zc); glVertex3i(x, 0, z);
-		glTexCoord3f(xc, 0.0, 1.0); glVertex3i(x, 0,  zb);
-		glTexCoord3f(xc, yc, 1.0); glVertex3i(x,  y,  zb);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x,  y, z);
+		glTexCoord3f(xc, 0.0, zc);  glVertex3f(x + 0.5f, 0, z);
+		glTexCoord3f(xc, 0.0, 1.0); glVertex3f(x + 0.5f, 0, zb);
+		glTexCoord3f(xc, yc, 1.0);  glVertex3f(x + 0.5f, y, zb);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x + 0.5f, y, z);
 	glEnd();
 }
 
@@ -340,10 +340,10 @@ void AnatomyHelper::renderS3()
 {
 	if (!m_dh->showSagittal) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(xc, yc, 0); glVertex3i(x, y, 0);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
-		glTexCoord3f(xc, 1.0, zc); glVertex3i(x, yb,  z);
-		glTexCoord3f(xc, 1.0, 0); glVertex3i(x, yb, 0);
+		glTexCoord3f(xc, yc, 0);   glVertex3f(x + 0.5f, y,  0);
+		glTexCoord3f(xc, yc, zc);  glVertex3f(x + 0.5f, y,  z);
+		glTexCoord3f(xc, 1.0, zc); glVertex3f(x + 0.5f, yb, z);
+		glTexCoord3f(xc, 1.0, 0);  glVertex3f(x + 0.5f, yb, 0);
 	glEnd();
 }
 
@@ -351,9 +351,9 @@ void AnatomyHelper::renderS4()
 {
 	if (!m_dh->showSagittal) return;
 	glBegin(GL_QUADS);
-		glTexCoord3f(xc, yc, zc); glVertex3i(x, y, z);
-		glTexCoord3f(xc, yc, 1.0); glVertex3i(x, y, zb);
-		glTexCoord3f(xc, 1.0, 1.0); glVertex3i(x, yb, zb);
-		glTexCoord3f(xc, 1.0, zc); glVertex3i(x, yb, z);
+		glTexCoord3f(xc, yc, zc);   glVertex3f(x + 0.5f, y,  z);
+		glTexCoord3f(xc, yc, 1.0);  glVertex3f(x + 0.5f, y,  zb);
+		glTexCoord3f(xc, 1.0, 1.0); glVertex3f(x + 0.5f, yb, zb);
+		glTexCoord3f(xc, 1.0, zc);  glVertex3f(x + 0.5f, yb, z);
 	glEnd();
 }
