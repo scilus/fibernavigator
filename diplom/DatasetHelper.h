@@ -50,13 +50,12 @@ public:
 	bool load(int index = 0, wxString filename = wxT(""),
 			float threshold = 0.0, bool active = true, bool showFS = true, bool useTex = true);
 	void finishLoading(DatasetInfo*);
-	bool loadScene(wxString);
-	bool loadSceneOld(wxString);
+	bool loadScene(wxString filename);
 	bool loadTextFile(wxString*, wxString);
 	bool fileNameExists(wxString filename);
 
 	//! Saves the current scene to an xml file
-	void save(wxString);
+	void save(wxString filename);
 
 	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	void updateAllSelectionBoxes();

@@ -117,15 +117,6 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 	// check file extension
 	wxString ext = filename.AfterLast('.');
 
-	if (ext == wxT("yav")) {
-		if (!loadSceneOld(filename)) {
-			return false;
-		}
-		scene->m_selBoxChanged = true;
-		mainFrame->refreshAllGLWidgets();
-		return true;
-	}
-
 	if (ext == wxT("scn")) {
 		if (!loadScene(filename)) {
 			return false;
@@ -467,172 +458,6 @@ bool DatasetHelper::loadScene(wxString filename)
 	return true;
 }
 
-bool DatasetHelper::loadSceneOld(wxString filename)
-{
-	/*
-	 * Variables to store the slice postions in, have to be set after loading
-	 * the anatomy files
-	 */
-	long xp, yp, zp;
-
-	wxXmlDocument doc;
-	if (!doc.Load(filename))
-		return false;
-
-	wxXmlNode *child = doc.GetRoot()->GetChildren();
-	while (child) {
-		if (child->GetName() == wxT("anatomy")) {
-			wxString srows = child->GetPropVal(wxT("rows"), wxT("1"));
-			wxString scolumns = child->GetPropVal(wxT("columns"), wxT("1"));
-			wxString sframes = child->GetPropVal(wxT("frames"), wxT("1"));
-			long _rows, _columns, _frames;
-			srows.ToLong(&_rows, 10);
-			scolumns.ToLong(&_columns, 10);
-			sframes.ToLong(&_frames, 10);
-			if (anatomy_loaded) {
-				if ((_rows != rows) || (_columns != columns) || (_frames
-						!= frames)) {
-					lastError = wxT("dimensions of loaded files must be the same");
-					return false;
-				}
-			} else {
-				rows = _rows;
-				columns = _columns;
-				frames = _frames;
-				updateTreeDims();
-				anatomy_loaded = true;
-			}
-			xp = columns / 2;
-			yp = rows / 2;
-			zp = frames / 2;
-		}
-
-		else if (child->GetName() == wxT("position")) {
-			wxString xPos = child->GetPropVal(wxT("x"), wxT("1"));
-			wxString yPos = child->GetPropVal(wxT("y"), wxT("1"));
-			wxString zPos = child->GetPropVal(wxT("z"), wxT("1"));
-			xPos.ToLong(&xp, 10);
-			yPos.ToLong(&yp, 10);
-			zPos.ToLong(&zp, 10);
-		}
-
-		else if (child->GetName() == wxT("data")) {
-			wxXmlNode *datasetnode = child->GetChildren();
-			while (datasetnode) {
-				load(-1, datasetnode->GetNodeContent());
-
-				datasetnode = datasetnode->GetNext();
-			}
-		}
-
-		else if (child->GetName() == wxT("points")) {
-			wxXmlNode *pNode = child->GetChildren();
-			while (pNode) {
-				wxString sx = pNode->GetPropVal(wxT("x"), wxT("0.0"));
-				wxString sy = pNode->GetPropVal(wxT("y"), wxT("0.0"));
-				wxString sz = pNode->GetPropVal(wxT("z"), wxT("0.0"));
-				double _x, _y, _z;
-				sx.ToDouble(&_x);
-				sy.ToDouble(&_y);
-				sz.ToDouble(&_z);
-				SplinePoint *point = new SplinePoint(_x, _y, _z, this);
-				mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId, wxT("point"), -1, -1, new MyTreeItemData(point, SPoint));
-				pNode = pNode->GetNext();
-			}
-		}
-
-		else if (child->GetName() == wxT("selection_boxes") /*&& TheDataset::fibers_loaded*/) {
-			wxXmlNode *mbNode = child->GetChildren();
-			while (mbNode) {
-				wxXmlNode *bNode = mbNode->GetChildren();
-				std::vector<SelectionBox*> vboxes;
-				wxString _name;
-				double cx, cy, cz, ix, iy, iz;
-				double _cx, _cy, _cz, _ix, _iy, _iz;
-				cx = cy = cz = ix = iy = iz = _cx = _cy = _cz = _ix = _iy = _iz
-						= 0.0;
-				while (bNode) {
-					if (bNode->GetName() == wxT("box")) {
-						wxXmlNode *cNode = bNode->GetChildren();
-						wxString _type = bNode->GetPropVal(wxT("type"), wxT("AND"));
-						while (cNode) {
-							if (cNode->GetName() == wxT("size")) {
-								wxString sx = cNode->GetPropVal(wxT("x"), wxT("0.0"));
-								wxString sy = cNode->GetPropVal(wxT("y"), wxT("0.0"));
-								wxString sz = cNode->GetPropVal(wxT("z"), wxT("0.0"));
-								sx.ToDouble(&_ix);
-								sy.ToDouble(&_iy);
-								sz.ToDouble(&_iz);
-							} else if (cNode->GetName() == wxT("center")) {
-								wxString sx = cNode->GetPropVal(wxT("x"), wxT("0.0"));
-								wxString sy = cNode->GetPropVal(wxT("y"), wxT("0.0"));
-								wxString sz = cNode->GetPropVal(wxT("z"), wxT("0.0"));
-								sx.ToDouble(&_cx);
-								sy.ToDouble(&_cy);
-								sz.ToDouble(&_cz);
-							} else if (cNode->GetName() == wxT("name")) {
-								_name = cNode->GetPropVal(wxT("string"), wxT("box"));
-							}
-							cNode = cNode->GetNext();
-						}
-						Vector3fT _vc = { { _cx, _cy, _cz } };
-						Vector3fT _vs = { { _ix, _iy, _iz } };
-						SelectionBox *selBox = new SelectionBox(_vc, _vs, this);
-						selBox->m_isTop = false;
-						selBox->m_isNOT = (_type == wxT("NOT"));
-						selBox->setName(_name);
-						vboxes.push_back(selBox);
-					} else if (bNode->GetName() == wxT("size")) {
-						wxString sx = bNode->GetPropVal(wxT("x"), wxT("0.0"));
-						wxString sy = bNode->GetPropVal(wxT("y"), wxT("0.0"));
-						wxString sz = bNode->GetPropVal(wxT("z"), wxT("0.0"));
-						sx.ToDouble(&ix);
-						sy.ToDouble(&iy);
-						sz.ToDouble(&iz);
-					} else if (bNode->GetName() == wxT("center")) {
-						wxString sx = bNode->GetPropVal(wxT("x"), wxT("0.0"));
-						wxString sy = bNode->GetPropVal(wxT("y"), wxT("0.0"));
-						wxString sz = bNode->GetPropVal(wxT("z"), wxT("0.0"));
-						sx.ToDouble(&cx);
-						sy.ToDouble(&cy);
-						sz.ToDouble(&cz);
-					} else if (bNode->GetName() == wxT("name")) {
-						_name = bNode->GetPropVal(wxT("string"), wxT("box"));
-					}
-					bNode = bNode->GetNext();
-				}
-				Vector3fT vc = { { cx, cy, cz } };
-				Vector3fT vs = { { ix, iy, iz } };
-				SelectionBox *selBox = new SelectionBox(vc, vs, this);
-				selBox->m_isTop = true;
-				selBox->setName(_name);
-				wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(
-						mainFrame->m_tSelBoxId, selBox->getName(), 0, -1,
-						new MyTreeItemData(selBox, MasterBox));
-				mainFrame->m_treeWidget->EnsureVisible(boxId);
-				selBox->setTreeId(boxId);
-				for (unsigned int i = 0; i < vboxes.size(); ++i) {
-					wxTreeItemId tNewBoxId =
-							mainFrame->m_treeWidget->AppendItem(boxId,
-									vboxes[i]->getName(), 0, -1,
-									new MyTreeItemData(vboxes[i], ChildBox));
-					mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
-					vboxes[i]->setTreeId(tNewBoxId);
-				}
-				mbNode = mbNode->GetNext();
-
-			}
-		}
-		child = child->GetNext();
-	}
-	mainFrame->m_xSlider->SetValue(xp);
-	mainFrame->m_ySlider->SetValue(yp);
-	mainFrame->m_zSlider->SetValue(zp);
-	updateView(xp, yp, zp);
-
-	return true;
-}
-
 void DatasetHelper::save(wxString filename)
 {
 	wxXmlNode *root = new wxXmlNode(NULL, wxXML_ELEMENT_NODE, wxT("scene"));
@@ -727,6 +552,8 @@ void DatasetHelper::save(wxString filename)
 
 	wxXmlDocument doc;
 	doc.SetRoot(root);
+	if (filename.AfterLast('.') != _T("scn"))
+		filename += _T(".scn");
 	doc.Save(filename, 2);
 }
 
