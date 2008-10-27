@@ -237,6 +237,7 @@ bool Anatomy::load(wxString filename)
 
 				flag = true;
 				m_dh->vectors_loaded = true;
+				m_dh->surface_isDirty = true;
 			} break;
 
 

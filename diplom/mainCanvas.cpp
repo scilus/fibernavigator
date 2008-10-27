@@ -94,6 +94,44 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 	switch (m_view)
 	{
 		case mainView: {
+			if(event.LeftIsDown())
+			{
+				m_mousePt.s.X = clickX;
+				m_mousePt.s.Y = clickY;
+
+				if (m_dh->scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
+					m_hr = pick(event.GetPosition());
+					if (m_hr.hit && (m_hr.picked <= sagittal)) {
+						m_hr.picked = 20;
+						GetEventHandler()->ProcessEvent( event1 );
+					}
+				}
+
+				else {
+					if (!m_dh->m_isDragging)												// Not Dragging
+					{
+						m_dh->m_isDragging = true;										// Prepare For Dragging
+						m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
+						m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
+					}
+					else
+					{
+						orthonormalize();
+						Quat4fT     ThisQuat;
+						m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
+						Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
+						Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
+						Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
+					}
+
+					updateView();
+					Refresh(false);
+				}
+			}
+			else
+				m_dh->m_isDragging = false;
+
+
 			if (event.MiddleIsDown())
 			{
 				if (!m_dh->m_ismDragging)
@@ -189,45 +227,13 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				m_dh->m_isrDragging = false;
 			}
 
-			if(event.LeftIsDown())
+			if (event.RightUp())
 			{
-				m_mousePt.s.X = clickX;
-				m_mousePt.s.Y = clickY;
-				if (m_dh->scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
-					m_hr = pick(event.GetPosition());
-					if (m_hr.hit && (m_hr.picked <= sagittal)) {
-						m_hr.picked = 20;
-						GetEventHandler()->ProcessEvent( event1 );
-					}
-				}
-				else {
-					if (!m_dh->m_isDragging)												// Not Dragging
-				    {
-						m_dh->m_isDragging = true;										// Prepare For Dragging
-						m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
-						m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
-						if (wxGetKeyState(WXK_CONTROL)) {
-							printf("%.20f , %.20f , %.20f,\n", m_lastRot.s.M00, m_lastRot.s.M10, m_lastRot.s.M20);
-							printf("%.20f , %.20f , %.20f,\n", m_lastRot.s.M01, m_lastRot.s.M11, m_lastRot.s.M21);
-							printf("%.20f , %.20f , %.20f,\n", m_lastRot.s.M02, m_lastRot.s.M12, m_lastRot.s.M22);
-						}
-				    }
-				    else
-				    {
-				    	orthonormalize();
-			            Quat4fT     ThisQuat;
-			            m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
-			            Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
-			            Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
-			            Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
-				    }
-
-					updateView();
-					Refresh(false);
-				}
+				if (m_dh->surface_loaded)
+					m_dh->surface_isDirty = true;
+				Refresh(false);
 			}
-			else
-				m_dh->m_isDragging = false;
+
 		} break;
 
 		case axial:
@@ -329,7 +335,6 @@ hitResult MainCanvas::pick(wxPoint click)
 	/**
 	 * check if one of the 3 planes is picked
 	 */
-	// TODO its still bugged dammit
 	float tpicked = 0;
 	int picked = 0;
 	hitResult hr;

@@ -264,8 +264,16 @@ void Surface::execute ()
 	std::vector< FVector > quadNormals;
 
 	// TODO
-	for (int i = 0 ; i < 4 ; ++i)
-		overSamplePoints();
+	if (m_dh->m_isrDragging)
+	{
+		for (int i = 0 ; i < 2 ; ++i)
+			overSamplePoints();
+	}
+	else
+	{
+		for (int i = 0 ; i < 4 ; ++i)
+			overSamplePoints();
+	}
 
 	m_numPoints = m_renderpointsPerRow * m_renderpointsPerCol;
 	std::vector< std::vector<int> >quadRef(m_numPoints, std::vector<int>(0,0));
@@ -290,15 +298,14 @@ void Surface::execute ()
 		m_colorArray = new float[m_splinePoints.size()*3];
 	}
 
-
 	for(int z = 0; z < m_renderpointsPerCol - 1; z++)
 	{
 		for(int x = 0; x < m_renderpointsPerRow - 1; x++)
 		{
-			pi0 = z * m_renderpointsPerRow + x;
+			pi0 = z     * m_renderpointsPerRow + x;
 			pi1 = (z+1) * m_renderpointsPerRow + x;
 			pi2 = (z+1) * m_renderpointsPerRow + x + 1;
-			pi3 = z * m_renderpointsPerRow + x + 1;
+			pi3 = z     * m_renderpointsPerRow + x + 1;
 
 			m_vertices.push_back(pi0);
 			m_vertices.push_back(pi1);
@@ -334,8 +341,8 @@ void Surface::execute ()
 			 tmp += quadNormals[quadRef[i][j]];
 		}
 		FVector n( tmp[0] / quadRef[i].size() * m_dh->normalDirection,
-				tmp[1] / quadRef[i].size() * m_dh->normalDirection,
-				tmp[2] / quadRef[i].size() * m_dh->normalDirection);
+				   tmp[1] / quadRef[i].size() * m_dh->normalDirection,
+				   tmp[2] / quadRef[i].size() * m_dh->normalDirection);
 		m_normals.push_back(n);
 	}
 
@@ -356,9 +363,9 @@ void Surface::execute ()
 		m_normalArray[ 3 * i + 1] = n[1];
 		m_normalArray[ 3 * i + 2] = n[2];
 
-		x = (int)p[0];
-		y = (int)p[1];
-		z = (int)p[2];
+		x = wxMin(m_dh->columns-1, wxMax(0,(int)p[0]));
+		y = wxMin(m_dh->rows   -1, wxMax(0,(int)p[1]));
+		z = wxMin(m_dh->frames -1, wxMax(0,(int)p[2]));
 
 		if (m_dh->vectors_loaded)
 		{
