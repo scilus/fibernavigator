@@ -54,6 +54,9 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	anatomyHelper = NULL;
 	shaderHelper = NULL;
 
+	boxLockIsOn = false;
+	semaphore = false;
+
 	Matrix4fSetIdentity(&m_transform);
 
 	lastError = wxT("");
@@ -811,4 +814,16 @@ void DatasetHelper::doMatrixManipulation()
 	glScalef(zoom, zoom, zoom);
 	glMultMatrixf(m_transform.M);
 	glTranslatef(-columns/2.0, -rows/2.0, -frames/2.0);
+}
+
+void DatasetHelper::updateView(float x, float y, float z)
+{
+	xSlize = x;
+	ySlize = y;
+	zSlize = z;
+
+	if (boxLockIsOn && !semaphore)
+	{
+		boxAtCrosshair->setCenter(x, y, z);
+	}
 }

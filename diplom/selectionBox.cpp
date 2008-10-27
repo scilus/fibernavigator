@@ -13,6 +13,7 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 	m_isActive = true;
 	m_isSelected = false;
 	m_colorChanged = false;
+	m_isLockedToCrosshair = false;
 	m_treeId = NULL;
 	m_handleRadius = 3.0;
 	m_stepSize = 9;
@@ -22,6 +23,14 @@ SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
 		m_inBox[i] = 0;
 	}
 	m_name = wxT("box");
+}
+
+SelectionBox::~SelectionBox()
+{
+	if (m_isLockedToCrosshair)
+	{
+		m_dh->boxLockIsOn = false;
+	}
 }
 
 void SelectionBox::select()
@@ -393,6 +402,14 @@ float SelectionBox::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vect
 	return bb/nb;
 }
 
+void SelectionBox::setCenter(float x, float y, float z)
+{
+	m_center.s.X = x;
+	m_center.s.Y = y;
+	m_center.s.Z = z;
+	update();
+}
+
 void SelectionBox::processDrag(wxPoint click, wxPoint lastPos)
 {
 	if (m_hr.picked == 10) {
@@ -423,8 +440,7 @@ void SelectionBox::drag(wxPoint click, wxPoint lastPos)
 	m_center.s.Y += change.s.Y;
 	m_center.s.Z += change.s.Z;
 
-	updateStatusBar();
-	m_dirty = true;
+	update();
 }
 
 void SelectionBox::resize(wxPoint click, wxPoint lastPos)
@@ -466,8 +482,7 @@ void SelectionBox::resize(wxPoint click, wxPoint lastPos)
 		float newZ = m_size.s.Z + (delta);
 		m_size.s.Z = wxMin(wxMax(newZ, 1),m_dh->frames);
 	}
-	updateStatusBar();
-	m_dirty = true;
+	update();
 }
 
 void SelectionBox::moveLeft()
@@ -568,6 +583,16 @@ void SelectionBox::resizeUp()
 
 void SelectionBox::update()
 {
+	if (m_isLockedToCrosshair)
+	{
+		m_dh->semaphore = true;
+		m_dh->updateView((int)m_center.s.X , (int)m_center.s.Y , (int)m_center.s.Z);
+		m_dh->mainFrame->m_xSlider->SetValue((int)m_center.s.X);
+		m_dh->mainFrame->m_ySlider->SetValue((int)m_center.s.Y);
+		m_dh->mainFrame->m_zSlider->SetValue((int)m_center.s.Z);
+		m_dh->semaphore = false;
+	}
+
 	updateStatusBar();
 	m_dirty = true;
 	m_dh->scene->m_selBoxChanged = true;
@@ -588,4 +613,30 @@ void SelectionBox::updateStatusBar()
 	m_dh->mainFrame->m_statusBar->SetStatusText(wxString::Format(wxT("Position %.2f, %.2f, %.2f  Size: %.0f, %.0f, %.0f"),
 			m_center.s.X , m_center.s.Y , m_center.s.Z , m_size.s.X, m_size.s.Y, m_size.s.Z),2);
 
+}
+
+void SelectionBox::lockToCrosshair()
+{
+	if (m_isLockedToCrosshair)
+	{
+		m_isLockedToCrosshair = false;
+		m_dh->boxLockIsOn = false;
+	}
+	else
+	{
+		if (m_dh->boxLockIsOn)
+		{
+			m_dh->boxAtCrosshair->m_isLockedToCrosshair = false;
+		}
+		m_isLockedToCrosshair = true;
+		m_dh->boxLockIsOn = true;
+		m_dh->boxAtCrosshair = this;
+		m_dh->semaphore = true;
+		m_dh->updateView((int)m_center.s.X , (int)m_center.s.Y , (int)m_center.s.Z);
+		m_dh->mainFrame->m_xSlider->SetValue((int)m_center.s.X);
+		m_dh->mainFrame->m_ySlider->SetValue((int)m_center.s.Y);
+		m_dh->mainFrame->m_zSlider->SetValue((int)m_center.s.Z);
+		m_dh->semaphore = false;
+		m_dh->mainFrame->refreshAllGLWidgets();
+	}
 }

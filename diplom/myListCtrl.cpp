@@ -144,6 +144,14 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 		}
 		break;
 
+    case WXK_HOME:
+		if (data->getType() == MasterBox || data->getType() == ChildBox)
+		{
+			((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->lockToCrosshair();
+		}
+		break;
+
+
     default:
 	    event.Skip();
 	    return;

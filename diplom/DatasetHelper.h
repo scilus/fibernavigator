@@ -82,11 +82,7 @@ public:
 	bool GLError();
 	void printGLError(wxString function = wxT(""));
 
-	void updateView(float x, float y, float z) {
-		xSlize = x;
-		ySlize = y;
-		zSlize = z;
-	};
+	void updateView(float x, float y, float z);
 
 	void changeZoom(int z);
 	void moveScene(int x, int y);
@@ -117,6 +113,11 @@ public:
 
 	SplinePoint* lastSelectedPoint;
 	SelectionBox* lastSelectedBox;
+
+	SelectionBox* boxAtCrosshair;
+	bool boxLockIsOn;
+	bool semaphore;
+
 	MainFrame* mainFrame;
 	TheScene* scene;
 	AnatomyHelper* anatomyHelper;

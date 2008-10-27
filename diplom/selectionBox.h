@@ -19,7 +19,7 @@ class DatasetHelper;
 class SelectionBox {
 public:
 	SelectionBox(Vector3fT, Vector3fT, DatasetHelper*);
-	~SelectionBox() {};
+	~SelectionBox();
 
 	void draw();
 	hitResult hitTest(Ray *ray);
@@ -30,7 +30,11 @@ public:
 	bool getShow() {return m_isVisible;};
 	void unselect() {m_isSelected = false;};
 
+	void lockToCrosshair();
+
 	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
+	void setCenter(float x, float y, float z);
+
 	Vector3fT getCenter() {return m_center;};
 	void setSize(Vector3fT v) {m_size = v;m_dirty = true;};
 	Vector3fT getSize() {return m_size;};
@@ -78,6 +82,7 @@ public:
 	bool m_isActive;
 	bool m_isVisible;
 	bool m_isSelected;
+	bool m_isLockedToCrosshair;
 
 	DatasetHelper* m_dh;
 
