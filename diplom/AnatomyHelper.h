@@ -25,6 +25,10 @@ public:
 
 
 private:
+	void renderAxial();
+	void renderCoronal();
+	void renderSagittal();
+
 	void renderA1();
 	void renderA2();
 	void renderA3();
@@ -38,12 +42,12 @@ private:
 	void renderS3();
 	void renderS4();
 
-	int x;
-	int y;
-	int z;
-	int xb;
-	int yb;
-	int zb;
+	float x;
+	float y;
+	float z;
+	float xb;
+	float yb;
+	float zb;
 	float xc;
 	float yc;
 	float zc;

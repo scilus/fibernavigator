@@ -47,10 +47,10 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 	{
 		case axial: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, 1.0, m_dh->zSlize/(float)m_dh->frames); glVertex3f( 0 + xo, 0 + yo, quadZ);
-		    	glTexCoord3f(0.0, 0.0, m_dh->zSlize/(float)m_dh->frames); glVertex3f( 0 + xo, y + yo, quadZ);
-		    	glTexCoord3f(1.0, 0.0, m_dh->zSlize/(float)m_dh->frames); glVertex3f( x + xo, y + yo, quadZ);
-		    	glTexCoord3f(1.0, 1.0, m_dh->zSlize/(float)m_dh->frames); glVertex3f( x + xo, 0 + yo, quadZ);
+				glTexCoord3f(0.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, 0 + yo, quadZ);
+		    	glTexCoord3f(0.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, y + yo, quadZ);
+		    	glTexCoord3f(1.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, y + yo, quadZ);
+		    	glTexCoord3f(1.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, 0 + yo, quadZ);
 			glEnd();
 			xline = m_dh->xSlize + xo;
 			yline = y - m_dh->ySlize + yo;
@@ -58,10 +58,10 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 
 		case coronal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, m_dh->ySlize/(float)m_dh->rows, 1.0); glVertex3f( 0 + xo, 0 + zo, quadZ);
-		    	glTexCoord3f(0.0, m_dh->ySlize/(float)m_dh->rows, 0.0); glVertex3f( 0 + xo, z + zo, quadZ);
-		    	glTexCoord3f(1.0, m_dh->ySlize/(float)m_dh->rows, 0.0); glVertex3f( x + xo, z + zo, quadZ);
-		    	glTexCoord3f(1.0, m_dh->ySlize/(float)m_dh->rows, 1.0); glVertex3f( x + xo, 0 + zo, quadZ);
+				glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( 0 + xo, 0 + zo, quadZ);
+		    	glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( 0 + xo, z + zo, quadZ);
+		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( x + xo, z + zo, quadZ);
+		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( x + xo, 0 + zo, quadZ);
 		    glEnd();
 		    xline = m_dh->xSlize + xo;
 		    yline = z - m_dh->zSlize + zo;
@@ -69,10 +69,10 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 
 		case sagittal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(m_dh->xSlize/(float)m_dh->columns, 0.0, 1.0); glVertex3f( 0 + yo, 0 + zo, quadZ);
-		    	glTexCoord3f(m_dh->xSlize/(float)m_dh->columns, 0.0, 0.0); glVertex3f( 0 + yo, z + zo, quadZ);
-		    	glTexCoord3f(m_dh->xSlize/(float)m_dh->columns, 1.0, 0.0); glVertex3f( y + yo, z + zo, quadZ);
-		    	glTexCoord3f(m_dh->xSlize/(float)m_dh->columns, 1.0, 1.0); glVertex3f( y + yo, 0 + zo, quadZ);
+				glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 0.0, 1.0); glVertex3f( 0 + yo, 0 + zo, quadZ);
+		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 0.0, 0.0); glVertex3f( 0 + yo, z + zo, quadZ);
+		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 1.0, 0.0); glVertex3f( y + yo, z + zo, quadZ);
+		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 1.0, 1.0); glVertex3f( y + yo, 0 + zo, quadZ);
 			glEnd();
 			xline = m_dh->ySlize + yo;
 			yline = z - m_dh->zSlize + zo;
@@ -95,18 +95,22 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 //////////////////////////////////////////////////////////////////////////
 void AnatomyHelper::renderMain()
 {
-	x = m_dh->xSlize;
-	y = m_dh->ySlize;
-	z = m_dh->zSlize;
+	x = m_dh->xSlize + 0.5f;
+	y = m_dh->ySlize + 0.5f;
+	z = m_dh->zSlize + 0.5f;
 
-	xc = m_dh->xSlize/(float)m_dh->columns;
-	yc = m_dh->ySlize/(float)m_dh->rows;
-	zc = m_dh->zSlize/(float)m_dh->frames;
+	xc = ((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns;
+	yc = ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows;
+	zc = ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames;
 
 	xb = m_dh->columns;
 	yb = m_dh->rows;
 	zb = m_dh->frames;
-
+#if 1
+	renderAxial();
+	renderCoronal();
+	renderSagittal();
+#else
 	switch (m_dh->quadrant)
 	{
 	case 1:
@@ -222,6 +226,40 @@ void AnatomyHelper::renderMain()
 		renderA2();
 		break;
 	}
+#endif
+}
+
+void AnatomyHelper::renderAxial()
+{
+	if (!m_dh->showAxial) return;
+	glBegin(GL_QUADS);
+		glTexCoord3f(0.0, 0.0, zc); glVertex3f(0,  0,  z);
+		glTexCoord3f(0.0, 1.0, zc); glVertex3f(0,  yb, z);
+		glTexCoord3f(1.0, 1.0, zc); glVertex3f(xb, yb, z);
+		glTexCoord3f(1.0, 0.0, zc); glVertex3f(xb, 0,  z);
+	glEnd();
+}
+
+void AnatomyHelper::renderCoronal()
+{
+	if (!m_dh->showCoronal) return;
+	glBegin(GL_QUADS);
+		glTexCoord3f(0.0, yc, 0.0); glVertex3f(0,  y, 0);
+		glTexCoord3f(0.0, yc, 1.0); glVertex3f(0,  y, zb);
+		glTexCoord3f(1.0, yc, 1.0); glVertex3f(xb, y, zb);
+		glTexCoord3f(1.0, yc, 0.0); glVertex3f(xb, y, 0);
+	glEnd();
+}
+
+void AnatomyHelper::renderSagittal()
+{
+	if (!m_dh->showSagittal) return;
+	glBegin(GL_QUADS);
+		glTexCoord3f(xc, 0.0, 0.0); glVertex3f(x, 0,  0);
+		glTexCoord3f(xc, 0.0, 1.0); glVertex3f(x, 0,  zb);
+		glTexCoord3f(xc, 1.0, 1.0); glVertex3f(x, yb, zb);
+		glTexCoord3f(xc, 1.0, 0.0); glVertex3f(x, yb, 0);
+	glEnd();
 }
 
 void AnatomyHelper::renderA1()

@@ -1,7 +1,5 @@
-varying vec3 TexCoord;
-
 void main()
 {
-	TexCoord = gl_MultiTexCoord0.xyz;
+	gl_TexCoord[0] = gl_MultiTexCoord0;
 	gl_Position = ftransform();
 }

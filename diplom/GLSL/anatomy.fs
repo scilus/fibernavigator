@@ -4,8 +4,6 @@ uniform float threshold[10];
 uniform int type[10];
 uniform int countTextures;
 
-varying vec3 TexCoord;
-
 vec3 defaultColorMap( float value )
 {
     value *= 5.0;
@@ -33,7 +31,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 	vec3 col1 = vec3(0.0);
 	if (type == 3)
 	{
-		col1.r = clamp( texture3D(tex, TexCoord).r, 0.0, 1.0);
+		col1.r = clamp( texture3D(tex, gl_TexCoord[0].xyz).r, 0.0, 1.0);
 
 		if (col1.r - threshold > 0.0)
 		{
@@ -43,9 +41,9 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 
 	else
 	{
-		col1.r = clamp( texture3D(tex, TexCoord).r, 0.0, 1.0);
-		col1.g = clamp( texture3D(tex, TexCoord).g, 0.0, 1.0);
-		col1.b = clamp( texture3D(tex, TexCoord).b, 0.0, 1.0);
+		col1.r = clamp( texture3D(tex, gl_TexCoord[0].xyz).r, 0.0, 1.0);
+		col1.g = clamp( texture3D(tex, gl_TexCoord[0].xyz).g, 0.0, 1.0);
+		col1.b = clamp( texture3D(tex, gl_TexCoord[0].xyz).b, 0.0, 1.0);
 
 		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold) > 0.0)
 		{
@@ -53,8 +51,6 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 		}
 		col.a += clamp (( (col.r*3.0) + (col.g*3.0) + (col.b*3.0) ), 0.0, 1.0) - threshold;
 	}
-	/*col.a += clamp ((col.r + col.g + col.b)/3.0 - threshold, 0.0, 1.0);*/
-
 }
 
 
