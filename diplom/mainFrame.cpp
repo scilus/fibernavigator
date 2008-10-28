@@ -1367,6 +1367,11 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_bottomNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_extraNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 #ifdef __WXMSW__
+	m_topNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
+	m_middleNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
+	m_bottomNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
+	m_extraNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
+
 	int posY = m_topNavWindow->GetSize().GetY();
 	m_zSliderHolder->SetPosition(wxPoint(0, posY));
 	posY += m_zSliderHolder->GetSize().GetY();
@@ -1377,6 +1382,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_bottomNavWindow->SetPosition(wxPoint(0, posY));
 	posY += m_bottomNavWindow->GetSize().GetY();
 	m_xSliderHolder->SetPosition(wxPoint(0, posY));
+	
 	m_gl0->SetSize(m_topNavWindow->GetClientSize());
 	m_gl1->SetSize(m_middleNavWindow->GetClientSize());
 	m_gl2->SetSize(m_bottomNavWindow->GetClientSize());
