@@ -15,8 +15,6 @@ uniform float threshold[10];
 uniform int type[10];
 uniform int countTextures;
 
-varying vec3 TexCoord;
-
 vec3 defaultColorMap(float value) {
 	value *= 5.0;
 	vec3 color;
@@ -59,7 +57,7 @@ void cutFrontSector() {
 
 void cutAtSplineSurface()
 {
-	vec3 u = TexCoord;
+	vec3 u = gl_TexCoord[0].xyz;
 	/*u.x = (u.x + dimX / 2) / (float) dimX;*/
 	u.y = (u.y) / (float) dimY;
 	u.z = (u.z) / (float) dimZ;
@@ -124,7 +122,7 @@ void main() {
 	vec4 color = vec4(0.0);
 
 	if (useTex) {
-		vec3 v = TexCoord;
+		vec3 v = gl_TexCoord[0].xyz;
 		v.x = (v.x) / (float) dimX;
 		v.y = (v.y) / (float) dimY;
 		v.z = (v.z) / (float) dimZ;

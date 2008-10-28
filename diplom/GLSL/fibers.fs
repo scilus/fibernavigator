@@ -1,8 +1,5 @@
 #include GLSL/lighting.fs
 
-varying vec3 TexCoord;
-varying vec4 color1;
-
 uniform int dimX, dimY, dimZ;
 uniform sampler3D tex;
 uniform bool show;
@@ -11,10 +8,10 @@ uniform int type;
 uniform bool useTex;
 
 void lookupTex() {
-	vec3 v = TexCoord;
-	v.x = (v.x + dimX / 2) / (float) dimX;
-	v.y = (v.y + dimY / 2) / (float) dimY;
-	v.z = (v.z + dimZ / 2) / (float) dimZ;
+	vec3 v = gl_TexCoord[0].xyz;
+	v.x = (v.x) / (float) dimX;
+	v.y = (v.y) / (float) dimY;
+	v.z = (v.z) / (float) dimZ;
 
 	vec3 col1;
 	col1.r = clamp(texture3D(tex, v).r, 0.0, 1.0);
@@ -48,7 +45,7 @@ void main() {
 	calculateLighting(gl_MaxLights, -n, vertex, gl_FrontMaterial.shininess,
 			ambient, diffuse, specular);
 
-	 color = color1 + (ambient  * gl_FrontMaterial.ambient)
+	 color = gl_Color + (ambient  * gl_FrontMaterial.ambient)
 				    + (diffuse  * gl_FrontMaterial.diffuse / 2.0)
 					+ (specular * gl_FrontMaterial.specular /2.0);
 

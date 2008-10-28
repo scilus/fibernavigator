@@ -1,13 +1,11 @@
 #include GLSL/lighting.vs
 
-varying vec4 color1;
-varying vec3 TexCoord;
-
 void main()
 {
-	color1 = gl_Color;
+	gl_FrontColor = gl_Color;
+	gl_BackColor = gl_Color;
 
-	TexCoord = gl_Vertex;
+	gl_TexCoord[0].xyz = gl_Vertex;
 
 	prepareLight();
 
