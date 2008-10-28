@@ -55,8 +55,8 @@ inline FMatrix::FMatrix(const FTensor& m)
   comp = new double[dimx*dimy];
   sizeOfArray = dimx*dimy;
 
-  for(unsigned int i=0; i<dimx; i++)
-    for(unsigned int j=0; j<dimy; j++)
+  for(unsigned char i=0; i<dimx; i++)
+    for(unsigned char j=0; j<dimy; j++)
       comp[i*dimx + j] = m(i,j);
 }
 

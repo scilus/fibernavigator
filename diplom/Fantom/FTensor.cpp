@@ -63,7 +63,7 @@ std::istream& binread( std::istream& in, FTensor &t )
       binread_raw( in, &values[i] );
     }
 
-  FTensor tmp( dimension, order, values );
+  FTensor tmp( (unsigned char)dimension, (unsigned char)order, values );
   t = tmp;
 
   return in;

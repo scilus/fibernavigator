@@ -328,7 +328,7 @@ void Surface::execute ()
 			FVector p3(p[0], p[1], p[2]);
 			quadRef[pi3].push_back(quadNormals.size());
 
-			FVector n1 = getNormalForQuad(&p0, &p1, &p2, &p3);
+			FVector n1 = getNormalForQuad(&p0, &p1, &p2);
 			quadNormals.push_back(n1);
 		}
 	}
@@ -385,7 +385,7 @@ void Surface::execute ()
 	m_dh->surface_isDirty = false;
 }
 
-FVector Surface::getNormalForQuad(const FVector* p1, const FVector* p2, const FVector* p3, const FVector* p4)
+FVector Surface::getNormalForQuad(const FVector* p1, const FVector* p2, const FVector* p3)
 {
 	FVector a = *p2 - *p1;
 	FVector b = *p3 - *p1;

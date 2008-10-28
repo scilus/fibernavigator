@@ -515,7 +515,7 @@ int CIsoSurface::GetVolumeLengths(float& fVolLengthX, float& fVolLengthY, float&
 		return -1;
 }
 
-unsigned int CIsoSurface::GetEdgeID(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo)
+int CIsoSurface::GetEdgeID(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo)
 {
 	switch (nEdgeNo) {
 	case 0:

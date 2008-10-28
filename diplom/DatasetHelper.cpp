@@ -290,6 +290,7 @@ bool DatasetHelper::loadScene(wxString filename)
 	 * the anatomy files
 	 */
 	long xp, yp, zp;
+	xp = yp = zp = 0;
 
 	wxXmlDocument doc;
 	if (!doc.Load(filename))
@@ -337,7 +338,7 @@ bool DatasetHelper::loadScene(wxString filename)
 				bool active = true;
 				bool useTex = true;
 				bool showFS = true;
-				double threshold;
+				double threshold = 0.0;
 				wxString path;
 
 				while (nodes) {
@@ -383,6 +384,7 @@ bool DatasetHelper::loadScene(wxString filename)
 			double cx, cy, cz, ix, iy, iz;
 			double _cx, _cy, _cz, _ix, _iy, _iz;
 			cx = cy = cz = ix = iy = iz = 0;
+			_cx = _cy = _cz = _ix = _iy = _iz = 0;
 
 			while (boxNode) {
 				wxXmlNode *infoNode = boxNode->GetChildren();
@@ -760,7 +762,7 @@ void DatasetHelper::createIsoSurface() {
 		return;
 	// get top most anatomy dataset
 	DatasetInfo* info;
-	Anatomy* anatomy;
+	Anatomy* anatomy = NULL;
 	bool flag = false;
 	for (int i = 0; i < mainFrame->m_listCtrl->GetItemCount(); ++i) {
 		info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);

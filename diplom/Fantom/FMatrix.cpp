@@ -1112,7 +1112,7 @@ FVector& FMatrix::mult(const FVector &v, FVector &d) const
 
 FVector& FMatrix::mult(const FTensor &v, FVector &d) const
 {
-  positive i, j;
+  unsigned char i, j;
   double *src, *dst;
 
   if (d.getDimension() != dimy)
@@ -1142,7 +1142,7 @@ FVector& FMatrix::mult(const FTensor &v, FVector &d) const
 
 FTensor& FMatrix::mult(const FTensor &v, FTensor &d) const
 {
-  positive i, j;
+  unsigned char i, j;
   double *src, *dst;
 
 #ifndef NODEBUG
@@ -1153,7 +1153,7 @@ FTensor& FMatrix::mult(const FTensor &v, FTensor &d) const
 #endif
 
   if (d.getDimension() != dimy || d.getOrder() != 1)
-    d.resizeTensor(dimy,1);
+    d.resizeTensor((unsigned char)dimy,1);
 
   dst= &d.comp[0];
   memset(dst, 0, dimy*sizeof(double));

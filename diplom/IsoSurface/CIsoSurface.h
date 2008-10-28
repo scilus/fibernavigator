@@ -92,7 +92,7 @@ protected:
 	TRIANGLEVECTOR m_trivecTriangles;
 
 	// Returns the edge ID.
-	unsigned int GetEdgeID(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo);
+	int GetEdgeID(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo);
 
 	// Returns the vertex ID.
 	unsigned int GetVertexID(unsigned int nX, unsigned int nY, unsigned int nZ);

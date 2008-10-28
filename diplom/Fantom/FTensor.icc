@@ -89,7 +89,7 @@ inline FTensor::FTensor(const FTensor& T) : FArray(T)
 
 inline FTensor::FTensor(const FVector& v) : FArray(v)
 {
-  dimension = v.getDimension();
+  dimension = (unsigned char)v.getDimension();
   order = 1;
 }
 
@@ -101,7 +101,7 @@ inline FTensor::FTensor(const FMatrix& m) : FArray(m)
   if (m.getDimensionX() != m.getDimensionY())
     THROW_EXCEPTION( FException, "FTensor constructor(FMatrix) only works on square matrices");
 #endif
-  dimension = m.getDimensionX();
+  dimension = (unsigned char)m.getDimensionX();
   order = 2;
 }
 
@@ -725,7 +725,7 @@ inline void FTensor::getEigenSystem(FVector& vals, FVector v[3])
 
     tQLiAlgorithm(vals, v[ 1 ]);   // Now calculate Eigenvectors and -values by QLi alg.
 
-    for(unsigned int x=0; x<3; x++)
+    for(unsigned char x=0; x<3; x++)
     {
       //vals[x]=v[x];  // Copy Eigenvalues
       v[0][x]=(*this)(x,0);  // Copy Eigenvectors;
@@ -742,7 +742,7 @@ inline void FTensor::getEigenSystem(FVector& vals, FVector v[3])
 
     tQLiAlgorithm(d, e);   // Now calculate Eigenvectors and -values by QLi alg.
 
-    for(unsigned int x=0; x<2; x++)
+    for(unsigned char x=0; x<2; x++)
     {
       vals[x]=d[x];  // Copy Eigenvalues
       v[0][x]=(*this)(x,0);  // Copy Eigenvectors;
@@ -924,7 +924,7 @@ inline FTensor contract(const FTensor& tensor, unsigned int index1, unsigned int
     THROW_EXCEPTION( FInvalidDimensionException, "Tensor order must be at least 2 to contract" );
 #endif
   
-  FTensor res( tensor.getDimension(), tensor.getOrder()-2, true);
+  FTensor res( (unsigned char)tensor.getDimension(), (unsigned char)tensor.getOrder()-2, true);
   
 //  THROW_DEFAULT_EXCEPTION(FNotImplementedException);
   
@@ -955,7 +955,7 @@ inline FTensor tensorProduct(const FTensor& lhs,const FTensor &rhs)
   if(lhs.getDimension() != rhs.getDimension())
     THROW_DEFAULT_EXCEPTION(FInvalidDimensionException);
 #endif
-  FTensor res( lhs.getDimension(), lhs.getOrder()+rhs.getOrder(), true);
+  FTensor res( (unsigned char)lhs.getDimension(), (unsigned char)lhs.getOrder()+(unsigned char)rhs.getOrder(), true);
   
 //  THROW_DEFAULT_EXCEPTION(FNotImplementedException);
 
@@ -983,11 +983,11 @@ inline FTensor dyadicProduct( const FVector& v1, const FVector& v2)
     THROW_DEFAULT_EXCEPTION(FInvalidDimensionException);
 #endif
   
-  FTensor t(v1.getDimension(), 2, true);
+  FTensor t((unsigned char)v1.getDimension(), 2, true);
   THROW_DEFAULT_EXCEPTION(FNotImplementedException);
   int dim = v1.getDimension();
-  for(int i=0; i< dim; ++i)
-    for(int j=0; j<dim; ++j)
+  for(unsigned char i=0; i< dim; ++i)
+    for(unsigned char j=0; j<dim; ++j)
       t(i,j) = v1[i]*v2[j];
   return t;
 }
