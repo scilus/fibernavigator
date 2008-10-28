@@ -339,7 +339,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	int picked = 0;
 	hitResult hr;
 	if (m_dh->showAxial) {
-		bb->setSizeZ(0.01);
+		bb->setSizeZ(0.01f);
 		bb->setCenterZ(zz);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
@@ -351,7 +351,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	}
 
 	if (m_dh->showCoronal) {
-		bb->setSizeY(0.01);
+		bb->setSizeY(0.01f);
 		bb->setCenterY(yy);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
@@ -372,7 +372,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	}
 
 	if (m_dh->showSagittal) {
-		bb->setSizeX(0.01);
+		bb->setSizeX(0.01f);
 		bb->setCenterX(xx);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {

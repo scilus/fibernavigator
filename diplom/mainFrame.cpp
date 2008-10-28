@@ -514,14 +514,14 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
  * Sets the main GL widget to some standard positions
  *
  ****************************************************************************************************/
-void MainFrame::OnMenuViewReset(wxCommandEvent& event)
+void MainFrame::OnMenuViewReset(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->zoom = 1;
 	m_dh->xMove = 0;
 	m_dh->yMove = 0;
 	refreshAllGLWidgets();
 }
-void MainFrame::OnMenuViewLeft(wxCommandEvent& event)
+void MainFrame::OnMenuViewLeft(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	m_dh->m_transform.s.M00 = 0.0;
@@ -532,7 +532,7 @@ void MainFrame::OnMenuViewLeft(wxCommandEvent& event)
 	m_dh->m_transform.s.M12 = -1.0;
 	m_mainGL->setRotation();
 }
-void MainFrame::OnMenuViewRight(wxCommandEvent& event)
+void MainFrame::OnMenuViewRight(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	m_dh->m_transform.s.M00 = 0.0;
@@ -543,21 +543,21 @@ void MainFrame::OnMenuViewRight(wxCommandEvent& event)
 	m_dh->m_transform.s.M12 = -1.0;
 	m_mainGL->setRotation();
 }
-void MainFrame::OnMenuViewTop(wxCommandEvent& event)
+void MainFrame::OnMenuViewTop(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	m_dh->m_transform.s.M11 = -1.0;
 	m_dh->m_transform.s.M22 = -1.0;
 	m_mainGL->setRotation();
 }
-void MainFrame::OnMenuViewBottom(wxCommandEvent& event)
+void MainFrame::OnMenuViewBottom(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	m_dh->m_transform.s.M11 = -1.0;
 	m_dh->m_transform.s.M00 = -1.0;
 	m_mainGL->setRotation();
 }
-void MainFrame::OnMenuViewFront(wxCommandEvent& event)
+void MainFrame::OnMenuViewFront(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	m_dh->m_transform.s.M11 = 0.0;
@@ -566,7 +566,7 @@ void MainFrame::OnMenuViewFront(wxCommandEvent& event)
 	m_dh->m_transform.s.M22 = 0.0;
 	m_mainGL->setRotation();
 }
-void MainFrame::OnMenuViewBack(wxCommandEvent& event)
+void MainFrame::OnMenuViewBack(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	m_dh->m_transform.s.M00 = -1.0;
@@ -795,7 +795,7 @@ void MainFrame::OnTogglePointMode(wxCommandEvent& WXUNUSED(event))
  *
  *
  ****************************************************************************************************/
-void MainFrame::OnToggleLIC(wxCommandEvent& event)
+void MainFrame::OnToggleLIC(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->use_lic = !m_dh->use_lic;
 	refreshAllGLWidgets();
@@ -805,7 +805,7 @@ void MainFrame::OnToggleLIC(wxCommandEvent& event)
  *
  *
  ****************************************************************************************************/
-void MainFrame::OnToggleNormal(wxCommandEvent& event)
+void MainFrame::OnToggleNormal(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->normalDirection *= -1.0;
 	m_dh->surface_isDirty = true;
@@ -822,7 +822,7 @@ void MainFrame::OnToggleNormal(wxCommandEvent& event)
  *
  *
  ****************************************************************************************************/
-void MainFrame::OnToggleTextureFiltering(wxCommandEvent& event)
+void MainFrame::OnToggleTextureFiltering(wxCommandEvent& WXUNUSED(event))
 {
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
@@ -1291,7 +1291,7 @@ void MainFrame::OnTreeLabelEdit(wxTreeEvent& event)
  * Moves all boundary points in one direction
  *
  ****************************************************************************************************/
-void MainFrame::OnMovePoints1(wxCommandEvent& event)
+void MainFrame::OnMovePoints1(wxCommandEvent& WXUNUSED(event))
 {
 	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
 
@@ -1315,7 +1315,7 @@ void MainFrame::OnMovePoints1(wxCommandEvent& event)
  * Moves all boundary points in one direction
  *
  ****************************************************************************************************/
-void MainFrame::OnMovePoints2(wxCommandEvent& event)
+void MainFrame::OnMovePoints2(wxCommandEvent& WXUNUSED(event))
 {
 	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
 

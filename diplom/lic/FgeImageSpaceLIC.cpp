@@ -40,9 +40,9 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
 	iterations = 4;
 
 	// blend factor default
-	noiseBlend = 0.2;
+	noiseBlend = 0.2f;
 	// blend factor of colormap
-	colormapBlend = 0.3;
+	colormapBlend = 0.3f;
 
 	// default scaler
 	tensorAdvectionScale = 2.0;
