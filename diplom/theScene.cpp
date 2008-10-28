@@ -134,7 +134,7 @@ void TheScene::renderSlizes()
 		glEnable(GL_ALPHA_TEST);
 		//glEnable(GL_BLEND);
 
-	glAlphaFunc(GL_GREATER, 0.001); // adjust your prefered threshold here
+	glAlphaFunc(GL_GREATER, 0.001f); // adjust your prefered threshold here
 
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
