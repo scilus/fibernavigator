@@ -1,6 +1,3 @@
-  
-verschieben der box mit koordinatenkreuz, 
-
 keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
 
 alpha blending und neues beleuchtungschema (farbe-licht)
@@ -87,3 +84,4 @@ speichern aller einstellungen der scene
 26.10
 
 zoom und schift
+verschieben der box mit koordinatenkreuz, 
