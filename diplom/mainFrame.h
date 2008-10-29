@@ -56,6 +56,7 @@ private:
     void OnToggleLighting(wxCommandEvent& event);
     void OnInvertFibers(wxCommandEvent& event);
 	void OnToggleTextureFiltering(wxCommandEvent& event);
+	void OnToggleBlendTexOnMesh(wxCommandEvent& event);
 	// Help
 	void OnAbout(wxCommandEvent& event);
 
@@ -193,6 +194,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_TOGGLE_LIGHTING				151
 #define MENU_OPTIONS_INVERT_FIBERS					152
 #define MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING		153
+#define MENU_OPTIONS_BLEND_TEX_ON_MESH				154
 // Menu Help
 #define MENU_HELP_ABOUT       						wxID_ABOUT
 /*

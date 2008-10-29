@@ -86,6 +86,7 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniInt("dimX", m_dh->columns);
 	m_meshShader->setUniInt("dimY", m_dh->rows);
 	m_meshShader->setUniInt("dimZ", m_dh->frames);
+	m_meshShader->setUniInt("blendTex", m_dh->blendTexOnMesh);
 	m_meshShader->setUniFloat("cutX", m_dh->xSlize + 0.5f);
 	m_meshShader->setUniFloat("cutY", m_dh->ySlize + 0.5f);
 	m_meshShader->setUniFloat("cutZ", m_dh->zSlize + 0.5f);

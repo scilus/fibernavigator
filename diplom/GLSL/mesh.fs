@@ -6,6 +6,7 @@ uniform int dimX, dimY, dimZ;
 
 uniform bool showFS;
 uniform bool useTex;
+uniform bool blendTex;
 uniform bool cutAtSurface;
 
 uniform sampler3D texes[10];
@@ -73,6 +74,8 @@ void cutAtSplineSurface()
 void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v)
 {
 	vec3 col1;
+	if (!blendTex)
+		threshold = 0.0;
 	if (type == 3)
 	{
 		col1.r = clamp( texture3D(tex, v).r, 0.0, 1.0);

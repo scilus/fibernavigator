@@ -63,6 +63,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
 	EVT_MENU(MENU_OPTIONS_INVERT_FIBERS, MainFrame::OnInvertFibers)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
+	EVT_MENU(MENU_OPTIONS_BLEND_TEX_ON_MESH, MainFrame::OnToggleBlendTexOnMesh)
 	// Menu Help
     EVT_MENU(MENU_HELP_ABOUT, MainFrame::OnAbout)
 
@@ -853,6 +854,16 @@ void MainFrame::OnToggleLighting(wxCommandEvent& WXUNUSED(event))
  *
  *
  ****************************************************************************************************/
+void MainFrame::OnToggleBlendTexOnMesh(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->blendTexOnMesh = !m_dh->blendTexOnMesh;
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
 void MainFrame::OnInvertFibers(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->invertFibers();
@@ -1382,7 +1393,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_bottomNavWindow->SetPosition(wxPoint(0, posY));
 	posY += m_bottomNavWindow->GetSize().GetY();
 	m_xSliderHolder->SetPosition(wxPoint(0, posY));
-	
+
 	m_gl0->SetSize(m_topNavWindow->GetClientSize());
 	m_gl1->SetSize(m_middleNavWindow->GetClientSize());
 	m_gl2->SetSize(m_bottomNavWindow->GetClientSize());

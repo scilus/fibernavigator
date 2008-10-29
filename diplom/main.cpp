@@ -111,6 +111,7 @@ bool MyApp::OnInit(void) {
 	options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
 	options_menu->AppendSeparator();
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_BLEND_TEX_ON_MESH, _T("Blend Texture on Mesh"));
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(MENU_HELP_ABOUT, _T("About"));

@@ -105,6 +105,7 @@ public:
 	//! if set the shaders will be reloaded during next render() call
 	bool scheduledReloadShaders;
 
+	bool blendTexOnMesh;
 	bool use_lic;
 	bool surface_loaded;
 	bool surface_isDirty;
