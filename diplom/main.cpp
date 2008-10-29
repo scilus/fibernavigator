@@ -18,28 +18,37 @@
 #include "wx/mdi.h"
 
 #include "icons/fileopen.xpm"
+#include "icons/disc.xpm"
 #include "icons/view1.xpm"
 #include "icons/view2.xpm"
 #include "icons/view3.xpm"
 #ifdef __WXMSW__
+// icons 16x16
 #include "icons/axialw.xpm"
 #include "icons/corw.xpm"
 #include "icons/sagw.xpm"
-#include "icons/boxw.xpm"
 #else
+//icons 25x25
 #include "icons/axial.xpm"
 #include "icons/cor.xpm"
 #include "icons/sag.xpm"
-#include "icons/box.xpm"
 #endif
+#include "icons/box.xpm"
+#include "icons/box_off.xpm"
+#include "icons/box_eye.xpm"
+
+#include "icons/grid.xpm"
+#include "icons/grid_spline.xpm"
+
+#include "icons/iso_surface.xpm"
+
 #include "icons/mini_cat.xpm"
 #include "icons/new.xpm"
-#include "icons/exp.xpm"
+#include "icons/lightbulb.xpm"
 #include "icons/quit.xpm"
 #include "icons/toggleselbox.xpm"
 #include "icons/toggleSurface.xpm"
-#include "icons/gball.xpm"
-#include "icons/toggleRGB.xpm"
+#include "icons/colorSelect.xpm"
 
 #include "main.h"
 #include "mainFrame.h"
@@ -118,24 +127,34 @@ bool MyApp::OnInit(void) {
 	frame->SetMenuBar(menu_bar);
 
 	wxToolBar* toolBar = new wxToolBar(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL | wxNO_BORDER);
+
 	wxBitmap bmpOpen(fileopen_xpm);
+	wxBitmap bmpSave(disc_xpm);
 	wxBitmap bmpAxial(axial_xpm);
 	wxBitmap bmpCor(cor_xpm);
 	wxBitmap bmpSag(sag_xpm);
 	wxBitmap bmpBox(box_xpm);
+	wxBitmap bmpBoxOff(box_off_xpm);
+	wxBitmap bmpBoxEye(box_eye_xpm);
+	wxBitmap bmpGrid(grid_xpm);
+	wxBitmap bmpGridSpline(grid_spline_xpm);
+	wxBitmap bmpIsoSurface(iso_surface_xpm);
 	wxBitmap bmpView1(view1_xpm);
 	wxBitmap bmpView2(view2_xpm);
 	wxBitmap bmpView3(view3_xpm);
 	wxBitmap bmpMiniCat(mini_cat_xpm);
 	wxBitmap bmpNew(new_xpm);
 	wxBitmap bmpQuit(quit_xpm);
-	wxBitmap bmpGBALL(gball_xpm);
+
 	wxBitmap bmpHideSelbox(toggleselbox_xpm);
 	wxBitmap bmpNewSurface(toggle_surface_xpm);
-	wxBitmap bmpAssignColor(toggleRGB_xpm);
-	wxBitmap bmpLighting(exp_xpm);
+	wxBitmap bmpAssignColor(colorSelect_xpm);
+	wxBitmap bmpLighting(lightbulb_xpm);
+
+
 	//toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
 	toolBar->AddTool(MENU_FILE_LOAD, bmpOpen, wxT("Open"));
+	toolBar->AddTool(MENU_FILE_SAVE, bmpSave, wxT("Save Scene"));
 	//toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
 	toolBar->AddSeparator();
 	toolBar->AddTool(BUTTON_AXIAL, bmpAxial, wxT("Axial"));
@@ -143,29 +162,27 @@ bool MyApp::OnInit(void) {
 	toolBar->AddTool(BUTTON_SAGITTAL, bmpSag, wxT("Sagittal"));
 	toolBar->AddTool(BUTTON_TOGGLE_ALPHA, bmpNewSurface, wxT("Toggle alpha blending"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(MENU_FILE_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
-	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_VOI_NEW_SELBOX, bmpBox, wxT("New Selection Box"));
-	toolBar->AddTool(MENU_VOI_RENDER_SELBOXES, bmpMiniCat, wxT("Toggle Selection Boxes"));
-	toolBar->AddTool(MENU_VOI_TOGGLE_SELBOX, bmpHideSelbox, wxT("Toggle activation status of selection box"));
+	toolBar->AddTool(MENU_VOI_RENDER_SELBOXES, bmpBoxEye, wxT("Toggle Selection Boxes"));
+	toolBar->AddTool(MENU_VOI_TOGGLE_SELBOX, bmpBoxOff, wxT("Toggle activation status of selection box"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(MENU_SPLINESURF_DRAW_POINTS, bmpGBALL, wxT("Toggle drawing of points"));
-	toolBar->AddTool(MENU_SPLINESURF_NEW, bmpNewSurface, wxT("New Spline Surface"));
+	toolBar->AddTool(MENU_SPLINESURF_NEW, bmpGridSpline, wxT("New Spline Surface"));
+	toolBar->AddTool(MENU_SPLINESURF_DRAW_POINTS, bmpGrid, wxT("Toggle drawing of points"));
+	toolBar->AddTool(BUTTON_MOVE_POINTS1, bmpView1, wxT("Move border points of spline surface"));
+	toolBar->AddTool(BUTTON_MOVE_POINTS2, bmpView3, wxT("Move border points of spline surface"));
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_OPTIONS_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_OPTIONS_TOGGLE_LIGHTING, bmpLighting, wxT("Toggle Lighting"));
 	toolBar->AddSeparator();
+	toolBar->AddTool(MENU_FILE_NEW_ISOSURF, bmpIsoSurface, wxT("New Iso Surface "));
+	toolBar->AddSeparator();
+#ifdef DEBUG
 	toolBar->AddTool(MENU_OPTIONS_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(MENU_FILE_NEW_ISOSURF, bmpMiniCat, wxT("New Iso Surface "));
+	toolBar->AddTool(MENU_FILE_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(BUTTON_MOVE_POINTS1, bmpView1, wxT("Move border points of spline surface"));
-	toolBar->AddTool(BUTTON_MOVE_POINTS2, bmpView3, wxT("Move border points of spline surface"));
-	toolBar->AddSeparator();
-	toolBar->AddTool(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, bmpView3, wxT("toggle texture filtering"));
-	toolBar->AddSeparator();
-
+#endif
 	toolBar->Realize();
 	frame->SetToolBar(toolBar);
 
