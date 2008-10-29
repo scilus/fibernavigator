@@ -371,6 +371,7 @@ void TheScene::drawPoints()
 	m_dh->shaderHelper->setMeshShaderVars();
 	m_dh->shaderHelper->m_meshShader->setUniInt("showFS", true);
 	m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
+	m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", false);
 
 	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
 
