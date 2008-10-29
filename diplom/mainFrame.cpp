@@ -728,19 +728,14 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || m_dh->surface_loaded) return;
 
-	if (!m_dh->fibers_loaded)
-	{
-		refreshAllGLWidgets();
-		return;
-	}
-
 	int xs = m_xSlider->GetValue();
 
 	//delete all existing points
 	m_treeWidget->DeleteChildren(m_tPointId);
-	Fibers *fibers;
+	Fibers *fibers = NULL;
 	wxTreeItemIdValue cookie = 0;
-	fibers = (Fibers*)((MyTreeItemData*)
+	if ( m_dh->fibers_loaded )
+		fibers = (Fibers*)((MyTreeItemData*)
 						m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
 
 	for ( int i = 0 ; i < 11 ; ++i)
@@ -755,14 +750,12 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 
 			if (i == 0 || i == 10 || j == 0 || j == 10) {
 				wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("boundary point"),-1, -1, new MyTreeItemData(point, BPoint));
-				//m_treeWidget->EnsureVisible(tId);
 				point->setTreeId(tId);
 			}
 			else
 			{
-				if (fibers->getBarycenter(point)) {
+				if (m_dh->fibers_loaded && fibers->getBarycenter(point)) {
 					wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, new MyTreeItemData(point, SPoint));
-					//m_treeWidget->EnsureVisible(tId);
 					point->setTreeId(tId);
 				}
 			}
