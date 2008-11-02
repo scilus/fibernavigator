@@ -1,11 +1,11 @@
 varying vec3 normal;
 varying vec4 vertex;
-varying vec3 half;
+varying vec3 halfvec;
 
 const vec4 AMBIENT_BLACK = vec4(0.0, 0.0, 0.0, 1.0);
 const vec4 DEFAULT_BLACK = vec4(0.0, 0.0, 0.0, 0.0);
 
-bool isLightEnabled(in int i)
+bool isLightEnabled( in int i)
 {
     /* A separate variable is used to get
     // rid of a linker error.*/
@@ -22,24 +22,24 @@ bool isLightEnabled(in int i)
     return(enabled);
 }
 
-float calculateAttenuation(in int i, in float dist)
+float calculateAttenuation( in int i, in float dist)
 {
-    return(1.0 / (gl_LightSource[i].constantAttenuation +
+    return( 1.0 / (gl_LightSource[i].constantAttenuation +
                   gl_LightSource[i].linearAttenuation * dist +
                   gl_LightSource[i].quadraticAttenuation * dist * dist));
 }
 
-void directionalLight(in int i, in vec3 normal, in float shininess,
+void directionalLight( in int i, in vec3 normal, in float shininess,
                       inout vec4 ambient, inout vec4 diffuse, inout vec4 specular)
 {
 	float nDotVP;
 	float nDotHV;
 	float pf;
 
-	vec3 L = normalize (gl_LightSource[i].position - vertex.xyz);
-	vec3 H = normalize (L + half.xyz);
+	vec3 L = normalize (gl_LightSource[i].position.xyz - vertex.xyz);
+	vec3 H = normalize (L + halfvec.xyz);
 
-	nDotVP = max(0.0, dot(normal, normalize(vec3(gl_LightSource[i].position))));
+	nDotVP = max(0.0, dot(normal, normalize((gl_LightSource[i].position.xyz))));
 	nDotHV = max(0.0, dot(normal, H));
 
 	if (nDotVP == 0.0)

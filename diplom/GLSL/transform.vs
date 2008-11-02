@@ -46,9 +46,9 @@ void main() {
 
 	for (int j = 0; j < 6; ++j) {
 		vec3 v = gl_Vertex.xyz;
-		v.x = (v.x) / (float) dimX;
-		v.y = (v.y) / (float) dimY;
-		v.z = (v.z) / (float) dimZ;
+		v.x = (v.x) / float( dimX);
+		v.y = (v.y) / float( dimY);
+		v.z = (v.z) / float( dimZ);
 
 		for (int i = 9; i > -1; i--) {
 			if (type[i] == 1) {

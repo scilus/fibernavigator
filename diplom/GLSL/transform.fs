@@ -44,9 +44,9 @@ void main() {
 	vec4 color = vec4(0.0);
 
 	vec3 v = TexCoord;
-	v.x = (v.x) / (float) dimX;
-	v.y = (v.y) / (float) dimY;
-	v.z = (v.z) / (float) dimZ;
+	v.x = (v.x) / float( dimX);
+	v.y = (v.y) / float( dimY);
+	v.z = (v.z) / float( dimZ);
 
 	for (int i = 9; i > -1; i--) {
 		lookupTex(color, type[i], texes[i], threshold[i], v);

@@ -16,7 +16,8 @@ uniform float threshold[10];
 uniform int type[10];
 uniform int countTextures;
 
-vec3 defaultColorMap(float value) {
+vec3 defaultColorMap(float value)
+{
 	value *= 5.0;
 	vec3 color;
 
@@ -37,7 +38,8 @@ vec3 defaultColorMap(float value) {
 	return color;
 }
 
-void cutFrontSector() {
+void cutFrontSector()
+{
 	if (sector == 1 && vertex.x > cutX && vertex.y > cutY && vertex.z > cutZ)
 		discard;
 	if (sector == 2 && vertex.x > cutX && vertex.y > cutY && vertex.z < cutZ)
@@ -59,14 +61,13 @@ void cutFrontSector() {
 void cutAtSplineSurface()
 {
 	vec3 u = gl_TexCoord[0].xyz;
-	/*u.x = (u.x + dimX / 2) / (float) dimX;*/
-	u.y = (u.y) / (float) dimY;
-	u.z = (u.z) / (float) dimZ;
+	u.y = u.y / float(dimY);
+	u.z = u.z / float(dimZ);
 
 	for (int i = 9; i > -1; i--) {
 		if (type[i] == 5)
 		{
-			if (vertex.x < (texture2D(cutTex, u.yz).r * dimX)) discard;
+			if (vertex.x < (texture2D(cutTex, u.yz).r * float(dimX))) discard;
 		}
 	}
 }
@@ -109,26 +110,25 @@ void main() {
 	/* Normalize the normal. A varying variable CANNOT
 	 // be modified by a fragment shader. So a new variable
 	 // needs to be created. */
-	vec3 n = normal;
+	vec3 n = normal.xyz;
 
-	vec4 ambient = vec4(0.0);
-	vec4 diffuse = vec4(0.0);
-	vec4 specular = vec4(0.0);
+	vec4 ambient;/* = vec4(0.0);*/
+	vec4 diffuse;/* = vec4(0.0);*/
+	vec4 specular;/* = vec4(0.0);*/
 
 	/* In this case the built in uniform gl_MaxLights is used
 	 // to denote the number of lights. A better option may be passing
 	 // in the number of lights as a uniform or replacing the current
 	 // value with a smaller value. */
-	calculateLighting(gl_MaxLights, -n, vertex, gl_FrontMaterial.shininess,
-			ambient, diffuse, specular);
+	calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess, ambient, diffuse, specular);
 
 	vec4 color = vec4(0.0);
 
 	if (useTex) {
 		vec3 v = gl_TexCoord[0].xyz;
-		v.x = (v.x) / (float) dimX;
-		v.y = (v.y) / (float) dimY;
-		v.z = (v.z) / (float) dimZ;
+		v.x = v.x / float(dimX);
+		v.y = v.y / float(dimY);
+		v.z = v.z / float(dimZ);
 
 		for (int i = 9; i > -1; i--) {
 			if (show[i])

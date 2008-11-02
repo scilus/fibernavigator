@@ -346,8 +346,6 @@ void Surface::execute ()
 		m_normals.push_back(n);
 	}
 
-	createCutTexture();
-
 	m_vertexArray = new float[m_splinePoints.size()*3];
 	m_normalArray = new float[m_splinePoints.size()*3];
 
@@ -383,6 +381,8 @@ void Surface::execute ()
 	}
 
 	m_dh->surface_isDirty = false;
+
+	createCutTexture();
 }
 
 FVector Surface::getNormalForQuad(const FVector* p1, const FVector* p2, const FVector* p3)
@@ -399,6 +399,8 @@ void Surface::draw()
 	{
 		execute();
 	}
+
+	//m_dh->mainFrame->m_gl0->testRender(m_GLuint);
 
 	if (m_dh->scene->getPointMode())
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -478,6 +480,42 @@ void Surface::movePoints()
 
 void Surface::createCutTexture()
 {
+#if 0
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport); // get the current viewport
+
+	// initialize Framebuffer for offscreen rendering ( calculates proper texture sizes for us )
+	FgeOffscreen fbo(viewport[2], viewport[3], true);
+
+	fbo.setClearColor(0.0, 0.0, 0.0);
+	fbo.activate();
+	fbo.addDepthTexture(true);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+/*
+	float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
+	float view1 = maxLength;
+	glLoadIdentity();
+	glOrtho( 0, view1, 0, view1, 0, view1);
+*/
+	// render
+	draw();
+
+	fbo.deactivate();
+
+	// restore matrix stuff
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+
+	// and restore all attributes to previous status
+	glPopAttrib();
+
+	m_GLuint = fbo.getDepthTexID();
+
+#else
 	int xDim = m_dh->rows;
 	int yDim = m_dh->frames;
 	int numPoints = m_renderpointsPerCol * m_renderpointsPerRow;
@@ -514,7 +552,7 @@ void Surface::createCutTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
 
 	glTexImage2D(GL_TEXTURE_2D,	0, GL_RGB, xDim, yDim, 0, GL_LUMINANCE, GL_FLOAT, cutTex);
-
+#endif
 }
 
 float Surface::getXValue(int y, int z, int numPoints)

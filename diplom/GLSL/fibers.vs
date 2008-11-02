@@ -5,7 +5,7 @@ void main()
 	gl_FrontColor = gl_Color;
 	gl_BackColor = gl_Color;
 
-	gl_TexCoord[0].xyz = gl_Vertex;
+	gl_TexCoord[0].xyz = gl_Vertex.xyz;
 
 	prepareLight();
 

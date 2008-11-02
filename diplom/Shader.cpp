@@ -42,6 +42,9 @@ bool Shader::link()
 		printProgramLog(m_shaderProgram);
 		return false;
 	}
+#ifdef DEBUG
+	printProgramLog(m_shaderProgram);
+#endif
 	return true;
 }
 
@@ -76,6 +79,9 @@ bool Shader::compile(GLuint* shaderId, wxString codeString)
 		printCompilerLog(*shaderId);
 		return false;
 	}
+#ifdef DEBUG
+	printCompilerLog(*shaderId);
+#endif
 	return true;
 }
 
@@ -95,9 +101,14 @@ bool Shader::loadCode(wxString filename)
 		printf("ERROR: fragment shader file not found!\n");
 		return false;
 	}
-
+#ifdef DEBUG
+	printf("compile vertex shader\n");
+#endif
 	if (!compile(&m_vertex, codeStringVS))
 		return false;
+#ifdef DEBUG
+	printf("compile fragment shader\n");
+#endif
 	if (!compile(&m_fragment, codeStringFS))
 		return false;
 	return true;
