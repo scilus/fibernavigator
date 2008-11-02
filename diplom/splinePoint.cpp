@@ -88,10 +88,10 @@ void SplinePoint::move(float w)
 }
 
 
-void SplinePoint::select()
+void SplinePoint::select(bool flag)
 {
 	m_selected = true;
-	if (m_treeId)
+	if (m_treeId && flag)
 	{
 		m_dh->mainFrame->m_treeWidget->SelectItem(m_treeId);
 		m_dh->mainFrame->m_treeWidget->EnsureVisible(m_treeId);

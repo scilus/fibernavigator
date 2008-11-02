@@ -360,12 +360,12 @@ void Fibers::resetLinesShown()
 
 void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 {
-	for (unsigned int i = 0 ; i != boxes.size() ; ++i)
+	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
 		bool dirty = false;
 		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
 		{
-			if (boxes[i][j]->isDirty()) dirty = true;
+			dirty |= boxes[i][j]->isDirty();
 		}
 		if (dirty)
 		{
@@ -385,7 +385,8 @@ void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 				}
 			}
 		}
-		if (boxes[i][0]->colorChanged())
+
+		if (boxes[i].size() > 0 && boxes[i][0]->colorChanged())
 		{
 			float *colorData;
 			if (m_dh->useVBO)
@@ -424,7 +425,7 @@ void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 	resetLinesShown();
 	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
-		if ( boxes[i][0]->m_isActive) {
+		if ( boxes[i].size() > 0 && boxes[i][0]->m_isActive) {
 			for (int k = 0 ; k <m_lineCount ; ++k)
 				m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBox[k];
 		}

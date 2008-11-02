@@ -192,7 +192,7 @@ bool MyApp::OnInit(void) {
 	int widths[] = { 250, 150, -1 };
 	statusBar->SetFieldsCount(WXSIZEOF(widths), widths);
 	frame->setMStatusBar(statusBar);
-
+	
 	frame->Show(true);
 
 	SetTopWindow(frame);

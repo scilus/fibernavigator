@@ -1211,7 +1211,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 	{
 		if (m_dh->lastSelectedBox) m_dh->lastSelectedBox->unselect();
 		m_dh->lastSelectedBox = (SelectionBox*)(m_treeWidget->GetItemData(treeid));
-		m_dh->lastSelectedBox->select();
+		m_dh->lastSelectedBox->select(false);
 		refreshAllGLWidgets();
 		return;
 	}
@@ -1219,14 +1219,16 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 	{
 		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
 		m_dh->lastSelectedPoint = (SplinePoint*)(m_treeWidget->GetItemData(treeid));
-		m_dh->lastSelectedPoint->select();
+		m_dh->lastSelectedPoint->select(false);
 		refreshAllGLWidgets();
 		return;
 
 	}
 
 	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);
+
 	if (!data) return;
+	
 	for (int i = 0 ; i < m_listCtrl->GetItemCount(); ++i)
 	{
 		DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(i);
@@ -1307,7 +1309,7 @@ int MainFrame::treeSelected(wxTreeItemId id)
 {
 	wxTreeItemId pId = m_treeWidget->GetItemParent(id);
 	wxTreeItemId ppId = m_treeWidget->GetItemParent(pId);
-
+	
 	if (m_treeWidget->GetItemText(pId) == _T("selection boxes"))
 		return MasterBox;
 	else if (m_treeWidget->GetItemText(ppId) == _T("selection boxes"))
@@ -1386,7 +1388,6 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	int height = this->GetClientSize().y;
 	NAV_SIZE = wxMin(255, height/4);
 	NAV_GL_SIZE = NAV_SIZE-4;
-
 	m_leftWindowHolder->SetDefaultSize(wxSize(150 + NAV_SIZE, height));
 	m_leftWindowTop->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
 	m_leftWindowBottom->SetDefaultSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
@@ -1397,7 +1398,16 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_middleNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_bottomNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_extraNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
+
+
 #ifdef __WXMSW__
+	m_leftWindowHolder->SetSize(wxSize(150 + NAV_SIZE, height));
+	m_leftWindowTop->SetSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
+	m_leftWindowBottom->SetSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
+	m_leftWindowBottom1->SetSize(wxSize(150 + NAV_SIZE, m_leftWindowBottom->GetClientSize().y - 20));
+	m_leftWindowBottom2->SetSize(wxSize(150 + NAV_SIZE, 20));
+	m_navWindow->SetSize(wxSize(NAV_SIZE, height));
+
 	m_topNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_middleNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_bottomNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
@@ -1444,7 +1454,8 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 #endif // wxUSE_MDI_ARCHITECTURE
 
     GetClientWindow()->Update();
-    this->Update();
+	this->Update();
+	this->Refresh();
 }
 
 /****************************************************************************************************

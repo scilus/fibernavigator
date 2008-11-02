@@ -160,16 +160,17 @@ void Surface::execute ()
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	for (int i = 0 ; i < countPoints ; ++i)
+	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
+	while ( id.IsOk() )
 	{
-		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
 		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
-
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);
 		p.push_back(point->getCenter().s.Y);
 		p.push_back(point->getCenter().s.Z);
 		givenPoints.push_back(p);
+
+		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
 	}
 
 	std::vector< std::vector< double > > deBoorPoints;

@@ -172,13 +172,13 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
 						m_dh->lastSelectedPoint = ((SplinePoint*)m_hr.object);
 
-						((SplinePoint*)m_hr.object)->select();
+						((SplinePoint*)m_hr.object)->select(true);
 					}
 					else if (m_hr.picked >= 10 && m_hr.picked < 20)
 					{
 						if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
 
-						((SelectionBox*)m_hr.object)->select();
+						((SelectionBox*)m_hr.object)->select(true);
 					}
 				}
 				else {

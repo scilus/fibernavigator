@@ -30,7 +30,7 @@ public:
 	void move(float);
 
 
-	void select();
+	void select(bool flag);
 	void unselect() {m_selected = false;};
 	float X() {return m_center.s.X;};
 	float Y() {return m_center.s.Y;};

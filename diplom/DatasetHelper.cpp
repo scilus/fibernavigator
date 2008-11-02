@@ -199,8 +199,10 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 				Vector3fT vs = { { columns / 8, rows / 8, frames / 8 } };
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->m_isTop = true;
+
 				wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(
-						mainFrame->m_tSelBoxId, wxT("box"), 0, -1, selBox);
+					mainFrame->m_tSelBoxId, wxT("box"), 0, -1, selBox);
+
 				mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				selBox->setTreeId(tNewBoxId);
 			}
@@ -570,31 +572,27 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 {
 	std::vector<std::vector<SelectionBox*> > boxes;
 
-	int countboxes = mainFrame->m_treeWidget->GetChildrenCount(
-			mainFrame->m_tSelBoxId, false);
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	for (int i = 0; i < countboxes; ++i) {
-		std::vector<SelectionBox*> b;
-		id = mainFrame->m_treeWidget->GetNextChild(mainFrame->m_tSelBoxId,
-				cookie);
-		if (id.IsOk()) {
-			b.push_back(
-					(SelectionBox*) (mainFrame->m_treeWidget->GetItemData(id)));
+	
+	id = mainFrame->m_treeWidget->GetFirstChild(mainFrame->m_tSelBoxId, cookie);
 
-			int childboxes = mainFrame->m_treeWidget->GetChildrenCount(id);
-			wxTreeItemIdValue childcookie = 0;
-			for (int i = 0; i < childboxes; ++i) {
-				childid
-						= mainFrame->m_treeWidget->GetNextChild(id, childcookie);
-				if (childid.IsOk()) {
-					b.push_back(
-							(SelectionBox*) (mainFrame->m_treeWidget->GetItemData(childid)));
-				}
-			}
+	while ( id.IsOk() )
+	{
+		std::vector<SelectionBox*> b;
+		b.push_back(  (SelectionBox*)(mainFrame->m_treeWidget->GetItemData(id)) );
+		wxTreeItemIdValue childcookie = 0;
+		childid	= mainFrame->m_treeWidget->GetFirstChild(id, childcookie);
+		while ( childid.IsOk() )
+		{
+			b.push_back((SelectionBox*)(mainFrame->m_treeWidget->GetItemData(childid)));
+			childid = mainFrame->m_treeWidget->GetNextChild(id, childcookie);
 		}
+		id = mainFrame->m_treeWidget->GetNextChild(mainFrame->m_tSelBoxId, cookie);
 		boxes.push_back(b);
+		
 	}
+
 	return boxes;
 }
 

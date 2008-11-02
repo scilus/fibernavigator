@@ -373,16 +373,17 @@ void TheScene::drawPoints()
 	m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
 	m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", false);
 
-	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
-
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	for (int i = 0 ; i < countPoints ; ++i)
+	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
+	while ( id.IsOk() )
 	{
-		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
-		SplinePoint *point = (SplinePoint*)m_dh->mainFrame->m_treeWidget->GetItemData(id);
+		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
 		point->draw();
+
+		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
 	}
+	
 	lightsOff();
 	m_dh->shaderHelper->m_meshShader->release();
 	glPopAttrib();

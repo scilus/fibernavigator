@@ -74,7 +74,7 @@ public:
 	void setColor(wxColour);
 
 	void update();
-	void select();
+	void select(bool flag);
 
 	std::vector<bool>m_inBox;
 
