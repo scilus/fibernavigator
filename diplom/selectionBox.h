@@ -16,7 +16,8 @@
 class MainCanvas;
 class DatasetHelper;
 
-class SelectionBox {
+class SelectionBox : public wxTreeItemData
+{
 public:
 	SelectionBox(Vector3fT, Vector3fT, DatasetHelper*);
 	~SelectionBox();

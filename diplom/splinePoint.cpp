@@ -8,6 +8,7 @@ SplinePoint::SplinePoint(Vector3fT center, DatasetHelper* dh)
 	Vector3fSetZero(&m_offsetVector);
 	m_dh = dh;
 	m_selected = false;
+	m_isBoundary = false;
 	m_dh->surface_isDirty = true;
 	m_treeId = NULL;
 }

@@ -380,7 +380,7 @@ void TheScene::drawPoints()
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
-		SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
+		SplinePoint *point = (SplinePoint*)m_dh->mainFrame->m_treeWidget->GetItemData(id);
 		point->draw();
 	}
 	lightsOff();

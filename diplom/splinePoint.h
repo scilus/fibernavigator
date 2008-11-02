@@ -14,7 +14,8 @@
 
 class DatasetHelper;
 
-class SplinePoint {
+class SplinePoint : public wxTreeItemData
+{
 public:
 	SplinePoint(Vector3fT, DatasetHelper*);
 	SplinePoint( double, double, double, DatasetHelper*);
@@ -40,6 +41,8 @@ public:
 	void setOffsetVector (Vector3fT vec) {m_offsetVector = vec;};
 	Vector3fT getOffsetVector() {return m_offsetVector;};
 	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
+	void setIsBoundary() {m_isBoundary = true;};
+	bool isBoundary() {return m_isBoundary;};
 
 private:
 	DatasetHelper* m_dh;
@@ -49,6 +52,7 @@ private:
 	Vector3fT m_origin;
 
 	bool m_selected;
+	bool m_isBoundary;
 	hitResult m_hr;
 	void drawSphere(float, float, float, float);
 	wxTreeItemId m_treeId;

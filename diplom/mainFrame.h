@@ -98,6 +98,7 @@ private:
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
     void OnTreeLabelEdit(wxTreeEvent& event);
+    int treeSelected(wxTreeItemId id);
 
     /*
      * System functions

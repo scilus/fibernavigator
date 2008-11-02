@@ -163,7 +163,7 @@ void Surface::execute ()
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
-		SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
+		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
 
 		std::vector< double > p;
 		p.push_back(point->getCenter().s.X);
@@ -472,7 +472,7 @@ void Surface::movePoints()
 	for (int i = 0 ; i < countPoints ; ++i)
 	{
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
-		SplinePoint *point = (SplinePoint*)((MyTreeItemData*)m_dh->mainFrame->m_treeWidget->GetItemData(id))->getData();
+		SplinePoint *point = (SplinePoint*)m_dh->mainFrame->m_treeWidget->GetItemData(id);
 		point->move(2.0 * m_threshold);
 	}
 	execute();

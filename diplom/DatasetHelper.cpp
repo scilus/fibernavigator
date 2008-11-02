@@ -200,8 +200,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->m_isTop = true;
 				wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(
-						mainFrame->m_tSelBoxId, wxT("box"), 0, -1,
-						new MyTreeItemData(selBox, MasterBox));
+						mainFrame->m_tSelBoxId, wxT("box"), 0, -1, selBox);
 				mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				selBox->setTreeId(tNewBoxId);
 			}
@@ -372,7 +371,7 @@ bool DatasetHelper::loadScene(wxString filename)
 				sy.ToDouble(&_y);
 				sz.ToDouble(&_z);
 				SplinePoint *point = new SplinePoint(_x, _y, _z, this);
-				mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId, wxT("point"), -1, -1, new MyTreeItemData(point, SPoint));
+				mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId, wxT("point"), -1, -1, point);
 				pNode = pNode->GetNext();
 			}
 		}
@@ -434,8 +433,7 @@ bool DatasetHelper::loadScene(wxString filename)
 				if (_type == wxT("MASTER")) {
 					selBox->m_isTop = true;
 					currentMasterId = mainFrame->m_treeWidget->AppendItem(
-							mainFrame->m_tSelBoxId, selBox->getName(), 0, -1,
-							new MyTreeItemData(selBox, MasterBox));
+							mainFrame->m_tSelBoxId, selBox->getName(), 0, -1, selBox);
 					mainFrame->m_treeWidget->EnsureVisible(currentMasterId);
 					mainFrame->m_treeWidget->SetItemImage(currentMasterId, 1 - selBox->m_isActive);
 					selBox->setTreeId(currentMasterId);
@@ -444,8 +442,7 @@ bool DatasetHelper::loadScene(wxString filename)
 					selBox->m_isTop = false;
 					selBox->m_isNOT = ( _type == _T("NOT") ) ;
 					wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(
-							currentMasterId, selBox->getName(), 0, -1,
-							new MyTreeItemData(selBox, ChildBox));
+							currentMasterId, selBox->getName(), 0, -1, selBox);
 					mainFrame->m_treeWidget->EnsureVisible(boxId);
 					mainFrame->m_treeWidget->SetItemImage(boxId, 1 - selBox->m_isActive);
 					selBox->setTreeId(boxId);
@@ -484,7 +481,7 @@ void DatasetHelper::save(wxString filename)
 	for (int i = 0; i < countPoints; ++i)
 	{
 		id = mainFrame->m_treeWidget->GetNextChild(mainFrame->m_tPointId, cookie);
-		SplinePoint	*point = (SplinePoint*) ((MyTreeItemData*) mainFrame->m_treeWidget->GetItemData(id))->getData();
+		SplinePoint	*point = (SplinePoint*) ( mainFrame->m_treeWidget->GetItemData(id));
 		wxXmlNode *pointnode =	new wxXmlNode(nodepoints, wxXML_ELEMENT_NODE, wxT("point"));
 
 		wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), point->getCenter().s.Z));
@@ -583,8 +580,8 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 				cookie);
 		if (id.IsOk()) {
 			b.push_back(
-					(SelectionBox*) ((MyTreeItemData*) mainFrame->m_treeWidget->GetItemData(
-							id))->getData());
+					(SelectionBox*) (mainFrame->m_treeWidget->GetItemData(id)));
+
 			int childboxes = mainFrame->m_treeWidget->GetChildrenCount(id);
 			wxTreeItemIdValue childcookie = 0;
 			for (int i = 0; i < childboxes; ++i) {
@@ -592,8 +589,7 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 						= mainFrame->m_treeWidget->GetNextChild(id, childcookie);
 				if (childid.IsOk()) {
 					b.push_back(
-							(SelectionBox*) ((MyTreeItemData*) mainFrame->m_treeWidget->GetItemData(
-									childid))->getData());
+							(SelectionBox*) (mainFrame->m_treeWidget->GetItemData(childid)));
 				}
 			}
 		}
@@ -831,3 +827,4 @@ void DatasetHelper::updateView(float x, float y, float z)
 		boxAtCrosshair->setCenter(x, y, z);
 	}
 }
+

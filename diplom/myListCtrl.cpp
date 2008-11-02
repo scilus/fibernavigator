@@ -70,92 +70,76 @@ END_EVENT_TABLE()
 void MyTreeCtrl::OnChar(wxKeyEvent& event)
 {
 	wxTreeItemId treeid = this->GetSelection();
-	wxTreeItemId parentid = this->GetItemParent(treeid);
-	MyTreeItemData *data;
 
-	data = (MyTreeItemData*)this->GetItemData(treeid);
-	if (!data) return;
+	wxTreeItemId pId = this->GetItemParent(treeid);
+	wxTreeItemId ppId = this->GetItemParent(pId);
+	int selected = 0;
 
-	switch( event.GetKeyCode() )
+	if (this->GetItemText(pId) == _T("selection boxes"))
+		selected = MasterBox;
+	else if (this->GetItemText(ppId) == _T("selection boxes"))
+		selected = ChildBox;
+	else return;
+
+	if ( event.GetKeyCode() == WXK_DELETE)
     {
-    case WXK_DELETE: {
-		if (data->getType() == MasterBox || data->getType() == ChildBox || data->getType() == SPoint || data->getType() == BPoint) {
-			if (data->getType() == ChildBox)
-			{
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(parentid))->getData()))->setDirty();
-			}
-			this->Delete(treeid);
-			wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );
-			GetEventHandler()->ProcessEvent( event1 );
-		}
-    } break;
-    case WXK_LEFT:
-    	if (data->getType() == MasterBox || data->getType() == ChildBox)
-    	{
-    		 if (wxGetKeyState(WXK_CONTROL))
-    			 ((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeLeft();
-    		 else
-    			 ((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveLeft();
-    	}
-    	break;
-    case WXK_RIGHT:
-		if (data->getType() == MasterBox || data->getType() == ChildBox)
+    	if (selected == ChildBox)
 		{
-			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeRight();
-			else
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveRight();
+			((SelectionBox*) ((this->GetItemData(pId))))->setDirty();
 		}
-		break;
-    case WXK_UP:
-		if (data->getType() == MasterBox || data->getType() == ChildBox)
-		{
-			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeForward();
-			else
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveForward();
-		}
-		break;
-    case WXK_DOWN:
-		if (data->getType() == MasterBox || data->getType() == ChildBox)
-		{
-			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeBack();
-			else
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveBack();
-		}
-		break;
-    case WXK_PAGEUP:
-		if (data->getType() == MasterBox || data->getType() == ChildBox)
-		{
-			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeUp();
-			else
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveUp();
-		}
-		break;
-    case WXK_PAGEDOWN:
-		if (data->getType() == MasterBox || data->getType() == ChildBox)
-		{
-			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->resizeDown();
-			else
-				((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->moveDown();
-		}
-		break;
-
-    case WXK_HOME:
-		if (data->getType() == MasterBox || data->getType() == ChildBox)
-		{
-			((SelectionBox*) (((MyTreeItemData*)this->GetItemData(treeid))->getData()))->lockToCrosshair();
-		}
-		break;
-
-
-    default:
-	    event.Skip();
-	    return;
+		this->Delete(treeid);
+		wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );
+		GetEventHandler()->ProcessEvent( event1 );
     }
+
+	else if (selected == MasterBox || selected == ChildBox)
+	{
+		switch( event.GetKeyCode() )
+		{
+		case WXK_LEFT:
+			 if (wxGetKeyState(WXK_CONTROL))
+				 ((SelectionBox*) (this->GetItemData(treeid)))->resizeLeft();
+			 else
+				 ((SelectionBox*) (this->GetItemData(treeid)))->moveLeft();
+			 break;
+		case WXK_RIGHT:
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (this->GetItemData(treeid)))->resizeRight();
+			else
+				((SelectionBox*) (this->GetItemData(treeid)))->moveRight();
+			break;
+		case WXK_UP:
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (this->GetItemData(treeid)))->resizeForward();
+			else
+				((SelectionBox*) (this->GetItemData(treeid)))->moveForward();
+			break;
+		case WXK_DOWN:
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (this->GetItemData(treeid)))->resizeBack();
+			else
+				((SelectionBox*) (this->GetItemData(treeid)))->moveBack();
+			break;
+		case WXK_PAGEUP:
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (this->GetItemData(treeid)))->resizeUp();
+			else
+				((SelectionBox*) (this->GetItemData(treeid)))->moveUp();
+			break;
+		case WXK_PAGEDOWN:
+			if (wxGetKeyState(WXK_CONTROL))
+				((SelectionBox*) (this->GetItemData(treeid)))->resizeDown();
+			else
+				((SelectionBox*) (this->GetItemData(treeid)))->moveDown();
+			break;
+		case WXK_HOME:
+			((SelectionBox*) (this->GetItemData(treeid)))->lockToCrosshair();
+			break;
+		default:
+			event.Skip();
+			return;
+		}
+	}
     Refresh(false);
 }
 

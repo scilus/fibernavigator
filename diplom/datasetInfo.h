@@ -27,6 +27,7 @@ enum DatasetType {
 	IsoSurface_,
 	MasterBox,
 	ChildBox,
+	Point_,
 	SPoint,
 	BPoint,
 	Label_planes,
