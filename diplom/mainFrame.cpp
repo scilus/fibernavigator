@@ -1328,19 +1328,18 @@ int MainFrame::treeSelected(wxTreeItemId id)
  ****************************************************************************************************/
 void MainFrame::OnMovePoints1(wxCommandEvent& WXUNUSED(event))
 {
-	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
-
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	for (int i = 0 ; i < countPoints ; ++i)
+	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
+	while ( id.IsOk() )
 	{
-		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
-
-		SplinePoint *point = (SplinePoint*)(m_treeWidget->GetItemData(id));
+		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
 		if (point->isBoundary())
 			point->setX(point->X() + 5.0);
 
+		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
 	}
+
 	m_dh->surface_isDirty = true;
 	refreshAllGLWidgets();
 }
@@ -1351,19 +1350,18 @@ void MainFrame::OnMovePoints1(wxCommandEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::OnMovePoints2(wxCommandEvent& WXUNUSED(event))
 {
-	int countPoints = m_treeWidget->GetChildrenCount(m_tPointId, true);
-
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	for (int i = 0 ; i < countPoints ; ++i)
+	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
+	while ( id.IsOk() )
 	{
-		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
-
-		SplinePoint *point = (SplinePoint*)(m_treeWidget->GetItemData(id));
+		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
 		if (point->isBoundary())
 			point->setX(point->X() - 5.0);
 
+		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
 	}
+
 	m_dh->surface_isDirty = true;
 	refreshAllGLWidgets();
 }
@@ -1516,12 +1514,21 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		switch (m_mainGL->getPicked())
 		{
 		case axial:
+#ifdef __WXMSW__
+			m_zSlider->SetValue(wxMin(wxMax(m_zSlider->GetValue() + delta*2, 0), m_zSlider->GetMax()));
+#endif
 			m_zSlider->SetValue(wxMin(wxMax(m_zSlider->GetValue() + delta, 0), m_zSlider->GetMax()));
 			break;
 		case coronal:
+#ifdef __WXMSW__
+			m_ySlider->SetValue(wxMin(wxMax(m_ySlider->GetValue() + delta*2, 0), m_ySlider->GetMax()));
+#endif
 			m_ySlider->SetValue(wxMin(wxMax(m_ySlider->GetValue() + delta, 0), m_ySlider->GetMax()));
 			break;
 		case sagittal:
+#ifdef __WXMSW__
+			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta*2, 0), m_xSlider->GetMax()));
+#endif
 			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta, 0), m_xSlider->GetMax()));
 			break;
 		case 20:
