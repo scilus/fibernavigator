@@ -1159,7 +1159,11 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		}
 		break;
 	case 3:
-		if (info->hasTreeId()) m_treeWidget->Delete(info->getTreeId());
+		if (info->hasTreeId())
+		{
+			m_treeWidget->SetItemData(info->getTreeId(), NULL);
+			m_treeWidget->Delete(info->getTreeId());
+		}
 		delete info;
 		m_listCtrl->DeleteItem(item);
 		break;
