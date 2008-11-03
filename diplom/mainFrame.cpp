@@ -1531,12 +1531,6 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 #endif
 			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta, 0), m_xSlider->GetMax()));
 			break;
-		case 20:
-			SplinePoint *point = new SplinePoint(m_mainGL->getEventCenter(), m_dh);
-			wxTreeItemId pId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, point);
-			//m_treeWidget->EnsureVisible(pId);
-			//m_treeWidget->SelectItem(pId);
-			point->setTreeId(pId);
 		}
 	}
 	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
