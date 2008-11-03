@@ -337,7 +337,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_listCtrl->InsertColumn(3, itemCol);
 
     m_treeWidget = new MyTreeCtrl(m_leftWindow, ID_TREE_CTRL, wxPoint(0, 0),
-    		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HAS_BUTTONS|wxTR_EDIT_LABELS);
+    		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_EDIT_LABELS);
     wxImageList* tImageList = new wxImageList(16,16);
     tImageList->Add(wxIcon(eyes_xpm));
     tImageList->Add(wxIcon(delete_xpm));
