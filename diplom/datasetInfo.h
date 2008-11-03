@@ -28,8 +28,6 @@ enum DatasetType {
 	MasterBox,
 	ChildBox,
 	Point_,
-	SPoint,
-	BPoint,
 	Label_planes,
 	Label_datasets,
 	Label_meshes,

@@ -23,7 +23,7 @@ enum FiberFileType {
 	binaryVTK,
 };
 
-class Fibers : public DatasetInfo
+class Fibers : public DatasetInfo , public wxTreeItemData
 {
 public:
 	Fibers(DatasetHelper*);

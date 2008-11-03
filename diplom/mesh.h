@@ -31,7 +31,8 @@ struct polygon {
 	int v3;
 };
 
-class Mesh : public DatasetInfo {
+class Mesh : public DatasetInfo , public wxTreeItemData
+{
 
 public:
 	Mesh(DatasetHelper*);

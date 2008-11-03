@@ -12,24 +12,6 @@
 #include "wx/imaglist.h"
 #include "datasetInfo.h"
 
-class MyTreeItemData: public wxTreeItemData {
-public:
-	MyTreeItemData(void* data, int type) :
-		m_data(data), m_type(type) {
-	}
-	void* getData() {
-		return m_data;
-	}
-	;
-	int getType() {
-		return m_type;
-	}
-	;
-private:
-	void* m_data;
-	int m_type;
-};
-
 class MyTreeCtrl: public wxTreeCtrl {
 public:
 	MyTreeCtrl(wxWindow *parent, const wxWindowID id, const wxPoint& pos,

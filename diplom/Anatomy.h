@@ -12,7 +12,8 @@
 #include "surface.h"
 
 
-class Anatomy: public DatasetInfo {
+class Anatomy : public DatasetInfo , public wxTreeItemData 
+{
 
 public:
 	Anatomy(DatasetHelper*);

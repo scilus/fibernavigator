@@ -337,22 +337,22 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_listCtrl->InsertColumn(3, itemCol);
 
     m_treeWidget = new MyTreeCtrl(m_leftWindow, ID_TREE_CTRL, wxPoint(0, 0),
-    		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_EDIT_LABELS);
+    		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HAS_BUTTONS|wxTR_EDIT_LABELS);
     wxImageList* tImageList = new wxImageList(16,16);
     tImageList->Add(wxIcon(eyes_xpm));
     tImageList->Add(wxIcon(delete_xpm));
     m_treeWidget->AssignImageList(tImageList);
 
-    m_tRootId = m_treeWidget->AddRoot(wxT("Root"), -1, -1, new MyTreeItemData(0, Label_datasets) );
-    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"), -1, -1, new MyTreeItemData(0, Label_planes));
+    m_tRootId = m_treeWidget->AddRoot(wxT("Scene"), -1, -1, NULL );
+    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"), -1, -1, NULL);
 	    m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"));
 	    m_tCoronalId  = m_treeWidget->AppendItem(m_tPlanesId, wxT("coronal"));
 	    m_tSagittalId = m_treeWidget->AppendItem(m_tPlanesId, wxT("sagittal"));
-    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("datasets"), -1, -1, new MyTreeItemData(0, Label_datasets));
-    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"), -1, -1, new MyTreeItemData(0, Label_meshes));
-    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"), -1, -1, new MyTreeItemData(0, Label_fibers));
-    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"), -1, -1, new MyTreeItemData(0, Label_points));
-    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"), -1, -1, new MyTreeItemData(0, Label_selBoxes));
+    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("datasets"), -1, -1, NULL);
+    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"), -1, -1, NULL);
+    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"), -1, -1, NULL);
+    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"), -1, -1, NULL);
+    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"), -1, -1, NULL);
 
     /*
      * Set OpenGL attributes
@@ -403,7 +403,27 @@ MainFrame::~MainFrame()
 	printf("main frame destructor\n");
 #endif
 	delete m_dh;
-
+	wxTreeItemId id, childid;
+	wxTreeItemIdValue cookie = 0;
+	
+	id = m_treeWidget->GetFirstChild(m_tDatasetId, cookie);
+	while ( id.IsOk() )
+	{
+		m_treeWidget->SetItemData(id, NULL);
+		id = m_treeWidget->GetNextChild(m_tDatasetId, cookie);
+	}
+	id = m_treeWidget->GetFirstChild(m_tMeshId, cookie);
+	while ( id.IsOk() )
+	{
+		m_treeWidget->SetItemData(id, NULL);
+		id = m_treeWidget->GetNextChild(m_tMeshId, cookie);
+	}
+	id = m_treeWidget->GetFirstChild(m_tFiberId, cookie);
+	while ( id.IsOk() )
+	{
+		m_treeWidget->SetItemData(id, NULL);
+		id = m_treeWidget->GetNextChild(m_tFiberId, cookie);
+	}
 }
 
 /****************************************************************************************************
@@ -492,8 +512,7 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
 
 	Fibers *fibers;
 	wxTreeItemIdValue cookie = 0;
-	fibers = (Fibers*)((MyTreeItemData*)
-				m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
+	fibers = (Fibers*)(m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)));
 
 	wxString caption = wxT("Choose a file");
 	wxString wildcard = wxT("fiber files (*.fib)|*.fib||*.*|*.*");
@@ -734,8 +753,7 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 	Fibers *fibers = NULL;
 	wxTreeItemIdValue cookie = 0;
 	if ( m_dh->fibers_loaded )
-		fibers = (Fibers*)((MyTreeItemData*)
-						m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)))->getData();
+		fibers = (Fibers*)(m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)));
 
 	for ( int i = 0 ; i < 11 ; ++i)
 		for ( int j = 0 ; j < 11 ; ++j )
@@ -1225,9 +1243,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 
 	}
 
-	MyTreeItemData *data = (MyTreeItemData*)m_treeWidget->GetItemData(treeid);
-
-	if (!data) return;
+	if (selected > Fibers_) return;
 	
 	for (int i = 0 ; i < m_listCtrl->GetItemCount(); ++i)
 	{
@@ -1261,15 +1277,15 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 	}
 
 	/* open load dialog */
-	if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == Label_datasets)
+	if (selected == Label_datasets)
 	{
 		m_dh->load(1);
 	}
-	else if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == Label_meshes)
+	else if (selected == Label_meshes)
 	{
 		m_dh->load(2);
 	}
-	else if (((MyTreeItemData*)m_treeWidget->GetItemData(treeid))->getType() == Label_fibers)
+	else if (selected == Label_fibers)
 	{
 		m_dh->load(3);
 	}
@@ -1309,12 +1325,18 @@ int MainFrame::treeSelected(wxTreeItemId id)
 {
 	wxTreeItemId pId = m_treeWidget->GetItemParent(id);
 	wxTreeItemId ppId = m_treeWidget->GetItemParent(pId);
-	
-	if (m_treeWidget->GetItemText(pId) == _T("selection boxes"))
+
+	if ( id == m_tDatasetId )
+		return Label_datasets;
+	else if ( id == m_tMeshId )
+		return Label_meshes;
+	else if ( id == m_tFiberId )
+		return Label_fibers;
+	else if ( pId == m_tSelBoxId )
 		return MasterBox;
-	else if (m_treeWidget->GetItemText(ppId) == _T("selection boxes"))
+	else if ( ppId == m_tSelBoxId )
 		return ChildBox;
-	if (m_treeWidget->GetItemText(pId) == _T("points"))
+	else if ( pId == m_tPointId )
 		return Point_;
 	return 0;
 }
@@ -1478,6 +1500,11 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	wxPoint pos, newpos;
 	float max = wxMax(m_dh->rows, wxMax(m_dh->columns, m_dh->frames));
 
+#ifdef __WXMSW__
+			float speedup = 2.0;
+#else
+			float speedup = 1.0;
+#endif
 
 	switch (event.GetInt())
 	{
@@ -1514,22 +1541,13 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		switch (m_mainGL->getPicked())
 		{
 		case axial:
-#ifdef __WXMSW__
-			m_zSlider->SetValue(wxMin(wxMax(m_zSlider->GetValue() + delta*2, 0), m_zSlider->GetMax()));
-#endif
-			m_zSlider->SetValue(wxMin(wxMax(m_zSlider->GetValue() + delta, 0), m_zSlider->GetMax()));
+			m_zSlider->SetValue(wxMin(wxMax(m_zSlider->GetValue() + delta*speedup, 0), m_zSlider->GetMax()));
 			break;
 		case coronal:
-#ifdef __WXMSW__
-			m_ySlider->SetValue(wxMin(wxMax(m_ySlider->GetValue() + delta*2, 0), m_ySlider->GetMax()));
-#endif
-			m_ySlider->SetValue(wxMin(wxMax(m_ySlider->GetValue() + delta, 0), m_ySlider->GetMax()));
+			m_ySlider->SetValue(wxMin(wxMax(m_ySlider->GetValue() + delta*speedup, 0), m_ySlider->GetMax()));
 			break;
 		case sagittal:
-#ifdef __WXMSW__
-			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta*2, 0), m_xSlider->GetMax()));
-#endif
-			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta, 0), m_xSlider->GetMax()));
+			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta*speedup, 0), m_xSlider->GetMax()));
 			break;
 		}
 	}

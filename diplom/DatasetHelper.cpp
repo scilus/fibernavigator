@@ -632,28 +632,23 @@ void DatasetHelper::updateTreeDS(const int i)
 	case Head_byte:
 	case Head_short:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tDatasetId, info->getName(), -1, -1,
-				new MyTreeItemData(info, Head_byte)));
+				mainFrame->m_tDatasetId, info->getName(), -1, -1, (Anatomy*)info));
 		break;
 	case Overlay:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tDatasetId, info->getName(), -1, -1,
-				new MyTreeItemData(info, Overlay)));
+				mainFrame->m_tDatasetId, info->getName(), -1, -1, (Anatomy*)info));
 		break;
 	case RGB:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tDatasetId, info->getName(), -1, -1,
-				new MyTreeItemData(info, RGB)));
+				mainFrame->m_tDatasetId, info->getName(), -1, -1, (Anatomy*)info));
 		break;
 	case Mesh_:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tMeshId, info->getName(), -1, -1,
-				new MyTreeItemData(info, Mesh_)));
+				mainFrame->m_tMeshId, info->getName(), -1, -1, (Mesh*)info));
 		break;
 	case Fibers_:
 		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tFiberId, info->getName(), -1, -1,
-				new MyTreeItemData(info, Fibers_)));
+			mainFrame->m_tFiberId, info->getName(), -1, -1, (Fibers*)info));
 		break;
 	}
 }
