@@ -156,8 +156,8 @@ bool Shader::loadFromFile(wxString* code, wxString fileName)
 
 void Shader::printCompilerLog(GLuint shader)
 {
-	int infologLen = 0;
-	int charsWritten = 0;
+	GLint infologLen = 0;
+	GLint charsWritten = 0;
 	GLchar *infoLog;
 
 	glGetShaderiv (shader, GL_INFO_LOG_LENGTH, &infologLen);
@@ -172,8 +172,8 @@ void Shader::printCompilerLog(GLuint shader)
 
 void Shader::printProgramLog(GLuint program)
 {
-	int infologLen = 0;
-	int charsWritten = 0;
+	GLint infologLen = 0;
+	GLint charsWritten = 0;
 	GLchar *infoLog;
 
 	glGetProgramiv (program, GL_INFO_LOG_LENGTH, &infologLen);
@@ -206,7 +206,7 @@ void Shader::setUniFloat(const GLchar* name, float value)
 	glUniform1f (texLoc, value);
 }
 
-void Shader::setUniArrayInt(const GLchar* name, int* value, int size)
+void Shader::setUniArrayInt(const GLchar* name, GLint* value, GLint size)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
 	glUniform1iv (texLoc, size, value);

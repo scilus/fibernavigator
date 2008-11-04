@@ -58,7 +58,7 @@ public:
 
     void setUniInt(const GLchar*, int);
     void setUniFloat(const GLchar*, float);
-    void setUniArrayInt(const GLchar*, int*, int);
+    void setUniArrayInt(const GLchar*, GLint*, GLint);
     void setUniArrayFloat(const GLchar*, float*, int);
     void setAttribFloat(const GLchar*, float);
 
