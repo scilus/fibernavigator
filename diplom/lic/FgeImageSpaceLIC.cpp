@@ -324,9 +324,9 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 	m_transformShader->setUniInt("dimY", m_dh->rows);
 	m_transformShader->setUniInt("dimZ", m_dh->frames);
 
-	int* tex = new int[10];
+	GLint* tex = new GLint[10];
 	float* threshold = new float[10];
-	int* type = new int[10];
+	GLint* type = new GLint[10];
 	int c = 0;
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
