@@ -5,6 +5,7 @@
  *      Author: ralph
  */
 #include "DatasetHelper.h"
+#include "mainFrame.h"
 
 #include "Anatomy.h"
 #include "fibers.h"
