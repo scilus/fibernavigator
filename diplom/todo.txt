@@ -53,6 +53,16 @@ ROI aus overlay und selection der fasern, die durch die roi gehen.
 
 fasern durchsichtig ( gewichtet mit overlay )
 
+surface durchsichtig ( simple implementation )
+
+laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
+
+loeschen der isosurface, wenn zugehoerige anatomy geloescht wird
+
+isosurface von belibigen skalaren datensatzen ( float/short )
+
+
+
 ===============================================================================
 =
 =     erledigt
