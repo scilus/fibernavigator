@@ -87,7 +87,7 @@ inline FTensor::FTensor(const FTensor& T) : FArray(T)
 
 //---------------------------------------------------------------------------
 
-inline FTensor::FTensor(const FVector& v) : FArray(v)
+inline FTensor::FTensor(const F::FVector& v) : FArray(v)
 {
   dimension = (unsigned char)v.getDimension();
   order = 1;
@@ -667,7 +667,7 @@ inline void FTensor::setValues(const double* c)
 
 //---------------------------------------------------------------------------
 
-inline void FTensor::tridiagonalize(FVector& d, FVector& e)
+inline void FTensor::tridiagonalize(F::FVector& d, F::FVector& e)
 {
   unsigned int n=dimension;
 
@@ -684,7 +684,7 @@ inline void FTensor::tridiagonalize(FVector& d, FVector& e)
 
 //---------------------------------------------------------------------------
 
-inline void FTensor::tQLiAlgorithm(FVector& d, FVector& e)
+inline void FTensor::tQLiAlgorithm(F::FVector& d, F::FVector& e)
 {
 #ifndef NODEBUG
     if (order != 2)
@@ -697,7 +697,7 @@ inline void FTensor::tQLiAlgorithm(FVector& d, FVector& e)
 
 //---------------------------------------------------------------------------
 
-inline void FTensor::getEigenSystem(FVector& vals, FVector v[3])
+inline void FTensor::getEigenSystem(F::FVector& vals, F::FVector v[3])
 {
 #ifndef NODEBUG
   if (order != 2)
@@ -706,7 +706,7 @@ inline void FTensor::getEigenSystem(FVector& vals, FVector v[3])
 
   if(dimension==3)
   {
-    //FVector d(3), e(3);
+    //F::FVector d(3), e(3);
     // we now reuse the parameter vector as temporary variables
 #if 0 // OLD
     tridiagonalize(d, e);  // First of all transform tensor into tridiagonal form
@@ -737,7 +737,7 @@ inline void FTensor::getEigenSystem(FVector& vals, FVector v[3])
   else
   {
     // FIXME: do something similar to above code?
-    FVector d(2), e(2);
+    F::FVector d(2), e(2);
     tridiagonalize(d, e);  // First of all transform tensor into tridiagonal form
 
     tQLiAlgorithm(d, e);   // Now calculate Eigenvectors and -values by QLi alg.
@@ -820,7 +820,7 @@ inline double operator*(const FTensor& A, const FTensor& B) {
   return tmp;
 }
 
-inline void FTensor::sortEigenvectors(FVector &eval, FVector *vecs)
+inline void FTensor::sortEigenvectors(F::FVector &eval, F::FVector *vecs)
 {
 #ifndef NODEBUG
     if(eval.size() != 2 && eval.size() != 3){
@@ -828,7 +828,7 @@ inline void FTensor::sortEigenvectors(FVector &eval, FVector *vecs)
     }
 #endif
     double tmp;
-    FVector vtmp;
+    F::FVector vtmp;
     if(eval.size() == 3){
     if(eval[0] > eval[1]) {
       if(eval[0] > eval[2]) {
@@ -873,7 +873,7 @@ inline void FTensor::sortEigenvectors(FVector &eval, FVector *vecs)
     }
 }
 
-inline void FTensor::getEigenvalueIndex(unsigned int* ev, const FVector &eval)
+inline void FTensor::getEigenvalueIndex(unsigned int* ev, const F::FVector &eval)
 {
   if(eval.size() == 3){
     if(eval[0] > eval[1]) { // 0 > 1
@@ -976,7 +976,7 @@ inline FTensor tensorProduct(const FTensor& lhs,const FTensor &rhs)
 }
 
 // i.e. tensor product of two vectors
-inline FTensor dyadicProduct( const FVector& v1, const FVector& v2)
+inline FTensor dyadicProduct( const F::FVector& v1, const F::FVector& v2)
 {
 #ifndef NODEBUG
   if(v1.getDimension() == v2.getDimension())
@@ -994,11 +994,11 @@ inline FTensor dyadicProduct( const FVector& v1, const FVector& v2)
 
 //---------------------------------------------------------------------------
 
-inline FTensor FTensor::tensorFromEigensystem( const FVector& vals, const FVector v[3])
+inline FTensor FTensor::tensorFromEigensystem( const F::FVector& vals, const F::FVector v[3])
 {
   FMatrix eigen(3,3);
   FMatrix D(3,3);
-  FVector nv[3];
+  F::FVector nv[3];
   
   nv[0] = v[0].normalized();
   nv[1] = v[1].normalized();
@@ -1094,7 +1094,7 @@ inline FTensor& FTensor::transform( const FMatrix& A )
   return ((*this) = t);
 }
   
-inline FTensor& FTensor::multAndContract( const FVector& v, unsigned int index )
+inline FTensor& FTensor::multAndContract( const F::FVector& v, unsigned int index )
 {
 #ifndef NODEBUG
   if(v.getDimension() != dimension)

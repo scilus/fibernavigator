@@ -532,13 +532,13 @@ void MainCanvas::setRotation()
 
 void MainCanvas::orthonormalize()
 {
-	FVector v1 = FVector(m_lastRot.s.M00, m_lastRot.s.M01, m_lastRot.s.M02);
-	FVector v2 = FVector(m_lastRot.s.M10, m_lastRot.s.M11, m_lastRot.s.M12);
-	FVector v3 = FVector(m_lastRot.s.M20, m_lastRot.s.M21, m_lastRot.s.M22);
+	F::FVector v1 = F::FVector(m_lastRot.s.M00, m_lastRot.s.M01, m_lastRot.s.M02);
+	F::FVector v2 = F::FVector(m_lastRot.s.M10, m_lastRot.s.M11, m_lastRot.s.M12);
+	F::FVector v3 = F::FVector(m_lastRot.s.M20, m_lastRot.s.M21, m_lastRot.s.M22);
 
-	FVector u1 = v1;
-	FVector u2 = v2 - ( ( scalar(v2, u1)/ scalar(u1,u1) ) * u1 );
-	FVector u3 = v3 - ( ( scalar(v3, u1)/ scalar(u1,u1) ) * u1 ) - ( ( scalar(v3, u2)/ scalar(u2,u2) ) * u2 );
+	F::FVector u1 = v1;
+	F::FVector u2 = v2 - ( ( scalar(v2, u1)/ scalar(u1,u1) ) * u1 );
+	F::FVector u3 = v3 - ( ( scalar(v3, u1)/ scalar(u1,u1) ) * u1 ) - ( ( scalar(v3, u2)/ scalar(u2,u2) ) * u2 );
 
 	m_lastRot.s.M00 = u1[0];
 	m_lastRot.s.M01 = u1[1];
@@ -552,7 +552,7 @@ void MainCanvas::orthonormalize()
 
 }
 
-double MainCanvas::scalar(FVector v1, FVector v2)
+double MainCanvas::scalar(const F::FVector& v1, const F::FVector& v2)
 {
 	return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
 }

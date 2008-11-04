@@ -39,7 +39,7 @@ namespace FMath
   };
 
   template< class Access>
-  inline void tQLiAlgorithm(Access access, FVector& d, FVector& e )
+  inline void tQLiAlgorithm(Access access, F::FVector& d, F::FVector& e )
   {
     const unsigned int n=d.getDimension();
 
@@ -111,7 +111,7 @@ namespace FMath
 
 
 template<class Access>
-  inline void tridiagonalize(Access access, FVector& d, FVector& e)
+  inline void tridiagonalize(Access access, F::FVector& d, F::FVector& e)
   {
     const unsigned int n=d.getDimension();
 

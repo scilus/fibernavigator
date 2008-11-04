@@ -108,7 +108,7 @@ public:
    * \param v
    * Vector to copy.
    */
-  explicit FTensor(const FVector& v);
+  explicit FTensor(const F::FVector& v);
 
   /**
    *\par Description:
@@ -710,7 +710,7 @@ public:
    *\param
    * e Returns the off-diagonal elements with e[0]=0.
    */
-  void tridiagonalize(FVector& d, FVector& e);
+  void tridiagonalize(F::FVector& d, F::FVector& e);
 
   /**
    *\par Description:
@@ -728,7 +728,7 @@ public:
    *\param
    * e Off-diagonal elements with e[0] arbitrary..
    */
-  void tQLiAlgorithm(FVector& d, FVector& e);
+  void tQLiAlgorithm(F::FVector& d, F::FVector& e);
 
   /**
    *\par Description:
@@ -738,11 +738,11 @@ public:
    *\post
    * Tensor now contains eigenvectors (as columns).
    *\param
-   * vals FVector to store Eigenvalues in.
+   * vals F::FVector to store Eigenvalues in.
    *\param
-   * v1 FVector[3] array to store Eigenvectors in.
+   * v1 F::FVector[3] array to store Eigenvectors in.
    */
-  void getEigenSystem(FVector& vals, FVector v[3]);
+  void getEigenSystem(F::FVector& vals, F::FVector v[3]);
 
   /**
    *\par Description:
@@ -750,16 +750,16 @@ public:
    *\pre
    * FTensor has dimension 3, is real, symmetric, positive definite (?) and of order 2.
    *\param
-   * vals FVector of dimension 3 to store Eigenvalues in.
+   * vals F::FVector of dimension 3 to store Eigenvalues in.
    *\param
-   * v1 FVector[3] array to store Eigenvectors in.
+   * v1 F::FVector[3] array to store Eigenvectors in.
    */
-  void getEigenSystem3DS(FVector& vals, FVector v[3]) const;
+  void getEigenSystem3DS(F::FVector& vals, F::FVector v[3]) const;
 
   /**
    * get the non-normalized eigenvector fitting to eigenvalue lambda
    */
-  void getEigenvector3DS(FVector &ev, const double lambda ) const;
+  void getEigenvector3DS(F::FVector &ev, const double lambda ) const;
 
   /**
    * get the sorted eigenvalues of a 3D symmetric tensor
@@ -767,7 +767,7 @@ public:
    * \pre tensor is symmetric
    * \param sorted eigenvalues
    */
-  void getEigenvalues3DS(FVector &evals ) const;
+  void getEigenvalues3DS(F::FVector &evals ) const;
 
   /// Undocumented
   static int pow(int a, int b);
@@ -786,13 +786,13 @@ public:
    * Sort Eigenvectors and values returned from getEigenSystem(...)
    *\pre
    * vals.size() == 2 || vals.size() == 3
-   * vecs is an array of the same amount of FVectors
+   * vecs is an array of the same amount of F::FVectors
    *\post
    * vals and vecs are sorted by the size of vals. vals[0] is the major eigenvalue, vecs[0] the major eigenvector.
    */
-  static void sortEigenvectors(FVector &vals, FVector *vecs);
+  static void sortEigenvectors(F::FVector &vals, F::FVector *vecs);
 
-  static void getEigenvalueIndex(unsigned int *index, const FVector &vals);
+  static void getEigenvalueIndex(unsigned int *index, const F::FVector &vals);
 
   /**
    *\par Description:
@@ -811,10 +811,10 @@ public:
 
   friend FTensor contract(const FTensor& tensor, int index1, int index2);
   friend FTensor tensorProduct(const FTensor& tensor,const FTensor &rhs);
-  friend FTensor dyadicProduct( const FVector& v1, const FVector& v2);
-  FTensor& multAndContract( const FVector& v1, unsigned int index );
+  friend FTensor dyadicProduct( const F::FVector& v1, const F::FVector& v2);
+  FTensor& multAndContract( const F::FVector& v1, unsigned int index );
 
-  static FTensor tensorFromEigensystem( const FArray& vals, const FVector vecs[3] );
+  static FTensor tensorFromEigensystem( const FArray& vals, const F::FVector vecs[3] );
 
   /**
    * Transforms the tensor from the current coordinate system into a new

@@ -92,7 +92,7 @@ std::ostream& binwrite( std::ostream& out, const FTensor& t )
 
 //---------------------------------------------------------------------------
 
-void FTensor::getEigenvalues3DS(FVector& vals) const
+void FTensor::getEigenvalues3DS(F::FVector& vals) const
 {
 #ifndef NODEBUG
   if (order != 2)
@@ -140,7 +140,7 @@ void FTensor::getEigenvalues3DS(FVector& vals) const
   vals[ 2 ] = I1_3 - sqrtV2*( ls + rs );
 }
 
-void FTensor::getEigenvector3DS(FVector &ev, const double lambda ) const
+void FTensor::getEigenvector3DS(F::FVector &ev, const double lambda ) const
 {
   const double zx = T( 0,1 )*T( 1,2 );
   const double yz = T( 0,2 )*T( 0,1 );
@@ -166,7 +166,7 @@ void FTensor::getEigenvector3DS(FVector &ev, const double lambda ) const
   // ev is not normalized!
 }
 
-void FTensor::getEigenSystem3DS(FVector& vals, FVector v[3]) const
+void FTensor::getEigenSystem3DS(F::FVector& vals, F::FVector v[3]) const
 {
   getEigenvalues3DS( vals );
 

@@ -19,7 +19,7 @@
 
 #include "FMatrix.h"
 #include "FMath.h"
-#include "FVector.h"
+#include "F::FVector.h"
 #include "FTensor.h"
 #include "FString.h"
 #include "FException.h"
@@ -310,7 +310,7 @@ double FMatrix::invert (void )
 
 //---------------------------------------------------------------------------
 
-void FMatrix::tridiagonalize(FVector& d, FVector& e)
+void FMatrix::tridiagonalize(F::FVector& d, F::FVector& e)
 {
   positive n=dimy;
 
@@ -329,7 +329,7 @@ void FMatrix::tridiagonalize(FVector& d, FVector& e)
 
 #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
 
-void FMatrix::tQLiAlgorithm(FVector& d, FVector& e)
+void FMatrix::tQLiAlgorithm(F::FVector& d, F::FVector& e)
 {
   positive n=d.getDimension();
 
@@ -339,7 +339,7 @@ void FMatrix::tQLiAlgorithm(FVector& d, FVector& e)
 //---------------------------------------------------------------------------
 
 void FMatrix::getEigenSystem( std::vector< std::complex< double > >& evals,
-			      std::vector< FVector >& evecs )
+			      std::vector< F::FVector >& evecs )
 {
   if( dimx == 3 )
   {
@@ -460,7 +460,7 @@ void FMatrix::getEigenSystem( std::vector< std::complex< double > >& evals,
 
 //---------------------------------------------------------------------------
 
-void FMatrix::getEigenSystem(FVector& vals, std::vector<FVector>& vectors)
+void FMatrix::getEigenSystem(F::FVector& vals, std::vector<F::FVector>& vectors)
 {
   positive dim = dimy;
 
@@ -469,7 +469,7 @@ void FMatrix::getEigenSystem(FVector& vals, std::vector<FVector>& vectors)
 
   positive x;
 
-  FVector di, ed, v(dim);
+  F::FVector di, ed, v(dim);
 
   //  std::cerr <<"Matrix: "<<std::endl<<(*this);
 
@@ -590,7 +590,7 @@ FMatrix& FMatrix::gaussJ( FMatrix &b )
 
 //---------------------------------------------------------------------------
 
-FVector& FMatrix::gaussJ( FVector &v )
+F::FVector& FMatrix::gaussJ( F::FVector &v )
 // PAR: a[1..n][1..n] contains the matrix of the system to solve
 //	n   is the number of rows and columns in the system
 //	b[1..n][1..m] contains m right sides, which are solved simultan
@@ -643,7 +643,7 @@ FVector& FMatrix::gaussJ( FVector &v )
 //               {
 //                 FException e;
 //                 e.setErrorMessage("FMatrix.invert: Singular Matrix-1");
-//                 e.addTraceMessage("FVector& FMatrix::gaussJ( FMatrix &v ) ");
+//                 e.addTraceMessage("F::FVector& FMatrix::gaussJ( FMatrix &v ) ");
 //                 throw e;
 //               }
 #endif
@@ -815,7 +815,7 @@ istream& operator>> ( istream& is , FMatrix& a)
 
 //---------------------------------------------------------------------------
 
-void FMatrix::makeDiagonal(const FVector& v)
+void FMatrix::makeDiagonal(const F::FVector& v)
 {
   dimx = dimy = v.sizeOfArray;
   if (sizeOfArray != dimx*dimy)
@@ -891,7 +891,7 @@ void FMatrix::makeScaling(double d)
 
 //---------------------------------------------------------------------------
 
-void FMatrix::set(const FVector & v)
+void FMatrix::set(const F::FVector & v)
 {
 #ifndef NODEBUG
     if( this->dimx * this->dimy != v.sizeOfArray )
@@ -1050,10 +1050,10 @@ FMatrix& FMatrix::mult(const FMatrix &m, FMatrix &d) const
 
 //---------------------------------------------------------------------------
 
-FVector FMatrix::operator*(const FVector &v) const
+F::FVector FMatrix::operator*(const F::FVector &v) const
 {
   positive i, j;
-  FVector result(dimy); // should be initialized to zero
+  F::FVector result(dimy); // should be initialized to zero
   double *src, *dst;
 
 #ifndef NODEBUG
@@ -1080,7 +1080,7 @@ FVector FMatrix::operator*(const FVector &v) const
 
 //---------------------------------------------------------------------------
 
-FVector& FMatrix::mult(const FVector &v, FVector &d) const
+F::FVector& FMatrix::mult(const F::FVector &v, F::FVector &d) const
 {
   positive i, j;
   double *src, *dst;
@@ -1110,7 +1110,7 @@ FVector& FMatrix::mult(const FVector &v, FVector &d) const
 
 //---------------------------------------------------------------------------
 
-FVector& FMatrix::mult(const FTensor &v, FVector &d) const
+F::FVector& FMatrix::mult(const FTensor &v, F::FVector &d) const
 {
   unsigned char i, j;
   double *src, *dst;
@@ -1172,7 +1172,7 @@ FTensor& FMatrix::mult(const FTensor &v, FTensor &d) const
 
 //---------------------------------------------------------------------------
 
-void FMatrix::svdcmp(FVector& w, FMatrix& v)
+void FMatrix::svdcmp(F::FVector& w, FMatrix& v)
 {
   // Given a matrix a[1..m][1..n], this routine computes its singular value
   // decomposition, A =U  W  V T . The matrix U replaces a on output.
@@ -1186,7 +1186,7 @@ void FMatrix::svdcmp(FVector& w, FMatrix& v)
   w.resize(n);
   v.resize(n,n);
 
-  FVector rv1(n);
+  F::FVector rv1(n);
 
   g=scale=anorm=0.0; // Householder reduction to bidiagonal form.
   for (i=1;i<=n;i++)
@@ -1393,7 +1393,7 @@ void FMatrix::svdcmp(FVector& w, FMatrix& v)
 
 //---------------------------------------------------------------------------
 
-void FMatrix::svDecomp(const FMatrix& u, const FVector& w, const FMatrix& v, const FVector& b, FVector& x)
+void FMatrix::svDecomp(const FMatrix& u, const F::FVector& w, const FMatrix& v, const F::FVector& b, F::FVector& x)
 {
   // Solves A  X = B for a vector X, where A is specied by the arrays u[1..m][1..n],
   // w[1..n], v[1..n][1..n] as returned by svdcmp. m and n are the dimensions of a, and
@@ -1414,7 +1414,7 @@ void FMatrix::svDecomp(const FMatrix& u, const FVector& w, const FMatrix& v, con
 
   int jj,j,i;
   double s;
-  FVector tmp(n);
+  F::FVector tmp(n);
 
   for (j=1;j<=n;j++) // Calculate U T B.
     {
@@ -1438,12 +1438,12 @@ void FMatrix::svDecomp(const FMatrix& u, const FVector& w, const FMatrix& v, con
 
 #define FSVD_EPSILON 0.01
 
-bool FMatrix::solveSingularSystem(FVector& b, FVector& x,
-				  std::vector<FVector>& nullspace,
-				  std::vector<FVector>& range, double zeroTresholdEpsilon) const
+bool FMatrix::solveSingularSystem(F::FVector& b, F::FVector& x,
+				  std::vector<F::FVector>& nullspace,
+				  std::vector<F::FVector>& range, double zeroTresholdEpsilon) const
 {
   FMatrix v(x.getDimension(),x.getDimension()),u(*this);
-  FVector w(x.getDimension());
+  F::FVector w(x.getDimension());
   double wmax,wmin;
 
   u.svdcmp(w, v);  // a is replaced by u
@@ -1466,14 +1466,14 @@ bool FMatrix::solveSingularSystem(FVector& b, FVector& x,
       if(w[l]==0.0) // this column of V belongs to nullspace
 	{
 	  unsigned int rows=v.getDimensionY();
-	  FVector n(rows);
+	  F::FVector n(rows);
 	  for(unsigned int c=0; c<rows; c++) n[c] = v(c,l);
 	  nullspace.push_back(n);
 	}
       else // this column of U belongs to range
 	{
 	  unsigned int rows=u.getDimensionY();
-	  FVector n(rows);
+	  F::FVector n(rows);
 	  for(unsigned int c=0; c<rows; c++) n[c] = u(c,l);
 	  range.push_back(n);
 	}
@@ -1483,7 +1483,7 @@ bool FMatrix::solveSingularSystem(FVector& b, FVector& x,
 
   unsigned int rank = range.size();
 
-  FVector check(b.getDimension());
+  F::FVector check(b.getDimension());
 
   for(unsigned int c=0; c<rank; c++)
     check += (range[c]*b)*range[c];
@@ -1641,7 +1641,7 @@ double FMatrix::detOf() const
 //------------------------------------------------------------------------------
 
 // Calculation taken from http://www.cprogramming.com/tutorial/3d/rotation.html
-FMatrix FMatrix::rot3RH( const FVector& axis, double angle )
+FMatrix FMatrix::rot3RH( const F::FVector& axis, double angle )
 {
   FMatrix m(3,3);
   double c = cos(angle);
@@ -1666,7 +1666,7 @@ FMatrix FMatrix::rot3RH( const FVector& axis, double angle )
   return m;
 }
 
-FMatrix FMatrix::rot4RH( const FVector& axis, double angle )
+FMatrix FMatrix::rot4RH( const F::FVector& axis, double angle )
 {
   FMatrix m(4,4);
   double c = cos(angle);
@@ -1692,7 +1692,7 @@ FMatrix FMatrix::rot4RH( const FVector& axis, double angle )
   return m;
 }
 
-FMatrix FMatrix::rot3LH( const FVector& axis, double angle )
+FMatrix FMatrix::rot3LH( const F::FVector& axis, double angle )
 {
   FMatrix m(3,3);
   double c = cos(angle);
@@ -1717,7 +1717,7 @@ FMatrix FMatrix::rot3LH( const FVector& axis, double angle )
   return m;
 }
 
-FMatrix FMatrix::rot4LH( const FVector& axis, double angle )
+FMatrix FMatrix::rot4LH( const F::FVector& axis, double angle )
 {
   FMatrix m(4,4);
   double c = cos(angle);

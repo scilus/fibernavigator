@@ -391,7 +391,7 @@ inline FArray operator*(const FArray& v, const FMatrix &m)
 
   positive newSize = m.dimx;
   
-  FVector result(newSize); // should be initialized to zero
+  F::FVector result(newSize); // should be initialized to zero
 
   dst=&result.comp[0];
   for ( i=0; i<m.dimx; i++)

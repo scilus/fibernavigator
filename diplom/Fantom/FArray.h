@@ -541,10 +541,13 @@ protected:
  *! Define FPosition as FArray
  */
 typedef FArray FPosition;
+
+namespace F {
 /**
  *! Define FVector as FArray
  */
 typedef FArray FVector;
+}
 
 #ifndef OUTLINE
 #include "FArray.icc"

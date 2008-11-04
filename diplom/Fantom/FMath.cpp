@@ -11,7 +11,7 @@
 
 #include "FMath.h"
 #include "FException.h"
-#include "FVector.h"
+#include "F::FVector.h"
 
 #include <iostream>
 #include <cmath>
@@ -263,8 +263,8 @@ void FMath::Eigensystem(const FMatrix& A, std::complex<double> e[2], double* EV0
 
 // --------------------------------------------------------------------------
 
-void FMath::mnewt(int ntrial, FVector& x, double tolx, double tolf,
-		  void (*usrfun)(FVector, FVector, FMatrix)){
+void FMath::mnewt(int ntrial, F::FVector& x, double tolx, double tolf,
+		  void (*usrfun)(F::FVector, F::FVector, FMatrix)){
   // cf. Numerical Recipes pp.379-383
 
   positive N = x.getDimension();
@@ -273,9 +273,9 @@ void FMath::mnewt(int ntrial, FVector& x, double tolx, double tolf,
   int k, i;
 
   double errx, errf, d;
-  FVector fvec(N);
+  F::FVector fvec(N);
   FMatrix fjac(N,N);
-  FVector p(N);
+  F::FVector p(N);
 
   indx = new positive [3] ;
   for (k=0 ; k<ntrial ; k++) {
@@ -326,7 +326,7 @@ void FMath::Ludecomp(FMatrix& a, positive* indx, double& d)
     i, j, k,
     imax=0;//initialized to avoid warning
   double big, dum, sum, temp;
-  FVector vv(N);
+  F::FVector vv(N);
 
   d = 1.0;
   for (i=0;i<N;i++) // nachsehen ob eine zeile leer (0) ist
@@ -386,7 +386,7 @@ void FMath::Ludecomp(FMatrix& a, positive* indx, double& d)
 
 // --------------------------------------------------------------------------
 
-void FMath::Lubacksb(const FMatrix& a, FVector& b, positive * indx)
+void FMath::Lubacksb(const FMatrix& a, F::FVector& b, positive * indx)
   // PAR: a[1..n][1..n] is matrix in LU-decomposition from ludcmp,
   //	indx[1..n] is permutation vector from ludcmp,
   //	n is the dimension of a,
@@ -502,10 +502,10 @@ void FMath::jordanCanonicalForm( const FMatrix& m, FMatrix& d, vector< complex <
   FMatrix r(s,n+1);
   FMatrix b(s,n);
 
-  vector< FVector > nullSpace;
-  vector< FVector > range;
+  vector< F::FVector > nullSpace;
+  vector< F::FVector > range;
 
-  FVector dmy1(n), dmy2(n);
+  F::FVector dmy1(n), dmy2(n);
 
 
   for (i=0; i<s; i++) {
@@ -586,7 +586,7 @@ static void mix( FArray& result,
 //---------------------------------------------------------------------------
 
 void FMath::intersectTetrahedronToPlane( const vector<FPosition>& tet,
-                                         const FVector& n,
+                                         const F::FVector& n,
                                          const FPosition& p,
                                          vector<FPosition>& result )
 {
@@ -601,7 +601,7 @@ void FMath::intersectTetrahedronToPlane( const FPosition& tet0,
                                          const FPosition& tet1,
                                          const FPosition& tet2,
                                          const FPosition& tet3,
-                                         const FVector& n,
+                                         const F::FVector& n,
                                          const FPosition& p,
                                          vector<FPosition>& result )
 {

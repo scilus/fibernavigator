@@ -24,11 +24,16 @@ if(BUILD_OPTION_OPENMP)
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 endif(BUILD_OPTION_OPENMP)
 
+find_package( OpenGL REQUIRED )
+
+INCLUDE_DIRECTORIES( glew/include )
 INCLUDE( ${wxWidgets_USE_FILE} )
 INCLUDE_DIRECTORIES( ${wxWidgets_INCLUDE_DIRS} )
 ADD_DEFINITIONS( `wx-config --cppflags` )
 add_executable( main MACOSX_BUNDLE ${_srcs} ${_srcs2} ${_srcs3} ${_srcs4} ${_srcs5})
 #target_link_libraries( main `wx-config --libs` )
-target_link_libraries( main -lGL -lGLU -lGLEW )
+#target_link_libraries( main -lGL -lGLU -lGLEW )
 target_link_libraries( main ${wxWidgets_LIBRARIES} )
-target_link_libraries( main -lwx_gtk2u_gl-2.8 ) 
+#target_link_libraries( main -lwx_gtk2u_gl-2.8 ) 
+
+target_link_libraries( main "-framework OpenGL" -L../diplom/glew/lib GLEW wx_macud_gl-2.8 )

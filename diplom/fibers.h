@@ -80,7 +80,7 @@ private:
 	float *m_boxMax;
 
 	int m_count;
-	FVector m_barycenter;
+	F::FVector m_barycenter;
 };
 
 #endif /*CURVES_H_*/

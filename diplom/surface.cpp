@@ -217,7 +217,7 @@ void Surface::execute ()
 
 		FArray dmy(*pointsIt);
 
-		FVector result = transMatrix * dmy;
+		F::FVector result = transMatrix * dmy;
 		(*pointsIt)[0] = result[0];
 		(*pointsIt)[1] = result[1];
 		(*pointsIt)[2] = result[2];
@@ -232,7 +232,7 @@ void Surface::execute ()
 	{
 		FArray dmy(*pointsIt);
 
-		FVector result = transMatrix * dmy;
+		F::FVector result = transMatrix * dmy;
 		(*pointsIt)[0] = result[0];
 		(*pointsIt)[1] = result[1];
 		(*pointsIt)[2] = result[2];
@@ -262,7 +262,7 @@ void Surface::execute ()
 
 	int pi0, pi1, pi2, pi3;
 	m_normals.clear();
-	std::vector< FVector > quadNormals;
+	std::vector< F::FVector > quadNormals;
 
 	// TODO
 	if (m_dh->m_isrDragging)
@@ -314,34 +314,34 @@ void Surface::execute ()
 			m_vertices.push_back(pi3);
 
 			p = m_splinePoints[pi0];
-			FVector p0(p[0], p[1], p[2]);
+			F::FVector p0(p[0], p[1], p[2]);
 			quadRef[pi0].push_back(quadNormals.size());
 
 			p = m_splinePoints[pi1];
-			FVector p1(p[0], p[1], p[2]);
+			F::FVector p1(p[0], p[1], p[2]);
 			quadRef[pi1].push_back(quadNormals.size());
 
 			p = m_splinePoints[pi2];
-			FVector p2(p[0], p[1], p[2]);
+			F::FVector p2(p[0], p[1], p[2]);
 			quadRef[pi2].push_back(quadNormals.size());
 
 			p = m_splinePoints[pi3];
-			FVector p3(p[0], p[1], p[2]);
+			F::FVector p3(p[0], p[1], p[2]);
 			quadRef[pi3].push_back(quadNormals.size());
 
-			FVector n1 = getNormalForQuad(&p0, &p1, &p2);
+			F::FVector n1 = getNormalForQuad(&p0, &p1, &p2);
 			quadNormals.push_back(n1);
 		}
 	}
 
 	for (int i = 0 ; i < m_numPoints ; ++i )
 	{
-		FVector tmp(0.0,0.0,0.0);
+		F::FVector tmp(0.0,0.0,0.0);
 		for ( unsigned int j = 0 ; j < quadRef[i].size() ; ++j)
 		{
 			 tmp += quadNormals[quadRef[i][j]];
 		}
-		FVector n( tmp[0] / quadRef[i].size() * m_dh->normalDirection,
+		F::FVector n( tmp[0] / quadRef[i].size() * m_dh->normalDirection,
 				   tmp[1] / quadRef[i].size() * m_dh->normalDirection,
 				   tmp[2] / quadRef[i].size() * m_dh->normalDirection);
 		m_normals.push_back(n);
@@ -386,11 +386,11 @@ void Surface::execute ()
 	createCutTexture();
 }
 
-FVector Surface::getNormalForQuad(const FVector* p1, const FVector* p2, const FVector* p3)
+F::FVector Surface::getNormalForQuad(const F::FVector* p1, const F::FVector* p2, const F::FVector* p3)
 {
-	FVector a = *p2 - *p1;
-	FVector b = *p3 - *p1;
-	FVector n = a.crossProduct(b);
+	F::FVector a = *p2 - *p1;
+	F::FVector b = *p3 - *p1;
+	F::FVector n = a.crossProduct(b);
 	return n.normalize();
 }
 
@@ -524,7 +524,7 @@ void Surface::createCutTexture()
 	m_pointArray= new float[numPoints*3];
 	for (int i = 0 ; i < numPoints ; ++i )
 	{
-		FVector p = m_splinePoints[i];
+		F::FVector p = m_splinePoints[i];
 		m_pointArray[3*i] = p[0];
 		m_pointArray[3*i+1] = p[1];
 		m_pointArray[3*i+2] = p[2];
@@ -627,7 +627,7 @@ void Surface::overSamplePoints()
 	m_numPoints = m_renderpointsPerRow * m_renderpointsPerCol;
 	std::vector< std::vector<int> >quadRef(m_numPoints, std::vector<int>(0,0));
 	std::vector< double > p;
-	FVector p1, p2, p3, p4;
+	F::FVector p1, p2, p3, p4;
 
 	for(int z = 0 ; z < m_renderpointsPerCol - 1; z++)
 	{
@@ -641,7 +641,7 @@ void Surface::overSamplePoints()
 
 			m_splinePoints.push_back(p1);
 
-			FVector p5( (p1[0] + p2[0]) / 2.0 , (p1[1] + p2[1]) / 2.0 , (p1[2] + p2[2]) / 2.0);
+			F::FVector p5( (p1[0] + p2[0]) / 2.0 , (p1[1] + p2[1]) / 2.0 , (p1[2] + p2[2]) / 2.0);
 
 			m_splinePoints.push_back(p5);
 		}
@@ -659,14 +659,14 @@ void Surface::overSamplePoints()
 			p3 = tempPoints[pi2];
 			p4 = tempPoints[pi3];
 
-			FVector p5( (p1[0] + p3[0]) / 2.0 , (p1[1] + p3[1]) / 2.0 , (p1[2] + p3[2]) / 2.0);
+			F::FVector p5( (p1[0] + p3[0]) / 2.0 , (p1[1] + p3[1]) / 2.0 , (p1[2] + p3[2]) / 2.0);
 			m_splinePoints.push_back(p5);
 
-			FVector p6( (p1[0] + p2[0] + p3[0] + p4[0]) / 4.0 , (p1[1] + p2[1] + p3[1] + p4[1]) / 4.0 , (p1[2] + p2[2] + p3[2] + p4[2]) / 4.0);
+			F::FVector p6( (p1[0] + p2[0] + p3[0] + p4[0]) / 4.0 , (p1[1] + p2[1] + p3[1] + p4[1]) / 4.0 , (p1[2] + p2[2] + p3[2] + p4[2]) / 4.0);
 			m_splinePoints.push_back(p6);
 
 		}
-		FVector p7( (p2[0] + p4[0]) / 2.0 , (p2[1] + p4[1]) / 2.0 , (p2[2] + p4[2]) / 2.0);
+		F::FVector p7( (p2[0] + p4[0]) / 2.0 , (p2[1] + p4[1]) / 2.0 , (p2[2] + p4[2]) / 2.0);
 		m_splinePoints.push_back(p7);
 
 	}
@@ -681,7 +681,7 @@ void Surface::overSamplePoints()
 
 		m_splinePoints.push_back(p1);
 
-		FVector p5( (p1[0] + p2[0]) / 2.0 , (p1[1] + p2[1]) / 2.0 , (p1[2] + p2[2]) / 2.0);
+		F::FVector p5( (p1[0] + p2[0]) / 2.0 , (p1[1] + p2[1]) / 2.0 , (p1[2] + p2[2]) / 2.0);
 
 		m_splinePoints.push_back(p5);
 	}

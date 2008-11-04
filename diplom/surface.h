@@ -36,7 +36,7 @@ private:
 	void getSplineSurfaceDeBoorPoints(  std::vector< std::vector< double > > &givenPoints,
 										    std::vector< std::vector< double > > &deBoorPoints,
 										    int numRows, int numCols);
-	FVector getNormalForQuad(const FVector*, const FVector*, const FVector*);
+	F::FVector getNormalForQuad(const F::FVector*, const F::FVector*, const F::FVector*);
 
 	float getXValue(int y , int z, int numPoints);
 	void boxTest(int left, int right, int axis);
@@ -61,7 +61,7 @@ private:
 
 	std::vector< std::vector< double > > m_splinePoints;
 	std::vector< int > m_vertices;
-	std::vector< FVector >m_normals;
+	std::vector< F::FVector >m_normals;
 
 	int m_renderpointsPerCol;
 	int m_renderpointsPerRow;

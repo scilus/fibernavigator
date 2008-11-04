@@ -113,8 +113,8 @@ namespace FMath
    *  given function that evaluates derivatives and Jacobian
    *  matrix of the considered scalar function.
    */
-  void mnewt(int ntrial, FVector& x, double tolx, double tolf,
-             void (*usrfun)(FVector, FVector, FMatrix));
+  void mnewt(int ntrial, F::FVector& x, double tolx, double tolf,
+             void (*usrfun)(F::FVector, F::FVector, FMatrix));
 
   /**
    *\par Description:
@@ -133,7 +133,7 @@ namespace FMath
    *\param indx
    * permutation vector that was produced by the l/u-decomposition.
    */
-  void Lubacksb(const FMatrix& a, FVector& b, positive* indx);
+  void Lubacksb(const FMatrix& a, F::FVector& b, positive* indx);
 
   /**
    *\par Description:
@@ -179,7 +179,7 @@ namespace FMath
    * vector containing the found intersection points (either 0, 3 or 4).
    */
   void intersectTetrahedronToPlane(const vector<FPosition>& tet,
-                                   const FVector& n,
+                                   const F::FVector& n,
                                    const FPosition& p,
                                    vector<FPosition>& result);
 
@@ -199,7 +199,7 @@ namespace FMath
                                    const FPosition& tet1,
                                    const FPosition& tet2,
                                    const FPosition& tet3,
-                                   const FVector& n,
+                                   const F::FVector& n,
                                    const FPosition& p,
                                    vector<FPosition>& result);
 

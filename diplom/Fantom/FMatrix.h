@@ -17,6 +17,7 @@
 #include <iosfwd>
 
 #include "FArray.h"
+
 //#include "FRefArray.hh"
 class FRefArray;
 class FTensor;
@@ -168,11 +169,11 @@ public:
   /**
    * Create a diagonal matrix containing v as its diagonal elements.
    * \pre
-   * v is a valid FVector
+   * v is a valid F::FVector
    * \post
    * Matrix is square and M(i,i) = v(i)
    */
-  void makeDiagonal(const FVector& v);
+  void makeDiagonal(const F::FVector& v);
 
   /**
    * Set the matrix to be a idendity matrix, i.e., a diagonal matrix
@@ -203,11 +204,11 @@ public:
   /**
    * Efficient method to convert an FArray into a matrix.
    * \pre
-   * v is a valid FVector and has same number of components as *this
+   * v is a valid F::FVector and has same number of components as *this
    * \post
    * components of *this are set to those of v
    */
-  void set(const FVector & v);
+  void set(const F::FVector & v);
 
   /**
    * Householder reduction of a real symmetric matrix to a tridiagonal one.
@@ -222,7 +223,7 @@ public:
    *\param
    * e Returns the off-diagonal elements with e[0]=0.
    */
-  void tridiagonalize(FVector& d, FVector& e);
+  void tridiagonalize(F::FVector& d, F::FVector& e);
 
   /**
    * Tridiagonalized QL algorithm with implicit shifts.
@@ -240,7 +241,7 @@ public:
    *\param
    * e Off-diagonal elements with e[0] arbitrary..
    */
-  void tQLiAlgorithm(FVector& d, FVector& e);
+  void tQLiAlgorithm(F::FVector& d, F::FVector& e);
 
   /**
    * Calculate Eigenvalues and Eigenvectors of matrix.
@@ -251,11 +252,11 @@ public:
    * vals and vectors have been resized to match the
    * size of the matrix
    *\param
-   * vals FVector to store Eigenvalues in.
+   * vals F::FVector to store Eigenvalues in.
    *\param
    * vectors STL vector containing eigenvectors.
    */
-  void getEigenSystem(FVector& vals, std::vector<FVector>& vectors);
+  void getEigenSystem(F::FVector& vals, std::vector<F::FVector>& vectors);
 
    /**
    *\par Description:
@@ -267,7 +268,7 @@ public:
    * evecs contains the eigenvectors of the matrix and is resized to 3
    */
     void getEigenSystem( std::vector< std::complex< double > >& evals,
-			 std::vector< FVector >& evecs );
+			 std::vector< F::FVector >& evecs );
 
   /**
    *\par Description:
@@ -298,7 +299,7 @@ public:
    * Martrix is inverted and rightside contains the solution(s)
    *\param rightside containing the result to solve the system for
    */
-  FVector& gaussJ( FVector& rightside );
+  F::FVector& gaussJ( F::FVector& rightside );
 
   /**
    * Cyclic Jacobi Algorithm
@@ -332,12 +333,12 @@ public:
 
   /** Matrix by Vector multiplication (binary).
    */
-  FVector operator*(const FVector& v) const;
+  F::FVector operator*(const F::FVector& v) const;
 
   ///  Undocumented.
-  FVector& mult(const FVector &m, FVector &d) const;
+  F::FVector& mult(const F::FVector &m, F::FVector &d) const;
 
-  FVector& mult(const FTensor &m, FVector &d) const;
+  F::FVector& mult(const FTensor &m, F::FVector &d) const;
 
   FTensor& mult(const FTensor &m, FTensor &d) const;
 
@@ -414,14 +415,14 @@ public:
   friend std::ostream& operator<< (std::ostream& os, const FMatrix& m);
   friend std::istream& operator>> (std::istream& os, FMatrix& m);
 
-  friend FVector operator*(const FVector &v, const FMatrix& m);
+  friend F::FVector operator*(const F::FVector &v, const FMatrix& m);
   friend FMatrix operator*(const double &lamda, const FMatrix& m);
-  friend FVector& operator*=(FVector& v, const FMatrix& matrix);
+  friend F::FVector& operator*=(F::FVector& v, const FMatrix& matrix);
 
   ///  Undocumented.
-  bool solveSingularSystem(FVector& b, FVector& x,
-          std::vector<FVector>& nullspace,
-          std::vector<FVector>& range, double zeroTresholdEpsilon = 1.0e-6) const;
+  bool solveSingularSystem(F::FVector& b, F::FVector& x,
+          std::vector<F::FVector>& nullspace,
+          std::vector<F::FVector>& range, double zeroTresholdEpsilon = 1.0e-6) const;
 
   /** Size reporter.
    * \return number of array-entries.
@@ -433,12 +434,12 @@ public:
    * \post
    * *this replaced by the matrix U of decomposition
    */
-  void svdcmp(FVector& w, FMatrix& v);
+  void svdcmp(F::FVector& w, FMatrix& v);
 
   /**
    *  used by solveSingularSystem()
    */
-  static void svDecomp(const FMatrix& u, const FVector& w, const FMatrix& v, const FVector& b, FVector& x);
+  static void svDecomp(const FMatrix& u, const F::FVector& w, const FMatrix& v, const F::FVector& b, F::FVector& x);
 
   /**
    * copy a matrix sub in a bigger matrix
@@ -485,21 +486,21 @@ public:
   //
 
   /**
-   * Create a right handed 3x3 rotation matrix rotating theta degrees around FVector
+   * Create a right handed 3x3 rotation matrix rotating theta degrees around F::FVector
    */
-  static FMatrix rot3RH( const FVector& axis, double angle );
+  static FMatrix rot3RH( const F::FVector& axis, double angle );
   /**
-   * Create a right handed 4x4 rotation matrix rotating theta degrees around FVector
+   * Create a right handed 4x4 rotation matrix rotating theta degrees around F::FVector
    */
-  static FMatrix rot4RH( const FVector& axis, double angle );
+  static FMatrix rot4RH( const F::FVector& axis, double angle );
   /**
-   * Create a left handed 3x3 rotation matrix rotating theta degrees around FVector
+   * Create a left handed 3x3 rotation matrix rotating theta degrees around F::FVector
    */
-  static FMatrix rot3LH( const FVector& axis, double angle );
+  static FMatrix rot3LH( const F::FVector& axis, double angle );
   /**
-   * Create a left handed 4x4 rotation matrix rotating theta degrees around FVector
+   * Create a left handed 4x4 rotation matrix rotating theta degrees around F::FVector
    */
-  static FMatrix rot4LH( const FVector& axis, double angle );
+  static FMatrix rot4LH( const F::FVector& axis, double angle );
 
 
 

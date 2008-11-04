@@ -48,7 +48,7 @@ public:
     Vector3fT getEventCenter();
     void setRotation();
     void orthonormalize();
-    double scalar(FVector, FVector);
+    double scalar(const F::FVector&, const F::FVector&);
 
     void testRender(GLuint tex);
 
