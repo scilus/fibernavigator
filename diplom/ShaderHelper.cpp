@@ -6,6 +6,7 @@
  */
 
 #include "ShaderHelper.h"
+#include "DatasetHelper.h"
 
 ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh = dh;
@@ -57,10 +58,10 @@ ShaderHelper::~ShaderHelper() {
 
 void ShaderHelper::setTextureShaderVars()
 {
-	int* tex = new int[10];
-	int* show = new int[10];
+	GLint* tex = new GLint[10];
+	GLint* show = new GLint[10];
 	float* threshold = new float[10];
-	int* type = new int[10];
+	GLint* type = new GLint[10];
 	int c = 0;
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
@@ -92,10 +93,10 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniFloat("cutZ", m_dh->zSlize + 0.5f);
 	m_meshShader->setUniInt("sector", m_dh->quadrant);
 
-	int* tex = new int[10];
-	int* show = new int[10];
+	GLint* tex = new GLint[10];
+	GLint* show = new GLint[10];
 	float* threshold = new float[10];
-	int* type = new int[10];
+	GLint* type = new GLint[10];
 	int c = 0;
 	GLuint cutTex = 0;
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
@@ -172,10 +173,10 @@ void ShaderHelper::setSplineSurfaceShaderVars()
 	m_splineSurfShader->setUniInt("dimY", m_dh->rows);
 	m_splineSurfShader->setUniInt("dimZ", m_dh->frames);
 
-	int* tex = new int[10];
-	int* show = new int[10];
+	GLint* tex = new GLint[10];
+	GLint* show = new GLint[10];
 	float* threshold = new float[10];
-	int* type = new int[10];
+	GLint* type = new GLint[10];
 	int c = 0;
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
