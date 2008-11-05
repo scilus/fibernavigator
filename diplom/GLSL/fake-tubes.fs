@@ -5,8 +5,7 @@ varying float tangent_dot_view;
 /*
  * simple fragment shader that does rendering of tubes with diffuse illumination
  */
-void main()
-{
+void main() {
   //discard;
   vec3 color = abs(normalize(tangentR3));
 

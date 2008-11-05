@@ -36,4 +36,8 @@ add_executable( main MACOSX_BUNDLE ${_srcs} ${_srcs2} ${_srcs3} ${_srcs4} ${_src
 target_link_libraries( main ${wxWidgets_LIBRARIES} )
 #target_link_libraries( main -lwx_gtk2u_gl-2.8 ) 
 
-target_link_libraries( main "-framework OpenGL" -L../diplom/glew/lib GLEW wx_macud_gl-2.8 )
+if(APPLE)
+    target_link_libraries( main "-framework OpenGL" -L../diplom/glew/lib GLEW wx_macud_gl-2.8 )
+else(APPLE)
+    target_link_libraries( main -L../diplom/glew/lib GLEW wx_gtk2u_gl-2.8 )
+endif(APPLE)
