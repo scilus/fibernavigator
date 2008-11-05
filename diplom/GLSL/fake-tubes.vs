@@ -15,10 +15,8 @@ void main() {
 	tangent = (gl_ModelViewProjectionMatrix * vec4(gl_Normal,0.)).xyz; //< transform our tangent vector
 	s_param = gl_MultiTexCoord0.x; //< store texture coordinate for shader
 
-	vec3 eyeVec = vec3(gl_ModelViewMatrix * gl_Vertex);
-	vec3 viewVec = normalize(-eyeVec);
-
-	vec3 offsetNN = cross(vec3(0., 0., -1.), normalize(tangent.xyz));
+	vec3 v = (gl_ModelViewMatrix * vec4(0., 0., -1., 0.)).xyz;
+	vec3 offsetNN = cross(v, normalize(tangent.xyz));
 	vec3 offset = normalize(offsetNN);
 	tangent_dot_view = length(offsetNN);
 
