@@ -11,7 +11,7 @@
 
 #include "FMath.h"
 #include "FException.h"
-#include "F::FVector.h"
+#include "FVector.h"
 
 #include <iostream>
 #include <cmath>
