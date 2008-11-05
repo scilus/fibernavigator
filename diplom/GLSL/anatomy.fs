@@ -1,6 +1,7 @@
 uniform sampler3D texes[10];
 uniform bool show[10];
 uniform float threshold[10];
+uniform float alpha[10];
 uniform int type[10];
 uniform int countTextures;
 
@@ -26,7 +27,7 @@ vec3 defaultColorMap( float value )
 	return color;
 }
 
-void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold)
+void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold, in float alpha)
 {
 	vec3 col1 = vec3(0.0);
 	if (type == 3)
@@ -35,7 +36,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 
 		if (col1.r - threshold > 0.0)
 		{
-			col.rgb = defaultColorMap( col1.r);
+			col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * defaultColorMap( col1.r));
 		}
 	}
 
@@ -47,7 +48,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 
 		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold) > 0.0)
 		{
-			col.rgb = col1.rgb;
+			col.rgb =  ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
 		}
 		col.a += clamp (( (col.r*3.0) + (col.g*3.0) + (col.b*3.0) ), 0.0, 1.0) - threshold;
 	}
@@ -60,7 +61,7 @@ void main()
 
 	for (int i = 9 ; i > -1 ; i--)
 	{
-		if (show[i]) lookupTex(col, type[i], texes[i], threshold[i]);
+		if (show[i]) lookupTex(col, type[i], texes[i], threshold[i], alpha[i]);
 	}
 
 	col = clamp(col, 0.0, 1.0);

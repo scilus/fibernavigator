@@ -72,7 +72,8 @@ void ShaderHelper::setTextureShaderVars()
 {
 	GLint* tex = new GLint[10];
 	GLint* show = new GLint[10];
-	float* threshold = new float[10];
+	GLfloat* threshold = new GLfloat[10];
+	GLfloat* alpha = new GLfloat[10];
 	GLint* type = new GLint[10];
 	int c = 0;
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
@@ -82,6 +83,7 @@ void ShaderHelper::setTextureShaderVars()
 			tex[c] = c;
 			show[c] = info->getShow();
 			threshold[c] = info->getThreshold();
+			alpha[c] = info->getAlpha();
 			type[c] = info->getType();
 			++c;
 		}
@@ -91,6 +93,7 @@ void ShaderHelper::setTextureShaderVars()
 	m_textureShader->setUniArrayInt("show", show, c);
 	m_textureShader->setUniArrayInt("type", type, c);
 	m_textureShader->setUniArrayFloat("threshold", threshold, c);
+	m_textureShader->setUniArrayFloat("alpha", alpha, c);
 	m_textureShader->setUniInt("countTextures", c);
 }
 
@@ -108,6 +111,7 @@ void ShaderHelper::setMeshShaderVars()
 	GLint* tex = new GLint[10];
 	GLint* show = new GLint[10];
 	float* threshold = new float[10];
+	GLfloat* alpha = new GLfloat[10];
 	GLint* type = new GLint[10];
 	int c = 0;
 	GLuint cutTex = 0;
@@ -118,6 +122,7 @@ void ShaderHelper::setMeshShaderVars()
 			tex[c] = c;
 			show[c] = info->getShow();
 			threshold[c] = info->getThreshold();
+			alpha[c] = info->getAlpha();
 			type[c] = info->getType();
 			++c;
 		}
@@ -143,6 +148,7 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniArrayInt("show", show, c);
 	m_meshShader->setUniArrayInt("type", type, c);
 	m_meshShader->setUniArrayFloat("threshold", threshold, c);
+	m_textureShader->setUniArrayFloat("alpha", alpha, c);
 	m_meshShader->setUniInt("countTextures", c);
 }
 
@@ -189,6 +195,7 @@ void ShaderHelper::setSplineSurfaceShaderVars()
 	GLint* tex = new GLint[10];
 	GLint* show = new GLint[10];
 	float* threshold = new float[10];
+	GLfloat* alpha = new GLfloat[10];
 	GLint* type = new GLint[10];
 	int c = 0;
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
@@ -198,6 +205,7 @@ void ShaderHelper::setSplineSurfaceShaderVars()
 			tex[c] = c;
 			show[c] = info->getShow();
 			threshold[c] = info->getThreshold();
+			alpha[c] = info->getAlpha();
 			type[c] = info->getType();
 			++c;
 		}
@@ -207,6 +215,7 @@ void ShaderHelper::setSplineSurfaceShaderVars()
 	m_splineSurfShader->setUniArrayInt("show", show, c);
 	m_splineSurfShader->setUniArrayInt("type", type, c);
 	m_splineSurfShader->setUniArrayFloat("threshold", threshold, c);
+	m_textureShader->setUniArrayFloat("alpha", alpha, c);
 	m_splineSurfShader->setUniInt("countTextures", c);
 }
 

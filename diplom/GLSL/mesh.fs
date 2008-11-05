@@ -3,7 +3,7 @@
 uniform int sector;
 uniform float cutX, cutY, cutZ;
 uniform int dimX, dimY, dimZ;
-uniform float alpha;
+uniform float alpha_;
 
 uniform bool showFS;
 uniform bool useTex;
@@ -14,6 +14,7 @@ uniform sampler3D texes[10];
 uniform sampler2D cutTex;
 uniform bool show[10];
 uniform float threshold[10];
+uniform float alpha[10];
 uniform int type[10];
 uniform int countTextures;
 
@@ -72,7 +73,7 @@ void cutAtSplineSurface() {
 	}
 }
 
-void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v)
+void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v, in float alpha)
 {
 	vec3 col1;
 	if (!blendTex)
@@ -83,7 +84,7 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 
 		if (col1.r - threshold> 0.0)
 		{
-			color.rgb = defaultColorMap( col1.r);
+			color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * defaultColorMap( col1.r));
 		}
 	}
 	if (type == 1 || type == 2 || type == 4)
@@ -94,7 +95,7 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 
 		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold)> 0.0)
 		{
-			color.rgb = col1.rgb;
+			color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
 		}
 	}
 }
@@ -135,7 +136,7 @@ void main() {
 
 		for (int i = 9; i > -1; i--) {
 			if (show[i])
-				lookupTex(color, type[i], texes[i], threshold[i], v);
+				lookupTex(color, type[i], texes[i], threshold[i], v, alpha[i]);
 		}
 
 		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0)
@@ -149,7 +150,7 @@ void main() {
 				* gl_FrontMaterial.specular);
 	}
 
-	color.a = alpha;
+	color.a = alpha_;
 	color = clamp(color, 0.0, 1.0);
 
 	gl_FragColor = color;

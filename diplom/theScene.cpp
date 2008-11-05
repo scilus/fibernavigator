@@ -216,7 +216,7 @@ void TheScene::renderMesh()
 				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
 				m_dh->shaderHelper->m_meshShader->setUniInt("showFS", info->getShowFS());
 				m_dh->shaderHelper->m_meshShader->setUniInt("useTex", info->getUseTex());
-				m_dh->shaderHelper->m_meshShader->setUniFloat("alpha", info->getAlpha());
+				m_dh->shaderHelper->m_meshShader->setUniFloat("alpha_", info->getAlpha());
 
 				if (m_dh->surface_loaded)
 					m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", true);
