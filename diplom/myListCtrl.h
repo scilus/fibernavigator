@@ -10,7 +10,6 @@
 #include "wx/listctrl.h"
 #include "wx/treectrl.h"
 #include "wx/imaglist.h"
-#include "datasetInfo.h"
 
 class MyTreeCtrl: public wxTreeCtrl {
 public:

@@ -79,6 +79,8 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 		selected = MasterBox;
 	else if (this->GetItemText(ppId) == _T("selection boxes"))
 		selected = ChildBox;
+	else if (this->GetItemText(pId) == _T("points"))
+		selected = Point_;
 	else return;
 
 	if ( event.GetKeyCode() == WXK_DELETE)
