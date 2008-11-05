@@ -1281,7 +1281,7 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
 
 	int selected = treeSelected(treeid);
-	if ( selected == ChildBox ||  selected == MasterBox )
+	if ( selected == ChildBox )
 	{
 		((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->toggleNOT();
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
