@@ -57,6 +57,7 @@ public:
 	void freeArrays() {delete[] m_colorArray; delete[] m_normalArray;};
 
 	void save(wxString filename);
+	void drawFakeTubes();
 
 	float *m_pointArray;
 	int* m_lineArray;

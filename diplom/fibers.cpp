@@ -297,50 +297,72 @@ void Fibers::createColorArray()
     float r,g,b, rr, gg, bb;
     float x1,x2,y1,y2,z1,z2;
     float lastx, lasty, lastz;
+    float nextx, nexty, nextz;
     for ( int i = 0 ; i < getLineCount() ; ++i )
     {
-    	//pc = getStartIndexForLine(i)*3;
+    	// calculate global color for line /////////////////////
+    	// get first point of line
         x1 = m_pointArray[pc];
         y1 = m_pointArray[pc+1];
         z1 = m_pointArray[pc+2];
+        // get last point of line
         x2 = m_pointArray[pc + getPointsPerLine(i)*3 - 3];
         y2 = m_pointArray[pc + getPointsPerLine(i)*3 - 2];
         z2 = m_pointArray[pc + getPointsPerLine(i)*3 - 1];
-
+        // calculate vector
         r = (x1) - (x2);
         g = (y1) - (y2);
         b = (z1) - (z2);
         if (r < 0.0) r *= -1.0 ;
         if (g < 0.0) g *= -1.0 ;
         if (b < 0.0) b *= -1.0 ;
-
+        // normalize it
         float norm = sqrt(r*r + g*g + b*b);
         r *= 1.0/norm;
         g *= 1.0/norm;
         b *= 1.0/norm;
+        ////////////////////////////////////////////////////////
 
-        lastx = lasty = lastz = 0.0;
+
+        lastx = m_pointArray[pc];
+        lasty = m_pointArray[pc+1];
+        lastz = m_pointArray[pc+2];
 
         for (int j = 0; j < getPointsPerLine(i) ; ++j )
         {
-        	rr = lastx - m_pointArray[pc];
-            gg = lasty - m_pointArray[pc+1];
-            bb = lastz - m_pointArray[pc+2];
+        	if ( pc < getStartIndexForLine(i) + getPointsPerLine(i)*3 )
+        	{
+        		nextx = m_pointArray[pc+3];
+        		nexty = m_pointArray[pc+4];
+        		nextz = m_pointArray[pc+5];
+        	}
+        	else
+        	{
+        		nextx = m_pointArray[pc];
+        	    nexty = m_pointArray[pc+1];
+        	    nextz = m_pointArray[pc+2];
+        	}
+        	rr = lastx - nextx;
+            gg = lasty - nexty;
+            bb = lastz - nextz;
+
             lastx = m_pointArray[pc];
             lasty = m_pointArray[pc+1];
             lastz = m_pointArray[pc+2];
+            // make it positive
             if (rr < 0.0) rr *= -1.0 ;
             if (gg < 0.0) gg *= -1.0 ;
             if (bb < 0.0) bb *= -1.0 ;
+            // normalize it
             float norm = sqrt(rr*rr + gg*gg + bb*bb);
             rr *= 1.0/norm;
             gg *= 1.0/norm;
             bb *= 1.0/norm;
-
+            // set local color (tangent vector) in the normal array
         	m_normalArray[pc] = rr;
         	m_normalArray[pc+1] = gg;
         	m_normalArray[pc+2] = bb;
-
+        	//set the global color in the color value
         	m_colorArray[pc] = r;
 	        m_colorArray[pc+1] = g;
 	        m_colorArray[pc+2] = b;
@@ -532,6 +554,12 @@ void Fibers::initializeBuffer()
 
 void Fibers::draw()
 {
+	if (m_dh->useFakeTubes)
+	{
+		drawFakeTubes();
+		return;
+	}
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -779,3 +807,53 @@ std::string Fibers::intToString(int number)
 	return out.str();
 }
 
+void Fibers::drawFakeTubes()
+{
+	float *colors;
+	float *normals;
+	if (m_dh->useVBO)
+	{
+		//glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+		//colors = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+		normals = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+	}
+	else
+	{
+		colors = m_colorArray;
+		normals = m_normalArray;
+	}
+
+	if (m_dh->scene->getPointMode())
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	for ( int i = 0 ; i < m_lineCount ; ++i )
+	{
+		if (m_inBox[i] == 1)
+		{
+			glBegin(GL_QUAD_STRIP);
+			int idx = getStartIndexForLine(i)*3;
+			for (int k = 0 ; k < getPointsPerLine(i) ; ++k)
+			{
+				glNormal3f( normals[idx], normals[idx+1], normals[idx+2] );
+				glColor3f ( normals[idx], normals[idx+1], normals[idx+2] );
+				//glNormal3f( colors[idx], colors[idx+1], colors[idx+2] );
+				//glColor3f ( colors[idx], colors[idx+1], colors[idx+2]);
+				glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
+				glVertex3f (m_pointArray[idx], m_pointArray[idx+1], m_pointArray[idx+2]);
+				glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
+				glVertex3f (m_pointArray[idx], m_pointArray[idx+1], m_pointArray[idx+2]);
+				idx += 3;
+				//
+			}
+			glEnd();
+		}
+	}
+	// clean up
+	if (m_dh->useVBO)
+	{
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+	}
+}

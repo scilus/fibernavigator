@@ -68,6 +68,7 @@ private:
 	void renderSlizes();
 	void renderMesh();
 	void renderFibers();
+	void renderFakeTubes();
 	void renderSplineSurface();
 
 	void drawSelectionBoxes();

@@ -25,6 +25,7 @@ public:
 	Shader *m_textureShader;
 	Shader *m_meshShader;
 	Shader *m_fiberShader;
+	Shader *m_fakeTubeShader;
 	Shader *m_splineSurfShader;
 
 private:

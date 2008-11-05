@@ -133,6 +133,7 @@ public:
 	float zSlize;
 	int quadrant;
 	bool fibersInverted;
+	bool useFakeTubes;
 
 	bool m_isDragging;
 	bool m_isrDragging;

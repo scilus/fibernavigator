@@ -38,6 +38,18 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 
 #ifdef DEBUG
 	m_dh->printTime();
+	printf("initializing fake tube shader\n");
+#endif
+
+	m_fakeTubeShader = new Shader(wxT("GLSL/fake-tubes"));
+	m_fakeTubeShader->bind();
+
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fake tube shader"));
+
+
+
+#ifdef DEBUG
+	m_dh->printTime();
 	printf("initializing spline surface shader\n");
 #endif
 	m_splineSurfShader = new Shader(wxT("GLSL/splineSurf"));
@@ -151,11 +163,12 @@ void ShaderHelper::setFiberShaderVars()
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 		if(info->getType() < Mesh_)
 		{
-			if(info->getType() == Overlay) {
+			if( (info->getType() == Overlay) && info->getShow() ) {
 				tex = c;
 				show = info->getShow();
 				threshold = info->getThreshold();
 				type = info->getType();
+				break;
 			}
 			++c;
 		}

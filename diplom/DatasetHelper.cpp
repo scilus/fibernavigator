@@ -66,6 +66,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	lastGLError = GL_NO_ERROR;
 
 	fibersInverted = false;
+	useFakeTubes = false;
 
 	m_isDragging = false;
 	m_isrDragging = false;
@@ -575,7 +576,7 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	
+
 	id = mainFrame->m_treeWidget->GetFirstChild(mainFrame->m_tSelBoxId, cookie);
 
 	while ( id.IsOk() )
@@ -591,7 +592,7 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 		}
 		id = mainFrame->m_treeWidget->GetNextChild(mainFrame->m_tSelBoxId, cookie);
 		boxes.push_back(b);
-		
+
 	}
 
 	return boxes;

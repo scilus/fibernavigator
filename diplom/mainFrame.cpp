@@ -62,6 +62,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_OPTIONS_ASSIGN_COLOR, MainFrame::OnAssignColor)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
 	EVT_MENU(MENU_OPTIONS_INVERT_FIBERS, MainFrame::OnInvertFibers)
+	EVT_MENU(MENU_OPTIONS_USE_FAKE_TUBES, MainFrame::OnUseFakeTubes)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
 	EVT_MENU(MENU_OPTIONS_BLEND_TEX_ON_MESH, MainFrame::OnToggleBlendTexOnMesh)
 	// Menu Help
@@ -405,7 +406,7 @@ MainFrame::~MainFrame()
 	delete m_dh;
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	
+
 	id = m_treeWidget->GetFirstChild(m_tDatasetId, cookie);
 	while ( id.IsOk() )
 	{
@@ -886,6 +887,16 @@ void MainFrame::OnInvertFibers(wxCommandEvent& WXUNUSED(event))
  *
  *
  ****************************************************************************************************/
+void MainFrame::OnUseFakeTubes(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->useFakeTubes = !m_dh->useFakeTubes;
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
 void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
@@ -1248,7 +1259,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 	}
 
 	if (selected > Fibers_) return;
-	
+
 	for (int i = 0 ; i < m_listCtrl->GetItemCount(); ++i)
 	{
 		DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(i);

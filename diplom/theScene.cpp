@@ -110,7 +110,11 @@ void TheScene::renderScene()
 
 	if (m_dh->fibers_loaded)
 	{
-		renderFibers();
+		if (m_dh->useFakeTubes)
+			renderFakeTubes();
+		else
+			renderFibers();
+
 		if (m_dh->fibers_loaded)
 		{
 			if (m_showBoxes )
@@ -284,6 +288,35 @@ void TheScene::renderFibers()
 	glPopAttrib();
 }
 
+void TheScene::renderFakeTubes()
+{
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+
+		if (info->getType() == Fibers_ && info->getShow())
+		{
+			if (m_selBoxChanged)
+			{
+				((Fibers*)info)->updateLinesShown(m_dh->getSelectionBoxes());
+				m_selBoxChanged = false;
+			}
+
+			m_dh->shaderHelper->m_fakeTubeShader->bind();
+
+			info->draw();
+
+			m_dh->shaderHelper->m_fakeTubeShader->release();
+		}
+	}
+
+	if (m_dh->GLError()) m_dh->printGLError(wxT("draw fake tubes"));
+
+	glPopAttrib();
+}
+
 void TheScene::lightsOn()
 {
 	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -383,7 +416,7 @@ void TheScene::drawPoints()
 
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
 	}
-	
+
 	lightsOff();
 	m_dh->shaderHelper->m_meshShader->release();
 	glPopAttrib();
