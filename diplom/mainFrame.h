@@ -72,6 +72,7 @@ private:
     void OnYSliderMoved(wxCommandEvent& event);
     void OnZSliderMoved(wxCommandEvent& event);
     void OnTSliderMoved(wxCommandEvent& event);
+    void OnTSlider2Moved(wxCommandEvent& event);
 
     /*
      * Button functions
@@ -140,6 +141,7 @@ public:
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
     wxSlider* m_tSlider;
+    wxSlider* m_tSlider2;
 
 	wxStatusBar* m_statusBar;
 	MyListCtrl* m_listCtrl;
@@ -227,6 +229,7 @@ DECLARE_EVENT_TABLE()
 #define ID_Y_SLIDER 				331
 #define ID_Z_SLIDER 				332
 #define ID_T_SLIDER					333
+#define ID_T_SLIDER2				334
 
 #define ID_BUTTON_UP 				340
 #define ID_BUTTON_DOWN 				341

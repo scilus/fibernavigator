@@ -25,6 +25,7 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	is_loaded = false;
 	m_highest_value = 1.0;
 	m_threshold = 0.00f;
+	m_alpha = 1.0f;
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;

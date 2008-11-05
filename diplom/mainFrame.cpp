@@ -75,9 +75,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_LIST_ITEM_SELECTED(ID_LIST_CTRL, MainFrame::OnSelectListItem)
 	EVT_BUTTON(ID_BUTTON_UP, MainFrame::OnListItemUp)
 	EVT_BUTTON(ID_BUTTON_DOWN, MainFrame::OnListItemDown)
-	EVT_SLIDER(ID_T_SLIDER, MainFrame::OnTSliderMoved)
-
-    /*
+	/*
      * Tree widget events
      */
     EVT_TREE_SEL_CHANGED(ID_TREE_CTRL, MainFrame::OnSelectTreeItem)
@@ -95,10 +93,12 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_COMMAND(ID_GL_NAV_Y, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
 	EVT_COMMAND(ID_GL_NAV_Z, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
 	EVT_COMMAND(ID_GL_MAIN, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
-	/* slize selection slider moved */
+	/* slider events */
 	EVT_SLIDER(ID_X_SLIDER, MainFrame::OnXSliderMoved)
 	EVT_SLIDER(ID_Y_SLIDER, MainFrame::OnYSliderMoved)
 	EVT_SLIDER(ID_Z_SLIDER, MainFrame::OnZSliderMoved)
+	EVT_SLIDER(ID_T_SLIDER, MainFrame::OnTSliderMoved)
+	EVT_SLIDER(ID_T_SLIDER2, MainFrame::OnTSlider2Moved)
 
     /*
      * Buttons, not yet in menus
@@ -176,13 +176,15 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetBackgroundColour(wxColour(255, 255, 255));
     m_leftWindowBottom2 = win;
 
-    wxButton *button = new wxButton(m_leftWindowBottom2, ID_BUTTON_UP, wxT("up"), wxPoint(0,2), wxSize(50,19));
+    wxButton *button = new wxButton(m_leftWindowBottom2, ID_BUTTON_UP, wxT("up"), wxPoint(0,2), wxSize(30,19));
     button->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
-    button = new wxButton(m_leftWindowBottom2, ID_BUTTON_DOWN, wxT("down"), wxPoint(50,2), wxSize(50,19));
+    button = new wxButton(m_leftWindowBottom2, ID_BUTTON_DOWN, wxT("down"), wxPoint(30,2), wxSize(30,19));
     button->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
 
     m_tSlider = new wxSlider(m_leftWindowBottom2, ID_T_SLIDER, 30, 0, 100,
-        		wxPoint(100,2), wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+        		wxPoint(60,2), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    m_tSlider2 = new wxSlider(m_leftWindowBottom2, ID_T_SLIDER2, 30, 0, 100,
+            		wxPoint(160,2), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
 
     win = new wxSashLayoutWindow(m_leftWindowTop, wxID_ANY,
@@ -315,7 +317,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_zSlider->SetMinSize(wxSize(1, -1));
 
     m_listCtrl = new MyListCtrl(m_leftWindowBottom1, ID_LIST_CTRL, wxDefaultPosition,
-    		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
+    		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
 
     wxImageList* imageList = new wxImageList(16,16);
     imageList->Add(wxIcon(eyes_xpm));
@@ -1026,6 +1028,24 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
  *
  *
  ****************************************************************************************************/
+void MainFrame::OnTSlider2Moved(wxCommandEvent& WXUNUSED(event))
+{
+	float alpha = (float)m_tSlider2->GetValue()/100.0;
+
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
+	//m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
+
+	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+	info->setAlpha(alpha);
+
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
 void MainFrame::OnButtonAxial(wxCommandEvent& WXUNUSED(event))
 {
 	if (m_dh->scene)
@@ -1195,6 +1215,7 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	if (item == -1) return;
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
 	m_tSlider->SetValue((int)(info->getThreshold()*100));
+	m_tSlider2->SetValue((int)(info->getAlpha()*100));
 	m_treeWidget->SelectItem(info->getTreeId());
 	m_treeWidget->EnsureVisible(info->getTreeId());
 }
@@ -1434,7 +1455,6 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_bottomNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_extraNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 
-
 #ifdef __WXMSW__
 	m_leftWindowHolder->SetSize(wxSize(150 + NAV_SIZE, height));
 	m_leftWindowTop->SetSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
@@ -1467,6 +1487,10 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_xSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_ySlider->SetSize(wxSize(NAV_GL_SIZE, -1));
 	m_zSlider->SetSize(wxSize(NAV_GL_SIZE, -1));
+	int sliderspace = (90 + NAV_SIZE)/3;
+	m_tSlider->SetSize(sliderspace*2,-1);
+	m_tSlider2->SetSize(sliderspace,-1);
+	m_tSlider2->SetPosition(wxPoint(60 + m_tSlider->GetSize().x,2));
 
 	/* resize list ctrl widget */
 	m_listCtrl->SetSize(0,0, m_leftWindowBottom->GetClientSize().x, m_leftWindowBottom->GetClientSize().y);

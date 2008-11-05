@@ -97,8 +97,6 @@ void TheScene::renderScene()
 {
 	if (m_dh->mainFrame->m_listCtrl->GetItemCount() == 0) return;
 
-	renderMesh();
-
 	renderSplineSurface();
 
 	if (m_pointMode)
@@ -123,6 +121,8 @@ void TheScene::renderScene()
 			}
 		}
 	}
+
+	renderMesh();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("render scene"));
 }
@@ -216,11 +216,15 @@ void TheScene::renderMesh()
 				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
 				m_dh->shaderHelper->m_meshShader->setUniInt("showFS", info->getShowFS());
 				m_dh->shaderHelper->m_meshShader->setUniInt("useTex", info->getUseTex());
+				m_dh->shaderHelper->m_meshShader->setUniFloat("alpha", info->getAlpha());
 
 				if (m_dh->surface_loaded)
 					m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", true);
 				else
 					m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", false);
+
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 				glCallList(info->getGLuint());
 			}

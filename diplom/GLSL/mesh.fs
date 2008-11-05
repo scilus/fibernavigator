@@ -3,6 +3,7 @@
 uniform int sector;
 uniform float cutX, cutY, cutZ;
 uniform int dimX, dimY, dimZ;
+uniform float alpha;
 
 uniform bool showFS;
 uniform bool useTex;
@@ -16,8 +17,9 @@ uniform float threshold[10];
 uniform int type[10];
 uniform int countTextures;
 
-vec3 defaultColorMap(float value)
-{
+varying float flag;
+
+vec3 defaultColorMap(float value) {
 	value *= 5.0;
 	vec3 color;
 
@@ -38,8 +40,7 @@ vec3 defaultColorMap(float value)
 	return color;
 }
 
-void cutFrontSector()
-{
+void cutFrontSector() {
 	if (sector == 1 && vertex.x > cutX && vertex.y > cutY && vertex.z > cutZ)
 		discard;
 	if (sector == 2 && vertex.x > cutX && vertex.y > cutY && vertex.z < cutZ)
@@ -58,16 +59,15 @@ void cutFrontSector()
 		discard;
 }
 
-void cutAtSplineSurface()
-{
+void cutAtSplineSurface() {
 	vec3 u = gl_TexCoord[0].xyz;
 	u.y = u.y / float(dimY);
 	u.z = u.z / float(dimZ);
 
 	for (int i = 9; i > -1; i--) {
-		if (type[i] == 5)
-		{
-			if (vertex.x < (texture2D(cutTex, u.yz).r * float(dimX))) discard;
+		if (type[i] == 5) {
+			if (vertex.x < (texture2D(cutTex, u.yz).r * float(dimX)))
+				discard;
 		}
 	}
 }
@@ -76,7 +76,7 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 {
 	vec3 col1;
 	if (!blendTex)
-		threshold = 0.0;
+	threshold = 0.0;
 	if (type == 3)
 	{
 		col1.r = clamp( texture3D(tex, v).r, 0.0, 1.0);
@@ -92,7 +92,7 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 		col1.g = clamp( texture3D(tex, v).g, 0.0, 1.0);
 		col1.b = clamp( texture3D(tex, v).b, 0.0, 1.0);
 
-		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold) > 0.0)
+		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold)> 0.0)
 		{
 			color.rgb = col1.rgb;
 		}
@@ -100,12 +100,14 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 }
 
 void main() {
+	if (flag < -0.0)
+		discard;
+
 	if (!showFS)
 		cutFrontSector();
 
 	if (cutAtSurface)
 		cutAtSplineSurface();
-
 
 	/* Normalize the normal. A varying variable CANNOT
 	 // be modified by a fragment shader. So a new variable
@@ -120,7 +122,8 @@ void main() {
 	 // to denote the number of lights. A better option may be passing
 	 // in the number of lights as a uniform or replacing the current
 	 // value with a smaller value. */
-	calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess, ambient, diffuse, specular);
+	calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess,
+			ambient, diffuse, specular);
 
 	vec4 color = vec4(0.0);
 
@@ -135,19 +138,18 @@ void main() {
 				lookupTex(color, type[i], texes[i], threshold[i], v);
 		}
 
-		color.a = 1.0;
-
-		color = color + (ambient * color / 2.0) + (diffuse * color /2.0) + (specular * color / 2.0);
+		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0)
+				+ (specular * color / 2.0);
 	}
 
-	if (color.rgb == vec3(0.0))
-	{
+	if (color.rgb == vec3(0.0)) {
 		color = gl_FrontLightModelProduct.sceneColor + (ambient
 				* gl_FrontMaterial.ambient) + (diffuse
 				* gl_FrontMaterial.diffuse) + (specular
 				* gl_FrontMaterial.specular);
 	}
 
+	color.a = alpha;
 	color = clamp(color, 0.0, 1.0);
 
 	gl_FragColor = color;

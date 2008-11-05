@@ -71,6 +71,8 @@ public:
 	void setHighestValue(float value) {m_highest_value = value;};
 	float getThreshold() {return m_threshold;};
 	void setThreshold(float value) {m_threshold = value;};
+	float getAlpha() {return m_alpha;};
+	void setAlpha(float v) {m_alpha = v;};
 
 	int getLength() {return m_length;};
 	int getBands() {return m_bands;};
@@ -118,6 +120,7 @@ protected:
 	wxString m_name;
 	wxString m_fullPath;
 	float m_threshold;
+	float m_alpha;
 	wxTreeItemId m_treeId;
 
 	wxColour m_color;

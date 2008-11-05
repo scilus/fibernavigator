@@ -19,6 +19,7 @@ Fibers::Fibers(DatasetHelper* dh)
 	is_loaded = false;
 	m_highest_value = 1.0;
 	m_threshold = 0.10f;
+	m_alpha = 1.0;
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;

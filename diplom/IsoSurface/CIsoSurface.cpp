@@ -308,6 +308,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh)
 	m_dh = dh;
 	m_type = IsoSurface_;
 	m_threshold = 0.40f;
+	m_alpha = 1.0;
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;
