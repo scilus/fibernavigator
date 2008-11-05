@@ -40,7 +40,7 @@ typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
 class CIsoSurface  : public DatasetInfo {
 public:
 	// Constructor and destructor.
-	CIsoSurface(DatasetHelper*);
+	CIsoSurface(DatasetHelper*, wxUint8* ptScalarField);
 	~CIsoSurface();
 
 	bool load(wxString filename) {return false;};
@@ -53,7 +53,7 @@ public:
 
 	// Generates the isosurface from the scalar field contained in the
 	// buffer ptScalarField[].
-	void GenerateSurface(const wxUint8* ptScalarField, wxUint8 tIsoLevel, unsigned int nCellsX, unsigned int nCellsY,  unsigned int nCellsZ, float fCellLengthX, float fCellLengthY, float fCellLengthZ);
+	void GenerateSurface(wxUint8 tIsoLevel);
 
 	// Returns true if a valid surface has been generated.
 	bool IsSurfaceValid();
@@ -119,7 +119,7 @@ protected:
 	float m_fCellLengthX, m_fCellLengthY, m_fCellLengthZ;
 
 	// The buffer holding the scalar field.
-	const wxUint8* m_ptScalarField;
+	wxUint8* m_ptScalarField;
 
 	// The isosurface value.
 	wxUint8 m_tIsoLevel;

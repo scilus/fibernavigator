@@ -303,9 +303,22 @@ const int CIsoSurface::m_triTable[256][16] = {
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-CIsoSurface::CIsoSurface(DatasetHelper* dh)
+CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 {
 	m_dh = dh;
+
+	m_nCellsX = m_dh->columns-1;
+	m_nCellsY = m_dh->rows-1;
+	m_nCellsZ = m_dh->frames-1;
+	m_fCellLengthX = 1.0;
+	m_fCellLengthY = 1.0;
+	m_fCellLengthZ = 1.0;
+
+	int size = (m_nCellsX + 1) * (m_nCellsY + 1) * (m_nCellsZ + 1);
+	m_ptScalarField = new wxUint8[size];
+	for ( int i = 0 ; i < size ; ++i)
+		m_ptScalarField[i] = ptScalarField[i];
+
 	m_type = IsoSurface_;
 	m_threshold = 0.40f;
 	m_alpha = 1.0;
@@ -315,19 +328,12 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh)
 	m_color = wxColour(230,230,230);
 	m_hasTreeId = false;
 
-	m_fCellLengthX = 0;
-	m_fCellLengthY = 0;
-	m_fCellLengthZ = 0;
-	m_nCellsX = 0;
-	m_nCellsY = 0;
-	m_nCellsZ = 0;
 	m_nTriangles = 0;
 	m_nNormals = 0;
 	m_nVertices = 0;
 	m_ppt3dVertices = NULL;
 	m_piTriangleIndices = NULL;
 	m_pvec3dNormals = NULL;
-	m_ptScalarField = NULL;
 	m_tIsoLevel = 50;
 	m_bValidSurface = false;
 }
@@ -337,19 +343,12 @@ CIsoSurface::~CIsoSurface()
 	DeleteSurface();
 }
 
-void CIsoSurface::GenerateSurface(const wxUint8* ptScalarField, wxUint8 tIsoLevel, unsigned int nCellsX, unsigned int nCellsY, unsigned int nCellsZ, float fCellLengthX, float fCellLengthY, float fCellLengthZ)
+void CIsoSurface::GenerateSurface(wxUint8 tIsoLevel)
 {
 	if (m_bValidSurface)
 		DeleteSurface();
 
 	m_tIsoLevel = tIsoLevel;
-	m_nCellsX = nCellsX;
-	m_nCellsY = nCellsY;
-	m_nCellsZ = nCellsZ;
-	m_fCellLengthX = fCellLengthX;
-	m_fCellLengthY = fCellLengthY;
-	m_fCellLengthZ = fCellLengthZ;
-	m_ptScalarField = ptScalarField;
 
 	unsigned int nPointsInXDirection = (m_nCellsX + 1);
 	unsigned int nPointsInSlice = nPointsInXDirection*(m_nCellsY + 1);
@@ -478,12 +477,6 @@ bool CIsoSurface::IsSurfaceValid()
 
 void CIsoSurface::DeleteSurface()
 {
-	m_fCellLengthX = 0;
-	m_fCellLengthY = 0;
-	m_fCellLengthZ = 0;
-	m_nCellsX = 0;
-	m_nCellsY = 0;
-	m_nCellsZ = 0;
 	m_nTriangles = 0;
 	m_nNormals = 0;
 	m_nVertices = 0;
@@ -499,7 +492,6 @@ void CIsoSurface::DeleteSurface()
 		delete[] m_pvec3dNormals;
 		m_pvec3dNormals = NULL;
 	}
-	m_ptScalarField = NULL;
 	m_tIsoLevel = 0;
 	m_bValidSurface = false;
 }
@@ -750,9 +742,9 @@ void CIsoSurface::CalculateNormals()
 
 void CIsoSurface::generateGeometry()
 {
-	float xOff = -0.5f;
-	float yOff = -0.5f;
-	float zOff = -0.5f;
+	float xOff = 0.5f;
+	float yOff = 0.5f;
+	float zOff = 0.5f;
 
 	//printf("%d vertices : %d  normals: %d triangles\n", m_nVertices, m_nNormals, m_nTriangles);
 
@@ -769,11 +761,11 @@ void CIsoSurface::generateGeometry()
 			id2 = m_piTriangleIndices[i*3+2];
 
 			glNormal3f( m_pvec3dNormals[id0][0], m_pvec3dNormals[id0][1], m_pvec3dNormals[id0][2]);
-			glVertex3f( m_ppt3dVertices[id0][0] - xOff, m_ppt3dVertices[id0][1] - yOff, m_ppt3dVertices[id0][2] - zOff);
+			glVertex3f( m_ppt3dVertices[id0][0] + xOff, m_ppt3dVertices[id0][1] + yOff, m_ppt3dVertices[id0][2] + zOff);
 			glNormal3f( m_pvec3dNormals[id1][0], m_pvec3dNormals[id1][1], m_pvec3dNormals[id1][2]);
-			glVertex3f( m_ppt3dVertices[id1][0] - xOff, m_ppt3dVertices[id1][1] - yOff, m_ppt3dVertices[id1][2] - zOff);
+			glVertex3f( m_ppt3dVertices[id1][0] + xOff, m_ppt3dVertices[id1][1] + yOff, m_ppt3dVertices[id1][2] + zOff);
 			glNormal3f( m_pvec3dNormals[id2][0], m_pvec3dNormals[id2][1], m_pvec3dNormals[id2][2]);
-			glVertex3f( m_ppt3dVertices[id2][0] - xOff, m_ppt3dVertices[id2][1] - yOff, m_ppt3dVertices[id2][2] - zOff);
+			glVertex3f( m_ppt3dVertices[id2][0] + xOff, m_ppt3dVertices[id2][1] + yOff, m_ppt3dVertices[id2][2] + zOff);
 
 		}
 	glEnd();
@@ -784,6 +776,6 @@ void CIsoSurface::generateGeometry()
 
 void CIsoSurface::GenerateWithThreshold()
 {
-	GenerateSurface(m_ptScalarField, 255*m_threshold, m_dh->columns-1, m_dh->rows-1, m_dh->frames-1, 1.0, 1.0, 1.0);
+	GenerateSurface(255*m_threshold);
 	generateGeometry();
 }
