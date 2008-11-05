@@ -14,4 +14,8 @@ class MyApp: public wxApp
 {
   public:
     bool OnInit(void);
+
+  private:
+    static const wxString APP_NAME;
+    static const wxString APP_VENDOR;
 };

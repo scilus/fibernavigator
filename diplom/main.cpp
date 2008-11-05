@@ -55,14 +55,27 @@
 
 MainFrame *frame = NULL;
 
+const wxString MyApp::APP_NAME = _T(  "main" );
+const wxString MyApp::APP_VENDOR = _T(  "Ralph S. & Mario H." );
+
 IMPLEMENT_APP(MyApp)
 
 // Initialise this in OnInit, not statically
 bool MyApp::OnInit(void) {
-	// Create the main frame window
 
+    SetAppName (  APP_NAME );
+    SetVendorName (  APP_VENDOR );
+
+#ifdef __WXMAC__
+    //wxImage::AddHandler( new wxJPEGHandler() );
+    wxImage::AddHandler( new wxPNGHandler() );
+    //wxImage::AddHandler( new wxGIFHandler() );
+#endif
+
+	// Create the main frame window
 	frame = new MainFrame(NULL, wxID_ANY, _T("Viewer"), wxPoint(0, 0), wxSize(1200, 820), wxDEFAULT_FRAME_STYLE
 			| wxHSCROLL | wxVSCROLL);
+
 
 	// Give it an icon (this is ignored in MDI mode: uses resources)
 #ifdef __WXMSW__
@@ -129,7 +142,7 @@ bool MyApp::OnInit(void) {
 	frame->SetMenuBar(menu_bar);
 
 	wxToolBar* toolBar = new wxToolBar(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL | wxNO_BORDER);
-
+#ifndef __WXMAC__
 	wxBitmap bmpOpen(fileopen_xpm);
 	wxBitmap bmpSave(disc_xpm);
 	wxBitmap bmpAxial(axial_xpm);
@@ -148,11 +161,36 @@ bool MyApp::OnInit(void) {
 	wxBitmap bmpNew(new_xpm);
 	wxBitmap bmpQuit(quit_xpm);
 
-	wxBitmap bmpHideSelbox(toggleselbox_xpm);
+    wxBitmap bmpHideSelbox(toggleselbox_xpm);
 	wxBitmap bmpNewSurface(toggle_surface_xpm);
 	wxBitmap bmpAssignColor(colorSelect_xpm);
 	wxBitmap bmpLighting(lightbulb_xpm);
+#else
 
+	wxBitmap bmpOpen  (wxImage(_T("icons/fileopen.png" ), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpSave  (wxImage(_T("icons/disc.png" ), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpAxial (wxImage(_T("icons/axial.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpCor   (wxImage(_T("icons/cor.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpSag   (wxImage(_T("icons/sag.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpBox   (wxImage(_T("icons/box.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpBoxOff(wxImage(_T("icons/box_off.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpBoxEye(wxImage(_T("icons/box_eye.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpGrid  (wxImage(_T("icons/grid.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpGridSpline(wxImage(_T("icons/grid_spline.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpIsoSurface(wxImage(_T("icons/iso_surface.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpView1 (wxImage(_T("icons/view1.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpView2 (wxImage(_T("icons/view2.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpView3 (wxImage(_T("icons/view3.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpMiniCat(wxImage(_T("icons/mini_cat.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpNew   (wxImage(_T("icons/new.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpQuit  (wxImage(_T("icons/quit.png"), wxBITMAP_TYPE_PNG));
+
+    wxBitmap bmpHideSelbox(wxImage(_T("icons/toggleselbox.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpNewSurface(wxImage(_T("icons/toggleSurface.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpAssignColor(wxImage(_T("icons/colorSelect.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpLighting(wxImage(_T("icons/lightbulb.png"), wxBITMAP_TYPE_PNG));
+
+#endif
 
 	//toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
 	toolBar->AddTool(MENU_FILE_LOAD, bmpOpen, wxT("Open"));
