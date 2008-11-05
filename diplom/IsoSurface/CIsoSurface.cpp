@@ -319,6 +319,27 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 	for ( int i = 0 ; i < size ; ++i)
 		m_ptScalarField[i] = ptScalarField[i];
 
+	for (unsigned int z = 1 ; z < m_nCellsZ ; ++z)
+		for (unsigned int y = 1 ; y < m_nCellsY ; ++y)
+			for (unsigned int x = 1 ; x < m_nCellsX ; ++x)
+			{
+				std::vector<wxUint8>list;
+				for (unsigned int zz = z-1; zz < z+2 ; ++zz)
+				{
+					list.push_back(m_ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
+					list.push_back(m_ptScalarField[x - 1 + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
+					list.push_back(m_ptScalarField[x + 1 + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
+					list.push_back(m_ptScalarField[x + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
+					list.push_back(m_ptScalarField[x - 1 + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
+					list.push_back(m_ptScalarField[x + 1 + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
+					list.push_back(m_ptScalarField[x + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
+					list.push_back(m_ptScalarField[x - 1 + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
+					list.push_back(m_ptScalarField[x + 1 + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
+				}
+				nth_element (list.begin(), list.begin() + 13, list.end());
+				m_ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*z] = list[13];
+			}
+
 	m_type = IsoSurface_;
 	m_threshold = 0.40f;
 	m_alpha = 1.0;
