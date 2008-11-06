@@ -321,8 +321,14 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
 
     wxImageList* imageList = new wxImageList(16,16);
+#ifndef __WXMAC__
     imageList->Add(wxIcon(eyes_xpm));
     imageList->Add(wxIcon(delete_xpm));
+#else
+    imageList->Add((wxImage( _T( "icons/eyes.png" ), wxBITMAP_TYPE_PNG )));
+    imageList->Add((wxImage( _T( "icons/delete.png" ), wxBITMAP_TYPE_PNG )));
+#endif
+
     m_listCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
 
     wxListItem itemCol;
@@ -343,8 +349,15 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_treeWidget = new MyTreeCtrl(m_leftWindow, ID_TREE_CTRL, wxPoint(0, 0),
     		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_EDIT_LABELS);
     wxImageList* tImageList = new wxImageList(16,16);
+#ifndef __WXMAC__
     tImageList->Add(wxIcon(eyes_xpm));
     tImageList->Add(wxIcon(delete_xpm));
+#else
+    imageList->Add((wxImage( _T( "icons/eyes.png" ), wxBITMAP_TYPE_PNG )));
+    imageList->Add((wxImage( _T( "icons/delete.png" ), wxBITMAP_TYPE_PNG )));
+#endif
+
+
     m_treeWidget->AssignImageList(tImageList);
 
     m_tRootId = m_treeWidget->AddRoot(wxT("Scene"), -1, -1, NULL );
@@ -390,14 +403,18 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_mainGL = new MainCanvas(m_dh, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
         			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
     m_gl0 = new MainCanvas(m_dh, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
-    	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib);
+    	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
 
     m_gl1 = new MainCanvas(m_dh, coronal, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
-        	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib);
+        	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib, m_mainGL);
     m_gl2 = new MainCanvas(m_dh, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
-       	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib);
+       	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL);
 
-    m_dh->scene->setMainGLContext(new wxGLContext(m_mainGL));
+#ifndef __WXMAC__
+    m_dh->scene->setMainGLContext(new wxGLContext(m_mainGL)); // I don't understand this (mario)
+#else
+    m_dh->scene->setMainGLContext( m_mainGL->GetContext() );
+#endif
 
 }
 

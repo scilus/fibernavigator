@@ -16,8 +16,8 @@ BEGIN_EVENT_TABLE(MainCanvas, wxGLCanvas)
 END_EVENT_TABLE()
 
 MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID id,
-    const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib)
-    : wxGLCanvas(parent, id, gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name )
+    const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib, wxGLCanvas*shared )
+    : wxGLCanvas(parent, shared, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name, gl_attrib )
 {
 	m_init = false;
 	m_view = view;
@@ -70,10 +70,14 @@ void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void MainCanvas::OnSize(wxSizeEvent& event)
 {
+#ifndef __WXMAC__
     if (!m_dh->scene->m_texAssigned)
     		SetCurrent();
 	else
 		SetCurrent(*m_dh->scene->getMainGLContext());
+#else
+    SetCurrent();
+#endif
 
 	// this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize(event);
@@ -443,8 +447,11 @@ void MainCanvas::render()
 {
 	wxPaintDC dc(this);
 
+#ifndef __WXMAC__
     SetCurrent(*m_dh->scene->getMainGLContext());
-
+#else
+    SetCurrent();
+#endif
 	int w, h;
     GetClientSize(&w, &h);
     glViewport(0, 0, (GLint) w, (GLint) h);
@@ -481,7 +488,11 @@ void MainCanvas::render()
 void MainCanvas::invalidate()
 {
 	if (m_dh->scene->m_texAssigned) {
+#ifndef __WXMAC__
 		SetCurrent(*m_dh->scene->getMainGLContext());
+#else
+        SetCurrent();
+#endif
 		//m_dh->scene->releaseTextures();
 		m_dh->scene->m_texAssigned = false;
 	}
@@ -561,7 +572,11 @@ void MainCanvas::testRender(GLuint tex)
 {
 	wxPaintDC dc(this);
 
+#ifndef __WXMAC__
 	SetCurrent(*m_dh->scene->getMainGLContext());
+#else
+    SetCurrent();
+#endif
 
 	int w, h;
 	GetClientSize(&w, &h);

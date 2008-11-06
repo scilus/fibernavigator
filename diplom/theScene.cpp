@@ -27,7 +27,10 @@ TheScene::~TheScene()
 #ifdef DEBUG
 	printf("execute scene destructor\n");
 #endif
+#ifndef __WXMAC__
+    // on mac, this is just a pointer to the original object that is deleted with the widgets
 	if (m_mainGLContext) delete m_mainGLContext;
+#endif
 #ifdef DEBUG
 	printf("scene destructor done\n");
 #endif

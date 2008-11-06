@@ -26,7 +26,8 @@ public:
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = _T("GLCanvas"),
-        int* gl_attrib = NULL);
+        int* gl_attrib = NULL,
+        wxGLCanvas* shared=( wxGLCanvas* )NULL);
    ~MainCanvas();
 
    	bool	m_init;
