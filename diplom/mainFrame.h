@@ -18,6 +18,7 @@ public:
     ~MainFrame();
     void setTSlider(wxSlider *slider) {m_tSlider = slider;};
     void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
+    void setMMenuBar(wxMenuBar *bar) {m_menuBar = bar;};
 
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
@@ -58,6 +59,7 @@ private:
     void OnUseFakeTubes(wxCommandEvent& event);
 	void OnToggleTextureFiltering(wxCommandEvent& event);
 	void OnToggleBlendTexOnMesh(wxCommandEvent& event);
+	void OnToggleFilterIso(wxCommandEvent& event);
 	// Help
 	void OnAbout(wxCommandEvent& event);
 
@@ -144,6 +146,7 @@ public:
     wxSlider* m_tSlider2;
 
 	wxStatusBar* m_statusBar;
+	wxMenuBar *m_menuBar;
 	MyListCtrl* m_listCtrl;
 	wxTreeCtrl* m_treeWidget;
 	wxTreeItemId m_tRootId;
@@ -200,6 +203,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING		153
 #define MENU_OPTIONS_BLEND_TEX_ON_MESH				154
 #define MENU_OPTIONS_USE_FAKE_TUBES					155
+#define MENU_OPTIONS_FILTER_ISO						156
 // Menu Help
 #define MENU_HELP_ABOUT       						wxID_ABOUT
 /*

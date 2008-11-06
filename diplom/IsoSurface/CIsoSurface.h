@@ -40,7 +40,7 @@ typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
 class CIsoSurface  : public DatasetInfo {
 public:
 	// Constructor and destructor.
-	CIsoSurface(DatasetHelper*, wxUint8* ptScalarField, bool filter);
+	CIsoSurface(DatasetHelper*, wxUint8* ptScalarField);
 	~CIsoSurface();
 
 	bool load(wxString filename) {return false;};

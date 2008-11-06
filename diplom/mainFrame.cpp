@@ -65,6 +65,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_OPTIONS_USE_FAKE_TUBES, MainFrame::OnUseFakeTubes)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
 	EVT_MENU(MENU_OPTIONS_BLEND_TEX_ON_MESH, MainFrame::OnToggleBlendTexOnMesh)
+	EVT_MENU(MENU_OPTIONS_FILTER_ISO, MainFrame::OnToggleFilterIso)
 	// Menu Help
     EVT_MENU(MENU_HELP_ABOUT, MainFrame::OnAbout)
 
@@ -599,7 +600,7 @@ void MainFrame::OnMenuViewBack(wxCommandEvent& WXUNUSED(event))
 	m_dh->m_transform.s.M21 = -1.0;
 	m_mainGL->setRotation();
 }
-/*TODO***************************************************************************************************
+/****************************************************************************************************
  *
  * Menu VOI
  *
@@ -615,7 +616,8 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->m_isActive = !box->m_isActive;
-		m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
+		//m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
+		m_treeWidget->SetItemBold(tBoxId, 1 - box->m_isActive);
 		box->setDirty();
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
@@ -626,7 +628,8 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
 				childBox->m_isActive = box->m_isActive;
-				m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
+				//m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
+				m_treeWidget->SetItemBold(childId, 1 - box->m_isActive);
 				childBox->setDirty();
 			}
 		}
@@ -634,7 +637,8 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	else if (treeSelected(tBoxId) == ChildBox)
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
+		//m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
+		m_treeWidget->SetItemBold(tBoxId, 1-  !box->m_isActive);
 		box->m_isActive = !box->m_isActive;
 		box->setDirty();
 	}
@@ -658,7 +662,7 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->m_isVisible = !box->m_isVisible;
-		//m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
+		m_treeWidget->SetItemImage(tBoxId, 1 - box->getShow());
 		box->setDirty();
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
@@ -669,7 +673,7 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
 				childBox->m_isVisible = box->m_isVisible;
-				//m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
+				m_treeWidget->SetItemImage(childId, 1 - box->getShow());
 				childBox->setDirty();
 			}
 		}
@@ -677,7 +681,7 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	else if (treeSelected(tBoxId) == ChildBox)
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		//m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
+		m_treeWidget->SetItemImage(tBoxId, 1-  !box->getShow());
 		box->m_isVisible = !box->m_isVisible;
 		box->setDirty();
 	}
@@ -710,6 +714,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 		selBox->m_isTop = false;
 
 		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, selBox);
+		m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxGREEN);
 		m_treeWidget->EnsureVisible(tNewBoxId);
 		selBox->setTreeId(tNewBoxId);
 	}
@@ -717,6 +722,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 	{
 		// box is top
 		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, selBox);
+		m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
 		m_treeWidget->EnsureVisible(tNewBoxId);
 		selBox->setTreeId(tNewBoxId);
 	}
@@ -871,6 +877,16 @@ void MainFrame::OnToggleLighting(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnToggleBlendTexOnMesh(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->blendTexOnMesh = !m_dh->blendTexOnMesh;
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnToggleFilterIso(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->filterIsoSurf = !m_dh->filterIsoSurf;
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -1266,9 +1282,16 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 		if (m_dh->lastSelectedBox) m_dh->lastSelectedBox->unselect();
 		m_dh->lastSelectedBox = (SelectionBox*)(m_treeWidget->GetItemData(treeid));
 		m_dh->lastSelectedBox->select(false);
+
+		//TODO
+		wxMenu* voiMenu = m_menuBar->GetMenu(2);
+		voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->m_isActive);
+		voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
+
 		refreshAllGLWidgets();
 		return;
 	}
+
 	else if ( selected == Point_)
 	{
 		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
@@ -1308,6 +1331,10 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty();
 		m_dh->scene->m_selBoxChanged = true;
+		if (((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->m_isNOT)
+			m_treeWidget->SetItemBackgroundColour(treeid, *wxRED);
+		else
+			m_treeWidget->SetItemBackgroundColour(treeid, *wxGREEN);
 		refreshAllGLWidgets();
 		return;
 	}
@@ -1364,7 +1391,7 @@ void MainFrame::OnTreeLabelEdit(wxTreeEvent& event)
 /****************************************************************************************************
  *
  * Helper function to determine what kind of item is selected in the tree widget
- * TODO
+ *
  ****************************************************************************************************/
 int MainFrame::treeSelected(wxTreeItemId id)
 {
@@ -1520,6 +1547,14 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
     wxLayoutAlgorithm layout;
     layout.LayoutMDIFrame(this);
 #endif // wxUSE_MDI_ARCHITECTURE
+
+    // get the options menu
+    wxMenu* oMenu = m_menuBar->GetMenu(4);
+    oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
+    oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
+    oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
+    oMenu->Check(oMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
+    oMenu->Check(oMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
 
     GetClientWindow()->Update();
 	this->Update();

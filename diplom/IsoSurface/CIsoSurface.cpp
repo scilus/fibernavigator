@@ -303,7 +303,7 @@ const int CIsoSurface::m_triTable[256][16] = {
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField, bool filter)
+CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 {
 	m_dh = dh;
 
@@ -319,7 +319,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField, bool filter)
 	for ( int i = 0 ; i < size ; ++i)
 		m_ptScalarField[i] = ptScalarField[i];
 
-	if (filter)
+	if (m_dh->filterIsoSurf)
 	{
 		for (unsigned int z = 1 ; z < m_nCellsZ ; ++z)
 			for (unsigned int y = 1 ; y < m_nCellsY ; ++y)

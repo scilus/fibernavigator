@@ -108,8 +108,8 @@ bool MyApp::OnInit(void) {
 	wxMenu *voi_menu = new wxMenu;
 	voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New"));
 	voi_menu->AppendSeparator();
-	voi_menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("toggle activation"));
-	voi_menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("toggle visibility"));
+	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SELBOX, _T("active"));
+	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SHOWBOX, _T("visible"));
 
 	wxMenu *surf_menu = new wxMenu;
 	surf_menu->Append(MENU_SPLINESURF_NEW, _T("New"));
@@ -126,6 +126,7 @@ bool MyApp::OnInit(void) {
 	options_menu->AppendSeparator();
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_BLEND_TEX_ON_MESH, _T("Blend Texture on Mesh"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_FILTER_ISO, _T("Filter Dataset for IsoSurface"));
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(MENU_HELP_ABOUT, _T("About"));
@@ -140,6 +141,7 @@ bool MyApp::OnInit(void) {
 
 	// Associate the menu bar with the frame
 	frame->SetMenuBar(menu_bar);
+	frame->setMMenuBar(menu_bar);
 
 	wxToolBar* toolBar = new wxToolBar(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL | wxNO_BORDER);
 #ifndef __WXMAC__

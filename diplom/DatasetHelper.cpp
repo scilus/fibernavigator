@@ -67,6 +67,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 	fibersInverted = false;
 	useFakeTubes = false;
+	filterIsoSurf = true;;
 
 	m_isDragging = false;
 	m_isrDragging = false;
@@ -203,6 +204,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 
 				wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(
 					mainFrame->m_tSelBoxId, wxT("box"), 0, -1, selBox);
+				mainFrame->m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
 
 				mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				selBox->setTreeId(tNewBoxId);
@@ -438,7 +440,9 @@ bool DatasetHelper::loadScene(wxString filename)
 					currentMasterId = mainFrame->m_treeWidget->AppendItem(
 							mainFrame->m_tSelBoxId, selBox->getName(), 0, -1, selBox);
 					mainFrame->m_treeWidget->EnsureVisible(currentMasterId);
-					mainFrame->m_treeWidget->SetItemImage(currentMasterId, 1 - selBox->m_isActive);
+					mainFrame->m_treeWidget->SetItemImage(currentMasterId, 1 - selBox->getShow());
+					mainFrame->m_treeWidget->SetItemBold(currentMasterId, 1 - selBox->m_isActive);
+					mainFrame->m_treeWidget->SetItemBackgroundColour(currentMasterId, *wxCYAN);
 					selBox->setTreeId(currentMasterId);
 
 				} else {
@@ -447,7 +451,12 @@ bool DatasetHelper::loadScene(wxString filename)
 					wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(
 							currentMasterId, selBox->getName(), 0, -1, selBox);
 					mainFrame->m_treeWidget->EnsureVisible(boxId);
-					mainFrame->m_treeWidget->SetItemImage(boxId, 1 - selBox->m_isActive);
+					mainFrame->m_treeWidget->SetItemImage(boxId, 1 - selBox->getShow());
+					mainFrame->m_treeWidget->SetItemBold(boxId, 1 - selBox->m_isActive);
+					if (selBox->m_isNOT)
+						mainFrame->m_treeWidget->SetItemBackgroundColour(boxId, *wxRED);
+					else
+						mainFrame->m_treeWidget->SetItemBackgroundColour(boxId, *wxGREEN);
 					selBox->setTreeId(boxId);
 				}
 				boxNode = boxNode->GetNext();
@@ -766,10 +775,7 @@ void DatasetHelper::createIsoSurface() {
 	if (!flag)
 		return;
 
-	wxMessageDialog dialog(NULL, wxT("Filter Dataset?"), wxT(""), wxNO_DEFAULT|wxYES_NO|wxICON_INFORMATION);
-	bool filter = (dialog.ShowModal() == wxID_YES);
-
-	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset(), filter);
+	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset());
 	isosurf->GenerateSurface(100);
 
 	if (isosurf->IsSurfaceValid()) {

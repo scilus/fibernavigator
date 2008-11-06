@@ -134,6 +134,7 @@ public:
 	int quadrant;
 	bool fibersInverted;
 	bool useFakeTubes;
+	bool filterIsoSurf;
 
 	bool m_isDragging;
 	bool m_isrDragging;
