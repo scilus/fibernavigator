@@ -593,10 +593,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\icons\exp.xpm"
-			>
-		</File>
-		<File
 			RelativePath=".\icons\eyes.xpm"
 			>
 		</File>
@@ -665,14 +661,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\icons\new.xpm"
-			>
-		</File>
-		<File
-			RelativePath=".\icons\quit.xpm"
-			>
-		</File>
-		<File
 			RelativePath=".\icons\sag.xpm"
 			>
 		</File>
@@ -689,10 +677,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\icons\toggleselbox.xpm"
-			>
-		</File>
-		<File
 			RelativePath=".\icons\toggleSurface.xpm"
 			>
 		</File>
@@ -706,10 +690,6 @@
 		</File>
 		<File
 			RelativePath=".\icons\view1.xpm"
-			>
-		</File>
-		<File
-			RelativePath=".\icons\view2.xpm"
 			>
 		</File>
 		<File
