@@ -115,9 +115,9 @@ void main() {
 	 // needs to be created. */
 	vec3 n = normal.xyz;
 
-	vec4 ambient;/* = vec4(0.0);*/
-	vec4 diffuse;/* = vec4(0.0);*/
-	vec4 specular;/* = vec4(0.0);*/
+	vec4 ambient = vec4(0.0);
+	vec4 diffuse = vec4(0.0);
+	vec4 specular = vec4(0.0);
 
 	/* In this case the built in uniform gl_MaxLights is used
 	 // to denote the number of lights. A better option may be passing

@@ -775,15 +775,15 @@ void DatasetHelper::createIsoSurface() {
 	if (!flag)
 		return;
 
-	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset());
 	printTime();
 	printf("start generating iso surface...\n");
+	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset());
 	isosurf->GenerateSurface(100);
 	printTime();
-	printf("done\n");
+	printf("iso surface done\n");
 
 	if (isosurf->IsSurfaceValid()) {
-		printf("surface is valid\n");
+		//printf("surface is valid\n");
 		isosurf->generateGeometry();
 		isosurf->setName(wxT("iso surface"));
 

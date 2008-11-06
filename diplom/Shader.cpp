@@ -14,10 +14,13 @@ Shader::Shader(wxString fileName) {
 
 	m_vertex = glCreateShader(GL_VERTEX_SHADER);
 	m_fragment = glCreateShader(GL_FRAGMENT_SHADER);
-	loadCode(fileName);
 
 	m_shaderProgram = glCreateProgram();
-	link();
+
+	if (loadCode(fileName))
+	{
+		link();
+	}
 
 }
 
@@ -76,12 +79,8 @@ bool Shader::compile(GLuint* shaderId, wxString codeString)
 	GLint compiled;
 	glGetShaderiv (*shaderId, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		printCompilerLog(*shaderId);
 		return false;
 	}
-#ifdef DEBUG
-	printCompilerLog(*shaderId);
-#endif
 	return true;
 }
 
@@ -101,16 +100,18 @@ bool Shader::loadCode(wxString filename)
 		printf("ERROR: fragment shader file not found!\n");
 		return false;
 	}
-#ifdef DEBUG
-	printf("compile vertex shader\n");
-#endif
 	if (!compile(&m_vertex, codeStringVS))
+	{
+		printf("ERROR in vertex shader\n");
+		printCompilerLog(m_vertex);
 		return false;
-#ifdef DEBUG
-	printf("compile fragment shader\n");
-#endif
+	}
 	if (!compile(&m_fragment, codeStringFS))
+	{
+		printf("ERROR in fragment shader\n");
+		printCompilerLog(m_fragment);
 		return false;
+	}
 	return true;
 }
 
@@ -161,11 +162,11 @@ void Shader::printCompilerLog(GLuint shader)
 	GLchar *infoLog;
 
 	glGetShaderiv (shader, GL_INFO_LOG_LENGTH, &infologLen);
-	if (infologLen > 0)
+	if (infologLen > 1)
 	{
 		infoLog = (GLchar*) malloc (infologLen);
 		glGetShaderInfoLog(shader, infologLen, &charsWritten, infoLog);
-		printf("Compiler Log:\n%s\n\n", infoLog);
+		printf("Compiler Log:\n%s\n===========================================================\n", infoLog);
 		free (infoLog);
 	}
 }
@@ -177,11 +178,11 @@ void Shader::printProgramLog(GLuint program)
 	GLchar *infoLog;
 
 	glGetProgramiv (program, GL_INFO_LOG_LENGTH, &infologLen);
-	if (infologLen > 0)
+	if (infologLen > 1)
 	{
 		infoLog = (GLchar*) malloc (infologLen);
 		glGetProgramInfoLog(program, infologLen, &charsWritten, infoLog);
-		printf("Program Log:\n%s\n\n", infoLog);
+		printf("Program Log:\n%s\n===========================================================\n", infoLog);
 		free (infoLog);
 	}
 }

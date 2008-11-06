@@ -651,7 +651,7 @@ POINT3DID CIsoSurface::CalculateIntersection(unsigned int nX, unsigned int nY, u
 	wxUint8 val1 = m_ptScalarField[v1z*nPointsInSlice + v1y*nPointsInXDirection + v1x];
 	wxUint8 val2 = m_ptScalarField[v2z*nPointsInSlice + v2y*nPointsInXDirection + v2x];
 	POINT3DID intersection = Interpolate(x1, y1, z1, x2, y2, z2, val1, val2);
-
+	intersection.newID = 0;
 	return intersection;
 }
 
@@ -664,7 +664,7 @@ POINT3DID CIsoSurface::Interpolate(float fX1, float fY1, float fZ1, float fX2, f
 	interpolation.x = fX1 + mu*(fX2 - fX1);
 	interpolation.y = fY1 + mu*(fY2 - fY1);
 	interpolation.z = fZ1 + mu*(fZ2 - fZ1);
-
+	interpolation.newID = 0;
 	return interpolation;
 }
 

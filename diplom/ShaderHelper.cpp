@@ -60,10 +60,14 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 }
 
 ShaderHelper::~ShaderHelper() {
+	m_dh->printTime();
 	printf("execute shader helper destructor\n");
 	delete m_textureShader;
 	delete m_meshShader;
 	delete m_fiberShader;
+	delete m_splineSurfShader;
+	delete m_fakeTubeShader;
+	m_dh->printTime();
 	printf("shader helper destructor done\n");
 }
 
