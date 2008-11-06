@@ -766,7 +766,10 @@ void DatasetHelper::createIsoSurface() {
 	if (!flag)
 		return;
 
-	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset());
+	wxMessageDialog dialog(NULL, wxT("Filter Dataset?"), wxT(""), wxNO_DEFAULT|wxYES_NO|wxICON_INFORMATION);
+	bool filter = (dialog.ShowModal() == wxID_YES);
+
+	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset(), filter);
 	isosurf->GenerateSurface(100);
 
 	if (isosurf->IsSurfaceValid()) {
