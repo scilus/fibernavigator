@@ -328,15 +328,15 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField, bool filter)
 					std::vector<wxUint8>list;
 					for (unsigned int zz = z-1; zz < z+2 ; ++zz)
 					{
-						list.push_back(m_ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(m_ptScalarField[x - 1 + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(m_ptScalarField[x + 1 + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(m_ptScalarField[x + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(m_ptScalarField[x - 1 + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(m_ptScalarField[x + 1 + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(m_ptScalarField[x + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(m_ptScalarField[x - 1 + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(m_ptScalarField[x + 1 + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x - 1 + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x + 1 + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x - 1 + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x + 1 + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x - 1 + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x + 1 + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
 					}
 					nth_element (list.begin(), list.begin() + 13, list.end());
 					m_ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*z] = list[13];
