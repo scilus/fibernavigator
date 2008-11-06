@@ -41,13 +41,10 @@ bool Shader::link()
 	glLinkProgram(m_shaderProgram);
 	GLint linked;
 	glGetProgramiv (m_shaderProgram, GL_LINK_STATUS, &linked);
+	printProgramLog(m_shaderProgram);
 	if (!linked) {
-		printProgramLog(m_shaderProgram);
 		return false;
 	}
-#ifdef DEBUG
-	printProgramLog(m_shaderProgram);
-#endif
 	return true;
 }
 
