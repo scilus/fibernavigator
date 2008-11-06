@@ -1311,21 +1311,30 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 		refreshAllGLWidgets();
 		return;
 	}
-
+	bool flag = true;
 	/* open load dialog */
 	if (selected == Label_datasets)
 	{
-		m_dh->load(1);
+		flag = m_dh->load(1);
 	}
 	else if (selected == Label_meshes)
 	{
-		m_dh->load(2);
+		flag = m_dh->load(2);
 	}
 	else if (selected == Label_fibers)
 	{
-		m_dh->load(3);
+		flag = m_dh->load(3);
+		m_dh->scene->m_selBoxChanged = true;
 	}
-	m_dh->scene->m_selBoxChanged = true;
+
+	if ( !flag )
+	{
+		wxMessageBox(wxT("ERROR\n") + m_dh->lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+		m_statusBar->SetStatusText(wxT("ERROR"),1);
+		m_statusBar->SetStatusText(m_dh->lastError,2);
+		return;
+	}
+
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************

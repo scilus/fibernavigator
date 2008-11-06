@@ -91,11 +91,6 @@ DatasetHelper::~DatasetHelper() {
 }
 
 bool DatasetHelper::load(int index, wxString filename, float threshold, bool active, bool showFS, bool useTex) {
-	if (mainFrame->m_listCtrl->GetItemCount() > 9) {
-		lastError = wxT("ERROR\nCan't load any more files.\nDelete some first.\n");
-		return false;
-	}
-
 	if (index >= 0) {
 		wxString caption = wxT("Choose a file");
 		wxString
@@ -133,6 +128,10 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 	}
 
 	else if (ext == wxT("hea")) {
+		if (mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tDatasetId) > 9) {
+			lastError = wxT("ERROR\nCan't load any more datasets.\nDelete some first.\n");
+			return false;
+		}
 		Anatomy *anatomy = new Anatomy(this);
 		if (anatomy->load(filename)) {
 			rows = anatomy->getRows();
