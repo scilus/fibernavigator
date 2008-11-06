@@ -1,10 +1,10 @@
 /* XPM */
 const char* delete_xpm[] = {
 "16 16 4 1",
-" 	c None s None",
-".	c red",
+" 	c None",
+".	c #FF0000",
 "X	c #808080",
-"o	c black",
+"o	c #000000",
 "                ",
 "                ",
 "           .    ",

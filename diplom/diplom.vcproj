@@ -110,7 +110,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;C:\wxWidgets-2.8.8\lib\vc_lib\mswu&quot;;&quot;C:\wxWidgets-2.8.8\include&quot;;.;C:\glew\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;__WINDOWS__;__WXMSW__;NOPCH;_UNICODE"
+				PreprocessorDefinitions="WIN32;_WINDOWS;__WINDOWS__;__WXMSW__;NOPCH;_UNICODE;DEBUG"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -529,7 +529,23 @@
 			>
 		</File>
 		<File
+			RelativePath=".\icons\axial.xpm"
+			>
+		</File>
+		<File
 			RelativePath=".\icons\axialw.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\box.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\box_eye.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\box_off.xpm"
 			>
 		</File>
 		<File
@@ -549,7 +565,23 @@
 			>
 		</File>
 		<File
+			RelativePath=".\icons\colorSelect.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\cor.xpm"
+			>
+		</File>
+		<File
 			RelativePath=".\icons\corw.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\delete.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\disc.xpm"
 			>
 		</File>
 		<File
@@ -558,6 +590,14 @@
 		</File>
 		<File
 			RelativePath=".\GLSL\edgedetection.vs"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\exp.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\eyes.xpm"
 			>
 		</File>
 		<File
@@ -573,6 +613,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\icons\fileopen.xpm"
+			>
+		</File>
+		<File
 			RelativePath=".\Fantom\FMatrix.icc"
 			>
 		</File>
@@ -582,6 +626,22 @@
 		</File>
 		<File
 			RelativePath=".\Fantom\FTensor.icc"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\grid.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\grid_spline.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\iso_surface.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\lightbulb.xpm"
 			>
 		</File>
 		<File
@@ -601,6 +661,22 @@
 			>
 		</File>
 		<File
+			RelativePath=".\icons\mini_cat.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\new.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\quit.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\sag.xpm"
+			>
+		</File>
+		<File
 			RelativePath=".\icons\sagw.xpm"
 			>
 		</File>
@@ -613,11 +689,31 @@
 			>
 		</File>
 		<File
+			RelativePath=".\icons\toggleselbox.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\toggleSurface.xpm"
+			>
+		</File>
+		<File
 			RelativePath=".\GLSL\transform.fs"
 			>
 		</File>
 		<File
 			RelativePath=".\GLSL\transform.vs"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\view1.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\view2.xpm"
+			>
+		</File>
+		<File
+			RelativePath=".\icons\view3.xpm"
 			>
 		</File>
 	</Files>

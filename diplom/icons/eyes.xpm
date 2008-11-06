@@ -1,11 +1,11 @@
 /* XPM */
 const char* eyes_xpm[] = {
 "16 16 5 1",
-" 	c None s None",
-".	c black",
+" 	c None",
+".	c #000000",
 "O	c #808080",
 "X	c #c0c0c0",
-"o	c white",
+"o	c #FFFFFF",
 "                ",
 "                ",
 "                ",

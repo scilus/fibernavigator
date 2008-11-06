@@ -19,9 +19,6 @@
 
 #include "icons/fileopen.xpm"
 #include "icons/disc.xpm"
-#include "icons/view1.xpm"
-#include "icons/view2.xpm"
-#include "icons/view3.xpm"
 #ifdef __WXMSW__
 // icons 16x16
 #include "icons/axialw.xpm"
@@ -33,22 +30,18 @@
 #include "icons/cor.xpm"
 #include "icons/sag.xpm"
 #endif
+#include "icons/toggleSurface.xpm"
 #include "icons/box.xpm"
 #include "icons/box_off.xpm"
 #include "icons/box_eye.xpm"
-
 #include "icons/grid.xpm"
 #include "icons/grid_spline.xpm"
-
-#include "icons/iso_surface.xpm"
-
-#include "icons/mini_cat.xpm"
-#include "icons/new.xpm"
-#include "icons/lightbulb.xpm"
-#include "icons/quit.xpm"
-#include "icons/toggleselbox.xpm"
-#include "icons/toggleSurface.xpm"
+#include "icons/view1.xpm"
+#include "icons/view3.xpm"
 #include "icons/colorSelect.xpm"
+#include "icons/lightbulb.xpm"
+#include "icons/iso_surface.xpm"
+#include "icons/mini_cat.xpm"
 
 #include "main.h"
 #include "mainFrame.h"
@@ -157,13 +150,9 @@ bool MyApp::OnInit(void) {
 	wxBitmap bmpGridSpline(grid_spline_xpm);
 	wxBitmap bmpIsoSurface(iso_surface_xpm);
 	wxBitmap bmpView1(view1_xpm);
-	wxBitmap bmpView2(view2_xpm);
 	wxBitmap bmpView3(view3_xpm);
 	wxBitmap bmpMiniCat(mini_cat_xpm);
-	wxBitmap bmpNew(new_xpm);
-	wxBitmap bmpQuit(quit_xpm);
 
-    wxBitmap bmpHideSelbox(toggleselbox_xpm);
 	wxBitmap bmpNewSurface(toggle_surface_xpm);
 	wxBitmap bmpAssignColor(colorSelect_xpm);
 	wxBitmap bmpLighting(lightbulb_xpm);

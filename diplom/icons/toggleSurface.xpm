@@ -1,7 +1,7 @@
 /* XPM */
 const char * toggle_surface_xpm[] = {
 "16 16 2 1",
-" 	c None s None",
+" 	c None",
 ".	c red",
 "                ",
 "       ..       ",
