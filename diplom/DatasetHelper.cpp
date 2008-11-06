@@ -776,7 +776,11 @@ void DatasetHelper::createIsoSurface() {
 		return;
 
 	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset());
+	printTime();
+	printf("start generating iso surface...\n");
 	isosurf->GenerateSurface(100);
+	printTime();
+	printf("done\n");
 
 	if (isosurf->IsSurfaceValid()) {
 		printf("surface is valid\n");

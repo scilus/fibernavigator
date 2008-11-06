@@ -8,6 +8,7 @@
 
 #include <math.h>
 #include "CIsoSurface.h"
+#include "loopSubD.h"
 
 const unsigned int CIsoSurface::m_edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -489,7 +490,6 @@ void CIsoSurface::GenerateSurface(wxUint8 tIsoLevel)
 			}
 
 	RenameVerticesAndTriangles();
-	CalculateNormals();
 	m_bValidSurface = true;
 }
 
@@ -690,6 +690,32 @@ void CIsoSurface::RenameVerticesAndTriangles()
 		vecIterator++;
 	}
 
+#if 0
+	// create the triangle mesh
+	m_tMesh = new TriangleMesh();
+
+	// Copy all the vertices and triangles into two arrays so that they
+	// can be efficiently accessed.
+	// Copy vertices.
+	mapIterator = m_i2pt3idVertices.begin();
+	m_nVertices = m_i2pt3idVertices.size();
+	m_ppt3dVertices = new POINT3D[m_nVertices];
+	for (unsigned int i = 0; i < m_nVertices; i++, mapIterator++) {
+		m_tMesh->addVert(Vector((*mapIterator).second.x, (*mapIterator).second.y, (*mapIterator).second.z));
+	}
+	// Copy vertex indices which make triangles.
+	vecIterator = m_trivecTriangles.begin();
+	m_nTriangles = m_trivecTriangles.size();
+	m_piTriangleIndices = new unsigned int[m_nTriangles*3];
+	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++) {
+		m_tMesh->addTriangle((*vecIterator).pointID[0], (*vecIterator).pointID[1], (*vecIterator).pointID[2]);
+	}
+	m_tMesh->calcTriangleNormals();
+	m_tMesh->calcStarSizes();
+	m_tMesh->calcNeighbors();
+
+	loopSubD loop(m_tMesh);
+#else
 	// Copy all the vertices and triangles into two arrays so that they
 	// can be efficiently accessed.
 	// Copy vertices.
@@ -710,6 +736,9 @@ void CIsoSurface::RenameVerticesAndTriangles()
 		m_piTriangleIndices[i*3+1] = (*vecIterator).pointID[1];
 		m_piTriangleIndices[i*3+2] = (*vecIterator).pointID[2];
 	}
+	CalculateNormals();
+
+#endif
 
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();
@@ -769,12 +798,29 @@ void CIsoSurface::generateGeometry()
 	float yOff = 0.5f;
 	float zOff = 0.5f;
 
-	//printf("%d vertices : %d  normals: %d triangles\n", m_nVertices, m_nNormals, m_nTriangles);
-
 	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
+#if 0
+	int* intp;
+	Vector point;
+	Vector pointNormal;
+
+	glBegin(GL_TRIANGLES);
+		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
+		{
+			intp = m_tMesh->getTriangles(i);
+			for(int j = 0 ; j < 3 ; ++j)
+			{
+				pointNormal = m_tMesh->getVertNormal(intp[j]);
+				glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
+				point = m_tMesh->getVertices(intp[j]);
+				glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
+			}
+		}
+	glEnd();
+#else
 	glBegin(GL_TRIANGLES);
 		for (unsigned int i = 0; i < m_nTriangles; i++) {
 
@@ -792,6 +838,8 @@ void CIsoSurface::generateGeometry()
 
 		}
 	glEnd();
+#endif
+
 
 	glEndList();
 	m_GLuint = dl;
