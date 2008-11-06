@@ -136,7 +136,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, 1020));
     win->SetOrientation(wxLAYOUT_VERTICAL);
     win->SetAlignment(wxLAYOUT_LEFT);
-    win->SetBackgroundColour(wxColour(0, 0, 0));
+    win->SetBackgroundColour(wxColour(255, 255, 255));
     m_leftWindowHolder = win;
 
     // Window to hold the tree widget and nav windows
@@ -146,7 +146,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, 3*NAV_SIZE + 60));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(0, 0, 0));
+    win->SetBackgroundColour(wxColour(255, 255, 255));
     m_leftWindowTop = win;
 
     // Window to hold the list ctrl widget
@@ -156,7 +156,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(0, 0, 0));
+    win->SetBackgroundColour(wxColour(255, 255, 255));
     m_leftWindowBottom = win;
 
     win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY,
@@ -165,7 +165,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE));
     win->SetOrientation(wxLAYOUT_HORIZONTAL);
     win->SetAlignment(wxLAYOUT_TOP);
-    win->SetBackgroundColour(wxColour(0, 0, 0));
+    win->SetBackgroundColour(wxColour(255, 255, 255));
     m_leftWindowBottom1 = win;
 
     win = new wxSashLayoutWindow(m_leftWindowBottom, wxID_ANY,
@@ -1495,7 +1495,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
 	/* resize the navigation widgets */
 	int height = this->GetClientSize().y;
-	NAV_SIZE = wxMin(255, height/4);
+	NAV_SIZE = wxMin(255, height/4 - 5);
 	NAV_GL_SIZE = NAV_SIZE-4;
 	m_leftWindowHolder->SetDefaultSize(wxSize(150 + NAV_SIZE, height));
 	m_leftWindowTop->SetDefaultSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
@@ -1509,12 +1509,13 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_extraNavWindow->SetDefaultSize(wxSize(NAV_SIZE, NAV_SIZE));
 
 #ifdef __WXMSW__
+	m_navWindow->SetSize(wxSize(NAV_SIZE, height));
 	m_leftWindowHolder->SetSize(wxSize(150 + NAV_SIZE, height));
 	m_leftWindowTop->SetSize(wxSize(150 + NAV_SIZE, NAV_SIZE*3 + 65));
 	m_leftWindowBottom->SetSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
 	m_leftWindowBottom1->SetSize(wxSize(150 + NAV_SIZE, m_leftWindowBottom->GetClientSize().y - 20));
-	m_leftWindowBottom2->SetSize(wxSize(150 + NAV_SIZE, 20));
-	m_navWindow->SetSize(wxSize(NAV_SIZE, height));
+	m_leftWindowBottom2->SetSize(wxSize(150 + NAV_SIZE, m_leftWindowBottom->GetClientSize().y - m_leftWindowBottom1->GetClientSize().y));
+	
 
 	m_topNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_middleNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
@@ -1546,7 +1547,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_tSlider2->SetPosition(wxPoint(60 + m_tSlider->GetSize().x,2));
 
 	/* resize list ctrl widget */
-	m_listCtrl->SetSize(0,0, m_leftWindowBottom->GetClientSize().x, m_leftWindowBottom->GetClientSize().y);
+	m_listCtrl->SetSize(0,0, m_leftWindowBottom1->GetClientSize().x, m_leftWindowBottom1->GetClientSize().y);
 	m_listCtrl->SetColumnWidth(0, 20);
 	m_listCtrl->SetColumnWidth(1, m_leftWindowBottom->GetClientSize().x - 140);
 	m_listCtrl->SetColumnWidth(2, 80);
@@ -1566,14 +1567,15 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 #endif // wxUSE_MDI_ARCHITECTURE
 
     // get the options menu
-    wxMenu* oMenu = m_menuBar->GetMenu(4);
-    oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
-    oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
-    oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
-    oMenu->Check(oMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
-    oMenu->Check(oMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
-
-    GetClientWindow()->Update();
+#ifndef __WXMSW__
+		wxMenu* oMenu = m_menuBar->GetMenu(4);
+		oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
+		oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
+		oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
+		oMenu->Check(oMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
+		oMenu->Check(oMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
+#endif
+	GetClientWindow()->Update();
 	this->Update();
 	this->Refresh();
 }

@@ -260,6 +260,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IsoSurface\loopSubD.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -277,6 +281,10 @@
 			</File>
 			<File
 				RelativePath=".\myListCtrl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IsoSurface\point3D.cpp"
 				>
 			</File>
 			<File
@@ -304,7 +312,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IsoSurface\Vectors.cpp"
+				RelativePath=".\IsoSurface\triangleMesh.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IsoSurface\Vector.cpp"
 				>
 			</File>
 		</Filter>
@@ -426,6 +438,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IsoSurface\loopSubD.h"
+				>
+			</File>
+			<File
 				RelativePath=".\main.h"
 				>
 			</File>
@@ -443,6 +459,10 @@
 			</File>
 			<File
 				RelativePath=".\myListCtrl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IsoSurface\point3D.h"
 				>
 			</File>
 			<File
@@ -474,7 +494,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IsoSurface\Vectors.h"
+				RelativePath=".\IsoSurface\triangleMesh.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IsoSurface\Vector.h"
 				>
 			</File>
 		</Filter>
