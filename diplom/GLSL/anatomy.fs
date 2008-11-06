@@ -48,7 +48,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 
 		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold) > 0.0)
 		{
-			col.rgb =  ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
+			col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
 		}
 		col.a += clamp (( (col.r*3.0) + (col.g*3.0) + (col.b*3.0) ), 0.0, 1.0) - threshold;
 	}
