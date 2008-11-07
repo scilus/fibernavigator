@@ -10,40 +10,6 @@
 
 #include <algorithm>
 
-struct iter
-{
-  typedef std::random_access_iterator_tag iterator_category;
-  typedef wxUint32 value_type;
-  typedef int difference_type;
-  typedef wxUint32* pointer;
-  typedef wxUint32& reference;
-
-  wxUint32 *data;
-  size_t pos;
-
-  iter( const iter &rhs ) : data( rhs.data ), pos( rhs.pos ){}
-
-  iter( wxUint32*data, size_t pos ):
-    data( data ), pos( pos ) {}
-
-
-  iter operator+( size_t i ) const { return iter( data, pos+i );}
-  iter operator-( size_t i ) const { return iter( data, pos-i );}
-  int operator-( iter &rhs ) const { return pos - rhs.pos;}
-
-  wxUint32& operator*(){ return data[ pos ];}
-  const wxUint32& operator*() const { return data[ pos ];}
-
-  iter& operator +=( size_t i ){ pos += i; return *this;}
-  iter& operator++(){ ++pos; return *this;}
-  iter& operator--(){ --pos; return *this;}
-
-  bool operator==( const iter&rhs ) const { return pos == rhs.pos; }
-  bool operator!=( const iter&rhs ) const { return pos != rhs.pos; }
-  bool operator<=( const iter&rhs ) const { return pos <= rhs.pos; }
-  bool operator< ( const iter&rhs ) const { return pos <  rhs.pos; }
-};
-
 struct lessy
 {
   float const * const  data;
@@ -60,12 +26,12 @@ struct lessy
 class KdTreeThread : public wxThread {
 
 public:
-	KdTreeThread(float*, wxUint32*, int, int, int, DatasetHelper* );
+	KdTreeThread(float*, std::vector<wxUint32>*, int, int, int, DatasetHelper* );
 
 	void buildTree(int, int, int);
 	virtual void *Entry();
 
-	wxUint32 *m_tree;
+	std::vector<wxUint32>* m_tree;
 	float *m_pointArray;
 	DatasetHelper* m_dh;
 	int m_left;
@@ -79,7 +45,7 @@ public:
 	KdTree(int, float*);
 	~KdTree();
 
-	wxUint32 *m_tree;
+	std::vector<wxUint32>m_tree;
 	DatasetHelper* m_dh;
 
 private:
