@@ -18,9 +18,7 @@ uniform float alpha[10];
 uniform int type[10];
 uniform int countTextures;
 
-varying float flag;
-
-vec3 defaultColorMap(float value) 
+vec3 defaultColorMap(float value)
 {
 	value *= 5.0;
 	vec3 color;
@@ -102,7 +100,7 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 }
 
 void main() {
-	if (flag < -0.0)
+	if (!gl_FrontFacing)
 		discard;
 
 	if (!showFS)

@@ -1,12 +1,16 @@
-#include GLSL/lighting.vs
+varying vec3 N, L;
+varying vec4 myColor;
 
 void main() {
-	gl_FrontColor = gl_Color;
-	gl_BackColor = gl_Color;
-
 	gl_TexCoord[0].xyz = gl_Vertex.xyz;
 
-	prepareLight();
-
 	gl_Position = ftransform();
+
+	N = gl_NormalMatrix * gl_Normal;
+
+	vec4 V = gl_ModelViewMatrix * gl_Vertex;
+
+	L = gl_LightSource[0].position.xyz - V.xyz;
+
+	myColor = normalize(abs(gl_Color));
 }

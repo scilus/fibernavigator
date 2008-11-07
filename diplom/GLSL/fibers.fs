@@ -1,11 +1,14 @@
-#include GLSL/lighting.fs
-
 uniform int dimX, dimY, dimZ;
 uniform sampler3D tex;
 uniform bool show;
 uniform float threshold;
 uniform int type;
 uniform bool useTex;
+uniform bool lightOn;
+
+varying vec4 myColor;
+
+varying vec3 N, L;
 
 void lookupTex() {
 	vec3 v = gl_TexCoord[0].xyz;
@@ -26,30 +29,20 @@ void main() {
 	if (type == 3 && useTex)
 		lookupTex();
 
-	vec4 color = vec4(0.0);
+	if (lightOn)
+	{
+		vec3 NN = normalize(N);
+		vec3 NL = normalize(L);
+		vec3 NH = normalize(NL + vec3(0.0, 0.0, 1.0));
+		float NdotL = max (0.0, dot(NN, NL));
 
-	/* Normalize the normal. A varying variable CANNOT
-	 // be modified by a fragment shader. So a new variable
-	 // needs to be created. */
+		gl_FragColor.rgb = (myColor.rgb * NdotL) + myColor.rgb;
+		if (NdotL > 0.0)
+			gl_FragColor.rgb += pow(max(0.0, dot(NN, NH)), 128.0)/ 4.0;
 
-	vec3 n = normal.xyz;
+	}
+	else
+		gl_FragColor  = myColor;
 
-	vec4 ambient = vec4(0.0);
-	vec4 diffuse = vec4(0.0);
-	vec4 specular = vec4(0.0);
-
-	/* In this case the built in uniform gl_MaxLights is used
-	 // to denote the number of lights. A better option may be passing
-	 // in the number of lights as a uniform or replacing the current
-	 // value with a smaller value. */
-	calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess,
-			ambient, diffuse, specular);
-
-	 color = gl_Color + (ambient  * gl_FrontMaterial.ambient)
-				    + (diffuse  * gl_FrontMaterial.diffuse / 2.0)
-					+ (specular * gl_FrontMaterial.specular /2.0);
-
-	color = clamp(color, 0.0, 1.0);
-
-	gl_FragColor = color;
+	gl_FragColor.a = myColor.a;
 }
