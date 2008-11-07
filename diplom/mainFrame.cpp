@@ -400,41 +400,33 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_dh->scene = new TheScene(m_dh);
 
     m_mainGL = new MainCanvas(m_dh, mainView, m_rightWindow, ID_GL_MAIN, wxDefaultPosition,
-        			wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
+                                wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
+
+#ifndef CTX
     m_gl0 = new MainCanvas(m_dh, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
-#ifdef CTX
-    	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL->GetContext());
-#else
-    	        wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
-#endif
+                wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
 
     m_gl1 = new MainCanvas(m_dh, coronal, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
-#ifdef CTX
-        	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib, m_mainGL->GetContext());
-#else
-        	        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib, m_mainGL);
-#endif
+                        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib, m_mainGL);
     m_gl2 = new MainCanvas(m_dh, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
-#ifdef CTX
-       	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL->GetContext());
+                wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL);
 #else
-       	        wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL);
+    m_gl0 = new MainCanvas(m_dh, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
+                wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL->GetContext());
+
+    m_gl1 = new MainCanvas(m_dh, coronal, m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition,
+                        wxDefaultSize, 0, _T("NavGLCanvasY"), gl_attrib, m_mainGL->GetContext());
+    m_gl2 = new MainCanvas(m_dh, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition,
+                wxDefaultSize, 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL->GetContext());
 #endif
 
-#ifdef CTX
-#ifndef __WXMAC__
-    m_dh->scene->setMainGLContext(new wxGLContext(m_mainGL));
-#else
 #ifndef __WXMAC__
     m_dh->scene->setMainGLContext(new wxGLContext(m_mainGL)); // I don't understand this (mario)
 #else
     m_dh->scene->setMainGLContext( m_mainGL->GetContext() );
 #endif
-#endif
-#else
-    // WXMAC uses wxGLContext& as argument, so cannot overload function here
-    m_dh->scene->setMainGLContext(m_mainGL->GetContext() ); //new wxGLContext(*( wxGLContext* )m_mainGL));
-#endif
+
+
 }
 
 MainFrame::~MainFrame()
@@ -1534,7 +1526,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_leftWindowBottom->SetSize(wxSize(150 + NAV_SIZE, height - m_leftWindowTop->GetSize().y));
 	m_leftWindowBottom1->SetSize(wxSize(150 + NAV_SIZE, m_leftWindowBottom->GetClientSize().y - 20));
 	m_leftWindowBottom2->SetSize(wxSize(150 + NAV_SIZE, m_leftWindowBottom->GetClientSize().y - m_leftWindowBottom1->GetClientSize().y));
-	
+
 
 	m_topNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
 	m_middleNavWindow->SetSize(wxSize(NAV_SIZE, NAV_SIZE));
