@@ -1626,8 +1626,8 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		float x = ((float)pos.x/NAV_GL_SIZE) * max;
 		float y = ((float)pos.y/NAV_GL_SIZE) * max;
 
-		m_xSlider->SetValue( x - (max - m_dh->columns)/2.0 );
-		m_ySlider->SetValue( y - (max - m_dh->rows)/2.0);
+		m_xSlider->SetValue( (int)(x - (max - m_dh->columns)/2.0) );
+		m_ySlider->SetValue( (int)(y - (max - m_dh->rows)/2.0) );
 		break;
 	}
 	case coronal: {
@@ -1635,8 +1635,8 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		float x = ((float)pos.x/NAV_GL_SIZE) * max;
 		float y = ((float)pos.y/NAV_GL_SIZE) * max;
 
-		m_xSlider->SetValue( x - (max - m_dh->columns)/2.0 );
-		m_zSlider->SetValue( y - (max - m_dh->frames)/2.0);
+		m_xSlider->SetValue( (int)(x - (max - m_dh->columns)/2.0) );
+		m_zSlider->SetValue( (int)(y - (max - m_dh->frames)/2.0) );
 		break;
 	}
 	case sagittal: {
@@ -1644,23 +1644,23 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		float x = ((float)pos.x/NAV_GL_SIZE) * max;
 		float y = ((float)pos.y/NAV_GL_SIZE) * max;
 
-		m_ySlider->SetValue( x - (max - m_dh->rows)/2.0 );
-		m_zSlider->SetValue( y - (max - m_dh->frames)/2.0 );
+		m_ySlider->SetValue( (int)(x - (max - m_dh->rows)/2.0) );
+		m_zSlider->SetValue( (int)(y - (max - m_dh->frames)/2.0) );
 		break;
 	}
 	case mainView:
-		int delta = m_mainGL->getDelta();
+		int delta = (int)m_mainGL->getDelta();
 
 		switch (m_mainGL->getPicked())
 		{
 		case axial:
-			m_zSlider->SetValue(wxMin(wxMax(m_zSlider->GetValue() + delta*speedup, 0), m_zSlider->GetMax()));
+			m_zSlider->SetValue((int)wxMin(wxMax(m_zSlider->GetValue() + delta*speedup, 0), m_zSlider->GetMax()));
 			break;
 		case coronal:
-			m_ySlider->SetValue(wxMin(wxMax(m_ySlider->GetValue() + delta*speedup, 0), m_ySlider->GetMax()));
+			m_ySlider->SetValue((int)wxMin(wxMax(m_ySlider->GetValue() + delta*speedup, 0), m_ySlider->GetMax()));
 			break;
 		case sagittal:
-			m_xSlider->SetValue(wxMin(wxMax(m_xSlider->GetValue() + delta*speedup, 0), m_xSlider->GetMax()));
+			m_xSlider->SetValue((int)wxMin(wxMax(m_xSlider->GetValue() + delta*speedup, 0), m_xSlider->GetMax()));
 			break;
 		}
 	}

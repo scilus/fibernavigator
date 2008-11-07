@@ -848,6 +848,6 @@ void CIsoSurface::generateGeometry()
 
 void CIsoSurface::GenerateWithThreshold()
 {
-	GenerateSurface(255*m_threshold);
+	GenerateSurface((int)(255*m_threshold));
 	generateGeometry();
 }

@@ -76,12 +76,12 @@ bool Fibers::load(wxString filename)
 	wxString type(temp, wxConvUTF8);
 	if (type == wxT("ASCII")) {
 		//ASCII file, maybe later
-		return NULL;
+		return false;
 	}
 
 	if (type != wxT("BINARY")) {
 		//somethingn else, don't know what to do
-		return NULL;
+		return false;
 	}
 
 	j = 0;

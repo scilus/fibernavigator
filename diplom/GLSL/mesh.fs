@@ -20,7 +20,8 @@ uniform int countTextures;
 
 varying float flag;
 
-vec3 defaultColorMap(float value) {
+vec3 defaultColorMap(float value) 
+{
 	value *= 5.0;
 	vec3 color;
 

@@ -157,7 +157,7 @@ bool Anatomy::load(wxString filename)
 		if (dataFile.Open(filename.BeforeLast('.')+ wxT(".ima")))
 		{
 			wxFileOffset nSize = dataFile.Length();
-			if (nSize == wxInvalidOffset) return NULL;
+			if (nSize == wxInvalidOffset) return false;
 
 			switch (m_type)
 			{
@@ -167,7 +167,7 @@ bool Anatomy::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] m_byteDataset;
-					return NULL;
+					return false;
 				}
 				flag = true;
 			} break;
@@ -178,7 +178,7 @@ bool Anatomy::load(wxString filename)
 					{
 						dataFile.Close();
 						delete[] m_shortDataset;
-						return NULL;
+						return false;
 					}
 					flag = true;
 					wxUint16 max = 0;
@@ -195,7 +195,7 @@ bool Anatomy::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] m_floatDataset;
-					return NULL;
+					return false;
 				}
 				flag = true;
 			} break;
@@ -207,7 +207,7 @@ bool Anatomy::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] buffer;
-					return NULL;
+					return false;
 				}
 
 				wxUint8 *pointbytes = (wxUint8*)buffer;
@@ -249,7 +249,7 @@ bool Anatomy::load(wxString filename)
 				{
 					dataFile.Close();
 					delete[] buffer;
-					return NULL;
+					return false;
 				}
 				flag = true;
 
