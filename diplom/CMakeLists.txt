@@ -40,12 +40,12 @@ if(APPLE)
     target_link_libraries( main "-framework OpenGL" -L../diplom/glew/lib GLEW wx_macud_gl-2.8 )
 	set( _BundleName "Main" )
 	set( _BundleInfo "A MRI visualization tool")
-	#set( _BundleIcon "path.icns" )
+	set( _BundleIcon "main.icns" )
 	set_target_properties(main
 	  PROPERTIES
 	  MACOSX_BUNDLE_BUNDLE_NAME ${_BundleName}
 	  MACOSX_BUNDLE_INFO_STRING ${_BundleInfo}
-	  # MACOSX_BUNDLE_BUNDLE_ICON ${_BundleIcon}
+	  MACOSX_BUNDLE_BUNDLE_ICON ${_BundleIcon}
 	  )
 else(APPLE)
     target_link_libraries( main -L../diplom/glew/lib GLEW wx_gtk2u_gl-2.8 )
