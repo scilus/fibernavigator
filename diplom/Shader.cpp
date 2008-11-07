@@ -6,6 +6,7 @@
  */
 
 #include "Shader.h"
+#include "main.h"
 
 Shader::Shader(wxString fileName) {
 	m_vertex = 0;
@@ -116,7 +117,7 @@ bool Shader::loadFromFile(wxString* code, wxString fileName)
 {
 	wxTextFile file;
 	*code = wxT("");
-	if (file.Open(fileName))
+	if (file.Open(MyApp::respath + fileName))
 	{
 		size_t i;
 		for (i = 0 ; i < file.GetLineCount() ; ++i)

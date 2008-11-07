@@ -18,4 +18,7 @@ class MyApp: public wxApp
   private:
     static const wxString APP_NAME;
     static const wxString APP_VENDOR;
+
+  public:
+    static wxString respath;
 };

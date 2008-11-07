@@ -45,7 +45,8 @@ if(APPLE)
 	  PROPERTIES
 	  MACOSX_BUNDLE_BUNDLE_NAME ${_BundleName}
 	  MACOSX_BUNDLE_INFO_STRING ${_BundleInfo}
-	  MACOSX_BUNDLE_BUNDLE_ICON ${_BundleIcon}
+	  MACOSX_BUNDLE_ICON_FILE ${_BundleIcon}
+	  MACOSX_BUNDLE_COPYRIGHT "(c) 2008, Ralph and Mario"
 	  )
 else(APPLE)
     target_link_libraries( main -L../diplom/glew/lib GLEW wx_gtk2u_gl-2.8 )

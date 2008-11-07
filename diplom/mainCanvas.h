@@ -8,13 +8,13 @@
 #endif
 
 #include "theScene.h"
-#include "mainFrame.h"
+//#include "mainFrame.h"
 #include "wx/glcanvas.h"
 
 #include "boundingBox.h"
 #include "DatasetHelper.h"
 #include "wx/math.h"
-#include "Fantom/FVector.h"
+#include "Fantom/FArray.h"
 
 class DatasetHelper;
 
@@ -26,8 +26,12 @@ public:
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = _T("GLCanvas"),
+#ifdef CTX
+        int* gl_attrib = NULL, wxGLContext* ctx = NULL);
+#else
         int* gl_attrib = NULL,
         wxGLCanvas* shared=( wxGLCanvas* )NULL);
+#endif
    ~MainCanvas();
 
    	bool	m_init;

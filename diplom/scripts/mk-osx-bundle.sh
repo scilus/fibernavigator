@@ -113,87 +113,6 @@ rm -Rf ${EXE}-img
 mkdir ${EXE}-img
 cp -R $EXE.app ${EXE}-img/
 
-# we do not need QT, so skip it
-if false 
-then
-  # check what we need from qt
-  declare -a NEEDED_LIBS=( "QtCore" "QtGui" "QtXml" "QtSql" "QtNetwork" "QtOpenGL" "QtSvg")
-  # additional files you'd like to get copied to the final dmg inside DMG not bundle! 
-  declare -a ADD_FILES=() #"bin/ticket.pdf" "bin/copying.txt") 
-
-  if [ -z $QTDIR ]; then 
-	echo "\$QTDIR environment variable not found... exiting." 
-	exit 1 
-  fi 
-
-
-  # canonicalize QtDir, unfortunately this bash has no realpath() implementation 
-  # so we need to use perl for this 
-  QTDIR=`perl -e "use Cwd 'realpath'; print realpath('$QTDIR');"` 
-
-  if [ ! -d "$bundle_dir" ]; then 
-	echo "Application bundle not found in bin... exiting." 
-	exit 1 
-  fi 
-
-  echo "Creating Frameworks directory in application bundle..." 
-  mkdir -p "$framework_dir" 
-  mkdir -p $plugin_dir 
-  mkdir -p $locale_dir 
-
-  libcount=${#NEEDED_LIBS[@]} 
-  for (( i = 0 ; i < libcount ; i++ )) 
-  do 
-	lib=${NEEDED_LIBS[$i]} 
-	echo "Processing $lib..." 
-
-	if [ ! -d "$QTDIR/lib/$lib.framework" ]; then 
-	  echo "Couldn't find $lib.framework in $QTDIR." 
-	  exit 1 
-	fi 
-
-	rm -rf "$framework_dir/$lib.framework" 
-	cp -fR "$QTDIR/lib/$lib.framework" "$framework_dir" 
-	echo "...$lib copied." 
-
-	install_name_tool \ 
-	-id "@executable_path/../Frameworks/$lib.framework/Versions/4/$lib" \ 
-	"$framework_dir/$lib.framework/Versions/4/$lib" 
-
-	# other Qt libs depend at least on QtCore 
-	if [ "$lib" != "QtCore" ]; then 
-	  install_name_tool -change "$QTDIR/lib/QtCore.framework/Versions/4/QtCore" \ 
-	  "@executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore" \ 
-	  "$framework_dir/$lib.framework/Versions/Current/$lib" 
-	fi 
-
-	install_name_tool -change "$QTDIR/lib/$lib.framework/Versions/4/$lib" \ 
-	"@executable_path/../Frameworks/$lib.framework/Versions/4/$lib" \ 
-	"$bundle_bin" 
-
-	echo "...$lib done." 
-  done 
-
-  echo "Removing any debug libraries and headers..." 
-  find "$framework_dir" | egrep "debug|Headers" | xargs rm -rf 
-
-  echo "Preparing image directory..." 
-  tempdir="/tmp/`basename $0`.$$" 
-  mkdir $tempdir 
-  cp -R $bundle_dir $tempdir 
-  echo "...Bundle copied" 
-  fcount=${#ADD_FILES[@]} 
-  for (( i = 0 ; i < fcount ; i++ )) do 
-	file=${ADD_FILES[$i]}    
-	if [ ! -f "$file" ]; then 
-	  echo "WARNING: $file not found!" 
-	else 
-	  cp "$file" $tempdir 
-	  echo "...$file copied" 
-	fi 
-  done 
-
-fi
 
 
 # add a readme
@@ -208,6 +127,11 @@ cp $SOURCE/icons/main.icns $RESOURCE_DIR/
 mkdir -p ${RESOURCE_DIR}/GLSL
 cp -R $SOURCE/GLSL/*.vs $RESOURCE_DIR/GLSL/
 cp -R $SOURCE/GLSL/*.fs $RESOURCE_DIR/GLSL/
+
+cd $SOURCE;
+svn info > $path/$EXE-img/svn-info.txt
+cd $path
+
 
 # create a disk image from this directory
 rm main.dmg

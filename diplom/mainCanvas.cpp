@@ -5,6 +5,8 @@
 
 #include "splinePoint.h"
 
+#include "mainFrame.h"
+
 DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
 DEFINE_EVENT_TYPE(wxEVT_NAVGL_EVENT)
 
@@ -16,8 +18,14 @@ BEGIN_EVENT_TABLE(MainCanvas, wxGLCanvas)
 END_EVENT_TABLE()
 
 MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID id,
+#ifdef CTX
+    const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib, wxGLContext*ctx)
+    : wxGLCanvas(parent, ctx, id, 
+        wxDefaultPosition, wxDefaultSize, 0, name) // gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name )
+#else
     const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib, wxGLCanvas*shared )
     : wxGLCanvas(parent, shared, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name, gl_attrib )
+#endif
 {
 	m_init = false;
 	m_view = view;
@@ -72,9 +80,13 @@ void MainCanvas::OnSize(wxSizeEvent& event)
 {
 #ifndef __WXMAC__
     if (!m_dh->scene->m_texAssigned)
-    		SetCurrent();
+    		wxGLCanvas::SetCurrent();
+#ifndef __WXMAC__
 	else
-		SetCurrent(*m_dh->scene->getMainGLContext());
+		wxGLCanvas::SetCurrent(*m_dh->scene->getMainGLContext());
+#else
+    this->SetCurrent();
+#endif
 #else
     SetCurrent();
 #endif
@@ -480,7 +492,7 @@ void MainCanvas::render()
     default:
     	m_dh->scene->renderNavView(m_view);
     }
-	glFlush();
+	//glFlush();
 
 	SwapBuffers();
 }

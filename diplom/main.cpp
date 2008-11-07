@@ -46,6 +46,7 @@
 #include "main.h"
 #include "mainFrame.h"
 
+wxString MyApp::respath;
 MainFrame *frame = NULL;
 
 const wxString MyApp::APP_NAME = _T(  "main" );
@@ -63,6 +64,24 @@ bool MyApp::OnInit(void) {
     //wxImage::AddHandler( new wxJPEGHandler() );
     wxImage::AddHandler( new wxPNGHandler() );
     //wxImage::AddHandler( new wxGIFHandler() );
+    //
+    //
+
+    // OSX only: Try to find the resource path...
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+    CFURLRef resourcesURL = CFBundleCopyBundleURL( mainBundle );
+    CFStringRef str = CFURLCopyFileSystemPath(  resourcesURL, kCFURLPOSIXPathStyle );
+    CFRelease( resourcesURL );
+    char path[ PATH_MAX ];
+                      
+    CFStringGetCString(  str, path, FILENAME_MAX, kCFStringEncodingASCII );
+    CFRelease( str );
+    fprintf( stderr, path );
+
+    respath = wxString::FromAscii( path );
+    respath += _T( "/Contents/Resources/" );
+    std::cout << "path: " << respath << "\"" << std::endl;
+
 #endif
 
 	// Create the main frame window
@@ -157,29 +176,28 @@ bool MyApp::OnInit(void) {
 	wxBitmap bmpAssignColor(colorSelect_xpm);
 	wxBitmap bmpLighting(lightbulb_xpm);
 #else
+	wxBitmap bmpOpen  (wxImage(respath+_T("icons/fileopen.png" ), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpSave  (wxImage(respath+_T("icons/disc.png" ), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpAxial (wxImage(respath+_T("icons/axial.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpCor   (wxImage(respath+_T("icons/cor.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpSag   (wxImage(respath+_T("icons/sag.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpBox   (wxImage(respath+_T("icons/box.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpBoxOff(wxImage(respath+_T("icons/box_off.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpBoxEye(wxImage(respath+_T("icons/box_eye.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpGrid  (wxImage(respath+_T("icons/grid.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpGridSpline(wxImage(respath+_T("icons/grid_spline.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpIsoSurface(wxImage(respath+_T("icons/iso_surface.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpView1 (wxImage(respath+_T("icons/view1.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpView2 (wxImage(respath+_T("icons/view2.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpView3 (wxImage(respath+_T("icons/view3.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpMiniCat(wxImage(respath+_T("icons/mini_cat.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpNew   (wxImage(respath+_T("icons/new.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpQuit  (wxImage(respath+_T("icons/quit.png"), wxBITMAP_TYPE_PNG));
 
-	wxBitmap bmpOpen  (wxImage(_T("icons/fileopen.png" ), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpSave  (wxImage(_T("icons/disc.png" ), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpAxial (wxImage(_T("icons/axial.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpCor   (wxImage(_T("icons/cor.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpSag   (wxImage(_T("icons/sag.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpBox   (wxImage(_T("icons/box.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpBoxOff(wxImage(_T("icons/box_off.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpBoxEye(wxImage(_T("icons/box_eye.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpGrid  (wxImage(_T("icons/grid.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpGridSpline(wxImage(_T("icons/grid_spline.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpIsoSurface(wxImage(_T("icons/iso_surface.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpView1 (wxImage(_T("icons/view1.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpView2 (wxImage(_T("icons/view2.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpView3 (wxImage(_T("icons/view3.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpMiniCat(wxImage(_T("icons/mini_cat.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpNew   (wxImage(_T("icons/new.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpQuit  (wxImage(_T("icons/quit.png"), wxBITMAP_TYPE_PNG));
-
-    wxBitmap bmpHideSelbox(wxImage(_T("icons/toggleselbox.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpNewSurface(wxImage(_T("icons/toggleSurface.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpAssignColor(wxImage(_T("icons/colorSelect.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpLighting(wxImage(_T("icons/lightbulb.png"), wxBITMAP_TYPE_PNG));
+    wxBitmap bmpHideSelbox(wxImage(respath+_T("icons/toggleselbox.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpNewSurface(wxImage(respath+_T("icons/toggleSurface.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpAssignColor(wxImage(respath+_T("icons/colorSelect.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpLighting(wxImage(respath+_T("icons/lightbulb.png"), wxBITMAP_TYPE_PNG));
 
 #endif
 
