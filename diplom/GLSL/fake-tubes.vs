@@ -2,6 +2,7 @@
 varying float tangent_dot_view;
 varying vec3 tangentR3;
 varying float s_param;
+varying vec4 myColor;
 
 void main() {
 	gl_ClipVertex = gl_ModelViewMatrix * gl_Vertex; //< make clipping planes work
@@ -29,7 +30,7 @@ void main() {
 
 
 	pos.xyz += offset * (s_param * thickness); //< add offset in y-direction (eye-space)
-
+	myColor = gl_Color;
 
 	gl_Position = pos; //< store final position
 }

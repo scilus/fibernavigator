@@ -782,10 +782,12 @@ void Fibers::drawFakeTubes()
 	float *normals;
 	if (m_dh->useVBO)
 	{
-		//glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-		//colors = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+		colors = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-		normals = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+		normals = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
 	}
 	else
 	{
@@ -807,9 +809,9 @@ void Fibers::drawFakeTubes()
 			for (int k = 0 ; k < getPointsPerLine(i) ; ++k)
 			{
 				glNormal3f( normals[idx], normals[idx+1], normals[idx+2] );
-				glColor3f ( normals[idx], normals[idx+1], normals[idx+2] );
+				//glColor3f ( normals[idx], normals[idx+1], normals[idx+2] );
 				//glNormal3f( colors[idx], colors[idx+1], colors[idx+2] );
-				//glColor3f ( colors[idx], colors[idx+1], colors[idx+2]);
+				glColor3f ( colors[idx], colors[idx+1], colors[idx+2]);
 				glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
 				glVertex3f (m_pointArray[idx], m_pointArray[idx+1], m_pointArray[idx+2]);
 				glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
@@ -819,10 +821,5 @@ void Fibers::drawFakeTubes()
 			}
 			glEnd();
 		}
-	}
-	// clean up
-	if (m_dh->useVBO)
-	{
-		glUnmapBuffer(GL_ARRAY_BUFFER);
 	}
 }

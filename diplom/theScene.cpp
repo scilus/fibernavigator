@@ -303,6 +303,7 @@ void TheScene::renderFakeTubes()
 			}
 
 			m_dh->shaderHelper->m_fakeTubeShader->bind();
+			m_dh->shaderHelper->m_fakeTubeShader->setUniInt("globalColor", info->getShowFS());
 
 			info->draw();
 
