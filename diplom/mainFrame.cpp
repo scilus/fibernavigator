@@ -1164,6 +1164,7 @@ void MainFrame::refreshAllGLWidgets()
 	if (m_gl2) m_gl2->render();
 	if (m_mainGL) m_mainGL->render();
 	updateStatusBar();
+	updateMenus();
 }
 /****************************************************************************************************
  *
@@ -1310,11 +1311,6 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 		if (m_dh->lastSelectedBox) m_dh->lastSelectedBox->unselect();
 		m_dh->lastSelectedBox = (SelectionBox*)(m_treeWidget->GetItemData(treeid));
 		m_dh->lastSelectedBox->select(false);
-
-		//TODO
-		wxMenu* voiMenu = m_menuBar->GetMenu(2);
-		voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->m_isActive);
-		voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
 
 		refreshAllGLWidgets();
 		return;
@@ -1577,16 +1573,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
     layout.LayoutMDIFrame(this);
 #endif // wxUSE_MDI_ARCHITECTURE
 
-    // get the options menu
-#ifndef __WXMSW__
-		wxMenu* oMenu = m_menuBar->GetMenu(4);
-		oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
-		oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
-		oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
-		oMenu->Check(oMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
-		oMenu->Check(oMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
-#endif
-	GetClientWindow()->Update();
+ 	GetClientWindow()->Update();
 	this->Update();
 	this->Refresh();
 }
@@ -1677,4 +1664,45 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 void MainFrame::OnMouseEvent(wxMouseEvent& WXUNUSED(event))
 {
 	this->Refresh();
+}
+
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::updateMenus()
+{
+	// get the options menu
+	#ifndef __WXMSW__
+		wxMenu* oMenu = m_menuBar->GetMenu(4);
+		oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
+		oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
+		oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
+		oMenu->Check(oMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
+		oMenu->Check(oMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
+
+		m_toolBar->ToggleTool(BUTTON_AXIAL, m_dh->showAxial);
+		m_toolBar->ToggleTool(BUTTON_CORONAL, m_dh->showCoronal);
+		m_toolBar->ToggleTool(BUTTON_SAGITTAL, m_dh->showSagittal);
+		m_toolBar->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->scene->m_blendAlpha);
+
+		m_toolBar->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
+
+		wxMenu* voiMenu = m_menuBar->GetMenu(2);
+		voiMenu->Check(voiMenu->FindItem(_T("active")), false);
+		voiMenu->Check(voiMenu->FindItem(_T("visible")), false);
+
+		wxTreeItemId treeid = m_treeWidget->GetSelection();
+		int selected = treeSelected(treeid);
+		if ( selected == ChildBox ||  selected == MasterBox )
+		{
+			voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->m_isActive);
+			voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
+
+			m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->scene->m_showBoxes);
+			m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->m_isActive);
+		}
+
+	#endif
 }

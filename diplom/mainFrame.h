@@ -19,6 +19,7 @@ public:
     void setTSlider(wxSlider *slider) {m_tSlider = slider;};
     void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
     void setMMenuBar(wxMenuBar *bar) {m_menuBar = bar;};
+    void setMToolBar(wxToolBar *bar) {m_toolBar = bar;};
 
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
@@ -109,6 +110,7 @@ private:
      */
     void OnKdTreeThreadFinished(wxCommandEvent& event);
     void updateStatusBar();
+    void updateMenus();
 
     wxSashLayoutWindow* m_leftWindowHolder;
     wxSashLayoutWindow* m_leftWindowTop;
@@ -147,6 +149,7 @@ public:
 
 	wxStatusBar* m_statusBar;
 	wxMenuBar *m_menuBar;
+	wxToolBar *m_toolBar;
 	MyListCtrl* m_listCtrl;
 	wxTreeCtrl* m_treeWidget;
 	wxTreeItemId m_tRootId;

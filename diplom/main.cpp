@@ -73,7 +73,7 @@ bool MyApp::OnInit(void) {
     CFStringRef str = CFURLCopyFileSystemPath(  resourcesURL, kCFURLPOSIXPathStyle );
     CFRelease( resourcesURL );
     char path[ PATH_MAX ];
-                      
+
     CFStringGetCString(  str, path, FILENAME_MAX, kCFStringEncodingASCII );
     CFRelease( str );
     fprintf( stderr, path );
@@ -206,14 +206,14 @@ bool MyApp::OnInit(void) {
 	toolBar->AddTool(MENU_FILE_SAVE, bmpSave, wxT("Save Scene"));
 	//toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(BUTTON_AXIAL, bmpAxial, wxT("Axial"));
-	toolBar->AddTool(BUTTON_CORONAL, bmpCor, wxT("Coronal"));
-	toolBar->AddTool(BUTTON_SAGITTAL, bmpSag, wxT("Sagittal"));
-	toolBar->AddTool(BUTTON_TOGGLE_ALPHA, bmpNewSurface, wxT("Toggle alpha blending"));
+	toolBar->AddCheckTool(BUTTON_AXIAL, wxT("Axial"), bmpAxial);
+	toolBar->AddCheckTool(BUTTON_CORONAL, wxT("Coronal"), bmpCor);
+	toolBar->AddCheckTool(BUTTON_SAGITTAL, wxT("Sagittal"), bmpSag);
+	toolBar->AddCheckTool(BUTTON_TOGGLE_ALPHA, wxT("Toggle alpha blending"), bmpNewSurface);
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_VOI_NEW_SELBOX, bmpBox, wxT("New Selection Box"));
-	toolBar->AddTool(MENU_VOI_RENDER_SELBOXES, bmpBoxEye, wxT("Toggle Selection Boxes"));
-	toolBar->AddTool(MENU_VOI_TOGGLE_SELBOX, bmpBoxOff, wxT("Toggle activation status of selection box"));
+	toolBar->AddCheckTool(MENU_VOI_RENDER_SELBOXES, wxT("Toggle Selection Boxes"), bmpBoxEye);
+	toolBar->AddCheckTool(MENU_VOI_TOGGLE_SELBOX, wxT("Toggle activation status of selection box"), bmpBoxOff);
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_SPLINESURF_NEW, bmpGridSpline, wxT("New Spline Surface"));
 	toolBar->AddTool(MENU_SPLINESURF_DRAW_POINTS, bmpGrid, wxT("Toggle drawing of points"));
@@ -222,7 +222,7 @@ bool MyApp::OnInit(void) {
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_OPTIONS_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(MENU_OPTIONS_TOGGLE_LIGHTING, bmpLighting, wxT("Toggle Lighting"));
+	toolBar->AddCheckTool(MENU_OPTIONS_TOGGLE_LIGHTING, wxT("Toggle Lighting"), bmpLighting);
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_FILE_NEW_ISOSURF, bmpIsoSurface, wxT("New Iso Surface "));
 	toolBar->AddSeparator();
@@ -234,6 +234,7 @@ bool MyApp::OnInit(void) {
 #endif
 	toolBar->Realize();
 	frame->SetToolBar(toolBar);
+	frame->setMToolBar(toolBar);
 
 	wxStatusBar* statusBar = new wxStatusBar(frame, wxID_ANY, wxST_SIZEGRIP);
 	frame->SetStatusBar(statusBar);
