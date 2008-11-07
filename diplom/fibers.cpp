@@ -295,82 +295,58 @@ void Fibers::createColorArray()
 	printf("create color arrays\n");
 
 	int pc = 0;
-    float r,g,b, rr, gg, bb;
-    float x1,x2,y1,y2,z1,z2;
-    float lastx, lasty, lastz;
-    float nextx, nexty, nextz;
-    for ( int i = 0 ; i < getLineCount() ; ++i )
-    {
-    	// calculate global color for line /////////////////////
-    	// get first point of line
-        x1 = m_pointArray[pc];
-        y1 = m_pointArray[pc+1];
-        z1 = m_pointArray[pc+2];
-        // get last point of line
-        x2 = m_pointArray[pc + getPointsPerLine(i)*3 - 3];
-        y2 = m_pointArray[pc + getPointsPerLine(i)*3 - 2];
-        z2 = m_pointArray[pc + getPointsPerLine(i)*3 - 1];
-        // calculate vector
-        r = (x1) - (x2);
-        g = (y1) - (y2);
-        b = (z1) - (z2);
-        if (r < 0.0) r *= -1.0 ;
-        if (g < 0.0) g *= -1.0 ;
-        if (b < 0.0) b *= -1.0 ;
-        // normalize it
-        float norm = sqrt(r*r + g*g + b*b);
-        r *= 1.0/norm;
-        g *= 1.0/norm;
-        b *= 1.0/norm;
-        ////////////////////////////////////////////////////////
+	float r,g,b, rr, gg, bb;
+	float x1,x2,y1,y2,z1,z2;
+	float lastx, lasty, lastz;
+	for ( int i = 0 ; i < getLineCount() ; ++i )
+	{
+		x1 = m_pointArray[pc];
+		y1 = m_pointArray[pc+1];
+		z1 = m_pointArray[pc+2];
+		x2 = m_pointArray[pc + getPointsPerLine(i)*3 - 3];
+		y2 = m_pointArray[pc + getPointsPerLine(i)*3 - 2];
+		z2 = m_pointArray[pc + getPointsPerLine(i)*3 - 1];
 
+		r = (x1) - (x2);
+		g = (y1) - (y2);
+		b = (z1) - (z2);
+		if (r < 0.0) r *= -1.0 ;
+		if (g < 0.0) g *= -1.0 ;
+		if (b < 0.0) b *= -1.0 ;
 
-        lastx = m_pointArray[pc];
-        lasty = m_pointArray[pc+1];
-        lastz = m_pointArray[pc+2];
+		float norm = sqrt(r*r + g*g + b*b);
+		r *= 1.0/norm;
+		g *= 1.0/norm;
+		b *= 1.0/norm;
 
-        for (int j = 0; j < getPointsPerLine(i) ; ++j )
-        {
-        	if ( pc < getStartIndexForLine(i) + getPointsPerLine(i)*3 )
-        	{
-        		nextx = m_pointArray[pc+3];
-        		nexty = m_pointArray[pc+4];
-        		nextz = m_pointArray[pc+5];
-        	}
-        	else
-        	{
-        		nextx = m_pointArray[pc];
-        	    nexty = m_pointArray[pc+1];
-        	    nextz = m_pointArray[pc+2];
-        	}
-        	rr = lastx - nextx;
-            gg = lasty - nexty;
-            bb = lastz - nextz;
+		lastx = lasty = lastz = 0.0;
 
-            lastx = m_pointArray[pc];
-            lasty = m_pointArray[pc+1];
-            lastz = m_pointArray[pc+2];
-            // make it positive
-            if (rr < 0.0) rr *= -1.0 ;
-            if (gg < 0.0) gg *= -1.0 ;
-            if (bb < 0.0) bb *= -1.0 ;
-            // normalize it
-            float norm = sqrt(rr*rr + gg*gg + bb*bb);
-            rr *= 1.0/norm;
-            gg *= 1.0/norm;
-            bb *= 1.0/norm;
-            // set local color (tangent vector) in the normal array
-        	m_normalArray[pc] = rr;
-        	m_normalArray[pc+1] = gg;
-        	m_normalArray[pc+2] = bb;
-        	//set the global color in the color value
-        	m_colorArray[pc] = r;
-	        m_colorArray[pc+1] = g;
-	        m_colorArray[pc+2] = b;
-	        pc += 3;
-        }
-    }
+		for (int j = 0; j < getPointsPerLine(i) ; ++j )
+		{
+			rr = lastx - m_pointArray[pc];
+			gg = lasty - m_pointArray[pc+1];
+			bb = lastz - m_pointArray[pc+2];
+			lastx = m_pointArray[pc];
+			lasty = m_pointArray[pc+1];
+			lastz = m_pointArray[pc+2];
+			if (rr < 0.0) rr *= -1.0 ;
+			if (gg < 0.0) gg *= -1.0 ;
+			if (bb < 0.0) bb *= -1.0 ;
+			float norm = sqrt(rr*rr + gg*gg + bb*bb);
+			rr *= 1.0/norm;
+			gg *= 1.0/norm;
+			bb *= 1.0/norm;
 
+            m_normalArray[pc] = rr;
+            m_normalArray[pc+1] = gg;
+            m_normalArray[pc+2] = bb;
+
+            m_colorArray[pc] = r;
+            m_colorArray[pc+1] = g;
+            m_colorArray[pc+2] = b;
+            pc += 3;
+		}
+	}
 }
 
 void Fibers::resetLinesShown()
