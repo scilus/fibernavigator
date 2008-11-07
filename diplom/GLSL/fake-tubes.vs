@@ -8,7 +8,7 @@ void main() {
 
 	vec3 tangent;
 
-	float thickness = 0.01;
+	float thickness = 0.005;
 
 	tangentR3 = gl_Normal;
 	//tangent = gl_NormalMatrix * gl_Normal; //< transform our tangent vector

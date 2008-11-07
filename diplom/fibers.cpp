@@ -329,9 +329,11 @@ void Fibers::createColorArray()
 			lastx = m_pointArray[pc];
 			lasty = m_pointArray[pc+1];
 			lastz = m_pointArray[pc+2];
+/*
 			if (rr < 0.0) rr *= -1.0 ;
 			if (gg < 0.0) gg *= -1.0 ;
 			if (bb < 0.0) bb *= -1.0 ;
+*/
 			float norm = sqrt(rr*rr + gg*gg + bb*bb);
 			rr *= 1.0/norm;
 			gg *= 1.0/norm;

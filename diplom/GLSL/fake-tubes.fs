@@ -10,10 +10,10 @@ void main() {
   vec3 color = abs(normalize(tangentR3));
 
   vec3 view = vec3(0.,0.,-1.);
-  float view_dot_normal = sqrt(1.-s_param*s_param);
+  float view_dot_normal = sqrt(1.-s_param*s_param)+.1;
 
   float s = (s_param+1.)*0.5;			  //< normalize in [0..1]
-  gl_FragColor.rgb = clamp(view_dot_normal *(color +pow(view_dot_normal,30.)*pow(tangent_dot_view,30.)*vec3(1.,1.,1.)), 0., 1.);         //< set the color of this fragment (i.e. pixel)
+  gl_FragColor.rgb = clamp(view_dot_normal *(color + 0.15*pow(view_dot_normal,10.) * pow(tangent_dot_view,10.) *vec3(1.,1.,1.)), 0., 1.);         //< set the color of this fragment (i.e. pixel)
   gl_FragColor.a   = 1.;
 }
 

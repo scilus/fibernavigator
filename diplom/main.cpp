@@ -134,7 +134,7 @@ bool MyApp::OnInit(void) {
 	options_menu->AppendSeparator();
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
-	options_menu->AppendCheckItem(MENU_OPTIONS_USE_FAKE_TUBES, _T("Use Fake Tubes"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_USE_FAKE_TUBES, _T("Use Tubes"));
 	options_menu->AppendSeparator();
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_BLEND_TEX_ON_MESH, _T("Blend Texture on Mesh"));
