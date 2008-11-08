@@ -284,11 +284,6 @@ bool MyApp::OnInit(void) {
 		fName.Normalize(wxPATH_NORM_LONG|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
 		cmdFileName = fName.GetFullPath();
 		frame->m_dh->load(-1, cmdFileName);
-
-		char* cstring1;
-		cstring1 = (char*) malloc(cmdFileName.length());
-		strcpy(cstring1, (const char*) cmdFileName.mb_str(wxConvUTF8));
-		printf("%s\n", cstring1);
 	}
 
 	return true;
