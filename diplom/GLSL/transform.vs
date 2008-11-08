@@ -60,7 +60,7 @@ void main() {
 		gl_Vertex.xyz += 2 * offset;
 	}
 */
-	TexCoord = gl_Vertex;
+	TexCoord = gl_Vertex.xyz;
 
 	vec4 tensor = gl_Color;
 

@@ -16,6 +16,9 @@
 #endif
 
 #include "wx/mdi.h"
+#include "wx/filefn.h"
+#include "wx/cmdline.h"
+#include "wx/filename.h"
 
 #include "icons/fileopen.xpm"
 #include "icons/disc.xpm"
@@ -49,45 +52,63 @@
 wxString MyApp::respath;
 MainFrame *frame = NULL;
 
-const wxString MyApp::APP_NAME = _T(  "main" );
-const wxString MyApp::APP_VENDOR = _T(  "Ralph S. & Mario H." );
+const wxString MyApp::APP_NAME = _T( "main" );
+const wxString MyApp::APP_VENDOR = _T( "Ralph S. & Mario H." );
 
 IMPLEMENT_APP(MyApp)
+
+static const wxCmdLineEntryDesc desc[] = {
+	{wxCMD_LINE_SWITCH, _T("h"), _T("help"), _T("help yourself")},
+	{wxCMD_LINE_PARAM, NULL, NULL, _T("scene file"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
+	{wxCMD_LINE_NONE}
+};
 
 // Initialise this in OnInit, not statically
 bool MyApp::OnInit(void) {
 
-    SetAppName (  APP_NAME );
-    SetVendorName (  APP_VENDOR );
+	SetAppName(APP_NAME);
+	SetVendorName(APP_VENDOR);
+
+	respath = wxFindAppPath(argv[0], wxGetCwd(), _T("FNPATH"), _T("fn"));
+#ifdef __WXMSW__
+	if (respath.Last() != '\\') respath += '\\';
+#else
+	if (respath.Last() != '/') respath += '/';
+#endif
+#ifdef DEBUG
+	char* cstring;
+	cstring = (char*) malloc(respath.length());
+	strcpy(cstring, (const char*) respath.mb_str(wxConvUTF8));
+	printf("%s\n", cstring);
+#endif
 
 #ifdef __WXMAC__
-    //wxImage::AddHandler( new wxJPEGHandler() );
-    wxImage::AddHandler( new wxPNGHandler() );
-    //wxImage::AddHandler( new wxGIFHandler() );
-    //
-    //
+	//wxImage::AddHandler( new wxJPEGHandler() );
+	wxImage::AddHandler( new wxPNGHandler() );
+	//wxImage::AddHandler( new wxGIFHandler() );
+	//
+	//
 
-    // OSX only: Try to find the resource path...
-    CFBundleRef mainBundle = CFBundleGetMainBundle();
-    CFURLRef resourcesURL = CFBundleCopyBundleURL( mainBundle );
-    CFStringRef str = CFURLCopyFileSystemPath(  resourcesURL, kCFURLPOSIXPathStyle );
-    CFRelease( resourcesURL );
-    char path[ PATH_MAX ];
+	// OSX only: Try to find the resource path...
+	CFBundleRef mainBundle = CFBundleGetMainBundle();
+	CFURLRef resourcesURL = CFBundleCopyBundleURL( mainBundle );
+	CFStringRef str = CFURLCopyFileSystemPath( resourcesURL, kCFURLPOSIXPathStyle );
+	CFRelease( resourcesURL );
+	char path[ PATH_MAX ];
 
-    CFStringGetCString(  str, path, FILENAME_MAX, kCFStringEncodingASCII );
-    CFRelease( str );
-    fprintf( stderr, path );
+	CFStringGetCString( str, path, FILENAME_MAX, kCFStringEncodingASCII );
+	CFRelease( str );
+	fprintf( stderr, path );
 
-    respath = wxString::FromAscii( path );
-    respath += _T( "/Contents/Resources/" );
-    std::cout << "path: " << respath << "\"" << std::endl;
+	respath = wxString::FromAscii( path );
+	respath += _T( "/Contents/Resources/" );
+	std::cout << "path: " << respath << "\"" << std::endl;
 
 #endif
 
 	// Create the main frame window
-	frame = new MainFrame(NULL, wxID_ANY, _T("Viewer"), wxPoint(0, 0), wxSize(1200, 820), wxDEFAULT_FRAME_STYLE
+	frame = new MainFrame(NULL, wxID_ANY, _T("Fiber Navigator"), wxPoint(0, 0), wxSize(1200, 820), wxDEFAULT_FRAME_STYLE
 			| wxHSCROLL | wxVSCROLL);
-
 
 	// Give it an icon (this is ignored in MDI mode: uses resources)
 #ifdef __WXMSW__
@@ -155,7 +176,9 @@ bool MyApp::OnInit(void) {
 	frame->SetMenuBar(menu_bar);
 	frame->setMMenuBar(menu_bar);
 
-	wxToolBar* toolBar = new wxToolBar(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL | wxNO_BORDER);
+	wxToolBar *toolBar =
+					new wxToolBar(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL
+							| wxNO_BORDER);
 #ifndef __WXMAC__
 	wxBitmap bmpOpen(fileopen_xpm);
 	wxBitmap bmpSave(disc_xpm);
@@ -176,25 +199,25 @@ bool MyApp::OnInit(void) {
 	wxBitmap bmpAssignColor(colorSelect_xpm);
 	wxBitmap bmpLighting(lightbulb_xpm);
 #else
-	wxBitmap bmpOpen  (wxImage(respath+_T("icons/fileopen.png" ), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpSave  (wxImage(respath+_T("icons/disc.png" ), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpOpen (wxImage(respath+_T("icons/fileopen.png" ), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpSave (wxImage(respath+_T("icons/disc.png" ), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpAxial (wxImage(respath+_T("icons/axial.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpCor   (wxImage(respath+_T("icons/cor.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpSag   (wxImage(respath+_T("icons/sag.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpBox   (wxImage(respath+_T("icons/box.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpCor (wxImage(respath+_T("icons/cor.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpSag (wxImage(respath+_T("icons/sag.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpBox (wxImage(respath+_T("icons/box.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpBoxOff(wxImage(respath+_T("icons/box_off.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpBoxEye(wxImage(respath+_T("icons/box_eye.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpGrid  (wxImage(respath+_T("icons/grid.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpGrid (wxImage(respath+_T("icons/grid.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpGridSpline(wxImage(respath+_T("icons/grid_spline.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpIsoSurface(wxImage(respath+_T("icons/iso_surface.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpView1 (wxImage(respath+_T("icons/view1.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpView2 (wxImage(respath+_T("icons/view2.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpView3 (wxImage(respath+_T("icons/view3.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpMiniCat(wxImage(respath+_T("icons/mini_cat.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpNew   (wxImage(respath+_T("icons/new.png"), wxBITMAP_TYPE_PNG));
-	wxBitmap bmpQuit  (wxImage(respath+_T("icons/quit.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpNew (wxImage(respath+_T("icons/new.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpQuit (wxImage(respath+_T("icons/quit.png"), wxBITMAP_TYPE_PNG));
 
-    wxBitmap bmpHideSelbox(wxImage(respath+_T("icons/toggleselbox.png"), wxBITMAP_TYPE_PNG));
+	wxBitmap bmpHideSelbox(wxImage(respath+_T("icons/toggleselbox.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpNewSurface(wxImage(respath+_T("icons/toggleSurface.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpAssignColor(wxImage(respath+_T("icons/colorSelect.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpLighting(wxImage(respath+_T("icons/lightbulb.png"), wxBITMAP_TYPE_PNG));
@@ -246,6 +269,88 @@ bool MyApp::OnInit(void) {
 
 	SetTopWindow(frame);
 
+	wxString cmdFileName;
+	wxCmdLineParser cmdParser(desc, argc, argv);
+	cmdParser.Parse(false);
+
+	if (cmdParser.GetParamCount() > 0)
+	{
+		cmdFileName = cmdParser.GetParam(0);
+		wxFileName fName(cmdFileName);
+		fName.Normalize(wxPATH_NORM_LONG|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
+		cmdFileName = fName.GetFullPath();
+		frame->m_dh->load(-1, cmdFileName);
+
+		char* cstring1;
+		cstring1 = (char*) malloc(cmdFileName.length());
+		strcpy(cstring1, (const char*) cmdFileName.mb_str(wxConvUTF8));
+		printf("%s\n", cstring1);
+	}
+
 	return true;
 }
 
+// Find the absolute path where this application has been run from.
+// argv0 is wxTheApp->argv[0]
+// cwd is the current working directory (at startup)
+// appVariableName is the name of a variable containing the directory for this app, e.g.
+// MYAPPDIR. This is checked first.
+wxString MyApp::wxFindAppPath(const wxString& argv0, const wxString& cwd,
+		const wxString& appVariableName, const wxString& appName) {
+	wxString str;
+
+#ifndef __WXWINCE__
+	// Try appVariableName
+	if (!appVariableName.IsEmpty()) {
+		str = wxGetenv(appVariableName);
+		if (!str.IsEmpty())
+			return str;
+	}
+#endif
+
+#if defined(__WXMAC__) && !defined(__DARWIN__)
+	return cwd;
+#endif
+
+	if (wxIsAbsolutePath(argv0))
+		return wxPathOnly(argv0);
+	else {
+		// Is it a relative path?
+		if (!cwd.IsEmpty()) {
+			wxString currentDir(cwd);
+			if (currentDir.Last() != wxFILE_SEP_PATH)
+				currentDir += wxFILE_SEP_PATH;
+
+			str = currentDir + argv0;
+			if (wxFileExists(str))
+				return wxPathOnly(str);
+#ifdef __WXMAC__
+			// The current directory may be above the actual
+			// bundle. So if we find the bundle below it,
+			// we know where we are.
+			if (!appName.IsEmpty())
+			{
+				wxString p = currentDir + appName + wxT(".app");
+				if (wxDirExists(p))
+				{
+					p += wxFILE_SEP_PATH;
+					p += wxT("Content/MacOS");
+					return p;
+				}
+			}
+#endif
+		}
+	}
+
+	// OK, it's neither an absolute path nor a relative path.
+	// Search PATH.
+
+	wxPathList pathList;
+	pathList.AddEnvList(wxT("PATH"));
+	str = pathList.FindAbsoluteValidPath(argv0);
+	if (!str.IsEmpty())
+		return wxPathOnly(str);
+
+	// Failed
+	return wxEmptyString;
+}
