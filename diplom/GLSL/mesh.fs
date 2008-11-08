@@ -1,4 +1,4 @@
-#include GLSL/lighting.fs
+#include lighting.fs
 
 uniform int sector;
 uniform float cutX, cutY, cutZ;

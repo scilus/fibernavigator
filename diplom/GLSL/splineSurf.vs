@@ -1,4 +1,4 @@
-#include GLSL/lighting.vs
+#include lighting.vs
 
 uniform sampler3D texes[10];
 uniform int type[10];

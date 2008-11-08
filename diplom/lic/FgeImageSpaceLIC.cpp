@@ -186,7 +186,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_glh->printTime();
 	printf("initializing  LIC texture shader\n");
 
-	m_transformShader = new Shader(wxT("GLSL/transform"));
+	m_transformShader = new Shader(wxT("transform"));
 	m_transformShader->bind();
 
 	if (m_glh->GLError())
@@ -201,7 +201,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_glh->printTime();
 	printf("initializing  LIC edge shader\n");
 
-	m_edgeShader = new Shader(wxT("GLSL/edgedetection"));
+	m_edgeShader = new Shader(wxT("edgedetection"));
 	m_edgeShader->bind();
 
 	if (m_glh->GLError())
@@ -216,7 +216,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_glh->printTime();
 	printf("initializing  LIC advection shader\n");
 
-	m_advectionShader = new Shader(wxT("GLSL/advection"));
+	m_advectionShader = new Shader(wxT("advection"));
 	m_advectionShader->bind();
 
 	if (m_glh->GLError())
@@ -231,7 +231,7 @@ void FgeImageSpaceLIC::reloadShaders() {
 	m_glh->printTime();
 	printf("initializing  LIC clipping shader\n");
 
-	m_clippingShader = new Shader(wxT("GLSL/clipping"));
+	m_clippingShader = new Shader(wxT("clipping"));
 	m_clippingShader->bind();
 
 	if (m_glh->GLError())

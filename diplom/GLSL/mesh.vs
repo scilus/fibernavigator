@@ -1,4 +1,4 @@
-#include GLSL/lighting.vs
+#include lighting.vs
 
 varying float flag;
 

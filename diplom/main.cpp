@@ -50,6 +50,8 @@
 #include "mainFrame.h"
 
 wxString MyApp::respath;
+wxString MyApp::shaderPath;
+
 MainFrame *frame = NULL;
 
 const wxString MyApp::APP_NAME = _T( "main" );
@@ -72,8 +74,10 @@ bool MyApp::OnInit(void) {
 	respath = wxFindAppPath(argv[0], wxGetCwd(), _T("FNPATH"), _T("fn"));
 #ifdef __WXMSW__
 	if (respath.Last() != '\\') respath += '\\';
+	shaderPath += _T("GLSL\\");
 #else
 	if (respath.Last() != '/') respath += '/';
+	shaderPath += _T("GLSL/");
 #endif
 #ifdef DEBUG
 	char* cstring;

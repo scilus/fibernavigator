@@ -1,4 +1,4 @@
-#include GLSL/lighting.fs
+#include lighting.fs
 
 uniform int dimX, dimY, dimZ;
 

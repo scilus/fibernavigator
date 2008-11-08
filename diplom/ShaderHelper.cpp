@@ -14,7 +14,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh->printTime();
 	printf("initializing texture shader\n");
 #endif
-	m_textureShader = new Shader(wxT("GLSL/anatomy"));
+	m_textureShader = new Shader(wxT("anatomy"));
 	m_textureShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup anatomy shader"));
@@ -22,7 +22,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh->printTime();
 	printf("initializing mesh shader\n");
 #endif
-	m_meshShader = new Shader(wxT("GLSL/mesh"));
+	m_meshShader = new Shader(wxT("mesh"));
 	m_meshShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup mesh shader"));
@@ -31,7 +31,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	printf("initializing fiber shader\n");
 #endif
 
-	m_fiberShader = new Shader(wxT("GLSL/fibers"));
+	m_fiberShader = new Shader(wxT("fibers"));
 	m_fiberShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fiber shader"));
@@ -41,7 +41,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	printf("initializing fake tube shader\n");
 #endif
 
-	m_fakeTubeShader = new Shader(wxT("GLSL/fake-tubes"));
+	m_fakeTubeShader = new Shader(wxT("fake-tubes"));
 	m_fakeTubeShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fake tube shader"));
@@ -52,7 +52,7 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh->printTime();
 	printf("initializing spline surface shader\n");
 #endif
-	m_splineSurfShader = new Shader(wxT("GLSL/splineSurf"));
+	m_splineSurfShader = new Shader(wxT("splineSurf"));
 	m_splineSurfShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup spline surface shader"));

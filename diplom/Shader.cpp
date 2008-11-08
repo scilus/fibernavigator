@@ -117,7 +117,7 @@ bool Shader::loadFromFile(wxString* code, wxString fileName)
 {
 	wxTextFile file;
 	*code = wxT("");
-	if (file.Open(MyApp::respath + fileName))
+	if (file.Open(MyApp::shaderPath + fileName))
 	{
 		size_t i;
 		for (i = 0 ; i < file.GetLineCount() ; ++i)
