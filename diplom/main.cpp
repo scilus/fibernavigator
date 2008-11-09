@@ -65,6 +65,22 @@ static const wxCmdLineEntryDesc desc[] = {
 	{wxCMD_LINE_NONE}
 };
 
+namespace {
+  void printwx( const wxString& str )
+  {
+	char* cstring;
+	cstring = (char*) malloc(str.length());
+	strcpy(cstring, (const char*) str.mb_str(wxConvUTF8));
+	printf("%s\n", cstring);
+    free( cstring );
+  }
+
+  void printwx( const wxString& str1, const wxString& str2 )
+  {
+    printwx( str1 ); printwx( str2 );
+  }
+}
+
 // Initialise this in OnInit, not statically
 bool MyApp::OnInit(void) {
 
@@ -72,26 +88,14 @@ bool MyApp::OnInit(void) {
 	SetVendorName(APP_VENDOR);
 
 	respath = wxFindAppPath(argv[0], wxGetCwd(), _T("FNPATH"), _T("fn"));
+    printwx( _T( "respath:" ), respath );
 #ifdef __WXMSW__
 	if (respath.Last() != '\\') respath += '\\';
 	shaderPath += _T("GLSL\\");
-#else
-	if (respath.Last() != '/') respath += '/';
-	shaderPath += _T("GLSL/");
-#endif
-#ifdef DEBUG
-	char* cstring;
-	cstring = (char*) malloc(respath.length());
-	strcpy(cstring, (const char*) respath.mb_str(wxConvUTF8));
-	printf("%s\n", cstring);
-#endif
-
-#ifdef __WXMAC__
-	//wxImage::AddHandler( new wxJPEGHandler() );
-	wxImage::AddHandler( new wxPNGHandler() );
-	//wxImage::AddHandler( new wxGIFHandler() );
-	//
-	//
+#elif __WXMAC__
+#if 1
+    // if we use the above code to get the same on OSX, I get a segfault somewhere
+    // therefore I use the OSX native code here:
 
 	// OSX only: Try to find the resource path...
 	CFBundleRef mainBundle = CFBundleGetMainBundle();
@@ -105,9 +109,28 @@ bool MyApp::OnInit(void) {
 	fprintf( stderr, path );
 
 	respath = wxString::FromAscii( path );
-	respath += _T( "/Contents/Resources/" );
-	std::cout << "path: " << respath << "\"" << std::endl;
+#endif
+    respath += _T( "/Contents/Resources/" );
+    shaderPath = respath + _T( "GLSL/" );
+#else
+	if (respath.Last() != '/') respath += '/';
+	shaderPath += _T("GLSL/");
+#endif
+#ifdef DEBUG
+	char* cstring;
+	cstring = (char*) malloc(respath.length());
+	strcpy(cstring, (const char*) respath.mb_str(wxConvUTF8));
+	printf("%s\n", cstring);
+    free( cstring );
+#endif
 
+    printwx( _T( "respath_:" ), respath );
+    printwx( _T( "shader:" ), shaderPath );
+#ifdef __WXMAC__
+	//wxImage::AddHandler( new wxJPEGHandler() );
+	wxImage::AddHandler( new wxPNGHandler() );
+	//wxImage::AddHandler( new wxGIFHandler() );
+	//
 #endif
 
 	// Create the main frame window
