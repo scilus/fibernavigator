@@ -597,6 +597,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\GLSL\fake-tubes.fs"
+			>
+		</File>
+		<File
+			RelativePath=".\GLSL\fake-tubes.vs"
+			>
+		</File>
+		<File
 			RelativePath=".\Fantom\FArray.icc"
 			>
 		</File>
@@ -674,6 +682,10 @@
 		</File>
 		<File
 			RelativePath=".\GLSL\splineSurf.vs"
+			>
+		</File>
+		<File
+			RelativePath=".\todo.txt"
 			>
 		</File>
 		<File
