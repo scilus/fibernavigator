@@ -61,7 +61,7 @@ IMPLEMENT_APP(MyApp)
 
 static const wxCmdLineEntryDesc desc[] = {
 	{wxCMD_LINE_SWITCH, _T("h"), _T("help"), _T("help yourself")},
-	{wxCMD_LINE_PARAM, NULL, NULL, _T("scene file"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
+	{wxCMD_LINE_PARAM, NULL, NULL, _T("scene file"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL|wxCMD_LINE_PARAM_MULTIPLE},
 	{wxCMD_LINE_NONE}
 };
 
@@ -88,7 +88,6 @@ bool MyApp::OnInit(void) {
 	SetVendorName(APP_VENDOR);
 
 	respath = wxFindAppPath(argv[0], wxGetCwd(), _T("FNPATH"), _T("fn"));
-    printwx( _T( "respath:" ), respath );
 #ifdef __WXMSW__
 	if (respath.Last() != '\\') respath += '\\';
 	shaderPath += _T("GLSL\\");
@@ -114,18 +113,12 @@ bool MyApp::OnInit(void) {
     shaderPath = respath + _T( "GLSL/" );
 #else
 	if (respath.Last() != '/') respath += '/';
-	shaderPath += _T("GLSL/");
+	shaderPath =  respath + _T("GLSL/");
 #endif
 #ifdef DEBUG
-	char* cstring;
-	cstring = (char*) malloc(respath.length());
-	strcpy(cstring, (const char*) respath.mb_str(wxConvUTF8));
-	printf("%s\n", cstring);
-    free( cstring );
-#endif
-
-    printwx( _T( "respath_:" ), respath );
+    printwx( _T( "respath:" ), respath );
     printwx( _T( "shader:" ), shaderPath );
+#endif
 #ifdef __WXMAC__
 	//wxImage::AddHandler( new wxJPEGHandler() );
 	wxImage::AddHandler( new wxPNGHandler() );
@@ -302,11 +295,14 @@ bool MyApp::OnInit(void) {
 
 	if (cmdParser.GetParamCount() > 0)
 	{
-		cmdFileName = cmdParser.GetParam(0);
-		wxFileName fName(cmdFileName);
-		fName.Normalize(wxPATH_NORM_LONG|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
-		cmdFileName = fName.GetFullPath();
-		frame->m_dh->load(-1, cmdFileName);
+		for (size_t i = 0 ; i < cmdParser.GetParamCount() ; ++i)
+		{
+			cmdFileName = cmdParser.GetParam(i);
+			wxFileName fName(cmdFileName);
+			fName.Normalize(wxPATH_NORM_LONG|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
+			cmdFileName = fName.GetFullPath();
+			frame->m_dh->load(-1, cmdFileName);
+		}
 	}
 
 	return true;
