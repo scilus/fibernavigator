@@ -68,7 +68,7 @@ void Shader::release()
 bool Shader::compile(GLuint* shaderId, wxString codeString)
 {
 	char *temp;
-	temp = (char*) malloc(codeString.Length());
+	temp = (char*) malloc(codeString.Length()+1);
 	strcpy(temp, (const char*)codeString.mb_str(wxConvUTF8));
 	const char* code = temp;
 

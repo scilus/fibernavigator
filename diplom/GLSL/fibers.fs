@@ -1,4 +1,5 @@
-#include lighting.fs
+varying vec3 normal;
+varying vec3 position;
 
 uniform int dimX, dimY, dimZ;
 uniform sampler3D tex;
@@ -12,9 +13,9 @@ varying vec4 myColor;
 
 void lookupTex() {
 	vec3 v = gl_TexCoord[0].xyz;
-	v.x = (v.x) / float( dimX);
-	v.y = (v.y) / float( dimY);
-	v.z = (v.z) / float( dimZ);
+	v.x = (v.x) / float(dimX);
+	v.y = (v.y) / float(dimY);
+	v.z = (v.z) / float(dimZ);
 
 	vec3 col1;
 	col1.r = clamp(texture3D(tex, v).r, 0.0, 1.0);
@@ -29,25 +30,41 @@ void main() {
 	if (type == 3 && useTex)
 		lookupTex();
 
-	if (lightOn)
-	{
-		vec3 n = normal.xyz;
+	if (lightOn) {
+		// normalize the vertex normal and the view vector
+		vec3 norm = abs(normal);
+		vec3 view = normalize(-position);
 
-		vec4 ambient = vec4(0.0);
+		vec4 ambient = vec4(0.0); //gl_FrontLightModelProduct.sceneColor;
 		vec4 diffuse = vec4(0.0);
 		vec4 specular = vec4(0.0);
 
-		/* In this case the built in uniform gl_MaxLights is used
-		 // to denote the number of lights. A better option may be passing
-		 // in the number of lights as a uniform or replacing the current
-		 // value with a smaller value. */
-		calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess,
-				ambient, diffuse, specular);
+		// accumulate ambient, diffuse, and specular for each light
+		for (int i = 0; i < gl_MaxLights; i++) {
+			// early out if the current light is disabled
+			if (gl_LightSource[i].diffuse[3] == 0.0)
+				continue;
 
-		gl_FragColor = myColor + (ambient * myColor) + (diffuse * myColor)
-						+ (specular * myColor);
+			// determine the light and light reflection vectors
+			//vec3 light = normalize(gl_LightSource[i].position.xyz - position);
+			vec3 light = (gl_ModelViewMatrix * vec4(0., 0., -1., 0.)).xyz;
+			vec3 reflected = -reflect(light, norm);
 
-	}
-	else
+			// add the current light's ambient value
+			ambient += gl_FrontLightProduct[i].ambient;
+
+			// calculate and add the current light's diffuse value
+			vec4 calculatedDiffuse = vec4(max(dot(norm, light), 0.0));
+			diffuse += gl_FrontLightProduct[i].diffuse * calculatedDiffuse;
+
+			// calculate and add the current light's specular value
+			vec4 calculatedSpecular = vec4(pow(max(dot(reflected, view), 0.0), 0.3
+					* gl_FrontMaterial.shininess));
+			specular += clamp(gl_FrontLightProduct[i].specular
+					* calculatedSpecular, 0.0, 1.0);
+		}
+		gl_FragColor = myColor + diffuse + specular;
+
+	} else
 		gl_FragColor = myColor;
 }
