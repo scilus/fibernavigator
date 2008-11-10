@@ -20,7 +20,7 @@ END_EVENT_TABLE()
 MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID id,
 #ifdef CTX
     const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib, wxGLContext*ctx)
-    : wxGLCanvas(parent, ctx, id, 
+    : wxGLCanvas(parent, ctx, id,
         wxDefaultPosition, wxDefaultSize, 0, name) // gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name )
 #else
     const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* gl_attrib, wxGLCanvas*shared )
@@ -357,7 +357,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	 */
 	float tpicked = 0;
 	int picked = 0;
-	hitResult hr;
+	hitResult hr = {false, 0.0f, 0, NULL};
 	if (m_dh->showAxial) {
 		bb->setSizeZ(0.01f);
 		bb->setCenterZ(zz);
