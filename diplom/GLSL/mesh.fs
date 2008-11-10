@@ -100,8 +100,8 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 }
 
 void main() {
-	if (!gl_FrontFacing)
-		//discard;
+	if (gl_FrontFacing)
+		discard;
 
 	if (!showFS)
 		cutFrontSector();
