@@ -39,30 +39,24 @@ void main() {
 		vec4 diffuse = vec4(0.0);
 		vec4 specular = vec4(0.0);
 
-		// accumulate ambient, diffuse, and specular for each light
-		for (int i = 0; i < gl_MaxLights; i++) {
-			// early out if the current light is disabled
-			if (gl_LightSource[i].diffuse[3] == 0.0)
-				continue;
+		// determine the light and light reflection vectors
+		//vec3 light = normalize(gl_LightSource[0].position.xyz - position);
+		vec3 light = (gl_ModelViewMatrix * vec4(0., 0., -1., 0.)).xyz;
+		vec3 reflected = -reflect(light, norm);
 
-			// determine the light and light reflection vectors
-			//vec3 light = normalize(gl_LightSource[i].position.xyz - position);
-			vec3 light = (gl_ModelViewMatrix * vec4(0., 0., -1., 0.)).xyz;
-			vec3 reflected = -reflect(light, norm);
+		// add the current light's ambient value
+		ambient += gl_FrontLightProduct[0].ambient;
 
-			// add the current light's ambient value
-			ambient += gl_FrontLightProduct[i].ambient;
+		// calculate and add the current light's diffuse value
+		vec4 calculatedDiffuse = vec4(max(dot(norm, light), 0.0));
+		diffuse += gl_FrontLightProduct[0].diffuse * calculatedDiffuse;
 
-			// calculate and add the current light's diffuse value
-			vec4 calculatedDiffuse = vec4(max(dot(norm, light), 0.0));
-			diffuse += gl_FrontLightProduct[i].diffuse * calculatedDiffuse;
+		// calculate and add the current light's specular value
+		vec4 calculatedSpecular = vec4(pow(max(dot(reflected, view), 0.0), 0.3
+				* gl_FrontMaterial.shininess));
+		specular += clamp(gl_FrontLightProduct[0].specular
+				* calculatedSpecular, 0.0, 1.0);
 
-			// calculate and add the current light's specular value
-			vec4 calculatedSpecular = vec4(pow(max(dot(reflected, view), 0.0), 0.3
-					* gl_FrontMaterial.shininess));
-			specular += clamp(gl_FrontLightProduct[i].specular
-					* calculatedSpecular, 0.0, 1.0);
-		}
 		gl_FragColor = myColor + diffuse + specular;
 
 	} else
