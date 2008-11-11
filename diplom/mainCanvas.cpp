@@ -115,6 +115,15 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				m_mousePt.s.X = clickX;
 				m_mousePt.s.Y = clickY;
 
+				if (wxGetKeyState(WXK_CONTROL)) {
+					m_hr = pick(event.GetPosition());
+					m_dh->updateView((int)getEventCenter().s.X , (int)getEventCenter().s.Y , (int)getEventCenter().s.Z);
+					m_dh->mainFrame->m_xSlider->SetValue((int)getEventCenter().s.X);
+					m_dh->mainFrame->m_ySlider->SetValue((int)getEventCenter().s.Y);
+					m_dh->mainFrame->m_zSlider->SetValue((int)getEventCenter().s.Z);
+					m_dh->mainFrame->refreshAllGLWidgets();
+				}
+
 				if (m_dh->scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
 					m_hr = pick(event.GetPosition());
 					if (m_hr.hit && (m_hr.picked <= sagittal)) {
