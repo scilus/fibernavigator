@@ -17,6 +17,6 @@ void main()
 	}
 
 	col = clamp(col, 0.0, 1.0);
-	if (length(col) == 0.0) discard;
+
 	gl_FragColor = col;
 }

@@ -175,6 +175,15 @@ bool MyApp::OnInit(void) {
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("Assign Color"));
+
+	wxMenu* cMaps = new wxMenu;
+	cMaps->Append(MENU_OPTIONS_CMAP0, wxT("default color map"));
+	cMaps->Append(MENU_OPTIONS_CMAP1, wxT("color map 1"));
+	cMaps->Append(MENU_OPTIONS_CMAP2, wxT("color map 2"));
+	cMaps->Append(MENU_OPTIONS_CMAP3, wxT("color map 3"));
+	cMaps->Append(MENU_OPTIONS_CMAP4, wxT("color map 4"));
+
+	options_menu->Append(MENU_OPTIONS_COLOR_MAPS, _T("Set Color Map"), cMaps);
 	options_menu->AppendSeparator();
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
@@ -183,6 +192,8 @@ bool MyApp::OnInit(void) {
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_BLEND_TEX_ON_MESH, _T("Blend Texture on Mesh"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_FILTER_ISO, _T("Filter Dataset for IsoSurface"));
+
+
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(MENU_HELP_ABOUT, _T("About"));

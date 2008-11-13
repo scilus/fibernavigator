@@ -68,6 +68,12 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
 	EVT_MENU(MENU_OPTIONS_BLEND_TEX_ON_MESH, MainFrame::OnToggleBlendTexOnMesh)
 	EVT_MENU(MENU_OPTIONS_FILTER_ISO, MainFrame::OnToggleFilterIso)
+	EVT_MENU(MENU_OPTIONS_CMAP0, MainFrame::OnSetCMap0)
+	EVT_MENU(MENU_OPTIONS_CMAP1, MainFrame::OnSetCMap1)
+	EVT_MENU(MENU_OPTIONS_CMAP2, MainFrame::OnSetCMap2)
+	EVT_MENU(MENU_OPTIONS_CMAP3, MainFrame::OnSetCMap3)
+	EVT_MENU(MENU_OPTIONS_CMAP4, MainFrame::OnSetCMap4)
+	EVT_MENU(MENU_OPTIONS_CMAP5, MainFrame::OnSetCMap5)
 	// Menu Help
     EVT_MENU(MENU_HELP_ABOUT, MainFrame::OnAbout)
 
@@ -1009,6 +1015,13 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
+
+void MainFrame::OnSetCMap0(wxCommandEvent& event) {m_dh->colorMap = 0;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap1(wxCommandEvent& event) {m_dh->colorMap = 1;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap2(wxCommandEvent& event) {m_dh->colorMap = 2;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap3(wxCommandEvent& event) {m_dh->colorMap = 3;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap4(wxCommandEvent& event) {m_dh->colorMap = 4;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap5(wxCommandEvent& event) {m_dh->colorMap = 5;refreshAllGLWidgets();}
 /****************************************************************************************************
  *
  * Menu Help

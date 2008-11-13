@@ -148,6 +148,7 @@ void TheScene::renderSlizes()
 	bindTextures();
 	m_dh->shaderHelper->m_textureShader->bind();
 	m_dh->shaderHelper->setTextureShaderVars();
+	m_dh->shaderHelper->m_textureShader->setUniInt("useColorMap", m_dh->colorMap);
 
 	m_dh->anatomyHelper->renderMain();
 
@@ -183,6 +184,7 @@ void TheScene::renderSplineSurface()
 				wxColor c = info->getColor();
 				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
 				m_dh->shaderHelper->m_splineSurfShader->setUniInt("useTex", info->getUseTex());
+				m_dh->shaderHelper->m_splineSurfShader->setUniInt("useColorMap", m_dh->colorMap);
 
 				info->draw();
 
@@ -220,6 +222,7 @@ void TheScene::renderMesh()
 				m_dh->shaderHelper->m_meshShader->setUniInt("showFS", info->getShowFS());
 				m_dh->shaderHelper->m_meshShader->setUniInt("useTex", info->getUseTex());
 				m_dh->shaderHelper->m_meshShader->setUniFloat("alpha_", info->getAlpha());
+				m_dh->shaderHelper->m_meshShader->setUniInt("useColorMap", m_dh->colorMap);
 
 				if (m_dh->surface_loaded)
 					m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", true);

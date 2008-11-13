@@ -38,6 +38,8 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	useVBO = true;
 	lighting = false;
 
+	colorMap = 0;
+
 	showSagittal = true;
 	showCoronal = true;
 	showAxial = true;

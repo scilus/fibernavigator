@@ -135,6 +135,7 @@ public:
 	bool fibersInverted;
 	bool useFakeTubes;
 	bool filterIsoSurf;
+	int colorMap;
 
 	bool m_isDragging;
 	bool m_isrDragging;
