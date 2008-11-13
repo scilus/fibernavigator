@@ -43,6 +43,7 @@ public:
 	void generateTexture() {};
 	void generateGeometry() ;
 	void initializeBuffer() {};
+	void drawVectors() {};
 
 	void setFiletype(int value) 	  {m_filetype = value;};
 	void setCountVerts(int value) 	  {m_countVerts = value;};

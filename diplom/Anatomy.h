@@ -12,7 +12,7 @@
 #include "surface.h"
 
 
-class Anatomy : public DatasetInfo , public wxTreeItemData 
+class Anatomy : public DatasetInfo , public wxTreeItemData
 {
 
 public:
@@ -24,6 +24,7 @@ public:
 	void generateTexture();
 	void generateGeometry() {};
 	void initializeBuffer() {};
+	void drawVectors() {};
 
 	wxUint8* getByteDataset();
 	float* getFloatDataset();

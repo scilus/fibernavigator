@@ -46,8 +46,6 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fake tube shader"));
 
-
-
 #ifdef DEBUG
 	m_dh->printTime();
 	printf("initializing spline surface shader\n");
@@ -56,6 +54,15 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_splineSurfShader->bind();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup spline surface shader"));
+
+#ifdef DEBUG
+	m_dh->printTime();
+	printf("initializing vector shader\n");
+#endif
+	m_vectorShader = new Shader(wxT("vectors"));
+	m_vectorShader->bind();
+
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup vectors shader"));
 
 }
 

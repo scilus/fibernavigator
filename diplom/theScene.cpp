@@ -183,7 +183,7 @@ void TheScene::renderSplineSurface()
 
 				wxColor c = info->getColor();
 				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
-				m_dh->shaderHelper->m_splineSurfShader->setUniInt("useTex", info->getUseTex());
+				m_dh->shaderHelper->m_splineSurfShader->setUniInt("useTex", !info->getUseTex());
 				m_dh->shaderHelper->m_splineSurfShader->setUniInt("useColorMap", m_dh->colorMap);
 
 				info->draw();
@@ -193,6 +193,13 @@ void TheScene::renderSplineSurface()
 				lightsOff();
 
 				if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
+			}
+
+			if ( m_dh->vectors_loaded && m_dh->drawVectors)
+			{
+				m_dh->shaderHelper->m_vectorShader->bind();
+				info->drawVectors();
+				m_dh->shaderHelper->m_vectorShader->release();
 			}
 
 			glPopAttrib();

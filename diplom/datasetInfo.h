@@ -59,6 +59,7 @@ public:
 	virtual void generateTexture()=0;
 	virtual void generateGeometry()=0;
 	virtual void initializeBuffer()=0;
+	virtual void drawVectors()=0;
 
 	wxTreeItemId getTreeId() const {return m_treeId;};
     void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;m_hasTreeId = true;};

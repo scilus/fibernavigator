@@ -27,6 +27,7 @@ public:
 	Shader *m_fiberShader;
 	Shader *m_fakeTubeShader;
 	Shader *m_splineSurfShader;
+	Shader *m_vectorShader;
 
 private:
 	DatasetHelper* m_dh;

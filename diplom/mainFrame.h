@@ -53,6 +53,7 @@ private:
 	void OnToggleNormal(wxCommandEvent& event);
 	void OnTogglePointMode(wxCommandEvent& event);
 	void OnToggleLIC(wxCommandEvent& event);
+	void OnToggleDrawVectors(wxCommandEvent& event);
 	// Options
 	void OnAssignColor(wxCommandEvent& event);
     void OnToggleLighting(wxCommandEvent& event);
@@ -206,6 +207,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_SPLINESURF_NEW							141
 #define MENU_SPLINESURF_TOGGLE_LIC					142
 #define MENU_SPLINESURF_TOGGLE_NORMAL				143
+#define MENU_SPLINESURF_DRAW_VECTORS				144
 // Menu Options
 #define MENU_OPTIONS_ASSIGN_COLOR					150
 #define MENU_OPTIONS_TOGGLE_LIGHTING				151

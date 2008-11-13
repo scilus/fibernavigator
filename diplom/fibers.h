@@ -34,6 +34,7 @@ public:
 	void generateTexture() {};
 	void generateGeometry() {};
 	void initializeBuffer();
+	void drawVectors() {};
 
 	int getPointsPerLine(int);
 	int getStartIndexForLine(int);

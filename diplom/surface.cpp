@@ -690,3 +690,27 @@ void Surface::overSamplePoints()
 	m_renderpointsPerRow = m_renderpointsPerRow * 2 - 1;
 	m_renderpointsPerCol = m_renderpointsPerCol * 2 - 1;
 }
+
+void Surface::drawVectors()
+{
+	int numQuads = (m_renderpointsPerCol - 1) * (m_renderpointsPerRow - 1);
+	int i0, i1, i2;
+	glBegin(GL_LINES);
+
+	for (int i = 0 ; i < numQuads*4 ; ++i)
+	{
+		i0 = m_indexArray[i]*3;
+		i1 = m_indexArray[i]*3+1;
+		i2 = m_indexArray[i]*3+2;
+		//glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
+		glColor3f(m_colorArray[i0], m_colorArray[i1], m_colorArray[i2]);
+		glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
+		glVertex3f(m_vertexArray[i0], m_vertexArray[i1], m_vertexArray[i2]);
+		//glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
+		glColor3f(m_colorArray[i0], m_colorArray[i1], m_colorArray[i2]);
+		glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
+		glVertex3f(m_vertexArray[i0], m_vertexArray[i1], m_vertexArray[i2]);
+	}
+
+	glEnd();
+}

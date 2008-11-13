@@ -60,6 +60,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_LIC, MainFrame::OnToggleLIC)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_NORMAL, MainFrame::OnToggleNormal)
 	EVT_MENU(MENU_SPLINESURF_DRAW_POINTS, MainFrame::OnTogglePointMode)
+	EVT_MENU(MENU_SPLINESURF_DRAW_VECTORS, MainFrame::OnToggleDrawVectors)
 	// Menu Options
 	EVT_MENU(MENU_OPTIONS_ASSIGN_COLOR, MainFrame::OnAssignColor)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
@@ -843,6 +844,17 @@ void MainFrame::OnTogglePointMode(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
 	m_dh->scene->togglePointMode();
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnToggleDrawVectors(wxCommandEvent& WXUNUSED(event))
+{
+	if (!m_dh->scene) return;
+	m_dh->drawVectors = !m_dh->drawVectors;
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************

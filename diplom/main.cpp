@@ -172,6 +172,7 @@ bool MyApp::OnInit(void) {
 	surf_menu->AppendSeparator();
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_LIC, _T("Toggle Lic"));
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_NORMAL, _T("Toggle Normal Direction"));
+	surf_menu->AppendCheckItem(MENU_SPLINESURF_DRAW_VECTORS, _T("Draw Vectors"));
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("Assign Color"));

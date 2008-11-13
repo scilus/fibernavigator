@@ -49,6 +49,7 @@ public:
 	void generateTexture() {};
 	void generateGeometry() ;
 	void initializeBuffer() {};
+	void drawVectors() {};
 
 	void GenerateWithThreshold();
 

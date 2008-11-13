@@ -108,6 +108,7 @@ public:
 
 	bool blendTexOnMesh;
 	bool use_lic;
+	bool drawVectors;
 	bool surface_loaded;
 	bool surface_isDirty;
 	wxString lastPath;
