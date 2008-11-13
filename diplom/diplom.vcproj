@@ -633,6 +633,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\GLSL\functions.fs"
+			>
+		</File>
+		<File
 			RelativePath=".\icons\grid.xpm"
 			>
 		</File>

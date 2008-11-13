@@ -42,6 +42,7 @@ void main() {
 		// determine the light and light reflection vectors
 		//vec3 light = normalize(gl_LightSource[0].position.xyz - position);
 		vec3 light = (gl_ModelViewMatrix * vec4(0., 0., -1., 0.)).xyz;
+		//vec3 light = vec3(0.0, 0.0, -1.0);
 		vec3 reflected = -reflect(light, norm);
 
 		// add the current light's ambient value
@@ -57,7 +58,7 @@ void main() {
 		specular += clamp(gl_FrontLightProduct[0].specular
 				* calculatedSpecular, 0.0, 1.0);
 
-		gl_FragColor = myColor + diffuse + specular;
+		gl_FragColor = myColor + diffuse;// + specular;
 
 	} else
 		gl_FragColor = myColor;
