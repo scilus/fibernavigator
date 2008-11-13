@@ -266,7 +266,7 @@ void SelectionBox::drawSphere(float x, float y, float z, float r)
 
 hitResult SelectionBox::hitTest(Ray *ray)
 {
-	hitResult hr;
+	hitResult hr = {false, 0.0f, 0, NULL};
 	if (m_isVisible && m_isActive) {
 		float tpicked = 0;
 		int picked = 0;
