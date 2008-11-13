@@ -37,10 +37,10 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
 	m_dh->scheduledReloadShaders = true;
 
 	// 2 iterations by default
-	iterations = 4;
+	iterations = 2;
 
 	// blend factor default
-	noiseBlend = 0.2f;
+	noiseBlend = 0.1f;
 	// blend factor of colormap
 	colormapBlend = 0.3f;
 
@@ -479,7 +479,7 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 
 	// give the blending and scaling parameters
 	m_advectionShader->setUniFloat("noiseBlend", noiseBlend);
-	m_advectionShader->setUniFloat("tensorAdvectionScale", tensorAdvectionScale);
+	m_advectionShader->setUniFloat("tensorAdvectionScale", tensorAdvectionScale * info->getAlpha()*5);
 
 	// animation flag
 	//m_advectionShader->setUniFloat("advectionAnimation", advectionAnimation ? 1.0 : 0.0);

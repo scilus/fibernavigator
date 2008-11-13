@@ -30,6 +30,7 @@ Surface::Surface(DatasetHelper* dh)
 	m_dh->surface_loaded = true;
 	m_numPoints = 0;
 	m_hasTreeId = false;
+	m_alpha = 0.2;
 	execute();
 }
 
