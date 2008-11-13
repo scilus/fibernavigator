@@ -703,11 +703,11 @@ void Surface::drawVectors()
 		i0 = m_indexArray[i]*3;
 		i1 = m_indexArray[i]*3+1;
 		i2 = m_indexArray[i]*3+2;
-		//glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
+		glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
 		glColor3f(m_colorArray[i0], m_colorArray[i1], m_colorArray[i2]);
 		glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
 		glVertex3f(m_vertexArray[i0], m_vertexArray[i1], m_vertexArray[i2]);
-		//glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
+		glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
 		glColor3f(m_colorArray[i0], m_colorArray[i1], m_colorArray[i2]);
 		glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
 		glVertex3f(m_vertexArray[i0], m_vertexArray[i1], m_vertexArray[i2]);

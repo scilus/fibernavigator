@@ -5,8 +5,12 @@ void main()
 
 	float scale = 0.5;
 	float s_param = gl_MultiTexCoord0.x;
-	vec3 offset = s_param * scale * normalize(gl_Color.rgb);
 	vec4 pos = gl_Vertex ;
+
+	vec3 A = gl_Color.rgb;
+	vec3 B = gl_Normal;
+
+	vec3 offset = cross(B, (cross(A,B))) * s_param * scale;
 	pos.xyz += offset;
 
 	gl_Position = gl_ModelViewProjectionMatrix * pos;
