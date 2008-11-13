@@ -90,63 +90,81 @@ public:
 
 	void doMatrixManipulation();
 
+	/////////////////////////////////////////////////////////////////////////////////
+	// general info about the datasets
+	/////////////////////////////////////////////////////////////////////////////////
 	int rows;
 	int columns;
 	int frames;
-	bool useVBO;
-	bool lighting;
 	unsigned int countFibers;
-	Matrix4fT m_transform;
 	wxString lastError;
-	GLenum lastGLError;
+	// last path from loading, load file dialog will open with it
+	wxString lastPath;
+
 	bool anatomy_loaded;
 	bool fibers_loaded;
 	bool vectors_loaded;
-
-	//! if set the shaders will be reloaded during next render() call
-	bool scheduledReloadShaders;
-
-	bool blendTexOnMesh;
-	bool use_lic;
-	bool drawVectors;
 	bool surface_loaded;
 	bool surface_isDirty;
-	wxString lastPath;
-	int threadsActive;
 
-	SplinePoint* lastSelectedPoint;
-	SelectionBox* lastSelectedBox;
-
-	SelectionBox* boxAtCrosshair;
-	bool boxLockIsOn;
-	bool semaphore;
-
-	MainFrame* mainFrame;
-	TheScene* scene;
-	AnatomyHelper* anatomyHelper;
-	ShaderHelper* shaderHelper;
-
+	/////////////////////////////////////////////////////////////////////////////////
+	// state variables for rendering
+	/////////////////////////////////////////////////////////////////////////////////
+	Matrix4fT m_transform;
+	bool useVBO;
+	GLenum lastGLError;
+	int quadrant;
+	//! if set the shaders will be reloaded during next render() call
+	bool scheduledReloadShaders;
+	/////////////////////////////////////////////////////////////////////////////////
+	// state variables for menu entries
+	/////////////////////////////////////////////////////////////////////////////////
 	bool showSagittal;
 	bool showCoronal;
 	bool showAxial;
+
 	float xSlize;
 	float ySlize;
 	float zSlize;
-	int quadrant;
+	// lighting for fibers
+	bool lighting;
+	// ignore threshold for textures on meshes
+	bool blendTexOnMesh;
+	// show the lic texture on spline surface
+	bool use_lic;
+	// draw vectors as small lines on spline surface
+	bool drawVectors;
+	// normal direction of the spline surface
+	float normalDirection;
 	bool fibersInverted;
 	bool useFakeTubes;
 	bool filterIsoSurf;
 	int colorMap;
+	/////////////////////////////////////////////////////////////////////////////////
+	// pointers to often used objects
+	/////////////////////////////////////////////////////////////////////////////////
+	SplinePoint* lastSelectedPoint;
+	SelectionBox* lastSelectedBox;
+	SelectionBox* boxAtCrosshair;
+	AnatomyHelper* anatomyHelper;
+	ShaderHelper* shaderHelper;
+	MainFrame* mainFrame;
+	TheScene* scene;
 
+	bool boxLockIsOn;
+	bool semaphore;
+	int threadsActive;
+	/////////////////////////////////////////////////////////////////////////////////
+	// pointers to often used objects
+	/////////////////////////////////////////////////////////////////////////////////
 	bool m_isDragging;
 	bool m_isrDragging;
 	bool m_ismDragging;
-
 	float zoom;
 	int xMove;
 	int yMove;
 
-	float normalDirection;
+
 
 private:
 
