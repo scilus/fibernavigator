@@ -39,7 +39,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	lighting = false;
 
 	colorMap = 0;
-	drawVectors = true;
+	drawVectors = false;
 
 	showSagittal = true;
 	showCoronal = true;
