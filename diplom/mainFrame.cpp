@@ -650,9 +650,8 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	if (treeSelected(tBoxId) == MasterBox)
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		box->m_isActive = !box->m_isActive;
+		box->toggleActive();
 		//m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
-		m_treeWidget->SetItemBold(tBoxId, 1 - box->m_isActive);
 		box->setDirty();
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
@@ -664,7 +663,6 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
 				childBox->m_isActive = box->m_isActive;
 				//m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
-				m_treeWidget->SetItemBold(childId, 1 - box->m_isActive);
 				childBox->setDirty();
 			}
 		}
@@ -678,7 +676,6 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 		box->setDirty();
 	}
 
-	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************

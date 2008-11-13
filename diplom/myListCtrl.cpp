@@ -64,24 +64,36 @@ DEFINE_EVENT_TYPE(wxEVT_TREE_EVENT)
 
 BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
 	EVT_CHAR(MyTreeCtrl::OnChar)
+	EVT_RIGHT_UP(MyTreeCtrl::OnRightClick)
+	EVT_MENU(TREE_CTRL_TOGGLE_ANDNOT, MyTreeCtrl::OnToggleAndNot)
+	EVT_MENU(TREE_CTRL_DELETE_BOX, MyTreeCtrl::OnDeleteBox)
+	EVT_MENU(TREE_CTRL_TOGGLE_BOX_ACTIVE, MyTreeCtrl::OnToggleBoxActive)
+	EVT_MENU(TREE_CTRL_TOGGLE_BOX_SHOW, MyTreeCtrl::OnToggleBoxShow)
 END_EVENT_TABLE()
 
-
-void MyTreeCtrl::OnChar(wxKeyEvent& event)
+int MyTreeCtrl::getSelectedType()
 {
 	wxTreeItemId treeid = this->GetSelection();
 
 	wxTreeItemId pId = this->GetItemParent(treeid);
 	wxTreeItemId ppId = this->GetItemParent(pId);
-	int selected = 0;
 
 	if (this->GetItemText(pId) == _T("selection boxes"))
-		selected = MasterBox;
+		return MasterBox;
 	else if (this->GetItemText(ppId) == _T("selection boxes"))
-		selected = ChildBox;
+		return ChildBox;
 	else if (this->GetItemText(pId) == _T("points"))
-		selected = Point_;
-	else return;
+		return Point_;
+	else return 0;
+}
+void MyTreeCtrl::OnChar(wxKeyEvent& event)
+{
+	int selected = getSelectedType();
+
+	wxTreeItemId treeid = this->GetSelection();
+
+	wxTreeItemId pId = this->GetItemParent(treeid);
+	wxTreeItemId ppId = this->GetItemParent(pId);
 
 	if ( event.GetKeyCode() == WXK_DELETE)
     {
@@ -145,3 +157,89 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
     Refresh(false);
 }
 
+void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
+{
+	int selected = getSelectedType();
+
+	wxMenu* menu = new wxMenu;
+
+	if (selected == MasterBox)
+	{
+		SelectionBox* box =((SelectionBox*) (this->GetItemData( this->GetSelection())));
+		if (box->getActive())
+			menu->Append(TREE_CTRL_TOGGLE_BOX_ACTIVE, _T("deactivate"));
+		else
+			menu->Append(TREE_CTRL_TOGGLE_BOX_ACTIVE, _T("activate"));
+		if (box->getShow())
+			menu->Append(TREE_CTRL_TOGGLE_BOX_SHOW, _T("hide"));
+		else
+			menu->Append(TREE_CTRL_TOGGLE_BOX_SHOW, _T("show"));
+
+		menu->AppendSeparator();
+		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
+	}
+
+	if (selected == ChildBox)
+	{
+		SelectionBox* box =((SelectionBox*) (this->GetItemData( this->GetSelection())));
+		menu->Append(TREE_CTRL_TOGGLE_ANDNOT, _T("toggle AND/NOT"));
+		menu->AppendSeparator();
+		if (box->getActive())
+			menu->Append(TREE_CTRL_TOGGLE_BOX_ACTIVE, _T("deactivate"));
+		else
+			menu->Append(TREE_CTRL_TOGGLE_BOX_ACTIVE, _T("activate"));
+		if (box->getShow())
+			menu->Append(TREE_CTRL_TOGGLE_BOX_SHOW, _T("hide"));
+		else
+			menu->Append(TREE_CTRL_TOGGLE_BOX_SHOW, _T("show"));
+		menu->AppendSeparator();
+		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
+
+	}
+	PopupMenu(menu, event.GetPosition());
+}
+
+void MyTreeCtrl::OnToggleAndNot(wxCommandEvent& event)
+{
+	wxTreeItemId treeid = this->GetSelection();
+	((SelectionBox*) (this->GetItemData(treeid)))->toggleNOT();
+}
+
+void MyTreeCtrl::OnDeleteBox(wxCommandEvent& event)
+{
+	if (getSelectedType() == ChildBox)
+	{
+		((SelectionBox*) ((this->GetItemData(this->GetItemParent(this->GetSelection())))))->setDirty();
+	}
+	this->Delete(this->GetSelection());
+	wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );
+	GetEventHandler()->ProcessEvent( event1 );
+}
+
+void MyTreeCtrl::OnToggleBoxActive(wxCommandEvent& event)
+{
+	wxTreeItemId treeid = this->GetSelection();
+	((SelectionBox*) (this->GetItemData(treeid)))->toggleActive();
+	((SelectionBox*) (this->GetItemData(treeid)))->setDirty();
+
+	if (getSelectedType() == MasterBox)
+	{
+		int childboxes = GetChildrenCount(treeid);
+		wxTreeItemIdValue childcookie = 0;
+		for (int i = 0 ; i < childboxes ; ++i)
+		{
+			wxTreeItemId childId = GetNextChild(treeid, childcookie);
+			if (childId.IsOk()) {
+				SelectionBox *childBox = ((SelectionBox*)(GetItemData(childId)));
+				childBox->toggleActive();
+				childBox->setDirty();
+			}
+		}
+	}
+}
+
+void MyTreeCtrl::OnToggleBoxShow(wxCommandEvent& event)
+{
+	wxTreeItemId treeid = this->GetSelection();
+	((SelectionBox*) (this->GetItemData(treeid)))->toggleShow();
+}

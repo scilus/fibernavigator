@@ -28,6 +28,8 @@ public:
 
 	bool toggleShow() {return m_isVisible = !m_isVisible;};
 	bool toggleNOT() {return m_isNOT = !m_isNOT;};
+	bool toggleActive() {return m_isActive = ! m_isActive;};
+	bool getActive() {return m_isActive;};
 	bool getShow() {return m_isVisible;};
 	void unselect() {m_isSelected = false;};
 
@@ -41,7 +43,7 @@ public:
 	Vector3fT getSize() {return m_size;};
 	void setPicked(int s) {m_hr.picked = s;};
 	bool isDirty() {return m_dirty;};
-	void setDirty() {m_dirty = true;};
+	void setDirty();
 	void notDirty() {m_dirty = false;};
 	bool colorChanged() {return m_colorChanged;};
 	wxColour getColor() {return m_color;};

@@ -643,3 +643,9 @@ void SelectionBox::lockToCrosshair()
 		m_dh->mainFrame->refreshAllGLWidgets();
 	}
 }
+
+void SelectionBox::setDirty()
+{
+	m_dirty = true;
+	m_dh->scene->m_selBoxChanged = true;
+}

@@ -20,6 +20,12 @@ public:
 
 private:
 	void OnChar(wxKeyEvent& event);
+	void OnRightClick(wxMouseEvent& event);
+	void OnToggleAndNot(wxCommandEvent& event);
+	void OnDeleteBox(wxCommandEvent& event);
+	void OnToggleBoxActive(wxCommandEvent& event);
+	void OnToggleBoxShow(wxCommandEvent& event);
+	int getSelectedType();
 
 	DECLARE_EVENT_TABLE()
 }	;
