@@ -2,7 +2,6 @@ vec3 defaultColorMap( float value )
 {
     value *= 5.0;
 	vec3 color;
-
 	if( value < 0.0 )
 		color = vec3( 0.0, 0.0, 0.0 );
     else if( value < 1.0 )
@@ -24,16 +23,39 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 {
 	vec3 col1 = vec3(0.0);
 
-	col1 = clamp( texture3D(tex, gl_TexCoord[0].xyz), 0.0, 1.0);
+	col1 = clamp( texture3D(tex, gl_TexCoord[0].xyz).rgb, 0.0, 1.0);
+
 	if ( type == 3 )
 	{
-		if ( col1. r - threshold <= 0.0) 
+		if ( col1. r - threshold <= 0.0)
 			return;
 		col1 = defaultColorMap( col1.r );
 	}
+
 	if ( (length(col1) - threshold) > 0.1)
 	{
 		col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
 	}
+
 	col.a += clamp (( (col.r*3.0) + (col.g*3.0) + (col.b*3.0) ), 0.0, 1.0) - threshold;
+}
+
+void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v, in float alpha)
+{
+	vec3 col1;
+
+	col1 = clamp( texture3D(tex, v).rgb, 0.0, 1.0);
+
+	if ( type == 3 )
+	{
+		if ( col1. r - threshold <= 0.0)
+			return;
+		col1 = defaultColorMap( col1.r );
+	}
+
+	if ( length(col1) - threshold >  0.1)
+	{
+		color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
+	}
+
 }

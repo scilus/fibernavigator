@@ -18,27 +18,7 @@ uniform float alpha[10];
 uniform int type[10];
 uniform int countTextures;
 
-vec3 defaultColorMap(float value)
-{
-	value *= 5.0;
-	vec3 color;
-
-	if (value < 0.0)
-		color = vec3(0.0, 0.0, 0.0);
-	else if (value < 1.0)
-		color = vec3(0.0, value, 1.0);
-	else if (value < 2.0)
-		color = vec3(0.0, 1.0, 2.0 - value);
-	else if (value < 3.0)
-		color = vec3(value - 2.0, 1.0, 0.0);
-	else if (value < 4.0)
-		color = vec3(1.0, 4.0 - value, 0.0);
-	else if (value <= 5.0)
-		color = vec3(1.0, 0.0, value - 4.0);
-	else
-		color = vec3(1.0, 0.0, 1.0);
-	return color;
-}
+#include functions.fs
 
 void cutFrontSector() {
 	if (sector == 1 && vertex.x > cutX && vertex.y > cutY && vertex.z > cutZ)
@@ -72,36 +52,9 @@ void cutAtSplineSurface() {
 	}
 }
 
-void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v, in float alpha)
-{
-	vec3 col1;
-	if (!blendTex)
-	threshold = 0.0;
-	if (type == 3)
-	{
-		col1.r = clamp( texture3D(tex, v).r, 0.0, 1.0);
-
-		if (col1.r - threshold> 0.0)
-		{
-			color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * defaultColorMap( col1.r));
-		}
-	}
-	if (type == 1 || type == 2 || type == 4)
-	{
-		col1.r = clamp( texture3D(tex, v).r, 0.0, 1.0);
-		col1.g = clamp( texture3D(tex, v).g, 0.0, 1.0);
-		col1.b = clamp( texture3D(tex, v).b, 0.0, 1.0);
-
-		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold)> 0.0)
-		{
-			color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
-		}
-	}
-}
-
 void main() {
 	if (gl_FrontFacing)
-		discard;
+		;//discard;
 
 	if (!showFS)
 		cutFrontSector();
@@ -134,8 +87,9 @@ void main() {
 		v.z = v.z / float(dimZ);
 
 		for (int i = 9; i > -1; i--) {
-			if (show[i])
-				lookupTex(color, type[i], texes[i], threshold[i], v, alpha[i]);
+			float threshold_ = 0.0;
+			if (blendTex) threshold_ = threshold[i];
+			if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold_, v, alpha[i]);
 		}
 
 		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0)
