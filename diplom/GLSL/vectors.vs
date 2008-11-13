@@ -12,6 +12,7 @@ void main()
 
 	vec3 offset = cross(B, (cross(A,B))) * s_param * scale;
 	pos.xyz += offset;
-
+	// a small offset so they don't disappear in the surface
+	pos.x -= 0.1;
 	gl_Position = gl_ModelViewProjectionMatrix * pos;
 }
