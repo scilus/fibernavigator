@@ -340,7 +340,13 @@ void Anatomy::generateTexture()
 			GL_UNSIGNED_BYTE,
 			m_rgbDataset);
 		break;
-	case Vectors_:
+	case Vectors_: {
+		int size = m_rows*m_columns*m_frames*3;
+		float *tempData = new float[size];
+		for ( int i = 0 ; i < size ; ++i )
+			tempData[i] = wxMax(m_floatDataset[i], -m_floatDataset[i]);
+
+
 		glTexImage3D(GL_TEXTURE_3D,
 			0,
 			GL_RGBA,
@@ -350,8 +356,10 @@ void Anatomy::generateTexture()
 			0,
 			GL_RGB,
 			GL_FLOAT,
-			m_floatDataset);
+			tempData);
+		delete[] tempData;
 		break;
+	}
 	default:
 		break;
 	}

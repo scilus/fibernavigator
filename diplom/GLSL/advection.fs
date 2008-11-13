@@ -48,7 +48,7 @@ vec4 sharpen(vec4 noise) {
 	float cinv = 1.0; // blending factor, in case the noise value is larger than threshold
 
 	if (noise.r > c)
-		e = cinv * noise;
+		e = cinv * noise.r;
 	else
 		e = 0.0;
 
@@ -61,12 +61,14 @@ vec4 sharpen(vec4 noise) {
  // Noise modification. For timebased animation.
  ////////////////////////////////////////////////////////////////////////////////////////////
 vec4 nnn(vec4 noise) {
-	float ts = advectionAnimation * (fantom_time % 10000) * 3.14 * 0.001;
+	//float ts = advectionAnimation * (fantom_time ) * 3.14 * 0.001;
 
-	//  return noise;
+	//return noise;
 	//  return sin(noise*3.14*2. + ts);
 
-	return sharpen(sin(noise * 3.14 * 2.0 + ts));
+	//return sharpen(sin(noise * 3.14 * 2.0 + ts));
+	return sharpen(sin(noise * 3.14 * 2.0 ));
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +97,7 @@ void main() {
 			tensor.x / textureSizeW, tensor.y / textureSizeH));
 	vec4 advectedNoise1 = texture2D(tex3, advectedPosition1);
 
-	vec2 advectedPosition2 = gl_TexCoord[3].st + (tensorAdvectionScale * vec2(
+	vec2 advectedPosition2 = gl_TexCoord[3].st + (tensorAdvectionScale  * vec2(
 			tensor.x / textureSizeW, tensor.y / textureSizeH));
 	vec4 advectedNoise2 = texture2D(tex3, advectedPosition2);
 
