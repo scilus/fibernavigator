@@ -58,7 +58,7 @@ void main() {
 		specular += clamp(gl_FrontLightProduct[0].specular
 				* calculatedSpecular, 0.0, 1.0);
 
-		gl_FragColor = myColor + diffuse;// + specular;
+		gl_FragColor = myColor + diffuse + specular;
 
 	} else
 		gl_FragColor = myColor;
