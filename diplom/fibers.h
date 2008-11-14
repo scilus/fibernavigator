@@ -41,8 +41,8 @@ public:
 	int getLineForPoint(int);
 	void setPoints(float* points) {m_pointArray = points;};
 	float* getPoints() {return m_pointArray;};
-	int getLineCount() {return m_lineCount;};
-	int getPointCount() {return m_pointCount;};
+	int getLineCount() {return m_countLines;};
+	int getPointCount() {return m_countPoints;};
 	void calculateLinePointers();
 
 	void resetLinesShown();
@@ -72,8 +72,8 @@ public:
 private:
 	std::string intToString(int number);
 
-	int m_lineCount;
-	int m_pointCount;
+	int m_countLines;
+	int m_countPoints;
 	int *m_linePointers;
 	int *m_reverse;
 	KdTree *m_kdTree;

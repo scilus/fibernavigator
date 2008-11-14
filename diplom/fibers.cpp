@@ -157,9 +157,9 @@ bool Fibers::load(wxString filename)
 	printf("and %d lines\n", countLines);
 #endif
 
-	m_lineCount = countLines;
-	m_dh->countFibers = m_lineCount;
-	m_pointCount = countPoints;
+	m_countLines = countLines;
+	m_dh->countFibers = m_countLines;
+	m_countPoints = countPoints;
 	m_linePointers = new int[countLines+1];
 	m_linePointers[countLines] = countPoints;
 	m_reverse = new int[countPoints];
@@ -212,7 +212,7 @@ bool Fibers::load(wxString filename)
 #endif
 	initializeBuffer();
 
-	m_kdTree = new KdTree(m_pointCount, m_pointArray, m_dh);
+	m_kdTree = new KdTree(m_countPoints, m_pointArray, m_dh);
 
 	return true;
 }
@@ -236,7 +236,7 @@ void Fibers::calculateLinePointers()
 	int pc = 0;
 	int lc = 0;
 	int tc = 0;
-	for (int i = 0 ; i < m_lineCount ; ++i)
+	for (int i = 0 ; i < m_countLines ; ++i)
 	{
 		m_linePointers[i] = tc;
 		lc = m_lineArray[pc];
@@ -248,7 +248,7 @@ void Fibers::calculateLinePointers()
 	pc = 0;
 
 
-	for ( int i = 0 ; i < m_pointCount ; ++i)
+	for ( int i = 0 ; i < m_countPoints ; ++i)
 	{
 		if ( i == m_linePointers[lc+1]) ++lc;
 		m_reverse[i] = lc;
@@ -343,7 +343,7 @@ void Fibers::createColorArray()
 
 void Fibers::resetLinesShown()
 {
-	for (int i = 0; i < m_lineCount ; ++i)
+	for (int i = 0; i < m_countLines ; ++i)
 	{
 		m_inBox[i] = 0;
 	}
@@ -370,7 +370,7 @@ void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 					boxes[i][j]->notDirty();
 				}
 				if ( boxes[i][j]->m_isActive) {
-					for (int k = 0 ; k <m_lineCount ; ++k)
+					for (int k = 0 ; k <m_countLines ; ++k)
 					boxes[i][0]->m_inBox[k] = boxes[i][0]->m_inBox[k] & ( (boxes[i][j]->m_inBox[k] | boxes[i][j]->m_isNOT) &
 																			!(boxes[i][j]->m_inBox[k] & boxes[i][j]->m_isNOT));
 				}
@@ -391,7 +391,7 @@ void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 			}
 			wxColour col = boxes[i][0]->getColor();
 
-			for ( int l = 0 ; l < m_lineCount ; ++l )
+			for ( int l = 0 ; l < m_countLines ; ++l )
 			{
 				if (boxes[i][0]->m_inBox[l])
 				{
@@ -417,13 +417,13 @@ void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
 		if ( boxes[i].size() > 0 && boxes[i][0]->m_isActive) {
-			for (int k = 0 ; k <m_lineCount ; ++k)
+			for (int k = 0 ; k <m_countLines ; ++k)
 				m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBox[k];
 		}
 	}
 	if (m_dh->fibersInverted)
 	{
-		for (int k = 0 ; k <m_lineCount ; ++k)
+		for (int k = 0 ; k <m_countLines ; ++k)
 		{
 			m_inBox[k] = !m_inBox[k];
 		}
@@ -444,7 +444,7 @@ std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
 	m_boxMin[2] = vpos.s.Z - vsize.s.Z/2;
 	m_boxMax[2] = vpos.s.Z + vsize.s.Z/2;
 
-	boxTest(0, m_pointCount-1, 0);
+	boxTest(0, m_countPoints-1, 0);
 	return m_inBox;
 }
 
@@ -483,7 +483,7 @@ void Fibers::initializeBuffer()
 	bool isOK = true;
 	glGenBuffers(3, m_bufferObjects);
 	glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_pointArray, GL_STATIC_DRAW );
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, m_pointArray, GL_STATIC_DRAW );
 	if (m_dh->GLError())
 	{
 		m_dh->printGLError(wxT("initialize vbo points"));
@@ -492,7 +492,7 @@ void Fibers::initializeBuffer()
 	if (isOK)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_colorArray, GL_STATIC_DRAW );
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, m_colorArray, GL_STATIC_DRAW );
 		if (m_dh->GLError())
 		{
 			m_dh->printGLError(wxT("initialize vbo colors"));
@@ -502,7 +502,7 @@ void Fibers::initializeBuffer()
 	if (isOK)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_pointCount*3, m_normalArray, GL_STATIC_DRAW );
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, m_normalArray, GL_STATIC_DRAW );
 		if (m_dh->GLError())
 		{
 			m_dh->printGLError(wxT("initialize vbo normals"));
@@ -559,7 +559,7 @@ void Fibers::draw()
 	    glNormalPointer (GL_FLOAT, 0, 0);
 	}
 
-	for ( int i = 0 ; i < m_lineCount ; ++i )
+	for ( int i = 0 ; i < m_countLines ; ++i )
 	{
 		if (m_inBox[i] == 1)
 			glDrawArrays(GL_LINE_STRIP, getStartIndexForLine(i), getPointsPerLine(i));
@@ -588,7 +588,7 @@ bool Fibers::getBarycenter(SplinePoint* point)
 	m_barycenter.resize(3, false);
 	m_count = 0;
 
-	barycenterTest(0, m_pointCount-1, 0);
+	barycenterTest(0, m_countPoints-1, 0);
 	if (m_count > threshold) {
 		m_barycenter[0] /= m_count;
 		m_barycenter[1] /= m_count;
@@ -660,7 +660,7 @@ void Fibers::save(wxString filename)
 	float greenVal = 0.5;
 	float blueVal = 0.5f;
 
-	for ( int l = 0 ; l < m_lineCount ; ++l )
+	for ( int l = 0 ; l < m_countLines ; ++l )
 	{
 		if (m_inBox[l])
 		{
@@ -800,7 +800,7 @@ void Fibers::drawFakeTubes()
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	for ( int i = 0 ; i < m_lineCount ; ++i )
+	for ( int i = 0 ; i < m_countLines ; ++i )
 	{
 		if (m_inBox[i] == 1)
 		{
