@@ -3,7 +3,7 @@ void main()
 	gl_FrontColor = gl_Color;
 	gl_BackColor = gl_Color;
 
-	float scale = 0.5;
+	float scale = 0.3;
 	float s_param = gl_MultiTexCoord0.x;
 	vec4 pos = gl_Vertex ;
 

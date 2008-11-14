@@ -696,6 +696,7 @@ void Surface::drawVectors()
 {
 	int numQuads = (m_renderpointsPerCol - 1) * (m_renderpointsPerRow - 1);
 	int i0, i1, i2;
+	glLineWidth(2.0);
 	glBegin(GL_LINES);
 
 	for (int i = 0 ; i < numQuads*4 ; ++i)
