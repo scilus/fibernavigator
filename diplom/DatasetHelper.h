@@ -93,7 +93,7 @@ public:
 
 	void doMatrixManipulation();
 
-	Fibers* getFiberDataset(bool &exists);
+	bool getFiberDataset(Fibers *&f);
 
 
 	/////////////////////////////////////////////////////////////////////////////////

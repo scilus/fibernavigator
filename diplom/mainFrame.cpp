@@ -1032,10 +1032,8 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::OnResetColor(wxCommandEvent& WXUNUSED(event))
 {
-	Fibers* fibers; // initalize it quiet compiler
-	bool exists;
-	fibers = m_dh->getFiberDataset(exists);
-	if (!exists) return;
+	Fibers* fibers = NULL; // initalize it quiet compiler
+	if (!m_dh->getFiberDataset(fibers)) return;
 	fibers->resetColorArray();
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
