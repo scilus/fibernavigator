@@ -63,6 +63,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_SPLINESURF_DRAW_VECTORS, MainFrame::OnToggleDrawVectors)
 	// Menu Options
 	EVT_MENU(MENU_OPTIONS_ASSIGN_COLOR, MainFrame::OnAssignColor)
+	EVT_MENU(MENU_OPTIONS_RESET_COLOR, MainFrame::OnResetColor)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
 	EVT_MENU(MENU_OPTIONS_INVERT_FIBERS, MainFrame::OnInvertFibers)
 	EVT_MENU(MENU_OPTIONS_USE_FAKE_TUBES, MainFrame::OnUseFakeTubes)
@@ -1020,6 +1021,22 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 			box->setDirty();
 		}
 	}
+	m_dh->scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
+}
+
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnResetColor(wxCommandEvent& WXUNUSED(event))
+{
+	Fibers* fibers; // initalize it quiet compiler
+	bool exists;
+	fibers = m_dh->getFiberDataset(exists);
+	if (!exists) return;
+	fibers->resetColorArray();
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }

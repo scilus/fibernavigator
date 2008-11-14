@@ -25,6 +25,8 @@
 #include "ArcBall.h"
 
 #include "datasetInfo.h"
+
+
 #include "selectionBox.h"
 
 #include "mainFrame.h"
@@ -41,6 +43,7 @@ class AnatomyHelper;
 class ShaderHelper;
 class SplinePoint;
 class SelectionBox;
+class Fibers;
 
 class DatasetHelper {
 public:
@@ -89,6 +92,9 @@ public:
 	void moveScene(int x, int y);
 
 	void doMatrixManipulation();
+
+	Fibers* getFiberDataset(bool &exists);
+
 
 	/////////////////////////////////////////////////////////////////////////////////
 	// general info about the datasets

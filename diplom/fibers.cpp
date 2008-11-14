@@ -25,6 +25,11 @@ Fibers::Fibers(DatasetHelper* dh)
 	m_useTex = true;
 	m_bufferObjects = new GLuint[3];
 	m_hasTreeId = false;
+
+	m_pointArray = NULL;
+	m_lineArray = NULL;
+	m_colorArray = NULL;
+	m_normalArray = NULL;
 }
 
 Fibers::~Fibers()
@@ -170,8 +175,6 @@ bool Fibers::load(wxString filename)
 	}
 
 	m_pointArray = new float[countPoints*3];
-	m_colorArray = new float[countPoints*3];
-	m_normalArray = new float[countPoints*3];
 	m_lineArray = new int[lengthLines*4];
 	m_lengthPoints = countPoints*3;
 	m_lengthLines = lengthLines;
@@ -294,6 +297,12 @@ void Fibers::createColorArray()
 	m_dh->printTime();
 	printf("create color arrays\n");
 
+	if (m_colorArray) delete[] m_colorArray;
+	if (m_normalArray) delete[] m_normalArray;
+
+	m_colorArray = new float[m_countPoints*3];
+	m_normalArray = new float[m_countPoints*3];
+
 	int pc = 0;
 	float r,g,b, rr, gg, bb;
 	float x1,x2,y1,y2,z1,z2;
@@ -340,6 +349,60 @@ void Fibers::createColorArray()
 		}
 	}
 }
+
+void Fibers::resetColorArray()
+{
+	m_dh->printTime();
+	printf("reset color arrays\n");
+
+	float *colorData;
+	if (m_dh->useVBO)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+		colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+	}
+	else
+	{
+		colorData = m_colorArray;
+	}
+
+	int pc = 0;
+	float r,g,b;
+	float x1,x2,y1,y2,z1,z2;
+
+	for ( int i = 0 ; i < getLineCount() ; ++i )
+	{
+		x1 = m_pointArray[pc];
+		y1 = m_pointArray[pc+1];
+		z1 = m_pointArray[pc+2];
+		x2 = m_pointArray[pc + getPointsPerLine(i)*3 - 3];
+		y2 = m_pointArray[pc + getPointsPerLine(i)*3 - 2];
+		z2 = m_pointArray[pc + getPointsPerLine(i)*3 - 1];
+
+		r = (x1) - (x2);
+		g = (y1) - (y2);
+		b = (z1) - (z2);
+
+		float norm = sqrt(r*r + g*g + b*b);
+		r *= 1.0/norm;
+        g *= 1.0/norm;
+        b *= 1.0/norm;
+
+		for (int j = 0; j < getPointsPerLine(i) ; ++j )
+		{
+	        colorData[pc] = r;
+	        colorData[pc+1] = g;
+	        colorData[pc+2] = b;
+            pc += 3;
+		}
+	}
+
+	if (m_dh->useVBO)
+	{
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+	}
+}
+
 
 void Fibers::resetLinesShown()
 {

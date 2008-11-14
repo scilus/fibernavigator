@@ -56,6 +56,7 @@ private:
 	void OnToggleDrawVectors(wxCommandEvent& event);
 	// Options
 	void OnAssignColor(wxCommandEvent& event);
+	void OnResetColor(wxCommandEvent& event);
     void OnToggleLighting(wxCommandEvent& event);
     void OnInvertFibers(wxCommandEvent& event);
     void OnUseFakeTubes(wxCommandEvent& event);
@@ -223,6 +224,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_CMAP3							163
 #define MENU_OPTIONS_CMAP4							164
 #define MENU_OPTIONS_CMAP5							165
+#define MENU_OPTIONS_RESET_COLOR					166
 // Menu Help
 #define MENU_HELP_ABOUT       						wxID_ABOUT
 /*

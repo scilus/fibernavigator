@@ -837,3 +837,18 @@ void DatasetHelper::updateView(float x, float y, float z)
 	}
 }
 
+Fibers* DatasetHelper::getFiberDataset(bool &exists)
+{
+	exists = false;
+	Fibers* f = NULL;
+	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() == Fibers_ )
+		{
+			f = (Fibers*) mainFrame->m_listCtrl->GetItemData(i);
+			exists = true;
+		}
+	}
+	return f;
+}

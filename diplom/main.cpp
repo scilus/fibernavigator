@@ -176,6 +176,7 @@ bool MyApp::OnInit(void) {
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("Assign Color"));
+	options_menu->Append(MENU_OPTIONS_RESET_COLOR, _T("Reset Colors on Fibers"));
 
 	wxMenu* cMaps = new wxMenu;
 	cMaps->Append(MENU_OPTIONS_CMAP0, wxT("default color map"));

@@ -55,6 +55,7 @@ public:
 
 	void toggleEndianess();
 	void createColorArray();
+	void resetColorArray();
 	void freeArrays() {delete[] m_colorArray; delete[] m_normalArray;};
 
 	void save(wxString filename);
