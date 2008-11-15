@@ -120,6 +120,7 @@ public:
 	bool useVBO;
 	GLenum lastGLError;
 	int quadrant;
+	int textures;
 	//! if set the shaders will be reloaded during next render() call
 	bool scheduledReloadShaders;
 	/////////////////////////////////////////////////////////////////////////////////

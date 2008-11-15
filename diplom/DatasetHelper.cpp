@@ -37,6 +37,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	use_lic = false;
 	useVBO = true;
 	lighting = false;
+	textures = 0;
 
 	colorMap = 0;
 	drawVectors = false;

@@ -113,8 +113,10 @@ void spotLight(in int i, in vec3 N, in vec3 V, in float shininess,
 void calculateLighting(in int numLights, in vec3 N, in vec3 V, in float shininess,
                        inout vec4 ambient, inout vec4 diffuse, inout vec4 specular)
 {
+	directionalLight(0, N, shininess, ambient, diffuse, specular);
     /* Just loop through each light, and if its enabled add
     // its contributions to the color of the pixel. */
+/*
     for (int i = 0; i < numLights; i++)
     {
         if (isLightEnabled(i))
@@ -127,5 +129,6 @@ void calculateLighting(in int numLights, in vec3 N, in vec3 V, in float shinines
                  spotLight(i, N, V, shininess, ambient, diffuse, specular);
         }
     }
+*/
 }
 
