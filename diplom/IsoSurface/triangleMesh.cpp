@@ -220,3 +220,81 @@ int TriangleMesh::getNextVertex(int triNum, int vertNum)
 	return answer;
 }
 
+void TriangleMesh::cleanUp()
+{
+	std::vector<int> queue;
+	std::vector<bool> visited(numTris, false);
+	std::vector< std::vector<int> >objects;
+	queue.push_back(0);
+	std::vector<int>n;
+
+	while (!queue.empty())
+	{
+		std::vector<int>newObject;
+		newObject.clear();
+		while (!queue.empty())
+		{
+			int index = queue.back();
+			visited[index] = true;
+			queue.pop_back();
+			newObject.push_back(index);
+			n = neighbors[index];
+			for ( int i = 0 ; i < 3 ; ++i)
+			{
+				if ( (n[i] != -1) && !visited[n[i]])
+					queue.push_back(n[i]);
+			}
+		}
+		int counter = 0;
+		for (int i = 0 ; i < numTris ; ++i)
+			if (!visited[i]) ++counter;
+		//printf("%d triangles not visited\n", counter);
+		for (int i = 0 ; i < numTris ; ++i)
+		{
+			if (!visited[i])
+			{
+				queue.push_back(i);
+				break;
+			}
+		}
+		objects.push_back(newObject);
+	}
+	size_t biggest = 0;
+	size_t sizeBiggest = objects[0].size();
+	for ( size_t i = 0 ; i < objects.size() ; ++i)
+	{
+		if (sizeBiggest < objects[i].size() )
+		{
+			biggest = i;
+			sizeBiggest = objects[i].size();
+		}
+	}
+
+	std::vector<int>obj = objects[biggest];
+	std::vector<Vector>tempTriangles;
+	for (size_t i = 0 ; i < obj.size() ; ++i)
+	{
+		tempTriangles.push_back(triangles[obj[i]]);
+	}
+
+	vertNormals.clear();
+	triangles.clear();
+	triNormals.clear();
+	vIsInTriangle.clear();
+	neighbors.clear();
+	numTris = 0;
+
+	std::vector<int> v;
+	for (int i = 0 ; i < numVerts ; ++i)
+	{
+		vIsInTriangle.push_back( v );
+	}
+
+	for (size_t i = 0 ; i < tempTriangles.size() ; ++i)
+	{
+		Vector t = tempTriangles[i];
+		addTriangle((int)t[0], (int)t[1], (int)t[2]);
+	}
+	calcNeighbors();
+	calcVertNormals();
+}

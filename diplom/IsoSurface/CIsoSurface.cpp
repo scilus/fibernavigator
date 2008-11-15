@@ -693,9 +693,9 @@ void CIsoSurface::RenameVerticesAndTriangles()
 		vecIterator++;
 	}
 
-#if 1
 	m_tMesh->clearMesh();
 
+#if 1
 	// Copy all the vertices and triangles into two arrays so that they
 	// can be efficiently accessed.
 	// Copy vertices.
@@ -712,10 +712,15 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++) {
 			m_tMesh->addTriangle((*vecIterator).pointID[0], (*vecIterator).pointID[1], (*vecIterator).pointID[2]);
 	}
+	m_tMesh->calcNeighbors();
+	m_tMesh->calcVertNormals();
+	m_tMesh->cleanUp();
+	//loopSubD loop(m_tMesh);
 
 
+#else
 
-	/*
+
 	m_tMesh->addVert(Vector(0., 0., 0.));
 	m_tMesh->addVert(Vector(0., 0., 100.));
 	m_tMesh->addVert(Vector(100., 0., 100.));
@@ -737,39 +742,18 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	m_tMesh->addTriangle(5, 6, 2);
 	m_tMesh->addTriangle(0, 3, 4);
 	m_tMesh->addTriangle(3, 7, 4);
-*/
 
 	m_tMesh->calcNeighbors();
-	for (int i = 0 ; i < 1 ; ++i)
+	for (int i = 0 ; i <  6; ++i)
 	{
 		loopSubD loop(m_tMesh);
 	}
 
-
-#else
-	// Copy all the vertices and triangles into two arrays so that they
-	// can be efficiently accessed.
-	// Copy vertices.
-	mapIterator = m_i2pt3idVertices.begin();
-	m_nVertices = m_i2pt3idVertices.size();
-	m_ppt3dVertices = new POINT3D[m_nVertices];
-	for (unsigned int i = 0; i < m_nVertices; i++, mapIterator++) {
-		m_ppt3dVertices[i][0] = (*mapIterator).second.x;
-		m_ppt3dVertices[i][1] = (*mapIterator).second.y;
-		m_ppt3dVertices[i][2] = (*mapIterator).second.z;
-	}
-	// Copy vertex indices which make triangles.
-	vecIterator = m_trivecTriangles.begin();
-	m_nTriangles = m_trivecTriangles.size();
-	m_piTriangleIndices = new unsigned int[m_nTriangles*3];
-	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++) {
-		m_piTriangleIndices[i*3] = (*vecIterator).pointID[0];
-		m_piTriangleIndices[i*3+1] = (*vecIterator).pointID[1];
-		m_piTriangleIndices[i*3+2] = (*vecIterator).pointID[2];
-	}
-	CalculateNormals();
-
 #endif
+
+
+
+
 
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();

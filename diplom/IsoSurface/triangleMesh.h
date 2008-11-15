@@ -77,6 +77,9 @@ class TriangleMesh {
 
 		bool getOpenMeshError() { return openMeshError; };
 
+		void cleanUp();
+
+
 	private:
 
 
