@@ -703,19 +703,49 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	m_nVertices = m_i2pt3idVertices.size();
 	m_ppt3dVertices = new POINT3D[m_nVertices];
 	for (unsigned int i = 0; i < m_nVertices; i++, mapIterator++) {
-		m_tMesh->addVert(Vector((*mapIterator).second.x, (*mapIterator).second.y, (*mapIterator).second.z));
+			m_tMesh->addVert(Vector((*mapIterator).second.x, (*mapIterator).second.y, (*mapIterator).second.z));
 	}
 	// Copy vertex indices which make triangles.
 	vecIterator = m_trivecTriangles.begin();
 	m_nTriangles = m_trivecTriangles.size();
 	m_piTriangleIndices = new unsigned int[m_nTriangles*3];
 	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++) {
-		m_tMesh->addTriangle((*vecIterator).pointID[0], (*vecIterator).pointID[1], (*vecIterator).pointID[2]);
+			m_tMesh->addTriangle((*vecIterator).pointID[0], (*vecIterator).pointID[1], (*vecIterator).pointID[2]);
 	}
 
-	m_tMesh->calcNeighbors();
 
-	//loopSubD loop(m_tMesh);
+
+	/*
+	m_tMesh->addVert(Vector(0., 0., 0.));
+	m_tMesh->addVert(Vector(0., 0., 100.));
+	m_tMesh->addVert(Vector(100., 0., 100.));
+	m_tMesh->addVert(Vector(100., 0., 0.));
+	m_tMesh->addVert(Vector(0., 100., 0.));
+	m_tMesh->addVert(Vector(0., 100., 100.));
+	m_tMesh->addVert(Vector(100., 100., 100.));
+	m_tMesh->addVert(Vector(100., 100., 0.));
+
+	m_tMesh->addTriangle(0, 1, 3);
+	m_tMesh->addTriangle(1, 2, 3);
+	m_tMesh->addTriangle(2, 7, 3);
+	m_tMesh->addTriangle(2, 6, 7);
+	m_tMesh->addTriangle(7, 6, 4);
+	m_tMesh->addTriangle(6, 5, 4);
+	m_tMesh->addTriangle(4, 5, 0);
+	m_tMesh->addTriangle(5, 1, 0);
+	m_tMesh->addTriangle(1, 5, 2);
+	m_tMesh->addTriangle(5, 6, 2);
+	m_tMesh->addTriangle(0, 3, 4);
+	m_tMesh->addTriangle(3, 7, 4);
+*/
+
+	m_tMesh->calcNeighbors();
+	for (int i = 0 ; i < 1 ; ++i)
+	{
+		loopSubD loop(m_tMesh);
+	}
+
+
 #else
 	// Copy all the vertices and triangles into two arrays so that they
 	// can be efficiently accessed.

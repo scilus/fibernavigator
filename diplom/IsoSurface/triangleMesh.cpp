@@ -180,14 +180,30 @@ int TriangleMesh::getThirdVert(int coVert1, int coVert2, int triangleNum)
 
 void TriangleMesh::setTriangle(int triNum, int vertA, int vertB, int vertC)
 {
+	// TODO
+	eraseTriFromVert(triNum, triangles[triNum][1]);
+	eraseTriFromVert(triNum, triangles[triNum][2]);
+
 	triangles[triNum][0] = vertA;
 	triangles[triNum][1] = vertB;
 	triangles[triNum][2] = vertC;
 
+	vIsInTriangle[vertB].push_back(triNum);
+	vIsInTriangle[vertC].push_back(triNum);
+
 	triNormals[triNum] = calcTriangleNormal(triNum);
 }
 
-
+void TriangleMesh::eraseTriFromVert(int triNum, int vertNum)
+{
+	std::vector<int>temp;
+	for ( size_t i = 0 ; i < vIsInTriangle[vertNum].size() ; ++i)
+	{
+		if ( triNum != vIsInTriangle[vertNum][i])
+			temp.push_back(vIsInTriangle[vertNum][i]);
+	}
+	vIsInTriangle[vertNum] = temp;
+}
 
 int TriangleMesh::getNextVertex(int triNum, int vertNum)
 {

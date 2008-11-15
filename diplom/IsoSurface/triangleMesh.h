@@ -61,6 +61,8 @@ class TriangleMesh {
 		std::vector<int> getStar(int vertNum) 	{ return vIsInTriangle[vertNum]; };
 
 		void setVertex(int vertNum, Vector nPos)	{ vertices[vertNum] = nPos; };
+		void eraseTriFromVert( int triNum, int vertNum);
+
 		void setTriangle(int triNum, int vertA, int vertB, int vertC);
 
 		bool isInTriangle(int vertNum, int triangleNum);
