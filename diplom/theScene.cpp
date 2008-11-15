@@ -218,6 +218,11 @@ void TheScene::renderMesh()
 	m_dh->shaderHelper->m_meshShader->bind();
 	m_dh->shaderHelper->setMeshShaderVars();
 
+	if (m_dh->scene->getPointMode())
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);

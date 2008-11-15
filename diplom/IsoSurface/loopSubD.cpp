@@ -43,29 +43,33 @@ loopSubD::loopSubD(TriangleMesh* nTriMesh){
 	for(int i=0; i<numTriFaces; i++){
 		insertCenterTriangle(i);
 	}
+
 	printf("loop subdivision pass 3\n");
 	for(int i=0; i<numTriFaces; i++){
 		insertCornerTriangles(i);
 
 	}
+
 	printf("loop subdivision pass 4\n");
 	for(int i=0; i<numTriVerts; i++){
 		triMesh->setVertex(i, newVertexPositions[i]);
 	}
+
 	delete[] newVertexPositions;
+
 	printf("loop subdivision pass 5\n");
-	triMesh->calcStarSizes();
-	printf("loop subdivision pass 6\n");
 	triMesh->calcNeighbors();
 	printf("loop subdivision done\n");
+
 }
 
-Vector loopSubD::calcNewPosition(int vertNum){
+Vector loopSubD::calcNewPosition(int vertNum)
+{
+	std::vector<int> starP = triMesh->getStar(vertNum);
+	int starSize = starP.size();
 
-	int starSize = triMesh->getStarN(vertNum);
-	int* starP = triMesh->getStar(vertNum);
 
-	Vector oldPos = triMesh->getVertices(vertNum);
+	Vector oldPos = triMesh->getVertex(vertNum);
 	double alpha = getAlpha(starSize);
 	oldPos.scaleBy(1.0 - ((double) starSize * alpha));
 
@@ -73,18 +77,16 @@ Vector loopSubD::calcNewPosition(int vertNum){
 	int edgeV = 0;
 	for(int i=0; i<starSize; i++){
 		edgeV = triMesh->getNextVertex(starP[i], vertNum);
-		newPos.translateBy(triMesh->getVertices(edgeV));
+		newPos.translateBy(triMesh->getVertex(edgeV));
 	}
 	newPos.scaleBy(alpha);
-
-	delete[] starP;
 
 	return oldPos + newPos;
 }
 
 void loopSubD::insertCenterTriangle(int triNum){
 
-	int* intP = triMesh->getTriangles(triNum);
+	Vector intP = triMesh->getTriangle(triNum);
 	int edgeVerts[3];
 
 	for(int i=0; i<3; i++){
@@ -102,8 +104,8 @@ void loopSubD::insertCornerTriangles(int triNum){
 	// addTris:		1, b, a
 	// addTris:		2, c, b
 	//
-	int* originalTri = triMesh->getTriangles(triNum);
-	int* centerTri   = triMesh->getTriangles(triNum + numTriFaces);
+	Vector originalTri = triMesh->getTriangle(triNum);
+	Vector centerTri   = triMesh->getTriangle(triNum + numTriFaces);
 
 	triMesh->addTriangle(originalTri[1], centerTri[1], centerTri[0]);
 	triMesh->addTriangle(originalTri[2], centerTri[2], centerTri[1]);
@@ -123,15 +125,15 @@ int loopSubD::calcEdgeVert(int triNum, int edgeV1, int edgeV2, int V3){
 	if(neighborFaceNum > triNum){
 		neighborVert = triMesh->getThirdVert(edgeV1, edgeV2, neighborFaceNum);
 
-		Vector edgePart = triMesh->getVertices(edgeV1) + triMesh->getVertices(edgeV2);
-		Vector neighborPart = triMesh->getVertices(neighborVert) + triMesh->getVertices(V3);
+		Vector edgePart = triMesh->getVertex(edgeV1) + triMesh->getVertex(edgeV2);
+		Vector neighborPart = triMesh->getVertex(neighborVert) + triMesh->getVertex(V3);
 
 		edgeVert = ((edgePart * (3.0/8.0)) + (neighborPart * (1.0/8.0)));
 		vertNum = triMesh->getNumVertices();
 		triMesh->addVert(edgeVert);
 	} else {
-		int* neighborCenterP = triMesh->getTriangles(neighborFaceNum + numTriFaces);
-		int* neighborP = triMesh->getTriangles(neighborFaceNum);
+		Vector neighborCenterP = triMesh->getTriangle(neighborFaceNum + numTriFaces);
+		Vector neighborP = triMesh->getTriangle(neighborFaceNum);
 
 		if(neighborP[0] == edgeV2){
 			vertNum = neighborCenterP[0];

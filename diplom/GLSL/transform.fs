@@ -28,11 +28,17 @@ void lookupTex(inout vec4 color, in int type, in sampler3D tex, in float thresho
 		col1.g = clamp( texture3D(tex, v).g, 0.0, 1.0);
 		col1.b = clamp( texture3D(tex, v).b, 0.0, 1.0);
 
-		if ( ((col1.r + col1.g + col1.b) / 3.0 - threshold)> 0.0)
+		if ( (length(col1) - threshold) < 0.0)
 		{
-			color.rgb = col1.rgb;
+			discard;
 		}
 	}
+
+	if (type == 4)
+	{
+
+	}
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,9 +57,6 @@ void main() {
 	for (int i = 9; i > -1; i--) {
 		lookupTex(color, type[i], texes[i], threshold[i], v);
 	}
-
-	if (color.rgb == vec3(0.0))
-		discard;
 
 	gl_FragColor = gl_Color;
 }
