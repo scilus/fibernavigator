@@ -37,7 +37,7 @@ const double FStreamlineOnSurfaceEuler::epsilon = 1.0e-6;
 const double epsilon2 = 1.0e-8;
 F::FVector lastDirectionVector(3);
 //---------------------------------------------------------------------------
-#if 1
+#if 0
 FStreamlineOnSurfaceEuler::
 FStreamlineOnSurfaceEuler( DatasetHelper* dh, TriangleMesh* grid )
 /*    : allSteps(), steps(), allNormals(), vecs(), field( aField ),
@@ -51,8 +51,6 @@ FStreamlineOnSurfaceEuler( DatasetHelper* dh, TriangleMesh* grid )
     try
     {
     	nbCells = m_grid->getNumTriangles();
-    	int tensorOrder = m_tensorField->getOrder();
-    	int posDim = m_tensorField->getPosDim();
 
 #ifdef __GRAPHICS__
 	FgePrimitiveHandler *primitive_handler =
