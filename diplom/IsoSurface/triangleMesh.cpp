@@ -4,8 +4,9 @@
 #include <string.h>
 
 // Construction
-TriangleMesh::TriangleMesh ()
+TriangleMesh::TriangleMesh (DatasetHelper* dh)
 {
+	m_dh = dh;
 	numVerts	 = 0;
 	numTris		 = 0;
 
@@ -48,22 +49,28 @@ void TriangleMesh::addTriangle(int vertA, int vertB, int vertC)
 	vIsInTriangle[vertC].push_back(numTris);
 	std::vector<int> v(3,-1);
 	neighbors.push_back( v );
-	triangleTensor.push_back(0);
 	numTris = triangles.size();
+
+	Vector p = ( getVertex(vertA) + getVertex(vertB) + getVertex(vertC) )/3.0;
+	int x = (int)(p[0] + 0.5 );
+	int y = (int)(p[1] + 0.5 );
+	int z = (int)(p[2] + 0.5 );
+	int index = x + y * m_dh->columns + z * m_dh->columns * m_dh->frames;
+	triangleTensor.push_back(index);
 }
 
 void TriangleMesh::addTriangle(int vertA, int vertB, int vertC, int tensorIndex)
 {
-	Vector t(vertA, vertB, vertC);
-	triangles.push_back(t);
-	triNormals.push_back(calcTriangleNormal(t));
-	vIsInTriangle[vertA].push_back(numTris);
-	vIsInTriangle[vertB].push_back(numTris);
-	vIsInTriangle[vertC].push_back(numTris);
-	std::vector<int> v(3,-1);
-	neighbors.push_back( v );
-	numTris = triangles.size();
-	triangleTensor.push_back(tensorIndex);
+        Vector t(vertA, vertB, vertC);
+        triangles.push_back(t);
+        triNormals.push_back(calcTriangleNormal(t));
+        vIsInTriangle[vertA].push_back(numTris);
+        vIsInTriangle[vertB].push_back(numTris);
+        vIsInTriangle[vertC].push_back(numTris);
+        std::vector<int> v(3,-1);
+        neighbors.push_back( v );
+        numTris = triangles.size();
+        triangleTensor.push_back(tensorIndex);
 }
 
 Vector TriangleMesh::calcTriangleNormal(Vector t){
@@ -142,6 +149,29 @@ void TriangleMesh::calcNeighbor(int triangleNum)
 	neighbors[triangleNum][0] = getNeighbor(coVert0, coVert1, triangleNum);
 	neighbors[triangleNum][1] = getNeighbor(coVert1, coVert2, triangleNum);
 	neighbors[triangleNum][2] = getNeighbor(coVert2, coVert0, triangleNum);
+}
+
+int TriangleMesh::calcTriangleTensor(int triNum)
+{
+
+	Vector v0 = vertices[triangles[triNum][0]];
+	Vector v1 = vertices[triangles[triNum][1]];
+	Vector v2= vertices[triangles[triNum][2]];
+	Vector p = ( v0 + v1 + v2 )/3.0;
+	int x = (int)(p[0] + 0.5 );
+	int y = (int)(p[1] + 0.5 );
+	int z = (int)(p[2] + 0.5 );
+	return  x + y * m_dh->columns + z * m_dh->columns * m_dh->frames;
+}
+
+
+void TriangleMesh::calcTriangleTensors()
+{
+	triangleTensor.clear();
+	for( int i = 0 ; i < numTris ; ++i)
+	{
+		triangleTensor.push_back(calcTriangleTensor(i));
+	}
 }
 
 

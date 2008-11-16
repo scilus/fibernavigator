@@ -31,7 +31,8 @@ Surface::Surface(DatasetHelper* dh)
 	m_numPoints = 0;
 	m_hasTreeId = false;
 	m_alpha = 0.2;
-	m_tMesh = new TriangleMesh();
+	m_tMesh = NULL;
+
 	execute();
 }
 
@@ -160,6 +161,9 @@ void Surface::execute ()
 	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
 	if (countPoints == 0) return;
 
+	if (m_tMesh) delete m_tMesh;
+	m_tMesh = new TriangleMesh(m_dh);
+
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
@@ -267,20 +271,8 @@ void Surface::execute ()
 				int p2 = (z+1) * m_renderpointsPerCol + x;
 				int p3 = (z+1) * m_renderpointsPerCol + x + 1;
 
-				Vector p = ( m_tMesh->getVertex(p0) + m_tMesh->getVertex(p1) + m_tMesh->getVertex(p2) )/3.0;
-				int xx = (int)(p[0] + 0.5 );
-				int yy = (int)(p[1] + 0.5 );
-				int zz = (int)(p[2] + 0.5 );
-				int index = xx + yy * m_dh->columns + zz * m_dh->columns * m_dh->frames;
-				m_tMesh->addTriangle( p0, p1, p2, index );
-
-				p = ( m_tMesh->getVertex(p2) + m_tMesh->getVertex(p1) + m_tMesh->getVertex(p3) )/3.0;
-				xx = (int)(p[0] + 0.5 );
-				yy = (int)(p[1] + 0.5 );
-				zz = (int)(p[2] + 0.5 );
-				index = xx + yy * m_dh->columns + zz * m_dh->columns * m_dh->frames;
-
-				m_tMesh->addTriangle( p2, p1, p3, index );
+				m_tMesh->addTriangle( p0, p1, p2 );
+				m_tMesh->addTriangle( p2, p1, p3 );
 			}
 	}
 
@@ -290,7 +282,7 @@ void Surface::execute ()
 
 	m_dh->surface_isDirty = false;
 
-	//createCutTexture();
+	createCutTexture();
 }
 
 F::FVector Surface::getNormalForQuad(const F::FVector* p1, const F::FVector* p2, const F::FVector* p3)

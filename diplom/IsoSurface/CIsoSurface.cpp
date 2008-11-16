@@ -361,7 +361,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 	m_tIsoLevel = 50;
 	m_bValidSurface = false;
 
-	m_tMesh = new TriangleMesh();
+	m_tMesh = new TriangleMesh(m_dh);
 }
 
 CIsoSurface::~CIsoSurface()

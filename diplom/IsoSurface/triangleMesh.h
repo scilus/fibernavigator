@@ -11,6 +11,7 @@
 
 #include "Vector.h"
 #include <vector>
+#include "../DatasetHelper.h"
 
 #define PI 3.14159
 
@@ -18,6 +19,8 @@ class TriangleMesh {
 
 	// Attributes
 	private:
+		DatasetHelper* m_dh;
+
 		std::vector<Vector> vertices;
 		std::vector<Vector> vertNormals;
 
@@ -39,7 +42,7 @@ class TriangleMesh {
 
 	// Construction
 	public:
-		TriangleMesh ();
+		TriangleMesh (DatasetHelper* dh);
 		~TriangleMesh ();
 
 	// Operations
@@ -48,11 +51,15 @@ class TriangleMesh {
 		void addVert(float x, float y, float z);
 		void addTriangle(int vertA, int vertB, int vertC);
 		void addTriangle(int vertA, int vertB, int vertC, int tensorIndex);
+
 		Vector calcTriangleNormal(Vector);
 		Vector calcTriangleNormal(int triNum);
 
 		void calcVertNormals();
 		Vector getVertNormal(int vertNum);
+
+		int calcTriangleTensor(int triNum);
+		void calcTriangleTensors();
 
 		int getNeighbor(int coVert1, int coVert2, int triangleNum);
 		void calcNeighbors();
