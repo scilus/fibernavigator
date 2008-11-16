@@ -10,7 +10,7 @@
 
 #include "datasetInfo.h"
 #include "surface.h"
-
+#include "lic/TensorField.h"
 
 class Anatomy : public DatasetInfo , public wxTreeItemData
 {
@@ -30,6 +30,7 @@ public:
 
 	wxUint8* getByteDataset();
 	float* getFloatDataset();
+	TensorField* getTensorField() { return m_tensorField; };
 
 	//bool isInsideTriangle(double, double, double, double, double, double, double, double);
 	//void cutRestOfLine(int, int, int);
@@ -39,6 +40,7 @@ private:
 	wxUint16 *m_shortDataset;
 	wxUint8 *m_rgbDataset;
 	float *m_floatDataset;
+	TensorField* m_tensorField;
 };
 
 #endif /* ANATOMY_H_ */

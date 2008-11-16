@@ -36,6 +36,8 @@
 #include "AnatomyHelper.h"
 #include "ShaderHelper.h"
 
+#include "lic/TensorField.h"
+
 class MainFrame;
 class DatasetInfo;
 class TheScene;
@@ -44,6 +46,7 @@ class ShaderHelper;
 class SplinePoint;
 class SelectionBox;
 class Fibers;
+class TensorField;
 
 class DatasetHelper {
 public:
@@ -95,7 +98,7 @@ public:
 
 	bool getFiberDataset(Fibers *&f);
 	float* getVectorDataset();
-	float* getTensorDataset();
+	TensorField* getTensorField();
 
 
 	/////////////////////////////////////////////////////////////////////////////////

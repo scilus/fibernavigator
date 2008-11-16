@@ -48,8 +48,22 @@ void TriangleMesh::addTriangle(int vertA, int vertB, int vertC)
 	vIsInTriangle[vertC].push_back(numTris);
 	std::vector<int> v(3,-1);
 	neighbors.push_back( v );
-
+	triangleTensor.push_back(0);
 	numTris = triangles.size();
+}
+
+void TriangleMesh::addTriangle(int vertA, int vertB, int vertC, int tensorIndex)
+{
+	Vector t(vertA, vertB, vertC);
+	triangles.push_back(t);
+	triNormals.push_back(calcTriangleNormal(t));
+	vIsInTriangle[vertA].push_back(numTris);
+	vIsInTriangle[vertB].push_back(numTris);
+	vIsInTriangle[vertC].push_back(numTris);
+	std::vector<int> v(3,-1);
+	neighbors.push_back( v );
+	numTris = triangles.size();
+	triangleTensor.push_back(tensorIndex);
 }
 
 Vector TriangleMesh::calcTriangleNormal(Vector t){

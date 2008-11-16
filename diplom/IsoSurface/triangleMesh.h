@@ -23,6 +23,7 @@ class TriangleMesh {
 
 		std::vector< Vector > triangles;
 		std::vector<Vector> triNormals;
+		std::vector< int >triangleTensor;
 
 		std::vector < std::vector<int> >vIsInTriangle;
 
@@ -46,6 +47,7 @@ class TriangleMesh {
 		void addVert(Vector newVert);
 		void addVert(float x, float y, float z);
 		void addTriangle(int vertA, int vertB, int vertC);
+		void addTriangle(int vertA, int vertB, int vertC, int tensorIndex);
 		Vector calcTriangleNormal(Vector);
 		Vector calcTriangleNormal(int triNum);
 
@@ -64,6 +66,7 @@ class TriangleMesh {
 		Vector getNormal(int triNum)			{ return triNormals[triNum]; };
 		Vector getTriangle(int triNum)			{ return triangles[triNum]; };
 		std::vector<int> getStar(int vertNum) 	{ return vIsInTriangle[vertNum]; };
+		int getTriangleTensor(int triNum)		{ return triangleTensor[triNum];};
 
 		void setVertex(int vertNum, Vector nPos)	{ vertices[vertNum] = nPos; };
 		void eraseTriFromVert( int triNum, int vertNum);

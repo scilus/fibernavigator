@@ -870,7 +870,7 @@ float* DatasetHelper::getVectorDataset()
 	return NULL;
 }
 
-float* DatasetHelper::getTensorDataset()
+TensorField* DatasetHelper::getTensorField()
 {
 	if (!tensors_loaded) return NULL;
 	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
@@ -879,7 +879,7 @@ float* DatasetHelper::getTensorDataset()
 		if (info->getType() == Tensors_ )
 		{
 			Anatomy* a = (Anatomy*) mainFrame->m_listCtrl->GetItemData(i);
-			return a->getFloatDataset();
+			return a->getTensorField();
 		}
 	}
 	tensors_loaded = false;

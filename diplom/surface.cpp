@@ -262,13 +262,25 @@ void Surface::execute ()
 	{
 		for(int x = 0; x < m_renderpointsPerRow - 1; x++)
 			{
-				m_tMesh->addTriangle( 	(z * m_renderpointsPerCol + x),
-										(z * m_renderpointsPerCol + x + 1),
-										((z+1) * m_renderpointsPerCol + x) );
+				int p0 = z * m_renderpointsPerCol + x;
+				int p1 = z * m_renderpointsPerCol + x + 1;
+				int p2 = (z+1) * m_renderpointsPerCol + x;
+				int p3 = (z+1) * m_renderpointsPerCol + x + 1;
 
-				m_tMesh->addTriangle(	((z+1) * m_renderpointsPerCol + x),
-										(z * m_renderpointsPerCol + x + 1),
-										((z+1) * m_renderpointsPerCol + x + 1));
+				Vector p = ( m_tMesh->getVertex(p0) + m_tMesh->getVertex(p1) + m_tMesh->getVertex(p2) )/3.0;
+				int xx = (int)(p[0] + 0.5 );
+				int yy = (int)(p[1] + 0.5 );
+				int zz = (int)(p[2] + 0.5 );
+				int index = xx + yy * m_dh->columns + zz * m_dh->columns * m_dh->frames;
+				m_tMesh->addTriangle( p0, p1, p2, index );
+
+				p = ( m_tMesh->getVertex(p2) + m_tMesh->getVertex(p1) + m_tMesh->getVertex(p3) )/3.0;
+				xx = (int)(p[0] + 0.5 );
+				yy = (int)(p[1] + 0.5 );
+				zz = (int)(p[2] + 0.5 );
+				index = xx + yy * m_dh->columns + zz * m_dh->columns * m_dh->frames;
+
+				m_tMesh->addTriangle( p2, p1, p3, index );
 			}
 	}
 

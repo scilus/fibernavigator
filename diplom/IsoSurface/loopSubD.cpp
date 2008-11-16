@@ -99,7 +99,7 @@ void loopSubD::insertCenterTriangle(int triNum){
 	for(int i=0; i<3; i++){
 		edgeVerts[i] = calcEdgeVert(triNum, intP[i], intP[(i + 1) % 3], intP[(i + 2) % 3]);
 	}
-	triMesh->addTriangle(edgeVerts[0], edgeVerts[1], edgeVerts[2]);
+	triMesh->addTriangle(edgeVerts[0], edgeVerts[1], edgeVerts[2], triMesh->getTriangleTensor(triNum));
 }
 
 void loopSubD::insertCornerTriangles(int triNum){
@@ -114,8 +114,8 @@ void loopSubD::insertCornerTriangles(int triNum){
 	Vector originalTri = triMesh->getTriangle(triNum);
 	Vector centerTri   = triMesh->getTriangle(triNum + numTriFaces);
 
-	triMesh->addTriangle(originalTri[1], centerTri[1], centerTri[0]);
-	triMesh->addTriangle(originalTri[2], centerTri[2], centerTri[1]);
+	triMesh->addTriangle(originalTri[1], centerTri[1], centerTri[0], triMesh->getTriangleTensor(triNum));
+	triMesh->addTriangle(originalTri[2], centerTri[2], centerTri[1], triMesh->getTriangleTensor(triNum));
 	triMesh->setTriangle(triNum, originalTri[0], centerTri[0], centerTri[2]);
 }
 

@@ -7,14 +7,13 @@
 
 #include "TensorField.h"
 
-TensorField::TensorField(DatasetHelper* dh)
+TensorField::TensorField(DatasetHelper* dh, float* tensorData)
 {
 	m_dh = dh;
 	m_cells = m_dh->rows * m_dh->frames * m_dh->columns;
 	if ( m_dh->tensors_loaded)
 	{
 		theField.clear();
-		float* tensorData = m_dh->getTensorDataset();
 
 		for ( int i = 0 ; i < m_cells ; ++i)
 		{
