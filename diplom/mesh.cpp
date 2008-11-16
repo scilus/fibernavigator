@@ -25,12 +25,13 @@ Mesh::Mesh(DatasetHelper* dh)
 	m_useTex = true;
 	m_color = wxColour(230,230,230);
 	m_hasTreeId = false;
+
+	m_tMesh = new TriangleMesh();
 }
 
 Mesh::~Mesh()
 {
-	delete[] m_polygonArray;
-	delete[] m_vertexArray;
+	delete m_tMesh;
 }
 
 bool Mesh::load(wxString filename)
@@ -88,7 +89,6 @@ bool Mesh::load(wxString filename)
 		// number of vertices
 		setCountVerts(c.i);
 
-		m_vertexArray = new vertex[c.i];
 		fp += 4;
 		for (unsigned int i = 0 ; i < c.i ; ++i)
 		{
@@ -96,20 +96,21 @@ bool Mesh::load(wxString filename)
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			m_vertexArray[i].x = f.f;
+			float x = f.f;
 			fp += 4;
 			f.b[0] = buffer[fp];
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			m_vertexArray[i].y = f.f;
+			float y = f.f;
 			fp += 4;
 			f.b[0] = buffer[fp];
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			m_vertexArray[i].z = f.f;
+			float z = f.f;
 			fp += 4;
+			m_tMesh->addVert(x, y, z);
 		}
 
 		c.b[0] = buffer[fp];
@@ -118,33 +119,8 @@ bool Mesh::load(wxString filename)
 		c.b[3] = buffer[fp+3];
 
 		setCountNormals(c.i);
-		fp += 4;
-		if (c.i == getCountVerts())
-		{
-			for (unsigned int i = 0 ; i < c.i ; ++i)
-			{
-				f.b[0] = buffer[fp];
-				f.b[1] = buffer[fp+1];
-				f.b[2] = buffer[fp+2];
-				f.b[3] = buffer[fp+3];
-				m_vertexArray[i].nx = f.f;
-				fp += 4;
-				f.b[0] = buffer[fp];
-				f.b[1] = buffer[fp+1];
-				f.b[2] = buffer[fp+2];
-				f.b[3] = buffer[fp+3];
-				m_vertexArray[i].ny = f.f;
-				fp += 4;
-				f.b[0] = buffer[fp];
-				f.b[1] = buffer[fp+1];
-				f.b[2] = buffer[fp+2];
-				f.b[3] = buffer[fp+3];
-				m_vertexArray[i].nz = f.f;
-				fp += 4;
-			}
-		}
 
-		fp += 4;
+		fp += 8 + 12 * c.i;
 
 		c.b[0] = buffer[fp];
 		c.b[1] = buffer[fp+1];
@@ -152,7 +128,6 @@ bool Mesh::load(wxString filename)
 		c.b[3] = buffer[fp+3];
 		setCountPolygons(c.i);
 
-		m_polygonArray = new polygon[c.i];
 		fp += 4;
 		for (unsigned int i = 0 ; i < getCountPolygons() ; ++i)
 		{
@@ -160,22 +135,27 @@ bool Mesh::load(wxString filename)
 			c.b[1] = buffer[fp+1];
 			c.b[2] = buffer[fp+2];
 			c.b[3] = buffer[fp+3];
-			m_polygonArray[i].v1 = c.i;
+			int v1 = c.i;
 			fp += 4;
 			c.b[0] = buffer[fp];
 			c.b[1] = buffer[fp+1];
 			c.b[2] = buffer[fp+2];
 			c.b[3] = buffer[fp+3];
-			m_polygonArray[i].v2 = c.i;
+			int v2 = c.i;
 			fp += 4;
 			c.b[0] = buffer[fp];
 			c.b[1] = buffer[fp+1];
 			c.b[2] = buffer[fp+2];
 			c.b[3] = buffer[fp+3];
-			m_polygonArray[i].v3 = c.i;
+			int v3 = c.i;
 			fp += 4;
+			m_tMesh->addTriangle(v1, v2, v3);
 		}
 	}
+
+	m_tMesh->calcNeighbors();
+	m_tMesh->calcVertNormals();
+
 	m_fullPath = filename;
 #ifdef __WXMSW__
 	m_name = filename.AfterLast('\\');
@@ -191,34 +171,25 @@ bool Mesh::load(wxString filename)
 
 void Mesh::generateGeometry()
 {
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
+	Vector triangleEdges;
+	Vector point;
+	Vector pointNormal;
+
 	glBegin(GL_TRIANGLES);
-		for (unsigned int j = 0 ; j < m_countPolygons ; ++j)
+		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
 		{
-			polygon p = m_polygonArray[j];
-
-			glNormal3f( 	m_vertexArray[p.v1].nx,
-							m_vertexArray[p.v1].ny,
-							m_vertexArray[p.v1].nz);
-			glVertex3f( 	m_vertexArray[p.v1].x,
-							m_vertexArray[p.v1].y,
-							m_vertexArray[p.v1].z);
-
-			glNormal3f( 	m_vertexArray[p.v2].nx,
-							m_vertexArray[p.v2].ny,
-							m_vertexArray[p.v2].nz);
-			glVertex3f(		m_vertexArray[p.v2].x,
-							m_vertexArray[p.v2].y,
-							m_vertexArray[p.v2].z);
-
-			glNormal3f( 	m_vertexArray[p.v3].nx,
-							m_vertexArray[p.v3].ny,
-							m_vertexArray[p.v3].nz);
-			glVertex3f(		m_vertexArray[p.v3].x,
-							m_vertexArray[p.v3].y,
-							m_vertexArray[p.v3].z);
+			triangleEdges = m_tMesh->getTriangle(i);
+			for(int j = 0 ; j < 3 ; ++j)
+			{
+				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
+				glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
+				point = m_tMesh->getVertex(triangleEdges[j]);
+				glVertex3d(point.x, point.y, point.z);
+			}
 		}
 	glEnd();
 

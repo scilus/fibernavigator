@@ -1,5 +1,6 @@
 // TriangleMesh.cpp
 #include "triangleMesh.h"
+#include "loopSubD.h"
 #include <string.h>
 
 // Construction
@@ -24,6 +25,16 @@ void TriangleMesh::addVert(Vector newVert)
 	vIsInTriangle.push_back( v );
 	numVerts = vertices.size();
 }
+
+void TriangleMesh::addVert(float x, float y, float z)
+{
+	Vector newVert(x,y,z);
+	vertices.push_back( newVert );
+	std::vector<int> v;
+	vIsInTriangle.push_back( v );
+	numVerts = vertices.size();
+}
+
 
 void TriangleMesh::addTriangle(int vertA, int vertB, int vertC)
 {
@@ -297,4 +308,9 @@ void TriangleMesh::cleanUp()
 	}
 	calcNeighbors();
 	calcVertNormals();
+}
+
+void TriangleMesh::doLoopSubD()
+{
+	loopSubD loop(this);
 }

@@ -129,7 +129,7 @@ protected:
 	// Indicates whether a valid surface is present.
 	bool m_bValidSurface;
 
-	// Trianglemesh for later subdivide
+	// Trianglemesh
 	TriangleMesh* m_tMesh;
 
 	// Lookup tables used in the construction of the isosurface.

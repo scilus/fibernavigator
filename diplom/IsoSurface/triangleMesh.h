@@ -1,4 +1,5 @@
-
+#ifndef TRIANGLEMESH_H
+#define TRIANGLEMESH_H
 /*****************************************************************
 *
 * TriangleMesh.h
@@ -40,6 +41,7 @@ class TriangleMesh {
 	// Operations
 	public:
 		void addVert(Vector newVert);
+		void addVert(float x, float y, float z);
 		void addTriangle(int vertA, int vertB, int vertC);
 		Vector calcTriangleNormal(Vector);
 		Vector calcTriangleNormal(int triNum);
@@ -79,6 +81,8 @@ class TriangleMesh {
 
 		void cleanUp();
 
+		void doLoopSubD();
+
 
 	private:
 
@@ -87,3 +91,4 @@ class TriangleMesh {
 
 	// Implementation
 };
+#endif

@@ -8,7 +8,6 @@
 
 #include <math.h>
 #include "CIsoSurface.h"
-#include "loopSubD.h"
 #include <algorithm>
 
 const unsigned int CIsoSurface::m_edgeTable[256] = {
@@ -715,12 +714,8 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	m_tMesh->calcNeighbors();
 	m_tMesh->calcVertNormals();
 	m_tMesh->cleanUp();
-	//loopSubD loop(m_tMesh);
-
 
 #else
-
-
 	m_tMesh->addVert(Vector(0., 0., 0.));
 	m_tMesh->addVert(Vector(0., 0., 100.));
 	m_tMesh->addVert(Vector(100., 0., 100.));
@@ -742,18 +737,7 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	m_tMesh->addTriangle(5, 6, 2);
 	m_tMesh->addTriangle(0, 3, 4);
 	m_tMesh->addTriangle(3, 7, 4);
-
-	m_tMesh->calcNeighbors();
-	for (int i = 0 ; i <  6; ++i)
-	{
-		loopSubD loop(m_tMesh);
-	}
-
 #endif
-
-
-
-
 
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();
@@ -817,7 +801,6 @@ void CIsoSurface::generateGeometry()
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
-#if 1
 	Vector triangleEdges;
 	Vector point;
 	Vector pointNormal;
@@ -835,26 +818,6 @@ void CIsoSurface::generateGeometry()
 			}
 		}
 	glEnd();
-#else
-	glBegin(GL_TRIANGLES);
-		for (unsigned int i = 0; i < m_nTriangles; i++) {
-
-			unsigned int id0, id1, id2;
-			id0 = m_piTriangleIndices[i*3];
-			id1 = m_piTriangleIndices[i*3+1];
-			id2 = m_piTriangleIndices[i*3+2];
-
-			glNormal3f( m_pvec3dNormals[id0][0], m_pvec3dNormals[id0][1], m_pvec3dNormals[id0][2]);
-			glVertex3f( m_ppt3dVertices[id0][0] + xOff, m_ppt3dVertices[id0][1] + yOff, m_ppt3dVertices[id0][2] + zOff);
-			glNormal3f( m_pvec3dNormals[id1][0], m_pvec3dNormals[id1][1], m_pvec3dNormals[id1][2]);
-			glVertex3f( m_ppt3dVertices[id1][0] + xOff, m_ppt3dVertices[id1][1] + yOff, m_ppt3dVertices[id1][2] + zOff);
-			glNormal3f( m_pvec3dNormals[id2][0], m_pvec3dNormals[id2][1], m_pvec3dNormals[id2][2]);
-			glVertex3f( m_ppt3dVertices[id2][0] + xOff, m_ppt3dVertices[id2][1] + yOff, m_ppt3dVertices[id2][2] + zOff);
-
-		}
-	glEnd();
-#endif
-
 
 	glEndList();
 	m_GLuint = dl;

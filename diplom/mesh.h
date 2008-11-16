@@ -3,6 +3,7 @@
 
 #include "datasetInfo.h"
 #include "DatasetHelper.h"
+#include "IsoSurface/triangleMesh.h"
 
 #include "wx/wxprec.h"
 
@@ -57,9 +58,6 @@ public:
 	unsigned int getCountPolygons() {return m_countPolygons;};
 	unsigned int getPolygonDim() 	{return m_polygonDim;};
 
-	vertex* m_vertexArray;
-	polygon* m_polygonArray;
-
 private:
 	unsigned int m_filetype;
 	unsigned int m_countVerts;
@@ -67,6 +65,9 @@ private:
 	unsigned int m_countTimeSteps;
 	unsigned int m_countPolygons;
 	unsigned int m_polygonDim;
+
+	// Trianglemesh
+	TriangleMesh* m_tMesh;
 };
 
 #endif /*MESH_H_*/

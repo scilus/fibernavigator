@@ -901,7 +901,6 @@ void Fibers::drawFakeTubes()
 
 void Fibers::switchNormals(bool positive)
 {
-	printf("huhu\n");
 	float *normals;
 	if (m_dh->useVBO)
 	{
