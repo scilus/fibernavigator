@@ -8,6 +8,7 @@
 #include "Fantom/FBSplineSurface.h"
 #include "DatasetHelper.h"
 #include "KdTree.h"
+#include "IsoSurface/triangleMesh.h"
 
 class DatasetHelper;
 
@@ -25,11 +26,10 @@ public:
 	void createCutTexture();
 	void drawVectors();
 	void clean() {};
-	void smooth() {};
+	void smooth() {m_tMesh->doLoopSubD();};
 
 	void movePoints();
 
-	std::vector< int >getVertices() {return m_vertices;};
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
 	void setSetSampleRate(float r) {m_sampleRateT = m_sampleRateU = r; execute();};
 
@@ -44,12 +44,6 @@ private:
 	float getXValue(int y , int z, int numPoints);
 	void boxTest(int left, int right, int axis);
 
-	void overSamplePoints();
-
-	float* m_vertexArray;
-	float* m_normalArray;
-	float* m_colorArray;
-	unsigned int* m_indexArray;
 
 	double m_radius;
 	double m_my;
@@ -63,8 +57,6 @@ private:
 	double m_zAverage;
 
 	std::vector< std::vector< double > > m_splinePoints;
-	std::vector< int > m_vertices;
-	std::vector< F::FVector >m_normals;
 
 	int m_renderpointsPerCol;
 	int m_renderpointsPerRow;
@@ -77,6 +69,7 @@ private:
 
 	KdTree *m_kdTree;
 	DatasetHelper* m_dh;
+	TriangleMesh* m_tMesh;
 };
 
 

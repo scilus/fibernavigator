@@ -129,7 +129,15 @@ int loopSubD::calcEdgeVert(int triNum, int edgeV1, int edgeV2, int V3){
 
 	neighborFaceNum = triMesh->getNeighbor(edgeV1, edgeV2, triNum);
 
-	if(neighborFaceNum > triNum){
+	if(neighborFaceNum == -1)
+	{
+		Vector edgeVert = (triMesh->getVertex(edgeV1) + triMesh->getVertex(edgeV2))/2.0;
+		vertNum = triMesh->getNumVertices();
+		triMesh->addVert(edgeVert);
+	}
+
+	else if(neighborFaceNum > triNum)
+	{
 		neighborVert = triMesh->getThirdVert(edgeV1, edgeV2, neighborFaceNum);
 
 		Vector edgePart = triMesh->getVertex(edgeV1) + triMesh->getVertex(edgeV2);
@@ -138,7 +146,9 @@ int loopSubD::calcEdgeVert(int triNum, int edgeV1, int edgeV2, int V3){
 		edgeVert = ((edgePart * (3.0/8.0)) + (neighborPart * (1.0/8.0)));
 		vertNum = triMesh->getNumVertices();
 		triMesh->addVert(edgeVert);
-	} else {
+	}
+	else
+	{
 		Vector neighborCenterP = triMesh->getTriangle(neighborFaceNum + numTriFaces);
 		Vector neighborP = triMesh->getTriangle(neighborFaceNum);
 
