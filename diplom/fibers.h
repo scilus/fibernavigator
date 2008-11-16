@@ -35,6 +35,8 @@ public:
 	void generateGeometry() {};
 	void initializeBuffer();
 	void drawVectors() {};
+	void clean() {};
+	void smooth() {};
 
 	int getPointsPerLine(int);
 	int getStartIndexForLine(int);

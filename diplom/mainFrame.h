@@ -63,6 +63,8 @@ private:
 	void OnToggleTextureFiltering(wxCommandEvent& event);
 	void OnToggleBlendTexOnMesh(wxCommandEvent& event);
 	void OnToggleFilterIso(wxCommandEvent& event);
+	void OnClean(wxCommandEvent& event);
+	void OnLoop(wxCommandEvent& event);
 
 	void OnSetCMap0(wxCommandEvent& event);
 	void OnSetCMap1(wxCommandEvent& event);
@@ -225,6 +227,8 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_CMAP4							164
 #define MENU_OPTIONS_CMAP5							165
 #define MENU_OPTIONS_RESET_COLOR					166
+#define MENU_OPTIONS_CLEAN							167
+#define MENU_OPTIONS_LOOP							168
 // Menu Help
 #define MENU_HELP_ABOUT       						wxID_ABOUT
 /*

@@ -24,6 +24,8 @@ public:
 	void initializeBuffer() {};
 	void createCutTexture();
 	void drawVectors();
+	void clean() {};
+	void smooth() {};
 
 	void movePoints();
 

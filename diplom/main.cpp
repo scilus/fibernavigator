@@ -194,6 +194,8 @@ bool MyApp::OnInit(void) {
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_BLEND_TEX_ON_MESH, _T("Blend Texture on Mesh"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_FILTER_ISO, _T("Filter Dataset for IsoSurface"));
+	options_menu->Append(MENU_OPTIONS_CLEAN, _T("Clean Artefacts from Surface"));
+	options_menu->Append(MENU_OPTIONS_LOOP, _T("Smooth Surface (Loop SubD)"));
 
 
 

@@ -25,6 +25,8 @@ public:
 	void generateGeometry() {};
 	void initializeBuffer() {};
 	void drawVectors() {};
+	void clean() {};
+	void smooth() {};
 
 	wxUint8* getByteDataset();
 	float* getFloatDataset();

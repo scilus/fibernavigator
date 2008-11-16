@@ -8,6 +8,8 @@ TriangleMesh::TriangleMesh ()
 {
 	numVerts	 = 0;
 	numTris		 = 0;
+
+	isCleaned = false;
 }
 
 // Destructor
@@ -233,6 +235,7 @@ int TriangleMesh::getNextVertex(int triNum, int vertNum)
 
 void TriangleMesh::cleanUp()
 {
+	if ( isCleaned ) return;
 	std::vector<int> queue;
 	std::vector<bool> visited(numTris, false);
 	std::vector< std::vector<int> >objects;
@@ -270,6 +273,7 @@ void TriangleMesh::cleanUp()
 		}
 		objects.push_back(newObject);
 	}
+	if (objects.size() == 1) return;
 	size_t biggest = 0;
 	size_t sizeBiggest = objects[0].size();
 	for ( size_t i = 0 ; i < objects.size() ; ++i)
@@ -308,6 +312,8 @@ void TriangleMesh::cleanUp()
 	}
 	calcNeighbors();
 	calcVertNormals();
+
+	isCleaned = true;
 }
 
 void TriangleMesh::doLoopSubD()

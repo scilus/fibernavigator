@@ -33,6 +33,9 @@ class TriangleMesh {
 
 		bool openMeshError;
 
+		// we don't delete vertices yet, so can do a cleanup only once
+		bool isCleaned;
+
 	// Construction
 	public:
 		TriangleMesh ();

@@ -713,7 +713,6 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	}
 	m_tMesh->calcNeighbors();
 	m_tMesh->calcVertNormals();
-	m_tMesh->cleanUp();
 
 #else
 	m_tMesh->addVert(Vector(0., 0., 0.));

@@ -50,6 +50,8 @@ public:
 	void generateGeometry() ;
 	void initializeBuffer() {};
 	void drawVectors() {};
+	void clean() {m_tMesh->cleanUp();};
+	void smooth() {m_tMesh->doLoopSubD();};
 
 	void GenerateWithThreshold();
 

@@ -70,6 +70,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
 	EVT_MENU(MENU_OPTIONS_BLEND_TEX_ON_MESH, MainFrame::OnToggleBlendTexOnMesh)
 	EVT_MENU(MENU_OPTIONS_FILTER_ISO, MainFrame::OnToggleFilterIso)
+	EVT_MENU(MENU_OPTIONS_CLEAN, MainFrame::OnClean)
+	EVT_MENU(MENU_OPTIONS_LOOP, MainFrame::OnLoop)
 	EVT_MENU(MENU_OPTIONS_CMAP0, MainFrame::OnSetCMap0)
 	EVT_MENU(MENU_OPTIONS_CMAP1, MainFrame::OnSetCMap1)
 	EVT_MENU(MENU_OPTIONS_CMAP2, MainFrame::OnSetCMap2)
@@ -947,6 +949,44 @@ void MainFrame::OnToggleBlendTexOnMesh(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnToggleFilterIso(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->filterIsoSurf = !m_dh->filterIsoSurf;
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnClean(wxCommandEvent& WXUNUSED(event))
+{
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() == Mesh_ || info->getType() ==  IsoSurface_)
+		{
+			info->clean();
+			info->generateGeometry();
+		}
+	}
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnLoop(wxCommandEvent& WXUNUSED(event))
+{
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() == Mesh_ || info->getType() ==  IsoSurface_)
+		{
+			info->smooth();
+			info->generateGeometry();
+		}
+	}
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
