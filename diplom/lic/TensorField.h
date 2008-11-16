@@ -20,6 +20,7 @@ public:
 	int getOrder() 	{ return m_order; };
 	int getPosDim()	{ return m_posDim; };
 
+	FTensor getTensorAtIndex(int index) {return theField[index];};
 private:
 	DatasetHelper* m_dh;
 	std::vector<FTensor> theField;

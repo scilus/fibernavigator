@@ -37,18 +37,20 @@ const double FStreamlineOnSurfaceEuler::epsilon = 1.0e-6;
 const double epsilon2 = 1.0e-8;
 F::FVector lastDirectionVector(3);
 //---------------------------------------------------------------------------
-#if 0
+#if 1
 FStreamlineOnSurfaceEuler::
-FStreamlineOnSurfaceEuler( DatasetHelper* dh )
+FStreamlineOnSurfaceEuler( DatasetHelper* dh, TriangleMesh* grid )
 /*    : allSteps(), steps(), allNormals(), vecs(), field( aField ),
       maxCells(10000), singEdges(), offset(1.0e-5),
       vertices(3), edges(3), p0p1(3), p0p2(3)*/
 {
 	m_dh = dh;
-	m_tensorField = new TensorField(m_dh);
+	m_grid = grid;
+	m_tensorField = m_dh->getTensorField();
+
     try
     {
-    	nbCells = m_tensorField->getCells();
+    	nbCells = m_grid->getNumTriangles();
     	int tensorOrder = m_tensorField->getOrder();
     	int posDim = m_tensorField->getPosDim();
 
@@ -79,6 +81,7 @@ FStreamlineOnSurfaceEuler( DatasetHelper* dh )
     FTensor tensortensor;
 
 	//
+    /*
 	bool isScalar = ( tensorOrder == 0 );
     this->isTensor = ( tensorOrder == 2 );
 	is2Din3D = ( posDim == 3 );
@@ -90,17 +93,25 @@ FStreamlineOnSurfaceEuler( DatasetHelper* dh )
 	FArray e0, e1, p0p2, p0, p1(2), p2(2);
 	p1(1) = 0.;
 	double delta;
+*/
+	for ( unsigned int i = 0 ; i < nbCells ; ++i )
+	{
+		int index = grid->getTriangleTensor(i);
+		FTensor t = m_tensorField->getTensorAtIndex(index);
+		cell_vectors[i] = FArray( t );
+    }
 
+	// if i understand this right, i dont need the whole next block
+#if 0
 	// associate every cell with a constant vector value
 	if ( info.tensorSet->getNbTensors() == info.nbCells )
 	{
-
-	    FTensor dummy;
-	    for ( positive i=0 ; i<info.nbCells ; i++ )
-	    {
-		info.tensorSet->getTensor( dummy, FIndex(i) );
-		cell_vectors[i] = FArray( dummy );
-	    }
+		FTensor dummy;
+		for ( positive i=0 ; i<info.nbCells ; i++ )
+		{
+			info.tensorSet->getTensor( dummy, FIndex(i) );
+			cell_vectors[i] = FArray( dummy );
+		}
 	}
 	else
 	{
@@ -245,6 +256,7 @@ FStreamlineOnSurfaceEuler( DatasetHelper* dh )
 		}
 	    }
 	}
+#endif
 
 #ifdef __GRAPHICS__
 	// display them for debugging purposes

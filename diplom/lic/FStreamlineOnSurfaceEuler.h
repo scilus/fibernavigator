@@ -24,6 +24,7 @@
 
 #include "../DatasetHelper.h"
 #include "TensorField.h"
+#include "../IsoSurface/triangleMesh.h"
 
 class FDataSet;
 class FGrid;
@@ -90,7 +91,7 @@ public:
     };
 
 
-    FStreamlineOnSurfaceEuler( DatasetHelper *dh );
+    FStreamlineOnSurfaceEuler( DatasetHelper *dh, TriangleMesh* grid );
     ~FStreamlineOnSurfaceEuler();
 
 
@@ -163,6 +164,9 @@ protected:
 protected:
 
 	DatasetHelper* m_dh;
+	TensorField* m_tensorField;
+	TriangleMesh* m_grid;
+
 
     static const double epsilon;
 
@@ -170,7 +174,7 @@ protected:
     //shared_ptr< const FTensorField > field;
     //FTensorFieldInfo info;
 
-    TensorField* m_tensorField;
+
     bool dir, save;
 
     unsigned int nbCells;
