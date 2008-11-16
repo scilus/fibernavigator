@@ -968,6 +968,9 @@ void MainFrame::OnInvertFibers(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnUseFakeTubes(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->useFakeTubes = !m_dh->useFakeTubes;
+	Fibers* f;
+	if ( m_dh->getFiberDataset(f))
+		f->switchNormals(!m_dh->useFakeTubes);
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************

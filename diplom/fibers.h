@@ -60,6 +60,7 @@ public:
 
 	void save(wxString filename);
 	void drawFakeTubes();
+	void switchNormals(bool positive);
 
 	float *m_pointArray;
 	int* m_lineArray;

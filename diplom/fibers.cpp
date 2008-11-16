@@ -319,6 +319,10 @@ void Fibers::createColorArray()
 		r = (x1) - (x2);
 		g = (y1) - (y2);
 		b = (z1) - (z2);
+		if (r < 0.0) r *= -1.0 ;
+        if (g < 0.0) g *= -1.0 ;
+		if (b < 0.0) b *= -1.0 ;
+
 
 		float norm = sqrt(r*r + g*g + b*b);
 		r *= 1.0/norm;
@@ -337,6 +341,14 @@ void Fibers::createColorArray()
 			lastx = m_pointArray[pc];
 			lasty = m_pointArray[pc+1];
 			lastz = m_pointArray[pc+2];
+
+			if (rr < 0.0) rr *= -1.0 ;
+			if (gg < 0.0) gg *= -1.0 ;
+			if (bb < 0.0) bb *= -1.0 ;
+			float norm = sqrt(rr*rr + gg*gg + bb*bb);
+			rr *= 1.0/norm;
+			gg *= 1.0/norm;
+			bb *= 1.0/norm;
 
 			m_normalArray[pc] = rr;
             m_normalArray[pc+1] = gg;
@@ -884,5 +896,89 @@ void Fibers::drawFakeTubes()
 			}
 			glEnd();
 		}
+	}
+}
+
+void Fibers::switchNormals(bool positive)
+{
+	printf("huhu\n");
+	float *normals;
+	if (m_dh->useVBO)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+		normals = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+	}
+	else
+	{
+		normals = m_normalArray;
+	}
+
+	if (positive)
+	{
+		int pc = 0;
+		float rr, gg, bb;
+		float lastx, lasty, lastz;
+		for ( int i = 0 ; i < getLineCount() ; ++i )
+		{
+			lastx = m_pointArray[pc]   + (m_pointArray[pc]   - m_pointArray[pc+3]);
+			lasty = m_pointArray[pc+1] + (m_pointArray[pc+1] - m_pointArray[pc+4]);
+			lastz = m_pointArray[pc+2] + (m_pointArray[pc+2] - m_pointArray[pc+5]);
+
+			for (int j = 0; j < getPointsPerLine(i) ; ++j )
+			{
+				rr = lastx - m_pointArray[pc];
+				gg = lasty - m_pointArray[pc+1];
+				bb = lastz - m_pointArray[pc+2];
+				lastx = m_pointArray[pc];
+				lasty = m_pointArray[pc+1];
+				lastz = m_pointArray[pc+2];
+
+				if (rr < 0.0) rr *= -1.0 ;
+	            if (gg < 0.0) gg *= -1.0 ;
+	            if (bb < 0.0) bb *= -1.0 ;
+	            float norm = sqrt(rr*rr + gg*gg + bb*bb);
+				rr *= 1.0/norm;
+				gg *= 1.0/norm;
+				bb *= 1.0/norm;
+
+				normals[pc] = rr;
+				normals[pc+1] = gg;
+				normals[pc+2] = bb;
+
+				pc += 3;
+			}
+		}
+	}
+	else
+	{
+		int pc = 0;
+		float rr, gg, bb;
+		float lastx, lasty, lastz;
+		for ( int i = 0 ; i < getLineCount() ; ++i )
+		{
+			lastx = m_pointArray[pc]   + (m_pointArray[pc]   - m_pointArray[pc+3]);
+			lasty = m_pointArray[pc+1] + (m_pointArray[pc+1] - m_pointArray[pc+4]);
+			lastz = m_pointArray[pc+2] + (m_pointArray[pc+2] - m_pointArray[pc+5]);
+
+			for (int j = 0; j < getPointsPerLine(i) ; ++j )
+			{
+				rr = lastx - m_pointArray[pc];
+				gg = lasty - m_pointArray[pc+1];
+				bb = lastz - m_pointArray[pc+2];
+				lastx = m_pointArray[pc];
+				lasty = m_pointArray[pc+1];
+				lastz = m_pointArray[pc+2];
+
+				normals[pc] = rr;
+				normals[pc+1] = gg;
+				normals[pc+2] = bb;
+
+				pc += 3;
+			}
+		}
+	}
+	if (m_dh->useVBO)
+	{
+		glUnmapBuffer(GL_ARRAY_BUFFER);
 	}
 }

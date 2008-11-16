@@ -276,13 +276,13 @@ void TheScene::renderFibers()
 				glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
 
 			}
-
+			/*
 			bindTextures();
 			m_dh->shaderHelper->m_fiberShader->bind();
 			m_dh->shaderHelper->setFiberShaderVars();
 			m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", !info->getUseTex());
 			m_dh->shaderHelper->m_fiberShader->setUniInt("lightOn", m_dh->lighting);
-
+*/
 			if (m_selBoxChanged)
 			{
 				((Fibers*)info)->updateLinesShown(m_dh->getSelectionBoxes());
@@ -290,7 +290,7 @@ void TheScene::renderFibers()
 			}
 			info->draw();
 
-			m_dh->shaderHelper->m_fiberShader->release();
+			//m_dh->shaderHelper->m_fiberShader->release();
 
 			lightsOff();
 		}
@@ -333,8 +333,8 @@ void TheScene::renderFakeTubes()
 
 void TheScene::lightsOn()
 {
-	GLfloat light_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
-	GLfloat light_diffuse[] = { 0.6f, 0.6f, 0.6f, 1.0f };
+	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light_diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
 	GLfloat light_specular[] = { 0.4f, 0.4f, 0.4f, 1.0f };
 	GLfloat specref[] = { 0.5, 0.5, 0.5, 0.5};
 
