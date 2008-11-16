@@ -45,8 +45,12 @@ FStreamlineOnSurfaceEuler( DatasetHelper* dh )
       vertices(3), edges(3), p0p1(3), p0p2(3)*/
 {
 	m_dh = dh;
+	m_tensorField = new TensorField(m_dh);
     try
     {
+    	nbCells = m_tensorField->getCells();
+    	int tensorOrder = m_tensorField->getOrder();
+    	int posDim = m_tensorField->getPosDim();
 
 #ifdef __GRAPHICS__
 	FgePrimitiveHandler *primitive_handler =
@@ -69,15 +73,15 @@ FStreamlineOnSurfaceEuler( DatasetHelper* dh )
 	std::vector< FIndex  > indices;
 	std::vector< FTensor > vectors(3);
 	std::vector< FArray  > vertices(3);
-	cell_vectors.resize( info.nbCells );
+	cell_vectors.resize( nbCells );
 	FArray normal, tensor;
 	FArray mean;
     FTensor tensortensor;
 
 	//
-	bool isScalar = ( info.tensorOrder == 0 );
-    this->isTensor = ( info.tensorOrder == 2 );
-	is2Din3D = ( info.posDim == 3 );
+	bool isScalar = ( tensorOrder == 0 );
+    this->isTensor = ( tensorOrder == 2 );
+	is2Din3D = ( posDim == 3 );
 	if ( is2Din3D )
 	    tensor = FArray(3);
 	else

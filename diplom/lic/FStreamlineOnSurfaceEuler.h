@@ -23,6 +23,7 @@
 //#include "dataSet/src/FTensorSet.hh"
 
 #include "../DatasetHelper.h"
+#include "TensorField.h"
 
 class FDataSet;
 class FGrid;
@@ -168,6 +169,8 @@ protected:
     // TODO
     //shared_ptr< const FTensorField > field;
     //FTensorFieldInfo info;
+
+    TensorField* m_tensorField;
     bool dir, save;
 
     unsigned int nbCells;
