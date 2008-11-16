@@ -652,7 +652,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->toggleActive();
-		//m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
+		m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
 		box->setDirty();
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
@@ -663,7 +663,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
 				childBox->m_isActive = box->m_isActive;
-				//m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
+				m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
 				childBox->setDirty();
 			}
 		}
@@ -671,8 +671,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	else if (treeSelected(tBoxId) == ChildBox)
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		//m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
-		m_treeWidget->SetItemBold(tBoxId, 1-  !box->m_isActive);
+		m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
 		box->m_isActive = !box->m_isActive;
 		box->setDirty();
 	}
@@ -695,7 +694,14 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->m_isVisible = !box->m_isVisible;
-		m_treeWidget->SetItemImage(tBoxId, 1 - box->getShow());
+
+		if (box->getShow() && box->getActive())
+			m_treeWidget->SetItemImage(tBoxId, 0 );
+		else if (!box->getActive())
+			m_treeWidget->SetItemImage(tBoxId, 1 );
+		else
+			m_treeWidget->SetItemImage(tBoxId, -1 );
+
 		box->setDirty();
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
@@ -706,7 +712,12 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
 				childBox->m_isVisible = box->m_isVisible;
-				m_treeWidget->SetItemImage(childId, 1 - box->getShow());
+				if ( childBox->getShow() && childBox->getActive() )
+					m_treeWidget->SetItemImage(childId, 0);
+				else if ( !childBox->getActive() )
+					m_treeWidget->SetItemImage(childId, 1);
+				else
+					m_treeWidget->SetItemImage(childId, -1);
 				childBox->setDirty();
 			}
 		}
@@ -714,8 +725,14 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	else if (treeSelected(tBoxId) == ChildBox)
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		m_treeWidget->SetItemImage(tBoxId, 1-  !box->getShow());
 		box->m_isVisible = !box->m_isVisible;
+		if (box->getShow() && box->getActive())
+			m_treeWidget->SetItemImage(tBoxId, 0 );
+		else if (!box->getActive())
+			m_treeWidget->SetItemImage(tBoxId, 1 );
+		else
+			m_treeWidget->SetItemImage(tBoxId, -1 );
+
 		box->setDirty();
 	}
 
@@ -1244,40 +1261,11 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 	int col = m_listCtrl->getColClicked();
 	switch (col)
 	{
-	case 0:
-		if (info->toggleShow())
-		{
-			m_listCtrl->SetItem(item, 0, wxT(""), 0);
-		}
-		else
-		{
-			m_listCtrl->SetItem(item, 0, wxT(""), 1);
-		}
-		refreshAllGLWidgets();
-		break;
-	case 1:
+	case 11:
 		if (!info->toggleShowFS())
 			m_listCtrl->SetItem(item, 1, info->getName() + wxT("*"));
 		else
 			m_listCtrl->SetItem(item, 1, info->getName());
-		break;
-	case 2:
-		if (info->getType() >= Mesh_)
-		{
-			if (!info->toggleUseTex())
-				m_listCtrl->SetItem(item, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );
-			else
-				m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), info->getThreshold() ));
-		}
-		break;
-	case 3:
-		if (info->hasTreeId())
-		{
-			m_treeWidget->SetItemData(info->getTreeId(), NULL);
-			m_treeWidget->Delete(info->getTreeId());
-		}
-		delete info;
-		m_listCtrl->DeleteItem(item);
 		break;
 	default:
 		break;
@@ -1299,6 +1287,43 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	m_tSlider2->SetValue((int)(info->getAlpha()*100));
 	m_treeWidget->SelectItem(info->getTreeId());
 	m_treeWidget->EnsureVisible(info->getTreeId());
+
+	int col = m_listCtrl->getColClicked();
+	switch (col)
+	{
+	case 10:
+		if (info->toggleShow())
+		{
+			m_listCtrl->SetItem(item, 0, wxT(""), 0);
+		}
+		else
+		{
+			m_listCtrl->SetItem(item, 0, wxT(""), 1);
+		}
+		refreshAllGLWidgets();
+		break;
+	case 12:
+		if (info->getType() >= Mesh_)
+		{
+			if (!info->toggleUseTex())
+				m_listCtrl->SetItem(item, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );
+			else
+				m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), info->getThreshold() ));
+		}
+		break;
+	case 13:
+		if (info->hasTreeId())
+		{
+			m_treeWidget->SetItemData(info->getTreeId(), NULL);
+			m_treeWidget->Delete(info->getTreeId());
+		}
+		delete info;
+		m_listCtrl->DeleteItem(item);
+		break;
+	default:
+		break;
+	}
+	refreshAllGLWidgets();
 }
 /****************************************************************************************************
  *

@@ -14,12 +14,12 @@ void MyListCtrl::OnLeftClick(wxMouseEvent& event)
 	int col;
 	int x = event.GetPosition().x;
 	int sizeX = 0;
-	for ( col = 0 ; col < this->GetColumnCount() ; ++col)
+	for ( col = 0 ; col < GetColumnCount() ; ++col)
 	{
-		sizeX += this->GetColumnWidth(col);
+		sizeX += GetColumnWidth(col);
 		if (x <= sizeX) break;
 	}
-	m_col_clicked = col;
+	m_col_clicked = col + 10;
 
 	event.Skip();
 }
@@ -31,32 +31,32 @@ int MyListCtrl::getColClicked()
 
 void MyListCtrl::swap(long a, long b)
 {
-	DatasetInfo *infoA = (DatasetInfo*) this->GetItemData(a);
-	DatasetInfo *infoB = (DatasetInfo*) this->GetItemData(b);
+	DatasetInfo *infoA = (DatasetInfo*) GetItemData(a);
+	DatasetInfo *infoB = (DatasetInfo*) GetItemData(b);
 
-	this->SetItem(a, 0, wxT(""), infoB->getShow() ? 0 : 1);
-	this->SetItem(a, 1, infoB->getName());
-	this->SetItem(a, 2, wxString::Format(wxT("%.2f"), infoB->getThreshold()));
-	this->SetItemData(a, (long)infoB);
+	SetItem(a, 0, wxT(""), infoB->getShow() ? 0 : 1);
+	SetItem(a, 1, infoB->getName());
+	SetItem(a, 2, wxString::Format(wxT("%.2f"), infoB->getThreshold()));
+	SetItemData(a, (long)infoB);
 
-	this->SetItem(b, 0, wxT(""), infoA->getShow() ? 0 : 1);
-	this->SetItem(b, 1, infoA->getName());
-	this->SetItem(b, 2, wxString::Format(wxT("%.2f"), infoA->getThreshold()));
-	this->SetItemData(b, (long)infoA);
+	SetItem(b, 0, wxT(""), infoA->getShow() ? 0 : 1);
+	SetItem(b, 1, infoA->getName());
+	SetItem(b, 2, wxString::Format(wxT("%.2f"), infoA->getThreshold()));
+	SetItemData(b, (long)infoA);
 }
 
 void MyListCtrl::moveItemUp(long item)
 {
 	if (item == 0) return;
 	swap (item - 1, item);
-	this->SetItemState(item - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	SetItemState(item - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
 void MyListCtrl::moveItemDown(long item)
 {
-	if (item == this->GetItemCount() - 1) return;
+	if (item == GetItemCount() - 1) return;
 	swap (item, item +1);
-	this->SetItemState(item + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	SetItemState(item + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
 DECLARE_EVENT_TYPE(wxEVT_TREE_EVENT, -1)
@@ -67,22 +67,20 @@ BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
 	EVT_RIGHT_UP(MyTreeCtrl::OnRightClick)
 	EVT_MENU(TREE_CTRL_TOGGLE_ANDNOT, MyTreeCtrl::OnToggleAndNot)
 	EVT_MENU(TREE_CTRL_DELETE_BOX, MyTreeCtrl::OnDeleteBox)
-	EVT_MENU(TREE_CTRL_TOGGLE_BOX_ACTIVE, MyTreeCtrl::OnToggleBoxActive)
-	EVT_MENU(TREE_CTRL_TOGGLE_BOX_SHOW, MyTreeCtrl::OnToggleBoxShow)
 END_EVENT_TABLE()
 
 int MyTreeCtrl::getSelectedType()
 {
-	wxTreeItemId treeid = this->GetSelection();
+	wxTreeItemId treeid = GetSelection();
 
-	wxTreeItemId pId = this->GetItemParent(treeid);
-	wxTreeItemId ppId = this->GetItemParent(pId);
+	wxTreeItemId pId = GetItemParent(treeid);
+	wxTreeItemId ppId = GetItemParent(pId);
 
-	if (this->GetItemText(pId) == _T("selection boxes"))
+	if (GetItemText(pId) == _T("selection boxes"))
 		return MasterBox;
-	else if (this->GetItemText(ppId) == _T("selection boxes"))
+	else if (GetItemText(ppId) == _T("selection boxes"))
 		return ChildBox;
-	else if (this->GetItemText(pId) == _T("points"))
+	else if (GetItemText(pId) == _T("points"))
 		return Point_;
 	else return 0;
 }
@@ -90,18 +88,18 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 {
 	int selected = getSelectedType();
 
-	wxTreeItemId treeid = this->GetSelection();
+	wxTreeItemId treeid = GetSelection();
 
-	wxTreeItemId pId = this->GetItemParent(treeid);
-	wxTreeItemId ppId = this->GetItemParent(pId);
+	wxTreeItemId pId = GetItemParent(treeid);
+	wxTreeItemId ppId = GetItemParent(pId);
 
 	if ( event.GetKeyCode() == WXK_DELETE)
     {
     	if (selected == ChildBox)
 		{
-			((SelectionBox*) ((this->GetItemData(pId))))->setDirty();
+			((SelectionBox*) ((GetItemData(pId))))->setDirty();
 		}
-		this->Delete(treeid);
+		Delete(treeid);
 		wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );
 		GetEventHandler()->ProcessEvent( event1 );
     }
@@ -112,42 +110,42 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 		{
 		case WXK_LEFT:
 			 if (wxGetKeyState(WXK_CONTROL))
-				 ((SelectionBox*) (this->GetItemData(treeid)))->resizeLeft();
+				 ((SelectionBox*) (GetItemData(treeid)))->resizeLeft();
 			 else
-				 ((SelectionBox*) (this->GetItemData(treeid)))->moveLeft();
+				 ((SelectionBox*) (GetItemData(treeid)))->moveLeft();
 			 break;
 		case WXK_RIGHT:
 			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (this->GetItemData(treeid)))->resizeRight();
+				((SelectionBox*) (GetItemData(treeid)))->resizeRight();
 			else
-				((SelectionBox*) (this->GetItemData(treeid)))->moveRight();
+				((SelectionBox*) (GetItemData(treeid)))->moveRight();
 			break;
 		case WXK_UP:
 			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (this->GetItemData(treeid)))->resizeForward();
+				((SelectionBox*) (GetItemData(treeid)))->resizeForward();
 			else
-				((SelectionBox*) (this->GetItemData(treeid)))->moveForward();
+				((SelectionBox*) (GetItemData(treeid)))->moveForward();
 			break;
 		case WXK_DOWN:
 			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (this->GetItemData(treeid)))->resizeBack();
+				((SelectionBox*) (GetItemData(treeid)))->resizeBack();
 			else
-				((SelectionBox*) (this->GetItemData(treeid)))->moveBack();
+				((SelectionBox*) (GetItemData(treeid)))->moveBack();
 			break;
 		case WXK_PAGEUP:
 			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (this->GetItemData(treeid)))->resizeUp();
+				((SelectionBox*) (GetItemData(treeid)))->resizeUp();
 			else
-				((SelectionBox*) (this->GetItemData(treeid)))->moveUp();
+				((SelectionBox*) (GetItemData(treeid)))->moveUp();
 			break;
 		case WXK_PAGEDOWN:
 			if (wxGetKeyState(WXK_CONTROL))
-				((SelectionBox*) (this->GetItemData(treeid)))->resizeDown();
+				((SelectionBox*) (GetItemData(treeid)))->resizeDown();
 			else
-				((SelectionBox*) (this->GetItemData(treeid)))->moveDown();
+				((SelectionBox*) (GetItemData(treeid)))->moveDown();
 			break;
 		case WXK_HOME:
-			((SelectionBox*) (this->GetItemData(treeid)))->lockToCrosshair();
+			((SelectionBox*) (GetItemData(treeid)))->lockToCrosshair();
 			break;
 		default:
 			event.Skip();
@@ -165,15 +163,15 @@ void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 
 	if (selected == MasterBox)
 	{
-		SelectionBox* box =((SelectionBox*) (this->GetItemData( this->GetSelection())));
+		SelectionBox* box =((SelectionBox*) (GetItemData( GetSelection())));
 		if (box->getActive())
-			menu->Append(TREE_CTRL_TOGGLE_BOX_ACTIVE, _T("deactivate"));
+			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("deactivate"));
 		else
-			menu->Append(TREE_CTRL_TOGGLE_BOX_ACTIVE, _T("activate"));
+			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("activate"));
 		if (box->getShow())
-			menu->Append(TREE_CTRL_TOGGLE_BOX_SHOW, _T("hide"));
+			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("hide"));
 		else
-			menu->Append(TREE_CTRL_TOGGLE_BOX_SHOW, _T("show"));
+			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
 
 		menu->AppendSeparator();
 		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
@@ -181,17 +179,17 @@ void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 
 	if (selected == ChildBox)
 	{
-		SelectionBox* box =((SelectionBox*) (this->GetItemData( this->GetSelection())));
+		SelectionBox* box =((SelectionBox*) (GetItemData( GetSelection())));
 		menu->Append(TREE_CTRL_TOGGLE_ANDNOT, _T("toggle AND/NOT"));
 		menu->AppendSeparator();
 		if (box->getActive())
-			menu->Append(TREE_CTRL_TOGGLE_BOX_ACTIVE, _T("deactivate"));
+			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("deactivate"));
 		else
-			menu->Append(TREE_CTRL_TOGGLE_BOX_ACTIVE, _T("activate"));
+			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("activate"));
 		if (box->getShow())
-			menu->Append(TREE_CTRL_TOGGLE_BOX_SHOW, _T("hide"));
+			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("hide"));
 		else
-			menu->Append(TREE_CTRL_TOGGLE_BOX_SHOW, _T("show"));
+			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
 		menu->AppendSeparator();
 		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
 
@@ -201,45 +199,17 @@ void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 
 void MyTreeCtrl::OnToggleAndNot(wxCommandEvent& event)
 {
-	wxTreeItemId treeid = this->GetSelection();
-	((SelectionBox*) (this->GetItemData(treeid)))->toggleNOT();
+	wxTreeItemId treeid = GetSelection();
+	((SelectionBox*) (GetItemData(treeid)))->toggleNOT();
 }
 
 void MyTreeCtrl::OnDeleteBox(wxCommandEvent& event)
 {
 	if (getSelectedType() == ChildBox)
 	{
-		((SelectionBox*) ((this->GetItemData(this->GetItemParent(this->GetSelection())))))->setDirty();
+		((SelectionBox*) ((GetItemData(GetItemParent(GetSelection())))))->setDirty();
 	}
-	this->Delete(this->GetSelection());
+	Delete(GetSelection());
 	wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );
 	GetEventHandler()->ProcessEvent( event1 );
-}
-
-void MyTreeCtrl::OnToggleBoxActive(wxCommandEvent& event)
-{
-	wxTreeItemId treeid = this->GetSelection();
-	((SelectionBox*) (this->GetItemData(treeid)))->toggleActive();
-	((SelectionBox*) (this->GetItemData(treeid)))->setDirty();
-
-	if (getSelectedType() == MasterBox)
-	{
-		int childboxes = GetChildrenCount(treeid);
-		wxTreeItemIdValue childcookie = 0;
-		for (int i = 0 ; i < childboxes ; ++i)
-		{
-			wxTreeItemId childId = GetNextChild(treeid, childcookie);
-			if (childId.IsOk()) {
-				SelectionBox *childBox = ((SelectionBox*)(GetItemData(childId)));
-				childBox->toggleActive();
-				childBox->setDirty();
-			}
-		}
-	}
-}
-
-void MyTreeCtrl::OnToggleBoxShow(wxCommandEvent& event)
-{
-	wxTreeItemId treeid = this->GetSelection();
-	((SelectionBox*) (this->GetItemData(treeid)))->toggleShow();
 }
