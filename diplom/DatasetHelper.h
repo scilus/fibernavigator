@@ -94,6 +94,8 @@ public:
 	void doMatrixManipulation();
 
 	bool getFiberDataset(Fibers *&f);
+	float* getVectorDataset();
+	float* getTensorDataset();
 
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -110,6 +112,7 @@ public:
 	bool anatomy_loaded;
 	bool fibers_loaded;
 	bool vectors_loaded;
+	bool tensors_loaded;
 	bool surface_loaded;
 	bool surface_isDirty;
 

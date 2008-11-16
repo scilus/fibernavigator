@@ -16,12 +16,15 @@
 enum DatasetType {
 	TERROR = -1,
 	not_initialized = 0,
+	// Textures
 	Head_byte,
 	Head_short,
 	Overlay,
 	RGB,
 	Vectors_,
+	// everything higher can't be used as a texture
 	Mesh_,
+	Tensors_,
 	Fibers_,
 	Surface_,
 	IsoSurface_,

@@ -47,6 +47,10 @@ Anatomy::~Anatomy() {
 		delete[] m_floatDataset;
 		m_dh->vectors_loaded = false;
 		break;
+	case Tensors_:
+		delete[] m_floatDataset;
+		m_dh->tensors_loaded = false;
+		break;
 	case RGB:
 		delete[] m_rgbDataset;
 		break;
@@ -142,8 +146,10 @@ bool Anatomy::load(wxString filename)
 	else if (m_repn.Cmp(wxT("float")) == 0)
 	{
 		if (m_bands / m_frames == 3) {
-			printf("vector dataset detected\n");
 			m_type = Vectors_;
+		}
+		else if (m_bands / m_frames == 6) {
+			m_type = Tensors_;
 		}
 		else
 			m_type = Overlay;
@@ -230,9 +236,9 @@ bool Anatomy::load(wxString filename)
 					startslize = i * offset * 3;
 					for (int j = 0 ; j < offset ; ++j)
 					{
-						m_floatDataset[startslize + 3 * j] = wxMax( buffer[startslize + j], buffer[startslize + j] );
-						m_floatDataset[startslize + 3 * j + 1] = wxMax ( buffer[startslize + offset + j], buffer[startslize + offset + j] );
-						m_floatDataset[startslize + 3 * j + 2] = wxMax ( buffer[startslize + 2*offset + j], buffer[startslize + 2*offset + j] );
+						m_floatDataset[startslize + 3 * j] 		= buffer[startslize + j];
+						m_floatDataset[startslize + 3 * j + 1] 	= buffer[startslize + offset + j];
+						m_floatDataset[startslize + 3 * j + 2] 	= buffer[startslize + 2*offset + j];
 					}
 				}
 
@@ -241,6 +247,48 @@ bool Anatomy::load(wxString filename)
 				m_dh->surface_isDirty = true;
 			} break;
 
+			case Tensors_: {
+				m_floatDataset = new float[nSize/4];
+				float* buffer = new float[nSize/4];
+				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
+				{
+					dataFile.Close();
+					delete[] buffer;
+					return false;
+				}
+
+				wxUint8 *pointbytes = (wxUint8*)buffer;
+				wxUint8 temp;
+				for ( int i = 0 ; i < nSize; i +=4)
+				{
+					temp  = pointbytes[i];
+					pointbytes[i] = pointbytes[i+3];
+					pointbytes[i+3] = temp;
+					temp  = pointbytes[i+1];
+					pointbytes[i+1] = pointbytes[i+2];
+					pointbytes[i+2] = temp;
+				}
+
+				int offset = m_columns * m_rows;
+				int startslize = 0;
+
+				for (int i = 0 ; i < m_frames ; ++i)
+				{
+					startslize = i * offset * 6;
+					for (int j = 0 ; j < offset ; ++j)
+					{
+						m_floatDataset[startslize + 3 * j] 		= buffer[startslize + j];
+						m_floatDataset[startslize + 3 * j + 1] 	= buffer[startslize + offset + j];
+						m_floatDataset[startslize + 3 * j + 2] 	= buffer[startslize + 2*offset + j];
+						m_floatDataset[startslize + 3 * j + 3] 	= buffer[startslize + 3*offset + j];
+						m_floatDataset[startslize + 3 * j + 4] 	= buffer[startslize + 4*offset + j];
+						m_floatDataset[startslize + 3 * j + 5] 	= buffer[startslize + 5*offset + j];
+					}
+				}
+
+				flag = true;
+				m_dh->tensors_loaded = true;
+			} break;
 
 			case RGB: {
 				wxUint8 *buffer = new wxUint8[nSize];

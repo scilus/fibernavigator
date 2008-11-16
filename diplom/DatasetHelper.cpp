@@ -29,6 +29,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	fibers_loaded = false;
 	surface_loaded = false;
 	vectors_loaded = false;
+	tensors_loaded = false;
 	surface_isDirty = true;
 
 
@@ -851,4 +852,36 @@ bool DatasetHelper::getFiberDataset(Fibers *&f)
 		}
 	}
 	return false;
+}
+
+float* DatasetHelper::getVectorDataset()
+{
+	if (!vectors_loaded) return NULL;
+	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() == Vectors_ )
+		{
+			Anatomy* a = (Anatomy*) mainFrame->m_listCtrl->GetItemData(i);
+			return a->getFloatDataset();
+		}
+	}
+	vectors_loaded = false;
+	return NULL;
+}
+
+float* DatasetHelper::getTensorDataset()
+{
+	if (!tensors_loaded) return NULL;
+	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() == Tensors_ )
+		{
+			Anatomy* a = (Anatomy*) mainFrame->m_listCtrl->GetItemData(i);
+			return a->getFloatDataset();
+		}
+	}
+	tensors_loaded = false;
+	return NULL;
 }
