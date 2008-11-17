@@ -9,6 +9,7 @@ TriangleMesh::TriangleMesh (DatasetHelper* dh)
 	m_dh = dh;
 	numVerts	 = 0;
 	numTris		 = 0;
+	defaultColor = Vector(0.5f, 0.5f, 0.5f);
 
 	isCleaned = false;
 }
@@ -52,25 +53,34 @@ void TriangleMesh::addTriangle(int vertA, int vertB, int vertC)
 	numTris = triangles.size();
 
 	Vector p = ( getVertex(vertA) + getVertex(vertB) + getVertex(vertC) )/3.0;
-	int x = (int)(p[0] + 0.5 );
-	int y = (int)(p[1] + 0.5 );
-	int z = (int)(p[2] + 0.5 );
-	int index = x + y * m_dh->columns + z * m_dh->columns * m_dh->frames;
+	int x = wxMin(m_dh->columns-1, wxMax(0,(int)p[0]));
+	int y = wxMin(m_dh->rows   -1, wxMax(0,(int)p[1]));
+	int z = wxMin(m_dh->frames -1, wxMax(0,(int)p[2]));
+
+	int index = x + y * m_dh->columns + z * m_dh->columns * m_dh->rows;
 	triangleTensor.push_back(index);
+	triangleColor.push_back(defaultColor);
 }
 
 void TriangleMesh::addTriangle(int vertA, int vertB, int vertC, int tensorIndex)
 {
-        Vector t(vertA, vertB, vertC);
-        triangles.push_back(t);
-        triNormals.push_back(calcTriangleNormal(t));
-        vIsInTriangle[vertA].push_back(numTris);
-        vIsInTriangle[vertB].push_back(numTris);
-        vIsInTriangle[vertC].push_back(numTris);
-        std::vector<int> v(3,-1);
-        neighbors.push_back( v );
-        numTris = triangles.size();
-        triangleTensor.push_back(tensorIndex);
+	Vector t(vertA, vertB, vertC);
+	triangles.push_back(t);
+	triNormals.push_back(calcTriangleNormal(t));
+	vIsInTriangle[vertA].push_back(numTris);
+	vIsInTriangle[vertB].push_back(numTris);
+	vIsInTriangle[vertC].push_back(numTris);
+	std::vector<int> v(3,-1);
+	neighbors.push_back( v );
+	numTris = triangles.size();
+	triangleTensor.push_back(tensorIndex);
+	triangleColor.push_back(defaultColor);
+}
+
+void TriangleMesh::setTriangleColor(int triNum, float r, float g, float b)
+{
+	Vector c(r,g,b);
+	triangleColor[triNum] = c;
 }
 
 Vector TriangleMesh::calcTriangleNormal(Vector t){
@@ -129,7 +139,7 @@ int TriangleMesh::getNeighbor(int coVert1, int coVert2, int triangleNum)
 			if ( (candidates[i] != triangleNum) && (candidates[i] == compares[k]))
 				return candidates[i];
 		}
-	return -1;
+	return triangleNum;
 }
 
 void TriangleMesh::calcNeighbors()
@@ -186,6 +196,7 @@ Vector TriangleMesh::getTriangleCenter(int triNum)
 	Vector v1 = vertices[triangles[triNum][1]];
 	Vector v2 = vertices[triangles[triNum][2]];
 	Vector p = ( v0 + v1 + v2 )/3.0;
+	return p;
 }
 
 bool TriangleMesh::hasEdge(int coVert1, int coVert2, int triangleNum){
@@ -387,36 +398,35 @@ void TriangleMesh::getCellVerticesIndices( const FIndex& triNum,
     //assert( triNum < numTris );
     vertices.clear();
 
-	vertices.push_back( triangles[triNum][0] );
-	vertices.push_back( triangles[triNum][1] );
-	vertices.push_back( triangles[triNum][2] );
+	vertices.push_back( FIndex((int)triangles[triNum][0]) );
+	vertices.push_back( FIndex((int)triangles[triNum][1]) );
+	vertices.push_back( FIndex((int)triangles[triNum][2]) );
 }
 
 void TriangleMesh::getPosition( FPosition& resultPos, const FIndex& pIndex ) const
 {
     positive ind = pIndex.getIndex();
-
     //assert( ind < numVerts );
-
     resultPos.resize(3);
-
-    resultPos[0] = vertices[ind][0];
-    resultPos[1] = vertices[ind][1];
-    resultPos[2] = vertices[ind][2];
+    resultPos[0] = vertices[ind].x;
+    resultPos[1] = vertices[ind].y;
+    resultPos[2] = vertices[ind].z;
 }
 
 void TriangleMesh::getEdgeNeighbor( const FIndex& triNum, int pos, std::vector< FIndex >& neigh ) const
 {
 	//assert( triNum < numTris );
 	neigh.clear();
-	neigh.push_back(FIndex(neighbors[triNum][pos]));
+	neigh.push_back(FIndex((int)neighbors[triNum][pos]));
 }
 
-void TriangleMesh::getNeighbors( const FIndex& triNum, std::vector< FIndex >& neighs ) const
+void TriangleMesh::getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs ) const
 {
 	//assert( triNum < numTris );
 	neighs.clear();
-	neighs.push_back(FIndex(neighbors[triNum][0]));
-	neighs.push_back(FIndex(neighbors[triNum][1]));
-	neighs.push_back(FIndex(neighbors[triNum][2]));
+	std::vector<int>neighbors = vIsInTriangle[vertId];
+	for (size_t i = 0 ; i < neighbors.size() ; ++i)
+	{
+		neighs.push_back(FIndex(neighbors[i]));
+	}
 }

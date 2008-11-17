@@ -30,6 +30,8 @@ public:
 
 	void movePoints();
 
+	void drawLIC();
+
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
 	void setSetSampleRate(float r) {m_sampleRateT = m_sampleRateU = r; execute();};
 

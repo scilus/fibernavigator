@@ -130,7 +130,7 @@ int loopSubD::calcEdgeVert(int triNum, int edgeV1, int edgeV2, int V3){
 
 	neighborFaceNum = triMesh->getNeighbor(edgeV1, edgeV2, triNum);
 
-	if(neighborFaceNum == -1)
+	if(neighborFaceNum == triNum)
 	{
 		Vector edgeVert = (triMesh->getVertex(edgeV1) + triMesh->getVertex(edgeV2))/2.0;
 		vertNum = triMesh->getNumVertices();

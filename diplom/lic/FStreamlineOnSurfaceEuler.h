@@ -235,14 +235,18 @@ protected:
 
     double myCrossProd( const FArray& v1, const FArray& v2 );
 
-    bool is2Din3D;
-
     FArray lastProjection;
     FArray n_edge;
 
     bool isInside( const FIndex& cellId, const FArray& pos );
     bool isTensor;
 };
+
+//===========================================================================
+#ifndef OUTLINE
+#include "FStreamlineOnSurfaceEuler.icc"
+#endif
+//===========================================================================
 
 #endif // __FStreamlineOnSurfaceEuler_hh
 

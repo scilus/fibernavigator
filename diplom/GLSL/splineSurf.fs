@@ -39,8 +39,7 @@ void main() {
 		if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold[i], v, alpha[i]);
 	}
 
-	if (color.rgb == vec3(0.0))
-		discard;
+	if (color.rgb == vec3(0.0)) discard;
 
 	color.a = 1.0;
 
@@ -49,5 +48,6 @@ void main() {
 
 	color = clamp(color, 0.0, 1.0);
 
-	gl_FragColor = color;
+	//gl_FragColor = color;
+	gl_FragColor = gl_Color;
 }

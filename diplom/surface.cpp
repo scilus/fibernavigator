@@ -7,6 +7,8 @@
 #include "Anatomy.h"
 
 #include "GL/glew.h"
+#include "IsoSurface/loopSubD.h"
+#include "lic/SurfaceLIC.h"
 
 Surface::Surface(DatasetHelper* dh)
 {
@@ -279,6 +281,16 @@ void Surface::execute ()
 	m_tMesh->calcNeighbors();
 	m_tMesh->calcVertNormals();
 
+	for (int i = 0 ; i < 5 ; ++i)
+		loopSubD loop(m_tMesh);
+
+	if (m_dh->tensors_loaded && m_dh->use_lic)
+	{
+		printf("initiating lic\n");
+		SurfaceLIC lic(m_dh, m_tMesh);
+		printf("initiating lic 2\n");
+		lic.execute();
+	}
 
 	m_dh->surface_isDirty = false;
 
@@ -468,4 +480,40 @@ void Surface::drawVectors()
 
 	glEnd();
 	*/
+}
+
+void Surface::drawLIC()
+{
+	if (m_dh->surface_isDirty)
+	{
+		execute();
+	}
+
+	//m_dh->mainFrame->m_gl0->testRender(m_GLuint);
+
+	if (m_dh->scene->getPointMode())
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	Vector triangleEdges;
+	Vector point;
+	Vector pointNormal;
+	Vector color;
+
+	glBegin(GL_TRIANGLES);
+		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
+		{
+			triangleEdges = m_tMesh->getTriangle(i);
+			color = m_tMesh->getTriangleColor(i);
+			glColor3f(color.x, color.y, color.z);
+			for(int j = 0 ; j < 3 ; ++j)
+			{
+				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
+				glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
+				point = m_tMesh->getVertex(triangleEdges[j]);
+				glVertex3d(point.x, point.y, point.z);
+			}
+		}
+	glEnd();
 }

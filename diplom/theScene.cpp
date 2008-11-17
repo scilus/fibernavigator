@@ -170,38 +170,34 @@ void TheScene::renderSplineSurface()
 
 			bindTextures();
 
-			if (m_dh->vectors_loaded && m_dh->use_lic)
-			{
-				m_lic->render(info);
-			}
-			else
-			{
-				lightsOn();
+			lightsOn();
 
-				m_dh->shaderHelper->m_splineSurfShader->bind();
-				m_dh->shaderHelper->setSplineSurfaceShaderVars();
+			m_dh->shaderHelper->m_splineSurfShader->bind();
+			m_dh->shaderHelper->setSplineSurfaceShaderVars();
 
-				wxColor c = info->getColor();
-				glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
-				m_dh->shaderHelper->m_splineSurfShader->setUniInt("useTex", !info->getUseTex());
-				m_dh->shaderHelper->m_splineSurfShader->setUniInt("useColorMap", m_dh->colorMap);
+			wxColor c = info->getColor();
+			glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
+			m_dh->shaderHelper->m_splineSurfShader->setUniInt("useTex", !info->getUseTex());
+			m_dh->shaderHelper->m_splineSurfShader->setUniInt("useColorMap", m_dh->colorMap);
 
-				info->draw();
+			//info->draw();
+			Surface* surf = (Surface*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+			surf->drawLIC();
 
-				m_dh->shaderHelper->m_splineSurfShader->release();
+			m_dh->shaderHelper->m_splineSurfShader->release();
 
-				lightsOff();
+			lightsOff();
 
-				if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
-			}
+			if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
 
+/*
 			if ( m_dh->vectors_loaded && m_dh->drawVectors)
 			{
 				m_dh->shaderHelper->m_vectorShader->bind();
 				info->drawVectors();
 				m_dh->shaderHelper->m_vectorShader->release();
 			}
-
+*/
 			glPopAttrib();
 		}
 	}

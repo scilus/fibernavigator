@@ -29,6 +29,7 @@ class TriangleMesh {
 		std::vector< Vector > triangles;
 		std::vector<Vector> triNormals;
 		std::vector< int >triangleTensor;
+		std::vector<Vector>triangleColor;
 
 		std::vector < std::vector<int> >vIsInTriangle;
 
@@ -41,6 +42,8 @@ class TriangleMesh {
 
 		// we don't delete vertices yet, so can do a cleanup only once
 		bool isCleaned;
+
+		Vector defaultColor;
 
 	// Construction
 	public:
@@ -75,6 +78,7 @@ class TriangleMesh {
 		Vector getVertex (int triNum, int pos);
 		Vector getNormal(int triNum)			{ return triNormals[triNum]; };
 		Vector getTriangle(int triNum)			{ return triangles[triNum]; };
+		Vector getTriangleColor(int triNum)		{ return triangleColor[triNum];};
 		std::vector<int> getStar(int vertNum) 	{ return vIsInTriangle[vertNum]; };
 		int getTriangleTensor(int triNum)		{ return triangleTensor[triNum];};
 
@@ -85,6 +89,7 @@ class TriangleMesh {
 		void eraseTriFromVert( int triNum, int vertNum);
 
 		void setTriangle(int triNum, int vertA, int vertB, int vertC);
+		void setTriangleColor(int triNum, float r, float g, float b);
 
 		bool isInTriangle(int vertNum, int triangleNum);
 
@@ -105,7 +110,8 @@ class TriangleMesh {
 		void getCellVerticesIndices( const FIndex& cellId, std::vector< FIndex >& vertices ) const;
 		void getPosition( FPosition& resultPos, const FIndex& pIndex ) const;
 		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh ) const;
-		void getNeighbors( const FIndex& cellId, std::vector< FIndex >& neighs ) const;
+		void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs ) const;
+
 
 	private:
 

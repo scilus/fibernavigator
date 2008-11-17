@@ -242,6 +242,9 @@ bool Anatomy::load(wxString filename)
 					}
 				}
 
+				m_tensorField = new TensorField(m_dh, m_floatDataset, true);
+				m_dh->tensors_loaded = true;
+
 				flag = true;
 				m_dh->vectors_loaded = true;
 				m_dh->surface_isDirty = true;
@@ -285,6 +288,8 @@ bool Anatomy::load(wxString filename)
 						m_floatDataset[startslize + 3 * j + 5] 	= buffer[startslize + 5*offset + j];
 					}
 				}
+
+				m_tensorField = new TensorField(m_dh, m_floatDataset);
 
 				flag = true;
 				m_dh->tensors_loaded = true;

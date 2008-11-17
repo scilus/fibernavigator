@@ -16,17 +16,7 @@
 
 FArray dirty;
 
-// #define __GRAPHICS__
-// #define __DEBUG__
-
-#ifdef __GRAPHICS__
-#include "Fge/src/FgePrimitiveList.hh"
-#include "Fge/src/FgePrimitiveHandler.hh"
-#include "Fge/src/FgePoints.hh"
-#include "Fge/src/FgeLines.hh"
-#include "Fge/src/Fge_config.hh"
-#endif
-
+//#define __DEBUG__
 #ifdef OUTLINE
 #include "FStreamlineOnSurfaceEuler.icc"
 #endif
@@ -41,12 +31,13 @@ F::FVector lastDirectionVector(3);
 
 FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh,
 		TriangleMesh* grid)
-/*    : allSteps(), steps(), allNormals(), vecs(), field( aField ),
+    : allSteps(), steps(), allNormals(), vecs(),
  maxCells(10000), singEdges(), offset(1.0e-5),
- vertices(3), edges(3), p0p1(3), p0p2(3)*/
+ vertices(3), edges(3), p0p1(3), p0p2(3)
 {
 	m_dh = dh;
 	m_grid = grid;
+
 	m_tensorField = m_dh->getTensorField();
 
 	try {
@@ -76,17 +67,16 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh,
 		 double delta;
 		 */
 
-		is2Din3D = true;
-
 		for (unsigned int i = 0; i < nbCells; ++i) {
 			int index = grid->getTriangleTensor(i);
 			FTensor t = m_tensorField->getTensorAtIndex(index);
 			cell_vectors[i] = FArray(t);
 		}
+		printf("lic constructor done\n");
 
 #ifdef __DEBUG__
-		cout << "FStreamlineOnSurfaceEuler: exit" << endl
-		<< "info.nbCells = " << (int) info.nbCells << endl;
+		std::cout << "FStreamlineOnSurfaceEuler: exit" << std::endl
+		<< "nbCells = " << (int) nbCells << std::endl;
 #endif
 	}CATCH_N_RETHROW( FException );
 }
@@ -102,7 +92,7 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 		const FIndex& cellId, bool dir, double length) {
 
 #ifdef __DEBUG__
-	cout << endl << endl << "integrate: start=" << start << endl;
+	std::cout << std::endl << std::endl << "integrate: start=" << start << std::endl;
 #endif
 
 	try {
@@ -128,16 +118,15 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 		steps.push_back(start);
 		vecs.push_back(cell_vectors[cellId]);
 		visitedCells.push_back(cellId);
-
-
-		succeeded = walkThroughCell( currPos, currCell, FArray(is2Din3D ? 3: 2), first, second,
+		// TODO
+		succeeded = walkThroughCell( currPos, currCell, FArray(3), first, second,
 				fwd, false, nextPos, nextCell, posRot );
 
 
 		stepLength = (nextPos - start).norm();
 		if (stepLength > length) {
 #ifdef __DEBUG__
-			cout << "step length exceeded in first cell" << endl;
+			std::cout << "step length exceeded in first cell" << std::endl;
 #endif
 
 			// length reached: interrupt computation
@@ -170,7 +159,7 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 			currCell = nextCell;
 		} else {
 #ifdef __DEBUG__
-			cout << "left grid in from first cell" << endl;
+			std::cout << "left grid in from first cell" << std::endl;
 #endif
 			return 1;
 		}
@@ -189,7 +178,7 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 
 #ifdef __DEBUG__
 				if ( !succeeded )
-				cout << "walkThroughCell failed" << endl;
+				std::cout << "walkThroughCell failed" << std::endl;
 #endif
 			} else {
 				// currPos is implicit in start vertex id
@@ -201,7 +190,7 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 
 #ifdef __DEBUG__
 				if ( !succeeded )
-				cout << "walkThroughVertex failed" << endl;
+				std::cout << "walkThroughVertex failed" << std::endl;
 #endif
 
 			}
@@ -215,7 +204,7 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 			stepLength = (nextPos - currPos).norm();
 			if (currLength + stepLength > length) {
 #ifdef __DEBUG__
-				cout << "step length exceeded" << endl;
+				std::cout << "step length exceeded" << std::endl;
 #endif
 
 				// length reached: interrupt computation
@@ -228,13 +217,13 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 				// You're right: this is a dirty workaround.
 				if (first.isValid() && second.isValid() && first == second) {
 #ifdef __DEBUG__
-					cout << "slightly moving away from edge" << endl;
+					std::cout << "slightly moving away from edge" << std::endl;
 
-					cout << "checking returned position in both given cells"
-					<< endl;
-					cout << "currCell: " << endl;
+					std::cout << "checking returned position in both given cells"
+					<< std::endl;
+					std::cout << "currCell: " << std::endl;
 					bool bla = isInside( currCell, nextPos );
-					cout << "nextCell: " << endl;
+					std::cout << "nextCell: " << std::endl;
 					bla = isInside( nextCell, nextPos );
 #endif
 
@@ -255,16 +244,16 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 
 				// check results
 #ifdef __DEBUG__
-				cout << endl << endl << "checking returned position: " << endl;
+				std::cout << std::endl << std::endl << "checking returned position: " << std::endl;
 				if ( isInside( currCell, nextPos ) )
-				cout << "correct" << endl << endl;
+				std::cout << "correct" << std::endl << std::endl;
 				else
-				cout << "error" << endl << endl;
+				std::cout << "error" << std::endl << std::endl;
 #endif
 
 				return 0;
 			} else if (stepLength < 1.0e-8)
-				// avoid endless loop
+				// avoid std::endless loop
 				return 2;
 
 			// increment length
@@ -390,25 +379,23 @@ double FStreamlineOnSurfaceEuler::myCrossProd(const FArray& v1,
 }
 
 //---------------------------------------------------------------------------
-
+//TODO
 bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		const FIndex& cellId, const FArray& lastStep, FIndex& vertId1,
 		FIndex& vertId2, double fwd, bool onEdge, FArray& exit,
 		FIndex& nextCell, bool& posRot) {
 #ifdef __DEBUG__
-	cout << endl << "walking through a cell" << endl;
+	std::cout << std::endl << "walking through a cell" << std::endl;
 #endif
-
-	// TODO
 	m_grid->getCellVerticesIndices(cellId, indices);
-	for (positive i = 0; i < 3; i++)
+	for (positive i = 0; i < 3; ++i)
+	{
 		m_grid->getPosition(vertices[i], indices[i]);
-
-
+	}
 
 	if (onEdge) {
 #ifdef __DEBUG__
-		cout << "starting from an edge" << endl;
+		std::cout << "starting from an edge" << std::endl;
 #endif
 
 		// identify current edge in list, assuming positive orientation
@@ -417,7 +404,6 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		while (indices[i] != vertId1) {
 			++i;
 		}
-
 		// re-numerate vertices
 		positive ids[3] = { i, (i + 1) % 3, (i + 2) % 3 };
 
@@ -445,10 +431,10 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		// check for singular edge
 		if (vec[1] < 0.) {
 #ifdef __DEBUG__
-			cout << "proceed along singular edge" << endl;
-			cout << "posRot is " << ( posRot ? "true" : "false" ) << endl;
-			cout << "fwd = " << fwd << endl;
-			cout << "vec[0]=" << vec[0] << endl;
+			std::cout << "proceed along singular edge" << std::endl;
+			std::cout << "posRot is " << ( posRot ? "true" : "false" ) << std::endl;
+			std::cout << "fwd = " << fwd << std::endl;
+			std::cout << "vec[0]=" << vec[0] << std::endl;
 #endif
 
 			// check for degenerate case
@@ -456,8 +442,8 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 
 			{
 #ifdef __DEBUG__
-				cout << "FStreamlineOnSurfaceEuler WARNING: DEGENERATE CONFIGURATION ENCOUNTERED"
-				<< endl;
+				std::cout << "FStreamlineOnSurfaceEuler WARNING: DEGENERATE CONFIGURATION ENCOUNTERED"
+				<< std::endl;
 #endif
 				return false;
 			}
@@ -476,7 +462,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		}
 
 #ifdef __DEBUG__
-		cout << "crossing the cell" << endl;
+		std::cout << "crossing the cell" << std::endl;
 #endif
 
 		// cell vertices in local coordinates
@@ -495,7 +481,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		u = crossProd(vec, tmp[0]) / crossProd(tmp[1], vec);
 		if (u > -epsilon && u < 1. + epsilon) {
 #ifdef __DEBUG__
-			cout << "found intersection on edge #1, u=" << u << endl;
+			std::cout << "found intersection on edge #1, u=" << u << std::endl;
 #endif
 
 			exit = (1. - u) * vertices[ids[1]] + u * vertices[ids[2]];
@@ -505,8 +491,8 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 			exit_edge[1] = verts[ids[1]][1] - verts[ids[2]][1];
 			posRot = (exit_edge[0] * vec[0] + exit_edge[1] * vec[1] > 0.);
 #ifdef __DEBUG__
-			cout << "posRot is " << ( posRot ? "true" : "false" ) << endl;
-			cout << "fwd = " << fwd << endl;
+			std::cout << "posRot is " << ( posRot ? "true" : "false" ) << std::endl;
+			std::cout << "fwd = " << fwd << std::endl;
 #endif
 			// get neighboring cell
 			m_grid->getEdgeNeighbor(cellId, ids[1], neighs);
@@ -532,7 +518,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		u = crossProd(vec, tmp[0]) / crossProd(tmp[1], vec);
 		if (u > -epsilon && u < 1. + epsilon) {
 #ifdef __DEBUG__
-			cout << "found intersection on edge #2, u=" << u << endl;
+			std::cout << "found intersection on edge #2, u=" << u << std::endl;
 #endif
 
 			exit = (1. - u) * vertices[ids[2]] + u * vertices[ids[0]];
@@ -542,8 +528,8 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 			exit_edge[1] = verts[ids[2]][1] - verts[ids[0]][1];
 			posRot = (exit_edge[0] * vec[0] + exit_edge[1] * vec[1] > 0.);
 #ifdef __DEBUG__
-			cout << "posRot is " << ( posRot ? "true" : "false" ) << endl;
-			cout << "fwd = " << fwd << endl;
+			std::cout << "posRot is " << ( posRot ? "true" : "false" ) << std::endl;
+			std::cout << "fwd = " << fwd << std::endl;
 #endif
 			// get neighboring cell
 			m_grid->getEdgeNeighbor(cellId, ids[2], neighs);
@@ -563,24 +549,22 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 
 		// otherwise failed
 #ifdef __DEBUG__
-		cout << "intersection point computation failed: u=" << u << endl;
+		std::cout << "intersection point computation failed: u=" << u << std::endl;
 #endif
 
 		return false;
 
 	} else {
 #ifdef __DEBUG__
-		cout << "starting within the cell" << endl;
+		std::cout << "starting within the cell" << std::endl;
 #endif
 
 		// local basis: (basis[0], basis[1]) spans cell plane
 		basis[0] = vertices[1] - vertices[0];
 		p0p2 = vertices[2] - vertices[0];
-		if (is2Din3D) {
-			normal = crossProduct(basis[0], p0p2);
-			basis[1] = crossProduct(normal, basis[0]);
-		} else
-			basis[1] = FArray(-basis[0](1), basis[0](0));
+
+		normal = crossProduct(basis[0], p0p2);
+		basis[1] = crossProduct(normal, basis[0]);
 
 		basis[0].normalize();
 		basis[1].normalize();
@@ -613,7 +597,8 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		direct[0] = vec[0];
 		direct[1] = vec[1];
 
-		for (positive i = 0; i < 3; i++) {
+		for (positive i = 0; i < 3; i++)
+		{
 			cross = crossProd(v[i], direct);
 			if (cross > epsilon) {
 				valid[(i + 2) % 3] = false;
@@ -624,8 +609,9 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 				valid[i] = false;
 				break;
 			} else if (cross >= 0) {
+				// TODO
 #ifdef __DEBUG__
-				cout << "FStreamlineOnSurfaceEuler WARNING: we are pointing toward a vertex" << endl;
+				std::cout << "FStreamlineOnSurfaceEuler WARNING: we are pointing toward a vertex" << std::endl;
 #endif
 				valid[(i + 2) % 3] = true;
 				valid[i] = false;
@@ -633,7 +619,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 				break;
 			} else {
 #ifdef __DEBUG__
-				cout << "FStreamlineOnSurfaceEuler WARNING: we are pointing toward a vertex" << endl;
+				std::cout << "FStreamlineOnSurfaceEuler WARNING: we are pointing toward a vertex" << std::endl;
 #endif
 				valid[i] = true;
 				valid[(i + 1) % 3] = false;
@@ -643,12 +629,14 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		}
 		id0 = 0;
 		while (!valid[id0])
+		{
 			++id0;
-		id1 = (id0 + 1) % 3;
+		}
 
+		id1 = (id0 + 1) % 3;
 		if (id0 > 2 || id1 > 2) {
 #ifdef __DEBUG__
-			cout << "no correct edge found. failed" << endl;
+			std::cout << "no correct edge found. failed" << std::endl;
 #endif
 
 			return false;
@@ -656,9 +644,8 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 
 		// compute intersection point
 #ifdef __DEBUG__
-		cout << "found intersection on edge #" << id0 << flush;
+		//std::cout << "found intersection on edge #" << id0 << flush;
 #endif
-
 		o = 1.;
 		if (isTensor) {
 			double orient = cell_vectors[cellId.getIndex()] * lastStep;
@@ -666,18 +653,13 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 				o = -1.;
 		}
 		double u;
-		if (is2Din3D)
-			u = (crossProduct(entry - vertices[id0], o * fwd
-					* cell_vectors[cellId]) * normal) / (crossProduct(
-					vertices[id1] - vertices[id0], fwd * cell_vectors[cellId])
-					* normal);
-		else
-			u = myCrossProd(entry - vertices[id0], o * fwd
-					* cell_vectors[cellId]) / myCrossProd(vertices[id1]
-					- vertices[id0], fwd * cell_vectors[cellId]);
+		u = (crossProduct(entry - vertices[id0], o * fwd
+				* cell_vectors[cellId]) * normal) / (crossProduct(
+				vertices[id1] - vertices[id0], fwd * cell_vectors[cellId])
+				* normal);
 
 #ifdef __DEBUG__
-		cout << ", u=" << u << endl;
+		std::cout << ", u=" << u << std::endl;
 #endif
 
 		if (u < .01)
@@ -690,8 +672,8 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		exit_edge[1] = verts[id0][1] - verts[id1][1];
 		posRot = (exit_edge[0] * vec[0] + exit_edge[1] * vec[1] > 0.);
 #ifdef __DEBUG__
-		cout << "posRot is " << ( posRot ? "true" : "false" ) << endl;
-		cout << "fwd = " << fwd << endl;
+		std::cout << "posRot is " << ( posRot ? "true" : "false" ) << std::endl;
+		std::cout << "fwd = " << fwd << std::endl;
 #endif
 	}
 
@@ -721,7 +703,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 		FArray& exit, FIndex& currCell, FIndex& nextCell) {
 
 #ifdef __DEBUG__
-	cout << endl << endl << "walking through a vertex" << endl;
+	std::cout << std::endl << std::endl << "walking through a vertex" << std::endl;
 #endif
 
 	positive k, neighId;
@@ -739,7 +721,6 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 			m_grid->getPosition(vertices[j], indices[j]);
 		}
 		neighId = neighs[i].getIndex();
-
 		k = 0;
 		while (indices[k] != vertId) {
 			++k;
@@ -780,7 +761,6 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 			}
 		}
 	}
-
 	if (rightAngle < 0) {
 		return false;
 	}
@@ -849,7 +829,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 	// start search from right angular domain
 
 #ifdef __DEBUG__
-	cout << "must look for a singular edge to proceed" << endl;
+	std::cout << "must look for a singular edge to proceed" << std::endl;
 #endif
 
 	FIndex curr = neighs[rightAngle];
@@ -865,7 +845,6 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 	while (indices[k] != vertId) {
 		++k;
 	}
-
 	// 1st neighbor
 	m_grid-> getEdgeNeighbor(curr, k, neighs2);
 	if (neighs2.size()) {
@@ -883,12 +862,11 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 			nextCell = n1;
 
 #ifdef __DEBUG__
-			cout << "found neighbor #1" << endl;
+			std::cout << "found neighbor #1" << std::endl;
 #endif
 			return true;
 		}
 	}
-
 	// 2nd neighbor
 	m_grid-> getEdgeNeighbor(curr, (k + 2) % 3, neighs2);
 	if (neighs2.size()) {
@@ -905,14 +883,14 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 			nextCell = n1;
 
 #ifdef __DEBUG__
-			cout << "found neighbor #2" << endl;
+			std::cout << "found neighbor #2" << std::endl;
 #endif
 			return true;
 		}
 	}
-
 	// get further neighbors
-	if (n1.isValid()) {
+	if (n1.isValid())
+	{
 		m_grid->getCellVerticesIndices(n1, indices);
 		for (positive i = 0; i < 3; i++) {
 			m_grid->getPosition(vertices[i], indices[i]);
@@ -940,7 +918,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 				nextCell = n3;
 
 #ifdef __DEBUG__
-				cout << "found neighbor #3" << endl;
+				std::cout << "found neighbor #3" << std::endl;
 #endif
 				return true;
 			}
@@ -963,31 +941,33 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 				nextCell = n3;
 
 #ifdef __DEBUG__
-				cout << "found neighbor #4" << endl;
+				std::cout << "found neighbor #4" << std::endl;
 #endif
 				return true;
 			}
 		}
 	}
-
-	if (n2.isValid()) {
+	if (n2.isValid())
+	{
 		m_grid->getCellVerticesIndices(n2, indices);
 		for (positive i = 0; i < 3; i++) {
 			m_grid->getPosition(vertices[i], indices[i]);
 		}
-
 		k = 0;
 		while (indices[k] != vertId) {
 			++k;
 		}
-
 		m_grid-> getEdgeNeighbor(n2, (k + 1) % 3, neighs2);
-		if (neighs2.size() && neighs2[0] != curr) {
+
+		if (neighs2.size() && neighs2[0] != curr)
+		{
 			n4 = neighs2[0];
 			p0p1 = vertices[(k + 1) % 3] - vertices[k];
+
 			if (crossProduct(p0p1, fwd * cell_vectors[n4.getIndex()])
 					* crossProduct(p0p1, fwd * cell_vectors[n2.getIndex()])
-					< 0.) {
+					< 0.)
+			{
 				// found
 				vertId1 = vertId2 = indices[(k + 1) % 3];
 				m_grid->getPosition(exit, indices[(k + 1) % 3]);
@@ -997,20 +977,22 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 				nextCell = n4;
 
 #ifdef __DEBUG__
-				cout << "found neighbor #5" << endl;
+				std::cout << "found neighbor #5" << std::endl;
 #endif
 				return true;
 			}
 		}
-		m_grid->getEdgeNeighbor(n2, (k + 2)
-				% 3, neighs2);
-		if (neighs2.size() && neighs2[0] != curr) {
+
+		m_grid->getEdgeNeighbor(n2, (k + 2)	% 3, neighs2);
+		if (neighs2.size() && neighs2[0] != curr)
+		{
 			n4 = neighs2[0];
 
 			p0p1 = vertices[(k + 2) % 3] - vertices[k];
 			if (crossProduct(p0p1, fwd * cell_vectors[n4.getIndex()])
 					* crossProduct(p0p1, fwd * cell_vectors[n2.getIndex()])
-					< 0.) {
+					< 0.)
+			{
 				// found
 				vertId1 = vertId2 = indices[(k + 2) % 3];
 				m_grid->getPosition(exit, indices[(k + 2) % 3]);
@@ -1020,16 +1002,15 @@ bool FStreamlineOnSurfaceEuler::walkThroughVertex(const FIndex& vertId,
 				nextCell = n4;
 
 #ifdef __DEBUG__
-				cout << "found neighbor #6" << endl;
+				std::cout << "found neighbor #6" << std::endl;
 #endif
 				return true;
 			}
 		}
 	}
-
 	// otherwise give up
 #ifdef __DEBUG__
-	cout << "no satisfying singular edge found" << endl;
+	std::cout << "no satisfying singular edge found" << std::endl;
 #endif
 	return false;
 }
@@ -1062,13 +1043,13 @@ bool FStreamlineOnSurfaceEuler::isInside(const FIndex& cellId,
 
 		if (fabs((pos - p[0]) * normal) > 1.0e-5) {
 #ifdef __DEBUG__
-			cout << "distance to plane too large: " << fabs( (pos-p[0])*normal )
-			<< endl;
-			cout << "corresponding positions are: " << endl
-			<< "* curr = " << pos << endl
-			<< "* p0 = " << p[0] << endl
-			<< "* p1 = " << p[1] << endl
-			<< "* p2 = " << p[2] << endl << endl;
+			std::cout << "distance to plane too large: " << fabs( (pos-p[0])*normal )
+			<< std::endl;
+			std::cout << "corresponding positions are: " << std::endl
+			<< "* curr = " << pos << std::endl
+			<< "* p0 = " << p[0] << std::endl
+			<< "* p1 = " << p[1] << std::endl
+			<< "* p2 = " << p[2] << std::endl << std::endl;
 #endif
 			return false;
 		}
@@ -1099,25 +1080,25 @@ bool FStreamlineOnSurfaceEuler::isInside(const FIndex& cellId,
 				return true;
 #ifdef __DEBUG__
 			else
-			cout << "wrong barycentric coordinates: "
-			<< "b[1] = " << b[1]/denom << endl;
+			std::cout << "wrong barycentric coordinates: "
+			<< "b[1] = " << b[1]/denom << std::endl;
 #endif
 		}
 
 #ifdef __DEBUG__
-		cout << "wrong barycentric coordinates: "
-		<< "b[0] = " << b[0]/denom << endl;
-		cout << "corresponding positions are: " << endl
-		<< "* curr = " << pos << endl
-		<< "* p0 = " << p[0] << endl
-		<< "* p1 = " << p[1] << endl
-		<< "* p2 = " << p[2] << endl << endl;
+		std::cout << "wrong barycentric coordinates: "
+		<< "b[0] = " << b[0]/denom << std::endl;
+		std::cout << "corresponding positions are: " << std::endl
+		<< "* curr = " << pos << std::endl
+		<< "* p0 = " << p[0] << std::endl
+		<< "* p1 = " << p[1] << std::endl
+		<< "* p2 = " << p[2] << std::endl << std::endl;
 #endif
 
 		return false;
 	} catch (FException& e) {
 		printf("caught exception in isInside:\n ");
-		//cout << "caught exception in isInside: " << e << endl;
+		//std::cout << "caught exception in isInside: " << e << std::endl;
 		return false;
 	}
 }

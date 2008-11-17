@@ -8,6 +8,10 @@ uniform bool useTex;
 void main() {
 	prepareLight();
 
+	// pass the color to the fragment shader
+	gl_FrontColor = gl_Color;
+	gl_BackColor = gl_Color;
+
 	if (useTex) {
 		float greyVal = 0.5;
 		vec4 myVert = gl_Vertex;
@@ -35,6 +39,7 @@ void main() {
 	}
 
 	else {
+
 		gl_TexCoord[0].xyz = gl_Vertex.xyz;
 		gl_Position = ftransform();
 	}

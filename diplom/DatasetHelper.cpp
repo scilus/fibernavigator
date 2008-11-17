@@ -35,7 +35,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 	scheduledReloadShaders = true;
 	blendTexOnMesh = true;
-	use_lic = false;
+	use_lic = true;
 	useVBO = true;
 	lighting = false;
 	textures = 0;
@@ -876,7 +876,7 @@ TensorField* DatasetHelper::getTensorField()
 	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == Tensors_ )
+		if (info->getType() == Tensors_ || info->getType() == Vectors_)
 		{
 			Anatomy* a = (Anatomy*) mainFrame->m_listCtrl->GetItemData(i);
 			return a->getTensorField();

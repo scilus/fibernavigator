@@ -144,7 +144,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 			col1 = defaultColorMap( col1.r );
 	}
 
-	if ( (length(col1) - threshold) > 0.0)
+	if ( ( (col1.r + col1.g + col1.b)/3.0 - threshold) > 0.0 )
 	{
 		col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
 	}
@@ -174,7 +174,7 @@ void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float thr
 			col1 = defaultColorMap( col1.r );
 	}
 
-	if ( length(col1) - threshold >  0.1)
+	if ( (col1.r + col1.g + col1.b)/3.0 - threshold >  0.0)
 	{
 		color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
 	}
