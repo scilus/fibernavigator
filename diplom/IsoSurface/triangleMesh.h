@@ -13,6 +13,8 @@
 #include <vector>
 #include "../DatasetHelper.h"
 
+#include "../Fantom/FIndex.h"
+
 #define PI 3.14159
 
 class TriangleMesh {
@@ -70,10 +72,14 @@ class TriangleMesh {
 		int getNumVertices()					{ return numVerts; };
 		int getNumTriangles()					{ return numTris; };
 		Vector getVertex (int vertNum) 			{ return vertices[vertNum]; };
+		Vector getVertex (int triNum, int pos);
 		Vector getNormal(int triNum)			{ return triNormals[triNum]; };
 		Vector getTriangle(int triNum)			{ return triangles[triNum]; };
 		std::vector<int> getStar(int vertNum) 	{ return vIsInTriangle[vertNum]; };
 		int getTriangleTensor(int triNum)		{ return triangleTensor[triNum];};
+
+		Vector getTriangleCenter(int triNum) ;
+
 
 		void setVertex(int vertNum, Vector nPos)	{ vertices[vertNum] = nPos; };
 		void eraseTriFromVert( int triNum, int vertNum);
@@ -96,6 +102,10 @@ class TriangleMesh {
 
 		void doLoopSubD();
 
+		void getCellVerticesIndices( const FIndex& cellId, std::vector< FIndex >& vertices ) const;
+		void getPosition( FPosition& resultPos, const FIndex& pIndex ) const;
+		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh ) const;
+		void getNeighbors( const FIndex& cellId, std::vector< FIndex >& neighs ) const;
 
 	private:
 

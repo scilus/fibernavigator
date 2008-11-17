@@ -105,6 +105,12 @@ Vector TriangleMesh::getVertNormal(int vertNum)
 	return sum;
 }
 
+Vector TriangleMesh::getVertex (int triNum, int pos)
+{
+	if (pos < 0 || pos > 2) pos = 0;
+	return vertices[triangles[triNum][pos]];
+}
+
 void TriangleMesh::calcVertNormals()
 {
 	vertNormals.clear();
@@ -156,7 +162,7 @@ int TriangleMesh::calcTriangleTensor(int triNum)
 
 	Vector v0 = vertices[triangles[triNum][0]];
 	Vector v1 = vertices[triangles[triNum][1]];
-	Vector v2= vertices[triangles[triNum][2]];
+	Vector v2 = vertices[triangles[triNum][2]];
 	Vector p = ( v0 + v1 + v2 )/3.0;
 	int x = (int)(p[0] + 0.5 );
 	int y = (int)(p[1] + 0.5 );
@@ -174,9 +180,13 @@ void TriangleMesh::calcTriangleTensors()
 	}
 }
 
-
-
-
+Vector TriangleMesh::getTriangleCenter(int triNum)
+{
+	Vector v0 = vertices[triangles[triNum][0]];
+	Vector v1 = vertices[triangles[triNum][1]];
+	Vector v2 = vertices[triangles[triNum][2]];
+	Vector p = ( v0 + v1 + v2 )/3.0;
+}
 
 bool TriangleMesh::hasEdge(int coVert1, int coVert2, int triangleNum){
 
@@ -184,8 +194,12 @@ bool TriangleMesh::hasEdge(int coVert1, int coVert2, int triangleNum){
 
 }
 
-bool TriangleMesh::isInTriangle(int vertNum, int triangleNum){
-
+bool TriangleMesh::isInTriangle(int vertNum, int triangleNum)
+{
+	return ( (vertNum == triangles[triangleNum][0]) ||
+			 (vertNum == triangles[triangleNum][1]) ||
+			 (vertNum == triangles[triangleNum][2]) );
+	/*
 	bool found = false;
 	int index = 0;
 
@@ -198,6 +212,7 @@ bool TriangleMesh::isInTriangle(int vertNum, int triangleNum){
 	}
 
 	return found;
+	*/
 }
 
 void TriangleMesh::clearMesh()
@@ -363,4 +378,45 @@ void TriangleMesh::cleanUp()
 void TriangleMesh::doLoopSubD()
 {
 	loopSubD loop(this);
+}
+
+
+void TriangleMesh::getCellVerticesIndices( const FIndex& triNum,
+							      std::vector< FIndex >& vertices ) const
+{
+    //assert( triNum < numTris );
+    vertices.clear();
+
+	vertices.push_back( triangles[triNum][0] );
+	vertices.push_back( triangles[triNum][1] );
+	vertices.push_back( triangles[triNum][2] );
+}
+
+void TriangleMesh::getPosition( FPosition& resultPos, const FIndex& pIndex ) const
+{
+    positive ind = pIndex.getIndex();
+
+    //assert( ind < numVerts );
+
+    resultPos.resize(3);
+
+    resultPos[0] = vertices[ind][0];
+    resultPos[1] = vertices[ind][1];
+    resultPos[2] = vertices[ind][2];
+}
+
+void TriangleMesh::getEdgeNeighbor( const FIndex& triNum, int pos, std::vector< FIndex >& neigh ) const
+{
+	//assert( triNum < numTris );
+	neigh.clear();
+	neigh.push_back(FIndex(neighbors[triNum][pos]));
+}
+
+void TriangleMesh::getNeighbors( const FIndex& triNum, std::vector< FIndex >& neighs ) const
+{
+	//assert( triNum < numTris );
+	neighs.clear();
+	neighs.push_back(FIndex(neighbors[triNum][0]));
+	neighs.push_back(FIndex(neighbors[triNum][1]));
+	neighs.push_back(FIndex(neighbors[triNum][2]));
 }
