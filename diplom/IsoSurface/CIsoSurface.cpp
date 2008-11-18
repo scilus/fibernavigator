@@ -696,9 +696,7 @@ void CIsoSurface::RenameVerticesAndTriangles()
 
 	m_tMesh->clearMesh();
 
-#if 1
-	// Copy all the vertices and triangles into two arrays so that they
-	// can be efficiently accessed.
+	// Copy all the vertices and triangles into triangle mesh
 	// Copy vertices.
 	mapIterator = m_i2pt3idVertices.begin();
 	m_nVertices = m_i2pt3idVertices.size();
@@ -713,33 +711,8 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++) {
 			m_tMesh->addTriangle((*vecIterator).pointID[0], (*vecIterator).pointID[1], (*vecIterator).pointID[2]);
 	}
-	m_tMesh->calcNeighbors();
-	m_tMesh->calcVertNormals();
 
-
-#else
-	m_tMesh->addVert(Vector(0., 0., 0.));
-	m_tMesh->addVert(Vector(0., 0., 100.));
-	m_tMesh->addVert(Vector(100., 0., 100.));
-	m_tMesh->addVert(Vector(100., 0., 0.));
-	m_tMesh->addVert(Vector(0., 100., 0.));
-	m_tMesh->addVert(Vector(0., 100., 100.));
-	m_tMesh->addVert(Vector(100., 100., 100.));
-	m_tMesh->addVert(Vector(100., 100., 0.));
-
-	m_tMesh->addTriangle(0, 1, 3);
-	m_tMesh->addTriangle(1, 2, 3);
-	m_tMesh->addTriangle(2, 7, 3);
-	m_tMesh->addTriangle(2, 6, 7);
-	m_tMesh->addTriangle(7, 6, 4);
-	m_tMesh->addTriangle(6, 5, 4);
-	m_tMesh->addTriangle(4, 5, 0);
-	m_tMesh->addTriangle(5, 1, 0);
-	m_tMesh->addTriangle(1, 5, 2);
-	m_tMesh->addTriangle(5, 6, 2);
-	m_tMesh->addTriangle(0, 3, 4);
-	m_tMesh->addTriangle(3, 7, 4);
-#endif
+	m_tMesh->finalize();
 
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();

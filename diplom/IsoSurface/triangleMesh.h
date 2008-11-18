@@ -42,6 +42,8 @@ class TriangleMesh {
 
 		// we don't delete vertices yet, so can do a cleanup only once
 		bool isCleaned;
+		// flag to indicate vertNormals and neighbors aren't calculated yet
+		bool isFinished;
 
 		Vector defaultColor;
 
@@ -52,54 +54,52 @@ class TriangleMesh {
 
 	// Operations
 	public:
-		void addVert(Vector newVert);
-		void addVert(float x, float y, float z);
-		void addTriangle(int vertA, int vertB, int vertC);
-		void addTriangle(int vertA, int vertB, int vertC, int tensorIndex);
+		void addVert(const Vector newVert);
+		void addVert(const float x, const float y, const float z);
+		void addTriangle(const int vertA, const int vertB, const int vertC);
+		void addTriangle(const int vertA, const int vertB, const int vertC, const int tensorIndex);
 
-		Vector calcTriangleNormal(Vector);
-		Vector calcTriangleNormal(int triNum);
+		Vector calcTriangleNormal(const Vector);
+		Vector calcTriangleNormal(const int triNum);
 
 		void calcVertNormals();
-		Vector getVertNormal(int vertNum);
+		Vector getVertNormal(const int vertNum);
 
-		int calcTriangleTensor(int triNum);
+		int calcTriangleTensor(const int triNum);
 		void calcTriangleTensors();
 
-		int getNeighbor(int coVert1, int coVert2, int triangleNum);
+		int getNeighbor(const int coVert1, const int coVert2, const int triangleNum);
 		void calcNeighbors();
-		void calcNeighbor(int triangleNum);
+		void calcNeighbor(const int triangleNum);
 
 		void clearMesh();
+		void finalize() { calcNeighbors(); calcVertNormals(); isFinished = true;};
 
-		int getNumVertices()					{ return numVerts; };
-		int getNumTriangles()					{ return numTris; };
-		Vector getVertex (int vertNum) 			{ return vertices[vertNum]; };
-		Vector getVertex (int triNum, int pos);
-		Vector getNormal(int triNum)			{ return triNormals[triNum]; };
-		Vector getTriangle(int triNum)			{ return triangles[triNum]; };
-		Vector getTriangleColor(int triNum)		{ return triangleColor[triNum];};
-		std::vector<int> getStar(int vertNum) 	{ return vIsInTriangle[vertNum]; };
-		int getTriangleTensor(int triNum)		{ return triangleTensor[triNum];};
+		int getNumVertices()							{ return numVerts; };
+		int getNumTriangles()							{ return numTris; };
+		Vector getVertex (const int vertNum) 			{ return vertices[vertNum]; };
+		Vector getVertex (const int triNum, int pos);
+		Vector getNormal(const int triNum)				{ return triNormals[triNum]; };
+		Vector getTriangle(const int triNum)			{ return triangles[triNum]; };
+		Vector getTriangleColor(const int triNum)		{ return triangleColor[triNum];};
+		std::vector<int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
+		int getTriangleTensor(const int triNum)			{ return triangleTensor[triNum];};
 
 		Vector getTriangleCenter(int triNum) ;
 
 
-		void setVertex(int vertNum, Vector nPos)	{ vertices[vertNum] = nPos; };
-		void eraseTriFromVert( int triNum, int vertNum);
+		void setVertex(const int vertNum, const Vector nPos)	{ vertices[vertNum] = nPos; };
+		void eraseTriFromVert( const int triNum, const int vertNum);
 
-		void setTriangle(int triNum, int vertA, int vertB, int vertC);
-		void setTriangleColor(int triNum, float r, float g, float b);
+		void setTriangle(const int triNum, const int vertA, const int vertB, const int vertC);
+		void setTriangleColor(const int triNum, const float r, const float g, const float b);
 
-		bool isInTriangle(int vertNum, int triangleNum);
+		bool isInTriangle(const int vertNum, const int triangleNum);
 
-		bool hasEdge(int coVert1, int coVert2, int triangleNum);
-		int getThirdVert(int coVert1, int coVert2, int triangleNum);
+		bool hasEdge(const int coVert1, const int coVert2, const int triangleNum);
+		int getThirdVert(const int coVert1, const int coVert2, const int triangleNum);
 
-
-		int** removeTriangles();
-
-		int getNextVertex(int triNum, int vertNum);
+		int getNextVertex(const int triNum, const int vertNum);
 
 		bool getOpenMeshError() { return openMeshError; };
 

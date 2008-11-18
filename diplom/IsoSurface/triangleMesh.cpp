@@ -12,6 +12,7 @@ TriangleMesh::TriangleMesh (DatasetHelper* dh)
 	defaultColor = Vector(0.5f, 0.5f, 0.5f);
 
 	isCleaned = false;
+	isFinished = false;
 }
 
 // Destructor
@@ -22,7 +23,7 @@ TriangleMesh::~TriangleMesh ()
 
 // Operations
 
-void TriangleMesh::addVert(Vector newVert)
+void TriangleMesh::addVert(const Vector newVert)
 {
 	vertices.push_back( newVert );
 	std::vector<int> v;
@@ -30,7 +31,7 @@ void TriangleMesh::addVert(Vector newVert)
 	numVerts = vertices.size();
 }
 
-void TriangleMesh::addVert(float x, float y, float z)
+void TriangleMesh::addVert(const float x, const float y, const float z)
 {
 	Vector newVert(x,y,z);
 	vertices.push_back( newVert );
@@ -40,7 +41,7 @@ void TriangleMesh::addVert(float x, float y, float z)
 }
 
 
-void TriangleMesh::addTriangle(int vertA, int vertB, int vertC)
+void TriangleMesh::addTriangle(const int vertA, const int vertB, const int vertC)
 {
 	Vector t(vertA, vertB, vertC);
 	triangles.push_back(t);
@@ -62,7 +63,7 @@ void TriangleMesh::addTriangle(int vertA, int vertB, int vertC)
 	triangleColor.push_back(defaultColor);
 }
 
-void TriangleMesh::addTriangle(int vertA, int vertB, int vertC, int tensorIndex)
+void TriangleMesh::addTriangle(const int vertA, const int vertB, const int vertC, const int tensorIndex)
 {
 	Vector t(vertA, vertB, vertC);
 	triangles.push_back(t);
@@ -77,13 +78,14 @@ void TriangleMesh::addTriangle(int vertA, int vertB, int vertC, int tensorIndex)
 	triangleColor.push_back(defaultColor);
 }
 
-void TriangleMesh::setTriangleColor(int triNum, float r, float g, float b)
+void TriangleMesh::setTriangleColor(const int triNum, const float r, const float g, const float b)
 {
 	Vector c(r,g,b);
 	triangleColor[triNum] = c;
 }
 
-Vector TriangleMesh::calcTriangleNormal(Vector t){
+Vector TriangleMesh::calcTriangleNormal(const Vector t)
+{
 
 	Vector v1 = vertices[t[1]] - vertices[t[0]];
 	Vector v2 = vertices[t[2]] - vertices[t[0]];
@@ -93,7 +95,8 @@ Vector TriangleMesh::calcTriangleNormal(Vector t){
 	return tempNormal;
 }
 
-Vector TriangleMesh::calcTriangleNormal(int triNum){
+Vector TriangleMesh::calcTriangleNormal(const int triNum)
+{
 
 	Vector v1 = vertices[triangles[triNum][1]] - vertices[triangles[triNum][0]];
 	Vector v2 = vertices[triangles[triNum][2]] - vertices[triangles[triNum][0]];
@@ -103,7 +106,7 @@ Vector TriangleMesh::calcTriangleNormal(int triNum){
 	return tempNormal;
 }
 
-Vector TriangleMesh::getVertNormal(int vertNum)
+Vector TriangleMesh::getVertNormal(const int vertNum)
 {
 	Vector sum(0,0,0);
 
@@ -115,7 +118,7 @@ Vector TriangleMesh::getVertNormal(int vertNum)
 	return sum;
 }
 
-Vector TriangleMesh::getVertex (int triNum, int pos)
+Vector TriangleMesh::getVertex (const int triNum, int pos)
 {
 	if (pos < 0 || pos > 2) pos = 0;
 	return vertices[triangles[triNum][pos]];
@@ -128,7 +131,7 @@ void TriangleMesh::calcVertNormals()
 		vertNormals.push_back(getVertNormal(i));
 }
 
-int TriangleMesh::getNeighbor(int coVert1, int coVert2, int triangleNum)
+int TriangleMesh::getNeighbor(const int coVert1, const int coVert2, const int triangleNum)
 {
 	std::vector<int>candidates = vIsInTriangle[coVert1];
 	std::vector<int>compares   = vIsInTriangle[coVert2];
@@ -156,7 +159,7 @@ void TriangleMesh::calcNeighbors()
 	}
 }
 
-void TriangleMesh::calcNeighbor(int triangleNum)
+void TriangleMesh::calcNeighbor(const int triangleNum)
 {
 	int coVert0 = triangles[triangleNum][0];
 	int coVert1 = triangles[triangleNum][1];
@@ -167,7 +170,7 @@ void TriangleMesh::calcNeighbor(int triangleNum)
 	neighbors[triangleNum][2] = getNeighbor(coVert2, coVert0, triangleNum);
 }
 
-int TriangleMesh::calcTriangleTensor(int triNum)
+int TriangleMesh::calcTriangleTensor(const int triNum)
 {
 	Vector p = getTriangleCenter(triNum);
 	int x = wxMin(m_dh->columns-1, wxMax(0,(int)(p[0] + 0.5)));
@@ -185,7 +188,7 @@ void TriangleMesh::calcTriangleTensors()
 	}
 }
 
-Vector TriangleMesh::getTriangleCenter(int triNum)
+Vector TriangleMesh::getTriangleCenter(const int triNum)
 {
 	Vector v0 = vertices[(int)triangles[triNum][0]];
 	Vector v1 = vertices[(int)triangles[triNum][1]];
@@ -194,31 +197,17 @@ Vector TriangleMesh::getTriangleCenter(int triNum)
 	return p;
 }
 
-bool TriangleMesh::hasEdge(int coVert1, int coVert2, int triangleNum){
+bool TriangleMesh::hasEdge(const int coVert1, const int coVert2, const int triangleNum){
 
 	return(isInTriangle(coVert1,triangleNum) && isInTriangle(coVert2,triangleNum));
 
 }
 
-bool TriangleMesh::isInTriangle(int vertNum, int triangleNum)
+bool TriangleMesh::isInTriangle(const int vertNum, const int triangleNum)
 {
 	return ( (vertNum == triangles[triangleNum][0]) ||
 			 (vertNum == triangles[triangleNum][1]) ||
 			 (vertNum == triangles[triangleNum][2]) );
-	/*
-	bool found = false;
-	int index = 0;
-
-	while(!found && (index < 3)){
-		if(vertNum == triangles[triangleNum][index]){
-			found = true;
-		} else {
-			index++;
-		}
-	}
-
-	return found;
-	*/
 }
 
 void TriangleMesh::clearMesh()
@@ -226,20 +215,17 @@ void TriangleMesh::clearMesh()
 	vertices.clear();
 	vertNormals.clear();
 	triangles.clear();
+	triangleTensor.clear();
+	triangleColor.clear();
 	neighbors.clear();
 	triNormals.clear();
 	vIsInTriangle.clear();
 
 	numVerts	 = 0;
 	numTris		 = 0;
-
 }
 
-
-
-
-
-int TriangleMesh::getThirdVert(int coVert1, int coVert2, int triangleNum)
+int TriangleMesh::getThirdVert(const int coVert1, const int coVert2, const int triangleNum)
 {
 	int index = 0;
 	bool found = false;
@@ -256,7 +242,7 @@ int TriangleMesh::getThirdVert(int coVert1, int coVert2, int triangleNum)
 }
 
 
-void TriangleMesh::setTriangle(int triNum, int vertA, int vertB, int vertC)
+void TriangleMesh::setTriangle(const int triNum, const int vertA, const int vertB, const int vertC)
 {
 	// TODO
 	eraseTriFromVert(triNum, triangles[triNum][1]);
@@ -272,7 +258,7 @@ void TriangleMesh::setTriangle(int triNum, int vertA, int vertB, int vertC)
 	triNormals[triNum] = calcTriangleNormal(triNum);
 }
 
-void TriangleMesh::eraseTriFromVert(int triNum, int vertNum)
+void TriangleMesh::eraseTriFromVert(const int triNum, const int vertNum)
 {
 	std::vector<int>temp;
 	for ( size_t i = 0 ; i < vIsInTriangle[vertNum].size() ; ++i)
@@ -283,7 +269,7 @@ void TriangleMesh::eraseTriFromVert(int triNum, int vertNum)
 	vIsInTriangle[vertNum] = temp;
 }
 
-int TriangleMesh::getNextVertex(int triNum, int vertNum)
+int TriangleMesh::getNextVertex(const int triNum, const int vertNum)
 {
 	int answer = -1;
 
