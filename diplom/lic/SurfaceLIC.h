@@ -57,17 +57,16 @@ private:
 	int nbCells;
 
 	// profile stuff
-	void initialize(void);
 	double max_length;
-	double maxArea;
 	unsigned int nbFold;
 	double offset;
-	unsigned int maxSubdiv, modulo;
-	bool optimizeShape, black, uniform;
-	unsigned int mode;
+	unsigned int modulo;
+	bool optimizeShape, black;
+
+	positive min_length;
+	positive threshold;
 
 	//  double normalx, normaly, normalz;
-	F::FVector mynormal;
 	void calculatePixelLuminance(const FIndex& cellId);
 
 	MyLICStreamline *streamline;
@@ -84,31 +83,7 @@ private:
 
 	positive nbVisited;
 
-	void refineGrid();
 	void displayTexture();
-
-	std::list<std::string> fieldSelectionList;
-	FIndex selField;
-	int tfID[100];
-	bool whitenoise;
-	FIndex SourceField_id;
-/*
-	struct sourceFilter_t: public FGenPro::TensorFieldFilter {
-		bool accept(FTensorFieldInfo& info) {
-			return (shared_dynamic_cast<const FCellDefinitions3DTriangulation> (
-					info.cellDef) && !info.isCellBased);
-		}
-	} src_filter;
-
-	struct textureFilter_t: public FGenPro::TensorFieldFilter {
-		bool accept(FTensorFieldInfo& info) {
-			if (info.tensorOrder == 0) {
-				return true;
-			}
-			return false;
-		}
-	} textureFilter;
-	*/
 };
 
 #endif /* SURFACELIC_H_ */

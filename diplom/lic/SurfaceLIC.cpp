@@ -13,13 +13,13 @@ SurfaceLIC::SurfaceLIC(DatasetHelper* dh, TriangleMesh* grid) {
 	m_grid = grid;
 
 	nbFold = 20;
-	maxArea = 0.;
-	max_length = 1.;
-	maxSubdiv = 4;
+	max_length = 10.;
 	modulo = 20;
-	optimizeShape = false;
+
 	black = true;
-	uniform = false;
+
+	min_length = 10;
+	threshold = 10;
 
 	nbCells = m_grid->getNumTriangles();
 }
@@ -52,7 +52,7 @@ void SurfaceLIC::execute() {
 		}
 		// cell-based streamlines
 		streamline = new MyLICStreamline(m_dh, m_grid);
-		streamline->setParams(&hit_texture, 10, 10);
+		streamline->setParams(&hit_texture, min_length, threshold);
 
 		// iterate over all texture points
 		positive m, q, n = 0;
@@ -132,12 +132,6 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 		line.push_back(steps[i](2));
 	}
 	testLines.push_back(line);
-	//   FgeLineStrips *lines = new FgeLineStrips();
-	//   lines->setNewColor( drand48(), drand48(), drand48() );
-	//   vector< FArray > steps = streamline->getIntermediateSteps();
-	//   for ( positive i=0 ; i<steps.size() ; i++ )
-	//     lines->setNewVertex( steps[i](0), steps[i](1), steps[i](2) );
-	//   primitive_handler->commitPrimitive( listId, lines );
 
 	streamline->integrate(start, cellId, false, max_length);
 	visitedBwd = streamline->getVisitedCells();
@@ -152,16 +146,9 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 	}
 	testLines.push_back(line);
 
-	//   lines = new FgeLineStrips();
-	//   lines->setNewColor( drand48(), drand48(), drand48() );
-	//   steps = streamline->getIntermediateSteps();
-	//   for ( positive i=0 ; i<steps.size() ; i++ )
-	//     lines->setNewVertex( steps[i](0), steps[i](1), steps[i](2) );
-	//   primitive_handler->commitPrimitive( listId, lines );
 
 	positive total_sz = visitedFwd.size() + visitedBwd.size();
 
-	   //std::cout << std::endl << "streamline size = " << total_sz << std::endl;
 
 	// adjust kernel size to streamline length
 	positive kernel_sz = nbFold;
@@ -239,12 +226,6 @@ public:
 //---------------------------------------------------------------------------
 
 void SurfaceLIC::displayTexture() {
-	FArray refnormal = mynormal; //FArray( normalx, normaly, normalz );
-	bool normalcontrol = (refnormal.norm() != 0.);
-	if (normalcontrol)
-		refnormal.normalize();
-	FArray normal;
-
 	double gray;
 
 	for (int i = 0 ; i < nbCells ; ++i)
@@ -257,16 +238,6 @@ void SurfaceLIC::displayTexture() {
 		m_grid->setTriangleColor(i, gray, gray, gray);
 
 	}
-/*
-	for (int i = 0 ; i < nbCells ; ++i)
-	{
-		int index = m_grid->getTriangleTensor(i);
-		FArray c = FArray(m_dh->getTensorField()->getTensorAtIndex(index));
-
-		m_grid->setTriangleColor(i, c[0], c[1], c[2]);
-
-	}
-*/
 }
 
 //---------------------------------------------------------------------------
