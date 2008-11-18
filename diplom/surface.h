@@ -26,7 +26,8 @@ public:
 	void createCutTexture();
 	void drawVectors();
 	void clean() {};
-	void smooth() {m_tMesh->doLoopSubD();};
+	void smooth() {m_tMesh->doLoopSubD(); licCalculated = false;};
+	void activateLIC();
 
 	void movePoints();
 
@@ -68,7 +69,7 @@ private:
 	float* m_pointArray;
 	float m_xValue;
 	int m_count;
-	bool licCalculated;
+	int subDCount;
 
 	KdTree *m_kdTree;
 	DatasetHelper* m_dh;

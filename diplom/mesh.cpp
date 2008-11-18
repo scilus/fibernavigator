@@ -196,3 +196,8 @@ void Mesh::generateGeometry()
 	glEndList();
 	m_GLuint = dl;
 }
+
+void Mesh::activateLIC()
+{
+
+}

@@ -27,6 +27,7 @@ public:
 	void drawVectors() {};
 	void clean() {};
 	void smooth() {};
+	void activateLIC() {};
 
 	wxUint8* getByteDataset();
 	float* getFloatDataset();

@@ -16,7 +16,7 @@ SurfaceLIC::SurfaceLIC(DatasetHelper* dh, TriangleMesh* grid) {
 	maxArea = 0.;
 	max_length = 1.;
 	maxSubdiv = 4;
-	modulo = 10;
+	modulo = 20;
 	optimizeShape = false;
 	black = true;
 	uniform = false;

@@ -880,7 +880,12 @@ void MainFrame::OnToggleDrawVectors(wxCommandEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::OnToggleLIC(wxCommandEvent& WXUNUSED(event))
 {
-	m_dh->use_lic = !m_dh->use_lic;
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		info->activateLIC();
+	}
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************

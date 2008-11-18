@@ -17,6 +17,7 @@ uniform float threshold[10];
 uniform float alpha[10];
 uniform int type[10];
 uniform int countTextures;
+uniform bool useLic;
 
 #include functions.fs
 
@@ -106,5 +107,9 @@ void main() {
 	color.a = alpha_;
 	color = clamp(color, 0.0, 1.0);
 
-	gl_FragColor = color;
+	if (useLic)
+			gl_FragColor = (0.7  * gl_Color) + (0.3 * color);
+		else
+			gl_FragColor = color;
+	//gl_FragColor = color;
 }

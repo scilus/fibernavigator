@@ -37,6 +37,7 @@ public:
 	void drawVectors() {};
 	void clean() {};
 	void smooth() {};
+	void activateLIC() {};
 
 	int getPointsPerLine(int);
 	int getStartIndexForLine(int);

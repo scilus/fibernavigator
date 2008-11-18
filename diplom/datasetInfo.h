@@ -65,6 +65,7 @@ public:
 	virtual void drawVectors()=0;
 	virtual void clean()=0;
 	virtual void smooth()=0;
+	virtual void activateLIC()=0;
 
 	wxTreeItemId getTreeId() const {return m_treeId;};
     void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;m_hasTreeId = true;};
@@ -94,6 +95,7 @@ public:
 	bool toggleShow() {m_show = !m_show; return m_show;};
 	bool toggleShowFS() {m_showFS = !m_showFS; return m_showFS;};
 	bool toggleUseTex() {m_useTex = !m_useTex; return m_useTex;};
+	bool toggleUseLIC() {m_useLIC = !m_useLIC; return m_useLIC;};
 
 	void setShow(bool v) {m_show = v;};
 	void setShowFS(bool v) {m_showFS = v;};
@@ -102,6 +104,7 @@ public:
 	bool getShowFS() {return m_showFS;};
 	bool getUseTex() {return m_useTex;};
 	bool hasTreeId() {return m_hasTreeId;};
+	bool getUseLIC() {return m_useLIC;};
 
 	void setGLuint(GLuint value) {m_GLuint = value;};
 	GLuint getGLuint() {return m_GLuint;};
@@ -137,6 +140,8 @@ protected:
 	bool m_showFS;	// show front sector for meshs
 	bool m_useTex; 	// color mesh with textures loaded,
 					// if false use colormap on threshold value
+	bool licCalculated;
+	bool m_useLIC;
 	GLuint *m_bufferObjects;
 };
 

@@ -9,6 +9,7 @@
 #include <math.h>
 #include "CIsoSurface.h"
 #include <algorithm>
+#include "../lic/SurfaceLIC.h"
 
 const unsigned int CIsoSurface::m_edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -362,6 +363,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 	m_bValidSurface = false;
 
 	m_tMesh = new TriangleMesh(m_dh);
+	licCalculated = false;
 }
 
 CIsoSurface::~CIsoSurface()
@@ -714,6 +716,7 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	m_tMesh->calcNeighbors();
 	m_tMesh->calcVertNormals();
 
+
 #else
 	m_tMesh->addVert(Vector(0., 0., 0.));
 	m_tMesh->addVert(Vector(0., 0., 100.));
@@ -803,6 +806,7 @@ void CIsoSurface::generateGeometry()
 	Vector triangleEdges;
 	Vector point;
 	Vector pointNormal;
+	Vector color;
 
 	glBegin(GL_TRIANGLES);
 		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
@@ -826,4 +830,9 @@ void CIsoSurface::GenerateWithThreshold()
 {
 	GenerateSurface((int)(255*m_threshold));
 	generateGeometry();
+}
+
+void CIsoSurface::activateLIC()
+{
+
 }

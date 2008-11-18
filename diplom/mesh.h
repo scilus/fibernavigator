@@ -47,6 +47,7 @@ public:
 	void drawVectors() {};
 	void clean() {m_tMesh->cleanUp();};
 	void smooth() {m_tMesh->doLoopSubD();};
+	void activateLIC();
 
 	void setFiletype(int value) 	  {m_filetype = value;};
 	void setCountVerts(int value) 	  {m_countVerts = value;};

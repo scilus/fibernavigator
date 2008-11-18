@@ -35,6 +35,7 @@ Surface::Surface(DatasetHelper* dh)
 	m_tMesh = NULL;
 
 	licCalculated = false;
+	subDCount = 0;
 	execute();
 }
 
@@ -284,11 +285,13 @@ void Surface::execute ()
 //TODO
 	for (int i = 0 ; i < 3 ; ++i)
 		m_tMesh->doLoopSubD();
+	subDCount = 3;
 
-	if (m_dh->vectors_loaded && m_dh->use_lic)
+	if (m_dh->vectors_loaded && m_useLIC)
 	{
 		m_tMesh->doLoopSubD();
 		m_tMesh->doLoopSubD();
+		subDCount = 5;
 		printf("initiating lic\n");
 		SurfaceLIC lic(m_dh, m_tMesh);
 		printf("initiating lic 2\n");
@@ -538,4 +541,21 @@ void Surface::drawLIC()
 	}
 
 
+}
+
+void Surface::activateLIC()
+{
+	m_useLIC = !m_useLIC;
+	if (!m_useLIC) return;
+
+	for (int i = subDCount ; i < 5 ; ++i)
+		m_tMesh->doLoopSubD();
+	subDCount = 5;
+
+	SurfaceLIC lic(m_dh, m_tMesh);
+	lic.execute();
+	m_testLines.clear();
+	if (m_dh->drawVectors)
+		m_testLines = lic.testLines;
+	licCalculated = true;
 }
