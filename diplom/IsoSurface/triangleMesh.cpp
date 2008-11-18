@@ -414,3 +414,8 @@ void TriangleMesh::getNeighbors( const FIndex& vertId, std::vector< FIndex >& ne
 		neighs.push_back(FIndex(neighbors[i]));
 	}
 }
+
+void TriangleMesh::flipNormals()
+{
+
+}

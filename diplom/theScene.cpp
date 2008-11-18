@@ -168,6 +168,11 @@ void TheScene::renderSplineSurface()
 		{
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+			if (m_dh->scene->getPointMode())
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			else
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 			bindTextures();
 
 			lightsOn();
@@ -181,9 +186,7 @@ void TheScene::renderSplineSurface()
 			m_dh->shaderHelper->m_splineSurfShader->setUniInt("useLic", info->getUseLIC());
 			m_dh->shaderHelper->m_splineSurfShader->setUniInt("useColorMap", m_dh->colorMap);
 
-			//info->draw();
-			Surface* surf = (Surface*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-			surf->drawLIC();
+			info->draw();
 
 			m_dh->shaderHelper->m_splineSurfShader->release();
 

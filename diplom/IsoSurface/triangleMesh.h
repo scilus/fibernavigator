@@ -62,6 +62,8 @@ class TriangleMesh {
 		Vector calcTriangleNormal(const Vector);
 		Vector calcTriangleNormal(const int triNum);
 
+		void flipNormals();
+
 		void calcVertNormals();
 		Vector getVertNormal(const int vertNum);
 

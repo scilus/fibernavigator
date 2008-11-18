@@ -898,6 +898,18 @@ void MainFrame::OnToggleNormal(wxCommandEvent& WXUNUSED(event))
 	m_dh->normalDirection *= -1.0;
 	m_dh->surface_isDirty = true;
 	refreshAllGLWidgets();
+	/*
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() < Surface_ )
+		{
+			Surface* surf = (Surface*)m_listCtrl->GetItemData(item);
+		}
+	}
+	refreshAllGLWidgets();
+*/
 }
 
 /****************************************************************************************************

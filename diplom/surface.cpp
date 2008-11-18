@@ -302,6 +302,7 @@ void Surface::execute ()
 	}
 
 	m_dh->surface_isDirty = false;
+	generateGeometry();
 
 	createCutTexture();
 }
@@ -321,30 +322,11 @@ void Surface::draw()
 		execute();
 	}
 
-	//m_dh->mainFrame->m_gl0->testRender(m_GLuint);
+	glCallList(m_GLuint2);
 
-	if (m_dh->scene->getPointMode())
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	else
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if ( m_dh->drawVectors && licCalculated)
+		glCallList(m_GLuint3);
 
-	Vector triangleEdges;
-	Vector point;
-	Vector pointNormal;
-
-	glBegin(GL_TRIANGLES);
-		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
-		{
-			triangleEdges = m_tMesh->getTriangle(i);
-			for(int j = 0 ; j < 3 ; ++j)
-			{
-				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
-				glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
-				point = m_tMesh->getVertex(triangleEdges[j]);
-				glVertex3d(point.x, point.y, point.z);
-			}
-		}
-	glEnd();
 }
 
 void Surface::movePoints()
@@ -491,20 +473,64 @@ void Surface::drawVectors()
 	*/
 }
 
-void Surface::drawLIC()
+void Surface::activateLIC()
 {
+	m_useLIC = !m_useLIC;
+	if (!m_useLIC || licCalculated) return;
 
-	if (m_dh->surface_isDirty || (m_dh->use_lic && !licCalculated))
+	for (int i = subDCount ; i < 5 ; ++i)
+		m_tMesh->doLoopSubD();
+	subDCount = 5;
+
+	SurfaceLIC lic(m_dh, m_tMesh);
+	lic.execute();
+	m_testLines.clear();
+	//if (m_dh->drawVectors)
+		m_testLines = lic.testLines;
+	licCalculated = true;
+
+	generateGeometry();
+}
+
+void Surface::generateGeometry()
+{
+	if (m_useLIC)
 	{
-		execute();
+		generateLICGeometry();
+		return;
 	}
 
-	//m_dh->mainFrame->m_gl0->testRender(m_GLuint);
+	if (m_GLuint2) glDeleteLists(m_GLuint2, 1);
+	GLuint dl = glGenLists(1);
+	glNewList (dl, GL_COMPILE);
 
-	if (m_dh->scene->getPointMode())
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	else
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	Vector triangleEdges;
+	Vector point;
+	Vector pointNormal;
+
+	glBegin(GL_TRIANGLES);
+		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
+		{
+			triangleEdges = m_tMesh->getTriangle(i);
+			for(int j = 0 ; j < 3 ; ++j)
+			{
+				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
+				glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
+				point = m_tMesh->getVertex(triangleEdges[j]);
+				glVertex3d(point.x, point.y, point.z);
+			}
+		}
+	glEnd();
+
+	glEndList();
+	m_GLuint2 = dl;
+}
+
+void Surface::generateLICGeometry()
+{
+	if (m_GLuint2) glDeleteLists(m_GLuint2, 1);
+	GLuint dl = glGenLists(1);
+	glNewList (dl, GL_COMPILE);
 
 	Vector triangleEdges;
 	Vector point;
@@ -527,7 +553,13 @@ void Surface::drawLIC()
 		}
 	glEnd();
 
-	if (m_dh->drawVectors)
+	glEndList();
+	m_GLuint2 = dl;
+
+	if (m_GLuint3) glDeleteLists(m_GLuint3, 1);
+	GLuint dl2 = glGenLists(1);
+	glNewList (dl2, GL_COMPILE);
+
 	for (size_t i = 0 ; i < m_testLines.size() ; ++i)
 	{
 		//printf("draw line of size %d\n", m_testLines[i].size());
@@ -540,23 +572,6 @@ void Surface::drawLIC()
 		}
 		glEnd();
 	}
-
-
-}
-
-void Surface::activateLIC()
-{
-	m_useLIC = !m_useLIC;
-	if (!m_useLIC || licCalculated) return;
-
-	for (int i = subDCount ; i < 5 ; ++i)
-		m_tMesh->doLoopSubD();
-	subDCount = 5;
-
-	SurfaceLIC lic(m_dh, m_tMesh);
-	lic.execute();
-	m_testLines.clear();
-	//if (m_dh->drawVectors)
-		m_testLines = lic.testLines;
-	licCalculated = true;
+	glEndList();
+	m_GLuint3 = dl2;
 }

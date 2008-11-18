@@ -21,7 +21,8 @@ public:
 	bool load(wxString filename) {return false;};
 	void draw();
 	void generateTexture() {};
-	void generateGeometry() {};
+	void generateGeometry();
+	void generateLICGeometry() ;
 	void initializeBuffer() {};
 	void createCutTexture();
 	void drawVectors();
@@ -30,8 +31,8 @@ public:
 	void activateLIC();
 
 	void movePoints();
+	void flipNormals() {m_tMesh->flipNormals();};
 
-	void drawLIC();
 
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
 	void setSetSampleRate(float r) {m_sampleRateT = m_sampleRateU = r; execute();};
@@ -70,6 +71,8 @@ private:
 	float m_xValue;
 	int m_count;
 	int subDCount;
+	GLuint m_GLuint2;
+	GLuint m_GLuint3;
 
 	KdTree *m_kdTree;
 	DatasetHelper* m_dh;
