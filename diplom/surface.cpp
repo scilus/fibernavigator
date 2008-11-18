@@ -546,7 +546,7 @@ void Surface::drawLIC()
 void Surface::activateLIC()
 {
 	m_useLIC = !m_useLIC;
-	if (!m_useLIC) return;
+	if (!m_useLIC || licCalculated) return;
 
 	for (int i = subDCount ; i < 5 ; ++i)
 		m_tMesh->doLoopSubD();
@@ -555,7 +555,7 @@ void Surface::activateLIC()
 	SurfaceLIC lic(m_dh, m_tMesh);
 	lic.execute();
 	m_testLines.clear();
-	if (m_dh->drawVectors)
+	//if (m_dh->drawVectors)
 		m_testLines = lic.testLines;
 	licCalculated = true;
 }
