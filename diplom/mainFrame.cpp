@@ -881,7 +881,7 @@ void MainFrame::OnToggleDrawVectors(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnToggleLIC(wxCommandEvent& WXUNUSED(event))
 {
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-	if (item != -1)
+	if (item != -1 && m_dh->vectors_loaded)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
 		info->activateLIC();
