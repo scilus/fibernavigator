@@ -256,13 +256,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				m_dh->m_isrDragging = false;
 			}
 
-			if (event.RightUp())
-			{
-				if (m_dh->surface_loaded)
-					m_dh->surface_isDirty = true;
-				Refresh(false);
-			}
-
 		} break;
 
 		case axial:
