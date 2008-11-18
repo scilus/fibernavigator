@@ -12,7 +12,7 @@ TriangleMesh::TriangleMesh (DatasetHelper* dh)
 	defaultColor = Vector(0.5f, 0.5f, 0.5f);
 
 	isCleaned = false;
-	isFinished = false;
+	m_isFinished = false;
 }
 
 // Destructor
@@ -26,18 +26,20 @@ TriangleMesh::~TriangleMesh ()
 void TriangleMesh::addVert(const Vector newVert)
 {
 	vertices.push_back( newVert );
-	std::vector<int> v;
-	vIsInTriangle.push_back( v );
+	//std::vector<int> v;
+	//vIsInTriangle.push_back( v );
 	numVerts = vertices.size();
+	vIsInTriangle.resize(numVerts);
 }
 
 void TriangleMesh::addVert(const float x, const float y, const float z)
 {
 	Vector newVert(x,y,z);
 	vertices.push_back( newVert );
-	std::vector<int> v;
-	vIsInTriangle.push_back( v );
+	//std::vector<int> v;
+	//vIsInTriangle.push_back( v );
 	numVerts = vertices.size();
+	vIsInTriangle.resize(numVerts);
 }
 
 
@@ -369,6 +371,7 @@ void TriangleMesh::cleanUp()
 
 void TriangleMesh::doLoopSubD()
 {
+	if (!m_isFinished) finalize();
 	loopSubD loop(this);
 }
 

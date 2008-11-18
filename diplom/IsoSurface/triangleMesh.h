@@ -43,7 +43,7 @@ class TriangleMesh {
 		// we don't delete vertices yet, so can do a cleanup only once
 		bool isCleaned;
 		// flag to indicate vertNormals and neighbors aren't calculated yet
-		bool isFinished;
+		bool m_isFinished;
 
 		Vector defaultColor;
 
@@ -73,17 +73,18 @@ class TriangleMesh {
 		void calcNeighbor(const int triangleNum);
 
 		void clearMesh();
-		void finalize() { calcNeighbors(); calcVertNormals(); isFinished = true;};
+		void finalize() { calcNeighbors(); calcVertNormals(); m_isFinished = true;};
 
 		int getNumVertices()							{ return numVerts; };
 		int getNumTriangles()							{ return numTris; };
 		Vector getVertex (const int vertNum) 			{ return vertices[vertNum]; };
 		Vector getVertex (const int triNum, int pos);
 		Vector getNormal(const int triNum)				{ return triNormals[triNum]; };
-		Vector getTriangle(const int triNum)			{ return triangles[triNum]; };
-		Vector getTriangleColor(const int triNum)		{ return triangleColor[triNum];};
+		Vector getTriangle(const int triNum)			{ return triangles[triNum];  };
+		Vector getTriangleColor(const int triNum)		{ return triangleColor[triNum]; };
 		std::vector<int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
-		int getTriangleTensor(const int triNum)			{ return triangleTensor[triNum];};
+		int getTriangleTensor(const int triNum)			{ return triangleTensor[triNum]; };
+		bool isFinished()								{ return m_isFinished; }
 
 		Vector getTriangleCenter(int triNum) ;
 

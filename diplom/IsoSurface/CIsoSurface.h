@@ -48,6 +48,7 @@ public:
 	void draw() {};
 	void generateTexture() {};
 	void generateGeometry() ;
+	void generateLICGeometry() ;
 	void initializeBuffer() {};
 	void drawVectors() {};
 	void clean() {m_tMesh->cleanUp();};
@@ -113,9 +114,6 @@ protected:
 	// Renames vertices and triangles so that they can be accessed more
 	// efficiently.
 	void RenameVerticesAndTriangles();
-
-	// Calculates the normals.
-	void CalculateNormals();
 
 	// No. of cells in x, y, and z directions.
 	unsigned int m_nCellsX, m_nCellsY, m_nCellsZ;

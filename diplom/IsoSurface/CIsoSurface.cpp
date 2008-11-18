@@ -364,6 +364,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 
 	m_tMesh = new TriangleMesh(m_dh);
 	licCalculated = false;
+	m_useLIC = false;
 }
 
 CIsoSurface::~CIsoSurface()
@@ -718,55 +719,45 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	m_trivecTriangles.clear();
 }
 
-void CIsoSurface::CalculateNormals()
+void CIsoSurface::generateGeometry()
 {
-	m_nNormals = m_nVertices;
-	m_pvec3dNormals = new VECTOR3D[m_nNormals];
-
-	// Set all normals to 0.
-	for (unsigned int i = 0; i < m_nNormals; i++) {
-		m_pvec3dNormals[i][0] = 0;
-		m_pvec3dNormals[i][1] = 0;
-		m_pvec3dNormals[i][2] = 0;
+	if (m_useLIC)
+	{
+		generateLICGeometry();
+		return;
 	}
 
-	// Calculate normals.
-	for (unsigned int i = 0; i < m_nTriangles; i++) {
-		VECTOR3D vec1, vec2, normal;
-		unsigned int id0, id1, id2;
-		id0 = m_piTriangleIndices[i*3];
-		id1 = m_piTriangleIndices[i*3+1];
-		id2 = m_piTriangleIndices[i*3+2];
-		vec1[0] = m_ppt3dVertices[id1][0] - m_ppt3dVertices[id0][0];
-		vec1[1] = m_ppt3dVertices[id1][1] - m_ppt3dVertices[id0][1];
-		vec1[2] = m_ppt3dVertices[id1][2] - m_ppt3dVertices[id0][2];
-		vec2[0] = m_ppt3dVertices[id2][0] - m_ppt3dVertices[id0][0];
-		vec2[1] = m_ppt3dVertices[id2][1] - m_ppt3dVertices[id0][1];
-		vec2[2] = m_ppt3dVertices[id2][2] - m_ppt3dVertices[id0][2];
-		normal[0] = vec1[2]*vec2[1] - vec1[1]*vec2[2];
-		normal[1] = vec1[0]*vec2[2] - vec1[2]*vec2[0];
-		normal[2] = vec1[1]*vec2[0] - vec1[0]*vec2[1];
-		m_pvec3dNormals[id0][0] += normal[0];
-		m_pvec3dNormals[id0][1] += normal[1];
-		m_pvec3dNormals[id0][2] += normal[2];
-		m_pvec3dNormals[id1][0] += normal[0];
-		m_pvec3dNormals[id1][1] += normal[1];
-		m_pvec3dNormals[id1][2] += normal[2];
-		m_pvec3dNormals[id2][0] += normal[0];
-		m_pvec3dNormals[id2][1] += normal[1];
-		m_pvec3dNormals[id2][2] += normal[2];
-	}
+	float xOff = 0.5f;
+	float yOff = 0.5f;
+	float zOff = 0.5f;
 
-	// Normalize normals.
-	for (unsigned int i = 0; i < m_nNormals; i++) {
-		float length = sqrt(m_pvec3dNormals[i][0]*m_pvec3dNormals[i][0] + m_pvec3dNormals[i][1]*m_pvec3dNormals[i][1] + m_pvec3dNormals[i][2]*m_pvec3dNormals[i][2]);
-		m_pvec3dNormals[i][0] /= length;
-		m_pvec3dNormals[i][1] /= length;
-		m_pvec3dNormals[i][2] /= length;
-	}
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	GLuint dl = glGenLists(1);
+	glNewList (dl, GL_COMPILE);
+
+	Vector triangleEdges;
+	Vector point;
+	Vector pointNormal;
+
+	glBegin(GL_TRIANGLES);
+		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
+		{
+			triangleEdges = m_tMesh->getTriangle(i);
+			for(int j = 0 ; j < 3 ; ++j)
+			{
+				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
+				glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
+				point = m_tMesh->getVertex(triangleEdges[j]);
+				glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
+			}
+		}
+	glEnd();
+
+	glEndList();
+	m_GLuint = dl;
 }
 
-void CIsoSurface::generateGeometry()
+void CIsoSurface::generateLICGeometry()
 {
 	float xOff = 0.5f;
 	float yOff = 0.5f;
@@ -785,6 +776,8 @@ void CIsoSurface::generateGeometry()
 		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
 		{
 			triangleEdges = m_tMesh->getTriangle(i);
+			color = m_tMesh->getTriangleColor(i);
+			glColor3f(color.x, color.y, color.z);
 			for(int j = 0 ; j < 3 ; ++j)
 			{
 				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
@@ -807,5 +800,20 @@ void CIsoSurface::GenerateWithThreshold()
 
 void CIsoSurface::activateLIC()
 {
+	m_useLIC = !m_useLIC;
+	if (!m_useLIC) {
+		generateGeometry();
+		return;
+	}
+	if (!licCalculated)
+	{
+		for (int i = 0 ; i < 0 ; ++i)
+			m_tMesh->doLoopSubD();
 
+
+		SurfaceLIC lic(m_dh, m_tMesh);
+		lic.execute();
+		licCalculated = true;
+	}
+	generateLICGeometry();
 }
