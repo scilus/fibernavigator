@@ -1313,9 +1313,19 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 		else
 			m_listCtrl->SetItem(item, 1, info->getName());
 		break;
+	case 13:
+		if (info->hasTreeId())
+		{
+			m_treeWidget->SetItemData(info->getTreeId(), NULL);
+			m_treeWidget->Delete(info->getTreeId());
+		}
+		delete info;
+		m_listCtrl->DeleteItem(item);
+		break;
 	default:
 		break;
 	}
+
 	refreshAllGLWidgets();
 }
 
@@ -1357,15 +1367,7 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 				m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), info->getThreshold() ));
 		}
 		break;
-	case 13:
-		if (info->hasTreeId())
-		{
-			m_treeWidget->SetItemData(info->getTreeId(), NULL);
-			m_treeWidget->Delete(info->getTreeId());
-		}
-		delete info;
-		m_listCtrl->DeleteItem(item);
-		break;
+
 	default:
 		break;
 	}

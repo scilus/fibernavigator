@@ -50,7 +50,7 @@ void main() {
 	color = clamp(color, 0.0, 1.0);
 
 	if (useLic)
-		gl_FragColor = (0.7  * gl_Color) + (0.3 * color);
+		gl_FragColor = (0.8  * gl_Color) + (0.2 * color);
 	else
 		gl_FragColor = color;
 	//gl_FragColor = gl_Color;

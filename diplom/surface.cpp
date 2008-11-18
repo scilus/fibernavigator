@@ -35,6 +35,7 @@ Surface::Surface(DatasetHelper* dh)
 	m_tMesh = NULL;
 
 	licCalculated = false;
+	m_useLIC = false;
 	subDCount = 0;
 	execute();
 }
