@@ -37,6 +37,7 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh,
 {
 	m_dh = dh;
 	m_grid = grid;
+	isTensor = true;
 
 	m_tensorField = m_dh->getTensorField();
 
@@ -404,6 +405,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		// FIXME: fix orientation for tensor case:
 		double o = 1.;
 		if (lastStep.size() != 0) {
+			//double orient = cell_vectors[cellId.getIndex()] * lastStep;
 			double orient = cell_vectors[cellId.getIndex()] * lastStep;
 			if (orient < 0.)
 				o = -1.;

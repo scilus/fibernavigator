@@ -34,6 +34,7 @@ Surface::Surface(DatasetHelper* dh)
 	m_alpha = 0.2;
 	m_tMesh = NULL;
 
+	licCalculated = false;
 	execute();
 }
 
@@ -279,17 +280,21 @@ void Surface::execute ()
 
 	m_tMesh->calcNeighbors();
 	m_tMesh->calcVertNormals();
+	licCalculated = false;
 //TODO
-	for (int i = 0 ; i < 5 ; ++i)
+	for (int i = 0 ; i < 3 ; ++i)
 		m_tMesh->doLoopSubD();
 
-	if (m_dh->tensors_loaded && m_dh->use_lic)
+	if (m_dh->vectors_loaded && m_dh->use_lic)
 	{
+		m_tMesh->doLoopSubD();
+		m_tMesh->doLoopSubD();
 		printf("initiating lic\n");
 		SurfaceLIC lic(m_dh, m_tMesh);
 		printf("initiating lic 2\n");
 		lic.execute();
 		m_testLines = lic.testLines;
+		licCalculated = true;
 	}
 
 	m_dh->surface_isDirty = false;
@@ -485,12 +490,10 @@ void Surface::drawVectors()
 void Surface::drawLIC()
 {
 
-	if (m_dh->surface_isDirty)
+	if (m_dh->surface_isDirty || (m_dh->use_lic && !licCalculated))
 	{
 		execute();
 	}
-
-
 
 	//m_dh->mainFrame->m_gl0->testRender(m_GLuint);
 
@@ -519,7 +522,8 @@ void Surface::drawLIC()
 			}
 		}
 	glEnd();
-/*
+
+	if (m_dh->drawVectors)
 	for (size_t i = 0 ; i < m_testLines.size() ; ++i)
 	{
 		//printf("draw line of size %d\n", m_testLines[i].size());
@@ -528,10 +532,10 @@ void Surface::drawLIC()
 		glColor3f(1.0, 1.0, 0.0);
 		for (size_t k = 0 ; k < m_testLines[i].size() ; k += 3)
 		{
-			glVertex3f(m_testLines[i][k], m_testLines[i][k+1], m_testLines[i][k+2]);
+			glVertex3f(m_testLines[i][k] - 0.1, m_testLines[i][k+1], m_testLines[i][k+2]);
 		}
 		glEnd();
 	}
-*/
+
 
 }

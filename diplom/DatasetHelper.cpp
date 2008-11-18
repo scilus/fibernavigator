@@ -35,7 +35,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 	scheduledReloadShaders = true;
 	blendTexOnMesh = true;
-	use_lic = true;
+	use_lic = false;
 	useVBO = true;
 	lighting = false;
 	textures = 0;

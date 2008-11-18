@@ -178,6 +178,7 @@ void TheScene::renderSplineSurface()
 			wxColor c = info->getColor();
 			glColor3f((float)c.Red()/255.0, (float)c.Green()/255.0, (float)c.Blue()/255.0);
 			m_dh->shaderHelper->m_splineSurfShader->setUniInt("useTex", !info->getUseTex());
+			m_dh->shaderHelper->m_splineSurfShader->setUniInt("useLic", m_dh->use_lic);
 			m_dh->shaderHelper->m_splineSurfShader->setUniInt("useColorMap", m_dh->colorMap);
 
 			//info->draw();

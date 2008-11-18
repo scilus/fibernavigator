@@ -68,6 +68,7 @@ private:
 	float* m_pointArray;
 	float m_xValue;
 	int m_count;
+	bool licCalculated;
 
 	KdTree *m_kdTree;
 	DatasetHelper* m_dh;
