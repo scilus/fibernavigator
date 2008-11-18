@@ -169,17 +169,12 @@ void TriangleMesh::calcNeighbor(int triangleNum)
 
 int TriangleMesh::calcTriangleTensor(int triNum)
 {
-
-	Vector v0 = vertices[triangles[triNum][0]];
-	Vector v1 = vertices[triangles[triNum][1]];
-	Vector v2 = vertices[triangles[triNum][2]];
-	Vector p = ( v0 + v1 + v2 )/3.0;
-	int x = (int)(p[0] + 0.5 );
-	int y = (int)(p[1] + 0.5 );
-	int z = (int)(p[2] + 0.5 );
-	return  x + y * m_dh->columns + z * m_dh->columns * m_dh->frames;
+	Vector p = getTriangleCenter(triNum);
+	int x = wxMin(m_dh->columns-1, wxMax(0,(int)(p[0] + 0.5)));
+	int y = wxMin(m_dh->rows   -1, wxMax(0,(int)(p[1] + 0.5)));
+	int z = wxMin(m_dh->frames -1, wxMax(0,(int)(p[2] + 0.5)));
+	return  x + y * m_dh->columns + z * m_dh->columns * m_dh->rows;
 }
-
 
 void TriangleMesh::calcTriangleTensors()
 {
@@ -192,9 +187,9 @@ void TriangleMesh::calcTriangleTensors()
 
 Vector TriangleMesh::getTriangleCenter(int triNum)
 {
-	Vector v0 = vertices[triangles[triNum][0]];
-	Vector v1 = vertices[triangles[triNum][1]];
-	Vector v2 = vertices[triangles[triNum][2]];
+	Vector v0 = vertices[(int)triangles[triNum][0]];
+	Vector v1 = vertices[(int)triangles[triNum][1]];
+	Vector v2 = vertices[(int)triangles[triNum][2]];
 	Vector p = ( v0 + v1 + v2 )/3.0;
 	return p;
 }

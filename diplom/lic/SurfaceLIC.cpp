@@ -6,6 +6,7 @@
  */
 
 #include "SurfaceLIC.h"
+#include "../Fantom/FTensor.h"
 
 SurfaceLIC::SurfaceLIC(DatasetHelper* dh, TriangleMesh* grid) {
 	m_dh = dh;
@@ -15,7 +16,7 @@ SurfaceLIC::SurfaceLIC(DatasetHelper* dh, TriangleMesh* grid) {
 	maxArea = 0.;
 	max_length = 1.;
 	maxSubdiv = 4;
-	modulo = 20;
+	modulo = 10;
 	optimizeShape = false;
 	black = true;
 	uniform = false;
@@ -32,6 +33,8 @@ SurfaceLIC::~SurfaceLIC() {
 void SurfaceLIC::execute() {
 	try {
 		nbVisited = 0;
+
+		testLines.clear();
 
 		// create textures
 		output_texture.resize(m_grid->getNumTriangles());
@@ -104,10 +107,31 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 		m_grid->getPosition(pos[j], ids[j]);
 	}
 	start = 1. / 3. * (pos[0] + pos[1] + pos[2]);
+
+	/*
+	if (cellId.getIndex() % 10000 == 0)
+	{
+		printf("cellId: %d\n", cellId.getIndex());
+		printf("vertices: %d : %d : %d \n", ids[0].getIndex(), ids[1].getIndex(), ids[2].getIndex());
+		printf("position 0: %f, %f, %f\n", pos[0][0], pos[0][1], pos[0][2]);
+		printf("position 1: %f, %f, %f\n", pos[1][0], pos[1][1], pos[1][2]);
+		printf("position 2: %f, %f, %f\n", pos[2][0], pos[2][1], pos[2][2]);
+		printf("mean: %f, %f, %f\n", start[0], start[1], start[2]);
+	}
+*/
 	// integrate
 	streamline->integrate(start, cellId, true, max_length);
 	visitedFwd = streamline->getVisitedCells();
 
+	std::vector<float>line;
+	std::vector< FArray > steps = streamline->getIntermediateSteps();
+	for ( positive i=0 ; i<steps.size() ; ++i )
+	{
+		line.push_back(steps[i](0));
+		line.push_back(steps[i](1));
+		line.push_back(steps[i](2));
+	}
+	testLines.push_back(line);
 	//   FgeLineStrips *lines = new FgeLineStrips();
 	//   lines->setNewColor( drand48(), drand48(), drand48() );
 	//   vector< FArray > steps = streamline->getIntermediateSteps();
@@ -118,6 +142,16 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 	streamline->integrate(start, cellId, false, max_length);
 	visitedBwd = streamline->getVisitedCells();
 
+	line.clear();
+	steps = streamline->getIntermediateSteps();
+	for ( positive i=0 ; i<steps.size() ; ++i )
+	{
+		line.push_back(steps[i](0));
+		line.push_back(steps[i](1));
+		line.push_back(steps[i](2));
+	}
+	testLines.push_back(line);
+
 	//   lines = new FgeLineStrips();
 	//   lines->setNewColor( drand48(), drand48(), drand48() );
 	//   steps = streamline->getIntermediateSteps();
@@ -127,7 +161,7 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 
 	positive total_sz = visitedFwd.size() + visitedBwd.size();
 
-	//   cout << endl << "streamline size = " << total_sz << endl;
+	   //std::cout << std::endl << "streamline size = " << total_sz << std::endl;
 
 	// adjust kernel size to streamline length
 	positive kernel_sz = nbFold;
@@ -223,6 +257,16 @@ void SurfaceLIC::displayTexture() {
 		m_grid->setTriangleColor(i, gray, gray, gray);
 
 	}
+/*
+	for (int i = 0 ; i < nbCells ; ++i)
+	{
+		int index = m_grid->getTriangleTensor(i);
+		FArray c = FArray(m_dh->getTensorField()->getTensorAtIndex(index));
+
+		m_grid->setTriangleColor(i, c[0], c[1], c[2]);
+
+	}
+*/
 }
 
 //---------------------------------------------------------------------------

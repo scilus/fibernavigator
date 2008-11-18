@@ -7,7 +7,6 @@
 #include "Anatomy.h"
 
 #include "GL/glew.h"
-#include "IsoSurface/loopSubD.h"
 #include "lic/SurfaceLIC.h"
 
 Surface::Surface(DatasetHelper* dh)
@@ -280,9 +279,9 @@ void Surface::execute ()
 
 	m_tMesh->calcNeighbors();
 	m_tMesh->calcVertNormals();
-
+//TODO
 	for (int i = 0 ; i < 5 ; ++i)
-		loopSubD loop(m_tMesh);
+		m_tMesh->doLoopSubD();
 
 	if (m_dh->tensors_loaded && m_dh->use_lic)
 	{
@@ -290,6 +289,7 @@ void Surface::execute ()
 		SurfaceLIC lic(m_dh, m_tMesh);
 		printf("initiating lic 2\n");
 		lic.execute();
+		m_testLines = lic.testLines;
 	}
 
 	m_dh->surface_isDirty = false;
@@ -484,10 +484,13 @@ void Surface::drawVectors()
 
 void Surface::drawLIC()
 {
+
 	if (m_dh->surface_isDirty)
 	{
 		execute();
 	}
+
+
 
 	//m_dh->mainFrame->m_gl0->testRender(m_GLuint);
 
@@ -516,4 +519,19 @@ void Surface::drawLIC()
 			}
 		}
 	glEnd();
+/*
+	for (size_t i = 0 ; i < m_testLines.size() ; ++i)
+	{
+		//printf("draw line of size %d\n", m_testLines[i].size());
+		glBegin(GL_LINE_STRIP);
+		//glColor3f( drand48(), drand48(), drand48() );
+		glColor3f(1.0, 1.0, 0.0);
+		for (size_t k = 0 ; k < m_testLines[i].size() ; k += 3)
+		{
+			glVertex3f(m_testLines[i][k], m_testLines[i][k+1], m_testLines[i][k+2]);
+		}
+		glEnd();
+	}
+*/
+
 }

@@ -52,21 +52,6 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh,
 		FArray mean;
 		FTensor tensortensor;
 
-		//
-		/*
-		 bool isScalar = ( tensorOrder == 0 );
-		 this->isTensor = ( tensorOrder == 2 );
-		 is2Din3D = ( posDim == 3 );
-		 if ( is2Din3D )
-		 tensor = FArray(3);
-		 else
-		 tensor = FArray(2);
-
-		 FArray e0, e1, p0p2, p0, p1(2), p2(2);
-		 p1(1) = 0.;
-		 double delta;
-		 */
-
 		for (unsigned int i = 0; i < nbCells; ++i) {
 			int index = grid->getTriangleTensor(i);
 			FTensor t = m_tensorField->getTensorAtIndex(index);

@@ -72,6 +72,8 @@ private:
 	KdTree *m_kdTree;
 	DatasetHelper* m_dh;
 	TriangleMesh* m_tMesh;
+
+	std::vector< std::vector<float> >m_testLines;
 };
 
 

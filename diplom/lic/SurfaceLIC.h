@@ -18,6 +18,9 @@ public:
 	virtual ~SurfaceLIC();
 
 	virtual void execute();
+
+	std::vector< std::vector<float> >testLines;
+
 private:
 
 	class MyLICStreamline: public FStreamlineOnSurfaceEuler {
