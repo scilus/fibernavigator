@@ -173,6 +173,13 @@ bool MyApp::OnInit(void) {
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_LIC, _T("Toggle Lic"));
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_NORMAL, _T("Toggle Normal Direction"));
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_DRAW_VECTORS, _T("Draw Vectors"));
+	surf_menu->AppendSeparator();
+	surf_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
+	surf_menu->AppendCheckItem(MENU_OPTIONS_BLEND_TEX_ON_MESH, _T("Blend Texture on Mesh"));
+	surf_menu->AppendCheckItem(MENU_OPTIONS_FILTER_ISO, _T("Filter Dataset for IsoSurface"));
+	surf_menu->Append(MENU_OPTIONS_CLEAN, _T("Clean Artefacts from Surface"));
+	surf_menu->Append(MENU_OPTIONS_LOOP, _T("Smooth Surface (Loop SubD)"));
+
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("Assign Color"));
@@ -190,12 +197,7 @@ bool MyApp::OnInit(void) {
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_USE_FAKE_TUBES, _T("Use Tubes"));
-	options_menu->AppendSeparator();
-	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
-	options_menu->AppendCheckItem(MENU_OPTIONS_BLEND_TEX_ON_MESH, _T("Blend Texture on Mesh"));
-	options_menu->AppendCheckItem(MENU_OPTIONS_FILTER_ISO, _T("Filter Dataset for IsoSurface"));
-	options_menu->Append(MENU_OPTIONS_CLEAN, _T("Clean Artefacts from Surface"));
-	options_menu->Append(MENU_OPTIONS_LOOP, _T("Smooth Surface (Loop SubD)"));
+
 
 
 
@@ -206,7 +208,7 @@ bool MyApp::OnInit(void) {
 	menu_bar->Append(file_menu, _T("&File"));
 	menu_bar->Append(view_menu, _T("&View"));
 	menu_bar->Append(voi_menu, _T("&VOI"));
-	menu_bar->Append(surf_menu, _T("&Spline Surface"));
+	menu_bar->Append(surf_menu, _T("&Surfaces"));
 	menu_bar->Append(options_menu, _T("&Options"));
 	menu_bar->Append(help_menu, _T("&Help"));
 

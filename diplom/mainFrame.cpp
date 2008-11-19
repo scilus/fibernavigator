@@ -55,7 +55,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_VOI_RENDER_SELBOXES, MainFrame::OnHideSelBoxes)
 	EVT_MENU(MENU_VOI_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
 	EVT_MENU(MENU_VOI_TOGGLE_SHOWBOX, MainFrame::OnToggleShowBox)
-	// Menu Spline Surface
+	// Menu Surfaces
 	EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_LIC, MainFrame::OnToggleLIC)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_NORMAL, MainFrame::OnToggleNormal)
@@ -1316,7 +1316,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 {
 	int item = event.GetIndex();
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
-	int col = m_listCtrl->getColClicked();
+	int col = m_listCtrl->getColActivated();
 	switch (col)
 	{
 	case 11:
@@ -1351,11 +1351,13 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	int item = event.GetIndex();
 	if (item == -1) return;
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+	updateMenus();
+	/*
 	m_tSlider->SetValue((int)(info->getThreshold()*100));
 	m_tSlider2->SetValue((int)(info->getAlpha()*100));
 	m_treeWidget->SelectItem(info->getTreeId());
 	m_treeWidget->EnsureVisible(info->getTreeId());
-
+*/
 	int col = m_listCtrl->getColClicked();
 	switch (col)
 	{
@@ -1796,34 +1798,52 @@ void MainFrame::updateMenus()
 {
 	// get the options menu
 	#ifndef __WXMSW__
-		wxMenu* oMenu = m_menuBar->GetMenu(4);
-		oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
-		oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
-		oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
-		oMenu->Check(oMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
-		oMenu->Check(oMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
 
-		m_toolBar->ToggleTool(BUTTON_AXIAL, m_dh->showAxial);
-		m_toolBar->ToggleTool(BUTTON_CORONAL, m_dh->showCoronal);
-		m_toolBar->ToggleTool(BUTTON_SAGITTAL, m_dh->showSagittal);
-		m_toolBar->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->scene->m_blendAlpha);
+	wxMenu* oMenu = m_menuBar->GetMenu(4);
+	oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
+	oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
+	oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
+	wxMenu* sMenu = m_menuBar->GetMenu(3);
+	sMenu->Check(sMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
+	sMenu->Check(sMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
 
-		m_toolBar->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
+	m_toolBar->ToggleTool(BUTTON_AXIAL, m_dh->showAxial);
+	m_toolBar->ToggleTool(BUTTON_CORONAL, m_dh->showCoronal);
+	m_toolBar->ToggleTool(BUTTON_SAGITTAL, m_dh->showSagittal);
+	m_toolBar->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->scene->m_blendAlpha);
 
-		wxMenu* voiMenu = m_menuBar->GetMenu(2);
-		voiMenu->Check(voiMenu->FindItem(_T("active")), false);
-		voiMenu->Check(voiMenu->FindItem(_T("visible")), false);
+	m_toolBar->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
 
-		wxTreeItemId treeid = m_treeWidget->GetSelection();
-		int selected = treeSelected(treeid);
-		if ( selected == ChildBox ||  selected == MasterBox )
-		{
-			voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->m_isActive);
-			voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
+	wxMenu* voiMenu = m_menuBar->GetMenu(2);
+	voiMenu->Check(voiMenu->FindItem(_T("active")), false);
+	voiMenu->Check(voiMenu->FindItem(_T("visible")), false);
 
-			m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->scene->m_showBoxes);
-			m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->m_isActive);
-		}
+	wxTreeItemId treeid = m_treeWidget->GetSelection();
+	int selected = treeSelected(treeid);
+	if ( selected == ChildBox ||  selected == MasterBox )
+	{
+		voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->m_isActive);
+		voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
 
+		m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->scene->m_showBoxes);
+		m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->m_isActive);
+	}
+
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+
+		m_tSlider->SetValue((int)(info->getThreshold()*100));
+		m_tSlider2->SetValue((int)(info->getAlpha()*100));
+		m_treeWidget->SelectItem(info->getTreeId());
+		m_treeWidget->EnsureVisible(info->getTreeId());
+
+		sMenu->Check(sMenu->FindItem(_T("Toggle Texture Mode")), !info->getShowFS());
+		sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
+		sMenu->Check(sMenu->FindItem(_T("Toggle Normal Direction")), (m_dh->normalDirection < 0));
+		sMenu->Check(sMenu->FindItem(_T("Draw Vectors")), m_dh->drawVectors);
+
+	}
 	#endif
 }

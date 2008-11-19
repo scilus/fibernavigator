@@ -20,14 +20,25 @@ void MyListCtrl::OnLeftClick(wxMouseEvent& event)
 		if (x <= sizeX) break;
 	}
 	m_col_clicked = col + 10;
+	m_col_activated = col + 10;
 
 	event.Skip();
 }
 
 int MyListCtrl::getColClicked()
 {
-	return m_col_clicked;
+	int r = m_col_clicked;
+	m_col_clicked = 0;
+	return r;
 }
+
+int MyListCtrl::getColActivated()
+{
+	int r = m_col_activated;
+	m_col_activated = 0;
+	return r;
+}
+
 
 void MyListCtrl::swap(long a, long b)
 {
