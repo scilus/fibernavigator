@@ -419,3 +419,19 @@ void TriangleMesh::flipNormals()
 {
 
 }
+
+void TriangleMesh::reserveVerts(const int size)
+{
+	vertices.reserve(size);
+	vertNormals.reserve(size);
+}
+
+void TriangleMesh::reserveTriangles(const int size)
+{
+	triangles.reserve(size);
+	triNormals.reserve(size);
+	triangleTensor.reserve(size);
+	triangleColor.reserve(size);
+	neighbors.reserve(size);
+
+}

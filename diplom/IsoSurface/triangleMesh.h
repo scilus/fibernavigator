@@ -25,14 +25,12 @@ class TriangleMesh {
 
 		std::vector<Vector> vertices;
 		std::vector<Vector> vertNormals;
+		std::vector < std::vector<int> >vIsInTriangle;
 
 		std::vector< Vector > triangles;
 		std::vector<Vector> triNormals;
 		std::vector< int >triangleTensor;
 		std::vector<Vector>triangleColor;
-
-		std::vector < std::vector<int> >vIsInTriangle;
-
 		std::vector< std::vector<int> > neighbors;
 
 		int	numVerts;
@@ -114,6 +112,9 @@ class TriangleMesh {
 		void getPosition( FPosition& resultPos, const FIndex& pIndex ) const;
 		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh ) const;
 		void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs ) const;
+
+		void reserveVerts(const int size);
+		void reserveTriangles(const int size);
 
 
 	private:

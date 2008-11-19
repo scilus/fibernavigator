@@ -33,6 +33,9 @@ loopSubD::loopSubD(TriangleMesh* nTriMesh){
 	numTriVerts = triMesh->getNumVertices();
 	numTriFaces = triMesh->getNumTriangles();
 
+	triMesh->reserveVerts(numTriVerts*4);
+	triMesh->reserveTriangles(numTriFaces*4);
+
 	wxDateTime dt = wxDateTime::Now();
 	printf("[%02d:%02d:%02d] ", dt.GetHour(), dt.GetMinute(), dt.GetSecond());
 

@@ -10,8 +10,8 @@
 TensorField::TensorField(DatasetHelper* dh, float* tensorData)
 {
 	m_dh = dh;
-	//m_cells = m_dh->rows * m_dh->frames * m_dh->columns;
-	m_cells = 160*200*160;
+	m_cells = m_dh->rows * m_dh->frames * m_dh->columns;
+	
 	theField.clear();
 
 	for ( int i = 0 ; i < m_cells ; ++i)
@@ -39,9 +39,9 @@ TensorField::TensorField(DatasetHelper* dh, float* tensorData, bool isVector)
 {
 	printf("fill tensor field\n");
 	m_dh = dh;
-	//m_cells = m_dh->rows * m_dh->frames * m_dh->columns;
-	m_cells = 160*200*160;
+	m_cells = m_dh->rows * m_dh->frames * m_dh->columns;
 	theField.clear();
+	theField.reserve(m_cells);
 
 	for ( int i = 0 ; i < m_cells ; ++i)
 	{

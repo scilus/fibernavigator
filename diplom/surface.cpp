@@ -116,6 +116,7 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 	double dX = (xMax - xMin) / (numCols - 1);
 	double dZ = (zMax - zMin) / (numRows - 1);
 
+	deBoorPoints.reserve(numRows * numCols);
 
 	for( int row = 0; row < numRows; ++row)
 		for( int col = 0; col < numCols; ++col)
@@ -171,13 +172,14 @@ void Surface::execute ()
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
+	givenPoints.reserve(m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId));
 	while ( id.IsOk() )
 	{
 		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
-		std::vector< double > p;
-		p.push_back(point->getCenter().s.X);
-		p.push_back(point->getCenter().s.Y);
-		p.push_back(point->getCenter().s.Z);
+		std::vector< double > p(3);
+		p[0] = point->getCenter().s.X;
+		p[1] = point->getCenter().s.Y;
+		p[2] = point->getCenter().s.Z;
 		givenPoints.push_back(p);
 
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
@@ -258,6 +260,7 @@ void Surface::execute ()
 
 	std::vector< double > positions;
 
+	m_tMesh->reserveVerts(m_splinePoints.size());
 	for( std::vector< std::vector< double > >::iterator posIt = m_splinePoints.begin(); posIt != m_splinePoints.end(); posIt++)
 	{
 		m_tMesh->addVert((*posIt)[0], (*posIt)[1], (*posIt)[2]);
@@ -265,6 +268,8 @@ void Surface::execute ()
 
 	m_renderpointsPerCol = splineSurface.getNumSamplePointsU();
 	m_renderpointsPerRow = splineSurface.getNumSamplePointsT();
+
+	m_tMesh->reserveTriangles(2 * m_renderpointsPerCol * m_renderpointsPerRow);
 
 	for(int z = 0; z < m_renderpointsPerCol - 1; z++)
 	{

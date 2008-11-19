@@ -232,6 +232,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Fantom\FIndex.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Fantom\FMath.cpp"
 				>
 			</File>
@@ -245,6 +249,10 @@
 			</File>
 			<File
 				RelativePath=".\Fantom\FRefArray.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FStreamlineOnSurfaceEuler.cpp"
 				>
 			</File>
 			<File
@@ -305,6 +313,14 @@
 			</File>
 			<File
 				RelativePath=".\surface.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\SurfaceLIC.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\TensorField.cpp"
 				>
 			</File>
 			<File
@@ -398,6 +414,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Fantom\FIndex.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Fantom\FMath.h"
 				>
 			</File>
@@ -411,6 +431,10 @@
 			</File>
 			<File
 				RelativePath=".\Fantom\FRefArray.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\FStreamlineOnSurfaceEuler.h"
 				>
 			</File>
 			<File
@@ -487,6 +511,14 @@
 			</File>
 			<File
 				RelativePath=".\surface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\SurfaceLIC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lic\TensorField.h"
 				>
 			</File>
 			<File
@@ -621,11 +653,19 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Fantom\FIndex.icc"
+			>
+		</File>
+		<File
 			RelativePath=".\Fantom\FMatrix.icc"
 			>
 		</File>
 		<File
 			RelativePath=".\Fantom\FRefArray.icc"
+			>
+		</File>
+		<File
+			RelativePath=".\lic\FStreamlineOnSurfaceEuler.icc"
 			>
 		</File>
 		<File

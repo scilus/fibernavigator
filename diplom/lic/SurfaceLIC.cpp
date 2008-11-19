@@ -43,10 +43,17 @@ void SurfaceLIC::execute() {
 
 		// setup all the textures
 		// create a random input texture of luminance values
+#ifdef __WXMSW__
+		srand(time(0));
+#else
 		srand48(time(0));
-
+#endif
 		for (int i = 0 ; i < m_grid->getNumTriangles() ; ++i) {
+#ifdef __WXMSW__
+			input_texture[i] = (float) rand()/ (RAND_MAX + 1);
+#else
 			input_texture[i] = (float) drand48();
+#endif
 			output_texture[i] = 0.0;
 			hit_texture[i] = 0;
 		}
