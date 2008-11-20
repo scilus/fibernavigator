@@ -100,6 +100,10 @@ public:
 	float* getVectorDataset();
 	TensorField* getTensorField();
 
+	void toggleBoxes() {showBoxes = !showBoxes;};
+	bool togglePointMode() {return pointMode = !pointMode;};
+	bool getPointMode() {return pointMode;};
+
 
 	/////////////////////////////////////////////////////////////////////////////////
 	// general info about the datasets
@@ -129,6 +133,10 @@ public:
 	int textures;
 	//! if set the shaders will be reloaded during next render() call
 	bool scheduledReloadShaders;
+
+	bool showBoxes;
+	bool blendAlpha;
+	bool pointMode;
 
 	int debugLevel;
 	/////////////////////////////////////////////////////////////////////////////////

@@ -860,7 +860,7 @@ void Fibers::drawFakeTubes()
 		normals = m_normalArray;
 	}
 
-	if (m_dh->scene->getPointMode())
+	if (m_dh->getPointMode())
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

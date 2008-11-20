@@ -789,7 +789,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnHideSelBoxes(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
-	m_dh->scene->toggleBoxes();
+	m_dh->toggleBoxes();
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -857,7 +857,7 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnTogglePointMode(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
-	m_dh->scene->togglePointMode();
+	m_dh->togglePointMode();
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -1256,7 +1256,7 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 		m_mainGL->setRotation();
 	}
 	else
-		m_dh->scene->m_blendAlpha = !m_dh->scene->m_blendAlpha;
+		m_dh->blendAlpha = !m_dh->blendAlpha;
 
 	m_mainGL->render();
 }
@@ -1791,9 +1791,9 @@ void MainFrame::updateMenus()
 	m_toolBar->ToggleTool(BUTTON_AXIAL, m_dh->showAxial);
 	m_toolBar->ToggleTool(BUTTON_CORONAL, m_dh->showCoronal);
 	m_toolBar->ToggleTool(BUTTON_SAGITTAL, m_dh->showSagittal);
-	m_toolBar->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->scene->m_blendAlpha);
+	m_toolBar->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->blendAlpha);
 	m_toolBar->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
-	m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->scene->m_showBoxes);
+	m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
 
 	wxMenu* voiMenu = m_menuBar->GetMenu(2);
 	voiMenu->Check(voiMenu->FindItem(_T("active")), false);
@@ -1812,7 +1812,7 @@ void MainFrame::updateMenus()
 		voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->m_isActive);
 		voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
 
-		m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->scene->m_showBoxes);
+		m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
 		m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->m_isActive);
 	}
 

@@ -80,6 +80,10 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 	normalDirection = 1.0;
 
+	showBoxes = true;
+	pointMode = false;
+	blendAlpha = false;
+
 #ifdef DEBUG
 	debugLevel = 0;
 #else

@@ -129,7 +129,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_dh->mainFrame->refreshAllGLWidgets();
 				}
 
-				if (m_dh->scene->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
+				if (m_dh->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
 					m_hr = pick(event.GetPosition());
 					if (m_hr.hit && (m_hr.picked <= sagittal)) {
 						m_hr.picked = 20;
@@ -423,7 +423,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with the selection box sizers
 	 */
-	if (m_dh->scene->m_showBoxes)
+	if (m_dh->showBoxes)
 	{
 		std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
 		for (unsigned int i = 0 ; i < boxes.size() ; ++i)
@@ -439,7 +439,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with points for spline surface
 	 */
-	if (m_dh->scene->m_pointMode)
+	if (m_dh->pointMode)
 	{
 		wxTreeItemId id, childid;
 		wxTreeItemIdValue cookie = 0;

@@ -14,9 +14,6 @@ TheScene::TheScene(DatasetHelper* dh)
 	m_texAssigned = false;
 
 	m_mainGLContext = 0;
-	m_showBoxes = true;
-	m_pointMode = false;
-	m_blendAlpha = false;
 
 	m_dh->anatomyHelper = new AnatomyHelper(m_dh);
 	m_selBoxChanged = true;
@@ -99,7 +96,7 @@ void TheScene::renderScene()
 
 	renderSplineSurface();
 
-	if (m_pointMode)
+	if (m_dh->pointMode)
 	{
 		drawPoints();
 	}
@@ -115,7 +112,7 @@ void TheScene::renderScene()
 
 		if (m_dh->fibers_loaded)
 		{
-			if (m_showBoxes )
+			if (m_dh->showBoxes )
 			{
 				drawSelectionBoxes();
 			}
@@ -131,7 +128,7 @@ void TheScene::renderSlizes()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	if (m_blendAlpha)
+	if (m_dh->blendAlpha)
 		glDisable(GL_ALPHA_TEST);
 		//glDisable(GL_BLEND);
 	else
@@ -165,7 +162,7 @@ void TheScene::renderSplineSurface()
 		{
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-			if (m_dh->scene->getPointMode())
+			if (m_dh->pointMode)
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			else
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -215,7 +212,7 @@ void TheScene::renderMesh()
 	m_dh->shaderHelper->m_meshShader->bind();
 	m_dh->shaderHelper->setMeshShaderVars();
 
-	if (m_dh->scene->getPointMode())
+	if (m_dh->pointMode)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
