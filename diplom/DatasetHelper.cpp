@@ -85,7 +85,6 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 #else
 	debugLevel = 1;
 #endif
-
 }
 
 DatasetHelper::~DatasetHelper() {
@@ -880,13 +879,14 @@ void DatasetHelper::printTime()
 void DatasetHelper::printwxT(wxString string)
 {
 	char* cstring;
-	cstring = (char*) malloc(string.length());
+	cstring = (char*) malloc(string.length()+1);
 	strcpy(cstring, (const char*) string.mb_str(wxConvUTF8));
 	printf("%s", cstring);
 }
 
 void DatasetHelper::printDebug(wxString string, int level)
 {
+	if (debugLevel > level) return;
 	printTime();
-	//printwxT(string + _T("\n"));
+	printwxT(string + _T("\n"));
 }
