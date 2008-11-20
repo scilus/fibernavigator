@@ -85,7 +85,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 #else
 	debugLevel = 1;
 #endif
-	debugLevel = 1;
+
 }
 
 DatasetHelper::~DatasetHelper() {
@@ -888,5 +888,5 @@ void DatasetHelper::printwxT(wxString string)
 void DatasetHelper::printDebug(wxString string, int level)
 {
 	printTime();
-	printwxT(string + _T("\n"));
+	//printwxT(string + _T("\n"));
 }
