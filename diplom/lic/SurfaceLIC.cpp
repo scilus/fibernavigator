@@ -115,23 +115,13 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 	}
 	start = 1. / 3. * (pos[0] + pos[1] + pos[2]);
 
-	/*
-	if (cellId.getIndex() % 10000 == 0)
-	{
-		printf("cellId: %d\n", cellId.getIndex());
-		printf("vertices: %d : %d : %d \n", ids[0].getIndex(), ids[1].getIndex(), ids[2].getIndex());
-		printf("position 0: %f, %f, %f\n", pos[0][0], pos[0][1], pos[0][2]);
-		printf("position 1: %f, %f, %f\n", pos[1][0], pos[1][1], pos[1][2]);
-		printf("position 2: %f, %f, %f\n", pos[2][0], pos[2][1], pos[2][2]);
-		printf("mean: %f, %f, %f\n", start[0], start[1], start[2]);
-	}
-*/
 	// integrate
 	streamline->integrate(start, cellId, true, max_length);
 	visitedFwd = streamline->getVisitedCells();
 
 	std::vector<float>line;
 	std::vector< FArray > steps = streamline->getIntermediateSteps();
+	line.reserve(steps.size() *3);
 	for ( positive i=0 ; i<steps.size() ; ++i )
 	{
 		line.push_back(steps[i](0));
@@ -145,6 +135,7 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 
 	line.clear();
 	steps = streamline->getIntermediateSteps();
+	line.reserve(steps.size() *3);
 	for ( positive i=0 ; i<steps.size() ; ++i )
 	{
 		line.push_back(steps[i](0));

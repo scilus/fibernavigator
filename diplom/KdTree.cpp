@@ -9,8 +9,9 @@ KdTree::KdTree(int size, float *pointArray, DatasetHelper* dh)
 	m_pointArray = pointArray;
 
 	m_tree.clear();
+	m_tree.resize(size);
 	for (int i = 0 ; i < size ;  ++i)
-		m_tree.push_back(i);
+		m_tree[i] = i;
 	dh->printTime();
 	printf ("build kd tree...\n");
 
@@ -43,8 +44,9 @@ KdTree::KdTree(int size, float *pointArray)
 	m_size = size;
 	m_pointArray = pointArray;
 	m_tree.clear();
+	m_tree.resize(size);
 	for (int i = 0 ; i < size ;  ++i)
-		m_tree.push_back(i);
+		m_tree[i] = i;
 	buildTree(0, size-1, 0);
 }
 

@@ -696,6 +696,8 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	}
 
 	m_tMesh->clearMesh();
+	m_tMesh->reserveVerts(m_nVertices);
+	m_tMesh->reserveTriangles(m_nTriangles);
 
 	// Copy all the vertices and triangles into triangle mesh
 	// Copy vertices.
