@@ -141,8 +141,6 @@ bool MyApp::OnInit(void) {
 	frame->SetMinSize(wxSize(800, 600));
 	// Make a menubar
 	wxMenu *file_menu = new wxMenu;
-	file_menu->Append(MENU_FILE_NEW_ISOSURF, _T("New IsoSurface"));
-	file_menu->AppendSeparator();
 	file_menu->Append(MENU_FILE_LOAD, _T("Load"));
 	file_menu->Append(MENU_FILE_RELOAD_SHADER, _T("Reload Shader"));
 	file_menu->AppendSeparator();
@@ -168,7 +166,8 @@ bool MyApp::OnInit(void) {
 	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SHOWBOX, _T("visible"));
 
 	wxMenu *surf_menu = new wxMenu;
-	surf_menu->Append(MENU_SPLINESURF_NEW, _T("New"));
+	surf_menu->Append(MENU_SPLINESURF_NEW, _T("New Spline Surface"));
+	surf_menu->Append(MENU_FILE_NEW_ISOSURF, _T("New Iso Surface"));
 	surf_menu->AppendSeparator();
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_LIC, _T("Toggle Lic"));
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_NORMAL, _T("Toggle Normal Direction"));

@@ -370,13 +370,13 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_treeWidget->AssignImageList(tImageList);
 
     m_tRootId = m_treeWidget->AddRoot(wxT("Scene"), -1, -1, NULL );
-    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("planes"), -1, -1, NULL);
+    m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("Info"), -1, -1, NULL);
 	    m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"));
 	    m_tCoronalId  = m_treeWidget->AppendItem(m_tPlanesId, wxT("coronal"));
 	    m_tSagittalId = m_treeWidget->AppendItem(m_tPlanesId, wxT("sagittal"));
-    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("datasets"), -1, -1, NULL);
-    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("meshes"), -1, -1, NULL);
-    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("fibers"), -1, -1, NULL);
+    m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("load datasets"), -1, -1, NULL);
+    m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("load meshes"), -1, -1, NULL);
+    m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("load fibers"), -1, -1, NULL);
     m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"), -1, -1, NULL);
     m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"), -1, -1, NULL);
 
@@ -840,7 +840,6 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 		}
 
 	Surface *surface = new Surface(m_dh);
-
 	m_listCtrl->InsertItem(0, wxT(""), 0);
 	m_listCtrl->SetItem(0, 1, surface->getName());
 	m_listCtrl->SetItem(0, 2, wxT("0.50"));
@@ -1327,11 +1326,6 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 			m_listCtrl->SetItem(item, 1, info->getName());
 		break;
 	case 13:
-		if (info->hasTreeId())
-		{
-			m_treeWidget->SetItemData(info->getTreeId(), NULL);
-			m_treeWidget->Delete(info->getTreeId());
-		}
 		delete info;
 		m_listCtrl->DeleteItem(item);
 		break;
@@ -1356,15 +1350,7 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 
 	m_tSlider->SetValue((int)(info->getThreshold()*100));
 	m_tSlider2->SetValue((int)(info->getAlpha()*100));
-	m_treeWidget->SelectItem(info->getTreeId());
-	m_treeWidget->EnsureVisible(info->getTreeId());
 
-	/*
-	m_tSlider->SetValue((int)(info->getThreshold()*100));
-	m_tSlider2->SetValue((int)(info->getAlpha()*100));
-	m_treeWidget->SelectItem(info->getTreeId());
-	m_treeWidget->EnsureVisible(info->getTreeId());
-*/
 	int col = m_listCtrl->getColClicked();
 	switch (col)
 	{
@@ -1457,15 +1443,28 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 
 	}
 
-	if (selected > Fibers_) return;
-
-	for (int i = 0 ; i < m_listCtrl->GetItemCount(); ++i)
+	bool flag = true;
+	/* open load dialog */
+	if (selected == Label_datasets)
 	{
-		DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(i);
-		if (info->getTreeId() == treeid)
-		{
-			m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-		}
+		flag = m_dh->load(1);
+	}
+	else if (selected == Label_meshes)
+	{
+		flag = m_dh->load(2);
+	}
+	else if (selected == Label_fibers)
+	{
+		flag = m_dh->load(3);
+		m_dh->scene->m_selBoxChanged = true;
+	}
+
+	if ( !flag )
+	{
+		wxMessageBox(wxT("ERROR\n") + m_dh->lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
+		m_statusBar->SetStatusText(wxT("ERROR"),1);
+		m_statusBar->SetStatusText(m_dh->lastError,2);
+		return;
 	}
 
 	refreshAllGLWidgets();
@@ -1493,30 +1492,6 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 		refreshAllGLWidgets();
 		return;
 	}
-	bool flag = true;
-	/* open load dialog */
-	if (selected == Label_datasets)
-	{
-		flag = m_dh->load(1);
-	}
-	else if (selected == Label_meshes)
-	{
-		flag = m_dh->load(2);
-	}
-	else if (selected == Label_fibers)
-	{
-		flag = m_dh->load(3);
-		m_dh->scene->m_selBoxChanged = true;
-	}
-
-	if ( !flag )
-	{
-		wxMessageBox(wxT("ERROR\n") + m_dh->lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-		m_statusBar->SetStatusText(wxT("ERROR"),1);
-		m_statusBar->SetStatusText(m_dh->lastError,2);
-		return;
-	}
-
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************

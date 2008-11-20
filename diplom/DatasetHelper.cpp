@@ -285,7 +285,6 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 		mainFrame->m_gl2->changeOrthoSize(newSize);
 	}
 
-	updateTreeDS(0);
 	mainFrame->refreshAllGLWidgets();
 
 
@@ -401,6 +400,14 @@ bool DatasetHelper::loadScene(wxString filename)
 				mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId, wxT("point"), -1, -1, point);
 				pNode = pNode->GetNext();
 			}
+
+			Surface *surface = new Surface(this);
+			mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+			mainFrame->m_listCtrl->SetItem(0, 1, _T("spline surface"));
+			mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.50"));
+			mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
+			mainFrame->m_listCtrl->SetItemData(0, (long)surface);
+			mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 		}
 
 		else if (child->GetName() == wxT("selection_boxes") /*&& TheDataset::fibers_loaded*/) {
@@ -639,34 +646,6 @@ void DatasetHelper::updateTreeDims()
 			wxString::Format(wxT("%d rows"), rows));
 	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSagittalId,
 			wxString::Format(wxT("%d frames"), frames));
-}
-
-void DatasetHelper::updateTreeDS(const int i)
-{
-	DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
-	switch (info->getType()) {
-	case Head_byte:
-	case Head_short:
-		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tDatasetId, info->getName(), -1, -1, (Anatomy*)info));
-		break;
-	case Overlay:
-		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tDatasetId, info->getName(), -1, -1, (Anatomy*)info));
-		break;
-	case RGB:
-		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tDatasetId, info->getName(), -1, -1, (Anatomy*)info));
-		break;
-	case Mesh_:
-		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-				mainFrame->m_tMeshId, info->getName(), -1, -1, (Mesh*)info));
-		break;
-	case Fibers_:
-		info->setTreeId(mainFrame->m_treeWidget->AppendItem(
-			mainFrame->m_tFiberId, info->getName(), -1, -1, (Fibers*)info));
-		break;
-	}
 }
 
 void DatasetHelper::treeFinished()

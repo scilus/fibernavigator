@@ -67,8 +67,6 @@ public:
 	virtual void smooth()=0;
 	virtual void activateLIC()=0;
 
-	wxTreeItemId getTreeId() const {return m_treeId;};
-    void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;m_hasTreeId = true;};
 	wxString getName() {return m_name;};
 	wxString getPath() {return m_fullPath;};
 	void setName(wxString name) {m_name = name;};
@@ -103,7 +101,6 @@ public:
 	bool getShow() {return m_show;};
 	bool getShowFS() {return m_showFS;};
 	bool getUseTex() {return m_useTex;};
-	bool hasTreeId() {return m_hasTreeId;};
 	bool getUseLIC() {return m_useLIC;};
 
 	void setGLuint(GLuint value) {m_GLuint = value;};
@@ -130,7 +127,6 @@ protected:
 	wxString m_fullPath;
 	float m_threshold;
 	float m_alpha;
-	wxTreeItemId m_treeId;
 
 	wxColour m_color;
 	GLuint m_GLuint;

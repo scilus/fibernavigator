@@ -68,7 +68,6 @@ public:
 	Vector3fT mapMouse2World(int, int);
 	Vector3fT mapMouse2WorldBack(int, int);
 	void updateTreeDims();
-	void updateTreeDS(int);
 
 	bool invertFibers() {fibersInverted = !fibersInverted; return fibersInverted;};
 

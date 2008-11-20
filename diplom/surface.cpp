@@ -42,6 +42,7 @@ Surface::Surface(DatasetHelper* dh)
 
 Surface::~Surface()
 {
+	m_dh->mainFrame->m_treeWidget->DeleteChildren(m_dh->mainFrame->m_tPointId);
 	m_dh->surface_loaded = false;
 }
 
