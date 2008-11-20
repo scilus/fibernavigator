@@ -1782,6 +1782,7 @@ void MainFrame::updateMenus()
 	// get the options menu
 	#ifndef __WXMSW__
 
+	// globals
 	wxMenu* oMenu = m_menuBar->GetMenu(4);
 	oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
 	oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
@@ -1794,17 +1795,23 @@ void MainFrame::updateMenus()
 	m_toolBar->ToggleTool(BUTTON_CORONAL, m_dh->showCoronal);
 	m_toolBar->ToggleTool(BUTTON_SAGITTAL, m_dh->showSagittal);
 	m_toolBar->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->scene->m_blendAlpha);
-
 	m_toolBar->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
+	m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->scene->m_showBoxes);
 
 	wxMenu* voiMenu = m_menuBar->GetMenu(2);
 	voiMenu->Check(voiMenu->FindItem(_T("active")), false);
 	voiMenu->Check(voiMenu->FindItem(_T("visible")), false);
+	voiMenu->Enable(voiMenu->FindItem(_T("active")), false);
+	voiMenu->Enable(voiMenu->FindItem(_T("visible")), false);
+
 
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
 	int selected = treeSelected(treeid);
+
 	if ( selected == ChildBox ||  selected == MasterBox )
 	{
+		voiMenu->Enable(voiMenu->FindItem(_T("active")), true);
+		voiMenu->Enable(voiMenu->FindItem(_T("visible")), true);
 		voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->m_isActive);
 		voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
 
@@ -1812,14 +1819,41 @@ void MainFrame::updateMenus()
 		m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->m_isActive);
 	}
 
+	sMenu->Enable(sMenu->FindItem(_T("Toggle Texture Mode")), false);
+	sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), false);
+	sMenu->Enable(sMenu->FindItem(_T("Toggle Normal Direction")), false);
+	sMenu->Enable(sMenu->FindItem(_T("Draw Vectors")), false);
+	sMenu->Enable(sMenu->FindItem(_T("Clean Artefacts from Surface")), false);
+	sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), false);
+
+
+
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
 	{
 		DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
-		sMenu->Check(sMenu->FindItem(_T("Toggle Texture Mode")), !info->getShowFS());
-		sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
-		sMenu->Check(sMenu->FindItem(_T("Toggle Normal Direction")), (m_dh->normalDirection < 0));
-		sMenu->Check(sMenu->FindItem(_T("Draw Vectors")), m_dh->drawVectors);
+		if (info->getType() < Mesh_)
+		{
+			sMenu->Enable(sMenu->FindItem(_T("Toggle Texture Mode")), true);
+			sMenu->Check(sMenu->FindItem(_T("Toggle Texture Mode")), !info->getShowFS());
+		}
+		if (info->getType() == IsoSurface_ )
+		{
+			sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), true);
+			sMenu->Enable(sMenu->FindItem(_T("Clean Artefacts from Surface")), true);
+			sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), true);
+			sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
+		}
+		if (info->getType() == Surface_)
+		{
+			sMenu->Enable(sMenu->FindItem(_T("Toggle Normal Direction")), true);
+			sMenu->Enable(sMenu->FindItem(_T("Draw Vectors")), true);
+			sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), true);
+			sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
+			sMenu->Check(sMenu->FindItem(_T("Toggle Normal Direction")), (m_dh->normalDirection < 0));
+			sMenu->Check(sMenu->FindItem(_T("Draw Vectors")), m_dh->drawVectors);
+		}
+
 
 	}
 	#endif
