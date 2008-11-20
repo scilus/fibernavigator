@@ -68,6 +68,13 @@ void MainCanvas::init()
 	m_init = true;
 }
 
+void MainCanvas::changeOrthoSize(int value)
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho( 0, value, 0, value, -3000, 3000);
+}
+
 
 void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 {

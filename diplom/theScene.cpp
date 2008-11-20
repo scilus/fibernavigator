@@ -52,8 +52,9 @@ void TheScene::initGL(int view)
 		m_texAssigned = true;
 	}
 
-	float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
-	float view1 = maxLength;
+	//float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
+	//float view1 = maxLength;
+	float view1 = 200;
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

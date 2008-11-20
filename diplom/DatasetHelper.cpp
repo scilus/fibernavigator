@@ -142,11 +142,25 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 			return false;
 		}
 		Anatomy *anatomy = new Anatomy(this);
-		if (anatomy->load(filename)) {
-			rows = anatomy->getRows();
-			columns = anatomy->getColumns();
-			frames = anatomy->getFrames();
-			anatomy_loaded = true;
+
+		if (anatomy->load(filename))
+		{
+
+			if (anatomy_loaded)
+			{
+				if (anatomy->getRows() != rows || anatomy->getColumns()	!= columns || anatomy->getFrames() != frames)
+				{
+					lastError = wxT("dimensions of loaded files must be the same");
+					return false;
+				}
+			}
+			else
+			{
+				rows = anatomy->getRows();
+				columns = anatomy->getColumns();
+				frames = anatomy->getFrames();
+				anatomy_loaded = true;
+			}
 
 			anatomy->setThreshold(threshold);
 			anatomy->setShow(active);
@@ -154,19 +168,13 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 			anatomy->setuseTex(useTex);
 			finishLoading(anatomy);
 			return true;
-		} else {
-			if (!anatomy_loaded) {
-				if (anatomy->getRows() <= 0 || anatomy->getColumns() <= 0
-						|| anatomy->getFrames() <= 0) {
-					lastError = wxT("couldn't parse header file");
-					return false;
-				}
-			} else {
-				if (anatomy->getRows() != rows || anatomy->getColumns()
-						!= columns || anatomy->getFrames() != frames) {
-					lastError = wxT("dimensions of loaded files must be the same");
-					return false;
-				}
+		}
+		else  //(anatomy->load(filename))
+		{
+			if (anatomy->getRows() <= 0 || anatomy->getColumns() <= 0 || anatomy->getFrames() <= 0)
+			{
+				lastError = wxT("couldn't parse header file");
+				return false;
 			}
 			lastError = wxT("couldn't load anatomy file");
 			return false;
@@ -256,7 +264,8 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 	mainFrame->m_statusBar->SetStatusText(wxT("Ready"), 1);
 	mainFrame->m_statusBar->SetStatusText(info->getName() + wxT(" loaded"), 2);
 
-	if (mainFrame->m_listCtrl->GetItemCount() == 1) {
+	if (mainFrame->m_listCtrl->GetItemCount() == 1)
+	{
 		mainFrame->m_xSlider->SetMax(wxMax(2,columns-1));
 		mainFrame->m_xSlider->SetValue(columns / 2);
 		mainFrame->m_ySlider->SetMax(wxMax(2,rows-1));
@@ -268,13 +277,18 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 				mainFrame->m_ySlider->GetValue(),
 				mainFrame->m_zSlider->GetValue());
 
-		mainFrame->renewAllGLWidgets();
 		updateTreeDims();
-		updateTreeDS(0);
-	} else {
-		mainFrame->refreshAllGLWidgets();
-		updateTreeDS(0);
+		int newSize = wxMax(wxMax(rows, columns), frames);
+		mainFrame->m_mainGL->changeOrthoSize(newSize);
+		mainFrame->m_gl0->changeOrthoSize(newSize);
+		mainFrame->m_gl1->changeOrthoSize(newSize);
+		mainFrame->m_gl2->changeOrthoSize(newSize);
 	}
+
+	updateTreeDS(0);
+	mainFrame->refreshAllGLWidgets();
+
+
 
 }
 
