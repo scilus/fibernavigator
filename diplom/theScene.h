@@ -30,6 +30,7 @@ class TheScene {
 public:
 	bool m_showBoxes;
 	bool m_blendAlpha;
+	bool m_pointMode;
 
 	TheScene(DatasetHelper*);
 	~TheScene();
@@ -59,8 +60,6 @@ private:
 
 	DatasetHelper* m_dh;
 	FgeImageSpaceLIC* m_lic;
-
-	bool m_pointMode;
 
 	void lightsOn();
 	void lightsOff();

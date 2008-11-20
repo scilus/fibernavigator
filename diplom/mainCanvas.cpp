@@ -439,19 +439,21 @@ hitResult MainCanvas::pick(wxPoint click)
 	/*
 	 * check for hits with points for spline surface
 	 */
-	wxTreeItemId id, childid;
-	wxTreeItemIdValue cookie = 0;
-	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
-	while ( id.IsOk() )
+	if (m_dh->scene->m_pointMode)
 	{
-		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
-		hitResult hr1 = point->hitTest(ray);
-		if (hr1.hit && !hr.hit) hr = hr1;
-		else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
+		wxTreeItemId id, childid;
+		wxTreeItemIdValue cookie = 0;
+		id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
+		while ( id.IsOk() )
+		{
+			SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
+			hitResult hr1 = point->hitTest(ray);
+			if (hr1.hit && !hr.hit) hr = hr1;
+			else if (hr1.hit && hr.hit && (hr1.tmin < hr.tmin)) hr = hr1;
 
-		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
+			id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
+		}
 	}
-
 	return hr;
 
 
