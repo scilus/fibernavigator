@@ -520,7 +520,9 @@ void Surface::generateGeometry()
 			for(int j = 0 ; j < 3 ; ++j)
 			{
 				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
-				glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
+				glNormal3d(pointNormal.x * m_dh->normalDirection,
+						pointNormal.y  * m_dh->normalDirection,
+						pointNormal.z  * m_dh->normalDirection);
 				point = m_tMesh->getVertex(triangleEdges[j]);
 				glVertex3d(point.x, point.y, point.z);
 			}
@@ -551,7 +553,9 @@ void Surface::generateLICGeometry()
 			for(int j = 0 ; j < 3 ; ++j)
 			{
 				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
-				glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
+				glNormal3d(pointNormal.x * m_dh->normalDirection,
+						pointNormal.y  * m_dh->normalDirection,
+						pointNormal.z  * m_dh->normalDirection);
 				point = m_tMesh->getVertex(triangleEdges[j]);
 				glVertex3d(point.x, point.y, point.z);
 			}

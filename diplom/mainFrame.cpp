@@ -894,20 +894,17 @@ void MainFrame::OnToggleLIC(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnToggleNormal(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->normalDirection *= -1.0;
-	m_dh->surface_isDirty = true;
-	refreshAllGLWidgets();
-	/*
-	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-	if (item != -1)
+
+	for (int i = 0 ; i < m_listCtrl->GetItemCount() ; ++i)
 	{
-		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
-		if (info->getType() < Surface_ )
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(i);
+		if (info->getType() == Surface_)
 		{
-			Surface* surf = (Surface*)m_listCtrl->GetItemData(item);
+			Surface* surf = (Surface*)m_listCtrl->GetItemData(i);
+			surf->generateGeometry();
 		}
 	}
 	refreshAllGLWidgets();
-*/
 }
 
 /****************************************************************************************************

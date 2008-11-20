@@ -78,7 +78,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_isrDragging = false;
 	m_ismDragging = false;
 
-	normalDirection = -1.0;
+	normalDirection = 1.0;
 
 #ifdef DEBUG
 	debugLevel = 0;
