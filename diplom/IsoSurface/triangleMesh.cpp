@@ -315,7 +315,6 @@ void TriangleMesh::cleanUp()
 		int counter = 0;
 		for (int i = 0 ; i < numTris ; ++i)
 			if (!visited[i]) ++counter;
-		//printf("%d triangles not visited\n", counter);
 		for (int i = 0 ; i < numTris ; ++i)
 		{
 			if (!visited[i])

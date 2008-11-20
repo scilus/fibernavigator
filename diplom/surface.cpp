@@ -298,9 +298,8 @@ void Surface::execute ()
 		m_tMesh->doLoopSubD();
 		m_tMesh->doLoopSubD();
 		subDCount = 5;
-		printf("initiating lic\n");
+		m_dh->printDebug(_T("initiating lic"), 1);
 		SurfaceLIC lic(m_dh, m_tMesh);
-		printf("initiating lic 2\n");
 		lic.execute();
 		m_testLines = lic.testLines;
 		licCalculated = true;
@@ -567,9 +566,7 @@ void Surface::generateLICGeometry()
 
 	for (size_t i = 0 ; i < m_testLines.size() ; ++i)
 	{
-		//printf("draw line of size %d\n", m_testLines[i].size());
 		glBegin(GL_LINE_STRIP);
-		//glColor3f( drand48(), drand48(), drand48() );
 		glColor3f(1.0, 1.0, 0.0);
 		for (size_t k = 0 ; k < m_testLines[i].size() ; k += 3)
 		{

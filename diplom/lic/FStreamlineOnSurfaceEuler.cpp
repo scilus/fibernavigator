@@ -58,7 +58,6 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh,
 			FTensor t = m_tensorField->getTensorAtIndex(index);
 			cell_vectors[i] = FArray(t);
 		}
-		printf("lic constructor done\n");
 
 #ifdef __DEBUG__
 		std::cout << "FStreamlineOnSurfaceEuler: exit" << std::endl
@@ -1084,7 +1083,7 @@ bool FStreamlineOnSurfaceEuler::isInside(const FIndex& cellId,
 
 		return false;
 	} catch (FException& e) {
-		printf("caught exception in isInside:\n ");
+		m_dh->printDebug(_T("caught exception in isInside:\n "), 2);
 		//std::cout << "caught exception in isInside: " << e << std::endl;
 		return false;
 	}

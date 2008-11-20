@@ -192,7 +192,6 @@ bool Anatomy::load(wxString filename)
 					{
 						max = wxMax(max, m_shortDataset[i]);
 					}
-					printf("max: %d\n", max);
 				} break;
 
 			case Overlay: {

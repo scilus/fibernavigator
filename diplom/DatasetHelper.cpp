@@ -79,21 +79,25 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_ismDragging = false;
 
 	normalDirection = -1.0;
+
+#ifdef DEBUG
+	debugLevel = 0;
+#else
+	debugLevel = 1;
+#endif
+	debugLevel = 1;
 }
 
 DatasetHelper::~DatasetHelper() {
-#ifdef DEBUG
-	printf("execute dataset helper destructor\n");
-#endif
+
+	printDebug(_T("execute dataset helper destructor"),0);
 	if (scene)
 		delete scene;
 	if (anatomyHelper)
 		delete anatomyHelper;
 	if (lastSelectedPoint)
 		delete lastSelectedPoint;
-#ifdef DEBUG
-	printf("dataset helper destructor done\n");
-#endif
+	printDebug(_T("dataset helper destructor done"),0);
 }
 
 bool DatasetHelper::load(int index, wxString filename, float threshold, bool active, bool showFS, bool useTex) {
@@ -575,12 +579,6 @@ void DatasetHelper::save(wxString filename)
 	doc.Save(filename, 2);
 }
 
-void DatasetHelper::printTime()
-{
-	wxDateTime dt = wxDateTime::Now();
-	printf("[%02d:%02d:%02d] ", dt.GetHour(), dt.GetMinute(), dt.GetSecond());
-}
-
 std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 {
 	std::vector<std::vector<SelectionBox*> > boxes;
@@ -607,14 +605,6 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 	}
 
 	return boxes;
-}
-
-void DatasetHelper::printwxT(wxString string)
-{
-	char* cstring;
-	cstring = (char*) malloc(string.length());
-	strcpy(cstring, (const char*) string.mb_str(wxConvUTF8));
-	printf("%s", cstring);
 }
 
 void DatasetHelper::updateTreeDims()
@@ -671,8 +661,7 @@ void DatasetHelper::treeFinished()
 	threadsActive--;
 	if (threadsActive > 0)
 		return;
-	printTime();
-	printf("tree finished\n");
+	printDebug(_T("tree finished"),1);
 	fibers_loaded = true;
 	updateAllSelectionBoxes();
 	scene->m_selBoxChanged = true;
@@ -741,11 +730,6 @@ bool DatasetHelper::GLError() {
 	return true;
 }
 
-void DatasetHelper::printGLError(wxString function) {
-	printwxT(function);
-	printf(" : ERROR: %s\n", gluErrorString(lastGLError));
-}
-
 bool DatasetHelper::loadTextFile(wxString* string, wxString filename) {
 	wxTextFile file;
 	*string = wxT("");
@@ -778,15 +762,13 @@ void DatasetHelper::createIsoSurface() {
 	if (!flag)
 		return;
 
-	printTime();
-	printf("start generating iso surface...\n");
+	printDebug(_T("start generating iso surface..."),1);
 	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset());
 	isosurf->GenerateSurface(100);
-	printTime();
-	printf("iso surface done\n");
+
+	printDebug(_T("iso surface done"),1);
 
 	if (isosurf->IsSurfaceValid()) {
-		//printf("surface is valid\n");
 		isosurf->generateGeometry();
 		isosurf->setName(wxT("iso surface"));
 
@@ -799,7 +781,7 @@ void DatasetHelper::createIsoSurface() {
 				wxLIST_STATE_SELECTED);
 
 	} else {
-		printf("surface is not valid\n");
+		printDebug(_T("***ERROR*** surface is not valid"),2);
 	}
 	mainFrame->refreshAllGLWidgets();
 }
@@ -882,4 +864,29 @@ TensorField* DatasetHelper::getTensorField()
 	}
 	tensors_loaded = false;
 	return NULL;
+}
+
+void DatasetHelper::printGLError(wxString function) {
+	printDebug(_T("***ERROR***: ") + function, 2);
+	printDebug(wxString::Format(_T("***ERROR***: %s\n"), gluErrorString(lastGLError)), 2);
+}
+
+void DatasetHelper::printTime()
+{
+	wxDateTime dt = wxDateTime::Now();
+	printf("[%02d:%02d:%02d] ", dt.GetHour(), dt.GetMinute(), dt.GetSecond());
+}
+
+void DatasetHelper::printwxT(wxString string)
+{
+	char* cstring;
+	cstring = (char*) malloc(string.length());
+	strcpy(cstring, (const char*) string.mb_str(wxConvUTF8));
+	printf("%s", cstring);
+}
+
+void DatasetHelper::printDebug(wxString string, int level)
+{
+	printTime();
+	printwxT(string + _T("\n"));
 }

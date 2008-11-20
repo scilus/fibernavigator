@@ -10,72 +10,47 @@
 
 ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh = dh;
-#ifdef DEBUG
-	m_dh->printTime();
-	printf("initializing texture shader\n");
-#endif
+
+	m_dh->printDebug(_T("initializing texture shader"), 1);
 	m_textureShader = new Shader(wxT("anatomy"));
 	m_textureShader->bind();
-
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup anatomy shader"));
-#ifdef DEBUG
-	m_dh->printTime();
-	printf("initializing mesh shader\n");
-#endif
+
+	m_dh->printDebug(_T("initializing mesh shader"), 1);
 	m_meshShader = new Shader(wxT("mesh"));
 	m_meshShader->bind();
-
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup mesh shader"));
-#ifdef DEBUG
-	m_dh->printTime();
-	printf("initializing fiber shader\n");
-#endif
 
+	m_dh->printDebug(_T("initializing fiber shader"), 1);
 	m_fiberShader = new Shader(wxT("fibers"));
 	m_fiberShader->bind();
-
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fiber shader"));
 
-#ifdef DEBUG
-	m_dh->printTime();
-	printf("initializing fake tube shader\n");
-#endif
-
+	m_dh->printDebug(_T("initializing fake tube shader"), 1);
 	m_fakeTubeShader = new Shader(wxT("fake-tubes"));
 	m_fakeTubeShader->bind();
-
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup fake tube shader"));
 
-#ifdef DEBUG
-	m_dh->printTime();
-	printf("initializing spline surface shader\n");
-#endif
+	m_dh->printDebug(_T("initializing spline surface shader"), 1);
 	m_splineSurfShader = new Shader(wxT("splineSurf"));
 	m_splineSurfShader->bind();
-
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup spline surface shader"));
 
-#ifdef DEBUG
-	m_dh->printTime();
-	printf("initializing vector shader\n");
-#endif
+	m_dh->printDebug(_T("initializing vector shader"), 1);
 	m_vectorShader = new Shader(wxT("vectors"));
 	m_vectorShader->bind();
-
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup vectors shader"));
 
 }
 
 ShaderHelper::~ShaderHelper() {
-	m_dh->printTime();
-	printf("execute shader helper destructor\n");
+	m_dh->printDebug(_T("execute shader helper destructor\n"), 0);
 	delete m_textureShader;
 	delete m_meshShader;
 	delete m_fiberShader;
 	delete m_splineSurfShader;
 	delete m_fakeTubeShader;
-	m_dh->printTime();
-	printf("shader helper destructor done\n");
+	m_dh->printDebug(_T("shader helper destructor done\n"), 0);
 }
 
 

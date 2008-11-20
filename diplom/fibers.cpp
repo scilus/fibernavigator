@@ -45,8 +45,7 @@ Fibers::~Fibers()
 
 bool Fibers::load(wxString filename)
 {
-	m_dh->printTime();
-	printf("start loading vtk file\n");
+	m_dh->printDebug(_T("start loading vtk file"), 1);
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
 
@@ -157,10 +156,7 @@ bool Fibers::load(wxString filename)
 
 	//int cc = i;
 
-#ifdef DEBUG
-	printf("loading %d points\n", countPoints);
-	printf("and %d lines\n", countLines);
-#endif
+	m_dh->printDebug(wxString::Format(_T("loading %d points and %d lines."), countPoints, countLines), 1);
 
 	m_countLines = countLines;
 	m_dh->countFibers = m_countLines;
@@ -191,9 +187,8 @@ bool Fibers::load(wxString filename)
 	*/
 
 	toggleEndianess();
-	m_dh->printTime();
 
-	printf("move vertices\n");
+	m_dh->printDebug(_T("move vertices"), 1);
 
 	for (int i = 0; i < countPoints * 3 ; ++i) {
 		m_pointArray[i] = m_dh->columns - m_pointArray[i];
@@ -203,8 +198,7 @@ bool Fibers::load(wxString filename)
 
 	calculateLinePointers();
 	createColorArray();
-	m_dh->printTime();
-	printf("read all\n");
+	m_dh->printDebug(_T("read all"), 1);
 
 	m_type = Fibers_;
 	m_fullPath = filename;
@@ -234,8 +228,7 @@ int Fibers::getStartIndexForLine(int line)
 
 void Fibers::calculateLinePointers()
 {
-	m_dh->printTime();
-	printf("calculate line pointers\n");
+	m_dh->printDebug(_T("calculate line pointers"), 1);
 	int pc = 0;
 	int lc = 0;
 	int tc = 0;
@@ -265,8 +258,7 @@ int Fibers::getLineForPoint(int point)
 
 void Fibers::toggleEndianess()
 {
-	m_dh->printTime();
-	printf("toggle Endianess\n");
+	m_dh->printDebug(_T("toggle Endianess"), 1);;
 
 	wxUint8 *pointbytes = (wxUint8*)m_pointArray;
 	wxUint8 temp;
@@ -294,8 +286,7 @@ void Fibers::toggleEndianess()
 
 void Fibers::createColorArray()
 {
-	m_dh->printTime();
-	printf("create color arrays\n");
+	m_dh->printDebug(_T("create color arrays"), 1);
 
 	if (m_colorArray) delete[] m_colorArray;
 	if (m_normalArray) delete[] m_normalArray;
@@ -364,8 +355,7 @@ void Fibers::createColorArray()
 
 void Fibers::resetColorArray()
 {
-	m_dh->printTime();
-	printf("reset color arrays\n");
+	m_dh->printDebug(_T("reset color arrays"), 1);
 
 	float *colorData;
 	if (m_dh->useVBO)
@@ -591,7 +581,7 @@ void Fibers::initializeBuffer()
 	}
 	else
 	{
-		printf("ERROR: Not enough memory on your gfx card. Using vertex arrays.\n");
+		m_dh->printDebug(_T("***ERROR***: Not enough memory on your gfx card. Using vertex arrays."), 2);
 		glDeleteBuffers(3, m_bufferObjects);
 	}
 }

@@ -82,7 +82,8 @@ public:
 	 * Helper functions
 	 */
 	void printTime();
-	void printwxT(wxString);
+	void printwxT(wxString string);
+	void printDebug(wxString string, int level);
 	/*
 	 * Check for GL error
 	 */
@@ -129,6 +130,8 @@ public:
 	int textures;
 	//! if set the shaders will be reloaded during next render() call
 	bool scheduledReloadShaders;
+
+	int debugLevel;
 	/////////////////////////////////////////////////////////////////////////////////
 	// state variables for menu entries
 	/////////////////////////////////////////////////////////////////////////////////

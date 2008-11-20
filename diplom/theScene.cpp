@@ -24,16 +24,14 @@ TheScene::TheScene(DatasetHelper* dh)
 
 TheScene::~TheScene()
 {
-#ifdef DEBUG
-	printf("execute scene destructor\n");
-#endif
+	m_dh->printDebug(_T("execute scene destructor"), 0);
+
 #ifndef __WXMAC__
     // on mac, this is just a pointer to the original object that is deleted with the widgets
 	if (m_mainGLContext) delete m_mainGLContext;
 #endif
-#ifdef DEBUG
-	printf("scene destructor done\n");
-#endif
+	m_dh->printDebug(_T("scene destructor done"), 0);
+
 }
 
 void TheScene::initGL(int view)
@@ -42,12 +40,10 @@ void TheScene::initGL(int view)
 	if (GLEW_OK != err)
 	{
 		/* Problem: glewInit failed, something is seriously wrong. */
-		m_dh->printTime();
-		printf("Error: %s\n", glewGetErrorString(err));
+		m_dh->printDebug(_T("Error: ") + wxString::FromAscii((char*)glewGetErrorString(err)), 2);
 	}
 	if (view == mainView) {
-		m_dh->printTime();
-		printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+		m_dh->printDebug(_T("Status: Using GLEW ") +  wxString::FromAscii((char*)glewGetString(GLEW_VERSION)), 1);
 	}
 	glEnable(GL_DEPTH_TEST);
 

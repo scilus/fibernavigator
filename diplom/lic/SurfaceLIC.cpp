@@ -61,6 +61,8 @@ void SurfaceLIC::execute() {
 		streamline = new MyLICStreamline(m_dh, m_grid);
 		streamline->setParams(&hit_texture, min_length, threshold);
 
+		m_dh->printDebug(_T("start calculating lic"), 1);
+
 		// iterate over all texture points
 		positive m, q, n = 0;
 		m = (m_grid->getNumTriangles() - 1) / modulo;
@@ -75,7 +77,7 @@ void SurfaceLIC::execute() {
 			for (positive j = 0; j < m ; ++j, ++n) {
 				calculatePixelLuminance(FIndex(modulo * j + i));
 			}
-
+		m_dh->printDebug(_T("lic done"), 1);
 
 	} catch (FException& e) {
 		if (streamline)
@@ -94,7 +96,6 @@ void SurfaceLIC::execute() {
 
 void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 {
-	//printf("calculatePixelLuminance: cell #%d\n", cellId.getIndex());
 	//   cout << "calculatePixelLuminance: cell #" << cellId << " ";
 	// already calculated ?
 	if (hit_texture[cellId.getIndex()]) {

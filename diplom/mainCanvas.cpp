@@ -46,22 +46,20 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 
 MainCanvas::~MainCanvas()
 {
-#ifdef DEBUG
 	switch(m_view) {
 	case mainView :
-		printf("execute main canvas destructor: main view\n");
+		m_dh->printDebug(_T("execute main canvas destructor: main view"), 0);
 		break;
 	case axial:
-		printf("execute main canvas destructor: axial view\n");
+		m_dh->printDebug(_T("execute main canvas destructor: axial view"), 0);
 		break;
 	case coronal:
-		printf("execute main canvas destructor: coronal view\n");
+		m_dh->printDebug(_T("execute main canvas destructor: coronal view"), 0);
 		break;
 	case sagittal:
-		printf("execute main canvas destructor: sagittal view\n");
+		m_dh->printDebug(_T("execute main canvas destructor: sagittal view"), 0);
 		break;
 	}
-#endif
 }
 
 void MainCanvas::init()

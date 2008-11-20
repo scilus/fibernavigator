@@ -57,7 +57,6 @@ void Shader::unlink()
 void Shader::bind()
 {
 	glUseProgram(m_shaderProgram);
-	//printf("using shader: %d\n", m_shaderProgram);
 }
 
 void Shader::release()

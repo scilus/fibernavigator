@@ -398,7 +398,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	#endif
     if(!doubleBuffer)
     {
-        printf("don't have double buffer, disabling\n");
+    	m_dh->printDebug(_T("don't have double buffer, disabling"), 1);
 	#ifdef __WXGTK__
         gl_attrib[9] = None;
 	#endif
@@ -441,9 +441,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
 MainFrame::~MainFrame()
 {
-#ifdef DEBUG
-	printf("main frame destructor\n");
-#endif
+	m_dh->printDebug(_T("main frame destructor"), 0);
+
 	delete m_dh;
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;

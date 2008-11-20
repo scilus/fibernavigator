@@ -425,7 +425,6 @@ void SelectionBox::processDrag(wxPoint click, wxPoint lastPos)
 
 void SelectionBox::drag(wxPoint click, wxPoint lastPos)
 {
-	//printf("(%d,%d) (%d,%d)\n", lastPos.x, lastPos.y, click.x, click.y );
 	Vector3fT vs = m_dh->mapMouse2World(click.x, click.y);
 	Vector3fT ve = m_dh->mapMouse2WorldBack(click.x, click.y);
 	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
