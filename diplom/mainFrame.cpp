@@ -1353,6 +1353,12 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	if (item == -1) return;
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
 	updateMenus();
+
+	m_tSlider->SetValue((int)(info->getThreshold()*100));
+	m_tSlider2->SetValue((int)(info->getAlpha()*100));
+	m_treeWidget->SelectItem(info->getTreeId());
+	m_treeWidget->EnsureVisible(info->getTreeId());
+
 	/*
 	m_tSlider->SetValue((int)(info->getThreshold()*100));
 	m_tSlider2->SetValue((int)(info->getAlpha()*100));
@@ -1386,6 +1392,7 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	default:
 		break;
 	}
+
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -1834,12 +1841,6 @@ void MainFrame::updateMenus()
 	if (item != -1)
 	{
 		DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
-
-		m_tSlider->SetValue((int)(info->getThreshold()*100));
-		m_tSlider2->SetValue((int)(info->getAlpha()*100));
-		m_treeWidget->SelectItem(info->getTreeId());
-		m_treeWidget->EnsureVisible(info->getTreeId());
-
 		sMenu->Check(sMenu->FindItem(_T("Toggle Texture Mode")), !info->getShowFS());
 		sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
 		sMenu->Check(sMenu->FindItem(_T("Toggle Normal Direction")), (m_dh->normalDirection < 0));
