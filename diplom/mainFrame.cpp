@@ -1114,12 +1114,12 @@ void MainFrame::OnResetColor(wxCommandEvent& WXUNUSED(event))
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnSetCMap0(wxCommandEvent& event) {m_dh->colorMap = 0;refreshAllGLWidgets();}
-void MainFrame::OnSetCMap1(wxCommandEvent& event) {m_dh->colorMap = 1;refreshAllGLWidgets();}
-void MainFrame::OnSetCMap2(wxCommandEvent& event) {m_dh->colorMap = 2;refreshAllGLWidgets();}
-void MainFrame::OnSetCMap3(wxCommandEvent& event) {m_dh->colorMap = 3;refreshAllGLWidgets();}
-void MainFrame::OnSetCMap4(wxCommandEvent& event) {m_dh->colorMap = 4;refreshAllGLWidgets();}
-void MainFrame::OnSetCMap5(wxCommandEvent& event) {m_dh->colorMap = 5;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap0(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 0;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap1(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 1;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap2(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 2;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap3(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 3;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap4(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 4;refreshAllGLWidgets();}
+void MainFrame::OnSetCMap5(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 5;refreshAllGLWidgets();}
 /****************************************************************************************************
  *
  * Menu Help

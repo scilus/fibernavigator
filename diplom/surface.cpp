@@ -31,7 +31,7 @@ Surface::Surface(DatasetHelper* dh)
 	m_dh->surface_loaded = true;
 	m_numPoints = 0;
 	m_hasTreeId = false;
-	m_alpha = 0.2;
+	m_alpha = 0.2f;
 	m_tMesh = NULL;
 
 	licCalculated = false;

@@ -208,13 +208,13 @@ void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 	PopupMenu(menu, event.GetPosition());
 }
 
-void MyTreeCtrl::OnToggleAndNot(wxCommandEvent& event)
+void MyTreeCtrl::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))
 {
 	wxTreeItemId treeid = GetSelection();
 	((SelectionBox*) (GetItemData(treeid)))->toggleNOT();
 }
 
-void MyTreeCtrl::OnDeleteBox(wxCommandEvent& event)
+void MyTreeCtrl::OnDeleteBox(wxCommandEvent& WXUNUSED(event))
 {
 	if (getSelectedType() == ChildBox)
 	{

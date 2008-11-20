@@ -289,7 +289,7 @@ bool Anatomy::load(wxString filename)
 					}
 				}
 
-				m_tensorField = new TensorField(m_dh, m_floatDataset);
+				m_tensorField = new TensorField(m_dh, m_floatDataset, false);
 
 				flag = true;
 				m_dh->tensors_loaded = true;
