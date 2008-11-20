@@ -1126,8 +1126,8 @@ void MainFrame::OnSetCMap5(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 5;
  ****************************************************************************************************/
 void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-      (void)wxMessageBox(_T("Fiber Navigator\nAuthor: Ralph Schurade (c) 2008\n\n"
-    		  "$Revision $"), _T("About Fiber Navigator"));
+	wxString rev = _T("$Revision$");
+	(void)wxMessageBox(_T("Fiber Navigator\nAuthor: Ralph Schurade (c) 2008\n\n") + rev, _T("About Fiber Navigator"));
 }
 
 /****************************************************************************************************
