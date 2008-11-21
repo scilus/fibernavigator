@@ -13,7 +13,6 @@
 #include <map>
 #include <vector>
 #include "point3D.h"
-#include "triangleMesh.h"
 
 #include "../datasetInfo.h"
 #include "../DatasetHelper.h"
@@ -129,9 +128,6 @@ protected:
 
 	// Indicates whether a valid surface is present.
 	bool m_bValidSurface;
-
-	// Trianglemesh
-	TriangleMesh* m_tMesh;
 
 	// Lookup tables used in the construction of the isosurface.
 	static const unsigned int m_edgeTable[256];

@@ -1764,7 +1764,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
  * OnMouseEvent just repaints the Window
  *
  ****************************************************************************************************/
-void MainFrame::OnMouseEvent(wxMouseEvent& WXUNUSED(event))
+void MainFrame::OnMouseEvent(wxMouseEvent& event)
 {
 	this->Refresh();
 }

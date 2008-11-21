@@ -679,9 +679,14 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	ID2POINT3DID::iterator mapIterator = m_i2pt3idVertices.begin();
 	TRIANGLEVECTOR::iterator vecIterator = m_trivecTriangles.begin();
 
+	m_tMesh->clearMesh();
+	m_tMesh->reserveVerts(m_i2pt3idVertices.size());
+	m_tMesh->reserveTriangles(m_trivecTriangles.size());
+
 	// Rename vertices.
 	while (mapIterator != m_i2pt3idVertices.end()) {
 		(*mapIterator).second.newID = nextID;
+		m_tMesh->addVert(Vector((*mapIterator).second.x, (*mapIterator).second.y, (*mapIterator).second.z));
 		nextID++;
 		mapIterator++;
 	}
@@ -692,27 +697,8 @@ void CIsoSurface::RenameVerticesAndTriangles()
 			unsigned int newID = m_i2pt3idVertices[(*vecIterator).pointID[i]].newID;
 			(*vecIterator).pointID[i] = newID;
 		}
+		m_tMesh->addTriangle((*vecIterator).pointID[0], (*vecIterator).pointID[1], (*vecIterator).pointID[2]);
 		vecIterator++;
-	}
-
-	m_tMesh->clearMesh();
-	m_tMesh->reserveVerts(m_nVertices);
-	m_tMesh->reserveTriangles(m_nTriangles);
-
-	// Copy all the vertices and triangles into triangle mesh
-	// Copy vertices.
-	mapIterator = m_i2pt3idVertices.begin();
-	m_nVertices = m_i2pt3idVertices.size();
-	m_ppt3dVertices = new POINT3D[m_nVertices];
-	for (unsigned int i = 0; i < m_nVertices; i++, mapIterator++) {
-			m_tMesh->addVert(Vector((*mapIterator).second.x, (*mapIterator).second.y, (*mapIterator).second.z));
-	}
-	// Copy vertex indices which make triangles.
-	vecIterator = m_trivecTriangles.begin();
-	m_nTriangles = m_trivecTriangles.size();
-	m_piTriangleIndices = new unsigned int[m_nTriangles*3];
-	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++) {
-			m_tMesh->addTriangle((*vecIterator).pointID[0], (*vecIterator).pointID[1], (*vecIterator).pointID[2]);
 	}
 
 	m_tMesh->finalize();
@@ -741,20 +727,36 @@ void CIsoSurface::generateGeometry()
 	Vector point;
 	Vector pointNormal;
 
-	glBegin(GL_TRIANGLES);
-		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
-		{
-			triangleEdges = m_tMesh->getTriangle(i);
-			for(int j = 0 ; j < 3 ; ++j)
+	if (m_tMesh->isFinished())
+	{
+		glBegin(GL_TRIANGLES);
+			for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
 			{
-				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
-				glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
-				point = m_tMesh->getVertex(triangleEdges[j]);
-				glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
+				triangleEdges = m_tMesh->getTriangle(i);
+				for(int j = 0 ; j < 3 ; ++j)
+				{
+					pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
+					glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
+					point = m_tMesh->getVertex(triangleEdges[j]);
+					glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
+				}
 			}
-		}
-	glEnd();
-
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_TRIANGLES);
+			for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
+			{
+				triangleEdges = m_tMesh->getTriangle(i);
+				for(int j = 0 ; j < 3 ; ++j)
+				{
+					point = m_tMesh->getVertex(triangleEdges[j]);
+					glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
+				}
+			}
+		glEnd();
+	}
 	glEndList();
 	m_GLuint = dl;
 }

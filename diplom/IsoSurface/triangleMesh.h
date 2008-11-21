@@ -14,8 +14,11 @@
 #include "../DatasetHelper.h"
 
 #include "../Fantom/FIndex.h"
+#include "../Fantom/FArray.h"
 
 #define PI 3.14159
+
+class DatasetHelper;
 
 class TriangleMesh {
 

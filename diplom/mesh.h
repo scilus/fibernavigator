@@ -68,9 +68,6 @@ private:
 	unsigned int m_countTimeSteps;
 	unsigned int m_countPolygons;
 	unsigned int m_polygonDim;
-
-	// Trianglemesh
-	TriangleMesh* m_tMesh;
 };
 
 #endif /*MESH_H_*/

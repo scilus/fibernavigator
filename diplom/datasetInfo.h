@@ -10,6 +10,8 @@
 #include "wx/treectrl.h"
 #include "DatasetHelper.h"
 
+#include "IsoSurface/triangleMesh.h"
+
 #include <GL/glew.h>
 
 
@@ -50,6 +52,7 @@ union converterByteFloat {
 };
 
 class DatasetHelper;
+class TriangleMesh;
 
 class DatasetInfo
 {
@@ -107,6 +110,9 @@ public:
 	GLuint getGLuint() {return m_GLuint;};
 	void setColor(wxColour color) {m_color = color;};
 	wxColour getColor() {return m_color;};
+
+	// Trianglemesh
+	TriangleMesh* m_tMesh;
 
 protected:
 	DatasetHelper* m_dh;
