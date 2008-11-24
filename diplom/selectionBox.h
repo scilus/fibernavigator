@@ -51,6 +51,7 @@ public:
 	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
 	wxString getName() {return m_name;};
 	void setName(wxString name) {m_name = name;};
+	int getIcon();
 
 	void draw1();
 	void draw2();

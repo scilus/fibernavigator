@@ -361,11 +361,11 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_EDIT_LABELS);
     wxImageList* tImageList = new wxImageList(16,16);
 #ifndef __WXMAC__
-    tImageList->Add(wxIcon(eyes_xpm));
     tImageList->Add(wxIcon(delete_xpm));
+    tImageList->Add(wxIcon(eyes_xpm));
 #else
-    tImageList->Add(wxImage(MyApp::respath + _T( "icons/eyes.png" ), wxBITMAP_TYPE_PNG));
     tImageList->Add(wxImage(MyApp::respath + _T( "icons/delete.png" ), wxBITMAP_TYPE_PNG));
+    tImageList->Add(wxImage(MyApp::respath + _T( "icons/eyes.png" ), wxBITMAP_TYPE_PNG));
 #endif
     m_treeWidget->AssignImageList(tImageList);
 
@@ -653,7 +653,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->toggleActive();
-		m_treeWidget->SetItemImage(tBoxId, 1 - box->m_isActive);
+		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
 		box->setDirty();
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
@@ -663,8 +663,8 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 			wxTreeItemId childId = m_treeWidget->GetNextChild(tBoxId, childcookie);
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
-				childBox->m_isActive = box->m_isActive;
-				m_treeWidget->SetItemImage(childId, 1 - box->m_isActive);
+				box->toggleActive();
+				m_treeWidget->SetItemImage(childId, box->getIcon());
 				childBox->setDirty();
 			}
 		}
@@ -672,8 +672,8 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	else if (treeSelected(tBoxId) == ChildBox)
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		m_treeWidget->SetItemImage(tBoxId, 1-  !box->m_isActive);
-		box->m_isActive = !box->m_isActive;
+		box->toggleActive();
+		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
 		box->setDirty();
 	}
 
@@ -695,14 +695,7 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->m_isVisible = !box->m_isVisible;
-
-		if (box->getShow() && box->getActive())
-			m_treeWidget->SetItemImage(tBoxId, 0 );
-		else if (!box->getActive())
-			m_treeWidget->SetItemImage(tBoxId, 1 );
-		else
-			m_treeWidget->SetItemImage(tBoxId, -1 );
-
+		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
 		box->setDirty();
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
@@ -713,12 +706,7 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
 				childBox->m_isVisible = box->m_isVisible;
-				if ( childBox->getShow() && childBox->getActive() )
-					m_treeWidget->SetItemImage(childId, 0);
-				else if ( !childBox->getActive() )
-					m_treeWidget->SetItemImage(childId, 1);
-				else
-					m_treeWidget->SetItemImage(childId, -1);
+				m_treeWidget->SetItemImage(tBoxId, box->getIcon());
 				childBox->setDirty();
 			}
 		}
@@ -727,13 +715,7 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->m_isVisible = !box->m_isVisible;
-		if (box->getShow() && box->getActive())
-			m_treeWidget->SetItemImage(tBoxId, 0 );
-		else if (!box->getActive())
-			m_treeWidget->SetItemImage(tBoxId, 1 );
-		else
-			m_treeWidget->SetItemImage(tBoxId, -1 );
-
+		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
 		box->setDirty();
 	}
 
@@ -1418,42 +1400,34 @@ void MainFrame::OnListItemDown(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 {
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
-
 	int selected = treeSelected(treeid);
-	if ( selected == ChildBox ||  selected == MasterBox )
+
+	bool flag = true;
+	int load = 0;
+	switch (selected)
 	{
+	case MasterBox:
+	case ChildBox:
 		if (m_dh->lastSelectedBox) m_dh->lastSelectedBox->unselect();
 		m_dh->lastSelectedBox = (SelectionBox*)(m_treeWidget->GetItemData(treeid));
 		m_dh->lastSelectedBox->select(false);
-
-		refreshAllGLWidgets();
-		return;
-	}
-
-	else if ( selected == Point_)
-	{
+		break;
+	case Point_:
 		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
 		m_dh->lastSelectedPoint = (SplinePoint*)(m_treeWidget->GetItemData(treeid));
 		m_dh->lastSelectedPoint->select(false);
-		refreshAllGLWidgets();
-		return;
-
-	}
-
-	bool flag = true;
-	/* open load dialog */
-	if (selected == Label_datasets)
-	{
-		flag = m_dh->load(1);
-	}
-	else if (selected == Label_meshes)
-	{
-		flag = m_dh->load(2);
-	}
-	else if (selected == Label_fibers)
-	{
-		flag = m_dh->load(3);
-		m_dh->scene->m_selBoxChanged = true;
+		break;
+	case Label_fibers:
+		++load;
+	case Label_meshes:
+		++load;
+	case Label_datasets:
+		flag = m_dh->load(++load);
+		if (flag) m_dh->scene->m_selBoxChanged = true;
+		m_treeWidget->Unselect();
+		break;
+	default:
+		break;
 	}
 
 	if ( !flag )

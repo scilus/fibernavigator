@@ -648,3 +648,13 @@ void SelectionBox::setDirty()
 	m_dirty = true;
 	m_dh->scene->m_selBoxChanged = true;
 }
+
+int SelectionBox::getIcon()
+{
+	if (m_isActive && m_isVisible)
+		return 1;
+	else if (m_isActive && !m_isVisible)
+		return -1;
+	else
+		return 0;
+}

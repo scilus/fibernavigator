@@ -225,7 +225,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 				wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(
 					mainFrame->m_tSelBoxId, wxT("box"), 0, -1, selBox);
 				mainFrame->m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
-
+				mainFrame->m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
 				mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				selBox->setTreeId(tNewBoxId);
 			}
@@ -476,7 +476,7 @@ bool DatasetHelper::loadScene(wxString filename)
 					currentMasterId = mainFrame->m_treeWidget->AppendItem(
 							mainFrame->m_tSelBoxId, selBox->getName(), 0, -1, selBox);
 					mainFrame->m_treeWidget->EnsureVisible(currentMasterId);
-					mainFrame->m_treeWidget->SetItemImage(currentMasterId, 1 - selBox->getShow());
+					mainFrame->m_treeWidget->SetItemImage(currentMasterId,selBox->getIcon());
 					mainFrame->m_treeWidget->SetItemBackgroundColour(currentMasterId, *wxCYAN);
 					selBox->setTreeId(currentMasterId);
 
@@ -486,7 +486,7 @@ bool DatasetHelper::loadScene(wxString filename)
 					wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(
 							currentMasterId, selBox->getName(), 0, -1, selBox);
 					mainFrame->m_treeWidget->EnsureVisible(boxId);
-					mainFrame->m_treeWidget->SetItemImage(boxId, 1 - selBox->getShow());
+					mainFrame->m_treeWidget->SetItemImage(boxId, selBox->getIcon());
 					if (selBox->m_isNOT)
 						mainFrame->m_treeWidget->SetItemBackgroundColour(boxId, *wxRED);
 					else
