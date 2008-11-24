@@ -405,13 +405,16 @@ bool DatasetHelper::loadScene(wxString filename)
 				pNode = pNode->GetNext();
 			}
 
-			Surface *surface = new Surface(this);
-			mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
-			mainFrame->m_listCtrl->SetItem(0, 1, _T("spline surface"));
-			mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.50"));
-			mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
-			mainFrame->m_listCtrl->SetItemData(0, (long)surface);
-			mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			if (mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tPointId) > 0)
+			{
+				Surface *surface = new Surface(this);
+				mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+				mainFrame->m_listCtrl->SetItem(0, 1, _T("spline surface"));
+				mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.50"));
+				mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
+				mainFrame->m_listCtrl->SetItemData(0, (long)surface);
+				mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			}
 		}
 
 		else if (child->GetName() == wxT("selection_boxes") /*&& TheDataset::fibers_loaded*/) {
