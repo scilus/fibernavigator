@@ -102,6 +102,7 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
 		currCell = cellId;
 		steps.push_back(start);
 		vecs.push_back(cell_vectors[cellId]);
+//		length*= sqrt(cell_vectors[cellId][0]*cell_vectors[cellId][0] + cell_vectors[cellId][1]*cell_vectors[cellId][1] + cell_vectors[cellId][2]*cell_vectors[cellId][2]);
 		visitedCells.push_back(cellId);
 		// TODO
 		succeeded = walkThroughCell( currPos, currCell, FArray(3), first, second,
@@ -402,17 +403,20 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 
 		// local coordinates
 		// FIXME: fix orientation for tensor case:
-		double o = 1.;
-		if (lastStep.size() != 0) {
-			//double orient = cell_vectors[cellId.getIndex()] * lastStep;
-			double orient = cell_vectors[cellId.getIndex()] * lastStep;
-			if (orient < 0.)
-				o = -1.;
-		}
 		point[0] = (entry - vertices[ids[0]]) * basis[0];
 		point[1] = 0.;
-		vec[0] = o * fwd * cell_vectors[cellId.getIndex()] * basis[0];
-		vec[1] = o * fwd * cell_vectors[cellId.getIndex()] * basis[1];
+		vec[0] = fwd * cell_vectors[cellId.getIndex()] * basis[0];
+		vec[1] = fwd * cell_vectors[cellId.getIndex()] * basis[1];
+		double o = 1.0;
+		if (lastStep.size() != 0) {
+			double orient =  (basis[0]*vec[0] + basis[1]*vec[1]) * lastStep;
+			if (orient < 0.)
+			{
+				o = -1.0;
+				vec[0] *= -1.;
+				vec[1] *= -1.;
+			}
+		}
 
 		// check for singular edge
 		if (vec[1] < 0.) {
@@ -566,14 +570,18 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 		point[0] = (entry - vertices[0]) * basis[0];
 		point[1] = (entry - vertices[0]) * basis[1];
 		//  ...direction vector
-		double o = 1.;
+		vec[0] = fwd * cell_vectors[cellId] * basis[0];
+		vec[1] = fwd * cell_vectors[cellId] * basis[1];
+
 		if (lastStep.size() != 0) {
-			double orient = cell_vectors[cellId.getIndex()] * lastStep;
+			double orient =  (basis[0]*vec[0] + basis[1]*vec[1]) * lastStep;
 			if (orient < 0.)
-				o = -1.;
+			{
+				vec[0] *= -1.;
+				vec[1] *= -1.;
+			}
 		}
-		vec[0] = o * fwd * cell_vectors[cellId] * basis[0];
-		vec[1] = o * fwd * cell_vectors[cellId] * basis[1];
+
 
 		// vector indicating if vec may intersect the corresponding edge
 		for (positive i = 0; i < 3; i++) {
@@ -632,7 +640,7 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 #ifdef __DEBUG__
 		//std::cout << "found intersection on edge #" << id0 << flush;
 #endif
-		o = 1.;
+		double o = 1.;
 		if (isTensor) {
 			double orient = cell_vectors[cellId.getIndex()] * lastStep;
 			if (orient < 0.)
