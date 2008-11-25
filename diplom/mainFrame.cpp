@@ -663,8 +663,8 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 			wxTreeItemId childId = m_treeWidget->GetNextChild(tBoxId, childcookie);
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
-				box->toggleActive();
-				m_treeWidget->SetItemImage(childId, box->getIcon());
+				childBox->m_isActive = box->getActive();
+				m_treeWidget->SetItemImage(childId, childBox->getIcon());
 				childBox->setDirty();
 			}
 		}
@@ -705,8 +705,8 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 			wxTreeItemId childId = m_treeWidget->GetNextChild(tBoxId, childcookie);
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
-				childBox->m_isVisible = box->m_isVisible;
-				m_treeWidget->SetItemImage(tBoxId, box->getIcon());
+				childBox->m_isVisible = box->getShow();
+				m_treeWidget->SetItemImage(childId, childBox->getIcon());
 				childBox->setDirty();
 			}
 		}
@@ -749,6 +749,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, selBox);
 		m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxGREEN);
 		m_treeWidget->EnsureVisible(tNewBoxId);
+		m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
 		selBox->setTreeId(tNewBoxId);
 	}
 	else
@@ -757,6 +758,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, selBox);
 		m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
 		m_treeWidget->EnsureVisible(tNewBoxId);
+		m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
 		selBox->setTreeId(tNewBoxId);
 	}
 
@@ -1277,7 +1279,7 @@ void MainFrame::renewAllGLWidgets()
 void MainFrame::updateStatusBar()
 {
 	wxString sbString0 = wxT("");
-	sbString0 = wxString::Format(wxT("Axial: %d Coronal: %d Sagittal: %d"),m_zSlider->GetValue(), m_ySlider->GetValue(), m_xSlider->GetValue());
+	sbString0 = wxString::Format(wxT("Position: %d  %d  %d"), m_xSlider->GetValue(), m_ySlider->GetValue(), m_zSlider->GetValue());
 	m_statusBar->SetStatusText(sbString0,0);
 }
 /****************************************************************************************************
@@ -1450,7 +1452,27 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 	wxTreeItemId treeid = m_treeWidget->GetSelection();
 
 	int selected = treeSelected(treeid);
-	if ( selected == ChildBox )
+	if ( selected == MasterBox )
+	{
+		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(treeid));
+		box->toggleActive();
+		m_treeWidget->SetItemImage(treeid, box->getIcon());
+		box->setDirty();
+		
+		int childboxes = m_treeWidget->GetChildrenCount(treeid);
+		wxTreeItemIdValue childcookie = 0;
+		for (int i = 0 ; i < childboxes ; ++i)
+		{
+			wxTreeItemId childId = m_treeWidget->GetNextChild(treeid, childcookie);
+			if (childId.IsOk()) {
+				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
+				childBox->m_isActive = box->getActive();
+				m_treeWidget->SetItemImage(childId, childBox->getIcon());
+				childBox->setDirty();
+			}
+		}
+	}
+	else if ( selected == ChildBox )
 	{
 		((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->toggleNOT();
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);

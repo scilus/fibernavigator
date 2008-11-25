@@ -163,6 +163,9 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 			return;
 		}
 	}
+	else {
+		event.Skip();
+	}
     Refresh(false);
 }
 

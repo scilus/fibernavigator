@@ -122,10 +122,13 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 				if (wxGetKeyState(WXK_CONTROL)) {
 					m_hr = pick(event.GetPosition());
-					m_dh->updateView((int)getEventCenter().s.X , (int)getEventCenter().s.Y , (int)getEventCenter().s.Z);
-					m_dh->mainFrame->m_xSlider->SetValue((int)getEventCenter().s.X);
-					m_dh->mainFrame->m_ySlider->SetValue((int)getEventCenter().s.Y);
-					m_dh->mainFrame->m_zSlider->SetValue((int)getEventCenter().s.Z);
+					int newX = (int)(getEventCenter().s.X + 0.5);
+					int newY = (int)(getEventCenter().s.Y + 0.5);
+					int newZ = (int)(getEventCenter().s.Z + 0.5);
+					m_dh->updateView( newX, newY , newZ);
+					m_dh->mainFrame->m_xSlider->SetValue(newX);
+					m_dh->mainFrame->m_ySlider->SetValue(newY);
+					m_dh->mainFrame->m_zSlider->SetValue(newZ);
 					m_dh->mainFrame->refreshAllGLWidgets();
 				}
 

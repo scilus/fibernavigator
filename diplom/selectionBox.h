@@ -28,7 +28,7 @@ public:
 
 	bool toggleShow() {return m_isVisible = !m_isVisible;};
 	bool toggleNOT() {return m_isNOT = !m_isNOT;};
-	bool toggleActive() {return m_isActive = ! m_isActive;};
+	bool toggleActive() {return m_isActive = !m_isActive;};
 	bool getActive() {return m_isActive;};
 	bool getShow() {return m_isVisible;};
 	void unselect() {m_isSelected = false;};
