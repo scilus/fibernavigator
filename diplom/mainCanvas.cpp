@@ -676,6 +676,9 @@ void MainCanvas::OnChar(wxKeyEvent& event)
 			m_dh->mainFrame->m_zSlider->SetValue( wxMin(m_dh->mainFrame->m_zSlider->GetValue() + 1, m_dh->frames));
 			break;
 		case WXK_HOME:
+			m_dh->mainFrame->m_xSlider->SetValue( m_dh->columns / 2);
+			m_dh->mainFrame->m_ySlider->SetValue( m_dh->rows / 2);
+			m_dh->mainFrame->m_zSlider->SetValue( m_dh->frames / 2);
 			break;
 		default:
 			event.Skip();
