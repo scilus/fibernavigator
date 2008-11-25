@@ -55,6 +55,7 @@ public:
     void setRotation();
     void orthonormalize();
     double scalar(const F::FVector&, const F::FVector&);
+	void OnChar(wxKeyEvent& event);
 
     void testRender(GLuint tex);
 

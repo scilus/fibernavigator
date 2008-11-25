@@ -122,7 +122,7 @@ private:
     void OnKdTreeThreadFinished(wxCommandEvent& event);
     void updateStatusBar();
     void updateMenus();
-
+ 
     wxSashLayoutWindow* m_leftWindowHolder;
     wxSashLayoutWindow* m_leftWindowTop;
     wxSashLayoutWindow* m_leftWindowBottom;

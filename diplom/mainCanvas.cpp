@@ -15,6 +15,7 @@ BEGIN_EVENT_TABLE(MainCanvas, wxGLCanvas)
     EVT_PAINT(MainCanvas::OnPaint)
     EVT_MOUSE_EVENTS(MainCanvas::OnMouseEvent)
     EVT_ERASE_BACKGROUND(MainCanvas::OnEraseBackground)
+    EVT_CHAR(MainCanvas::OnChar)
 END_EVENT_TABLE()
 
 MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID id,
@@ -649,4 +650,36 @@ void MainCanvas::testRender(GLuint tex)
 	glFlush();
 
 	SwapBuffers();
+}
+
+void MainCanvas::OnChar(wxKeyEvent& event)
+{
+	switch( event.GetKeyCode() )
+		{
+		case WXK_LEFT:
+			m_dh->mainFrame->m_xSlider->SetValue( wxMax(0, m_dh->mainFrame->m_xSlider->GetValue() - 1));
+			break;
+		case WXK_RIGHT:
+			m_dh->mainFrame->m_xSlider->SetValue( wxMin(m_dh->mainFrame->m_xSlider->GetValue() + 1, m_dh->columns));
+			break;
+		case WXK_UP:
+			m_dh->mainFrame->m_ySlider->SetValue( wxMax(0, m_dh->mainFrame->m_ySlider->GetValue() - 1));
+			break;
+		case WXK_DOWN:
+			m_dh->mainFrame->m_ySlider->SetValue( wxMin(m_dh->mainFrame->m_ySlider->GetValue() + 1, m_dh->rows));
+			break;
+		case WXK_PAGEUP:
+			m_dh->mainFrame->m_zSlider->SetValue( wxMax(0, m_dh->mainFrame->m_zSlider->GetValue() - 1));
+			break;
+		case WXK_PAGEDOWN:
+			m_dh->mainFrame->m_zSlider->SetValue( wxMin(m_dh->mainFrame->m_zSlider->GetValue() + 1, m_dh->frames));
+			break;
+		case WXK_HOME:
+			break;
+		default:
+			event.Skip();
+			return;
+		}
+	m_dh->updateView(m_dh->mainFrame->m_xSlider->GetValue(), m_dh->mainFrame->m_ySlider->GetValue(), m_dh->mainFrame->m_zSlider->GetValue());
+	m_dh->mainFrame->refreshAllGLWidgets();
 }
