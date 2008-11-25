@@ -110,6 +110,7 @@ void MainCanvas::OnSize(wxSizeEvent& event)
 void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 {
 	wxCommandEvent event1( wxEVT_NAVGL_EVENT, GetId() );
+	SetFocus();
 	event1.SetInt(m_view);
 	int clickX = event.GetPosition().x;
 	int clickY = event.GetPosition().y;
