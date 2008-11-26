@@ -867,7 +867,8 @@ TensorField* DatasetHelper::getTensorField()
 
 void DatasetHelper::printGLError(wxString function) {
 	printDebug(_T("***ERROR***: ") + function, 2);
-	printDebug(wxString::Format(_T("***ERROR***: %s\n"), gluErrorString(lastGLError)), 2);
+	printf(" : ERROR: %s\n", gluErrorString(lastGLError));	
+//printDebug(wxString::Format(_T("***ERROR***: %s\n"), //gluErrorString(lastGLError)), 2);
 }
 
 void DatasetHelper::printTime()

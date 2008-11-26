@@ -271,21 +271,23 @@ void TheScene::renderFibers()
 				glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
 
 			}
-			/*
-			bindTextures();
-			m_dh->shaderHelper->m_fiberShader->bind();
-			m_dh->shaderHelper->setFiberShaderVars();
-			m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", !info->getUseTex());
-			m_dh->shaderHelper->m_fiberShader->setUniInt("lightOn", m_dh->lighting);
-*/
+			if (!info->getUseTex())
+			{
+				bindTextures();
+				m_dh->shaderHelper->m_fiberShader->bind();
+				m_dh->shaderHelper->setFiberShaderVars();
+				m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", !info->getUseTex());
+				m_dh->shaderHelper->m_fiberShader->setUniInt("lightOn", m_dh->lighting);
+				m_dh->shaderHelper->m_fiberShader->setUniInt("useColorMap", m_dh->colorMap);
+			}
 			if (m_selBoxChanged)
 			{
 				((Fibers*)info)->updateLinesShown(m_dh->getSelectionBoxes());
 				m_selBoxChanged = false;
 			}
 			info->draw();
-
-			//m_dh->shaderHelper->m_fiberShader->release();
+			if (info->getUseTex())
+				m_dh->shaderHelper->m_fiberShader->release();
 
 			lightsOff();
 		}

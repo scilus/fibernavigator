@@ -1,5 +1,4 @@
-varying vec3 normal;
-varying vec3 position;
+#include functions.fs
 
 uniform int dimX, dimY, dimZ;
 uniform sampler3D tex;
@@ -11,7 +10,7 @@ uniform bool lightOn;
 
 varying vec4 myColor;
 
-void lookupTex() {
+float lookupTex() {
 	vec3 v = gl_TexCoord[0].xyz;
 	v.x = (v.x) / float(dimX);
 	v.y = (v.y) / float(dimY);
@@ -23,43 +22,22 @@ void lookupTex() {
 	if (col1.r < threshold) {
 		discard;
 	}
-
+	else
+	   return col1.r;
 }
 
 void main() {
+	vec4 cooloor = vec4(1.0);
 	if (type == 3 && useTex)
-		lookupTex();
-
-	if (lightOn) {
-		// normalize the vertex normal and the view vector
-		vec3 norm = abs(normal);
-		vec3 view = normalize(-position);
-
-		vec4 ambient = vec4(0.0); //gl_FrontLightModelProduct.sceneColor;
-		vec4 diffuse = vec4(0.0);
-		vec4 specular = vec4(0.0);
-
-		// determine the light and light reflection vectors
-		//vec3 light = normalize(gl_LightSource[0].position.xyz - position);
-		vec3 light = (gl_ModelViewMatrix * vec4(0., 0., -1., 0.)).xyz;
-		//vec3 light = vec3(0.0, 0.0, -1.0);
-		vec3 reflected = -reflect(light, norm);
-
-		// add the current light's ambient value
-		ambient += gl_FrontLightProduct[0].ambient;
-
-		// calculate and add the current light's diffuse value
-		vec4 calculatedDiffuse = vec4(max(dot(norm, light), 0.0));
-		diffuse += gl_FrontLightProduct[0].diffuse * calculatedDiffuse;
-
-		// calculate and add the current light's specular value
-		vec4 calculatedSpecular = vec4(pow(max(dot(reflected, view), 0.0), 0.3
-				* gl_FrontMaterial.shininess));
-		specular += clamp(gl_FrontLightProduct[0].specular
-				* calculatedSpecular, 0.0, 1.0);
-
-		gl_FragColor = myColor + diffuse + specular;
-
-	} else
-		gl_FragColor = myColor;
+		if ( useColorMap == 1 )
+			cooloor.rgb  = colorMap1( lookupTex() );
+		else if ( useColorMap == 2 )
+			cooloor.rgb  = colorMap2( lookupTex() );
+		else if ( useColorMap == 3 )
+			cooloor.rgb  = colorMap3( lookupTex() );
+		else if ( useColorMap == 4 )
+			cooloor.rgb  = colorMap4( lookupTex() );
+		else
+			cooloor.rgb = defaultColorMap( lookupTex() );
+	gl_FragColor = cooloor;
 }
