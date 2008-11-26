@@ -61,6 +61,7 @@ private:
 	void renderFibers();
 	void renderFakeTubes();
 	void renderSplineSurface();
+	void drawColorMapLegend();
 
 	void drawSelectionBoxes();
 	void drawPoints();

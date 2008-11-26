@@ -41,6 +41,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	textures = 0;
 
 	colorMap = 0;
+	showColorMapLegend = true;
 	drawVectors = false;
 
 	showSagittal = true;
@@ -867,7 +868,7 @@ TensorField* DatasetHelper::getTensorField()
 
 void DatasetHelper::printGLError(wxString function) {
 	printDebug(_T("***ERROR***: ") + function, 2);
-	printf(" : ERROR: %s\n", gluErrorString(lastGLError));	
+	printf(" : ERROR: %s\n", gluErrorString(lastGLError));
 //printDebug(wxString::Format(_T("***ERROR***: %s\n"), //gluErrorString(lastGLError)), 2);
 }
 

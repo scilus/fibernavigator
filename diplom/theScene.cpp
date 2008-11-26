@@ -121,6 +121,9 @@ void TheScene::renderScene()
 
 	renderMesh();
 
+	if (m_dh->showColorMapLegend)
+		drawColorMapLegend();
+
 	if (m_dh->GLError()) m_dh->printGLError(wxT("render scene"));
 }
 
@@ -433,4 +436,48 @@ void TheScene::drawPoints()
 	glPopAttrib();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("draw points"));
+}
+
+void TheScene::drawColorMapLegend()
+{
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glPushMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	int size = wxMax(wxMax(m_dh->rows, m_dh->columns), m_dh->frames);
+	glOrtho( 0, size, 0, size, -3000, 3000);
+
+	m_dh->shaderHelper->m_legendShader->bind();
+	m_dh->shaderHelper->m_legendShader->setUniInt("useColorMap", m_dh->colorMap);
+
+	glColor3f(0.0, 0.0, 0.0);
+	glLineWidth(5.0);
+	glBegin(GL_LINES);
+		glTexCoord1f(0.0);
+		glVertex3i(size - 60, 10, 2900);
+		glTexCoord1f(1.0);
+		glVertex3i(size - 20, 10, 2900);
+	glEnd();
+
+	m_dh->shaderHelper->m_legendShader->release();
+
+	glLineWidth(1.0);
+	glColor3f(0.0, 0.0, 0.0);
+	glBegin(GL_LINES);
+		glVertex3i(size - 60, 10, 2900);
+		glVertex3i(size - 60, 12, 2900);
+		glVertex3i(size - 50, 10, 2900);
+		glVertex3i(size - 50, 12, 2900);
+		glVertex3i(size - 40, 10, 2900);
+		glVertex3i(size - 40, 12, 2900);
+		glVertex3i(size - 30, 10, 2900);
+		glVertex3i(size - 30, 12, 2900);
+		glVertex3i(size - 20, 10, 2900);
+		glVertex3i(size - 20, 12, 2900);
+	glEnd();
+
+	m_dh->shaderHelper->m_legendShader->release();
+
+	glPopMatrix();
+	glPopAttrib();
 }

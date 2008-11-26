@@ -41,6 +41,11 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_vectorShader->bind();
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup vectors shader"));
 
+	m_dh->printDebug(_T("initializing legend shader"), 1);
+	m_legendShader = new Shader(wxT("legend"));
+	m_legendShader->bind();
+	if (m_dh->GLError()) m_dh->printGLError(wxT("setup legend shader"));
+
 }
 
 ShaderHelper::~ShaderHelper() {

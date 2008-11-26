@@ -78,6 +78,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_OPTIONS_CMAP3, MainFrame::OnSetCMap3)
 	EVT_MENU(MENU_OPTIONS_CMAP4, MainFrame::OnSetCMap4)
 	EVT_MENU(MENU_OPTIONS_CMAP5, MainFrame::OnSetCMap5)
+	EVT_MENU(MENU_OPTIONS_CMAP_LEGEND, MainFrame::OnToggleColorMapLegend)
 	// Menu Help
     EVT_MENU(MENU_HELP_ABOUT, MainFrame::OnAbout)
 
@@ -1093,6 +1094,17 @@ void MainFrame::OnResetColor(wxCommandEvent& WXUNUSED(event))
 	refreshAllGLWidgets();
 }
 
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnToggleColorMapLegend(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->showColorMapLegend = !m_dh->showColorMapLegend;
+	refreshAllGLWidgets();
+}
+
 void MainFrame::OnSetCMap0(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 0;refreshAllGLWidgets();}
 void MainFrame::OnSetCMap1(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 1;refreshAllGLWidgets();}
 void MainFrame::OnSetCMap2(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 2;refreshAllGLWidgets();}
@@ -1458,7 +1470,7 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 		box->toggleActive();
 		m_treeWidget->SetItemImage(treeid, box->getIcon());
 		box->setDirty();
-		
+
 		int childboxes = m_treeWidget->GetChildrenCount(treeid);
 		wxTreeItemIdValue childcookie = 0;
 		for (int i = 0 ; i < childboxes ; ++i)
@@ -1780,6 +1792,7 @@ void MainFrame::updateMenus()
 	oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
 	oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
 	oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
+	oMenu->Check(oMenu->FindItem(_T("Show Color Map Legend")), m_dh->showColorMapLegend);
 	wxMenu* sMenu = m_menuBar->GetMenu(3);
 	sMenu->Check(sMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
 	sMenu->Check(sMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);

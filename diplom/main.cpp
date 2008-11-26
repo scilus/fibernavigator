@@ -192,6 +192,7 @@ bool MyApp::OnInit(void) {
 	cMaps->Append(MENU_OPTIONS_CMAP4, wxT("color map 4"));
 
 	options_menu->Append(MENU_OPTIONS_COLOR_MAPS, _T("Set Color Map"), cMaps);
+	options_menu->AppendCheckItem(MENU_OPTIONS_CMAP_LEGEND, _T("Show Color Map Legend"));
 	options_menu->AppendSeparator();
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));

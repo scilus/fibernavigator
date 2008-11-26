@@ -65,6 +65,7 @@ private:
 	void OnToggleFilterIso(wxCommandEvent& event);
 	void OnClean(wxCommandEvent& event);
 	void OnLoop(wxCommandEvent& event);
+	void OnToggleColorMapLegend(wxCommandEvent& event);
 
 	void OnSetCMap0(wxCommandEvent& event);
 	void OnSetCMap1(wxCommandEvent& event);
@@ -122,7 +123,7 @@ private:
     void OnKdTreeThreadFinished(wxCommandEvent& event);
     void updateStatusBar();
     void updateMenus();
- 
+
     wxSashLayoutWindow* m_leftWindowHolder;
     wxSashLayoutWindow* m_leftWindowTop;
     wxSashLayoutWindow* m_leftWindowBottom;
@@ -229,6 +230,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_RESET_COLOR					166
 #define MENU_OPTIONS_CLEAN							167
 #define MENU_OPTIONS_LOOP							168
+#define MENU_OPTIONS_CMAP_LEGEND					169
 // Menu Help
 #define MENU_HELP_ABOUT       						wxID_ABOUT
 /*
