@@ -1,7 +1,7 @@
 #include "selectionBox.h"
 #include "fibers.h"
 
-SelectionBox::SelectionBox(Vector3fT center, Vector3fT size, DatasetHelper* dh)
+SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 {
 	m_dh = dh;
 	m_center = center;
@@ -52,15 +52,15 @@ void SelectionBox::draw()
 {
 	if (!m_isActive || !m_isVisible) return;
 
-	float cx = m_center.s.X;
-	float cy = m_center.s.Y;
-	float cz = m_center.s.Z;
-	mx = cx - m_size.s.X/2;
-	px = cx + m_size.s.X/2;
-	my = cy - m_size.s.Y/2;
-	py = cy + m_size.s.Y/2;
-	mz = cz - m_size.s.Z/2;
-	pz = cz + m_size.s.Z/2;
+	float cx = m_center.x;
+	float cy = m_center.y;
+	float cz = m_center.z;
+	mx = cx - m_size.x/2;
+	px = cx + m_size.x/2;
+	my = cy - m_size.y/2;
+	py = cy + m_size.y/2;
+	mz = cz - m_size.z/2;
+	pz = cz + m_size.z/2;
 
 	GLfloat c[] = { 0.5, 0.5, 0.5, 0.5};
 
@@ -270,26 +270,13 @@ hitResult SelectionBox::hitTest(Ray *ray)
 	if (m_isVisible && m_isActive) {
 		float tpicked = 0;
 		int picked = 0;
-		float cx = m_center.s.X;
-        float cy = m_center.s.Y;
-        float cz = m_center.s.Z;
+		float cx = m_center.x;
+        float cy = m_center.y;
+        float cz = m_center.z;
 
 
 		BoundingBox *bb = new BoundingBox(m_center, m_size);
-		hr = bb->hitTest(ray);
-		if (hr.hit) {
-			if (picked == 0) {
-				picked = 10;
-				tpicked = hr.tmin;
 
-			}
-			else {
-				if (hr.tmin < tpicked) {
-					picked = 10;
-					tpicked = hr.tmin;
-				}
-			}
-		}
 		if (wxGetKeyState(WXK_CONTROL))
 		{
 			bb->setCenter(mx - 1 , cy, cz);
@@ -297,119 +284,141 @@ hitResult SelectionBox::hitTest(Ray *ray)
 			bb->setSizeX(1);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
-					if (picked == 0) {
-							picked = 11;
-							tpicked = hr.tmin;
+
+				if (picked == 0) {
+					picked = 11;
+					tpicked = hr.tmin;
+				}
+				else {
+					if (hr.tmin < tpicked) {
+						picked = 11;
+						tpicked = hr.tmin;
 					}
-					else {
-							if (hr.tmin < tpicked) {
-									picked = 11;
-									tpicked = hr.tmin;
-							}
-					}
+				}
 			}
 			bb->setCenter(px + 1, cy, cz);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
-					if (picked == 0) {
-							picked = 12;
-							tpicked = hr.tmin;
+				if (picked == 0) {
+					picked = 12;
+					tpicked = hr.tmin;
+				}
+				else {
+					if (hr.tmin < tpicked) {
+						picked = 12;
+						tpicked = hr.tmin;
 					}
-					else {
-							if (hr.tmin < tpicked) {
-									picked = 12;
-									tpicked = hr.tmin;
-							}
-					}
+				}
 			}
 			bb->setCenter(cx, my - 1, cz);
 			bb->setSize(m_size);
 			bb->setSizeY(1);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
-					if (picked == 0) {
-							picked = 13;
-							tpicked = hr.tmin;
+				if (picked == 0) {
+					picked = 13;
+					tpicked = hr.tmin;
+				}
+				else {
+					if (hr.tmin < tpicked) {
+						picked = 13;
+						tpicked = hr.tmin;
 					}
-					else {
-							if (hr.tmin < tpicked) {
-									picked = 13;
-									tpicked = hr.tmin;
-							}
-					}
+				}
 			}
 			bb->setCenter(cx, py + 1, cz);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
-					if (picked == 0) {
-							picked = 14;
-							tpicked = hr.tmin;
+				if (picked == 0) {
+					picked = 14;
+					tpicked = hr.tmin;
+				}
+				else {
+					if (hr.tmin < tpicked) {
+						picked = 14;
+						tpicked = hr.tmin;
 					}
-					else {
-							if (hr.tmin < tpicked) {
-									picked = 14;
-									tpicked = hr.tmin;
-							}
-					}
+				}
 			}
 			bb->setCenter(cx, cy, mz - 1);
 			bb->setSize(m_size);
 			bb->setSizeZ(1);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
-					if (picked == 0) {
-							picked = 15;
-							tpicked = hr.tmin;
+				if (picked == 0) {
+					picked = 15;
+					tpicked = hr.tmin;
+				}
+				else {
+					if (hr.tmin < tpicked) {
+						picked = 15;
+						tpicked = hr.tmin;
 					}
-					else {
-							if (hr.tmin < tpicked) {
-									picked = 15;
-									tpicked = hr.tmin;
-							}
-					}
+				}
 			}
 			bb->setCenter(cx, cy, pz + 1);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
-					if (picked == 0) {
-							picked = 16;
-							tpicked = hr.tmin;
+				if (picked == 0) {
+					picked = 16;
+					tpicked = hr.tmin;
+				}
+				else {
+					if (hr.tmin < tpicked) {
+						picked = 16;
+						tpicked = hr.tmin;
 					}
-					else {
-							if (hr.tmin < tpicked) {
-									picked = 16;
-									tpicked = hr.tmin;
-							}
-					}
+				}
 			}
 
 		}
-		if (picked != 0) {
+
+		else  // if (wxGetKeyState(WXK_CONTROL))
+		{
+			BoundingBox *bb = new BoundingBox(m_center, m_size);
+			hr = bb->hitTest(ray);
+			if (hr.hit) {
+				if (picked == 0) {
+					picked = 10;
+					tpicked = hr.tmin;
+
+				}
+				else {
+					if (hr.tmin < tpicked) {
+						picked = 10;
+						tpicked = hr.tmin;
+					}
+				}
+			}
+		}
+		if (picked != 0)
+		{
 			hr.hit = true;
 			hr.tmin = tpicked;
 			hr.picked = picked;
 			hr.object = this;
 		}
+
 	}
 	m_hr = hr;
 	return hr;
 }
 
-float SelectionBox::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
+float SelectionBox::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector n)
 {
-	Vector3fT vs = m_dh->mapMouse2World(x1, y1);
-	Vector3fT ve = m_dh->mapMouse2World(x2, y2);
-	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
-	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
-	float nb = ((dir.s.X * n.s.X) + (dir.s.Y * n.s.Y) + (dir.s.Z * n.s.Z));
+	Vector vs = m_dh->mapMouse2World(x1, y1);
+	Vector ve = m_dh->mapMouse2World(x2, y2);
+	Vector dir ( ve.x - vs.x, ve.y - vs.y, ve.z - vs.z );
+	float bb = ((dir.x * dir.x) + (dir.y * dir.y) + (dir.z * dir.z));
+	float nb = ((dir.x * n.x) + (dir.y * n.y) + (dir.z * n.z));
 	return bb/nb;
 }
 
 void SelectionBox::setCenter(float x, float y, float z)
 {
-	m_center.s.X = x;
-	m_center.s.Y = y;
-	m_center.s.Z = z;
+	m_center.x = x;
+	m_center.y = y;
+	m_center.z = z;
 	update();
 }
 
@@ -425,161 +434,161 @@ void SelectionBox::processDrag(wxPoint click, wxPoint lastPos)
 
 void SelectionBox::drag(wxPoint click, wxPoint lastPos)
 {
-	Vector3fT vs = m_dh->mapMouse2World(click.x, click.y);
-	Vector3fT ve = m_dh->mapMouse2WorldBack(click.x, click.y);
-	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
+	Vector vs = m_dh->mapMouse2World(click.x, click.y);
+	Vector ve = m_dh->mapMouse2WorldBack(click.x, click.y);
+	Vector dir ( ve.x - vs.x, ve.y - vs.y, ve.z - vs.z );
 
-	Vector3fT vs2 = m_dh->mapMouse2World(lastPos.x, lastPos.y);
-	Vector3fT ve2 = m_dh->mapMouse2WorldBack(lastPos.x, lastPos.y);
-	Vector3fT dir2 = {{ve2.s.X - vs2.s.X, ve2.s.Y - vs2.s.Y, ve2.s.Z - vs2.s.Z}};
+	Vector vs2 = m_dh->mapMouse2World(lastPos.x, lastPos.y);
+	Vector ve2 = m_dh->mapMouse2WorldBack(lastPos.x, lastPos.y);
+	Vector dir2 ( ve2.x - vs2.x, ve2.y - vs2.y, ve2.z - vs2.z );
 
-	Vector3fT change =
-		{{(vs.s.X + dir.s.X * m_hr.tmin) - (vs2.s.X + dir2.s.X * m_hr.tmin),
-		  (vs.s.Y + dir.s.Y * m_hr.tmin) - (vs2.s.Y + dir2.s.Y * m_hr.tmin),
-		  (vs.s.Z + dir.s.Z * m_hr.tmin) - (vs2.s.Z + dir2.s.Z * m_hr.tmin)}};
+	Vector change (
+		(vs.x + dir.x * m_hr.tmin) - (vs2.x + dir2.x * m_hr.tmin),
+		  (vs.y + dir.y * m_hr.tmin) - (vs2.y + dir2.y * m_hr.tmin),
+		  (vs.z + dir.z * m_hr.tmin) - (vs2.z + dir2.z * m_hr.tmin) );
 
-	m_center.s.X += change.s.X;
-	m_center.s.Y += change.s.Y;
-	m_center.s.Z += change.s.Z;
+	m_center.x += change.x;
+	m_center.y += change.y;
+	m_center.z += change.z;
 
 	update();
 }
 
 void SelectionBox::resize(wxPoint click, wxPoint lastPos)
 {
-	Vector3fT  n= {{0,0,0}};
+	Vector  n ( 0, 0, 0 );
 	float delta = 0;
 	switch (m_hr.picked)
 	{
 	case 11:
-		n.s.X = -1.0;
+		n.x = -1.0;
 		break;
 	case 12:
-		n.s.X = 1.0;
+		n.x = 1.0;
 		break;
 	case 13:
-		n.s.Y = -1.0;
+		n.y = -1.0;
 		break;
 	case 14:
-		n.s.Y = 1.0;
+		n.y = 1.0;
 		break;
 	case 15:
-		n.s.Z = -1.0;
+		n.z = -1.0;
 		break;
 	case 16:
-		n.s.Z = 1.0;
+		n.z = 1.0;
 		break;
 	default:;
 	}
 	delta =  wxMax(wxMin(getAxisParallelMovement(lastPos.x, lastPos.y, click.x, click.y, n ),1),-1);
 	if (m_hr.picked == 11 || m_hr.picked == 12) {
-		float newX = m_size.s.X + (delta);
-		m_size.s.X = wxMin(wxMax(newX, 1),m_dh->columns);
+		float newX = m_size.x + (delta);
+		m_size.x = wxMin(wxMax(newX, 1),m_dh->columns);
 	}
 	if (m_hr.picked == 13 || m_hr.picked == 14) {
-		float newY = m_size.s.Y + (delta);
-		m_size.s.Y = wxMin(wxMax(newY, 1),m_dh->rows);
+		float newY = m_size.y + (delta);
+		m_size.y = wxMin(wxMax(newY, 1),m_dh->rows);
 	}
 	if (m_hr.picked == 15 || m_hr.picked == 16) {
-		float newZ = m_size.s.Z + (delta);
-		m_size.s.Z = wxMin(wxMax(newZ, 1),m_dh->frames);
+		float newZ = m_size.z + (delta);
+		m_size.z = wxMin(wxMax(newZ, 1),m_dh->frames);
 	}
 	update();
 }
 
 void SelectionBox::moveLeft()
 {
-	if ( m_center.s.X < 0 ) return;
-	m_center.s.X = (int)m_center.s.X - 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_center.s.X -= m_stepSize;
+	if ( m_center.x < 0 ) return;
+	m_center.x = (int)m_center.x - 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.x -= m_stepSize;
 	update();
 }
 
 void SelectionBox::moveRight()
 {
-	if ( m_center.s.X > m_dh->columns ) return;
-		m_center.s.X = (int)m_center.s.X + 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_center.s.X += m_stepSize;
+	if ( m_center.x > m_dh->columns ) return;
+		m_center.x = (int)m_center.x + 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.x += m_stepSize;
 	update();
 }
 
 void SelectionBox::moveForward()
 {
-	if ( m_center.s.Y < 0 ) return;
-	m_center.s.Y = (int)m_center.s.Y - 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Y -= m_stepSize;
+	if ( m_center.y < 0 ) return;
+	m_center.y = (int)m_center.y - 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.y -= m_stepSize;
 	update();
 }
 
 void SelectionBox::moveBack()
 {
-	if ( m_center.s.Y > m_dh->rows ) return;
-	m_center.s.Y = (int)m_center.s.Y + 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Y += m_stepSize;
+	if ( m_center.y > m_dh->rows ) return;
+	m_center.y = (int)m_center.y + 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.y += m_stepSize;
 	update();
 }
 
 void SelectionBox::moveUp()
 {
-	if ( m_center.s.Z < 0 ) return;
-	m_center.s.Z = (int)m_center.s.Z - 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Z -= m_stepSize;
+	if ( m_center.z < 0 ) return;
+	m_center.z = (int)m_center.z - 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.z -= m_stepSize;
 	update();
 }
 
 void SelectionBox::moveDown()
 {
-	if ( m_center.s.Z > m_dh->frames ) return;
-	m_center.s.Z = (int)m_center.s.Z + 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_center.s.Z += m_stepSize;
+	if ( m_center.z > m_dh->frames ) return;
+	m_center.z = (int)m_center.z + 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_center.z += m_stepSize;
 	update();
 }
 
 void SelectionBox::resizeLeft()
 {
-	if ( m_size.s.X < 2 ) return;
-	m_size.s.X -= 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.X = wxMax(1 ,m_size.s.X - m_stepSize);
+	if ( m_size.x < 2 ) return;
+	m_size.x -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.x = wxMax(1 ,m_size.x - m_stepSize);
 	update();
 }
 
 void SelectionBox::resizeRight()
 {
-	if ( m_size.s.X > m_dh->columns ) return;
-	m_size.s.X += 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.X += m_stepSize;
+	if ( m_size.x > m_dh->columns ) return;
+	m_size.x += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.x += m_stepSize;
 	update();
 }
 
 void SelectionBox::resizeBack()
 {
-	if ( m_size.s.Y < 2 ) return;
-	m_size.s.Y -= 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Y = wxMax(1, m_size.s.Y - m_stepSize);
+	if ( m_size.y < 2 ) return;
+	m_size.y -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.y = wxMax(1, m_size.y - m_stepSize);
 	update();
 }
 
 void SelectionBox::resizeForward()
 {
-	if ( m_size.s.Y > m_dh->rows ) return;
-	m_size.s.Y += 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Y += m_stepSize;
+	if ( m_size.y > m_dh->rows ) return;
+	m_size.y += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.y += m_stepSize;
 	update();
 }
 
 void SelectionBox::resizeDown()
 {
-	if ( m_size.s.Z < 2 ) return;
-	m_size.s.Z -= 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Z = wxMax(1, m_size.s.Z - m_stepSize);
+	if ( m_size.z < 2 ) return;
+	m_size.z -= 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.z = wxMax(1, m_size.z - m_stepSize);
 	update();
 }
 
 void SelectionBox::resizeUp()
 {
-	if ( m_size.s.Z > m_dh->frames ) return;
-	m_size.s.Z += 1.0;
-	if (wxGetKeyState(WXK_SHIFT)) m_size.s.Z += m_stepSize;
+	if ( m_size.z > m_dh->frames ) return;
+	m_size.z += 1.0;
+	if (wxGetKeyState(WXK_SHIFT)) m_size.z += m_stepSize;
 	update();
 }
 
@@ -588,10 +597,10 @@ void SelectionBox::update()
 	if (m_isLockedToCrosshair)
 	{
 		m_dh->semaphore = true;
-		m_dh->updateView((int)m_center.s.X , (int)m_center.s.Y , (int)m_center.s.Z);
-		m_dh->mainFrame->m_xSlider->SetValue((int)m_center.s.X);
-		m_dh->mainFrame->m_ySlider->SetValue((int)m_center.s.Y);
-		m_dh->mainFrame->m_zSlider->SetValue((int)m_center.s.Z);
+		m_dh->updateView((int)m_center.x , (int)m_center.y , (int)m_center.z);
+		m_dh->mainFrame->m_xSlider->SetValue((int)m_center.x);
+		m_dh->mainFrame->m_ySlider->SetValue((int)m_center.y);
+		m_dh->mainFrame->m_zSlider->SetValue((int)m_center.z);
 		m_dh->semaphore = false;
 	}
 
@@ -613,7 +622,7 @@ void SelectionBox::updateStatusBar()
 {
 	m_dh->mainFrame->m_statusBar->SetStatusText(wxT("Selection Box"),1);
 	m_dh->mainFrame->m_statusBar->SetStatusText(wxString::Format(wxT("Position %.2f, %.2f, %.2f  Size: %.0f, %.0f, %.0f"),
-			m_center.s.X , m_center.s.Y , m_center.s.Z , m_size.s.X, m_size.s.Y, m_size.s.Z),2);
+			m_center.x , m_center.y , m_center.z , m_size.x, m_size.y, m_size.z),2);
 
 }
 
@@ -634,10 +643,10 @@ void SelectionBox::lockToCrosshair()
 		m_dh->boxLockIsOn = true;
 		m_dh->boxAtCrosshair = this;
 		m_dh->semaphore = true;
-		m_dh->updateView((int)m_center.s.X , (int)m_center.s.Y , (int)m_center.s.Z);
-		m_dh->mainFrame->m_xSlider->SetValue((int)m_center.s.X);
-		m_dh->mainFrame->m_ySlider->SetValue((int)m_center.s.Y);
-		m_dh->mainFrame->m_zSlider->SetValue((int)m_center.s.Z);
+		m_dh->updateView((int)m_center.x , (int)m_center.y , (int)m_center.z);
+		m_dh->mainFrame->m_xSlider->SetValue((int)m_center.x);
+		m_dh->mainFrame->m_ySlider->SetValue((int)m_center.y);
+		m_dh->mainFrame->m_zSlider->SetValue((int)m_center.z);
 		m_dh->semaphore = false;
 		m_dh->mainFrame->refreshAllGLWidgets();
 	}

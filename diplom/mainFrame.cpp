@@ -731,10 +731,8 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
-	Vector3fT vc = {{m_xSlider->GetValue(),
-					m_ySlider->GetValue(),
-					m_zSlider->GetValue()}};
-	Vector3fT vs = {{m_dh->columns/8,m_dh->rows/8, m_dh->frames/8}};
+	Vector vc (m_xSlider->GetValue(), m_ySlider->GetValue(), m_zSlider->GetValue() );
+	Vector vs ( m_dh->columns/8,m_dh->rows/8, m_dh->frames/8 );
 	SelectionBox *selBox = new SelectionBox(vc, vs, m_dh);
 
 	// check if selection box selected

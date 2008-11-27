@@ -122,11 +122,11 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				m_mousePt.s.X = clickX;
 				m_mousePt.s.Y = clickY;
 
-				if (wxGetKeyState(WXK_CONTROL)) {
+				if (wxGetKeyState(WXK_CONTROL) && !m_dh->getPointMode()) {
 					m_hr = pick(event.GetPosition());
-					int newX = (int)(getEventCenter().s.X + 0.5);
-					int newY = (int)(getEventCenter().s.Y + 0.5);
-					int newZ = (int)(getEventCenter().s.Z + 0.5);
+					int newX = (int)(getEventCenter().x + 0.5);
+					int newY = (int)(getEventCenter().y + 0.5);
+					int newZ = (int)(getEventCenter().z + 0.5);
 					m_dh->updateView( newX, newY , newZ);
 					m_dh->mainFrame->m_xSlider->SetValue(newX);
 					m_dh->mainFrame->m_ySlider->SetValue(newY);
@@ -134,7 +134,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_dh->mainFrame->refreshAllGLWidgets();
 				}
 
-				if (m_dh->getPointMode() && wxGetKeyState(WXK_CONTROL)) {
+				else if (wxGetKeyState(WXK_CONTROL) && m_dh->getPointMode()) {
 					m_hr = pick(event.GetPosition());
 					if (m_hr.hit && (m_hr.picked <= sagittal)) {
 						m_hr.picked = 20;
@@ -228,16 +228,16 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						int yDrag = (m_lastPos.y - clickY);
 						GetEventHandler()->ProcessEvent( event1 );
 
-						Vector3fT n = {{0,0,0}};
+						Vector n ( 0, 0, 0 );
 						switch (m_hr.picked) {
 						case axial:
-							n.s.Z = 1.0;
+							n.z = 1.0;
 							break;
 						case coronal:
-							n.s.Y = 1.0;
+							n.y = 1.0;
 							break;
 						case sagittal:
-							n.s.X = 1.0;
+							n.x = 1.0;
 							break;
 						}
 						if (xDrag == 0 && yDrag == 0) m_delta = 0;
@@ -327,13 +327,13 @@ void MainCanvas::updateView()
 	m_dh->quadrant = quadrant;
 }
 
-float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector3fT n)
+float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector n)
 {
-	Vector3fT vs = m_dh->mapMouse2World(x1, y1);
-	Vector3fT ve = m_dh->mapMouse2World(x2, y2);
-	Vector3fT dir = {{ve.s.X - vs.s.X, ve.s.Y - vs.s.Y, ve.s.Z - vs.s.Z}};
-	float bb = ((dir.s.X * dir.s.X) + (dir.s.Y * dir.s.Y) + (dir.s.Z * dir.s.Z));
-	float nb = ((dir.s.X * n.s.X) + (dir.s.Y * n.s.Y) + (dir.s.Z * n.s.Z));
+	Vector vs = m_dh->mapMouse2World(x1, y1);
+	Vector ve = m_dh->mapMouse2World(x2, y2);
+	Vector dir ( ve.x - vs.x, ve.y - vs.y, ve.z - vs.z );
+	float bb = ((dir.x * dir.x) + (dir.y * dir.y) + (dir.z * dir.z));
+	float nb = ((dir.x * n.x) + (dir.y * n.y) + (dir.z * n.z));
 	return bb/nb;
 }
 
@@ -535,14 +535,14 @@ void MainCanvas::renderTestRay()
 		glVertex3f(m_pos1X, m_pos1Y, m_pos1Z);
 		glVertex3f(m_pos2X, m_pos2Y, m_pos2Z);
 	glEnd();
-	Vector3fT dir = {{m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z}};
-	m_dh->scene->drawSphere(m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z, 3.0);
+	Vector dir ( m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z );
+	m_dh->scene->drawSphere(m_pos1X + m_hr.tmin*dir.x, m_pos1Y + m_hr.tmin*dir.y, m_pos1Z + m_hr.tmin*dir.z, 3.0);
 }
 
-Vector3fT MainCanvas::getEventCenter()
+Vector MainCanvas::getEventCenter()
 {
-	Vector3fT dir = {{m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z}};
-	Vector3fT center = {{m_pos1X + m_hr.tmin*dir.s.X, m_pos1Y + m_hr.tmin*dir.s.Y, m_pos1Z + m_hr.tmin*dir.s.Z}};
+	Vector dir ( m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z );
+	Vector center ( m_pos1X + m_hr.tmin*dir.x, m_pos1Y + m_hr.tmin*dir.y, m_pos1Z + m_hr.tmin*dir.z );
 	return center;
 }
 
@@ -593,65 +593,6 @@ void MainCanvas::orthonormalize()
 double MainCanvas::scalar(const F::FVector& v1, const F::FVector& v2)
 {
 	return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
-}
-
-void MainCanvas::testRender(GLuint tex)
-{
-	wxPaintDC dc(this);
-
-#ifndef __WXMAC__
-	SetCurrent(*m_dh->scene->getMainGLContext());
-#else
-    SetCurrent();
-#endif
-
-	int w, h;
-	GetClientSize(&w, &h);
-	glViewport(0, 0, (GLint) w, (GLint) h);
-
-	/* clear color and depth buffers */
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glColor3f(1.0, 1.0, 1.0);
-
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0001f);
-
-	glEnable(GL_TEXTURE_2D);
-
-	// bind texture
-	glBindTexture(GL_TEXTURE_2D, tex);
-
-	// setup wrapping
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// we do not want linear/mip mapped texture filters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	// texture environment
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	int x = m_dh->columns;
-	int y = m_dh->rows;
-
-	glBegin(GL_QUADS);
-		glTexCoord2f(0.0, 1.0); glVertex3f( 0, 0, 0);
-		glTexCoord2f(0.0, 0.0); glVertex3f( 0, y, 0);
-		glTexCoord2f(1.0, 0.0); glVertex3f( x, y, 0);
-		glTexCoord2f(1.0, 1.0); glVertex3f( x, 0, 0);
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-
-	glPopAttrib();
-
-	glFlush();
-
-	SwapBuffers();
 }
 
 void MainCanvas::OnChar(wxKeyEvent& event)

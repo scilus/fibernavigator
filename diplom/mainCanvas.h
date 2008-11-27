@@ -8,7 +8,6 @@
 #endif
 
 #include "theScene.h"
-//#include "mainFrame.h"
 #include "wx/glcanvas.h"
 
 #include "boundingBox.h"
@@ -50,14 +49,12 @@ public:
     void invalidate();
     void renderTestRay();
     hitResult pick(wxPoint);
-    float getAxisParallelMovement(int, int, int, int, Vector3fT);
-    Vector3fT getEventCenter();
+    float getAxisParallelMovement(int, int, int, int, Vector);
+    Vector getEventCenter();
     void setRotation();
     void orthonormalize();
     double scalar(const F::FVector&, const F::FVector&);
 	void OnChar(wxKeyEvent& event);
-
-    void testRender(GLuint tex);
 
     DECLARE_EVENT_TABLE()
 

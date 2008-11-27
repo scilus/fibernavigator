@@ -10,7 +10,6 @@
 #include "datasetInfo.h"
 
 #include "GL/glew.h"
-#include "ArcBall.h"
 #include "KdTree.h"
 #include "selectionBox.h"
 #include <vector>

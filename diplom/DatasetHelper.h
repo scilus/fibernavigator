@@ -22,7 +22,6 @@
 #include "wx/xml/xml.h"
 
 #include <vector>
-#include "ArcBall.h"
 
 #include "datasetInfo.h"
 
@@ -65,8 +64,8 @@ public:
 
 	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	void updateAllSelectionBoxes();
-	Vector3fT mapMouse2World(int, int);
-	Vector3fT mapMouse2WorldBack(int, int);
+	Vector mapMouse2World(int, int);
+	Vector mapMouse2WorldBack(int, int);
 	void updateTreeDims();
 
 	bool invertFibers() {fibersInverted = !fibersInverted; return fibersInverted;};

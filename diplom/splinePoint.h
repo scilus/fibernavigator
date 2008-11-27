@@ -8,7 +8,6 @@
 #endif
 
 #include "GL/glew.h"
-#include "ArcBall.h"
 #include "boundingBox.h"
 #include "DatasetHelper.h"
 
@@ -17,12 +16,12 @@ class DatasetHelper;
 class SplinePoint : public wxTreeItemData
 {
 public:
-	SplinePoint(Vector3fT, DatasetHelper*);
+	SplinePoint(Vector, DatasetHelper*);
 	SplinePoint( double, double, double, DatasetHelper*);
 	~SplinePoint();
 
-	void setCenter(Vector3fT c) { m_center = c;};
-	Vector3fT getCenter() {return m_center;};
+	void setCenter(Vector c) { m_center = c;};
+	Vector getCenter() {return m_center;};
 	void draw();
 
 	hitResult hitTest(Ray *ray);
@@ -32,24 +31,24 @@ public:
 
 	void select(bool flag);
 	void unselect() {m_selected = false;};
-	float X() {return m_center.s.X;};
-	float Y() {return m_center.s.Y;};
-	float Z() {return m_center.s.Z;};
+	float X() {return m_center.x;};
+	float Y() {return m_center.y;};
+	float Z() {return m_center.z;};
 	void setX(float x);
-	void setY(float y) {m_center.s.Y = y;};
-	void setZ(float z) {m_center.s.Z = z;};
-	void setOffsetVector (Vector3fT vec) {m_offsetVector = vec;};
-	Vector3fT getOffsetVector() {return m_offsetVector;};
+	void setY(float y) {m_center.y = y;};
+	void setZ(float z) {m_center.z = z;};
+	void setOffsetVector (Vector vec) {m_offsetVector = vec;};
+	Vector getOffsetVector() {return m_offsetVector;};
 	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
 	void setIsBoundary() {m_isBoundary = true;};
 	bool isBoundary() {return m_isBoundary;};
 
 private:
 	DatasetHelper* m_dh;
-	Vector3fT m_center;
+	Vector m_center;
 
-	Vector3fT m_offsetVector;
-	Vector3fT m_origin;
+	Vector m_offsetVector;
+	Vector m_origin;
 
 	bool m_selected;
 	bool m_isBoundary;

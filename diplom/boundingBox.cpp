@@ -1,59 +1,59 @@
 #include "boundingBox.h"
 
-Ray::Ray(Vector3fT origin, Vector3fT end)
+Ray::Ray(Vector origin, Vector end)
 {
 	m_origin = origin;
 	m_end = end;
-	Vector3fT v1 = {{end.s.X - origin.s.X, end.s.Y - origin.s.Y, end.s.Z - origin.s.Z}};
+	Vector v1 (end[0] - origin[0], end[1] - origin[1], end[2] - origin[2]);
 	m_dir = v1;
 }
 
 Ray::Ray(float x1, float y1, float z1, float x2, float y2, float z2)
 {
-	Vector3fT v1 = {{x1, y1, z1}};
+	Vector v1(x1, y1, z1);
 	m_origin = v1;
-	Vector3fT v2 = {{x2, y2, z2}};
+	Vector v2(x2, y2, z2);
 	m_end = v2;
-	Vector3fT v3 = {{m_end.s.X - m_origin.s.X, m_end.s.Y - m_origin.s.Y, m_end.s.Z - m_origin.s.Z}};
+	Vector v3( m_end[0] - m_origin[0], m_end[1] - m_origin[1], m_end[2] - m_origin[2]);
 	m_dir = v3;
 }
 
-BoundingBox::BoundingBox(Vector3fT center, Vector3fT size)
+BoundingBox::BoundingBox(Vector center, Vector size)
 {
-	xmin = center.s.X -  size.s.X/2;
-	xmax = center.s.X +  size.s.X/2;
-	ymin = center.s.Y -  size.s.Y/2;
-	ymax = center.s.Y +  size.s.Y/2;
-	zmin = center.s.Z -  size.s.Z/2;
-	zmax = center.s.Z +  size.s.Z/2;
+	xmin = center[0] -  size[0];
+	xmax = center[0] +  size[0];
+	ymin = center[1] -  size[1];
+	ymax = center[1] +  size[1];
+	zmin = center[2] -  size[2];
+	zmax = center[2] +  size[2];
 }
 
 BoundingBox::BoundingBox(float x, float y, float z, float sizex, float sizey, float sizez)
 {
-	xmin = x - sizex/2;
-	xmax = x + sizex/2;
-	ymin = y - sizey/2;
-	ymax = y + sizey/2;
-	zmin = z - sizez/2;
-	zmax = z + sizez/2;
+	xmin = x - sizex/2.0;
+	xmax = x + sizex/2.0;
+	ymin = y - sizey/2.0;
+	ymax = y + sizey/2.0;
+	zmin = z - sizez/2.0;
+	zmax = z + sizez/2.0;
 }
 
 void BoundingBox::setCenter(float x, float y, float z)
 {
 	float xs = xmax - xmin;
-	xmin = x - xs/2;
-	xmax = x + xs/2;
+	xmin = x - xs/2.0;
+	xmax = x + xs/2.0;
 	float ys = ymax - ymin;
-	ymin = y - ys/2;
-	ymax = y + ys/2;
+	ymin = y - ys/2.0;
+	ymax = y + ys/2.0;
 	float zs = zmax - zmin;
-	zmin = z - zs/2;
-	zmax = z + zs/2;
+	zmin = z - zs/2.0;
+	zmax = z + zs/2.0;
 }
 
-void BoundingBox::setCenter(Vector3fT c)
+void BoundingBox::setCenter(Vector c)
 {
-	setCenter(c.s.X, c.s.Y, c.s.Z);
+	setCenter(c[0], c[0], c[0]);
 }
 
 void BoundingBox::setSize(float x, float y, float z)
@@ -63,44 +63,44 @@ void BoundingBox::setSize(float x, float y, float z)
 	setSizeZ(z);
 }
 
-void BoundingBox::setSize(Vector3fT c)
+void BoundingBox::setSize(Vector c)
 {
-	setSize(c.s.X, c.s.Y, c.s.Z);
+	setSize(c[0], c[0], c[0]);
 }
 
 hitResult BoundingBox::hitTest(Ray *ray)
 {
 	hitResult hr = {false, 0, 0, NULL};
 	float tmin, tmax, tymin, tymax, tzmin, tzmax;
-	float dirx = ray->m_dir.s.X;
+	float dirx = ray->m_dir.x;
 	if (dirx >= 0) {
-		tmin = ( xmin - ray->m_origin.s.X)/dirx;
-		tmax = ( xmax - ray->m_origin.s.X)/dirx;
+		tmin = ( xmin - ray->m_origin.x)/dirx;
+		tmax = ( xmax - ray->m_origin.x)/dirx;
 	}
 	else {
-		tmin = ( xmax - ray->m_origin.s.X)/dirx;
-		tmax = ( xmin - ray->m_origin.s.X)/dirx;
+		tmin = ( xmax - ray->m_origin.x)/dirx;
+		tmax = ( xmin - ray->m_origin.x)/dirx;
 	}
-	float diry = ray->m_dir.s.Y;
+	float diry = ray->m_dir.y;
 	if (diry >= 0) {
-		tymin = ( ymin - ray->m_origin.s.Y)/diry;
-		tymax = ( ymax - ray->m_origin.s.Y)/diry;
+		tymin = ( ymin - ray->m_origin.y)/diry;
+		tymax = ( ymax - ray->m_origin.y)/diry;
 	}
 	else {
-		tymin = ( ymax - ray->m_origin.s.Y)/diry;
-		tymax = ( ymin - ray->m_origin.s.Y)/diry;
+		tymin = ( ymax - ray->m_origin.y)/diry;
+		tymax = ( ymin - ray->m_origin.y)/diry;
 	}
 	if ( (tmin > tymax) || (tymin > tmax)) return hr;
 	if (tymin > tmin) tmin = tymin;
 	if (tymax < tmax) tmax = tymax;
-	float dirz = ray->m_dir.s.Z;
+	float dirz = ray->m_dir.z;
 	if (dirz >= 0) {
-		tzmin = ( zmin - ray->m_origin.s.Z)/dirz;
-		tzmax = ( zmax - ray->m_origin.s.Z)/dirz;
+		tzmin = ( zmin - ray->m_origin.z)/dirz;
+		tzmax = ( zmax - ray->m_origin.z)/dirz;
 	}
 	else {
-		tzmin = ( zmax - ray->m_origin.s.Z)/dirz;
-		tzmax = ( zmin - ray->m_origin.s.Z)/dirz;
+		tzmin = ( zmax - ray->m_origin.z)/dirz;
+		tzmax = ( zmin - ray->m_origin.z)/dirz;
 	}
 	if ( (tmin > tzmax) || (tzmin > tmax)) return hr;
 	if (tzmin > tmin) tmin = tzmin;

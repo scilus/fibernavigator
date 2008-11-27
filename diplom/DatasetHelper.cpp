@@ -215,11 +215,11 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		Fibers *fibers = new Fibers(this);
 		if (fibers->load(filename)) {
 			if (index != -1) {
-				Vector3fT vc = { { mainFrame->m_xSlider->GetValue(),
+				Vector vc ( mainFrame->m_xSlider->GetValue(),
 						mainFrame->m_ySlider->GetValue() ,
-						mainFrame->m_zSlider->GetValue() } };
+						mainFrame->m_zSlider->GetValue() );
 
-				Vector3fT vs = { { columns / 8, rows / 8, frames / 8 } };
+				Vector vs( columns / 8, rows / 8, frames / 8 );
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->m_isTop = true;
 
@@ -465,8 +465,8 @@ bool DatasetHelper::loadScene(wxString filename)
 					}
 					infoNode = infoNode->GetNext();
 				}
-				Vector3fT vc = { { _cx, _cy, _cz } };
-				Vector3fT vs = { { _ix, _iy, _iz } };
+				Vector vc ( _cx, _cy, _cz );
+				Vector vs ( _ix, _iy, _iz );
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->setName(_name);
 				selBox->m_isActive = ( _active == _T("yes") ) ;
@@ -531,9 +531,9 @@ void DatasetHelper::save(wxString filename)
 		SplinePoint	*point = (SplinePoint*) ( mainFrame->m_treeWidget->GetItemData(id));
 		wxXmlNode *pointnode =	new wxXmlNode(nodepoints, wxXML_ELEMENT_NODE, wxT("point"));
 
-		wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), point->getCenter().s.Z));
-		wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), point->getCenter().s.Y), propz);
-		wxXmlProperty *propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), point->getCenter().s.X), propy);
+		wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), point->getCenter().z));
+		wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), point->getCenter().y), propz);
+		wxXmlProperty *propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), point->getCenter().x), propy);
 		pointnode->AddProperty(propx);
 	}
 
@@ -545,15 +545,15 @@ void DatasetHelper::save(wxString filename)
 			currentBox = boxes[i - 1][j - 1];
 
 			wxXmlNode *center = new wxXmlNode(box, wxXML_ELEMENT_NODE, wxT("center"));
-			wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), currentBox->getCenter().s.Z));
-			wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), currentBox->getCenter().s.Y), propz);
-			wxXmlProperty *propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), currentBox->getCenter().s.X), propy);
+			wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), currentBox->getCenter().z));
+			wxXmlProperty *propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), currentBox->getCenter().y), propz);
+			wxXmlProperty *propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), currentBox->getCenter().x), propy);
 			center->AddProperty(propx);
 
 			wxXmlNode *size = new wxXmlNode(box, wxXML_ELEMENT_NODE, wxT("size"));
-			propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), currentBox->getSize().s.Z));
-			propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), currentBox->getSize().s.Y), propz);
-			propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), currentBox->getSize().s.X), propy);
+			propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), currentBox->getSize().z));
+			propy = new wxXmlProperty(wxT("y"), wxString::Format(wxT("%f"), currentBox->getSize().y), propz);
+			propx = new wxXmlProperty(wxT("x"), wxString::Format(wxT("%f"), currentBox->getSize().x), propy);
 			size->AddProperty(propx);
 
 			wxXmlNode *name = new wxXmlNode(box, wxXML_ELEMENT_NODE, wxT("name"));
@@ -675,7 +675,7 @@ void DatasetHelper::updateAllSelectionBoxes() {
 			boxes[i][j]->setDirty();
 }
 
-Vector3fT DatasetHelper::mapMouse2World(int x, int y)
+Vector DatasetHelper::mapMouse2World(int x, int y)
 {
 	glPushMatrix();
 	doMatrixManipulation();
@@ -695,11 +695,11 @@ Vector3fT DatasetHelper::mapMouse2World(int x, int y)
 	gluUnProject(winX, winY, 0, modelview, projection, viewport, &posX, &posY,
 			&posZ);
 	glPopMatrix();
-	Vector3fT v = { { posX, posY, posZ } };
+	Vector v ( posX, posY, posZ );
 	return v;
 }
 
-Vector3fT DatasetHelper::mapMouse2WorldBack(int x, int y)
+Vector DatasetHelper::mapMouse2WorldBack(int x, int y)
 {
 	glPushMatrix();
 	doMatrixManipulation();
@@ -719,7 +719,7 @@ Vector3fT DatasetHelper::mapMouse2WorldBack(int x, int y)
 	gluUnProject(winX, winY, 1, modelview, projection, viewport, &posX, &posY,
 			&posZ);
 	glPopMatrix();
-	Vector3fT v = { { posX, posY, posZ } };
+	Vector v ( posX, posY, posZ );
 	return v;
 }
 

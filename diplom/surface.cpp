@@ -178,9 +178,9 @@ void Surface::execute ()
 	{
 		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
 		std::vector< double > p(3);
-		p[0] = point->getCenter().s.X;
-		p[1] = point->getCenter().s.Y;
-		p[2] = point->getCenter().s.Z;
+		p[0] = point->getCenter().x;
+		p[1] = point->getCenter().y;
+		p[2] = point->getCenter().z;
 		givenPoints.push_back(p);
 
 		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);

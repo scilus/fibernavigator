@@ -497,17 +497,17 @@ void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 
 std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
 {
-	Vector3fT vpos = box->getCenter();
-	Vector3fT vsize = box->getSize();
+	Vector vpos = box->getCenter();
+	Vector vsize = box->getSize();
 	resetLinesShown();
 	m_boxMin = new float[3];
 	m_boxMax = new float[3];
-	m_boxMin[0] = vpos.s.X - vsize.s.X/2;
-	m_boxMax[0] = vpos.s.X + vsize.s.X/2;
-	m_boxMin[1] = vpos.s.Y - vsize.s.Y/2;
-	m_boxMax[1] = vpos.s.Y + vsize.s.Y/2;
-	m_boxMin[2] = vpos.s.Z - vsize.s.Z/2;
-	m_boxMax[2] = vpos.s.Z + vsize.s.Z/2;
+	m_boxMin[0] = vpos.x - vsize.x/2;
+	m_boxMax[0] = vpos.x + vsize.x/2;
+	m_boxMin[1] = vpos.y - vsize.y/2;
+	m_boxMax[1] = vpos.y + vsize.y/2;
+	m_boxMin[2] = vpos.z - vsize.z/2;
+	m_boxMax[2] = vpos.z + vsize.z/2;
 
 	boxTest(0, m_countPoints-1, 0);
 	return m_inBox;
@@ -663,7 +663,7 @@ bool Fibers::getBarycenter(SplinePoint* point)
 		float y1 = ( m_barycenter[1] - point->Y() );
 		float z1 = ( m_barycenter[2] - point->Z() );
 
-		Vector3fT v = {{x1, y1, z1}};
+		Vector v (x1, y1, z1 );
 		point->setOffsetVector(v);
 
 		point->setX(point->X() + x1);

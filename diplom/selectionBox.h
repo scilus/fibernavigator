@@ -8,10 +8,10 @@
 #endif
 
 #include "GL/glew.h"
-#include "ArcBall.h"
 #include "boundingBox.h"
 #include <vector>
 #include "DatasetHelper.h"
+#include "IsoSurface/Vector.h"
 
 class MainCanvas;
 class DatasetHelper;
@@ -19,7 +19,7 @@ class DatasetHelper;
 class SelectionBox : public wxTreeItemData
 {
 public:
-	SelectionBox(Vector3fT, Vector3fT, DatasetHelper*);
+	SelectionBox(Vector, Vector, DatasetHelper*);
 	~SelectionBox();
 
 	void draw();
@@ -35,12 +35,12 @@ public:
 
 	void lockToCrosshair();
 
-	void setCenter(Vector3fT c) { m_center = c; m_dirty = true;};
+	void setCenter(Vector c) { m_center = c; m_dirty = true;};
 	void setCenter(float x, float y, float z);
 
-	Vector3fT getCenter() {return m_center;};
-	void setSize(Vector3fT v) {m_size = v;m_dirty = true;};
-	Vector3fT getSize() {return m_size;};
+	Vector getCenter() {return m_center;};
+	void setSize(Vector v) {m_size = v;m_dirty = true;};
+	Vector getSize() {return m_size;};
 	void setPicked(int s) {m_hr.picked = s;};
 	bool isDirty() {return m_dirty;};
 	void setDirty();
@@ -95,11 +95,11 @@ private:
 	void drag(wxPoint click, wxPoint lastPos);
 	void resize(wxPoint click, wxPoint lastPos);
 
-	float getAxisParallelMovement(int, int, int, int, Vector3fT);
+	float getAxisParallelMovement(int, int, int, int, Vector);
 	void updateStatusBar();
 
-	Vector3fT m_center;
-	Vector3fT m_size;
+	Vector m_center;
+	Vector m_size;
 	hitResult m_hr;
 	float mx, px, my, py, mz, pz;
 	wxString m_name;
