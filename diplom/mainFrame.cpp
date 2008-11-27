@@ -1828,7 +1828,7 @@ void MainFrame::updateMenus()
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Texture Mode")), false);
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), false);
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Normal Direction")), false);
-	sMenu->Enable(sMenu->FindItem(_T("Draw Vectors")), false);
+	//sMenu->Enable(sMenu->FindItem(_T("Draw Vectors")), false);
 	sMenu->Enable(sMenu->FindItem(_T("Clean Artefacts from Surface")), false);
 	sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), false);
 
@@ -1849,6 +1849,7 @@ void MainFrame::updateMenus()
 			sMenu->Enable(sMenu->FindItem(_T("Clean Artefacts from Surface")), true);
 			sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), true);
 			sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
+			sMenu->Check(sMenu->FindItem(_T("Draw Vectors")), m_dh->drawVectors);
 		}
 		if (info->getType() == Surface_)
 		{

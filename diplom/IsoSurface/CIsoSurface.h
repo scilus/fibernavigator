@@ -44,7 +44,7 @@ public:
 	~CIsoSurface();
 
 	bool load(wxString filename) {return false;};
-	void draw() {};
+	void draw();
 	void generateTexture() {};
 	void generateGeometry() ;
 	void generateLICGeometry() ;
@@ -132,6 +132,9 @@ protected:
 	// Lookup tables used in the construction of the isosurface.
 	static const unsigned int m_edgeTable[256];
 	static const int m_triTable[256][16];
+
+	GLuint m_GLuint2;
+	std::vector< std::vector<float> >m_testLines;
 };
 #endif // CISOSURFACE_H
 

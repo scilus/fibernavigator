@@ -201,3 +201,9 @@ void Mesh::activateLIC()
 {
 
 }
+
+
+void Mesh::draw()
+{
+	glCallList(m_GLuint);
+}

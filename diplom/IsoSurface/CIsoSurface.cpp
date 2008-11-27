@@ -794,6 +794,23 @@ void CIsoSurface::generateLICGeometry()
 
 	glEndList();
 	m_GLuint = dl;
+
+	if (m_GLuint2) glDeleteLists(m_GLuint2, 1);
+	GLuint dl2 = glGenLists(1);
+	glNewList (dl2, GL_COMPILE);
+
+	for (size_t i = 0 ; i < m_testLines.size() ; ++i)
+	{
+		glBegin(GL_LINE_STRIP);
+		glColor3f(1.0, 1.0, 0.0);
+		for (size_t k = 0 ; k < m_testLines[i].size() ; k += 3)
+		{
+			glVertex3f(m_testLines[i][k] - 0.1, m_testLines[i][k+1], m_testLines[i][k+2]);
+		}
+		glEnd();
+	}
+	glEndList();
+	m_GLuint2 = dl2;
 }
 
 void CIsoSurface::GenerateWithThreshold()
@@ -817,7 +834,16 @@ void CIsoSurface::activateLIC()
 
 		SurfaceLIC lic(m_dh, m_tMesh);
 		lic.execute();
+		m_testLines = lic.testLines;
 		licCalculated = true;
 	}
 	generateLICGeometry();
+}
+
+void CIsoSurface::draw()
+{
+	glCallList(m_GLuint);
+
+	if ( m_dh->drawVectors && licCalculated)
+		glCallList(m_GLuint2);
 }

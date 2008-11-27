@@ -40,7 +40,7 @@ public:
 	~Mesh();
 
 	bool load(wxString filename);
-	void draw() {};
+	void draw();
 	void generateTexture() {};
 	void generateGeometry() ;
 	void initializeBuffer() {};
