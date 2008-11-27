@@ -552,9 +552,8 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->fibers_loaded) return;
 
-	Fibers *fibers;
-	wxTreeItemIdValue cookie = 0;
-	fibers = (Fibers*)(m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)));
+	Fibers *fibers = NULL;
+	m_dh->getFiberDataset(fibers);
 
 	wxString caption = wxT("Choose a file");
 	wxString wildcard = wxT("fiber files (*.fib)|*.fib||*.*|*.*");
