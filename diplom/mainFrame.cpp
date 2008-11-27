@@ -796,9 +796,9 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 	//delete all existing points
 	m_treeWidget->DeleteChildren(m_tPointId);
 	Fibers *fibers = NULL;
-	wxTreeItemIdValue cookie = 0;
+
 	if ( m_dh->fibers_loaded )
-		fibers = (Fibers*)(m_treeWidget->GetItemData(m_treeWidget->GetFirstChild(m_tFiberId,cookie)));
+		m_dh->getFiberDataset(fibers);
 
 	for ( int i = 0 ; i < 11 ; ++i)
 		for ( int j = 0 ; j < 11 ; ++j )
