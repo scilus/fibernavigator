@@ -705,6 +705,8 @@ void CIsoSurface::RenameVerticesAndTriangles()
 
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();
+	licCalculated = false;
+	m_useLIC = false;
 }
 
 void CIsoSurface::generateGeometry()
@@ -794,7 +796,7 @@ void CIsoSurface::generateLICGeometry()
 
 	glEndList();
 	m_GLuint = dl;
-
+#ifdef __DRAW_STREAMLINES__
 	if (m_GLuint2) glDeleteLists(m_GLuint2, 1);
 	GLuint dl2 = glGenLists(1);
 	glNewList (dl2, GL_COMPILE);
@@ -811,6 +813,7 @@ void CIsoSurface::generateLICGeometry()
 	}
 	glEndList();
 	m_GLuint2 = dl2;
+#endif
 }
 
 void CIsoSurface::GenerateWithThreshold()
@@ -834,7 +837,9 @@ void CIsoSurface::activateLIC()
 
 		SurfaceLIC lic(m_dh, m_tMesh);
 		lic.execute();
+#ifdef __DRAW_STREAMLINES__
 		m_testLines = lic.testLines;
+#endif
 		licCalculated = true;
 	}
 	generateLICGeometry();

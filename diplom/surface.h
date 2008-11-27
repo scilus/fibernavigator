@@ -27,7 +27,7 @@ public:
 	void createCutTexture();
 	void drawVectors();
 	void clean() {};
-	void smooth() {m_tMesh->doLoopSubD(); licCalculated = false;};
+	void smooth() {m_tMesh->doLoopSubD(); ++subDCount;licCalculated = false;};
 	void activateLIC();
 
 	void movePoints();

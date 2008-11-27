@@ -119,7 +119,7 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 	// integrate
 	streamline->integrate(start, cellId, true, max_length);
 	visitedFwd = streamline->getVisitedCells();
-
+#ifdef __DRAW_STREAMLINES__
 	std::vector<float>line;
 	std::vector< FArray > steps = streamline->getIntermediateSteps();
 	line.reserve(steps.size() *3);
@@ -130,10 +130,10 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 		line.push_back(steps[i](2));
 	}
 	testLines.push_back(line);
-
+#endif
 	streamline->integrate(start, cellId, false, max_length);
 	visitedBwd = streamline->getVisitedCells();
-
+#ifdef __DRAW_STREAMLINES__
 	line.clear();
 	steps = streamline->getIntermediateSteps();
 	line.reserve(steps.size() *3);
@@ -144,7 +144,7 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 		line.push_back(steps[i](2));
 	}
 	testLines.push_back(line);
-
+#endif
 
 	positive total_sz = visitedFwd.size() + visitedBwd.size();
 

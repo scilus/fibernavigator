@@ -119,6 +119,8 @@ class TriangleMesh {
 		void reserveVerts(const int size);
 		void reserveTriangles(const int size);
 
+		void printInfo();
+
 
 	private:
 

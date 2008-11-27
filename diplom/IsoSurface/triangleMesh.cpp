@@ -434,3 +434,21 @@ void TriangleMesh::reserveTriangles(const int size)
 	neighbors.reserve(size);
 
 }
+
+void TriangleMesh::printInfo()
+{
+	int bytes = 0;
+	printf("Triangle Mesh contains %d Vertices and %d Triangles.\n", numVerts, numTris);
+	bytes += ( 6 * sizeof(float) * numVerts ) + ( 12 * sizeof(float) * numTris );
+		for ( size_t i = 0 ; i < vIsInTriangle.size() ; ++i)
+	{
+		bytes += (int)(vIsInTriangle[i].size()) * sizeof(int);
+	}
+
+	for ( size_t i = 0 ; i < neighbors.size() ; ++i)
+	{
+		bytes += (int)(neighbors[i].size()) * sizeof(int);
+	}
+
+	printf("Triangle Mesh uses %d bytes.\n", bytes);
+}

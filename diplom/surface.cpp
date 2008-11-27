@@ -302,10 +302,11 @@ void Surface::execute ()
 		m_dh->printDebug(_T("initiating lic"), 1);
 		SurfaceLIC lic(m_dh, m_tMesh);
 		lic.execute();
+#ifdef __DRAW_STREAMLINES__
 		m_testLines = lic.testLines;
+#endif
 		licCalculated = true;
 	}
-
 	m_dh->surface_isDirty = false;
 	generateGeometry();
 
@@ -564,7 +565,7 @@ void Surface::generateLICGeometry()
 
 	glEndList();
 	m_GLuint2 = dl;
-
+#ifdef __DRAW_STREAMLINES__
 	if (m_GLuint3) glDeleteLists(m_GLuint3, 1);
 	GLuint dl2 = glGenLists(1);
 	glNewList (dl2, GL_COMPILE);
@@ -581,4 +582,5 @@ void Surface::generateLICGeometry()
 	}
 	glEndList();
 	m_GLuint3 = dl2;
+#endif
 }

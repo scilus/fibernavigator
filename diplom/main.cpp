@@ -171,7 +171,9 @@ bool MyApp::OnInit(void) {
 	surf_menu->AppendSeparator();
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_LIC, _T("Toggle Lic"));
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_NORMAL, _T("Toggle Normal Direction"));
+#ifdef __DRAW_STREAMLINES__
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_DRAW_VECTORS, _T("Draw Vectors"));
+#endif
 	surf_menu->AppendSeparator();
 	surf_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, _T("Toggle Texture Mode"));
 	surf_menu->AppendCheckItem(MENU_OPTIONS_BLEND_TEX_ON_MESH, _T("Blend Texture on Mesh"));

@@ -36,11 +36,11 @@ loopSubD::loopSubD(TriangleMesh* nTriMesh){
 	triMesh->reserveVerts(numTriVerts*4);
 	triMesh->reserveTriangles(numTriFaces*4);
 
-	wxDateTime dt = wxDateTime::Now();
-	printf("[%02d:%02d:%02d] ", dt.GetHour(), dt.GetMinute(), dt.GetSecond());
+	//wxDateTime dt = wxDateTime::Now();
+	//printf("[%02d:%02d:%02d] ", dt.GetHour(), dt.GetMinute(), dt.GetSecond());
 
 	Vector* newVertexPositions = new Vector[numTriVerts];
-	printf("start loop subdivision on %d vertices , %d triangles\n", numTriVerts, numTriFaces);
+	//printf("start loop subdivision on %d vertices , %d triangles\n", numTriVerts, numTriFaces);
 	for(int i=0; i<numTriVerts; i++){
 		newVertexPositions[i] = calcNewPosition(i);
 	}
@@ -68,7 +68,9 @@ loopSubD::loopSubD(TriangleMesh* nTriMesh){
 	triMesh->calcTriangleTensors();
 	wxDateTime dt1 = wxDateTime::Now();
 	printf("[%02d:%02d:%02d] ", dt1.GetHour(), dt1.GetMinute(), dt1.GetSecond());
-	printf("loop subdivision done, mesh now has %d vertices , %d triangles\n",triMesh->getNumVertices(),triMesh->getNumTriangles());
+	//printf("loop subdivision done, mesh now has %d vertices , %d triangles\n",triMesh->getNumVertices(),triMesh->getNumTriangles());
+	triMesh->printInfo();
+
 }
 
 Vector loopSubD::calcNewPosition(int vertNum)

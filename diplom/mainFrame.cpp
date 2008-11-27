@@ -1856,6 +1856,7 @@ void MainFrame::updateMenus()
 			sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
 			sMenu->Check(sMenu->FindItem(_T("Toggle Normal Direction")), (m_dh->normalDirection < 0));
 			sMenu->Check(sMenu->FindItem(_T("Draw Vectors")), m_dh->drawVectors);
+			sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), true);
 		}
 
 
