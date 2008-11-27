@@ -805,7 +805,7 @@ void CIsoSurface::generateLICGeometry()
 		glColor3f(1.0, 1.0, 0.0);
 		for (size_t k = 0 ; k < m_testLines[i].size() ; k += 3)
 		{
-			glVertex3f(m_testLines[i][k] - 0.1, m_testLines[i][k+1], m_testLines[i][k+2]);
+			glVertex3f(m_testLines[i][k], m_testLines[i][k+1], m_testLines[i][k+2]);
 		}
 		glEnd();
 	}
