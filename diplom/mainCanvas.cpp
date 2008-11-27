@@ -118,7 +118,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		case mainView: {
 			if(event.LeftIsDown())
 			{
-				SetFocus();
+				//SetFocus();
 				m_mousePt.s.X = clickX;
 				m_mousePt.s.Y = clickY;
 
@@ -173,6 +173,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 			if (event.MiddleIsDown())
 			{
+				SetFocus();
 				if (!m_dh->m_ismDragging)
 				{
 					m_dh->m_ismDragging = true;
