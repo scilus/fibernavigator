@@ -6,31 +6,6 @@ windows portierung
 
 benutzer menus und buttons
 
-file
-	- load
-	- save
-	- new iso surface
-view
-volume of interest VOI
-	- new
-	- toggle selection
-	- invert
-	- toggle AND/OR
-	- delete
-	
-spline surface
-	- new
-	- point mode
-	- delete
-	- move left/right
-
-options
-	- color 
-	- toggle lighting
-	- invert fibers
-	- toggle texture filtering
-	- fiber coloring local/global
-	- color map
 help
 	- keyboard shortcuts
 

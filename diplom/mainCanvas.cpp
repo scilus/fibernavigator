@@ -172,7 +172,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 			if (event.MiddleIsDown())
 			{
-				SetFocus();
 				if (!m_dh->m_ismDragging)
 				{
 					m_dh->m_ismDragging = true;
@@ -219,6 +218,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 						((SelectionBox*)m_hr.object)->select(true);
 					}
+					else
+						SetFocus();
 				}
 				else {
 					if (event.Dragging() && m_hr.picked < 10)
