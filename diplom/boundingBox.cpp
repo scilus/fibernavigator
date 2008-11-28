@@ -18,12 +18,12 @@ Ray::Ray(float x1, float y1, float z1, float x2, float y2, float z2)
 
 BoundingBox::BoundingBox(Vector center, Vector size)
 {
-	xmin = center[0] -  size[0];
-	xmax = center[0] +  size[0];
-	ymin = center[1] -  size[1];
-	ymax = center[1] +  size[1];
-	zmin = center[2] -  size[2];
-	zmax = center[2] +  size[2];
+	xmin = center[0] -  size[0]/2.0;
+	xmax = center[0] +  size[0]/2.0;
+	ymin = center[1] -  size[1]/2.0;
+	ymax = center[1] +  size[1]/2.0;
+	zmin = center[2] -  size[2]/2.0;
+	zmax = center[2] +  size[2]/2.0;
 }
 
 BoundingBox::BoundingBox(float x, float y, float z, float sizex, float sizey, float sizez)
