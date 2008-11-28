@@ -130,7 +130,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 
 	if ( type == 3 )
 	{
-		if ( col1. r - threshold <= 0.0)
+		if ( col1.r - threshold <= 0.0)
 			return;
 		if ( useColorMap == 1 )
 			col1 = colorMap1( col1.r );
@@ -142,13 +142,17 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 			col1 = colorMap4( col1.r );
 		else
 			col1 = defaultColorMap( col1.r );
-	}
 
-	if ( ( (col1.r + col1.g + col1.b)/3.0 - threshold) > 0.0 )
-	{
 		col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
 	}
 
+	else
+	{
+		if ( ( (col1.r + col1.g + col1.b)/3.0 - threshold) > 0.0 )
+		{
+			col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
+		}
+	}
 	col.a += clamp (( (col.r*3.0) + (col.g*3.0) + (col.b*3.0) ), 0.0, 1.0) - threshold;
 }
 
@@ -172,11 +176,16 @@ void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float thr
 			col1 = colorMap4( col1.r );
 		else
 			col1 = defaultColorMap( col1.r );
-	}
 
-	if ( (col1.r + col1.g + col1.b)/3.0 - threshold >  0.0)
-	{
 		color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
 	}
-
+	
+	else
+	{
+		if ( (col1.r + col1.g + col1.b)/3.0 - threshold >  0.0)
+		{
+			color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
+		}
+	}
+	
 }

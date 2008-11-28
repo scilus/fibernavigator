@@ -28,16 +28,23 @@ float lookupTex() {
 
 void main() {
 	vec4 cooloor = vec4(1.0);
+	float value = lookupTex();
+	float newVal;
+	if (threshold < 1.0)
+		newVal = (value - threshold) / (1.0 - threshold);
+	else
+		newVal = 1.0;
+	
 	if (type == 3 && useTex)
 		if ( useColorMap == 1 )
-			cooloor.rgb  = colorMap1( lookupTex() );
+			cooloor.rgb  = colorMap1( newVal );
 		else if ( useColorMap == 2 )
-			cooloor.rgb  = colorMap2( lookupTex() );
+			cooloor.rgb  = colorMap2( newVal );
 		else if ( useColorMap == 3 )
-			cooloor.rgb  = colorMap3( lookupTex() );
+			cooloor.rgb  = colorMap3( newVal );
 		else if ( useColorMap == 4 )
-			cooloor.rgb  = colorMap4( lookupTex() );
+			cooloor.rgb  = colorMap4( newVal );
 		else
-			cooloor.rgb = defaultColorMap( lookupTex() );
+			cooloor.rgb = defaultColorMap( newVal );
 	gl_FragColor = cooloor;
 }

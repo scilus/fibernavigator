@@ -289,8 +289,8 @@ void TheScene::renderFibers()
 				m_selBoxChanged = false;
 			}
 			info->draw();
-			if (info->getUseTex())
-				m_dh->shaderHelper->m_fiberShader->release();
+			
+			m_dh->shaderHelper->m_fiberShader->release();
 
 			lightsOff();
 		}
