@@ -2,8 +2,6 @@ keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
 
 alpha blending und neues beleuchtungschema (farbe-licht)
 
-commandozeile und laden der shader : offnen einer szene und/oder liste
-
 windows portierung
 
 benutzer menus und buttons
@@ -45,19 +43,13 @@ exclusivitaet ( eine faser nicht gleichzeitig in mehreren boxen )
 
 laden anderer bild und mesh formate ( *.nii, *.v )
 
-faked tubes
-
 tastaturbuffer und test und evtl kleine anpassungen fuer ein laptop computer
 
 ROI aus overlay und selection der fasern, die durch die roi gehen.
 
 fasern durchsichtig ( gewichtet mit overlay )
 
-surface durchsichtig ( simple implementation )
-
 laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
-
-loeschen der isosurface, wenn zugehoerige anatomy geloescht wird
 
 isosurface von belibigen skalaren datensatzen ( float/short )
 
@@ -95,3 +87,11 @@ speichern aller einstellungen der scene
 
 zoom und schift
 verschieben der box mit koordinatenkreuz, 
+
+commandozeile und laden der shader : offnen einer szene und/oder liste
+
+loeschen der isosurface, wenn zugehoerige anatomy geloescht wird
+
+faked tubes
+
+surface durchsichtig ( simple implementation )

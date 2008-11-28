@@ -36,6 +36,8 @@ void SplinePoint::draw()
 {
 	if (m_selected)
 		glColor3f(1.0f, 0.8f, 0.0f);
+	else if (m_isBoundary)
+		glColor3f(1.0f, 0.0f, 0.0f);
 	else
 		glColor3f(0.0f, 0.8f, 0.8f);
 	drawSphere(m_center.x, m_center.y, m_center.z, 2);

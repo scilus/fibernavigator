@@ -807,16 +807,18 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 			// create the point
 			SplinePoint *point = new SplinePoint(xs, yy, zz, m_dh);
 
-			if (i == 0 || i == 10 || j == 0 || j == 10) {
+			if (i == 0 || i == 10 || j == 0 || j == 10)
+			{
 				wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("boundary point"),-1, -1, point);
 				point->setTreeId(tId);
-				point->setIsBoundary();
+				point->setIsBoundary(true);
 			}
 			else
 			{
 				if (m_dh->fibers_loaded && fibers->getBarycenter(point)) {
 					wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId, wxT("point"),-1, -1, point);
 					point->setTreeId(tId);
+					point->setIsBoundary(false);
 				}
 			}
 		}

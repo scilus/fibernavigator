@@ -40,7 +40,7 @@ public:
 	void setOffsetVector (Vector vec) {m_offsetVector = vec;};
 	Vector getOffsetVector() {return m_offsetVector;};
 	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
-	void setIsBoundary() {m_isBoundary = true;};
+	void setIsBoundary(bool v) {m_isBoundary = v;};
 	bool isBoundary() {return m_isBoundary;};
 
 private:

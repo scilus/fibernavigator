@@ -41,7 +41,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	textures = 0;
 
 	colorMap = 0;
-	showColorMapLegend = true;
+	showColorMapLegend = false;
 	drawVectors = false;
 
 	showSagittal = true;
