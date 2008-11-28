@@ -132,6 +132,11 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 	{
 		if ( col1.r - threshold <= 0.0)
 			return;
+		if (threshold < 1.0)
+			col1.r = (col1.r - threshold) / (1.0 - threshold);
+		else
+			col1.r = 1.0;
+
 		if ( useColorMap == 1 )
 			col1 = colorMap1( col1.r );
 		else if ( useColorMap == 2 )
@@ -166,6 +171,11 @@ void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float thr
 	{
 		if ( col1. r - threshold <= 0.0)
 			return;
+		if (threshold < 1.0)
+			col1.r = (col1.r - threshold) / (1.0 - threshold);
+		else
+			col1.r = 1.0;
+
 		if ( useColorMap == 1 )
 			col1 = colorMap1( col1.r );
 		else if ( useColorMap == 2 )
@@ -179,7 +189,7 @@ void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float thr
 
 		color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
 	}
-	
+
 	else
 	{
 		if ( (col1.r + col1.g + col1.b)/3.0 - threshold >  0.0)
@@ -187,5 +197,5 @@ void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float thr
 			color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
 		}
 	}
-	
+
 }
