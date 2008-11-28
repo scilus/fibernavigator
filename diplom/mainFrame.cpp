@@ -55,6 +55,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_VOI_RENDER_SELBOXES, MainFrame::OnHideSelBoxes)
 	EVT_MENU(MENU_VOI_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
 	EVT_MENU(MENU_VOI_TOGGLE_SHOWBOX, MainFrame::OnToggleShowBox)
+	EVT_MENU(MENU_VOI_RENAME_BOX, MainFrame::OnRenameBox)
 	// Menu Surfaces
 	EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_LIC, MainFrame::OnToggleLIC)
@@ -720,6 +721,26 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	}
 
 	m_dh->scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnRenameBox(wxCommandEvent& WXUNUSED(event))
+{
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+	if (treeSelected(tBoxId) == MasterBox || treeSelected(tBoxId) == ChildBox)
+	{
+		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
+
+		wxTextEntryDialog dialog(this, _T("Please enter a new name"));
+		dialog.SetValue(box->getName());
+		if ( (dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T("") ))
+			box->setName(dialog.GetValue());
+		m_treeWidget->SetItemText(tBoxId, box->getName());
+	}
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************

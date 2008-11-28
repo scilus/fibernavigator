@@ -188,6 +188,7 @@ void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
 
 		menu->AppendSeparator();
+		menu->Append(MENU_VOI_RENAME_BOX, _T("rename"));
 		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
 	}
 
@@ -205,6 +206,7 @@ void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 		else
 			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
 		menu->AppendSeparator();
+		menu->Append(MENU_VOI_RENAME_BOX, _T("rename"));
 		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
 
 	}
