@@ -17,7 +17,6 @@
 #include "FgeGLTexture.h"
 
 #include "../Shader.h"
-#include "../GLHelper.h"
 #include "../datasetInfo.h"
 #include "../DatasetHelper.h"
 
@@ -124,9 +123,6 @@ class  FgeImageSpaceLIC
 
     //! size of the additional surrounding area for rendering ( to avoid artefacts)
     int frameSize;
-
-    //! GL Helper
-    GLHelper* m_glh;
 };
 
 #endif /* FgeImageSpaceLIC_hh */

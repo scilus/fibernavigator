@@ -1,9 +1,7 @@
 #include "boundingBox.h"
 
-Ray::Ray(Vector origin, Vector end)
+Ray::Ray(Vector origin, Vector end) : m_origin(origin), m_end(end)
 {
-	m_origin = origin;
-	m_end = end;
 	Vector v1 (end[0] - origin[0], end[1] - origin[1], end[2] - origin[2]);
 	m_dir = v1;
 }

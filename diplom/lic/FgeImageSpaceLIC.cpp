@@ -54,8 +54,6 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
 	noiseTexture = NULL;
 
 	frameSize = 20;
-
-	m_glh = new GLHelper();
 }
 
 FgeImageSpaceLIC::~FgeImageSpaceLIC() {
@@ -183,14 +181,14 @@ void FgeImageSpaceLIC::reloadShaders() {
 	// Transformation Shader
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
-	m_glh->printTime();
+	m_dh->printTime();
 	printf("initializing  LIC texture shader\n");
 
 	m_transformShader = new Shader(wxT("transform"));
 	m_transformShader->bind();
 
-	if (m_glh->GLError())
-		m_glh->printGLError(wxT("LIC setup transform shader"));
+	if (m_dh->GLError())
+		m_dh->printGLError(wxT("LIC setup transform shader"));
 
 	m_transformShader->release();
 
@@ -198,14 +196,14 @@ void FgeImageSpaceLIC::reloadShaders() {
 	// Edge Detection Shader
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
-	m_glh->printTime();
+	m_dh->printTime();
 	printf("initializing  LIC edge shader\n");
 
 	m_edgeShader = new Shader(wxT("edgedetection"));
 	m_edgeShader->bind();
 
-	if (m_glh->GLError())
-		m_glh->printGLError(wxT("LIC setup edge shader"));
+	if (m_dh->GLError())
+		m_dh->printGLError(wxT("LIC setup edge shader"));
 
 	m_edgeShader->release();
 
@@ -213,14 +211,14 @@ void FgeImageSpaceLIC::reloadShaders() {
 	// Advection Shader
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
-	m_glh->printTime();
+	m_dh->printTime();
 	printf("initializing  LIC advection shader\n");
 
 	m_advectionShader = new Shader(wxT("advection"));
 	m_advectionShader->bind();
 
-	if (m_glh->GLError())
-		m_glh->printGLError(wxT("LIC setup advection shader"));
+	if (m_dh->GLError())
+		m_dh->printGLError(wxT("LIC setup advection shader"));
 
 	m_advectionShader->release();
 
@@ -228,14 +226,14 @@ void FgeImageSpaceLIC::reloadShaders() {
 	// Clipping Shader
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
-	m_glh->printTime();
+	m_dh->printTime();
 	printf("initializing  LIC clipping shader\n");
 
 	m_clippingShader = new Shader(wxT("clipping"));
 	m_clippingShader->bind();
 
-	if (m_glh->GLError())
-		m_glh->printGLError(wxT("LIC setup clipping shader"));
+	if (m_dh->GLError())
+		m_dh->printGLError(wxT("LIC setup clipping shader"));
 
 	m_clippingShader->release();
 }
