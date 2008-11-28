@@ -29,17 +29,14 @@ public:
 	void smooth() {};
 	void activateLIC() {};
 
-	wxUint8* getByteDataset();
 	float* getFloatDataset();
+	float* getScalarField();
 	TensorField* getTensorField() { return m_tensorField; };
 
 	//bool isInsideTriangle(double, double, double, double, double, double, double, double);
 	//void cutRestOfLine(int, int, int);
 
 private:
-	wxUint8 *m_byteDataset;
-	wxUint16 *m_shortDataset;
-	wxUint8 *m_rgbDataset;
 	float *m_floatDataset;
 	TensorField* m_tensorField;
 };

@@ -40,7 +40,7 @@ typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
 class CIsoSurface  : public DatasetInfo {
 public:
 	// Constructor and destructor.
-	CIsoSurface(DatasetHelper*, wxUint8* ptScalarField);
+	CIsoSurface(DatasetHelper*, float* ptScalarField);
 	~CIsoSurface();
 
 	bool load(wxString filename) {return false;};
@@ -58,7 +58,7 @@ public:
 
 	// Generates the isosurface from the scalar field contained in the
 	// buffer ptScalarField[].
-	void GenerateSurface(wxUint8 tIsoLevel);
+	void GenerateSurface(float tIsoLevel);
 
 	// Returns true if a valid surface has been generated.
 	bool IsSurfaceValid();
@@ -108,7 +108,7 @@ protected:
 
 	// Interpolates between two grid points to produce the point at which
 	// the isosurface intersects an edge.
-	POINT3DID Interpolate(float fX1, float fY1, float fZ1, float fX2, float fY2, float fZ2, wxUint8 tVal1, wxUint8 tVal2);
+	POINT3DID Interpolate(float fX1, float fY1, float fZ1, float fX2, float fY2, float fZ2, float tVal1, float tVal2);
 
 	// Renames vertices and triangles so that they can be accessed more
 	// efficiently.
@@ -121,10 +121,10 @@ protected:
 	float m_fCellLengthX, m_fCellLengthY, m_fCellLengthZ;
 
 	// The buffer holding the scalar field.
-	wxUint8* m_ptScalarField;
+	float* m_ptScalarField;
 
 	// The isosurface value.
-	wxUint8 m_tIsoLevel;
+	float m_tIsoLevel;
 
 	// Indicates whether a valid surface is present.
 	bool m_bValidSurface;

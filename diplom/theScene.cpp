@@ -289,7 +289,7 @@ void TheScene::renderFibers()
 				m_selBoxChanged = false;
 			}
 			info->draw();
-			
+
 			m_dh->shaderHelper->m_fiberShader->release();
 
 			lightsOff();

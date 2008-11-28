@@ -763,12 +763,14 @@ void DatasetHelper::createIsoSurface() {
 		return;
 
 	printDebug(_T("start generating iso surface..."),1);
-	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getByteDataset());
-	isosurf->GenerateSurface(100);
+
+	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getScalarField());
+	isosurf->GenerateSurface(0.4f);
 
 	printDebug(_T("iso surface done"),1);
 
-	if (isosurf->IsSurfaceValid()) {
+	if (isosurf->IsSurfaceValid())
+	{
 		isosurf->generateGeometry();
 		isosurf->setName(wxT("iso surface"));
 
@@ -780,10 +782,12 @@ void DatasetHelper::createIsoSurface() {
 		mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
 				wxLIST_STATE_SELECTED);
 
-	} else {
+	} else
+	{
 		printDebug(_T("***ERROR*** surface is not valid"),2);
 	}
 	mainFrame->refreshAllGLWidgets();
+
 }
 
 void DatasetHelper::changeZoom(int z)

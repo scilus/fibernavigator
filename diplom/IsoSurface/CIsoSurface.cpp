@@ -305,7 +305,7 @@ const int CIsoSurface::m_triTable[256][16] = {
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
+CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 {
 	m_dh = dh;
 
@@ -316,10 +316,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 	m_fCellLengthY = 1.0;
 	m_fCellLengthZ = 1.0;
 
-	int size = (m_nCellsX + 1) * (m_nCellsY + 1) * (m_nCellsZ + 1);
-	m_ptScalarField = new wxUint8[size];
-	for ( int i = 0 ; i < size ; ++i)
-		m_ptScalarField[i] = ptScalarField[i];
+	m_ptScalarField = ptScalarField;
 
 	if (m_dh->filterIsoSurf)
 	{
@@ -327,18 +324,18 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 			for (unsigned int y = 1 ; y < m_nCellsY ; ++y)
 				for (unsigned int x = 1 ; x < m_nCellsX ; ++x)
 				{
-					std::vector<wxUint8>list;
+					std::vector<float>list;
 					for (unsigned int zz = z-1; zz < z+2 ; ++zz)
 					{
-						list.push_back(ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(ptScalarField[x - 1 + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(ptScalarField[x + 1 + m_dh->columns*y + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(ptScalarField[x + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(ptScalarField[x - 1 + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(ptScalarField[x + 1 + m_dh->columns*(y-1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(ptScalarField[x + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(ptScalarField[x - 1 + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
-						list.push_back(ptScalarField[x + 1 + m_dh->columns*(y+1) + m_dh->columns*m_dh->rows*zz]);
+						list.push_back(ptScalarField[x +     m_dh->columns * y +     m_dh->columns * m_dh->rows * zz]);
+						list.push_back(ptScalarField[x - 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz]);
+						list.push_back(ptScalarField[x + 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz]);
+						list.push_back(ptScalarField[x +     m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz]);
+						list.push_back(ptScalarField[x - 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz]);
+						list.push_back(ptScalarField[x + 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz]);
+						list.push_back(ptScalarField[x +     m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz]);
+						list.push_back(ptScalarField[x - 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz]);
+						list.push_back(ptScalarField[x + 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz]);
 					}
 					nth_element (list.begin(), list.begin() + 13, list.end());
 					m_ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*z] = list[13];
@@ -351,7 +348,6 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 	m_showFS = true;
 	m_useTex = true;
 	m_color = wxColour(230,230,230);
-	m_hasTreeId = false;
 
 	m_nTriangles = 0;
 	m_nNormals = 0;
@@ -359,7 +355,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, wxUint8* ptScalarField)
 	m_ppt3dVertices = NULL;
 	m_piTriangleIndices = NULL;
 	m_pvec3dNormals = NULL;
-	m_tIsoLevel = 50;
+	m_tIsoLevel = 0.40;
 	m_bValidSurface = false;
 
 	m_tMesh = new TriangleMesh(m_dh);
@@ -372,7 +368,7 @@ CIsoSurface::~CIsoSurface()
 	DeleteSurface();
 }
 
-void CIsoSurface::GenerateSurface(wxUint8 tIsoLevel)
+void CIsoSurface::GenerateSurface(float tIsoLevel)
 {
 	if (m_bValidSurface)
 		DeleteSurface();
@@ -653,14 +649,14 @@ POINT3DID CIsoSurface::CalculateIntersection(unsigned int nX, unsigned int nY, u
 
 	unsigned int nPointsInXDirection = (m_nCellsX + 1);
 	unsigned int nPointsInSlice = nPointsInXDirection*(m_nCellsY + 1);
-	wxUint8 val1 = m_ptScalarField[v1z*nPointsInSlice + v1y*nPointsInXDirection + v1x];
-	wxUint8 val2 = m_ptScalarField[v2z*nPointsInSlice + v2y*nPointsInXDirection + v2x];
+	float val1 = m_ptScalarField[v1z*nPointsInSlice + v1y*nPointsInXDirection + v1x];
+	float val2 = m_ptScalarField[v2z*nPointsInSlice + v2y*nPointsInXDirection + v2x];
 	POINT3DID intersection = Interpolate(x1, y1, z1, x2, y2, z2, val1, val2);
 	intersection.newID = 0;
 	return intersection;
 }
 
-POINT3DID CIsoSurface::Interpolate(float fX1, float fY1, float fZ1, float fX2, float fY2, float fZ2, wxUint8 tVal1, wxUint8 tVal2)
+POINT3DID CIsoSurface::Interpolate(float fX1, float fY1, float fZ1, float fX2, float fY2, float fZ2, float tVal1, float tVal2)
 {
 	POINT3DID interpolation;
 	float mu;
@@ -702,6 +698,7 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	}
 
 	m_tMesh->finalize();
+	m_tMesh->printInfo();
 
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();
@@ -818,7 +815,7 @@ void CIsoSurface::generateLICGeometry()
 
 void CIsoSurface::GenerateWithThreshold()
 {
-	GenerateSurface((int)(255*m_threshold));
+	GenerateSurface(m_threshold);
 	generateGeometry();
 }
 

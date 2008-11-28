@@ -32,29 +32,11 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	m_hasTreeId = false;
 }
 
-Anatomy::~Anatomy() {
-	switch (m_type) {
-	case Head_byte:
-		delete[] m_byteDataset;
-		break;
-	case Head_short:
-		delete[] m_shortDataset;
-		break;
-	case Overlay:
-		delete[] m_floatDataset;
-		break;
-	case Vectors_:
-		delete[] m_floatDataset;
-		m_dh->vectors_loaded = false;
-		break;
-	case Tensors_:
-		delete[] m_floatDataset;
-		m_dh->tensors_loaded = false;
-		break;
-	case RGB:
-		delete[] m_rgbDataset;
-		break;
-	}
+Anatomy::~Anatomy()
+{
+	delete[] m_floatDataset;
+	m_dh->tensors_loaded = false;
+
 	const GLuint* tex = &m_GLuint;
 	glDeleteTextures(1, tex);
 }
@@ -168,41 +150,67 @@ bool Anatomy::load(wxString filename)
 			switch (m_type)
 			{
 			case Head_byte: {
-				m_byteDataset = new wxUint8[nSize];
-				if (dataFile.Read(m_byteDataset, (size_t) nSize) != nSize)
+				wxUint8* byteDataset = new wxUint8[nSize];
+				if (dataFile.Read(byteDataset, (size_t) nSize) != nSize)
 				{
 					dataFile.Close();
-					delete[] m_byteDataset;
+					delete[] byteDataset;
 					return false;
 				}
+				m_floatDataset = new float[nSize*3];
+				for ( int i = 0 ; i < nSize ; ++i)
+				{
+					m_floatDataset[i * 3    ] = (float)byteDataset[i] / 255.0;
+					m_floatDataset[i * 3 + 1] = (float)byteDataset[i] / 255.0;
+					m_floatDataset[i * 3 + 2] = (float)byteDataset[i] / 255.0;
+				}
+				delete[] byteDataset;
 				flag = true;
 			} break;
 
 			case Head_short: {
-				m_shortDataset = new wxUint16[nSize/2];
-					if (dataFile.Read(m_shortDataset, (size_t) nSize) != nSize)
-					{
-						dataFile.Close();
-						delete[] m_shortDataset;
-						return false;
-					}
-					flag = true;
-					wxUint16 max = 0;
-					for ( unsigned int i = 0 ; i < sizeof(m_shortDataset) ; ++i)
-					{
-						max = wxMax(max, m_shortDataset[i]);
-					}
-				} break;
-
-			case Overlay: {
-				m_floatDataset = new float[nSize/4];
-				if (dataFile.Read(m_floatDataset, (size_t) nSize) != nSize)
+				wxUint16* shortDataset = new wxUint16[nSize/2];
+				if (dataFile.Read(shortDataset, (size_t) nSize) != nSize)
 				{
 					dataFile.Close();
-					delete[] m_floatDataset;
+					delete[] shortDataset;
 					return false;
 				}
 				flag = true;
+				wxUint16 max = 0;
+				for ( unsigned int i = 0 ; i < sizeof(shortDataset) ; ++i)
+				{
+					max = wxMax(max, shortDataset[i]);
+				}
+				printf("max: %d\n", max);
+				m_floatDataset = new float[3 * nSize/2];
+				for ( int i = 0 ; i < nSize/2 ; ++i)
+				{
+					m_floatDataset[i * 3    ] = (float)shortDataset[i] / (float)max;
+					m_floatDataset[i * 3 + 1] = (float)shortDataset[i] / (float)max;
+					m_floatDataset[i * 3 + 2] = (float)shortDataset[i] / (float)max;
+				}
+				delete[] shortDataset;
+			} break;
+
+			case Overlay: {
+				float* floatDataset = new float[nSize/4];
+				if (dataFile.Read(floatDataset, (size_t) nSize) != nSize)
+				{
+					dataFile.Close();
+					delete[] floatDataset;
+					return false;
+				}
+				m_floatDataset = new float[3 * nSize/4];
+				for ( int i = 0 ; i < nSize/4 ; ++i)
+				{
+					m_floatDataset[i * 3    ] = (float)floatDataset[i];
+					m_floatDataset[i * 3 + 1] = (float)floatDataset[i];
+					m_floatDataset[i * 3 + 2] = (float)floatDataset[i];
+				}
+				delete[] floatDataset;
+				flag = true;
+
 			} break;
 
 			case Vectors_: {
@@ -286,6 +294,7 @@ bool Anatomy::load(wxString filename)
 						m_floatDataset[startslize + 3 * j + 4] 	= buffer[startslize + 4*offset + j];
 						m_floatDataset[startslize + 3 * j + 5] 	= buffer[startslize + 5*offset + j];
 					}
+					delete[] buffer;
 				}
 
 				m_tensorField = new TensorField(m_dh, m_floatDataset, false);
@@ -296,7 +305,7 @@ bool Anatomy::load(wxString filename)
 
 			case RGB: {
 				wxUint8 *buffer = new wxUint8[nSize];
-				m_rgbDataset = new wxUint8[nSize];
+				m_floatDataset = new float[nSize];
 				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
 				{
 					dataFile.Close();
@@ -313,11 +322,12 @@ bool Anatomy::load(wxString filename)
 					startslize = i * offset * 3;
 					for (int j = 0 ; j < offset ; ++j)
 					{
-						m_rgbDataset[startslize + 3*j] = buffer[startslize + j];
-						m_rgbDataset[startslize + 3*j + 1] = buffer[startslize + offset + j];
-						m_rgbDataset[startslize + 3*j + 2] = buffer[startslize + 2*offset + j];
+						m_floatDataset[startslize + 3 * j    ] = (float)buffer[startslize + j           ] / 255.0;
+						m_floatDataset[startslize + 3 * j + 1] = (float)buffer[startslize + offset + j  ] / 255.0;
+						m_floatDataset[startslize + 3 * j + 2] = (float)buffer[startslize + 2*offset + j] / 255.0;
 					}
 				}
+				delete[] buffer;
 			} break;
 			}
 		}
@@ -345,41 +355,8 @@ void Anatomy::generateTexture()
 	switch (m_type)
 	{
 	case Head_byte:
-		glTexImage3D(GL_TEXTURE_3D,
-			0,
-			GL_RGBA,
-			m_columns,
-			m_rows,
-			m_frames,
-			0,
-			GL_LUMINANCE,
-			GL_UNSIGNED_BYTE,
-			m_byteDataset);
-		break;
 	case Head_short:
-		glTexImage3D(GL_TEXTURE_3D,
-			0,
-			GL_RGBA,
-			m_columns,
-			m_rows,
-			m_frames,
-			0,
-			GL_LUMINANCE,
-			GL_UNSIGNED_SHORT,
-			m_shortDataset);
-		break;
 	case Overlay:
-		glTexImage3D(GL_TEXTURE_3D,
-			0,
-			GL_RGBA,
-			m_columns,
-			m_rows,
-			m_frames,
-			0,
-			GL_LUMINANCE,
-			GL_FLOAT,
-			m_floatDataset);
-		break;
 	case RGB:
 		glTexImage3D(GL_TEXTURE_3D,
 			0,
@@ -389,8 +366,8 @@ void Anatomy::generateTexture()
 			m_frames,
 			0,
 			GL_RGB,
-			GL_UNSIGNED_BYTE,
-			m_rgbDataset);
+			GL_FLOAT,
+			m_floatDataset);
 		break;
 	case Vectors_: {
 		int size = m_rows*m_columns*m_frames*3;
@@ -417,22 +394,15 @@ void Anatomy::generateTexture()
 	}
 }
 
-wxUint8* Anatomy::getByteDataset()
-{
-	if (m_type == Head_byte)
-	{
-		return m_byteDataset;
-	}
-	else
-		return NULL;
-}
-
 float* Anatomy::getFloatDataset()
 {
-	if (m_type == Vectors_)
-	{
-		return m_floatDataset;
-	}
-	else
-		return NULL;
+	return m_floatDataset;
+}
+
+float* Anatomy::getScalarField()
+{
+	float* tmpField = new float[m_rows*m_columns*m_frames];
+	for ( int i = 0 ; i < m_rows*m_columns*m_frames ; ++i)
+		tmpField[i] = m_floatDataset[3*i];
+	return tmpField;
 }
