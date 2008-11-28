@@ -313,14 +313,6 @@ void Surface::execute ()
 	createCutTexture();
 }
 
-F::FVector Surface::getNormalForQuad(const F::FVector* p1, const F::FVector* p2, const F::FVector* p3)
-{
-	F::FVector a = *p2 - *p1;
-	F::FVector b = *p3 - *p1;
-	F::FVector n = a.crossProduct(b);
-	return n.normalize();
-}
-
 void Surface::draw()
 {
 	if (m_dh->surface_isDirty)

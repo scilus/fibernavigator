@@ -107,7 +107,7 @@ namespace{
 }
 
 FgeGLTexture::FgeGLTexture( GLenum target, int width, int height, bool depth, GLint type, GLvoid* data)
-  : target( target ), width(width), height(height), depth(depth), type( type ), data( data ){}
+  : target( target ), type( type ), width(width), height(height), depth(depth), data( data ){}
 
 FgeGLTexture::~FgeGLTexture()
 {

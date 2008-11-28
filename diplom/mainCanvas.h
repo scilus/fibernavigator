@@ -52,9 +52,7 @@ public:
     float getAxisParallelMovement(int, int, int, int, Vector);
     Vector getEventCenter();
     void setRotation();
-    void orthonormalize();
-    double scalar(const F::FVector&, const F::FVector&);
-	void OnChar(wxKeyEvent& event);
+ 	void OnChar(wxKeyEvent& event);
 
     DECLARE_EVENT_TABLE()
 

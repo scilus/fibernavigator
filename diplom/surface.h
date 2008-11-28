@@ -43,7 +43,6 @@ private:
 	void getSplineSurfaceDeBoorPoints(  std::vector< std::vector< double > > &givenPoints,
 										    std::vector< std::vector< double > > &deBoorPoints,
 										    int numRows, int numCols);
-	F::FVector getNormalForQuad(const F::FVector*, const F::FVector*, const F::FVector*);
 
 	float getXValue(int y , int z, int numPoints);
 	void boxTest(int left, int right, int axis);

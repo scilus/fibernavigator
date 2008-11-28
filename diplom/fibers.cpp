@@ -649,19 +649,20 @@ bool Fibers::getBarycenter(SplinePoint* point)
 	m_boxMax[1] = point->Y() + 5.0/2;
 	m_boxMin[2] = point->Z() - 5.0/2;
 	m_boxMax[2] = point->Z() + 5.0/2;
-	m_barycenter.clear();
-	m_barycenter.resize(3, false);
+	m_barycenter.x = 0;
+	m_barycenter.y = 0;
+	m_barycenter.z = 0;
 	m_count = 0;
 
 	barycenterTest(0, m_countPoints-1, 0);
 	if (m_count > threshold) {
-		m_barycenter[0] /= m_count;
-		m_barycenter[1] /= m_count;
-		m_barycenter[2] /= m_count;
+		m_barycenter.x /= m_count;
+		m_barycenter.y /= m_count;
+		m_barycenter.z /= m_count;
 
-		float x1 = ( m_barycenter[0] - point->X() );
-		float y1 = ( m_barycenter[1] - point->Y() );
-		float z1 = ( m_barycenter[2] - point->Z() );
+		float x1 = ( m_barycenter.x - point->X() );
+		float y1 = ( m_barycenter.y - point->Y() );
+		float z1 = ( m_barycenter.z - point->Z() );
 
 		Vector v (x1, y1, z1 );
 		point->setOffsetVector(v);
