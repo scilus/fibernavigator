@@ -51,7 +51,7 @@ void BoundingBox::setCenter(float x, float y, float z)
 
 void BoundingBox::setCenter(Vector c)
 {
-	setCenter(c[0], c[0], c[0]);
+	setCenter(c[0], c[1], c[2]);
 }
 
 void BoundingBox::setSize(float x, float y, float z)
@@ -63,7 +63,7 @@ void BoundingBox::setSize(float x, float y, float z)
 
 void BoundingBox::setSize(Vector c)
 {
-	setSize(c[0], c[0], c[0]);
+	setSize(c[0], c[1], c[2]);
 }
 
 hitResult BoundingBox::hitTest(Ray *ray)

@@ -274,11 +274,10 @@ hitResult SelectionBox::hitTest(Ray *ray)
         float cy = m_center.y;
         float cz = m_center.z;
 
-
-		BoundingBox *bb = new BoundingBox(m_center, m_size);
-
-		if (wxGetKeyState(WXK_CONTROL))
+       	if (wxGetKeyState(WXK_CONTROL))
 		{
+       		BoundingBox *bb = new BoundingBox(m_center, m_size);
+
 			bb->setCenter(mx - 1 , cy, cz);
 			bb->setSize(m_size);
 			bb->setSizeX(1);
