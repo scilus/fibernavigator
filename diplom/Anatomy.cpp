@@ -157,12 +157,10 @@ bool Anatomy::load(wxString filename)
 					delete[] byteDataset;
 					return false;
 				}
-				m_floatDataset = new float[nSize*3];
+				m_floatDataset = new float[nSize];
 				for ( int i = 0 ; i < nSize ; ++i)
 				{
-					m_floatDataset[i * 3    ] = (float)byteDataset[i] / 255.0;
-					m_floatDataset[i * 3 + 1] = (float)byteDataset[i] / 255.0;
-					m_floatDataset[i * 3 + 2] = (float)byteDataset[i] / 255.0;
+					m_floatDataset[i] = (float)byteDataset[i] / 255.0;
 				}
 				delete[] byteDataset;
 				flag = true;
@@ -179,12 +177,10 @@ bool Anatomy::load(wxString filename)
 				flag = true;
 
 				float max = 65535.0;
-				m_floatDataset = new float[3 * nSize/2];
+				m_floatDataset = new float[nSize/2];
 				for ( int i = 0 ; i < nSize/2 ; ++i)
 				{
-					m_floatDataset[i * 3    ] = (float)shortDataset[i] / max;
-					m_floatDataset[i * 3 + 1] = (float)shortDataset[i] / max;
-					m_floatDataset[i * 3 + 2] = (float)shortDataset[i] / max;
+					m_floatDataset[i] = (float)shortDataset[i] / max;
 				}
 				delete[] shortDataset;
 			} break;
@@ -197,12 +193,10 @@ bool Anatomy::load(wxString filename)
 					delete[] floatDataset;
 					return false;
 				}
-				m_floatDataset = new float[3 * nSize/4];
+				m_floatDataset = new float[nSize/4];
 				for ( int i = 0 ; i < nSize/4 ; ++i)
 				{
-					m_floatDataset[i * 3    ] = (float)floatDataset[i];
-					m_floatDataset[i * 3 + 1] = (float)floatDataset[i];
-					m_floatDataset[i * 3 + 2] = (float)floatDataset[i];
+					m_floatDataset[i] = (float)floatDataset[i];
 				}
 				delete[] floatDataset;
 				flag = true;
@@ -353,6 +347,17 @@ void Anatomy::generateTexture()
 	case Head_byte:
 	case Head_short:
 	case Overlay:
+		glTexImage3D(GL_TEXTURE_3D,
+			0,
+			GL_RGBA,
+			m_columns,
+			m_rows,
+			m_frames,
+			0,
+			GL_LUMINANCE,
+			GL_FLOAT,
+			m_floatDataset);
+		break;
 	case RGB:
 		glTexImage3D(GL_TEXTURE_3D,
 			0,
@@ -393,12 +398,4 @@ void Anatomy::generateTexture()
 float* Anatomy::getFloatDataset()
 {
 	return m_floatDataset;
-}
-
-float* Anatomy::getScalarField()
-{
-	float* tmpField = new float[m_rows*m_columns*m_frames];
-	for ( int i = 0 ; i < m_rows*m_columns*m_frames ; ++i)
-		tmpField[i] = m_floatDataset[3*i];
-	return tmpField;
 }

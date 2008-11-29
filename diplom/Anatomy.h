@@ -30,7 +30,6 @@ public:
 	void activateLIC() {};
 
 	float* getFloatDataset();
-	float* getScalarField();
 	TensorField* getTensorField() { return m_tensorField; };
 
 	//bool isInsideTriangle(double, double, double, double, double, double, double, double);

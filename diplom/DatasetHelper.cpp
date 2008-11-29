@@ -764,7 +764,7 @@ void DatasetHelper::createIsoSurface() {
 
 	printDebug(_T("start generating iso surface..."),1);
 
-	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getScalarField());
+	CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getFloatDataset());
 	isosurf->GenerateSurface(0.4f);
 
 	printDebug(_T("iso surface done"),1);
