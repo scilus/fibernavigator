@@ -1886,3 +1886,4 @@ void MainFrame::updateMenus()
 	}
 	#endif
 }
+

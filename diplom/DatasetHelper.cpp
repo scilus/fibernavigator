@@ -753,7 +753,7 @@ void DatasetHelper::createIsoSurface() {
 	bool flag = false;
 	for (int i = 0; i < mainFrame->m_listCtrl->GetItemCount(); ++i) {
 		info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() == Head_byte) {
+		if (info->getType() < RGB) {
 			anatomy = (Anatomy*) info;
 			flag = true;
 			break;

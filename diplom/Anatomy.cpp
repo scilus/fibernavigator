@@ -177,18 +177,14 @@ bool Anatomy::load(wxString filename)
 					return false;
 				}
 				flag = true;
-				wxUint16 max = 0;
-				for ( unsigned int i = 0 ; i < sizeof(shortDataset) ; ++i)
-				{
-					max = wxMax(max, shortDataset[i]);
-				}
-				printf("max: %d\n", max);
+
+				float max = 65535.0;
 				m_floatDataset = new float[3 * nSize/2];
 				for ( int i = 0 ; i < nSize/2 ; ++i)
 				{
-					m_floatDataset[i * 3    ] = (float)shortDataset[i] / (float)max;
-					m_floatDataset[i * 3 + 1] = (float)shortDataset[i] / (float)max;
-					m_floatDataset[i * 3 + 2] = (float)shortDataset[i] / (float)max;
+					m_floatDataset[i * 3    ] = (float)shortDataset[i] / max;
+					m_floatDataset[i * 3 + 1] = (float)shortDataset[i] / max;
+					m_floatDataset[i * 3 + 2] = (float)shortDataset[i] / max;
 				}
 				delete[] shortDataset;
 			} break;
