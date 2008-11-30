@@ -105,7 +105,8 @@ DatasetHelper::~DatasetHelper() {
 }
 
 bool DatasetHelper::load(int index, wxString filename, float threshold, bool active, bool showFS, bool useTex) {
-	if (index >= 0) {
+	if (index >= 0)
+	{
 		wxString caption = wxT("Choose a file");
 		wxString
 				wildcard =
@@ -132,6 +133,12 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 	// check file extension
 	wxString ext = filename.AfterLast('.');
 
+	if (ext == _T("ima"))
+	{
+		filename = filename.BeforeLast('.') + _T(".hea");
+		ext = _T("hea");
+	}
+
 	if (ext == wxT("scn")) {
 		if (!loadScene(filename)) {
 			return false;
@@ -150,7 +157,6 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 
 		if (anatomy->load(filename))
 		{
-
 			if (anatomy_loaded)
 			{
 				if (anatomy->getRows() != rows || anatomy->getColumns()	!= columns || anatomy->getFrames() != frames)

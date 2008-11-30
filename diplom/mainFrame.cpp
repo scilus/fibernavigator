@@ -1341,6 +1341,16 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 	case 13:
 		delete info;
 		m_listCtrl->DeleteItem(item);
+		m_dh->anatomy_loaded = false;
+		for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+		{
+			DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+			if (info->getType() < Mesh_)
+			{
+				m_dh->anatomy_loaded = true;
+				break;
+			}
+		}
 		break;
 	default:
 		break;
@@ -1881,8 +1891,6 @@ void MainFrame::updateMenus()
 			sMenu->Check(sMenu->FindItem(_T("Draw Vectors")), m_dh->drawVectors);
 			sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), true);
 		}
-
-
 	}
 	#endif
 }
