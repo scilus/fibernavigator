@@ -19,7 +19,8 @@ class DatasetHelper;
 class SelectionBox : public wxTreeItemData
 {
 public:
-	SelectionBox(Vector, Vector, DatasetHelper*);
+	SelectionBox(Vector center, Vector size, DatasetHelper* dh);
+	SelectionBox(float* overlay, DatasetHelper* dh);
 	~SelectionBox();
 
 	void draw();
@@ -81,12 +82,17 @@ public:
 
 	std::vector<bool>m_inBox;
 
+	bool m_isBox;
+	float* m_overlay;
+
 	bool m_isTop;
 	bool m_isNOT;
 	bool m_isActive;
 	bool m_isVisible;
 	bool m_isSelected;
 	bool m_isLockedToCrosshair;
+
+	float m_threshold;
 
 	DatasetHelper* m_dh;
 

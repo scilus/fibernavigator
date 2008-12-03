@@ -49,7 +49,7 @@ public:
 
 	void resetLinesShown();
 	std::vector<bool> getLinesShown(SelectionBox*);
-	void updateLinesShown(std::vector<std::vector<SelectionBox*> >);
+	void updateLinesShown();
 	void boxTest(int, int, int);
 
 	bool getBarycenter(SplinePoint*);

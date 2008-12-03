@@ -414,8 +414,10 @@ void Fibers::resetLinesShown()
 	}
 }
 
-void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
+void Fibers::updateLinesShown()
 {
+	std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
+
 	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
 		bool dirty = false;
@@ -497,19 +499,36 @@ void Fibers::updateLinesShown(std::vector<std::vector<SelectionBox*> > boxes)
 
 std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
 {
-	Vector vpos = box->getCenter();
-	Vector vsize = box->getSize();
 	resetLinesShown();
-	m_boxMin = new float[3];
-	m_boxMax = new float[3];
-	m_boxMin[0] = vpos.x - vsize.x/2;
-	m_boxMax[0] = vpos.x + vsize.x/2;
-	m_boxMin[1] = vpos.y - vsize.y/2;
-	m_boxMax[1] = vpos.y + vsize.y/2;
-	m_boxMin[2] = vpos.z - vsize.z/2;
-	m_boxMax[2] = vpos.z + vsize.z/2;
 
-	boxTest(0, m_countPoints-1, 0);
+	if (box->m_isBox)
+	{
+		Vector vpos = box->getCenter();
+		Vector vsize = box->getSize();
+		m_boxMin = new float[3];
+		m_boxMax = new float[3];
+		m_boxMin[0] = vpos.x - vsize.x/2;
+		m_boxMax[0] = vpos.x + vsize.x/2;
+		m_boxMin[1] = vpos.y - vsize.y/2;
+		m_boxMax[1] = vpos.y + vsize.y/2;
+		m_boxMin[2] = vpos.z - vsize.z/2;
+		m_boxMax[2] = vpos.z + vsize.z/2;
+		boxTest(0, m_countPoints-1, 0);
+	}
+	else
+	{
+		for (int i = 0 ; i < m_countPoints ; ++i)
+		{
+			int x = wxMin(m_dh->columns-1, wxMax(0, (int)m_pointArray[i * 3    ]));
+			int y = wxMin(m_dh->rows   -1, wxMax(0, (int)m_pointArray[i * 3 + 1]));
+			int z = wxMin(m_dh->frames -1, wxMax(0, (int)m_pointArray[i * 3 + 2]));
+			int index =  x + y * m_dh->columns + z * m_dh->rows * m_dh->columns;
+			if ( (box->m_overlay[index] - box->m_threshold) > 0.01f)
+			{
+				m_inBox[getLineForPoint(i)] = 1;
+			}
+		}
+	}
 	return m_inBox;
 }
 

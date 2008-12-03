@@ -47,6 +47,7 @@ private:
     void OnToggleSelBox(wxCommandEvent& event);
     void OnToggleShowBox(wxCommandEvent& event);
     void OnNewSelBox(wxCommandEvent& event);
+    void OnNewFromOverlay(wxCommandEvent& event);
     void OnHideSelBoxes(wxCommandEvent& event);
     void OnRenameBox(wxCommandEvent& event);
 	// Spline Surface
@@ -208,6 +209,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_VOI_TOGGLE_SELBOX						132
 #define MENU_VOI_TOGGLE_SHOWBOX						133
 #define MENU_VOI_RENAME_BOX							134
+#define MENU_VOI_NEW_FROM_OVERLAY					135
 // Menu Spline Surface
 #define MENU_SPLINESURF_DRAW_POINTS					140
 #define MENU_SPLINESURF_NEW							141

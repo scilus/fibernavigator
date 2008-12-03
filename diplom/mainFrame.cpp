@@ -17,6 +17,7 @@
 #include "fibers.h"
 #include "surface.h"
 #include "IsoSurface/CIsoSurface.h"
+#include "Anatomy.h"
 
 #include "icons/eyes.xpm"
 #include "icons/delete.xpm"
@@ -52,6 +53,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_VIEW_BACK, MainFrame::OnMenuViewBack)
 	// Menu VOI
     EVT_MENU(MENU_VOI_NEW_SELBOX, MainFrame::OnNewSelBox)
+    EVT_MENU(MENU_VOI_NEW_FROM_OVERLAY, MainFrame::OnNewFromOverlay)
 	EVT_MENU(MENU_VOI_RENDER_SELBOXES, MainFrame::OnHideSelBoxes)
 	EVT_MENU(MENU_VOI_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
 	EVT_MENU(MENU_VOI_TOGGLE_SHOWBOX, MainFrame::OnToggleShowBox)
@@ -784,6 +786,32 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 	m_dh->scene->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
+/*TODO***************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
+{
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() == Overlay )
+		{
+			Anatomy* a = (Anatomy*) m_listCtrl->GetItemData(item);
+			SelectionBox *selBox = new SelectionBox(a->getFloatDataset(), m_dh);
+			wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("ROI"),0, -1, selBox);
+			m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
+			m_treeWidget->EnsureVisible(tNewBoxId);
+			m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
+			selBox->setTreeId(tNewBoxId);
+			a->m_roi = selBox;
+		}
+	}
+	m_dh->scene->m_selBoxChanged = true;
+	refreshAllGLWidgets();
+}
 /****************************************************************************************************
  *
  *
@@ -1188,6 +1216,16 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 	{
 		CIsoSurface* s = (CIsoSurface*) m_listCtrl->GetItemData(item);
 		s->GenerateWithThreshold();
+	}
+	if (info->getType() == Overlay)
+	{
+		Anatomy* a = (Anatomy*) m_listCtrl->GetItemData(item);
+		if (a->m_roi)
+		{
+			a->m_roi->m_threshold = threshold;
+			a->m_roi->setDirty();
+			m_dh->scene->m_selBoxChanged = true;
+		}
 	}
 	refreshAllGLWidgets();
 }

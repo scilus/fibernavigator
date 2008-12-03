@@ -161,6 +161,7 @@ bool MyApp::OnInit(void) {
 
 	wxMenu *voi_menu = new wxMenu;
 	voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New"));
+	voi_menu->Append(MENU_VOI_NEW_FROM_OVERLAY, _T("New ROI from Overlay"));
 	voi_menu->AppendSeparator();
 	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SELBOX, _T("active"));
 	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SHOWBOX, _T("visible"));

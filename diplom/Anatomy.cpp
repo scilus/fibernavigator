@@ -30,6 +30,7 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	m_showFS = true;
 	m_useTex = true;
 	m_hasTreeId = false;
+	m_roi = 0;
 }
 
 Anatomy::~Anatomy()

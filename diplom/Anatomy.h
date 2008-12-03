@@ -11,6 +11,7 @@
 #include "datasetInfo.h"
 #include "surface.h"
 #include "lic/TensorField.h"
+#include "selectionBox.h"
 
 class Anatomy : public DatasetInfo , public wxTreeItemData
 {
@@ -32,8 +33,7 @@ public:
 	float* getFloatDataset();
 	TensorField* getTensorField() { return m_tensorField; };
 
-	//bool isInsideTriangle(double, double, double, double, double, double, double, double);
-	//void cutRestOfLine(int, int, int);
+	SelectionBox* m_roi;
 
 private:
 	float *m_floatDataset;

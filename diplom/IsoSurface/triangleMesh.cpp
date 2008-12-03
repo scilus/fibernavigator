@@ -364,7 +364,7 @@ void TriangleMesh::cleanUp()
 	}
 	calcNeighbors();
 	calcVertNormals();
-
+	calcTriangleTensors();
 	isCleaned = true;
 }
 

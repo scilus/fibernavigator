@@ -285,7 +285,7 @@ void TheScene::renderFibers()
 			}
 			if (m_selBoxChanged)
 			{
-				((Fibers*)info)->updateLinesShown(m_dh->getSelectionBoxes());
+				((Fibers*)info)->updateLinesShown();
 				m_selBoxChanged = false;
 			}
 			info->draw();
@@ -313,7 +313,7 @@ void TheScene::renderFakeTubes()
 		{
 			if (m_selBoxChanged)
 			{
-				((Fibers*)info)->updateLinesShown(m_dh->getSelectionBoxes());
+				((Fibers*)info)->updateLinesShown();
 				m_selBoxChanged = false;
 			}
 

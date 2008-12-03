@@ -4,6 +4,7 @@
 SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 {
 	m_dh = dh;
+	m_isBox = true;
 	m_center = center;
 	m_size = size;
 	m_isVisible = true;
@@ -23,6 +24,31 @@ SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 		m_inBox[i] = 0;
 	}
 	m_name = wxT("box");
+}
+
+SelectionBox::SelectionBox(float* overlay, DatasetHelper* dh)
+{
+	m_dh = dh;
+	m_isBox = false;
+	m_overlay = overlay;
+	m_isVisible = true;
+	m_dirty = true;
+	m_isTop = true;
+	m_isNOT = false;
+	m_isActive = true;
+	m_isSelected = false;
+	m_colorChanged = false;
+	m_isLockedToCrosshair = false;
+	m_treeId = NULL;
+	m_handleRadius = 3.0;
+	m_stepSize = 9;
+	m_threshold = 0;
+	m_inBox.resize(m_dh->countFibers, sizeof(bool));
+	for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
+	{
+		m_inBox[i] = 0;
+	}
+	m_name = wxT("ROI");
 }
 
 SelectionBox::~SelectionBox()
@@ -50,7 +76,7 @@ void SelectionBox::select(bool flag)
 
 void SelectionBox::draw()
 {
-	if (!m_isActive || !m_isVisible) return;
+	if (!m_isActive || !m_isVisible || !m_isBox) return;
 
 	float cx = m_center.x;
 	float cy = m_center.y;
@@ -267,7 +293,7 @@ void SelectionBox::drawSphere(float x, float y, float z, float r)
 hitResult SelectionBox::hitTest(Ray *ray)
 {
 	hitResult hr = {false, 0.0f, 0, NULL};
-	if (m_isVisible && m_isActive) {
+	if (m_isVisible && m_isActive && m_isBox) {
 		float tpicked = 0;
 		int picked = 0;
 		float cx = m_center.x;
