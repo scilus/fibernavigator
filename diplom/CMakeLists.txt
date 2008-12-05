@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.4)
+
 file( GLOB _srcs "*.cpp" )
 
 file( GLOB _srcs2 "GLSL/*.cpp" )
@@ -26,19 +28,24 @@ endif(BUILD_OPTION_OPENMP)
 
 find_package( OpenGL REQUIRED )
 
-INCLUDE_DIRECTORIES( glew/include )
+find_path( GLEW_INCLUDE_DIR glew.h )
+find_path( GLEW_LIBRARY libglew.so libGLEW.dylib )
+link_directories( ${GLEW_DIR} )
+
+INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_DIR} )
+
 INCLUDE( ${wxWidgets_USE_FILE} )
 INCLUDE_DIRECTORIES( ${wxWidgets_INCLUDE_DIRS} )
 ADD_DEFINITIONS( `wx-config --cppflags` )
 add_executable( main MACOSX_BUNDLE ${_srcs} ${_srcs2} ${_srcs3} ${_srcs4} ${_srcs5})
-#target_link_libraries( main `wx-config --libs` )
+#target_link_libraries( main `${wxWidgets_CONFIG_EXECUTABLE} --libs` )
 #target_link_libraries( main -lGL -lGLU -lGLEW )
 target_link_libraries( main ${wxWidgets_LIBRARIES} )
 #target_link_libraries( main -lwx_gtk2u_gl-2.8 ) 
 
 if(APPLE)
-    target_link_libraries( main "-framework OpenGL" -L../diplom/glew/lib GLEW wx_macud_gl-2.8 )
-	set( _BundleName "Main" )
+    target_link_libraries( main "-framework OpenGL" GLEW wx_macud_gl-2.8 )
+	set( _BundleName "Fiber Navigator" )
 	set( _BundleInfo "A MRI visualization tool")
 	set( _BundleIcon "main.icns" )
 	set_target_properties(main
