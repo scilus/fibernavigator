@@ -209,5 +209,7 @@ GLuint Mesh::getGLuint()
 
 void Mesh::draw()
 {
+	if (!m_GLuint)
+		generateGeometry();
 	glCallList(m_GLuint);
 }

@@ -316,7 +316,10 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_fCellLengthY = 1.0;
 	m_fCellLengthZ = 1.0;
 
-	m_ptScalarField = ptScalarField;
+	int size = m_dh->columns * m_dh->rows * m_dh->frames;
+	m_ptScalarField = new float[size];
+	for ( int i = 0 ; i < size ; ++i)
+		m_ptScalarField[i] = ptScalarField[i];
 
 	if (m_dh->filterIsoSurf)
 	{
