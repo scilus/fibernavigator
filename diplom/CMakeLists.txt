@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.4)
+PROJECT( FiberNavigator )
 
 file( GLOB _srcs "*.cpp" )
 
@@ -6,7 +7,7 @@ file( GLOB _srcs2 "GLSL/*.cpp" )
 file( GLOB _srcs3 "Fantom/*.cpp" )
 file( GLOB _srcs4 "IsoSurface/*.cpp" )
 file( GLOB _srcs5 "lic/*.cpp" )
-PROJECT( ralph )
+
 # # at least it is not defined when compiling on my mac
 # #  add_definitions( -D__WXMAC__ )
 # #  add_definitions( -D__WXCOCOA__ )
@@ -36,25 +37,31 @@ INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_DIR} )
 
 INCLUDE( ${wxWidgets_USE_FILE} )
 INCLUDE_DIRECTORIES( ${wxWidgets_INCLUDE_DIRS} )
-ADD_DEFINITIONS( `wx-config --cppflags` )
-add_executable( main MACOSX_BUNDLE ${_srcs} ${_srcs2} ${_srcs3} ${_srcs4} ${_srcs5})
-#target_link_libraries( main `${wxWidgets_CONFIG_EXECUTABLE} --libs` )
-#target_link_libraries( main -lGL -lGLU -lGLEW )
-target_link_libraries( main ${wxWidgets_LIBRARIES} )
-#target_link_libraries( main -lwx_gtk2u_gl-2.8 ) 
+ADD_DEFINITIONS( `${wxWidgets_CONFIG_EXECUTABLE} --cppflags` )
 
 if(APPLE)
-    target_link_libraries( main "-framework OpenGL" GLEW wx_macud_gl-2.8 )
-	set( _BundleName "Fiber Navigator" )
-	set( _BundleInfo "A MRI visualization tool")
-	set( _BundleIcon "main.icns" )
-	set_target_properties(main
-	  PROPERTIES
+    set( target "FiberNavigator")
+    add_executable( ${target} MACOSX_BUNDLE ${_srcs} ${_srcs2} ${_srcs3} ${_srcs4} ${_srcs5})
+    target_link_libraries( ${target} "-framework OpenGL" GLEW wx_macud_gl-2.8 )
+    set( _BundleName "Fiber Navigator" )
+    set( _BundleInfo "A MRI visualization tool")
+    set( _BundleIcon "main.icns" )
+    set_target_properties( ${target}
+       PROPERTIES
 	  MACOSX_BUNDLE_BUNDLE_NAME ${_BundleName}
 	  MACOSX_BUNDLE_INFO_STRING ${_BundleInfo}
 	  MACOSX_BUNDLE_ICON_FILE ${_BundleIcon}
 	  MACOSX_BUNDLE_COPYRIGHT "(c) 2008, Ralph and Mario"
 	  )
 else(APPLE)
+    set( target "main")
+    add_executable( ${target} ${_srcs} ${_srcs2} ${_srcs3} ${_srcs4} ${_srcs5})
     target_link_libraries( main -L../diplom/glew/lib GLEW wx_gtk2u_gl-2.8 )
 endif(APPLE)
+
+#target_link_libraries( ${target} `${wxWidgets_CONFIG_EXECUTABLE} --libs` )
+#target_link_libraries( ${target} -lGL -lGLU -lGLEW )
+target_link_libraries( ${target} ${wxWidgets_LIBRARIES} )
+#target_link_libraries( ${target} -lwx_gtk2u_gl-2.8 ) 
+
+
