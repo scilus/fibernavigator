@@ -227,7 +227,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 
 				Vector vs( columns / 8, rows / 8, frames / 8 );
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
-				selBox->m_isTop = true;
+				selBox->setIsMaster(true);
 
 				wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(
 					mainFrame->m_tSelBoxId, wxT("box"), 0, -1, selBox);
@@ -475,11 +475,11 @@ bool DatasetHelper::loadScene(wxString filename)
 				Vector vs ( _ix, _iy, _iz );
 				SelectionBox *selBox = new SelectionBox(vc, vs, this);
 				selBox->setName(_name);
-				selBox->m_isActive = ( _active == _T("yes") ) ;
-				selBox->m_isVisible = ( _visible == _T("yes") ) ;
+				selBox->setActive( _active == _T("yes") ) ;
+				selBox->setVisible( _visible == _T("yes") ) ;
 
 				if (_type == wxT("MASTER")) {
-					selBox->m_isTop = true;
+					selBox->setIsMaster(true);
 					currentMasterId = mainFrame->m_treeWidget->AppendItem(
 							mainFrame->m_tSelBoxId, selBox->getName(), 0, -1, selBox);
 					mainFrame->m_treeWidget->EnsureVisible(currentMasterId);
@@ -488,13 +488,12 @@ bool DatasetHelper::loadScene(wxString filename)
 					selBox->setTreeId(currentMasterId);
 
 				} else {
-					selBox->m_isTop = false;
-					selBox->m_isNOT = ( _type == _T("NOT") ) ;
+					selBox->setNOT( _type == _T("NOT") ) ;
 					wxTreeItemId boxId = mainFrame->m_treeWidget->AppendItem(
 							currentMasterId, selBox->getName(), 0, -1, selBox);
 					mainFrame->m_treeWidget->EnsureVisible(boxId);
 					mainFrame->m_treeWidget->SetItemImage(boxId, selBox->getIcon());
-					if (selBox->m_isNOT)
+					if (selBox->getNOT())
 						mainFrame->m_treeWidget->SetItemBackgroundColour(boxId, *wxRED);
 					else
 						mainFrame->m_treeWidget->SetItemBackgroundColour(boxId, *wxGREEN);
@@ -571,9 +570,9 @@ void DatasetHelper::save(wxString filename)
 			if (j - 1 == 0)
 				proptype = new wxXmlProperty(wxT("type"), wxT("MASTER"));
 			else
-				proptype = new wxXmlProperty(wxT("type"), (currentBox->m_isNOT) ? wxT("NOT") : wxT("AND"));
-			wxXmlProperty *propactive = new wxXmlProperty(wxT("active"), (currentBox->m_isActive) ? wxT("yes") : wxT("no"), proptype);
-			wxXmlProperty *propvisible = new wxXmlProperty(wxT("visible"), (currentBox->m_isVisible) ? wxT("yes") : wxT("no"), propactive);
+				proptype = new wxXmlProperty(wxT("type"), currentBox->getNOT() ? wxT("NOT") : wxT("AND"));
+			wxXmlProperty *propactive = new wxXmlProperty(wxT("active"), currentBox->getActive() ? wxT("yes") : wxT("no"), proptype);
+			wxXmlProperty *propvisible = new wxXmlProperty(wxT("visible"), currentBox->getVisible() ? wxT("yes") : wxT("no"), propactive);
 			status->AddProperty(propvisible);
 		}
 	}
@@ -678,7 +677,7 @@ void DatasetHelper::updateAllSelectionBoxes() {
 	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
 	for (unsigned int i = 0; i < boxes.size(); ++i)
 		for (unsigned int j = 0; j < boxes[i].size(); ++j)
-			boxes[i][j]->setDirty();
+			boxes[i][j]->setDirty(true);
 }
 
 Vector DatasetHelper::mapMouse2World(int x, int y)

@@ -9,7 +9,7 @@ SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 	m_size = size;
 	m_isVisible = true;
 	m_dirty = true;
-	m_isTop = true;
+	m_isTop = false;
 	m_isNOT = false;
 	m_isActive = true;
 	m_isSelected = false;
@@ -677,9 +677,9 @@ void SelectionBox::lockToCrosshair()
 	}
 }
 
-void SelectionBox::setDirty()
+void SelectionBox::setDirty(bool v)
 {
-	m_dirty = true;
+	m_dirty = v;
 	m_dh->scene->m_selBoxChanged = true;
 }
 
@@ -691,4 +691,17 @@ int SelectionBox::getIcon()
 		return -1;
 	else
 		return 0;
+}
+
+void SelectionBox::setIsMaster(bool v)
+{
+	m_isTop = v;
+	if (m_isTop)
+	{
+		m_inBranch.resize(m_dh->countFibers, sizeof(bool));
+		for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
+		{
+			m_inBranch[i] = 0;
+		}
+	}
 }

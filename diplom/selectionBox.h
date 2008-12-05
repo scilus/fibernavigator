@@ -29,8 +29,15 @@ public:
 
 	bool toggleShow() {return m_isVisible = !m_isVisible;};
 	bool toggleNOT() {return m_isNOT = !m_isNOT;};
+	bool getNOT() {return m_isNOT;};
+	void setNOT(bool v) {m_isNOT = v;};
 	bool toggleActive() {return m_isActive = !m_isActive;};
 	bool getActive() {return m_isActive;};
+	void setActive(bool v) {m_isActive = v;};
+
+	bool getVisible() {return m_isVisible;};
+	void setVisible(bool v) {m_isVisible = v;};
+
 	bool getShow() {return m_isVisible;};
 	void unselect() {m_isSelected = false;};
 
@@ -43,16 +50,24 @@ public:
 	void setSize(Vector v) {m_size = v;m_dirty = true;};
 	Vector getSize() {return m_size;};
 	void setPicked(int s) {m_hr.picked = s;};
+
 	bool isDirty() {return m_dirty;};
-	void setDirty();
-	void notDirty() {m_dirty = false;};
+	void setDirty(bool v);
+
 	bool colorChanged() {return m_colorChanged;};
 	wxColour getColor() {return m_color;};
 	void setColorChanged(bool v) {m_colorChanged = v;};
+
 	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
+
 	wxString getName() {return m_name;};
 	void setName(wxString name) {m_name = name;};
 	int getIcon();
+	bool getIsBox() {return m_isBox;};
+
+
+	void setIsMaster(bool v);
+	bool getIsMaster() {return m_isTop;};
 
 	void draw1();
 	void draw2();
@@ -81,19 +96,10 @@ public:
 	void select(bool flag);
 
 	std::vector<bool>m_inBox;
-
-	bool m_isBox;
-	float* m_overlay;
-
-	bool m_isTop;
-	bool m_isNOT;
-	bool m_isActive;
-	bool m_isVisible;
-	bool m_isSelected;
-	bool m_isLockedToCrosshair;
+	std::vector<bool>m_inBranch;
 
 	float m_threshold;
-
+	float* m_overlay;
 	DatasetHelper* m_dh;
 
 private:
@@ -117,6 +123,15 @@ private:
 	wxTreeItemId m_treeId;
 
 	int m_stepSize;
+
+	bool m_isBox;
+
+	bool m_isTop;
+	bool m_isNOT;
+	bool m_isActive;
+	bool m_isVisible;
+	bool m_isSelected;
+	bool m_isLockedToCrosshair;
 
 };
 

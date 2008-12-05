@@ -657,7 +657,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->toggleActive();
 		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
-		box->setDirty();
+		box->setDirty(true);
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
 		wxTreeItemIdValue childcookie = 0;
@@ -666,9 +666,9 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 			wxTreeItemId childId = m_treeWidget->GetNextChild(tBoxId, childcookie);
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
-				childBox->m_isActive = box->getActive();
+				childBox->setActive ( box->getActive() );
 				m_treeWidget->SetItemImage(childId, childBox->getIcon());
-				childBox->setDirty();
+				childBox->setDirty(true);
 			}
 		}
 	}
@@ -677,7 +677,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->toggleActive();
 		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
-		box->setDirty();
+		box->setDirty(true);
 	}
 
 	refreshAllGLWidgets();
@@ -697,9 +697,9 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 	if (treeSelected(tBoxId) == MasterBox)
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		box->m_isVisible = !box->m_isVisible;
+		box->toggleShow();
 		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
-		box->setDirty();
+		box->setDirty(true);
 
 		int childboxes = m_treeWidget->GetChildrenCount(tBoxId);
 		wxTreeItemIdValue childcookie = 0;
@@ -708,18 +708,18 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 			wxTreeItemId childId = m_treeWidget->GetNextChild(tBoxId, childcookie);
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
-				childBox->m_isVisible = box->getShow();
+				childBox->setVisible( box->getShow() );
 				m_treeWidget->SetItemImage(childId, childBox->getIcon());
-				childBox->setDirty();
+				childBox->setDirty(true);
 			}
 		}
 	}
 	else if (treeSelected(tBoxId) == ChildBox)
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		box->m_isVisible = !box->m_isVisible;
+		box->toggleShow();
 		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
-		box->setDirty();
+		box->setDirty(true);
 	}
 
 	m_dh->scene->m_selBoxChanged = true;
@@ -765,8 +765,6 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 	if (treeSelected(tBoxId) == MasterBox)
 	{
 		// box is under another box
-		selBox->m_isTop = false;
-
 		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("box"),0, -1, selBox);
 		m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxGREEN);
 		m_treeWidget->EnsureVisible(tNewBoxId);
@@ -776,6 +774,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 	else
 	{
 		// box is top
+		selBox->setIsMaster(true);
 		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("box"),0, -1, selBox);
 		m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
 		m_treeWidget->EnsureVisible(tNewBoxId);
@@ -806,6 +805,7 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 			m_treeWidget->EnsureVisible(tNewBoxId);
 			m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
 			selBox->setTreeId(tNewBoxId);
+			selBox->setIsMaster(true);
 			a->m_roi = selBox;
 		}
 	}
@@ -1110,7 +1110,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box = (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->setColor(col);
-		box->setDirty();
+		box->setDirty(true);
 	}
 	else
 	{
@@ -1118,7 +1118,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 		{
 			SelectionBox *box = (SelectionBox*)(m_treeWidget->GetItemData(m_treeWidget->GetItemParent(tBoxId)));
 			box->setColor(col);
-			box->setDirty();
+			box->setDirty(true);
 		}
 	}
 	m_dh->scene->m_selBoxChanged = true;
@@ -1220,7 +1220,7 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 		if (a->m_roi)
 		{
 			a->m_roi->m_threshold = threshold;
-			a->m_roi->setDirty();
+			a->m_roi->setDirty(true);
 			m_dh->scene->m_selBoxChanged = true;
 		}
 	}
@@ -1534,7 +1534,7 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(treeid));
 		box->toggleActive();
 		m_treeWidget->SetItemImage(treeid, box->getIcon());
-		box->setDirty();
+		box->setDirty(true);
 
 		int childboxes = m_treeWidget->GetChildrenCount(treeid);
 		wxTreeItemIdValue childcookie = 0;
@@ -1543,9 +1543,9 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 			wxTreeItemId childId = m_treeWidget->GetNextChild(treeid, childcookie);
 			if (childId.IsOk()) {
 				SelectionBox *childBox = ((SelectionBox*)(m_treeWidget->GetItemData(childId)));
-				childBox->m_isActive = box->getActive();
+				childBox->setActive ( box->getActive() );
 				m_treeWidget->SetItemImage(childId, childBox->getIcon());
-				childBox->setDirty();
+				childBox->setDirty(true);
 			}
 		}
 	}
@@ -1553,9 +1553,9 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 	{
 		((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->toggleNOT();
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
-		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty();
+		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty(true);
 		m_dh->scene->m_selBoxChanged = true;
-		if (((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->m_isNOT)
+		if (((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->getNOT())
 			m_treeWidget->SetItemBackgroundColour(treeid, *wxRED);
 		else
 			m_treeWidget->SetItemBackgroundColour(treeid, *wxGREEN);
@@ -1883,11 +1883,11 @@ void MainFrame::updateMenus()
 	{
 		voiMenu->Enable(voiMenu->FindItem(_T("active")), true);
 		voiMenu->Enable(voiMenu->FindItem(_T("visible")), true);
-		voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->m_isActive);
+		voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->getActive());
 		voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
 
 		m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
-		m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->m_isActive);
+		m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->getActive());
 	}
 
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Texture Mode")), false);

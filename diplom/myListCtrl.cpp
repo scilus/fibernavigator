@@ -108,7 +108,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
     {
     	if (selected == ChildBox)
 		{
-			((SelectionBox*) ((GetItemData(pId))))->setDirty();
+			((SelectionBox*) ((GetItemData(pId))))->setDirty(true);
 		}
     	if (selected == ChildBox || selected == MasterBox || selected == Point_)
     	{
@@ -223,7 +223,7 @@ void MyTreeCtrl::OnDeleteBox(wxCommandEvent& WXUNUSED(event))
 {
 	if (getSelectedType() == ChildBox)
 	{
-		((SelectionBox*) ((GetItemData(GetItemParent(GetSelection())))))->setDirty();
+		((SelectionBox*) ((GetItemData(GetItemParent(GetSelection())))))->setDirty(true);
 	}
 	Delete(GetSelection());
 	wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );

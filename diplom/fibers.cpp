@@ -420,29 +420,37 @@ void Fibers::updateLinesShown()
 
 	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
-		bool dirty = false;
-		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
+		if ( boxes[i][0]->getActive())
 		{
-			dirty |= boxes[i][j]->isDirty();
-		}
-		if (dirty)
-		{
-			boxes[i][0]->m_inBox = getLinesShown(boxes[i][0]);
-			boxes[i][0]->notDirty();
+			if (boxes[i][0]->isDirty())
+			{
+				boxes[i][0]->m_inBox = getLinesShown(boxes[i][0]);
+				boxes[i][0]->setDirty(false);
+			}
+
+			for (int k = 0 ; k <m_countLines ; ++k)
+				boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBox[k];
 
 			for (unsigned int j = 1 ; j < boxes[i].size() ; ++j)
 			{
-				if  (boxes[i][j]->isDirty()) {
+				if  (boxes[i][j]->isDirty())
+				{
 					boxes[i][j]->m_inBox = getLinesShown(boxes[i][j]);
-					boxes[i][j]->notDirty();
+					boxes[i][j]->setDirty(false);
 				}
-				if ( boxes[i][j]->m_isActive) {
+				if (!boxes[i][j]->getNOT())
 					for (int k = 0 ; k <m_countLines ; ++k)
-					boxes[i][0]->m_inBox[k] = boxes[i][0]->m_inBox[k] & ( (boxes[i][j]->m_inBox[k] | boxes[i][j]->m_isNOT) &
-																			!(boxes[i][j]->m_inBox[k] & boxes[i][j]->m_isNOT));
-				}
+					{
+						boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k] & boxes[i][j]->m_inBox[k];
+					}
+				else
+					for (int k = 0 ; k <m_countLines ; ++k)
+					{
+						boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k] & !boxes[i][j]->m_inBox[k];
+					}
 			}
 		}
+
 
 		if (boxes[i].size() > 0 && boxes[i][0]->colorChanged())
 		{
@@ -483,9 +491,10 @@ void Fibers::updateLinesShown()
 	resetLinesShown();
 	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
-		if ( boxes[i].size() > 0 && boxes[i][0]->m_isActive) {
+		if ( boxes[i].size() > 0 && boxes[i][0]->getActive())
+		{
 			for (int k = 0 ; k <m_countLines ; ++k)
-				m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBox[k];
+				m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBranch[k];
 		}
 	}
 	if (m_dh->fibersInverted)
@@ -501,7 +510,7 @@ std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
 {
 	resetLinesShown();
 
-	if (box->m_isBox)
+	if (box->getIsBox())
 	{
 		Vector vpos = box->getCenter();
 		Vector vsize = box->getSize();
