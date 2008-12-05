@@ -30,6 +30,7 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	m_showFS = true;
 	m_useTex = true;
 	m_hasTreeId = false;
+	m_GLuint = 0;
 	m_roi = 0;
 }
 
@@ -325,8 +326,6 @@ bool Anatomy::load(wxString filename)
 		dataFile.Close();
 	}
 
-	if (flag) generateTexture();
-
 	is_loaded = flag;
 
 	return flag;
@@ -394,6 +393,13 @@ void Anatomy::generateTexture()
 	default:
 		break;
 	}
+}
+
+GLuint Anatomy::getGLuint()
+{
+	if (!m_GLuint)
+		generateTexture();
+	return m_GLuint;
 }
 
 float* Anatomy::getFloatDataset()

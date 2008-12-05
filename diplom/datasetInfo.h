@@ -62,13 +62,11 @@ public:
 
 	virtual bool load(wxString filename)=0;
 	virtual void draw()=0;
-	virtual void generateTexture()=0;
-	virtual void generateGeometry()=0;
-	virtual void initializeBuffer()=0;
-	virtual void drawVectors()=0;
 	virtual void clean()=0;
 	virtual void smooth()=0;
 	virtual void activateLIC()=0;
+	virtual GLuint getGLuint()=0;
+
 
 	wxString getName() {return m_name;};
 	wxString getPath() {return m_fullPath;};
@@ -107,7 +105,6 @@ public:
 	bool getUseLIC() {return m_useLIC;};
 
 	void setGLuint(GLuint value) {m_GLuint = value;};
-	GLuint getGLuint() {return m_GLuint;};
 	void setColor(wxColour color) {m_color = color;};
 	wxColour getColor() {return m_color;};
 
@@ -115,6 +112,10 @@ public:
 	TriangleMesh* m_tMesh;
 
 protected:
+	virtual void generateTexture()=0;
+	virtual void generateGeometry()=0;
+	virtual void initializeBuffer()=0;
+
 	DatasetHelper* m_dh;
 
 	int m_length;

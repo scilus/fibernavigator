@@ -45,13 +45,8 @@ public:
 
 	bool load(wxString filename) {return false;};
 	void draw();
-	void generateTexture() {};
-	void generateGeometry() ;
-	void generateLICGeometry() ;
-	void initializeBuffer() {};
-	void drawVectors() {};
-	void clean() {m_tMesh->cleanUp();};
-	void smooth() {m_tMesh->doLoopSubD();};
+	void clean();
+	void smooth();
 	void activateLIC();
 
 	void GenerateWithThreshold();
@@ -135,6 +130,14 @@ protected:
 
 	GLuint m_GLuint2;
 	std::vector< std::vector<float> >m_testLines;
+
+private:
+	GLuint getGLuint() {return 0;};
+	void generateTexture() {};
+	void generateGeometry() ;
+	void generateLICGeometry() ;
+	void initializeBuffer() {};
+
 };
 #endif // CISOSURFACE_H
 

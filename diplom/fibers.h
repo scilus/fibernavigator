@@ -37,6 +37,7 @@ public:
 	void clean() {};
 	void smooth() {};
 	void activateLIC() {};
+	GLuint getGLuint() {return 0;};
 
 	int getPointsPerLine(int);
 	int getStartIndexForLine(int);

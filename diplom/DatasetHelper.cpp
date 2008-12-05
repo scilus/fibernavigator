@@ -777,7 +777,6 @@ void DatasetHelper::createIsoSurface() {
 
 	if (isosurf->IsSurfaceValid())
 	{
-		isosurf->generateGeometry();
 		isosurf->setName(wxT("iso surface"));
 
 		mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);

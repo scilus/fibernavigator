@@ -20,18 +20,14 @@ public:
 
 	bool load(wxString filename) {return false;};
 	void draw();
-	void generateTexture() {};
-	void generateGeometry();
-	void generateLICGeometry() ;
-	void initializeBuffer() {};
-	void createCutTexture();
-	void drawVectors();
+
 	void clean() {};
 	void smooth() {m_tMesh->doLoopSubD(); ++subDCount;licCalculated = false;};
 	void activateLIC();
+	GLuint getCutTex() {return m_CutTex;};
 
 	void movePoints();
-	void flipNormals() {m_tMesh->flipNormals();};
+	void flipNormals();
 
 
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
@@ -39,6 +35,13 @@ public:
 
 private:
 	void execute();
+	void generateTexture() {};
+	void generateGeometry();
+	void generateLICGeometry() ;
+	void initializeBuffer() {};
+	void createCutTexture();
+	GLuint getGLuint() {return 0;};
+
 	FTensor getCovarianceMatrix(std::vector< std::vector< double > > points);
 	void getSplineSurfaceDeBoorPoints(  std::vector< std::vector< double > > &givenPoints,
 										    std::vector< std::vector< double > > &deBoorPoints,
@@ -70,8 +73,9 @@ private:
 	float m_xValue;
 	int m_count;
 	int subDCount;
-	GLuint m_GLuint2;
-	GLuint m_GLuint3;
+	float m_normalDirection;
+	GLuint m_GLuint;
+	GLuint m_CutTex;
 
 	KdTree *m_kdTree;
 	DatasetHelper* m_dh;

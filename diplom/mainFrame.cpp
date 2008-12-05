@@ -934,7 +934,7 @@ void MainFrame::OnToggleNormal(wxCommandEvent& WXUNUSED(event))
 		if (info->getType() == Surface_)
 		{
 			Surface* surf = (Surface*)m_listCtrl->GetItemData(i);
-			surf->generateGeometry();
+			surf->flipNormals();
 		}
 	}
 	refreshAllGLWidgets();
@@ -1010,7 +1010,6 @@ void MainFrame::OnClean(wxCommandEvent& WXUNUSED(event))
 		if (info->getType() == Mesh_ || info->getType() ==  IsoSurface_)
 		{
 			info->clean();
-			info->generateGeometry();
 		}
 	}
 	refreshAllGLWidgets();
@@ -1027,8 +1026,6 @@ void MainFrame::OnLoop(wxCommandEvent& WXUNUSED(event))
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
 		info->smooth();
-		info->generateGeometry();
-
 	}
 	refreshAllGLWidgets();
 }

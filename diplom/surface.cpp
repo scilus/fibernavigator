@@ -33,6 +33,9 @@ Surface::Surface(DatasetHelper* dh)
 	m_hasTreeId = false;
 	m_alpha = 0.2f;
 	m_tMesh = NULL;
+	m_GLuint = 0;
+	m_CutTex = 0;
+	m_normalDirection = 1.0;
 
 	licCalculated = false;
 	m_useLIC = false;
@@ -302,13 +305,13 @@ void Surface::execute ()
 		m_dh->printDebug(_T("initiating lic"), 1);
 		SurfaceLIC lic(m_dh, m_tMesh);
 		lic.execute();
-#ifdef __DRAW_STREAMLINES__
-		m_testLines = lic.testLines;
-#endif
+
 		licCalculated = true;
 	}
 	m_dh->surface_isDirty = false;
-	generateGeometry();
+
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	m_GLuint = 0;
 
 	createCutTexture();
 }
@@ -319,12 +322,10 @@ void Surface::draw()
 	{
 		execute();
 	}
+	if (!m_GLuint)
+		generateGeometry();
 
-	glCallList(m_GLuint2);
-
-	if ( m_dh->drawVectors && licCalculated)
-		glCallList(m_GLuint3);
-
+	glCallList(m_GLuint);
 }
 
 void Surface::movePoints()
@@ -372,8 +373,8 @@ void Surface::createCutTexture()
 	}
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glGenTextures(1, &m_GLuint);
-	glBindTexture(GL_TEXTURE_2D, m_GLuint);
+	glGenTextures(1, &m_CutTex);
+	glBindTexture(GL_TEXTURE_2D, m_CutTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -444,33 +445,6 @@ void Surface::boxTest(int left, int right, int axis)
 	}
 }
 
-void Surface::drawVectors()
-{
-	/*
-	int numQuads = (m_renderpointsPerCol - 1) * (m_renderpointsPerRow - 1);
-	int i0, i1, i2;
-	glLineWidth(2.0);
-	glBegin(GL_LINES);
-
-	for (int i = 0 ; i < numQuads*4 ; ++i)
-	{
-		i0 = m_indexArray[i]*3;
-		i1 = m_indexArray[i]*3+1;
-		i2 = m_indexArray[i]*3+2;
-		glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
-		glColor3f(m_colorArray[i0], m_colorArray[i1], m_colorArray[i2]);
-		glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
-		glVertex3f(m_vertexArray[i0], m_vertexArray[i1], m_vertexArray[i2]);
-		glNormal3f(m_normalArray[i0], m_normalArray[i1], m_normalArray[i2]);
-		glColor3f(m_colorArray[i0], m_colorArray[i1], m_colorArray[i2]);
-		glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
-		glVertex3f(m_vertexArray[i0], m_vertexArray[i1], m_vertexArray[i2]);
-	}
-
-	glEnd();
-	*/
-}
-
 void Surface::activateLIC()
 {
 	m_useLIC = !m_useLIC;
@@ -482,12 +456,11 @@ void Surface::activateLIC()
 
 	SurfaceLIC lic(m_dh, m_tMesh);
 	lic.execute();
-	m_testLines.clear();
-	//if (m_dh->drawVectors)
-		m_testLines = lic.testLines;
-	licCalculated = true;
 
-	generateGeometry();
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	m_GLuint = 0;
+
+	licCalculated = true;
 }
 
 void Surface::generateGeometry()
@@ -498,7 +471,7 @@ void Surface::generateGeometry()
 		return;
 	}
 
-	if (m_GLuint2) glDeleteLists(m_GLuint2, 1);
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
@@ -513,9 +486,9 @@ void Surface::generateGeometry()
 			for(int j = 0 ; j < 3 ; ++j)
 			{
 				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
-				glNormal3d(pointNormal.x * m_dh->normalDirection,
-						pointNormal.y  * m_dh->normalDirection,
-						pointNormal.z  * m_dh->normalDirection);
+				glNormal3d(pointNormal.x * m_normalDirection,
+						pointNormal.y  * m_normalDirection,
+						pointNormal.z  * m_normalDirection);
 				point = m_tMesh->getVertex(triangleEdges[j]);
 				glVertex3d(point.x, point.y, point.z);
 			}
@@ -523,12 +496,12 @@ void Surface::generateGeometry()
 	glEnd();
 
 	glEndList();
-	m_GLuint2 = dl;
+	m_GLuint = dl;
 }
 
 void Surface::generateLICGeometry()
 {
-	if (m_GLuint2) glDeleteLists(m_GLuint2, 1);
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
@@ -546,9 +519,9 @@ void Surface::generateLICGeometry()
 			for(int j = 0 ; j < 3 ; ++j)
 			{
 				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
-				glNormal3d(pointNormal.x * m_dh->normalDirection,
-						pointNormal.y  * m_dh->normalDirection,
-						pointNormal.z  * m_dh->normalDirection);
+				glNormal3d(pointNormal.x * m_normalDirection,
+						pointNormal.y  * m_normalDirection,
+						pointNormal.z  * m_normalDirection);
 				point = m_tMesh->getVertex(triangleEdges[j]);
 				glVertex3d(point.x, point.y, point.z);
 			}
@@ -556,23 +529,12 @@ void Surface::generateLICGeometry()
 	glEnd();
 
 	glEndList();
-	m_GLuint2 = dl;
-#ifdef __DRAW_STREAMLINES__
-	if (m_GLuint3) glDeleteLists(m_GLuint3, 1);
-	GLuint dl2 = glGenLists(1);
-	glNewList (dl2, GL_COMPILE);
+	m_GLuint = dl;
+}
 
-	for (size_t i = 0 ; i < m_testLines.size() ; ++i)
-	{
-		glBegin(GL_LINE_STRIP);
-		glColor3f(1.0, 1.0, 0.0);
-		for (size_t k = 0 ; k < m_testLines[i].size() ; k += 3)
-		{
-			glVertex3f(m_testLines[i][k] - 0.1, m_testLines[i][k+1], m_testLines[i][k+2]);
-		}
-		glEnd();
-	}
-	glEndList();
-	m_GLuint3 = dl2;
-#endif
+void Surface::flipNormals()
+{
+	m_normalDirection = m_dh->normalDirection;
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	m_GLuint = 0;
 }

@@ -361,6 +361,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_tMesh = new TriangleMesh(m_dh);
 	licCalculated = false;
 	m_useLIC = false;
+	m_GLuint = 0;
 }
 
 CIsoSurface::~CIsoSurface()
@@ -816,7 +817,8 @@ void CIsoSurface::generateLICGeometry()
 void CIsoSurface::GenerateWithThreshold()
 {
 	GenerateSurface(m_threshold);
-	generateGeometry();
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	m_GLuint = 0;
 }
 
 void CIsoSurface::activateLIC()
@@ -839,11 +841,28 @@ void CIsoSurface::activateLIC()
 #endif
 		licCalculated = true;
 	}
-	generateLICGeometry();
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	m_GLuint = 0;
+}
+
+void CIsoSurface::clean()
+{
+	m_tMesh->cleanUp();
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	m_GLuint = 0;
+}
+
+void CIsoSurface::smooth()
+{
+	m_tMesh->doLoopSubD();
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	m_GLuint = 0;
 }
 
 void CIsoSurface::draw()
 {
+	if (!m_GLuint)
+		generateGeometry();
 	glCallList(m_GLuint);
 
 	if ( m_dh->drawVectors && licCalculated)

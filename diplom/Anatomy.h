@@ -22,13 +22,7 @@ public:
 
 	bool load(wxString filename);
 	void draw() {};
-	void generateTexture();
-	void generateGeometry() {};
-	void initializeBuffer() {};
-	void drawVectors() {};
-	void clean() {};
-	void smooth() {};
-	void activateLIC() {};
+	GLuint getGLuint();
 
 	float* getFloatDataset();
 	TensorField* getTensorField() { return m_tensorField; };
@@ -36,6 +30,13 @@ public:
 	SelectionBox* m_roi;
 
 private:
+	void generateTexture();
+	void generateGeometry() {};
+	void initializeBuffer() {};
+	void clean() {};
+	void smooth() {};
+	void activateLIC() {};
+
 	float *m_floatDataset;
 	TensorField* m_tensorField;
 };

@@ -25,7 +25,7 @@ Mesh::Mesh(DatasetHelper* dh)
 	m_useTex = true;
 	m_color = wxColour(230,230,230);
 	m_hasTreeId = false;
-
+	m_GLuint = 0;
 	m_tMesh = new TriangleMesh(m_dh);
 }
 
@@ -164,8 +164,6 @@ bool Mesh::load(wxString filename)
 #endif
 	m_type = Mesh_;
 
-	generateGeometry();
-
 	return true;
 }
 
@@ -202,6 +200,12 @@ void Mesh::activateLIC()
 
 }
 
+GLuint Mesh::getGLuint()
+{
+	if (!m_GLuint)
+		generateGeometry();
+	return m_GLuint;
+}
 
 void Mesh::draw()
 {

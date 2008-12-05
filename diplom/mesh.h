@@ -41,10 +41,6 @@ public:
 
 	bool load(wxString filename);
 	void draw();
-	void generateTexture() {};
-	void generateGeometry() ;
-	void initializeBuffer() {};
-	void drawVectors() {};
 	void clean() {m_tMesh->cleanUp();};
 	void smooth() {m_tMesh->doLoopSubD();};
 	void activateLIC();
@@ -62,6 +58,11 @@ public:
 	unsigned int getPolygonDim() 	{return m_polygonDim;};
 
 private:
+	void generateTexture() {};
+	void generateGeometry() ;
+	void initializeBuffer() {};
+	GLuint getGLuint();
+
 	unsigned int m_filetype;
 	unsigned int m_countVerts;
 	unsigned int m_countNormals;

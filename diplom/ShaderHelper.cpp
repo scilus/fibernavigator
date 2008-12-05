@@ -7,6 +7,7 @@
 
 #include "ShaderHelper.h"
 #include "DatasetHelper.h"
+#include "surface.h"
 
 ShaderHelper::ShaderHelper(DatasetHelper* dh) {
 	m_dh = dh;
@@ -119,7 +120,8 @@ void ShaderHelper::setMeshShaderVars()
 		}
 		else if (info->getType() == Surface_)
 		{
-			cutTex = info->getGLuint();
+			Surface* s = (Surface*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+			cutTex = s->getCutTex();
 		}
 	}
 
