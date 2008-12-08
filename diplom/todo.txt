@@ -28,7 +28,13 @@ laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
 
 isosurface von belibigen skalaren datensatzen ( float/short )
 
-
+===============================================================================
+=
+=     bug-liste
+=
+===============================================================================
+08.12.2008
+reset colors on fibers. macht manche fasern schwarz
 
 ===============================================================================
 =

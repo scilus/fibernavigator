@@ -468,7 +468,7 @@ void Fibers::updateLinesShown()
 
 			for ( int l = 0 ; l < m_countLines ; ++l )
 			{
-				if (boxes[i][0]->m_inBox[l])
+				if (boxes[i][0]->m_inBranch[l])
 				{
 					unsigned int pc = getStartIndexForLine(l)*3;
 
