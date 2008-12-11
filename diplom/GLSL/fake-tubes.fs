@@ -20,6 +20,6 @@ void main() {
 	gl_FragColor.rgb = clamp(view_dot_normal * (color + 0.15 * pow(
 			view_dot_normal, 10.) * pow(tangent_dot_view, 10.) * vec3(1., 1.,
 			1.)), 0., 1.); //< set the color of this fragment (i.e. pixel)
-	gl_FragColor.a = 1.;
+	gl_FragColor.a = myColor.a;
 }
 
