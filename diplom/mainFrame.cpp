@@ -1871,7 +1871,7 @@ void MainFrame::updateMenus()
 	wxMenu* oMenu = m_menuBar->GetMenu(4);
 	oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
 	oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
-	oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
+	oMenu->Check(oMenu->FindItem(_T("Use Tubes")), m_dh->useFakeTubes);
 	oMenu->Check(oMenu->FindItem(_T("Use Transparent Fibers")), m_dh->useTransparency);
 	oMenu->Check(oMenu->FindItem(_T("Show Color Map Legend")), m_dh->showColorMapLegend);
 	wxMenu* sMenu = m_menuBar->GetMenu(3);
