@@ -933,7 +933,6 @@ void Fibers::drawFakeTubes()
 				if (m_inBox[i])
 					nbSnipplets += getPointsPerLine(i)-1;
 			}
-			std::cout << "nb snipplets total: " << nbSnipplets << std::endl;
 			snippletsort = new unsigned int[nbSnipplets+1];
 			lineids = new unsigned int[nbSnipplets*2];
 
@@ -1029,7 +1028,6 @@ void Fibers::drawFakeTubes()
 	}
 	else
 	{
-    std::cout << "normal tubes" << std::endl;
 		for ( int i = 0 ; i < m_countLines ; ++i )
 		{
 			if (m_inBox[i] == 1)
