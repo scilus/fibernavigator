@@ -63,6 +63,7 @@ public:
 
 	void save(wxString filename);
 	void drawFakeTubes();
+	void drawSortedLines();
 	void switchNormals(bool positive);
 
 	float *m_pointArray;
@@ -88,6 +89,8 @@ private:
 
 	int m_count;
 	Vector m_barycenter;
+
+	bool isInitialized;
 };
 
 #endif /*CURVES_H_*/

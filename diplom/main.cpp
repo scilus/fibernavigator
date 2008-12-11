@@ -200,6 +200,7 @@ bool MyApp::OnInit(void) {
 	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_USE_FAKE_TUBES, _T("Use Tubes"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_USE_TRANSPARENCY, _T("Use Transparent Fibers"));
 
 
 

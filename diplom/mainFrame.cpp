@@ -70,6 +70,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
 	EVT_MENU(MENU_OPTIONS_INVERT_FIBERS, MainFrame::OnInvertFibers)
 	EVT_MENU(MENU_OPTIONS_USE_FAKE_TUBES, MainFrame::OnUseFakeTubes)
+	EVT_MENU(MENU_OPTIONS_USE_TRANSPARENCY, MainFrame::OnUseTransparency)
 	EVT_MENU(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
 	EVT_MENU(MENU_OPTIONS_BLEND_TEX_ON_MESH, MainFrame::OnToggleBlendTexOnMesh)
 	EVT_MENU(MENU_OPTIONS_FILTER_ISO, MainFrame::OnToggleFilterIso)
@@ -1058,6 +1059,18 @@ void MainFrame::OnUseFakeTubes(wxCommandEvent& WXUNUSED(event))
  *
  *
  ****************************************************************************************************/
+void MainFrame::OnUseTransparency(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->useTransparency = !m_dh->useTransparency;
+	Fibers* f;
+//	if ( m_dh->getFiberDataset(f))
+//		f->switchNormals(!m_dh->useFakeTubes);
+	refreshAllGLWidgets();
+}/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
 void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene) return;
@@ -1857,6 +1870,7 @@ void MainFrame::updateMenus()
 	oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
 	oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
 	oMenu->Check(oMenu->FindItem(_T("Use Fake Tubes")), m_dh->useFakeTubes);
+	oMenu->Check(oMenu->FindItem(_T("Use Transparent Fibers")), m_dh->useTransparency);
 	oMenu->Check(oMenu->FindItem(_T("Show Color Map Legend")), m_dh->showColorMapLegend);
 	wxMenu* sMenu = m_menuBar->GetMenu(3);
 	sMenu->Check(sMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);

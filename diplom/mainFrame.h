@@ -62,6 +62,7 @@ private:
     void OnToggleLighting(wxCommandEvent& event);
     void OnInvertFibers(wxCommandEvent& event);
     void OnUseFakeTubes(wxCommandEvent& event);
+    void OnUseTransparency(wxCommandEvent& event);
 	void OnToggleTextureFiltering(wxCommandEvent& event);
 	void OnToggleBlendTexOnMesh(wxCommandEvent& event);
 	void OnToggleFilterIso(wxCommandEvent& event);
@@ -224,6 +225,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_BLEND_TEX_ON_MESH				154
 #define MENU_OPTIONS_USE_FAKE_TUBES					155
 #define MENU_OPTIONS_FILTER_ISO						156
+#define MENU_OPTIONS_USE_TRANSPARENCY			157
 #define MENU_OPTIONS_COLOR_MAPS						159
 #define MENU_OPTIONS_CMAP0							160
 #define MENU_OPTIONS_CMAP1							161

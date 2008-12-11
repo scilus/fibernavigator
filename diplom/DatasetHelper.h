@@ -160,6 +160,7 @@ public:
 	float normalDirection;
 	bool fibersInverted;
 	bool useFakeTubes;
+	bool useTransparency;
 	bool filterIsoSurf;
 	int colorMap;
 	bool showColorMapLegend;

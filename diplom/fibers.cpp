@@ -5,6 +5,7 @@
 
 Fibers::Fibers(DatasetHelper* dh)
 {
+	isInitialized = false;
 	m_dh = dh;
 	m_type = not_initialized;
 	m_length = 0;
@@ -164,11 +165,7 @@ bool Fibers::load(wxString filename)
 	m_linePointers = new int[countLines+1];
 	m_linePointers[countLines] = countPoints;
 	m_reverse = new int[countPoints];
-	m_inBox.resize(countLines, sizeof(bool));
-	for (int i = 0; i < countLines ; ++i)
-	{
-		m_inBox[i] = 0;
-	}
+	m_inBox.resize(countLines, false);
 
 	m_pointArray = new float[countPoints*3];
 	m_lineArray = new int[lengthLines*4];
@@ -207,7 +204,7 @@ bool Fibers::load(wxString filename)
 #else
 	m_name = filename.AfterLast('/');
 #endif
-	initializeBuffer();
+	//initializeBuffer(); //FIXME!
 
 	m_kdTree = new KdTree(m_countPoints, m_pointArray, m_dh);
 
@@ -572,6 +569,8 @@ void Fibers::boxTest(int left, int right, int axis)
 
 void Fibers::initializeBuffer()
 {
+	if(isInitialized) return;
+	isInitialized = true;
 	if (!m_dh->useVBO) return;
 	bool isOK = true;
 	glGenBuffers(3, m_bufferObjects);
@@ -616,9 +615,15 @@ void Fibers::initializeBuffer()
 
 void Fibers::draw()
 {
+	initializeBuffer();
 	if (m_dh->useFakeTubes)
 	{
 		drawFakeTubes();
+		return;
+	}
+	if (m_dh->useTransparency)
+	{
+		drawSortedLines();
 		return;
 	}
 
@@ -870,8 +875,261 @@ std::string Fibers::intToString(int number)
 	return out.str();
 }
 
+namespace{
+template<class T>
+struct IndirectComp{
+	IndirectComp(const T &zvals)
+	: zvals(zvals)
+	{
+	}
+
+    // watch out: operator less, but we are sorting in descending z-order, i.e.,
+    // highest z value will be first in array and painted first as well
+	template< class I >
+	bool operator()(const I &i1, const I &i2) const {return zvals[i1] > zvals[i2];}
+private:
+	const T &zvals;
+};
+}
+
 void Fibers::drawFakeTubes()
 {
+    float *colors;
+    float *normals;
+    if (m_dh->useVBO)
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
+        colors = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
+        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
+        normals = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
+    }
+    else
+    {
+        colors = m_colorArray;
+        normals = m_normalArray;
+    }
+
+    if (m_dh->getPointMode())
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+
+	if (m_dh->useTransparency)
+	{
+	    // only sort those lines we see
+		unsigned int *snippletsort=0;
+		unsigned int *lineids=0;
+
+		unsigned int *lineIBelongTo=0;
+		int nbSnipplets=0;
+
+		if(snippletsort==0)
+		{
+
+			for(int i=0; i < m_countLines; ++i)
+			{
+				if (m_inBox[i])
+					nbSnipplets += getPointsPerLine(i)-1;
+			}
+			std::cout << "nb snipplets total: " << nbSnipplets << std::endl;
+			snippletsort = new unsigned int[nbSnipplets+1];
+			lineids = new unsigned int[nbSnipplets*2];
+			lineIBelongTo = new unsigned int[nbSnipplets];
+
+			int snp = 0;
+			for(int i=0; i < m_countLines; ++i)
+			{
+				if(!m_inBox[i])continue;
+				const unsigned int p = getPointsPerLine(i);
+
+				for(int k=0; k < p-1; ++k)
+				{
+					lineids[snp<<1] = getStartIndexForLine(i)+k;
+					lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
+					lineIBelongTo[snp] = i;
+					snippletsort[snp] = snp++;
+				}
+			}
+		}
+
+	    //std::cout << "done loop" << std::endl;
+		GLfloat matrix[16];
+		#ifdef __VERBOSE__
+		  glGetFloatv( GL_PROJECTION_MATRIX, matrix );
+		  std::cout << "projection matrix:" << std::endl
+			<< "(  " << matrix[0] << " # " << matrix[4] << " # " << matrix[8] << " # " << matrix[12] << ")" << std::endl
+			<< "(  " << matrix[1] << " # " << matrix[5] << " # " << matrix[9] << " # " << matrix[13] << ")" << std::endl
+			<< "(  " << matrix[2] << " # " << matrix[6] << " # " << matrix[10] << " # " << matrix[14] << ")" << std::endl
+			<< "(  " << matrix[3] << " # " << matrix[7] << " # " << matrix[11] << " # " << matrix[15] << ")" << std::endl;
+		#endif
+	    #if 0
+		  glGetFloatv( GL_MODELVIEW_MATRIX, matrix );
+		#ifdef __VERBOSE__
+		  std::cout << "modelview matrix:" << std::endl
+			<< "(  " << matrix[0] << " # " << matrix[4] << " # " << matrix[8] << " # " << matrix[12] << ")" << std::endl
+			<< "(  " << matrix[1] << " # " << matrix[5] << " # " << matrix[9] << " # " << matrix[13] << ")" << std::endl
+			<< "(  " << matrix[2] << " # " << matrix[6] << " # " << matrix[10] << " # " << matrix[14] << ")" << std::endl
+			<< "(  " << matrix[3] << " # " << matrix[7] << " # " << matrix[11] << " # " << matrix[15] << ")" << std::endl;
+		#endif
+	    #endif
+		std::vector<float> zval(nbSnipplets);
+		for(unsigned int i=0; i< nbSnipplets; ++i)
+		{
+			zval[i] = ( m_pointArray[ lineids[i<<1] * 3 + 0 ] *matrix[ 2] +
+				    m_pointArray[ lineids[i<<1] * 3 + 1 ] *matrix[ 6] +
+				    m_pointArray[ lineids[i<<1] * 3 + 2 ] *matrix[10] + matrix[14])
+					/ ( m_pointArray[ lineids[i<<1] * 3 + 0 ] *matrix[ 3] +
+					    m_pointArray[ lineids[i<<1] * 3 + 1 ] *matrix[ 7] +
+					    m_pointArray[ lineids[i<<1] * 3 + 2 ] *matrix[11] + matrix[15]);
+		}
+
+	    //std::cout << "sorting" << std::endl;
+	    // we should replace this by something that employs the kd-tree to speed up sorting!
+		std::sort(&snippletsort[0],&snippletsort[nbSnipplets], IndirectComp<std::vector<float> >(zval));
+
+	    //std::cout << "painting" << std::endl;
+
+	    glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBegin(GL_QUADS);
+		for ( int i = 0 ; i < nbSnipplets; ++i )
+		{
+		    // this works, but can't we use arrays and index mode here, to speed things up?
+            int idx=lineids[snippletsort[i]<<1];
+            int idx3 = idx * 3;
+            int id2=lineids[(snippletsort[i]<<1)+1];
+            int id23 = id2 * 3;
+            glColor4f( colors[idx3 + 0], colors[idx3 + 1], colors[idx3 + 2], m_alpha );
+            glNormal3f( normals[idx3 + 0], normals[idx3 + 1], normals[idx3 + 2]);
+
+            glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
+            glVertex3f( m_pointArray[idx3 +0], m_pointArray[idx3 +1], m_pointArray[idx3 +2]);
+
+            glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
+            glVertex3f( m_pointArray[idx3 +0], m_pointArray[idx3 +1], m_pointArray[idx3 +2]);
+
+            glColor4f( colors[id23 + 0], colors[id23 + 1], colors[id23 + 2], m_alpha );
+            glNormal3f( normals[id23 + 0], normals[id23 + 1], normals[id23 + 2]);
+
+            glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
+            glVertex3f( m_pointArray[id23 +0], m_pointArray[id23 +1], m_pointArray[id23 +2]);
+
+            glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
+            glVertex3f( m_pointArray[id23 +0], m_pointArray[id23 +1], m_pointArray[id23 +2]);
+		}
+		glEnd();
+
+		// FIXME: store these later on!
+		delete[] snippletsort;
+		delete[] lineids;
+		delete[] lineIBelongTo;
+	    glDisable(GL_BLEND);
+	}
+	else
+	{
+    std::cout << "normal tubes" << std::endl;
+		for ( int i = 0 ; i < m_countLines ; ++i )
+		{
+			if (m_inBox[i] == 1)
+			{
+				glBegin(GL_QUAD_STRIP);
+				int idx = getStartIndexForLine(i)*3;
+				for (int k = 0 ; k < getPointsPerLine(i) ; ++k)
+				{
+					glNormal3f( normals[idx], normals[idx+1], normals[idx+2] );
+					//glColor3f ( normals[idx], normals[idx+1], normals[idx+2] );
+					//glNormal3f( colors[idx], colors[idx+1], colors[idx+2] );
+					glColor3f ( colors[idx], colors[idx+1], colors[idx+2]);
+					glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
+					glVertex3f (m_pointArray[idx], m_pointArray[idx+1], m_pointArray[idx+2]);
+					glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
+					glVertex3f (m_pointArray[idx], m_pointArray[idx+1], m_pointArray[idx+2]);
+					idx += 3;
+					//
+				}
+				glEnd();
+			}
+		}
+	}
+}
+
+void Fibers::drawSortedLines()
+{
+// only sort those lines we see
+	unsigned int *snippletsort=0;
+	unsigned int *lineids=0;
+
+	unsigned int *lineIBelongTo=0;
+	int nbSnipplets=0;
+
+	if(snippletsort==0)
+	{
+
+		for(int i=0; i < m_countLines; ++i)
+		{
+			if (m_inBox[i])
+				nbSnipplets += getPointsPerLine(i)-1;
+		}
+		// std::cout << "nb snipplets total: " << nbSnipplets << std::endl;
+		snippletsort = new unsigned int[nbSnipplets+1];
+		lineids = new unsigned int[nbSnipplets*2];
+		lineIBelongTo = new unsigned int[nbSnipplets];
+
+		int snp = 0;
+		for(int i=0; i < m_countLines; ++i)
+		{
+			if(!m_inBox[i])continue;
+			const unsigned int p = getPointsPerLine(i);
+
+			for(int k=0; k < p-1; ++k)
+			{
+				lineids[snp<<1] = getStartIndexForLine(i)+k;
+				lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
+				lineIBelongTo[snp] = i;
+				snippletsort[snp] = snp++;
+			}
+		}
+	}
+
+
+    // std::cout << "done loop" << std::endl;
+	GLfloat matrix[16];
+	#ifdef __VERBOSE__
+	  glGetFloatv( GL_PROJECTION_MATRIX, matrix );
+	  std::cout << "projection matrix:" << std::endl
+	        << "(  " << matrix[0] << " # " << matrix[4] << " # " << matrix[8] << " # " << matrix[12] << ")" << std::endl
+	        << "(  " << matrix[1] << " # " << matrix[5] << " # " << matrix[9] << " # " << matrix[13] << ")" << std::endl
+	        << "(  " << matrix[2] << " # " << matrix[6] << " # " << matrix[10] << " # " << matrix[14] << ")" << std::endl
+	        << "(  " << matrix[3] << " # " << matrix[7] << " # " << matrix[11] << " # " << matrix[15] << ")" << std::endl;
+	#endif
+#if 0
+	  glGetFloatv( GL_MODELVIEW_MATRIX, matrix );
+	#ifdef __VERBOSE__
+	  std::cout << "modelview matrix:" << std::endl
+	        << "(  " << matrix[0] << " # " << matrix[4] << " # " << matrix[8] << " # " << matrix[12] << ")" << std::endl
+	        << "(  " << matrix[1] << " # " << matrix[5] << " # " << matrix[9] << " # " << matrix[13] << ")" << std::endl
+	        << "(  " << matrix[2] << " # " << matrix[6] << " # " << matrix[10] << " # " << matrix[14] << ")" << std::endl
+	        << "(  " << matrix[3] << " # " << matrix[7] << " # " << matrix[11] << " # " << matrix[15] << ")" << std::endl;
+	#endif
+#endif
+	std::vector<float> zval(nbSnipplets);
+	for(unsigned int i=0; i< nbSnipplets; ++i)
+	{
+		zval[i] = ( m_pointArray[ lineids[i<<1] * 3 + 0 ] *matrix[ 2] +
+		            m_pointArray[ lineids[i<<1] * 3 + 1 ] *matrix[ 6] +
+			    m_pointArray[ lineids[i<<1] * 3 + 2 ] *matrix[10] + matrix[14])
+				/ ( m_pointArray[ lineids[i<<1] * 3 + 0 ] *matrix[ 3] +
+				    m_pointArray[ lineids[i<<1] * 3 + 1 ] *matrix[ 7] +
+				    m_pointArray[ lineids[i<<1] * 3 + 2 ] *matrix[11] + matrix[15]);
+	}
+
+    // std::cout << "sorting" << std::endl;
+	std::sort(&snippletsort[0],&snippletsort[nbSnipplets], IndirectComp<std::vector<float> >(zval));
+
+    // std::cout << "painting" << std::endl;
 	float *colors;
 	float *normals;
 	if (m_dh->useVBO)
@@ -894,28 +1152,31 @@ void Fibers::drawFakeTubes()
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	for ( int i = 0 ; i < m_countLines ; ++i )
+    glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBegin(GL_LINES);
+	int i = 0;
+	for ( int c = 0 ; c < nbSnipplets; ++c )
 	{
-		if (m_inBox[i] == 1)
-		{
-			glBegin(GL_QUAD_STRIP);
-			int idx = getStartIndexForLine(i)*3;
-			for (int k = 0 ; k < getPointsPerLine(i) ; ++k)
-			{
-				glNormal3f( normals[idx], normals[idx+1], normals[idx+2] );
-				//glColor3f ( normals[idx], normals[idx+1], normals[idx+2] );
-				//glNormal3f( colors[idx], colors[idx+1], colors[idx+2] );
-				glColor3f ( colors[idx], colors[idx+1], colors[idx+2]);
-				glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
-				glVertex3f (m_pointArray[idx], m_pointArray[idx+1], m_pointArray[idx+2]);
-				glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
-				glVertex3f (m_pointArray[idx], m_pointArray[idx+1], m_pointArray[idx+2]);
-				idx += 3;
-				//
-			}
-			glEnd();
-		}
+		i = c;
+        int idx=lineids[snippletsort[i]<<1];
+        int idx3 = idx * 3;
+        int id2=lineids[(snippletsort[i]<<1)+1];
+        int id23 = id2 * 3;
+        glColor4f( colors[idx3 + 0], colors[idx3 + 1], colors[idx3 + 2], m_alpha);
+        glNormal3f( normals[idx3 + 0], normals[idx3 + 1], normals[idx3 + 2]);
+        glVertex3f( m_pointArray[idx3 +0], m_pointArray[idx3 +1], m_pointArray[idx3 +2]);
+        glColor4f( colors[id23 + 0], colors[id23 + 1], colors[id23 + 2], m_alpha);
+        glNormal3f( normals[id23 + 0], normals[id23 + 1], normals[id23 + 2]);
+        glVertex3f( m_pointArray[id23 +0], m_pointArray[id23 +1], m_pointArray[id23 +2]);
 	}
+	glEnd();
+    glDisable(GL_BLEND);
+
+	// FIXME: store these later on!
+	delete[] snippletsort;
+	delete[] lineids;
+	delete[] lineIBelongTo;
 }
 
 void Fibers::switchNormals(bool positive)

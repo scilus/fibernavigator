@@ -73,6 +73,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 	fibersInverted = false;
 	useFakeTubes = false;
+	useTransparency = false;
 	filterIsoSurf = false;
 
 	m_isDragging = false;
