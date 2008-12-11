@@ -954,8 +954,8 @@ void Fibers::drawFakeTubes()
 
 	    //std::cout << "done loop" << std::endl;
 		GLfloat matrix[16];
+        glGetFloatv( GL_PROJECTION_MATRIX, matrix );
 		#ifdef __VERBOSE__
-		  glGetFloatv( GL_PROJECTION_MATRIX, matrix );
 		  std::cout << "projection matrix:" << std::endl
 			<< "(  " << matrix[0] << " # " << matrix[4] << " # " << matrix[8] << " # " << matrix[12] << ")" << std::endl
 			<< "(  " << matrix[1] << " # " << matrix[5] << " # " << matrix[9] << " # " << matrix[13] << ")" << std::endl
