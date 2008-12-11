@@ -1609,7 +1609,9 @@ void MainFrame::OnTreeLabelEdit(wxTreeEvent& event)
 int MainFrame::treeSelected(wxTreeItemId id)
 {
 	wxTreeItemId pId = m_treeWidget->GetItemParent(id);
+	if ( !pId.IsOk() ) return 0;
 	wxTreeItemId ppId = m_treeWidget->GetItemParent(pId);
+	if ( !ppId.IsOk() ) return 0;
 
 	if ( id == m_tDatasetId )
 		return Label_datasets;
