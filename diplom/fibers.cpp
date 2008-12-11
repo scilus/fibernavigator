@@ -923,7 +923,6 @@ void Fibers::drawFakeTubes()
 		unsigned int *snippletsort=0;
 		unsigned int *lineids=0;
 
-		unsigned int *lineIBelongTo=0;
 		int nbSnipplets=0;
 
 		if(snippletsort==0)
@@ -937,7 +936,6 @@ void Fibers::drawFakeTubes()
 			std::cout << "nb snipplets total: " << nbSnipplets << std::endl;
 			snippletsort = new unsigned int[nbSnipplets+1];
 			lineids = new unsigned int[nbSnipplets*2];
-			lineIBelongTo = new unsigned int[nbSnipplets];
 
 			int snp = 0;
 			for(int i=0; i < m_countLines; ++i)
@@ -949,7 +947,6 @@ void Fibers::drawFakeTubes()
 				{
 					lineids[snp<<1] = getStartIndexForLine(i)+k;
 					lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
-					lineIBelongTo[snp] = i;
 					snippletsort[snp] = snp++;
 				}
 			}
@@ -1027,7 +1024,6 @@ void Fibers::drawFakeTubes()
 		// FIXME: store these later on!
 		delete[] snippletsort;
 		delete[] lineids;
-		delete[] lineIBelongTo;
 	    glDisable(GL_BLEND);
 		glDisable( GL_LINE_SMOOTH );
 	}
@@ -1065,33 +1061,32 @@ void Fibers::drawSortedLines()
 	unsigned int *snippletsort=0;
 	unsigned int *lineids=0;
 
-	unsigned int *lineIBelongTo=0;
 	int nbSnipplets=0;
 
 	if(snippletsort==0)
 	{
-
+	    // estimate memory required for arrays
 		for(int i=0; i < m_countLines; ++i)
 		{
 			if (m_inBox[i])
 				nbSnipplets += getPointsPerLine(i)-1;
 		}
 		// std::cout << "nb snipplets total: " << nbSnipplets << std::endl;
-		snippletsort = new unsigned int[nbSnipplets+1];
+		snippletsort = new unsigned int[nbSnipplets+1]; // +1 just to be sure because of fancy problems with some sort functions
 		lineids = new unsigned int[nbSnipplets*2];
-		lineIBelongTo = new unsigned int[nbSnipplets];
 
+        // build data structure for sorting
 		int snp = 0;
 		for(int i=0; i < m_countLines; ++i)
 		{
 			if(!m_inBox[i])continue;
 			const unsigned int p = getPointsPerLine(i);
 
+			// TODO: update lineids and snippletsort size only when fiber selection changes
 			for(int k=0; k < p-1; ++k)
 			{
 				lineids[snp<<1] = getStartIndexForLine(i)+k;
 				lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
-				lineIBelongTo[snp] = i;
 				snippletsort[snp] = snp++;
 			}
 		}
@@ -1118,15 +1113,18 @@ void Fibers::drawSortedLines()
 	        << "(  " << matrix[3] << " # " << matrix[7] << " # " << matrix[11] << " # " << matrix[15] << ")" << std::endl;
 	#endif
 #endif
+
+    // compute z values of lines (in our case: starting points only)
 	std::vector<float> zval(nbSnipplets);
 	for(unsigned int i=0; i< nbSnipplets; ++i)
 	{
-		zval[i] = ( m_pointArray[ lineids[i<<1] * 3 + 0 ] *matrix[ 2] +
-		            m_pointArray[ lineids[i<<1] * 3 + 1 ] *matrix[ 6] +
-			    m_pointArray[ lineids[i<<1] * 3 + 2 ] *matrix[10] + matrix[14])
-				/ ( m_pointArray[ lineids[i<<1] * 3 + 0 ] *matrix[ 3] +
-				    m_pointArray[ lineids[i<<1] * 3 + 1 ] *matrix[ 7] +
-				    m_pointArray[ lineids[i<<1] * 3 + 2 ] *matrix[11] + matrix[15]);
+	    const int id = lineids[ i<<1 ] *3;
+		zval[i] = ( m_pointArray[ id + 0 ] *matrix[ 2] +
+		            m_pointArray[ id + 1 ] *matrix[ 6] +
+			        m_pointArray[ id + 2 ] *matrix[10] + matrix[14])
+				/ ( m_pointArray[ id + 0 ] *matrix[ 3] +
+				    m_pointArray[ id + 1 ] *matrix[ 7] +
+				    m_pointArray[ id + 2 ] *matrix[11] + matrix[15]);
 	}
 
     // std::cout << "sorting" << std::endl;
@@ -1179,7 +1177,6 @@ void Fibers::drawSortedLines()
 	// FIXME: store these later on!
 	delete[] snippletsort;
 	delete[] lineids;
-	delete[] lineIBelongTo;
 }
 
 void Fibers::switchNormals(bool positive)
