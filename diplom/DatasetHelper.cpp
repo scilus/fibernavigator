@@ -221,7 +221,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		}
 		Fibers *fibers = new Fibers(this);
 		if (fibers->load(filename)) {
-			if (index != -1) {
+			if (index != -1 && mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tSelBoxId) == 0) {
 				Vector vc ( mainFrame->m_xSlider->GetValue(),
 						mainFrame->m_ySlider->GetValue() ,
 						mainFrame->m_zSlider->GetValue() );
@@ -237,6 +237,20 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 				mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
 				selBox->setTreeId(tNewBoxId);
 			}
+			std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
+			for (unsigned int i = 0 ; i < boxes.size() ; ++i)
+			{
+				for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
+				{
+					boxes[i][j]->m_inBox.resize(countFibers, sizeof(bool));
+					for (unsigned int k = 0; k < countFibers ; ++k)
+					{
+						boxes[i][j]->m_inBox[k] = 0;
+					}
+
+				}
+			}
+
 			fibers->setThreshold(threshold);
 			fibers->setShow(active);
 			fibers->setShowFS(showFS);
