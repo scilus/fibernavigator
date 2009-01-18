@@ -150,10 +150,6 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 	}
 
 	else if (ext == wxT("hea")) {
-		if (mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tDatasetId) > 9) {
-			lastError = wxT("ERROR\nCan't load any more datasets.\nDelete some first.\n");
-			return false;
-		}
 		Anatomy *anatomy = new Anatomy(this);
 
 		if (anatomy->load(filename))
@@ -247,6 +243,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 					{
 						boxes[i][j]->m_inBox[k] = 0;
 					}
+					boxes[i][j]->setDirty(true);
 
 				}
 			}

@@ -82,6 +82,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(MENU_OPTIONS_CMAP3, MainFrame::OnSetCMap3)
 	EVT_MENU(MENU_OPTIONS_CMAP4, MainFrame::OnSetCMap4)
 	EVT_MENU(MENU_OPTIONS_CMAP5, MainFrame::OnSetCMap5)
+	EVT_MENU(MENU_OPTIONS_CMAPNO, MainFrame::OnSetCMapNo)
 	EVT_MENU(MENU_OPTIONS_CMAP_LEGEND, MainFrame::OnToggleColorMapLegend)
 	// Menu Help
     EVT_MENU(MENU_HELP_ABOUT, MainFrame::OnAbout)
@@ -1169,6 +1170,7 @@ void MainFrame::OnSetCMap2(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 2;
 void MainFrame::OnSetCMap3(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 3;refreshAllGLWidgets();}
 void MainFrame::OnSetCMap4(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 4;refreshAllGLWidgets();}
 void MainFrame::OnSetCMap5(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = 5;refreshAllGLWidgets();}
+void MainFrame::OnSetCMapNo(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = -1;refreshAllGLWidgets();}
 /****************************************************************************************************
  *
  * Menu Help

@@ -76,6 +76,7 @@ private:
 	void OnSetCMap3(wxCommandEvent& event);
 	void OnSetCMap4(wxCommandEvent& event);
 	void OnSetCMap5(wxCommandEvent& event);
+	void OnSetCMapNo(wxCommandEvent& event);
 	// Help
 	void OnAbout(wxCommandEvent& event);
 
@@ -225,7 +226,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_BLEND_TEX_ON_MESH				154
 #define MENU_OPTIONS_USE_FAKE_TUBES					155
 #define MENU_OPTIONS_FILTER_ISO						156
-#define MENU_OPTIONS_USE_TRANSPARENCY			157
+#define MENU_OPTIONS_USE_TRANSPARENCY				157
 #define MENU_OPTIONS_COLOR_MAPS						159
 #define MENU_OPTIONS_CMAP0							160
 #define MENU_OPTIONS_CMAP1							161
@@ -237,6 +238,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_CLEAN							167
 #define MENU_OPTIONS_LOOP							168
 #define MENU_OPTIONS_CMAP_LEGEND					169
+#define MENU_OPTIONS_CMAPNO							170
 // Menu Help
 #define MENU_HELP_ABOUT       						wxID_ABOUT
 /*

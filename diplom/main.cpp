@@ -188,6 +188,7 @@ bool MyApp::OnInit(void) {
 	options_menu->Append(MENU_OPTIONS_RESET_COLOR, _T("Reset Colors on Fibers"));
 
 	wxMenu* cMaps = new wxMenu;
+	cMaps->Append(MENU_OPTIONS_CMAPNO, wxT("no color map"));
 	cMaps->Append(MENU_OPTIONS_CMAP0, wxT("default color map"));
 	cMaps->Append(MENU_OPTIONS_CMAP1, wxT("color map 1"));
 	cMaps->Append(MENU_OPTIONS_CMAP2, wxT("color map 2"));

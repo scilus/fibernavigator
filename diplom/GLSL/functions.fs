@@ -128,7 +128,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 
 	col1 = clamp( texture3D(tex, gl_TexCoord[0].xyz).rgb, 0.0, 1.0);
 
-	if ( type == 3 )
+	if ( type == 3 && useColorMap != -1)
 	{
 		if ( col1.r - threshold <= 0.0)
 			return;
@@ -167,7 +167,7 @@ void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float thr
 
 	col1 = clamp( texture3D(tex, v).rgb, 0.0, 1.0);
 
-	if ( type == 3 )
+	if ( type == 3 && useColorMap != -1)
 	{
 		if ( col1. r - threshold <= 0.0)
 			return;
