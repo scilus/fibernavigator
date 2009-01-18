@@ -1062,7 +1062,7 @@ void MainFrame::OnUseFakeTubes(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnUseTransparency(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->useTransparency = !m_dh->useTransparency;
-	Fibers* f;
+//	Fibers* f;
 //	if ( m_dh->getFiberDataset(f))
 //		f->switchNormals(!m_dh->useFakeTubes);
 	refreshAllGLWidgets();
@@ -1609,9 +1609,9 @@ void MainFrame::OnTreeLabelEdit(wxTreeEvent& event)
 int MainFrame::treeSelected(wxTreeItemId id)
 {
 	wxTreeItemId pId = m_treeWidget->GetItemParent(id);
-	if ( !pId.IsOk() ) return 0;
+	//if ( !pId.IsOk() ) return 0;
 	wxTreeItemId ppId = m_treeWidget->GetItemParent(pId);
-	if ( !ppId.IsOk() ) return 0;
+	//if ( !ppId.IsOk() ) return 0;
 
 	if ( id == m_tDatasetId )
 		return Label_datasets;

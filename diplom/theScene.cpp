@@ -9,7 +9,6 @@
 TheScene::TheScene(DatasetHelper* dh)
 {
 	m_dh = dh;
-	m_lic = new FgeImageSpaceLIC(m_dh);
 
 	m_texAssigned = false;
 
