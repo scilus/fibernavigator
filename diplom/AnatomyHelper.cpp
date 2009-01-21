@@ -47,21 +47,21 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 	{
 		case axial: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(1.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, 0 + yo, quadZ);
-		    	glTexCoord3f(1.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, y + yo, quadZ);
-		    	glTexCoord3f(0.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, y + yo, quadZ);
-		    	glTexCoord3f(0.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, 0 + yo, quadZ);
-			glEnd();
+				glTexCoord3f(0.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, 0 + yo, quadZ);
+				glTexCoord3f(1.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, 0 + yo, quadZ);
+				glTexCoord3f(1.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, y + yo, quadZ);
+				glTexCoord3f(0.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, y + yo, quadZ);
+		    glEnd();
 			xline = m_dh->xSlize + xo;
 			yline = m_dh->ySlize;
 		} break;
 
 		case coronal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( 0 + xo, 0 + zo, quadZ);
-		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( 0 + xo, z + zo, quadZ);
-		    	glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( x + xo, z + zo, quadZ);
-		    	glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( x + xo, 0 + zo, quadZ);
+				glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( 0 + xo, 0 + zo, quadZ);
+		    	glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( 0 + xo, z + zo, quadZ);
+		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( x + xo, z + zo, quadZ);
+		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( x + xo, 0 + zo, quadZ);
 		    glEnd();
 		    xline = m_dh->xSlize + xo;
 		    yline = m_dh->zSlize + zo;

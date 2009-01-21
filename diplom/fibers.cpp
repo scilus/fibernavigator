@@ -187,7 +187,7 @@ bool Fibers::load(wxString filename)
 
 	m_dh->printDebug(_T("move vertices"), 1);
 	for (int i = 0; i < countPoints * 3 ; ++i) {
-		//m_pointArray[i] = m_dh->columns - m_pointArray[i];
+		m_pointArray[i] = m_dh->columns - m_pointArray[i];
 		++i;
 		m_pointArray[i] = m_dh->rows - m_pointArray[i];
 		++i;
@@ -770,7 +770,7 @@ void Fibers::save(wxString filename)
 
 			for (int j = 0; j < getPointsPerLine(l) ; ++j )
 			{
-				pointsToSave.push_back(m_pointArray[pc]);
+				pointsToSave.push_back(m_dh->columns - m_pointArray[pc]);
 				++pc;
 				pointsToSave.push_back(m_dh->rows - m_pointArray[pc]);
 				++pc;
