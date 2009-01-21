@@ -12,6 +12,7 @@
 #include "surface.h"
 #include "lic/TensorField.h"
 #include "selectionBox.h"
+#include "nifti/nifti1_io.h"
 
 class Anatomy : public DatasetInfo , public wxTreeItemData
 {
@@ -26,6 +27,7 @@ public:
 
 	float* getFloatDataset();
 	TensorField* getTensorField() { return m_tensorField; };
+	bool loadNifti(wxString filename);
 
 	SelectionBox* m_roi;
 
