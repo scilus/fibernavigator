@@ -594,8 +594,8 @@ void MainFrame::OnMenuViewLeft(wxCommandEvent& WXUNUSED(event))
 	m_dh->m_transform.s.M11 = 0.0;
 	m_dh->m_transform.s.M22 = 0.0;
 	m_dh->m_transform.s.M20 = -1.0;
-	m_dh->m_transform.s.M01 = 1.0;
-	m_dh->m_transform.s.M12 = -1.0;
+	m_dh->m_transform.s.M01 = -1.0;
+	m_dh->m_transform.s.M12 = 1.0;
 	m_mainGL->setRotation();
 }
 void MainFrame::OnMenuViewRight(wxCommandEvent& WXUNUSED(event))
@@ -605,40 +605,38 @@ void MainFrame::OnMenuViewRight(wxCommandEvent& WXUNUSED(event))
 	m_dh->m_transform.s.M11 = 0.0;
 	m_dh->m_transform.s.M22 = 0.0;
 	m_dh->m_transform.s.M20 = 1.0;
-	m_dh->m_transform.s.M01 = -1.0;
-	m_dh->m_transform.s.M12 = -1.0;
+	m_dh->m_transform.s.M01 = 1.0;
+	m_dh->m_transform.s.M12 = 1.0;
 	m_mainGL->setRotation();
 }
 void MainFrame::OnMenuViewTop(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
-	m_dh->m_transform.s.M11 = -1.0;
-	m_dh->m_transform.s.M22 = -1.0;
 	m_mainGL->setRotation();
 }
 void MainFrame::OnMenuViewBottom(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
-	m_dh->m_transform.s.M11 = -1.0;
 	m_dh->m_transform.s.M00 = -1.0;
+	m_dh->m_transform.s.M22 = -1.0;
 	m_mainGL->setRotation();
 }
 void MainFrame::OnMenuViewFront(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
+	m_dh->m_transform.s.M00 = -1.0;
 	m_dh->m_transform.s.M11 = 0.0;
-	m_dh->m_transform.s.M12 = -1.0;
-	m_dh->m_transform.s.M21 = 1.0;
 	m_dh->m_transform.s.M22 = 0.0;
+	m_dh->m_transform.s.M21 = 1.0;
+	m_dh->m_transform.s.M12 = 1.0;
 	m_mainGL->setRotation();
 }
 void MainFrame::OnMenuViewBack(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
-	m_dh->m_transform.s.M00 = -1.0;
 	m_dh->m_transform.s.M11 = 0.0;
 	m_dh->m_transform.s.M22 = 0.0;
-	m_dh->m_transform.s.M12 = -1.0;
+	m_dh->m_transform.s.M12 = 1.0;
 	m_dh->m_transform.s.M21 = -1.0;
 	m_mainGL->setRotation();
 }
@@ -1310,15 +1308,15 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 	{
 		Matrix4fSetIdentity(&m_dh->m_transform);
 
-		m_dh->m_transform.s.M00 = -0.67698019742965698242f;
-		m_dh->m_transform.s.M10 =  0.48420974612236022949f;
-		m_dh->m_transform.s.M20 = -0.55429106950759887695;
-		m_dh->m_transform.s.M01 =  0.73480975627899169922f;
-		m_dh->m_transform.s.M11 =  0.40184235572814941406f;
-		m_dh->m_transform.s.M21 = -0.54642277956008911133f;
-		m_dh->m_transform.s.M02 = -0.04184586182236671448f;
-		m_dh->m_transform.s.M12 = -0.77721565961837768555f;
-		m_dh->m_transform.s.M22 = -0.62784034013748168945f;
+		m_dh->m_transform.s.M00 = -0.66625452041625976562f;
+		m_dh->m_transform.s.M10 =  0.42939949035644531250f;
+		m_dh->m_transform.s.M20 = -0.60968911647796630859f;
+		m_dh->m_transform.s.M01 = -0.74149495363235473633f;
+		m_dh->m_transform.s.M11 = -0.46842813491821289062f;
+		m_dh->m_transform.s.M21 = 0.40184235572814941406f;
+		m_dh->m_transform.s.M02 = -0.07932166755199432373f;
+		m_dh->m_transform.s.M12 = 0.77213370800018310547f;
+		m_dh->m_transform.s.M22 = 0.63048923015594482422f;
 		m_mainGL->setRotation();
 	}
 	else
@@ -1807,7 +1805,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		float y = ((float)pos.y/NAV_GL_SIZE) * max;
 
 		m_xSlider->SetValue( (int)(x - (max - m_dh->columns)/2.0) );
-		m_ySlider->SetValue( (int)(y - (max - m_dh->rows)/2.0) );
+		m_ySlider->SetValue( (int)(max - y) );
 		break;
 	}
 	case coronal: {
@@ -1816,7 +1814,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		float y = ((float)pos.y/NAV_GL_SIZE) * max;
 
 		m_xSlider->SetValue( (int)(x - (max - m_dh->columns)/2.0) );
-		m_zSlider->SetValue( (int)(y - (max - m_dh->frames)/2.0) );
+		m_zSlider->SetValue( (int)(max - y) );
 		break;
 	}
 	case sagittal: {
@@ -1824,8 +1822,8 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 		float x = ((float)pos.x/NAV_GL_SIZE) * max;
 		float y = ((float)pos.y/NAV_GL_SIZE) * max;
 
-		m_ySlider->SetValue( (int)(x - (max - m_dh->rows)/2.0) );
-		m_zSlider->SetValue( (int)(y - (max - m_dh->frames)/2.0) );
+		m_ySlider->SetValue( (int)(max - x) );
+		m_zSlider->SetValue( (int)(max - y) );
 		break;
 	}
 	case mainView:

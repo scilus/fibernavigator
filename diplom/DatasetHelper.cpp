@@ -111,7 +111,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		wxString caption = wxT("Choose a file");
 		wxString
 				wildcard =
-						wxT("*.*|*.*|Header files (*.hea)|*.hea|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib|Nifti (*.nii)|*.nii");
+						wxT("*.*|*.*|Nifti (*.nii)|*.nii|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
 		wxString defaultDir = wxEmptyString;
 		wxString defaultFilename = wxEmptyString;
 		wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,
@@ -134,12 +134,6 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 	// check file extension
 	wxString ext = filename.AfterLast('.');
 
-	if (ext == _T("ima"))
-	{
-		filename = filename.BeforeLast('.') + _T(".hea");
-		ext = _T("hea");
-	}
-
 	if (ext == wxT("scn")) {
 		if (!loadScene(filename)) {
 			return false;
@@ -149,7 +143,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		return true;
 	}
 
-	else if (ext == wxT("hea") || ext == wxT("nii") || ext == wxT("gz")) {
+	else if (ext == wxT("nii") || ext == wxT("gz")) {
 		Anatomy *anatomy = new Anatomy(this);
 
 		if (anatomy->load(filename))

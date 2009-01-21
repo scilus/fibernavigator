@@ -47,35 +47,35 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 	{
 		case axial: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, 0 + yo, quadZ);
-		    	glTexCoord3f(0.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, y + yo, quadZ);
-		    	glTexCoord3f(1.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, y + yo, quadZ);
-		    	glTexCoord3f(1.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, 0 + yo, quadZ);
+				glTexCoord3f(1.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, 0 + yo, quadZ);
+		    	glTexCoord3f(1.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, y + yo, quadZ);
+		    	glTexCoord3f(0.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, y + yo, quadZ);
+		    	glTexCoord3f(0.0, 0.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, 0 + yo, quadZ);
 			glEnd();
 			xline = m_dh->xSlize + xo;
-			yline = y - m_dh->ySlize + yo;
+			yline = m_dh->ySlize;
 		} break;
 
 		case coronal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( 0 + xo, 0 + zo, quadZ);
-		    	glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( 0 + xo, z + zo, quadZ);
-		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( x + xo, z + zo, quadZ);
-		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( x + xo, 0 + zo, quadZ);
+				glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( 0 + xo, 0 + zo, quadZ);
+		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( 0 + xo, z + zo, quadZ);
+		    	glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( x + xo, z + zo, quadZ);
+		    	glTexCoord3f(0.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( x + xo, 0 + zo, quadZ);
 		    glEnd();
 		    xline = m_dh->xSlize + xo;
-		    yline = z - m_dh->zSlize + zo;
+		    yline = m_dh->zSlize + zo;
 		} break;
 
 		case sagittal: {
 			glBegin(GL_QUADS);
-				glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 0.0, 1.0); glVertex3f( 0 + yo, 0 + zo, quadZ);
-		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 0.0, 0.0); glVertex3f( 0 + yo, z + zo, quadZ);
-		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 1.0, 0.0); glVertex3f( y + yo, z + zo, quadZ);
-		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 1.0, 1.0); glVertex3f( y + yo, 0 + zo, quadZ);
+				glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 1.0, 0.0); glVertex3f( 0 + yo, 0 + zo, quadZ);
+		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 1.0, 1.0); glVertex3f( 0 + yo, z + zo, quadZ);
+		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 0.0, 1.0); glVertex3f( y + yo, z + zo, quadZ);
+		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 0.0, 0.0); glVertex3f( y + yo, 0 + zo, quadZ);
 			glEnd();
-			xline = m_dh->ySlize + yo;
-			yline = z - m_dh->zSlize + zo;
+			xline = max - m_dh->ySlize;
+			yline = m_dh->zSlize + zo;
 		} break;
 	}
 

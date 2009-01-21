@@ -63,6 +63,7 @@ bool Anatomy::load(wxString filename)
 		printf("detected nifti file\n");
 		return loadNifti(filename);
 	}
+
 	else if (m_name.AfterLast('.') == _T("gz"))
 	{
 		printf("checking for compressed nifti file\n");
@@ -70,290 +71,13 @@ bool Anatomy::load(wxString filename)
 		if (tmpName.AfterLast('.') == _T("nii"))
 		{
 			printf("found compressed nifti file\n");
-			loadNifti(filename);
+			//loadNifti(filename);
 			return false;
 		}
 	}
+	return false;
 
 
-	// read header file
-	wxTextFile headerFile;
-	bool flag = false;
-	if (headerFile.Open(filename))
-	{
-		size_t i;
-		wxString sLine;
-		wxString sValue;
-		wxString sLabel;
-		long lTmpValue;
-		for (i = 3 ; i < headerFile.GetLineCount() ; ++i)
-		{
-			sLine = headerFile.GetLine(i);
-			sLabel = sLine.BeforeLast(' ');
-			sValue = sLine.AfterLast(' ');
-			sLabel.Trim(false);
-			sLabel.Trim();
-			if (sLabel.Contains(wxT("length:")))
-			{
-				flag = sValue.ToLong(&lTmpValue, 10);
-				m_length = (int)lTmpValue;
-			}
-			if (sLabel == wxT("nbands:"))
-			{
-				flag = sValue.ToLong(&lTmpValue, 10);
-				m_bands = (int)lTmpValue;
-			}
-			if (sLabel == wxT("nframes:"))
-			{
-				flag = sValue.ToLong(&lTmpValue, 10);
-				m_frames = (int)lTmpValue;
-			}
-			if (sLabel == wxT("nrows:"))
-			{
-				flag = sValue.ToLong(&lTmpValue, 10);
-				m_rows = (int)lTmpValue;
-			}
-			if (sLabel == wxT("ncolumns:"))
-			{
-				flag = sValue.ToLong(&lTmpValue, 10);
-				m_columns = (int)lTmpValue;
-			}
-			if (sLabel == wxT("repn:"))
-			//if (sLabel.Contains(wxT("repn:")))
-			{
-				m_repn = sValue;
-			}
-			if (sLabel.Contains(wxT("voxel:")))
-			{
-				wxString sNumber;
-				sValue = sLine.AfterLast(':');
-				sValue = sValue.BeforeLast('\"');
-				sNumber = sValue.AfterLast(' ');
-				flag = sNumber.ToDouble(&m_zVoxel);
-				sValue = sValue.BeforeLast(' ');
-				sNumber = sValue.AfterLast(' ');
-				flag = sNumber.ToDouble(&m_yVoxel);
-				sValue = sValue.BeforeLast(' ');
-				sNumber = sValue.AfterLast('\"');
-				flag = sNumber.ToDouble(&m_xVoxel);
-			}
-		}
-	}
-	headerFile.Close();
-
-	if (m_repn.Cmp(wxT("ubyte")) == 0)
-	{
-		if (m_bands / m_frames == 1) {
-			m_type = Head_byte;
-		}
-		else if (m_bands / m_frames == 3) {
-			m_type = RGB;
-		}
-		else m_type = TERROR;
-	}
-	else if (m_repn.Cmp(wxT("short")) == 0) m_type = Head_short;
-	else if (m_repn.Cmp(wxT("float")) == 0)
-	{
-		if (m_bands / m_frames == 3) {
-			m_type = Vectors_;
-		}
-		else if (m_bands / m_frames == 6) {
-			m_type = Tensors_;
-		}
-		else
-			m_type = Overlay;
-	}
-	else m_type = TERROR;
-
-	if (flag)
-	{
-		flag = false;
-		wxFile dataFile;
-		if (dataFile.Open(filename.BeforeLast('.')+ wxT(".ima")))
-		{
-			wxFileOffset nSize = dataFile.Length();
-			if (nSize == wxInvalidOffset) return false;
-
-			switch (m_type)
-			{
-			case Head_byte: {
-				wxUint8* byteDataset = new wxUint8[nSize];
-				if (dataFile.Read(byteDataset, (size_t) nSize) != nSize)
-				{
-					dataFile.Close();
-					delete[] byteDataset;
-					return false;
-				}
-				m_floatDataset = new float[nSize];
-				for ( int i = 0 ; i < nSize ; ++i)
-				{
-					m_floatDataset[i] = (float)byteDataset[i] / 255.0;
-				}
-				delete[] byteDataset;
-				flag = true;
-			} break;
-
-			case Head_short: {
-				wxUint16* shortDataset = new wxUint16[nSize/2];
-				if (dataFile.Read(shortDataset, (size_t) nSize) != nSize)
-				{
-					dataFile.Close();
-					delete[] shortDataset;
-					return false;
-				}
-				flag = true;
-
-				float max = 65535.0;
-				m_floatDataset = new float[nSize/2];
-				for ( int i = 0 ; i < nSize/2 ; ++i)
-				{
-					m_floatDataset[i] = (float)shortDataset[i] / max;
-				}
-				delete[] shortDataset;
-			} break;
-
-			case Overlay: {
-				float* floatDataset = new float[nSize/4];
-				if (dataFile.Read(floatDataset, (size_t) nSize) != nSize)
-				{
-					dataFile.Close();
-					delete[] floatDataset;
-					return false;
-				}
-				m_floatDataset = new float[nSize/4];
-				for ( int i = 0 ; i < nSize/4 ; ++i)
-				{
-					m_floatDataset[i] = (float)floatDataset[i];
-				}
-				delete[] floatDataset;
-				flag = true;
-
-			} break;
-
-			case Vectors_: {
-				m_floatDataset = new float[nSize/4];
-				float* buffer = new float[nSize/4];
-				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
-				{
-					dataFile.Close();
-					delete[] buffer;
-					return false;
-				}
-
-				wxUint8 *pointbytes = (wxUint8*)buffer;
-				wxUint8 temp;
-				for ( int i = 0 ; i < nSize; i +=4)
-				{
-					temp  = pointbytes[i];
-					pointbytes[i] = pointbytes[i+3];
-					pointbytes[i+3] = temp;
-					temp  = pointbytes[i+1];
-					pointbytes[i+1] = pointbytes[i+2];
-					pointbytes[i+2] = temp;
-				}
-
-				int offset = m_columns * m_rows;
-				int startslize = 0;
-
-				for (int i = 0 ; i < m_frames ; ++i)
-				{
-					startslize = i * offset * 3;
-					for (int j = 0 ; j < offset ; ++j)
-					{
-						m_floatDataset[startslize + 3 * j] 		= buffer[startslize + j];
-						m_floatDataset[startslize + 3 * j + 1] 	= buffer[startslize + offset + j];
-						m_floatDataset[startslize + 3 * j + 2] 	= buffer[startslize + 2*offset + j];
-					}
-				}
-
-				m_tensorField = new TensorField(m_dh, m_floatDataset, true);
-				m_dh->tensors_loaded = true;
-
-				flag = true;
-				m_dh->vectors_loaded = true;
-				m_dh->surface_isDirty = true;
-			} break;
-
-			case Tensors_: {
-				m_floatDataset = new float[nSize/4];
-				float* buffer = new float[nSize/4];
-				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
-				{
-					dataFile.Close();
-					delete[] buffer;
-					return false;
-				}
-
-				wxUint8 *pointbytes = (wxUint8*)buffer;
-				wxUint8 temp;
-				for ( int i = 0 ; i < nSize; i +=4)
-				{
-					temp  = pointbytes[i];
-					pointbytes[i] = pointbytes[i+3];
-					pointbytes[i+3] = temp;
-					temp  = pointbytes[i+1];
-					pointbytes[i+1] = pointbytes[i+2];
-					pointbytes[i+2] = temp;
-				}
-
-				int offset = m_columns * m_rows;
-				int startslize = 0;
-
-				for (int i = 0 ; i < m_frames ; ++i)
-				{
-					startslize = i * offset * 6;
-					for (int j = 0 ; j < offset ; ++j)
-					{
-						m_floatDataset[startslize + 3 * j] 		= buffer[startslize + j];
-						m_floatDataset[startslize + 3 * j + 1] 	= buffer[startslize + offset + j];
-						m_floatDataset[startslize + 3 * j + 2] 	= buffer[startslize + 2*offset + j];
-						m_floatDataset[startslize + 3 * j + 3] 	= buffer[startslize + 3*offset + j];
-						m_floatDataset[startslize + 3 * j + 4] 	= buffer[startslize + 4*offset + j];
-						m_floatDataset[startslize + 3 * j + 5] 	= buffer[startslize + 5*offset + j];
-					}
-					delete[] buffer;
-				}
-
-				m_tensorField = new TensorField(m_dh, m_floatDataset, false);
-
-				flag = true;
-				m_dh->tensors_loaded = true;
-			} break;
-
-			case RGB: {
-				wxUint8 *buffer = new wxUint8[nSize];
-				m_floatDataset = new float[nSize];
-				if (dataFile.Read(buffer, (size_t) nSize) != nSize)
-				{
-					dataFile.Close();
-					delete[] buffer;
-					return false;
-				}
-				flag = true;
-
-				int offset = m_columns * m_rows;
-				int startslize = 0;
-
-				for (int i = 0 ; i < m_frames ; ++i)
-				{
-					startslize = i * offset * 3;
-					for (int j = 0 ; j < offset ; ++j)
-					{
-						m_floatDataset[startslize + 3 * j    ] = (float)buffer[startslize + j           ] / 255.0;
-						m_floatDataset[startslize + 3 * j + 1] = (float)buffer[startslize + offset + j  ] / 255.0;
-						m_floatDataset[startslize + 3 * j + 2] = (float)buffer[startslize + 2*offset + j] / 255.0;
-					}
-				}
-				delete[] buffer;
-			} break;
-			}
-		}
-		dataFile.Close();
-	}
-
-	is_loaded = flag;
-
-	return flag;
 }
 // TODO
 bool Anatomy::loadNifti(wxString filename)
@@ -458,19 +182,8 @@ bool Anatomy::loadNifti(wxString filename)
 			m_floatDataset = new float[nSize];
 			for ( int i = 0 ; i < nSize ; ++i)
 			{
-				m_floatDataset[i] = (float)data[nSize - i] / 255.0;
+				m_floatDataset[i] = (float)data[i] / 255.0;
 			}
-
-			int fSize = m_frames * m_rows;
-			float fBuffer;
-			for (int i = 0 ; i < fSize ; ++i)
-				for (int j = 0 ; j < m_columns /2 ; ++j)
-				{
-					fBuffer = m_floatDataset[j + i * m_columns];
-					m_floatDataset[j + i * m_columns] = m_floatDataset[(m_columns - 1 - j) + i * m_columns];
-					m_floatDataset[(m_columns - 1 - j) + i * m_columns] = fBuffer;
-				}
-
 
 			flag = true;
 		} break;
@@ -511,6 +224,38 @@ bool Anatomy::loadNifti(wxString filename)
 
 			}
 
+
+			flag = true;
+		} break;
+
+		case Vectors_: {
+			float *data=NULL;
+			data = (float *) malloc(sizeof(float) * hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3);
+			if (data == NULL) {
+				fprintf(stderr, "\nError allocating data buffer for %s\n",hdr_file);
+				return false;
+			}
+			ret = fread(data, sizeof(float), hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3, fp);
+			if (ret != hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3) {
+				fprintf(stderr, "\nError reading volume 1 from %s (%d)\n",hdr_file,ret);
+				return false;
+			}
+
+			int nSize = hdr.dim[1]*hdr.dim[2]*hdr.dim[3];
+			m_floatDataset = new float[nSize*3];
+
+			for (int i = 0 ; i < nSize ; ++i)
+			{
+
+				m_floatDataset[i * 3    ] = data[i];
+				m_floatDataset[i * 3 + 1] = data[nSize + i  ];
+				m_floatDataset[i * 3 + 2] = data[(2 * nSize) + i];
+
+			}
+			m_tensorField = new TensorField(m_dh, m_floatDataset, true);
+            m_dh->tensors_loaded = true;
+            m_dh->vectors_loaded = true;
+            m_dh->surface_isDirty = true;
 
 			flag = true;
 		} break;

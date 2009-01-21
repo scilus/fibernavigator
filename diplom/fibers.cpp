@@ -186,11 +186,12 @@ bool Fibers::load(wxString filename)
 	toggleEndianess();
 
 	m_dh->printDebug(_T("move vertices"), 1);
-
 	for (int i = 0; i < countPoints * 3 ; ++i) {
-		m_pointArray[i] = m_dh->columns - m_pointArray[i];
-		i += 2;
-		m_pointArray[i] = m_dh->frames - m_pointArray[i];
+		//m_pointArray[i] = m_dh->columns - m_pointArray[i];
+		++i;
+		m_pointArray[i] = m_dh->rows - m_pointArray[i];
+		++i;
+		//m_pointArray[i] = m_dh->frames - m_pointArray[i];
 	}
 
 	calculateLinePointers();
@@ -769,11 +770,11 @@ void Fibers::save(wxString filename)
 
 			for (int j = 0; j < getPointsPerLine(l) ; ++j )
 			{
-				pointsToSave.push_back(m_dh->columns - m_pointArray[pc]);
-				++pc;
 				pointsToSave.push_back(m_pointArray[pc]);
 				++pc;
-				pointsToSave.push_back(m_dh->columns - m_pointArray[pc]);
+				pointsToSave.push_back(m_dh->rows - m_pointArray[pc]);
+				++pc;
+				pointsToSave.push_back(m_pointArray[pc]);
 				++pc;
 
 				linesToSave.push_back(pointIndex);
@@ -942,7 +943,7 @@ void Fibers::drawFakeTubes()
 				if(!m_inBox[i])continue;
 				const unsigned int p = getPointsPerLine(i);
 
-				for(int k=0; k < p-1; ++k)
+				for(unsigned int k=0; k < p-1; ++k)
 				{
 					lineids[snp<<1] = getStartIndexForLine(i)+k;
 					lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
@@ -972,7 +973,7 @@ void Fibers::drawFakeTubes()
 		#endif
 	    #endif
 		std::vector<float> zval(nbSnipplets);
-		for(unsigned int i=0; i< nbSnipplets; ++i)
+		for(int i=0; i< nbSnipplets; ++i)
 		{
 			zval[i] = ( m_pointArray[ lineids[i<<1] * 3 + 0 ] *matrix[ 2] +
 				    m_pointArray[ lineids[i<<1] * 3 + 1 ] *matrix[ 6] +
@@ -1081,7 +1082,7 @@ void Fibers::drawSortedLines()
 			const unsigned int p = getPointsPerLine(i);
 
 			// TODO: update lineids and snippletsort size only when fiber selection changes
-			for(int k=0; k < p-1; ++k)
+			for(unsigned int k=0; k < p-1; ++k)
 			{
 				lineids[snp<<1] = getStartIndexForLine(i)+k;
 				lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
@@ -1114,7 +1115,7 @@ void Fibers::drawSortedLines()
 
     // compute z values of lines (in our case: starting points only)
 	std::vector<float> zval(nbSnipplets);
-	for(unsigned int i=0; i< nbSnipplets; ++i)
+	for(int i=0; i< nbSnipplets; ++i)
 	{
 	    const int id = lineids[ i<<1 ] *3;
 		zval[i] = ( m_pointArray[ id + 0 ] *matrix[ 2] +

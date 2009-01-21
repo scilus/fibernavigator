@@ -31,10 +31,15 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 	m_init = false;
 	m_view = view;
 	m_dh = dh;
-
+/*
 	m_lastRot.M[0] = -0.67698019742965698242f; m_lastRot.M[1] =  0.48420974612236022949f; m_lastRot.M[2] = -0.55429106950759887695;
 	m_lastRot.M[3] =  0.73480975627899169922f; m_lastRot.M[4] =  0.40184235572814941406f; m_lastRot.M[5] = -0.54642277956008911133f;
 	m_lastRot.M[6] = -0.04184586182236671448f; m_lastRot.M[7] = -0.77721565961837768555f; m_lastRot.M[8] = -0.62784034013748168945f;
+*/
+	m_lastRot.M[0] = -0.66625452041625976562f; m_lastRot.M[1] = 0.42939949035644531250f;  m_lastRot.M[2] = -0.60968911647796630859f;
+	m_lastRot.M[3] = -0.74149495363235473633f; m_lastRot.M[4] = -0.46842813491821289062f; m_lastRot.M[5] = 0.48037606477737426758f;
+	m_lastRot.M[6] = -0.07932166755199432373f; m_lastRot.M[7] = 0.77213370800018310547f;  m_lastRot.M[8] = 0.63048923015594482422f;
+
 
 	Matrix4fSetIdentity(&m_dh->m_transform);
 	Matrix3fSetIdentity(&m_thisRot);
@@ -201,6 +206,12 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		    {
 				if (!m_dh->m_isrDragging)												// Not Dragging
 			    {
+					if (wxGetKeyState(WXK_CONTROL))
+					{
+						printf("%.20f : %.20f : %.20f \n", m_lastRot.M[0], m_lastRot.M[1], m_lastRot.M[2]);
+						printf("%.20f : %.20f : %.20f \n", m_lastRot.M[3], m_lastRot.M[4], m_lastRot.M[5]);
+						printf("%.20f : %.20f : %.20f \n", m_lastRot.M[6], m_lastRot.M[7], m_lastRot.M[8]);
+					}
 					m_dh->m_isrDragging = true;										// Prepare For Dragging
 					m_lastPos = event.GetPosition();
 					m_hr = pick(event.GetPosition());
