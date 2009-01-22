@@ -143,7 +143,14 @@ bool Anatomy::loadNifti(wxString filename)
 		} break;
 
 		case Head_short: {
-			short *data = (short*)filedata->data;
+			nifti_swap_2bytes(nSize, filedata->data);
+
+			unsigned short int *data = (unsigned short int*)filedata->data;
+			int max = 0;
+			for (int i = 0 ; i < nSize ; ++i)
+				max = wxMax(max, data[i]);
+
+			printf("max: %d\n", max);
 
 			m_floatDataset = new float[nSize];
 			for ( int i = 0 ; i < nSize ; ++i)
