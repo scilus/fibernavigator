@@ -93,6 +93,8 @@ bool Anatomy::loadNifti(wxString filename)
 
 	printf("XYZT dimensions: %d %d %d %d\n", ima->dim[1], ima->dim[2], ima->dim[3], ima->dim[4]);
 	printf("datatype: %d\n", ima->datatype);
+	printf("byte order: %d\n", ima->byteorder);
+
 
 	if (ima->datatype == 2)
 	{
@@ -138,6 +140,18 @@ bool Anatomy::loadNifti(wxString filename)
 			}
 
 			flag = true;
+		} break;
+
+		case Head_short: {
+			short *data = (short*)filedata->data;
+
+			m_floatDataset = new float[nSize];
+			for ( int i = 0 ; i < nSize ; ++i)
+			{
+				m_floatDataset[i] = (float)data[i] / 65536.0;
+			}
+			flag = true;
+
 		} break;
 
 		case Overlay: {
