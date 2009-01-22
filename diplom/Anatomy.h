@@ -12,7 +12,6 @@
 #include "surface.h"
 #include "lic/TensorField.h"
 #include "selectionBox.h"
-#include "nifti/nifti1_io.h"
 
 class Anatomy : public DatasetInfo , public wxTreeItemData
 {

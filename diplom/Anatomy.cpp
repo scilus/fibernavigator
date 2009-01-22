@@ -10,11 +10,10 @@
 #include "wx/textfile.h"
 #include <GL/glew.h>
 
+#include "nifti/nifti1_io.h"
 
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
-#define HAVE_ZLIB
-
 
 Anatomy::Anatomy(DatasetHelper* dh) {
 	m_dh = dh;

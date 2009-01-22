@@ -16,7 +16,7 @@ are required:
    that specifies whether to use compression (1) or not (0)
  - use znz_isnull rather than any (pointer == NULL) comparisons in the code
    for znzfile types (normally done after a return from znzopen)
- 
+
 NB: seeks for writable files with compression are quite restricted
 
  */
@@ -39,7 +39,7 @@ znzlib.c  (zipped or non-zipped library)
 */
 
 
-/* Note extra argument (use_compression) where 
+/* Note extra argument (use_compression) where
    use_compression==0 is no compression
    use_compression!=0 uses zlib (gzip) compression
 */
@@ -116,7 +116,7 @@ int Xznzclose(znzFile * file)
     if ((*file)->zfptr!=NULL)  { retval = gzclose((*file)->zfptr); }
 #endif
     if ((*file)->nzfptr!=NULL) { retval = fclose((*file)->nzfptr); }
-                                                                                
+
     free(*file);
     *file = NULL;
   }
@@ -128,7 +128,7 @@ size_t znzread(void* buf, size_t size, size_t nmemb, znzFile file)
 {
   if (file==NULL) { return 0; }
 #ifdef HAVE_ZLIB
-  if (file->zfptr!=NULL) 
+  if (file->zfptr!=NULL)
     return (size_t) (gzread(file->zfptr,buf,((int) size)*((int) nmemb)) / size);
 #endif
   return fread(buf,size,nmemb,file->nzfptr);
@@ -261,7 +261,7 @@ int znzprintf(znzFile stream, const char *format, ...)
     vsprintf(tmpstr,format,va);
     retval=gzprintf(stream->zfptr,"%s",tmpstr);
     free(tmpstr);
-  } else 
+  } else
 #endif
   {
    retval=vfprintf(stream->nzfptr,format,va);
