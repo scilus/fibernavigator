@@ -59,19 +59,18 @@ bool Anatomy::load(wxString filename)
 	// test for nifti
 	if (m_name.AfterLast('.') == _T("nii"))
 	{
-		printf("detected nifti file\n");
+		//printf("detected nifti file\n");
 		return loadNifti(filename);
 	}
 
 	else if (m_name.AfterLast('.') == _T("gz"))
 	{
-		printf("checking for compressed nifti file\n");
+		//printf("checking for compressed nifti file\n");
 		wxString tmpName = m_name.BeforeLast('.');
 		if (tmpName.AfterLast('.') == _T("nii"))
 		{
-			printf("found compressed nifti file\n");
-			loadNifti(filename);
-			return false;
+			//printf("found compressed nifti file\n");
+			return loadNifti(filename);
 		}
 	}
 	return false;
@@ -91,10 +90,11 @@ bool Anatomy::loadNifti(wxString filename)
 	m_rows = ima->dim[2]; // 200
 	m_frames = ima->dim[3]; // 160
 
+	/*
 	printf("XYZT dimensions: %d %d %d %d\n", ima->dim[1], ima->dim[2], ima->dim[3], ima->dim[4]);
 	printf("datatype: %d\n", ima->datatype);
 	printf("byte order: %d\n", ima->byteorder);
-
+	*/
 
 	if (ima->datatype == 2)
 	{
@@ -146,11 +146,6 @@ bool Anatomy::loadNifti(wxString filename)
 			nifti_swap_2bytes(nSize, filedata->data);
 
 			unsigned short int *data = (unsigned short int*)filedata->data;
-			int max = 0;
-			for (int i = 0 ; i < nSize ; ++i)
-				max = wxMax(max, data[i]);
-
-			printf("max: %d\n", max);
 
 			m_floatDataset = new float[nSize];
 			for ( int i = 0 ; i < nSize ; ++i)
