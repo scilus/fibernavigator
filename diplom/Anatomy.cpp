@@ -71,7 +71,7 @@ bool Anatomy::load(wxString filename)
 		if (tmpName.AfterLast('.') == _T("nii"))
 		{
 			printf("found compressed nifti file\n");
-			//loadNifti(filename);
+			loadNifti(filename);
 			return false;
 		}
 	}
@@ -82,58 +82,34 @@ bool Anatomy::load(wxString filename)
 // TODO
 bool Anatomy::loadNifti(wxString filename)
 {
-	nifti_1_header hdr;
-
-	FILE *fp;
-	int ret;
-
 	char* hdr_file;
 	hdr_file = (char*) malloc(filename.length()+1);
 	strcpy(hdr_file, (const char*) filename.mb_str(wxConvUTF8));
 
+	nifti_image* ima = nifti_image_read(hdr_file, 0);
 
+	m_columns = ima->dim[1]; // 160
+	m_rows = ima->dim[2]; // 200
+	m_frames = ima->dim[3]; // 160
 
-	/********** open and read header */
-	fp = fopen(hdr_file,"r");
-	if (fp == NULL) {
-	        fprintf(stderr, "\nError opening header file %s\n",hdr_file);
-	        exit(1);
-	}
-	ret = fread(&hdr, MIN_HEADER_SIZE, 1, fp);
-	if (ret != 1) {
-	        fprintf(stderr, "\nError reading header file %s\n",hdr_file);
-	        exit(1);
-	}
-	fclose(fp);
+	printf("XYZT dimensions: %d %d %d %d\n", ima->dim[1], ima->dim[2], ima->dim[3], ima->dim[4]);
+	printf("datatype: %d\n", ima->datatype);
 
-
-	/********** print a little header information */
-	fprintf(stderr, "\n%s header information:",hdr_file);
-	fprintf(stderr, "\nXYZT dimensions: %d %d %d %d",hdr.dim[1],hdr.dim[2],hdr.dim[3],hdr.dim[4]);
-	fprintf(stderr, "\nDatatype code and bits/pixel: %d %d",hdr.datatype,hdr.bitpix);
-	fprintf(stderr, "\nScaling slope and intercept: %.6f %.6f",hdr.scl_slope,hdr.scl_inter);
-	fprintf(stderr, "\nByte offset to data in datafile: %ld",(long)(hdr.vox_offset));
-	fprintf(stderr, "\n");
-
-	m_columns = hdr.dim[1]; // 160
-	m_rows = hdr.dim[2]; // 200
-	m_frames = hdr.dim[3]; // 160
-
-	if (hdr.datatype == 2)
+	if (ima->datatype == 2)
 	{
-		if (hdr.dim[4] == 1) {
+		if (ima->dim[4] == 1) {
 			m_type = Head_byte;
 		}
-		else if (hdr.dim[4] == 3) {
+		else if (ima->dim[4] == 3) {
 			m_type = RGB;
 		}
 		else m_type = TERROR;
 	}
-	else if (hdr.datatype == 4) m_type = Head_short;
+	else if (ima->datatype == 4) m_type = Head_short;
 
-	else if (hdr.datatype == 16)
+	else if (ima->datatype == 16)
 	{
-		if (hdr.dim[4] == 3) {
+		if (ima->dim[4] == 3) {
 			m_type = Vectors_;
 		}
 		/*
@@ -146,39 +122,16 @@ bool Anatomy::loadNifti(wxString filename)
 	}
 	else m_type = TERROR;
 
+	nifti_image* filedata = nifti_image_read(hdr_file, 1);
+	int nSize = ima->dim[1] * ima->dim[2] * ima->dim[3];
 
-
-	/********** open the datafile, jump to data offset */
-	fp = fopen(hdr_file,"r");
-	if (fp == NULL) {
-	        fprintf(stderr, "\nError opening data file %s\n",hdr_file);
-	        exit(1);
-	}
-
-	ret = fseek(fp, (long)(hdr.vox_offset), SEEK_SET);
-	if (ret != 0) {
-	        fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(hdr.vox_offset), hdr_file);
-	        exit(1);
-	}
 	bool flag = false;
 
 	switch (m_type)
 	{
 		case Head_byte: {
-			/********** allocate buffer and read first 3D volume from data file */
-			unsigned char *data=NULL;
-			data = (unsigned char *) malloc(sizeof(unsigned char) * hdr.dim[1]*hdr.dim[2]*hdr.dim[3]);
-			if (data == NULL) {
-				fprintf(stderr, "\nError allocating data buffer for %s\n",hdr_file);
-				return false;
-			}
-			ret = fread(data, sizeof(unsigned char), hdr.dim[1]*hdr.dim[2]*hdr.dim[3], fp);
-			if (ret != hdr.dim[1]*hdr.dim[2]*hdr.dim[3]) {
-				fprintf(stderr, "\nError reading volume 1 from %s (%d)\n",hdr_file,ret);
-				return false;
-			}
+			unsigned char *data = (unsigned char*)filedata->data;
 
-			int nSize = hdr.dim[1]*hdr.dim[2]*hdr.dim[3];
 			m_floatDataset = new float[nSize];
 			for ( int i = 0 ; i < nSize ; ++i)
 			{
@@ -189,30 +142,13 @@ bool Anatomy::loadNifti(wxString filename)
 		} break;
 
 		case Overlay: {
-			m_floatDataset = new float[hdr.dim[1]*hdr.dim[2]*hdr.dim[3]];
-			ret = fread(m_floatDataset, sizeof(float), hdr.dim[1]*hdr.dim[2]*hdr.dim[3], fp);
-			if (ret != hdr.dim[1]*hdr.dim[2]*hdr.dim[3]) {
-				fprintf(stderr, "\nError reading volume 1 from %s (%d)\n",hdr_file,ret);
-				return false;
-
-			}
+			m_floatDataset = (float*) filedata->data;
 			flag = true;
 		} break;
 
 		case RGB: {
-			unsigned char *data=NULL;
-			data = (unsigned char *) malloc(sizeof(unsigned char) * hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3);
-			if (data == NULL) {
-				fprintf(stderr, "\nError allocating data buffer for %s\n",hdr_file);
-				return false;
-			}
-			ret = fread(data, sizeof(unsigned char), hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3, fp);
-			if (ret != hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3) {
-				fprintf(stderr, "\nError reading volume 1 from %s (%d)\n",hdr_file,ret);
-				return false;
-			}
+			unsigned char *data=(unsigned char*)filedata->data;
 
-			int nSize = hdr.dim[1]*hdr.dim[2]*hdr.dim[3];
 			m_floatDataset = new float[nSize*3];
 
 			for (int i = 0 ; i < nSize ; ++i)
@@ -224,24 +160,12 @@ bool Anatomy::loadNifti(wxString filename)
 
 			}
 
-
 			flag = true;
 		} break;
 
 		case Vectors_: {
-			float *data=NULL;
-			data = (float *) malloc(sizeof(float) * hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3);
-			if (data == NULL) {
-				fprintf(stderr, "\nError allocating data buffer for %s\n",hdr_file);
-				return false;
-			}
-			ret = fread(data, sizeof(float), hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3, fp);
-			if (ret != hdr.dim[1]*hdr.dim[2]*hdr.dim[3]*3) {
-				fprintf(stderr, "\nError reading volume 1 from %s (%d)\n",hdr_file,ret);
-				return false;
-			}
+			float *data=(float*)filedata->data;
 
-			int nSize = hdr.dim[1]*hdr.dim[2]*hdr.dim[3];
 			m_floatDataset = new float[nSize*3];
 
 			for (int i = 0 ; i < nSize ; ++i)
@@ -263,8 +187,6 @@ bool Anatomy::loadNifti(wxString filename)
 		default:
 			break;
 	}
-
-	fclose(fp);
 
 	is_loaded = flag;
 
