@@ -338,6 +338,11 @@ bool DatasetHelper::loadScene(wxString filename)
 	long xp, yp, zp;
 	xp = yp = zp = 0;
 
+	double r00, r10, r20, r01, r11, r21, r02, r12, r22;
+	r10 = r20 = r01 = r21 = r02 = r12 = 0;
+	r00 = r11 = r22 = 1;
+
+
 	wxXmlDocument doc;
 	if (!doc.Load(filename))
 		return false;
@@ -375,6 +380,29 @@ bool DatasetHelper::loadScene(wxString filename)
 			yPos.ToLong(&yp, 10);
 			zPos.ToLong(&zp, 10);
 		}
+
+		else if (child->GetName() == wxT("rotation")) {
+			wxString rot00 = child->GetPropVal(wxT("rot00"), wxT("1"));
+			wxString rot10 = child->GetPropVal(wxT("rot10"), wxT("1"));
+			wxString rot20 = child->GetPropVal(wxT("rot20"), wxT("1"));
+			wxString rot01 = child->GetPropVal(wxT("rot01"), wxT("1"));
+			wxString rot11 = child->GetPropVal(wxT("rot11"), wxT("1"));
+			wxString rot21 = child->GetPropVal(wxT("rot21"), wxT("1"));
+			wxString rot02 = child->GetPropVal(wxT("rot02"), wxT("1"));
+			wxString rot12 = child->GetPropVal(wxT("rot12"), wxT("1"));
+			wxString rot22 = child->GetPropVal(wxT("rot22"), wxT("1"));
+
+			rot00.ToDouble(&r00);
+			rot10.ToDouble(&r10);
+			rot20.ToDouble(&r20);
+			rot01.ToDouble(&r01);
+			rot11.ToDouble(&r11);
+			rot21.ToDouble(&r21);
+			rot02.ToDouble(&r02);
+			rot12.ToDouble(&r12);
+			rot22.ToDouble(&r22);
+		}
+
 
 		else if (child->GetName() == wxT("data")) {
 			wxXmlNode *datasetnode = child->GetChildren();
@@ -519,6 +547,17 @@ bool DatasetHelper::loadScene(wxString filename)
 	mainFrame->m_zSlider->SetValue(zp);
 	updateView(xp, yp, zp);
 
+	m_transform.s.M00 = r00;
+	m_transform.s.M10 = r10;
+	m_transform.s.M20 = r20;
+	m_transform.s.M01 = r01;
+	m_transform.s.M11 = r11;
+	m_transform.s.M21 = r21;
+	m_transform.s.M02 = r02;
+	m_transform.s.M12 = r12;
+	m_transform.s.M22 = r22;
+	mainFrame->m_mainGL->setRotation();
+
 	return true;
 }
 
@@ -529,12 +568,25 @@ void DatasetHelper::save(wxString filename)
 	wxXmlNode *nodepoints = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("points"));
 	wxXmlNode *data = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("data"));
 	wxXmlNode *anatomy = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("anatomy"));
+	wxXmlNode *rotation = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("rotation"));
 	wxXmlNode *anatomyPos = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("position"));
 
 	wxXmlProperty *prop1 = new wxXmlProperty(wxT("rows"), wxString::Format(wxT("%d"), rows));
 	wxXmlProperty *prop2 = new wxXmlProperty(wxT("columns"), wxString::Format(wxT("%d"), columns), prop1);
 	wxXmlProperty *prop3 = new wxXmlProperty(wxT("frames"), wxString::Format(wxT("%d"), frames), prop2);
 	anatomy->AddProperty(prop3);
+
+	wxXmlProperty *rot00 = new wxXmlProperty(wxT("rot00"), wxString::Format(wxT("%.20f"), m_transform.s.M00));
+	wxXmlProperty *rot10 = new wxXmlProperty(wxT("rot10"), wxString::Format(wxT("%.20f"), m_transform.s.M10), rot00);
+	wxXmlProperty *rot20 = new wxXmlProperty(wxT("rot20"), wxString::Format(wxT("%.20f"), m_transform.s.M20), rot10);
+	wxXmlProperty *rot01 = new wxXmlProperty(wxT("rot01"), wxString::Format(wxT("%.20f"), m_transform.s.M01), rot20);
+	wxXmlProperty *rot11 = new wxXmlProperty(wxT("rot11"), wxString::Format(wxT("%.20f"), m_transform.s.M11), rot01);
+	wxXmlProperty *rot21 = new wxXmlProperty(wxT("rot21"), wxString::Format(wxT("%.20f"), m_transform.s.M21), rot11);
+	wxXmlProperty *rot02 = new wxXmlProperty(wxT("rot02"), wxString::Format(wxT("%.20f"), m_transform.s.M02), rot21);
+	wxXmlProperty *rot12 = new wxXmlProperty(wxT("rot12"), wxString::Format(wxT("%.20f"), m_transform.s.M12), rot02);
+	wxXmlProperty *rot22 = new wxXmlProperty(wxT("rot22"), wxString::Format(wxT("%.20f"), m_transform.s.M22), rot12);
+	rotation->AddProperty(rot22);
+
 
 	int countPoints = mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tPointId, true);
 	wxTreeItemId id, childid;
