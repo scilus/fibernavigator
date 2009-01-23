@@ -369,7 +369,7 @@ void Fibers::resetColorArray()
 	int pc = 0;
 	float r,g,b;
 	float x1,x2,y1,y2,z1,z2;
-
+	float lastx, lasty, lastz;
 	for ( int i = 0 ; i < getLineCount() ; ++i )
 	{
 		x1 = m_pointArray[pc];
@@ -382,18 +382,26 @@ void Fibers::resetColorArray()
 		r = (x1) - (x2);
 		g = (y1) - (y2);
 		b = (z1) - (z2);
+		if (r < 0.0) r *= -1.0 ;
+		if (g < 0.0) g *= -1.0 ;
+		if (b < 0.0) b *= -1.0 ;
+
 
 		float norm = sqrt(r*r + g*g + b*b);
 		r *= 1.0/norm;
-        g *= 1.0/norm;
-        b *= 1.0/norm;
+		g *= 1.0/norm;
+		b *= 1.0/norm;
+
+		lastx = m_pointArray[pc]   + (m_pointArray[pc]   - m_pointArray[pc+3]);
+		lasty = m_pointArray[pc+1] + (m_pointArray[pc+1] - m_pointArray[pc+4]);
+		lastz = m_pointArray[pc+2] + (m_pointArray[pc+2] - m_pointArray[pc+5]);
 
 		for (int j = 0; j < getPointsPerLine(i) ; ++j )
 		{
-	        colorData[pc] = r;
-	        colorData[pc+1] = g;
-	        colorData[pc+2] = b;
-            pc += 3;
+			colorData[pc] = r;
+			colorData[pc+1] = g;
+			colorData[pc+2] = b;
+			pc += 3;
 		}
 	}
 
