@@ -90,7 +90,7 @@ void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 void MainCanvas::OnSize(wxSizeEvent& event)
 {
 #ifndef __WXMAC__
-    if (!m_dh->scene->m_texAssigned)
+    if (!m_dh->m_texAssigned)
     		wxGLCanvas::SetCurrent();
 #ifndef __WXMAC__
 	else
@@ -264,7 +264,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					else if (event.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20)
 					{
 						((SelectionBox*)m_hr.object)->processDrag(event.GetPosition(), m_lastPos);
-						m_dh->scene->m_selBoxChanged = true;
+						m_dh->m_selBoxChanged = true;
 					}
 					else if (event.Dragging() && m_hr.picked == 20)
 					{
@@ -525,14 +525,14 @@ void MainCanvas::render()
 
 void MainCanvas::invalidate()
 {
-	if (m_dh->scene->m_texAssigned) {
+	if (m_dh->m_texAssigned) {
 #ifndef __WXMAC__
 		SetCurrent(*m_dh->scene->getMainGLContext());
 #else
         SetCurrent();
 #endif
 		//m_dh->scene->releaseTextures();
-		m_dh->scene->m_texAssigned = false;
+		m_dh->m_texAssigned = false;
 	}
 	m_init = false;
 }

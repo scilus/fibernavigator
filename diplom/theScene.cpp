@@ -10,12 +10,10 @@ TheScene::TheScene(DatasetHelper* dh)
 {
 	m_dh = dh;
 
-	m_texAssigned = false;
-
 	m_mainGLContext = 0;
 
 	m_dh->anatomyHelper = new AnatomyHelper(m_dh);
-	m_selBoxChanged = true;
+
 }
 
 TheScene::~TheScene()
@@ -43,9 +41,9 @@ void TheScene::initGL(int view)
 	}
 	glEnable(GL_DEPTH_TEST);
 
-	if (!m_texAssigned) {
+	if (!m_dh->m_texAssigned) {
 		m_dh->shaderHelper = new ShaderHelper(m_dh);
-		m_texAssigned = true;
+		m_dh->m_texAssigned = true;
 	}
 
 	//float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
@@ -282,10 +280,10 @@ void TheScene::renderFibers()
 				m_dh->shaderHelper->m_fiberShader->setUniInt("lightOn", m_dh->lighting);
 				m_dh->shaderHelper->m_fiberShader->setUniInt("useColorMap", m_dh->colorMap);
 			}
-			if (m_selBoxChanged)
+			if (m_dh->m_selBoxChanged)
 			{
 				((Fibers*)info)->updateLinesShown();
-				m_selBoxChanged = false;
+				m_dh->m_selBoxChanged = false;
 			}
 			info->draw();
 
@@ -310,10 +308,10 @@ void TheScene::renderFakeTubes()
 
 		if (info->getType() == Fibers_ && info->getShow())
 		{
-			if (m_selBoxChanged)
+			if (m_dh->m_selBoxChanged)
 			{
 				((Fibers*)info)->updateLinesShown();
-				m_selBoxChanged = false;
+				m_dh->m_selBoxChanged = false;
 			}
 
 			m_dh->shaderHelper->m_fakeTubeShader->bind();

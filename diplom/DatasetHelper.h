@@ -188,6 +188,9 @@ public:
 	int xMove;
 	int yMove;
 
+	bool m_texAssigned;
+	bool m_selBoxChanged;
+
 
 
 private:

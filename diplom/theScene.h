@@ -11,7 +11,7 @@
 #include "datasetInfo.h"
 #include "DatasetHelper.h"
 
-#include "lic/FgeImageSpaceLIC.h"
+//#include "lic/FgeImageSpaceLIC.h"
 
 #include "wx/glcanvas.h"
 
@@ -43,15 +43,11 @@ public:
 
 	void drawSphere(float, float, float, float);
 
-	bool m_texAssigned;
-	bool m_selBoxChanged;
-
-
 private:
 	wxGLContext* m_mainGLContext;
 
 	DatasetHelper* m_dh;
-	FgeImageSpaceLIC* m_lic;
+	//FgeImageSpaceLIC* m_lic;
 
 	void lightsOn();
 	void lightsOff();

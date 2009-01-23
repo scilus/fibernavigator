@@ -722,7 +722,7 @@ void MainFrame::OnToggleShowBox(wxCommandEvent& WXUNUSED(event))
 		box->setDirty(true);
 	}
 
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -782,7 +782,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 		selBox->setTreeId(tNewBoxId);
 	}
 
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 /*TODO***************************************************************************************************
@@ -809,7 +809,7 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 			a->m_roi = selBox;
 		}
 	}
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -1037,7 +1037,7 @@ void MainFrame::OnLoop(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnInvertFibers(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->invertFibers();
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -1111,7 +1111,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 		if (info->getType() == Mesh_ || info->getType() == IsoSurface_ || info->getType() == Surface_ )
 		{
 			info->setColor(col);
-			m_dh->scene->m_selBoxChanged = true;
+			m_dh->m_selBoxChanged = true;
 			refreshAllGLWidgets();
 			return;
 		}
@@ -1133,7 +1133,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 			box->setDirty(true);
 		}
 	}
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 
@@ -1147,7 +1147,7 @@ void MainFrame::OnResetColor(wxCommandEvent& WXUNUSED(event))
 	Fibers* fibers = NULL; // initalize it quiet compiler
 	if (!m_dh->getFiberDataset(fibers)) return;
 	fibers->resetColorArray();
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 
@@ -1234,7 +1234,7 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 		{
 			a->m_roi->m_threshold = threshold;
 			a->m_roi->setDirty(true);
-			m_dh->scene->m_selBoxChanged = true;
+			m_dh->m_selBoxChanged = true;
 		}
 	}
 	refreshAllGLWidgets();
@@ -1515,7 +1515,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 		++load;
 	case Label_datasets:
 		flag = m_dh->load(++load);
-		if (flag) m_dh->scene->m_selBoxChanged = true;
+		if (flag) m_dh->m_selBoxChanged = true;
 		m_treeWidget->Unselect();
 		break;
 	default:
@@ -1567,7 +1567,7 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 		((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->toggleNOT();
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty(true);
-		m_dh->scene->m_selBoxChanged = true;
+		m_dh->m_selBoxChanged = true;
 		if (((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->getNOT())
 			m_treeWidget->SetItemBackgroundColour(treeid, *wxRED);
 		else
@@ -1584,7 +1584,7 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::OnTreeEvent(wxCommandEvent& WXUNUSED(event))
 {
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************

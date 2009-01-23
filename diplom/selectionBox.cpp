@@ -631,7 +631,7 @@ void SelectionBox::update()
 
 	updateStatusBar();
 	m_dirty = true;
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 	m_dh->mainFrame->refreshAllGLWidgets();
 }
 
@@ -680,7 +680,7 @@ void SelectionBox::lockToCrosshair()
 void SelectionBox::setDirty(bool v)
 {
 	m_dirty = v;
-	m_dh->scene->m_selBoxChanged = true;
+	m_dh->m_selBoxChanged = true;
 }
 
 int SelectionBox::getIcon()

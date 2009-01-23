@@ -86,6 +86,9 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	pointMode = false;
 	blendAlpha = false;
 
+	m_texAssigned = false;
+	m_selBoxChanged = true;
+
 #ifdef DEBUG
 	debugLevel = 0;
 #else
@@ -138,7 +141,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		if (!loadScene(filename)) {
 			return false;
 		}
-		scene->m_selBoxChanged = true;
+		m_selBoxChanged = true;
 		mainFrame->refreshAllGLWidgets();
 		return true;
 	}
@@ -675,7 +678,7 @@ void DatasetHelper::treeFinished()
 	printDebug(_T("tree finished"),1);
 	fibers_loaded = true;
 	updateAllSelectionBoxes();
-	scene->m_selBoxChanged = true;
+	m_selBoxChanged = true;
 	mainFrame->refreshAllGLWidgets();
 }
 

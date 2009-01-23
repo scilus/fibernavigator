@@ -150,7 +150,6 @@ bool Anatomy::loadNifti(wxString filename)
 			{
 				max = wxMax(max, data[i]);
 			}
-			printf("max: %d\n", max);
 
 			m_floatDataset = new float[nSize];
 			for ( int i = 0 ; i < nSize ; ++i)
@@ -258,7 +257,6 @@ void Anatomy::generateTexture()
 		float *tempData = new float[size];
 		for ( int i = 0 ; i < size ; ++i )
 			tempData[i] = wxMax(m_floatDataset[i], -m_floatDataset[i]);
-
 
 		glTexImage3D(GL_TEXTURE_3D,
 			0,
