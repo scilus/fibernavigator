@@ -107,12 +107,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="3"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;C:\wxWidgets-2.8.8\lib\vc_lib\mswu&quot;;&quot;C:\wxWidgets-2.8.8\include&quot;;.;C:\glew\include"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="&quot;C:\wxWidgets-2.8.9\lib\vc_lib\mswu&quot;;&quot;C:\wxWidgets-2.8.9\include&quot;;.;C:\glew\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;__WINDOWS__;__WXMSW__;NOPCH;_UNICODE;DEBUG"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -128,10 +129,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glew32.lib wxbase28u.lib wxbase28u_net.lib wxbase28u_xml.lib wxmsw28u_adv.lib wxmsw28u_aui.lib wxmsw28u_core.lib wxmsw28u_gl.lib wxmsw28u_html.lib wxmsw28u_media.lib wxmsw28u_qa.lib wxmsw28u_richtext.lib wxmsw28u_xrc.lib wxregexu.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib uuid.lib advapi32.lib wsock32.lib odbc32.lib"
+				AdditionalDependencies="glew32.lib wxmsw28u.lib wxmsw28u_gl.lib wxpng.lib wxzlib.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib uuid.lib advapi32.lib wsock32.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\wxWidgets-2.8.8\lib\vc_lib&quot;;C:\glew\lib"
-				GenerateDebugInformation="true"
+				AdditionalLibraryDirectories="&quot;C:\wxWidgets-2.8.9\lib\vc_lib&quot;;C:\glew\lib"
+				IgnoreAllDefaultLibraries="false"
+				GenerateDebugInformation="false"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -260,10 +262,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GLHelper.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\KdTree.cpp"
 				>
 			</File>
@@ -289,6 +287,10 @@
 			</File>
 			<File
 				RelativePath=".\myListCtrl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\nifti\nifti1_io.c"
 				>
 			</File>
 			<File
@@ -335,6 +337,10 @@
 				RelativePath=".\IsoSurface\Vector.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\nifti\znzlib.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -363,6 +369,10 @@
 			</File>
 			<File
 				RelativePath=".\IsoSurface\CIsoSurface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\nifti\config.h"
 				>
 			</File>
 			<File
@@ -454,10 +464,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GLHelper.h"
-				>
-			</File>
-			<File
 				RelativePath=".\KdTree.h"
 				>
 			</File>
@@ -483,6 +489,14 @@
 			</File>
 			<File
 				RelativePath=".\myListCtrl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\nifti\nifti1.h"
+				>
+			</File>
+			<File
+				RelativePath=".\nifti\nifti1_io.h"
 				>
 			</File>
 			<File
@@ -531,6 +545,18 @@
 			</File>
 			<File
 				RelativePath=".\IsoSurface\Vector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\nifti\zconf.h"
+				>
+			</File>
+			<File
+				RelativePath=".\nifti\zlib.h"
+				>
+			</File>
+			<File
+				RelativePath=".\nifti\znzlib.h"
 				>
 			</File>
 		</Filter>
