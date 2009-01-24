@@ -1,6 +1,7 @@
 #ifndef _ZNZLIB_H_
 #define _ZNZLIB_H_
 
+#define HAVE_ZLIB
 /*
 znzlib.h  (zipped or non-zipped library)
 

@@ -19,8 +19,6 @@
 
 #include "znzlib.h"
 
-#define HAVE_ZLIB
-
 /*=================*/
 #ifdef  __cplusplus
 extern "C" {

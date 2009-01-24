@@ -114,7 +114,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		wxString caption = wxT("Choose a file");
 		wxString
 				wildcard =
-						wxT("*.*|*.*|Nifti (*.nii)|*.nii|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
+						wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
 		wxString defaultDir = wxEmptyString;
 		wxString defaultFilename = wxEmptyString;
 		wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,
