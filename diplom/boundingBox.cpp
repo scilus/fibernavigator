@@ -68,7 +68,7 @@ void BoundingBox::setSize(Vector c)
 
 hitResult BoundingBox::hitTest(Ray *ray)
 {
-	hitResult hr = {false, 0, 0, NULL};
+	hitResult hr = {false, 0, 0, 0};
 	float tmin, tmax, tymin, tymax, tzmin, tzmax;
 	float dirx = ray->m_dir.x;
 	if (dirx >= 0) {
