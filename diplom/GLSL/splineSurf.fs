@@ -35,10 +35,21 @@ void main() {
 	v.x = (v.x) / float(dimX);
 	v.y = (v.y) / float(dimY);
 	v.z = (v.z) / float(dimZ);
-
+/*
 	for (int i = 9; i > -1; i--) {
 		if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold[i], v, alpha[i]);
 	}
+*/
+	if (show[9]) lookupTexMesh(color, type[9], texes[9], threshold[9], v, alpha[9]);
+	if (show[8]) lookupTexMesh(color, type[8], texes[8], threshold[8], v, alpha[8]);
+	if (show[7]) lookupTexMesh(color, type[7], texes[7], threshold[7], v, alpha[7]);
+	if (show[6]) lookupTexMesh(color, type[6], texes[6], threshold[6], v, alpha[6]);
+	if (show[5]) lookupTexMesh(color, type[5], texes[5], threshold[5], v, alpha[5]);
+	if (show[4]) lookupTexMesh(color, type[4], texes[4], threshold[4], v, alpha[4]);
+	if (show[3]) lookupTexMesh(color, type[3], texes[3], threshold[3], v, alpha[3]);
+	if (show[2]) lookupTexMesh(color, type[2], texes[2], threshold[2], v, alpha[2]);
+	if (show[1]) lookupTexMesh(color, type[1], texes[1], threshold[1], v, alpha[1]);
+	if (show[0]) lookupTexMesh(color, type[0], texes[0], threshold[0], v, alpha[0]);
 
 	if (color.rgb == vec3(0.0)) discard;
 
