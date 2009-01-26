@@ -32,6 +32,7 @@ DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
  * Event Table
  *
  ****************************************************************************************************/
+ 
 BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	/*
 	 * Menu events

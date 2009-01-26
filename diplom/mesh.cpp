@@ -102,13 +102,13 @@ bool Mesh::load(wxString filename)
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			float y = f.f;
+			float y = m_dh->rows - f.f;
 			fp += 4;
 			f.b[0] = buffer[fp];
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			float z = f.f;
+			float z = m_dh->frames - f.f;
 			fp += 4;
 			m_tMesh->addVert(x, y, z);
 		}
