@@ -9,7 +9,7 @@
 #echo $1
 #
 # change these defines to what you want to build a bundle from
-export EXE=main
+export EXE=FiberNavigator
 export BUNDLEDIR=$EXE.app
 export EXEC_DIR=$BUNDLEDIR/Contents/MacOS
 export FRAMEWORK_DIR=$BUNDLEDIR/Contents/Frameworks
@@ -29,9 +29,13 @@ mkdir -p $FRAMEWORK_DIR
 #EXTLIBS="/sw/lib/libboost_python.dylib"
 #EXTLIBS2="libboost_python.dylib"
 
+SYSROOT=/Developer/SDKs/MacOSX10.5.sdk
+SYSROOT2=/Developer/SDKs/MacOSX10.4u.sdk
+
 # copy additional libraries
-EXTLIBS=("/usr/lib/libwx_macud-2.8.0.dylib" "/usr/lib/libwx_macud_gl-2.8.0.dylib" "/usr/lib/libGLEW.1.5.0.dylib")
-EXTLIBN=("libwx_macud-2.8.0.dylib" "libwx_macud_gl-2.8.0.dylib" "libGLEW.1.5.0.dylib")
+#EXTLIBS=("/usr/lib/libwx_macud-2.8.0.dylib" "/usr/lib/libwx_macud_gl-2.8.0.dylib" "/usr/lib/libGLEW.1.5.0.dylib")
+EXTLIBS=("${SYSROOT2}/opt//lib/libwx_mac-2.8.0.dylib" "${SYSROOT2}/opt//lib/libwx_mac_gl-2.8.0.dylib" "/Users/mario/glew/glew-10.5/lib/libGLEW.1.5.1.dylib")
+EXTLIBN=("libwx_mac-2.8.0.dylib" "libwx_mac_gl-2.8.0.dylib" "libGLEW.1.5.1.dylib")
 
 echo "==========================>> $EXTLIBS"
 for i in ${EXTLIBS[@]}
@@ -60,6 +64,14 @@ do
   -change $mlib \
   @executable_path/../Frameworks/$mbase \
   $EXEC_DIR/$EXE
+
+# some path still end up in /usr/lib don't know why,
+# but we circumvent this...
+  install_name_tool \
+  -change /usr/lib/$mbase \
+  @executable_path/../Frameworks/$mbase \
+  $EXEC_DIR/$EXE
+
 done
 
 
@@ -134,6 +146,6 @@ cd $path
 
 
 # create a disk image from this directory
-rm main.dmg
+rm ${EXE}.dmg
 hdiutil create -srcfolder ${EXE}-img -format UDBZ -volname ${EXE} ${EXE}.dmg
 
