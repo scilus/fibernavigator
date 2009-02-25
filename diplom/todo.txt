@@ -29,6 +29,7 @@ laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
 isosurface von belibigen skalaren datensatzen ( float/short )
 
 20.02.2008 : Einige Dinge die noch gemacht werden muessen:
+* slider fuer isosurface reparieren
 * koordinatensystem: anzeige in unterschiedlichen konventionen ( nullpunkt in lipsia und nifti )
 * start des programms mit nicht verhandenem filenamen -> absturz
 * verwendung der voxelgröße ( skalierung )
