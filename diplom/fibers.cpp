@@ -187,11 +187,11 @@ bool Fibers::load(wxString filename)
 
 	m_dh->printDebug(_T("move vertices"), 1);
 	for (int i = 0; i < countPoints * 3 ; ++i) {
-		m_pointArray[i] = m_dh->columns - m_pointArray[i];
+		m_pointArray[i] = m_pointArray[i] ;
 		++i;
-		m_pointArray[i] = m_dh->rows - m_pointArray[i];
+		m_pointArray[i] = m_dh->columns - m_pointArray[i] ;
 		++i;
-		//m_pointArray[i] = m_dh->frames - m_pointArray[i];
+		m_pointArray[i] = m_dh->frames - m_pointArray[i] ;
 	}
 
 	calculateLinePointers();

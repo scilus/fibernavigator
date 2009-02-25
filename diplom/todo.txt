@@ -28,6 +28,21 @@ laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
 
 isosurface von belibigen skalaren datensatzen ( float/short )
 
+20.02.2008 : Einige Dinge die noch gemacht werden muessen:
+* koordinatensystem: anzeige in unterschiedlichen konventionen ( nullpunkt in lipsia und nifti )
+* start des programms mit nicht verhandenem filenamen -> absturz
+* verwendung der voxelgröße ( skalierung )
+* skalierung der grauwerte
+* interne implementierung der offsetflaeche
+* keine OPENGL installation: beim start lesbare fehlermeldung
+* falls möglich: remote x-session: initializing verwendung der shader auf dem localhost. 
+* implementierung einer clipping plane, um fasern auszublenden
+* evtl. ein frei rotierbares navigation slide
+* lesen der fasern als vtk-ascii file
+* lesen der fasern als binary file so wie es z.b. camino erzeugt (Ting)
+* lesen von freesurfer mesh files
+* skalieren des main frames ( nicht nur quadratisch. ist besonders fuer wide-screen fesnter notwendig
+
 ===============================================================================
 =
 =     bug-liste
