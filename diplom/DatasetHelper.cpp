@@ -114,7 +114,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		wxString caption = wxT("Choose a file");
 		wxString
 				wildcard =
-						wxT("*.*|*.*|Nifti (*.nii/*.nii.gz)|*.nii*|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
+						wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
 		wxString defaultDir = wxEmptyString;
 		wxString defaultFilename = wxEmptyString;
 		wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,
@@ -547,7 +547,6 @@ bool DatasetHelper::loadScene(wxString filename)
 	mainFrame->m_zSlider->SetValue(zp);
 	updateView(xp, yp, zp);
 
-/*	Matrix4fSetIdentity(&m_transform);
 	m_transform.s.M00 = r00;
 	m_transform.s.M10 = r10;
 	m_transform.s.M20 = r20;
@@ -558,7 +557,7 @@ bool DatasetHelper::loadScene(wxString filename)
 	m_transform.s.M12 = r12;
 	m_transform.s.M22 = r22;
 	mainFrame->m_mainGL->setRotation();
-*/
+
 	return true;
 }
 
