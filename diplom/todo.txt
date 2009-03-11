@@ -43,6 +43,7 @@ isosurface von belibigen skalaren datensatzen ( float/short )
 * lesen der fasern als binary file so wie es z.b. camino erzeugt (Ting)
 * lesen von freesurfer mesh files
 * skalieren des main frames ( nicht nur quadratisch. ist besonders fuer wide-screen fesnter notwendig
+* BUG: lic texturierung und neues coordinatensystem
 
 ===============================================================================
 =
