@@ -175,7 +175,8 @@ void TriangleMesh::calcNeighbor(const int triangleNum)
 int TriangleMesh::calcTriangleTensor(const int triNum)
 {
 	Vector p = getTriangleCenter(triNum);
-	int x = wxMin(m_dh->columns-1, wxMax(0,(int)(p[0] + 0.5)));
+	//int x = wxMin(m_dh->columns-1, wxMax(0,(int)(p[0] + 0.5)));
+	int x = wxMax(m_dh->columns - (int)(p[0] + 0.5), 0);
 	int y = wxMin(m_dh->rows   -1, wxMax(0,(int)(p[1] + 0.5)));
 	int z = wxMin(m_dh->frames -1, wxMax(0,(int)(p[2] + 0.5)));
 	return  x + y * m_dh->columns + z * m_dh->columns * m_dh->rows;
