@@ -108,7 +108,8 @@ DatasetHelper::~DatasetHelper() {
 	printDebug(_T("dataset helper destructor done"),0);
 }
 
-bool DatasetHelper::load(int index, wxString filename, float threshold, bool active, bool showFS, bool useTex) {
+bool DatasetHelper::load(int index, wxString filename, float threshold, bool active, bool showFS, bool useTex) 
+{
 	if (index >= 0)
 	{
 		wxString caption = wxT("Choose a file");
@@ -151,22 +152,6 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 
 		if (anatomy->load(filename))
 		{
-			if (anatomy_loaded)
-			{
-				if (anatomy->getRows() != rows || anatomy->getColumns()	!= columns || anatomy->getFrames() != frames)
-				{
-					lastError = wxT("dimensions of loaded files must be the same");
-					return false;
-				}
-			}
-			else
-			{
-				rows = anatomy->getRows();
-				columns = anatomy->getColumns();
-				frames = anatomy->getFrames();
-				anatomy_loaded = true;
-			}
-
 			anatomy->setThreshold(threshold);
 			anatomy->setShow(active);
 			anatomy->setShowFS(showFS);
@@ -174,6 +159,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 			finishLoading(anatomy);
 			return true;
 		}
+		/*
 		else  //(anatomy->load(filename))
 		{
 			if (anatomy->getRows() <= 0 || anatomy->getColumns() <= 0 || anatomy->getFrames() <= 0)
@@ -184,6 +170,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 			lastError = wxT("couldn't load anatomy file");
 			return false;
 		}
+		*/
 	}
 
 	else if (ext == wxT("mesh")) {

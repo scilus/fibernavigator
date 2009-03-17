@@ -89,6 +89,22 @@ bool Anatomy::loadNifti(wxString filename)
 	m_columns = ima->dim[1]; // 160
 	m_rows = ima->dim[2]; // 200
 	m_frames = ima->dim[3]; // 160
+	
+	if (m_dh->anatomy_loaded)
+	{
+		if (m_rows != m_dh->rows || m_columns != m_dh->columns || m_frames != m_dh->frames)
+		{
+			m_dh->lastError = wxT("dimensions of loaded files must be the same");
+			return false;
+		}
+	}
+	else
+	{
+		m_dh->rows 		= m_rows;
+		m_dh->columns 	= m_columns;
+		m_dh->frames 	= m_frames;
+		m_dh->anatomy_loaded = true;
+	}
 
 	/*
 	printf("XYZT dimensions: %d %d %d %d\n", ima->dim[1], ima->dim[2], ima->dim[3], ima->dim[4]);
