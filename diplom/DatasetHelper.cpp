@@ -122,10 +122,12 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 				wildcard, wxOPEN);
 		dialog.SetFilterIndex(index);
 		dialog.SetDirectory(lastPath);
-		if (dialog.ShowModal() == wxID_OK) {
+		if (dialog.ShowModal() == wxID_OK) 
+		{
 			lastPath = dialog.GetDirectory();
 			filename = dialog.GetPath();
-		} else
+		} 
+		else
 			return false;
 	}
 
@@ -135,6 +137,17 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		lastError = wxT("dataset already loaded");
 		return false;
 	}
+	
+	// check if filename is valid
+	if ( !wxFile::Exists( filename ) )
+	{
+		printf("File ");
+		printwxT(filename);
+		printf(" doesn't exist!\n");
+		lastError = wxT("File doesn't exist!");
+		return false;
+	}
+	
 	// check file extension
 	wxString ext = filename.AfterLast('.');
 
@@ -159,27 +172,22 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 			finishLoading(anatomy);
 			return true;
 		}
-		/*
-		else  //(anatomy->load(filename))
+		else
 		{
-			if (anatomy->getRows() <= 0 || anatomy->getColumns() <= 0 || anatomy->getFrames() <= 0)
-			{
-				lastError = wxT("couldn't parse header file");
-				return false;
-			}
-			lastError = wxT("couldn't load anatomy file");
 			return false;
 		}
-		*/
 	}
 
-	else if (ext == wxT("mesh")) {
-		if (!anatomy_loaded) {
+	else if (ext == wxT("mesh"))
+	{
+		if (!anatomy_loaded) 
+		{
 			lastError = wxT("no anatomy file loaded");
 			return false;
 		}
 		Mesh *mesh = new Mesh(this);
-		if (mesh->load(filename)) {
+		if (mesh->load(filename)) 
+		{
 			mesh->setThreshold(threshold);
 			mesh->setShow(active);
 			mesh->setShowFS(showFS);
