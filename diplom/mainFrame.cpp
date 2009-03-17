@@ -625,20 +625,20 @@ void MainFrame::OnMenuViewBottom(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuViewFront(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
-	m_dh->m_transform.s.M00 = -1.0;
 	m_dh->m_transform.s.M11 = 0.0;
 	m_dh->m_transform.s.M22 = 0.0;
-	m_dh->m_transform.s.M21 = 1.0;
 	m_dh->m_transform.s.M12 = 1.0;
+	m_dh->m_transform.s.M21 = -1.0;
 	m_mainGL->setRotation();
 }
 void MainFrame::OnMenuViewBack(wxCommandEvent& WXUNUSED(event))
 {
 	Matrix4fSetIdentity(&m_dh->m_transform);
+	m_dh->m_transform.s.M00 = -1.0;
 	m_dh->m_transform.s.M11 = 0.0;
 	m_dh->m_transform.s.M22 = 0.0;
+	m_dh->m_transform.s.M21 = 1.0;
 	m_dh->m_transform.s.M12 = 1.0;
-	m_dh->m_transform.s.M21 = -1.0;
 	m_mainGL->setRotation();
 }
 /****************************************************************************************************
