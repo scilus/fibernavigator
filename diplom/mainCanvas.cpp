@@ -587,16 +587,16 @@ void MainCanvas::OnChar(wxKeyEvent& event)
 		case WXK_RIGHT:
 			m_dh->mainFrame->m_xSlider->SetValue( wxMin(m_dh->mainFrame->m_xSlider->GetValue() + 1, m_dh->columns));
 			break;
-		case WXK_UP:
+		case WXK_DOWN:
 			m_dh->mainFrame->m_ySlider->SetValue( wxMax(0, m_dh->mainFrame->m_ySlider->GetValue() - 1));
 			break;
-		case WXK_DOWN:
+		case WXK_UP:
 			m_dh->mainFrame->m_ySlider->SetValue( wxMin(m_dh->mainFrame->m_ySlider->GetValue() + 1, m_dh->rows));
 			break;
-		case WXK_PAGEUP:
+		case WXK_PAGEDOWN:
 			m_dh->mainFrame->m_zSlider->SetValue( wxMax(0, m_dh->mainFrame->m_zSlider->GetValue() - 1));
 			break;
-		case WXK_PAGEDOWN:
+		case WXK_PAGEUP:
 			m_dh->mainFrame->m_zSlider->SetValue( wxMin(m_dh->mainFrame->m_zSlider->GetValue() + 1, m_dh->frames));
 			break;
 		case WXK_HOME:
