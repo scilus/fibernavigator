@@ -134,25 +134,25 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 			else
 				((SelectionBox*) (GetItemData(treeid)))->moveRight();
 			break;
-		case WXK_UP:
+		case WXK_DOWN:
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (GetItemData(treeid)))->resizeForward();
 			else
 				((SelectionBox*) (GetItemData(treeid)))->moveForward();
 			break;
-		case WXK_DOWN:
+		case WXK_UP:
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (GetItemData(treeid)))->resizeBack();
 			else
 				((SelectionBox*) (GetItemData(treeid)))->moveBack();
 			break;
-		case WXK_PAGEUP:
+		case WXK_PAGEDOWN:
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (GetItemData(treeid)))->resizeUp();
 			else
 				((SelectionBox*) (GetItemData(treeid)))->moveUp();
 			break;
-		case WXK_PAGEDOWN:
+		case WXK_PAGEUP:
 			if (wxGetKeyState(WXK_CONTROL))
 				((SelectionBox*) (GetItemData(treeid)))->resizeDown();
 			else

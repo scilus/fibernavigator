@@ -128,7 +128,7 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 			filename = dialog.GetPath();
 		} 
 		else
-			return false;
+			return true;
 	}
 
 	// check if dataset is already loaded and ignore it if yes

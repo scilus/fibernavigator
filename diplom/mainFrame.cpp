@@ -1504,6 +1504,15 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 		if (m_dh->lastSelectedBox) m_dh->lastSelectedBox->unselect();
 		m_dh->lastSelectedBox = (SelectionBox*)(m_treeWidget->GetItemData(treeid));
 		m_dh->lastSelectedBox->select(false);
+		for (int i = 0 ; i < m_listCtrl->GetItemCount() ; ++i)
+		{
+			DatasetInfo* info = (DatasetInfo*) m_listCtrl->GetItemData(i);
+			if (info->getType() == Fibers_ )
+			{
+				m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			}
+		}
+		
 		break;
 	case Point_:
 		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
