@@ -179,7 +179,7 @@ public:
 	bool semaphore;
 	int threadsActive;
 	/////////////////////////////////////////////////////////////////////////////////
-	// pointers to often used objects
+	// variables for mouse interaction
 	/////////////////////////////////////////////////////////////////////////////////
 	bool m_isDragging;
 	bool m_isrDragging;
@@ -188,6 +188,9 @@ public:
 	int xMove;
 	int yMove;
 
+	wxString m_scnFileName;
+	bool m_scnFileLoaded;
+	
 	bool m_texAssigned;
 	bool m_selBoxChanged;
 

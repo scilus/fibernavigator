@@ -543,6 +543,8 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
 	dialog.SetFilterIndex(0);
 	dialog.SetDirectory(m_dh->lastPath);
+	if (m_dh->m_scnFileLoaded)
+		dialog.SetFilename(m_dh->m_scnFileName);
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		m_dh->lastPath = dialog.GetDirectory();

@@ -88,6 +88,9 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 	m_texAssigned = false;
 	m_selBoxChanged = true;
+	
+	m_scnFileName = _T("");
+	m_scnFileLoaded = false;
 
 #ifdef DEBUG
 	debugLevel = 0;
@@ -157,6 +160,13 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 		}
 		m_selBoxChanged = true;
 		mainFrame->refreshAllGLWidgets();
+		
+		#ifdef __WXMSW__
+			m_scnFileName = filename.AfterLast('\\');
+		#else
+			m_scnFileName = filename.AfterLast('/');
+		#endif
+		m_scnFileLoaded = true;
 		return true;
 	}
 
