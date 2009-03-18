@@ -48,6 +48,10 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 
 	m_delta = 0;
 	m_arcBall = new ArcBallT(640.0f, 480.0f);
+	
+	orthoSizeNormal = 200;
+	orthoSizeMainX = 200;
+	orthoSizeMainY = 200;
 }
 
 MainCanvas::~MainCanvas()
@@ -76,9 +80,25 @@ void MainCanvas::init()
 
 void MainCanvas::changeOrthoSize(int value)
 {
+	orthoSizeNormal = value;
+	orthoSizeMainX = value;
+	orthoSizeMainY = value;
+	
+	if (m_view == mainView)
+	{
+		int xSize = m_dh->mainFrame->m_rightWindow->GetSize().x;
+		int ySize = m_dh->mainFrame->m_rightWindow->GetSize().y;
+		float ratio = (float)xSize / (float)ySize;
+		if (ratio > 1.0)
+			orthoSizeMainX = (int)(orthoSizeMainX * ratio);
+		else
+			orthoSizeMainY = (int)(orthoSizeMainY * (1.0 + (1.0 - ratio)) );		
+	}
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho( 0, value, 0, value, -3000, 3000);
+	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -3000, 3000);
+	
+	
 }
 
 
@@ -508,14 +528,22 @@ void MainCanvas::render()
     {
     case mainView: {
     	// TODO marker
+    	glMatrixMode(GL_PROJECTION);
+    	glLoadIdentity();
+    	glOrtho( 0, orthoSizeMainX, 0, orthoSizeMainY, -3000, 3000);
+    	
     	glPushMatrix();
     	m_dh->doMatrixManipulation();
+    	
     	m_dh->scene->renderScene();
     	//renderTestRay();
 	    glPopMatrix();
 	    break;
     }
     default:
+    	glMatrixMode(GL_PROJECTION);
+    	glLoadIdentity();
+    	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -3000, 3000);
     	m_dh->scene->renderNavView(m_view);
     }
 	//glFlush();

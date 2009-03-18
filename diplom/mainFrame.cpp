@@ -788,7 +788,7 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
-/*TODO***************************************************************************************************
+/****************************************************************************************************
  *
  *
  *
@@ -1764,11 +1764,18 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_listCtrl->SetColumnWidth(3, 20);
 
 	/* resize main gl window */
+	/*
 	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x),
 			this->GetClientSize().y);
 	m_rightWindowHolder->SetDefaultSize(wxSize(mainSize, mainSize));
 	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
-
+	 */
+	int mainSizeX = this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x;
+	int mainSizeY = this->GetClientSize().y;
+	m_rightWindowHolder->SetDefaultSize(wxSize(mainSizeX, mainSizeY));
+	m_rightWindow->SetDefaultSize(wxSize(mainSizeX, mainSizeY));
+	m_mainGL->changeOrthoSize(wxMax(wxMax(m_dh->rows, m_dh->columns), m_dh->frames));
+	
 	m_dh->updateView(m_xSlider->GetValue(),m_ySlider->GetValue(),m_zSlider->GetValue());
 
 #if wxUSE_MDI_ARCHITECTURE

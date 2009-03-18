@@ -74,7 +74,12 @@ private:
 	 ArcBallT   *m_arcBall;
 	 Point2fT    m_mousePt;
 
-	 DatasetHelper* m_dh;;
+	 DatasetHelper* m_dh;
+	 
+	 
+	 int orthoSizeNormal;
+	 int orthoSizeMainX;
+	 int orthoSizeMainY;
 };
 
 #endif /*MAINCANVAS_H_*/

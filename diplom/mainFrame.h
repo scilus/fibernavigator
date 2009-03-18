@@ -137,7 +137,6 @@ private:
     wxSashLayoutWindow* m_mainWindow;
     wxSashLayoutWindow* m_navWindow;
     wxSashLayoutWindow* m_rightWindowHolder;
-    wxSashLayoutWindow* m_rightWindow;
     wxSashLayoutWindow* m_extraRightWindow;
     wxSashLayoutWindow* m_topNavWindow;
     wxSashLayoutWindow* m_middleNavWindow;
@@ -156,6 +155,8 @@ public:
 	MainCanvas* m_gl1;
 	MainCanvas* m_gl2;
 	MainCanvas* m_mainGL;
+	
+	wxSashLayoutWindow* m_rightWindow;
 
 	wxSlider* m_xSlider;
     wxSlider* m_ySlider;
