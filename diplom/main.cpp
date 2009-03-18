@@ -44,7 +44,9 @@
 #include "icons/colorSelect.xpm"
 #include "icons/lightbulb.xpm"
 #include "icons/iso_surface.xpm"
+#include "icons/tubes.xpm"
 #include "icons/mini_cat.xpm"
+
 
 #include "main.h"
 #include "mainFrame.h"
@@ -243,6 +245,7 @@ bool MyApp::OnInit(void) {
 	wxBitmap bmpNewSurface(toggle_surface_xpm);
 	wxBitmap bmpAssignColor(colorSelect_xpm);
 	wxBitmap bmpLighting(lightbulb_xpm);
+	wxBitmap bmpTubes (tubes_xpm);
 #else
 	wxBitmap bmpOpen (wxImage(respath+_T("icons/fileopen.png" ), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpSave (wxImage(respath+_T("icons/disc.png" ), wxBITMAP_TYPE_PNG));
@@ -293,6 +296,8 @@ bool MyApp::OnInit(void) {
 	toolBar->AddCheckTool(MENU_OPTIONS_TOGGLE_LIGHTING, wxT("Toggle Lighting"), bmpLighting);
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_FILE_NEW_ISOSURF, bmpIsoSurface, wxT("New Iso Surface "));
+	toolBar->AddSeparator();
+	toolBar->AddCheckTool(MENU_OPTIONS_USE_FAKE_TUBES, wxT("Toggle Tubes"),  bmpTubes);
 	toolBar->AddSeparator();
 #ifdef DEBUG
 	toolBar->AddTool(MENU_OPTIONS_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));

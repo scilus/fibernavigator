@@ -1896,6 +1896,7 @@ void MainFrame::updateMenus()
 	m_toolBar->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->blendAlpha);
 	m_toolBar->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
 	m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
+	m_toolBar->ToggleTool(MENU_OPTIONS_USE_FAKE_TUBES, m_dh->useFakeTubes);
 
 	wxMenu* voiMenu = m_menuBar->GetMenu(2);
 	voiMenu->Check(voiMenu->FindItem(_T("active")), false);
