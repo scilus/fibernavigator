@@ -273,9 +273,9 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 		mainFrame->m_listCtrl->SetItem(0, 0, wxT(""), 1);
 
 	if (!info->getShowFS())
-		mainFrame->m_listCtrl->SetItem(0, 1, info->getName() + wxT("*"));
+		mainFrame->m_listCtrl->SetItem(0, 1, info->getName().BeforeFirst('.') + wxT("*"));
 	else
-		mainFrame->m_listCtrl->SetItem(0, 1, info->getName());
+		mainFrame->m_listCtrl->SetItem(0, 1, info->getName().BeforeFirst('.'));
 
 	if (!info->getUseTex())
 		mainFrame->m_listCtrl->SetItem(0, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );
@@ -840,9 +840,11 @@ void DatasetHelper::createIsoSurface() {
 
 	printDebug(_T("iso surface done"),1);
 
+	wxString anatomyName = anatomy->getName().BeforeFirst('.');
+	
 	if (isosurf->IsSurfaceValid())
 	{
-		isosurf->setName(wxT("iso surface"));
+		isosurf->setName(anatomyName + wxT(" (iso surface)"));
 
 		mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
 		mainFrame->m_listCtrl->SetItem(0, 1, isosurf->getName());
