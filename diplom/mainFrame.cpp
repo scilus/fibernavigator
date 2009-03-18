@@ -230,18 +230,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     // main window right side, holds the big gl widget
     win = new wxSashLayoutWindow(this, wxID_ANY,
   		  wxDefaultPosition, wxSize(200, 30),
-  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(765, 765));
-    win->SetMinSize(wxSize(100,100));
-    win->SetMaxSize(wxSize(2000,2000));
-    win->SetOrientation(wxLAYOUT_VERTICAL);
-    win->SetAlignment(wxLAYOUT_LEFT);
-    win->SetBackgroundColour(wxColour(0, 0, 0));
-    m_rightWindowHolder = win;
-
-    // main window right side, holds the big gl widget
-    win = new wxSashLayoutWindow(m_rightWindowHolder, wxID_ANY,
-  		  wxDefaultPosition, wxSize(200, 30),
   		  wxRAISED_BORDER | wxSW_3D | wxCLIP_CHILDREN);
     win->SetDefaultSize(wxSize(700, 700));
     win->SetMinSize(wxSize(100,100));
@@ -249,16 +237,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     win->SetAlignment(wxLAYOUT_TOP);
     win->SetBackgroundColour(wxColour(180, 180, 180));
     m_rightWindow = win;
-
-    // extra window right side, prevent scaling of the main gl widget
-    win = new wxSashLayoutWindow(m_rightWindowHolder, wxID_ANY,
-  		  wxDefaultPosition, wxSize(765, 765),
-  		  wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-    win->SetDefaultSize(wxSize(765, 1));
-    win->SetOrientation(wxLAYOUT_HORIZONTAL);
-    win->SetAlignment(wxLAYOUT_BOTTOM);
-    win->SetBackgroundColour(wxColour(255, 255, 255));
-    m_extraRightWindow = win;
 
     win = new wxSashLayoutWindow(m_navWindow, wxID_ANY,
   		  wxDefaultPosition, wxSize(NAV_SIZE, NAV_SIZE),
@@ -1763,16 +1741,9 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	m_listCtrl->SetColumnWidth(2, 80);
 	m_listCtrl->SetColumnWidth(3, 20);
 
-	/* resize main gl window */
-	/*
-	int mainSize = wxMin((this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x),
-			this->GetClientSize().y);
-	m_rightWindowHolder->SetDefaultSize(wxSize(mainSize, mainSize));
-	m_rightWindow->SetDefaultSize(wxSize(mainSize, mainSize));
-	 */
 	int mainSizeX = this->GetClientSize().x - m_leftWindow->GetSize().x - m_navWindow->GetSize().x;
 	int mainSizeY = this->GetClientSize().y;
-	m_rightWindowHolder->SetDefaultSize(wxSize(mainSizeX, mainSizeY));
+
 	m_rightWindow->SetDefaultSize(wxSize(mainSizeX, mainSizeY));
 	m_mainGL->changeOrthoSize(wxMax(wxMax(m_dh->rows, m_dh->columns), m_dh->frames));
 	
