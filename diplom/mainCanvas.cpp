@@ -78,16 +78,17 @@ void MainCanvas::init()
 	m_init = true;
 }
 
-void MainCanvas::changeOrthoSize(int value)
+void MainCanvas::changeOrthoSize()
 {
-	orthoSizeNormal = value;
-	orthoSizeMainX = value;
-	orthoSizeMainY = value;
+	orthoSizeNormal = wxMax(wxMax(m_dh->rows, m_dh->columns), m_dh->frames);
+	orthoSizeMainX = orthoSizeNormal;
+	orthoSizeMainY = orthoSizeNormal;
 	
 	if (m_view == mainView)
 	{
-		int xSize = m_dh->mainFrame->m_rightWindow->GetSize().x;
-		int ySize = m_dh->mainFrame->m_rightWindow->GetSize().y;
+		//TODO
+		int xSize = GetSize().x;
+		int ySize = GetSize().y;
 		float ratio = (float)xSize / (float)ySize;
 		if (ratio > 1.0)
 			orthoSizeMainX = (int)(orthoSizeMainX * ratio);

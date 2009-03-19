@@ -11,7 +11,7 @@ class DatasetHelper;
 class MyListCtrl;
 
 // Define a new frame
-class MainFrame: public wxMDIParentFrame
+class MainFrame : public wxMDIParentFrame
 {
 public:
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
@@ -128,36 +128,14 @@ private:
     void updateStatusBar();
     void updateMenus();
 
-    wxSashLayoutWindow* m_leftWindowHolder;
-    wxSashLayoutWindow* m_leftWindowTop;
-    wxSashLayoutWindow* m_leftWindowBottom;
-    wxSashLayoutWindow* m_leftWindowBottom1;
-    wxSashLayoutWindow* m_leftWindowBottom2;
-    wxSashLayoutWindow* m_leftWindow;
-    wxSashLayoutWindow* m_mainWindow;
-    wxSashLayoutWindow* m_navWindow;
-    wxSashLayoutWindow* m_rightWindowHolder;
-    wxSashLayoutWindow* m_extraRightWindow;
-    wxSashLayoutWindow* m_topNavWindow;
-    wxSashLayoutWindow* m_middleNavWindow;
-    wxSashLayoutWindow* m_bottomNavWindow;
-    wxSashLayoutWindow* m_extraNavWindow;
-
-	wxSashLayoutWindow* m_xSliderHolder;
-	wxSashLayoutWindow* m_ySliderHolder;
-	wxSashLayoutWindow* m_zSliderHolder;
-
-    int NAV_SIZE;
-    int NAV_GL_SIZE;
-
 public:
+	wxBoxSizer *topSizer;
+	
 	MainCanvas* m_gl0;
 	MainCanvas* m_gl1;
 	MainCanvas* m_gl2;
 	MainCanvas* m_mainGL;
 	
-	wxSashLayoutWindow* m_rightWindow;
-
 	wxSlider* m_xSlider;
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;

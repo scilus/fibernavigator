@@ -132,15 +132,14 @@ bool MyApp::OnInit(void) {
 #endif
 
 	// Create the main frame window
-	frame = new MainFrame(NULL, wxID_ANY, _T("Fiber Navigator"), wxPoint(0, 0), wxSize(1200, 820), wxDEFAULT_FRAME_STYLE
-			| wxHSCROLL | wxVSCROLL);
+	frame = new MainFrame(NULL, wxID_ANY, _T("Fiber Navigator"), wxPoint(0, 0), wxSize(1200, 820), wxDEFAULT_FRAME_STYLE);
 
 	// Give it an icon (this is ignored in MDI mode: uses resources)
 #ifdef __WXMSW__
 	frame->SetIcon(wxIcon(_T("sashtest_icn")));
 #endif
 
-	frame->SetMinSize(wxSize(800, 600));
+	frame->SetMinSize(wxSize(800, 730));
 	// Make a menubar
 	wxMenu *file_menu = new wxMenu;
 	file_menu->Append(MENU_FILE_LOAD, _T("Load"));

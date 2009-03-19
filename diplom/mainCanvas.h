@@ -37,7 +37,7 @@ public:
 
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
-    void changeOrthoSize(int value);
+    void changeOrthoSize();
     void OnEraseBackground(wxEraseEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
     wxPoint getMousePos() {return m_clicked;};

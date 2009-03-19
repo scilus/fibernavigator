@@ -304,10 +304,10 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 
 		updateTreeDims();
 		int newSize = wxMax(wxMax(rows, columns), frames);
-		mainFrame->m_mainGL->changeOrthoSize(newSize);
-		mainFrame->m_gl0->changeOrthoSize(newSize);
-		mainFrame->m_gl1->changeOrthoSize(newSize);
-		mainFrame->m_gl2->changeOrthoSize(newSize);
+		mainFrame->m_mainGL->changeOrthoSize();
+		mainFrame->m_gl0->changeOrthoSize();
+		mainFrame->m_gl1->changeOrthoSize();
+		mainFrame->m_gl2->changeOrthoSize();
 	}
 
 	mainFrame->refreshAllGLWidgets();
