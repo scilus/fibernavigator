@@ -302,7 +302,6 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 				mainFrame->m_ySlider->GetValue(),
 				mainFrame->m_zSlider->GetValue());
 
-		updateTreeDims();
 		int newSize = wxMax(wxMax(rows, columns), frames);
 		mainFrame->m_mainGL->changeOrthoSize();
 		mainFrame->m_gl0->changeOrthoSize();
@@ -372,7 +371,6 @@ bool DatasetHelper::loadScene(wxString filename)
 				rows = _rows;
 				columns = _columns;
 				frames = _frames;
-				updateTreeDims();
 				anatomy_loaded = true;
 			}
 		}
@@ -704,27 +702,6 @@ std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
 	}
 
 	return boxes;
-}
-
-void DatasetHelper::updateTreeDims()
-{
-	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tAxialId);
-	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tCoronalId);
-	mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tSagittalId);
-	mainFrame->m_treeWidget->AppendItem(
-			mainFrame->m_tAxialId,
-			wxString::Format(wxT("%d rows"), rows));
-	mainFrame->m_treeWidget->AppendItem(
-			mainFrame->m_tAxialId,
-			wxString::Format(wxT("%d columns"), columns));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tCoronalId,
-			wxString::Format(wxT("%d columns"), columns));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tCoronalId,
-			wxString::Format(wxT("%d frames"), frames));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSagittalId,
-			wxString::Format(wxT("%d rows"), rows));
-	mainFrame->m_treeWidget->AppendItem(mainFrame->m_tSagittalId,
-			wxString::Format(wxT("%d frames"), frames));
 }
 
 void DatasetHelper::treeFinished()

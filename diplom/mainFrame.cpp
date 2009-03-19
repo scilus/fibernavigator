@@ -102,6 +102,11 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_TREE_ITEM_ACTIVATED(ID_TREE_CTRL, MainFrame::OnActivateTreeItem)
 	EVT_COMMAND(ID_TREE_CTRL, wxEVT_TREE_EVENT, MainFrame::OnTreeEvent)
 	EVT_TREE_END_LABEL_EDIT(ID_TREE_CTRL, MainFrame::OnTreeLabelEdit)
+	EVT_BUTTON(ID_BUTTON_LOAD1, MainFrame::OnLoad1)
+	EVT_BUTTON(ID_BUTTON_LOAD2, MainFrame::OnLoad2)
+	EVT_BUTTON(ID_BUTTON_LOAD3, MainFrame::OnLoad3)
+	
+
     /*
     * Interface events
     */
@@ -127,7 +132,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_MENU(BUTTON_CORONAL, MainFrame::OnButtonCoronal)
 	EVT_MENU(BUTTON_SAGITTAL, MainFrame::OnButtonSagittal)
 	EVT_MENU(BUTTON_TOGGLE_ALPHA, MainFrame::OnToggleAlpha)
-
 	EVT_MENU(BUTTON_MOVE_POINTS1, MainFrame::OnMovePoints1)
 	EVT_MENU(BUTTON_MOVE_POINTS2, MainFrame::OnMovePoints2)
 
@@ -163,6 +167,15 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	buttonUp->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
 	wxButton *buttonDown = new wxButton(this, ID_BUTTON_DOWN, wxT("down"), wxDefaultPosition, wxSize(40,19));
 	buttonDown->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
+	
+	wxButton *buttonLoad1 = new wxButton(this, ID_BUTTON_LOAD1, wxT("Load Datasets"), wxDefaultPosition, wxSize(150,20));
+	buttonLoad1->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
+	wxButton *buttonLoad2 = new wxButton(this, ID_BUTTON_LOAD2, wxT("Load Meshes"), wxDefaultPosition, wxSize(150,20));
+	buttonLoad2->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
+	wxButton *buttonLoad3 = new wxButton(this, ID_BUTTON_LOAD3, wxT("Load Fibers"), wxDefaultPosition, wxSize(150,20));
+	buttonLoad3->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
+	
+	
 	//TODO	
    
 	m_listCtrl = new MyListCtrl(this, ID_LIST_CTRL, wxDefaultPosition,
@@ -170,7 +183,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	
 	
 	m_treeWidget = new MyTreeCtrl(this, ID_TREE_CTRL, wxDefaultPosition,
-	   		wxSize(150,515), wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
+	   		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
+	m_treeWidget->SetMaxSize(wxSize(150,-1));
 	
 	
    wxImageList* imageList = new wxImageList(16,16);
@@ -215,18 +229,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
    m_treeWidget->AssignImageList(tImageList);
 
    m_tRootId = m_treeWidget->AddRoot(wxT("Scene"), -1, -1, NULL );
-   m_tPlanesId = m_treeWidget->AppendItem(m_tRootId, wxT("Info"), -1, -1, NULL);
-   m_tAxialId    = m_treeWidget->AppendItem(m_tPlanesId, wxT("axial"));
-   m_tCoronalId  = m_treeWidget->AppendItem(m_tPlanesId, wxT("coronal"));
-   m_tSagittalId = m_treeWidget->AppendItem(m_tPlanesId, wxT("sagittal"));
-   m_tDatasetId = m_treeWidget->AppendItem(m_tRootId, wxT("load datasets"), -1, -1, NULL);
-   m_tMeshId = m_treeWidget->AppendItem(m_tRootId, wxT("load meshes"), -1, -1, NULL);
-   m_tFiberId = m_treeWidget->AppendItem(m_tRootId, wxT("load fibers"), -1, -1, NULL);
    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"), -1, -1, NULL);
    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"), -1, -1, NULL);
 
-	
-	
     /*
      * Set OpenGL attributes
      */
@@ -282,11 +287,12 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_dh->scene->setMainGLContext( m_mainGL->GetContext() );
 #endif
 
-	topSizer 		= new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *topSizer 		= new wxBoxSizer( wxHORIZONTAL );
 	wxBoxSizer *leftSizer 		= new wxBoxSizer( wxVERTICAL );
 	wxBoxSizer *leftTopSizer 	= new wxBoxSizer( wxHORIZONTAL );
 	wxBoxSizer *navSizer 		= new wxBoxSizer( wxVERTICAL );
 	wxBoxSizer *buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer *treeSizer		= new wxBoxSizer( wxVERTICAL );
 	
 	navSizer->Add( m_gl0, 0, wxALL, 0 );
 	navSizer->Add( m_zSlider, 0, wxALL, 1 );
@@ -295,8 +301,13 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	navSizer->Add( m_gl2, 0, wxALL, 0 );
 	navSizer->Add( m_xSlider, 0, wxALL, 1 );
 	
-	leftTopSizer->Add( m_treeWidget, 0, wxALL, 1 );
-	leftTopSizer->Add( navSizer, 0, wxALL, 1 );
+	treeSizer->Add( buttonLoad1, 0, wxALL, 0 );
+	treeSizer->Add( buttonLoad2, 0, wxALL, 0 );
+	treeSizer->Add( buttonLoad3, 0, wxALL, 0 );
+	treeSizer->Add( m_treeWidget, 1, wxALL, 0 );
+	
+	leftTopSizer->Add( treeSizer, 0, wxALL | wxEXPAND, 0 );
+	leftTopSizer->Add( navSizer, 0, wxALL, 0 );
     
     buttonSizer->Add( buttonUp, 0, wxALL, 1 );
     buttonSizer->Add( buttonDown, 0, wxALL, 1 );
@@ -327,27 +338,6 @@ MainFrame::~MainFrame()
 	m_dh->printDebug(_T("main frame destructor"), 0);
 
 	delete m_dh;
-	wxTreeItemId id, childid;
-	wxTreeItemIdValue cookie = 0;
-
-	id = m_treeWidget->GetFirstChild(m_tDatasetId, cookie);
-	while ( id.IsOk() )
-	{
-		m_treeWidget->SetItemData(id, NULL);
-		id = m_treeWidget->GetNextChild(m_tDatasetId, cookie);
-	}
-	id = m_treeWidget->GetFirstChild(m_tMeshId, cookie);
-	while ( id.IsOk() )
-	{
-		m_treeWidget->SetItemData(id, NULL);
-		id = m_treeWidget->GetNextChild(m_tMeshId, cookie);
-	}
-	id = m_treeWidget->GetFirstChild(m_tFiberId, cookie);
-	while ( id.IsOk() )
-	{
-		m_treeWidget->SetItemData(id, NULL);
-		id = m_treeWidget->GetNextChild(m_tFiberId, cookie);
-	}
 }
 
 /****************************************************************************************************
@@ -1501,13 +1491,7 @@ int MainFrame::treeSelected(wxTreeItemId id)
 	wxTreeItemId ppId = m_treeWidget->GetItemParent(pId);
 	//if ( !ppId.IsOk() ) return 0;
 
-	if ( id == m_tDatasetId )
-		return Label_datasets;
-	else if ( id == m_tMeshId )
-		return Label_meshes;
-	else if ( id == m_tFiberId )
-		return Label_fibers;
-	else if ( pId == m_tSelBoxId )
+	if ( pId == m_tSelBoxId )
 		return MasterBox;
 	else if ( ppId == m_tSelBoxId )
 		return ChildBox;
@@ -1515,7 +1499,26 @@ int MainFrame::treeSelected(wxTreeItemId id)
 		return Point_;
 	return 0;
 }
-
+/****************************************************************************************************
+ *
+ * 
+ *
+ ****************************************************************************************************/
+void MainFrame::OnLoad1(wxCommandEvent& WXUNUSED(event))
+{
+	bool flag = m_dh->load(1);
+	if (flag) m_dh->m_selBoxChanged = true;
+}
+void MainFrame::OnLoad2(wxCommandEvent& WXUNUSED(event))
+{
+	bool flag = m_dh->load(2);
+	if (flag) m_dh->m_selBoxChanged = true;
+}
+void MainFrame::OnLoad3(wxCommandEvent& WXUNUSED(event))
+{
+	bool flag = m_dh->load(3);
+	if (flag) m_dh->m_selBoxChanged = true;
+}
 
 
 /****************************************************************************************************
@@ -1580,7 +1583,7 @@ void MainFrame::OnMovePoints2(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
 	wxSize clientSize = this->GetClientSize();
-	topSizer->SetDimension(0,0, clientSize.x, clientSize.y);
+	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
 	
 	m_mainGL->changeOrthoSize();
 

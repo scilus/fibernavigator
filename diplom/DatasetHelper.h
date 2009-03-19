@@ -66,7 +66,6 @@ public:
 	void updateAllSelectionBoxes();
 	Vector mapMouse2World(int, int);
 	Vector mapMouse2WorldBack(int, int);
-	void updateTreeDims();
 
 	bool invertFibers() {fibersInverted = !fibersInverted; return fibersInverted;};
 

@@ -120,6 +120,9 @@ private:
     void OnTreeEvent(wxCommandEvent& event);
     void OnTreeLabelEdit(wxTreeEvent& event);
     int treeSelected(wxTreeItemId id);
+    void OnLoad1(wxCommandEvent& event);
+    void OnLoad2(wxCommandEvent& event);
+    void OnLoad3(wxCommandEvent& event);
 
     /*
      * System functions
@@ -129,8 +132,6 @@ private:
     void updateMenus();
 
 public:
-	wxBoxSizer *topSizer;
-	
 	MainCanvas* m_gl0;
 	MainCanvas* m_gl1;
 	MainCanvas* m_gl2;
@@ -149,16 +150,6 @@ public:
 	wxTreeCtrl* m_treeWidget;
 	wxTreeItemId m_tRootId;
 	wxTreeItemId m_tPointId;
-	wxTreeItemId m_tPlanesId;
-	wxTreeItemId m_tAxialId;
-	wxTreeItemId m_tCoronalId;
-	wxTreeItemId m_tSagittalId;
-	wxTreeItemId m_tDatasetId;
-	wxTreeItemId m_tHeadId;
-	wxTreeItemId m_tRGBId;
-	wxTreeItemId m_tOverlayId;
-	wxTreeItemId m_tMeshId;
-	wxTreeItemId m_tFiberId;
 	wxTreeItemId m_tSelBoxId;
 
 	DatasetHelper* m_dh;
@@ -229,6 +220,9 @@ DECLARE_EVENT_TABLE()
 #define BUTTON_TOGGLE_ALPHA 						203
 #define BUTTON_MOVE_POINTS1 						204
 #define BUTTON_MOVE_POINTS2 						205
+#define ID_BUTTON_LOAD1								206
+#define ID_BUTTON_LOAD2								207
+#define ID_BUTTON_LOAD3								208
 
 /*
  * Defines for interface items and other events
