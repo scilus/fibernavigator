@@ -151,7 +151,16 @@ public:
 	wxTreeItemId m_tRootId;
 	wxTreeItemId m_tPointId;
 	wxTreeItemId m_tSelBoxId;
-
+	
+	wxBoxSizer *topSizer;
+	wxBoxSizer *leftSizer;
+	wxBoxSizer *leftTopSizer;
+	wxBoxSizer *navSizer;
+	wxBoxSizer *buttonSizer;
+	wxBoxSizer *treeSizer;
+	bool enlargeNav;
+	
+	
 	DatasetHelper* m_dh;
 
 DECLARE_EVENT_TABLE()

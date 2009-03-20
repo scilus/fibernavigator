@@ -149,6 +149,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     const long style):
   wxFrame(parent, id, title, pos, size, style)
 {
+	enlargeNav = false;
+	
 	m_xSlider = new wxSlider(this, ID_X_SLIDER, 50, 0, 100, wxDefaultPosition,
            		wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
@@ -175,9 +177,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	wxButton *buttonLoad3 = new wxButton(this, ID_BUTTON_LOAD3, wxT("Load Fibers"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad3->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
 	
-	
-	//TODO	
-   
 	m_listCtrl = new MyListCtrl(this, ID_LIST_CTRL, wxDefaultPosition,
    		wxSize(300,-1), wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
 	
@@ -267,10 +266,13 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 #ifndef CTX
     m_gl0 = new MainCanvas(m_dh, axial, this, ID_GL_NAV_X, wxDefaultPosition,
                 wxSize(150,150), 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
+    m_gl0->SetMaxSize(wxSize(150,150));
     m_gl1 = new MainCanvas(m_dh, coronal, this, ID_GL_NAV_Y, wxDefaultPosition,
     			wxSize(150,150), 0, _T("NavGLCanvasY"), gl_attrib, m_mainGL);
+    m_gl1->SetMaxSize(wxSize(150,150));
     m_gl2 = new MainCanvas(m_dh, sagittal, this, ID_GL_NAV_Z, wxDefaultPosition,
     			wxSize(150,150), 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL);
+    m_gl2->SetMaxSize(wxSize(150,150));
 #else
     m_gl0 = new MainCanvas(m_dh, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
                 wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL->GetContext());
@@ -287,18 +289,18 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_dh->scene->setMainGLContext( m_mainGL->GetContext() );
 #endif
 
-    wxBoxSizer *topSizer 		= new wxBoxSizer( wxHORIZONTAL );
-	wxBoxSizer *leftSizer 		= new wxBoxSizer( wxVERTICAL );
-	wxBoxSizer *leftTopSizer 	= new wxBoxSizer( wxHORIZONTAL );
-	wxBoxSizer *navSizer 		= new wxBoxSizer( wxVERTICAL );
-	wxBoxSizer *buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
-	wxBoxSizer *treeSizer		= new wxBoxSizer( wxVERTICAL );
+    topSizer 		= new wxBoxSizer( wxHORIZONTAL );
+	leftSizer 		= new wxBoxSizer( wxVERTICAL );
+	leftTopSizer 	= new wxBoxSizer( wxHORIZONTAL );
+	navSizer 		= new wxBoxSizer( wxVERTICAL );
+	buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
+	treeSizer		= new wxBoxSizer( wxVERTICAL );
 	
-	navSizer->Add( m_gl0, 0, wxALL, 1 );
+	navSizer->Add( m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
 	navSizer->Add( m_zSlider, 0, wxALL, 1 );
-	navSizer->Add( m_gl1, 0, wxALL, 1 );
+	navSizer->Add( m_gl1, 1, wxALL  | wxEXPAND | wxSHAPED, 1 );
 	navSizer->Add( m_ySlider, 0, wxALL, 1 );
-	navSizer->Add( m_gl2, 0, wxALL, 1 );
+	navSizer->Add( m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
 	navSizer->Add( m_xSlider, 0, wxALL, 1 );
 	
 	treeSizer->Add( buttonLoad1, 0, wxALL | wxALIGN_CENTER, 0 );
@@ -307,7 +309,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	treeSizer->Add( m_treeWidget, 1, wxALL, 1 );
 	
 	leftTopSizer->Add( treeSizer, 0, wxALL | wxEXPAND, 0 );
-	leftTopSizer->Add( navSizer, 0, wxALL, 0 );
+	leftTopSizer->Add( navSizer, 1, wxALL | wxEXPAND, 0 );
     
     buttonSizer->Add( buttonUp, 0, wxALL, 1 );
     buttonSizer->Add( buttonDown, 0, wxALL, 1 );
@@ -320,16 +322,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     
     topSizer->Add( leftSizer, 0, wxEXPAND | wxALL, 0 );
     topSizer->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
-    
+
     SetSizer( topSizer );
     topSizer->SetSizeHints( this );
-    
-
-
-
-
-
-
 
 }
 
@@ -1175,22 +1170,61 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 	if (!m_dh->scene) return;
 	if ( wxGetKeyState(WXK_CONTROL) )
 	{
-		Matrix4fSetIdentity(&m_dh->m_transform);
-
-		m_dh->m_transform.s.M00 = -0.66625452041625976562f;
-		m_dh->m_transform.s.M10 =  0.42939949035644531250f;
-		m_dh->m_transform.s.M20 = -0.60968911647796630859f;
-		m_dh->m_transform.s.M01 = -0.74149495363235473633f;
-		m_dh->m_transform.s.M11 = -0.46842813491821289062f;
-		m_dh->m_transform.s.M21 = 0.40184235572814941406f;
-		m_dh->m_transform.s.M02 = -0.07932166755199432373f;
-		m_dh->m_transform.s.M12 = 0.77213370800018310547f;
-		m_dh->m_transform.s.M22 = 0.63048923015594482422f;
-		m_mainGL->setRotation();
+		enlargeNav = !enlargeNav;
+		wxSize clientSize = this->GetClientSize();
+		if (enlargeNav)
+		{
+			treeSizer->Show(false);
+			buttonSizer->Show(false);
+			m_listCtrl->Show(false);
+			
+			int newSize = (clientSize.y - 65)/3;
+			
+			m_gl0->SetMinSize(wxSize(newSize,newSize));
+			m_gl1->SetMinSize(wxSize(newSize,newSize));
+			m_gl2->SetMinSize(wxSize(newSize,newSize));
+			m_gl0->SetMaxSize(wxSize(newSize,newSize));
+			m_gl1->SetMaxSize(wxSize(newSize,newSize));
+			m_gl2->SetMaxSize(wxSize(newSize,newSize));
+			
+			m_xSlider->SetMinSize(wxSize(newSize,-1));
+			m_ySlider->SetMinSize(wxSize(newSize,-1));
+			m_zSlider->SetMinSize(wxSize(newSize,-1));
+			
+			leftTopSizer->Detach(1);
+			topSizer->Prepend(navSizer, 0, wxALL | wxEXPAND, 1);
+		}
+		else
+		{
+			m_gl0->SetMinSize(wxSize(150,150));
+			m_gl1->SetMinSize(wxSize(150,150));
+			m_gl2->SetMinSize(wxSize(150,150));
+			m_gl0->SetMaxSize(wxSize(150,150));
+			m_gl1->SetMaxSize(wxSize(150,150));
+			m_gl2->SetMaxSize(wxSize(150,150));
+			
+			m_xSlider->SetMinSize(wxSize(150,-1));
+			m_ySlider->SetMinSize(wxSize(150,-1));
+			m_zSlider->SetMinSize(wxSize(150,-1));
+			
+			topSizer->Detach(0);
+			leftTopSizer->Add( navSizer, 1, wxALL | wxEXPAND, 0 );
+			
+			treeSizer->Show(true);
+			buttonSizer->Show(true);
+			m_listCtrl->Show(true);
+		}
+		GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
 	}
 	else
 		m_dh->blendAlpha = !m_dh->blendAlpha;
 
+	m_mainGL->changeOrthoSize();
+
+	this->Update();
+	this->Refresh();
+
+	
 	m_mainGL->render();
 }
 /****************************************************************************************************
@@ -1583,6 +1617,20 @@ void MainFrame::OnMovePoints2(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
 	wxSize clientSize = this->GetClientSize();
+	
+	int newSize = (clientSize.y - 65)/3;
+				
+	m_gl0->SetMinSize(wxSize(newSize,newSize));
+	m_gl1->SetMinSize(wxSize(newSize,newSize));
+	m_gl2->SetMinSize(wxSize(newSize,newSize));
+	m_gl0->SetMaxSize(wxSize(newSize,newSize));
+	m_gl1->SetMaxSize(wxSize(newSize,newSize));
+	m_gl2->SetMaxSize(wxSize(newSize,newSize));
+	
+	m_xSlider->SetMinSize(wxSize(newSize,-1));
+	m_ySlider->SetMinSize(wxSize(newSize,-1));
+	m_zSlider->SetMinSize(wxSize(newSize,-1));
+	
 	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
 	
 	m_mainGL->changeOrthoSize();
