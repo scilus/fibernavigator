@@ -33,7 +33,7 @@ DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
  *
  ****************************************************************************************************/
  
-BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
+BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	/*
 	 * Menu events
 	 */
@@ -1618,19 +1618,22 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
 	wxSize clientSize = this->GetClientSize();
 	
-	int newSize = (clientSize.y - 65)/3;
-				
-	m_gl0->SetMinSize(wxSize(newSize,newSize));
-	m_gl1->SetMinSize(wxSize(newSize,newSize));
-	m_gl2->SetMinSize(wxSize(newSize,newSize));
-	m_gl0->SetMaxSize(wxSize(newSize,newSize));
-	m_gl1->SetMaxSize(wxSize(newSize,newSize));
-	m_gl2->SetMaxSize(wxSize(newSize,newSize));
-	
-	m_xSlider->SetMinSize(wxSize(newSize,-1));
-	m_ySlider->SetMinSize(wxSize(newSize,-1));
-	m_zSlider->SetMinSize(wxSize(newSize,-1));
-	
+	if (enlargeNav)
+	{
+		int newSize = (clientSize.y - 65)/3;
+					
+		m_gl0->SetMinSize(wxSize(newSize,newSize));
+		m_gl1->SetMinSize(wxSize(newSize,newSize));
+		m_gl2->SetMinSize(wxSize(newSize,newSize));
+		m_gl0->SetMaxSize(wxSize(newSize,newSize));
+		m_gl1->SetMaxSize(wxSize(newSize,newSize));
+		m_gl2->SetMaxSize(wxSize(newSize,newSize));
+		
+		m_xSlider->SetMinSize(wxSize(newSize,-1));
+		m_ySlider->SetMinSize(wxSize(newSize,-1));
+		m_zSlider->SetMinSize(wxSize(newSize,-1));
+	}
+
 	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
 	
 	m_mainGL->changeOrthoSize();
@@ -1736,7 +1739,7 @@ void MainFrame::OnMouseEvent(wxMouseEvent& event)
 void MainFrame::updateMenus()
 {
 	// get the options menu
-	#ifndef __WXMSW__
+	//#ifndef __WXMSW__
 
 	// globals
 	wxMenu* oMenu = m_menuBar->GetMenu(4);
@@ -1815,5 +1818,5 @@ void MainFrame::updateMenus()
 			sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), true);
 		}
 	}
-	#endif
+	//#endif
 }
