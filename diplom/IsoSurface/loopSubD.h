@@ -29,10 +29,10 @@ public:
 	loopSubD(TriangleMesh* nTriMesh);
 	virtual ~loopSubD();
 
-	int calcEdgeVert(int triNum, int edgeV1, int edgeV2, int V3);
-	Vector calcNewPosition(int vertNum);
-	void insertCenterTriangle(int triNum);
-	void insertCornerTriangles(int triNum);
+	int calcEdgeVert(int triNum, unsigned int edgeV1, unsigned int edgeV2, unsigned int V3);
+	Vector calcNewPosition(unsigned int vertNum);
+	void insertCenterTriangle(unsigned int triNum);
+	void insertCornerTriangles(unsigned int triNum);
 	double getAlpha(int n);
 
 };

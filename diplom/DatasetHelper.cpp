@@ -302,7 +302,6 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 				mainFrame->m_ySlider->GetValue(),
 				mainFrame->m_zSlider->GetValue());
 
-		int newSize = wxMax(wxMax(rows, columns), frames);
 		mainFrame->m_mainGL->changeOrthoSize();
 		mainFrame->m_gl0->changeOrthoSize();
 		mainFrame->m_gl1->changeOrthoSize();
@@ -579,15 +578,15 @@ void DatasetHelper::save(wxString filename)
 	wxXmlProperty *prop3 = new wxXmlProperty(wxT("frames"), wxString::Format(wxT("%d"), frames), prop2);
 	anatomy->AddProperty(prop3);
 
-	wxXmlProperty *rot00 = new wxXmlProperty(wxT("rot00"), wxString::Format(wxT("%.20f"), m_transform.s.M00));
-	wxXmlProperty *rot10 = new wxXmlProperty(wxT("rot10"), wxString::Format(wxT("%.20f"), m_transform.s.M10), rot00);
-	wxXmlProperty *rot20 = new wxXmlProperty(wxT("rot20"), wxString::Format(wxT("%.20f"), m_transform.s.M20), rot10);
-	wxXmlProperty *rot01 = new wxXmlProperty(wxT("rot01"), wxString::Format(wxT("%.20f"), m_transform.s.M01), rot20);
-	wxXmlProperty *rot11 = new wxXmlProperty(wxT("rot11"), wxString::Format(wxT("%.20f"), m_transform.s.M11), rot01);
-	wxXmlProperty *rot21 = new wxXmlProperty(wxT("rot21"), wxString::Format(wxT("%.20f"), m_transform.s.M21), rot11);
-	wxXmlProperty *rot02 = new wxXmlProperty(wxT("rot02"), wxString::Format(wxT("%.20f"), m_transform.s.M02), rot21);
-	wxXmlProperty *rot12 = new wxXmlProperty(wxT("rot12"), wxString::Format(wxT("%.20f"), m_transform.s.M12), rot02);
-	wxXmlProperty *rot22 = new wxXmlProperty(wxT("rot22"), wxString::Format(wxT("%.20f"), m_transform.s.M22), rot12);
+	wxXmlProperty *rot00 = new wxXmlProperty(wxT("rot00"), wxString::Format(wxT("%.8f"), m_transform.s.M00));
+	wxXmlProperty *rot10 = new wxXmlProperty(wxT("rot10"), wxString::Format(wxT("%.8f"), m_transform.s.M10), rot00);
+	wxXmlProperty *rot20 = new wxXmlProperty(wxT("rot20"), wxString::Format(wxT("%.8f"), m_transform.s.M20), rot10);
+	wxXmlProperty *rot01 = new wxXmlProperty(wxT("rot01"), wxString::Format(wxT("%.8f"), m_transform.s.M01), rot20);
+	wxXmlProperty *rot11 = new wxXmlProperty(wxT("rot11"), wxString::Format(wxT("%.8f"), m_transform.s.M11), rot01);
+	wxXmlProperty *rot21 = new wxXmlProperty(wxT("rot21"), wxString::Format(wxT("%.8f"), m_transform.s.M21), rot11);
+	wxXmlProperty *rot02 = new wxXmlProperty(wxT("rot02"), wxString::Format(wxT("%.8f"), m_transform.s.M02), rot21);
+	wxXmlProperty *rot12 = new wxXmlProperty(wxT("rot12"), wxString::Format(wxT("%.8f"), m_transform.s.M12), rot02);
+	wxXmlProperty *rot22 = new wxXmlProperty(wxT("rot22"), wxString::Format(wxT("%.8f"), m_transform.s.M22), rot12);
 	rotation->AddProperty(rot22);
 
 

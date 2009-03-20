@@ -11,7 +11,7 @@ class DatasetHelper;
 class MyListCtrl;
 
 // Define a new frame
-class MainFrame : public wxMDIParentFrame
+class MainFrame : public wxFrame
 {
 public:
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);

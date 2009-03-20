@@ -92,7 +92,7 @@ public:
 
 
     FStreamlineOnSurfaceEuler( DatasetHelper *dh, TriangleMesh* grid );
-    ~FStreamlineOnSurfaceEuler();
+    virtual ~FStreamlineOnSurfaceEuler();
 
 
 //---------------------------------------------------------------------------

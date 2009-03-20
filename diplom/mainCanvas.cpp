@@ -227,11 +227,11 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 		    {
 				if (!m_dh->m_isrDragging)												// Not Dragging
 			    {
-					if (wxGetKeyState(WXK_CONTROL))
+					if (wxGetKeyState(WXK_CONTROL) && wxGetKeyState(WXK_SHIFT))
 					{
-						printf("%.20f : %.20f : %.20f \n", m_lastRot.M[0], m_lastRot.M[1], m_lastRot.M[2]);
-						printf("%.20f : %.20f : %.20f \n", m_lastRot.M[3], m_lastRot.M[4], m_lastRot.M[5]);
-						printf("%.20f : %.20f : %.20f \n", m_lastRot.M[6], m_lastRot.M[7], m_lastRot.M[8]);
+						printf("%.20f : %.20f : %.20f \n", m_dh->m_transform.M[0], m_dh->m_transform.M[1], m_dh->m_transform.M[2]);
+						printf("%.20f : %.20f : %.20f \n", m_dh->m_transform.M[3], m_dh->m_transform.M[4], m_dh->m_transform.M[5]);
+						printf("%.20f : %.20f : %.20f \n", m_dh->m_transform.M[6], m_dh->m_transform.M[7], m_dh->m_transform.M[8]);
 					}
 					m_dh->m_isrDragging = true;										// Prepare For Dragging
 					m_lastPos = event.GetPosition();
@@ -588,20 +588,21 @@ Vector MainCanvas::getEventCenter()
 
 void MainCanvas::setRotation()
 {
-	m_lastRot.s.M00 = m_dh->m_transform.s.M00;
-	m_lastRot.s.M01 = m_dh->m_transform.s.M01;
-	m_lastRot.s.M02 = m_dh->m_transform.s.M02;
-	m_lastRot.s.M10 = m_dh->m_transform.s.M10;
-	m_lastRot.s.M11 = m_dh->m_transform.s.M11;
-	m_lastRot.s.M12 = m_dh->m_transform.s.M12;
-	m_lastRot.s.M20 = m_dh->m_transform.s.M20;
-	m_lastRot.s.M21 = m_dh->m_transform.s.M21;
-	m_lastRot.s.M22 = m_dh->m_transform.s.M22;
+	m_thisRot.s.M00 = m_dh->m_transform.s.M00;
+	m_thisRot.s.M01 = m_dh->m_transform.s.M01;
+	m_thisRot.s.M02 = m_dh->m_transform.s.M02;
+	m_thisRot.s.M10 = m_dh->m_transform.s.M10;
+	m_thisRot.s.M11 = m_dh->m_transform.s.M11;
+	m_thisRot.s.M12 = m_dh->m_transform.s.M12;
+	m_thisRot.s.M20 = m_dh->m_transform.s.M20;
+	m_thisRot.s.M21 = m_dh->m_transform.s.M21;
+	m_thisRot.s.M22 = m_dh->m_transform.s.M22;
 
 	Matrix4fSetIdentity(&m_dh->m_transform);
-	Matrix3fSetIdentity(&m_thisRot);
-	Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
-	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_lastRot);
+	Matrix3fSetIdentity(&m_lastRot);
+	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);
+
+	
 	updateView();
 	m_dh->mainFrame->refreshAllGLWidgets();
 }

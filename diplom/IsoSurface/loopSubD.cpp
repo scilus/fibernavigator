@@ -73,9 +73,9 @@ loopSubD::loopSubD(TriangleMesh* nTriMesh){
 
 }
 
-Vector loopSubD::calcNewPosition(int vertNum)
+Vector loopSubD::calcNewPosition(unsigned int vertNum)
 {
-	std::vector<int> starP = triMesh->getStar(vertNum);
+	std::vector<unsigned int> starP = triMesh->getStar(vertNum);
 	int starSize = starP.size();
 
 
@@ -94,18 +94,18 @@ Vector loopSubD::calcNewPosition(int vertNum)
 	return oldPos + newPos;
 }
 
-void loopSubD::insertCenterTriangle(int triNum){
+void loopSubD::insertCenterTriangle(unsigned int triNum){
 
-	Vector intP = triMesh->getTriangle(triNum);
+	Triangle intP = triMesh->getTriangle(triNum);
 	int edgeVerts[3];
 
 	for(int i=0; i<3; i++){
-		edgeVerts[i] = calcEdgeVert(triNum, intP[i], intP[(i + 1) % 3], intP[(i + 2) % 3]);
+		edgeVerts[i] = calcEdgeVert(triNum, intP.pointID[i], intP.pointID[(i + 1) % 3], intP.pointID[(i + 2) % 3]);
 	}
 	triMesh->addTriangle(edgeVerts[0], edgeVerts[1], edgeVerts[2], triMesh->getTriangleTensor(triNum));
 }
 
-void loopSubD::insertCornerTriangles(int triNum){
+void loopSubD::insertCornerTriangles(unsigned int triNum){
 
 	// comment:		center are twisted from the orignal vertices.
 	// original:	0, 1, 2
@@ -114,15 +114,15 @@ void loopSubD::insertCornerTriangles(int triNum){
 	// addTris:		1, b, a
 	// addTris:		2, c, b
 	//
-	Vector originalTri = triMesh->getTriangle(triNum);
-	Vector centerTri   = triMesh->getTriangle(triNum + numTriFaces);
+	Triangle originalTri = triMesh->getTriangle(triNum);
+	Triangle centerTri   = triMesh->getTriangle(triNum + numTriFaces);
 
-	triMesh->addTriangle(originalTri[1], centerTri[1], centerTri[0], triMesh->getTriangleTensor(triNum));
-	triMesh->addTriangle(originalTri[2], centerTri[2], centerTri[1], triMesh->getTriangleTensor(triNum));
-	triMesh->setTriangle(triNum, originalTri[0], centerTri[0], centerTri[2]);
+	triMesh->addTriangle(originalTri.pointID[1], centerTri.pointID[1], centerTri.pointID[0], triMesh->getTriangleTensor(triNum));
+	triMesh->addTriangle(originalTri.pointID[2], centerTri.pointID[2], centerTri.pointID[1], triMesh->getTriangleTensor(triNum));
+	triMesh->setTriangle(triNum, originalTri.pointID[0], centerTri.pointID[0], centerTri.pointID[2]);
 }
 
-int loopSubD::calcEdgeVert(int triNum, int edgeV1, int edgeV2, int V3){
+int loopSubD::calcEdgeVert(int triNum, unsigned int edgeV1, unsigned int edgeV2, unsigned int V3){
 
 	int vertNum = -1;
 
@@ -152,15 +152,15 @@ int loopSubD::calcEdgeVert(int triNum, int edgeV1, int edgeV2, int V3){
 	}
 	else
 	{
-		Vector neighborCenterP = triMesh->getTriangle(neighborFaceNum + numTriFaces);
-		Vector neighborP = triMesh->getTriangle(neighborFaceNum);
+		Triangle neighborCenterP = triMesh->getTriangle(neighborFaceNum + numTriFaces);
+		Triangle neighborP = triMesh->getTriangle(neighborFaceNum);
 
-		if(neighborP[0] == edgeV2){
-			vertNum = neighborCenterP[0];
-		} else if(neighborP[1] == edgeV2){
-			vertNum = neighborCenterP[1];
+		if(neighborP.pointID[0] == edgeV2){
+			vertNum = neighborCenterP.pointID[0];
+		} else if(neighborP.pointID[1] == edgeV2){
+			vertNum = neighborCenterP.pointID[1];
 		} else {
-			vertNum = neighborCenterP[2];
+			vertNum = neighborCenterP.pointID[2];
 		}
 	}
 

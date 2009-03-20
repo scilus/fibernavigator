@@ -726,7 +726,7 @@ void CIsoSurface::generateGeometry()
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
-	Vector triangleEdges;
+	Triangle triangleEdges;
 	Vector point;
 	Vector pointNormal;
 
@@ -738,9 +738,9 @@ void CIsoSurface::generateGeometry()
 				triangleEdges = m_tMesh->getTriangle(i);
 				for(int j = 0 ; j < 3 ; ++j)
 				{
-					pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
+					pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
 					glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
-					point = m_tMesh->getVertex(triangleEdges[j]);
+					point = m_tMesh->getVertex(triangleEdges.pointID[j]);
 					glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
 				}
 			}
@@ -754,7 +754,7 @@ void CIsoSurface::generateGeometry()
 				triangleEdges = m_tMesh->getTriangle(i);
 				for(int j = 0 ; j < 3 ; ++j)
 				{
-					point = m_tMesh->getVertex(triangleEdges[j]);
+					point = m_tMesh->getVertex(triangleEdges.pointID[j]);
 					glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
 				}
 			}
@@ -774,7 +774,7 @@ void CIsoSurface::generateLICGeometry()
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
-	Vector triangleEdges;
+	Triangle triangleEdges;
 	Vector point;
 	Vector pointNormal;
 	Vector color;
@@ -787,9 +787,9 @@ void CIsoSurface::generateLICGeometry()
 			glColor3f(color.x, color.y, color.z);
 			for(int j = 0 ; j < 3 ; ++j)
 			{
-				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
+				pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
 				glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
-				point = m_tMesh->getVertex(triangleEdges[j]);
+				point = m_tMesh->getVertex(triangleEdges.pointID[j]);
 				glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
 			}
 		}

@@ -20,6 +20,10 @@
 
 class DatasetHelper;
 
+struct Triangle {
+	unsigned int pointID[3];
+};
+
 class TriangleMesh {
 
 	// Attributes
@@ -28,9 +32,9 @@ class TriangleMesh {
 
 		std::vector<Vector> vertices;
 		std::vector<Vector> vertNormals;
-		std::vector < std::vector<int> >vIsInTriangle;
+		std::vector < std::vector<unsigned int> >vIsInTriangle;
 
-		std::vector< Vector > triangles;
+		std::vector< Triangle > triangles;
 		std::vector<Vector> triNormals;
 		std::vector< int >triangleTensor;
 		std::vector<Vector>triangleColor;
@@ -60,7 +64,7 @@ class TriangleMesh {
 		void addTriangle(const int vertA, const int vertB, const int vertC);
 		void addTriangle(const int vertA, const int vertB, const int vertC, const int tensorIndex);
 
-		Vector calcTriangleNormal(const Vector);
+		Vector calcTriangleNormal(const Triangle);
 		Vector calcTriangleNormal(const int triNum);
 
 		void flipNormals();
@@ -71,7 +75,7 @@ class TriangleMesh {
 		int calcTriangleTensor(const int triNum);
 		void calcTriangleTensors();
 
-		int getNeighbor(const int coVert1, const int coVert2, const int triangleNum);
+		int getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
 		void calcNeighbors();
 		void calcNeighbor(const int triangleNum);
 
@@ -83,27 +87,27 @@ class TriangleMesh {
 		Vector getVertex (const int vertNum) 			{ return vertices[vertNum]; };
 		Vector getVertex (const int triNum, int pos);
 		Vector getNormal(const int triNum)				{ return triNormals[triNum]; };
-		Vector getTriangle(const int triNum)			{ return triangles[triNum];  };
+		Triangle getTriangle(const int triNum)			{ return triangles[triNum];  };
 		Vector getTriangleColor(const int triNum)		{ return triangleColor[triNum]; };
-		std::vector<int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
+		std::vector<unsigned int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
 		int getTriangleTensor(const int triNum)			{ return triangleTensor[triNum]; };
 		bool isFinished()								{ return m_isFinished; }
 
 		Vector getTriangleCenter(int triNum) ;
 
 
-		void setVertex(const int vertNum, const Vector nPos)	{ vertices[vertNum] = nPos; };
-		void eraseTriFromVert( const int triNum, const int vertNum);
+		void setVertex(const unsigned int vertNum, const Vector nPos)	{ vertices[vertNum] = nPos; };
+		void eraseTriFromVert( const unsigned int triNum, const unsigned int vertNum);
 
-		void setTriangle(const int triNum, const int vertA, const int vertB, const int vertC);
-		void setTriangleColor(const int triNum, const float r, const float g, const float b);
+		void setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC);
+		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b);
 
-		bool isInTriangle(const int vertNum, const int triangleNum);
+		bool isInTriangle(const unsigned int vertNum, const unsigned int triangleNum);
 
-		bool hasEdge(const int coVert1, const int coVert2, const int triangleNum);
-		int getThirdVert(const int coVert1, const int coVert2, const int triangleNum);
+		bool hasEdge(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
+		int getThirdVert(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
 
-		int getNextVertex(const int triNum, const int vertNum);
+		int getNextVertex(const unsigned int triNum, const unsigned int vertNum);
 
 		bool getOpenMeshError() { return openMeshError; };
 

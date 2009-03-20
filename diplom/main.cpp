@@ -142,10 +142,10 @@ bool MyApp::OnInit(void) {
 	frame->SetMinSize(wxSize(800, 730));
 	// Make a menubar
 	wxMenu *file_menu = new wxMenu;
-	file_menu->Append(MENU_FILE_LOAD, _T("Load"));
+	file_menu->Append(MENU_FILE_LOAD, _T("Load\tCtrl-L"));
 	file_menu->Append(MENU_FILE_RELOAD_SHADER, _T("Reload Shader"));
 	file_menu->AppendSeparator();
-	file_menu->Append(MENU_FILE_SAVE, _T("Save Current Scene"));
+	file_menu->Append(MENU_FILE_SAVE, _T("Save Current Scene\tCtrl-S"));
 	file_menu->Append(MENU_FILE_SAVE_FIBERS, _T("Save Selected Fibers"));
 	file_menu->AppendSeparator();
 	file_menu->Append(MENU_FILE_QUIT, _T("Exit"));
@@ -164,8 +164,8 @@ bool MyApp::OnInit(void) {
 	voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New"));
 	voi_menu->Append(MENU_VOI_NEW_FROM_OVERLAY, _T("New ROI from Overlay"));
 	voi_menu->AppendSeparator();
-	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SELBOX, _T("active"));
-	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SHOWBOX, _T("visible"));
+	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SELBOX, _T("active\tCtrl-A"));
+	voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SHOWBOX, _T("visible\tCtrl-V"));
 
 	wxMenu *surf_menu = new wxMenu;
 	surf_menu->Append(MENU_SPLINESURF_NEW, _T("New Spline Surface"));
@@ -185,8 +185,8 @@ bool MyApp::OnInit(void) {
 
 
 	wxMenu *options_menu = new wxMenu;
-	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("Assign Color"));
-	options_menu->Append(MENU_OPTIONS_RESET_COLOR, _T("Reset Colors on Fibers"));
+	options_menu->Append(MENU_OPTIONS_ASSIGN_COLOR, _T("Assign Color\tCtrl-C"));
+	options_menu->Append(MENU_OPTIONS_RESET_COLOR, _T("Reset Colors on Fibers\tCtrl-R"));
 
 	wxMenu* cMaps = new wxMenu;
 	cMaps->Append(MENU_OPTIONS_CMAPNO, wxT("no color map"));
@@ -197,11 +197,11 @@ bool MyApp::OnInit(void) {
 	cMaps->Append(MENU_OPTIONS_CMAP4, wxT("color map 4"));
 
 	options_menu->Append(MENU_OPTIONS_COLOR_MAPS, _T("Set Color Map"), cMaps);
-	options_menu->AppendCheckItem(MENU_OPTIONS_CMAP_LEGEND, _T("Show Color Map Legend"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_CMAP_LEGEND, _T("Show Color Map Legend\tCtrl-M"));
 	options_menu->AppendSeparator();
-	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting\tCtrl-I"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
-	options_menu->AppendCheckItem(MENU_OPTIONS_USE_FAKE_TUBES, _T("Use Tubes"));
+	options_menu->AppendCheckItem(MENU_OPTIONS_USE_FAKE_TUBES, _T("Use Tubes\tCtrl-T"));
 	options_menu->AppendCheckItem(MENU_OPTIONS_USE_TRANSPARENCY, _T("Use Transparent Fibers"));
 
 

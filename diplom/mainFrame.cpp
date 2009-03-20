@@ -105,7 +105,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
 	EVT_BUTTON(ID_BUTTON_LOAD1, MainFrame::OnLoad1)
 	EVT_BUTTON(ID_BUTTON_LOAD2, MainFrame::OnLoad2)
 	EVT_BUTTON(ID_BUTTON_LOAD3, MainFrame::OnLoad3)
-	
 
     /*
     * Interface events
@@ -118,6 +117,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIParentFrame)
     EVT_COMMAND(ID_GL_NAV_Y, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
 	EVT_COMMAND(ID_GL_NAV_Z, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
 	EVT_COMMAND(ID_GL_MAIN, wxEVT_NAVGL_EVENT, MainFrame::OnGLEvent)
+
 	/* slider events */
 	EVT_SLIDER(ID_X_SLIDER, MainFrame::OnXSliderMoved)
 	EVT_SLIDER(ID_Y_SLIDER, MainFrame::OnYSliderMoved)
@@ -147,7 +147,7 @@ END_EVENT_TABLE()
  ****************************************************************************************************/
 MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size,
     const long style):
-  wxMDIParentFrame(parent, id, title, pos, size, style)
+  wxFrame(parent, id, title, pos, size, style)
 {
 	m_xSlider = new wxSlider(this, ID_X_SLIDER, 50, 0, 100, wxDefaultPosition,
            		wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
@@ -168,22 +168,22 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	wxButton *buttonDown = new wxButton(this, ID_BUTTON_DOWN, wxT("down"), wxDefaultPosition, wxSize(40,19));
 	buttonDown->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
 	
-	wxButton *buttonLoad1 = new wxButton(this, ID_BUTTON_LOAD1, wxT("Load Datasets"), wxDefaultPosition, wxSize(150,20));
+	wxButton *buttonLoad1 = new wxButton(this, ID_BUTTON_LOAD1, wxT("Load Datasets"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad1->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
-	wxButton *buttonLoad2 = new wxButton(this, ID_BUTTON_LOAD2, wxT("Load Meshes"), wxDefaultPosition, wxSize(150,20));
+	wxButton *buttonLoad2 = new wxButton(this, ID_BUTTON_LOAD2, wxT("Load Meshes"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad2->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
-	wxButton *buttonLoad3 = new wxButton(this, ID_BUTTON_LOAD3, wxT("Load Fibers"), wxDefaultPosition, wxSize(150,20));
+	wxButton *buttonLoad3 = new wxButton(this, ID_BUTTON_LOAD3, wxT("Load Fibers"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad3->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
 	
 	
 	//TODO	
    
 	m_listCtrl = new MyListCtrl(this, ID_LIST_CTRL, wxDefaultPosition,
-   		wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
+   		wxSize(300,-1), wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
 	
 	
 	m_treeWidget = new MyTreeCtrl(this, ID_TREE_CTRL, wxDefaultPosition,
-	   		wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
+	   		wxSize(150,-1), wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
 	m_treeWidget->SetMaxSize(wxSize(150,-1));
 	
 	
@@ -213,8 +213,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
    m_listCtrl->InsertColumn(3, itemCol);
    
    m_listCtrl->SetColumnWidth(0, 20);
-   m_listCtrl->SetColumnWidth(1, 188);
-   m_listCtrl->SetColumnWidth(2, 80);
+   m_listCtrl->SetColumnWidth(1, 218);
+   m_listCtrl->SetColumnWidth(2, 50);
    m_listCtrl->SetColumnWidth(3, 20);
    
 
@@ -294,17 +294,17 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	wxBoxSizer *buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
 	wxBoxSizer *treeSizer		= new wxBoxSizer( wxVERTICAL );
 	
-	navSizer->Add( m_gl0, 0, wxALL, 0 );
+	navSizer->Add( m_gl0, 0, wxALL, 1 );
 	navSizer->Add( m_zSlider, 0, wxALL, 1 );
-	navSizer->Add( m_gl1, 0, wxALL, 0 );
+	navSizer->Add( m_gl1, 0, wxALL, 1 );
 	navSizer->Add( m_ySlider, 0, wxALL, 1 );
-	navSizer->Add( m_gl2, 0, wxALL, 0 );
+	navSizer->Add( m_gl2, 0, wxALL, 1 );
 	navSizer->Add( m_xSlider, 0, wxALL, 1 );
 	
-	treeSizer->Add( buttonLoad1, 0, wxALL, 0 );
-	treeSizer->Add( buttonLoad2, 0, wxALL, 0 );
-	treeSizer->Add( buttonLoad3, 0, wxALL, 0 );
-	treeSizer->Add( m_treeWidget, 1, wxALL, 0 );
+	treeSizer->Add( buttonLoad1, 0, wxALL | wxALIGN_CENTER, 0 );
+	treeSizer->Add( buttonLoad2, 0, wxALL | wxALIGN_CENTER, 0 );
+	treeSizer->Add( buttonLoad3, 0, wxALL | wxALIGN_CENTER, 0 );
+	treeSizer->Add( m_treeWidget, 1, wxALL, 1 );
 	
 	leftTopSizer->Add( treeSizer, 0, wxALL | wxEXPAND, 0 );
 	leftTopSizer->Add( navSizer, 0, wxALL, 0 );
@@ -1769,4 +1769,3 @@ void MainFrame::updateMenus()
 	}
 	#endif
 }
-

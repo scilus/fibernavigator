@@ -173,7 +173,7 @@ void Mesh::generateGeometry()
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
 
-	Vector triangleEdges;
+	Triangle triangleEdges;
 	Vector point;
 	Vector pointNormal;
 
@@ -183,9 +183,9 @@ void Mesh::generateGeometry()
 			triangleEdges = m_tMesh->getTriangle(i);
 			for(int j = 0 ; j < 3 ; ++j)
 			{
-				pointNormal = m_tMesh->getVertNormal(triangleEdges[j]);
+				pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
 				glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
-				point = m_tMesh->getVertex(triangleEdges[j]);
+				point = m_tMesh->getVertex(triangleEdges.pointID[j]);
 				glVertex3d(point.x, point.y, point.z);
 			}
 		}
