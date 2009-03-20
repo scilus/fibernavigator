@@ -36,9 +36,9 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 	int y = m_dh->rows;
 	int z = m_dh->frames;
 
-	float xo = -(m_dh->columns - max)/2.0;
-	float yo = -(m_dh->rows    - max)/2.0;
-	float zo = -(m_dh->frames  - max)/2.0;
+	float xo = ( max - x ) / 2.0;
+	float yo = ( max - y ) / 2.0;
+	float zo = ( max - z ) / 2.0;
 
 	float quadZ = -0.1f;
 	float lineZ = 0.0f;

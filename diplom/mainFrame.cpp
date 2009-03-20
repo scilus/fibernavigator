@@ -1625,28 +1625,28 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 	case axial: {
 		pos = m_gl0->getMousePos();
 		float x = ((float)pos.x/NAV_GL_SIZE) * max;
-		float y = ((float)pos.y/NAV_GL_SIZE) * max;
+		float y = ((float)(NAV_GL_SIZE - pos.y)/NAV_GL_SIZE * max);
 
 		m_xSlider->SetValue( (int)(x - (max - m_dh->columns)/2.0) );
-		m_ySlider->SetValue( (int)(max - y) );
+		m_ySlider->SetValue( (int)(y) );
 		break;
 	}
 	case coronal: {
 		pos = m_gl1->getMousePos();
 		float x = ((float)pos.x/NAV_GL_SIZE) * max;
-		float y = ((float)pos.y/NAV_GL_SIZE) * max;
+		float y = ((float)(NAV_GL_SIZE - pos.y)/NAV_GL_SIZE * max);
 
 		m_xSlider->SetValue( (int)(x - (max - m_dh->columns)/2.0) );
-		m_zSlider->SetValue( (int)(max - y) );
+		m_zSlider->SetValue( (int)(y/max*m_dh->rows - 20 ) );
 		break;
 	}
 	case sagittal: {
 		pos = m_gl2->getMousePos();
 		float x = ((float)pos.x/NAV_GL_SIZE) * max;
-		float y = ((float)pos.y/NAV_GL_SIZE) * max;
+		float y = ((float)(NAV_GL_SIZE - pos.y)/NAV_GL_SIZE * max);
 
 		m_ySlider->SetValue( (int)(max - x) );
-		m_zSlider->SetValue( (int)(max - y) );
+		m_zSlider->SetValue( (int)(y/max*m_dh->rows - 20 ) );
 		break;
 	}
 	case mainView:
