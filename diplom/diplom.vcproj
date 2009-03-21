@@ -567,10 +567,6 @@
 			>
 		</Filter>
 		<File
-			RelativePath=".\.project"
-			>
-		</File>
-		<File
 			RelativePath=".\GLSL\advection.fs"
 			>
 		</File>
