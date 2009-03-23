@@ -87,6 +87,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_OPTIONS_CMAP_LEGEND, MainFrame::OnToggleColorMapLegend)
 	// Menu Help
     EVT_MENU(MENU_HELP_ABOUT, MainFrame::OnAbout)
+    EVT_MENU(MENU_HELP_SHORTCUTS, MainFrame::OnShortcuts)
 
     /*
      * List widget events
@@ -168,7 +169,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	m_tSlider = new wxSlider(this, ID_T_SLIDER, 30, 0, 100, wxDefaultPosition, 
 				wxSize(110, 19), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 	m_tSlider2 = new wxSlider(this, ID_T_SLIDER2, 30, 0, 100, wxDefaultPosition, 
-				wxSize(110, 19), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+				wxSize(103, 19), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 	
 	wxButton *buttonUp = new wxButton(this, ID_BUTTON_UP, wxT("up"), wxDefaultPosition, wxSize(40,19));
 	buttonUp->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
@@ -183,7 +184,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	buttonLoad3->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
 	
 	m_listCtrl = new MyListCtrl(this, ID_LIST_CTRL, wxDefaultPosition,
-   		wxSize(300,-1), wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
+   		wxSize(293,-1), wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
 	
 	
 	m_treeWidget = new MyTreeCtrl(this, ID_TREE_CTRL, wxDefaultPosition,
@@ -217,7 +218,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
    m_listCtrl->InsertColumn(3, itemCol);
    
    m_listCtrl->SetColumnWidth(0, 20);
-   m_listCtrl->SetColumnWidth(1, 218);
+   m_listCtrl->SetColumnWidth(1, 214);
    m_listCtrl->SetColumnWidth(2, 50);
    m_listCtrl->SetColumnWidth(3, 20);
    
@@ -1046,8 +1047,30 @@ void MainFrame::OnSetCMapNo(wxCommandEvent& WXUNUSED(event)) {m_dh->colorMap = -
 void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
 	wxString rev = _T("$Revision$");
+	rev = rev.AfterFirst('$');
+	rev = rev.BeforeLast('$');
 	wxString date = _T("$Date$");
+	date = date.AfterFirst('$');
+	date = date.BeforeLast('$');
 	(void)wxMessageBox(_T("Fiber Navigator\nAuthor: Ralph Schurade (c) 2008\n\n") + rev + _T("\n") + date, _T("About Fiber Navigator"));
+}
+
+void MainFrame::OnShortcuts(wxCommandEvent& WXUNUSED(event))
+{
+	wxString nl = _T("\n");
+	(void)wxMessageBox(_T("Keyboard Shortcuts") + nl
+			+ _T("_________________________________________________________") + nl
+			+ _T("Move selected box:") + nl
+			+ _T("   cursor up/down/left/right, page up/down") + nl
+			+ _T("Move selected box larger steps:") + nl
+			+ _T("   shift + cursor up/down/left/right, page up/down") + nl
+			+ _T("Resize selected box:") + nl
+			+ _T("   ctrl + cursor up/down/left/right, page up/down") + nl
+			+ _T("Resize selected box larger steps:") + nl
+			+ _T("   ctrl + shift + cursor up/down/left/right, page up/down") + nl
+			+ _T("Delete selected box and all sub boxes:") + nl
+			+ _T("   del") + nl
+);
 }
 
 /****************************************************************************************************
@@ -1225,7 +1248,7 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 		m_dh->blendAlpha = !m_dh->blendAlpha;
 
 	m_mainGL->changeOrthoSize();
-
+	updateMenus();
 	this->Update();
 	this->Refresh();
 

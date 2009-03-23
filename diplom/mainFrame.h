@@ -79,6 +79,7 @@ private:
 	void OnSetCMapNo(wxCommandEvent& event);
 	// Help
 	void OnAbout(wxCommandEvent& event);
+	void OnShortcuts(wxCommandEvent& event);
 
 	/*
 	 * Window Functions
@@ -225,6 +226,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_CMAPNO							170
 // Menu Help
 #define MENU_HELP_ABOUT       						wxID_ABOUT
+#define MENU_HELP_SHORTCUTS    						180
 /*
  * Defines for Buttons, will move into Menus eventually
  */

@@ -10,8 +10,6 @@
 =
 ========================================================================
 
-
-help- keyboard shortcuts
 abspeichern der farben
 laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
 skalierung der grauwerte
@@ -65,6 +63,7 @@ background and threshold
 =
 ===============================================================================
 
+help- keyboard shortcuts
 keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
 windows portierung (es kompiliert und laeuft braucht aber noch arbeit)
 benutzer menus und buttons

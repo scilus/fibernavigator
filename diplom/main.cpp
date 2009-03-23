@@ -209,6 +209,7 @@ bool MyApp::OnInit(void) {
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(MENU_HELP_ABOUT, _T("About"));
+	help_menu->Append(MENU_HELP_SHORTCUTS, _T("Keyboard shortcuts"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, _T("&File"));
