@@ -35,6 +35,7 @@ public:
 		wxListCtrl(parent, id, pos, size, style) {
 	};
 	void OnLeftClick(wxMouseEvent& event);
+	void OnRightClick(wxMouseEvent& event);
 	int getColClicked();
 	int getColActivated();
 	void moveItemUp(long);

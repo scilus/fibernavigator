@@ -95,6 +95,11 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_LIST_ITEM_SELECTED(ID_LIST_CTRL, MainFrame::OnSelectListItem)
 	EVT_BUTTON(ID_BUTTON_UP, MainFrame::OnListItemUp)
 	EVT_BUTTON(ID_BUTTON_DOWN, MainFrame::OnListItemDown)
+	EVT_MENU(MENU_LIST_DELETE, MainFrame::OnListMenuDelete)
+	EVT_MENU(MENU_LIST_TOGGLESHOW, MainFrame::OnListMenuShow)
+	EVT_MENU(MENU_LIST_TOGGLECOLOR, MainFrame::OnListMenuThreshold)
+	EVT_MENU(MENU_LIST_TOGGLENAME, MainFrame::OnListMenuName)
+	
 	/*
      * Tree widget events
      */
@@ -1292,16 +1297,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 	case 13:
 		delete info;
 		m_listCtrl->DeleteItem(item);
-		m_dh->anatomy_loaded = false;
-		for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
-		{
-			DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-			if (info->getType() < Mesh_)
-			{
-				m_dh->anatomy_loaded = true;
-				break;
-			}
-		}
+		m_dh->updateLoadStatus();
 		break;
 	default:
 		break;
@@ -1381,6 +1377,59 @@ void MainFrame::OnListItemDown(wxCommandEvent& WXUNUSED(event))
 	m_listCtrl->EnsureVisible(item);
 	refreshAllGLWidgets();
 }
+
+void MainFrame::OnListMenuName(wxCommandEvent& event)
+{
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
+	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+	if (!info->toggleShowFS())
+		m_listCtrl->SetItem(item, 1, info->getName() + wxT("*"));
+	else
+		m_listCtrl->SetItem(item, 1, info->getName());
+}
+
+void MainFrame::OnListMenuThreshold(wxCommandEvent& event)
+{
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
+	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+	if (info->getType() >= Mesh_)
+	{
+		if (!info->toggleUseTex())
+			m_listCtrl->SetItem(item, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );
+		else
+			m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), info->getThreshold() ));
+	}
+}
+
+void MainFrame::OnListMenuDelete(wxCommandEvent& event)
+{
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
+	m_listCtrl->DeleteItem(item);
+	// anatomy deleted? check if another one is still present
+	m_dh->updateLoadStatus();
+	refreshAllGLWidgets();
+}
+
+void MainFrame::OnListMenuShow(wxCommandEvent& event)
+{
+
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
+	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+	if (info->toggleShow())
+	{
+		m_listCtrl->SetItem(item, 0, wxT(""), 0);
+	}
+	else
+	{
+		m_listCtrl->SetItem(item, 0, wxT(""), 1);
+	}
+	refreshAllGLWidgets();
+}
+
 
 /****************************************************************************************************
  *
@@ -1564,14 +1613,14 @@ void MainFrame::OnMovePoints1(wxCommandEvent& WXUNUSED(event))
 {
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
+	id = m_treeWidget->GetFirstChild(m_tPointId, cookie);
 	while ( id.IsOk() )
 	{
-		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
+		SplinePoint *point = (SplinePoint*)(m_treeWidget->GetItemData(id));
 		if (point->isBoundary())
 			point->setX(point->X() + 5.0);
 
-		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
+		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
 	}
 
 	m_dh->surface_isDirty = true;
@@ -1586,14 +1635,14 @@ void MainFrame::OnMovePoints2(wxCommandEvent& WXUNUSED(event))
 {
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
-	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
+	id = m_treeWidget->GetFirstChild(m_tPointId, cookie);
 	while ( id.IsOk() )
 	{
-		SplinePoint *point = (SplinePoint*)(m_dh->mainFrame->m_treeWidget->GetItemData(id));
+		SplinePoint *point = (SplinePoint*)(m_treeWidget->GetItemData(id));
 		if (point->isBoundary())
 			point->setX(point->X() - 5.0);
 
-		id = m_dh->mainFrame->m_treeWidget->GetNextChild(m_dh->mainFrame->m_tPointId, cookie);
+		id = m_treeWidget->GetNextChild(m_tPointId, cookie);
 	}
 
 	m_dh->surface_isDirty = true;

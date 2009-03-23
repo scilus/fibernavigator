@@ -110,6 +110,11 @@ private:
     void OnSelectListItem(wxListEvent& event);
     void OnListItemUp(wxCommandEvent& event);
     void OnListItemDown(wxCommandEvent& event);
+    
+    void OnListMenuName(wxCommandEvent& event);
+    void OnListMenuThreshold(wxCommandEvent& event);
+    void OnListMenuDelete(wxCommandEvent& event);
+    void OnListMenuShow(wxCommandEvent& event);
 
     /*
      * Tree widget event functions
@@ -233,6 +238,13 @@ DECLARE_EVENT_TABLE()
 #define ID_BUTTON_LOAD2								207
 #define ID_BUTTON_LOAD3								208
 
+/*
+ * Menu entries for right click on list widget
+ */
+#define	MENU_LIST_DELETE							220
+#define MENU_LIST_TOGGLESHOW						221
+#define MENU_LIST_TOGGLECOLOR						222
+#define MENU_LIST_TOGGLENAME						223
 /*
  * Defines for interface items and other events
  */

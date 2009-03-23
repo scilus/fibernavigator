@@ -945,3 +945,45 @@ void DatasetHelper::printDebug(wxString string, int level)
 	printTime();
 	printwxT(string + _T("\n"));
 }
+
+void DatasetHelper::updateLoadStatus()
+{
+	bool anatomy_loaded = false;
+	bool fibers_loaded = false;
+	bool vectors_loaded = false;
+	bool tensors_loaded = false;
+	bool surface_loaded = false;
+	
+	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
+		switch (info->getType())
+		{
+		case Head_byte:
+		case Head_short:
+		case Overlay:
+		case RGB:
+			anatomy_loaded = true;
+			break;
+		case Vectors_:
+			anatomy_loaded = true;
+			vectors_loaded = true;
+			break;
+		case Mesh_:
+			break;
+		case Tensors_:
+			tensors_loaded = true;
+			break;
+		case Fibers_:
+			fibers_loaded = true;
+			break;
+		case Surface_:
+			surface_loaded = true;
+			break;
+		case IsoSurface_:
+			break;
+		default:
+			break;
+		}
+	}
+}

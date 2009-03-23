@@ -10,7 +10,7 @@
 =
 ========================================================================
 
-keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
+
 help- keyboard shortcuts
 abspeichern der farben
 laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
@@ -65,6 +65,7 @@ background and threshold
 =
 ===============================================================================
 
+keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
 windows portierung (es kompiliert und laeuft braucht aber noch arbeit)
 benutzer menus und buttons
 ROI aus overlay und selection der fasern, die durch die roi gehen.

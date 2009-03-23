@@ -5,6 +5,7 @@
 
 BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
 	EVT_LEFT_DOWN(MyListCtrl::OnLeftClick)
+	EVT_RIGHT_UP(MyListCtrl::OnRightClick)
 END_EVENT_TABLE()
 
 
@@ -24,6 +25,54 @@ void MyListCtrl::OnLeftClick(wxMouseEvent& event)
 
 	event.Skip();
 }
+
+void MyListCtrl::OnRightClick(wxMouseEvent& event)
+{
+	wxMenu* menu = new wxMenu;
+	
+	long item = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	DatasetInfo *info = (DatasetInfo*) GetItemData(item);
+	
+	if (info->getType() < Mesh_)
+	{
+		if (info->getShowFS())
+			menu->Append(MENU_LIST_TOGGLENAME, _T("no interpolation"));
+		else 
+			menu->Append(MENU_LIST_TOGGLENAME, _T("interpolation"));
+	}
+	if (info->getType() == Mesh_ || info->getType() == IsoSurface_)
+	{
+		if (info->getShowFS())
+			menu->Append(MENU_LIST_TOGGLENAME, _T("cut front sector"));
+		else 
+			menu->Append(MENU_LIST_TOGGLENAME, _T("show front sector"));
+		if (info->getUseTex())
+			menu->Append(MENU_LIST_TOGGLECOLOR, _T("use coloring"));
+		else
+			menu->Append(MENU_LIST_TOGGLECOLOR, _T("use textures"));
+	}
+	if (info->getType() == Fibers_)
+	{
+		if (info->getShowFS())
+			menu->Append(MENU_LIST_TOGGLENAME, _T("local coloring"));
+		else 
+			menu->Append(MENU_LIST_TOGGLENAME, _T("global coloring"));
+		if (info->getUseTex())
+			menu->Append(MENU_LIST_TOGGLECOLOR, _T("color with overlay"));
+		else
+			menu->Append(MENU_LIST_TOGGLECOLOR, _T("normal coloring"));
+	}
+	
+	menu->AppendSeparator();
+	if (info->getShow())
+		menu->Append(MENU_LIST_TOGGLESHOW, _T("deactivate"));
+	else
+		menu->Append(MENU_LIST_TOGGLESHOW, _T("activate"));
+	menu->Append(MENU_LIST_DELETE, _T("delete"));
+	
+	PopupMenu(menu, event.GetPosition());
+}
+
 
 int MyListCtrl::getColClicked()
 {

@@ -42,8 +42,6 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 Anatomy::~Anatomy()
 {
 	delete[] m_floatDataset;
-	m_dh->tensors_loaded = false;
-
 	const GLuint* tex = &m_GLuint;
 	glDeleteTextures(1, tex);
 }

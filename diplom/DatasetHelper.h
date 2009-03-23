@@ -102,6 +102,7 @@ public:
 	bool togglePointMode() {return pointMode = !pointMode;};
 	bool getPointMode() {return pointMode;};
 
+	void updateLoadStatus();
 
 	/////////////////////////////////////////////////////////////////////////////////
 	// general info about the datasets

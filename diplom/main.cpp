@@ -153,12 +153,12 @@ bool MyApp::OnInit(void) {
 	wxMenu *view_menu = new wxMenu;
 	view_menu->Append(MENU_VIEW_RESET, _T("reset"));
 	view_menu->AppendSeparator();
-	view_menu->Append(MENU_VIEW_LEFT, _T("left"));
-	view_menu->Append(MENU_VIEW_RIGHT, _T("right"));
-	view_menu->Append(MENU_VIEW_FRONT, _T("posterior"));
-	view_menu->Append(MENU_VIEW_BACK, _T("anterior"));
-	view_menu->Append(MENU_VIEW_TOP, _T("superior"));
-	view_menu->Append(MENU_VIEW_BOTTOM, _T("inferior"));
+	view_menu->Append(MENU_VIEW_LEFT, _T("left\tS"));
+	view_menu->Append(MENU_VIEW_RIGHT, _T("right\tShift-S"));
+	view_menu->Append(MENU_VIEW_FRONT, _T("posterior\tC"));
+	view_menu->Append(MENU_VIEW_BACK, _T("anterior\tShift-C"));
+	view_menu->Append(MENU_VIEW_TOP, _T("superior\tA"));
+	view_menu->Append(MENU_VIEW_BOTTOM, _T("inferior\tShift-A"));
 
 	wxMenu *voi_menu = new wxMenu;
 	voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New"));
