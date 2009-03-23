@@ -1,63 +1,80 @@
+========================================================================
+=
+= neue wuensche kommen hier rein (ausreichende erlaeuterung)
+=
+========================================================================
+
+========================================================================
+=
+= relativ(?) einfach
+=
+========================================================================
+
 keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
-
-alpha blending und neues beleuchtungschema (farbe-licht)
-
-windows portierung
-
-benutzer menus und buttons
-
-help
-	- keyboard shortcuts
-
-
+help- keyboard shortcuts
 abspeichern der farben
+laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
+skalierung der grauwerte
+interne implementierung der offsetflaeche
+keine OPENGL installation: beim start lesbare fehlermeldung
+lesen der fasern als vtk-ascii file
+lesen der fasern als binary file so wie es z.b. camino erzeugt (Ting)
+lesen von freesurfer mesh files	
 
+========================================================================
+=
+= aufwaendiger
+=
+========================================================================
+laden anderer bild und mesh formate ( *.nii, *.v )
+test und evtl kleine anpassungen fuer ein laptop computer
+fasern durchsichtig ( gewichtet mit overlay )
+slider fuer isosurface reparieren
+koordinatensystem: anzeige in unterschiedlichen konventionen ( nullpunkt in lipsia und nifti )
+verwendung der voxelgroesse ( skalierung )
+implementierung einer clipping plane, um fasern auszublenden
+evtl. ein frei rotierbares navigation slide
+
+========================================================================
+=
+= eher unwahrscheinlich
+=
+========================================================================
+alpha blending und neues beleuchtungschema (farbe-licht)
+exclusivitaet ( eine faser nicht gleichzeitig in mehreren boxen )
+tastaturbuffer
+falls moeglich: remote x-session: initializing verwendung der shader auf dem localhost.
+
+========================================================================
+=
+= mehr erklaerung noetig
+=
+========================================================================
 background and threshold
 
-exclusivitaet ( eine faser nicht gleichzeitig in mehreren boxen )
-
-laden anderer bild und mesh formate ( *.nii, *.v )
-
-tastaturbuffer und test und evtl kleine anpassungen fuer ein laptop computer
-
-ROI aus overlay und selection der fasern, die durch die roi gehen.
-
-fasern durchsichtig ( gewichtet mit overlay )
-
-laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
-
-isosurface von belibigen skalaren datensatzen ( float/short )
-
-20.02.2008 : Einige Dinge die noch gemacht werden muessen:
-* slider fuer isosurface reparieren
-* koordinatensystem: anzeige in unterschiedlichen konventionen ( nullpunkt in lipsia und nifti )
-* start des programms mit nicht verhandenem filenamen -> absturz
-* verwendung der voxelgröße ( skalierung )
-* skalierung der grauwerte
-* interne implementierung der offsetflaeche
-* keine OPENGL installation: beim start lesbare fehlermeldung
-* falls möglich: remote x-session: initializing verwendung der shader auf dem localhost. 
-* implementierung einer clipping plane, um fasern auszublenden
-* evtl. ein frei rotierbares navigation slide
-* lesen der fasern als vtk-ascii file
-* lesen der fasern als binary file so wie es z.b. camino erzeugt (Ting)
-* lesen von freesurfer mesh files
-* skalieren des main frames ( nicht nur quadratisch. ist besonders fuer wide-screen fesnter notwendig
-* BUG: lic texturierung und neues coordinatensystem
 
 ===============================================================================
 =
 =     bug-liste
 =
 ===============================================================================
-08.12.2008
-reset colors on fibers. macht manche fasern schwarz
 
 ===============================================================================
 =
 =     erledigt
 =
 ===============================================================================
+
+windows portierung (es kompiliert und laeuft braucht aber noch arbeit)
+benutzer menus und buttons
+ROI aus overlay und selection der fasern, die durch die roi gehen.
+isosurface von belibigen skalaren datensatzen ( float/short )
+start des programms mit nicht verhandenem filenamen -> absturz
+skalieren des main frames ( nicht nur quadratisch. ist besonders fuer wide-screen fesnter notwendig
+BUG: lic texturierung und neues coordinatensystem
+
+08.12.2008
+reset colors on fibers. macht manche fasern schwarz
 
 08.10.2008
 
