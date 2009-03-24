@@ -33,14 +33,15 @@ public:
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
 	void setSetSampleRate(float r) {m_sampleRateT = m_sampleRateU = r; execute();};
 
+	bool save( wxString filename )const;
 private:
 	void execute();
-	void generateTexture() {};
+	void generateTexture() {}
 	void generateGeometry();
-	void generateLICGeometry() ;
-	void initializeBuffer() {};
+	void generateLICGeometry();
+	void initializeBuffer() {}
 	void createCutTexture();
-	GLuint getGLuint() {return 0;};
+	GLuint getGLuint() {return 0;}
 
 	FTensor getCovarianceMatrix(std::vector< std::vector< double > > points);
 	void getSplineSurfaceDeBoorPoints(  std::vector< std::vector< double > > &givenPoints,

@@ -9,6 +9,8 @@
 #include "GL/glew.h"
 #include "lic/SurfaceLIC.h"
 
+#include <fstream>
+
 Surface::Surface(DatasetHelper* dh)
 {
 	m_dh = dh;
@@ -310,10 +312,13 @@ void Surface::execute ()
 	}
 	m_dh->surface_isDirty = false;
 
+#ifndef __WXMAC__
+	// FIXME MAC !!!
 	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	m_GLuint = 0;
 
 	createCutTexture();
+#endif
 }
 
 void Surface::draw()
@@ -497,6 +502,97 @@ void Surface::generateGeometry()
 
 	glEndList();
 	m_GLuint = dl;
+}
+
+bool Surface::save(wxString filename ) const
+{
+#if 0
+	m_dh->printDebug(_T("start saving vtk file"), 1);
+	wxFile dataFile;
+	wxFileOffset nSize = 0;
+
+	if (dataFile.Open(filename))
+	{
+//		nSize = dataFile.Length();
+//		if (nSize == wxInvalidOffset) return false;
+	}
+	else
+	{
+		return false;
+	}
+
+	m_dh->printDebug(_T("start writing file)"));
+	dataFile.write("# vtk DataFile Version 2.0\n");
+	dataFile.write("generated using FiberNavigator\n");
+	dataFile.write("ASCII\n");
+
+	dataFile.write("POINT_DATA %d float\n", m_tMesh->getNumVertices());
+	for(int i=0; i< m_tMesh->getNumVertices(); ++i)
+	{
+		point = m_tMesh->getVertex(i);
+		dataFile.write("%d %d %d\n", point.x, point.y, point.z);
+	}
+
+	dataFile.write("CELLS %d %d\n", m_tMesh->getNumTriangles(), m_tMesh->getNumTriangles()*4);
+	for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
+	{
+		triangleEdges = m_tMesh->getTriangle(i);
+		dataFile.write("3 %d %d %d\n", triangleEdges.pointID[0],
+			triangleEdges.pointID[1], triangleEdges.pointID[2]);
+	}
+	dataFile.write("CELL_TYPES");
+	for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
+	{
+		dataFile.write("3\n");
+	}
+	return true;
+#else
+	//m_dh->printDebug(_T("start saving vtk file"), 1);
+	std::ofstream dataFile(filename.c_str());
+	wxFileOffset nSize = 0;
+
+	if (dataFile)
+	{
+		std::cout << "opening file" << std::endl;
+//		nSize = dataFile.Length();
+//		if (nSize == wxInvalidOffset) return false;
+	}
+	else
+	{
+		std::cout << "open file failed: " << filename.c_str() << std::endl;
+		return false;
+	}
+
+	m_dh->printDebug(_T("start writing file)"), 1);
+	dataFile << ("# vtk DataFile Version 2.0\n");
+	dataFile << ("generated using FiberNavigator\n");
+	dataFile << ("ASCII\n");
+
+	Triangle triangleEdges;
+	Vector point;
+	dataFile << "POINT_DATA " << m_tMesh->getNumVertices() << " float\n";
+	for(int i=0; i< m_tMesh->getNumVertices(); ++i)
+	{
+		point = m_tMesh->getVertex(i);
+		dataFile << point.x << " " << point.y << " " << point.z <<"\n";
+	}
+
+	dataFile << "CELLS " << m_tMesh->getNumTriangles() << " " << m_tMesh->getNumTriangles()*4;
+	for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
+	{
+		triangleEdges = m_tMesh->getTriangle(i);
+		dataFile << "3 " << triangleEdges.pointID[0] << " " << 
+			triangleEdges.pointID[1] << " " << triangleEdges.pointID[2] << "\n";
+	}
+	dataFile << "CELL_TYPES\n";
+	for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
+	{
+		dataFile << "3\n";
+	}
+	std::cout << " saving  done" << std::endl;
+	return true;
+
+#endif
 }
 
 void Surface::generateLICGeometry()

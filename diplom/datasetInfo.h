@@ -61,6 +61,7 @@ public:
 	virtual ~DatasetInfo() {};
 
 	virtual bool load(wxString filename)=0;
+	virtual bool save(wxString filename)const{ return false;}
 	virtual void draw()=0;
 	virtual void clean()=0;
 	virtual void smooth()=0;
