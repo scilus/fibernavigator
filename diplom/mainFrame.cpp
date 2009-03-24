@@ -1235,8 +1235,6 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 
 			SetSizer( topSizer1 );
 			topSizer1->SetSizeHints( this );
-			
-			SetMinSize(wxSize(945,730));
 			break;
 		}
 		case 2:
@@ -1254,12 +1252,10 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 			buttonLoad2->Show(true);
 			buttonLoad3->Show(true);
 			
-			int newSize = wxMin(clientSize.x/2,clientSize.y/2);
-			m_gl0->SetMinSize(wxSize(newSize, newSize));
-			m_gl1->SetMinSize(wxSize(newSize, newSize));
-			m_gl2->SetMinSize(wxSize(newSize, newSize));
-			m_mainGL->SetMinSize(wxSize(newSize, newSize));
-			
+			m_gl0->SetMinSize(wxSize(100, 100));
+			m_gl1->SetMinSize(wxSize(100, 100));
+			m_gl2->SetMinSize(wxSize(100, 100));
+			m_mainGL->SetMinSize(wxSize(100, 100));
 			m_gl0->SetMaxSize(wxSize(10000, 10000));
 			m_gl1->SetMaxSize(wxSize(10000, 10000));
 			m_gl2->SetMaxSize(wxSize(10000, 10000));
@@ -1284,9 +1280,8 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 		    leftSizer->Add(treeSizer, 0, wxALL, 1 );
 		    leftSizer->Add( m_listCtrl, 1, wxALL | wxEXPAND, 1 );
 		    leftSizer->Add( buttonSizer, 0, wxALIGN_BOTTOM | wxALL, 1 );
-		    
 		
-			topSizer2 = new wxGridSizer(2,2,1,1);
+			topSizer2 = new wxFlexGridSizer(2,2,1,1);
 			topSizer2->Add(m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1);
 			topSizer2->Add(m_gl1, 1, wxALL | wxEXPAND | wxSHAPED, 1);
 			topSizer2->Add(m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1);
@@ -1297,8 +1292,6 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 			
 			SetSizer( topSizer );
 			topSizer->SetSizeHints( this );
-			
-			SetMinSize(wxSize(945,730));
 			break;
 		}
 		default:
@@ -1322,6 +1315,7 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 			m_gl0->SetMaxSize(wxSize(150,150));
 			m_gl1->SetMaxSize(wxSize(150,150));
 			m_gl2->SetMaxSize(wxSize(150,150));
+			m_mainGL->SetMaxSize(wxSize(1000,1000));
 			
 			m_xSlider->SetMinSize(wxSize(150,-1));
 			m_ySlider->SetMinSize(wxSize(150,-1));
@@ -1363,8 +1357,6 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 
 		    SetSizer( topSizer );
 		    topSizer->SetSizeHints( this );
-		    
-		    SetMinSize(wxSize(945,730));
 			break;
 		}
 		}
@@ -1832,10 +1824,26 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 		m_ySlider->SetMinSize(wxSize(newSize,-1));
 		m_zSlider->SetMinSize(wxSize(newSize,-1));
 	}
+	if (enlargeNav == 2)
+	{
+		int newSize = wxMin((clientSize.x - leftSizer->GetSize().x - 5)/2 ,clientSize.y /2 -5);
+					
+		m_gl0->SetMinSize(wxSize(newSize,newSize));
+		m_gl1->SetMinSize(wxSize(newSize,newSize));
+		m_gl2->SetMinSize(wxSize(newSize,newSize));
+		m_mainGL->SetMinSize(wxSize(newSize,newSize));
+		m_gl0->SetMaxSize(wxSize(newSize,newSize));
+		m_gl1->SetMaxSize(wxSize(newSize,newSize));
+		m_gl2->SetMaxSize(wxSize(newSize,newSize));
+		m_mainGL->SetMaxSize(wxSize(newSize,newSize));
+		
+		m_xSlider->SetMinSize(wxSize(newSize,-1));
+		m_ySlider->SetMinSize(wxSize(newSize,-1));
+		m_zSlider->SetMinSize(wxSize(newSize,-1));
+	}
 
 	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
 
-	
 	m_mainGL->changeOrthoSize();
 #if 0
 	printf("%d : %d : %d :%d : %d, %d\n", this->GetSize().x, this->GetSize().y, 

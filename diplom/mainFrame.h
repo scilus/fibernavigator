@@ -166,7 +166,7 @@ public:
 	
 	wxBoxSizer *topSizer;
 	wxBoxSizer *topSizer1;
-	wxGridSizer *topSizer2;
+	wxFlexGridSizer *topSizer2;
 	wxBoxSizer *leftSizer;
 	wxBoxSizer *leftTopSizer;
 	wxBoxSizer *navSizer;
