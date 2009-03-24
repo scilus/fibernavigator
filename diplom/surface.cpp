@@ -547,8 +547,12 @@ bool Surface::save(wxString filename ) const
 	}
 	return true;
 #else
+	char* c_file;
+	c_file = (char*) malloc(filename.length()+1);
+	strcpy(c_file, (const char*) filename.mb_str(wxConvUTF8));
+	
 	//m_dh->printDebug(_T("start saving vtk file"), 1);
-	std::ofstream dataFile(filename.c_str());
+	std::ofstream dataFile(c_file);
 	wxFileOffset nSize = 0;
 
 	if (dataFile)
