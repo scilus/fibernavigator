@@ -148,6 +148,12 @@ public:
     wxSlider* m_zSlider;
     wxSlider* m_tSlider;
     wxSlider* m_tSlider2;
+    
+    wxButton *buttonUp;
+    wxButton *buttonDown;
+    wxButton *buttonLoad1;
+    wxButton *buttonLoad2;
+    wxButton *buttonLoad3;
 
 	wxStatusBar* m_statusBar;
 	wxMenuBar *m_menuBar;
@@ -159,12 +165,15 @@ public:
 	wxTreeItemId m_tSelBoxId;
 	
 	wxBoxSizer *topSizer;
+	wxBoxSizer *topSizer1;
+	wxGridSizer *topSizer2;
 	wxBoxSizer *leftSizer;
 	wxBoxSizer *leftTopSizer;
 	wxBoxSizer *navSizer;
+	wxBoxSizer *navSizer1;
 	wxBoxSizer *buttonSizer;
 	wxBoxSizer *treeSizer;
-	bool enlargeNav;
+	int enlargeNav;
 	
 	
 	DatasetHelper* m_dh;

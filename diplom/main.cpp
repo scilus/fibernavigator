@@ -139,7 +139,7 @@ bool MyApp::OnInit(void) {
 	frame->SetIcon(wxIcon(_T("sashtest_icn")));
 #endif
 
-	frame->SetMinSize(wxSize(800, 730));
+	frame->SetMinSize(wxSize(945, 730));
 	// Make a menubar
 	wxMenu *file_menu = new wxMenu;
 	file_menu->Append(MENU_FILE_LOAD, _T("Load\tCtrl-L"));

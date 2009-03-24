@@ -50,8 +50,8 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 	m_arcBall = new ArcBallT(640.0f, 480.0f);
 	
 	orthoSizeNormal = 200;
-	orthoSizeMainX = 200;
-	orthoSizeMainY = 200;
+	orthoModX = 0;
+	orthoModY = 0;
 }
 
 MainCanvas::~MainCanvas()
@@ -81,19 +81,19 @@ void MainCanvas::init()
 void MainCanvas::changeOrthoSize()
 {
 	orthoSizeNormal = wxMax(wxMax(m_dh->rows, m_dh->columns), m_dh->frames);
-	orthoSizeMainX = orthoSizeNormal;
-	orthoSizeMainY = orthoSizeNormal;
-	
+		
 	if (m_view == mainView)
 	{
 		//TODO
+		orthoModX = 0;
+		orthoModY = 0;
 		int xSize = GetSize().x;
 		int ySize = GetSize().y;
 		float ratio = (float)xSize / (float)ySize;
 		if (ratio > 1.0)
-			orthoSizeMainX = (int)(orthoSizeMainX * ratio);
+			orthoModX = ((int)(orthoSizeNormal * ratio) - orthoSizeNormal)/2;
 		else
-			orthoSizeMainY = (int)(orthoSizeMainY * (1.0 + (1.0 - ratio)) );		
+			orthoModY = ((int)(orthoSizeNormal * (1.0 + (1.0 - ratio)) ) - orthoSizeNormal)/2;		
 	}
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -531,7 +531,7 @@ void MainCanvas::render()
     	// TODO marker
     	glMatrixMode(GL_PROJECTION);
     	glLoadIdentity();
-    	glOrtho( 0, orthoSizeMainX, 0, orthoSizeMainY, -3000, 3000);
+    	glOrtho( - orthoModX, orthoSizeNormal + orthoModX, - orthoModY, orthoSizeNormal + orthoModY, -3000, 3000);
     	
     	glPushMatrix();
     	m_dh->doMatrixManipulation();

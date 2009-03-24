@@ -155,7 +155,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     const long style):
   wxFrame(parent, id, title, pos, size, style)
 {
-	enlargeNav = false;
+	enlargeNav = 0;
 	
 	m_xSlider = new wxSlider(this, ID_X_SLIDER, 50, 0, 100, wxDefaultPosition,
            		wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
@@ -171,16 +171,16 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	m_tSlider2 = new wxSlider(this, ID_T_SLIDER2, 30, 0, 100, wxDefaultPosition, 
 				wxSize(103, 19), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 	
-	wxButton *buttonUp = new wxButton(this, ID_BUTTON_UP, wxT("up"), wxDefaultPosition, wxSize(40,19));
+	buttonUp = new wxButton(this, ID_BUTTON_UP, wxT("up"), wxDefaultPosition, wxSize(40,19));
 	buttonUp->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
-	wxButton *buttonDown = new wxButton(this, ID_BUTTON_DOWN, wxT("down"), wxDefaultPosition, wxSize(40,19));
+	buttonDown = new wxButton(this, ID_BUTTON_DOWN, wxT("down"), wxDefaultPosition, wxSize(40,19));
 	buttonDown->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
 	
-	wxButton *buttonLoad1 = new wxButton(this, ID_BUTTON_LOAD1, wxT("Load Datasets"), wxDefaultPosition, wxSize(148,20));
+	buttonLoad1 = new wxButton(this, ID_BUTTON_LOAD1, wxT("Load Datasets"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad1->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
-	wxButton *buttonLoad2 = new wxButton(this, ID_BUTTON_LOAD2, wxT("Load Meshes"), wxDefaultPosition, wxSize(148,20));
+	buttonLoad2 = new wxButton(this, ID_BUTTON_LOAD2, wxT("Load Meshes"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad2->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
-	wxButton *buttonLoad3 = new wxButton(this, ID_BUTTON_LOAD3, wxT("Load Fibers"), wxDefaultPosition, wxSize(148,20));
+	buttonLoad3 = new wxButton(this, ID_BUTTON_LOAD3, wxT("Load Fibers"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad3->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
 	
 	m_listCtrl = new MyListCtrl(this, ID_LIST_CTRL, wxDefaultPosition,
@@ -1198,9 +1198,11 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 	if (!m_dh->scene) return;
 	if ( wxGetKeyState(WXK_CONTROL) )
 	{
-		enlargeNav = !enlargeNav;
+		enlargeNav = (enlargeNav + 1) % 3;
 		wxSize clientSize = this->GetClientSize();
-		if (enlargeNav)
+		switch (enlargeNav)
+		{
+		case 1:
 		{
 			treeSizer->Show(false);
 			buttonSizer->Show(false);
@@ -1219,14 +1221,104 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 			m_ySlider->SetMinSize(wxSize(newSize,-1));
 			m_zSlider->SetMinSize(wxSize(newSize,-1));
 			
-			leftTopSizer->Detach(1);
-			topSizer->Prepend(navSizer, 0, wxALL | wxEXPAND, 1);
+			navSizer1 = new wxBoxSizer( wxVERTICAL );
+			navSizer1->Add( m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
+			navSizer1->Add( m_zSlider, 0, wxALL, 1 );
+			navSizer1->Add( m_gl1, 1, wxALL  | wxEXPAND | wxSHAPED, 1 );
+			navSizer1->Add( m_ySlider, 0, wxALL, 1 );
+			navSizer1->Add( m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
+			navSizer1->Add( m_xSlider, 0, wxALL, 1 );
+			
+			topSizer1 = new wxBoxSizer( wxHORIZONTAL );
+			topSizer1->Add(navSizer1, 0, wxALL | wxEXPAND, 1);
+			topSizer1->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
+
+			SetSizer( topSizer1 );
+			topSizer1->SetSizeHints( this );
+			
+			SetMinSize(wxSize(945,730));
+			break;
 		}
-		else
+		case 2:
 		{
+			m_treeWidget->Show(true);
+			m_listCtrl->Show(true);
+			m_xSlider->Show(false);
+			m_ySlider->Show(false);
+			m_zSlider->Show(false);
+			m_tSlider->Show(true);
+			m_tSlider2->Show(true);
+			buttonUp->Show(true);
+			buttonDown->Show(true);
+			buttonLoad1->Show(true);
+			buttonLoad2->Show(true);
+			buttonLoad3->Show(true);
+			
+			int newSize = wxMin(clientSize.x/2,clientSize.y/2);
+			m_gl0->SetMinSize(wxSize(newSize, newSize));
+			m_gl1->SetMinSize(wxSize(newSize, newSize));
+			m_gl2->SetMinSize(wxSize(newSize, newSize));
+			m_mainGL->SetMinSize(wxSize(newSize, newSize));
+			
+			m_gl0->SetMaxSize(wxSize(10000, 10000));
+			m_gl1->SetMaxSize(wxSize(10000, 10000));
+			m_gl2->SetMaxSize(wxSize(10000, 10000));
+			m_mainGL->SetMaxSize(wxSize(10000, 10000));
+						
+			topSizer 		= new wxBoxSizer( wxHORIZONTAL );
+			leftSizer 		= new wxBoxSizer( wxVERTICAL );
+			buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
+			treeSizer		= new wxBoxSizer( wxVERTICAL );
+			
+			m_treeWidget->SetMinSize(wxSize(150, 350));
+			treeSizer->Add( buttonLoad1, 0, wxALL | wxALIGN_CENTER, 0 );
+			treeSizer->Add( buttonLoad2, 0, wxALL | wxALIGN_CENTER, 0 );
+			treeSizer->Add( buttonLoad3, 0, wxALL | wxALIGN_CENTER, 0 );
+			treeSizer->Add( m_treeWidget, 1, wxALL, 1 );
+					    
+		    buttonSizer->Add( buttonUp, 0, wxALL, 1 );
+		    buttonSizer->Add( buttonDown, 0, wxALL, 1 );
+		    buttonSizer->Add( m_tSlider, 0, wxALL, 1 );
+		    buttonSizer->Add( m_tSlider2, 0, wxALL, 1 );
+		    
+		    leftSizer->Add(treeSizer, 0, wxALL, 1 );
+		    leftSizer->Add( m_listCtrl, 1, wxALL | wxEXPAND, 1 );
+		    leftSizer->Add( buttonSizer, 0, wxALIGN_BOTTOM | wxALL, 1 );
+		    
+		
+			topSizer2 = new wxGridSizer(2,2,1,1);
+			topSizer2->Add(m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1);
+			topSizer2->Add(m_gl1, 1, wxALL | wxEXPAND | wxSHAPED, 1);
+			topSizer2->Add(m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1);
+			topSizer2->Add(m_mainGL, 1, wxALL | wxEXPAND | wxSHAPED, 1);
+					
+			topSizer->Add(leftSizer, 0 , wxALL | wxEXPAND, 1);
+			topSizer->Add(topSizer2, 1 , wxALL | wxEXPAND, 1);
+			
+			SetSizer( topSizer );
+			topSizer->SetSizeHints( this );
+			
+			SetMinSize(wxSize(945,730));
+			break;
+		}
+		default:
+		{
+			m_treeWidget->Show(true);
+			m_listCtrl->Show(true);
+			m_xSlider->Show(true);
+			m_ySlider->Show(true);
+			m_zSlider->Show(true);
+			m_tSlider->Show(true);
+			m_tSlider2->Show(true);
+			buttonUp->Show(true);
+			buttonDown->Show(true);
+			buttonLoad1->Show(true);
+			buttonLoad2->Show(true);
+			buttonLoad3->Show(true);
 			m_gl0->SetMinSize(wxSize(150,150));
 			m_gl1->SetMinSize(wxSize(150,150));
 			m_gl2->SetMinSize(wxSize(150,150));
+			m_mainGL->SetMinSize(wxSize(400,400));
 			m_gl0->SetMaxSize(wxSize(150,150));
 			m_gl1->SetMaxSize(wxSize(150,150));
 			m_gl2->SetMaxSize(wxSize(150,150));
@@ -1235,14 +1327,49 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 			m_ySlider->SetMinSize(wxSize(150,-1));
 			m_zSlider->SetMinSize(wxSize(150,-1));
 			
-			topSizer->Detach(0);
-			leftTopSizer->Add( navSizer, 1, wxALL | wxEXPAND, 0 );
+			topSizer 		= new wxBoxSizer( wxHORIZONTAL );
+			leftSizer 		= new wxBoxSizer( wxVERTICAL );
+			leftTopSizer 	= new wxBoxSizer( wxHORIZONTAL );
+			navSizer 		= new wxBoxSizer( wxVERTICAL );
+			buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
+			treeSizer		= new wxBoxSizer( wxVERTICAL );
 			
-			treeSizer->Show(true);
-			buttonSizer->Show(true);
-			m_listCtrl->Show(true);
+			navSizer->Add( m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
+			navSizer->Add( m_zSlider, 0, wxALL, 1 );
+			navSizer->Add( m_gl1, 1, wxALL  | wxEXPAND | wxSHAPED, 1 );
+			navSizer->Add( m_ySlider, 0, wxALL, 1 );
+			navSizer->Add( m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
+			navSizer->Add( m_xSlider, 0, wxALL, 1 );
+			
+			treeSizer->Add( buttonLoad1, 0, wxALL | wxALIGN_CENTER, 0 );
+			treeSizer->Add( buttonLoad2, 0, wxALL | wxALIGN_CENTER, 0 );
+			treeSizer->Add( buttonLoad3, 0, wxALL | wxALIGN_CENTER, 0 );
+			treeSizer->Add( m_treeWidget, 1, wxALL, 1 );
+			
+			leftTopSizer->Add( treeSizer, 0, wxALL | wxEXPAND, 0 );
+			leftTopSizer->Add( navSizer, 1, wxALL | wxEXPAND, 0 );
+		    
+		    buttonSizer->Add( buttonUp, 0, wxALL, 1 );
+		    buttonSizer->Add( buttonDown, 0, wxALL, 1 );
+		    buttonSizer->Add( m_tSlider, 0, wxALL, 1 );
+		    buttonSizer->Add( m_tSlider2, 0, wxALL, 1 );
+		    
+		    leftSizer->Add( leftTopSizer, 0, wxALL, 1 );
+		    leftSizer->Add( m_listCtrl, 1, wxALL | wxEXPAND, 1 );
+		    leftSizer->Add( buttonSizer, 0, wxALIGN_BOTTOM | wxALL, 1 );
+		    
+		    topSizer->Add( leftSizer, 0, wxEXPAND | wxALL, 0 );
+		    topSizer->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
+
+		    SetSizer( topSizer );
+		    topSizer->SetSizeHints( this );
+		    
+		    SetMinSize(wxSize(945,730));
+			break;
+		}
 		}
 		GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
+		m_listCtrl->SetColumnWidth(1, m_listCtrl->GetSize().x - 90);
 	}
 	else
 		m_dh->blendAlpha = !m_dh->blendAlpha;
@@ -1690,7 +1817,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
 	wxSize clientSize = this->GetClientSize();
 	
-	if (enlargeNav)
+	if (enlargeNav == 1)
 	{
 		int newSize = (clientSize.y - 65)/3;
 					
@@ -1707,9 +1834,14 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	}
 
 	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
+
 	
 	m_mainGL->changeOrthoSize();
-
+#if 0
+	printf("%d : %d : %d :%d : %d, %d\n", this->GetSize().x, this->GetSize().y, 
+			this->GetClientSize().x, this->GetClientSize().y,
+			m_mainGL->GetSize().x, m_mainGL->GetSize().y);
+#endif
 	this->Update();
 	this->Refresh();
 }

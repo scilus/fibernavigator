@@ -78,8 +78,8 @@ private:
 	 
 	 
 	 int orthoSizeNormal;
-	 int orthoSizeMainX;
-	 int orthoSizeMainY;
+	 int orthoModX;
+	 int orthoModY;
 };
 
 #endif /*MAINCANVAS_H_*/
