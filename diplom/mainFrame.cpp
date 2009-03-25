@@ -981,7 +981,8 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 		if (info->getType() == Mesh_ || info->getType() == IsoSurface_ || info->getType() == Surface_ )
 		{
 			info->setColor(col);
-			m_dh->m_selBoxChanged = true;
+			info->setuseTex(false);
+			m_listCtrl->SetItem(item, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );
 			refreshAllGLWidgets();
 			return;
 		}

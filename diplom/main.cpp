@@ -288,8 +288,8 @@ bool MyApp::OnInit(void) {
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_SPLINESURF_NEW, bmpGridSpline, wxT("New Spline Surface"));
 	toolBar->AddTool(MENU_SPLINESURF_DRAW_POINTS, bmpGrid, wxT("Toggle drawing of points"));
-	toolBar->AddTool(BUTTON_MOVE_POINTS1, bmpView1, wxT("Move border points of spline surface"));
-	toolBar->AddTool(BUTTON_MOVE_POINTS2, bmpView3, wxT("Move border points of spline surface"));
+	toolBar->AddTool(BUTTON_MOVE_POINTS1, bmpView1, wxT("Move boundary points of spline surface"));
+	toolBar->AddTool(BUTTON_MOVE_POINTS2, bmpView3, wxT("Move boundary points of spline surface"));
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_OPTIONS_ASSIGN_COLOR, bmpAssignColor, wxT("Assign Color"));
 	toolBar->AddSeparator();

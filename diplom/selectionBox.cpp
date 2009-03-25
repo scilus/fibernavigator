@@ -9,7 +9,7 @@ SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 	m_size = size;
 	m_isVisible = true;
 	m_dirty = true;
-	m_isTop = false;
+	m_isMaster = false;
 	m_isNOT = false;
 	m_isActive = true;
 	m_isSelected = false;
@@ -33,7 +33,7 @@ SelectionBox::SelectionBox(float* overlay, DatasetHelper* dh)
 	m_overlay = overlay;
 	m_isVisible = true;
 	m_dirty = true;
-	m_isTop = true;
+	m_isMaster = true;
 	m_isNOT = false;
 	m_isActive = true;
 	m_isSelected = false;
@@ -90,7 +90,7 @@ void SelectionBox::draw()
 
 	GLfloat c[] = { 0.5, 0.5, 0.5, 0.5};
 
-	if ( m_isTop )
+	if ( m_isMaster )
 	{
 		c[0] = 0.0f;
 		c[1] = 1.0f;
@@ -637,7 +637,7 @@ void SelectionBox::update()
 
 void SelectionBox::setColor(wxColour color)
 {
-	if (!m_isTop) return;
+	if (!m_isMaster) return;
 	m_color = color;
 	m_colorChanged = true;
 	update();
@@ -695,8 +695,8 @@ int SelectionBox::getIcon()
 
 void SelectionBox::setIsMaster(bool v)
 {
-	m_isTop = v;
-	if (m_isTop)
+	m_isMaster = v;
+	if (m_isMaster)
 	{
 		m_inBranch.resize(m_dh->countFibers, sizeof(bool));
 		for (unsigned int i = 0; i < m_dh->countFibers ; ++i)

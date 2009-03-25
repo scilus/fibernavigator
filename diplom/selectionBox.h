@@ -67,7 +67,7 @@ public:
 
 
 	void setIsMaster(bool v);
-	bool getIsMaster() {return m_isTop;};
+	bool getIsMaster() {return m_isMaster;};
 
 	void draw1();
 	void draw2();
@@ -126,7 +126,7 @@ private:
 
 	bool m_isBox;
 
-	bool m_isTop;
+	bool m_isMaster;
 	bool m_isNOT;
 	bool m_isActive;
 	bool m_isVisible;
