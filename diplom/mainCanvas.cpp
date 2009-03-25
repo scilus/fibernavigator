@@ -84,7 +84,6 @@ void MainCanvas::changeOrthoSize()
 		
 	if (m_view == mainView)
 	{
-		//TODO
 		orthoModX = 0;
 		orthoModY = 0;
 		int xSize = GetSize().x;
@@ -97,7 +96,7 @@ void MainCanvas::changeOrthoSize()
 	}
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -3000, 3000);
+	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -500, 500);
 	
 	
 }
@@ -392,7 +391,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	glPopMatrix();
 	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
 	BoundingBox *bb = new BoundingBox(m_dh->columns/2, m_dh->rows/2, m_dh->frames/2, m_dh->columns, m_dh->rows, m_dh->frames);
-
+		
 	float xx = m_dh->xSlize;
 	float yy = m_dh->ySlize;
 	float zz = m_dh->zSlize;
@@ -528,10 +527,9 @@ void MainCanvas::render()
     switch (m_view)
     {
     case mainView: {
-    	// TODO marker
     	glMatrixMode(GL_PROJECTION);
     	glLoadIdentity();
-    	glOrtho( - orthoModX, orthoSizeNormal + orthoModX, - orthoModY, orthoSizeNormal + orthoModY, -3000, 3000);
+    	glOrtho( - orthoModX, orthoSizeNormal + orthoModX, - orthoModY, orthoSizeNormal + orthoModY, -500, 500);
     	
     	glPushMatrix();
     	m_dh->doMatrixManipulation();
@@ -544,7 +542,7 @@ void MainCanvas::render()
     default:
     	glMatrixMode(GL_PROJECTION);
     	glLoadIdentity();
-    	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -3000, 3000);
+    	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -500, 500);
     	m_dh->scene->renderNavView(m_view);
     }
 	//glFlush();
@@ -583,6 +581,13 @@ Vector MainCanvas::getEventCenter()
 {
 	Vector dir ( m_pos2X - m_pos1X, m_pos2Y- m_pos1Y, m_pos2Z - m_pos1Z );
 	Vector center ( m_pos1X + m_hr.tmin*dir.x, m_pos1Y + m_hr.tmin*dir.y, m_pos1Z + m_hr.tmin*dir.z );
+	/*
+	printf("front: %f : %f : %f\n", m_pos1X, m_pos1Y, m_pos1Z);
+	printf("back : %f : %f : %f\n", m_pos2X, m_pos2Y, m_pos2Z);
+	printf("tmin : %f\n", m_hr.tmin);
+	printf("dir  : %f : %f : %f\n", dir.x, dir.y, dir.z);
+	printf("pos  : %f : %f : %f\n==========================================\n", center.x, center.y, center.z);
+*/
 	return center;
 }
 

@@ -1,5 +1,12 @@
 #include "boundingBox.h"
 
+#include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
+
 Ray::Ray(Vector origin, Vector end) : m_origin(origin), m_end(end)
 {
 	Vector v1 (end[0] - origin[0], end[1] - origin[1], end[2] - origin[2]);
@@ -12,7 +19,7 @@ Ray::Ray(float x1, float y1, float z1, float x2, float y2, float z2)
 	m_origin = v1;
 	Vector v2(x2, y2, z2);
 	m_end = v2;
-	Vector v3( m_end[0] - m_origin[0], m_end[1] - m_origin[1], m_end[2] - m_origin[2]);
+	Vector v3( x2 - x1, y2 - y1, z2 - z1);
 	m_dir = v3;
 }
 
@@ -70,41 +77,51 @@ hitResult BoundingBox::hitTest(Ray *ray)
 {
 	hitResult hr = {false, 0, 0, 0};
 	float tmin, tmax, tymin, tymax, tzmin, tzmax;
+	tmin = tymin = tzmin = 0.0;
+	tmax = tymax = tzmax = 1.0;
 	float dirx = ray->m_dir.x;
-	if (dirx >= 0) {
-		tmin = ( xmin - ray->m_origin.x)/dirx;
-		tmax = ( xmax - ray->m_origin.x)/dirx;
+	if ( dirx > 0 ) 
+	{
+		tmin = ( xmin - ray->m_origin.x ) / dirx;
+		tmax = ( xmax - ray->m_origin.x ) / dirx;
 	}
-	else {
-		tmin = ( xmax - ray->m_origin.x)/dirx;
-		tmax = ( xmin - ray->m_origin.x)/dirx;
+	else if ( dirx < 0 ) 
+	{
+		tmin = ( xmax - ray->m_origin.x) / dirx;
+		tmax = ( xmin - ray->m_origin.x) / dirx;
 	}
+	
 	float diry = ray->m_dir.y;
-	if (diry >= 0) {
+	if ( diry > 0 )
+	{
 		tymin = ( ymin - ray->m_origin.y)/diry;
 		tymax = ( ymax - ray->m_origin.y)/diry;
 	}
-	else {
+	else if ( diry < 0 )
+	{
 		tymin = ( ymax - ray->m_origin.y)/diry;
 		tymax = ( ymin - ray->m_origin.y)/diry;
 	}
-	if ( (tmin > tymax) || (tymin > tmax)) return hr;
-	if (tymin > tmin) tmin = tymin;
-	if (tymax < tmax) tmax = tymax;
+	if ( tmin > tymax || tymin > tmax ) return hr;
+	if ( tymin > tmin ) tmin = tymin;
+	if ( tymax < tmax ) tmax = tymax;
+		
 	float dirz = ray->m_dir.z;
-	if (dirz >= 0) {
-		tzmin = ( zmin - ray->m_origin.z)/dirz;
-		tzmax = ( zmax - ray->m_origin.z)/dirz;
+	if ( dirz > 0 ) 
+	{
+		tzmin = ( zmin - ray->m_origin.z ) / dirz;
+		tzmax = ( zmax - ray->m_origin.z ) / dirz;
 	}
-	else {
-		tzmin = ( zmax - ray->m_origin.z)/dirz;
-		tzmax = ( zmin - ray->m_origin.z)/dirz;
+	else if ( dirz < 0 ) 
+	{
+		tzmin = ( zmax - ray->m_origin.z ) / dirz;
+		tzmax = ( zmin - ray->m_origin.z ) / dirz;
 	}
-	if ( (tmin > tzmax) || (tzmin > tmax)) return hr;
-	if (tzmin > tmin) tmin = tzmin;
-	if (tzmax < tmax) tmax = tzmax;
-
-	if (tmin > tmax) return hr;
+	if ( tmin > tzmax || tzmin > tmax ) return hr;
+	if ( tzmin > tmin ) tmin = tzmin;
+	if ( tzmax < tmax ) tmax = tzmax;
+	
+	if ( tmin > tmax ) return hr;
 	hr.hit = true;
 	hr.tmin = tmin;
 	return hr;
