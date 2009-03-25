@@ -144,6 +144,8 @@ public:
 	bool showSagittal;
 	bool showCoronal;
 	bool showAxial;
+	
+	bool showCrosshair;
 
 	float xSlize;
 	float ySlize;

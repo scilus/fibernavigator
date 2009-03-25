@@ -47,6 +47,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	showSagittal = true;
 	showCoronal = true;
 	showAxial = true;
+	showCrosshair = false;
 	xSlize = 0.5;
 	ySlize = 0.5;
 	zSlize = 0.5;

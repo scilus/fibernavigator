@@ -43,6 +43,7 @@ private:
 	void OnMenuViewBottom(wxCommandEvent& event);
 	void OnMenuViewFront(wxCommandEvent& event);
 	void OnMenuViewBack(wxCommandEvent& event);
+	void OnMenuViewCrosshair(wxCommandEvent& event);
 	// Voi
     void OnToggleSelBox(wxCommandEvent& event);
     void OnToggleShowBox(wxCommandEvent& event);
@@ -199,6 +200,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_VIEW_TOP								124
 #define MENU_VIEW_BOTTOM							125
 #define MENU_VIEW_RESET								126
+#define MENU_VIEW_SHOW_CROSSHAIR					127
 // Menu Voi
 #define MENU_VOI_NEW_SELBOX							130
 #define MENU_VOI_RENDER_SELBOXES					131

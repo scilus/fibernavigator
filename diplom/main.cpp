@@ -159,6 +159,8 @@ bool MyApp::OnInit(void) {
 	view_menu->Append(MENU_VIEW_BACK, _T("anterior\tShift-C"));
 	view_menu->Append(MENU_VIEW_TOP, _T("superior\tA"));
 	view_menu->Append(MENU_VIEW_BOTTOM, _T("inferior\tShift-A"));
+	view_menu->AppendSeparator();
+	view_menu->AppendCheckItem(MENU_VIEW_SHOW_CROSSHAIR, _T("show crosshair"));
 
 	wxMenu *voi_menu = new wxMenu;
 	voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New"));

@@ -19,6 +19,7 @@ public:
 	virtual ~AnatomyHelper();
 
 	void renderMain();
+	void renderCrosshair();
 	void renderNav(int, Shader*);
 
 	void render() {};

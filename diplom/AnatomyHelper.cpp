@@ -229,6 +229,41 @@ void AnatomyHelper::renderMain()
 #endif
 }
 
+void AnatomyHelper::renderCrosshair()
+{
+	float offset = 0.02;
+	glLineWidth(1.0);
+	glBegin(GL_LINES);
+		glVertex3f(x - offset, y - offset,  0);
+		glVertex3f(x - offset, y - offset,  zb);
+		glVertex3f(x - offset, y + offset,  0);
+		glVertex3f(x - offset, y + offset,  zb);
+		glVertex3f(x + offset, y + offset,  0);
+		glVertex3f(x + offset, y + offset,  zb);
+		glVertex3f(x + offset, y - offset,  0);
+		glVertex3f(x + offset, y - offset,  zb);
+				
+		glVertex3f(x - offset, 0,   z - offset);
+		glVertex3f(x - offset, yb,  z - offset);
+		glVertex3f(x - offset, 0,   z + offset);
+		glVertex3f(x - offset, yb,  z + offset);
+		glVertex3f(x + offset, 0,   z + offset);
+		glVertex3f(x + offset, yb,  z + offset);
+		glVertex3f(x + offset, 0,   z - offset);
+		glVertex3f(x + offset, yb,  z - offset);
+		
+		glVertex3f(0,  y - offset, z - offset);
+		glVertex3f(xb, y - offset, z - offset);
+		glVertex3f(0,  y - offset, z + offset);
+		glVertex3f(xb, y - offset, z + offset);
+		glVertex3f(0,  y + offset, z + offset);
+		glVertex3f(xb, y + offset, z + offset);
+		glVertex3f(0,  y + offset, z - offset);
+		glVertex3f(xb, y + offset, z - offset);
+		
+	glEnd();
+}
+
 void AnatomyHelper::renderAxial()
 {
 	if (!m_dh->showAxial) return;

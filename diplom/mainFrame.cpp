@@ -52,6 +52,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_VIEW_BOTTOM, MainFrame::OnMenuViewBottom)
 	EVT_MENU(MENU_VIEW_FRONT, MainFrame::OnMenuViewFront)
 	EVT_MENU(MENU_VIEW_BACK, MainFrame::OnMenuViewBack)
+	EVT_MENU(MENU_VIEW_SHOW_CROSSHAIR, MainFrame::OnMenuViewCrosshair)
 	// Menu VOI
     EVT_MENU(MENU_VOI_NEW_SELBOX, MainFrame::OnNewSelBox)
     EVT_MENU(MENU_VOI_NEW_FROM_OVERLAY, MainFrame::OnNewFromOverlay)
@@ -509,6 +510,11 @@ void MainFrame::OnMenuViewBack(wxCommandEvent& WXUNUSED(event))
 	m_dh->m_transform.s.M21 = 1.0;
 	m_dh->m_transform.s.M12 = 1.0;
 	m_mainGL->setRotation();
+}
+void MainFrame::OnMenuViewCrosshair(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->showCrosshair = !m_dh->showCrosshair;
+	refreshAllGLWidgets();
 }
 /****************************************************************************************************
  *
@@ -1978,6 +1984,9 @@ void MainFrame::updateMenus()
 	voiMenu->Check(voiMenu->FindItem(_T("visible")), false);
 	voiMenu->Enable(voiMenu->FindItem(_T("active")), false);
 	voiMenu->Enable(voiMenu->FindItem(_T("visible")), false);
+	
+	wxMenu* viewMenu = m_menuBar->GetMenu(1);
+	viewMenu->Check(viewMenu->FindItem(_T("show crosshair")), m_dh->showCrosshair);
 
 
 	wxTreeItemId treeid = m_treeWidget->GetSelection();

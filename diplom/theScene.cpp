@@ -149,6 +149,9 @@ void TheScene::renderSlizes()
 	glDisable(GL_BLEND);
 
 	m_dh->shaderHelper->m_textureShader->release();
+	
+	if (m_dh->showCrosshair)
+		m_dh->anatomyHelper->renderCrosshair();
 
 	glPopAttrib();
 }
