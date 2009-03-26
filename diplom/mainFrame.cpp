@@ -1211,7 +1211,8 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 	if ( wxGetKeyState(WXK_CONTROL) )
 	{
 		enlargeNav = (enlargeNav + 1) % 3;
-		wxSize clientSize = this->GetClientSize();
+		wxSize clientSize = GetClientSize();
+		wxSize windowSize = GetSize();
 		switch (enlargeNav)
 		{
 		case 1:
@@ -1222,9 +1223,9 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 			
 			int newSize = (clientSize.y - 65)/3;
 			
-			m_gl0->SetMinSize(wxSize(newSize,newSize));
-			m_gl1->SetMinSize(wxSize(newSize,newSize));
-			m_gl2->SetMinSize(wxSize(newSize,newSize));
+			m_gl0->SetMinSize(wxSize(100,100));
+			m_gl1->SetMinSize(wxSize(100,100));
+			m_gl2->SetMinSize(wxSize(100,100));
 			m_gl0->SetMaxSize(wxSize(newSize,newSize));
 			m_gl1->SetMaxSize(wxSize(newSize,newSize));
 			m_gl2->SetMaxSize(wxSize(newSize,newSize));
@@ -1374,6 +1375,7 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 		}
 		GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
 		m_listCtrl->SetColumnWidth(1, m_listCtrl->GetSize().x - 90);
+		SetSize(windowSize);
 	}
 	else
 		m_dh->blendAlpha = !m_dh->blendAlpha;

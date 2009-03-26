@@ -37,7 +37,6 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	blendTexOnMesh = true;
 	use_lic = false;
 	useVBO = true;
-	lighting = false;
 	textures = 0;
 
 	colorMap = 0;
@@ -72,6 +71,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	lastPath = wxT("");
 	lastGLError = GL_NO_ERROR;
 
+	lighting = true;
 	fibersInverted = false;
 	useFakeTubes = false;
 	useTransparency = false;

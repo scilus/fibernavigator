@@ -10,7 +10,6 @@
 =
 ========================================================================
 
-abspeichern der farben
 laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
 skalierung der grauwerte
 interne implementierung der offsetflaeche
@@ -24,6 +23,7 @@ lesen von freesurfer mesh files
 = aufwaendiger
 =
 ========================================================================
+abspeichern der farben
 laden anderer bild und mesh formate ( *.nii, *.v )
 test und evtl kleine anpassungen fuer ein laptop computer
 fasern durchsichtig ( gewichtet mit overlay )
@@ -63,6 +63,7 @@ background and threshold
 =
 ===============================================================================
 
+multiple file selection in load dialog
 help- keyboard shortcuts
 keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O
 windows portierung (es kompiliert und laeuft braucht aber noch arbeit)
