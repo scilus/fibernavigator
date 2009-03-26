@@ -52,8 +52,8 @@ public:
 	DatasetHelper(MainFrame*);
 	virtual ~DatasetHelper();
 
-	bool load(int index = 0, wxString filename = wxT(""),
-			float threshold = 0.0, bool active = true, bool showFS = true, bool useTex = true);
+	bool load(int index);
+	bool load(wxString filename, bool createBox = true, float threshold = 0.0, bool active = true, bool showFS = true, bool useTex = true);
 	void finishLoading(DatasetInfo*);
 	bool loadScene(wxString filename);
 	bool loadTextFile(wxString*, wxString);

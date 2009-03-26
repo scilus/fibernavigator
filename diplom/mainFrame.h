@@ -23,6 +23,8 @@ public:
 
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
+    
+    void createNewSelBox();
 
 private:
 	/*

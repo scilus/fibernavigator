@@ -628,6 +628,10 @@ void MainFrame::OnRenameBox(wxCommandEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 {
+	createNewSelBox();
+}
+void MainFrame::createNewSelBox()
+{
 	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
 	Vector vc (m_xSlider->GetValue(), m_ySlider->GetValue(), m_zSlider->GetValue() );
@@ -659,8 +663,9 @@ void MainFrame::OnNewSelBox(wxCommandEvent& WXUNUSED(event))
 	}
 
 	m_dh->m_selBoxChanged = true;
-	refreshAllGLWidgets();
+	refreshAllGLWidgets();	
 }
+
 /****************************************************************************************************
  *
  *
@@ -1978,6 +1983,7 @@ void MainFrame::updateMenus()
 	m_toolBar->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
 	m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
 	m_toolBar->ToggleTool(MENU_OPTIONS_USE_FAKE_TUBES, m_dh->useFakeTubes);
+	m_toolBar->ToggleTool(MENU_SPLINESURF_DRAW_POINTS, m_dh->pointMode);
 
 	wxMenu* voiMenu = m_menuBar->GetMenu(2);
 	voiMenu->Check(voiMenu->FindItem(_T("active")), false);

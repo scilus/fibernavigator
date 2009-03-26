@@ -289,7 +289,7 @@ bool MyApp::OnInit(void) {
 	toolBar->AddCheckTool(MENU_VOI_TOGGLE_SELBOX, wxT("Toggle activation status of selection box"), bmpBoxOff);
 	toolBar->AddSeparator();
 	toolBar->AddTool(MENU_SPLINESURF_NEW, bmpGridSpline, wxT("New Spline Surface"));
-	toolBar->AddTool(MENU_SPLINESURF_DRAW_POINTS, bmpGrid, wxT("Toggle drawing of points"));
+	toolBar->AddCheckTool(MENU_SPLINESURF_DRAW_POINTS, wxT("Toggle drawing of points"), bmpGrid);
 	toolBar->AddTool(BUTTON_MOVE_POINTS1, bmpView1, wxT("Move boundary points of spline surface"));
 	toolBar->AddTool(BUTTON_MOVE_POINTS2, bmpView3, wxT("Move boundary points of spline surface"));
 	toolBar->AddSeparator();
@@ -333,7 +333,7 @@ bool MyApp::OnInit(void) {
 			wxFileName fName(cmdFileName);
 			fName.Normalize(wxPATH_NORM_LONG|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
 			cmdFileName = fName.GetFullPath();
-			frame->m_dh->load(-1, cmdFileName);
+			frame->m_dh->load(cmdFileName);
 		}
 	}
 

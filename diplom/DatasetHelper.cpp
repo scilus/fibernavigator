@@ -112,29 +112,39 @@ DatasetHelper::~DatasetHelper() {
 	printDebug(_T("dataset helper destructor done"),0);
 }
 
-bool DatasetHelper::load(int index, wxString filename, float threshold, bool active, bool showFS, bool useTex) 
+bool DatasetHelper::load(int index)
 {
-	if (index >= 0)
+	wxArrayString fileNames;
+	wxString caption = wxT("Choose a file");
+	wxString
+			wildcard =
+					wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,
+			wildcard, wxOPEN | wxFD_MULTIPLE);
+	dialog.SetFilterIndex(index);
+	dialog.SetDirectory(lastPath);
+	if (dialog.ShowModal() == wxID_OK) 
 	{
-		wxString caption = wxT("Choose a file");
-		wxString
-				wildcard =
-						wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
-		wxString defaultDir = wxEmptyString;
-		wxString defaultFilename = wxEmptyString;
-		wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,
-				wildcard, wxOPEN);
-		dialog.SetFilterIndex(index);
-		dialog.SetDirectory(lastPath);
-		if (dialog.ShowModal() == wxID_OK) 
-		{
-			lastPath = dialog.GetDirectory();
-			filename = dialog.GetPath();
-		} 
-		else
-			return true;
+		lastPath = dialog.GetDirectory();
+		dialog.GetPaths(fileNames);
+	} 
+	else
+		return true;
+	
+	bool flag = true;
+	for ( size_t i = 0 ; i < fileNames.size() ; ++i)
+	{
+		if ( !load(fileNames[i]) && flag )
+			flag = false;
 	}
+	
+	return flag;
+}
 
+bool DatasetHelper::load(wxString filename, bool createBox, float threshold, bool active, bool showFS, bool useTex) 
+{
 	// check if dataset is already loaded and ignore it if yes
 	if (fileNameExists(filename))
 	{
@@ -219,22 +229,12 @@ bool DatasetHelper::load(int index, wxString filename, float threshold, bool act
 			return false;
 		}
 		Fibers *fibers = new Fibers(this);
-		if (fibers->load(filename)) {
-			if (index != -1 && mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tSelBoxId) == 0) {
-				Vector vc ( mainFrame->m_xSlider->GetValue(),
-						mainFrame->m_ySlider->GetValue() ,
-						mainFrame->m_zSlider->GetValue() );
-
-				Vector vs( columns / 8, rows / 8, frames / 8 );
-				SelectionBox *selBox = new SelectionBox(vc, vs, this);
-				selBox->setIsMaster(true);
-
-				wxTreeItemId tNewBoxId = mainFrame->m_treeWidget->AppendItem(
-					mainFrame->m_tSelBoxId, wxT("box"), 0, -1, selBox);
-				mainFrame->m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
-				mainFrame->m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
-				mainFrame->m_treeWidget->EnsureVisible(tNewBoxId);
-				selBox->setTreeId(tNewBoxId);
+		if (fibers->load(filename)) 
+		{
+			if (createBox && mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tSelBoxId) == 0) 
+			{
+				fibers_loaded = true;
+				mainFrame->createNewSelBox();
 			}
 			std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
 			for (unsigned int i = 0 ; i < boxes.size() ; ++i)
@@ -432,7 +432,7 @@ bool DatasetHelper::loadScene(wxString filename)
 					}
 					nodes = nodes->GetNext();
 				}
-				load(-1, path, threshold, active, showFS, useTex);
+				load(path, false, threshold, active, showFS, useTex);
 				datasetnode = datasetnode->GetNext();
 			}
 		}
