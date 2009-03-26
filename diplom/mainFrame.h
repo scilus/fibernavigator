@@ -4,11 +4,9 @@
 #include "mainCanvas.h"
 #include "myListCtrl.h"
 #include "wx/treectrl.h"
-#include "wx/laywin.h"
 #include "DatasetHelper.h"
 
 class DatasetHelper;
-class MyListCtrl;
 
 // Define a new frame
 class MainFrame : public wxFrame
@@ -16,7 +14,7 @@ class MainFrame : public wxFrame
 public:
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
     ~MainFrame();
-    void setTSlider(wxSlider *slider) {m_tSlider = slider;};
+    void setTSlider(MySlider *slider) {m_tSlider = slider;};
     void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
     void setMMenuBar(wxMenuBar *bar) {m_menuBar = bar;};
     void setMToolBar(wxToolBar *bar) {m_toolBar = bar;};
@@ -150,7 +148,7 @@ public:
 	wxSlider* m_xSlider;
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
-    wxSlider* m_tSlider;
+    MySlider* m_tSlider;
     wxSlider* m_tSlider2;
     
     wxButton *buttonUp;

@@ -278,3 +278,24 @@ void MyTreeCtrl::OnDeleteBox(wxCommandEvent& WXUNUSED(event))
 	wxCommandEvent event1( wxEVT_TREE_EVENT, GetId() );
 	GetEventHandler()->ProcessEvent( event1 );
 }
+
+BEGIN_EVENT_TABLE(MySlider, wxSlider)
+	EVT_MOUSE_EVENTS(MySlider::OnMouseEvent)
+END_EVENT_TABLE()
+
+void MySlider::OnMouseEvent(wxMouseEvent& event)
+{
+	if ( event.LeftDown())
+	{
+		m_leftIsDown = true;
+	}
+	if ( event.LeftUp())
+	{
+		m_leftIsDown = false;
+	}
+	if ( event.LeftIsDown())
+	{
+		m_leftIsDown = true;
+	}
+	event.Skip();		
+}

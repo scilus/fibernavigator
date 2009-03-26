@@ -6,7 +6,6 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/laywin.h"
 #include "wx/filedlg.h"
 #include "wx/statbmp.h"
 #include "wx/colordlg.h"
@@ -168,8 +167,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	m_zSlider = new wxSlider(this, ID_Z_SLIDER, 50, 0, 100, wxDefaultPosition, 
 			 	wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 	
-	m_tSlider = new wxSlider(this, ID_T_SLIDER, 30, 0, 100, wxDefaultPosition, 
+	m_tSlider = new MySlider(this, ID_T_SLIDER, 30, 0, 100, wxDefaultPosition, 
 				wxSize(110, 19), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+	
 	m_tSlider2 = new wxSlider(this, ID_T_SLIDER2, 30, 0, 100, wxDefaultPosition, 
 				wxSize(103, 19), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 	
@@ -1122,20 +1122,20 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 	m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
 	info->setThreshold(threshold);
-	if (info->getType() == Surface_)
+	if ( info->getType() == Surface_ )
 	{
 		Surface* s = (Surface*) m_listCtrl->GetItemData(item);
 		s->movePoints();
 	}
-	if (info->getType() == IsoSurface_ &&  !wxGetKeyState(WXK_SHIFT))
+	if ( info->getType() == IsoSurface_ && !m_tSlider->leftDown())
 	{
 		CIsoSurface* s = (CIsoSurface*) m_listCtrl->GetItemData(item);
 		s->GenerateWithThreshold();
 	}
-	if (info->getType() == Overlay)
+	if ( info->getType() == Overlay )
 	{
 		Anatomy* a = (Anatomy*) m_listCtrl->GetItemData(item);
-		if (a->m_roi)
+		if ( a->m_roi )
 		{
 			a->m_roi->m_threshold = threshold;
 			a->m_roi->setDirty(true);
