@@ -277,6 +277,7 @@ bool MyApp::OnInit(void) {
 	//toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
 	toolBar->AddTool(MENU_FILE_LOAD, bmpOpen, wxT("Open"));
 	toolBar->AddTool(MENU_FILE_SAVE, bmpSave, wxT("Save Scene"));
+	toolBar->AddTool(BUTTON_TOGGLE_LAYOUT, bmpNewSurface, wxT("Toggle window layout"));
 	//toolBar->AddTool(VIEWER_QUIT, bmpQuit, wxT("Quit"));
 	toolBar->AddSeparator();
 	toolBar->AddCheckTool(BUTTON_AXIAL, wxT("Axial"), bmpAxial);

@@ -37,6 +37,7 @@ private:
 	void OnSave(wxCommandEvent& event);
 	void OnSaveFibers(wxCommandEvent& event);
 	void OnQuit(wxCommandEvent& event);
+	void OnToggleLayout(wxCommandEvent& event);
 	// View
 	void OnMenuViewReset(wxCommandEvent& event);
 	void OnMenuViewLeft(wxCommandEvent& event);
@@ -194,6 +195,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_FILE_SAVE								103
 #define MENU_FILE_SAVE_FIBERS						104
 #define MENU_FILE_QUIT        						wxID_EXIT
+#define BUTTON_TOGGLE_LAYOUT						105
 // Menu View
 #define MENU_VIEW_LEFT								120
 #define MENU_VIEW_RIGHT								121

@@ -44,6 +44,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_FILE_SAVE, MainFrame::OnSave)
     EVT_MENU(MENU_FILE_SAVE_FIBERS, MainFrame::OnSaveFibers)
     EVT_MENU(MENU_FILE_QUIT, MainFrame::OnQuit)
+    EVT_MENU(BUTTON_TOGGLE_LAYOUT, MainFrame::OnToggleLayout)
 	// Menu View
     EVT_MENU(MENU_VIEW_RESET, MainFrame::OnMenuViewReset)
     EVT_MENU(MENU_VIEW_LEFT, MainFrame::OnMenuViewLeft)
@@ -112,7 +113,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_BUTTON(ID_BUTTON_LOAD1, MainFrame::OnLoad1)
 	EVT_BUTTON(ID_BUTTON_LOAD2, MainFrame::OnLoad2)
 	EVT_BUTTON(ID_BUTTON_LOAD3, MainFrame::OnLoad3)
-
+	
     /*
     * Interface events
     */
@@ -1207,14 +1208,28 @@ void MainFrame::OnButtonSagittal(wxCommandEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 {
+	m_dh->blendAlpha = !m_dh->blendAlpha;
+
+	updateMenus();
+	this->Update();
+	this->Refresh();
+
+	
+	m_mainGL->render();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
+{
 	if (!m_dh->scene) return;
-	if ( wxGetKeyState(WXK_CONTROL) )
+	enlargeNav = (enlargeNav + 1) % 3;
+	wxSize clientSize = GetClientSize();
+	wxSize windowSize = GetSize();
+	switch (enlargeNav)
 	{
-		enlargeNav = (enlargeNav + 1) % 3;
-		wxSize clientSize = GetClientSize();
-		wxSize windowSize = GetSize();
-		switch (enlargeNav)
-		{
 		case 1:
 		{
 			treeSizer->Show(false);
@@ -1245,7 +1260,7 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 			topSizer1 = new wxBoxSizer( wxHORIZONTAL );
 			topSizer1->Add(navSizer1, 0, wxALL | wxEXPAND, 1);
 			topSizer1->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
-
+	
 			SetSizer( topSizer1 );
 			topSizer1->SetSizeHints( this );
 			break;
@@ -1367,26 +1382,16 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 		    
 		    topSizer->Add( leftSizer, 0, wxEXPAND | wxALL, 0 );
 		    topSizer->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
-
+	
 		    SetSizer( topSizer );
 		    topSizer->SetSizeHints( this );
 			break;
 		}
-		}
-		GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
-		m_listCtrl->SetColumnWidth(1, m_listCtrl->GetSize().x - 90);
-		SetSize(windowSize);
 	}
-	else
-		m_dh->blendAlpha = !m_dh->blendAlpha;
+	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
+	m_listCtrl->SetColumnWidth(1, m_listCtrl->GetSize().x - 90);
+	SetSize(windowSize);
 
-	m_mainGL->changeOrthoSize();
-	updateMenus();
-	this->Update();
-	this->Refresh();
-
-	
-	m_mainGL->render();
 }
 /****************************************************************************************************
  *
@@ -1504,7 +1509,7 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
 	default:
 		break;
 	}
-
+	m_mainGL->changeOrthoSize();
 	refreshAllGLWidgets();
 }
 /****************************************************************************************************
