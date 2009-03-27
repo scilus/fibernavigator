@@ -9,19 +9,15 @@
 = relativ(?) einfach
 =
 ========================================================================
-
 interne implementierung der offsetflaeche
 keine OPENGL installation: beim start lesbare fehlermeldung
 lesen der fasern als vtk-ascii file
-lesen von freesurfer mesh files	
-
 ========================================================================
 =
 = aufwaendiger
 =
 ========================================================================
 abspeichern der farben
-laden anderer bild und mesh formate ( *.nii, *.v )
 fasern durchsichtig ( gewichtet mit overlay )
 slider fuer isosurface reparieren
 koordinatensystem: anzeige in unterschiedlichen konventionen ( nullpunkt in lipsia und nifti )
@@ -59,6 +55,8 @@ background and threshold
 =     erledigt
 =
 ===============================================================================
+lesen von freesurfer mesh files	
+laden anderer bild und mesh formate ( *.nii, *.v )
 laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
 skalierung der grauwerte
 lesen der fasern als binary file so wie es z.b. camino erzeugt (Ting)

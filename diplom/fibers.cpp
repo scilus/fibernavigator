@@ -78,6 +78,8 @@ bool Fibers::loadCamino(wxString filename)
 	wxUint8* buffer = new wxUint8[nSize];
 	dataFile.Read(buffer, nSize);
 	
+	dataFile.Close();
+	
 	m_countLines = 0; // number of lines
 	m_countPoints = 0; // number of points
 

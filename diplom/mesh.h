@@ -40,6 +40,8 @@ public:
 	~Mesh();
 
 	bool load(wxString filename);
+	bool loadMesh(wxString filename);
+	bool loadSurf(wxString filename);
 	void draw();
 	void clean() {m_tMesh->cleanUp();};
 	void smooth() {m_tMesh->doLoopSubD();};

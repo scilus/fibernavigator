@@ -38,6 +38,113 @@ Mesh::~Mesh()
 
 bool Mesh::load(wxString filename)
 {
+	if (filename.AfterLast('.') == _T("mesh"))
+		return loadMesh(filename);
+	if (filename.AfterLast('.') == _T("surf"))
+		return loadSurf(filename);
+	return true;
+}
+
+bool Mesh::loadSurf(wxString filename)
+{
+	m_dh->printDebug(_T("start loading freesurfer mesh file"), 1);
+	wxFile dataFile;
+	wxFileOffset nSize = 0;
+	int pc = 3;
+	converterByteINT32 cbi;
+	converterByteFloat cbf;
+
+	if (dataFile.Open(filename))
+	{
+		nSize = dataFile.Length();
+		if (nSize == wxInvalidOffset) return false;
+	}
+	
+	wxUint8* buffer = new wxUint8[nSize];
+	dataFile.Read(buffer, nSize);
+	dataFile.Close();
+	
+	// find double \n (0x0a)
+	while (pc < nSize)
+	{
+		if (buffer[pc++] == 0x0a)
+		{
+			if (buffer[pc++] == 0x0a)
+				break;
+		}
+	}
+	
+	cbi.b[3] = buffer[pc++];
+	cbi.b[2] = buffer[pc++];
+	cbi.b[1] = buffer[pc++];
+	cbi.b[0] = buffer[pc++];
+	setCountVerts(cbi.i);
+	cbi.b[3] = buffer[pc++];
+	cbi.b[2] = buffer[pc++];
+	cbi.b[1] = buffer[pc++];
+	cbi.b[0] = buffer[pc++];
+	setCountPolygons(cbi.i);
+	
+	printf("pc: %d   vertex count: %d   face count: %d\n", pc, m_countVerts, m_countPolygons);
+	
+	for (unsigned int i = 0 ; i < m_countVerts ; ++i)
+	{
+		cbf.b[3] = buffer[pc++];
+		cbf.b[2] = buffer[pc++];
+		cbf.b[1] = buffer[pc++];
+		cbf.b[0] = buffer[pc++];
+		float x = cbf.f + 0.5 + m_dh->columns/2;
+		cbf.b[3] = buffer[pc++];
+		cbf.b[2] = buffer[pc++];
+		cbf.b[1] = buffer[pc++];
+		cbf.b[0] = buffer[pc++];
+		float y = cbf.f + 0.5 + m_dh->rows/2;
+		cbf.b[3] = buffer[pc++];
+		cbf.b[2] = buffer[pc++];
+		cbf.b[1] = buffer[pc++];
+		cbf.b[0] = buffer[pc++];
+		float z = cbf.f + 0.5 + m_dh->frames/2;
+		m_tMesh->addVert(x, y, z);
+	}
+	
+	for (unsigned int i = 0 ; i < getCountPolygons() ; ++i)
+	{
+		cbi.b[3] = buffer[pc++];
+		cbi.b[2] = buffer[pc++];
+		cbi.b[1] = buffer[pc++];
+		cbi.b[0] = buffer[pc++];
+		int v1 = cbi.i;
+		cbi.b[3] = buffer[pc++];
+		cbi.b[2] = buffer[pc++];
+		cbi.b[1] = buffer[pc++];
+		cbi.b[0] = buffer[pc++];
+		int v2 = cbi.i;
+		cbi.b[3] = buffer[pc++];
+		cbi.b[2] = buffer[pc++];
+		cbi.b[1] = buffer[pc++];
+		cbi.b[0] = buffer[pc++];
+		int v3 = cbi.i;
+
+		m_tMesh->addTriangle(v1, v2, v3);
+	}
+	
+	m_tMesh->calcNeighbors();
+	m_tMesh->calcVertNormals();
+
+	m_fullPath = filename;
+	#ifdef __WXMSW__
+		m_name = filename.AfterLast('\\');
+	#else
+	m_name = filename.AfterLast('/');
+	#endif
+	m_type = Mesh_;
+
+	
+	return true;
+}
+
+bool Mesh::loadMesh(wxString filename)
+{
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
 

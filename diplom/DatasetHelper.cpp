@@ -116,7 +116,9 @@ bool DatasetHelper::load(int index)
 {
 	wxArrayString fileNames;
 	wxString caption = wxT("Choose a file");
-	wxString wildcard =	wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|"
+	wxString wildcard =	wxT("*.*|*.*|Nifti (*.nii)|*.nii*|"
+			"Mesh files (*.mesh)|*.mesh|"
+			"Mesh files (*.surf)|*.surf|"
 			"Fibers VTK (*.fib)|*.fib|"
 			"Fibers PTK (*.bundlesdata)|*.bundlesdata|"
 			"Fibers Camino (*.Bfloat)|*.Bfloat");
@@ -200,7 +202,7 @@ bool DatasetHelper::load(wxString filename, bool createBox, float threshold, boo
 		}
 	}
 
-	else if (ext == wxT("mesh"))
+	else if (ext == wxT("mesh") || ext == wxT("surf") )
 	{
 		if (!anatomy_loaded) 
 		{
