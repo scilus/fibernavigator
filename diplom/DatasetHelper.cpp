@@ -118,7 +118,7 @@ bool DatasetHelper::load(int index)
 	wxString caption = wxT("Choose a file");
 	wxString
 			wildcard =
-					wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib");
+					wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Fibers VTK (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers Camino (*.Bfloat)|*.Bfloat");
 	wxString defaultDir = wxEmptyString;
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,
@@ -219,7 +219,7 @@ bool DatasetHelper::load(wxString filename, bool createBox, float threshold, boo
 		return false;
 	}
 
-	else if (ext == wxT("fib")) {
+	else if (ext == wxT("fib") || ext == wxT("bundlesdata") || ext == wxT("Bfloat")) {
 		if (!anatomy_loaded) {
 			lastError = wxT("no anatomy file loaded");
 			return false;

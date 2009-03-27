@@ -88,6 +88,8 @@ bool Anatomy::loadNifti(wxString filename)
 	m_rows = ima->dim[2]; // 200
 	m_frames = ima->dim[3]; // 160
 	
+	printf("%f : %f : %f\n", ima->dx, ima->dy, ima->dz);
+	
 	if (m_dh->anatomy_loaded)
 	{
 		if (m_rows != m_dh->rows || m_columns != m_dh->columns || m_frames != m_dh->frames)

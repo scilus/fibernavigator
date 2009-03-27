@@ -29,6 +29,9 @@ public:
 	~Fibers();
 
 	bool load(wxString filename);
+	bool loadVTK(wxString filename);
+	bool loadPTK(wxString filename);
+	bool loadCamino(wxString filename);
 	void draw();
 	void generateTexture() {};
 	void generateGeometry() {};

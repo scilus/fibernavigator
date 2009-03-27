@@ -46,7 +46,247 @@ Fibers::~Fibers()
 
 bool Fibers::load(wxString filename)
 {
-	m_dh->printDebug(_T("start loading vtk file"), 1);
+	if (filename.AfterLast('.') == _T("fib"))
+		return loadVTK(filename);
+	if (filename.AfterLast('.') == _T("bundlesdata"))
+		return loadPTK(filename);
+	if (filename.AfterLast('.') == _T("Bfloat"))
+		return loadCamino(filename);
+	return true;
+}
+
+bool Fibers::loadCamino(wxString filename)
+{
+	m_dh->printDebug(_T("start loading Camino file"), 1);
+	wxFile dataFile;
+	wxFileOffset nSize = 0;
+	int pc = 0;
+	converterByteINT32 cbi;
+	converterByteFloat cbf;
+	std::vector<float>tmpPoints;
+	std::vector<int>tmpLines;
+
+	if (dataFile.Open(filename))
+	{
+		nSize = dataFile.Length();
+		if (nSize == wxInvalidOffset) return false;
+	}
+	
+	wxUint8* buffer = new wxUint8[nSize];
+	dataFile.Read(buffer, nSize);
+	
+	m_countLines = 0; // number of lines
+	m_countPoints = 0; // number of points
+
+	int cl = 0;
+	while (pc < nSize)
+	{
+		++m_countLines;
+		
+		cbf.b[3] = buffer[pc++];
+		cbf.b[2] = buffer[pc++];
+		cbf.b[1] = buffer[pc++];
+		cbf.b[0] = buffer[pc++];
+		cl = (int) cbf.f;
+		tmpLines.push_back(cl);
+		
+
+		pc += 4;
+		for ( int i = 0 ; i < cl ; ++i)
+		{
+			tmpLines.push_back(m_countPoints);
+			++m_countPoints;
+			
+			cbf.b[3] = buffer[pc++];
+			cbf.b[2] = buffer[pc++];
+			cbf.b[1] = buffer[pc++];
+			cbf.b[0] = buffer[pc++];
+			tmpPoints.push_back(cbf.f);
+			cbf.b[3] = buffer[pc++];
+			cbf.b[2] = buffer[pc++];
+			cbf.b[1] = buffer[pc++];
+			cbf.b[0] = buffer[pc++];
+			tmpPoints.push_back(cbf.f);
+			cbf.b[3] = buffer[pc++];
+			cbf.b[2] = buffer[pc++];
+			cbf.b[1] = buffer[pc++];
+			cbf.b[0] = buffer[pc++];
+			tmpPoints.push_back(cbf.f);
+			
+			if (pc > nSize) break;
+		}
+	}
+	
+	m_linePointers = new int[m_countLines+1];
+	m_linePointers[m_countLines] = m_countPoints;
+	m_reverse = new int[m_countPoints];
+	m_inBox.resize(m_countLines, false);
+
+	m_lengthPoints = tmpPoints.size(); // size of the point array
+	m_lengthLines = tmpLines.size(); // size of the line array
+	
+	m_pointArray = new float[m_lengthPoints];
+	m_lineArray = new int[m_lengthLines];
+	
+	for (int i = 0 ; i < m_lengthPoints ; ++i)
+	{
+		m_pointArray[i] = tmpPoints[i]; 
+	}
+	for (int i = 0 ; i < m_lengthLines ; ++i)
+	{
+		m_lineArray[i] = tmpLines[i]; 
+	}
+	
+	printf("%d lines and %d points \n", m_countLines, m_countPoints);
+
+
+	m_dh->printDebug(_T("move vertices"), 1);
+	
+	for (int i = 0; i < m_countPoints * 3 ; ++i) {
+		//m_pointArray[i] = m_dh->columns - m_pointArray[i];
+		++i;
+		m_pointArray[i] = m_dh->rows - m_pointArray[i];
+		++i;
+		m_pointArray[i] = m_dh->frames - m_pointArray[i];
+	}
+
+	calculateLinePointers();
+	createColorArray();
+	m_dh->printDebug(_T("read all"), 1);
+	
+	delete[] buffer;
+
+	m_dh->countFibers = m_countLines;
+	
+	m_type = Fibers_;
+	m_fullPath = filename;
+	#ifdef __WXMSW__
+		m_name = filename.AfterLast('\\');
+	#else
+		m_name = filename.AfterLast('/');
+	#endif
+	
+	m_kdTree = new KdTree(m_countPoints, m_pointArray, m_dh);
+	
+	return true;
+}
+
+
+bool Fibers::loadPTK(wxString filename)
+{
+	m_dh->printDebug(_T("start loading PTK file"), 1);
+	wxFile dataFile;
+	wxFileOffset nSize = 0;
+	int pc = 0;
+	converterByteINT32 cbi;
+	converterByteFloat cbf;
+	std::vector<float>tmpPoints;
+	std::vector<int>tmpLines;
+
+	if (dataFile.Open(filename))
+	{
+		nSize = dataFile.Length();
+		if (nSize == wxInvalidOffset) return false;
+	}
+	
+	wxUint8* buffer = new wxUint8[nSize];
+	dataFile.Read(buffer, nSize);
+	
+	m_countLines = 0; // number of lines
+	m_countPoints = 0; // number of points
+	
+	while (pc < nSize)
+	{
+		++m_countLines;
+		
+		cbi.b[0] = buffer[pc++];
+		cbi.b[1] = buffer[pc++];
+		cbi.b[2] = buffer[pc++];
+		cbi.b[3] = buffer[pc++];
+		
+		tmpLines.push_back(cbi.i);
+		
+		for ( size_t i = 0 ; i < cbi.i ; ++i)
+		{
+			tmpLines.push_back(m_countPoints);
+			++m_countPoints;
+			
+			cbf.b[0] = buffer[pc++];
+			cbf.b[1] = buffer[pc++];
+			cbf.b[2] = buffer[pc++];
+			cbf.b[3] = buffer[pc++];
+			tmpPoints.push_back(cbf.f);
+			cbf.b[0] = buffer[pc++];
+			cbf.b[1] = buffer[pc++];
+			cbf.b[2] = buffer[pc++];
+			cbf.b[3] = buffer[pc++];
+			tmpPoints.push_back(cbf.f);
+			cbf.b[0] = buffer[pc++];
+			cbf.b[1] = buffer[pc++];
+			cbf.b[2] = buffer[pc++];
+			cbf.b[3] = buffer[pc++];
+			tmpPoints.push_back(cbf.f);
+		}
+			
+	}
+	
+	m_linePointers = new int[m_countLines+1];
+	m_linePointers[m_countLines] = m_countPoints;
+	m_reverse = new int[m_countPoints];
+	m_inBox.resize(m_countLines, false);
+
+	m_lengthPoints = tmpPoints.size(); // size of the point array
+	m_lengthLines = tmpLines.size(); // size of the line array
+	
+	m_pointArray = new float[m_lengthPoints];
+	m_lineArray = new int[m_lengthLines];
+	
+	for (int i = 0 ; i < m_lengthPoints ; ++i)
+	{
+		m_pointArray[i] = tmpPoints[i]; 
+	}
+	for (int i = 0 ; i < m_lengthLines ; ++i)
+	{
+		m_lineArray[i] = tmpLines[i]; 
+	}
+	
+	printf("%d lines and %d points \n", m_countLines, m_countPoints);
+
+
+	m_dh->printDebug(_T("move vertices"), 1);
+	
+	for (int i = 0; i < m_countPoints * 3 ; ++i) {
+		//m_pointArray[i] = m_dh->columns - m_pointArray[i];
+		++i;
+		m_pointArray[i] = m_dh->rows - m_pointArray[i];
+		++i;
+		m_pointArray[i] = m_dh->frames - m_pointArray[i];
+	}
+
+	calculateLinePointers();
+	createColorArray();
+	m_dh->printDebug(_T("read all"), 1);
+	
+	delete[] buffer;
+
+	m_dh->countFibers = m_countLines;
+	
+	m_type = Fibers_;
+	m_fullPath = filename;
+	#ifdef __WXMSW__
+		m_name = filename.AfterLast('\\');
+	#else
+		m_name = filename.AfterLast('/');
+	#endif
+	
+	m_kdTree = new KdTree(m_countPoints, m_pointArray, m_dh);
+	
+	return true;
+}
+
+bool Fibers::loadVTK(wxString filename)
+{
+	m_dh->printDebug(_T("start loading VTK file"), 1);
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
 
@@ -230,6 +470,7 @@ void Fibers::calculateLinePointers()
 	int pc = 0;
 	int lc = 0;
 	int tc = 0;
+	
 	for (int i = 0 ; i < m_countLines ; ++i)
 	{
 		m_linePointers[i] = tc;
@@ -240,7 +481,6 @@ void Fibers::calculateLinePointers()
 
 	lc = 0;
 	pc = 0;
-
 
 	for ( int i = 0 ; i < m_countPoints ; ++i)
 	{
