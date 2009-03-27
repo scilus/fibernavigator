@@ -31,6 +31,9 @@ Fibers::Fibers(DatasetHelper* dh)
 	m_lineArray = NULL;
 	m_colorArray = NULL;
 	m_normalArray = NULL;
+	
+	m_oldMax = 1.0;
+	m_newMax = 1.0;
 }
 
 Fibers::~Fibers()

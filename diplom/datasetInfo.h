@@ -77,6 +77,8 @@ public:
 	float getHighestValue() {return m_highest_value;};
 	void setHighestValue(float value) {m_highest_value = value;};
 	float getThreshold() {return m_threshold;};
+	float getOldMax() {return m_oldMax;};
+	float getNewMax() {return m_newMax;};
 	void setThreshold(float value) {m_threshold = value;};
 	float getAlpha() {return m_alpha;};
 	void setAlpha(float v) {m_alpha = v;};
@@ -135,6 +137,8 @@ protected:
 	wxString m_fullPath;
 	float m_threshold;
 	float m_alpha;
+	float m_oldMax;
+	float m_newMax;
 
 	wxColour m_color;
 	GLuint m_GLuint;

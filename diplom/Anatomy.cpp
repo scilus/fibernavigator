@@ -37,6 +37,8 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	m_hasTreeId = false;
 	m_GLuint = 0;
 	m_roi = 0;
+	m_oldMax = 1.0;
+	m_newMax = 1.0;
 }
 
 Anatomy::~Anatomy()
@@ -88,7 +90,7 @@ bool Anatomy::loadNifti(wxString filename)
 	m_rows = ima->dim[2]; // 200
 	m_frames = ima->dim[3]; // 160
 	
-	printf("%f : %f : %f\n", ima->dx, ima->dy, ima->dz);
+	//printf("%f : %f : %f\n", ima->dx, ima->dy, ima->dz);
 	
 	if (m_dh->anatomy_loaded)
 	{
@@ -154,30 +156,58 @@ bool Anatomy::loadNifti(wxString filename)
 			{
 				m_floatDataset[i] = (float)data[i] / 255.0;
 			}
-
 			flag = true;
 		} break;
 
 		case Head_short: {
 			short int *data = (short int*)filedata->data;
-
 			int max = 0;
+			std::vector<int>histo(65536,0);
 			for ( int i = 0 ; i < nSize ; ++i)
 			{
 				max = wxMax(max, data[i]);
+				++histo[data[i]];
 			}
-
+			int fivepercent = (int)(nSize * 0.001);
+			int newMax = 65535;
+			int adder = 0;
+			for (int i = 65535 ; i > 0 ; --i)
+			{
+				adder += histo[i];
+				newMax = i;
+				if (adder > fivepercent) break;
+			}
+			for ( int i = 0 ; i < nSize ; ++i)
+			{
+				if ( data[i] > newMax ) data[i] = newMax;
+			}
+			
 			m_floatDataset = new float[nSize];
 			for ( int i = 0 ; i < nSize ; ++i)
 			{
-				m_floatDataset[i] = (float)data[i] / (float)max;
+				m_floatDataset[i] = (float)data[i] / (float)newMax;
 			}
+			m_oldMax = max;
+			m_newMax = newMax;
 			flag = true;
 
 		} break;
 
 		case Overlay: {
 			m_floatDataset = (float*) filedata->data;
+			float max = 0.0;
+			for ( int i = 0 ; i < nSize ; ++i)
+			{
+				if ( m_floatDataset[i] > max ) 
+					max = m_floatDataset[i];
+			}
+			for ( int i = 0 ; i < nSize ; ++i)
+			{
+				m_floatDataset[i] = m_floatDataset[i]/max;
+			}
+			m_oldMax = max;
+			m_newMax = 1.0;
+			
 			flag = true;
 		} break;
 
@@ -194,7 +224,6 @@ bool Anatomy::loadNifti(wxString filename)
 				m_floatDataset[i * 3 + 2] = (float)data[(2 * nSize) + i] / 255.0;
 
 			}
-
 			flag = true;
 		} break;
 
@@ -215,7 +244,6 @@ bool Anatomy::loadNifti(wxString filename)
             m_dh->tensors_loaded = true;
             m_dh->vectors_loaded = true;
             m_dh->surface_isDirty = true;
-
 			flag = true;
 		} break;
 

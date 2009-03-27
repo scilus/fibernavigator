@@ -19,6 +19,8 @@ Mesh::Mesh(DatasetHelper* dh)
 	is_loaded = false;
 	m_highest_value = 1.0;
 	m_threshold = 0.0f;
+	m_oldMax = 1.0;
+	m_newMax = 1.0;
 	m_alpha = 1.0f;
 	m_show = true;
 	m_showFS = true;

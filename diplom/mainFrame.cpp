@@ -220,8 +220,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
    m_listCtrl->InsertColumn(3, itemCol);
    
    m_listCtrl->SetColumnWidth(0, 20);
-   m_listCtrl->SetColumnWidth(1, 214);
-   m_listCtrl->SetColumnWidth(2, 50);
+   m_listCtrl->SetColumnWidth(1, 194);
+   m_listCtrl->SetColumnWidth(2, 70);
    m_listCtrl->SetColumnWidth(3, 20);
    
 
@@ -1119,8 +1119,10 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
-	m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold ));
+	
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+	m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold * info->getOldMax() ));
+	
 	info->setThreshold(threshold);
 	if ( info->getType() == Surface_ )
 	{
@@ -1389,7 +1391,7 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 		}
 	}
 	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
-	m_listCtrl->SetColumnWidth(1, m_listCtrl->GetSize().x - 90);
+	m_listCtrl->SetColumnWidth(1, m_listCtrl->GetSize().x - 110);
 	SetSize(windowSize);
 
 }

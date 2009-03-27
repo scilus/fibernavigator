@@ -351,7 +351,9 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_showFS = true;
 	m_useTex = true;
 	m_color = wxColour(230,230,230);
-
+	m_oldMax = 1.0;
+	m_newMax = 1.0;
+		
 	m_nTriangles = 0;
 	m_nNormals = 0;
 	m_nVertices = 0;

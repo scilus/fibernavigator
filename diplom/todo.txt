@@ -10,12 +10,9 @@
 =
 ========================================================================
 
-laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
-skalierung der grauwerte
 interne implementierung der offsetflaeche
 keine OPENGL installation: beim start lesbare fehlermeldung
 lesen der fasern als vtk-ascii file
-lesen der fasern als binary file so wie es z.b. camino erzeugt (Ting)
 lesen von freesurfer mesh files	
 
 ========================================================================
@@ -25,7 +22,6 @@ lesen von freesurfer mesh files
 ========================================================================
 abspeichern der farben
 laden anderer bild und mesh formate ( *.nii, *.v )
-test und evtl kleine anpassungen fuer ein laptop computer
 fasern durchsichtig ( gewichtet mit overlay )
 slider fuer isosurface reparieren
 koordinatensystem: anzeige in unterschiedlichen konventionen ( nullpunkt in lipsia und nifti )
@@ -42,6 +38,7 @@ alpha blending und neues beleuchtungschema (farbe-licht)
 exclusivitaet ( eine faser nicht gleichzeitig in mehreren boxen )
 tastaturbuffer
 falls moeglich: remote x-session: initializing verwendung der shader auf dem localhost.
+test und evtl kleine anpassungen fuer ein laptop computer
 
 ========================================================================
 =
@@ -62,7 +59,9 @@ background and threshold
 =     erledigt
 =
 ===============================================================================
-
+laden der bilder mit skalierung auf 0-max wert... slideranzeige mit max wert
+skalierung der grauwerte
+lesen der fasern als binary file so wie es z.b. camino erzeugt (Ting)
 multiple file selection in load dialog
 help- keyboard shortcuts
 keyboard shortcuts : axial (a), sagital (s), coronal (c); strg S; STRG O

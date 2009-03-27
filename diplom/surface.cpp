@@ -29,6 +29,8 @@ Surface::Surface(DatasetHelper* dh)
 	m_type = Surface_;
 	m_hasTreeId = false;
 	m_threshold = 0.5;
+	m_oldMax = 1.0;
+	m_newMax = 1.0;
 	m_name = wxT("spline surface");
 	m_dh->surface_loaded = true;
 	m_numPoints = 0;
