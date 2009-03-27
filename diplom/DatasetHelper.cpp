@@ -91,6 +91,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_selBoxChanged = true;
 	
 	m_scnFileName = _T("");
+	m_scenePath = _T("");
 	m_scnFileLoaded = false;
 
 #ifdef DEBUG
@@ -177,8 +178,10 @@ bool DatasetHelper::load(wxString filename, bool createBox, float threshold, boo
 		
 		#ifdef __WXMSW__
 			m_scnFileName = filename.AfterLast('\\');
+			m_scenePath = filename.BeforeLast('\\');
 		#else
 			m_scnFileName = filename.AfterLast('/');
+			m_scenePath = filename.BeforeLast('/');
 		#endif
 		m_scnFileLoaded = true;
 		return true;

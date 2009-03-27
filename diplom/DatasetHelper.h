@@ -114,6 +114,10 @@ public:
 	wxString lastError;
 	// last path from loading, load file dialog will open with it
 	wxString lastPath;
+	wxString m_scenePath;
+	
+	wxString m_scnFileName;
+	bool m_scnFileLoaded;
 
 	bool anatomy_loaded;
 	bool fibers_loaded;
@@ -189,9 +193,6 @@ public:
 	float zoom;
 	int xMove;
 	int yMove;
-
-	wxString m_scnFileName;
-	bool m_scnFileLoaded;
 	
 	bool m_texAssigned;
 	bool m_selBoxChanged;

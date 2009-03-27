@@ -414,6 +414,7 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 	dialog.SetDirectory(m_dh->lastPath);
 	if (m_dh->m_scnFileLoaded)
 		dialog.SetFilename(m_dh->m_scnFileName);
+		dialog.SetPath(m_dh->m_scenePath);
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		m_dh->lastPath = dialog.GetDirectory();
