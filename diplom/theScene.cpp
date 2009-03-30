@@ -153,6 +153,8 @@ void TheScene::renderSlizes()
 	if (m_dh->showCrosshair)
 		m_dh->anatomyHelper->renderCrosshair();
 
+	if (m_dh->GLError()) m_dh->printGLError(wxT("render slizes"));
+	
 	glPopAttrib();
 }
 
@@ -191,14 +193,6 @@ void TheScene::renderSplineSurface()
 
 			if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
 
-/*
-			if ( m_dh->vectors_loaded && m_dh->drawVectors)
-			{
-				m_dh->shaderHelper->m_vectorShader->bind();
-				info->drawVectors();
-				m_dh->shaderHelper->m_vectorShader->release();
-			}
-*/
 			glPopAttrib();
 		}
 	}

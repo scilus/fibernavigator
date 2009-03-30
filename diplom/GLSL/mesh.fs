@@ -86,43 +86,12 @@ void main() {
 		v.x = v.x / float(dimX);
 		v.y = v.y / float(dimY);
 		v.z = v.z / float(dimZ);
-	/*
+
 		for (int i = 9; i > -1; i--) {
 			float threshold_ = 0.0;
 			if (blendTex) threshold_ = threshold[i];
 			if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold_, v, alpha[i]);
 		}
-*/
-		float threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[9];
-		if (show[9]) lookupTexMesh(color, type[9], texes[9], threshold_, v, alpha[9]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[8];
-		if (show[8]) lookupTexMesh(color, type[8], texes[8], threshold_, v, alpha[8]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[7];
-		if (show[7]) lookupTexMesh(color, type[7], texes[7], threshold_, v, alpha[7]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[6];
-		if (show[6]) lookupTexMesh(color, type[6], texes[6], threshold_, v, alpha[6]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[5];
-		if (show[5]) lookupTexMesh(color, type[5], texes[5], threshold_, v, alpha[5]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[4];
-		if (show[4]) lookupTexMesh(color, type[4], texes[4], threshold_, v, alpha[4]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[3];
-		if (show[3]) lookupTexMesh(color, type[3], texes[3], threshold_, v, alpha[3]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[2];
-		if (show[2]) lookupTexMesh(color, type[2], texes[2], threshold_, v, alpha[2]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[1];
-		if (show[1]) lookupTexMesh(color, type[1], texes[1], threshold_, v, alpha[1]);
-		threshold_ = 0.0;
-		if (blendTex) threshold_ = threshold[0];
-		if (show[0]) lookupTexMesh(color, type[0], texes[0], threshold_, v, alpha[0]);
 
 		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0)
 				+ (specular * color / 2.0);

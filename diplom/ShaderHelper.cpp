@@ -86,7 +86,6 @@ void ShaderHelper::setTextureShaderVars()
 	m_textureShader->setUniArrayInt("type", type, c);
 	m_textureShader->setUniArrayFloat("threshold", threshold, c);
 	m_textureShader->setUniArrayFloat("alpha", alpha, c);
-	m_textureShader->setUniInt("countTextures", c);
 }
 
 void ShaderHelper::setMeshShaderVars()
@@ -141,8 +140,7 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniArrayInt("show", show, c);
 	m_meshShader->setUniArrayInt("type", type, c);
 	m_meshShader->setUniArrayFloat("threshold", threshold, c);
-	m_textureShader->setUniArrayFloat("alpha", alpha, c);
-	m_meshShader->setUniInt("countTextures", c);
+	m_meshShader->setUniArrayFloat("alpha", alpha, c);
 }
 
 void ShaderHelper::setFiberShaderVars()
@@ -208,7 +206,6 @@ void ShaderHelper::setSplineSurfaceShaderVars()
 	m_splineSurfShader->setUniArrayInt("show", show, c);
 	m_splineSurfShader->setUniArrayInt("type", type, c);
 	m_splineSurfShader->setUniArrayFloat("threshold", threshold, c);
-	m_textureShader->setUniArrayFloat("alpha", alpha, c);
-	m_splineSurfShader->setUniInt("countTextures", c);
+	m_splineSurfShader->setUniArrayFloat("alpha", alpha, c);
 }
 

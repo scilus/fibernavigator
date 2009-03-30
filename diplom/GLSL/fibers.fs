@@ -38,12 +38,13 @@ void main() {
 	if (type == 3 && useTex)
 		if ( useColorMap == 1 )
 			cooloor.rgb  = colorMap1( newVal );
+			/*
 		else if ( useColorMap == 2 )
 			cooloor.rgb  = colorMap2( newVal );
 		else if ( useColorMap == 3 )
 			cooloor.rgb  = colorMap3( newVal );
 		else if ( useColorMap == 4 )
-			cooloor.rgb  = colorMap4( newVal );
+			cooloor.rgb  = colorMap4( newVal ); */
 		else
 			cooloor.rgb = defaultColorMap( newVal );
 	gl_FragColor = cooloor;
