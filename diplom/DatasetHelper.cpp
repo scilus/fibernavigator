@@ -796,20 +796,15 @@ void DatasetHelper::createIsoSurface() {
 	// check anatomy - quit if not present
 	if (!anatomy_loaded)
 		return;
-	// get top most anatomy dataset
-	DatasetInfo* info;
-	Anatomy* anatomy = NULL;
-	bool flag = false;
-	for (int i = 0; i < mainFrame->m_listCtrl->GetItemCount(); ++i) {
-		info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
-		if (info->getType() < RGB) {
-			anatomy = (Anatomy*) info;
-			flag = true;
-			break;
-		}
-	}
-	if (!flag)
+	// get selected anatomy dataset
+	long item = mainFrame->m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
+	
+	DatasetInfo *info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(item);
+	if (info->getType() > Overlay) 
 		return;
+	
+	Anatomy* anatomy = (Anatomy*) info;
 
 	printDebug(_T("start generating iso surface..."),1);
 

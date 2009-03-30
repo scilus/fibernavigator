@@ -2018,7 +2018,9 @@ void MainFrame::updateMenus()
 		m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
 		m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->getActive());
 	}
-
+	//MENU_FILE_NEW_ISOSURF
+	sMenu->Enable(sMenu->FindItem(_T("New Iso Surface")), false);
+	m_toolBar->EnableTool(MENU_FILE_NEW_ISOSURF, false);
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Texture Mode")), false);
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), false);
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Normal Direction")), false);
@@ -2032,6 +2034,11 @@ void MainFrame::updateMenus()
 	if (item != -1)
 	{
 		DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+		if (info->getType() < RGB)
+		{
+			sMenu->Enable(sMenu->FindItem(_T("New Iso Surface")), true);
+			m_toolBar->EnableTool(MENU_FILE_NEW_ISOSURF, true);
+		}
 		if (info->getType() < Mesh_)
 		{
 			sMenu->Enable(sMenu->FindItem(_T("Toggle Texture Mode")), true);
