@@ -281,6 +281,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 								m_delta =  -1;
 							else if (delta > 0.5)
 								m_delta = 1;
+							else m_delta = 0;
 						}
 					}
 					else if (event.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20)
@@ -367,7 +368,7 @@ float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector
 	Vector dir ( ve.x - vs.x, ve.y - vs.y, ve.z - vs.z );
 	float bb = ((dir.x * dir.x) + (dir.y * dir.y) + (dir.z * dir.z));
 	float nb = ((dir.x * n.x) + (dir.y * n.y) + (dir.z * n.z));
-	return bb/nb;
+	return bb/nb;	
 }
 
 hitResult MainCanvas::pick(wxPoint click)
@@ -521,6 +522,8 @@ void MainCanvas::render()
     {
         init();
     }
+    
+    
      /* clear color and depth buffers */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -616,18 +619,70 @@ void MainCanvas::setRotation()
 
 void MainCanvas::OnChar(wxKeyEvent& event)
 {
+	int w, h;
+	GetClientSize(&w, &h);
+	Quat4fT     ThisQuat;
+	
+	if ( wxGetKeyState(WXK_CONTROL) )
+	{
+		m_mousePt.s.X = w/2;
+		m_mousePt.s.Y = h/2;
+		m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
+		m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
+	}
+	
 	switch( event.GetKeyCode() )
 		{
 		case WXK_LEFT:
-			m_dh->mainFrame->m_xSlider->SetValue( wxMax(0, m_dh->mainFrame->m_xSlider->GetValue() - 1));
+			if ( wxGetKeyState(WXK_CONTROL) )
+			{
+				m_mousePt.s.X = w/2 - 2;
+				m_mousePt.s.Y = h/2;
+				m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
+				Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
+				Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
+				Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
+			}
+			else
+				m_dh->mainFrame->m_xSlider->SetValue( wxMax(0, m_dh->mainFrame->m_xSlider->GetValue() - 1));
 			break;
 		case WXK_RIGHT:
+			if ( wxGetKeyState(WXK_CONTROL) )
+			{
+				m_mousePt.s.X = w/2 + 2;
+				m_mousePt.s.Y = h/2;
+				m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
+				Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
+				Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
+				Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
+			}
+			else
 			m_dh->mainFrame->m_xSlider->SetValue( wxMin(m_dh->mainFrame->m_xSlider->GetValue() + 1, m_dh->columns));
 			break;
 		case WXK_DOWN:
+			if ( wxGetKeyState(WXK_CONTROL) )
+			{
+				m_mousePt.s.X = w/2;
+				m_mousePt.s.Y = h/2 - 2;
+				m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
+				Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
+				Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
+				Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
+			}
+			else
 			m_dh->mainFrame->m_ySlider->SetValue( wxMax(0, m_dh->mainFrame->m_ySlider->GetValue() - 1));
 			break;
 		case WXK_UP:
+			if ( wxGetKeyState(WXK_CONTROL) )
+			{
+				m_mousePt.s.X = w/2;
+				m_mousePt.s.Y = h/2 + 2;
+				m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
+				Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
+				Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
+				Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One				
+			}
+			else
 			m_dh->mainFrame->m_ySlider->SetValue( wxMin(m_dh->mainFrame->m_ySlider->GetValue() + 1, m_dh->rows));
 			break;
 		case WXK_PAGEDOWN:

@@ -19,6 +19,7 @@ public:
 	virtual ~AnatomyHelper();
 
 	void renderMain();
+	void renderFreeSlize();
 	void renderCrosshair();
 	void renderNav(int, Shader*);
 
@@ -43,15 +44,15 @@ private:
 	void renderS3();
 	void renderS4();
 
-	float x;
-	float y;
-	float z;
-	float xb;
-	float yb;
-	float zb;
-	float xc;
-	float yc;
-	float zc;
+	float m_x;
+	float m_y;
+	float m_z;
+	float m_xb;
+	float m_yb;
+	float m_zb;
+	float m_xc;
+	float m_yc;
+	float m_zc;
 
 	DatasetHelper* m_dh;
 };

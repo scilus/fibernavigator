@@ -154,6 +154,9 @@ public:
 	float xSlize;
 	float ySlize;
 	float zSlize;
+	
+	Vector m_freeSlizeOffset;
+	Vector m_freeSlizeRotation;
 	// lighting for fibers
 	bool lighting;
 	// ignore threshold for textures on meshes

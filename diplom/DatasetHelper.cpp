@@ -93,6 +93,10 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_scnFileName = _T("");
 	m_scenePath = _T("");
 	m_scnFileLoaded = false;
+	
+	Vector v(0.0, 0.0, 0.0);
+	m_freeSlizeOffset = v;
+	m_freeSlizeRotation = v;
 
 #ifdef DEBUG
 	debugLevel = 0;

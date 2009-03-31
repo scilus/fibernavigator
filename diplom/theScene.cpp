@@ -89,39 +89,36 @@ void TheScene::bindTextures()
 
 void TheScene::renderScene()
 {
-	if (m_dh->mainFrame->m_listCtrl->GetItemCount() == 0) return;
+	if ( m_dh->mainFrame->m_listCtrl->GetItemCount() == 0 ) return;
 
 	renderSplineSurface();
 
-	if (m_dh->pointMode)
+	if ( m_dh->pointMode )
 	{
 		drawPoints();
 	}
 
 	renderSlizes();
 
-	if (m_dh->fibers_loaded)
+	if ( m_dh->fibers_loaded )
 	{
-		if (m_dh->useFakeTubes)
+		if  (m_dh->useFakeTubes )
 			renderFakeTubes();
 		else
 			renderFibers();
 
-		if (m_dh->fibers_loaded)
+		if ( m_dh->showBoxes )
 		{
-			if (m_dh->showBoxes )
-			{
-				drawSelectionBoxes();
-			}
+			drawSelectionBoxes();
 		}
 	}
 
 	renderMesh();
 
-	if (m_dh->showColorMapLegend)
+	if ( m_dh->showColorMapLegend )
 		drawColorMapLegend();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("render scene"));
+	if ( m_dh->GLError() ) m_dh->printGLError(wxT("render scene"));
 }
 
 void TheScene::renderSlizes()
@@ -145,7 +142,9 @@ void TheScene::renderSlizes()
 	m_dh->shaderHelper->m_textureShader->setUniInt("useColorMap", m_dh->colorMap);
 
 	m_dh->anatomyHelper->renderMain();
-
+	
+	//m_dh->anatomyHelper->renderFreeSlize();
+	
 	glDisable(GL_BLEND);
 
 	m_dh->shaderHelper->m_textureShader->release();

@@ -469,8 +469,8 @@ void SelectionBox::drag(wxPoint click, wxPoint lastPos)
 
 	Vector change (
 		(vs.x + dir.x * m_hr.tmin) - (vs2.x + dir2.x * m_hr.tmin),
-		  (vs.y + dir.y * m_hr.tmin) - (vs2.y + dir2.y * m_hr.tmin),
-		  (vs.z + dir.z * m_hr.tmin) - (vs2.z + dir2.z * m_hr.tmin) );
+		(vs.y + dir.y * m_hr.tmin) - (vs2.y + dir2.y * m_hr.tmin),
+		(vs.z + dir.z * m_hr.tmin) - (vs2.z + dir2.z * m_hr.tmin) );
 
 	m_center.x += change.x;
 	m_center.y += change.y;
