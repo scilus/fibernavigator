@@ -172,7 +172,6 @@ void ShaderHelper::setFiberShaderVars()
 	}
 
 	m_fiberShader->setUniInt("tex", tex);
-	m_fiberShader->setUniInt("show", show);
 	m_fiberShader->setUniInt("type", type);
 	m_fiberShader->setUniFloat("threshold", threshold);
 }

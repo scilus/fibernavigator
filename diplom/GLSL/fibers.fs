@@ -2,11 +2,9 @@
 
 uniform int dimX, dimY, dimZ;
 uniform sampler3D tex;
-uniform bool show;
 uniform float threshold;
 uniform int type;
 uniform bool useTex;
-uniform bool lightOn;
 
 varying vec4 myColor;
 
@@ -47,5 +45,6 @@ void main() {
 			cooloor.rgb  = colorMap4( newVal ); */
 		else
 			cooloor.rgb = defaultColorMap( newVal );
+	cooloor.a = newVal;
 	gl_FragColor = cooloor;
 }

@@ -273,7 +273,6 @@ void TheScene::renderFibers()
 				m_dh->shaderHelper->m_fiberShader->bind();
 				m_dh->shaderHelper->setFiberShaderVars();
 				m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", !info->getUseTex());
-				m_dh->shaderHelper->m_fiberShader->setUniInt("lightOn", m_dh->lighting);
 				m_dh->shaderHelper->m_fiberShader->setUniInt("useColorMap", m_dh->colorMap);
 			}
 			if (m_dh->m_selBoxChanged)

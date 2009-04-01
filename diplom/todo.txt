@@ -18,7 +18,6 @@ lesen der fasern als vtk-ascii file
 =
 ========================================================================
 abspeichern der farben
-fasern durchsichtig ( gewichtet mit overlay )
 koordinatensystem: anzeige in unterschiedlichen konventionen ( nullpunkt in lipsia und nifti )
 verwendung der voxelgroesse ( skalierung )
 implementierung einer clipping plane, um fasern auszublenden
@@ -54,6 +53,7 @@ background and threshold
 =     erledigt
 =
 ===============================================================================
+fasern durchsichtig ( gewichtet mit overlay )
 slider fuer isosurface reparieren
 lesen von freesurfer mesh files	
 laden anderer bild und mesh formate ( *.nii, *.v )
