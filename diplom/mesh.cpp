@@ -26,7 +26,6 @@ Mesh::Mesh(DatasetHelper* dh)
 	m_showFS = true;
 	m_useTex = true;
 	m_color = wxColour(230,230,230);
-	m_hasTreeId = false;
 	m_GLuint = 0;
 	m_tMesh = new TriangleMesh(m_dh);
 }

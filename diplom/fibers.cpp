@@ -25,7 +25,6 @@ Fibers::Fibers(DatasetHelper* dh)
 	m_showFS = true;
 	m_useTex = true;
 	m_bufferObjects = new GLuint[3];
-	m_hasTreeId = false;
 
 	m_pointArray = NULL;
 	m_lineArray = NULL;

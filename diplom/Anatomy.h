@@ -17,7 +17,8 @@ class Anatomy : public DatasetInfo , public wxTreeItemData
 {
 
 public:
-	Anatomy(DatasetHelper*);
+	Anatomy(DatasetHelper* dh);
+	Anatomy(DatasetHelper* dh, float* dataset);
 	virtual ~Anatomy();
 
 	bool load(wxString filename);
@@ -37,6 +38,7 @@ private:
 	void clean() {};
 	void smooth() {};
 	void activateLIC() {};
+	void createOffset(float* dataset);
 
 	float *m_floatDataset;
 	TensorField* m_tensorField;

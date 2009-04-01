@@ -33,10 +33,6 @@ enum DatasetType {
 	MasterBox,
 	ChildBox,
 	Point_,
-	Label_planes,
-	Label_datasets,
-	Label_meshes,
-	Label_fibers,
 	Label_points,
 	Label_selBoxes,
 };
@@ -143,7 +139,6 @@ protected:
 	wxColour m_color;
 	GLuint m_GLuint;
 
-	bool m_hasTreeId;
 	bool m_show;
 	bool m_showFS;	// show front sector for meshs
 	bool m_useTex; 	// color mesh with textures loaded,

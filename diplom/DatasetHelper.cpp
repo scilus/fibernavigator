@@ -839,6 +839,42 @@ void DatasetHelper::createIsoSurface() {
 
 }
 
+void DatasetHelper::createDistanceMap() {
+	// check anatomy - quit if not present
+	if (!anatomy_loaded)
+		return;
+	// get selected anatomy dataset
+	long item = mainFrame->m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
+	
+	DatasetInfo *info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(item);
+	if (info->getType() > Overlay) 
+		return;
+	
+	Anatomy* anatomy = (Anatomy*) info;
+
+	printDebug(_T("start generating distance map..."),1);
+
+	Anatomy* newAnatomy = new Anatomy(this, anatomy->getFloatDataset());
+	
+
+	printDebug(_T("distance map done"),1);
+
+	newAnatomy->setName(anatomy->getName() + wxT(" (offset)"));
+
+	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+	mainFrame->m_listCtrl->SetItem(0, 1, newAnatomy->getName());
+	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.00"));
+	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
+	mainFrame->m_listCtrl->SetItemData(0, (long) newAnatomy);
+	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
+			wxLIST_STATE_SELECTED);
+
+	mainFrame->refreshAllGLWidgets();
+
+}
+
+
 void DatasetHelper::changeZoom(int z)
 {
 	float delta = ((int)zoom)*0.1f;

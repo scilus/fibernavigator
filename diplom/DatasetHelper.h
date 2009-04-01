@@ -70,6 +70,7 @@ public:
 	bool invertFibers() {fibersInverted = !fibersInverted; return fibersInverted;};
 
 	void createIsoSurface();
+	void createDistanceMap();
 	/*
 	 * Called from MainFrame when a kdTree thread signals it's finished
 	 */

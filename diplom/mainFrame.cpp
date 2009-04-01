@@ -61,6 +61,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_VOI_TOGGLE_SHOWBOX, MainFrame::OnToggleShowBox)
 	EVT_MENU(MENU_VOI_RENAME_BOX, MainFrame::OnRenameBox)
 	// Menu Surfaces
+	EVT_MENU(MENU_SURFACE_NEW_OFFSET, MainFrame::OnNewOffsetMap)	
 	EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_LIC, MainFrame::OnToggleLIC)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_NORMAL, MainFrame::OnToggleNormal)
@@ -361,6 +362,11 @@ MainFrame::~MainFrame()
 void MainFrame::OnNewIsoSurface(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->createIsoSurface();
+}
+	
+void MainFrame::OnNewOffsetMap(wxCommandEvent& WXUNUSED(event))
+{
+	m_dh->createDistanceMap();
 }
 /****************************************************************************************************
  *
@@ -1454,9 +1460,9 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 	{
 	case 11:
 		if (!info->toggleShowFS())
-			m_listCtrl->SetItem(item, 1, info->getName() + wxT("*"));
+			m_listCtrl->SetItem(item, 1, info->getName().BeforeFirst('.') + wxT("*"));
 		else
-			m_listCtrl->SetItem(item, 1, info->getName());
+			m_listCtrl->SetItem(item, 1, info->getName().BeforeFirst('.'));
 		break;
 	case 13:
 		delete info;
@@ -1548,9 +1554,9 @@ void MainFrame::OnListMenuName(wxCommandEvent& event)
 	if (item == -1) return;
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
 	if (!info->toggleShowFS())
-		m_listCtrl->SetItem(item, 1, info->getName() + wxT("*"));
+		m_listCtrl->SetItem(item, 1, info->getName().BeforeFirst('.') + wxT("*"));
 	else
-		m_listCtrl->SetItem(item, 1, info->getName());
+		m_listCtrl->SetItem(item, 1, info->getName().BeforeFirst('.') );
 }
 
 void MainFrame::OnListMenuThreshold(wxCommandEvent& event)
@@ -1633,15 +1639,6 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
 		m_dh->lastSelectedPoint = (SplinePoint*)(m_treeWidget->GetItemData(treeid));
 		m_dh->lastSelectedPoint->select(false);
-		break;
-	case Label_fibers:
-		++load;
-	case Label_meshes:
-		++load;
-	case Label_datasets:
-		flag = m_dh->load(++load);
-		if (flag) m_dh->m_selBoxChanged = true;
-		m_treeWidget->Unselect();
 		break;
 	default:
 		break;

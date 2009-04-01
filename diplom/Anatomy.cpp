@@ -34,11 +34,37 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	m_show = true;
 	m_showFS = true;
 	m_useTex = true;
-	m_hasTreeId = false;
 	m_GLuint = 0;
 	m_roi = 0;
 	m_oldMax = 1.0;
 	m_newMax = 1.0;
+}
+
+Anatomy::Anatomy(DatasetHelper* dh, float* dataset) {
+	m_dh = dh;
+	m_type = Head_byte;
+	m_length = 0;
+	m_bands = 0;
+	m_frames = m_dh->frames;
+	m_rows = m_dh->rows;
+	m_columns = m_dh->columns;
+	m_repn = wxT("");
+	m_xVoxel = 1.0;
+	m_yVoxel = 1.0;
+	m_zVoxel = 1.0;
+	is_loaded = true;
+	m_highest_value = 1.0;
+	m_threshold = 0.00f;
+	m_alpha = 1.0f;
+	m_show = true;
+	m_showFS = true;
+	m_useTex = true;
+	m_GLuint = 0;
+	m_roi = 0;
+	m_oldMax = 1.0;
+	m_newMax = 1.0;
+	
+	createOffset(dataset);
 }
 
 Anatomy::~Anatomy()
@@ -330,4 +356,164 @@ GLuint Anatomy::getGLuint()
 float* Anatomy::getFloatDataset()
 {
 	return m_floatDataset;
+}
+
+void Anatomy::createOffset(float* source)
+{
+	int b,r,c,bb,rr,r0,b0,c0;
+	int i,istart,iend;
+	int nbands,nrows,ncols,npixels;
+	int d,d1,d2,cc1,cc2;
+	float u,dmin,dmax,*destpix;
+	bool *srcpix;
+	double g,*array;
+
+	nbands = m_frames;
+	nrows  = m_rows;
+	ncols  = m_columns;
+
+	npixels = wxMax(nbands,nrows);
+	array =  new double [npixels];
+
+	npixels = nbands * nrows * ncols;
+
+	m_floatDataset = new float[npixels];
+	for ( int i = 0 ; i < npixels ; ++i)
+	{
+		m_floatDataset[i] = 0.0;
+	}
+	
+	bool* bitmask = new bool[npixels];
+	for ( int i = 0 ; i < npixels ; ++i)
+	{
+		if ( source[i] < 0.01)
+			bitmask[i] = true;
+		else
+			bitmask[i] = false;
+	}
+
+	dmax = 999999999.0;
+
+	// first pass 
+	for (b=0; b<nbands; ++b) 
+	{
+		for (r=0; r<nrows; ++r) 
+		{
+			for (c=0; c<ncols; ++c) 
+			{
+				//if (VPixel(src,b,r,c,VBit) == 1) 
+				if ( bitmask[b*nrows*ncols + r*ncols + c] )
+				{
+					m_floatDataset[b*nrows*ncols + r*ncols + c] = 0;
+					continue;
+				}
+
+				srcpix = bitmask + b*nrows*ncols + r*ncols + c;
+				cc1 = c;
+				while (cc1 < ncols && *srcpix++ == 0) 
+					cc1++;
+				d1 = (cc1 >= ncols ? ncols : (cc1 - c));
+
+				srcpix = bitmask + b*nrows*ncols + r*ncols + c;
+				cc2 = c;
+				while (cc2 >= 0  && *srcpix-- == 0) 
+					cc2--;
+				d2 = (cc2 <= 0 ? ncols : (c - cc2));
+
+				if (d1 <= d2) {
+					d  = d1;
+					c0 = cc1;
+				}
+				else {
+					d  = d2;
+					c0 = cc2;
+				}
+				m_floatDataset[b*nrows*ncols + r*ncols + c] = (float) (d * d);
+			}
+		}
+	}
+
+	// second pass
+	for (b=0; b<nbands; b++) 
+	{
+		for (c=0; c<ncols; c++) 
+		{
+			for (r=0; r<nrows; r++)
+				array[r] = (double) m_floatDataset[b*nrows*ncols + r*ncols + c];
+
+			for (r=0; r<nrows; r++) 
+			{
+				if ( bitmask[b*nrows*ncols + r*ncols + c] == 1) continue;
+
+				dmin = dmax;
+				r0 = r;
+				g = sqrt(array[r]);
+				istart = r - (int) g;
+				if (istart < 0) istart = 0;
+				iend = r + (int) g + 1;
+				if (iend >= nrows)
+					iend = nrows;
+
+				for (rr=istart; rr<iend; rr++) {
+					u = array[rr] + (r - rr) * (r - rr);
+					if (u < dmin) {
+						dmin = u;
+						r0 = rr;
+					}
+				}
+				m_floatDataset[b*nrows*ncols + r*ncols + c] = dmin;
+			}
+		}
+	}
+
+	// third pass 
+
+	for (r=0; r<nrows; r++) 
+	{
+		for (c=0; c<ncols; c++) 
+		{
+			for (b=0; b<nbands; b++)
+				array[b] = (double) m_floatDataset[b*nrows*ncols + r*ncols + c];
+
+			for (b=0; b<nbands; b++) 
+			{
+				if ( bitmask[b*nrows*ncols + r*ncols + c] == 1) continue;
+
+				dmin = dmax;
+				b0 = b;
+
+				g = sqrt(array[b]);
+				istart = b - (int) g - 1;
+				if (istart < 0) istart = 0;
+				iend = b + (int) g + 1;
+				if (iend >= nbands)
+					iend = nbands;
+
+				for (bb=istart; bb<iend; bb++) {
+					u = array[bb] + (b - bb) * (b - bb);
+					if (u < dmin) {
+						dmin = u;
+						b0 = bb;
+					}
+				}
+				m_floatDataset[b*nrows*ncols + r*ncols + c] = dmin;
+			}
+		}
+	}
+
+	delete[] array;
+
+	float max = 0;
+	for (i = 0 ; i < npixels ; ++i ) 
+	{
+		m_floatDataset[i] = sqrt((double) m_floatDataset[i]);
+		if ( m_floatDataset[i] > max ) max = m_floatDataset[i];
+	}
+	for (i = 0 ; i < npixels ; ++i ) 
+	{
+		m_floatDataset[i] = m_floatDataset[i]/max;
+		
+	}
+
+	
 }

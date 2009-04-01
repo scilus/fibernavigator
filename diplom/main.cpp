@@ -172,6 +172,7 @@ bool MyApp::OnInit(void) {
 	wxMenu *surf_menu = new wxMenu;
 	surf_menu->Append(MENU_SPLINESURF_NEW, _T("New Spline Surface"));
 	surf_menu->Append(MENU_FILE_NEW_ISOSURF, _T("New Iso Surface"));
+	surf_menu->Append(MENU_SURFACE_NEW_OFFSET, _T("New Distance Map"));
 	surf_menu->AppendSeparator();
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_LIC, _T("Toggle Lic"));
 	surf_menu->AppendCheckItem(MENU_SPLINESURF_TOGGLE_NORMAL, _T("Toggle Normal Direction"));
