@@ -380,6 +380,7 @@ void CIsoSurface::GenerateSurface(float tIsoLevel)
 		DeleteSurface();
 
 	m_tIsoLevel = tIsoLevel;
+	m_threshold = tIsoLevel;
 
 	unsigned int nPointsInXDirection = (m_nCellsX + 1);
 	unsigned int nPointsInSlice = nPointsInXDirection*(m_nCellsY + 1);

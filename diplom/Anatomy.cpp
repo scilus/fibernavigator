@@ -364,7 +364,7 @@ void Anatomy::createOffset(float* source)
 	int i,istart,iend;
 	int nbands,nrows,ncols,npixels;
 	int d,d1,d2,cc1,cc2;
-	float u,dmin,dmax,*destpix;
+	float u,dmin,dmax;
 	bool *srcpix;
 	double g,*array;
 
@@ -515,5 +515,116 @@ void Anatomy::createOffset(float* source)
 		
 	}
 
+	// filter with gauss
+	// create the filter kernel
+	double sigma = 4;
+
+	int dim  = (int)(3.0 * sigma + 1);
+	int n    = 2*dim+1;
+	double step = 1;
+
+	float* kernel = new float[n];
 	
+	double sum = 0;
+	double x = -(float)dim;
+	
+	double uu;
+	for (int i = 0 ; i < n; ++i) 
+	{
+		uu = xxgauss(x,sigma);
+		sum += uu;
+		kernel[i] = uu;
+		x += step;
+	}
+
+	/* normalize */
+	for (int i=0 ; i<n ; ++i) 
+	{
+		uu = kernel[i];
+		uu /= sum;
+		kernel[i] = uu;
+	}
+	
+	d = n / 2 ;
+	float* float_pp;
+	float* tmp = new float[npixels];
+	int c1, cc;
+	
+	for ( int i = 0 ; i < npixels ; ++i)
+	{
+		tmp[i] = 0.0;
+	}
+	
+	for (b=0; b<nbands; ++b) 
+	{
+		for (r=0; r<nrows; ++r) 
+		{
+			for (c=d; c<ncols-d; ++c) 
+			{
+
+				float_pp = kernel;
+				sum = 0;
+				c0 = c-d;
+				c1 = c+d;
+				for (cc=c0; cc<=c1; cc++) 
+				{
+					x = m_floatDataset[b*nrows*ncols + r*ncols + cc];
+					sum += x * (*float_pp++);
+				}
+				tmp[b*nrows*ncols + r*ncols + c] = sum;
+			}
+		}
+	}
+	int r1;
+	for (b=0; b<nbands; ++b) 
+	{
+		for (r=d; r<nrows-d; ++r) 
+		{
+			for (c=0; c<ncols; ++c) 
+			{
+				float_pp = kernel;
+				sum = 0;
+				r0 = r-d;
+				r1 = r+d;
+				for (rr=r0; rr<=r1; rr++) 
+				{
+					x = tmp[b*nrows*ncols + rr*ncols + c];
+					sum += x * (*float_pp++);
+				}
+				m_floatDataset[b*nrows*ncols + r*ncols + c] = sum;
+			}
+		}
+	}
+	int b1;
+	for (b=d; b<nbands-d; ++b) 
+	{
+		for (r=0; r<nrows; ++r) 
+		{
+			for (c=0; c<ncols; ++c) 
+			{
+
+				float_pp = kernel;
+				sum = 0;
+				b0 = b-d;
+				b1 = b+d;
+				for (bb=b0; bb<=b1; bb++) 
+				{
+					x = m_floatDataset[bb*nrows*ncols + r*ncols + c];
+					sum += x * (*float_pp++);
+				}
+				tmp[b*nrows*ncols + r*ncols + c] = sum;
+			}
+		}
+	}
+
+	m_floatDataset = tmp;
+}
+
+
+double Anatomy::xxgauss(double x,double sigma)
+{
+  double y,z,a=2.506628273;
+  z = x / sigma;
+  y = exp((double)-z*z*0.5)/(sigma * a);
+  return y;
 }

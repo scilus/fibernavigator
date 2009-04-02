@@ -39,6 +39,8 @@ private:
 	void smooth() {};
 	void activateLIC() {};
 	void createOffset(float* dataset);
+	
+	double xxgauss(double x, double sigma);
 
 	float *m_floatDataset;
 	TensorField* m_tensorField;

@@ -856,12 +856,37 @@ void DatasetHelper::createDistanceMap() {
 	printDebug(_T("start generating distance map..."),1);
 
 	Anatomy* newAnatomy = new Anatomy(this, anatomy->getFloatDataset());
-	
 
 	printDebug(_T("distance map done"),1);
 
-	newAnatomy->setName(anatomy->getName() + wxT(" (offset)"));
+	printDebug(_T("start generating iso surface..."),1);
 
+	CIsoSurface *isosurf = new CIsoSurface(this, newAnatomy->getFloatDataset());
+	isosurf->GenerateSurface(0.1f);
+
+	printDebug(_T("iso surface done"),1);
+
+	wxString anatomyName = anatomy->getName().BeforeFirst('.');
+
+	if (isosurf->IsSurfaceValid())
+	{
+		isosurf->setName(anatomyName + wxT(" (offset)"));
+
+		mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+		mainFrame->m_listCtrl->SetItem(0, 1, isosurf->getName());
+		mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.10"));
+		mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
+		mainFrame->m_listCtrl->SetItemData(0, (long) isosurf);
+		mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
+				wxLIST_STATE_SELECTED);
+
+	} else
+	{
+		printDebug(_T("***ERROR*** surface is not valid"),2);
+	}
+	mainFrame->refreshAllGLWidgets();
+	
+/*
 	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
 	mainFrame->m_listCtrl->SetItem(0, 1, newAnatomy->getName());
 	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.00"));
@@ -871,7 +896,7 @@ void DatasetHelper::createDistanceMap() {
 			wxLIST_STATE_SELECTED);
 
 	mainFrame->refreshAllGLWidgets();
-
+*/
 }
 
 
