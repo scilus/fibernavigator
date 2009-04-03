@@ -645,8 +645,8 @@ void SelectionBox::setColor(wxColour color)
 
 void SelectionBox::updateStatusBar()
 {
-	m_dh->mainFrame->m_statusBar->SetStatusText(wxT("Selection Box"),1);
-	m_dh->mainFrame->m_statusBar->SetStatusText(wxString::Format(wxT("Position %.2f, %.2f, %.2f  Size: %.0f, %.0f, %.0f"),
+	m_dh->mainFrame->GetStatusBar()->SetStatusText(wxT("Selection Box"),1);
+	m_dh->mainFrame->GetStatusBar()->SetStatusText(wxString::Format(wxT("Position %.2f, %.2f, %.2f  Size: %.0f, %.0f, %.0f"),
 			m_center.x , m_center.y , m_center.z , m_size.x, m_size.y, m_size.z),2);
 
 }
