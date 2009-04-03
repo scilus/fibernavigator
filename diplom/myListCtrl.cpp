@@ -244,7 +244,7 @@ void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 	if (selected == ChildBox)
 	{
 		SelectionBox* box =((SelectionBox*) (GetItemData( GetSelection())));
-		menu->Append(TREE_CTRL_TOGGLE_ANDNOT, _T("toggle AND/NOT"));
+		menu->Append(MENU_VOI_TOGGLE_ANDNOT, _T("toggle AND/NOT"));
 		menu->AppendSeparator();
 		if (box->getActive())
 			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("deactivate"));

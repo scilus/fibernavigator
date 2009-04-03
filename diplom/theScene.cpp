@@ -106,15 +106,13 @@ void TheScene::renderScene()
 			renderFakeTubes();
 		else
 			renderFibers();
-
-		if ( m_dh->showBoxes )
-		{
-			drawSelectionBoxes();
-		}
 	}
 
 	renderMesh();
-
+	
+	if ( m_dh->fibers_loaded && m_dh->showBoxes)
+		drawSelectionBoxes();
+	
 	if ( m_dh->showColorMapLegend )
 		drawColorMapLegend();
 

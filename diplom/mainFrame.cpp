@@ -60,6 +60,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_VOI_TOGGLE_SELBOX, MainFrame::OnToggleSelBox)
 	EVT_MENU(MENU_VOI_TOGGLE_SHOWBOX, MainFrame::OnToggleShowBox)
 	EVT_MENU(MENU_VOI_RENAME_BOX, MainFrame::OnRenameBox)
+	EVT_MENU(MENU_VOI_TOGGLE_ANDNOT, MainFrame::OnToggleAndNot)
 	// Menu Surfaces
 	EVT_MENU(MENU_SURFACE_NEW_OFFSET, MainFrame::OnNewOffsetMap)	
 	EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
@@ -560,6 +561,39 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->toggleActive();
+		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
+		box->setDirty(true);
+	}
+
+	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ * 
+ *
+ ****************************************************************************************************/
+void MainFrame::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))
+{
+	if (!m_dh->scene || !m_dh->fibers_loaded) return;
+
+	// check if selection box selected
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+
+
+	if (treeSelected(tBoxId) == ChildBox)
+	{
+		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
+		box->toggleNOT();
+		
+	
+		wxTreeItemId parentid = m_treeWidget->GetItemParent(tBoxId);
+		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty(true);
+
+		if (((SelectionBox*) (m_treeWidget->GetItemData(tBoxId)))->getNOT())
+			m_treeWidget->SetItemBackgroundColour(tBoxId, *wxRED);
+		else
+			m_treeWidget->SetItemBackgroundColour(tBoxId, *wxGREEN);
+				
 		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
 		box->setDirty(true);
 	}
@@ -1689,7 +1723,7 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 		((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->toggleNOT();
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty(true);
-		m_dh->m_selBoxChanged = true;
+
 		if (((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->getNOT())
 			m_treeWidget->SetItemBackgroundColour(treeid, *wxRED);
 		else
