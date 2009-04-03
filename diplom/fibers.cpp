@@ -758,6 +758,7 @@ void Fibers::updateLinesShown()
 
 std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
 {
+	if (!box->getIsBox() && !box->m_overlay) return box->m_inBox;
 	resetLinesShown();
 
 	if (box->getIsBox())
@@ -786,7 +787,7 @@ std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
 			{
 				m_inBox[getLineForPoint(i)] = 1;
 			}
-		}
+		}	
 	}
 	return m_inBox;
 }

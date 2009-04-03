@@ -28,6 +28,7 @@ public:
 	float* getFloatDataset();
 	TensorField* getTensorField() { return m_tensorField; };
 	bool loadNifti(wxString filename);
+	void setZero(int x, int y, int z);
 
 	SelectionBox* m_roi;
 

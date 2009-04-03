@@ -323,7 +323,7 @@ bool MyApp::OnInit(void) {
 	frame->CreateStatusBar(2);
 	wxStatusBar* statusBar = frame->GetStatusBar();//new wxStatusBar(frame, wxID_ANY, wxST_SIZEGRIP);/
 
-	std::cout << "we do have a status bar" << std::endl;
+	//std::cout << "we do have a status bar" << std::endl;
 	//frame->SetStatusBar(statusBar);
 	int widths[] = { 250, 150, -1 };
 	//statusBar->SetFieldsCount(WXSIZEOF(widths), widths);

@@ -72,6 +72,7 @@ Anatomy::~Anatomy()
 	delete[] m_floatDataset;
 	const GLuint* tex = &m_GLuint;
 	glDeleteTextures(1, tex);
+	if ( m_roi ) m_roi->m_overlay = NULL;
 }
 
 bool Anatomy::load(wxString filename)
@@ -627,4 +628,23 @@ double Anatomy::xxgauss(double x,double sigma)
   z = x / sigma;
   y = exp((double)-z*z*0.5)/(sigma * a);
   return y;
+}
+
+void Anatomy::setZero(int x, int y, int z)
+{
+	m_columns = x;
+	m_rows = y;
+	m_frames = z;
+	
+	int nSize = m_rows * m_columns * m_frames;
+	if  ( m_type == not_initialized )
+		m_floatDataset = new float[nSize];
+	else
+		delete[] m_floatDataset;
+		m_floatDataset = new float[nSize];
+	
+	for ( int i = 0 ; i < nSize ; ++i)
+	{
+		m_floatDataset[i] = 0.0;
+	}
 }

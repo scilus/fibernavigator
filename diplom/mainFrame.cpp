@@ -104,6 +104,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_LIST_TOGGLESHOW, MainFrame::OnListMenuShow)
 	EVT_MENU(MENU_LIST_TOGGLECOLOR, MainFrame::OnListMenuThreshold)
 	EVT_MENU(MENU_LIST_TOGGLENAME, MainFrame::OnListMenuName)
+	EVT_MENU(MENU_LIST_CUTOUT, MainFrame::OnListMenuCutOut)
 	
 	/*
      * Tree widget events
@@ -743,23 +744,50 @@ void MainFrame::createNewSelBox()
  ****************************************************************************************************/
 void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 {
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+	wxTreeItemId pId = m_treeWidget->GetItemParent(tBoxId);
+	SelectionBox *selBox;
+	Anatomy* a;
+	
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
 		if (info->getType() == Overlay )
 		{
-			Anatomy* a = (Anatomy*) m_listCtrl->GetItemData(item);
-			SelectionBox *selBox = new SelectionBox(a->getFloatDataset(), m_dh);
-			wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("ROI"),0, -1, selBox);
-			m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
-			m_treeWidget->EnsureVisible(tNewBoxId);
-			m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
-			selBox->setTreeId(tNewBoxId);
-			selBox->setIsMaster(true);
-			a->m_roi = selBox;
+			a = (Anatomy*) m_listCtrl->GetItemData(item);
+			selBox = new SelectionBox(a->getFloatDataset(), m_dh);
+			
 		}
 	}
+	else 
+		return;
+		
+	if (treeSelected(tBoxId) == MasterBox)
+	{
+		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("ROI"),0, -1, selBox);
+		m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxGREEN);
+		m_treeWidget->EnsureVisible(tNewBoxId);
+		m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
+		selBox->setTreeId(tNewBoxId);
+		selBox->setIsMaster(false);
+	}
+	else
+	{
+		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(m_tSelBoxId, wxT("ROI"),0, -1, selBox);
+		m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxCYAN);
+		m_treeWidget->EnsureVisible(tNewBoxId);
+		m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
+		selBox->setTreeId(tNewBoxId);
+		selBox->setIsMaster(true);
+		 
+	}
+	
+	a->m_roi = selBox;
+			
+			
+			
+
 	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
@@ -1489,10 +1517,17 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::refreshAllGLWidgets()
 {
+#if defined(__WXMAC__)
 	if (m_gl0) m_gl0->Refresh();
 	if (m_gl1) m_gl1->Refresh();
 	if (m_gl2) m_gl2->Refresh();
 	if (m_mainGL) m_mainGL->Refresh();
+#else
+	if (m_gl0) m_gl0->render();
+	if (m_gl1) m_gl1->render();
+	if (m_gl2) m_gl2->render();
+	if (m_mainGL) m_mainGL->render();
+#endif
 	updateStatusBar();
 	updateMenus();
 }
@@ -1628,7 +1663,7 @@ void MainFrame::OnListItemDown(wxCommandEvent& WXUNUSED(event))
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnListMenuName(wxCommandEvent& event)
+void MainFrame::OnListMenuName(wxCommandEvent&  WXUNUSED(event))
 {
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
@@ -1639,7 +1674,7 @@ void MainFrame::OnListMenuName(wxCommandEvent& event)
 		m_listCtrl->SetItem(item, 1, info->getName().BeforeFirst('.') );
 }
 
-void MainFrame::OnListMenuThreshold(wxCommandEvent& event)
+void MainFrame::OnListMenuThreshold(wxCommandEvent&  WXUNUSED(event))
 {
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
@@ -1653,7 +1688,7 @@ void MainFrame::OnListMenuThreshold(wxCommandEvent& event)
 	}
 }
 
-void MainFrame::OnListMenuDelete(wxCommandEvent& event)
+void MainFrame::OnListMenuDelete(wxCommandEvent&  WXUNUSED(event))
 {
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
@@ -1663,7 +1698,7 @@ void MainFrame::OnListMenuDelete(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
-void MainFrame::OnListMenuShow(wxCommandEvent& event)
+void MainFrame::OnListMenuShow(wxCommandEvent&  WXUNUSED(event))
 {
 
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
@@ -1680,6 +1715,12 @@ void MainFrame::OnListMenuShow(wxCommandEvent& event)
 	refreshAllGLWidgets();
 }
 
+void MainFrame::OnListMenuCutOut(wxCommandEvent&  WXUNUSED(event))
+{
+	m_dh->createCutDataset();	
+	
+	refreshAllGLWidgets();
+}
 
 /****************************************************************************************************
  *
@@ -1697,7 +1738,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 	int selected = treeSelected(treeid);
 
 	bool flag = true;
-	int load = 0;
+
 	switch (selected)
 	{
 	case MasterBox:
@@ -1705,6 +1746,8 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 		if (m_dh->lastSelectedBox) m_dh->lastSelectedBox->unselect();
 		m_dh->lastSelectedBox = (SelectionBox*)(m_treeWidget->GetItemData(treeid));
 		m_dh->lastSelectedBox->select(false);
+		/* Commented out for now, until we find a better solution 
+		 * 
 		for (int i = 0 ; i < m_listCtrl->GetItemCount() ; ++i)
 		{
 			DatasetInfo* info = (DatasetInfo*) m_listCtrl->GetItemData(i);
@@ -1713,7 +1756,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 				m_listCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 			}
 		}
-		
+		*/
 		break;
 	case Point_:
 		if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
@@ -1766,16 +1809,15 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 	}
 	else if ( selected == ChildBox )
 	{
-		((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->toggleNOT();
+		SelectionBox* box =  (SelectionBox*) (m_treeWidget->GetItemData(treeid));
+		
+		box->toggleNOT();
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty(true);
-
-		if (((SelectionBox*) (m_treeWidget->GetItemData(treeid)))->getNOT())
+		if ( box->getNOT() )
 			m_treeWidget->SetItemBackgroundColour(treeid, *wxRED);
 		else
 			m_treeWidget->SetItemBackgroundColour(treeid, *wxGREEN);
-		refreshAllGLWidgets();
-		return;
 	}
 	refreshAllGLWidgets();
 }

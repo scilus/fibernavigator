@@ -35,6 +35,9 @@ void MyListCtrl::OnRightClick(wxMouseEvent& event)
 	
 	if (info->getType() < Mesh_)
 	{
+		if (info->getShow())
+			menu->Append(MENU_LIST_CUTOUT, _T("cut area"));
+		menu->AppendSeparator();
 		if (info->getShowFS())
 			menu->Append(MENU_LIST_TOGGLENAME, _T("no interpolation"));
 		else 

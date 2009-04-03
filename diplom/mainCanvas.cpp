@@ -223,7 +223,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				m_dh->changeZoom(event.GetWheelRotation());
 				Refresh(false);
 			}
-
+					
 			if (event.RightIsDown())
 		    {
 				if (!m_dh->m_isrDragging)												// Not Dragging
@@ -237,7 +237,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_dh->m_isrDragging = true;										// Prepare For Dragging
 					m_lastPos = event.GetPosition();
 					m_hr = pick(event.GetPosition());
-
+					
 					if (m_hr.picked == 20)
 					{
 						if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
@@ -251,16 +251,16 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 						((SelectionBox*)m_hr.object)->select(true);
 					}
-					else
-						SetFocus();
+					
+					SetFocus();
 				}
-				else {
+				else 
+				{
 					if (event.Dragging() && m_hr.picked < 10)
 					{
 						int xDrag = m_lastPos.x - clickX;
 						int yDrag = (m_lastPos.y - clickY);
-						GetEventHandler()->ProcessEvent( event1 );
-
+						
 						Vector n ( 0, 0, 0 );
 						switch (m_hr.picked) {
 						case axial:
@@ -273,8 +273,10 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 							n.x = 1.0;
 							break;
 						}
-						if (xDrag == 0 && yDrag == 0) m_delta = 0;
-						else {
+						if (xDrag == 0 && yDrag == 0) 
+							m_delta = 0;
+						else 
+						{
 							m_delta = 0;
 							float delta =  wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),1),-1);
 							if ( delta < -0.5)
@@ -283,6 +285,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 								m_delta = 1;
 							else m_delta = 0;
 						}
+						GetEventHandler()->ProcessEvent( event1 );
 					}
 					else if (event.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20)
 					{
@@ -297,7 +300,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				m_lastPos = event.GetPosition();
 				Refresh(false);
 		    }
-			else {
+			else 
+			{
 				m_dh->m_isrDragging = false;
 			}
 
@@ -405,11 +409,13 @@ hitResult MainCanvas::pick(wxPoint click)
 	float tpicked = 0;
 	int picked = 0;
 	hitResult hr = {false, 0.0f, 0, NULL};
-	if (m_dh->showAxial) {
+	if (m_dh->showAxial) 
+	{
 		bb->setSizeZ(0.01f);
 		bb->setCenterZ(zz);
 		hr = bb->hitTest(ray);
-		if (hr.hit) {
+		if (hr.hit) 
+		{
 			tpicked = hr.tmin;
 			picked = axial;
 		}
@@ -417,18 +423,21 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setCenterZ(m_dh->frames/2);
 	}
 
-	if (m_dh->showCoronal) {
+	if (m_dh->showCoronal) 
+	{
 		bb->setSizeY(0.01f);
 		bb->setCenterY(yy);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
-			if (picked == 0) {
+			if (picked == 0) 
+			{
 				picked = coronal;
 				tpicked = hr.tmin;
 			}
-			else {
-
-				if (hr.tmin < tpicked) {
+			else 
+			{
+				if (hr.tmin < tpicked) 
+				{
 					picked = coronal;
 					tpicked = hr.tmin;
 				}
@@ -438,24 +447,29 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setCenterY(m_dh->rows/2);
 	}
 
-	if (m_dh->showSagittal) {
+	if (m_dh->showSagittal) 
+	{
 		bb->setSizeX(0.01f);
 		bb->setCenterX(xx);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
-			if (picked == 0) {
+			if (picked == 0) 
+			{
 				picked = sagittal;
 				tpicked = hr.tmin;
 			}
-			else {
-				if (hr.tmin < tpicked) {
+			else 
+			{
+				if (hr.tmin < tpicked) 
+				{
 					picked = sagittal;
 					tpicked = hr.tmin;
 				}
 			}
 		}
 	}
-	if (picked != 0) {
+	if (picked != 0) 
+	{
 		hr.tmin = tpicked;
 		hr.picked = picked;
 	}

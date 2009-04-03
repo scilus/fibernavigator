@@ -72,6 +72,7 @@ public:
 
 	void createIsoSurface();
 	void createDistanceMap();
+	void createCutDataset();
 	/*
 	 * Called from MainFrame when a kdTree thread signals it's finished
 	 */

@@ -121,6 +121,7 @@ private:
     void OnListMenuThreshold(wxCommandEvent& event);
     void OnListMenuDelete(wxCommandEvent& event);
     void OnListMenuShow(wxCommandEvent& event);
+    void OnListMenuCutOut(wxCommandEvent& event);
 
     /*
      * Tree widget event functions
@@ -195,9 +196,9 @@ DECLARE_EVENT_TABLE()
 #define MENU_FILE_RELOAD_SHADER						102
 #define MENU_FILE_SAVE								103
 #define MENU_FILE_SAVE_FIBERS						104
-#define MENU_FILE_SAVE_SURFACE					105
+#define MENU_FILE_SAVE_SURFACE						105
 #define MENU_FILE_QUIT        						wxID_EXIT
-#define BUTTON_TOGGLE_LAYOUT						105
+#define BUTTON_TOGGLE_LAYOUT						106
 // Menu View
 #define MENU_VIEW_LEFT								120
 #define MENU_VIEW_RIGHT								121
@@ -266,6 +267,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_LIST_TOGGLESHOW						221
 #define MENU_LIST_TOGGLECOLOR						222
 #define MENU_LIST_TOGGLENAME						223
+#define MENU_LIST_CUTOUT							224
 /*
  * Defines for interface items and other events
  */

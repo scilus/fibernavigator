@@ -909,18 +909,82 @@ void DatasetHelper::createDistanceMap() {
 		printDebug(_T("***ERROR*** surface is not valid"),2);
 	}
 	mainFrame->refreshAllGLWidgets();
+}
+
+void DatasetHelper::createCutDataset()
+{
+	// check anatomy - quit if not present
+	if (!anatomy_loaded)
+		return;
+	// get selected anatomy dataset
+	long item = mainFrame->m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item == -1) return;
 	
-/*
+	DatasetInfo *info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(item);
+	if (info->getType() > Overlay) 
+		return;
+	
+	Anatomy* anatomy = (Anatomy*) info;
+	Anatomy* newAnatomy = new Anatomy(this);
+	newAnatomy->setZero(columns, rows, frames);
+	
+	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
+	int x1, x2, y1, y2, z1, z2;
+	
+	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
+	{
+		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
+		{
+			if ( boxes[i][j]->getShow() )
+			{
+				x1 = (int) (boxes[i][j]->getCenter().x - boxes[i][j]->getSize().x /2);
+				x2 = (int) (boxes[i][j]->getCenter().x + boxes[i][j]->getSize().x /2);
+				y1 = (int) (boxes[i][j]->getCenter().y - boxes[i][j]->getSize().y /2);
+				y2 = (int) (boxes[i][j]->getCenter().y + boxes[i][j]->getSize().y /2);								
+				z1 = (int) (boxes[i][j]->getCenter().z - boxes[i][j]->getSize().z /2);
+				z2 = (int) (boxes[i][j]->getCenter().z + boxes[i][j]->getSize().z /2);
+				
+				x1 = wxMax(0, wxMin(x1, columns));
+				x2 = wxMax(0, wxMin(x2, columns));
+				y1 = wxMax(0, wxMin(y1, rows));
+				y2 = wxMax(0, wxMin(y2, rows));
+				z1 = wxMax(0, wxMin(z1, frames));
+				z2 = wxMax(0, wxMin(z2, frames));
+				
+				float* src = anatomy->getFloatDataset();
+				float* dst = newAnatomy->getFloatDataset();
+				
+				printf ("x1: %d   x2: %d   y1: %d   y2: %d   z1: %d   z2: %d\n", x1,x2,y1,y2,z1,z2);
+				
+				for (int b=z1 ; b < z2 ; ++b) 
+				{
+					for (int r=y1 ; r < y2 ; ++r) 
+					{
+						for (int c=x1 ; c<x2 ; ++c) 
+						{
+							dst[b*rows*columns + r*columns + c] = src[b*rows*columns + r*columns + c];
+						}
+					}
+				}
+				
+			}
+		}
+	}
+
+	
+	
+	newAnatomy->setName(anatomy->getName().BeforeFirst('.') + wxT(" (cut)"));
+	newAnatomy->setType(anatomy->getType());
+
 	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
 	mainFrame->m_listCtrl->SetItem(0, 1, newAnatomy->getName());
-	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.00"));
+	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.40"));
 	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
 	mainFrame->m_listCtrl->SetItemData(0, (long) newAnatomy);
 	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
 			wxLIST_STATE_SELECTED);
-
+	
 	mainFrame->refreshAllGLWidgets();
-*/
 }
 
 
