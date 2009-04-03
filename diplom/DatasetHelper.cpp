@@ -16,6 +16,7 @@
 #include "myListCtrl.h"
 
 #include "IsoSurface/CIsoSurface.h"
+#include "surface.h"
 
 DatasetHelper::DatasetHelper(MainFrame* mf) {
 	mainFrame = mf;
@@ -272,28 +273,36 @@ bool DatasetHelper::load(wxString filename, bool createBox, float threshold, boo
 
 void DatasetHelper::finishLoading(DatasetInfo *info)
 {
-	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+#ifdef __WXMAC__
+	// insert at zero is a well-known bug on OSX, so we append there...
+	// http://trac.wxwidgets.org/ticket/4492
+	long id = mainFrame->m_listCtrl->GetItemCount();
+#else
+	long id = 0;
+#endif
+	mainFrame->m_listCtrl->InsertItem(id, wxT(""), 0);
 	if (info->getShow())
-		mainFrame->m_listCtrl->SetItem(0, 0, wxT(""), 0);
+		mainFrame->m_listCtrl->SetItem(id, 0, wxT(""), 0);
 	else
-		mainFrame->m_listCtrl->SetItem(0, 0, wxT(""), 1);
+		mainFrame->m_listCtrl->SetItem(id, 0, wxT(""), 1);
 
 	if (!info->getShowFS())
-		mainFrame->m_listCtrl->SetItem(0, 1, info->getName().BeforeFirst('.') + wxT("*"));
+		mainFrame->m_listCtrl->SetItem(id, 1, info->getName().BeforeFirst('.')	+ wxT("*"));
 	else
-		mainFrame->m_listCtrl->SetItem(0, 1, info->getName().BeforeFirst('.'));
+		mainFrame->m_listCtrl->SetItem(id, 1, info->getName().BeforeFirst('.'));
 
 	if (!info->getUseTex())
+	//	mainFrame->m_listCtrl->SetItem(id, 2, wxT("(") + wxString::Format(wxT("%.2f"), info->getThreshold()) + wxT(")") );
 		mainFrame->m_listCtrl->SetItem(0, 2, wxT("(") + wxString::Format(wxT("%.2f"), (info->getThreshold()) * info->getOldMax()) + wxT(")") );
 	else
-		mainFrame->m_listCtrl->SetItem(0, 2, wxString::Format(wxT("%.2f"), info->getThreshold() ));
+		mainFrame->m_listCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), info->getThreshold() ));
 
-	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
-	mainFrame->m_listCtrl->SetItemData(0, (long) info);
-	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	mainFrame->m_listCtrl->SetItem(id, 3, wxT(""), 1);
+	mainFrame->m_listCtrl->SetItemData(id, (long) info);
+	mainFrame->m_listCtrl->SetItemState(id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-	mainFrame->m_statusBar->SetStatusText(wxT("Ready"), 1);
-	mainFrame->m_statusBar->SetStatusText(info->getName() + wxT(" loaded"), 2);
+	mainFrame->GetStatusBar()->SetStatusText(wxT("Ready"), 1);
+	mainFrame->GetStatusBar()->SetStatusText(info->getName() + wxT(" loaded"), 2);
 
 	if (mainFrame->m_listCtrl->GetItemCount() == 1)
 	{
@@ -460,12 +469,20 @@ bool DatasetHelper::loadScene(wxString filename)
 			if (mainFrame->m_treeWidget->GetChildrenCount(mainFrame->m_tPointId) > 0)
 			{
 				Surface *surface = new Surface(this);
-				mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
-				mainFrame->m_listCtrl->SetItem(0, 1, _T("spline surface"));
-				mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.50"));
-				mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
-				mainFrame->m_listCtrl->SetItemData(0, (long)surface);
-				mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+#ifdef __WXMAC__
+	// insert at zero is a well-known bug on OSX, so we append there...
+	// http://trac.wxwidgets.org/ticket/4492
+	long id = mainFrame->m_listCtrl->GetItemCount();
+#else
+	long id = 0;
+#endif
+
+				mainFrame->m_listCtrl->InsertItem(id, wxT(""), 0);
+				mainFrame->m_listCtrl->SetItem(id, 1, _T("spline surface"));
+				mainFrame->m_listCtrl->SetItem(id, 2, wxT("0.50"));
+				mainFrame->m_listCtrl->SetItem(id, 3, wxT(""), 1);
+				mainFrame->m_listCtrl->SetItemData(id, (long)surface);
+				mainFrame->m_listCtrl->SetItemState(id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 			}
 		}
 
@@ -823,12 +840,19 @@ void DatasetHelper::createIsoSurface() {
 	{
 		isosurf->setName(anatomyName + wxT(" (iso surface)"));
 
-		mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
-		mainFrame->m_listCtrl->SetItem(0, 1, isosurf->getName());
-		mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.40"));
-		mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
-		mainFrame->m_listCtrl->SetItemData(0, (long) isosurf);
-		mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
+#ifdef __WXMAC__
+	// insert at zero is a well-known bug on OSX, so we append there...
+	// http://trac.wxwidgets.org/ticket/4492
+	long id = mainFrame->m_listCtrl->GetItemCount();
+#else
+	long id = 0;
+#endif
+		mainFrame->m_listCtrl->InsertItem(id, wxT(""), 0);
+		mainFrame->m_listCtrl->SetItem(id, 1, isosurf->getName());
+		mainFrame->m_listCtrl->SetItem(id, 2, wxT("0.40"));
+		mainFrame->m_listCtrl->SetItem(id, 3, wxT(""), 1);
+		mainFrame->m_listCtrl->SetItemData(id, (long) isosurf);
+		mainFrame->m_listCtrl->SetItemState(id, wxLIST_STATE_SELECTED,
 				wxLIST_STATE_SELECTED);
 
 	} else
@@ -942,6 +966,21 @@ bool DatasetHelper::getFiberDataset(Fibers *&f)
 		if (info->getType() == Fibers_ )
 		{
 			f = (Fibers*) mainFrame->m_listCtrl->GetItemData(i);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool DatasetHelper::getSurfaceDataset(Surface *&s)
+{
+	s = NULL;
+	for (int i = 0 ; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	{
+		DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
+		if (info->getType() == Surface_ )
+		{
+			s = (Surface*) mainFrame->m_listCtrl->GetItemData(i);
 			return true;
 		}
 	}

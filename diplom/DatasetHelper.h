@@ -46,6 +46,7 @@ class SplinePoint;
 class SelectionBox;
 class Fibers;
 class TensorField;
+class Surface;
 
 class DatasetHelper {
 public:
@@ -96,6 +97,7 @@ public:
 	void doMatrixManipulation();
 
 	bool getFiberDataset(Fibers *&f);
+	bool getSurfaceDataset(Surface *&s);
 	float* getVectorDataset();
 	TensorField* getTensorField();
 
