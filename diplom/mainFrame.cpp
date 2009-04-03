@@ -275,8 +275,8 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
                                 wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
 
 
-    Show();
-    m_mainGL->Show(); // now the OpenGL Window is created so the context is valid
+    //Show();
+    //m_mainGL->Show(); // now the OpenGL Window is created so the context is valid
 #ifndef CTX
     m_gl0 = new MainCanvas(m_dh, axial, this, ID_GL_NAV_X, wxDefaultPosition,
                 wxSize(150,150), 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
