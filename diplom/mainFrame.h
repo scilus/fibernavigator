@@ -15,9 +15,9 @@ public:
     MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
     ~MainFrame();
     void setTSlider(MySlider *slider) {m_tSlider = slider;};
-    void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
-    void setMMenuBar(wxMenuBar *bar) {m_menuBar = bar;};
-    void setMToolBar(wxToolBar *bar) {m_toolBar = bar;};
+    //void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
+    //void setMMenuBar(wxMenuBar *bar) {m_menuBar = bar;};
+    //void setMToolBar(wxToolBar *bar) {m_toolBar = bar;};
 
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
@@ -34,6 +34,7 @@ private:
 	void OnReloadShaders(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
 	void OnSaveFibers(wxCommandEvent& event);
+	void OnSaveSurface(wxCommandEvent& event);
 	void OnQuit(wxCommandEvent& event);
 	void OnToggleLayout(wxCommandEvent& event);
 	// View
@@ -159,9 +160,9 @@ public:
     wxButton *buttonLoad2;
     wxButton *buttonLoad3;
 
-	wxStatusBar* m_statusBar;
-	wxMenuBar *m_menuBar;
-	wxToolBar *m_toolBar;
+	//wxStatusBar* m_statusBar;
+	//wxMenuBar *m_menuBar;
+	//wxToolBar *m_toolBar;
 	MyListCtrl* m_listCtrl;
 	wxTreeCtrl* m_treeWidget;
 	wxTreeItemId m_tRootId;
@@ -194,6 +195,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_FILE_RELOAD_SHADER						102
 #define MENU_FILE_SAVE								103
 #define MENU_FILE_SAVE_FIBERS						104
+#define MENU_FILE_SAVE_SURFACE					105
 #define MENU_FILE_QUIT        						wxID_EXIT
 #define BUTTON_TOGGLE_LAYOUT						105
 // Menu View

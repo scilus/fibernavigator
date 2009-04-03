@@ -147,6 +147,7 @@ bool MyApp::OnInit(void) {
 	file_menu->AppendSeparator();
 	file_menu->Append(MENU_FILE_SAVE, _T("Save Current Scene\tCtrl-S"));
 	file_menu->Append(MENU_FILE_SAVE_FIBERS, _T("Save Selected Fibers"));
+	file_menu->Append(MENU_FILE_SAVE_SURFACE, _T("Save Selected Surface"));
 	file_menu->AppendSeparator();
 	file_menu->Append(MENU_FILE_QUIT, _T("Exit"));
 
@@ -212,7 +213,13 @@ bool MyApp::OnInit(void) {
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(MENU_HELP_ABOUT, _T("About"));
+#ifdef __WXMAC__
+	// we need this in order to allow the about menu relocation, since ABOUT is
+        // not the default id of the about menu
+        wxApp::s_macAboutMenuItemId = MENU_HELP_ABOUT;
+#endif
 	help_menu->Append(MENU_HELP_SHORTCUTS, _T("Keyboard shortcuts"));
+
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, _T("&File"));
@@ -224,7 +231,7 @@ bool MyApp::OnInit(void) {
 
 	// Associate the menu bar with the frame
 	frame->SetMenuBar(menu_bar);
-	frame->setMMenuBar(menu_bar);
+	//frame->setMMenuBar(menu_bar);
 
 	wxToolBar *toolBar =
 					new wxToolBar(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL
@@ -272,7 +279,7 @@ bool MyApp::OnInit(void) {
 	wxBitmap bmpNewSurface(wxImage(respath+_T("icons/toggleSurface.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpAssignColor(wxImage(respath+_T("icons/colorSelect.png"), wxBITMAP_TYPE_PNG));
 	wxBitmap bmpLighting(wxImage(respath+_T("icons/lightbulb.png"), wxBITMAP_TYPE_PNG));
-
+	wxBitmap bmpTubes (wxImage(respath+_T("icons/tubes.png"), wxBITMAP_TYPE_PNG));
 #endif
 
 	//toolBar->AddTool(VIEWER_NEW, bmpNew, wxT("New"));
@@ -311,13 +318,19 @@ bool MyApp::OnInit(void) {
 #endif
 	toolBar->Realize();
 	frame->SetToolBar(toolBar);
-	frame->setMToolBar(toolBar);
+	//frame->setMToolBar(toolBar);
 
-	wxStatusBar* statusBar = new wxStatusBar(frame, wxID_ANY, wxST_SIZEGRIP);
-	frame->SetStatusBar(statusBar);
+	frame->CreateStatusBar(2);
+	wxStatusBar* statusBar = frame->GetStatusBar();//new wxStatusBar(frame, wxID_ANY, wxST_SIZEGRIP);/
+
+	std::cout << "we do have a status bar" << std::endl;
+	//frame->SetStatusBar(statusBar);
 	int widths[] = { 250, 150, -1 };
+	//statusBar->SetFieldsCount(WXSIZEOF(widths), widths);
+	//statusBar->SetFieldsCount(2);
 	statusBar->SetFieldsCount(WXSIZEOF(widths), widths);
-	frame->setMStatusBar(statusBar);
+	//frame->setMStatusBar(statusBar);
+	statusBar->Show();
 
 	frame->Show(true);
 

@@ -42,6 +42,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_FILE_RELOAD_SHADER, MainFrame::OnReloadShaders)
 	EVT_MENU(MENU_FILE_SAVE, MainFrame::OnSave)
     EVT_MENU(MENU_FILE_SAVE_FIBERS, MainFrame::OnSaveFibers)
+    EVT_MENU(MENU_FILE_SAVE_SURFACE, MainFrame::OnSaveSurface)
     EVT_MENU(MENU_FILE_QUIT, MainFrame::OnQuit)
     EVT_MENU(BUTTON_TOGGLE_LAYOUT, MainFrame::OnToggleLayout)
 	// Menu View
@@ -273,6 +274,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
     m_mainGL = new MainCanvas(m_dh, mainView, this, ID_GL_MAIN, wxDefaultPosition,
                                 wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
 
+
+    Show();
+    m_mainGL->Show(); // now the OpenGL Window is created so the context is valid
 #ifndef CTX
     m_gl0 = new MainCanvas(m_dh, axial, this, ID_GL_NAV_X, wxDefaultPosition,
                 wxSize(150,150), 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
@@ -390,8 +394,8 @@ void MainFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
 	if ( !m_dh->load(0) )
 	{
 		wxMessageBox(wxT("ERROR\n") + m_dh->lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-		m_statusBar->SetStatusText(wxT("ERROR"),1);
-		m_statusBar->SetStatusText(m_dh->lastError,2);
+		GetStatusBar()->SetStatusText(wxT("ERROR"),1);
+		GetStatusBar()->SetStatusText(m_dh->lastError,2);
 		return;
 	}
 }
@@ -451,6 +455,30 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
 	{
 		m_dh->lastPath = dialog.GetDirectory();
 		fibers->save(dialog.GetPath());
+	}
+}
+
+void MainFrame::OnSaveSurface(wxCommandEvent& WXUNUSED(event))
+{
+	// if ...
+	
+	Surface *surface = NULL;
+	if(!m_dh->getSurfaceDataset(surface)) return;
+	std::cout << "got surface: " << surface << std::endl;
+
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("surfae files (*.vtk)|*.vtk");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
+	dialog.SetFilterIndex(0);
+	dialog.SetDirectory(m_dh->lastPath);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		std::cout << " start saving" << std::endl;
+		m_dh->lastPath = dialog.GetDirectory();
+		surface->save(dialog.GetPath());
+		std::cout << " done saving" << std::endl;
 	}
 }
 
@@ -795,13 +823,21 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 			}
 		}
 
+#ifdef __WXMAC__
+	// insert at zero is a well-known bug on OSX, so we append there...
+	// http://trac.wxwidgets.org/ticket/4492
+	long id = m_listCtrl->GetItemCount();
+#else
+	long id = 0;
+#endif
+
 	Surface *surface = new Surface(m_dh);
-	m_listCtrl->InsertItem(0, wxT(""), 0);
-	m_listCtrl->SetItem(0, 1, surface->getName());
-	m_listCtrl->SetItem(0, 2, wxT("0.50"));
-	m_listCtrl->SetItem(0, 3, wxT(""), 1);
-	m_listCtrl->SetItemData(0, (long)surface);
-	m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	m_listCtrl->InsertItem(id, wxT(""), 0);
+	m_listCtrl->SetItem(id, 1, surface->getName());
+	m_listCtrl->SetItem(id, 2, wxT("0.50"));
+	m_listCtrl->SetItem(id, 3, wxT(""), 1);
+	m_listCtrl->SetItemData(id, (long)surface);
+	m_listCtrl->SetItemState(id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
 	refreshAllGLWidgets();
 }
@@ -1215,7 +1251,7 @@ void MainFrame::OnButtonAxial(wxCommandEvent& WXUNUSED(event))
 	if (m_dh->scene)
 	{
 		m_dh->showAxial = !m_dh->showAxial;
-		m_mainGL->render();
+		m_mainGL->Refresh();
 	}
 }
 /****************************************************************************************************
@@ -1228,7 +1264,7 @@ void MainFrame::OnButtonCoronal(wxCommandEvent& WXUNUSED(event))
 	if (m_dh->scene)
 	{
 		m_dh->showCoronal = !m_dh->showCoronal;
-		m_mainGL->render();
+		m_mainGL->Refresh();
 	}
 }
 /****************************************************************************************************
@@ -1241,7 +1277,7 @@ void MainFrame::OnButtonSagittal(wxCommandEvent& WXUNUSED(event))
 	if (m_dh->scene)
 	{
 		m_dh->showSagittal = !m_dh->showSagittal;
-		m_mainGL->render();
+		m_mainGL->Refresh();
 	}
 }
 /****************************************************************************************************
@@ -1435,6 +1471,16 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 	m_listCtrl->SetColumnWidth(1, m_listCtrl->GetSize().x - 110);
 	SetSize(windowSize);
 
+//<<<<<<< .mine
+//	m_mainGL->Refresh();
+//=======
+	m_mainGL->changeOrthoSize();
+	updateMenus();
+	this->Update();
+	this->Refresh();
+
+	
+	m_mainGL->render();
 }
 /****************************************************************************************************
  *
@@ -1443,10 +1489,10 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::refreshAllGLWidgets()
 {
-	if (m_gl0) m_gl0->render();
-	if (m_gl1) m_gl1->render();
-	if (m_gl2) m_gl2->render();
-	if (m_mainGL) m_mainGL->render();
+	if (m_gl0) m_gl0->Refresh();
+	if (m_gl1) m_gl1->Refresh();
+	if (m_gl2) m_gl2->Refresh();
+	if (m_mainGL) m_mainGL->Refresh();
 	updateStatusBar();
 	updateMenus();
 }
@@ -1472,7 +1518,7 @@ void MainFrame::updateStatusBar()
 {
 	wxString sbString0 = wxT("");
 	sbString0 = wxString::Format(wxT("Position: %d  %d  %d"), m_xSlider->GetValue(), m_ySlider->GetValue(), m_zSlider->GetValue());
-	m_statusBar->SetStatusText(sbString0,0);
+	GetStatusBar()->SetStatusText(sbString0,0);
 }
 /****************************************************************************************************
  *
@@ -1681,8 +1727,8 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 	if ( !flag )
 	{
 		wxMessageBox(wxT("ERROR\n") + m_dh->lastError,  wxT(""), wxOK|wxICON_INFORMATION, NULL);
-		m_statusBar->SetStatusText(wxT("ERROR"),1);
-		m_statusBar->SetStatusText(m_dh->lastError,2);
+		GetStatusBar()->SetStatusText(wxT("ERROR"),1);
+		GetStatusBar()->SetStatusText(m_dh->lastError,2);
 		return;
 	}
 
@@ -1865,7 +1911,9 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 	if (enlargeNav == 1)
 	{
 		int newSize = (clientSize.y - 65)/3;
-					
+		
+if(m_gl0)
+{	
 		m_gl0->SetMinSize(wxSize(newSize,newSize));
 		m_gl1->SetMinSize(wxSize(newSize,newSize));
 		m_gl2->SetMinSize(wxSize(newSize,newSize));
@@ -1876,6 +1924,7 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 		m_xSlider->SetMinSize(wxSize(newSize,-1));
 		m_ySlider->SetMinSize(wxSize(newSize,-1));
 		m_zSlider->SetMinSize(wxSize(newSize,-1));
+}
 	}
 	if (enlargeNav == 2)
 	{
@@ -1895,8 +1944,10 @@ void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 		m_zSlider->SetMinSize(wxSize(newSize,-1));
 	}
 
+if(GetSizer())
 	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
 
+if(m_mainGL)	
 	m_mainGL->changeOrthoSize();
 #if 0
 	printf("%d : %d : %d :%d : %d, %d\n", this->GetSize().x, this->GetSize().y, 
@@ -1921,7 +1972,7 @@ void MainFrame::OnKdTreeThreadFinished(wxCommandEvent& WXUNUSED(event))
 
 /****************************************************************************************************
  *
- * OnGLEvent handles mouse events in the GL rendering widgets
+ * OnGLEvent handles mouse events in the GL Refreshing widgets
  *
  ****************************************************************************************************/
 void MainFrame::OnGLEvent( wxCommandEvent &event )
@@ -2007,32 +2058,32 @@ void MainFrame::updateMenus()
 	//#ifndef __WXMSW__
 
 	// globals
-	wxMenu* oMenu = m_menuBar->GetMenu(4);
+	wxMenu* oMenu = GetMenuBar()->GetMenu(4);
 	oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
 	oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")), m_dh->fibersInverted);
 	oMenu->Check(oMenu->FindItem(_T("Use Tubes")), m_dh->useFakeTubes);
 	oMenu->Check(oMenu->FindItem(_T("Use Transparent Fibers")), m_dh->useTransparency);
 	oMenu->Check(oMenu->FindItem(_T("Show Color Map Legend")), m_dh->showColorMapLegend);
-	wxMenu* sMenu = m_menuBar->GetMenu(3);
+	wxMenu* sMenu = GetMenuBar()->GetMenu(3);
 	sMenu->Check(sMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
 	sMenu->Check(sMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
 
-	m_toolBar->ToggleTool(BUTTON_AXIAL, m_dh->showAxial);
-	m_toolBar->ToggleTool(BUTTON_CORONAL, m_dh->showCoronal);
-	m_toolBar->ToggleTool(BUTTON_SAGITTAL, m_dh->showSagittal);
-	m_toolBar->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->blendAlpha);
-	m_toolBar->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
-	m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
-	m_toolBar->ToggleTool(MENU_OPTIONS_USE_FAKE_TUBES, m_dh->useFakeTubes);
-	m_toolBar->ToggleTool(MENU_SPLINESURF_DRAW_POINTS, m_dh->pointMode);
+	GetToolBar()->ToggleTool(BUTTON_AXIAL, m_dh->showAxial);
+	GetToolBar()->ToggleTool(BUTTON_CORONAL, m_dh->showCoronal);
+	GetToolBar()->ToggleTool(BUTTON_SAGITTAL, m_dh->showSagittal);
+	GetToolBar()->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->blendAlpha);
+	GetToolBar()->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
+	GetToolBar()->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
+	// FIXME GetToolBar()->ToggleTool(MENU_OPTIONS_USE_FAKE_TUBES, m_dh->useFakeTubes);
+	GetToolBar()->ToggleTool(MENU_SPLINESURF_DRAW_POINTS, m_dh->pointMode);
 
-	wxMenu* voiMenu = m_menuBar->GetMenu(2);
+	wxMenu* voiMenu = GetMenuBar()->GetMenu(2);
 	voiMenu->Check(voiMenu->FindItem(_T("active")), false);
 	voiMenu->Check(voiMenu->FindItem(_T("visible")), false);
 	voiMenu->Enable(voiMenu->FindItem(_T("active")), false);
 	voiMenu->Enable(voiMenu->FindItem(_T("visible")), false);
 	
-	wxMenu* viewMenu = m_menuBar->GetMenu(1);
+	wxMenu* viewMenu = GetMenuBar()->GetMenu(1);
 	viewMenu->Check(viewMenu->FindItem(_T("show crosshair")), m_dh->showCrosshair);
 
 
@@ -2046,12 +2097,12 @@ void MainFrame::updateMenus()
 		voiMenu->Check(voiMenu->FindItem(_T("active")), m_dh->lastSelectedBox->getActive());
 		voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
 
-		m_toolBar->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
-		m_toolBar->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->getActive());
+		GetToolBar()->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
+		GetToolBar()->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->getActive());
 	}
 	//MENU_FILE_NEW_ISOSURF
 	sMenu->Enable(sMenu->FindItem(_T("New Iso Surface")), false);
-	m_toolBar->EnableTool(MENU_FILE_NEW_ISOSURF, false);
+	GetToolBar()->EnableTool(MENU_FILE_NEW_ISOSURF, false);
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Texture Mode")), false);
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), false);
 	sMenu->Enable(sMenu->FindItem(_T("Toggle Normal Direction")), false);
@@ -2068,7 +2119,7 @@ void MainFrame::updateMenus()
 		if (info->getType() < RGB)
 		{
 			sMenu->Enable(sMenu->FindItem(_T("New Iso Surface")), true);
-			m_toolBar->EnableTool(MENU_FILE_NEW_ISOSURF, true);
+			GetToolBar()->EnableTool(MENU_FILE_NEW_ISOSURF, true);
 		}
 		if (info->getType() < Mesh_)
 		{
