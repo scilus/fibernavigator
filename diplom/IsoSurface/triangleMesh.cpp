@@ -26,20 +26,18 @@ TriangleMesh::~TriangleMesh ()
 void TriangleMesh::addVert(const Vector newVert)
 {
 	vertices.push_back( newVert );
-	//std::vector<int> v;
-	//vIsInTriangle.push_back( v );
 	numVerts = vertices.size();
 	vIsInTriangle.resize(numVerts);
+	vertColors.resize(numVerts);
 }
 
 void TriangleMesh::addVert(const float x, const float y, const float z)
 {
 	Vector newVert(x,y,z);
 	vertices.push_back( newVert );
-	//std::vector<int> v;
-	//vIsInTriangle.push_back( v );
 	numVerts = vertices.size();
 	vIsInTriangle.resize(numVerts);
+	vertColors.resize(numVerts);
 }
 
 
@@ -84,6 +82,12 @@ void TriangleMesh::setTriangleColor(const unsigned int triNum, const float r, co
 {
 	Vector c(r,g,b);
 	triangleColor[triNum] = c;
+}
+
+void TriangleMesh::setVertexColor(const unsigned int vertNum, const float r, const float g, const float b)
+{
+	Vector c(r,g,b);
+	vertColors[vertNum] = c;
 }
 
 Vector TriangleMesh::calcTriangleNormal(const Triangle t)
@@ -217,6 +221,7 @@ void TriangleMesh::clearMesh()
 {
 	vertices.clear();
 	vertNormals.clear();
+	vertColors.clear();
 	triangles.clear();
 	triangleTensor.clear();
 	triangleColor.clear();
@@ -346,6 +351,7 @@ void TriangleMesh::cleanUp()
 	}
 
 	vertNormals.clear();
+	vertColors.clear();
 	triangles.clear();
 	triNormals.clear();
 	vIsInTriangle.clear();
@@ -424,6 +430,7 @@ void TriangleMesh::reserveVerts(const int size)
 {
 	vertices.reserve(size);
 	vertNormals.reserve(size);
+	vertColors.reserve(size);
 }
 
 void TriangleMesh::reserveTriangles(const int size)

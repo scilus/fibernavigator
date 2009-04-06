@@ -224,6 +224,7 @@ void TheScene::renderMesh()
 				m_dh->shaderHelper->m_meshShader->setUniFloat("alpha_", info->getAlpha());
 				m_dh->shaderHelper->m_meshShader->setUniInt("useColorMap", m_dh->colorMap);
 				m_dh->shaderHelper->m_meshShader->setUniInt("useLic", info->getUseLIC());
+				m_dh->shaderHelper->m_meshShader->setUniInt("useCMAP", info->getIsGlyph());
 
 				if (m_dh->surface_loaded)
 					m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", true);

@@ -367,6 +367,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	licCalculated = false;
 	m_useLIC = false;
 	m_GLuint = 0;
+	m_isGlyph = false;
 }
 
 CIsoSurface::~CIsoSurface()
@@ -686,10 +687,14 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	m_tMesh->reserveVerts(m_i2pt3idVertices.size());
 	m_tMesh->reserveTriangles(m_trivecTriangles.size());
 
+	float xOff = 0.5f;
+	float yOff = 0.5f;
+	float zOff = 0.5f;
+	
 	// Rename vertices.
 	while (mapIterator != m_i2pt3idVertices.end()) {
 		(*mapIterator).second.newID = nextID;
-		m_tMesh->addVert(Vector((*mapIterator).second.x, (*mapIterator).second.y, (*mapIterator).second.z));
+		m_tMesh->addVert(Vector((*mapIterator).second.x + xOff, (*mapIterator).second.y + yOff, (*mapIterator).second.z + zOff));
 		nextID++;
 		mapIterator++;
 	}
@@ -721,10 +726,6 @@ void CIsoSurface::generateGeometry()
 		return;
 	}
 
-	float xOff = 0.5f;
-	float yOff = 0.5f;
-	float zOff = 0.5f;
-
 	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
@@ -744,7 +745,7 @@ void CIsoSurface::generateGeometry()
 					pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
 					glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
 					point = m_tMesh->getVertex(triangleEdges.pointID[j]);
-					glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
+					glVertex3d(point.x, point.y, point.z);
 				}
 			}
 		glEnd();
@@ -758,7 +759,7 @@ void CIsoSurface::generateGeometry()
 				for(int j = 0 ; j < 3 ; ++j)
 				{
 					point = m_tMesh->getVertex(triangleEdges.pointID[j]);
-					glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
+					glVertex3d(point.x, point.y, point.z);
 				}
 			}
 		glEnd();
@@ -769,10 +770,6 @@ void CIsoSurface::generateGeometry()
 
 void CIsoSurface::generateLICGeometry()
 {
-	float xOff = 0.5f;
-	float yOff = 0.5f;
-	float zOff = 0.5f;
-
 	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	GLuint dl = glGenLists(1);
 	glNewList (dl, GL_COMPILE);
@@ -793,31 +790,13 @@ void CIsoSurface::generateLICGeometry()
 				pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
 				glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
 				point = m_tMesh->getVertex(triangleEdges.pointID[j]);
-				glVertex3d(point.x + xOff, point.y + yOff, point.z + zOff);
+				glVertex3d(point.x, point.y, point.z);
 			}
 		}
 	glEnd();
 
 	glEndList();
 	m_GLuint = dl;
-#ifdef __DRAW_STREAMLINES__
-	if (m_GLuint2) glDeleteLists(m_GLuint2, 1);
-	GLuint dl2 = glGenLists(1);
-	glNewList (dl2, GL_COMPILE);
-
-	for (size_t i = 0 ; i < m_testLines.size() ; ++i)
-	{
-		glBegin(GL_LINE_STRIP);
-		glColor3f(1.0, 1.0, 0.0);
-		for (size_t k = 0 ; k < m_testLines[i].size() ; k += 3)
-		{
-			glVertex3f(m_testLines[i][k], m_testLines[i][k+1], m_testLines[i][k+2]);
-		}
-		glEnd();
-	}
-	glEndList();
-	m_GLuint2 = dl2;
-#endif
 }
 
 void CIsoSurface::GenerateWithThreshold()
@@ -842,9 +821,6 @@ void CIsoSurface::activateLIC()
 
 		SurfaceLIC lic(m_dh, m_tMesh);
 		lic.execute();
-#ifdef __DRAW_STREAMLINES__
-		m_testLines = lic.testLines;
-#endif
 		licCalculated = true;
 	}
 	if (m_GLuint) glDeleteLists(m_GLuint, 1);
@@ -870,7 +846,4 @@ void CIsoSurface::draw()
 	if (!m_GLuint)
 		generateGeometry();
 	glCallList(m_GLuint);
-
-	if ( m_dh->drawVectors && licCalculated)
-		glCallList(m_GLuint2);
 }

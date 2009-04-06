@@ -33,6 +33,7 @@ Fibers::Fibers(DatasetHelper* dh)
 	
 	m_oldMax = 1.0;
 	m_newMax = 1.0;
+	m_isGlyph = false;
 }
 
 Fibers::~Fibers()
@@ -869,7 +870,9 @@ void Fibers::initializeBuffer()
 
 void Fibers::draw()
 {
-	initializeBuffer();
+	// FIXME usage of vbo's collides with vertex arrays for other objects, disabling it for now
+	m_dh->useVBO = false;
+	//initializeBuffer();
 	if (m_dh->useFakeTubes)
 	{
 		drawFakeTubes();

@@ -102,6 +102,7 @@ public:
 	bool getShowFS() {return m_showFS;};
 	bool getUseTex() {return m_useTex;};
 	bool getUseLIC() {return m_useLIC;};
+	bool getIsGlyph() {return m_isGlyph;};
 
 	void setGLuint(GLuint value) {m_GLuint = value;};
 	void setColor(wxColour color) {m_color = color;};
@@ -143,6 +144,7 @@ protected:
 	bool m_showFS;	// show front sector for meshs
 	bool m_useTex; 	// color mesh with textures loaded,
 					// if false use colormap on threshold value
+	bool m_isGlyph;
 	bool licCalculated;
 	bool m_useLIC;
 	GLuint *m_bufferObjects;

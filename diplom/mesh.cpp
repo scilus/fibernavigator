@@ -28,6 +28,8 @@ Mesh::Mesh(DatasetHelper* dh)
 	m_color = wxColour(230,230,230);
 	m_GLuint = 0;
 	m_tMesh = new TriangleMesh(m_dh);
+	isInitialized = false;
+	m_isGlyph = false;
 }
 
 Mesh::~Mesh()
@@ -39,8 +41,109 @@ bool Mesh::load(wxString filename)
 {
 	if (filename.AfterLast('.') == _T("mesh"))
 		return loadMesh(filename);
-	if (filename.AfterLast('.') == _T("surf"))
+	else if (filename.AfterLast('.') == _T("surf"))
 		return loadSurf(filename);
+	else if (filename.AfterLast('.') == _T("dip"))
+			return loadDip(filename);
+	return true;
+}
+
+bool Mesh::loadDip(wxString filename)
+{
+	m_dh->printDebug(_T("start loading DIP mesh file"), 1);
+	wxTextFile file;
+	wxString line;
+	wxString numberString, xString, yString, zString;
+	double x,y,z;
+	long tmpVal, v1, v2, v3;
+	float minMagnitude = 100000;
+	float maxMagnitude = 0;
+	
+
+	if ( file.Open(filename) )
+	{
+		line = file.GetFirstLine();
+		while ( !file.Eof() )
+		{
+			line = file.GetNextLine();
+			if ( line.BeforeFirst('=') == _T("NumberPositions") )
+			{
+				 numberString = line.AfterLast('=');
+				 numberString.ToLong(&tmpVal, 10);
+				 setCountVerts((int)tmpVal);
+				 printf("num verts: %d\n", m_countVerts);
+			}
+			if ( line == _T("PositionsFixed"))
+			{
+				for ( size_t i = 0 ; i < m_countVerts ; ++i)
+				{
+					line = file.GetNextLine();
+					xString = line.BeforeFirst(' ');
+					yString = line.AfterFirst(' ').BeforeLast(' ');
+					zString = line.AfterLast(' ');
+					xString.ToDouble(&x);
+					yString.ToDouble(&y);
+					zString.ToDouble(&z);
+					//printf("%d: %f, %f, %f\n", i, x,y,z);
+					m_tMesh->addVert(x, y, z);
+				}
+			}
+			if ( line == _T("Magnitudes "))
+			{
+				std::vector<float>tmpMagnitudes(m_countVerts, 0);
+				for ( size_t i = 0 ; i < m_countVerts ; ++i)
+				{
+					line = file.GetNextLine();
+					line.ToDouble(&x);
+					if ( x < minMagnitude) minMagnitude = x;
+					if ( x > maxMagnitude) maxMagnitude = x;
+					
+					tmpMagnitudes[i] = x; 
+				}
+				float diff = maxMagnitude - minMagnitude;
+				for ( size_t i = 0 ; i < m_countVerts ; ++i)
+				{
+					float c = ( tmpMagnitudes[i] - minMagnitude ) / diff;
+					m_tMesh->setVertexColor(i, c, c, c); 
+				}
+			}
+			if ( line.BeforeFirst('=') == _T("NumberPolygons") )
+			{
+				 numberString = line.AfterLast('=');
+				 numberString.ToLong(&tmpVal, 10);
+				 setCountPolygons((int)tmpVal);
+				 printf("num tris: %d\n", m_countPolygons);
+			}
+			if ( line == _T("Polygons"))
+			{
+				for ( size_t i = 0 ; i < m_countPolygons ; ++i)
+				{
+					line = file.GetNextLine();
+					xString = line.BeforeFirst(' ');
+					yString = line.AfterFirst(' ').BeforeLast(' ');
+					zString = line.AfterLast(' ');
+					xString.ToLong(&v1, 10);
+					yString.ToLong(&v2, 10);
+					zString.ToLong(&v3, 10);
+					//printf("%d: %d, %d, %d\n", i, v1, v2, v3);
+					m_tMesh->addTriangle(v1, v2, v3);
+				}
+			}
+		}		
+	}
+	
+	m_tMesh->calcNeighbors();
+	m_tMesh->calcVertNormals();
+
+	m_fullPath = filename;
+	#ifdef __WXMSW__
+	m_name = filename.AfterLast('\\');
+	#else
+	m_name = filename.AfterLast('/');
+	#endif
+	m_type = Mesh_;
+	m_isGlyph = true;
+	
 	return true;
 }
 
@@ -277,30 +380,34 @@ bool Mesh::loadMesh(wxString filename)
 
 void Mesh::generateGeometry()
 {
-	if (m_GLuint) glDeleteLists(m_GLuint, 1);
-	GLuint dl = glGenLists(1);
-	glNewList (dl, GL_COMPILE);
-
-	Triangle triangleEdges;
-	Vector point;
-	Vector pointNormal;
-
-	glBegin(GL_TRIANGLES);
-		for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
+	m_pointArray = new GLfloat[m_tMesh->getNumVertices()*3];
+	m_normalArray = new GLfloat[m_tMesh->getNumVertices()*3];
+	m_colorArray = new GLfloat[m_tMesh->getNumVertices()*3];
+	m_indexArray = new GLuint[m_tMesh->getNumTriangles()*3];
+	
+	for (int i = 0 ; i < m_tMesh->getNumVertices() ; ++i)
+	{
+		m_pointArray[i*3]   = m_tMesh->getVertex(i).x;
+		m_pointArray[i*3+1] = m_tMesh->getVertex(i).y;
+		m_pointArray[i*3+2] = m_tMesh->getVertex(i).z;
+		m_normalArray[i*3]  = m_tMesh->getVertNormal(i).x;
+		m_normalArray[i*3+1]  = m_tMesh->getVertNormal(i).y;
+		m_normalArray[i*3+2]  = m_tMesh->getVertNormal(i).z;
+		if ( m_isGlyph )
 		{
-			triangleEdges = m_tMesh->getTriangle(i);
-			for(int j = 0 ; j < 3 ; ++j)
-			{
-				pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
-				glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
-				point = m_tMesh->getVertex(triangleEdges.pointID[j]);
-				glVertex3d(point.x, point.y, point.z);
-			}
+			m_colorArray[i*3]  = m_tMesh->getVertColor(i).x;
+			m_colorArray[i*3+1]  = m_tMesh->getVertColor(i).y;
+			m_colorArray[i*3+2]  = m_tMesh->getVertColor(i).z;
 		}
-	glEnd();
-
-	glEndList();
-	m_GLuint = dl;
+	}
+	for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
+	{
+		m_indexArray[i*3] = m_tMesh->getTriangle(i).pointID[0];
+		m_indexArray[i*3+1] = m_tMesh->getTriangle(i).pointID[1];
+		m_indexArray[i*3+2] = m_tMesh->getTriangle(i).pointID[2];
+	}
+	
+	isInitialized = true;
 }
 
 void Mesh::activateLIC()
@@ -317,7 +424,24 @@ GLuint Mesh::getGLuint()
 
 void Mesh::draw()
 {
-	if (!m_GLuint)
+	if ( !isInitialized ) 
 		generateGeometry();
-	glCallList(m_GLuint);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, m_pointArray);
+	glNormalPointer(GL_FLOAT, 0, m_normalArray);
+	
+	if ( m_isGlyph )
+	{
+		glEnableClientState(GL_COLOR_ARRAY);
+		glColorPointer (3, GL_FLOAT, 0, m_colorArray);
+	}
+	
+	glDrawElements(GL_TRIANGLES, m_tMesh->getNumTriangles()*3, GL_UNSIGNED_INT, m_indexArray);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	if ( m_isGlyph )
+		glDisableClientState(GL_COLOR_ARRAY);
+	
 }

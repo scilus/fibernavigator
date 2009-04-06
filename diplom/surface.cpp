@@ -42,6 +42,7 @@ Surface::Surface(DatasetHelper* dh)
 	licCalculated = false;
 	m_useLIC = false;
 	subDCount = 0;
+	m_isGlyph = false;
 	execute();
 }
 

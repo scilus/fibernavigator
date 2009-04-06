@@ -32,6 +32,7 @@ class TriangleMesh {
 
 		std::vector<Vector> vertices;
 		std::vector<Vector> vertNormals;
+		std::vector<Vector> vertColors;
 		std::vector < std::vector<unsigned int> >vIsInTriangle;
 
 		std::vector< Triangle > triangles;
@@ -87,6 +88,7 @@ class TriangleMesh {
 		Vector getVertex (const int vertNum) 			{ return vertices[vertNum]; };
 		Vector getVertex (const int triNum, int pos);
 		Vector getNormal(const int triNum)				{ return triNormals[triNum]; };
+		Vector getVertColor( const int vertNum)			{ return vertColors[vertNum]; };
 		Triangle getTriangle(const int triNum)			{ return triangles[triNum];  };
 		Vector getTriangleColor(const int triNum)		{ return triangleColor[triNum]; };
 		std::vector<unsigned int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
@@ -101,6 +103,7 @@ class TriangleMesh {
 
 		void setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC);
 		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b);
+		void setVertexColor(const unsigned int vertNum, const float r, const float g, const float b);
 
 		bool isInTriangle(const unsigned int vertNum, const unsigned int triangleNum);
 

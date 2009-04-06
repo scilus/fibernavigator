@@ -122,7 +122,7 @@ bool DatasetHelper::load(int index)
 {
 	wxArrayString fileNames;
 	wxString caption = wxT("Choose a file");
-	wxString wildcard =	wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Fibers VTK (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers Camino (*.Bfloat)|*.Bfloat");
+	wxString wildcard =	wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers Camino (*.Bfloat)|*.Bfloat");
 	wxString defaultDir = wxEmptyString;
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,
@@ -187,7 +187,7 @@ bool DatasetHelper::load(wxString filename, bool createBox, float threshold, boo
 		return true;
 	}
 
-	else if (ext == wxT("nii") || ext == wxT("gz")) {
+	else if (ext == _T("nii") || ext == _T("gz")) {
 		Anatomy *anatomy = new Anatomy(this);
 
 		if (anatomy->load(filename))
@@ -205,7 +205,7 @@ bool DatasetHelper::load(wxString filename, bool createBox, float threshold, boo
 		}
 	}
 
-	else if (ext == wxT("mesh") || ext == wxT("surf") )
+	else if (ext == _T("mesh") || ext == _T("surf") || ext == _T("dip"))
 	{
 		if (!anatomy_loaded) 
 		{
@@ -225,7 +225,7 @@ bool DatasetHelper::load(wxString filename, bool createBox, float threshold, boo
 		return false;
 	}
 
-	else if (ext == wxT("fib") || ext == wxT("bundlesdata") || ext == wxT("Bfloat")) {
+	else if (ext == _T("fib") || ext == _T("bundlesdata") || ext == _T("Bfloat")) {
 		if (!anatomy_loaded) {
 			lastError = wxT("no anatomy file loaded");
 			return false;

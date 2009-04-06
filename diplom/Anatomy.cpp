@@ -38,6 +38,7 @@ Anatomy::Anatomy(DatasetHelper* dh) {
 	m_roi = 0;
 	m_oldMax = 1.0;
 	m_newMax = 1.0;
+	m_isGlyph = false;
 }
 
 Anatomy::Anatomy(DatasetHelper* dh, float* dataset) {

@@ -4,9 +4,11 @@ uniform int sector;
 uniform float cutX, cutY, cutZ;
 uniform int dimX, dimY, dimZ;
 uniform float alpha_;
+varying vec4 myColor;
 
 uniform bool showFS;
 uniform bool useTex;
+uniform bool useCMAP;
 uniform bool blendTex;
 uniform bool cutAtSurface;
 
@@ -81,7 +83,8 @@ void main() {
 
 	vec4 color = vec4(0.0);
 
-	if (useTex) {
+	if ( useTex ) 
+	{
 		vec3 v = gl_TexCoord[0].xyz;
 		v.x = v.x / float(dimX);
 		v.y = v.y / float(dimY);
@@ -96,8 +99,14 @@ void main() {
 		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0)
 				+ (specular * color / 2.0);
 	}
+	
+	if ( useCMAP )
+	{
+		color.rgb = defaultColorMap( myColor.r );
+	} 
 
-	if (color.rgb == vec3(0.0)) {
+	if ( color.rgb == vec3(0.0) ) 
+	{
 		color = gl_FrontLightModelProduct.sceneColor + (ambient
 				* gl_FrontMaterial.ambient) + (diffuse
 				* gl_FrontMaterial.diffuse) + (specular

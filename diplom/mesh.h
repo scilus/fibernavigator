@@ -42,6 +42,7 @@ public:
 	bool load(wxString filename);
 	bool loadMesh(wxString filename);
 	bool loadSurf(wxString filename);
+	bool loadDip(wxString filename);
 	void draw();
 	void clean() {m_tMesh->cleanUp();};
 	void smooth() {m_tMesh->doLoopSubD();};
@@ -71,6 +72,13 @@ private:
 	unsigned int m_countTimeSteps;
 	unsigned int m_countPolygons;
 	unsigned int m_polygonDim;
+	
+	GLfloat* m_pointArray;
+	GLfloat* m_normalArray;
+	GLfloat* m_colorArray;
+	GLuint*   m_indexArray;
+	
+	bool isInitialized;
 };
 
 #endif /*MESH_H_*/
