@@ -35,6 +35,11 @@ Mesh::Mesh(DatasetHelper* dh)
 Mesh::~Mesh()
 {
 	delete m_tMesh;
+	
+	if ( m_pointArray  ) delete[] m_pointArray;
+	if ( m_normalArray ) delete[] m_normalArray;
+	if ( m_colorArray  ) delete[] m_colorArray;
+	if ( m_indexArray  ) delete[] m_indexArray;
 }
 
 bool Mesh::load(wxString filename)
@@ -85,7 +90,7 @@ bool Mesh::loadDip(wxString filename)
 					yString.ToDouble(&y);
 					zString.ToDouble(&z);
 					//printf("%d: %f, %f, %f\n", i, x,y,z);
-					m_tMesh->addVert(x, y, z);
+					m_tMesh->addVert(x, y, m_dh->frames - z);
 				}
 			}
 			if ( line == _T("Magnitudes "))
@@ -132,8 +137,7 @@ bool Mesh::loadDip(wxString filename)
 		}		
 	}
 	
-	m_tMesh->calcNeighbors();
-	m_tMesh->calcVertNormals();
+	m_tMesh->finalize();
 
 	m_fullPath = filename;
 	#ifdef __WXMSW__
@@ -230,8 +234,7 @@ bool Mesh::loadSurf(wxString filename)
 		m_tMesh->addTriangle(v1, v2, v3);
 	}
 	
-	m_tMesh->calcNeighbors();
-	m_tMesh->calcVertNormals();
+	m_tMesh->finalize();
 
 	m_fullPath = filename;
 	#ifdef __WXMSW__
@@ -364,8 +367,7 @@ bool Mesh::loadMesh(wxString filename)
 		}
 	}
 
-	m_tMesh->calcNeighbors();
-	m_tMesh->calcVertNormals();
+	m_tMesh->finalize();
 
 	m_fullPath = filename;
 #ifdef __WXMSW__

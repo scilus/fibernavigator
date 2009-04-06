@@ -112,7 +112,7 @@ Vector TriangleMesh::calcTriangleNormal(const int triNum)
 	return tempNormal;
 }
 
-Vector TriangleMesh::getVertNormal(const int vertNum)
+Vector TriangleMesh::calcVertNormal(const int vertNum)
 {
 	Vector sum(0,0,0);
 
@@ -133,8 +133,9 @@ Vector TriangleMesh::getVertex (const int triNum, int pos)
 void TriangleMesh::calcVertNormals()
 {
 	vertNormals.clear();
-	for ( int i = 0 ; i <numVerts ; ++i)
-		vertNormals.push_back(getVertNormal(i));
+	vertNormals.resize(numVerts);
+	for ( int i = 0 ; i < numVerts ; ++i)
+		vertNormals[i] = calcVertNormal(i);
 }
 
 int TriangleMesh::getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum)

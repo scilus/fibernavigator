@@ -368,11 +368,20 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_useLIC = false;
 	m_GLuint = 0;
 	m_isGlyph = false;
+	isInitialized = false;
+	
+	m_pointArray = NULL;
+	m_normalArray = NULL;
+	m_indexArray = NULL;
 }
 
 CIsoSurface::~CIsoSurface()
 {
 	DeleteSurface();
+	delete m_tMesh;
+	if ( m_pointArray  ) delete[] m_pointArray;
+	if ( m_normalArray ) delete[] m_normalArray;
+	if ( m_indexArray  ) delete[] m_indexArray;
 }
 
 void CIsoSurface::GenerateSurface(float tIsoLevel)
@@ -718,6 +727,45 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	m_useLIC = false;
 }
 
+void CIsoSurface::GenerateWithThreshold()
+{
+	GenerateSurface(m_threshold);
+	isInitialized = false;
+}
+
+void CIsoSurface::activateLIC()
+{
+	m_useLIC = !m_useLIC;
+	if (!m_useLIC) {
+		generateGeometry();
+		return;
+	}
+	if (!licCalculated)
+	{
+		for (int i = 0 ; i < 0 ; ++i)
+			m_tMesh->doLoopSubD();
+
+
+		SurfaceLIC lic(m_dh, m_tMesh);
+		lic.execute();
+		licCalculated = true;
+	}
+	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	m_GLuint = 0;
+}
+
+void CIsoSurface::clean()
+{
+	m_tMesh->cleanUp();
+	isInitialized = false;
+}
+
+void CIsoSurface::smooth()
+{
+	m_tMesh->doLoopSubD();
+	isInitialized = false;
+}
+
 void CIsoSurface::generateGeometry()
 {
 	if (m_useLIC)
@@ -725,47 +773,32 @@ void CIsoSurface::generateGeometry()
 		generateLICGeometry();
 		return;
 	}
-
-	if (m_GLuint) glDeleteLists(m_GLuint, 1);
-	GLuint dl = glGenLists(1);
-	glNewList (dl, GL_COMPILE);
-
-	Triangle triangleEdges;
-	Vector point;
-	Vector pointNormal;
-
-	if (m_tMesh->isFinished())
+	
+	if ( m_pointArray  ) delete[] m_pointArray;
+	if ( m_normalArray ) delete[] m_normalArray;
+	if ( m_indexArray  ) delete[] m_indexArray;
+ 	
+	m_pointArray = new GLfloat[m_tMesh->getNumVertices()*3];
+	m_normalArray = new GLfloat[m_tMesh->getNumVertices()*3];
+	m_indexArray = new GLuint[m_tMesh->getNumTriangles()*3];
+	
+	for (int i = 0 ; i < m_tMesh->getNumVertices() ; ++i)
 	{
-		glBegin(GL_TRIANGLES);
-			for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
-			{
-				triangleEdges = m_tMesh->getTriangle(i);
-				for(int j = 0 ; j < 3 ; ++j)
-				{
-					pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
-					glNormal3d(pointNormal.x*-1.0, pointNormal.y*-1.0, pointNormal.z*-1.0);
-					point = m_tMesh->getVertex(triangleEdges.pointID[j]);
-					glVertex3d(point.x, point.y, point.z);
-				}
-			}
-		glEnd();
+		m_pointArray[i*3]   	= m_tMesh->getVertex(i).x;
+		m_pointArray[i*3+1] 	= m_tMesh->getVertex(i).y;
+		m_pointArray[i*3+2] 	= m_tMesh->getVertex(i).z;
+		m_normalArray[i*3]  	= -m_tMesh->getVertNormal(i).x;
+		m_normalArray[i*3+1]  	= -m_tMesh->getVertNormal(i).y;
+		m_normalArray[i*3+2]  	= -m_tMesh->getVertNormal(i).z;
 	}
-	else
+	for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
 	{
-		glBegin(GL_TRIANGLES);
-			for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
-			{
-				triangleEdges = m_tMesh->getTriangle(i);
-				for(int j = 0 ; j < 3 ; ++j)
-				{
-					point = m_tMesh->getVertex(triangleEdges.pointID[j]);
-					glVertex3d(point.x, point.y, point.z);
-				}
-			}
-		glEnd();
+		m_indexArray[i*3] 	= m_tMesh->getTriangle(i).pointID[0];
+		m_indexArray[i*3+1] = m_tMesh->getTriangle(i).pointID[1];
+		m_indexArray[i*3+2] = m_tMesh->getTriangle(i).pointID[2];
 	}
-	glEndList();
-	m_GLuint = dl;
+	
+	isInitialized = true;
 }
 
 void CIsoSurface::generateLICGeometry()
@@ -799,51 +832,17 @@ void CIsoSurface::generateLICGeometry()
 	m_GLuint = dl;
 }
 
-void CIsoSurface::GenerateWithThreshold()
-{
-	GenerateSurface(m_threshold);
-	if (m_GLuint) glDeleteLists(m_GLuint, 1);
-	m_GLuint = 0;
-}
-
-void CIsoSurface::activateLIC()
-{
-	m_useLIC = !m_useLIC;
-	if (!m_useLIC) {
-		generateGeometry();
-		return;
-	}
-	if (!licCalculated)
-	{
-		for (int i = 0 ; i < 0 ; ++i)
-			m_tMesh->doLoopSubD();
-
-
-		SurfaceLIC lic(m_dh, m_tMesh);
-		lic.execute();
-		licCalculated = true;
-	}
-	if (m_GLuint) glDeleteLists(m_GLuint, 1);
-	m_GLuint = 0;
-}
-
-void CIsoSurface::clean()
-{
-	m_tMesh->cleanUp();
-	if (m_GLuint) glDeleteLists(m_GLuint, 1);
-	m_GLuint = 0;
-}
-
-void CIsoSurface::smooth()
-{
-	m_tMesh->doLoopSubD();
-	if (m_GLuint) glDeleteLists(m_GLuint, 1);
-	m_GLuint = 0;
-}
-
 void CIsoSurface::draw()
 {
-	if (!m_GLuint)
+	if ( !isInitialized ) 
 		generateGeometry();
-	glCallList(m_GLuint);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, m_pointArray);
+	glNormalPointer(GL_FLOAT, 0, m_normalArray);
+	
+	glDrawElements(GL_TRIANGLES, m_tMesh->getNumTriangles()*3, GL_UNSIGNED_INT, m_indexArray);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
 }

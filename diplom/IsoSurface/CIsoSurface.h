@@ -128,8 +128,12 @@ protected:
 	static const unsigned int m_edgeTable[256];
 	static const int m_triTable[256][16];
 
-	GLuint m_GLuint2;
-	std::vector< std::vector<float> >m_testLines;
+	GLfloat* m_pointArray;
+	GLfloat* m_normalArray;
+	GLuint*   m_indexArray;
+	
+	bool isInitialized;
+	
 
 private:
 	GLuint getGLuint() {return 0;};

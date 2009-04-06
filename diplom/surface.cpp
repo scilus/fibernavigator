@@ -292,8 +292,7 @@ void Surface::execute ()
 			}
 	}
 
-	m_tMesh->calcNeighbors();
-	m_tMesh->calcVertNormals();
+	m_tMesh->finalize();
 	licCalculated = false;
 //TODO
 	for (int i = 0 ; i < 3 ; ++i)

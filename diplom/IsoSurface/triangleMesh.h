@@ -65,42 +65,27 @@ class TriangleMesh {
 		void addTriangle(const int vertA, const int vertB, const int vertC);
 		void addTriangle(const int vertA, const int vertB, const int vertC, const int tensorIndex);
 
-		Vector calcTriangleNormal(const Triangle);
-		Vector calcTriangleNormal(const int triNum);
-
-		void flipNormals();
-
-		void calcVertNormals();
-		Vector getVertNormal(const int vertNum);
-
-		int calcTriangleTensor(const int triNum);
-		void calcTriangleTensors();
-
-		int getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
-		void calcNeighbors();
-		void calcNeighbor(const int triangleNum);
 
 		void clearMesh();
 		void finalize() { calcNeighbors(); calcVertNormals(); m_isFinished = true;};
 
-		int getNumVertices()							{ return numVerts; };
-		int getNumTriangles()							{ return numTris; };
-		Vector getVertex (const int vertNum) 			{ return vertices[vertNum]; };
+		int getNumVertices()									{ return numVerts; };
+		int getNumTriangles()									{ return numTris; };
+		Vector getVertex (const int vertNum) 					{ return vertices[vertNum]; };
 		Vector getVertex (const int triNum, int pos);
-		Vector getNormal(const int triNum)				{ return triNormals[triNum]; };
-		Vector getVertColor( const int vertNum)			{ return vertColors[vertNum]; };
-		Triangle getTriangle(const int triNum)			{ return triangles[triNum];  };
-		Vector getTriangleColor(const int triNum)		{ return triangleColor[triNum]; };
+		Vector getNormal(const int triNum)						{ return triNormals[triNum]; };
+		Vector getVertNormal(const int vertNum) 				{ return vertNormals[vertNum];};
+		Vector getVertColor( const int vertNum)					{ return vertColors[vertNum]; };
+		Triangle getTriangle(const int triNum)					{ return triangles[triNum];  };
+		Vector getTriangleColor(const int triNum)				{ return triangleColor[triNum]; };
 		std::vector<unsigned int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
-		int getTriangleTensor(const int triNum)			{ return triangleTensor[triNum]; };
-		bool isFinished()								{ return m_isFinished; }
+		int getTriangleTensor(const int triNum)					{ return triangleTensor[triNum]; };
+		bool isFinished()										{ return m_isFinished; }
 
 		Vector getTriangleCenter(int triNum) ;
 
-
 		void setVertex(const unsigned int vertNum, const Vector nPos)	{ vertices[vertNum] = nPos; };
 		void eraseTriFromVert( const unsigned int triNum, const unsigned int vertNum);
-
 		void setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC);
 		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b);
 		void setVertexColor(const unsigned int vertNum, const float r, const float g, const float b);
@@ -115,25 +100,36 @@ class TriangleMesh {
 		bool getOpenMeshError() { return openMeshError; };
 
 		void cleanUp();
-
 		void doLoopSubD();
 
 		void getCellVerticesIndices( const FIndex& cellId, std::vector< FIndex >& vertices ) const;
 		void getPosition( FPosition& resultPos, const FIndex& pIndex ) const;
 		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh ) const;
 		void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs ) const;
-
+		int getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
+		
 		void reserveVerts(const int size);
 		void reserveTriangles(const int size);
 
 		void printInfo();
 
-
+		void calcTriangleTensors();
+		void calcNeighbors();
+		
+		
 	private:
+		Vector calcTriangleNormal(const Triangle);
+		Vector calcTriangleNormal(const int triNum);
+		void calcVertNormals();
+		Vector calcVertNormal(const int vertNum);
+
+		void flipNormals();
+
+		
+		int calcTriangleTensor(const int triNum);
+		void calcNeighbor(const int triangleNum);
 
 
-	// Overrides
 
-	// Implementation
 };
 #endif
