@@ -42,13 +42,6 @@ void TheScene::initGL(int view)
 		if (view == mainView) 
 		{
 			m_dh->printDebug(_T("Status: Using GLEW ") +  wxString::FromAscii((char*)glewGetString(GLEW_VERSION)), 1);
-
-			if ( !glewIsSupported("GL_VERTEX_SHADER") || !glewIsSupported("GL_FRAGMENT_SHADER"))
-			{
-				printf("*** ERROR shader not supported\n");
-				printf("*** Please check your OpenGL installation...exiting!\n");
-				exit(false);
-			}
 		}
 		glEnable(GL_DEPTH_TEST);
 	
