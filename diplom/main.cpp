@@ -87,13 +87,6 @@ namespace {
 // Initialise this in OnInit, not statically
 bool MyApp::OnInit(void) 
 {
-	// i'm still not sure which GLX version is needed, but 1.3 seems to be ok
-	if ( wxGLCanvas::GetGLXVersion() < 13 )
-	{
-		printf("OpenGL and a sufficient graphics card need to be installed to run this programm.\n");
-		exit(false);
-	}
-	
 	try 
 	{
 		SetAppName(APP_NAME);

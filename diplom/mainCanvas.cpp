@@ -28,6 +28,16 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
     : wxGLCanvas(parent, shared, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name, gl_attrib )
 #endif
 {
+	// i'm still not sure which GLX version is needed, but 1.3 seems to be ok
+	// have to do this here, because wxGLCanvas::GetGLXVersion doesn't return reliable results when called 
+	// in the init function in main.cpp
+	if ( GetGLXVersion() < 13 )
+	{
+		printf("Found GLX version: %d\n", GetGLXVersion());
+		printf("OpenGL and a sufficient graphics card need to be installed to run this programm.\n");
+		exit(false);
+	}
+	
 	m_init = false;
 	m_view = view;
 	m_dh = dh;
