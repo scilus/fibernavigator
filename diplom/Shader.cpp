@@ -13,16 +13,24 @@ Shader::Shader(wxString fileName) {
 	m_fragment = 0;
 	m_shaderProgram = 0;
 
-	m_vertex = glCreateShader(GL_VERTEX_SHADER);
-	m_fragment = glCreateShader(GL_FRAGMENT_SHADER);
-
-	m_shaderProgram = glCreateProgram();
-
-	if (loadCode(fileName))
+	try
 	{
-		link();
+		m_vertex = glCreateShader(GL_VERTEX_SHADER);
+		m_fragment = glCreateShader(GL_FRAGMENT_SHADER);
+	
+		m_shaderProgram = glCreateProgram();
+	
+		if (loadCode(fileName))
+		{
+			link();
+		}
 	}
-
+	catch (...)
+	{
+		printf("***error while creating shader\n");
+		printf("***please check your OpenGL installation\n");
+		exit(false);
+	}
 }
 
 Shader::~Shader() {
