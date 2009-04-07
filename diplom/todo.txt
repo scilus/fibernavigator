@@ -30,7 +30,6 @@ evtl. ein frei rotierbares navigation slide
 ========================================================================
 alpha blending und neues beleuchtungschema (farbe-licht)
 exclusivitaet ( eine faser nicht gleichzeitig in mehreren boxen )
-tastaturbuffer
 falls moeglich: remote x-session: initializing verwendung der shader auf dem localhost.
 test und evtl kleine anpassungen fuer ein laptop computer
 

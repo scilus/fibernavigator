@@ -95,15 +95,13 @@ void main() {
 			if (blendTex) threshold_ = threshold[i];
 			if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold_, v, alpha[i]);
 		}
-
-		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0)
-				+ (specular * color / 2.0);
+		color = color + (ambient * color / 2.0) + (diffuse * color) + (specular * color / 2.0);	
 	}
 	
 	if ( useCMAP )
 	{
-		//color.rgb = defaultColorMap( myColor.r );
 		colorMap( color.rgb, myColor.r);
+		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0) + (specular * color / 2.0);			
 	} 
 
 	if ( color.rgb == vec3(0.0) ) 
@@ -118,8 +116,7 @@ void main() {
 	color = clamp(color, 0.0, 1.0);
 
 	if (useLic)
-			gl_FragColor = (0.7  * gl_Color) + (0.3 * color);
-		else
-			gl_FragColor = color;
-	//gl_FragColor = color;
+		gl_FragColor = (0.7  * gl_Color) + (0.3 * color);
+	else
+		gl_FragColor = color;
 }

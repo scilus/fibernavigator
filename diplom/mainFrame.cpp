@@ -242,10 +242,12 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
    m_tRootId = m_treeWidget->AddRoot(wxT("Scene"), -1, -1, NULL );
    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"), -1, -1, NULL);
    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"), -1, -1, NULL);
-
-    /*
-     * Set OpenGL attributes
-     */
+   
+   
+   	/*
+    * Set OpenGL attributes
+    */
+   printf("Initializing OpenGL\n");
     GLboolean doubleBuffer = GL_TRUE;
     #ifdef __WXMSW__
     	int *gl_attrib = NULL;
@@ -267,27 +269,25 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	#endif
         doubleBuffer = GL_FALSE;
     }
-
+    
     m_dh = new DatasetHelper(this);
-
+    
     m_dh->scene = new TheScene(m_dh);
-
+    
     m_mainGL = new MainCanvas(m_dh, mainView, this, ID_GL_MAIN, wxDefaultPosition,
                                 wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
-
-
-    //Show();
-    //m_mainGL->Show(); // now the OpenGL Window is created so the context is valid
+   
 #ifndef CTX
-    m_gl0 = new MainCanvas(m_dh, axial, this, ID_GL_NAV_X, wxDefaultPosition,
-                wxSize(150,150), 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
-    m_gl0->SetMaxSize(wxSize(150,150));
-    m_gl1 = new MainCanvas(m_dh, coronal, this, ID_GL_NAV_Y, wxDefaultPosition,
-    			wxSize(150,150), 0, _T("NavGLCanvasY"), gl_attrib, m_mainGL);
-    m_gl1->SetMaxSize(wxSize(150,150));
-    m_gl2 = new MainCanvas(m_dh, sagittal, this, ID_GL_NAV_Z, wxDefaultPosition,
-    			wxSize(150,150), 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL);
-    m_gl2->SetMaxSize(wxSize(150,150));
+       m_gl0 = new MainCanvas(m_dh, axial, this, ID_GL_NAV_X, wxDefaultPosition,
+	                wxSize(150,150), 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
+	    m_gl0->SetMaxSize(wxSize(150,150));
+	    m_gl1 = new MainCanvas(m_dh, coronal, this, ID_GL_NAV_Y, wxDefaultPosition,
+	    			wxSize(150,150), 0, _T("NavGLCanvasY"), gl_attrib, m_mainGL);
+	    m_gl1->SetMaxSize(wxSize(150,150));
+	    m_gl2 = new MainCanvas(m_dh, sagittal, this, ID_GL_NAV_Z, wxDefaultPosition,
+	    			wxSize(150,150), 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL);
+	    m_gl2->SetMaxSize(wxSize(150,150));
+    
 #else
     m_gl0 = new MainCanvas(m_dh, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
                 wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL->GetContext());
@@ -303,7 +303,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 #else
     m_dh->scene->setMainGLContext( m_mainGL->GetContext() );
 #endif
-
     topSizer 		= new wxBoxSizer( wxHORIZONTAL );
 	leftSizer 		= new wxBoxSizer( wxVERTICAL );
 	leftTopSizer 	= new wxBoxSizer( wxHORIZONTAL );

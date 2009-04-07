@@ -30,31 +30,36 @@ TheScene::~TheScene()
 
 void TheScene::initGL(int view)
 {
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
+	try
 	{
-		/* Problem: glewInit failed, something is seriously wrong. */
-		m_dh->printDebug(_T("Error: ") + wxString::FromAscii((char*)glewGetErrorString(err)), 2);
+		GLenum err = glewInit();
+		if (GLEW_OK != err)
+		{
+			/* Problem: glewInit failed, something is seriously wrong. */
+			m_dh->printDebug(_T("Error: ") + wxString::FromAscii((char*)glewGetErrorString(err)), 2);
+		}
+		if (view == mainView) {
+			m_dh->printDebug(_T("Status: Using GLEW ") +  wxString::FromAscii((char*)glewGetString(GLEW_VERSION)), 1);
+		}
+		glEnable(GL_DEPTH_TEST);
+	
+		if (!m_dh->m_texAssigned) {
+			m_dh->shaderHelper = new ShaderHelper(m_dh);
+			m_dh->m_texAssigned = true;
+		}
+	
+		//float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
+		//float view1 = maxLength;
+		float view1 = 200;
+		glClearColor(1.0, 1.0, 1.0, 0.0);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho( 0, view1, 0, view1, -3000, 3000);
 	}
-	if (view == mainView) {
-		m_dh->printDebug(_T("Status: Using GLEW ") +  wxString::FromAscii((char*)glewGetString(GLEW_VERSION)), 1);
+	catch (...)
+	{
+		if (m_dh->GLError()) m_dh->printGLError(wxT("init"));
 	}
-	glEnable(GL_DEPTH_TEST);
-
-	if (!m_dh->m_texAssigned) {
-		m_dh->shaderHelper = new ShaderHelper(m_dh);
-		m_dh->m_texAssigned = true;
-	}
-
-	//float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
-	//float view1 = maxLength;
-	float view1 = 200;
-	glClearColor(1.0, 1.0, 1.0, 0.0);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho( 0, view1, 0, view1, -3000, 3000);
-
-	if (m_dh->GLError()) m_dh->printGLError(wxT("init"));
 }
 
 void TheScene::bindTextures()
