@@ -8,18 +8,16 @@
 #include "Shader.h"
 #include "main.h"
 
-Shader::Shader(wxString fileName) {
+Shader::Shader(wxString fileName) 
+{
 	m_vertex = 0;
 	m_fragment = 0;
 	m_shaderProgram = 0;
-
 	try
 	{
 		m_vertex = glCreateShader(GL_VERTEX_SHADER);
 		m_fragment = glCreateShader(GL_FRAGMENT_SHADER);
-	
 		m_shaderProgram = glCreateProgram();
-	
 		if (loadCode(fileName))
 		{
 			link();
