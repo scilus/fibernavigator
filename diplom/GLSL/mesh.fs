@@ -8,9 +8,9 @@ varying vec4 myColor;
 
 uniform bool showFS;
 uniform bool useTex;
-uniform bool useCMAP;
 uniform bool blendTex;
 uniform bool cutAtSurface;
+uniform bool useCMAP;
 
 uniform sampler3D texes[10];
 uniform sampler2D cutTex;
@@ -102,7 +102,8 @@ void main() {
 	
 	if ( useCMAP )
 	{
-		color.rgb = defaultColorMap( myColor.r );
+		//color.rgb = defaultColorMap( myColor.r );
+		colorMap( color.rgb, myColor.r);
 	} 
 
 	if ( color.rgb == vec3(0.0) ) 

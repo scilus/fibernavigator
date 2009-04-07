@@ -76,7 +76,6 @@ bool Mesh::loadDip(wxString filename)
 				 numberString = line.AfterLast('=');
 				 numberString.ToLong(&tmpVal, 10);
 				 setCountVerts((int)tmpVal);
-				 printf("num verts: %d\n", m_countVerts);
 			}
 			if ( line == _T("PositionsFixed"))
 			{
@@ -89,11 +88,10 @@ bool Mesh::loadDip(wxString filename)
 					xString.ToDouble(&x);
 					yString.ToDouble(&y);
 					zString.ToDouble(&z);
-					//printf("%d: %f, %f, %f\n", i, x,y,z);
 					m_tMesh->addVert(x, y, m_dh->frames - z);
 				}
 			}
-			if ( line == _T("Magnitudes "))
+			if ( line == _T("Magnitudes"))
 			{
 				std::vector<float>tmpMagnitudes(m_countVerts, 0);
 				for ( size_t i = 0 ; i < m_countVerts ; ++i)
@@ -117,7 +115,6 @@ bool Mesh::loadDip(wxString filename)
 				 numberString = line.AfterLast('=');
 				 numberString.ToLong(&tmpVal, 10);
 				 setCountPolygons((int)tmpVal);
-				 printf("num tris: %d\n", m_countPolygons);
 			}
 			if ( line == _T("Polygons"))
 			{
@@ -130,7 +127,6 @@ bool Mesh::loadDip(wxString filename)
 					xString.ToLong(&v1, 10);
 					yString.ToLong(&v2, 10);
 					zString.ToLong(&v3, 10);
-					//printf("%d: %d, %d, %d\n", i, v1, v2, v3);
 					m_tMesh->addTriangle(v1, v2, v3);
 				}
 			}

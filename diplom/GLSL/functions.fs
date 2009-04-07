@@ -99,14 +99,11 @@ vec3 colorMap3( in float value )
 	vec4 color8  = vec4(128./255.,   0./255.,  38./255., 1.);
 
 	float colorValue = value * 8.;
-
 	int sel = int(floor(colorValue));
-
-	return color8.rgb;
 	
-	if (sel >= 8)
-		return color8.rgb;
-	else if (sel < 0)
+	if ( sel >= 8 )
+		return color0.rgb;
+	else if ( sel < 0 )
 		return color0.rgb;
 	else
 	{
@@ -128,8 +125,7 @@ vec3 colorMap3( in float value )
 			return ( color7*colorValue + color6*(1.-colorValue)).rgb;
 		else if (sel < 8)
 			return ( color8*colorValue + color7*(1.-colorValue)).rgb;
-		else
-			return color0.rgb;
+		else return color0.rgb;
 	}
 }
 
@@ -155,6 +151,20 @@ vec3 colorMap4( in float value )
 	return vec3(colorRed, colorGreen, colorBlue);
 }
 
+void colorMap( inout vec3 col, in float value )
+{
+	if ( useColorMap == 1 )
+		col = colorMap1( value );
+	else if ( useColorMap == 2 )
+		col = colorMap2( value );
+	else if ( useColorMap == 3 )
+		col = colorMap3( value );
+	else if ( useColorMap == 4 )
+		col = colorMap4( value );
+	else 
+		col = defaultColorMap( value );
+}
+
 void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold, in float alpha)
 {
 	vec3 col1 = vec3(0.0);
@@ -170,16 +180,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 		else
 			col1.r = 1.0;
 
-		if ( useColorMap == 1 )
-			col1 = colorMap1( col1.r );
-		else if ( useColorMap == 2 )
-			col1 = colorMap2( col1.r );
-		else if ( useColorMap == 3 )
-			col1 = colorMap3( col1.r );
-		else if ( useColorMap == 4 )
-			col1 = colorMap4( col1.r );
-		else 
-			col1 = defaultColorMap( col1.r );
+		colorMap(col1, col1.r);
 
 		col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
 	}
@@ -208,16 +209,8 @@ void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float thr
 			col1.r = (col1.r - threshold) / (1.0 - threshold);
 		else
 			col1.r = 1.0;
-		if ( useColorMap == 1 )
-			col1 = colorMap1( col1.r );
-		else if ( useColorMap == 2 )
-			col1 = colorMap2( col1.r );
-		else if ( useColorMap == 3 )
-			col1 = colorMap3( col1.r );
-		else if ( useColorMap == 4 )
-			col1 = colorMap4( col1.r );
-		else
-			col1 = defaultColorMap( col1.r );
+			
+		colorMap(col1, col1.r);
 
 		color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
 	}

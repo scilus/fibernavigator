@@ -1882,7 +1882,7 @@ void MainFrame::OnLoad2(wxCommandEvent& WXUNUSED(event))
 }
 void MainFrame::OnLoad3(wxCommandEvent& WXUNUSED(event))
 {
-	bool flag = m_dh->load(4);
+	bool flag = m_dh->load(5);
 	if (flag) m_dh->m_selBoxChanged = true;
 }
 
