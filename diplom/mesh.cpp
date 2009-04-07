@@ -88,7 +88,7 @@ bool Mesh::loadDip(wxString filename)
 					xString.ToDouble(&x);
 					yString.ToDouble(&y);
 					zString.ToDouble(&z);
-					m_tMesh->addVert(x, y, m_dh->frames - z);
+					m_tMesh->addVert(x, m_dh->rows - y, m_dh->frames - z);
 				}
 			}
 			if ( line == _T("Magnitudes"))
