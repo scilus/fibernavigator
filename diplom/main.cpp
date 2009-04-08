@@ -217,6 +217,7 @@ bool MyApp::OnInit(void)
 	        wxApp::s_macAboutMenuItemId = MENU_HELP_ABOUT;
 	#endif
 		help_menu->Append(MENU_HELP_SHORTCUTS, _T("Keyboard shortcuts"));
+		help_menu->Append(MENU_HELP_SCREENSHOT, _T("Screenshot"));
 		
 		wxMenuBar *menu_bar = new wxMenuBar;
 		menu_bar->Append(file_menu, _T("&File"));

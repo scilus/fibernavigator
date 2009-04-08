@@ -119,6 +119,8 @@ public:
 	// last path from loading, load file dialog will open with it
 	wxString lastPath;
 	wxString m_scenePath;
+	wxString m_screenshotPath;
+	wxString m_screenshotName;
 	
 	wxString m_scnFileName;
 	bool m_scnFileLoaded;
@@ -140,6 +142,8 @@ public:
 	int textures;
 	//! if set the shaders will be reloaded during next render() call
 	bool scheduledReloadShaders;
+	// the screenshot button has been pressed, next render pass it will be executed
+	bool scheduledScreenshot;
 
 	bool showBoxes;
 	bool blendAlpha;

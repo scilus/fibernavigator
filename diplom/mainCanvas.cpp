@@ -4,6 +4,7 @@
 #include "wx/utils.h"
 
 #include "splinePoint.h"
+#include "lic/FgeOffscreen.h"
 
 #include "mainFrame.h"
 
@@ -557,16 +558,41 @@ void MainCanvas::render()
     switch (m_view)
     {
     case mainView: {
-    	glMatrixMode(GL_PROJECTION);
-    	glLoadIdentity();
-    	glOrtho( - orthoModX, orthoSizeNormal + orthoModX, - orthoModY, orthoSizeNormal + orthoModY, -500, 500);
-    	
-    	glPushMatrix();
-    	m_dh->doMatrixManipulation();
-    	
-    	m_dh->scene->renderScene();
-    	//renderTestRay();
-	    glPopMatrix();
+    	if ( m_dh->scheduledScreenshot)
+    	{
+    		printf("max texture size %d", GL_MAX_3D_TEXTURE_SIZE);
+    		FgeOffscreen fbo(4000, 4000, true);;
+    		fbo.setClearColor(1.0, 1.0, 1.0);
+    		fbo.activate();
+    		
+        	glMatrixMode(GL_PROJECTION);
+        	glLoadIdentity();
+        	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -500, 500);
+        	glViewport(0, 0, 4000, 4000);
+        	
+        	glPushMatrix();
+        	m_dh->doMatrixManipulation();
+        	m_dh->scene->renderScene();
+    	    glPopMatrix();
+    	    
+    	    fbo.getTexObject(1)->saveImageToPPM((m_dh->m_screenshotName).mb_str());
+    		fbo.deactivate();
+    		m_dh->scheduledScreenshot = false;
+    	}
+    	else
+    	{
+    		glMatrixMode(GL_PROJECTION);
+	    	glLoadIdentity();
+	    	glOrtho( - orthoModX, orthoSizeNormal + orthoModX, - orthoModY, orthoSizeNormal + orthoModY, -500, 500);
+	    	
+	    	glPushMatrix();
+	    	m_dh->doMatrixManipulation();
+	    	
+	    	m_dh->scene->renderScene();
+	    	//renderTestRay();
+		    glPopMatrix();
+    	}
+	   
 	    break;
     }
     default:

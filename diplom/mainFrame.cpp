@@ -92,6 +92,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	// Menu Help
     EVT_MENU(MENU_HELP_ABOUT, MainFrame::OnAbout)
     EVT_MENU(MENU_HELP_SHORTCUTS, MainFrame::OnShortcuts)
+    EVT_MENU(MENU_HELP_SCREENSHOT, MainFrame::OnScreenshot)
 
     /*
      * List widget events
@@ -1190,6 +1191,25 @@ void MainFrame::OnShortcuts(wxCommandEvent& WXUNUSED(event))
 );
 }
 
+void MainFrame::OnScreenshot(wxCommandEvent& WXUNUSED(event))
+{
+	wxString caption = wxT("Choose a file");
+	wxString wildcard = wxT("PPM files (*.ppm)|*.ppm||*.*|*.*");
+	wxString defaultDir = wxEmptyString;
+	wxString defaultFilename = wxEmptyString;
+	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
+	dialog.SetFilterIndex(0);
+	dialog.SetDirectory(m_dh->m_screenshotPath);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		m_dh->m_screenshotPath = dialog.GetDirectory();
+		m_dh->m_screenshotName = dialog.GetPath();
+		m_dh->scheduledScreenshot = true;
+		m_mainGL->render();
+		m_mainGL->render();
+	}	
+}
+
 /****************************************************************************************************
  *
  * Events on Widgets, Sliders and Buttons
@@ -1449,7 +1469,7 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 			m_gl0->SetMaxSize(wxSize(150,150));
 			m_gl1->SetMaxSize(wxSize(150,150));
 			m_gl2->SetMaxSize(wxSize(150,150));
-			m_mainGL->SetMaxSize(wxSize(1000,1000));
+			m_mainGL->SetMaxSize(wxSize(10000,10000));
 			
 			m_xSlider->SetMinSize(wxSize(150,-1));
 			m_ySlider->SetMinSize(wxSize(150,-1));

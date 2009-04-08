@@ -104,7 +104,7 @@ void TheScene::bindTextures()
 void TheScene::renderScene()
 {
 	if ( m_dh->mainFrame->m_listCtrl->GetItemCount() == 0 ) return;
-
+	
 	renderSplineSurface();
 
 	if ( m_dh->pointMode )
@@ -129,7 +129,7 @@ void TheScene::renderScene()
 	
 	if ( m_dh->showColorMapLegend )
 		drawColorMapLegend();
-
+	
 	if ( m_dh->GLError() ) m_dh->printGLError(wxT("render scene"));
 }
 

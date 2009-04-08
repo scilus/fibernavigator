@@ -9,8 +9,6 @@
 = relativ(?) einfach
 =
 ========================================================================
-interne implementierung der offsetflaeche
-keine OPENGL installation: beim start lesbare fehlermeldung
 lesen der fasern als vtk-ascii file
 ========================================================================
 =
@@ -52,6 +50,8 @@ background and threshold
 =     erledigt
 =
 ===============================================================================
+interne implementierung der offsetflaeche
+keine OPENGL installation: beim start lesbare fehlermeldung
 fasern durchsichtig ( gewichtet mit overlay )
 slider fuer isosurface reparieren
 lesen von freesurfer mesh files	

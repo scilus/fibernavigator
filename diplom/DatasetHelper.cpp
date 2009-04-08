@@ -35,6 +35,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 
 
 	scheduledReloadShaders = true;
+	scheduledScreenshot = false;
 	blendTexOnMesh = true;
 	use_lic = false;
 	useVBO = true;
@@ -93,6 +94,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	
 	m_scnFileName = _T("");
 	m_scenePath = _T("");
+	m_screenshotPath = _T("");
 	m_scnFileLoaded = false;
 	
 	Vector v(0.0, 0.0, 0.0);
