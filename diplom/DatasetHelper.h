@@ -208,7 +208,7 @@ public:
 	bool m_texAssigned;
 	bool m_selBoxChanged;
 
-
+	int geforceLevel;
 
 private:
 

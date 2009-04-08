@@ -101,6 +101,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_freeSlizeOffset = v;
 	m_freeSlizeRotation = v;
 
+	geforceLevel = 0;
 #ifdef DEBUG
 	debugLevel = 0;
 #else

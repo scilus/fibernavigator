@@ -560,15 +560,28 @@ void MainCanvas::render()
     case mainView: {
     	if ( m_dh->scheduledScreenshot)
     	{
-    		printf("max texture size %d", GL_MAX_3D_TEXTURE_SIZE);
-    		FgeOffscreen fbo(4000, 4000, true);;
+    		int size = 0;
+    		switch (m_dh->geforceLevel)
+    		{
+    		case 6:
+    			size = 2000;
+    			break;
+    		case 8:
+    			size = 4000;
+    			break;
+    		default:
+    			size = 1000;
+    			break;
+    		}
+    		
+    		FgeOffscreen fbo(size, size, true);;
     		fbo.setClearColor(1.0, 1.0, 1.0);
     		fbo.activate();
     		
         	glMatrixMode(GL_PROJECTION);
         	glLoadIdentity();
         	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -500, 500);
-        	glViewport(0, 0, 4000, 4000);
+        	glViewport(0, 0, size, size);
         	
         	glPushMatrix();
         	m_dh->doMatrixManipulation();

@@ -244,11 +244,12 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"), -1, -1, NULL);
    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"), -1, -1, NULL);
    
+   m_dh = new DatasetHelper(this);
    
    	/*
     * Set OpenGL attributes
     */
-   printf("Initializing OpenGL\n");
+    m_dh->printDebug(_T("Initializing OpenGL"), 1);
     GLboolean doubleBuffer = GL_TRUE;
     #ifdef __WXMSW__
     	int *gl_attrib = NULL;
@@ -271,7 +272,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
         doubleBuffer = GL_FALSE;
     }
     
-    m_dh = new DatasetHelper(this);
+    
     
     m_dh->scene = new TheScene(m_dh);
     

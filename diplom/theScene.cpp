@@ -43,6 +43,28 @@ void TheScene::initGL(int view)
 		{
 			m_dh->printDebug(_T("Status: Using GLEW ") +  wxString::FromAscii((char*)glewGetString(GLEW_VERSION)), 1);
 			
+			
+			wxString vendor;
+			wxString renderer;
+			vendor = wxString::FromAscii((char*)glGetString(GL_VENDOR));
+			renderer = wxString::FromAscii((char*)glGetString(GL_RENDERER));
+			
+			if ( renderer.Contains( _T("GeForce 6")) )
+			{
+				m_dh->geforceLevel = 6; 
+			}
+			else if ( renderer.Contains( _T("GeForce 7")) )
+			{
+				m_dh->geforceLevel = 7;
+			}
+			else if ( renderer.Contains( _T("GeForce 8")) )
+			{
+				m_dh->geforceLevel = 8;
+			}
+			
+			
+			m_dh->printDebug(vendor + _T(" ") + renderer, 1);
+						
 			if( !glewIsSupported("GL_ARB_shader_objects") )
 			{
 				printf("*** ERROR no support for shader objects found.\n");
