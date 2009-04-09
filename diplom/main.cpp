@@ -50,7 +50,7 @@
 #include <exception>
 
 #include "main.h"
-#include "mainFrame.h"
+#include "gui/mainFrame.h"
 
 wxString MyApp::respath;
 wxString MyApp::shaderPath;
