@@ -553,8 +553,7 @@ bool Surface::save(wxString filename ) const
 	
 	//m_dh->printDebug(_T("start saving vtk file"), 1);
 	std::ofstream dataFile(c_file);
-	wxFileOffset nSize = 0;
-
+	
 	if (dataFile)
 	{
 		std::cout << "opening file" << std::endl;

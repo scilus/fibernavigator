@@ -64,7 +64,6 @@ bool Fibers::loadCamino(wxString filename)
 	wxFile dataFile;
 	wxFileOffset nSize = 0;
 	int pc = 0;
-	converterByteINT32 cbi;
 	converterByteFloat cbf;
 	std::vector<float>tmpPoints;
 	std::vector<int>tmpLines;

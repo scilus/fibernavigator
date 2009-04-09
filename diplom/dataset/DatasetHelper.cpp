@@ -633,10 +633,13 @@ void DatasetHelper::save(wxString filename)
 
 	SelectionBox* currentBox;
 	std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
-	for (unsigned int i = boxes.size(); i > 0; --i) {
-		for (unsigned int j = boxes[i - 1].size(); j > 0; --j) {
+	for (unsigned int i = boxes.size(); i > 0; --i) 
+	{
+		for (unsigned int j = boxes[i - 1].size(); j > 0; --j) 
+		{
 			wxXmlNode *box = new wxXmlNode(nodeboxes, wxXML_ELEMENT_NODE, wxT("box"));
 			currentBox = boxes[i - 1][j - 1];
+			if ( !currentBox->getIsBox() ) continue;
 
 			wxXmlNode *center = new wxXmlNode(box, wxXML_ELEMENT_NODE, wxT("center"));
 			wxXmlProperty *propz = new wxXmlProperty(wxT("z"), wxString::Format(wxT("%f"), currentBox->getCenter().z));
@@ -662,7 +665,8 @@ void DatasetHelper::save(wxString filename)
 				proptype = new wxXmlProperty(wxT("type"), currentBox->getNOT() ? wxT("NOT") : wxT("AND"));
 			wxXmlProperty *propactive = new wxXmlProperty(wxT("active"), currentBox->getActive() ? wxT("yes") : wxT("no"), proptype);
 			wxXmlProperty *propvisible = new wxXmlProperty(wxT("visible"), currentBox->getVisible() ? wxT("yes") : wxT("no"), propactive);
-			status->AddProperty(propvisible);
+			wxXmlProperty *propisbox = new wxXmlProperty(wxT("isBox"), currentBox->getIsBox() ? wxT("yes") : wxT("no"), propvisible);
+			status->AddProperty(propisbox);
 		}
 	}
 

@@ -433,9 +433,9 @@ void AnatomyHelper::renderS4()
 
 void AnatomyHelper::renderFreeSlize()
 {
-	float x_off = m_dh->m_freeSlizeOffset.x;
-	float y_off = m_dh->m_freeSlizeOffset.y;
-	float z_off = m_dh->m_freeSlizeOffset.z;
+	//float x_off = m_dh->m_freeSlizeOffset.x;
+	//float y_off = m_dh->m_freeSlizeOffset.y;
+	//float z_off = m_dh->m_freeSlizeOffset.z;
 	float x_rot = m_dh->m_freeSlizeRotation.x;
 	float y_rot = m_dh->m_freeSlizeRotation.y;
 	float z_rot = m_dh->m_freeSlizeRotation.z;

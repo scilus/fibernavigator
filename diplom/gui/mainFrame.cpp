@@ -747,8 +747,8 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 {
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 	wxTreeItemId pId = m_treeWidget->GetItemParent(tBoxId);
-	SelectionBox *selBox;
-	Anatomy* a;
+	SelectionBox *selBox = NULL;
+	Anatomy* a = NULL;
 	
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
@@ -786,9 +786,6 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 	
 	a->m_roi = selBox;
 			
-			
-			
-
 	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
@@ -1299,7 +1296,7 @@ void MainFrame::OnButtonAxial(wxCommandEvent& WXUNUSED(event))
 	if (m_dh->scene)
 	{
 		m_dh->showAxial = !m_dh->showAxial;
-		m_mainGL->Refresh();
+		m_mainGL->render();
 	}
 }
 /****************************************************************************************************
@@ -1312,7 +1309,7 @@ void MainFrame::OnButtonCoronal(wxCommandEvent& WXUNUSED(event))
 	if (m_dh->scene)
 	{
 		m_dh->showCoronal = !m_dh->showCoronal;
-		m_mainGL->Refresh();
+		m_mainGL->render();
 	}
 }
 /****************************************************************************************************
@@ -1325,7 +1322,7 @@ void MainFrame::OnButtonSagittal(wxCommandEvent& WXUNUSED(event))
 	if (m_dh->scene)
 	{
 		m_dh->showSagittal = !m_dh->showSagittal;
-		m_mainGL->Refresh();
+		m_mainGL->render();
 	}
 }
 /****************************************************************************************************
@@ -1339,7 +1336,7 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 
 	updateMenus();
 	this->Update();
-	this->Refresh();
+	//this->Refresh();
 
 	
 	m_mainGL->render();
@@ -1519,9 +1516,6 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 	m_listCtrl->SetColumnWidth(1, m_listCtrl->GetSize().x - 110);
 	SetSize(windowSize);
 
-//<<<<<<< .mine
-//	m_mainGL->Refresh();
-//=======
 	m_mainGL->changeOrthoSize();
 	updateMenus();
 	this->Update();
@@ -1537,6 +1531,9 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
  ****************************************************************************************************/
 void MainFrame::refreshAllGLWidgets()
 {
+	updateStatusBar();
+	updateMenus();
+	
 #if defined(__WXMAC__)
 	if (m_gl0) m_gl0->Refresh();
 	if (m_gl1) m_gl1->Refresh();
@@ -1548,8 +1545,6 @@ void MainFrame::refreshAllGLWidgets()
 	if (m_gl2) m_gl2->render();
 	if (m_mainGL) m_mainGL->render();
 #endif
-	updateStatusBar();
-	updateMenus();
 }
 /****************************************************************************************************
  *
@@ -1872,7 +1867,7 @@ void MainFrame::OnTreeLabelEdit(wxTreeEvent& event)
  ****************************************************************************************************/
 int MainFrame::treeSelected(wxTreeItemId id)
 {
-	wxTreeItemId pId = m_treeWidget->GetItemParent(id);
+	wxTreeItemId pId = m_treeWidget->GetItemParent(id); 
 	//if ( !pId.IsOk() ) return 0;
 	wxTreeItemId ppId = m_treeWidget->GetItemParent(pId);
 	//if ( !ppId.IsOk() ) return 0;
@@ -2011,11 +2006,7 @@ if(GetSizer())
 
 if(m_mainGL)	
 	m_mainGL->changeOrthoSize();
-#if 0
-	printf("%d : %d : %d :%d : %d, %d\n", this->GetSize().x, this->GetSize().y, 
-			this->GetClientSize().x, this->GetClientSize().y,
-			m_mainGL->GetSize().x, m_mainGL->GetSize().y);
-#endif
+
 	this->Update();
 	this->Refresh();
 }
@@ -2106,7 +2097,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
  ****************************************************************************************************/
 void MainFrame::OnMouseEvent(wxMouseEvent& event)
 {
-	this->Refresh();
+	//this->Refresh();
 }
 
 /****************************************************************************************************
