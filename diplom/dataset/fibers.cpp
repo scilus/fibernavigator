@@ -783,7 +783,7 @@ std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
 			int y = wxMin(m_dh->rows   -1, wxMax(0, (int)m_pointArray[i * 3 + 1]));
 			int z = wxMin(m_dh->frames -1, wxMax(0, (int)m_pointArray[i * 3 + 2]));
 			int index =  x + y * m_dh->columns + z * m_dh->rows * m_dh->columns;
-			if ( (box->m_overlay[index] - box->m_threshold) > 0.01f)
+			if ( (box->m_overlay[index] - box->getThreshold() ) > 0.01f)
 			{
 				m_inBox[getLineForPoint(i)] = 1;
 			}

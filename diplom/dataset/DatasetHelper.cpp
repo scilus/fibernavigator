@@ -961,7 +961,7 @@ void DatasetHelper::createCutDataset()
 				float* src = anatomy->getFloatDataset();
 				float* dst = newAnatomy->getFloatDataset();
 				
-				printf ("x1: %d   x2: %d   y1: %d   y2: %d   z1: %d   z2: %d\n", x1,x2,y1,y2,z1,z2);
+				//printf ("x1: %d   x2: %d   y1: %d   y2: %d   z1: %d   z2: %d\n", x1,x2,y1,y2,z1,z2);
 				
 				for (int b=z1 ; b < z2 ; ++b) 
 				{

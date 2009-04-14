@@ -62,6 +62,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_VOI_TOGGLE_SHOWBOX, MainFrame::OnToggleShowBox)
 	EVT_MENU(MENU_VOI_RENAME_BOX, MainFrame::OnRenameBox)
 	EVT_MENU(MENU_VOI_TOGGLE_ANDNOT, MainFrame::OnToggleAndNot)
+	EVT_MENU(MENU_VOI_COLOR_ROI, MainFrame::OnColorRoi)
 	// Menu Surfaces
 	EVT_MENU(MENU_SURFACE_NEW_OFFSET, MainFrame::OnNewOffsetMap)	
 	EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
@@ -802,6 +803,56 @@ void MainFrame::OnHideSelBoxes(wxCommandEvent& WXUNUSED(event))
 }
 /****************************************************************************************************
  *
+ * 
+ *
+ ****************************************************************************************************/
+void MainFrame::OnColorRoi(wxCommandEvent& WXUNUSED(event))
+{
+	if (!m_dh->scene || !m_dh->fibers_loaded) return;
+
+	// check if selection box selected
+	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+	SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
+
+	
+	
+	wxColourData colorData;
+
+	for ( int i = 0; i < 10 ; ++i)
+	{
+		wxColour color(i*28, i*28, i*28);
+		colorData.SetCustomColour(i, color);
+	}
+	int i = 10;
+	wxColour color(255, 0, 0);
+	colorData.SetCustomColour(i++, color);
+	wxColour color1(0, 255, 0);
+	colorData.SetCustomColour(i++, color1);
+	wxColour color2(0, 0, 255);
+	colorData.SetCustomColour(i++, color2);
+	wxColour color3(255, 255, 0);
+	colorData.SetCustomColour(i++, color3);
+	wxColour color4(255, 0, 255);
+	colorData.SetCustomColour(i++, color4);
+	wxColour color5(0, 255, 255);
+	colorData.SetCustomColour(i++, color5);
+
+	wxColourDialog dialog(this, &colorData);
+	wxColour col;
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		wxColourData retData = dialog.GetColourData();
+		col = retData.GetColour();
+	}
+	else return;
+
+	box->setColor(col);
+	
+	refreshAllGLWidgets();
+}
+
+/****************************************************************************************************
+ *
  * Menu Spline Surface
  *
  ****************************************************************************************************/
@@ -1261,9 +1312,7 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 		Anatomy* a = (Anatomy*) m_listCtrl->GetItemData(item);
 		if ( a->m_roi )
 		{
-			a->m_roi->m_threshold = threshold;
-			a->m_roi->setDirty(true);
-			m_dh->m_selBoxChanged = true;
+			a->m_roi->setThreshold( threshold );
 		}
 	}
 	refreshAllGLWidgets();

@@ -719,7 +719,7 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	}
 
 	m_tMesh->finalize();
-	m_tMesh->printInfo();
+	//m_tMesh->printInfo();
 
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();

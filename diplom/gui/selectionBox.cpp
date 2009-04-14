@@ -1,5 +1,6 @@
 #include "selectionBox.h"
 #include "../dataset/fibers.h"
+#include "../misc/IsoSurface/CIsoSurface.h"
 
 SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 {
@@ -9,6 +10,7 @@ SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 	m_size = size;
 	m_isVisible = true;
 	m_dirty = true;
+	m_gfxDirty = true;
 	m_isMaster = false;
 	m_isNOT = false;
 	m_isActive = true;
@@ -38,6 +40,8 @@ SelectionBox::SelectionBox(float* overlay, DatasetHelper* dh)
 	m_isActive = true;
 	m_isSelected = false;
 	m_colorChanged = false;
+	wxColour col(240, 30, 30);
+	m_color = col;
 	m_isLockedToCrosshair = false;
 	m_treeId = NULL;
 	m_handleRadius = 3.0;
@@ -49,6 +53,8 @@ SelectionBox::SelectionBox(float* overlay, DatasetHelper* dh)
 		m_inBox[i] = 0;
 	}
 	m_name = wxT("ROI");
+	
+	m_isosurface = new CIsoSurface(m_dh, m_overlay);
 }
 
 SelectionBox::~SelectionBox()
@@ -74,9 +80,28 @@ void SelectionBox::select(bool flag)
 	}
 }
 
+void SelectionBox::drawIsoSurface()
+{
+	if ( !m_isActive || !m_isVisible ) return;
+	
+	if ( m_gfxDirty )
+	{
+		m_isosurface->setThreshold( m_threshold );
+		m_isosurface->GenerateWithThreshold();
+		m_gfxDirty = false;
+	}
+	glColor3ub(m_color.Red(), m_color.Green(), m_color.Blue());
+	m_isosurface->draw();
+}
+
 void SelectionBox::draw()
 {
-	if (!m_isActive || !m_isVisible || !m_isBox) return;
+	if ( !m_isActive || !m_isVisible ) return;
+	
+	if ( !m_isBox )
+	{
+		return;
+	}
 
 	float cx = m_center.x;
 	float cy = m_center.y;
@@ -225,10 +250,6 @@ void SelectionBox::draw()
 	glEnd();
 
 	glDisable(GL_BLEND);
-
-
-
-
 }
 
 void SelectionBox::draw1()
@@ -637,6 +658,11 @@ void SelectionBox::update()
 
 void SelectionBox::setColor(wxColour color)
 {
+	if (! m_isBox)
+	{
+		m_color = color;
+		return;
+	}
 	if (!m_isMaster) return;
 	m_color = color;
 	m_colorChanged = true;
@@ -704,4 +730,12 @@ void SelectionBox::setIsMaster(bool v)
 			m_inBranch[i] = 0;
 		}
 	}
+}
+
+void SelectionBox::setThreshold(float v)
+{
+	m_threshold = v;
+	m_dirty = true;
+	m_gfxDirty = true;
+	m_dh->m_selBoxChanged = true;
 }

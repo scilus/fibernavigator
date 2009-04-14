@@ -54,6 +54,7 @@ private:
     void OnHideSelBoxes(wxCommandEvent& event);
     void OnRenameBox(wxCommandEvent& event);
     void OnToggleAndNot(wxCommandEvent& event);
+    void OnColorRoi(wxCommandEvent& event);
 	// Spline Surface
 	void OnNewSurface(wxCommandEvent& event);
 	void OnToggleNormal(wxCommandEvent& event);
@@ -217,6 +218,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_VOI_RENAME_BOX							134
 #define MENU_VOI_NEW_FROM_OVERLAY					135
 #define MENU_VOI_TOGGLE_ANDNOT						136
+#define MENU_VOI_COLOR_ROI							137
 // Menu Spline Surface
 #define MENU_SPLINESURF_DRAW_POINTS					140
 #define MENU_SPLINESURF_NEW							141

@@ -274,6 +274,27 @@ void TheScene::renderMesh()
 			}
 		}
 	}
+	
+	std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
+	
+	m_dh->shaderHelper->m_meshShader->setUniInt("showFS", true);
+	m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
+	m_dh->shaderHelper->m_meshShader->setUniFloat("alpha_", 1.0);
+	m_dh->shaderHelper->m_meshShader->setUniInt("useColorMap",  m_dh->colorMap);
+	m_dh->shaderHelper->m_meshShader->setUniInt("useLic", false);
+	m_dh->shaderHelper->m_meshShader->setUniInt("useCMAP", false);
+	
+	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
+	{
+		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
+		{
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			if ( !boxes[i][j]->getIsBox() )
+				boxes[i][j]->drawIsoSurface();
+			glPopAttrib();
+		}
+	}
+	
 	m_dh->shaderHelper->m_meshShader->release();
 
 	lightsOff();

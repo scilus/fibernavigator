@@ -15,6 +15,7 @@
 
 class MainCanvas;
 class DatasetHelper;
+class CIsoSurface;
 
 class SelectionBox : public wxTreeItemData
 {
@@ -24,6 +25,7 @@ public:
 	~SelectionBox();
 
 	void draw();
+	void drawIsoSurface();
 	hitResult hitTest(Ray *ray);
 	void processDrag(wxPoint click, wxPoint lastPos);
 
@@ -53,6 +55,8 @@ public:
 
 	bool isDirty() {return m_dirty;};
 	void setDirty(bool v);
+	void setThreshold(float v);
+	float getThreshold() { return m_threshold;};
 
 	bool colorChanged() {return m_colorChanged;};
 	wxColour getColor() {return m_color;};
@@ -98,7 +102,6 @@ public:
 	std::vector<bool>m_inBox;
 	std::vector<bool>m_inBranch;
 
-	float m_threshold;
 	float* m_overlay;
 	DatasetHelper* m_dh;
 
@@ -118,12 +121,15 @@ private:
 
 	float m_handleRadius;
 	bool m_dirty;
+	bool m_gfxDirty;
 	bool m_colorChanged;
 	wxColour m_color;
 	wxTreeItemId m_treeId;
 
 	int m_stepSize;
 
+	float m_threshold;
+	CIsoSurface* m_isosurface;
 	bool m_isBox;
 
 	bool m_isMaster;
