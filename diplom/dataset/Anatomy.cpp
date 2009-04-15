@@ -6,10 +6,12 @@
  */
 
 #include "Anatomy.h"
+#include "fibers.h"
 
 #include "wx/textfile.h"
 #include <GL/glew.h>
 
+#include "../gui/selectionBox.h"
 #include "../misc/nifti/nifti1_io.h"
 
 #define MIN_HEADER_SIZE 348
@@ -73,7 +75,7 @@ Anatomy::~Anatomy()
 	delete[] m_floatDataset;
 	const GLuint* tex = &m_GLuint;
 	glDeleteTextures(1, tex);
-	if ( m_roi ) m_roi->m_overlay = NULL;
+	//if ( m_roi ) m_roi->m_overlay = NULL;
 }
 
 bool Anatomy::load(wxString filename)
@@ -113,7 +115,7 @@ bool Anatomy::loadNifti(wxString filename)
 	strcpy(hdr_file, (const char*) filename.mb_str(wxConvUTF8));
 
 	nifti_image* ima = nifti_image_read(hdr_file, 0);
-
+	
 	m_columns = ima->dim[1]; // 160
 	m_rows = ima->dim[2]; // 200
 	m_frames = ima->dim[3]; // 160
@@ -135,12 +137,6 @@ bool Anatomy::loadNifti(wxString filename)
 		m_dh->frames 	= m_frames;
 		m_dh->anatomy_loaded = true;
 	}
-
-	/*
-	printf("XYZT dimensions: %d %d %d %d\n", ima->dim[1], ima->dim[2], ima->dim[3], ima->dim[4]);
-	printf("datatype: %d\n", ima->datatype);
-	printf("byte order: %d\n", ima->byteorder);
-	*/
 
 	if (ima->datatype == 2)
 	{
@@ -285,6 +281,17 @@ bool Anatomy::loadNifti(wxString filename)
 
 }
 
+void Anatomy::saveNifti(wxString filename)
+{
+	int dims [] = {3,m_columns, m_rows, m_frames,1,0,0,0};
+	nifti_image* ima = nifti_make_new_nim(dims, DT_FLOAT32, 1);
+	char fn[1024];
+	strcpy(fn, (const char*)filename.mb_str(wxConvUTF8));
+	ima->fname = fn;
+	ima->data = m_floatDataset;
+	 nifti_image_write(ima);
+}
+
 void Anatomy::generateTexture()
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
@@ -353,11 +360,6 @@ GLuint Anatomy::getGLuint()
 	if (!m_GLuint)
 		generateTexture();
 	return m_GLuint;
-}
-
-float* Anatomy::getFloatDataset()
-{
-	return m_floatDataset;
 }
 
 void Anatomy::createOffset(float* source)
@@ -648,4 +650,120 @@ void Anatomy::setZero(int x, int y, int z)
 	{
 		m_floatDataset[i] = 0.0;
 	}
+}
+
+void Anatomy::minimize()
+{
+	if ( !m_dh->fibers_loaded) return;
+	std::vector<bool> tmp( m_columns * m_rows * m_frames, false);
+	Fibers* fib = NULL; 
+	m_dh->getFiberDataset(fib);
+	
+	int x,y,z;
+	
+	for ( int i = 0 ; i < fib->getLineCount() ; ++i )
+	{
+		if (fib->m_inBox[i] == 1)
+		{
+			for ( int j = fib->getStartIndexForLine(i) ; j < (fib->getStartIndexForLine(i) + (fib->getPointsPerLine(i)*3)) ; ++j )
+			{
+				x = wxMin(m_dh->columns-1, wxMax(0, (int)fib->m_pointArray[j++]));
+				y = wxMin(m_dh->rows   -1, wxMax(0, (int)fib->m_pointArray[j++]));
+				z = wxMin(m_dh->frames -1, wxMax(0, (int)fib->m_pointArray[j]));
+				int index =  x + y * m_dh->columns + z * m_dh->rows * m_dh->columns;
+				tmp[index] = true;
+			}
+		}
+	}
+	
+	if (m_dh->morphing)
+	{
+		dilatate(&tmp);
+		dilatate(&tmp);
+		dilatate(&tmp);
+		erode(&tmp);
+		erode(&tmp);
+		erode(&tmp);
+	}
+	for ( int i = 0 ; i < m_columns * m_rows * m_frames ; ++i )
+	{
+		if ( !tmp[i] )
+			m_floatDataset[i] = 0;
+	}
+	const GLuint* tex = &m_GLuint;
+	glDeleteTextures(1, tex);
+	generateTexture();
+}
+
+void Anatomy::dilatate(std::vector<bool>* input)
+{
+	std::vector<bool> tmp (input->size(), false);
+	for (int c = 1 ; c < m_columns - 1 ; ++c )
+	{
+		for ( int r = 1 ; r < m_rows - 1 ; ++r)
+		{
+			for ( int f = 1 ; f < m_frames - 1 ; ++f)
+			{
+				int index = c + r * m_columns + f * m_columns * m_rows; 
+				if ( input->at(index) )
+					dilatate1(&tmp, index);
+			}
+		}
+	}
+	for (size_t i = 0 ; i < input->size() ; ++i)
+	{
+		input->at(i) = tmp[i];
+	}
+}
+
+void Anatomy::dilatate1(std::vector<bool>* input, int index)
+{
+	input->at(index - 1) = true;
+	input->at(index    ) = true;
+	input->at(index + 1) = true;
+	input->at(index - m_columns - 1) = true;
+	input->at(index - m_columns    ) = true;
+	input->at(index - m_columns + 1) = true;
+	input->at(index + m_columns - 1) = true;
+	input->at(index + m_columns    ) = true;
+	input->at(index + m_columns + 1) = true;
+	input->at(index - m_columns * m_rows - 1) = true;
+	input->at(index - m_columns * m_rows    ) = true;
+	input->at(index - m_columns * m_rows + 1) = true;
+	input->at(index + m_columns * m_rows - 1) = true;
+	input->at(index + m_columns * m_rows    ) = true;
+	input->at(index + m_columns * m_rows + 1) = true;
+	input->at(index - m_columns * m_rows - m_columns) = true;
+	input->at(index - m_columns * m_rows + m_columns) = true;
+	input->at(index + m_columns * m_rows - m_columns) = true;
+	input->at(index + m_columns * m_rows + m_columns) = true;
+		
+}
+
+
+void Anatomy::erode(std::vector<bool>* input)
+{
+	std::vector<bool> tmp (input->size(), false);
+	for (int c = 1 ; c < m_columns - 1 ; ++c )
+	{
+		for ( int r = 1 ; r < m_rows - 1 ; ++r)
+		{
+			for ( int f = 1 ; f < m_frames - 1 ; ++f)
+			{
+				int index = c + r * m_columns + f * m_columns * m_rows; 
+				if ( input->at(index) )
+					erode1(&tmp, input, index);
+			}
+		}
+	}
+	for (size_t i = 0 ; i < input->size() ; ++i)
+	{
+		input->at(i) = tmp[i];
+	}
+}
+
+void Anatomy::erode1(std::vector<bool>* tmp, std::vector<bool>* input, int index)
+{
+	tmp->at(index) = input->at(index - 1) &	input->at(index + 1) & input->at(index - m_columns) & 
+		input->at(index + m_columns) & input->at(index - m_columns * m_rows) & input->at(index + m_columns * m_rows);
 }

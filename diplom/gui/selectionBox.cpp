@@ -658,13 +658,8 @@ void SelectionBox::update()
 
 void SelectionBox::setColor(wxColour color)
 {
-	if (! m_isBox)
-	{
-		m_color = color;
-		return;
-	}
-	if (!m_isMaster) return;
 	m_color = color;
+	if (!m_isMaster) return;
 	m_colorChanged = true;
 	update();
 }

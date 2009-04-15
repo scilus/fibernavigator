@@ -11,7 +11,8 @@
 #include "datasetInfo.h"
 #include "surface.h"
 #include "../misc/lic/TensorField.h"
-#include "../gui/selectionBox.h"
+
+class SelectionBox;
 
 class Anatomy : public DatasetInfo , public wxTreeItemData
 {
@@ -25,10 +26,13 @@ public:
 	void draw() {};
 	GLuint getGLuint();
 
-	float* getFloatDataset();
+	float* getFloatDataset() { return m_floatDataset;};
+	float getFloatDataset(int i) {return m_floatDataset[i];};
 	TensorField* getTensorField() { return m_tensorField; };
 	bool loadNifti(wxString filename);
+	void saveNifti(wxString filename);
 	void setZero(int x, int y, int z);
+	void minimize();
 
 	SelectionBox* m_roi;
 
@@ -40,8 +44,13 @@ private:
 	void smooth() {};
 	void activateLIC() {};
 	void createOffset(float* dataset);
-	
+
 	double xxgauss(double x, double sigma);
+	
+	void dilatate(std::vector<bool>*);
+	void dilatate1(std::vector<bool>*, int index);
+	void erode(std::vector<bool>*);
+	void erode1(std::vector<bool>*, std::vector<bool>*, int index);
 
 	float *m_floatDataset;
 	TensorField* m_tensorField;

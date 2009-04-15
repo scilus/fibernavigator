@@ -35,6 +35,8 @@ private:
 	void OnSave(wxCommandEvent& event);
 	void OnSaveFibers(wxCommandEvent& event);
 	void OnSaveSurface(wxCommandEvent& event);
+	void OnSaveDataset(wxCommandEvent& event);
+	void OnMinimizeDataset(wxCommandEvent& event);
 	void OnQuit(wxCommandEvent& event);
 	void OnToggleLayout(wxCommandEvent& event);
 	// View
@@ -55,6 +57,7 @@ private:
     void OnRenameBox(wxCommandEvent& event);
     void OnToggleAndNot(wxCommandEvent& event);
     void OnColorRoi(wxCommandEvent& event);
+    void OnUseMorph(wxCommandEvent& event);
 	// Spline Surface
 	void OnNewSurface(wxCommandEvent& event);
 	void OnToggleNormal(wxCommandEvent& event);
@@ -200,7 +203,10 @@ DECLARE_EVENT_TABLE()
 #define MENU_FILE_SAVE_FIBERS						104
 #define MENU_FILE_SAVE_SURFACE						105
 #define MENU_FILE_QUIT        						wxID_EXIT
-#define BUTTON_TOGGLE_LAYOUT						106
+#define MENU_FILE_SAVE_DATASET						106
+#define MENU_FILE_MINIMIZE_DATASET					107
+#define BUTTON_TOGGLE_LAYOUT						119
+
 // Menu View
 #define MENU_VIEW_LEFT								120
 #define MENU_VIEW_RIGHT								121
@@ -219,6 +225,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_VOI_NEW_FROM_OVERLAY					135
 #define MENU_VOI_TOGGLE_ANDNOT						136
 #define MENU_VOI_COLOR_ROI							137
+#define MENU_VOI_USE_MORPH							138
 // Menu Spline Surface
 #define MENU_SPLINESURF_DRAW_POINTS					140
 #define MENU_SPLINESURF_NEW							141

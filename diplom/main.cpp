@@ -169,6 +169,8 @@ bool MyApp::OnInit(void)
 		voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New"));
 		voi_menu->Append(MENU_VOI_NEW_FROM_OVERLAY, _T("New ROI from Overlay"));
 		voi_menu->AppendSeparator();
+		voi_menu->AppendCheckItem(MENU_VOI_USE_MORPH, _T("morphing"));
+		voi_menu->AppendSeparator();
 		voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SELBOX, _T("active\tCtrl-A"));
 		voi_menu->AppendCheckItem(MENU_VOI_TOGGLE_SHOWBOX, _T("visible\tCtrl-V"));
 	

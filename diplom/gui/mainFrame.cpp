@@ -43,6 +43,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_FILE_SAVE, MainFrame::OnSave)
     EVT_MENU(MENU_FILE_SAVE_FIBERS, MainFrame::OnSaveFibers)
     EVT_MENU(MENU_FILE_SAVE_SURFACE, MainFrame::OnSaveSurface)
+    EVT_MENU(MENU_FILE_SAVE_DATASET, MainFrame::OnSaveDataset)
+    EVT_MENU(MENU_FILE_MINIMIZE_DATASET, MainFrame::OnMinimizeDataset)
     EVT_MENU(MENU_FILE_QUIT, MainFrame::OnQuit)
     EVT_MENU(BUTTON_TOGGLE_LAYOUT, MainFrame::OnToggleLayout)
 	// Menu View
@@ -63,6 +65,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_VOI_RENAME_BOX, MainFrame::OnRenameBox)
 	EVT_MENU(MENU_VOI_TOGGLE_ANDNOT, MainFrame::OnToggleAndNot)
 	EVT_MENU(MENU_VOI_COLOR_ROI, MainFrame::OnColorRoi)
+	EVT_MENU(MENU_VOI_USE_MORPH, MainFrame::OnUseMorph)
 	// Menu Surfaces
 	EVT_MENU(MENU_SURFACE_NEW_OFFSET, MainFrame::OnNewOffsetMap)	
 	EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
@@ -461,6 +464,61 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
 	}
 }
 
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnSaveDataset(wxCommandEvent& WXUNUSED(event))
+{
+	Anatomy* a = NULL;
+		
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() < Mesh_ )
+		{
+			a = (Anatomy*) m_listCtrl->GetItemData(item);
+			
+			wxString caption = wxT("Choose a file");
+			wxString wildcard = wxT("nifti files (*.nii)|*.nii||*.*|*.*");
+			wxString defaultDir = wxEmptyString;
+			wxString defaultFilename = wxEmptyString;
+			wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
+			dialog.SetFilterIndex(0);
+			dialog.SetDirectory(m_dh->lastPath);
+			if (dialog.ShowModal() == wxID_OK)
+			{
+				m_dh->lastPath = dialog.GetDirectory();
+				a->saveNifti(dialog.GetPath());
+			}		
+		}
+	}
+}
+
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnMinimizeDataset(wxCommandEvent& WXUNUSED(event))
+{
+	Anatomy* a = NULL;
+		
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() < Mesh_ )
+		{
+			a = (Anatomy*) m_listCtrl->GetItemData(item);
+			a->minimize();
+		}
+	}
+}
+
+
 void MainFrame::OnSaveSurface(wxCommandEvent& WXUNUSED(event))
 {
 	// if ...
@@ -759,7 +817,7 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 		{
 			a = (Anatomy*) m_listCtrl->GetItemData(item);
 			selBox = new SelectionBox(a->getFloatDataset(), m_dh);
-			
+			selBox->setThreshold(a->getThreshold());
 		}
 	}
 	else 
@@ -800,6 +858,16 @@ void MainFrame::OnHideSelBoxes(wxCommandEvent& WXUNUSED(event))
 	if (!m_dh->scene) return;
 	m_dh->toggleBoxes();
 	refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnUseMorph(wxCommandEvent& WXUNUSED(event))
+{
+	if (!m_dh->scene) return;
+	m_dh->morphing = !m_dh->morphing;
 }
 /****************************************************************************************************
  *
@@ -2184,7 +2252,7 @@ void MainFrame::updateMenus()
 	voiMenu->Check(voiMenu->FindItem(_T("visible")), false);
 	voiMenu->Enable(voiMenu->FindItem(_T("active")), false);
 	voiMenu->Enable(voiMenu->FindItem(_T("visible")), false);
-	
+	voiMenu->Check(voiMenu->FindItem(_T("morphing")), m_dh->morphing);	
 	wxMenu* viewMenu = GetMenuBar()->GetMenu(1);
 	viewMenu->Check(viewMenu->FindItem(_T("show crosshair")), m_dh->showCrosshair);
 

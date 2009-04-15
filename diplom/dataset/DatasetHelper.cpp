@@ -92,6 +92,8 @@ DatasetHelper::DatasetHelper(MainFrame* mf) {
 	m_texAssigned = false;
 	m_selBoxChanged = true;
 	
+	morphing = false;
+	
 	m_scnFileName = _T("");
 	m_scenePath = _T("");
 	m_screenshotPath = _T("");
@@ -985,7 +987,7 @@ void DatasetHelper::createCutDataset()
 
 	mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
 	mainFrame->m_listCtrl->SetItem(0, 1, newAnatomy->getName());
-	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.40"));
+	mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.00"));
 	mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
 	mainFrame->m_listCtrl->SetItemData(0, (long) newAnatomy);
 	mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
