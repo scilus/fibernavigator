@@ -676,28 +676,35 @@ void Anatomy::minimize()
 		}
 	}
 	
-	if (m_dh->morphing)
-	{
-		dilatate(&tmp);
-		dilatate(&tmp);
-		dilatate(&tmp);
-		erode(&tmp);
-		erode(&tmp);
-		erode(&tmp);
-	}
+	Anatomy* newAnatomy = new Anatomy(m_dh);
+	newAnatomy->setZero(m_columns, m_rows, m_frames);
+
+	float* dst = newAnatomy->getFloatDataset(); 
+	
 	for ( int i = 0 ; i < m_columns * m_rows * m_frames ; ++i )
 	{
-		if ( !tmp[i] )
-			m_floatDataset[i] = 0;
+		if ( tmp[i] && m_floatDataset[i] > 0 )
+			dst[i] = 1.0;
 	}
-	const GLuint* tex = &m_GLuint;
-	glDeleteTextures(1, tex);
-	generateTexture();
+
+	newAnatomy->setName(getName() + _T("(minimal)"));
+	newAnatomy->setType(getType());
+
+	m_dh->mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
+	m_dh->mainFrame->m_listCtrl->SetItem(0, 1, newAnatomy->getName());
+	m_dh->mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.00"));
+	m_dh->mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
+	m_dh->mainFrame->m_listCtrl->SetItemData(0, (long) newAnatomy);
+	m_dh->mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,	wxLIST_STATE_SELECTED);
+	
+	
+
 }
 
-void Anatomy::dilatate(std::vector<bool>* input)
+void Anatomy::dilate()
 {
-	std::vector<bool> tmp (input->size(), false);
+	int nsize = m_columns*m_rows*m_frames;
+	std::vector<bool> tmp (nsize, false);
 	for (int c = 1 ; c < m_columns - 1 ; ++c )
 	{
 		for ( int r = 1 ; r < m_rows - 1 ; ++r)
@@ -705,18 +712,22 @@ void Anatomy::dilatate(std::vector<bool>* input)
 			for ( int f = 1 ; f < m_frames - 1 ; ++f)
 			{
 				int index = c + r * m_columns + f * m_columns * m_rows; 
-				if ( input->at(index) )
-					dilatate1(&tmp, index);
+				if ( m_floatDataset[index] == 1.0 )
+					dilate1(&tmp, index);
 			}
 		}
 	}
-	for (size_t i = 0 ; i < input->size() ; ++i)
+	for (int i = 0 ; i < nsize ; ++i)
 	{
-		input->at(i) = tmp[i];
+		if (tmp[i]) m_floatDataset[i] = 1.0;
 	}
+	const GLuint* tex = &m_GLuint;
+	glDeleteTextures(1, tex);
+	generateTexture();
+	m_dh->mainFrame->m_mainGL->render();
 }
 
-void Anatomy::dilatate1(std::vector<bool>* input, int index)
+void Anatomy::dilate1(std::vector<bool>* input, int index)
 {
 	input->at(index - 1) = true;
 	input->at(index    ) = true;
@@ -741,9 +752,10 @@ void Anatomy::dilatate1(std::vector<bool>* input, int index)
 }
 
 
-void Anatomy::erode(std::vector<bool>* input)
+void Anatomy::erode()
 {
-	std::vector<bool> tmp (input->size(), false);
+	int nsize = m_columns*m_rows*m_frames;
+	std::vector<bool> tmp (nsize, false);
 	for (int c = 1 ; c < m_columns - 1 ; ++c )
 	{
 		for ( int r = 1 ; r < m_rows - 1 ; ++r)
@@ -751,19 +763,29 @@ void Anatomy::erode(std::vector<bool>* input)
 			for ( int f = 1 ; f < m_frames - 1 ; ++f)
 			{
 				int index = c + r * m_columns + f * m_columns * m_rows; 
-				if ( input->at(index) )
-					erode1(&tmp, input, index);
+				if ( m_floatDataset[index] == 1.0 )
+					erode1(&tmp, index);
 			}
 		}
 	}
-	for (size_t i = 0 ; i < input->size() ; ++i)
+	for (int i = 0 ; i < nsize ; ++i)
 	{
-		input->at(i) = tmp[i];
+		if (!tmp[i]) m_floatDataset[i] = 0.0;
 	}
+	const GLuint* tex = &m_GLuint;
+	glDeleteTextures(1, tex);
+	generateTexture();
+	m_dh->mainFrame->m_mainGL->render();
 }
 
-void Anatomy::erode1(std::vector<bool>* tmp, std::vector<bool>* input, int index)
+void Anatomy::erode1(std::vector<bool>* tmp, int index)
 {
-	tmp->at(index) = input->at(index - 1) &	input->at(index + 1) & input->at(index - m_columns) & 
-		input->at(index + m_columns) & input->at(index - m_columns * m_rows) & input->at(index + m_columns * m_rows);
+	float test = m_floatDataset[index - 1] + m_floatDataset[index] + m_floatDataset[index + 1] +
+		m_floatDataset[index - m_columns - 1] + m_floatDataset[index - m_columns] + m_floatDataset[index - m_columns + 1] +
+		m_floatDataset[index + m_columns - 1] + m_floatDataset[index + m_columns] + m_floatDataset[index + m_columns + 1] +
+		m_floatDataset[index - m_columns * m_rows - 1] + m_floatDataset[index - m_columns * m_rows] + m_floatDataset[index - m_columns * m_rows + 1] +
+		m_floatDataset[index + m_columns * m_rows - 1] + m_floatDataset[index + m_columns * m_rows] + m_floatDataset[index + m_columns * m_rows + 1] +
+		m_floatDataset[index - m_columns * m_rows - m_columns] + m_floatDataset[index - m_columns * m_rows + m_columns] + 
+		m_floatDataset[index + m_columns * m_rows - m_columns] + m_floatDataset[index + m_columns * m_rows + m_columns];
+	if (test == 19.0) tmp->at(index) = 1.0;
 }

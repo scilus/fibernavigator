@@ -33,7 +33,8 @@ public:
 	void saveNifti(wxString filename);
 	void setZero(int x, int y, int z);
 	void minimize();
-
+	void dilate();
+	void erode();
 	SelectionBox* m_roi;
 
 private:
@@ -47,10 +48,9 @@ private:
 
 	double xxgauss(double x, double sigma);
 	
-	void dilatate(std::vector<bool>*);
-	void dilatate1(std::vector<bool>*, int index);
-	void erode(std::vector<bool>*);
-	void erode1(std::vector<bool>*, std::vector<bool>*, int index);
+	
+	void dilate1(std::vector<bool>*, int index);
+	void erode1(std::vector<bool>*, int index);
 
 	float *m_floatDataset;
 	TensorField* m_tensorField;

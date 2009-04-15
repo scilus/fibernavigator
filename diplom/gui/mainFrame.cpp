@@ -45,6 +45,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(MENU_FILE_SAVE_SURFACE, MainFrame::OnSaveSurface)
     EVT_MENU(MENU_FILE_SAVE_DATASET, MainFrame::OnSaveDataset)
     EVT_MENU(MENU_FILE_MINIMIZE_DATASET, MainFrame::OnMinimizeDataset)
+    EVT_MENU(MENU_FILE_DILATE_DATASET, MainFrame::OnDilateDataset)
+    EVT_MENU(MENU_FILE_ERODE_DATASET, MainFrame::OnErodeDataset)
     EVT_MENU(MENU_FILE_QUIT, MainFrame::OnQuit)
     EVT_MENU(BUTTON_TOGGLE_LAYOUT, MainFrame::OnToggleLayout)
 	// Menu View
@@ -514,6 +516,48 @@ void MainFrame::OnMinimizeDataset(wxCommandEvent& WXUNUSED(event))
 		{
 			a = (Anatomy*) m_listCtrl->GetItemData(item);
 			a->minimize();
+		}
+	}
+}
+
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnDilateDataset(wxCommandEvent& WXUNUSED(event))
+{
+	Anatomy* a = NULL;
+		
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() < Mesh_ )
+		{
+			a = (Anatomy*) m_listCtrl->GetItemData(item);
+			a->dilate();
+		}
+	}
+}
+
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnErodeDataset(wxCommandEvent& WXUNUSED(event))
+{
+	Anatomy* a = NULL;
+		
+	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if (item != -1)
+	{
+		DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData(item);
+		if (info->getType() < Mesh_ )
+		{
+			a = (Anatomy*) m_listCtrl->GetItemData(item);
+			a->erode();
 		}
 	}
 }

@@ -37,6 +37,8 @@ private:
 	void OnSaveSurface(wxCommandEvent& event);
 	void OnSaveDataset(wxCommandEvent& event);
 	void OnMinimizeDataset(wxCommandEvent& event);
+	void OnDilateDataset(wxCommandEvent& event);
+	void OnErodeDataset(wxCommandEvent& event);
 	void OnQuit(wxCommandEvent& event);
 	void OnToggleLayout(wxCommandEvent& event);
 	// View
@@ -205,6 +207,8 @@ DECLARE_EVENT_TABLE()
 #define MENU_FILE_QUIT        						wxID_EXIT
 #define MENU_FILE_SAVE_DATASET						106
 #define MENU_FILE_MINIMIZE_DATASET					107
+#define MENU_FILE_DILATE_DATASET					108
+#define MENU_FILE_ERODE_DATASET						109
 #define BUTTON_TOGGLE_LAYOUT						119
 
 // Menu View
