@@ -1,6 +1,7 @@
 #include "selectionBox.h"
 #include "../dataset/fibers.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+#include "../dataset/Anatomy.h"
 
 SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 {
@@ -28,11 +29,10 @@ SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 	m_name = wxT("box");
 }
 
-SelectionBox::SelectionBox(float* overlay, DatasetHelper* dh)
+SelectionBox::SelectionBox(DatasetHelper* dh, Anatomy* a)
 {
 	m_dh = dh;
 	m_isBox = false;
-	m_overlay = overlay;
 	m_isVisible = true;
 	m_dirty = true;
 	m_isMaster = true;
@@ -53,8 +53,8 @@ SelectionBox::SelectionBox(float* overlay, DatasetHelper* dh)
 		m_inBox[i] = 0;
 	}
 	m_name = wxT("ROI");
-	
-	m_isosurface = new CIsoSurface(m_dh, m_overlay);
+	m_sourceAnatomy = a;
+	m_isosurface = new CIsoSurface(m_dh, a->getFloatDataset());
 }
 
 SelectionBox::~SelectionBox()
@@ -62,6 +62,14 @@ SelectionBox::~SelectionBox()
 	if (m_isLockedToCrosshair)
 	{
 		m_dh->boxLockIsOn = false;
+	}
+	if ( !m_isBox)
+	{
+		delete m_isosurface;
+		if ( m_sourceAnatomy && m_sourceAnatomy->m_roi == this)
+		{
+			m_sourceAnatomy->m_roi = NULL;
+		}
 	}
 }
 

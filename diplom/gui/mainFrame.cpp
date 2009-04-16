@@ -860,7 +860,7 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 		if (info->getType() == Overlay )
 		{
 			a = (Anatomy*) m_listCtrl->GetItemData(item);
-			selBox = new SelectionBox(a->getFloatDataset(), m_dh);
+			selBox = new SelectionBox(m_dh, a);
 			selBox->setThreshold(a->getThreshold());
 		}
 	}

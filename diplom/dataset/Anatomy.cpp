@@ -75,7 +75,7 @@ Anatomy::~Anatomy()
 	delete[] m_floatDataset;
 	const GLuint* tex = &m_GLuint;
 	glDeleteTextures(1, tex);
-	//if ( m_roi ) m_roi->m_overlay = NULL;
+	if ( m_roi ) m_roi->m_sourceAnatomy = NULL;
 }
 
 bool Anatomy::load(wxString filename)

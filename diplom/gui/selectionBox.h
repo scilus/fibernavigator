@@ -16,12 +16,13 @@
 class MainCanvas;
 class DatasetHelper;
 class CIsoSurface;
+class Anatomy;
 
 class SelectionBox : public wxTreeItemData
 {
 public:
 	SelectionBox(Vector center, Vector size, DatasetHelper* dh);
-	SelectionBox(float* overlay, DatasetHelper* dh);
+	SelectionBox(DatasetHelper* dh, Anatomy* a);
 	~SelectionBox();
 
 	void draw();
@@ -102,8 +103,8 @@ public:
 	std::vector<bool>m_inBox;
 	std::vector<bool>m_inBranch;
 
-	float* m_overlay;
 	DatasetHelper* m_dh;
+	Anatomy* m_sourceAnatomy;
 
 private:
 	void drawSphere(float, float, float, float);
