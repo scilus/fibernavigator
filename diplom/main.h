@@ -1,26 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        main.h
-// Purpose:     main window
 // Author:      Ralph Schurade
-// Modified by:
-// Created:     03/27/08
-// RCS-ID:
-// Copyright:
-// Licence:
 /////////////////////////////////////////////////////////////////////////////
 
-// Define a new application
-class MyApp: public wxApp {
+class MyApp : public wxApp
+{
 public:
-	bool OnInit(void);
+    bool OnInit(void);
 
 private:
-	wxString wxFindAppPath(const wxString& argv0, const wxString& cwd, const wxString& appVariableName,
-	                       const wxString& appName);
-	static const wxString APP_NAME;
-	static const wxString APP_VENDOR;
+    wxString wxFindAppPath(const wxString& argv0, const wxString& cwd,
+            const wxString& appVariableName, const wxString& appName);
+    static const wxString APP_NAME;
+    static const wxString APP_VENDOR;
 
 public:
-	static wxString respath;
-	static wxString shaderPath;
+    static wxString respath;
+    static wxString shaderPath;
 };

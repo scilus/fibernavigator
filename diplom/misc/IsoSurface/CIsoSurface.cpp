@@ -357,9 +357,6 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_nTriangles = 0;
 	m_nNormals = 0;
 	m_nVertices = 0;
-	m_ppt3dVertices = NULL;
-	m_piTriangleIndices = NULL;
-	m_pvec3dNormals = NULL;
 	m_tIsoLevel = 0.40;
 	m_bValidSurface = false;
 
@@ -523,18 +520,9 @@ void CIsoSurface::DeleteSurface()
 	m_nTriangles = 0;
 	m_nNormals = 0;
 	m_nVertices = 0;
-	if (m_ppt3dVertices != NULL) {
-		delete[] m_ppt3dVertices;
-		m_ppt3dVertices = NULL;
-	}
-	if (m_piTriangleIndices != NULL) {
-		delete[] m_piTriangleIndices;
-		m_piTriangleIndices = NULL;
-	}
-	if (m_pvec3dNormals != NULL) {
-		delete[] m_pvec3dNormals;
-		m_pvec3dNormals = NULL;
-	}
+
+	m_tMesh->clearMesh();
+	
 	m_tIsoLevel = 0;
 	m_bValidSurface = false;
 }
@@ -722,7 +710,7 @@ void CIsoSurface::RenameVerticesAndTriangles()
 
 	m_tMesh->finalize();
 	//m_tMesh->printInfo();
-
+	
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();
 	licCalculated = false;

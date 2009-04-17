@@ -70,20 +70,11 @@ protected:
 	// The number of vertices which make up the isosurface.
 	unsigned int m_nVertices;
 
-	// The vertices which make up the isosurface.
-	POINT3D* m_ppt3dVertices;
-
 	// The number of triangles which make up the isosurface.
 	unsigned int m_nTriangles;
 
-	// The indices of the vertices which make up the triangles.
-	unsigned int* m_piTriangleIndices;
-
 	// The number of normals.
 	unsigned int m_nNormals;
-
-	// The normals.
-	VECTOR3D* m_pvec3dNormals;
 
 	// List of POINT3Ds which form the isosurface.
 	ID2POINT3DID m_i2pt3idVertices;
@@ -131,7 +122,7 @@ protected:
 	GLfloat* m_pointArray;
 	GLfloat* m_normalArray;
 	GLfloat* m_colorArray;
-	GLuint*   m_indexArray;
+	GLuint*  m_indexArray;
 	
 	bool isInitialized;
 	

@@ -18,7 +18,15 @@ TriangleMesh::TriangleMesh (DatasetHelper* dh)
 // Destructor
 TriangleMesh::~TriangleMesh ()
 {
-
+	vertices.clear();
+	vertNormals.clear();
+	vertColors.clear();
+	vIsInTriangle.clear();
+	triangles.clear();
+	triNormals.clear();
+	triangleTensor.clear();
+	triangleColor.clear();
+	neighbors.clear();
 }
 
 // Operations
