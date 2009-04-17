@@ -130,6 +130,7 @@ protected:
 
 	GLfloat* m_pointArray;
 	GLfloat* m_normalArray;
+	GLfloat* m_colorArray;
 	GLuint*   m_indexArray;
 	
 	bool isInitialized;
