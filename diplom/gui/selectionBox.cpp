@@ -667,10 +667,18 @@ void SelectionBox::update()
 void SelectionBox::setColor(wxColour color)
 {
 	m_color = color;
-	if (!m_isMaster) return;
-	m_colorChanged = true;
 	update();
 }
+
+void SelectionBox::setFiberColor(wxColour color)
+{
+    m_fiberColor = color;
+    if (!m_isMaster) return;
+    m_colorChanged = true;
+    update();
+}
+
+
 
 void SelectionBox::updateStatusBar()
 {

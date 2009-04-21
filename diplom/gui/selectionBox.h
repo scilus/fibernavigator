@@ -61,6 +61,7 @@ public:
 
 	bool colorChanged() {return m_colorChanged;};
 	wxColour getColor() {return m_color;};
+	wxColour getFiberColor() {return m_fiberColor;};
 	void setColorChanged(bool v) {m_colorChanged = v;};
 
 	void setTreeId(wxTreeItemId treeId) {m_treeId = treeId;};
@@ -96,6 +97,7 @@ public:
 	void resizeDown();
 
 	void setColor(wxColour);
+	void setFiberColor(wxColour);
 
 	void update();
 	void select(bool flag);
@@ -124,7 +126,10 @@ private:
 	bool m_dirty;
 	bool m_gfxDirty;
 	bool m_colorChanged;
+	// used for coloring the isosurface
 	wxColour m_color;
+	// used for the selected fibers
+	wxColour m_fiberColor;
 	wxTreeItemId m_treeId;
 
 	int m_stepSize;

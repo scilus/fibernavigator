@@ -1270,7 +1270,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 	if (treeSelected(tBoxId) == MasterBox)
 	{
 		SelectionBox *box = (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
-		box->setColor(col);
+		box->setFiberColor(col);
 		box->setDirty(true);
 	}
 	else
@@ -1278,7 +1278,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
 		if (treeSelected(tBoxId) == ChildBox)
 		{
 			SelectionBox *box = (SelectionBox*)(m_treeWidget->GetItemData(m_treeWidget->GetItemParent(tBoxId)));
-			box->setColor(col);
+			box->setFiberColor(col);
 			box->setDirty(true);
 		}
 	}

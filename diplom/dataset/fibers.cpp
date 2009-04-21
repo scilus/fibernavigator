@@ -747,7 +747,7 @@ void Fibers::updateLinesShown()
             {
                 colorData = m_colorArray;
             }
-            wxColour col = boxes[i][0]->getColor();
+            wxColour col = boxes[i][0]->getFiberColor();
 
             for (int l = 0; l < m_countLines; ++l)
             {
