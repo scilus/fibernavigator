@@ -863,6 +863,8 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 			selBox = new SelectionBox(m_dh, a);
 			selBox->setThreshold(a->getThreshold());
 		}
+		else
+		    return;
 	}
 	else 
 		return;
