@@ -155,18 +155,18 @@ bool MyApp::OnInit(void)
         wxMenu *view_menu = new wxMenu;
         view_menu->Append(MENU_VIEW_RESET, _T("reset"));
         view_menu->AppendSeparator();
-        view_menu->Append(MENU_VIEW_LEFT, _T("left\tS"));
-        view_menu->Append(MENU_VIEW_RIGHT, _T("right\tShift-S"));
-        view_menu->Append(MENU_VIEW_FRONT, _T("posterior\tC"));
-        view_menu->Append(MENU_VIEW_BACK, _T("anterior\tShift-C"));
-        view_menu->Append(MENU_VIEW_TOP, _T("superior\tA"));
-        view_menu->Append(MENU_VIEW_BOTTOM, _T("inferior\tShift-A"));
+        view_menu->Append(MENU_VIEW_LEFT, _T("left\tL"));
+        view_menu->Append(MENU_VIEW_RIGHT, _T("right\tR"));
+        view_menu->Append(MENU_VIEW_TOP, _T("superior\tS"));
+        view_menu->Append(MENU_VIEW_BOTTOM, _T("inferior\tI"));
+        view_menu->Append(MENU_VIEW_BACK, _T("anterior\tA"));
+        view_menu->Append(MENU_VIEW_FRONT, _T("posterior\tP"));
         view_menu->AppendSeparator();
-        view_menu->AppendCheckItem(MENU_VIEW_SHOW_CROSSHAIR, _T("show crosshair"));
+        view_menu->AppendCheckItem(MENU_VIEW_SHOW_CROSSHAIR, _T("show crosshair\tC"));
 
         wxMenu *voi_menu = new wxMenu;
-        voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New"));
-        voi_menu->Append(MENU_VOI_NEW_FROM_OVERLAY, _T("New ROI from Overlay"));
+        voi_menu->Append(MENU_VOI_NEW_SELBOX, _T("New Selection-Box\tB"));
+        voi_menu->Append(MENU_VOI_NEW_FROM_OVERLAY, _T("New VOI from Overlay"));
         voi_menu->AppendSeparator();
         voi_menu->AppendCheckItem(MENU_VOI_USE_MORPH, _T("morphing"));
         voi_menu->AppendSeparator();
@@ -195,15 +195,15 @@ bool MyApp::OnInit(void)
         options_menu->Append(MENU_OPTIONS_RESET_COLOR, _T("Reset Colors on Fibers\tCtrl-R"));
 
         wxMenu* cMaps = new wxMenu;
-        cMaps->Append(MENU_OPTIONS_CMAPNO, wxT("no color map"));
-        cMaps->Append(MENU_OPTIONS_CMAP0, wxT("default color map"));
-        cMaps->Append(MENU_OPTIONS_CMAP1, wxT("color map 1"));
-        cMaps->Append(MENU_OPTIONS_CMAP2, wxT("color map 2"));
-        cMaps->Append(MENU_OPTIONS_CMAP3, wxT("color map 3"));
-        cMaps->Append(MENU_OPTIONS_CMAP4, wxT("color map 4"));
+        cMaps->Append(MENU_OPTIONS_CMAPNO, wxT("Gray"));
+        cMaps->Append(MENU_OPTIONS_CMAP0, wxT("Blue-Green-Purple"));
+        cMaps->Append(MENU_OPTIONS_CMAP1, wxT("Rainbow"));
+        cMaps->Append(MENU_OPTIONS_CMAP2, wxT("Hotiron"));
+        cMaps->Append(MENU_OPTIONS_CMAP3, wxT("Red-Yellow"));
+        cMaps->Append(MENU_OPTIONS_CMAP4, wxT("Blue-Lightblue"));
 
         options_menu->Append(MENU_OPTIONS_COLOR_MAPS, _T("Set Color Map"), cMaps);
-        options_menu->AppendCheckItem(MENU_OPTIONS_CMAP_LEGEND, _T("Show Color Map Legend\tCtrl-M"));
+        options_menu->AppendCheckItem(MENU_OPTIONS_CMAP_LEGEND, _T("Show Color Map\tCtrl-M"));
         options_menu->AppendSeparator();
         options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting\tCtrl-I"));
         options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
@@ -301,7 +301,7 @@ bool MyApp::OnInit(void)
         toolBar->AddSeparator();
         toolBar->AddCheckTool(MENU_OPTIONS_TOGGLE_LIGHTING, wxT("Toggle Lighting"), bmpLighting);
         toolBar->AddSeparator();
-        toolBar->AddTool(MENU_FILE_NEW_ISOSURF, bmpIsoSurface, wxT("New Iso Surface "));
+        toolBar->AddTool(MENU_FILE_NEW_ISOSURF, bmpIsoSurface, wxT("New Iso Surface"));
         toolBar->AddSeparator();
         toolBar->AddCheckTool(MENU_OPTIONS_USE_FAKE_TUBES, wxT("Toggle Tubes"), bmpTubes);
         toolBar->AddSeparator();

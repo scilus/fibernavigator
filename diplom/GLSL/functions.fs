@@ -45,6 +45,63 @@ vec3 colorMap1 ( in float value )
 
 vec3 colorMap2( in float value )
 {
+	vec4 color8  = vec4(255./255., 255./255., 204./255., 1.);
+	vec4 color7  = vec4(255./255., 237./255., 160./255., 1.);
+	vec4 color6  = vec4(254./255., 217./255., 118./255., 1.);
+	vec4 color5  = vec4(254./255., 178./255.,  76./255., 1.);
+	vec4 color4  = vec4(253./255., 141./255.,  60./255., 1.);
+	vec4 color3  = vec4(252./255.,  78./255.,  42./255., 1.);
+	vec4 color2  = vec4(227./255.,  26./255.,  28./255., 1.);
+	vec4 color1  = vec4(189./255.,   0./255.,  38./255., 1.);
+	vec4 color0  = vec4(128./255.,   0./255.,  38./255., 1.);
+
+	float colorValue = value * 8.;
+	int sel = int(floor(colorValue));
+	
+	if ( sel >= 8 )
+		return color0.rgb;
+	else if ( sel < 0 )
+		return color0.rgb;
+	else
+	{
+		colorValue -= float(sel);
+		
+		if (sel < 1)
+			return ( color1*colorValue + color0*(1.-colorValue)).rgb;
+		else if (sel < 2)
+			return ( color2*colorValue + color1*(1.-colorValue)).rgb;
+		else if (sel < 3)
+			return ( color3*colorValue + color2*(1.-colorValue)).rgb;
+		else if (sel < 4)
+			return ( color4*colorValue + color3*(1.-colorValue)).rgb;
+		else if (sel < 5)
+			return ( color5*colorValue + color4*(1.-colorValue)).rgb;
+		else if (sel < 6)
+			return ( color6*colorValue + color5*(1.-colorValue)).rgb;
+		else if (sel < 7)
+			return ( color7*colorValue + color6*(1.-colorValue)).rgb;
+		else if (sel < 8)
+			return ( color8*colorValue + color7*(1.-colorValue)).rgb;
+		else return color0.rgb;
+	}
+}
+
+vec3 colorMap3( in float value )
+{
+	vec4 color0 = vec4(255./255., 0./255., 0./255., 1.);
+	vec4 color1 = vec4(255./255., 255./255., 0./255., 1.);
+    return ( color1*value + color0*(1.-value)).rgb;
+}
+
+vec3 colorMap4( in float value )
+{
+	vec4 color0 = vec4(0./255., 0./255., 255./255., 1.);
+	vec4 color1 = vec4(200./255., 255./255., 255./255., 1.);
+    return ( color1*value + color0*(1.-value)).rgb;
+}
+
+vec3 colorMap5( in float value )
+{
 	vec4 color0 = vec4(255./255., 255./255., 217./255., 1.);
 	vec4 color1 = vec4(237./255., 248./255., 177./255., 1.);
 	vec4 color2 = vec4(199./255., 233./255., 180./255., 1.);
@@ -86,50 +143,7 @@ vec3 colorMap2( in float value )
 	}
 }
 
-vec3 colorMap3( in float value )
-{
-	vec4 color0  = vec4(255./255., 255./255., 204./255., 1.);
-	vec4 color1  = vec4(255./255., 237./255., 160./255., 1.);
-	vec4 color2  = vec4(254./255., 217./255., 118./255., 1.);
-	vec4 color3  = vec4(254./255., 178./255.,  76./255., 1.);
-	vec4 color4  = vec4(253./255., 141./255.,  60./255., 1.);
-	vec4 color5  = vec4(252./255.,  78./255.,  42./255., 1.);
-	vec4 color6  = vec4(227./255.,  26./255.,  28./255., 1.);
-	vec4 color7  = vec4(189./255.,   0./255.,  38./255., 1.);
-	vec4 color8  = vec4(128./255.,   0./255.,  38./255., 1.);
-
-	float colorValue = value * 8.;
-	int sel = int(floor(colorValue));
-	
-	if ( sel >= 8 )
-		return color0.rgb;
-	else if ( sel < 0 )
-		return color0.rgb;
-	else
-	{
-		colorValue -= float(sel);
-		
-		if (sel < 1)
-			return ( color1*colorValue + color0*(1.-colorValue)).rgb;
-		else if (sel < 2)
-			return ( color2*colorValue + color1*(1.-colorValue)).rgb;
-		else if (sel < 3)
-			return ( color3*colorValue + color2*(1.-colorValue)).rgb;
-		else if (sel < 4)
-			return ( color4*colorValue + color3*(1.-colorValue)).rgb;
-		else if (sel < 5)
-			return ( color5*colorValue + color4*(1.-colorValue)).rgb;
-		else if (sel < 6)
-			return ( color6*colorValue + color5*(1.-colorValue)).rgb;
-		else if (sel < 7)
-			return ( color7*colorValue + color6*(1.-colorValue)).rgb;
-		else if (sel < 8)
-			return ( color8*colorValue + color7*(1.-colorValue)).rgb;
-		else return color0.rgb;
-	}
-}
-
-vec3 colorMap4( in float value )
+vec3 colorMap6( in float value )
 {
 	float basecolor = 0.0;
 	float frequency = 5.0;
