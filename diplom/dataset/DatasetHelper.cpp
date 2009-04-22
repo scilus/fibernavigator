@@ -7,6 +7,8 @@
 #include "DatasetHelper.h"
 #include "../gui/mainFrame.h"
 
+#include <memory>
+
 #include "Anatomy.h"
 #include "fibers.h"
 #include "splinePoint.h"
