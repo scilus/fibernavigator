@@ -250,6 +250,8 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_lastPos = event.GetPosition();
 					m_hr = pick(event.GetPosition());
 
+					SetFocus();
+
 					if (m_hr.picked == 20)
 					{
 						if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
@@ -263,8 +265,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 						((SelectionBox*)m_hr.object)->select(true);
 					}
-
-					//SetFocus();
 				}
 				else
 				{
