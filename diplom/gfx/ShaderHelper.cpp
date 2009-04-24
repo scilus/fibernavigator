@@ -71,7 +71,8 @@ void ShaderHelper::setTextureShaderVars()
 	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
 	{
 		DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-		if(info->getType() < Mesh_) {
+		if(info->getType() < Mesh_)
+		{
 			tex[c] = c;
 			show[c] = info->getShow();
 			threshold[c] = info->getThreshold();
@@ -79,6 +80,7 @@ void ShaderHelper::setTextureShaderVars()
 			type[c] = info->getType();
 			++c;
 		}
+		if ( c == 10 ) break;
 	}
 
 	m_textureShader->setUniArrayInt("texes", tex, c);
@@ -122,6 +124,7 @@ void ShaderHelper::setMeshShaderVars()
 			Surface* s = (Surface*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 			cutTex = s->getCutTex();
 		}
+		if ( c == 9 ) break;
 	}
 
 	if (cutTex != 0 && m_dh->surface_loaded)
@@ -169,6 +172,7 @@ void ShaderHelper::setFiberShaderVars()
 			}
 			++c;
 		}
+		if ( c == 10 ) break;
 	}
 
 	m_fiberShader->setUniInt("tex", tex);
@@ -199,6 +203,7 @@ void ShaderHelper::setSplineSurfaceShaderVars()
 			type[c] = info->getType();
 			++c;
 		}
+		if ( c == 10 ) break;
 	}
 
 	m_splineSurfShader->setUniArrayInt("texes", tex, c);
