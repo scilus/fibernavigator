@@ -264,7 +264,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 						((SelectionBox*)m_hr.object)->select(true);
 					}
 
-					SetFocus();
+					//SetFocus();
 				}
 				else
 				{
