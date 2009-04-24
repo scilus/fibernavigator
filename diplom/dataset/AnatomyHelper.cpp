@@ -30,11 +30,11 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 	float xline = 0;
 	float yline = 0;
 
-	float max = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
+	float max = (float)wxMax(m_dh->columns * m_dh->xVoxel, wxMax(m_dh->rows * m_dh->yVoxel, m_dh->frames * m_dh->zVoxel));
 
-	int x = m_dh->columns;
-	int y = m_dh->rows;
-	int z = m_dh->frames;
+	float x = m_dh->columns * m_dh->xVoxel;
+	float y = m_dh->rows * m_dh->yVoxel;
+	float z = m_dh->frames * m_dh->zVoxel;
 
 	float xo = ( max - x ) / 2.0;
 	float yo = ( max - y ) / 2.0;
@@ -52,8 +52,8 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 				glTexCoord3f(1.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( x + xo, y + yo, quadZ);
 				glTexCoord3f(0.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, y + yo, quadZ);
 		    glEnd();
-			xline = m_dh->xSlize + xo;
-			yline = m_dh->ySlize;
+			xline = m_dh->xSlize * m_dh->xVoxel + xo;
+			yline = m_dh->ySlize * m_dh->yVoxel;
 		} break;
 
 		case coronal: {
@@ -63,8 +63,8 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 1.0); glVertex3f( x + xo, z + zo, quadZ);
 		    	glTexCoord3f(1.0, ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows, 0.0); glVertex3f( x + xo, 0 + zo, quadZ);
 		    glEnd();
-		    xline = m_dh->xSlize + xo;
-		    yline = m_dh->zSlize + zo;
+		    xline = m_dh->xSlize * m_dh->xVoxel + xo;
+		    yline = m_dh->zSlize * m_dh->zVoxel + zo;
 		} break;
 
 		case sagittal: {
@@ -74,8 +74,8 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 0.0, 1.0); glVertex3f( y + yo, z + zo, quadZ);
 		    	glTexCoord3f(((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns, 0.0, 0.0); glVertex3f( y + yo, 0 + zo, quadZ);
 			glEnd();
-			xline = max - m_dh->ySlize;
-			yline = m_dh->zSlize + zo;
+			xline = max - m_dh->ySlize * m_dh->yVoxel;
+			yline = m_dh->zSlize * m_dh->zVoxel + zo;
 		} break;
 	}
 
@@ -95,17 +95,17 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 //////////////////////////////////////////////////////////////////////////
 void AnatomyHelper::renderMain()
 {
-	m_x = m_dh->xSlize + 0.5f;
-	m_y = m_dh->ySlize + 0.5f;
-	m_z = m_dh->zSlize + 0.5f;
+	m_x = ( m_dh->xSlize * m_dh->xVoxel ) + 0.5f;
+	m_y = ( m_dh->ySlize * m_dh->yVoxel ) + 0.5f;
+	m_z = ( m_dh->zSlize * m_dh->zVoxel ) + 0.5f;
 
 	m_xc = ((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns;
 	m_yc = ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows;
 	m_zc = ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames;
 
-	m_xb = m_dh->columns;
-	m_yb = m_dh->rows;
-	m_zb = m_dh->frames;
+	m_xb = m_dh->columns * m_dh->xVoxel ;
+	m_yb = m_dh->rows * m_dh->yVoxel ;
+	m_zb = m_dh->frames * m_dh->zVoxel ;
 #if 1
 	renderAxial();
 	renderCoronal();
@@ -242,7 +242,7 @@ void AnatomyHelper::renderCrosshair()
 		glVertex3f(m_x + offset, m_y + offset,  m_zb);
 		glVertex3f(m_x + offset, m_y - offset,  0);
 		glVertex3f(m_x + offset, m_y - offset,  m_zb);
-				
+
 		glVertex3f(m_x - offset, 0,   	m_z - offset);
 		glVertex3f(m_x - offset, m_yb,  m_z - offset);
 		glVertex3f(m_x - offset, 0,   	m_z + offset);
@@ -251,7 +251,7 @@ void AnatomyHelper::renderCrosshair()
 		glVertex3f(m_x + offset, m_yb,  m_z + offset);
 		glVertex3f(m_x + offset, 0,   	m_z - offset);
 		glVertex3f(m_x + offset, m_yb,  m_z - offset);
-		
+
 		glVertex3f(0,  		m_y - offset, m_z - offset);
 		glVertex3f(m_xb, 	m_y - offset, m_z - offset);
 		glVertex3f(0,  		m_y - offset, m_z + offset);
@@ -260,7 +260,7 @@ void AnatomyHelper::renderCrosshair()
 		glVertex3f(m_xb, 	m_y + offset, m_z + offset);
 		glVertex3f(0,  		m_y + offset, m_z - offset);
 		glVertex3f(m_xb, 	m_y + offset, m_z - offset);
-		
+
 	glEnd();
 }
 
@@ -444,7 +444,7 @@ void AnatomyHelper::renderFreeSlize()
 	float z_dim = (float) m_dh->frames;
 
 	glPushMatrix();
-	glMatrixMode(GL_PROJECTION); 
+	glMatrixMode(GL_PROJECTION);
 	glTranslatef(x_dim/2.0, y_dim/2.0, z_dim/2.0);
 	glRotatef(x_rot, 1.0, 0.0, 0.0);
 	glRotatef(y_rot, 0.0, 1.0, 0.0);
@@ -457,6 +457,6 @@ void AnatomyHelper::renderFreeSlize()
 		glTexCoord3f(1.0, 1.0, 0.5); 	glVertex3f(x_dim, y_dim, z_dim/2);
 		glTexCoord3f(1.0, 0.0, 0.5); 	glVertex3f(x_dim, 0, z_dim/2);
 	glEnd();
-	
+
 	glPopMatrix();
 }

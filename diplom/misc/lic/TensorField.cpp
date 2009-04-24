@@ -38,9 +38,9 @@ TensorField::TensorField(DatasetHelper* dh, float* tensorData, bool isVector)
 			t.setValue(0, 1, tensorData[ i * 6 + 1 ]);
 			t.setValue(1, 1, tensorData[ i * 6 + 3 ]);
 			t.setValue(2, 1, tensorData[ i * 6 + 4 ]);
-			t.setValue(0, 1, tensorData[ i * 6 + 2 ]);
-			t.setValue(1, 1, tensorData[ i * 6 + 4 ]);
-			t.setValue(1, 1, tensorData[ i * 6 + 5 ]);
+			t.setValue(0, 2, tensorData[ i * 6 + 2 ]);
+			t.setValue(1, 2, tensorData[ i * 6 + 4 ]);
+			t.setValue(2, 2, tensorData[ i * 6 + 5 ]);
 			theField.push_back(t);
 		}
 		m_order = 2;

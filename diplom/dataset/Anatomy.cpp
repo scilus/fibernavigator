@@ -27,9 +27,6 @@ Anatomy::Anatomy(DatasetHelper* dh)
     m_rows = 0;
     m_columns = 0;
     m_repn = wxT("");
-    m_xVoxel = 0.0;
-    m_yVoxel = 0.0;
-    m_zVoxel = 0.0;
     is_loaded = false;
     m_highest_value = 1.0;
     m_threshold = 0.00f;
@@ -54,9 +51,6 @@ Anatomy::Anatomy(DatasetHelper* dh, float* dataset)
     m_rows = m_dh->rows;
     m_columns = m_dh->columns;
     m_repn = wxT("");
-    m_xVoxel = 1.0;
-    m_yVoxel = 1.0;
-    m_zVoxel = 1.0;
     is_loaded = true;
     m_highest_value = 1.0;
     m_threshold = 0.00f;
@@ -121,7 +115,7 @@ bool Anatomy::loadNifti(wxString filename)
     m_columns = ima->dim[1]; // 160
     m_rows = ima->dim[2]; // 200
     m_frames = ima->dim[3]; // 160
-
+    
     if (m_dh->anatomy_loaded)
     {
         if (m_rows != m_dh->rows || m_columns != m_dh->columns || m_frames
@@ -136,6 +130,11 @@ bool Anatomy::loadNifti(wxString filename)
         m_dh->rows = m_rows;
         m_dh->columns = m_columns;
         m_dh->frames = m_frames;
+        
+        m_dh->xVoxel = ima->dx;
+        m_dh->yVoxel = ima->dy;
+        m_dh->zVoxel = ima->dz;
+        
         m_dh->anatomy_loaded = true;
     }
 

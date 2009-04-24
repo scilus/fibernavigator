@@ -27,6 +27,11 @@ DatasetHelper::DatasetHelper(MainFrame* mf)
     rows = 1;
     columns = 1;
     frames = 1;
+    
+    xVoxel = 1.0;
+    yVoxel = 1.0;
+    zVoxel = 1.0;
+    
     countFibers = 0;
     threadsActive = 0;
     anatomy_loaded = false;
@@ -1066,11 +1071,11 @@ void DatasetHelper::moveScene(int x, int y)
 
 void DatasetHelper::doMatrixManipulation()
 {
-    float max = (float)wxMax(columns, wxMax(rows, frames))/2.0;
+    float max = (float)wxMax(columns * xVoxel, wxMax(rows * yVoxel, frames * zVoxel))/2.0;
     glTranslatef(max + xMove, max + yMove, max);
     glScalef(zoom, zoom, zoom);
     glMultMatrixf(m_transform.M);
-    glTranslatef(-columns/2.0, -rows/2.0, -frames/2.0);
+    glTranslatef(-columns * xVoxel/2.0, -rows * yVoxel/2.0, -frames * zVoxel/2.0);
 }
 
 void DatasetHelper::updateView(float x, float y, float z)

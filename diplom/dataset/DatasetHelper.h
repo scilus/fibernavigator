@@ -114,6 +114,11 @@ public:
 	int rows;
 	int columns;
 	int frames;
+	
+	float xVoxel;
+	float yVoxel;
+	float zVoxel;
+	
 	unsigned int countFibers;
 	wxString lastError;
 	// last path from loading, load file dialog will open with it

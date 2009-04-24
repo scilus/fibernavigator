@@ -31,7 +31,7 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 {
 #ifndef __WXMAC__
 	// i'm still not sure which GLX version is needed, but 1.3 seems to be ok
-	// have to do this here, because wxGLCanvas::GetGLXVersion doesn't return reliable results when called 
+	// have to do this here, because wxGLCanvas::GetGLXVersion doesn't return reliable results when called
 	// in the init function in main.cpp
 	if ( GetGLXVersion() < 13 )
 	{
@@ -60,7 +60,7 @@ MainCanvas::MainCanvas(DatasetHelper* dh, int view, wxWindow *parent, wxWindowID
 
 	m_delta = 0;
 	m_arcBall = new ArcBallT(640.0f, 480.0f);
-	
+
 	orthoSizeNormal = 200;
 	orthoModX = 0;
 	orthoModY = 0;
@@ -92,8 +92,8 @@ void MainCanvas::init()
 
 void MainCanvas::changeOrthoSize()
 {
-	orthoSizeNormal = wxMax(wxMax(m_dh->rows, m_dh->columns), m_dh->frames);
-		
+	orthoSizeNormal = wxMax(wxMax(m_dh->columns * m_dh->xVoxel, m_dh->rows * m_dh->yVoxel), m_dh->frames * m_dh->zVoxel);
+
 	if (m_view == mainView)
 	{
 		orthoModX = 0;
@@ -104,13 +104,13 @@ void MainCanvas::changeOrthoSize()
 		if (ratio > 1.0)
 			orthoModX = ((int)(orthoSizeNormal * ratio) - orthoSizeNormal)/2;
 		else
-			orthoModY = ((int)(orthoSizeNormal * (1.0 + (1.0 - ratio)) ) - orthoSizeNormal)/2;		
+			orthoModY = ((int)(orthoSizeNormal * (1.0 + (1.0 - ratio)) ) - orthoSizeNormal)/2;
 	}
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -500, 500);
-	
-	
+
+
 }
 
 
@@ -179,7 +179,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				}
 
 			}
-			
+
 			if(event.LeftIsDown())
 			{
 				//SetFocus();
@@ -200,10 +200,10 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
 					Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
 				}
-	
+
 				updateView();
 				Refresh(false);
-					
+
 				}
 				else
 					m_dh->m_isDragging = false;
@@ -235,7 +235,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				m_dh->changeZoom(event.GetWheelRotation());
 				Refresh(false);
 			}
-					
+
 			if (event.RightIsDown())
 		    {
 				if (!m_dh->m_isrDragging)												// Not Dragging
@@ -249,7 +249,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_dh->m_isrDragging = true;										// Prepare For Dragging
 					m_lastPos = event.GetPosition();
 					m_hr = pick(event.GetPosition());
-					
+
 					if (m_hr.picked == 20)
 					{
 						if (m_dh->lastSelectedPoint) m_dh->lastSelectedPoint->unselect();
@@ -263,16 +263,16 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 
 						((SelectionBox*)m_hr.object)->select(true);
 					}
-					
+
 					SetFocus();
 				}
-				else 
+				else
 				{
 					if (event.Dragging() && m_hr.picked < 10)
 					{
 						int xDrag = m_lastPos.x - clickX;
 						int yDrag = (m_lastPos.y - clickY);
-						
+
 						Vector n ( 0, 0, 0 );
 						switch (m_hr.picked) {
 						case axial:
@@ -285,9 +285,9 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 							n.x = 1.0;
 							break;
 						}
-						if (xDrag == 0 && yDrag == 0) 
+						if (xDrag == 0 && yDrag == 0)
 							m_delta = 0;
-						else 
+						else
 						{
 							m_delta = 0;
 							float delta =  wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),1),-1);
@@ -312,7 +312,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 				m_lastPos = event.GetPosition();
 				Refresh(false);
 		    }
-			else 
+			else
 			{
 				m_dh->m_isrDragging = false;
 			}
@@ -384,7 +384,7 @@ float MainCanvas::getAxisParallelMovement(int x1, int y1, int x2, int y2, Vector
 	Vector dir ( ve.x - vs.x, ve.y - vs.y, ve.z - vs.z );
 	float bb = ((dir.x * dir.x) + (dir.y * dir.y) + (dir.z * dir.z));
 	float nb = ((dir.x * n.x) + (dir.y * n.y) + (dir.z * n.z));
-	return bb/nb;	
+	return bb/nb;
 }
 
 hitResult MainCanvas::pick(wxPoint click)
@@ -410,7 +410,7 @@ hitResult MainCanvas::pick(wxPoint click)
 	glPopMatrix();
 	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
 	BoundingBox *bb = new BoundingBox(m_dh->columns/2, m_dh->rows/2, m_dh->frames/2, m_dh->columns, m_dh->rows, m_dh->frames);
-		
+
 	float xx = m_dh->xSlize;
 	float yy = m_dh->ySlize;
 	float zz = m_dh->zSlize;
@@ -421,12 +421,12 @@ hitResult MainCanvas::pick(wxPoint click)
 	float tpicked = 0;
 	int picked = 0;
 	hitResult hr = {false, 0.0f, 0, NULL};
-	if (m_dh->showAxial) 
+	if (m_dh->showAxial)
 	{
 		bb->setSizeZ(0.01f);
 		bb->setCenterZ(zz);
 		hr = bb->hitTest(ray);
-		if (hr.hit) 
+		if (hr.hit)
 		{
 			tpicked = hr.tmin;
 			picked = axial;
@@ -435,20 +435,20 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setCenterZ(m_dh->frames/2);
 	}
 
-	if (m_dh->showCoronal) 
+	if (m_dh->showCoronal)
 	{
 		bb->setSizeY(0.01f);
 		bb->setCenterY(yy);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
-			if (picked == 0) 
+			if (picked == 0)
 			{
 				picked = coronal;
 				tpicked = hr.tmin;
 			}
-			else 
+			else
 			{
-				if (hr.tmin < tpicked) 
+				if (hr.tmin < tpicked)
 				{
 					picked = coronal;
 					tpicked = hr.tmin;
@@ -459,20 +459,20 @@ hitResult MainCanvas::pick(wxPoint click)
 		bb->setCenterY(m_dh->rows/2);
 	}
 
-	if (m_dh->showSagittal) 
+	if (m_dh->showSagittal)
 	{
 		bb->setSizeX(0.01f);
 		bb->setCenterX(xx);
 		hr = bb->hitTest(ray);
 		if (hr.hit) {
-			if (picked == 0) 
+			if (picked == 0)
 			{
 				picked = sagittal;
 				tpicked = hr.tmin;
 			}
-			else 
+			else
 			{
-				if (hr.tmin < tpicked) 
+				if (hr.tmin < tpicked)
 				{
 					picked = sagittal;
 					tpicked = hr.tmin;
@@ -480,7 +480,7 @@ hitResult MainCanvas::pick(wxPoint click)
 			}
 		}
 	}
-	if (picked != 0) 
+	if (picked != 0)
 	{
 		hr.tmin = tpicked;
 		hr.picked = picked;
@@ -548,8 +548,8 @@ void MainCanvas::render()
     {
         init();
     }
-    
-    
+
+
      /* clear color and depth buffers */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -573,21 +573,21 @@ void MainCanvas::render()
     			size = 1000;
     			break;
     		}
-    		
+
     		FgeOffscreen fbo(size, size, true);;
     		fbo.setClearColor(1.0, 1.0, 1.0);
     		fbo.activate();
-    		
+
         	glMatrixMode(GL_PROJECTION);
         	glLoadIdentity();
         	glOrtho( 0, orthoSizeNormal, 0, orthoSizeNormal, -500, 500);
         	glViewport(0, 0, size, size);
-        	
+
         	glPushMatrix();
         	m_dh->doMatrixManipulation();
         	m_dh->scene->renderScene();
     	    glPopMatrix();
-    	    
+
     	    fbo.getTexObject(1)->saveImageToPPM((m_dh->m_screenshotName).mb_str());
     		fbo.deactivate();
     		m_dh->scheduledScreenshot = false;
@@ -597,15 +597,15 @@ void MainCanvas::render()
     		glMatrixMode(GL_PROJECTION);
 	    	glLoadIdentity();
 	    	glOrtho( - orthoModX, orthoSizeNormal + orthoModX, - orthoModY, orthoSizeNormal + orthoModY, -500, 500);
-	    	
+
 	    	glPushMatrix();
 	    	m_dh->doMatrixManipulation();
-	    	
+
 	    	m_dh->scene->renderScene();
 	    	//renderTestRay();
 		    glPopMatrix();
     	}
-	   
+
 	    break;
     }
     default:
@@ -676,7 +676,7 @@ void MainCanvas::setRotation()
 	Matrix3fSetIdentity(&m_lastRot);
 	Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);
 
-	
+
 	updateView();
 	m_dh->mainFrame->refreshAllGLWidgets();
 }
@@ -686,7 +686,7 @@ void MainCanvas::OnChar(wxKeyEvent& event)
 	int w, h;
 	GetClientSize(&w, &h);
 	Quat4fT     ThisQuat;
-	
+
 	if ( wxGetKeyState(WXK_CONTROL) )
 	{
 		m_mousePt.s.X = w/2;
@@ -694,7 +694,7 @@ void MainCanvas::OnChar(wxKeyEvent& event)
 		m_lastRot = m_thisRot;										// Set Last Static Rotation To Last Dynamic One
 		m_arcBall->click(&m_mousePt);								// Update Start Vector And Prepare For Dragging
 	}
-	
+
 	switch( event.GetKeyCode() )
 		{
 		case WXK_LEFT:
@@ -744,7 +744,7 @@ void MainCanvas::OnChar(wxKeyEvent& event)
 				m_arcBall->drag(&m_mousePt, &ThisQuat);						// Update End Vector And Get Rotation As Quaternion
 				Matrix3fSetRotationFromQuat4f(&m_thisRot, &ThisQuat);		// Convert Quaternion Into Matrix3fT
 				Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);				// Accumulate Last Rotation Into This One
-				Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One				
+				Matrix4fSetRotationFromMatrix3f(&m_dh->m_transform, &m_thisRot);	// Set Our Final Transform's Rotation From This One
 			}
 			else
 			m_dh->mainFrame->m_ySlider->SetValue( wxMin(m_dh->mainFrame->m_ySlider->GetValue() + 1, m_dh->rows));

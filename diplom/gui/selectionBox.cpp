@@ -91,7 +91,7 @@ void SelectionBox::select(bool flag)
 void SelectionBox::drawIsoSurface()
 {
 	if ( !m_isActive || !m_isVisible ) return;
-	
+
 	if ( m_gfxDirty )
 	{
 		m_isosurface->setThreshold( m_threshold );
@@ -105,7 +105,7 @@ void SelectionBox::drawIsoSurface()
 void SelectionBox::draw()
 {
 	if ( !m_isActive || !m_isVisible ) return;
-	
+
 	if ( !m_isBox )
 	{
 		return;
@@ -114,12 +114,12 @@ void SelectionBox::draw()
 	float cx = m_center.x;
 	float cy = m_center.y;
 	float cz = m_center.z;
-	mx = cx - m_size.x/2;
-	px = cx + m_size.x/2;
-	my = cy - m_size.y/2;
-	py = cy + m_size.y/2;
-	mz = cz - m_size.z/2;
-	pz = cz + m_size.z/2;
+	mx = cx - ( m_size.x/2 * m_dh->xVoxel );
+	px = cx + ( m_size.x/2 * m_dh->xVoxel );
+	my = cy - ( m_size.y/2 * m_dh->yVoxel );
+	py = cy + ( m_size.y/2 * m_dh->yVoxel );
+	mz = cz - ( m_size.z/2 * m_dh->zVoxel );
+	pz = cz + ( m_size.z/2 * m_dh->zVoxel );
 
 	GLfloat c[] = { 0.5, 0.5, 0.5, 0.5};
 

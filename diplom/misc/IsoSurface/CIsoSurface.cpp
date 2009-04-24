@@ -312,9 +312,9 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_nCellsX = m_dh->columns-1;
 	m_nCellsY = m_dh->rows-1;
 	m_nCellsZ = m_dh->frames-1;
-	m_fCellLengthX = 1.0;
-	m_fCellLengthY = 1.0;
-	m_fCellLengthZ = 1.0;
+	m_fCellLengthX = m_dh->xVoxel;
+	m_fCellLengthY = m_dh->yVoxel;
+	m_fCellLengthZ = m_dh->zVoxel;
 
 	int size = m_dh->columns * m_dh->rows * m_dh->frames;
 	m_ptScalarField = new float[size];
@@ -353,7 +353,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_color = wxColour(230,230,230);
 	m_oldMax = 1.0;
 	m_newMax = 1.0;
-		
+
 	m_nTriangles = 0;
 	m_nNormals = 0;
 	m_nVertices = 0;
@@ -366,7 +366,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_GLuint = 0;
 	m_isGlyph = false;
 	isInitialized = false;
-	
+
 	m_pointArray = NULL;
 	m_normalArray = NULL;
 	m_indexArray = NULL;
@@ -522,7 +522,7 @@ void CIsoSurface::DeleteSurface()
 	m_nVertices = 0;
 
 	m_tMesh->clearMesh();
-	
+
 	m_tIsoLevel = 0;
 	m_bValidSurface = false;
 }
@@ -689,7 +689,7 @@ void CIsoSurface::RenameVerticesAndTriangles()
 	float xOff = 0.5f;
 	float yOff = 0.5f;
 	float zOff = 0.5f;
-	
+
 	// Rename vertices.
 	while (mapIterator != m_i2pt3idVertices.end()) {
 		(*mapIterator).second.newID = nextID;
@@ -710,7 +710,7 @@ void CIsoSurface::RenameVerticesAndTriangles()
 
 	m_tMesh->finalize();
 	//m_tMesh->printInfo();
-	
+
 	m_i2pt3idVertices.clear();
 	m_trivecTriangles.clear();
 	licCalculated = false;
@@ -763,15 +763,15 @@ void CIsoSurface::generateGeometry()
 		generateLICGeometry();
 		return;
 	}
-	
+
 	if ( m_pointArray  ) delete[] m_pointArray;
 	if ( m_normalArray ) delete[] m_normalArray;
 	if ( m_indexArray  ) delete[] m_indexArray;
- 	
+
 	m_pointArray = new GLfloat[m_tMesh->getNumVertices()*3];
 	m_normalArray = new GLfloat[m_tMesh->getNumVertices()*3];
 	m_indexArray = new GLuint[m_tMesh->getNumTriangles()*3];
-	
+
 	for (int i = 0 ; i < m_tMesh->getNumVertices() ; ++i)
 	{
 		m_pointArray[i*3]   	= m_tMesh->getVertex(i).x;
@@ -787,7 +787,7 @@ void CIsoSurface::generateGeometry()
 		m_indexArray[i*3+1] = m_tMesh->getTriangle(i).pointID[1];
 		m_indexArray[i*3+2] = m_tMesh->getTriangle(i).pointID[2];
 	}
-	
+
 	isInitialized = true;
 }
 
@@ -797,14 +797,14 @@ void CIsoSurface::generateLICGeometry()
 	if ( m_normalArray ) delete[] m_normalArray;
 	if ( m_indexArray  ) delete[] m_indexArray;
 	if ( m_colorArray  ) delete[] m_colorArray;
- 	
+
 	m_pointArray = new GLfloat[m_tMesh->getNumVertices()*3];
 	m_normalArray = new GLfloat[m_tMesh->getNumVertices()*3];
 	m_colorArray = new GLfloat[m_tMesh->getNumVertices()*3];
-	
+
 	m_indexArray = new GLuint[m_tMesh->getNumTriangles()*3];
-	
-	
+
+
 	for (int i = 0 ; i < m_tMesh->getNumVertices() ; ++i)
 	{
 		m_pointArray[i*3]   	= m_tMesh->getVertex(i).x;
@@ -816,7 +816,7 @@ void CIsoSurface::generateLICGeometry()
 		m_colorArray[i*3]   	= m_tMesh->getTriangleColor(i).x;
 		m_colorArray[i*3+1] 	= m_tMesh->getTriangleColor(i).y;
 		m_colorArray[i*3+2] 	= m_tMesh->getTriangleColor(i).z;
-		
+
 	}
 	for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
 	{
@@ -824,14 +824,14 @@ void CIsoSurface::generateLICGeometry()
 		m_indexArray[i*3+1] = m_tMesh->getTriangle(i).pointID[1];
 		m_indexArray[i*3+2] = m_tMesh->getTriangle(i).pointID[2];
 	}
-	
+
 	isInitialized = true;
-	
+
 }
 
 void CIsoSurface::draw()
 {
-	if ( !isInitialized ) 
+	if ( !isInitialized )
 		generateGeometry();
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -842,9 +842,9 @@ void CIsoSurface::draw()
 		glEnableClientState(GL_COLOR_ARRAY);
 		glVertexPointer(3, GL_FLOAT, 0, m_colorArray);
 	}
-		
+
 	glDrawElements(GL_TRIANGLES, m_tMesh->getNumTriangles()*3, GL_UNSIGNED_INT, m_indexArray);
-	
+
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 }

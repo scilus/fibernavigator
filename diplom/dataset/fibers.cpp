@@ -15,9 +15,6 @@ Fibers::Fibers(DatasetHelper* dh)
     m_rows = 0;
     m_columns = 0;
     m_repn = wxT("");
-    m_xVoxel = 0.0;
-    m_yVoxel = 0.0;
-    m_zVoxel = 0.0;
     is_loaded = false;
     m_highest_value = 1.0;
     m_threshold = 0.10f;

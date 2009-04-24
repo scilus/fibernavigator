@@ -86,9 +86,6 @@ public:
 	int getColumns() {return m_columns;};
 
 	wxString getRpn() {return m_repn;};
-	double getXVoxel() {return m_xVoxel;};
-	double getYVoxel() {return m_yVoxel;};
-	double getZVoxel() {return m_zVoxel;};
 
 	bool toggleShow() {m_show = !m_show; return m_show;};
 	bool toggleShowFS() {m_showFS = !m_showFS; return m_showFS;};
@@ -125,9 +122,6 @@ protected:
 	int m_columns;
 	int m_type;
 	wxString m_repn;
-	double m_xVoxel;
-	double m_yVoxel;
-	double m_zVoxel;
 	bool is_loaded;
 	float m_highest_value;
 	wxString m_name;

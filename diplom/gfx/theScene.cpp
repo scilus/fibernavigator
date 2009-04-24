@@ -39,32 +39,32 @@ void TheScene::initGL(int view)
 			m_dh->printDebug(_T("Error: ") + wxString::FromAscii((char*)glewGetErrorString(err)), 2);
 			exit(false);
 		}
-		if (view == mainView) 
+		if (view == mainView)
 		{
 			m_dh->printDebug(_T("Status: Using GLEW ") +  wxString::FromAscii((char*)glewGetString(GLEW_VERSION)), 1);
-			
-			
+
+
 			wxString vendor;
 			wxString renderer;
 			vendor = wxString::FromAscii((char*)glGetString(GL_VENDOR));
 			renderer = wxString::FromAscii((char*)glGetString(GL_RENDERER));
-			
+
 			if ( renderer.Contains( _T("GeForce 6")) )
 			{
-				m_dh->geforceLevel = 6; 
+				m_dh->geforceLevel = 6;
 			}
 			else if ( renderer.Contains( _T("GeForce 7")) )
 			{
 				m_dh->geforceLevel = 7;
 			}
-			else if ( renderer.Contains( _T("GeForce 8")) )
+			else if ( renderer.Contains( _T("GeForce 8")) || renderer.Contains( _T("GeForce GTX 2")))
 			{
 				m_dh->geforceLevel = 8;
 			}
-			
-			
+
+
 			m_dh->printDebug(vendor + _T(" ") + renderer, 1);
-						
+
 			if( !glewIsSupported("GL_ARB_shader_objects") )
 			{
 				printf("*** ERROR no support for shader objects found.\n");
@@ -73,12 +73,12 @@ void TheScene::initGL(int view)
 			}
 		}
 		glEnable(GL_DEPTH_TEST);
-	
+
 		if (!m_dh->m_texAssigned) {
 			m_dh->shaderHelper = new ShaderHelper(m_dh);
 			m_dh->m_texAssigned = true;
 		}
-	
+
 		//float maxLength = (float)wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
 		//float view1 = maxLength;
 		float view1 = 200;
@@ -126,7 +126,7 @@ void TheScene::bindTextures()
 void TheScene::renderScene()
 {
 	if ( m_dh->mainFrame->m_listCtrl->GetItemCount() == 0 ) return;
-	
+
 	renderSplineSurface();
 
 	if ( m_dh->pointMode )
@@ -145,13 +145,13 @@ void TheScene::renderScene()
 	}
 
 	renderMesh();
-	
+
 	if ( m_dh->fibers_loaded && m_dh->showBoxes)
 		drawSelectionBoxes();
-	
+
 	if ( m_dh->showColorMapLegend )
 		drawColorMapLegend();
-	
+
 	if ( m_dh->GLError() ) m_dh->printGLError(wxT("render scene"));
 }
 
@@ -176,18 +176,18 @@ void TheScene::renderSlizes()
 	m_dh->shaderHelper->m_textureShader->setUniInt("useColorMap", m_dh->colorMap);
 
 	m_dh->anatomyHelper->renderMain();
-	
+
 	//m_dh->anatomyHelper->renderFreeSlize();
-	
+
 	glDisable(GL_BLEND);
 
 	m_dh->shaderHelper->m_textureShader->release();
-	
+
 	if (m_dh->showCrosshair)
 		m_dh->anatomyHelper->renderCrosshair();
 
 	if (m_dh->GLError()) m_dh->printGLError(wxT("render slizes"));
-	
+
 	glPopAttrib();
 }
 
@@ -274,16 +274,16 @@ void TheScene::renderMesh()
 			}
 		}
 	}
-	
+
 	std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
-	
+
 	m_dh->shaderHelper->m_meshShader->setUniInt("showFS", true);
 	m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
 	m_dh->shaderHelper->m_meshShader->setUniFloat("alpha_", 1.0);
 	m_dh->shaderHelper->m_meshShader->setUniInt("useColorMap",  m_dh->colorMap);
 	m_dh->shaderHelper->m_meshShader->setUniInt("useLic", false);
 	m_dh->shaderHelper->m_meshShader->setUniInt("useCMAP", false);
-	
+
 	for (unsigned int i = 0 ; i < boxes.size() ; ++i)
 	{
 		for (unsigned int j = 0 ; j < boxes[i].size() ; ++j)
@@ -294,7 +294,7 @@ void TheScene::renderMesh()
 			glPopAttrib();
 		}
 	}
-	
+
 	m_dh->shaderHelper->m_meshShader->release();
 
 	lightsOff();
