@@ -40,7 +40,8 @@ typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
 class CIsoSurface  : public DatasetInfo {
 public:
 	// Constructor and destructor.
-	CIsoSurface(DatasetHelper*, float* ptScalarField);
+	//CIsoSurface(DatasetHelper*, float* ptScalarField);
+	CIsoSurface(DatasetHelper*, Anatomy* anatomy);
 	~CIsoSurface();
 
 	bool load(wxString filename) {return false;};
@@ -123,9 +124,9 @@ protected:
 	GLfloat* m_normalArray;
 	GLfloat* m_colorArray;
 	GLuint*  m_indexArray;
-	
+
 	bool isInitialized;
-	
+
 
 private:
 	GLuint getGLuint() {return 0;};

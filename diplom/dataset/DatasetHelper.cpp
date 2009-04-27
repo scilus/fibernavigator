@@ -27,11 +27,11 @@ DatasetHelper::DatasetHelper(MainFrame* mf)
     rows = 1;
     columns = 1;
     frames = 1;
-    
+
     xVoxel = 1.0;
     yVoxel = 1.0;
     zVoxel = 1.0;
-    
+
     countFibers = 0;
     threadsActive = 0;
     anatomy_loaded = false;
@@ -259,7 +259,7 @@ bool DatasetHelper::load(wxString filename, bool createBox, float threshold,
         if (fibers->load(filename))
         {
             fibers_loaded = true;
-            
+
             std::vector<std::vector<SelectionBox*> > boxes = getSelectionBoxes();
             for (unsigned int i = 0; i < boxes.size() ; ++i)
             {
@@ -892,7 +892,7 @@ void DatasetHelper::createIsoSurface()
 
     printDebug(_T("start generating iso surface..."),1);
 
-    CIsoSurface *isosurf = new CIsoSurface(this, anatomy->getFloatDataset());
+    CIsoSurface *isosurf = new CIsoSurface(this, anatomy); //->getFloatDataset());
     isosurf->GenerateSurface(0.4f);
 
     printDebug(_T("iso surface done"),1);
@@ -915,7 +915,7 @@ void DatasetHelper::createIsoSurface()
         mainFrame->m_listCtrl->SetItem(id, 2, wxT("0.40"));
         mainFrame->m_listCtrl->SetItem(id, 3, wxT(""), 1);
         mainFrame->m_listCtrl->SetItemData(id, (long) isosurf);
-        mainFrame->m_listCtrl->SetItemState(id, wxLIST_STATE_SELECTED, 
+        mainFrame->m_listCtrl->SetItemState(id, wxLIST_STATE_SELECTED,
         wxLIST_STATE_SELECTED);
 
     }
@@ -946,13 +946,13 @@ void DatasetHelper::createDistanceMap()
 
     printDebug(_T("start generating distance map..."),1);
 
-    std::auto_ptr<Anatomy> newAnatomy(new Anatomy(this, anatomy->getFloatDataset()));
+    Anatomy* newAnatomy = new Anatomy(this, anatomy->getFloatDataset());
 
     printDebug(_T("distance map done"),1);
 
     printDebug(_T("start generating iso surface..."),1);
 
-    CIsoSurface *isosurf = new CIsoSurface(this, newAnatomy->getFloatDataset());
+    CIsoSurface *isosurf = new CIsoSurface(this, newAnatomy);
     isosurf->GenerateSurface(0.1f);
 
     printDebug(_T("iso surface done"),1);
@@ -968,7 +968,7 @@ void DatasetHelper::createDistanceMap()
         mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.10"));
         mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
         mainFrame->m_listCtrl->SetItemData(0, (long) isosurf);
-        mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, 
+        mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
         wxLIST_STATE_SELECTED);
 
     }
@@ -977,6 +977,7 @@ void DatasetHelper::createDistanceMap()
         printDebug(_T("***ERROR*** surface is not valid"),2);
     }
 
+    delete newAnatomy;
     mainFrame->refreshAllGLWidgets();
 }
 
@@ -1051,7 +1052,7 @@ void DatasetHelper::createCutDataset()
     mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.00"));
     mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
     mainFrame->m_listCtrl->SetItemData(0, (long) newAnatomy);
-    mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, 
+    mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
     wxLIST_STATE_SELECTED);
 
     mainFrame->refreshAllGLWidgets();

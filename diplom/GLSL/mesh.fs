@@ -98,7 +98,7 @@ void main() {
 		color = color + (ambient * color / 2.0) + (diffuse * color) + (specular * color / 2.0);	
 	}
 	
-	if ( useCMAP && !useTex )
+	else if ( useCMAP && !useTex )
 	{
 		colorMap( color.rgb, myColor.r);
 		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0) + (specular * color / 2.0);			

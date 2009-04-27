@@ -54,7 +54,7 @@ SelectionBox::SelectionBox(DatasetHelper* dh, Anatomy* a)
 	}
 	m_name = wxT("ROI");
 	m_sourceAnatomy = a;
-	m_isosurface = new CIsoSurface(m_dh, a->getFloatDataset());
+	m_isosurface = new CIsoSurface(m_dh, a);
 }
 
 SelectionBox::~SelectionBox()

@@ -5,7 +5,6 @@
 ========================================================================
 
 kleinigkeiten:
-* skalierung der Anzeige bei isosurface
 * save scn file...  falsches verzeichnis
 * slider bei roi from overlay
 * keine skalierung (verdickung) der tubes bei vergr�serung des fensters.
@@ -13,7 +12,7 @@ kleinigkeiten:
 * die box lasst  sich nicht verschieben, wenn man den view auf "left" oder top, etc. stellt. 
   - related bug: problem mit "strg  + click" bei superior/left view.
 * snapshot: add file extention *.ppm in dem file-auswahl dialog. falls Name ohne *.ppm, dann .ppm hinzuf�gen.
-* auswahl der boxen in der 3d scene tum verschieben/loeschen geht nicht mehr
+
 
 ========================================================================
 =
@@ -62,6 +61,8 @@ background and threshold
 =     erledigt
 =
 ===============================================================================
+skalierung der Anzeige bei isosurface
+auswahl der boxen in der 3d scene tum verschieben/loeschen geht nicht mehr
 bug: new roi from overlay ohne auswahl des overlays -> seg fault
 interne implementierung der offsetflaeche
 keine OPENGL installation: beim start lesbare fehlermeldung

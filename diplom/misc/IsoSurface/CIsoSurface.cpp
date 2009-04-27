@@ -10,6 +10,7 @@
 #include "CIsoSurface.h"
 #include <algorithm>
 #include "../lic/SurfaceLIC.h"
+#include "../../dataset/Anatomy.h"
 
 const unsigned int CIsoSurface::m_edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -305,7 +306,8 @@ const int CIsoSurface::m_triTable[256][16] = {
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
+//CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
+CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy)
 {
 	m_dh = dh;
 
@@ -319,7 +321,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	int size = m_dh->columns * m_dh->rows * m_dh->frames;
 	m_ptScalarField = new float[size];
 	for ( int i = 0 ; i < size ; ++i)
-		m_ptScalarField[i] = ptScalarField[i];
+		m_ptScalarField[i] = anatomy->getFloatDataset(i); //ptScalarField[i];
 
 	if (m_dh->filterIsoSurf)
 	{
@@ -330,15 +332,15 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 					std::vector<float>list;
 					for (unsigned int zz = z-1; zz < z+2 ; ++zz)
 					{
-						list.push_back(ptScalarField[x +     m_dh->columns * y +     m_dh->columns * m_dh->rows * zz]);
-						list.push_back(ptScalarField[x - 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz]);
-						list.push_back(ptScalarField[x + 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz]);
-						list.push_back(ptScalarField[x +     m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz]);
-						list.push_back(ptScalarField[x - 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz]);
-						list.push_back(ptScalarField[x + 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz]);
-						list.push_back(ptScalarField[x +     m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz]);
-						list.push_back(ptScalarField[x - 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz]);
-						list.push_back(ptScalarField[x + 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz]);
+						list.push_back(anatomy->getFloatDataset(x +     m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->getFloatDataset(x - 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->getFloatDataset(x + 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->getFloatDataset(x +     m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->getFloatDataset(x - 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->getFloatDataset(x + 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->getFloatDataset(x +     m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->getFloatDataset(x - 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->getFloatDataset(x + 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
 					}
 					nth_element (list.begin(), list.begin() + 13, list.end());
 					m_ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*z] = list[13];
@@ -351,7 +353,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 	m_showFS = true;
 	m_useTex = true;
 	m_color = wxColour(230,230,230);
-	m_oldMax = 1.0;
+	m_oldMax = anatomy->getOldMax();
 	m_newMax = 1.0;
 
 	m_nTriangles = 0;
