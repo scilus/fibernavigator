@@ -4,11 +4,6 @@
 =
 ========================================================================
 
-kleinigkeiten:
-* die box lasst  sich nicht verschieben, wenn man den view auf "left" oder top, etc. stellt. 
-  - related bug: problem mit "strg  + click" bei superior/left view.
-(das ist keine kleinigkeit zur Hölle)
-  
 ========================================================================
 =
 = relativ(?) einfach
@@ -56,6 +51,8 @@ background and threshold
 =     erledigt
 =
 ===============================================================================
+* die box lasst  sich nicht verschieben, wenn man den view auf "left" oder top, etc. stellt. 
+  - related bug: problem mit "strg  + click" bei superior/left view.
 roi mit wert null-> keine isosurface
 keine skalierung (verdickung) der tubes bei vergr�serung des fensters.
 save scn file...  falsches verzeichnis

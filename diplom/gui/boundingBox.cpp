@@ -80,17 +80,22 @@ hitResult BoundingBox::hitTest(Ray *ray)
 	tmin = tymin = tzmin = 0.0;
 	tmax = tymax = tzmax = 1.0;
 	float dirx = ray->m_dir.x;
-	if ( dirx > 0 ) 
+	if ( dirx > 0 )
 	{
 		tmin = ( xmin - ray->m_origin.x ) / dirx;
 		tmax = ( xmax - ray->m_origin.x ) / dirx;
 	}
-	else if ( dirx < 0 ) 
+	else if ( dirx < 0 )
 	{
 		tmin = ( xmax - ray->m_origin.x) / dirx;
 		tmax = ( xmin - ray->m_origin.x) / dirx;
 	}
-	
+	else
+	{
+        tmin = ( xmax - ray->m_origin.x) / -0.0001;
+        tmax = ( xmin - ray->m_origin.x) / -0.0001;
+    }
+
 	float diry = ray->m_dir.y;
 	if ( diry > 0 )
 	{
@@ -102,25 +107,35 @@ hitResult BoundingBox::hitTest(Ray *ray)
 		tymin = ( ymax - ray->m_origin.y)/diry;
 		tymax = ( ymin - ray->m_origin.y)/diry;
 	}
+	else
+    {
+        tymin = ( ymax - ray->m_origin.y) / -0.0001;
+        tymax = ( ymin - ray->m_origin.y) / -0.0001;
+    }
 	if ( tmin > tymax || tymin > tmax ) return hr;
 	if ( tymin > tmin ) tmin = tymin;
 	if ( tymax < tmax ) tmax = tymax;
-		
+
 	float dirz = ray->m_dir.z;
-	if ( dirz > 0 ) 
+	if ( dirz > 0 )
 	{
 		tzmin = ( zmin - ray->m_origin.z ) / dirz;
 		tzmax = ( zmax - ray->m_origin.z ) / dirz;
 	}
-	else if ( dirz < 0 ) 
+	else if ( dirz < 0 )
 	{
 		tzmin = ( zmax - ray->m_origin.z ) / dirz;
 		tzmax = ( zmin - ray->m_origin.z ) / dirz;
 	}
+	else
+    {
+        tzmin = ( zmax - ray->m_origin.z) / -0.0001;
+        tzmax = ( zmin - ray->m_origin.z) / -0.0001;
+    }
 	if ( tmin > tzmax || tzmin > tmax ) return hr;
 	if ( tzmin > tmin ) tmin = tzmin;
 	if ( tzmax < tmax ) tmax = tzmax;
-	
+
 	if ( tmin > tmax ) return hr;
 	hr.hit = true;
 	hr.tmin = tmin;
