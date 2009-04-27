@@ -372,6 +372,8 @@ void TheScene::renderFakeTubes()
 
 			m_dh->shaderHelper->m_fakeTubeShader->bind();
 			m_dh->shaderHelper->m_fakeTubeShader->setUniInt("globalColor", info->getShowFS());
+			m_dh->shaderHelper->m_fakeTubeShader->setUniFloat("dimX", (float)m_dh->mainFrame->m_mainGL->GetSize().x);
+			m_dh->shaderHelper->m_fakeTubeShader->setUniFloat("dimY", (float)m_dh->mainFrame->m_mainGL->GetSize().y);
 
 			info->draw();
 

@@ -8,7 +8,7 @@
 #include "Shader.h"
 #include "../main.h"
 
-Shader::Shader(wxString fileName) 
+Shader::Shader(wxString fileName)
 {
 	m_vertex = 0;
 	m_fragment = 0;
@@ -202,7 +202,9 @@ void Shader::setUniInt(const GLchar* name, int value)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
 	if (texLoc == -1)
+	{
 		printf("No such uniform named \"%s\"\n", name);
+	}
 	glUniform1i (texLoc, value);
 }
 
@@ -210,7 +212,9 @@ void Shader::setUniFloat(const GLchar* name, float value)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
 	if (texLoc == -1)
+	{
 		printf("No such uniform named \"%s\"\n", name);
+	}
 	glUniform1f (texLoc, value);
 }
 
