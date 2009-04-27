@@ -31,7 +31,7 @@ DECLARE_EVENT_TYPE(wxEVT_NAVGL_EVENT, -1)
  * Event Table
  *
  ****************************************************************************************************/
- 
+
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	/*
 	 * Menu events
@@ -69,7 +69,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_VOI_COLOR_ROI, MainFrame::OnColorRoi)
 	EVT_MENU(MENU_VOI_USE_MORPH, MainFrame::OnUseMorph)
 	// Menu Surfaces
-	EVT_MENU(MENU_SURFACE_NEW_OFFSET, MainFrame::OnNewOffsetMap)	
+	EVT_MENU(MENU_SURFACE_NEW_OFFSET, MainFrame::OnNewOffsetMap)
 	EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_LIC, MainFrame::OnToggleLIC)
 	EVT_MENU(MENU_SPLINESURF_TOGGLE_NORMAL, MainFrame::OnToggleNormal)
@@ -112,7 +112,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(MENU_LIST_TOGGLECOLOR, MainFrame::OnListMenuThreshold)
 	EVT_MENU(MENU_LIST_TOGGLENAME, MainFrame::OnListMenuName)
 	EVT_MENU(MENU_LIST_CUTOUT, MainFrame::OnListMenuCutOut)
-	
+
 	/*
      * Tree widget events
      */
@@ -123,7 +123,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_BUTTON(ID_BUTTON_LOAD1, MainFrame::OnLoad1)
 	EVT_BUTTON(ID_BUTTON_LOAD2, MainFrame::OnLoad2)
 	EVT_BUTTON(ID_BUTTON_LOAD3, MainFrame::OnLoad3)
-	
+
     /*
     * Interface events
     */
@@ -168,43 +168,43 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
   wxFrame(parent, id, title, pos, size, style)
 {
 	enlargeNav = 0;
-	
+
 	m_xSlider = new wxSlider(this, ID_X_SLIDER, 50, 0, 100, wxDefaultPosition,
            		wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
 	m_ySlider = new wxSlider(this, ID_Y_SLIDER, 50, 0, 100, wxDefaultPosition,
        			wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
-	m_zSlider = new wxSlider(this, ID_Z_SLIDER, 50, 0, 100, wxDefaultPosition, 
+	m_zSlider = new wxSlider(this, ID_Z_SLIDER, 50, 0, 100, wxDefaultPosition,
 			 	wxSize(150, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-	
-	m_tSlider = new MySlider(this, ID_T_SLIDER, 30, 0, 100, wxDefaultPosition, 
+
+	m_tSlider = new MySlider(this, ID_T_SLIDER, 30, 0, 100, wxDefaultPosition,
 				wxSize(110, 19), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-	
-	m_tSlider2 = new wxSlider(this, ID_T_SLIDER2, 30, 0, 100, wxDefaultPosition, 
+
+	m_tSlider2 = new wxSlider(this, ID_T_SLIDER2, 30, 0, 100, wxDefaultPosition,
 				wxSize(103, 19), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-	
+
 	buttonUp = new wxButton(this, ID_BUTTON_UP, wxT("up"), wxDefaultPosition, wxSize(40,19));
 	buttonUp->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
 	buttonDown = new wxButton(this, ID_BUTTON_DOWN, wxT("down"), wxDefaultPosition, wxSize(40,19));
 	buttonDown->SetFont(wxFont(6, wxDEFAULT, wxNORMAL, wxNORMAL));
-	
+
 	buttonLoad1 = new wxButton(this, ID_BUTTON_LOAD1, wxT("Load Datasets"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad1->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
 	buttonLoad2 = new wxButton(this, ID_BUTTON_LOAD2, wxT("Load Meshes"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad2->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
 	buttonLoad3 = new wxButton(this, ID_BUTTON_LOAD3, wxT("Load Fibers"), wxDefaultPosition, wxSize(148,20));
 	buttonLoad3->SetFont(wxFont(8, wxDEFAULT, wxNORMAL, wxNORMAL));
-	
+
 	m_listCtrl = new MyListCtrl(this, ID_LIST_CTRL, wxDefaultPosition,
    		wxSize(293,-1), wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
-	
-	
+
+
 	m_treeWidget = new MyTreeCtrl(this, ID_TREE_CTRL, wxDefaultPosition,
 	   		wxSize(150,-1), wxTR_HAS_BUTTONS|wxTR_SINGLE|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS);
 	m_treeWidget->SetMaxSize(wxSize(150,-1));
-	
-	
+
+
    wxImageList* imageList = new wxImageList(16,16);
 #ifndef __WXMAC__
    imageList->Add(wxIcon(eyes_xpm));
@@ -229,12 +229,12 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 
    itemCol.SetText(wxT(""));
    m_listCtrl->InsertColumn(3, itemCol);
-   
+
    m_listCtrl->SetColumnWidth(0, 20);
    m_listCtrl->SetColumnWidth(1, 194);
    m_listCtrl->SetColumnWidth(2, 70);
    m_listCtrl->SetColumnWidth(3, 20);
-   
+
 
    wxImageList* tImageList = new wxImageList(16,16);
 #ifndef __WXMAC__
@@ -249,9 +249,9 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
    m_tRootId = m_treeWidget->AddRoot(wxT("Scene"), -1, -1, NULL );
    m_tPointId  = m_treeWidget->AppendItem(m_tRootId, wxT("points"), -1, -1, NULL);
    m_tSelBoxId  = m_treeWidget->AppendItem(m_tRootId, wxT("selection boxes"), -1, -1, NULL);
-   
+
    m_dh = new DatasetHelper(this);
-   
+
    	/*
     * Set OpenGL attributes
     */
@@ -277,14 +277,14 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	#endif
         doubleBuffer = GL_FALSE;
     }
-    
-    
-    
+
+
+
     m_dh->scene = new TheScene(m_dh);
-    
+
     m_mainGL = new MainCanvas(m_dh, mainView, this, ID_GL_MAIN, wxDefaultPosition,
                                 wxDefaultSize, 0, _T("MainGLCanvas"), gl_attrib);
-   
+
 #ifndef CTX
        m_gl0 = new MainCanvas(m_dh, axial, this, ID_GL_NAV_X, wxDefaultPosition,
 	                wxSize(150,150), 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL);
@@ -295,7 +295,7 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	    m_gl2 = new MainCanvas(m_dh, sagittal, this, ID_GL_NAV_Z, wxDefaultPosition,
 	    			wxSize(150,150), 0, _T("NavGLCanvasZ"), gl_attrib, m_mainGL);
 	    m_gl2->SetMaxSize(wxSize(150,150));
-    
+
 #else
     m_gl0 = new MainCanvas(m_dh, axial, m_topNavWindow, ID_GL_NAV_X, wxDefaultPosition,
                 wxDefaultSize, 0, _T("NavGLCanvasX"), gl_attrib, m_mainGL->GetContext());
@@ -317,31 +317,31 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id, const wxString& titl
 	navSizer 		= new wxBoxSizer( wxVERTICAL );
 	buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
 	treeSizer		= new wxBoxSizer( wxVERTICAL );
-	
+
 	navSizer->Add( m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
 	navSizer->Add( m_zSlider, 0, wxALL, 1 );
 	navSizer->Add( m_gl1, 1, wxALL  | wxEXPAND | wxSHAPED, 1 );
 	navSizer->Add( m_ySlider, 0, wxALL, 1 );
 	navSizer->Add( m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
 	navSizer->Add( m_xSlider, 0, wxALL, 1 );
-	
+
 	treeSizer->Add( buttonLoad1, 0, wxALL | wxALIGN_CENTER, 0 );
 	treeSizer->Add( buttonLoad2, 0, wxALL | wxALIGN_CENTER, 0 );
 	treeSizer->Add( buttonLoad3, 0, wxALL | wxALIGN_CENTER, 0 );
 	treeSizer->Add( m_treeWidget, 1, wxALL, 1 );
-	
+
 	leftTopSizer->Add( treeSizer, 0, wxALL | wxEXPAND, 0 );
 	leftTopSizer->Add( navSizer, 1, wxALL | wxEXPAND, 0 );
-    
+
     buttonSizer->Add( buttonUp, 0, wxALL, 1 );
     buttonSizer->Add( buttonDown, 0, wxALL, 1 );
     buttonSizer->Add( m_tSlider, 0, wxALL, 1 );
     buttonSizer->Add( m_tSlider2, 0, wxALL, 1 );
-    
+
     leftSizer->Add( leftTopSizer, 0, wxALL, 1 );
     leftSizer->Add( m_listCtrl, 1, wxALL | wxEXPAND, 1 );
     leftSizer->Add( buttonSizer, 0, wxALIGN_BOTTOM | wxALL, 1 );
-    
+
     topSizer->Add( leftSizer, 0, wxEXPAND | wxALL, 0 );
     topSizer->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
 
@@ -376,7 +376,7 @@ void MainFrame::OnNewIsoSurface(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->createIsoSurface();
 }
-	
+
 void MainFrame::OnNewOffsetMap(wxCommandEvent& WXUNUSED(event))
 {
 	m_dh->createDistanceMap();
@@ -425,7 +425,7 @@ void MainFrame::OnReloadShaders(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
 	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("Scene files (*.scn)|*.scn||*.*|*.*");
+	wxString wildcard = wxT("Scene files (*.scn)|*.scn|*.*|*.*");
 	wxString defaultDir = wxEmptyString;
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
@@ -433,10 +433,10 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 	dialog.SetDirectory(m_dh->lastPath);
 	if (m_dh->m_scnFileLoaded)
 		dialog.SetFilename(m_dh->m_scnFileName);
-		dialog.SetPath(m_dh->m_scenePath);
+        dialog.SetDirectory(m_dh->m_scenePath);
 	if (dialog.ShowModal() == wxID_OK)
 	{
-		m_dh->lastPath = dialog.GetDirectory();
+		m_dh->m_scenePath = dialog.GetDirectory();
 		m_dh->save(dialog.GetPath());
 	}
 }
@@ -474,7 +474,7 @@ void MainFrame::OnSaveFibers(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSaveDataset(wxCommandEvent& WXUNUSED(event))
 {
 	Anatomy* a = NULL;
-		
+
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
 	{
@@ -482,7 +482,7 @@ void MainFrame::OnSaveDataset(wxCommandEvent& WXUNUSED(event))
 		if (info->getType() < Mesh_ )
 		{
 			a = (Anatomy*) m_listCtrl->GetItemData(item);
-			
+
 			wxString caption = wxT("Choose a file");
 			wxString wildcard = wxT("nifti files (*.nii)|*.nii||*.*|*.*");
 			wxString defaultDir = wxEmptyString;
@@ -494,7 +494,7 @@ void MainFrame::OnSaveDataset(wxCommandEvent& WXUNUSED(event))
 			{
 				m_dh->lastPath = dialog.GetDirectory();
 				a->saveNifti(dialog.GetPath());
-			}		
+			}
 		}
 	}
 }
@@ -507,7 +507,7 @@ void MainFrame::OnSaveDataset(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMinimizeDataset(wxCommandEvent& WXUNUSED(event))
 {
 	Anatomy* a = NULL;
-		
+
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
 	{
@@ -528,7 +528,7 @@ void MainFrame::OnMinimizeDataset(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnDilateDataset(wxCommandEvent& WXUNUSED(event))
 {
 	Anatomy* a = NULL;
-		
+
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
 	{
@@ -549,7 +549,7 @@ void MainFrame::OnDilateDataset(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnErodeDataset(wxCommandEvent& WXUNUSED(event))
 {
 	Anatomy* a = NULL;
-		
+
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
 	{
@@ -566,7 +566,7 @@ void MainFrame::OnErodeDataset(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSaveSurface(wxCommandEvent& WXUNUSED(event))
 {
 	// if ...
-	
+
 	Surface *surface = NULL;
 	if(!m_dh->getSurfaceDataset(surface)) return;
 	std::cout << "got surface: " << surface << std::endl;
@@ -702,7 +702,7 @@ void MainFrame::OnToggleSelBox(wxCommandEvent& WXUNUSED(event))
 }
 /****************************************************************************************************
  *
- * 
+ *
  *
  ****************************************************************************************************/
 void MainFrame::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))
@@ -717,8 +717,8 @@ void MainFrame::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))
 	{
 		SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 		box->toggleNOT();
-		
-	
+
+
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(tBoxId);
 		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty(true);
 
@@ -726,7 +726,7 @@ void MainFrame::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))
 			m_treeWidget->SetItemBackgroundColour(tBoxId, *wxRED);
 		else
 			m_treeWidget->SetItemBackgroundColour(tBoxId, *wxGREEN);
-				
+
 		m_treeWidget->SetItemImage(tBoxId, box->getIcon());
 		box->setDirty(true);
 	}
@@ -838,7 +838,7 @@ void MainFrame::createNewSelBox()
 	}
 
 	m_dh->m_selBoxChanged = true;
-	refreshAllGLWidgets();	
+	refreshAllGLWidgets();
 }
 
 /****************************************************************************************************
@@ -852,7 +852,7 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 	wxTreeItemId pId = m_treeWidget->GetItemParent(tBoxId);
 	SelectionBox *selBox = NULL;
 	Anatomy* a = NULL;
-	
+
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item != -1)
 	{
@@ -866,9 +866,9 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 		else
 		    return;
 	}
-	else 
+	else
 		return;
-		
+
 	if (treeSelected(tBoxId) == MasterBox)
 	{
 		wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(tBoxId, wxT("ROI"),0, -1, selBox);
@@ -886,11 +886,11 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 		m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
 		selBox->setTreeId(tNewBoxId);
 		selBox->setIsMaster(true);
-		 
+
 	}
-	
+
 	a->m_roi = selBox;
-			
+
 	m_dh->m_selBoxChanged = true;
 	refreshAllGLWidgets();
 }
@@ -917,7 +917,7 @@ void MainFrame::OnUseMorph(wxCommandEvent& WXUNUSED(event))
 }
 /****************************************************************************************************
  *
- * 
+ *
  *
  ****************************************************************************************************/
 void MainFrame::OnColorRoi(wxCommandEvent& WXUNUSED(event))
@@ -928,8 +928,8 @@ void MainFrame::OnColorRoi(wxCommandEvent& WXUNUSED(event))
 	wxTreeItemId tBoxId = m_treeWidget->GetSelection();
 	SelectionBox *box =  (SelectionBox*)(m_treeWidget->GetItemData(tBoxId));
 
-	
-	
+
+
 	wxColourData colorData;
 
 	for ( int i = 0; i < 10 ; ++i)
@@ -961,7 +961,7 @@ void MainFrame::OnColorRoi(wxCommandEvent& WXUNUSED(event))
 	else return;
 
 	box->setColor(col);
-	
+
 	refreshAllGLWidgets();
 }
 
@@ -1357,7 +1357,7 @@ void MainFrame::OnShortcuts(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnScreenshot(wxCommandEvent& WXUNUSED(event))
 {
 	wxString caption = wxT("Choose a file");
-	wxString wildcard = wxT("PPM files (*.ppm)|*.ppm||*.*|*.*");
+	wxString wildcard = wxT("PPM files (*.ppm)|*.ppm|*.*|*.*");
 	wxString defaultDir = wxEmptyString;
 	wxString defaultFilename = wxEmptyString;
 	wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
@@ -1367,10 +1367,12 @@ void MainFrame::OnScreenshot(wxCommandEvent& WXUNUSED(event))
 	{
 		m_dh->m_screenshotPath = dialog.GetDirectory();
 		m_dh->m_screenshotName = dialog.GetPath();
+		if (m_dh->m_screenshotName.AfterLast('.') != _T("ppm"))
+		    m_dh->m_screenshotName += _T(".ppm");
 		m_dh->scheduledScreenshot = true;
 		m_mainGL->render();
 		m_mainGL->render();
-	}	
+	}
 }
 
 /****************************************************************************************************
@@ -1406,10 +1408,10 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
 
 	long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if (item == -1) return;
-	
+
 	DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
 	m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold * info->getOldMax() ));
-	
+
 	info->setThreshold(threshold);
 	if ( info->getType() == Surface_ )
 	{
@@ -1501,7 +1503,7 @@ void MainFrame::OnToggleAlpha(wxCommandEvent& WXUNUSED(event))
 	this->Update();
 	//this->Refresh();
 
-	
+
 	m_mainGL->render();
 }
 /****************************************************************************************************
@@ -1522,20 +1524,20 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 			treeSizer->Show(false);
 			buttonSizer->Show(false);
 			m_listCtrl->Show(false);
-			
+
 			int newSize = (clientSize.y - 65)/3;
-			
+
 			m_gl0->SetMinSize(wxSize(100,100));
 			m_gl1->SetMinSize(wxSize(100,100));
 			m_gl2->SetMinSize(wxSize(100,100));
 			m_gl0->SetMaxSize(wxSize(newSize,newSize));
 			m_gl1->SetMaxSize(wxSize(newSize,newSize));
 			m_gl2->SetMaxSize(wxSize(newSize,newSize));
-			
+
 			m_xSlider->SetMinSize(wxSize(newSize,-1));
 			m_ySlider->SetMinSize(wxSize(newSize,-1));
 			m_zSlider->SetMinSize(wxSize(newSize,-1));
-			
+
 			navSizer1 = new wxBoxSizer( wxVERTICAL );
 			navSizer1->Add( m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
 			navSizer1->Add( m_zSlider, 0, wxALL, 1 );
@@ -1543,11 +1545,11 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 			navSizer1->Add( m_ySlider, 0, wxALL, 1 );
 			navSizer1->Add( m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
 			navSizer1->Add( m_xSlider, 0, wxALL, 1 );
-			
+
 			topSizer1 = new wxBoxSizer( wxHORIZONTAL );
 			topSizer1->Add(navSizer1, 0, wxALL | wxEXPAND, 1);
 			topSizer1->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
-	
+
 			SetSizer( topSizer1 );
 			topSizer1->SetSizeHints( this );
 			break;
@@ -1566,7 +1568,7 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 			buttonLoad1->Show(true);
 			buttonLoad2->Show(true);
 			buttonLoad3->Show(true);
-			
+
 			m_gl0->SetMinSize(wxSize(100, 100));
 			m_gl1->SetMinSize(wxSize(100, 100));
 			m_gl2->SetMinSize(wxSize(100, 100));
@@ -1575,36 +1577,36 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 			m_gl1->SetMaxSize(wxSize(10000, 10000));
 			m_gl2->SetMaxSize(wxSize(10000, 10000));
 			m_mainGL->SetMaxSize(wxSize(10000, 10000));
-						
+
 			topSizer 		= new wxBoxSizer( wxHORIZONTAL );
 			leftSizer 		= new wxBoxSizer( wxVERTICAL );
 			buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
 			treeSizer		= new wxBoxSizer( wxVERTICAL );
-			
+
 			m_treeWidget->SetMinSize(wxSize(150, 350));
 			treeSizer->Add( buttonLoad1, 0, wxALL | wxALIGN_CENTER, 0 );
 			treeSizer->Add( buttonLoad2, 0, wxALL | wxALIGN_CENTER, 0 );
 			treeSizer->Add( buttonLoad3, 0, wxALL | wxALIGN_CENTER, 0 );
 			treeSizer->Add( m_treeWidget, 1, wxALL, 1 );
-					    
+
 		    buttonSizer->Add( buttonUp, 0, wxALL, 1 );
 		    buttonSizer->Add( buttonDown, 0, wxALL, 1 );
 		    buttonSizer->Add( m_tSlider, 0, wxALL, 1 );
 		    buttonSizer->Add( m_tSlider2, 0, wxALL, 1 );
-		    
+
 		    leftSizer->Add(treeSizer, 0, wxALL, 1 );
 		    leftSizer->Add( m_listCtrl, 1, wxALL | wxEXPAND, 1 );
 		    leftSizer->Add( buttonSizer, 0, wxALIGN_BOTTOM | wxALL, 1 );
-		
+
 			topSizer2 = new wxFlexGridSizer(2,2,1,1);
 			topSizer2->Add(m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1);
 			topSizer2->Add(m_gl1, 1, wxALL | wxEXPAND | wxSHAPED, 1);
 			topSizer2->Add(m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1);
 			topSizer2->Add(m_mainGL, 1, wxALL | wxEXPAND | wxSHAPED, 1);
-					
+
 			topSizer->Add(leftSizer, 0 , wxALL | wxEXPAND, 1);
 			topSizer->Add(topSizer2, 1 , wxALL | wxEXPAND, 1);
-			
+
 			SetSizer( topSizer );
 			topSizer->SetSizeHints( this );
 			break;
@@ -1631,45 +1633,45 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 			m_gl1->SetMaxSize(wxSize(150,150));
 			m_gl2->SetMaxSize(wxSize(150,150));
 			m_mainGL->SetMaxSize(wxSize(10000,10000));
-			
+
 			m_xSlider->SetMinSize(wxSize(150,-1));
 			m_ySlider->SetMinSize(wxSize(150,-1));
 			m_zSlider->SetMinSize(wxSize(150,-1));
-			
+
 			topSizer 		= new wxBoxSizer( wxHORIZONTAL );
 			leftSizer 		= new wxBoxSizer( wxVERTICAL );
 			leftTopSizer 	= new wxBoxSizer( wxHORIZONTAL );
 			navSizer 		= new wxBoxSizer( wxVERTICAL );
 			buttonSizer 	= new wxBoxSizer( wxHORIZONTAL );
 			treeSizer		= new wxBoxSizer( wxVERTICAL );
-			
+
 			navSizer->Add( m_gl0, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
 			navSizer->Add( m_zSlider, 0, wxALL, 1 );
 			navSizer->Add( m_gl1, 1, wxALL  | wxEXPAND | wxSHAPED, 1 );
 			navSizer->Add( m_ySlider, 0, wxALL, 1 );
 			navSizer->Add( m_gl2, 1, wxALL | wxEXPAND | wxSHAPED, 1 );
 			navSizer->Add( m_xSlider, 0, wxALL, 1 );
-			
+
 			treeSizer->Add( buttonLoad1, 0, wxALL | wxALIGN_CENTER, 0 );
 			treeSizer->Add( buttonLoad2, 0, wxALL | wxALIGN_CENTER, 0 );
 			treeSizer->Add( buttonLoad3, 0, wxALL | wxALIGN_CENTER, 0 );
 			treeSizer->Add( m_treeWidget, 1, wxALL, 1 );
-			
+
 			leftTopSizer->Add( treeSizer, 0, wxALL | wxEXPAND, 0 );
 			leftTopSizer->Add( navSizer, 1, wxALL | wxEXPAND, 0 );
-		    
+
 		    buttonSizer->Add( buttonUp, 0, wxALL, 1 );
 		    buttonSizer->Add( buttonDown, 0, wxALL, 1 );
 		    buttonSizer->Add( m_tSlider, 0, wxALL, 1 );
 		    buttonSizer->Add( m_tSlider2, 0, wxALL, 1 );
-		    
+
 		    leftSizer->Add( leftTopSizer, 0, wxALL, 1 );
 		    leftSizer->Add( m_listCtrl, 1, wxALL | wxEXPAND, 1 );
 		    leftSizer->Add( buttonSizer, 0, wxALIGN_BOTTOM | wxALL, 1 );
-		    
+
 		    topSizer->Add( leftSizer, 0, wxEXPAND | wxALL, 0 );
 		    topSizer->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
-	
+
 		    SetSizer( topSizer );
 		    topSizer->SetSizeHints( this );
 			break;
@@ -1684,7 +1686,7 @@ void MainFrame::OnToggleLayout(wxCommandEvent& WXUNUSED(event))
 	this->Update();
 	this->Refresh();
 
-	
+
 	m_mainGL->render();
 }
 /****************************************************************************************************
@@ -1696,7 +1698,7 @@ void MainFrame::refreshAllGLWidgets()
 {
 	updateStatusBar();
 	updateMenus();
-	
+
 #if defined(__WXMAC__)
 	if (m_gl0) m_gl0->Refresh();
 	if (m_gl1) m_gl1->Refresh();
@@ -1895,8 +1897,8 @@ void MainFrame::OnListMenuShow(wxCommandEvent&  WXUNUSED(event))
 
 void MainFrame::OnListMenuCutOut(wxCommandEvent&  WXUNUSED(event))
 {
-	m_dh->createCutDataset();	
-	
+	m_dh->createCutDataset();
+
 	refreshAllGLWidgets();
 }
 
@@ -1924,8 +1926,8 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
 		if (m_dh->lastSelectedBox) m_dh->lastSelectedBox->unselect();
 		m_dh->lastSelectedBox = (SelectionBox*)(m_treeWidget->GetItemData(treeid));
 		m_dh->lastSelectedBox->select(false);
-		/* Commented out for now, until we find a better solution 
-		 * 
+		/* Commented out for now, until we find a better solution
+		 *
 		for (int i = 0 ; i < m_listCtrl->GetItemCount() ; ++i)
 		{
 			DatasetInfo* info = (DatasetInfo*) m_listCtrl->GetItemData(i);
@@ -1988,7 +1990,7 @@ void MainFrame::OnActivateTreeItem(wxTreeEvent& WXUNUSED(event))
 	else if ( selected == ChildBox )
 	{
 		SelectionBox* box =  (SelectionBox*) (m_treeWidget->GetItemData(treeid));
-		
+
 		box->toggleNOT();
 		wxTreeItemId parentid = m_treeWidget->GetItemParent(treeid);
 		((SelectionBox*) (m_treeWidget->GetItemData(parentid)))->setDirty(true);
@@ -2030,7 +2032,7 @@ void MainFrame::OnTreeLabelEdit(wxTreeEvent& event)
  ****************************************************************************************************/
 int MainFrame::treeSelected(wxTreeItemId id)
 {
-	wxTreeItemId pId = m_treeWidget->GetItemParent(id); 
+	wxTreeItemId pId = m_treeWidget->GetItemParent(id);
 	//if ( !pId.IsOk() ) return 0;
 	wxTreeItemId ppId = m_treeWidget->GetItemParent(pId);
 	//if ( !ppId.IsOk() ) return 0;
@@ -2045,7 +2047,7 @@ int MainFrame::treeSelected(wxTreeItemId id)
 }
 /****************************************************************************************************
  *
- * 
+ *
  *
  ****************************************************************************************************/
 void MainFrame::OnLoad1(wxCommandEvent& WXUNUSED(event))
@@ -2127,20 +2129,20 @@ void MainFrame::OnMovePoints2(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
 	wxSize clientSize = this->GetClientSize();
-	
+
 	if (enlargeNav == 1)
 	{
 		int newSize = (clientSize.y - 65)/3;
-		
+
 if(m_gl0)
-{	
+{
 		m_gl0->SetMinSize(wxSize(newSize,newSize));
 		m_gl1->SetMinSize(wxSize(newSize,newSize));
 		m_gl2->SetMinSize(wxSize(newSize,newSize));
 		m_gl0->SetMaxSize(wxSize(newSize,newSize));
 		m_gl1->SetMaxSize(wxSize(newSize,newSize));
 		m_gl2->SetMaxSize(wxSize(newSize,newSize));
-		
+
 		m_xSlider->SetMinSize(wxSize(newSize,-1));
 		m_ySlider->SetMinSize(wxSize(newSize,-1));
 		m_zSlider->SetMinSize(wxSize(newSize,-1));
@@ -2149,7 +2151,7 @@ if(m_gl0)
 	if (enlargeNav == 2)
 	{
 		int newSize = wxMin((clientSize.x - leftSizer->GetSize().x - 5)/2 ,clientSize.y /2 -5);
-					
+
 		m_gl0->SetMinSize(wxSize(newSize,newSize));
 		m_gl1->SetMinSize(wxSize(newSize,newSize));
 		m_gl2->SetMinSize(wxSize(newSize,newSize));
@@ -2158,7 +2160,7 @@ if(m_gl0)
 		m_gl1->SetMaxSize(wxSize(newSize,newSize));
 		m_gl2->SetMaxSize(wxSize(newSize,newSize));
 		m_mainGL->SetMaxSize(wxSize(newSize,newSize));
-		
+
 		m_xSlider->SetMinSize(wxSize(newSize,-1));
 		m_ySlider->SetMinSize(wxSize(newSize,-1));
 		m_zSlider->SetMinSize(wxSize(newSize,-1));
@@ -2167,7 +2169,7 @@ if(m_gl0)
 if(GetSizer())
 	GetSizer()->SetDimension(0,0, clientSize.x, clientSize.y);
 
-if(m_mainGL)	
+if(m_mainGL)
 	m_mainGL->changeOrthoSize();
 
 	this->Update();
@@ -2201,7 +2203,7 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
 #else
 			float speedup = 1.0;
 #endif
-	int NAV_GL_SIZE = m_gl0->GetSize().x;		
+	int NAV_GL_SIZE = m_gl0->GetSize().x;
 
 	switch (event.GetInt())
 	{
@@ -2298,7 +2300,7 @@ void MainFrame::updateMenus()
 	voiMenu->Check(voiMenu->FindItem(_T("visible")), false);
 	voiMenu->Enable(voiMenu->FindItem(_T("active")), false);
 	voiMenu->Enable(voiMenu->FindItem(_T("visible")), false);
-	voiMenu->Check(voiMenu->FindItem(_T("morphing")), m_dh->morphing);	
+	voiMenu->Check(voiMenu->FindItem(_T("morphing")), m_dh->morphing);
 	wxMenu* viewMenu = GetMenuBar()->GetMenu(1);
 	viewMenu->Check(viewMenu->FindItem(_T("show crosshair")), m_dh->showCrosshair);
 
