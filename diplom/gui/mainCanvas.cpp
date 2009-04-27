@@ -409,9 +409,6 @@ hitResult MainCanvas::pick(wxPoint click)
 	gluUnProject( winX, winY, 0, modelview, projection, viewport, &m_pos1X, &m_pos1Y, &m_pos1Z);
 	gluUnProject( winX, winY, 1, modelview, projection, viewport, &m_pos2X, &m_pos2Y, &m_pos2Z);
 
-	printf("%f, %f, %f\n", m_pos1X, m_pos1Y, m_pos1Z);
-	printf("%f, %f, %f\n", m_pos2X, m_pos2Y, m_pos2Z);
-
 	glPopMatrix();
 	Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
 	BoundingBox *bb = new BoundingBox(m_dh->columns/2, m_dh->rows/2, m_dh->frames/2, m_dh->columns, m_dh->rows, m_dh->frames);
