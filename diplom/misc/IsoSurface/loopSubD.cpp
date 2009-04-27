@@ -65,6 +65,7 @@ loopSubD::loopSubD(TriangleMesh* nTriMesh){
 
 	//printf("loop subdivision pass 5\n");
 	triMesh->calcNeighbors();
+	triMesh->calcVertNormals();
 	triMesh->calcTriangleTensors();
 	wxDateTime dt1 = wxDateTime::Now();
 	printf("[%02d:%02d:%02d] ", dt1.GetHour(), dt1.GetMinute(), dt1.GetSecond());

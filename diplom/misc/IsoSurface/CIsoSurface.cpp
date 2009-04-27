@@ -783,6 +783,7 @@ void CIsoSurface::generateGeometry()
 		m_normalArray[i*3+1]  	= -m_tMesh->getVertNormal(i).y;
 		m_normalArray[i*3+2]  	= -m_tMesh->getVertNormal(i).z;
 	}
+
 	for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
 	{
 		m_indexArray[i*3] 	= m_tMesh->getTriangle(i).pointID[0];

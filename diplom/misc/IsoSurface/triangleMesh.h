@@ -107,7 +107,7 @@ class TriangleMesh {
 		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh ) const;
 		void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs ) const;
 		int getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
-		
+
 		void reserveVerts(const int size);
 		void reserveTriangles(const int size);
 
@@ -115,17 +115,17 @@ class TriangleMesh {
 
 		void calcTriangleTensors();
 		void calcNeighbors();
-		
-		
+		void calcVertNormals();
+
+
 	private:
 		Vector calcTriangleNormal(const Triangle);
 		Vector calcTriangleNormal(const int triNum);
-		void calcVertNormals();
 		Vector calcVertNormal(const int vertNum);
 
 		void flipNormals();
 
-		
+
 		int calcTriangleTensor(const int triNum);
 		void calcNeighbor(const int triangleNum);
 
