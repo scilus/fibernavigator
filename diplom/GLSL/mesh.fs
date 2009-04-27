@@ -103,13 +103,6 @@ void main() {
 		colorMap( color.rgb, myColor.r);
 		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0) + (specular * color / 2.0);			
 	} 
-	else
-	{
-	   color.r = 0.5;
-	   color.g = 0.5;
-	   color.b = 0.5;
-	   color = color + (ambient * color/2.0) + (diffuse * color) + (specular * color/2.0);   
-	}
 
 	if ( color.rgb == vec3(0.0) ) 
 	{

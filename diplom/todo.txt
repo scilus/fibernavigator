@@ -5,10 +5,10 @@
 ========================================================================
 
 kleinigkeiten:
-* keine skalierung (verdickung) der tubes bei vergr�serung des fensters.
-* roi mit wert null-> keine isosurface
 * die box lasst  sich nicht verschieben, wenn man den view auf "left" oder top, etc. stellt. 
   - related bug: problem mit "strg  + click" bei superior/left view.
+(das ist keine kleinigkeit zur Hölle)
+  
 ========================================================================
 =
 = relativ(?) einfach
@@ -56,6 +56,8 @@ background and threshold
 =     erledigt
 =
 ===============================================================================
+roi mit wert null-> keine isosurface
+keine skalierung (verdickung) der tubes bei vergr�serung des fensters.
 save scn file...  falsches verzeichnis
 snapshot: add file extention *.ppm in dem file-auswahl dialog. falls Name ohne *.ppm, dann .ppm hinzuf�gen.
 skalierung der Anzeige bei isosurface

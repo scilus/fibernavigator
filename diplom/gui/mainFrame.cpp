@@ -861,7 +861,9 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
 		{
 			a = (Anatomy*) m_listCtrl->GetItemData(item);
 			selBox = new SelectionBox(m_dh, a);
-			selBox->setThreshold(a->getThreshold());
+			float trs = a->getThreshold();
+			if ( trs == 0.0 ) trs = 0.01;
+			selBox->setThreshold( trs );
 		}
 		else
 		    return;
