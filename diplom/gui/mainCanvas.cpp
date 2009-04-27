@@ -250,7 +250,6 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
 					m_lastPos = event.GetPosition();
 					m_hr = pick(event.GetPosition());
 
-					printf("picked %d\n", m_hr.picked);
 					SetFocus();
 
 					if (m_hr.picked == 20)
