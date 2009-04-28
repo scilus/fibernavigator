@@ -17,6 +17,7 @@ lesen der fasern als vtk-ascii file
 ========================================================================
 verwendung der voxelgroesse ( skalierung )
 
+hallo
 abspeichern der farben
 koordinatensystem: anzeige in unterschiedlichen konventionen ( nullpunkt in lipsia und nifti )
 implementierung einer clipping plane, um fasern auszublenden
