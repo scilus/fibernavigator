@@ -11,9 +11,10 @@
 
 #include "Anatomy.h"
 #include "fibers.h"
-#include "splinePoint.h"
-#include "mesh.h"
 #include "KdTree.h"
+#include "../main.h"
+#include "mesh.h"
+#include "splinePoint.h"
 #include "surface.h"
 #include "../gui/myListCtrl.h"
 
@@ -77,7 +78,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf)
     Matrix4fSetIdentity(&m_transform);
 
     lastError = wxT("");
-    lastPath = wxT("");
+    lastPath = MyApp::respath + _T("data");
     lastGLError = GL_NO_ERROR;
 
     lighting = true;

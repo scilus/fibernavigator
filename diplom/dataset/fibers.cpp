@@ -687,7 +687,7 @@ void Fibers::resetLinesShown()
 void Fibers::updateLinesShown()
 {
     std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
-    
+
     if ( boxes.size() == 0 )
     {
         for (int i = 0; i < m_countLines; ++i)
@@ -1254,7 +1254,11 @@ void Fibers::drawFakeTubes()
                 {
                     lineids[snp<<1] = getStartIndexForLine(i)+k;
                     lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
-                    snippletsort[snp] = snp++;
+                    // FIXME mario kannst du bei gelegenheit mal gucken warum
+                    // der compiler die warnung wirft
+                    // Warning operation on 'snp' may be undefined
+                    //snippletsort[snp] = snp++;
+                    snippletsort[snp] = snp + 1;
                 }
             }
         }
@@ -1404,7 +1408,11 @@ void Fibers::drawSortedLines()
             {
                 lineids[snp<<1] = getStartIndexForLine(i)+k;
                 lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
-                snippletsort[snp] = snp++;
+                // FIXME mario kannst du bei gelegenheit mal gucken warum
+                // der compiler die warnung wirft
+                // Warning operation on 'snp' may be undefined
+                //snippletsort[snp] = snp++;
+                snippletsort[snp] = snp + 1;
             }
         }
     }

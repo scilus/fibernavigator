@@ -175,12 +175,14 @@ void SurfaceLIC::calculatePixelLuminance(const FIndex& cellId)
 	double mult = div;
 	for (; curr < total_sz; curr++, front++) {
 		if (!black)
+		{
 			if (front < 2 * kernel_sz)
 				mult = 1. / (double) front;
 			else if (front < total_sz)
 				mult = div;
 			else
 				mult = 1. / (double) (kernel_sz - curr + total_sz);
+		}
 
 		positive id = getId(curr, visitedBwd, visitedFwd);
 		output_texture[id] += sum * mult;

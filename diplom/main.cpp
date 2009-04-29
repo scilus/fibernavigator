@@ -122,8 +122,8 @@ bool MyApp::OnInit(void)
 #ifdef DEBUG
 #ifndef __WXMSW__
         // this crashes on windows
-        //printwx( _T( "respath:" ), respath );
-        //printwx( _T( "shader:" ), shaderPath );
+        printwx( _T( "respath:" ), respath );
+        printwx( _T( "shader:" ), shaderPath );
 #endif
 #endif
 #ifdef __WXMAC__
