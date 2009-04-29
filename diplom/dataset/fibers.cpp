@@ -908,8 +908,6 @@ void Fibers::initializeBuffer()
 
 void Fibers::draw()
 {
-    // FIXME usage of vbo's collides with vertex arrays for other objects, disabling it for now
-    //m_dh->useVBO = false;
     initializeBuffer();
     if (m_dh->useFakeTubes)
     {
@@ -1257,8 +1255,7 @@ void Fibers::drawFakeTubes()
                     // FIXME mario kannst du bei gelegenheit mal gucken warum
                     // der compiler die warnung wirft
                     // Warning operation on 'snp' may be undefined
-                    //snippletsort[snp] = snp++;
-                    snippletsort[snp] = snp + 1;
+                    snippletsort[snp] = snp++;
                 }
             }
         }
@@ -1411,8 +1408,7 @@ void Fibers::drawSortedLines()
                 // FIXME mario kannst du bei gelegenheit mal gucken warum
                 // der compiler die warnung wirft
                 // Warning operation on 'snp' may be undefined
-                //snippletsort[snp] = snp++;
-                snippletsort[snp] = snp + 1;
+                snippletsort[snp] = snp++;
             }
         }
     }
