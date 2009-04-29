@@ -120,13 +120,6 @@ protected:
 	static const unsigned int m_edgeTable[256];
 	static const int m_triTable[256][16];
 
-	GLfloat* m_pointArray;
-	GLfloat* m_normalArray;
-	GLfloat* m_colorArray;
-	GLuint*  m_indexArray;
-
-	bool isInitialized;
-
 
 private:
 	GLuint getGLuint() {return 0;};

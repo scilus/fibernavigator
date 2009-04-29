@@ -367,22 +367,12 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy)
 	m_useLIC = false;
 	m_GLuint = 0;
 	m_isGlyph = false;
-	isInitialized = false;
-
-	m_pointArray = NULL;
-	m_normalArray = NULL;
-	m_indexArray = NULL;
-	m_colorArray = NULL;
 }
 
 CIsoSurface::~CIsoSurface()
 {
 	DeleteSurface();
 	delete m_tMesh;
-	if ( m_pointArray  ) delete[] m_pointArray;
-	if ( m_normalArray ) delete[] m_normalArray;
-	if ( m_indexArray  ) delete[] m_indexArray;
-	if ( m_colorArray  ) delete[] m_colorArray;
 }
 
 void CIsoSurface::GenerateSurface(float tIsoLevel)
@@ -721,8 +711,9 @@ void CIsoSurface::RenameVerticesAndTriangles()
 
 void CIsoSurface::GenerateWithThreshold()
 {
-	GenerateSurface(m_threshold);
-	isInitialized = false;
+    GenerateSurface(m_threshold);
+    if (m_GLuint) glDeleteLists(m_GLuint, 1);
+    m_GLuint = 0;
 }
 
 void CIsoSurface::activateLIC()
@@ -748,14 +739,16 @@ void CIsoSurface::activateLIC()
 
 void CIsoSurface::clean()
 {
-	m_tMesh->cleanUp();
-	isInitialized = false;
+    m_tMesh->cleanUp();
+   if (m_GLuint) glDeleteLists(m_GLuint, 1);
+   m_GLuint = 0;
 }
 
 void CIsoSurface::smooth()
 {
-	m_tMesh->doLoopSubD();
-	isInitialized = false;
+    m_tMesh->doLoopSubD();
+    if (m_GLuint) glDeleteLists(m_GLuint, 1);
+    m_GLuint = 0;
 }
 
 void CIsoSurface::generateGeometry()
@@ -766,88 +759,85 @@ void CIsoSurface::generateGeometry()
 		return;
 	}
 
-	if ( m_pointArray  ) delete[] m_pointArray;
-	if ( m_normalArray ) delete[] m_normalArray;
-	if ( m_indexArray  ) delete[] m_indexArray;
+    if (m_GLuint) glDeleteLists(m_GLuint, 1);
+    GLuint dl = glGenLists(1);
+    glNewList (dl, GL_COMPILE);
 
-	m_pointArray = new GLfloat[m_tMesh->getNumVertices()*3];
-	m_normalArray = new GLfloat[m_tMesh->getNumVertices()*3];
-	m_indexArray = new GLuint[m_tMesh->getNumTriangles()*3];
+    Triangle triangleEdges;
+    Vector point;
+    Vector pointNormal;
 
-	for (int i = 0 ; i < m_tMesh->getNumVertices() ; ++i)
-	{
-		m_pointArray[i*3]   	= m_tMesh->getVertex(i).x;
-		m_pointArray[i*3+1] 	= m_tMesh->getVertex(i).y;
-		m_pointArray[i*3+2] 	= m_tMesh->getVertex(i).z;
-		m_normalArray[i*3]  	= -m_tMesh->getVertNormal(i).x;
-		m_normalArray[i*3+1]  	= -m_tMesh->getVertNormal(i).y;
-		m_normalArray[i*3+2]  	= -m_tMesh->getVertNormal(i).z;
-	}
-
-	for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
-	{
-		m_indexArray[i*3] 	= m_tMesh->getTriangle(i).pointID[0];
-		m_indexArray[i*3+1] = m_tMesh->getTriangle(i).pointID[1];
-		m_indexArray[i*3+2] = m_tMesh->getTriangle(i).pointID[2];
-	}
-
-	isInitialized = true;
+    if (m_tMesh->isFinished())
+    {
+        glBegin(GL_TRIANGLES);
+        for (int i = 0; i < m_tMesh->getNumTriangles(); ++i)
+        {
+            triangleEdges = m_tMesh->getTriangle(i);
+            for (int j = 0; j < 3; ++j)
+            {
+                pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
+                glNormal3d(pointNormal.x * -1.0, pointNormal.y * -1.0,
+                        pointNormal.z * -1.0);
+                point = m_tMesh->getVertex(triangleEdges.pointID[j]);
+                glVertex3d(point.x, point.y, point.z);
+            }
+        }
+        glEnd();
+    }
+    else
+    {
+        glBegin(GL_TRIANGLES);
+        for (int i = 0; i < m_tMesh->getNumTriangles(); ++i)
+        {
+            triangleEdges = m_tMesh->getTriangle(i);
+            for (int j = 0; j < 3; ++j)
+            {
+                point = m_tMesh->getVertex(triangleEdges.pointID[j]);
+                glVertex3d(point.x, point.y, point.z);
+            }
+        }
+        glEnd();
+    }
+    glEndList();
+    m_GLuint = dl;
 }
 
 void CIsoSurface::generateLICGeometry()
 {
-	if ( m_pointArray  ) delete[] m_pointArray;
-	if ( m_normalArray ) delete[] m_normalArray;
-	if ( m_indexArray  ) delete[] m_indexArray;
-	if ( m_colorArray  ) delete[] m_colorArray;
+    if (m_GLuint)
+        glDeleteLists(m_GLuint, 1);
+    GLuint dl = glGenLists(1);
+    glNewList(dl, GL_COMPILE);
 
-	m_pointArray = new GLfloat[m_tMesh->getNumVertices()*3];
-	m_normalArray = new GLfloat[m_tMesh->getNumVertices()*3];
-	m_colorArray = new GLfloat[m_tMesh->getNumVertices()*3];
+    Triangle triangleEdges;
+    Vector point;
+    Vector pointNormal;
+    Vector color;
 
-	m_indexArray = new GLuint[m_tMesh->getNumTriangles()*3];
+    glBegin(GL_TRIANGLES);
+    for (int i = 0; i < m_tMesh->getNumTriangles(); ++i)
+    {
+        triangleEdges = m_tMesh->getTriangle(i);
+        color = m_tMesh->getTriangleColor(i);
+        glColor3f(color.x, color.y, color.z);
+        for (int j = 0; j < 3; ++j)
+        {
+            pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
+            glNormal3d(pointNormal.x * -1.0, pointNormal.y * -1.0,
+                    pointNormal.z * -1.0);
+            point = m_tMesh->getVertex(triangleEdges.pointID[j]);
+            glVertex3d(point.x, point.y, point.z);
+        }
+    }
+    glEnd();
 
-
-	for (int i = 0 ; i < m_tMesh->getNumVertices() ; ++i)
-	{
-		m_pointArray[i*3]   	= m_tMesh->getVertex(i).x;
-		m_pointArray[i*3+1] 	= m_tMesh->getVertex(i).y;
-		m_pointArray[i*3+2] 	= m_tMesh->getVertex(i).z;
-		m_normalArray[i*3]  	= -m_tMesh->getVertNormal(i).x;
-		m_normalArray[i*3+1]  	= -m_tMesh->getVertNormal(i).y;
-		m_normalArray[i*3+2]  	= -m_tMesh->getVertNormal(i).z;
-		m_colorArray[i*3]   	= m_tMesh->getTriangleColor(i).x;
-		m_colorArray[i*3+1] 	= m_tMesh->getTriangleColor(i).y;
-		m_colorArray[i*3+2] 	= m_tMesh->getTriangleColor(i).z;
-
-	}
-	for (int i = 0 ; i < m_tMesh->getNumTriangles() ; ++i)
-	{
-		m_indexArray[i*3] 	= m_tMesh->getTriangle(i).pointID[0];
-		m_indexArray[i*3+1] = m_tMesh->getTriangle(i).pointID[1];
-		m_indexArray[i*3+2] = m_tMesh->getTriangle(i).pointID[2];
-	}
-
-	isInitialized = true;
-
+    glEndList();
+    m_GLuint = dl;
 }
 
 void CIsoSurface::draw()
 {
-	if ( !isInitialized )
-		generateGeometry();
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, m_pointArray);
-	glNormalPointer(GL_FLOAT, 0, m_normalArray);
-	if (m_useLIC)
-	{
-		glEnableClientState(GL_COLOR_ARRAY);
-		glVertexPointer(3, GL_FLOAT, 0, m_colorArray);
-	}
-
-	glDrawElements(GL_TRIANGLES, m_tMesh->getNumTriangles()*3, GL_UNSIGNED_INT, m_indexArray);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
+    if (!m_GLuint)
+        generateGeometry();
+    glCallList(m_GLuint);
 }

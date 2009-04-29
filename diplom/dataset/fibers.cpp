@@ -909,8 +909,8 @@ void Fibers::initializeBuffer()
 void Fibers::draw()
 {
     // FIXME usage of vbo's collides with vertex arrays for other objects, disabling it for now
-    m_dh->useVBO = false;
-    //initializeBuffer();
+    //m_dh->useVBO = false;
+    initializeBuffer();
     if (m_dh->useFakeTubes)
     {
         drawFakeTubes();

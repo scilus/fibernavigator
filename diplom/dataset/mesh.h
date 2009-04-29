@@ -72,13 +72,6 @@ private:
 	unsigned int m_countTimeSteps;
 	unsigned int m_countPolygons;
 	unsigned int m_polygonDim;
-	
-	GLfloat* m_pointArray;
-	GLfloat* m_normalArray;
-	GLfloat* m_colorArray;
-	GLuint*   m_indexArray;
-	
-	bool isInitialized;
 };
 
 #endif /*MESH_H_*/
