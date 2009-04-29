@@ -3,6 +3,7 @@
 uniform int sector;
 uniform float cutX, cutY, cutZ;
 uniform int dimX, dimY, dimZ;
+uniform float voxX, voxY, voxZ;
 uniform float alpha_;
 varying vec4 myColor;
 
@@ -86,9 +87,9 @@ void main() {
 	if ( useTex ) 
 	{
 		vec3 v = gl_TexCoord[0].xyz;
-		v.x = v.x / float(dimX);
-		v.y = v.y / float(dimY);
-		v.z = v.z / float(dimZ);
+		v.x = v.x / (float(dimX) * voxX);
+		v.y = v.y / (float(dimY) * voxY);
+		v.z = v.z / (float(dimZ) * voxZ);
 
 		for (int i = 9; i > -1; i--) {
 			float threshold_ = 0.0;

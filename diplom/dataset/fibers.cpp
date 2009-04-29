@@ -444,9 +444,9 @@ bool Fibers::loadVTK(wxString filename)
     m_dh->printDebug(_T("move vertices"), 1);
     for (int i = 0; i < countPoints * 3; ++i)
     {
-        m_pointArray[i] = m_dh->columns - m_pointArray[i];
+        m_pointArray[i] = m_dh->columns * m_dh->xVoxel - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->rows - m_pointArray[i];
+        m_pointArray[i] = m_dh->rows * m_dh->yVoxel - m_pointArray[i];
         ++i;
         //m_pointArray[i] = m_dh->frames - m_pointArray[i];
     }
@@ -952,11 +952,16 @@ void Fibers::draw()
         glNormalPointer(GL_FLOAT, 0, 0);
     }
 
+    //glEnable( GL_LINE_SMOOTH);
+    //glHint( GL_LINE_SMOOTH_HINT, GL_NICEST);
+
     for (int i = 0; i < m_countLines; ++i)
     {
         if (m_inBox[i] == 1)
             glDrawArrays(GL_LINE_STRIP, getStartIndexForLine(i), getPointsPerLine(i));
     }
+
+    //glDisable( GL_LINE_SMOOTH);
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);

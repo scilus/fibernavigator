@@ -809,7 +809,7 @@ void MainFrame::createNewSelBox()
 {
 	if (!m_dh->scene || !m_dh->fibers_loaded) return;
 
-	Vector vc (m_xSlider->GetValue(), m_ySlider->GetValue(), m_zSlider->GetValue() );
+	Vector vc (m_xSlider->GetValue() * m_dh->xVoxel, m_ySlider->GetValue() * m_dh->yVoxel, m_zSlider->GetValue() * m_dh->zVoxel );
 	Vector vs ( m_dh->columns/8,m_dh->rows/8, m_dh->frames/8 );
 	SelectionBox *selBox = new SelectionBox(vc, vs, m_dh);
 
