@@ -981,7 +981,7 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_dh->scene || m_dh->surface_loaded) return;
 
-	int xs = m_xSlider->GetValue();
+	int xs = m_xSlider->GetValue() * m_dh->xVoxel;
 
 	//delete all existing points
 	m_treeWidget->DeleteChildren(m_tPointId);
@@ -994,8 +994,8 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 		for ( int j = 0 ; j < 11 ; ++j )
 		{
 
-			int yy = (m_dh->rows/10)*i;
-			int zz = (m_dh->frames/10)*j;
+			int yy = (m_dh->rows/10 * m_dh->yVoxel)*i;
+			int zz = (m_dh->frames/10 * m_dh->zVoxel)*j;
 
 			// create the point
 			SplinePoint *point = new SplinePoint(xs, yy, zz, m_dh);

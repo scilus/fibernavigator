@@ -154,6 +154,9 @@ void ShaderHelper::setFiberShaderVars()
 	m_fiberShader->setUniInt("dimX", m_dh->columns);
 	m_fiberShader->setUniInt("dimY", m_dh->rows);
 	m_fiberShader->setUniInt("dimZ", m_dh->frames);
+	m_fiberShader->setUniFloat("voxX", m_dh->xVoxel);
+    m_fiberShader->setUniFloat("voxY", m_dh->yVoxel);
+    m_fiberShader->setUniFloat("voxZ", m_dh->zVoxel);
 
 	int tex = 0;
 	int show = 0;
@@ -188,6 +191,9 @@ void ShaderHelper::setSplineSurfaceShaderVars()
 	m_splineSurfShader->setUniInt("dimX", m_dh->columns);
 	m_splineSurfShader->setUniInt("dimY", m_dh->rows);
 	m_splineSurfShader->setUniInt("dimZ", m_dh->frames);
+	m_splineSurfShader->setUniFloat("voxX", m_dh->xVoxel);
+	m_splineSurfShader->setUniFloat("voxY", m_dh->yVoxel);
+	m_splineSurfShader->setUniFloat("voxZ", m_dh->zVoxel);
 
 	GLint* tex = new GLint[10];
 	GLint* show = new GLint[10];

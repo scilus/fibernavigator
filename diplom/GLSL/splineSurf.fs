@@ -1,6 +1,7 @@
 #include lighting.fs
 
 uniform int dimX, dimY, dimZ;
+uniform float voxX, voxY, voxZ;
 
 uniform sampler3D texes[10];
 uniform bool show[10];
@@ -32,9 +33,9 @@ void main() {
 	vec4 color = vec4(0.0);
 
 	vec3 v = gl_TexCoord[0].xyz;
-	v.x = (v.x) / float(dimX);
-	v.y = (v.y) / float(dimY);
-	v.z = (v.z) / float(dimZ);
+	v.x = v.x / (float(dimX) * voxX);
+    v.y = v.y / (float(dimY) * voxY);
+    v.z = v.z / (float(dimZ) * voxZ);
 
 	for (int i = 9; i > -1; i--) {
 		if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold[i], v, alpha[i]);

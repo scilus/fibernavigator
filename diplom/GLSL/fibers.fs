@@ -1,6 +1,7 @@
 #include functions.fs
 
 uniform int dimX, dimY, dimZ;
+uniform float voxX, voxY, voxZ;
 uniform sampler3D tex;
 uniform float threshold;
 uniform int type;
@@ -10,9 +11,9 @@ varying vec4 myColor;
 
 float lookupTex() {
 	vec3 v = gl_TexCoord[0].xyz;
-	v.x = (v.x) / float(dimX);
-	v.y = (v.y) / float(dimY);
-	v.z = (v.z) / float(dimZ);
+	v.x = v.x / (float(dimX) * voxX);
+    v.y = v.y / (float(dimY) * voxY);
+    v.z = v.z / (float(dimZ) * voxZ);
 
 	vec3 col1;
 	col1.r = clamp(texture3D(tex, v).r, 0.0, 1.0);
