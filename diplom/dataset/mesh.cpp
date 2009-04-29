@@ -79,7 +79,7 @@ bool Mesh::loadDip(wxString filename)
 					xString.ToDouble(&x);
 					yString.ToDouble(&y);
 					zString.ToDouble(&z);
-					m_tMesh->addVert(x, m_dh->rows - y, m_dh->frames - z);
+					m_tMesh->addVert(x, m_dh->rows * m_dh->yVoxel - y, m_dh->frames * m_dh->zVoxel - z);
 				}
 			}
 			if ( line == _T("Magnitudes"))
@@ -178,25 +178,23 @@ bool Mesh::loadSurf(wxString filename)
 	cbi.b[0] = buffer[pc++];
 	setCountPolygons(cbi.i);
 
-	printf("pc: %d   vertex count: %d   face count: %d\n", pc, m_countVerts, m_countPolygons);
-
 	for (unsigned int i = 0 ; i < m_countVerts ; ++i)
 	{
 		cbf.b[3] = buffer[pc++];
 		cbf.b[2] = buffer[pc++];
 		cbf.b[1] = buffer[pc++];
 		cbf.b[0] = buffer[pc++];
-		float x = cbf.f + 0.5 + m_dh->columns/2;
+		float x = cbf.f + 0.5  * m_dh->xVoxel + m_dh->columns/2 * m_dh->xVoxel;
 		cbf.b[3] = buffer[pc++];
 		cbf.b[2] = buffer[pc++];
 		cbf.b[1] = buffer[pc++];
 		cbf.b[0] = buffer[pc++];
-		float y = cbf.f + 0.5 + m_dh->rows/2;
+		float y = cbf.f + 0.5 * m_dh->yVoxel + m_dh->rows/2  * m_dh->yVoxel;
 		cbf.b[3] = buffer[pc++];
 		cbf.b[2] = buffer[pc++];
 		cbf.b[1] = buffer[pc++];
 		cbf.b[0] = buffer[pc++];
-		float z = cbf.f + 0.5 + m_dh->frames/2;
+		float z = cbf.f + 0.5 * m_dh->zVoxel + m_dh->frames/2  * m_dh->zVoxel;
 		m_tMesh->addVert(x, y, z);
 	}
 
@@ -303,13 +301,13 @@ bool Mesh::loadMesh(wxString filename)
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			float y = m_dh->rows - f.f;
+			float y = m_dh->rows * m_dh->yVoxel - f.f;
 			fp += 4;
 			f.b[0] = buffer[fp];
 			f.b[1] = buffer[fp+1];
 			f.b[2] = buffer[fp+2];
 			f.b[3] = buffer[fp+3];
-			float z = m_dh->frames - f.f;
+			float z = m_dh->frames * m_dh->zVoxel - f.f;
 			fp += 4;
 			m_tMesh->addVert(x, y, z);
 		}
