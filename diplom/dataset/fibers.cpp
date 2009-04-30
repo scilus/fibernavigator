@@ -146,11 +146,11 @@ bool Fibers::loadCamino(wxString filename)
 
     for (int i = 0; i < m_countPoints * 3; ++i)
     {
-        //m_pointArray[i] = m_dh->columns - m_pointArray[i];
+        m_pointArray[i] = m_dh->columns * m_dh->xVoxel - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->rows - m_pointArray[i];
+        //m_pointArray[i] = m_dh->rows * m_dh->yVoxel - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->frames - m_pointArray[i];
+        //m_pointArray[i] = m_dh->frames * m_dh->zVoxel - m_pointArray[i];
     }
 
     calculateLinePointers();
