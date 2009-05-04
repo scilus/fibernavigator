@@ -115,7 +115,7 @@ bool Anatomy::loadNifti(wxString filename)
     m_columns = ima->dim[1]; // 160
     m_rows = ima->dim[2]; // 200
     m_frames = ima->dim[3]; // 160
-    
+
     if (m_dh->anatomy_loaded)
     {
         if (m_rows != m_dh->rows || m_columns != m_dh->columns || m_frames
@@ -130,13 +130,13 @@ bool Anatomy::loadNifti(wxString filename)
         m_dh->rows = m_rows;
         m_dh->columns = m_columns;
         m_dh->frames = m_frames;
-        
-        m_dh->xVoxel = ima->dx;
-        m_dh->yVoxel = ima->dy;
-        m_dh->zVoxel = ima->dz;
-        
+
         m_dh->anatomy_loaded = true;
     }
+
+    m_dh->xVoxel = ima->dx;
+    m_dh->yVoxel = ima->dy;
+    m_dh->zVoxel = ima->dz;
 
     if (ima->datatype == 2)
     {
@@ -424,14 +424,14 @@ void Anatomy::createOffset(float* source)
 
     dmax = 999999999.0;
 
-    // first pass 
+    // first pass
     for (b=0; b<nbands; ++b)
     {
         for (r=0; r<nrows; ++r)
         {
             for (c=0; c<ncols; ++c)
             {
-                //if (VPixel(src,b,r,c,VBit) == 1) 
+                //if (VPixel(src,b,r,c,VBit) == 1)
                 if (bitmask[b*nrows*ncols + r*ncols + c])
                 {
                     m_floatDataset[b*nrows*ncols + r*ncols + c] = 0;
@@ -502,7 +502,7 @@ void Anatomy::createOffset(float* source)
         }
     }
 
-    // third pass 
+    // third pass
 
     for (r=0; r<nrows; r++)
     {

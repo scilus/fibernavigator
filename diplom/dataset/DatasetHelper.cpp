@@ -137,7 +137,10 @@ bool DatasetHelper::load(int index)
     wxArrayString fileNames;
     wxString caption= wxT("Choose a file");
     wxString
-            wildcard=	wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers Camino (*.Bfloat)|*.Bfloat");
+            wildcard=	wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|"
+                    "Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|"
+                    "Fibers VTK (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|"
+                    "Scene Files (*.scn)|*.scn");
     wxString defaultDir = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,
@@ -311,7 +314,8 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
         mainFrame->m_listCtrl->SetItem(id, 1, info->getName().BeforeFirst('.'));
 
     if (!info->getUseTex())
-        mainFrame->m_listCtrl->SetItem(0, 2, wxT("(") + wxString::Format(wxT("%.2f"), (info->getThreshold()) * info->getOldMax()) + wxT(")"));
+        mainFrame->m_listCtrl->SetItem(0, 2, wxT("(") + wxString::Format(wxT("%.2f"),
+                (info->getThreshold()) * info->getOldMax()) + wxT(")"));
     else
         mainFrame->m_listCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), info->getThreshold()));
 

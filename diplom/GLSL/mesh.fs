@@ -24,22 +24,27 @@ uniform bool useLic;
 
 #include functions.fs
 
-void cutFrontSector() {
-	if (sector == 1 && vertex.x > cutX && vertex.y > cutY && vertex.z > cutZ)
+void cutFrontSector() 
+{
+    float cx = cutX * voxX;
+    float cy = cutY * voxY;
+    float cz = cutZ * voxZ;
+
+	if (sector == 1 && vertex.x > cx && vertex.y > cy && vertex.z > cz)
 		discard;
-	if (sector == 2 && vertex.x > cutX && vertex.y > cutY && vertex.z < cutZ)
+	if (sector == 2 && vertex.x > cx && vertex.y > cy && vertex.z < cz)
 		discard;
-	if (sector == 3 && vertex.x > cutX && vertex.y < cutY && vertex.z < cutZ)
+	if (sector == 3 && vertex.x > cx && vertex.y < cy && vertex.z < cz)
 		discard;
-	if (sector == 4 && vertex.x > cutX && vertex.y < cutY && vertex.z > cutZ)
+	if (sector == 4 && vertex.x > cx && vertex.y < cy && vertex.z > cz)
 		discard;
-	if (sector == 5 && vertex.x < cutX && vertex.y < cutY && vertex.z > cutZ)
+	if (sector == 5 && vertex.x < cx && vertex.y < cy && vertex.z > cz)
 		discard;
-	if (sector == 6 && vertex.x < cutX && vertex.y < cutY && vertex.z < cutZ)
+	if (sector == 6 && vertex.x < cx && vertex.y < cy && vertex.z < cz)
 		discard;
-	if (sector == 7 && vertex.x < cutX && vertex.y > cutY && vertex.z < cutZ)
+	if (sector == 7 && vertex.x < cx && vertex.y > cy && vertex.z < cz)
 		discard;
-	if (sector == 8 && vertex.x < cutX && vertex.y > cutY && vertex.z > cutZ)
+	if (sector == 8 && vertex.x < cx && vertex.y > cy && vertex.z > cz)
 		discard;
 }
 
