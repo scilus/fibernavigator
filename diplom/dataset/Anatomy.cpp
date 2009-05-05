@@ -107,7 +107,7 @@ bool Anatomy::load(wxString filename)
 bool Anatomy::loadNifti(wxString filename)
 {
     char* hdr_file;
-    hdr_file = (char*) malloc(filename.length()+1);
+    hdr_file = (char*) malloc(filename.length() + 1);
     strcpy(hdr_file, (const char*) filename.mb_str(wxConvUTF8));
 
     nifti_image* ima = nifti_image_read(hdr_file, 0);
@@ -118,8 +118,7 @@ bool Anatomy::loadNifti(wxString filename)
 
     if (m_dh->anatomy_loaded)
     {
-        if (m_rows != m_dh->rows || m_columns != m_dh->columns || m_frames
-                != m_dh->frames)
+        if (m_rows != m_dh->rows || m_columns != m_dh->columns || m_frames != m_dh->frames)
         {
             m_dh->lastError = wxT("dimensions of loaded files must be the same");
             return false;
@@ -160,11 +159,12 @@ bool Anatomy::loadNifti(wxString filename)
         {
             m_type = Vectors_;
         }
-        /*
-         else if (m_bands / m_frames == 6) {
-         m_type = Tensors_;
-         }
-         */
+
+        else if (m_bands / m_frames >= 6)
+        {
+            m_type = Tensors_;
+        }
+
         else
             m_type = Overlay;
     }
@@ -180,12 +180,12 @@ bool Anatomy::loadNifti(wxString filename)
     {
         case Head_byte:
         {
-            unsigned char *data = (unsigned char*)filedata->data;
+            unsigned char *data = (unsigned char*) filedata->data;
 
             m_floatDataset = new float[nSize];
             for (int i = 0; i < nSize; ++i)
             {
-                m_floatDataset[i] = (float)data[i] / 255.0;
+                m_floatDataset[i] = (float) data[i] / 255.0;
             }
             flag = true;
             delete[] data;
@@ -194,7 +194,7 @@ bool Anatomy::loadNifti(wxString filename)
 
         case Head_short:
         {
-            short int *data = (short int*)filedata->data;
+            short int *data = (short int*) filedata->data;
             int max = 0;
             std::vector<int> histo(65536, 0);
             for (int i = 0; i < nSize; ++i)
@@ -202,7 +202,7 @@ bool Anatomy::loadNifti(wxString filename)
                 max = wxMax(max, data[i]);
                 ++histo[data[i]];
             }
-            int fivepercent = (int)(nSize * 0.001);
+            int fivepercent = (int) (nSize * 0.001);
             int newMax = 65535;
             int adder = 0;
             for (int i = 65535; i > 0; --i)
@@ -221,7 +221,7 @@ bool Anatomy::loadNifti(wxString filename)
             m_floatDataset = new float[nSize];
             for (int i = 0; i < nSize; ++i)
             {
-                m_floatDataset[i] = (float)data[i] / (float)newMax;
+                m_floatDataset[i] = (float) data[i] / (float) newMax;
             }
             m_oldMax = max;
             m_newMax = newMax;
@@ -241,7 +241,7 @@ bool Anatomy::loadNifti(wxString filename)
             }
             for (int i = 0; i < nSize; ++i)
             {
-                m_floatDataset[i] = m_floatDataset[i]/max;
+                m_floatDataset[i] = m_floatDataset[i] / max;
             }
             m_oldMax = max;
             m_newMax = 1.0;
@@ -252,17 +252,16 @@ bool Anatomy::loadNifti(wxString filename)
 
         case RGB:
         {
-            unsigned char *data=(unsigned char*)filedata->data;
+            unsigned char *data = (unsigned char*) filedata->data;
 
-            m_floatDataset = new float[nSize*3];
+            m_floatDataset = new float[nSize * 3];
 
             for (int i = 0; i < nSize; ++i)
             {
 
-                m_floatDataset[i * 3 ] = (float)data[i] / 255.0;
-                m_floatDataset[i * 3 + 1] = (float)data[nSize + i ] / 255.0;
-                m_floatDataset[i * 3 + 2] = (float)data[(2 * nSize) + i] / 255.0;
-
+                m_floatDataset[i * 3] = (float) data[i] / 255.0;
+                m_floatDataset[i * 3 + 1] = (float) data[nSize + i] / 255.0;
+                m_floatDataset[i * 3 + 2] = (float) data[(2 * nSize) + i] / 255.0;
             }
             flag = true;
             delete[] data;
@@ -271,19 +270,19 @@ bool Anatomy::loadNifti(wxString filename)
 
         case Vectors_:
         {
-            float *data=(float*)filedata->data;
+            float *data = (float*) filedata->data;
 
-            m_floatDataset = new float[nSize*3];
+            m_floatDataset = new float[nSize * 3];
 
             for (int i = 0; i < nSize; ++i)
             {
 
-                m_floatDataset[i * 3 ] = data[i];
-                m_floatDataset[i * 3 + 1] = data[nSize + i ];
+                m_floatDataset[i * 3] = data[i];
+                m_floatDataset[i * 3 + 1] = data[nSize + i];
                 m_floatDataset[i * 3 + 2] = data[(2 * nSize) + i];
 
             }
-            m_tensorField = new TensorField(m_dh, m_floatDataset, true);
+            m_tensorField = new TensorField(m_dh, m_floatDataset, 1, 3);
             m_dh->tensors_loaded = true;
             m_dh->vectors_loaded = true;
             m_dh->surface_isDirty = true;
@@ -292,10 +291,36 @@ bool Anatomy::loadNifti(wxString filename)
         }
             break;
 
+        case Tensors_:
+        {
+            float *data = (float*) filedata->data;
+            int components = m_bands / m_frames;
+
+            m_floatDataset = new float[nSize * components];
+
+            for (int i = 0; i < nSize; ++i)
+            {
+
+                for (int j = 0; j < components; ++j)
+                {
+                    m_floatDataset[i * components + j] = data[(j * nSize) + i];
+                }
+            }
+
+            if ( components == 6 )
+            {
+                m_tensorField = new TensorField(m_dh, m_floatDataset, 2, 3);
+            }
+            m_dh->tensors_loaded = true;
+            delete[] data;
+            flag = true;
+        }
+            break;
+
         default:
             break;
     }
-    delete [] hdr_file;
+    delete[] hdr_file;
     delete ima;
     delete filedata;
 
@@ -307,11 +332,11 @@ bool Anatomy::loadNifti(wxString filename)
 
 void Anatomy::saveNifti(wxString filename)
 {
-    int dims [] =
+    int dims[] =
     { 3, m_columns, m_rows, m_frames, 1, 0, 0, 0 };
     nifti_image* ima = nifti_make_new_nim(dims, DT_FLOAT32, 1);
     char fn[1024];
-    strcpy(fn, (const char*)filename.mb_str(wxConvUTF8));
+    strcpy(fn, (const char*) filename.mb_str(wxConvUTF8));
     ima->fname = fn;
     ima->data = m_floatDataset;
     nifti_image_write(ima);
@@ -319,7 +344,7 @@ void Anatomy::saveNifti(wxString filename)
 
 void Anatomy::generateTexture()
 {
-    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glGenTextures(1, &m_GLuint);
     glBindTexture(GL_TEXTURE_3D, m_GLuint);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -333,46 +358,22 @@ void Anatomy::generateTexture()
         case Head_byte:
         case Head_short:
         case Overlay:
-            glTexImage3D(GL_TEXTURE_3D,
-            0,
-            GL_RGBA,
-            m_columns,
-            m_rows,
-            m_frames,
-            0,
-            GL_LUMINANCE,
-            GL_FLOAT,
-            m_floatDataset);
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_LUMINANCE, GL_FLOAT,
+                    m_floatDataset);
             break;
         case RGB:
-            glTexImage3D(GL_TEXTURE_3D,
-            0,
-            GL_RGBA,
-            m_columns,
-            m_rows,
-            m_frames,
-            0,
-            GL_RGB,
-            GL_FLOAT,
-            m_floatDataset);
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT,
+                    m_floatDataset);
             break;
         case Vectors_:
         {
-            int size = m_rows*m_columns*m_frames*3;
+            int size = m_rows * m_columns * m_frames * 3;
             float *tempData = new float[size];
             for (int i = 0; i < size; ++i)
                 tempData[i] = wxMax(m_floatDataset[i], -m_floatDataset[i]);
 
-            glTexImage3D(GL_TEXTURE_3D,
-            0,
-            GL_RGBA,
-            m_columns,
-            m_rows,
-            m_frames,
-            0,
-            GL_RGB,
-            GL_FLOAT,
-            tempData);
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT,
+                    tempData);
             delete[] tempData;
             break;
         }
@@ -402,8 +403,8 @@ void Anatomy::createOffset(float* source)
     nrows = m_rows;
     ncols = m_columns;
 
-    npixels = wxMax(nbands,nrows);
-    array = new double [npixels];
+    npixels = wxMax(nbands, nrows);
+    array = new double[npixels];
 
     npixels = nbands * nrows * ncols;
 
@@ -425,26 +426,26 @@ void Anatomy::createOffset(float* source)
     dmax = 999999999.0;
 
     // first pass
-    for (b=0; b<nbands; ++b)
+    for (b = 0; b < nbands; ++b)
     {
-        for (r=0; r<nrows; ++r)
+        for (r = 0; r < nrows; ++r)
         {
-            for (c=0; c<ncols; ++c)
+            for (c = 0; c < ncols; ++c)
             {
                 //if (VPixel(src,b,r,c,VBit) == 1)
-                if (bitmask[b*nrows*ncols + r*ncols + c])
+                if (bitmask[b * nrows * ncols + r * ncols + c])
                 {
-                    m_floatDataset[b*nrows*ncols + r*ncols + c] = 0;
+                    m_floatDataset[b * nrows * ncols + r * ncols + c] = 0;
                     continue;
                 }
 
-                srcpix = bitmask + b*nrows*ncols + r*ncols + c;
+                srcpix = bitmask + b * nrows * ncols + r * ncols + c;
                 cc1 = c;
                 while (cc1 < ncols && *srcpix++ == 0)
                     cc1++;
                 d1 = (cc1 >= ncols ? ncols : (cc1 - c));
 
-                srcpix = bitmask + b*nrows*ncols + r*ncols + c;
+                srcpix = bitmask + b * nrows * ncols + r * ncols + c;
                 cc2 = c;
                 while (cc2 >= 0 && *srcpix-- == 0)
                     cc2--;
@@ -460,22 +461,22 @@ void Anatomy::createOffset(float* source)
                     d = d2;
                     c0 = cc2;
                 }
-                m_floatDataset[b*nrows*ncols + r*ncols + c] = (float) (d * d);
+                m_floatDataset[b * nrows * ncols + r * ncols + c] = (float) (d * d);
             }
         }
     }
 
     // second pass
-    for (b=0; b<nbands; b++)
+    for (b = 0; b < nbands; b++)
     {
-        for (c=0; c<ncols; c++)
+        for (c = 0; c < ncols; c++)
         {
-            for (r=0; r<nrows; r++)
-                array[r] = (double) m_floatDataset[b*nrows*ncols + r*ncols + c];
+            for (r = 0; r < nrows; r++)
+                array[r] = (double) m_floatDataset[b * nrows * ncols + r * ncols + c];
 
-            for (r=0; r<nrows; r++)
+            for (r = 0; r < nrows; r++)
             {
-                if (bitmask[b*nrows*ncols + r*ncols + c] == 1)
+                if (bitmask[b * nrows * ncols + r * ncols + c] == 1)
                     continue;
 
                 dmin = dmax;
@@ -488,7 +489,7 @@ void Anatomy::createOffset(float* source)
                 if (iend >= nrows)
                     iend = nrows;
 
-                for (rr=istart; rr<iend; rr++)
+                for (rr = istart; rr < iend; rr++)
                 {
                     u = array[rr] + (r - rr) * (r - rr);
                     if (u < dmin)
@@ -497,23 +498,23 @@ void Anatomy::createOffset(float* source)
                         r0 = rr;
                     }
                 }
-                m_floatDataset[b*nrows*ncols + r*ncols + c] = dmin;
+                m_floatDataset[b * nrows * ncols + r * ncols + c] = dmin;
             }
         }
     }
 
     // third pass
 
-    for (r=0; r<nrows; r++)
+    for (r = 0; r < nrows; r++)
     {
-        for (c=0; c<ncols; c++)
+        for (c = 0; c < ncols; c++)
         {
-            for (b=0; b<nbands; b++)
-                array[b] = (double) m_floatDataset[b*nrows*ncols + r*ncols + c];
+            for (b = 0; b < nbands; b++)
+                array[b] = (double) m_floatDataset[b * nrows * ncols + r * ncols + c];
 
-            for (b=0; b<nbands; b++)
+            for (b = 0; b < nbands; b++)
             {
-                if (bitmask[b*nrows*ncols + r*ncols + c] == 1)
+                if (bitmask[b * nrows * ncols + r * ncols + c] == 1)
                     continue;
 
                 dmin = dmax;
@@ -527,7 +528,7 @@ void Anatomy::createOffset(float* source)
                 if (iend >= nbands)
                     iend = nbands;
 
-                for (bb=istart; bb<iend; bb++)
+                for (bb = istart; bb < iend; bb++)
                 {
                     u = array[bb] + (b - bb) * (b - bb);
                     if (u < dmin)
@@ -536,7 +537,7 @@ void Anatomy::createOffset(float* source)
                         b0 = bb;
                     }
                 }
-                m_floatDataset[b*nrows*ncols + r*ncols + c] = dmin;
+                m_floatDataset[b * nrows * ncols + r * ncols + c] = dmin;
             }
         }
     }
@@ -552,7 +553,7 @@ void Anatomy::createOffset(float* source)
     }
     for (i = 0; i < npixels; ++i)
     {
-        m_floatDataset[i] = m_floatDataset[i]/max;
+        m_floatDataset[i] = m_floatDataset[i] / max;
 
     }
 
@@ -560,14 +561,14 @@ void Anatomy::createOffset(float* source)
     // create the filter kernel
     double sigma = 4;
 
-    int dim = (int)(3.0 * sigma + 1);
-    int n = 2*dim+1;
+    int dim = (int) (3.0 * sigma + 1);
+    int n = 2* dim + 1;
     double step = 1;
 
     float* kernel = new float[n];
 
     double sum = 0;
-    double x = -(float)dim;
+    double x = -(float) dim;
 
     double uu;
     for (int i = 0; i < n; ++i)
@@ -579,7 +580,7 @@ void Anatomy::createOffset(float* source)
     }
 
     /* normalize */
-    for (int i=0; i<n; ++i)
+    for (int i = 0; i < n; ++i)
     {
         uu = kernel[i];
         uu /= sum;
@@ -596,64 +597,64 @@ void Anatomy::createOffset(float* source)
         tmp[i] = 0.0;
     }
 
-    for (b=0; b<nbands; ++b)
+    for (b = 0; b < nbands; ++b)
     {
-        for (r=0; r<nrows; ++r)
+        for (r = 0; r < nrows; ++r)
         {
-            for (c=d; c<ncols-d; ++c)
+            for (c = d; c < ncols - d; ++c)
             {
 
                 float_pp = kernel;
                 sum = 0;
-                c0 = c-d;
-                c1 = c+d;
-                for (cc=c0; cc<=c1; cc++)
+                c0 = c - d;
+                c1 = c + d;
+                for (cc = c0; cc <= c1; cc++)
                 {
-                    x = m_floatDataset[b*nrows*ncols + r*ncols + cc];
+                    x = m_floatDataset[b * nrows * ncols + r * ncols + cc];
                     sum += x * (*float_pp++);
                 }
-                tmp[b*nrows*ncols + r*ncols + c] = sum;
+                tmp[b * nrows * ncols + r * ncols + c] = sum;
             }
         }
     }
     int r1;
-    for (b=0; b<nbands; ++b)
+    for (b = 0; b < nbands; ++b)
     {
-        for (r=d; r<nrows-d; ++r)
+        for (r = d; r < nrows - d; ++r)
         {
-            for (c=0; c<ncols; ++c)
+            for (c = 0; c < ncols; ++c)
             {
                 float_pp = kernel;
                 sum = 0;
-                r0 = r-d;
-                r1 = r+d;
-                for (rr=r0; rr<=r1; rr++)
+                r0 = r - d;
+                r1 = r + d;
+                for (rr = r0; rr <= r1; rr++)
                 {
-                    x = tmp[b*nrows*ncols + rr*ncols + c];
+                    x = tmp[b * nrows * ncols + rr * ncols + c];
                     sum += x * (*float_pp++);
                 }
-                m_floatDataset[b*nrows*ncols + r*ncols + c] = sum;
+                m_floatDataset[b * nrows * ncols + r * ncols + c] = sum;
             }
         }
     }
     int b1;
-    for (b=d; b<nbands-d; ++b)
+    for (b = d; b < nbands - d; ++b)
     {
-        for (r=0; r<nrows; ++r)
+        for (r = 0; r < nrows; ++r)
         {
-            for (c=0; c<ncols; ++c)
+            for (c = 0; c < ncols; ++c)
             {
 
                 float_pp = kernel;
                 sum = 0;
-                b0 = b-d;
-                b1 = b+d;
-                for (bb=b0; bb<=b1; bb++)
+                b0 = b - d;
+                b1 = b + d;
+                for (bb = b0; bb <= b1; bb++)
                 {
-                    x = m_floatDataset[bb*nrows*ncols + r*ncols + c];
+                    x = m_floatDataset[bb * nrows * ncols + r * ncols + c];
                     sum += x * (*float_pp++);
                 }
-                tmp[b*nrows*ncols + r*ncols + c] = sum;
+                tmp[b * nrows * ncols + r * ncols + c] = sum;
             }
         }
     }
@@ -663,9 +664,9 @@ void Anatomy::createOffset(float* source)
 
 double Anatomy::xxgauss(double x, double sigma)
 {
-    double y, z, a=2.506628273;
+    double y, z, a = 2.506628273;
     z = x / sigma;
-    y = exp((double)-z*z*0.5)/(sigma * a);
+    y = exp((double) -z * z * 0.5) / (sigma * a);
     return y;
 }
 
@@ -690,27 +691,25 @@ void Anatomy::setZero(int x, int y, int z)
 
 void Anatomy::minimize()
 {
-    if ( !m_dh->fibers_loaded)
+    if (!m_dh->fibers_loaded)
         return;
     std::vector<bool> tmp(m_columns * m_rows * m_frames, false);
-    Fibers* fib= NULL;
+    Fibers* fib = NULL;
     m_dh->getFiberDataset(fib);
 
     int x, y, z;
 
-    for (int i = 0; i < fib->getLineCount() ; ++i)
+    for (int i = 0; i < fib->getLineCount(); ++i)
     {
         if (fib->m_inBox[i] == 1)
         {
-            for (int j = fib->getStartIndexForLine(i) ; j
-                    < (fib->getStartIndexForLine(i) + (fib->getPointsPerLine(i)
-                            *3)); ++j)
+            for (int j = fib->getStartIndexForLine(i); j < (fib->getStartIndexForLine(i)
+                    + (fib->getPointsPerLine(i) * 3)); ++j)
             {
-                x = wxMin(m_dh->columns-1, wxMax(0, (int)fib->m_pointArray[j++]));
-                y = wxMin(m_dh->rows -1, wxMax(0, (int)fib->m_pointArray[j++]));
-                z = wxMin(m_dh->frames -1, wxMax(0, (int)fib->m_pointArray[j]));
-                int index = x + y * m_dh->columns + z * m_dh->rows
-                        * m_dh->columns;
+                x = wxMin(m_dh->columns - 1, wxMax(0, (int) fib->m_pointArray[j++]));
+                y = wxMin(m_dh->rows - 1, wxMax(0, (int) fib->m_pointArray[j++]));
+                z = wxMin(m_dh->frames - 1, wxMax(0, (int) fib->m_pointArray[j]));
+                int index = x + y * m_dh->columns + z * m_dh->rows * m_dh->columns;
                 tmp[index] = true;
             }
         }
@@ -735,14 +734,13 @@ void Anatomy::minimize()
     m_dh->mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.00"));
     m_dh->mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
     m_dh->mainFrame->m_listCtrl->SetItemData(0, (long) newAnatomy);
-    m_dh->mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
-            wxLIST_STATE_SELECTED);
+    m_dh->mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
 }
 
 void Anatomy::dilate()
 {
-    int nsize = m_columns*m_rows*m_frames;
+    int nsize = m_columns * m_rows * m_frames;
     std::vector<bool> tmp(nsize, false);
     for (int c = 1; c < m_columns - 1; ++c)
     {
@@ -793,7 +791,7 @@ void Anatomy::dilate1(std::vector<bool>* input, int index)
 
 void Anatomy::erode()
 {
-    int nsize = m_columns*m_rows*m_frames;
+    int nsize = m_columns * m_rows * m_frames;
     std::vector<bool> tmp(nsize, false);
     for (int c = 1; c < m_columns - 1; ++c)
     {
@@ -820,22 +818,15 @@ void Anatomy::erode()
 
 void Anatomy::erode1(std::vector<bool>* tmp, int index)
 {
-    float test = m_floatDataset[index - 1] + m_floatDataset[index]
-            + m_floatDataset[index + 1] + m_floatDataset[index - m_columns - 1]
-            + m_floatDataset[index - m_columns]
-            + m_floatDataset[index - m_columns + 1]
-            + m_floatDataset[index + m_columns - 1]
-            + m_floatDataset[index + m_columns]
-            + m_floatDataset[index + m_columns + 1]
-            + m_floatDataset[index - m_columns * m_rows - 1]
-            + m_floatDataset[index - m_columns * m_rows]
-            + m_floatDataset[index - m_columns * m_rows + 1]
-            + m_floatDataset[index + m_columns * m_rows - 1]
-            + m_floatDataset[index + m_columns * m_rows]
-            + m_floatDataset[index + m_columns * m_rows + 1]
-            + m_floatDataset[index - m_columns * m_rows - m_columns]
-            + m_floatDataset[index - m_columns * m_rows + m_columns]
-            + m_floatDataset[index + m_columns * m_rows - m_columns]
+    float test = m_floatDataset[index - 1] + m_floatDataset[index] + m_floatDataset[index + 1]
+            + m_floatDataset[index - m_columns - 1] + m_floatDataset[index - m_columns]
+            + m_floatDataset[index - m_columns + 1] + m_floatDataset[index + m_columns - 1]
+            + m_floatDataset[index + m_columns] + m_floatDataset[index + m_columns + 1]
+            + m_floatDataset[index - m_columns * m_rows - 1] + m_floatDataset[index - m_columns * m_rows]
+            + m_floatDataset[index - m_columns * m_rows + 1] + m_floatDataset[index + m_columns * m_rows - 1]
+            + m_floatDataset[index + m_columns * m_rows] + m_floatDataset[index + m_columns * m_rows + 1]
+            + m_floatDataset[index - m_columns * m_rows - m_columns] + m_floatDataset[index - m_columns
+            * m_rows + m_columns] + m_floatDataset[index + m_columns * m_rows - m_columns]
             + m_floatDataset[index + m_columns * m_rows + m_columns];
     if (test == 19.0)
         tmp->at(index) = 1.0;

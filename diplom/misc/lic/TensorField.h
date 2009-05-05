@@ -13,7 +13,7 @@
 
 class TensorField {
 public:
-	TensorField(DatasetHelper* dh, float* tensorData, bool isVector);
+	TensorField(DatasetHelper* dh, float* tensorData, int order, int posDim);
 	virtual ~TensorField();
 
 	int getCells() 	{ return m_cells; };
