@@ -112,14 +112,13 @@ bool Anatomy::loadNifti(wxString filename)
 
     nifti_image* ima = nifti_image_read(hdr_file, 0);
 
-#ifdef DEBUG
     nifti_1_header *tmphdr = nifti_read_header(hdr_file, 0, 0);
     disp_nifti_1_header("", tmphdr);
-#endif
 
     m_columns = ima->dim[1]; // 160
     m_rows = ima->dim[2]; // 200
     m_frames = ima->dim[3]; // 160
+    m_bands = ima->dim[4];
 
     if (m_dh->anatomy_loaded)
     {
@@ -165,7 +164,7 @@ bool Anatomy::loadNifti(wxString filename)
             m_type = Vectors_;
         }
 
-        else if (m_bands / m_frames >= 6)
+        else if (m_bands >= 6)
         {
             m_type = Tensors_;
         }
@@ -299,7 +298,7 @@ bool Anatomy::loadNifti(wxString filename)
         case Tensors_:
         {
             float *data = (float*) filedata->data;
-            int components = m_bands / m_frames;
+            int components = m_bands;
 
             m_floatDataset = new float[nSize * components];
 
