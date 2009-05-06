@@ -112,6 +112,11 @@ bool Anatomy::loadNifti(wxString filename)
 
     nifti_image* ima = nifti_image_read(hdr_file, 0);
 
+#ifdef DEBUG
+    nifti_1_header *tmphdr = nifti_read_header(hdr_file, 0, 0);
+    disp_nifti_1_header("", tmphdr);
+#endif
+
     m_columns = ima->dim[1]; // 160
     m_rows = ima->dim[2]; // 200
     m_frames = ima->dim[3]; // 160

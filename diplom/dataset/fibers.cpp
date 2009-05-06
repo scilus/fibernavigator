@@ -798,12 +798,12 @@ std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
         Vector vsize = box->getSize();
         m_boxMin = new float[3];
         m_boxMax = new float[3];
-        m_boxMin[0] = vpos.x - vsize.x/2;
-        m_boxMax[0] = vpos.x + vsize.x/2;
-        m_boxMin[1] = vpos.y - vsize.y/2;
-        m_boxMax[1] = vpos.y + vsize.y/2;
-        m_boxMin[2] = vpos.z - vsize.z/2;
-        m_boxMax[2] = vpos.z + vsize.z/2;
+        m_boxMin[0] = vpos.x - vsize.x/2 * m_dh->xVoxel;
+        m_boxMax[0] = vpos.x + vsize.x/2 * m_dh->xVoxel;
+        m_boxMin[1] = vpos.y - vsize.y/2 * m_dh->yVoxel;
+        m_boxMax[1] = vpos.y + vsize.y/2 * m_dh->yVoxel;
+        m_boxMin[2] = vpos.z - vsize.z/2 * m_dh->zVoxel;
+        m_boxMax[2] = vpos.z + vsize.z/2 * m_dh->zVoxel;
         boxTest(0, m_countPoints-1, 0);
     }
     else
