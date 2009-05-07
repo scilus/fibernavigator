@@ -337,8 +337,8 @@ hitResult SelectionBox::hitTest(Ray *ray)
        		BoundingBox *bb = new BoundingBox(cx, cy, cz, sx, sy, sz);
 
 			bb->setCenter(mx - 1 , cy, cz);
-			bb->setSize(m_size);
-			bb->setSizeX(1);
+			bb->setSize(sx, sy, sz);
+			bb->setSizeX(m_dh->xVoxel);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
 
@@ -368,8 +368,8 @@ hitResult SelectionBox::hitTest(Ray *ray)
 				}
 			}
 			bb->setCenter(cx, my - 1, cz);
-			bb->setSize(m_size);
-			bb->setSizeY(1);
+			bb->setSize(sx, sy, sz);
+			bb->setSizeY(m_dh->yVoxel);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
 				if (picked == 0) {
@@ -398,8 +398,8 @@ hitResult SelectionBox::hitTest(Ray *ray)
 				}
 			}
 			bb->setCenter(cx, cy, mz - 1);
-			bb->setSize(m_size);
-			bb->setSizeZ(1);
+			bb->setSize(sx, sy, sz);
+			bb->setSizeZ(m_dh->zVoxel);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
 				if (picked == 0) {
@@ -432,7 +432,7 @@ hitResult SelectionBox::hitTest(Ray *ray)
 
 		else  // if (wxGetKeyState(WXK_CONTROL))
 		{
-			BoundingBox *bb = new BoundingBox(m_center, m_size);
+			BoundingBox *bb = new BoundingBox(cx, cy, cz, sx, sy, sz);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
 				if (picked == 0) {
