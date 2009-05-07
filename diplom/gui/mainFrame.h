@@ -21,7 +21,7 @@ public:
 
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
-    
+
     void createNewSelBox();
 
 private:
@@ -60,6 +60,7 @@ private:
     void OnToggleAndNot(wxCommandEvent& event);
     void OnColorRoi(wxCommandEvent& event);
     void OnUseMorph(wxCommandEvent& event);
+    void OnCountFibers(wxCommandEvent& event);
 	// Spline Surface
 	void OnNewSurface(wxCommandEvent& event);
 	void OnToggleNormal(wxCommandEvent& event);
@@ -123,7 +124,7 @@ private:
     void OnSelectListItem(wxListEvent& event);
     void OnListItemUp(wxCommandEvent& event);
     void OnListItemDown(wxCommandEvent& event);
-    
+
     void OnListMenuName(wxCommandEvent& event);
     void OnListMenuThreshold(wxCommandEvent& event);
     void OnListMenuDelete(wxCommandEvent& event);
@@ -155,13 +156,13 @@ public:
 	MainCanvas* m_gl1;
 	MainCanvas* m_gl2;
 	MainCanvas* m_mainGL;
-	
+
 	wxSlider* m_xSlider;
     wxSlider* m_ySlider;
     wxSlider* m_zSlider;
     MySlider* m_tSlider;
     wxSlider* m_tSlider2;
-    
+
     wxButton *buttonUp;
     wxButton *buttonDown;
     wxButton *buttonLoad1;
@@ -176,7 +177,7 @@ public:
 	wxTreeItemId m_tRootId;
 	wxTreeItemId m_tPointId;
 	wxTreeItemId m_tSelBoxId;
-	
+
 	wxBoxSizer *topSizer;
 	wxBoxSizer *topSizer1;
 	wxFlexGridSizer *topSizer2;
@@ -187,8 +188,8 @@ public:
 	wxBoxSizer *buttonSizer;
 	wxBoxSizer *treeSizer;
 	int enlargeNav;
-	
-	
+
+
 	DatasetHelper* m_dh;
 
 DECLARE_EVENT_TABLE()
@@ -230,6 +231,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_VOI_TOGGLE_ANDNOT						136
 #define MENU_VOI_COLOR_ROI							137
 #define MENU_VOI_USE_MORPH							138
+#define MENU_VOI_COUNT_FIBERS                       139
 // Menu Spline Surface
 #define MENU_SPLINESURF_DRAW_POINTS					140
 #define MENU_SPLINESURF_NEW							141

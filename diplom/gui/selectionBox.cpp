@@ -328,10 +328,13 @@ hitResult SelectionBox::hitTest(Ray *ray)
 		float cx = m_center.x;
         float cy = m_center.y;
         float cz = m_center.z;
+        float sx = m_size.x * m_dh->xVoxel;
+        float sy = m_size.y * m_dh->yVoxel;
+        float sz = m_size.z * m_dh->zVoxel;
 
        	if (wxGetKeyState(WXK_CONTROL))
 		{
-       		BoundingBox *bb = new BoundingBox(m_center, m_size);
+       		BoundingBox *bb = new BoundingBox(cx, cy, cz, sx, sy, sz);
 
 			bb->setCenter(mx - 1 , cy, cz);
 			bb->setSize(m_size);
@@ -683,8 +686,8 @@ void SelectionBox::setFiberColor(wxColour color)
 void SelectionBox::updateStatusBar()
 {
 	m_dh->mainFrame->GetStatusBar()->SetStatusText(wxT("Selection Box"),1);
-	m_dh->mainFrame->GetStatusBar()->SetStatusText(wxString::Format(wxT("Position %.2f, %.2f, %.2f  Size: %.0f, %.0f, %.0f"),
-			m_center.x , m_center.y , m_center.z , m_size.x, m_size.y, m_size.z),2);
+	m_dh->mainFrame->GetStatusBar()->SetStatusText(wxString::Format(wxT("Position %.2f, %.2f, %.2f  Size: %.2f, %.2f, %.2f"),
+			m_center.x , m_center.y , m_center.z , m_size.x * m_dh->xVoxel, m_size.y * m_dh->yVoxel, m_size.z * m_dh->zVoxel),2);
 
 }
 
@@ -749,4 +752,14 @@ void SelectionBox::setThreshold(float v)
 	m_dirty = true;
 	m_gfxDirty = true;
 	m_dh->m_selBoxChanged = true;
+}
+
+int SelectionBox::countSelectedFibers()
+{
+    int count = 0;
+    for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
+    {
+        if ( m_inBox[i] ) ++count;
+    }
+    return count;
 }

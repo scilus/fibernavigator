@@ -58,6 +58,7 @@ EVT_MENU(MENU_VOI_RENAME_BOX, MainFrame::OnRenameBox)
 EVT_MENU(MENU_VOI_TOGGLE_ANDNOT, MainFrame::OnToggleAndNot)
 EVT_MENU(MENU_VOI_COLOR_ROI, MainFrame::OnColorRoi)
 EVT_MENU(MENU_VOI_USE_MORPH, MainFrame::OnUseMorph)
+EVT_MENU(MENU_VOI_COUNT_FIBERS, MainFrame::OnCountFibers)
 // Menu Surfaces
 EVT_MENU(MENU_SURFACE_NEW_OFFSET, MainFrame::OnNewOffsetMap)
 EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
@@ -810,6 +811,27 @@ void MainFrame::OnRenameBox(wxCommandEvent& WXUNUSED(event))
     }
     refreshAllGLWidgets();
 }
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnCountFibers(wxCommandEvent& WXUNUSED(event))
+{
+    wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+    if (treeSelected(tBoxId) == MasterBox)
+    {
+        SelectionBox *box = (SelectionBox*) (m_treeWidget->GetItemData(tBoxId));
+        int count = box->countSelectedFibers();
+
+        wxString::Format(wxT("Selected Fibers: %d"), count);
+
+        wxMessageBox(wxString::Format(wxT("Selected Fibers: %d"), count), wxT(""), wxOK
+                       | wxICON_INFORMATION, NULL);
+    }
+    refreshAllGLWidgets();
+}
+
 /****************************************************************************************************
  *
  *

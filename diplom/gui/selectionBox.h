@@ -71,6 +71,7 @@ public:
 	int getIcon();
 	bool getIsBox() {return m_isBox;};
 
+	int countSelectedFibers();
 
 	void setIsMaster(bool v);
 	bool getIsMaster() {return m_isMaster;};
