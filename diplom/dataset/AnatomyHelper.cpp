@@ -430,33 +430,3 @@ void AnatomyHelper::renderS4()
 		glTexCoord3f(m_xc, 1.0, m_zc);  glVertex3f(m_x + 0.5f, m_yb, m_z);
 	glEnd();
 }
-
-void AnatomyHelper::renderFreeSlize()
-{
-	//float x_off = m_dh->m_freeSlizeOffset.x;
-	//float y_off = m_dh->m_freeSlizeOffset.y;
-	//float z_off = m_dh->m_freeSlizeOffset.z;
-	float x_rot = m_dh->m_freeSlizeRotation.x;
-	float y_rot = m_dh->m_freeSlizeRotation.y;
-	float z_rot = m_dh->m_freeSlizeRotation.z;
-	float x_dim = (float) m_dh->columns;
-	float y_dim = (float) m_dh->rows;
-	float z_dim = (float) m_dh->frames;
-
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glTranslatef(x_dim/2.0, y_dim/2.0, z_dim/2.0);
-	glRotatef(x_rot, 1.0, 0.0, 0.0);
-	glRotatef(y_rot, 0.0, 1.0, 0.0);
-	glRotatef(z_rot, 0.0, 0.0, 1.0);
-	glTranslatef(-x_dim/2.0, -y_dim/2.0, -z_dim/2.0);
-
-	glBegin(GL_QUADS);
-		glTexCoord3f(0.0, 0.0, 0.5); 	glVertex3f(0, 0, z_dim/2);
-		glTexCoord3f(0.0, 1.0, 0.5); 	glVertex3f(0, y_dim, z_dim/2);
-		glTexCoord3f(1.0, 1.0, 0.5); 	glVertex3f(x_dim, y_dim, z_dim/2);
-		glTexCoord3f(1.0, 0.0, 0.5); 	glVertex3f(x_dim, 0, z_dim/2);
-	glEnd();
-
-	glPopMatrix();
-}

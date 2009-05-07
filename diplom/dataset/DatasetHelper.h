@@ -53,22 +53,23 @@ public:
 	DatasetHelper(MainFrame*);
 	virtual ~DatasetHelper();
 
-	bool load(int index);
-	bool load(wxString filename, bool createBox = true, float threshold = 0.0, bool active = true, bool showFS = true, bool useTex = true);
+	bool load(const int index);
+	bool load(wxString filename, const float threshold = 0.0, const bool active = true,
+	        const bool showFS = true, const bool useTex = true);
 	void finishLoading(DatasetInfo*);
-	bool loadScene(wxString filename);
-	bool loadTextFile(wxString*, wxString);
-	bool fileNameExists(wxString filename);
+	bool loadScene(const wxString filename);
+	bool loadTextFile(wxString* string, const wxString filename);
+	bool fileNameExists(const wxString filename);
 
 	//! Saves the current scene to an xml file
-	void save(wxString filename);
+	void save(const wxString filename);
 
 	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
 	void updateAllSelectionBoxes();
-	Vector mapMouse2World(int, int);
-	Vector mapMouse2WorldBack(int, int);
+	Vector mapMouse2World(const int x, const int y);
+	Vector mapMouse2WorldBack(const int x, const int y);
 
-	bool invertFibers() {fibersInverted = !fibersInverted; return fibersInverted;};
+	bool invertFibers() {return fibersInverted = !fibersInverted;};
 
 	void createIsoSurface();
 	void createDistanceMap();
@@ -82,18 +83,18 @@ public:
 	 * Helper functions
 	 */
 	void printTime();
-	void printwxT(wxString string);
-	void printDebug(wxString string, int level);
+	void printwxT(const wxString string);
+	void printDebug(const wxString string, const int level);
 	/*
 	 * Check for GL error
 	 */
 	bool GLError();
-	void printGLError(wxString function = wxT(""));
+	void printGLError(const wxString function = wxT(""));
 
-	void updateView(float x, float y, float z);
+	void updateView(const float x, const float y, const float z);
 
-	void changeZoom(int z);
-	void moveScene(int x, int y);
+	void changeZoom(const int z);
+	void moveScene(const int x, const int y);
 
 	void doMatrixManipulation();
 
@@ -114,22 +115,14 @@ public:
 	int rows;
 	int columns;
 	int frames;
-	
+
 	float xVoxel;
 	float yVoxel;
 	float zVoxel;
-	
-	unsigned int countFibers;
-	wxString lastError;
-	// last path from loading, load file dialog will open with it
-	wxString lastPath;
-	wxString m_scenePath;
-	wxString m_screenshotPath;
-	wxString m_screenshotName;
-	
-	wxString m_scnFileName;
-	bool m_scnFileLoaded;
 
+	unsigned int countFibers;
+
+	bool m_scnFileLoaded;
 	bool anatomy_loaded;
 	bool fibers_loaded;
 	bool vectors_loaded;
@@ -161,15 +154,13 @@ public:
 	bool showSagittal;
 	bool showCoronal;
 	bool showAxial;
-	
+
 	bool showCrosshair;
 
 	float xSlize;
 	float ySlize;
 	float zSlize;
-	
-	Vector m_freeSlizeOffset;
-	Vector m_freeSlizeRotation;
+
 	// lighting for fibers
 	bool lighting;
 	// ignore threshold for textures on meshes
@@ -186,23 +177,14 @@ public:
 	bool filterIsoSurf;
 	int colorMap;
 	bool showColorMapLegend;
-	
+
 	bool morphing;
-	/////////////////////////////////////////////////////////////////////////////////
-	// pointers to often used objects
-	/////////////////////////////////////////////////////////////////////////////////
-	SplinePoint* lastSelectedPoint;
-	SelectionBox* lastSelectedBox;
-	SelectionBox* boxAtCrosshair;
-	AnatomyHelper* anatomyHelper;
-	ShaderHelper* shaderHelper;
-	MainFrame* mainFrame;
-	TheScene* scene;
 
 	bool boxLockIsOn;
 	bool semaphore;
 	int threadsActive;
-	/////////////////////////////////////////////////////////////////////////////////
+
+   /////////////////////////////////////////////////////////////////////////////////
 	// variables for mouse interaction
 	/////////////////////////////////////////////////////////////////////////////////
 	bool m_isDragging;
@@ -211,11 +193,29 @@ public:
 	float zoom;
 	int xMove;
 	int yMove;
-	
+
 	bool m_texAssigned;
 	bool m_selBoxChanged;
 
 	int geforceLevel;
+
+	wxString lastError;
+    wxString lastPath;
+    wxString m_scenePath;
+    wxString m_scnFileName;
+    wxString m_screenshotPath;
+    wxString m_screenshotName;
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // pointers to often used objects
+    /////////////////////////////////////////////////////////////////////////////////
+    SplinePoint* lastSelectedPoint;
+    SelectionBox* lastSelectedBox;
+    SelectionBox* boxAtCrosshair;
+    AnatomyHelper* anatomyHelper;
+    ShaderHelper* shaderHelper;
+    TheScene* scene;
+    MainFrame* mainFrame;
 
 private:
 

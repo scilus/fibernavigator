@@ -22,101 +22,100 @@
 #include "surface.h"
 
 DatasetHelper::DatasetHelper(MainFrame* mf)
-{
-    mainFrame = mf;
+:   rows(1),
+    columns(1),
+    frames(1),
 
-    rows = 1;
-    columns = 1;
-    frames = 1;
+    xVoxel(1.0),
+    yVoxel(1.0),
+    zVoxel(1.0),
+    countFibers(0),
 
-    xVoxel = 1.0;
-    yVoxel = 1.0;
-    zVoxel = 1.0;
+    m_scnFileLoaded(false),
+    anatomy_loaded(false),
+    fibers_loaded(false),
+    vectors_loaded(false),
+    tensors_loaded(false),
+    surface_loaded(false),
+    surface_isDirty(true),
 
-    countFibers = 0;
-    threadsActive = 0;
-    anatomy_loaded = false;
-    fibers_loaded = false;
-    surface_loaded = false;
-    vectors_loaded = false;
-    tensors_loaded = false;
-    surface_isDirty = true;
+    useVBO(true),
+    lastGLError(GL_NO_ERROR),
+    quadrant(6),
+    textures(0),
 
-    scheduledReloadShaders = true;
-    scheduledScreenshot = false;
-    blendTexOnMesh = true;
-    use_lic = false;
-    useVBO = true;
-    textures = 0;
+    scheduledReloadShaders(true),
+    scheduledScreenshot(false),
 
-    colorMap = 0;
-    showColorMapLegend = false;
-    drawVectors = false;
+    showBoxes(true),
+    blendAlpha(false),
+    pointMode(false),
 
-    showSagittal = true;
-    showCoronal = true;
-    showAxial = true;
-    showCrosshair = false;
-    xSlize = 0.5;
-    ySlize = 0.5;
-    zSlize = 0.5;
-    quadrant = 6;
-
-    zoom = 1;
-    xMove = 0;
-    yMove = 0;
-
-    lastSelectedPoint = NULL;
-    lastSelectedBox = NULL;
-    scene = NULL;
-    anatomyHelper = NULL;
-    shaderHelper = NULL;
-
-    boxLockIsOn = false;
-    semaphore = false;
-
-    Matrix4fSetIdentity(&m_transform);
-
-    lastError = wxT("");
-    lastPath = MyApp::respath + _T("data");
-    lastGLError = GL_NO_ERROR;
-
-    lighting = true;
-    fibersInverted = false;
-    useFakeTubes = false;
-    useTransparency = false;
-    filterIsoSurf = false;
-
-    m_isDragging = false;
-    m_isrDragging = false;
-    m_ismDragging = false;
-
-    normalDirection = 1.0;
-
-    showBoxes = true;
-    pointMode = false;
-    blendAlpha = false;
-
-    m_texAssigned = false;
-    m_selBoxChanged = true;
-
-    morphing = false;
-
-    m_scnFileName = _T("");
-    m_scenePath = _T("");
-    m_screenshotPath = _T("");
-    m_scnFileLoaded = false;
-
-    Vector v(0.0, 0.0, 0.0);
-    m_freeSlizeOffset = v;
-    m_freeSlizeRotation = v;
-
-    geforceLevel = 0;
 #ifdef DEBUG
-    debugLevel = 0;
+    debugLevel(0),
 #else
-    debugLevel = 1;
+    debugLevel(1),
 #endif
+
+    showSagittal(true),
+    showCoronal(true),
+    showAxial(true),
+
+    showCrosshair(false),
+
+    xSlize(0.5),
+    ySlize(0.5),
+    zSlize(0.5),
+
+    lighting(true),
+    blendTexOnMesh(true),
+    use_lic(false),
+    drawVectors(false),
+
+    normalDirection(1.0),
+
+    fibersInverted(false),
+    useFakeTubes(false),
+    useTransparency(false),
+    filterIsoSurf(false),
+
+    colorMap(0),
+    showColorMapLegend(false),
+
+    morphing(false),
+    boxLockIsOn(false),
+    semaphore(false),
+    threadsActive(0),
+
+    m_isDragging(false),
+    m_isrDragging(false),
+    m_ismDragging(false),
+    zoom(1),
+    xMove(0),
+    yMove(0),
+
+    m_texAssigned(false),
+    m_selBoxChanged(true),
+
+    geforceLevel(0),
+
+    lastError(_T("")),
+    lastPath(MyApp::respath + _T("data")),
+    m_scenePath(_T("")),
+    m_scnFileName(_T("")),
+    m_screenshotPath(_T("")),
+    m_screenshotName(_T("")),
+
+    lastSelectedPoint(0),
+    lastSelectedBox(0),
+    boxAtCrosshair(0),
+    anatomyHelper(0),
+    shaderHelper(0),
+    scene(0),
+
+    mainFrame (mf)
+{
+    Matrix4fSetIdentity(&m_transform);
 }
 
 DatasetHelper::~DatasetHelper()
@@ -132,7 +131,7 @@ DatasetHelper::~DatasetHelper()
     printDebug(_T("dataset helper destructor done"),0);
 }
 
-bool DatasetHelper::load(int index)
+bool DatasetHelper::load(const int index)
 {
     wxArrayString fileNames;
     wxString caption= wxT("Choose a file");
@@ -165,8 +164,8 @@ bool DatasetHelper::load(int index)
     return flag;
 }
 
-bool DatasetHelper::load(wxString filename, bool createBox, float threshold,
-        bool active, bool showFS, bool useTex)
+bool DatasetHelper::load(wxString filename, const float threshold, const bool active,
+        const bool showFS, const bool useTex)
 {
     // check if dataset is already loaded and ignore it if yes
     if (fileNameExists(filename))
@@ -350,7 +349,7 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
 
 }
 
-bool DatasetHelper::fileNameExists(wxString filename)
+bool DatasetHelper::fileNameExists(const wxString filename)
 {
     int countDatasets = mainFrame->m_listCtrl->GetItemCount();
     if (countDatasets == 0)
@@ -369,7 +368,7 @@ bool DatasetHelper::fileNameExists(wxString filename)
 
 }
 
-bool DatasetHelper::loadScene(wxString filename)
+bool DatasetHelper::loadScene(const wxString filename)
 {
     /*
      * Variables to store the slice postions in, have to be set after loading
@@ -477,7 +476,7 @@ bool DatasetHelper::loadScene(wxString filename)
                     }
                     nodes = nodes->GetNext();
                 }
-                load(path, false, threshold, active, showFS, useTex);
+                load(path, threshold, active, showFS, useTex);
                 datasetnode = datasetnode->GetNext();
             }
         }
@@ -637,7 +636,7 @@ bool DatasetHelper::loadScene(wxString filename)
     return true;
 }
 
-void DatasetHelper::save(wxString filename)
+void DatasetHelper::save(const wxString filename)
 {
     wxXmlNode *root = new wxXmlNode(NULL, wxXML_ELEMENT_NODE, wxT("scene"));
     wxXmlNode *nodeboxes = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("selection_boxes"));
@@ -753,8 +752,9 @@ void DatasetHelper::save(wxString filename)
     wxXmlDocument doc;
     doc.SetRoot(root);
     if (filename.AfterLast('.') != _T("scn"))
-        filename += _T(".scn");
-    doc.Save(filename, 2);
+        doc.Save(filename + _T(".scn"), 2);
+    else
+        doc.Save(filename, 2);
 }
 
 std::vector<std::vector<SelectionBox*> > DatasetHelper::getSelectionBoxes()
@@ -806,7 +806,7 @@ void DatasetHelper::updateAllSelectionBoxes()
             boxes[i][j]->setDirty(true);
 }
 
-Vector DatasetHelper::mapMouse2World(int x, int y)
+Vector DatasetHelper::mapMouse2World(const int x, const int y)
 {
     glPushMatrix();
     doMatrixManipulation();
@@ -830,7 +830,7 @@ Vector DatasetHelper::mapMouse2World(int x, int y)
     return v;
 }
 
-Vector DatasetHelper::mapMouse2WorldBack(int x, int y)
+Vector DatasetHelper::mapMouse2WorldBack(const int x, const int y)
 {
     glPushMatrix();
     doMatrixManipulation();
@@ -862,7 +862,7 @@ bool DatasetHelper::GLError()
     return true;
 }
 
-bool DatasetHelper::loadTextFile(wxString* string, wxString filename)
+bool DatasetHelper::loadTextFile(wxString* string, const wxString filename)
 {
     wxTextFile file;
     *string = wxT("");
@@ -1063,13 +1063,13 @@ void DatasetHelper::createCutDataset()
     mainFrame->refreshAllGLWidgets();
 }
 
-void DatasetHelper::changeZoom(int z)
+void DatasetHelper::changeZoom(const int z)
 {
     float delta = ((int)zoom)*0.1f;
     z >= 0 ? zoom = wxMin(10, zoom+delta) : zoom = wxMax(1, zoom-delta);
 }
 
-void DatasetHelper::moveScene(int x, int y)
+void DatasetHelper::moveScene(const int x, const int y)
 {
     xMove -= x;
     yMove += y;
@@ -1084,7 +1084,7 @@ void DatasetHelper::doMatrixManipulation()
     glTranslatef(-columns * xVoxel/2.0, -rows * yVoxel/2.0, -frames * zVoxel/2.0);
 }
 
-void DatasetHelper::updateView(float x, float y, float z)
+void DatasetHelper::updateView(const float x, const float y, const float z)
 {
     xSlize = x;
     ySlize = y;
@@ -1164,7 +1164,7 @@ TensorField* DatasetHelper::getTensorField()
     return NULL;
 }
 
-void DatasetHelper::printGLError(wxString function)
+void DatasetHelper::printGLError(const wxString function)
 {
     printDebug(_T("***ERROR***: ") + function, 2);
     printf(" : ERROR: %s\n", gluErrorString(lastGLError));
@@ -1177,7 +1177,7 @@ void DatasetHelper::printTime()
     printf("[%02d:%02d:%02d] ", dt.GetHour(), dt.GetMinute(), dt.GetSecond());
 }
 
-void DatasetHelper::printwxT(wxString string)
+void DatasetHelper::printwxT(const wxString string)
 {
     char* cstring;
     cstring = (char*) malloc(string.length()+1);
@@ -1185,7 +1185,7 @@ void DatasetHelper::printwxT(wxString string)
     printf("%s", cstring);
 }
 
-void DatasetHelper::printDebug(wxString string, int level)
+void DatasetHelper::printDebug(const wxString string, const int level)
 {
     //
     if (debugLevel > level)
