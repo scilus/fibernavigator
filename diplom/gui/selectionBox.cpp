@@ -759,7 +759,7 @@ int SelectionBox::countSelectedFibers()
     int count = 0;
     for (unsigned int i = 0; i < m_dh->countFibers ; ++i)
     {
-        if ( m_inBox[i] ) ++count;
+        if ( m_inBranch[i] ) ++count;
     }
     return count;
 }
