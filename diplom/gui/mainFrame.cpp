@@ -1320,7 +1320,7 @@ void MainFrame::OnAssignColor(wxCommandEvent& WXUNUSED(event))
     {
         DatasetInfo* info = (DatasetInfo*) m_listCtrl->GetItemData(item);
         if (info->getType() == Mesh_ || info->getType() == IsoSurface_
-                || info->getType() == Surface_)
+                || info->getType() == Surface_ || info->getType() == Vectors_)
         {
             info->setColor(col);
             info->setuseTex(false);

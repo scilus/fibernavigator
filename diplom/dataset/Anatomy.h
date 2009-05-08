@@ -28,6 +28,7 @@ public:
 
 	float* getFloatDataset() { return m_floatDataset;};
 	float getFloatDataset(int i) {return m_floatDataset[i];};
+	float at(int i) {return m_floatDataset[i];};
 	TensorField* getTensorField() { return m_tensorField; };
 	bool loadNifti(wxString filename);
 	void saveNifti(wxString filename);
@@ -47,8 +48,8 @@ private:
 	void createOffset(float* dataset);
 
 	double xxgauss(double x, double sigma);
-	
-	
+
+
 	void dilate1(std::vector<bool>*, int index);
 	void erode1(std::vector<bool>*, int index);
 

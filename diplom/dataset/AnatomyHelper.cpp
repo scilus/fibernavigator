@@ -83,6 +83,7 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 	shader->release();
 	glPopAttrib();
 
+	glLineWidth(1.0);
 	glColor3f(1.0, 0.0, 0.0);
 	glBegin (GL_LINES);
 		glVertex3f (0, yline, lineZ);

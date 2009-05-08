@@ -57,6 +57,8 @@ private:
 	void renderFibers();
 	void renderFakeTubes();
 	void renderSplineSurface();
+
+	void drawVectors();
 	void drawColorMapLegend();
 
 	void drawSelectionBoxes();

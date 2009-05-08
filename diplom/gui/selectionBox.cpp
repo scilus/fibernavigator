@@ -336,7 +336,7 @@ hitResult SelectionBox::hitTest(Ray *ray)
 		{
        		BoundingBox *bb = new BoundingBox(cx, cy, cz, sx, sy, sz);
 
-			bb->setCenter(mx - 1 , cy, cz);
+			bb->setCenter(mx , cy, cz);
 			bb->setSize(sx, sy, sz);
 			bb->setSizeX(m_dh->xVoxel);
 			hr = bb->hitTest(ray);
@@ -353,7 +353,7 @@ hitResult SelectionBox::hitTest(Ray *ray)
 					}
 				}
 			}
-			bb->setCenter(px + 1, cy, cz);
+			bb->setCenter(px, cy, cz);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
 				if (picked == 0) {
@@ -367,7 +367,7 @@ hitResult SelectionBox::hitTest(Ray *ray)
 					}
 				}
 			}
-			bb->setCenter(cx, my - 1, cz);
+			bb->setCenter(cx, my, cz);
 			bb->setSize(sx, sy, sz);
 			bb->setSizeY(m_dh->yVoxel);
 			hr = bb->hitTest(ray);
@@ -383,7 +383,7 @@ hitResult SelectionBox::hitTest(Ray *ray)
 					}
 				}
 			}
-			bb->setCenter(cx, py + 1, cz);
+			bb->setCenter(cx, py, cz);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
 				if (picked == 0) {
@@ -397,7 +397,7 @@ hitResult SelectionBox::hitTest(Ray *ray)
 					}
 				}
 			}
-			bb->setCenter(cx, cy, mz - 1);
+			bb->setCenter(cx, cy, mz);
 			bb->setSize(sx, sy, sz);
 			bb->setSizeZ(m_dh->zVoxel);
 			hr = bb->hitTest(ray);
@@ -413,7 +413,7 @@ hitResult SelectionBox::hitTest(Ray *ray)
 					}
 				}
 			}
-			bb->setCenter(cx, cy, pz + 1);
+			bb->setCenter(cx, cy, pz);
 			hr = bb->hitTest(ray);
 			if (hr.hit) {
 				if (picked == 0) {

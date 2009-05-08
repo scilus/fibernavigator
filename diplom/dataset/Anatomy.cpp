@@ -39,6 +39,8 @@ Anatomy::Anatomy(DatasetHelper* dh)
     m_oldMax = 1.0;
     m_newMax = 1.0;
     m_isGlyph = false;
+    wxColour c(255,255,0);
+    m_color = c;
 }
 
 Anatomy::Anatomy(DatasetHelper* dh, float* dataset)
@@ -62,6 +64,8 @@ Anatomy::Anatomy(DatasetHelper* dh, float* dataset)
     m_roi = 0;
     m_oldMax = 1.0;
     m_newMax = 1.0;
+    wxColour c(255,255,0);
+    m_color = c;
 
     createOffset(dataset);
 }

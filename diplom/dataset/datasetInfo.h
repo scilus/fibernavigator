@@ -23,9 +23,9 @@ enum DatasetType {
 	Head_short,
 	Overlay,
 	RGB,
-	Vectors_,
 	// everything higher can't be used as a texture
 	Mesh_,
+	Vectors_,
 	Tensors_,
 	Fibers_,
 	Surface_,
