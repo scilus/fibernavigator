@@ -96,9 +96,9 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 //////////////////////////////////////////////////////////////////////////
 void AnatomyHelper::renderMain()
 {
-	m_x = ( m_dh->xSlize * m_dh->xVoxel ) + 0.5f;
-	m_y = ( m_dh->ySlize * m_dh->yVoxel ) + 0.5f;
-	m_z = ( m_dh->zSlize * m_dh->zVoxel ) + 0.5f;
+	m_x = ( m_dh->xSlize * m_dh->xVoxel ) + 0.5f * m_dh->xVoxel;
+	m_y = ( m_dh->ySlize * m_dh->yVoxel ) + 0.5f * m_dh->yVoxel;
+	m_z = ( m_dh->zSlize * m_dh->zVoxel ) + 0.5f * m_dh->zVoxel;
 
 	m_xc = ((float)m_dh->xSlize + 0.5f)/(float)m_dh->columns;
 	m_yc = ((float)m_dh->ySlize + 0.5f)/(float)m_dh->rows;

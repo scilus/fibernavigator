@@ -310,9 +310,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
                         else
                         {
                             m_delta = 0;
-                            float
-                                    delta =
-                                            wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),1),-1);
+                            float delta = wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),1),-1);
                             if (delta < -0.5)
                                 m_delta = -1;
                             else if (delta > 0.5)
@@ -464,8 +462,7 @@ hitResult MainCanvas::pick(wxPoint click)
      */
     float tpicked = 0;
     int picked = 0;
-    hitResult hr =
-    { false, 0.0f, 0, NULL };
+    hitResult hr = { false, 0.0f, 0, NULL };
     if (m_dh->showAxial)
     {
         bb->setSizeZ(0.01f);
@@ -702,7 +699,7 @@ void MainCanvas::renderTestRay()
     glEnd();
     Vector dir(m_pos2X - m_pos1X, m_pos2Y - m_pos1Y, m_pos2Z - m_pos1Z);
     m_dh->scene->drawSphere(m_pos1X + m_hr.tmin * dir.x, m_pos1Y + m_hr.tmin
-            * dir.y, m_pos1Z + m_hr.tmin * dir.z, 3.0);
+            * dir.y, m_pos1Z + m_hr.tmin * dir.z, 3.0 * m_dh->xVoxel);
 }
 
 Vector MainCanvas::getEventCenter()
