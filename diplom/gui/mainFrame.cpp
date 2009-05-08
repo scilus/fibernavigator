@@ -848,7 +848,14 @@ void MainFrame::createNewSelBox()
 
     Vector vc(m_xSlider->GetValue() * m_dh->xVoxel, m_ySlider->GetValue()
             * m_dh->yVoxel, m_zSlider->GetValue() * m_dh->zVoxel);
-    Vector vs(m_dh->columns / 8, m_dh->rows / 8, m_dh->frames / 8);
+
+    float xs = m_dh->columns * m_dh->xVoxel;
+    float ys = m_dh->rows * m_dh->yVoxel;
+    float zs = m_dh->frames * m_dh->zVoxel;
+    float mins = wxMax(xs, wxMax(ys, zs))/8;
+
+
+    Vector vs(mins / m_dh->xVoxel, mins / m_dh->yVoxel, mins /m_dh->zVoxel);
     SelectionBox *selBox = new SelectionBox(vc, vs, m_dh);
 
     // check if selection box selected
