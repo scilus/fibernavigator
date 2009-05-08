@@ -11,10 +11,9 @@
 
 #include <fstream>
 
-Surface::Surface(DatasetHelper* dh)
+Surface::Surface(DatasetHelper* dh) : DatasetInfo(dh)
 {
-	m_dh = dh;
-	m_radius = 30.0;
+    m_radius = 30.0;
 	m_my = 8.0;
 	m_numDeBoorRows = 12;
 	m_numDeBoorCols = 12;
@@ -22,28 +21,17 @@ Surface::Surface(DatasetHelper* dh)
 
 	m_sampleRateT = m_sampleRateU = 0.5;
 
-	m_show = true;
-	m_showFS = true;
-	m_useTex = true;
-
 	m_type = Surface_;
 	m_threshold = 0.5;
-	m_oldMax = 1.0;
-	m_newMax = 1.0;
 	m_name = wxT("spline surface");
-	m_dh->surface_loaded = true;
+
 	m_numPoints = 0;
 	m_alpha = 0.2f;
 	m_tMesh = NULL;
-	m_GLuint = 0;
 	m_CutTex = 0;
 	m_normalDirection = 1.0;
 
-	licCalculated = false;
-	m_useLIC = false;
 	subDCount = 0;
-	m_isGlyph = false;
-	execute();
 }
 
 Surface::~Surface()
@@ -169,13 +157,11 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 
 void Surface::execute ()
 {
-	std::vector< std::vector< double > > givenPoints;
+    std::vector< std::vector< double > > givenPoints;
 	int countPoints = m_dh->mainFrame->m_treeWidget->GetChildrenCount(m_dh->mainFrame->m_tPointId, true);
 	if (countPoints == 0) return;
-
 	if (m_tMesh) delete m_tMesh;
 	m_tMesh = new TriangleMesh(m_dh);
-
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;
 	id = m_dh->mainFrame->m_treeWidget->GetFirstChild(m_dh->mainFrame->m_tPointId, cookie);
@@ -550,10 +536,10 @@ bool Surface::save(wxString filename ) const
 	char* c_file;
 	c_file = (char*) malloc(filename.length()+1);
 	strcpy(c_file, (const char*) filename.mb_str(wxConvUTF8));
-	
+
 	//m_dh->printDebug(_T("start saving vtk file"), 1);
 	std::ofstream dataFile(c_file);
-	
+
 	if (dataFile)
 	{
 		std::cout << "opening file" << std::endl;
@@ -584,7 +570,7 @@ bool Surface::save(wxString filename ) const
 	for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
 	{
 		triangleEdges = m_tMesh->getTriangle(i);
-		dataFile << "3 " << triangleEdges.pointID[0] << " " << 
+		dataFile << "3 " << triangleEdges.pointID[0] << " " <<
 			triangleEdges.pointID[1] << " " << triangleEdges.pointID[2] << "\n";
 	}
 	dataFile << "CELL_TYPES\n";

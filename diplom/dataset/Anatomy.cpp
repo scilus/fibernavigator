@@ -17,55 +17,25 @@
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 
-Anatomy::Anatomy(DatasetHelper* dh)
+Anatomy::Anatomy(DatasetHelper* dh) : DatasetInfo (dh)
 {
-    m_dh = dh;
-    m_type = not_initialized;
-    m_length = 0;
-    m_bands = 0;
-    m_frames = 0;
-    m_rows = 0;
-    m_columns = 0;
-    m_repn = wxT("");
-    is_loaded = false;
-    m_highest_value = 1.0;
-    m_threshold = 0.00f;
-    m_alpha = 1.0f;
-    m_show = true;
-    m_showFS = true;
-    m_useTex = true;
-    m_GLuint = 0;
     m_roi = 0;
-    m_oldMax = 1.0;
-    m_newMax = 1.0;
-    m_isGlyph = false;
-    wxColour c(255,255,0);
-    m_color = c;
+    m_floatDataset = 0;
+    m_tensorField = 0;
 }
 
-Anatomy::Anatomy(DatasetHelper* dh, float* dataset)
+Anatomy::Anatomy(DatasetHelper* dh, float* dataset) : DatasetInfo(dh)
 {
-    m_dh = dh;
+
     m_type = Head_byte;
-    m_length = 0;
-    m_bands = 0;
     m_frames = m_dh->frames;
     m_rows = m_dh->rows;
     m_columns = m_dh->columns;
-    m_repn = wxT("");
     is_loaded = true;
-    m_highest_value = 1.0;
-    m_threshold = 0.00f;
-    m_alpha = 1.0f;
-    m_show = true;
-    m_showFS = true;
-    m_useTex = true;
-    m_GLuint = 0;
+
     m_roi = 0;
-    m_oldMax = 1.0;
-    m_newMax = 1.0;
-    wxColour c(255,255,0);
-    m_color = c;
+    m_floatDataset = 0;
+    m_tensorField = 0;
 
     createOffset(dataset);
 }

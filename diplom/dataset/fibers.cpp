@@ -4,34 +4,15 @@
 #include <fstream>
 #include "Anatomy.h"
 
-Fibers::Fibers(DatasetHelper* dh)
+Fibers::Fibers(DatasetHelper* dh) : DatasetInfo(dh)
 {
     isInitialized = false;
-    m_dh = dh;
-    m_type = not_initialized;
-    m_length = 0;
-    m_bands = 0;
-    m_frames = 0;
-    m_rows = 0;
-    m_columns = 0;
-    m_repn = wxT("");
-    is_loaded = false;
-    m_highest_value = 1.0;
-    m_threshold = 0.10f;
-    m_alpha = 1.0;
-    m_show = true;
-    m_showFS = true;
-    m_useTex = true;
     m_bufferObjects = new GLuint[3];
 
     m_pointArray = NULL;
     m_lineArray = NULL;
     m_colorArray = NULL;
     m_normalArray = NULL;
-
-    m_oldMax = 1.0;
-    m_newMax = 1.0;
-    m_isGlyph = false;
 }
 
 Fibers::~Fibers()

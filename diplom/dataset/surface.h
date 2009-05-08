@@ -18,6 +18,8 @@ public:
 	Surface(DatasetHelper*);
 	~Surface();
 
+	void execute();
+
 	bool load(wxString filename) {return false;};
 	void draw();
 
@@ -35,7 +37,6 @@ public:
 
 	bool save( wxString filename )const;
 private:
-	void execute();
 	void generateTexture() {}
 	void generateGeometry();
 	void generateLICGeometry();
@@ -75,11 +76,9 @@ private:
 	int m_count;
 	int subDCount;
 	float m_normalDirection;
-	GLuint m_GLuint;
-	GLuint m_CutTex;
 
+	GLuint m_CutTex;
 	KdTree *m_kdTree;
-	DatasetHelper* m_dh;
 
 	std::vector< std::vector<float> >m_testLines;
 };

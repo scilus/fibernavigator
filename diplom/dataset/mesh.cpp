@@ -3,29 +3,10 @@
 #include "wx/wfstream.h"
 #include "wx/datstrm.h"
 
-Mesh::Mesh(DatasetHelper* dh)
+Mesh::Mesh(DatasetHelper* dh) : DatasetInfo(dh)
 {
-	m_dh = dh;
-	m_type = not_initialized;
-	m_length = 0;
-	m_bands = 0;
-	m_frames = 0;
-	m_rows = 0;
-	m_columns = 0;
-	m_repn = wxT("");
-	is_loaded = false;
-	m_highest_value = 1.0;
-	m_threshold = 0.0f;
-	m_oldMax = 1.0;
-	m_newMax = 1.0;
-	m_alpha = 1.0f;
-	m_show = true;
-	m_showFS = true;
-	m_useTex = true;
 	m_color = wxColour(230,230,230);
-	m_GLuint = 0;
 	m_tMesh = new TriangleMesh(m_dh);
-	m_isGlyph = false;
 }
 
 Mesh::~Mesh()

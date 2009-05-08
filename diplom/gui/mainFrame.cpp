@@ -1082,12 +1082,16 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
 #endif
 
     Surface *surface = new Surface(m_dh);
+    surface->execute();
+
     m_listCtrl->InsertItem(id, wxT(""), 0);
     m_listCtrl->SetItem(id, 1, surface->getName());
     m_listCtrl->SetItem(id, 2, wxT("0.50"));
     m_listCtrl->SetItem(id, 3, wxT(""), 1);
     m_listCtrl->SetItemData(id, (long) surface);
     m_listCtrl->SetItemState(id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
+    m_dh->surface_loaded = true;
 
     refreshAllGLWidgets();
 }

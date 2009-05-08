@@ -53,7 +53,40 @@ class TriangleMesh;
 class DatasetInfo
 {
 public:
-	DatasetInfo() {};
+	DatasetInfo(DatasetHelper* dh) :
+	m_dh(dh),
+
+    m_length(0),
+    m_bands(0),
+    m_frames(0),
+    m_rows(0),
+    m_columns(0),
+    m_type(not_initialized),
+    m_repn(_T("")),
+    is_loaded(false),
+    m_highest_value(1.0),
+
+    m_name(_T("")),
+    m_fullPath(_T("")),
+
+    m_threshold(0.00f),
+    m_alpha(1.0f),
+    m_oldMax(1.0),
+    m_newMax(1.0),
+
+    m_color( wxColour(255, 255, 0)),
+    m_GLuint(0),
+
+    m_show(true),
+    m_showFS(true),
+    m_useTex(true),
+
+    m_isGlyph(false),
+
+    licCalculated(false),
+    m_useLIC(false),
+    m_bufferObjects(0)
+	{};
 	virtual ~DatasetInfo() {};
 
 	virtual bool load(wxString filename)=0;

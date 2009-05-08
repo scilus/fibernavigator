@@ -307,10 +307,8 @@ const int CIsoSurface::m_triTable[256][16] = {
 };
 
 //CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
-CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy)
+CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy) : DatasetInfo(dh)
 {
-	m_dh = dh;
-
 	m_nCellsX = m_dh->columns-1;
 	m_nCellsY = m_dh->rows-1;
 	m_nCellsZ = m_dh->frames-1;
@@ -348,13 +346,8 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy)
 	}
 	m_type = IsoSurface_;
 	m_threshold = 0.40f;
-	m_alpha = 1.0;
-	m_show = true;
-	m_showFS = true;
-	m_useTex = true;
 	m_color = wxColour(230,230,230);
 	m_oldMax = anatomy->getOldMax();
-	m_newMax = 1.0;
 
 	m_nTriangles = 0;
 	m_nNormals = 0;
@@ -363,10 +356,6 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy)
 	m_bValidSurface = false;
 
 	m_tMesh = new TriangleMesh(m_dh);
-	licCalculated = false;
-	m_useLIC = false;
-	m_GLuint = 0;
-	m_isGlyph = false;
 }
 
 CIsoSurface::~CIsoSurface()
