@@ -311,6 +311,10 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
                         {
                             m_delta = 0;
                             float delta = wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),1),-1);
+
+                            float mult = wxMin(m_dh->xVoxel, wxMin(m_dh->yVoxel, m_dh->zVoxel));
+                            if ( mult < 1.0)
+                                delta /= mult;
                             if (delta < -0.5)
                                 m_delta = -1;
                             else if (delta > 0.5)
