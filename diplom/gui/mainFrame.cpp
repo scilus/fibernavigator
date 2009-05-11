@@ -838,11 +838,7 @@ void MainFrame::OnCountFibers(wxCommandEvent& WXUNUSED(event))
         int count = boxes[i][0]->countSelectedFibers();
         output += boxes[i][0]->getName();
         output += wxString::Format(wxT(" %d\n"), count);
-
-
-
     }
-    m_dh->printwxT(output);
 
     wxString caption = wxT("Choose a file");
     wxString wildcard = wxT("Scene files (*.scn)|*.scn|*.*|*.*");
