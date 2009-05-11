@@ -9,10 +9,10 @@
 #include "../main.h"
 
 Shader::Shader(wxString fileName)
+:   m_shaderProgram(0),
+    m_vertex(0),
+    m_fragment(0)
 {
-	m_vertex = 0;
-	m_fragment = 0;
-	m_shaderProgram = 0;
 	try
 	{
 		m_vertex = glCreateShader(GL_VERTEX_SHADER);

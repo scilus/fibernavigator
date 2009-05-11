@@ -3,11 +3,10 @@
 #include <algorithm>
 
 KdTree::KdTree(int size, float *pointArray, DatasetHelper* dh)
+:   m_dh(dh),
+    m_size(size),
+    m_pointArray(pointArray)
 {
-	m_dh = dh;
-	m_size = size;
-	m_pointArray = pointArray;
-
 	m_tree.clear();
 	m_tree.resize(size);
 	for (int i = 0 ; i < size ;  ++i)
@@ -40,9 +39,9 @@ KdTree::KdTree(int size, float *pointArray, DatasetHelper* dh)
 }
 
 KdTree::KdTree(int size, float *pointArray)
+:   m_size(size),
+    m_pointArray(pointArray)
 {
-	m_size = size;
-	m_pointArray = pointArray;
 	m_tree.clear();
 	m_tree.resize(size);
 	for (int i = 0 ; i < size ;  ++i)
@@ -69,14 +68,13 @@ void KdTree::buildTree(int left, int right, int axis)
 
 
 KdTreeThread::KdTreeThread(float *pointArray, std::vector<wxUint32>* tree, int left, int right, int axis, DatasetHelper* dh)
+:   m_tree(tree),
+    m_pointArray(pointArray),
+    m_dh(dh),
+    m_left(left),
+    m_right(right),
+    m_axis(axis)
 {
-	m_pointArray = pointArray;
-	m_tree = tree;
-	m_left = left;
-	m_right = right;
-	m_axis = axis;
-	m_dh = dh;
-
 	Create();
 }
 

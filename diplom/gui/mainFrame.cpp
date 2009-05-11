@@ -829,6 +829,39 @@ void MainFrame::OnCountFibers(wxCommandEvent& WXUNUSED(event))
         wxMessageBox(wxString::Format(wxT("Selected Fibers: %d"), count), wxT(""), wxOK
                        | wxICON_INFORMATION, NULL);
     }
+
+    std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
+    wxString output = _("");
+
+    for (unsigned int i = 0 ; i < boxes.size() ; ++i)
+    {
+        int count = boxes[i][0]->countSelectedFibers();
+        output += boxes[i][0]->getName();
+        output += wxString::Format(wxT(" %d\n"), count);
+
+
+
+    }
+    m_dh->printwxT(output);
+
+    wxString caption = wxT("Choose a file");
+    wxString wildcard = wxT("Scene files (*.scn)|*.scn|*.*|*.*");
+    wxString defaultDir = wxEmptyString;
+    wxString defaultFilename = wxEmptyString;
+    wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard,
+           wxSAVE);
+    dialog.SetFilterIndex(0);
+    dialog.SetDirectory(m_dh->lastPath);
+    if (dialog.ShowModal() == wxID_OK)
+    {
+       wxTextFile file(dialog.GetPath());
+       file.Create();
+       file.Open();
+       file.AddLine(output);
+       file.Write();
+       file.Close();
+    }
+
     refreshAllGLWidgets();
 }
 

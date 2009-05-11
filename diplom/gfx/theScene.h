@@ -44,10 +44,8 @@ public:
 	void drawSphere(float, float, float, float);
 
 private:
+    DatasetHelper* m_dh;
 	wxGLContext* m_mainGLContext;
-
-	DatasetHelper* m_dh;
-	//FgeImageSpaceLIC* m_lic;
 
 	void lightsOn();
 	void lightsOff();

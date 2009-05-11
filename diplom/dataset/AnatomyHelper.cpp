@@ -8,8 +8,10 @@
 
 #include "GL/glew.h"
 
-AnatomyHelper::AnatomyHelper(DatasetHelper* dh) {
-	m_dh = dh;
+AnatomyHelper::AnatomyHelper(DatasetHelper* dh)
+: m_dh(dh)
+{
+
 }
 
 AnatomyHelper::~AnatomyHelper() {

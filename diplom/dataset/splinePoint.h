@@ -44,16 +44,15 @@ public:
 	bool isBoundary() {return m_isBoundary;};
 
 private:
+    void drawSphere(float, float, float, float);
+
 	DatasetHelper* m_dh;
 	Vector m_center;
-
-	Vector m_offsetVector;
 	Vector m_origin;
-
+	Vector m_offsetVector;
 	bool m_selected;
 	bool m_isBoundary;
 	hitResult m_hr;
-	void drawSphere(float, float, float, float);
 	wxTreeItemId m_treeId;
 };
 

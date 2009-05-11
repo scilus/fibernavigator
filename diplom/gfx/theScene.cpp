@@ -8,13 +8,10 @@
 #include "../dataset/Anatomy.h"
 
 TheScene::TheScene(DatasetHelper* dh)
+:   m_dh(dh),
+    m_mainGLContext(0)
 {
-	m_dh = dh;
-
-	m_mainGLContext = 0;
-
 	m_dh->anatomyHelper = new AnatomyHelper(m_dh);
-
 }
 
 TheScene::~TheScene()

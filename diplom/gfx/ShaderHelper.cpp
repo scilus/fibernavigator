@@ -9,9 +9,9 @@
 #include "../dataset/DatasetHelper.h"
 #include "../dataset/surface.h"
 
-ShaderHelper::ShaderHelper(DatasetHelper* dh) {
-	m_dh = dh;
-
+ShaderHelper::ShaderHelper(DatasetHelper* dh)
+:   m_dh(dh)
+{
 	m_dh->printDebug(_T("initializing texture shader"), 1);
 	m_textureShader = new Shader(wxT("anatomy"));
 	m_textureShader->bind();

@@ -2,28 +2,26 @@
 #include "../gui/selectionBox.h"
 
 SplinePoint::SplinePoint(Vector center, DatasetHelper* dh)
+:   m_dh(dh),
+    m_center(center),
+    m_origin(center),
+    m_offsetVector(Vector(0.0, 0.0, 0.0)),
+    m_selected(false),
+    m_isBoundary(false),
+    m_treeId(0)
 {
-	m_center = center;
-	m_origin = center;
-	Vector v(0, 0, 0);
-	m_offsetVector = v;
-	m_dh = dh;
-	m_selected = false;
-	m_isBoundary = false;
 	m_dh->surface_isDirty = true;
-	m_treeId = NULL;
 }
 
 SplinePoint::SplinePoint(double x, double y, double z, DatasetHelper* dh)
+:   m_dh(dh),
+    m_center(Vector(x, y, z)),
+    m_origin(Vector(x, y, z)),
+    m_offsetVector(Vector(0.0, 0.0, 0.0)),
+    m_selected(false),
+    m_isBoundary(false),
+    m_treeId(0)
 {
-
-	Vector center (x, y, z );
-	m_center = center;
-	m_origin = center;
-	m_dh = dh;
-	Vector v(0, 0, 0);
-	m_offsetVector = v;
-	m_selected = false;
 	m_dh->surface_isDirty = true;
 }
 
