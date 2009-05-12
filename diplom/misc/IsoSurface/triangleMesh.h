@@ -38,7 +38,7 @@ class TriangleMesh {
 		std::vector< Triangle > triangles;
 		std::vector<Vector> triNormals;
 		std::vector< int >triangleTensor;
-		std::vector<Vector>triangleColor;
+		std::vector<wxColour>triangleColor;
 		std::vector< std::vector<int> > neighbors;
 
 		int	numVerts;
@@ -51,7 +51,7 @@ class TriangleMesh {
 		// flag to indicate vertNormals and neighbors aren't calculated yet
 		bool m_isFinished;
 
-		Vector defaultColor;
+		wxColour defaultColor;
 
 	// Construction
 	public:
@@ -77,7 +77,7 @@ class TriangleMesh {
 		Vector getVertNormal(const int vertNum) 				{ return vertNormals[vertNum];};
 		Vector getVertColor( const int vertNum)					{ return vertColors[vertNum]; };
 		Triangle getTriangle(const int triNum)					{ return triangles[triNum];  };
-		Vector getTriangleColor(const int triNum)				{ return triangleColor[triNum]; };
+		wxColour getTriangleColor(const int triNum)				{ return triangleColor[triNum]; };
 		std::vector<unsigned int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
 		int getTriangleTensor(const int triNum)					{ return triangleTensor[triNum]; };
 		bool isFinished()										{ return m_isFinished; }
@@ -87,7 +87,7 @@ class TriangleMesh {
 		void setVertex(const unsigned int vertNum, const Vector nPos)	{ vertices[vertNum] = nPos; };
 		void eraseTriFromVert( const unsigned int triNum, const unsigned int vertNum);
 		void setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC);
-		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b);
+		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b, const float a=1.0);
 		void setVertexColor(const unsigned int vertNum, const float r, const float g, const float b);
 
 		bool isInTriangle(const unsigned int vertNum, const unsigned int triangleNum);

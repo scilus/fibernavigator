@@ -44,7 +44,6 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh,
     {
         nbCells = m_grid->getNumTriangles();
 
-        //field->getConvenienceInfo( info );
         std::vector<FIndex> indices;
         std::vector<FTensor> vectors(3);
         std::vector<FArray> vertices(3);
@@ -57,6 +56,10 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh,
         {
             int index = grid->getTriangleTensor(i);
             FTensor t = m_tensorField->getTensorAtIndex(index);
+
+            //Vector center (m_grid->getTriangleCenter(i));
+            //FTensor t = m_tensorField->getInterpolatedVector(center.x, center.y, center.z);
+
             cell_vectors[i] = FArray(t);
         }
 
@@ -95,6 +98,7 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start,
         FIndex first, second;
 
         currLength = 0.;
+        scalarAdd = 0.;
 
         valid[0] = valid[1] = valid[2] = true;
 
@@ -414,6 +418,34 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry,
 #ifdef __DEBUG__
         std::cout << "starting from an edge" << std::endl;
 #endif
+
+        int index = m_grid->getTriangleTensor(cellId.getIndex());
+        FTensor t1 = m_tensorField->getTensorAtIndex(index);
+        //Vector center ( m_grid->getTriangleCenter(cellId.getIndex()) );
+        //FTensor t1 = m_tensorField->getInterpolatedVector(center.x, center.y, center.z);
+
+        Vector vt = m_grid->getNormal(cellId.getIndex());
+        FTensor t2(3, 1, true);
+        t2.setValue(0, vt.x);
+        t2.setValue(1, vt.y);
+        t2.setValue(2, vt.z);
+        float scalar = t1 * t2;
+        //FArray t3(t4);
+        //float scalar = fabs(t3[0]*vt[0] + t3[1]*vt[1] + t3[2]*vt[2]);
+/*
+        scalarAdd += scalar;
+
+        if ( cellId.getIndex() % 10000 == 0)
+        {
+            printf("%d: (%f, %f, %f)*(%f, %f, %f) = %f \n", cellId.getIndex(), t3[0], t3[1], t3[2], vt[0], vt[1], vt[2], scalar);
+        }
+*/
+
+        if (currLength >  2.)
+            if ( scalar > 0.7 ) return false;
+          //  if ( scalarAdd / (currLength) < 0.5 ) return false;
+
+
 
         // identify current edge in list, assuming positive orientation
         // of entry edge

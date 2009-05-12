@@ -122,7 +122,12 @@ void main() {
 	color = clamp(color, 0.0, 1.0);
 
 	if (useLic)
-		gl_FragColor = (0.7  * gl_Color) + (0.3 * color);
+	{
+	   if ( gl_Color.a > 1.0 )
+	       gl_FragColor = (0.7  * gl_Color) + (0.3 * color);
+	   else
+	       gl_FragColor = color;
+    }
 	else
 		gl_FragColor = color;
 }

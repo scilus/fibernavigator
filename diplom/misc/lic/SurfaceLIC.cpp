@@ -229,6 +229,9 @@ public:
 void SurfaceLIC::displayTexture() {
 	double gray;
 
+	TensorField* tensorField = m_dh->getTensorField();
+	FTensor t2(3, 1, true);
+
 	for (int i = 0 ; i < nbCells ; ++i)
 	{
 		if (hit_texture[i])
@@ -236,7 +239,17 @@ void SurfaceLIC::displayTexture() {
 		else
 			gray = input_texture[i];
 
-		m_grid->setTriangleColor(i, gray, gray, gray);
+		int index = m_grid->getTriangleTensor(i);
+		FTensor t1 = tensorField->getTensorAtIndex(index);
+
+		Vector vt = m_grid->getNormal(i);
+
+		t2.setValue(0, vt.x);
+		t2.setValue(1, vt.y);
+		t2.setValue(2, vt.z);
+
+		float alpha = t1 * t2;
+		m_grid->setTriangleColor(i, gray, gray, gray, alpha);
 
 	}
 }

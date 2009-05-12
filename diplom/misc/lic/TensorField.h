@@ -21,6 +21,7 @@ public:
 	int getPosDim()	{ return m_posDim; };
 
 	FTensor getTensorAtIndex(int index) {return theField[index];};
+	FTensor getInterpolatedVector(const float x, const float y, const float z);
 
 private:
 	DatasetHelper* m_dh;

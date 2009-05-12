@@ -240,6 +240,7 @@ protected:
 
     bool isInside( const FIndex& cellId, const FArray& pos );
     bool isTensor;
+    float scalarAdd;
 };
 
 //===========================================================================

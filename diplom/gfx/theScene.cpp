@@ -664,7 +664,7 @@ void TheScene::drawVectors()
                         }
                     }
                 }
-                if ( m_dh->showSagittal )
+                //if ( m_dh->showSagittal )
                 {
                     for ( int i = 0 ; i < m_dh->rows ; ++i )
                     {

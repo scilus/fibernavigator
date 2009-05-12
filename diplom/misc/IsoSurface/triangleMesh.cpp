@@ -9,7 +9,7 @@ TriangleMesh::TriangleMesh (DatasetHelper* dh)
 	m_dh = dh;
 	numVerts	 = 0;
 	numTris		 = 0;
-	defaultColor = Vector(0.5f, 0.5f, 0.5f);
+	defaultColor = wxColour(0.5f, 0.5f, 0.5f, 1.0f);
 
 	isCleaned = false;
 	m_isFinished = false;
@@ -86,9 +86,13 @@ void TriangleMesh::addTriangle(const int vertA, const int vertB, const int vertC
 	triangleColor.push_back(defaultColor);
 }
 
-void TriangleMesh::setTriangleColor(const unsigned int triNum, const float r, const float g, const float b)
+void TriangleMesh::setTriangleColor(const unsigned int triNum, const float r, const float g, const float b, const float a)
 {
-	Vector c(r,g,b);
+	unsigned char red = (unsigned char)(r * 255);
+	unsigned char green = (unsigned char)(g * 255);
+	unsigned char blue= (unsigned char)(b * 255);
+	unsigned char alpha = (unsigned char)(a * 255);
+	wxColour c(red, green, blue, alpha);
 	triangleColor[triNum] = c;
 }
 
@@ -189,7 +193,7 @@ int TriangleMesh::calcTriangleTensor(const int triNum)
 {
 	Vector p = getTriangleCenter(triNum);
 	//int x = wxMin(m_dh->columns-1, wxMax(0,(int)(p[0] + 0.5)));
-	int x = wxMax(m_dh->columns - (int)(p[0] + 0.5), 0);
+	int x = wxMin(m_dh->columns-1, wxMax(0,(int)(p[0] + 0.5)));
 	int y = wxMin(m_dh->rows   -1, wxMax(0,(int)(p[1] + 0.5)));
 	int z = wxMin(m_dh->frames -1, wxMax(0,(int)(p[2] + 0.5)));
 	return  x + y * m_dh->columns + z * m_dh->columns * m_dh->rows;
