@@ -51,11 +51,13 @@ void main() {
 	color = clamp(color, 0.0, 1.0);
 
 	if (useLic)
-    {
-        gl_FragColor = clamp( ( (gl_Color ) ), 0.0, 1.0);
-        //gl_FragColor = clamp( ( (gl_Color ) / gl_Color.a), 0.0, 1.0);
-	}
+	{
+	   float licBlend = gl_Color.a;
+       //gl_FragColor = licBlend * gl_Color + (1. - licBlend) * color;
+       gl_FragColor = clamp((gl_Color + vec4(0.3)), 0.0, 1.0) * color ;
+       //gl_FragColor = gl_Color;
+	
+    }
 	else
 		gl_FragColor = color;
-
 }

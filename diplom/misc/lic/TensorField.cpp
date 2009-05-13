@@ -6,6 +6,7 @@
  */
 
 #include "TensorField.h"
+#include "../Fantom/FVector.h"
 
 TensorField::TensorField(DatasetHelper* dh, float* tensorData, int order, int posDim)
 : m_order(order), m_posDim(posDim)
@@ -58,29 +59,83 @@ FTensor TensorField::getInterpolatedVector(float x, float y, float z)
     int nx = wxMin(m_dh->columns-1, wxMax(0,(int)x));
     int ny = wxMin(m_dh->rows   -1, wxMax(0,(int)y));
     int nz = wxMin(m_dh->frames -1, wxMax(0,(int)z));
-    int baseindex  =  nx + ny * m_dh->columns + nz * m_dh->columns * m_dh->rows;
-
-    int nextX = wxMin(m_dh->columns-1, nx+1);
-    int nextXIndex = nextX + ny * m_dh->columns + nz * m_dh->columns * m_dh->rows;
-    int nextY = wxMin(m_dh->rows-1, ny+1);
-    int nextYIndex =  nx + nextY  * m_dh->columns + nz * m_dh->columns * m_dh->rows;
-    int nextZ = wxMin(m_dh->frames-1, nz+1);
-    int nextZIndex =  nx + ny  * m_dh->columns + nextZ * m_dh->columns * m_dh->rows;
 
     float xMult = x - (int)x;
     float yMult = y - (int)y;
     float zMult = z - (int)z;
 
-    FArray tBase = FArray(getTensorAtIndex(baseindex));
-    FArray tX = FArray(getTensorAtIndex(nextXIndex));
-    FArray tY = FArray(getTensorAtIndex(nextYIndex));
-    FArray tZ = FArray(getTensorAtIndex(nextZIndex));
+    int nextX = wxMin(m_dh->columns-1, nx+1);
+    int nextY = wxMin(m_dh->rows-1, ny+1);
+    int nextZ = wxMin(m_dh->frames-1, nz+1);
 
 
-    FTensor t(3, 1, true);
-    t.setValue(0, tBase[0]* xMult + tX[0] * (1.0 - xMult));
-    t.setValue(1, tBase[1]* yMult + tY[1] * (1.0 - yMult));
-    t.setValue(2, tBase[2]* zMult + tZ[2] * (1.0 - zMult));
+    int xyzIndex  =  nx + ny * m_dh->columns + nz * m_dh->columns * m_dh->rows;
+    int x1yzIndex = nextX + ny * m_dh->columns + nz * m_dh->columns * m_dh->rows;
+    int xy1zIndex =  nx + nextY  * m_dh->columns + nz * m_dh->columns * m_dh->rows;
+    int x1y1zIndex = nextX + nextY * m_dh->columns + nz * m_dh->columns * m_dh->rows;
+    int xyz1Index  =  nx + ny * m_dh->columns + nextZ * m_dh->columns * m_dh->rows;
+    int x1yz1Index = nextX + ny * m_dh->columns + nextZ * m_dh->columns * m_dh->rows;
+    int xy1z1Index =  nx + nextY  * m_dh->columns + nextZ * m_dh->columns * m_dh->rows;
+    int x1y1z1Index = nextX + nextY * m_dh->columns + nextZ * m_dh->columns * m_dh->rows;
 
-    return t;
+    FTensor txyz = getTensorAtIndex(xyzIndex);
+    FTensor tx1yz = getTensorAtIndex(x1yzIndex);
+    FTensor txy1z = getTensorAtIndex(xy1zIndex);
+    FTensor tx1y1z = getTensorAtIndex(x1y1zIndex);
+    FTensor txyz1 = getTensorAtIndex(xyz1Index);
+    FTensor tx1yz1 = getTensorAtIndex(x1yz1Index);
+    FTensor txy1z1 = getTensorAtIndex(xy1z1Index);
+    FTensor tx1y1z1 = getTensorAtIndex(x1y1z1Index);
+
+
+    FMatrix matxyz = createMatrix(txyz, txyz);
+    FMatrix matx1yz = createMatrix(tx1yz, tx1yz);
+    FMatrix matxy1z = createMatrix(txy1z, txy1z);
+    FMatrix matx1y1z = createMatrix(tx1y1z, tx1y1z);
+    FMatrix matxyz1 = createMatrix(txyz1, txyz1);
+    FMatrix matx1yz1 = createMatrix(tx1yz1, tx1yz1);
+    FMatrix matxy1z1 = createMatrix(txy1z1, txy1z1);
+    FMatrix matx1y1z1 = createMatrix(tx1y1z1, tx1y1z1);
+
+
+    FMatrix i1 = matxyz * (1. - zMult) + matxyz1 * zMult;
+    FMatrix i2 = matxy1z * (1. - zMult) + matxy1z1 * zMult;
+    FMatrix j1 = matx1yz * (1. - zMult) + matx1yz1 * zMult;
+    FMatrix j2 = matx1y1z * (1. - zMult) + matx1y1z1 * zMult;
+
+    FMatrix w1 = i1 * (1. - yMult) + i2 * yMult;
+    FMatrix w2 = j1 * (1. - yMult) + j2 * yMult;
+
+    FMatrix matResult = w1 * (1. - xMult) + w2 * xMult;
+
+    std::vector<FArray>evecs;
+    FArray vals(0,0,0);
+
+    matResult.getEigenSystem(vals, evecs);
+
+    if (vals[0] >= vals[1] && vals[0] > vals[2])      return FTensor(evecs[0]);
+    else if (vals[1] > vals[0] && vals[1] >= vals[2]) return FTensor(evecs[1]);
+    else if (vals[2] >= vals[0] && vals[2] > vals[1]) return FTensor(evecs[2]);
+    else return FTensor(evecs[0]);
+
 }
+
+FMatrix TensorField::createMatrix(FTensor lhs, FTensor rhs)
+{
+    FArray a1(lhs);
+    FArray a2(rhs);
+    FMatrix result(3,3);
+    result(0,0) = a1[0] * a2[0];
+    result(0,1) = a1[0] * a2[1];
+    result(0,2) = a1[0] * a2[2];
+    result(1,0) = a1[1] * a2[0];
+    result(1,1) = a1[1] * a2[1];
+    result(1,2) = a1[1] * a2[2];
+    result(2,0) = a1[2] * a2[0];
+    result(2,1) = a1[2] * a2[1];
+    result(2,2) = a1[2] * a2[2];
+
+
+    return result;
+}
+

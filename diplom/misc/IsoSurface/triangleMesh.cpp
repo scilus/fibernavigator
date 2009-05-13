@@ -92,8 +92,22 @@ void TriangleMesh::setTriangleColor(const unsigned int triNum, const float r, co
 	unsigned char green = (unsigned char)(g * 255);
 	unsigned char blue= (unsigned char)(b * 255);
 	unsigned char alpha = (unsigned char)(a * 255);
-	wxColour c(red, green, blue, alpha);
-	triangleColor[triNum] = c;
+
+	triangleColor[triNum].Set(red, green, blue, alpha);
+}
+
+void TriangleMesh::setTriangleColor(const unsigned int triNum, const float r, const float g, const float b)
+{
+    unsigned char red = (unsigned char)(r * 255);
+    unsigned char green = (unsigned char)(g * 255);
+    unsigned char blue= (unsigned char)(b * 255);
+    triangleColor[triNum].Set(red, green, blue, triangleColor[triNum].Alpha());
+}
+
+void TriangleMesh::setTriangleAlpha(const unsigned int triNum, const float a)
+{
+    unsigned char alpha = (unsigned char)(a * 255);
+    triangleColor[triNum].Set(triangleColor[triNum].Red(), triangleColor[triNum].Green(), triangleColor[triNum].Blue(), alpha);
 }
 
 void TriangleMesh::setVertexColor(const unsigned int vertNum, const float r, const float g, const float b)

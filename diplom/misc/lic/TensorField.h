@@ -27,6 +27,9 @@ private:
 	DatasetHelper* m_dh;
 	std::vector<FTensor> theField;
 
+	FMatrix createMatrix(FTensor lhs, FTensor rhs);
+
+
 	int m_cells;
 	int m_order;
 	int m_posDim;

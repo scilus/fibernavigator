@@ -87,7 +87,9 @@ class TriangleMesh {
 		void setVertex(const unsigned int vertNum, const Vector nPos)	{ vertices[vertNum] = nPos; };
 		void eraseTriFromVert( const unsigned int triNum, const unsigned int vertNum);
 		void setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC);
-		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b, const float a=1.0);
+		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b, const float a);
+		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b);
+		void setTriangleAlpha(const unsigned int triNum, const float a);
 		void setVertexColor(const unsigned int vertNum, const float r, const float g, const float b);
 
 		bool isInTriangle(const unsigned int vertNum, const unsigned int triangleNum);
