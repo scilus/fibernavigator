@@ -58,13 +58,13 @@ void main()
         // gl_Color.a = noise texture gray value
 	
 	   float licBlend = (1.0 - gl_Color.g) * 0.8;
-	   vec4 licColor = vec4(gl_Color.r, gl_Color.r, gl_Color.r, (1.0 - gl_Color.g) );
-	   vec4 tempColor = licColor * 1.8 - vec4(0.4);
+	   vec4 tempColor = vec4(gl_Color.r, gl_Color.r, gl_Color.r, (1.0 - gl_Color.g) );
+	   vec4 licColor = tempColor * 1.8 - vec4(0.4);
        
        float noiseBlend = clamp((gl_Color.g - 0.6),0., 1.) * clamp((gl_Color.b - 0.2),0., 1.) * 2.;
        vec4 noiseColor = vec4( gl_Color.a );
        
-       gl_FragColor = ((noiseColor - vec4(0.5)) * color * noiseBlend) + ((tempColor - vec4(0.5)) * color * licBlend) + color;
+       gl_FragColor = ((noiseColor - vec4(0.5)) * color * noiseBlend) + ((licColor - vec4(0.5)) * color * licBlend) + color;
     }
 	else
 		gl_FragColor = color;
