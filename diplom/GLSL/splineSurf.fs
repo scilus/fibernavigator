@@ -13,7 +13,8 @@ uniform bool useLic;
 
 #include functions.fs
 
-void main() {
+void main() 
+{
 	/* Normalize the normal. A varying variable CANNOT
 	 // be modified by a fragment shader. So a new variable
 	 // needs to be created. */
@@ -45,18 +46,25 @@ void main() {
 
 	color.a = 1.0;
 
-	color = color * 0.8 + (ambient * color / 2.0) + (diffuse * color / 2.0)
-			+ (specular * color / 2.0);
+	//color = color * 0.8 + (ambient * color / 2.0) + (diffuse * color / 2.0) + (specular * color / 2.0);
 
 	color = clamp(color, 0.0, 1.0);
 
 	if (useLic)
 	{
-	   float licBlend = gl_Color.a;
-       //gl_FragColor = licBlend * gl_Color + (1. - licBlend) * color;
-       gl_FragColor = clamp((gl_Color + vec4(0.3)), 0.0, 1.0) * color ;
-       //gl_FragColor = gl_Color;
+	    // gl_Color.r = LIC texture graay value
+        // gl_Color.g = scalar product of triangle normal and input vector
+        // gl_Color.b = FA value
+        // gl_Color.a = noise texture gray value
 	
+	   float licBlend = (1.0 - gl_Color.g) * 0.8;
+	   vec4 licColor = vec4(gl_Color.r, gl_Color.r, gl_Color.r, (1.0 - gl_Color.g) );
+	   vec4 tempColor = licColor * 1.8 - vec4(0.4);
+       
+       float noiseBlend = clamp((gl_Color.g - 0.6),0., 1.) * clamp((gl_Color.b - 0.2),0., 1.) * 2.;
+       vec4 noiseColor = vec4( gl_Color.a );
+       
+       gl_FragColor = ((noiseColor - vec4(0.5)) * color * noiseBlend) + ((tempColor - vec4(0.5)) * color * licBlend) + color;
     }
 	else
 		gl_FragColor = color;

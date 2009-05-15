@@ -248,7 +248,8 @@ void SurfaceLIC::displayTexture()
         }
        //gray = (m_grid->getTriangleColor(i)).Alpha()/255.0;
 
-        m_grid->setTriangleColor(i, gray, gray, gray);
+        m_grid->setTriangleRed(i, gray);
+        m_grid->setTriangleAlpha(i, input_texture[i]);
     }
 }
 

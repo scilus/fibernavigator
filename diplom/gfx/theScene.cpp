@@ -137,7 +137,6 @@ void TheScene::renderScene()
 		drawPoints();
 	}
 
-	drawVectors();
 	renderSlizes();
 
 	if ( m_dh->fibers_loaded )
@@ -155,6 +154,8 @@ void TheScene::renderScene()
 
 	if ( m_dh->showColorMapLegend )
 		drawColorMapLegend();
+
+	drawVectors();
 
 	if ( m_dh->GLError() ) m_dh->printGLError(wxT("render scene"));
 }
@@ -543,6 +544,9 @@ void TheScene::drawVectors()
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
     {
         DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
@@ -675,10 +679,17 @@ void TheScene::drawVectors()
 
                             if ( vecs->at(index) <= 0.0)
                             {
-                                glColor3f(fabs(vecs->at(index)), fabs(vecs->at(index+1)), fabs(vecs->at(index+2)));
+                                float r = fabs(vecs->at(index));
+                                float g = fabs(vecs->at(index+1));
+                                float b =  fabs(vecs->at(index+2));
+                                float a = sqrt (r*r + g*g + b*b);
+                                r /= a;
+                                g /= a;
+                                b /= a;
+                                glColor4f( r , g, b, a);
                                 glVertex3f((GLfloat)m_dh->xSlize + .5 + vecs->at(index)/2., (GLfloat)i + .5 + vecs->at(index+1)/2.,  (GLfloat)j + .5 + vecs->at(index+2)/2.);
                                 glVertex3f((GLfloat)m_dh->xSlize + .5, (GLfloat)i + .5, (GLfloat) j + .5);
-                                glColor3f(fabs(vecs->at(index) *.7), fabs(vecs->at(index+1) * .7), fabs(vecs->at(index+2) * .7));
+                                glColor4f(r *.7, g * .7, b * .7, a);
                                 glVertex3f((GLfloat)m_dh->xSlize + .5 - vecs->at(index)/2., (GLfloat)i + .5 - vecs->at(index+1)/2.,  (GLfloat)j + .5 - vecs->at(index+2)/2.);
                                 glVertex3f((GLfloat)m_dh->xSlize + .5, (GLfloat)i + .5, (GLfloat) j + .5);
 
@@ -686,10 +697,18 @@ void TheScene::drawVectors()
                             }
                             else
                             {
-                                glColor3f(fabs(vecs->at(index) *.7), fabs(vecs->at(index+1) * .7), fabs(vecs->at(index+2) * .7));
+                                float r = fabs(vecs->at(index));
+                                float g = fabs(vecs->at(index+1));
+                                float b =  fabs(vecs->at(index+2));
+                                float a = sqrt (r*r + g*g + b*b);
+                                r /= a;
+                                g /= a;
+                                b /= a;
+                                glColor4f( r , g, b, a);
+                                glColor4f(r *.7, g * .7, b * .7, a);
                                 glVertex3f((GLfloat)m_dh->xSlize + .5 - vecs->at(index)/2., (GLfloat)i + .5 - vecs->at(index+1)/2.,  (GLfloat)j + .5 - vecs->at(index+2)/2.);
                                 glVertex3f((GLfloat)m_dh->xSlize + .5, (GLfloat)i + .5, (GLfloat) j + .5);
-                                glColor3f(fabs(vecs->at(index)), fabs(vecs->at(index+1)), fabs(vecs->at(index+2)));
+                                glColor4f( r , g, b, a);
                                 glVertex3f((GLfloat)m_dh->xSlize + .5 + vecs->at(index)/2., (GLfloat)i + .5 + vecs->at(index+1)/2.,  (GLfloat)j + .5 + vecs->at(index+2)/2.);
                                 glVertex3f((GLfloat)m_dh->xSlize + .5, (GLfloat)i + .5, (GLfloat) j + .5);
 

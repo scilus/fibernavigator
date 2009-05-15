@@ -90,6 +90,10 @@ class TriangleMesh {
 		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b, const float a);
 		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b);
 		void setTriangleAlpha(const unsigned int triNum, const float a);
+		void setTriangleRed(const unsigned int triNum, const float r);
+		void setTriangleGreen(const unsigned int triNum, const float g);
+		void setTriangleBlue(const unsigned int triNum, const float b);
+
 		void setVertexColor(const unsigned int vertNum, const float r, const float g, const float b);
 
 		bool isInTriangle(const unsigned int vertNum, const unsigned int triangleNum);

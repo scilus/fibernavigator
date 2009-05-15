@@ -110,6 +110,25 @@ void TriangleMesh::setTriangleAlpha(const unsigned int triNum, const float a)
     triangleColor[triNum].Set(triangleColor[triNum].Red(), triangleColor[triNum].Green(), triangleColor[triNum].Blue(), alpha);
 }
 
+void TriangleMesh::setTriangleRed(const unsigned int triNum, const float r)
+{
+    unsigned char red = (unsigned char)(r * 255);
+    triangleColor[triNum].Set(red, triangleColor[triNum].Green(), triangleColor[triNum].Blue(), triangleColor[triNum].Alpha());
+}
+
+void TriangleMesh::setTriangleGreen(const unsigned int triNum, const float g)
+{
+    unsigned char green = (unsigned char)(g * 255);
+    triangleColor[triNum].Set(triangleColor[triNum].Red(), green, triangleColor[triNum].Blue(), triangleColor[triNum].Alpha());
+}
+
+void TriangleMesh::setTriangleBlue(const unsigned int triNum, const float b)
+{
+    unsigned char blue = (unsigned char)(b * 255);
+    triangleColor[triNum].Set(triangleColor[triNum].Red(), triangleColor[triNum].Green(), blue, triangleColor[triNum].Alpha());
+}
+
+
 void TriangleMesh::setVertexColor(const unsigned int vertNum, const float r, const float g, const float b)
 {
 	Vector c(r,g,b);

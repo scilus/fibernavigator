@@ -414,20 +414,25 @@ bool FStreamlineOnSurfaceEuler::walkThroughCell(const FArray& entry, const FInde
 
     FTensor t1(cell_vectors[cellId.getIndex()]);
 
+
+    FTensor t5 = m_tensorField->getTensorAtIndex(m_grid->getTriangleTensor(cellId.getIndex()));
+    float fa = sqrt(wxMin((t5.norm() * 2.0), 1.0));
+    m_grid->setTriangleBlue(cellId.getIndex(), fa);
+
     Vector vt = m_grid->getNormal(cellId.getIndex());
     FTensor t2(3, 1, true);
     t2.setValue(0, vt.x);
     t2.setValue(1, vt.y);
     t2.setValue(2, vt.z);
-    //float scalar = 1. - (acos(fabs(t1 * t2) / 1.570796325));
-    float scalar = fabs(t1 * t2) ;
+    float scalar = 1. - (acos(fabs(t1 * t2)) / 1.570796325) * fa;
+    m_grid->setTriangleGreen(cellId.getIndex(), scalar);
+    //float scalar = fabs(t1 * t2) ;
 
     m_grid->setTriangleAlpha(cellId.getIndex(), 1.0 - scalar);
 
     if (currLength >  2.)
         if (scalar > 0.9)
         {
-            //m_grid->setTriangleAlpha(cellId.getIndex(), 0.0);
             return false;
         }
 
