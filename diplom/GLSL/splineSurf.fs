@@ -31,7 +31,7 @@ void main()
 	calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess,
 			ambient, diffuse, specular);
 
-	vec4 color = vec4(0.0);
+	vec4 color = vec4(1.0);
 
 	vec3 v = gl_TexCoord[0].xyz;
 	v.x = v.x / (float(dimX) * voxX);
@@ -42,7 +42,7 @@ void main()
 		if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold[i], v, alpha[i]);
 	}
 
-	if (color.rgb == vec3(0.0)) discard;
+    //if (color.rgb == vec3(0.0)) discard;
 
 	color.a = 1.0;
 
@@ -56,12 +56,14 @@ void main()
         // gl_Color.g = scalar product of triangle normal and input vector
         // gl_Color.b = FA value
         // gl_Color.a = noise texture gray value
-	
-	   float licBlend = (1.0 - gl_Color.g) * 0.8;
+	   float fa = clamp( (gl_Color.b - 0.1) * 3., 0., 1. ); 
+		
+	   float licBlend = (1.0 - gl_Color.g) * fa;
 	   vec4 tempColor = vec4(gl_Color.r, gl_Color.r, gl_Color.r, (1.0 - gl_Color.g) );
-	   vec4 licColor = tempColor * 1.8 - vec4(0.4);
+	   vec4 licColor = clamp( tempColor * 1.8 - vec4(0.4), 0., 1.);
        
-       float noiseBlend = clamp((gl_Color.g - 0.6),0., 1.) * clamp((gl_Color.b - 0.2),0., 1.) * 2.;
+       
+       float noiseBlend = clamp((gl_Color.g - 0.6),0., 1.) * clamp((fa - 0.2),0., 1.) * 3.;
        vec4 noiseColor = vec4( gl_Color.a );
        
        gl_FragColor = ((noiseColor - vec4(0.5)) * color * noiseBlend) + ((licColor - vec4(0.5)) * color * licBlend) + color;

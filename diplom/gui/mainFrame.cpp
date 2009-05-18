@@ -1065,6 +1065,9 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
         return;
 
     int xs = m_xSlider->GetValue() * m_dh->xVoxel;
+    int ys = m_ySlider->GetValue() * m_dh->yVoxel;
+    int zs = m_zSlider->GetValue() * m_dh->zVoxel;
+
 
     //delete all existing points
     m_treeWidget->DeleteChildren(m_tPointId);
@@ -1073,34 +1076,111 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
     if (m_dh->fibers_loaded)
         m_dh->getFiberDataset(fibers);
 
-    for (int i = 0; i < 11; ++i)
-        for (int j = 0; j < 11; ++j)
+    if (m_dh->showSagittal)
+    {
+        for (int i = 0; i < 11; ++i)
         {
-
-            int yy = (m_dh->rows / 10 * m_dh->yVoxel) * i;
-            int zz = (m_dh->frames / 10 * m_dh->zVoxel) * j;
-
-            // create the point
-            SplinePoint *point = new SplinePoint(xs, yy, zz, m_dh);
-
-            if (i == 0 || i == 10 || j == 0 || j == 10)
+            for (int j = 0; j < 11; ++j)
             {
-                wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId,
-                        wxT("boundary point"), -1, -1, point);
-                point->setTreeId(tId);
-                point->setIsBoundary(true);
-            }
-            else
-            {
-                if (m_dh->fibers_loaded && fibers->getBarycenter(point))
+
+                int yy = (m_dh->rows / 10 * m_dh->yVoxel) * i;
+                int zz = (m_dh->frames / 10 * m_dh->zVoxel) * j;
+
+                // create the point
+                SplinePoint *point = new SplinePoint(xs, yy, zz, m_dh);
+
+                if (i == 0 || i == 10 || j == 0 || j == 10)
                 {
                     wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId,
-                            wxT("point"), -1, -1, point);
+                            wxT("boundary point"), -1, -1, point);
                     point->setTreeId(tId);
-                    point->setIsBoundary(false);
+                    point->setIsBoundary(true);
+                }
+                else
+                {
+                    if (m_dh->fibers_loaded && fibers->getBarycenter(point))
+                    {
+                        wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId,
+                                wxT("point"), -1, -1, point);
+                        point->setTreeId(tId);
+                        point->setIsBoundary(false);
+                    }
                 }
             }
         }
+    }
+
+    else if (m_dh->showCoronal)
+    {
+        for (int i = 0; i < 11; ++i)
+        {
+            for (int j = 0; j < 11; ++j)
+            {
+
+                int xx = (m_dh->columns / 10 * m_dh->xVoxel) * i;
+                int zz = (m_dh->frames / 10 * m_dh->zVoxel) * j;
+
+                // create the point
+                SplinePoint *point = new SplinePoint(xx, ys, zz, m_dh);
+
+                if (i == 0 || i == 10 || j == 0 || j == 10)
+                {
+                    wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId,
+                            wxT("boundary point"), -1, -1, point);
+                    point->setTreeId(tId);
+                    point->setIsBoundary(true);
+                }
+                /*
+                else
+                {
+                    if (m_dh->fibers_loaded && fibers->getBarycenter(point))
+                    {
+                        wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId,
+                                wxT("point"), -1, -1, point);
+                        point->setTreeId(tId);
+                        point->setIsBoundary(false);
+                    }
+                }
+                */
+            }
+        }
+    }
+
+    else
+    {
+        for (int i = 0; i < 11; ++i)
+        {
+            for (int j = 0; j < 11; ++j)
+            {
+
+                int xx = (m_dh->columns / 10 * m_dh->xVoxel) * i;
+                int yy = (m_dh->rows / 10 * m_dh->yVoxel) * j;
+
+                // create the point
+                SplinePoint *point = new SplinePoint(xx, yy, zs, m_dh);
+
+                if (i == 0 || i == 10 || j == 0 || j == 10)
+                {
+                    wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId,
+                            wxT("boundary point"), -1, -1, point);
+                    point->setTreeId(tId);
+                    point->setIsBoundary(true);
+                }
+                /*
+                else
+                {
+                    if (m_dh->fibers_loaded && fibers->getBarycenter(point))
+                    {
+                        wxTreeItemId tId = m_treeWidget->AppendItem(m_tPointId,
+                                wxT("point"), -1, -1, point);
+                        point->setTreeId(tId);
+                        point->setIsBoundary(false);
+                    }
+                }
+                */
+            }
+        }
+    }
 
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
