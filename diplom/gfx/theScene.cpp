@@ -555,7 +555,7 @@ void TheScene::drawVectors()
         if (info->getType() == Vectors_ && info->getShow())
         {
             Anatomy* vecs = (Anatomy*)info;
-            glLineWidth(2.0);
+            glLineWidth(1.0);
             glBegin(GL_LINES);
 
             float r,g,b,a;

@@ -166,6 +166,8 @@ bool Anatomy::loadNifti(wxString filename)
                 m_floatDataset[i] = (float) data[i] / 255.0;
             }
             flag = true;
+
+            m_oldMax = 255;;
             delete[] data;
         }
             break;

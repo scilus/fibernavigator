@@ -305,12 +305,12 @@ bool MyApp::OnInit(void)
         toolBar->AddSeparator();
         toolBar->AddCheckTool(MENU_OPTIONS_USE_FAKE_TUBES, wxT("Toggle Tubes"), bmpTubes);
         toolBar->AddSeparator();
-#ifdef DEBUG
+//#ifdef DEBUG
         toolBar->AddTool(MENU_OPTIONS_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));
         toolBar->AddSeparator();
         toolBar->AddTool(MENU_FILE_RELOAD_SHADER, bmpMiniCat, wxT("Reload Shaders"));
         toolBar->AddSeparator();
-#endif
+//#endif
         toolBar->Realize();
 
         frame->SetToolBar(toolBar);

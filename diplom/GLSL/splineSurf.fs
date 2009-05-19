@@ -52,7 +52,7 @@ void main()
 
 	if (useLic)
 	{
-	    // gl_Color.r = LIC texture graay value
+	    // gl_Color.r = LIC texture gray value
         // gl_Color.g = scalar product of triangle normal and input vector
         // gl_Color.b = FA value
         // gl_Color.a = noise texture gray value
