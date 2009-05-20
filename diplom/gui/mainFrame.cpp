@@ -934,7 +934,7 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
     if (item != -1)
     {
         DatasetInfo* info = (DatasetInfo*) m_listCtrl->GetItemData(item);
-        if (info->getType() == Overlay)
+        if (info->getType() < RGB)
         {
             a = (Anatomy*) m_listCtrl->GetItemData(item);
             selBox = new SelectionBox(m_dh, a);
@@ -1645,7 +1645,7 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
         CIsoSurface* s = (CIsoSurface*) m_listCtrl->GetItemData(item);
         s->GenerateWithThreshold();
     }
-    if (info->getType() == Overlay)
+    if (info->getType() < RGB)
     {
         Anatomy* a = (Anatomy*) m_listCtrl->GetItemData(item);
         if (a->m_roi)
