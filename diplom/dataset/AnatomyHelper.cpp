@@ -55,7 +55,7 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 				glTexCoord3f(0.0, 1.0, ((float)m_dh->zSlize + 0.5f)/(float)m_dh->frames); glVertex3f( 0 + xo, y + yo, quadZ);
 		    glEnd();
 			xline = m_dh->xSlize * m_dh->xVoxel + xo;
-			yline = m_dh->ySlize * m_dh->yVoxel;
+			yline = m_dh->ySlize * m_dh->yVoxel + yo;
 		} break;
 
 		case coronal: {
