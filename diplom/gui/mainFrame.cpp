@@ -2483,7 +2483,7 @@ void MainFrame::OnKdTreeThreadFinished(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnGLEvent(wxCommandEvent &event)
 {
     wxPoint pos, newpos;
-    float max = wxMax(m_dh->rows, wxMax(m_dh->columns, m_dh->frames));
+    float max = wxMax(m_dh->columns, wxMax(m_dh->rows, m_dh->frames));
 
 #ifdef __WXMSW__
     float speedup = 2.0;
@@ -2497,11 +2497,11 @@ void MainFrame::OnGLEvent(wxCommandEvent &event)
         case axial:
         {
             pos = m_gl0->getMousePos();
-            float x = ((float) pos.x / NAV_GL_SIZE) * max;
+            float x = ((float) pos.x / NAV_GL_SIZE * max);
             float y = ((float) (NAV_GL_SIZE - pos.y) / NAV_GL_SIZE * max);
 
-            m_xSlider->SetValue((int) (x - (max - m_dh->columns) / 2.0));
-            m_ySlider->SetValue((int) (y));
+            m_xSlider->SetValue((int) x - (max - m_dh->columns) / 2.0 );
+            m_ySlider->SetValue((int) y - (max - m_dh->rows) / 2.0 );
             break;
         }
         case coronal:
@@ -2510,18 +2510,18 @@ void MainFrame::OnGLEvent(wxCommandEvent &event)
             float x = ((float) pos.x / NAV_GL_SIZE) * max;
             float y = ((float) (NAV_GL_SIZE - pos.y) / NAV_GL_SIZE * max);
 
-            m_xSlider->SetValue((int) (x - (max - m_dh->columns) / 2.0));
-            m_zSlider->SetValue((int) (y / max * m_dh->rows - 20));
+            m_xSlider->SetValue((int) x - (max - m_dh->columns) / 2.0 );
+            m_zSlider->SetValue((int) y - (max - m_dh->frames) / 2.0 );
             break;
         }
         case sagittal:
         {
             pos = m_gl2->getMousePos();
-            float x = ((float) pos.x / NAV_GL_SIZE) * max;
+            float x = ((float) (NAV_GL_SIZE - pos.x) / NAV_GL_SIZE) * max;
             float y = ((float) (NAV_GL_SIZE - pos.y) / NAV_GL_SIZE * max);
 
-            m_ySlider->SetValue((int) (max - x));
-            m_zSlider->SetValue((int) (y / max * m_dh->rows - 20));
+            m_ySlider->SetValue((int) x - (max - m_dh->rows) / 2.0 );
+            m_zSlider->SetValue((int) y - (max - m_dh->frames) / 2.0);
             break;
         }
         case mainView:

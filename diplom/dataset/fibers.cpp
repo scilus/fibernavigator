@@ -1056,9 +1056,9 @@ void Fibers::save(wxString filename)
 
             for (int j = 0; j < getPointsPerLine(l) ; ++j)
             {
-                pointsToSave.push_back(m_dh->columns - m_pointArray[pc]);
+                pointsToSave.push_back(m_dh->columns * m_dh->xVoxel - m_pointArray[pc]);
                 ++pc;
-                pointsToSave.push_back(m_dh->rows - m_pointArray[pc]);
+                pointsToSave.push_back(m_dh->rows * m_dh->yVoxel - m_pointArray[pc]);
                 ++pc;
                 pointsToSave.push_back(m_pointArray[pc]);
                 ++pc;
