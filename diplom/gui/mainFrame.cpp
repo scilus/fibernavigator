@@ -1631,8 +1631,10 @@ void MainFrame::OnTSliderMoved(wxCommandEvent& WXUNUSED(event))
         return;
 
     DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
-    m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold
-            * info->getOldMax()));
+    if ( info->getUseTex() )
+        m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"), threshold * info->getOldMax()));
+    else
+        m_listCtrl->SetItem(item, 2, wxString::Format(wxT("(%.2f)"), threshold * info->getOldMax()));
 
     info->setThreshold(threshold);
     if (info->getType() == Surface_)
@@ -2042,10 +2044,10 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
             {
                 if (!info->toggleUseTex())
                     m_listCtrl->SetItem(item, 2, wxT("(") + wxString::Format(
-                            wxT("%.2f"), info->getThreshold()) + wxT(")"));
+                            wxT("%.2f"), info->getThreshold() * info->getOldMax()) + wxT(")"));
                 else
                     m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"),
-                            info->getThreshold()));
+                            info->getThreshold()  * info->getOldMax()));
             }
             break;
 
@@ -2111,10 +2113,10 @@ void MainFrame::OnListMenuThreshold(wxCommandEvent&  WXUNUSED(event))
     {
         if (!info->toggleUseTex())
             m_listCtrl->SetItem(item, 2, wxT("(") + wxString::Format(
-                    wxT("%.2f"), info->getThreshold()) + wxT(")"));
+                    wxT("%.2f"), info->getThreshold() * info->getOldMax()) + wxT(")"));
         else
             m_listCtrl->SetItem(item, 2, wxString::Format(wxT("%.2f"),
-                    info->getThreshold()));
+                    info->getThreshold() * info->getOldMax()));
     }
 }
 

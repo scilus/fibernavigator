@@ -94,7 +94,7 @@ public:
 	void updateView(const float x, const float y, const float z);
 
 	void changeZoom(const int z);
-	void moveScene(const int x, const int y);
+	void moveScene(int x, int y);
 
 	void doMatrixManipulation();
 
@@ -191,8 +191,8 @@ public:
 	bool m_isrDragging;
 	bool m_ismDragging;
 	float zoom;
-	int xMove;
-	int yMove;
+	float xMove;
+	float yMove;
 
 	bool m_texAssigned;
 	bool m_selBoxChanged;

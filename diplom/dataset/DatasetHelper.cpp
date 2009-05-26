@@ -316,7 +316,7 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
         mainFrame->m_listCtrl->SetItem(0, 2, wxT("(") + wxString::Format(wxT("%.2f"),
                 (info->getThreshold()) * info->getOldMax()) + wxT(")"));
     else
-        mainFrame->m_listCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), info->getThreshold()));
+        mainFrame->m_listCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), info->getThreshold() * info->getOldMax()));
 
     mainFrame->m_listCtrl->SetItem(id, 3, wxT(""), 1);
     mainFrame->m_listCtrl->SetItemData(id, (long) info);
@@ -1069,10 +1069,13 @@ void DatasetHelper::changeZoom(const int z)
     z >= 0 ? zoom = wxMin(10, zoom+delta) : zoom = wxMax(1, zoom-delta);
 }
 
-void DatasetHelper::moveScene(const int x, const int y)
+void DatasetHelper::moveScene(int x, int y)
 {
-    xMove -= x;
-    yMove += y;
+    float max = (float)wxMax(columns*xVoxel, wxMax(rows*yVoxel, frames*zVoxel));
+    float div = 300. / max;
+
+    xMove -= (float)x/div;
+    yMove += (float)y/div;
 }
 
 void DatasetHelper::doMatrixManipulation()
