@@ -90,6 +90,9 @@ EVT_MENU(MENU_OPTIONS_CMAP_LEGEND, MainFrame::OnToggleColorMapLegend)
 EVT_MENU(MENU_HELP_ABOUT, MainFrame::OnAbout)
 EVT_MENU(MENU_HELP_SHORTCUTS, MainFrame::OnShortcuts)
 EVT_MENU(MENU_HELP_SCREENSHOT, MainFrame::OnScreenshot)
+EVT_MENU(MENU_HELP_SLIZEMOVIESAG, MainFrame::OnSlizeMovieSag)
+EVT_MENU(MENU_HELP_SLIZEMOVIECOR, MainFrame::OnSlizeMovieCor)
+EVT_MENU(MENU_HELP_SLIZEMOVIEAXI, MainFrame::OnSlizeMovieAxi)
 
 /*
  * List widget events
@@ -1589,6 +1592,21 @@ void MainFrame::OnScreenshot(wxCommandEvent& WXUNUSED(event))
         m_mainGL->render();
         m_mainGL->render();
     }
+}
+
+void MainFrame::OnSlizeMovieSag(wxCommandEvent& WXUNUSED(event))
+{
+    m_dh->doLicMovie(0);
+}
+
+void MainFrame::OnSlizeMovieCor(wxCommandEvent& WXUNUSED(event))
+{
+    m_dh->doLicMovie(1);
+}
+
+void MainFrame::OnSlizeMovieAxi(wxCommandEvent& WXUNUSED(event))
+{
+    m_dh->doLicMovie(2);
 }
 
 /****************************************************************************************************

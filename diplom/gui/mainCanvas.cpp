@@ -620,13 +620,16 @@ void MainCanvas::render()
                 switch (m_dh->geforceLevel)
                 {
                     case 6:
-                        size = 2000;
+                        size = 2048;
                         break;
                     case 8:
-                        size = 4000;
+                        size = 4096;
+                        break;
+                    case 99:
+                        size = 1024;
                         break;
                     default:
-                        size = 1000;
+                        size = 1024;
                         break;
                 }
 

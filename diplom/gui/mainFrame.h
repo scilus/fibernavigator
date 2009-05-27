@@ -93,6 +93,9 @@ private:
 	void OnAbout(wxCommandEvent& event);
 	void OnShortcuts(wxCommandEvent& event);
 	void OnScreenshot(wxCommandEvent& event);
+	void OnSlizeMovieSag(wxCommandEvent& event);
+	void OnSlizeMovieCor(wxCommandEvent& event);
+	void OnSlizeMovieAxi(wxCommandEvent& event);
 
 	/*
 	 * Window Functions
@@ -264,6 +267,10 @@ DECLARE_EVENT_TABLE()
 #define MENU_HELP_ABOUT       						wxID_ABOUT
 #define MENU_HELP_SHORTCUTS    						180
 #define MENU_HELP_SCREENSHOT   						181
+#define MENU_HELP_SLIZEMOVIE                        182
+#define MENU_HELP_SLIZEMOVIESAG                     183
+#define MENU_HELP_SLIZEMOVIECOR                     184
+#define MENU_HELP_SLIZEMOVIEAXI                     185
 /*
  * Defines for Buttons, will move into Menus eventually
  */

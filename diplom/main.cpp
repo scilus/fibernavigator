@@ -210,6 +210,11 @@ bool MyApp::OnInit(void)
         options_menu->AppendCheckItem(MENU_OPTIONS_USE_FAKE_TUBES, _T("Use Tubes\tCtrl-T"));
         options_menu->AppendCheckItem(MENU_OPTIONS_USE_TRANSPARENCY, _T("Use Transparent Fibers"));
 
+        wxMenu* licMovs = new wxMenu;
+        licMovs->Append(MENU_HELP_SLIZEMOVIESAG, wxT("sagittal"));
+        licMovs->Append(MENU_HELP_SLIZEMOVIECOR, wxT("coronal"));
+        licMovs->Append(MENU_HELP_SLIZEMOVIEAXI, wxT("axial"));
+
         wxMenu *help_menu = new wxMenu;
         help_menu->Append(MENU_HELP_ABOUT, _T("About"));
 #ifdef __WXMAC__
@@ -219,6 +224,7 @@ bool MyApp::OnInit(void)
 #endif
         help_menu->Append(MENU_HELP_SHORTCUTS, _T("Keyboard shortcuts"));
         help_menu->Append(MENU_HELP_SCREENSHOT, _T("Screenshot"));
+        help_menu->Append(MENU_HELP_SLIZEMOVIE, _T("LIC slize movie"), licMovs);
 
         wxMenuBar *menu_bar = new wxMenuBar;
         menu_bar->Append(file_menu, _T("&File"));

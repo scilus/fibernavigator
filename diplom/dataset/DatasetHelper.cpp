@@ -1239,3 +1239,190 @@ void DatasetHelper::updateLoadStatus()
         }
     }
 }
+
+void DatasetHelper::doLicMovie(int mode)
+{
+    wxString caption = wxT("Choose a file");
+    wxString wildcard = wxT("PPM files (*.ppm)|*.ppm|*.*|*.*");
+    wxString defaultDir = wxEmptyString;
+    wxString defaultFilename = wxEmptyString;
+    wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
+    wxString tmpFileName = _T("");
+
+    dialog.SetFilterIndex(0);
+    dialog.SetDirectory(m_screenshotPath);
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        m_screenshotPath = dialog.GetDirectory();
+        tmpFileName = dialog.GetPath();
+    }
+    int gf = geforceLevel;
+    geforceLevel = 99;
+
+    switch ( mode)
+    {
+        case 0:
+            for ( int i = 0; i < columns ; ++i)
+            {
+                if (i < 100)
+                    m_screenshotName = tmpFileName + _T("0") + wxString::Format(wxT("%d"),i) + _T(".ppm");
+                else
+                    m_screenshotName = tmpFileName + wxString::Format(wxT("%d"),i) + _T(".ppm");
+                if (i < 10)
+                    m_screenshotName = tmpFileName + _T("00") + wxString::Format(wxT("%d"),i) + _T(".ppm");
+
+                createLicSliceSag(i);
+            }
+            break;
+        case 1:
+            for ( int i = 0; i < rows ; ++i)
+            {
+                if (i < 100)
+                    m_screenshotName = tmpFileName + _T("0") + wxString::Format(wxT("%d"),i) + _T(".ppm");
+                else
+                    m_screenshotName = tmpFileName + wxString::Format(wxT("%d"),i) + _T(".ppm");
+                if (i < 10)
+                    m_screenshotName = tmpFileName + _T("00") + wxString::Format(wxT("%d"),i) + _T(".ppm");
+
+                createLicSliceCor(i);
+            }
+            break;
+        case 2:
+            for ( int i = 0; i < frames ; ++i)
+            {
+                if (i < 100)
+                    m_screenshotName = tmpFileName + _T("0") + wxString::Format(wxT("%d"),i) + _T(".ppm");
+                else
+                    m_screenshotName = tmpFileName + wxString::Format(wxT("%d"),i) + _T(".ppm");
+                if (i < 10)
+                    m_screenshotName = tmpFileName + _T("00") + wxString::Format(wxT("%d"),i) + _T(".ppm");
+
+                createLicSliceAxi(i);
+            }
+            break;
+        default:
+            break;
+    }
+
+    geforceLevel = gf;
+}
+
+void DatasetHelper::licMovieHelper()
+{
+    Surface *surface = new Surface(this);
+    surface->execute();
+
+#ifdef __WXMAC__
+    // insert at zero is a well-known bug on OSX, so we append there...
+    // http://trac.wxwidgets.org/ticket/4492
+    long id = m_listCtrl->GetItemCount();
+#else
+    long id = 0;
+#endif
+
+    mainFrame->m_listCtrl->InsertItem(id, wxT(""), 0);
+    mainFrame->m_listCtrl->SetItem(id, 1, surface->getName());
+    mainFrame->m_listCtrl->SetItem(id, 2, wxT("0.50"));
+    mainFrame->m_listCtrl->SetItem(id, 3, wxT(""), 1);
+    mainFrame->m_listCtrl->SetItemData(id, (long) surface);
+    mainFrame->m_listCtrl->SetItemState(id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
+    surface_loaded = true;
+    surface->activateLIC();
+
+    scheduledScreenshot = true;
+    mainFrame->m_mainGL->render();
+    mainFrame->m_mainGL->render();
+
+    delete surface;
+    mainFrame->m_listCtrl->DeleteItem(id);
+
+}
+
+void DatasetHelper::createLicSliceSag(int slize)
+{
+    int xs = slize * xVoxel;
+
+    //delete all existing points
+    mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tPointId);
+
+    for (int i = 0; i < 11; ++i)
+    {
+        for (int j = 0; j < 11; ++j)
+        {
+
+            int yy = (rows / 10 * yVoxel) * i;
+            int zz = (frames / 10 * zVoxel) * j;
+
+            // create the point
+            SplinePoint *point = new SplinePoint(xs, yy, zz, this);
+
+            if (i == 0 || i == 10 || j == 0 || j == 10)
+            {
+                wxTreeItemId tId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId,
+                        wxT("boundary point"), -1, -1, point);
+                point->setTreeId(tId);
+                point->setIsBoundary(true);
+            }
+        }
+    }
+    licMovieHelper();
+}
+
+void DatasetHelper::createLicSliceCor(int slize)
+{
+    int ys = slize * yVoxel;
+
+    //delete all existing points
+    mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tPointId);
+
+    for (int i = 0; i < 11; ++i)
+    {
+        for (int j = 0; j < 11; ++j)
+        {
+            int xx = (columns / 10 * xVoxel) * i;
+            int zz = (frames / 10 * zVoxel) * j;
+
+            // create the point
+            SplinePoint *point = new SplinePoint(xx, ys, zz, this);
+
+            if (i == 0 || i == 10 || j == 0 || j == 10)
+            {
+                wxTreeItemId tId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId,
+                        wxT("boundary point"), -1, -1, point);
+                point->setTreeId(tId);
+                point->setIsBoundary(true);
+            }
+        }
+    }
+    licMovieHelper();
+}
+
+void DatasetHelper::createLicSliceAxi(int slize)
+{
+    int zs = slize * zVoxel;
+
+    //delete all existing points
+    mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tPointId);
+
+    for (int i = 0; i < 11; ++i)
+    {
+        for (int j = 0; j < 11; ++j)
+        {
+            int xx = (columns / 10 * xVoxel) * i;
+            int yy = (rows / 10 * yVoxel) * j;
+
+            // create the point
+            SplinePoint *point = new SplinePoint(xx, yy, zs, this);
+
+            if (i == 0 || i == 10 || j == 0 || j == 10)
+            {
+                wxTreeItemId tId = mainFrame->m_treeWidget->AppendItem(mainFrame->m_tPointId,
+                       wxT("boundary point"), -1, -1, point);
+                point->setTreeId(tId);
+                point->setIsBoundary(true);
+            }
+        }
+    }
+    licMovieHelper();
+}

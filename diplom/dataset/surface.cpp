@@ -38,6 +38,16 @@ Surface::~Surface()
 {
 	m_dh->mainFrame->m_treeWidget->DeleteChildren(m_dh->mainFrame->m_tPointId);
 	m_dh->surface_loaded = false;
+	m_tMesh->clearMesh();
+	delete m_tMesh;
+	if (m_kdTree)
+	    delete m_kdTree;
+	if (m_pointArray)
+	    delete m_pointArray;
+	if (m_GLuint)
+	    glDeleteLists(m_GLuint, 1);
+	if (m_CutTex)
+	    glDeleteTextures(1, &m_CutTex);
 }
 
 FTensor Surface::getCovarianceMatrix(std::vector< std::vector< double > > points)

@@ -109,6 +109,12 @@ public:
 
 	void updateLoadStatus();
 
+	void doLicMovie(int mode);
+	void createLicSliceSag(int slize);
+	void createLicSliceCor(int slize);
+	void createLicSliceAxi(int slize);
+	void licMovieHelper();
+
 	/////////////////////////////////////////////////////////////////////////////////
 	// general info about the datasets
 	/////////////////////////////////////////////////////////////////////////////////
