@@ -31,7 +31,7 @@ void main()
 	calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess,
 			ambient, diffuse, specular);
 
-	vec4 color = vec4(1.0);
+	vec4 color = vec4(0.0);
 
 	vec3 v = gl_TexCoord[0].xyz;
 	v.x = v.x / (float(dimX) * voxX);
@@ -42,7 +42,7 @@ void main()
 		if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold[i], v, alpha[i]);
 	}
 
-    //if (color.rgb == vec3(0.0)) discard;
+    if (color.rgb == vec3(0.0)) discard;
 
 	color.a = 1.0;
 

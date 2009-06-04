@@ -575,26 +575,53 @@ void MainFrame::OnErodeDataset(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSaveSurface(wxCommandEvent& WXUNUSED(event))
 {
     // if ...
-
-    Surface *surface = NULL;
-    if (!m_dh->getSurfaceDataset(surface))
-        return;
-    std::cout << "got surface: " << surface << std::endl;
-
-    wxString caption = wxT("Choose a file");
-    wxString wildcard = wxT("surfae files (*.vtk)|*.vtk");
-    wxString defaultDir = wxEmptyString;
-    wxString defaultFilename = wxEmptyString;
-    wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard,
-            wxSAVE);
-    dialog.SetFilterIndex(0);
-    dialog.SetDirectory(m_dh->lastPath);
-    if (dialog.ShowModal() == wxID_OK)
+    long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+    if (item != -1)
     {
-        std::cout << " start saving" << std::endl;
-        m_dh->lastPath = dialog.GetDirectory();
-        surface->save(dialog.GetPath());
-        std::cout << " done saving" << std::endl;
+        DatasetInfo* info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+        if (info->getType() == Surface_)
+        {
+            Surface *surface = (Surface*) info;
+
+            std::cout << "got surface: " << surface << std::endl;
+
+            wxString caption = wxT("Choose a file");
+            wxString wildcard = wxT("surfae files (*.vtk)|*.vtk");
+            wxString defaultDir = wxEmptyString;
+            wxString defaultFilename = wxEmptyString;
+            wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
+            dialog.SetFilterIndex(0);
+            dialog.SetDirectory(m_dh->lastPath);
+            if (dialog.ShowModal() == wxID_OK)
+            {
+                std::cout << " start saving" << std::endl;
+                m_dh->lastPath = dialog.GetDirectory();
+                surface->save(dialog.GetPath());
+                std::cout << " done saving" << std::endl;
+            }
+
+        }
+        if (info->getType() == IsoSurface_)
+        {
+            CIsoSurface *surface = (CIsoSurface*) info;
+
+            std::cout << "got surface: " << surface << std::endl;
+
+            wxString caption = wxT("Choose a file");
+            wxString wildcard = wxT("surfae files (*.vtk)|*.vtk");
+            wxString defaultDir = wxEmptyString;
+            wxString defaultFilename = wxEmptyString;
+            wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxSAVE);
+            dialog.SetFilterIndex(0);
+            dialog.SetDirectory(m_dh->lastPath);
+            if (dialog.ShowModal() == wxID_OK)
+            {
+                std::cout << " start saving" << std::endl;
+                m_dh->lastPath = dialog.GetDirectory();
+                surface->save(dialog.GetPath());
+                std::cout << " done saving" << std::endl;
+            }
+        }
     }
 }
 

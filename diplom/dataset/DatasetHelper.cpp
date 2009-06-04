@@ -1137,8 +1137,7 @@ float* DatasetHelper::getVectorDataset()
         return NULL;
     for (int i = 0; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
     {
-        DatasetInfo* info =
-                (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
+        DatasetInfo* info = (DatasetInfo*) mainFrame->m_listCtrl->GetItemData(i);
         if (info->getType() == Vectors_)
         {
             Anatomy* a = (Anatomy*) mainFrame->m_listCtrl->GetItemData(i);
@@ -1251,11 +1250,13 @@ void DatasetHelper::doLicMovie(int mode)
 
     dialog.SetFilterIndex(0);
     dialog.SetDirectory(m_screenshotPath);
+    dialog.SetFilename(_T("image"));
     if (dialog.ShowModal() == wxID_OK)
     {
         m_screenshotPath = dialog.GetDirectory();
         tmpFileName = dialog.GetPath();
     }
+    else return;
     int gf = geforceLevel;
     geforceLevel = 99;
 

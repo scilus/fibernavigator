@@ -12,6 +12,8 @@
 #include "../lic/SurfaceLIC.h"
 #include "../../dataset/Anatomy.h"
 
+#include <fstream>
+
 const unsigned int CIsoSurface::m_edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
 	0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -354,6 +356,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy) : DatasetInfo(dh)
 	m_nVertices = 0;
 	m_tIsoLevel = 0.40;
 	m_bValidSurface = false;
+	m_positionsCalculated = false;
 
 	m_tMesh = new TriangleMesh(m_dh);
 }
@@ -703,6 +706,7 @@ void CIsoSurface::GenerateWithThreshold()
     GenerateSurface(m_threshold);
     if (m_GLuint) glDeleteLists(m_GLuint, 1);
     m_GLuint = 0;
+    m_positionsCalculated = false;
 }
 
 void CIsoSurface::activateLIC()
@@ -731,6 +735,7 @@ void CIsoSurface::clean()
     m_tMesh->cleanUp();
    if (m_GLuint) glDeleteLists(m_GLuint, 1);
    m_GLuint = 0;
+   m_positionsCalculated = false;
 }
 
 void CIsoSurface::smooth()
@@ -738,6 +743,7 @@ void CIsoSurface::smooth()
     m_tMesh->doLoopSubD();
     if (m_GLuint) glDeleteLists(m_GLuint, 1);
     m_GLuint = 0;
+    m_positionsCalculated = false;
 }
 
 void CIsoSurface::generateGeometry()
@@ -829,4 +835,138 @@ void CIsoSurface::draw()
     if (!m_GLuint)
         generateGeometry();
     glCallList(m_GLuint);
+}
+
+std::vector<Vector> CIsoSurface::getSurfaceVoxelPositions()
+{
+    if (!m_positionsCalculated)
+    {
+        Vector v(0,0,0);
+        size_t nSize = m_dh->columns * m_dh->rows * m_dh->frames;
+        std::vector<Vector>accu(nSize, v);;
+        std::vector<int>hits(nSize, 0);
+        std::vector<Vector>vertices = m_tMesh->getVerts();
+        m_svPositions.clear();
+
+        for (size_t i = 0 ; i < vertices.size() ; ++i)
+        {
+            v = vertices[i];
+            int index = (int)v.x + (int)v.y * m_dh->columns + (int)v.z * m_dh->columns * m_dh->rows;
+            accu[index].x += v.x;
+            accu[index].y += v.y;
+            accu[index].z += v.z;
+            hits[index] += 1;
+        }
+
+        for (size_t i = 0 ; i < nSize ; ++i)
+        {
+            if (hits[i] > 0)
+            {
+                accu[i].x /= hits[i];
+                accu[i].y /= hits[i];
+                accu[i].z /= hits[i];
+                if ((int)accu[i].x)
+                {
+                    Vector v(accu[i].x, accu[i].y, accu[i].z);
+                    m_svPositions.push_back(v);
+                }
+            }
+        }
+        m_positionsCalculated = true;
+    }
+    return m_svPositions;
+}
+
+bool CIsoSurface::save(wxString filename ) const
+{
+#if 0
+    m_dh->printDebug(_T("start saving vtk file"), 1);
+    wxFile dataFile;
+    wxFileOffset nSize = 0;
+
+    if (dataFile.Open(filename))
+    {
+//      nSize = dataFile.Length();
+//      if (nSize == wxInvalidOffset) return false;
+    }
+    else
+    {
+        return false;
+    }
+
+    m_dh->printDebug(_T("start writing file)"));
+    dataFile.write("# vtk DataFile Version 2.0\n");
+    dataFile.write("generated using FiberNavigator\n");
+    dataFile.write("ASCII\n");
+
+    dataFile.write("POINT_DATA %d float\n", m_tMesh->getNumVertices());
+    for(int i=0; i< m_tMesh->getNumVertices(); ++i)
+    {
+        point = m_tMesh->getVertex(i);
+        dataFile.write("%d %d %d\n", point.x, point.y, point.z);
+    }
+
+    dataFile.write("CELLS %d %d\n", m_tMesh->getNumTriangles(), m_tMesh->getNumTriangles()*4);
+    for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
+    {
+        triangleEdges = m_tMesh->getTriangle(i);
+        dataFile.write("3 %d %d %d\n", triangleEdges.pointID[0],
+            triangleEdges.pointID[1], triangleEdges.pointID[2]);
+    }
+    dataFile.write("CELL_TYPES");
+    for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
+    {
+        dataFile.write("3\n");
+    }
+    return true;
+#else
+    char* c_file;
+    c_file = (char*) malloc(filename.length()+1);
+    strcpy(c_file, (const char*) filename.mb_str(wxConvUTF8));
+
+    //m_dh->printDebug(_T("start saving vtk file"), 1);
+    std::ofstream dataFile(c_file);
+
+    if (dataFile)
+    {
+        std::cout << "opening file" << std::endl;
+//      nSize = dataFile.Length();
+//      if (nSize == wxInvalidOffset) return false;
+    }
+    else
+    {
+        std::cout << "open file failed: " << filename.c_str() << std::endl;
+        return false;
+    }
+
+    m_dh->printDebug(_T("start writing file)"), 1);
+    dataFile << ("# vtk DataFile Version 2.0\n");
+    dataFile << ("generated using FiberNavigator\n");
+    dataFile << ("ASCII\n");
+
+    Triangle triangleEdges;
+    Vector point;
+    dataFile << "POINT_DATA " << m_tMesh->getNumVertices() << " float\n";
+    for(int i=0; i< m_tMesh->getNumVertices(); ++i)
+    {
+        point = m_tMesh->getVertex(i);
+        dataFile << point.x << " " << point.y << " " << point.z <<"\n";
+    }
+
+    dataFile << "CELLS " << m_tMesh->getNumTriangles() << " " << m_tMesh->getNumTriangles()*4;
+    for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
+    {
+        triangleEdges = m_tMesh->getTriangle(i);
+        dataFile << "3 " << triangleEdges.pointID[0] << " " <<
+            triangleEdges.pointID[1] << " " << triangleEdges.pointID[2] << "\n";
+    }
+    dataFile << "CELL_TYPES\n";
+    for(int i=0; i< m_tMesh->getNumTriangles() ; ++i)
+    {
+        dataFile << "3\n";
+    }
+    std::cout << " saving  done" << std::endl;
+    return true;
+
+#endif
 }

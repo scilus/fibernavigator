@@ -32,6 +32,7 @@ Surface::Surface(DatasetHelper* dh) : DatasetInfo(dh)
 	m_normalDirection = 1.0;
 
 	subDCount = 0;
+	m_positionsCalculated = false;
 }
 
 Surface::~Surface()
@@ -310,8 +311,10 @@ void Surface::execute ()
 
 #ifndef __WXMAC__
 	// FIXME MAC !!!
-	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	if (m_GLuint)
+	    glDeleteLists(m_GLuint, 1);
 	m_GLuint = 0;
+	m_positionsCalculated = false;
 
 	createCutTexture();
 #endif
@@ -458,8 +461,10 @@ void Surface::activateLIC()
 	SurfaceLIC lic(m_dh, m_tMesh);
 	lic.execute();
 
-	if (m_GLuint) glDeleteLists(m_GLuint, 1);
+	if (m_GLuint)
+	    glDeleteLists(m_GLuint, 1);
 	m_GLuint = 0;
+	m_positionsCalculated = false;
 
 	licCalculated = true;
 }
@@ -632,4 +637,48 @@ void Surface::flipNormals()
 	m_normalDirection = m_dh->normalDirection;
 	if (m_GLuint) glDeleteLists(m_GLuint, 1);
 	m_GLuint = 0;
+	m_positionsCalculated = false;
+}
+
+std::vector<Vector> Surface::getSurfaceVoxelPositions()
+{
+    if (!m_positionsCalculated)
+    {
+        Vector v(0,0,0);
+        size_t nSize = m_dh->columns * m_dh->rows * m_dh->frames;
+        std::vector<Vector>accu(nSize, v);;
+        std::vector<int>hits(nSize, 0);
+        std::vector<Vector>vertices = m_tMesh->getVerts();
+        m_svPositions.clear();
+
+        for (size_t i = 0 ; i < vertices.size() ; ++i)
+        {
+            v = vertices[i];
+            int xx = (int)wxMax(0, wxMin(v.x, m_dh->columns));
+            int yy = (int)wxMax(0, wxMin(v.y, m_dh->rows));
+            int zz = (int)wxMax(0, wxMin(v.z, m_dh->frames));
+            int index = xx + yy * m_dh->columns + zz * m_dh->columns * m_dh->rows;
+            accu[index].x += v.x;
+            accu[index].y += v.y;
+            accu[index].z += v.z;
+            hits[index] += 1;
+        }
+
+        for (size_t i = 0 ; i < nSize ; ++i)
+        {
+            if (hits[i] > 0)
+            {
+                accu[i].x /= hits[i];
+                accu[i].y /= hits[i];
+                accu[i].z /= hits[i];
+                if ((int)accu[i].x)
+                {
+                    Vector v(accu[i].x, accu[i].y, accu[i].z);
+                    m_svPositions.push_back(v);
+                }
+            }
+        }
+        m_positionsCalculated = true;
+    }
+    return m_svPositions;
 }

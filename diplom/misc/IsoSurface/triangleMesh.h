@@ -82,6 +82,8 @@ class TriangleMesh {
 		int getTriangleTensor(const int triNum)					{ return triangleTensor[triNum]; };
 		bool isFinished()										{ return m_isFinished; }
 
+		std::vector<Vector> getVerts()                          { return vertices; };
+
 		Vector getTriangleCenter(int triNum) ;
 
 		void setVertex(const unsigned int vertNum, const Vector nPos)	{ vertices[vertNum] = nPos; };

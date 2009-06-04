@@ -49,6 +49,7 @@ public:
 	void clean();
 	void smooth();
 	void activateLIC();
+	std::vector<Vector> getSurfaceVoxelPositions();
 
 	void GenerateWithThreshold();
 
@@ -66,6 +67,8 @@ public:
 	// isosurface in enclosed in.  Returns -1 if the surface is not
 	// valid.
 	int GetVolumeLengths(float& fVolLengthX, float& fVolLengthY, float& fVolLengthZ);
+
+	bool save( wxString filename )const;
 
 protected:
 	// The number of vertices which make up the isosurface.
@@ -127,6 +130,9 @@ private:
 	void generateGeometry() ;
 	void generateLICGeometry() ;
 	void initializeBuffer() {};
+
+	bool m_positionsCalculated;
+	std::vector<Vector>m_svPositions;
 
 };
 #endif // CISOSURFACE_H

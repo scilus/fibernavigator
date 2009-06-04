@@ -34,6 +34,7 @@ public:
 
 	std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
 	void setSetSampleRate(float r) {m_sampleRateT = m_sampleRateU = r; execute();};
+	std::vector<Vector> getSurfaceVoxelPositions();
 
 	bool save( wxString filename )const;
 private:
@@ -81,6 +82,9 @@ private:
 	KdTree *m_kdTree;
 
 	std::vector< std::vector<float> >m_testLines;
+	bool m_positionsCalculated;
+	std::vector<Vector>m_svPositions;
+
 };
 
 
