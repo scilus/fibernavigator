@@ -763,3 +763,9 @@ int SelectionBox::countSelectedFibers()
     }
     return count;
 }
+
+bool SelectionBox::toggleActive()
+{
+    m_dh->m_selBoxChanged = true;
+    return m_isActive = !m_isActive;
+}

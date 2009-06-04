@@ -693,23 +693,26 @@ void Fibers::updateLinesShown()
 
             for (unsigned int j = 1; j < boxes[i].size() ; ++j)
             {
-                if (boxes[i][j]->isDirty())
+                if ( boxes[i][j]->getActive() )
                 {
-                    boxes[i][j]->m_inBox = getLinesShown(boxes[i][j]);
-                    boxes[i][j]->setDirty(false);
+                    if (boxes[i][j]->isDirty())
+                    {
+                        boxes[i][j]->m_inBox = getLinesShown(boxes[i][j]);
+                        boxes[i][j]->setDirty(false);
+                    }
+                    if (!boxes[i][j]->getNOT())
+                        for (int k = 0; k <m_countLines; ++k)
+                        {
+                            boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k]
+                                    & boxes[i][j]->m_inBox[k];
+                        }
+                    else
+                        for (int k = 0; k <m_countLines; ++k)
+                        {
+                            boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k]
+                                    & !boxes[i][j]->m_inBox[k];
+                        }
                 }
-                if (!boxes[i][j]->getNOT())
-                    for (int k = 0; k <m_countLines; ++k)
-                    {
-                        boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k]
-                                & boxes[i][j]->m_inBox[k];
-                    }
-                else
-                    for (int k = 0; k <m_countLines; ++k)
-                    {
-                        boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k]
-                                & !boxes[i][j]->m_inBox[k];
-                    }
             }
         }
 

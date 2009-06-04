@@ -34,7 +34,7 @@ public:
 	bool toggleNOT() {return m_isNOT = !m_isNOT;};
 	bool getNOT() {return m_isNOT;};
 	void setNOT(bool v) {m_isNOT = v;};
-	bool toggleActive() {return m_isActive = !m_isActive;};
+	bool toggleActive();
 	bool getActive() {return m_isActive;};
 	void setActive(bool v) {m_isActive = v;};
 
