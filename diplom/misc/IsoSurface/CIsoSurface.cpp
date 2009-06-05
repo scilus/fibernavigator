@@ -858,9 +858,22 @@ std::vector<Vector> CIsoSurface::getSurfaceVoxelPositions()
             hits[index] += 1;
         }
 
+        int pointsInVoxels = 0;
+        int voxelsHit = 0;
         for (size_t i = 0 ; i < nSize ; ++i)
         {
             if (hits[i] > 0)
+            {
+                ++voxelsHit;
+                pointsInVoxels += hits[i];
+            }
+        }
+        pointsInVoxels /= voxelsHit;
+        int threshold = pointsInVoxels / 2;
+
+        for (size_t i = 0 ; i < nSize ; ++i)
+        {
+            if (hits[i] > threshold)
             {
                 accu[i].x /= hits[i];
                 accu[i].y /= hits[i];

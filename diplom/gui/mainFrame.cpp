@@ -59,6 +59,7 @@ EVT_MENU(MENU_VOI_TOGGLE_ANDNOT, MainFrame::OnToggleAndNot)
 EVT_MENU(MENU_VOI_COLOR_ROI, MainFrame::OnColorRoi)
 EVT_MENU(MENU_VOI_USE_MORPH, MainFrame::OnUseMorph)
 EVT_MENU(MENU_VOI_COUNT_FIBERS, MainFrame::OnCountFibers)
+EVT_MENU(MENU_VOI_CREATE_TEXTURE, MainFrame::OnCreateColorTexture)
 // Menu Surfaces
 EVT_MENU(MENU_SURFACE_NEW_OFFSET, MainFrame::OnNewOffsetMap)
 EVT_MENU(MENU_SPLINESURF_NEW, MainFrame::OnNewSurface)
@@ -890,7 +891,115 @@ void MainFrame::OnCountFibers(wxCommandEvent& WXUNUSED(event))
 
     refreshAllGLWidgets();
 }
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
+{
+    Fibers *f = NULL;
+    if ( !m_dh->getFiberDataset(f) )
+        return ;
+    int x,y,z;
 
+    Anatomy* newAnatomy = new Anatomy(m_dh);
+    newAnatomy->setRGBZero(m_dh->columns, m_dh->rows, m_dh->frames);
+
+    wxTreeItemId tBoxId = m_treeWidget->GetSelection();
+    if (treeSelected(tBoxId) == MasterBox)
+    {
+        SelectionBox *box = (SelectionBox*) (m_treeWidget->GetItemData(tBoxId));
+        wxColour c = box->getFiberColor();
+
+        float* dst = newAnatomy->getFloatDataset();
+
+        for (int l = 0; l < f->getLineCount(); ++l)
+        {
+            if (box->m_inBranch[l])
+            {
+                unsigned int pc = f->getStartIndexForLine(l)*3;
+
+                for (int j = 0; j < f->getPointsPerLine(l) ; ++j)
+                {
+                    x = (int)f->m_pointArray[pc];
+                    ++pc;
+                    y = (int)f->m_pointArray[pc];
+                    ++pc;
+                    z = (int)f->m_pointArray[pc];
+                    ++pc;
+
+                    int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows) * 3;
+                    dst[index] = c.Red() / 255.;
+                    dst[index + 1] = c.Green() / 255.;
+                    dst[index + 2] = c.Blue() / 255.;
+                }
+            }
+        }
+    }
+
+    newAnatomy->setName( wxT(" (fiber_colors)"));
+
+    m_listCtrl->InsertItem(0, wxT(""), 0);
+    m_listCtrl->SetItem(0, 1, newAnatomy->getName());
+    m_listCtrl->SetItem(0, 2, wxT("0.00"));
+    m_listCtrl->SetItem(0, 3, wxT(""), 1);
+    m_listCtrl->SetItemData(0, (long) newAnatomy);
+    m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
+    wxLIST_STATE_SELECTED);
+
+    refreshAllGLWidgets();
+
+    Anatomy* newAnatomy2 = new Anatomy(m_dh);
+    newAnatomy2->setZero(m_dh->columns, m_dh->rows, m_dh->frames);
+    newAnatomy2->setType(Overlay);
+    float max = 0.;
+    if (treeSelected(tBoxId) == MasterBox)
+    {
+        SelectionBox *box = (SelectionBox*) (m_treeWidget->GetItemData(tBoxId));
+
+        float* dst = newAnatomy2->getFloatDataset();
+
+        for (int l = 0; l < f->getLineCount(); ++l)
+        {
+            if (box->m_inBranch[l])
+            {
+                unsigned int pc = f->getStartIndexForLine(l)*3;
+
+                for (int j = 0; j < f->getPointsPerLine(l) ; ++j)
+                {
+                    x = (int)f->m_pointArray[pc];
+                    ++pc;
+                    y = (int)f->m_pointArray[pc];
+                    ++pc;
+                    z = (int)f->m_pointArray[pc];
+                    ++pc;
+
+                    int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows);
+                    dst[index] += 1.0;
+                    max = wxMax(max,dst[index]);
+                }
+            }
+        }
+        for (int i = 0 ; i < m_dh->columns * m_dh->rows * m_dh->frames ; ++i)
+        {
+            dst[i] /= max;
+        }
+    }
+
+    newAnatomy2->setName( wxT(" (fiber_density)"));
+    newAnatomy2->setOldMax(max);
+    m_listCtrl->InsertItem(0, wxT(""), 0);
+    m_listCtrl->SetItem(0, 1, newAnatomy2->getName());
+    m_listCtrl->SetItem(0, 2, wxT("0.00"));
+    m_listCtrl->SetItem(0, 3, wxT(""), 1);
+    m_listCtrl->SetItemData(0, (long) newAnatomy2);
+    m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
+    wxLIST_STATE_SELECTED);
+
+    refreshAllGLWidgets();
+
+}
 /****************************************************************************************************
  *
  *

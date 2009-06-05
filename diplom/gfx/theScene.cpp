@@ -339,6 +339,7 @@ void TheScene::renderFibers()
 				m_dh->shaderHelper->setFiberShaderVars();
 				m_dh->shaderHelper->m_fiberShader->setUniInt("useTex", !info->getUseTex());
 				m_dh->shaderHelper->m_fiberShader->setUniInt("useColorMap", m_dh->colorMap);
+				m_dh->shaderHelper->m_fiberShader->setUniInt("useOverlay", info->getShowFS());
 			}
 			if (m_dh->m_selBoxChanged)
 			{
@@ -566,6 +567,9 @@ void TheScene::drawVectors()
             b = vecs->getColor().Blue() / 255.;
             a = 1.0;
 
+            float bright = 1.2;
+            float dull = 0.7;
+
             if (m_dh->showAxial)
             {
                 for (int i = 0; i < m_dh->columns; ++i)
@@ -581,49 +585,60 @@ void TheScene::drawVectors()
 
                         if (vecs->getUseTex())
                         {
-                            r = wxMin(1.0, fabs(x) * 1.2);
-                            g = wxMin(1.0, fabs(y) * 1.2);
-                            b = wxMin(1.0, fabs(z) * 1.2);
+                            r = wxMin(1.0, fabs(x) * bright);
+                            g = wxMin(1.0, fabs(y) * bright);
+                            b = wxMin(1.0, fabs(z)* bright);
                             a = sqrt(r * r + g * g + b * b);
                             r /= a;
                             g /= a;
                             b /= a;
                         }
 
-                        if (vecs->at(index + 2) <= 0.0)
+                        if (!vecs->getShowFS())
                         {
-
                             glColor4f(r, g, b, a);
                             glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2.,
-                                    (GLfloat) m_dh->zSlize + .4);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .4);
-                            glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2.,
-                                    (GLfloat) m_dh->zSlize + .6);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .6);
-                            glColor4f(r * .7, g * .7, b * .7, a);
+                                    (GLfloat) m_dh->zSlize + .5 + z / 2.);
                             glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2.,
-                                    (GLfloat) m_dh->zSlize + .4);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .4);
-                            glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2.,
-                                    (GLfloat) m_dh->zSlize + .6);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .6);
+                                    (GLfloat) m_dh->zSlize + .5 - z / 2.);
                         }
                         else
                         {
-                            glColor4f(r * .7, g * .7, b * .7, a);
-                            glVertex3f((GLfloat) i + .5 + x / 2.,
-                                    (GLfloat) j + .5 + vecs->at(index + 1) / 2., (GLfloat) m_dh->zSlize + .4);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .4);
-                            glVertex3f((GLfloat) i + .5 + x / 2.,
-                                    (GLfloat) j + .5 + vecs->at(index + 1) / 2., (GLfloat) m_dh->zSlize + .6);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .6);
-                            glColor4f(r, g, b, a);
-                            glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2.,
-                                    (GLfloat) m_dh->zSlize + .4);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .4);
-                            glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2.,
-                                    (GLfloat) m_dh->zSlize + .6);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .6);
+                            if (vecs->at(index + 2) <= 0.0)
+                            {
+
+                                glColor4f(r, g, b, a);
+                                glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2.,
+                                        (GLfloat) m_dh->zSlize + .4);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .4);
+                                glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2.,
+                                        (GLfloat) m_dh->zSlize + .6);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .6);
+                                glColor4f(r * dull, g * dull, b * dull, a);
+                                glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2.,
+                                        (GLfloat) m_dh->zSlize + .4);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .4);
+                                glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2.,
+                                        (GLfloat) m_dh->zSlize + .6);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .6);
+                            }
+                            else
+                            {
+                                glColor4f(r * dull, g * dull, b * dull, a);
+                                glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2.,
+                                        (GLfloat) m_dh->zSlize + .4);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .4);
+                                glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2.,
+                                        (GLfloat) m_dh->zSlize + .6);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .6);
+                                glColor4f(r, g, b, a);
+                                glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2.,
+                                        (GLfloat) m_dh->zSlize + .4);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .4);
+                                glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2.,
+                                        (GLfloat) m_dh->zSlize + .6);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_dh->zSlize + .6);
+                            }
                         }
                     }
                 }
@@ -643,50 +658,67 @@ void TheScene::drawVectors()
 
                         if (vecs->getUseTex())
                         {
-                            r = wxMin(1.0, fabs(x) * 1.2);
-                            g = wxMin(1.0, fabs(y) * 1.2);
-                            b = wxMin(1.0, fabs(z) * 1.2);
+                            r = wxMin(1.0, fabs(x)* bright);
+                            g = wxMin(1.0, fabs(y)* bright);
+                            b = wxMin(1.0, fabs(z)* bright);
                             a = sqrt(r * r + g * g + b * b);
                             r /= a;
                             g /= a;
                             b /= a;
                         }
-
-                        if (vecs->at(index + 1) <= 0.0)
+                        if (!vecs->getShowFS())
                         {
                             glColor4f(r, g, b, a);
-                            glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .4, (GLfloat) j
-                                    + .5 + z / 2.);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .4, (GLfloat) j + .5);
-                            glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .6, (GLfloat) j
-                                    + .5 + z / 2.);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .6, (GLfloat) j + .5);
-                            glColor4f(r * .7, g * .7, b * .7, a);
-                            glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .4, (GLfloat) j
-                                    + .5 - z / 2.);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .4, (GLfloat) j + .5);
-                            glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .6, (GLfloat) j
-                                    + .5 - z / 2.);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .6, (GLfloat) j + .5);
-
+                            glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .5 + y / 2.,
+                                    (GLfloat) j + .5 + z / 2.);
+                            glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .5 - y / 2.,
+                                    (GLfloat) j + .5 - z / 2.);
                         }
                         else
                         {
-                            glColor4f(r * .7, g * .7, b * .7, a);
-                            glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .4, (GLfloat) j
-                                    + .5 - z / 2.);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .4, (GLfloat) j + .5);
-                            glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .6, (GLfloat) j
-                                    + .5 - z / 2.);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .6, (GLfloat) j + .5);
-                            glColor4f(r, g, b, a);
-                            glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .4, (GLfloat) j
-                                    + .5 + z / 2.);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .4, (GLfloat) j + .5);
-                            glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .6, (GLfloat) j
-                                    + .5 + z / 2.);
-                            glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .6, (GLfloat) j + .5);
+                            if (vecs->at(index + 1) <= 0.0)
+                            {
+                                glColor4f(r, g, b, a);
+                                glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .4,
+                                        (GLfloat) j + .5 + z / 2.);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .4, (GLfloat) j + .5);
 
+                                glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .6,
+                                        (GLfloat) j + .5 - z / 2.);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .6, (GLfloat) j + .5);
+
+                                glColor4f(r * dull, g * dull, b * dull, a);
+                                glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .4,
+                                        (GLfloat) j + .5 - z / 2.);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .4, (GLfloat) j + .5);
+
+                                glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .6,
+                                        (GLfloat) j + .5 + z / 2.);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .6, (GLfloat) j + .5);
+
+                            }
+
+                            else
+                            {
+
+                                glColor4f(r * dull, g * dull, b * dull, a);
+                                glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .4,
+                                        (GLfloat) j + .5 + z / 2.);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .4, (GLfloat) j + .5);
+
+                                glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .6,
+                                        (GLfloat) j + .5 - z / 2.);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .6, (GLfloat) j + .5);
+
+                                glColor4f(r, g, b, a);
+                                glVertex3f((GLfloat) i + .5 - x / 2., (GLfloat) m_dh->ySlize + .4,
+                                        (GLfloat) j + .5 - z / 2.);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .4, (GLfloat) j + .5);
+
+                                glVertex3f((GLfloat) i + .5 + x / 2., (GLfloat) m_dh->ySlize + .6,
+                                        (GLfloat) j + .5 + z / 2.);
+                                glVertex3f((GLfloat) i + .5, (GLfloat) m_dh->ySlize + .6, (GLfloat) j + .5);
+                            }
                         }
                     }
                 }
@@ -706,49 +738,65 @@ void TheScene::drawVectors()
 
                         if (vecs->getUseTex())
                         {
-                            r = wxMin(1.0, fabs(x) * 1.2);
-                            g = wxMin(1.0, fabs(y) * 1.2);
-                            b = wxMin(1.0, fabs(z) * 1.2);
+                            r = wxMin(1.0, fabs(x)* bright);
+                            g = wxMin(1.0, fabs(y)* bright);
+                            b = wxMin(1.0, fabs(z)* bright);
                             a = sqrt(r * r + g * g + b * b);
                             r /= a;
                             g /= a;
                             b /= a;
                         }
-
-                        if (vecs->at(index) <= 0.0)
+                        if (!vecs->getShowFS())
                         {
-
                             glColor4f(r, g, b, a);
-                            glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j
-                                    + .5 + z / 2.);
-                            glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5);
-                            glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j
-                                    + .5 + z / 2.);
-                            glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5);
-                            glColor4f(r * .7, g * .7, b * .7, a);
-                            glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j
-                                    + .5 - z / 2.);
-                            glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5);
-                            glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j
-                                    + .5 - z / 2.);
-                            glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5);
+                            glVertex3f((GLfloat)m_dh->xSlize + .5 + x / 2., (GLfloat)i + .5 + y / 2.,
+                                    (GLfloat) j + .5 + z / 2.);
+                            glVertex3f((GLfloat)m_dh->xSlize + .5 - x / 2., (GLfloat)i + .5 - y / 2.,
+                                    (GLfloat) j + .5 - z / 2.);
                         }
                         else
                         {
-                            glColor4f(r * .7, g * .7, b * .7, a);
-                            glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j
-                                    + .5 - z / 2.);
-                            glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5);
-                            glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j
-                                    + .5 - z / 2.);
-                            glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5);
-                            glColor4f(r, g, b, a);
-                            glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j
-                                    + .5 + z / 2.);
-                            glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5);
-                            glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j
-                                    + .5 + z / 2.);
-                            glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5);
+                            if (vecs->at(index) <= 0.0)
+                            {
+
+                                glColor4f(r, g, b, a);
+                                glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5 + y / 2.,
+                                        (GLfloat) j + .5 + z / 2.);
+                                glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5);
+
+                                glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5 - y / 2.,
+                                        (GLfloat) j + .5 - z / 2.);
+                                glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5);
+
+                                glColor4f(r * dull, g * dull, b * dull, a);
+                                glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5 - y / 2.,
+                                        (GLfloat) j + .5 - z / 2.);
+                                glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5);
+
+                                glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5 + y / 2.,
+                                        (GLfloat) j + .5 + z / 2.);
+                                glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5);
+                            }
+                            else
+                            {
+                                glColor4f(r * dull, g * dull, b * dull, a);
+                                glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5 + y / 2.,
+                                        (GLfloat) j + .5 + z / 2.);
+                                glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5);
+
+                                glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5 - y / 2.,
+                                        (GLfloat) j + .5 - z / 2.);
+                                glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5);
+
+                                glColor4f(r, g, b, a);
+                                glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5 - y / 2.,
+                                        (GLfloat) j + .5 - z / 2.);
+                                glVertex3f((GLfloat) m_dh->xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5);
+
+                                glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5 + y / 2.,
+                                        (GLfloat) j + .5 + z / 2.);
+                                glVertex3f((GLfloat) m_dh->xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5);
+                            }
                         }
                     }
                 }
@@ -758,7 +806,7 @@ void TheScene::drawVectors()
             {
                 DatasetInfo* mesh = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(j);
 
-                if ( mesh->getType() == IsoSurface_  && mesh->getShow())
+                if (mesh->getType() == IsoSurface_ && mesh->getShow())
                 {
                     CIsoSurface* surf = (CIsoSurface*) mesh;
                     std::vector<Vector> positions = surf->getSurfaceVoxelPositions();
@@ -773,9 +821,9 @@ void TheScene::drawVectors()
 
                         if (vecs->getUseTex())
                         {
-                            r = wxMin(1.0, fabs(x) * 1.2);
-                            g = wxMin(1.0, fabs(y) * 1.2);
-                            b = wxMin(1.0, fabs(z) * 1.2);
+                            r = wxMin(1.0, fabs(x)* bright);
+                            g = wxMin(1.0, fabs(y)* bright);
+                            b = wxMin(1.0, fabs(z)* bright);
                             a = sqrt(r * r + g * g + b * b);
                             r /= a;
                             g /= a;
@@ -788,7 +836,7 @@ void TheScene::drawVectors()
                     }
                 }
 
-                else if ( mesh->getType() == Surface_  && mesh->getShow())
+                else if (mesh->getType() == Surface_ && mesh->getShow())
                 {
                     Surface* surf = (Surface*) mesh;
                     std::vector<Vector> positions = surf->getSurfaceVoxelPositions();
@@ -804,9 +852,9 @@ void TheScene::drawVectors()
 
                         if (vecs->getUseTex())
                         {
-                            r = wxMin(1.0, fabs(x) * 1.2);
-                            g = wxMin(1.0, fabs(y) * 1.2);
-                            b = wxMin(1.0, fabs(z) * 1.2);
+                            r = wxMin(1.0, fabs(x)* bright);
+                            g = wxMin(1.0, fabs(y)* bright);
+                            b = wxMin(1.0, fabs(z)* bright);
                             a = sqrt(r * r + g * g + b * b);
                             r /= a;
                             g /= a;

@@ -664,9 +664,23 @@ std::vector<Vector> Surface::getSurfaceVoxelPositions()
             hits[index] += 1;
         }
 
+        int pointsInVoxels = 0;
+        int voxelsHit = 0;
         for (size_t i = 0 ; i < nSize ; ++i)
         {
             if (hits[i] > 0)
+            {
+                ++voxelsHit;
+                pointsInVoxels += hits[i];
+            }
+        }
+        pointsInVoxels /= voxelsHit;
+        printf("%d\n", pointsInVoxels);
+        int threshold = pointsInVoxels / 2;
+
+        for (size_t i = 0 ; i < nSize ; ++i)
+        {
+            if (hits[i] > threshold)
             {
                 accu[i].x /= hits[i];
                 accu[i].y /= hits[i];
@@ -682,3 +696,15 @@ std::vector<Vector> Surface::getSurfaceVoxelPositions()
     }
     return m_svPositions;
 }
+
+void Surface::smooth()
+{
+    if (m_GLuint)
+        glDeleteLists(m_GLuint, 1);
+    m_GLuint = 0;
+    m_positionsCalculated = false;
+    m_tMesh->doLoopSubD();
+    ++subDCount;
+    licCalculated = false;
+}
+

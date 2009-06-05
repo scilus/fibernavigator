@@ -33,6 +33,7 @@ public:
 	bool loadNifti(wxString filename);
 	void saveNifti(wxString filename);
 	void setZero(int x, int y, int z);
+	void setRGBZero(int x, int y, int z);
 	void minimize();
 	void dilate();
 	void erode();

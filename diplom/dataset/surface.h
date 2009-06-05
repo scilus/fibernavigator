@@ -24,7 +24,7 @@ public:
 	void draw();
 
 	void clean() {};
-	void smooth() {m_tMesh->doLoopSubD(); ++subDCount;licCalculated = false;};
+	void smooth();
 	void activateLIC();
 	GLuint getCutTex() {return m_CutTex;};
 

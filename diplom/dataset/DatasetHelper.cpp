@@ -1072,7 +1072,7 @@ void DatasetHelper::changeZoom(const int z)
 void DatasetHelper::moveScene(int x, int y)
 {
     float max = (float)wxMax(columns*xVoxel, wxMax(rows*yVoxel, frames*zVoxel));
-    float div = 300. / max;
+    float div = 500. / max;
 
     xMove -= (float)x/div;
     yMove += (float)y/div;

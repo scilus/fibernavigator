@@ -243,6 +243,8 @@ void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
 		menu->AppendSeparator();
             menu->Append(MENU_VOI_COUNT_FIBERS, _T("count fibers"));
+        menu->AppendSeparator();
+        menu->Append(MENU_VOI_CREATE_TEXTURE, _T("create color texture"));
 		menu->AppendSeparator();
 		if (! box->getIsBox())
 		{

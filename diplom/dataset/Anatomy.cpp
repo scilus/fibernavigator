@@ -669,6 +669,27 @@ void Anatomy::setZero(int x, int y, int z)
     }
 }
 
+void Anatomy::setRGBZero(int x, int y, int z)
+{
+    m_columns = x;
+    m_rows = y;
+    m_frames = z;
+
+    int nSize = m_rows * m_columns * m_frames;
+    if (m_type == not_initialized)
+        m_floatDataset = new float[nSize*3];
+    else
+        delete[] m_floatDataset;
+    m_floatDataset = new float[nSize];
+
+    for (int i = 0; i < nSize*3; ++i)
+    {
+        m_floatDataset[i] = 0.0;
+    }
+    m_type = RGB;
+}
+
+
 void Anatomy::minimize()
 {
     if (!m_dh->fibers_loaded)

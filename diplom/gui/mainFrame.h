@@ -61,6 +61,7 @@ private:
     void OnColorRoi(wxCommandEvent& event);
     void OnUseMorph(wxCommandEvent& event);
     void OnCountFibers(wxCommandEvent& event);
+    void OnCreateColorTexture(wxCommandEvent& event);
 	// Spline Surface
 	void OnNewSurface(wxCommandEvent& event);
 	void OnToggleNormal(wxCommandEvent& event);
@@ -235,6 +236,7 @@ DECLARE_EVENT_TABLE()
 #define MENU_VOI_COLOR_ROI							137
 #define MENU_VOI_USE_MORPH							138
 #define MENU_VOI_COUNT_FIBERS                       139
+#define MENU_VOI_CREATE_TEXTURE                     230
 // Menu Spline Surface
 #define MENU_SPLINESURF_DRAW_POINTS					140
 #define MENU_SPLINESURF_NEW							141
