@@ -19,6 +19,9 @@ SelectionBox::SelectionBox(Vector center, Vector size, DatasetHelper* dh)
 	m_colorChanged = false;
 	m_isLockedToCrosshair = false;
 	m_treeId = NULL;
+	wxColour col(240, 30, 30);
+	m_color = col;
+	m_fiberColor = col;
 	m_handleRadius = 3.0;
 	m_stepSize = 9;
 	m_inBox.resize(m_dh->countFibers, sizeof(bool));
@@ -42,6 +45,7 @@ SelectionBox::SelectionBox(DatasetHelper* dh, Anatomy* a)
 	m_colorChanged = false;
 	wxColour col(240, 30, 30);
 	m_color = col;
+	m_fiberColor = col;
 	m_isLockedToCrosshair = false;
 	m_treeId = NULL;
 	m_handleRadius = 3.0;
