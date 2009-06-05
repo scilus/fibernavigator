@@ -48,6 +48,10 @@ void main()
 			cooloor.rgb  = colorMap4( newVal );
 		else
 			cooloor.rgb = defaultColorMap( newVal );
+
+ /*  cooloor.a = 1.-(1.-newVal)*(1.-newVal);
+     cooloor.a = newVal*newVal;*/
+
 	cooloor.a = newVal * myColor.a;
 	if ( useOverlay )
 	   cooloor.rgb = myColor.rgb;

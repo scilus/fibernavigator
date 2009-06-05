@@ -42,6 +42,8 @@
 #include "icons/iso_surface.xpm"
 #include "icons/tubes.xpm"
 #include "icons/mini_cat.xpm"
+#include "icons/alphablend.xpm"
+#include "icons/layout.xpm"
 
 #include <exception>
 
@@ -256,6 +258,8 @@ bool MyApp::OnInit(void)
         wxBitmap bmpView3(view3_xpm);
         wxBitmap bmpMiniCat(mini_cat_xpm);
 
+        wxBitmap bmpAlphaBlend(alphablend_xpm);
+        wxBitmap bmpToggleLayout(layout_xpm);
         wxBitmap bmpNewSurface(toggle_surface_xpm);
         wxBitmap bmpAssignColor(colorSelect_xpm);
         wxBitmap bmpLighting(lightbulb_xpm);
@@ -280,6 +284,8 @@ bool MyApp::OnInit(void)
         wxBitmap bmpQuit (wxImage(respath+_T("icons/quit.png"), wxBITMAP_TYPE_PNG));
 
         wxBitmap bmpHideSelbox(wxImage(respath+_T("icons/toggleselbox.png"), wxBITMAP_TYPE_PNG));
+        wxBitmap bmpAlphaBlend(wxImage(respath+_T("icons/alphablend.png"), wxBITMAP_TYPE_PNG));
+        wxBitmap bmpToggleLayout(wxImage(respath+_T("icons/layout.png"), wxBITMAP_TYPE_PNG));
         wxBitmap bmpNewSurface(wxImage(respath+_T("icons/toggleSurface.png"), wxBITMAP_TYPE_PNG));
         wxBitmap bmpAssignColor(wxImage(respath+_T("icons/colorSelect.png"), wxBITMAP_TYPE_PNG));
         wxBitmap bmpLighting(wxImage(respath+_T("icons/lightbulb.png"), wxBITMAP_TYPE_PNG));
@@ -287,12 +293,12 @@ bool MyApp::OnInit(void)
 #endif
         toolBar->AddTool(MENU_FILE_LOAD, bmpOpen, wxT("Open"));
         toolBar->AddTool(MENU_FILE_SAVE, bmpSave, wxT("Save Scene"));
-        toolBar->AddTool(BUTTON_TOGGLE_LAYOUT, bmpNewSurface, wxT("Toggle window layout"));
+        toolBar->AddTool(BUTTON_TOGGLE_LAYOUT, bmpToggleLayout, wxT("Toggle window layout"));
         toolBar->AddSeparator();
         toolBar->AddCheckTool(BUTTON_AXIAL, wxT("Axial"), bmpAxial);
         toolBar->AddCheckTool(BUTTON_CORONAL, wxT("Coronal"), bmpCor);
         toolBar->AddCheckTool(BUTTON_SAGITTAL, wxT("Sagittal"), bmpSag);
-        toolBar->AddCheckTool(BUTTON_TOGGLE_ALPHA, wxT("Toggle alpha blending"), bmpNewSurface);
+        toolBar->AddCheckTool(BUTTON_TOGGLE_ALPHA, wxT("Toggle alpha blending"), bmpAlphaBlend);
         toolBar->AddSeparator();
         toolBar->AddTool(MENU_VOI_NEW_SELBOX, bmpBox, wxT("New Selection Box"));
         toolBar->AddCheckTool(MENU_VOI_RENDER_SELBOXES, wxT("Toggle Selection Boxes"), bmpBoxEye);
