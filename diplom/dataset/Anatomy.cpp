@@ -20,7 +20,6 @@
 Anatomy::Anatomy(DatasetHelper* dh) : DatasetInfo (dh)
 {
     m_roi = 0;
-    m_floatDataset = 0;
     m_tensorField = 0;
 }
 
@@ -34,7 +33,6 @@ Anatomy::Anatomy(DatasetHelper* dh, float* dataset) : DatasetInfo(dh)
     is_loaded = true;
 
     m_roi = 0;
-    m_floatDataset = 0;
     m_tensorField = 0;
 
     createOffset(dataset);
@@ -42,7 +40,6 @@ Anatomy::Anatomy(DatasetHelper* dh, float* dataset) : DatasetInfo(dh)
 
 Anatomy::~Anatomy()
 {
-    delete[] m_floatDataset;
     const GLuint* tex = &m_GLuint;
     glDeleteTextures(1, tex);
     if (m_roi)
@@ -160,7 +157,7 @@ bool Anatomy::loadNifti(wxString filename)
         {
             unsigned char *data = (unsigned char*) filedata->data;
 
-            m_floatDataset = new float[nSize];
+            m_floatDataset.resize( nSize );
             for (int i = 0; i < nSize; ++i)
             {
                 m_floatDataset[i] = (float) data[i] / 255.0;
@@ -198,7 +195,7 @@ bool Anatomy::loadNifti(wxString filename)
                     data[i] = newMax;
             }
 
-            m_floatDataset = new float[nSize];
+            m_floatDataset.resize ( nSize );
             for (int i = 0; i < nSize; ++i)
             {
                 m_floatDataset[i] = (float) data[i] / (float) newMax;
@@ -212,7 +209,14 @@ bool Anatomy::loadNifti(wxString filename)
 
         case Overlay:
         {
-            m_floatDataset = (float*) filedata->data;
+            float *data = (float*) filedata->data;
+
+            m_floatDataset.resize( nSize );
+            for (int i = 0; i < nSize; ++i)
+            {
+                m_floatDataset[i] = (float) data[i];
+            }
+
             float max = 0.0;
             for (int i = 0; i < nSize; ++i)
             {
@@ -234,7 +238,7 @@ bool Anatomy::loadNifti(wxString filename)
         {
             unsigned char *data = (unsigned char*) filedata->data;
 
-            m_floatDataset = new float[nSize * 3];
+            m_floatDataset.resize ( nSize * 3 );
 
             for (int i = 0; i < nSize; ++i)
             {
@@ -252,7 +256,7 @@ bool Anatomy::loadNifti(wxString filename)
         {
             float *data = (float*) filedata->data;
 
-            m_floatDataset = new float[nSize * 3];
+            m_floatDataset.resize ( nSize * 3 );
 
             for (int i = 0; i < nSize; ++i)
             {
@@ -262,7 +266,7 @@ bool Anatomy::loadNifti(wxString filename)
                 m_floatDataset[i * 3 + 2] = data[(2 * nSize) + i];
 
             }
-            m_tensorField = new TensorField(m_dh, m_floatDataset, 1, 3);
+            m_tensorField = new TensorField(m_dh, &m_floatDataset[0], 1, 3);
             m_dh->tensors_loaded = true;
             m_dh->vectors_loaded = true;
             m_dh->surface_isDirty = true;
@@ -276,7 +280,7 @@ bool Anatomy::loadNifti(wxString filename)
             float *data = (float*) filedata->data;
             int components = m_bands;
 
-            m_floatDataset = new float[nSize * components];
+            m_floatDataset.resize ( nSize * components );
 
             for (int i = 0; i < nSize; ++i)
             {
@@ -289,7 +293,7 @@ bool Anatomy::loadNifti(wxString filename)
 
             if ( components == 6 )
             {
-                m_tensorField = new TensorField(m_dh, m_floatDataset, 2, 3);
+                m_tensorField = new TensorField(m_dh, &m_floatDataset[0], 2, 3);
             }
             m_dh->tensors_loaded = true;
             delete[] data;
@@ -318,7 +322,7 @@ void Anatomy::saveNifti(wxString filename)
     char fn[1024];
     strcpy(fn, (const char*) filename.mb_str(wxConvUTF8));
     ima->fname = fn;
-    ima->data = m_floatDataset;
+    ima->data = &m_floatDataset[0];
     nifti_image_write(ima);
 }
 
@@ -339,11 +343,11 @@ void Anatomy::generateTexture()
         case Head_short:
         case Overlay:
             glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_LUMINANCE, GL_FLOAT,
-                    m_floatDataset);
+                    &m_floatDataset[0]);
             break;
         case RGB:
             glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT,
-                    m_floatDataset);
+                    &m_floatDataset[0]);
             break;
         case Vectors_:
         {
@@ -388,7 +392,7 @@ void Anatomy::createOffset(float* source)
 
     npixels = nbands * nrows * ncols;
 
-    m_floatDataset = new float[npixels];
+    m_floatDataset.resize( npixels );
     for (int i = 0; i < npixels; ++i)
     {
         m_floatDataset[i] = 0.0;
@@ -569,7 +573,7 @@ void Anatomy::createOffset(float* source)
 
     d = n / 2;
     float* float_pp;
-    float* tmp = new float[npixels];
+    std::vector<float> tmp(npixels);
     int c1, cc;
 
     for (int i = 0; i < npixels; ++i)
@@ -657,11 +661,9 @@ void Anatomy::setZero(int x, int y, int z)
     m_frames = z;
 
     int nSize = m_rows * m_columns * m_frames;
-    if (m_type == not_initialized)
-        m_floatDataset = new float[nSize];
-    else
-        delete[] m_floatDataset;
-    m_floatDataset = new float[nSize];
+
+    m_floatDataset.clear();
+    m_floatDataset.resize( nSize );
 
     for (int i = 0; i < nSize; ++i)
     {
@@ -676,11 +678,9 @@ void Anatomy::setRGBZero(int x, int y, int z)
     m_frames = z;
 
     int nSize = m_rows * m_columns * m_frames;
-    if (m_type == not_initialized)
-        m_floatDataset = new float[nSize*3];
-    else
-        delete[] m_floatDataset;
-    m_floatDataset = new float[nSize];
+
+    m_floatDataset.clear();
+    m_floatDataset.resize( nSize * 3);
 
     for (int i = 0; i < nSize*3; ++i)
     {
@@ -832,3 +832,20 @@ void Anatomy::erode1(std::vector<bool>* tmp, int index)
     if (test == 19.0)
         tmp->at(index) = 1.0;
 }
+
+float* Anatomy::getFloatDataset()
+{
+    return &m_floatDataset[0];
+}
+
+float Anatomy::at(int i)
+{
+    return m_floatDataset[i];
+}
+
+
+TensorField* Anatomy::getTensorField()
+{
+    return m_tensorField;
+}
+

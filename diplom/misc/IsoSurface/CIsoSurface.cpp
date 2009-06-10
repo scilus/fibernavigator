@@ -321,7 +321,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy) : DatasetInfo(dh)
 	int size = m_dh->columns * m_dh->rows * m_dh->frames;
 	m_ptScalarField = new float[size];
 	for ( int i = 0 ; i < size ; ++i)
-		m_ptScalarField[i] = anatomy->getFloatDataset(i); //ptScalarField[i];
+		m_ptScalarField[i] = anatomy->at(i); //ptScalarField[i];
 
 	if (m_dh->filterIsoSurf)
 	{
@@ -332,15 +332,15 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy) : DatasetInfo(dh)
 					std::vector<float>list;
 					for (unsigned int zz = z-1; zz < z+2 ; ++zz)
 					{
-						list.push_back(anatomy->getFloatDataset(x +     m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
-						list.push_back(anatomy->getFloatDataset(x - 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
-						list.push_back(anatomy->getFloatDataset(x + 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
-						list.push_back(anatomy->getFloatDataset(x +     m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
-						list.push_back(anatomy->getFloatDataset(x - 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
-						list.push_back(anatomy->getFloatDataset(x + 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
-						list.push_back(anatomy->getFloatDataset(x +     m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
-						list.push_back(anatomy->getFloatDataset(x - 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
-						list.push_back(anatomy->getFloatDataset(x + 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x +     m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x - 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x + 1 + m_dh->columns * y +     m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x +     m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x - 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x + 1 + m_dh->columns * (y-1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x +     m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x - 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
+						list.push_back(anatomy->at(x + 1 + m_dh->columns * (y+1) + m_dh->columns * m_dh->rows * zz));
 					}
 					nth_element (list.begin(), list.begin() + 13, list.end());
 					m_ptScalarField[x + m_dh->columns*y + m_dh->columns*m_dh->rows*z] = list[13];

@@ -47,7 +47,6 @@ public:
 	int getStartIndexForLine(int);
 	int getLineForPoint(int);
 
-	float* getPoints();
 	float getPointValue(int index);
 	int getLineCount();
 	int getPointCount();
@@ -78,9 +77,9 @@ private:
 	int m_countPoints;
     int m_count;
 
-    float *m_pointArray;
-    float *m_colorArray;
-    float *m_normalArray;
+    std::vector<float> m_pointArray;
+    std::vector<float> m_colorArray;
+    std::vector<float> m_normalArray;
 
     std::vector<int> m_lineArray;
 	std::vector<int> m_linePointers;

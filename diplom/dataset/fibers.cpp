@@ -8,10 +8,6 @@ Fibers::Fibers(DatasetHelper* dh) : DatasetInfo(dh)
 {
     isInitialized = false;
     m_bufferObjects = new GLuint[3];
-
-    m_pointArray = NULL;
-    m_colorArray = NULL;
-    m_normalArray = NULL;
 }
 
 Fibers::~Fibers()
@@ -22,8 +18,10 @@ Fibers::~Fibers()
     if ( m_dh->useVBO )
         glDeleteBuffers(3, m_bufferObjects);
 
-    if ( m_pointArray )
-        delete[] m_pointArray;
+    m_pointArray.clear();
+    m_normalArray.clear();
+    m_colorArray.clear();
+
     if ( m_kdTree )
         delete m_kdTree;
 
@@ -112,7 +110,7 @@ bool Fibers::loadCamino(wxString filename)
     m_reverse.resize(m_countPoints);
     m_selected.resize(m_countLines, false);
 
-    m_pointArray = new float[tmpPoints.size()];
+    m_pointArray.resize( tmpPoints.size() );
 
     for ( size_t i = 0; i < tmpPoints.size() ; ++i)
     {
@@ -148,7 +146,7 @@ bool Fibers::loadCamino(wxString filename)
     m_name = filename.AfterLast('/');
 #endif
 
-    m_kdTree = new KdTree(m_countPoints, m_pointArray, m_dh);
+    m_kdTree = new KdTree(m_countPoints, &m_pointArray[0], m_dh);
 
     return true;
 }
@@ -216,7 +214,7 @@ bool Fibers::loadPTK(wxString filename)
     m_reverse.resize(m_countPoints);
     m_selected.resize(m_countLines, false);
 
-    m_pointArray = new float[tmpPoints.size()];
+    m_pointArray.resize( tmpPoints.size() );
 
     for (size_t i = 0 ; i < tmpPoints.size() ; ++i)
     {
@@ -252,7 +250,7 @@ bool Fibers::loadPTK(wxString filename)
     m_name = filename.AfterLast('/');
 #endif
 
-    m_kdTree = new KdTree(m_countPoints, m_pointArray, m_dh);
+    m_kdTree = new KdTree(m_countPoints, &m_pointArray[0], m_dh);
 
     return true;
 }
@@ -395,33 +393,13 @@ bool Fibers::loadVTK(wxString filename)
     m_reverse.resize(countPoints);
     m_selected.resize(countLines, false);
 
-    m_pointArray = new float[countPoints*3];
-    int* tmpLineArray = new int[lengthLines*4];
+    m_pointArray.resize( countPoints*3 );
     m_lineArray.resize(lengthLines*4);
 
     dataFile.Seek(pc);
-    dataFile.Read(m_pointArray, (size_t) countPoints*12);
+    dataFile.Read(&m_pointArray[0], (size_t) countPoints*12);
     dataFile.Seek(lc);
-    dataFile.Read(tmpLineArray, (size_t) lengthLines*4);
-
-    // toggle endianess for the line array
-    wxUint8 *linebytes = (wxUint8*)tmpLineArray;
-    wxUint8 temp1;
-    for ( size_t i = 0 ; i < m_lineArray.size()*4 ; i +=4)
-    {
-        temp1 = linebytes[i];
-        linebytes[i] = linebytes[i+3];
-        linebytes[i+3] = temp1;
-        temp1 = linebytes[i+1];
-        linebytes[i+1] = linebytes[i+2];
-        linebytes[i+2] = temp1;
-    }
-    // copy the line array to the std::vector
-    for (size_t i = 0 ; i < m_lineArray.size() ; ++i)
-    {
-        m_lineArray[i] = tmpLineArray[i];
-    }
-    delete[] tmpLineArray;
+    dataFile.Read(&m_lineArray[0], (size_t) lengthLines*4);
 
     /*
      * we don't use the color info saved here but calculate our own
@@ -455,8 +433,10 @@ bool Fibers::loadVTK(wxString filename)
 #endif
     //initializeBuffer(); //FIXME!
 
-    m_kdTree = new KdTree(m_countPoints, m_pointArray, m_dh);
+    m_kdTree = new KdTree(m_countPoints, &m_pointArray[0], m_dh);
 
+    delete[] buffer;
+    delete[] temp;
     return true;
 }
 
@@ -597,7 +577,7 @@ void Fibers::toggleEndianess()
     m_dh->printDebug(_T("toggle Endianess"), 1);;
 
     wxUint8 temp;
-    wxUint8 *pointbytes = (wxUint8*)m_pointArray;
+    wxUint8 *pointbytes = (wxUint8*)&m_pointArray[0];
 
     for (int i = 0; i < m_countPoints*12; i +=4)
     {
@@ -607,6 +587,19 @@ void Fibers::toggleEndianess()
         temp = pointbytes[i+1];
         pointbytes[i+1] = pointbytes[i+2];
         pointbytes[i+2] = temp;
+    }
+
+    // toggle endianess for the line array
+    wxUint8 *linebytes = (wxUint8*)&m_lineArray[0];
+
+    for ( size_t i = 0 ; i < m_lineArray.size()*4 ; i +=4)
+    {
+        temp = linebytes[i];
+        linebytes[i] = linebytes[i+3];
+        linebytes[i+3] = temp;
+        temp = linebytes[i+1];
+        linebytes[i+1] = linebytes[i+2];
+        linebytes[i+2] = temp;
     }
 }
 
@@ -655,13 +648,10 @@ void Fibers::createColorArray()
 {
     m_dh->printDebug(_T("create color arrays"), 1);
 
-    if (m_colorArray)
-        delete[] m_colorArray;
-    if (m_normalArray)
-        delete[] m_normalArray;
-
-    m_colorArray = new float[m_countPoints*3];
-    m_normalArray = new float[m_countPoints*3];
+    m_colorArray.clear();
+    m_normalArray.clear();
+    m_colorArray.resize( m_countPoints*3 );
+    m_normalArray.resize( m_countPoints*3 );
 
     int pc = 0;
     float r, g, b, rr, gg, bb;
@@ -739,7 +729,7 @@ void Fibers::resetColorArray()
     }
     else
     {
-        colorData = m_colorArray;
+        colorData = &m_colorArray[0];
     }
 
     int pc = 0;
@@ -864,7 +854,7 @@ void Fibers::updateLinesShown()
             }
             else
             {
-                colorData = m_colorArray;
+                colorData = &m_colorArray[0];
             }
             wxColour col = boxes[i][0]->getFiberColor();
 
@@ -937,7 +927,7 @@ std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
             int z= wxMin(m_dh->frames -1, wxMax(0, (int)m_pointArray[i * 3 + 2]));
             int index = x + y * m_dh->columns + z * m_dh->rows * m_dh->columns;
 
-            if ( (box->m_sourceAnatomy->getFloatDataset(index)
+            if ( (box->m_sourceAnatomy->at(index)
                     - box->getThreshold() ) > 0.01f)
             {
                 m_selected[getLineForPoint(i)] = 1;
@@ -990,7 +980,7 @@ void Fibers::initializeBuffer()
     bool isOK = true;
     glGenBuffers(3, m_bufferObjects);
     glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, m_pointArray, GL_STATIC_DRAW );
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, &m_pointArray[0], GL_STATIC_DRAW );
     if (m_dh->GLError())
     {
         m_dh->printGLError(wxT("initialize vbo points"));
@@ -999,7 +989,7 @@ void Fibers::initializeBuffer()
     if (isOK)
     {
         glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, m_colorArray, GL_STATIC_DRAW );
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, &m_colorArray[0], GL_STATIC_DRAW );
         if (m_dh->GLError())
         {
             m_dh->printGLError(wxT("initialize vbo colors"));
@@ -1009,7 +999,7 @@ void Fibers::initializeBuffer()
     if (isOK)
     {
         glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, m_normalArray, GL_STATIC_DRAW );
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, &m_normalArray[0], GL_STATIC_DRAW );
         if (m_dh->GLError())
         {
             m_dh->printGLError(wxT("initialize vbo normals"));
@@ -1048,12 +1038,12 @@ void Fibers::draw()
 
     if (!m_dh->useVBO)
     {
-        glVertexPointer(3, GL_FLOAT, 0, m_pointArray);
+        glVertexPointer(3, GL_FLOAT, 0, &m_pointArray[0]);
         if (m_showFS)
-            glColorPointer(3, GL_FLOAT, 0, m_colorArray); // global colors
+            glColorPointer(3, GL_FLOAT, 0, &m_colorArray[0]); // global colors
         else
-            glColorPointer(3, GL_FLOAT, 0, m_normalArray); // local colors
-        glNormalPointer(GL_FLOAT, 0, m_normalArray);
+            glColorPointer(3, GL_FLOAT, 0, &m_normalArray[0]); // local colors
+        glNormalPointer(GL_FLOAT, 0, &m_normalArray[0]);
     }
     else
     {
@@ -1208,8 +1198,8 @@ void Fibers::drawFakeTubes()
     }
     else
     {
-        colors = m_colorArray;
-        normals = m_normalArray;
+        colors = &m_colorArray[0];
+        normals = &m_normalArray[0];
     }
 
     if (m_dh->getPointMode())
@@ -1459,8 +1449,8 @@ void Fibers::drawSortedLines()
     }
     else
     {
-        colors = m_colorArray;
-        normals = m_normalArray;
+        colors = &m_colorArray[0];
+        normals = &m_normalArray[0];
     }
 
     if (m_dh->getPointMode())
@@ -1506,7 +1496,7 @@ void Fibers::switchNormals(bool positive)
     }
     else
     {
-        normals = m_normalArray;
+        normals = &m_normalArray[0];
     }
 
     if (positive)
@@ -1588,13 +1578,8 @@ void Fibers::switchNormals(bool positive)
 
 void Fibers::freeArrays()
 {
-    delete[] m_colorArray;
-    delete[] m_normalArray;
-}
-
-float* Fibers::getPoints()
-{
-    return m_pointArray;
+    m_colorArray.clear();
+    m_normalArray.clear();
 }
 
 float Fibers::getPointValue(int index)

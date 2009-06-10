@@ -26,10 +26,10 @@ public:
 	void draw() {};
 	GLuint getGLuint();
 
-	float* getFloatDataset() { return m_floatDataset;};
-	float getFloatDataset(int i) {return m_floatDataset[i];};
-	float at(int i) {return m_floatDataset[i];};
-	TensorField* getTensorField() { return m_tensorField; };
+	float* getFloatDataset();
+	float at(int i);
+	TensorField* getTensorField();
+
 	bool loadNifti(wxString filename);
 	void saveNifti(wxString filename);
 	void setZero(int x, int y, int z);
@@ -54,7 +54,7 @@ private:
 	void dilate1(std::vector<bool>*, int index);
 	void erode1(std::vector<bool>*, int index);
 
-	float *m_floatDataset;
+	std::vector<float> m_floatDataset;
 	TensorField* m_tensorField;
 };
 
