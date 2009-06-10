@@ -73,7 +73,7 @@ public:
 	int* m_lineArray;
 	float *m_colorArray;
 	float *m_normalArray;
-	std::vector<bool>m_inBox;
+	std::vector<bool>m_selected;
 
 	int m_lengthPoints;
 	int m_lengthLines;

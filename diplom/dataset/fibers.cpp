@@ -17,13 +17,22 @@ Fibers::Fibers(DatasetHelper* dh) : DatasetInfo(dh)
 
 Fibers::~Fibers()
 {
-    delete[] m_linePointers;
-    delete[] m_pointArray;
-    delete[] m_lineArray;
-    delete[] m_reverse;
-    delete m_kdTree;
-    glDeleteBuffers(3, m_bufferObjects);
+    m_dh->printDebug(_T("executing fibers destructor"), 1);
     m_dh->fibers_loaded = false;
+
+    if ( m_dh->useVBO )
+        glDeleteBuffers(3, m_bufferObjects);
+
+    if ( m_linePointers )
+        delete[] m_linePointers;
+    if ( m_pointArray )
+        delete[] m_pointArray;
+    if ( m_lineArray )
+        delete[] m_lineArray;
+    if ( m_reverse )
+        delete[] m_reverse;
+    if ( m_kdTree )
+        delete m_kdTree;
 }
 
 bool Fibers::load(wxString filename)
@@ -104,7 +113,7 @@ bool Fibers::loadCamino(wxString filename)
     m_linePointers = new int[m_countLines+1];
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse = new int[m_countPoints];
-    m_inBox.resize(m_countLines, false);
+    m_selected.resize(m_countLines, false);
 
     m_lengthPoints = tmpPoints.size(); // size of the point array
     m_lengthLines = tmpLines.size(); // size of the line array
@@ -217,7 +226,7 @@ bool Fibers::loadPTK(wxString filename)
     m_linePointers = new int[m_countLines+1];
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse = new int[m_countPoints];
-    m_inBox.resize(m_countLines, false);
+    m_selected.resize(m_countLines, false);
 
     m_lengthPoints = tmpPoints.size(); // size of the point array
     m_lengthLines = tmpLines.size(); // size of the line array
@@ -402,7 +411,7 @@ bool Fibers::loadVTK(wxString filename)
     m_linePointers = new int[countLines+1];
     m_linePointers[countLines] = countPoints;
     m_reverse = new int[countPoints];
-    m_inBox.resize(countLines, false);
+    m_selected.resize(countLines, false);
 
     m_pointArray = new float[countPoints*3];
     m_lineArray = new int[lengthLines*4];
@@ -661,7 +670,7 @@ void Fibers::resetLinesShown()
 {
     for (int i = 0; i < m_countLines; ++i)
     {
-        m_inBox[i] = 0;
+        m_selected[i] = 0;
     }
 }
 
@@ -673,7 +682,7 @@ void Fibers::updateLinesShown()
     {
         for (int i = 0; i < m_countLines; ++i)
         {
-            m_inBox[i] = 1;
+            m_selected[i] = 1;
         }
         return;
     }
@@ -684,6 +693,10 @@ void Fibers::updateLinesShown()
         {
             if (boxes[i][0]->isDirty())
             {
+                boxes[i][0]->m_inBox.clear();
+                boxes[i][0]->m_inBox.resize(m_countLines);
+                boxes[i][0]->m_inBranch.clear();
+                boxes[i][0]->m_inBranch.resize(m_countLines);
                 boxes[i][0]->m_inBox = getLinesShown(boxes[i][0]);
                 boxes[i][0]->setDirty(false);
             }
@@ -697,6 +710,8 @@ void Fibers::updateLinesShown()
                 {
                     if (boxes[i][j]->isDirty())
                     {
+                        boxes[i][j]->m_inBox.clear();
+                        boxes[i][j]->m_inBox.resize(m_countLines);
                         boxes[i][j]->m_inBox = getLinesShown(boxes[i][j]);
                         boxes[i][j]->setDirty(false);
                     }
@@ -758,14 +773,14 @@ void Fibers::updateLinesShown()
         if (boxes[i].size() > 0 && boxes[i][0]->getActive())
         {
             for (int k = 0; k <m_countLines; ++k)
-                m_inBox[k] = m_inBox[k] | boxes[i][0]->m_inBranch[k];
+                m_selected[k] = m_selected[k] | boxes[i][0]->m_inBranch[k];
         }
     }
     if (m_dh->fibersInverted)
     {
         for (int k = 0; k <m_countLines; ++k)
         {
-            m_inBox[k] = !m_inBox[k];
+            m_selected[k] = !m_selected[k];
         }
     }
 }
@@ -802,11 +817,11 @@ std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
             if ( (box->m_sourceAnatomy->getFloatDataset(index)
                     - box->getThreshold() ) > 0.01f)
             {
-                m_inBox[getLineForPoint(i)] = 1;
+                m_selected[getLineForPoint(i)] = 1;
             }
         }
     }
-    return m_inBox;
+    return m_selected;
 }
 
 void Fibers::boxTest(int left, int right, int axis)
@@ -835,7 +850,7 @@ void Fibers::boxTest(int left, int right, int axis)
                 && m_pointArray[pointIndex + axis2] <= m_boxMax[axis2]
                 && m_pointArray[pointIndex + axis2] >= m_boxMin[axis2])
         {
-            m_inBox[getLineForPoint(m_kdTree->m_tree[root])] = 1;
+            m_selected[getLineForPoint(m_kdTree->m_tree[root])] = 1;
         }
         boxTest(left, root -1, axis1);
         boxTest(root+1, right, axis1);
@@ -941,7 +956,7 @@ void Fibers::draw()
 
     for (int i = 0; i < m_countLines; ++i)
     {
-        if (m_inBox[i] == 1)
+        if (m_selected[i] == 1)
             glDrawArrays(GL_LINE_STRIP, getStartIndexForLine(i), getPointsPerLine(i));
     }
 
@@ -1019,7 +1034,7 @@ void Fibers::barycenterTest(int left, int right, int axis)
     else
     {
         int axis2 = (axis+2) % 3;
-        if (m_inBox[getLineForPoint(m_kdTree->m_tree[root])] == 1
+        if (m_selected[getLineForPoint(m_kdTree->m_tree[root])] == 1
                 && m_pointArray[pointIndex + axis1] <= m_boxMax[axis1]
                 && m_pointArray[pointIndex + axis1] >= m_boxMin[axis1]
                 && m_pointArray[pointIndex + axis2] <= m_boxMax[axis2]
@@ -1051,7 +1066,7 @@ void Fibers::save(wxString filename)
 
     for (int l = 0; l < m_countLines; ++l)
     {
-        if (m_inBox[l])
+        if (m_selected[l])
         {
             unsigned int pc = getStartIndexForLine(l)*3;
 
@@ -1224,7 +1239,7 @@ void Fibers::drawFakeTubes()
 
             for (int i=0; i < m_countLines; ++i)
             {
-                if (m_inBox[i])
+                if (m_selected[i])
                     nbSnipplets += getPointsPerLine(i)-1;
             }
             snippletsort = new unsigned int[nbSnipplets+1];
@@ -1233,7 +1248,7 @@ void Fibers::drawFakeTubes()
             int snp = 0;
             for (int i=0; i < m_countLines; ++i)
             {
-                if (!m_inBox[i])
+                if (!m_selected[i])
                     continue;
                 const unsigned int p = getPointsPerLine(i);
 
@@ -1336,7 +1351,7 @@ void Fibers::drawFakeTubes()
     {
         for (int i = 0; i < m_countLines; ++i)
         {
-            if (m_inBox[i] == 1)
+            if (m_selected[i] == 1)
             {
                 glBegin(GL_QUAD_STRIP);
                 int idx = getStartIndexForLine(i)*3;
@@ -1374,7 +1389,7 @@ void Fibers::drawSortedLines()
         // estimate memory required for arrays
         for (int i=0; i < m_countLines; ++i)
         {
-            if (m_inBox[i])
+            if (m_selected[i])
                 nbSnipplets += getPointsPerLine(i)-1;
         }
         // std::cout << "nb snipplets total: " << nbSnipplets << std::endl;
@@ -1385,7 +1400,7 @@ void Fibers::drawSortedLines()
         int snp = 0;
         for (int i=0; i < m_countLines; ++i)
         {
-            if (!m_inBox[i])
+            if (!m_selected[i])
                 continue;
             const unsigned int p = getPointsPerLine(i);
 

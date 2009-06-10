@@ -702,7 +702,7 @@ void Anatomy::minimize()
 
     for (int i = 0; i < fib->getLineCount(); ++i)
     {
-        if (fib->m_inBox[i] == 1)
+        if (fib->m_selected[i] == 1)
         {
             for (int j = fib->getStartIndexForLine(i); j < (fib->getStartIndexForLine(i)
                     + (fib->getPointsPerLine(i) * 3)); ++j)
