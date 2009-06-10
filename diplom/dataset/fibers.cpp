@@ -10,7 +10,6 @@ Fibers::Fibers(DatasetHelper* dh) : DatasetInfo(dh)
     m_bufferObjects = new GLuint[3];
 
     m_pointArray = NULL;
-    m_lineArray = NULL;
     m_colorArray = NULL;
     m_normalArray = NULL;
 }
@@ -23,16 +22,14 @@ Fibers::~Fibers()
     if ( m_dh->useVBO )
         glDeleteBuffers(3, m_bufferObjects);
 
-    if ( m_linePointers )
-        delete[] m_linePointers;
     if ( m_pointArray )
         delete[] m_pointArray;
-    if ( m_lineArray )
-        delete[] m_lineArray;
-    if ( m_reverse )
-        delete[] m_reverse;
     if ( m_kdTree )
         delete m_kdTree;
+
+    m_lineArray.clear();
+    m_linePointers.clear();
+    m_reverse.clear();
 }
 
 bool Fibers::load(wxString filename)
@@ -54,7 +51,6 @@ bool Fibers::loadCamino(wxString filename)
     int pc = 0;
     converterByteFloat cbf;
     std::vector<float> tmpPoints;
-    std::vector<int> tmpLines;
 
     if (dataFile.Open(filename))
     {
@@ -81,12 +77,12 @@ bool Fibers::loadCamino(wxString filename)
         cbf.b[1] = buffer[pc++];
         cbf.b[0] = buffer[pc++];
         cl = (int) cbf.f;
-        tmpLines.push_back(cl);
+        m_lineArray.push_back(cl);
 
         pc += 4;
         for (int i = 0; i < cl; ++i)
         {
-            tmpLines.push_back(m_countPoints);
+            m_lineArray.push_back(m_countPoints);
             ++m_countPoints;
 
             cbf.b[3] = buffer[pc++];
@@ -110,24 +106,17 @@ bool Fibers::loadCamino(wxString filename)
         }
     }
 
-    m_linePointers = new int[m_countLines+1];
+    m_linePointers.resize(m_countLines+1);
     m_linePointers[m_countLines] = m_countPoints;
-    m_reverse = new int[m_countPoints];
+
+    m_reverse.resize(m_countPoints);
     m_selected.resize(m_countLines, false);
 
-    m_lengthPoints = tmpPoints.size(); // size of the point array
-    m_lengthLines = tmpLines.size(); // size of the line array
+    m_pointArray = new float[tmpPoints.size()];
 
-    m_pointArray = new float[m_lengthPoints];
-    m_lineArray = new int[m_lengthLines];
-
-    for (int i = 0; i < m_lengthPoints; ++i)
+    for ( size_t i = 0; i < tmpPoints.size() ; ++i)
     {
         m_pointArray[i] = tmpPoints[i];
-    }
-    for (int i = 0; i < m_lengthLines; ++i)
-    {
-        m_lineArray[i] = tmpLines[i];
     }
 
     printf("%d lines and %d points \n", m_countLines, m_countPoints);
@@ -173,7 +162,6 @@ bool Fibers::loadPTK(wxString filename)
     converterByteINT32 cbi;
     converterByteFloat cbf;
     std::vector<float> tmpPoints;
-    std::vector<int> tmpLines;
 
     if (dataFile.Open(filename))
     {
@@ -197,11 +185,11 @@ bool Fibers::loadPTK(wxString filename)
         cbi.b[2] = buffer[pc++];
         cbi.b[3] = buffer[pc++];
 
-        tmpLines.push_back(cbi.i);
+        m_lineArray.push_back(cbi.i);
 
         for (size_t i = 0; i < cbi.i; ++i)
         {
-            tmpLines.push_back(m_countPoints);
+            m_lineArray.push_back(m_countPoints);
             ++m_countPoints;
 
             cbf.b[0] = buffer[pc++];
@@ -223,24 +211,16 @@ bool Fibers::loadPTK(wxString filename)
 
     }
 
-    m_linePointers = new int[m_countLines+1];
+    m_linePointers.resize(m_countLines+1);
     m_linePointers[m_countLines] = m_countPoints;
-    m_reverse = new int[m_countPoints];
+    m_reverse.resize(m_countPoints);
     m_selected.resize(m_countLines, false);
 
-    m_lengthPoints = tmpPoints.size(); // size of the point array
-    m_lengthLines = tmpLines.size(); // size of the line array
+    m_pointArray = new float[tmpPoints.size()];
 
-    m_pointArray = new float[m_lengthPoints];
-    m_lineArray = new int[m_lengthLines];
-
-    for (int i = 0; i < m_lengthPoints; ++i)
+    for (size_t i = 0 ; i < tmpPoints.size() ; ++i)
     {
         m_pointArray[i] = tmpPoints[i];
-    }
-    for (int i = 0; i < m_lengthLines; ++i)
-    {
-        m_lineArray[i] = tmpLines[i];
     }
 
     printf("%d lines and %d points \n", m_countLines, m_countPoints);
@@ -374,7 +354,9 @@ bool Fibers::loadVTK(wxString filename)
     sLines = sLines.BeforeFirst(' ');
     if (!sLines.ToLong(&tempValue, 10))
         return false; //can't read lines
+
     int countLines = (int)tempValue;
+
     // start postion of the line array in the file
     int lc = i;
 
@@ -408,20 +390,39 @@ bool Fibers::loadVTK(wxString filename)
     m_countLines = countLines;
     m_dh->countFibers = m_countLines;
     m_countPoints = countPoints;
-    m_linePointers = new int[countLines+1];
+    m_linePointers.resize(m_countLines+1);
     m_linePointers[countLines] = countPoints;
-    m_reverse = new int[countPoints];
+    m_reverse.resize(countPoints);
     m_selected.resize(countLines, false);
 
     m_pointArray = new float[countPoints*3];
-    m_lineArray = new int[lengthLines*4];
-    m_lengthPoints = countPoints*3;
-    m_lengthLines = lengthLines;
+    int* tmpLineArray = new int[lengthLines*4];
+    m_lineArray.resize(lengthLines*4);
 
     dataFile.Seek(pc);
     dataFile.Read(m_pointArray, (size_t) countPoints*12);
     dataFile.Seek(lc);
-    dataFile.Read(m_lineArray, (size_t) lengthLines*4);
+    dataFile.Read(tmpLineArray, (size_t) lengthLines*4);
+
+    // toggle endianess for the line array
+    wxUint8 *linebytes = (wxUint8*)tmpLineArray;
+    wxUint8 temp1;
+    for ( size_t i = 0 ; i < m_lineArray.size()*4 ; i +=4)
+    {
+        temp1 = linebytes[i];
+        linebytes[i] = linebytes[i+3];
+        linebytes[i+3] = temp1;
+        temp1 = linebytes[i+1];
+        linebytes[i+1] = linebytes[i+2];
+        linebytes[i+2] = temp1;
+    }
+    // copy the line array to the std::vector
+    for (size_t i = 0 ; i < m_lineArray.size() ; ++i)
+    {
+        m_lineArray[i] = tmpLineArray[i];
+    }
+    delete[] tmpLineArray;
+
     /*
      * we don't use the color info saved here but calculate our own
      *
@@ -459,6 +460,156 @@ bool Fibers::loadVTK(wxString filename)
     return true;
 }
 
+void Fibers::save(wxString filename)
+{
+    if (filename.AfterLast('.') != _T("fib"))
+        filename += _T(".fib");
+    std::vector<float> pointsToSave;
+    std::vector<int> linesToSave;
+    std::vector<float> colorsToSave;
+    int pointIndex = 0;
+    int countLines = 0;
+
+    float redVal = 0.5f;
+    float greenVal = 0.5;
+    float blueVal = 0.5f;
+
+    for (int l = 0; l < m_countLines; ++l)
+    {
+        if (m_selected[l])
+        {
+            unsigned int pc = getStartIndexForLine(l)*3;
+
+            linesToSave.push_back(getPointsPerLine(l));
+
+            for (int j = 0; j < getPointsPerLine(l) ; ++j)
+            {
+                pointsToSave.push_back(m_dh->columns * m_dh->xVoxel - m_pointArray[pc]);
+                ++pc;
+                pointsToSave.push_back(m_dh->rows * m_dh->yVoxel - m_pointArray[pc]);
+                ++pc;
+                pointsToSave.push_back(m_pointArray[pc]);
+                ++pc;
+
+                linesToSave.push_back(pointIndex);
+                ++pointIndex;
+
+                colorsToSave.push_back(redVal);
+                colorsToSave.push_back(greenVal);
+                colorsToSave.push_back(blueVal);
+            }
+            ++countLines;
+        }
+    }
+
+    converterByteINT32 c;
+    converterByteFloat f;
+
+    std::ofstream myfile;
+    std::vector<char> vBuffer;
+
+    std::string header1 =
+            "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
+    header1 += intToString(pointsToSave.size()/3);
+    header1 += " float\n";
+
+    for (unsigned int i = 0; i < header1.size() ; ++i)
+    {
+        vBuffer.push_back(header1[i]);
+    }
+
+    for (unsigned int i = 0; i < pointsToSave.size() ; ++i)
+    {
+        f.f = pointsToSave[i];
+        vBuffer.push_back(f.b[3]);
+        vBuffer.push_back(f.b[2]);
+        vBuffer.push_back(f.b[1]);
+        vBuffer.push_back(f.b[0]);
+    }
+
+    vBuffer.push_back('\n');
+    std::string header2 = "LINES " + intToString(countLines) + " "
+            + intToString(linesToSave.size()) + "\n";
+
+    for (unsigned int i = 0; i < header2.size() ; ++i)
+    {
+        vBuffer.push_back(header2[i]);
+    }
+
+    for (unsigned int i = 0; i < linesToSave.size() ; ++i)
+    {
+        c.i = linesToSave[i];
+        vBuffer.push_back(c.b[3]);
+        vBuffer.push_back(c.b[2]);
+        vBuffer.push_back(c.b[1]);
+        vBuffer.push_back(c.b[0]);
+    }
+
+    vBuffer.push_back('\n');
+
+    std::string header3 = "CELL_DATA 0\n";
+    header3 += "COLOR_SCALARS scalars 3\n";
+
+    for (unsigned int i = 0; i < header3.size() ; ++i)
+    {
+        vBuffer.push_back(header3[i]);
+    }
+
+    for (unsigned int i = 0; i < colorsToSave.size() ; ++i)
+    {
+        f.f = colorsToSave[i];
+        vBuffer.push_back(f.b[0]);
+        vBuffer.push_back(f.b[1]);
+        vBuffer.push_back(f.b[2]);
+        vBuffer.push_back(f.b[3]);
+    }
+
+    vBuffer.push_back('\n');
+
+    // finally put the buffer vector into a char* array
+    char * buffer;
+    buffer = new char [vBuffer.size()];
+
+    for (unsigned int i = 0; i < vBuffer.size() ; ++i)
+    {
+        buffer[i] = vBuffer[i];
+    }
+
+    char* fn;
+    fn = (char*)malloc(filename.length());
+    strcpy(fn, (const char*)filename.mb_str(wxConvUTF8));
+
+    myfile.open(fn, std::ios::binary);
+    myfile.write(buffer, vBuffer.size());
+
+    myfile.close();
+}
+
+std::string Fibers::intToString(int number)
+{
+    std::stringstream out;
+    out << number;
+    return out.str();
+}
+
+void Fibers::toggleEndianess()
+{
+    m_dh->printDebug(_T("toggle Endianess"), 1);;
+
+    wxUint8 temp;
+    wxUint8 *pointbytes = (wxUint8*)m_pointArray;
+
+    for (int i = 0; i < m_countPoints*12; i +=4)
+    {
+        temp = pointbytes[i];
+        pointbytes[i] = pointbytes[i+3];
+        pointbytes[i+3] = temp;
+        temp = pointbytes[i+1];
+        pointbytes[i+1] = pointbytes[i+2];
+        pointbytes[i+2] = temp;
+    }
+}
+
 int Fibers::getPointsPerLine(int line)
 {
     return (m_linePointers[line+1] - m_linePointers[line]);
@@ -467,6 +618,11 @@ int Fibers::getPointsPerLine(int line)
 int Fibers::getStartIndexForLine(int line)
 {
     return m_linePointers[line];
+}
+
+int Fibers::getLineForPoint(int point)
+{
+    return m_reverse[point];
 }
 
 void Fibers::calculateLinePointers()
@@ -492,39 +648,6 @@ void Fibers::calculateLinePointers()
         if (i == m_linePointers[lc+1])
             ++lc;
         m_reverse[i] = lc;
-    }
-}
-
-int Fibers::getLineForPoint(int point)
-{
-    return m_reverse[point];
-}
-
-void Fibers::toggleEndianess()
-{
-    m_dh->printDebug(_T("toggle Endianess"), 1);;
-
-    wxUint8 *pointbytes = (wxUint8*)m_pointArray;
-    wxUint8 temp;
-    for (int i = 0; i < m_lengthPoints*4; i +=4)
-    {
-        temp = pointbytes[i];
-        pointbytes[i] = pointbytes[i+3];
-        pointbytes[i+3] = temp;
-        temp = pointbytes[i+1];
-        pointbytes[i+1] = pointbytes[i+2];
-        pointbytes[i+2] = temp;
-    }
-
-    wxUint8 *linebytes = (wxUint8*)m_lineArray;
-    for (int i = 0; i < m_lengthLines*4; i +=4)
-    {
-        temp = linebytes[i];
-        linebytes[i] = linebytes[i+3];
-        linebytes[i+3] = temp;
-        temp = linebytes[i+1];
-        linebytes[i+1] = linebytes[i+2];
-        linebytes[i+2] = temp;
     }
 }
 
@@ -795,8 +918,8 @@ std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
     {
         Vector vpos = box->getCenter();
         Vector vsize = box->getSize();
-        m_boxMin = new float[3];
-        m_boxMax = new float[3];
+        m_boxMin.resize(3);
+        m_boxMax.resize(3);
         m_boxMin[0] = vpos.x - vsize.x/2 * m_dh->xVoxel;
         m_boxMax[0] = vpos.x + vsize.x/2 * m_dh->xVoxel;
         m_boxMin[1] = vpos.y - vsize.y/2 * m_dh->yVoxel;
@@ -973,8 +1096,8 @@ bool Fibers::getBarycenter(SplinePoint* point)
     int threshold = 20;
     // multiplier for moving the point towards the barycenter
 
-    m_boxMin = new float[3];
-    m_boxMax = new float[3];
+    m_boxMin.resize(3);
+    m_boxMax.resize(3);
     m_boxMin[0] = point->X() - 25.0/2;
     m_boxMax[0] = point->X() + 25.0/2;
     m_boxMin[1] = point->Y() - 5.0/2;
@@ -1048,138 +1171,6 @@ void Fibers::barycenterTest(int left, int right, int axis)
         barycenterTest(left, root -1, axis1);
         barycenterTest(root+1, right, axis1);
     }
-}
-
-void Fibers::save(wxString filename)
-{
-    if (filename.AfterLast('.') != _T("fib"))
-        filename += _T(".fib");
-    std::vector<float> pointsToSave;
-    std::vector<int> linesToSave;
-    std::vector<float> colorsToSave;
-    int pointIndex = 0;
-    int countLines = 0;
-
-    float redVal = 0.5f;
-    float greenVal = 0.5;
-    float blueVal = 0.5f;
-
-    for (int l = 0; l < m_countLines; ++l)
-    {
-        if (m_selected[l])
-        {
-            unsigned int pc = getStartIndexForLine(l)*3;
-
-            linesToSave.push_back(getPointsPerLine(l));
-
-            for (int j = 0; j < getPointsPerLine(l) ; ++j)
-            {
-                pointsToSave.push_back(m_dh->columns * m_dh->xVoxel - m_pointArray[pc]);
-                ++pc;
-                pointsToSave.push_back(m_dh->rows * m_dh->yVoxel - m_pointArray[pc]);
-                ++pc;
-                pointsToSave.push_back(m_pointArray[pc]);
-                ++pc;
-
-                linesToSave.push_back(pointIndex);
-                ++pointIndex;
-
-                colorsToSave.push_back(redVal);
-                colorsToSave.push_back(greenVal);
-                colorsToSave.push_back(blueVal);
-            }
-            ++countLines;
-        }
-    }
-
-    converterByteINT32 c;
-    converterByteFloat f;
-
-    std::ofstream myfile;
-    std::vector<char> vBuffer;
-
-    std::string header1 =
-            "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
-    header1 += intToString(pointsToSave.size()/3);
-    header1 += " float\n";
-
-    for (unsigned int i = 0; i < header1.size() ; ++i)
-    {
-        vBuffer.push_back(header1[i]);
-    }
-
-    for (unsigned int i = 0; i < pointsToSave.size() ; ++i)
-    {
-        f.f = pointsToSave[i];
-        vBuffer.push_back(f.b[3]);
-        vBuffer.push_back(f.b[2]);
-        vBuffer.push_back(f.b[1]);
-        vBuffer.push_back(f.b[0]);
-    }
-
-    vBuffer.push_back('\n');
-    std::string header2 = "LINES " + intToString(countLines) + " "
-            + intToString(linesToSave.size()) + "\n";
-
-    for (unsigned int i = 0; i < header2.size() ; ++i)
-    {
-        vBuffer.push_back(header2[i]);
-    }
-
-    for (unsigned int i = 0; i < linesToSave.size() ; ++i)
-    {
-        c.i = linesToSave[i];
-        vBuffer.push_back(c.b[3]);
-        vBuffer.push_back(c.b[2]);
-        vBuffer.push_back(c.b[1]);
-        vBuffer.push_back(c.b[0]);
-    }
-
-    vBuffer.push_back('\n');
-
-    std::string header3 = "CELL_DATA 0\n";
-    header3 += "COLOR_SCALARS scalars 3\n";
-
-    for (unsigned int i = 0; i < header3.size() ; ++i)
-    {
-        vBuffer.push_back(header3[i]);
-    }
-
-    for (unsigned int i = 0; i < colorsToSave.size() ; ++i)
-    {
-        f.f = colorsToSave[i];
-        vBuffer.push_back(f.b[0]);
-        vBuffer.push_back(f.b[1]);
-        vBuffer.push_back(f.b[2]);
-        vBuffer.push_back(f.b[3]);
-    }
-
-    vBuffer.push_back('\n');
-
-    // finally put the buffer vector into a char* array
-    char * buffer;
-    buffer = new char [vBuffer.size()];
-
-    for (unsigned int i = 0; i < vBuffer.size() ; ++i)
-    {
-        buffer[i] = vBuffer[i];
-    }
-
-    char* fn;
-    fn = (char*)malloc(filename.length());
-    strcpy(fn, (const char*)filename.mb_str(wxConvUTF8));
-
-    myfile.open(fn, std::ios::binary);
-    myfile.write(buffer, vBuffer.size());
-
-    myfile.close();
-}
-
-std::string Fibers::intToString(int number)
-{
-    std::stringstream out;
-    out << number;
-    return out.str();
 }
 
 namespace
@@ -1593,4 +1584,35 @@ void Fibers::switchNormals(bool positive)
     {
         glUnmapBuffer(GL_ARRAY_BUFFER);
     }
+}
+
+void Fibers::freeArrays()
+{
+    delete[] m_colorArray;
+    delete[] m_normalArray;
+}
+
+float* Fibers::getPoints()
+{
+    return m_pointArray;
+}
+
+float Fibers::getPointValue(int index)
+{
+    return m_pointArray[index];
+}
+
+int Fibers::getLineCount()
+{
+    return m_countLines;
+}
+
+int Fibers::getPointCount()
+{
+    return m_countPoints;
+}
+
+bool Fibers::isSelected(int fiber)
+{
+    return m_selected[fiber];
 }

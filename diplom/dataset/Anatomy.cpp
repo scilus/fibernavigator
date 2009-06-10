@@ -702,14 +702,14 @@ void Anatomy::minimize()
 
     for (int i = 0; i < fib->getLineCount(); ++i)
     {
-        if (fib->m_selected[i] == 1)
+        if ( fib->isSelected(i) )
         {
             for (int j = fib->getStartIndexForLine(i); j < (fib->getStartIndexForLine(i)
                     + (fib->getPointsPerLine(i) * 3)); ++j)
             {
-                x = wxMin(m_dh->columns - 1, wxMax(0, (int) fib->m_pointArray[j++]));
-                y = wxMin(m_dh->rows - 1, wxMax(0, (int) fib->m_pointArray[j++]));
-                z = wxMin(m_dh->frames - 1, wxMax(0, (int) fib->m_pointArray[j]));
+                x = wxMin(m_dh->columns - 1, wxMax(0, (int) fib->getPointValue(j++)));
+                y = wxMin(m_dh->rows - 1, wxMax(0, (int) fib->getPointValue(j++)));
+                z = wxMin(m_dh->frames - 1, wxMax(0, (int) fib->getPointValue(j)));
                 int index = x + y * m_dh->columns + z * m_dh->rows * m_dh->columns;
                 tmp[index] = true;
             }

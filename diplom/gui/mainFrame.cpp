@@ -922,11 +922,11 @@ void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
 
                 for (int j = 0; j < f->getPointsPerLine(l) ; ++j)
                 {
-                    x = (int)f->m_pointArray[pc];
+                    x = (int)f->getPointValue(pc);
                     ++pc;
-                    y = (int)f->m_pointArray[pc];
+                    y = (int)f->getPointValue(pc);
                     ++pc;
-                    z = (int)f->m_pointArray[pc];
+                    z = (int)f->getPointValue(pc);
                     ++pc;
 
                     int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows) * 3;
@@ -968,11 +968,11 @@ void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
 
                 for (int j = 0; j < f->getPointsPerLine(l) ; ++j)
                 {
-                    x = (int)f->m_pointArray[pc];
+                    x = (int)f->getPointValue(pc);
                     ++pc;
-                    y = (int)f->m_pointArray[pc];
+                    y = (int)f->getPointValue(pc);
                     ++pc;
-                    z = (int)f->m_pointArray[pc];
+                    z = (int)f->getPointValue(pc);
                     ++pc;
 
                     int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows);

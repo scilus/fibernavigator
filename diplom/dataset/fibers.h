@@ -32,6 +32,7 @@ public:
 	bool loadVTK(wxString filename);
 	bool loadPTK(wxString filename);
 	bool loadCamino(wxString filename);
+	void save(wxString filename);
 	void draw();
 	void generateTexture() {};
 	void generateGeometry() {};
@@ -45,55 +46,51 @@ public:
 	int getPointsPerLine(int);
 	int getStartIndexForLine(int);
 	int getLineForPoint(int);
-	void setPoints(float* points) {m_pointArray = points;};
-	float* getPoints() {return m_pointArray;};
-	int getLineCount() {return m_countLines;};
-	int getPointCount() {return m_countPoints;};
-	void calculateLinePointers();
 
-	void resetLinesShown();
-	std::vector<bool> getLinesShown(SelectionBox*);
-	void updateLinesShown();
-	void boxTest(int, int, int);
+	float* getPoints();
+	float getPointValue(int index);
+	int getLineCount();
+	int getPointCount();
 
 	bool getBarycenter(SplinePoint*);
-	void barycenterTest(int, int, int);
 
-	void toggleEndianess();
-	void createColorArray();
-	void resetColorArray();
-	void freeArrays() {delete[] m_colorArray; delete[] m_normalArray;};
+    void updateLinesShown();
+    void resetColorArray();
+    void switchNormals(bool positive);
+    bool isSelected(int fiber);
 
-	void save(wxString filename);
-	void drawFakeTubes();
-	void drawSortedLines();
-	void switchNormals(bool positive);
-
-	float *m_pointArray;
-	int* m_lineArray;
-	float *m_colorArray;
-	float *m_normalArray;
-	std::vector<bool>m_selected;
-
-	int m_lengthPoints;
-	int m_lengthLines;
 
 private:
 	std::string intToString(int number);
-
-	int m_countLines;
-	int m_countPoints;
-	int *m_linePointers;
-	int *m_reverse;
-	KdTree *m_kdTree;
-
-	float *m_boxMin;
-	float *m_boxMax;
-
-	int m_count;
-	Vector m_barycenter;
+    void calculateLinePointers();
+    void resetLinesShown();
+    std::vector<bool> getLinesShown(SelectionBox*);
+    void boxTest(int, int, int);
+    void barycenterTest(int, int, int);
+    void toggleEndianess();
+    void createColorArray();
+    void freeArrays();
+    void drawFakeTubes();
+    void drawSortedLines();
 
 	bool isInitialized;
+	int m_countLines;
+	int m_countPoints;
+    int m_count;
+
+    float *m_pointArray;
+    float *m_colorArray;
+    float *m_normalArray;
+
+    std::vector<int> m_lineArray;
+	std::vector<int> m_linePointers;
+	std::vector<int> m_reverse;
+	std::vector<bool> m_selected;
+	std::vector<float> m_boxMin;
+	std::vector<float> m_boxMax;
+
+	KdTree *m_kdTree;
+	Vector m_barycenter;
 };
 
 #endif /*CURVES_H_*/
