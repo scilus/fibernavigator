@@ -72,7 +72,8 @@ private:
     void drawFakeTubes();
     void drawSortedLines();
 
-	bool isInitialized;
+	bool m_isInitialized;
+	bool m_normalsPositive;
 	int m_countLines;
 	int m_countPoints;
     int m_count;

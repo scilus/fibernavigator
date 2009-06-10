@@ -6,7 +6,8 @@
 
 Fibers::Fibers(DatasetHelper* dh) : DatasetInfo(dh)
 {
-    isInitialized = false;
+    m_isInitialized = false;
+    m_normalsPositive = false;
     m_bufferObjects = new GLuint[3];
 }
 
@@ -972,9 +973,9 @@ void Fibers::boxTest(int left, int right, int axis)
 
 void Fibers::initializeBuffer()
 {
-    if (isInitialized)
+    if (m_isInitialized)
         return;
-    isInitialized = true;
+    m_isInitialized = true;
     if (!m_dh->useVBO)
         return;
     bool isOK = true;
@@ -1185,6 +1186,8 @@ private:
 
 void Fibers::drawFakeTubes()
 {
+    if (!m_normalsPositive)
+        switchNormals(false);
     float *colors;
     float *normals;
     if (m_dh->useVBO)
@@ -1539,6 +1542,7 @@ void Fibers::switchNormals(bool positive)
                 pc += 3;
             }
         }
+        m_normalsPositive = true;
     }
     else
     {
@@ -1569,6 +1573,7 @@ void Fibers::switchNormals(bool positive)
                 pc += 3;
             }
         }
+        m_normalsPositive = false;
     }
     if (m_dh->useVBO)
     {
