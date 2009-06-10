@@ -642,6 +642,8 @@ void Anatomy::createOffset(float* source)
             }
         }
     }
+    delete[] bitmask;
+    delete[] kernel;
 
     m_floatDataset = tmp;
 }

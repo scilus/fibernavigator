@@ -1040,6 +1040,16 @@ void MainFrame::createNewSelBox()
         m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
         selBox->setTreeId(tNewBoxId);
     }
+    else if (treeSelected(tBoxId) == ChildBox)
+    {
+        // box is under another box
+        wxTreeItemId tNewBoxId = m_treeWidget->AppendItem(pId, wxT("box"),
+                0, -1, selBox);
+        m_treeWidget->SetItemBackgroundColour(tNewBoxId, *wxGREEN);
+        m_treeWidget->EnsureVisible(tNewBoxId);
+        m_treeWidget->SetItemImage(tNewBoxId, selBox->getIcon());
+        selBox->setTreeId(tNewBoxId);
+    }
     else
     {
         // box is top
