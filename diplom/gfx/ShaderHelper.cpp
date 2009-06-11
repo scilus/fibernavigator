@@ -124,7 +124,7 @@ void ShaderHelper::setMeshShaderVars()
 
 	if (m_cutTex != 0 && m_dh->surface_loaded)
 	{
-	    m_textureCount = wxMax(9, m_textureCount);
+	    m_textureCount = wxMin(9, m_textureCount);
 		glActiveTexture(GL_TEXTURE0 + m_textureCount);
 		glBindTexture(GL_TEXTURE_2D, m_cutTex);
 		tex[m_textureCount] = m_textureCount;
@@ -134,11 +134,11 @@ void ShaderHelper::setMeshShaderVars()
 		m_meshShader->setUniInt("cutTex", m_textureCount);
 	}
 
-	m_meshShader->setUniArrayInt("texes", tex, m_textureCount);
-	m_meshShader->setUniArrayInt("show", show, m_textureCount);
-	m_meshShader->setUniArrayInt("type", type, m_textureCount);
-	m_meshShader->setUniArrayFloat("threshold", threshold, m_textureCount);
-	m_meshShader->setUniArrayFloat("alpha", alpha, m_textureCount);
+	m_meshShader->setUniArrayInt("texes", tex, m_textureCount+1);
+	m_meshShader->setUniArrayInt("show", show, m_textureCount+1);
+	m_meshShader->setUniArrayInt("type", type, m_textureCount+1);
+	m_meshShader->setUniArrayFloat("threshold", threshold, m_textureCount+1);
+	m_meshShader->setUniArrayFloat("alpha", alpha, m_textureCount+1);
 
 }
 
