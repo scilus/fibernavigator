@@ -100,7 +100,7 @@ public:
 
 	bool getFiberDataset(Fibers *&f);
 	bool getSurfaceDataset(Surface *&s);
-	float* getVectorDataset();
+	std::vector<float>* getVectorDataset();
 	TensorField* getTensorField();
 
 	void toggleBoxes() {showBoxes = !showBoxes;};

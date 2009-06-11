@@ -19,14 +19,14 @@ class Anatomy : public DatasetInfo , public wxTreeItemData
 
 public:
 	Anatomy(DatasetHelper* dh);
-	Anatomy(DatasetHelper* dh, float* dataset);
+	Anatomy(DatasetHelper* dh, std::vector<float>* dataset);
 	virtual ~Anatomy();
 
 	bool load(wxString filename);
 	void draw() {};
 	GLuint getGLuint();
 
-	float* getFloatDataset();
+	std::vector<float>* getFloatDataset();
 	float at(int i);
 	TensorField* getTensorField();
 
@@ -46,7 +46,7 @@ private:
 	void clean() {};
 	void smooth() {};
 	void activateLIC() {};
-	void createOffset(float* dataset);
+	void createOffset(std::vector<float>* dataset);
 
 	double xxgauss(double x, double sigma);
 

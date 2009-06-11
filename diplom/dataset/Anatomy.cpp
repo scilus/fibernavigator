@@ -23,7 +23,7 @@ Anatomy::Anatomy(DatasetHelper* dh) : DatasetInfo (dh)
     m_tensorField = 0;
 }
 
-Anatomy::Anatomy(DatasetHelper* dh, float* dataset) : DatasetInfo(dh)
+Anatomy::Anatomy(DatasetHelper* dh, std::vector<float>* dataset) : DatasetInfo(dh)
 {
 
     m_type = Head_byte;
@@ -373,7 +373,7 @@ GLuint Anatomy::getGLuint()
     return m_GLuint;
 }
 
-void Anatomy::createOffset(float* source)
+void Anatomy::createOffset(std::vector<float>* source)
 {
     int b, r, c, bb, rr, r0, b0, c0;
     int i, istart, iend;
@@ -401,7 +401,7 @@ void Anatomy::createOffset(float* source)
     bool* bitmask = new bool[npixels];
     for (int i = 0; i < npixels; ++i)
     {
-        if (source[i] < 0.01)
+        if (source->at(i) < 0.01)
             bitmask[i] = true;
         else
             bitmask[i] = false;
@@ -721,12 +721,12 @@ void Anatomy::minimize()
     Anatomy* newAnatomy = new Anatomy(m_dh);
     newAnatomy->setZero(m_columns, m_rows, m_frames);
 
-    float* dst = newAnatomy->getFloatDataset();
+    std::vector<float>* dst = newAnatomy->getFloatDataset();
 
     for (int i = 0; i < m_columns * m_rows * m_frames; ++i)
     {
         if (tmp[i] && m_floatDataset[i] > 0)
-            dst[i] = 1.0;
+            dst->at(i) = 1.0;
     }
 
     newAnatomy->setName(getName() + _T("(minimal)"));
@@ -835,9 +835,9 @@ void Anatomy::erode1(std::vector<bool>* tmp, int index)
         tmp->at(index) = 1.0;
 }
 
-float* Anatomy::getFloatDataset()
+std::vector<float>* Anatomy::getFloatDataset()
 {
-    return &m_floatDataset[0];
+    return &m_floatDataset;
 }
 
 float Anatomy::at(int i)

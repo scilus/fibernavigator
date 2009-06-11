@@ -1028,8 +1028,8 @@ void DatasetHelper::createCutDataset()
                 z1 = wxMax(0, wxMin(z1, frames));
                 z2 = wxMax(0, wxMin(z2, frames));
 
-                float* src = anatomy->getFloatDataset();
-                float* dst = newAnatomy->getFloatDataset();
+                std::vector<float>* src = anatomy->getFloatDataset();
+                std::vector<float>* dst = newAnatomy->getFloatDataset();
 
                 //printf ("x1: %d   x2: %d   y1: %d   y2: %d   z1: %d   z2: %d\n", x1,x2,y1,y2,z1,z2);
 
@@ -1039,8 +1039,8 @@ void DatasetHelper::createCutDataset()
                     {
                         for (int c=x1; c<x2; ++c)
                         {
-                            dst[b*rows*columns + r*columns + c]
-                                    = src[b*rows*columns + r*columns + c];
+                            dst->at(b*rows*columns + r*columns + c)
+                                    = src->at(b*rows*columns + r*columns + c);
                         }
                     }
                 }
@@ -1131,7 +1131,7 @@ bool DatasetHelper::getSurfaceDataset(Surface *&s)
     return false;
 }
 
-float* DatasetHelper::getVectorDataset()
+std::vector<float>* DatasetHelper::getVectorDataset()
 {
     if (!vectors_loaded)
         return NULL;

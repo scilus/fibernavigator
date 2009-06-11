@@ -912,7 +912,7 @@ void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
         SelectionBox *box = (SelectionBox*) (m_treeWidget->GetItemData(tBoxId));
         wxColour c = box->getFiberColor();
 
-        float* dst = newAnatomy->getFloatDataset();
+        std::vector<float>* dst = newAnatomy->getFloatDataset();
 
         for (int l = 0; l < f->getLineCount(); ++l)
         {
@@ -930,9 +930,9 @@ void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
                     ++pc;
 
                     int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows) * 3;
-                    dst[index] = c.Red() / 255.;
-                    dst[index + 1] = c.Green() / 255.;
-                    dst[index + 2] = c.Blue() / 255.;
+                    dst->at(index) = c.Red() / 255.;
+                    dst->at(index + 1) = c.Green() / 255.;
+                    dst->at(index + 2) = c.Blue() / 255.;
                 }
             }
         }
@@ -958,7 +958,7 @@ void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
     {
         SelectionBox *box = (SelectionBox*) (m_treeWidget->GetItemData(tBoxId));
 
-        float* dst = newAnatomy2->getFloatDataset();
+        std::vector<float>* dst = newAnatomy2->getFloatDataset();
 
         for (int l = 0; l < f->getLineCount(); ++l)
         {
@@ -976,14 +976,14 @@ void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
                     ++pc;
 
                     int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows);
-                    dst[index] += 1.0;
-                    max = wxMax(max,dst[index]);
+                    dst->at(index) += 1.0;
+                    max = wxMax(max,dst->at(index));
                 }
             }
         }
         for (int i = 0 ; i < m_dh->columns * m_dh->rows * m_dh->frames ; ++i)
         {
-            dst[i] /= max;
+            dst->at(i) /= max;
         }
     }
 
