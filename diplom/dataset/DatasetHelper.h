@@ -130,6 +130,7 @@ public:
 
 	bool m_scnFileLoaded;
 	bool anatomy_loaded;
+	bool mesh_loaded;
 	bool fibers_loaded;
 	bool vectors_loaded;
 	bool tensors_loaded;

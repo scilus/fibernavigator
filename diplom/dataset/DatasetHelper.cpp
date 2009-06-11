@@ -345,6 +345,7 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
         mainFrame->m_gl2->changeOrthoSize();
     }
 
+    updateLoadStatus();
     mainFrame->refreshAllGLWidgets();
 
 }
@@ -633,6 +634,7 @@ bool DatasetHelper::loadScene(const wxString filename)
     m_transform.s.M22 = r22;
     mainFrame->m_mainGL->setRotation();
 
+    updateLoadStatus();
     return true;
 }
 
@@ -928,6 +930,7 @@ void DatasetHelper::createIsoSurface()
     {
         printDebug(_T("***ERROR*** surface is not valid"),2);
     }
+    updateLoadStatus();
     mainFrame->refreshAllGLWidgets();
 
 }
@@ -983,6 +986,7 @@ void DatasetHelper::createDistanceMap()
     }
 
     delete newAnatomy;
+    updateLoadStatus();
     mainFrame->refreshAllGLWidgets();
 }
 
@@ -1060,6 +1064,7 @@ void DatasetHelper::createCutDataset()
     mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED,
     wxLIST_STATE_SELECTED);
 
+    updateLoadStatus();
     mainFrame->refreshAllGLWidgets();
 }
 
@@ -1198,11 +1203,12 @@ void DatasetHelper::printDebug(const wxString string, const int level)
 
 void DatasetHelper::updateLoadStatus()
 {
-    bool anatomy_loaded = false;
-    bool fibers_loaded = false;
-    bool vectors_loaded = false;
-    bool tensors_loaded = false;
-    bool surface_loaded = false;
+    anatomy_loaded = false;
+    mesh_loaded = false;
+    fibers_loaded = false;
+    vectors_loaded = false;
+    tensors_loaded = false;
+    surface_loaded = false;
 
     for (int i = 0; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
     {
@@ -1221,6 +1227,7 @@ void DatasetHelper::updateLoadStatus()
                 vectors_loaded = true;
                 break;
             case Mesh_:
+                mesh_loaded = true;
                 break;
             case Tensors_:
                 tensors_loaded = true;
@@ -1232,6 +1239,7 @@ void DatasetHelper::updateLoadStatus()
                 surface_loaded = true;
                 break;
             case IsoSurface_:
+                mesh_loaded = true;
                 break;
             default:
                 break;

@@ -16,7 +16,6 @@
 
 
 enum DatasetType {
-	TERROR = -1,
 	not_initialized = 0,
 	// Textures
 	Head_byte,

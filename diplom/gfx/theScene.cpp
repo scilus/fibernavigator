@@ -89,7 +89,8 @@ void TheScene::initGL(int view)
 	}
 	catch (...)
 	{
-		if (m_dh->GLError()) m_dh->printGLError(wxT("init"));
+		if ( m_dh->GLError() )
+		    m_dh->printGLError(wxT("init"));
 	}
 }
 
@@ -125,7 +126,8 @@ void TheScene::bindTextures()
 		}
 
 	}
-	if (m_dh->GLError()) m_dh->printGLError(wxT("bind textures"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("bind textures"));
 }
 
 void TheScene::renderScene()
@@ -134,34 +136,36 @@ void TheScene::renderScene()
 
 	m_dh->shaderHelper->initializeArrays();
 
-	renderSplineSurface();
+	renderSlizes();
+
+	if (m_dh->vectors_loaded )
+	    drawVectors();
+
+	if ( m_dh->surface_loaded )
+	    renderSplineSurface();
 
 	if ( m_dh->pointMode )
-	{
 		drawPoints();
-	}
-
-	renderSlizes();
 
 	if ( m_dh->fibers_loaded )
 	{
-		if  (m_dh->useFakeTubes )
+		if  ( m_dh->useFakeTubes )
 			renderFakeTubes();
 		else
 			renderFibers();
 	}
 
-	renderMesh();
+	if ( m_dh->mesh_loaded )
+	    renderMesh();
 
-	if ( m_dh->fibers_loaded && m_dh->showBoxes)
+	if ( m_dh->fibers_loaded && m_dh->showBoxes )
 		drawSelectionBoxes();
 
 	if ( m_dh->showColorMapLegend )
 		drawColorMapLegend();
 
-	drawVectors();
-
-	if ( m_dh->GLError() ) m_dh->printGLError(wxT("render scene"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("render scene"));
 }
 
 void TheScene::renderSlizes()
@@ -186,8 +190,6 @@ void TheScene::renderSlizes()
 
 	m_dh->anatomyHelper->renderMain();
 
-	//m_dh->anatomyHelper->renderFreeSlize();
-
 	glDisable(GL_BLEND);
 
 	m_dh->shaderHelper->m_textureShader->release();
@@ -195,7 +197,8 @@ void TheScene::renderSlizes()
 	if (m_dh->showCrosshair)
 		m_dh->anatomyHelper->renderCrosshair();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("render slizes"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("render slizes"));
 
 	glPopAttrib();
 }
@@ -233,7 +236,8 @@ void TheScene::renderSplineSurface()
 
 			lightsOff();
 
-			if (m_dh->GLError()) m_dh->printGLError(wxT("draw surface"));
+			if ( m_dh->GLError() )
+			    m_dh->printGLError(wxT("draw surface"));
 
 			glPopAttrib();
 		}
@@ -311,7 +315,8 @@ void TheScene::renderMesh()
 
 	lightsOff();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("draw mesh"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("draw mesh"));
 
 	glPopAttrib();
 }
@@ -328,14 +333,14 @@ void TheScene::renderFibers()
 		{
 			lightsOff();
 
-			if (m_dh->lighting)
+			if ( m_dh->lighting )
 			{
 				lightsOn();
 				GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0};
 				glLightfv (GL_LIGHT0, GL_POSITION, light_position0);
 
 			}
-			if (!info->getUseTex())
+			if ( !info->getUseTex() )
 			{
 				bindTextures();
 				m_dh->shaderHelper->m_fiberShader->bind();
@@ -344,7 +349,7 @@ void TheScene::renderFibers()
 				m_dh->shaderHelper->m_fiberShader->setUniInt("useColorMap", m_dh->colorMap);
 				m_dh->shaderHelper->m_fiberShader->setUniInt("useOverlay", info->getShowFS());
 			}
-			if (m_dh->m_selBoxChanged)
+			if ( m_dh->m_selBoxChanged )
 			{
 				((Fibers*)info)->updateLinesShown();
 				m_dh->m_selBoxChanged = false;
@@ -357,7 +362,8 @@ void TheScene::renderFibers()
 		}
 	}
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("draw fibers"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("draw fibers"));
 
 	glPopAttrib();
 }
@@ -372,7 +378,7 @@ void TheScene::renderFakeTubes()
 
 		if (info->getType() == Fibers_ && info->getShow())
 		{
-			if (m_dh->m_selBoxChanged)
+			if ( m_dh->m_selBoxChanged )
 			{
 				((Fibers*)info)->updateLinesShown();
 				m_dh->m_selBoxChanged = false;
@@ -389,7 +395,8 @@ void TheScene::renderFakeTubes()
 		}
 	}
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("draw fake tubes"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("draw fake tubes"));
 
 	glPopAttrib();
 }
@@ -421,7 +428,8 @@ void TheScene::lightsOn()
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specref);
 	glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 32);
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("setup lights"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("setup lights"));
 }
 
 void TheScene::lightsOff()
@@ -440,10 +448,9 @@ void TheScene::drawSphere(float x, float y, float z, float r)
 	gluSphere(quadric, r, 32, 32);
 	glPopMatrix();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("draw sphere"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("draw sphere"));
 }
-
-
 
 void TheScene::drawSelectionBoxes()
 {
@@ -460,7 +467,8 @@ void TheScene::drawSelectionBoxes()
 		}
 	}
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("draw selection boxes"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("draw selection boxes"));
 }
 
 void TheScene::drawPoints()
@@ -489,7 +497,8 @@ void TheScene::drawPoints()
 	m_dh->shaderHelper->m_meshShader->release();
 	glPopAttrib();
 
-	if (m_dh->GLError()) m_dh->printGLError(wxT("draw points"));
+	if ( m_dh->GLError() )
+	    m_dh->printGLError(wxT("draw points"));
 }
 
 void TheScene::drawColorMapLegend()
@@ -538,9 +547,6 @@ void TheScene::drawColorMapLegend()
 
 void TheScene::drawVectors()
 {
-    if (!m_dh->vectors_loaded)
-        return;
-
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
     glEnable( GL_LINE_SMOOTH);
@@ -867,7 +873,7 @@ void TheScene::drawVectors()
         }
     }
 
-    if (m_dh->GLError())
+    if ( m_dh->GLError() )
         m_dh->printGLError(wxT("draw vectors"));
 
     glPopAttrib();

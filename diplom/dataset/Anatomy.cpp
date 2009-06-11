@@ -44,6 +44,7 @@ Anatomy::~Anatomy()
     glDeleteTextures(1, tex);
     if (m_roi)
         m_roi->m_sourceAnatomy = NULL;
+    m_dh->updateLoadStatus();
 }
 
 bool Anatomy::load(wxString filename)
@@ -123,7 +124,7 @@ bool Anatomy::loadNifti(wxString filename)
             m_type = RGB;
         }
         else
-            m_type = TERROR;
+            m_type = not_initialized;
     }
     else if (ima->datatype == 4)
         m_type = Head_short;
@@ -144,7 +145,7 @@ bool Anatomy::loadNifti(wxString filename)
             m_type = Overlay;
     }
     else
-        m_type = TERROR;
+        m_type = not_initialized;
 
     nifti_image* filedata = nifti_image_read(hdr_file, 1);
     int nSize = ima->dim[1] * ima->dim[2] * ima->dim[3];
