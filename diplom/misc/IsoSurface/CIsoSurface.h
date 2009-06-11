@@ -111,7 +111,7 @@ protected:
 	float m_fCellLengthX, m_fCellLengthY, m_fCellLengthZ;
 
 	// The buffer holding the scalar field.
-	float* m_ptScalarField;
+	std::vector<float> m_ptScalarField;
 
 	// The isosurface value.
 	float m_tIsoLevel;

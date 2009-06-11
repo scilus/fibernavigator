@@ -308,7 +308,6 @@ const int CIsoSurface::m_triTable[256][16] = {
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-//CIsoSurface::CIsoSurface(DatasetHelper* dh, float* ptScalarField)
 CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy) : DatasetInfo(dh)
 {
 	m_nCellsX = m_dh->columns-1;
@@ -319,9 +318,9 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy) : DatasetInfo(dh)
 	m_fCellLengthZ = m_dh->zVoxel;
 
 	int size = m_dh->columns * m_dh->rows * m_dh->frames;
-	m_ptScalarField = new float[size];
+	m_ptScalarField.resize(size);
 	for ( int i = 0 ; i < size ; ++i)
-		m_ptScalarField[i] = anatomy->at(i); //ptScalarField[i];
+		m_ptScalarField[i] = anatomy->at(i);
 
 	if (m_dh->filterIsoSurf)
 	{
@@ -379,119 +378,137 @@ void CIsoSurface::GenerateSurface(float tIsoLevel)
 	unsigned int nPointsInSlice = nPointsInXDirection*(m_nCellsY + 1);
 
 	// Generate isosurface.
-	for (unsigned int z = 0; z < m_nCellsZ; z++)
-		for (unsigned int y = 0; y < m_nCellsY; y++)
-			for (unsigned int x = 0; x < m_nCellsX; x++) {
-				// Calculate table lookup index from those
-				// vertices which are below the isolevel.
-				unsigned int tableIndex = 0;
-				if (m_ptScalarField[z*nPointsInSlice + y*nPointsInXDirection + x] < m_tIsoLevel)
-					tableIndex |= 1;
-				if (m_ptScalarField[z*nPointsInSlice + (y+1)*nPointsInXDirection + x] < m_tIsoLevel)
-					tableIndex |= 2;
-				if (m_ptScalarField[z*nPointsInSlice + (y+1)*nPointsInXDirection + (x+1)] < m_tIsoLevel)
-					tableIndex |= 4;
-				if (m_ptScalarField[z*nPointsInSlice + y*nPointsInXDirection + (x+1)] < m_tIsoLevel)
-					tableIndex |= 8;
-				if (m_ptScalarField[(z+1)*nPointsInSlice + y*nPointsInXDirection + x] < m_tIsoLevel)
-					tableIndex |= 16;
-				if (m_ptScalarField[(z+1)*nPointsInSlice + (y+1)*nPointsInXDirection + x] < m_tIsoLevel)
-					tableIndex |= 32;
-				if (m_ptScalarField[(z+1)*nPointsInSlice + (y+1)*nPointsInXDirection + (x+1)] < m_tIsoLevel)
-					tableIndex |= 64;
-				if (m_ptScalarField[(z+1)*nPointsInSlice + y*nPointsInXDirection + (x+1)] < m_tIsoLevel)
-					tableIndex |= 128;
+    for (unsigned int z = 0; z < m_nCellsZ; z++)
+        for (unsigned int y = 0; y < m_nCellsY; y++)
+            for (unsigned int x = 0; x < m_nCellsX; x++)
+            {
+                // Calculate table lookup index from those
+                // vertices which are below the isolevel.
+                unsigned int tableIndex = 0;
+                if (m_ptScalarField[z * nPointsInSlice + y * nPointsInXDirection + x] < m_tIsoLevel)
+                    tableIndex |= 1;
+                if (m_ptScalarField[z * nPointsInSlice + (y + 1) * nPointsInXDirection + x] < m_tIsoLevel)
+                    tableIndex |= 2;
+                if (m_ptScalarField[z * nPointsInSlice + (y + 1) * nPointsInXDirection + (x + 1)] < m_tIsoLevel)
+                    tableIndex |= 4;
+                if (m_ptScalarField[z * nPointsInSlice + y * nPointsInXDirection + (x + 1)] < m_tIsoLevel)
+                    tableIndex |= 8;
+                if (m_ptScalarField[(z + 1) * nPointsInSlice + y * nPointsInXDirection + x] < m_tIsoLevel)
+                    tableIndex |= 16;
+                if (m_ptScalarField[(z + 1) * nPointsInSlice + (y + 1) * nPointsInXDirection + x] < m_tIsoLevel)
+                    tableIndex |= 32;
+                if (m_ptScalarField[(z + 1) * nPointsInSlice + (y + 1) * nPointsInXDirection + (x + 1)] < m_tIsoLevel)
+                    tableIndex |= 64;
+                if (m_ptScalarField[(z + 1) * nPointsInSlice + y * nPointsInXDirection + (x + 1)] < m_tIsoLevel)
+                    tableIndex |= 128;
 
-				// Now create a triangulation of the isosurface in this
-				// cell.
-				if (m_edgeTable[tableIndex] != 0) {
-					if (m_edgeTable[tableIndex] & 8) {
-						POINT3DID pt = CalculateIntersection(x, y, z, 3);
-						unsigned int id = GetEdgeID(x, y, z, 3);
-						m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-					}
-					if (m_edgeTable[tableIndex] & 1) {
-						POINT3DID pt = CalculateIntersection(x, y, z, 0);
-						unsigned int id = GetEdgeID(x, y, z, 0);
-						m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-					}
-					if (m_edgeTable[tableIndex] & 256) {
-						POINT3DID pt = CalculateIntersection(x, y, z, 8);
-						unsigned int id = GetEdgeID(x, y, z, 8);
-						m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-					}
+                // Now create a triangulation of the isosurface in this
+                // cell.
+                if (m_edgeTable[tableIndex] != 0)
+                {
+                    if (m_edgeTable[tableIndex] & 8)
+                    {
+                        POINT3DID pt = CalculateIntersection(x, y, z, 3);
+                        unsigned int id = GetEdgeID(x, y, z, 3);
+                        m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                    }
+                    if (m_edgeTable[tableIndex] & 1)
+                    {
+                        POINT3DID pt = CalculateIntersection(x, y, z, 0);
+                        unsigned int id = GetEdgeID(x, y, z, 0);
+                        m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                    }
+                    if (m_edgeTable[tableIndex] & 256)
+                    {
+                        POINT3DID pt = CalculateIntersection(x, y, z, 8);
+                        unsigned int id = GetEdgeID(x, y, z, 8);
+                        m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                    }
 
-					if (x == m_nCellsX - 1) {
-						if (m_edgeTable[tableIndex] & 4) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 2);
-							unsigned int id = GetEdgeID(x, y, z, 2);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
-						if (m_edgeTable[tableIndex] & 2048) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 11);
-							unsigned int id = GetEdgeID(x, y, z, 11);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
-					}
-					if (y == m_nCellsY - 1) {
-						if (m_edgeTable[tableIndex] & 2) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 1);
-							unsigned int id = GetEdgeID(x, y, z, 1);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
-						if (m_edgeTable[tableIndex] & 512) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 9);
-							unsigned int id = GetEdgeID(x, y, z, 9);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
-					}
-					if (z == m_nCellsZ - 1) {
-						if (m_edgeTable[tableIndex] & 16) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 4);
-							unsigned int id = GetEdgeID(x, y, z, 4);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
-						if (m_edgeTable[tableIndex] & 128) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 7);
-							unsigned int id = GetEdgeID(x, y, z, 7);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
-					}
-					if ((x==m_nCellsX - 1) && (y==m_nCellsY - 1))
-						if (m_edgeTable[tableIndex] & 1024) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 10);
-							unsigned int id = GetEdgeID(x, y, z, 10);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
-					if ((x==m_nCellsX - 1) && (z==m_nCellsZ - 1))
-						if (m_edgeTable[tableIndex] & 64) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 6);
-							unsigned int id = GetEdgeID(x, y, z, 6);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
-					if ((y==m_nCellsY - 1) && (z==m_nCellsZ - 1))
-						if (m_edgeTable[tableIndex] & 32) {
-							POINT3DID pt = CalculateIntersection(x, y, z, 5);
-							unsigned int id = GetEdgeID(x, y, z, 5);
-							m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
-						}
+                    if (x == m_nCellsX - 1)
+                    {
+                        if (m_edgeTable[tableIndex] & 4)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 2);
+                            unsigned int id = GetEdgeID(x, y, z, 2);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
+                        if (m_edgeTable[tableIndex] & 2048)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 11);
+                            unsigned int id = GetEdgeID(x, y, z, 11);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
+                    }
+                    if (y == m_nCellsY - 1)
+                    {
+                        if (m_edgeTable[tableIndex] & 2)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 1);
+                            unsigned int id = GetEdgeID(x, y, z, 1);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
+                        if (m_edgeTable[tableIndex] & 512)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 9);
+                            unsigned int id = GetEdgeID(x, y, z, 9);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
+                    }
+                    if (z == m_nCellsZ - 1)
+                    {
+                        if (m_edgeTable[tableIndex] & 16)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 4);
+                            unsigned int id = GetEdgeID(x, y, z, 4);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
+                        if (m_edgeTable[tableIndex] & 128)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 7);
+                            unsigned int id = GetEdgeID(x, y, z, 7);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
+                    }
+                    if ((x == m_nCellsX - 1) && (y == m_nCellsY - 1))
+                        if (m_edgeTable[tableIndex] & 1024)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 10);
+                            unsigned int id = GetEdgeID(x, y, z, 10);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
+                    if ((x == m_nCellsX - 1) && (z == m_nCellsZ - 1))
+                        if (m_edgeTable[tableIndex] & 64)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 6);
+                            unsigned int id = GetEdgeID(x, y, z, 6);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
+                    if ((y == m_nCellsY - 1) && (z == m_nCellsZ - 1))
+                        if (m_edgeTable[tableIndex] & 32)
+                        {
+                            POINT3DID pt = CalculateIntersection(x, y, z, 5);
+                            unsigned int id = GetEdgeID(x, y, z, 5);
+                            m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
+                        }
 
-					for (int i = 0; m_triTable[tableIndex][i] != -1; i += 3) {
-						TRIANGLE triangle;
-						unsigned int pointID0, pointID1, pointID2;
-						pointID0 = GetEdgeID(x, y, z, m_triTable[tableIndex][i]);
-						pointID1 = GetEdgeID(x, y, z, m_triTable[tableIndex][i+1]);
-						pointID2 = GetEdgeID(x, y, z, m_triTable[tableIndex][i+2]);
-						triangle.pointID[0] = pointID0;
-						triangle.pointID[1] = pointID1;
-						triangle.pointID[2] = pointID2;
-						m_trivecTriangles.push_back(triangle);
-					}
-				}
-			}
+                    for (int i = 0; m_triTable[tableIndex][i] != -1; i += 3)
+                    {
+                        TRIANGLE triangle;
+                        unsigned int pointID0, pointID1, pointID2;
+                        pointID0 = GetEdgeID(x, y, z, m_triTable[tableIndex][i]);
+                        pointID1 = GetEdgeID(x, y, z, m_triTable[tableIndex][i + 1]);
+                        pointID2 = GetEdgeID(x, y, z, m_triTable[tableIndex][i + 2]);
+                        triangle.pointID[0] = pointID0;
+                        triangle.pointID[1] = pointID1;
+                        triangle.pointID[2] = pointID2;
+                        m_trivecTriangles.push_back(triangle);
+                    }
+                }
+            }
 
-	RenameVerticesAndTriangles();
-	m_bValidSurface = true;
+    RenameVerticesAndTriangles();
+    m_bValidSurface = true;
 }
 
 bool CIsoSurface::IsSurfaceValid()
@@ -525,35 +542,36 @@ int CIsoSurface::GetVolumeLengths(float& fVolLengthX, float& fVolLengthY, float&
 
 int CIsoSurface::GetEdgeID(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo)
 {
-	switch (nEdgeNo) {
-	case 0:
-		return GetVertexID(nX, nY, nZ) + 1;
-	case 1:
-		return GetVertexID(nX, nY + 1, nZ);
-	case 2:
-		return GetVertexID(nX + 1, nY, nZ) + 1;
-	case 3:
-		return GetVertexID(nX, nY, nZ);
-	case 4:
-		return GetVertexID(nX, nY, nZ + 1) + 1;
-	case 5:
-		return GetVertexID(nX, nY + 1, nZ + 1);
-	case 6:
-		return GetVertexID(nX + 1, nY, nZ + 1) + 1;
-	case 7:
-		return GetVertexID(nX, nY, nZ + 1);
-	case 8:
-		return GetVertexID(nX, nY, nZ) + 2;
-	case 9:
-		return GetVertexID(nX, nY + 1, nZ) + 2;
-	case 10:
-		return GetVertexID(nX + 1, nY + 1, nZ) + 2;
-	case 11:
-		return GetVertexID(nX + 1, nY, nZ) + 2;
-	default:
-		// Invalid edge no.
-		return -1;
-	}
+	switch (nEdgeNo)
+    {
+        case 0:
+            return GetVertexID(nX, nY, nZ) + 1;
+        case 1:
+            return GetVertexID(nX, nY + 1, nZ);
+        case 2:
+            return GetVertexID(nX + 1, nY, nZ) + 1;
+        case 3:
+            return GetVertexID(nX, nY, nZ);
+        case 4:
+            return GetVertexID(nX, nY, nZ + 1) + 1;
+        case 5:
+            return GetVertexID(nX, nY + 1, nZ + 1);
+        case 6:
+            return GetVertexID(nX + 1, nY, nZ + 1) + 1;
+        case 7:
+            return GetVertexID(nX, nY, nZ + 1);
+        case 8:
+            return GetVertexID(nX, nY, nZ) + 2;
+        case 9:
+            return GetVertexID(nX, nY + 1, nZ) + 2;
+        case 10:
+            return GetVertexID(nX + 1, nY + 1, nZ) + 2;
+        case 11:
+            return GetVertexID(nX + 1, nY, nZ) + 2;
+        default:
+            // Invalid edge no.
+            return -1;
+    }
 }
 
 unsigned int CIsoSurface::GetVertexID(unsigned int nX, unsigned int nY, unsigned int nZ)
