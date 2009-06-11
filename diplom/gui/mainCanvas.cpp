@@ -67,24 +67,7 @@ const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* g
 
 MainCanvas::~MainCanvas()
 {
-    switch (m_view)
-    {
-        case mainView:
-            m_dh->printDebug(_T("execute main canvas destructor: main view"), 0);
-            break;
-        case axial:
-            m_dh->printDebug(_T("execute main canvas destructor: axial view"),
-                    0);
-            break;
-        case coronal:
-            m_dh->printDebug(
-                    _T("execute main canvas destructor: coronal view"), 0);
-            break;
-        case sagittal:
-            m_dh->printDebug(
-                    _T("execute main canvas destructor: sagittal view"), 0);
-            break;
-    }
+
 }
 
 void MainCanvas::init()

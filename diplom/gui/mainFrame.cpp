@@ -2095,13 +2095,13 @@ void MainFrame::refreshAllGLWidgets()
     if (m_gl2) m_gl2->Refresh();
     if (m_mainGL) m_mainGL->Refresh();
 #else
-    if (m_gl0)
+    if ( m_gl0 )
         m_gl0->render();
-    if (m_gl1)
+    if ( m_gl1 )
         m_gl1->render();
-    if (m_gl2)
+    if ( m_gl2 )
         m_gl2->render();
-    if (m_mainGL)
+    if ( m_mainGL )
         m_mainGL->render();
 #endif
 }
@@ -2181,7 +2181,7 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 void MainFrame::OnSelectListItem(wxListEvent& event)
 {
     int item = event.GetIndex();
-    if (item == -1)
+    if (m_dh->gui_blocked || item == -1)
         return;
     DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
     updateMenus();
@@ -2461,10 +2461,11 @@ void MainFrame::OnTreeLabelEdit(wxTreeEvent& event)
  ****************************************************************************************************/
 int MainFrame::treeSelected(wxTreeItemId id)
 {
+    if (!id.IsOk()) return 0;
     wxTreeItemId pId = m_treeWidget->GetItemParent(id);
-    //if ( !pId.IsOk() ) return 0;
+    if ( !pId.IsOk() ) return 0;
     wxTreeItemId ppId = m_treeWidget->GetItemParent(pId);
-    //if ( !ppId.IsOk() ) return 0;
+    if ( !ppId.IsOk() ) return 0;
 
     if (pId == m_tSelBoxId)
         return MasterBox;
@@ -2733,23 +2734,19 @@ void MainFrame::OnMouseEvent(wxMouseEvent& event)
 void MainFrame::updateMenus()
 {
     // get the options menu
-    //#ifndef __WXMSW__
-
     // globals
     wxMenu* oMenu = GetMenuBar()->GetMenu(4);
     oMenu->Check(oMenu->FindItem(_T("Toggle Fiber Lighting")), m_dh->lighting);
     oMenu->Check(oMenu->FindItem(_T("Invert Fiber Selection")),
             m_dh->fibersInverted);
+
     oMenu->Check(oMenu->FindItem(_T("Use Tubes")), m_dh->useFakeTubes);
-    oMenu->Check(oMenu->FindItem(_T("Use Transparent Fibers")),
-            m_dh->useTransparency);
-    oMenu->Check(oMenu->FindItem(_T("Show Color Map Legend")),
-            m_dh->showColorMapLegend);
+    oMenu->Check(oMenu->FindItem(_T("Use Transparent Fibers")), m_dh->useTransparency);
+    oMenu->Check(oMenu->FindItem(_T("Show Color Map")),  m_dh->showColorMapLegend);
+
     wxMenu* sMenu = GetMenuBar()->GetMenu(3);
-    sMenu->Check(sMenu->FindItem(_T("Blend Texture on Mesh")),
-            m_dh->blendTexOnMesh);
-    sMenu->Check(sMenu->FindItem(_T("Filter Dataset for IsoSurface")),
-            m_dh->filterIsoSurf);
+    sMenu->Check(sMenu->FindItem(_T("Blend Texture on Mesh")), m_dh->blendTexOnMesh);
+    sMenu->Check(sMenu->FindItem(_T("Filter Dataset for IsoSurface")), m_dh->filterIsoSurf);
 
     GetToolBar()->ToggleTool(BUTTON_AXIAL, m_dh->showAxial);
     GetToolBar()->ToggleTool(BUTTON_CORONAL, m_dh->showCoronal);
@@ -2757,7 +2754,7 @@ void MainFrame::updateMenus()
     GetToolBar()->ToggleTool(BUTTON_TOGGLE_ALPHA, m_dh->blendAlpha);
     GetToolBar()->ToggleTool(MENU_OPTIONS_TOGGLE_LIGHTING, m_dh->lighting);
     GetToolBar()->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
-    // FIXME GetToolBar()->ToggleTool(MENU_OPTIONS_USE_FAKE_TUBES, m_dh->useFakeTubes);
+    GetToolBar()->ToggleTool(MENU_OPTIONS_USE_FAKE_TUBES, m_dh->useFakeTubes);
     GetToolBar()->ToggleTool(MENU_SPLINESURF_DRAW_POINTS, m_dh->pointMode);
 
     wxMenu* voiMenu = GetMenuBar()->GetMenu(2);
@@ -2767,8 +2764,7 @@ void MainFrame::updateMenus()
     voiMenu->Enable(voiMenu->FindItem(_T("visible")), false);
     voiMenu->Check(voiMenu->FindItem(_T("morphing")), m_dh->morphing);
     wxMenu* viewMenu = GetMenuBar()->GetMenu(1);
-    viewMenu->Check(viewMenu->FindItem(_T("show crosshair")),
-            m_dh->showCrosshair);
+    viewMenu->Check(viewMenu->FindItem(_T("show crosshair")), m_dh->showCrosshair);
 
     wxTreeItemId treeid = m_treeWidget->GetSelection();
     int selected = treeSelected(treeid);
@@ -2777,22 +2773,23 @@ void MainFrame::updateMenus()
     {
         voiMenu->Enable(voiMenu->FindItem(_T("active")), true);
         voiMenu->Enable(voiMenu->FindItem(_T("visible")), true);
-        voiMenu->Check(voiMenu->FindItem(_T("active")),
-                m_dh->lastSelectedBox->getActive());
-        voiMenu->Check(voiMenu->FindItem(_T("visible")),
-                m_dh->lastSelectedBox->getShow());
+        voiMenu->Check(voiMenu->FindItem(_T("active")),  m_dh->lastSelectedBox->getActive());
+        voiMenu->Check(voiMenu->FindItem(_T("visible")), m_dh->lastSelectedBox->getShow());
 
         GetToolBar()->ToggleTool(MENU_VOI_RENDER_SELBOXES, m_dh->showBoxes);
-        GetToolBar()->ToggleTool(MENU_VOI_TOGGLE_SELBOX,
-                !m_dh->lastSelectedBox->getActive());
+        GetToolBar()->ToggleTool(MENU_VOI_TOGGLE_SELBOX, !m_dh->lastSelectedBox->getActive());
     }
+
     //MENU_FILE_NEW_ISOSURF
+    sMenu->Enable(sMenu->FindItem(_T("New Spline Surface")), !m_dh->surface_loaded);
+    GetToolBar()->EnableTool(MENU_SPLINESURF_NEW, !m_dh->surface_loaded);
     sMenu->Enable(sMenu->FindItem(_T("New Iso Surface")), false);
     GetToolBar()->EnableTool(MENU_FILE_NEW_ISOSURF, false);
+    sMenu->Enable(sMenu->FindItem(_T("New Distance Map")), false);
+    GetToolBar()->EnableTool(MENU_SURFACE_NEW_OFFSET, false);
     sMenu->Enable(sMenu->FindItem(_T("Toggle Texture Mode")), false);
     sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), false);
     sMenu->Enable(sMenu->FindItem(_T("Toggle Normal Direction")), false);
-    //sMenu->Enable(sMenu->FindItem(_T("Draw Vectors")), false);
     sMenu->Enable(sMenu->FindItem(_T("Clean Artefacts from Surface")), false);
     sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), false);
 
@@ -2805,6 +2802,8 @@ void MainFrame::updateMenus()
         {
             sMenu->Enable(sMenu->FindItem(_T("New Iso Surface")), true);
             GetToolBar()->EnableTool(MENU_FILE_NEW_ISOSURF, true);
+            sMenu->Enable(sMenu->FindItem(_T("New Distance Map")), true);
+            GetToolBar()->EnableTool(MENU_SURFACE_NEW_OFFSET, true);
         }
         if (info->getType() < Mesh_)
         {
@@ -2815,25 +2814,17 @@ void MainFrame::updateMenus()
         if (info->getType() == IsoSurface_)
         {
             sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), true);
-            sMenu->Enable(sMenu->FindItem(_T("Clean Artefacts from Surface")),
-                    true);
-            sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")),
-                    true);
+            sMenu->Enable(sMenu->FindItem(_T("Clean Artefacts from Surface")), true);
+            sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), m_dh->vectors_loaded);
             sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
-            sMenu->Check(sMenu->FindItem(_T("Draw Vectors")), m_dh->drawVectors);
         }
         if (info->getType() == Surface_)
         {
             sMenu->Enable(sMenu->FindItem(_T("Toggle Normal Direction")), true);
-            sMenu->Enable(sMenu->FindItem(_T("Draw Vectors")), true);
-            sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), true);
+            sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), m_dh->vectors_loaded);
             sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
-            sMenu->Check(sMenu->FindItem(_T("Toggle Normal Direction")),
-                    (m_dh->normalDirection < 0));
-            sMenu->Check(sMenu->FindItem(_T("Draw Vectors")), m_dh->drawVectors);
-            sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")),
-                    true);
+            sMenu->Check(sMenu->FindItem(_T("Toggle Normal Direction")), (m_dh->normalDirection < 0));
+            sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), true);
         }
     }
-    //#endif
 }

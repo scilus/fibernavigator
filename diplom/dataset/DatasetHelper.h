@@ -203,6 +203,7 @@ public:
 
 	bool m_texAssigned;
 	bool m_selBoxChanged;
+	bool gui_blocked;
 
 	int geforceLevel;
 

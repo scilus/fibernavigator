@@ -138,16 +138,19 @@ END_EVENT_TABLE()
 int MyTreeCtrl::getSelectedType()
 {
 	wxTreeItemId treeid = GetSelection();
+	if ( !treeid.IsOk() ) return 0;
+	if ( GetItemText(treeid) == _T("points") || GetItemText(treeid) == _T("selection boxes") ) return 0;
 
 	wxTreeItemId pId = GetItemParent(treeid);
 	wxTreeItemId ppId = GetItemParent(pId);
 
 	if (GetItemText(pId) == _T("selection boxes"))
 		return MasterBox;
+	else if (GetItemText(pId) == _T("points"))
+	        return Point_;
 	else if (GetItemText(ppId) == _T("selection boxes"))
 		return ChildBox;
-	else if (GetItemText(pId) == _T("points"))
-		return Point_;
+
 	else return 0;
 }
 void MyTreeCtrl::OnChar(wxKeyEvent& event)

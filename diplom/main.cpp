@@ -72,7 +72,7 @@ namespace
 void printwx(const wxString& str)
 {
     char* cstring;
-    cstring = (char*) malloc(str.length());
+    cstring = (char*) malloc(str.length()+1);
     strcpy(cstring, (const char*) str.mb_str(wxConvUTF8));
     printf("%s\n", cstring);
     free(cstring);

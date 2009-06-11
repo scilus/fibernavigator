@@ -84,8 +84,8 @@ bool Anatomy::loadNifti(wxString filename)
 
     nifti_image* ima = nifti_image_read(hdr_file, 0);
 #ifdef DEBUG
-    nifti_1_header *tmphdr = nifti_read_header(hdr_file, 0, 0);
-    disp_nifti_1_header("", tmphdr);
+    //nifti_1_header *tmphdr = nifti_read_header(hdr_file, 0, 0);
+    //disp_nifti_1_header("", tmphdr);
 #endif
     m_columns = ima->dim[1]; // 160
     m_rows = ima->dim[2]; // 200
@@ -166,7 +166,6 @@ bool Anatomy::loadNifti(wxString filename)
             flag = true;
 
             m_oldMax = 255;;
-            delete[] data;
         }
             break;
 
@@ -204,7 +203,6 @@ bool Anatomy::loadNifti(wxString filename)
             m_oldMax = max;
             m_newMax = newMax;
             flag = true;
-            delete[] data;
         }
             break;
 
@@ -249,7 +247,6 @@ bool Anatomy::loadNifti(wxString filename)
                 m_floatDataset[i * 3 + 2] = (float) data[(2 * nSize) + i] / 255.0;
             }
             flag = true;
-            delete[] data;
         }
             break;
 
@@ -271,7 +268,6 @@ bool Anatomy::loadNifti(wxString filename)
             m_dh->tensors_loaded = true;
             m_dh->vectors_loaded = true;
             m_dh->surface_isDirty = true;
-            delete[] data;
             flag = true;
         }
             break;
@@ -297,7 +293,6 @@ bool Anatomy::loadNifti(wxString filename)
                 m_tensorField = new TensorField(m_dh, &m_floatDataset[0], 2, 3);
             }
             m_dh->tensors_loaded = true;
-            delete[] data;
             flag = true;
         }
             break;
@@ -305,9 +300,6 @@ bool Anatomy::loadNifti(wxString filename)
         default:
             break;
     }
-    delete[] hdr_file;
-    delete ima;
-    delete filedata;
 
     is_loaded = flag;
 

@@ -96,6 +96,7 @@ DatasetHelper::DatasetHelper(MainFrame* mf)
 
     m_texAssigned(false),
     m_selBoxChanged(true),
+    gui_blocked(false),
 
     geforceLevel(0),
 
@@ -120,7 +121,6 @@ DatasetHelper::DatasetHelper(MainFrame* mf)
 
 DatasetHelper::~DatasetHelper()
 {
-
     printDebug(_T("execute dataset helper destructor"),0);
     if (scene)
         delete scene;
@@ -294,6 +294,7 @@ bool DatasetHelper::load(wxString filename, const float threshold, const bool ac
 
 void DatasetHelper::finishLoading(DatasetInfo *info)
 {
+    gui_blocked = true;
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
@@ -346,8 +347,8 @@ void DatasetHelper::finishLoading(DatasetInfo *info)
     }
 
     updateLoadStatus();
+    gui_blocked = false;
     mainFrame->refreshAllGLWidgets();
-
 }
 
 bool DatasetHelper::fileNameExists(const wxString filename)
@@ -1190,6 +1191,7 @@ void DatasetHelper::printwxT(const wxString string)
     cstring = (char*) malloc(string.length()+1);
     strcpy(cstring, (const char*) string.mb_str(wxConvUTF8));
     printf("%s", cstring);
+    free (cstring);
 }
 
 void DatasetHelper::printDebug(const wxString string, const int level)
