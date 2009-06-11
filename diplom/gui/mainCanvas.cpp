@@ -674,7 +674,12 @@ void MainCanvas::render()
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
             glOrtho(0, orthoSizeNormal, 0, orthoSizeNormal, -500, 500);
-            m_dh->scene->renderNavView(m_view);
+
+            if (m_dh->mainFrame->m_listCtrl->GetItemCount() != 0)
+            {
+                m_dh->anatomyHelper->renderNav(m_view, m_dh->shaderHelper->m_textureShader);
+                if (m_dh->GLError()) m_dh->printGLError(wxT("render nav view"));
+            }
     }
     //glFlush();
 

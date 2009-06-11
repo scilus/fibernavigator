@@ -430,16 +430,6 @@ void TheScene::lightsOff()
 	glDisable(GL_COLOR_MATERIAL);
 }
 
-
-void TheScene::renderNavView(int view)
-{
-	if (m_dh->mainFrame->m_listCtrl->GetItemCount() == 0) return;
-
-	m_dh->anatomyHelper->renderNav(view, m_dh->shaderHelper->m_textureShader);
-
-	if (m_dh->GLError()) m_dh->printGLError(wxT("render nav view"));
-}
-
 void TheScene::drawSphere(float x, float y, float z, float r)
 {
 	glPushMatrix();

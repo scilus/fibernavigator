@@ -39,7 +39,6 @@ public:
 	wxGLContext* getMainGLContext() {return m_mainGLContext;};
 
 	void renderScene();
-	void renderNavView(int);
 
 	void drawSphere(float, float, float, float);
 

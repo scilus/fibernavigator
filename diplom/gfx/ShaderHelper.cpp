@@ -122,6 +122,7 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniFloat("cutZ", m_dh->zSlize + 0.5f);
 	m_meshShader->setUniInt("sector", m_dh->quadrant);
 
+	int c = 0;
 	if (m_cutTex != 0 && m_dh->surface_loaded)
 	{
 	    m_textureCount = wxMin(9, m_textureCount);
@@ -132,13 +133,14 @@ void ShaderHelper::setMeshShaderVars()
 		threshold[m_textureCount] = 0;
 		type[m_textureCount] = 5;
 		m_meshShader->setUniInt("cutTex", m_textureCount);
+		c = 1;
 	}
 
-	m_meshShader->setUniArrayInt("texes", tex, m_textureCount+1);
-	m_meshShader->setUniArrayInt("show", show, m_textureCount+1);
-	m_meshShader->setUniArrayInt("type", type, m_textureCount+1);
-	m_meshShader->setUniArrayFloat("threshold", threshold, m_textureCount+1);
-	m_meshShader->setUniArrayFloat("alpha", alpha, m_textureCount+1);
+	m_meshShader->setUniArrayInt("texes", tex, m_textureCount+c);
+	m_meshShader->setUniArrayInt("show", show, m_textureCount+c);
+	m_meshShader->setUniArrayInt("type", type, m_textureCount+c);
+	m_meshShader->setUniArrayFloat("threshold", threshold, m_textureCount+c);
+	m_meshShader->setUniArrayFloat("alpha", alpha, m_textureCount+c);
 
 }
 
