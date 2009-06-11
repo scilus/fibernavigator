@@ -198,7 +198,7 @@ void Shader::printwxT(wxString string)
 	printf("%s", cstring);
 }
 
-void Shader::setUniInt(const GLchar* name, int value)
+void Shader::setUniInt(const GLchar* name, const GLint value)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
 	if (texLoc == -1)
@@ -208,7 +208,7 @@ void Shader::setUniInt(const GLchar* name, int value)
 	glUniform1i (texLoc, value);
 }
 
-void Shader::setUniFloat(const GLchar* name, float value)
+void Shader::setUniFloat(const GLchar* name, const GLfloat value)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
 	if (texLoc == -1)
@@ -218,20 +218,20 @@ void Shader::setUniFloat(const GLchar* name, float value)
 	glUniform1f (texLoc, value);
 }
 
-void Shader::setUniArrayInt(const GLchar* name, GLint* value, GLint size)
+void Shader::setUniArrayInt(const GLchar* name, GLint* value, const GLint size)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
 	glUniform1iv (texLoc, size, value);
 }
 
-void Shader::setUniArrayFloat(const GLchar* name, float* value, int size)
+void Shader::setUniArrayFloat(const GLchar* name, GLfloat* value, const int size)
 {
 	GLint texLoc = glGetUniformLocation (m_shaderProgram, name);
 	glUniform1fv (texLoc, size, value);
 
 }
 
-void Shader::setAttribFloat(const GLchar* name, float value)
+void Shader::setAttribFloat(const GLchar* name, const GLfloat value)
 {
 	GLint attrib = glGetAttribLocation (m_shaderProgram, name);
 	//if (attrib == -1)

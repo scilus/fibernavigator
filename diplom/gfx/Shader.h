@@ -56,11 +56,11 @@ public:
     GLuint getProgramObject() {return m_shaderProgram;};
 
 
-    void setUniInt(const GLchar*, int);
-    void setUniFloat(const GLchar*, float);
-    void setUniArrayInt(const GLchar*, GLint*, GLint);
-    void setUniArrayFloat(const GLchar*, float*, int);
-    void setAttribFloat(const GLchar*, float);
+    void setUniInt(const GLchar* name, const GLint value);
+    void setUniFloat(const GLchar* name, const GLfloat value);
+    void setUniArrayInt(const GLchar* name, GLint* array, const int size);
+    void setUniArrayFloat(const GLchar* name, GLfloat* array, const int size);
+    void setAttribFloat(const GLchar* name , const GLfloat value);
 
 
 private:

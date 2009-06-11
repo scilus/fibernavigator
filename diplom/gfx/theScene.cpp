@@ -73,7 +73,8 @@ void TheScene::initGL(int view)
 		}
 		glEnable(GL_DEPTH_TEST);
 
-		if (!m_dh->m_texAssigned) {
+		if (!m_dh->m_texAssigned)
+		{
 			m_dh->shaderHelper = new ShaderHelper(m_dh);
 			m_dh->m_texAssigned = true;
 		}
@@ -130,6 +131,8 @@ void TheScene::bindTextures()
 void TheScene::renderScene()
 {
 	if ( m_dh->mainFrame->m_listCtrl->GetItemCount() == 0 ) return;
+
+	m_dh->shaderHelper->initializeArrays();
 
 	renderSplineSurface();
 
@@ -549,6 +552,9 @@ void TheScene::drawVectors()
         return;
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    glEnable( GL_LINE_SMOOTH);
+    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST);
 
     for (int i = 0; i < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++i)
     {

@@ -17,6 +17,8 @@ public:
 	ShaderHelper(DatasetHelper*);
 	virtual ~ShaderHelper();
 
+	void initializeArrays();
+
 	void setTextureShaderVars();
 	void setMeshShaderVars();
 	void setFiberShaderVars();
@@ -32,6 +34,14 @@ public:
 
 private:
 	DatasetHelper* m_dh;
+
+	int m_textureCount;
+	GLuint m_cutTex;
+	GLint* tex;
+	GLint* show;
+	GLfloat* threshold;
+    GLfloat* alpha;
+    GLint* type;
 };
 
 #endif /* SHADERHELPER_H_ */

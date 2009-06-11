@@ -24,6 +24,7 @@ void AnatomyHelper::renderNav(int view, Shader *shader)
 
 	m_dh->scene->bindTextures();
 	shader->bind();
+	m_dh->shaderHelper->initializeArrays();
 	m_dh->shaderHelper->setTextureShaderVars();
 
 	glEnable(GL_ALPHA_TEST);
