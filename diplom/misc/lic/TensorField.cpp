@@ -8,7 +8,7 @@
 #include "TensorField.h"
 #include "../Fantom/FVector.h"
 
-TensorField::TensorField(DatasetHelper* dh, float* tensorData, int order, int posDim)
+TensorField::TensorField(DatasetHelper* dh, std::vector<float>* tensorData, int order, int posDim)
 : m_order(order), m_posDim(posDim)
 {
 	m_dh = dh;
@@ -21,32 +21,30 @@ TensorField::TensorField(DatasetHelper* dh, float* tensorData, int order, int po
 		for ( int i = 0 ; i < m_cells ; ++i)
 		{
 			FTensor t(3, 1, true);
-			t.setValue(0, tensorData[ i * 3 ]);
-			t.setValue(1, tensorData[ i * 3 + 1 ]);
-			t.setValue(2, tensorData[ i * 3 + 2 ]);
+			t.setValue(0, tensorData->at( i * 3 ));
+			t.setValue(1, tensorData->at( i * 3 + 1 ));
+			t.setValue(2, tensorData->at( i * 3 + 2 ));
 			theField.push_back(t);
 		}
 	}
-
 
 	else if ( m_order == 2 && m_posDim == 3 )
 	{
 		for ( int i = 0 ; i < m_cells ; ++i)
 		{
 			FTensor t(3, 2, true);
-			t.setValue(0, 0, tensorData[ i * 6 ]);
-			t.setValue(1, 0, tensorData[ i * 6 + 1 ]);
-			t.setValue(2, 0, tensorData[ i * 6 + 2 ]);
-			t.setValue(0, 1, tensorData[ i * 6 + 1 ]);
-			t.setValue(1, 1, tensorData[ i * 6 + 3 ]);
-			t.setValue(2, 1, tensorData[ i * 6 + 4 ]);
-			t.setValue(0, 2, tensorData[ i * 6 + 2 ]);
-			t.setValue(1, 2, tensorData[ i * 6 + 4 ]);
-			t.setValue(2, 2, tensorData[ i * 6 + 5 ]);
+			t.setValue(0, 0, tensorData->at( i * 6 ));
+			t.setValue(1, 0, tensorData->at( i * 6 + 1 ));
+			t.setValue(2, 0, tensorData->at( i * 6 + 2 ));
+			t.setValue(0, 1, tensorData->at( i * 6 + 1 ));
+			t.setValue(1, 1, tensorData->at( i * 6 + 3 ));
+			t.setValue(2, 1, tensorData->at( i * 6 + 4 ));
+			t.setValue(0, 2, tensorData->at( i * 6 + 2 ));
+			t.setValue(1, 2, tensorData->at( i * 6 + 4 ));
+			t.setValue(2, 2, tensorData->at( i * 6 + 5 ));
 			theField.push_back(t);
 		}
 	}
-
 }
 
 TensorField::~TensorField()
@@ -67,7 +65,6 @@ FTensor TensorField::getInterpolatedVector(float x, float y, float z)
     int nextX = wxMin(m_dh->columns-1, nx+1);
     int nextY = wxMin(m_dh->rows-1, ny+1);
     int nextZ = wxMin(m_dh->frames-1, nz+1);
-
 
     int xyzIndex  =  nx + ny * m_dh->columns + nz * m_dh->columns * m_dh->rows;
     int x1yzIndex = nextX + ny * m_dh->columns + nz * m_dh->columns * m_dh->rows;
@@ -97,7 +94,6 @@ FTensor TensorField::getInterpolatedVector(float x, float y, float z)
     FMatrix matxy1z1 = createMatrix(txy1z1, txy1z1);
     FMatrix matx1y1z1 = createMatrix(tx1y1z1, tx1y1z1);
 
-
     FMatrix i1 = matxyz * (1. - zMult) + matxyz1 * zMult;
     FMatrix i2 = matxy1z * (1. - zMult) + matxy1z1 * zMult;
     FMatrix j1 = matx1yz * (1. - zMult) + matx1yz1 * zMult;
@@ -107,7 +103,6 @@ FTensor TensorField::getInterpolatedVector(float x, float y, float z)
     FMatrix w2 = j1 * (1. - yMult) + j2 * yMult;
 
     FMatrix matResult = w1 * (1. - xMult) + w2 * xMult;
-
     std::vector<FArray>evecs;
     FArray vals(0,0,0);
 
@@ -135,7 +130,5 @@ FMatrix TensorField::createMatrix(FTensor lhs, FTensor rhs)
     result(2,1) = a1[2] * a2[1];
     result(2,2) = a1[2] * a2[2];
 
-
     return result;
 }
-

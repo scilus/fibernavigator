@@ -48,8 +48,10 @@ class TriangleMesh {
 
 		// we don't delete vertices yet, so can do a cleanup only once
 		bool isCleaned;
-		// flag to indicate vertNormals and neighbors aren't calculated yet
-		bool m_isFinished;
+
+		bool m_vertNormalsCalculated;
+		bool m_neighborsCalculated;
+		bool m_triangleTensorsCalculated;
 
 		wxColour defaultColor;
 
@@ -65,23 +67,19 @@ class TriangleMesh {
 		void addTriangle(const int vertA, const int vertB, const int vertC);
 		void addTriangle(const int vertA, const int vertB, const int vertC, const int tensorIndex);
 
-
 		void clearMesh();
-		void finalize() { calcNeighbors(); calcVertNormals(); m_isFinished = true;};
 
 		int getNumVertices()									{ return numVerts; };
 		int getNumTriangles()									{ return numTris; };
 		Vector getVertex (const int vertNum) 					{ return vertices[vertNum]; };
 		Vector getVertex (const int triNum, int pos);
 		Vector getNormal(const int triNum)						{ return triNormals[triNum]; };
-		Vector getVertNormal(const int vertNum) 				{ return vertNormals[vertNum];};
+		Vector getVertNormal(const int vertNum);
 		Vector getVertColor( const int vertNum)					{ return vertColors[vertNum]; };
 		Triangle getTriangle(const int triNum)					{ return triangles[triNum];  };
 		wxColour getTriangleColor(const int triNum)				{ return triangleColor[triNum]; };
 		std::vector<unsigned int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
-		int getTriangleTensor(const int triNum)					{ return triangleTensor[triNum]; };
-		bool isFinished()										{ return m_isFinished; }
-
+		int getTriangleTensor(const int triNum);
 		std::vector<Vector> getVerts()                          { return vertices; };
 
 		Vector getTriangleCenter(int triNum) ;
@@ -110,10 +108,10 @@ class TriangleMesh {
 		void cleanUp();
 		void doLoopSubD();
 
-		void getCellVerticesIndices( const FIndex& cellId, std::vector< FIndex >& vertices ) const;
-		void getPosition( FPosition& resultPos, const FIndex& pIndex ) const;
-		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh ) const;
-		void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs ) const;
+		void getCellVerticesIndices( const FIndex& cellId, std::vector< FIndex >& vertices );
+		void getPosition( FPosition& resultPos, const FIndex& pIndex );
+		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh );
+		void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs );
 		int getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
 
 		void reserveVerts(const int size);
@@ -121,15 +119,13 @@ class TriangleMesh {
 
 		void printInfo();
 
-		void calcTriangleTensors();
-		void calcNeighbors();
-		void calcVertNormals();
-
-
 	private:
 		Vector calcTriangleNormal(const Triangle);
 		Vector calcTriangleNormal(const int triNum);
 		Vector calcVertNormal(const int vertNum);
+		void calcTriangleTensors();
+		void calcNeighbors();
+		void calcVertNormals();
 
 		void flipNormals();
 

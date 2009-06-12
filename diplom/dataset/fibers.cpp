@@ -1014,7 +1014,9 @@ void Fibers::initializeBuffer()
     }
     else
     {
-        m_dh->printDebug(_T("***ERROR***: Not enough memory on your gfx card. Using vertex arrays."), 2);
+        m_dh->printDebug(_T("Not enough memory on your gfx card. Using vertex arrays."), 2);
+        m_dh->printDebug(_T("This shouldn't concern you. Perfomance just will be slightly worse."), 2);
+        m_dh->printDebug(_T("Get a better graphics card if you want more juice."), 2);
         glDeleteBuffers(3, m_bufferObjects);
     }
 }

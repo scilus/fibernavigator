@@ -38,6 +38,7 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh, Triangle
     isTensor = true;
 
     m_tensorField = m_dh->getTensorField();
+    m_grid->printInfo();
 
     try
     {
@@ -54,12 +55,8 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh, Triangle
         m_dh->printDebug(_T("interpolate vectors..."), 1);
         for (unsigned int i = 0; i < nbCells; ++i)
         {
-           // int index = grid->getTriangleTensor(i);
-            //FTensor t = m_tensorField->getTensorAtIndex(index);
-
             Vector center (m_grid->getTriangleCenter(i));
             FTensor t = m_tensorField->getInterpolatedVector(center.x, center.y, center.z);
-
             cell_vectors[i] = FArray(t).normalize();
         }
         m_dh->printDebug(_T("done"), 1);

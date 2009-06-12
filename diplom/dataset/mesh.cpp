@@ -105,8 +105,6 @@ bool Mesh::loadDip(wxString filename)
 		}
 	}
 
-	m_tMesh->finalize();
-
 	m_fullPath = filename;
 	#ifdef __WXMSW__
 	m_name = filename.AfterLast('\\');
@@ -199,8 +197,6 @@ bool Mesh::loadSurf(wxString filename)
 
 		m_tMesh->addTriangle(v1, v2, v3);
 	}
-
-	m_tMesh->finalize();
 
 	m_fullPath = filename;
 	#ifdef __WXMSW__
@@ -332,8 +328,6 @@ bool Mesh::loadMesh(wxString filename)
 			m_tMesh->addTriangle(v1, v2, v3);
 		}
 	}
-
-	m_tMesh->finalize();
 
 	m_fullPath = filename;
 #ifdef __WXMSW__

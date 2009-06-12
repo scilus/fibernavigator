@@ -124,6 +124,8 @@ bool MyApp::OnInit(void)
 #ifdef DEBUG
 #ifndef __WXMSW__
         // this crashes on windows
+        printwx( _T( "Warning: This version of Fibernavigator is debug compiled."),
+                 _T( "For better performance please compile a Release version."));
         printwx( _T( "respath:" ), respath );
         printwx( _T( "shader:" ), shaderPath );
 #endif

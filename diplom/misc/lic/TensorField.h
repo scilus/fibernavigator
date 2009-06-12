@@ -11,9 +11,10 @@
 #include "../../dataset/DatasetHelper.h"
 #include "../Fantom/FTensor.h"
 
-class TensorField {
+class TensorField
+{
 public:
-	TensorField(DatasetHelper* dh, float* tensorData, int order, int posDim);
+	TensorField(DatasetHelper* dh, std::vector<float>* tensorData, int order, int posDim);
 	virtual ~TensorField();
 
 	int getCells() 	{ return m_cells; };
@@ -24,7 +25,7 @@ public:
 	FTensor getInterpolatedVector(const float x, const float y, const float z);
 
 private:
-	DatasetHelper* m_dh;
+    DatasetHelper* m_dh;
 	std::vector<FTensor> theField;
 
 	FMatrix createMatrix(FTensor lhs, FTensor rhs);

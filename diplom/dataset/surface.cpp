@@ -289,7 +289,6 @@ void Surface::execute ()
 			}
 	}
 
-	m_tMesh->finalize();
 	licCalculated = false;
 //TODO
 	for (int i = 0 ; i < 3 ; ++i)
@@ -675,7 +674,7 @@ std::vector<Vector> Surface::getSurfaceVoxelPositions()
             }
         }
         pointsInVoxels /= voxelsHit;
-        printf("%d\n", pointsInVoxels);
+        //printf("%d\n", pointsInVoxels);
         int threshold = pointsInVoxels / 2;
 
         for (size_t i = 0 ; i < nSize ; ++i)

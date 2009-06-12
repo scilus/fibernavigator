@@ -253,7 +253,6 @@ bool Anatomy::loadNifti(wxString filename)
         case Vectors_:
         {
             float *data = (float*) filedata->data;
-
             m_floatDataset.resize ( nSize * 3 );
 
             for (int i = 0; i < nSize; ++i)
@@ -264,7 +263,7 @@ bool Anatomy::loadNifti(wxString filename)
                 m_floatDataset[i * 3 + 2] = data[(2 * nSize) + i];
 
             }
-            m_tensorField = new TensorField(m_dh, &m_floatDataset[0], 1, 3);
+            m_tensorField = new TensorField(m_dh, &m_floatDataset, 1, 3);
             m_dh->tensors_loaded = true;
             m_dh->vectors_loaded = true;
             m_dh->surface_isDirty = true;
@@ -290,7 +289,7 @@ bool Anatomy::loadNifti(wxString filename)
 
             if ( components == 6 )
             {
-                m_tensorField = new TensorField(m_dh, &m_floatDataset[0], 2, 3);
+                m_tensorField = new TensorField(m_dh, &m_floatDataset, 2, 3);
             }
             m_dh->tensors_loaded = true;
             flag = true;
@@ -302,7 +301,6 @@ bool Anatomy::loadNifti(wxString filename)
     }
 
     is_loaded = flag;
-
     return flag;
 
 }
@@ -343,17 +341,7 @@ void Anatomy::generateTexture()
                     &m_floatDataset[0]);
             break;
         case Vectors_:
-        {
-            int size = m_rows * m_columns * m_frames * 3;
-            float *tempData = new float[size];
-            for (int i = 0; i < size; ++i)
-                tempData[i] = wxMax(m_floatDataset[i], -m_floatDataset[i]);
-
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT,
-                    tempData);
-            delete[] tempData;
             break;
-        }
         default:
             break;
     }
@@ -837,7 +825,6 @@ float Anatomy::at(int i)
 {
     return m_floatDataset[i];
 }
-
 
 TensorField* Anatomy::getTensorField()
 {

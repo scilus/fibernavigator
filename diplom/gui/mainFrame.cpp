@@ -2813,9 +2813,9 @@ void MainFrame::updateMenus()
         }
         if (info->getType() == IsoSurface_)
         {
-            sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), true);
+            sMenu->Enable(sMenu->FindItem(_T("Toggle Lic")), m_dh->vectors_loaded);
             sMenu->Enable(sMenu->FindItem(_T("Clean Artefacts from Surface")), true);
-            sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), m_dh->vectors_loaded);
+            sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), true);
             sMenu->Check(sMenu->FindItem(_T("Toggle Lic")), info->getUseLIC());
         }
         if (info->getType() == Surface_)

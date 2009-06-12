@@ -12,24 +12,37 @@ TriangleMesh::TriangleMesh (DatasetHelper* dh)
 	defaultColor = wxColour(0.5f, 0.5f, 0.5f, 1.0f);
 
 	isCleaned = false;
-	m_isFinished = false;
+
+	m_vertNormalsCalculated = false;
+    m_neighborsCalculated = false;
+    m_triangleTensorsCalculated = false;
 }
 
-// Destructor
 TriangleMesh::~TriangleMesh ()
 {
-	vertices.clear();
-	vertNormals.clear();
-	vertColors.clear();
-	vIsInTriangle.clear();
-	triangles.clear();
-	triNormals.clear();
-	triangleTensor.clear();
-	triangleColor.clear();
-	neighbors.clear();
+    clearMesh();
 }
 
-// Operations
+void TriangleMesh::clearMesh()
+{
+    vertices.clear();
+    vertNormals.clear();
+    vertColors.clear();
+    triangles.clear();
+    triangleTensor.clear();
+    triangleColor.clear();
+    neighbors.clear();
+    triNormals.clear();
+    vIsInTriangle.clear();
+
+    numVerts     = 0;
+    numTris      = 0;
+
+    m_vertNormalsCalculated = false;
+    m_neighborsCalculated = false;
+    m_triangleTensorsCalculated = false;
+}
+
 
 void TriangleMesh::addVert(const Vector newVert)
 {
@@ -41,13 +54,8 @@ void TriangleMesh::addVert(const Vector newVert)
 
 void TriangleMesh::addVert(const float x, const float y, const float z)
 {
-	Vector newVert(x,y,z);
-	vertices.push_back( newVert );
-	numVerts = vertices.size();
-	vIsInTriangle.resize(numVerts);
-	vertColors.resize(numVerts);
+    addVert(Vector(x,y,z));
 }
-
 
 void TriangleMesh::addTriangle(const int vertA, const int vertB, const int vertC)
 {
@@ -137,7 +145,6 @@ void TriangleMesh::setVertexColor(const unsigned int vertNum, const float r, con
 
 Vector TriangleMesh::calcTriangleNormal(const Triangle t)
 {
-
 	Vector v1 = vertices[t.pointID[1]] - vertices[t.pointID[0]];
 	Vector v2 = vertices[t.pointID[2]] - vertices[t.pointID[0]];
 
@@ -157,6 +164,19 @@ Vector TriangleMesh::calcTriangleNormal(const int triNum)
 	return tempNormal;
 }
 
+Vector TriangleMesh::getVertex (const int triNum, int pos)
+{
+    if (pos < 0 || pos > 2) pos = 0;
+    return vertices[triangles[triNum].pointID[pos]];
+}
+
+Vector TriangleMesh::getVertNormal(const int vertNum)
+{
+    if ( !m_vertNormalsCalculated )
+        calcVertNormals();
+    return vertNormals[vertNum];
+}
+
 Vector TriangleMesh::calcVertNormal(const int vertNum)
 {
 	Vector sum(0,0,0);
@@ -169,11 +189,6 @@ Vector TriangleMesh::calcVertNormal(const int vertNum)
 	return sum;
 }
 
-Vector TriangleMesh::getVertex (const int triNum, int pos)
-{
-	if (pos < 0 || pos > 2) pos = 0;
-	return vertices[triangles[triNum].pointID[pos]];
-}
 
 void TriangleMesh::calcVertNormals()
 {
@@ -181,6 +196,7 @@ void TriangleMesh::calcVertNormals()
 	vertNormals.resize(numVerts);
 	for ( int i = 0 ; i < numVerts ; ++i)
 		vertNormals[i] = calcVertNormal(i);
+	m_vertNormalsCalculated = true;
 }
 
 int TriangleMesh::getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum)
@@ -209,6 +225,7 @@ void TriangleMesh::calcNeighbors()
 		neighbors[i][1] = getNeighbor(coVert1, coVert2, i);
 		neighbors[i][2] = getNeighbor(coVert2, coVert0, i);
 	}
+	m_neighborsCalculated = true;
 }
 
 void TriangleMesh::calcNeighbor(const int triangleNum)
@@ -220,6 +237,33 @@ void TriangleMesh::calcNeighbor(const int triangleNum)
 	neighbors[triangleNum][0] = getNeighbor(coVert0, coVert1, triangleNum);
 	neighbors[triangleNum][1] = getNeighbor(coVert1, coVert2, triangleNum);
 	neighbors[triangleNum][2] = getNeighbor(coVert2, coVert0, triangleNum);
+}
+
+void TriangleMesh::getEdgeNeighbor( const FIndex& triNum, int pos, std::vector< FIndex >& neigh )
+{
+    if ( !m_neighborsCalculated )
+        calcNeighbors();
+    neigh.clear();
+    neigh.push_back(FIndex((int)neighbors[triNum][pos]));
+}
+
+void TriangleMesh::getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs )
+{
+    if ( !m_neighborsCalculated )
+        calcNeighbors();
+    neighs.clear();
+    std::vector<unsigned int>neighbors = vIsInTriangle[vertId];
+    for (size_t i = 0 ; i < neighbors.size() ; ++i)
+    {
+        neighs.push_back(FIndex(neighbors[i]));
+    }
+}
+
+int TriangleMesh::getTriangleTensor(const int triNum)
+{
+    if (!m_triangleTensorsCalculated)
+        calcTriangleTensors();
+    return triangleTensor[triNum];
 }
 
 int TriangleMesh::calcTriangleTensor(const int triNum)
@@ -235,10 +279,12 @@ int TriangleMesh::calcTriangleTensor(const int triNum)
 void TriangleMesh::calcTriangleTensors()
 {
 	triangleTensor.clear();
+	triangleTensor.resize(numTris);
 	for( int i = 0 ; i < numTris ; ++i)
 	{
-		triangleTensor.push_back(calcTriangleTensor(i));
+		triangleTensor[i] = calcTriangleTensor(i);
 	}
+	m_triangleTensorsCalculated = true;
 }
 
 Vector TriangleMesh::getTriangleCenter(const int triNum)
@@ -263,22 +309,6 @@ bool TriangleMesh::isInTriangle(const unsigned int vertNum, const unsigned int t
 			 (vertNum == triangles[triangleNum].pointID[2]) );
 }
 
-void TriangleMesh::clearMesh()
-{
-	vertices.clear();
-	vertNormals.clear();
-	vertColors.clear();
-	triangles.clear();
-	triangleTensor.clear();
-	triangleColor.clear();
-	neighbors.clear();
-	triNormals.clear();
-	vIsInTriangle.clear();
-
-	numVerts	 = 0;
-	numTris		 = 0;
-}
-
 int TriangleMesh::getThirdVert(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum)
 {
 	int index = 0;
@@ -298,7 +328,6 @@ int TriangleMesh::getThirdVert(const unsigned int coVert1, const unsigned int co
 
 void TriangleMesh::setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC)
 {
-	// TODO
 	eraseTriFromVert(triNum, triangles[triNum].pointID[1]);
 	eraseTriFromVert(triNum, triangles[triNum].pointID[2]);
 
@@ -423,13 +452,24 @@ void TriangleMesh::cleanUp()
 
 void TriangleMesh::doLoopSubD()
 {
-	if (!m_isFinished) finalize();
+    if ( !m_neighborsCalculated )
+        calcNeighbors();
+
+	if ( !m_triangleTensorsCalculated )
+	    calcTriangleTensors();
+
 	loopSubD loop(this);
+	m_neighborsCalculated = false;
+	m_vertNormalsCalculated = false;
+	m_triangleTensorsCalculated = false;
+
+	calcVertNormals();
+	calcNeighbors();
+	calcTriangleTensors();
 }
 
 
-void TriangleMesh::getCellVerticesIndices( const FIndex& triNum,
-							      std::vector< FIndex >& vertices ) const
+void TriangleMesh::getCellVerticesIndices( const FIndex& triNum, std::vector< FIndex >& vertices )
 {
     //assert( triNum < numTris );
     vertices.clear();
@@ -439,7 +479,7 @@ void TriangleMesh::getCellVerticesIndices( const FIndex& triNum,
 	vertices.push_back( FIndex(triangles[triNum].pointID[2]) );
 }
 
-void TriangleMesh::getPosition( FPosition& resultPos, const FIndex& pIndex ) const
+void TriangleMesh::getPosition( FPosition& resultPos, const FIndex& pIndex )
 {
     positive ind = pIndex.getIndex();
     //assert( ind < numVerts );
@@ -447,24 +487,6 @@ void TriangleMesh::getPosition( FPosition& resultPos, const FIndex& pIndex ) con
     resultPos[0] = vertices[ind].x;
     resultPos[1] = vertices[ind].y;
     resultPos[2] = vertices[ind].z;
-}
-
-void TriangleMesh::getEdgeNeighbor( const FIndex& triNum, int pos, std::vector< FIndex >& neigh ) const
-{
-	//assert( triNum < numTris );
-	neigh.clear();
-	neigh.push_back(FIndex((int)neighbors[triNum][pos]));
-}
-
-void TriangleMesh::getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs ) const
-{
-	//assert( triNum < numTris );
-	neighs.clear();
-	std::vector<unsigned int>neighbors = vIsInTriangle[vertId];
-	for (size_t i = 0 ; i < neighbors.size() ; ++i)
-	{
-		neighs.push_back(FIndex(neighbors[i]));
-	}
 }
 
 void TriangleMesh::flipNormals()
@@ -492,6 +514,8 @@ void TriangleMesh::reserveTriangles(const int size)
 void TriangleMesh::printInfo()
 {
 	int bytes = 0;
+	wxDateTime dt1 = wxDateTime::Now();
+	printf("[%02d:%02d:%02d] ", dt1.GetHour(), dt1.GetMinute(), dt1.GetSecond());
 	printf("Triangle Mesh contains %d Vertices and %d Triangles.\n", numVerts, numTris);
 	bytes += ( 6 * sizeof(float) * numVerts ) + ( 12 * sizeof(float) * numTris );
 		for ( size_t i = 0 ; i < vIsInTriangle.size() ; ++i)
@@ -503,6 +527,25 @@ void TriangleMesh::printInfo()
 	{
 		bytes += (int)(neighbors[i].size()) * sizeof(int);
 	}
-
+	printf("[%02d:%02d:%02d] ", dt1.GetHour(), dt1.GetMinute(), dt1.GetSecond());
 	printf("Triangle Mesh uses %d bytes.\n", bytes);
+
+#ifdef DEBUG
+    printf("vertices: %d\n",vertices.size());
+    printf("vertNormals: %d\n",vertNormals.size());
+    printf("vertColors: %d\n",vertColors.size());
+    printf("triangles: %d\n",triangles.size());
+    printf("triangleTensor: %d\n",triangleTensor.size());
+    printf("triangleColor: %d\n",triangleColor.size());
+    printf("neighbors: %d\n",neighbors.size());
+    printf("triNormals: %d\n",triNormals.size());
+    printf("vIsInTriangle: %d\n",vIsInTriangle.size());
+
+    printf("vertNormalsCalculated = ");
+    (m_vertNormalsCalculated) ? printf("true\n") : printf("false\n");
+    printf("neighborsCalculated = ");
+    (m_neighborsCalculated) ? printf("true\n") : printf("false\n");
+    printf("triangleTensorsCalculated = ");
+    (m_triangleTensorsCalculated) ? printf("true\n") : printf("false\n");
+#endif
 }

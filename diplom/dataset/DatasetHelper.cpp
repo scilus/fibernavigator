@@ -1158,6 +1158,7 @@ TensorField* DatasetHelper::getTensorField()
 {
     if (!tensors_loaded)
         return NULL;
+
     for (int i = 0; i < mainFrame->m_listCtrl->GetItemCount() ; ++i)
     {
         DatasetInfo* info =
@@ -1227,6 +1228,7 @@ void DatasetHelper::updateLoadStatus()
             case Vectors_:
                 anatomy_loaded = true;
                 vectors_loaded = true;
+                tensors_loaded = true;
                 break;
             case Mesh_:
                 mesh_loaded = true;
