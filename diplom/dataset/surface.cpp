@@ -643,29 +643,29 @@ std::vector<Vector> Surface::getSurfaceVoxelPositions()
 {
     if (!m_positionsCalculated)
     {
-        Vector v(0,0,0);
+        Vector v(0, 0, 0);
         size_t nSize = m_dh->columns * m_dh->rows * m_dh->frames;
-        std::vector<Vector>accu(nSize, v);;
-        std::vector<int>hits(nSize, 0);
-        std::vector<Vector>vertices = m_tMesh->getVerts();
+        std::vector<Vector> accu(nSize, v);
+        std::vector<int> hits(nSize, 0);
+        std::vector<Vector> vertices = m_tMesh->getVerts();
         m_svPositions.clear();
 
-        for (size_t i = 0 ; i < vertices.size() ; ++i)
+        for (size_t i = 0; i < vertices.size(); ++i)
         {
             v = vertices[i];
-            int xx = (int)wxMax(0, wxMin(v.x, m_dh->columns));
-            int yy = (int)wxMax(0, wxMin(v.y, m_dh->rows));
-            int zz = (int)wxMax(0, wxMin(v.z, m_dh->frames));
-            int index = xx + yy * m_dh->columns + zz * m_dh->columns * m_dh->rows;
-            accu[index].x += v.x;
-            accu[index].y += v.y;
-            accu[index].z += v.z;
-            hits[index] += 1;
+            int index = (int) v.x + (int) v.y * m_dh->columns + (int) v.z * m_dh->columns * m_dh->rows;
+            if ( !(index < 0 || index > m_dh->columns * m_dh->rows * m_dh->frames) )
+            {
+                accu[index].x += v.x;
+                accu[index].y += v.y;
+                accu[index].z += v.z;
+                hits[index] += 1;
+            }
         }
 
         int pointsInVoxels = 0;
         int voxelsHit = 0;
-        for (size_t i = 0 ; i < nSize ; ++i)
+        for (size_t i = 0; i < nSize; ++i)
         {
             if (hits[i] > 0)
             {
@@ -674,17 +674,16 @@ std::vector<Vector> Surface::getSurfaceVoxelPositions()
             }
         }
         pointsInVoxels /= voxelsHit;
-        //printf("%d\n", pointsInVoxels);
         int threshold = pointsInVoxels / 2;
 
-        for (size_t i = 0 ; i < nSize ; ++i)
+        for (size_t i = 0; i < nSize; ++i)
         {
             if (hits[i] > threshold)
             {
                 accu[i].x /= hits[i];
                 accu[i].y /= hits[i];
                 accu[i].z /= hits[i];
-                if ((int)accu[i].x)
+                if ((int) accu[i].x)
                 {
                     Vector v(accu[i].x, accu[i].y, accu[i].z);
                     m_svPositions.push_back(v);

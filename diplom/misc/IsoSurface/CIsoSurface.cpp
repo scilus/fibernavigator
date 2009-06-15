@@ -851,7 +851,6 @@ std::vector<Vector> CIsoSurface::getSurfaceVoxelPositions()
         Vector v(0, 0, 0);
         size_t nSize = m_dh->columns * m_dh->rows * m_dh->frames;
         std::vector<Vector> accu(nSize, v);
-        ;
         std::vector<int> hits(nSize, 0);
         std::vector<Vector> vertices = m_tMesh->getVerts();
         m_svPositions.clear();
@@ -860,10 +859,13 @@ std::vector<Vector> CIsoSurface::getSurfaceVoxelPositions()
         {
             v = vertices[i];
             int index = (int) v.x + (int) v.y * m_dh->columns + (int) v.z * m_dh->columns * m_dh->rows;
-            accu[index].x += v.x;
-            accu[index].y += v.y;
-            accu[index].z += v.z;
-            hits[index] += 1;
+            if ( !(index < 0 || index > m_dh->columns * m_dh->rows * m_dh->frames) )
+            {
+                accu[index].x += v.x;
+                accu[index].y += v.y;
+                accu[index].z += v.z;
+                hits[index] += 1;
+            }
         }
 
         int pointsInVoxels = 0;
