@@ -248,7 +248,10 @@ void TheScene::renderMesh()
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	lightsOn();
+	if ( m_dh->lighting )
+    {
+	    lightsOn();
+    }
 
 	bindTextures();
 
@@ -275,6 +278,7 @@ void TheScene::renderMesh()
                 m_dh->shaderHelper->m_meshShader->setUniInt("useColorMap", m_dh->colorMap);
                 m_dh->shaderHelper->m_meshShader->setUniInt("useLic", info->getUseLIC());
                 m_dh->shaderHelper->m_meshShader->setUniInt("useCMAP", info->getIsGlyph());
+                m_dh->shaderHelper->m_meshShader->setUniInt("lightOn", m_dh->lighting);
 
                 if (m_dh->surface_loaded)
                     m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", true);

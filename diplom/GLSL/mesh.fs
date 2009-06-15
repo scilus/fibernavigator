@@ -21,6 +21,7 @@ uniform float alpha[10];
 uniform int type[10];
 uniform int countTextures;
 uniform bool useLic;
+uniform bool lightOn;
 
 #include functions.fs
 
@@ -88,8 +89,9 @@ void main()
 	 // to denote the number of lights. A better option may be passing
 	 // in the number of lights as a uniform or replacing the current
 	 // value with a smaller value. */
-	calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess,
-			ambient, diffuse, specular);
+	 
+	if ( lightOn )
+	   calculateLighting(gl_MaxLights, -n, vertex.xyz, gl_FrontMaterial.shininess, ambient, diffuse, specular);
 
 	vec4 color = vec4(0.0);
 
