@@ -48,20 +48,24 @@ void cutFrontSector()
 		discard;
 }
 
-void cutAtSplineSurface() {
+void cutAtSplineSurface() 
+{
 	vec3 u = gl_TexCoord[0].xyz;
 	u.y = u.y / float(dimY);
 	u.z = u.z / float(dimZ);
 
-	for (int i = 9; i > -1; i--) {
-		if (type[i] == 5) {
+	for (int i = 9; i > -1; i--) 
+	{
+		if (type[i] == 5) 
+		{
 			if (vertex.x < (texture2D(cutTex, u.yz).r * float(dimX)))
 				discard;
 		}
 	}
 }
 
-void main() {
+void main() 
+{
 	if (gl_FrontFacing)
 		;//discard;
 

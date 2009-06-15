@@ -12,11 +12,11 @@
 ShaderHelper::ShaderHelper(DatasetHelper* dh)
 :   m_dh(dh)
 {
-    tex = new GLint[10];
-    show = new GLint[10];
-    threshold = new GLfloat[10];
-    alpha = new GLfloat[10];
-    type = new GLint[10];
+    tex.resize(10);
+    show.resize(10);
+    type.resize(10);
+    threshold.resize(10);
+    alpha.resize(10);
 
 	m_dh->printDebug(_T("initializing texture shader"), 1);
 	m_textureShader = new Shader(wxT("anatomy"));
@@ -52,7 +52,6 @@ ShaderHelper::ShaderHelper(DatasetHelper* dh)
 	m_legendShader = new Shader(wxT("legend"));
 	m_legendShader->bind();
 	if (m_dh->GLError()) m_dh->printGLError(wxT("setup legend shader"));
-
 }
 
 ShaderHelper::~ShaderHelper() {
@@ -62,12 +61,6 @@ ShaderHelper::~ShaderHelper() {
 	delete m_fiberShader;
 	delete m_splineSurfShader;
 	delete m_fakeTubeShader;
-
-    delete[] tex;
-    delete[] show;
-    delete[] type;
-    delete[] threshold;
-    delete[] alpha;
 
 	m_dh->printDebug(_T("shader helper destructor done\n"), 0);
 }
@@ -89,22 +82,17 @@ void ShaderHelper::initializeArrays()
             type[m_textureCount]        = info->getType();
             ++m_textureCount;
         }
-        else if (info->getType() == Surface_)
-        {
-            Surface* s = (Surface*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
-            m_cutTex = s->getCutTex();
-        }
         if ( m_textureCount == 10 ) break;
     }
 }
 
 void ShaderHelper::setTextureShaderVars()
 {
-	m_textureShader->setUniArrayInt("texes", tex, m_textureCount);
-	m_textureShader->setUniArrayInt("show", show, m_textureCount);
-	m_textureShader->setUniArrayInt("type", type, m_textureCount);
-	m_textureShader->setUniArrayFloat("threshold", threshold, m_textureCount);
-	m_textureShader->setUniArrayFloat("alpha", alpha, m_textureCount);
+	m_textureShader->setUniArrayInt("texes", &tex[0], m_textureCount);
+	m_textureShader->setUniArrayInt("show", &show[0], m_textureCount);
+	m_textureShader->setUniArrayInt("type", &type[0], m_textureCount);
+	m_textureShader->setUniArrayFloat("threshold", &threshold[0], m_textureCount);
+	m_textureShader->setUniArrayFloat("alpha", &alpha[0], m_textureCount);
 
 }
 
@@ -122,25 +110,30 @@ void ShaderHelper::setMeshShaderVars()
 	m_meshShader->setUniFloat("cutZ", m_dh->zSlize + 0.5f);
 	m_meshShader->setUniInt("sector", m_dh->quadrant);
 
-	int c = 0;
-	if (m_cutTex != 0 && m_dh->surface_loaded)
-	{
-	    m_textureCount = wxMin(9, m_textureCount);
-		glActiveTexture(GL_TEXTURE0 + m_textureCount);
-		glBindTexture(GL_TEXTURE_2D, m_cutTex);
-		tex[m_textureCount] = m_textureCount;
-		show[m_textureCount] = false;
-		threshold[m_textureCount] = 0;
-		type[m_textureCount] = 5;
-		m_meshShader->setUniInt("cutTex", m_textureCount);
-		c = 1;
-	}
+	for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
+	    {
+	        DatasetInfo* info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
 
-	m_meshShader->setUniArrayInt("texes", tex, m_textureCount+c);
-	m_meshShader->setUniArrayInt("show", show, m_textureCount+c);
-	m_meshShader->setUniArrayInt("type", type, m_textureCount+c);
-	m_meshShader->setUniArrayFloat("threshold", threshold, m_textureCount+c);
-	m_meshShader->setUniArrayFloat("alpha", alpha, m_textureCount+c);
+	        if (info->getType() == Surface_)
+            {
+                Surface* s = (Surface*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
+                m_cutTex = s->getCutTex();
+
+                glActiveTexture(GL_TEXTURE0 + 9);
+                glBindTexture(GL_TEXTURE_2D, m_cutTex);
+                tex[9] = 9;
+                show[9] = false;
+                threshold[9] = 0;
+                type[9] = 5;
+                m_meshShader->setUniInt("cutTex", 9);
+            }
+	    }
+
+	m_meshShader->setUniArrayInt("texes", &tex[0], 10);
+	m_meshShader->setUniArrayInt("show", &show[0], 10);
+	m_meshShader->setUniArrayInt("type", &type[0], 10);
+	m_meshShader->setUniArrayFloat("threshold", &threshold[0], 10);
+	m_meshShader->setUniArrayFloat("alpha", &alpha[0], 10);
 
 }
 
@@ -190,10 +183,10 @@ void ShaderHelper::setSplineSurfaceShaderVars()
 	m_splineSurfShader->setUniFloat("voxY", m_dh->yVoxel);
 	m_splineSurfShader->setUniFloat("voxZ", m_dh->zVoxel);
 
-	m_splineSurfShader->setUniArrayInt("texes", tex, m_textureCount);
-	m_splineSurfShader->setUniArrayInt("show", show, m_textureCount);
-	m_splineSurfShader->setUniArrayInt("type", type, m_textureCount);
-	m_splineSurfShader->setUniArrayFloat("threshold", threshold, m_textureCount);
-	m_splineSurfShader->setUniArrayFloat("alpha", alpha, m_textureCount);
+	m_splineSurfShader->setUniArrayInt("texes", &tex[0], m_textureCount);
+	m_splineSurfShader->setUniArrayInt("show", &show[0], m_textureCount);
+	m_splineSurfShader->setUniArrayInt("type", &type[0], m_textureCount);
+	m_splineSurfShader->setUniArrayFloat("threshold", &threshold[0], m_textureCount);
+	m_splineSurfShader->setUniArrayFloat("alpha", &alpha[0], m_textureCount);
 }
 
