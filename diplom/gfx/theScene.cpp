@@ -138,9 +138,6 @@ void TheScene::renderScene()
 
 	renderSlizes();
 
-	if (m_dh->vectors_loaded )
-	    drawVectors();
-
 	if ( m_dh->surface_loaded )
 	    renderSplineSurface();
 
@@ -157,6 +154,9 @@ void TheScene::renderScene()
 
 	if ( m_dh->mesh_loaded )
 	    renderMesh();
+
+	if ( m_dh->vectors_loaded )
+	    drawVectors();
 
 	if ( m_dh->fibers_loaded && m_dh->showBoxes )
 		drawSelectionBoxes();
@@ -911,6 +911,8 @@ void TheScene::drawVectors()
 
     if ( m_dh->GLError() )
         m_dh->printGLError(wxT("draw vectors"));
+
+    glDisable(GL_BLEND);
 
     glPopAttrib();
 }
