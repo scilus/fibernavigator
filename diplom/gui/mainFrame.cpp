@@ -2189,7 +2189,8 @@ void MainFrame::OnSelectListItem(wxListEvent& event)
     m_tSlider->SetValue((int) (info->getThreshold() * 100));
     m_tSlider2->SetValue((int) (info->getAlpha() * 100));
 
-    int col = m_listCtrl->getColClicked();
+    int col = 0;
+    col = m_listCtrl->getColClicked();
     switch (col)
     {
         case 10:

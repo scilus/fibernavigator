@@ -43,6 +43,19 @@ public:
 	void setIsBoundary(bool v) {m_isBoundary = v;};
 	bool isBoundary() {return m_isBoundary;};
 
+	void moveLeft();
+	void moveRight();
+	void moveForward();
+	void moveBack();
+	void moveUp();
+	void moveDown();
+	void moveLeft5();
+    void moveRight5();
+    void moveForward5();
+    void moveBack5();
+    void moveUp5();
+    void moveDown5();
+
 private:
     void drawSphere(float, float, float, float);
 

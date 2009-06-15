@@ -14,8 +14,7 @@
 class MyTreeCtrl: public wxTreeCtrl {
 public:
 	MyTreeCtrl(wxWindow *parent, const wxWindowID id, const wxPoint& pos,
-			const wxSize& size, long style) :
-		wxTreeCtrl(parent, id, pos, size, style) {};
+			const wxSize& size, long style);
 
 private:
 	void OnChar(wxKeyEvent& event);
@@ -30,9 +29,8 @@ private:
 class MyListCtrl: public wxListCtrl {
 public:
 	MyListCtrl(wxWindow *parent, const wxWindowID id, const wxPoint& pos,
-			const wxSize& size, long style) :
-		wxListCtrl(parent, id, pos, size, style) {};
-		
+			const wxSize& size, long style);
+
 	void OnLeftClick(wxMouseEvent& event);
 	void OnRightClick(wxMouseEvent& event);
 	int getColClicked();
@@ -50,20 +48,20 @@ private:
 
 class MySlider: public wxSlider {
 public:
-	MySlider( wxWindow *parent, const wxWindowID id, 
-			  int value , int minValue, int maxValue, 
+	MySlider( wxWindow *parent, const wxWindowID id,
+			  int value , int minValue, int maxValue,
 			  const wxPoint& pos, const wxSize& size, long style ) :
-		wxSlider (parent, id, value, minValue, maxValue, pos, size, style) 
+		wxSlider (parent, id, value, minValue, maxValue, pos, size, style)
 	{
 		m_leftIsDown = false;
 	};
-		
-	bool leftDown() {return m_leftIsDown;};  
+
+	bool leftDown() {return m_leftIsDown;};
 private:
 	void OnMouseEvent(wxMouseEvent& event);
-	
+
 	bool m_leftIsDown;
-		
+
 	DECLARE_EVENT_TABLE()
 };
 

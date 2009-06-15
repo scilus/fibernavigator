@@ -485,6 +485,7 @@ void TheScene::drawPoints()
 	m_dh->shaderHelper->m_meshShader->setUniInt("showFS", true);
 	m_dh->shaderHelper->m_meshShader->setUniInt("useTex", false);
 	m_dh->shaderHelper->m_meshShader->setUniInt("cutAtSurface", false);
+	m_dh->shaderHelper->m_meshShader->setUniInt("lightOn", true);
 
 	wxTreeItemId id, childid;
 	wxTreeItemIdValue cookie = 0;

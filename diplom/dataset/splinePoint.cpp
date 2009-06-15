@@ -28,6 +28,7 @@ SplinePoint::SplinePoint(double x, double y, double z, DatasetHelper* dh)
 SplinePoint::~SplinePoint()
 {
 	m_dh->surface_isDirty = true;
+	m_dh->lastSelectedPoint = 0;
 }
 
 void SplinePoint::draw()
@@ -97,6 +98,7 @@ void SplinePoint::select(bool flag)
 	{
 		m_dh->mainFrame->m_treeWidget->SelectItem(m_treeId);
 		m_dh->mainFrame->m_treeWidget->EnsureVisible(m_treeId);
+		m_dh->mainFrame->m_treeWidget->SetFocus();
 	}
 }
 
@@ -104,4 +106,89 @@ void SplinePoint::setX(float x)
 {
 	m_center.x = x;
 	m_origin.x = x;
+}
+
+
+void SplinePoint::moveLeft()
+{
+    m_center.x -= 1;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveRight()
+{
+    m_center.x += 1;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveForward()
+{
+    m_center.y += 1;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveBack()
+{
+    m_center.y -= 1;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveUp()
+{
+    m_center.z += 1;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveDown()
+{
+    m_center.z -= 1;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveLeft5()
+{
+    m_center.x -= 5;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveRight5()
+{
+    m_center.x += 5;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveForward5()
+{
+    m_center.y += 5;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveBack5()
+{
+    m_center.y -= 5;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveUp5()
+{
+    m_center.z += 5;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
+}
+
+void SplinePoint::moveDown5()
+{
+    m_center.z -= 5;
+    m_dh->surface_isDirty = true;
+    m_dh->mainFrame->refreshAllGLWidgets();
 }
