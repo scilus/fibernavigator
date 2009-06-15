@@ -654,7 +654,8 @@ std::vector<Vector> Surface::getSurfaceVoxelPositions()
         {
             v = vertices[i];
             int index = (int) v.x + (int) v.y * m_dh->columns + (int) v.z * m_dh->columns * m_dh->rows;
-            if ( !(index < 0 || index > m_dh->columns * m_dh->rows * m_dh->frames) )
+            if ( !(index < 0 || index > m_dh->columns * m_dh->rows * m_dh->frames || v.x <  0 ||
+                    v.x > m_dh->columns || v.y < 0 || v.z > m_dh->rows || v.z < 0 || v.z > m_dh->frames) )
             {
                 accu[index].x += v.x;
                 accu[index].y += v.y;
