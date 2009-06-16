@@ -9,13 +9,14 @@ TriangleMesh::TriangleMesh (DatasetHelper* dh)
 	m_dh = dh;
 	numVerts	 = 0;
 	numTris		 = 0;
-	defaultColor = wxColour(0.5f, 0.5f, 0.5f, 1.0f);
 
 	isCleaned = false;
 
 	m_vertNormalsCalculated = false;
     m_neighborsCalculated = false;
     m_triangleTensorsCalculated = false;
+
+    defaultColor = wxColour(0.5f, 0.5f, 0.5f, 1.0f);
 }
 
 TriangleMesh::~TriangleMesh ()
@@ -27,17 +28,18 @@ void TriangleMesh::clearMesh()
 {
     vertices.clear();
     vertNormals.clear();
-    vertColors.clear();
+    vIsInTriangle.clear();
+
     triangles.clear();
     triangleTensor.clear();
     triangleColor.clear();
     neighbors.clear();
     triNormals.clear();
-    vIsInTriangle.clear();
 
     numVerts     = 0;
     numTris      = 0;
 
+    isCleaned = false;
     m_vertNormalsCalculated = false;
     m_neighborsCalculated = false;
     m_triangleTensorsCalculated = false;
@@ -49,7 +51,12 @@ void TriangleMesh::addVert(const Vector newVert)
 	vertices.push_back( newVert );
 	numVerts = vertices.size();
 	vIsInTriangle.resize(numVerts);
-	vertColors.resize(numVerts);
+}
+
+void TriangleMesh::fastAddVert(const Vector newVert)
+{
+    vertices[numVerts] = newVert ;
+    ++numVerts;
 }
 
 void TriangleMesh::addVert(const float x, const float y, const float z)
@@ -57,26 +64,21 @@ void TriangleMesh::addVert(const float x, const float y, const float z)
     addVert(Vector(x,y,z));
 }
 
+void TriangleMesh::reserveVerts(const int size)
+{
+    vertices.reserve(size);
+    vertNormals.reserve(size);
+}
+
+void TriangleMesh::resizeVerts(const int size)
+{
+    vertices.resize(size);
+    vIsInTriangle.resize(size);
+}
+
 void TriangleMesh::addTriangle(const int vertA, const int vertB, const int vertC)
 {
-	Triangle t = {{vertA, vertB, vertC}};
-	triangles.push_back(t);
-	triNormals.push_back(calcTriangleNormal(t));
-	vIsInTriangle[vertA].push_back(numTris);
-	vIsInTriangle[vertB].push_back(numTris);
-	vIsInTriangle[vertC].push_back(numTris);
-	std::vector<int> v(3,-1);
-	neighbors.push_back( v );
-	numTris = triangles.size();
-
-	Vector p = ( getVertex(vertA) + getVertex(vertB) + getVertex(vertC) )/3.0;
-	int x = wxMin(m_dh->columns-1, wxMax(0,(int)p[0]));
-	int y = wxMin(m_dh->rows   -1, wxMax(0,(int)p[1]));
-	int z = wxMin(m_dh->frames -1, wxMax(0,(int)p[2]));
-
-	int index = x + y * m_dh->columns + z * m_dh->columns * m_dh->rows;
-	triangleTensor.push_back(index);
-	triangleColor.push_back(defaultColor);
+	addTriangle(vertA, vertB, vertC, 0);
 }
 
 void TriangleMesh::addTriangle(const int vertA, const int vertB, const int vertC, const int tensorIndex)
@@ -92,6 +94,36 @@ void TriangleMesh::addTriangle(const int vertA, const int vertB, const int vertC
 	numTris = triangles.size();
 	triangleTensor.push_back(tensorIndex);
 	triangleColor.push_back(defaultColor);
+}
+
+void TriangleMesh::fastAddTriangle(const int vertA, const int vertB, const int vertC)
+{
+    Triangle t = {{vertA, vertB, vertC}};
+    triangles[numTris] = t;
+    triNormals[numTris] = calcTriangleNormal(t);
+    vIsInTriangle[vertA].push_back(numTris);
+    vIsInTriangle[vertB].push_back(numTris);
+    vIsInTriangle[vertC].push_back(numTris);
+    ++numTris;
+}
+
+void TriangleMesh::reserveTriangles(const int size)
+{
+    triangles.reserve(size);
+    triNormals.reserve(size);
+    triangleTensor.reserve(size);
+    triangleColor.reserve(size);
+    neighbors.reserve(size);
+}
+
+void TriangleMesh::resizeTriangles(const int size)
+{
+    triangles.resize(size);
+    triNormals.resize(size);
+    triangleTensor.resize(size,0);
+    triangleColor.resize(size, defaultColor);
+    std::vector<int> v(3,-1);
+    neighbors.resize(size, v);
 }
 
 void TriangleMesh::setTriangleColor(const unsigned int triNum, const float r, const float g, const float b, const float a)
@@ -134,13 +166,6 @@ void TriangleMesh::setTriangleBlue(const unsigned int triNum, const float b)
 {
     unsigned char blue = (unsigned char)(b * 255);
     triangleColor[triNum].Set(triangleColor[triNum].Red(), triangleColor[triNum].Green(), blue, triangleColor[triNum].Alpha());
-}
-
-
-void TriangleMesh::setVertexColor(const unsigned int vertNum, const float r, const float g, const float b)
-{
-	Vector c(r,g,b);
-	vertColors[vertNum] = c;
 }
 
 Vector TriangleMesh::calcTriangleNormal(const Triangle t)
@@ -370,6 +395,10 @@ int TriangleMesh::getNextVertex(const unsigned int triNum, const unsigned int ve
 void TriangleMesh::cleanUp()
 {
 	if ( isCleaned ) return;
+
+	if ( !m_neighborsCalculated )
+	    calcNeighbors();
+
 	std::vector<int> queue;
 	std::vector<bool> visited(numTris, false);
 	std::vector< std::vector<int> >objects;
@@ -393,9 +422,7 @@ void TriangleMesh::cleanUp()
 					queue.push_back(n[i]);
 			}
 		}
-		int counter = 0;
-		for (int i = 0 ; i < numTris ; ++i)
-			if (!visited[i]) ++counter;
+
 		for (int i = 0 ; i < numTris ; ++i)
 		{
 			if (!visited[i])
@@ -426,7 +453,6 @@ void TriangleMesh::cleanUp()
 	}
 
 	vertNormals.clear();
-	vertColors.clear();
 	triangles.clear();
 	triNormals.clear();
 	vIsInTriangle.clear();
@@ -494,23 +520,6 @@ void TriangleMesh::flipNormals()
 
 }
 
-void TriangleMesh::reserveVerts(const int size)
-{
-	vertices.reserve(size);
-	vertNormals.reserve(size);
-	vertColors.reserve(size);
-}
-
-void TriangleMesh::reserveTriangles(const int size)
-{
-	triangles.reserve(size);
-	triNormals.reserve(size);
-	triangleTensor.reserve(size);
-	triangleColor.reserve(size);
-	neighbors.reserve(size);
-
-}
-
 void TriangleMesh::printInfo()
 {
 	int bytes = 0;
@@ -548,4 +557,49 @@ void TriangleMesh::printInfo()
     printf("triangleTensorsCalculated = ");
     (m_triangleTensorsCalculated) ? printf("true\n") : printf("false\n");
 #endif
+}
+
+int TriangleMesh::getNumVertices()
+{
+    return numVerts;
+}
+
+int TriangleMesh::getNumTriangles()
+{
+    return numTris;
+}
+
+Vector TriangleMesh::getVertex(const int vertNum)
+{
+    return vertices[vertNum];
+}
+
+Vector TriangleMesh::getNormal(const int triNum)
+{
+    return triNormals[triNum];
+}
+
+Triangle TriangleMesh::getTriangle(const int triNum)
+{
+    return triangles[triNum];
+}
+
+wxColour TriangleMesh::getTriangleColor(const int triNum)
+{
+    return triangleColor[triNum];
+}
+
+std::vector<unsigned int> TriangleMesh::getStar(const int vertNum)
+{
+    return vIsInTriangle[vertNum];
+}
+
+std::vector<Vector> TriangleMesh::getVerts()
+{
+    return vertices;
+}
+
+void TriangleMesh::setVertex(const unsigned int vertNum, const Vector nPos)
+{
+    vertices[vertNum] = nPos;
 }

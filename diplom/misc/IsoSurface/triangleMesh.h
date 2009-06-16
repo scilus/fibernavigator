@@ -32,7 +32,6 @@ class TriangleMesh {
 
 		std::vector<Vector> vertices;
 		std::vector<Vector> vertNormals;
-		std::vector<Vector> vertColors;
 		std::vector < std::vector<unsigned int> >vIsInTriangle;
 
 		std::vector< Triangle > triangles;
@@ -43,8 +42,6 @@ class TriangleMesh {
 
 		int	numVerts;
 		int	numTris;
-
-		bool openMeshError;
 
 		// we don't delete vertices yet, so can do a cleanup only once
 		bool isCleaned;
@@ -64,27 +61,35 @@ class TriangleMesh {
 	public:
 		void addVert(const Vector newVert);
 		void addVert(const float x, const float y, const float z);
+		void fastAddVert(const Vector newVert);
+
 		void addTriangle(const int vertA, const int vertB, const int vertC);
 		void addTriangle(const int vertA, const int vertB, const int vertC, const int tensorIndex);
+		void fastAddTriangle(const int vertA, const int vertB, const int vertC);
 
 		void clearMesh();
 
-		int getNumVertices()									{ return numVerts; };
-		int getNumTriangles()									{ return numTris; };
-		Vector getVertex (const int vertNum) 					{ return vertices[vertNum]; };
-		Vector getVertex (const int triNum, int pos);
-		Vector getNormal(const int triNum)						{ return triNormals[triNum]; };
-		Vector getVertNormal(const int vertNum);
-		Vector getVertColor( const int vertNum)					{ return vertColors[vertNum]; };
-		Triangle getTriangle(const int triNum)					{ return triangles[triNum];  };
-		wxColour getTriangleColor(const int triNum)				{ return triangleColor[triNum]; };
-		std::vector<unsigned int> getStar(const int vertNum) 	{ return vIsInTriangle[vertNum]; };
-		int getTriangleTensor(const int triNum);
-		std::vector<Vector> getVerts()                          { return vertices; };
+		void reserveVerts(const int size);
+        void reserveTriangles(const int size);
+        void resizeVerts(const int size);
+        void resizeTriangles(const int size);
+		int getNumVertices();
+		int getNumTriangles();
 
+		Vector getVertex (const int vertNum);
+		Vector getVertex (const int triNum, int pos);
+		Vector getNormal(const int triNum);
+		Vector getVertNormal(const int vertNum);
+		Triangle getTriangle(const int triNum);
+		wxColour getTriangleColor(const int triNum);
+		std::vector<unsigned int> getStar(const int vertNum);
+		std::vector<Vector> getVerts();
+
+		int getTriangleTensor(const int triNum);
 		Vector getTriangleCenter(int triNum) ;
 
-		void setVertex(const unsigned int vertNum, const Vector nPos)	{ vertices[vertNum] = nPos; };
+		void setVertex(const unsigned int vertNum, const Vector nPos);
+
 		void eraseTriFromVert( const unsigned int triNum, const unsigned int vertNum);
 		void setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC);
 		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b, const float a);
@@ -94,16 +99,12 @@ class TriangleMesh {
 		void setTriangleGreen(const unsigned int triNum, const float g);
 		void setTriangleBlue(const unsigned int triNum, const float b);
 
-		void setVertexColor(const unsigned int vertNum, const float r, const float g, const float b);
-
 		bool isInTriangle(const unsigned int vertNum, const unsigned int triangleNum);
 
 		bool hasEdge(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
 		int getThirdVert(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
 
 		int getNextVertex(const unsigned int triNum, const unsigned int vertNum);
-
-		bool getOpenMeshError() { return openMeshError; };
 
 		void cleanUp();
 		void doLoopSubD();
@@ -113,9 +114,6 @@ class TriangleMesh {
 		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh );
 		void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs );
 		int getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
-
-		void reserveVerts(const int size);
-		void reserveTriangles(const int size);
 
 		void printInfo();
 

@@ -75,12 +75,14 @@ bool Mesh::loadDip(wxString filename)
 
 					tmpMagnitudes[i] = x;
 				}
+				/*
 				float diff = maxMagnitude - minMagnitude;
 				for ( size_t i = 0 ; i < m_countVerts ; ++i)
 				{
 					float c = ( tmpMagnitudes[i] - minMagnitude ) / diff;
 					m_tMesh->setVertexColor(i, c, c, c);
 				}
+				*/
 			}
 			if ( line.BeforeFirst('=') == _T("NumberPolygons") )
 			{
