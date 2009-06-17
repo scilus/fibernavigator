@@ -1328,7 +1328,7 @@ void DatasetHelper::licMovieHelper()
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
-    long id = m_listCtrl->GetItemCount();
+    long id = mainFrame->m_listCtrl->GetItemCount();
 #else
     long id = 0;
 #endif
