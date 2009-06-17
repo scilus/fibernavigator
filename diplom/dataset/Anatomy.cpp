@@ -83,6 +83,11 @@ bool Anatomy::loadNifti(wxString filename)
     strcpy(hdr_file, (const char*) filename.mb_str(wxConvUTF8));
 
     nifti_image* ima = nifti_image_read(hdr_file, 0);
+    if ( !ima )
+    {
+        m_dh->lastError = wxT("nifti file corrupt, cannot create nifti image from header");
+        return false;
+    }
 #ifdef DEBUG
     //nifti_1_header *tmphdr = nifti_read_header(hdr_file, 0, 0);
     //disp_nifti_1_header("", tmphdr);
@@ -148,6 +153,11 @@ bool Anatomy::loadNifti(wxString filename)
         m_type = not_initialized;
 
     nifti_image* filedata = nifti_image_read(hdr_file, 1);
+    if ( !filedata )
+    {
+        m_dh->lastError = wxT("nifti file corrupt");
+        return false;
+    }
     int nSize = ima->dim[1] * ima->dim[2] * ima->dim[3];
 
     bool flag = false;
