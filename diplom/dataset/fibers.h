@@ -67,7 +67,7 @@ private:
     void boxTest(int, int, int);
     void barycenterTest(int, int, int);
     void toggleEndianess();
-    void createColorArray();
+    void createColorArray(bool colorsLoadedFromFile);
     void freeArrays();
     void drawFakeTubes();
     void drawSortedLines();
