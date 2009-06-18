@@ -590,7 +590,7 @@ void TheScene::drawVectors()
                 {
                     for (int j = 0; j < m_dh->rows; ++j)
                     {
-                        int slize = m_dh->zSlize * m_dh->columns * m_dh->rows * 3;
+                        int slize = (int)(m_dh->zSlize * m_dh->columns * m_dh->rows * 3);
                         int index = i * 3 + j * m_dh->columns * 3 + slize;
 
                         float x = vecs->at(index);
@@ -676,7 +676,7 @@ void TheScene::drawVectors()
                 {
                     for (int j = 0; j < m_dh->frames; ++j)
                     {
-                        int slize = m_dh->ySlize * m_dh->columns * 3;
+                        int slize = (int)(m_dh->ySlize * m_dh->columns * 3);
                         int index = i * 3 + slize + j * m_dh->columns * m_dh->rows * 3;
 
                         float x = vecs->at(index);
@@ -763,7 +763,7 @@ void TheScene::drawVectors()
                 {
                     for (int j = 0; j < m_dh->frames; ++j)
                     {
-                        int slize = m_dh->xSlize * 3;
+                        int slize = (int)(m_dh->xSlize * 3);
                         int index = slize + i * m_dh->columns * 3 + j * m_dh->columns * m_dh->rows * 3;
 
                         float x = vecs->at(index);

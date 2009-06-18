@@ -1354,7 +1354,7 @@ void DatasetHelper::licMovieHelper()
 
 void DatasetHelper::createLicSliceSag(int slize)
 {
-    int xs = slize * xVoxel;
+    int xs = (int)(slize * xVoxel);
 
     //delete all existing points
     mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tPointId);
@@ -1364,8 +1364,8 @@ void DatasetHelper::createLicSliceSag(int slize)
         for (int j = 0; j < 11; ++j)
         {
 
-            int yy = (rows / 10 * yVoxel) * i;
-            int zz = (frames / 10 * zVoxel) * j;
+            int yy = (int)((rows / 10 * yVoxel) * i);
+            int zz = (int)((frames / 10 * zVoxel) * j);
 
             // create the point
             SplinePoint *point = new SplinePoint(xs, yy, zz, this);
@@ -1384,7 +1384,7 @@ void DatasetHelper::createLicSliceSag(int slize)
 
 void DatasetHelper::createLicSliceCor(int slize)
 {
-    int ys = slize * yVoxel;
+    int ys = (int)(slize * yVoxel);
 
     //delete all existing points
     mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tPointId);
@@ -1393,8 +1393,8 @@ void DatasetHelper::createLicSliceCor(int slize)
     {
         for (int j = 0; j < 11; ++j)
         {
-            int xx = (columns / 10 * xVoxel) * i;
-            int zz = (frames / 10 * zVoxel) * j;
+            int xx = (int)((columns / 10 * xVoxel) * i);
+            int zz = (int)((frames / 10 * zVoxel) * j);
 
             // create the point
             SplinePoint *point = new SplinePoint(xx, ys, zz, this);
@@ -1413,7 +1413,7 @@ void DatasetHelper::createLicSliceCor(int slize)
 
 void DatasetHelper::createLicSliceAxi(int slize)
 {
-    int zs = slize * zVoxel;
+    int zs = (int)(slize * zVoxel);
 
     //delete all existing points
     mainFrame->m_treeWidget->DeleteChildren(mainFrame->m_tPointId);
@@ -1422,8 +1422,8 @@ void DatasetHelper::createLicSliceAxi(int slize)
     {
         for (int j = 0; j < 11; ++j)
         {
-            int xx = (columns / 10 * xVoxel) * i;
-            int yy = (rows / 10 * yVoxel) * j;
+            int xx = (int)((columns / 10 * xVoxel) * i);
+            int yy = (int)((rows / 10 * yVoxel) * j);
 
             // create the point
             SplinePoint *point = new SplinePoint(xx, yy, zs, this);

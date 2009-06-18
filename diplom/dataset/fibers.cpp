@@ -535,13 +535,13 @@ void Fibers::save(wxString filename)
             for (int j = 0; j < getPointsPerLine(l) ; ++j)
             {
                 pointsToSave.push_back(m_dh->columns * m_dh->xVoxel - m_pointArray[pc]);
-                colorsToSave.push_back(colorData[pc]*255);
+                colorsToSave.push_back((wxUint8)(colorData[pc]*255));
                 ++pc;
                 pointsToSave.push_back(m_dh->rows * m_dh->yVoxel - m_pointArray[pc]);
-                colorsToSave.push_back(colorData[pc]*255);
+                colorsToSave.push_back((wxUint8)(colorData[pc]*255));
                 ++pc;
                 pointsToSave.push_back(m_pointArray[pc]);
-                colorsToSave.push_back(colorData[pc]*255);
+                colorsToSave.push_back((wxUint8)(colorData[pc]*255));
                 ++pc;
                 linesToSave.push_back(pointIndex);
                 ++pointIndex;

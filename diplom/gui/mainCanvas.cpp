@@ -79,7 +79,7 @@ void MainCanvas::init()
 void MainCanvas::changeOrthoSize()
 {
     orthoSizeNormal
-            = wxMax(wxMax(m_dh->columns * m_dh->xVoxel, m_dh->rows * m_dh->yVoxel), m_dh->frames * m_dh->zVoxel);
+            = (int)( wxMax(wxMax(m_dh->columns * m_dh->xVoxel, m_dh->rows * m_dh->yVoxel), m_dh->frames * m_dh->zVoxel));
 
     if (m_view == mainView)
     {

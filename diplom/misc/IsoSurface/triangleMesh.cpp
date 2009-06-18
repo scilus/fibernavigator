@@ -16,7 +16,7 @@ TriangleMesh::TriangleMesh (DatasetHelper* dh)
     m_neighborsCalculated = false;
     m_triangleTensorsCalculated = false;
 
-    defaultColor = wxColour(0.5f, 0.5f, 0.5f, 1.0f);
+    defaultColor = wxColour(200, 200, 200, 255);
 }
 
 TriangleMesh::~TriangleMesh ()

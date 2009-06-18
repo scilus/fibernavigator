@@ -1213,9 +1213,9 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
     if (!m_dh->scene || m_dh->surface_loaded)
         return;
 
-    int xs = m_xSlider->GetValue() * m_dh->xVoxel;
-    int ys = m_ySlider->GetValue() * m_dh->yVoxel;
-    int zs = m_zSlider->GetValue() * m_dh->zVoxel;
+    int xs = (int)(m_xSlider->GetValue() * m_dh->xVoxel);
+    int ys = (int)(m_ySlider->GetValue() * m_dh->yVoxel);
+    int zs = (int)(m_zSlider->GetValue() * m_dh->zVoxel);
 
 
     //delete all existing points
@@ -1232,8 +1232,8 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
             for (int j = 0; j < 11; ++j)
             {
 
-                int yy = (m_dh->rows / 10 * m_dh->yVoxel) * i;
-                int zz = (m_dh->frames / 10 * m_dh->zVoxel) * j;
+                int yy = (int)((m_dh->rows / 10 * m_dh->yVoxel) * i);
+                int zz = (int)((m_dh->frames / 10 * m_dh->zVoxel) * j);
 
                 // create the point
                 SplinePoint *point = new SplinePoint(xs, yy, zz, m_dh);
@@ -1266,8 +1266,8 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
             for (int j = 0; j < 11; ++j)
             {
 
-                int xx = (m_dh->columns / 10 * m_dh->xVoxel) * i;
-                int zz = (m_dh->frames / 10 * m_dh->zVoxel) * j;
+                int xx = (int)((m_dh->columns / 10 * m_dh->xVoxel) * i);
+                int zz = (int)((m_dh->frames / 10 * m_dh->zVoxel) * j);
 
                 // create the point
                 SplinePoint *point = new SplinePoint(xx, ys, zz, m_dh);
@@ -1302,8 +1302,8 @@ void MainFrame::OnNewSurface(wxCommandEvent& WXUNUSED(event))
             for (int j = 0; j < 11; ++j)
             {
 
-                int xx = (m_dh->columns / 10 * m_dh->xVoxel) * i;
-                int yy = (m_dh->rows / 10 * m_dh->yVoxel) * j;
+                int xx = (int)((m_dh->columns / 10 * m_dh->xVoxel) * i);
+                int yy = (int)((m_dh->rows / 10 * m_dh->yVoxel) * j);
 
                 // create the point
                 SplinePoint *point = new SplinePoint(xx, yy, zs, m_dh);
@@ -2668,8 +2668,8 @@ void MainFrame::OnGLEvent(wxCommandEvent &event)
             float x = ((float) pos.x / NAV_GL_SIZE * max);
             float y = ((float) (NAV_GL_SIZE - pos.y) / NAV_GL_SIZE * max);
 
-            m_xSlider->SetValue((int) x - (max - m_dh->columns) / 2.0 );
-            m_ySlider->SetValue((int) y - (max - m_dh->rows) / 2.0 );
+            m_xSlider->SetValue((int)( x - (max - m_dh->columns) / 2.0 ));
+            m_ySlider->SetValue((int)( y - (max - m_dh->rows) / 2.0 ));
             break;
         }
         case coronal:
@@ -2678,8 +2678,8 @@ void MainFrame::OnGLEvent(wxCommandEvent &event)
             float x = ((float) pos.x / NAV_GL_SIZE) * max;
             float y = ((float) (NAV_GL_SIZE - pos.y) / NAV_GL_SIZE * max);
 
-            m_xSlider->SetValue((int) x - (max - m_dh->columns) / 2.0 );
-            m_zSlider->SetValue((int) y - (max - m_dh->frames) / 2.0 );
+            m_xSlider->SetValue((int)( x - (max - m_dh->columns) / 2.0 ));
+            m_zSlider->SetValue((int)( y - (max - m_dh->frames) / 2.0 ));
             break;
         }
         case sagittal:
@@ -2688,8 +2688,8 @@ void MainFrame::OnGLEvent(wxCommandEvent &event)
             float x = ((float) (NAV_GL_SIZE - pos.x) / NAV_GL_SIZE) * max;
             float y = ((float) (NAV_GL_SIZE - pos.y) / NAV_GL_SIZE * max);
 
-            m_ySlider->SetValue((int) x - (max - m_dh->rows) / 2.0 );
-            m_zSlider->SetValue((int) y - (max - m_dh->frames) / 2.0);
+            m_ySlider->SetValue((int)( x - (max - m_dh->rows) / 2.0 ));
+            m_zSlider->SetValue((int)( y - (max - m_dh->frames) / 2.0));
             break;
         }
         case mainView:
