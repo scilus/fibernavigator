@@ -540,15 +540,14 @@ void TriangleMesh::printInfo()
 	printf("Triangle Mesh uses %d bytes.\n", bytes);
 
 #ifdef DEBUG
-    printf("vertices: %d\n",vertices.size());
-    printf("vertNormals: %d\n",vertNormals.size());
-    printf("vertColors: %d\n",vertColors.size());
-    printf("triangles: %d\n",triangles.size());
-    printf("triangleTensor: %d\n",triangleTensor.size());
-    printf("triangleColor: %d\n",triangleColor.size());
-    printf("neighbors: %d\n",neighbors.size());
-    printf("triNormals: %d\n",triNormals.size());
-    printf("vIsInTriangle: %d\n",vIsInTriangle.size());
+    printf("vertices: %d\n",(int)vertices.size());
+    printf("vertNormals: %d\n",(int)vertNormals.size());
+    printf("triangles: %d\n",(int)triangles.size());
+    printf("triangleTensor: %d\n",(int)triangleTensor.size());
+    printf("triangleColor: %d\n",(int)triangleColor.size());
+    printf("neighbors: %d\n",(int)neighbors.size());
+    printf("triNormals: %d\n",(int)triNormals.size());
+    printf("vIsInTriangle: %d\n",(int)vIsInTriangle.size());
 
     printf("vertNormalsCalculated = ");
     (m_vertNormalsCalculated) ? printf("true\n") : printf("false\n");
