@@ -1,55 +1,68 @@
-cmake_minimum_required(VERSION 2.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT( FiberNavigator )
 
-file( GLOB _srcs "*.cpp" )
-file( GLOB _srcs2 "gui/*.cpp" )
-file( GLOB _srcs3 "gfx/*.cpp" )
-file( GLOB _srcs4 "dataset/*.cpp" )
-file( GLOB _srcs5 "misc/Fantom/*.cpp" )
-file( GLOB _srcs6 "misc/IsoSurface/*.cpp" )
-file( GLOB _srcs7 "misc/lic/*.cpp" )
-file( GLOB _srcs8 "misc/nifti/*.c" )
+# Include local CMake modules
+LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../tools/CMakeModules )
 
-if(APPLE)
-set( wxWidgets_USE_LIBS base core gl xml aui )
-endif(APPLE)
-set( WXWIDGETS_USE_GL TRUE )
-find_package( wxWidgets REQUIRED )
+# First of all find out which platform we are on and set our own platform variable
+SET( FIBERNAVIGATOR_PLATFORM_LINUX "Linux" )
+SET( FIBERNAVIGATOR_PLATFORM_WINDOWS "Windows" )
+IF( CMAKE_HOST_SYSTEM MATCHES Linux )
+  SET( FIBERNAVIGATOR_PLATFORM
+       ${FIBERNAVIGATOR_PLATFORM_LINUX}
+       CACHE STRING "The platform we are building on." )
+ENDIF( CMAKE_HOST_SYSTEM MATCHES Linux )
+IF( CMAKE_HOST_SYSTEM MATCHES Windows )
+  SET( FIBERNAVIGATOR_PLATFORM
+    ${FIBERNAVIGATOR_PLATFORM_WINDOWS}
+    CACHE STRING "The platform we are building on." )
+ENDIF( CMAKE_HOST_SYSTEM MATCHES Windows )
 
-find_package( OpenGL REQUIRED )
+# Platform dependencies
+IF( FIBERNAVIGATOR_PLATFORM MATCHES ${FIBERNAVIGATOR_PLATFORM_WINDOWS} )
+  SET( LIBRARY_OUTPUT_PATH
+       ${PROJECT_BINARY_DIR}/bin
+       CACHE PATH "The libraries will be put into this directory.")
+ELSE( FIBERNAVIGATOR_PLATFORM MATCHES ${FIBERNAVIGATOR_PLATFORM_WINDOWS} )
+  SET( LIBRARY_OUTPUT_PATH
+       ${PROJECT_BINARY_DIR}/lib
+       CACHE PATH "The libraries will be put into this directory.")
+ENDIF( FIBERNAVIGATOR_PLATFORM MATCHES ${FIBERNAVIGATOR_PLATFORM_WINDOWS} )
+MARK_AS_ADVANCED( LIBRARY_OUTPUT_PATH )
+SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin CACHE PATH "The executables will be put into this directory.")
+MARK_AS_ADVANCED( EXECUTABLE_OUTPUT_PATH )
 
-#find_path( GLEW_INCLUDE_DIR glew.h )
-#find_library( GLEW_LIBRARY libglew.so libGLEW.dylib )
-#link_directories( ${GLEW_DIR} )
+# Package dependencies:
+FIND_PACKAGE( GLEW REQUIRED )
+FIND_PACKAGE( wxWidgets REQUIRED )
+SET( WXWIDGETS_USE_GL TRUE )
 
-#INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_DIR} )
-
+# Includes:
+INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_PATH} )
 INCLUDE( ${wxWidgets_USE_FILE} )
-  INCLUDE_DIRECTORIES( . ${wxWidgets_INCLUDE_DIRS} )
+INCLUDE_DIRECTORIES( . ${wxWidgets_INCLUDE_DIRS} )
 ADD_DEFINITIONS( `${wxWidgets_CONFIG_EXECUTABLE} gl --cppflags` )
 
-if(APPLE)
-    set( target "FiberNavigator")
-    include_directories( "~/glew/glew-10.5/include" )
-    link_directories( "~/glew/glew-10.5/lib" )
-    add_executable( ${target} MACOSX_BUNDLE ${_srcs} ${_srcs2} ${_srcs3} ${_srcs4} ${_srcs5} ${_srcs6} ${_srcs7} ${_srcs8})
-    target_link_libraries( ${target} "-framework OpenGL" GLEW )
-    set( _BundleName "Fiber Navigator" )
-    set( _BundleInfo "A MRI visualization tool")
-    set( _BundleIcon "main.icns" )
-    set_target_properties( ${target}
-       PROPERTIES
-	  MACOSX_BUNDLE_BUNDLE_NAME ${_BundleName}
-	  MACOSX_BUNDLE_INFO_STRING ${_BundleInfo}
-	  MACOSX_BUNDLE_ICON_FILE ${_BundleIcon}
-	  MACOSX_BUNDLE_COPYRIGHT "(c) 2008, Ralph and Mario"
-	  )
-else(APPLE)
-    set( target "main")
-    add_executable( ${target} ${_srcs} ${_srcs2} ${_srcs3} ${_srcs4} ${_srcs5} ${_srcs6} ${_srcs7} ${_srcs8})
-	target_link_libraries( main -L../diplom/glew/lib GLEW wx_gtk2u_gl-2.8 )
-	#target_link_libraries( ${target} -lGL -lGLU -lGLEW )
-endif(APPLE)
+# Global compiler flags:
+#-----------------------
+# -Wno-long-long    since on Ubuntu 8.10 it won't compile without it
+# -ansi             force ISO-C++98 compliance (not GNU++98)
+SET( CMAKE_CXX_FLAGS "-Wall -ansi -Wno-long-long" )
+SET( CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -O0" )
+SET( CMAKE_CXX_FLAGS_RELEASE "-O3" )
 
-target_link_libraries( ${target} ${wxWidgets_LIBRARIES} )
+SET( target "fibernavigator")
 
+file( GLOB GUI_SRC "gui/*.cpp" )
+file( GLOB GFX_SRC "gfx/*.cpp" )
+file( GLOB DS_SRC "dataset/*.cpp" )
+file( GLOB FANTOM_SRC "misc/Fantom/*.cpp" )
+file( GLOB ISO_SRC "misc/IsoSurface/*.cpp" )
+file( GLOB LIC_SRC "misc/lic/*.cpp" )
+file( GLOB NIFTI_SRC "misc/nifti/*.c" )
+
+ADD_EXECUTABLE( ${target} main.cpp ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} )
+
+TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8)
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)

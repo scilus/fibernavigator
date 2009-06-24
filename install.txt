@@ -1,0 +1,19 @@
+THIS FILE CONTAINS ONLY INSTRUCTION FOR INSTALLATION ON LINUX SO FAR. INSTRUCTIONS FOR OTHER PLATFORMS MAY FOLLOW IN THE FUTURE.
+
+Building utilizes cmake and make.
+
+The project should be built in the "build" directory. Assuming 
+the currect working directory to be project's main directory, 
+the following steps should do the trick:
+
+> cd build
+> ccmake ../src
+PRESS 'c' for configuration
+PRESS 'c' again for further configuration
+PRESS 'g' to generate the build system including the Makefiles.
+> make
+
+Now the subdirectory "bin" of the "build" directory should contain an executable named fibernavigator.
+Inside "build" the program can be started with the following command:
+
+> bin/fibernavigator
