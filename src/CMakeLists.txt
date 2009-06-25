@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
 PROJECT( FiberNavigator )
 
 # Include local CMake modules
@@ -32,6 +32,12 @@ MARK_AS_ADVANCED( LIBRARY_OUTPUT_PATH )
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin CACHE PATH "The executables will be put into this directory.")
 MARK_AS_ADVANCED( EXECUTABLE_OUTPUT_PATH )
 
+# Set default build type
+IF ( NOT CMAKE_BUILD_TYPE )
+    SET( CMAKE_BUILD_TYPE Release CACHE STRING"Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE )
+    MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
+ENDIF ( NOT CMAKE_BUILD_TYPE )
+
 # Package dependencies:
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( wxWidgets REQUIRED )
@@ -41,15 +47,20 @@ SET( WXWIDGETS_USE_GL TRUE )
 INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_PATH} )
 INCLUDE( ${wxWidgets_USE_FILE} )
 INCLUDE_DIRECTORIES( . ${wxWidgets_INCLUDE_DIRS} )
-ADD_DEFINITIONS( `${wxWidgets_CONFIG_EXECUTABLE} gl --cppflags` )
+ADD_DEFINITIONS( `${wxWidgets_CONFIG_EXECUTABLE} --cppflags` )
+
+#hiding this for now
+MARK_AS_ADVANCED( wxWidgets_wxrc_EXECUTABLE )
+MARK_AS_ADVANCED( wxWidgets_USE_DEBUG )
 
 # Global compiler flags:
 #-----------------------
 # -Wno-long-long    since on Ubuntu 8.10 it won't compile without it
 # -ansi             force ISO-C++98 compliance (not GNU++98)
 SET( CMAKE_CXX_FLAGS "-Wall -ansi -Wno-long-long" )
-SET( CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -O0" )
+SET( CMAKE_CXX_FLAGS_DEBUG "-g3 -DDEBUG -O0" )
 SET( CMAKE_CXX_FLAGS_RELEASE "-O3" )
+SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DDEBUG -O2" )
 
 SET( target "fibernavigator")
 
@@ -63,6 +74,6 @@ file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 
 ADD_EXECUTABLE( ${target} main.cpp ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} )
 
-TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8)
+TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} wx_gtk2u_gl-2.8 wx_baseu_xml-2.8)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)
