@@ -30,7 +30,8 @@ const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* g
 #endif
 {
 #ifndef __WXMAC__
-    // i'm still not sure which GLX version is needed, but 1.3 seems to be ok
+#ifndef __WINDOWS__
+	// i'm still not sure which GLX version is needed, but 1.3 seems to be ok
     // have to do this here, because wxGLCanvas::GetGLXVersion doesn't return reliable results when called
     // in the init function in main.cpp
     if ( GetGLXVersion() < 13 )
@@ -39,6 +40,7 @@ const wxPoint& pos, const wxSize& size, long style, const wxString& name, int* g
         printf("OpenGL and a sufficient graphics card need to be installed to run this programm.\n");
         exit(false);
     }
+#endif
 #endif
     m_init = false;
     m_view = view;
