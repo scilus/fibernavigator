@@ -58,7 +58,7 @@ MARK_AS_ADVANCED( wxWidgets_USE_DEBUG )
 # -Wno-long-long    since on Ubuntu 8.10 it won't compile without it
 # -ansi             force ISO-C++98 compliance (not GNU++98)
 SET( CMAKE_CXX_FLAGS "-Wall -ansi -Wno-long-long" )
-SET( CMAKE_CXX_FLAGS_DEBUG "-g3 -DDEBUG -O0" )
+SET( CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -O0" )
 SET( CMAKE_CXX_FLAGS_RELEASE "-O3" )
 SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DDEBUG -O2" )
 
@@ -74,6 +74,6 @@ file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 
 ADD_EXECUTABLE( ${target} main.cpp ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} )
 
-TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} wx_gtk2u_gl-2.8 wx_baseu_xml-2.8)
+TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)
