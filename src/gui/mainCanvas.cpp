@@ -144,7 +144,7 @@ void MainCanvas::OnMouseEvent(wxMouseEvent& event)
         {
             if (event.LeftUp())
             {
-                if (wxGetKeyState(WXK_CONTROL) && !m_dh->getPointMode())
+                if (wxGetKeyState(WXK_SHIFT) && !m_dh->getPointMode())
                 {
                     m_hr = pick(event.GetPosition());
                     int newX = (int) (getEventCenter().x + 0.5);
