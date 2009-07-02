@@ -1,0 +1,201 @@
+//Copyright (c) 2008 Aaron Knoll, Younis Hijazi, Andrew Kensler, Mathias Schott, Charles Hansen and Hans Hagen
+//
+// edited 2009 by Mario Hlawitschka and Alexander Wiebel
+//
+//Permission is hereby granted, free of charge, to any person
+//obtaining a copy of this software and associated documentation
+//files (the "Software"), to deal in the Software without
+//restriction, including without limitation the rights to use,
+//copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the
+//Software is furnished to do so, subject to the following
+//conditions:
+//
+//The above copyright notice and this permission notice shall be
+//included in all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//OTHER DEALINGS IN THE SOFTWARE.
+typedef float2 interval;
+
+const float IA_INF = 2e15;
+const interval IA_INTERVAL_INF = float2(-1e15, 1e15);
+
+//NOTE: there's no operator overloading in Cg!
+
+bool icontains(interval i, float f)
+{
+  return (f >= i.x && f <= i.y);
+}
+
+float iwidth(interval i)
+{
+  return (i.y - i.x);
+}
+
+float icenter(interval i)
+{
+  return ((i.x + i.y) * .5);
+}
+
+//comparison tests -- maybe implement later?
+
+interval ineg(interval i)
+{
+  return interval(-i.y, -i.x);
+}
+
+interval iabs(interval i)
+{
+  interval result;
+  result.x = max(i.x, max(-i.y, 0));
+  result.y = max(-i.x, i.y);
+  return result;
+}
+
+interval ircp(interval i)
+{
+  return (contains(i, 0) ? IA_INTERVAL_INF : rcp(i));
+}
+
+interval iadd(interval a, float b)
+{
+  return a + b;
+}
+
+interval iadd(float a, interval b)
+{
+  return a + b;
+}
+
+interval iadd(interval a, interval b)
+{
+  return a + b;
+}
+
+interval isub(interval a, float b)
+{
+  return a - b;
+}
+
+interval isub(float a, interval b)
+{
+  return float2(a - b.y, a - b.x);
+}
+
+interval isub(interval a, interval b)
+{
+  return float2(a.x - b.y, a.y - b.x);
+}
+
+interval imul(interval a, float b)
+{
+  float2 ab = a * b;
+  return float2(min(ab.x, ab.y), max(ab.x, ab.y));
+}
+
+interval imul(float a, interval b)
+{
+  float2 ab = a * b;
+  return float2(min(ab.x, ab.y), max(ab.x, ab.y));
+}
+
+interval imul(interval a, interval b)
+{
+  float lolo = a.x * b.x;
+  float lohi = a.x * b.y;
+  float hilo = a.y * b.x;
+  float hihi = a.y * b.y;
+  return float2( min(lolo, min(lohi, min(hilo, hihi))), max(lolo, max(lohi, max(hilo, hihi))) );
+}
+
+interval imul_pos(interval a, float b)
+{
+  return a * b;
+}
+
+interval imul_pos(float a, interval b)
+{
+  return a * b;
+}
+
+interval imul_pos(interval a, interval b)
+{
+  return a * b;
+}
+
+interval imul_neg(interval a, float b)
+{
+  return (a * b).yx;
+}
+
+interval imul_neg(float a, interval b)
+{
+  return (a * b).yx;
+}
+
+interval imul_neg(interval a, interval b)
+{
+  return (a * b).yx;
+}
+
+interval isqr(interval i)
+{
+  float2 ai = iabs(i);
+  return ai * ai;
+}
+
+/*
+interval ipow(interval i, float p)
+{
+	return i;
+}
+
+interval isqrt(interval i)
+{
+	return sqrt(i);
+}
+
+interval iexp(interval i)
+{
+  return interval(exp(i.x), exp(i.y));
+}
+
+interval ilog(interval i)
+{
+  return interval(log(i.x), log(i.y));
+}
+
+interval isin(interval i)
+{
+	interval result;
+	const float2 pi2 = imul(2.f,M_PI);
+
+    if(i.width() >= pi2) return interval(-1,1);
+
+    if(i.lo < 0) do{ i += pi2; } while(i.lo < 0);
+    else if(i.hi >= pi2) do { i -= pi2; } while(i.hi >= pi2);
+
+    if(i.contains(M_PI/2)||i.contains(5*M_PI/2)) result.hi = 1.0;
+    else result.hi = max(sin_hi(i.lo),sin_hi(i.hi));
+
+    if(i.contains(3*M_PI/2)||i.contains(7*M_PI/2)) result.lo = -1.0;
+    else result.lo = min(sin_lo(i.lo),sin_lo(i.hi));
+
+    return result;
+}
+
+interval icos(interval i)
+{
+   return sin (i + imul(0.5f,M_PI));
+}
+
+*/
+
+

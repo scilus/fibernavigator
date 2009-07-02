@@ -1,0 +1,325 @@
+
+//Copyright (c) 2008 Aaron Knoll, Younis Hijazi, Andrew Kensler, Mathias Schott, Charles Hansen and Hans Hagen
+//
+// edited 2009 by Mario Hlawitschka and Alexander Wiebel
+//
+//Permission is hereby granted, free of charge, to any person
+//obtaining a copy of this software and associated documentation
+//files (the "Software"), to deal in the Software without
+//restriction, including without limitation the rights to use,
+//copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the
+//Software is furnished to do so, subject to the following
+//conditions:
+//
+//The above copyright notice and this permission notice shall be
+//included in all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//OTHER DEALINGS IN THE SOFTWARE.
+typedef float2 interval;
+
+#define PI 3.1415926535897932384626433832795
+
+//definitions for float version. Implement these for the self-validated arithmetic.
+float ineg(float a) { return -a; }
+float iabs(float a) { return abs(a); }
+float ircp(float a){ return 1/a; }
+float iadd(float a, float b){ return a+b; }
+float isub(float a, float b){ return a-b; }
+float imul(float a, float b){ return a*b; }
+float idiv(float a, float b){ return a/b; }
+float isqr(float a){ return sqrt(a); }
+float iexp(float a){ return exp(a); }
+float ilog(float a){ return log(a); }
+float iln(float a){ return log(a); }
+float ipow(float a, float b){ return pow(a,b); }
+float isqrt(float a){ return sqrt(a); }
+float icos(float a){ return cos(a); }
+float iacos(float a){ return acos(a); }
+float isin(float a){ return sin(a); }
+float itan(float a){ return tan(a); }
+
+//NOTE: there's no operator overloading in Cg!
+
+interval make_interval(float a, float b)
+{
+  return interval(min(a,b), max(a,b));
+}
+
+bool icontains(interval i, float f)
+{
+  return (f >= i.x && f <= i.y);
+}
+
+bool4 icontains4(interval i, float4 f)
+{
+  return (f >= i.x && f <= i.y);
+}
+
+//does a contain any part of b?
+bool igt0(interval a)
+{
+  return (a.x > 0); 
+}
+
+bool iintersects(interval a, interval b)
+{
+  return (a.y >= b.x && a.x <= b.y);
+}
+
+float iwidth(interval i)
+{
+  return (i.y - i.x);
+}
+
+float icenter(interval i)
+{
+  return ((i.x + i.y) * .5);
+}
+
+//comparison tests -- maybe implement later?
+
+interval ineg(interval i)
+{
+  return interval(-i.y, -i.x);
+}
+
+interval iabs(interval i)
+{
+  interval result;
+  result.x = max(i.x, max(-i.y, 0));
+  result.y = max(-i.x, i.y);
+  return result;
+}
+
+interval ircp(float inf, interval i)
+{
+	interval r;
+	const bool ic0 = (i.x <= 0 && i.y >= 0); 
+	r.x = ic0 ? -inf : 1/i.y;
+	r.y = ic0 ? inf : 1/i.x;
+	return r;
+}
+
+interval imin(float a, interval b)
+{
+  return interval(min(a,b.x),min(a,b.y));
+}
+
+interval imin(interval a, interval b)
+{
+  return interval(min(a.x,b.x),min(a.y,b.y));
+}
+
+interval imax(float a, interval b)
+{
+  return interval(max(a,b.x),max(a,b.y));
+}
+
+interval imax(interval a, interval b)
+{
+  return interval(max(a.x,b.x),max(a.y,b.y));
+}
+
+interval iadd(interval a, float b)
+{
+  return a + b;
+}
+
+interval iadd(float a, interval b)
+{
+  return a + b;
+}
+
+interval iadd(interval a, interval b)
+{
+  return a + b;
+}
+
+interval isub(interval a, float b)
+{
+  return a - b;
+}
+
+interval isub(float a, interval b)
+{
+  return float2(a - b.y, a - b.x);
+}
+
+interval isub(interval a, interval b)
+{
+  return float2(a.x - b.y, a.y - b.x);
+}
+
+interval imul(interval a, float b)
+{
+  float2 ab = a * b;
+  return float2(min(ab.x, ab.y), max(ab.x, ab.y));
+}
+
+interval imul(float a, interval b)
+{
+  float2 ab = a * b;
+  return float2(min(ab.x, ab.y), max(ab.x, ab.y));
+}
+
+interval imul(interval a, interval b)
+{
+  float4 tmp = a.xxyy * b.xyxy;
+  return float2( min(tmp.x, min(tmp.y, min(tmp.z, tmp.w))), max(tmp.x, max(tmp.y, max(tmp.z, tmp.w))) );
+}
+
+interval idiv(float inf, interval a, float b)
+{
+	return imul(a, 1/b);
+}
+
+interval idiv(float inf, float a, interval b)
+{
+	return imul(a, ircp(inf, b));
+}
+
+interval idiv(float inf, interval a, interval b)
+{
+	return imul(a, ircp(inf, b));
+}
+
+interval isqr(interval i)
+{
+  float2 ai = iabs(i);
+  return ai * ai;
+}
+
+interval iexp(float inf,interval i)
+{
+  return interval(exp(i.x),exp(i.y));
+}
+
+interval ilog(float nan, float inf, interval i)
+{
+	interval r;
+	r.x = i.x < 0 ? -inf : log(i.x);
+	r.y = log(i.y);
+	r.x = i.y < 0 ? nan : r.x;
+	r.y = i.y < 0 ? nan : r.y;
+	return r;
+}
+
+interval iln(float nan, float inf, interval i)
+{
+	return ilog(nan, inf, i);
+}
+
+interval ipow(float nan, float inf, interval i, float p)
+{
+	return iexp(inf, imul(p, ilog(nan, inf, i)));
+}
+
+interval ipow(float nan, float inf, interval i, interval p)
+{
+	return iexp(inf, imul(p, ilog(nan, inf, i)));
+}
+
+interval isqrt(float nan, float inf, interval i)
+{
+	return ipow(nan, inf, i, .5);
+}
+
+interval icos(interval i)
+{
+	float divtest = abs(i.x) / (2*PI);
+	float ip = divtest - frac(divtest);
+	interval imv = i + (i.x < 0 ? 2*PI*(ip+1) : -2*PI*ip);
+	interval cosine = cos(imv);
+    interval result;
+	result.x = min(cosine.x, cosine.y);
+	result.y = max(cosine.x, cosine.y);
+	result.x = (icontains(imv, PI) || imv.y >= 3*PI) ? -1 : result.x;
+	result.y = (imv.y >= 2*PI) ? 1 : result.y;
+	return result;
+}
+
+interval iacos(float nan, float inf, interval i)
+{
+  interval r;
+  bool outOfBounds = i.y < -1 || i.x > 1;
+  r.y = i.x < -1 ? PI : acos(i.x);
+  r.x = i.y >  1 ? 0 : acos(i.y);
+  r.x = outOfBounds ? nan : r.x;
+  r.y = outOfBounds ? nan : r.y;
+  return r;
+}
+
+interval isin(interval i)
+{
+	return icos(isub(i,.5*PI));
+}
+
+interval itan(float inf, interval i)
+{
+	return idiv(inf, isin(i), icos(i));
+}
+
+//AARONBAD -- these have not been tried out yet. Use for arbitrary CSG operators inside implicits.
+interval ilt0(float nan, interval i)
+{
+  interval r;
+  r.x = (i.y < 0) ? i.x : (i.x > 0 ? nan : i.x);
+  r.y = (i.y < 0) ? i.y : (i.x > 0 ? nan : 0);
+  return r;
+}
+
+interval ilt(float nan, float a, interval b)
+{
+  return ilt0(nan, isub(a, b));
+}
+
+interval ilt(float nan, interval a, float b)
+{
+  return ilt0(nan, isub(a, b));
+}
+
+interval ilt(float nan, interval a, interval b)
+{
+  return ilt0(nan, isub(a, b));
+}
+
+interval igt0(float nan, interval i)
+{
+  interval r;
+  r.x = (i.x > 0) ? i.x : (i.y < 0 ? nan : 0);
+  r.y = (i.x > 0) ? i.y : (i.y < 0 ? nan : i.y);
+  return r;
+}
+
+interval igt(float nan, float a, interval b)
+{
+  return igt0(nan, isub(a, b));
+}
+
+interval igt(float nan, interval a, float b)
+{
+  return igt0(nan, isub(a, b));
+}
+
+interval igt(float nan, interval a, interval b)
+{
+  return igt0(nan, isub(a, b));
+}
+
+interval iand(float nan, interval a, interval b)
+{
+  if (b.x > a.y || a.x > b.y)
+    return interval(nan, nan);
+    
+  //AARONBAD -- not implemented
+}
+
+

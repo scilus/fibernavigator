@@ -1,0 +1,438 @@
+//Copyright (c) 2008 Aaron Knoll, Younis Hijazi, Andrew Kensler, Mathias Schott, Charles Hansen and Hans Hagen
+//
+// edited 2009 by Mario Hlawitschka and Alexander Wiebel
+//
+//Permission is hereby granted, free of charge, to any person
+//obtaining a copy of this software and associated documentation
+//files (the "Software"), to deal in the Software without
+//restriction, including without limitation the rights to use,
+//copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the
+//Software is furnished to do so, subject to the following
+//conditions:
+//
+//The above copyright notice and this permission notice shall be
+//included in all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//OTHER DEALINGS IN THE SOFTWARE.
+#include "GLSL/ImplicitSurfaceGlyphs/iarith.cg"
+
+//definitions for float version. Implement these for the self-validated arithmetic.
+float raf_neg(float a) { return -a; }
+float raf_abs(float a) { return abs(a); }
+float raf_rcp(float a){ return 1/a; }
+float raf_add(float a, float b){ return a+b; }
+float raf_sub(float a, float b){ return a-b; }
+float raf_mul(float a, float b){ return a*b; }
+float raf_div(float a, float b){ return a/b; }
+float raf_sqr(float a){ return sqrt(a); }
+float raf_exp(float a){ return exp(a); }
+float raf_log(float a){ return log(a); }
+float raf_ln(float a){ return log(a); }
+float raf_pow(float a, float b){ return pow(a,b); }
+float raf_sqrt(float a){ return sqrt(a); }
+float raf_cos(float a){ return cos(a); }
+float raf_sin(float a){ return sin(a); }
+float raf_tan(float a){ return tan(a); }
+
+#define ROUND_EPS 1e-6
+
+float accurateRcp(float x)
+{
+  const float rcp_x = 1/x;
+  return (rcp_x+rcp_x) - (rcp_x*rcp_x*x);
+}
+
+float2 accurateRcp(float2 x)
+{
+  const float2 rcp_x = float2(1,1)/x;
+  return (rcp_x+rcp_x) - (rcp_x*rcp_x*x);
+}
+
+
+//this is the AF1 implementation of Messine 02, "Extensions of Affine Arithmetic Application"
+
+typedef float3 raf;
+ 
+//raf.x = central value;
+//raf.y = e1 (shared symbol)
+//raf.z = e_n+1 (condensation symbol)
+
+//General idea: share e1 and e2 between affine terms, generate & condense e3.
+
+raf make_raf(float lo, float hi)
+{
+  raf r;
+  r.x = (hi + lo);
+  r.y = (hi - lo);
+  r.xy *= .5;
+  r.z = 0;
+  return r;
+}
+
+raf interval_to_raf(interval i)
+{
+  raf r;
+  r.x = (i.y + i.x);
+  r.y = (i.y - i.x);
+  r.xy *= .5;
+  r.z = 0;
+  return r;
+}
+
+float raf_radius(raf r)
+{
+  return abs(r.y) + r.z;
+}
+
+interval raf_to_interval(raf r)
+{
+  const float rad = raf_radius(r);
+  return interval(r.x - rad, r.x + rad);
+}
+
+bool raf_contains(raf r, float f)
+{
+  const float rad = raf_radius(r);
+  return (f >= (r.x - rad) && f <= (r.x + rad));
+}
+
+raf raf_min(float a, raf b)
+{
+  float b_min = b.x - b.y;
+  float b_max = b.x + b.y;
+  return interval_to_raf(interval(min(a,b_min),min(a,b_max)));
+}
+
+raf raf_min(raf a, raf b)
+{
+  float a_min = a.x - a.y;
+  float a_max = a.x + a.y;
+  float b_min = b.x - b.y;
+  float b_max = b.x + b.y;
+  return interval_to_raf(interval(min(a_min,b_min),min(a_max,b_max)));
+}
+
+raf raf_max(float a, raf b)
+{
+  float b_min = b.x - b.y;
+  float b_max = b.x + b.y;
+  return interval_to_raf(interval(max(a,b_min),max(a,b_max)));
+}
+
+raf raf_max(raf a, raf b)
+{
+  float a_min = a.x - a.y;
+  float a_max = a.x + a.y;
+  float b_min = b.x - b.y;
+  float b_max = b.x + b.y;
+  return interval_to_raf(interval(max(a_min,b_min),max(a_max,b_max)));
+}
+
+raf raf_add(raf a, float b)
+{
+  raf r = a;
+  r.x += b;
+  r.z = abs(r.z);
+  return r;
+}
+
+raf raf_add(float a, raf b)
+{
+  raf r = b;
+  r.x += a;
+  r.z = abs(r.z);
+  return r;
+}
+
+raf raf_add(raf a, raf b)
+{
+  return a + b;
+}
+
+raf raf_sub(raf a, float b)
+{
+  raf r = a;
+  r.x -= b;
+  r.z = abs(r.z);
+  return r;
+}
+
+raf raf_sub(float a, raf b)
+{
+  raf r = -b;
+  r.x += a;
+  r.z = abs(r.z);
+  return r;
+}
+
+raf raf_sub(raf a, raf b)
+{
+  raf r;
+  r.xyz = a.xyz - b.xyz;
+  r.z = a.z + b.z;
+  return r;
+}
+
+//AARONBAD - this probably doesn't work with AF1.
+raf raf_abs(raf r)
+{
+  interval i = raf_to_interval(r);
+  
+  if (i.x > 0) //strictly positive
+    return r;
+    
+  if (i.y < 0)  //strictly negative
+    return -r;
+
+  raf t = r * .5;
+  t.x = abs(t.x);
+  return t;
+}
+
+raf raf_neg(raf a)
+{
+  raf r = -a;
+  r.z = abs(r.z);
+  return r;
+}
+
+raf raf_rcp(float inf, raf a)
+{
+  interval i = raf_to_interval(a);
+  const bool ic0 = (i.x <= ROUND_EPS && i.y >= -ROUND_EPS);
+
+  raf r;
+  if (ic0)
+  {
+    r.y = inf;
+    return r;
+  }
+  
+  const float2 iabs = abs(i);
+  const interval mm = interval(min(iabs.x, iabs.y), max(iabs.x, iabs.y));
+  
+  const float2 imm = float2(1,1)*accurateRcp(mm);
+  const float alpha = -imm.y*imm.y;
+  
+  //note that i2 can actually have x > y!
+  float2 i2 = float2(imm.x - (alpha*mm.x), 2*imm.y);
+
+  float dzeta = icenter(i2);
+  dzeta = (i.x < 0) ? -dzeta : dzeta;
+  
+  r.xy = a.xy * alpha;
+  r.x += dzeta;
+  r.z = a.z * abs(alpha) + abs(iwidth(i2)*.5);
+  return r;
+}
+
+raf raf_mul(raf a, float b)
+{
+  raf r;
+  r.xy = a.xy * b;
+  r.z = a.z * abs(b);
+  return r;
+}
+
+raf raf_mul(float a, raf b)
+{
+  raf r;
+  r.xy = a * b.xy;
+  r.z = abs(a) * b.z;
+  return r;
+}
+
+raf raf_mul(raf a, raf b)
+{
+  raf r;
+  r.x = a.x * b.x;
+  r.y = a.x*b.y + b.x*a.y; 
+  //r.z = abs(a.x*b.z) + abs(b.x*a.z) + (raf_radius(a) * raf_radius(b)); 
+  r.z = abs(a.x)*b.z + abs(b.x)*a.z + (raf_radius(a) * raf_radius(b));     
+  return r;
+}
+
+raf raf_sqr(raf a)
+{
+  raf r;
+  r.x = a.x * a.x;
+  r.y = a.x * a.y;
+  r.z = abs(a.x)*a.z;
+  r.yz *= 2;     
+  r.z += raf_radius(a) * raf_radius(a);
+  return r;
+}
+
+raf raf_sqr_2(raf a)
+{
+  return raf_mul(a,a);
+}
+
+raf raf_div(float inf, raf a, float b)
+{
+  return raf_mul(a, 1/b);
+}
+
+raf raf_div(float inf, float a, raf b)
+{
+  return raf_mul(a, raf_rcp(inf, b));
+}
+
+raf raf_div(float inf, raf a, raf b)
+{
+  return raf_mul(a, raf_rcp(inf, b));
+}
+
+raf raf_exp(float inf, raf a)
+{
+  interval i = raf_to_interval(a);
+  const float2 ei = exp(i);
+  
+  raf r;
+  
+  //if ((i.y - i.x) < 1e-7)
+  //{
+  //  r.x = 0;
+  //  r.y = inf;
+  //  return r;
+  //}
+  
+  const float alpha = (ei.y - ei.x) / (i.y - i.x);
+  const float xs = log(alpha);
+  const float maxdelta = alpha*(xs-1-i.x) + ei.x;
+  const float dzeta = alpha*(1-xs);
+  
+  r.xy = a.xy * alpha;
+  r.x += dzeta;
+  r.z = a.z * abs(alpha) + abs(maxdelta*.5);
+  return r;
+}
+
+//AARONBAD -- this doesn't work either.
+raf raf_sqrt(float nan, float inf, raf a)
+{
+  interval i = raf_to_interval(a);
+
+  const float2 sqrti = sqrt(i);
+  const float t = (sqrti.x + sqrti.y);
+  const float alpha = 1/t;
+  const float dzeta = (t/8) + .5*sqrt(i.x*i.y)*alpha;
+  const float rdelta = sqrti.y - sqrti.x;
+  const float delta = rdelta*rdelta*.125*alpha;
+
+  raf r;  
+  r.xy = a.xy * alpha;
+  if (i.y < 0) r.x = nan;
+  r.x += dzeta;
+  r.z = a.x * abs(alpha) + abs(delta);
+  return r;
+}
+
+raf raf_log(float nan, float inf, raf a)
+{
+  interval i = raf_to_interval(a);
+
+  raf r;  
+  if (i.y < 0)
+  {
+    r.x = r.y = nan;
+    return r;  
+  }
+  else if (i.x <= 0)
+  {
+    r.y = inf;
+    return r;
+  }
+
+  if ((i.y - i.x) < 1e-7)
+  {
+    r.x = 0;
+    r.y = inf;
+    return r;
+  }
+  
+  interval li = log(i);
+  
+  const float alpha = (li.y - li.x) / (i.y - i.x);
+  const float xs = 1/alpha;
+  const float ys = alpha*(xs-i.x)+li.x;
+  const float maxdelta = log(xs) - ys;
+  const float dzeta = -alpha*xs + .5*(log(xs)+ys);
+  
+  r.xy = a.xy * alpha;
+  r.x += dzeta;
+  r.z = a.z * abs(alpha) + abs(maxdelta*.5);
+  return r;
+}  
+
+/*
+//AARONBAD - TODO
+
+interval iexp(interval i)
+{
+	return exp(i);
+}
+
+interval ilog(float nan, float inf, interval i)
+{
+	interval r;
+	r.x = i.x < 0 ? -inf : log(i.x);
+	r.y = log(i.y);
+	r.x = i.y < 0 ? nan : r.x;
+	r.y = i.y < 0 ? nan : r.y;
+	return r;
+}
+
+interval iln(float nan, float inf, interval i)
+{
+	return ilog(nan, inf, i);
+}
+
+interval ipow(float nan, float inf, interval i, float p)
+{
+	return iexp(imul(p, ilog(nan, inf, i)));
+}
+
+interval ipow(float nan, float inf, interval i, interval p)
+{
+	return iexp(imul(p, ilog(nan, inf, i)));
+}
+
+interval isqrt(float nan, float inf, interval i)
+{
+	return ipow(nan, inf, i, .5);
+}
+
+interval icos(interval i)
+{
+	float divtest = abs(i.x) / (2*PI);
+	float ip = divtest - frac(divtest);
+	interval imv = i + (i.x < 0 ? 2*PI*(ip+1) : -2*PI*ip);
+	interval cosine = cos(imv);
+    interval result;
+	result.x = min(cosine.x, cosine.y);
+	result.y = max(cosine.x, cosine.y);
+	result.x = (icontains(imv, PI) || imv.y >= 3*PI) ? -1 : result.x;
+	result.y = (imv.y >= 2*PI) ? 1 : result.y;
+	return result;
+}
+
+interval isin(interval i)
+{
+	return icos(isub(i,.5*PI));
+}
+
+interval itan(float inf, interval i)
+{
+	return idiv(inf, isin(i), icos(i));
+}
+
+*/

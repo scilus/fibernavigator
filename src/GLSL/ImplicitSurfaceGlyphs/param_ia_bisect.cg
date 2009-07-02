@@ -1,0 +1,300 @@
+//Copyright (c) 2008 Aaron Knoll, Younis Hijazi, Andrew Kensler, Mathias Schott, Charles Hansen and Hans Hagen
+//
+// edited 2009 by Mario Hlawitschka and Alexander Wiebel
+//
+//Permission is hereby granted, free of charge, to any person
+//obtaining a copy of this software and associated documentation
+//files (the "Software"), to deal in the Software without
+//restriction, including without limitation the rights to use,
+//copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the
+//Software is furnished to do so, subject to the following
+//conditions:
+//
+//The above copyright notice and this permission notice shall be
+//included in all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//OTHER DEALINGS IN THE SOFTWARE.
+#include "iarith.cg"
+
+GEN__IA
+
+STUB__EVALUATE
+
+
+interval test_evaluate_Sx(float nan, float inf, interval u, interval v)
+{
+   return imul(u, icos(v));
+}
+
+interval test_evaluate_Sy(float nan, float inf, interval u, interval v)
+{
+   return imul(u, isin(v));
+}
+
+interval test_evaluate_Sz(float nan, float inf, interval u, interval v)
+{
+   return u;
+}
+
+
+struct app_vertex
+{
+   float4 Position     : POSITION;
+   float4 TexCoord     : TEXCOORD1; 
+   float4 Color	       : COLOR0;
+
+};
+
+struct vertex_fragment
+{
+   float4 Position	  : POSITION; // For the rasterizer
+   float4 TexCoord	  : TEXCOORD0; 
+   float4 Color	      : TEXCOORD1;
+   float4 Pos         : TEXCOORD2;
+};
+
+struct fragment_out 
+{
+  float4 Color	      : COLOR0;
+};
+
+// Raycasting vertex program implementation
+vertex_fragment vertex_main( app_vertex IN )
+{    
+  vertex_fragment OUT;
+  
+  // Get OpenGL state matrices
+  float4x4 ModelView = glstate.matrix.modelview[0];
+  float4x4 ModelViewProj = glstate.matrix.mvp;
+ 
+  // Transform vertex
+  OUT.Position = mul( ModelViewProj, IN.Position );
+  OUT.Pos =  mul( ModelViewProj, IN.Position );				//this gives us the SCREEN SPACE position of the pixel
+  OUT.TexCoord = IN.TexCoord;													
+  OUT.Color = IN.Color;
+  return OUT;
+}
+
+// Raycasting fragment program implementation
+// Arbitrary implicit using interval bisection
+fragment_out fragment_main( vertex_fragment IN,
+														//uniform sampler2D tex,
+														uniform float3 origin,
+														uniform float3 camera_u,
+														uniform float3 camera_v,
+														uniform float3 camera_w,
+														uniform float2 half_pixel_uv,	
+														uniform float nan,
+														uniform float inf,
+														uniform float max_depth,
+														uniform float epsilon,
+														uniform float bumpmap_frequency,
+														uniform float3 domain_min,
+														uniform float3 domain_max,
+														uniform float3 light_pos,
+														uniform float3 front_color,
+														uniform float3 back_color
+													)
+{
+  fragment_out OUT;
+
+	/*
+    //render the box.
+    OUT.Color.xyz = float3(1,.2,.2);
+    OUT.Color.w = 1;
+    return OUT;
+	*/
+
+	const float3 domain_diag = domain_max - domain_min;
+ 	float3 penter = domain_min + IN.TexCoord.xyz * domain_diag;	//note IN.TexCoord is always in [0,1]
+
+	//this works too.
+	//float2 pos = (IN.Pos.xy / IN.Pos.w) + half_pixel_uv;
+	//float3 ray_dir = normalize(camera_w + (camera_u * pos.x) + (camera_v * pos.y));
+
+	float3 ray_dir = normalize(penter - origin);
+	float3 inv_ray_dir = float3(1,1,1)/ray_dir;
+	
+	float3 domain_t0 = (domain_min - origin) * inv_ray_dir;
+	float3 domain_t1 = (domain_max - origin) * inv_ray_dir;
+
+	float3 tmin = min(domain_t0, domain_t1);
+	float3 tmax = max(domain_t0, domain_t1);
+	float tenter = max(tmin.x, max(tmin.y, tmin.z));
+	float texit = min(tmax.x, min(tmax.y, tmax.z));
+
+	float3 orig = penter;
+	float3 dir = (origin + ray_dir * texit) - penter;
+
+	//look up the *exit* position from back-buffer 2D texture
+	//float2 texc = ((IN.Pos.xy / IN.Pos.w) + 1) / 2;		//convert from [-1,1] screen space to [0,1] texture space
+  	//float4 back_position  = tex2D(tex, texc);		//look up the back buffer texture at this texture coordinate
+  	//float3 dir = domain_min + (back_position.xyz * domain_diag) - orig;
+
+	float thit = -1;
+	
+	interval omega_u = interval(0, 2*PI);
+	interval omega_v = interval(-1, 1);
+
+	interval t = interval(0,1);
+	interval u = interval(0,1);
+	interval v = interval(0,1);
+	interval ix, iy, iz, iu, iv;
+	interval F_t;
+
+  	//right. we know we intersect the AABB, and we have know t=0 is entry, t=1 is exit.
+	iu = omega_u;
+	iv = omega_v;
+  	ix = iadd(orig.x, imul(t, dir.x));
+  	iy = iadd(orig.y, imul(t, dir.y));
+  	iz = iadd(orig.z, imul(t, dir.z));
+
+  	if ( iintersects(ix, test_evaluate_Sx(nan, inf, iu, iv))
+	  && iintersects(iy, test_evaluate_Sy(nan, inf, iu, iv))
+          && iintersects(iz, test_evaluate_Sz(nan, inf, iu, iv)) )
+	{
+		int d=0;
+		const int dlast = min(max_depth-1, log2(length(dir)/epsilon));
+		float tincr = .5f;
+		float uincr = .5f;
+		float vincr = .5f;
+
+		t.x = 0;
+		u.x = 0;
+		v.x = 0;
+
+		for(int i=0; i<1000; i++)
+		{
+			if (uincr == vincr && vincr == tincr)
+				u.y = u.x + uincr;
+			else if (vincr == tincr)
+				v.y = v.x + vincr;
+			else
+				t.y = t.x + tincr;
+
+			ix = iadd(orig.x, imul(t, dir.x));
+			iy = iadd(orig.y, imul(t, dir.y));
+			iz = iadd(orig.z, imul(t, dir.z));
+	    
+			iu = iadd(omega_u.x, imul(omega_u.width(), u));
+			iv = iadd(omega_v.x, imul(omega_v.width(), v));
+			
+  	        if ( iintersects(ix, test_evaluate_Sx(nan, inf, iu, iv))
+	          && iintersects(iy, test_evaluate_Sy(nan, inf, iu, iv))
+              && iintersects(iz, test_evaluate_Sz(nan, inf, iu, iv)) )
+			{
+				if (d==dlast) // || iwidth(F_t) < epsilon )
+				{
+					STUB__HIT
+				}
+				else
+				{
+					if (uincr == vincr && vincr == tincr)
+						uincr *= 0.5f;
+					else if (vincr == tincr)
+						vincr *= 0.5f;
+					else
+						tincr *= 0.5f;
+					d++;
+					continue;
+				}
+			}
+			t.x = t.y;
+			u.x = u.y;
+			v.x = v.y;
+
+			float tincr_next, fp;	
+			tincr_next = 2.f * tincr;
+			fp = frac(t.x/tincr_next);
+			if (fp < 1e-7)		//if fp == 0
+			{
+				for(int j=0; j<24; j++)
+				{
+					tincr = uincr = vincr = tincr_next;
+					d--;
+					tincr_next = tincr * 2.f;
+					fp = frac(t.x/tincr_next);
+					if (d == -1 || fp > 1e-7) break;		//if d == -1 || fp != 0
+				}
+				if (d == -1)
+					break;
+			}
+		}
+	}
+  
+  if (thit < 0)
+  {
+    OUT.Color.xyz = float3(.2,.2,.2);
+    OUT.Color.w = 1;
+    return OUT;
+  }
+  
+  //shade
+ 
+  float3 phit = orig + (dir*thit);
+
+	float3 gradient = evaluate_gradient(phit);
+	
+	/*
+	//AARONBAD -- what were we smoking when we thought of this?!!!
+	float3 gradient;
+	autodiff adt = autodiff(thit, 1);
+  autodiff adx = adadd(orig.x, admul(adt, dir.x));
+  autodiff ady = adadd(orig.y, admul(adt, dir.y));
+  autodiff adz = adadd(orig.z, admul(adt, dir.z));
+	evaluate_autodiff(adx, ady, adz).y
+	*/
+
+  float3 normal;
+
+	STUB__BUMPMAP
+
+
+	float3 light_direction = normalize(light_pos - phit);
+
+	//dir = normalize(dir);
+	//float3 v = -normalize(dir);
+	float3 v = -ray_dir;
+	float n_dot_v = dot(normal, v);
+	if(n_dot_v < 0)
+		normal = -normal;
+
+	float3 half_vector = normalize(v + light_direction);
+
+	float n_dot_l = dot(normal, light_direction);
+	float n_dot_h = max( dot(normal, half_vector),0);
+	float diffuse = clamp( n_dot_l,0,1);
+	const float light_exponent = 64;
+	float specular = n_dot_l > 0 ? pow( n_dot_h, light_exponent) : 0;
+	//specular = 0;
+
+	STUB__SHADE
+
+	//float3 lookup_color = n_dot_v > 0 ? front_color : back_color ;
+  //float3 lookup_color = n_dot_v > 0 ? IN.TexCoord : 1 -IN.TexCoord ;
+	//float3 lookup_color = lerp( front_color, back_color, saturate(length(gradient)));
+
+	//isoline code
+	//if (frac(length(gradient)) < 0.1)
+	//{
+	//	lookup_color = float3(1,0,0);	
+	//specular = 0;
+	//}
+
+//  lookup_color = (phit - domain_min) / domain_diag;
+
+	float3 color = float3(diffuse) * lookup_color + float3(specular); 
+
+	
+  OUT.Color.xyz = color;
+  OUT.Color.w = 1.;
+  return OUT;
+}

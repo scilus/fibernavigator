@@ -1,0 +1,231 @@
+//Copyright (c) 2008 Aaron Knoll, Younis Hijazi, Andrew Kensler, Mathias Schott, Charles Hansen and Hans Hagen
+//
+// edited 2009 by Mario Hlawitschka and Alexander Wiebel
+//
+//Permission is hereby granted, free of charge, to any person
+//obtaining a copy of this software and associated documentation
+//files (the "Software"), to deal in the Software without
+//restriction, including without limitation the rights to use,
+//copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the
+//Software is furnished to do so, subject to the following
+//conditions:
+//
+//The above copyright notice and this permission notice shall be
+//included in all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//OTHER DEALINGS IN THE SOFTWARE.
+struct interval4
+{
+  float4 lo, hi;
+};
+
+const float4 IA4_INF = float4(2e15);
+interval4 interval4_inf()
+{
+  interval4 i;
+  i.lo = -IA4_INF;
+  i.hi = IA4_INF;
+  return i;
+}
+
+//NOTE: there's no operator overloading in Cg!
+
+bool4 i4contains(interval4 i, float4 f)
+{
+  return (f >= i.lo && f <= i.hi);
+}
+
+bool4 i4notcontains(interval4 i, float4 f)
+{
+  return (f < i.lo || f > i.hi);
+}
+
+float4 i4width(interval4 i)
+{
+  return (i.hi - i.lo);
+}
+
+float4 i4center(interval4 i)
+{
+  return ((i.hi + i.lo) * .5);
+}
+
+//comparison tests -- maybe implement later?
+
+interval4 i4neg(interval4 i)
+{
+  interval4 r;
+  r.lo = -i.hi;
+  r.hi = -i.lo;
+  return r;
+}
+
+interval4 i4abs(interval4 i)
+{
+  interval4 r;
+  r.lo = max(i.lo, max(-i.hi, 0));
+  r.hi = max(-i.lo, i.hi);
+  return r;
+}
+
+interval4 i4rcp(interval4 i)
+{
+  bool4 c0 = i4contains(i, 0);
+  float4 rcplo = rcp(i.lo);
+  float4 rcphi = rcp(i.hi);
+  interval4 r;
+  r.lo = c0 ? -IA4_INF : min(rcplo, rcphi);
+  r.hi = c0 ? IA4_INF : max(rcplo, rcphi);
+  return r;
+}
+
+interval4 i4add(interval4 a, float4 b)
+{
+  interval4 r;
+  r.lo = a.lo + b;
+  r.hi = a.hi + b;
+  return r;
+}
+
+interval4 i4add(float4 a, interval4 b)
+{
+  interval4 r;
+  r.lo = a + b.lo;
+  r.hi = a + b.hi;
+  return r;
+}
+
+interval4 i4add(interval4 a, interval4 b)
+{
+  interval4 r;
+  r.lo = a.lo + b.lo;
+  r.hi = a.hi + b.hi;
+  return r;
+}
+
+interval4 i4sub(interval4 a, float4 b)
+{
+  interval4 r;
+  r.lo = a.lo - b;
+  r.hi = a.hi - b;
+  return r;
+}
+
+interval4 i4sub(float4 a, interval4 b)
+{
+  interval4 r;
+  r.lo = a - b.hi;
+  r.hi = a - b.lo;
+  return r;
+}
+
+interval4 i4sub(interval4 a, interval4 b)
+{
+  interval4 r;
+  r.lo = a.lo - b.hi;
+  r.hi = a.hi - b.lo;
+  return r;
+}
+
+interval4 i4mul(interval4 a, float4 b)
+{
+  float4 alb = a.lo * b;
+  float4 ahb = a.hi * b;
+  interval4 r;
+  r.lo = min(alb, ahb);
+  r.hi = max(alb, ahb);
+  return r;
+}
+
+interval4 i4mul(float4 a, interval4 b)
+{
+  float4 abl = a * b.lo;
+  float4 abh = a * b.hi;
+  interval4 r;
+  r.lo = min(abl, abh);
+  r.hi = max(abl, abh);
+  return r;
+}
+
+interval4 i4mul(interval4 a, interval4 b)
+{
+  float4 lolo = a.lo * b.lo;
+  float4 lohi = a.lo * b.hi;
+  float4 hilo = a.hi * b.lo;
+  float4 hihi = a.hi * b.hi;
+  interval4 r;
+  r.lo = min(lolo, min(lohi, min(hilo, hihi)));
+  r.hi = max(lolo, max(lohi, max(hilo, hihi)));
+  return r;
+}
+
+interval4 i4mul_pos(interval4 a, float4 b)
+{
+  interval4 r;
+  r.lo = a.lo * b;
+  r.hi = a.hi * b;
+  return r;
+}
+
+interval4 i4mul_pos(float4 a, interval4 b)
+{
+  interval4 r;
+  r.lo = a * b.lo;
+  r.hi = a * b.hi;
+  return r;
+}
+
+interval4 i4mul_pos(interval4 a, interval4 b)
+{
+  interval4 r;
+  r.lo = a.lo * b.lo;
+  r.hi = a.hi * b.hi;
+  return r;
+}
+
+interval4 i4exp(interval4 i)
+{
+  interval4 r;
+  r.lo = i.lo * i.lo;
+  r.hi = i.hi * i.hi;
+  return r;
+}
+
+interval4 i4sqr(interval4 i)
+{
+  interval4 r = i4abs(i);
+  r.lo *= r.lo;
+  r.hi *= r.hi;
+  return r;
+}
+
+interval4 i4sqrt(interval4 i)
+{
+  interval4 r;
+  r.lo = sqrt(i.lo);
+  r.hi = sqrt(i.hi);
+  return r;
+}
+
+interval4 i4pow(interval4 i, float4 p)
+{
+  float4 ilp = pow(i.lo, p);
+  float4 ihp = pow(i.hi, p);
+  
+  bool4 evenp = ((modf(p/2) == 0) && (ilp * ihp < 0));
+  interval4 r;
+  r.lo = evenp ? 0 : min(ilp, ihp);
+  r.hi = max(ilp, ihp);
+  return r;
+}
+
+
+
