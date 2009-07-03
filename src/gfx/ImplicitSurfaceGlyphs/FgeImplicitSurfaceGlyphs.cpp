@@ -140,7 +140,7 @@ float iso_color_offset = 0.f;
 float iso_color_scale = 1.f;
 int asymptotes = 0;
 int animate = 0;
-int use_cubemap = 0;
+int use_cubemap = 0;//before enabling this, please uncomment stuff marked with ALEXS_OLD_CG_CMAP_COMMENT. But be aware that this still might be not working.
 int actualAsymptotes = 1;
 int shaderID = 0;
 int actualShaderID = 0;
@@ -1689,8 +1689,8 @@ void FgeImplicitSurfaceGlyphs::raycasting_pass()
     set_tex_param( "vectors_xyz_tex", vectors_xyz_tex, fragment_main );
     tex->bind();
     set_tex_param( "mydata", tex->getId(), fragment_main );
-    cgGLSetupSampler( cgGetNamedParameter( fragment_main, "hsv_colors" ),
-                    hsv_colors );
+// cgGLSetupSampler( cgGetNamedParameter( fragment_main, "hsv_colors" ), //ALEXS_OLD_CG_HSV_COMMENT.
+//                    hsv_colors );                                      //ALEXS_OLD_CG_HSV_COMMENT.
 
     // set current camera here
     GLFrustum<GLfloat> frustum;
@@ -1760,8 +1760,8 @@ void FgeImplicitSurfaceGlyphs::raycasting_pass()
     cgGLSetParameter4f( cgGetNamedParameter( fragment_main, "domain_color" ),
                     domain_color[0], domain_color[1], domain_color[2],
                     domain_color[3] );
-    cgGLSetupSampler( cgGetNamedParameter( fragment_main, "cube_map" ),
-                    cube_map );
+    //cgGLSetupSampler( cgGetNamedParameter( fragment_main, "cube_map" ), //ALEXS_OLD_CG_CMAP_COMMENT
+     //               cube_map );                                         //ALEXS_OLD_CG_CMAP_COMMENT
     cgGLSetParameter1f(
                     cgGetNamedParameter( fragment_main, "iso_color_offset" ),
                     iso_color_offset );
