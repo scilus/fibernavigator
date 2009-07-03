@@ -37,8 +37,8 @@ using namespace std;
 #include "FNumberingSystem.h"
 #include "FFixArray.hh"
 
-#include <Cg/cg.h>
-#include <Cg/cgGL.h>
+#include <cg.h>
+#include <cgGL.h>
 
 #include <sstream>
 

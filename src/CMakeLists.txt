@@ -82,6 +82,7 @@ file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 IF( NVIDIA_CG_CONFIGURED )
     file( GLOB GLYPHS_SRC "gfx/ImplicitSurfaceGlyphs/*.cpp" )
     add_definitions( -DCG_GLYPHS )
+    include_directories( ${NVIDIA_CG_INCLUDE_DIR} ) 
 ENDIF( NVIDIA_CG_CONFIGURED )
 
 
