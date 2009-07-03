@@ -14,7 +14,6 @@
 #include <limits>
 #endif //CG_GLYPHS
 
-
 TheScene::TheScene(DatasetHelper* dh)
 :   m_dh(dh),
     m_mainGLContext(0)
@@ -1188,8 +1187,9 @@ void TheScene::drawSingleGlyph()
         {
             for( unsigned int compId = 0; compId < components; ++compId )
             {
-                std::cout<<"Tensor: " << tensors->at( index + compId ) << std::endl;
+//                std::cout<<"Tensor: " << tensors->at( index + compId ) << std::endl;
                 data[compId]=tensors->at( index + compId );
+//                if( compId == 3 || compId == 4) data[compId]*=-1;
            }
 //            for( unsigned int compId = 0; compId < components; ++compId )
 //            {
@@ -1198,14 +1198,14 @@ void TheScene::drawSingleGlyph()
 //            }
         }
 
-
-        std::cout << "################################################# " << std::endl;;
-        std::cout << "# DATA ";
-        for( unsigned int i = 0; i < numberOfValues; ++i)
-        {
-            std::cout<< data[i] << " ";
-        }
-        std::cout << std::endl;
+//
+//        std::cout << "################################################# " << std::endl;;
+//        std::cout << "# DATA ";
+//        for( unsigned int i = 0; i < numberOfValues; ++i)
+//        {
+//            std::cout<< data[i] << " ";
+//        }
+//        std::cout << std::endl;
 
         float maxValue = std::numeric_limits<float>::min();
         float minValue  = std::numeric_limits<float>::max();
@@ -1230,13 +1230,13 @@ void TheScene::drawSingleGlyph()
             data[i] = data[i]*dscale;
         }
 
-        std::cout << "################################################# range: " << range << std::endl;;
-        std::cout << "# DATA scaled ";
-        for( unsigned int i = 0; i < numberOfValues; ++i)
-        {
-            std::cout<< data[i] << " ";
-        }
-        std::cout << std::endl;
+//        std::cout << "################################################# range: " << range << std::endl;;
+//        std::cout << "# DATA scaled ";
+//        for( unsigned int i = 0; i < numberOfValues; ++i)
+//        {
+//            std::cout<< data[i] << " ";
+//        }
+//        std::cout << std::endl;
 //
 //        std::cout<<"|||||| "<<m_myGlyphs<<std::endl;
 //        if( m_myGlyphs != 0 )
@@ -1400,7 +1400,7 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
                 x * components
                 + y * m_dh->columns * components
                 + z * m_dh->columns * m_dh->rows * components;
-            std::cout << x << " " << y << " " << z << " posId: " << index/components<< " ----- ";
+//            std::cout << x << " " << y << " " << z << " posId: " << index/components<< " ----- ";
 
             for( int compId = 0; compId < components; ++compId )
             {
@@ -1410,28 +1410,28 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
                 maxValue = data[dataId] > maxValue ? data[dataId] : maxValue;
                 minValue = data[dataId] < minValue ? data[dataId] : minValue;
 //                 std::cout<<"["<<dataId<<","<<data[dataId]<<"] ";
-                std::cout<<data[dataId]<<" ";
+//                std::cout<<data[dataId]<<" ";
            }
-            std::cout<< std::endl;
+//            std::cout<< std::endl;
         }
-
-        std::cout << "################################################# " << std::endl;;
-        std::cout << "# DATA ";
-        for( unsigned int i = 0; i < nbTensors*ww; ++i)
-        {
-            if( i%ww == 0 )
-            {
-		std::cout << std::endl << i << " ";
-            unsigned int glyphId = i/ww;
-            int localindex =
-                glyphPositions[glyphId][0]
-                + glyphPositions[glyphId][1]* m_dh->columns
-                + glyphPositions[glyphId][2] * m_dh->columns * m_dh->rows;
-            std::cout<< glyphPositions[glyphId][0]<<" "<<glyphPositions[glyphId][1]<<" "<<glyphPositions[glyphId][2]<<" ------- " <<localindex<<" ------- ";
-            }
-            std::cout<< (fabs(data[i])>1e-9 ? data[i]:0) << " ";
-        }
-        std::cout << std::endl<<std::endl;
+//
+//        std::cout << "################################################# " << std::endl;;
+//        std::cout << "# DATA ";
+//        for( unsigned int i = 0; i < nbTensors*ww; ++i)
+//        {
+//            if( i%ww == 0 )
+//            {
+//		std::cout << std::endl << i << " ";
+//            unsigned int glyphId = i/ww;
+//            int localindex =
+//                glyphPositions[glyphId][0]
+//                + glyphPositions[glyphId][1]* m_dh->columns
+//                + glyphPositions[glyphId][2] * m_dh->columns * m_dh->rows;
+//            std::cout<< glyphPositions[glyphId][0]<<" "<<glyphPositions[glyphId][1]<<" "<<glyphPositions[glyphId][2]<<" ------- " <<localindex<<" ------- ";
+//            }
+//            std::cout<< (fabs(data[i])>1e-9 ? data[i]:0) << " ";
+//        }
+//        std::cout << std::endl<<std::endl;
 
 
          float range = maxValue -minValue;
@@ -1459,7 +1459,7 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 		absMax = fabs( maxValueLocal );
 	    else
 		absMax = fabs( minValueLocal );
-	    std::cout<<absMax<<std::endl;
+//	    std::cout<<absMax<<std::endl;
 	    float rangeLocal = maxValueLocal - minValueLocal;
 	   //  std::cout <<std::endl<< "rangeLocal["<<tensId<<"]="<<rangeLocal<<" "<<maxValueLocal<<" "<<minValueLocal<<std::endl;
 	    //normalize current tensor suing its range and max/min values
@@ -1485,8 +1485,8 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 //            data[i] = data[i]*dscale;
 //        }
 
-        std::cout << "################################################# range: " << maxValue<<"-"<<minValue<<"="<<range << std::endl;;
-        std::cout << "# DATA scaled ";
+//        std::cout << "################################################# range: " << maxValue<<"-"<<minValue<<"="<<range << std::endl;;
+//        std::cout << "# DATA scaled ";
 //         unsigned int blaaaaa=0;
 //         for( unsigned int i = 0; i < nbFloats; ++i)
 //         {
