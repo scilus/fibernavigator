@@ -75,6 +75,9 @@ private:
     void OnToggleLighting(wxCommandEvent& event);
     void OnInvertFibers(wxCommandEvent& event);
     void OnUseFakeTubes(wxCommandEvent& event);
+#ifdef CG_GLYPHS
+    void OnShowGlyphs(wxCommandEvent& event);
+#endif //CG_GLYPHS
     void OnUseTransparency(wxCommandEvent& event);
 	void OnToggleTextureFiltering(wxCommandEvent& event);
 	void OnToggleBlendTexOnMesh(wxCommandEvent& event);
@@ -251,6 +254,9 @@ DECLARE_EVENT_TABLE()
 #define MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING		153
 #define MENU_OPTIONS_BLEND_TEX_ON_MESH				154
 #define MENU_OPTIONS_USE_FAKE_TUBES					155
+#ifdef CG_GLYPHS
+#define MENU_OPTIONS_USE_GLYPHS					3232
+#endif //CG_GLYPHS
 #define MENU_OPTIONS_FILTER_ISO						156
 #define MENU_OPTIONS_USE_TRANSPARENCY				157
 #define MENU_OPTIONS_COLOR_MAPS						159
