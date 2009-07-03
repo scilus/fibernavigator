@@ -243,8 +243,10 @@ std::string getFileName( const std::string & file )
     std::ifstream firstGuess( file.c_str() );
     if( firstGuess )
         return file;
+#ifdef __GNUC__
 #warning FConfig entfernt
-    // std::string secondFile = std::string( FConfig::theConfig()->getEntry( "FANTOMBASEDIR" ) ) + MYSHADERDIR + file;
+#endif
+	// std::string secondFile = std::string( FConfig::theConfig()->getEntry( "FANTOMBASEDIR" ) ) + MYSHADERDIR + file;
     std::string secondFile = std::string( "" ) + MYSHADERDIR + file;
     std::ifstream secondGuess( secondFile.c_str() );
     if( secondGuess )
@@ -614,7 +616,9 @@ inline void FgeImplicitSurfaceGlyphs::build_shader( int control )
                             {
                                 if( strstr( readBuffer, "domain" ) )
                                 {
+#ifdef __GNUC__
 #warning [alex, assert]
+#endif
                                     assert(0);
                                     sscanf( readBuffer, "%s %f %f %f %f %f %f",
                                                     option_string,
@@ -1522,7 +1526,9 @@ void FgeImplicitSurfaceGlyphs::setNewVertex( GLfloat x, GLfloat y, GLfloat z )
 {
     assert( vertices.size() <= maxNumberOfGlyphs );
 
+#ifdef __GNUC__
 #warning alex added this
+#endif
     std::vector<double> myvertex(3);
     myvertex[0] = x;
     myvertex[1] = y;
@@ -1668,7 +1674,9 @@ void FgeImplicitSurfaceGlyphs::raycasting_pass()
 
     glext.pglFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, final_image, 0 );
 
+#ifdef __GNUC__
 #warning [alex] deactivated option ....... depth
+#endif
 //    if( use_cubemap )
         glClear( GL_DEPTH_BUFFER_BIT );
 //    else
@@ -1814,7 +1822,9 @@ void FgeImplicitSurfaceGlyphs::render()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
+#ifdef __GNUC__
 #warning alex has commeted this
+#endif
     // GLfloat fantomlight[4];
     // 	FgeGraphicsEngine::getLightPosition( fantomlight );
     // 	for(int i=0; i<3; ++i)

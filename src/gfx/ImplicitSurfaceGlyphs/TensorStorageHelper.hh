@@ -21,7 +21,7 @@ struct FTensorStorageHelper
 
   void initialize()
   {
-      unsigned int s = pow(dim,order);
+      unsigned int s = pow((float)dim,order);
       std::cout << "FTensorStorageHelper::initialize()" << std::endl;
       {
 	      // create the index map
