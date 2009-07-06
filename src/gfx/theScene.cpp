@@ -1189,7 +1189,6 @@ void TheScene::drawSingleGlyph()
             {
 //                std::cout<<"Tensor: " << tensors->at( index + compId ) << std::endl;
                 data[compId]=tensors->at( index + compId );
-//                if( compId == 3 || compId == 4) data[compId]*=-1;
            }
 //            for( unsigned int compId = 0; compId < components; ++compId )
 //            {

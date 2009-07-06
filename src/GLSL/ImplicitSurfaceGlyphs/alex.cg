@@ -275,6 +275,7 @@ hitrecord traverse(float3 orig, float3 dir, float w, float r0, float r1, float r
       t.x = 0;
       for(int i=0; i<1000; i++)
       {
+          bool skip=false;
           t.y = t.x + tincr;
           
           //ix = iadd(orig.x, imul(t, dir.x));
@@ -293,26 +294,29 @@ hitrecord traverse(float3 orig, float3 dir, float w, float r0, float r1, float r
               {
                   tincr *= .5f;
                   d++;
-                  continue;
+                  skip=true;
               }
           }
-          t.x = t.y;
-          
-          float tincr_next, fp;	
-          tincr_next = 2.f * tincr;
-          fp = frac(t.x/tincr_next);
-          if (fp < 1e-8)		//if fp == 0
+          if(!skip)
           {
-              for(int j=0; j<24; j++)
+              t.x = t.y;
+              
+              float tincr_next, fp;	
+              tincr_next = 2.f * tincr;
+              fp = frac(t.x/tincr_next);
+              if (fp < 1e-8)		//if fp == 0
               {
-                  tincr = tincr_next;
-                  d--;
-                  tincr_next = tincr * 2.f;
-                  fp = frac(t.x/tincr_next);
-                  if (d == -1 || fp > 1e-8) break;		//if d == -1 || fp != 0
+                  for(int j=0; j<24; j++)
+                  {
+                      tincr = tincr_next;
+                      d--;
+                      tincr_next = tincr * 2.f;
+                      fp = frac(t.x/tincr_next);
+                      if (d == -1 || fp > 1e-8) break;		//if d == -1 || fp != 0
+                  }
+                  if (d == -1)
+                      break;
               }
-              if (d == -1)
-                  break;
           }
       }
   }
