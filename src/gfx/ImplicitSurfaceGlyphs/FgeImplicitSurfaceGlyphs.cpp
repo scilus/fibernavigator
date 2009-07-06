@@ -243,10 +243,7 @@ std::string getFileName( const std::string & file )
     std::ifstream firstGuess( file.c_str() );
     if( firstGuess )
         return file;
-#ifdef __GNUC__
-#warning FConfig entfernt
-#endif
-	// std::string secondFile = std::string( FConfig::theConfig()->getEntry( "FANTOMBASEDIR" ) ) + MYSHADERDIR + file;
+
     std::string secondFile = std::string( "" ) + MYSHADERDIR + file;
     std::ifstream secondGuess( secondFile.c_str() );
     if( secondGuess )
@@ -1247,9 +1244,6 @@ void generate_hsv_colors()
 void FgeImplicitSurfaceGlyphs::cubeVertex( float x, float y, float z, float tx,
                                        float ty, float tz, float glyphPos )
 {
-//#warning [alex,clean]
-    //glColor3f( x, y, z );
-    //std::cout << tx << " " << ty << " " << tz << "   glyphPos: " << glyphPos << std::endl;
     pglMultiTexCoord4f( GL_TEXTURE7_ARB, tx, ty, tz, glyphPos ); //this HAS to be [0,1]
     glVertex3f( x, y, z );
 }
@@ -1526,9 +1520,6 @@ void FgeImplicitSurfaceGlyphs::setNewVertex( GLfloat x, GLfloat y, GLfloat z )
 {
     assert( vertices.size() <= maxNumberOfGlyphs );
 
-#ifdef __GNUC__
-#warning alex added this
-#endif
     std::vector<double> myvertex(3);
     myvertex[0] = x;
     myvertex[1] = y;
@@ -1821,14 +1812,6 @@ void FgeImplicitSurfaceGlyphs::raycasting_pass()
 void FgeImplicitSurfaceGlyphs::render()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-#ifdef __GNUC__
-#warning alex has commeted this
-#endif
-    // GLfloat fantomlight[4];
-    // 	FgeGraphicsEngine::getLightPosition( fantomlight );
-    // 	for(int i=0; i<3; ++i)
-    // 	    light[0][i] = fantomlight[i];
 
     glEnable( GL_CULL_FACE );
     raycasting_pass();
