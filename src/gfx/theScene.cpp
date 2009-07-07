@@ -1065,7 +1065,7 @@ void TheScene::drawSingleGlyph()
 {
     int order = 0;
     unsigned int components;
-    DatasetInfo* info;
+    DatasetInfo* info = 0;
     for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
     {
         info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
@@ -1265,7 +1265,7 @@ void TheScene::drawSingleGlyph()
 
     if ( m_dh->GLError() )
     {
-        m_dh->printGLError(wxT("[alex]afterender"));
+        m_dh->printGLError(wxT("afterender"));
     }
 }
 
@@ -1275,8 +1275,8 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
     if(glyphPositions.size()==0)return;
     std::cout << "drawGlyphs" << std::endl;
     int order = 0;
-    int components;
-    DatasetInfo* info;
+    unsigned int components;
+    DatasetInfo* info = 0;
     for (int i = 0 ; i < m_dh->mainFrame->m_listCtrl->GetItemCount() ; ++i)
     {
         info = (DatasetInfo*)m_dh->mainFrame->m_listCtrl->GetItemData(i);
@@ -1358,40 +1358,39 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
     if( !m_glyphsInitialized )
     {
         m_glyphsInitialized = true;
-
+        
         const unsigned int  nbTensors = glyphPositions.size();
-
+        
         int h, ww;
         int w;
-
+        
         FTensorStorageHelper tsh(3, order);
         std::cout << "getNbSymmetricComponents() : " << tsh.getNbSymmetricComponents() << std::endl;
         w = upPower2( tsh.getNbSymmetricComponents() );
         h = upPower2( nbTensors );
-
+        
         unsigned int numberOfValues = tsh.getNbSymmetricComponents() * nbTensors;
         std::cout<<"NBTENSORS: " << nbTensors<<std::endl;
         std::cout<<"NBVALUES : " << numberOfValues<<std::endl;
-
+        
         ww = w;
         if(ww%4 !=0) ww = (w/4) * 4 + 4;
         std::cout<<"WW   "<<ww<<std::endl;
         std::cout<<"H    "<<h<<std::endl;
         std::cout<<"WW*H "<<ww*h<<std::endl;
-
+        
         GLfloat * data;
         data = new GLfloat[ww*h];
-        unsigned int nbFloats = ww*h;
-
-
+        
+        
         Anatomy* tensors = (Anatomy*)info;
-
+        
         float maxValue = std::numeric_limits<float>::min();
         float minValue  = std::numeric_limits<float>::max();
-
+        
         for( unsigned int tensId = 0; tensId < nbTensors; ++tensId )
         {
-           // std::cout << "COORD " << glyphPositions[tensId][0] << " "<< glyphPositions[tensId][1] << " "<< glyphPositions[tensId][2] << " " << std::endl;
+            // std::cout << "COORD " << glyphPositions[tensId][0] << " "<< glyphPositions[tensId][1] << " "<< glyphPositions[tensId][2] << " " << std::endl;
             int x = glyphPositions[tensId][0];
             int y = glyphPositions[tensId][1];
             int z = glyphPositions[tensId][2];
@@ -1400,17 +1399,17 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
                 + y * m_dh->columns * components
                 + z * m_dh->columns * m_dh->rows * components;
 //            std::cout << x << " " << y << " " << z << " posId: " << index/components<< " ----- ";
-
-            for( int compId = 0; compId < components; ++compId )
+            
+            for( unsigned int compId = 0; compId < components; ++compId )
             {
-             //   std::cout<<"Tensor: " << tensors->at( index + compId ) << std::endl;
+                //   std::cout<<"Tensor: " << tensors->at( index + compId ) << std::endl;
                 unsigned int dataId = tensId * ww + compId;
                 data[dataId]=tensors->at( index + compId );
                 maxValue = data[dataId] > maxValue ? data[dataId] : maxValue;
                 minValue = data[dataId] < minValue ? data[dataId] : minValue;
 //                 std::cout<<"["<<dataId<<","<<data[dataId]<<"] ";
 //                std::cout<<data[dataId]<<" ";
-           }
+            }
 //            std::cout<< std::endl;
         }
 //
@@ -1433,48 +1432,47 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 //        std::cout << std::endl<<std::endl;
 
 
-         float range = maxValue -minValue;
+//         float range = maxValue -minValue;
 //         assert(range > 0);
+//        unsigned int nbFloats = ww*h;
 //         for( unsigned int i = 0; i < nbFloats; ++i)
 //         {
 //             data[i] = ( data[i] - minValue ) / range;
 //         }
 
 	 //run through all tensors in data array an normalize them locally
-        for( unsigned int tensId = 0; tensId < nbTensors; ++tensId)
-        {
-	    float maxValueLocal = std::numeric_limits<float>::min();
-	    float minValueLocal = std::numeric_limits<float>::max();
-	    //get max and min of current tensor's components
-	    for( unsigned int componentId=0; componentId < components; ++componentId )
-	    {
-                unsigned int dataId = tensId * ww + componentId;
-                maxValueLocal = data[dataId] > maxValueLocal ? data[dataId] : maxValueLocal;
-                minValueLocal = data[dataId] < minValueLocal ? data[dataId] : minValueLocal;
-	    }
-	    //range of the current tensor's components
-	    float absMax;
-	    if( fabs( maxValueLocal )  > fabs( minValueLocal ) )
-		absMax = fabs( maxValueLocal );
-	    else
-		absMax = fabs( minValueLocal );
-//	    std::cout<<absMax<<std::endl;
-	    float rangeLocal = maxValueLocal - minValueLocal;
-	   //  std::cout <<std::endl<< "rangeLocal["<<tensId<<"]="<<rangeLocal<<" "<<maxValueLocal<<" "<<minValueLocal<<std::endl;
-	    //normalize current tensor suing its range and max/min values
-		for( unsigned int componentId=0; componentId < components; ++componentId )
-		{
-		    unsigned int dataId = tensId * ww + componentId;
+         for( unsigned int tensId = 0; tensId < nbTensors; ++tensId)
+         {
+             float maxValueLocal = std::numeric_limits<float>::min();
+             float minValueLocal = std::numeric_limits<float>::max();
+             //get max and min of current tensor's components
+             for( unsigned int componentId=0; componentId < components; ++componentId )
+             {
+                 unsigned int dataId = tensId * ww + componentId;
+                 maxValueLocal = data[dataId] > maxValueLocal ? data[dataId] : maxValueLocal;
+                 minValueLocal = data[dataId] < minValueLocal ? data[dataId] : minValueLocal;
+             }
+             //range of the current tensor's components
+             float absMax;
+             if( fabs( maxValueLocal )  > fabs( minValueLocal ) )
+                 absMax = fabs( maxValueLocal );
+             else
+                 absMax = fabs( minValueLocal );
+             
+             //normalize current tensor using its range and max/min values
+             for( unsigned int componentId=0; componentId < components; ++componentId )
+             {
+                 unsigned int dataId = tensId * ww + componentId;
 // 		    if( rangeLocal != 0 )
 // 		    {
 // 		    data[dataId] = ( data[dataId] - minValueLocal ) / rangeLocal;
 // 		}
 		 data[dataId] = ( data[dataId] + absMax ) / (2*absMax);
-		}
-
-
-
-	}
+             }
+             
+             
+             
+         }
 
 //
 //        double dscale=10;
@@ -1519,7 +1517,7 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 
     if ( m_dh->GLError() )
     {
-        m_dh->printGLError(wxT("[alex]afterender"));
+        m_dh->printGLError(wxT("afterender"));
     }
 }
 #endif //CG_GLYPHS
