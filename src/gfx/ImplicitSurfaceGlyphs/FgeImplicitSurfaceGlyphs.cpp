@@ -716,7 +716,7 @@ inline void FgeImplicitSurfaceGlyphs::build_shader( int control )
                                 + dfdyExpression + dfdzExpression;
             }
 
-            unsigned int powpos = 0;
+            size_t powpos = 0;
             vector<int> powers_list;
             for( ;; )
             {
@@ -1549,13 +1549,8 @@ void FgeImplicitSurfaceGlyphs::setData( const unsigned int maxNumberOfGlyphs, GL
     data = new GLfloat[width*height];
     for( unsigned int i=0; i < width*height; ++i )
     {
-	data[i]=tensor[i];
+        data[i]=tensor[i];
     }
-//     for( unsigned int tensId = 0; tensId < width; ++ tensId )
-//         for( unsigned int i=0; i < height; ++i )
-//         {
-//             data[tensId*8+i] = tensor[tensId*6+i];
-//         }
 }
 
 void FgeImplicitSurfaceGlyphs::dataToTexture( unsigned int width, unsigned int height )
