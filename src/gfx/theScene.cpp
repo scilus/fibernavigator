@@ -981,23 +981,20 @@ void TheScene::drawGlyphsOnSurface()
     m_old_xSlice = m_dh->xSlize;
     m_old_ySlice = m_dh->ySlize;
     m_old_zSlice = m_dh->zSlize;
-
-
-
-    for (int j = 0; j < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++j)
-    {
-        DatasetInfo* mesh = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(j);
-
-        if (mesh->getType() == IsoSurface_ && mesh->getShow())
-        {
-            CIsoSurface* surf = (CIsoSurface*) mesh;
-            std::vector<Vector> isoSurfPos = surf->getSurfaceVoxelPositions();
-            if(isoSurfPos.size() != m_old_nbGlyphPositions)
-                m_glyphsInitialized = false;
-            m_old_nbGlyphPositions = isoSurfPos.size();
-        }
-    }
-
+//
+//    for (int j = 0; j < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++j)
+//    {
+//        DatasetInfo* mesh = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(j);
+//
+//        if( mesh->getType() == IsoSurface_ && mesh->getShow() )
+//        {
+//            CIsoSurface* surf = (CIsoSurface*) mesh;
+//            std::vector<Vector> isoSurfPos = surf->getSurfaceVoxelPositions();
+//            if(isoSurfPos.size() != m_old_nbGlyphPositions)
+//            m_glyphsInitialized = false;
+//            m_old_nbGlyphPositions = isoSurfPos.size();
+//        }
+//    }
 
     if( !m_glyphsInitialized )
     {
@@ -1007,6 +1004,7 @@ void TheScene::drawGlyphsOnSurface()
             DatasetInfo* info = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(i);
             if (info->getType() == Tensors_ && info->getShow())
             {
+                unsigned int modulo = 4;
                 if (m_dh->showAxial)
                 {
                     std::vector<Vector> gridPositions;
@@ -1015,46 +1013,83 @@ void TheScene::drawGlyphsOnSurface()
                     {
                         for (int j = 0; j < m_dh->rows; ++j)
                         {
-                            unsigned int modulo = 4;
                             if( i%modulo == 0 && j%modulo == 0 )
                             {
                                 Vector position( i, j, m_dh->zSlize );
                                 DatasetInfo* bla = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(0);
                                 Anatomy* vals = (Anatomy*)bla;
                                 double myval = vals->at(i+ j*m_dh->columns +m_dh->zSlize*m_dh->columns* m_dh->rows );
-                                //                            std::cout<<"POS " << position[0] <<" " << position[1]<<" "<<position[2]
-                                //                                       <<" THRESH "<<bla->getThreshold()<<" "<<myval<<std::endl;
                                 if(myval > bla->getThreshold())
-                                    m_positions.push_back(position);
+                                m_positions.push_back(position);
                             }
-                        }
-                }
-                }
-                for (int j = 0; j < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++j)
-                {
-                    DatasetInfo* mesh = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(j);
-
-                    if (mesh->getType() == IsoSurface_ && mesh->getShow())
-                    {
-                        CIsoSurface* surf = (CIsoSurface*) mesh;
-                        std::vector<Vector> isoSurfPos = surf->getSurfaceVoxelPositions();
-                        std::vector< Vector > filteredPositions;
-                        filteredPositions.clear();
-                        for (size_t k = 0; k < isoSurfPos.size(); ++k)
-                        {
-                            if( k%100 == 0)
-                            {
-                                m_positions.push_back( isoSurfPos[k] );
-                            }
-
                         }
                     }
-
-                    else
-                        if (mesh->getType() == Surface_ && mesh->getShow())
-                        {
-                        }
                 }
+                if (m_dh->showCoronal)
+                {
+                    std::vector<Vector> gridPositions;
+                    gridPositions.clear();
+                    for (int i = 0; i < m_dh->columns; ++i)
+                    {
+                        for (int j = 0; j < m_dh->frames; ++j)
+                        {
+                            if( i%modulo == 0 && j%modulo == 0 )
+                            {
+                                Vector position( i, m_dh->ySlize, j );
+                                DatasetInfo* bla = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(0);
+                                Anatomy* vals = (Anatomy*)bla;
+                                double myval = vals->at(i+ m_dh->ySlize*m_dh->columns + j*m_dh->columns* m_dh->rows );
+                                if(myval > bla->getThreshold())
+                                m_positions.push_back(position);
+                            }
+                        }
+                    }
+                }
+                if (m_dh->showSagittal)
+                {
+                    std::vector<Vector> gridPositions;
+                    gridPositions.clear();
+                    for (int i = 0; i < m_dh->rows; ++i)
+                    {
+                        for (int j = 0; j < m_dh->frames; ++j)
+                        {
+                            if( i%modulo == 0 && j%modulo == 0 )
+                            {
+                                Vector position( m_dh->xSlize, i, j );
+                                DatasetInfo* bla = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(0);
+                                Anatomy* vals = (Anatomy*)bla;
+                                double myval = vals->at( m_dh->xSlize+ i*m_dh->columns +j*m_dh->columns* m_dh->rows );
+                                if(myval > bla->getThreshold())
+                                m_positions.push_back(position);
+                            }
+                        }
+                    }
+                }
+//                for (int j = 0; j < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++j)
+//                {
+//                    DatasetInfo* mesh = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData(j);
+//
+//                    if (mesh->getType() == IsoSurface_ && mesh->getShow())
+//                    {
+//                        CIsoSurface* surf = (CIsoSurface*) mesh;
+//                        std::vector<Vector> isoSurfPos = surf->getSurfaceVoxelPositions();
+//                        std::vector< Vector > filteredPositions;
+//                        filteredPositions.clear();
+//                        for (size_t k = 0; k < isoSurfPos.size(); ++k)
+//                        {
+//                            if( k%100 == 0)
+//                            {
+//                                m_positions.push_back( isoSurfPos[k] );
+//                            }
+//
+//                        }
+//                    }
+//
+//                    else
+//                    if (mesh->getType() == Surface_ && mesh->getShow())
+//                    {
+//                    }
+//                }
             }
         }
     }
@@ -1092,7 +1127,11 @@ void TheScene::drawSingleGlyph()
 void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 {
 
-    if(glyphPositions.size()==0)return;
+    if( glyphPositions.size() == 0 )
+    {
+        return;
+    }
+
     int order = 0;
     unsigned int components;
     DatasetInfo* info = 0;
@@ -1136,7 +1175,6 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 
     if( !m_myGlyphs )
     {
-
         m_myGlyphs = new FgeImplicitSurfaceGlyphs;
         m_myGlyphs->setScaling(2);
         std::ostringstream oss;
@@ -1173,6 +1211,7 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
         m_myGlyphs->setFunction( oss.str(), 0.f, "", "", "" );
         m_myGlyphs->initiate();
     }
+    std::vector< Vector > maskedGlyphPositions;
 
     if( !m_glyphsInitialized )
     {
@@ -1180,19 +1219,13 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 
         const unsigned int  nbTensors = glyphPositions.size();
 
-        int h, ww;
-        int w;
 
         FTensorStorageHelper tsh(3, order);
         std::cout << "getNbSymmetricComponents() : " << tsh.getNbSymmetricComponents() << std::endl;
-        w = upPower2( tsh.getNbSymmetricComponents() );
-        h = upPower2( nbTensors );
+        int w = upPower2( tsh.getNbSymmetricComponents() );
+        int h = upPower2( nbTensors );
 
-        unsigned int numberOfValues = tsh.getNbSymmetricComponents() * nbTensors;
-        std::cout<<"NBTENSORS: " << nbTensors<<std::endl;
-        std::cout<<"NBVALUES : " << numberOfValues<<std::endl;
-
-        ww = w;
+        int ww = w;
         if(ww%4 !=0) ww = (w/4) * 4 + 4;
         std::cout<<"WW   "<<ww<<std::endl;
         std::cout<<"H    "<<h<<std::endl;
@@ -1201,11 +1234,12 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
         GLfloat * data;
         data = new GLfloat[ww*h];
 
+        unsigned int numberOfValues = tsh.getNbSymmetricComponents() * nbTensors;
+        std::cout<<"NBTENSORS: " << nbTensors<<std::endl;
+        std::cout<<"NBVALUES : " << numberOfValues<<std::endl;
+
 
         Anatomy* tensors = (Anatomy*)info;
-
-        float maxValue = std::numeric_limits<float>::min();
-        float minValue  = std::numeric_limits<float>::max();
 
         for( unsigned int tensId = 0; tensId < nbTensors; ++tensId )
         {
@@ -1219,18 +1253,89 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
                 + z * m_dh->columns * m_dh->rows * components;
 //            std::cout << x << " " << y << " " << z << " posId: " << index/components<< " ----- ";
 
+            float maxValueLocal = std::numeric_limits<float>::min();
+            float minValueLocal = std::numeric_limits<float>::max();
             for( unsigned int compId = 0; compId < components; ++compId )
             {
                 //   std::cout<<"Tensor: " << tensors->at( index + compId ) << std::endl;
                 unsigned int dataId = tensId * ww + compId;
                 data[dataId]=tensors->at( index + compId );
-                maxValue = data[dataId] > maxValue ? data[dataId] : maxValue;
-                minValue = data[dataId] < minValue ? data[dataId] : minValue;
+                maxValueLocal = data[dataId] > maxValueLocal ? data[dataId] : maxValueLocal;
+                minValueLocal = data[dataId] < minValueLocal ? data[dataId] : minValueLocal;
 //                 std::cout<<"["<<dataId<<","<<data[dataId]<<"] ";
 //                std::cout<<data[dataId]<<" ";
             }
-//            std::cout<< std::endl;
+
+            //range of the current tensor's components
+            float absMax;
+            if( fabs( maxValueLocal )  > fabs( minValueLocal ) )
+                absMax = fabs( maxValueLocal );
+            else
+                absMax = fabs( minValueLocal );
+
+            if( absMax > 1e-9 )
+                maskedGlyphPositions.push_back( glyphPositions[tensId] );
+
         }
+
+
+        //update data for the maskedGlyphPositions
+        const unsigned int nbMaskedTensors = maskedGlyphPositions.size();
+        std::cout <<  nbMaskedTensors << " / " << nbTensors << " = " << (float)nbMaskedTensors / (float)nbTensors <<std::endl;
+        h = upPower2( nbMaskedTensors );
+        std::cout<<"H    "<<h<<std::endl;
+        std::cout<<"WW*H "<<ww*h<<std::endl;
+        delete data;
+        data = new GLfloat[ww*h];
+
+        float maxValue = std::numeric_limits<float>::min();
+        float minValue = std::numeric_limits<float>::max();
+
+        //set the data with the maskedGlyphPositions
+        for( unsigned int tensId = 0; tensId < nbMaskedTensors; ++tensId )
+        {
+            // std::cout << "COORD " << glyphPositions[tensId][0] << " "<< glyphPositions[tensId][1] << " "<< glyphPositions[tensId][2] << " " << std::endl;
+            int x = maskedGlyphPositions[tensId][0];
+            int y = maskedGlyphPositions[tensId][1];
+            int z = maskedGlyphPositions[tensId][2];
+            int index =
+                x * components
+                + y * m_dh->columns * components
+                + z * m_dh->columns * m_dh->rows * components;
+//            std::cout << x << " " << y << " " << z << " posId: " << index/components<< " ----- ";
+
+            float maxValueLocal = std::numeric_limits<float>::min();
+            float minValueLocal = std::numeric_limits<float>::max();
+            for( unsigned int compId = 0; compId < components; ++compId )
+            {
+                //   std::cout<<"Tensor: " << tensors->at( index + compId ) << std::endl;
+                unsigned int dataId = tensId * ww + compId;
+                data[dataId] = tensors->at( index + compId );
+
+                maxValue = data[dataId] > maxValue ? data[dataId] : maxValue;
+                minValue = data[dataId] < minValue ? data[dataId] : minValue;
+
+                maxValueLocal = data[dataId] > maxValueLocal ? data[dataId] : maxValueLocal;
+                minValueLocal = data[dataId] < minValueLocal ? data[dataId] : minValueLocal;
+            }
+
+            //range of the current tensor's components
+            float absMax;
+            if( fabs( maxValueLocal )  > fabs( minValueLocal ) )
+                absMax = fabs( maxValueLocal );
+            else
+                absMax = fabs( minValueLocal );
+
+
+            //normalize current tensor using its range and max/min values
+            for( unsigned int componentId=0; componentId < components; ++componentId )
+            {
+                unsigned int dataId = tensId * ww + componentId;
+                data[dataId] = ( data[dataId] + absMax ) / (2*absMax);
+            }
+
+        }
+
 //
 //        std::cout << "################################################# " << std::endl;;
 //        std::cout << "# DATA ";
@@ -1259,39 +1364,10 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 //             data[i] = ( data[i] - minValue ) / range;
 //         }
 
-	 //run through all tensors in data array an normalize them locally
-         for( unsigned int tensId = 0; tensId < nbTensors; ++tensId)
-         {
-             float maxValueLocal = std::numeric_limits<float>::min();
-             float minValueLocal = std::numeric_limits<float>::max();
-             //get max and min of current tensor's components
-             for( unsigned int componentId=0; componentId < components; ++componentId )
-             {
-                 unsigned int dataId = tensId * ww + componentId;
-                 maxValueLocal = data[dataId] > maxValueLocal ? data[dataId] : maxValueLocal;
-                 minValueLocal = data[dataId] < minValueLocal ? data[dataId] : minValueLocal;
-             }
-             //range of the current tensor's components
-             float absMax;
-             if( fabs( maxValueLocal )  > fabs( minValueLocal ) )
-                 absMax = fabs( maxValueLocal );
-             else
-                 absMax = fabs( minValueLocal );
-
-             //normalize current tensor using its range and max/min values
-             for( unsigned int componentId=0; componentId < components; ++componentId )
-             {
-                 unsigned int dataId = tensId * ww + componentId;
-// 		    if( rangeLocal != 0 )
-// 		    {
-// 		    data[dataId] = ( data[dataId] - minValueLocal ) / rangeLocal;
-// 		}
-		 data[dataId] = ( data[dataId] + absMax ) / (2*absMax);
-             }
 
 
 
-         }
+
 
 //
 //        double dscale=10;
@@ -1316,13 +1392,13 @@ void TheScene::drawGlyphs( std::vector< Vector > glyphPositions )
 //         std::cout << std::endl<<blaaaaa<<std::endl;
         if( m_myGlyphs )
         {
-            m_myGlyphs->setData( glyphPositions.size() , data, ww, h );
+            m_myGlyphs->setData( maskedGlyphPositions.size() , data, ww, h );
             m_myGlyphs->dataToTexture( ww, h );
-            for( unsigned int tensId = 0; tensId < glyphPositions.size(); ++tensId )
+            for( unsigned int tensId = 0; tensId < maskedGlyphPositions.size(); ++tensId )
             {
-                int x = glyphPositions[tensId][0];
-                int y = glyphPositions[tensId][1];
-                int z = glyphPositions[tensId][2];
+                int x = maskedGlyphPositions[tensId][0];
+                int y = maskedGlyphPositions[tensId][1];
+                int z = maskedGlyphPositions[tensId][2];
                 m_myGlyphs->setNewVertex( x, y, z );
             }
         }
