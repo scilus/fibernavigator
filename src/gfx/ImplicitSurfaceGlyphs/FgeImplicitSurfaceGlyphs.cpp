@@ -1650,14 +1650,6 @@ void set_tex_param( const char* par, GLuint tex, const CGprogram &program )
 
 void FgeImplicitSurfaceGlyphs::raycasting_pass()
 {
-//    glLineWidth(4);
-//    glBegin(GL_LINES);
-//    glColor3f(0,0,1);
-//    glVertex3f(0,0,0);
-//    glVertex3f(150,150,150);
-//    glEnd();
-
-
     glext.pglFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, final_image, 0 );
 
 #ifdef __GNUC__
@@ -1743,8 +1735,6 @@ void FgeImplicitSurfaceGlyphs::raycasting_pass()
                     domain_min[0], domain_min[1], domain_min[2] );
     cgGLSetParameter3f( cgGetNamedParameter( fragment_main, "domain_max" ),
                     domain_max[0], domain_max[1], domain_max[2] );
-//    cgGLSetParameter3f( cgGetNamedParameter( fragment_main, "light_pos" ),
-//                    light[0][0], light[0][1], light[0][2] );
     cgGLSetParameter3f( cgGetNamedParameter( fragment_main, "light_pos" ),
                     eye[0], eye[1], eye[2] );
     cgGLSetParameter3f( cgGetNamedParameter( fragment_main, "front_color" ),
@@ -1786,13 +1776,7 @@ void FgeImplicitSurfaceGlyphs::raycasting_pass()
     std::vector<std::vector<double> >::iterator vertIt = vertices.begin();
     while( vertIt != vertices.end() )
     {
-//        std::cout << "render cube" << i << " at " << (*vertIt)[0] << " " << (*vertIt)[1] << " " << (*vertIt)[2] << "   scale: "<<boxScale<<std::endl;
-//        std::cout << "eyeorigin "<< eye[0] - (*vertIt)[0] << " "
-//        << eye[1] - (*vertIt)[1] << " "
-//        << eye[2] - (*vertIt)[2] << " " << std::endl;
-//        std::cout<< "center(max,min): " << (domain_min + domain_max)*.5 << std::endl;
         drawBox( (*vertIt)[0], (*vertIt)[1], (*vertIt)[2], boxScale, i);
-//        std::cout << "GlyphPosition: " << (*vertIt)[0] << " " << (*vertIt)[1] << " " << (*vertIt)[2] << std::endl << std::endl << std::endl << std::endl;
         ++vertIt;
         ++i;
     }
