@@ -716,7 +716,7 @@ inline void FgeImplicitSurfaceGlyphs::build_shader( int control )
                                 + dfdyExpression + dfdzExpression;
             }
 
-            int powpos = 0;
+            unsigned int powpos = 0;
             vector<int> powers_list;
             for( ;; )
             {
@@ -732,7 +732,7 @@ inline void FgeImplicitSurfaceGlyphs::build_shader( int control )
                                                     - 3 );
                     int intpower = atoi( istr.c_str() );
                     bool already = false;
-                    for( int i = 0; i < powers_list.size(); i++ )
+                    for( unsigned int i = 0; i < powers_list.size(); i++ )
                     {
                         if( powers_list[i] == intpower )
                         {
@@ -747,7 +747,7 @@ inline void FgeImplicitSurfaceGlyphs::build_shader( int control )
                     {
                         int ipm1 = intpower - 1;
                         already = false;
-                        for( int i = 0; i < powers_list.size(); i++ )
+                        for( unsigned int i = 0; i < powers_list.size(); i++ )
                         {
                             if( powers_list[i] == ipm1 )
                             {
@@ -764,7 +764,7 @@ inline void FgeImplicitSurfaceGlyphs::build_shader( int control )
             }
 
             {
-                for( int i = 0; i < powers_list.size(); i++ )
+                for( unsigned int i = 0; i < powers_list.size(); i++ )
                     fputs( make_pow( powers_list[i] ).c_str(), fout );
                 fputs( "\n", fout );
             }
@@ -772,21 +772,21 @@ inline void FgeImplicitSurfaceGlyphs::build_shader( int control )
             //make the powers
             if( genAD )
             {
-                for( int i = 0; i < powers_list.size(); i++ )
+                for( unsigned int i = 0; i < powers_list.size(); i++ )
                     fputs( make_autodiff_pow( powers_list[i] ).c_str(), fout );
                 fputs( "\n", fout );
             }
 
             if( genIA || genADIA )
             {
-                for( int i = 0; i < powers_list.size(); i++ )
+                for( unsigned int i = 0; i < powers_list.size(); i++ )
                     fputs( make_interval_pow( powers_list[i] ).c_str(), fout );
                 fputs( "\n", fout );
             }
 
             if( genRAFA )
             {
-                for( int i = 0; i < powers_list.size(); i++ )
+                for( unsigned int i = 0; i < powers_list.size(); i++ )
                     fputs( make_affine_pow( powers_list[i] ).c_str(), fout );
                 fputs( "\n", fout );
             }
@@ -794,7 +794,7 @@ inline void FgeImplicitSurfaceGlyphs::build_shader( int control )
             // FIXME: compiler option?
             if( genADIA )
             {
-                for( int i = 0; i < powers_list.size(); i++ )
+                for( unsigned int i = 0; i < powers_list.size(); i++ )
                     fputs( make_adia_pow( powers_list[i] ).c_str(), fout );
                 fputs( "\n", fout );
             }
