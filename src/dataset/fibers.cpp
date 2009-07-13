@@ -408,6 +408,9 @@ bool Fibers::loadVTK(wxString filename)
         dataFile.Seek(fileOffset);
         dataFile.Read(buffer, (size_t) 255);
 
+		//aa 2009/06/26 workaround if the buffer doesn't contain a string
+		buffer[254]='\n';
+		
         j = 0;
         int k = 0;
         // TODO test if there's really a color array;
