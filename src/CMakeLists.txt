@@ -43,17 +43,6 @@ FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( wxWidgets REQUIRED )
 SET( WXWIDGETS_USE_GL TRUE )
 
-#Cg
-find_path( NVIDIA_CG_INCLUDE_DIR cg.h /usr/include/Cg )
-find_library( NVIDIA_CG_LIBRARIES Cg )
-find_library( NVIDIA_CGGL_LIBRARIES CgGL )
-IF( NVIDIA_CG_INCLUDE_DIR AND NVIDIA_CG_LIBRARIES AND NVIDIA_CGGL_LIBRARIES )
-    SET( NVIDIA_CG_CONFIGURED TRUE )
-    MESSAGE( STATUS "Found Cg. Building with ImplicitSurfaceGlyphs" )
-ELSE( NVIDIA_CG_INCLUDE_DIR AND NVIDIA_CG_LIBRARIES AND NVIDIA_CGGL_LIBRARIES )
-    MESSAGE( STATUS "Cg not found. NOT building ImplicitSurfaceGlyphs" )
-ENDIF( NVIDIA_CG_INCLUDE_DIR AND NVIDIA_CG_LIBRARIES AND NVIDIA_CGGL_LIBRARIES)
-
 # Includes:
 INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_PATH} )
 INCLUDE( ${wxWidgets_USE_FILE} )
@@ -82,19 +71,9 @@ file( GLOB FANTOM_SRC "misc/Fantom/*.cpp" )
 file( GLOB ISO_SRC "misc/IsoSurface/*.cpp" )
 file( GLOB LIC_SRC "misc/lic/*.cpp" )
 file( GLOB NIFTI_SRC "misc/nifti/*.c" )
-IF( NVIDIA_CG_CONFIGURED )
-    file( GLOB GLYPHS_SRC "gfx/ImplicitSurfaceGlyphs/*.cpp" )
-    add_definitions( -DCG_GLYPHS )
-    include_directories( ${NVIDIA_CG_INCLUDE_DIR} ) 
-ENDIF( NVIDIA_CG_CONFIGURED )
 
+ADD_EXECUTABLE( ${target} main.cpp ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} )
 
-ADD_EXECUTABLE( ${target} main.cpp ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} ${GLYPHS_SRC} )
-
-TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8 )
-IF( NVIDIA_CG_CONFIGURED )
-    TARGET_LINK_LIBRARIES( ${target} ${NVIDIA_CG_LIBRARIES} ${NVIDIA_CGGL_LIBRARIES} )
-ENDIF( NVIDIA_CG_CONFIGURED )
-
+TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)

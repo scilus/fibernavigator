@@ -45,10 +45,6 @@
 #include "icons/alphablend.xpm"
 #include "icons/layout.xpm"
 
-#ifdef CG_GLYPHS
-#include "icons/glyph.xpm"
-#endif  //CG_GLYPHS
-
 #include <exception>
 
 #include "main.h"
@@ -216,9 +212,6 @@ bool MyApp::OnInit(void)
         options_menu->AppendCheckItem(MENU_OPTIONS_TOGGLE_LIGHTING, _T("Toggle Fiber Lighting\tCtrl-I"));
         options_menu->AppendCheckItem(MENU_OPTIONS_INVERT_FIBERS, _T("Invert Fiber Selection"));
         options_menu->AppendCheckItem(MENU_OPTIONS_USE_FAKE_TUBES, _T("Use Tubes\tCtrl-T"));
-#ifdef CG_GLYPHS
-        options_menu->AppendCheckItem(MENU_OPTIONS_USE_GLYPHS, _T("Show Glyphs"));
-#endif //CG_GLYPHS
         options_menu->AppendCheckItem(MENU_OPTIONS_USE_TRANSPARENCY, _T("Use Transparent Fibers"));
 
         wxMenu* licMovs = new wxMenu;
@@ -273,11 +266,6 @@ bool MyApp::OnInit(void)
         wxBitmap bmpAssignColor(colorSelect_xpm);
         wxBitmap bmpLighting(lightbulb_xpm);
         wxBitmap bmpTubes (tubes_xpm);
-
-#ifdef CG_GLYPHS
-        wxBitmap bmpGlyph (glyph_xpm);
-#endif //CG_GLYPHS
-
 #else
         wxBitmap bmpOpen (wxImage(respath+_T("icons/fileopen.png" ), wxBITMAP_TYPE_PNG));
         wxBitmap bmpSave (wxImage(respath+_T("icons/disc.png" ), wxBITMAP_TYPE_PNG));
@@ -304,19 +292,14 @@ bool MyApp::OnInit(void)
         wxBitmap bmpAssignColor(wxImage(respath+_T("icons/colorSelect.png"), wxBITMAP_TYPE_PNG));
         wxBitmap bmpLighting(wxImage(respath+_T("icons/lightbulb.png"), wxBITMAP_TYPE_PNG));
         wxBitmap bmpTubes (wxImage(respath+_T("icons/tubes.png"), wxBITMAP_TYPE_PNG));
-
-#ifdef CG_GLYPHS
-        wxBitmap bmpGlyph (wxImage(respath+_T("icons/glyphconver.png"), wxBITMAP_TYPE_PNG));
-#endif //CG_GLYPHS
-
 #endif
         toolBar->AddTool(MENU_FILE_LOAD, bmpOpen, wxT("Open"));
         toolBar->AddTool(MENU_FILE_SAVE, bmpSave, wxT("Save Scene"));
         toolBar->AddTool(BUTTON_TOGGLE_LAYOUT, bmpToggleLayout, wxT("Toggle window layout"));
         toolBar->AddSeparator();
-        toolBar->AddCheckTool(BUTTON_AXIAL, wxT("Axial"), bmpAxial, 0, wxT("Axial"));
-        toolBar->AddCheckTool(BUTTON_CORONAL, wxT("Coronal"), bmpCor, 0, wxT("Coronal"));
-        toolBar->AddCheckTool(BUTTON_SAGITTAL, wxT("Sagittal"), bmpSag, 0, wxT("Sagittal"));
+        toolBar->AddCheckTool(BUTTON_AXIAL, wxT("Axial"), bmpAxial);
+        toolBar->AddCheckTool(BUTTON_CORONAL, wxT("Coronal"), bmpCor);
+        toolBar->AddCheckTool(BUTTON_SAGITTAL, wxT("Sagittal"), bmpSag);
         toolBar->AddCheckTool(BUTTON_TOGGLE_ALPHA, wxT("Toggle alpha blending"), bmpAlphaBlend);
         toolBar->AddSeparator();
         toolBar->AddTool(MENU_VOI_NEW_SELBOX, bmpBox, wxT("New Selection Box"));
@@ -335,10 +318,6 @@ bool MyApp::OnInit(void)
         toolBar->AddTool(MENU_FILE_NEW_ISOSURF, bmpIsoSurface, wxT("New Iso Surface"));
         toolBar->AddSeparator();
         toolBar->AddCheckTool(MENU_OPTIONS_USE_FAKE_TUBES, wxT("Toggle Tubes"), bmpTubes);
-#ifdef CG_GLYPHS
-        toolBar->AddCheckTool(MENU_OPTIONS_USE_GLYPHS, wxT("Show Glyphs"), bmpGlyph, 0, wxT("Show Glyphs"));
-#endif //CG_GLYPHS
-
         toolBar->AddSeparator();
 #ifdef DEBUG
         toolBar->AddTool(MENU_OPTIONS_INVERT_FIBERS, bmpMiniCat, wxT("Invert Fibers"));

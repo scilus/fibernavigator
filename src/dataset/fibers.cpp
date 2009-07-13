@@ -407,8 +407,6 @@ bool Fibers::loadVTK(wxString filename)
         fileOffset += (countLines*3) +1;
         dataFile.Seek(fileOffset);
         dataFile.Read(buffer, (size_t) 255);
-		//aa 2009/06/26 workaround if the buffer doesn't contain a string
-		buffer[254]='\n';
 
         j = 0;
         int k = 0;

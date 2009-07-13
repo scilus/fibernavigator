@@ -63,10 +63,6 @@ DatasetHelper::DatasetHelper(MainFrame* mf)
 
     showCrosshair(false),
 
-#ifdef CG_GLYPHS
-    showGlyphs(false),
-#endif //CG_GLYPHS
-
     xSlize(0.5),
     ySlize(0.5),
     zSlize(0.5),
@@ -140,7 +136,7 @@ bool DatasetHelper::load(const int index)
     wxArrayString fileNames;
     wxString caption= wxT("Choose a file");
     wxString
-            wildcard=  wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh| Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip| Fibers VTK (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata| Scene Files (*.scn)|*.scn");
+            wildcard=	wxT("*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh| Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip| Fibers VTK (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata| Scene Files (*.scn)|*.scn");
     wxString defaultDir = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog(mainFrame, caption, defaultDir, defaultFilename,

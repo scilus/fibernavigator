@@ -162,10 +162,6 @@ public:
 	bool showCoronal;
 	bool showAxial;
 
-#ifdef CG_GLYPHS
-	bool showGlyphs;
-#endif //CG_GLYPHS
-
 	bool showCrosshair;
 
 	float xSlize;

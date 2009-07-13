@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\wxMSW-2.8.9\lib\vc_lib\mswu&quot;;&quot;C:\wxMSW-2.8.9\include&quot;;C:\glew\include;&quot;C:\Programme\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Programme\NVIDIA Corporation\Cg\include\Cg&quot;"
+				AdditionalIncludeDirectories="&quot;C:\wxMSW-2.8.9\lib\vc_lib\mswu&quot;;&quot;C:\wxMSW-2.8.9\include&quot;;C:\glew\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -117,8 +117,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;C:\wxMSW-2.8.9\lib\vc_lib\mswu&quot;;&quot;C:\wxMSW-2.8.9\include&quot;;&quot;C:\Programme\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Programme\NVIDIA Corporation\Cg\include\Cg&quot;;C:\glew\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;CG_GLYPHS"
+				AdditionalIncludeDirectories="&quot;C:\wxMSW-2.8.9\lib\vc_lib\mswu&quot;;&quot;C:\wxMSW-2.8.9\include&quot;;C:\glew\include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -136,9 +136,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glew32.lib wxbase28u.lib wxbase28u_net.lib wxbase28u_xml.lib wxmsw28u_adv.lib wxmsw28u_aui.lib wxmsw28u_core.lib wxmsw28u_gl.lib wxmsw28u_html.lib wxmsw28u_media.lib wxmsw28u_qa.lib wxmsw28u_richtext.lib wxmsw28u_xrc.lib wxregexu.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib uuid.lib advapi32.lib wsock32.lib odbc32.lib cg.lib cggl.lib"
+				AdditionalDependencies="glew32.lib wxbase28u.lib wxbase28u_net.lib wxbase28u_xml.lib wxmsw28u_adv.lib wxmsw28u_aui.lib wxmsw28u_core.lib wxmsw28u_gl.lib wxmsw28u_html.lib wxmsw28u_media.lib wxmsw28u_qa.lib wxmsw28u_richtext.lib wxmsw28u_xrc.lib wxregexu.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxexpat.lib winmm.lib comctl32.lib rpcrt4.lib uuid.lib advapi32.lib wsock32.lib odbc32.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\wxMSW-2.8.9\lib\vc_lib&quot;;&quot;C:\Programme\NVIDIA Corporation\Cg\lib&quot;;C:\glew\lib"
+				AdditionalLibraryDirectories="&quot;C:\wxMSW-2.8.9\lib\vc_lib&quot;;C:\glew\lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -221,22 +221,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeGLExtensions.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeGLFramebufferExtensions.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeGLFrustum.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeGLFrustum.icc"
-				>
-			</File>
-			<File
 				RelativePath="..\src\misc\lic\FgeGLTexture.cpp"
 				>
 			</File>
@@ -245,31 +229,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeImplicitSurfaceExpression.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeImplicitSurfaceGlyphs.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeMatrix.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\misc\lic\FgeOffscreen.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\src\misc\lic\FgeRenderbuffer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeVector.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeVector.icc"
 				>
 			</File>
 			<File
@@ -290,10 +254,6 @@
 			</File>
 			<File
 				RelativePath="..\src\misc\Fantom\FMultiIndex.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FNumberingSystem.cpp"
 				>
 			</File>
 			<File
@@ -447,27 +407,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FFixArray.hh"
-				>
-			</File>
-			<File
 				RelativePath="..\src\misc\lic\FgeFramebufferObject.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeGL.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeGLExtensions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeGLFramebufferExtensions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeGLFrustum.h"
 				>
 			</File>
 			<File
@@ -479,27 +419,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeImplicitSurfaceExpression.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeImplicitSurfaceGlyphs.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeMatrix.h"
-				>
-			</File>
-			<File
 				RelativePath="..\src\misc\lic\FgeOffscreen.h"
 				>
 			</File>
 			<File
 				RelativePath="..\src\misc\lic\FgeRenderbuffer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FgeVector.h"
 				>
 			</File>
 			<File
@@ -520,10 +444,6 @@
 			</File>
 			<File
 				RelativePath="..\src\misc\Fantom\FMultiIndex.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\FNumberingSystem.h"
 				>
 			</File>
 			<File
@@ -623,10 +543,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\gfx\ImplicitSurfaceGlyphs\TensorStorageHelper.hh"
-				>
-			</File>
-			<File
 				RelativePath="..\src\gfx\theScene.h"
 				>
 			</File>
@@ -710,10 +626,6 @@
 			</File>
 			<File
 				RelativePath="..\src\icons\fileopen.xpm"
-				>
-			</File>
-			<File
-				RelativePath="..\src\icons\glyph.xpm"
 				>
 			</File>
 			<File

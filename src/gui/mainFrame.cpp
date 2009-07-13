@@ -73,9 +73,6 @@ EVT_MENU(MENU_OPTIONS_RESET_COLOR, MainFrame::OnResetColor)
 EVT_MENU(MENU_OPTIONS_TOGGLE_LIGHTING, MainFrame::OnToggleLighting)
 EVT_MENU(MENU_OPTIONS_INVERT_FIBERS, MainFrame::OnInvertFibers)
 EVT_MENU(MENU_OPTIONS_USE_FAKE_TUBES, MainFrame::OnUseFakeTubes)
-#ifdef CG_GLYPHS
-EVT_MENU(MENU_OPTIONS_USE_GLYPHS, MainFrame::OnShowGlyphs)
-#endif //CG_GLYPHS
 EVT_MENU(MENU_OPTIONS_USE_TRANSPARENCY, MainFrame::OnUseTransparency)
 EVT_MENU(MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING, MainFrame::OnToggleTextureFiltering)
 EVT_MENU(MENU_OPTIONS_BLEND_TEX_ON_MESH, MainFrame::OnToggleBlendTexOnMesh)
@@ -1533,31 +1530,6 @@ void MainFrame::OnUseFakeTubes(wxCommandEvent& WXUNUSED(event))
         f->switchNormals(!m_dh->useFakeTubes);
     refreshAllGLWidgets();
 }
-
-#ifdef CG_GLYPHS
-/****************************************************************************************************
- *
- *
- *
- ****************************************************************************************************/
-void MainFrame::OnShowGlyphs(wxCommandEvent& WXUNUSED(event))
-{
-    if( !m_dh->tensors_loaded )
-    {
-        wxMessageBox(wxT("ERROR\n No tensors loaded!"), wxT(""), wxOK
-                        | wxICON_INFORMATION, NULL);
-        GetToolBar()->ToggleTool(MENU_OPTIONS_USE_GLYPHS, m_dh->showGlyphs);
-        return;
-    }
-
-    if (m_dh->scene)
-    {
-        m_dh->showGlyphs = !m_dh->showGlyphs;
-        m_mainGL->render();
-    }
-}
-#endif //CG_GLYPHS
-
 /****************************************************************************************************
  *
  *
