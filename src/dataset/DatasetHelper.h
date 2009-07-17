@@ -55,7 +55,7 @@ public:
 
 	bool load(const int index);
 	bool load(wxString filename, const float threshold = 0.0, const bool active = true,
-	        const bool showFS = true, const bool useTex = true);
+	        const bool showFS = true, const bool useTex = true, const float alpha = 1.0);
 	void finishLoading(DatasetInfo*);
 	bool loadScene(const wxString filename);
 	bool loadTextFile(wxString* string, const wxString filename);

@@ -317,9 +317,12 @@ bool Anatomy::loadNifti(wxString filename)
 
 void Anatomy::saveNifti(wxString filename)
 {
-    int dims[] =
-    { 3, m_columns, m_rows, m_frames, 1, 0, 0, 0 };
+    int dims[] = { 3, m_columns, m_rows, m_frames, 1, 0, 0, 0 };
+
     nifti_image* ima = nifti_make_new_nim(dims, DT_FLOAT32, 1);
+
+    ima->qform_code = 1;
+
     char fn[1024];
     strcpy(fn, (const char*) filename.mb_str(wxConvUTF8));
     ima->fname = fn;

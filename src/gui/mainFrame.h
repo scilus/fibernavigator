@@ -23,6 +23,7 @@ public:
     void renewAllGLWidgets();
 
     void createNewSelBox();
+    void Screenshot(wxString fileName);
 
 private:
 	/*

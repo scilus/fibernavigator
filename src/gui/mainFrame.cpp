@@ -1732,12 +1732,23 @@ void MainFrame::OnScreenshot(wxCommandEvent& WXUNUSED(event))
     {
         m_dh->m_screenshotPath = dialog.GetDirectory();
         m_dh->m_screenshotName = dialog.GetPath();
-        if (m_dh->m_screenshotName.AfterLast('.') != _T("ppm"))
+        if ( m_dh->m_screenshotName.AfterLast('.') != _T("ppm") )
             m_dh->m_screenshotName += _T(".ppm");
         m_dh->scheduledScreenshot = true;
         m_mainGL->render();
         m_mainGL->render();
     }
+}
+
+void MainFrame::Screenshot(wxString fileName)
+{
+    m_dh->m_screenshotPath = _("");
+    m_dh->m_screenshotName = fileName;
+    if ( m_dh->m_screenshotName.AfterLast('.') != _T("ppm") )
+        m_dh->m_screenshotName += _T(".ppm");
+    m_dh->scheduledScreenshot = true;
+    m_mainGL->render();
+    m_mainGL->render();
 }
 
 void MainFrame::OnSlizeMovieSag(wxCommandEvent& WXUNUSED(event))
