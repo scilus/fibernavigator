@@ -103,17 +103,15 @@ void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event)  )
 
 void MainCanvas::OnSize( wxSizeEvent& event )
 {
-#ifndef __WXMAC__
+#if defined( __WXMAC__ )
+	SetCurrent();
+#elif defined ( __WXMSW__ )
+	SetCurrent();
+#else
     if ( !m_dh->m_texAssigned )
         wxGLCanvas::SetCurrent();
-#ifndef __WXMAC__
     else
         wxGLCanvas::SetCurrent( *m_dh->scene->getMainGLContext() );
-#else
-    this->SetCurrent();
-#endif
-#else
-    SetCurrent();
 #endif
 
     // this is also necessary to update the context on some platforms
