@@ -577,8 +577,8 @@ void TheScene::drawVectors()
             b = vecs->getColor().Blue() / 255.;
             a = 1.0;
 
-            float bright = 1.2;
-            float dull = 0.7;
+            float bright = 1.2f;
+            float dull = 0.7f;
 
             bool topview   = m_dh->quadrant == 2 || m_dh->quadrant == 3 || m_dh->quadrant == 6 || m_dh->quadrant == 7;
             bool leftview  = m_dh->quadrant == 5 || m_dh->quadrant == 6 || m_dh->quadrant == 7 || m_dh->quadrant == 8;

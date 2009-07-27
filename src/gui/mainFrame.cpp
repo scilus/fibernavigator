@@ -1089,7 +1089,7 @@ void MainFrame::OnNewFromOverlay(wxCommandEvent& WXUNUSED(event))
             selBox = new SelectionBox(m_dh, a);
             float trs = a->getThreshold();
             if (trs == 0.0)
-                trs = 0.01;
+                trs = 0.01f;
             selBox->setThreshold(trs);
         }
         else

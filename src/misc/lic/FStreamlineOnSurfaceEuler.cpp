@@ -30,7 +30,7 @@ F::FVector lastDirectionVector(3);
 #if 1
 
 FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh, TriangleMesh* grid) :
-    allSteps(), steps(), allNormals(), vecs(), maxCells(10000), singEdges(), offset(1.0e-5), vertices(3),
+    allSteps(), steps(), allNormals(), vecs(), maxCells(10000), singEdges(), offset(1.0e-5f), vertices(3),
             edges(3), p0p1(3), p0p2(3)
 {
     m_dh = dh;
@@ -1190,7 +1190,7 @@ bool FStreamlineOnSurfaceEuler::isInside(const FIndex& cellId, const FArray& pos
     } catch (FException& e)
     {
         m_dh->printDebug(_T("caught exception in isInside:\n "), 2);
-        //std::cout << "caught exception in isInside: " << e << std::endl;
+        std::cout << "caught exception in isInside: " << e << std::endl;
         return false;
     }
 }

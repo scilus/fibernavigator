@@ -235,7 +235,7 @@ void AnatomyHelper::renderMain()
 
 void AnatomyHelper::renderCrosshair()
 {
-	float offset = 0.02;
+	float offset = 0.02f;
 	glLineWidth(1.0);
 	glBegin(GL_LINES);
 		glVertex3f(m_x - offset, m_y - offset,  0);

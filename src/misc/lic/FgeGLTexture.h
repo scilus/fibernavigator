@@ -23,7 +23,7 @@
 class FgeGLTexture
 {
   public:
-    FgeGLTexture( GLenum target = GL_TEXTURE_2D, int width=512, int height=512, bool depth=false, GLint type=GL_UNSIGNED_BYTE, GLvoid* data=NULL);
+    FgeGLTexture( GLenum target = GL_TEXTURE_2D, int width=512, int height=512, bool depth=false, GLint type=GL_UNSIGNED_BYTE, GLvoid* data=0);
 
 	~FgeGLTexture();
 

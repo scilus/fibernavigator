@@ -351,7 +351,7 @@ CIsoSurface::CIsoSurface(DatasetHelper* dh, Anatomy* anatomy) :
     m_nTriangles = 0;
     m_nNormals = 0;
     m_nVertices = 0;
-    m_tIsoLevel = 0.40;
+    m_tIsoLevel = 0.40f;
     m_bValidSurface = false;
     m_positionsCalculated = false;
 

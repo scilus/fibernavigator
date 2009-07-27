@@ -401,7 +401,7 @@ void Anatomy::createOffset(std::vector<float>* source)
             bitmask[i] = false;
     }
 
-    dmax = 999999999.0;
+    dmax = 999999999.0f;
 
     // first pass
     for (b = 0; b < nbands; ++b)
