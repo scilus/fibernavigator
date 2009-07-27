@@ -150,6 +150,7 @@ bool MyApp::OnInit( void )
 #endif
 
         frame->SetMinSize( wxSize( 945, 730 ) );
+		frame->SetSize( wxSize( 945, 730 ) );
         // Make a menubar
         wxMenu *file_menu = new wxMenu;
         file_menu->Append( MENU_FILE_LOAD, _T("Load\tCtrl-L") );
