@@ -100,6 +100,7 @@ EVT_MENU(MENU_HELP_SLIZEMOVIEAXI, MainFrame::OnSlizeMovieAxi)
  */
 EVT_LIST_ITEM_ACTIVATED(ID_LIST_CTRL, MainFrame::OnActivateListItem)
 EVT_LIST_ITEM_SELECTED(ID_LIST_CTRL, MainFrame::OnSelectListItem)
+EVT_LIST_ITEM_RIGHT_CLICK(ID_LIST_CTRL, MainFrame::OnRightClickListItem)
 EVT_BUTTON(ID_BUTTON_UP, MainFrame::OnListItemUp)
 EVT_BUTTON(ID_BUTTON_DOWN, MainFrame::OnListItemDown)
 EVT_MENU(MENU_LIST_DELETE, MainFrame::OnListMenuDelete)
@@ -2184,6 +2185,72 @@ void MainFrame::OnActivateListItem(wxListEvent& event)
 
     refreshAllGLWidgets();
 }
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnRightClickListItem(wxListEvent& event)
+{
+    wxMenu* menu = new wxMenu;
+
+    long item = event.GetIndex();
+    DatasetInfo *info = (DatasetInfo*) m_listCtrl->GetItemData(item);
+
+    if (info->getType() < Mesh_)
+    {
+        menu->Append(MENU_LIST_CUTOUT, _T("cut area"));
+        menu->Append(MENU_FILE_SAVE_DATASET, _T("save"));
+        menu->Append(MENU_FILE_MINIMIZE_DATASET, _T("minimize"));
+        menu->Append(MENU_FILE_DILATE_DATASET, _T("dilate"));
+        menu->Append(MENU_FILE_ERODE_DATASET, _T("erode"));
+        menu->AppendSeparator();
+        if (info->getShowFS())
+            menu->Append(MENU_LIST_TOGGLENAME, _T("no interpolation"));
+        else
+            menu->Append(MENU_LIST_TOGGLENAME, _T("interpolation"));
+    }
+    if (info->getType() == Mesh_ || info->getType() == IsoSurface_)
+    {
+        if (info->getShowFS())
+            menu->Append(MENU_LIST_TOGGLENAME, _T("cut front sector"));
+        else
+            menu->Append(MENU_LIST_TOGGLENAME, _T("show front sector"));
+        if (info->getUseTex())
+            menu->Append(MENU_LIST_TOGGLECOLOR, _T("use coloring"));
+        else
+            menu->Append(MENU_LIST_TOGGLECOLOR, _T("use textures"));
+    }
+    if (info->getType() == Fibers_)
+    {
+        if (info->getShowFS())
+            menu->Append(MENU_LIST_TOGGLENAME, _T("local coloring"));
+        else
+            menu->Append(MENU_LIST_TOGGLENAME, _T("global coloring"));
+        if (info->getUseTex())
+            menu->Append(MENU_LIST_TOGGLECOLOR, _T("color with overlay"));
+        else
+            menu->Append(MENU_LIST_TOGGLECOLOR, _T("normal coloring"));
+    }
+
+    menu->AppendSeparator();
+    if (info->getShow())
+        menu->Append(MENU_LIST_TOGGLESHOW, _T("deactivate"));
+    else
+        menu->Append(MENU_LIST_TOGGLESHOW, _T("activate"));
+    menu->Append(MENU_LIST_DELETE, _T("delete"));
+
+#ifdef __WXMSW__
+    int yAdjust = 40;
+#else
+    int yAdjust = 80;
+#endif
+
+    int mx = wxGetMousePosition().x - this->GetScreenPosition().x;
+    int my = wxGetMousePosition().y - this->GetScreenPosition().y - yAdjust;
+
+    PopupMenu(menu, wxPoint(mx, my) );
+}
 
 /****************************************************************************************************
  *
@@ -2392,7 +2459,7 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
         GetStatusBar()->SetStatusText(m_dh->lastError, 2);
         return;
     }
-	
+
     refreshAllGLWidgets();
 }
 /****************************************************************************************************
@@ -2456,8 +2523,14 @@ void MainFrame::OnRightClickTreeItem( wxTreeEvent& event )
 		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
 
 	}
+#ifdef __WXMSW__
+	int yAdjust = 40;
+#else
+	int yAdjust = 80;
+#endif
+
 	int mx = wxGetMousePosition().x - this->GetScreenPosition().x;
-	int my = wxGetMousePosition().y - this->GetScreenPosition().y - 40;
+	int my = wxGetMousePosition().y - this->GetScreenPosition().y - yAdjust;
 
 	PopupMenu(menu, wxPoint(mx, my) );
 }

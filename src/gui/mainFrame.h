@@ -126,6 +126,7 @@ private:
      * List widget event functions
      */
     void OnActivateListItem(wxListEvent& event);
+    void OnRightClickListItem(wxListEvent& event);
     void OnSelectListItem(wxListEvent& event);
     void OnListItemUp(wxCommandEvent& event);
     void OnListItemDown(wxCommandEvent& event);
