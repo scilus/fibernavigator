@@ -3,11 +3,6 @@
 uniform int dimX, dimY, dimZ;
 uniform float voxX, voxY, voxZ;
 
-uniform sampler3D texes[10];
-uniform bool show[10];
-uniform float threshold[10];
-uniform float alpha[10];
-uniform int type[10];
 uniform int countTextures;
 uniform bool useLic;
 
@@ -38,10 +33,17 @@ void main()
     v.y = v.y / (float(dimY) * voxY);
     v.z = v.z / (float(dimZ) * voxZ);
 
-	for (int i = 9; i > -1; i--) {
-		if (show[i]) lookupTexMesh(color, type[i], texes[i], threshold[i], v, alpha[i]);
-	}
-
+    if (show9) lookupTexMesh( color, type9, tex9, threshold9, v, alpha9 );
+    if (show8) lookupTexMesh( color, type8, tex8, threshold8, v, alpha8 );
+    if (show7) lookupTexMesh( color, type7, tex7, threshold7, v, alpha7 );
+    if (show6) lookupTexMesh( color, type6, tex6, threshold6, v, alpha6 );
+    if (show5) lookupTexMesh( color, type5, tex5, threshold5, v, alpha5 );
+    if (show4) lookupTexMesh( color, type4, tex4, threshold4, v, alpha4 );
+    if (show3) lookupTexMesh( color, type3, tex3, threshold3, v, alpha3 );
+    if (show2) lookupTexMesh( color, type2, tex2, threshold2, v, alpha2 );
+    if (show1) lookupTexMesh( color, type1, tex1, threshold1, v, alpha1 );
+    if (show0) lookupTexMesh( color, type0, tex0, threshold0, v, alpha0 );
+    
     if (color.rgb == vec3(0.0)) discard;
 
 	color.a = 1.0;

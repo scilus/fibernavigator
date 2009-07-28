@@ -37,11 +37,11 @@ private:
 
 	int m_textureCount;
 	GLuint m_cutTex;
-	std::vector<GLint> tex;
-	std::vector<GLint> show;
-	std::vector<GLfloat> threshold;
-	std::vector<GLfloat> alpha;
-    std::vector<GLint> type;
+	std::vector<GLint> m_tex;
+	std::vector<GLint> m_show;
+	std::vector<GLfloat> m_threshold;
+	std::vector<GLfloat> m_alpha;
+    std::vector<GLint> m_type;
 };
 
 #endif /* SHADERHELPER_H_ */
