@@ -113,6 +113,7 @@ EVT_MENU(MENU_LIST_CUTOUT, MainFrame::OnListMenuCutOut)
  */
 EVT_TREE_SEL_CHANGED(ID_TREE_CTRL, MainFrame::OnSelectTreeItem)
 EVT_TREE_ITEM_ACTIVATED(ID_TREE_CTRL, MainFrame::OnActivateTreeItem)
+EVT_TREE_ITEM_RIGHT_CLICK(ID_TREE_CTRL, MainFrame::OnRightClickTreeItem)
 EVT_COMMAND(ID_TREE_CTRL, wxEVT_TREE_EVENT, MainFrame::OnTreeEvent)
 EVT_TREE_END_LABEL_EDIT(ID_TREE_CTRL, MainFrame::OnTreeLabelEdit)
 EVT_BUTTON(ID_BUTTON_LOAD1, MainFrame::OnLoad1)
@@ -2391,8 +2392,74 @@ void MainFrame::OnSelectTreeItem(wxTreeEvent& WXUNUSED(event))
         GetStatusBar()->SetStatusText(m_dh->lastError, 2);
         return;
     }
-
+	
     refreshAllGLWidgets();
+}
+/****************************************************************************************************
+ *
+ *
+ *
+ ****************************************************************************************************/
+void MainFrame::OnRightClickTreeItem( wxTreeEvent& event )
+{
+	m_treeWidget->SelectItem( event.GetItem() );
+	wxTreeItemId treeid = m_treeWidget->GetSelection();
+    int selected = treeSelected(treeid);
+
+	wxMenu* menu = new wxMenu;
+
+	if (selected == MasterBox)
+	{
+		SelectionBox* box =((SelectionBox*) (m_treeWidget->GetItemData( treeid )));
+		if (box->getActive())
+			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("deactivate"));
+		else
+			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("activate"));
+		if (box->getShow())
+			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("hide"));
+		else
+			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
+		menu->AppendSeparator();
+            menu->Append(MENU_VOI_COUNT_FIBERS, _T("count fibers"));
+        menu->AppendSeparator();
+        menu->Append(MENU_VOI_CREATE_TEXTURE, _T("create color texture"));
+		menu->AppendSeparator();
+		if (! box->getIsBox())
+		{
+			menu->Append(MENU_VOI_COLOR_ROI, _T("set color"));
+			menu->AppendSeparator();
+		}
+		menu->Append(MENU_VOI_RENAME_BOX, _T("rename"));
+		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
+	}
+
+	if (selected == ChildBox)
+	{
+		SelectionBox* box =((SelectionBox*) (m_treeWidget->GetItemData( treeid )));
+		menu->Append(MENU_VOI_TOGGLE_ANDNOT, _T("toggle AND/NOT"));
+		menu->AppendSeparator();
+		if (box->getActive())
+			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("deactivate"));
+		else
+			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("activate"));
+		if (box->getShow())
+			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("hide"));
+		else
+			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
+		menu->AppendSeparator();
+		if (! box->getIsBox())
+		{
+			menu->Append(MENU_VOI_COLOR_ROI, _T("set color"));
+			menu->AppendSeparator();
+		}
+		menu->Append(MENU_VOI_RENAME_BOX, _T("rename"));
+		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
+
+	}
+	int mx = wxGetMousePosition().x - this->GetScreenPosition().x;
+	int my = wxGetMousePosition().y - this->GetScreenPosition().y - 40;
+
+	PopupMenu(menu, wxPoint(mx, my) );
 }
 /****************************************************************************************************
  *

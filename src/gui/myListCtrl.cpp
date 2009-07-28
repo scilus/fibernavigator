@@ -5,7 +5,7 @@
 
 BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
 	EVT_LEFT_DOWN(MyListCtrl::OnLeftClick)
-	EVT_RIGHT_UP(MyListCtrl::OnRightClick)
+	EVT_RIGHT_DOWN(MyListCtrl::OnRightClick)
 END_EVENT_TABLE()
 
 MyListCtrl::MyListCtrl(wxWindow *parent, const wxWindowID id, const wxPoint& pos,
@@ -136,7 +136,7 @@ DEFINE_EVENT_TYPE(wxEVT_TREE_EVENT)
 
 BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
 	EVT_CHAR(MyTreeCtrl::OnChar)
-	EVT_RIGHT_UP(MyTreeCtrl::OnRightClick)
+	//EVT_RIGHT_DOWN(MyTreeCtrl::OnRightClick)
 	EVT_MENU(TREE_CTRL_TOGGLE_ANDNOT, MyTreeCtrl::OnToggleAndNot)
 	EVT_MENU(TREE_CTRL_DELETE_BOX, MyTreeCtrl::OnDeleteBox)
 END_EVENT_TABLE()
@@ -290,59 +290,7 @@ void MyTreeCtrl::OnChar(wxKeyEvent& event)
 
 void MyTreeCtrl::OnRightClick(wxMouseEvent& event)
 {
-	int selected = getSelectedType();
 
-	wxMenu* menu = new wxMenu;
-
-	if (selected == MasterBox)
-	{
-		SelectionBox* box =((SelectionBox*) (GetItemData( GetSelection())));
-		if (box->getActive())
-			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("deactivate"));
-		else
-			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("activate"));
-		if (box->getShow())
-			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("hide"));
-		else
-			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
-		menu->AppendSeparator();
-            menu->Append(MENU_VOI_COUNT_FIBERS, _T("count fibers"));
-        menu->AppendSeparator();
-        menu->Append(MENU_VOI_CREATE_TEXTURE, _T("create color texture"));
-		menu->AppendSeparator();
-		if (! box->getIsBox())
-		{
-			menu->Append(MENU_VOI_COLOR_ROI, _T("set color"));
-			menu->AppendSeparator();
-		}
-		menu->Append(MENU_VOI_RENAME_BOX, _T("rename"));
-		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
-	}
-
-	if (selected == ChildBox)
-	{
-		SelectionBox* box =((SelectionBox*) (GetItemData( GetSelection())));
-		menu->Append(MENU_VOI_TOGGLE_ANDNOT, _T("toggle AND/NOT"));
-		menu->AppendSeparator();
-		if (box->getActive())
-			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("deactivate"));
-		else
-			menu->Append(MENU_VOI_TOGGLE_SELBOX, _T("activate"));
-		if (box->getShow())
-			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("hide"));
-		else
-			menu->Append(MENU_VOI_TOGGLE_SHOWBOX, _T("show"));
-		menu->AppendSeparator();
-		if (! box->getIsBox())
-		{
-			menu->Append(MENU_VOI_COLOR_ROI, _T("set color"));
-			menu->AppendSeparator();
-		}
-		menu->Append(MENU_VOI_RENAME_BOX, _T("rename"));
-		menu->Append(TREE_CTRL_DELETE_BOX, _T("delete"));
-
-	}
-	PopupMenu(menu, event.GetPosition());
 }
 
 void MyTreeCtrl::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))

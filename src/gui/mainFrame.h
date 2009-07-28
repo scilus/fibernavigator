@@ -140,6 +140,7 @@ private:
      * Tree widget event functions
      */
     void OnSelectTreeItem(wxTreeEvent& event);
+	void OnRightClickTreeItem(wxTreeEvent& event);
     void OnUnSelectTreeItem(wxTreeEvent& event);
     void OnActivateTreeItem(wxTreeEvent& event);
     void OnTreeEvent(wxCommandEvent& event);
