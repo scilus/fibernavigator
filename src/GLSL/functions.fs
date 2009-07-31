@@ -11,17 +11,6 @@ uniform sampler3D tex7;
 uniform sampler3D tex8;
 uniform sampler3D tex9;
 
-uniform bool show0;
-uniform bool show1;
-uniform bool show2;
-uniform bool show3;
-uniform bool show4;
-uniform bool show5;
-uniform bool show6;
-uniform bool show7;
-uniform bool show8;
-uniform bool show9;
-
 uniform float threshold0;
 uniform float threshold1;
 uniform float threshold2;
@@ -97,7 +86,7 @@ vec3 colorMap1 ( in float value )
 	else // iq == 5
 		return vec3(1., 0., q);
 }
-
+/*
 vec3 colorMap2( in float value )
 {
 	vec4 color8  = vec4(255./255., 255./255., 204./255., 1.);
@@ -112,7 +101,7 @@ vec3 colorMap2( in float value )
 
 	float colorValue = value * 8.;
 	int sel = int(floor(colorValue));
-	
+
 	if ( sel >= 8 )
 		return color0.rgb;
 	else if ( sel < 0 )
@@ -120,7 +109,7 @@ vec3 colorMap2( in float value )
 	else
 	{
 		colorValue -= float(sel);
-		
+
 		if (sel < 1)
 			return ( color1*colorValue + color0*(1.-colorValue)).rgb;
 		else if (sel < 2)
@@ -143,15 +132,15 @@ vec3 colorMap2( in float value )
 
 vec3 colorMap3( in float value )
 {
-	vec4 color0 = vec4(255./255., 0./255., 0./255., 1.);
-	vec4 color1 = vec4(255./255., 255./255., 0./255., 1.);
+	vec4 color0 = vec4(1., 0., 0., 1.);
+	vec4 color1 = vec4(1., 1., 0., 1.);
     return ( color1*value + color0*(1.-value)).rgb;
 }
 
 vec3 colorMap4( in float value )
 {
-	vec4 color0 = vec4(0./255., 0./255., 255./255., 1.);
-	vec4 color1 = vec4(200./255., 255./255., 255./255., 1.);
+	vec4 color0 = vec4(0., 0., 1., 1.);
+	vec4 color1 = vec4(0.78, 1., 1., 1.);
     return ( color1*value + color0*(1.-value)).rgb;
 }
 
@@ -169,7 +158,7 @@ vec3 colorMap5( in float value )
 
 	float colorValue = value * 8.;
 	int sel = int(floor(colorValue));
-	
+
 	if ( sel >= 8 )
 		return color0.rgb;
 	else if ( sel < 0 )
@@ -177,7 +166,7 @@ vec3 colorMap5( in float value )
 	else
 	{
 		colorValue -= float(sel);
-		
+
 		if (sel < 1)
 			return ( color1*colorValue + color0*(1.-colorValue)).rgb;
 		else if (sel < 2)
@@ -219,77 +208,39 @@ vec3 colorMap6( in float value )
 
 	return vec3(colorRed, colorGreen, colorBlue);
 }
-
+*/
 void colorMap( inout vec3 col, in float value )
 {
+
 	if ( useColorMap == 1 )
 		col = colorMap1( value );
+		/*
 	else if ( useColorMap == 2 )
 		col = colorMap2( value );
 	else if ( useColorMap == 3 )
 		col = colorMap3( value );
 	else if ( useColorMap == 4 )
 		col = colorMap4( value );
-	else 
-		col = defaultColorMap( value );
+		*/
+	else
+	    col = defaultColorMap( value );
 }
 
-void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold, in float alpha)
+void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold, in vec3 v, in float alpha)
 {
 	vec3 col1 = vec3(0.0);
 
-	col1 = clamp( texture3D(tex, gl_TexCoord[0].xyz).rgb, 0.0, 1.0);
-
-	if ( type == 3 && useColorMap != -1)
-	{
-		if ( col1.r - threshold <= 0.0)
-			return;
-		if (threshold < 1.0)
-			col1.r = (col1.r - threshold) / (1.0 - threshold);
-		else
-			col1.r = 1.0;
-
-		colorMap(col1, col1.r);
-
-		col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
-	}
-
-	else
-	{
-		if ( ( (col1.r + col1.g + col1.b)/3.0 - threshold) > 0.0 )
-		{
-			col.rgb = ((1.0 - alpha) * col.rgb) + (alpha * col1.rgb);
-		}
-	}
-	col.a += clamp (( (col.r*3.0) + (col.g*3.0) + (col.b*3.0) ), 0.0, 1.0) - threshold;
-}
-
-void lookupTexMesh(inout vec4 color, in int type, in sampler3D tex, in float threshold, in vec3 v, in float alpha)
-{
-	vec3 col1;
-
 	col1 = clamp( texture3D(tex, v).rgb, 0.0, 1.0);
 
+	if ( col1.r - threshold <= 0.0) return;
+
 	if ( type == 3 && useColorMap != -1)
 	{
-		if ( col1.r - threshold <= 0.0)
-			return;
 		if (threshold < 1.0)
 			col1.r = (col1.r - threshold) / (1.0 - threshold);
-		else
-			col1.r = 1.0;
-			
+
 		colorMap(col1, col1.r);
-
-		color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
 	}
 
-	else
-	{
-		if ( (col1.r + col1.g + col1.b)/3.0 - threshold >  0.0)
-		{
-			color.rgb = ((1.0 - alpha) * color.rgb) + (alpha * col1.rgb);
-		}
-	}
-
+	col.rgb = mix( col.rgb, col1.rgb, alpha);
 }

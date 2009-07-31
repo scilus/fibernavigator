@@ -1,3 +1,5 @@
+varying vec4 VaryingTexCoord0;
+
 #include functions.fs
 
 uniform int dimX, dimY, dimZ;
@@ -10,9 +12,9 @@ uniform bool useOverlay;
 
 varying vec4 myColor;
 
-float lookupTex() 
+float lookupTex()
 {
-	vec3 v = gl_TexCoord[0].xyz;
+	vec3 v = VaryingTexCoord0.xyz;
 	v.x = v.x / (float(dimX) * voxX);
     v.y = v.y / (float(dimY) * voxY);
     v.z = v.z / (float(dimZ) * voxZ);
@@ -27,7 +29,7 @@ float lookupTex()
 	   return col1.r;
 }
 
-void main() 
+void main()
 {
 	vec4 cooloor = vec4(1.0);
 	float value = lookupTex();
@@ -36,8 +38,9 @@ void main()
 		newVal = (value - threshold) / (1.0 - threshold);
 	else
 		newVal = 1.0;
-	
+
 	if (type == 3 && useTex)
+	    /*
 		if ( useColorMap == 1 )
 			cooloor.rgb  = colorMap1( newVal );
 		else if ( useColorMap == 2 )
@@ -47,6 +50,7 @@ void main()
 		else if ( useColorMap == 4 )
 			cooloor.rgb  = colorMap4( newVal );
 		else
+		*/
 			cooloor.rgb = defaultColorMap( newVal );
 
  /*  cooloor.a = 1.-(1.-newVal)*(1.-newVal);

@@ -1,5 +1,6 @@
 #include lighting.vs
 
+varying vec4 VaryingTexCoord0;
 uniform sampler3D texes[10];
 uniform int type[10];
 uniform int dimX, dimY, dimZ;
@@ -12,7 +13,8 @@ void main() {
 	gl_FrontColor = gl_Color;
 	gl_BackColor = gl_Color;
 
-	if (useTex) {
+	if (useTex)
+	{
 		float greyVal = 0.5;
 		vec4 myVert = gl_Vertex;
 
@@ -34,13 +36,13 @@ void main() {
 			myVert.xyz += 2.0 * offset;
 		}
 
-		gl_TexCoord[0].xyz = myVert.xyz;
+		VaryingTexCoord0 = myVert;
 		gl_Position = gl_ModelViewProjectionMatrix * myVert;
 	}
 
-	else {
-
-		gl_TexCoord[0].xyz = gl_Vertex.xyz;
+	else
+	{
+	    VaryingTexCoord0 = gl_Vertex;
 		gl_Position = ftransform();
 	}
 }

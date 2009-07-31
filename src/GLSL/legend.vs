@@ -1,9 +1,11 @@
+varying vec4 VaryingTexCoord0;
+
 void main()
 {
 	gl_FrontColor = gl_Color;
 	gl_BackColor = gl_Color;
 
-	gl_TexCoord[0] = gl_MultiTexCoord0;
+	VaryingTexCoord0 = gl_MultiTexCoord0;
 
 	gl_Position = ftransform();
 }

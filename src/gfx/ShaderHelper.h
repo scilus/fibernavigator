@@ -38,7 +38,6 @@ private:
 	int m_textureCount;
 	GLuint m_cutTex;
 	std::vector<GLint> m_tex;
-	std::vector<GLint> m_show;
 	std::vector<GLfloat> m_threshold;
 	std::vector<GLfloat> m_alpha;
     std::vector<GLint> m_type;
