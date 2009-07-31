@@ -5,7 +5,6 @@ varying vec4 VaryingTexCoord0;
 
 void main()
 {
-	// pass the color to the fragment shader
 	myColor = gl_Color;
 	VaryingTexCoord0 = gl_Vertex;
 

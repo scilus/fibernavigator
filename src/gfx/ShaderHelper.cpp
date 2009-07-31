@@ -46,13 +46,13 @@ ShaderHelper::ShaderHelper( DatasetHelper* dh ) :
     m_splineSurfShader->bind();
     if ( m_dh->GLError() )
         m_dh->printGLError( wxT("setup spline surface shader") );
-
+/*
     m_dh->printDebug( _T("initializing vector shader"), 1 );
     m_vectorShader = new Shader( wxT("vectors") );
     m_vectorShader->bind();
     if ( m_dh->GLError() )
         m_dh->printGLError( wxT("setup vectors shader") );
-
+*/
     m_dh->printDebug( _T("initializing legend shader"), 1 );
     m_legendShader = new Shader( wxT("legend") );
     m_legendShader->bind();
@@ -145,17 +145,24 @@ void ShaderHelper::setTextureShaderVars()
 
 void ShaderHelper::setMeshShaderVars()
 {
+    m_meshShader->setUniInt( "blendTex", m_dh->blendTexOnMesh );
+
+    m_meshShader->setUniInt( "cutAtSurface", m_dh->surface_loaded );
+    m_meshShader->setUniInt( "lightOn", m_dh->lighting );
+    m_meshShader->setUniInt( "useColorMap", m_dh->colorMap );
+
     m_meshShader->setUniInt( "dimX", m_dh->columns );
     m_meshShader->setUniInt( "dimY", m_dh->rows );
     m_meshShader->setUniInt( "dimZ", m_dh->frames );
     m_meshShader->setUniFloat( "voxX", m_dh->xVoxel );
     m_meshShader->setUniFloat( "voxY", m_dh->yVoxel );
     m_meshShader->setUniFloat( "voxZ", m_dh->zVoxel );
-    m_meshShader->setUniInt( "blendTex", m_dh->blendTexOnMesh );
+
+    m_meshShader->setUniInt( "sector", m_dh->quadrant );
     m_meshShader->setUniFloat( "cutX", m_dh->xSlize + 0.5f );
     m_meshShader->setUniFloat( "cutY", m_dh->ySlize + 0.5f );
     m_meshShader->setUniFloat( "cutZ", m_dh->zSlize + 0.5f );
-    m_meshShader->setUniInt( "sector", m_dh->quadrant );
+
 
     for ( int i = 0; i < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++i )
     {
@@ -171,9 +178,9 @@ void ShaderHelper::setMeshShaderVars()
             m_tex[9] = 9;
             m_threshold[9] = 0;
             m_type[9] = 5;
-            m_meshShader->setUniInt( "cutTex", 9 );
         }
     }
+    //m_meshShader->setUniInt( "cutTex", 9 );
 
     m_meshShader->setUniInt( "tex0", 0 );
     m_meshShader->setUniInt( "tex1", 1 );

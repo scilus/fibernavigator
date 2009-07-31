@@ -251,6 +251,7 @@ void TheScene::renderMesh()
         lightsOn();
     }
 
+
     bindTextures();
 
     m_dh->shaderHelper->m_meshShader->bind();
@@ -260,6 +261,7 @@ void TheScene::renderMesh()
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
 
     for ( int i = 0; i < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++i )
     {
@@ -273,15 +275,7 @@ void TheScene::renderMesh()
                 m_dh->shaderHelper->m_meshShader->setUniInt( "showFS", info->getShowFS() );
                 m_dh->shaderHelper->m_meshShader->setUniInt( "useTex", info->getUseTex() );
                 m_dh->shaderHelper->m_meshShader->setUniFloat( "alpha_", info->getAlpha() );
-                m_dh->shaderHelper->m_meshShader->setUniInt( "useColorMap", m_dh->colorMap );
                 m_dh->shaderHelper->m_meshShader->setUniInt( "useLic", info->getUseLIC() );
-                m_dh->shaderHelper->m_meshShader->setUniInt( "useCMAP", info->getIsGlyph() );
-                m_dh->shaderHelper->m_meshShader->setUniInt( "lightOn", m_dh->lighting );
-
-                if ( m_dh->surface_loaded )
-                    m_dh->shaderHelper->m_meshShader->setUniInt( "cutAtSurface", true );
-                else
-                    m_dh->shaderHelper->m_meshShader->setUniInt( "cutAtSurface", false );
 
                 glEnable( GL_BLEND );
                 glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -290,7 +284,7 @@ void TheScene::renderMesh()
             }
         }
     }
-
+/*
     std::vector< std::vector< SelectionBox* > > boxes = m_dh->getSelectionBoxes();
 
     m_dh->shaderHelper->m_meshShader->bind();
@@ -311,7 +305,7 @@ void TheScene::renderMesh()
             glPopAttrib();
         }
     }
-
+*/
     m_dh->shaderHelper->m_meshShader->release();
 
     lightsOff();

@@ -1,22 +1,23 @@
 #include lighting.fs
 
-uniform int sector;
-uniform float cutX, cutY, cutZ;
-uniform int dimX, dimY, dimZ;
-uniform float voxX, voxY, voxZ;
-uniform float alpha_;
 varying vec4 myColor;
 varying vec4 VaryingTexCoord0;
 
 uniform bool showFS;
+uniform int sector;
+uniform float cutX, cutY, cutZ;
+
+uniform int dimX, dimY, dimZ;
+uniform float voxX, voxY, voxZ;
+uniform float alpha_;
+
 uniform bool useTex;
 uniform bool blendTex;
-uniform bool cutAtSurface;
-uniform bool useCMAP;
 
-uniform sampler2D cutTex;
-uniform int countTextures;
+uniform bool cutAtSurface;
+//uniform sampler2D cutTex;
 uniform bool useLic;
+
 uniform bool lightOn;
 
 #include functions.fs
@@ -45,31 +46,23 @@ void cutFrontSector()
 		discard;
 }
 
+
 void cutAtSplineSurface()
 {
-	vec3 u = VaryingTexCoord0.xyz;
-	u.y = u.y / float(dimY);
-	u.z = u.z / float(dimZ);
+    vec3 u = VaryingTexCoord0.xyz;
+	u.y /= float(dimY);
+	u.z /= float(dimZ);
 
-	if ( type9 == 5 )
-	{
-		if ( vertex.x < ( texture2D(cutTex, u.yz).r * float(dimX) ) )
-			discard;
-	}
-
+	//if ( vertex.x < ( texture2D(cutTex, u.yz).r * float(dimX) ) ) discard;
 }
+
 
 void main()
 {
-	if (!showFS)
-		cutFrontSector();
 
-	if (cutAtSurface)
-		cutAtSplineSurface();
+	if (!showFS) cutFrontSector();
+	if ( (type9 == 5) && cutAtSurface ) cutAtSplineSurface();
 
-	/* Normalize the normal. A varying variable CANNOT
-	 // be modified by a fragment shader. So a new variable
-	 // needs to be created. */
 	vec4 ambient = vec4(0.0);
 	vec4 diffuse = vec4(0.0);
 	vec4 specular = vec4(0.0);
@@ -78,13 +71,13 @@ void main()
 	   calculateLighting(-normal, gl_FrontMaterial.shininess, ambient, diffuse, specular);
 
 	vec4 color = gl_FrontLightModelProduct.sceneColor + (ambient
-	                * gl_FrontMaterial.ambient) + (diffuse
-	                * gl_FrontMaterial.diffuse) + (specular
-	                * gl_FrontMaterial.specular);
+            * gl_FrontMaterial.ambient) + (diffuse
+            * gl_FrontMaterial.diffuse) + (specular
+            * gl_FrontMaterial.specular);
 
 	if ( useTex )
 	{
-		vec3 v = VaryingTexCoord0.xyz;
+	   vec3 v = VaryingTexCoord0.xyz;
 		v.x = v.x / (float(dimX) * voxX);
 		v.y = v.y / (float(dimY) * voxY);
 		v.z = v.z / (float(dimZ) * voxZ);
@@ -119,12 +112,6 @@ void main()
 		color = color + (ambient * color / 2.0) + (diffuse * color) + (specular * color / 2.0);
 	}
 
-	else if ( useCMAP && !useTex )
-	{
-		colorMap( color.rgb, myColor.r);
-		color = color + (ambient * color / 2.0) + (diffuse * color / 2.0) + (specular * color / 2.0);
-	}
-
 	color.a = alpha_;
 	color = clamp(color, 0.0, 1.0);
 
@@ -139,7 +126,6 @@ void main()
        float licBlend = (1.0 - gl_Color.g) * fa;
        vec4 tempColor = vec4(gl_Color.r, gl_Color.r, gl_Color.r, (1.0 - gl_Color.g) );
        vec4 licColor = clamp( tempColor * 1.8 - vec4(0.4), 0., 1.);
-
 
        float noiseBlend = clamp((gl_Color.g - 0.6),0., 1.) * clamp((fa - 0.2),0., 1.) * 3.;
        vec4 noiseColor = vec4( gl_Color.a );
