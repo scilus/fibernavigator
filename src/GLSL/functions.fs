@@ -232,7 +232,7 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 
 	col1 = clamp( texture3D(tex, v).rgb, 0.0, 1.0);
 
-	if ( col1.r - threshold <= 0.0) return;
+	if ( ( col1.r + col1.g + col1.b ) / 3.0  - threshold <= 0.0) return;
 
 	if ( type == 3 && useColorMap != -1)
 	{
