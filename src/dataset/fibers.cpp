@@ -4,7 +4,8 @@
 #include <fstream>
 #include "Anatomy.h"
 
-Fibers::Fibers(DatasetHelper* dh) : DatasetInfo(dh)
+Fibers::Fibers( DatasetHelper* dh ) :
+    DatasetInfo( dh )
 {
     m_isInitialized = false;
     m_normalsPositive = false;
@@ -13,11 +14,11 @@ Fibers::Fibers(DatasetHelper* dh) : DatasetInfo(dh)
 
 Fibers::~Fibers()
 {
-    m_dh->printDebug(_T("executing fibers destructor"), 1);
+    m_dh->printDebug( _T("executing fibers destructor"), 1 );
     m_dh->fibers_loaded = false;
 
     if ( m_dh->useVBO )
-        glDeleteBuffers(3, m_bufferObjects);
+        glDeleteBuffers( 3, m_bufferObjects );
 
     m_pointArray.clear();
     m_normalArray.clear();
@@ -31,35 +32,35 @@ Fibers::~Fibers()
     m_reverse.clear();
 }
 
-bool Fibers::load(wxString filename)
+bool Fibers::load( wxString filename )
 {
-    if (filename.AfterLast('.') == _T("fib"))
-        return loadVTK(filename);
-    if (filename.AfterLast('.') == _T("bundlesdata"))
-        return loadPTK(filename);
-    if (filename.AfterLast('.') == _T("Bfloat"))
-        return loadCamino(filename);
+    if ( filename.AfterLast( '.' ) == _T("fib") )
+        return loadVTK( filename );
+    if ( filename.AfterLast( '.' ) == _T("bundlesdata") )
+        return loadPTK( filename );
+    if ( filename.AfterLast( '.' ) == _T("Bfloat") )
+        return loadCamino( filename );
     return true;
 }
 
-bool Fibers::loadCamino(wxString filename)
+bool Fibers::loadCamino( wxString filename )
 {
-    m_dh->printDebug(_T("start loading Camino file"), 1);
+    m_dh->printDebug( _T("start loading Camino file"), 1 );
     wxFile dataFile;
     wxFileOffset nSize = 0;
     int pc = 0;
     converterByteFloat cbf;
-    std::vector<float> tmpPoints;
+    std::vector< float > tmpPoints;
 
-    if (dataFile.Open(filename))
+    if ( dataFile.Open( filename ) )
     {
         nSize = dataFile.Length();
-        if (nSize == wxInvalidOffset)
+        if ( nSize == wxInvalidOffset )
             return false;
     }
 
     wxUint8* buffer = new wxUint8[nSize];
-    dataFile.Read(buffer, nSize);
+    dataFile.Read( buffer, nSize );
 
     dataFile.Close();
 
@@ -67,7 +68,7 @@ bool Fibers::loadCamino(wxString filename)
     m_countPoints = 0; // number of points
 
     int cl = 0;
-    while (pc < nSize)
+    while ( pc < nSize )
     {
         ++m_countLines;
 
@@ -76,53 +77,53 @@ bool Fibers::loadCamino(wxString filename)
         cbf.b[1] = buffer[pc++];
         cbf.b[0] = buffer[pc++];
         cl = (int) cbf.f;
-        m_lineArray.push_back(cl);
+        m_lineArray.push_back( cl );
 
         pc += 4;
-        for (int i = 0; i < cl; ++i)
+        for ( int i = 0; i < cl; ++i )
         {
-            m_lineArray.push_back(m_countPoints);
+            m_lineArray.push_back( m_countPoints );
             ++m_countPoints;
 
             cbf.b[3] = buffer[pc++];
             cbf.b[2] = buffer[pc++];
             cbf.b[1] = buffer[pc++];
             cbf.b[0] = buffer[pc++];
-            tmpPoints.push_back(cbf.f);
+            tmpPoints.push_back( cbf.f );
             cbf.b[3] = buffer[pc++];
             cbf.b[2] = buffer[pc++];
             cbf.b[1] = buffer[pc++];
             cbf.b[0] = buffer[pc++];
-            tmpPoints.push_back(cbf.f);
+            tmpPoints.push_back( cbf.f );
             cbf.b[3] = buffer[pc++];
             cbf.b[2] = buffer[pc++];
             cbf.b[1] = buffer[pc++];
             cbf.b[0] = buffer[pc++];
-            tmpPoints.push_back(cbf.f);
+            tmpPoints.push_back( cbf.f );
 
-            if (pc > nSize)
+            if ( pc > nSize )
                 break;
         }
     }
 
-    m_linePointers.resize(m_countLines+1);
+    m_linePointers.resize( m_countLines + 1 );
     m_linePointers[m_countLines] = m_countPoints;
 
-    m_reverse.resize(m_countPoints);
-    m_selected.resize(m_countLines, false);
+    m_reverse.resize( m_countPoints );
+    m_selected.resize( m_countLines, false );
 
     m_pointArray.resize( tmpPoints.size() );
 
-    for ( size_t i = 0; i < tmpPoints.size() ; ++i)
+    for ( size_t i = 0; i < tmpPoints.size(); ++i )
     {
         m_pointArray[i] = tmpPoints[i];
     }
 
-    printf("%d lines and %d points \n", m_countLines, m_countPoints);
+    printf( "%d lines and %d points \n", m_countLines, m_countPoints );
 
-    m_dh->printDebug(_T("move vertices"), 1);
+    m_dh->printDebug( _T("move vertices"), 1 );
 
-    for (int i = 0; i < m_countPoints * 3; ++i)
+    for ( int i = 0; i < m_countPoints * 3; ++i )
     {
         m_pointArray[i] = m_dh->columns * m_dh->xVoxel - m_pointArray[i];
         ++i;
@@ -132,8 +133,8 @@ bool Fibers::loadCamino(wxString filename)
     }
 
     calculateLinePointers();
-    createColorArray(false);
-    m_dh->printDebug(_T("read all"), 1);
+    createColorArray( false );
+    m_dh->printDebug( _T("read all"), 1 );
 
     delete[] buffer;
 
@@ -144,38 +145,38 @@ bool Fibers::loadCamino(wxString filename)
 #ifdef __WXMSW__
     m_name = filename.AfterLast('\\');
 #else
-    m_name = filename.AfterLast('/');
+    m_name = filename.AfterLast( '/' );
 #endif
 
-    m_kdTree = new KdTree(m_countPoints, &m_pointArray[0], m_dh);
+    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 
     return true;
 }
 
-bool Fibers::loadPTK(wxString filename)
+bool Fibers::loadPTK( wxString filename )
 {
-    m_dh->printDebug(_T("start loading PTK file"), 1);
+    m_dh->printDebug( _T("start loading PTK file"), 1 );
     wxFile dataFile;
     wxFileOffset nSize = 0;
     int pc = 0;
     converterByteINT32 cbi;
     converterByteFloat cbf;
-    std::vector<float> tmpPoints;
+    std::vector< float > tmpPoints;
 
-    if (dataFile.Open(filename))
+    if ( dataFile.Open( filename ) )
     {
         nSize = dataFile.Length();
-        if (nSize == wxInvalidOffset)
+        if ( nSize == wxInvalidOffset )
             return false;
     }
 
     wxUint8* buffer = new wxUint8[nSize];
-    dataFile.Read(buffer, nSize);
+    dataFile.Read( buffer, nSize );
 
     m_countLines = 0; // number of lines
     m_countPoints = 0; // number of points
 
-    while (pc < nSize)
+    while ( pc < nSize )
     {
         ++m_countLines;
 
@@ -184,49 +185,49 @@ bool Fibers::loadPTK(wxString filename)
         cbi.b[2] = buffer[pc++];
         cbi.b[3] = buffer[pc++];
 
-        m_lineArray.push_back(cbi.i);
+        m_lineArray.push_back( cbi.i );
 
-        for (size_t i = 0; i < cbi.i; ++i)
+        for ( size_t i = 0; i < cbi.i; ++i )
         {
-            m_lineArray.push_back(m_countPoints);
+            m_lineArray.push_back( m_countPoints );
             ++m_countPoints;
 
             cbf.b[0] = buffer[pc++];
             cbf.b[1] = buffer[pc++];
             cbf.b[2] = buffer[pc++];
             cbf.b[3] = buffer[pc++];
-            tmpPoints.push_back(cbf.f);
+            tmpPoints.push_back( cbf.f );
             cbf.b[0] = buffer[pc++];
             cbf.b[1] = buffer[pc++];
             cbf.b[2] = buffer[pc++];
             cbf.b[3] = buffer[pc++];
-            tmpPoints.push_back(cbf.f);
+            tmpPoints.push_back( cbf.f );
             cbf.b[0] = buffer[pc++];
             cbf.b[1] = buffer[pc++];
             cbf.b[2] = buffer[pc++];
             cbf.b[3] = buffer[pc++];
-            tmpPoints.push_back(cbf.f);
+            tmpPoints.push_back( cbf.f );
         }
 
     }
 
-    m_linePointers.resize(m_countLines+1);
+    m_linePointers.resize( m_countLines + 1 );
     m_linePointers[m_countLines] = m_countPoints;
-    m_reverse.resize(m_countPoints);
-    m_selected.resize(m_countLines, false);
+    m_reverse.resize( m_countPoints );
+    m_selected.resize( m_countLines, false );
 
     m_pointArray.resize( tmpPoints.size() );
 
-    for (size_t i = 0 ; i < tmpPoints.size() ; ++i)
+    for ( size_t i = 0; i < tmpPoints.size(); ++i )
     {
         m_pointArray[i] = tmpPoints[i];
     }
 
-    printf("%d lines and %d points \n", m_countLines, m_countPoints);
+    printf( "%d lines and %d points \n", m_countLines, m_countPoints );
 
-    m_dh->printDebug(_T("move vertices"), 1);
+    m_dh->printDebug( _T("move vertices"), 1 );
 
-    for (int i = 0; i < m_countPoints * 3; ++i)
+    for ( int i = 0; i < m_countPoints * 3; ++i )
     {
         //m_pointArray[i] = m_dh->columns - m_pointArray[i];
         ++i;
@@ -236,8 +237,8 @@ bool Fibers::loadPTK(wxString filename)
     }
 
     calculateLinePointers();
-    createColorArray(false);
-    m_dh->printDebug(_T("read all"), 1);
+    createColorArray( false );
+    m_dh->printDebug( _T("read all"), 1 );
 
     delete[] buffer;
 
@@ -248,29 +249,29 @@ bool Fibers::loadPTK(wxString filename)
 #ifdef __WXMSW__
     m_name = filename.AfterLast('\\');
 #else
-    m_name = filename.AfterLast('/');
+    m_name = filename.AfterLast( '/' );
 #endif
 
-    m_kdTree = new KdTree(m_countPoints, &m_pointArray[0], m_dh);
+    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 
     return true;
 }
 
-bool Fibers::loadVTK(wxString filename)
+bool Fibers::loadVTK( wxString filename )
 {
-    m_dh->printDebug(_T("start loading VTK file"), 1);
+    m_dh->printDebug( _T("start loading VTK file"), 1 );
     wxFile dataFile;
     wxFileOffset nSize = 0;
 
-    if (dataFile.Open(filename))
+    if ( dataFile.Open( filename ) )
     {
         nSize = dataFile.Length();
-        if (nSize == wxInvalidOffset)
+        if ( nSize == wxInvalidOffset )
             return false;
     }
 
     wxUint8* buffer = new wxUint8[255];
-    dataFile.Read(buffer, (size_t) 255);
+    dataFile.Read( buffer, (size_t) 255 );
 
     int pointOffset = 0;
     int lineOffset = 0;
@@ -282,18 +283,18 @@ bool Fibers::loadVTK(wxString filename)
     int fileOffset = 0;
     int j = 0;
     // ignore the first 3 lines
-    while (buffer[fileOffset] != '\n')
+    while ( buffer[fileOffset] != '\n' )
     {
         ++fileOffset;
     }
     ++fileOffset;
-    while (buffer[fileOffset] != '\n')
+    while ( buffer[fileOffset] != '\n' )
     {
         ++fileOffset;
     }
     ++fileOffset;
     // check the file type
-    while (buffer[fileOffset] != '\n')
+    while ( buffer[fileOffset] != '\n' )
     {
         temp[j] = buffer[fileOffset];
         ++fileOffset;
@@ -301,14 +302,14 @@ bool Fibers::loadVTK(wxString filename)
     }
     ++fileOffset;
     temp[j] = 0;
-    wxString type(temp, wxConvUTF8);
-    if (type == wxT("ASCII"))
+    wxString type( temp, wxConvUTF8 );
+    if ( type == wxT("ASCII") )
     {
         //ASCII file, maybe later
         return false;
     }
 
-    if (type != wxT("BINARY"))
+    if ( type != wxT("BINARY") )
     {
         //somethingn else, don't know what to do
         return false;
@@ -316,14 +317,14 @@ bool Fibers::loadVTK(wxString filename)
 
     j = 0;
     // ignore line DATASET POLYDATA
-    while (buffer[fileOffset] != '\n')
+    while ( buffer[fileOffset] != '\n' )
     {
         ++fileOffset;
     }
     ++fileOffset;
     j = 0;
     // read POINTS
-    while (buffer[fileOffset] != '\n')
+    while ( buffer[fileOffset] != '\n' )
     {
         temp[j] = buffer[fileOffset];
         ++fileOffset;
@@ -331,22 +332,22 @@ bool Fibers::loadVTK(wxString filename)
     }
     ++fileOffset;
     temp[j] = 0;
-    wxString points(temp, wxConvUTF8);
-    points = points.AfterFirst(' ');
-    points = points.BeforeFirst(' ');
+    wxString points( temp, wxConvUTF8 );
+    points = points.AfterFirst( ' ' );
+    points = points.BeforeFirst( ' ' );
     long tempValue;
-    if (!points.ToLong(&tempValue, 10))
+    if ( !points.ToLong( &tempValue, 10 ) )
         return false; //can't read point count
-    int countPoints = (int)tempValue;
+    int countPoints = (int) tempValue;
 
     // start position of the point array in the file
     pointOffset = fileOffset;
     // jump to postion after point array
-    fileOffset += (12 * countPoints) +1;
+    fileOffset += ( 12 * countPoints ) + 1;
     j = 0;
-    dataFile.Seek(fileOffset);
-    dataFile.Read(buffer, (size_t) 255);
-    while (buffer[j] != '\n')
+    dataFile.Seek( fileOffset );
+    dataFile.Read( buffer, (size_t) 255 );
+    while ( buffer[j] != '\n' )
     {
         temp[j] = buffer[j];
         ++fileOffset;
@@ -355,30 +356,30 @@ bool Fibers::loadVTK(wxString filename)
     ++fileOffset;
     temp[j] = 0;
 
-    wxString sLines(temp, wxConvUTF8);
-    wxString sLengthLines = sLines.AfterLast(' ');
-    if (!sLengthLines.ToLong(&tempValue, 10))
+    wxString sLines( temp, wxConvUTF8 );
+    wxString sLengthLines = sLines.AfterLast( ' ' );
+    if ( !sLengthLines.ToLong( &tempValue, 10 ) )
         return false; //can't read size of lines array
-    int lengthLines = (int(tempValue));
-    sLines = sLines.AfterFirst(' ');
-    sLines = sLines.BeforeFirst(' ');
-    if (!sLines.ToLong(&tempValue, 10))
+    int lengthLines = ( int( tempValue ) );
+    sLines = sLines.AfterFirst( ' ' );
+    sLines = sLines.BeforeFirst( ' ' );
+    if ( !sLines.ToLong( &tempValue, 10 ) )
         return false; //can't read lines
 
-    int countLines = (int)tempValue;
+    int countLines = (int) tempValue;
 
     // start postion of the line array in the file
     lineOffset = fileOffset;
 
     // jump to postion after line array
-    fileOffset += (lengthLines*4) +1;
-    dataFile.Seek(fileOffset);
-    dataFile.Read(buffer, (size_t) 255);
+    fileOffset += ( lengthLines * 4 ) + 1;
+    dataFile.Seek( fileOffset );
+    dataFile.Read( buffer, (size_t) 255 );
 
     j = 0;
     int k = 0;
     // TODO test if there's really a color array;
-    while (buffer[k] != '\n')
+    while ( buffer[k] != '\n' )
     {
         temp[j] = buffer[k];
         ++fileOffset;
@@ -388,9 +389,9 @@ bool Fibers::loadVTK(wxString filename)
     ++k;
     ++fileOffset;
     temp[j] = 0;
-    wxString tmpString(temp, wxConvUTF8);
+    wxString tmpString( temp, wxConvUTF8 );
     j = 0;
-    while (buffer[k] != '\n')
+    while ( buffer[k] != '\n' )
     {
         temp[j] = buffer[k];
         ++fileOffset;
@@ -399,22 +400,22 @@ bool Fibers::loadVTK(wxString filename)
     }
     ++fileOffset;
     temp[j] = 0;
-    wxString tmpString2(temp, wxConvUTF8);
+    wxString tmpString2( temp, wxConvUTF8 );
 
-    if ( tmpString.BeforeFirst(' ') == _T("CELL_DATA") )
+    if ( tmpString.BeforeFirst( ' ' ) == _T("CELL_DATA") )
     {
         lineColorOffset = fileOffset;
-        fileOffset += (countLines*3) +1;
-        dataFile.Seek(fileOffset);
-        dataFile.Read(buffer, (size_t) 255);
+        fileOffset += ( countLines * 3 ) + 1;
+        dataFile.Seek( fileOffset );
+        dataFile.Read( buffer, (size_t) 255 );
 
-		//aa 2009/06/26 workaround if the buffer doesn't contain a string
-		buffer[254]='\n';
-		
+        //aa 2009/06/26 workaround if the buffer doesn't contain a string
+        buffer[254] = '\n';
+
         j = 0;
         int k = 0;
         // TODO test if there's really a color array;
-        while (buffer[k] != '\n')
+        while ( buffer[k] != '\n' )
         {
             temp[j] = buffer[k];
             ++fileOffset;
@@ -424,10 +425,10 @@ bool Fibers::loadVTK(wxString filename)
         ++k;
         ++fileOffset;
         temp[j] = 0;
-        wxString tmpString3(temp, wxConvUTF8);
+        wxString tmpString3( temp, wxConvUTF8 );
         tmpString = tmpString3;
         j = 0;
-        while (buffer[k] != '\n')
+        while ( buffer[k] != '\n' )
         {
             temp[j] = buffer[k];
             ++fileOffset;
@@ -436,39 +437,40 @@ bool Fibers::loadVTK(wxString filename)
         }
         ++fileOffset;
         temp[j] = 0;
-        wxString tmpString4(temp, wxConvUTF8);
+        wxString tmpString4( temp, wxConvUTF8 );
         tmpString2 = tmpString4;
     }
 
-    if ( tmpString.BeforeFirst(' ') == _T("POINT_DATA") && tmpString2.BeforeFirst(' ') == _T("COLOR_SCALARS"))
-    pointColorOffset = fileOffset;
+    if ( tmpString.BeforeFirst( ' ' ) == _T("POINT_DATA") && tmpString2.BeforeFirst( ' ' )
+            == _T("COLOR_SCALARS") )
+        pointColorOffset = fileOffset;
 
-    m_dh->printDebug(wxString::Format(_T("loading %d points and %d lines."), countPoints, countLines), 1);
+    m_dh->printDebug( wxString::Format( _T("loading %d points and %d lines."), countPoints, countLines ), 1 );
 
     m_countLines = countLines;
     m_dh->countFibers = m_countLines;
     m_countPoints = countPoints;
-    m_linePointers.resize(m_countLines+1);
+    m_linePointers.resize( m_countLines + 1 );
     m_linePointers[countLines] = countPoints;
-    m_reverse.resize(countPoints);
-    m_selected.resize(countLines, false);
+    m_reverse.resize( countPoints );
+    m_selected.resize( countLines, false );
 
     m_pointArray.resize( countPoints * 3 );
-    m_lineArray.resize ( lengthLines * 4 );
+    m_lineArray.resize( lengthLines * 4 );
     m_colorArray.resize( countPoints * 3 );
 
-    dataFile.Seek(pointOffset);
-    dataFile.Read(&m_pointArray[0], (size_t) countPoints*12);
-    dataFile.Seek(lineOffset);
-    dataFile.Read(&m_lineArray[0], (size_t) lengthLines*4);
+    dataFile.Seek( pointOffset );
+    dataFile.Read( &m_pointArray[0], (size_t) countPoints * 12 );
+    dataFile.Seek( lineOffset );
+    dataFile.Read( &m_lineArray[0], (size_t) lengthLines * 4 );
 
     if ( pointColorOffset != 0 )
     {
-        std::vector<wxUint8>tmpColorArray(countPoints * 3, 0);
-        dataFile.Seek(pointColorOffset);
-        dataFile.Read(&tmpColorArray[0], (size_t) countPoints*3);
+        std::vector< wxUint8 > tmpColorArray( countPoints * 3, 0 );
+        dataFile.Seek( pointColorOffset );
+        dataFile.Read( &tmpColorArray[0], (size_t) countPoints * 3 );
         /* */
-        for ( size_t i = 0 ; i < tmpColorArray.size() ; ++i)
+        for ( size_t i = 0; i < tmpColorArray.size(); ++i )
         {
             m_colorArray[i] = tmpColorArray[i] / 255.;
         }
@@ -476,8 +478,8 @@ bool Fibers::loadVTK(wxString filename)
     }
     toggleEndianess();
 
-    m_dh->printDebug(_T("move vertices"), 1);
-    for (int i = 0; i < countPoints * 3; ++i)
+    m_dh->printDebug( _T("move vertices"), 1 );
+    for ( int i = 0; i < countPoints * 3; ++i )
     {
         m_pointArray[i] = m_dh->columns * m_dh->xVoxel - m_pointArray[i];
         ++i;
@@ -487,66 +489,65 @@ bool Fibers::loadVTK(wxString filename)
     }
 
     calculateLinePointers();
-    createColorArray(colorsLoadedFromFile);
-    m_dh->printDebug(_T("read all"), 1);
+    createColorArray( colorsLoadedFromFile );
+    m_dh->printDebug( _T("read all"), 1 );
 
     m_type = Fibers_;
     m_fullPath = filename;
 #ifdef __WXMSW__
     m_name = filename.AfterLast('\\');
 #else
-    m_name = filename.AfterLast('/');
+    m_name = filename.AfterLast( '/' );
 #endif
 
-    m_kdTree = new KdTree(m_countPoints, &m_pointArray[0], m_dh);
+    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 
     delete[] buffer;
     delete[] temp;
     return true;
 }
 
-void Fibers::save(wxString filename)
+void Fibers::save( wxString filename )
 {
-    if (filename.AfterLast('.') != _T("fib"))
+    if ( filename.AfterLast( '.' ) != _T("fib") )
         filename += _T(".fib");
-    std::vector<float> pointsToSave;
-    std::vector<int> linesToSave;
-    std::vector<wxUint8> colorsToSave;
+    std::vector< float > pointsToSave;
+    std::vector< int > linesToSave;
+    std::vector< wxUint8 > colorsToSave;
     int pointIndex = 0;
     int countLines = 0;
 
     float *colorData;
-    if (m_dh->useVBO)
+    if ( m_dh->useVBO )
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-        colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        colorData = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
         colorData = &m_colorArray[0];
     }
 
-
-    for (int l = 0; l < m_countLines; ++l)
+    for ( int l = 0; l < m_countLines; ++l )
     {
-        if (m_selected[l])
+        if ( m_selected[l] )
         {
-            unsigned int pc = getStartIndexForLine(l)*3;
+            unsigned int pc = getStartIndexForLine( l ) * 3;
 
-            linesToSave.push_back(getPointsPerLine(l));
+            linesToSave.push_back( getPointsPerLine( l ) );
 
-            for (int j = 0; j < getPointsPerLine(l) ; ++j)
+            for ( int j = 0; j < getPointsPerLine( l ); ++j )
             {
-                pointsToSave.push_back(m_dh->columns * m_dh->xVoxel - m_pointArray[pc]);
-                colorsToSave.push_back((wxUint8)(colorData[pc]*255));
+                pointsToSave.push_back( m_dh->columns * m_dh->xVoxel - m_pointArray[pc] );
+                colorsToSave.push_back( (wxUint8) ( colorData[pc] * 255 ) );
                 ++pc;
-                pointsToSave.push_back(m_dh->rows * m_dh->yVoxel - m_pointArray[pc]);
-                colorsToSave.push_back((wxUint8)(colorData[pc]*255));
+                pointsToSave.push_back( m_dh->rows * m_dh->yVoxel - m_pointArray[pc] );
+                colorsToSave.push_back( (wxUint8) ( colorData[pc] * 255 ) );
                 ++pc;
-                pointsToSave.push_back(m_pointArray[pc]);
-                colorsToSave.push_back((wxUint8)(colorData[pc]*255));
+                pointsToSave.push_back( m_pointArray[pc] );
+                colorsToSave.push_back( (wxUint8) ( colorData[pc] * 255 ) );
                 ++pc;
-                linesToSave.push_back(pointIndex);
+                linesToSave.push_back( pointIndex );
                 ++pointIndex;
 
             }
@@ -554,94 +555,93 @@ void Fibers::save(wxString filename)
         }
     }
 
-    if (m_dh->useVBO)
+    if ( m_dh->useVBO )
     {
-        glUnmapBuffer(GL_ARRAY_BUFFER);
+        glUnmapBuffer( GL_ARRAY_BUFFER );
     }
 
     converterByteINT32 c;
     converterByteFloat f;
 
     std::ofstream myfile;
-    std::vector<char> vBuffer;
+    std::vector< char > vBuffer;
 
-    std::string header1 =
-            "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
-    header1 += intToString(pointsToSave.size()/3);
+    std::string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
+    header1 += intToString( pointsToSave.size() / 3 );
     header1 += " float\n";
 
-    for (unsigned int i = 0; i < header1.size() ; ++i)
+    for ( unsigned int i = 0; i < header1.size(); ++i )
     {
-        vBuffer.push_back(header1[i]);
+        vBuffer.push_back( header1[i] );
     }
 
-    for (unsigned int i = 0; i < pointsToSave.size() ; ++i)
+    for ( unsigned int i = 0; i < pointsToSave.size(); ++i )
     {
         f.f = pointsToSave[i];
-        vBuffer.push_back(f.b[3]);
-        vBuffer.push_back(f.b[2]);
-        vBuffer.push_back(f.b[1]);
-        vBuffer.push_back(f.b[0]);
+        vBuffer.push_back( f.b[3] );
+        vBuffer.push_back( f.b[2] );
+        vBuffer.push_back( f.b[1] );
+        vBuffer.push_back( f.b[0] );
     }
 
-    vBuffer.push_back('\n');
-    std::string header2 = "LINES " + intToString(countLines) + " "
-            + intToString(linesToSave.size()) + "\n";
+    vBuffer.push_back( '\n' );
+    std::string header2 = "LINES " + intToString( countLines ) + " " + intToString( linesToSave.size() )
+            + "\n";
 
-    for (unsigned int i = 0; i < header2.size() ; ++i)
+    for ( unsigned int i = 0; i < header2.size(); ++i )
     {
-        vBuffer.push_back(header2[i]);
+        vBuffer.push_back( header2[i] );
     }
 
-    for (unsigned int i = 0; i < linesToSave.size() ; ++i)
+    for ( unsigned int i = 0; i < linesToSave.size(); ++i )
     {
         c.i = linesToSave[i];
-        vBuffer.push_back(c.b[3]);
-        vBuffer.push_back(c.b[2]);
-        vBuffer.push_back(c.b[1]);
-        vBuffer.push_back(c.b[0]);
+        vBuffer.push_back( c.b[3] );
+        vBuffer.push_back( c.b[2] );
+        vBuffer.push_back( c.b[1] );
+        vBuffer.push_back( c.b[0] );
     }
 
-    vBuffer.push_back('\n');
+    vBuffer.push_back( '\n' );
 
     std::string header3 = "POINT_DATA ";
-    header3 += intToString(pointsToSave.size()/3);
+    header3 += intToString( pointsToSave.size() / 3 );
     header3 += " float\n";
     header3 += "COLOR_SCALARS scalars 3\n";
 
-    for (unsigned int i = 0; i < header3.size() ; ++i)
+    for ( unsigned int i = 0; i < header3.size(); ++i )
     {
-        vBuffer.push_back(header3[i]);
+        vBuffer.push_back( header3[i] );
     }
 
-    for (unsigned int i = 0; i < colorsToSave.size() ; ++i)
+    for ( unsigned int i = 0; i < colorsToSave.size(); ++i )
     {
 
-        vBuffer.push_back(colorsToSave[i]);
+        vBuffer.push_back( colorsToSave[i] );
     }
 
-    vBuffer.push_back('\n');
+    vBuffer.push_back( '\n' );
 
     // finally put the buffer vector into a char* array
     char * buffer;
-    buffer = new char [vBuffer.size()];
+    buffer = new char[vBuffer.size()];
 
-    for (unsigned int i = 0; i < vBuffer.size() ; ++i)
+    for ( unsigned int i = 0; i < vBuffer.size(); ++i )
     {
         buffer[i] = vBuffer[i];
     }
 
     char* fn;
-    fn = (char*)malloc(filename.length());
-    strcpy(fn, (const char*)filename.mb_str(wxConvUTF8));
+    fn = (char*) malloc( filename.length() );
+    strcpy( fn, (const char*) filename.mb_str( wxConvUTF8 ) );
 
-    myfile.open(fn, std::ios::binary);
-    myfile.write(buffer, vBuffer.size());
+    myfile.open( fn, std::ios::binary );
+    myfile.write( buffer, vBuffer.size() );
 
     myfile.close();
 }
 
-std::string Fibers::intToString(int number)
+std::string Fibers::intToString( int number )
 {
     std::stringstream out;
     out << number;
@@ -650,149 +650,150 @@ std::string Fibers::intToString(int number)
 
 void Fibers::toggleEndianess()
 {
-    m_dh->printDebug(_T("toggle Endianess"), 1);;
+    m_dh->printDebug( _T("toggle Endianess"), 1 );
+    ;
 
     wxUint8 temp;
-    wxUint8 *pointbytes = (wxUint8*)&m_pointArray[0];
+    wxUint8 *pointbytes = (wxUint8*) &m_pointArray[0];
 
-    for (int i = 0; i < m_countPoints*12; i +=4)
+    for ( int i = 0; i < m_countPoints * 12; i += 4 )
     {
         temp = pointbytes[i];
-        pointbytes[i] = pointbytes[i+3];
-        pointbytes[i+3] = temp;
-        temp = pointbytes[i+1];
-        pointbytes[i+1] = pointbytes[i+2];
-        pointbytes[i+2] = temp;
+        pointbytes[i] = pointbytes[i + 3];
+        pointbytes[i + 3] = temp;
+        temp = pointbytes[i + 1];
+        pointbytes[i + 1] = pointbytes[i + 2];
+        pointbytes[i + 2] = temp;
     }
 
     // toggle endianess for the line array
-    wxUint8 *linebytes = (wxUint8*)&m_lineArray[0];
+    wxUint8 *linebytes = (wxUint8*) &m_lineArray[0];
 
-    for ( size_t i = 0 ; i < m_lineArray.size()*4 ; i +=4)
+    for ( size_t i = 0; i < m_lineArray.size() * 4; i += 4 )
     {
         temp = linebytes[i];
-        linebytes[i] = linebytes[i+3];
-        linebytes[i+3] = temp;
-        temp = linebytes[i+1];
-        linebytes[i+1] = linebytes[i+2];
-        linebytes[i+2] = temp;
+        linebytes[i] = linebytes[i + 3];
+        linebytes[i + 3] = temp;
+        temp = linebytes[i + 1];
+        linebytes[i + 1] = linebytes[i + 2];
+        linebytes[i + 2] = temp;
     }
 }
 
-int Fibers::getPointsPerLine(int line)
+int Fibers::getPointsPerLine( int line )
 {
-    return (m_linePointers[line+1] - m_linePointers[line]);
+    return ( m_linePointers[line + 1] - m_linePointers[line] );
 }
 
-int Fibers::getStartIndexForLine(int line)
+int Fibers::getStartIndexForLine( int line )
 {
     return m_linePointers[line];
 }
 
-int Fibers::getLineForPoint(int point)
+int Fibers::getLineForPoint( int point )
 {
     return m_reverse[point];
 }
 
 void Fibers::calculateLinePointers()
 {
-    m_dh->printDebug(_T("calculate line pointers"), 1);
+    m_dh->printDebug( _T("calculate line pointers"), 1 );
     int pc = 0;
     int lc = 0;
     int tc = 0;
 
-    for (int i = 0; i < m_countLines; ++i)
+    for ( int i = 0; i < m_countLines; ++i )
     {
         m_linePointers[i] = tc;
         lc = m_lineArray[pc];
         tc += lc;
-        pc += (lc + 1);
+        pc += ( lc + 1 );
     }
 
     lc = 0;
     pc = 0;
 
-    for (int i = 0; i < m_countPoints; ++i)
+    for ( int i = 0; i < m_countPoints; ++i )
     {
-        if (i == m_linePointers[lc+1])
+        if ( i == m_linePointers[lc + 1] )
             ++lc;
         m_reverse[i] = lc;
     }
 }
 
-void Fibers::createColorArray(bool colorsLoadedFromFile)
+void Fibers::createColorArray( bool colorsLoadedFromFile )
 {
-    m_dh->printDebug(_T("create color arrays"), 1);
+    m_dh->printDebug( _T("create color arrays"), 1 );
 
     if ( !colorsLoadedFromFile )
     {
         m_colorArray.clear();
-        m_colorArray.resize( m_countPoints*3 );
+        m_colorArray.resize( m_countPoints * 3 );
     }
 
     m_normalArray.clear();
-    m_normalArray.resize( m_countPoints*3 );
+    m_normalArray.resize( m_countPoints * 3 );
 
     int pc = 0;
     float r, g, b, rr, gg, bb;
     float x1, x2, y1, y2, z1, z2;
     float lastx, lasty, lastz;
-    for (int i = 0; i < getLineCount() ; ++i)
+    for ( int i = 0; i < getLineCount(); ++i )
     {
         x1 = m_pointArray[pc];
-        y1 = m_pointArray[pc+1];
-        z1 = m_pointArray[pc+2];
-        x2 = m_pointArray[pc + getPointsPerLine(i)*3 - 3];
-        y2 = m_pointArray[pc + getPointsPerLine(i)*3 - 2];
-        z2 = m_pointArray[pc + getPointsPerLine(i)*3 - 1];
+        y1 = m_pointArray[pc + 1];
+        z1 = m_pointArray[pc + 2];
+        x2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 3];
+        y2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 2];
+        z2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 1];
 
-        r = (x1) - (x2);
-        g = (y1) - (y2);
-        b = (z1) - (z2);
-        if (r < 0.0)
+        r = ( x1 ) - ( x2 );
+        g = ( y1 ) - ( y2 );
+        b = ( z1 ) - ( z2 );
+        if ( r < 0.0 )
             r *= -1.0;
-        if (g < 0.0)
+        if ( g < 0.0 )
             g *= -1.0;
-        if (b < 0.0)
+        if ( b < 0.0 )
             b *= -1.0;
 
-        float norm = sqrt(r*r + g*g + b*b);
-        r *= 1.0/norm;
-        g *= 1.0/norm;
-        b *= 1.0/norm;
+        float norm = sqrt( r * r + g * g + b * b );
+        r *= 1.0 / norm;
+        g *= 1.0 / norm;
+        b *= 1.0 / norm;
 
-        lastx = m_pointArray[pc] + (m_pointArray[pc] - m_pointArray[pc+3]);
-        lasty = m_pointArray[pc+1] + (m_pointArray[pc+1] - m_pointArray[pc+4]);
-        lastz = m_pointArray[pc+2] + (m_pointArray[pc+2] - m_pointArray[pc+5]);
+        lastx = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
+        lasty = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
+        lastz = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
-        for (int j = 0; j < getPointsPerLine(i) ; ++j)
+        for ( int j = 0; j < getPointsPerLine( i ); ++j )
         {
             rr = lastx - m_pointArray[pc];
-            gg = lasty - m_pointArray[pc+1];
-            bb = lastz - m_pointArray[pc+2];
+            gg = lasty - m_pointArray[pc + 1];
+            bb = lastz - m_pointArray[pc + 2];
             lastx = m_pointArray[pc];
-            lasty = m_pointArray[pc+1];
-            lastz = m_pointArray[pc+2];
+            lasty = m_pointArray[pc + 1];
+            lastz = m_pointArray[pc + 2];
 
-            if (rr < 0.0)
+            if ( rr < 0.0 )
                 rr *= -1.0;
-            if (gg < 0.0)
+            if ( gg < 0.0 )
                 gg *= -1.0;
-            if (bb < 0.0)
+            if ( bb < 0.0 )
                 bb *= -1.0;
-            float norm = sqrt(rr*rr + gg*gg + bb*bb);
-            rr *= 1.0/norm;
-            gg *= 1.0/norm;
-            bb *= 1.0/norm;
+            float norm = sqrt( rr * rr + gg * gg + bb * bb );
+            rr *= 1.0 / norm;
+            gg *= 1.0 / norm;
+            bb *= 1.0 / norm;
 
             m_normalArray[pc] = rr;
-            m_normalArray[pc+1] = gg;
-            m_normalArray[pc+2] = bb;
-            if ( !colorsLoadedFromFile  )
+            m_normalArray[pc + 1] = gg;
+            m_normalArray[pc + 2] = bb;
+            if ( !colorsLoadedFromFile )
             {
                 m_colorArray[pc] = r;
-                m_colorArray[pc+1] = g;
-                m_colorArray[pc+2] = b;
+                m_colorArray[pc + 1] = g;
+                m_colorArray[pc + 2] = b;
             }
             pc += 3;
         }
@@ -801,13 +802,13 @@ void Fibers::createColorArray(bool colorsLoadedFromFile)
 
 void Fibers::resetColorArray()
 {
-    m_dh->printDebug(_T("reset color arrays"), 1);
+    m_dh->printDebug( _T("reset color arrays"), 1 );
 
     float *colorData;
-    if (m_dh->useVBO)
+    if ( m_dh->useVBO )
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-        colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        colorData = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
@@ -818,52 +819,52 @@ void Fibers::resetColorArray()
     float r, g, b;
     float x1, x2, y1, y2, z1, z2;
     float lastx, lasty, lastz;
-    for (int i = 0; i < getLineCount() ; ++i)
+    for ( int i = 0; i < getLineCount(); ++i )
     {
         x1 = m_pointArray[pc];
-        y1 = m_pointArray[pc+1];
-        z1 = m_pointArray[pc+2];
-        x2 = m_pointArray[pc + getPointsPerLine(i)*3 - 3];
-        y2 = m_pointArray[pc + getPointsPerLine(i)*3 - 2];
-        z2 = m_pointArray[pc + getPointsPerLine(i)*3 - 1];
+        y1 = m_pointArray[pc + 1];
+        z1 = m_pointArray[pc + 2];
+        x2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 3];
+        y2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 2];
+        z2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 1];
 
-        r = (x1) - (x2);
-        g = (y1) - (y2);
-        b = (z1) - (z2);
-        if (r < 0.0)
+        r = ( x1 ) - ( x2 );
+        g = ( y1 ) - ( y2 );
+        b = ( z1 ) - ( z2 );
+        if ( r < 0.0 )
             r *= -1.0;
-        if (g < 0.0)
+        if ( g < 0.0 )
             g *= -1.0;
-        if (b < 0.0)
+        if ( b < 0.0 )
             b *= -1.0;
 
-        float norm = sqrt(r*r + g*g + b*b);
-        r *= 1.0/norm;
-        g *= 1.0/norm;
-        b *= 1.0/norm;
+        float norm = sqrt( r * r + g * g + b * b );
+        r *= 1.0 / norm;
+        g *= 1.0 / norm;
+        b *= 1.0 / norm;
 
-        lastx = m_pointArray[pc] + (m_pointArray[pc] - m_pointArray[pc+3]);
-        lasty = m_pointArray[pc+1] + (m_pointArray[pc+1] - m_pointArray[pc+4]);
-        lastz = m_pointArray[pc+2] + (m_pointArray[pc+2] - m_pointArray[pc+5]);
+        lastx = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
+        lasty = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
+        lastz = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
-        for (int j = 0; j < getPointsPerLine(i) ; ++j)
+        for ( int j = 0; j < getPointsPerLine( i ); ++j )
         {
             colorData[pc] = r;
-            colorData[pc+1] = g;
-            colorData[pc+2] = b;
+            colorData[pc + 1] = g;
+            colorData[pc + 2] = b;
             pc += 3;
         }
     }
 
-    if (m_dh->useVBO)
+    if ( m_dh->useVBO )
     {
-        glUnmapBuffer(GL_ARRAY_BUFFER);
+        glUnmapBuffer( GL_ARRAY_BUFFER );
     }
 }
 
 void Fibers::resetLinesShown()
 {
-    for (int i = 0; i < m_countLines; ++i)
+    for ( int i = 0; i < m_countLines; ++i )
     {
         m_selected[i] = 0;
     }
@@ -871,53 +872,52 @@ void Fibers::resetLinesShown()
 
 void Fibers::updateLinesShown()
 {
-    std::vector<std::vector<SelectionBox*> > boxes = m_dh->getSelectionBoxes();
+    std::vector< std::vector< SelectionBox* > > boxes = m_dh->getSelectionBoxes();
 
     if ( boxes.size() == 0 )
     {
-        for (int i = 0; i < m_countLines; ++i)
+        for ( int i = 0; i < m_countLines; ++i )
         {
             m_selected[i] = 1;
         }
         return;
     }
 
-    for (unsigned int i = 0; i < boxes.size() ; ++i)
+    for ( unsigned int i = 0; i < boxes.size(); ++i )
     {
-        if (boxes[i][0]->getActive())
+        if ( boxes[i][0]->getActive() )
         {
-            if (boxes[i][0]->isDirty())
+            if ( boxes[i][0]->isDirty() )
             {
                 boxes[i][0]->m_inBox.clear();
-                boxes[i][0]->m_inBox.resize(m_countLines);
+                boxes[i][0]->m_inBox.resize( m_countLines );
                 boxes[i][0]->m_inBranch.clear();
-                boxes[i][0]->m_inBranch.resize(m_countLines);
-                boxes[i][0]->m_inBox = getLinesShown(boxes[i][0]);
-                boxes[i][0]->setDirty(false);
+                boxes[i][0]->m_inBranch.resize( m_countLines );
+                boxes[i][0]->m_inBox = getLinesShown( boxes[i][0] );
+                boxes[i][0]->setDirty( false );
             }
 
-            for (int k = 0; k <m_countLines; ++k)
+            for ( int k = 0; k < m_countLines; ++k )
                 boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBox[k];
 
-            for (unsigned int j = 1; j < boxes[i].size() ; ++j)
+            for ( unsigned int j = 1; j < boxes[i].size(); ++j )
             {
                 if ( boxes[i][j]->getActive() )
                 {
-                    if (boxes[i][j]->isDirty())
+                    if ( boxes[i][j]->isDirty() )
                     {
                         boxes[i][j]->m_inBox.clear();
-                        boxes[i][j]->m_inBox.resize(m_countLines);
-                        boxes[i][j]->m_inBox = getLinesShown(boxes[i][j]);
-                        boxes[i][j]->setDirty(false);
+                        boxes[i][j]->m_inBox.resize( m_countLines );
+                        boxes[i][j]->m_inBox = getLinesShown( boxes[i][j] );
+                        boxes[i][j]->setDirty( false );
                     }
-                    if (!boxes[i][j]->getNOT())
-                        for (int k = 0; k <m_countLines; ++k)
+                    if ( !boxes[i][j]->getNOT() )
+                        for ( int k = 0; k < m_countLines; ++k )
                         {
-                            boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k]
-                                    & boxes[i][j]->m_inBox[k];
+                            boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k] & boxes[i][j]->m_inBox[k];
                         }
                     else
-                        for (int k = 0; k <m_countLines; ++k)
+                        for ( int k = 0; k < m_countLines; ++k )
                         {
                             boxes[i][0]->m_inBranch[k] = boxes[i][0]->m_inBranch[k]
                                     & !boxes[i][j]->m_inBox[k];
@@ -926,13 +926,13 @@ void Fibers::updateLinesShown()
             }
         }
 
-        if (boxes[i].size() > 0 && boxes[i][0]->colorChanged())
+        if ( boxes[i].size() > 0 && boxes[i][0]->colorChanged() )
         {
             float *colorData;
-            if (m_dh->useVBO)
+            if ( m_dh->useVBO )
             {
-                glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-                colorData = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+                glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+                colorData = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
             }
             else
             {
@@ -940,154 +940,152 @@ void Fibers::updateLinesShown()
             }
             wxColour col = boxes[i][0]->getFiberColor();
 
-            for (int l = 0; l < m_countLines; ++l)
+            for ( int l = 0; l < m_countLines; ++l )
             {
-                if (boxes[i][0]->m_inBranch[l])
+                if ( boxes[i][0]->m_inBranch[l] )
                 {
-                    unsigned int pc = getStartIndexForLine(l)*3;
+                    unsigned int pc = getStartIndexForLine( l ) * 3;
 
-                    for (int j = 0; j < getPointsPerLine(l) ; ++j)
+                    for ( int j = 0; j < getPointsPerLine( l ); ++j )
                     {
-                        colorData[pc] = ((float)col.Red())/255.0;
-                        colorData[pc+1] = ((float)col.Green())/255.0;
-                        colorData[pc+2] = ((float)col.Blue())/255.0;
+                        colorData[pc] = ( (float) col.Red() ) / 255.0;
+                        colorData[pc + 1] = ( (float) col.Green() ) / 255.0;
+                        colorData[pc + 2] = ( (float) col.Blue() ) / 255.0;
                         pc += 3;
                     }
                 }
             }
-            if (m_dh->useVBO)
+            if ( m_dh->useVBO )
             {
-                glUnmapBuffer(GL_ARRAY_BUFFER);
+                glUnmapBuffer( GL_ARRAY_BUFFER );
             }
-            boxes[i][0]->setColorChanged(false);
+            boxes[i][0]->setColorChanged( false );
         }
     }
     resetLinesShown();
-    for (unsigned int i = 0; i < boxes.size() ; ++i)
+    for ( unsigned int i = 0; i < boxes.size(); ++i )
     {
-        if (boxes[i].size() > 0 && boxes[i][0]->getActive())
+        if ( boxes[i].size() > 0 && boxes[i][0]->getActive() )
         {
-            for (int k = 0; k <m_countLines; ++k)
+            for ( int k = 0; k < m_countLines; ++k )
                 m_selected[k] = m_selected[k] | boxes[i][0]->m_inBranch[k];
         }
     }
-    if (m_dh->fibersInverted)
+    if ( m_dh->fibersInverted )
     {
-        for (int k = 0; k <m_countLines; ++k)
+        for ( int k = 0; k < m_countLines; ++k )
         {
             m_selected[k] = !m_selected[k];
         }
     }
 }
 
-std::vector<bool> Fibers::getLinesShown(SelectionBox* box)
+std::vector< bool > Fibers::getLinesShown( SelectionBox* box )
 {
-    if (!box->getIsBox() && !box->m_sourceAnatomy)
+    if ( !box->getIsBox() && !box->m_sourceAnatomy )
         return box->m_inBox;
     resetLinesShown();
 
-    if (box->getIsBox())
+    if ( box->getIsBox() )
     {
         Vector vpos = box->getCenter();
         Vector vsize = box->getSize();
-        m_boxMin.resize(3);
-        m_boxMax.resize(3);
-        m_boxMin[0] = vpos.x - vsize.x/2 * m_dh->xVoxel;
-        m_boxMax[0] = vpos.x + vsize.x/2 * m_dh->xVoxel;
-        m_boxMin[1] = vpos.y - vsize.y/2 * m_dh->yVoxel;
-        m_boxMax[1] = vpos.y + vsize.y/2 * m_dh->yVoxel;
-        m_boxMin[2] = vpos.z - vsize.z/2 * m_dh->zVoxel;
-        m_boxMax[2] = vpos.z + vsize.z/2 * m_dh->zVoxel;
-        boxTest(0, m_countPoints-1, 0);
+        m_boxMin.resize( 3 );
+        m_boxMax.resize( 3 );
+        m_boxMin[0] = vpos.x - vsize.x / 2 * m_dh->xVoxel;
+        m_boxMax[0] = vpos.x + vsize.x / 2 * m_dh->xVoxel;
+        m_boxMin[1] = vpos.y - vsize.y / 2 * m_dh->yVoxel;
+        m_boxMax[1] = vpos.y + vsize.y / 2 * m_dh->yVoxel;
+        m_boxMin[2] = vpos.z - vsize.z / 2 * m_dh->zVoxel;
+        m_boxMax[2] = vpos.z + vsize.z / 2 * m_dh->zVoxel;
+        boxTest( 0, m_countPoints - 1, 0 );
     }
     else
     {
-        for (int i = 0; i < m_countPoints; ++i)
+        for ( int i = 0; i < m_countPoints; ++i )
         {
-            int x= wxMin(m_dh->columns-1, wxMax(0, (int)m_pointArray[i * 3 ]));
-            int y= wxMin(m_dh->rows -1, wxMax(0, (int)m_pointArray[i * 3 + 1]));
-            int z= wxMin(m_dh->frames -1, wxMax(0, (int)m_pointArray[i * 3 + 2]));
+            int x = wxMin(m_dh->columns-1, wxMax(0, (int)m_pointArray[i * 3 ]));
+            int y = wxMin(m_dh->rows -1, wxMax(0, (int)m_pointArray[i * 3 + 1]));
+            int z = wxMin(m_dh->frames -1, wxMax(0, (int)m_pointArray[i * 3 + 2]));
             int index = x + y * m_dh->columns + z * m_dh->rows * m_dh->columns;
 
-            if ( (box->m_sourceAnatomy->at(index)
-                    - box->getThreshold() ) > 0.01f)
+            if ( ( box->m_sourceAnatomy->at( index ) - box->getThreshold() ) > 0.01f )
             {
-                m_selected[getLineForPoint(i)] = 1;
+                m_selected[getLineForPoint( i )] = 1;
             }
         }
     }
     return m_selected;
 }
 
-void Fibers::boxTest(int left, int right, int axis)
+void Fibers::boxTest( int left, int right, int axis )
 {
     // abort condition
-    if (left > right)
+    if ( left > right )
         return;
 
-    int root = left + ((right-left)/2);
-    int axis1 = (axis+1) % 3;
-    int pointIndex = m_kdTree->m_tree[root]*3;
+    int root = left + ( ( right - left ) / 2 );
+    int axis1 = ( axis + 1 ) % 3;
+    int pointIndex = m_kdTree->m_tree[root] * 3;
 
-    if (m_pointArray[pointIndex + axis] < m_boxMin[axis])
+    if ( m_pointArray[pointIndex + axis] < m_boxMin[axis] )
     {
-        boxTest(root +1, right, axis1);
+        boxTest( root + 1, right, axis1 );
     }
-    else if (m_pointArray[pointIndex + axis] > m_boxMax[axis])
+    else if ( m_pointArray[pointIndex + axis] > m_boxMax[axis] )
     {
-        boxTest(left, root-1, axis1);
+        boxTest( left, root - 1, axis1 );
     }
     else
     {
-        int axis2 = (axis+2) % 3;
-        if (m_pointArray[pointIndex + axis1] <= m_boxMax[axis1]
-                && m_pointArray[pointIndex + axis1] >= m_boxMin[axis1]
-                && m_pointArray[pointIndex + axis2] <= m_boxMax[axis2]
-                && m_pointArray[pointIndex + axis2] >= m_boxMin[axis2])
+        int axis2 = ( axis + 2 ) % 3;
+        if ( m_pointArray[pointIndex + axis1] <= m_boxMax[axis1] && m_pointArray[pointIndex + axis1]
+                >= m_boxMin[axis1] && m_pointArray[pointIndex + axis2] <= m_boxMax[axis2]
+                && m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )
         {
-            m_selected[getLineForPoint(m_kdTree->m_tree[root])] = 1;
+            m_selected[getLineForPoint( m_kdTree->m_tree[root] )] = 1;
         }
-        boxTest(left, root -1, axis1);
-        boxTest(root+1, right, axis1);
+        boxTest( left, root - 1, axis1 );
+        boxTest( root + 1, right, axis1 );
     }
 }
 
-bool Fibers::getBarycenter(SplinePoint* point)
+bool Fibers::getBarycenter( SplinePoint* point )
 {
     // number of fibers needed to keep a point
     int threshold = 20;
     // multiplier for moving the point towards the barycenter
 
-    m_boxMin.resize(3);
-    m_boxMax.resize(3);
-    m_boxMin[0] = point->X() - 25.0/2;
-    m_boxMax[0] = point->X() + 25.0/2;
-    m_boxMin[1] = point->Y() - 5.0/2;
-    m_boxMax[1] = point->Y() + 5.0/2;
-    m_boxMin[2] = point->Z() - 5.0/2;
-    m_boxMax[2] = point->Z() + 5.0/2;
+    m_boxMin.resize( 3 );
+    m_boxMax.resize( 3 );
+    m_boxMin[0] = point->X() - 25.0 / 2;
+    m_boxMax[0] = point->X() + 25.0 / 2;
+    m_boxMin[1] = point->Y() - 5.0 / 2;
+    m_boxMax[1] = point->Y() + 5.0 / 2;
+    m_boxMin[2] = point->Z() - 5.0 / 2;
+    m_boxMax[2] = point->Z() + 5.0 / 2;
     m_barycenter.x = 0;
     m_barycenter.y = 0;
     m_barycenter.z = 0;
     m_count = 0;
 
-    barycenterTest(0, m_countPoints-1, 0);
-    if (m_count > threshold)
+    barycenterTest( 0, m_countPoints - 1, 0 );
+    if ( m_count > threshold )
     {
         m_barycenter.x /= m_count;
         m_barycenter.y /= m_count;
         m_barycenter.z /= m_count;
 
-        float x1 = (m_barycenter.x - point->X() );
-        float y1 = (m_barycenter.y - point->Y() );
-        float z1 = (m_barycenter.z - point->Z() );
+        float x1 = ( m_barycenter.x - point->X() );
+        float y1 = ( m_barycenter.y - point->Y() );
+        float z1 = ( m_barycenter.z - point->Z() );
 
-        Vector v(x1, y1, z1);
-        point->setOffsetVector(v);
+        Vector v( x1, y1, z1 );
+        point->setOffsetVector( v );
 
-        point->setX(point->X() + x1);
-        point->setY(point->Y() + y1);
-        point->setZ(point->Z() + z1);
+        point->setX( point->X() + x1 );
+        point->setY( point->Y() + y1 );
+        point->setZ( point->Z() + z1 );
         return true;
     }
     else
@@ -1096,167 +1094,166 @@ bool Fibers::getBarycenter(SplinePoint* point)
     }
 }
 
-void Fibers::barycenterTest(int left, int right, int axis)
+void Fibers::barycenterTest( int left, int right, int axis )
 {
     // abort condition
-    if (left > right)
+    if ( left > right )
         return;
 
-    int root = left + ((right-left)/2);
-    int axis1 = (axis+1) % 3;
-    int pointIndex = m_kdTree->m_tree[root]*3;
+    int root = left + ( ( right - left ) / 2 );
+    int axis1 = ( axis + 1 ) % 3;
+    int pointIndex = m_kdTree->m_tree[root] * 3;
 
-    if (m_pointArray[pointIndex + axis] < m_boxMin[axis])
+    if ( m_pointArray[pointIndex + axis] < m_boxMin[axis] )
     {
-        barycenterTest(root +1, right, axis1);
+        barycenterTest( root + 1, right, axis1 );
     }
-    else if (m_pointArray[pointIndex + axis] > m_boxMax[axis])
+    else if ( m_pointArray[pointIndex + axis] > m_boxMax[axis] )
     {
-        barycenterTest(left, root-1, axis1);
+        barycenterTest( left, root - 1, axis1 );
     }
     else
     {
-        int axis2 = (axis+2) % 3;
-        if (m_selected[getLineForPoint(m_kdTree->m_tree[root])] == 1
-                && m_pointArray[pointIndex + axis1] <= m_boxMax[axis1]
-                && m_pointArray[pointIndex + axis1] >= m_boxMin[axis1]
-                && m_pointArray[pointIndex + axis2] <= m_boxMax[axis2]
-                && m_pointArray[pointIndex + axis2] >= m_boxMin[axis2])
+        int axis2 = ( axis + 2 ) % 3;
+        if ( m_selected[getLineForPoint( m_kdTree->m_tree[root] )] == 1 && m_pointArray[pointIndex + axis1]
+                <= m_boxMax[axis1] && m_pointArray[pointIndex + axis1] >= m_boxMin[axis1]
+                && m_pointArray[pointIndex + axis2] <= m_boxMax[axis2] && m_pointArray[pointIndex + axis2]
+                >= m_boxMin[axis2] )
         {
-            m_barycenter[0] += m_pointArray[m_kdTree->m_tree[root]*3];
-            m_barycenter[1] += m_pointArray[m_kdTree->m_tree[root]*3+1];
-            m_barycenter[2] += m_pointArray[m_kdTree->m_tree[root]*3+2];
+            m_barycenter[0] += m_pointArray[m_kdTree->m_tree[root] * 3];
+            m_barycenter[1] += m_pointArray[m_kdTree->m_tree[root] * 3 + 1];
+            m_barycenter[2] += m_pointArray[m_kdTree->m_tree[root] * 3 + 2];
             m_count++;
         }
-        barycenterTest(left, root -1, axis1);
-        barycenterTest(root+1, right, axis1);
+        barycenterTest( left, root - 1, axis1 );
+        barycenterTest( root + 1, right, axis1 );
     }
 }
 
 void Fibers::initializeBuffer()
 {
-    if (m_isInitialized)
+    if ( m_isInitialized )
         return;
     m_isInitialized = true;
-    if (!m_dh->useVBO)
+    if ( !m_dh->useVBO )
         return;
     bool isOK = true;
-    glGenBuffers(3, m_bufferObjects);
-    glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, &m_pointArray[0], GL_STATIC_DRAW );
-    if (m_dh->GLError())
+    glGenBuffers( 3, m_bufferObjects );
+    glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(GLfloat) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
+    if ( m_dh->GLError() )
     {
-        m_dh->printGLError(wxT("initialize vbo points"));
+        m_dh->printGLError( wxT("initialize vbo points") );
         isOK = false;
     }
-    if (isOK)
+    if ( isOK )
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, &m_colorArray[0], GL_STATIC_DRAW );
-        if (m_dh->GLError())
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        glBufferData( GL_ARRAY_BUFFER, sizeof(GLfloat) * m_countPoints * 3, &m_colorArray[0], GL_STATIC_DRAW );
+        if ( m_dh->GLError() )
         {
-            m_dh->printGLError(wxT("initialize vbo colors"));
+            m_dh->printGLError( wxT("initialize vbo colors") );
             isOK = false;
         }
     }
-    if (isOK)
+    if ( isOK )
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*m_countPoints*3, &m_normalArray[0], GL_STATIC_DRAW );
-        if (m_dh->GLError())
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        glBufferData( GL_ARRAY_BUFFER, sizeof(GLfloat) * m_countPoints * 3, &m_normalArray[0], GL_STATIC_DRAW );
+        if ( m_dh->GLError() )
         {
-            m_dh->printGLError(wxT("initialize vbo normals"));
+            m_dh->printGLError( wxT("initialize vbo normals") );
             isOK = false;
         }
     }
     m_dh->useVBO = isOK;
-    if (isOK)
+    if ( isOK )
     {
         freeArrays();
     }
     else
     {
-        m_dh->printDebug(_T("Not enough memory on your gfx card. Using vertex arrays."), 2);
-        m_dh->printDebug(_T("This shouldn't concern you. Perfomance just will be slightly worse."), 2);
-        m_dh->printDebug(_T("Get a better graphics card if you want more juice."), 2);
-        glDeleteBuffers(3, m_bufferObjects);
+        m_dh->printDebug( _T("Not enough memory on your gfx card. Using vertex arrays."), 2 );
+        m_dh->printDebug( _T("This shouldn't concern you. Perfomance just will be slightly worse."), 2 );
+        m_dh->printDebug( _T("Get a better graphics card if you want more juice."), 2 );
+        glDeleteBuffers( 3, m_bufferObjects );
     }
 }
 
 void Fibers::draw()
 {
     initializeBuffer();
-    if (m_dh->useFakeTubes)
+    if ( m_dh->useFakeTubes )
     {
         drawFakeTubes();
         return;
     }
-    if (m_dh->useTransparency)
+    if ( m_dh->useTransparency )
     {
         drawSortedLines();
         return;
     }
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState( GL_VERTEX_ARRAY );
+    glEnableClientState( GL_COLOR_ARRAY );
+    glEnableClientState( GL_NORMAL_ARRAY );
 
-    if (!m_dh->useVBO)
+    if ( !m_dh->useVBO )
     {
-        glVertexPointer(3, GL_FLOAT, 0, &m_pointArray[0]);
-        if (m_showFS)
-            glColorPointer(3, GL_FLOAT, 0, &m_colorArray[0]); // global colors
+        glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
+        if ( m_showFS )
+            glColorPointer( 3, GL_FLOAT, 0, &m_colorArray[0] ); // global colors
         else
-            glColorPointer(3, GL_FLOAT, 0, &m_normalArray[0]); // local colors
-        glNormalPointer(GL_FLOAT, 0, &m_normalArray[0]);
+            glColorPointer( 3, GL_FLOAT, 0, &m_normalArray[0] ); // local colors
+        glNormalPointer( GL_FLOAT, 0, &m_normalArray[0] );
     }
     else
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[0]);
-        glVertexPointer(3, GL_FLOAT, 0, 0);
-        if (m_showFS)
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+        glVertexPointer( 3, GL_FLOAT, 0, 0 );
+        if ( m_showFS )
         {
-            glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-            glColorPointer(3, GL_FLOAT, 0, 0);
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
         }
         else
         {
-            glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-            glColorPointer(3, GL_FLOAT, 0, 0);
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-        glNormalPointer(GL_FLOAT, 0, 0);
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        glNormalPointer( GL_FLOAT, 0, 0 );
     }
 
     //glEnable( GL_LINE_SMOOTH);
     //glHint( GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-    for (int i = 0; i < m_countLines; ++i)
+    for ( int i = 0; i < m_countLines; ++i )
     {
-        if (m_selected[i] == 1)
-            glDrawArrays(GL_LINE_STRIP, getStartIndexForLine(i), getPointsPerLine(i));
+        if ( m_selected[i] == 1 )
+            glDrawArrays( GL_LINE_STRIP, getStartIndexForLine( i ), getPointsPerLine( i ) );
     }
 
     //glDisable( GL_LINE_SMOOTH);
 
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState( GL_VERTEX_ARRAY );
+    glDisableClientState( GL_COLOR_ARRAY );
+    glDisableClientState( GL_NORMAL_ARRAY );
 }
 
 namespace
 {
-template<class T> struct IndirectComp
+template< class T > struct IndirectComp
 {
-    IndirectComp(const T &zvals) :
-        zvals(zvals)
+    IndirectComp( const T &zvals ) :
+        zvals( zvals )
     {
     }
 
     // watch out: operator less, but we are sorting in descending z-order, i.e.,
     // highest z value will be first in array and painted first as well
-    template< class I > bool operator()(const I &i1, const I &i2) const
+    template< class I > bool operator()( const I &i1, const I &i2 ) const
     {
         return zvals[i1] > zvals[i2];
     }
@@ -1267,213 +1264,99 @@ private:
 
 void Fibers::drawFakeTubes()
 {
-    if (!m_normalsPositive)
-        switchNormals(false);
-    float *colors;
-    float *normals;
-    if (m_dh->useVBO)
+    if ( !m_normalsPositive )
+        switchNormals( false );
+    GLfloat *colors;
+    GLfloat *normals;
+#if 0
+    if ( m_dh->useVBO )
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-        colors = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-        normals = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-        glUnmapBuffer(GL_ARRAY_BUFFER);
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        colors = (GLfloat *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
+       //glUnmapBuffer( GL_ARRAY_BUFFER );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        normals = (GLfloat *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
+        //glUnmapBuffer( GL_ARRAY_BUFFER );
     }
     else
     {
         colors = &m_colorArray[0];
         normals = &m_normalArray[0];
     }
+#else
+    colors = &m_colorArray[0];
+    normals = &m_normalArray[0];
+#endif
 
-    if (m_dh->getPointMode())
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if ( m_dh->getPointMode() )
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    if (m_dh->useTransparency)
+    for ( int i = 0; i < m_countLines; ++i )
     {
-        // only sort those lines we see
-        unsigned int *snippletsort=0;
-        unsigned int *lineids=0;
-
-        int nbSnipplets=0;
-
-        if (snippletsort==0)
+        if ( m_selected[i] == 1 )
         {
-
-            for (int i=0; i < m_countLines; ++i)
+            glBegin( GL_QUAD_STRIP );
+            int idx = getStartIndexForLine( i ) * 3;
+            for ( int k = 0; k < getPointsPerLine( i ); ++k )
             {
-                if (m_selected[i])
-                    nbSnipplets += getPointsPerLine(i)-1;
+                glNormal3f( normals[idx], normals[idx + 1], normals[idx + 2] );
+                glColor3f(  colors[idx],  colors[idx + 1],  colors[idx + 2] );
+                glTexCoord2f(-1.0f, 0.0f);
+                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                glTexCoord2f(1.0f, 0.0f);
+                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                idx += 3;
+                //
             }
-            snippletsort = new unsigned int[nbSnipplets+1];
-            lineids = new unsigned int[nbSnipplets*2];
-
-            int snp = 0;
-            for (int i=0; i < m_countLines; ++i)
-            {
-                if (!m_selected[i])
-                    continue;
-                const unsigned int p = getPointsPerLine(i);
-
-                for (unsigned int k=0; k < p-1; ++k)
-                {
-                    lineids[snp<<1] = getStartIndexForLine(i)+k;
-                    lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
-                    // FIXME mario kannst du bei gelegenheit mal gucken warum
-                    // der compiler die warnung wirft
-                    // Warning operation on 'snp' may be undefined
-                    snippletsort[snp] = snp++;
-                }
-            }
+            glEnd();
         }
-
-        //std::cout << "done loop" << std::endl;
-        GLfloat matrix[16];
-        glGetFloatv( GL_PROJECTION_MATRIX, matrix);
-#ifdef __VERBOSE__
-        std::cout << "projection matrix:" << std::endl
-        << "(  " << matrix[0] << " # " << matrix[4] << " # " << matrix[8] << " # " << matrix[12] << ")" << std::endl
-        << "(  " << matrix[1] << " # " << matrix[5] << " # " << matrix[9] << " # " << matrix[13] << ")" << std::endl
-        << "(  " << matrix[2] << " # " << matrix[6] << " # " << matrix[10] << " # " << matrix[14] << ")" << std::endl
-        << "(  " << matrix[3] << " # " << matrix[7] << " # " << matrix[11] << " # " << matrix[15] << ")" << std::endl;
-#endif
-#if 0
-        glGetFloatv( GL_MODELVIEW_MATRIX, matrix );
-#ifdef __VERBOSE__
-        std::cout << "modelview matrix:" << std::endl
-        << "(  " << matrix[0] << " # " << matrix[4] << " # " << matrix[8] << " # " << matrix[12] << ")" << std::endl
-        << "(  " << matrix[1] << " # " << matrix[5] << " # " << matrix[9] << " # " << matrix[13] << ")" << std::endl
-        << "(  " << matrix[2] << " # " << matrix[6] << " # " << matrix[10] << " # " << matrix[14] << ")" << std::endl
-        << "(  " << matrix[3] << " # " << matrix[7] << " # " << matrix[11] << " # " << matrix[15] << ")" << std::endl;
-#endif
-#endif
-        std::vector<float> zval(nbSnipplets);
-        for (int i=0; i< nbSnipplets; ++i)
-        {
-            zval[i] = (m_pointArray[ lineids[i<<1] * 3 + 0 ] *matrix[ 2]
-                    + m_pointArray[ lineids[i<<1] * 3 + 1 ] *matrix[ 6]
-                    + m_pointArray[ lineids[i<<1] * 3 + 2 ] *matrix[10]
-                    + matrix[14]) / (m_pointArray[ lineids[i<<1] * 3 + 0 ]
-                    *matrix[ 3] + m_pointArray[ lineids[i<<1] * 3 + 1 ]
-                    *matrix[ 7] + m_pointArray[ lineids[i<<1] * 3 + 2 ]
-                    *matrix[11] + matrix[15]);
-        }
-
-        //std::cout << "sorting" << std::endl;
-        // we should replace this by something that employs the kd-tree to speed up sorting!
-        std::sort(&snippletsort[0], &snippletsort[nbSnipplets], IndirectComp<
-                std::vector<float> >(zval));
-
-        //std::cout << "painting" << std::endl;
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable( GL_LINE_SMOOTH);
-        glHint( GL_LINE_SMOOTH_HINT, GL_NICEST);
-        glBegin(GL_QUADS);
-        for (int i = 0; i < nbSnipplets; ++i)
-        {
-            // this works, but can't we use arrays and index mode here, to speed things up?
-            int idx=lineids[snippletsort[i]<<1];
-            int idx3 = idx * 3;
-            int id2=lineids[(snippletsort[i]<<1)+1];
-            int id23 = id2 * 3;
-            glColor4f(colors[idx3 + 0], colors[idx3 + 1], colors[idx3 + 2],
-                    m_alpha);
-            glNormal3f(normals[idx3 + 0], normals[idx3 + 1], normals[idx3 + 2]);
-
-            glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
-            glVertex3f(m_pointArray[idx3 +0], m_pointArray[idx3 +1],
-                    m_pointArray[idx3 +2]);
-
-            glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
-            glVertex3f(m_pointArray[idx3 +0], m_pointArray[idx3 +1],
-                    m_pointArray[idx3 +2]);
-
-            glColor4f(colors[id23 + 0], colors[id23 + 1], colors[id23 + 2],
-                    m_alpha);
-            glNormal3f(normals[id23 + 0], normals[id23 + 1], normals[id23 + 2]);
-
-            glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
-            glVertex3f(m_pointArray[id23 +0], m_pointArray[id23 +1],
-                    m_pointArray[id23 +2]);
-
-            glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
-            glVertex3f(m_pointArray[id23 +0], m_pointArray[id23 +1],
-                    m_pointArray[id23 +2]);
-        }
-        glEnd();
-
-        // FIXME: store these later on!
-        delete[] snippletsort;
-        delete[] lineids;
-        glDisable(GL_BLEND);
-        glDisable( GL_LINE_SMOOTH);
     }
-    else
+
+    if ( m_dh->useVBO )
     {
-        for (int i = 0; i < m_countLines; ++i)
-        {
-            if (m_selected[i] == 1)
-            {
-                glBegin(GL_QUAD_STRIP);
-                int idx = getStartIndexForLine(i)*3;
-                for (int k = 0; k < getPointsPerLine(i) ; ++k)
-                {
-                    glNormal3f(normals[idx], normals[idx+1], normals[idx+2]);
-                    //glColor3f ( normals[idx], normals[idx+1], normals[idx+2] );
-                    //glNormal3f( colors[idx], colors[idx+1], colors[idx+2] );
-                    glColor3f(colors[idx], colors[idx+1], colors[idx+2]);
-                    glMultiTexCoord2f(GL_TEXTURE0, -1.0f, 0.0f);
-                    glVertex3f(m_pointArray[idx], m_pointArray[idx+1],
-                            m_pointArray[idx+2]);
-                    glMultiTexCoord2f(GL_TEXTURE0, 1.0f, 0.0f);
-                    glVertex3f(m_pointArray[idx], m_pointArray[idx+1],
-                            m_pointArray[idx+2]);
-                    idx += 3;
-                    //
-                }
-                glEnd();
-            }
-        }
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        glUnmapBuffer( GL_ARRAY_BUFFER );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        glUnmapBuffer( GL_ARRAY_BUFFER );
     }
 }
+
 
 void Fibers::drawSortedLines()
 {
     // only sort those lines we see
-    unsigned int *snippletsort=0;
-    unsigned int *lineids=0;
+    unsigned int *snippletsort = 0;
+    unsigned int *lineids = 0;
 
-    int nbSnipplets=0;
+    int nbSnipplets = 0;
 
-    if (snippletsort==0)
+    if ( snippletsort == 0 )
     {
         // estimate memory required for arrays
-        for (int i=0; i < m_countLines; ++i)
+        for ( int i = 0; i < m_countLines; ++i )
         {
-            if (m_selected[i])
-                nbSnipplets += getPointsPerLine(i)-1;
+            if ( m_selected[i] )
+                nbSnipplets += getPointsPerLine( i ) - 1;
         }
         // std::cout << "nb snipplets total: " << nbSnipplets << std::endl;
-        snippletsort = new unsigned int[nbSnipplets+1]; // +1 just to be sure because of fancy problems with some sort functions
-        lineids = new unsigned int[nbSnipplets*2];
+        snippletsort = new unsigned int[nbSnipplets + 1]; // +1 just to be sure because of fancy problems with some sort functions
+        lineids = new unsigned int[nbSnipplets * 2];
 
         // build data structure for sorting
         int snp = 0;
-        for (int i=0; i < m_countLines; ++i)
+        for ( int i = 0; i < m_countLines; ++i )
         {
-            if (!m_selected[i])
+            if ( !m_selected[i] )
                 continue;
-            const unsigned int p = getPointsPerLine(i);
+            const unsigned int p = getPointsPerLine( i );
 
             // TODO: update lineids and snippletsort size only when fiber selection changes
-            for (unsigned int k=0; k < p-1; ++k)
+            for ( unsigned int k = 0; k < p - 1; ++k )
             {
-                lineids[snp<<1] = getStartIndexForLine(i)+k;
-                lineids[(snp<<1)+1] = getStartIndexForLine(i)+k+1;
+                lineids[snp << 1] = getStartIndexForLine( i ) + k;
+                lineids[( snp << 1 ) + 1] = getStartIndexForLine( i ) + k + 1;
                 // FIXME mario kannst du bei gelegenheit mal gucken warum
                 // der compiler die warnung wirft
                 // Warning operation on 'snp' may be undefined
@@ -1484,7 +1367,7 @@ void Fibers::drawSortedLines()
 
     // std::cout << "done loop" << std::endl;
     GLfloat matrix[16];
-    glGetFloatv( GL_PROJECTION_MATRIX, matrix);
+    glGetFloatv( GL_PROJECTION_MATRIX, matrix );
 #ifdef __VERBOSE__
     std::cout << "projection matrix:" << std::endl
     << "(  " << matrix[0] << " # " << matrix[4] << " # " << matrix[8] << " # " << matrix[12] << ")" << std::endl
@@ -1504,32 +1387,29 @@ void Fibers::drawSortedLines()
 #endif
 
     // compute z values of lines (in our case: starting points only)
-    std::vector<float> zval(nbSnipplets);
-    for (int i=0; i< nbSnipplets; ++i)
+    std::vector< float > zval( nbSnipplets );
+    for ( int i = 0; i < nbSnipplets; ++i )
     {
-        const int id = lineids[ i<<1 ] *3;
-        zval[i] = (m_pointArray[ id + 0 ] *matrix[ 2] + m_pointArray[ id + 1 ]
-                *matrix[ 6] + m_pointArray[ id + 2 ] *matrix[10] + matrix[14])
-                / (m_pointArray[ id + 0 ] *matrix[ 3] + m_pointArray[ id + 1 ]
-                        *matrix[ 7] + m_pointArray[ id + 2 ] *matrix[11]
-                        + matrix[15]);
+        const int id = lineids[i << 1] * 3;
+        zval[i] = ( m_pointArray[id + 0] * matrix[2] + m_pointArray[id + 1] * matrix[6]
+                + m_pointArray[id + 2] * matrix[10] + matrix[14] ) / ( m_pointArray[id + 0] * matrix[3]
+                + m_pointArray[id + 1] * matrix[7] + m_pointArray[id + 2] * matrix[11] + matrix[15] );
     }
 
     // std::cout << "sorting" << std::endl;
-    std::sort(&snippletsort[0], &snippletsort[nbSnipplets], IndirectComp<
-            std::vector<float> >(zval));
+    std::sort( &snippletsort[0], &snippletsort[nbSnipplets], IndirectComp< std::vector< float > > ( zval ) );
 
     // std::cout << "painting" << std::endl;
     float *colors;
     float *normals;
-    if (m_dh->useVBO)
+    if ( m_dh->useVBO )
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[1]);
-        colors = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-        normals = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-        glUnmapBuffer(GL_ARRAY_BUFFER);
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        colors = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
+        glUnmapBuffer( GL_ARRAY_BUFFER );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        normals = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
+        glUnmapBuffer( GL_ARRAY_BUFFER );
     }
     else
     {
@@ -1537,88 +1417,87 @@ void Fibers::drawSortedLines()
         normals = &m_normalArray[0];
     }
 
-    if (m_dh->getPointMode())
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if ( m_dh->getPointMode() )
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBegin(GL_LINES);
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glBegin( GL_LINES );
     int i = 0;
-    for (int c = 0; c < nbSnipplets; ++c)
+    for ( int c = 0; c < nbSnipplets; ++c )
     {
         i = c;
-        int idx=lineids[snippletsort[i]<<1];
+        int idx = lineids[snippletsort[i] << 1];
         int idx3 = idx * 3;
-        int id2=lineids[(snippletsort[i]<<1)+1];
+        int id2 = lineids[( snippletsort[i] << 1 ) + 1];
         int id23 = id2 * 3;
-        glColor4f(colors[idx3 + 0], colors[idx3 + 1], colors[idx3 + 2], m_alpha);
-        glNormal3f(normals[idx3 + 0], normals[idx3 + 1], normals[idx3 + 2]);
-        glVertex3f(m_pointArray[idx3 +0], m_pointArray[idx3 +1],
-                m_pointArray[idx3 +2]);
-        glColor4f(colors[id23 + 0], colors[id23 + 1], colors[id23 + 2], m_alpha);
-        glNormal3f(normals[id23 + 0], normals[id23 + 1], normals[id23 + 2]);
-        glVertex3f(m_pointArray[id23 +0], m_pointArray[id23 +1],
-                m_pointArray[id23 +2]);
+        glColor4f( colors[idx3 + 0], colors[idx3 + 1], colors[idx3 + 2], m_alpha );
+        glNormal3f( normals[idx3 + 0], normals[idx3 + 1], normals[idx3 + 2] );
+        glVertex3f( m_pointArray[idx3 + 0], m_pointArray[idx3 + 1], m_pointArray[idx3 + 2] );
+        glColor4f( colors[id23 + 0], colors[id23 + 1], colors[id23 + 2], m_alpha );
+        glNormal3f( normals[id23 + 0], normals[id23 + 1], normals[id23 + 2] );
+        glVertex3f( m_pointArray[id23 + 0], m_pointArray[id23 + 1], m_pointArray[id23 + 2] );
     }
     glEnd();
-    glDisable(GL_BLEND);
+    glDisable( GL_BLEND );
 
     // FIXME: store these later on!
     delete[] snippletsort;
     delete[] lineids;
 }
 
-void Fibers::switchNormals(bool positive)
+void Fibers::switchNormals( bool positive )
 {
     float *normals;
-    if (m_dh->useVBO)
+#if 0
+    if ( m_dh->useVBO )
     {
-        glBindBuffer(GL_ARRAY_BUFFER, m_bufferObjects[2]);
-        normals = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        normals = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
         normals = &m_normalArray[0];
     }
-
-    if (positive)
+#else
+    normals = &m_normalArray[0];
+#endif
+    if ( positive )
     {
         int pc = 0;
         float rr, gg, bb;
         float lastx, lasty, lastz;
-        for (int i = 0; i < getLineCount() ; ++i)
+        for ( int i = 0; i < getLineCount(); ++i )
         {
-            lastx = m_pointArray[pc] + (m_pointArray[pc] - m_pointArray[pc+3]);
-            lasty = m_pointArray[pc+1] + (m_pointArray[pc+1]
-                    - m_pointArray[pc+4]);
-            lastz = m_pointArray[pc+2] + (m_pointArray[pc+2]
-                    - m_pointArray[pc+5]);
+            lastx = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
+            lasty = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
+            lastz = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
-            for (int j = 0; j < getPointsPerLine(i) ; ++j)
+            for ( int j = 0; j < getPointsPerLine( i ); ++j )
             {
                 rr = lastx - m_pointArray[pc];
-                gg = lasty - m_pointArray[pc+1];
-                bb = lastz - m_pointArray[pc+2];
+                gg = lasty - m_pointArray[pc + 1];
+                bb = lastz - m_pointArray[pc + 2];
                 lastx = m_pointArray[pc];
-                lasty = m_pointArray[pc+1];
-                lastz = m_pointArray[pc+2];
+                lasty = m_pointArray[pc + 1];
+                lastz = m_pointArray[pc + 2];
 
-                if (rr < 0.0)
+                if ( rr < 0.0 )
                     rr *= -1.0;
-                if (gg < 0.0)
+                if ( gg < 0.0 )
                     gg *= -1.0;
-                if (bb < 0.0)
+                if ( bb < 0.0 )
                     bb *= -1.0;
-                float norm = sqrt(rr*rr + gg*gg + bb*bb);
-                rr *= 1.0/norm;
-                gg *= 1.0/norm;
-                bb *= 1.0/norm;
+                float norm = sqrt( rr * rr + gg * gg + bb * bb );
+                rr *= 1.0 / norm;
+                gg *= 1.0 / norm;
+                bb *= 1.0 / norm;
 
                 normals[pc] = rr;
-                normals[pc+1] = gg;
-                normals[pc+2] = bb;
+                normals[pc + 1] = gg;
+                normals[pc + 2] = bb;
 
                 pc += 3;
             }
@@ -1630,45 +1509,44 @@ void Fibers::switchNormals(bool positive)
         int pc = 0;
         float rr, gg, bb;
         float lastx, lasty, lastz;
-        for (int i = 0; i < getLineCount() ; ++i)
+        for ( int i = 0; i < getLineCount(); ++i )
         {
-            lastx = m_pointArray[pc] + (m_pointArray[pc] - m_pointArray[pc+3]);
-            lasty = m_pointArray[pc+1] + (m_pointArray[pc+1]
-                    - m_pointArray[pc+4]);
-            lastz = m_pointArray[pc+2] + (m_pointArray[pc+2]
-                    - m_pointArray[pc+5]);
+            lastx = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
+            lasty = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
+            lastz = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
-            for (int j = 0; j < getPointsPerLine(i) ; ++j)
+            for ( int j = 0; j < getPointsPerLine( i ); ++j )
             {
                 rr = lastx - m_pointArray[pc];
-                gg = lasty - m_pointArray[pc+1];
-                bb = lastz - m_pointArray[pc+2];
+                gg = lasty - m_pointArray[pc + 1];
+                bb = lastz - m_pointArray[pc + 2];
                 lastx = m_pointArray[pc];
-                lasty = m_pointArray[pc+1];
-                lastz = m_pointArray[pc+2];
+                lasty = m_pointArray[pc + 1];
+                lastz = m_pointArray[pc + 2];
 
                 normals[pc] = rr;
-                normals[pc+1] = gg;
-                normals[pc+2] = bb;
+                normals[pc + 1] = gg;
+                normals[pc + 2] = bb;
 
                 pc += 3;
             }
         }
         m_normalsPositive = false;
     }
-    if (m_dh->useVBO)
+    if ( m_dh->useVBO )
     {
-        glUnmapBuffer(GL_ARRAY_BUFFER);
+        glUnmapBuffer( GL_ARRAY_BUFFER );
     }
 }
 
 void Fibers::freeArrays()
 {
-    m_colorArray.clear();
-    m_normalArray.clear();
+    // disabled for now, due to problems with glMapBuffer
+    //m_colorArray.clear();
+    //m_normalArray.clear();
 }
 
-float Fibers::getPointValue(int index)
+float Fibers::getPointValue( int index )
 {
     return m_pointArray[index];
 }
@@ -1683,7 +1561,7 @@ int Fibers::getPointCount()
     return m_countPoints;
 }
 
-bool Fibers::isSelected(int fiber)
+bool Fibers::isSelected( int fiber )
 {
     return m_selected[fiber];
 }

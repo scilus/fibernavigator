@@ -135,6 +135,7 @@ void TheScene::renderScene()
 
     m_dh->shaderHelper->initializeArrays();
 
+    // opaque objects
     renderSlizes();
 
     if ( m_dh->surface_loaded )
@@ -143,6 +144,10 @@ void TheScene::renderScene()
     if ( m_dh->pointMode )
         drawPoints();
 
+    if ( m_dh->vectors_loaded )
+            drawVectors();
+
+    // possibly transparent objects
     if ( m_dh->fibers_loaded )
     {
         if ( m_dh->useFakeTubes )
@@ -153,9 +158,6 @@ void TheScene::renderScene()
 
     if ( m_dh->mesh_loaded )
         renderMesh();
-
-    if ( m_dh->vectors_loaded )
-        drawVectors();
 
     if ( m_dh->fibers_loaded && m_dh->showBoxes )
         drawSelectionBoxes();
@@ -250,7 +252,6 @@ void TheScene::renderMesh()
     {
         lightsOn();
     }
-
 
     bindTextures();
 

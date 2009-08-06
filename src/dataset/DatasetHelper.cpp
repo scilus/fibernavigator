@@ -1135,7 +1135,6 @@ void DatasetHelper::printGLError( const wxString function )
 {
     printDebug( _T("***ERROR***: ") + function, 2 );
     printf( " : ERROR: %s\n", gluErrorString( lastGLError ) );
-    //printDebug(wxString::Format(_T("***ERROR***: %s\n"), //gluErrorString(lastGLError)), 2);
 }
 
 void DatasetHelper::printTime()
