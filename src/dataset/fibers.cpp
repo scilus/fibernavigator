@@ -1313,7 +1313,7 @@ void Fibers::drawFakeTubes()
             glEnd();
         }
     }
-
+#if 0
     if ( m_dh->useVBO )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
@@ -1321,6 +1321,7 @@ void Fibers::drawFakeTubes()
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
+#endif
 }
 
 
@@ -1533,10 +1534,12 @@ void Fibers::switchNormals( bool positive )
         }
         m_normalsPositive = false;
     }
+#if 0
     if ( m_dh->useVBO )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
+#endif
 }
 
 void Fibers::freeArrays()

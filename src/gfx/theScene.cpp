@@ -156,8 +156,7 @@ void TheScene::renderScene()
             renderFibers();
     }
 
-    if ( m_dh->mesh_loaded )
-        renderMesh();
+    renderMesh();
 
     if ( m_dh->fibers_loaded && m_dh->showBoxes )
         drawSelectionBoxes();
@@ -263,6 +262,8 @@ void TheScene::renderMesh()
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     for ( int i = 0; i < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++i )
     {
@@ -273,28 +274,25 @@ void TheScene::renderMesh()
             {
                 wxColor c = info->getColor();
                 glColor3f( (float) c.Red() / 255.0, (float) c.Green() / 255.0, (float) c.Blue() / 255.0 );
+
                 m_dh->shaderHelper->m_meshShader->setUniInt( "showFS", info->getShowFS() );
                 m_dh->shaderHelper->m_meshShader->setUniInt( "useTex", info->getUseTex() );
                 m_dh->shaderHelper->m_meshShader->setUniFloat( "alpha_", info->getAlpha() );
                 m_dh->shaderHelper->m_meshShader->setUniInt( "useLic", info->getUseLIC() );
 
-                glEnable( GL_BLEND );
-                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
                 info->draw();
             }
         }
     }
-/*
+
+    glColor3f( (float) 1.0, (float) 0.0, (float) 0.0 );
     std::vector< std::vector< SelectionBox* > > boxes = m_dh->getSelectionBoxes();
 
-    m_dh->shaderHelper->m_meshShader->bind();
+    //m_dh->shaderHelper->m_meshShader->bind();
     m_dh->shaderHelper->m_meshShader->setUniInt( "showFS", true );
     m_dh->shaderHelper->m_meshShader->setUniInt( "useTex", false );
     m_dh->shaderHelper->m_meshShader->setUniFloat( "alpha_", 1.0 );
-    m_dh->shaderHelper->m_meshShader->setUniInt( "useColorMap", m_dh->colorMap );
     m_dh->shaderHelper->m_meshShader->setUniInt( "useLic", false );
-    m_dh->shaderHelper->m_meshShader->setUniInt( "useCMAP", false );
 
     for ( unsigned int i = 0; i < boxes.size(); ++i )
     {
@@ -306,7 +304,7 @@ void TheScene::renderMesh()
             glPopAttrib();
         }
     }
-*/
+
     m_dh->shaderHelper->m_meshShader->release();
 
     lightsOff();
