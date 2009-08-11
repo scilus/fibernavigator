@@ -981,12 +981,12 @@ void DatasetHelper::createCutDataset()
         {
             if ( boxes[i][j]->getShow() )
             {
-                x1 = (int) ( boxes[i][j]->getCenter().x - boxes[i][j]->getSize().x / 2 );
-                x2 = (int) ( boxes[i][j]->getCenter().x + boxes[i][j]->getSize().x / 2 );
-                y1 = (int) ( boxes[i][j]->getCenter().y - boxes[i][j]->getSize().y / 2 );
-                y2 = (int) ( boxes[i][j]->getCenter().y + boxes[i][j]->getSize().y / 2 );
-                z1 = (int) ( boxes[i][j]->getCenter().z - boxes[i][j]->getSize().z / 2 );
-                z2 = (int) ( boxes[i][j]->getCenter().z + boxes[i][j]->getSize().z / 2 );
+                x1 = (int) ( boxes[i][j]->getCenter().x / xVoxel - boxes[i][j]->getSize().x / 2 );
+                x2 = (int) ( boxes[i][j]->getCenter().x / xVoxel + boxes[i][j]->getSize().x / 2 );
+                y1 = (int) ( boxes[i][j]->getCenter().y / yVoxel - boxes[i][j]->getSize().y / 2 );
+                y2 = (int) ( boxes[i][j]->getCenter().y / yVoxel + boxes[i][j]->getSize().y / 2 );
+                z1 = (int) ( boxes[i][j]->getCenter().z / zVoxel - boxes[i][j]->getSize().z / 2 );
+                z2 = (int) ( boxes[i][j]->getCenter().z / zVoxel + boxes[i][j]->getSize().z / 2 );
 
                 x1 = wxMax(0, wxMin(x1, columns));
                 x2 = wxMax(0, wxMin(x2, columns));
