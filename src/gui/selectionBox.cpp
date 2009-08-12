@@ -567,7 +567,7 @@ void SelectionBox::moveLeft()
 
 void SelectionBox::moveRight()
 {
-	if ( m_center.x > m_dh->columns ) return;
+	if ( m_center.x > m_dh->columns * m_dh->xVoxel ) return;
 		m_center.x = (int)m_center.x + 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.x += m_stepSize;
 	update();
@@ -583,7 +583,7 @@ void SelectionBox::moveForward()
 
 void SelectionBox::moveBack()
 {
-	if ( m_center.y > m_dh->rows ) return;
+	if ( m_center.y > m_dh->rows * m_dh->yVoxel ) return;
 	m_center.y = (int)m_center.y + 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.y += m_stepSize;
 	update();
@@ -599,7 +599,7 @@ void SelectionBox::moveUp()
 
 void SelectionBox::moveDown()
 {
-	if ( m_center.z > m_dh->frames ) return;
+	if ( m_center.z > m_dh->frames * m_dh->zVoxel ) return;
 	m_center.z = (int)m_center.z + 1.0;
 	if (wxGetKeyState(WXK_SHIFT)) m_center.z += m_stepSize;
 	update();

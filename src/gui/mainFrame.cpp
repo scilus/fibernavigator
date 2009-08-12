@@ -924,14 +924,14 @@ void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
 
                 for (int j = 0; j < f->getPointsPerLine(l) ; ++j)
                 {
-                    x = (int)f->getPointValue(pc);
+                    x = (int)( f->getPointValue(pc) / m_dh->xVoxel );
                     ++pc;
-                    y = (int)f->getPointValue(pc);
+                    y = (int)( f->getPointValue(pc) / m_dh->yVoxel );
                     ++pc;
-                    z = (int)f->getPointValue(pc);
+                    z = (int)( f->getPointValue(pc) / m_dh->zVoxel );
                     ++pc;
 
-                    int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows) * 3;
+                    int index = ( x + y * m_dh->columns + z * m_dh->columns * m_dh->rows) * 3;
                     dst->at(index) = c.Red() / 255.;
                     dst->at(index + 1) = c.Green() / 255.;
                     dst->at(index + 2) = c.Blue() / 255.;
@@ -970,11 +970,11 @@ void MainFrame::OnCreateColorTexture(wxCommandEvent& WXUNUSED(event))
 
                 for (int j = 0; j < f->getPointsPerLine(l) ; ++j)
                 {
-                    x = (int)f->getPointValue(pc);
+                    x = (int)( f->getPointValue(pc) / m_dh->xVoxel );
                     ++pc;
-                    y = (int)f->getPointValue(pc);
+                    y = (int)( f->getPointValue(pc) / m_dh->yVoxel );
                     ++pc;
-                    z = (int)f->getPointValue(pc);
+                    z = (int)( f->getPointValue(pc) / m_dh->zVoxel );
                     ++pc;
 
                     int index = (x + y * m_dh->columns + z * m_dh->columns * m_dh->rows);

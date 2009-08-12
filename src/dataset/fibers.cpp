@@ -489,8 +489,7 @@ bool Fibers::loadVTK( wxString filename )
     }
 
     calculateLinePointers();
-    //createColorArray( colorsLoadedFromFile );
-    createColorArray( false );
+    createColorArray( colorsLoadedFromFile );
     m_dh->printDebug( _T("read all"), 1 );
 
     m_type = Fibers_;
