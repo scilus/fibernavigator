@@ -489,7 +489,8 @@ bool Fibers::loadVTK( wxString filename )
     }
 
     calculateLinePointers();
-    createColorArray( colorsLoadedFromFile );
+    //createColorArray( colorsLoadedFromFile );
+    createColorArray( false );
     m_dh->printDebug( _T("read all"), 1 );
 
     m_type = Fibers_;
@@ -929,14 +930,17 @@ void Fibers::updateLinesShown()
         if ( boxes[i].size() > 0 && boxes[i][0]->colorChanged() )
         {
             float *colorData;
+            float *colorData2;
             if ( m_dh->useVBO )
             {
                 glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
                 colorData = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+                colorData2 = &m_colorArray[0];
             }
             else
             {
                 colorData = &m_colorArray[0];
+                colorData2 = &m_colorArray[0];
             }
             wxColour col = boxes[i][0]->getFiberColor();
 
@@ -951,6 +955,9 @@ void Fibers::updateLinesShown()
                         colorData[pc] = ( (float) col.Red() ) / 255.0;
                         colorData[pc + 1] = ( (float) col.Green() ) / 255.0;
                         colorData[pc + 2] = ( (float) col.Blue() ) / 255.0;
+                        colorData2[pc] = ( (float) col.Red() ) / 255.0;
+                        colorData2[pc + 1] = ( (float) col.Green() ) / 255.0;
+                        colorData2[pc + 2] = ( (float) col.Blue() ) / 255.0;
                         pc += 3;
                     }
                 }
