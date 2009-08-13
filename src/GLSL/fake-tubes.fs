@@ -14,7 +14,7 @@ void main()
 	if (globalColor)
 		color = abs(normalize(myColor.rgb));
 	else
-		color = abs(normalize(tangentR3));
+	    color = abs(normalize(tangentR3));
 
 	vec3 view = vec3(0., 0., -1.);
 	float view_dot_normal = sqrt(1. - s_param * s_param) + .1;

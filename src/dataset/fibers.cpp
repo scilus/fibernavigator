@@ -805,14 +805,17 @@ void Fibers::resetColorArray()
     m_dh->printDebug( _T("reset color arrays"), 1 );
 
     float *colorData;
+    float *colorData2;
     if ( m_dh->useVBO )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
         colorData = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        colorData2 = &m_colorArray[0];
     }
     else
     {
         colorData = &m_colorArray[0];
+        colorData2 = &m_colorArray[0];
     }
 
     int pc = 0;
@@ -852,6 +855,9 @@ void Fibers::resetColorArray()
             colorData[pc] = r;
             colorData[pc + 1] = g;
             colorData[pc + 2] = b;
+            colorData2[pc] = r;
+            colorData2[pc + 1] = g;
+            colorData2[pc + 2] = b;
             pc += 3;
         }
     }
