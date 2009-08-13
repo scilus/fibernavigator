@@ -279,6 +279,7 @@ void TheScene::renderMesh()
                 m_dh->shaderHelper->m_meshShader->setUniInt( "useTex", info->getUseTex() );
                 m_dh->shaderHelper->m_meshShader->setUniFloat( "alpha_", info->getAlpha() );
                 m_dh->shaderHelper->m_meshShader->setUniInt( "useLic", info->getUseLIC() );
+                m_dh->shaderHelper->m_meshShader->setUniInt( "isGlyph", info->getIsGlyph());
 
                 info->draw();
             }

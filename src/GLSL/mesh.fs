@@ -13,6 +13,7 @@ uniform float alpha_;
 
 uniform bool useTex;
 uniform bool blendTex;
+uniform bool isGlyph;
 
 //uniform bool cutAtSurface;
 //uniform sampler2D cutTex;
@@ -110,6 +111,11 @@ void main()
 		}
 
 		color = color + (ambient * color / 2.0) + (diffuse * color) + (specular * color / 2.0);
+	}
+	else if (isGlyph && !useTex)
+	{
+	    colorMap( color.rgb, myColor.r);
+	    color = color + (ambient * color / 2.0) + (diffuse * color / 2.0) + (specular * color / 2.0);
 	}
 
 	color.a = alpha_;

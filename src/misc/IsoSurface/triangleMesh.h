@@ -32,6 +32,7 @@ class TriangleMesh {
 
 		std::vector<Vector> vertices;
 		std::vector<Vector> vertNormals;
+		std::vector<wxColour> vertColors;
 		std::vector < std::vector<unsigned int> >vIsInTriangle;
 
 		std::vector< Triangle > triangles;
@@ -80,6 +81,7 @@ class TriangleMesh {
 		Vector getVertex (const int triNum, int pos);
 		Vector getNormal(const int triNum);
 		Vector getVertNormal(const int vertNum);
+		wxColour getVertColor (const int vertNum);
 		Triangle getTriangle(const int triNum);
 		wxColour getTriangleColor(const int triNum);
 		std::vector<unsigned int> getStar(const int vertNum);
@@ -89,6 +91,7 @@ class TriangleMesh {
 		Vector getTriangleCenter(int triNum) ;
 
 		void setVertex(const unsigned int vertNum, const Vector nPos);
+		void setVertColor(const int vertNum, const wxColour color);
 
 		void eraseTriFromVert( const unsigned int triNum, const unsigned int vertNum);
 		void setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC);

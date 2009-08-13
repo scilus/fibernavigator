@@ -75,14 +75,15 @@ bool Mesh::loadDip(wxString filename)
 
 					tmpMagnitudes[i] = x;
 				}
-				/*
+
 				float diff = maxMagnitude - minMagnitude;
 				for ( size_t i = 0 ; i < m_countVerts ; ++i)
 				{
-					float c = ( tmpMagnitudes[i] - minMagnitude ) / diff;
-					m_tMesh->setVertexColor(i, c, c, c);
+					float c = ( ( tmpMagnitudes[i] - minMagnitude ) / diff ) * 255.;
+					wxColour color(c, c, c);
+					m_tMesh->setVertColor(i, color);
 				}
-				*/
+
 			}
 			if ( line.BeforeFirst('=') == _T("NumberPolygons") )
 			{
@@ -352,21 +353,42 @@ void Mesh::generateGeometry()
     Triangle triangleEdges;
     Vector point;
     Vector pointNormal;
+    wxColour color;
 
-    glBegin(GL_TRIANGLES);
-    for (int i = 0; i < m_tMesh->getNumTriangles(); ++i)
+    if ( !m_isGlyph)
     {
-        triangleEdges = m_tMesh->getTriangle(i);
-        for (int j = 0; j < 3; ++j)
+        glBegin(GL_TRIANGLES);
+        for (int i = 0; i < m_tMesh->getNumTriangles(); ++i)
         {
-            pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
-            glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
-            point = m_tMesh->getVertex(triangleEdges.pointID[j]);
-            glVertex3d(point.x, point.y, point.z);
+            triangleEdges = m_tMesh->getTriangle(i);
+            for (int j = 0; j < 3; ++j)
+            {
+                pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
+                glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
+                point = m_tMesh->getVertex(triangleEdges.pointID[j]);
+                glVertex3d(point.x, point.y, point.z);
+            }
         }
+        glEnd();
     }
-    glEnd();
-
+    else
+    {
+        glBegin(GL_TRIANGLES);
+        for (int i = 0; i < m_tMesh->getNumTriangles(); ++i)
+        {
+            triangleEdges = m_tMesh->getTriangle(i);
+            for (int j = 0; j < 3; ++j)
+            {
+                pointNormal = m_tMesh->getVertNormal(triangleEdges.pointID[j]);
+                glNormal3d(pointNormal.x, pointNormal.y, pointNormal.z);
+                color = m_tMesh->getVertColor(triangleEdges.pointID[j]);
+                glColor3f(color.Red() / 255., color.Green() / 255., color.Blue() / 255.);
+                point = m_tMesh->getVertex(triangleEdges.pointID[j]);
+                glVertex3d(point.x, point.y, point.z);
+            }
+        }
+        glEnd();
+    }
     glEndList();
     m_GLuint = dl;
 }

@@ -28,6 +28,7 @@ void TriangleMesh::clearMesh()
 {
     vertices.clear();
     vertNormals.clear();
+    vertColors.clear();
     vIsInTriangle.clear();
 
     triangles.clear();
@@ -51,6 +52,7 @@ void TriangleMesh::addVert(const Vector newVert)
 	vertices.push_back( newVert );
 	numVerts = vertices.size();
 	vIsInTriangle.resize(numVerts);
+	vertColors.resize(numVerts);
 }
 
 void TriangleMesh::fastAddVert(const Vector newVert)
@@ -214,6 +216,15 @@ Vector TriangleMesh::calcVertNormal(const int vertNum)
 	return sum;
 }
 
+void TriangleMesh::setVertColor( const int vertNum, const wxColour color)
+{
+    vertColors[vertNum] = color;
+}
+
+wxColour TriangleMesh::getVertColor(const int vertNum)
+{
+    return vertColors[vertNum];
+}
 
 void TriangleMesh::calcVertNormals()
 {
