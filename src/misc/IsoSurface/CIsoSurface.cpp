@@ -980,7 +980,7 @@ void CIsoSurface::generateLICGeometry()
     {
         triangleEdges = m_tMesh->getTriangle( i );
         color = m_tMesh->getTriangleColor( i );
-        glColor4ub( color.Red(), color.Green(), color.Blue(), color.Alpha() );
+        glColor4ub( color.Red(), color.Red(), color.Red(),255 );
         for ( int j = 0; j < 3; ++j )
         {
             pointNormal = m_tMesh->getVertNormal( triangleEdges.pointID[j] );
