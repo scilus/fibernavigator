@@ -1,4 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
+
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
+
 PROJECT( FiberNavigator )
 
 # Include local CMake modules
@@ -40,8 +45,11 @@ ENDIF ( NOT CMAKE_BUILD_TYPE )
 
 # Package dependencies:
 FIND_PACKAGE( GLEW REQUIRED )
-FIND_PACKAGE( wxWidgets REQUIRED )
 SET( WXWIDGETS_USE_GL TRUE )
+FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS base core gl net )
+IF (APPLE)
+     FIND_PACKAGE( OPENGL REQUIRED )
+ENDIF (APPLE)
 
 # Includes:
 INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_PATH} )
@@ -57,9 +65,9 @@ MARK_AS_ADVANCED( wxWidgets_USE_DEBUG )
 #-----------------------
 # -Wno-long-long    since on Ubuntu 8.10 it won't compile without it
 # -ansi             force ISO-C++98 compliance (not GNU++98)
-SET( CMAKE_CXX_FLAGS "-Wall -ansi -Wno-long-long" )
+SET( CMAKE_CXX_FLAGS "-Wall -ansi -Wno-long-long -DDEBUG" )
 SET( CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -O0" )
-SET( CMAKE_CXX_FLAGS_RELEASE "-O3" )
+SET( CMAKE_CXX_FLAGS_RELEASE "-O3 -DDEBUG" )
 SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DDEBUG -O2" )
 
 SET( target "fibernavigator")
@@ -74,6 +82,11 @@ file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 
 ADD_EXECUTABLE( ${target} main.cpp ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} )
 
-TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8)
-
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)
+IF (APPLE)  
+   TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${OPENGL_LIBRARY} ${wxWidgets_LIBRARIES} z)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/icons ${CMAKE_BINARY_DIR}/bin/Contents/Resources/icons)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/Contents/Resources/GLSL)
+ELSE(APPLE)
+    TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)
+ENDIF(APPLE)
