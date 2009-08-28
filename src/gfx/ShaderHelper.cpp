@@ -147,7 +147,7 @@ void ShaderHelper::setMeshShaderVars()
 {
     m_meshShader->setUniInt( "blendTex", m_dh->blendTexOnMesh );
 
-    //m_meshShader->setUniInt( "cutAtSurface", m_dh->surface_loaded );
+    m_meshShader->setUniInt( "cutAtSurface", m_dh->surface_loaded );
     m_meshShader->setUniInt( "lightOn", m_dh->lighting );
     m_meshShader->setUniInt( "useColorMap", m_dh->colorMap );
 
@@ -180,7 +180,7 @@ void ShaderHelper::setMeshShaderVars()
             m_type[9] = 5;
         }
     }
-    //m_meshShader->setUniInt( "cutTex", 9 );
+    m_meshShader->setUniInt( "cutTex", 9 );
 
     m_meshShader->setUniInt( "tex0", 0 );
     m_meshShader->setUniInt( "tex1", 1 );
