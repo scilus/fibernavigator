@@ -147,6 +147,8 @@ void TheScene::renderScene()
     if ( m_dh->vectors_loaded )
             drawVectors();
 
+    //drawGraph();
+
     // possibly transparent objects
     if ( m_dh->fibers_loaded )
     {
@@ -386,6 +388,7 @@ void TheScene::renderFakeTubes()
                     (float) m_dh->mainFrame->m_mainGL->GetSize().x );
             m_dh->shaderHelper->m_fakeTubeShader->setUniFloat( "dimY",
                     (float) m_dh->mainFrame->m_mainGL->GetSize().y );
+            m_dh->shaderHelper->m_fakeTubeShader->setUniFloat( "thickness", 3.175 );
 
             info->draw();
 
@@ -938,6 +941,75 @@ void TheScene::drawVectors()
         m_dh->printGLError( wxT("draw vectors") );
 
     glDisable( GL_BLEND );
+
+    glPopAttrib();
+}
+
+void TheScene::drawGraph()
+{
+    glPushAttrib( GL_ALL_ATTRIB_BITS );
+
+    std::vector<float>points;
+
+    wxTreeItemId id, childid;
+    wxTreeItemIdValue cookie = 0;
+    id = m_dh->mainFrame->m_treeWidget->GetFirstChild( m_dh->mainFrame->m_tPointId, cookie );
+    while ( id.IsOk() )
+    {
+        SplinePoint *point = (SplinePoint*) ( m_dh->mainFrame->m_treeWidget->GetItemData( id ) );
+        points.push_back(point->X());
+        points.push_back(point->Y());
+        points.push_back(point->Z());
+        id = m_dh->mainFrame->m_treeWidget->GetNextChild( m_dh->mainFrame->m_tPointId, cookie );
+    }
+/*
+    glColor3f( 0.0, 0.0, 1.0 );
+    for ( int i = 0 ; i < 10 ; ++i)
+    {
+        drawSphere( points[i*3], points[i*3+1], points[i*3+2], 2.0 );
+    }
+*/
+    m_dh->shaderHelper->m_graphShader->bind();
+    m_dh->shaderHelper->m_graphShader->setUniInt( "globalColor", false );
+    m_dh->shaderHelper->m_graphShader->setUniFloat( "animation", (float)m_dh->animationStep );
+    m_dh->shaderHelper->m_graphShader->setUniFloat( "dimX", (float) m_dh->mainFrame->m_mainGL->GetSize().x );
+    m_dh->shaderHelper->m_graphShader->setUniFloat( "dimY", (float) m_dh->mainFrame->m_mainGL->GetSize().y );
+
+    int countPoints = points.size() / 3;
+    glColor3f( 1.0, 0.0, 0.0 );
+
+    for ( int i = 0 ; i < countPoints ; ++i)
+    {
+        for ( int j = 0 ; j < countPoints ; ++j )
+        {
+            if ( j > i)
+            {
+                float length = sqrt ( (points[i*3] - points[j*3]) * (points[i*3] - points[j*3]) +
+                                      (points[i*3+1] - points[j*3+1]) * (points[i*3+1] - points[j*3+1]) +
+                                      (points[i*3+2] - points[j*3+2]) * (points[i*3+2] - points[j*3+2]) );
+
+                m_dh->shaderHelper->m_graphShader->setUniFloat( "thickness", (float)(i+1)*2 );
+                glColor3f( i/10., j/10., i+j/20. );
+                glBegin(GL_QUADS);
+                glTexCoord3f(-1.0f, 0, length);
+                glNormal3f(points[i*3] - points[j*3], points[i*3+1] - points[j*3+1], points[i*3+2] - points[j*3+2]);
+                glVertex3f( points[i*3], points[i*3+1], points[i*3+2] );
+                glTexCoord3f(1.0f, 0, length);
+                glNormal3f(points[i*3] - points[j*3], points[i*3+1] - points[j*3+1], points[i*3+2] - points[j*3+2]);
+                glVertex3f( points[i*3], points[i*3+1], points[i*3+2] );
+                glTexCoord3f(1.0f, 1.0, length);
+                glNormal3f(points[i*3] - points[j*3], points[i*3+1] -  points[j*3+1], points[i*3+2] - points[j*3+2]);
+                glVertex3f( points[j*3], points[j*3+1], points[j*3+2] );
+                glTexCoord3f(-1.0f, 1.0, length);
+                glNormal3f(points[i*3] - points[j*3], points[i*3+1] -  points[j*3+1], points[i*3+2] - points[j*3+2]);
+                glVertex3f( points[j*3], points[j*3+1], points[j*3+2] );
+                glEnd();
+            }
+        }
+    }
+
+
+    m_dh->shaderHelper->m_graphShader->release();
 
     glPopAttrib();
 }
