@@ -40,7 +40,7 @@ void main()
 		newVal = 1.0;
 
 	if (type == 3 && useTex)
-	    /*
+	{
 		if ( useColorMap == 1 )
 			cooloor.rgb  = colorMap1( newVal );
 		else if ( useColorMap == 2 )
@@ -50,9 +50,8 @@ void main()
 		else if ( useColorMap == 4 )
 			cooloor.rgb  = colorMap4( newVal );
 		else
-		*/
 			cooloor.rgb = defaultColorMap( newVal );
-
+	}
  /*  cooloor.a = 1.-(1.-newVal)*(1.-newVal);
      cooloor.a = newVal*newVal;*/
 

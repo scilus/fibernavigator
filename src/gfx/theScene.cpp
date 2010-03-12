@@ -116,9 +116,9 @@ void TheScene::bindTextures()
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
             }
-            if ( ++c == 10 )
+            if ( ++c == 8 )
             {
-                printf( "reached 10 textures\n" );
+                printf( "reached 8 textures\n" );
                 break;
             }
         }

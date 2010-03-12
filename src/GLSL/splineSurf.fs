@@ -28,8 +28,8 @@ void main()
     v.y = v.y / (float(dimY) * voxY);
     v.z = v.z / (float(dimZ) * voxZ);
 
-    if ( type9 > 0 ) lookupTex( color, type9, tex9, threshold9, v, alpha9 );
-    if ( type8 > 0 ) lookupTex( color, type8, tex8, threshold8, v, alpha8 );
+    //if ( type9 > 0 ) lookupTex( color, type9, tex9, threshold9, v, alpha9 );
+    //if ( type8 > 0 ) lookupTex( color, type8, tex8, threshold8, v, alpha8 );
     if ( type7 > 0 ) lookupTex( color, type7, tex7, threshold7, v, alpha7 );
     if ( type6 > 0 ) lookupTex( color, type6, tex6, threshold6, v, alpha6 );
     if ( type5 > 0 ) lookupTex( color, type5, tex5, threshold5, v, alpha5 );

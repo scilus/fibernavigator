@@ -62,7 +62,7 @@ void main()
 {
 
 	if (!showFS) cutFrontSector();
-	if ( (type9 == 5) && cutAtSurface ) cutAtSplineSurface();
+	if ( (type7 == 5) && cutAtSurface ) cutAtSplineSurface();
 
 	vec4 ambient = vec4(0.0);
 	vec4 diffuse = vec4(0.0);
@@ -85,8 +85,8 @@ void main()
 
 		if (blendTex)
 		{
-		     if ( type9 > 0 ) lookupTex( color, type9, tex9, 0.0, v, alpha9 );
-             if ( type8 > 0 ) lookupTex( color, type8, tex8, 0.0, v, alpha8 );
+		     //if ( type9 > 0 ) lookupTex( color, type9, tex9, 0.0, v, alpha9 );
+             //if ( type8 > 0 ) lookupTex( color, type8, tex8, 0.0, v, alpha8 );
              if ( type7 > 0 ) lookupTex( color, type7, tex7, 0.0, v, alpha7 );
              if ( type6 > 0 ) lookupTex( color, type6, tex6, 0.0, v, alpha6 );
              if ( type5 > 0 ) lookupTex( color, type5, tex5, 0.0, v, alpha5 );
@@ -98,8 +98,8 @@ void main()
 		}
 		else
 		{
-		     if ( type9 > 0 ) lookupTex( color, type9, tex9, threshold9, v, alpha9 );
-		     if ( type8 > 0 ) lookupTex( color, type8, tex8, threshold8, v, alpha8 );
+		     //if ( type9 > 0 ) lookupTex( color, type9, tex9, threshold9, v, alpha9 );
+		     //if ( type8 > 0 ) lookupTex( color, type8, tex8, threshold8, v, alpha8 );
 		     if ( type7 > 0 ) lookupTex( color, type7, tex7, threshold7, v, alpha7 );
 		     if ( type6 > 0 ) lookupTex( color, type6, tex6, threshold6, v, alpha6 );
 		     if ( type5 > 0 ) lookupTex( color, type5, tex5, threshold5, v, alpha5 );

@@ -4,14 +4,13 @@ varying float tangent_dot_view;
 varying vec3 tangentR3;
 varying float s_param;
 varying vec4 myColor;
+uniform float thickness;
 
 void main()
 {
 	gl_ClipVertex = gl_ModelViewMatrix * gl_Vertex; //< make clipping planes work
 
 	vec3 tangent;
-
-	float thickness = 3.175;
 
 	tangentR3 = gl_Normal;
 	tangent = (gl_ModelViewProjectionMatrix * vec4(gl_Normal,0.)).xyz; //< transform our tangent vector
