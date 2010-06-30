@@ -5,8 +5,8 @@ void main()
 {
 	vec4 col = vec4(0.0, 0.0, 0.0, 0.0);
 
-    //if ( type9 > 0 ) lookupTex(col, type9, tex9, threshold9, VaryingTexCoord0.xyz, alpha9);
-    //if ( type8 > 0 ) lookupTex(col, type8, tex8, threshold8, VaryingTexCoord0.xyz, alpha8);
+    if ( type9 > 0 ) lookupTex(col, type9, tex9, threshold9, VaryingTexCoord0.xyz, alpha9);
+    if ( type8 > 0 ) lookupTex(col, type8, tex8, threshold8, VaryingTexCoord0.xyz, alpha8);
     if ( type7 > 0 ) lookupTex(col, type7, tex7, threshold7, VaryingTexCoord0.xyz, alpha7);
     if ( type6 > 0 ) lookupTex(col, type6, tex6, threshold6, VaryingTexCoord0.xyz, alpha6);
     if ( type5 > 0 ) lookupTex(col, type5, tex5, threshold5, VaryingTexCoord0.xyz, alpha5);

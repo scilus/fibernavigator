@@ -158,8 +158,6 @@ private:
     void updateStatusBar();
     void updateMenus();
 
-    void OnTimerEvent(wxTimerEvent &event);
-
 public:
 	MainCanvas* m_gl0;
 	MainCanvas* m_gl1;
@@ -197,7 +195,7 @@ public:
 	wxBoxSizer *buttonSizer;
 	wxBoxSizer *treeSizer;
 	int enlargeNav;
-	wxTimer* m_timer;
+
 
 	DatasetHelper* m_dh;
 

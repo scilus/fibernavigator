@@ -31,7 +31,6 @@ public:
 	Shader *m_splineSurfShader;
 	Shader *m_vectorShader;
 	Shader *m_legendShader;
-	Shader *m_graphShader;
 
 private:
 	DatasetHelper* m_dh;

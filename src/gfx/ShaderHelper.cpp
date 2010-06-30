@@ -58,12 +58,6 @@ ShaderHelper::ShaderHelper( DatasetHelper* dh ) :
     m_legendShader->bind();
     if ( m_dh->GLError() )
         m_dh->printGLError( wxT("setup legend shader") );
-
-    m_dh->printDebug( _T("initializing graph shader"), 1 );
-    m_graphShader = new Shader( wxT("graph") );
-    m_graphShader->bind();
-    if ( m_dh->GLError() )
-        m_dh->printGLError( wxT("setup graph shader") );
 }
 
 ShaderHelper::~ShaderHelper()
@@ -97,7 +91,7 @@ void ShaderHelper::initializeArrays()
             m_type[m_textureCount] = info->getType();
             ++m_textureCount;
         }
-        if ( m_textureCount == 8 )
+        if ( m_textureCount == 10 )
             break;
     }
 }
@@ -112,8 +106,8 @@ void ShaderHelper::setTextureShaderVars()
     m_textureShader->setUniInt( "tex5", 5 );
     m_textureShader->setUniInt( "tex6", 6 );
     m_textureShader->setUniInt( "tex7", 7 );
-//    m_textureShader->setUniInt( "tex8", 8 );
-//    m_textureShader->setUniInt( "tex9", 9 );
+    m_textureShader->setUniInt( "tex8", 8 );
+    m_textureShader->setUniInt( "tex9", 9 );
 
     m_textureShader->setUniInt( "type0", m_type[0] );
     m_textureShader->setUniInt( "type1", m_type[1] );
@@ -123,8 +117,8 @@ void ShaderHelper::setTextureShaderVars()
     m_textureShader->setUniInt( "type5", m_type[5] );
     m_textureShader->setUniInt( "type6", m_type[6] );
     m_textureShader->setUniInt( "type7", m_type[7] );
-//    m_textureShader->setUniInt( "type8", m_type[8] );
-//    m_textureShader->setUniInt( "type9", m_type[9] );
+    m_textureShader->setUniInt( "type8", m_type[8] );
+    m_textureShader->setUniInt( "type9", m_type[9] );
 
     m_textureShader->setUniFloat( "threshold0", m_threshold[0] );
     m_textureShader->setUniFloat( "threshold1", m_threshold[1] );
@@ -134,8 +128,8 @@ void ShaderHelper::setTextureShaderVars()
     m_textureShader->setUniFloat( "threshold5", m_threshold[5] );
     m_textureShader->setUniFloat( "threshold6", m_threshold[6] );
     m_textureShader->setUniFloat( "threshold7", m_threshold[7] );
-//    m_textureShader->setUniFloat( "threshold8", m_threshold[8] );
-//    m_textureShader->setUniFloat( "threshold9", m_threshold[9] );
+    m_textureShader->setUniFloat( "threshold8", m_threshold[8] );
+    m_textureShader->setUniFloat( "threshold9", m_threshold[9] );
 
     m_textureShader->setUniFloat( "alpha0", m_alpha[0] );
     m_textureShader->setUniFloat( "alpha1", m_alpha[1] );
@@ -145,8 +139,8 @@ void ShaderHelper::setTextureShaderVars()
     m_textureShader->setUniFloat( "alpha5", m_alpha[5] );
     m_textureShader->setUniFloat( "alpha6", m_alpha[6] );
     m_textureShader->setUniFloat( "alpha7", m_alpha[7] );
-//    m_textureShader->setUniFloat( "alpha8", m_alpha[8] );
-//    m_textureShader->setUniFloat( "alpha9", m_alpha[9] );
+    m_textureShader->setUniFloat( "alpha8", m_alpha[8] );
+    m_textureShader->setUniFloat( "alpha9", m_alpha[9] );
 }
 
 void ShaderHelper::setMeshShaderVars()
@@ -179,11 +173,11 @@ void ShaderHelper::setMeshShaderVars()
             Surface* s = (Surface*) m_dh->mainFrame->m_listCtrl->GetItemData( i );
             m_cutTex = s->getCutTex();
 
-            glActiveTexture( GL_TEXTURE0 + 7 );
+            glActiveTexture( GL_TEXTURE0 + 9 );
             glBindTexture( GL_TEXTURE_2D, m_cutTex );
-            m_tex[7] = 7;
-            m_threshold[7] = 0;
-            m_type[7] = 5;
+            m_tex[9] = 9;
+            m_threshold[9] = 0;
+            m_type[9] = 5;
         }
     }
     m_meshShader->setUniInt( "cutTex", 9 );
@@ -196,8 +190,8 @@ void ShaderHelper::setMeshShaderVars()
     m_meshShader->setUniInt( "tex5", 5 );
     m_meshShader->setUniInt( "tex6", 6 );
     m_meshShader->setUniInt( "tex7", 7 );
-//    m_meshShader->setUniInt( "tex8", 8 );
-//    m_meshShader->setUniInt( "tex9", 9 );
+    m_meshShader->setUniInt( "tex8", 8 );
+    m_meshShader->setUniInt( "tex9", 9 );
 
     m_meshShader->setUniInt( "type0", m_type[0] );
     m_meshShader->setUniInt( "type1", m_type[1] );
@@ -207,8 +201,8 @@ void ShaderHelper::setMeshShaderVars()
     m_meshShader->setUniInt( "type5", m_type[5] );
     m_meshShader->setUniInt( "type6", m_type[6] );
     m_meshShader->setUniInt( "type7", m_type[7] );
-//    m_meshShader->setUniInt( "type8", m_type[8] );
-//    m_meshShader->setUniInt( "type9", m_type[9] );
+    m_meshShader->setUniInt( "type8", m_type[8] );
+    m_meshShader->setUniInt( "type9", m_type[9] );
 
     m_meshShader->setUniFloat( "threshold0", m_threshold[0] );
     m_meshShader->setUniFloat( "threshold1", m_threshold[1] );
@@ -218,8 +212,8 @@ void ShaderHelper::setMeshShaderVars()
     m_meshShader->setUniFloat( "threshold5", m_threshold[5] );
     m_meshShader->setUniFloat( "threshold6", m_threshold[6] );
     m_meshShader->setUniFloat( "threshold7", m_threshold[7] );
-//    m_meshShader->setUniFloat( "threshold8", m_threshold[8] );
-//    m_meshShader->setUniFloat( "threshold9", m_threshold[9] );
+    m_meshShader->setUniFloat( "threshold8", m_threshold[8] );
+    m_meshShader->setUniFloat( "threshold9", m_threshold[9] );
 
     m_meshShader->setUniFloat( "alpha0", m_alpha[0] );
     m_meshShader->setUniFloat( "alpha1", m_alpha[1] );
@@ -229,8 +223,8 @@ void ShaderHelper::setMeshShaderVars()
     m_meshShader->setUniFloat( "alpha5", m_alpha[5] );
     m_meshShader->setUniFloat( "alpha6", m_alpha[6] );
     m_meshShader->setUniFloat( "alpha7", m_alpha[7] );
-//    m_meshShader->setUniFloat( "alpha8", m_alpha[8] );
-//    m_meshShader->setUniFloat( "alpha9", m_alpha[9] );
+    m_meshShader->setUniFloat( "alpha8", m_alpha[8] );
+    m_meshShader->setUniFloat( "alpha9", m_alpha[9] );
 
 }
 
@@ -264,7 +258,7 @@ void ShaderHelper::setFiberShaderVars()
             }
             ++c;
         }
-        if ( c == 8 )
+        if ( c == 10 )
             break;
     }
 
@@ -290,8 +284,8 @@ void ShaderHelper::setSplineSurfaceShaderVars()
     m_splineSurfShader->setUniInt( "tex5", 5 );
     m_splineSurfShader->setUniInt( "tex6", 6 );
     m_splineSurfShader->setUniInt( "tex7", 7 );
-//    m_splineSurfShader->setUniInt( "tex8", 8 );
-//    m_splineSurfShader->setUniInt( "tex9", 9 );
+    m_splineSurfShader->setUniInt( "tex8", 8 );
+    m_splineSurfShader->setUniInt( "tex9", 9 );
 
     m_splineSurfShader->setUniInt( "type0", m_type[0] );
     m_splineSurfShader->setUniInt( "type1", m_type[1] );
@@ -301,8 +295,8 @@ void ShaderHelper::setSplineSurfaceShaderVars()
     m_splineSurfShader->setUniInt( "type5", m_type[5] );
     m_splineSurfShader->setUniInt( "type6", m_type[6] );
     m_splineSurfShader->setUniInt( "type7", m_type[7] );
-//    m_splineSurfShader->setUniInt( "type8", m_type[8] );
-//    m_splineSurfShader->setUniInt( "type9", m_type[9] );
+    m_splineSurfShader->setUniInt( "type8", m_type[8] );
+    m_splineSurfShader->setUniInt( "type9", m_type[9] );
 
     m_splineSurfShader->setUniFloat( "threshold0", m_threshold[0] );
     m_splineSurfShader->setUniFloat( "threshold1", m_threshold[1] );
@@ -312,8 +306,8 @@ void ShaderHelper::setSplineSurfaceShaderVars()
     m_splineSurfShader->setUniFloat( "threshold5", m_threshold[5] );
     m_splineSurfShader->setUniFloat( "threshold6", m_threshold[6] );
     m_splineSurfShader->setUniFloat( "threshold7", m_threshold[7] );
-//    m_splineSurfShader->setUniFloat( "threshold8", m_threshold[8] );
-//    m_splineSurfShader->setUniFloat( "threshold9", m_threshold[9] );
+    m_splineSurfShader->setUniFloat( "threshold8", m_threshold[8] );
+    m_splineSurfShader->setUniFloat( "threshold9", m_threshold[9] );
 
     m_splineSurfShader->setUniFloat( "alpha0", m_alpha[0] );
     m_splineSurfShader->setUniFloat( "alpha1", m_alpha[1] );
@@ -323,7 +317,7 @@ void ShaderHelper::setSplineSurfaceShaderVars()
     m_splineSurfShader->setUniFloat( "alpha5", m_alpha[5] );
     m_splineSurfShader->setUniFloat( "alpha6", m_alpha[6] );
     m_splineSurfShader->setUniFloat( "alpha7", m_alpha[7] );
-//    m_splineSurfShader->setUniFloat( "alpha8", m_alpha[8] );
-//    m_splineSurfShader->setUniFloat( "alpha9", m_alpha[9] );
+    m_splineSurfShader->setUniFloat( "alpha8", m_alpha[8] );
+    m_splineSurfShader->setUniFloat( "alpha9", m_alpha[9] );
 }
 

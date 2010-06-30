@@ -22,35 +22,18 @@
 #include "surface.h"
 
 DatasetHelper::DatasetHelper( MainFrame* mf ) :
-    rows( 1 ),
-    columns( 1 ),
-    frames( 1 ),
+    rows( 1 ), columns( 1 ), frames( 1 ),
 
-    xVoxel( 1.0 ),
-    yVoxel( 1.0 ),
-    zVoxel( 1.0 ),
-    countFibers( 0 ),
+    xVoxel( 1.0 ), yVoxel( 1.0 ), zVoxel( 1.0 ), countFibers( 0 ),
 
-    m_scnFileLoaded( false ),
-    anatomy_loaded( false ),
-    fibers_loaded( false ),
-    vectors_loaded( false ),
-    tensors_loaded( false ),
-    surface_loaded( false ),
-    surface_isDirty( true ),
+    m_scnFileLoaded( false ), anatomy_loaded( false ), fibers_loaded( false ), vectors_loaded( false ),
+            tensors_loaded( false ), surface_loaded( false ), surface_isDirty( true ),
 
-    useVBO( true ),
-    lastGLError( GL_NO_ERROR ),
-    quadrant( 6 ),
-    textures( 0 ),
+            useVBO( true ), lastGLError( GL_NO_ERROR ), quadrant( 6 ), textures( 0 ),
 
-    scheduledReloadShaders( true ),
-    scheduledScreenshot( false ),
+            scheduledReloadShaders( true ), scheduledScreenshot( false ),
 
-    showBoxes( true ),
-    blendAlpha( false ),
-    pointMode( false ),
-    animationStep( 0 ),
+            showBoxes( true ), blendAlpha( false ), pointMode( false ),
 
 #ifdef DEBUG
             debugLevel( 0 ),
@@ -58,64 +41,36 @@ DatasetHelper::DatasetHelper( MainFrame* mf ) :
             debugLevel(1),
 #endif
 
-    showSagittal( true ),
-    showCoronal( true ),
-    showAxial( true ),
+            showSagittal( true ), showCoronal( true ), showAxial( true ),
 
-    showCrosshair( false ),
+            showCrosshair( false ),
 
-    xSlize( 0.5 ),
-    ySlize( 0.5 ),
-    zSlize( 0.5 ),
+            xSlize( 0.5 ), ySlize( 0.5 ), zSlize( 0.5 ),
 
-    lighting( true ),
-    blendTexOnMesh( true ),
-    use_lic( false ),
-    drawVectors( false ),
+            lighting( true ), blendTexOnMesh( true ), use_lic( false ), drawVectors( false ),
 
-    normalDirection( 1.0 ),
+            normalDirection( 1.0 ),
 
-    fibersInverted( false ),
-    useFakeTubes( false ),
-    useTransparency( false ),
-    filterIsoSurf( false ),
+            fibersInverted( false ), useFakeTubes( false ), useTransparency( false ), filterIsoSurf( false ),
 
-    colorMap( 0 ),
-    showColorMapLegend( false ),
+            colorMap( 0 ), showColorMapLegend( false ),
 
-    morphing( false ),
-    boxLockIsOn( false ),
-    semaphore( false ),
-    threadsActive( 0 ),
+            morphing( false ), boxLockIsOn( false ), semaphore( false ), threadsActive( 0 ),
 
-    m_isDragging( false ),
-    m_isrDragging( false ),
-    m_ismDragging( false ),
-    zoom( 1 ),
-    xMove( 0 ),
-    yMove( 0 ),
+            m_isDragging( false ), m_isrDragging( false ), m_ismDragging( false ), zoom( 1 ), xMove( 0 ),
+            yMove( 0 ),
 
-    m_texAssigned( false ),
-    m_selBoxChanged( true ),
-    gui_blocked( false ),
+            m_texAssigned( false ), m_selBoxChanged( true ), gui_blocked( false ),
 
-    geforceLevel( 0 ),
+            geforceLevel( 0 ),
 
-    lastError( _T("") ),
-    lastPath( MyApp::respath + _T("data") ),
-    m_scenePath( _T("") ),
-    m_scnFileName( _T("") ),
-    m_screenshotPath( _T("") ),
-    m_screenshotName( _T("") ),
+            lastError( _T("") ), lastPath( MyApp::respath + _T("data") ), m_scenePath( _T("") ),
+            m_scnFileName( _T("") ), m_screenshotPath( _T("") ), m_screenshotName( _T("") ),
 
-    lastSelectedPoint( 0 ),
-    lastSelectedBox( 0 ),
-    boxAtCrosshair( 0 ),
-    anatomyHelper( 0 ),
-    shaderHelper( 0 ),
-    scene( 0 ),
+            lastSelectedPoint( 0 ), lastSelectedBox( 0 ), boxAtCrosshair( 0 ), anatomyHelper( 0 ),
+            shaderHelper( 0 ), scene( 0 ),
 
-    mainFrame( mf )
+            mainFrame( mf )
 {
     Matrix4fSetIdentity( &m_transform );
 }
@@ -1440,9 +1395,4 @@ void DatasetHelper::createLicSliceAxi( int slize )
         }
     }
     licMovieHelper();
-}
-
-void DatasetHelper::increaseAnimationStep()
-{
-    animationStep = (animationStep + 1) % 1000000;
 }

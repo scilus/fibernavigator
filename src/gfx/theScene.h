@@ -60,8 +60,6 @@ private:
 
 	void drawSelectionBoxes();
 	void drawPoints();
-
-	void drawGraph();
 };
 
 #endif /*THESCENE_H_*/

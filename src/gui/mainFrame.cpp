@@ -153,8 +153,6 @@ EVT_MENU(BUTTON_MOVE_POINTS2, MainFrame::OnMovePoints2)
 /* KDTREE thread finished */
 EVT_MENU(KDTREE_EVENT, MainFrame::OnKdTreeThreadFinished)
 
-EVT_TIMER(-1, MainFrame::OnTimerEvent)
-
 END_EVENT_TABLE()
 
 /*****************************************************************************************************
@@ -353,8 +351,6 @@ MainFrame::MainFrame(wxWindow *parent, const wxWindowID id,
     SetSizer(topSizer);
     topSizer->SetSizeHints(this);
 
-    m_timer = new wxTimer(this);
-    m_timer->Start(40);
 }
 
 MainFrame::~MainFrame()
@@ -2983,10 +2979,4 @@ void MainFrame::updateMenus()
             sMenu->Enable(sMenu->FindItem(_T("Smooth Surface (Loop SubD)")), true);
         }
     }
-}
-
-void MainFrame::OnTimerEvent(wxTimerEvent &event)
-{
-    refreshAllGLWidgets();
-    m_dh->increaseAnimationStep();
 }
