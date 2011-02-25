@@ -4,8 +4,8 @@
 *
 * TriangleMesh.h
 *
-* Author:	Russ Stimpson
-* Date:		2/7/03
+* Author:    Russ Stimpson
+* Date:        2/7/03
 *
 *****************************************************************/
 
@@ -16,125 +16,128 @@
 #include "../Fantom/FIndex.h"
 #include "../Fantom/FArray.h"
 
-#define PI 3.14159
+
+#ifndef M_PI
+#define M_PI 3.1415926535897932384626433832795
+#endif
 
 class DatasetHelper;
 
-struct Triangle {
-	unsigned int pointID[3];
+struct Triangle 
+{
+    unsigned int pointID[3];
 };
 
-class TriangleMesh {
+class TriangleMesh 
+{
+    public:
+        // Constructor / Destructor
+        TriangleMesh( DatasetHelper* dh );
+        ~TriangleMesh();
 
-	// Attributes
-	private:
-		DatasetHelper* m_dh;
+        // Functions
+        void addVert( const Vector newVert );
+        void addVert( const float x, const float y, const float z );
+        void fastAddVert( const Vector newVert );
 
-		std::vector<Vector> vertices;
-		std::vector<Vector> vertNormals;
-		std::vector<wxColour> vertColors;
-		std::vector < std::vector<unsigned int> >vIsInTriangle;
+        void addTriangle( const int vertA, const int vertB, const int vertC );
+        void addTriangle( const int vertA, const int vertB, const int vertC, const int tensorIndex );
+        void fastAddTriangle( const int vertA, const int vertB, const int vertC );
 
-		std::vector< Triangle > triangles;
-		std::vector<Vector> triNormals;
-		std::vector< int >triangleTensor;
-		std::vector<wxColour>triangleColor;
-		std::vector< std::vector<int> > neighbors;
+        void clearMesh();
 
-		int	numVerts;
-		int	numTris;
+        void reserveVerts    ( const int size );
+        void reserveTriangles( const int size );
+        void resizeVerts     ( const int size );
+        void resizeTriangles ( const int size );
+        int  getNumVertices();
+        int  getNumTriangles();
 
-		// we don't delete vertices yet, so can do a cleanup only once
-		bool isCleaned;
+        Vector   getVertex       ( const int vertNum );
+        Vector   getVertex       ( const int triNum, int pos );
+        Vector   getNormal       ( const int triNum  );
+        Vector   getVertNormal   ( const int vertNum );
+        wxColour getVertColor    ( const int vertNum );
+        Triangle getTriangle     ( const int triNum  );
+        wxColour getTriangleColor( const int triNum  );
 
-		bool m_vertNormalsCalculated;
-		bool m_neighborsCalculated;
-		bool m_triangleTensorsCalculated;
+        std::vector< unsigned int > getStar( const int vertNum );
+        std::vector< Vector >       getVerts();
 
-		wxColour defaultColor;
+        int    getTriangleTensor( const int triNum );
+        Vector getTriangleCenter( int triNum ) ;
 
-	// Construction
-	public:
-		TriangleMesh (DatasetHelper* dh);
-		~TriangleMesh ();
+        void setVertex( const unsigned int vertNum, const Vector nPos );
+        void setVertColor( const int vertNum, const wxColour color );
 
-	// Operations
-	public:
-		void addVert(const Vector newVert);
-		void addVert(const float x, const float y, const float z);
-		void fastAddVert(const Vector newVert);
+        void eraseTriFromVert( const unsigned int triNum, const unsigned int vertNum );
+        void setTriangle     ( const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC );
+        void setTriangleColor( const unsigned int triNum, const float r, const float g, const float b, const float a );
+        void setTriangleColor( const unsigned int triNum, const float r, const float g, const float b );
+        void setTriangleAlpha( const unsigned int triNum, const float a );
+        void setTriangleRed  ( const unsigned int triNum, const float r );
+        void setTriangleGreen( const unsigned int triNum, const float g );
+        void setTriangleBlue ( const unsigned int triNum, const float b );
 
-		void addTriangle(const int vertA, const int vertB, const int vertC);
-		void addTriangle(const int vertA, const int vertB, const int vertC, const int tensorIndex);
-		void fastAddTriangle(const int vertA, const int vertB, const int vertC);
+        bool isInTriangle( const unsigned int vertNum, const unsigned int triangleNum );
 
-		void clearMesh();
+        bool hasEdge     ( const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum );
+        int  getThirdVert( const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum );
 
-		void reserveVerts(const int size);
-        void reserveTriangles(const int size);
-        void resizeVerts(const int size);
-        void resizeTriangles(const int size);
-		int getNumVertices();
-		int getNumTriangles();
+        int  getNextVertex( const unsigned int triNum, const unsigned int vertNum );
 
-		Vector getVertex (const int vertNum);
-		Vector getVertex (const int triNum, int pos);
-		Vector getNormal(const int triNum);
-		Vector getVertNormal(const int vertNum);
-		wxColour getVertColor (const int vertNum);
-		Triangle getTriangle(const int triNum);
-		wxColour getTriangleColor(const int triNum);
-		std::vector<unsigned int> getStar(const int vertNum);
-		std::vector<Vector> getVerts();
+        void cleanUp();
+        void doLoopSubD();
 
-		int getTriangleTensor(const int triNum);
-		Vector getTriangleCenter(int triNum) ;
+        void getCellVerticesIndices( const FIndex& cellId, std::vector< FIndex >& vertices );
+        void getPosition( FPosition& resultPos, const FIndex& pIndex );
+        void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh );
+        void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs );
+        int  getNeighbor( const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum );
 
-		void setVertex(const unsigned int vertNum, const Vector nPos);
-		void setVertColor(const int vertNum, const wxColour color);
+        void printInfo();
 
-		void eraseTriFromVert( const unsigned int triNum, const unsigned int vertNum);
-		void setTriangle(const unsigned int triNum, const unsigned int vertA, const unsigned int vertB, const unsigned int vertC);
-		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b, const float a);
-		void setTriangleColor(const unsigned int triNum, const float r, const float g, const float b);
-		void setTriangleAlpha(const unsigned int triNum, const float a);
-		void setTriangleRed(const unsigned int triNum, const float r);
-		void setTriangleGreen(const unsigned int triNum, const float g);
-		void setTriangleBlue(const unsigned int triNum, const float b);
+        void   flipNormals();
+        
 
-		bool isInTriangle(const unsigned int vertNum, const unsigned int triangleNum);
+    private:
 
-		bool hasEdge(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
-		int getThirdVert(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
+        // Functions
+        Vector calcTriangleNormal( const Triangle );
+        Vector calcTriangleNormal( const int triNum );
+        Vector calcVertNormal( const int vertNum );
+        void   calcTriangleTensors();
+        void   calcNeighbors();
+        void   calcVertNormals();
 
-		int getNextVertex(const unsigned int triNum, const unsigned int vertNum);
+        int   calcTriangleTensor( const int triNum );
+        void  calcNeighbor( const int triangleNum );
 
-		void cleanUp();
-		void doLoopSubD();
+        // Variables
+        DatasetHelper* m_dh;
 
-		void getCellVerticesIndices( const FIndex& cellId, std::vector< FIndex >& vertices );
-		void getPosition( FPosition& resultPos, const FIndex& pIndex );
-		void getEdgeNeighbor( const FIndex& cellId, int pos, std::vector< FIndex >& neigh );
-		void getNeighbors( const FIndex& vertId, std::vector< FIndex >& neighs );
-		int getNeighbor(const unsigned int coVert1, const unsigned int coVert2, const unsigned int triangleNum);
+        std::vector< Vector >                      vertices;
+        std::vector< Vector >                      vertNormals;
+        std::vector< wxColour >                    vertColors;
+        std::vector< std::vector< unsigned int > > vIsInTriangle;
 
-		void printInfo();
+        std::vector< Triangle >           triangles;
+        std::vector< Vector >             triNormals;
+        std::vector< int >                triangleTensor;
+        std::vector< wxColour >           triangleColor;
+        std::vector< std::vector< int > > neighbors;
 
-	private:
-		Vector calcTriangleNormal(const Triangle);
-		Vector calcTriangleNormal(const int triNum);
-		Vector calcVertNormal(const int vertNum);
-		void calcTriangleTensors();
-		void calcNeighbors();
-		void calcVertNormals();
+        int    numVerts;
+        int    numTris;
 
-		void flipNormals();
+        // We don't delete vertices yet, so can do a cleanup only once.
+        bool isCleaned;
 
+        bool m_vertNormalsCalculated;
+        bool m_neighborsCalculated;
+        bool m_triangleTensorsCalculated;
 
-		int calcTriangleTensor(const int triNum);
-		void calcNeighbor(const int triangleNum);
-
-
-
+        wxColour defaultColor;
 };
-#endif
+
+#endif /* TRIANGLEMESH_H */

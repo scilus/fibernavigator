@@ -18,8 +18,9 @@
 #include <vector>
 #include <complex>
 
+
 #ifndef M_PI
-#define M_PI 3.14159265358979323846
+#define M_PI 3.1415926535897932384626433832795
 #endif
 
 #define TINY 1.0e-30
@@ -28,8 +29,8 @@
 
 void FMath::FGaussJ( FMatrix &a, FMatrix &b )
 // PAR: a[1..n][1..n] contains the matrix of the system to solve
-//	n   is the number of rows and columns in the system
-//	b[1..n][1..m] contains m right sides, which are solved simultan
+//    n   is the number of rows and columns in the system
+//    b[1..n][1..m] contains m right sides, which are solved simultan
 // PRE: no singular matrix. TESTED
 // POST: **a contains the inverse of the original matrix
 //       **b conatins the solutions for the m right sides
@@ -133,7 +134,7 @@ void FMath::FGaussJ( FMatrix &a, FMatrix &b )
 //===========================================================================
 
 int FMath::QuadraticEquation(double a, double b, double c,
-			     complex<double> x[2])
+                 complex<double> x[2])
 // PAR: a*x^2+b*x+c=0.0, x[0..1] gets the complex solutions
 // POST: x[0], x[1] contain the solution
 // RETURN: number of different solutions
@@ -160,15 +161,15 @@ int FMath::QuadraticEquation(double a, double b, double c,
     {
       if (a != 0.0) {
         x[0]=complex<double>(-0.5*b/a);
-	//although there is only one solution
-	//set x[1] for convenience to the same value as x[0]
+    //although there is only one solution
+    //set x[1] for convenience to the same value as x[0]
         x[1]=x[0];
         return 1;
       }
       else if (c == 0.0)
-	return -1;
+    return -1;
       else
-	return 0;
+    return 0;
     }
     // ASSERT: d<0.0
     complex<double> dd=d;
@@ -223,7 +224,7 @@ int FMath::CubicEquation(double a3, double a2, double a1, double a0, complex<dou
 // --------------------------------------------------------------------------
 
 void FMath::Eigensystem(const FMatrix& A, std::complex<double> e[2], double* EV0,
-			double* EV1)
+            double* EV1)
 // PAR: e[2] gets the eigen values, EV0, EV1 gets eigen vectors
 // POST: e[2] contains the eigen values,
 //       if e[0..1] real , EV0, EV1 contain eigen vectors
@@ -238,33 +239,33 @@ void FMath::Eigensystem(const FMatrix& A, std::complex<double> e[2], double* EV0
       double tmp = e[0].real()-A(0,0);
       if (tmp)
         {
-	  EV0[0] = A(0,1) / tmp;
-	  EV0[1] = 1.0 ;
+      EV0[0] = A(0,1) / tmp;
+      EV0[1] = 1.0 ;
         }
       else
-	{
-	  EV0[0] = 1.0;
-	  EV0[1] = 0.0;
-	}
+    {
+      EV0[0] = 1.0;
+      EV0[1] = 0.0;
+    }
 
       tmp = e[1].real()-A(0,0);
       if (tmp)
         {
-	  EV1[0] = A(0,1) / tmp;
-	  EV1[1] = 1.0 ;
+      EV1[0] = A(0,1) / tmp;
+      EV1[1] = 1.0 ;
         }
       else
-	{
-	  EV1[0] = 1.0;
-	  EV1[1] = 0.0;
-	}
+    {
+      EV1[0] = 1.0;
+      EV1[1] = 0.0;
+    }
     }
 }
 
 // --------------------------------------------------------------------------
 
 void FMath::mnewt(int ntrial, F::FVector& x, double tolx, double tolf,
-		  void (*usrfun)(F::FVector, F::FVector, FMatrix)){
+          void (*usrfun)(F::FVector, F::FVector, FMatrix)){
   // cf. Numerical Recipes pp.379-383
 
   positive N = x.getDimension();
@@ -308,8 +309,8 @@ void FMath::mnewt(int ntrial, F::FVector& x, double tolx, double tolf,
 
 void FMath::Ludecomp(FMatrix& a, positive* indx, double& d)
 // PAR: **a contains a matrix a[1..n][1..n]
-//	indx[1..n] gives the row permutations back (partial pivoting)
-//	d becomes +1, if equal number row interchanges and -1 if odd
+//    indx[1..n] gives the row permutations back (partial pivoting)
+//    d becomes +1, if equal number row interchanges and -1 if odd
 // POST: a contains LU decomposition, *indx the permutation and d the sign
 // REMARK: the program was taken from "Numerical Recipes in C", p.46/47
 {
@@ -388,11 +389,11 @@ void FMath::Ludecomp(FMatrix& a, positive* indx, double& d)
 
 void FMath::Lubacksb(const FMatrix& a, F::FVector& b, positive * indx)
   // PAR: a[1..n][1..n] is matrix in LU-decomposition from ludcmp,
-  //	indx[1..n] is permutation vector from ludcmp,
-  //	n is the dimension of a,
-  //	b[1..n] is a right side.
+  //    indx[1..n] is permutation vector from ludcmp,
+  //    n is the dimension of a,
+  //    b[1..n] is a right side.
   // POST: a, n, indx are unchanged
-  //	 b contains the solution of the equation
+  //     b contains the solution of the equation
   // REMARK: the routine was taken from "Numerical Recipes in C", p.47
 {
 #ifndef NODEBUG
@@ -628,23 +629,23 @@ void FMath::intersectTetrahedronToPlane( const FPosition& tet0,
 
     for (positive i=0; i<4; i++)
       if (lamda[i]>0)
-	set[0][setAsize++]=i;
+    set[0][setAsize++]=i;
       else
-	set[1][setBsize++]=i;
+    set[1][setBsize++]=i;
 
     if (setAsize-setBsize == 0){
       result.resize(4);
       mix( result[0], (*vecs)[set[0][0]], (*vecs)[set[1][0]],
-	   lamda[set[0][0]], lamda[set[1][0]]);
+       lamda[set[0][0]], lamda[set[1][0]]);
 
       mix( result[1], (*vecs)[set[0][1]], (*vecs)[set[1][0]],
-	   lamda[set[0][1]], lamda[set[1][0]]);
+       lamda[set[0][1]], lamda[set[1][0]]);
 
       mix( result[2], (*vecs)[set[0][1]], (*vecs)[set[1][1]],
-	   lamda[set[0][1]], lamda[set[1][1]]);
+       lamda[set[0][1]], lamda[set[1][1]]);
 
       mix( result[3], (*vecs)[set[0][0]], (*vecs)[set[1][1]],
-	   lamda[set[0][0]], lamda[set[1][1]]);
+       lamda[set[0][0]], lamda[set[1][1]]);
     }
     else if (abs(setAsize-setBsize) == 2){
       // mix 0 - 1, 0 - 2, 0 - 3 if set 1 is {0} and set 2 is {1 2 3}
@@ -657,20 +658,20 @@ void FMath::intersectTetrahedronToPlane( const FPosition& tet0,
       setBsize=(setBsize-1) >> 1;
       result.resize(3);
       mix( result[0],
-	   (*vecs)[set[setAsize][0]],
-	   (*vecs)[set[setBsize][0]],
-	   lamda[set[setAsize][0]],
-	   lamda[set[setBsize][0]]);
+       (*vecs)[set[setAsize][0]],
+       (*vecs)[set[setBsize][0]],
+       lamda[set[setAsize][0]],
+       lamda[set[setBsize][0]]);
       mix( result[1],
-	   (*vecs)[set[setAsize][0]],
-	   (*vecs)[set[setBsize][1]],
-	   lamda[set[setAsize][0]],
-	   lamda[set[setBsize][1]]);
+       (*vecs)[set[setAsize][0]],
+       (*vecs)[set[setBsize][1]],
+       lamda[set[setAsize][0]],
+       lamda[set[setBsize][1]]);
       mix( result[2],
-	   (*vecs)[set[setAsize][0]],
-	   (*vecs)[set[setBsize][2]],
-	   lamda[set[setAsize][0]],
-	   lamda[set[setBsize][2]]);
+       (*vecs)[set[setAsize][0]],
+       (*vecs)[set[setBsize][2]],
+       lamda[set[setAsize][0]],
+       lamda[set[setBsize][2]]);
     }
     else
       result.resize(0);

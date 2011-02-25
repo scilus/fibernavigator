@@ -181,11 +181,11 @@
     inline
     static void Vector3fMultMat4(Vector3fT* NewObj, const Vector3fT* v, const Matrix4fT* m)
     {
-    	Vector3fT Result;
-    	Result.s.X = v->s.X * m->s.XX + v->s.Y * m->s.XY + v->s.Z * m->s.XZ;
-    	Result.s.Y = v->s.X * m->s.YX + v->s.Y * m->s.YY + v->s.Z * m->s.YZ;
-    	Result.s.Z = v->s.X * m->s.ZX + v->s.Y * m->s.ZY + v->s.Z * m->s.ZZ;
-    	*NewObj = Result;
+        Vector3fT Result;
+        Result.s.X = v->s.X * m->s.XX + v->s.Y * m->s.XY + v->s.Z * m->s.XZ;
+        Result.s.Y = v->s.X * m->s.YX + v->s.Y * m->s.YY + v->s.Z * m->s.YZ;
+        Result.s.Z = v->s.X * m->s.ZX + v->s.Y * m->s.ZY + v->s.Z * m->s.ZZ;
+        *NewObj = Result;
     }
 
     /**
@@ -224,7 +224,7 @@
     inline
     static void Matrix3fSetIdentity(Matrix3fT* NewObj)
     {
-    	Matrix3fSetZero(NewObj);
+        Matrix3fSetZero(NewObj);
         //then set diagonal as 1
         NewObj->s.M00 =
         NewObj->s.M11 =
@@ -232,27 +232,27 @@
     }
 
     inline
-	static void Matrix4fSetZero(Matrix4fT* NewObj)
-	{
-		NewObj->s.M00 = NewObj->s.M01 = NewObj->s.M02 = NewObj->s.M03 =
-		NewObj->s.M10 = NewObj->s.M11 = NewObj->s.M12 = NewObj->s.M13 =
-		NewObj->s.M20 = NewObj->s.M21 = NewObj->s.M22 = NewObj->s.M23 =
-		NewObj->s.M30 = NewObj->s.M31 = NewObj->s.M32 = NewObj->s.M33 =	0.0f;
-	}
+    static void Matrix4fSetZero(Matrix4fT* NewObj)
+    {
+        NewObj->s.M00 = NewObj->s.M01 = NewObj->s.M02 = NewObj->s.M03 =
+        NewObj->s.M10 = NewObj->s.M11 = NewObj->s.M12 = NewObj->s.M13 =
+        NewObj->s.M20 = NewObj->s.M21 = NewObj->s.M22 = NewObj->s.M23 =
+        NewObj->s.M30 = NewObj->s.M31 = NewObj->s.M32 = NewObj->s.M33 =    0.0f;
+    }
 
-	/**
-	 * Sets this Matrix4 to identity.
-	 */
-	inline
-	static void Matrix4fSetIdentity(Matrix4fT* NewObj)
-	{
-		Matrix4fSetZero(NewObj);
-		//then set diagonal as 1
-		NewObj->s.M00 =
-		NewObj->s.M11 =
-		NewObj->s.M22 =
-		NewObj->s.M33 = 1.0f;
-	}
+    /**
+     * Sets this Matrix4 to identity.
+     */
+    inline
+    static void Matrix4fSetIdentity(Matrix4fT* NewObj)
+    {
+        Matrix4fSetZero(NewObj);
+        //then set diagonal as 1
+        NewObj->s.M00 =
+        NewObj->s.M11 =
+        NewObj->s.M22 =
+        NewObj->s.M33 = 1.0f;
+    }
 
     /**
      * Sets this Vector3 to zero
@@ -260,7 +260,7 @@
     inline
     static void Vector3fSetZero(Vector3fT* NewObj)
     {
-    	NewObj->s.X = NewObj->s.Y = NewObj->s.Z = 0.0;
+        NewObj->s.X = NewObj->s.Y = NewObj->s.Z = 0.0;
     }
 
     /**

@@ -76,7 +76,7 @@ class  FgeImageSpaceLIC
 
   private:
 
-	DatasetHelper* m_dh;
+    DatasetHelper* m_dh;
 
     float minX, minY, minZ, maxX, maxY, maxZ;
 

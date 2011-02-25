@@ -17,4 +17,5 @@ private:
 public:
     static wxString respath;
     static wxString shaderPath;
+    static wxString iconsPath;
 };

@@ -58,6 +58,24 @@ ShaderHelper::ShaderHelper( DatasetHelper* dh ) :
     m_legendShader->bind();
     if ( m_dh->GLError() )
         m_dh->printGLError( wxT("setup legend shader") );
+
+    m_dh->printDebug( _T("initializing graph shader"), 1 );
+    m_graphShader = new Shader( wxT("graph") );
+    m_graphShader->bind();
+    if ( m_dh->GLError() )
+        m_dh->printGLError( wxT("setup graph shader") );
+
+    m_dh->printDebug( _T("initializing tensors shader"), 1 );
+    m_tensorsShader = new Shader( wxT("tensors") );
+    m_tensorsShader->bind();
+    if ( m_dh->GLError() )
+        m_dh->printGLError( wxT("setup tensors shader") );
+
+    m_dh->printDebug( _T("initializing odfs shader"), 1 );
+    m_odfsShader = new Shader( wxT("odfs") );
+    m_odfsShader->bind();
+    if ( m_dh->GLError() )
+        m_dh->printGLError( wxT("setup odfs shader") );
 }
 
 ShaderHelper::~ShaderHelper()
@@ -68,6 +86,8 @@ ShaderHelper::~ShaderHelper()
     delete m_fiberShader;
     delete m_splineSurfShader;
     delete m_fakeTubeShader;
+    delete m_tensorsShader;
+    delete m_odfsShader;
 
     m_dh->printDebug( _T("shader helper destructor done\n"), 0 );
 }
@@ -81,10 +101,10 @@ void ShaderHelper::initializeArrays()
     m_threshold.resize( 10, 0 );
     m_alpha.resize( 10, 0 );
 
-    for ( int i = 0; i < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for ( int i = 0; i < m_dh->m_mainFrame->m_listCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* info = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData( i );
-        if ( info->getType() < Mesh_ && info->getShow() )
+        DatasetInfo* info = (DatasetInfo*) m_dh->m_mainFrame->m_listCtrl->GetItemData( i );
+        if ( info->getType() < MESH && info->getShow() )
         {
             m_threshold[m_textureCount] = info->getThreshold();
             m_alpha[m_textureCount] = info->getAlpha();
@@ -145,32 +165,32 @@ void ShaderHelper::setTextureShaderVars()
 
 void ShaderHelper::setMeshShaderVars()
 {
-    m_meshShader->setUniInt( "blendTex", m_dh->blendTexOnMesh );
+    m_meshShader->setUniInt( "blendTex", m_dh->m_blendTexOnMesh );
 
-    m_meshShader->setUniInt( "cutAtSurface", m_dh->surface_loaded );
-    m_meshShader->setUniInt( "lightOn", m_dh->lighting );
-    m_meshShader->setUniInt( "useColorMap", m_dh->colorMap );
+    m_meshShader->setUniInt( "cutAtSurface", m_dh->m_surfaceLoaded );
+    m_meshShader->setUniInt( "lightOn", m_dh->m_lighting );
+    //m_meshShader->setUniInt( "useColorMap", m_dh->m_colorMap );
 
-    m_meshShader->setUniInt( "dimX", m_dh->columns );
-    m_meshShader->setUniInt( "dimY", m_dh->rows );
-    m_meshShader->setUniInt( "dimZ", m_dh->frames );
-    m_meshShader->setUniFloat( "voxX", m_dh->xVoxel );
-    m_meshShader->setUniFloat( "voxY", m_dh->yVoxel );
-    m_meshShader->setUniFloat( "voxZ", m_dh->zVoxel );
+    m_meshShader->setUniInt( "dimX", m_dh->m_columns );
+    m_meshShader->setUniInt( "dimY", m_dh->m_rows );
+    m_meshShader->setUniInt( "dimZ", m_dh->m_frames );
+    m_meshShader->setUniFloat( "voxX", m_dh->m_xVoxel );
+    m_meshShader->setUniFloat( "voxY", m_dh->m_yVoxel );
+    m_meshShader->setUniFloat( "voxZ", m_dh->m_zVoxel );
 
-    m_meshShader->setUniInt( "sector", m_dh->quadrant );
-    m_meshShader->setUniFloat( "cutX", m_dh->xSlize + 0.5f );
-    m_meshShader->setUniFloat( "cutY", m_dh->ySlize + 0.5f );
-    m_meshShader->setUniFloat( "cutZ", m_dh->zSlize + 0.5f );
+    m_meshShader->setUniInt( "sector", m_dh->m_quadrant );
+    m_meshShader->setUniFloat( "cutX", m_dh->m_xSlize + 0.5f );
+    m_meshShader->setUniFloat( "cutY", m_dh->m_ySlize + 0.5f );
+    m_meshShader->setUniFloat( "cutZ", m_dh->m_zSlize + 0.5f );
 
 
-    for ( int i = 0; i < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for ( int i = 0; i < m_dh->m_mainFrame->m_listCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* info = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* info = (DatasetInfo*) m_dh->m_mainFrame->m_listCtrl->GetItemData( i );
 
-        if ( info->getType() == Surface_ )
+        if ( info->getType() == SURFACE )
         {
-            Surface* s = (Surface*) m_dh->mainFrame->m_listCtrl->GetItemData( i );
+            Surface* s = (Surface*) m_dh->m_mainFrame->m_listCtrl->GetItemData( i );
             m_cutTex = s->getCutTex();
 
             glActiveTexture( GL_TEXTURE0 + 9 );
@@ -230,12 +250,12 @@ void ShaderHelper::setMeshShaderVars()
 
 void ShaderHelper::setFiberShaderVars()
 {
-    m_fiberShader->setUniInt( "dimX", m_dh->columns );
-    m_fiberShader->setUniInt( "dimY", m_dh->rows );
-    m_fiberShader->setUniInt( "dimZ", m_dh->frames );
-    m_fiberShader->setUniFloat( "voxX", m_dh->xVoxel );
-    m_fiberShader->setUniFloat( "voxY", m_dh->yVoxel );
-    m_fiberShader->setUniFloat( "voxZ", m_dh->zVoxel );
+    m_fiberShader->setUniInt( "dimX", m_dh->m_columns );
+    m_fiberShader->setUniInt( "dimY", m_dh->m_rows );
+    m_fiberShader->setUniInt( "dimZ", m_dh->m_frames );
+    m_fiberShader->setUniFloat( "voxX", m_dh->m_xVoxel );
+    m_fiberShader->setUniFloat( "voxY", m_dh->m_yVoxel );
+    m_fiberShader->setUniFloat( "voxZ", m_dh->m_zVoxel );
 
     int tex = 0;
     int show = 0;
@@ -243,12 +263,12 @@ void ShaderHelper::setFiberShaderVars()
     int type = 0;
 
     int c = 0;
-    for ( int i = 0; i < m_dh->mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for ( int i = 0; i < m_dh->m_mainFrame->m_listCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* info = (DatasetInfo*) m_dh->mainFrame->m_listCtrl->GetItemData( i );
-        if ( info->getType() < Mesh_ )
+        DatasetInfo* info = (DatasetInfo*) m_dh->m_mainFrame->m_listCtrl->GetItemData( i );
+        if ( info->getType() < MESH )
         {
-            if ( ( info->getType() == Overlay ) && info->getShow() )
+            if ( ( info->getType() == OVERLAY ) && info->getShow() )
             {
                 tex = c;
                 show = info->getShow();
@@ -269,12 +289,12 @@ void ShaderHelper::setFiberShaderVars()
 
 void ShaderHelper::setSplineSurfaceShaderVars()
 {
-    m_splineSurfShader->setUniInt( "dimX", m_dh->columns );
-    m_splineSurfShader->setUniInt( "dimY", m_dh->rows );
-    m_splineSurfShader->setUniInt( "dimZ", m_dh->frames );
-    m_splineSurfShader->setUniFloat( "voxX", m_dh->xVoxel );
-    m_splineSurfShader->setUniFloat( "voxY", m_dh->yVoxel );
-    m_splineSurfShader->setUniFloat( "voxZ", m_dh->zVoxel );
+    m_splineSurfShader->setUniInt( "dimX", m_dh->m_columns );
+    m_splineSurfShader->setUniInt( "dimY", m_dh->m_rows );
+    m_splineSurfShader->setUniInt( "dimZ", m_dh->m_frames );
+    m_splineSurfShader->setUniFloat( "voxX", m_dh->m_xVoxel );
+    m_splineSurfShader->setUniFloat( "voxY", m_dh->m_yVoxel );
+    m_splineSurfShader->setUniFloat( "voxZ", m_dh->m_zVoxel );
 
     m_splineSurfShader->setUniInt( "tex0", 0 );
     m_splineSurfShader->setUniInt( "tex1", 1 );

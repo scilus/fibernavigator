@@ -30,8 +30,8 @@ void FException::print( std::ostream& out ) const
     out << what() << std::endl;
 
     for( std::list<std::string>::const_iterator i = trace.begin();
-	 i != trace.end(); ++i )
-	out << "trace: " << *i << std::endl;
+     i != trace.end(); ++i )
+    out << "trace: " << *i << std::endl;
 }
 
 //---------------------------------------------------------------------------

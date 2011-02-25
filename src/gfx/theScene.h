@@ -1,3 +1,14 @@
+/////////////////////////////////////////////////////////////////////////////
+// Name:            theScene.h
+// Author:          ---
+// Creation Date:   ---
+//
+// Description: theScene class.
+//
+// Last modifications:
+//      by : Imagicien - 12/11/2009
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef THESCENE_H_
 #define THESCENE_H_
 
@@ -10,56 +21,60 @@
 #include "../gui/ArcBall.h"
 #include "../dataset/datasetInfo.h"
 #include "../dataset/DatasetHelper.h"
-
-//#include "lic/FgeImageSpaceLIC.h"
-
 #include "wx/glcanvas.h"
 
-enum {
-	axial = 1,
-	coronal,
-	sagittal,
-	mainView
+//////////////////////////////////////////////////////////////////////////////////
+// COMMENT
+//////////////////////////////////////////////////////////////////////////////////
+enum 
+{
+    AXIAL = 1,
+    CORONAL,
+    SAGITTAL,
+    MAIN_VIEW
 };
 
 class DatasetHelper;
 class FgeImageSpaceLIC;
 
-class TheScene {
-
+class TheScene
+{
 public:
-	TheScene(DatasetHelper*);
-	~TheScene();
+    // Constructor/Destructor
+    TheScene( DatasetHelper* );
+    ~TheScene();
 
-	void initGL(int);
-
-	void bindTextures();
-
-	void setMainGLContext(wxGLContext* context) {m_mainGLContext = context;};
-	wxGLContext* getMainGLContext() {return m_mainGLContext;};
-
-	void renderScene();
-
-	void drawSphere(float, float, float, float);
+    // Functions
+    void         bindTextures    ();
+    void         drawSphere      ( float, float, float, float );
+    wxGLContext* getMainGLContext()                                 { return m_mainGLContext; };
+    void         initGL          ( int );
+    void         renderScene     ();
+    void         setMainGLContext( wxGLContext* i_context )         { m_mainGLContext = i_context; };
 
 private:
-    DatasetHelper* m_dh;
-	wxGLContext* m_mainGLContext;
+    // Functions
+    void extractFrustum         ();
+    void drawColorMapLegend     ();
+    void drawGraph              ();
+    void drawPoints             ();
+    void drawSelectionObjects   ();
+    void drawVectors            ();
+    void lightsOff              ();
+    void lightsOn               ();
+    void renderFakeTubes        ();
+    void renderFibers           ();
+    void renderMesh             ();
+    void renderODFs             ();
+    void renderSlizes           ();
+    void renderSplineSurface    ();
+    void renderTensors          ();
 
-	void lightsOn();
-	void lightsOff();
-
-	void renderSlizes();
-	void renderMesh();
-	void renderFibers();
-	void renderFakeTubes();
-	void renderSplineSurface();
-
-	void drawVectors();
-	void drawColorMapLegend();
-
-	void drawSelectionBoxes();
-	void drawPoints();
+    // Variables
+    DatasetHelper*  m_datasetHelper;
+    wxGLContext*    m_mainGLContext;
+    float           m_modelview[16];  // Variable for the frustum calculation.
+    float           m_projection[16]; // Variable for the frustum calculation.
 };
 
 #endif /*THESCENE_H_*/

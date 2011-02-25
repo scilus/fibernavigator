@@ -26,7 +26,7 @@
 #include "datasetInfo.h"
 
 
-#include "../gui/selectionBox.h"
+#include "../gui/SelectionObject.h"
 
 #include "../gui/mainFrame.h"
 #include "../gfx/theScene.h"
@@ -43,172 +43,200 @@ class TheScene;
 class AnatomyHelper;
 class ShaderHelper;
 class SplinePoint;
-class SelectionBox;
+class SelectionObject;
 class Fibers;
 class TensorField;
 class Surface;
 
-class DatasetHelper {
+typedef std::vector< std::vector< SelectionObject* > > SelectionObjectList;
+
+class DatasetHelper 
+{
 public:
-	DatasetHelper(MainFrame*);
-	virtual ~DatasetHelper();
+    // Constructor/destructor
+    DatasetHelper( MainFrame* i_mainFrame );
+    virtual ~DatasetHelper();
 
-	bool load(const int index);
-	bool load(wxString filename, const float threshold = 0.0, const bool active = true,
-	        const bool showFS = true, const bool useTex = true, const float alpha = 1.0);
-	void finishLoading(DatasetInfo*);
-	bool loadScene(const wxString filename);
-	bool loadTextFile(wxString* string, const wxString filename);
-	bool fileNameExists(const wxString filename);
+    // Functions
+    bool load( const int i_index );
+    bool load( wxString    i_filename, 
+               int   i_index     = -1, 
+               const float i_threshold = 0.0f, 
+               const bool  i_active    = true,
+               const bool  i_showFS    = true, 
+               const bool  i_useTex    = true, 
+               const float i_alpha     = 1.0f );
+    void finishLoading ( DatasetInfo* );
+    bool loadScene     ( const wxString i_filename );
+    bool loadTextFile  ( wxString* i_string, const wxString i_filename );
+    bool fileNameExists( const wxString i_filename );
 
-	//! Saves the current scene to an xml file
-	void save(const wxString filename);
+    //! Saves the current scene to an xml file
+    void save( const wxString filename );
 
-	std::vector<std::vector<SelectionBox*> > getSelectionBoxes();
-	void updateAllSelectionBoxes();
-	Vector mapMouse2World(const int x, const int y);
-	Vector mapMouse2WorldBack(const int x, const int y);
+    SelectionObjectList getSelectionObjects();
+    void   deleteAllPoints();
+    void   deleteAllSelectionObjects();
+    void   updateAllSelectionObjects();
+    Vector mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);
+    Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);    
 
-	bool invertFibers() {return fibersInverted = !fibersInverted;};
+    bool invertFibers() { return m_fibersInverted = ! m_fibersInverted; };
 
-	void createIsoSurface();
-	void createDistanceMap();
-	void createCutDataset();
-	/*
-	 * Called from MainFrame when a kdTree thread signals it's finished
-	 */
-	void treeFinished();
+    void createIsoSurface();
+    void createDistanceMapAndIso();
+    void createDistanceMap();
+    void createCutDataset();
+    /*
+     * Called from MainFrame when a kdTree thread signals it's finished
+     */
+    void treeFinished();
 
-	/*
-	 * Helper functions
-	 */
-	void printTime();
-	void printwxT(const wxString string);
-	void printDebug(const wxString string, const int level);
-	/*
-	 * Check for GL error
-	 */
-	bool GLError();
-	void printGLError(const wxString function = wxT(""));
+    /*
+     * Helper functions
+     */
+    void printTime();
+    void printwxT  ( const wxString i_string );
+    void printDebug( const wxString i_string, const int i_level );
+    /*
+     * Check for GL error
+     */
+    bool GLError();
+    void printGLError( const wxString function = wxT( "" ) );
 
-	void updateView(const float x, const float y, const float z);
+    void updateView( const float i_x, const float i_y, const float i_z );
 
-	void changeZoom(const int z);
-	void moveScene(int x, int y);
+    void changeZoom( const int i_z );
+    void moveScene ( int i_x, int i_y );
 
-	void doMatrixManipulation();
+    void doMatrixManipulation();
 
-	bool getFiberDataset(Fibers *&f);
-	bool getSurfaceDataset(Surface *&s);
-	std::vector<float>* getVectorDataset();
-	TensorField* getTensorField();
+    bool getFiberDataset  ( Fibers*  &i_fiber );
+    bool getSurfaceDataset( Surface* &i_surface );
+    std::vector< float >* getVectorDataset();
+    TensorField* getTensorField();
 
-	void toggleBoxes() {showBoxes = !showBoxes;};
-	bool togglePointMode() {return pointMode = !pointMode;};
-	bool getPointMode() {return pointMode;};
+    void toggleShowAllSelectionObjects() { m_showObjects = ! m_showObjects; };
+    void toggleActivateAllSelectionObjects() { m_activateObjects = ! m_activateObjects; };
+    bool togglePointMode()        { return m_pointMode = ! m_pointMode; };
+    bool getPointMode()           { return m_pointMode; };
 
-	void updateLoadStatus();
+    void updateLoadStatus();
 
-	void doLicMovie(int mode);
-	void createLicSliceSag(int slize);
-	void createLicSliceCor(int slize);
-	void createLicSliceAxi(int slize);
-	void licMovieHelper();
+    void doLicMovie       ( int i_mode );
+    void createLicSliceSag( int i_slize );
+    void createLicSliceCor( int i_slize );
+    void createLicSliceAxi( int i_slize );
+    void licMovieHelper();
 
-	/////////////////////////////////////////////////////////////////////////////////
-	// general info about the datasets
-	/////////////////////////////////////////////////////////////////////////////////
-	int rows;
-	int columns;
-	int frames;
+    void increaseAnimationStep();
 
-	float xVoxel;
-	float yVoxel;
-	float zVoxel;
+    /////////////////////////////////////////////////////////////////////////////////
+    // general info about the datasets
+    /////////////////////////////////////////////////////////////////////////////////
+    int                   m_rows;
+    int                   m_columns;
+    int                   m_frames;
+    std::vector< float >* m_floatDataset;
+    std::vector<Vector>   m_rulerPts;
+    bool                  m_isRulerToolActive;
+    double                m_rulerFullLength;
+    double                m_rulerPartialLength;
+    int                   m_fibersSamplingFactor;
 
-	unsigned int countFibers;
+    float m_xVoxel;
+    float m_yVoxel;
+    float m_zVoxel;
 
-	bool m_scnFileLoaded;
-	bool anatomy_loaded;
-	bool mesh_loaded;
-	bool fibers_loaded;
-	bool vectors_loaded;
-	bool tensors_loaded;
-	bool surface_loaded;
-	bool surface_isDirty;
+    unsigned int m_countFibers;
 
-	/////////////////////////////////////////////////////////////////////////////////
-	// state variables for rendering
-	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4fT m_transform;
-	bool useVBO;
-	GLenum lastGLError;
-	int quadrant;
-	int textures;
-	//! if set the shaders will be reloaded during next render() call
-	bool scheduledReloadShaders;
-	// the screenshot button has been pressed, next render pass it will be executed
-	bool scheduledScreenshot;
+    bool m_scnFileLoaded;
+    bool m_anatomyLoaded;
+    bool m_meshLoaded;
+    bool m_fibersLoaded;
+    bool m_vectorsLoaded;
+    bool m_tensorsFieldLoaded;
+    bool m_tensorsLoaded;
+    bool m_ODFsLoaded;
+    bool m_surfaceLoaded;
+    bool m_surfaceIsDirty;
 
-	bool showBoxes;
-	bool blendAlpha;
-	bool pointMode;
+    /////////////////////////////////////////////////////////////////////////////////
+    // state variables for rendering
+    /////////////////////////////////////////////////////////////////////////////////
+    Matrix4fT m_transform;
+    bool      m_useVBO;
+    GLenum    m_lastGLError;
+    int       m_quadrant;
+    int       m_textures;
+    //! if set the shaders will be reloaded during next render() call
+    bool      m_scheduledReloadShaders;
+    // the screenshot button has been pressed, next render pass it will be executed
+    bool      m_scheduledScreenshot;
 
-	int debugLevel;
-	/////////////////////////////////////////////////////////////////////////////////
-	// state variables for menu entries
-	/////////////////////////////////////////////////////////////////////////////////
-	bool showSagittal;
-	bool showCoronal;
-	bool showAxial;
+    bool      m_showObjects;
+    bool      m_activateObjects;
+    bool      m_blendAlpha;
+    bool      m_pointMode;
 
-	bool showCrosshair;
+    int       m_animationStep;
 
-	float xSlize;
-	float ySlize;
-	float zSlize;
+    int       m_debugLevel;
 
-	// lighting for fibers
-	bool lighting;
-	// ignore threshold for textures on meshes
-	bool blendTexOnMesh;
-	// show the lic texture on spline surface
-	bool use_lic;
-	// draw vectors as small lines on spline surface
-	bool drawVectors;
-	// normal direction of the spline surface
-	float normalDirection;
-	bool fibersInverted;
-	bool useFakeTubes;
-	bool useTransparency;
-	bool filterIsoSurf;
-	int colorMap;
-	bool showColorMapLegend;
+    float     m_frustum[6][4]; // Countains the information of the planes forming the frustum.
+    /////////////////////////////////////////////////////////////////////////////////
+    // state variables for menu entries
+    /////////////////////////////////////////////////////////////////////////////////
+    bool m_showSagittal;
+    bool m_showCoronal;
+    bool m_showAxial;
 
-	bool morphing;
+    bool m_showCrosshair;
 
-	bool boxLockIsOn;
-	bool semaphore;
-	int threadsActive;
+    float m_xSlize;
+    float m_ySlize;
+    float m_zSlize;
+
+    bool  m_lighting;         // m_lighting for fibers.
+    bool  m_blendTexOnMesh;   // Ignore threshold for textures on meshes.
+    bool  m_useLic;           // Show the lic texture on spline surface.
+    bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
+    float m_normalDirection;  // Normal direction of the spline surface.
+    bool  m_fibersInverted;
+    bool  m_useFakeTubes;
+    bool  m_clearToBlack;
+    bool  m_useTransparency;
+    bool  m_filterIsoSurf;
+    int   m_colorMap;
+    bool  m_showColorMapLegend;
+    bool  m_displayMinMaxCrossSection;
+    bool  m_displayGlyphOptions;
+    FibersColorationMode   m_fiberColorationMode;
+
+    bool  m_morphing;
+
+    bool  m_boxLockIsOn;
+    bool  m_semaphore;
+    int   m_threadsActive;
 
    /////////////////////////////////////////////////////////////////////////////////
-	// variables for mouse interaction
-	/////////////////////////////////////////////////////////////////////////////////
-	bool m_isDragging;
-	bool m_isrDragging;
-	bool m_ismDragging;
-	float zoom;
-	float xMove;
-	float yMove;
+    // variables for mouse interaction
+    /////////////////////////////////////////////////////////////////////////////////
+    bool  m_isDragging;
+    bool  m_isrDragging;
+    bool  m_ismDragging;
+    float m_zoom;
+    float m_xMove;
+    float m_yMove;
 
-	bool m_texAssigned;
-	bool m_selBoxChanged;
-	bool gui_blocked;
+    bool  m_texAssigned;
+    bool  m_selBoxChanged;
+    bool  m_guiBlocked;
 
-	int geforceLevel;
+    int   m_geforceLevel;
 
-	wxString lastError;
-    wxString lastPath;
+    wxString m_lastError;
+    wxString m_lastPath;
     wxString m_scenePath;
     wxString m_scnFileName;
     wxString m_screenshotPath;
@@ -217,18 +245,15 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // pointers to often used objects
     /////////////////////////////////////////////////////////////////////////////////
-    SplinePoint* lastSelectedPoint;
-    SelectionBox* lastSelectedBox;
-    SelectionBox* boxAtCrosshair;
-    AnatomyHelper* anatomyHelper;
-    ShaderHelper* shaderHelper;
-    TheScene* scene;
-    MainFrame* mainFrame;
-
-private:
-
+    AnatomyHelper*   m_anatomyHelper;
+    SelectionObject* m_boxAtCrosshair;
+    SplinePoint*     m_lastSelectedPoint;
+    SelectionObject* m_lastSelectedObject;
+    MainFrame*       m_mainFrame;
+    TheScene*        m_theScene;
+    ShaderHelper*    m_shaderHelper;
 };
 
-#define ID_KDTREE_FINISHED	50
+#define ID_KDTREE_FINISHED    50
 
 #endif /* DATASETHELPER_H_ */

@@ -15,45 +15,47 @@ class DatasetHelper;
 
 class AnatomyHelper {
 public:
-	AnatomyHelper(DatasetHelper*);
-	virtual ~AnatomyHelper();
+    //constructor/destructor
+    AnatomyHelper( DatasetHelper* );
+    virtual ~AnatomyHelper();
 
-	void renderMain();
-	void renderCrosshair();
-	void renderNav(int, Shader*);
-
-	void render() {};
-
-
+    //functions
+    void render() {};
+    void renderCrosshair();
+    void renderMain();
+    void renderNav( int, Shader* );
+    
 private:
-	void renderAxial();
-	void renderCoronal();
-	void renderSagittal();
+    //functions
+    void renderAxial();
+    void renderCoronal();
+    void renderSagittal();
 
-	void renderA1();
-	void renderA2();
-	void renderA3();
-	void renderA4();
-	void renderC1();
-	void renderC2();
-	void renderC3();
-	void renderC4();
-	void renderS1();
-	void renderS2();
-	void renderS3();
-	void renderS4();
+    void renderA1();
+    void renderA2();
+    void renderA3();
+    void renderA4();
+    void renderC1();
+    void renderC2();
+    void renderC3();
+    void renderC4();
+    void renderS1();
+    void renderS2();
+    void renderS3();
+    void renderS4();
 
-	float m_x;
-	float m_y;
-	float m_z;
-	float m_xb;
-	float m_yb;
-	float m_zb;
-	float m_xc;
-	float m_yc;
-	float m_zc;
+    //variables
+    float m_x;
+    float m_y;
+    float m_z;
+    float m_xb;
+    float m_yb;
+    float m_zb;
+    float m_xc;
+    float m_yc;
+    float m_zc;
 
-	DatasetHelper* m_dh;
+    DatasetHelper* m_datasetHelper;
 };
 
 #endif /* ANATOMYHELPER_H_ */

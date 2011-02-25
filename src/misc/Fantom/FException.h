@@ -20,7 +20,7 @@
 // --------------------------------------------------------------------------
 
 class FException: public std::runtime_error
-		  
+          
 {
 public:
     std::list<std::string> trace;
@@ -52,7 +52,7 @@ std::ostream& operator<<( std::ostream& out, const FException& e );
 
 #if defined ( WIN32 )
 #  ifdef _MSC_VER
-#    define __F_EXCEPTION_FUNC		"MSVC_NO_FUNCTION_NAMES"
+#    define __F_EXCEPTION_FUNC        "MSVC_NO_FUNCTION_NAMES"
 #  else
 #   define __F_EXCEPTION_FUNC    __PRETTY_FUNCTION__
 #  endif
@@ -75,8 +75,8 @@ std::ostream& operator<<( std::ostream& out, const FException& e );
 
 
 
-#define RETHROW_EXCEPTION(e)         					   \
-{									   \
+#define RETHROW_EXCEPTION(e)                                \
+{                                       \
   std::ostringstream f__oss;                                                \
   f__oss << __LINE__;                                                       \
   std::string f__except_str;                                                \
@@ -88,7 +88,7 @@ std::ostream& operator<<( std::ostream& out, const FException& e );
   f__except_str += __FILE__;                                                \
   e.addTraceMessage( f__except_str );                                       \
   throw e;                                                                 \
-}	                                                                   \
+}                                                                       \
 
 #define THROW_DEFAULT_EXCEPTION(type)                                      \
 {                                                                          \
@@ -114,7 +114,7 @@ catch ( type &e ){                                                         \
  RETHROW_EXCEPTION(e);                                                     \
 }                                                                          \
 
-																									
+                                                                                                    
 // --------------------------------------------------------------------------
 
 #define DEFINE_DEFAULTMSG_EXCEPTION_TYPE(type,msg)                         \

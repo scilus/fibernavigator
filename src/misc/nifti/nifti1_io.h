@@ -8,7 +8,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+//#include <cstring>
+#include "string.h"
 #include <math.h>
 #include <ctype.h>
 
@@ -499,8 +500,14 @@ typedef struct {
 #  define FIXED_FLOAT(x)   (x)                               /* don't fix it */
 #endif
 
-#undef  ASSIF                                 /* assign v to *p, if possible */
-#define ASSIF(p,v) if( (p)!=NULL ) *(p) = (v)
+#undef  ASSIF_F                                 /* assign v to *p, if possible -- float */
+#define ASSIF_F(p,v) if( (p)!=NULL ) *(p) = (float)(v)
+
+#undef  ASSIF_D                                 /* assign v to *p, if possible -- double */
+#define ASSIF_D(p,v) if( (p)!=NULL ) *(p) = (v)
+
+#undef  ASSIF_I                                 /* assign v to *p, if possible -- int */
+#define ASSIF_I(p,v) if( (p)!=NULL ) *(p) = (int)(v)
 
 #undef  MSB_FIRST
 #undef  LSB_FIRST

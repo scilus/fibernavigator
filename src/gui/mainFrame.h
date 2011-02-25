@@ -1,327 +1,293 @@
+/////////////////////////////////////////////////////////////////////////////
+// Name:            mainFrame.h
+// Author:          ---
+// Creation Date:   ---
+//
+// Description: mainFrame class.
+//
+// Last modifications:
+//      by : ggirard - 02-2011
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef MAINFRAME_H_
 #define MAINFRAME_H_
 
+#include <wx/checkbox.h>
+#include <wx/grid.h>
+#include <wx/treectrl.h>
+
 #include "mainCanvas.h"
 #include "myListCtrl.h"
-#include "wx/treectrl.h"
+#include "SelectionObject.h"
+
+
 #include "../dataset/DatasetHelper.h"
+#include "../dataset/datasetInfo.h"
+#include "../misc/Algorithms/Helper.h"
 
 class DatasetHelper;
+class SelectionObject;
+class DatasetInfo;
+class ToolBar;
+class MenuBar;
+class FNObject;
 
 // Define a new frame
 class MainFrame : public wxFrame
 {
-public:
-    MainFrame(wxWindow *parent, const wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
-    ~MainFrame();
-    void setTSlider(MySlider *slider) {m_tSlider = slider;};
-    //void setMStatusBar(wxStatusBar *bar) {m_statusBar = bar;};
-    //void setMMenuBar(wxMenuBar *bar) {m_menuBar = bar;};
-    //void setMToolBar(wxToolBar *bar) {m_toolBar = bar;};
+    friend class ToolBar;
+    friend class MenuBar;
+    friend class DatasetInfo;
+    friend class Anatomy;
+    friend class Surface;
+    friend class CIsoSurface;
+    friend class Mesh;
+    friend class Fibers;
+    friend class Glyph;
+    friend class Tensors;
+    friend class ODFs;
+    friend class SelectionObject;
+    friend class SplinePoint;
 
+public:
+    MainFrame( wxWindow* i_parent, const wxWindowID i_id, const wxString& i_title, const wxPoint& i_pos, const wxSize& i_size, const long i_style);
+    ~MainFrame();
+
+    void DisplayPropertiesSheet();
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
-
-    void createNewSelBox();
-    void Screenshot(wxString fileName);
-
+    void Screenshot             ( wxString         i_fileName    );
+    void SetGlyphOptionsValues  ( DatasetInfo*     i_tensors     );
+	void OnTreeChange();
+    void OnMouseEvent                       ( wxMouseEvent&   event );
+    void OnLoad                             ( wxCommandEvent& event );
+    
 private:
-	/*
-	 * Menu Functions
-	 */
-	// File
-	void OnNewIsoSurface(wxCommandEvent& event);
-	void OnLoad(wxCommandEvent& event);
-	void OnReloadShaders(wxCommandEvent& event);
-	void OnSave(wxCommandEvent& event);
-	void OnSaveFibers(wxCommandEvent& event);
-	void OnSaveSurface(wxCommandEvent& event);
-	void OnSaveDataset(wxCommandEvent& event);
-	void OnMinimizeDataset(wxCommandEvent& event);
-	void OnDilateDataset(wxCommandEvent& event);
-	void OnErodeDataset(wxCommandEvent& event);
-	void OnQuit(wxCommandEvent& event);
-	void OnToggleLayout(wxCommandEvent& event);
-	// View
-	void OnMenuViewReset(wxCommandEvent& event);
-	void OnMenuViewLeft(wxCommandEvent& event);
-	void OnMenuViewRight(wxCommandEvent& event);
-	void OnMenuViewTop(wxCommandEvent& event);
-	void OnMenuViewBottom(wxCommandEvent& event);
-	void OnMenuViewFront(wxCommandEvent& event);
-	void OnMenuViewBack(wxCommandEvent& event);
-	void OnMenuViewCrosshair(wxCommandEvent& event);
-	// Voi
-    void OnToggleSelBox(wxCommandEvent& event);
-    void OnToggleShowBox(wxCommandEvent& event);
-    void OnNewSelBox(wxCommandEvent& event);
-    void OnNewFromOverlay(wxCommandEvent& event);
-    void OnHideSelBoxes(wxCommandEvent& event);
-    void OnRenameBox(wxCommandEvent& event);
-    void OnToggleAndNot(wxCommandEvent& event);
-    void OnColorRoi(wxCommandEvent& event);
-    void OnUseMorph(wxCommandEvent& event);
-    void OnCountFibers(wxCommandEvent& event);
-    void OnCreateColorTexture(wxCommandEvent& event);
-	// Spline Surface
-	void OnNewSurface(wxCommandEvent& event);
-	void OnToggleNormal(wxCommandEvent& event);
-	void OnTogglePointMode(wxCommandEvent& event);
-	void OnToggleLIC(wxCommandEvent& event);
-	void OnToggleDrawVectors(wxCommandEvent& event);
-	void OnNewOffsetMap(wxCommandEvent& event);
-	// Options
-	void OnAssignColor(wxCommandEvent& event);
-	void OnResetColor(wxCommandEvent& event);
-    void OnToggleLighting(wxCommandEvent& event);
-    void OnInvertFibers(wxCommandEvent& event);
-    void OnUseFakeTubes(wxCommandEvent& event);
-    void OnUseTransparency(wxCommandEvent& event);
-	void OnToggleTextureFiltering(wxCommandEvent& event);
-	void OnToggleBlendTexOnMesh(wxCommandEvent& event);
-	void OnToggleFilterIso(wxCommandEvent& event);
-	void OnClean(wxCommandEvent& event);
-	void OnLoop(wxCommandEvent& event);
-	void OnToggleColorMapLegend(wxCommandEvent& event);
+    void OnDeleteListItem                   ( wxEvent& event );
+    void OnToggleShowFS                     ( wxEvent& event );
 
-	void OnSetCMap0(wxCommandEvent& event);
-	void OnSetCMap1(wxCommandEvent& event);
-	void OnSetCMap2(wxCommandEvent& event);
-	void OnSetCMap3(wxCommandEvent& event);
-	void OnSetCMap4(wxCommandEvent& event);
-	void OnSetCMap5(wxCommandEvent& event);
-	void OnSetCMapNo(wxCommandEvent& event);
-	// Help
-	void OnAbout(wxCommandEvent& event);
-	void OnShortcuts(wxCommandEvent& event);
-	void OnScreenshot(wxCommandEvent& event);
-	void OnSlizeMovieSag(wxCommandEvent& event);
-	void OnSlizeMovieCor(wxCommandEvent& event);
-	void OnSlizeMovieAxi(wxCommandEvent& event);
+    void OnNewIsoSurface                    ( wxCommandEvent& event );    
+    void OnReloadShaders                    ( wxCommandEvent& event );
+    void OnSave                             ( wxCommandEvent& event );
+    void OnSaveFibers                       ( wxCommandEvent& event );
+    void OnSaveSurface                      ( wxCommandEvent& event );
+    void OnSaveDataset                      ( wxCommandEvent& event );
+    void OnMinimizeDataset                  ( wxCommandEvent& event );
+    void OnDilateDataset                    ( wxCommandEvent& event );
+    void OnErodeDataset                     ( wxCommandEvent& event );
+    void OnQuit                             ( wxCommandEvent& event );
+    // View
+    void OnMenuViewReset                    ( wxCommandEvent& event );
+    void OnMenuViewLeft                     ( wxCommandEvent& event );
+    void OnMenuViewRight                    ( wxCommandEvent& event );
+    void OnMenuViewTop                      ( wxCommandEvent& event );
+    void OnMenuViewBottom                   ( wxCommandEvent& event );
+    void OnMenuViewFront                    ( wxCommandEvent& event );
+    void OnMenuViewBack                     ( wxCommandEvent& event );
+    void OnMenuViewCrosshair                ( wxCommandEvent& event );
+    void OnToggleShowProperties             ( wxCommandEvent& event );
+    // Voi
+    void OnToggleSelectionObjects           ( wxCommandEvent& event );
+    void OnToggleShowSelectionObject        ( wxCommandEvent& event );
+    void OnNewSelectionBox                  ( wxCommandEvent& event );
+    void OnNewSelectionEllipsoid            ( wxCommandEvent& event );
+    void OnNewVoiFromOverlay                ( wxCommandEvent& event );
+    void OnHideSelectionObjects             ( wxCommandEvent& event );
+    void OnActivateSelectionObjects         ( wxCommandEvent& event );
+    void OnRenameBox                        ( wxCommandEvent& event );
+    void OnToggleAndNot                     ( wxCommandEvent& event );
+    void OnColorRoi                         ( wxCommandEvent& event );
+    void OnVoiFlipNormals                   ( wxCommandEvent& event );
+    void OnUseMorph                         ( wxCommandEvent& event );
+    void OnDisplayFibersInfo                ( wxCommandEvent& event );
+    void OnDistanceAnchorSet                ( wxCommandEvent& event );
+    void OnDisplayMeanFiber                 ( wxCommandEvent& event );
+    void OnDisplayCrossSections             ( wxCommandEvent& event );
+    void OnDisplayDispersionTube            ( wxCommandEvent& event );
+    void OnColorWithCurvature               ( wxCommandEvent& event );
+    void OnNormalColoring                   ( wxCommandEvent& event );
+    void OnColorWithTorsion                 ( wxCommandEvent& event );
+    void OnGenerateFiberVolume              ( wxCommandEvent& event );
+    void OnCreateFibersColorTexture         ( wxCommandEvent& event );
+    void OnCreateFibersDensityTexture       ( wxCommandEvent& event );
+    // Spline Surface
+    void OnNewSplineSurface                 ( wxCommandEvent& event );
+    void OnToggleNormal                     ( wxCommandEvent& event );
+    void OnToggleDrawPointsMode             ( wxCommandEvent& event );
+    void OnToggleLIC                        ( wxCommandEvent& event );
+    void OnToggleDrawVectors                ( wxCommandEvent& event );
+    void OnNewOffsetSurface                 ( wxCommandEvent& event );
+    void OnNewDistanceMap                   ( wxCommandEvent& event );
+    // Options
+    void OnAssignColor                      ( wxCommandEvent& event );
+    void OnResetColor                       ( wxCommandEvent& event );
+    void OnToggleLighting                   ( wxCommandEvent& event );
+    void OnInvertFibers                     ( wxCommandEvent& event );
+    void OnUseFakeTubes                     ( wxCommandEvent& event );
+    void OnClearToBlack                     ( wxCommandEvent& event );
+    void OnRulerTool                        ( wxCommandEvent& event );
+    void OnRulerToolClear                   ( wxCommandEvent& event );
+    void OnRulerToolAdd                     ( wxCommandEvent& event );
+    void OnRulerToolDel                     ( wxCommandEvent& event );
+    void OnUseTransparency                  ( wxCommandEvent& event );
+    void OnToggleTextureFiltering           ( wxCommandEvent& event );
+    void OnToggleBlendTexOnMesh             ( wxCommandEvent& event );
+    void OnToggleFilterIso                  ( wxCommandEvent& event );
+    void OnClean                            ( wxCommandEvent& event );
+    void OnLoop                             ( wxCommandEvent& event );
+    void OnToggleColorMapLegend             ( wxCommandEvent& event );
+    
+    void OnSetCMap0                         ( wxCommandEvent& event );
+    void OnSetCMap1                         ( wxCommandEvent& event );
+    void OnSetCMap2                         ( wxCommandEvent& event );
+    void OnSetCMap3                         ( wxCommandEvent& event );
+    void OnSetCMap4                         ( wxCommandEvent& event );
+    void OnSetCMap5                         ( wxCommandEvent& event );
+    void OnSetCMapNo                        ( wxCommandEvent& event );
 
-	/*
-	 * Window Functions
-	 */
-	void OnSize(wxSizeEvent& event);
-    void OnMouseEvent(wxMouseEvent& event);
-    void OnGLEvent(wxCommandEvent &event);
+    // Help
+    void OnAbout                            ( wxCommandEvent& event );
+    void OnShortcuts                        ( wxCommandEvent& event );
+    void OnScreenshot                       ( wxCommandEvent& event );
+    void OnSlizeMovieSag                    ( wxCommandEvent& event );
+    void OnSlizeMovieCor                    ( wxCommandEvent& event );
+    void OnSlizeMovieAxi                    ( wxCommandEvent& event );
 
-	void OnXSliderMoved(wxCommandEvent& event);
-    void OnYSliderMoved(wxCommandEvent& event);
-    void OnZSliderMoved(wxCommandEvent& event);
-    void OnTSliderMoved(wxCommandEvent& event);
-    void OnTSlider2Moved(wxCommandEvent& event);
+    void OnSize                             ( wxSizeEvent&    event );    
+    void OnGLEvent                          ( wxCommandEvent& event );
+    
+    void OnSliderMoved                      ( wxCommandEvent& event );
+    void OnSliderIntensityThresholdMoved    ( wxCommandEvent& event );
+    void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
+    
+    void OnGlyphMinHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
+    void OnGlyphMaxHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
+    void OnGlyphSaturationSliderMoved       ( wxCommandEvent& event ); // The coloration.
+    void OnGlyphLuminanceSliderMoved        ( wxCommandEvent& event ); // The coloration.
+    void updateGlyphColoration              ( GlyphColorModifier i_modifier, float i_value );    
+    void OnGlyphXAxisFlipChecked            ( wxCommandEvent& event ); // The axis flip.
+    void OnGlyphYAxisFlipChecked            ( wxCommandEvent& event ); // The axis flip.
+    void OnGlyphZAxisFlipChecked            ( wxCommandEvent& event ); // The axis flip.
+    void OnGlyphFlip                        ( AxisType i_axisType, bool i_isChecked );    
+    void OnGlyphLODSliderMoved              ( wxCommandEvent& event ); // The lod.    
+    void OnGlyphLightAttenuationSliderMoved ( wxCommandEvent& event ); // The light attenuation.    
+    void OnGlyphLightXDirectionSliderMoved  ( wxCommandEvent& event ); // The light attenuation.
+    void OnGlyphLightYDirectionSliderMoved  ( wxCommandEvent& event ); // The light attenuation.
+    void OnGlyphLightZDirectionSliderMoved  ( wxCommandEvent& event ); // The light attenuation.
+    void OnGlyphLightPositionChanged          ( AxisType i_axisType, float i_position );    
+    void OnGlyphDisplaySliderMoved          ( wxCommandEvent& event ); // The display ratio.    
+    void OnGlyphScalingFactorSliderMoved    ( wxCommandEvent& event ); // The scaling factor.    
+    void OnGlyphNormalSelected              ( wxCommandEvent& event ); // The map on ellipsoid.    
+    void OnGlyphMapOnSphereSelected         ( wxCommandEvent& event ); // The map on sphere.    
+    void OnGlyphAxesSelected                ( wxCommandEvent& event ); // The display the 3 vector representing the ellipsoid.    
+    void OnGlyphMainAxisSelected            ( wxCommandEvent& event ); // The display of the main vector of the ellipsoid.    
+    void OnGlyphColorWithPosition           ( wxCommandEvent& event ); // The color with position.
 
-    /*
-     * Button functions
-     */
-    void OnButtonAxial(wxCommandEvent& event);
-    void OnButtonCoronal(wxCommandEvent& event);
-    void OnButtonSagittal(wxCommandEvent& event);
-    void OnToggleAlpha(wxCommandEvent& event);
-    void OnMovePoints1(wxCommandEvent& event);
-    void OnMovePoints2(wxCommandEvent& event);
+    void OnToggleShowAxial                  ( wxCommandEvent& event );
+    void OnToggleShowCoronal                ( wxCommandEvent& event );
+    void OnToggleShowSagittal               ( wxCommandEvent& event );
+    void OnToggleAlpha                      ( wxCommandEvent& event );
+    void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );
+    void OnMoveBoundaryPointsRight          ( wxCommandEvent& event );
 
     /*
      * List widget event functions
      */
-    void OnActivateListItem(wxListEvent& event);
-    void OnRightClickListItem(wxListEvent& event);
-    void OnSelectListItem(wxListEvent& event);
-    void OnListItemUp(wxCommandEvent& event);
-    void OnListItemDown(wxCommandEvent& event);
+    void OnActivateListItem                 ( wxListEvent&    event );
+    void OnSelectListItem                   ( wxListEvent&    event );
+    void OnListItemUp                       ( wxCommandEvent& event );
+    void OnListItemDown                     ( wxCommandEvent& event );
 
-    void OnListMenuName(wxCommandEvent& event);
-    void OnListMenuThreshold(wxCommandEvent& event);
-    void OnListMenuDelete(wxCommandEvent& event);
-    void OnListMenuShow(wxCommandEvent& event);
-    void OnListMenuCutOut(wxCommandEvent& event);
+    void OnListMenuName                     ( wxCommandEvent& event );
+    void OnListMenuThreshold                ( wxCommandEvent& event );
+    void OnListMenuShow                     ( wxCommandEvent& event );
+    void OnListMenuCutOut                   ( wxCommandEvent& event );
+    void OnListMenuDistance                 ( wxCommandEvent& event );
+    void OnListMenuMinDistance              ( wxCommandEvent& event );
 
     /*
      * Tree widget event functions
      */
-    void OnSelectTreeItem(wxTreeEvent& event);
-	void OnRightClickTreeItem(wxTreeEvent& event);
-    void OnUnSelectTreeItem(wxTreeEvent& event);
-    void OnActivateTreeItem(wxTreeEvent& event);
-    void OnTreeEvent(wxCommandEvent& event);
-    void OnTreeLabelEdit(wxTreeEvent& event);
-    int treeSelected(wxTreeItemId id);
-    void OnLoad1(wxCommandEvent& event);
-    void OnLoad2(wxCommandEvent& event);
-    void OnLoad3(wxCommandEvent& event);
-
+    void OnDeleteTreeItem                   ( wxTreeEvent&    event );
+    void OnSelectTreeItem                   ( wxTreeEvent&    event );
+    void OnRightClickTreeItem               ( wxTreeEvent&    event );
+    void OnUnSelectTreeItem                 ( wxTreeEvent&    event );
+    void OnActivateTreeItem                 ( wxTreeEvent&    event );
+    void OnTreeLabelEdit                    ( wxTreeEvent&    event );
+    int  treeSelected                       ( wxTreeItemId    i_id  );  
+    void OnFiberFilterSlider                ( wxCommandEvent& event );
     /*
      * System functions
      */
-    void OnKdTreeThreadFinished(wxCommandEvent& event);
+    void OnKdTreeThreadFinished             ( wxCommandEvent& event );
     void updateStatusBar();
     void updateMenus();
+    void OnTimerEvent                       ( wxTimerEvent&   event );
+
+    void CreateNewSelectionObject( ObjectType i_newSelectionObjectType );
+    void ColorFibers();
+    
+private:
+    ToolBar             *m_toolBar;
+    MenuBar             *m_menuBar;       
+    wxBoxSizer          *m_currentSizer;
+    wxBoxSizer          *m_noSelectionSizer;
+    FNObject            *m_currentFNObject;
+    bool                m_isDisplayProperties; 
+    long                m_currentListItem;
+    bool                m_isCurrentFNObjectChanged;
+
+    wxBoxSizer          *m_mainSizer;
+    wxBoxSizer          *m_mainSizer1;
+    wxFlexGridSizer     *m_mainSizer2;
+    wxBoxSizer          *m_leftMainSizer;
+    wxBoxSizer          *m_leftSizer;
+    wxBoxSizer          *m_navSizer;
+    wxBoxSizer          *m_navSizer1;
+    wxBoxSizer          *m_treeSizer;
+    wxBoxSizer          *m_rightMainSizer;
+
+    int                 m_enlargeNav;
+    wxTimer             *m_timer;
 
 public:
-	MainCanvas* m_gl0;
-	MainCanvas* m_gl1;
-	MainCanvas* m_gl2;
-	MainCanvas* m_mainGL;
-
-	wxSlider* m_xSlider;
-    wxSlider* m_ySlider;
-    wxSlider* m_zSlider;
-    MySlider* m_tSlider;
-    wxSlider* m_tSlider2;
-
-    wxButton *buttonUp;
-    wxButton *buttonDown;
-    wxButton *buttonLoad1;
-    wxButton *buttonLoad2;
-    wxButton *buttonLoad3;
-
-	//wxStatusBar* m_statusBar;
-	//wxMenuBar *m_menuBar;
-	//wxToolBar *m_toolBar;
-	MyListCtrl* m_listCtrl;
-	wxTreeCtrl* m_treeWidget;
-	wxTreeItemId m_tRootId;
-	wxTreeItemId m_tPointId;
-	wxTreeItemId m_tSelBoxId;
-
-	wxBoxSizer *topSizer;
-	wxBoxSizer *topSizer1;
-	wxFlexGridSizer *topSizer2;
-	wxBoxSizer *leftSizer;
-	wxBoxSizer *leftTopSizer;
-	wxBoxSizer *navSizer;
-	wxBoxSizer *navSizer1;
-	wxBoxSizer *buttonSizer;
-	wxBoxSizer *treeSizer;
-	int enlargeNav;
-
-
-	DatasetHelper* m_dh;
+    MainCanvas*         m_mainGL;
+    MainCanvas*         m_gl0;
+    MainCanvas*         m_gl1;
+    MainCanvas*         m_gl2;
+    MyListCtrl*         m_listCtrl;
+    wxTreeCtrl*         m_treeWidget;
+    wxSlider*           m_xSlider;
+    wxSlider*           m_ySlider;
+    wxSlider*           m_zSlider;
+    DatasetHelper*      m_datasetHelper;
+    wxTreeItemId        m_tRootId;
+    wxTreeItemId        m_tPointId;
+    wxTreeItemId        m_tSelectionObjectsId;
 
 DECLARE_EVENT_TABLE()
 };
 
 /*
- * Defines for Menu Events
- */
-//Menu File
-#define MENU_FILE_NEW_ISOSURF						100
-#define MENU_FILE_LOAD								101
-#define MENU_FILE_RELOAD_SHADER						102
-#define MENU_FILE_SAVE								103
-#define MENU_FILE_SAVE_FIBERS						104
-#define MENU_FILE_SAVE_SURFACE						105
-#define MENU_FILE_QUIT        						wxID_EXIT
-#define MENU_FILE_SAVE_DATASET						106
-#define MENU_FILE_MINIMIZE_DATASET					107
-#define MENU_FILE_DILATE_DATASET					108
-#define MENU_FILE_ERODE_DATASET						109
-#define BUTTON_TOGGLE_LAYOUT						119
-
-// Menu View
-#define MENU_VIEW_LEFT								120
-#define MENU_VIEW_RIGHT								121
-#define MENU_VIEW_FRONT								122
-#define MENU_VIEW_BACK								123
-#define MENU_VIEW_TOP								124
-#define MENU_VIEW_BOTTOM							125
-#define MENU_VIEW_RESET								126
-#define MENU_VIEW_SHOW_CROSSHAIR					127
-// Menu Voi
-#define MENU_VOI_NEW_SELBOX							130
-#define MENU_VOI_RENDER_SELBOXES					131
-#define MENU_VOI_TOGGLE_SELBOX						132
-#define MENU_VOI_TOGGLE_SHOWBOX						133
-#define MENU_VOI_RENAME_BOX							134
-#define MENU_VOI_NEW_FROM_OVERLAY					135
-#define MENU_VOI_TOGGLE_ANDNOT						136
-#define MENU_VOI_COLOR_ROI							137
-#define MENU_VOI_USE_MORPH							138
-#define MENU_VOI_COUNT_FIBERS                       139
-#define MENU_VOI_CREATE_TEXTURE                     230
-// Menu Spline Surface
-#define MENU_SPLINESURF_DRAW_POINTS					140
-#define MENU_SPLINESURF_NEW							141
-#define MENU_SPLINESURF_TOGGLE_LIC					142
-#define MENU_SPLINESURF_TOGGLE_NORMAL				143
-#define MENU_SPLINESURF_DRAW_VECTORS				144
-#define MENU_SURFACE_NEW_OFFSET						145
-// Menu Options
-#define MENU_OPTIONS_ASSIGN_COLOR					150
-#define MENU_OPTIONS_TOGGLE_LIGHTING				151
-#define MENU_OPTIONS_INVERT_FIBERS					152
-#define MENU_OPTIONS_TOGGLE_TEXTURE_FILTERING		153
-#define MENU_OPTIONS_BLEND_TEX_ON_MESH				154
-#define MENU_OPTIONS_USE_FAKE_TUBES					155
-#define MENU_OPTIONS_FILTER_ISO						156
-#define MENU_OPTIONS_USE_TRANSPARENCY				157
-#define MENU_OPTIONS_COLOR_MAPS						159
-#define MENU_OPTIONS_CMAP0							160
-#define MENU_OPTIONS_CMAP1							161
-#define MENU_OPTIONS_CMAP2							162
-#define MENU_OPTIONS_CMAP3							163
-#define MENU_OPTIONS_CMAP4							164
-#define MENU_OPTIONS_CMAP5							165
-#define MENU_OPTIONS_RESET_COLOR					166
-#define MENU_OPTIONS_CLEAN							167
-#define MENU_OPTIONS_LOOP							168
-#define MENU_OPTIONS_CMAP_LEGEND					169
-#define MENU_OPTIONS_CMAPNO							170
-// Menu Help
-#define MENU_HELP_ABOUT       						wxID_ABOUT
-#define MENU_HELP_SHORTCUTS    						180
-#define MENU_HELP_SCREENSHOT   						181
-#define MENU_HELP_SLIZEMOVIE                        182
-#define MENU_HELP_SLIZEMOVIESAG                     183
-#define MENU_HELP_SLIZEMOVIECOR                     184
-#define MENU_HELP_SLIZEMOVIEAXI                     185
-/*
- * Defines for Buttons, will move into Menus eventually
- */
-#define BUTTON_AXIAL						 		200
-#define BUTTON_CORONAL 								201
-#define BUTTON_SAGITTAL 							202
-#define BUTTON_TOGGLE_ALPHA 						203
-#define BUTTON_MOVE_POINTS1 						204
-#define BUTTON_MOVE_POINTS2 						205
-#define ID_BUTTON_LOAD1								206
-#define ID_BUTTON_LOAD2								207
-#define ID_BUTTON_LOAD3								208
-
-/*
- * Menu entries for right click on list widget
- */
-#define	MENU_LIST_DELETE							220
-#define MENU_LIST_TOGGLESHOW						221
-#define MENU_LIST_TOGGLECOLOR						222
-#define MENU_LIST_TOGGLENAME						223
-#define MENU_LIST_CUTOUT							224
-/*
  * Defines for interface items and other events
  */
-#define KDTREE_EVENT				300
+#define KDTREE_EVENT                                270
 
-#define ID_GL_NAV_X 				310
-#define ID_GL_NAV_Y  				311
-#define ID_GL_NAV_Z   				312
-#define ID_GL_MAIN					313
+#define ID_GL_NAV_X                                 271
+#define ID_GL_NAV_Y                                 272
+#define ID_GL_NAV_Z                                 273
+#define ID_GL_MAIN                                  290
 
-#define ID_LIST_CTRL				320
-#define ID_TREE_CTRL				321
+#define ID_LIST_CTRL                                291
+#define ID_TREE_CTRL                                300
 
-#define ID_X_SLIDER 				330
-#define ID_Y_SLIDER 				331
-#define ID_Z_SLIDER 				332
-#define ID_T_SLIDER					333
-#define ID_T_SLIDER2				334
-
-#define ID_BUTTON_UP 				340
-#define ID_BUTTON_DOWN 				341
-
-#define TREE_CTRL_TOGGLE_ANDNOT		400
-#define TREE_CTRL_DELETE_BOX		401
-#define TREE_CTRL_TOGGLE_BOX_ACTIVE 402
-#define TREE_CTRL_TOGGLE_BOX_SHOW	403
+#define ID_X_SLIDER                                 301
+#define ID_Y_SLIDER                                 302
+#define ID_Z_SLIDER                                 303
+ 
+#define TREE_CTRL_TOGGLE_ANDNOT                     351
+#define TREE_CTRL_DELETE_BOX                        352
+#define TREE_CTRL_TOGGLE_BOX_ACTIVE                 353
+#define TREE_CTRL_TOGGLE_BOX_SHOW                   370
 
 #endif /*MAINFRAME_H_*/

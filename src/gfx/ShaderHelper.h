@@ -14,32 +14,35 @@
 
 class ShaderHelper {
 public:
-	ShaderHelper(DatasetHelper*);
-	virtual ~ShaderHelper();
+    ShaderHelper(DatasetHelper*);
+    virtual ~ShaderHelper();
 
-	void initializeArrays();
+    void initializeArrays();
 
-	void setTextureShaderVars();
-	void setMeshShaderVars();
-	void setFiberShaderVars();
-	void setSplineSurfaceShaderVars();
+    void setTextureShaderVars();
+    void setMeshShaderVars();
+    void setFiberShaderVars();
+    void setSplineSurfaceShaderVars();
 
-	Shader *m_textureShader;
-	Shader *m_meshShader;
-	Shader *m_fiberShader;
-	Shader *m_fakeTubeShader;
-	Shader *m_splineSurfShader;
-	Shader *m_vectorShader;
-	Shader *m_legendShader;
+    Shader *m_textureShader;
+    Shader *m_meshShader;
+    Shader *m_fiberShader;
+    Shader *m_fakeTubeShader;
+    Shader *m_splineSurfShader;
+    Shader *m_vectorShader;
+    Shader *m_legendShader;
+    Shader *m_graphShader;
+    Shader *m_tensorsShader;
+    Shader *m_odfsShader;
 
 private:
-	DatasetHelper* m_dh;
+    DatasetHelper* m_dh;
 
-	int m_textureCount;
-	GLuint m_cutTex;
-	std::vector<GLint> m_tex;
-	std::vector<GLfloat> m_threshold;
-	std::vector<GLfloat> m_alpha;
+    int m_textureCount;
+    GLuint m_cutTex;
+    std::vector<GLint> m_tex;
+    std::vector<GLfloat> m_threshold;
+    std::vector<GLfloat> m_alpha;
     std::vector<GLint> m_type;
 };
 

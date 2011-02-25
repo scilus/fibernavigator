@@ -20,40 +20,40 @@ using namespace std;
  * \param offscreenDimension the size of the offscreen textures in pixels.
  */
 FgeOffscreen::FgeOffscreen(unsigned int offscreenDimension) {
-	// init
-	fbo = NULL;
+    // init
+    fbo = NULL;
 
-	texID = 1;
-	depthID = 1;
+    texID = 1;
+    depthID = 1;
 
-	sizeW = offscreenDimension;
-	sizeH = offscreenDimension;
+    sizeW = offscreenDimension;
+    sizeH = offscreenDimension;
 
-	usedW = sizeW;
-	usedH = sizeH;
+    usedW = sizeW;
+    usedH = sizeH;
 
-	textures.clear();
-	depthTextures.clear();
+    textures.clear();
+    depthTextures.clear();
 
-	// now create the fbo
-	fbo = new FgeFramebufferObject(true);
-	//DUMP_GL_ERROR( "FgeOffscreen_FBO_CREATE" );
+    // now create the fbo
+    fbo = new FgeFramebufferObject(true);
+    //DUMP_GL_ERROR( "FgeOffscreen_FBO_CREATE" );
 
-	// disable it
-	fbo->disable();
+    // disable it
+    fbo->disable();
 
-	// add default texture
-	addTexture();
+    // add default texture
+    addTexture();
 
-	// add default depth texture
-	addDepthTexture();
+    // add default depth texture
+    addDepthTexture();
 
-	// clear color is per default black
-	clearColor = new float[4];
-	clearColor[0] = 0.0;
-	clearColor[1] = 0.0;
-	clearColor[2] = 0.0;
-	clearColor[3] = 1.0;
+    // clear color is per default black
+    clearColor = new float[4];
+    clearColor[0] = 0.0;
+    clearColor[1] = 0.0;
+    clearColor[2] = 0.0;
+    clearColor[3] = 1.0;
 }
 
 /**
@@ -64,50 +64,50 @@ FgeOffscreen::FgeOffscreen(unsigned int offscreenDimension) {
  * \param autoScale automaticaly select texture valid size that is >= width and hight
  */
 FgeOffscreen::FgeOffscreen(unsigned int width, unsigned int height,
-		bool autoScale) {
-	// init
-	fbo = NULL;
+        bool autoScale) {
+    // init
+    fbo = NULL;
 
-	texID = 1;
-	depthID = 1;
+    texID = 1;
+    depthID = 1;
 
-	usedW = width;
-	usedH = height;
+    usedW = width;
+    usedH = height;
 
-	if (!autoScale) {
-		sizeH = height;
-		sizeW = width;
-	} else {
-		// find next fitting texture
+    if (!autoScale) {
+        sizeH = height;
+        sizeW = width;
+    } else {
+        // find next fitting texture
 
-		double log2 = 0.693147;
+        double log2 = 0.693147;
 
-		sizeW = (unsigned int) pow(2, ceil((log((double) width - 1) / log2)));
-		sizeH = (unsigned int) pow(2, ceil((log((double) height - 1) / log2)));
-	}
+        sizeW = (unsigned int) pow(2, ceil((log((double) width - 1) / log2)));
+        sizeH = (unsigned int) pow(2, ceil((log((double) height - 1) / log2)));
+    }
 
-	textures.clear();
-	depthTextures.clear();
+    textures.clear();
+    depthTextures.clear();
 
-	// now create the fbo
-	fbo = new FgeFramebufferObject(true);
-	//DUMP_GL_ERROR( "FgeOffscreen_FBO_CREATE" );
+    // now create the fbo
+    fbo = new FgeFramebufferObject(true);
+    //DUMP_GL_ERROR( "FgeOffscreen_FBO_CREATE" );
 
-	// disable it
-	fbo->disable();
+    // disable it
+    fbo->disable();
 
-	// add default texture
-	addTexture();
+    // add default texture
+    addTexture();
 
-	// add default depth texture
-	addDepthTexture();
+    // add default depth texture
+    addDepthTexture();
 
-	// clear color is per default black
-	clearColor = new float[4];
-	clearColor[0] = 0.0;
-	clearColor[1] = 0.0;
-	clearColor[2] = 0.0;
-	clearColor[3] = 1.0;
+    // clear color is per default black
+    clearColor = new float[4];
+    clearColor[0] = 0.0;
+    clearColor[1] = 0.0;
+    clearColor[2] = 0.0;
+    clearColor[3] = 1.0;
 
 }
 
@@ -116,25 +116,25 @@ FgeOffscreen::FgeOffscreen(unsigned int width, unsigned int height,
  * The destructor. Cleans all added textures.
  */
 FgeOffscreen::~FgeOffscreen() {
-	// deactivate the fbo
-	deactivate();
+    // deactivate the fbo
+    deactivate();
 
-	// delete the fbo
-	delete fbo;
+    // delete the fbo
+    delete fbo;
 
-	// free the textures
-	for (unsigned int i = 0; i < textures.size(); i++) {
-		if (!textures[i].permanent)
-			delete textures[i].texture;
-	}
-	textures.clear();
+    // free the textures
+    for (unsigned int i = 0; i < textures.size(); i++) {
+        if (!textures[i].permanent)
+            delete textures[i].texture;
+    }
+    textures.clear();
 
-	// free the textures
-	for (unsigned int i = 0; i < depthTextures.size(); i++) {
-		if (!depthTextures[i].permanent)
-			delete depthTextures[i].texture;
-	}
-	depthTextures.clear();
+    // free the textures
+    for (unsigned int i = 0; i < depthTextures.size(); i++) {
+        if (!depthTextures[i].permanent)
+            delete depthTextures[i].texture;
+    }
+    depthTextures.clear();
 }
 
 /**
@@ -143,13 +143,13 @@ FgeOffscreen::~FgeOffscreen() {
  * \param no The number of the texture to use. The first added texture is 1, the second 2 and so on.
  */
 void FgeOffscreen::selectTexture(unsigned int no) {
-	if (no > textures.size())
-		return;
+    if (no > textures.size())
+        return;
 
-	// get the opengl id
-	//  texID=textures[no-1].texture->getId();
-	// store id
-	texID = no;
+    // get the opengl id
+    //  texID=textures[no-1].texture->getId();
+    // store id
+    texID = no;
 }
 
 /**
@@ -158,12 +158,12 @@ void FgeOffscreen::selectTexture(unsigned int no) {
  * \param The number of the texture to use. The first added texture is 1, the second 2 and so on.
  */
 void FgeOffscreen::selectDepthTexture(unsigned int no) {
-	if (no > depthTextures.size())
-		return;
+    if (no > depthTextures.size())
+        return;
 
-	// get the opengl id
-	//depthID=depthTextures[no-1].texture->getId();
-	depthID = no;
+    // get the opengl id
+    //depthID=depthTextures[no-1].texture->getId();
+    depthID = no;
 }
 
 /**
@@ -173,17 +173,17 @@ void FgeOffscreen::selectDepthTexture(unsigned int no) {
  * \return the number of the texture in the list (used for selectTexture).
  */
 unsigned int FgeOffscreen::addTexture(bool permanent) {
-	// just create and push back
-	FgeGLTexture* tmpTex = new FgeGLTexture(GL_TEXTURE_2D, sizeW, sizeH);
-	tmpTex->initialize();
-	TextureDescriptor tmpTexDesc = { permanent, tmpTex };
-	textures.push_back(tmpTexDesc);
+    // just create and push back
+    FgeGLTexture* tmpTex = new FgeGLTexture(GL_TEXTURE_2D, sizeW, sizeH);
+    tmpTex->initialize();
+    TextureDescriptor tmpTexDesc = { permanent, tmpTex };
+    textures.push_back(tmpTexDesc);
 
-	// select this texture
-	selectTexture(textures.size());
+    // select this texture
+    selectTexture(textures.size());
 
-	// return number
-	return textures.size();
+    // return number
+    return textures.size();
 }
 
 /**
@@ -193,18 +193,18 @@ unsigned int FgeOffscreen::addTexture(bool permanent) {
  * \return the number of the texture in the list (used for selectDepthTexture).
  */
 unsigned int FgeOffscreen::addDepthTexture(bool permanent) {
-	// just create and push back
-	FgeGLTexture* tmpDepthTex =
-			new FgeGLTexture(GL_TEXTURE_2D, sizeW, sizeH, true, GL_FLOAT);
-	tmpDepthTex->initialize();
-	TextureDescriptor tmpDepthTexDesc = { permanent, tmpDepthTex };
-	depthTextures.push_back(tmpDepthTexDesc);
+    // just create and push back
+    FgeGLTexture* tmpDepthTex =
+            new FgeGLTexture(GL_TEXTURE_2D, sizeW, sizeH, true, GL_FLOAT);
+    tmpDepthTex->initialize();
+    TextureDescriptor tmpDepthTexDesc = { permanent, tmpDepthTex };
+    depthTextures.push_back(tmpDepthTexDesc);
 
-	// select this texture
-	selectDepthTexture(depthTextures.size());
+    // select this texture
+    selectDepthTexture(depthTextures.size());
 
-	// return number
-	return depthTextures.size();
+    // return number
+    return depthTextures.size();
 }
 
 /**
@@ -227,7 +227,7 @@ void FgeOffscreen::setClearColor(const float r, const float g, const float b)
  * \return the color
  */
 float* FgeOffscreen::getClearColor() {
-	return clearColor;
+    return clearColor;
 }
 
 /**
@@ -236,7 +236,7 @@ float* FgeOffscreen::getClearColor() {
  * \return the OpenGL ID
  */
 GLuint FgeOffscreen::getTexID() {
-	return textures[texID - 1].texture->getId();
+    return textures[texID - 1].texture->getId();
 }
 
 /**
@@ -246,11 +246,11 @@ GLuint FgeOffscreen::getTexID() {
  * \param no the number of the texture in list (returned by addTexture).
  */
 GLuint FgeOffscreen::getTexID(unsigned int no) {
-	if (no > textures.size())
-		return 0;
+    if (no > textures.size())
+        return 0;
 
-	// get the opengl id
-	return textures[no - 1].texture->getId();
+    // get the opengl id
+    return textures[no - 1].texture->getId();
 }
 
 /**
@@ -259,7 +259,7 @@ GLuint FgeOffscreen::getTexID(unsigned int no) {
  * \return the OpenGL ID
  */
 GLuint FgeOffscreen::getDepthTexID() {
-	return depthTextures[depthID - 1].texture->getId();
+    return depthTextures[depthID - 1].texture->getId();
 }
 
 /**
@@ -269,11 +269,11 @@ GLuint FgeOffscreen::getDepthTexID() {
  * \param no the number of the depth texture in list (returned by addDepthTexture).
  */
 GLuint FgeOffscreen::getDepthTexID(unsigned int no) {
-	if (no > depthTextures.size())
-		return 0;
+    if (no > depthTextures.size())
+        return 0;
 
-	// get the opengl id
-	return depthTextures[no - 1].texture->getId();
+    // get the opengl id
+    return depthTextures[no - 1].texture->getId();
 }
 
 /**
@@ -283,11 +283,11 @@ GLuint FgeOffscreen::getDepthTexID(unsigned int no) {
  * \param no the number of the depth texture in list (returned by addDepthTexture).
  */
 FgeGLTexture* FgeOffscreen::getTexObject(unsigned int no) {
-	if (no > textures.size())
-		return 0;
+    if (no > textures.size())
+        return 0;
 
-	// get the object adress
-	return textures[no - 1].texture;
+    // get the object adress
+    return textures[no - 1].texture;
 }
 
 /**
@@ -297,11 +297,11 @@ FgeGLTexture* FgeOffscreen::getTexObject(unsigned int no) {
  * \param no the number of the depth texture in list (returned by addDepthTexture).
  */
 FgeGLTexture* FgeOffscreen::getDepthTexObject(unsigned int no) {
-	if (no > depthTextures.size())
-		return 0;
+    if (no > depthTextures.size())
+        return 0;
 
-	// get the object adress
-	return depthTextures[no - 1].texture;
+    // get the object adress
+    return depthTextures[no - 1].texture;
 
 }
 
@@ -311,9 +311,9 @@ FgeGLTexture* FgeOffscreen::getDepthTexObject(unsigned int no) {
  * \param id the OpenGL ID of the texture to render
  */
 void FgeOffscreen::renderArbitraryTexture(GLuint id) {
-	vector<GLuint> ids;
-	ids.push_back(id);
-	renderArbitraryTextures(ids);
+    vector<GLuint> ids;
+    ids.push_back(id);
+    renderArbitraryTextures(ids);
 }
 
 /**
@@ -323,7 +323,7 @@ void FgeOffscreen::renderArbitraryTexture(GLuint id) {
  * \param ids the list of OpenGL ID's of the textures to render
  */
 void FgeOffscreen::renderArbitraryTextures(vector<GLuint> &ids) {
-	renderArbitraryTextures(ids, sizeW, sizeH, usedW, usedH);
+    renderArbitraryTextures(ids, sizeW, sizeH, usedW, usedH);
 }
 
 /**
@@ -335,8 +335,8 @@ void FgeOffscreen::renderArbitraryTextures(vector<GLuint> &ids) {
  * \param height height of the quad
  */
 void FgeOffscreen::renderArbitraryTextures(vector<GLuint> &ids,
-		unsigned int width, unsigned int height) {
-	renderArbitraryTextures(ids, width, height, width, height);
+        unsigned int width, unsigned int height) {
+    renderArbitraryTextures(ids, width, height, width, height);
 }
 
 /**
@@ -350,9 +350,9 @@ void FgeOffscreen::renderArbitraryTextures(vector<GLuint> &ids,
  * \param areaHeight height of area to render
  */
 void FgeOffscreen::renderArbitraryTextures(vector<GLuint> &ids,
-		unsigned int width, unsigned int height, unsigned int areaWidth,
-		unsigned int areaHeight) {
-	renderArbitraryTextures(ids, width, height, areaWidth, areaHeight, 0, 0);
+        unsigned int width, unsigned int height, unsigned int areaWidth,
+        unsigned int areaHeight) {
+    renderArbitraryTextures(ids, width, height, areaWidth, areaHeight, 0, 0);
 }
 
 /**
@@ -368,104 +368,104 @@ void FgeOffscreen::renderArbitraryTextures(vector<GLuint> &ids,
  * \param areaXOffset an Y offset to move the area around
  */
 void FgeOffscreen::renderArbitraryTextures(vector<GLuint> &ids,
-		unsigned int width, unsigned int height, unsigned int areaWidth,
-		unsigned int areaHeight, int areaXOffset, int areaYOffset) {
-	// area exceedes texture bounds?
-	if (areaWidth + areaXOffset > width)
-		areaWidth = width - areaXOffset;
-	if (areaHeight + areaYOffset > height)
-		areaHeight = height - areaYOffset;
+        unsigned int width, unsigned int height, unsigned int areaWidth,
+        unsigned int areaHeight, int areaXOffset, int areaYOffset) {
+    // area exceedes texture bounds?
+    if (areaWidth + areaXOffset > width)
+        areaWidth = width - areaXOffset;
+    if (areaHeight + areaYOffset > height)
+        areaHeight = height - areaYOffset;
 
-	// enough units availiable?
-	GLint numberUnits;
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &numberUnits);
-	if ((unsigned int) numberUnits < ids.size()) {
+    // enough units availiable?
+    GLint numberUnits;
+    glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &numberUnits);
+    if ((unsigned int) numberUnits < ids.size()) {
 #ifndef NODEBUG
-		cout << __FILE__ << ":" << __LINE__
-				<< ": not enough texture units availiable (" << ids.size()
-				<< " of " << numberUnits << " requested)" << endl;
+        cout << __FILE__ << ":" << __LINE__
+                << ": not enough texture units availiable (" << ids.size()
+                << " of " << numberUnits << " requested)" << endl;
 #endif
-		return;
-	}
+        return;
+    }
 
-	// push attribs on stack to get status quo on  end of rendering
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
+    // push attribs on stack to get status quo on  end of rendering
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-	// select matrix and back it up
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
+    // select matrix and back it up
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
 
-	// setup 2d projection matrix, viewport
-	glViewport(0, 0, areaWidth, areaHeight);
-	glOrtho(0.0, areaWidth, 0.0, areaHeight, -1, 1);
+    // setup 2d projection matrix, viewport
+    glViewport(0, 0, areaWidth, areaHeight);
+    glOrtho(0.0, areaWidth, 0.0, areaHeight, -1, 1);
 
-	// everything else is based upon the modelview matrix
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+    // everything else is based upon the modelview matrix
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
 
-	// no lighting
-	glDisable(GL_LIGHTING);
+    // no lighting
+    glDisable(GL_LIGHTING);
 
-	for (unsigned int i = 0; i < ids.size(); i++) {
+    for (unsigned int i = 0; i < ids.size(); i++) {
 
-		// enable multitexture unit
-		glActiveTextureARB(GL_TEXTURE0_ARB + i);
+        // enable multitexture unit
+        glActiveTextureARB(GL_TEXTURE0_ARB + i);
 
-		// texturing
-		glEnable(GL_TEXTURE_2D);
+        // texturing
+        glEnable(GL_TEXTURE_2D);
 
-		// bind texture
-		glBindTexture(GL_TEXTURE_2D, ids[i]);
+        // bind texture
+        glBindTexture(GL_TEXTURE_2D, ids[i]);
 
-		// setup wrapping
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // setup wrapping
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		// we do not want linear/mip mapped texture filters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        // we do not want linear/mip mapped texture filters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-		// texture environment
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        // texture environment
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	}
+    }
 
-	// render the texture box
-	glColor3f(1.0, 1.0, 1.0);
-	glTranslatef((float) areaXOffset, (float) areaYOffset, 0.0);
-	glBegin(GL_QUADS);
+    // render the texture box
+    glColor3f(1.0, 1.0, 1.0);
+    glTranslatef((float) areaXOffset, (float) areaYOffset, 0.0);
+    glBegin(GL_QUADS);
 
-	for (unsigned int i = 0; i < ids.size(); i++)
-		glMultiTexCoord2fARB(GL_TEXTURE0_ARB + i, 0.0, 0.0);
+    for (unsigned int i = 0; i < ids.size(); i++)
+        glMultiTexCoord2fARB(GL_TEXTURE0_ARB + i, 0.0, 0.0);
 
-	glVertex2i(0, 0);
+    glVertex2i(0, 0);
 
-	for (unsigned int i = 0; i < ids.size(); i++)
-		glMultiTexCoord2fARB(GL_TEXTURE0_ARB + i, 1.0, 0.0);
+    for (unsigned int i = 0; i < ids.size(); i++)
+        glMultiTexCoord2fARB(GL_TEXTURE0_ARB + i, 1.0, 0.0);
 
-	glVertex2i(width, 0);
+    glVertex2i(width, 0);
 
-	for (unsigned int i = 0; i < ids.size(); i++)
-		glMultiTexCoord2fARB(GL_TEXTURE0_ARB + i, 1.0, 1.0);
+    for (unsigned int i = 0; i < ids.size(); i++)
+        glMultiTexCoord2fARB(GL_TEXTURE0_ARB + i, 1.0, 1.0);
 
-	glVertex2i(width, height);
+    glVertex2i(width, height);
 
-	for (unsigned int i = 0; i < ids.size(); i++)
-		glMultiTexCoord2fARB(GL_TEXTURE0_ARB + i, 0.0, 1.0);
+    for (unsigned int i = 0; i < ids.size(); i++)
+        glMultiTexCoord2fARB(GL_TEXTURE0_ARB + i, 0.0, 1.0);
 
-	glVertex2i(0, height);
+    glVertex2i(0, height);
 
-	glEnd();
+    glEnd();
 
-	// restore the status quo
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
+    // restore the status quo
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
 
-	// restore status quo
-	glPopAttrib();
+    // restore status quo
+    glPopAttrib();
 
 }
 
@@ -474,7 +474,7 @@ void FgeOffscreen::renderArbitraryTextures(vector<GLuint> &ids,
  * Renders the current texture on a quad. Is usefull if you want a shader to modify your texture (filters).
  */
 void FgeOffscreen::renderTexture() {
-	renderArbitraryTexture(getTexID());
+    renderArbitraryTexture(getTexID());
 }
 
 /**
@@ -483,7 +483,7 @@ void FgeOffscreen::renderTexture() {
  * \param no the number of texture in list (returned by addTexture).
  */
 void FgeOffscreen::renderTexture(unsigned int no) {
-	renderArbitraryTexture(getTexID(no));
+    renderArbitraryTexture(getTexID(no));
 }
 
 /**
@@ -491,7 +491,7 @@ void FgeOffscreen::renderTexture(unsigned int no) {
  * Renders the current depth texture on a quad. Is usefull if you want a shader to modify your texture (filters).
  */
 void FgeOffscreen::renderDepthTexture() {
-	renderArbitraryTexture(getDepthTexID());
+    renderArbitraryTexture(getDepthTexID());
 }
 
 /**
@@ -500,7 +500,7 @@ void FgeOffscreen::renderDepthTexture() {
  * \param no the number of the depth texture in list (returned by addDepthTexture).
  */
 void FgeOffscreen::renderDepthTexture(unsigned int no) {
-	renderArbitraryTexture(getDepthTexID(no));
+    renderArbitraryTexture(getDepthTexID(no));
 }
 
 /**
@@ -509,7 +509,7 @@ void FgeOffscreen::renderDepthTexture(unsigned int no) {
  * \return texture width
  */
 unsigned int FgeOffscreen::getTextureWidth() {
-	return sizeW;
+    return sizeW;
 }
 
 /**
@@ -518,7 +518,7 @@ unsigned int FgeOffscreen::getTextureWidth() {
  * \return texture height
  */
 unsigned int FgeOffscreen::getTextureHeight() {
-	return sizeH;
+    return sizeH;
 }
 
 /**
@@ -527,7 +527,7 @@ unsigned int FgeOffscreen::getTextureHeight() {
  * \return texture area width
  */
 unsigned int FgeOffscreen::getTextureAreaWidth() {
-	return usedW;
+    return usedW;
 }
 
 /**
@@ -536,7 +536,7 @@ unsigned int FgeOffscreen::getTextureAreaWidth() {
  * \return texture area height
  */
 unsigned int FgeOffscreen::getTextureAreaHeight() {
-	return usedH;
+    return usedH;
 }
 
 /**
@@ -546,11 +546,11 @@ unsigned int FgeOffscreen::getTextureAreaHeight() {
  * \param permanent the flag. true if the texture should not be deleted during destruction
  */
 void FgeOffscreen::setTexturePermanent(unsigned int no, bool permanent) {
-	if (no > textures.size())
-		return;
+    if (no > textures.size())
+        return;
 
-	// get the descriptor
-	textures[no - 1].permanent = permanent;
+    // get the descriptor
+    textures[no - 1].permanent = permanent;
 }
 
 /**
@@ -560,11 +560,11 @@ void FgeOffscreen::setTexturePermanent(unsigned int no, bool permanent) {
  * \return the flag. true if the texture should not be deleted during destruction
  */
 bool FgeOffscreen::getTexturePermanent(unsigned int no) {
-	if (no > textures.size())
-		return false;
+    if (no > textures.size())
+        return false;
 
-	// get the descriptor
-	return textures[no - 1].permanent;
+    // get the descriptor
+    return textures[no - 1].permanent;
 }
 
 /**
@@ -574,11 +574,11 @@ bool FgeOffscreen::getTexturePermanent(unsigned int no) {
  * \param permanent the flag. true if the texture should not be deleted during destruction
  */
 void FgeOffscreen::setDepthTexturePermanent(unsigned int no, bool permanent) {
-	if (no > depthTextures.size())
-		return;
+    if (no > depthTextures.size())
+        return;
 
-	// get the descriptor�
-	depthTextures[no - 1].permanent = permanent;
+    // get the descriptor�
+    depthTextures[no - 1].permanent = permanent;
 }
 
 /**
@@ -588,11 +588,11 @@ void FgeOffscreen::setDepthTexturePermanent(unsigned int no, bool permanent) {
  * \return the flag. true if the texture should not be deleted during destruction
  */
 bool FgeOffscreen::getDepthTexturePermanent(unsigned int no) {
-	if (no > depthTextures.size())
-		return false;
+    if (no > depthTextures.size())
+        return false;
 
-	// get the descriptor�
-	return depthTextures[no - 1].permanent;
+    // get the descriptor�
+    return depthTextures[no - 1].permanent;
 }
 
 /**
@@ -600,70 +600,70 @@ bool FgeOffscreen::getDepthTexturePermanent(unsigned int no) {
  * Just activates the Framebuffer Object. After calling this all rendering will go to the selected texture.
  */
 void FgeOffscreen::activate() {
-	/*
-	 // if something has went wrong BEFORE activate has been called
-	 //DUMP_GL_ERROR( "FgeOffscreen_PRE_ACTIVATE");
+    /*
+     // if something has went wrong BEFORE activate has been called
+     //DUMP_GL_ERROR( "FgeOffscreen_PRE_ACTIVATE");
 
-	 if (fbo->getAttachedId(GL_COLOR_ATTACHMENT0_EXT)!=texID)
-	 {
+     if (fbo->getAttachedId(GL_COLOR_ATTACHMENT0_EXT)!=texID)
+     {
 
-	 // unattach previously attached one
-	 fbo->unattach(GL_COLOR_ATTACHMENT0_EXT);
-	 //DUMP_GL_ERROR( "FgeOffscreen_FBO_UNATTACH_TEX" );
+     // unattach previously attached one
+     fbo->unattach(GL_COLOR_ATTACHMENT0_EXT);
+     //DUMP_GL_ERROR( "FgeOffscreen_FBO_UNATTACH_TEX" );
 
-	 // attach the selected texture
-	 fbo->attachTexture( GL_TEXTURE_2D, texID, GL_COLOR_ATTACHMENT0_EXT );
-	 //DUMP_GL_ERROR( "FgeOffscreen_FBO_ATTACH_TEX" );
+     // attach the selected texture
+     fbo->attachTexture( GL_TEXTURE_2D, texID, GL_COLOR_ATTACHMENT0_EXT );
+     //DUMP_GL_ERROR( "FgeOffscreen_FBO_ATTACH_TEX" );
 
-	 // bind it and check validity
-	 fbo->bind();
-	 //DUMP_GL_ERROR( "FgeOffscreen_FBO_BIND" );
-	 fbo->isValid();
-	 //DUMP_GL_ERROR( "FgeOffscreen_FBO_VALIDITY" );
+     // bind it and check validity
+     fbo->bind();
+     //DUMP_GL_ERROR( "FgeOffscreen_FBO_BIND" );
+     fbo->isValid();
+     //DUMP_GL_ERROR( "FgeOffscreen_FBO_VALIDITY" );
 
-	 }
+     }
 
-	 if (fbo->getAttachedId(GL_DEPTH_ATTACHMENT_EXT)!=depthID)
-	 {
-	 // unattach previously attached one
-	 fbo->unattach(GL_DEPTH_ATTACHMENT_EXT);
-	 //DUMP_GL_ERROR( "FgeOffscreen_FBO_UNATTACH_DEPTHTEX" );
+     if (fbo->getAttachedId(GL_DEPTH_ATTACHMENT_EXT)!=depthID)
+     {
+     // unattach previously attached one
+     fbo->unattach(GL_DEPTH_ATTACHMENT_EXT);
+     //DUMP_GL_ERROR( "FgeOffscreen_FBO_UNATTACH_DEPTHTEX" );
 
-	 // attach the selected depth texture
-	 fbo->attachTexture( GL_TEXTURE_2D, depthID, GL_DEPTH_ATTACHMENT_EXT );
-	 //DUMP_GL_ERROR( "FgeOffscreen_FBO_ATTACH_DEPTHTEX" );
+     // attach the selected depth texture
+     fbo->attachTexture( GL_TEXTURE_2D, depthID, GL_DEPTH_ATTACHMENT_EXT );
+     //DUMP_GL_ERROR( "FgeOffscreen_FBO_ATTACH_DEPTHTEX" );
 
-	 // check validity
-	 if( !fbo->isValid() )
-	 {
-	 std::cerr << "ERROR: invalid framebuffer" << std::endl;
-	 }
-	 //DUMP_GL_ERROR( "FgeOffscreen_DEPTHTEX_VALIDITY" );
+     // check validity
+     if( !fbo->isValid() )
+     {
+     std::cerr << "ERROR: invalid framebuffer" << std::endl;
+     }
+     //DUMP_GL_ERROR( "FgeOffscreen_DEPTHTEX_VALIDITY" );
 
-	 }
+     }
 
-	 // bind the fbo
-	 fbo->bind();
-	 //DUMP_GL_ERROR( "FgeOffscreen_FBO_BIND" );
+     // bind the fbo
+     fbo->bind();
+     //DUMP_GL_ERROR( "FgeOffscreen_FBO_BIND" );
 
-	 // select COLOR_ATTACHMENT0 as render target
-	 glDrawBuffer( GL_COLOR_ATTACHMENT0_EXT ); // draw into the first texture
-	 //DUMP_GL_ERROR( "FgeOffscreen_DRAWBUFFER_SETFBO" );
+     // select COLOR_ATTACHMENT0 as render target
+     glDrawBuffer( GL_COLOR_ATTACHMENT0_EXT ); // draw into the first texture
+     //DUMP_GL_ERROR( "FgeOffscreen_DRAWBUFFER_SETFBO" );
 
-	 // clear color and depth texture
-	 glClearColor( clearColor.getRed(), clearColor.getGreen(), clearColor.getBlue(), clearColor.getAlpha());
-	 //DUMP_GL_ERROR( "FgeOffscreen_COLOR_CLEAR" );
-	 glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	 //DUMP_GL_ERROR( "FgeOffscreen_CLEAR_COLOR_DEPTH" );
+     // clear color and depth texture
+     glClearColor( clearColor.getRed(), clearColor.getGreen(), clearColor.getBlue(), clearColor.getAlpha());
+     //DUMP_GL_ERROR( "FgeOffscreen_COLOR_CLEAR" );
+     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+     //DUMP_GL_ERROR( "FgeOffscreen_CLEAR_COLOR_DEPTH" );
 
-	 // copy viewport for later restoring
-	 glGetIntegerv( GL_VIEWPORT, &viewportParams[0] );
-	 glViewport( 0, 0,  usedW, usedH);
-	 //DUMP_GL_ERROR( "FgeOffscreen_VIEWPORT_SET" );
-	 */
+     // copy viewport for later restoring
+     glGetIntegerv( GL_VIEWPORT, &viewportParams[0] );
+     glViewport( 0, 0,  usedW, usedH);
+     //DUMP_GL_ERROR( "FgeOffscreen_VIEWPORT_SET" );
+     */
 
-	unsigned int list[] = { texID };
-	activate(1, list);
+    unsigned int list[] = { texID };
+    activate(1, list);
 }
 
 /**
@@ -673,82 +673,82 @@ void FgeOffscreen::activate() {
  * \param texList list of texture id's
  */
 void FgeOffscreen::activate(unsigned int num, unsigned int texList[]) {
-	// valid parameters?
-	if (num > textures.size())
-		return;
+    // valid parameters?
+    if (num > textures.size())
+        return;
 
-	// if something has went wrong BEFORE activate has been called
-	//DUMP_GL_ERROR( "FgeOffscreen_PRE_ACTIVATE");
+    // if something has went wrong BEFORE activate has been called
+    //DUMP_GL_ERROR( "FgeOffscreen_PRE_ACTIVATE");
 
-	// activate all textures
-	for (unsigned int i = 0; i < num; i++) {
-		if (fbo->getAttachedId(GL_COLOR_ATTACHMENT0_EXT + i)
-				!= textures[texList[i] - 1].texture->getId()) {
-			// unattach previously attached one
-			fbo->unattach(GL_COLOR_ATTACHMENT0_EXT + i);
-			//DUMP_GL_ERROR( "FgeOffscreen_FBO_UNATTACH_TEX" );
+    // activate all textures
+    for (unsigned int i = 0; i < num; i++) {
+        if (fbo->getAttachedId(GL_COLOR_ATTACHMENT0_EXT + i)
+                != textures[texList[i] - 1].texture->getId()) {
+            // unattach previously attached one
+            fbo->unattach(GL_COLOR_ATTACHMENT0_EXT + i);
+            //DUMP_GL_ERROR( "FgeOffscreen_FBO_UNATTACH_TEX" );
 
-			// attach the selected texture
-			fbo->attachTexture(GL_TEXTURE_2D,
-					textures[texList[i] - 1].texture->getId(),
-					GL_COLOR_ATTACHMENT0_EXT + i);
-			//DUMP_GL_ERROR( "FgeOffscreen_FBO_ATTACH_TEX" );
+            // attach the selected texture
+            fbo->attachTexture(GL_TEXTURE_2D,
+                    textures[texList[i] - 1].texture->getId(),
+                    GL_COLOR_ATTACHMENT0_EXT + i);
+            //DUMP_GL_ERROR( "FgeOffscreen_FBO_ATTACH_TEX" );
 
-			// bind it and check validity
-			fbo->bind();
-			//DUMP_GL_ERROR( "FgeOffscreen_FBO_BIND" );
-			fbo->isValid();
-			//DUMP_GL_ERROR( "FgeOffscreen_FBO_VALIDITY" );
-		}
-	}
+            // bind it and check validity
+            fbo->bind();
+            //DUMP_GL_ERROR( "FgeOffscreen_FBO_BIND" );
+            fbo->isValid();
+            //DUMP_GL_ERROR( "FgeOffscreen_FBO_VALIDITY" );
+        }
+    }
 
-	if (fbo->getAttachedId(GL_DEPTH_ATTACHMENT_EXT) != depthTextures[depthID
-			- 1].texture->getId()) {
-		// unattach previously attached one
-		fbo->unattach(GL_DEPTH_ATTACHMENT_EXT);
-		//DUMP_GL_ERROR( "FgeOffscreen_FBO_UNATTACH_DEPTHTEX" );
+    if (fbo->getAttachedId(GL_DEPTH_ATTACHMENT_EXT) != depthTextures[depthID
+            - 1].texture->getId()) {
+        // unattach previously attached one
+        fbo->unattach(GL_DEPTH_ATTACHMENT_EXT);
+        //DUMP_GL_ERROR( "FgeOffscreen_FBO_UNATTACH_DEPTHTEX" );
 
-		// attach the selected depth texture
-		fbo->attachTexture(GL_TEXTURE_2D,
-				depthTextures[depthID - 1].texture->getId(),
-				GL_DEPTH_ATTACHMENT_EXT );
-		//DUMP_GL_ERROR( "FgeOffscreen_FBO_ATTACH_DEPTHTEX" );
+        // attach the selected depth texture
+        fbo->attachTexture(GL_TEXTURE_2D,
+                depthTextures[depthID - 1].texture->getId(),
+                GL_DEPTH_ATTACHMENT_EXT );
+        //DUMP_GL_ERROR( "FgeOffscreen_FBO_ATTACH_DEPTHTEX" );
 
-		// check validity
-		if (!fbo->isValid()) {
-			std::cerr << "ERROR: invalid framebuffer" << std::endl;
-		}
-		//DUMP_GL_ERROR( "FgeOffscreen_DEPTHTEX_VALIDITY" );
+        // check validity
+        if (!fbo->isValid()) {
+            std::cerr << "ERROR: invalid framebuffer" << std::endl;
+        }
+        //DUMP_GL_ERROR( "FgeOffscreen_DEPTHTEX_VALIDITY" );
 
-	}
+    }
 
-	// bind the fbo
-	fbo->bind();
-	//DUMP_GL_ERROR( "FgeOffscreen_FBO_BIND" );
+    // bind the fbo
+    fbo->bind();
+    //DUMP_GL_ERROR( "FgeOffscreen_FBO_BIND" );
 
-	// select COLOR_ATTACHMENT0 as render target
-	// DIRTY but it works for now
-	GLenum mrt[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT,
-			GL_COLOR_ATTACHMENT2_EXT, GL_COLOR_ATTACHMENT3_EXT,
-			GL_COLOR_ATTACHMENT4_EXT, GL_COLOR_ATTACHMENT5_EXT,
-			GL_COLOR_ATTACHMENT6_EXT, GL_COLOR_ATTACHMENT7_EXT,
-			GL_COLOR_ATTACHMENT8_EXT, GL_COLOR_ATTACHMENT9_EXT,
-			GL_COLOR_ATTACHMENT10_EXT, GL_COLOR_ATTACHMENT11_EXT,
-			GL_COLOR_ATTACHMENT12_EXT, GL_COLOR_ATTACHMENT13_EXT,
-			GL_COLOR_ATTACHMENT14_EXT, GL_COLOR_ATTACHMENT15_EXT };
-	glDrawBuffers(num, mrt);
-	//DUMP_GL_ERROR( "FgeOffscreen_DRAWBUFFER_SETFBO" );
+    // select COLOR_ATTACHMENT0 as render target
+    // DIRTY but it works for now
+    GLenum mrt[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT,
+            GL_COLOR_ATTACHMENT2_EXT, GL_COLOR_ATTACHMENT3_EXT,
+            GL_COLOR_ATTACHMENT4_EXT, GL_COLOR_ATTACHMENT5_EXT,
+            GL_COLOR_ATTACHMENT6_EXT, GL_COLOR_ATTACHMENT7_EXT,
+            GL_COLOR_ATTACHMENT8_EXT, GL_COLOR_ATTACHMENT9_EXT,
+            GL_COLOR_ATTACHMENT10_EXT, GL_COLOR_ATTACHMENT11_EXT,
+            GL_COLOR_ATTACHMENT12_EXT, GL_COLOR_ATTACHMENT13_EXT,
+            GL_COLOR_ATTACHMENT14_EXT, GL_COLOR_ATTACHMENT15_EXT };
+    glDrawBuffers(num, mrt);
+    //DUMP_GL_ERROR( "FgeOffscreen_DRAWBUFFER_SETFBO" );
 
-	// clear color and depth texture
-	glClearColor( clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
-	//DUMP_GL_ERROR( "FgeOffscreen_COLOR_CLEAR" );
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//DUMP_GL_ERROR( "FgeOffscreen_CLEAR_COLOR_DEPTH" );
+    // clear color and depth texture
+    glClearColor( clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+    //DUMP_GL_ERROR( "FgeOffscreen_COLOR_CLEAR" );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //DUMP_GL_ERROR( "FgeOffscreen_CLEAR_COLOR_DEPTH" );
 
-	// copy viewport for later restoring
-	glGetIntegerv(GL_VIEWPORT, &viewportParams[0]);
-	glViewport(0, 0, usedW, usedH);
-	//DUMP_GL_ERROR( "FgeOffscreen_VIEWPORT_SET" );
+    // copy viewport for later restoring
+    glGetIntegerv(GL_VIEWPORT, &viewportParams[0]);
+    glViewport(0, 0, usedW, usedH);
+    //DUMP_GL_ERROR( "FgeOffscreen_VIEWPORT_SET" );
 }
 
 /**
@@ -756,23 +756,23 @@ void FgeOffscreen::activate(unsigned int num, unsigned int texList[]) {
  * Disables the Framebuffer Object.
  */
 void FgeOffscreen::deactivate() {
-	// if something has went wrong BEFORE deactivate has been called
-	//DUMP_GL_ERROR( "FgeOffscreen_PRE_DEACTIVATE");
+    // if something has went wrong BEFORE deactivate has been called
+    //DUMP_GL_ERROR( "FgeOffscreen_PRE_DEACTIVATE");
 
-	// disable the FBO
-	fbo->disable();
-	//DUMP_GL_ERROR( "FgeOffscreen_FBO_DISABLE" );
+    // disable the FBO
+    fbo->disable();
+    //DUMP_GL_ERROR( "FgeOffscreen_FBO_DISABLE" );
 
-	// set default renderbuffer
-	glDrawBuffer(GL_BACK);
-	//DUMP_GL_ERROR( "FgeOffscreen_DRAWBUFFER_SET" );
+    // set default renderbuffer
+    glDrawBuffer(GL_BACK);
+    //DUMP_GL_ERROR( "FgeOffscreen_DRAWBUFFER_SET" );
 
-	fbo->disable();
-	//DUMP_GL_ERROR( "FgeOffscreen_FBO_DISABLE" );
+    fbo->disable();
+    //DUMP_GL_ERROR( "FgeOffscreen_FBO_DISABLE" );
 
-	// restore viewport
-	glViewport(viewportParams[0], viewportParams[1], viewportParams[2],
-			viewportParams[3]);
-	//DUMP_GL_ERROR( "FgeOffscreen_VIEWPORT_RESTORE" );
+    // restore viewport
+    glViewport(viewportParams[0], viewportParams[1], viewportParams[2],
+            viewportParams[3]);
+    //DUMP_GL_ERROR( "FgeOffscreen_VIEWPORT_RESTORE" );
 }
 

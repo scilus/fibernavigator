@@ -26,33 +26,33 @@ struct lessy
 class KdTreeThread : public wxThread {
 
 public:
-	KdTreeThread(float*, std::vector<wxUint32>*, int, int, int, DatasetHelper* );
+    KdTreeThread(float*, std::vector<wxUint32>*, int, int, int, DatasetHelper* );
 
-	void buildTree(int, int, int);
-	virtual void *Entry();
+    void buildTree(int, int, int);
+    virtual void *Entry();
 
-	std::vector<wxUint32>* m_tree;
-	float *m_pointArray;
-	DatasetHelper* m_dh;
-	int m_left;
-	int m_right;
-	int m_axis;
+    std::vector<wxUint32>* m_tree;
+    float *m_pointArray;
+    DatasetHelper* m_dh;
+    int m_left;
+    int m_right;
+    int m_axis;
 };
 
 class KdTree {
 public:
-	KdTree(int, float*, DatasetHelper*);
-	KdTree(int, float*);
-	~KdTree();
+    KdTree(int, float*, DatasetHelper*);
+    KdTree(int, float*);
+    ~KdTree();
 
-	std::vector<wxUint32>m_tree;
-	DatasetHelper* m_dh;
+    std::vector<wxUint32>m_tree;
+    DatasetHelper* m_dh;
 
 private:
-	void buildTree(int, int, int);
-	int m_size;
-	wxUint32 m_root;
-	float *m_pointArray;
+    void buildTree(int, int, int);
+    int m_size;
+    wxUint32 m_root;
+    float *m_pointArray;
 };
 
 #endif /*KDTREE_H_*/

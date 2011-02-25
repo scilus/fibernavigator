@@ -62,10 +62,24 @@ FArray::FArray(const std::vector<double>& a)
 {
   sizeOfArray=a.size();
   comp=new double[sizeOfArray];
+
   // copy the elements
-  unsigned int j;
-  for (j=0;j<sizeOfArray; j++)
-    comp[j]=a[j];
+  if( sizeOfArray > 0 ) 
+      memcpy( comp, &a[0], sizeof(double) * a.size() );
+}
+
+//---------------------------------------------------------------------
+
+FArray::FArray(const std::vector<float>& a)
+{
+  std::vector<double> temp(a.begin(), a.end());
+
+  sizeOfArray=temp.size();
+  comp=new double[sizeOfArray];
+
+  // copy the elements
+  if( sizeOfArray > 0 )    
+    memcpy( comp, &temp[0], sizeof(double) * temp.size() );
 }
 
 //---------------------------------------------------------------------
@@ -267,7 +281,7 @@ ostream& binwrite( ostream & os, const FArray & a )
     binwrite_raw( os, &size );
 
     if( size )
-	binwrite_raw( os, a.comp, size );
+    binwrite_raw( os, a.comp, size );
 
     return os;
 }

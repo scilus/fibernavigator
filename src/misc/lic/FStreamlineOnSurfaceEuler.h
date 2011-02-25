@@ -41,53 +41,53 @@ public:
     // structure to handle a pair of ids associated with an edge
     struct EdgeIndex
     {
-	EdgeIndex();
-	EdgeIndex( FIndex anId1, FIndex anId2 );
-	EdgeIndex( const EdgeIndex& a );
-	bool operator==( const EdgeIndex& a ) const;
-	bool operator<( const EdgeIndex& a ) const;
-	void display() const;
+    EdgeIndex();
+    EdgeIndex( FIndex anId1, FIndex anId2 );
+    EdgeIndex( const EdgeIndex& a );
+    bool operator==( const EdgeIndex& a ) const;
+    bool operator<( const EdgeIndex& a ) const;
+    void display() const;
 
-	FIndex id1, id2;
+    FIndex id1, id2;
     };
 
     // edge geometry
     struct EdgePos
     {
-	EdgePos();
-	EdgePos( const FArray& pos1, const FArray& pos2 );
-	EdgePos( const EdgePos& edgePos );
+    EdgePos();
+    EdgePos( const FArray& pos1, const FArray& pos2 );
+    EdgePos( const EdgePos& edgePos );
 
-	FArray a, b;
+    FArray a, b;
     };
 
 
     // structure to handle paths over surfaces embedded in 3D space
     struct Path
     {
-	// position array
-	std::vector< FArray > pos;
+    // position array
+    std::vector< FArray > pos;
 
-	// corresponding cells
-	std::vector< FIndex > cells;
+    // corresponding cells
+    std::vector< FIndex > cells;
 
-	// corresponding cells' normal vectors
-	std::vector< F::FVector > normals;
+    // corresponding cells' normal vectors
+    std::vector< F::FVector > normals;
 
-	// geodesic's length
-	double length;
+    // geodesic's length
+    double length;
     };
 
 
     // structure to handle singular edges during streamline integration
     struct singSegment
     {
-	// normalized vector between both segment vertices
-	F::FVector dist;
+    // normalized vector between both segment vertices
+    F::FVector dist;
 
-	// values required for (numerically stable) crossing check
-	double delta[3];
-	FPosition coord;
+    // values required for (numerically stable) crossing check
+    double delta[3];
+    FPosition coord;
     };
 
 
@@ -106,7 +106,7 @@ public:
     // 2: singularity or singular edge
     // 3: proceed test failed
     virtual int integrate( const FPosition& start, const FIndex& cellId,
-			   bool dir, double length );
+               bool dir, double length );
 
     virtual bool proceed( void );
 
@@ -163,9 +163,9 @@ protected:
 
 protected:
 
-	DatasetHelper* m_dh;
-	TensorField* m_tensorField;
-	TriangleMesh* m_grid;
+    DatasetHelper* m_dh;
+    TensorField* m_tensorField;
+    TriangleMesh* m_grid;
 
 
     static const double epsilon;
@@ -194,15 +194,15 @@ protected:
     float offset;
 
     bool walkThroughCell( const FArray& entry, const FIndex& cellId, const FArray& lastStep,
-			  FIndex& vertId1, FIndex& vertId2,
-			  double fwd, bool onEdge, FArray& exit,
-			  FIndex& nextCell, bool& posRot );
+              FIndex& vertId1, FIndex& vertId2,
+              double fwd, bool onEdge, FArray& exit,
+              FIndex& nextCell, bool& posRot );
 
     bool walkThroughVertex( const FIndex& vertId, const FArray& lastStep,
-			    FIndex& vertId1, FIndex& vertId2,
-			    double fwd, FArray& exit,
-			    FIndex& currCell,
-			    FIndex& nextCell );
+                FIndex& vertId1, FIndex& vertId2,
+                double fwd, FArray& exit,
+                FIndex& currCell,
+                FIndex& nextCell );
 
 
     std::vector< FIndex > indices;
@@ -229,7 +229,7 @@ protected:
 
     // old school C-like computation
     void baryCoords( double& b0, double& b1, double& b2,
-		     double point[], double verts[][2] );
+             double point[], double verts[][2] );
 
     double crossProd( double v1[], double v2[] );
 

@@ -15,25 +15,25 @@ class TriangleMesh;
 class loopSubD  
 {
 public:
-	
-	TriangleMesh* triMesh;
+    
+    TriangleMesh* triMesh;
 
-	int numTriVerts;
-	int numTriFaces;
+    int numTriVerts;
+    int numTriFaces;
 
-	int numEdgeVerts;
+    int numEdgeVerts;
 
-	Vector vec;
+    Vector vec;
 
-	loopSubD();
-	loopSubD(TriangleMesh* nTriMesh);
-	virtual ~loopSubD();
+    loopSubD();
+    loopSubD(TriangleMesh* nTriMesh);
+    virtual ~loopSubD();
 
-	int calcEdgeVert(int triNum, unsigned int edgeV1, unsigned int edgeV2, unsigned int V3);
-	Vector calcNewPosition(unsigned int vertNum);
-	void insertCenterTriangle(unsigned int triNum);
-	void insertCornerTriangles(unsigned int triNum);
-	double getAlpha(int n);
+    int calcEdgeVert(int triNum, unsigned int edgeV1, unsigned int edgeV2, unsigned int V3);
+    Vector calcNewPosition(unsigned int vertNum);
+    void insertCenterTriangle(unsigned int triNum);
+    void insertCornerTriangles(unsigned int triNum);
+    double getAlpha(int n);
 
 };
 

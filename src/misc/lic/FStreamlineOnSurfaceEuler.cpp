@@ -108,7 +108,7 @@ int FStreamlineOnSurfaceEuler::integrate(const FPosition& start, const FIndex& c
         currCell = cellId;
         steps.push_back(start);
         vecs.push_back(cell_vectors[cellId]);
-        //		length*= sqrt(cell_vectors[cellId][0]*cell_vectors[cellId][0] + cell_vectors[cellId][1]*cell_vectors[cellId][1] + cell_vectors[cellId][2]*cell_vectors[cellId][2]);
+        //        length*= sqrt(cell_vectors[cellId][0]*cell_vectors[cellId][0] + cell_vectors[cellId][1]*cell_vectors[cellId][1] + cell_vectors[cellId][2]*cell_vectors[cellId][2]);
         visitedCells.push_back(cellId);
 
         succeeded = walkThroughCell(currPos, currCell, FArray(3), first, second, fwd, false, nextPos,

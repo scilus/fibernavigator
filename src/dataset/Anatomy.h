@@ -12,50 +12,61 @@
 #include "surface.h"
 #include "../misc/lic/TensorField.h"
 
-class SelectionBox;
-
+class SelectionObject;
+class MainFrame;
 class Anatomy : public DatasetInfo , public wxTreeItemData
 {
 
 public:
-	Anatomy(DatasetHelper* dh);
-	Anatomy(DatasetHelper* dh, std::vector<float>* dataset);
-	virtual ~Anatomy();
+    //constructor/destructor
+    Anatomy( DatasetHelper *datasetHelper );
+    Anatomy( DatasetHelper *datasetHelper, std::vector<float> *dataset);
+    Anatomy( DatasetHelper *datasetHelper, int type);
+    virtual ~Anatomy();
+   
+   
+   float at( int i );
+   std::vector<float>* getFloatDataset();
+   GLuint getGLuint();
+   void setRGBZero( int x, int y, int z );
+   TensorField* getTensorField();
+   void setZero( int x, int y, int z );
+    
+ 
+   void dilate();
+   void draw()             {};
+   void erode();
+   void minimize();
+   bool load     (wxString fileName);
+   bool loadNifti(wxString fileName);
+   void saveNifti(wxString fileName);    
+   virtual void createPropertiesSizer(MainFrame *parent);
+   virtual void updatePropertiesSizer();
 
-	bool load(wxString filename);
-	void draw() {};
-	GLuint getGLuint();
-
-	std::vector<float>* getFloatDataset();
-	float at(int i);
-	TensorField* getTensorField();
-
-	bool loadNifti(wxString filename);
-	void saveNifti(wxString filename);
-	void setZero(int x, int y, int z);
-	void setRGBZero(int x, int y, int z);
-	void minimize();
-	void dilate();
-	void erode();
-	SelectionBox* m_roi;
-
-private:
-	void generateTexture();
-	void generateGeometry() {};
-	void initializeBuffer() {};
-	void clean() {};
-	void smooth() {};
-	void activateLIC() {};
-	void createOffset(std::vector<float>* dataset);
-
-	double xxgauss(double x, double sigma);
-
-
-	void dilate1(std::vector<bool>*, int index);
-	void erode1(std::vector<bool>*, int index);
-
-	std::vector<float> m_floatDataset;
-	TensorField* m_tensorField;
+   SelectionObject         *m_roi;
+ private:
+    wxButton    *m_pbtnCut;
+    wxButton    *m_pbtnMinimize;
+    wxButton    *m_pbtnDilate;
+    wxButton    *m_pbtnErode;
+    wxButton    *m_pbtnNewIsoSurface;
+    wxButton    *m_pbtnNewDistanceMap;
+    wxButton    *m_pbtnNewOffsetSurface;
+    wxButton    *m_pbtnNewVOI;
+ 
+    void activateLIC()      {};
+    void clean()            {};
+    void createOffset( std::vector<float>* dataset );
+    void dilate1( std::vector<bool>*, int index );
+    void erode1( std::vector<bool>*, int index );
+    void generateTexture();
+    void generateGeometry() {};
+    void initializeBuffer() {};
+    void smooth()           {};
+    double xxgauss( double x, double sigma );    
+    
+    std::vector<float>      m_floatDataset;
+    TensorField             *m_tensorField;
 };
 
 #endif /* ANATOMY_H_ */

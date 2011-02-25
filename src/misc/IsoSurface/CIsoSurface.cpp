@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "../lic/SurfaceLIC.h"
 #include "../../dataset/Anatomy.h"
+#include "../../main.h"
 
 #include <fstream>
 #include <ctime>
@@ -298,19 +299,19 @@ const int CIsoSurface::m_triTable[256][16] =
 CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy ) :
     DatasetInfo( dh )
 {
-    m_nCellsX = m_dh->columns - 1;
-    m_nCellsY = m_dh->rows - 1;
-    m_nCellsZ = m_dh->frames - 1;
-    m_fCellLengthX = m_dh->xVoxel;
-    m_fCellLengthY = m_dh->yVoxel;
-    m_fCellLengthZ = m_dh->zVoxel;
+    m_nCellsX = m_dh->m_columns - 1;
+    m_nCellsY = m_dh->m_rows - 1;
+    m_nCellsZ = m_dh->m_frames - 1;
+    m_fCellLengthX = m_dh->m_xVoxel;
+    m_fCellLengthY = m_dh->m_yVoxel;
+    m_fCellLengthZ = m_dh->m_zVoxel;
 
-    int size = m_dh->columns * m_dh->rows * m_dh->frames;
+    int size = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
     m_ptScalarField.resize( size );
     for ( int i = 0; i < size; ++i )
         m_ptScalarField[i] = anatomy->at( i );
 
-    if ( m_dh->filterIsoSurf )
+    if ( m_dh->m_filterIsoSurf )
     {
         for ( unsigned int z = 1; z < m_nCellsZ; ++z )
             for ( unsigned int y = 1; y < m_nCellsY; ++y )
@@ -319,31 +320,30 @@ CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy ) :
                     std::vector< float > list;
                     for ( unsigned int zz = z - 1; zz < z + 2; ++zz )
                     {
-                        list.push_back( anatomy->at( x + m_dh->columns * y + m_dh->columns * m_dh->rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->columns * y + m_dh->columns * m_dh->rows
+                        list.push_back( anatomy->at( x + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows
                                 * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->columns * y + m_dh->columns * m_dh->rows
+                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows
                                 * zz ) );
-                        list.push_back( anatomy->at( x + m_dh->columns * ( y - 1 ) + m_dh->columns
-                                * m_dh->rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->columns * ( y - 1 ) + m_dh->columns
-                                * m_dh->rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->columns * ( y - 1 ) + m_dh->columns
-                                * m_dh->rows * zz ) );
-                        list.push_back( anatomy->at( x + m_dh->columns * ( y + 1 ) + m_dh->columns
-                                * m_dh->rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->columns * ( y + 1 ) + m_dh->columns
-                                * m_dh->rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->columns * ( y + 1 ) + m_dh->columns
-                                * m_dh->rows * zz ) );
+                        list.push_back( anatomy->at( x + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
+                                * m_dh->m_rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
+                                * m_dh->m_rows * zz ) );
+                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
+                                * m_dh->m_rows * zz ) );
+                        list.push_back( anatomy->at( x + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
+                                * m_dh->m_rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
+                                * m_dh->m_rows * zz ) );
+                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
+                                * m_dh->m_rows * zz ) );
                     }
                     nth_element( list.begin(), list.begin() + 13, list.end() );
-                    m_ptScalarField[x + m_dh->columns * y + m_dh->columns * m_dh->rows * z] = list[13];
+                    m_ptScalarField[x + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows * z] = list[13];
                 }
     }
-    m_type = IsoSurface_;
+    m_type = ISO_SURFACE;
     m_threshold = 0.40f;
-    m_color = wxColour( 230, 230, 230 );
     m_oldMax = anatomy->getOldMax();
 
     m_nTriangles = 0;
@@ -372,10 +372,6 @@ void CIsoSurface::GenerateSurface( float tIsoLevel )
 
     unsigned int nPointsInXDirection = ( m_nCellsX + 1 );
     unsigned int nPointsInSlice = nPointsInXDirection * ( m_nCellsY + 1 );
-
-    //std::clock_t t1 = std::clock();
-    //printf("start: %u\n", (unsigned int)t1);
-
 
 #if 1
     // Generate isosurface.
@@ -516,7 +512,7 @@ void CIsoSurface::GenerateSurface( float tIsoLevel )
         }
     }
 #else
-    std::vector<int>aIndex(m_dh->columns * m_dh->rows * m_dh->frames ,0);
+    std::vector<int>aIndex(m_dh->m_columns * m_dh->m_rows * m_dh->m_frames ,0);
 
     // Generate isosurface.
     for (unsigned int z = 1; z < m_nCellsZ + 1; z++)
@@ -656,11 +652,6 @@ void CIsoSurface::GenerateSurface( float tIsoLevel )
         }
     }
 #endif
-
-    //std::clock_t t2 = std::clock();
-    //printf("end: %u\n", (unsigned int)t2);
-    //printf("diff: %u\n", (unsigned int)(t2-t1));
-
 
     RenameVerticesAndTriangles();
     m_bValidSurface = true;
@@ -952,7 +943,8 @@ void CIsoSurface::generateGeometry()
         for ( int j = 0; j < 3; ++j )
         {
             pointNormal = m_tMesh->getVertNormal( triangleEdges.pointID[j] );
-            glNormal3d( pointNormal.x * -1.0, pointNormal.y * -1.0, pointNormal.z * -1.0 );
+            //Flip the normals by default since most isosurface loaded need their normals flipped.
+            glNormal3d( -pointNormal.x, -pointNormal.y, -pointNormal.z); 
             point = m_tMesh->getVertex( triangleEdges.pointID[j] );
             glVertex3d( point.x, point.y, point.z );
         }
@@ -998,7 +990,10 @@ void CIsoSurface::generateLICGeometry()
 void CIsoSurface::draw()
 {
     if ( !m_GLuint )
+    {
         generateGeometry();
+    }
+
     glCallList( m_GLuint );
 }
 
@@ -1013,7 +1008,7 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
     if ( !m_positionsCalculated )
     {
         Vector v( 0, 0, 0 );
-        size_t nSize = m_dh->columns * m_dh->rows * m_dh->frames;
+        size_t nSize = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
         std::vector< Vector > accu( nSize, v );
         std::vector< int > hits( nSize, 0 );
         std::vector< Vector > vertices = m_tMesh->getVerts();
@@ -1022,8 +1017,8 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
         for ( size_t i = 0; i < vertices.size(); ++i )
         {
             v = vertices[i];
-            int index = (int) v.x + (int) v.y * m_dh->columns + (int) v.z * m_dh->columns * m_dh->rows;
-            if ( !( index < 0 || index > m_dh->columns * m_dh->rows * m_dh->frames ) )
+            int index = (int) v.x + (int) v.y * m_dh->m_columns + (int) v.z * m_dh->m_columns * m_dh->m_rows;
+            if ( !( index < 0 || index > m_dh->m_columns * m_dh->m_rows * m_dh->m_frames ) )
             {
                 accu[index].x += v.x;
                 accu[index].y += v.y;
@@ -1056,9 +1051,9 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
                 accu[i].z /= hits[i];
                 if ( (int) accu[i].x )
                 {
-                    accu[i].x = wxMin( m_dh->columns, wxMax ( accu[i].x, 0 ) );
-                    accu[i].y = wxMin( m_dh->rows, wxMax ( accu[i].y, 0 ) );
-                    accu[i].z = wxMin( m_dh->frames, wxMax ( accu[i].z, 0 ) );
+                    accu[i].x = wxMin( m_dh->m_columns, wxMax ( accu[i].x, 0 ) );
+                    accu[i].y = wxMin( m_dh->m_rows, wxMax ( accu[i].y, 0 ) );
+                    accu[i].z = wxMin( m_dh->m_frames, wxMax ( accu[i].z, 0 ) );
 
                     Vector v( accu[i].x, accu[i].y, accu[i].z );
                     m_svPositions.push_back( v );
@@ -1163,4 +1158,34 @@ bool CIsoSurface::save( wxString filename ) const
     return true;
 
 #endif
+}
+
+void CIsoSurface::createPropertiesSizer(MainFrame *parent)
+{
+    DatasetInfo::createPropertiesSizer(parent);
+
+    m_ptoggleCutFrontSector = new wxToggleButton(parent, wxID_ANY,wxT("Cut Front Sector"),wxDefaultPosition, wxSize(140,-1));
+    m_propertiesSizer->Add(m_ptoggleCutFrontSector,0,wxALIGN_CENTER);
+    parent->Connect(m_ptoggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(MainFrame::OnToggleShowFS));  
+    
+    wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    m_ptoggleUseColoring = new wxToggleButton(parent, wxID_ANY,wxT("Use Coloring"),wxDefaultPosition, wxSize(100,-1));
+    wxImage bmpColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
+    m_pbtnSelectColor = new wxBitmapButton(parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize(40,-1));
+    l_sizer->Add(m_ptoggleUseColoring,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnListMenuThreshold));
+    parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnAssignColor));
+}
+
+void CIsoSurface::updatePropertiesSizer()
+{
+    DatasetInfo::updatePropertiesSizer();
+    m_ptoggleFiltering->Enable(false);
+    m_ptoggleFiltering->SetValue(false);
+    m_ptoggleUseColoring->SetValue(!getUseTex());
+    m_ptoggleCutFrontSector->SetValue(!getShowFS());
+
+    
 }

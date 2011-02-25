@@ -80,7 +80,7 @@ public:
    *comp: array of double coordinates.
    */
   FTensor(unsigned char dimension, unsigned char order,
-	  const std::vector<double>& comp);
+      const std::vector<double>& comp);
 
   /**
    *\par Description:

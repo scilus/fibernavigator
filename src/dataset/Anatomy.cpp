@@ -8,301 +8,342 @@
 #include "Anatomy.h"
 #include "fibers.h"
 
-#include "wx/textfile.h"
-#include <GL/glew.h>
-
-#include "../gui/selectionBox.h"
+#include "../gui/mainFrame.h"
+#include "../gui/SelectionObject.h"
 #include "../misc/nifti/nifti1_io.h"
+
+#include <wx/textfile.h>
+#include <GL/glew.h>
+#include <cassert>
 
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 
-Anatomy::Anatomy(DatasetHelper* dh) : DatasetInfo (dh)
+Anatomy::Anatomy( DatasetHelper* i_datasetHelper ) : 
+    DatasetInfo ( i_datasetHelper )
 {
-    m_roi = 0;
+    m_roi         = 0;
     m_tensorField = 0;
 }
 
-Anatomy::Anatomy(DatasetHelper* dh, std::vector<float>* dataset) : DatasetInfo(dh)
+Anatomy::Anatomy( DatasetHelper* i_datasetHelper, std::vector< float >* i_dataset) : 
+    DatasetInfo( i_datasetHelper )
 {
+    m_columns       = m_dh->m_columns;
+    m_frames        = m_dh->m_frames;
+    m_isLoaded      = true;   
+    m_roi           = 0;
+    m_rows          = m_dh->m_rows;
+    m_tensorField   = 0;
+    m_type          = HEAD_BYTE;
+    createOffset( i_dataset );
+}
 
-    m_type = Head_byte;
-    m_frames = m_dh->frames;
-    m_rows = m_dh->rows;
-    m_columns = m_dh->columns;
-    is_loaded = true;
+Anatomy::Anatomy(DatasetHelper* datasetHelper, int type)
+:DatasetInfo(datasetHelper)
+{
+    if(type == RGB)
+    {
+        m_columns       = m_dh->m_columns;
+        m_frames        = m_dh->m_frames;
+        m_isLoaded      = true;   
+        m_roi           = 0;
+        m_rows          = m_dh->m_rows;
+        m_tensorField   = 0;
+        m_type          = type;
 
-    m_roi = 0;
-    m_tensorField = 0;
+        m_floatDataset.resize( m_columns * m_frames * m_rows * 3 );
 
-    createOffset(dataset);
+        for(unsigned int i = 0; i < m_floatDataset.size(); ++i )
+        {
+            m_floatDataset[i]       = 0;
+        }
+    }
+    else
+    {
+        assert(false);
+    }
 }
 
 Anatomy::~Anatomy()
 {
     const GLuint* tex = &m_GLuint;
-    glDeleteTextures(1, tex);
-    if (m_roi)
+    glDeleteTextures( 1, tex );
+
+    if( m_roi )
+    {
         m_roi->m_sourceAnatomy = NULL;
+    }
+
     m_dh->updateLoadStatus();
 }
 
-bool Anatomy::load(wxString filename)
+bool Anatomy::load( wxString i_fileName )
 {
-    m_fullPath = filename;
+    m_fullPath = i_fileName;
 #ifdef __WXMSW__
-    m_name = filename.AfterLast('\\');
+    m_name = i_fileName.AfterLast( '\\' );
 #else
-    m_name = filename.AfterLast('/');
+    m_name = i_fileName.AfterLast( '/' );
 #endif
     // test for nifti
-    if (m_name.AfterLast('.') == _T("nii"))
+    if ( m_name.AfterLast( '.' ) == _T( "nii" ) )
     {
-        //printf("detected nifti file\n");
-        return loadNifti(filename);
+        //printf( "detected nifti file\n" );
+        return loadNifti( i_fileName );
     }
-
-    else if (m_name.AfterLast('.') == _T("gz"))
+    else if ( m_name.AfterLast( '.' ) == _T( "gz" ) )
     {
-        //printf("checking for compressed nifti file\n");
-        wxString tmpName = m_name.BeforeLast('.');
-        if (tmpName.AfterLast('.') == _T("nii"))
+        //printf( "checking for compressed nifti file\n" );
+        wxString l_tmpName = m_name.BeforeLast( '.' );
+        if ( l_tmpName.AfterLast( '.' ) == _T( "nii" ) )
         {
-            //printf("found compressed nifti file\n");
-            return loadNifti(filename);
+            //printf( "found compressed nifti file\n" );
+            return loadNifti( i_fileName );
         }
     }
+
     return false;
-
 }
-// TODO
-bool Anatomy::loadNifti(wxString filename)
-{
-    char* hdr_file;
-    hdr_file = (char*) malloc(filename.length() + 1);
-    strcpy(hdr_file, (const char*) filename.mb_str(wxConvUTF8));
 
-    nifti_image* ima = nifti_image_read(hdr_file, 0);
-    if ( !ima )
+///////////////////////////////////////////////////////////////////////////
+// COMMENT
+// TODO
+bool Anatomy::loadNifti( wxString i_fileName )
+{
+    char* l_hdrFile;
+    l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
+    strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
+
+    nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
+    if( ! l_image )
     {
-        m_dh->lastError = wxT("nifti file corrupt, cannot create nifti image from header");
+        m_dh->m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
         return false;
     }
 #ifdef DEBUG
-    //nifti_1_header *tmphdr = nifti_read_header(hdr_file, 0, 0);
-    //disp_nifti_1_header("", tmphdr);
+    //nifti_1_header *l_tmphdr = nifti_read_header( l_hdrFile, 0, 0 );
+    //disp_nifti_1_header( "", l_tmphdr );
 #endif
-    m_columns = ima->dim[1]; // 160
-    m_rows = ima->dim[2]; // 200
-    m_frames = ima->dim[3]; // 160
-    m_bands = ima->dim[4];
+    m_columns   = l_image->dim[1]; // 160
+    m_rows      = l_image->dim[2]; // 200
+    m_frames    = l_image->dim[3]; // 160
+    m_bands     = l_image->dim[4];
 
-    if (m_dh->anatomy_loaded)
+    if( m_dh->m_anatomyLoaded )
     {
-        if (m_rows != m_dh->rows || m_columns != m_dh->columns || m_frames != m_dh->frames)
+        if( m_rows != m_dh->m_rows || m_columns != m_dh->m_columns || m_frames != m_dh->m_frames )
         {
-            m_dh->lastError = wxT("dimensions of loaded files must be the same");
+            m_dh->m_lastError = wxT( "dimensions of loaded files must be the same" );
             return false;
         }
     }
-    else
+    /*else
     {
-        m_dh->rows = m_rows;
-        m_dh->columns = m_columns;
-        m_dh->frames = m_frames;
+        m_dh->m_rows            = m_rows;
+        m_dh->m_columns         = m_columns;
+        m_dh->m_frames          = m_frames;
+        m_dh->m_anatomyLoaded   = true;
+    }*/
 
-        m_dh->anatomy_loaded = true;
-    }
+    m_dh->m_xVoxel = l_image->dx;
+    m_dh->m_yVoxel = l_image->dy;
+    m_dh->m_zVoxel = l_image->dz;
 
-    m_dh->xVoxel = ima->dx;
-    m_dh->yVoxel = ima->dy;
-    m_dh->zVoxel = ima->dz;
-
-    if (ima->datatype == 2)
+    if( l_image->datatype == 2 )
     {
-        if (ima->dim[4] == 1)
+        if( l_image->dim[4] == 1 )
         {
-            m_type = Head_byte;
+            m_type = HEAD_BYTE;
         }
-        else if (ima->dim[4] == 3)
+        else if( l_image->dim[4] == 3 )
         {
             m_type = RGB;
         }
         else
-            m_type = not_initialized;
+            m_type = BOT_INITIALIZED;
     }
-    else if (ima->datatype == 4)
-        m_type = Head_short;
+    else if( l_image->datatype == 4 )
+        m_type = HEAD_SHORT;
 
-    else if (ima->datatype == 16)
+    else if( l_image->datatype == 16 )
     {
-        if (ima->dim[4] == 3)
+        if( l_image->dim[4] == 3 )
         {
-            m_type = Vectors_;
+            m_type = VECTORS;
         }
 
-        else if (m_bands >= 6)
+        else if( m_bands >= 6 )
         {
-            m_type = Tensors_;
+            m_type = TENSOR_FIELD;
         }
 
         else
-            m_type = Overlay;
+            m_type = OVERLAY;
     }
     else
-        m_type = not_initialized;
+        m_type = BOT_INITIALIZED;
 
-    nifti_image* filedata = nifti_image_read(hdr_file, 1);
-    if ( !filedata )
+    nifti_image* l_fileData = nifti_image_read( l_hdrFile, 1 );
+    if( ! l_fileData )
     {
-        m_dh->lastError = wxT("nifti file corrupt");
+        m_dh->m_lastError = wxT( "nifti file corrupt" );
         return false;
     }
-    int nSize = ima->dim[1] * ima->dim[2] * ima->dim[3];
+    int l_nSize = l_image->dim[1] * l_image->dim[2] * l_image->dim[3];
 
-    bool flag = false;
+    bool l_flag = false;
 
-    switch (m_type)
+    switch( m_type )
     {
-        case Head_byte:
+        case HEAD_BYTE:
         {
-            unsigned char *data = (unsigned char*) filedata->data;
+            unsigned char* l_data = (unsigned char*)l_fileData->data;
+            m_floatDataset.resize( l_nSize );
 
-            m_floatDataset.resize( nSize );
-            for (int i = 0; i < nSize; ++i)
+            for( int i = 0; i < l_nSize; ++i )
             {
-                m_floatDataset[i] = (float) data[i] / 255.0;
+                m_floatDataset[i] = (float)l_data[i] / 255.0;
             }
-            flag = true;
 
+            l_flag = true;
             m_oldMax = 255;;
         }
             break;
 
-        case Head_short:
+        case HEAD_SHORT:
         {
-            short int *data = (short int*) filedata->data;
-            int max = 0;
-            std::vector<int> histo(65536, 0);
-            for (int i = 0; i < nSize; ++i)
+            short int* l_data = (short int*)l_fileData->data;
+            int l_max = 0;
+            std::vector<int> l_histo( 65536, 0 );
+
+            for( int i = 0; i < l_nSize; ++i )
             {
-                max = wxMax(max, data[i]);
-                ++histo[data[i]];
-            }
-            int fivepercent = (int) (nSize * 0.001);
-            int newMax = 65535;
-            int adder = 0;
-            for (int i = 65535; i > 0; --i)
-            {
-                adder += histo[i];
-                newMax = i;
-                if (adder > fivepercent)
-                    break;
-            }
-            for (int i = 0; i < nSize; ++i)
-            {
-                if (data[i] > newMax)
-                    data[i] = newMax;
+                l_max = wxMax(l_max, l_data[i]);
+                ++l_histo[l_data[i]];
             }
 
-            m_floatDataset.resize ( nSize );
-            for (int i = 0; i < nSize; ++i)
+            int l_fivePercent   = (int)( l_nSize * 0.001 );
+            int l_newMax        = 65535;
+            int l_adder         = 0;
+
+            for( int i = 65535; i > 0; --i )
             {
-                m_floatDataset[i] = (float) data[i] / (float) newMax;
+                l_adder += l_histo[i];
+                l_newMax = i;
+
+                if( l_adder > l_fivePercent )
+                    break;
             }
-            m_oldMax = max;
-            m_newMax = newMax;
-            flag = true;
+            for( int i = 0; i < l_nSize; ++i )
+            {
+                if ( l_data[i] > l_newMax )
+                    l_data[i] = l_newMax;
+            }
+
+            m_floatDataset.resize ( l_nSize );
+
+            for( int i = 0; i < l_nSize; ++i )
+            {
+                m_floatDataset[i] = (float)l_data[i] / (float)l_newMax;
+            }
+
+            m_oldMax    = l_max;
+            m_newMax    = l_newMax;
+            l_flag      = true;
         }
             break;
 
-        case Overlay:
+        case OVERLAY:
         {
-            float *data = (float*) filedata->data;
+            float* l_data = (float*)l_fileData->data;
 
-            m_floatDataset.resize( nSize );
-            for (int i = 0; i < nSize; ++i)
+            m_floatDataset.resize( l_nSize );
+            for( int i = 0; i < l_nSize; ++i )
             {
-                m_floatDataset[i] = (float) data[i];
+                m_floatDataset[i] = (float)l_data[i];
             }
 
-            float max = 0.0;
-            for (int i = 0; i < nSize; ++i)
+            float l_max = 0.0;
+            for( int i = 0; i < l_nSize; ++i )
             {
-                if (m_floatDataset[i] > max)
-                    max = m_floatDataset[i];
+                if (m_floatDataset[i] > l_max)
+                    l_max = m_floatDataset[i];
             }
-            for (int i = 0; i < nSize; ++i)
-            {
-                m_floatDataset[i] = m_floatDataset[i] / max;
-            }
-            m_oldMax = max;
-            m_newMax = 1.0;
 
-            flag = true;
+            for( int i = 0; i < l_nSize; ++i )
+            {
+                m_floatDataset[i] = m_floatDataset[i] / l_max;
+            }
+
+            m_oldMax    = l_max;
+            m_newMax    = 1.0;
+            l_flag      = true;
         }
             break;
 
         case RGB:
         {
-            unsigned char *data = (unsigned char*) filedata->data;
+            unsigned char* l_data = (unsigned char*)l_fileData->data;
 
-            m_floatDataset.resize ( nSize * 3 );
+            m_floatDataset.resize( l_nSize * 3 );
 
-            for (int i = 0; i < nSize; ++i)
+            for( int i = 0; i < l_nSize; ++i )
             {
-
-                m_floatDataset[i * 3] = (float) data[i] / 255.0;
-                m_floatDataset[i * 3 + 1] = (float) data[nSize + i] / 255.0;
-                m_floatDataset[i * 3 + 2] = (float) data[(2 * nSize) + i] / 255.0;
+                m_floatDataset[i * 3]       = (float)l_data[i] / 255.0;
+                m_floatDataset[i * 3 + 1]   = (float)l_data[l_nSize + i] / 255.0;
+                m_floatDataset[i * 3 + 2]   = (float)l_data[(2 * l_nSize) + i] / 255.0;
             }
-            flag = true;
+
+            l_flag = true;
         }
             break;
 
-        case Vectors_:
+        case VECTORS:
         {
-            float *data = (float*) filedata->data;
-            m_floatDataset.resize ( nSize * 3 );
+            float* l_data = (float*)l_fileData->data;
+            m_floatDataset.resize( l_nSize * 3 );
 
-            for (int i = 0; i < nSize; ++i)
+            for( int i = 0; i < l_nSize; ++i )
             {
-
-                m_floatDataset[i * 3] = data[i];
-                m_floatDataset[i * 3 + 1] = data[nSize + i];
-                m_floatDataset[i * 3 + 2] = data[(2 * nSize) + i];
-
+                m_floatDataset[i * 3]       = l_data[i];
+                m_floatDataset[i * 3 + 1]   = l_data[l_nSize + i];
+                m_floatDataset[i * 3 + 2]   = l_data[(2 * l_nSize) + i];
             }
-            m_tensorField = new TensorField(m_dh, &m_floatDataset, 1, 3);
-            m_dh->tensors_loaded = true;
-            m_dh->vectors_loaded = true;
-            m_dh->surface_isDirty = true;
-            flag = true;
+
+            m_tensorField              = new TensorField( m_dh, &m_floatDataset, 1, 3 );
+            m_dh->m_tensorsFieldLoaded = true;
+            m_dh->m_vectorsLoaded      = true;
+            m_dh->m_surfaceIsDirty     = true;
+            l_flag                     = true;
         }
             break;
 
-        case Tensors_:
+        case TENSOR_FIELD:
         {
-            float *data = (float*) filedata->data;
-            int components = m_bands;
+            m_dh->m_lastError = wxT( "no anatomy file loaded" );
+                return false;
+            
+            /*float* l_data = (float*)l_fileData->data;
+            int l_components = m_bands;
 
-            m_floatDataset.resize ( nSize * components );
+            m_floatDataset.resize( l_nSize * l_components );
 
-            for (int i = 0; i < nSize; ++i)
+            for( int i = 0; i < l_nSize; ++i )
             {
-
-                for (int j = 0; j < components; ++j)
+                for( int j = 0; j < l_components; ++j )
                 {
-                    m_floatDataset[i * components + j] = data[(j * nSize) + i];
+                    m_floatDataset[i * l_components + j] = l_data[(j * l_nSize) + i];
                 }
             }
 
-            if ( components == 6 )
+            if( l_components == 6 )
             {
-                m_tensorField = new TensorField(m_dh, &m_floatDataset, 2, 3);
+                m_tensorField = new TensorField( m_dh, &m_floatDataset, 2, 3 );
             }
-            m_dh->tensors_loaded = true;
-            flag = true;
+
+            m_dh->m_tensorsFieldLoaded = true;
+            l_flag                     = true;*/
         }
             break;
 
@@ -310,537 +351,627 @@ bool Anatomy::loadNifti(wxString filename)
             break;
     }
 
-    is_loaded = flag;
-    return flag;
+    if( l_flag )
+    {
+        m_dh->m_rows            = m_rows;
+        m_dh->m_columns         = m_columns;
+        m_dh->m_frames          = m_frames;
+        m_dh->m_anatomyLoaded   = true;
+    } 
 
+    m_isLoaded = l_flag;
+
+    return l_flag;
 }
 
-void Anatomy::saveNifti(wxString filename)
+///////////////////////////////////////////////////////////////////////////
+// COMMENT
+void Anatomy::saveNifti( wxString i_fileName )
 {
     int dims[] = { 3, m_columns, m_rows, m_frames, 1, 0, 0, 0 };
 
-    nifti_image* ima = nifti_make_new_nim(dims, DT_FLOAT32, 1);
+    nifti_image* l_image = nifti_make_new_nim( dims, DT_FLOAT32, 1 );
+    l_image->qform_code  = 1;
 
-    ima->qform_code = 1;
-
-    char fn[1024];
-    strcpy(fn, (const char*) filename.mb_str(wxConvUTF8));
-    ima->fname = fn;
-    ima->data = &m_floatDataset[0];
-    nifti_image_write(ima);
+    char l_fn[1024];
+    strcpy( l_fn, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
+    l_image->fname  = l_fn;
+    l_image->data   = &m_floatDataset[0];
+    nifti_image_write( l_image );
 }
 
+///////////////////////////////////////////////////////////////////////////
+// COMMENT
 void Anatomy::generateTexture()
 {
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glGenTextures(1, &m_GLuint);
-    glBindTexture(GL_TEXTURE_3D, m_GLuint);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+    glPixelStorei  ( GL_UNPACK_ALIGNMENT, 1 );
+    glGenTextures  ( 1, &m_GLuint );
+    glBindTexture  ( GL_TEXTURE_3D, m_GLuint );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP );
 
-    switch (m_type)
+    switch( m_type )
     {
-        case Head_byte:
-        case Head_short:
-        case Overlay:
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_LUMINANCE, GL_FLOAT,
-                    &m_floatDataset[0]);
+        case HEAD_BYTE:
+        case HEAD_SHORT:
+        case OVERLAY:
+            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_LUMINANCE, GL_FLOAT, &m_floatDataset[0] );
             break;
+
         case RGB:
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT,
-                    &m_floatDataset[0]);
+            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT, &m_floatDataset[0] );
             break;
-        case Vectors_:
+
+        case VECTORS:
             break;
+
+        // The code to generate a texture from Tensors is not implemented yet, basicly this means that 
+        // the data inside the m_floatDataset is not set properly.
+        case TENSOR_FIELD:
+            break;
+
         default:
             break;
     }
 }
 
+///////////////////////////////////////////////////////////////////////////
+// COMMENT
 GLuint Anatomy::getGLuint()
 {
-    if (!m_GLuint)
+    if( ! m_GLuint )
         generateTexture();
+
     return m_GLuint;
 }
 
-void Anatomy::createOffset(std::vector<float>* source)
+///////////////////////////////////////////////////////////////////////////
+// COMMENT
+void Anatomy::createOffset( std::vector<float>* i_source )
 {
     int b, r, c, bb, rr, r0, b0, c0;
     int i, istart, iend;
-    int nbands, nrows, ncols, npixels;
+    int l_nbBands, l_nbRows, l_nbCols, l_nbPixels;
     int d, d1, d2, cc1, cc2;
     float u, dmin, dmax;
-    bool *srcpix;
+    bool* l_srcpix;
     double g, *array;
 
-    nbands = m_frames;
-    nrows = m_rows;
-    ncols = m_columns;
+    l_nbBands  = m_frames;
+    l_nbRows   = m_rows;
+    l_nbCols   = m_columns;
 
-    npixels = wxMax(nbands, nrows);
-    array = new double[npixels];
+    l_nbPixels = wxMax( l_nbBands, l_nbRows );
+    array = new double[l_nbPixels];
 
-    npixels = nbands * nrows * ncols;
+    l_nbPixels = l_nbBands * l_nbRows * l_nbCols;
 
-    m_floatDataset.resize( npixels );
-    for (int i = 0; i < npixels; ++i)
+    m_floatDataset.resize( l_nbPixels );
+    for( int i = 0; i < l_nbPixels; ++i )
     {
         m_floatDataset[i] = 0.0;
     }
 
-    bool* bitmask = new bool[npixels];
-    for (int i = 0; i < npixels; ++i)
+    bool* l_bitMask = new bool[l_nbPixels];
+    for( int i = 0; i < l_nbPixels; ++i )
     {
-        if (source->at(i) < 0.01)
-            bitmask[i] = true;
+        ////////////////////////////////////////////////////////////////////////
+
+        if( i_source->at(i) < 0.01 )
+            l_bitMask[i] = true;
         else
-            bitmask[i] = false;
+            l_bitMask[i] = false;
+
+        ////////////////////////////////////////////////////////////////////////
     }
 
     dmax = 999999999.0f;
 
     // first pass
-    for (b = 0; b < nbands; ++b)
+    for( b = 0; b < l_nbBands; ++b )
     {
-        for (r = 0; r < nrows; ++r)
+        for( r = 0; r < l_nbRows; ++r )
         {
-            for (c = 0; c < ncols; ++c)
+            for( c = 0; c < l_nbCols; ++c )
             {
                 //if (VPixel(src,b,r,c,VBit) == 1)
-                if (bitmask[b * nrows * ncols + r * ncols + c])
+                if ( l_bitMask[b * l_nbRows * l_nbCols + r * l_nbCols + c] )
                 {
-                    m_floatDataset[b * nrows * ncols + r * ncols + c] = 0;
+                    //m_floatDataset[b * l_nbRows * l_nbCols + r * l_nbCols + c] = 0;
                     continue;
                 }
 
-                srcpix = bitmask + b * nrows * ncols + r * ncols + c;
+                l_srcpix = l_bitMask + b * l_nbRows * l_nbCols + r * l_nbCols + c;
                 cc1 = c;
-                while (cc1 < ncols && *srcpix++ == 0)
+
+                while( cc1 < l_nbCols && *l_srcpix++ == 0 )
                     cc1++;
-                d1 = (cc1 >= ncols ? ncols : (cc1 - c));
 
-                srcpix = bitmask + b * nrows * ncols + r * ncols + c;
+                d1 = ( cc1 >= l_nbCols ? l_nbCols : ( cc1 - c ) );
+
+                l_srcpix = l_bitMask + b * l_nbRows * l_nbCols + r * l_nbCols + c;
                 cc2 = c;
-                while (cc2 >= 0 && *srcpix-- == 0)
-                    cc2--;
-                d2 = (cc2 <= 0 ? ncols : (c - cc2));
 
-                if (d1 <= d2)
+                while( cc2 >= 0 && *l_srcpix-- == 0 )
+                    cc2--;
+
+                d2 = ( cc2 <= 0 ? l_nbCols : ( c - cc2 ) );
+
+                if( d1 <= d2 )
                 {
-                    d = d1;
+                    d  = d1;
                     c0 = cc1;
                 }
                 else
                 {
-                    d = d2;
+                    d  = d2;
                     c0 = cc2;
                 }
-                m_floatDataset[b * nrows * ncols + r * ncols + c] = (float) (d * d);
+                m_floatDataset[b * l_nbRows * l_nbCols + r * l_nbCols + c] = (float)( d * d );
             }
         }
     }
 
     // second pass
-    for (b = 0; b < nbands; b++)
+    for( b = 0; b < l_nbBands; b++ )
     {
-        for (c = 0; c < ncols; c++)
+        for( c = 0; c < l_nbCols; c++ )
         {
-            for (r = 0; r < nrows; r++)
-                array[r] = (double) m_floatDataset[b * nrows * ncols + r * ncols + c];
+            for( r = 0; r < l_nbRows; r++ )
+                array[r] = (double)m_floatDataset[b * l_nbRows * l_nbCols + r * l_nbCols + c];
 
-            for (r = 0; r < nrows; r++)
+            for( r = 0; r < l_nbRows; r++ )
             {
-                if (bitmask[b * nrows * ncols + r * ncols + c] == 1)
+                if( l_bitMask[b * l_nbRows * l_nbCols + r * l_nbCols + c] == 1 )
                     continue;
 
-                dmin = dmax;
-                r0 = r;
-                g = sqrt(array[r]);
-                istart = r - (int) g;
-                if (istart < 0)
-                    istart = 0;
-                iend = r + (int) g + 1;
-                if (iend >= nrows)
-                    iend = nrows;
+                dmin    = dmax;
+                r0      = r;
+                g       = sqrt(array[r]);
+                istart  = r - (int) g;
 
-                for (rr = istart; rr < iend; rr++)
+                if( istart < 0 )
+                    istart = 0;
+
+                iend    = r + (int) g + 1;
+
+                if ( iend >= l_nbRows )
+                    iend = l_nbRows;
+
+                for( rr = istart; rr < iend; rr++ )
                 {
                     u = array[rr] + (r - rr) * (r - rr);
-                    if (u < dmin)
+                    if( u < dmin )
                     {
                         dmin = u;
-                        r0 = rr;
+                        r0   = rr;
                     }
                 }
-                m_floatDataset[b * nrows * ncols + r * ncols + c] = dmin;
+                m_floatDataset[b * l_nbRows * l_nbCols + r * l_nbCols + c] = dmin;
             }
         }
     }
 
     // third pass
 
-    for (r = 0; r < nrows; r++)
+    for( r = 0; r < l_nbRows; r++ )
     {
-        for (c = 0; c < ncols; c++)
+        for( c = 0; c < l_nbCols; c++ )
         {
-            for (b = 0; b < nbands; b++)
-                array[b] = (double) m_floatDataset[b * nrows * ncols + r * ncols + c];
+            for( b = 0; b < l_nbBands; b++ )
+                array[b] = (double) m_floatDataset[b * l_nbRows * l_nbCols + r * l_nbCols + c];
 
-            for (b = 0; b < nbands; b++)
+            for( b = 0; b < l_nbBands; b++ )
             {
-                if (bitmask[b * nrows * ncols + r * ncols + c] == 1)
+                if( l_bitMask[b * l_nbRows * l_nbCols + r * l_nbCols + c] == 1 )
                     continue;
 
-                dmin = dmax;
-                b0 = b;
-
-                g = sqrt(array[b]);
+                dmin   = dmax;
+                b0     = b;
+                g      = sqrt(array[b]);
                 istart = b - (int) g - 1;
-                if (istart < 0)
-                    istart = 0;
-                iend = b + (int) g + 1;
-                if (iend >= nbands)
-                    iend = nbands;
 
-                for (bb = istart; bb < iend; bb++)
+                if( istart < 0 )
+                    istart = 0;
+
+                iend   = b + (int) g + 1;
+
+                if( iend >= l_nbBands )
+                    iend = l_nbBands;
+
+                for( bb = istart; bb < iend; bb++ )
                 {
                     u = array[bb] + (b - bb) * (b - bb);
-                    if (u < dmin)
+
+                    if( u < dmin )
                     {
                         dmin = u;
-                        b0 = bb;
+                        b0   = bb;
                     }
                 }
-                m_floatDataset[b * nrows * ncols + r * ncols + c] = dmin;
+                m_floatDataset[b * l_nbRows * l_nbCols + r * l_nbCols + c] = dmin;
             }
         }
     }
 
-    delete[] array;
+    //delete[] array;
 
     float max = 0;
-    for (i = 0; i < npixels; ++i)
+    for( i = 0; i < l_nbPixels; ++i )
     {
-        m_floatDataset[i] = sqrt((double) m_floatDataset[i]);
-        if (m_floatDataset[i] > max)
+        m_floatDataset[i] = sqrt( (double)m_floatDataset[i] );
+        if( m_floatDataset[i] > max )
             max = m_floatDataset[i];
     }
-    for (i = 0; i < npixels; ++i)
+    for( i = 0; i < l_nbPixels; ++i )
     {
         m_floatDataset[i] = m_floatDataset[i] / max;
-
     }
 
     // filter with gauss
     // create the filter kernel
-    double sigma = 4;
+    double sigma  = 4;
 
-    int dim = (int) (3.0 * sigma + 1);
-    int n = 2* dim + 1;
-    double step = 1;
+    int dim       = (int)( 3.0 * sigma + 1 );
+    int n         = 2* dim + 1;
+    double step   = 1;
 
     float* kernel = new float[n];
 
-    double sum = 0;
-    double x = -(float) dim;
+    double sum    = 0;
+    double x      = -(float)dim;
 
     double uu;
-    for (int i = 0; i < n; ++i)
+    for( int i = 0; i < n; ++i )
     {
-        uu = xxgauss(x, sigma);
-        sum += uu;
+        uu        = xxgauss( x, sigma );
+        sum       += uu;
         kernel[i] = uu;
-        x += step;
+        x         += step;
     }
 
     /* normalize */
-    for (int i = 0; i < n; ++i)
+    for( int i = 0; i < n; ++i )
     {
-        uu = kernel[i];
-        uu /= sum;
+        uu        = kernel[i];
+        uu        /= sum;
         kernel[i] = uu;
     }
 
     d = n / 2;
     float* float_pp;
-    std::vector<float> tmp(npixels);
+    std::vector<float> tmp( l_nbPixels );
     int c1, cc;
 
-    for (int i = 0; i < npixels; ++i)
+    for( int i = 0; i < l_nbPixels; ++i )
     {
         tmp[i] = 0.0;
     }
 
-    for (b = 0; b < nbands; ++b)
+    for( b = 0; b < l_nbBands; ++b )
     {
-        for (r = 0; r < nrows; ++r)
+        for( r = 0; r < l_nbRows; ++r )
         {
-            for (c = d; c < ncols - d; ++c)
+            for( c = d; c < l_nbCols - d; ++c )
             {
-
                 float_pp = kernel;
-                sum = 0;
-                c0 = c - d;
-                c1 = c + d;
-                for (cc = c0; cc <= c1; cc++)
+                sum      = 0;
+                c0       = c - d;
+                c1       = c + d;
+
+                for( cc = c0; cc <= c1; cc++ )
                 {
-                    x = m_floatDataset[b * nrows * ncols + r * ncols + cc];
+                    x = m_floatDataset[b * l_nbRows * l_nbCols + r * l_nbCols + cc];
                     sum += x * (*float_pp++);
                 }
-                tmp[b * nrows * ncols + r * ncols + c] = sum;
+                tmp[b * l_nbRows * l_nbCols + r * l_nbCols + c] = sum;
             }
         }
     }
     int r1;
-    for (b = 0; b < nbands; ++b)
+    for( b = 0; b < l_nbBands; ++b )
     {
-        for (r = d; r < nrows - d; ++r)
+        for( r = d; r < l_nbRows - d; ++r )
         {
-            for (c = 0; c < ncols; ++c)
+            for( c = 0; c < l_nbCols; ++c )
             {
                 float_pp = kernel;
-                sum = 0;
-                r0 = r - d;
-                r1 = r + d;
-                for (rr = r0; rr <= r1; rr++)
+                sum      = 0;
+                r0       = r - d;
+                r1       = r + d;
+
+                for( rr = r0; rr <= r1; rr++ )
                 {
-                    x = tmp[b * nrows * ncols + rr * ncols + c];
+                    x = tmp[b * l_nbRows * l_nbCols + rr * l_nbCols + c];
                     sum += x * (*float_pp++);
                 }
-                m_floatDataset[b * nrows * ncols + r * ncols + c] = sum;
+
+                m_floatDataset[b * l_nbRows * l_nbCols + r * l_nbCols + c] = sum;
             }
         }
     }
     int b1;
-    for (b = d; b < nbands - d; ++b)
+    for( b = d; b < l_nbBands - d; ++b )
     {
-        for (r = 0; r < nrows; ++r)
+        for( r = 0; r < l_nbRows; ++r )
         {
-            for (c = 0; c < ncols; ++c)
+            for( c = 0; c < l_nbCols; ++c )
             {
-
                 float_pp = kernel;
-                sum = 0;
-                b0 = b - d;
-                b1 = b + d;
-                for (bb = b0; bb <= b1; bb++)
+                sum      = 0;
+                b0       = b - d;
+                b1       = b + d;
+
+                for( bb = b0; bb <= b1; bb++ )
                 {
-                    x = m_floatDataset[bb * nrows * ncols + r * ncols + c];
+                    x   = m_floatDataset[bb * l_nbRows * l_nbCols + r * l_nbCols + c];
                     sum += x * (*float_pp++);
                 }
-                tmp[b * nrows * ncols + r * ncols + c] = sum;
+
+                tmp[b * l_nbRows * l_nbCols + r * l_nbCols + c] = sum;
             }
         }
     }
-    delete[] bitmask;
+
+    delete[] l_bitMask;
     delete[] kernel;
 
     m_floatDataset = tmp;
 }
 
-double Anatomy::xxgauss(double x, double sigma)
+double Anatomy::xxgauss( double i_x, double i_sigma )
 {
-    double y, z, a = 2.506628273;
-    z = x / sigma;
-    y = exp((double) -z * z * 0.5) / (sigma * a);
-    return y;
+    double l_y, l_z, l_a = 2.506628273;
+
+    l_z = i_x / i_sigma;
+    l_y = exp( (double) -l_z * l_z * 0.5 ) / ( i_sigma * l_a );
+
+    return l_y;
 }
 
-void Anatomy::setZero(int x, int y, int z)
+void Anatomy::setZero( int i_x, int i_y, int i_z )
 {
-    m_columns = x;
-    m_rows = y;
-    m_frames = z;
+    m_columns = i_x;
+    m_rows    = i_y;
+    m_frames  = i_z;
 
-    int nSize = m_rows * m_columns * m_frames;
+    int l_nSize = m_rows * m_columns * m_frames;
 
     m_floatDataset.clear();
-    m_floatDataset.resize( nSize );
+    m_floatDataset.resize( l_nSize );
 
-    for (int i = 0; i < nSize; ++i)
+    for( int i = 0; i < l_nSize; ++i )
     {
         m_floatDataset[i] = 0.0;
     }
 }
 
-void Anatomy::setRGBZero(int x, int y, int z)
+void Anatomy::setRGBZero( int i_x, int i_y, int i_z )
 {
-    m_columns = x;
-    m_rows = y;
-    m_frames = z;
+    m_columns = i_x;
+    m_rows    = i_y;
+    m_frames  = i_z;
 
-    int nSize = m_rows * m_columns * m_frames;
+    int l_nSize = m_rows * m_columns * m_frames;
 
     m_floatDataset.clear();
-    m_floatDataset.resize( nSize * 3);
+    m_floatDataset.resize( l_nSize * 3);
 
-    for (int i = 0; i < nSize*3; ++i)
+    for (int i = 0; i < l_nSize * 3; ++i)
     {
         m_floatDataset[i] = 0.0;
     }
+
     m_type = RGB;
 }
 
-
 void Anatomy::minimize()
 {
-    if (!m_dh->fibers_loaded)
+    if( ! m_dh->m_fibersLoaded )
         return;
-    std::vector<bool> tmp(m_columns * m_rows * m_frames, false);
-    Fibers* fib = NULL;
-    m_dh->getFiberDataset(fib);
 
-    int x, y, z;
+    std::vector<bool> l_tmp( m_columns * m_rows * m_frames, false );
+    Fibers* l_fiber = NULL;
+    m_dh->getFiberDataset( l_fiber );
 
-    for (int i = 0; i < fib->getLineCount(); ++i)
+    int l_x, l_y, l_z, l_index;
+
+    for( int i = 0; i < l_fiber->getLineCount(); ++i )
     {
-        if ( fib->isSelected(i) )
+        if( l_fiber->isSelected( i ) )
         {
-            for (int j = fib->getStartIndexForLine(i); j < (fib->getStartIndexForLine(i)
-                    + (fib->getPointsPerLine(i) * 3)); ++j)
+            for( int j = l_fiber->getStartIndexForLine(i); j < ( l_fiber->getStartIndexForLine( i ) + ( l_fiber->getPointsPerLine( i ) * 3 ) ); ++j )
             {
-                x = wxMin(m_dh->columns - 1, wxMax(0, (int) fib->getPointValue(j++)));
-                y = wxMin(m_dh->rows - 1, wxMax(0, (int) fib->getPointValue(j++)));
-                z = wxMin(m_dh->frames - 1, wxMax(0, (int) fib->getPointValue(j)));
-                int index = x + y * m_dh->columns + z * m_dh->rows * m_dh->columns;
-                tmp[index] = true;
+                l_x = wxMin( m_dh->m_columns - 1, wxMax( 0, (int) l_fiber->getPointValue( j++ ) ) );
+                l_y = wxMin( m_dh->m_rows    - 1, wxMax( 0, (int) l_fiber->getPointValue( j++ ) ) );
+                l_z = wxMin( m_dh->m_frames  - 1, wxMax( 0, (int) l_fiber->getPointValue( j ) ) );
+
+                l_index = l_x + l_y * m_dh->m_columns + l_z * m_dh->m_rows * m_dh->m_columns;
+                l_tmp[l_index] = true;
             }
         }
     }
 
-    Anatomy* newAnatomy = new Anatomy(m_dh);
-    newAnatomy->setZero(m_columns, m_rows, m_frames);
+    Anatomy* l_newAnatomy = new Anatomy( m_dh );
+    l_newAnatomy->setZero( m_columns, m_rows, m_frames );
 
-    std::vector<float>* dst = newAnatomy->getFloatDataset();
+    std::vector<float>* l_dst = l_newAnatomy->getFloatDataset();
 
-    for (int i = 0; i < m_columns * m_rows * m_frames; ++i)
+    for( int i = 0; i < m_columns * m_rows * m_frames; ++i )
     {
-        if (tmp[i] && m_floatDataset[i] > 0)
-            dst->at(i) = 1.0;
+        if( l_tmp[i] && m_floatDataset[i] > 0 )
+            l_dst->at( i ) = 1.0;
     }
 
-    newAnatomy->setName(getName() + _T("(minimal)"));
-    newAnatomy->setType(getType());
+    l_newAnatomy->setName( getName() + _T( "(minimal)" ) );
+    l_newAnatomy->setType( getType() );
 
-    m_dh->mainFrame->m_listCtrl->InsertItem(0, wxT(""), 0);
-    m_dh->mainFrame->m_listCtrl->SetItem(0, 1, newAnatomy->getName());
-    m_dh->mainFrame->m_listCtrl->SetItem(0, 2, wxT("0.00"));
-    m_dh->mainFrame->m_listCtrl->SetItem(0, 3, wxT(""), 1);
-    m_dh->mainFrame->m_listCtrl->SetItemData(0, (long) newAnatomy);
-    m_dh->mainFrame->m_listCtrl->SetItemState(0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-
+    m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
+    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00") );
+    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
+    m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
+    m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 }
 
 void Anatomy::dilate()
 {
-    int nsize = m_columns * m_rows * m_frames;
-    std::vector<bool> tmp(nsize, false);
-    for (int c = 1; c < m_columns - 1; ++c)
+    int l_nSize = m_columns * m_rows * m_frames;
+    std::vector<bool> l_tmp( l_nSize, false );
+    int l_index;
+
+    for( int c = 1; c < m_columns - 1; ++c )
     {
-        for (int r = 1; r < m_rows - 1; ++r)
+        for( int r = 1; r < m_rows - 1; ++r )
         {
-            for (int f = 1; f < m_frames - 1; ++f)
+            for( int f = 1; f < m_frames - 1; ++f )
             {
-                int index = c + r * m_columns + f * m_columns * m_rows;
-                if (m_floatDataset[index] == 1.0)
-                    dilate1(&tmp, index);
+                l_index = c + r * m_columns + f * m_columns * m_rows;
+                if( m_floatDataset[l_index] == 1.0 )
+                    dilate1( &l_tmp, l_index );
             }
         }
     }
-    for (int i = 0; i < nsize; ++i)
+    for( int i = 0; i < l_nSize; ++i )
     {
-        if (tmp[i])
+        if ( l_tmp[i] )
             m_floatDataset[i] = 1.0;
     }
-    const GLuint* tex = &m_GLuint;
-    glDeleteTextures(1, tex);
+
+    const GLuint* l_tex = &m_GLuint;
+    glDeleteTextures( 1, l_tex );
     generateTexture();
-    m_dh->mainFrame->m_mainGL->render();
+    //m_dh->m_mainFrame->m_mainGL->render();
 }
 
-void Anatomy::dilate1(std::vector<bool>* input, int index)
+void Anatomy::dilate1( std::vector<bool>* i_input, int i_index )
 {
-    input->at(index - 1) = true;
-    input->at(index) = true;
-    input->at(index + 1) = true;
-    input->at(index - m_columns - 1) = true;
-    input->at(index - m_columns) = true;
-    input->at(index - m_columns + 1) = true;
-    input->at(index + m_columns - 1) = true;
-    input->at(index + m_columns) = true;
-    input->at(index + m_columns + 1) = true;
-    input->at(index - m_columns * m_rows - 1) = true;
-    input->at(index - m_columns * m_rows) = true;
-    input->at(index - m_columns * m_rows + 1) = true;
-    input->at(index + m_columns * m_rows - 1) = true;
-    input->at(index + m_columns * m_rows) = true;
-    input->at(index + m_columns * m_rows + 1) = true;
-    input->at(index - m_columns * m_rows - m_columns) = true;
-    input->at(index - m_columns * m_rows + m_columns) = true;
-    input->at(index + m_columns * m_rows - m_columns) = true;
-    input->at(index + m_columns * m_rows + m_columns) = true;
-
+    i_input->at( i_index - 1 )                              = true;
+    i_input->at( i_index )                                  = true;
+    i_input->at( i_index + 1 )                              = true;
+    i_input->at( i_index - m_columns - 1 )                  = true;
+    i_input->at( i_index - m_columns )                      = true;
+    i_input->at( i_index - m_columns + 1 )                  = true;
+    i_input->at( i_index + m_columns - 1 )                  = true;
+    i_input->at( i_index + m_columns )                      = true;
+    i_input->at( i_index + m_columns + 1 )                  = true;
+    i_input->at( i_index - m_columns * m_rows - 1 )         = true;
+    i_input->at( i_index - m_columns * m_rows )             = true;
+    i_input->at( i_index - m_columns * m_rows + 1 )         = true;
+    i_input->at( i_index + m_columns * m_rows - 1 )         = true;
+    i_input->at( i_index + m_columns * m_rows )             = true;
+    i_input->at( i_index + m_columns * m_rows + 1 )         = true;
+    i_input->at( i_index - m_columns * m_rows - m_columns ) = true;
+    i_input->at( i_index - m_columns * m_rows + m_columns ) = true;
+    i_input->at( i_index + m_columns * m_rows - m_columns ) = true;
+    i_input->at( i_index + m_columns * m_rows + m_columns ) = true;
 }
 
 void Anatomy::erode()
 {
-    int nsize = m_columns * m_rows * m_frames;
-    std::vector<bool> tmp(nsize, false);
-    for (int c = 1; c < m_columns - 1; ++c)
+    int l_nsize = m_columns * m_rows * m_frames;
+    std::vector<bool> l_tmp( l_nsize, false );
+    int l_index;
+
+    for( int c = 1; c < m_columns - 1; ++c )
     {
-        for (int r = 1; r < m_rows - 1; ++r)
+        for( int r = 1; r < m_rows - 1; ++r )
         {
-            for (int f = 1; f < m_frames - 1; ++f)
+            for( int f = 1; f < m_frames - 1; ++f )
             {
-                int index = c + r * m_columns + f * m_columns * m_rows;
-                if (m_floatDataset[index] == 1.0)
-                    erode1(&tmp, index);
+                l_index = c + r * m_columns + f * m_columns * m_rows;
+                if( m_floatDataset[l_index] == 1.0 )
+                    erode1( &l_tmp, l_index );
             }
         }
     }
-    for (int i = 0; i < nsize; ++i)
+    for( int i = 0; i < l_nsize; ++i )
     {
-        if (!tmp[i])
+        if ( ! l_tmp[i] )
             m_floatDataset[i] = 0.0;
     }
-    const GLuint* tex = &m_GLuint;
-    glDeleteTextures(1, tex);
+    const GLuint* l_tex = &m_GLuint;
+    glDeleteTextures( 1, l_tex );
     generateTexture();
-    m_dh->mainFrame->m_mainGL->render();
+    //m_dh->m_mainFrame->m_mainGL->render();
 }
 
-void Anatomy::erode1(std::vector<bool>* tmp, int index)
+void Anatomy::erode1( std::vector< bool >* i_tmp, int i_index )
 {
-    float test = m_floatDataset[index - 1] + m_floatDataset[index] + m_floatDataset[index + 1]
-            + m_floatDataset[index - m_columns - 1] + m_floatDataset[index - m_columns]
-            + m_floatDataset[index - m_columns + 1] + m_floatDataset[index + m_columns - 1]
-            + m_floatDataset[index + m_columns] + m_floatDataset[index + m_columns + 1]
-            + m_floatDataset[index - m_columns * m_rows - 1] + m_floatDataset[index - m_columns * m_rows]
-            + m_floatDataset[index - m_columns * m_rows + 1] + m_floatDataset[index + m_columns * m_rows - 1]
-            + m_floatDataset[index + m_columns * m_rows] + m_floatDataset[index + m_columns * m_rows + 1]
-            + m_floatDataset[index - m_columns * m_rows - m_columns] + m_floatDataset[index - m_columns
-            * m_rows + m_columns] + m_floatDataset[index + m_columns * m_rows - m_columns]
-            + m_floatDataset[index + m_columns * m_rows + m_columns];
-    if (test == 19.0)
-        tmp->at(index) = 1.0;
+    float test = m_floatDataset[i_index - 1] + m_floatDataset[i_index] + m_floatDataset[i_index + 1]
+               + m_floatDataset[i_index - m_columns - 1] + m_floatDataset[i_index - m_columns]
+               + m_floatDataset[i_index - m_columns + 1] + m_floatDataset[i_index + m_columns - 1]
+               + m_floatDataset[i_index + m_columns] + m_floatDataset[i_index + m_columns + 1]
+               + m_floatDataset[i_index - m_columns * m_rows - 1] + m_floatDataset[i_index - m_columns * m_rows]
+               + m_floatDataset[i_index - m_columns * m_rows + 1] + m_floatDataset[i_index + m_columns * m_rows - 1]
+               + m_floatDataset[i_index + m_columns * m_rows] + m_floatDataset[i_index + m_columns * m_rows + 1]
+               + m_floatDataset[i_index - m_columns * m_rows - m_columns] + m_floatDataset[i_index - m_columns
+               * m_rows + m_columns] + m_floatDataset[i_index + m_columns * m_rows - m_columns]
+               + m_floatDataset[i_index + m_columns * m_rows + m_columns];
+
+    if( test == 19.0 )
+        i_tmp->at( i_index ) = 1.0;
 }
 
-std::vector<float>* Anatomy::getFloatDataset()
+std::vector< float >* Anatomy::getFloatDataset()
 {
     return &m_floatDataset;
 }
 
-float Anatomy::at(int i)
+float Anatomy::at( int l_i )
 {
-    return m_floatDataset[i];
+    return m_floatDataset[l_i];
 }
 
 TensorField* Anatomy::getTensorField()
 {
     return m_tensorField;
+}
+
+void Anatomy::createPropertiesSizer(MainFrame *parent)
+{
+    DatasetInfo::createPropertiesSizer(parent);  
+    wxSizer *l_sizer;
+    m_pbtnDilate = new wxButton(parent, wxID_ANY, wxT("Dilate"),wxDefaultPosition, wxSize(85,-1));
+    m_pbtnErode  = new wxButton(parent, wxID_ANY, wxT("Erode"),wxDefaultPosition, wxSize(85,-1));
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add(m_pbtnDilate,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pbtnErode,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_pbtnDilate->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnDilateDataset));
+    parent->Connect(m_pbtnErode->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnErodeDataset));
+
+    m_pbtnCut = new wxButton(parent, wxID_ANY, wxT("Cut (boxes)"), wxDefaultPosition, wxSize(85,-1));
+    m_pbtnMinimize = new wxButton(parent, wxID_ANY, wxT("Minimize (fibers)"), wxDefaultPosition, wxSize(85,-1));
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add(m_pbtnCut,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pbtnMinimize,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_pbtnMinimize->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnMinimizeDataset));
+    parent->Connect(m_pbtnCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnListMenuCutOut));
+
+    m_pbtnNewDistanceMap = new wxButton(parent, wxID_ANY, wxT("New Distance Map"), wxDefaultPosition, wxSize(140,-1));
+    m_pbtnNewIsoSurface  = new wxButton(parent, wxID_ANY, wxT("New Iso Surface"), wxDefaultPosition, wxSize(140,-1));
+    m_pbtnNewOffsetSurface = new wxButton(parent, wxID_ANY, wxT("New Offset Surface"), wxDefaultPosition, wxSize(140,-1));
+    m_pbtnNewVOI = new wxButton(parent, wxID_ANY, wxT("New VOI"), wxDefaultPosition, wxSize(140,-1));
+    m_propertiesSizer->Add(m_pbtnNewDistanceMap,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(m_pbtnNewIsoSurface,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(m_pbtnNewOffsetSurface,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(m_pbtnNewVOI,0,wxALIGN_CENTER);
+    parent->Connect(m_pbtnNewIsoSurface->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewIsoSurface));
+    parent->Connect(m_pbtnNewDistanceMap->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewDistanceMap));
+    parent->Connect(m_pbtnNewOffsetSurface->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewOffsetSurface));
+    parent->Connect(m_pbtnNewVOI->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewVoiFromOverlay));
+}
+
+void Anatomy::updatePropertiesSizer()
+{
+    DatasetInfo::updatePropertiesSizer();
+    m_pbtnMinimize->Enable(m_dh->m_fibersLoaded);   
+    m_pbtnCut->Enable(m_dh->getSelectionObjects().size()>0);
+    m_pbtnNewVOI->Enable(m_dh->m_fibersLoaded);
 }
 

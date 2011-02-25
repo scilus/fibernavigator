@@ -115,92 +115,92 @@ FMatrix invert(const FMatrix& A) {
     switch (A.dimx)
       {
       case 1:
-	{
-	  if (A.comp[0] == 0.)
-	    THROW_DEFAULT_EXCEPTION(FMatrixSingularException);
+    {
+      if (A.comp[0] == 0.)
+        THROW_DEFAULT_EXCEPTION(FMatrixSingularException);
 
-	  result.comp[0] = 1. / A.comp[0];
-	  break;
-	}
+      result.comp[0] = 1. / A.comp[0];
+      break;
+    }
       case 2:
-	{
-	  double denom, a11, a21, a12, a22;
-	  a11 = A.comp[0];
-	  a21 = A.comp[1];
-	  a12 = A.comp[2];
-	  a22 = A.comp[3];
-	  denom = (a11*a22-a12*a21);
-	  if (denom == 0.)
-	    THROW_DEFAULT_EXCEPTION( FMatrixSingularException );
+    {
+      double denom, a11, a21, a12, a22;
+      a11 = A.comp[0];
+      a21 = A.comp[1];
+      a12 = A.comp[2];
+      a22 = A.comp[3];
+      denom = (a11*a22-a12*a21);
+      if (denom == 0.)
+        THROW_DEFAULT_EXCEPTION( FMatrixSingularException );
 
-	  double invdenom=1.0/denom;
-	  result.comp[0] = a22 *invdenom;
-	  result.comp[1] = -a12 *invdenom;
-	  result.comp[2] = -a21 *invdenom;
-	  result.comp[3] = a11 *invdenom;
-	  break;
-	}
+      double invdenom=1.0/denom;
+      result.comp[0] = a22 *invdenom;
+      result.comp[1] = -a12 *invdenom;
+      result.comp[2] = -a21 *invdenom;
+      result.comp[3] = a11 *invdenom;
+      break;
+    }
       case 3:
-	{
-	  double denom, a11, a12, a13, a21, a22, a23, a31, a32, a33;
-	  a11 = A.comp[0];
-	  a21 = A.comp[1];
-	  a31 = A.comp[2];
-	  a12 = A.comp[3];
-	  a22 = A.comp[4];
-	  a32 = A.comp[5];
-	  a13 = A.comp[6];
-	  a23 = A.comp[7];
-	  a33 = A.comp[8];
+    {
+      double denom, a11, a12, a13, a21, a22, a23, a31, a32, a33;
+      a11 = A.comp[0];
+      a21 = A.comp[1];
+      a31 = A.comp[2];
+      a12 = A.comp[3];
+      a22 = A.comp[4];
+      a32 = A.comp[5];
+      a13 = A.comp[6];
+      a23 = A.comp[7];
+      a33 = A.comp[8];
 
-	  //  old:
-	  //   denom = a11*a22*a33-a11*a23*a32-a21*a12*a33+a21*a13*a32+
-	  //     a31*a12*a23-a31*a13*a22;
-	  // I optimized determinant computation
-	  // so that the scalarproduct of
-	  // the crossproduct of the 2nd and the 3rd column of the matrix
-	  // (= the 1st row of the inverted matrix before division)
-	  // and the 1st column of the initial matrix is used (c) Max
+      //  old:
+      //   denom = a11*a22*a33-a11*a23*a32-a21*a12*a33+a21*a13*a32+
+      //     a31*a12*a23-a31*a13*a22;
+      // I optimized determinant computation
+      // so that the scalarproduct of
+      // the crossproduct of the 2nd and the 3rd column of the matrix
+      // (= the 1st row of the inverted matrix before division)
+      // and the 1st column of the initial matrix is used (c) Max
 
 
-	  result.comp[0] =  (a22*a33-a23*a32) ;
-	  result.comp[1] = -(a21*a33-a23*a31) ;
-	  result.comp[2] =  (a21*a32-a22*a31) ;
+      result.comp[0] =  (a22*a33-a23*a32) ;
+      result.comp[1] = -(a21*a33-a23*a31) ;
+      result.comp[2] =  (a21*a32-a22*a31) ;
 
-	  denom= result.comp[0]*a11+result.comp[1]*a12+result.comp[2]*a13;
+      denom= result.comp[0]*a11+result.comp[1]*a12+result.comp[2]*a13;
 
-	  if (denom == 0.) {
-	    THROW_DEFAULT_EXCEPTION( FMatrixSingularException );
-	  }
+      if (denom == 0.) {
+        THROW_DEFAULT_EXCEPTION( FMatrixSingularException );
+      }
 
-	  double invdenom = 1.0 / denom;
+      double invdenom = 1.0 / denom;
 
-	  result.comp[0] *= invdenom;
-	  result.comp[1] *= invdenom;
-	  result.comp[2] *= invdenom;
-	  result.comp[3] = -(a12*a33-a13*a32) * invdenom;
-	  result.comp[4] =  (a11*a33-a13*a31) * invdenom;
-	  result.comp[5] = -(a11*a32-a12*a31) * invdenom;
-	  result.comp[6] =  (a12*a23-a13*a22) * invdenom;
-	  result.comp[7] = -(a11*a23-a13*a21) * invdenom;
-	  result.comp[8] =  (a11*a22-a12*a21) * invdenom;
-	  break;
-	}
+      result.comp[0] *= invdenom;
+      result.comp[1] *= invdenom;
+      result.comp[2] *= invdenom;
+      result.comp[3] = -(a12*a33-a13*a32) * invdenom;
+      result.comp[4] =  (a11*a33-a13*a31) * invdenom;
+      result.comp[5] = -(a11*a32-a12*a31) * invdenom;
+      result.comp[6] =  (a12*a23-a13*a22) * invdenom;
+      result.comp[7] = -(a11*a23-a13*a21) * invdenom;
+      result.comp[8] =  (a11*a22-a12*a21) * invdenom;
+      break;
+    }
       default:
-	{
-	  // a la Tom
+    {
+      // a la Tom
       //
       // Explanation:
       // We invert by solving a system without right side,
       // thus we need an invalid Matrix B which is empty
       // but its dimy must match A.dimy
       //
-	  FMatrix B(0, 0);
-	  B.dimx=0;
-	  B.dimy= A.dimy;
-	  result = A;
-	  result.gaussJ(B);
-	}
+      FMatrix B(0, 0);
+      B.dimx=0;
+      B.dimy= A.dimy;
+      result = A;
+      result.gaussJ(B);
+    }
       }
   }
   CATCH_N_RETHROW(FException);
@@ -239,7 +239,7 @@ double FMatrix::invert (void )
         if (denom == 0.)
           THROW_DEFAULT_EXCEPTION( FMatrixSingularException );
 
-	double invdenom=1.0/denom;
+    double invdenom=1.0/denom;
 
         comp[0] = a22 *invdenom;
         comp[1] = -a12 *invdenom;
@@ -259,31 +259,31 @@ double FMatrix::invert (void )
         a13 = comp[6];
         a23 = comp[7];
         a33 = comp[8];
-	//  old:
-	//   denom = a11*a22*a33-a11*a23*a32-a21*a12*a33+a21*a13*a32+
+    //  old:
+    //   denom = a11*a22*a33-a11*a23*a32-a21*a12*a33+a21*a13*a32+
         //     a31*a12*a23-a31*a13*a22;
-	// I optimized determinant computation
-	// so that the scalarproduct of
-	// the crossproduct of the 2nd and the 3rd column of the matrix
-	// (= the 1st row of the inverted matrix before division)
-	// and the 1st column of the initial matrix is used (c) Max
+    // I optimized determinant computation
+    // so that the scalarproduct of
+    // the crossproduct of the 2nd and the 3rd column of the matrix
+    // (= the 1st row of the inverted matrix before division)
+    // and the 1st column of the initial matrix is used (c) Max
 
 
         comp[0] =  (a22*a33-a23*a32) ;
         comp[1] = -(a21*a33-a23*a31) ;
         comp[2] =  (a21*a32-a22*a31) ;
 
-	denom= comp[0]*a11+comp[1]*a12+comp[2]*a13;
+    denom= comp[0]*a11+comp[1]*a12+comp[2]*a13;
 
         if (denom == 0.) {
           THROW_DEFAULT_EXCEPTION( FMatrixSingularException );
-	}
+    }
 
-	double invdenom=1.0/denom;
+    double invdenom=1.0/denom;
 
-	comp[0] *= invdenom;
-	comp[1] *= invdenom;
-	comp[2] *= invdenom;
+    comp[0] *= invdenom;
+    comp[1] *= invdenom;
+    comp[2] *= invdenom;
         comp[3] = -(a12*a33-a13*a32) * invdenom;
         comp[4] =  (a11*a33-a13*a31) * invdenom;
         comp[5] = -(a11*a32-a12*a31) * invdenom;
@@ -301,8 +301,8 @@ double FMatrix::invert (void )
         // this call should invert this Matrix without needing too many overhead
         gaussJ(B);
 
-	//no return of denominator:
-	return 0;
+    //no return of denominator:
+    return 0;
       }
     }
 }
@@ -338,7 +338,7 @@ void FMatrix::tQLiAlgorithm(F::FVector& d, F::FVector& e)
 //---------------------------------------------------------------------------
 
 void FMatrix::getEigenSystem( std::vector< std::complex< double > >& evals,
-			      std::vector< F::FVector >& evecs )
+                  std::vector< F::FVector >& evecs )
 {
   if( dimx == 3 )
   {
@@ -355,64 +355,64 @@ void FMatrix::getEigenSystem( std::vector< std::complex< double > >& evals,
     double maxdet;
     for ( positive i=0 ; i<evals.size() ; ++i )
     {
-	if ( !evals[i].imag() )
-	{
-	    // compute eigenvector associated with real eigenvalue
+    if ( !evals[i].imag() )
+    {
+        // compute eigenvector associated with real eigenvalue
 
-	    // A-\lambda I_3
-	    matrix = *this;
-	    for ( positive j=0 ; j<3 ; ++j )
-		matrix(j,j) -= evals[i].real();
+        // A-\lambda I_3
+        matrix = *this;
+        for ( positive j=0 ; j<3 ; ++j )
+        matrix(j,j) -= evals[i].real();
 
-	    // loop over scalar components of the eigenvector to
-	    // find one that is not zero
-	    for ( positive j=0 ; j<3 ; ++j )
-	    {
-		col = indices[j];
+        // loop over scalar components of the eigenvector to
+        // find one that is not zero
+        for ( positive j=0 ; j<3 ; ++j )
+        {
+        col = indices[j];
 
-		// assume evec[j]=1 i.e. is non zero
-		// compute determinant of associated subsystems
-		for ( positive k=0 ; k<3 ; ++k )
-		{
-		    row = indices[k];
-		    det[k] = matrix(row[0],col[0])*matrix(row[1],col[1])-
-			matrix(row[1],col[0])*matrix(row[0],col[1]);
-		}
+        // assume evec[j]=1 i.e. is non zero
+        // compute determinant of associated subsystems
+        for ( positive k=0 ; k<3 ; ++k )
+        {
+            row = indices[k];
+            det[k] = matrix(row[0],col[0])*matrix(row[1],col[1])-
+            matrix(row[1],col[0])*matrix(row[0],col[1]);
+        }
 
-		// get maximum
-		maxdet = 0;
-		for ( positive k=0 ; k<3 ; ++k )
-		    if ( fabs(det[k]) > maxdet )
-		    {
-			maxi = k;
-			maxdet = fabs(det[k]);
-		    }
+        // get maximum
+        maxdet = 0;
+        for ( positive k=0 ; k<3 ; ++k )
+            if ( fabs(det[k]) > maxdet )
+            {
+            maxi = k;
+            maxdet = fabs(det[k]);
+            }
 
-		if ( maxdet < epsilon )
-		    continue;
+        if ( maxdet < epsilon )
+            continue;
 
                 // can solve the system by setting
-		// maxi-th coordinate equal to 1
-		row = indices[maxi];
-		det[maxi] = 1./det[maxi];
-		evecs[i].resize(3);
-		evecs[i]( col[0] ) = det[maxi]*
-		    ( -matrix( row[0], j )*matrix( row[1], col[1] )+
-		      matrix( row[1], j )*matrix( row[0], col[1] ) );
-		evecs[i]( col[1] ) = det[maxi]*
-		    ( -matrix( row[0], col[0] )*matrix( row[1], j )+
-		      matrix( row[1], col[0] )*matrix( row[0], j ) );
-		evecs[i]( j ) = 1.;
-	    }
-	    if ( !evecs[i].size() )
-	    {
+        // maxi-th coordinate equal to 1
+        row = indices[maxi];
+        det[maxi] = 1./det[maxi];
+        evecs[i].resize(3);
+        evecs[i]( col[0] ) = det[maxi]*
+            ( -matrix( row[0], j )*matrix( row[1], col[1] )+
+              matrix( row[1], j )*matrix( row[0], col[1] ) );
+        evecs[i]( col[1] ) = det[maxi]*
+            ( -matrix( row[0], col[0] )*matrix( row[1], j )+
+              matrix( row[1], col[0] )*matrix( row[0], j ) );
+        evecs[i]( j ) = 1.;
+        }
+        if ( !evecs[i].size() )
+        {
 #ifndef NODEBUG
-	      std::cout << "degenerate eigensystem: can't solve it!" << std::endl;
-	      std::cout << "corresponding matrix is" << std::endl << matrix << std::endl;
+          std::cout << "degenerate eigensystem: can't solve it!" << std::endl;
+          std::cout << "corresponding matrix is" << std::endl << matrix << std::endl;
 #endif
-		return;
-	    }
-	}
+        return;
+        }
+    }
     }
   }
   else
@@ -420,8 +420,8 @@ void FMatrix::getEigenSystem( std::vector< std::complex< double > >& evals,
     FMatrix matrix = *this;
     evals.resize(2);
     FMath::QuadraticEquation(1., -(matrix(0,0)+matrix(1,1)),
-			     matrix(0,0)*matrix(1,1)-matrix(0,1)*matrix(1,0),
-			     &(evals[0]) );
+                 matrix(0,0)*matrix(1,1)-matrix(0,1)*matrix(1,0),
+                 &(evals[0]) );
 
     if ( evals.size() != 2 || evals[0].imag() || evals[1].imag() )
       THROW_DEFAULT_EXCEPTION( FNotImplementedException );
@@ -440,7 +440,7 @@ void FMatrix::getEigenSystem( std::vector< std::complex< double > >& evals,
     evecs[0](1) = 1;
 
     if (fabs(fabs(evecs[0](0)) -
-	     fabs((matrix(1,1) - evals[0].real())/matrix(1,0))) > epsilon)
+         fabs((matrix(1,1) - evals[0].real())/matrix(1,0))) > epsilon)
       throw FException("Cannot solve eigensystem.");
 
     evecs[0].normalize();
@@ -450,7 +450,7 @@ void FMatrix::getEigenSystem( std::vector< std::complex< double > >& evals,
     evecs[1](1) = 1;
 
     if (fabs(fabs(evecs[1](0)) -
-	     fabs((matrix(1,1)-evals[1].real())/matrix(1,0))) > epsilon)
+         fabs((matrix(1,1)-evals[1].real())/matrix(1,0))) > epsilon)
       throw FException("Cannot solve eigensystem.");
 
     evecs[1].normalize();
@@ -491,8 +491,8 @@ void FMatrix::getEigenSystem(F::FVector& vals, std::vector<F::FVector>& vectors)
 
 FMatrix& FMatrix::gaussJ( FMatrix &b )
 // PAR: a[1..n][1..n] contains the matrix of the system to solve
-//	n   is the number of rows and columns in the system
-//	b[1..n][1..m] contains m right sides, which are solved simultan
+//    n   is the number of rows and columns in the system
+//    b[1..n][1..m] contains m right sides, which are solved simultan
 // PRE: no singular matrix. TESTED
 // POST: **a contains the inverse of the original matrix
 //       **b conatins the solutions for the m right sides
@@ -591,8 +591,8 @@ FMatrix& FMatrix::gaussJ( FMatrix &b )
 
 F::FVector& FMatrix::gaussJ( F::FVector &v )
 // PAR: a[1..n][1..n] contains the matrix of the system to solve
-//	n   is the number of rows and columns in the system
-//	b[1..n][1..m] contains m right sides, which are solved simultan
+//    n   is the number of rows and columns in the system
+//    b[1..n][1..m] contains m right sides, which are solved simultan
 // PRE: no singular matrix. TESTED
 // POST: **a contains the inverse of the original matrix
 //       **b conatins the solutions for the m right sides
@@ -733,10 +733,10 @@ ostream& operator<< ( ostream& os, const FMatrix& matrix )
       os << (i?" [":"[[");
       for (j=0; j< matrix.dimx; j++)
       {
-	  if (j<matrix.dimx-1)
-	      os << matrix[i*matrix.dimx+j] << ",\t";
-	  else
-	      os << matrix[i*matrix.dimx+j] << ((i<matrix.dimy-1) ? "]":"]]") << "\n";
+      if (j<matrix.dimx-1)
+          os << matrix[i*matrix.dimx+j] << ",\t";
+      else
+          os << matrix[i*matrix.dimx+j] << ((i<matrix.dimy-1) ? "]":"]]") << "\n";
       }
   }
 
@@ -1058,8 +1058,8 @@ F::FVector FMatrix::operator*(const F::FVector &v) const
 #ifndef NODEBUG
   if (dimx != v.sizeOfArray)
     {
-		cout << dimx << " " << v.sizeOfArray << endl;
-		THROW_EXCEPTION(FInvalidDimensionException, "Vector has to be same size as width of Matrix");
+        cout << dimx << " " << v.sizeOfArray << endl;
+        THROW_EXCEPTION(FInvalidDimensionException, "Vector has to be same size as width of Matrix");
     }
 #endif
 
@@ -1194,71 +1194,71 @@ void FMatrix::svdcmp(F::FVector& w, FMatrix& v)
       rv1[i-1]=scale*g;
       g=s=scale=0.0;
       if (i <= m)
-	{
-	  for (k=i;k<=m;k++) scale += fabs((*this)(k-1,i-1));
-	  if (scale)
-	    {
-	      for (k=i;k<=m;k++)
-		{
-		  (*this)(k-1,i-1) /= scale;
-		  s += (*this)(k-1,i-1)*(*this)(k-1,i-1);
-		}
-	      f=(*this)(i-1,i-1);
-	      g = -SIGN(sqrt(s),f);
-	      h=f*g-s;
-	      (*this)(i-1,i-1)=f-g;
-	      for (j=l;j<=n;j++)
-		{
-		  for (s=0.0,k=i;k<=m;k++) s += (*this)(k-1,i-1)*(*this)(k-1,j-1);
-		  f=s/h;
-		  for (k=i;k<=m;k++) (*this)(k-1,j-1) += f*(*this)(k-1,i-1);
-		}
-	      for (k=i;k<=m;k++) (*this)(k-1,i-1) *= scale;
-	    }
-	}
+    {
+      for (k=i;k<=m;k++) scale += fabs((*this)(k-1,i-1));
+      if (scale)
+        {
+          for (k=i;k<=m;k++)
+        {
+          (*this)(k-1,i-1) /= scale;
+          s += (*this)(k-1,i-1)*(*this)(k-1,i-1);
+        }
+          f=(*this)(i-1,i-1);
+          g = -SIGN(sqrt(s),f);
+          h=f*g-s;
+          (*this)(i-1,i-1)=f-g;
+          for (j=l;j<=n;j++)
+        {
+          for (s=0.0,k=i;k<=m;k++) s += (*this)(k-1,i-1)*(*this)(k-1,j-1);
+          f=s/h;
+          for (k=i;k<=m;k++) (*this)(k-1,j-1) += f*(*this)(k-1,i-1);
+        }
+          for (k=i;k<=m;k++) (*this)(k-1,i-1) *= scale;
+        }
+    }
       w[i-1]=scale *g;
       g=s=scale=0.0;
       if (i <= m && i != n)
-	{
-	  for (k=l;k<=n;k++) scale += fabs((*this)(i-1,k-1));
-	  if (scale)
-	    {
-	      for (k=l;k<=n;k++)
-		{
-		  (*this)(i-1,k-1) /= scale;
-		  s += (*this)(i-1,k-1)*(*this)(i-1,k-1);
-		}
-	      f=(*this)(i-1,l-1);
-	      g = -SIGN(sqrt(s),f);
-	      h=f*g-s;
-	      (*this)(i-1,l-1)=f-g;
-	      for (k=l;k<=n;k++) rv1[k-1]=(*this)(i-1,k-1)/h;
-	      for (j=l;j<=m;j++)
-		{
-		  for (s=0.0,k=l;k<=n;k++) s += (*this)(j-1,k-1)*(*this)(i-1,k-1);
-		  for (k=l;k<=n;k++) (*this)(j-1,k-1) += s*rv1[k-1];
-		}
-	      for (k=l;k<=n;k++) (*this)(i-1,k-1) *= scale;
-	    }
-	}
+    {
+      for (k=l;k<=n;k++) scale += fabs((*this)(i-1,k-1));
+      if (scale)
+        {
+          for (k=l;k<=n;k++)
+        {
+          (*this)(i-1,k-1) /= scale;
+          s += (*this)(i-1,k-1)*(*this)(i-1,k-1);
+        }
+          f=(*this)(i-1,l-1);
+          g = -SIGN(sqrt(s),f);
+          h=f*g-s;
+          (*this)(i-1,l-1)=f-g;
+          for (k=l;k<=n;k++) rv1[k-1]=(*this)(i-1,k-1)/h;
+          for (j=l;j<=m;j++)
+        {
+          for (s=0.0,k=l;k<=n;k++) s += (*this)(j-1,k-1)*(*this)(i-1,k-1);
+          for (k=l;k<=n;k++) (*this)(j-1,k-1) += s*rv1[k-1];
+        }
+          for (k=l;k<=n;k++) (*this)(i-1,k-1) *= scale;
+        }
+    }
       anorm=FMAX(anorm,(fabs(w[i-1])+fabs(rv1[i-1])));
     }
   for (i=n;i>=1;i--) //  Accumulation of right-hand transformations.
     {
       if (i < n)
-	{
-	  if (g)
-	    {
-	      for (j=l;j<=n;j++) // Double division to avoid possible under ow.
-		v(j-1,i-1)=((*this)(i-1,j-1)/(*this)(i-1,l-1))/g;
-	      for (j=l;j<=n;j++)
-		{
-		  for (s=0.0,k=l;k<=n;k++) s += (*this)(i-1,k-1)*v(k-1,j-1);
-		  for (k=l;k<=n;k++) v(k-1,j-1) += s*v(k-1,i-1);
-		}
-	    }
-	  for (j=l;j<=n;j++) v(i-1,j-1)=v(j-1,i-1)=0.0;
-	}
+    {
+      if (g)
+        {
+          for (j=l;j<=n;j++) // Double division to avoid possible under ow.
+        v(j-1,i-1)=((*this)(i-1,j-1)/(*this)(i-1,l-1))/g;
+          for (j=l;j<=n;j++)
+        {
+          for (s=0.0,k=l;k<=n;k++) s += (*this)(i-1,k-1)*v(k-1,j-1);
+          for (k=l;k<=n;k++) v(k-1,j-1) += s*v(k-1,i-1);
+        }
+        }
+      for (j=l;j<=n;j++) v(i-1,j-1)=v(j-1,i-1)=0.0;
+    }
       v(i-1,i-1)=1.0;
       g=rv1[i-1];
       l=i;
@@ -1269,124 +1269,124 @@ void FMatrix::svdcmp(F::FVector& w, FMatrix& v)
       g=w[i-1];
       for (j=l;j<=n;j++) (*this)(i-1,j-1)=0.0;
       if (g)
-	{
-	  g=1.0/g;
-	  for (j=l;j<=n;j++)
-	    {
-	      for (s=0.0,k=l;k<=m;k++) s += (*this)(k-1,i-1)*(*this)(k-1,j-1);
-	      f=(s/(*this)(i-1,i-1))*g;
-	      for (k=i;k<=m;k++) (*this)(k-1,j-1) += f*(*this)(k-1,i-1);
-	    }
-	  for (j=i;j<=m;j++) (*this)(j-1,i-1) *= g;
-	} else for (j=i;j<=m;j++) (*this)(j-1,i-1)=0.0;
+    {
+      g=1.0/g;
+      for (j=l;j<=n;j++)
+        {
+          for (s=0.0,k=l;k<=m;k++) s += (*this)(k-1,i-1)*(*this)(k-1,j-1);
+          f=(s/(*this)(i-1,i-1))*g;
+          for (k=i;k<=m;k++) (*this)(k-1,j-1) += f*(*this)(k-1,i-1);
+        }
+      for (j=i;j<=m;j++) (*this)(j-1,i-1) *= g;
+    } else for (j=i;j<=m;j++) (*this)(j-1,i-1)=0.0;
       ++(*this)(i-1,i-1);
     }
   for (k=n;k>=1;k--) // Diagonalization of the bidiagonal form: Loop over
     {                // singular values, and over allowed iterations.
       for (its=1;its<=30;its++)
-	{
-	  flag=1;
-	  for (l=k;l>=1;l--) // Test for splitting.
-	    {		     // Note that rv1[0] is always zero.
-	      nm=l-1;
-	      if ((double)(fabs(rv1[l-1])+anorm) == anorm)
-		{
-		  flag=0;
-		  break;
-		}
-	      if ((double)(fabs(w[nm-1])+anorm) == anorm) break;
-	    }
-	  if (flag)
-	    {
-	      c=0.0; // Cancellation of rv1[0], if l > 1.
-	      s=1.0;
-	      for (i=l;i<=k;i++)
-		{
-		  f=s*rv1[i-1];
-		  rv1[i-1]=c*rv1[i-1];
-		  if ((double)(fabs(f)+anorm) == anorm) break;
-		  g=w[i-1];
-		  h=FMath::pythag(f,g);
-		  w[i-1]=h;
-		  h=1.0/h;
-		  c=g*h;
-		  s = -f*h;
-		  for (j=1;j<=m;j++)
-		    {
-		      y=(*this)(j-1,nm-1);
-		      z=(*this)(j-1,i-1);
-		      (*this)(j-1,nm-1)=y*c+z*s;
-		      (*this)(j-1,i-1)=z*c-y*s;
-		    }
-		}
-	    }
-	  z=w[k-1];
-	  if (l == k) // Convergence.
-	    {
-	      if (z < 0.0) // Singular value is made nonnegative.
-		{
-		  w[k-1] = -z;
-		  for (j=1;j<=n;j++) v(j-1,k-1) = -v(j-1,k-1);
-		}
-	      break;
-	    }
-	  if (its == 30)
-	      THROW_EXCEPTION(FTooManyIterationsException, "No convergence in 30 svdcmp iterations");
+    {
+      flag=1;
+      for (l=k;l>=1;l--) // Test for splitting.
+        {             // Note that rv1[0] is always zero.
+          nm=l-1;
+          if ((double)(fabs(rv1[l-1])+anorm) == anorm)
+        {
+          flag=0;
+          break;
+        }
+          if ((double)(fabs(w[nm-1])+anorm) == anorm) break;
+        }
+      if (flag)
+        {
+          c=0.0; // Cancellation of rv1[0], if l > 1.
+          s=1.0;
+          for (i=l;i<=k;i++)
+        {
+          f=s*rv1[i-1];
+          rv1[i-1]=c*rv1[i-1];
+          if ((double)(fabs(f)+anorm) == anorm) break;
+          g=w[i-1];
+          h=FMath::pythag(f,g);
+          w[i-1]=h;
+          h=1.0/h;
+          c=g*h;
+          s = -f*h;
+          for (j=1;j<=m;j++)
+            {
+              y=(*this)(j-1,nm-1);
+              z=(*this)(j-1,i-1);
+              (*this)(j-1,nm-1)=y*c+z*s;
+              (*this)(j-1,i-1)=z*c-y*s;
+            }
+        }
+        }
+      z=w[k-1];
+      if (l == k) // Convergence.
+        {
+          if (z < 0.0) // Singular value is made nonnegative.
+        {
+          w[k-1] = -z;
+          for (j=1;j<=n;j++) v(j-1,k-1) = -v(j-1,k-1);
+        }
+          break;
+        }
+      if (its == 30)
+          THROW_EXCEPTION(FTooManyIterationsException, "No convergence in 30 svdcmp iterations");
 
-	  x=w[l-1]; // Shift from bottom 2-by-2 minor.
-	  nm=k-1;
-	  y=w[nm-1];
-	  g=rv1[nm-1];
-	  h=rv1[k-1];
-	  f=((y-z)*(y+z)+(g-h)*(g+h))/(2.0*h*y);
-	  g=FMath::pythag(f,1.0);
-	  f=((x-z)*(x+z)+h*((y/(f+SIGN(g,f)))-h))/x;
-	  c=s=1.0; // Next QR transformation:
-	  for (j=l;j<=nm;j++)
-	    {
-	      i=j+1;
-	      g=rv1[i-1];
-	      y=w[i-1];
-	      h=s*g;
-	      g=c*g;
-	      z=FMath::pythag(f,h);
-	      rv1[j-1]=z;
-	      c=f/z;
-	      s=h/z;
-	      f=x*c+g*s;
-	      g = g*c-x*s;
-	      h=y*s;
-	      y *= c;
-	      for (jj=1;jj<=n;jj++)
-		{
-		  x=v(jj-1,j-1);
-		  z=v(jj-1,i-1);
-		  v(jj-1,j-1)=x*c+z*s;
-		  v(jj-1,i-1)=z*c-x*s;
-		}
-	      z=FMath::pythag(f,h);
-	      w[j-1]=z;  // Rotation can be arbitrary if z = 0.
-	      if (z)
-		{
-		  z=1.0/z;
-		  c=f*z;
-		  s=h*z;
-		}
-	      f=c*g+s*y;
-	      x=c*y-s*g;
+      x=w[l-1]; // Shift from bottom 2-by-2 minor.
+      nm=k-1;
+      y=w[nm-1];
+      g=rv1[nm-1];
+      h=rv1[k-1];
+      f=((y-z)*(y+z)+(g-h)*(g+h))/(2.0*h*y);
+      g=FMath::pythag(f,1.0);
+      f=((x-z)*(x+z)+h*((y/(f+SIGN(g,f)))-h))/x;
+      c=s=1.0; // Next QR transformation:
+      for (j=l;j<=nm;j++)
+        {
+          i=j+1;
+          g=rv1[i-1];
+          y=w[i-1];
+          h=s*g;
+          g=c*g;
+          z=FMath::pythag(f,h);
+          rv1[j-1]=z;
+          c=f/z;
+          s=h/z;
+          f=x*c+g*s;
+          g = g*c-x*s;
+          h=y*s;
+          y *= c;
+          for (jj=1;jj<=n;jj++)
+        {
+          x=v(jj-1,j-1);
+          z=v(jj-1,i-1);
+          v(jj-1,j-1)=x*c+z*s;
+          v(jj-1,i-1)=z*c-x*s;
+        }
+          z=FMath::pythag(f,h);
+          w[j-1]=z;  // Rotation can be arbitrary if z = 0.
+          if (z)
+        {
+          z=1.0/z;
+          c=f*z;
+          s=h*z;
+        }
+          f=c*g+s*y;
+          x=c*y-s*g;
 
-	      for (jj=1;jj<=m;jj++)
-		{
-		  y=(*this)(jj-1,j-1);
-		  z=(*this)(jj-1,i-1);
-		  (*this)(jj-1,j-1)=y*c+z*s;
-		  (*this)(jj-1,i-1)=z*c-y*s;
-		}
-	    }
-	  rv1[l-1]=0.0;
-	  rv1[k-1]=f;
-	  w[k-1]=x;
-	}
+          for (jj=1;jj<=m;jj++)
+        {
+          y=(*this)(jj-1,j-1);
+          z=(*this)(jj-1,i-1);
+          (*this)(jj-1,j-1)=y*c+z*s;
+          (*this)(jj-1,i-1)=z*c-y*s;
+        }
+        }
+      rv1[l-1]=0.0;
+      rv1[k-1]=f;
+      w[k-1]=x;
+    }
     }
 }
 
@@ -1401,13 +1401,13 @@ void FMatrix::svDecomp(const FMatrix& u, const F::FVector& w, const FMatrix& v, 
   // may be called sequentially with different b's.
 #ifndef NODEBUG
   if(v.getDimensionX() != v.getDimensionY())
-	  THROW_EXCEPTION( FInvalidDimensionException, "v is not square matrix" );
+      THROW_EXCEPTION( FInvalidDimensionException, "v is not square matrix" );
   if(u.getDimensionX() != v.getDimensionX())
-	  THROW_EXCEPTION( FInvalidDimensionException, "dimension of u must match dimension of v" );
+      THROW_EXCEPTION( FInvalidDimensionException, "dimension of u must match dimension of v" );
   if(u.getDimensionY() != b.size())
-	  THROW_EXCEPTION( FInvalidDimensionException, "size of b must match dimension of u" );
+      THROW_EXCEPTION( FInvalidDimensionException, "size of b must match dimension of u" );
   if(u.getDimensionX() != x.size())
-	  THROW_EXCEPTION( FInvalidDimensionException, "size of x must match dimension of u" );
+      THROW_EXCEPTION( FInvalidDimensionException, "size of x must match dimension of u" );
 #endif
   int m = u.getDimensionY(), n = u.getDimensionX();
 
@@ -1419,10 +1419,10 @@ void FMatrix::svDecomp(const FMatrix& u, const F::FVector& w, const FMatrix& v, 
     {
       s=0.0;
       if (w[j-1]) // Nonzero result only if wj is nonzero.
-	{
-	  for (i=1;i<=m;i++) s += u(i-1,j-1)*b[i-1];
-	  s /= w[j-1];  // This is the divide by wj .
-	}
+    {
+      for (i=1;i<=m;i++) s += u(i-1,j-1)*b[i-1];
+      s /= w[j-1];  // This is the divide by wj .
+    }
       tmp[j-1]=s;
     }
   for (j=1;j<=n;j++) // Matrix multiply by V to get answer.
@@ -1438,8 +1438,8 @@ void FMatrix::svDecomp(const FMatrix& u, const F::FVector& w, const FMatrix& v, 
 #define FSVD_EPSILON 0.01
 
 bool FMatrix::solveSingularSystem(F::FVector& b, F::FVector& x,
-				  std::vector<F::FVector>& nullspace,
-				  std::vector<F::FVector>& range, double zeroTresholdEpsilon) const
+                  std::vector<F::FVector>& nullspace,
+                  std::vector<F::FVector>& range, double zeroTresholdEpsilon) const
 {
   FMatrix v(x.getDimension(),x.getDimension()),u(*this);
   F::FVector w(x.getDimension());
@@ -1463,19 +1463,19 @@ bool FMatrix::solveSingularSystem(F::FVector& b, F::FVector& x,
   for(unsigned int l=0; l<w.getDimension(); l++)
     {
       if(w[l]==0.0) // this column of V belongs to nullspace
-	{
-	  unsigned int rows=v.getDimensionY();
-	  F::FVector n(rows);
-	  for(unsigned int c=0; c<rows; c++) n[c] = v(c,l);
-	  nullspace.push_back(n);
-	}
+    {
+      unsigned int rows=v.getDimensionY();
+      F::FVector n(rows);
+      for(unsigned int c=0; c<rows; c++) n[c] = v(c,l);
+      nullspace.push_back(n);
+    }
       else // this column of U belongs to range
-	{
-	  unsigned int rows=u.getDimensionY();
-	  F::FVector n(rows);
-	  for(unsigned int c=0; c<rows; c++) n[c] = u(c,l);
-	  range.push_back(n);
-	}
+    {
+      unsigned int rows=u.getDimensionY();
+      F::FVector n(rows);
+      for(unsigned int c=0; c<rows; c++) n[c] = u(c,l);
+      range.push_back(n);
+    }
     }
 
   // Now check system's solvability
@@ -1618,9 +1618,9 @@ double FMatrix::detOf() const
   if((dimx == 3)&&(dimy == 3))
     {
       result = (*this)(0,0)*(*this)(1,1)*(*this)(2,2) -
-	       (*this)(0,0)*(*this)(1,2)*(*this)(2,1) -
+           (*this)(0,0)*(*this)(1,2)*(*this)(2,1) -
                (*this)(1,0)*(*this)(0,1)*(*this)(2,2) +
-	       (*this)(1,0)*(*this)(0,2)*(*this)(2,1) +
+           (*this)(1,0)*(*this)(0,2)*(*this)(2,1) +
                (*this)(2,0)*(*this)(0,1)*(*this)(1,2) -
                (*this)(2,0)*(*this)(0,2)*(*this)(1,1);
     }

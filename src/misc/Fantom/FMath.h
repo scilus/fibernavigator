@@ -96,7 +96,7 @@ namespace FMath
    *  alulated eigenvectors
    */
   void Eigensystem(const FMatrix& A, std::complex<double> e[2], double* EV0,
-		   double* EV1);
+           double* EV1);
 
   /**
    *\par Description:

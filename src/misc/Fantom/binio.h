@@ -61,7 +61,7 @@ inline std::ostream& binwrite( std::ostream& out, const std::string& s )
     std::string::const_iterator i = s.begin();
 
     while( len-- )
-	out.put( *(i++) );
+    out.put( *(i++) );
 
     return out;
 }
@@ -100,7 +100,7 @@ inline std::istream& binread( std::istream& in, std::string& s )
     std::string::iterator i = s.begin();
 
     while( len-- )
-	in.get( *(i++) );
+    in.get( *(i++) );
 
     return in;
 }
@@ -111,8 +111,8 @@ inline std::istream& binread( std::istream& in, std::string& s )
 template<typename T1,typename T2> inline std::ostream&
 binwrite( std::ostream& out, const std::pair<T1,T2>& v )
 {
- 	binwrite( out, v.first );
- 	binwrite( out, v.second );
+     binwrite( out, v.first );
+     binwrite( out, v.second );
 
     return out;
 }
@@ -133,7 +133,7 @@ binwrite( std::ostream& out, const std::vector<T>& v )
     binwrite_raw( out, &size );
 
     for( typename std::vector<T>::const_iterator i=v.begin(); i!=v.end(); ++i )
- 	binwrite( out, *i );
+     binwrite( out, *i );
 
     return out;
 }
@@ -147,7 +147,7 @@ binread( std::istream& in, std::vector<T>& v )
     v.resize( size );
 
     for( typename std::vector<T>::iterator i=v.begin(); i!=v.end(); ++i )
-	binread( in, *i );
+    binread( in, *i );
 
     return in;
 }

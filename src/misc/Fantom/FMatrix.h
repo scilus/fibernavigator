@@ -268,7 +268,7 @@ public:
    * evecs contains the eigenvectors of the matrix and is resized to 3
    */
     void getEigenSystem( std::vector< std::complex< double > >& evals,
-			 std::vector< F::FVector >& evecs );
+             std::vector< F::FVector >& evecs );
 
   /**
    *\par Description:

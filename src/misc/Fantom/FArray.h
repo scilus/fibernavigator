@@ -53,6 +53,13 @@ public:
   FArray(const std::vector<double>& a);
 
   /**
+  * Copy constructor.
+  * \param a
+  * Vector to copy into this array.
+  */
+  FArray(const std::vector<float>& a);
+
+  /**
    * Copy constructor.
    * \param m
    * Matrix to copy into this array.
