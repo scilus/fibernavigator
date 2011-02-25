@@ -1773,7 +1773,7 @@ void SelectionObject::createPropertiesSizer(MainFrame *parent)
     m_propertiesSizer->AddSpacer(8);
 
     m_ptoggleCalculatesFibersInfo = new wxToggleButton(parent, wxID_ANY, wxT("Calculates Fibers Stats"), wxDefaultPosition, wxSize(140,-1));
-    //m_propertiesSizer->Add(m_ptoggleCalculatesFibersInfo,0,wxALIGN_CENTER);      
+    m_propertiesSizer->Add(m_ptoggleCalculatesFibersInfo,0,wxALIGN_CENTER);      
     parent->Connect(m_ptoggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnDisplayFibersInfo));
 
     m_propertiesSizer->AddSpacer(2);
@@ -1806,17 +1806,18 @@ void SelectionObject::createPropertiesSizer(MainFrame *parent)
     m_pbtnDisplayCrossSections      = new wxButton( parent, wxID_ANY, wxT("Display Cross Section (C.S.)"), wxDefaultPosition, wxSize(140,-1));
     m_pbtnDisplayDispersionTube     = new wxButton( parent, wxID_ANY, wxT("Display Dispersion Tube"), wxDefaultPosition, wxSize(140,-1));
 
-    //m_propertiesSizer->Add( m_pgridfibersInfo,0,wxALL,0);
-    //m_propertiesSizer->AddSpacer(2);
-    //m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
-    //m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
-    //m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add( m_pgridfibersInfo,0,wxALL,0);
+    
+    m_propertiesSizer->AddSpacer(2);
+    m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
 
     parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnDisplayMeanFiber));
     parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnDisplayCrossSections));
     parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnDisplayDispersionTube));
 
-    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster() && m_objectType != CISO_SURFACE_TYPE);
+    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster() && m_objectType != CISO_SURFACE_TYPE && false); //bug with some fibers dataset sets
     m_pbtnNewFibersColorVolume->Enable(getIsMaster());
     m_pbtnNewFibersDensityVolume->Enable(getIsMaster());
     m_ptoggleAndNot->Enable(!getIsMaster() && m_objectType != CISO_SURFACE_TYPE);

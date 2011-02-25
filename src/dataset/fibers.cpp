@@ -2488,7 +2488,8 @@ bool Fibers::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoi
 
 void Fibers::createPropertiesSizer(MainFrame *parent)
 {
-    DatasetInfo::createPropertiesSizer(parent);
+    setFibersLength();
+    DatasetInfo::createPropertiesSizer(parent);    
     wxSizer *l_sizer;
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Min Length"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
@@ -2501,8 +2502,7 @@ void Fibers::createPropertiesSizer(MainFrame *parent)
     m_psliderFibersFilterMax = new wxSlider(parent, wxID_ANY, 100, 0, 100, wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersFilterMax,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-
-    this->setFibersLength();
+        
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Subsampling"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
     m_psliderFibersSampling = new wxSlider(parent, wxID_ANY, getMinFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -2554,7 +2554,6 @@ void Fibers::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(68,1,0);
     l_sizer->Add(m_pradioTorsion);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-
     parent->Connect(m_pradioNormalColoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnNormalColoring));
     parent->Connect(m_pradioDistanceAnchoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnListMenuDistance));
     parent->Connect(m_pradioMinDistanceAnchoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnListMenuMinDistance));
