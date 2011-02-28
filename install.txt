@@ -48,7 +48,7 @@ If you already have wxWidgets compiled and installed with support for openGL ena
 
 10- Create an environment variable called "GLEWDIR" pointing to your GLEW installation directory.
 
-11- Open the visual studio solution provided in the root folder of fibernavigator, compile the application and then run it.
+11- Generate the visual studio solution using cmake. *Change the build-type configuration to DEBUG;release if needed.
 
 Known issues with the windows build :
 
