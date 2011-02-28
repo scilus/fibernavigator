@@ -150,10 +150,7 @@ DatasetHelper::~DatasetHelper()
 
     if ( m_anatomyHelper )
         delete m_anatomyHelper;
-
-    if ( m_lastSelectedPoint )
-        delete m_lastSelectedPoint;
-
+    
     printDebug( _T( "dataset helper destructor done" ), 0 );
 }
 

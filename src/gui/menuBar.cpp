@@ -54,6 +54,11 @@ MenuBar::MenuBar()
     m_itemToogleInvertFibersSelection = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Inverse Fibers Selection"));
     m_itemToggleUseFakeTubes = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Fake Tubes"));
     m_itemToggleUseTransparency = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Transparent Fibers"));
+ 
+    m_menuSurface = new wxMenu();
+    m_itemNewSplineSurface = m_menuSurface->Append(wxID_ANY, wxT("New Spline Surface"));
+    m_itemMoveBoundaryPointLeft = m_menuSurface->Append(wxID_ANY, wxT("Move Left"));
+    m_itemMoveBoundaryPointRight = m_menuSurface->Append(wxID_ANY, wxT("Move Right"));
     
     m_menuOptions = new wxMenu();
     m_menuRuler = new wxMenu();
@@ -63,12 +68,6 @@ MenuBar::MenuBar()
     m_itemRulerRemove = m_menuRuler->Append(wxID_ANY, wxT("Remove Last Point"));
     m_menuOptions->AppendSubMenu(m_menuRuler, wxT("Ruler"));
 
-    m_menuSurface = new wxMenu();
-    m_itemNewSplineSurface = m_menuSurface->Append(wxID_ANY, wxT("New Spline Surface"));
-    m_itemMoveBoundaryPointLeft = m_menuSurface->Append(wxID_ANY, wxT("Move Left"));
-    m_itemMoveBoundaryPointRight = m_menuSurface->Append(wxID_ANY, wxT("Move Right"));
-    m_menuOptions->AppendSubMenu(m_menuSurface, wxT("Surface"));
-        
     m_menuColorMaps = new wxMenu();
     m_itemGray = m_menuColorMaps->Append(wxID_ANY, wxT("Gray"));
     m_itemBlueGreenPurple = m_menuColorMaps->Append(wxID_ANY, wxT("Blue-Green-Purple"));
@@ -103,6 +102,7 @@ MenuBar::MenuBar()
     this->Append(m_menuView, wxT("&View"));
     this->Append(m_menuVoi, wxT("&VOI"));
     this->Append(m_menuFibers, wxT("&Fibers"));
+    this->Append(m_menuSurface, wxT("Surface"));
     this->Append(m_menuOptions, wxT("&Option"));
     this->Append(m_menuHelp, wxT("&Help"));
 

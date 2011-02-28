@@ -32,7 +32,6 @@ class ToolBar;
 class MenuBar;
 class FNObject;
 
-// Define a new frame
 class MainFrame : public wxFrame
 {
     friend class ToolBar;
@@ -54,6 +53,8 @@ public:
     ~MainFrame();
 
     void DisplayPropertiesSheet();
+    void deleteFNObject();
+    void deleteTreeItem();
     void refreshAllGLWidgets();
     void renewAllGLWidgets();
     void Screenshot             ( wxString         i_fileName    );
@@ -233,9 +234,10 @@ private:
     wxBoxSizer          *m_currentSizer;
     wxBoxSizer          *m_noSelectionSizer;
     FNObject            *m_currentFNObject;
+    FNObject            *m_lastSelectedFNObject;
     bool                m_isDisplayProperties; 
     long                m_currentListItem;
-    bool                m_isCurrentFNObjectChanged;
+    long                m_lastSelectedListItem;
 
     wxBoxSizer          *m_mainSizer;
     wxBoxSizer          *m_mainSizer1;
@@ -256,7 +258,7 @@ public:
     MainCanvas*         m_gl1;
     MainCanvas*         m_gl2;
     MyListCtrl*         m_listCtrl;
-    wxTreeCtrl*         m_treeWidget;
+    MyTreeCtrl*         m_treeWidget;
     wxSlider*           m_xSlider;
     wxSlider*           m_ySlider;
     wxSlider*           m_zSlider;

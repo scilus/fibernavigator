@@ -57,7 +57,7 @@ Fibers::~Fibers()
 
 bool Fibers::load( wxString i_filename )
 {
-    bool res;
+   bool res = false;
    if( i_filename.AfterLast( '.' ) == _T( "fib" ) ){
         if (loadVTK( i_filename )){
             res = true;
@@ -578,10 +578,6 @@ bool Fibers::loadDmri(wxString i_fileName)
     l_file = fopen(i_fileName.mb_str(),"r");
     if (l_file == NULL) return false;
 
-    float l_xb = m_dh->m_columns * m_dh->m_xVoxel ;
-    float l_yb = m_dh->m_rows    * m_dh->m_yVoxel ;
-    float l_zb = m_dh->m_frames  * m_dh->m_zVoxel ;
-    
     char s1[10], s2[10], s3[10], s4[10];
     float f1,f2,f3,f4,f5;
     // the header
@@ -1281,7 +1277,6 @@ void Fibers::save( wxString i_fileName )
 
 void Fibers::saveDMRI( wxString i_fileName )
 {
-    int l_pointIndex = 0;
     int l_countLines = 0;
 
     if( i_fileName.AfterLast( '.' ) != _T( "fib" ) )
@@ -1305,7 +1300,7 @@ void Fibers::saveDMRI( wxString i_fileName )
     float dist = 0.5;
     if (m_countLines>0)
     {
-        float dist = sqrt(m_pointArray[0]*m_pointArray[0]+m_pointArray[1]*m_pointArray[1]+m_pointArray[2]*m_pointArray[2]);
+        dist = sqrt(m_pointArray[0]*m_pointArray[0]+m_pointArray[1]*m_pointArray[1]+m_pointArray[2]*m_pointArray[2]);
     }
 
     myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";

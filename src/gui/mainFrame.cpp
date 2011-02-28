@@ -98,7 +98,8 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
 {
     wxImage::AddHandler(new wxPNGHandler);
     m_isDisplayProperties = true;
-    m_isCurrentFNObjectChanged = false;
+    m_lastSelectedFNObject = NULL;
+    m_lastSelectedListItem = -1;
     m_currentFNObject = NULL;
     m_currentListItem = -1;   
     m_currentSizer = NULL;
@@ -239,7 +240,7 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     m_mainSizer->SetSizeHints( this );
 
     m_timer = new wxTimer( this );
-    m_timer->Start( 40 );
+    m_timer->Start( 50 );
 
     m_menuBar = new MenuBar();
     m_toolBar = new ToolBar(this);
@@ -352,18 +353,14 @@ void MainFrame::OnSaveFibers( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnSaveDataset( wxCommandEvent& WXUNUSED(event) )
 {
-    Anatomy* l_anatomy = NULL;
-
-    long item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( item != -1 )
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
-        DatasetInfo* info = (DatasetInfo*)m_listCtrl->GetItemData( item );
-        if( info->getType() < MESH )
+        if( ((DatasetInfo*)m_currentFNObject)->getType() < MESH )
         {
-            l_anatomy = (Anatomy*)m_listCtrl->GetItemData( item );
+            Anatomy* l_anatomy = (Anatomy*)m_currentFNObject;
 
             wxString caption         = wxT( "Choose l_anatomy file" );
-            wxString wildcard        = wxT( "nifti files (*.nii)|*.nii|*.*|*.*" );
+            wxString wildcard        = wxT( "nifti files (*.nii)|*.nii*|*.*|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
@@ -390,63 +387,44 @@ void MainFrame::OnQuit( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnMinimizeDataset( wxCommandEvent& WXUNUSED(event) )
 {
-    Anatomy* l_anatomy = NULL;
-
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item != -1 )
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
-        DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
-        if( l_info->getType() < MESH )
+        if( ((DatasetInfo*)m_currentFNObject)->getType() < MESH )
         {
-            l_anatomy = (Anatomy*)m_listCtrl->GetItemData( l_item );
-            l_anatomy->minimize();
+             ((Anatomy*)m_currentFNObject)->minimize();
         }
     }
 }
 
 void MainFrame::OnDilateDataset( wxCommandEvent& WXUNUSED(event) )
 {
-    Anatomy* l_anatomy = NULL;
-
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item != -1 )
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_listCtrl->GetItemData( l_item );
-        if(l_info->getType() < MESH )
+         if( ((DatasetInfo*)m_currentFNObject)->getType() < MESH )
         {
-            l_anatomy = (Anatomy*) m_listCtrl->GetItemData( l_item );
-            l_anatomy->dilate();
+             ((Anatomy*)m_currentFNObject)->dilate();
         }
     }
 }
 
 void MainFrame::OnErodeDataset(wxCommandEvent& WXUNUSED(event))
 {
-    Anatomy* l_anatomy = NULL;
-
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item != -1 )
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_listCtrl->GetItemData( l_item );
-        if( l_info->getType() < MESH )
+        if( ((DatasetInfo*)m_currentFNObject)->getType() < MESH )
         {
-            l_anatomy = (Anatomy*)m_listCtrl->GetItemData( l_item );
-            l_anatomy->erode();
+            ((Anatomy*)m_currentFNObject)->erode();
         }
     }
 }
 
 void MainFrame::OnSaveSurface( wxCommandEvent& WXUNUSED(event) )
 {
-    long l_item = m_listCtrl->GetNextItem(- 1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item != -1 )
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
-        DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
-        if( l_info->getType() == SURFACE )
+        if( ((DatasetInfo*)m_currentFNObject)->getType() == SURFACE )
         {
-            Surface *l_surface = (Surface*)l_info;
-
-            std::cout << "got l_surface: " << l_surface << std::endl;
+            Surface *l_surface = (Surface*)m_currentFNObject;
 
             wxString caption         = wxT( "Choose a file" );
             wxString wildcard        = wxT( "surfae files (*.vtk)|*.vtk" );
@@ -457,18 +435,13 @@ void MainFrame::OnSaveSurface( wxCommandEvent& WXUNUSED(event) )
             dialog.SetDirectory( m_datasetHelper->m_lastPath );
             if( dialog.ShowModal() == wxID_OK )
             {
-                std::cout << " start saving" << std::endl;
                 m_datasetHelper->m_lastPath = dialog.GetDirectory();
                 l_surface->save( dialog.GetPath() );
-                std::cout << " done saving" << std::endl;
             }
-
         }
-        if( l_info->getType() == ISO_SURFACE )
+        else if( ((DatasetInfo*)m_currentFNObject)->getType() == ISO_SURFACE )
         {
-            CIsoSurface *l_surface = (CIsoSurface*)l_info;
-
-            std::cout << "got l_surface: " << l_surface << std::endl;
+            CIsoSurface *l_surface = (CIsoSurface*)m_currentFNObject;
 
             wxString caption         = wxT( "Choose a file" );
             wxString wildcard        = wxT( "surfae files (*.vtk)|*.vtk" );
@@ -479,10 +452,8 @@ void MainFrame::OnSaveSurface( wxCommandEvent& WXUNUSED(event) )
             dialog.SetDirectory( m_datasetHelper->m_lastPath );
             if( dialog.ShowModal() == wxID_OK )
             {
-                std::cout << " start saving" << std::endl;
                 m_datasetHelper->m_lastPath = dialog.GetDirectory();
                 l_surface->save( dialog.GetPath() );
-                std::cout << " done saving" << std::endl;
             }
         }
     }
@@ -808,7 +779,31 @@ void MainFrame::OnGenerateFiberVolume( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::ColorFibers()
 {   
-    ((Fibers*)m_currentFNObject)->updateFibersColors();    
+    if (m_currentFNObject != NULL && m_currentListItem != -1)
+    {
+        ((Fibers*)m_currentFNObject)->updateFibersColors();  
+    }  
+}
+
+void MainFrame::deleteFNObject()
+{
+    if (m_currentSizer!=NULL)
+    {
+        m_rightMainSizer->Hide(m_currentSizer, true);
+        m_rightMainSizer->Detach(m_currentSizer);        
+        m_currentSizer = NULL;
+    }
+    //delete m_currentFNObject;
+    m_currentFNObject = NULL;
+    m_lastSelectedFNObject = NULL;
+    m_currentListItem = -1;
+    m_lastSelectedListItem = -1;
+
+    m_rightMainSizer->Layout();
+    if( m_mainGL )
+    {
+        m_mainGL->changeOrthoSize();
+    }
 }
 
 void MainFrame::DisplayPropertiesSheet()
@@ -821,30 +816,26 @@ void MainFrame::DisplayPropertiesSheet()
             m_rightMainSizer->Hide( m_currentSizer, true );   
         }
     }
+    else if (m_lastSelectedFNObject == NULL && m_currentFNObject == NULL)
+    {        
+        if (m_currentSizer != NULL)
+        {
+            m_rightMainSizer->Hide( m_currentSizer, true );   
+        }
+        m_rightMainSizer->Show( m_noSelectionSizer, true, true); 
+    }
     else
     {
         FNObject *l_info = NULL;
-        m_currentListItem = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-        if (m_currentListItem == -1){
-            if (m_datasetHelper->m_lastSelectedObject != NULL && ( treeSelected(m_datasetHelper->m_lastSelectedObject->GetId()) == MASTER_OBJECT || treeSelected(m_datasetHelper->m_lastSelectedObject->GetId()) == CHILD_OBJECT))
-            {
-                l_info = m_datasetHelper->m_lastSelectedObject;
-            }
-            else if (m_datasetHelper->m_lastSelectedPoint != NULL && treeSelected(m_datasetHelper->m_lastSelectedPoint->GetId()) == POINT_DATASET)
-            {
-                l_info = m_datasetHelper->m_lastSelectedPoint;
-            }
-            else if (m_currentSizer != NULL)
-            {
-                m_rightMainSizer->Hide( m_currentSizer, true ); 
-                m_currentSizer = NULL;
-            }
+        if (m_lastSelectedFNObject != m_currentFNObject)
+        {
+            l_info = m_lastSelectedFNObject;
         }
         else
         {
-            l_info = (FNObject*)m_listCtrl->GetItemData(m_currentListItem);
+            l_info = m_currentFNObject;
         }
-
+        
         if (l_info != NULL)
         {       
             m_rightMainSizer->Hide(m_noSelectionSizer);
@@ -852,8 +843,7 @@ void MainFrame::DisplayPropertiesSheet()
             {
                 if (m_currentSizer != NULL )
                 {
-                    m_rightMainSizer->Hide(m_currentSizer);
-                    m_rightMainSizer->Layout();
+                    m_rightMainSizer->Hide(m_currentSizer);                    
                 }
                 if (!l_info->getProprietiesSizer())
                 {
@@ -874,10 +864,15 @@ void MainFrame::DisplayPropertiesSheet()
         }
         else
         {
+            if (m_currentSizer != NULL)
+            {
+                m_rightMainSizer->Hide( m_currentSizer, true ); 
+                m_currentSizer = NULL;
+            }
             m_rightMainSizer->Show( m_noSelectionSizer, true, true); 
-
         }
         m_currentFNObject = l_info;
+        m_currentListItem = m_lastSelectedListItem;
     }
 
     m_rightMainSizer->Layout();
@@ -1094,14 +1089,11 @@ void MainFrame::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
         l_treeObjectId = m_datasetHelper->m_lastSelectedObject->GetId();
     }
       
-      
-    long item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if(item != -1)
+    if(m_currentFNObject != NULL && m_currentListItem != -1)
     {
-        DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( item );
-        if (l_info->getType() < RGB)
+        if ( ((DatasetInfo*)m_currentFNObject)->getType() < RGB)
         {
-            l_anatomy = (Anatomy*)m_listCtrl->GetItemData( item );
+            l_anatomy = (Anatomy*)m_currentFNObject;
             l_selectionObject = new SelectionBox( m_datasetHelper, l_anatomy );
             float trs = l_anatomy->getThreshold();
             if( trs == 0.0 )
@@ -1369,11 +1361,9 @@ void MainFrame::OnToggleDrawVectors( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnToggleLIC( wxCommandEvent& WXUNUSED(event) )
 {
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item != -1 && m_datasetHelper->m_vectorsLoaded )
+    if( m_currentFNObject != NULL && m_currentListItem != -1 && m_datasetHelper->m_vectorsLoaded )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_listCtrl->GetItemData( l_item );
-        l_info->activateLIC();
+        ((DatasetInfo*) m_currentFNObject)->activateLIC();
     }
     refreshAllGLWidgets();
 }
@@ -1396,16 +1386,15 @@ void MainFrame::OnToggleNormal( wxCommandEvent& WXUNUSED(event ))
 
 void MainFrame::OnToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
 {
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item != -1 )
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
-        DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
+        DatasetInfo* l_info = (DatasetInfo*)m_currentFNObject;
         if( l_info->getType() < MESH )
         {
             if( ! l_info->toggleShowFS() )
-                m_listCtrl->SetItem( l_item, 1, l_info->getName() + wxT( "*" ) );
+                m_listCtrl->SetItem( m_currentListItem, 1, l_info->getName() + wxT( "*" ) );
             else
-                m_listCtrl->SetItem( l_item, 1, l_info->getName() );
+                m_listCtrl->SetItem( m_currentListItem, 1, l_info->getName() );
         }
     }
     refreshAllGLWidgets();
@@ -1431,10 +1420,9 @@ void MainFrame::OnToggleFilterIso( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnClean( wxCommandEvent& WXUNUSED(event) )
 {
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if(l_item != -1 )
+     if(m_currentFNObject != NULL && m_currentListItem != -1 )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_listCtrl->GetItemData( l_item );
+        DatasetInfo* l_info = (DatasetInfo*) m_currentFNObject;
         if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE)
            l_info->clean();
     }
@@ -1443,11 +1431,9 @@ void MainFrame::OnClean( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnLoop( wxCommandEvent& WXUNUSED(event) )
 {
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item != -1 )
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
-        DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
-        l_info->smooth();
+        ((DatasetInfo*)m_currentFNObject)->smooth();
     }
     refreshAllGLWidgets();
 }
@@ -1783,15 +1769,12 @@ void MainFrame::OnGlyphLuminanceSliderMoved( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::updateGlyphColoration( GlyphColorModifier i_modifier, float i_value )
 {
-    // We get the currently selected item.
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item == -1 )
-        return;
-            
-    DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
-    
-    if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
-        ( (Glyph*)l_info )->setColor( i_modifier, i_value );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {            
+        DatasetInfo* l_info = (DatasetInfo*)m_currentFNObject;    
+        if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
+            ( (Glyph*)l_info )->setColor( i_modifier, i_value );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1799,15 +1782,12 @@ void MainFrame::updateGlyphColoration( GlyphColorModifier i_modifier, float i_va
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphLODSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    // We get the currently selected item.
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item == -1 )
-        return;
-    
-    DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
-    
-    if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
-        ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_currentFNObject)->m_psliderLODValue->GetValue() );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {            
+        DatasetInfo* l_info = (DatasetInfo*)m_currentFNObject;
+        if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
+            ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_currentFNObject)->m_psliderLODValue->GetValue() );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1815,15 +1795,12 @@ void MainFrame::OnGlyphLODSliderMoved( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphLightAttenuationSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    // We get the currently selected item.
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item == -1 )
-        return;
-    
-    DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
-    
-    if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
-        ( (Glyph*)l_info )->setLighAttenuation( ((Glyph*)m_currentFNObject)->m_psliderLightAttenuation->GetValue() / 100.0f );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {            
+        DatasetInfo* l_info = (DatasetInfo*)m_currentFNObject;
+        if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
+            ( (Glyph*)l_info )->setLighAttenuation( ((Glyph*)m_currentFNObject)->m_psliderLightAttenuation->GetValue() / 100.0f );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1831,7 +1808,10 @@ void MainFrame::OnGlyphLightAttenuationSliderMoved( wxCommandEvent& WXUNUSED(eve
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphLightXDirectionSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    OnGlyphLightPositionChanged( X_AXIS, ((Glyph*)m_currentFNObject)->m_psliderLightXPosition->GetValue() / 100.0f  );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        OnGlyphLightPositionChanged( X_AXIS, ((Glyph*)m_currentFNObject)->m_psliderLightXPosition->GetValue() / 100.0f  );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1839,7 +1819,10 @@ void MainFrame::OnGlyphLightXDirectionSliderMoved( wxCommandEvent& WXUNUSED(even
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphLightYDirectionSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    OnGlyphLightPositionChanged( Y_AXIS, ((Glyph*)m_currentFNObject)->m_psliderLightYPosition->GetValue() / 100.0f  );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        OnGlyphLightPositionChanged( Y_AXIS, ((Glyph*)m_currentFNObject)->m_psliderLightYPosition->GetValue() / 100.0f  );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1847,7 +1830,10 @@ void MainFrame::OnGlyphLightYDirectionSliderMoved( wxCommandEvent& WXUNUSED(even
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphLightZDirectionSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    OnGlyphLightPositionChanged( Z_AXIS, ((Glyph*)m_currentFNObject)->m_psliderLightZPosition->GetValue() / 100.0f  );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        OnGlyphLightPositionChanged( Z_AXIS, ((Glyph*)m_currentFNObject)->m_psliderLightZPosition->GetValue() / 100.0f  );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1858,7 +1844,10 @@ void MainFrame::OnGlyphLightZDirectionSliderMoved( wxCommandEvent& WXUNUSED(even
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphLightPositionChanged( AxisType i_axisType, float i_position )
 {
-    ((Glyph*)m_currentFNObject)->setLightPosition( i_axisType, i_position);
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->setLightPosition( i_axisType, i_position);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1866,7 +1855,10 @@ void MainFrame::OnGlyphLightPositionChanged( AxisType i_axisType, float i_positi
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphDisplaySliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    ((Glyph*)m_currentFNObject)->setDisplayFactor( ((Glyph*)m_currentFNObject)->m_psliderDisplayValue->GetValue());
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->setDisplayFactor( ((Glyph*)m_currentFNObject)->m_psliderDisplayValue->GetValue());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1874,7 +1866,10 @@ void MainFrame::OnGlyphDisplaySliderMoved( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphScalingFactorSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    ((Glyph*)m_currentFNObject)->setScalingFactor( ((Glyph*)m_currentFNObject)->m_psliderScalingFactor->GetValue());
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->setScalingFactor( ((Glyph*)m_currentFNObject)->m_psliderScalingFactor->GetValue());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1913,7 +1908,10 @@ void MainFrame::OnGlyphZAxisFlipChecked( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphFlip( AxisType i_axisType, bool i_isChecked )
 {
-    ((Glyph*)m_currentFNObject)->flipAxis( i_axisType, i_isChecked );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->flipAxis( i_axisType, i_isChecked );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1922,7 +1920,10 @@ void MainFrame::OnGlyphFlip( AxisType i_axisType, bool i_isChecked )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphMapOnSphereSelected( wxCommandEvent& event )
 {
-    ((Glyph*)m_currentFNObject)->setDisplayShape( SPHERE );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->setDisplayShape( SPHERE );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1931,7 +1932,10 @@ void MainFrame::OnGlyphMapOnSphereSelected( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphNormalSelected( wxCommandEvent& event )
 {
-    ((Glyph*)m_currentFNObject)->setDisplayShape( NORMAL );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->setDisplayShape( NORMAL );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1940,7 +1944,10 @@ void MainFrame::OnGlyphNormalSelected( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphAxesSelected( wxCommandEvent& event )
 {
-    ((Glyph*)m_currentFNObject)->setDisplayShape( AXES );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->setDisplayShape( AXES );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1949,7 +1956,10 @@ void MainFrame::OnGlyphAxesSelected( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphMainAxisSelected( wxCommandEvent& event )
 {
-    ((Glyph*)m_currentFNObject)->setDisplayShape( AXIS );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->setDisplayShape( AXIS );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1958,47 +1968,56 @@ void MainFrame::OnGlyphMainAxisSelected( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnGlyphColorWithPosition( wxCommandEvent& event )
 {
-    ((Glyph*)m_currentFNObject)->setColorWithPosition( event.IsChecked() );
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        ((Glyph*)m_currentFNObject)->setColorWithPosition( event.IsChecked() );
+    }
 }
 
 void MainFrame::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    DatasetInfo* l_current = (DatasetInfo*)m_currentFNObject;
-    float l_threshold = (float)l_current->m_psliderThresholdIntensity->GetValue() / 100.0f;
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        DatasetInfo* l_current = (DatasetInfo*)m_currentFNObject;
+        float l_threshold = (float)l_current->m_psliderThresholdIntensity->GetValue() / 100.0f;
 
-    if( l_current->getUseTex() )
-        m_listCtrl->SetItem( m_currentListItem, 2, wxString::Format( wxT( "%.2f" ),   l_threshold * l_current->getOldMax() ) );
-    else
-        m_listCtrl->SetItem( m_currentListItem, 2, wxString::Format( wxT( "(%.2f)" ), l_threshold * l_current->getOldMax() ) );
+        if( l_current->getUseTex() )
+            m_listCtrl->SetItem( m_currentListItem, 2, wxString::Format( wxT( "%.2f" ),   l_threshold * l_current->getOldMax() ) );
+        else
+            m_listCtrl->SetItem( m_currentListItem, 2, wxString::Format( wxT( "(%.2f)" ), l_threshold * l_current->getOldMax() ) );
 
-    l_current->setThreshold( l_threshold );
-    if( l_current->getType() == SURFACE )
-    {
-        Surface* s = (Surface*)l_current;
-        s->movePoints();
+        l_current->setThreshold( l_threshold );
+        if( l_current->getType() == SURFACE )
+        {
+            Surface* s = (Surface*)l_current;
+            s->movePoints();
+        }
+        if( l_current->getType() == ISO_SURFACE && ! l_current->m_psliderThresholdIntensity->leftDown() )
+        {
+            CIsoSurface* s = (CIsoSurface*)l_current;
+            s->GenerateWithThreshold();
+        }
+        if( l_current->getType() < RGB )
+        {
+            Anatomy* a = (Anatomy*)l_current;
+            if( a->m_roi )
+                a->m_roi->setThreshold( l_threshold );
+        }
+        // This slider will set the Brightness level. Currently only the glyphs uses this value.
+        l_current->setBrightness( 1.0f - l_threshold );
+        refreshAllGLWidgets();
     }
-    if( l_current->getType() == ISO_SURFACE && ! l_current->m_psliderThresholdIntensity->leftDown() )
-    {
-        CIsoSurface* s = (CIsoSurface*)l_current;
-        s->GenerateWithThreshold();
-    }
-    if( l_current->getType() < RGB )
-    {
-        Anatomy* a = (Anatomy*)l_current;
-        if( a->m_roi )
-            a->m_roi->setThreshold( l_threshold );
-    }
-    // This slider will set the Brightness level. Currently only the glyphs uses this value.
-    l_current->setBrightness( 1.0f - l_threshold );
-    refreshAllGLWidgets();
 }
 
 void MainFrame::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    DatasetInfo* l_current = (DatasetInfo*)m_currentFNObject;
-    float l_alpha = (float)l_current->m_psliderOpacity->GetValue() / 100.0f;
-    l_current->setAlpha( l_alpha );
-    refreshAllGLWidgets();
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {
+        DatasetInfo* l_current = (DatasetInfo*)m_currentFNObject;
+        float l_alpha = (float)l_current->m_psliderOpacity->GetValue() / 100.0f;
+        l_current->setAlpha( l_alpha );
+        refreshAllGLWidgets();
+    }
 }
 
 void MainFrame::OnFiberFilterSlider( wxCommandEvent& WXUNUSED(event) )
@@ -2038,8 +2057,7 @@ void MainFrame::OnToggleAlpha( wxCommandEvent& WXUNUSED(event) )
     m_datasetHelper->m_blendAlpha = ! m_datasetHelper->m_blendAlpha;
 
     updateMenus();
-    this->Update();    
-
+    this->Update();  
     m_mainGL->Refresh();
 }
 
@@ -2106,7 +2124,10 @@ void MainFrame::updateStatusBar()
 void MainFrame::OnActivateListItem( wxListEvent& event )
 {
     int l_item = event.GetIndex();
+    m_treeWidget->UnselectAll();
     DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
+    m_lastSelectedFNObject = l_info;
+    m_lastSelectedListItem = l_item;
     int l_col = m_listCtrl->getColActivated();
     switch( l_col )
     {        
@@ -2123,17 +2144,12 @@ void MainFrame::OnActivateListItem( wxListEvent& event )
                 m_listCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
             break;
         case 13:
-            m_rightMainSizer->Hide(m_currentSizer);
-            m_rightMainSizer->Detach(m_currentSizer);
-            m_rightMainSizer->Layout();
-            m_currentFNObject = NULL;  
-            m_currentSizer = NULL;
-            m_currentListItem = -1;
-            delete l_info;
+            deleteFNObject();
             m_listCtrl->DeleteItem( l_item );
             m_datasetHelper->updateLoadStatus();
             break;
         default:
+            return;
             break;
     }
     refreshAllGLWidgets();
@@ -2141,7 +2157,7 @@ void MainFrame::OnActivateListItem( wxListEvent& event )
 
 void MainFrame::OnToggleShowFS( wxEvent& WXUNUSED(event) )
 {
-    if (m_currentListItem != -1)
+    if (m_currentFNObject != NULL && m_currentListItem != -1)
     {
         if( ! ((DatasetInfo*)m_currentFNObject)->toggleShowFS())
             m_listCtrl->SetItem( m_currentListItem, 1, ((DatasetInfo*)m_currentFNObject)->getName().BeforeFirst( '.' ) + wxT( "*" ) );
@@ -2153,8 +2169,9 @@ void MainFrame::OnToggleShowFS( wxEvent& WXUNUSED(event) )
 
 void MainFrame::OnDeleteListItem( wxEvent& WXUNUSED(event) )
 {
-    if (m_currentListItem != -1)
+    if (m_currentFNObject != NULL && m_currentListItem != -1)
     {       
+        long tmp = m_currentListItem;
         if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
         {
             m_datasetHelper->deleteAllSelectionObjects();
@@ -2164,20 +2181,8 @@ void MainFrame::OnDeleteListItem( wxEvent& WXUNUSED(event) )
         {
             m_datasetHelper->deleteAllPoints();
         }
-        m_rightMainSizer->Hide(m_currentSizer);
-        m_rightMainSizer->Detach(m_currentSizer);
-        m_rightMainSizer->Layout();
-        m_listCtrl->DeleteItem( m_currentListItem );
-        m_currentFNObject = NULL;  
-        m_currentSizer = NULL;
-        m_currentListItem = -1;
-        delete m_currentFNObject;
-        if( m_mainGL )
-        {
-            m_mainGL->changeOrthoSize();
-        }
-
-        m_datasetHelper->updateLoadStatus();
+        deleteFNObject();
+        m_listCtrl->DeleteItem( tmp );
         refreshAllGLWidgets();
     }
 }
@@ -2185,9 +2190,7 @@ void MainFrame::OnDeleteListItem( wxEvent& WXUNUSED(event) )
 void MainFrame::OnSelectListItem( wxListEvent& event )
 {
     int l_item = event.GetIndex();
-    m_currentListItem = l_item;
     m_treeWidget->UnselectAll();
-    
     DatasetInfo *l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item) ;
     int l_col = m_listCtrl->getColClicked();
     if (l_col == 12 && l_info->getType() >= MESH)
@@ -2201,7 +2204,9 @@ void MainFrame::OnSelectListItem( wxListEvent& event )
             m_listCtrl->SetItem( l_item,2,wxString::Format( wxT( "%.2f" ), l_info->getThreshold() * l_info->getOldMax() ) );
         }            
     }
-    m_mainGL->changeOrthoSize();
+    m_lastSelectedFNObject = l_info;
+    m_lastSelectedListItem = l_item;
+    //m_mainGL->changeOrthoSize();
     refreshAllGLWidgets();
 }
 
@@ -2230,29 +2235,28 @@ void MainFrame::OnListMenuName( wxCommandEvent&  WXUNUSED(event) )
         m_listCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
     else
         m_listCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
+
 }
 
 void MainFrame::OnListMenuThreshold( wxCommandEvent&  WXUNUSED(event) )
 {
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item == -1 )
+    if( m_currentFNObject == NULL && m_currentListItem != -1)
         return;
-    DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
+    DatasetInfo* l_info = (DatasetInfo*)m_currentFNObject;
     if( l_info->getType() >= MESH )
     {
         if( ! l_info->toggleUseTex() )
-            m_listCtrl->SetItem( l_item,
+            m_listCtrl->SetItem( m_currentListItem,
                                  2,
                                  wxT( "(" ) + wxString::Format( wxT( "%.2f" ),
                                  l_info->getThreshold() * l_info->getOldMax()) + wxT( ")" ) );
         else
-            m_listCtrl->SetItem( l_item,
+            m_listCtrl->SetItem( m_currentListItem,
                                  2,
                                  wxString::Format( wxT( "%.2f" ),
                                  l_info->getThreshold() * l_info->getOldMax() ) );
     }
 }
-
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be called when the show button after a right 
@@ -2260,15 +2264,14 @@ void MainFrame::OnListMenuThreshold( wxCommandEvent&  WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnListMenuShow( wxCommandEvent&  WXUNUSED(event) )
 {
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item == -1 )
+    if( m_currentFNObject == NULL && m_currentListItem != -1)
         return;
 
-    DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
+    DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem );
     if( l_info->toggleShow() )
-        m_listCtrl->SetItem( l_item, 0, wxT( "" ), 0 );
+        m_listCtrl->SetItem( m_currentListItem, 0, wxT( "" ), 0 );
     else
-        m_listCtrl->SetItem( l_item, 0, wxT( "" ), 1 );
+        m_listCtrl->SetItem( m_currentListItem, 0, wxT( "" ), 1 );
 
     refreshAllGLWidgets();
 }
@@ -2321,28 +2324,36 @@ void MainFrame::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
 // This function will be called when the delete tree item event is triggered.
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::OnDeleteTreeItem( wxTreeEvent& WXUNUSED(event) )
+{    
+    deleteTreeItem();
+}
+
+void MainFrame::deleteTreeItem()
 {
     if (m_currentFNObject != NULL)
-    {
-        m_rightMainSizer->Hide(m_currentSizer);
-        m_rightMainSizer->Detach(m_currentSizer);
-        if( m_mainGL )
+    {   
+        wxTreeItemId l_treeId = m_treeWidget->GetSelection();
+        if (!l_treeId.IsOk())
         {
-            m_mainGL->changeOrthoSize();
+            return;
         }
-        m_rightMainSizer->Layout();
-        m_currentFNObject = NULL;  
-        m_currentSizer = NULL;
-        if (m_datasetHelper->m_lastSelectedObject != NULL)
+        int l_selected = treeSelected( l_treeId );  
+        if (l_selected == CHILD_OBJECT)
         {
-            m_treeWidget->Delete(m_datasetHelper->m_lastSelectedObject->GetId());
-            m_datasetHelper->m_selBoxChanged = true;
+            ((SelectionObject*) ((m_treeWidget->GetItemData(m_treeWidget->GetItemParent(l_treeId)))))->setIsDirty(true);
         }
-        else
+        if (l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT || l_selected == POINT_DATASET)
         {
-             m_treeWidget->Delete(m_datasetHelper->m_lastSelectedPoint->GetId());
+            deleteFNObject();
+            m_treeWidget->Delete(l_treeId);
+            if (m_datasetHelper->m_lastSelectedObject != NULL)
+            {
+                m_datasetHelper->m_selBoxChanged = true;
+            }
+            m_datasetHelper->m_lastSelectedObject = NULL;
+            m_datasetHelper->m_lastSelectedPoint = NULL;
         }
-    }        
+    }
     refreshAllGLWidgets();
 }
 
@@ -2357,8 +2368,8 @@ void MainFrame::OnSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
         return;
     }
     int l_selected = treeSelected( l_treeId );
-    
-    SelectionObject* l_selectionObject = NULL;
+    SelectionObject* l_selectionObject;
+    SplinePoint* l_selectedPoint;
 
     switch( l_selected )
     {
@@ -2372,10 +2383,11 @@ void MainFrame::OnSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
                 m_datasetHelper->m_lastSelectedPoint = NULL;
             }
 
-
             l_selectionObject = (SelectionObject*)( m_treeWidget->GetItemData( l_treeId ) );
             m_datasetHelper->m_lastSelectedObject = l_selectionObject;
             m_datasetHelper->m_lastSelectedObject->select( false );
+            m_lastSelectedFNObject = l_selectionObject;
+            m_lastSelectedListItem = -1;
             break;
 
         case POINT_DATASET:
@@ -2387,11 +2399,14 @@ void MainFrame::OnSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
                 m_datasetHelper->m_lastSelectedObject = NULL;
             }
 
-            m_datasetHelper->m_lastSelectedPoint = (SplinePoint*)( m_treeWidget->GetItemData( l_treeId ) );
+            l_selectedPoint = (SplinePoint*)( m_treeWidget->GetItemData( l_treeId ) );
+            m_datasetHelper->m_lastSelectedPoint = l_selectedPoint;
             m_datasetHelper->m_lastSelectedPoint->select( false );
+            m_lastSelectedFNObject = l_selectedPoint;
+            m_lastSelectedListItem = -1;
             break;
 
-        default: 
+        default:
             if( m_datasetHelper->m_lastSelectedPoint )
             {
                 m_datasetHelper->m_lastSelectedPoint->unselect();
@@ -2403,12 +2418,13 @@ void MainFrame::OnSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
                 m_datasetHelper->m_lastSelectedObject = NULL;
             }
             break;
-    }
+    }    
+#ifdef __WXMSW__
     if (m_currentListItem != -1)
     {       
-       m_listCtrl->SetItemState(m_currentListItem,0,wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED);  
+        m_listCtrl->SetItemState(m_currentListItem,0,wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED);  
     }
-
+#endif
     refreshAllGLWidgets();
 }
 

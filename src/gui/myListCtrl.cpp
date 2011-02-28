@@ -128,15 +128,7 @@ void MyTreeCtrl::OnChar( wxKeyEvent& event )
 
     if( event.GetKeyCode() == WXK_DELETE)
     {
-        if (selected == CHILD_OBJECT)
-        {
-            ((SelectionObject*) ((GetItemData(pId))))->setIsDirty(true);
-        }
-        if (selected == CHILD_OBJECT || selected == MASTER_OBJECT || selected == POINT_DATASET)
-        {
-            Delete(treeid);
-			m_mainFrame->OnTreeChange();
-        }
+        m_mainFrame->deleteTreeItem();
     }
 
     else if (selected == MASTER_OBJECT || selected == CHILD_OBJECT)
