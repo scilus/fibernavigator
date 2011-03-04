@@ -2488,19 +2488,19 @@ void Fibers::createPropertiesSizer(MainFrame *parent)
     wxSizer *l_sizer;
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Min Length"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
-    m_psliderFibersFilterMin = new wxSlider(parent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_psliderFibersFilterMin = new wxSlider(parent, wxID_ANY, getMinFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersFilterMin,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Max Length"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
-    m_psliderFibersFilterMax = new wxSlider(parent, wxID_ANY, 100, 0, 100, wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_psliderFibersFilterMax = new wxSlider(parent, wxID_ANY, getMaxFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersFilterMax,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
         
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Subsampling"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
-    m_psliderFibersSampling = new wxSlider(parent, wxID_ANY, getMinFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_psliderFibersSampling = new wxSlider(parent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersSampling,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);    
 

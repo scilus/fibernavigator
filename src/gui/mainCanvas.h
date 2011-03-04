@@ -63,10 +63,10 @@ public:
 private:
      int         m_view;            // identifier of gl widget
      wxPoint     m_clicked;        // last clicked point
-     wxPoint    m_lastPos;        // last position to calculate right mouse dragging     
-     float         m_delta;
-     hitResult  m_hr;
-     Vector       m_hitPts;
+     wxPoint     m_lastPos;        // last position to calculate right mouse dragging     
+     float       m_delta;
+     hitResult   m_hr;
+     Vector      m_hitPts;
      bool        m_isRulerHit;
 
      GLdouble m_pos1X, m_pos1Y, m_pos1Z;    // point of origin for picking
