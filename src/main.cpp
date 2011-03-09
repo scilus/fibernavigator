@@ -86,13 +86,13 @@ bool MyApp::OnInit( void )
         shaderPath = respath + _T("GLSL\\");
         iconsPath  = respath + _T("icons\\");
         
-        int fd;
+       /* int fd;
         FILE *fp;
         AllocConsole();
         fd = _open_osfhandle( (long)GetStdHandle( STD_OUTPUT_HANDLE ), 0);
         fp = _fdopen( fd, "w" );
         *stdout = *fp;
-        setvbuf( stdout, NULL, _IONBF, 0 );
+        setvbuf( stdout, NULL, _IONBF, 0 );*/
         
 
 #elif __WXMAC__

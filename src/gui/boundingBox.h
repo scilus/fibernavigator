@@ -1,7 +1,7 @@
 #ifndef BOUNDINGBOX_H_
 #define BOUNDINGBOX_H_
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include "../misc/IsoSurface/Vector.h"
 
 

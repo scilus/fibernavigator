@@ -2014,8 +2014,7 @@ void MainFrame::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(event) )
     if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
         DatasetInfo* l_current = (DatasetInfo*)m_currentFNObject;
-        float l_alpha = (float)l_current->m_psliderOpacity->GetValue() / 100.0f;
-        l_current->setAlpha( l_alpha );
+        l_current->setAlpha( (float)l_current->m_psliderOpacity->GetValue() / 100.0f);
         refreshAllGLWidgets();
     }
 }
@@ -2144,9 +2143,7 @@ void MainFrame::OnActivateListItem( wxListEvent& event )
                 m_listCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
             break;
         case 13:
-            deleteFNObject();
-            m_listCtrl->DeleteItem( l_item );
-            m_datasetHelper->updateLoadStatus();
+             deleteListItem();
             break;
         default:
             return;
@@ -2169,13 +2166,17 @@ void MainFrame::OnToggleShowFS( wxEvent& WXUNUSED(event) )
 
 void MainFrame::OnDeleteListItem( wxEvent& WXUNUSED(event) )
 {
+    deleteListItem();
+}
+
+void MainFrame::deleteListItem()
+{
     if (m_currentFNObject != NULL && m_currentListItem != -1)
     {       
         long tmp = m_currentListItem;
         if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
         {
             m_datasetHelper->deleteAllSelectionObjects();
-            m_datasetHelper->m_fibersLoaded = false;
         }
         else if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getType() == SURFACE)
         {
@@ -2183,6 +2184,7 @@ void MainFrame::OnDeleteListItem( wxEvent& WXUNUSED(event) )
         }
         deleteFNObject();
         m_listCtrl->DeleteItem( tmp );
+        m_datasetHelper->updateLoadStatus();
         refreshAllGLWidgets();
     }
 }
@@ -2206,7 +2208,6 @@ void MainFrame::OnSelectListItem( wxListEvent& event )
     }
     m_lastSelectedFNObject = l_info;
     m_lastSelectedListItem = l_item;
-    //m_mainGL->changeOrthoSize();
     refreshAllGLWidgets();
 }
 
@@ -2326,6 +2327,7 @@ void MainFrame::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnDeleteTreeItem( wxTreeEvent& WXUNUSED(event) )
 {    
     deleteTreeItem();
+
 }
 
 void MainFrame::deleteTreeItem()
@@ -2343,7 +2345,7 @@ void MainFrame::deleteTreeItem()
             ((SelectionObject*) ((m_treeWidget->GetItemData(m_treeWidget->GetItemParent(l_treeId)))))->setIsDirty(true);
         }
         if (l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT || l_selected == POINT_DATASET)
-        {
+        {  
             deleteFNObject();
             m_treeWidget->Delete(l_treeId);
             if (m_datasetHelper->m_lastSelectedObject != NULL)
@@ -2352,7 +2354,8 @@ void MainFrame::deleteTreeItem()
             }
             m_datasetHelper->m_lastSelectedObject = NULL;
             m_datasetHelper->m_lastSelectedPoint = NULL;
-        }
+        }   
+        m_datasetHelper->m_selBoxChanged = true;
     }
     refreshAllGLWidgets();
 }

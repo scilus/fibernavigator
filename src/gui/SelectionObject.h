@@ -20,7 +20,7 @@
 
 #include "boundingBox.h"
 #include "fnObject.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include <vector>
 #include <wx/grid.h>
 #include "../dataset/DatasetHelper.h"

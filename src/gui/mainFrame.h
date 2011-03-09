@@ -54,6 +54,7 @@ public:
 
     void DisplayPropertiesSheet();
     void deleteFNObject();
+    void deleteListItem();
     void deleteTreeItem();
     void refreshAllGLWidgets();
     void renewAllGLWidgets();

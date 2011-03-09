@@ -1426,8 +1426,7 @@ void DatasetHelper::printDebug( const wxString i_string, const int i_level )
     printwxT( i_string + _T( "\n" ) );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
+
 void DatasetHelper::updateLoadStatus()
 {
     m_anatomyLoaded      = false;

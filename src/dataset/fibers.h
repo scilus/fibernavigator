@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "datasetInfo.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include "KdTree.h"
 #include "splinePoint.h"
 #include "../gui/SelectionObject.h"

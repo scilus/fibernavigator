@@ -7,7 +7,7 @@
 #include "wx/wx.h"
 #endif
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include "../gui/boundingBox.h"
 #include "../gui/fnObject.h"
 #include "DatasetHelper.h"

@@ -8,7 +8,7 @@
 #include "../gui/myListCtrl.h"
 #include "Anatomy.h"
 #include "../gui/mainFrame.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include "../misc/lic/SurfaceLIC.h"
 #include "../main.h"
 
