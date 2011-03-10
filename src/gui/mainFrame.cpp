@@ -1613,20 +1613,20 @@ void MainFrame::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
         return;
     }
 
-    long l_item = m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item != -1 )
+    
+    if( m_currentListItem != -1 )
     {
-        DatasetInfo* l_info = (DatasetInfo*)m_listCtrl->GetItemData( l_item );
+        DatasetInfo *l_info = (DatasetInfo*)m_currentFNObject;
         if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
         {
             l_info->setColor( l_col );
             l_info->setuseTex( false );
-            m_listCtrl->SetItem( l_item, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
+            m_listCtrl->SetItem( m_currentListItem, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
         }
     }
     else if ( m_datasetHelper->m_lastSelectedObject != NULL )
     {
-        SelectionObject *l_selObj = m_datasetHelper->m_lastSelectedObject;
+        SelectionObject *l_selObj = (SelectionObject*)m_currentFNObject;
         if (!l_selObj->getIsMaster())
         {
             wxTreeItemId l_parentId = m_treeWidget->GetItemParent( m_datasetHelper->m_lastSelectedObject->GetId());
