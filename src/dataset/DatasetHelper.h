@@ -150,6 +150,7 @@ public:
 
     unsigned int m_countFibers;
 
+    bool m_loadDataset;
     bool m_scnFileLoaded;
     bool m_anatomyLoaded;
     bool m_meshLoaded;

@@ -16,11 +16,12 @@ MenuBar::MenuBar()
 {
     m_menuFile = new wxMenu();
     m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Load\tCtrl-L"));
+    m_itemLoadDataset = m_menuFile->Append(wxID_ANY, wxT("Load Dataset"));
     //m_itemReloadShader = m_menuFile->Append(wxID_ANY, wxT("Reload Shader"));
     m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
     m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));
     m_itemSaveSelectedSurface = m_menuFile->Append(wxID_ANY, wxT("Save Selected Surface"));
-    //m_itemSaveSelectedDataset = m_menuFile->Append(wxID_ANY, wxT("Save Selected Dataset"));
+    m_itemSaveSelectedDataset = m_menuFile->Append(wxID_ANY, wxT("Save Selected Dataset"));
     m_menuFile->AppendSeparator();
     m_itemQuit = m_menuFile->Append(wxID_EXIT, wxT("Quit\tCtrl-Q"));
 
@@ -118,11 +119,12 @@ MenuBar::MenuBar()
 void MenuBar::initMenuBar( MainFrame *mf )
 {
     mf->Connect(m_itemLoad->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnLoad));
+    mf->Connect(m_itemLoadDataset->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnLoadDatasets));
     //mf->Connect(m_itemReloadShader->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnReloadShaders));
     mf->Connect(m_itemSaveSCN->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSave));
     mf->Connect(m_itemSaveSelectedFibers->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSaveFibers));
     mf->Connect(m_itemSaveSelectedSurface->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSaveSurface));
-    //mf->Connect(m_itemSaveSelectedDataset->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSaveDataset));
+    mf->Connect(m_itemSaveSelectedDataset->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSaveDataset));
     mf->Connect(m_itemQuit->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnQuit));    
     mf->Connect(m_itemToggleShowAxial->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowAxial));
     mf->Connect(m_itemToggleShowCoronal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowCoronal));

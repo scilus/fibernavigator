@@ -194,7 +194,7 @@ void TheScene::renderScene()
             renderFibers();
     }
     
-    if( m_datasetHelper->m_fibersLoaded && m_datasetHelper->m_showObjects )
+    if( m_datasetHelper->m_showObjects )
         drawSelectionObjects();
 
     if( m_datasetHelper->GLError() )

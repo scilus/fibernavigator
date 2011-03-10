@@ -247,11 +247,11 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
             return false;
         }
 
-        if (l_image->datatype == 16 && l_image->dim[4] == 6)
+        if (l_image->datatype == 16 && l_image->ndim == 4 && l_image->dim[4] == 6)
         {
             i_index=8;
         }
-        else if (l_image->datatype == 16 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
+        else if (l_image->datatype == 16 && l_image->ndim == 4 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
         {
             i_index=9;
         }

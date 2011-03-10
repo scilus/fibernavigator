@@ -125,6 +125,6 @@ void ToolBar::updateToolBar( MainFrame *mf )
     //ToggleTool(m_toggleDrawPoints->GetId(), mf->m_datasetHelper->m_pointMode);
     ToggleTool(m_toggleRuler->GetId(), mf->m_datasetHelper->m_isRulerToolActive);
     ToggleTool(m_toggleClearToBlack->GetId(), mf->m_datasetHelper->m_clearToBlack);
-    EnableTool(m_btnNewSelectionBox->GetId(), mf->m_datasetHelper->m_fibersLoaded);
+    //EnableTool(m_btnNewSelectionBox->GetId(), mf->m_datasetHelper->m_fibersLoaded);
     ToggleTool(m_toggleInverseSelection->GetId(), mf->m_datasetHelper->m_fibersInverted);     
 }

@@ -972,6 +972,6 @@ void Anatomy::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
     m_pbtnMinimize->Enable(m_dh->m_fibersLoaded);   
     m_pbtnCut->Enable(m_dh->getSelectionObjects().size()>0);
-    m_pbtnNewVOI->Enable(m_dh->m_fibersLoaded);
+    //m_pbtnNewVOI->Enable(m_dh->m_fibersLoaded);
 }
 

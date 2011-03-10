@@ -291,6 +291,67 @@ void MainFrame::OnLoad( wxCommandEvent& WXUNUSED(event) )
     }
     refreshAllGLWidgets();
 }
+//////////////////////////////////////////////////////////////////////////
+// This function will be called when someone click on the Load Datasets button.
+//////////////////////////////////////////////////////////////////////////
+void MainFrame::OnLoadDatasets( wxCommandEvent& WXUNUSED(event) )
+{
+    loadIndex( 1 );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// This function will be called when someone click on the Load Meshes button.
+//////////////////////////////////////////////////////////////////////////
+void MainFrame::OnLoadMeshes( wxCommandEvent& WXUNUSED(event) )
+{
+    loadIndex( 2 );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// This function will be called when someone click on the Load Fibers button.
+//////////////////////////////////////////////////////////////////////////
+void MainFrame::OnLoadFibers( wxCommandEvent& WXUNUSED(event) )
+{
+    loadIndex( 5 );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// This function will be called when someone click on the Load Tensors button.
+//////////////////////////////////////////////////////////////////////////
+void MainFrame::OnLoadTensors( wxCommandEvent& WXUNUSED(event) )
+{
+    loadIndex( 8 );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// This function will be called when someone click on the Load ODFs button.
+//////////////////////////////////////////////////////////////////////////
+void MainFrame::OnLoadODFs( wxCommandEvent& WXUNUSED(event) )
+{
+    loadIndex( 9 );
+}
+//////////////////////////////////////////////////////////////////////////
+// This function will load a specific type specified by the index in argument.
+//
+// i_index          : The index we are trying to load.
+//
+// Returns true if there was no errors, false otherwise.
+//////////////////////////////////////////////////////////////////////////
+bool MainFrame::loadIndex( int i_index )
+{
+    if( ! m_datasetHelper->load( i_index ) )
+    {
+        wxMessageBox( wxT( "ERROR\n" ) + m_datasetHelper->m_lastError, wxT( "" ), wxOK | wxICON_INFORMATION, NULL );
+        GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
+        GetStatusBar()->SetStatusText( m_datasetHelper->m_lastError, 2 );
+
+        return false;
+    }
+    else
+        m_datasetHelper->m_selBoxChanged = true;
+ 
+    return true;
+}
 
 void MainFrame::OnReloadShaders( wxCommandEvent& WXUNUSED(event) )
 {
@@ -350,6 +411,7 @@ void MainFrame::OnSaveFibers( wxCommandEvent& WXUNUSED(event) )
         }
     }
 }
+
 
 void MainFrame::OnSaveDataset( wxCommandEvent& WXUNUSED(event) )
 {
@@ -547,7 +609,7 @@ void MainFrame::OnMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnToggleSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {
-    if( ! m_datasetHelper->m_theScene || !m_datasetHelper->m_fibersLoaded )
+    if( ! m_datasetHelper->m_theScene)
         return;
 
     // Get what selection object is selected.
@@ -586,7 +648,7 @@ void MainFrame::OnToggleSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 {
-    if( ! m_datasetHelper->m_theScene || ! m_datasetHelper->m_fibersLoaded )
+    if( ! m_datasetHelper->m_theScene)
         return;
 
     // Get what selection object is selected.
@@ -613,7 +675,7 @@ void MainFrame::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(event) )
 {
-    if( ! m_datasetHelper->m_theScene || ! m_datasetHelper->m_fibersLoaded )
+    if( ! m_datasetHelper->m_theScene)
         return;
 
     // Get the selected selection object.
@@ -1019,7 +1081,7 @@ void MainFrame::OnNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::CreateNewSelectionObject( ObjectType i_newSelectionObjectType )
 {
-    if( ! m_datasetHelper->m_theScene || ! m_datasetHelper->m_fibersLoaded )
+    if( ! m_datasetHelper->m_theScene)
         return;
 
     Vector l_center( m_xSlider->GetValue() * m_datasetHelper->m_xVoxel, 
@@ -1029,7 +1091,7 @@ void MainFrame::CreateNewSelectionObject( ObjectType i_newSelectionObjectType )
     float xs   = m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel;
     float ys   = m_datasetHelper->m_rows    * m_datasetHelper->m_yVoxel;
     float zs   = m_datasetHelper->m_frames  * m_datasetHelper->m_zVoxel;
-    float mins = wxMax( xs, wxMax( ys, zs ) ) / 10;
+    float mins = wxMax( xs, wxMax( ys, zs ) ) / 15;
 
     Vector l_size( mins / m_datasetHelper->m_xVoxel, 
                    mins / m_datasetHelper->m_yVoxel,
@@ -2176,7 +2238,8 @@ void MainFrame::deleteListItem()
         long tmp = m_currentListItem;
         if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
         {
-            m_datasetHelper->deleteAllSelectionObjects();
+            //m_datasetHelper->deleteAllSelectionObjects();
+            m_datasetHelper->m_selBoxChanged = true;
         }
         else if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getType() == SURFACE)
         {

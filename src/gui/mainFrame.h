@@ -228,6 +228,13 @@ private:
 
     void CreateNewSelectionObject( ObjectType i_newSelectionObjectType );
     void ColorFibers();
+
+    void OnLoadDatasets                     ( wxCommandEvent& event );
+    void OnLoadMeshes                       ( wxCommandEvent& event );
+    void OnLoadFibers                       ( wxCommandEvent& event );
+    void OnLoadTensors                      ( wxCommandEvent& event );
+    void OnLoadODFs                         ( wxCommandEvent& event );
+    bool loadIndex                          ( int i_index );
     
 private:
     ToolBar             *m_toolBar;
