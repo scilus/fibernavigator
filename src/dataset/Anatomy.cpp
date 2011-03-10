@@ -376,6 +376,9 @@ void Anatomy::saveNifti( wxString i_fileName )
     char l_fn[1024];
     strcpy( l_fn, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
     l_image->fname  = l_fn;
+    l_image->dx = m_dh->m_xVoxel;
+    l_image->dy = m_dh->m_yVoxel;
+    l_image->dz = m_dh->m_zVoxel;
     l_image->data   = &m_floatDataset[0];
     nifti_image_write( l_image );
 }
