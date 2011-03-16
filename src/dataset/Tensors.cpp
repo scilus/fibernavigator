@@ -100,7 +100,7 @@ bool Tensors::loadNifti( wxString i_fileName )
 
     float* l_data = (float*)l_fileData->data;
     
-    vector< float > l_fileFloatData;
+    vector< float > l_fileFloatData;    
     l_fileFloatData.resize( l_nSize * m_bands );
 
     // We need to do a bit of moving around with the data in order to have it like we want.

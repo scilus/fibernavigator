@@ -201,7 +201,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 if ( !m_dh->m_ismDragging)
                 {
                     if (m_dh->m_isRulerToolActive){
-                        //TODO HACK to be corrected!!!!!!!!  (gab)
+                        //TODO HACK to be corrected
                         m_hr = pick(event.GetPosition(), true);
                     }
                     m_dh->m_ismDragging = true;
@@ -658,7 +658,10 @@ void MainCanvas::render()
                     m_isRulerHit = false;
                 }
                 //renderTestRay();
-                //renderAxes();
+                if (m_dh->m_isShowAxes)
+                {
+                    renderAxes();
+                }
                 if (m_dh->m_isRulerToolActive){
                     renderRulerDisplay();
                 }

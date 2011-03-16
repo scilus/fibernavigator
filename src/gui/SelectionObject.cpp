@@ -1759,8 +1759,8 @@ void SelectionObject::createPropertiesSizer(MainFrame *parent)
     m_propertiesSizer->Add(m_pbtnSelectColorFibers,0,wxALIGN_CENTER);
     parent->Connect(m_pbtnSelectColorFibers->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnAssignColor));
     
-    m_pbtnNewFibersColorVolume = new wxButton(parent, wxID_ANY, wxT("New Color Volume"), wxDefaultPosition, wxSize(140,-1));
-    m_pbtnNewFibersDensityVolume = new wxButton(parent, wxID_ANY, wxT("New Density Volume"), wxDefaultPosition, wxSize(140,-1));
+    m_pbtnNewFibersColorVolume = new wxButton(parent, wxID_ANY, wxT("New Color map"), wxDefaultPosition, wxSize(140,-1));
+    m_pbtnNewFibersDensityVolume = new wxButton(parent, wxID_ANY, wxT("New Density map"), wxDefaultPosition, wxSize(140,-1));
     m_propertiesSizer->Add(m_pbtnNewFibersColorVolume,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(m_pbtnNewFibersDensityVolume,0,wxALIGN_CENTER);
     parent->Connect(m_pbtnNewFibersColorVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnCreateFibersColorTexture));

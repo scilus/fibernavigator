@@ -595,6 +595,11 @@ void MainFrame::OnMenuViewBack( wxCommandEvent& WXUNUSED(event) )
     m_mainGL->setRotation();
 }
 
+void MainFrame::OnMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
+{
+    m_datasetHelper->m_isShowAxes = ! m_datasetHelper->m_isShowAxes;
+}
+
 void MainFrame::OnMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
 {
     m_datasetHelper->m_showCrosshair = ! m_datasetHelper->m_showCrosshair;
@@ -955,6 +960,7 @@ void MainFrame::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(event) )
 
     Anatomy* l_newAnatomy = new Anatomy( m_datasetHelper );
     l_newAnatomy->setZero( m_datasetHelper->m_columns, m_datasetHelper->m_rows, m_datasetHelper->m_frames );
+    l_newAnatomy->setDataType( 16 );
     l_newAnatomy->setType( OVERLAY );
     float l_max = 0.0f;
     wxTreeItemId l_treeObjectId = m_treeWidget->GetSelection();
@@ -1087,15 +1093,12 @@ void MainFrame::CreateNewSelectionObject( ObjectType i_newSelectionObjectType )
     Vector l_center( m_xSlider->GetValue() * m_datasetHelper->m_xVoxel, 
                      m_ySlider->GetValue() * m_datasetHelper->m_yVoxel, 
                      m_zSlider->GetValue() * m_datasetHelper->m_zVoxel );
+    float l_sizeV = 10;
 
-    float xs   = m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel;
-    float ys   = m_datasetHelper->m_rows    * m_datasetHelper->m_yVoxel;
-    float zs   = m_datasetHelper->m_frames  * m_datasetHelper->m_zVoxel;
-    float mins = wxMax( xs, wxMax( ys, zs ) ) / 15;
-
-    Vector l_size( mins / m_datasetHelper->m_xVoxel, 
-                   mins / m_datasetHelper->m_yVoxel,
-                   mins / m_datasetHelper->m_zVoxel );
+    Vector l_size( l_sizeV / m_datasetHelper->m_xVoxel, 
+                   l_sizeV / m_datasetHelper->m_yVoxel,
+                   l_sizeV / m_datasetHelper->m_zVoxel );
+    
 
     SelectionObject* l_newSelectionObject;
     if( i_newSelectionObjectType == ELLIPSOID_TYPE )
@@ -2237,8 +2240,7 @@ void MainFrame::deleteListItem()
     {       
         long tmp = m_currentListItem;
         if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
-        {
-            //m_datasetHelper->deleteAllSelectionObjects();
+        {            
             m_datasetHelper->m_selBoxChanged = true;
         }
         else if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getType() == SURFACE)

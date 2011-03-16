@@ -162,9 +162,9 @@ bool Fibers::loadCamino( wxString i_filename )
     {
         m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
         ++i;
-        //m_pointArray[i] = m_dh->m_rows * m_dh->m_yVoxel - m_pointArray[i];
+        m_pointArray[i] = m_dh->m_rows * m_dh->m_yVoxel - m_pointArray[i];
         ++i;
-        //m_pointArray[i] = m_dh->m_frames * m_dh->m_zVoxel - m_pointArray[i];
+        m_pointArray[i] = m_dh->m_frames * m_dh->m_zVoxel - m_pointArray[i];
     }
 
     calculateLinePointers();
@@ -1170,14 +1170,10 @@ void Fibers::save( wxString i_fileName )
     {
         l_colorData = &m_colorArray[0];
     }
-
-    int min = m_psliderFibersFilterMin->GetValue();
-    int max = m_psliderFibersFilterMax->GetValue();
-    int subSampling = m_psliderFibersSampling->GetValue();
-    int maxSubSampling = m_psliderFibersSampling->GetMax()+1;
+    
     for( int l = 0; l < m_countLines; ++l )
     {
-        if( m_selected[l] && (l%maxSubSampling)>=subSampling && m_length[l]>min && m_length[l]<max )
+        if( m_selected[l] && isNotFiltered(l) )
         {
             unsigned int pc = getStartIndexForLine( l ) * 3;
             l_linesToSave.push_back( getPointsPerLine( l ) );
@@ -2092,13 +2088,10 @@ void Fibers::draw()
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
         glNormalPointer( GL_FLOAT, 0, 0 );
     }
-    int min = m_psliderFibersFilterMin->GetValue();
-    int max = m_psliderFibersFilterMax->GetValue();
-    int subSampling = m_psliderFibersSampling->GetValue();
-    int maxSubSampling = m_psliderFibersSampling->GetMax()+1;
+
     for( int i = 0; i < m_countLines; ++i )
     {
-        if ( (m_selected[i] == 1 || !m_dh->m_activateObjects) && (i%maxSubSampling)>=subSampling && m_length[i]>min && m_length[i]<max)
+        if ( (m_selected[i] || !m_dh->m_activateObjects) && isNotFiltered(i))
             glDrawArrays( GL_LINE_STRIP, getStartIndexForLine( i ), getPointsPerLine( i ) );
     }
 
@@ -2131,9 +2124,7 @@ namespace
     };
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
+
 void Fibers::drawFakeTubes()
 {
     if( ! m_normalsPositive )
@@ -2149,15 +2140,11 @@ void Fibers::drawFakeTubes()
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-    int min = m_psliderFibersFilterMin->GetValue();
-    int max = m_psliderFibersFilterMax->GetValue();
-    int subSampling = m_psliderFibersSampling->GetValue();
-    int maxSubSampling = m_psliderFibersSampling->GetMax()+1;
+    
     
     for( int i = 0; i < m_countLines; ++i )
     {
-        if( m_selected[i] == 1 && (i%maxSubSampling)>=subSampling && m_length[i]>min && m_length[i]<max)
+        if( m_selected[i] && isNotFiltered(i) )
         {
             int idx = getStartIndexForLine( i ) * 3;
 
@@ -2186,16 +2173,11 @@ void Fibers::drawSortedLines()
     unsigned int *l_snippletSort = NULL;
     unsigned int *l_lineIds      = NULL;
     int l_nbSnipplets = 0;
-
-    int min = m_psliderFibersFilterMin->GetValue();
-    int max = m_psliderFibersFilterMax->GetValue();
-    int subSampling = m_psliderFibersSampling->GetValue();
-    int maxSubSampling = m_psliderFibersSampling->GetMax()+1;
     
     // Estimate memory required for arrays.
     for( int i = 0; i < m_countLines; ++i )
     {
-        if ( m_selected[i] && (i%maxSubSampling)>=subSampling && m_length[i]>min && m_length[i]<max)
+        if ( m_selected[i] && isNotFiltered(i))
             l_nbSnipplets += getPointsPerLine( i ) - 1;
     }
 
@@ -2206,7 +2188,7 @@ void Fibers::drawSortedLines()
     int l_snp = 0;
     for( int i = 0; i < m_countLines; ++i )
     {
-        if (!(m_selected[i] && (i%maxSubSampling)>=subSampling && m_length[i]>min && m_length[i]<max))
+        if (!(m_selected[i] && isNotFiltered(i)))
             continue;
 
         const unsigned int l_p = getPointsPerLine( i );
@@ -2287,7 +2269,6 @@ void Fibers::drawSortedLines()
     }
     else
     {
-
         int i = 0;
         for( int c = 0; c < l_nbSnipplets; ++c )
         {
@@ -2306,7 +2287,6 @@ void Fibers::drawSortedLines()
             glVertex3f( m_pointArray[l_id23 + 0], m_pointArray[l_id23 + 1], m_pointArray[l_id23 + 2] );
         }
     }
-
 
     glEnd();
     glDisable( GL_BLEND );
@@ -2480,6 +2460,17 @@ bool Fibers::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoi
     }
     return true;
 }
+
+bool Fibers::isNotFiltered(int i)
+{
+    int min = m_psliderFibersFilterMin->GetValue();
+    int max = m_psliderFibersFilterMax->GetValue();
+    int subSampling = m_psliderFibersSampling->GetValue();
+    int maxSubSampling = m_psliderFibersSampling->GetMax()+1;
+    //return (i%maxSubSampling)>=subSampling && m_length[i]>=min && m_length[i]=<max;
+    return true;
+}
+
 
 void Fibers::createPropertiesSizer(MainFrame *parent)
 {

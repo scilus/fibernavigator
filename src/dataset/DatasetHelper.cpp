@@ -61,6 +61,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_activateObjects ( true),
     m_blendAlpha   ( false ),
     m_pointMode    ( false ),
+    m_isShowAxes   ( false ),
     m_animationStep( 0     ),
 
 #ifdef DEBUG
@@ -255,9 +256,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
         {
             i_index=9;
         }
-
-
-
 
         DatasetInfo *l_dataset = NULL;
         if (i_index==8)
@@ -977,8 +975,6 @@ Vector DatasetHelper::mapMouse2World( const int i_x, const int i_y,GLdouble i_pr
     return l_vector;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 Vector DatasetHelper::mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
 {
     //glPushMatrix();
@@ -1006,9 +1002,6 @@ Vector DatasetHelper::mapMouse2WorldBack( const int i_x, const int i_y,GLdouble 
 }
 
 
-
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 bool DatasetHelper::GLError()
 {
     m_lastGLError = glGetError();
@@ -1151,8 +1144,6 @@ void DatasetHelper::createDistanceMapAndIso()
     m_mainFrame->refreshAllGLWidgets();
 }
 
-///////////////////////////////////////////////////////////////////////////
-
 void DatasetHelper::createDistanceMap()
 {
     if( ! m_anatomyLoaded )
@@ -1195,8 +1186,6 @@ void DatasetHelper::createDistanceMap()
     m_mainFrame->refreshAllGLWidgets();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::createCutDataset()
 {
     // check l_anatomy - quit if not present
@@ -1242,8 +1231,6 @@ void DatasetHelper::createCutDataset()
                 std::vector< float >* l_src = l_anatomy->getFloatDataset();
                 std::vector< float >* l_dst = l_newAnatomy->getFloatDataset();
 
-                //printf ("x1: %d   x2: %d   y1: %d   y2: %d   z1: %d   z2: %d\n", x1,x2,y1,y2,z1,z2);
-
                 for( int b = z1; b < z2; ++b )
                 {
                     for( int r = y1; r < y2; ++r )
@@ -1260,6 +1247,8 @@ void DatasetHelper::createCutDataset()
 
     l_newAnatomy->setName( l_anatomy->getName().BeforeFirst( '.' ) + wxT( " (cut)" ) );
     l_newAnatomy->setType( l_anatomy->getType() );
+    l_newAnatomy->setDataType(l_anatomy->getDataType());
+    l_newAnatomy->setNewMax(l_anatomy->getNewMax());
 
     m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
     m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );

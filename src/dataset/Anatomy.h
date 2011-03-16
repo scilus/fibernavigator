@@ -40,6 +40,8 @@ public:
    bool load     (wxString fileName);
    bool loadNifti(wxString fileName);
    void saveNifti(wxString fileName);    
+   void setDataType(int i_type){m_dataType = i_type;}
+   int  getDataType(){return m_dataType;}
    virtual void createPropertiesSizer(MainFrame *parent);
    virtual void updatePropertiesSizer();
 
@@ -66,6 +68,7 @@ public:
     double xxgauss( double x, double sigma );    
     
     std::vector<float>      m_floatDataset;
+    int                     m_dataType;
     TensorField             *m_tensorField;
 };
 

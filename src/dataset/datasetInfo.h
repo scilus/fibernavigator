@@ -60,6 +60,7 @@ public:
     float    getThreshold()                      { return m_threshold;          };
     float    getOldMax()                         { return m_oldMax;             };
     void     setOldMax(float v)                  { m_oldMax = v;                };
+    void     setNewMax(float v)                  { m_newMax = v;                };
     float    getNewMax()                         { return m_newMax;             };
     void     setThreshold(float value)           { m_threshold = value;         };
     float    getAlpha()                          { return m_alpha;              };

@@ -179,6 +179,7 @@ public:
     bool      m_activateObjects;
     bool      m_blendAlpha;
     bool      m_pointMode;
+    bool      m_isShowAxes;
 
     int       m_animationStep;
 

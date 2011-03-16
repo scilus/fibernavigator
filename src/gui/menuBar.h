@@ -26,7 +26,6 @@ public:
 //private:
     wxMenu      *m_menuFile;
         wxMenuItem  *m_itemLoad;
-        wxMenuItem  *m_itemLoadDataset;
         wxMenuItem  *m_itemReloadShader;
         wxMenuItem  *m_itemSaveSCN;
         wxMenuItem  *m_itemSaveSelectedFibers;
@@ -48,6 +47,7 @@ public:
         wxMenuItem  *m_itemAnterior;
         wxMenuItem  *m_itemPosterior;
         wxMenuItem  *m_itemToggleShowCrosshair;
+        wxMenuItem  *m_itemToggleShowAxes;
 
     wxMenu      *m_menuVoi;
         wxMenuItem  *m_itemNewSelectionBox;

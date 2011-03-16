@@ -73,6 +73,7 @@ public:
     void    switchNormals       ( bool     i_positive );
     void    updateFibersColors  ();
     void    updateLinesShown    ();  
+    bool    isNotFiltered          (int i);
 
     void    generateFiberVolume();
     void    setFibersLength();

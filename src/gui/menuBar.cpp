@@ -16,7 +16,6 @@ MenuBar::MenuBar()
 {
     m_menuFile = new wxMenu();
     m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Load\tCtrl-L"));
-    m_itemLoadDataset = m_menuFile->Append(wxID_ANY, wxT("Load Dataset"));
     //m_itemReloadShader = m_menuFile->Append(wxID_ANY, wxT("Reload Shader"));
     m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
     m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));
@@ -42,6 +41,7 @@ MenuBar::MenuBar()
     m_itemToggleShowSagittal = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Sagittal Slice"));
     m_menuView->AppendSeparator();
     m_itemToggleShowCrosshair = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Crosshair"));
+    m_itemToggleShowAxes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Axes"));
     m_itemToggleShowProperties = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Properties Sheet"));
 
     m_menuVoi = new wxMenu();
@@ -119,7 +119,6 @@ MenuBar::MenuBar()
 void MenuBar::initMenuBar( MainFrame *mf )
 {
     mf->Connect(m_itemLoad->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnLoad));
-    mf->Connect(m_itemLoadDataset->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnLoadDatasets));
     //mf->Connect(m_itemReloadShader->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnReloadShaders));
     mf->Connect(m_itemSaveSCN->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSave));
     mf->Connect(m_itemSaveSelectedFibers->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSaveFibers));
@@ -137,6 +136,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemAnterior->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewBack));
     mf->Connect(m_itemPosterior->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewFront));
     mf->Connect(m_itemToggleShowCrosshair->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewCrosshair));
+    mf->Connect(m_itemToggleShowAxes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewAxes));
     mf->Connect(m_itemNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNewSelectionBox));
     mf->Connect(m_itemNewSelectionEllipsoid->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNewSelectionEllipsoid));
     mf->Connect(m_itemToggleUseMorphing->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnUseMorph));
@@ -176,6 +176,8 @@ void MenuBar::initMenuBar( MainFrame *mf )
 
 void MenuBar::updateMenuBar( MainFrame *mf )
 {
+    //m_itemSaveSelectedDataset->Enable(mf->m_currentListItem != -1 && (((DatasetInfo*)mf->m_currentFNObject)->getType()==HEAD_BYTE || ((DatasetInfo*)mf->m_currentFNObject)->getType()==HEAD_SHORT));
+    
     m_itemToggleLighting->Check(mf->m_datasetHelper->m_lighting);
     m_itemToggleRuler->Check(mf->m_datasetHelper->m_isRulerToolActive);
     m_itemToogleInvertFibersSelection->Check(mf->m_datasetHelper->m_fibersInverted);
@@ -190,6 +192,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleClearToBlack->Check(mf->m_datasetHelper->m_clearToBlack);
     m_itemToggleBlendTextureOnMesh->Check(mf->m_datasetHelper->m_blendTexOnMesh);
     m_itemToggleFilterISO->Check(mf->m_datasetHelper->m_filterIsoSurf);
+    m_itemToggleShowAxes->Check(mf->m_datasetHelper->m_isShowAxes);
     //m_itemToggleColorMapLegend->Check(mf->m_datasetHelper->m_colorMap);
     m_itemToggleShowProperties->Check(mf->m_isDisplayProperties);     
     m_itemMoveBoundaryPointLeft->Enable(mf->m_datasetHelper->m_surfaceLoaded);

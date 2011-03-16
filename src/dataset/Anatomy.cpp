@@ -24,6 +24,8 @@ Anatomy::Anatomy( DatasetHelper* i_datasetHelper ) :
 {
     m_roi         = 0;
     m_tensorField = 0;
+    m_bands       = 1;
+    m_dataType    = 2;
 }
 
 Anatomy::Anatomy( DatasetHelper* i_datasetHelper, std::vector< float >* i_dataset) : 
@@ -31,11 +33,13 @@ Anatomy::Anatomy( DatasetHelper* i_datasetHelper, std::vector< float >* i_datase
 {
     m_columns       = m_dh->m_columns;
     m_frames        = m_dh->m_frames;
+    m_bands         = 1;
     m_isLoaded      = true;   
     m_roi           = 0;
     m_rows          = m_dh->m_rows;
     m_tensorField   = 0;
     m_type          = HEAD_BYTE;
+    m_dataType      = 2;
     createOffset( i_dataset );
 }
 
@@ -51,6 +55,8 @@ Anatomy::Anatomy(DatasetHelper* datasetHelper, int type)
         m_rows          = m_dh->m_rows;
         m_tensorField   = 0;
         m_type          = type;
+        m_bands         = 3;
+        m_dataType      = 2;
 
         m_floatDataset.resize( m_columns * m_frames * m_rows * 3 );
 
@@ -106,9 +112,6 @@ bool Anatomy::load( wxString i_fileName )
     return false;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-// TODO
 bool Anatomy::loadNifti( wxString i_fileName )
 {
     char* l_hdrFile;
@@ -125,10 +128,11 @@ bool Anatomy::loadNifti( wxString i_fileName )
     //nifti_1_header *l_tmphdr = nifti_read_header( l_hdrFile, 0, 0 );
     //disp_nifti_1_header( "", l_tmphdr );
 #endif
-    m_columns   = l_image->dim[1]; // 160
-    m_rows      = l_image->dim[2]; // 200
-    m_frames    = l_image->dim[3]; // 160
+    m_columns   = l_image->dim[1]; 
+    m_rows      = l_image->dim[2]; 
+    m_frames    = l_image->dim[3]; 
     m_bands     = l_image->dim[4];
+    m_dataType = l_image->datatype;
 
     if( m_dh->m_anatomyLoaded )
     {
@@ -138,18 +142,10 @@ bool Anatomy::loadNifti( wxString i_fileName )
             return false;
         }
     }
-    /*else
-    {
-        m_dh->m_rows            = m_rows;
-        m_dh->m_columns         = m_columns;
-        m_dh->m_frames          = m_frames;
-        m_dh->m_anatomyLoaded   = true;
-    }*/
 
     m_dh->m_xVoxel = l_image->dx;
     m_dh->m_yVoxel = l_image->dy;
     m_dh->m_zVoxel = l_image->dz;
-
     if( l_image->datatype == 2 )
     {
         if( l_image->dim[4] == 1 )
@@ -172,12 +168,6 @@ bool Anatomy::loadNifti( wxString i_fileName )
         {
             m_type = VECTORS;
         }
-
-        else if( m_bands >= 6 )
-        {
-            m_type = TENSOR_FIELD;
-        }
-
         else
             m_type = OVERLAY;
     }
@@ -207,7 +197,7 @@ bool Anatomy::loadNifti( wxString i_fileName )
             }
 
             l_flag = true;
-            m_oldMax = 255;;
+            m_oldMax = 255;            
         }
             break;
 
@@ -290,9 +280,9 @@ bool Anatomy::loadNifti( wxString i_fileName )
 
             for( int i = 0; i < l_nSize; ++i )
             {
-                m_floatDataset[i * 3]       = (float)l_data[i] / 255.0;
-                m_floatDataset[i * 3 + 1]   = (float)l_data[l_nSize + i] / 255.0;
-                m_floatDataset[i * 3 + 2]   = (float)l_data[(2 * l_nSize) + i] / 255.0;
+                m_floatDataset[i * 3]       = (float)l_data[i]  / 255.0f;
+                m_floatDataset[i * 3 + 1]   = (float)l_data[l_nSize + i] / 255.0f;
+                m_floatDataset[i * 3 + 2]   = (float)l_data[(2 * l_nSize) + i] / 255.0f;
             }
 
             l_flag = true;
@@ -319,35 +309,9 @@ bool Anatomy::loadNifti( wxString i_fileName )
         }
             break;
 
-        case TENSOR_FIELD:
-        {
-            m_dh->m_lastError = wxT( "no anatomy file loaded" );
-                return false;
-            
-            /*float* l_data = (float*)l_fileData->data;
-            int l_components = m_bands;
-
-            m_floatDataset.resize( l_nSize * l_components );
-
-            for( int i = 0; i < l_nSize; ++i )
-            {
-                for( int j = 0; j < l_components; ++j )
-                {
-                    m_floatDataset[i * l_components + j] = l_data[(j * l_nSize) + i];
-                }
-            }
-
-            if( l_components == 6 )
-            {
-                m_tensorField = new TensorField( m_dh, &m_floatDataset, 2, 3 );
-            }
-
-            m_dh->m_tensorsFieldLoaded = true;
-            l_flag                     = true;*/
-        }
-            break;
-
         default:
+            m_dh->m_lastError = wxT( "unsuported file format" );
+            return false;
             break;
     }
 
@@ -364,27 +328,59 @@ bool Anatomy::loadNifti( wxString i_fileName )
     return l_flag;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void Anatomy::saveNifti( wxString i_fileName )
-{
-    int dims[] = { 3, m_columns, m_rows, m_frames, 1, 0, 0, 0 };
-
-    nifti_image* l_image = nifti_make_new_nim( dims, DT_FLOAT32, 1 );
-    l_image->qform_code  = 1;
-
+{    
+    int dims[] = { 4, m_columns, m_rows, m_frames, m_bands, 0, 0, 0 };
+    nifti_image* l_image;
+    l_image = nifti_make_new_nim( dims, m_dataType, 1 );
+    
     char l_fn[1024];
     strcpy( l_fn, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
+
+    l_image->qform_code  = 1;    
+    l_image->datatype = m_dataType;
     l_image->fname  = l_fn;
     l_image->dx = m_dh->m_xVoxel;
     l_image->dy = m_dh->m_yVoxel;
     l_image->dz = m_dh->m_zVoxel;
-    l_image->data   = &m_floatDataset[0];
-    nifti_image_write( l_image );
+
+    if(m_type==HEAD_BYTE)
+    {
+        vector<unsigned char> tmp(m_floatDataset.size());
+        for(unsigned int i=0;i<m_floatDataset.size();i++)
+            tmp[i] = m_floatDataset[i]*255;
+        l_image->data   = &tmp[0];
+        nifti_image_write( l_image );
+    }
+    else if (m_type==HEAD_SHORT)
+    {
+        vector<short> tmp(m_floatDataset.size());
+        for(unsigned int i=0;i<m_floatDataset.size();i++)
+            tmp[i] = (short)(m_floatDataset[i]*m_newMax);
+        l_image->data   = &tmp[0];
+        nifti_image_write( l_image );
+    }
+    else if (m_type==RGB)
+    {
+        vector<unsigned char> tmp(m_floatDataset.size());
+        int l_nSize = m_floatDataset.size()/3;
+        for( int i = 0; i < l_nSize; ++i )
+        {
+            tmp[i]              = m_floatDataset[i * 3]     * 255.0f;
+            tmp[l_nSize + i]    = m_floatDataset[i * 3 + 1] * 255.0f;
+            tmp[2*l_nSize + i]  = m_floatDataset[i * 3 + 2] * 255.0f;
+        }
+        l_image->data   = &tmp[0];
+        nifti_image_write( l_image );
+    }
+    else
+    {
+        l_image->data   = &m_floatDataset[0];
+        nifti_image_write( l_image );
+    }
+
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void Anatomy::generateTexture()
 {
     glPixelStorei  ( GL_UNPACK_ALIGNMENT, 1 );
@@ -421,8 +417,6 @@ void Anatomy::generateTexture()
     }
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 GLuint Anatomy::getGLuint()
 {
     if( ! m_GLuint )
@@ -431,8 +425,6 @@ GLuint Anatomy::getGLuint()
     return m_GLuint;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void Anatomy::createOffset( std::vector<float>* i_source )
 {
     int b, r, c, bb, rr, r0, b0, c0;
@@ -461,14 +453,10 @@ void Anatomy::createOffset( std::vector<float>* i_source )
     bool* l_bitMask = new bool[l_nbPixels];
     for( int i = 0; i < l_nbPixels; ++i )
     {
-        ////////////////////////////////////////////////////////////////////////
-
         if( i_source->at(i) < 0.01 )
             l_bitMask[i] = true;
         else
             l_bitMask[i] = false;
-
-        ////////////////////////////////////////////////////////////////////////
     }
 
     dmax = 999999999.0f;
@@ -740,6 +728,7 @@ void Anatomy::setZero( int i_x, int i_y, int i_z )
     m_columns = i_x;
     m_rows    = i_y;
     m_frames  = i_z;
+    m_bands   = 1;
 
     int l_nSize = m_rows * m_columns * m_frames;
 
@@ -757,17 +746,18 @@ void Anatomy::setRGBZero( int i_x, int i_y, int i_z )
     m_columns = i_x;
     m_rows    = i_y;
     m_frames  = i_z;
+    m_bands   = 3;
 
     int l_nSize = m_rows * m_columns * m_frames;
 
     m_floatDataset.clear();
-    m_floatDataset.resize( l_nSize * 3);
+    m_floatDataset.resize( l_nSize * m_bands);
 
-    for (int i = 0; i < l_nSize * 3; ++i)
+    for (int i = 0; i < l_nSize * m_bands; ++i)
     {
         m_floatDataset[i] = 0.0;
     }
-
+    m_dataType = 2;
     m_type = RGB;
 }
 
@@ -786,14 +776,15 @@ void Anatomy::minimize()
     {
         if( l_fiber->isSelected( i ) )
         {
-            for( int j = l_fiber->getStartIndexForLine(i); j < ( l_fiber->getStartIndexForLine( i ) + ( l_fiber->getPointsPerLine( i ) * 3 ) ); ++j )
+            for( int j = l_fiber->getStartIndexForLine(i); j < ( l_fiber->getStartIndexForLine( i ) + ( l_fiber->getPointsPerLine( i )) ); )
             {
-                l_x = wxMin( m_dh->m_columns - 1, wxMax( 0, (int) l_fiber->getPointValue( j++ ) ) );
-                l_y = wxMin( m_dh->m_rows    - 1, wxMax( 0, (int) l_fiber->getPointValue( j++ ) ) );
-                l_z = wxMin( m_dh->m_frames  - 1, wxMax( 0, (int) l_fiber->getPointValue( j ) ) );
+                l_x = wxMin( m_dh->m_columns - 1, wxMax( 0, (int) l_fiber->getPointValue( j*3 )/m_dh->m_xVoxel ) );
+                l_y = wxMin( m_dh->m_rows    - 1, wxMax( 0, (int) l_fiber->getPointValue( j*3 + 1)/m_dh->m_yVoxel ) );
+                l_z = wxMin( m_dh->m_frames  - 1, wxMax( 0, (int) l_fiber->getPointValue( j*3 + 2) /m_dh->m_zVoxel) );
 
                 l_index = l_x + l_y * m_dh->m_columns + l_z * m_dh->m_rows * m_dh->m_columns;
                 l_tmp[l_index] = true;
+                j += 3;
             }
         }
     }
@@ -810,7 +801,8 @@ void Anatomy::minimize()
     }
 
     l_newAnatomy->setName( getName() + _T( "(minimal)" ) );
-    l_newAnatomy->setType( getType() );
+    l_newAnatomy->setType( HEAD_BYTE );
+    l_newAnatomy->setDataType( 2 );
 
     m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
     m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
@@ -847,7 +839,6 @@ void Anatomy::dilate()
     const GLuint* l_tex = &m_GLuint;
     glDeleteTextures( 1, l_tex );
     generateTexture();
-    //m_dh->m_mainFrame->m_mainGL->render();
 }
 
 void Anatomy::dilate1( std::vector<bool>* i_input, int i_index )
@@ -899,7 +890,6 @@ void Anatomy::erode()
     const GLuint* l_tex = &m_GLuint;
     glDeleteTextures( 1, l_tex );
     generateTexture();
-    //m_dh->m_mainFrame->m_mainGL->render();
 }
 
 void Anatomy::erode1( std::vector< bool >* i_tmp, int i_index )
@@ -975,6 +965,11 @@ void Anatomy::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
     m_pbtnMinimize->Enable(m_dh->m_fibersLoaded);   
     m_pbtnCut->Enable(m_dh->getSelectionObjects().size()>0);
-    //m_pbtnNewVOI->Enable(m_dh->m_fibersLoaded);
+    m_pbtnNewIsoSurface->Enable(getType() <= OVERLAY);
+    m_pbtnNewDistanceMap->Enable(getType() <= OVERLAY);
+    m_pbtnNewOffsetSurface->Enable(getType() <= OVERLAY);
+    m_pbtnNewVOI->Enable(getType() <= OVERLAY);
+    m_pbtnMinimize->Enable(getType() <= OVERLAY);
+    m_pbtnCut->Enable(getType() <= OVERLAY);
 }
 
