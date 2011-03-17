@@ -28,6 +28,25 @@ Anatomy::Anatomy( DatasetHelper* i_datasetHelper ) :
     m_dataType    = 2;
 }
 
+Anatomy::Anatomy( DatasetHelper* i_datasetHelper, std::vector< float >* i_dataset, int sample) : 
+    DatasetInfo( i_datasetHelper )
+{
+    m_columns       = m_dh->m_columns;
+    m_frames        = m_dh->m_frames;
+    m_isLoaded      = true;   
+    m_roi           = 0;
+    m_rows          = m_dh->m_rows;
+    m_tensorField   = 0;
+    m_type          = HEAD_BYTE;
+	
+	m_floatDataset.resize( m_columns * m_frames * m_rows);
+	for(unsigned int i = 0; i < m_floatDataset.size(); ++i )
+        {
+			m_floatDataset[i]       = i_dataset->at(i);
+        }
+
+}
+
 Anatomy::Anatomy( DatasetHelper* i_datasetHelper, std::vector< float >* i_dataset) : 
     DatasetInfo( i_datasetHelper )
 {
@@ -914,6 +933,7 @@ std::vector< float >* Anatomy::getFloatDataset()
     return &m_floatDataset;
 }
 
+
 float Anatomy::at( int l_i )
 {
     return m_floatDataset[l_i];
@@ -958,6 +978,36 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     parent->Connect(m_pbtnNewDistanceMap->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewDistanceMap));
     parent->Connect(m_pbtnNewOffsetSurface->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewOffsetSurface));
     parent->Connect(m_pbtnNewVOI->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewVoiFromOverlay));
+	
+	m_ptoggleSegment = new wxToggleButton(parent, wxID_ANY,wxT("Segment"),wxDefaultPosition, wxSize(140,-1));
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	l_sizer->Add(m_ptoggleSegment,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_ptoggleSegment->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnSegment));
+	
+
+	m_pradiobtnFlood = new wxRadioButton(parent, wxID_ANY, _T( "Floodfill" ), wxDefaultPosition, wxSize(132,-1));
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	l_sizer->Add(m_pradiobtnFlood);
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	
+	parent->Connect(m_pradiobtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnFloodFill));
+	m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    m_psliderFlood->SetValue(20);
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(0,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+    l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnSliderFloodMoved));
+	
+
+	m_pradiobtnGraph = new wxRadioButton(parent, wxID_ANY, _T( "Graph Cut" ), wxDefaultPosition, wxSize(132,-1));
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	l_sizer->Add(m_pradiobtnGraph);
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_pradiobtnGraph->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnGraphCut));
+	
+
 }
 
 void Anatomy::updatePropertiesSizer()
@@ -971,5 +1021,6 @@ void Anatomy::updatePropertiesSizer()
     m_pbtnNewVOI->Enable(getType() <= OVERLAY);
     m_pbtnMinimize->Enable(getType() <= OVERLAY);
     m_pbtnCut->Enable(getType() <= OVERLAY);
+	m_ptoggleSegment->SetValue(m_dh->m_isSegmentActive);
 }
 

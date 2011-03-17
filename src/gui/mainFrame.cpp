@@ -2084,6 +2084,7 @@ void MainFrame::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+
 void MainFrame::OnFiberFilterSlider( wxCommandEvent& WXUNUSED(event) )
 {
     refreshAllGLWidgets();
@@ -2783,4 +2784,30 @@ void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
 {    
     refreshAllGLWidgets();
     m_datasetHelper->increaseAnimationStep();    
+}
+
+void MainFrame::OnSegment(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_isSegmentActive = !m_datasetHelper->m_isSegmentActive;
+}
+
+void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 0;
+	m_datasetHelper->m_isFloodfillActive = true;
+	m_datasetHelper->m_isGraphcutActive = false;
+
+}
+
+void MainFrame::OnGraphCut(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 1;
+	m_datasetHelper->m_isGraphcutActive = true;
+	m_datasetHelper->m_isFloodfillActive = false;
+}
+
+void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
+{
+	((Anatomy*)m_currentFNObject)->setFloodThreshold(((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 100.0f);
+	std::cout << ((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() << endl;
 }

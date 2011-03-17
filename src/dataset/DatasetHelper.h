@@ -143,6 +143,11 @@ public:
     double                m_rulerFullLength;
     double                m_rulerPartialLength;
     int                   m_fibersSamplingFactor;
+	bool				  m_isSegmentActive;
+	int					  m_SegmentMethod;
+	bool				  m_isFloodfillActive;
+	bool				  m_isGraphcutActive;
+
 
     float m_xVoxel;
     float m_yVoxel;

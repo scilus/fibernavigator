@@ -16,6 +16,11 @@
 #include "../misc/Fantom/FArray.h"
 
 #include <vector>
+
+typedef std::vector<float> image1D;
+typedef std::vector<image1D> image2D;
+typedef std::vector<image2D> image3D;
+
 class DatasetHelper;
 
 class MainCanvas: public wxGLCanvas
@@ -52,6 +57,8 @@ public:
     void renderTestRay();
     void renderAxes();
     void renderRulerDisplay();
+	void segmentTumor();
+	void floodFill(image3D&, image3D&, Vector, float);
     hitResult pick(wxPoint, bool isRuler);
     float getAxisParallelMovement(int, int, int, int, Vector);
     Vector getEventCenter();
@@ -68,6 +75,9 @@ private:
      hitResult   m_hr;
      Vector      m_hitPts;
      bool        m_isRulerHit;
+
+
+	 //std::vector<std::vector<std::vector<float>>> image3D;
 
      GLdouble m_pos1X, m_pos1Y, m_pos1Z;    // point of origin for picking
      GLdouble m_pos2X, m_pos2Y, m_pos2Z;    // distant point for picking

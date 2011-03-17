@@ -162,6 +162,7 @@ private:
     void OnSliderMoved                      ( wxCommandEvent& event );
     void OnSliderIntensityThresholdMoved    ( wxCommandEvent& event );
     void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
+
     
     void OnGlyphMinHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
     void OnGlyphMaxHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
@@ -192,6 +193,11 @@ private:
     void OnToggleAlpha                      ( wxCommandEvent& event );
     void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );
     void OnMoveBoundaryPointsRight          ( wxCommandEvent& event );
+	
+	void OnSegment							( wxCommandEvent& event );
+	void OnFloodFill						( wxCommandEvent& event );
+	void OnGraphCut							( wxCommandEvent& event );
+	void OnSliderFloodMoved					( wxCommandEvent& event );
 
     /*
      * List widget event functions

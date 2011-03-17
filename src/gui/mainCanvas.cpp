@@ -4,6 +4,16 @@
 #include "../dataset/splinePoint.h"
 #include "../misc/lic/FgeOffscreen.h"
 #include "mainFrame.h"
+#include "../dataset/Anatomy.h"
+#include <list>
+
+typedef std::vector<float> image1D;
+typedef std::vector<image1D> image2D;
+typedef std::vector<image2D> image3D;
+
+#define MAX(a,b) ((a) > (b) ? (a) : (b)) 
+#define MIN(a,b) ((a) < (b) ? (a) : (b)) 
+
 
 extern const wxEventType wxEVT_NAVGL_EVENT = wxNewEventType();
 
@@ -173,8 +183,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 SetFocus();
                 m_mousePt.s.X = clickX;
                 m_mousePt.s.Y = clickY;
-
-                if ( !m_dh->m_isDragging ) // Not Dragging
+				
+				if ( !m_dh->m_isDragging ) // Not Dragging
                 {
                     m_dh->m_isDragging = true; // Prepare For Dragging
                     m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
@@ -200,14 +210,19 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
             {
                 if ( !m_dh->m_ismDragging)
                 {
-                    if (m_dh->m_isRulerToolActive){
+					if (m_dh->m_isSegmentActive)
+					{
+						m_hr = pick(event.GetPosition(), true);
+						segmentTumor();
+					}
+					else if (m_dh->m_isRulerToolActive){
                         //TODO HACK to be corrected
                         m_hr = pick(event.GetPosition(), true);
                     }
                     m_dh->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
                 }
-                else  if (!m_dh->m_isRulerToolActive)
+                else  if (!m_dh->m_isRulerToolActive && !m_dh->m_isSegmentActive)
                 {                    
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -458,7 +473,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
         {
             tpicked = hr.tmin;
             picked = AXIAL;
-            if (m_dh->m_isRulerToolActive){
+			if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
                 m_hitPts = bb->hitCoordinate(ray,CORONAL);
                 m_isRulerHit = isRuler;
             }
@@ -478,7 +493,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             {
                 picked = CORONAL;
                 tpicked = hr.tmin;
-                if (m_dh->m_isRulerToolActive){
+                if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
                     m_hitPts = bb->hitCoordinate(ray,AXIAL);
                     m_isRulerHit = isRuler;
                 }
@@ -499,7 +514,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             {
                 picked = SAGITTAL;
                 tpicked = hr.tmin;
-                if (m_dh->m_isRulerToolActive){
+                if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
                     m_isRulerHit = isRuler;
                 }                
@@ -646,7 +661,7 @@ void MainCanvas::render()
                 m_dh->m_theScene->renderScene();
 
                 //add the hit Point to ruler point list
-                if ( m_dh->m_isRulerToolActive && !m_dh->m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL)){
+				if ( m_dh->m_isRulerToolActive && !m_dh->m_isSegmentActive && !m_dh->m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL)){
                     if (m_dh->m_rulerPts.size()>0 ){
                         Vector lastPts = m_dh->m_rulerPts.back();
                         if( lastPts != m_hitPts){                            
@@ -665,6 +680,10 @@ void MainCanvas::render()
                 if (m_dh->m_isRulerToolActive){
                     renderRulerDisplay();
                 }
+				if(m_dh->m_isSegmentActive)
+				{
+					
+				}
 
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
@@ -936,4 +955,168 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                       m_dh->m_mainFrame->m_ySlider->GetValue(),
                       m_dh->m_mainFrame->m_zSlider->GetValue() );
     m_dh->m_mainFrame->refreshAllGLWidgets();
+}
+
+void MainCanvas::floodFill(image3D& src, image3D& result, Vector click, float range)
+{
+	//Get the user clicked voxel
+	double xClick = floor(click[0]/m_dh->m_xVoxel);
+	double yClick = floor(click[1]/m_dh->m_yVoxel);
+	double zClick = floor(click[2]/m_dh->m_zVoxel);
+	
+	std::cout << "FloodFill" << endl;
+	//std::cout << xClick << " " << yClick << " " << zClick << endl;
+
+	//Intensity of the current voxel
+	float value = src[xClick][yClick][zClick];
+	float upBracket = value+range;
+	float downBracket = value-range;
+
+	std::list<Vector> toVisit;
+	int north, south, east, west, front, back, x, y, z;
+	float NorthV, EastV, SouthV, WestV, FrontV, BackV;
+	float resultNorth, resultEast, resultSouth, resultWest, resultFront, resultBack;
+
+	//Add pixel to the top
+	toVisit.push_front(Vector(xClick,yClick,zClick));
+
+	//While there's still pixel to visit
+	while(!toVisit.empty())
+	{
+		x = toVisit.front()[0];
+		y = toVisit.front()[1];
+		z = toVisit.front()[2];
+		toVisit.pop_front();
+		
+		result[x][y][z] = 1.0f;
+		
+		north = MAX(0,y-1);
+		south = MIN(m_dh->m_rows-1,y+1);
+		east = MIN(m_dh->m_columns-1,x+1);
+		west = MAX(0,x-1);
+		front = MAX(0,z-1);
+		back = MIN(m_dh->m_frames-1,z+1);
+		
+
+		int cpt = 0;
+		cpt++;
+		//cout << north << " " << south << " " << east << " " << west << " " << front << " " << back << endl;
+		
+		NorthV = src[x][north][z];
+		SouthV = src[x][south][z];
+		EastV = src[east][y][z];
+		WestV = src[west][y][z];
+		FrontV = src[x][y][front];
+		BackV = src[x][y][back];
+
+		resultNorth = result[x][north][z];
+		resultSouth = result[x][south][z];
+		resultEast = result[east][y][z]; 
+		resultWest = result[west][y][z];
+		resultFront = result[x][y][front];
+		resultBack = result[x][y][back];
+		
+		if(NorthV >= downBracket && NorthV < upBracket && resultNorth != 1.0f)
+			toVisit.push_front(Vector(x,north,z));
+
+		if(SouthV >= downBracket && SouthV < upBracket && resultSouth != 1.0f)
+			toVisit.push_front(Vector(x,south,z));
+
+		if(EastV >= downBracket && EastV < upBracket && resultEast != 1.0f)
+			toVisit.push_front(Vector(east,y,z));
+
+		if(WestV >= downBracket && WestV < upBracket && resultWest != 1.0f)
+			toVisit.push_front(Vector(west,y,z));
+
+		if(FrontV >= downBracket && FrontV < upBracket && resultFront != 1.0f)
+			toVisit.push_front(Vector(x,y,front));
+
+		if(BackV >= downBracket && BackV < upBracket && resultBack != 1.0f)
+			toVisit.push_front(Vector(x,y,back));
+	}
+
+}
+
+/* Segment a selected area */
+void MainCanvas::segmentTumor()
+{
+	std::cout << "Segment method:" << endl;
+	
+	int dataLength = m_dh->m_rows * m_dh->m_columns * m_dh->m_frames;
+
+	// get selected l_anatomy dataset
+    long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
+	
+	//1D vector with the normalized brightness ( 0 to 1 )
+	std::vector<float>* flatVoxels = l_info->getFloatDataset();
+	std::vector<float>* flatTumor = new std::vector<float>;
+	flatTumor->resize(dataLength);
+	
+	image3D volumeVoxels, volumeTumor;
+	volumeVoxels.resize(m_dh->m_columns);
+	volumeTumor.resize(m_dh->m_columns);
+
+	//Convert a 1D vector to a 3D vector
+	for (int i = 0; i < m_dh->m_columns; i++)
+	{
+		volumeVoxels[i].resize(m_dh->m_rows);
+		volumeTumor[i].resize(m_dh->m_rows);
+		for (int j = 0; j < m_dh->m_rows; j++)
+		{
+			volumeVoxels[i][j].resize(m_dh->m_frames);
+			volumeTumor[i][j].resize(m_dh->m_frames);
+			for (int k = 0; k < m_dh->m_frames; k++)
+			{
+				volumeVoxels[i][j][k] = (*flatVoxels)[i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)];
+			}
+		}
+	}
+	
+
+	//Segmentation methods
+	//Case 1 : Floodfill
+	//Case 2 : Graph Cut
+	
+	float threshold = l_info->getFloodThreshold();
+	cout << threshold << endl;
+	//float threshold =  0.2f; //0.2 blood,  0.004 glyome
+	if(m_dh->m_SegmentMethod == 0)
+	{
+		floodFill(volumeVoxels, volumeTumor, m_hitPts, threshold);
+	}
+	else
+	{
+		std::cout << "Other method" << std::endl;
+	}
+	
+	std::cout << "Filling data 1D" << std::endl;
+	//Convert the 3D vector into a 1D vector
+	for (int i = 0; i < m_dh->m_columns; i++)
+	{
+		for (int j = 0; j < m_dh->m_rows; j++)
+		{
+			for (int k = 0; k < m_dh->m_frames; k++)
+				flatTumor->at(i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)) = volumeTumor[i][j][k];
+		}
+	}
+
+	//Create a new anatomy for the tumor
+	std::cout << "Creating anatomy" << std::endl;
+	Anatomy* l_newAnatomy = new Anatomy(m_dh, flatTumor, 0);
+
+	l_newAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
+	l_newAnatomy->setType( l_info->getType() );
+
+    m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
+    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00") );
+    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
+    m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
+    m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	
+	//wxString caption = wxT( "Segment.nii" );
+	//l_newAnatomy->saveNifti( caption );
+	
+
 }

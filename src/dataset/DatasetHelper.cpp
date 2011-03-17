@@ -75,7 +75,11 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_showAxial   ( true ),
 
     m_showCrosshair( false ),
-    m_isRulerToolActive( false),
+    m_isRulerToolActive( false ),
+	m_isSegmentActive( false ),
+	m_isFloodfillActive ( true ),
+	m_isGraphcutActive ( false ),
+	m_SegmentMethod(0),
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
     m_fibersSamplingFactor(1),

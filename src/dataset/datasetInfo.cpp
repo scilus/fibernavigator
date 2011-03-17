@@ -108,6 +108,7 @@ void DatasetInfo::createPropertiesSizer(MainFrame *parent)
     parent->Connect(m_pbtnSmoothLoop->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnLoop)); 
     parent->Connect(m_pbtnClean->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnClean));  
     parent->Connect(m_ptoggleLIC->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnToggleLIC));  
+	
 
 }
 
@@ -117,4 +118,5 @@ void DatasetInfo::updatePropertiesSizer()
     m_ptoggleVisibility->SetValue(getShow());
     m_ptoggleFiltering->SetValue(getShowFS());
     m_ptoggleLIC->SetValue(getUseLIC());
+	
 }
