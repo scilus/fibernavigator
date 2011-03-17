@@ -2467,8 +2467,8 @@ bool Fibers::isNotFiltered(int i)
     int max = m_psliderFibersFilterMax->GetValue();
     int subSampling = m_psliderFibersSampling->GetValue();
     int maxSubSampling = m_psliderFibersSampling->GetMax()+1;
-    //return (i%maxSubSampling)>=subSampling && m_length[i]>=min && m_length[i]=<max;
-    return true;
+    return (i%maxSubSampling)>=subSampling && m_length[i]>=min && m_length[i]<=max;
+    
 }
 
 
