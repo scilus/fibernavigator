@@ -67,7 +67,7 @@ public:
 private:
     void OnDeleteListItem                   ( wxEvent& event );
     void OnToggleShowFS                     ( wxEvent& event );
-
+    void OnFibersFilter                     ( wxCommandEvent& event);
     void OnNewIsoSurface                    ( wxCommandEvent& event );    
     void OnReloadShaders                    ( wxCommandEvent& event );
     void OnSave                             ( wxCommandEvent& event );

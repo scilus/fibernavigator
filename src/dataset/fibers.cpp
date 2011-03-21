@@ -148,7 +148,7 @@ bool Fibers::loadCamino( wxString i_filename )
 
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
-
+    m_filtered.resize(m_countLines, false);
     m_pointArray.resize( l_tmpPoints.size() );
 
     for( size_t i = 0; i < l_tmpPoints.size(); ++i )
@@ -253,6 +253,7 @@ bool Fibers::loadPTK( wxString l_fileName )
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
+    m_filtered.resize(m_countLines, false);
 
     m_pointArray.resize( l_tmpPoints.size() );
 
@@ -514,6 +515,7 @@ bool Fibers::loadVTK( wxString i_fileName )
     m_linePointers.resize( m_countLines + 1 );
     m_linePointers[countLines] = l_countPoints;
     m_reverse.resize( l_countPoints );
+    m_filtered.resize(countLines, false);
     m_selected.resize( countLines, false );
 
     m_pointArray.resize( l_countPoints * 3 );
@@ -633,6 +635,7 @@ bool Fibers::loadDmri(wxString i_fileName)
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
 
+
     m_linePointers[0] = 0;
     for( int i = 0; i < m_countLines; ++i )
         m_linePointers[i+1] = m_linePointers[i]+ lines[i].size()/3;
@@ -685,6 +688,7 @@ void Fibers::loadTestFibers()
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
+    m_filtered.resize(m_countLines, false);
 
     // Because you need to load an anatomy file first in order to load this fake set of fibers, 
     // the points composing your fibers have to be between [0,159] in x, [0,199] in y and [0,159] in z.
@@ -1173,7 +1177,7 @@ void Fibers::save( wxString i_fileName )
     
     for( int l = 0; l < m_countLines; ++l )
     {
-        if( m_selected[l] && isNotFiltered(l) )
+        if( m_selected[l] && !m_filtered[l] )
         {
             unsigned int pc = getStartIndexForLine( l ) * 3;
             l_linesToSave.push_back( getPointsPerLine( l ) );
@@ -1281,7 +1285,7 @@ void Fibers::saveDMRI( wxString i_fileName )
     int nbrlines=0;
     for( int l = 0; l < m_countLines; ++l )
     {
-        if( m_selected[l])
+        if( m_selected[l] && !m_filtered[l])
         {
             nbrlines++;
         }
@@ -1304,7 +1308,7 @@ void Fibers::saveDMRI( wxString i_fileName )
 
     for( int l = 0; l < m_countLines; ++l )
     {
-        if( m_selected[l])
+        if( m_selected[l] && !m_filtered[l])
         {
             unsigned int pc = getStartIndexForLine( l ) * 3;            
             myfile << getPointsPerLine( l ) << " 1\n1\n";
@@ -2091,7 +2095,7 @@ void Fibers::draw()
 
     for( int i = 0; i < m_countLines; ++i )
     {
-        if ( (m_selected[i] || !m_dh->m_activateObjects) && isNotFiltered(i))
+        if ( (m_selected[i] || !m_dh->m_activateObjects) && !m_filtered[i])
             glDrawArrays( GL_LINE_STRIP, getStartIndexForLine( i ), getPointsPerLine( i ) );
     }
 
@@ -2144,7 +2148,7 @@ void Fibers::drawFakeTubes()
     
     for( int i = 0; i < m_countLines; ++i )
     {
-        if( m_selected[i] && isNotFiltered(i) )
+        if( m_selected[i] && !m_filtered[i] )
         {
             int idx = getStartIndexForLine( i ) * 3;
 
@@ -2177,7 +2181,7 @@ void Fibers::drawSortedLines()
     // Estimate memory required for arrays.
     for( int i = 0; i < m_countLines; ++i )
     {
-        if ( m_selected[i] && isNotFiltered(i))
+        if ( m_selected[i] && !m_filtered[i])
             l_nbSnipplets += getPointsPerLine( i ) - 1;
     }
 
@@ -2188,7 +2192,7 @@ void Fibers::drawSortedLines()
     int l_snp = 0;
     for( int i = 0; i < m_countLines; ++i )
     {
-        if (!(m_selected[i] && isNotFiltered(i)))
+        if (!(m_selected[i] && !m_filtered[i]))
             continue;
 
         const unsigned int l_p = getPointsPerLine( i );
@@ -2461,14 +2465,15 @@ bool Fibers::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoi
     return true;
 }
 
-bool Fibers::isNotFiltered(int i)
+void Fibers::updateFibersFilters()
 {
     int min = m_psliderFibersFilterMin->GetValue();
     int max = m_psliderFibersFilterMax->GetValue();
     int subSampling = m_psliderFibersSampling->GetValue();
     int maxSubSampling = m_psliderFibersSampling->GetMax()+1;
-    return (i%maxSubSampling)>=subSampling && m_length[i]>=min && m_length[i]<=max;
-    
+
+    for ( int i = 0; i < m_countLines; ++i )
+        m_filtered[i]=!((i%maxSubSampling)>=subSampling && m_length[i]>=min && m_length[i]<=max);     
 }
 
 
@@ -2482,18 +2487,21 @@ void Fibers::createPropertiesSizer(MainFrame *parent)
     m_psliderFibersFilterMin = new wxSlider(parent, wxID_ANY, getMinFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersFilterMin,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_psliderFibersFilterMin->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnFibersFilter));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Max Length"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
     m_psliderFibersFilterMax = new wxSlider(parent, wxID_ANY, getMaxFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersFilterMax,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-        
+    parent->Connect(m_psliderFibersFilterMax->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnFibersFilter));
+            
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Subsampling"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
     m_psliderFibersSampling = new wxSlider(parent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersSampling,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);    
+    parent->Connect(m_psliderFibersSampling->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnFibersFilter));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pGeneratesFibersDensityVolume = new wxButton(parent, wxID_ANY,wxT("New Density Volume"),wxDefaultPosition, wxSize(140,-1));

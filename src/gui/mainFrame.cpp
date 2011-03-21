@@ -240,7 +240,7 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     m_mainSizer->SetSizeHints( this );
 
     m_timer = new wxTimer( this );
-    m_timer->Start( 50 );
+    m_timer->Start( 40 );
 
     m_menuBar = new MenuBar();
     m_toolBar = new ToolBar(this);
@@ -2423,6 +2423,13 @@ void MainFrame::deleteTreeItem()
         m_datasetHelper->m_selBoxChanged = true;
     }
     refreshAllGLWidgets();
+}
+
+void MainFrame::OnFibersFilter( wxCommandEvent& event)
+{
+    Fibers* data;
+    m_datasetHelper->getFiberDataset(data);
+    data->updateFibersFilters();
 }
 
 ///////////////////////////////////////////////////////////////////////////

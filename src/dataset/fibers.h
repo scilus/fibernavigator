@@ -73,7 +73,7 @@ public:
     void    switchNormals       ( bool     i_positive );
     void    updateFibersColors  ();
     void    updateLinesShown    ();  
-    bool    isNotFiltered          (int i);
+    void    updateFibersFilters ();
 
     void    generateFiberVolume();
     void    setFibersLength();
@@ -129,6 +129,7 @@ private:
     bool            m_normalsPositive;
     vector< int >   m_reverse;
     vector< bool >  m_selected;
+    vector< bool >  m_filtered;
     vector< float > m_length;
     float           m_maxLength;
     float           m_minLength;

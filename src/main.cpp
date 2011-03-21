@@ -85,7 +85,7 @@ bool MyApp::OnInit( void )
         if (respath.Last() != '\\') respath += '\\';
         shaderPath = respath + _T("GLSL\\");
         iconsPath  = respath + _T("icons\\");
-        
+        /*
        /* int fd;
         FILE *fp;
         AllocConsole();
