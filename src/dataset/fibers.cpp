@@ -634,7 +634,7 @@ bool Fibers::loadDmri(wxString i_fileName)
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
-
+    m_filtered.resize( m_countLines, false );
 
     m_linePointers[0] = 0;
     for( int i = 0; i < m_countLines; ++i )
