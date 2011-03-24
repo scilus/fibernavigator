@@ -210,7 +210,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
             {
                 if ( !m_dh->m_ismDragging)
                 {
-					if (m_dh->m_isSegmentActive)
+					if (m_dh->m_isSegmentActive && !m_dh->m_isGraphcutActive)
 					{
 						m_hr = pick(event.GetPosition(), true);
 						segmentTumor();
@@ -230,6 +230,22 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->moveScene( xDrag, yDrag );
                     Refresh( false );
                 }
+				else if(!m_dh->m_isRulerToolActive && m_dh->m_isSegmentActive && m_dh->m_isGraphcutActive)
+				{
+					/*while( event.MiddleIsDown() )
+					{
+						m_hr = pick(event.GetPosition(), true);
+						Vector current;
+
+						current[0] = floor(m_hitPts[0]/m_dh->m_xVoxel);
+						current[1] = floor(m_hitPts[1]/m_dh->m_yVoxel);
+						current[2] = floor(m_hitPts[2]/m_dh->m_zVoxel);
+
+						if(current[0] != object && current[1] != floor(m_hitPts[1]/m_dh->m_xVoxel) && current[2] != floor(m_hitPts[2]/m_dh->m_xVoxel))
+							object.push_back(current);
+					}
+					std::cout << object.size() << endl;*/
+				}
             }
             else
             {
@@ -957,7 +973,18 @@ void MainCanvas::OnChar( wxKeyEvent& event )
     m_dh->m_mainFrame->refreshAllGLWidgets();
 }
 
-void MainCanvas::floodFill(image3D& src, image3D& result, Vector click, float range)
+/*
+	Returns the element at position [x][y][z] in 3D space
+*/
+float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
+{
+	return (*vect)[i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)];
+}
+
+/*
+	Floodfill method using a threshold range
+*/
+void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, Vector click, float range)
 {
 	//Get the user clicked voxel
 	double xClick = floor(click[0]/m_dh->m_xVoxel);
@@ -965,10 +992,9 @@ void MainCanvas::floodFill(image3D& src, image3D& result, Vector click, float ra
 	double zClick = floor(click[2]/m_dh->m_zVoxel);
 	
 	std::cout << "FloodFill" << endl;
-	//std::cout << xClick << " " << yClick << " " << zClick << endl;
 
 	//Intensity of the current voxel
-	float value = src[xClick][yClick][zClick];
+	float value = getElement(xClick,yClick,zClick,src);
 	float upBracket = value+range;
 	float downBracket = value-range;
 
@@ -987,57 +1013,54 @@ void MainCanvas::floodFill(image3D& src, image3D& result, Vector click, float ra
 		y = toVisit.front()[1];
 		z = toVisit.front()[2];
 		toVisit.pop_front();
-		
-		result[x][y][z] = 1.0f;
-		
+
+		result->at(x+(y*m_dh->m_columns)+(z*m_dh->m_rows*m_dh->m_columns)) = 1.0f; //Mark as read
+
 		north = MAX(0,y-1);
 		south = MIN(m_dh->m_rows-1,y+1);
 		east = MIN(m_dh->m_columns-1,x+1);
 		west = MAX(0,x-1);
 		front = MAX(0,z-1);
 		back = MIN(m_dh->m_frames-1,z+1);
-		
 
-		int cpt = 0;
-		cpt++;
-		//cout << north << " " << south << " " << east << " " << west << " " << front << " " << back << endl;
-		
-		NorthV = src[x][north][z];
-		SouthV = src[x][south][z];
-		EastV = src[east][y][z];
-		WestV = src[west][y][z];
-		FrontV = src[x][y][front];
-		BackV = src[x][y][back];
+		NorthV = getElement(x,north,z,src);
+		SouthV = getElement(x,south,z,src);
+		EastV = getElement(east,y,z,src);
+		WestV = getElement(west,y,z,src);
+		FrontV = getElement(x,y,front,src);
+		BackV = getElement(x,y,back,src);
 
-		resultNorth = result[x][north][z];
-		resultSouth = result[x][south][z];
-		resultEast = result[east][y][z]; 
-		resultWest = result[west][y][z];
-		resultFront = result[x][y][front];
-		resultBack = result[x][y][back];
+		resultNorth = getElement(x,north,z,result);
+		resultSouth = getElement(x,south,z,result);
+		resultEast = getElement(east,y,z,result); 
+		resultWest = getElement(west,y,z,result);
+		resultFront = getElement(x,y,front,result);
+		resultBack = getElement(x,y,back,result);
 		
-		if(NorthV >= downBracket && NorthV < upBracket && resultNorth != 1.0f)
+		if(NorthV >= downBracket && NorthV < upBracket && resultNorth != 1.0f) //North
 			toVisit.push_front(Vector(x,north,z));
 
-		if(SouthV >= downBracket && SouthV < upBracket && resultSouth != 1.0f)
+		if(SouthV >= downBracket && SouthV < upBracket && resultSouth != 1.0f) //South
 			toVisit.push_front(Vector(x,south,z));
 
-		if(EastV >= downBracket && EastV < upBracket && resultEast != 1.0f)
+		if(EastV >= downBracket && EastV < upBracket && resultEast != 1.0f) //East
 			toVisit.push_front(Vector(east,y,z));
 
-		if(WestV >= downBracket && WestV < upBracket && resultWest != 1.0f)
+		if(WestV >= downBracket && WestV < upBracket && resultWest != 1.0f) //West
 			toVisit.push_front(Vector(west,y,z));
 
-		if(FrontV >= downBracket && FrontV < upBracket && resultFront != 1.0f)
+		if(FrontV >= downBracket && FrontV < upBracket && resultFront != 1.0f) //Front
 			toVisit.push_front(Vector(x,y,front));
 
-		if(BackV >= downBracket && BackV < upBracket && resultBack != 1.0f)
+		if(BackV >= downBracket && BackV < upBracket && resultBack != 1.0f)  //Back
 			toVisit.push_front(Vector(x,y,back));
 	}
 
 }
 
-/* Segment a selected area */
+/* 
+	Segment selected area 
+*/
 void MainCanvas::segmentTumor()
 {
 	std::cout << "Segment method:" << endl;
@@ -1052,62 +1075,28 @@ void MainCanvas::segmentTumor()
 	std::vector<float>* flatVoxels = l_info->getFloatDataset();
 	std::vector<float>* flatTumor = new std::vector<float>;
 	flatTumor->resize(dataLength);
+	float threshold = l_info->getFloodThreshold(); 
 	
-	image3D volumeVoxels, volumeTumor;
-	volumeVoxels.resize(m_dh->m_columns);
-	volumeTumor.resize(m_dh->m_columns);
-
-	//Convert a 1D vector to a 3D vector
-	for (int i = 0; i < m_dh->m_columns; i++)
-	{
-		volumeVoxels[i].resize(m_dh->m_rows);
-		volumeTumor[i].resize(m_dh->m_rows);
-		for (int j = 0; j < m_dh->m_rows; j++)
-		{
-			volumeVoxels[i][j].resize(m_dh->m_frames);
-			volumeTumor[i][j].resize(m_dh->m_frames);
-			for (int k = 0; k < m_dh->m_frames; k++)
-			{
-				volumeVoxels[i][j][k] = (*flatVoxels)[i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)];
-			}
-		}
-	}
-	
-
 	//Segmentation methods
-	//Case 1 : Floodfill
-	//Case 2 : Graph Cut
-	
-	float threshold = l_info->getFloodThreshold();
-	cout << threshold << endl;
-	//float threshold =  0.2f; //0.2 blood,  0.004 glyome
-	if(m_dh->m_SegmentMethod == 0)
+	//Case 0 : Floodfill
+	//Case 1 : Graph Cut
+	switch(m_dh->m_SegmentMethod)
 	{
-		floodFill(volumeVoxels, volumeTumor, m_hitPts, threshold);
-	}
-	else
-	{
-		std::cout << "Other method" << std::endl;
-	}
-	
-	std::cout << "Filling data 1D" << std::endl;
-	//Convert the 3D vector into a 1D vector
-	for (int i = 0; i < m_dh->m_columns; i++)
-	{
-		for (int j = 0; j < m_dh->m_rows; j++)
-		{
-			for (int k = 0; k < m_dh->m_frames; k++)
-				flatTumor->at(i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)) = volumeTumor[i][j][k];
-		}
+		case 0 :
+			floodFill(flatVoxels, flatTumor, m_hitPts, threshold);
+			break;
+
+		case 1 :
+			std::cout << "Other method" << std::endl;
+			break;
 	}
 
+	
 	//Create a new anatomy for the tumor
 	std::cout << "Creating anatomy" << std::endl;
 	Anatomy* l_newAnatomy = new Anatomy(m_dh, flatTumor, 0);
-
+	l_newAnatomy->setType(OVERLAY);
 	l_newAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
-	l_newAnatomy->setType( l_info->getType() );
-
     m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
     m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
     m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00") );
@@ -1115,8 +1104,4 @@ void MainCanvas::segmentTumor()
     m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
     m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 	
-	//wxString caption = wxT( "Segment.nii" );
-	//l_newAnatomy->saveNifti( caption );
-	
-
 }

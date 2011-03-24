@@ -240,7 +240,7 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     m_mainSizer->SetSizeHints( this );
 
     m_timer = new wxTimer( this );
-    m_timer->Start( 50 );
+    m_timer->Start( 40 );
 
     m_menuBar = new MenuBar();
     m_toolBar = new ToolBar(this);
@@ -2426,6 +2426,13 @@ void MainFrame::deleteTreeItem()
     refreshAllGLWidgets();
 }
 
+void MainFrame::OnFibersFilter( wxCommandEvent& event)
+{
+    Fibers* data;
+    m_datasetHelper->getFiberDataset(data);
+    data->updateFibersFilters();
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // This function will be called when the selection changed event in the item tree is triggered.
 ///////////////////////////////////////////////////////////////////////////
@@ -2788,7 +2795,7 @@ void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
 
 void MainFrame::OnSegment(wxCommandEvent& WXUNUSED(event))
 {
-	m_datasetHelper->m_isSegmentActive = !m_datasetHelper->m_isSegmentActive;
+	m_datasetHelper->m_isSegmentActive = !m_datasetHelper->m_isSegmentActive;		
 }
 
 void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
@@ -2808,6 +2815,6 @@ void MainFrame::OnGraphCut(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 {
-	((Anatomy*)m_currentFNObject)->setFloodThreshold(((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 100.0f);
-	std::cout << ((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() << endl;
+	((Anatomy*)m_currentFNObject)->setFloodThreshold(((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f);
+	std::cout << (((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f) << endl;
 }

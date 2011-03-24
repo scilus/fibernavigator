@@ -17,10 +17,6 @@
 
 #include <vector>
 
-typedef std::vector<float> image1D;
-typedef std::vector<image1D> image2D;
-typedef std::vector<image2D> image3D;
-
 class DatasetHelper;
 
 class MainCanvas: public wxGLCanvas
@@ -58,12 +54,15 @@ public:
     void renderAxes();
     void renderRulerDisplay();
 	void segmentTumor();
-	void floodFill(image3D&, image3D&, Vector, float);
+	void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);
+	float getElement(int,int,int,std::vector<float>*);
     hitResult pick(wxPoint, bool isRuler);
     float getAxisParallelMovement(int, int, int, int, Vector);
     Vector getEventCenter();
     void setRotation();
-     void OnChar(wxKeyEvent& event);
+    void OnChar(wxKeyEvent& event);
+
+	std::vector<Vector> object;
 
     DECLARE_EVENT_TABLE()
 

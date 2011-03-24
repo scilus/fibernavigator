@@ -993,7 +993,8 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
 	
 	parent->Connect(m_pradiobtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnFloodFill));
 	m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_psliderFlood->SetValue(20);
+    m_psliderFlood->SetValue(40);
+	setFloodThreshold(0.2f);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(0,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
