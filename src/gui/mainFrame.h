@@ -198,6 +198,7 @@ private:
 	void OnFloodFill						( wxCommandEvent& event );
 	void OnSelectBck						( wxCommandEvent& event );
 	void OnSliderFloodMoved					( wxCommandEvent& event );
+	void OnKmeans							( wxCommandEvent& event );
 	void OnbtnGraphCut						( wxCommandEvent& event );
 	void OnSelectObj						( wxCommandEvent& event );
 

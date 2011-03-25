@@ -65,6 +65,9 @@ public:
 	wxRadioButton	*m_pradiobtnBck;
 	wxRadioButton	*m_pradiobtnObj;
 	wxButton		*m_pbtnGraphCut;
+	wxButton		*m_pbtnKmeans;
+
+	
 	
  
     void activateLIC()      {};

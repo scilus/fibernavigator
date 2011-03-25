@@ -1016,7 +1016,111 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 {
 	return (*vect)[i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)];
 }
+/*
+	Kmeans Segmentation
+*/
+void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::vector<float>* src, std::vector<float>* label)
+{
+	/* Segment current image with kmeans */
 
+	/* Variables */
+
+	float lastMeans[2];
+	float nbPixel[2];
+	bool stop;
+	int labelClass;
+	int length = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
+
+	/* Step 0 : Take two random pixels */
+	means[0] = 0.f;
+	means[1] = 0.f;
+	/*
+		The two first means must not be equal.
+		The higher or equal is to ensure that the first class
+		is sea, and the second is land.
+	*/
+	while(means[0] == means[1])
+	{
+		int randX = rand()%(length-1);
+		srand(time(NULL));
+		means[0] = 0.0f;//src->at(length/2);//getElement(object[0][0],object[0][1],object[0][2],src);	// Mean of the first class
+
+		randX = rand()%(length-1);
+		srand(time(NULL));
+		means[1] = 1.0f; //src->at(randX);//getElement(background[0][0],background[0][1],background[0][2],src); // // Mean of the second class
+	}
+
+	if (means[0] > means[1])
+	{
+		SWAP(means[0], means[1], float);
+	}
+
+	lastMeans[0] = 0.f; lastMeans[1] = 0.f;
+	stop = false;
+	do
+	{
+		/* Step 1 : For each pixel, find its class */
+		for (int x = 0; x < length; ++x)
+		{
+			
+			if (SQR((src->at(x)-means[0])) < SQR((src->at(x)-means[1])))
+			{
+				label->at(x) = 0.f;
+			}
+			else
+			{
+				label->at(x) = 1.f;
+			}
+			
+		}
+
+		/* Step 2 : Reinitialize means */
+		means[0] = 0;	means[1] = 0;
+		nbPixel[0] = 0; nbPixel[1] = 0;
+
+		/* Step 3 : Compute the new mean values */
+		for (int x = 0; x < length; ++x)
+		{
+			
+			labelClass = label->at(x);
+			means[labelClass] = means[labelClass] + src->at(x);
+			nbPixel[labelClass] += 1;
+			
+		}
+
+		/* Step 4 : Compute average value */
+		means[0] = means[0]/nbPixel[0];
+		means[1] = means[1]/nbPixel[1];
+		/*
+			End condition : We stop if the difference between last mean values and current
+			mean values is less than 1%
+		*/
+		stop = (fabs(means[0]-lastMeans[0]) <= means[0] / 100) && (fabs(means[1]-lastMeans[1]) <= means[1] / 100);
+		lastMeans[0] = means[0];
+		lastMeans[1] = means[1];
+
+		
+	} while (!stop);
+
+	/* Estimate the std dev and the proportion of each class */
+	stddev[0] = 0;
+	stddev[1] = 0;
+	for (int x = 0; x < length; ++x)
+	{
+		
+		labelClass = label->at(x);
+		/* Compute standard deviation */
+		stddev[labelClass] = stddev[labelClass] + SQR((src->at(x)-means[labelClass]));
+	
+	}
+
+	stddev[0] = sqrt(stddev[0]/nbPixel[0]);
+	stddev[1] = sqrt(stddev[1]/nbPixel[1]);
+
+	apriori[0] = nbPixel[0]/ (length);
+	apriori[1] = nbPixel[1]/ (length);
+
+}
 /*
 	Floodfill method using a threshold range
 */
@@ -1093,6 +1197,9 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
 	}
 
 }
+/*
+	Graph Cut segmentation
+*/
 
 void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 {
@@ -1118,6 +1225,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 	
 		result->at(a+(b*m_dh->m_columns)+(c*m_dh->m_rows*m_dh->m_columns)) = 0.5f;
 	}
+
 }
 
 
@@ -1138,20 +1246,31 @@ void MainCanvas::segmentTumor()
 	std::vector<float>* flatVoxels = l_info->getFloatDataset();
 	std::vector<float>* flatTumor = new std::vector<float>;
 	flatTumor->resize(dataLength);
-	float threshold = l_info->getFloodThreshold(); 
+	 
 	
 	//Segmentation methods
 	//Case 0 : Floodfill
 	//Case 1 : Graph Cut
+	//Case 2 : KMeans
 	switch(m_dh->m_SegmentMethod)
 	{
 		case 0 :
-			floodFill(flatVoxels, flatTumor, m_hitPts, threshold);
-			break;
+			{
+				float threshold = l_info->getFloodThreshold();
+				floodFill(flatVoxels, flatTumor, m_hitPts, threshold);
+				break;
+			}
 
 		case 1 :
 			graphCut(flatVoxels, flatTumor);
 			break;
+
+		case 2 :
+			{
+				float means[2], stddev[2], apriori[2];
+				KMeans(means,stddev,apriori,flatVoxels,flatTumor);
+				break;
+			}
 	}
 
 	
@@ -1166,6 +1285,7 @@ void MainCanvas::segmentTumor()
     m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
     m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
     m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	
 	
 }
 

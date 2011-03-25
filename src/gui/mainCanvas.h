@@ -16,6 +16,10 @@
 #include "../misc/Fantom/FArray.h"
 
 #include <vector>
+#include <time.h>
+#include "stdlib.h"
+#define SWAP(a,b,t) t tempr=(a);(a)=(b);(b)=tempr
+#define SQR(a) ((a)*(a))
 
 class DatasetHelper;
 
@@ -53,10 +57,13 @@ public:
     void renderTestRay();
     void renderAxes();
     void renderRulerDisplay();
+
 	void segmentTumor();
+	void KMeans(float means[2],float stddev[2],float apriori[2],std::vector<float>*,std::vector<float>*);
 	void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);
 	void graphCut(std::vector<float>*, std::vector<float>*);
 	float getElement(int,int,int,std::vector<float>*);
+    
     hitResult pick(wxPoint, bool isRuler);
     float getAxisParallelMovement(int, int, int, int, Vector);
     Vector getEventCenter();

@@ -2819,12 +2819,19 @@ void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 	std::cout << (((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f) << endl;
 }
 
+void MainFrame::OnKmeans( wxCommandEvent& WXUNUSED(event) )
+{
+	m_datasetHelper->m_SegmentMethod = 2;
+	m_mainGL->segmentTumor();
+}
+
 void MainFrame::OnSelectObj(wxCommandEvent& WXUNUSED(event))
 {
 	m_datasetHelper->m_SegmentMethod = 1;
 	m_datasetHelper->m_isSelectBckActive = false;
 	m_datasetHelper->m_isFloodfillActive = false;
 	m_datasetHelper->m_isSelectObjActive = true;
+	
 }
 
 void MainFrame::OnSelectBck(wxCommandEvent& WXUNUSED(event))

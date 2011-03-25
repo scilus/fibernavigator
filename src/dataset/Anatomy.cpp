@@ -1005,6 +1005,7 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
 	l_sizer->Add(m_pradiobtnObj);
 	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 	parent->Connect(m_pradiobtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnSelectObj));
+	
 
 	m_pradiobtnBck = new wxRadioButton(parent, wxID_ANY, _T( "Select Background" ), wxDefaultPosition, wxSize(132,-1));
 	l_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -1017,6 +1018,12 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_pbtnGraphCut,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_pbtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnbtnGraphCut));
+
+	m_pbtnKmeans = new wxButton(parent, wxID_ANY, wxT("K-Means"), wxDefaultPosition, wxSize(132,-1));
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add(m_pbtnKmeans,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_pbtnKmeans->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnKmeans));
 
 	
 
