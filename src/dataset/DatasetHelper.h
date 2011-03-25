@@ -148,6 +148,9 @@ public:
 	bool				  m_isFloodfillActive;
 	bool				  m_isSelectBckActive;
 	bool				  m_isSelectObjActive;
+	bool				  m_isObjfilled;
+	bool			      m_isBckfilled;
+	bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled); };
 
 
     float m_xVoxel;

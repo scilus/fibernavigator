@@ -979,43 +979,46 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     parent->Connect(m_pbtnNewOffsetSurface->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewOffsetSurface));
     parent->Connect(m_pbtnNewVOI->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewVoiFromOverlay));
 	
-	m_ptoggleSegment = new wxToggleButton(parent, wxID_ANY,wxT("Segment"),wxDefaultPosition, wxSize(140,-1));
+	m_ptoggleSegment = new wxToggleButton(parent, wxID_ANY,wxT("Segment mode"),wxDefaultPosition, wxSize(140,-1));
 	l_sizer = new wxBoxSizer(wxHORIZONTAL);
 	l_sizer->Add(m_ptoggleSegment,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 	parent->Connect(m_ptoggleSegment->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnSegment));
 	
-    
-	m_pradiobtnFlood = new wxRadioButton(parent, wxID_ANY, _T( "Floodfill" ), wxDefaultPosition, wxSize(132,-1));
 	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	m_pradiobtnFlood = new wxRadioButton(parent, wxID_ANY, _T( "Click region" ), wxDefaultPosition, wxSize(80,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Floodfill   "),wxDefaultPosition, wxSize(50,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
 	l_sizer->Add(m_pradiobtnFlood);
 	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-	
 	parent->Connect(m_pradiobtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnFloodFill));
-	m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+
+	m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(80,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderFlood->SetValue(40);
 	setFloodThreshold(0.2f);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnSliderFloodMoved));
 
-	m_pradiobtnObj = new wxRadioButton(parent, wxID_ANY, _T( "Select Object" ), wxDefaultPosition, wxSize(132,-1));
 	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	m_pradiobtnObj = new wxRadioButton(parent, wxID_ANY, _T( "Select Class 1" ), wxDefaultPosition, wxSize(85,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
 	l_sizer->Add(m_pradiobtnObj);
 	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 	parent->Connect(m_pradiobtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnSelectObj));
 	
-
-	m_pradiobtnBck = new wxRadioButton(parent, wxID_ANY, _T( "Select Background" ), wxDefaultPosition, wxSize(132,-1));
 	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	m_pradiobtnBck = new wxRadioButton(parent, wxID_ANY, _T( "Select Class 2" ), wxDefaultPosition, wxSize(85,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
 	l_sizer->Add(m_pradiobtnBck);
 	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 	parent->Connect(m_pradiobtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnSelectBck));
 
-	m_pbtnGraphCut = new wxButton(parent, wxID_ANY, wxT("Done"), wxDefaultPosition, wxSize(85,-1));
+	m_pbtnGraphCut = new wxButton(parent, wxID_ANY, wxT("Generate Graphcut"), wxDefaultPosition, wxSize(120,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(m_pbtnGraphCut,0,wxALIGN_CENTER);
+	m_pbtnGraphCut->Enable(m_dh->graphcutReady());
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_pbtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnbtnGraphCut));
 
@@ -1041,5 +1044,6 @@ void Anatomy::updatePropertiesSizer()
     m_pbtnMinimize->Enable(getType() <= OVERLAY);
     m_pbtnCut->Enable(getType() <= OVERLAY);
 	m_ptoggleSegment->SetValue(m_dh->m_isSegmentActive);
+	m_pbtnGraphCut->Enable(m_dh->graphcutReady());
 }
 

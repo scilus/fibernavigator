@@ -267,6 +267,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 
 					if(current[0] != object.back()[0] || current[1] != object.back()[1] || current[2] != object.back()[2])
 						object.push_back(current);
+					
+					m_dh->m_isObjfilled = true;
 				}
 				else if(!m_dh->m_isRulerToolActive && m_dh->m_isSegmentActive && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
 				{
@@ -281,6 +283,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 
 					if(current[0] != background.back()[0] || current[1] != background.back()[1] || current[2] != background.back()[2])
 						background.push_back(current);
+
+					m_dh->m_isBckfilled = true;
 				}
             }
 			else
@@ -1021,6 +1025,7 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 */
 void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::vector<float>* src, std::vector<float>* label)
 {
+	std::cout << "KMeans" << endl;
 	/* Segment current image with kmeans */
 
 	/* Variables */
@@ -1203,6 +1208,8 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
 
 void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 {
+	std::cout << "Graphcut" << endl;
+
 	int x,y,z;
 	int a,b,c;
 	
@@ -1234,7 +1241,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 */
 void MainCanvas::segmentTumor()
 {
-	std::cout << "Segment method:" << endl;
+	std::cout << "Segment method: ";
 	
 	int dataLength = m_dh->m_rows * m_dh->m_columns * m_dh->m_frames;
 
@@ -1277,6 +1284,7 @@ void MainCanvas::segmentTumor()
 	//Create a new anatomy for the tumor
 	std::cout << "Creating anatomy" << std::endl;
 	Anatomy* l_newAnatomy = new Anatomy(m_dh, flatTumor, 0);
+	l_newAnatomy->setShowFS(false);
 	l_newAnatomy->setType(OVERLAY);
 	l_newAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
     m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
@@ -1285,6 +1293,7 @@ void MainCanvas::segmentTumor()
     m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
     m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
     m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	
 	
 	
 }

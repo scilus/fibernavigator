@@ -2801,6 +2801,9 @@ void MainFrame::OnSegment(wxCommandEvent& WXUNUSED(event))
 		m_mainGL->object.clear();
 	if(!m_mainGL->background.empty())
 		m_mainGL->background.clear();
+
+	m_datasetHelper->m_isObjfilled = false;
+	m_datasetHelper->m_isBckfilled = false;
 }
 
 void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
@@ -2852,7 +2855,11 @@ void MainFrame::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
 
 	if(!m_mainGL->object.empty())
 		m_mainGL->object.clear();
+	
 	if(!m_mainGL->background.empty())
 		m_mainGL->background.clear();
+	m_datasetHelper->m_isObjfilled = false;
+	m_datasetHelper->m_isBckfilled = false;
+	
 }
 

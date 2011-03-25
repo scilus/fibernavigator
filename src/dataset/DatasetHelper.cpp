@@ -80,6 +80,8 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 	m_isFloodfillActive ( true ),
 	m_isSelectBckActive ( false ),
 	m_isSelectObjActive ( false ),
+	m_isObjfilled ( false ),
+	m_isBckfilled ( false ),
 	m_SegmentMethod(0),
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
