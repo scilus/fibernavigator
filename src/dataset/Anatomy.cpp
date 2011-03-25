@@ -985,7 +985,7 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 	parent->Connect(m_ptoggleSegment->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnSegment));
 	
-
+    
 	m_pradiobtnFlood = new wxRadioButton(parent, wxID_ANY, _T( "Floodfill" ), wxDefaultPosition, wxSize(132,-1));
 	l_sizer = new wxBoxSizer(wxHORIZONTAL);
 	l_sizer->Add(m_pradiobtnFlood);
@@ -996,17 +996,28 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     m_psliderFlood->SetValue(40);
 	setFloodThreshold(0.2f);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(0,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnSliderFloodMoved));
-	
 
-	m_pradiobtnGraph = new wxRadioButton(parent, wxID_ANY, _T( "Graph Cut" ), wxDefaultPosition, wxSize(132,-1));
+	m_pradiobtnObj = new wxRadioButton(parent, wxID_ANY, _T( "Select Object" ), wxDefaultPosition, wxSize(132,-1));
 	l_sizer = new wxBoxSizer(wxHORIZONTAL);
-	l_sizer->Add(m_pradiobtnGraph);
+	l_sizer->Add(m_pradiobtnObj);
 	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-	parent->Connect(m_pradiobtnGraph->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnGraphCut));
+	parent->Connect(m_pradiobtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnSelectObj));
+
+	m_pradiobtnBck = new wxRadioButton(parent, wxID_ANY, _T( "Select Background" ), wxDefaultPosition, wxSize(132,-1));
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	l_sizer->Add(m_pradiobtnBck);
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_pradiobtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnSelectBck));
+
+	m_pbtnGraphCut = new wxButton(parent, wxID_ANY, wxT("Done"), wxDefaultPosition, wxSize(85,-1));
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add(m_pbtnGraphCut,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_pbtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnbtnGraphCut));
+
 	
 
 }

@@ -210,19 +210,43 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
             {
                 if ( !m_dh->m_ismDragging)
                 {
-					if (m_dh->m_isSegmentActive && !m_dh->m_isGraphcutActive)
+					if (m_dh->m_isSegmentActive && m_dh->m_isFloodfillActive) //FloodFill Method (1click)
 					{
 						m_hr = pick(event.GetPosition(), true);
 						segmentTumor();
 					}
-					else if (m_dh->m_isRulerToolActive){
+					else if (m_dh->m_isRulerToolActive){ //Ruler Tool
                         //TODO HACK to be corrected
                         m_hr = pick(event.GetPosition(), true);
                     }
+					else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && m_dh->m_isSegmentActive) //Prepare Drag for selectObj-GraphCut
+					{
+						m_hr = pick(event.GetPosition(), true);
+
+						Vector current;
+						current[0] = floor(m_hitPts[0]/m_dh->m_xVoxel);
+						current[1] = floor(m_hitPts[1]/m_dh->m_yVoxel);
+						current[2] = floor(m_hitPts[2]/m_dh->m_zVoxel);
+
+						object.push_back(current);
+						
+					}
+					else if (!m_dh->m_isRulerToolActive && m_dh->m_isSelectBckActive && !m_dh->m_isSelectObjActive && m_dh->m_isSegmentActive) //Prepare Drag for selectBck-GraphCut
+					{
+						m_hr = pick(event.GetPosition(), true);
+
+						Vector current;
+						current[0] = floor(m_hitPts[0]/m_dh->m_xVoxel);
+						current[1] = floor(m_hitPts[1]/m_dh->m_yVoxel);
+						current[2] = floor(m_hitPts[2]/m_dh->m_zVoxel);
+
+						background.push_back(current);
+						
+					}
                     m_dh->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
                 }
-                else  if (!m_dh->m_isRulerToolActive && !m_dh->m_isSegmentActive)
+                else  if (!m_dh->m_isRulerToolActive && !m_dh->m_isSegmentActive) //Move Scene
                 {                    
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -230,24 +254,36 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->moveScene( xDrag, yDrag );
                     Refresh( false );
                 }
-				else if(!m_dh->m_isRulerToolActive && m_dh->m_isSegmentActive && m_dh->m_isGraphcutActive)
+				else if(!m_dh->m_isRulerToolActive && m_dh->m_isSegmentActive && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
 				{
-					/*while( event.MiddleIsDown() )
-					{
-						m_hr = pick(event.GetPosition(), true);
-						Vector current;
+					m_hr = pick(event.GetPosition(), true);
 
-						current[0] = floor(m_hitPts[0]/m_dh->m_xVoxel);
-						current[1] = floor(m_hitPts[1]/m_dh->m_yVoxel);
-						current[2] = floor(m_hitPts[2]/m_dh->m_zVoxel);
+					Vector current;
+					current[0] = floor(m_hitPts[0]/m_dh->m_xVoxel);
+					current[1] = floor(m_hitPts[1]/m_dh->m_yVoxel);
+					current[2] = floor(m_hitPts[2]/m_dh->m_zVoxel);
+					
+					
 
-						if(current[0] != object && current[1] != floor(m_hitPts[1]/m_dh->m_xVoxel) && current[2] != floor(m_hitPts[2]/m_dh->m_xVoxel))
-							object.push_back(current);
-					}
-					std::cout << object.size() << endl;*/
+					if(current[0] != object.back()[0] || current[1] != object.back()[1] || current[2] != object.back()[2])
+						object.push_back(current);
+				}
+				else if(!m_dh->m_isRulerToolActive && m_dh->m_isSegmentActive && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
+				{
+					m_hr = pick(event.GetPosition(), true);
+
+					Vector current;
+					current[0] = floor(m_hitPts[0]/m_dh->m_xVoxel);
+					current[1] = floor(m_hitPts[1]/m_dh->m_yVoxel);
+					current[2] = floor(m_hitPts[2]/m_dh->m_zVoxel);
+					
+					
+
+					if(current[0] != background.back()[0] || current[1] != background.back()[1] || current[2] != background.back()[2])
+						background.push_back(current);
 				}
             }
-            else
+			else
             {
                 m_dh->m_ismDragging = false;
             }
@@ -1058,6 +1094,33 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
 
 }
 
+void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
+{
+	int x,y,z;
+	int a,b,c;
+	
+	while(!object.empty())
+	{
+		x = object.back()[0];
+		y = object.back()[1];
+		z = object.back()[2];
+		object.pop_back();
+
+		result->at(x+(y*m_dh->m_columns)+(z*m_dh->m_rows*m_dh->m_columns)) = 1.0f;
+	}
+
+	while(!background.empty())
+	{
+		a = background.back()[0];
+		b = background.back()[1];
+		c = background.back()[2];
+		background.pop_back();
+	
+		result->at(a+(b*m_dh->m_columns)+(c*m_dh->m_rows*m_dh->m_columns)) = 0.5f;
+	}
+}
+
+
 /* 
 	Segment selected area 
 */
@@ -1087,7 +1150,7 @@ void MainCanvas::segmentTumor()
 			break;
 
 		case 1 :
-			std::cout << "Other method" << std::endl;
+			graphCut(flatVoxels, flatTumor);
 			break;
 	}
 
@@ -1105,3 +1168,4 @@ void MainCanvas::segmentTumor()
     m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 	
 }
+

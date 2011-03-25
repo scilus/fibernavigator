@@ -62,7 +62,9 @@ public:
     wxButton		*m_pbtnNewVOI;
 	wxToggleButton  *m_ptoggleSegment;
 	wxRadioButton	*m_pradiobtnFlood;
-	wxRadioButton	*m_pradiobtnGraph;
+	wxRadioButton	*m_pradiobtnBck;
+	wxRadioButton	*m_pradiobtnObj;
+	wxButton		*m_pbtnGraphCut;
 	
  
     void activateLIC()      {};

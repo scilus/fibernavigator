@@ -196,8 +196,11 @@ private:
 	
 	void OnSegment							( wxCommandEvent& event );
 	void OnFloodFill						( wxCommandEvent& event );
-	void OnGraphCut							( wxCommandEvent& event );
+	void OnSelectBck						( wxCommandEvent& event );
 	void OnSliderFloodMoved					( wxCommandEvent& event );
+	void OnbtnGraphCut						( wxCommandEvent& event );
+	void OnSelectObj						( wxCommandEvent& event );
+
 
     /*
      * List widget event functions

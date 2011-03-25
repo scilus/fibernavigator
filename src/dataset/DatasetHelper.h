@@ -146,7 +146,8 @@ public:
 	bool				  m_isSegmentActive;
 	int					  m_SegmentMethod;
 	bool				  m_isFloodfillActive;
-	bool				  m_isGraphcutActive;
+	bool				  m_isSelectBckActive;
+	bool				  m_isSelectObjActive;
 
 
     float m_xVoxel;

@@ -2795,22 +2795,22 @@ void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
 
 void MainFrame::OnSegment(wxCommandEvent& WXUNUSED(event))
 {
-	m_datasetHelper->m_isSegmentActive = !m_datasetHelper->m_isSegmentActive;		
+	m_datasetHelper->m_isSegmentActive = !m_datasetHelper->m_isSegmentActive;
+	
+	if(!m_mainGL->object.empty())
+		m_mainGL->object.clear();
+	if(!m_mainGL->background.empty())
+		m_mainGL->background.clear();
 }
 
 void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
 {
 	m_datasetHelper->m_SegmentMethod = 0;
 	m_datasetHelper->m_isFloodfillActive = true;
-	m_datasetHelper->m_isGraphcutActive = false;
+	m_datasetHelper->m_isSelectBckActive = false;
+	m_datasetHelper->m_isSelectObjActive = false;
 
-}
 
-void MainFrame::OnGraphCut(wxCommandEvent& WXUNUSED(event))
-{
-	m_datasetHelper->m_SegmentMethod = 1;
-	m_datasetHelper->m_isGraphcutActive = true;
-	m_datasetHelper->m_isFloodfillActive = false;
 }
 
 void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
@@ -2818,3 +2818,34 @@ void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 	((Anatomy*)m_currentFNObject)->setFloodThreshold(((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f);
 	std::cout << (((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f) << endl;
 }
+
+void MainFrame::OnSelectObj(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 1;
+	m_datasetHelper->m_isSelectBckActive = false;
+	m_datasetHelper->m_isFloodfillActive = false;
+	m_datasetHelper->m_isSelectObjActive = true;
+}
+
+void MainFrame::OnSelectBck(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 1;
+	m_datasetHelper->m_isFloodfillActive = false;
+	m_datasetHelper->m_isSelectBckActive = true;
+	m_datasetHelper->m_isSelectObjActive = false;
+}
+
+void MainFrame::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 1;
+	m_datasetHelper->m_isSelectBckActive = false;
+	m_datasetHelper->m_isSelectObjActive = false;
+	m_datasetHelper->m_isFloodfillActive = false;
+	m_mainGL->segmentTumor();
+
+	if(!m_mainGL->object.empty())
+		m_mainGL->object.clear();
+	if(!m_mainGL->background.empty())
+		m_mainGL->background.clear();
+}
+
