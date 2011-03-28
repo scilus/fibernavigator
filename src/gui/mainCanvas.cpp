@@ -5,7 +5,9 @@
 #include "../misc/lic/FgeOffscreen.h"
 #include "mainFrame.h"
 #include "../dataset/Anatomy.h"
+#include "../misc/Algorithms/GCoptimization.h"
 #include <list>
+#include <limits>
 
 typedef std::vector<float> image1D;
 typedef std::vector<image1D> image2D;
@@ -1013,16 +1015,14 @@ void MainCanvas::OnChar( wxKeyEvent& event )
     m_dh->m_mainFrame->refreshAllGLWidgets();
 }
 
-/*
-	Returns the element at position [x][y][z] in 3D space
-*/
+
+//Returns the element at position [x][y][z] in 3D space
 float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 {
 	return (*vect)[i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)];
 }
-/*
-	Kmeans Segmentation
-*/
+
+//Kmeans Segmentation
 void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::vector<float>* src, std::vector<float>* label)
 {
 	std::cout << "KMeans" << endl;
@@ -1067,14 +1067,16 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 		/* Step 1 : For each pixel, find its class */
 		for (int x = 0; x < length; ++x)
 		{
-			
-			if (SQR((src->at(x)-means[0])) < SQR((src->at(x)-means[1])))
+			if(src->at(x) > 0.0f)
 			{
-				label->at(x) = 0.f;
-			}
-			else
-			{
-				label->at(x) = 1.f;
+				if (SQR((src->at(x)-means[0])) < SQR((src->at(x)-means[1])))
+				{
+					label->at(x) = 0.0f;
+				}
+				else
+				{
+					label->at(x) = 1.0f;
+				}
 			}
 			
 		}
@@ -1086,10 +1088,12 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 		/* Step 3 : Compute the new mean values */
 		for (int x = 0; x < length; ++x)
 		{
-			
-			labelClass = label->at(x);
-			means[labelClass] = means[labelClass] + src->at(x);
-			nbPixel[labelClass] += 1;
+			if(src->at(x) > 0.0f)
+			{
+				labelClass = label->at(x);
+				means[labelClass] = means[labelClass] + src->at(x);
+				nbPixel[labelClass] += 1;
+			}
 			
 		}
 
@@ -1112,11 +1116,12 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 	stddev[1] = 0;
 	for (int x = 0; x < length; ++x)
 	{
-		
-		labelClass = label->at(x);
-		/* Compute standard deviation */
-		stddev[labelClass] = stddev[labelClass] + SQR((src->at(x)-means[labelClass]));
-	
+		if(src->at(x) > 0.0f)
+		{
+			labelClass = label->at(x);
+			/* Compute standard deviation */
+			stddev[labelClass] = stddev[labelClass] + SQR((src->at(x)-means[labelClass]));
+		}
 	}
 
 	stddev[0] = sqrt(stddev[0]/nbPixel[0]);
@@ -1126,9 +1131,8 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 	apriori[1] = nbPixel[1]/ (length);
 
 }
-/*
-	Floodfill method using a threshold range
-*/
+
+//Floodfill method using a threshold range
 void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, Vector click, float range)
 {
 	//Get the user clicked voxel
@@ -1202,43 +1206,155 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
 	}
 
 }
-/*
-	Graph Cut segmentation
-*/
 
+//Graph Cut segmentation
 void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 {
 	std::cout << "Graphcut" << endl;
 
-	int x,y,z;
-	int a,b,c;
+	int numLabels = 2;
+	int totalDimension, xDim, yDim, zDim;
+	int dataLength = m_dh->m_rows * m_dh->m_columns * m_dh->m_frames;
+	float means[2],stddev[2],apriori[2];
+
+	/* Estimate Gaussian parameters (kmeans) */
+	std::vector<float>* estimateParams = new std::vector<float>;
+	estimateParams->resize(dataLength);
+
+	//KMeans(means,stddev,apriori,src,estimateParams);
+
 	
+	//Get the dimensions of the box
+	std::vector< std::vector< SelectionObject* > > l_selectionObjects = m_dh->getSelectionObjects();
+    int x1, x2, y1, y2, z1, z2;
+
+    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+    {
+        for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+        {
+            if( l_selectionObjects[i][j]->getIsVisible() )
+            {
+                x1 = (int)( l_selectionObjects[i][j]->getCenter().x / m_dh->m_xVoxel - l_selectionObjects[i][j]->getSize().x / 2 );
+                x2 = (int)( l_selectionObjects[i][j]->getCenter().x / m_dh->m_xVoxel + l_selectionObjects[i][j]->getSize().x / 2 );
+                y1 = (int)( l_selectionObjects[i][j]->getCenter().y / m_dh->m_yVoxel - l_selectionObjects[i][j]->getSize().y / 2 );
+                y2 = (int)( l_selectionObjects[i][j]->getCenter().y / m_dh->m_yVoxel + l_selectionObjects[i][j]->getSize().y / 2 );
+                z1 = (int)( l_selectionObjects[i][j]->getCenter().z / m_dh->m_zVoxel - l_selectionObjects[i][j]->getSize().z / 2 );
+                z2 = (int)( l_selectionObjects[i][j]->getCenter().z / m_dh->m_zVoxel + l_selectionObjects[i][j]->getSize().z / 2 );
+
+                x1 = wxMax(0, wxMin(x1, m_dh->m_columns));
+                x2 = wxMax(0, wxMin(x2, m_dh->m_columns));
+                y1 = wxMax(0, wxMin(y1 ,m_dh->m_rows));
+                y2 = wxMax(0, wxMin(y2, m_dh->m_rows));
+                z1 = wxMax(0, wxMin(z1, m_dh->m_frames));
+                z2 = wxMax(0, wxMin(z2, m_dh->m_frames));
+			}
+		}
+	}
+
+	xDim = (x2-x1);
+	yDim = (y2-y1);
+	zDim = (z2-z1);
+	totalDimension = xDim * yDim * zDim;
+
+	/* Generate Graph cut algorithm */
+	GCoptimizationGeneralGraph gc(totalDimension,numLabels);
+	
+	
+	/* Specify data cost between Obj/Back final nodes */
 	while(!object.empty())
 	{
-		x = object.back()[0];
-		y = object.back()[1];
-		z = object.back()[2];
+		int x = object.back()[0] - x1;
+		int y = object.back()[1] - y1;
+		int z = object.back()[2] - z1;
 		object.pop_back();
 
-		result->at(x+(y*m_dh->m_columns)+(z*m_dh->m_rows*m_dh->m_columns)) = 1.0f;
+		int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
+		gc.setDataCost(indice, 0, 0.0f);
+		gc.setDataCost(indice, 1, std::numeric_limits<int>::infinity());
+		gc.setLabel(indice,1);
 	}
 
 	while(!background.empty())
 	{
-		a = background.back()[0];
-		b = background.back()[1];
-		c = background.back()[2];
+		int x = background.back()[0] - x1;
+		int y = background.back()[1] - y1;
+		int z = background.back()[2] - z1;
 		background.pop_back();
-	
-		result->at(a+(b*m_dh->m_columns)+(c*m_dh->m_rows*m_dh->m_columns)) = 0.5f;
+
+		int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
+		gc.setDataCost(indice, 1, 0.0f);
+		gc.setDataCost(indice, 0, std::numeric_limits<int>::infinity());
+		gc.setLabel(indice,0);
 	}
 
+	/* Specify the Neighboring with the function to optimize*/
+	for(int x = 0; x < xDim; x++)
+	{
+		for(int y = 0; y < yDim; y++)
+		{
+			for(int z = 0; z < zDim; z++)
+			{
+				int current = (x+(y*(xDim))+(z*(yDim)*(xDim)));
+				int nextRight = (MIN((x+1),xDim-1)+((y)*(xDim))+((z)*(yDim)*(xDim)));
+				int nextBottom = ((x)+(MIN((y+1),yDim-1)*(xDim))+((z)*(yDim)*(xDim)));
+				int nextDepth = ((x)+((y)*(xDim))+(MIN((z+1),zDim-1)*(yDim)*(xDim)));
+
+				int currentSrc = ((x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
+				int nextRightSrc = (MIN((x+x1+1),m_dh->m_columns-1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
+				int nextBottomSrc = ((x+x1)+(MIN((y+y1+1),m_dh->m_rows-1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
+				int nextDepthSrc = ((x+x1)+((y+y1)*(m_dh->m_columns))+(MIN((z+z1+1),m_dh->m_frames-1)*(m_dh->m_rows)*(m_dh->m_columns)));
+
+
+				if(current != nextRight)
+				{
+					float valueRight = std::exp(-std::abs(src->at(nextRightSrc) - src->at(currentSrc)));
+					gc.setNeighbors(current,nextRight,valueRight);
+				}
+
+				if(current != nextBottom)
+				{
+					float valueBottom = std::exp(-std::abs(src->at(nextBottomSrc) - src->at(currentSrc)));
+					gc.setNeighbors(current,nextBottom,valueBottom);
+				}
+
+				if(current != nextDepth)
+				{
+					float valueDepth = std::exp(-std::abs(src->at(nextDepthSrc) - src->at(currentSrc)));
+					gc.setNeighbors(current,nextDepth,valueDepth);
+				}
+			}
+		}
+	}
+	
+	//Set smooth cost
+	for (int l1 = 0; l1 < numLabels; l1++)
+	{
+		for (int l2 = 0; l2 < numLabels; l2++)
+		{
+			gc.setSmoothCost(l1, l2, ((int)((l1==l2)?0:1)));
+		}
+	}
+
+
+	gc.expansion();
+
+	/* Save results */
+	for(int x = 0; x < xDim; x++)
+	{
+		for(int y = 0; y < yDim; y++)
+		{
+			for(int z = 0; z < zDim; z++)
+			{
+				float value = gc.whatLabel((x+(y*(xDim))+(z*(yDim)*(xDim))));
+				result->at((x+x1)+((y+y1)*m_dh->m_columns)+((z+z1)*m_dh->m_rows*m_dh->m_columns)) = value;
+			}
+		}
+	}
 }
 
 
-/* 
-	Segment selected area 
-*/
+
+//Segment selected area 
 void MainCanvas::segmentTumor()
 {
 	std::cout << "Segment method: ";
@@ -1249,11 +1365,12 @@ void MainCanvas::segmentTumor()
     long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
 	Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
 	
+	
 	//1D vector with the normalized brightness ( 0 to 1 )
 	std::vector<float>* flatVoxels = l_info->getFloatDataset();
 	std::vector<float>* flatTumor = new std::vector<float>;
 	flatTumor->resize(dataLength);
-	 
+	
 	
 	//Segmentation methods
 	//Case 0 : Floodfill
@@ -1269,8 +1386,8 @@ void MainCanvas::segmentTumor()
 			}
 
 		case 1 :
-			graphCut(flatVoxels, flatTumor);
-			break;
+				graphCut(flatVoxels, flatTumor);
+				break;
 
 		case 2 :
 			{
