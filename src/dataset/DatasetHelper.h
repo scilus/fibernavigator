@@ -150,6 +150,8 @@ public:
 	bool				  m_isSelectObjActive;
 	bool				  m_isObjfilled;
 	bool			      m_isBckfilled;
+	bool			      m_isObjCreated;
+	bool				  m_isBckCreated;
 	bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled); };
 
 

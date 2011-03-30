@@ -2248,6 +2248,17 @@ void MainFrame::deleteListItem()
         {
             m_datasetHelper->deleteAllPoints();
         }
+		if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getName() == _T( "(Object)" ))
+        {            
+            m_datasetHelper->m_isObjCreated = false;
+			m_datasetHelper->m_isObjfilled = false;
+	
+        }
+		if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getName() == _T( "(Background)" ))
+        {            
+            m_datasetHelper->m_isBckCreated = false;
+			m_datasetHelper->m_isBckfilled = false;
+        }
         deleteFNObject();
         m_listCtrl->DeleteItem( tmp );
         m_datasetHelper->updateLoadStatus();
@@ -2804,6 +2815,8 @@ void MainFrame::OnSegment(wxCommandEvent& WXUNUSED(event))
 
 	m_datasetHelper->m_isObjfilled = false;
 	m_datasetHelper->m_isBckfilled = false;
+	m_datasetHelper->m_isObjCreated = false;
+	m_datasetHelper->m_isBckCreated = false;
 }
 
 void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
@@ -2834,6 +2847,9 @@ void MainFrame::OnSelectObj(wxCommandEvent& WXUNUSED(event))
 	m_datasetHelper->m_isSelectBckActive = false;
 	m_datasetHelper->m_isFloodfillActive = false;
 	m_datasetHelper->m_isSelectObjActive = true;
+
+	
+	
 	
 }
 
@@ -2843,6 +2859,8 @@ void MainFrame::OnSelectBck(wxCommandEvent& WXUNUSED(event))
 	m_datasetHelper->m_isFloodfillActive = false;
 	m_datasetHelper->m_isSelectBckActive = true;
 	m_datasetHelper->m_isSelectObjActive = false;
+
+	
 }
 
 void MainFrame::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))

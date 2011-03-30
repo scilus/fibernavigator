@@ -6,6 +6,7 @@
 #include "mainFrame.h"
 #include "../dataset/Anatomy.h"
 #include "../misc/Algorithms/GCoptimization.h"
+#include "math.h"
 #include <list>
 #include <limits>
 
@@ -271,6 +272,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 						object.push_back(current);
 					
 					m_dh->m_isObjfilled = true;
+					m_dh->m_isObjCreated = true;
 				}
 				else if(!m_dh->m_isRulerToolActive && m_dh->m_isSegmentActive && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
 				{
@@ -287,12 +289,68 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 						background.push_back(current);
 
 					m_dh->m_isBckfilled = true;
+					m_dh->m_isBckCreated = true;
 				}
             }
 			else
             {
                 m_dh->m_ismDragging = false;
             }
+			if ( !event.MiddleIsDown() && m_dh->m_isObjfilled && m_dh->m_isObjCreated)
+			{
+				std::vector<float>* result = new std::vector<float>;
+				result->resize(m_dh->m_columns*m_dh->m_rows*m_dh->m_frames);
+				for(unsigned int i = 0; i < object.size(); i++)
+				{
+					int x = object.at(i)[0];
+					int y = object.at(i)[1];
+					int z = object.at(i)[2];
+
+					result->at(x+(y*m_dh->m_columns)+(z*m_dh->m_rows*m_dh->m_columns)) = 1.0f;
+				
+				}
+
+				Anatomy* l_newAnatomy = new Anatomy(m_dh, result, 0);
+				l_newAnatomy->setShowFS(false);
+				l_newAnatomy->setType(OVERLAY);
+				l_newAnatomy->setName( _T( "(Object)" ) );
+				m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
+				m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+				m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00") );
+				m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
+				m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
+				m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+				
+				m_dh->m_isObjCreated = false;
+			}
+
+			if ( !event.MiddleIsDown() && m_dh->m_isBckfilled && m_dh->m_isBckCreated)
+			{
+				std::vector<float>* result = new std::vector<float>;
+				result->resize(m_dh->m_columns*m_dh->m_rows*m_dh->m_frames);
+				for(unsigned int i = 0; i < background.size(); i++)
+				{
+					int x = background.at(i)[0];
+					int y = background.at(i)[1];
+					int z = background.at(i)[2];
+
+					result->at(x+(y*m_dh->m_columns)+(z*m_dh->m_rows*m_dh->m_columns)) = 0.5f;
+				
+				}
+
+				Anatomy* l_newAnatomy = new Anatomy(m_dh, result, 0);
+				l_newAnatomy->setShowFS(false);
+				l_newAnatomy->setType(OVERLAY);
+				l_newAnatomy->setName( _T( "(Background)" ) );
+				m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
+				m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+				m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00") );
+				m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
+				m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
+				m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+				m_dh->m_isBckCreated = false;
+			}
 
             if ( event.GetWheelDelta() != 0)
             {
@@ -1019,7 +1077,8 @@ void MainCanvas::OnChar( wxKeyEvent& event )
 //Returns the element at position [x][y][z] in 3D space
 float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 {
-	return (*vect)[i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)];
+	float value = (*vect)[i+(j*m_dh->m_columns)+(k*m_dh->m_rows*m_dh->m_columns)];
+	return value;
 }
 
 //Kmeans Segmentation
@@ -1037,8 +1096,8 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 	int length = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
 
 	/* Step 0 : Take two random pixels */
-	means[0] = 0.f;
-	means[1] = 0.f;
+	means[0] = 0.0f;
+	means[1] = 1.0f;
 	/*
 		The two first means must not be equal.
 		The higher or equal is to ensure that the first class
@@ -1046,13 +1105,17 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 	*/
 	while(means[0] == means[1])
 	{
-		int randX = rand()%(length-1);
-		srand(time(NULL));
-		means[0] = 0.0f;//src->at(length/2);//getElement(object[0][0],object[0][1],object[0][2],src);	// Mean of the first class
+		if(m_dh->m_SegmentMethod == 1)
+		{
+			//int randX = rand()%(length-1);
+			//srand(time(NULL));
+			means[0] = getElement(object[0][0],object[0][1],object[0][2],src);	// Mean of the first class
 
-		randX = rand()%(length-1);
-		srand(time(NULL));
-		means[1] = 1.0f; //src->at(randX);//getElement(background[0][0],background[0][1],background[0][2],src); // // Mean of the second class
+			//randX = rand()%(length-1);
+			//srand(time(NULL));
+			means[1] = getElement(background[0][0],background[0][1],background[0][2],src); // // Mean of the second class	
+		}
+
 	}
 
 	if (means[0] > means[1])
@@ -1060,7 +1123,7 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 		SWAP(means[0], means[1], float);
 	}
 
-	lastMeans[0] = 0.f; lastMeans[1] = 0.f;
+	lastMeans[0] = 0.0f; lastMeans[1] = 0.0f;
 	stop = false;
 	do
 	{
@@ -1215,12 +1278,10 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 	int numLabels = 2;
 	int totalDimension, xDim, yDim, zDim;
 	int dataLength = m_dh->m_rows * m_dh->m_columns * m_dh->m_frames;
-	float means[2],stddev[2],apriori[2];
-
 	/* Estimate Gaussian parameters (kmeans) */
-	std::vector<float>* estimateParams = new std::vector<float>;
-	estimateParams->resize(dataLength);
-
+	//float means[2],stddev[2],apriori[2];
+	//std::vector<float>* estimateParams = new std::vector<float>;
+	//estimateParams->resize(dataLength);
 	//KMeans(means,stddev,apriori,src,estimateParams);
 
 	
@@ -1251,9 +1312,9 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 		}
 	}
 
-	xDim = (x2-x1);
-	yDim = (y2-y1);
-	zDim = (z2-z1);
+	xDim = (x2-x1); //X width
+	yDim = (y2-y1); //Y width
+	zDim = (z2-z1); //Z width
 	totalDimension = xDim * yDim * zDim;
 
 	/* Generate Graph cut algorithm */
@@ -1269,9 +1330,9 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 		object.pop_back();
 
 		int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
-		gc.setDataCost(indice, 0, 0.0f);
-		gc.setDataCost(indice, 1, std::numeric_limits<int>::infinity());
-		gc.setLabel(indice,1);
+		gc.setDataCost(indice, 0, numeric_limits<float>::infinity());
+		gc.setDataCost(indice, 1, 0.0f);
+		//gc.setLabel(indice,1);
 	}
 
 	while(!background.empty())
@@ -1282,59 +1343,55 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 		background.pop_back();
 
 		int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
-		gc.setDataCost(indice, 1, 0.0f);
-		gc.setDataCost(indice, 0, std::numeric_limits<int>::infinity());
-		gc.setLabel(indice,0);
+		gc.setDataCost(indice, 0, 0.0f);
+		gc.setDataCost(indice, 1, numeric_limits<float>::infinity());
+		//gc.setLabel(indice,0);
+		
 	}
 
-	/* Specify the Neighboring with the function to optimize*/
-	for(int x = 0; x < xDim; x++)
-	{
-		for(int y = 0; y < yDim; y++)
-		{
-			for(int z = 0; z < zDim; z++)
-			{
-				int current = (x+(y*(xDim))+(z*(yDim)*(xDim)));
-				int nextRight = (MIN((x+1),xDim-1)+((y)*(xDim))+((z)*(yDim)*(xDim)));
-				int nextBottom = ((x)+(MIN((y+1),yDim-1)*(xDim))+((z)*(yDim)*(xDim)));
-				int nextDepth = ((x)+((y)*(xDim))+(MIN((z+1),zDim-1)*(yDim)*(xDim)));
-
-				int currentSrc = ((x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
-				int nextRightSrc = (MIN((x+x1+1),m_dh->m_columns-1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
-				int nextBottomSrc = ((x+x1)+(MIN((y+y1+1),m_dh->m_rows-1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
-				int nextDepthSrc = ((x+x1)+((y+y1)*(m_dh->m_columns))+(MIN((z+z1+1),m_dh->m_frames-1)*(m_dh->m_rows)*(m_dh->m_columns)));
-
-
-				if(current != nextRight)
-				{
-					float valueRight = std::exp(-std::abs(src->at(nextRightSrc) - src->at(currentSrc)));
-					gc.setNeighbors(current,nextRight,valueRight);
-				}
-
-				if(current != nextBottom)
-				{
-					float valueBottom = std::exp(-std::abs(src->at(nextBottomSrc) - src->at(currentSrc)));
-					gc.setNeighbors(current,nextBottom,valueBottom);
-				}
-
-				if(current != nextDepth)
-				{
-					float valueDepth = std::exp(-std::abs(src->at(nextDepthSrc) - src->at(currentSrc)));
-					gc.setNeighbors(current,nextDepth,valueDepth);
-				}
-			}
-		}
-	}
-	
 	//Set smooth cost
 	for (int l1 = 0; l1 < numLabels; l1++)
 	{
 		for (int l2 = 0; l2 < numLabels; l2++)
 		{
-			gc.setSmoothCost(l1, l2, ((int)((l1==l2)?0:1)));
+			gc.setSmoothCost(l1, l2, abs(l1-l2));
 		}
 	}
 
+	/* Specify the Neighboring with the function to optimize*/
+	
+	//Neighbors in X
+	for (int z = 0; z < zDim; z++ )
+		for (int y = 0; y < yDim; y++ )
+			for (int  x = 1; x < xDim; x++ )
+			{
+				int current = (x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns));
+				int prec = ((x+x1-1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
+				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2*50.0f*50.0f);
+				gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),(x-1)+(y*(xDim))+(z*(yDim)*(xDim)),value);
+			}
+
+	//Neighbors in Y
+	for (int z = 0; z < zDim; z++ )
+		for (int y = 1; y < yDim; y++ )
+			for (int  x = 0; x < xDim; x++ )
+			{
+				int current = (x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns));
+				int prec = ((x+x1)+((y+y1-1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
+				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2*50.0f*50.0f);
+				gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),x+((y-1)*(xDim))+(z*(yDim)*(xDim)),value);
+			}
+
+	//Neighbors in Z
+	for (int z = 1; z < zDim; z++ )
+		for (int y = 0; y < yDim; y++ )
+			for (int  x = 0; x < xDim; x++ )
+			{
+				int current = (x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns));
+				int prec = ((x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1-1)*(m_dh->m_rows)*(m_dh->m_columns)));
+				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2.0f*10.0f*10.0f);
+				gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),x+(y*(xDim))+((z-1)*(yDim)*(xDim)),value);
+			}
 
 	gc.expansion();
 
@@ -1410,6 +1467,7 @@ void MainCanvas::segmentTumor()
     m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
     m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
     m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
 	
 	
 	

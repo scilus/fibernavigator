@@ -63,7 +63,7 @@ public:
 	void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);
 	void graphCut(std::vector<float>*, std::vector<float>*);
 	float getElement(int,int,int,std::vector<float>*);
-    
+
     hitResult pick(wxPoint, bool isRuler);
     float getAxisParallelMovement(int, int, int, int, Vector);
     Vector getEventCenter();
