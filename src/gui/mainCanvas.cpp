@@ -1279,14 +1279,47 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, f
 	int totalDimension, xDim, yDim, zDim;
 	int dataLength = m_dh->m_rows * m_dh->m_columns * m_dh->m_frames;
 	
-	/* Estimate Gaussian parameters (kmeans) */
-	//float means[2],stddev[2],apriori[2];
-	//std::vector<float>* estimateParams = new std::vector<float>;
-	//estimateParams->resize(dataLength);
-	//KMeans(means,stddev,apriori,src,estimateParams);
-
+	/* Estimate Gaussian parameters*/
+	//Means
+	float means[2],stddev[2];
 	
-	//Get the dimensions of the box
+	means[0] = 0;	
+	means[1] = 0;
+	for (unsigned int x = 0; x < object.size(); ++x)
+	{
+		int indice =(object.at(x)[0]+(object.at(x)[1]*(m_dh->m_columns))+(object.at(x)[2]*(m_dh->m_rows)*(m_dh->m_columns)));
+		means[0] += src->at(indice);
+	}
+
+	for (unsigned int x = 0; x < background.size(); ++x)
+	{
+		int indice =(background.at(x)[0]+(background.at(x)[1]*(m_dh->m_columns))+(background.at(x)[2]*(m_dh->m_rows)*(m_dh->m_columns)));
+		means[1] += src->at(indice);
+	}
+
+	means[0] = means[0]/object.size(); //Mean of the class 1
+	means[1] = means[1]/background.size(); //Mean of the class 2
+	
+	//Standard deviation
+	stddev[0] = 0;
+	stddev[1] = 0;
+	for (unsigned int x = 0; x < object.size(); ++x)
+	{
+		int indice =(object.at(x)[0]+(object.at(x)[1]*(m_dh->m_columns))+(object.at(x)[2]*(m_dh->m_rows)*(m_dh->m_columns)));
+		stddev[0] += SQR((src->at(indice)-means[0]));
+	}
+
+	for (unsigned int x = 0; x < background.size(); ++x)
+	{
+		int indice =(background.at(x)[0]+(background.at(x)[1]*(m_dh->m_columns))+(background.at(x)[2]*(m_dh->m_rows)*(m_dh->m_columns)));
+		stddev[1] += SQR((src->at(indice)-means[1]));
+	}
+
+	stddev[0] = sqrt(stddev[0]/object.size()); //stddev of the class 1
+	stddev[1] = sqrt(stddev[1]/background.size()); //stddev of the class 2 
+	
+
+	//Get the dimensions of the selection box (englobing the area of interest)
 	std::vector< std::vector< SelectionObject* > > l_selectionObjects = m_dh->getSelectionObjects();
     int x1, x2, y1, y2, z1, z2;
 
@@ -1321,8 +1354,25 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, f
 	/* Generate Graph cut algorithm */
 	GCoptimizationGeneralGraph gc(totalDimension,numLabels);
 	
-	
-	/* Specify data cost between Obj/Back final nodes */
+	//Datacost with Gaussian parameters for all Obj/Bck - final nodes links
+	for(int x = 0; x < xDim; x++)
+	{
+		for(int y = 0; y < yDim; y++)
+		{
+			for(int z = 0; z < zDim; z++)
+			{
+				for(int label = 0; label < numLabels; label++)
+				{
+					int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
+					int current = (x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns));
+					int value = -logf(exp(-pow(current-means[label],2)/(2*stddev[label]*stddev[label]))/(sqrt(2*3.1416)*stddev[label]));
+					gc.setDataCost(indice, label, value);
+				}
+			}
+		}
+	}
+
+	/* Specify USER data cost between Obj/Back final nodes */
 	for(unsigned int i = 0; i < object.size(); i++)
 	{
 		int x = object.at(i)[0] - x1;
