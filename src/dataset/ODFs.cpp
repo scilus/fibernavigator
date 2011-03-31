@@ -30,7 +30,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     m_order          ( 0    ),
     m_radiusAttribLoc( 0    ),
     m_radiusBuffer   ( NULL ),
-    m_sh_basis       ( 1 )
+    m_sh_basis       ( 0 )
 {
     m_scalingFactor = 0.0f;
 
@@ -197,7 +197,7 @@ void ODFs::getODFpoints(   FMatrix                       &i_phiThetaDirection,
 {
     int l_idx = 0;
 
-    bool flipx = true;
+    bool flipx = false;
 
     float x,y,z;
     // Deformiong the mesh
@@ -712,6 +712,63 @@ void ODFs::getSphericalHarmonicMatrixDescoteauxThesis( const vector< float > &i_
 ///////////////////////////////////////////////////////////////////////////
 // This functions computes the Spherical harmonics matrix as well as the
 // matrix containing the phi and theta directions. The basis implementation
+// corresponds to the implementation in PTK (Poupon ToolKit)
+//
+// i_meshPts            : Points of the undeformed mesh.
+// o_phiThetaDirection  : Matrix containing the phi and theta directions
+// o_shMatrix           : Spherical harmonics matrix
+///////////////////////////////////////////////////////////////////////////
+void ODFs::getSphericalHarmonicMatrixPTK( const vector< float > &i_meshPts, 
+                                          FMatrix &o_phiThetaDirection, 
+                                          FMatrix &o_shMatrix )
+{
+    int nbMeshPts = i_meshPts.size() / 3;
+    
+    complex< float > cplx, cplx_1, cplx_2;
+
+    float l_cartesianDir[3]; // Stored in x, y z
+    float l_sphericalDir[3]; // Stored in radius, phi, theta
+
+    for( int i = 0; i < nbMeshPts; i++) 
+    {
+        int j = 0;   // Counter for the j dimension of o_shMatrix
+
+        l_cartesianDir[0] = i_meshPts[ i * 3     ];
+        l_cartesianDir[1] = i_meshPts[ i * 3 + 1 ];
+        l_cartesianDir[2] = i_meshPts[ i * 3 + 2 ];
+
+        Helper::cartesianToSpherical( l_cartesianDir, l_sphericalDir );
+
+        o_phiThetaDirection( i, 0 ) = l_sphericalDir[1]; // Phi
+        o_phiThetaDirection( i, 1 ) = l_sphericalDir[2]; // Theta
+
+        for( int l = 0; l <= m_order; l+=2 )
+            for( int m = -l; m <= l; ++m ) 
+            {                   
+               cplx_1 = getSphericalHarmonic( l,  m, l_sphericalDir[2], l_sphericalDir[1] );
+               cplx_2 = getSphericalHarmonic( l, abs(m), l_sphericalDir[2], l_sphericalDir[1] );
+
+               int sign = 1;
+               if( m % 2 )
+                  sign *= -1;
+
+               if(m > 0)
+                  o_shMatrix(i,j) = std::sqrt(2.0)*sign*imag(cplx_2);
+               else if( m == 0 )
+                  o_shMatrix(i,j) = real(cplx_1);
+               else
+                  o_shMatrix(i,j) = std::sqrt(2.0)*real(cplx_1);
+
+               ++j;
+               
+            } // for
+    } // for
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// This functions computes the Spherical harmonics matrix as well as the
+// matrix containing the phi and theta directions. The basis implementation
 // corresponds to Tournier et al 2004 and 2007 bases
 //
 // i_meshPts            : Points of the undeformed mesh.
@@ -766,7 +823,7 @@ void ODFs::getSphericalHarmonicMatrix( const vector< float > &i_meshPts,
 {
 
    if( m_sh_basis == 0 ) {
-      cout << "Using RR5768 SH basis\n";
+      cout << "Using RR5768 SH basis (as in DMRI)\n";
       getSphericalHarmonicMatrixRR5768(i_meshPts, o_phiThetaDirection, o_shMatrix );
    }
    else if( m_sh_basis == 1 ) {
@@ -776,6 +833,10 @@ void ODFs::getSphericalHarmonicMatrix( const vector< float > &i_meshPts,
    else if( m_sh_basis == 2 ) {
       cout << "Using Tournier's SH basis\n";
       getSphericalHarmonicMatrixTournier(i_meshPts, o_phiThetaDirection, o_shMatrix );
+   }
+   else if( m_sh_basis == 3 ) {
+      cout << "Using PTK SH basis\n";
+      getSphericalHarmonicMatrixPTK(i_meshPts, o_phiThetaDirection, o_shMatrix );
    }
    else
       getSphericalHarmonicMatrixRR5768(i_meshPts, o_phiThetaDirection, o_shMatrix );
