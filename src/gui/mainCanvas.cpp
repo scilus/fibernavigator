@@ -1098,10 +1098,10 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 	/* Step 0 : Take two random pixels */
 	means[0] = 0.0f;
 	means[1] = 1.0f;
-	/*
-		The two first means must not be equal.
-		The higher or equal is to ensure that the first class
-		is sea, and the second is land.
+	
+	/* 
+	The two first means must not be equal.
+	If using Graphcut, we want the means to be choosen from the obj/bck 
 	*/
 	while(means[0] == means[1])
 	{
@@ -1271,13 +1271,14 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
 }
 
 //Graph Cut segmentation
-void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
+void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, float sigma)
 {
 	std::cout << "Graphcut" << endl;
 
 	int numLabels = 2;
 	int totalDimension, xDim, yDim, zDim;
 	int dataLength = m_dh->m_rows * m_dh->m_columns * m_dh->m_frames;
+	
 	/* Estimate Gaussian parameters (kmeans) */
 	//float means[2],stddev[2],apriori[2];
 	//std::vector<float>* estimateParams = new std::vector<float>;
@@ -1322,31 +1323,26 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 	
 	
 	/* Specify data cost between Obj/Back final nodes */
-	while(!object.empty())
+	for(unsigned int i = 0; i < object.size(); i++)
 	{
-		int x = object.back()[0] - x1;
-		int y = object.back()[1] - y1;
-		int z = object.back()[2] - z1;
-		object.pop_back();
+		int x = object.at(i)[0] - x1;
+		int y = object.at(i)[1] - y1;
+		int z = object.at(i)[2] - z1;
 
 		int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
 		gc.setDataCost(indice, 0, numeric_limits<float>::infinity());
 		gc.setDataCost(indice, 1, 0.0f);
-		//gc.setLabel(indice,1);
 	}
 
-	while(!background.empty())
+	for(unsigned int i = 0; i < background.size(); i++)
 	{
-		int x = background.back()[0] - x1;
-		int y = background.back()[1] - y1;
-		int z = background.back()[2] - z1;
-		background.pop_back();
+		int x = background.at(i)[0] - x1;
+		int y = background.at(i)[1] - y1;
+		int z = background.at(i)[2] - z1;
 
 		int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
 		gc.setDataCost(indice, 0, 0.0f);
 		gc.setDataCost(indice, 1, numeric_limits<float>::infinity());
-		//gc.setLabel(indice,0);
-		
 	}
 
 	//Set smooth cost
@@ -1367,7 +1363,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 			{
 				int current = (x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns));
 				int prec = ((x+x1-1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
-				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2*50.0f*50.0f);
+				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2*sigma*sigma);
 				gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),(x-1)+(y*(xDim))+(z*(yDim)*(xDim)),value);
 			}
 
@@ -1378,7 +1374,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 			{
 				int current = (x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns));
 				int prec = ((x+x1)+((y+y1-1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns)));
-				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2*50.0f*50.0f);
+				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2*sigma*sigma);
 				gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),x+((y-1)*(xDim))+(z*(yDim)*(xDim)),value);
 			}
 
@@ -1389,7 +1385,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result)
 			{
 				int current = (x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1)*(m_dh->m_rows)*(m_dh->m_columns));
 				int prec = ((x+x1)+((y+y1)*(m_dh->m_columns))+((z+z1-1)*(m_dh->m_rows)*(m_dh->m_columns)));
-				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2.0f*10.0f*10.0f);
+				float value = std::exp(-SQR(src->at(current) - src->at(prec))/2.0f*sigma*sigma);
 				gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),x+(y*(xDim))+((z-1)*(yDim)*(xDim)),value);
 			}
 
@@ -1424,9 +1420,9 @@ void MainCanvas::segmentTumor()
 	
 	
 	//1D vector with the normalized brightness ( 0 to 1 )
-	std::vector<float>* flatVoxels = l_info->getFloatDataset();
-	std::vector<float>* flatTumor = new std::vector<float>;
-	flatTumor->resize(dataLength);
+	std::vector<float>* sourceData = l_info->getFloatDataset();
+	std::vector<float>* resultData = new std::vector<float>;
+	resultData->resize(dataLength);
 	
 	
 	//Segmentation methods
@@ -1438,18 +1434,21 @@ void MainCanvas::segmentTumor()
 		case 0 :
 			{
 				float threshold = l_info->getFloodThreshold();
-				floodFill(flatVoxels, flatTumor, m_hitPts, threshold);
+				floodFill(sourceData, resultData, m_hitPts, threshold);
 				break;
 			}
 
 		case 1 :
-				graphCut(flatVoxels, flatTumor);
+			{
+				float sigma = l_info->getGraphSigma();
+				graphCut(sourceData, resultData,sigma);
 				break;
+			}
 
 		case 2 :
 			{
 				float means[2], stddev[2], apriori[2];
-				KMeans(means,stddev,apriori,flatVoxels,flatTumor);
+				KMeans(means,stddev,apriori,sourceData,resultData);
 				break;
 			}
 	}
@@ -1457,7 +1456,7 @@ void MainCanvas::segmentTumor()
 	
 	//Create a new anatomy for the tumor
 	std::cout << "Creating anatomy" << std::endl;
-	Anatomy* l_newAnatomy = new Anatomy(m_dh, flatTumor, 0);
+	Anatomy* l_newAnatomy = new Anatomy(m_dh, resultData, 0);
 	l_newAnatomy->setShowFS(false);
 	l_newAnatomy->setType(OVERLAY);
 	l_newAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );

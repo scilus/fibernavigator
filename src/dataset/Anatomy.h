@@ -29,6 +29,7 @@ public:
    float at( int i );
    std::vector<float>* getFloatDataset();
    MySlider        *m_psliderFlood;
+   MySlider		   *m_psliderGraphSigma;
   
    GLuint getGLuint();
    void setRGBZero( int x, int y, int z );
@@ -49,6 +50,9 @@ public:
    virtual void updatePropertiesSizer();
    float    getFloodThreshold()                          { return m_floodThreshold;              };
    void     setFloodThreshold(float v)                   { m_floodThreshold = v;                 };
+   float    getGraphSigma()								 { return m_graphSigma;                  };
+   void     setGraphSigma(float v)                       { m_graphSigma = v;                 };
+
 
    SelectionObject         *m_roi;
  private:
@@ -83,6 +87,7 @@ public:
 	
     
 	float					m_floodThreshold;
+	float				    m_graphSigma;
     std::vector<float>      m_floatDataset;
     int                     m_dataType;
     TensorField             *m_tensorField;

@@ -2835,6 +2835,12 @@ void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 	std::cout << (((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f) << endl;
 }
 
+void MainFrame::OnSliderGraphSigmaMoved( wxCommandEvent& WXUNUSED(event) )
+{
+	((Anatomy*)m_currentFNObject)->setGraphSigma(((Anatomy*)m_currentFNObject)->m_psliderGraphSigma->GetValue());
+	std::cout << (((Anatomy*)m_currentFNObject)->m_psliderGraphSigma->GetValue()) << endl;
+}
+
 void MainFrame::OnKmeans( wxCommandEvent& WXUNUSED(event) )
 {
 	m_datasetHelper->m_SegmentMethod = 2;
@@ -2866,18 +2872,18 @@ void MainFrame::OnSelectBck(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
 {
 	m_datasetHelper->m_SegmentMethod = 1;
-	m_datasetHelper->m_isSelectBckActive = false;
-	m_datasetHelper->m_isSelectObjActive = false;
+	//m_datasetHelper->m_isSelectBckActive = false;
+	//m_datasetHelper->m_isSelectObjActive = false;
 	m_datasetHelper->m_isFloodfillActive = false;
 	m_mainGL->segmentTumor();
 
-	if(!m_mainGL->object.empty())
+	/*if(!m_mainGL->object.empty())
 		m_mainGL->object.clear();
 	
 	if(!m_mainGL->background.empty())
 		m_mainGL->background.clear();
 	m_datasetHelper->m_isObjfilled = false;
-	m_datasetHelper->m_isBckfilled = false;
+	m_datasetHelper->m_isBckfilled = false;*/
 	
 }
 

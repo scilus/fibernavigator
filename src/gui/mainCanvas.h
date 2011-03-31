@@ -61,7 +61,7 @@ public:
 	void segmentTumor();
 	void KMeans(float means[2],float stddev[2],float apriori[2],std::vector<float>*,std::vector<float>*);
 	void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);
-	void graphCut(std::vector<float>*, std::vector<float>*);
+	void graphCut(std::vector<float>*, std::vector<float>*, float);
 	float getElement(int,int,int,std::vector<float>*);
 
     hitResult pick(wxPoint, bool isRuler);
