@@ -1,0 +1,5 @@
+256 256 192 1
+-type S16
+-dx 1 -dy 1 -dz 1 -dt 1
+-bo DCBA
+-om binar

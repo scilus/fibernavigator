@@ -1,0 +1,26 @@
+/* XPM */
+static char *rulertool_clear_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 4 1",
+"o c Black",
+"  c #FFFFFF",
+". c #ED1C24",
+"X c #22B14C",
+/* pixels */
+"                ",
+"                ",
+" .............  ",
+"                ",
+"                ",
+" XXXXXXXXXXXXX  ",
+"                ",
+"      ooo o     ",
+"     o   o      ",
+"    o   o o     ",
+"    o  o  o     ",
+"    o o   o     ",
+"     o   o      ",
+"    o ooo       ",
+"                ",
+"                "
+};

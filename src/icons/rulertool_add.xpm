@@ -1,0 +1,25 @@
+/* XPM */
+static char *rulertool_add_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 3 1",
+"  c #FFFFFF",
+". c #ED1C24",
+"X c #22B14C",
+/* pixels */
+"                ",
+"                ",
+" .............  ",
+"                ",
+"                ",
+" XXXXXXXXXXXXX  ",
+"                ",
+"                ",
+"       X        ",
+"       X        ",
+"     XXXXX      ",
+"       X        ",
+"       X        ",
+"                ",
+"                ",
+"                "
+};
