@@ -1,0 +1,111 @@
+#ifdef OUTLINE
+#define inline
+#endif
+
+//---------------------------------------------------------------------------
+
+inline FStreamlineOnSurfaceEuler::EdgeIndex::EdgeIndex() 
+    : id1(), id2() 
+{}
+
+//---------------------------------------------------------------------------
+
+inline FStreamlineOnSurfaceEuler::EdgeIndex::
+EdgeIndex( FIndex anId1, FIndex anId2 )
+{
+    if ( !anId2.isValid() )
+	id1 = anId1;
+    else if ( anId1 < anId2 )
+    {
+	id1 = anId1; id2 = anId2;
+    }
+    else
+    {
+	id1 = anId2; id2 = anId1;
+    }
+}
+
+//---------------------------------------------------------------------------
+
+inline FStreamlineOnSurfaceEuler::EdgeIndex::
+EdgeIndex( const EdgeIndex& a )
+{
+    id1 = a.id1;
+    if ( a.id2.isValid() )
+	id2 = a.id2;
+}
+
+//---------------------------------------------------------------------------
+
+inline bool FStreamlineOnSurfaceEuler::EdgeIndex::
+operator==( const EdgeIndex& a ) const
+{
+    // Remark: id1 is always valid
+    if ( !id1.isValid() || !a.id1.isValid() )
+    {
+	//cerr << "ERROR: invalid first index in FaceIndex::operator<()" << endl;
+	return false;
+    }
+
+    if ( id1 != a.id1 )
+	return false;
+    else if ( id2.isValid() )
+	if ( a.id2.isValid() )
+	    return ( id2 == a.id2 );
+	else
+	    return false;
+    else
+	return ( !a.id2.isValid() );
+}
+
+//---------------------------------------------------------------------------
+
+inline bool FStreamlineOnSurfaceEuler::EdgeIndex::
+operator<( const EdgeIndex& a ) const
+{
+    if ( !id1.isValid() || !a.id1.isValid() )
+    {
+	//cerr << "ERROR: invalid first index in FaceIndex::operator<()"
+	  //   << endl;
+	return false;
+    }
+
+    if ( id1 != a.id1 )
+	return ( id1 < a.id1 );
+
+    if ( id2.isValid() && a.id2.isValid() )
+	return ( id2 < a.id2 );
+    else
+	return ( id2.isValid() );
+}
+
+//---------------------------------------------------------------------------
+
+inline void FStreamlineOnSurfaceEuler::EdgeIndex::
+display() const
+{
+    //cout << "EdgeIndex: " << id1 << "->" << id2 << endl;
+}
+
+//---------------------------------------------------------------------------
+
+inline FStreamlineOnSurfaceEuler::EdgePos::
+EdgePos()
+    : a(), b()
+{}
+
+//---------------------------------------------------------------------------
+
+inline FStreamlineOnSurfaceEuler::EdgePos::
+EdgePos( const FArray& pos1, const FArray& pos2 )
+    : a(pos1), b(pos2)
+{}
+
+//---------------------------------------------------------------------------
+
+inline FStreamlineOnSurfaceEuler::EdgePos::
+EdgePos( const EdgePos& edgePos )
+    : a(edgePos.a), b(edgePos.b)
+{}
+
+//---------------------------------------------------------------------------
