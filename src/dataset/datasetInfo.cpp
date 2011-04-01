@@ -70,7 +70,7 @@ void DatasetInfo::createPropertiesSizer(MainFrame *parent)
     parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler(MainFrame::OnDeleteListItem));
     
     m_ptoggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(90,-1));
-    m_ptoggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Filtering"),wxDefaultPosition, wxSize(90,-1));
+    m_ptoggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Interpolation"),wxDefaultPosition, wxSize(90,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(m_ptoggleVisibility,0,wxALIGN_CENTER);
     l_sizer->Add(m_ptoggleFiltering,0,wxALIGN_CENTER);
