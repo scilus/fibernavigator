@@ -30,7 +30,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     m_order          ( 0    ),
     m_radiusAttribLoc( 0    ),
     m_radiusBuffer   ( NULL ),
-    m_sh_basis       ( 0 )
+    m_sh_basis       ( 3 )
 {
     m_scalingFactor = 0.0f;
 

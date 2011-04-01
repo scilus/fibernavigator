@@ -259,8 +259,10 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
 
 MainFrame::~MainFrame()
 {
+    m_timer->Stop();
     m_datasetHelper->printDebug( _T( "main frame destructor" ), 0 );
-
+    m_datasetHelper->printDebug( _T( "timer stoped" ), 0 );    
+    
     if( m_datasetHelper )               
         delete m_datasetHelper;
 }

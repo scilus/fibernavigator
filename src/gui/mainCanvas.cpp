@@ -598,7 +598,7 @@ void MainCanvas::render()
         {
             if ( m_dh->m_scheduledScreenshot )
             {
-                int size = 0;
+                int size = 0;		
                 switch ( m_dh->m_geforceLevel )
                 {
                     case 6:
@@ -607,6 +607,9 @@ void MainCanvas::render()
                     case 8:
                         size = 4096;
                         break;
+		            case 42:
+			            size = 8192;
+			            break;
                     case 99:
                         size = 1024;
                         break;
@@ -616,8 +619,11 @@ void MainCanvas::render()
                 }
 
                 FgeOffscreen fbo( size, size, true );
-                ;
-                fbo.setClearColor( 1.0, 1.0, 1.0 );
+                if (m_dh->m_clearToBlack){
+                    fbo.setClearColor( 0.0f, 0.0f, 0.0f);
+                } else {
+                    fbo.setClearColor( 1.0f, 1.0f, 1.0f);
+                }
                 fbo.activate();
 
                 glMatrixMode( GL_PROJECTION );

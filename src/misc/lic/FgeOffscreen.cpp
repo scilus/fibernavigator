@@ -63,8 +63,7 @@ FgeOffscreen::FgeOffscreen(unsigned int offscreenDimension) {
  * \param width the size of the offscreen textures in pixels.
  * \param autoScale automaticaly select texture valid size that is >= width and hight
  */
-FgeOffscreen::FgeOffscreen(unsigned int width, unsigned int height,
-        bool autoScale) {
+FgeOffscreen::FgeOffscreen(unsigned int width, unsigned int height, bool autoScale) {
     // init
     fbo = NULL;
 
