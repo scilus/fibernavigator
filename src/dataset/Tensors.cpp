@@ -428,11 +428,8 @@ void Tensors::setScalingFactor( float i_scalingFactor )
 void Tensors::createPropertiesSizer(MainFrame *parent)
 {
     Glyph::createPropertiesSizer(parent);
-    m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));
-    wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(68,1,0);
-    l_sizer->Add(m_pradiobtnAxes);
-    m_psizerDisplay->Add(l_sizer,0,wxALIGN_CENTER);
+    m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));    
+    m_psizerDisplay->Add(m_pradiobtnAxes);
     parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnGlyphAxesSelected));
     m_pradiobtnAxes->SetValue          (isDisplayShape(AXES));
 }
