@@ -186,6 +186,11 @@ private:
     void OnGlyphMainAxisSelected            ( wxCommandEvent& event ); // The display of the main vector of the ellipsoid.    
     void OnGlyphColorWithPosition           ( wxCommandEvent& event ); // The color with position.
 
+	void OnOriginalShBasis					( wxCommandEvent& event );
+	void OnDescoteauxShBasis				( wxCommandEvent& event );
+	void OnTournierShBasis					( wxCommandEvent& event );
+	void OnPTKShBasis						( wxCommandEvent& event );
+
     void OnToggleShowAxial                  ( wxCommandEvent& event );
     void OnToggleShowCoronal                ( wxCommandEvent& event );
     void OnToggleShowSagittal               ( wxCommandEvent& event );
