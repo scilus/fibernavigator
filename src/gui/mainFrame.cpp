@@ -2092,65 +2092,25 @@ void MainFrame::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::OnOriginalShBasis( wxCommandEvent& WXUNUSED(event) )
 {
 	ODFs* l_dataset = new ODFs( m_datasetHelper );
-	l_dataset->setShBasis( 0 );
-	l_dataset->load(((ODFs*)m_currentFNObject)->m_lastODF_path);
+	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 0);
 }
 
 void MainFrame::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
 {
-    ODFs* l_dataset = new ODFs( m_datasetHelper );
-	l_dataset->setShBasis( 1 );
-
-	if( l_dataset->load(((ODFs*)m_currentFNObject)->m_lastODF_path))
-        {
-			l_dataset->setThreshold( ((ODFs*)m_currentFNObject)->getThreshold());
-			l_dataset->setAlpha    ( ((ODFs*)m_currentFNObject)->getAlpha());
-			l_dataset->setShow     ( ((ODFs*)m_currentFNObject)->getShow() );
-            l_dataset->setShowFS   ( ((ODFs*)m_currentFNObject)->getShowFS() );
-			l_dataset->setuseTex   ( ((ODFs*)m_currentFNObject)->getUseTex() );
-            m_datasetHelper->finishLoading( l_dataset );        
-     
-            m_datasetHelper->m_ODFsLoaded = true;
-
-        }
+	ODFs* l_dataset = new ODFs( m_datasetHelper );
+	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 1);
 }
 
 void MainFrame::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
 {
-    ODFs* l_dataset = new ODFs( m_datasetHelper );
-	l_dataset->setShBasis( 2 );
-
-	if( l_dataset->load(((ODFs*)m_currentFNObject)->m_lastODF_path))
-        {
-			l_dataset->setThreshold( ((ODFs*)m_currentFNObject)->getThreshold());
-			l_dataset->setAlpha    ( ((ODFs*)m_currentFNObject)->getAlpha());
-			l_dataset->setShow     ( ((ODFs*)m_currentFNObject)->getShow() );
-            l_dataset->setShowFS   ( ((ODFs*)m_currentFNObject)->getShowFS() );
-			l_dataset->setuseTex   ( ((ODFs*)m_currentFNObject)->getUseTex() );
-            m_datasetHelper->finishLoading( l_dataset );        
-     
-            m_datasetHelper->m_ODFsLoaded = true;
-
-        }
+	ODFs* l_dataset = new ODFs( m_datasetHelper );
+	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 2);
 }
 
 void MainFrame::OnPTKShBasis( wxCommandEvent& WXUNUSED(event) )
 {
-    ODFs* l_dataset = new ODFs( m_datasetHelper );
-	l_dataset->setShBasis( 3 );
-
-	if( l_dataset->load(((ODFs*)m_currentFNObject)->m_lastODF_path))
-        {
-			l_dataset->setThreshold( ((ODFs*)m_currentFNObject)->getThreshold());
-			l_dataset->setAlpha    ( ((ODFs*)m_currentFNObject)->getAlpha());
-			l_dataset->setShow     ( ((ODFs*)m_currentFNObject)->getShow() );
-            l_dataset->setShowFS   ( ((ODFs*)m_currentFNObject)->getShowFS() );
-			l_dataset->setuseTex   ( ((ODFs*)m_currentFNObject)->getUseTex() );
-            m_datasetHelper->finishLoading( l_dataset );        
-     
-            m_datasetHelper->m_ODFsLoaded = true;
-
-        }
+	ODFs* l_dataset = new ODFs( m_datasetHelper );
+	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 3);
 }
 
 void MainFrame::OnFiberFilterSlider( wxCommandEvent& WXUNUSED(event) )
