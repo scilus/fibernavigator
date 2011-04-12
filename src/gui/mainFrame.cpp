@@ -2093,18 +2093,21 @@ void MainFrame::OnOriginalShBasis( wxCommandEvent& WXUNUSED(event) )
 {
 	ODFs* l_dataset = new ODFs( m_datasetHelper );
 	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 0);
+
 }
 
 void MainFrame::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
 {
 	ODFs* l_dataset = new ODFs( m_datasetHelper );
 	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 1);
+
 }
 
 void MainFrame::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
 {
 	ODFs* l_dataset = new ODFs( m_datasetHelper );
 	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 2);
+
 }
 
 void MainFrame::OnPTKShBasis( wxCommandEvent& WXUNUSED(event) )
