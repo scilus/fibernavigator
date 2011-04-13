@@ -84,6 +84,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 	m_isBckfilled ( false ),
 	m_isObjCreated ( false ),
 	m_isBckCreated ( false ),
+	m_isBoxCreated ( false ),
 	m_SegmentMethod(0),
     m_rulerFullLength(0),
     m_rulerPartialLength(0),

@@ -1078,6 +1078,7 @@ void MainFrame::OnNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::OnNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
     CreateNewSelectionObject( BOX_TYPE );    
+	m_datasetHelper->m_isBoxCreated = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////

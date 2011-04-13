@@ -152,7 +152,8 @@ public:
 	bool			      m_isBckfilled;
 	bool			      m_isObjCreated;
 	bool				  m_isBckCreated;
-	bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled); };
+	bool				  m_isBoxCreated;
+	bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled && m_isBoxCreated); };
 
 
     float m_xVoxel;
