@@ -2872,18 +2872,10 @@ void MainFrame::OnSelectBck(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
 {
 	m_datasetHelper->m_SegmentMethod = 1;
-	//m_datasetHelper->m_isSelectBckActive = false;
-	//m_datasetHelper->m_isSelectObjActive = false;
 	m_datasetHelper->m_isFloodfillActive = false;
 	m_mainGL->segmentTumor();
 
-	/*if(!m_mainGL->object.empty())
-		m_mainGL->object.clear();
-	
-	if(!m_mainGL->background.empty())
-		m_mainGL->background.clear();
-	m_datasetHelper->m_isObjfilled = false;
-	m_datasetHelper->m_isBckfilled = false;*/
+
 	
 }
 
