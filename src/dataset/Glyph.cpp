@@ -700,15 +700,18 @@ void Glyph::createPropertiesSizer(MainFrame *parent)
     parent->Connect(m_ptoggleColorWithPosition->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnGlyphColorWithPosition));
     
     m_propertiesSizer->AddSpacer(8);
-    m_psizerDisplay = new wxBoxSizer(wxVERTICAL);    
-    m_psizerDisplay->Add(new wxStaticText( parent, wxID_ANY, _T( "Display" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_LEFT);
-    m_pradiobtnNormal = new wxRadioButton(parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize(132,-1));
+	m_psizerDisplay = new wxBoxSizer(wxVERTICAL);    
+	m_psizerDisplay->Add(new wxStaticText( parent, wxID_ANY, _T( "Display" ), wxDefaultPosition, wxSize( 50, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+	m_propertiesSizer->Add(m_psizerDisplay,0,wxALIGN_LEFT);
+
+	m_psizerDisplay = new wxBoxSizer(wxVERTICAL);
+    m_pradiobtnNormal = new wxRadioButton(parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
     m_psizerDisplay->Add(m_pradiobtnNormal);
-    m_pradiobtnMapOnSphere  = new wxRadioButton(parent, wxID_ANY, _T( "Map On Sphere" ), wxDefaultPosition, wxSize(132,-1));
+	m_pradiobtnMapOnSphere  = new wxRadioButton(parent, wxID_ANY, _T( "Map On Sphere" ), wxDefaultPosition, wxSize(132,-1));
     m_psizerDisplay->Add(m_pradiobtnMapOnSphere);
     m_pradiobtnMainAxis = new wxRadioButton(parent, wxID_ANY, _T( "Main Diffusion Axis" ), wxDefaultPosition, wxSize(132,-1));    
     m_psizerDisplay->Add(m_pradiobtnMainAxis);
-    m_propertiesSizer->Add(m_psizerDisplay,0,wxCENTER);
+	m_propertiesSizer->Add(m_psizerDisplay,0,wxALIGN_CENTER);
 
     parent->Connect(m_pradiobtnNormal->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnGlyphNormalSelected));
     parent->Connect(m_pradiobtnMapOnSphere->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnGlyphMapOnSphereSelected));

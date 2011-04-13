@@ -35,6 +35,14 @@ public:
     bool loadNifti  ( wxString i_fileName );
     virtual void createPropertiesSizer(MainFrame *parent);
     virtual void updatePropertiesSizer();
+	
+	bool isShBasis( int i_sh_basis ) {return m_sh_basis == i_sh_basis;};
+	void setShBasis(int value){m_sh_basis = value;}
+	void changeShBasis(ODFs*,DatasetHelper*, int);
+
+	//Vars
+	wxString    m_lastODF_path;
+
 private:
     // From Glyph
     bool createStructure  ( vector< float >& i_fileFloatData );
@@ -76,6 +84,11 @@ private:
     int     m_order;
     GLuint  m_radiusAttribLoc;
     GLuint* m_radiusBuffer; 
+	wxRadioButton *m_pRadiobtnOriginalBasis;
+	wxRadioButton *m_pRadiobtnDescoteauxBasis;
+	wxRadioButton *m_pRadiobtnTournierBasis;
+	wxRadioButton *m_pRadiobtnPTKBasis;
+
 
     vector< vector < float > >        m_coefficients;
     vector< vector < float > >        m_radius;

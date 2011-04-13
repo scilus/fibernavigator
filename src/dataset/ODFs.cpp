@@ -22,6 +22,7 @@
 // 0: Original Descoteaux et al RR 5768 basis (default in dmri)
 // 1: Descoteaux PhD thesis basis definition
 // 2: Tournier
+// 3: PTK
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
@@ -30,7 +31,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     m_order          ( 0    ),
     m_radiusAttribLoc( 0    ),
     m_radiusBuffer   ( NULL ),
-    m_sh_basis       ( 3 )
+    m_sh_basis       ( 0 )
 {
     m_scalingFactor = 0.0f;
 
@@ -55,6 +56,7 @@ ODFs::~ODFs()
 bool ODFs::load( wxString i_fileName )
 {
     m_fullPath = i_fileName;
+	m_lastODF_path = i_fileName;
 
 #ifdef __WXMSW__
     m_name = i_fileName.AfterLast( '\\' );
@@ -361,21 +363,11 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     m_flippedAxes[1] ? l_flippedAxes[1] = -1.0f : l_flippedAxes[1] = 1.0f;
     m_flippedAxes[2] ? l_flippedAxes[2] = -1.0f : l_flippedAxes[2] = 1.0f;
     
-    //flip ODF to fiberNavigator world original
-//     if( i_axis == Y_AXIS ) { //Coronal: flip x
-//         l_flippedAxes[0] *= -1.0f;  
-//     } else if( i_axis == Z_AXIS ){  //Axial: flip x,y
-//         l_flippedAxes[0] *= -1.0f;
-//         l_flippedAxes[1] *= -1.0f;        
-//     }       
-
-
     //For VisContest with sh basis computed from ptk, Max Thesis
     if( i_axis == Y_AXIS ) { //Coronal: flip x
        l_flippedAxes[0] *= -1.0f;  
     } 
     // Need a global flip in X on top of that, which is done above
-
 
     DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUni3Float(   "axisFlip",    l_flippedAxes               );
 
@@ -881,10 +873,87 @@ complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, fl
 
     return l_retval;
 }
+/*
+	Allows the users to switch between differents SH basis (ODFs)
+*/
+void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
+{
+	
+	l_dataset->setShBasis( basis ); // Uses the current Spherical Harmonics basis selected
+
+
+	if( l_dataset->load(m_lastODF_path)) //Reloads the ODFs
+        {
+			//Copy all params modifications
+			l_dataset->setThreshold		   ( getThreshold() );
+			l_dataset->setAlpha			   ( getAlpha() );
+			l_dataset->setShow			   ( getShow() );
+            l_dataset->setShowFS		   ( getShowFS() );
+			l_dataset->setuseTex		   ( getUseTex() );
+			l_dataset->setColor			   ( MIN_HUE, getColor( MIN_HUE ) );
+			l_dataset->setColor			   ( MAX_HUE, getColor( MAX_HUE ) );
+			l_dataset->setColor			   ( SATURATION, getColor( SATURATION ) );
+			l_dataset->setColor			   ( LUMINANCE, getColor( LUMINANCE ) );
+			l_dataset->setLOD			   (getLOD());
+			l_dataset->setLighAttenuation  (getLightAttenuation());
+			l_dataset->setLightPosition    (X_AXIS, getLightPosition( X_AXIS ));
+			l_dataset->setLightPosition    (Y_AXIS, getLightPosition( Y_AXIS ));
+			l_dataset->setLightPosition    (Z_AXIS, getLightPosition( Z_AXIS ));
+			l_dataset->setDisplayFactor    (getDisplayFactor());
+			l_dataset->setScalingFactor    (getScalingFactor());
+			l_dataset->flipAxis			   (X_AXIS, isAxisFlipped( X_AXIS ));
+			l_dataset->flipAxis			   (Y_AXIS, isAxisFlipped( Y_AXIS ));
+			l_dataset->flipAxis			   (Z_AXIS, isAxisFlipped( Z_AXIS ));
+			l_dataset->setColorWithPosition(getColorWithPosition());
+			
+			m_dh->m_mainFrame->deleteListItem();
+            m_data->finishLoading( l_dataset );        
+            m_data->m_ODFsLoaded = true;
+
+
+
+        }
+}
 
 void ODFs::createPropertiesSizer(MainFrame *parent)
 {
     Glyph::createPropertiesSizer(parent);
+	wxSizer *l_sizer;
+
+	m_propertiesSizer->AddSpacer(8);
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);    
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Sh Basis "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_LEFT);
+
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	m_pRadiobtnOriginalBasis = new wxRadioButton(parent, wxID_ANY, _T( "Original" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
+	l_sizer->Add(m_pRadiobtnOriginalBasis);
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_pRadiobtnOriginalBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnOriginalShBasis));
+	
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	m_pRadiobtnDescoteauxBasis = new wxRadioButton(parent, wxID_ANY, _T( "Descoteaux" ), wxDefaultPosition, wxSize(132,-1));
+	l_sizer->Add(m_pRadiobtnDescoteauxBasis);
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_pRadiobtnDescoteauxBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnDescoteauxShBasis));
+
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	m_pRadiobtnTournierBasis = new wxRadioButton(parent, wxID_ANY, _T( "Tournier" ), wxDefaultPosition, wxSize(132,-1));
+	l_sizer->Add(m_pRadiobtnTournierBasis);
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_pRadiobtnTournierBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnTournierShBasis));
+
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	m_pRadiobtnPTKBasis = new wxRadioButton(parent, wxID_ANY, _T( "PTK" ), wxDefaultPosition, wxSize(132,-1));
+	l_sizer->Add(m_pRadiobtnPTKBasis);
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnPTKShBasis));
+	
+	m_pRadiobtnOriginalBasis->SetValue			(isShBasis(0));
+    m_pRadiobtnDescoteauxBasis->SetValue		(isShBasis(1));
+    m_pRadiobtnTournierBasis->SetValue			(isShBasis(2));
+	m_pRadiobtnPTKBasis->SetValue				(isShBasis(3));
+	
 }
 
 void ODFs::updatePropertiesSizer()
@@ -902,6 +971,8 @@ void ODFs::updatePropertiesSizer()
     m_psliderLightZPosition->Enable(false);
     //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
     m_psliderScalingFactor->Enable (false);
+
+	
 }
 
 

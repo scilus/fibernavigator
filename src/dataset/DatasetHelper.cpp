@@ -277,11 +277,11 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
                 return false;
             }
 
-            if( m_ODFsLoaded )
+            /*if( m_ODFsLoaded )
             {
                 m_lastError = wxT( "ODFs already loaded" );
                 return false;
-            }
+            }*/
             l_dataset = new ODFs( this );            
         }
         else
@@ -403,12 +403,14 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
     if( ! i_info->getShowFS() )
         m_mainFrame->m_listCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
     else
-        m_mainFrame->m_listCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ) );
+        m_mainFrame->m_listCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ));
 
     if( ! i_info->getUseTex() )
         m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), ( i_info->getThreshold() ) * i_info->getOldMax() ) + wxT( ")" ) );
     else
         m_mainFrame->m_listCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
+
+
 
     m_mainFrame->m_listCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
     m_mainFrame->m_listCtrl->SetItemData( l_id, (long)i_info );
