@@ -1037,8 +1037,6 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_pbtnKmeans->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnKmeans));
 
-	
-
 }
 
 void Anatomy::updatePropertiesSizer()
