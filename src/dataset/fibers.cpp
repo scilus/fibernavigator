@@ -630,10 +630,8 @@ bool Fibers::loadDmri(wxString i_fileName)
                 cur_line[j*3+1]= f2;
                 cur_line[j*3+2]= f3;
             }            
-            if (i%2==0){
-                m_countPoints += cur_line.size()/3;
-                lines.push_back(cur_line);
-            }
+            m_countPoints += cur_line.size()/3;
+            lines.push_back(cur_line);            
         } 
     }
     fclose(l_file);
@@ -1310,10 +1308,6 @@ void Fibers::saveDMRI( wxString i_fileName )
     myfile.open( l_fn, ios::out );
 
     float dist = 0.5;
-    if (m_countLines>0)
-    {
-        dist = sqrt(m_pointArray[0]*m_pointArray[0]+m_pointArray[1]*m_pointArray[1]+m_pointArray[2]*m_pointArray[2]);
-    }
 
     myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
     myfile << nbrlines << " " << dist <<"\n";
