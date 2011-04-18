@@ -1856,7 +1856,10 @@ void MainFrame::OnGlyphLODSliderMoved( wxCommandEvent& WXUNUSED(event) )
     {            
         DatasetInfo* l_info = (DatasetInfo*)m_currentFNObject;
         if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
+		{
             ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_currentFNObject)->m_psliderLODValue->GetValue() );
+			((ODFs*)l_info)->isCalculate = false;
+		}
     }
 }
 

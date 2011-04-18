@@ -9,7 +9,7 @@ void main()
 	// Color with position (x = r, y = g, z = b)
 	if( colorWithPos == 1 )
 		gl_FragColor.rgb = vertexPos;
-	// Color normally
+	//Color normally
 	else
 		gl_FragColor = texture1D( clut, texturePosition );
 	
