@@ -1508,7 +1508,8 @@ void MainCanvas::segmentTumor()
 	std::cout << "Creating anatomy" << std::endl;
 	Anatomy* l_newAnatomy = new Anatomy(m_dh, resultData, 0);
 	l_newAnatomy->setShowFS(false);
-	l_newAnatomy->setType(OVERLAY);
+	l_newAnatomy->setType(2);
+	l_newAnatomy->setDataType(4);
 	l_newAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
     m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
     m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );

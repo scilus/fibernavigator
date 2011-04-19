@@ -38,6 +38,8 @@ Anatomy::Anatomy( DatasetHelper* i_datasetHelper, std::vector< float >* i_datase
     m_rows          = m_dh->m_rows;
     m_tensorField   = 0;
     m_type          = HEAD_BYTE;
+	m_dataType		= 2;
+	m_bands			= 1;
 	
 	m_floatDataset.resize( m_columns * m_frames * m_rows);
 	for(unsigned int i = 0; i < m_floatDataset.size(); ++i )
