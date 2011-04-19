@@ -267,7 +267,7 @@ double ODFs::setAngle(double angle)
 	std::pair<float,float> res;
 	
 	vectUnique.resize(1);
-	
+	std::cout <<  m_phiThetaDirection[m_currentLOD].getDimensionY() << std::endl;
 	for(unsigned int i=0; i < m_phiThetaDirection[m_currentLOD].getDimensionY(); i++)
 	{
 		bool unique = true;
@@ -340,9 +340,9 @@ void ODFs::setNbors(std::vector<int>* Nbors, double angle)
 	for(unsigned int i = 0; i < m_phiThetaDirection[m_currentLOD].getDimensionY(); i++) 
 	{
 	
-		d.x = std::cos(m_phiThetaDirection[m_currentLOD](0,i))*std::sin(m_phiThetaDirection[m_currentLOD](1,i));
-		d.y = std::sin(m_phiThetaDirection[m_currentLOD](0,i))*std::sin(m_phiThetaDirection[m_currentLOD](1,i));
-		d.z = std::cos(m_phiThetaDirection[m_currentLOD](1,i));
+		d.x = std::cos(m_phiThetaDirection[m_currentLOD](i,0))*std::sin(m_phiThetaDirection[m_currentLOD](i,1));
+		d.y = std::sin(m_phiThetaDirection[m_currentLOD](i,0))*std::sin(m_phiThetaDirection[m_currentLOD](i,1));
+		d.z = std::cos(m_phiThetaDirection[m_currentLOD](i,1));
 		
 		/* 
 		   look at other possible direction sampling neighbors
@@ -354,9 +354,9 @@ void ODFs::setNbors(std::vector<int>* Nbors, double angle)
 		{
 			if(j != i ) 
 			{
-				d2.x = std::cos(m_phiThetaDirection[m_currentLOD](0,j))*std::sin(m_phiThetaDirection[m_currentLOD](1,j));
-				d2.y = std::sin(m_phiThetaDirection[m_currentLOD](0,j))*std::sin(m_phiThetaDirection[m_currentLOD](1,j));
-				d2.z = std::cos(m_phiThetaDirection[m_currentLOD](1,j));
+				d2.x = std::cos(m_phiThetaDirection[m_currentLOD](j,0))*std::sin(m_phiThetaDirection[m_currentLOD](j,1));
+				d2.y = std::sin(m_phiThetaDirection[m_currentLOD](j,0))*std::sin(m_phiThetaDirection[m_currentLOD](j,1));
+				d2.z = std::cos(m_phiThetaDirection[m_currentLOD](j,1));
 			    	    
 				float ang = 180*std::acos(d.x*d2.x + d.y*d2.y + d.z*d2.z)/M_PI;
 	    
@@ -461,9 +461,9 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
 		indices.push_back(i);
 		
 		  Vector dd;
-		  dd[0] = std::cos(m_phiThetaDirection[m_currentLOD](0,i))*std::sin(m_phiThetaDirection[m_currentLOD](1,i));
-		  dd[1] = std::sin(m_phiThetaDirection[m_currentLOD](0,i))*std::sin(m_phiThetaDirection[m_currentLOD](1,i));
-		  dd[2] =  std::cos(m_phiThetaDirection[m_currentLOD](1,i));
+		  dd[0] = std::cos(m_phiThetaDirection[m_currentLOD](i,0))*std::sin(m_phiThetaDirection[m_currentLOD](i,1));
+		  dd[1] = std::sin(m_phiThetaDirection[m_currentLOD](i,0))*std::sin(m_phiThetaDirection[m_currentLOD](i,1));
+		  dd[2] =  std::cos(m_phiThetaDirection[m_currentLOD](i,1));
 		  max_dir.push_back(dd);
 
 	  }

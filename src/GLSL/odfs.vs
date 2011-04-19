@@ -2,8 +2,11 @@ attribute float radius;
 uniform vec2    radiusMinMax;
 uniform vec3  	offset, axisFlip;
 uniform int   	mapOnSphere, swapRadius;
+uniform int     showAxis;
 varying float 	texturePosition;
 varying vec3 	vertexPos;
+
+	
 
 void main()
 {
@@ -30,7 +33,11 @@ void main()
 		newRadius *= -1.0;
 
 	// Set the correct flip and apply the newRadius modifier to this odf.
-	tempVertex *= axisFlip * newRadius;
+	if( showAxis == 0 )
+		tempVertex *= (newRadius * axisFlip);
+	else
+		vertexPos = gl_Vertex.xyz;
+		
 	
 	// Place the odf in the center of its voxel.
 	tempVertex += offset;
