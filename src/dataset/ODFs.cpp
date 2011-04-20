@@ -361,15 +361,6 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     m_flippedAxes[1] ? l_flippedAxes[1] = -1.0f : l_flippedAxes[1] = 1.0f;
     m_flippedAxes[2] ? l_flippedAxes[2] = -1.0f : l_flippedAxes[2] = 1.0f;
     
-    //flip ODF to fiberNavigator world original
-//     if( i_axis == Y_AXIS ) { //Coronal: flip x
-//         l_flippedAxes[0] *= -1.0f;  
-//     } else if( i_axis == Z_AXIS ){  //Axial: flip x,y
-//         l_flippedAxes[0] *= -1.0f;
-//         l_flippedAxes[1] *= -1.0f;        
-//     }       
-
-
     //For VisContest with sh basis computed from ptk, Max Thesis
     if( i_axis == Y_AXIS ) { //Coronal: flip x
        l_flippedAxes[0] *= -1.0f;  

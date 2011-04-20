@@ -637,7 +637,7 @@ bool Fibers::loadDmri(wxString i_fileName)
     fclose(l_file);
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
-    m_dh->m_countFibers = m_countLines;   
+    m_dh->m_countFibers = m_countLines + 1;   
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
