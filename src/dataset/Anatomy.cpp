@@ -1018,8 +1018,8 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
 	parent->Connect(m_pradiobtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnSelectBck));
 
 	m_psliderGraphSigma = new MySlider(parent, wxID_ANY,0,0,500, wxDefaultPosition, wxSize(80,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_psliderGraphSigma->SetValue(25);
-	setGraphSigma(25.0f);
+    m_psliderGraphSigma->SetValue(200);
+	setGraphSigma(200.0f);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
 	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Sigma "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderGraphSigma,0,wxALIGN_CENTER);

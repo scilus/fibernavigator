@@ -1395,7 +1395,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, f
 		gc.setDataCost(indice, 1, numeric_limits<float>::infinity());
 	}
 
-	//Set smooth cost
+	//Set smooth cost 
 	for (int l1 = 0; l1 < numLabels; l1++)
 	{
 		for (int l2 = 0; l2 < numLabels; l2++)
