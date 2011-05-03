@@ -748,7 +748,7 @@ void ODFs::getSphericalHarmonicMatrixPTK( const vector< float > &i_meshPts,
                else if( m == 0 )
                   o_shMatrix(i,j) = real(cplx_1);
                else
-                  o_shMatrix(i,j) = std::sqrt(2.0)*real(cplx_1);
+                  o_shMatrix(i,j) = std::sqrt(2.0)*real(cplx_2);
 
                ++j;
                
