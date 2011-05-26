@@ -2862,7 +2862,7 @@ void MainFrame::OnBoxSizeX( wxCommandEvent &event )
 	Vector currSize;
 	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeX->GetValue().ToDouble(&sizeX);  
 	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
-	currSize.x = sizeX;
+	currSize.x = sizeX/m_datasetHelper->m_xVoxel;
 	((SelectionObject*)m_currentFNObject)->setSize(currSize);
 	
 	
@@ -2873,7 +2873,7 @@ void MainFrame::OnBoxSizeY( wxCommandEvent &event )
 	Vector currSize;
 	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeY->GetValue().ToDouble(&sizeY);  
 	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
-	currSize.y = sizeY;
+	currSize.y = sizeY/m_datasetHelper->m_yVoxel;
 	((SelectionObject*)m_currentFNObject)->setSize(currSize);
 	
 	
@@ -2884,7 +2884,7 @@ void MainFrame::OnBoxSizeZ( wxCommandEvent &event )
 	Vector currSize;
 	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeZ->GetValue().ToDouble(&sizeZ);  
 	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
-	currSize.z = sizeZ;
+	currSize.z = sizeZ/m_datasetHelper->m_zVoxel;
 	((SelectionObject*)m_currentFNObject)->setSize(currSize);
 	
 	
