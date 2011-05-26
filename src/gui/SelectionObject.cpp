@@ -1865,9 +1865,9 @@ void SelectionObject::createPropertiesSizer(MainFrame *parent)
 	l_sizer->Add(m_ctrlBoxZ,0,wxALIGN_CENTER);
 
 	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-	parent->Connect(m_ctrlBoxX->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionX));
-	parent->Connect(m_ctrlBoxY->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionY));
-	parent->Connect(m_ctrlBoxZ->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionZ));
+	parent->Connect(m_ctrlBoxX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionX));
+	parent->Connect(m_ctrlBoxY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionY));
+	parent->Connect(m_ctrlBoxZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionZ));
 	
 	m_propertiesSizer->AddSpacer(8);
 	l_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -1891,9 +1891,9 @@ void SelectionObject::createPropertiesSizer(MainFrame *parent)
 	l_sizer->Add(m_ctrlBoxSizeZ,0,wxALIGN_CENTER);
 
 	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-	parent->Connect(m_ctrlBoxSizeX->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxSizeX));
-	parent->Connect(m_ctrlBoxSizeY->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxSizeY));
-	parent->Connect(m_ctrlBoxSizeZ->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxSizeZ));
+	parent->Connect(m_ctrlBoxSizeX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeX));
+	parent->Connect(m_ctrlBoxSizeY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeY));
+	parent->Connect(m_ctrlBoxSizeZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeZ));
 
 }
 
@@ -1910,17 +1910,17 @@ void SelectionObject::updatePropertiesSizer()
 
 	if(m_boxMoved)
 	{
-		m_ctrlBoxX->SetValue(wxString::Format( wxT( "%.2f"), m_center.x));
-		m_ctrlBoxY->SetValue(wxString::Format( wxT( "%.2f"), m_center.y));
-		m_ctrlBoxZ->SetValue(wxString::Format( wxT( "%.2f"), m_center.z));
+		m_ctrlBoxX->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.x));
+		m_ctrlBoxY->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.y));
+		m_ctrlBoxZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.z));
 		m_boxMoved = false;
 	}
 
 	if(m_boxResized)
 	{
-		m_ctrlBoxSizeX->SetValue(wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel));
-		m_ctrlBoxSizeY->SetValue(wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel));
-		m_ctrlBoxSizeZ->SetValue(wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel));
+		m_ctrlBoxSizeX->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel));
+		m_ctrlBoxSizeY->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel));
+		m_ctrlBoxSizeZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel));
 		m_boxResized = false;
 	}
 
