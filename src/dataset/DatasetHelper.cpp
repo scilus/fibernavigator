@@ -184,11 +184,11 @@ bool DatasetHelper::load( const int i_index )
 bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha )
 {
     // check if dataset is already loaded and ignore it if yes
-    if( fileNameExists( i_fileName ) )
+    /*if( fileNameExists( i_fileName ) )
     {
         m_lastError = wxT( "dataset already loaded" );
         return false;
-    }
+    }*/
 
     // check if i_fileName is valid
     if( ! wxFile::Exists( i_fileName ) )

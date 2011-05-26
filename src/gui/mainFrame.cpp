@@ -1858,7 +1858,7 @@ void MainFrame::OnGlyphLODSliderMoved( wxCommandEvent& WXUNUSED(event) )
         if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
 		{
             ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_currentFNObject)->m_psliderLODValue->GetValue() );
-			((ODFs*)l_info)->isCalculate = false;
+			((ODFs*)l_info)->isAngleNborsEstimated = false;
 		}
     }
 }
@@ -2825,4 +2825,34 @@ void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
 {    
     refreshAllGLWidgets();
     m_datasetHelper->increaseAnimationStep();    
+}
+void MainFrame::OnBoxPositionX( wxCommandEvent &event )
+{    
+	double posX = 0;
+	Vector currPos;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxX->GetValue().ToDouble(&posX);  
+	currPos = ((SelectionObject*)m_currentFNObject)->getCenter();
+	((SelectionObject*)m_currentFNObject)->setCenter(posX,currPos.y,currPos.z);
+	
+	
+}
+void MainFrame::OnBoxPositionY( wxCommandEvent &event )
+{    
+	double posY = 0;
+	Vector currPos;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxY->GetValue().ToDouble(&posY);  
+	currPos = ((SelectionObject*)m_currentFNObject)->getCenter();
+	((SelectionObject*)m_currentFNObject)->setCenter(currPos.x,posY,currPos.z);
+	
+	
+}
+void MainFrame::OnBoxPositionZ( wxCommandEvent &event )
+{    
+	double posZ = 0;
+	Vector currPos;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxZ->GetValue().ToDouble(&posZ);  
+	currPos = ((SelectionObject*)m_currentFNObject)->getCenter();
+	((SelectionObject*)m_currentFNObject)->setCenter(currPos.x,currPos.y,posZ);
+	
+	
 }

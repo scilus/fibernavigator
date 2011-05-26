@@ -18,6 +18,7 @@
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../main.h"
 #include "../gui/mainFrame.h"
+#include <wx/textctrl.h>
 
 SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ):
     m_displayCrossSections     ( CS_NOTHING   ),
@@ -51,6 +52,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_stepSize              = 9;
     m_threshold             = 0.0f;
     m_treeId                = NULL;
+	m_boxMoved				= false;
 
     //Distance coloring
     m_DistColoring          = false;
@@ -99,7 +101,8 @@ void SelectionObject::moveBack()
 
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.y += m_stepSize;
-
+	
+	m_boxMoved = true;
     update();
 }
 
@@ -116,6 +119,7 @@ void SelectionObject::moveDown()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.z += m_stepSize;
 
+	m_boxMoved = true;
     update();
 }
 
@@ -132,6 +136,7 @@ void SelectionObject::moveForward()
     if( wxGetKeyState( WXK_SHIFT ) ) 
         m_center.y -= m_stepSize;
 
+	m_boxMoved = true;
     update();
 }
 
@@ -148,6 +153,7 @@ void SelectionObject::moveLeft()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.x -= m_stepSize;
 
+	m_boxMoved = true;
     update();
 }
 
@@ -164,6 +170,7 @@ void SelectionObject::moveRight()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.x += m_stepSize;
 
+	m_boxMoved = true;
     update();
 }
 
@@ -180,6 +187,7 @@ void SelectionObject::moveUp()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.z -= m_stepSize;
 
+	m_boxMoved = true;
     update();
 }
 
@@ -488,7 +496,8 @@ void SelectionObject::drag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_proje
     m_center.x += l_change.x;
     m_center.y += l_change.y;
     m_center.z += l_change.z;
-
+	
+	m_boxMoved = true;
     update();
 }
 
@@ -1826,6 +1835,50 @@ void SelectionObject::createPropertiesSizer(MainFrame *parent)
     m_pbtnSetAsDistanceAnchor->Enable(m_objectType == CISO_SURFACE_TYPE);
 
     m_propertiesSizer->Add(new wxStaticText( parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(200,15)));
+
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	
+	//l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Position"),wxDefaultPosition, wxSize(200,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+	m_ctrlBoxX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.x), wxDefaultPosition, wxSize(45,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+	l_sizer->Add(m_ctrlBoxX,0,wxALIGN_CENTER);
+	
+	
+	m_ctrlBoxY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.y), wxDefaultPosition, wxSize(45,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+	l_sizer->Add(m_ctrlBoxY,0,wxALIGN_CENTER);
+
+
+	m_ctrlBoxZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.z), wxDefaultPosition, wxSize(45,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+	l_sizer->Add(m_ctrlBoxZ,0,wxALIGN_CENTER);
+
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_ctrlBoxX->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionX));
+	parent->Connect(m_ctrlBoxY->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionY));
+	parent->Connect(m_ctrlBoxZ->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionZ));
+
+	l_sizer = new wxBoxSizer(wxHORIZONTAL);
+	//l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Size"),wxDefaultPosition, wxSize(200,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+	m_ctrlBoxSizeX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.x), wxDefaultPosition, wxSize(45,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+	l_sizer->Add(m_ctrlBoxSizeX,0,wxALIGN_CENTER);
+	
+	
+	m_ctrlBoxSizeY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.y), wxDefaultPosition, wxSize(45,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+	l_sizer->Add(m_ctrlBoxSizeY,0,wxALIGN_CENTER);
+
+
+	m_ctrlBoxSizeZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.z), wxDefaultPosition, wxSize(45,-1));
+	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+	l_sizer->Add(m_ctrlBoxSizeZ,0,wxALIGN_CENTER);
+
+	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+	parent->Connect(m_ctrlBoxSizeX->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionX));
+	parent->Connect(m_ctrlBoxSizeY->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionY));
+	parent->Connect(m_ctrlBoxSizeZ->GetId(),wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::OnBoxPositionZ));
+
 }
 
 void SelectionObject::updatePropertiesSizer()
@@ -1838,4 +1891,15 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleDisplayMeanFiber->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
     m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
     m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+
+	
+
+	if(m_boxMoved)
+	{
+		m_ctrlBoxX->SetValue(wxString::Format( wxT( "%.2f"), m_center.x));
+		m_ctrlBoxY->SetValue(wxString::Format( wxT( "%.2f"), m_center.y));
+		m_ctrlBoxZ->SetValue(wxString::Format( wxT( "%.2f"), m_center.z));
+		m_boxMoved = false;
+
+	}
 }

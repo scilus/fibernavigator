@@ -113,6 +113,9 @@ private:
     void OnGenerateFiberVolume              ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );
     void OnCreateFibersDensityTexture       ( wxCommandEvent& event );
+	void OnBoxPositionX						( wxCommandEvent& event );
+	void OnBoxPositionY						( wxCommandEvent& event );
+	void OnBoxPositionZ						( wxCommandEvent& event );
     // Spline Surface
     void OnNewSplineSurface                 ( wxCommandEvent& event );
     void OnToggleNormal                     ( wxCommandEvent& event );

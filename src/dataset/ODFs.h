@@ -45,7 +45,7 @@ public:
 
 	struct direction_value { double x,y,z,v; };
 	struct direction { double x,y,z; };
-	bool isCalculate;
+	bool isAngleNborsEstimated;
 	std::vector<int>* Nbors;
 	double angle;
 
@@ -114,6 +114,8 @@ private:
     vector< FMatrix >                 m_phiThetaDirection;    
     vector< float >                   m_meshPts;    
     map< int, pair< float, float > >  m_radiiMinMaxMap;
+	FMatrix							  phiThetaUnique;
+
 	
 
     int                               m_sh_basis;

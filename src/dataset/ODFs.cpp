@@ -33,7 +33,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     m_radiusAttribLoc( 0    ),
     m_radiusBuffer   ( NULL ),
     m_sh_basis       ( 0 ),
-	isCalculate ( false )
+	isAngleNborsEstimated ( false )
 {
     m_scalingFactor = 0.0f;
 
@@ -263,11 +263,11 @@ void ODFs::computeRadiiArray( const FMatrix &i_B, vector< float > &i_C, vector< 
 double ODFs::setAngle(double angle)
 { 
 	
-	std::vector<std::pair<float,float>> vectUnique;
+	std::vector<std::pair<float,float> > vectUnique;
 	std::pair<float,float> res;
 	
 	vectUnique.resize(1);
-	std::cout <<  m_phiThetaDirection[m_currentLOD].getDimensionY() << std::endl;
+
 	for(unsigned int i=0; i < m_phiThetaDirection[m_currentLOD].getDimensionY(); i++)
 	{
 		bool unique = true;
@@ -323,7 +323,7 @@ double ODFs::setAngle(double angle)
 			}
 	  }
 
-      //cout << angle << " is the minimum angle...\n";
+	  //std::cout << "Angle: " << angle << std::endl;
 	  return angle;
 }
 
@@ -363,7 +363,7 @@ void ODFs::setNbors(std::vector<int>* Nbors, double angle)
 				if(ang > 90)
 				  ang = 180 - ang;
 			  
-				if(fabs(angle - ang) < angle/3) 
+				if(fabs(angle - ang) < angle/3.0f) 
 				{ /* allow +- 1/3* angle  with neighborhing expected direction */
 				  neighbors_i.push_back(j);
 				}
@@ -373,7 +373,7 @@ void ODFs::setNbors(std::vector<int>* Nbors, double angle)
 		Nbors[i] = neighbors_i;
 		neighbors_i.clear();
 	}
-	isCalculate = true;
+	isAngleNborsEstimated = true;
 }
 /*
 	Extracts Main Directions of ODFs
@@ -384,7 +384,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
     std::vector<Vector> max_dir;
     std::vector<float> hemisODF;
 
-    float epsilon = 0.0;  //for equality measurement
+    float epsilon = 0.0f;  //for equality measurement
 
 	vector< float > ODF;
     pair< float, float > l_minMax;
@@ -458,12 +458,15 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
 
       if(candidate)
 	  {
-		indices.push_back(i);
+		  indices.push_back(i);
 		
+		  float phi = m_phiThetaDirection[m_currentLOD](i,0);
+		  float theta = m_phiThetaDirection[m_currentLOD](i,1);
+
 		  Vector dd;
-		  dd[0] = std::cos(m_phiThetaDirection[m_currentLOD](i,0))*std::sin(m_phiThetaDirection[m_currentLOD](i,1));
-		  dd[1] = std::sin(m_phiThetaDirection[m_currentLOD](i,0))*std::sin(m_phiThetaDirection[m_currentLOD](i,1));
-		  dd[2] =  std::cos(m_phiThetaDirection[m_currentLOD](i,1));
+		  dd[0] = std::cos(phi)*std::sin(theta);
+		  dd[1] = std::sin(phi)*std::sin(theta);
+		  dd[2] =  std::cos(theta);
 		  max_dir.push_back(dd);
 
 	  }
@@ -581,9 +584,9 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     m_flippedAxes[2] ? l_flippedAxes[2] = -1.0f : l_flippedAxes[2] = 1.0f;
     
     //For VisContest with sh basis computed from ptk, Max Thesis
-    if( i_axis == Y_AXIS ) { //Coronal: flip x
-       l_flippedAxes[0] *= -1.0f;  
-    } 
+    //if( i_axis == Y_AXIS ) { //Coronal: flip x
+    //   l_flippedAxes[0] *= -1.0f;  
+    //} 
     // Need a global flip in X on top of that, which is done above
 
     DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUni3Float(   "axisFlip",    l_flippedAxes               );
@@ -593,18 +596,16 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
 		vector<Vector> mainDirections;
 		
 		//We only need to calculate the angle and the nbors once
-		if(!isCalculate)
+		if(!isAngleNborsEstimated)
 		{
 			Nbors = new std::vector<int>[m_phiThetaDirection.at(m_currentLOD).getDimensionY()];
-			angle = 90.0f;
-
-			angle = setAngle(angle);
+			angle = setAngle(90.0f);
 			setNbors(Nbors,angle);
 		}
 
 		//Get the main directions only for non-null odfs
 		if(m_coefficients.at(currentIdx)[0] != 0)
-			mainDirections = getODFmaxNotNorm(m_coefficients.at(currentIdx),m_shMatrix[m_currentLOD],m_phiThetaDirection[m_currentLOD],0.5,angle,Nbors);
+			mainDirections = getODFmaxNotNorm(m_coefficients.at(currentIdx),m_shMatrix[m_currentLOD],m_phiThetaDirection[m_currentLOD],0,angle,Nbors);
 
 		//Throw the main directions to the Shader
 		for(unsigned int i =0; i < mainDirections.size(); i++)
