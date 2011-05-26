@@ -2856,3 +2856,36 @@ void MainFrame::OnBoxPositionZ( wxCommandEvent &event )
 	
 	
 }
+void MainFrame::OnBoxSizeX( wxCommandEvent &event )
+{    
+	double sizeX = 0;
+	Vector currSize;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeX->GetValue().ToDouble(&sizeX);  
+	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
+	currSize.x = sizeX;
+	((SelectionObject*)m_currentFNObject)->setSize(currSize);
+	
+	
+}
+void MainFrame::OnBoxSizeY( wxCommandEvent &event )
+{    
+	double sizeY = 0;
+	Vector currSize;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeY->GetValue().ToDouble(&sizeY);  
+	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
+	currSize.y = sizeY;
+	((SelectionObject*)m_currentFNObject)->setSize(currSize);
+	
+	
+}
+void MainFrame::OnBoxSizeZ( wxCommandEvent &event )
+{    
+	double sizeZ = 0;
+	Vector currSize;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeZ->GetValue().ToDouble(&sizeZ);  
+	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
+	currSize.z = sizeZ;
+	((SelectionObject*)m_currentFNObject)->setSize(currSize);
+	
+	
+}

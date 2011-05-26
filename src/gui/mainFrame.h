@@ -116,6 +116,9 @@ private:
 	void OnBoxPositionX						( wxCommandEvent& event );
 	void OnBoxPositionY						( wxCommandEvent& event );
 	void OnBoxPositionZ						( wxCommandEvent& event );
+	void OnBoxSizeX							( wxCommandEvent& event );
+	void OnBoxSizeY							( wxCommandEvent& event );
+	void OnBoxSizeZ							( wxCommandEvent& event );
     // Spline Surface
     void OnNewSplineSurface                 ( wxCommandEvent& event );
     void OnToggleNormal                     ( wxCommandEvent& event );

@@ -140,7 +140,7 @@ public :
 
     void       setPicked( int i_picked )              { m_hitResult.picked = i_picked;         };
 
-    void       setSize( Vector i_size )               { m_size = i_size; m_isDirty = true;     };
+    void       setSize( Vector i_size )               { m_size = i_size; m_isDirty = true; update();  };
     Vector     getSize()                              { return m_size;};
 
     void       setThreshold( float i_threshold );
@@ -173,6 +173,7 @@ public :
 	wxTextCtrl	  *m_ctrlBoxSizeY;
 	wxTextCtrl	  *m_ctrlBoxSizeZ;
 	bool		  m_boxMoved;
+	bool          m_boxResized;
 
 
 protected :
