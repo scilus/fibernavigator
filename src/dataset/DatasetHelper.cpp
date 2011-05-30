@@ -129,7 +129,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_selBoxChanged( true ),
     m_guiBlocked   ( false ),
 
-    m_geforceLevel( 0 ),
+    m_geforceLevel( 6 ),
 
     m_lastError     ( _T( "" ) ),
     m_lastPath      ( MyApp::respath + _T( "data" ) ),
@@ -150,8 +150,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     Matrix4fSetIdentity( &m_transform );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// Destructor
 DatasetHelper::~DatasetHelper()
 {
     printDebug( _T( "execute dataset helper destructor" ), 0 );
@@ -169,7 +167,7 @@ bool DatasetHelper::load( const int i_index )
 {
     wxArrayString l_fileNames;
     wxString l_caption          = wxT( "Choose a file" );
-    wxString l_wildcard         = wxT( "Nifti (*.nii)|*.nii*|*.*|*.*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
+    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
     wxString l_defaultDir       = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
     wxFileDialog dialog( m_mainFrame, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
@@ -193,8 +191,6 @@ bool DatasetHelper::load( const int i_index )
     return l_flag;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha )
 {
     // check if dataset is already loaded and ignore it if yes
@@ -397,8 +393,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
     return false;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::finishLoading( DatasetInfo* i_info )
 {
     m_guiBlocked = true;
@@ -456,8 +450,6 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
     m_mainFrame->refreshAllGLWidgets();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 bool DatasetHelper::fileNameExists( const wxString i_fileName )
 {
     int l_countDataSets = m_mainFrame->m_listCtrl->GetItemCount();
@@ -477,8 +469,6 @@ bool DatasetHelper::fileNameExists( const wxString i_fileName )
     return false;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 bool DatasetHelper::loadScene( const wxString i_fileName )
 {
     /*
@@ -734,7 +724,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
     m_mainFrame->m_mainGL->setRotation();
 
     updateLoadStatus();
-
     return true;
 }
 
@@ -888,7 +877,6 @@ std::vector< std::vector< SelectionObject* > > DatasetHelper::getSelectionObject
 
         l_id = m_mainFrame->m_treeWidget->GetNextChild( m_mainFrame->m_tSelectionObjectsId, l_cookie );
         l_selectionObjects.push_back( l_b );
-
     }
 
     return l_selectionObjects;
@@ -964,15 +952,8 @@ Vector DatasetHelper::mapMouse2World( const int i_x, const int i_y,GLdouble i_pr
 {
     glPushMatrix();
     doMatrixManipulation();
-
-    //GLint l_viewport[4];
-    //GLdouble l_projection[16];
-    //GLdouble l_modelview[16];    
+ 
     GLfloat l_winX, l_winY;
-
-    //glGetDoublev( GL_MODELVIEW_MATRIX, l_modelview );
-    //glGetDoublev( GL_PROJECTION_MATRIX, l_projection );
-    //glGetIntegerv( GL_VIEWPORT, l_viewport );
 
     l_winX = (float) i_x;
     l_winY = (float) i_viewport[3] - (float) i_y;
@@ -986,26 +967,14 @@ Vector DatasetHelper::mapMouse2World( const int i_x, const int i_y,GLdouble i_pr
 }
 
 Vector DatasetHelper::mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
-{
-    //glPushMatrix();
-    //doMatrixManipulation();
-
-    //GLint l_viewport[4];
-    //GLdouble l_projection[16];
-    //GLdouble l_modelview[16];
-    
+{   
     GLfloat l_winX, l_winY;
-
-    //glGetDoublev( GL_MODELVIEW_MATRIX, l_modelview );
-    //glGetDoublev( GL_PROJECTION_MATRIX, l_projection );
-    //glGetIntegerv( GL_VIEWPORT, l_viewport );
 
     l_winX = (float) i_x;
     l_winY = (float) i_viewport[3] - (float) i_y;
 
     GLdouble l_posX, l_posY, l_posZ;
     gluUnProject( l_winX, l_winY, 1, i_modelview, i_projection, i_viewport, &l_posX, &l_posY, &l_posZ );
-    //glPopMatrix();
 
     Vector l_vector( l_posX, l_posY, l_posZ );
     return l_vector;
@@ -1088,7 +1057,6 @@ void DatasetHelper::createIsoSurface()
 
     updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
-
 }
 
 void DatasetHelper::createDistanceMapAndIso()
@@ -1271,16 +1239,12 @@ void DatasetHelper::createCutDataset()
     m_mainFrame->refreshAllGLWidgets();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::changeZoom( const int i_z )
 {
     float delta = ( (int)m_zoom ) * 0.1f;
     i_z >= 0 ? m_zoom = wxMin( 10, m_zoom+delta ) : m_zoom = wxMax( 1, m_zoom-delta );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::moveScene( int i_x, int i_y )
 {
     float l_max = (float)wxMax( m_columns * m_xVoxel, wxMax( m_rows * m_yVoxel, m_frames * m_zVoxel ) );
@@ -1290,8 +1254,6 @@ void DatasetHelper::moveScene( int i_x, int i_y )
     m_yMove += (float)i_y / l_div;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::doMatrixManipulation()
 {
     float l_max = (float)wxMax( m_columns * m_xVoxel, wxMax( m_rows * m_yVoxel, m_frames * m_zVoxel) ) / 2.0;
@@ -1301,8 +1263,6 @@ void DatasetHelper::doMatrixManipulation()
     glTranslatef( -m_columns * m_xVoxel / 2.0, -m_rows * m_yVoxel / 2.0, -m_frames * m_zVoxel / 2.0 );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::updateView( const float i_x, const float i_y, const float i_z )
 {
     m_xSlize = i_x;
@@ -1320,8 +1280,6 @@ void DatasetHelper::updateView( const float i_x, const float i_y, const float i_
     }
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 bool DatasetHelper::getFiberDataset( Fibers* &io_f )
 {
     io_f = NULL;
@@ -1338,8 +1296,6 @@ bool DatasetHelper::getFiberDataset( Fibers* &io_f )
     return false;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 bool DatasetHelper::getSurfaceDataset( Surface *&io_s )
 {
     io_s = NULL;
@@ -1414,8 +1370,6 @@ void DatasetHelper::printwxT( const wxString i_string )
     free( l_cstring );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::printDebug( const wxString i_string, const int i_level )
 {
     if ( m_debugLevel > i_level )
@@ -1480,8 +1434,6 @@ void DatasetHelper::updateLoadStatus()
     }
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::doLicMovie( int i_mode )
 {
     wxString l_caption          = wxT( "Choose a file" );
@@ -1557,8 +1509,6 @@ void DatasetHelper::doLicMovie( int i_mode )
     m_geforceLevel = l_gf;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::licMovieHelper()
 {
     Surface* l_surface = new Surface( this );
@@ -1591,8 +1541,6 @@ void DatasetHelper::licMovieHelper()
 
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::createLicSliceSag( int i_slize )
 {
     int l_xs = (int)( i_slize * m_xVoxel );
@@ -1621,8 +1569,6 @@ void DatasetHelper::createLicSliceSag( int i_slize )
     licMovieHelper();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::createLicSliceCor( int i_slize )
 {
     int l_ys = (int)( i_slize * m_yVoxel );
@@ -1652,8 +1598,6 @@ void DatasetHelper::createLicSliceCor( int i_slize )
     licMovieHelper();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::createLicSliceAxi( int i_slize )
 {
     int l_zs = (int)( i_slize * m_zVoxel );
@@ -1683,8 +1627,6 @@ void DatasetHelper::createLicSliceAxi( int i_slize )
     licMovieHelper();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
 void DatasetHelper::increaseAnimationStep()
 {
     m_animationStep = ( m_animationStep + 1 ) % 1000000;

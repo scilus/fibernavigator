@@ -251,8 +251,10 @@ double Helper::getFAFromEigenValues( double i_eigenValue1, double i_eigenValue2,
     double l_denominator = pow( pow( i_eigenValue1, (double)2.0f ) +
                                 pow( i_eigenValue2, (double)2.0f ) +
                                 pow( i_eigenValue3, (double)2.0f ), (double)0.5f );
-
-    return pow( 3.0f / 2.0f, 0.5f ) * l_numerator / l_denominator;
+	if (l_denominator == 0)
+		return -1.0f;
+	else
+		return pow( 3.0f / 2.0f, 0.5f ) * l_numerator / l_denominator;
 }
 
 ///////////////////////////////////////////////////////////////////////////

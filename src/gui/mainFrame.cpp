@@ -240,7 +240,7 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     m_mainSizer->SetSizeHints( this );
 
     m_timer = new wxTimer( this );
-    m_timer->Start( 40 );
+    m_timer->Start( 50 );
 
     m_menuBar = new MenuBar();
     m_toolBar = new ToolBar(this);
@@ -259,8 +259,10 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
 
 MainFrame::~MainFrame()
 {
+    m_timer->Stop();
     m_datasetHelper->printDebug( _T( "main frame destructor" ), 0 );
-
+    m_datasetHelper->printDebug( _T( "timer stoped" ), 0 );    
+    
     if( m_datasetHelper )               
         delete m_datasetHelper;
 }
@@ -1257,8 +1259,11 @@ void MainFrame::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
     l_colorData.SetCustomColour( i++, color3 );
     l_colorData.SetCustomColour( i++, color4 );
     l_colorData.SetCustomColour( i++, color5 );
-
+#ifdef __WXMAC__
+    wxColourDialog dialog( this);
+#else
     wxColourDialog dialog( this, &l_colorData );
+#endif
     wxColour l_color;
 
     if( dialog.ShowModal() == wxID_OK )
@@ -2037,6 +2042,14 @@ void MainFrame::OnGlyphColorWithPosition( wxCommandEvent& event )
     if( m_currentFNObject != NULL && m_currentListItem != -1 )
     {
         ((Glyph*)m_currentFNObject)->setColorWithPosition( event.IsChecked() );
+    }
+}
+
+void MainFrame::OnNormalizeTensors( wxCommandEvent& event )
+{
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {		
+        ((Tensors*)m_currentFNObject)->normalize();		
     }
 }
 

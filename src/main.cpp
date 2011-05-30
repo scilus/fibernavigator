@@ -136,7 +136,7 @@ bool MyApp::OnInit( void )
 #endif
 
         // Create the main frame window
-        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 781"), wxPoint( 0, 0 ), wxSize( 1280, 680 ), wxDEFAULT_FRAME_STYLE );
+        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 823"), wxPoint( 0, 0 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
         // Give it an icon (this is ignored in MDI mode: uses resources)
 
 #ifdef __WXMSW__
@@ -145,7 +145,7 @@ bool MyApp::OnInit( void )
 
 #endif
         
-        frame->SetMinSize( wxSize( 945, 730 ) );
+        frame->SetMinSize( wxSize( 800, 600 ) );
         frame->SetSize( wxSize( 1024, 768 ) );
         
        // frame->init();            
@@ -281,4 +281,10 @@ wxString MyApp::wxFindAppPath( const wxString& argv0, const wxString& cwd, const
 
     // Failed
     return wxEmptyString;
+}
+
+int MyApp::OnExit()
+{
+    cout << "exiting" << endl;
+    return 0;
 }

@@ -38,19 +38,16 @@ void FgeGLTexture::saveImageToPPM(const char* filename)
         bind();
         glGetTexImage( target, 0, GL_RGBA, type, tmpImageData);
         
-        for ( unsigned int i = 0 ; i < height ; ++i )
+        for ( unsigned int i = 1 ; i <= height ; ++i )
         {
             for ( unsigned int j = 0 ; j < width * 4 ; ++j )
             {
-                imageData[i * width * 4 + j     ] = tmpImageData[(height - i) * width * 4 + j   ];
-                imageData[i * width * 4 + j + 1 ] = tmpImageData[(height - i) * width * 4 + j + 1 ];
-                imageData[i * width * 4 + j + 2 ] = tmpImageData[(height - i) * width * 4 + j + 2 ];
-                //imageData[i * width + j + 3 ] = tmpImageData[(height - i) * width + j + 3 ];
+                imageData[(i-1) * width * 4 + j     ] = tmpImageData[(height - i) * width * 4 + j   ];
+                imageData[(i-1) * width * 4 + j + 1 ] = tmpImageData[(height - i) * width * 4 + j + 1 ];
+                imageData[(i-1) * width * 4 + j + 2 ] = tmpImageData[(height - i) * width * 4 + j + 2 ];                
             }
         }
-        
 
-        // finally write
         ofstream o( filename );
         o << "P3\n# Texture\n"<< width << " " << height << "\n255\n";
 
@@ -61,6 +58,7 @@ void FgeGLTexture::saveImageToPPM(const char* filename)
 
         o.close();
         delete[] imageData;
+        delete[] tmpImageData;
     }
     else if ( type == GL_BYTE )
     {

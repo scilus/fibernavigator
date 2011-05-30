@@ -21,6 +21,7 @@
 Tensors::Tensors( DatasetHelper* i_datasetHelper ) :
     Glyph              ( i_datasetHelper )
 {
+	m_isNormalized = false;
     m_scalingFactor = 5.0f;
     m_currentLOD = LOD_3;
     // Generating hemispheres
@@ -114,7 +115,7 @@ bool Tensors::loadNifti( wxString i_fileName )
        return false;
     
     m_isLoaded = true;
-
+	normalize();
     return true;
 }
 
@@ -161,9 +162,7 @@ bool Tensors::createStructure( vector< float >& i_fileFloatData )
                 // Set the info of this tensor so we will be able to draw it.
                 setTensorInfo( l_tensorField.getTensorAtIndex( z * l_rowTimesColumns         + 
                                                                y * m_datasetHelper.m_columns +
-                                                               x                               ),
-                               m_tensorsMatrix,
-                               m_tensorsFA );
+                                                               x                               ));
             }
 
     return true;
@@ -177,8 +176,7 @@ bool Tensors::createStructure( vector< float >& i_fileFloatData )
 // o_matrixVector   : The vector where the calculated matrix will be pushed. 
 // o_FAVector       : The vector where the calculated FA will be pushed. 
 ///////////////////////////////////////////////////////////////////////////
-void Tensors::setTensorInfo( FTensor i_FTensor, vector< FMatrix > &o_matrixVector, 
-                             vector< float > &o_FAVector )
+void Tensors::setTensorInfo( FTensor i_FTensor)
 {
     FMatrix l_transMatrix = FMatrix( 3, 3 );
     F::FVector l_eigenValues( 0.0, 0.0, 0.0 );
@@ -209,36 +207,61 @@ void Tensors::setTensorInfo( FTensor i_FTensor, vector< FMatrix > &o_matrixVecto
 
     // This means that all the eigen values where < EPSILON, we set this tensor 
     // matrix and FA to some default values because we will not display this tensor anyway.
-    if( l_count == 3 )
+    if( l_count < 3 )
     {
-        o_FAVector.push_back( -1.0f );
-        o_matrixVector.push_back( l_transMatrix );
-        return;
-    }
+		//slow on linux
+		//l_eigenVectors[0].normalize();
+		//l_eigenVectors[1].normalize();
+		//l_eigenVectors[2].normalize();
+		//l_eigenValues.normalize();
+		
+		l_eigenValues[0]*=VISUALIZATION_FACTOR;
+		l_eigenValues[1]*=VISUALIZATION_FACTOR;
+		l_eigenValues[2]*=VISUALIZATION_FACTOR;
+	    
+		l_transMatrix( 0, 0 ) = l_eigenValues[0] * l_eigenVectors[0][0];
+		l_transMatrix( 1, 0 ) = l_eigenValues[0] * l_eigenVectors[0][1];
+		l_transMatrix( 2, 0 ) = l_eigenValues[0] * l_eigenVectors[0][2];
 
-    l_eigenVectors[0].normalize();
-    l_eigenVectors[1].normalize();
-    l_eigenVectors[2].normalize();
-    l_eigenValues.normalize();
+		l_transMatrix( 0, 1 ) = l_eigenValues[1] * l_eigenVectors[1][0];
+		l_transMatrix( 1, 1 ) = l_eigenValues[1] * l_eigenVectors[1][1];
+		l_transMatrix( 2, 1 ) = l_eigenValues[1] * l_eigenVectors[1][2];
 
-    // Calculate the matrix representing this tensor.
-    l_transMatrix( 0, 0 ) = l_eigenValues[0] * l_eigenVectors[0][0];
-    l_transMatrix( 1, 0 ) = l_eigenValues[0] * l_eigenVectors[0][1];
-    l_transMatrix( 2, 0 ) = l_eigenValues[0] * l_eigenVectors[0][2];
-
-    l_transMatrix( 0, 1 ) = l_eigenValues[1] * l_eigenVectors[1][0];
-    l_transMatrix( 1, 1 ) = l_eigenValues[1] * l_eigenVectors[1][1];
-    l_transMatrix( 2, 1 ) = l_eigenValues[1] * l_eigenVectors[1][2];
-
-    l_transMatrix( 0, 2 ) = l_eigenValues[2] * l_eigenVectors[2][0];
-    l_transMatrix( 1, 2 ) = l_eigenValues[2] * l_eigenVectors[2][1];
-    l_transMatrix( 2, 2 ) = l_eigenValues[2] * l_eigenVectors[2][2];
-
+		l_transMatrix( 0, 2 ) = l_eigenValues[2] * l_eigenVectors[2][0];
+		l_transMatrix( 1, 2 ) = l_eigenValues[2] * l_eigenVectors[2][1];
+		l_transMatrix( 2, 2 ) = l_eigenValues[2] * l_eigenVectors[2][2];
+	}
     // Saves the FA of this tensor to be able to set it's color when drawing it.
-    o_FAVector.push_back( Helper::getFAFromEigenValues( l_eigenValues[0], 
-                                                        l_eigenValues[1], l_eigenValues[2] ) );
+	m_tensorsFA.push_back( Helper::getFAFromEigenValues( l_eigenValues[0], l_eigenValues[1], l_eigenValues[2] ) );
     // Saves the matrix of this tensor to be able to deform it's points when drawing it.
-    o_matrixVector.push_back( l_transMatrix );
+	m_tensorsMatrix.push_back( l_transMatrix );
+	//Saves eigen values
+	m_tensorsEigenValues.push_back( l_eigenValues );
+}
+
+void Tensors::normalize()
+{
+	int len = m_datasetHelper.m_columns*m_datasetHelper.m_rows*m_datasetHelper.m_frames;
+	for (int i=0; i<len; i++)
+	{	
+		double correction = sqrt(m_tensorsEigenValues[i][0]*m_tensorsEigenValues[i][0] + m_tensorsEigenValues[i][1]*m_tensorsEigenValues[i][1] + m_tensorsEigenValues[i][2]*m_tensorsEigenValues[i][2]);
+		if (m_isNormalized)
+		{
+			correction = 1/correction;
+		}
+		m_tensorsMatrix[i]( 0, 0 ) /= correction;
+		m_tensorsMatrix[i]( 1, 0 ) /= correction;
+		m_tensorsMatrix[i]( 2, 0 ) /= correction;
+
+		m_tensorsMatrix[i]( 0, 1 ) /= correction;
+		m_tensorsMatrix[i]( 1, 1 ) /= correction;
+		m_tensorsMatrix[i]( 2, 1 ) /= correction;
+
+		m_tensorsMatrix[i]( 0, 2 ) /= correction;
+		m_tensorsMatrix[i]( 1, 2 ) /= correction;
+		m_tensorsMatrix[i]( 2, 2 ) /= correction;
+	}
+	m_isNormalized = !m_isNormalized;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -428,18 +451,21 @@ void Tensors::setScalingFactor( float i_scalingFactor )
 void Tensors::createPropertiesSizer(MainFrame *parent)
 {
     Glyph::createPropertiesSizer(parent);
-    m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));
-    wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(68,1,0);
-    l_sizer->Add(m_pradiobtnAxes);
-    m_psizerDisplay->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnGlyphAxesSelected));
+	m_pbtnNormalize = new wxToggleButton(parent, wxID_ANY, wxT("Normalize"), wxDefaultPosition, wxSize(140,-1));	
+    parent->Connect(m_pbtnNormalize->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED,wxCommandEventHandler(MainFrame::OnNormalizeTensors));
+	m_propertiesSizer->Add(m_pbtnNormalize,0,wxALIGN_CENTER);
+
+    m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));    
+    m_psizerDisplay->Add(m_pradiobtnAxes);
+	parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnGlyphAxesSelected));
     m_pradiobtnAxes->SetValue          (isDisplayShape(AXES));
 }
 
 void Tensors::updatePropertiesSizer()
 {
     Glyph::updatePropertiesSizer();
+
+	m_pbtnNormalize->SetValue(m_isNormalized);
 
 }
 

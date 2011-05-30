@@ -7,6 +7,7 @@ class MyApp : public wxApp
 {
 public:
     bool OnInit(void);
+    int  OnExit();
 
 private:
     wxString wxFindAppPath(const wxString& argv0, const wxString& cwd,
