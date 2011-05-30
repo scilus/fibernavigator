@@ -1245,6 +1245,7 @@ void ODFs::updatePropertiesSizer()
     m_psliderLightZPosition->Enable(false);
     //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
     m_psliderScalingFactor->Enable (false);
+	m_pRadiobtnPTKBasis->Enable(false);
 
 	
 }
