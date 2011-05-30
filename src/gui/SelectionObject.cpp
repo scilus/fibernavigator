@@ -20,6 +20,10 @@
 #include "../gui/mainFrame.h"
 #include <wx/textctrl.h>
 
+#include <iostream>
+#include <fstream>
+
+
 SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ):
     m_displayCrossSections     ( CS_NOTHING   ),
     m_displayDispersionCone    ( DC_NOTHING   )
@@ -725,6 +729,15 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
     m_meanFiberPoints.clear();
     getMeanFiber( l_selectedFibersPoints, MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
 
+	/* Ecriture directe du fichier txt concernant la mean fiber */
+	ofstream fichier("test.txt", ios::out | ios::trunc);  //déclaration du flux et ouverture du fichier
+	if(fichier)  // si l'ouverture a réussi
+    {
+		for (int i = 0 ; i < MEAN_FIBER_NB_POINTS ; i++)
+		fichier << m_meanFiberPoints[i].x << " " <<  m_meanFiberPoints[i].y << " " << m_meanFiberPoints[i].z << "\n";
+	}
+	fichier.close();
+	
     // Once the vector is filled up with the points data we can calculate the fibers info grid items.
     getFibersCount                  ( o_gridInfo.m_count             );
     getMeanFiberValue               ( l_selectedFibersPoints, 
@@ -788,40 +801,62 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
                                           unsigned int                i_nbPoints,
                                           vector< Vector >           &o_meanFiberPoints )
 {
-    o_meanFiberPoints.resize( i_nbPoints );
+	o_meanFiberPoints.resize( i_nbPoints );
 
-    for( unsigned int i = 0; i < i_fibersPoints.size(); ++i )
+	for( unsigned int i = 0; i < i_fibersPoints.size(); ++i )
     {
         unsigned int l_currentFiberNbPoints = i_fibersPoints[i].size();
-        // The -1 is because we dont take into consideration the number of points but 
-        // the number of vector between the points.
-        float        l_currentFiberRatio    = (float)( i_fibersPoints[i].size() - 1 ) / ( i_nbPoints - 1 );
         
-        // The first and the last point of every fibers does not need to be calculated.
-        o_meanFiberPoints[0]              += i_fibersPoints[i][0];
-        o_meanFiberPoints[i_nbPoints - 1] += i_fibersPoints[i][l_currentFiberNbPoints - 1] ;
+		// The -1 is because we dont take into consideration the number of points but 
+        // the number of vector between the points.
+        
+		float        l_currentFiberRatio    = (float)( i_fibersPoints[i].size() - 1 ) / ( i_nbPoints - 1 );
+        
+		// These two variable help to know if the fibers are in the same direction
+		float comp_first_pt = abs(i_fibersPoints[i][0].x-i_fibersPoints[0][0].x) + 
+							  abs(i_fibersPoints[i][0].y-i_fibersPoints[0][0].y) +
+							  abs(i_fibersPoints[i][0].z-i_fibersPoints[0][0].z);
 
-        for( unsigned int j = 1; j < i_nbPoints - 1; ++j )
-        {
-            // If the current fiber as the same amount of point we want to approximate, 
-            // we do not need to approximate anything.
-            if( l_currentFiberNbPoints  == i_nbPoints )
-            {
-                o_meanFiberPoints[j] += i_fibersPoints[i][j];
-            }
-            else
-            {
-                float l_currentPointInterpolationRatio = l_currentFiberRatio * j;
-                
-                // Calculating the ratio of the interpolation.
-                int l_pointBelow = (int)l_currentPointInterpolationRatio;
-                l_currentPointInterpolationRatio -= l_pointBelow;
-                
-                // Simple interpolation.
-                o_meanFiberPoints[j] += ( ( i_fibersPoints[i][l_pointBelow]     * ( 1.0 - l_currentPointInterpolationRatio ) ) + 
-                                          ( i_fibersPoints[i][l_pointBelow + 1] *         l_currentPointInterpolationRatio ) );
-            }
-        }
+		float comp_last_pt = abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].x-i_fibersPoints[0][0].x) +
+							 abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].y-i_fibersPoints[0][0].y) +
+							 abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].z-i_fibersPoints[0][0].z);
+
+		if(comp_first_pt < comp_last_pt)    
+		{
+
+			o_meanFiberPoints[0]              += i_fibersPoints[i][0];
+			o_meanFiberPoints[i_nbPoints - 1] += i_fibersPoints[i][l_currentFiberNbPoints - 1] ;
+
+			for( unsigned int j = 1; j < i_nbPoints - 1; ++j )
+			{
+				float l_currentPointInterpolationRatio = l_currentFiberRatio * j;
+             
+				 // Calculating the ratio of the interpolation.
+				int l_pointBelow = (int)l_currentPointInterpolationRatio;
+				l_currentPointInterpolationRatio -= l_pointBelow;
+				// Simple interpolation.
+				o_meanFiberPoints[j] += ( ( i_fibersPoints[i][l_pointBelow]     * ( 1.0 - l_currentPointInterpolationRatio ) ) + 
+					                    ( i_fibersPoints[i][l_pointBelow + 1] *         l_currentPointInterpolationRatio ) );
+			}
+		}
+		else
+		{
+
+			o_meanFiberPoints[0]              += i_fibersPoints[i][l_currentFiberNbPoints - 1];
+			o_meanFiberPoints[i_nbPoints - 1] += i_fibersPoints[i][0];
+			
+			for( unsigned int j = i_nbPoints - 2 ; j > 0 ; --j )	
+			{
+				float l_currentPointInterpolationRatio = l_currentFiberRatio * j;
+             
+				 // Calculating the ratio of the interpolation.
+				int l_pointBelow = (int)l_currentPointInterpolationRatio;
+				l_currentPointInterpolationRatio -= l_pointBelow;
+				// Simple interpolation.
+				o_meanFiberPoints[i_nbPoints-j-1] += ( ( i_fibersPoints[i][l_pointBelow]     * ( 1.0 - l_currentPointInterpolationRatio ) ) + 
+					                    ( i_fibersPoints[i][l_pointBelow + 1] *           l_currentPointInterpolationRatio ) );
+			}			
+		}
     }
 
     for( unsigned int i = 0; i < o_meanFiberPoints.size(); ++i )
@@ -898,23 +933,26 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fib
 
     unsigned int l_count = 0;
     unsigned int l_pos   = 0;
-
-    for( unsigned int i = 0; i < i_fibersPoints.size(); ++i )
+	
+    for( unsigned int i = 0; i < i_fibersPoints.size(); i++ )
     {
-        for( unsigned int j = 0; j < i_fibersPoints[i].size(); ++j )
+        for( unsigned int j = 0; j < i_fibersPoints[i].size(); j++ )
         {
-            l_pos = i_fibersPoints[i][j].x +
-                    i_fibersPoints[i][j].y * m_datasetHelper->m_columns +
-                    i_fibersPoints[i][j].z * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
+            l_pos = i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel +
+                    i_fibersPoints[i][j].y * m_datasetHelper->m_columns / m_datasetHelper->m_yVoxel +
+                    i_fibersPoints[i][j].z * m_datasetHelper->m_columns * m_datasetHelper->m_rows / (m_datasetHelper->m_yVoxel*m_datasetHelper->m_zVoxel);
+
+			Vector test = i_fibersPoints[i][j];
+			
 
             o_meanValue += (* ( m_datasetHelper->m_floatDataset ) )[l_pos];
 
             l_count++;
         }
     }
-
+	
     o_meanValue /= l_count;
-
+	
     return true;
 }
 
@@ -1078,9 +1116,9 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
     // We want to return the values in millimeters so we need to multiply them by the spacing in the anatomy file.
     float l_spacing = m_datasetHelper->m_xVoxel * m_datasetHelper->m_yVoxel * m_datasetHelper->m_zVoxel;
 
-    o_maxCrossSection  *= l_spacing;
-    o_minCrossSection  *= l_spacing;
-    o_meanCrossSection *= l_spacing;
+	o_maxCrossSection  *= l_spacing;
+	o_minCrossSection  *= l_spacing;
+	o_meanCrossSection *= l_spacing;
 
     return true;
 }
@@ -1710,13 +1748,18 @@ void SelectionObject::SetFiberInfoGridValues()
         FibersInfoGridParams l_params;
         calculateGridParams( l_params );
 
+
+
         m_pgridfibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ), l_params.m_count              ) );
         m_pgridfibersInfo->SetCellValue( 1,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanValue        ) );
         m_pgridfibersInfo->SetCellValue( 2,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanLength       ) );
         m_pgridfibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minLength        ) );
         m_pgridfibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxLength        ) );
         m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanCrossSection ) );
-        m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minCrossSection  ) );
+		if ( l_params.m_minCrossSection > l_params.m_count )
+			m_pgridfibersInfo->SetCellValue( 6,  0, wxT( "INF") );
+		else	
+			m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minCrossSection  ) );
         m_pgridfibersInfo->SetCellValue( 7,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxCrossSection  ) );
         m_pgridfibersInfo->SetCellValue( 8,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
         m_pgridfibersInfo->SetCellValue( 9,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
@@ -1834,7 +1877,7 @@ void SelectionObject::createPropertiesSizer(MainFrame *parent)
     parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnDisplayCrossSections));
     parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnDisplayDispersionTube));
 
-    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster() && m_objectType != CISO_SURFACE_TYPE && false); //bug with some fibers dataset sets
+    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster() && m_objectType != CISO_SURFACE_TYPE /* && false*/); //bug with some fibers dataset sets
     m_pbtnNewFibersColorVolume->Enable(getIsMaster());
     m_pbtnNewFibersDensityVolume->Enable(getIsMaster());
     m_ptoggleAndNot->Enable(!getIsMaster() && m_objectType != CISO_SURFACE_TYPE);

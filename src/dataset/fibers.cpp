@@ -579,55 +579,65 @@ bool Fibers::loadDmri(wxString i_fileName)
     
     l_file = fopen(i_fileName.mb_str(),"r");
     if (l_file == NULL) return false;
-
-    char s1[10], s2[10], s3[10], s4[10];
+	char *s1 = new char[10];
+	char *s2 = new char[10];
+	char *s3 = new char[10];
+	char *s4 = new char[10];
     float f1,f2,f3,f4,f5;
+	int res;
     // the header
-    fscanf(l_file, "%f %s", &f1, &s1);
-    fscanf(l_file, "%f %s %s %s %s", &f1, &s1, &s2, &s3, &s4);
-    fscanf(l_file, "%f", &f1);
-    fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
-    fscanf(l_file, "%f %s %s %s %s", &f1, &s1, &s2, &s3, &s4);
-    fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
-    fscanf(l_file, "%d %f", &m_countLines, &f2);
+    res = fscanf(l_file, "%f %s", &f1, s1);
+	res = fscanf(l_file, "%f %s %s %s %s", &f1, s1, s2, s3, s4);
+    res = fscanf(l_file, "%f", &f1);
+	res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);    
+    res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
+    res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
+    res = fscanf(l_file, "%d %f", &m_countLines, &f2);
     
     // the list of points
     vector< vector<float> > lines;
     m_countPoints = 0;
     float back,front;
     for (int i=0; i<m_countLines; i++){        
-        fscanf(l_file, "%f %f %f", &back, &front, &f1);
+        res = fscanf(l_file, "%f %f %f", &back, &front, &f1);
         
-        int nbpoints = back+front -1;
-        if (nbpoints>1 && back>=1 && front>=1){        
+        int nbpoints = back+front;
+		if (back!=0 && front!=0)
+		{
+			nbpoints--;
+		}
+        if (nbpoints>0){        
             vector<float> cur_line;
-            cur_line.resize((back+front-1)*3);    
+			
+			cur_line.resize(nbpoints*3);  
+			
             //back
             for(int j=back-1;j>=0;j--){
-                fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);                
+                res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);                
                 cur_line[j*3]  = f1;
                 cur_line[j*3+1]= f2;
                 cur_line[j*3+2]= f3;                
             }
-            //repeated pts
-            fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);    
+			if (back !=0 && front!=0)
+			{
+				//repeated pts
+				res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);  
+			}
             //front    
             for (int j=back;j<nbpoints;j++){
-                fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);                    
+                res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);                    
                 cur_line[j*3]  = f1;
                 cur_line[j*3+1]= f2;
                 cur_line[j*3+2]= f3;
             }            
-            if (i%2==0){
-                m_countPoints += cur_line.size()/3;
-                lines.push_back(cur_line);
-            }
+            m_countPoints += cur_line.size()/3;
+            lines.push_back(cur_line);            
         } 
     }
     fclose(l_file);
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
-    m_dh->m_countFibers = m_countLines;   
+    m_dh->m_countFibers = m_countLines + 1;   
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -1050,7 +1060,7 @@ void Fibers::colorWithMinDistance( float* i_colorData )
         Vector theColor;
         float theAlpha;
 
-        if(m_localizedAlpha.size() != getPointCount())
+        if(m_localizedAlpha.size() != (unsigned int) getPointCount())
         {
             m_localizedAlpha = vector<float>(getPointCount());
         }
@@ -1114,7 +1124,7 @@ void Fibers::generateFiberVolume()
         l_colorData  = &m_colorArray[0];
     }
 
-    if(m_localizedAlpha.size() != getPointCount())
+    if(m_localizedAlpha.size() != (unsigned int)getPointCount())
     {
         m_localizedAlpha = vector<float>(getPointCount(),1);
     }
@@ -1298,10 +1308,6 @@ void Fibers::saveDMRI( wxString i_fileName )
     myfile.open( l_fn, ios::out );
 
     float dist = 0.5;
-    if (m_countLines>0)
-    {
-        dist = sqrt(m_pointArray[0]*m_pointArray[0]+m_pointArray[1]*m_pointArray[1]+m_pointArray[2]*m_pointArray[2]);
-    }
 
     myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
     myfile << nbrlines << " " << dist <<"\n";
@@ -2203,7 +2209,8 @@ void Fibers::drawSortedLines()
             l_lineIds[l_snp << 1] = getStartIndexForLine( i ) + k;
             l_lineIds[( l_snp << 1 ) + 1] = getStartIndexForLine( i ) + k + 1;
             
-            l_snippletSort[l_snp] = l_snp++;
+            l_snippletSort[l_snp] = l_snp;
+			l_snp++;
         }
     }    
 

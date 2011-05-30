@@ -2047,6 +2047,14 @@ void MainFrame::OnGlyphColorWithPosition( wxCommandEvent& event )
     }
 }
 
+void MainFrame::OnNormalizeTensors( wxCommandEvent& event )
+{
+    if( m_currentFNObject != NULL && m_currentListItem != -1 )
+    {		
+        ((Tensors*)m_currentFNObject)->normalize();		
+    }
+}
+
 void MainFrame::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED(event) )
 {
     if( m_currentFNObject != NULL && m_currentListItem != -1 )

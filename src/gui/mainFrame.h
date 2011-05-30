@@ -191,6 +191,7 @@ private:
     void OnGlyphAxesSelected                ( wxCommandEvent& event ); // The display the 3 vector representing the ellipsoid.    
     void OnGlyphMainAxisSelected            ( wxCommandEvent& event ); // The display of the main vector of the ellipsoid.    
     void OnGlyphColorWithPosition           ( wxCommandEvent& event ); // The color with position.
+	void OnNormalizeTensors                 ( wxCommandEvent& event ); //normalise tensors values;
 
 	void OnOriginalShBasis					( wxCommandEvent& event );
 	void OnDescoteauxShBasis				( wxCommandEvent& event );
