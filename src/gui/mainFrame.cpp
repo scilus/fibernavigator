@@ -1856,7 +1856,10 @@ void MainFrame::OnGlyphLODSliderMoved( wxCommandEvent& WXUNUSED(event) )
     {            
         DatasetInfo* l_info = (DatasetInfo*)m_currentFNObject;
         if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
+		{
             ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_currentFNObject)->m_psliderLODValue->GetValue() );
+			((ODFs*)l_info)->isAngleNborsEstimated = false;
+		}
     }
 }
 
@@ -2095,6 +2098,33 @@ void MainFrame::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(event) )
         l_current->setAlpha( (float)l_current->m_psliderOpacity->GetValue() / 100.0f);
         refreshAllGLWidgets();
     }
+}
+
+void MainFrame::OnOriginalShBasis( wxCommandEvent& WXUNUSED(event) )
+{
+	ODFs* l_dataset = new ODFs( m_datasetHelper );
+	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 0);
+
+}
+
+void MainFrame::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
+{
+	ODFs* l_dataset = new ODFs( m_datasetHelper );
+	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 1);
+
+}
+
+void MainFrame::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
+{
+	ODFs* l_dataset = new ODFs( m_datasetHelper );
+	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 2);
+
+}
+
+void MainFrame::OnPTKShBasis( wxCommandEvent& WXUNUSED(event) )
+{
+	ODFs* l_dataset = new ODFs( m_datasetHelper );
+	((ODFs*)m_currentFNObject)->changeShBasis(l_dataset, m_datasetHelper, 3);
 }
 
 void MainFrame::OnFiberFilterSlider( wxCommandEvent& WXUNUSED(event) )
@@ -2803,4 +2833,67 @@ void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
 {    
     refreshAllGLWidgets();
     m_datasetHelper->increaseAnimationStep();    
+}
+void MainFrame::OnBoxPositionX( wxCommandEvent &event )
+{    
+	double posX = 0;
+	Vector currPos;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxX->GetValue().ToDouble(&posX);  
+	currPos = ((SelectionObject*)m_currentFNObject)->getCenter();
+	((SelectionObject*)m_currentFNObject)->setCenter(posX,currPos.y,currPos.z);
+	
+	
+}
+void MainFrame::OnBoxPositionY( wxCommandEvent &event )
+{    
+	double posY = 0;
+	Vector currPos;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxY->GetValue().ToDouble(&posY);  
+	currPos = ((SelectionObject*)m_currentFNObject)->getCenter();
+	((SelectionObject*)m_currentFNObject)->setCenter(currPos.x,posY,currPos.z);
+	
+	
+}
+void MainFrame::OnBoxPositionZ( wxCommandEvent &event )
+{    
+	double posZ = 0;
+	Vector currPos;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxZ->GetValue().ToDouble(&posZ);  
+	currPos = ((SelectionObject*)m_currentFNObject)->getCenter();
+	((SelectionObject*)m_currentFNObject)->setCenter(currPos.x,currPos.y,posZ);
+	
+	
+}
+void MainFrame::OnBoxSizeX( wxCommandEvent &event )
+{    
+	double sizeX = 0;
+	Vector currSize;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeX->GetValue().ToDouble(&sizeX);  
+	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
+	currSize.x = sizeX/m_datasetHelper->m_xVoxel;
+	((SelectionObject*)m_currentFNObject)->setSize(currSize);
+	
+	
+}
+void MainFrame::OnBoxSizeY( wxCommandEvent &event )
+{    
+	double sizeY = 0;
+	Vector currSize;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeY->GetValue().ToDouble(&sizeY);  
+	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
+	currSize.y = sizeY/m_datasetHelper->m_yVoxel;
+	((SelectionObject*)m_currentFNObject)->setSize(currSize);
+	
+	
+}
+void MainFrame::OnBoxSizeZ( wxCommandEvent &event )
+{    
+	double sizeZ = 0;
+	Vector currSize;
+	((SelectionObject*)m_currentFNObject)->m_ctrlBoxSizeZ->GetValue().ToDouble(&sizeZ);  
+	currSize = ((SelectionObject*)m_currentFNObject)->getSize();
+	currSize.z = sizeZ/m_datasetHelper->m_zVoxel;
+	((SelectionObject*)m_currentFNObject)->setSize(currSize);
+	
+	
 }

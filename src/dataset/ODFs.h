@@ -35,6 +35,20 @@ public:
     bool loadNifti  ( wxString i_fileName );
     virtual void createPropertiesSizer(MainFrame *parent);
     virtual void updatePropertiesSizer();
+	
+	bool isShBasis( int i_sh_basis ) {return m_sh_basis == i_sh_basis;};
+	void setShBasis(int value){m_sh_basis = value;}
+	void changeShBasis(ODFs*,DatasetHelper*, int);
+
+	//Vars
+	wxString    m_lastODF_path;
+
+	struct direction_value { double x,y,z,v; };
+	struct direction { double x,y,z; };
+	bool isAngleNborsEstimated;
+	std::vector<int>* Nbors;
+	double angle;
+
 private:
     // From Glyph
     bool createStructure  ( vector< float >& i_fileFloatData );
@@ -72,10 +86,27 @@ private:
     void             loadRadiusBuffer           ( AxisType i_axis );
     void             reloadRadiusBuffer         ( AxisType i_axis );
 
+	std::vector<Vector> getODFmaxNotNorm(vector < float >  coefs,const FMatrix & SHmatrix, 
+					   const FMatrix & grad,
+					   const float & max_thresh,
+					   const float & angle,
+					   const std::vector<int> Nbors[]);
+	
+	void			setNbors(std::vector<int>* Nbors, double angle);
+	double			setAngle(double angle);
+
+	
+
+
     // Variables
     int     m_order;
     GLuint  m_radiusAttribLoc;
     GLuint* m_radiusBuffer; 
+	wxRadioButton *m_pRadiobtnOriginalBasis;
+	wxRadioButton *m_pRadiobtnDescoteauxBasis;
+	wxRadioButton *m_pRadiobtnTournierBasis;
+	wxRadioButton *m_pRadiobtnPTKBasis;
+
 
     vector< vector < float > >        m_coefficients;
     vector< vector < float > >        m_radius;
@@ -83,6 +114,9 @@ private:
     vector< FMatrix >                 m_phiThetaDirection;    
     vector< float >                   m_meshPts;    
     map< int, pair< float, float > >  m_radiiMinMaxMap;
+	FMatrix							  phiThetaUnique;
+
+	
 
     int                               m_sh_basis;
 };

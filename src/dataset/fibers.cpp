@@ -2392,8 +2392,8 @@ void Fibers::switchNormals( bool i_positive )
 void Fibers::freeArrays()
 {
     // Disabled for now, due to problems with glMapBuffer.
-    m_colorArray.clear();
-    m_normalArray.clear();
+    //m_colorArray.clear();
+    //m_normalArray.clear();
 }
 
 float Fibers::getPointValue( int i_index )
