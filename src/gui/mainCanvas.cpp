@@ -211,18 +211,24 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 
             if ( event.MiddleIsDown() )
             {
+				long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+				
+				Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
                 if ( !m_dh->m_ismDragging)
                 {
-					if (m_dh->m_isSegmentActive && m_dh->m_isFloodfillActive) //FloodFill Method (1click)
+					if (l_info->isSegmentOn && m_dh->m_isFloodfillActive) //FloodFill Method (1click)
 					{
 						m_hr = pick(event.GetPosition(), true);
 						segmentTumor();
+						
+						l_info->toggleSegment();
+						
 					}
 					else if (m_dh->m_isRulerToolActive){ //Ruler Tool
                         //TODO HACK to be corrected
                         m_hr = pick(event.GetPosition(), true);
                     }
-					else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && m_dh->m_isSegmentActive) //Prepare Drag for selectObj-GraphCut
+					else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && l_info->isSegmentOn) //Prepare Drag for selectObj-GraphCut
 					{
 						m_hr = pick(event.GetPosition(), true);
 
@@ -234,7 +240,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 						object.push_back(current);
 						
 					}
-					else if (!m_dh->m_isRulerToolActive && m_dh->m_isSelectBckActive && !m_dh->m_isSelectObjActive && m_dh->m_isSegmentActive) //Prepare Drag for selectBck-GraphCut
+					else if (!m_dh->m_isRulerToolActive && m_dh->m_isSelectBckActive && !m_dh->m_isSelectObjActive && l_info->isSegmentOn) //Prepare Drag for selectBck-GraphCut
 					{
 						m_hr = pick(event.GetPosition(), true);
 
@@ -249,7 +255,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
                 }
-                else  if (!m_dh->m_isRulerToolActive && !m_dh->m_isSegmentActive) //Move Scene
+                else  if (!m_dh->m_isRulerToolActive && !l_info->isSegmentOn) //Move Scene
                 {                    
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -257,7 +263,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->moveScene( xDrag, yDrag );
                     Refresh( false );
                 }
-				else if(!m_dh->m_isRulerToolActive && m_dh->m_isSegmentActive && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
+				else if(!m_dh->m_isRulerToolActive && l_info->isSegmentOn && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
 				{
 					m_hr = pick(event.GetPosition(), true);
 
@@ -274,7 +280,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 					m_dh->m_isObjfilled = true;
 					m_dh->m_isObjCreated = true;
 				}
-				else if(!m_dh->m_isRulerToolActive && m_dh->m_isSegmentActive && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
+				else if(!m_dh->m_isRulerToolActive && l_info->isSegmentOn && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
 				{
 					m_hr = pick(event.GetPosition(), true);
 
@@ -576,8 +582,11 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
     /**
      * check if one of the 3 planes is picked
      */
+
     float tpicked = 0;
     int picked = 0;
+	long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
     hitResult hr =
     { false, 0.0f, 0, NULL };
     if ( m_dh->m_showAxial )
@@ -589,7 +598,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
         {
             tpicked = hr.tmin;
             picked = AXIAL;
-			if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
+			if (m_dh->m_isRulerToolActive || l_info->isSegmentOn){
                 m_hitPts = bb->hitCoordinate(ray,CORONAL);
                 m_isRulerHit = isRuler;
             }
@@ -609,7 +618,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             {
                 picked = CORONAL;
                 tpicked = hr.tmin;
-                if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
+                if (m_dh->m_isRulerToolActive || l_info->isSegmentOn){
                     m_hitPts = bb->hitCoordinate(ray,AXIAL);
                     m_isRulerHit = isRuler;
                 }
@@ -630,7 +639,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             {
                 picked = SAGITTAL;
                 tpicked = hr.tmin;
-                if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
+                if (m_dh->m_isRulerToolActive || l_info->isSegmentOn){
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
                     m_isRulerHit = isRuler;
                 }                
@@ -783,7 +792,8 @@ void MainCanvas::render()
                 m_dh->m_theScene->renderScene();
 
                 //add the hit Point to ruler point list
-				if ( m_dh->m_isRulerToolActive && !m_dh->m_isSegmentActive && !m_dh->m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL)){
+				
+				if ( m_dh->m_isRulerToolActive && !m_dh->m_isFloodfillActive && !m_dh->m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL)){
                     if (m_dh->m_rulerPts.size()>0 ){
                         Vector lastPts = m_dh->m_rulerPts.back();
                         if( lastPts != m_hitPts){                            

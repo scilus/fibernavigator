@@ -2839,8 +2839,10 @@ void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
 	m_datasetHelper->m_isFloodfillActive = true;
 	m_datasetHelper->m_isSelectBckActive = false;
 	m_datasetHelper->m_isSelectObjActive = false;
+	((Anatomy*)m_currentFNObject)->toggleSegment();
+	
 
-
+	
 }
 
 void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )

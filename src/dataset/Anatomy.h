@@ -52,6 +52,8 @@ public:
    void     setFloodThreshold(float v)                   { m_floodThreshold = v;                 };
    float    getGraphSigma()								 { return m_graphSigma;                  };
    void     setGraphSigma(float v)                       { m_graphSigma = v;                 };
+   bool     isSegmentOn;
+   void		toggleSegment()								 { isSegmentOn = !isSegmentOn; m_ptoggleSegment->SetValue(isSegmentOn); };
 
 
    SelectionObject         *m_roi;
