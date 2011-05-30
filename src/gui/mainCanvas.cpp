@@ -1271,6 +1271,7 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
 }
 
 //Graph Cut segmentation
+//Library Copyright 2007 Olga Veksler
 void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, float sigma)
 {
 	std::cout << "Graphcut" << endl;
