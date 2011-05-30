@@ -63,9 +63,12 @@ private:
     void getSphericalHarmonicMatrixDescoteauxThesis ( const vector< float > &i_meshPts, 
                                                       FMatrix &o_phiThetaDirection, 
                                                       FMatrix &o_shMatrix );
+    void       getSphericalHarmonicMatrixPTK ( const vector< float > &i_meshPts, 
+                                               FMatrix &o_phiThetaDirection, 
+                                               FMatrix &o_shMatrix );
     void             getSphericalHarmonicMatrixTournier ( const vector< float > &i_meshPts, 
-                                                           FMatrix &o_phiThetaDirection, 
-                                                           FMatrix &o_shMatrix );
+                                                          FMatrix &o_phiThetaDirection, 
+                                                          FMatrix &o_shMatrix );
     void             loadRadiusBuffer           ( AxisType i_axis );
     void             reloadRadiusBuffer         ( AxisType i_axis );
 

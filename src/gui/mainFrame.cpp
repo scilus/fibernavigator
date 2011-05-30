@@ -1704,7 +1704,7 @@ void MainFrame::OnSetCMapNo( wxCommandEvent& WXUNUSED(event) )
 {
     m_datasetHelper->m_colorMap = -1;
     refreshAllGLWidgets();
-}
+} 
 
 /****************************************************************************************************
  *
