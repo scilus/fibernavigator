@@ -54,6 +54,7 @@ public:
    void     setGraphSigma(float v)                       { m_graphSigma = v;                 };
    bool     isSegmentOn;
    void		toggleSegment()								 { isSegmentOn = !isSegmentOn; m_ptoggleSegment->SetValue(isSegmentOn); };
+   
 
 
    SelectionObject         *m_roi;
@@ -72,6 +73,7 @@ public:
 	wxRadioButton	*m_pradiobtnObj;
 	wxButton		*m_pbtnGraphCut;
 	wxButton		*m_pbtnKmeans;
+	wxStaticText    *m_thresBox;
 
 	
 	

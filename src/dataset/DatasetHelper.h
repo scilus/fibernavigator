@@ -153,6 +153,7 @@ public:
 	bool			      m_isObjCreated;
 	bool				  m_isBckCreated;
 	bool				  m_isBoxCreated;
+	bool				  m_thresSliderMoved;
 	bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled && m_isBoxCreated); };
 
 

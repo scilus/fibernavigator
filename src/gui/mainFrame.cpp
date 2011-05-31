@@ -2848,7 +2848,8 @@ void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 {
 	((Anatomy*)m_currentFNObject)->setFloodThreshold(((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f);
-	std::cout << (((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f) << endl;
+	//std::cout << (((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f) << endl;
+	m_datasetHelper->m_thresSliderMoved = true;
 }
 
 void MainFrame::OnSliderGraphSigmaMoved( wxCommandEvent& WXUNUSED(event) )
