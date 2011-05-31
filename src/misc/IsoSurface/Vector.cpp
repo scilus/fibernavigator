@@ -30,6 +30,7 @@ Vector::Vector(double newX, double newY, double newZ)
     z = newZ;
 }
 
+
 Vector::Vector(double array[])
 {
     x = array[0];

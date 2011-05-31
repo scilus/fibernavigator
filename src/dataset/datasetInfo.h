@@ -109,6 +109,8 @@ public:
     wxButton        *m_pbtnClean;
     wxToggleButton  *m_ptoggleLIC;
 
+	
+
 
 protected:
     virtual void generateTexture()=0;

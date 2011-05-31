@@ -1080,6 +1080,7 @@ void MainFrame::OnNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::OnNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
     CreateNewSelectionObject( BOX_TYPE );    
+	m_datasetHelper->m_isBoxCreated = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2290,6 +2291,17 @@ void MainFrame::deleteListItem()
         {
             m_datasetHelper->deleteAllPoints();
         }
+		if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getName() == _T( "(Object)" ))
+        {            
+            m_datasetHelper->m_isObjCreated = false;
+			m_datasetHelper->m_isObjfilled = false;
+	
+        }
+		if (((DatasetInfo*)m_listCtrl->GetItemData( m_currentListItem))->getName() == _T( "(Background)" ))
+        {            
+            m_datasetHelper->m_isBckCreated = false;
+			m_datasetHelper->m_isBckfilled = false;
+        }
         deleteFNObject();
         m_listCtrl->DeleteItem( tmp );
         m_datasetHelper->updateLoadStatus();
@@ -2897,3 +2909,82 @@ void MainFrame::OnBoxSizeZ( wxCommandEvent &event )
 	
 	
 }
+
+void MainFrame::OnSegment(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_isSegmentActive = !m_datasetHelper->m_isSegmentActive;
+	
+	if(!m_mainGL->object.empty())
+		m_mainGL->object.clear();
+	if(!m_mainGL->background.empty())
+		m_mainGL->background.clear();
+
+	m_datasetHelper->m_isObjfilled = false;
+	m_datasetHelper->m_isBckfilled = false;
+	m_datasetHelper->m_isObjCreated = false;
+	m_datasetHelper->m_isBckCreated = false;
+}
+
+void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 0;
+	m_datasetHelper->m_isFloodfillActive = true;
+	m_datasetHelper->m_isSelectBckActive = false;
+	m_datasetHelper->m_isSelectObjActive = false;
+	((Anatomy*)m_currentFNObject)->toggleSegment();
+	
+
+	
+}
+
+void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
+{
+	((Anatomy*)m_currentFNObject)->setFloodThreshold(((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f);
+	//std::cout << (((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f) << endl;
+	m_datasetHelper->m_thresSliderMoved = true;
+}
+
+void MainFrame::OnSliderGraphSigmaMoved( wxCommandEvent& WXUNUSED(event) )
+{
+	((Anatomy*)m_currentFNObject)->setGraphSigma(((Anatomy*)m_currentFNObject)->m_psliderGraphSigma->GetValue());
+	std::cout << (((Anatomy*)m_currentFNObject)->m_psliderGraphSigma->GetValue()) << endl;
+}
+
+void MainFrame::OnKmeans( wxCommandEvent& WXUNUSED(event) )
+{
+	m_datasetHelper->m_SegmentMethod = 2;
+	m_mainGL->segmentTumor();
+}
+
+void MainFrame::OnSelectObj(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 1;
+	m_datasetHelper->m_isSelectBckActive = false;
+	m_datasetHelper->m_isFloodfillActive = false;
+	m_datasetHelper->m_isSelectObjActive = true;
+
+	
+	
+	
+}
+
+void MainFrame::OnSelectBck(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 1;
+	m_datasetHelper->m_isFloodfillActive = false;
+	m_datasetHelper->m_isSelectBckActive = true;
+	m_datasetHelper->m_isSelectObjActive = false;
+
+	
+}
+
+void MainFrame::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
+{
+	m_datasetHelper->m_SegmentMethod = 1;
+	m_datasetHelper->m_isFloodfillActive = false;
+	m_mainGL->segmentTumor();
+
+
+	
+}
+
