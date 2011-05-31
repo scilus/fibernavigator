@@ -1290,13 +1290,13 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
 //Library Copyright 2007 Olga Veksler
 void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, float sigma)
 {
-	std::cout << "Graphcut" << endl;
+	/*std::cout << "Graphcut" << endl;
 
 	int numLabels = 2;
 	int totalDimension, xDim, yDim, zDim;
 	int dataLength = m_dh->m_rows * m_dh->m_columns * m_dh->m_frames;
 	
-	/* Estimate Gaussian parameters*/
+	//Estimate Gaussian parameters
 	//Means
 	float means[2],stddev[2];
 	
@@ -1368,7 +1368,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, f
 	zDim = (z2-z1); //Z width
 	totalDimension = xDim * yDim * zDim;
 
-	/* Generate Graph cut algorithm */
+	//Generate Graph cut algorithm 
 	GCoptimizationGeneralGraph gc(totalDimension,numLabels);
 	
 	//Datacost with Gaussian parameters for all Obj/Bck - final nodes links
@@ -1389,7 +1389,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, f
 		}
 	}
 
-	/* Specify USER data cost between Obj/Back final nodes */
+	//Specify USER data cost between Obj/Back final nodes 
 	for(unsigned int i = 0; i < object.size(); i++)
 	{
 		int x = object.at(i)[0] - x1;
@@ -1421,7 +1421,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, f
 		}
 	}
 
-	/* Specify the Neighboring with the function to optimize*/
+	// Specify the Neighboring with the function to optimize
 	
 	//Neighbors in X
 	for (int z = 0; z < zDim; z++ )
@@ -1458,7 +1458,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, f
 
 	gc.expansion();
 
-	/* Save results */
+	//Save results 
 	for(int x = 0; x < xDim; x++)
 	{
 		for(int y = 0; y < yDim; y++)
@@ -1469,7 +1469,7 @@ void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, f
 				result->at((x+x1)+((y+y1)*m_dh->m_columns)+((z+z1)*m_dh->m_rows*m_dh->m_columns)) = value;
 			}
 		}
-	}
+	}*/
 }
 
 
