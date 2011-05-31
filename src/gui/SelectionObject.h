@@ -100,6 +100,7 @@ public :
     void update();
     virtual void createPropertiesSizer(MainFrame *parent);
     virtual void updatePropertiesSizer();
+	
     
     // Set/get and there affiliated functions
     bool       toggleIsActive();
@@ -139,7 +140,7 @@ public :
 
     void       setPicked( int i_picked )              { m_hitResult.picked = i_picked;         };
 
-    void       setSize( Vector i_size )               { m_size = i_size; m_isDirty = true;     };
+    void       setSize( Vector i_size )               { m_size = i_size; m_isDirty = true; update();  };
     Vector     getSize()                              { return m_size;};
 
     void       setThreshold( float i_threshold );
@@ -165,6 +166,15 @@ public :
     vector< bool > m_inBox;
     vector< bool > m_inBranch;
     Anatomy*       m_sourceAnatomy;
+	wxTextCtrl	  *m_ctrlBoxX;
+	wxTextCtrl	  *m_ctrlBoxY;
+	wxTextCtrl	  *m_ctrlBoxZ;
+	wxTextCtrl	  *m_ctrlBoxSizeX;
+	wxTextCtrl	  *m_ctrlBoxSizeY;
+	wxTextCtrl	  *m_ctrlBoxSizeZ;
+	bool		  m_boxMoved;
+	bool          m_boxResized;
+
 
 protected :
     virtual void drawObject( GLfloat* i_color ) = 0;
@@ -315,6 +325,7 @@ private:
     wxButton        *m_pbtnFlipNormal;
     wxBitmapButton  *m_pbtnSelectColor;
     wxButton        *m_pbtnSelectColorFibers;
+	
 
 
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.

@@ -113,6 +113,12 @@ private:
     void OnGenerateFiberVolume              ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );
     void OnCreateFibersDensityTexture       ( wxCommandEvent& event );
+	void OnBoxPositionX						( wxCommandEvent& event );
+	void OnBoxPositionY						( wxCommandEvent& event );
+	void OnBoxPositionZ						( wxCommandEvent& event );
+	void OnBoxSizeX							( wxCommandEvent& event );
+	void OnBoxSizeY							( wxCommandEvent& event );
+	void OnBoxSizeZ							( wxCommandEvent& event );
     // Spline Surface
     void OnNewSplineSurface                 ( wxCommandEvent& event );
     void OnToggleNormal                     ( wxCommandEvent& event );
@@ -187,6 +193,11 @@ private:
     void OnGlyphMainAxisSelected            ( wxCommandEvent& event ); // The display of the main vector of the ellipsoid.    
     void OnGlyphColorWithPosition           ( wxCommandEvent& event ); // The color with position.
 	void OnNormalizeTensors                 ( wxCommandEvent& event ); //normalise tensors values;
+
+	void OnOriginalShBasis					( wxCommandEvent& event );
+	void OnDescoteauxShBasis				( wxCommandEvent& event );
+	void OnTournierShBasis					( wxCommandEvent& event );
+	void OnPTKShBasis						( wxCommandEvent& event );
 
     void OnToggleShowAxial                  ( wxCommandEvent& event );
     void OnToggleShowCoronal                ( wxCommandEvent& event );
