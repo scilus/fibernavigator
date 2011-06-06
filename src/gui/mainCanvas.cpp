@@ -5,7 +5,7 @@
 #include "../misc/lic/FgeOffscreen.h"
 #include "mainFrame.h"
 #include "../dataset/Anatomy.h"
-#include "../misc/Algorithms/GCoptimization.h"
+//#include "../misc/Algorithms/GCoptimization.h"
 #include "math.h"
 #include <list>
 #include <limits>
@@ -213,10 +213,12 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
             {
 				long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
 				
+				DatasetInfo* l_type = (DatasetInfo*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
 				Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
                 if ( !m_dh->m_ismDragging)
                 {
-					if (l_info->isSegmentOn && m_dh->m_isFloodfillActive) //FloodFill Method (1click)
+					
+					if ((Anatomy*)l_info->isSegmentOn && m_dh->m_isFloodfillActive && l_type->getType() < MESH ) //FloodFill Method (1click)
 					{
 						m_hr = pick(event.GetPosition(), true);
 						segmentTumor();
@@ -228,7 +230,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                         //TODO HACK to be corrected
                         m_hr = pick(event.GetPosition(), true);
                     }
-					else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && l_info->isSegmentOn) //Prepare Drag for selectObj-GraphCut
+					else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && (Anatomy*)l_info->isSegmentOn) //Prepare Drag for selectObj-GraphCut
 					{
 						m_hr = pick(event.GetPosition(), true);
 
@@ -240,7 +242,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 						object.push_back(current);
 						
 					}
-					else if (!m_dh->m_isRulerToolActive && m_dh->m_isSelectBckActive && !m_dh->m_isSelectObjActive && l_info->isSegmentOn) //Prepare Drag for selectBck-GraphCut
+					else if (!m_dh->m_isRulerToolActive && m_dh->m_isSelectBckActive && !m_dh->m_isSelectObjActive && (Anatomy*)l_info->isSegmentOn) //Prepare Drag for selectBck-GraphCut
 					{
 						m_hr = pick(event.GetPosition(), true);
 
@@ -255,7 +257,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
                 }
-                else  if (!m_dh->m_isRulerToolActive && !l_info->isSegmentOn) //Move Scene
+				else  if (!m_dh->m_isRulerToolActive) //Move Scene
                 {                    
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -263,7 +265,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->moveScene( xDrag, yDrag );
                     Refresh( false );
                 }
-				else if(!m_dh->m_isRulerToolActive && l_info->isSegmentOn && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
+				else if(!m_dh->m_isRulerToolActive && (Anatomy*)l_info->isSegmentOn && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
 				{
 					m_hr = pick(event.GetPosition(), true);
 
@@ -280,7 +282,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 					m_dh->m_isObjfilled = true;
 					m_dh->m_isObjCreated = true;
 				}
-				else if(!m_dh->m_isRulerToolActive && l_info->isSegmentOn && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
+				else if(!m_dh->m_isRulerToolActive && (Anatomy*)l_info->isSegmentOn && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
 				{
 					m_hr = pick(event.GetPosition(), true);
 
