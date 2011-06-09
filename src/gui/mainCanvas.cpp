@@ -211,26 +211,32 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 
             if ( event.MiddleIsDown() )
             {
-				long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
 				
-				DatasetInfo* l_type = (DatasetInfo*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
-				Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
                 if ( !m_dh->m_ismDragging)
                 {
+					long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
 					
-					if ((Anatomy*)l_info->isSegmentOn && m_dh->m_isFloodfillActive && l_type->getType() < MESH ) //FloodFill Method (1click)
+					if(l_item != -1 && !m_dh->m_isRulerToolActive)
 					{
-						m_hr = pick(event.GetPosition(), true);
-						segmentTumor();
+						DatasetInfo* l_type = (DatasetInfo*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
+						Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
+
+						if (l_info->isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
+						{
+							m_dh->m_isSegmentActive = true;
+							m_hr = pick(event.GetPosition(), true);
+							segmentTumor();
 						
-						l_info->toggleSegment();
+							l_info->toggleSegment();
 						
+						}
 					}
+					
 					else if (m_dh->m_isRulerToolActive){ //Ruler Tool
                         //TODO HACK to be corrected
                         m_hr = pick(event.GetPosition(), true);
                     }
-					else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && (Anatomy*)l_info->isSegmentOn) //Prepare Drag for selectObj-GraphCut
+					/*else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && (Anatomy*)l_info->isSegmentOn) //Prepare Drag for selectObj-GraphCut
 					{
 						m_hr = pick(event.GetPosition(), true);
 
@@ -253,7 +259,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 
 						background.push_back(current);
 						
-					}
+					}*/
                     m_dh->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
                 }
@@ -265,7 +271,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->moveScene( xDrag, yDrag );
                     Refresh( false );
                 }
-				else if(!m_dh->m_isRulerToolActive && (Anatomy*)l_info->isSegmentOn && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
+				/*else if(!m_dh->m_isRulerToolActive && (Anatomy*)l_info->isSegmentOn && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
 				{
 					m_hr = pick(event.GetPosition(), true);
 
@@ -298,13 +304,13 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 
 					m_dh->m_isBckfilled = true;
 					m_dh->m_isBckCreated = true;
-				}
+				}*/
             }
 			else
             {
                 m_dh->m_ismDragging = false;
             }
-			if ( !event.MiddleIsDown() && m_dh->m_isObjfilled && m_dh->m_isObjCreated)
+			/*if ( !event.MiddleIsDown() && m_dh->m_isObjfilled && m_dh->m_isObjCreated)
 			{
 				std::vector<float>* result = new std::vector<float>;
 				result->resize(m_dh->m_columns*m_dh->m_rows*m_dh->m_frames);
@@ -358,7 +364,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 				m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
 				m_dh->m_isBckCreated = false;
-			}
+			}*/
 
             if ( event.GetWheelDelta() != 0)
             {
@@ -588,7 +594,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
     float tpicked = 0;
     int picked = 0;
 	long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-	Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
+	//Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
     hitResult hr =
     { false, 0.0f, 0, NULL };
     if ( m_dh->m_showAxial )
@@ -600,9 +606,10 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
         {
             tpicked = hr.tmin;
             picked = AXIAL;
-			if (m_dh->m_isRulerToolActive || l_info->isSegmentOn){
+			if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
                 m_hitPts = bb->hitCoordinate(ray,CORONAL);
                 m_isRulerHit = isRuler;
+				m_dh->m_isSegmentActive = false;
             }
         }
         bb->setSizeZ( zSize );
@@ -620,9 +627,10 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             {
                 picked = CORONAL;
                 tpicked = hr.tmin;
-                if (m_dh->m_isRulerToolActive || l_info->isSegmentOn){
+                if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
                     m_hitPts = bb->hitCoordinate(ray,AXIAL);
                     m_isRulerHit = isRuler;
+					m_dh->m_isSegmentActive = false;
                 }
             }            
         }
@@ -641,9 +649,10 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             {
                 picked = SAGITTAL;
                 tpicked = hr.tmin;
-                if (m_dh->m_isRulerToolActive || l_info->isSegmentOn){
+                if (m_dh->m_isRulerToolActive || m_dh->m_isSegmentActive){
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
                     m_isRulerHit = isRuler;
+					m_dh->m_isSegmentActive = false;
                 }                
             }
         }
@@ -795,7 +804,7 @@ void MainCanvas::render()
 
                 //add the hit Point to ruler point list
 				
-				if ( m_dh->m_isRulerToolActive && !m_dh->m_isFloodfillActive && !m_dh->m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL)){
+				if ( m_dh->m_isRulerToolActive && !m_dh->m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL)){
                     if (m_dh->m_rulerPts.size()>0 ){
                         Vector lastPts = m_dh->m_rulerPts.back();
                         if( lastPts != m_hitPts){                            
