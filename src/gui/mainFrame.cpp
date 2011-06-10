@@ -2782,31 +2782,31 @@ void MainFrame::OnGLEvent( wxCommandEvent &event )
         case AXIAL:
         {
             l_pos = m_gl0->getMousePos();
-            float x = ( (float)l_pos.x / NAV_GL_SIZE * l_max );
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * l_max );
+            float x = ( (float)l_pos.x / NAV_GL_SIZE * m_datasetHelper->m_columns );
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_datasetHelper->m_rows );
 
-            m_xSlider->SetValue( (int)( x - ( l_max - m_datasetHelper->m_columns) / 2.0f ) );
-            m_ySlider->SetValue( (int)( y - ( l_max - m_datasetHelper->m_rows) / 2.0f ) );
+            m_xSlider->SetValue( (int)( x ) );
+            m_ySlider->SetValue( (int)( y ) );
             break;
         }
         case CORONAL:
         {
             l_pos = m_gl1->getMousePos();
-            float x = ( (float)l_pos.x / NAV_GL_SIZE ) * l_max;
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * l_max );
+            float x = ( (float)l_pos.x / NAV_GL_SIZE ) * m_datasetHelper->m_columns;
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_datasetHelper->m_frames );
 
-            m_xSlider->SetValue( (int)( x - ( l_max - m_datasetHelper->m_columns) / 2.0f ) );
-            m_zSlider->SetValue( (int)( y - ( l_max - m_datasetHelper->m_frames)  / 2.0f ) );
+            m_xSlider->SetValue( (int)( x ) );
+            m_zSlider->SetValue( (int)( y ) );
             break;
         }
         case SAGITTAL:
         {
             l_pos = m_gl2->getMousePos();
-            float x = ( (float)( NAV_GL_SIZE - l_pos.x ) / NAV_GL_SIZE ) * l_max;
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * l_max );
+            float x = ( (float)( NAV_GL_SIZE - l_pos.x ) / NAV_GL_SIZE ) * m_datasetHelper->m_rows;
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_datasetHelper->m_frames );
 
-            m_ySlider->SetValue( (int)( x - ( l_max - m_datasetHelper->m_rows)   / 2.0f ) );
-            m_zSlider->SetValue( (int)( y - ( l_max - m_datasetHelper->m_frames) / 2.0f ) );
+            m_ySlider->SetValue( (int)( x ) );
+            m_zSlider->SetValue( (int)( y ) );
             break;
         }
         case MAIN_VIEW:
