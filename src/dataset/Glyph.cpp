@@ -740,7 +740,5 @@ void Glyph::updatePropertiesSizer()
     m_ptoggleAxisFlipY->SetValue       (isAxisFlipped( Y_AXIS ));
     m_ptoggleAxisFlipZ->SetValue       (isAxisFlipped( Z_AXIS ));
     m_ptoggleColorWithPosition->SetValue(getColorWithPosition());
-	m_pradiobtnMainAxis->Enable(false);
-
 }
 

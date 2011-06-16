@@ -1224,8 +1224,8 @@ void ODFs::createPropertiesSizer(MainFrame *parent)
 	parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnPTKShBasis));
 	
 	m_pRadiobtnOriginalBasis->SetValue			(isShBasis(0));
-    m_pRadiobtnDescoteauxBasis->SetValue		(isShBasis(1));
-    m_pRadiobtnTournierBasis->SetValue			(isShBasis(2));
+        m_pRadiobtnDescoteauxBasis->SetValue		        (isShBasis(1));
+        m_pRadiobtnTournierBasis->SetValue			(isShBasis(2));
 	m_pRadiobtnPTKBasis->SetValue				(isShBasis(3));
 	
 }
@@ -1245,8 +1245,8 @@ void ODFs::updatePropertiesSizer()
     m_psliderLightZPosition->Enable(false);
     //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
     m_psliderScalingFactor->Enable (false);
-	m_pRadiobtnPTKBasis->Enable(false);
-
+    m_pRadiobtnPTKBasis->Enable(false);
+    m_pradiobtnMainAxis->Enable(false);
 	
 }
 
