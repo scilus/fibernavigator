@@ -89,6 +89,7 @@ private:
     void OnMenuViewCrosshair                ( wxCommandEvent& event );
     void OnMenuViewAxes                     ( wxCommandEvent& event );
     void OnToggleShowProperties             ( wxCommandEvent& event );
+	void OnMenuLock							( wxCommandEvent& event );
     // Voi
     void OnToggleSelectionObjects           ( wxCommandEvent& event );
     void OnToggleShowSelectionObject        ( wxCommandEvent& event );

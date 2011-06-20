@@ -585,6 +585,10 @@ void MainFrame::OnMenuViewFront( wxCommandEvent& WXUNUSED(event) )
     m_datasetHelper->m_transform.s.M21 = -1.0f;
     m_mainGL->setRotation();
 }
+void MainFrame::OnMenuLock( wxCommandEvent& WXUNUSED(event) )
+{
+	m_mainGL->m_isSlizesLocked = !m_mainGL->m_isSlizesLocked;
+}
 
 void MainFrame::OnMenuViewBack( wxCommandEvent& WXUNUSED(event) )
 {

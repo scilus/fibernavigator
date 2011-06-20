@@ -64,6 +64,7 @@ const wxPoint& pos,const wxSize & size, long style, const wxString& name, int* g
     m_orthoModY = 0;
     m_hitPts =Vector(0,0,0);
     m_isRulerHit = false;
+	m_isSlizesLocked = false;
 }
 
 MainCanvas::~MainCanvas()
@@ -409,7 +410,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 }
                 else
                 {
-                    if ( event.Dragging() && m_hr.picked < 10 )
+                    if ( event.Dragging() && m_hr.picked < 10 && !m_isSlizesLocked)
                     {
                         int xDrag = m_lastPos.x - clickX;
                         int yDrag = m_lastPos.y - clickY;
@@ -1088,7 +1089,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             break;
         case WXK_END:
             m_dh->m_rulerPts.clear();
-            break;
+            break; 
         default:
             event.Skip();
             return;

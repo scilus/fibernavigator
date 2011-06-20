@@ -57,6 +57,7 @@ public:
     void renderTestRay();
     void renderAxes();
     void renderRulerDisplay();
+	bool		 m_isSlizesLocked;
 
 	void segmentTumor();
 	void KMeans(float means[2],float stddev[2],float apriori[2],std::vector<float>*,std::vector<float>*);
@@ -83,6 +84,7 @@ private:
      hitResult   m_hr;
      Vector      m_hitPts;
      bool        m_isRulerHit;
+	 
 
 
 	 //std::vector<std::vector<std::vector<float>>> image3D;

@@ -48,6 +48,7 @@ public:
         wxMenuItem  *m_itemPosterior;
         wxMenuItem  *m_itemToggleShowCrosshair;
         wxMenuItem  *m_itemToggleShowAxes;
+		wxMenuItem  *m_itemLockSlizes;
 
     wxMenu      *m_menuVoi;
         wxMenuItem  *m_itemNewSelectionBox;
