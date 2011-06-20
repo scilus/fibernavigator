@@ -589,6 +589,10 @@ void MainFrame::OnMenuLock( wxCommandEvent& WXUNUSED(event) )
 {
 	m_mainGL->m_isSlizesLocked = !m_mainGL->m_isSlizesLocked;
 }
+void MainFrame::OnSceneLock( wxCommandEvent& WXUNUSED(event) )
+{
+	m_mainGL->m_isSceneLocked = !m_mainGL->m_isSceneLocked;
+}
 
 void MainFrame::OnMenuViewBack( wxCommandEvent& WXUNUSED(event) )
 {

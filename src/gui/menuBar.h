@@ -49,6 +49,7 @@ public:
         wxMenuItem  *m_itemToggleShowCrosshair;
         wxMenuItem  *m_itemToggleShowAxes;
 		wxMenuItem  *m_itemLockSlizes;
+		wxMenuItem  *m_itemLockScene;
 
     wxMenu      *m_menuVoi;
         wxMenuItem  *m_itemNewSelectionBox;

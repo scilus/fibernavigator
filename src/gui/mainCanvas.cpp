@@ -65,6 +65,7 @@ const wxPoint& pos,const wxSize & size, long style, const wxString& name, int* g
     m_hitPts =Vector(0,0,0);
     m_isRulerHit = false;
 	m_isSlizesLocked = false;
+	m_isSceneLocked = false;
 }
 
 MainCanvas::~MainCanvas()
@@ -194,7 +195,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
                     m_arcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
                 }
-                else
+                else if(!m_isSceneLocked)
                 {                    
                     Quat4fT ThisQuat;
                     m_arcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
@@ -264,7 +265,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
                 }
-				else  if (!m_dh->m_isRulerToolActive) //Move Scene
+				else  if (!m_dh->m_isRulerToolActive && !m_isSceneLocked) //Move Scene
                 {                    
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -367,7 +368,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 				m_dh->m_isBckCreated = false;
 			}*/
 
-            if ( event.GetWheelDelta() != 0)
+            if ( event.GetWheelDelta() != 0 && !m_isSceneLocked)
             {
                 m_dh->changeZoom( event.GetWheelRotation() );
                 Refresh( false );

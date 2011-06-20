@@ -45,6 +45,7 @@ MenuBar::MenuBar()
     m_itemToggleShowAxes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Axes"));
     m_itemToggleShowProperties = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Properties Sheet"));
 	m_itemLockSlizes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Lock Slices\tF"));
+	m_itemLockScene = m_menuView->AppendCheckItem(wxID_ANY, wxT("Lock Scene\tG"));
 
     m_menuVoi = new wxMenu();
     m_itemNewSelectionBox = m_menuVoi->Append(wxID_ANY, wxT("New Selection Box"));
@@ -138,6 +139,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemAnterior->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewBack));
     mf->Connect(m_itemPosterior->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewFront));
 	mf->Connect(m_itemLockSlizes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuLock));
+	mf->Connect(m_itemLockScene->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSceneLock));
     mf->Connect(m_itemToggleShowCrosshair->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewCrosshair));
     mf->Connect(m_itemToggleShowAxes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewAxes));
     mf->Connect(m_itemNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNewSelectionBox));

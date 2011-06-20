@@ -57,7 +57,8 @@ public:
     void renderTestRay();
     void renderAxes();
     void renderRulerDisplay();
-	bool		 m_isSlizesLocked;
+	bool m_isSlizesLocked;
+	bool m_isSceneLocked;
 
 	void segmentTumor();
 	void KMeans(float means[2],float stddev[2],float apriori[2],std::vector<float>*,std::vector<float>*);
