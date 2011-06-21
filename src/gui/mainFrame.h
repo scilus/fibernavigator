@@ -88,7 +88,6 @@ private:
     void OnMenuViewBack                     ( wxCommandEvent& event );
     void OnMenuViewCrosshair                ( wxCommandEvent& event );
     void OnMenuViewAxes                     ( wxCommandEvent& event );
-    void OnToggleShowProperties             ( wxCommandEvent& event );
 	void OnMenuLock							( wxCommandEvent& event );
 	void OnSceneLock						( wxCommandEvent& event );
     // Voi
@@ -266,10 +265,8 @@ private:
     ToolBar             *m_toolBar;
     MenuBar             *m_menuBar;       
     wxBoxSizer          *m_currentSizer;
-    wxBoxSizer          *m_noSelectionSizer;
     FNObject            *m_currentFNObject;
     FNObject            *m_lastSelectedFNObject;
-    bool                m_isDisplayProperties; 
     long                m_currentListItem;
     long                m_lastSelectedListItem;
 

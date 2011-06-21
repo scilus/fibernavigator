@@ -97,7 +97,6 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     wxFrame( i_parent, i_id, i_title, i_pos, i_size, i_style )
 {
     wxImage::AddHandler(new wxPNGHandler);
-    m_isDisplayProperties = true;
     m_lastSelectedFNObject = NULL;
     m_lastSelectedListItem = -1;
     m_currentFNObject = NULL;
@@ -105,15 +104,18 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     m_currentSizer = NULL;
     m_enlargeNav = 0;
 
-    m_xSlider  = new wxSlider( this, ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 150, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_ySlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 150, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_zSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 150, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_xSlider  = new wxSlider( this, ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 180, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_ySlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 180, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_zSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 180, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
   
-    m_listCtrl   = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( 293, -1 ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    m_listCtrl   = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( 308, 300 ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    m_listCtrl->SetMaxSize( wxSize( 308, 300 ) );
+	m_listCtrl->SetMinSize( wxSize( 308, 300 ) );
 
-    m_treeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition,wxSize( 150, -1 ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS );
-    m_treeWidget->SetMaxSize( wxSize( 150, -1 ) );
+    m_treeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition,wxSize( 308, -1 ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS );
+    m_treeWidget->SetMaxSize( wxSize( 308, -1 ) );
+	m_treeWidget->SetMinSize( wxSize( 308, 100 ) );
 
     wxImageList* imageList = new wxImageList( 16, 16 );
 
@@ -122,6 +124,7 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
 
     m_listCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
 
+	cout << m_listCtrl->GetColumnCount() << endl;
     wxListItem itemCol;
     itemCol.SetText( wxT( "" ) );
     m_listCtrl->InsertColumn( 0, itemCol );
@@ -185,18 +188,18 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     m_mainGL = new MainCanvas( m_datasetHelper, MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize,      0, _T( "MainGLCanvas" ), gl_attrib );
 
 #ifndef CTX
-    m_gl0 = new MainCanvas( m_datasetHelper,       AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( 150, 150 ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_mainGL );
-    m_gl0->SetMaxSize( wxSize( 150, 150 ) );
-    m_gl1 = new MainCanvas( m_datasetHelper,     CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( 150, 150 ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_mainGL );
-    m_gl1->SetMaxSize( wxSize( 150, 150 ) );
-    m_gl2 = new MainCanvas( m_datasetHelper,    SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( 150, 150 ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_mainGL );
-    m_gl2->SetMaxSize( wxSize( 150, 150 ) );
-
+    m_gl0 = new MainCanvas( m_datasetHelper,       AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( 180, 180 ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_mainGL );
+    m_gl1 = new MainCanvas( m_datasetHelper,     CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( 180, 180 ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_mainGL );    
+    m_gl2 = new MainCanvas( m_datasetHelper,    SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( 180, 180 ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_mainGL );
 #else
-    m_gl0 = new MainCanvas( m_datasetHelper, axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxDefaultSize, 0, _T( "NavGLCanvasX" ), gl_attrib, m_mainGL->GetContext() );
-    m_gl1 = new MainCanvas( m_datasetHelper, coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxDefaultSize, 0, _T( "NavGLCanvasY" ), gl_attrib, m_mainGL->GetContext() );
-    m_gl2 = new MainCanvas( m_datasetHelper, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition, wxDefaultSize, 0, _T( "NavGLCanvasZ" ), gl_attrib, m_mainGL->GetContext() );
+    m_gl0 = new MainCanvas( m_datasetHelper, axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( 180, 180 ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_mainGL->GetContext() );
+    m_gl1 = new MainCanvas( m_datasetHelper, coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( 180, 180 ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_mainGL->GetContext() );
+    m_gl2 = new MainCanvas( m_datasetHelper, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition, wxSize( 180, 180 ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_mainGL->GetContext() );
 #endif
+
+	m_gl0->SetMaxSize( wxSize( 180, 180 ) );
+	m_gl1->SetMaxSize( wxSize( 180, 180 ) );
+	m_gl2->SetMaxSize( wxSize( 180, 180 ) );
 
 #ifndef __WXMAC__
     m_datasetHelper->m_theScene->setMainGLContext( new wxGLContext( m_mainGL ) ); // I don't understand this (mario)
@@ -204,43 +207,59 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     m_datasetHelper->m_theScene->setMainGLContext( m_mainGL->GetContext() );
 #endif
 
-    m_mainSizer         = new wxBoxSizer( wxHORIZONTAL ); // Contains everything in the UI.
+	m_mainSizer         = new wxBoxSizer( wxHORIZONTAL ); // Contains everything in the UI.
     m_leftMainSizer     = new wxBoxSizer( wxVERTICAL );   // Contains everything left in the UI (leftSizer, listCtrl and buttonSizer).
     m_leftSizer         = new wxBoxSizer( wxHORIZONTAL ); // Contains the treeSizer and the navSizer.
-    m_navSizer          = new wxBoxSizer( wxVERTICAL );   // Contains the 3 navigation windows with there respectiv sliders.
+    m_navSizer          = new wxBoxSizer( wxHORIZONTAL );   // Contains the 3 navigation windows with there respectiv sliders.
     m_treeSizer         = new wxBoxSizer( wxVERTICAL );   // Contains the tree and the loadDataSets, loadMeshes and the loadFibers buttons.
-    m_rightMainSizer    = new wxBoxSizer( wxHORIZONTAL ); // Contains the OpenGl window and the rightSizer.
+	m_rightMainSizer    = new wxBoxSizer( wxVERTICAL ); // Contains the OpenGl window and the rightSizer.
 
-    m_noSelectionSizer = new wxBoxSizer( wxVERTICAL );
-    m_noSelectionSizer->Add(new wxStaticText( this, wxID_ANY, wxT("No Object Selected"),wxDefaultPosition, wxSize(200,15)));
+	wxBoxSizer *m_xSizer     = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer *m_ySizer     = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer *m_zSizer     = new wxBoxSizer( wxVERTICAL );
 
-    m_navSizer->Add( m_gl0,     1, wxALL | wxEXPAND | wxSHAPED, 1 );
-    m_navSizer->Add( m_zSlider, 0, wxALL,                       1 );
-    m_navSizer->Add( m_gl1,     1, wxALL | wxEXPAND | wxSHAPED, 1 );
-    m_navSizer->Add( m_ySlider, 0, wxALL,                       1 );
-    m_navSizer->Add( m_gl2,     1, wxALL | wxEXPAND | wxSHAPED, 1 );
-    m_navSizer->Add( m_xSlider, 0, wxALL,                       1 );
+	wxBoxSizer *m_listSizer = new wxBoxSizer( wxVERTICAL );
 
-    m_treeSizer->Add( m_treeWidget, 1, wxALL, 1 );
-    
-    m_leftSizer->Add( m_treeSizer, 0, wxALL | wxEXPAND, 0 );
-    m_leftSizer->Add( m_navSizer,  1, wxALL | wxEXPAND, 0 );
+	wxBoxSizer *m_objectSizer = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_rightMainSizer->SetMinSize(wxSize(242,-1));
 
-    m_leftMainSizer->Add( m_leftSizer,   0, wxALL,                  1 );
-    m_leftMainSizer->Add( m_listCtrl,    1, wxALL | wxEXPAND,       1 );
+	m_zSizer->Add( m_gl0,     1, wxALL | wxFIXED_MINSIZE, 2 );
+    m_zSizer->Add( m_zSlider, 0, wxALL,                       2 );
+    m_ySizer->Add( m_gl1,     1, wxALL | wxFIXED_MINSIZE, 2 );
+    m_ySizer->Add( m_ySlider, 0, wxALL,                       2 );
+    m_xSizer->Add( m_gl2,     1, wxALL | wxFIXED_MINSIZE, 2 );
+    m_xSizer->Add( m_xSlider, 0, wxALL ,                       2 );
 
-    m_rightMainSizer->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
-    m_rightMainSizer->Add(m_noSelectionSizer, 0, wxALL, 1 );
+	m_navSizer->Add( m_zSizer, 0, wxALL | wxFIXED_MINSIZE, 1);
+	m_navSizer->Add( m_ySizer, 0, wxALL | wxFIXED_MINSIZE, 1);
+	m_navSizer->Add( m_xSizer, 0, wxALL | wxFIXED_MINSIZE, 1);
+	m_navSizer->SetMinSize( wxSize(550,15));
 
-    m_mainSizer->Add( m_leftMainSizer,  0, wxEXPAND | wxALL, 0 );
-    m_mainSizer->Add( m_rightMainSizer, 1, wxEXPAND | wxALL, 0 );
-        
+	m_treeSizer->Add( m_treeWidget,  1, wxALL | wxEXPAND,  1 );
+
+	m_listSizer->Add( m_listCtrl,    0, wxALL | wxEXPAND,  2 );
+	m_listSizer->Add( m_treeSizer,   1, wxALL | wxEXPAND,  1 );
+	
+	m_objectSizer->Add(m_listSizer, 1, wxALL | wxEXPAND, 0);
+	m_objectSizer->Add(m_rightMainSizer, 0, wxALL | wxFIXED_MINSIZE, 0);
+	
+	m_objectSizer->SetMinSize( wxSize(550,15));
+
+	m_leftMainSizer->Add( m_navSizer,  0, wxALL | wxFIXED_MINSIZE, 0 );
+	m_leftMainSizer->Add( m_objectSizer,  1, wxALL | wxEXPAND, 0 );
+	m_leftMainSizer->SetMinSize( wxSize(550,15));
+	
+
+	m_mainSizer->Add( m_leftMainSizer,  0,  wxALL | wxEXPAND, 0 );
+    m_mainSizer->Add( m_mainGL, 1, wxEXPAND | wxALL, 2 );
+
     this->SetBackgroundColour(*wxLIGHT_GREY);
     SetSizer( m_mainSizer );
     m_mainSizer->SetSizeHints( this );
 
     m_timer = new wxTimer( this );
-    m_timer->Start( 50 );
+    m_timer->Start( 100 );
 
     m_menuBar = new MenuBar();
     m_toolBar = new ToolBar(this);
@@ -885,21 +904,12 @@ void MainFrame::deleteFNObject()
 
 void MainFrame::DisplayPropertiesSheet()
 {   
-    if (!m_isDisplayProperties)
-    {
-        m_rightMainSizer->Hide( m_noSelectionSizer, true); 
-        if (m_currentSizer != NULL)
-        {
-            m_rightMainSizer->Hide( m_currentSizer, true );   
-        }
-    }
-    else if (m_lastSelectedFNObject == NULL && m_currentFNObject == NULL)
+    if (m_lastSelectedFNObject == NULL && m_currentFNObject == NULL)
     {        
         if (m_currentSizer != NULL)
         {
             m_rightMainSizer->Hide( m_currentSizer, true );   
         }
-        m_rightMainSizer->Show( m_noSelectionSizer, true, true); 
     }
     else
     {
@@ -915,7 +925,6 @@ void MainFrame::DisplayPropertiesSheet()
         
         if (l_info != NULL)
         {       
-            m_rightMainSizer->Hide(m_noSelectionSizer);
             if (m_currentFNObject != l_info)
             {
                 if (m_currentSizer != NULL )
@@ -929,7 +938,7 @@ void MainFrame::DisplayPropertiesSheet()
                 m_currentSizer = l_info->getProprietiesSizer();
                 if (!m_rightMainSizer->Show( m_currentSizer, true, true ))
                 {
-                    m_rightMainSizer->Add(m_currentSizer, 0, wxALL, 1 );
+                    m_rightMainSizer->Add(m_currentSizer, 0, wxALL | wxFIXED_MINSIZE, 0 );
                     m_rightMainSizer->Show( m_currentSizer, true, true );
                 }                
             }
@@ -938,6 +947,9 @@ void MainFrame::DisplayPropertiesSheet()
                 m_rightMainSizer->Show( m_currentSizer, true, true );
             }        
             l_info->updatePropertiesSizer();
+
+            this->Refresh();
+
         }
         else
         {
@@ -946,17 +958,19 @@ void MainFrame::DisplayPropertiesSheet()
                 m_rightMainSizer->Hide( m_currentSizer, true ); 
                 m_currentSizer = NULL;
             }
-            m_rightMainSizer->Show( m_noSelectionSizer, true, true); 
         }
         m_currentFNObject = l_info;
         m_currentListItem = m_lastSelectedListItem;
     }
+	
 
     m_rightMainSizer->Layout();
+	
     if( m_mainGL )
     {
         m_mainGL->changeOrthoSize();
-    }        
+    }   
+     
 }
 
 void MainFrame::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(event) )
@@ -2197,6 +2211,7 @@ void MainFrame::refreshAllGLWidgets()
         wxString sbString1 = wxString::Format( wxT("%4.1fmm (%2.1fmm)" ), m_datasetHelper->m_rulerFullLength, m_datasetHelper->m_rulerPartialLength );
         m_toolBar->m_txtRuler->SetValue(sbString1);    
     } 
+	
 }
 
 void MainFrame::renewAllGLWidgets()
@@ -2403,12 +2418,6 @@ void MainFrame::OnListMenuShow( wxCommandEvent&  WXUNUSED(event) )
         m_listCtrl->SetItem( m_currentListItem, 0, wxT( "" ), 1 );
 
     refreshAllGLWidgets();
-}
-
-void MainFrame::OnToggleShowProperties( wxCommandEvent& event )
-{
-    m_isDisplayProperties = !m_isDisplayProperties; 
-    DisplayPropertiesSheet();
 }
 
 
@@ -2948,6 +2957,7 @@ void MainFrame::OnFloodFill(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 {
 	((Anatomy*)m_currentFNObject)->setFloodThreshold(((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f);
+
 	//std::cout << (((Anatomy*)m_currentFNObject)->m_psliderFlood->GetValue() / 200.0f) << endl;
 	m_datasetHelper->m_thresSliderMoved = true;
 }

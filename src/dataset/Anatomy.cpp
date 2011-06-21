@@ -1001,11 +1001,11 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
 	m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderFlood->SetValue(40);
 	setFloodThreshold(0.2f);
-	m_thresBox = new wxStaticText(parent, wxID_ANY, wxT("0.20"),wxDefaultPosition, wxSize(40,-1), wxALIGN_CENTER);
+	m_ptxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.20") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
 	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
-	l_sizer->Add(m_thresBox,0,wxALIGN_CENTER);
+	l_sizer->Add(m_ptxtThresBox,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnSliderFloodMoved));
 
@@ -1061,7 +1061,7 @@ void Anatomy::updatePropertiesSizer()
 	//m_pbtnGraphCut->Enable(m_dh->graphcutReady());
 	if(m_dh->m_thresSliderMoved)
 	{
-		m_thresBox->SetLabel(wxString::Format( wxT( "%.3f"), m_psliderFlood->GetValue() / 200.0f));
+		m_ptxtThresBox->SetValue(wxString::Format( wxT( "%.3f"), m_psliderFlood->GetValue() / 200.0f));
 		m_dh->m_thresSliderMoved = false;
 	}
 }

@@ -43,7 +43,6 @@ MenuBar::MenuBar()
     m_menuView->AppendSeparator();
     m_itemToggleShowCrosshair = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Crosshair"));
     m_itemToggleShowAxes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Axes"));
-    m_itemToggleShowProperties = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Properties Sheet"));
 	m_itemLockSlizes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Lock Slices\tF"));
 	m_itemLockScene = m_menuView->AppendCheckItem(wxID_ANY, wxT("Lock Scene\tG"));
 
@@ -176,7 +175,6 @@ void MenuBar::initMenuBar( MainFrame *mf )
     //mf->Connect(m_itemAxialMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieAxi));
     //mf->Connect(m_itemCoronalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieCor));
     //mf->Connect(m_itemSagittalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieSag));
-    mf->Connect(m_itemToggleShowProperties->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowProperties));
 }
 
 void MenuBar::updateMenuBar( MainFrame *mf )
@@ -199,7 +197,6 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleFilterISO->Check(mf->m_datasetHelper->m_filterIsoSurf);
     m_itemToggleShowAxes->Check(mf->m_datasetHelper->m_isShowAxes);
     //m_itemToggleColorMapLegend->Check(mf->m_datasetHelper->m_colorMap);
-    m_itemToggleShowProperties->Check(mf->m_isDisplayProperties);     
     m_itemMoveBoundaryPointLeft->Enable(mf->m_datasetHelper->m_surfaceLoaded);
     m_itemMoveBoundaryPointRight->Enable(mf->m_datasetHelper->m_surfaceLoaded);
     m_itemToggleDrawPoints->Check(mf->m_datasetHelper->m_pointMode);

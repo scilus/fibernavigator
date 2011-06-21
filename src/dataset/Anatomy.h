@@ -49,7 +49,7 @@ public:
    virtual void createPropertiesSizer(MainFrame *parent);
    virtual void updatePropertiesSizer();
    float    getFloodThreshold()                          { return m_floodThreshold;              };
-   void     setFloodThreshold(float v)                   { m_floodThreshold = v;                 };
+   void     setFloodThreshold(float v)                   { m_floodThreshold = v;};
    float    getGraphSigma()								 { return m_graphSigma;                  };
    void     setGraphSigma(float v)                       { m_graphSigma = v;                 };
    bool     isSegmentOn;
@@ -73,7 +73,7 @@ public:
 	wxRadioButton	*m_pradiobtnObj;
 	wxButton		*m_pbtnGraphCut;
 	wxButton		*m_pbtnKmeans;
-	wxStaticText    *m_thresBox;
+	wxTextCtrl      *m_ptxtThresBox;
 
 	
 	
