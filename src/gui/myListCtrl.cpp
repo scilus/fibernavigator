@@ -93,7 +93,7 @@ END_EVENT_TABLE()
 MyTreeCtrl::MyTreeCtrl(MainFrame *parent, const wxWindowID id, const wxPoint& pos,
             const wxSize& size, long style) : wxTreeCtrl(parent, id, pos, size, style)
 {
-	m_mainFrame = parent;
+    m_mainFrame = parent;
 };
 
 int MyTreeCtrl::getSelectedType()
@@ -269,5 +269,5 @@ void MySlider::OnMouseEvent(wxMouseEvent& event)
     {
         m_leftIsDown = true;
     }
-    event.Skip();	
+    event.Skip();    
 }

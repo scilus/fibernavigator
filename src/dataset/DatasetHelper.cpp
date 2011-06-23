@@ -76,17 +76,17 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_showCrosshair( false ),
     m_isRulerToolActive( false ),
-	m_isSegmentActive( false ),
-	m_isFloodfillActive ( true ),
-	m_isSelectBckActive ( false ),
-	m_isSelectObjActive ( false ),
-	m_isObjfilled ( false ),
-	m_isBckfilled ( false ),
-	m_isObjCreated ( false ),
-	m_isBckCreated ( false ),
-	m_isBoxCreated ( false ),
-	m_thresSliderMoved ( false ),
-	m_SegmentMethod(0),
+    m_isSegmentActive( false ),
+    m_isFloodfillActive ( true ),
+    m_isSelectBckActive ( false ),
+    m_isSelectObjActive ( false ),
+    m_isObjfilled ( false ),
+    m_isBckfilled ( false ),
+    m_isObjCreated ( false ),
+    m_isBckCreated ( false ),
+    m_isBoxCreated ( false ),
+    m_thresSliderMoved ( false ),
+    m_SegmentMethod(0),
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
     m_fibersSamplingFactor(1),
@@ -438,8 +438,7 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
         m_mainFrame->m_ySlider->SetValue( m_rows / 2 );
         m_mainFrame->m_zSlider->SetMax( wxMax( 2, m_frames - 1 ) );
         m_mainFrame->m_zSlider->SetValue( m_frames / 2 );
-        //m_mainFrame->m_tSlider->SetValue( 0 );
-
+        
         updateView( m_mainFrame->m_xSlider->GetValue(), m_mainFrame->m_ySlider->GetValue(), m_mainFrame->m_zSlider->GetValue() );
 
         m_mainFrame->m_mainGL->changeOrthoSize();

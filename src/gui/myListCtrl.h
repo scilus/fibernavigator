@@ -20,7 +20,7 @@ public:
             const wxSize& size, long style);
     int getSelectedType();
 private:
-	MainFrame *m_mainFrame;
+    MainFrame *m_mainFrame;
     void OnChar(wxKeyEvent& event);
     void OnRightClick(wxMouseEvent& event);
     void OnToggleAndNot(wxCommandEvent& event);
@@ -57,7 +57,7 @@ public:
         wxSlider (parent, id, value, minValue, maxValue, pos, size, style)
     {
         m_leftIsDown = false;
-	};
+    };
 
     bool leftDown() {return m_leftIsDown;};
 private:

@@ -119,7 +119,7 @@ private:
     vector< float > m_colorArray;
     int             m_count;
     int             m_countLines;
-    int				m_countPoints;
+    int                m_countPoints;
     bool            m_isInitialized;
     KdTree*         m_kdTree;
     vector< int >   m_lineArray;

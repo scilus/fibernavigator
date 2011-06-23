@@ -100,7 +100,7 @@ public :
     void update();
     virtual void createPropertiesSizer(MainFrame *parent);
     virtual void updatePropertiesSizer();
-	
+    
     
     // Set/get and there affiliated functions
     bool       toggleIsActive();
@@ -166,14 +166,14 @@ public :
     vector< bool > m_inBox;
     vector< bool > m_inBranch;
     Anatomy*       m_sourceAnatomy;
-	wxTextCtrl	  *m_ctrlBoxX;
-	wxTextCtrl	  *m_ctrlBoxY;
-	wxTextCtrl	  *m_ctrlBoxZ;
-	wxTextCtrl	  *m_ctrlBoxSizeX;
-	wxTextCtrl	  *m_ctrlBoxSizeY;
-	wxTextCtrl	  *m_ctrlBoxSizeZ;
-	bool		  m_boxMoved;
-	bool          m_boxResized;
+    wxTextCtrl      *m_ctrlBoxX;
+    wxTextCtrl      *m_ctrlBoxY;
+    wxTextCtrl      *m_ctrlBoxZ;
+    wxTextCtrl      *m_ctrlBoxSizeX;
+    wxTextCtrl      *m_ctrlBoxSizeY;
+    wxTextCtrl      *m_ctrlBoxSizeZ;
+    bool          m_boxMoved;
+    bool          m_boxResized;
 
 
 protected :
@@ -325,7 +325,7 @@ private:
     wxButton        *m_pbtnFlipNormal;
     wxBitmapButton  *m_pbtnSelectColor;
     wxButton        *m_pbtnSelectColorFibers;
-	
+    
 
 
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.

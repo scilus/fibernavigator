@@ -60,7 +60,7 @@ public:
     void renewAllGLWidgets();
     void Screenshot             ( wxString         i_fileName    );
     void SetGlyphOptionsValues  ( DatasetInfo*     i_tensors     );
-	void OnTreeChange();
+    void OnTreeChange();
     void OnMouseEvent                       ( wxMouseEvent&   event );
     void OnLoad                             ( wxCommandEvent& event );
     
@@ -88,8 +88,8 @@ private:
     void OnMenuViewBack                     ( wxCommandEvent& event );
     void OnMenuViewCrosshair                ( wxCommandEvent& event );
     void OnMenuViewAxes                     ( wxCommandEvent& event );
-	void OnMenuLock							( wxCommandEvent& event );
-	void OnSceneLock						( wxCommandEvent& event );
+    void OnMenuLock                            ( wxCommandEvent& event );
+    void OnSceneLock                        ( wxCommandEvent& event );
     // Voi
     void OnToggleSelectionObjects           ( wxCommandEvent& event );
     void OnToggleShowSelectionObject        ( wxCommandEvent& event );
@@ -114,12 +114,12 @@ private:
     void OnGenerateFiberVolume              ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );
     void OnCreateFibersDensityTexture       ( wxCommandEvent& event );
-	void OnBoxPositionX						( wxCommandEvent& event );
-	void OnBoxPositionY						( wxCommandEvent& event );
-	void OnBoxPositionZ						( wxCommandEvent& event );
-	void OnBoxSizeX							( wxCommandEvent& event );
-	void OnBoxSizeY							( wxCommandEvent& event );
-	void OnBoxSizeZ							( wxCommandEvent& event );
+    void OnBoxPositionX                        ( wxCommandEvent& event );
+    void OnBoxPositionY                        ( wxCommandEvent& event );
+    void OnBoxPositionZ                        ( wxCommandEvent& event );
+    void OnBoxSizeX                            ( wxCommandEvent& event );
+    void OnBoxSizeY                            ( wxCommandEvent& event );
+    void OnBoxSizeZ                            ( wxCommandEvent& event );
     // Spline Surface
     void OnNewSplineSurface                 ( wxCommandEvent& event );
     void OnToggleNormal                     ( wxCommandEvent& event );
@@ -193,12 +193,12 @@ private:
     void OnGlyphAxesSelected                ( wxCommandEvent& event ); // The display the 3 vector representing the ellipsoid.    
     void OnGlyphMainAxisSelected            ( wxCommandEvent& event ); // The display of the main vector of the ellipsoid.    
     void OnGlyphColorWithPosition           ( wxCommandEvent& event ); // The color with position.
-	void OnNormalizeTensors                 ( wxCommandEvent& event ); //normalise tensors values;
+    void OnNormalizeTensors                 ( wxCommandEvent& event ); //normalise tensors values;
 
-	void OnOriginalShBasis					( wxCommandEvent& event );
-	void OnDescoteauxShBasis				( wxCommandEvent& event );
-	void OnTournierShBasis					( wxCommandEvent& event );
-	void OnPTKShBasis						( wxCommandEvent& event );
+    void OnOriginalShBasis                    ( wxCommandEvent& event );
+    void OnDescoteauxShBasis                ( wxCommandEvent& event );
+    void OnTournierShBasis                    ( wxCommandEvent& event );
+    void OnPTKShBasis                        ( wxCommandEvent& event );
 
     void OnToggleShowAxial                  ( wxCommandEvent& event );
     void OnToggleShowCoronal                ( wxCommandEvent& event );
@@ -206,15 +206,15 @@ private:
     void OnToggleAlpha                      ( wxCommandEvent& event );
     void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );
     void OnMoveBoundaryPointsRight          ( wxCommandEvent& event );
-	
-	void OnSegment							( wxCommandEvent& event );
-	void OnFloodFill						( wxCommandEvent& event );
-	void OnSelectBck						( wxCommandEvent& event );
-	void OnSliderFloodMoved					( wxCommandEvent& event );
-	void OnSliderGraphSigmaMoved			( wxCommandEvent& event );
-	void OnKmeans							( wxCommandEvent& event );
-	void OnbtnGraphCut						( wxCommandEvent& event );
-	void OnSelectObj						( wxCommandEvent& event );
+    
+    void OnSegment                            ( wxCommandEvent& event );
+    void OnFloodFill                        ( wxCommandEvent& event );
+    void OnSelectBck                        ( wxCommandEvent& event );
+    void OnSliderFloodMoved                    ( wxCommandEvent& event );
+    void OnSliderGraphSigmaMoved            ( wxCommandEvent& event );
+    void OnKmeans                            ( wxCommandEvent& event );
+    void OnbtnGraphCut                        ( wxCommandEvent& event );
+    void OnSelectObj                        ( wxCommandEvent& event );
 
 
     /*
@@ -271,19 +271,17 @@ private:
     long                m_lastSelectedListItem;
 
     wxBoxSizer          *m_mainSizer;
-    wxBoxSizer          *m_mainSizer1;
-    wxFlexGridSizer     *m_mainSizer2;
+    wxBoxSizer          *m_listSizer;
+    wxBoxSizer          *m_objectSizer;
     wxBoxSizer          *m_leftMainSizer;
-    wxBoxSizer          *m_leftSizer;
     wxBoxSizer          *m_navSizer;
-    wxBoxSizer          *m_navSizer1;
-    wxBoxSizer          *m_treeSizer;
-    wxBoxSizer          *m_rightMainSizer;
+    wxBoxSizer          *m_propertiesSizer;
 
-    int                 m_enlargeNav;
     wxTimer             *m_timer;
 
 public:
+    //wxPanel             *m_propertiesPanel;
+
     MainCanvas*         m_mainGL;
     MainCanvas*         m_gl0;
     MainCanvas*         m_gl1;

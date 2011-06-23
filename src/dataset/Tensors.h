@@ -30,13 +30,13 @@ public:
 
     bool loadNifti( wxString i_fileName );
     bool load     ( wxString i_fileName );
-	void normalize();
+    void normalize();
     virtual void createPropertiesSizer(MainFrame *parent);
     virtual void updatePropertiesSizer();
-	
+    
 private:
     wxRadioButton      *m_pradiobtnAxes;
-	wxToggleButton	   *m_pbtnNormalize;
+    wxToggleButton       *m_pbtnNormalize;
     // From Glyph
     bool createStructure ( vector< float >& i_fileFloatData );
     void drawGlyph       ( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis = AXIS_UNDEFINED );
@@ -47,9 +47,9 @@ private:
     
     vector< float   >  m_tensorsFA;        // All the tensors's FA values.
     vector< FMatrix >  m_tensorsMatrix;    // All the tensors's matrix.  
-	vector< F::FVector >  m_tensorsEigenValues;// All the tensors's eigen values
-	bool m_isNormalized;
-	static const int VISUALIZATION_FACTOR = 600;
+    vector< F::FVector >  m_tensorsEigenValues;// All the tensors's eigen values
+    bool m_isNormalized;
+    static const int VISUALIZATION_FACTOR = 600;
 };
 
 #endif /* TENSORS_H_ */

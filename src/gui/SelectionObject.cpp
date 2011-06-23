@@ -56,8 +56,8 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_stepSize              = 9;
     m_threshold             = 0.0f;
     m_treeId                = NULL;
-	m_boxMoved				= false;
-	m_boxResized			= false;
+    m_boxMoved                = false;
+    m_boxResized            = false;
 
     //Distance coloring
     m_DistColoring          = false;
@@ -106,8 +106,8 @@ void SelectionObject::moveBack()
 
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.y += m_stepSize;
-	
-	m_boxMoved = true;
+    
+    m_boxMoved = true;
     update();
 }
 
@@ -124,7 +124,7 @@ void SelectionObject::moveDown()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.z += m_stepSize;
 
-	m_boxMoved = true;
+    m_boxMoved = true;
     update();
 }
 
@@ -141,7 +141,7 @@ void SelectionObject::moveForward()
     if( wxGetKeyState( WXK_SHIFT ) ) 
         m_center.y -= m_stepSize;
 
-	m_boxMoved = true;
+    m_boxMoved = true;
     update();
 }
 
@@ -158,7 +158,7 @@ void SelectionObject::moveLeft()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.x -= m_stepSize;
 
-	m_boxMoved = true;
+    m_boxMoved = true;
     update();
 }
 
@@ -175,7 +175,7 @@ void SelectionObject::moveRight()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.x += m_stepSize;
 
-	m_boxMoved = true;
+    m_boxMoved = true;
     update();
 }
 
@@ -192,7 +192,7 @@ void SelectionObject::moveUp()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_center.z -= m_stepSize;
 
-	m_boxMoved = true;
+    m_boxMoved = true;
     update();
 }
 
@@ -217,7 +217,7 @@ void SelectionObject::resizeBack()
     if( wxGetKeyState( WXK_SHIFT ) ) 
         m_size.y = wxMax( 1, m_size.y - m_stepSize );
 
-	m_boxResized = true;
+    m_boxResized = true;
     update();
 }
 
@@ -234,7 +234,7 @@ void SelectionObject::resizeDown()
     if( wxGetKeyState( WXK_SHIFT ) ) 
         m_size.z = wxMax( 1, m_size.z - m_stepSize );
 
-	m_boxResized = true;
+    m_boxResized = true;
     update();
 }
 
@@ -251,7 +251,7 @@ void SelectionObject::resizeForward()
     if( wxGetKeyState ( WXK_SHIFT ) )
         m_size.y += m_stepSize;
 
-	m_boxResized = true;
+    m_boxResized = true;
     update();
 }
 
@@ -268,7 +268,7 @@ void SelectionObject::resizeLeft()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_size.x = wxMax( 1 ,m_size.x - m_stepSize );
 
-	m_boxResized = true;
+    m_boxResized = true;
     update();
 }
 
@@ -285,7 +285,7 @@ void SelectionObject::resizeRight()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_size.x += m_stepSize;
 
-	m_boxResized = true;
+    m_boxResized = true;
     update();
 }
 
@@ -302,7 +302,7 @@ void SelectionObject::resizeUp()
     if( wxGetKeyState( WXK_SHIFT ) )
         m_size.z += m_stepSize;
 
-	m_boxResized = true;
+    m_boxResized = true;
     update();
 }
 
@@ -507,8 +507,8 @@ void SelectionObject::drag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_proje
     m_center.x += l_change.x;
     m_center.y += l_change.y;
     m_center.z += l_change.z;
-	
-	m_boxMoved = true;
+    
+    m_boxMoved = true;
     update();
 }
 
@@ -545,8 +545,8 @@ void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_pro
         float newZ = m_size.z + l_delta;
         m_size.z = wxMin( wxMax( newZ, 1 ), m_datasetHelper->m_frames );
     }
-	
-	m_boxResized = true;
+    
+    m_boxResized = true;
     update();
 }
 
@@ -729,15 +729,15 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
     m_meanFiberPoints.clear();
     getMeanFiber( l_selectedFibersPoints, MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
 
-	/* Ecriture directe du fichier txt concernant la mean fiber */
-	ofstream fichier("test.txt", ios::out | ios::trunc);  //déclaration du flux et ouverture du fichier
-	if(fichier)  // si l'ouverture a réussi
+    /* Ecriture directe du fichier txt concernant la mean fiber */
+    ofstream fichier("test.txt", ios::out | ios::trunc);  //déclaration du flux et ouverture du fichier
+    if(fichier)  // si l'ouverture a réussi
     {
-		for (int i = 0 ; i < MEAN_FIBER_NB_POINTS ; i++)
-		fichier << m_meanFiberPoints[i].x << " " <<  m_meanFiberPoints[i].y << " " << m_meanFiberPoints[i].z << "\n";
-	}
-	fichier.close();
-	
+        for (int i = 0 ; i < MEAN_FIBER_NB_POINTS ; i++)
+        fichier << m_meanFiberPoints[i].x << " " <<  m_meanFiberPoints[i].y << " " << m_meanFiberPoints[i].z << "\n";
+    }
+    fichier.close();
+    
     // Once the vector is filled up with the points data we can calculate the fibers info grid items.
     getFibersCount                  ( o_gridInfo.m_count             );
     getMeanFiberValue               ( l_selectedFibersPoints, 
@@ -801,62 +801,62 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
                                           unsigned int                i_nbPoints,
                                           vector< Vector >           &o_meanFiberPoints )
 {
-	o_meanFiberPoints.resize( i_nbPoints );
+    o_meanFiberPoints.resize( i_nbPoints );
 
-	for( unsigned int i = 0; i < i_fibersPoints.size(); ++i )
+    for( unsigned int i = 0; i < i_fibersPoints.size(); ++i )
     {
         unsigned int l_currentFiberNbPoints = i_fibersPoints[i].size();
         
-		// The -1 is because we dont take into consideration the number of points but 
+        // The -1 is because we dont take into consideration the number of points but 
         // the number of vector between the points.
         
-		float        l_currentFiberRatio    = (float)( i_fibersPoints[i].size() - 1 ) / ( i_nbPoints - 1 );
+        float        l_currentFiberRatio    = (float)( i_fibersPoints[i].size() - 1 ) / ( i_nbPoints - 1 );
         
-		// These two variable help to know if the fibers are in the same direction
-		float comp_first_pt = abs(i_fibersPoints[i][0].x-i_fibersPoints[0][0].x) + 
-							  abs(i_fibersPoints[i][0].y-i_fibersPoints[0][0].y) +
-							  abs(i_fibersPoints[i][0].z-i_fibersPoints[0][0].z);
+        // These two variable help to know if the fibers are in the same direction
+        float comp_first_pt = abs(i_fibersPoints[i][0].x-i_fibersPoints[0][0].x) + 
+                              abs(i_fibersPoints[i][0].y-i_fibersPoints[0][0].y) +
+                              abs(i_fibersPoints[i][0].z-i_fibersPoints[0][0].z);
 
-		float comp_last_pt = abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].x-i_fibersPoints[0][0].x) +
-							 abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].y-i_fibersPoints[0][0].y) +
-							 abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].z-i_fibersPoints[0][0].z);
+        float comp_last_pt = abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].x-i_fibersPoints[0][0].x) +
+                             abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].y-i_fibersPoints[0][0].y) +
+                             abs(i_fibersPoints[i][i_fibersPoints[i].size()-1].z-i_fibersPoints[0][0].z);
 
-		if(comp_first_pt < comp_last_pt)    
-		{
+        if(comp_first_pt < comp_last_pt)    
+        {
 
-			o_meanFiberPoints[0]              += i_fibersPoints[i][0];
-			o_meanFiberPoints[i_nbPoints - 1] += i_fibersPoints[i][l_currentFiberNbPoints - 1] ;
+            o_meanFiberPoints[0]              += i_fibersPoints[i][0];
+            o_meanFiberPoints[i_nbPoints - 1] += i_fibersPoints[i][l_currentFiberNbPoints - 1] ;
 
-			for( unsigned int j = 1; j < i_nbPoints - 1; ++j )
-			{
-				float l_currentPointInterpolationRatio = l_currentFiberRatio * j;
+            for( unsigned int j = 1; j < i_nbPoints - 1; ++j )
+            {
+                float l_currentPointInterpolationRatio = l_currentFiberRatio * j;
              
-				 // Calculating the ratio of the interpolation.
-				int l_pointBelow = (int)l_currentPointInterpolationRatio;
-				l_currentPointInterpolationRatio -= l_pointBelow;
-				// Simple interpolation.
-				o_meanFiberPoints[j] += ( ( i_fibersPoints[i][l_pointBelow]     * ( 1.0 - l_currentPointInterpolationRatio ) ) + 
-					                    ( i_fibersPoints[i][l_pointBelow + 1] *         l_currentPointInterpolationRatio ) );
-			}
-		}
-		else
-		{
+                 // Calculating the ratio of the interpolation.
+                int l_pointBelow = (int)l_currentPointInterpolationRatio;
+                l_currentPointInterpolationRatio -= l_pointBelow;
+                // Simple interpolation.
+                o_meanFiberPoints[j] += ( ( i_fibersPoints[i][l_pointBelow]     * ( 1.0 - l_currentPointInterpolationRatio ) ) + 
+                                        ( i_fibersPoints[i][l_pointBelow + 1] *         l_currentPointInterpolationRatio ) );
+            }
+        }
+        else
+        {
 
-			o_meanFiberPoints[0]              += i_fibersPoints[i][l_currentFiberNbPoints - 1];
-			o_meanFiberPoints[i_nbPoints - 1] += i_fibersPoints[i][0];
-			
-			for( unsigned int j = i_nbPoints - 2 ; j > 0 ; --j )	
-			{
-				float l_currentPointInterpolationRatio = l_currentFiberRatio * j;
+            o_meanFiberPoints[0]              += i_fibersPoints[i][l_currentFiberNbPoints - 1];
+            o_meanFiberPoints[i_nbPoints - 1] += i_fibersPoints[i][0];
+            
+            for( unsigned int j = i_nbPoints - 2 ; j > 0 ; --j )    
+            {
+                float l_currentPointInterpolationRatio = l_currentFiberRatio * j;
              
-				 // Calculating the ratio of the interpolation.
-				int l_pointBelow = (int)l_currentPointInterpolationRatio;
-				l_currentPointInterpolationRatio -= l_pointBelow;
-				// Simple interpolation.
-				o_meanFiberPoints[i_nbPoints-j-1] += ( ( i_fibersPoints[i][l_pointBelow]     * ( 1.0 - l_currentPointInterpolationRatio ) ) + 
-					                    ( i_fibersPoints[i][l_pointBelow + 1] *           l_currentPointInterpolationRatio ) );
-			}			
-		}
+                 // Calculating the ratio of the interpolation.
+                int l_pointBelow = (int)l_currentPointInterpolationRatio;
+                l_currentPointInterpolationRatio -= l_pointBelow;
+                // Simple interpolation.
+                o_meanFiberPoints[i_nbPoints-j-1] += ( ( i_fibersPoints[i][l_pointBelow]     * ( 1.0 - l_currentPointInterpolationRatio ) ) + 
+                                        ( i_fibersPoints[i][l_pointBelow + 1] *           l_currentPointInterpolationRatio ) );
+            }            
+        }
     }
 
     for( unsigned int i = 0; i < o_meanFiberPoints.size(); ++i )
@@ -933,7 +933,7 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fib
 
     unsigned int l_count = 0;
     unsigned int l_pos   = 0;
-	
+    
     for( unsigned int i = 0; i < i_fibersPoints.size(); i++ )
     {
         for( unsigned int j = 0; j < i_fibersPoints[i].size(); j++ )
@@ -942,17 +942,17 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fib
                     i_fibersPoints[i][j].y * m_datasetHelper->m_columns / m_datasetHelper->m_yVoxel +
                     i_fibersPoints[i][j].z * m_datasetHelper->m_columns * m_datasetHelper->m_rows / (m_datasetHelper->m_yVoxel*m_datasetHelper->m_zVoxel);
 
-			Vector test = i_fibersPoints[i][j];
-			
+            Vector test = i_fibersPoints[i][j];
+            
 
             o_meanValue += (* ( m_datasetHelper->m_floatDataset ) )[l_pos];
 
             l_count++;
         }
     }
-	
+    
     o_meanValue /= l_count;
-	
+    
     return true;
 }
 
@@ -1116,9 +1116,9 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
     // We want to return the values in millimeters so we need to multiply them by the spacing in the anatomy file.
     float l_spacing = m_datasetHelper->m_xVoxel * m_datasetHelper->m_yVoxel * m_datasetHelper->m_zVoxel;
 
-	o_maxCrossSection  *= l_spacing;
-	o_minCrossSection  *= l_spacing;
-	o_meanCrossSection *= l_spacing;
+    o_maxCrossSection  *= l_spacing;
+    o_minCrossSection  *= l_spacing;
+    o_meanCrossSection *= l_spacing;
 
     return true;
 }
@@ -1756,10 +1756,10 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minLength        ) );
         m_pgridfibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxLength        ) );
         m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanCrossSection ) );
-		if ( l_params.m_minCrossSection > l_params.m_count )
-			m_pgridfibersInfo->SetCellValue( 6,  0, wxT( "INF") );
-		else	
-			m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minCrossSection  ) );
+        if ( l_params.m_minCrossSection > l_params.m_count )
+            m_pgridfibersInfo->SetCellValue( 6,  0, wxT( "INF") );
+        else    
+            m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minCrossSection  ) );
         m_pgridfibersInfo->SetCellValue( 7,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxCrossSection  ) );
         m_pgridfibersInfo->SetCellValue( 8,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
         m_pgridfibersInfo->SetCellValue( 9,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
@@ -1887,56 +1887,56 @@ void SelectionObject::createPropertiesSizer(MainFrame *parent)
 
     m_propertiesSizer->Add(new wxStaticText( parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(200,15)));
 
-	l_sizer = new wxBoxSizer(wxHORIZONTAL);
-	
-	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Position"),wxDefaultPosition, wxSize(140,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-	m_propertiesSizer->AddSpacer(1);
-	l_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_ctrlBoxX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.x), wxDefaultPosition, wxSize(45,-1));
-	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-	l_sizer->Add(m_ctrlBoxX,0,wxALIGN_CENTER);
-	
-	
-	m_ctrlBoxY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.y), wxDefaultPosition, wxSize(45,-1));
-	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-	l_sizer->Add(m_ctrlBoxY,0,wxALIGN_CENTER);
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Position"),wxDefaultPosition, wxSize(140,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    m_propertiesSizer->AddSpacer(1);
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    m_ctrlBoxX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.x), wxDefaultPosition, wxSize(45,-1));
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+    l_sizer->Add(m_ctrlBoxX,0,wxALIGN_CENTER);
+    
+    
+    m_ctrlBoxY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.y), wxDefaultPosition, wxSize(45,-1));
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+    l_sizer->Add(m_ctrlBoxY,0,wxALIGN_CENTER);
 
 
-	m_ctrlBoxZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.z), wxDefaultPosition, wxSize(45,-1));
-	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-	l_sizer->Add(m_ctrlBoxZ,0,wxALIGN_CENTER);
+    m_ctrlBoxZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.z), wxDefaultPosition, wxSize(45,-1));
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+    l_sizer->Add(m_ctrlBoxZ,0,wxALIGN_CENTER);
 
-	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-	parent->Connect(m_ctrlBoxX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionX));
-	parent->Connect(m_ctrlBoxY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionY));
-	parent->Connect(m_ctrlBoxZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionZ));
-	
-	m_propertiesSizer->AddSpacer(8);
-	l_sizer = new wxBoxSizer(wxHORIZONTAL);
-	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Size"),wxDefaultPosition, wxSize(140,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-	m_propertiesSizer->AddSpacer(1);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_ctrlBoxX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionX));
+    parent->Connect(m_ctrlBoxY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionY));
+    parent->Connect(m_ctrlBoxZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxPositionZ));
+    
+    m_propertiesSizer->AddSpacer(8);
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Size"),wxDefaultPosition, wxSize(140,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    m_propertiesSizer->AddSpacer(1);
 
-	l_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_ctrlBoxSizeX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel), wxDefaultPosition, wxSize(45,-1));
-	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-	l_sizer->Add(m_ctrlBoxSizeX,0,wxALIGN_CENTER);
-	
-	
-	m_ctrlBoxSizeY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel), wxDefaultPosition, wxSize(45,-1));
-	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-	l_sizer->Add(m_ctrlBoxSizeY,0,wxALIGN_CENTER);
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    m_ctrlBoxSizeX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel), wxDefaultPosition, wxSize(45,-1));
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+    l_sizer->Add(m_ctrlBoxSizeX,0,wxALIGN_CENTER);
+    
+    
+    m_ctrlBoxSizeY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel), wxDefaultPosition, wxSize(45,-1));
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+    l_sizer->Add(m_ctrlBoxSizeY,0,wxALIGN_CENTER);
 
 
-	m_ctrlBoxSizeZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel), wxDefaultPosition, wxSize(45,-1));
-	l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-	l_sizer->Add(m_ctrlBoxSizeZ,0,wxALIGN_CENTER);
+    m_ctrlBoxSizeZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel), wxDefaultPosition, wxSize(45,-1));
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
+    l_sizer->Add(m_ctrlBoxSizeZ,0,wxALIGN_CENTER);
 
-	m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-	parent->Connect(m_ctrlBoxSizeX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeX));
-	parent->Connect(m_ctrlBoxSizeY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeY));
-	parent->Connect(m_ctrlBoxSizeZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeZ));
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_ctrlBoxSizeX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeX));
+    parent->Connect(m_ctrlBoxSizeY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeY));
+    parent->Connect(m_ctrlBoxSizeZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(MainFrame::OnBoxSizeZ));
 
 }
 
@@ -1951,20 +1951,20 @@ void SelectionObject::updatePropertiesSizer()
     m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
     m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
 
-	if(m_boxMoved)
-	{
-		m_ctrlBoxX->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.x));
-		m_ctrlBoxY->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.y));
-		m_ctrlBoxZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.z));
-		m_boxMoved = false;
-	}
+    if(m_boxMoved)
+    {
+        m_ctrlBoxX->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.x));
+        m_ctrlBoxY->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.y));
+        m_ctrlBoxZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.z));
+        m_boxMoved = false;
+    }
 
-	if(m_boxResized)
-	{
-		m_ctrlBoxSizeX->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel));
-		m_ctrlBoxSizeY->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel));
-		m_ctrlBoxSizeZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel));
-		m_boxResized = false;
-	}
+    if(m_boxResized)
+    {
+        m_ctrlBoxSizeX->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel));
+        m_ctrlBoxSizeY->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel));
+        m_ctrlBoxSizeZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel));
+        m_boxResized = false;
+    }
 
 }

@@ -57,14 +57,14 @@ public:
     void renderTestRay();
     void renderAxes();
     void renderRulerDisplay();
-	bool m_isSlizesLocked;
-	bool m_isSceneLocked;
+    bool m_isSlizesLocked;
+    bool m_isSceneLocked;
 
-	void segmentTumor();
-	void KMeans(float means[2],float stddev[2],float apriori[2],std::vector<float>*,std::vector<float>*);
-	void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);
-	void graphCut(std::vector<float>*, std::vector<float>*, float);
-	float getElement(int,int,int,std::vector<float>*);
+    void segmentTumor();
+    void KMeans(float means[2],float stddev[2],float apriori[2],std::vector<float>*,std::vector<float>*);
+    void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);
+    void graphCut(std::vector<float>*, std::vector<float>*, float);
+    float getElement(int,int,int,std::vector<float>*);
 
     hitResult pick(wxPoint, bool isRuler);
     float getAxisParallelMovement(int, int, int, int, Vector);
@@ -72,8 +72,8 @@ public:
     void setRotation();
     void OnChar(wxKeyEvent& event);
 
-	std::vector<Vector> object;
-	std::vector<Vector> background;
+    std::vector<Vector> object;
+    std::vector<Vector> background;
 
     DECLARE_EVENT_TABLE()
 
@@ -85,10 +85,10 @@ private:
      hitResult   m_hr;
      Vector      m_hitPts;
      bool        m_isRulerHit;
-	 
+     
 
 
-	 //std::vector<std::vector<std::vector<float>>> image3D;
+     //std::vector<std::vector<std::vector<float>>> image3D;
 
      GLdouble m_pos1X, m_pos1Y, m_pos1Z;    // point of origin for picking
      GLdouble m_pos2X, m_pos2Y, m_pos2Z;    // distant point for picking

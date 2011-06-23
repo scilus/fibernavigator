@@ -579,17 +579,17 @@ bool Fibers::loadDmri(wxString i_fileName)
     
     l_file = fopen(i_fileName.mb_str(),"r");
     if (l_file == NULL) return false;
-	char *s1 = new char[10];
-	char *s2 = new char[10];
-	char *s3 = new char[10];
-	char *s4 = new char[10];
+    char *s1 = new char[10];
+    char *s2 = new char[10];
+    char *s3 = new char[10];
+    char *s4 = new char[10];
     float f1,f2,f3,f4,f5;
-	int res;
+    int res;
     // the header
     res = fscanf(l_file, "%f %s", &f1, s1);
-	res = fscanf(l_file, "%f %s %s %s %s", &f1, s1, s2, s3, s4);
+    res = fscanf(l_file, "%f %s %s %s %s", &f1, s1, s2, s3, s4);
     res = fscanf(l_file, "%f", &f1);
-	res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);    
+    res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);    
     res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
     res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
     res = fscanf(l_file, "%d %f", &m_countLines, &f2);
@@ -602,15 +602,15 @@ bool Fibers::loadDmri(wxString i_fileName)
         res = fscanf(l_file, "%f %f %f", &back, &front, &f1);
         
         int nbpoints = back+front;
-		if (back!=0 && front!=0)
-		{
-			nbpoints--;
-		}
+        if (back!=0 && front!=0)
+        {
+            nbpoints--;
+        }
         if (nbpoints>0){        
             vector<float> cur_line;
-			
-			cur_line.resize(nbpoints*3);  
-			
+            
+            cur_line.resize(nbpoints*3);  
+            
             //back
             for(int j=back-1;j>=0;j--){
                 res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);                
@@ -618,11 +618,11 @@ bool Fibers::loadDmri(wxString i_fileName)
                 cur_line[j*3+1]= f2;
                 cur_line[j*3+2]= f3;                
             }
-			if (back !=0 && front!=0)
-			{
-				//repeated pts
-				res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);  
-			}
+            if (back !=0 && front!=0)
+            {
+                //repeated pts
+                res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);  
+            }
             //front    
             for (int j=back;j<nbpoints;j++){
                 res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);                    
@@ -2210,7 +2210,7 @@ void Fibers::drawSortedLines()
             l_lineIds[( l_snp << 1 ) + 1] = getStartIndexForLine( i ) + k + 1;
             
             l_snippletSort[l_snp] = l_snp;
-			l_snp++;
+            l_snp++;
         }
     }    
 

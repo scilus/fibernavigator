@@ -21,7 +21,7 @@ public:
     //constructor/destructor
     Anatomy( DatasetHelper *datasetHelper );
     Anatomy( DatasetHelper *datasetHelper, std::vector<float> *dataset);
-	Anatomy( DatasetHelper *datasetHelper, std::vector<float> *dataset, int sample);
+    Anatomy( DatasetHelper *datasetHelper, std::vector<float> *dataset, int sample);
     Anatomy( DatasetHelper *datasetHelper, int type);
     virtual ~Anatomy();
    
@@ -29,7 +29,7 @@ public:
    float at( int i );
    std::vector<float>* getFloatDataset();
    MySlider        *m_psliderFlood;
-   MySlider		   *m_psliderGraphSigma;
+   MySlider           *m_psliderGraphSigma;
   
    GLuint getGLuint();
    void setRGBZero( int x, int y, int z );
@@ -50,33 +50,33 @@ public:
    virtual void updatePropertiesSizer();
    float    getFloodThreshold()                          { return m_floodThreshold;              };
    void     setFloodThreshold(float v)                   { m_floodThreshold = v;};
-   float    getGraphSigma()								 { return m_graphSigma;                  };
+   float    getGraphSigma()                                 { return m_graphSigma;                  };
    void     setGraphSigma(float v)                       { m_graphSigma = v;                 };
    bool     isSegmentOn;
-   void		toggleSegment()								 { isSegmentOn = !isSegmentOn; m_ptoggleSegment->SetValue(isSegmentOn); };
+   void        toggleSegment()                                 { isSegmentOn = !isSegmentOn; m_ptoggleSegment->SetValue(isSegmentOn); };
    
 
 
    SelectionObject         *m_roi;
  private:
-    wxButton		*m_pbtnCut;
-    wxButton		*m_pbtnMinimize;
-    wxButton		*m_pbtnDilate;
-    wxButton		*m_pbtnErode;
-    wxButton		*m_pbtnNewIsoSurface;
-    wxButton		*m_pbtnNewDistanceMap;
-    wxButton		*m_pbtnNewOffsetSurface;
-    wxButton		*m_pbtnNewVOI;
-	wxToggleButton  *m_ptoggleSegment;
-	wxRadioButton	*m_pradiobtnFlood;
-	wxRadioButton	*m_pradiobtnBck;
-	wxRadioButton	*m_pradiobtnObj;
-	wxButton		*m_pbtnGraphCut;
-	wxButton		*m_pbtnKmeans;
-	wxTextCtrl      *m_ptxtThresBox;
+    wxButton        *m_pbtnCut;
+    wxButton        *m_pbtnMinimize;
+    wxButton        *m_pbtnDilate;
+    wxButton        *m_pbtnErode;
+    wxButton        *m_pbtnNewIsoSurface;
+    wxButton        *m_pbtnNewDistanceMap;
+    wxButton        *m_pbtnNewOffsetSurface;
+    wxButton        *m_pbtnNewVOI;
+    wxToggleButton  *m_ptoggleSegment;
+    wxRadioButton    *m_pradiobtnFlood;
+    wxRadioButton    *m_pradiobtnBck;
+    wxRadioButton    *m_pradiobtnObj;
+    wxButton        *m_pbtnGraphCut;
+    wxButton        *m_pbtnKmeans;
+    wxTextCtrl      *m_ptxtThresBox;
 
-	
-	
+    
+    
  
     void activateLIC()      {};
     void clean()            {};
@@ -88,10 +88,10 @@ public:
     void initializeBuffer() {};
     void smooth()           {};
     double xxgauss( double x, double sigma );   
-	
     
-	float					m_floodThreshold;
-	float				    m_graphSigma;
+    
+    float                    m_floodThreshold;
+    float                    m_graphSigma;
     std::vector<float>      m_floatDataset;
     int                     m_dataType;
     TensorField             *m_tensorField;

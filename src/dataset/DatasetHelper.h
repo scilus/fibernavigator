@@ -143,18 +143,18 @@ public:
     double                m_rulerFullLength;
     double                m_rulerPartialLength;
     int                   m_fibersSamplingFactor;
-	bool				  m_isSegmentActive;
-	int					  m_SegmentMethod;
-	bool				  m_isFloodfillActive;
-	bool				  m_isSelectBckActive;
-	bool				  m_isSelectObjActive;
-	bool				  m_isObjfilled;
-	bool			      m_isBckfilled;
-	bool			      m_isObjCreated;
-	bool				  m_isBckCreated;
-	bool				  m_isBoxCreated;
-	bool				  m_thresSliderMoved;
-	bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled && m_isBoxCreated); };
+    bool                  m_isSegmentActive;
+    int                      m_SegmentMethod;
+    bool                  m_isFloodfillActive;
+    bool                  m_isSelectBckActive;
+    bool                  m_isSelectObjActive;
+    bool                  m_isObjfilled;
+    bool                  m_isBckfilled;
+    bool                  m_isObjCreated;
+    bool                  m_isBckCreated;
+    bool                  m_isBoxCreated;
+    bool                  m_thresSliderMoved;
+    bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled && m_isBoxCreated); };
 
 
     float m_xVoxel;

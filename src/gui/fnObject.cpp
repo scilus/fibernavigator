@@ -24,8 +24,8 @@ wxBoxSizer* FNObject::getProprietiesSizer()
 void FNObject::createPropertiesSizer( MainFrame *parent )
 {
     m_propertiesSizer = new wxBoxSizer( wxVERTICAL );
-	m_propertiesSizer->SetMinSize( wxSize(242,15));
-	
+    m_propertiesSizer->SetMinSize( wxSize(210,15));
+    
 }
 
 void FNObject::updatePropertiesSizer()
