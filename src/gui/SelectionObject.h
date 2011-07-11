@@ -326,7 +326,7 @@ public:
     wxTextCtrl      *m_ctrlBoxSizeX;
     wxTextCtrl      *m_ctrlBoxSizeY;
     wxTextCtrl      *m_ctrlBoxSizeZ;
-
+    
 
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.
     static const int    MEAN_FIBER_NB_POINTS=50;         // This value represent the number of points we want the mean fiber to have.

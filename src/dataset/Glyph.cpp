@@ -630,7 +630,7 @@ void Glyph::createPropertiesSizer(PropertiesWindow *parent)
     l_sizer->Add(m_psliderLuminanceValue,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
     parent->Connect(m_psliderLuminanceValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLuminanceSliderMoved)); 
-    
+
     m_psliderLightAttenuation  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light Attenuation" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
@@ -665,7 +665,7 @@ void Glyph::createPropertiesSizer(PropertiesWindow *parent)
     l_sizer->Add(m_psliderDisplayValue,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
     parent->Connect(m_psliderDisplayValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphDisplaySliderMoved));
-    
+
     m_psliderScalingFactor  = new wxSlider( parent, wxID_ANY,   0, 1, 20, wxDefaultPosition, wxSize( 140, -1 ));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Scaling Factor" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);

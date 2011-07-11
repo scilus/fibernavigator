@@ -36,6 +36,15 @@ TheScene::TheScene( DatasetHelper* i_datasetHelper ) :
         m_projection[i] = 0.0f;
         m_modelview[i]  = 0.0f;
     }
+    m_isRotateZ = false;
+    m_isNavSagital = false;
+    m_isNavCoronal = false;
+    m_isNavAxial = false;
+    m_posAxial = 0;
+    m_posCoronal = 0;
+    m_posSagital = 0;
+    m_rotAngle = 0;
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -163,6 +172,48 @@ void TheScene::renderScene()
 
     m_datasetHelper->m_shaderHelper->initializeArrays();
 
+    //Animate
+	if(m_isRotateZ)
+    {
+	    if (m_rotAngle>360) 
+		    m_rotAngle=0;
+
+    	glTranslatef(m_datasetHelper->m_columns / 2 * m_datasetHelper->m_xVoxel,m_datasetHelper->m_rows / 2 * m_datasetHelper->m_yVoxel,m_datasetHelper->m_frames / 2 * m_datasetHelper->m_zVoxel);
+	    glRotatef(m_rotAngle,0,0,1);
+	    glTranslatef(-m_datasetHelper->m_columns / 2 * m_datasetHelper->m_xVoxel,-m_datasetHelper->m_rows / 2 * m_datasetHelper->m_yVoxel,-m_datasetHelper->m_frames / 2 * m_datasetHelper->m_zVoxel);
+    }
+
+    //Navigate trhoug slizes
+    if(m_isNavSagital) 
+    {
+	    if (m_posSagital > m_datasetHelper->m_columns) 
+		    m_posSagital=0;
+
+        m_datasetHelper->updateView(m_posSagital,m_datasetHelper->m_ySlize,m_datasetHelper->m_zSlize);
+        m_datasetHelper->m_mainFrame->m_xSlider->SetValue(m_posSagital);
+    }
+
+    if(m_isNavCoronal)
+    {
+	    if (m_posCoronal > m_datasetHelper->m_rows) 
+		    m_posCoronal=0;
+
+        m_datasetHelper->updateView(m_datasetHelper->m_xSlize,m_posCoronal,m_datasetHelper->m_zSlize);
+        m_datasetHelper->m_mainFrame->m_ySlider->SetValue(m_posCoronal);
+    }
+
+    if(m_isNavAxial)
+    {
+	    if (m_posAxial > m_datasetHelper->m_frames) 
+		    m_posAxial=0;
+
+        m_datasetHelper->updateView(m_datasetHelper->m_xSlize,m_datasetHelper->m_ySlize,m_posAxial);
+        m_datasetHelper->m_mainFrame->m_zSlider->SetValue(m_posAxial);
+    }
+
+
+	
+	
     // Opaque objects.
     renderSlizes();
 
@@ -196,6 +247,8 @@ void TheScene::renderScene()
     
     if( m_datasetHelper->m_showObjects )
         drawSelectionObjects();
+
+    
 
     if( m_datasetHelper->GLError() )
         m_datasetHelper->printGLError( wxT( "render theScene" ) );

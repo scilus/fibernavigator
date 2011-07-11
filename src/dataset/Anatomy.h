@@ -14,8 +14,11 @@
 
 class SelectionObject;
 class MainFrame;
+class PropertiesWindow;
 class Anatomy : public DatasetInfo , public wxTreeItemData
 {
+
+friend class PropertiesWindow;
 
 public:
     //constructor/destructor
@@ -58,7 +61,7 @@ public:
 public:
    SelectionObject  *m_roi;
 
-private:
+ private:
     wxButton        *m_pbtnCut;
     wxButton        *m_pbtnMinimize;
     wxButton        *m_pbtnDilate;
@@ -74,7 +77,7 @@ private:
     wxButton        *m_pbtnGraphCut;
     wxButton        *m_pbtnKmeans;
     wxTextCtrl      *m_ptxtThresBox;
-    
+
     void activateLIC()      {};
     void clean()            {};
     void createOffset( std::vector<float>* dataset );

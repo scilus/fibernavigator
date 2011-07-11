@@ -1059,10 +1059,5 @@ void Anatomy::updatePropertiesSizer()
     m_pbtnMinimize->Enable(getType() <= OVERLAY);
     m_pbtnCut->Enable(getType() <= OVERLAY);
     //m_pbtnGraphCut->Enable(m_dh->graphcutReady());
-    if(m_dh->m_thresSliderMoved)
-    {
-        m_ptxtThresBox->SetValue(wxString::Format( wxT( "%.3f"), m_psliderFlood->GetValue() / 200.0f));
-        m_dh->m_thresSliderMoved = false;
-    }
 }
 

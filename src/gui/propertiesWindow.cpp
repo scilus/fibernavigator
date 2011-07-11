@@ -269,8 +269,9 @@ void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
 
 void PropertiesWindow::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    ((Anatomy*)m_mainFrame->m_currentSceneObject)->setFloodThreshold(((Anatomy*)m_mainFrame->m_currentSceneObject)->m_psliderFlood->GetValue() / 200.0f);
-    m_mainFrame->m_datasetHelper->m_thresSliderMoved = true;
+    float l_sliderValue = ((Anatomy*)m_mainFrame->m_currentSceneObject)->m_psliderFlood->GetValue() / 200.0f;
+    ((Anatomy*)m_mainFrame->m_currentSceneObject)->setFloodThreshold(l_sliderValue);
+    ((Anatomy*)m_mainFrame->m_currentSceneObject)->m_ptxtThresBox->SetValue(wxString::Format( wxT( "%.2f"), l_sliderValue));
 }
 
 void PropertiesWindow::OnSliderGraphSigmaMoved( wxCommandEvent& WXUNUSED(event) )

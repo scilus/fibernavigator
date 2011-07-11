@@ -208,6 +208,8 @@ MainFrame::MainFrame(      wxWindow*   i_parent,
     m_datasetHelper->m_theScene->setMainGLContext( m_mainGL->GetContext() );
 #endif
 
+    //m_propertiesPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(242,-1));
+    //wxScrolledWindow *m_propertiesWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(242,-1), wxVSCROLL);
     m_mainSizer         = new wxBoxSizer( wxHORIZONTAL ); // Contains everything in the UI.
     m_leftMainSizer     = new wxBoxSizer( wxVERTICAL   ); // Contains the navSizer adn the objectsizer.
     m_navSizer          = new wxBoxSizer( wxHORIZONTAL ); // Contains the 3 navigation windows with there respectiv sliders.
@@ -724,6 +726,7 @@ void MainFrame::DisplayPropertiesSheet()
                 m_lastSelectedSceneObject->createPropertiesSizer(m_propertiesWindow);
             }   
             m_currentSizer = m_lastSelectedSceneObject->getProprietiesSizer();
+            
             m_currentSceneObject = m_lastSelectedSceneObject;
             m_currentListItem = m_lastSelectedListItem;
             if (!m_propertiesWindow->GetSizer()->Show( m_currentSizer, true, true ))
@@ -731,6 +734,7 @@ void MainFrame::DisplayPropertiesSheet()
                 m_propertiesWindow->GetSizer()->Add(m_currentSizer, 0, wxLeft | wxFIXED_MINSIZE, 0 );
                 m_propertiesWindow->GetSizer()->Show( m_currentSizer, true, true );                
             }  
+            m_currentSceneObject->updatePropertiesSizer();
             doOnSize();            
         } 
         m_lastSelectedSceneObject = NULL;
@@ -1312,6 +1316,7 @@ void MainFrame::refreshViews()
         m_gl1->Refresh(true);
     if ( m_gl2 ) 
         m_gl2->Refresh(true);
+    
 }
 
 void MainFrame::renewAllGLWidgets()
@@ -1661,8 +1666,42 @@ int MainFrame::treeSelected( wxTreeItemId i_id )
         return POINT_DATASET;
     return 0;
 }
+void MainFrame::OnRotateZ( wxCommandEvent& event )
+{
+    m_datasetHelper->m_theScene->m_isRotateZ = !m_datasetHelper->m_theScene->m_isRotateZ; 
+    setTimerSpeed();
+}
 
+void MainFrame::OnNavigateAxial( wxCommandEvent& event )
+{
+    m_datasetHelper->m_theScene->m_isNavAxial = !m_datasetHelper->m_theScene->m_isNavAxial;
+    setTimerSpeed();
+}
 
+void MainFrame::OnNavigateSagital( wxCommandEvent& event )
+{
+    m_datasetHelper->m_theScene->m_isNavSagital = !m_datasetHelper->m_theScene->m_isNavSagital;    
+    setTimerSpeed();  
+}
+
+void MainFrame::OnNavigateCoronal( wxCommandEvent& event )
+{
+    m_datasetHelper->m_theScene->m_isNavCoronal = !m_datasetHelper->m_theScene->m_isNavCoronal;
+    setTimerSpeed();
+}
+
+void MainFrame::setTimerSpeed()
+{
+    m_timer->Stop();
+    if(m_datasetHelper->m_theScene->m_isNavCoronal || m_datasetHelper->m_theScene->m_isNavAxial || m_datasetHelper->m_theScene->m_isNavSagital || m_datasetHelper->m_theScene->m_isRotateZ)
+    {        
+        m_timer->Start( 50 );
+    }
+    else
+    {
+        m_timer->Start( 100 );
+    }
+}
 /****************************************************************************************************
  *
  * System event funtions
@@ -1780,6 +1819,33 @@ void MainFrame::updateMenus()
 
 void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
 {    
+    //Rotate animation
+    if(m_datasetHelper->m_theScene->m_isRotateZ)
+        m_datasetHelper->m_theScene->m_rotAngle++;
+
+    
+    //Navigate through slizes sagital
+    if(m_datasetHelper->m_theScene->m_isNavSagital) 
+        m_datasetHelper->m_theScene->m_posSagital++;
+    else
+        m_datasetHelper->m_theScene->m_posSagital = m_datasetHelper->m_xSlize;
+    
+
+    //Navigate through slizes axial
+    if(m_datasetHelper->m_theScene->m_isNavAxial) 
+        m_datasetHelper->m_theScene->m_posAxial++;
+    else
+        m_datasetHelper->m_theScene->m_posAxial = m_datasetHelper->m_zSlize;
+
+
+    //Navigate through slizes coronal
+    if(m_datasetHelper->m_theScene->m_isNavCoronal) 
+        m_datasetHelper->m_theScene->m_posCoronal++;
+    else
+        m_datasetHelper->m_theScene->m_posCoronal = m_datasetHelper->m_ySlize;
+
+
+    refreshAllGLWidgets();
     refreshViews();
     m_datasetHelper->increaseAnimationStep();    
 }

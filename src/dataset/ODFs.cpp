@@ -1246,7 +1246,7 @@ void ODFs::updatePropertiesSizer()
     m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
     m_psliderScalingFactor->Enable (false);
     m_pRadiobtnPTKBasis->Enable(false);
-    m_pradiobtnMainAxis->Enable(false);    
+    m_pradiobtnMainAxis->Enable(false);
 }
 
 

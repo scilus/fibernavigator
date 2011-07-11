@@ -39,6 +39,11 @@ public:
             wxMenuItem  *m_itemToggleShowAxial;
             wxMenuItem  *m_itemToggleShowCoronal;
             wxMenuItem  *m_itemToggleShowSagittal;
+        wxMenu      *m_menuNavigate;
+            wxMenuItem  *m_itemNavigateSlizeX;
+            wxMenuItem  *m_itemNavigateSlizeY;
+            wxMenuItem  *m_itemNavigateSlizeZ;
+        wxMenuItem  *m_itemRotateZ;
         wxMenuItem  *m_itemReset;
         wxMenuItem  *m_itemLeft;
         wxMenuItem  *m_itemRight;
@@ -88,6 +93,8 @@ public:
         wxMenuItem  *m_itemToggleBlendTextureOnMesh;
         wxMenuItem  *m_itemToggleFilterISO;
         wxMenuItem  *m_itemToggleNormal;
+        
+
         //wxMenuItem  *m_itemToggleColorMapLegend;
 
 

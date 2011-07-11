@@ -202,6 +202,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                     Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
                     Matrix4fSetRotationFromMatrix3f( &m_dh->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+					
+					
                 }
 
                 updateView();
@@ -786,6 +788,7 @@ void MainCanvas::render()
 
                 glPushMatrix();
                 m_dh->doMatrixManipulation();
+				
                 m_dh->m_theScene->renderScene();
                 glPopMatrix();
 

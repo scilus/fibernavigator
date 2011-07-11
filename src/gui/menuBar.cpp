@@ -39,8 +39,17 @@ MenuBar::MenuBar()
     m_itemToggleShowAxial = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Axial Slice"));
     m_itemToggleShowCoronal = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Coronal Slice"));
     m_itemToggleShowSagittal = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Sagittal Slice"));
-    
     m_menuView->AppendSeparator();
+
+    m_menuNavigate = new wxMenu();
+    m_menuView->AppendSubMenu(m_menuNavigate, wxT("Navigate"));
+    m_itemNavigateSlizeX = m_menuNavigate->AppendCheckItem(wxID_ANY, wxT("Sagittal"));
+    m_itemNavigateSlizeY = m_menuNavigate->AppendCheckItem(wxID_ANY, wxT("Axial"));
+    m_itemNavigateSlizeZ = m_menuNavigate->AppendCheckItem(wxID_ANY, wxT("Coronal"));
+    m_menuView->AppendSeparator();
+
+    m_itemRotateZ = m_menuView->AppendCheckItem(wxID_ANY, wxT("Rotate (Z axis)"));
+
     m_itemToggleShowCrosshair = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Crosshair"));
     m_itemToggleShowAxes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Axes"));
     m_itemLockSlizes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Lock Slices\tF"));
@@ -88,6 +97,7 @@ MenuBar::MenuBar()
     m_itemToggleFilterISO = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Filter Iso"));
     m_itemToggleNormal = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Flip Normal"));
     //m_itemToggleColorMapLegend = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Show Color Map"));
+  
 
 
     m_menuHelp = new wxMenu();
@@ -130,6 +140,11 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemToggleShowAxial->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowAxial));
     mf->Connect(m_itemToggleShowCoronal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowCoronal));
     mf->Connect(m_itemToggleShowSagittal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowSagittal));
+    
+    mf->Connect(m_itemNavigateSlizeX->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNavigateSagital));
+    mf->Connect(m_itemNavigateSlizeY->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNavigateAxial));
+    mf->Connect(m_itemNavigateSlizeZ->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNavigateCoronal));
+   
     mf->Connect(m_itemReset->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewReset));
     mf->Connect(m_itemLeft->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewLeft));
     mf->Connect(m_itemRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMenuViewRight));
@@ -175,6 +190,9 @@ void MenuBar::initMenuBar( MainFrame *mf )
     //mf->Connect(m_itemAxialMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieAxi));
     //mf->Connect(m_itemCoronalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieCor));
     //mf->Connect(m_itemSagittalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieSag));
+    mf->Connect(m_itemRotateZ->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnRotateZ));
+   
+    
 }
 
 void MenuBar::updateMenuBar( MainFrame *mf )

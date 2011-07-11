@@ -1765,7 +1765,7 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 9,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
         m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
     }*/
-}
+    }
 
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 {

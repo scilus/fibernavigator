@@ -141,7 +141,13 @@ private:
     void OnToggleShowSagittal               ( wxCommandEvent& event );
     void OnToggleAlpha                      ( wxCommandEvent& event );
     
+    void OnRotateZ                          ( wxCommandEvent& event );
+    void OnNavigateSagital                  ( wxCommandEvent& event );
+    void OnNavigateAxial                    ( wxCommandEvent& event );
+    void OnNavigateCoronal                  ( wxCommandEvent& event );
+    void setTimerSpeed                      ();
     /*
+
      * List widget event functions
      */
     void OnActivateListItem                 ( wxListEvent&    event );
