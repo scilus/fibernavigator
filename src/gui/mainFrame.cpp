@@ -1673,6 +1673,18 @@ void MainFrame::OnRotateZ( wxCommandEvent& event )
     setTimerSpeed();
 }
 
+void MainFrame::OnRotateY( wxCommandEvent& event )
+{
+    m_datasetHelper->m_theScene->m_isRotateY = !m_datasetHelper->m_theScene->m_isRotateY; 
+    setTimerSpeed();
+}
+
+void MainFrame::OnRotateX( wxCommandEvent& event )
+{
+    m_datasetHelper->m_theScene->m_isRotateX = !m_datasetHelper->m_theScene->m_isRotateX; 
+    setTimerSpeed();
+}
+
 void MainFrame::OnNavigateAxial( wxCommandEvent& event )
 {
     m_datasetHelper->m_theScene->m_isNavAxial = !m_datasetHelper->m_theScene->m_isNavAxial;
@@ -1694,7 +1706,8 @@ void MainFrame::OnNavigateCoronal( wxCommandEvent& event )
 void MainFrame::setTimerSpeed()
 {
     m_timer->Stop();
-    if(m_datasetHelper->m_theScene->m_isNavCoronal || m_datasetHelper->m_theScene->m_isNavAxial || m_datasetHelper->m_theScene->m_isNavSagital || m_datasetHelper->m_theScene->m_isRotateZ)
+    if(m_datasetHelper->m_theScene->m_isNavCoronal || m_datasetHelper->m_theScene->m_isNavAxial || m_datasetHelper->m_theScene->m_isNavSagital || m_datasetHelper->m_theScene->m_isRotateZ
+        || m_datasetHelper->m_theScene->m_isRotateY || m_datasetHelper->m_theScene->m_isRotateX)
     {        
         m_timer->Start( 50 );
     }
@@ -1822,7 +1835,13 @@ void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
 {    
     //Rotate animation
     if(m_datasetHelper->m_theScene->m_isRotateZ)
-        m_datasetHelper->m_theScene->m_rotAngle++;
+        m_datasetHelper->m_theScene->m_rotAngleZ++;
+
+    if(m_datasetHelper->m_theScene->m_isRotateY)
+        m_datasetHelper->m_theScene->m_rotAngleY++;
+
+    if(m_datasetHelper->m_theScene->m_isRotateX)
+        m_datasetHelper->m_theScene->m_rotAngleX++;
 
     
     //Navigate through slizes sagital
