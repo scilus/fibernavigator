@@ -194,12 +194,6 @@ bool DatasetHelper::load( const int i_index )
 
 bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha )
 {
-    // check if dataset is already loaded and ignore it if yes
-    /*if( fileNameExists( i_fileName ) )
-    {
-        m_lastError = wxT( "dataset already loaded" );
-        return false;
-    }*/
 
     // check if i_fileName is valid
     if( ! wxFile::Exists( i_fileName ) )
@@ -287,12 +281,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
                 m_lastError = wxT( "no anatomy file loaded" );
                 return false;
             }
-
-            /*if( m_ODFsLoaded )
-            {
-                m_lastError = wxT( "ODFs already loaded" );
-                return false;
-            }*/
             l_dataset = new ODFs( this );            
         }
         else
@@ -515,7 +503,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 m_anatomyLoaded   = true;
             }
         }
-
         else if( l_child->GetName() == wxT( "position" ) )
         {
             l_child->GetPropVal( wxT( "x" ), wxT( "1" ) ).ToLong( &xp, 10 );
@@ -570,7 +557,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 l_dataSetNode = l_dataSetNode->GetNext();
             }
         }
-
         else if( l_child->GetName() == wxT( "points" ) )
         {
             wxXmlNode* l_pNode = l_child->GetChildren();
@@ -609,7 +595,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 m_mainFrame->m_listCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
             }
         }
-
         else if( l_child->GetName() == wxT( "selection_objects" ) )
         {
             wxXmlNode* l_boxNode = l_child->GetChildren();

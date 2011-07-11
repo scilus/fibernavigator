@@ -733,10 +733,10 @@ void MainFrame::DisplayPropertiesSheet()
             {
                 m_propertiesWindow->GetSizer()->Add(m_currentSizer, 0, wxLeft | wxFIXED_MINSIZE, 0 );
                 m_propertiesWindow->GetSizer()->Show( m_currentSizer, true, true );                
-            }  
-            m_currentSceneObject->updatePropertiesSizer();
+            }             
             doOnSize();            
-        } 
+        }        
+        m_currentSceneObject->updatePropertiesSizer();
         m_lastSelectedSceneObject = NULL;
     }     
 }
@@ -1294,6 +1294,7 @@ void MainFrame::refreshAllGLWidgets()
 {
     updateStatusBar();
     updateMenus();
+
     refreshViews();   
     if (m_datasetHelper->m_isRulerToolActive){
         wxString sbString1 = wxString::Format( wxT("%4.1fmm (%2.1fmm)" ), m_datasetHelper->m_rulerFullLength, m_datasetHelper->m_rulerPartialLength );

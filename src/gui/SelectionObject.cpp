@@ -1743,12 +1743,10 @@ void SelectionObject::SetFiberInfoGridValues()
         l_masterObject->SetFiberInfoGridValues();
         return;
     }
-  /*  if (m_ptoggleCalculatesFibersInfo->GetValue())
+   if (m_ptoggleCalculatesFibersInfo->GetValue())
     {
         FibersInfoGridParams l_params;
         calculateGridParams( l_params );
-
-
 
         m_pgridfibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ), l_params.m_count              ) );
         m_pgridfibersInfo->SetCellValue( 1,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanValue        ) );
@@ -1764,7 +1762,7 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 8,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
         m_pgridfibersInfo->SetCellValue( 9,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
         m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
-    }*/
+    }
     }
 
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
@@ -1839,7 +1837,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->AddSpacer(2);
 
     // Initialize the grid.
-    /*m_pgridfibersInfo = new wxGrid(parent, wxID_ANY );
+    m_pgridfibersInfo = new wxGrid(parent, wxID_ANY );
     m_pgridfibersInfo->SetRowLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
     wxFont l_font2 = m_pgridfibersInfo->GetFont();
     l_font2.SetPointSize(8);
@@ -1878,7 +1876,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
 
     m_ptoggleCalculatesFibersInfo->Enable(getIsMaster() && m_objectType != CISO_SURFACE_TYPE); //bug with some fibers dataset sets
-    */
+    
     
     m_pbtnNewFibersColorVolume->Enable(getIsMaster());
     m_pbtnNewFibersDensityVolume->Enable(getIsMaster());
@@ -1949,10 +1947,10 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleVisibility->SetValue(getIsVisible());
     m_ptoggleActivate->SetValue(getIsActive());
     m_ptxtName->SetValue(getName());
-    //m_pgridfibersInfo->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
-    //m_ptoggleDisplayMeanFiber->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
-    //m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
-    //m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    m_pgridfibersInfo->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    m_ptoggleDisplayMeanFiber->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
 
     if(m_boxMoved)
     {
