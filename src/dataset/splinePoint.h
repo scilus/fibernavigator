@@ -9,12 +9,12 @@
 
 #include <GL/glew.h>
 #include "../gui/boundingBox.h"
-#include "../gui/fnObject.h"
+#include "../gui/sceneObject.h"
 #include "DatasetHelper.h"
 
 class DatasetHelper;
 
-class SplinePoint : public wxTreeItemData, public FNObject
+class SplinePoint : public wxTreeItemData, public SceneObject
 {
 public:
     SplinePoint( Vector, DatasetHelper* );
@@ -62,7 +62,7 @@ public:
     void moveBack5();
     void moveUp5();
     void moveDown5();
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
 
 private:

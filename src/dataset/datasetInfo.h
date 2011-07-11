@@ -13,7 +13,7 @@
 
 #include "../misc/IsoSurface/triangleMesh.h"
 #include "../misc/Algorithms/Helper.h"
-#include "../gui/fnObject.h"
+#include "../gui/sceneObject.h"
 #include "../gui/myListCtrl.h"
 #include <GL/glew.h>
 
@@ -33,12 +33,12 @@ class DatasetHelper;
 class TriangleMesh;
 class MainFrame;
 
-class DatasetInfo : public FNObject
+class DatasetInfo : public SceneObject
 {
 public:
     DatasetInfo( DatasetHelper* datasetHelper ); 
     
-    virtual void createPropertiesSizer(MainFrame *parent); 
+    virtual void createPropertiesSizer(PropertiesWindow *parent); 
     virtual void updatePropertiesSizer();
 
     virtual bool   load( wxString filename )=0;

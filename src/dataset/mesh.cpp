@@ -422,13 +422,13 @@ void Mesh::draw()
     glCallList(m_GLuint);
 }
 
-void Mesh::createPropertiesSizer(MainFrame *parent)
+void Mesh::createPropertiesSizer(PropertiesWindow *parent)
 {
     DatasetInfo::createPropertiesSizer(parent);
 
     m_ptoggleCutFrontSector = new wxToggleButton(parent, wxID_ANY,wxT("Cut Front Sector"),wxDefaultPosition, wxSize(140,-1));
     m_propertiesSizer->Add(m_ptoggleCutFrontSector,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(MainFrame::OnToggleShowFS));  
+    parent->Connect(m_ptoggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
 
     wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_ptoggleUseColoring = new wxToggleButton(parent, wxID_ANY,wxT("Use Coloring"),wxDefaultPosition, wxSize(100,-1));
@@ -437,8 +437,8 @@ void Mesh::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_ptoggleUseColoring,0,wxALIGN_CENTER);
     l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnListMenuThreshold));
-    parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnAssignColor));
+    parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListMenuThreshold));
+    parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
 }
 
 void Mesh::updatePropertiesSizer()

@@ -77,7 +77,7 @@ public:
 
     void    generateFiberVolume();
     void    setFibersLength();
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
 
 private:

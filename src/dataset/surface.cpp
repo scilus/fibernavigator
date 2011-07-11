@@ -709,7 +709,7 @@ void Surface::smooth()
     licCalculated = false;
 }
 
-void Surface::createPropertiesSizer(MainFrame *parent)
+void Surface::createPropertiesSizer(PropertiesWindow *parent)
 {
     DatasetInfo::createPropertiesSizer(parent);
     m_ptoggleDrawPoints = new wxToggleButton(parent, wxID_ANY, wxT("Show Points"), wxDefaultPosition, wxSize(80,-1));
@@ -722,9 +722,9 @@ void Surface::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_pbtnMoveBoundaryLeft,0,wxALIGN_CENTER);
     l_sizer->Add(m_pbtnMoveBoundaryRight,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleDrawPoints->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnToggleDrawPointsMode));
-    parent->Connect(m_pbtnMoveBoundaryLeft->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnMoveBoundaryPointsLeft));
-    parent->Connect(m_pbtnMoveBoundaryRight->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnMoveBoundaryPointsRight));
+    parent->Connect(m_ptoggleDrawPoints->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleDrawPointsMode));
+    parent->Connect(m_pbtnMoveBoundaryLeft->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMoveBoundaryPointsLeft));
+    parent->Connect(m_pbtnMoveBoundaryRight->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMoveBoundaryPointsRight));
 }
 
 void Surface::updatePropertiesSizer()

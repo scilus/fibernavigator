@@ -39,9 +39,9 @@ DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) :
 
 }
 
-void DatasetInfo::createPropertiesSizer(MainFrame *parent)
+void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
 {
-    FNObject::createPropertiesSizer(parent);
+    SceneObject::createPropertiesSizer(parent);
     wxBoxSizer *l_sizer;
 
     m_ptxtName = new wxTextCtrl(parent, wxID_ANY, getName(),wxDefaultPosition, wxSize(180,-1), wxTE_CENTRE | wxTE_READONLY);    
@@ -65,9 +65,9 @@ void DatasetInfo::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_pbtnDown,0,wxALIGN_CENTER);
     l_sizer->Add(m_pbtnDelete,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnDown->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnListItemDown));
-    parent->Connect(m_pbtnUp->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnListItemUp));
-    parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler(MainFrame::OnDeleteListItem));
+    parent->Connect(m_pbtnDown->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemDown));
+    parent->Connect(m_pbtnUp->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemUp));
+    parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnDeleteListItem));
     
     m_ptoggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(90,-1));
     m_ptoggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Interpolation"),wxDefaultPosition, wxSize(90,-1));
@@ -75,8 +75,8 @@ void DatasetInfo::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_ptoggleVisibility,0,wxALIGN_CENTER);
     l_sizer->Add(m_ptoggleFiltering,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleVisibility->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnListMenuShow));   
-    parent->Connect(m_ptoggleFiltering->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(MainFrame::OnToggleShowFS));  
+    parent->Connect(m_ptoggleVisibility->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemShow));   
+    parent->Connect(m_ptoggleFiltering->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
     
     m_psliderThresholdIntensity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderThresholdIntensity->SetValue((int)(getThreshold()*100));
@@ -84,7 +84,7 @@ void DatasetInfo::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Intensity "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderThresholdIntensity,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderThresholdIntensity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnSliderIntensityThresholdMoved));
+    parent->Connect(m_psliderThresholdIntensity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderIntensityThresholdMoved));
 
     m_psliderOpacity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderOpacity->SetValue((int)(getAlpha()*100));
@@ -92,9 +92,9 @@ void DatasetInfo::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Opacity "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderOpacity,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderOpacity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnSliderOpacityThresholdMoved));
+    parent->Connect(m_psliderOpacity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderOpacityThresholdMoved));
 
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    /*l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pbtnSmoothLoop = new wxButton(parent, wxID_ANY,wxT("Smooth"),wxDefaultPosition, wxSize(60,-1));
     l_sizer->Add(m_pbtnSmoothLoop,0,wxALIGN_CENTER);
     m_pbtnSmoothLoop->Enable(getType() == MESH ); // || getType() == MESH || getType() == SURFACE
@@ -105,16 +105,16 @@ void DatasetInfo::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_ptoggleLIC,0,wxALIGN_CENTER);
     m_ptoggleLIC->Enable(m_dh->m_vectorsLoaded && (getType() == SURFACE || getType() == ISO_SURFACE));
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnSmoothLoop->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnLoop)); 
-    parent->Connect(m_pbtnClean->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnClean));  
-    parent->Connect(m_ptoggleLIC->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnToggleLIC));     
+    //parent->Connect(m_pbtnSmoothLoop->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnLoop)); 
+    //parent->Connect(m_pbtnClean->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnClean));  
+    //parent->Connect(m_ptoggleLIC->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleLIC));*/     
 }
 
 void DatasetInfo::updatePropertiesSizer()
 {
-    FNObject::updatePropertiesSizer();
+    SceneObject::updatePropertiesSizer();
     m_ptoggleVisibility->SetValue(getShow());
     m_ptoggleFiltering->SetValue(getShowFS());
-    m_ptoggleLIC->SetValue(getUseLIC());
+    //m_ptoggleLIC->SetValue(getUseLIC());
     
 }

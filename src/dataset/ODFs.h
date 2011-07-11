@@ -33,7 +33,7 @@ public:
 
     // Functions
     bool loadNifti  ( wxString i_fileName );
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
     
     bool isShBasis( int i_sh_basis ) {return m_sh_basis == i_sh_basis;};

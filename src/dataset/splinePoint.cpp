@@ -200,9 +200,9 @@ void SplinePoint::moveDown5()
     m_dh->m_mainFrame->refreshAllGLWidgets();
 }
 
-void SplinePoint::createPropertiesSizer(MainFrame *parent)
+void SplinePoint::createPropertiesSizer(PropertiesWindow *parent)
 {
-    FNObject::createPropertiesSizer(parent);  
+    SceneObject::createPropertiesSizer(parent);  
     wxSizer *l_sizer;
 
     m_ptxtName = new wxTextCtrl(parent, wxID_ANY, getName(),wxDefaultPosition, wxSize(180,-1), wxTE_CENTRE | wxTE_READONLY);    
@@ -218,13 +218,13 @@ void SplinePoint::createPropertiesSizer(MainFrame *parent)
     wxImage bmpDelete(MyApp::iconsPath+ wxT("delete.png" ), wxBITMAP_TYPE_PNG);
     m_pbtnDelete = new wxBitmapButton(parent, wxID_ANY, bmpDelete, wxDefaultPosition, wxSize(40,-1));
     m_propertiesSizer->Add(m_pbtnDelete,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(MainFrame::OnDeleteTreeItem));
+    parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(PropertiesWindow::OnDeleteTreeItem));
 
-    m_propertiesSizer->Add(new wxStaticText( parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(200,15)));
+    m_propertiesSizer->Add(new wxStaticText(parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(200,15)));
 
 }
 
 void SplinePoint::updatePropertiesSizer()
 {
-    FNObject::updatePropertiesSizer();
+    SceneObject::updatePropertiesSizer();
 }

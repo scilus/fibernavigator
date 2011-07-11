@@ -1189,7 +1189,7 @@ void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
         }
 }
 
-void ODFs::createPropertiesSizer(MainFrame *parent)
+void ODFs::createPropertiesSizer(PropertiesWindow *parent)
 {
     Glyph::createPropertiesSizer(parent);
     wxSizer *l_sizer;
@@ -1203,29 +1203,29 @@ void ODFs::createPropertiesSizer(MainFrame *parent)
     m_pRadiobtnOriginalBasis = new wxRadioButton(parent, wxID_ANY, _T( "RR5768" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
     l_sizer->Add(m_pRadiobtnOriginalBasis);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pRadiobtnOriginalBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnOriginalShBasis));
+    parent->Connect(m_pRadiobtnOriginalBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnOriginalShBasis));
     
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pRadiobtnDescoteauxBasis = new wxRadioButton(parent, wxID_ANY, _T( "Descoteaux" ), wxDefaultPosition, wxSize(132,-1));
     l_sizer->Add(m_pRadiobtnDescoteauxBasis);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pRadiobtnDescoteauxBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnDescoteauxShBasis));
+    parent->Connect(m_pRadiobtnDescoteauxBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnDescoteauxShBasis));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pRadiobtnTournierBasis = new wxRadioButton(parent, wxID_ANY, _T( "Tournier" ), wxDefaultPosition, wxSize(132,-1));
     l_sizer->Add(m_pRadiobtnTournierBasis);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pRadiobtnTournierBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnTournierShBasis));
+    parent->Connect(m_pRadiobtnTournierBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnTournierShBasis));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pRadiobtnPTKBasis = new wxRadioButton(parent, wxID_ANY, _T( "PTK" ), wxDefaultPosition, wxSize(132,-1));
     l_sizer->Add(m_pRadiobtnPTKBasis);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnPTKShBasis));
+    parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnPTKShBasis));
     
-    m_pRadiobtnOriginalBasis->SetValue            (isShBasis(0));
-        m_pRadiobtnDescoteauxBasis->SetValue                (isShBasis(1));
-        m_pRadiobtnTournierBasis->SetValue            (isShBasis(2));
+    m_pRadiobtnOriginalBasis->SetValue           (isShBasis(0));
+    m_pRadiobtnDescoteauxBasis->SetValue         (isShBasis(1));
+    m_pRadiobtnTournierBasis->SetValue           (isShBasis(2));
     m_pRadiobtnPTKBasis->SetValue                (isShBasis(3));
     
 }
@@ -1234,20 +1234,19 @@ void ODFs::updatePropertiesSizer()
 {
     Glyph::updatePropertiesSizer();
     //set to min.
-    //m_pradiobtnMainAxis->Enable(false);
-    //m_psliderLightAttenuation->SetValue(m_psliderLightAttenuation->GetMin());
+    m_pradiobtnMainAxis->Enable(false);
+    m_psliderLightAttenuation->SetValue(m_psliderLightAttenuation->GetMin());
     m_psliderLightAttenuation->Enable(false);
-    //m_psliderLightXPosition->SetValue(m_psliderLightXPosition->GetMin());
+    m_psliderLightXPosition->SetValue(m_psliderLightXPosition->GetMin());
     m_psliderLightXPosition->Enable(false);
-    //m_psliderLightYPosition->SetValue(m_psliderLightYPosition->GetMin());
+    m_psliderLightYPosition->SetValue(m_psliderLightYPosition->GetMin());
     m_psliderLightYPosition->Enable(false);
-    //m_psliderLightZPosition->SetValue(m_psliderLightZPosition->GetMin());
+    m_psliderLightZPosition->SetValue(m_psliderLightZPosition->GetMin());
     m_psliderLightZPosition->Enable(false);
-    //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
+    m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
     m_psliderScalingFactor->Enable (false);
     m_pRadiobtnPTKBasis->Enable(false);
-    m_pradiobtnMainAxis->Enable(false);
-    
+    m_pradiobtnMainAxis->Enable(false);    
 }
 
 

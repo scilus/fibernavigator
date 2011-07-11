@@ -31,7 +31,7 @@ public:
     bool loadNifti( wxString i_fileName );
     bool load     ( wxString i_fileName );
     void normalize();
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
     
 private:

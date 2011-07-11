@@ -448,16 +448,16 @@ void Tensors::setScalingFactor( float i_scalingFactor )
     loadBuffer();
 }
 
-void Tensors::createPropertiesSizer(MainFrame *parent)
+void Tensors::createPropertiesSizer(PropertiesWindow *parent)
 {
     Glyph::createPropertiesSizer(parent);
     m_pbtnNormalize = new wxToggleButton(parent, wxID_ANY, wxT("Normalize"), wxDefaultPosition, wxSize(140,-1));    
-    parent->Connect(m_pbtnNormalize->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED,wxCommandEventHandler(MainFrame::OnNormalizeTensors));
+    parent->Connect(m_pbtnNormalize->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED,wxCommandEventHandler(PropertiesWindow::OnNormalizeTensors));
     m_propertiesSizer->Add(m_pbtnNormalize,0,wxALIGN_CENTER);
 
     m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));    
     m_psizerDisplay->Add(m_pradiobtnAxes);
-    parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnGlyphAxesSelected));
+    parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphAxesSelected));
     m_pradiobtnAxes->SetValue          (isDisplayShape(AXES));
 }
 

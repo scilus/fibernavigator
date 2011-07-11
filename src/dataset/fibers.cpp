@@ -2484,7 +2484,7 @@ void Fibers::updateFibersFilters()
 }
 
 
-void Fibers::createPropertiesSizer(MainFrame *parent)
+void Fibers::createPropertiesSizer(PropertiesWindow *parent)
 {
     setFibersLength();
     DatasetInfo::createPropertiesSizer(parent);    
@@ -2494,43 +2494,43 @@ void Fibers::createPropertiesSizer(MainFrame *parent)
     m_psliderFibersFilterMin = new wxSlider(parent, wxID_ANY, getMinFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersFilterMin,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderFibersFilterMin->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnFibersFilter));
+    parent->Connect(m_psliderFibersFilterMin->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnFibersFilter));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Max Length"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
     m_psliderFibersFilterMax = new wxSlider(parent, wxID_ANY, getMaxFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersFilterMax,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderFibersFilterMax->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnFibersFilter));
+    parent->Connect(m_psliderFibersFilterMax->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnFibersFilter));
             
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Subsampling"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
     m_psliderFibersSampling = new wxSlider(parent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     l_sizer->Add(m_psliderFibersSampling,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);    
-    parent->Connect(m_psliderFibersSampling->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnFibersFilter));
+    parent->Connect(m_psliderFibersSampling->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnFibersFilter));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pGeneratesFibersDensityVolume = new wxButton(parent, wxID_ANY,wxT("New Density Volume"),wxDefaultPosition, wxSize(140,-1));
     l_sizer->Add(m_pGeneratesFibersDensityVolume,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pGeneratesFibersDensityVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnGenerateFiberVolume));
+    parent->Connect(m_pGeneratesFibersDensityVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGenerateFiberVolume));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_ptoggleLocalColoring = new wxToggleButton(parent, wxID_ANY,wxT("Local Coloring"),wxDefaultPosition, wxSize(140,-1));
     l_sizer->Add(m_ptoggleLocalColoring,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleLocalColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnListMenuThreshold));
+    parent->Connect(m_ptoggleLocalColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListMenuThreshold));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_ptoggleNormalColoring = new wxToggleButton(parent, wxID_ANY,wxT("Color With Overley"),wxDefaultPosition, wxSize(140,-1));
     l_sizer->Add(m_ptoggleNormalColoring,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleNormalColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(MainFrame::OnToggleShowFS));
+    parent->Connect(m_ptoggleNormalColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));
 
     m_propertiesSizer->AddSpacer(8);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+    l_sizer->Add(new wxStaticText(parent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(8,1,0);
     m_pradioNormalColoring = new wxRadioButton(parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize(132,-1));
     l_sizer->Add(m_pradioNormalColoring);
@@ -2555,11 +2555,11 @@ void Fibers::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(68,1,0);
     l_sizer->Add(m_pradioTorsion);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pradioNormalColoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnNormalColoring));
-    parent->Connect(m_pradioDistanceAnchoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnListMenuDistance));
-    parent->Connect(m_pradioMinDistanceAnchoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnListMenuMinDistance));
-    parent->Connect(m_pradioTorsion->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnColorWithTorsion));
-    parent->Connect(m_pradioCurvature->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnColorWithCurvature));
+    parent->Connect(m_pradioNormalColoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnNormalColoring));
+    parent->Connect(m_pradioDistanceAnchoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnListMenuDistance));
+    parent->Connect(m_pradioMinDistanceAnchoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnListMenuMinDistance));
+    parent->Connect(m_pradioTorsion->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnColorWithTorsion));
+    parent->Connect(m_pradioCurvature->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnColorWithCurvature));
 
     m_pradioNormalColoring->SetValue(m_dh->m_fiberColorationMode == NORMAL_COLOR);
 }

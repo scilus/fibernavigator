@@ -9,26 +9,25 @@
 //      
 /////////////////////////////////////////////////////////////////////////////
 
-#include "fnObject.h"
-#include "mainFrame.h"
-FNObject::FNObject()
+#include "sceneObject.h"
+SceneObject::SceneObject()
 {
     m_propertiesSizer = NULL;
 }
 
-wxBoxSizer* FNObject::getProprietiesSizer()
+wxBoxSizer* SceneObject::getProprietiesSizer()
 {
     return m_propertiesSizer;
 }
 
-void FNObject::createPropertiesSizer( MainFrame *parent )
+void SceneObject::createPropertiesSizer( PropertiesWindow *parent )
 {
     m_propertiesSizer = new wxBoxSizer( wxVERTICAL );
     m_propertiesSizer->SetMinSize( wxSize(210,15));
     
 }
 
-void FNObject::updatePropertiesSizer()
+void SceneObject::updatePropertiesSizer()
 {
 
 }

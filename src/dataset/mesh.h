@@ -48,7 +48,7 @@ public:
     void clean()                        { m_tMesh->cleanUp(); };
     void smooth()                       { m_tMesh->doLoopSubD(); };
     void activateLIC();
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
 
     void setFiletype     ( int value )  { m_filetype      = value; };

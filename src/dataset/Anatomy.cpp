@@ -950,7 +950,7 @@ TensorField* Anatomy::getTensorField()
     return m_tensorField;
 }
 
-void Anatomy::createPropertiesSizer(MainFrame *parent)
+void Anatomy::createPropertiesSizer(PropertiesWindow *parent)
 {
     DatasetInfo::createPropertiesSizer(parent);  
     wxSizer *l_sizer;
@@ -960,8 +960,8 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_pbtnDilate,0,wxALIGN_CENTER);
     l_sizer->Add(m_pbtnErode,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnDilate->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnDilateDataset));
-    parent->Connect(m_pbtnErode->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnErodeDataset));
+    parent->Connect(m_pbtnDilate->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDilateDataset));
+    parent->Connect(m_pbtnErode->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnErodeDataset));
 
     m_pbtnCut = new wxButton(parent, wxID_ANY, wxT("Cut (boxes)"), wxDefaultPosition, wxSize(85,-1));
     m_pbtnMinimize = new wxButton(parent, wxID_ANY, wxT("Minimize (fibers)"), wxDefaultPosition, wxSize(85,-1));
@@ -969,8 +969,8 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_pbtnCut,0,wxALIGN_CENTER);
     l_sizer->Add(m_pbtnMinimize,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnMinimize->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnMinimizeDataset));
-    parent->Connect(m_pbtnCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnListMenuCutOut));
+    parent->Connect(m_pbtnMinimize->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMinimizeDataset));
+    parent->Connect(m_pbtnCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemCutOut));
 
     m_pbtnNewDistanceMap = new wxButton(parent, wxID_ANY, wxT("New Distance Map"), wxDefaultPosition, wxSize(140,-1));
     m_pbtnNewIsoSurface  = new wxButton(parent, wxID_ANY, wxT("New Iso Surface"), wxDefaultPosition, wxSize(140,-1));
@@ -980,23 +980,23 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     m_propertiesSizer->Add(m_pbtnNewIsoSurface,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(m_pbtnNewOffsetSurface,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(m_pbtnNewVOI,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnNewIsoSurface->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewIsoSurface));
-    parent->Connect(m_pbtnNewDistanceMap->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewDistanceMap));
-    parent->Connect(m_pbtnNewOffsetSurface->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewOffsetSurface));
-    parent->Connect(m_pbtnNewVOI->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnNewVoiFromOverlay));
+    parent->Connect(m_pbtnNewIsoSurface->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewIsoSurface));
+    parent->Connect(m_pbtnNewDistanceMap->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewDistanceMap));
+    parent->Connect(m_pbtnNewOffsetSurface->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewOffsetSurface));
+    parent->Connect(m_pbtnNewVOI->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewVoiFromOverlay));
     
     m_ptoggleSegment = new wxToggleButton(parent, wxID_ANY,wxT("Floodfill"),wxDefaultPosition, wxSize(140,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(m_ptoggleSegment,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleSegment->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnFloodFill));
+    parent->Connect(m_ptoggleSegment->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFloodFill));
     
     /*l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pradiobtnFlood = new wxRadioButton(parent, wxID_ANY, _T( "Click region" ), wxDefaultPosition, wxSize(80,-1));
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Floodfill   "),wxDefaultPosition, wxSize(50,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_pradiobtnFlood);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pradiobtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnFloodFill));*/
+    parent->Connect(m_pradiobtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnFloodFill));*/
 
     m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderFlood->SetValue(40);
@@ -1007,21 +1007,21 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
     l_sizer->Add(m_ptxtThresBox,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnSliderFloodMoved));
+    parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderFloodMoved));
 
     /*l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pradiobtnObj = new wxRadioButton(parent, wxID_ANY, _T( "Select Class 1" ), wxDefaultPosition, wxSize(85,-1));
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_pradiobtnObj);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pradiobtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnSelectObj));
+    parent->Connect(m_pradiobtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectObj));
     
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pradiobtnBck = new wxRadioButton(parent, wxID_ANY, _T( "Select Class 2" ), wxDefaultPosition, wxSize(85,-1));
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_pradiobtnBck);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pradiobtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(MainFrame::OnSelectBck));
+    parent->Connect(m_pradiobtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectBck));
 
     m_psliderGraphSigma = new MySlider(parent, wxID_ANY,0,0,500, wxDefaultPosition, wxSize(80,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderGraphSigma->SetValue(200);
@@ -1030,20 +1030,20 @@ void Anatomy::createPropertiesSizer(MainFrame *parent)
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Sigma "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderGraphSigma,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderGraphSigma->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(MainFrame::OnSliderGraphSigmaMoved));
+    parent->Connect(m_psliderGraphSigma->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderGraphSigmaMoved));
 
     m_pbtnGraphCut = new wxButton(parent, wxID_ANY, wxT("Generate Graphcut"), wxDefaultPosition, wxSize(120,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(m_pbtnGraphCut,0,wxALIGN_CENTER);
     m_pbtnGraphCut->Enable(m_dh->graphcutReady());
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnbtnGraphCut));*/
+    parent->Connect(m_pbtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnbtnGraphCut));*/
 
     /*m_pbtnKmeans = new wxButton(parent, wxID_ANY, wxT("K-Means"), wxDefaultPosition, wxSize(132,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(m_pbtnKmeans,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnKmeans->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::OnKmeans));*/
+    parent->Connect(m_pbtnKmeans->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnKmeans));*/
 
 }
 

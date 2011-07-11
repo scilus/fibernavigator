@@ -14,14 +14,15 @@
 
 #include <wx/wx.h>
 
-class MainFrame;
-class FNObject
+#include "propertiesWindow.h"
+
+class SceneObject
 {
 
 public:
-    FNObject();
+    SceneObject();
     wxBoxSizer  *m_propertiesSizer;
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
     wxBoxSizer* getProprietiesSizer();   
     

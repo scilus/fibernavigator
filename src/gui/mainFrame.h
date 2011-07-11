@@ -30,7 +30,7 @@ class SelectionObject;
 class DatasetInfo;
 class ToolBar;
 class MenuBar;
-class FNObject;
+class SceneObject;
 
 class MainFrame : public wxFrame
 {
@@ -47,37 +47,33 @@ class MainFrame : public wxFrame
     friend class ODFs;
     friend class SelectionObject;
     friend class SplinePoint;
+    friend class PropertiesWindow;
 
 public:
     MainFrame( wxWindow* i_parent, const wxWindowID i_id, const wxString& i_title, const wxPoint& i_pos, const wxSize& i_size, const long i_style);
     ~MainFrame();
 
     void DisplayPropertiesSheet();
-    void deleteFNObject();
+    void deleteSceneObject();
     void deleteListItem();
     void deleteTreeItem();
     void refreshAllGLWidgets();
+    void refreshViews();
     void renewAllGLWidgets();
-    void Screenshot             ( wxString         i_fileName    );
-    void SetGlyphOptionsValues  ( DatasetInfo*     i_tensors     );
+    void Screenshot                         ( wxString         i_fileName    );
+    void SetGlyphOptionsValues              ( DatasetInfo*     i_tensors     );
     void OnTreeChange();
     void OnMouseEvent                       ( wxMouseEvent&   event );
     void OnLoad                             ( wxCommandEvent& event );
     
 private:
-    void OnDeleteListItem                   ( wxEvent& event );
-    void OnToggleShowFS                     ( wxEvent& event );
-    void OnFibersFilter                     ( wxCommandEvent& event);
-    void OnNewIsoSurface                    ( wxCommandEvent& event );    
     void OnReloadShaders                    ( wxCommandEvent& event );
     void OnSave                             ( wxCommandEvent& event );
     void OnSaveFibers                       ( wxCommandEvent& event );
     void OnSaveSurface                      ( wxCommandEvent& event );
     void OnSaveDataset                      ( wxCommandEvent& event );
-    void OnMinimizeDataset                  ( wxCommandEvent& event );
-    void OnDilateDataset                    ( wxCommandEvent& event );
-    void OnErodeDataset                     ( wxCommandEvent& event );
     void OnQuit                             ( wxCommandEvent& event );
+    void OnClose                            ( wxCloseEvent&   event );
     // View
     void OnMenuViewReset                    ( wxCommandEvent& event );
     void OnMenuViewLeft                     ( wxCommandEvent& event );
@@ -88,48 +84,21 @@ private:
     void OnMenuViewBack                     ( wxCommandEvent& event );
     void OnMenuViewCrosshair                ( wxCommandEvent& event );
     void OnMenuViewAxes                     ( wxCommandEvent& event );
-    void OnMenuLock                            ( wxCommandEvent& event );
+    void OnMenuLock                         ( wxCommandEvent& event );
     void OnSceneLock                        ( wxCommandEvent& event );
     // Voi
     void OnToggleSelectionObjects           ( wxCommandEvent& event );
-    void OnToggleShowSelectionObject        ( wxCommandEvent& event );
     void OnNewSelectionBox                  ( wxCommandEvent& event );
     void OnNewSelectionEllipsoid            ( wxCommandEvent& event );
-    void OnNewVoiFromOverlay                ( wxCommandEvent& event );
     void OnHideSelectionObjects             ( wxCommandEvent& event );
     void OnActivateSelectionObjects         ( wxCommandEvent& event );
-    void OnRenameBox                        ( wxCommandEvent& event );
-    void OnToggleAndNot                     ( wxCommandEvent& event );
-    void OnColorRoi                         ( wxCommandEvent& event );
-    void OnVoiFlipNormals                   ( wxCommandEvent& event );
     void OnUseMorph                         ( wxCommandEvent& event );
-    void OnDisplayFibersInfo                ( wxCommandEvent& event );
-    void OnDistanceAnchorSet                ( wxCommandEvent& event );
-    void OnDisplayMeanFiber                 ( wxCommandEvent& event );
-    void OnDisplayCrossSections             ( wxCommandEvent& event );
-    void OnDisplayDispersionTube            ( wxCommandEvent& event );
-    void OnColorWithCurvature               ( wxCommandEvent& event );
-    void OnNormalColoring                   ( wxCommandEvent& event );
-    void OnColorWithTorsion                 ( wxCommandEvent& event );
-    void OnGenerateFiberVolume              ( wxCommandEvent& event );
-    void OnCreateFibersColorTexture         ( wxCommandEvent& event );
-    void OnCreateFibersDensityTexture       ( wxCommandEvent& event );
-    void OnBoxPositionX                        ( wxCommandEvent& event );
-    void OnBoxPositionY                        ( wxCommandEvent& event );
-    void OnBoxPositionZ                        ( wxCommandEvent& event );
-    void OnBoxSizeX                            ( wxCommandEvent& event );
-    void OnBoxSizeY                            ( wxCommandEvent& event );
-    void OnBoxSizeZ                            ( wxCommandEvent& event );
+    
     // Spline Surface
     void OnNewSplineSurface                 ( wxCommandEvent& event );
     void OnToggleNormal                     ( wxCommandEvent& event );
-    void OnToggleDrawPointsMode             ( wxCommandEvent& event );
-    void OnToggleLIC                        ( wxCommandEvent& event );
     void OnToggleDrawVectors                ( wxCommandEvent& event );
-    void OnNewOffsetSurface                 ( wxCommandEvent& event );
-    void OnNewDistanceMap                   ( wxCommandEvent& event );
     // Options
-    void OnAssignColor                      ( wxCommandEvent& event );
     void OnResetColor                       ( wxCommandEvent& event );
     void OnToggleLighting                   ( wxCommandEvent& event );
     void OnInvertFibers                     ( wxCommandEvent& event );
@@ -143,8 +112,6 @@ private:
     void OnToggleTextureFiltering           ( wxCommandEvent& event );
     void OnToggleBlendTexOnMesh             ( wxCommandEvent& event );
     void OnToggleFilterIso                  ( wxCommandEvent& event );
-    void OnClean                            ( wxCommandEvent& event );
-    void OnLoop                             ( wxCommandEvent& event );
     void OnToggleColorMapLegend             ( wxCommandEvent& event );
     
     void OnSetCMap0                         ( wxCommandEvent& event );
@@ -163,74 +130,24 @@ private:
     void OnSlizeMovieCor                    ( wxCommandEvent& event );
     void OnSlizeMovieAxi                    ( wxCommandEvent& event );
 
-    void OnSize                             ( wxSizeEvent&    event );    
+    void OnSize                             ( wxSizeEvent&    event );
+    void doOnSize();
     void OnGLEvent                          ( wxCommandEvent& event );
     
     void OnSliderMoved                      ( wxCommandEvent& event );
-    void OnSliderIntensityThresholdMoved    ( wxCommandEvent& event );
-    void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
-
     
-    void OnGlyphMinHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
-    void OnGlyphMaxHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
-    void OnGlyphSaturationSliderMoved       ( wxCommandEvent& event ); // The coloration.
-    void OnGlyphLuminanceSliderMoved        ( wxCommandEvent& event ); // The coloration.
-    void updateGlyphColoration              ( GlyphColorModifier i_modifier, float i_value );    
-    void OnGlyphXAxisFlipChecked            ( wxCommandEvent& event ); // The axis flip.
-    void OnGlyphYAxisFlipChecked            ( wxCommandEvent& event ); // The axis flip.
-    void OnGlyphZAxisFlipChecked            ( wxCommandEvent& event ); // The axis flip.
-    void OnGlyphFlip                        ( AxisType i_axisType, bool i_isChecked );    
-    void OnGlyphLODSliderMoved              ( wxCommandEvent& event ); // The lod.    
-    void OnGlyphLightAttenuationSliderMoved ( wxCommandEvent& event ); // The light attenuation.    
-    void OnGlyphLightXDirectionSliderMoved  ( wxCommandEvent& event ); // The light attenuation.
-    void OnGlyphLightYDirectionSliderMoved  ( wxCommandEvent& event ); // The light attenuation.
-    void OnGlyphLightZDirectionSliderMoved  ( wxCommandEvent& event ); // The light attenuation.
-    void OnGlyphLightPositionChanged          ( AxisType i_axisType, float i_position );    
-    void OnGlyphDisplaySliderMoved          ( wxCommandEvent& event ); // The display ratio.    
-    void OnGlyphScalingFactorSliderMoved    ( wxCommandEvent& event ); // The scaling factor.    
-    void OnGlyphNormalSelected              ( wxCommandEvent& event ); // The map on ellipsoid.    
-    void OnGlyphMapOnSphereSelected         ( wxCommandEvent& event ); // The map on sphere.    
-    void OnGlyphAxesSelected                ( wxCommandEvent& event ); // The display the 3 vector representing the ellipsoid.    
-    void OnGlyphMainAxisSelected            ( wxCommandEvent& event ); // The display of the main vector of the ellipsoid.    
-    void OnGlyphColorWithPosition           ( wxCommandEvent& event ); // The color with position.
-    void OnNormalizeTensors                 ( wxCommandEvent& event ); //normalise tensors values;
-
-    void OnOriginalShBasis                    ( wxCommandEvent& event );
-    void OnDescoteauxShBasis                ( wxCommandEvent& event );
-    void OnTournierShBasis                    ( wxCommandEvent& event );
-    void OnPTKShBasis                        ( wxCommandEvent& event );
-
     void OnToggleShowAxial                  ( wxCommandEvent& event );
     void OnToggleShowCoronal                ( wxCommandEvent& event );
     void OnToggleShowSagittal               ( wxCommandEvent& event );
     void OnToggleAlpha                      ( wxCommandEvent& event );
-    void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );
-    void OnMoveBoundaryPointsRight          ( wxCommandEvent& event );
     
-    void OnSegment                            ( wxCommandEvent& event );
-    void OnFloodFill                        ( wxCommandEvent& event );
-    void OnSelectBck                        ( wxCommandEvent& event );
-    void OnSliderFloodMoved                    ( wxCommandEvent& event );
-    void OnSliderGraphSigmaMoved            ( wxCommandEvent& event );
-    void OnKmeans                            ( wxCommandEvent& event );
-    void OnbtnGraphCut                        ( wxCommandEvent& event );
-    void OnSelectObj                        ( wxCommandEvent& event );
-
-
     /*
      * List widget event functions
      */
     void OnActivateListItem                 ( wxListEvent&    event );
     void OnSelectListItem                   ( wxListEvent&    event );
-    void OnListItemUp                       ( wxCommandEvent& event );
-    void OnListItemDown                     ( wxCommandEvent& event );
 
     void OnListMenuName                     ( wxCommandEvent& event );
-    void OnListMenuThreshold                ( wxCommandEvent& event );
-    void OnListMenuShow                     ( wxCommandEvent& event );
-    void OnListMenuCutOut                   ( wxCommandEvent& event );
-    void OnListMenuDistance                 ( wxCommandEvent& event );
-    void OnListMenuMinDistance              ( wxCommandEvent& event );
 
     /*
      * Tree widget event functions
@@ -241,8 +158,7 @@ private:
     void OnUnSelectTreeItem                 ( wxTreeEvent&    event );
     void OnActivateTreeItem                 ( wxTreeEvent&    event );
     void OnTreeLabelEdit                    ( wxTreeEvent&    event );
-    int  treeSelected                       ( wxTreeItemId    i_id  );  
-    void OnFiberFilterSlider                ( wxCommandEvent& event );
+    int  treeSelected                       ( wxTreeItemId    i_id  ); 
     /*
      * System functions
      */
@@ -252,7 +168,11 @@ private:
     void OnTimerEvent                       ( wxTimerEvent&   event );
 
     void CreateNewSelectionObject( ObjectType i_newSelectionObjectType );
-    void ColorFibers();
+    
+    void OnToggleDrawPointsMode             ( wxCommandEvent& event );
+    void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );
+    void OnMoveBoundaryPointsRight          ( wxCommandEvent& event );
+    void moveBoundaryPoints( int i_value);
 
     void OnLoadDatasets                     ( wxCommandEvent& event );
     void OnLoadMeshes                       ( wxCommandEvent& event );
@@ -265,8 +185,8 @@ private:
     ToolBar             *m_toolBar;
     MenuBar             *m_menuBar;       
     wxBoxSizer          *m_currentSizer;
-    FNObject            *m_currentFNObject;
-    FNObject            *m_lastSelectedFNObject;
+    SceneObject         *m_currentSceneObject;
+    SceneObject         *m_lastSelectedSceneObject;
     long                m_currentListItem;
     long                m_lastSelectedListItem;
 
@@ -275,13 +195,11 @@ private:
     wxBoxSizer          *m_objectSizer;
     wxBoxSizer          *m_leftMainSizer;
     wxBoxSizer          *m_navSizer;
-    wxBoxSizer          *m_propertiesSizer;
 
     wxTimer             *m_timer;
 
 public:
-    //wxPanel             *m_propertiesPanel;
-
+    PropertiesWindow   *m_propertiesWindow;
     MainCanvas*         m_mainGL;
     MainCanvas*         m_gl0;
     MainCanvas*         m_gl1;

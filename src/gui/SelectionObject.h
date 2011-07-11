@@ -19,7 +19,7 @@
 #endif
 
 #include "boundingBox.h"
-#include "fnObject.h"
+#include "sceneObject.h"
 #include <GL/glew.h>
 #include <vector>
 #include <wx/grid.h>
@@ -70,7 +70,7 @@ struct FibersInfoGridParams
     float m_dispersion;
 };
 
-class SelectionObject : public FNObject, public wxTreeItemData
+class SelectionObject : public SceneObject, public wxTreeItemData
 {
 public :
     SelectionObject ( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper );
@@ -98,7 +98,7 @@ public :
     void resizeUp();
     void select( bool i_flag );
     void update();
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
     
     
@@ -166,12 +166,6 @@ public :
     vector< bool > m_inBox;
     vector< bool > m_inBranch;
     Anatomy*       m_sourceAnatomy;
-    wxTextCtrl      *m_ctrlBoxX;
-    wxTextCtrl      *m_ctrlBoxY;
-    wxTextCtrl      *m_ctrlBoxZ;
-    wxTextCtrl      *m_ctrlBoxSizeX;
-    wxTextCtrl      *m_ctrlBoxSizeY;
-    wxTextCtrl      *m_ctrlBoxSizeZ;
     bool          m_boxMoved;
     bool          m_boxResized;
 
@@ -317,15 +311,21 @@ private:
     wxToggleButton  *m_ptoggleCalculatesFibersInfo;
     wxButton        *m_pbtnNewFibersDensityVolume;
     wxButton        *m_pbtnNewFibersColorVolume;    
-    wxGrid          *m_pgridfibersInfo;
+    //wxGrid          *m_pgridfibersInfo;
     wxToggleButton  *m_ptoggleDisplayMeanFiber;
-    wxButton        *m_pbtnDisplayCrossSections;
-    wxButton        *m_pbtnDisplayDispersionTube;
+    //wxButton        *m_pbtnDisplayCrossSections;
+    //wxButton        *m_pbtnDisplayDispersionTube;
     wxButton        *m_pbtnSetAsDistanceAnchor;
     wxButton        *m_pbtnFlipNormal;
     wxBitmapButton  *m_pbtnSelectColor;
     wxButton        *m_pbtnSelectColorFibers;
-    
+public:
+    wxTextCtrl      *m_ctrlBoxX;
+    wxTextCtrl      *m_ctrlBoxY;
+    wxTextCtrl      *m_ctrlBoxZ;
+    wxTextCtrl      *m_ctrlBoxSizeX;
+    wxTextCtrl      *m_ctrlBoxSizeY;
+    wxTextCtrl      *m_ctrlBoxSizeZ;
 
 
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.

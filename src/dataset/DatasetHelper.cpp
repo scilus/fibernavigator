@@ -420,9 +420,7 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
         m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), ( i_info->getThreshold() ) * i_info->getOldMax() ) + wxT( ")" ) );
     else
         m_mainFrame->m_listCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
-
-
-
+    
     m_mainFrame->m_listCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
     m_mainFrame->m_listCtrl->SetItemData( l_id, (long)i_info );
     m_mainFrame->m_listCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );

@@ -30,7 +30,7 @@ public:
 
     void movePoints();
     void flipNormals();
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
     std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
     void setSetSampleRate(float r) {m_sampleRateT = m_sampleRateU = r; execute();};

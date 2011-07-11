@@ -353,7 +353,7 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
     return hr;
 }
 
-void SelectionBox::createPropertiesSizer(MainFrame *parent)
+void SelectionBox::createPropertiesSizer(PropertiesWindow *parent)
 {
     SelectionObject::createPropertiesSizer(parent);  
 }

@@ -27,7 +27,7 @@ public:
     // Fonction from SelectionObject (virtual pure)
     hitResult hitTest( Ray* i_ray );
 
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
 
 private:

@@ -92,8 +92,7 @@ bool MyApp::OnInit( void )
         fd = _open_osfhandle( (long)GetStdHandle( STD_OUTPUT_HANDLE ), 0);
         fp = _fdopen( fd, "w" );
         *stdout = *fp;
-        setvbuf( stdout, NULL, _IONBF, 0 );
-        
+        setvbuf( stdout, NULL, _IONBF, 0 );        
 
 #elif __WXMAC__
 
@@ -136,7 +135,7 @@ bool MyApp::OnInit( void )
 #endif
 
         // Create the main frame window
-        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 869"), wxPoint( 0, 0 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
+        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 870"), wxPoint( 0, 0 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
         // Give it an icon (this is ignored in MDI mode: uses resources)
 
 #ifdef __WXMSW__

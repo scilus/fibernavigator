@@ -69,7 +69,7 @@ public:
     float        getScalingFactor ()                        { return m_scalingFactor; };
 
     void         refreshSlidersValues();
-    virtual void createPropertiesSizer(MainFrame *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
 
     // Items related to the glyph options sizer.
