@@ -769,6 +769,7 @@ void PropertiesWindow::OnNormalizeTensors( wxCommandEvent& event )
 void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 {
     ((SelectionObject*)m_mainFrame->m_currentSceneObject)->SetFiberInfoGridValues();
+    m_mainFrame->refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////

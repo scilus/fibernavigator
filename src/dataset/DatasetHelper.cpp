@@ -194,12 +194,6 @@ bool DatasetHelper::load( const int i_index )
 
 bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha )
 {
-    // check if dataset is already loaded and ignore it if yes
-    /*if( fileNameExists( i_fileName ) )
-    {
-        m_lastError = wxT( "dataset already loaded" );
-        return false;
-    }*/
 
     // check if i_fileName is valid
     if( ! wxFile::Exists( i_fileName ) )
@@ -287,12 +281,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
                 m_lastError = wxT( "no anatomy file loaded" );
                 return false;
             }
-
-            /*if( m_ODFsLoaded )
-            {
-                m_lastError = wxT( "ODFs already loaded" );
-                return false;
-            }*/
             l_dataset = new ODFs( this );            
         }
         else
@@ -515,7 +503,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 m_anatomyLoaded   = true;
             }
         }
-
         else if( l_child->GetName() == wxT( "position" ) )
         {
             l_child->GetPropVal( wxT( "x" ), wxT( "1" ) ).ToLong( &xp, 10 );
@@ -524,15 +511,15 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
         }
         else if( l_child->GetName() == wxT( "rotation" ) )
         {
-            l_child->GetPropVal( wxT( "rot00" ), wxT( "1" ) ).ToDouble( &r00 );
-            l_child->GetPropVal( wxT( "rot10" ), wxT( "1" ) ).ToDouble( &r10 );
-            l_child->GetPropVal( wxT( "rot20" ), wxT( "1" ) ).ToDouble( &r20 );
-            l_child->GetPropVal( wxT( "rot01" ), wxT( "1" ) ).ToDouble( &r01 );
-            l_child->GetPropVal( wxT( "rot11" ), wxT( "1" ) ).ToDouble( &r11 );
-            l_child->GetPropVal( wxT( "rot21" ), wxT( "1" ) ).ToDouble( &r21 );
-            l_child->GetPropVal( wxT( "rot02" ), wxT( "1" ) ).ToDouble( &r02 );
-            l_child->GetPropVal( wxT( "rot12" ), wxT( "1" ) ).ToDouble( &r12 );
-            l_child->GetPropVal( wxT( "rot22" ), wxT( "1" ) ).ToDouble( &r22 );
+            //l_child->GetPropVal( wxT( "rot00" ), wxT( "1" ) ).ToDouble( &r00 );
+            //l_child->GetPropVal( wxT( "rot10" ), wxT( "1" ) ).ToDouble( &r10 );
+            //l_child->GetPropVal( wxT( "rot20" ), wxT( "1" ) ).ToDouble( &r20 );
+            //l_child->GetPropVal( wxT( "rot01" ), wxT( "1" ) ).ToDouble( &r01 );
+            //l_child->GetPropVal( wxT( "rot11" ), wxT( "1" ) ).ToDouble( &r11 );
+            //l_child->GetPropVal( wxT( "rot21" ), wxT( "1" ) ).ToDouble( &r21 );
+            //l_child->GetPropVal( wxT( "rot02" ), wxT( "1" ) ).ToDouble( &r02 );
+            //l_child->GetPropVal( wxT( "rot12" ), wxT( "1" ) ).ToDouble( &r12 );
+            //l_child->GetPropVal( wxT( "rot22" ), wxT( "1" ) ).ToDouble( &r22 );
         }
 
         else if( l_child->GetName() == wxT( "data" ) )
@@ -570,7 +557,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 l_dataSetNode = l_dataSetNode->GetNext();
             }
         }
-
         else if( l_child->GetName() == wxT( "points" ) )
         {
             wxXmlNode* l_pNode = l_child->GetChildren();
@@ -609,7 +595,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 m_mainFrame->m_listCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
             }
         }
-
         else if( l_child->GetName() == wxT( "selection_objects" ) )
         {
             wxXmlNode* l_boxNode = l_child->GetChildren();
@@ -669,9 +654,9 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 if( l_item == -1 )
                     return false;
 
-                DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( l_item );
-                if( l_info->getType() > OVERLAY )
-                    return false;
+                //DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( l_item );
+                //if( l_info->getType() > OVERLAY )
+                //    return false;
 
                 SelectionObject* l_selectionObject = new SelectionBox( l_vc, l_vs, this );
                 l_selectionObject->setName( l_name );
@@ -712,7 +697,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
     m_mainFrame->m_zSlider->SetValue( zp );
     updateView( xp, yp, zp );
 
-    m_transform.s.M00 = r00;
+    /*m_transform.s.M00 = r00;
     m_transform.s.M10 = r10;
     m_transform.s.M20 = r20;
     m_transform.s.M01 = r01;
@@ -721,7 +706,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
     m_transform.s.M02 = r02;
     m_transform.s.M12 = r12;
     m_transform.s.M22 = r22;
-    m_mainFrame->m_mainGL->setRotation();
+    m_mainFrame->m_mainGL->setRotation();*/
 
     updateLoadStatus();
     return true;
