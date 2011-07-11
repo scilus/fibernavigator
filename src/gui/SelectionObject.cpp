@@ -746,15 +746,15 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
                                       o_gridInfo.m_meanLength, 
                                       o_gridInfo.m_maxLength, 
                                       o_gridInfo.m_minLength         );
-    getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
-                                      m_meanFiberPoints,
-                                      o_gridInfo.m_meanCrossSection, 
-                                      o_gridInfo.m_maxCrossSection,
-                                      o_gridInfo.m_minCrossSection   );
+    //getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
+    //                                  m_meanFiberPoints,
+    //                                  o_gridInfo.m_meanCrossSection, 
+    //                                  o_gridInfo.m_maxCrossSection,
+    //                                  o_gridInfo.m_minCrossSection   );
     getFibersMeanCurvatureAndTorsion( l_selectedFibersPoints, 
                                       o_gridInfo.m_meanCurvature, 
                                       o_gridInfo.m_meanTorsion       );
-    getFiberDispersion              ( o_gridInfo.m_dispersion        );
+    //getFiberDispersion              ( o_gridInfo.m_dispersion        );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1064,6 +1064,7 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
             getFiberPlaneIntersectionPoint( i_fibersPoints[j], l_pointOnPlane, l_planeNormal, l_intersectionPoints );
 
         // We need at least 3 points to get a valid cross section.
+
         if( l_intersectionPoints.size() < 3 )
             continue;
 
@@ -1189,22 +1190,26 @@ bool SelectionObject::getFibersMeanCurvatureAndTorsion( const vector< vector< Ve
     if( i_fiberVector.size() == 0 )
         return false;
 
-    for( unsigned int i = 0; i < i_fiberVector.size(); ++i )
-    {
-        l_currentFiberCurvature = 0.0f;
-        l_currentFiberTorsion   = 0.0f;
+	getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, m_meanFiberPoints);
+	getFiberMeanCurvatureAndTorsion(m_meanFiberPoints, o_meanCurvature, o_meanTorsion );
 
-        getFiberMeanCurvatureAndTorsion( i_fiberVector[i], l_currentFiberCurvature, l_currentFiberTorsion );
+    //for( unsigned int i = 0; i < i_fiberVector.size(); ++i )
+    //{
+    //    l_currentFiberCurvature = 0.0f;
+    //    l_currentFiberTorsion   = 0.0f;
 
-        o_meanCurvature += l_currentFiberCurvature;
-        o_meanTorsion   += l_currentFiberTorsion;
-    }
+    //    getFiberMeanCurvatureAndTorsion( i_fiberVector[i], l_currentFiberCurvature, l_currentFiberTorsion );
 
-    o_meanCurvature /= i_fiberVector.size();
-    o_meanTorsion   /= i_fiberVector.size();
+    //    o_meanCurvature += l_currentFiberCurvature;
+    //    o_meanTorsion   += l_currentFiberTorsion;
+    //}
+
+    //o_meanCurvature /= i_fiberVector.size();
+    //o_meanTorsion   /= i_fiberVector.size();
 
     return true;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Computes the curvature and torsion for a given fiber. The reason there is only one
@@ -1753,15 +1758,15 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 2,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanLength       ) );
         m_pgridfibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minLength        ) );
         m_pgridfibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxLength        ) );
-        m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanCrossSection ) );
-        if ( l_params.m_minCrossSection > l_params.m_count )
-            m_pgridfibersInfo->SetCellValue( 6,  0, wxT( "INF") );
-        else    
-            m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minCrossSection  ) );
-        m_pgridfibersInfo->SetCellValue( 7,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxCrossSection  ) );
-        m_pgridfibersInfo->SetCellValue( 8,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
-        m_pgridfibersInfo->SetCellValue( 9,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
-        m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
+        //m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanCrossSection ) );
+        //if ( l_params.m_minCrossSection > l_params.m_count )
+        //    m_pgridfibersInfo->SetCellValue( 6,  0, wxT( "INF") );
+        //else    
+        //    m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minCrossSection  ) );
+		  //    m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxCrossSection  ) );
+        m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
+        m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
+        //m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
     }
     }
 
@@ -1838,42 +1843,43 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 
     // Initialize the grid.
     m_pgridfibersInfo = new wxGrid(parent, wxID_ANY );
+
     m_pgridfibersInfo->SetRowLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
     wxFont l_font2 = m_pgridfibersInfo->GetFont();
     l_font2.SetPointSize(8);
     l_font2.SetWeight(wxFONTWEIGHT_BOLD);
     m_pgridfibersInfo->SetFont(l_font2);
     m_pgridfibersInfo->SetColLabelSize(2);
-    m_pgridfibersInfo->CreateGrid( 11, 1, wxGrid::wxGridSelectCells );
+    m_pgridfibersInfo->CreateGrid( 7, 1, wxGrid::wxGridSelectCells );
     m_pgridfibersInfo->SetColLabelValue( 0, wxT("") );
     m_pgridfibersInfo->SetRowLabelValue( 0,  wxT( "Count"                   ) );
     m_pgridfibersInfo->SetRowLabelValue( 1,  wxT( "Mean Value"              ) );
     m_pgridfibersInfo->SetRowLabelValue( 2,  wxT( "Mean Length(mm)"         ) );
     m_pgridfibersInfo->SetRowLabelValue( 3,  wxT( "Min Length(mm)"          ) );
     m_pgridfibersInfo->SetRowLabelValue( 4,  wxT( "Max Length(mm)"          ) );
-    m_pgridfibersInfo->SetRowLabelValue( 5,  wxT( "Mean C. S.(mm)"          ) );
-    m_pgridfibersInfo->SetRowLabelValue( 6,  wxT( "Min C. S.(mm)"           ) );
-    m_pgridfibersInfo->SetRowLabelValue( 7,  wxT( "Max C. S.(mm)"           ) );
-    m_pgridfibersInfo->SetRowLabelValue( 8,  wxT( "Mean Curvature"          ) );
-    m_pgridfibersInfo->SetRowLabelValue( 9,  wxT( "Mean Torsion"            ) );
-    m_pgridfibersInfo->SetRowLabelValue( 10, wxT( "Dispersion"              ) );
+    //m_pgridfibersInfo->SetRowLabelValue( 5,  wxT( "Mean C. S.(mm)"          ) );
+    //m_pgridfibersInfo->SetRowLabelValue( 6,  wxT( "Min C. S.(mm)"           ) );
+    //m_pgridfibersInfo->SetRowLabelValue( 7,  wxT( "Max C. S.(mm)"           ) );
+    m_pgridfibersInfo->SetRowLabelValue( 5,  wxT( "Mean Curvature"          ) );
+    m_pgridfibersInfo->SetRowLabelValue( 6,  wxT( "Mean Torsion"            ) );
+    //m_pgridfibersInfo->SetRowLabelValue( 10, wxT( "Dispersion"              ) );
 
     m_pgridfibersInfo->SetRowLabelSize( 110 );
     
     m_ptoggleDisplayMeanFiber       = new wxToggleButton(parent, wxID_ANY, wxT("Display Mean Fiber"), wxDefaultPosition, wxSize(140,-1));
-    m_pbtnDisplayCrossSections      = new wxButton(parent, wxID_ANY, wxT("Display Cross Section (C.S.)"), wxDefaultPosition, wxSize(140,-1));
-    m_pbtnDisplayDispersionTube     = new wxButton(parent, wxID_ANY, wxT("Display Dispersion Tube"), wxDefaultPosition, wxSize(140,-1));
+    //m_pbtnDisplayCrossSections      = new wxButton(parent, wxID_ANY, wxT("Display Cross Section (C.S.)"), wxDefaultPosition, wxSize(140,-1));
+    //m_pbtnDisplayDispersionTube     = new wxButton(parent, wxID_ANY, wxT("Display Dispersion Tube"), wxDefaultPosition, wxSize(140,-1));
 
     m_propertiesSizer->Add( m_pgridfibersInfo,0,wxALL,0);
     
     m_propertiesSizer->AddSpacer(2);
     m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
+    //m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
+    //m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
 
     parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
-    parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections));
-    parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
+    //parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections));
+    //parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
 
     m_ptoggleCalculatesFibersInfo->Enable(getIsMaster() && m_objectType != CISO_SURFACE_TYPE); //bug with some fibers dataset sets
     
@@ -1949,8 +1955,8 @@ void SelectionObject::updatePropertiesSizer()
     m_ptxtName->SetValue(getName());
     m_pgridfibersInfo->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
     m_ptoggleDisplayMeanFiber->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
-    m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
-    m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    //m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    //m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
 
     if(m_boxMoved)
     {
