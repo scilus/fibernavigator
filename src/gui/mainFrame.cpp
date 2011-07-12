@@ -702,6 +702,7 @@ void MainFrame::deleteSceneObject()
     m_currentListItem = -1;
     m_lastSelectedListItem = -1;
     m_propertiesWindow->GetSizer()->Layout();
+    doOnSize();
 }
 
 void MainFrame::DisplayPropertiesSheet()
@@ -1417,8 +1418,7 @@ void MainFrame::deleteListItem()
         deleteSceneObject();
         m_listCtrl->DeleteItem( tmp );
         m_datasetHelper->updateLoadStatus();
-        refreshAllGLWidgets();
-        doOnSize();
+        refreshAllGLWidgets();        
     }
 }
 
