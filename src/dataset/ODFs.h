@@ -48,13 +48,15 @@ public:
     bool isAngleNborsEstimated;
     std::vector<std::pair<float,int> >* Nbors;
     double angle;
+    std::vector<std::vector<Vector> > mainDirections;
 
 private:
     // From Glyph
     bool createStructure  ( vector< float >& i_fileFloatData );
     void drawGlyph        ( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis );
     void loadBuffer       ();
-    void sliderPosChanged ( AxisType i_axis );    
+    void sliderPosChanged ( AxisType i_axis );  
+    void extractMaximas   ();
 
     // Functions
     void             computeXRadiusSlice();
