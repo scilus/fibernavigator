@@ -46,7 +46,7 @@ public:
     struct direction_value { double x,y,z,v; };
     struct direction { double x,y,z; };
     bool isAngleNborsEstimated;
-    std::vector<int>* Nbors;
+    std::vector<std::pair<float,int> >* Nbors;
     double angle;
 
 private:
@@ -90,9 +90,9 @@ private:
                        const FMatrix & grad,
                        const float & max_thresh,
                        const float & angle,
-                       const std::vector<int> Nbors[]);
+                       const std::vector<std::pair<float,int> >* Nbors);
     
-    void            setNbors(std::vector<int>* Nbors, double angle);
+    void            setNbors(FMatrix i_phiThetaDirection, std::vector<std::pair<float,int> >* Nbors);
     double            setAngle(double angle);
 
     

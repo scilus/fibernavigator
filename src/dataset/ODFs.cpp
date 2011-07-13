@@ -330,18 +330,20 @@ double ODFs::setAngle(double angle)
   // File.close();
       //std::cout << "Angle: " << angle << std::endl;
       //angle = 1.1009;
-      return 5*angle;
+      return angle;
 }
 
 /*
     Set NBors for Max Dir
 */
-void ODFs::setNbors(std::vector<int>* Nbors, double angle)
+void ODFs::setNbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,int> >* Nbors)
 {
-    
+    ofstream File;
+   File.open("C:\\Users\\chamberm\\ODFdonnées\\angle.txt",ios::out);
     // find neighbors to all mesh points 
     std::vector<int> neighbors_i;
     direction d,d2; /*current direction*/
+
     
     for(unsigned int i = 0; i < m_phiThetaDirection[NB_OF_LOD -1].getDimensionY(); i++) 
     {
@@ -365,41 +367,62 @@ void ODFs::setNbors(std::vector<int>* Nbors, double angle)
                 d2.z = std::cos(m_phiThetaDirection[NB_OF_LOD -1](j,1));
                         
                 float ang = 180*std::acos(d.x*d2.x + d.y*d2.y + d.z*d2.z)/M_PI;
+                 if(ang > 90)
+                      ang = 180 - ang;
+
+                if(ang >= angle)
+                {
+                    if(i==0)
+                     File << ang << "\n";
         
-                if(ang > 90)
-                  ang = 180 - ang;
-              
-                if(fabs(angle - ang) < angle/3.0f) 
-                { /* allow +- 1/3* angle  with neighborhing expected direction */
-                  neighbors_i.push_back(j);
+                   
+                    if(Nbors[i].size() < 20)
+                    {
+                        std::pair<float,int> element(ang,j);
+                        Nbors[i].push_back(element);
+                    }
+                    else
+                    {
+                        float max = -1;
+                        int indice = 0;
+
+                        for(unsigned int k=0; k<Nbors[i].size();k++)
+                        {
+                            if(Nbors[i][k].first > max)
+                            {
+                                max = Nbors[i][k].first;
+                                indice = k;
+                            }
+                        }
+
+                        if(max>=0 && max > ang)
+                        {
+                            std::pair<float,int> element(ang,j);
+                            Nbors[i][indice] = element;
+                        }
+                    }
                 }
             }
-        }
-    
-        Nbors[i] = neighbors_i;
-        neighbors_i.clear();
+        } 
     }
    //ofstream File;
-   //File.open("C:\\Users\\chamberm\\ODFdonnées\\possible.txt",ios::out);
+   //File.open("C:\\Users\\chamberm\\ODFdonnées\\nbors.txt",ios::out);
    // for(unsigned int i = 0; i < m_phiThetaDirection[NB_OF_LOD - 1].getDimensionY(); i++) {
-   //  d2.x = std::cos(m_phiThetaDirection[NB_OF_LOD -1](i,0))*std::sin(m_phiThetaDirection[NB_OF_LOD -1](i,1));
-   //             d2.y = std::sin(m_phiThetaDirection[NB_OF_LOD -1](i,0))*std::sin(m_phiThetaDirection[NB_OF_LOD -1](i,1));
-   //             d2.z = std::cos(m_phiThetaDirection[NB_OF_LOD -1](i,1));
-   //     File << "(" << d2.x <<" " << d2.y << " " << d2.z << ")------" <<" i = " << i << " -> ";     //Outputs to file
+   //     File << i << "-> ";
 	  //for(unsigned int j = 0; j < Nbors[i].size(); j++) {
    //   
-   //       File << Nbors[i][j] << ",";     //Outputs to file
+   //       File << Nbors[i][j].second << ", ";     //Outputs to file
 	  //}
    //  
    //   File << " other possible neighbors\n";
    //   }
-   // File.close();
+    File.close();
     isAngleNborsEstimated = true;
 }
 /*
     Extracts Main Directions of ODFs
 */
-std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix & SHmatrix, const FMatrix & grad, const float & max_thresh, const float & angle, const std::vector<int> Nbors[])
+std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix & SHmatrix, const FMatrix & grad, const float & max_thresh, const float & angle, const std::vector<std::pair<float,int> >* Nbors)
 {
 
     std::vector<Vector> max_dir;
@@ -415,7 +438,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
     computeRadiiArray( SHmatrix, coefs, ODF, l_minMax );
     
     
-/*
+
     for(unsigned int i = 0; i < m_phiThetaDirection[NB_OF_LOD - 1].getDimensionY(); i++) 
     {
    
@@ -452,7 +475,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
     }
 
 
-*/
+
     std::vector<int> indices;
 
     bool candidate = false;
@@ -460,7 +483,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
     {
       candidate = false;
 
-      if(ODF[i] > 1.5)//max_thresh) 
+      if(ODF[i] > 2)//max_thresh) 
       { 
           //potential maximum
           /* look at other possible direction sampling neighbors
@@ -469,7 +492,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
 
         for(unsigned int j=0; j<Nbors[i].size(); j++)
         {
-          if(ODF[i] - ODF[Nbors[i][j]] > epsilon)
+            if(ODF[i] - ODF[Nbors[i][j].second] > epsilon)
           {
             /*
                has to be epsilon bigger
@@ -629,9 +652,10 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
         //We only need to calculate the angle and the nbors once
         if(!isAngleNborsEstimated)
         {
-            Nbors = new std::vector<int>[m_phiThetaDirection.at(NB_OF_LOD - 1).getDimensionY()];
+
+            Nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection.at(NB_OF_LOD - 1).getDimensionY()];
             angle = setAngle(90.0f);
-            setNbors(Nbors,angle);
+            setNbors(m_phiThetaDirection.at(NB_OF_LOD - 1),Nbors);
         }
 
         //Get the main directions only for non-null odfs
@@ -654,6 +678,47 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
 
             }
         }
+       /* DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "showAxis", 1 );
+         
+        
+            direction d;
+            direction d1;
+            direction d2;
+            direction d3;
+            direction d4;
+        
+
+            d.x= std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][0].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][0].second,1));
+          d.y = std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][0].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][0].second,1));
+          d.z =  std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][0].second,1));
+
+          d1.x= std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][1].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][1].second,1));
+          d1.y = std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][1].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][1].second,1));
+          d1.z =  std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][1].second,1));
+
+          d2.x= std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][2].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][2].second,1));
+          d2.y = std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][2].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][2].second,1));
+          d2.z =  std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][2].second,1));
+
+          d3.x= std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][3].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][3].second,1));
+          d3.y = std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][3].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][3].second,1));
+          d3.z =  std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][3].second,1));
+
+          d4.x= std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][4].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][4].second,1));
+          d4.y = std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][4].second,0))*std::sin(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][4].second,1));
+          d4.z =  std::cos(m_phiThetaDirection[NB_OF_LOD-1](Nbors[0][4].second,1));
+
+
+            glBegin(GL_LINE_STRIP);
+            glVertex3f(d.x,d.y,d.z);
+                glVertex3f(d1.x,d1.y,d1.z);
+                glVertex3f(d2.x,d2.y,d2.z);
+                glVertex3f(d3.x,d3.y,d3.z);
+                glVertex3f(d4.x,d4.y,d4.z);
+            glEnd();*/
+
+                
+
 
        /* float max = 0;
         float indice = 0;
