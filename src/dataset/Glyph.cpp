@@ -502,7 +502,7 @@ void Glyph::getSpherePoints( LODChoices       i_LOD,
         case LOD_3 : l_lats  = 14; l_longs = 14; break; // For 240  points.
         case LOD_4 : l_lats  = 20; l_longs = 20; break; // For 462  points.
         case LOD_5 : l_lats  = 28; l_longs = 28; break; // For 870  points.
-        case LOD_6 : l_lats  = 32; l_longs = 32; break; // For 1122 points.
+        case LOD_6 : l_lats  = 32; l_longs = 32; break; // For 1112 points.
         default: return; // We do nothing incase the param was not good.
     } 
 

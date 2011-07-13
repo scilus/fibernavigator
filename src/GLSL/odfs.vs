@@ -33,10 +33,10 @@ void main()
 		newRadius *= -1.0;
 
 	// Set the correct flip and apply the newRadius modifier to this odf.
-	if( showAxis == 0 )
+	//if( showAxis == 0 )
 		tempVertex *= (newRadius * axisFlip);
-	else
-		vertexPos = gl_Vertex.xyz;
+	//else
+		//vertexPos = gl_Vertex.xyz;
 		
 	
 	// Place the odf in the center of its voxel.
