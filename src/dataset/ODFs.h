@@ -39,13 +39,14 @@ public:
     bool isShBasis( int i_sh_basis ) {return m_sh_basis == i_sh_basis;};
     void setShBasis(int value){m_sh_basis = value;}
     void changeShBasis(ODFs*,DatasetHelper*, int);
+    void extractMaximas   ();
 
     //Vars
     wxString    m_lastODF_path;
 
     struct direction_value { double x,y,z,v; };
     struct direction { double x,y,z; };
-    bool isAngleNborsEstimated;
+    bool isMaximasSet;
     std::vector<std::pair<float,int> >* Nbors;
     double angle;
     std::vector<std::vector<Vector> > mainDirections;
@@ -56,7 +57,7 @@ private:
     void drawGlyph        ( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis );
     void loadBuffer       ();
     void sliderPosChanged ( AxisType i_axis );  
-    void extractMaximas   ();
+    
 
     // Functions
     void             computeXRadiusSlice();

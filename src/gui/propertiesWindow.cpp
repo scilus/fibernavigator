@@ -565,7 +565,7 @@ void PropertiesWindow::OnGlyphLODSliderMoved( wxCommandEvent& WXUNUSED(event) )
         if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
         {
             ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_mainFrame->m_currentSceneObject)->m_psliderLODValue->GetValue() );
-            ((ODFs*)l_info)->isAngleNborsEstimated = false;
+            //((ODFs*)l_info)->isMaximasSet = false;
         }
     }
 }
@@ -738,7 +738,12 @@ void PropertiesWindow::OnGlyphMainAxisSelected( wxCommandEvent& event )
 {
     if( m_mainFrame->m_currentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
     {
+        if(((DatasetInfo*)m_mainFrame->m_currentSceneObject)->getType() == ODFS && !((ODFs*)m_mainFrame->m_currentSceneObject)->isMaximasSet)
+        {
+            ((ODFs*)m_mainFrame->m_currentSceneObject)->extractMaximas();
+        }
         ((Glyph*)m_mainFrame->m_currentSceneObject)->setDisplayShape( AXIS );
+
     }
 }
 

@@ -33,7 +33,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     m_radiusAttribLoc( 0    ),
     m_radiusBuffer   ( NULL ),
     m_sh_basis       ( 0 ),
-    isAngleNborsEstimated ( false )
+    isMaximasSet ( false )
 {
     m_scalingFactor = 0.0f;
 
@@ -134,8 +134,6 @@ bool ODFs::loadNifti( wxString i_fileName )
     createStructure( l_fileFloatData );
 
     m_isLoaded = true;
-
-    extractMaximas();
 
     return true;
 }
@@ -424,7 +422,7 @@ void ODFs::setNbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,int
             }
         } 
     }
-    isAngleNborsEstimated = true;
+    
 }
 /*
     Extracts Main Directions of ODFs
@@ -528,7 +526,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
 
       }
     }
-
+    isMaximasSet = true;
     return max_dir;
 }
 
@@ -1177,7 +1175,7 @@ void ODFs::getSphericalHarmonicMatrix( const vector< float > &i_meshPts,
    else
       getSphericalHarmonicMatrixRR5768(i_meshPts, o_phiThetaDirection, o_shMatrix );
 
-   isAngleNborsEstimated = false;
+   isMaximasSet = false;
    
 }
 
