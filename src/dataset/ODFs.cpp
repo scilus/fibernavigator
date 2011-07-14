@@ -183,6 +183,15 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
 
     for( unsigned int i = 0; i < NB_OF_LOD; ++i )
     {
+        if(i==0 && m_sh_basis == 0)
+            cout << "Using RR5768 SH basis (as in DMRI)\n";
+        if(i==0 && m_sh_basis == 1)
+            cout << "Using Max's Thesis SH basis\n";
+        if(i==0 && m_sh_basis == 2)
+            cout << "Using Tournier's SH basis\n";
+        if(i==0 && m_sh_basis == 3)
+            cout << "Using PTK SH basis\n";
+
         // Creating phi / theta directions matrices with for all LODs
         m_phiThetaDirection.push_back( FMatrix( getLODNbOfPoints((LODChoices)i), 2) );
 
@@ -1150,19 +1159,19 @@ void ODFs::getSphericalHarmonicMatrix( const vector< float > &i_meshPts,
 {
 
    if( m_sh_basis == 0 ) {
-      cout << "Using RR5768 SH basis (as in DMRI)\n";
+      
       getSphericalHarmonicMatrixRR5768(i_meshPts, o_phiThetaDirection, o_shMatrix );
    }
    else if( m_sh_basis == 1 ) {
-      cout << "Using Max's Thesis SH basis\n";
+      
       getSphericalHarmonicMatrixDescoteauxThesis(i_meshPts, o_phiThetaDirection, o_shMatrix );
    }
    else if( m_sh_basis == 2 ) {
-      cout << "Using Tournier's SH basis\n";
+      
       getSphericalHarmonicMatrixTournier(i_meshPts, o_phiThetaDirection, o_shMatrix );
    }
    else if( m_sh_basis == 3 ) {
-      cout << "Using PTK SH basis\n";
+      
       getSphericalHarmonicMatrixPTK(i_meshPts, o_phiThetaDirection, o_shMatrix );
    }
    else
