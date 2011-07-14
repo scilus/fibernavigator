@@ -527,7 +527,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
       }
     }
 
-    if(indices.size()>1)
+    if(indices.size()/2>1)
 	{
 		float new_min = 100;
 		float new_max = 0 ;
