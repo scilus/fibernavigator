@@ -486,7 +486,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
     {
       candidate = false;
 
-      if(ODF[i] > 2)//max_thresh) 
+      if(norm_hemisODF[i] > 0.5)//max_thresh) 
       { 
           //potential maximum
           /* look at other possible direction sampling neighbors
@@ -495,7 +495,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
 
         for(unsigned int j=0; j<Nbors[i].size(); j++)
         {
-            if(ODF[i] - ODF[Nbors[i][j].second] > epsilon)
+            if(norm_hemisODF[i] - norm_hemisODF[Nbors[i][j].second] > epsilon)
           {
             /*
                has to be epsilon bigger
