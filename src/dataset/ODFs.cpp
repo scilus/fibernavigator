@@ -526,6 +526,31 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
 
       }
     }
+
+    if(indices.size()>1)
+	{
+		float new_min = 100;
+		float new_max = 0 ;
+	
+		for(unsigned int i=0; i<indices.size();i++)
+		{
+			if (norm_hemisODF[indices[i]]>new_max)
+				new_max=norm_hemisODF[indices[i]];
+
+			if (norm_hemisODF[indices[i]]<new_min)
+				new_min=norm_hemisODF[indices[i]];
+		}
+
+        for(unsigned int i=0; i<indices.size();i++)
+		{
+			max_dir[i].x *= ( (norm_hemisODF[indices[i]] - new_min) / (new_max - new_min));
+            max_dir[i].y *= ( (norm_hemisODF[indices[i]] - new_min) / (new_max - new_min));
+            max_dir[i].z *= ( (norm_hemisODF[indices[i]] - new_min) / (new_max - new_min));
+        }
+    }
+
+
+
     isMaximasSet = true;
     return max_dir;
 }
