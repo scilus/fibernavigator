@@ -1059,5 +1059,6 @@ void Anatomy::updatePropertiesSizer()
     m_pbtnMinimize->Enable(getType() <= OVERLAY);
     m_pbtnCut->Enable(getType() <= OVERLAY);
     //m_pbtnGraphCut->Enable(m_dh->graphcutReady());
+    m_psliderFlood->Enable(isSegmentOn);
 }
 
