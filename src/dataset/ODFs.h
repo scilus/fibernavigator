@@ -40,7 +40,7 @@ public:
     void setShBasis(int value){m_sh_basis = value;}
     void changeShBasis(ODFs*,DatasetHelper*, int);
     void extractMaximas   ();
-
+    float m_axisThreshold;
     //Vars
     wxString    m_lastODF_path;
 
@@ -50,6 +50,10 @@ public:
     std::vector<std::pair<float,int> >* Nbors;
     double angle;
     std::vector<std::vector<Vector> > mainDirections;
+
+    MySlider            *m_psliderFlood;
+    wxStaticText          *m_pTextThres;
+    wxTextCtrl      *m_ptxtThresBox;
 
 private:
     // From Glyph
@@ -109,6 +113,7 @@ private:
     wxRadioButton *m_pRadiobtnDescoteauxBasis;
     wxRadioButton *m_pRadiobtnTournierBasis;
     wxRadioButton *m_pRadiobtnPTKBasis;
+    
 
 
     vector< vector < float > >        m_coefficients;

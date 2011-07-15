@@ -713,12 +713,18 @@ void Glyph::createPropertiesSizer(PropertiesWindow *parent)
     m_psizerDisplay->Add(m_pradiobtnMainAxis);
     m_propertiesSizer->Add(m_psizerDisplay,0,wxALIGN_CENTER);
 
+
     parent->Connect(m_pradiobtnNormal->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphNormalSelected));
     parent->Connect(m_pradiobtnMapOnSphere->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphMapOnSphereSelected));
     parent->Connect(m_pradiobtnMainAxis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphMainAxisSelected));
     m_pradiobtnNormal->SetValue        (isDisplayShape(NORMAL));
     m_pradiobtnMapOnSphere->SetValue   (isDisplayShape(SPHERE));
     m_pradiobtnMainAxis->SetValue      (isDisplayShape(AXIS));
+
+
+
+    
+
 }
 
 void Glyph::updatePropertiesSizer()
@@ -740,5 +746,7 @@ void Glyph::updatePropertiesSizer()
     m_ptoggleAxisFlipY->SetValue       (isAxisFlipped( Y_AXIS ));
     m_ptoggleAxisFlipZ->SetValue       (isAxisFlipped( Z_AXIS ));
     m_ptoggleColorWithPosition->SetValue(getColorWithPosition());
+
+    
 }
 

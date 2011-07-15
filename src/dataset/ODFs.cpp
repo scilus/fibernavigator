@@ -33,7 +33,8 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     m_radiusAttribLoc( 0    ),
     m_radiusBuffer   ( NULL ),
     m_sh_basis       ( 0 ),
-    isMaximasSet ( false )
+    isMaximasSet ( false ),
+    m_axisThreshold ( 0.5f )
 {
     m_scalingFactor = 0.0f;
 
@@ -153,7 +154,7 @@ void ODFs::extractMaximas()
                 int  currentIdx = getGlyphIndex( z, y, x );
 
                 if(m_coefficients.at(currentIdx)[0] != 0)
-                    mainDirections[currentIdx] = getODFmaxNotNorm(m_coefficients.at(currentIdx),m_shMatrix[NB_OF_LOD - 1],m_phiThetaDirection[NB_OF_LOD - 1],0.5f,angle,Nbors);
+                    mainDirections[currentIdx] = getODFmaxNotNorm(m_coefficients.at(currentIdx),m_shMatrix[NB_OF_LOD - 1],m_phiThetaDirection[NB_OF_LOD - 1],m_axisThreshold,angle,Nbors);
             }
      m_nbPointsPerGlyph = getLODNbOfPoints( LOD_0 );
 }
@@ -484,7 +485,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
     {
       candidate = false;
 
-      if(norm_hemisODF[i] > 0.5)//max_thresh) 
+      if(norm_hemisODF[i] > max_thresh)//max_thresh) 
       { 
           //potential maximum
           /* look at other possible direction sampling neighbors
@@ -1289,6 +1290,18 @@ void ODFs::createPropertiesSizer(PropertiesWindow *parent)
     Glyph::createPropertiesSizer(parent);
     wxSizer *l_sizer;
 
+    m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    m_psliderFlood->SetValue(5);
+    m_ptxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.5") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    m_pTextThres = new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
+    l_sizer->Add(m_pTextThres,0,wxALIGN_CENTER);
+    l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
+    l_sizer->Add(m_ptxtThresBox,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
+
+
     m_propertiesSizer->AddSpacer(8);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);    
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Sh Basis "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
@@ -1329,7 +1342,7 @@ void ODFs::updatePropertiesSizer()
 {
     Glyph::updatePropertiesSizer();
     //set to min.
-    m_pradiobtnMainAxis->Enable(false);
+    //m_pradiobtnMainAxis->Enable(false);
     m_psliderLightAttenuation->SetValue(m_psliderLightAttenuation->GetMin());
     m_psliderLightAttenuation->Enable(false);
     m_psliderLightXPosition->SetValue(m_psliderLightXPosition->GetMin());
@@ -1342,6 +1355,20 @@ void ODFs::updatePropertiesSizer()
     m_psliderScalingFactor->Enable (false);
     m_pRadiobtnPTKBasis->Enable(false);
     m_pradiobtnMainAxis->Enable(true);
+
+    if(!isDisplayShape(AXIS))
+    {
+        m_pTextThres->Hide();
+        m_psliderFlood->Hide();
+        m_ptxtThresBox->Hide();
+    }
+    else
+    {
+        m_pTextThres->Show();
+        m_psliderFlood->Show();
+        m_ptxtThresBox->Show();
+    }
+
 }
 
 

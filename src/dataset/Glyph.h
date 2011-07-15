@@ -68,6 +68,8 @@ public:
     virtual void setScalingFactor ( float i_scalingFactor ) { m_scalingFactor  = i_scalingFactor; };
     float        getScalingFactor ()                        { return m_scalingFactor; };
 
+    
+
     void         refreshSlidersValues();
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
@@ -92,6 +94,7 @@ public:
     wxRadioButton      *m_pradiobtnNormal;
     wxRadioButton      *m_pradiobtnMapOnSphere;
     wxRadioButton      *m_pradiobtnMainAxis;
+    
 protected:
     // From DatasetInfo
     virtual void    activateLIC()      {};
@@ -147,6 +150,7 @@ protected:
 
 
 
+
     int   m_currentSliderPos[3];   // Current sliders positions [x, y, z].
     bool  m_flippedAxes[3];        // Are axes flipped or not, true if flipped, false otherwise [x, y, z].
     float m_lightPosition[3];      // Light's position [x, y, z]
@@ -154,6 +158,7 @@ protected:
     vector< float >            m_floatColorDataset;
     vector< float >             m_axesPoints;       //the 6 points describing the 3 axes
     vector< vector < float > > m_LODspheres;           // Stores the hemispheres for all LODs.
+    
 };
 
 #endif /* GLYPH_H_ */

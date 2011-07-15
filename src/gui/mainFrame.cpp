@@ -1849,3 +1849,5 @@ void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
     refreshViews();
     m_datasetHelper->increaseAnimationStep();    
 }
+
+

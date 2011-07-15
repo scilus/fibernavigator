@@ -736,6 +736,7 @@ void PropertiesWindow::OnGlyphAxesSelected( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnGlyphMainAxisSelected( wxCommandEvent& event )
 {
+
     if( m_mainFrame->m_currentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
     {
         if(((DatasetInfo*)m_mainFrame->m_currentSceneObject)->getType() == ODFS && !((ODFs*)m_mainFrame->m_currentSceneObject)->isMaximasSet)
@@ -743,7 +744,8 @@ void PropertiesWindow::OnGlyphMainAxisSelected( wxCommandEvent& event )
             ((ODFs*)m_mainFrame->m_currentSceneObject)->extractMaximas();
         }
         ((Glyph*)m_mainFrame->m_currentSceneObject)->setDisplayShape( AXIS );
-
+        ((Glyph*)m_mainFrame->m_currentSceneObject)->updatePropertiesSizer();
+      
     }
 }
 
@@ -1201,4 +1203,13 @@ void PropertiesWindow::OnBoxSizeZ( wxCommandEvent &event )
     currSize = ((SelectionObject*)m_mainFrame->m_currentSceneObject)->getSize();
     currSize.z = sizeZ/m_mainFrame->m_datasetHelper->m_zVoxel;
     ((SelectionObject*)m_mainFrame->m_currentSceneObject)->setSize(currSize);
+}
+
+void PropertiesWindow::OnSliderAxisMoved( wxCommandEvent& WXUNUSED(event) )
+{
+    float l_sliderValue = ((ODFs*)m_mainFrame->m_currentSceneObject)->m_psliderFlood->GetValue() / 10.0f;
+    ((ODFs*)m_mainFrame->m_currentSceneObject)->m_axisThreshold = l_sliderValue;
+    ((ODFs*)m_mainFrame->m_currentSceneObject)->m_ptxtThresBox->SetValue(wxString::Format( wxT( "%.1f"), l_sliderValue));
+
+    std::cout << ((ODFs*)m_mainFrame->m_currentSceneObject)->m_axisThreshold << std::endl;
 }
