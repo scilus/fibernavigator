@@ -1003,7 +1003,8 @@ void Anatomy::createPropertiesSizer(PropertiesWindow *parent)
     setFloodThreshold(0.2f);
     m_ptxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.20") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+    m_pTextThres = new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
+    l_sizer->Add(m_pTextThres,0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
     l_sizer->Add(m_ptxtThresBox,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
@@ -1059,6 +1060,18 @@ void Anatomy::updatePropertiesSizer()
     m_pbtnMinimize->Enable(getType() <= OVERLAY);
     m_pbtnCut->Enable(getType() <= OVERLAY);
     //m_pbtnGraphCut->Enable(m_dh->graphcutReady());
-    m_psliderFlood->Enable(isSegmentOn);
+    if(!isSegmentOn)
+    {
+        m_pTextThres->Hide();
+        m_psliderFlood->Hide();
+        m_ptxtThresBox->Hide();
+    }
+    else
+    {
+        m_pTextThres->Show();
+        m_psliderFlood->Show();
+        m_ptxtThresBox->Show();
+    }
+    
 }
 
