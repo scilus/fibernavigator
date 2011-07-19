@@ -135,7 +135,7 @@ bool MyApp::OnInit( void )
 #endif
 
         // Create the main frame window
-        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 893"), wxPoint( 0, 0 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
+        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 923"), wxPoint( 0, 0 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
         // Give it an icon (this is ignored in MDI mode: uses resources)
 
 #ifdef __WXMSW__
