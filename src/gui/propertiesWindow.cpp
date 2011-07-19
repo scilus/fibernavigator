@@ -1213,3 +1213,8 @@ void PropertiesWindow::OnSliderAxisMoved( wxCommandEvent& WXUNUSED(event) )
 
     std::cout << ((ODFs*)m_mainFrame->m_currentSceneObject)->m_axisThreshold << std::endl;
 }
+
+void PropertiesWindow::OnRecalcMainDir( wxCommandEvent& WXUNUSED(event) )
+{   
+    ((ODFs*)m_mainFrame->m_currentSceneObject)->extractMaximas();
+}

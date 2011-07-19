@@ -127,7 +127,8 @@ public:
     void OnBoxSizeX                         ( wxCommandEvent& event );
     void OnBoxSizeY                         ( wxCommandEvent& event );
     void OnBoxSizeZ                         ( wxCommandEvent& event );
-    void OnSliderAxisMoved                 ( wxCommandEvent& event );
+    void OnSliderAxisMoved                  ( wxCommandEvent& event );
+    void OnRecalcMainDir                    ( wxCommandEvent& event );
 
     MainFrame *m_mainFrame;
 

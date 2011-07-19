@@ -54,6 +54,7 @@ public:
     MySlider            *m_psliderFlood;
     wxStaticText          *m_pTextThres;
     wxTextCtrl      *m_ptxtThresBox;
+    wxButton  *m_pbtnMainDir;
 
 private:
     // From Glyph

@@ -1301,6 +1301,12 @@ void ODFs::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
 
+    m_pbtnMainDir = new wxButton(parent, wxID_ANY,wxT("Recalculate"),wxDefaultPosition, wxSize(140,-1));
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add(m_pbtnMainDir,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    parent->Connect(m_pbtnMainDir->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnRecalcMainDir));
+
 
     m_propertiesSizer->AddSpacer(8);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);    
@@ -1361,12 +1367,14 @@ void ODFs::updatePropertiesSizer()
         m_pTextThres->Hide();
         m_psliderFlood->Hide();
         m_ptxtThresBox->Hide();
+        m_pbtnMainDir->Hide();
     }
     else
     {
         m_pTextThres->Show();
         m_psliderFlood->Show();
         m_ptxtThresBox->Show();
+        m_pbtnMainDir->Show();
     }
 
 }
