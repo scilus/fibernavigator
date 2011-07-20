@@ -156,7 +156,7 @@ void ODFs::extractMaximas()
                 if(m_coefficients.at(currentIdx)[0] != 0)
                     mainDirections[currentIdx] = getODFmaxNotNorm(m_coefficients.at(currentIdx),m_shMatrix[NB_OF_LOD - 1],m_phiThetaDirection[NB_OF_LOD - 1],m_axisThreshold,angle,Nbors);
             }
-     m_nbPointsPerGlyph = getLODNbOfPoints( LOD_0 );
+     //m_nbPointsPerGlyph = getLODNbOfPoints( LOD_0 );
 }
 ///////////////////////////////////////////////////////////////////////////
 // This function fills up a vector (m_Points) that contains all the point 
