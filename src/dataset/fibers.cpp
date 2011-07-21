@@ -70,9 +70,364 @@ bool Fibers::load( wxString i_filename )
    
    if( i_filename.AfterLast( '.' ) == _T( "Bfloat" ) )
       res = loadCamino( i_filename );
+   
+   if( i_filename.AfterLast( '.' ) == _T( "trk" ) )
+      res = loadTRK( i_filename );
 
     return res;
 }
+
+bool Fibers::loadTRK(wxString i_fileName)
+{
+	stringstream ss;
+	m_dh->printDebug(wxT("Start loading TRK file..."), 1 );
+
+    wxFile l_dataFile;
+    wxFileOffset l_nSize = 0;
+    converterByteINT16 l_cbi;
+    converterByteINT32 l_cbi32;
+    converterByteFloat l_cbf;
+
+    if(!l_dataFile.Open(i_fileName)) return false;
+    
+    l_nSize = l_dataFile.Length();
+    if( l_nSize == wxInvalidOffset ) return false;
+
+    ////
+    // READ HEADER
+    ////
+
+    //Read file header. [1000 bytes]
+    wxUint8* l_buffer = new wxUint8[1000];
+    l_dataFile.Read( l_buffer, (size_t)1000 );
+
+    //ID String for track file. The first 5 characters must match "TRACK". [6 bytes]
+    char id_string[6];
+    memcpy(id_string, &l_buffer[0], 6);
+	ss.str("");
+	ss << "Type: " << id_string;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    if (strncmp(id_string, "TRACK", 5) != 0) return false;    
+    
+    //Dimension of the image volume. [6 bytes]
+    wxUint16 dim[3];
+    for (int i=0; i!=3;++i)
+    {
+        memcpy(l_cbi.b, &l_buffer[6 + (i*2)], 2);
+        dim[i] = l_cbi.i;
+    }
+	ss.str("");
+	ss << "Dim: " << dim[0] << "x" << dim[1] << "x" << dim[2];
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    //Voxel size of the image volume. [12 bytes]
+    float voxel_size[3];
+    for (int i=0; i!=3;++i)
+    {
+        memcpy(l_cbf.b, &l_buffer[12 + (i*4)], 4);
+        voxel_size[i] = l_cbf.f;
+    }
+	ss.str("");
+	ss << "Voxel size: " << voxel_size[0] << "x" << voxel_size[1] << "x" << voxel_size[2];
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    //Origin of the image volume. [12 bytes]
+    float origin[3];
+    for (int i=0; i!=3;++i)
+    {
+        memcpy(l_cbf.b, &l_buffer[24 + (i*4)], 4);
+        origin[i] = l_cbf.f;
+    }
+	ss.str("");
+	ss << "Origin: (" << origin[0] << "," << origin[1] << "," << origin[2] << ")";
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    //Number of scalars saved at each track point. [2 bytes]
+    wxUint16 n_scalars;
+    memcpy(l_cbi.b, &l_buffer[36], 2);
+    n_scalars = l_cbi.i;
+	ss.str("");
+	ss << "Nb. scalars: " << n_scalars;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    //Name of each scalar. (20 characters max each, max 10 names) [200 bytes]
+    char scalar_name[10][20];
+    memcpy(scalar_name, &l_buffer[38], 200);
+    for (int i=0; i!=10;++i)
+	{
+		ss.str("");
+		ss << "Scalar name #" << i << ": " << scalar_name[i];
+		m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+	}
+
+    //Number of properties saved at each track. [2 bytes]
+    wxUint16 n_properties;
+    memcpy(l_cbi.b, &l_buffer[238], 2);
+    n_properties = l_cbi.i;
+	ss.str("");
+	ss << "Nb. properties: " << n_properties;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Name of each property. (20 characters max each, max 10 names) [200 bytes]
+    char property_name[10][20];
+    memcpy(property_name, &l_buffer[240], 200);
+    for (int i=0; i!=10;++i)
+	{
+		ss.str("");
+		ss << "Property name #" << i << ": " << property_name[i];
+	}
+
+    //4x4 matrix for voxel to RAS (crs to xyz) transformation. 
+    // If vox_to_ras[3][3] is 0, it means the matrix is not recorded.
+    // This field is added from version 2. [64 bytes]
+    float vox_to_ras[4][4];
+    for (int i=0; i != 4; ++i)
+    {
+		ss.str("");
+        for (int j=0; j != 4; ++j)
+        {
+            memcpy(l_cbf.b, &l_buffer[440 + (i*4+j)], 4);
+            vox_to_ras[i][j] = l_cbf.f;
+            ss << vox_to_ras[i][j] << " ";
+        }
+        ss;
+		m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    }
+
+    //Reserved space for future version. [444 bytes]
+    char reserved[444]; //Not used.
+    //l_buffer[504]...
+
+    //Storing order of the original image data. [4 bytes]
+    char voxel_order[4];
+    memcpy(voxel_order, &l_buffer[948], 4);
+	ss.str("");
+	ss << "Voxel order: " << voxel_order;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    //Paddings [4 bytes]
+    char pad2[4];
+    memcpy(pad2, &l_buffer[952], 4);
+	ss.str("");
+	ss << "Pad #2: " << pad2;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    //Image orientation of the original image. As defined in the DICOM header. [24 bytes]
+    float image_orientation_patient[6];
+	ss.str("");
+    ss << "Image orientation patient: ";
+    for (int i=0; i != 6; ++i)
+    {
+        memcpy(l_cbf.b, &l_buffer[956 + (i*4)], 4);
+        image_orientation_patient[i] = l_cbf.f;
+        ss << image_orientation_patient[i] << " ";
+    }
+	ss;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    //Paddings. [2 bytes]
+    char pad1[2];
+    memcpy(pad1, &l_buffer[980], 2);
+	ss.str("");
+	ss << "Pad #1: " << pad1;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Inversion/rotation flags used to generate this track file. [1 byte]
+    bool invert_x = l_buffer[982] > 0;
+	ss.str("");
+	ss << "Invert X: " << invert_x;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Inversion/rotation flags used to generate this track file. [1 byte]
+    bool invert_y = l_buffer[983] > 0;
+	ss.str("");
+	ss << "Invert Y: " << invert_y;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Inversion/rotation flags used to generate this track file. [1 byte]
+    bool invert_z = l_buffer[984] > 0;
+	ss.str("");
+	ss << "Invert Z: " << invert_z;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Inversion/rotation flags used to generate this track file. [1 byte]
+    bool swap_xy = l_buffer[985] > 0;
+	ss.str("");
+	ss << "Swap XY: " << swap_xy;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Inversion/rotation flags used to generate this track file. [1 byte]
+    bool swap_yz = l_buffer[986] > 0;
+	ss.str("");
+	ss << "Swap YZ: " << swap_yz;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Inversion/rotation flags used to generate this track file. [1 byte]
+    bool swap_zx = l_buffer[987] > 0;
+	ss.str("");
+	ss << "Swap ZX: " << swap_zx;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Number of tracks stored in this track file. 0 means the number was NOT stored. [4 bytes]
+    wxUint32 n_count;
+    memcpy(l_cbi32.b, &l_buffer[988], 4);
+    n_count = l_cbi32.i;
+	ss.str("");
+	ss << "Nb. tracks: " << n_count;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    
+    //Version number. Current version is 2. [4 bytes]
+    wxUint32 version;
+    memcpy(l_cbi32.b, &l_buffer[992], 4);
+    version = l_cbi32.i;
+	ss.str("");
+	ss << "Version: " << version;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    //Size of the header. Used to determine byte swap. Should be 1000. [4 bytes]
+    wxUint32 hdr_size;
+    memcpy(l_cbi32.b, &l_buffer[996], 4);
+    hdr_size = l_cbi32.i;
+	ss.str("");
+	ss << "HDR size: " << hdr_size;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+	////
+    // READ DATA
+    ////
+    delete[] l_buffer;
+    l_buffer = NULL;
+	
+    vector<float> l_tmpPoints;
+
+    if (n_count == 0) return false; //TODO: handle it. (0 means the number was NOT stored.)
+    
+    vector<vector<float> > lines;
+    m_countPoints = 0;
+
+    for (int i=0; i!=n_count; ++i)
+    {
+        //Number of points in this track. [4 bytes]
+        wxUint32 n_points;
+        l_dataFile.Read(l_cbi32.b, (size_t)4);
+        n_points = l_cbi32.i;
+
+        //Read data of one track.
+        size_t ptsSize = 3+n_scalars;
+        size_t tractSize = 4*(n_points*(ptsSize) + n_properties);
+        l_buffer = new wxUint8[tractSize];
+        l_dataFile.Read(l_buffer, tractSize);
+
+        vector<float> cur_line;
+        for (int j=0; j!=n_points; ++j)
+        {
+            //Read coordinates (x,y,z) and scalars associated to each point.
+            for (int k=0; k!=ptsSize; ++k)
+            {
+                if (k > 3) break; //TODO: incorporate scalars in the navigator.
+                memcpy(l_cbf.b, &l_buffer[4*(j*ptsSize+k)], 4);
+                cur_line.push_back(l_cbf.f);
+            }
+        }
+
+        for (int j=0; j!=n_properties; ++j) {} //TODO: incorporate properties in the navigator.
+
+        m_countPoints += cur_line.size()/3;
+        lines.push_back(cur_line);
+
+        delete[] l_buffer;
+        l_buffer = NULL;
+    }
+
+    l_dataFile.Close();
+
+	////
+    //POST PROCESS: set all the data in the right format for the navigator
+	////
+    m_dh->printDebug( wxT( "Setting data in right format for the navigator..." ), 1 );
+
+    m_countLines = lines.size();
+    m_dh->m_countFibers = m_countLines;   
+    m_pointArray.max_size();
+    m_linePointers.resize( m_countLines + 1 );
+    m_pointArray.resize( m_countPoints * 3 );
+    m_linePointers[m_countLines] = m_countPoints;
+    m_reverse.resize( m_countPoints );
+    m_selected.resize( m_countLines, false );
+    m_filtered.resize( m_countLines, false );
+    
+	ss.str("");
+	ss << "m_countLines: " << m_countLines;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+	ss.str("");
+	ss << "m_countPoints: " << m_countPoints;
+	m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    m_linePointers[0] = 0;
+    for( int i = 0; i < m_countLines; ++i )
+        m_linePointers[i+1] = m_linePointers[i]+ lines[i].size()/3;
+
+    int l_lineCounter = 0;
+    for( int i = 0; i < m_countPoints; ++i )
+    {
+        if( i == m_linePointers[l_lineCounter + 1] )
+            ++l_lineCounter;
+        m_reverse[i] = l_lineCounter;
+    }
+
+    unsigned int pos=0;
+    vector< vector<float> >::iterator it;
+    for (it=lines.begin(); it<lines.end(); it++){
+        vector<float>::iterator it2;
+        for (it2=(*it).begin(); it2<(*it).end(); it2++){
+            m_pointArray[pos++] = *it2;
+        }
+    }
+
+	if (voxel_size[0] == 0 && voxel_size[1] == 0 && voxel_size[2] == 0)
+	{
+		ss.str("");
+		ss << "Using anatomy's voxel size: [" << m_dh->m_xVoxel << "," << m_dh->m_yVoxel << "," << m_dh->m_zVoxel << "]";
+		m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+		voxel_size[0] = m_dh->m_xVoxel;
+		voxel_size[1] = m_dh->m_yVoxel;
+		voxel_size[2] = m_dh->m_zVoxel;
+
+		ss.str("");
+		ss << "Centering with respect to the anatomy: [" << m_dh->m_columns/2 << "," << m_dh->m_rows/2 << "," << m_dh->m_frames/2 << "]";
+		m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+		origin[0] = m_dh->m_columns/2;
+		origin[1] = m_dh->m_rows/2;
+		origin[2] = m_dh->m_frames/2;
+	}
+
+    int flipX = (!invert_x)? 1: -1;
+    int flipY = (!invert_y)? 1: -1;
+    int flipZ = (!invert_z)? 1: -1;
+
+    for( int i = 0; i < m_countPoints * 3; ++i )
+    {
+        m_pointArray[i] = ((flipX * m_pointArray[i] + origin[0]) / voxel_size[0]) * m_dh->m_xVoxel;
+        ++i;
+        m_pointArray[i] = ((flipY * m_pointArray[i] + origin[1]) / voxel_size[1]) * m_dh->m_yVoxel;
+        ++i;
+        m_pointArray[i] = ((flipZ * m_pointArray[i] + origin[2]) / voxel_size[2]) * m_dh->m_zVoxel;
+    }
+
+	m_dh->printDebug(wxT("End loading TRK file"), 1 );
+
+    createColorArray( false );
+    m_type = FIBERS;
+    m_fullPath = i_fileName;
+    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+#ifdef __WXMSW__
+    m_name = i_fileName.AfterLast( '\\' );
+#else
+    m_name = i_fileName.AfterLast( '/' );
+#endif
+    return true;
+}
+
 
 bool Fibers::loadCamino( wxString i_filename )
 {

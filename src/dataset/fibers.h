@@ -61,6 +61,7 @@ public:
     void    initializeBuffer    ();
     bool    isSelected          ( int      i_fiber    );
     bool    load                ( wxString i_filename );
+    bool    loadTRK             ( wxString i_fileName );
     bool    loadCamino          ( wxString i_filename );
     bool    loadPTK             ( wxString i_filename );
     void    loadTestFibers      ();
