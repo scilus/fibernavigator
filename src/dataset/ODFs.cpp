@@ -399,8 +399,28 @@ void ODFs::setNbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,int
                 {
                     if(Nbors[i].size() < 20)
                     {
-                        std::pair<float,int> element(ang,j);
-                        Nbors[i].push_back(element);
+                        bool diff = true;
+                        if(Nbors[i].size() !=0)
+                        {
+                          for(int n=0; n< Nbors[i].size(); n++)
+                          {
+                              if(m_phiThetaDirection[NB_OF_LOD -1](j,0) == m_phiThetaDirection[NB_OF_LOD -1](Nbors[i][n].second,0) && 
+                                  m_phiThetaDirection[NB_OF_LOD -1](j,1) == m_phiThetaDirection[NB_OF_LOD -1](Nbors[i][n].second,1))
+                                diff = false;
+                          
+
+                          }
+                          if(diff)
+                          {
+                            std::pair<float,int> element(ang,j);
+                            Nbors[i].push_back(element);
+                          }
+                        }
+                        else
+                        {
+                            std::pair<float,int> element(ang,j);
+                            Nbors[i].push_back(element);
+                        }
                     }
                     else
                     {
@@ -457,7 +477,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
 
     std::vector<float> norm_hemisODF;
     float max = 0;
-    float min = 100;
+    float min = numeric_limits<float>::infinity();
 
     for(unsigned int i = 0; i < hemisODF.size(); i++)
     {
