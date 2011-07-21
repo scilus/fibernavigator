@@ -73,6 +73,7 @@ public:
     void         refreshSlidersValues();
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
+    int             getGlyphIndex       ( int i_zVoxel, int i_yVoxel, int i_xVoxel );
 
     // Items related to the glyph options sizer.
     wxSlider           *m_psliderMinHueValue;
@@ -120,7 +121,7 @@ protected:
     void            fillColorDataset    ( float i_minHueAngle, float i_maxHueAngle, float i_saturationValue, float i_luminanceValue );
     void            generateColorTexture( float i_minHue, float i_maxHue, float i_saturation, float i_luminance );
     void            generateSpherePoints( float i_scalingFactor );
-    int             getGlyphIndex       ( int i_zVoxel, int i_yVoxel, int i_xVoxel );
+    
     int             getLODNbOfPoints    ( const LODChoices i_LODChoices );
     void            getSpherePoints     ( LODChoices            i_LOD,
                                           float                 i_scalingFactor,

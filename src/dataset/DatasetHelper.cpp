@@ -1242,7 +1242,7 @@ void DatasetHelper::createCutDataset()
 void DatasetHelper::changeZoom( const int i_z )
 {
     float delta = ( (int)m_zoom ) * 0.1f;
-    i_z >= 0 ? m_zoom = wxMin( 10, m_zoom+delta ) : m_zoom = wxMax( 1, m_zoom-delta );
+    i_z >= 0 ? m_zoom = wxMin( 50, m_zoom+delta ) : m_zoom = wxMax( 1, m_zoom-delta );
 }
 
 void DatasetHelper::moveScene( int i_x, int i_y )

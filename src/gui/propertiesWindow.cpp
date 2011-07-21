@@ -1217,4 +1217,15 @@ void PropertiesWindow::OnSliderAxisMoved( wxCommandEvent& WXUNUSED(event) )
 void PropertiesWindow::OnRecalcMainDir( wxCommandEvent& WXUNUSED(event) )
 {   
     ((ODFs*)m_mainFrame->m_currentSceneObject)->extractMaximas();
+
+    /*for( int z = 0; z < m_mainFrame->m_datasetHelper->m_frames; z++ )
+        for( int y = 0; y < m_mainFrame->m_datasetHelper->m_rows; y++ )
+            for( int x = 0; x < m_mainFrame->m_datasetHelper->m_columns; x++ )
+            {
+                int  currentIdx = ((Glyph*)m_mainFrame->m_currentSceneObject)->getGlyphIndex( z, y, x );
+
+                if(((ODFs*)m_mainFrame->m_currentSceneObject)->getCoeffs().at(currentIdx)[0] != 0)
+                    ((ODFs*)m_mainFrame->m_currentSceneObject)->mainDirections[currentIdx] = ((ODFs*)m_mainFrame->m_currentSceneObject)->getODFmaxNotNorm(((ODFs*)m_mainFrame->m_currentSceneObject)->getCoeffs().at(currentIdx),
+                    ((ODFs*)m_mainFrame->m_currentSceneObject)->getShMatrix()[NB_OF_LOD - 1], ((ODFs*)m_mainFrame->m_currentSceneObject)->getPhiTheta()[NB_OF_LOD - 1],((ODFs*)m_mainFrame->m_currentSceneObject)->m_axisThreshold,((ODFs*)m_mainFrame->m_currentSceneObject)->angle,((ODFs*)m_mainFrame->m_currentSceneObject)->Nbors);
+            }*/
 }

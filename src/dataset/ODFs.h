@@ -37,18 +37,34 @@ public:
     virtual void updatePropertiesSizer();
     
     bool isShBasis( int i_sh_basis ) {return m_sh_basis == i_sh_basis;};
+    vector< vector < float > > getCoeffs() {return m_coefficients;}
+    vector< FMatrix > getShMatrix() {return m_shMatrix;}
+    vector< FMatrix > getPhiTheta() {return m_phiThetaDirection;}
+
     void setShBasis(int value){m_sh_basis = value;}
     void changeShBasis(ODFs*,DatasetHelper*, int);
     void extractMaximas   ();
-    float m_axisThreshold;
+    
+
+    std::vector<Vector> getODFmaxNotNorm(vector < float >  coefs,const FMatrix & SHmatrix, 
+                       const FMatrix & grad,
+                       const float & max_thresh,
+                       const float & angle,
+                       const std::vector<std::pair<float,int> >* Nbors);
+    
+    void            setNbors(FMatrix i_phiThetaDirection, std::vector<std::pair<float,int> >* Nbors);
+    double            setAngle(double angle);
+
     //Vars
     wxString    m_lastODF_path;
 
     struct direction_value { double x,y,z,v; };
     struct direction { double x,y,z; };
+
     bool isMaximasSet;
-    std::vector<std::pair<float,int> >* Nbors;
     double angle;
+    float m_axisThreshold;
+    std::vector<std::pair<float,int> >* Nbors;
     std::vector<std::vector<Vector> > mainDirections;
 
     MySlider            *m_psliderFlood;
@@ -94,14 +110,7 @@ private:
     void             loadRadiusBuffer           ( AxisType i_axis );
     void             reloadRadiusBuffer         ( AxisType i_axis );
 
-    std::vector<Vector> getODFmaxNotNorm(vector < float >  coefs,const FMatrix & SHmatrix, 
-                       const FMatrix & grad,
-                       const float & max_thresh,
-                       const float & angle,
-                       const std::vector<std::pair<float,int> >* Nbors);
     
-    void            setNbors(FMatrix i_phiThetaDirection, std::vector<std::pair<float,int> >* Nbors);
-    double            setAngle(double angle);
 
     
 

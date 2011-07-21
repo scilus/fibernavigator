@@ -156,7 +156,7 @@ void ODFs::extractMaximas()
                 if(m_coefficients.at(currentIdx)[0] != 0)
                     mainDirections[currentIdx] = getODFmaxNotNorm(m_coefficients.at(currentIdx),m_shMatrix[NB_OF_LOD - 1],m_phiThetaDirection[NB_OF_LOD - 1],m_axisThreshold,angle,Nbors);
             }
-     //m_nbPointsPerGlyph = getLODNbOfPoints( LOD_0 );
+     
 }
 ///////////////////////////////////////////////////////////////////////////
 // This function fills up a vector (m_Points) that contains all the point 
@@ -299,6 +299,7 @@ double ODFs::setAngle(double angle)
 
     for(unsigned int i=0; i < m_phiThetaDirection[NB_OF_LOD -1].getDimensionY(); i++)
     {
+
         bool unique = true;
         for(unsigned int j=0; j < vectUnique.size(); j++)
         {
@@ -311,6 +312,8 @@ double ODFs::setAngle(double angle)
             res.first = m_phiThetaDirection[NB_OF_LOD -1](i,0);
             res.second = m_phiThetaDirection[NB_OF_LOD -1](i,1);
             vectUnique.push_back(res); 
+
+
         }
     }
     
@@ -460,10 +463,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
     {
       if(hemisODF[i] > max)
         max = hemisODF[i];
-    }
 
-    for(unsigned int i = 0; i < hemisODF.size(); i++)
-    {
       if(hemisODF[i] < min)
         min = hemisODF[i];
     }
@@ -514,21 +514,48 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
 
       if(candidate)
       {
+          
+
           indices.push_back(i);
         
           float phi = m_phiThetaDirection[NB_OF_LOD - 1](i,0);
           float theta = m_phiThetaDirection[NB_OF_LOD - 1](i,1);
 
+          bool diff = true;
+
           Vector dd;
           dd[0] = std::cos(phi)*std::sin(theta);
           dd[1] = std::sin(phi)*std::sin(theta);
           dd[2] =  std::cos(theta);
-          max_dir.push_back(dd);
+          
+          if( max_dir.size() != 0)
+          {
+              for(int n=0; n< max_dir.size(); n++)
+              {
+                  if(dd.x == max_dir.at(n).x && dd.y == max_dir.at(n).y && dd.z == max_dir.at(n).z)
+                      diff = false;
+                      
+
+              }
+              if(diff)
+                max_dir.push_back(dd);
+          }
+          else
+          {
+                max_dir.push_back(dd);
+          }
+          
+
+          
 
       }
+
+        
+
+
     }
 
-    if(indices.size()/2>1)
+    /*if(indices.size()/2>1)
 	{
 		float new_min = 100;
 		float new_max = 0 ;
@@ -548,11 +575,12 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
             max_dir[i].y *= ( (norm_hemisODF[indices[i]] - new_min) / (new_max - new_min));
             max_dir[i].z *= ( (norm_hemisODF[indices[i]] - new_min) / (new_max - new_min));
         }
-    }
+    }*/
 
 
 
     isMaximasSet = true;
+   
     return max_dir;
 }
 
