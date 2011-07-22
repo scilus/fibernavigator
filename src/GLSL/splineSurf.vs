@@ -1,8 +1,8 @@
 #include lighting.vs
 
 varying vec4 VaryingTexCoord0;
-uniform sampler3D texes[10];
-uniform int type[10];
+uniform sampler3D texes[6];
+uniform int type[6];
 uniform int dimX, dimY, dimZ;
 uniform bool useTex;
 
@@ -24,11 +24,26 @@ void main() {
 			v.y = (v.y) / float(dimY);
 			v.z = (v.z) / float(dimZ);
 
-			for (int i = 9; i > -1; i--) {
-				if (type[i] == 1) {
-					greyVal = clamp(texture3D(texes[i], v).r, 0.0, 1.0);
-				}
+			
+			if (type[5] == 1) {
+				greyVal = clamp(texture3D(texes[5], v).r, 0.0, 1.0);
 			}
+			if (type[4] == 1) {
+				greyVal = clamp(texture3D(texes[4], v).r, 0.0, 1.0);
+			}
+			if (type[3] == 1) {
+				greyVal = clamp(texture3D(texes[3], v).r, 0.0, 1.0);
+			}
+			if (type[2] == 1) {
+				greyVal = clamp(texture3D(texes[2], v).r, 0.0, 1.0);
+			}
+			if (type[1] == 1) {
+				greyVal = clamp(texture3D(texes[1], v).r, 0.0, 1.0);
+			}
+			if (type[0] == 1) {
+				greyVal = clamp(texture3D(texes[0], v).r, 0.0, 1.0);
+			}
+		
 			vec3 offset = (greyVal - 0.5) * gl_Normal;
 
 			// FIXME: we cannot modify gl_Vertex, so we need to copy it!

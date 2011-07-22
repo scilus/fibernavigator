@@ -302,10 +302,10 @@ void ShaderHelper::setSplineSurfaceShaderVars()
     m_splineSurfShader->setUniInt( "tex3", 3 );
     m_splineSurfShader->setUniInt( "tex4", 4 );
     m_splineSurfShader->setUniInt( "tex5", 5 );
-    m_splineSurfShader->setUniInt( "tex6", 6 );
+    /*m_splineSurfShader->setUniInt( "tex6", 6 );
     m_splineSurfShader->setUniInt( "tex7", 7 );
     m_splineSurfShader->setUniInt( "tex8", 8 );
-    m_splineSurfShader->setUniInt( "tex9", 9 );
+    m_splineSurfShader->setUniInt( "tex9", 9 );*/
 
     m_splineSurfShader->setUniInt( "type0", m_type[0] );
     m_splineSurfShader->setUniInt( "type1", m_type[1] );
@@ -313,10 +313,10 @@ void ShaderHelper::setSplineSurfaceShaderVars()
     m_splineSurfShader->setUniInt( "type3", m_type[3] );
     m_splineSurfShader->setUniInt( "type4", m_type[4] );
     m_splineSurfShader->setUniInt( "type5", m_type[5] );
-    m_splineSurfShader->setUniInt( "type6", m_type[6] );
+   /* m_splineSurfShader->setUniInt( "type6", m_type[6] );
     m_splineSurfShader->setUniInt( "type7", m_type[7] );
     m_splineSurfShader->setUniInt( "type8", m_type[8] );
-    m_splineSurfShader->setUniInt( "type9", m_type[9] );
+    m_splineSurfShader->setUniInt( "type9", m_type[9] );*/
 
     m_splineSurfShader->setUniFloat( "threshold0", m_threshold[0] );
     m_splineSurfShader->setUniFloat( "threshold1", m_threshold[1] );
@@ -324,10 +324,10 @@ void ShaderHelper::setSplineSurfaceShaderVars()
     m_splineSurfShader->setUniFloat( "threshold3", m_threshold[3] );
     m_splineSurfShader->setUniFloat( "threshold4", m_threshold[4] );
     m_splineSurfShader->setUniFloat( "threshold5", m_threshold[5] );
-    m_splineSurfShader->setUniFloat( "threshold6", m_threshold[6] );
+   /* m_splineSurfShader->setUniFloat( "threshold6", m_threshold[6] );
     m_splineSurfShader->setUniFloat( "threshold7", m_threshold[7] );
     m_splineSurfShader->setUniFloat( "threshold8", m_threshold[8] );
-    m_splineSurfShader->setUniFloat( "threshold9", m_threshold[9] );
+    m_splineSurfShader->setUniFloat( "threshold9", m_threshold[9] );*/
 
     m_splineSurfShader->setUniFloat( "alpha0", m_alpha[0] );
     m_splineSurfShader->setUniFloat( "alpha1", m_alpha[1] );
@@ -335,9 +335,9 @@ void ShaderHelper::setSplineSurfaceShaderVars()
     m_splineSurfShader->setUniFloat( "alpha3", m_alpha[3] );
     m_splineSurfShader->setUniFloat( "alpha4", m_alpha[4] );
     m_splineSurfShader->setUniFloat( "alpha5", m_alpha[5] );
-    m_splineSurfShader->setUniFloat( "alpha6", m_alpha[6] );
+    /*m_splineSurfShader->setUniFloat( "alpha6", m_alpha[6] );
     m_splineSurfShader->setUniFloat( "alpha7", m_alpha[7] );
     m_splineSurfShader->setUniFloat( "alpha8", m_alpha[8] );
-    m_splineSurfShader->setUniFloat( "alpha9", m_alpha[9] );
+    m_splineSurfShader->setUniFloat( "alpha9", m_alpha[9] );*/
 }
 
