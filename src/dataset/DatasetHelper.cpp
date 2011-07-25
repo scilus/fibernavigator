@@ -160,6 +160,19 @@ DatasetHelper::~DatasetHelper()
 
     if ( m_anatomyHelper )
         delete m_anatomyHelper;
+
+	if ( m_shaderHelper )
+        delete m_shaderHelper;
+
+	//Not causing Memory leaks for now!!! But should be deleted, if allocated.
+	//if ( m_boxAtCrosshair )
+	//	delete m_boxAtCrosshair;
+	//if ( m_lastSelectedPoint )
+	//	delete m_lastSelectedPoint;
+	//if ( m_lastSelectedObject )
+	//	delete m_lastSelectedObject;
+	//if ( m_mainFrame )
+	//	delete m_mainFrame;
     
     printDebug( _T( "dataset helper destructor done" ), 0 );
 }
@@ -168,7 +181,7 @@ bool DatasetHelper::load( const int i_index )
 {
     wxArrayString l_fileNames;
     wxString l_caption          = wxT( "Choose a file" );
-    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
+    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
     wxString l_defaultDir       = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
     wxFileDialog dialog( m_mainFrame, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
@@ -332,7 +345,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
         }
         return false;
     }
-    else if( l_ext == _T( "fib" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) )
+    else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) )
     {
         if( ! m_anatomyLoaded )
         {

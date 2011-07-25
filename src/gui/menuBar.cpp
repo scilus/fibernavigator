@@ -15,7 +15,7 @@
 MenuBar::MenuBar()
 {
     m_menuFile = new wxMenu();
-    m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Load\tCtrl-L"));
+    m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Open\tCtrl-O"));
     //m_itemReloadShader = m_menuFile->Append(wxID_ANY, wxT("Reload Shader"));
     m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
     m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));

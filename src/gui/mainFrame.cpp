@@ -289,8 +289,8 @@ MainFrame::~MainFrame()
 {
     m_timer->Stop();
     m_datasetHelper->printDebug( _T( "main frame destructor" ), 0 );
-    m_datasetHelper->printDebug( _T( "timer stoped" ), 0 );    
-    
+    m_datasetHelper->printDebug( _T( "timer stopped" ), 0 );
+		if (m_timer)		delete m_timer;    
     if( m_datasetHelper )               
         delete m_datasetHelper;
 }
@@ -1418,7 +1418,7 @@ void MainFrame::deleteListItem()
         deleteSceneObject();
         m_listCtrl->DeleteItem( tmp );
         m_datasetHelper->updateLoadStatus();
-        refreshAllGLWidgets();        
+        refreshAllGLWidgets();
     }
 }
 

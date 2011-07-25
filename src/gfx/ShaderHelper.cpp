@@ -88,6 +88,8 @@ ShaderHelper::~ShaderHelper()
     delete m_fakeTubeShader;
     delete m_tensorsShader;
     delete m_odfsShader;
+	delete m_graphShader;
+	delete m_legendShader;
 
     m_dh->printDebug( _T("shader helper destructor done\n"), 0 );
 }

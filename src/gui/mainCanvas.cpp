@@ -70,7 +70,8 @@ const wxPoint& pos,const wxSize & size, long style, const wxString& name, int* g
 
 MainCanvas::~MainCanvas()
 {
-
+	if (m_arcBall)
+		delete m_arcBall;
 }
 
 void MainCanvas::init()

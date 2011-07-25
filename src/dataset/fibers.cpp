@@ -7,6 +7,7 @@
 //
 // Last modifications:
 //      by : ggirard - 29/12/2010
+//      by : Marc-Alexandre Côté - 30/03/2011
 /////////////////////////////////////////////////////////////////////////////
 
 #include "fibers.h"
@@ -26,7 +27,7 @@
 #define MIN_ALPHA_VALUE 0.017f
 
 Fibers::Fibers( DatasetHelper* i_datasetHelper ) :
-    DatasetInfo( i_datasetHelper )
+DatasetInfo( i_datasetHelper )
 {
     m_isInitialized         = false;
     m_normalsPositive       = false;
@@ -57,22 +58,23 @@ Fibers::~Fibers()
 
 bool Fibers::load( wxString i_filename )
 {
-   bool res = false;
-   if( i_filename.AfterLast( '.' ) == _T( "fib" ) ){
-        if (loadVTK( i_filename )){
+    bool res = false;
+    if( i_filename.AfterLast( '.' ) == _T( "fib" ) )
+    {
+        if (loadVTK( i_filename ))
             res = true;
-        } else {
-            res = loadDmri(i_filename);  
-        }
-   }
-   if( i_filename.AfterLast( '.' ) == _T( "bundlesdata" ) )
-      res = loadPTK( i_filename );
-   
-   if( i_filename.AfterLast( '.' ) == _T( "Bfloat" ) )
-      res = loadCamino( i_filename );
-   
-   if( i_filename.AfterLast( '.' ) == _T( "trk" ) )
-      res = loadTRK( i_filename );
+        else
+            res = loadDmri(i_filename);
+    }
+
+    if( i_filename.AfterLast( '.' ) == _T( "bundlesdata" ) )
+        res = loadPTK( i_filename );
+
+    if( i_filename.AfterLast( '.' ) == _T( "Bfloat" ) )
+        res = loadCamino( i_filename );
+
+    if( i_filename.AfterLast( '.' ) == _T( "trk" ) )
+        res = loadTRK( i_filename );
 
     return res;
 }
@@ -428,7 +430,6 @@ bool Fibers::loadTRK(wxString i_fileName)
     return true;
 }
 
-
 bool Fibers::loadCamino( wxString i_filename )
 {
     m_dh->printDebug( _T( "start loading Camino file" ), 1 );
@@ -439,7 +440,7 @@ bool Fibers::loadCamino( wxString i_filename )
     if( l_dataFile.Open( i_filename ) )
     {
         l_nSize = l_dataFile.Length();
-    
+
         if( l_nSize == wxInvalidOffset )
             return false;
     }
@@ -621,28 +622,28 @@ bool Fibers::loadPTK( wxString l_fileName )
 
     /*for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_dh->m_columns - m_pointArray[i];
-        ++i;
-        m_pointArray[i] = m_dh->m_rows - m_pointArray[i];
-        ++i;
-        m_pointArray[i] = m_dh->m_frames - m_pointArray[i];
+    m_pointArray[i] = m_dh->m_columns - m_pointArray[i];
+    ++i;
+    m_pointArray[i] = m_dh->m_rows - m_pointArray[i];
+    ++i;
+    m_pointArray[i] = m_dh->m_frames - m_pointArray[i];
     }*/
     /********************************************************************
-     * This is a fix for the visContest
-     * Only tested on -visContest fibers
-     *                -PGuevara datas    
-     *
-     * Hypothesis: If bundles computed in ptk, coordinates (x,y,z) are
-     * already in the space of the dataset. Good voxel size and origin 
-     *
-     ********************************************************************/
+    * This is a fix for the visContest
+    * Only tested on -visContest fibers
+    *                -PGuevara datas    
+    *
+    * Hypothesis: If bundles computed in ptk, coordinates (x,y,z) are
+    * already in the space of the dataset. Good voxel size and origin 
+    *
+    ********************************************************************/
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-       m_pointArray[i] = m_dh->m_columns* m_dh->m_xVoxel - m_pointArray[i];
-       ++i;
-       m_pointArray[i] = m_dh->m_rows   * m_dh->m_yVoxel - m_pointArray[i];
-       ++i;
-       m_pointArray[i] = m_dh->m_frames * m_dh->m_zVoxel - m_pointArray[i];
+        m_pointArray[i] = m_dh->m_columns* m_dh->m_xVoxel - m_pointArray[i];
+        ++i;
+        m_pointArray[i] = m_dh->m_rows   * m_dh->m_yVoxel - m_pointArray[i];
+        ++i;
+        m_pointArray[i] = m_dh->m_frames * m_dh->m_zVoxel - m_pointArray[i];
     }
     calculateLinePointers();
     createColorArray( false );
@@ -725,7 +726,7 @@ bool Fibers::loadVTK( wxString i_fileName )
     while( l_buffer[l_fileOffset] != '\n' )
         ++l_fileOffset;
     ++l_fileOffset;
-    
+
     l_j = 0;
     // Read POINTS.
     while( l_buffer[l_fileOffset] != '\n' )
@@ -888,7 +889,7 @@ bool Fibers::loadVTK( wxString i_fileName )
         vector< wxUint8 > tmpColorArray( l_countPoints * 3, 0 );
         l_dataFile.Seek( l_pointColorOffset );
         l_dataFile.Read( &tmpColorArray[0], (size_t) l_countPoints * 3 );
-        
+
         for( size_t i = 0; i < tmpColorArray.size(); ++i )
         {
             m_colorArray[i] = tmpColorArray[i] / 255.;
@@ -931,7 +932,7 @@ bool Fibers::loadVTK( wxString i_fileName )
 bool Fibers::loadDmri(wxString i_fileName)
 {
     FILE *l_file;    
-    
+
     l_file = fopen(i_fileName.mb_str(),"r");
     if (l_file == NULL) return false;
     char *s1 = new char[10];
@@ -948,14 +949,14 @@ bool Fibers::loadDmri(wxString i_fileName)
     res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
     res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
     res = fscanf(l_file, "%d %f", &m_countLines, &f2);
-    
+
     // the list of points
     vector< vector<float> > lines;
     m_countPoints = 0;
     float back,front;
     for (int i=0; i<m_countLines; i++){        
         res = fscanf(l_file, "%f %f %f", &back, &front, &f1);
-        
+
         int nbpoints = back+front;
         if (back!=0 && front!=0)
         {
@@ -1004,7 +1005,7 @@ bool Fibers::loadDmri(wxString i_fileName)
     m_linePointers[0] = 0;
     for( int i = 0; i < m_countLines; ++i )
         m_linePointers[i+1] = m_linePointers[i]+ lines[i].size()/3;
-    
+
     int l_lineCounter = 0;
     for( int i = 0; i < m_countPoints; ++i )
     {
@@ -1021,19 +1022,18 @@ bool Fibers::loadDmri(wxString i_fileName)
             m_pointArray[pos++] = *it2;
         }
     }
-    
+
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = i_fileName;
     m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
-    #ifdef __WXMSW__
+#ifdef __WXMSW__
     m_name = i_fileName.AfterLast( '\\' );
 #else
     m_name = i_fileName.AfterLast( '/' );
 #endif
     return true;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////
 // This function was made for debug purposes, it will create a fake set of 
@@ -1083,11 +1083,11 @@ void Fibers::loadTestFibers()
     m_pointArray[pos++] = l_circleRadius * sin( M_PI * 80.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 80.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
     m_pointArray[pos++] = l_circleRadius * sin( M_PI * 90.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 90.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
 
-    
+
     // No need to modify the rest of this function if you only want to add a test fiber.
     for( int i = 0; i < m_countLines; ++i )
         m_linePointers[i] = i * l_lengthLines;
-    
+
     int l_lineCounter = 0;
     for( int i = 0; i < m_countPoints; ++i )
     {
@@ -1172,7 +1172,7 @@ void Fibers::colorWithTorsion( float* i_colorData )
         int    l_index        = 0;
         float  l_progression  = 0.0f;
         int    l_pointPerLine = getPointsPerLine( i );
-        
+
         // We cannot calculate the torsion for a fiber that as less that 5 points. 
         // So we simply do not cange the color for this fiber
         if( l_pointPerLine < 5 )
@@ -1186,13 +1186,13 @@ void Fibers::colorWithTorsion( float* i_colorData )
             else if( j == l_pointPerLine - 2 ) { l_index = ( l_pointPerLine - 2 ) * 3; l_progression = 0.75f; } // For the before last point of each fiber.
             else if( j == l_pointPerLine - 1 ) { l_index = ( l_pointPerLine - 2 ) * 3; l_progression = 1.0f;  } // For the last point of each fiber.
             else                               {                                       l_progression = 0.5f;  } // For every other points.
-            
+
             m_dh->m_lastSelectedObject->getProgressionTorsion( Vector( m_pointArray[l_index-6], m_pointArray[l_index-5], m_pointArray[l_index-4] ), 
-                                                               Vector( m_pointArray[l_index-3], m_pointArray[l_index-2], m_pointArray[l_index-1] ),
-                                                               Vector( m_pointArray[l_index],   m_pointArray[l_index+1], m_pointArray[l_index+2] ),
-                                                               Vector( m_pointArray[l_index+3], m_pointArray[l_index+4], m_pointArray[l_index+5] ),
-                                                               Vector( m_pointArray[l_index+6], m_pointArray[l_index+7], m_pointArray[l_index+8] ),
-                                                               l_progression, l_color );
+                Vector( m_pointArray[l_index-3], m_pointArray[l_index-2], m_pointArray[l_index-1] ),
+                Vector( m_pointArray[l_index],   m_pointArray[l_index+1], m_pointArray[l_index+2] ),
+                Vector( m_pointArray[l_index+3], m_pointArray[l_index+4], m_pointArray[l_index+5] ),
+                Vector( m_pointArray[l_index+6], m_pointArray[l_index+7], m_pointArray[l_index+8] ),
+                l_progression, l_color );
 
             // Lets apply a specific harcoded coloration for the torsion.
             float l_realColor;
@@ -1233,7 +1233,7 @@ void Fibers::colorWithCurvature( float* i_colorData )
 {
     if( i_colorData == NULL )
         return;
-    
+
     int    l_pc = 0;
     Vector l_firstDerivative, l_secondDerivative, l_thirdDerivative;
 
@@ -1244,7 +1244,7 @@ void Fibers::colorWithCurvature( float* i_colorData )
         int    l_index        = 0;
         float  l_progression  = 0.0f;
         int    l_pointPerLine = getPointsPerLine( i );
-        
+
         // We cannot calculate the curvature for a fiber that as less that 5 points. 
         // So we simply do not cange the color for this fiber
         if( l_pointPerLine < 5 )
@@ -1258,13 +1258,13 @@ void Fibers::colorWithCurvature( float* i_colorData )
             else if( j == l_pointPerLine - 2 ) { l_index = ( l_pointPerLine - 2 ) * 3; l_progression = 0.75f; } // For the before last point of each fiber.
             else if( j == l_pointPerLine - 1 ) { l_index = ( l_pointPerLine - 2 ) * 3; l_progression = 1.0f;  } // For the last point of each fiber.
             else                               {                                       l_progression = 0.5f;  } // For every other points.
-            
+
             m_dh->m_lastSelectedObject->getProgressionCurvature( Vector( m_pointArray[l_index-6], m_pointArray[l_index-5], m_pointArray[l_index-4] ), 
-                                                                 Vector( m_pointArray[l_index-3], m_pointArray[l_index-2], m_pointArray[l_index-1] ),
-                                                                 Vector( m_pointArray[l_index],   m_pointArray[l_index+1], m_pointArray[l_index+2] ),
-                                                                 Vector( m_pointArray[l_index+3], m_pointArray[l_index+4], m_pointArray[l_index+5] ),
-                                                                 Vector( m_pointArray[l_index+6], m_pointArray[l_index+7], m_pointArray[l_index+8] ),
-                                                                 l_progression, l_color );
+                Vector( m_pointArray[l_index-3], m_pointArray[l_index-2], m_pointArray[l_index-1] ),
+                Vector( m_pointArray[l_index],   m_pointArray[l_index+1], m_pointArray[l_index+2] ),
+                Vector( m_pointArray[l_index+3], m_pointArray[l_index+4], m_pointArray[l_index+5] ),
+                Vector( m_pointArray[l_index+6], m_pointArray[l_index+7], m_pointArray[l_index+8] ),
+                l_progression, l_color );
 
             // Lets apply a specific harcoded coloration for the curvature.
             float l_realColor;
@@ -1539,7 +1539,7 @@ void Fibers::save( wxString i_fileName )
     {
         l_colorData = &m_colorArray[0];
     }
-    
+
     for( int l = 0; l < m_countLines; ++l )
     {
         if( m_selected[l] && !m_filtered[l] )
@@ -2068,7 +2068,7 @@ void Fibers::updateLinesShown()
 
             if( m_dh->m_useVBO )
                 glUnmapBuffer( GL_ARRAY_BUFFER );
-            
+
             l_selectionObjects[i][0]->setColorChanged( false );
         }
     }
@@ -2190,9 +2190,9 @@ void Fibers::boxTest( int i_left, int i_right, int i_axis )
     {
         int l_axis2 = ( i_axis + 2 ) % 3;
         if ( m_pointArray[l_pointIndex + l_axis1] <= m_boxMax[l_axis1] && 
-             m_pointArray[l_pointIndex + l_axis1] >= m_boxMin[l_axis1] && 
-             m_pointArray[l_pointIndex + l_axis2] <= m_boxMax[l_axis2] && 
-             m_pointArray[l_pointIndex + l_axis2] >= m_boxMin[l_axis2] )
+            m_pointArray[l_pointIndex + l_axis1] >= m_boxMin[l_axis1] && 
+            m_pointArray[l_pointIndex + l_axis2] <= m_boxMax[l_axis2] && 
+            m_pointArray[l_pointIndex + l_axis2] >= m_boxMin[l_axis2] )
         {
             m_selected[getLineForPoint( m_kdTree->m_tree[l_root] )] = 1;
         }
@@ -2312,10 +2312,10 @@ void Fibers::barycenterTest( int i_left, int i_right, int i_axis )
         int l_axis2 = ( i_axis + 2 ) % 3;
 
         if ( m_selected[getLineForPoint( m_kdTree->m_tree[l_root] )] == 1 && 
-             m_pointArray[l_pointIndex + l_axis1] <= m_boxMax[l_axis1]    && 
-             m_pointArray[l_pointIndex + l_axis1] >= m_boxMin[l_axis1]    && 
-             m_pointArray[l_pointIndex + l_axis2] <= m_boxMax[l_axis2]    && 
-             m_pointArray[l_pointIndex + l_axis2] >= m_boxMin[l_axis2] )
+            m_pointArray[l_pointIndex + l_axis1] <= m_boxMax[l_axis1]    && 
+            m_pointArray[l_pointIndex + l_axis1] >= m_boxMin[l_axis1]    && 
+            m_pointArray[l_pointIndex + l_axis2] <= m_boxMax[l_axis2]    && 
+            m_pointArray[l_pointIndex + l_axis2] >= m_boxMin[l_axis2] )
         {
             m_barycenter[0] += m_pointArray[m_kdTree->m_tree[l_root] * 3];
             m_barycenter[1] += m_pointArray[m_kdTree->m_tree[l_root] * 3 + 1];
@@ -2337,7 +2337,7 @@ void Fibers::initializeBuffer()
         return;
 
     m_isInitialized = true;
-    
+
     bool isOK = true;
 
     glGenBuffers( 3, m_bufferObjects );
@@ -2397,7 +2397,7 @@ void Fibers::draw()
         updateFibersColors();
         m_cachedThreshold = m_threshold;
     }
-  
+
     initializeBuffer();
 
     if( m_dh->m_useFakeTubes )
@@ -2473,16 +2473,16 @@ namespace
     template< class T > struct IndirectComp
     {
         IndirectComp( const T &zvals ) :
-            zvals( zvals )
-        {
-        }
+    zvals( zvals )
+    {
+    }
 
-        // Watch out: operator less, but we are sorting in descending z-order, i.e.,
-        // highest z value will be first in array and painted first as well
-        template< class I > bool operator()( const I &i1, const I &i2 ) const
-        {
-            return zvals[i1] > zvals[i2];
-        }
+    // Watch out: operator less, but we are sorting in descending z-order, i.e.,
+    // highest z value will be first in array and painted first as well
+    template< class I > bool operator()( const I &i1, const I &i2 ) const
+    {
+        return zvals[i1] > zvals[i2];
+    }
 
     private:
         const T &zvals;
@@ -2505,8 +2505,8 @@ void Fibers::drawFakeTubes()
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    
-    
+
+
     for( int i = 0; i < m_countLines; ++i )
     {
         if( m_selected[i] && !m_filtered[i] )
@@ -2514,7 +2514,7 @@ void Fibers::drawFakeTubes()
             int idx = getStartIndexForLine( i ) * 3;
 
             glBegin( GL_QUAD_STRIP );
-            
+
             for( int k = 0; k < getPointsPerLine( i ); ++k )
             {
                 glNormal3f( l_normals[idx], l_normals[idx + 1], l_normals[idx + 2] );
@@ -2538,7 +2538,7 @@ void Fibers::drawSortedLines()
     unsigned int *l_snippletSort = NULL;
     unsigned int *l_lineIds      = NULL;
     int l_nbSnipplets = 0;
-    
+
     // Estimate memory required for arrays.
     for( int i = 0; i < m_countLines; ++i )
     {
@@ -2563,7 +2563,7 @@ void Fibers::drawSortedLines()
         {
             l_lineIds[l_snp << 1] = getStartIndexForLine( i ) + k;
             l_lineIds[( l_snp << 1 ) + 1] = getStartIndexForLine( i ) + k + 1;
-            
+
             l_snippletSort[l_snp] = l_snp;
             l_snp++;
         }
@@ -2578,8 +2578,8 @@ void Fibers::drawSortedLines()
     {
         const int id = l_lineIds[i << 1] * 3;
         l_zVal[i] = ( m_pointArray[id + 0] * l_matrix[2] + m_pointArray[id + 1] * l_matrix[6]
-                  + m_pointArray[id + 2] * l_matrix[10] + l_matrix[14] ) / ( m_pointArray[id + 0] * l_matrix[3]
-                  + m_pointArray[id + 1] * l_matrix[7] + m_pointArray[id + 2] * l_matrix[11] + l_matrix[15] );
+        + m_pointArray[id + 2] * l_matrix[10] + l_matrix[14] ) / ( m_pointArray[id + 0] * l_matrix[3]
+        + m_pointArray[id + 1] * l_matrix[7] + m_pointArray[id + 2] * l_matrix[11] + l_matrix[15] );
     }
 
     sort( &l_snippletSort[0], &l_snippletSort[l_nbSnipplets], IndirectComp< vector< float > > ( l_zVal ) );
@@ -2786,7 +2786,7 @@ void Fibers::setFibersLength()
     float l_dx,l_dy, l_dz;
     m_maxLength=0;
     m_minLength=1000000;
-      for( unsigned int j = 0 ; j< l_FibersPoints.size(); j++){
+    for( unsigned int j = 0 ; j< l_FibersPoints.size(); j++){
         l_currentFiberPoints = l_FibersPoints[j];
         m_length[j] = 0;
         for( unsigned int i = 1; i < l_currentFiberPoints.size(); ++i )
@@ -2838,7 +2838,6 @@ void Fibers::updateFibersFilters()
         m_filtered[i]=!((i%maxSubSampling)>=subSampling && m_length[i]>=min && m_length[i]<=max);     
 }
 
-
 void Fibers::createPropertiesSizer(PropertiesWindow *parent)
 {
     setFibersLength();
@@ -2857,7 +2856,7 @@ void Fibers::createPropertiesSizer(PropertiesWindow *parent)
     l_sizer->Add(m_psliderFibersFilterMax,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderFibersFilterMax->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnFibersFilter));
-            
+
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Subsampling"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
     m_psliderFibersSampling = new wxSlider(parent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
