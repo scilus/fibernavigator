@@ -46,14 +46,13 @@ public:
     void extractMaximas();
     
 
-    std::vector<Vector> getODFmaxNotNorm(vector < float >  coefs,const FMatrix & SHmatrix, 
+    std::vector<Vector> getODFmax(vector < float >  coefs,const FMatrix & SHmatrix, 
                        const FMatrix & grad,
                        const float & max_thresh,
-                       const float & angle,
-                       const std::vector<std::pair<float,int> >* Nbors);
+                       const std::vector<std::pair<float,int> >* m_nbors);
     
-    void            setNbors(FMatrix i_phiThetaDirection, std::vector<std::pair<float,int> >* Nbors);
-    double            setAngle(double angle);
+    void			  set_m_nbors(FMatrix i_phiThetaDirection, std::vector<std::pair<float,int> >* m_nbors);
+    double            get_min_angle();
 
     //Vars
     wxString    m_lastODF_path;
@@ -61,11 +60,11 @@ public:
     struct direction_value { double x,y,z,v; };
     struct direction { double x,y,z; };
 
-    bool isMaximasSet;
-    double angle;
-    float m_axisThreshold;
-    std::vector<std::pair<float,int> >* Nbors;
-    std::vector<std::vector<Vector> >   mainDirections;
+    bool								m_isMaximasSet;
+    double								m_angle_min;
+    float								m_axisThreshold;
+    std::vector<std::pair<float,int> >* m_nbors;
+    std::vector<std::vector<Vector> >   m_mainDirections;
 
     MySlider        *m_psliderFlood;
     wxStaticText    *m_pTextThres;
