@@ -142,6 +142,8 @@ private:
     void OnToggleAlpha                      ( wxCommandEvent& event );
     
     void OnRotateZ                          ( wxCommandEvent& event );
+    void OnRotateY                          ( wxCommandEvent& event );
+    void OnRotateX                          ( wxCommandEvent& event );
     void OnNavigateSagital                  ( wxCommandEvent& event );
     void OnNavigateAxial                    ( wxCommandEvent& event );
     void OnNavigateCoronal                  ( wxCommandEvent& event );

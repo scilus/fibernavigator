@@ -70,7 +70,8 @@ const wxPoint& pos,const wxSize & size, long style, const wxString& name, int* g
 
 MainCanvas::~MainCanvas()
 {
-
+	if (m_arcBall)
+		delete m_arcBall;
 }
 
 void MainCanvas::init()
@@ -1281,22 +1282,22 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
         resultFront = getElement(x,y,front,result);
         resultBack = getElement(x,y,back,result);
         
-        if(NorthV >= downBracket && NorthV < upBracket && resultNorth != 1.0f) //North
+        if(NorthV >= downBracket && NorthV <= upBracket && resultNorth != 1.0f) //North
             toVisit.push_front(Vector(x,north,z));
 
-        if(SouthV >= downBracket && SouthV < upBracket && resultSouth != 1.0f) //South
+        if(SouthV >= downBracket && SouthV <= upBracket && resultSouth != 1.0f) //South
             toVisit.push_front(Vector(x,south,z));
 
-        if(EastV >= downBracket && EastV < upBracket && resultEast != 1.0f) //East
+        if(EastV >= downBracket && EastV <= upBracket && resultEast != 1.0f) //East
             toVisit.push_front(Vector(east,y,z));
 
-        if(WestV >= downBracket && WestV < upBracket && resultWest != 1.0f) //West
+        if(WestV >= downBracket && WestV <= upBracket && resultWest != 1.0f) //West
             toVisit.push_front(Vector(west,y,z));
 
-        if(FrontV >= downBracket && FrontV < upBracket && resultFront != 1.0f) //Front
+        if(FrontV >= downBracket && FrontV <= upBracket && resultFront != 1.0f) //Front
             toVisit.push_front(Vector(x,y,front));
 
-        if(BackV >= downBracket && BackV < upBracket && resultBack != 1.0f)  //Back
+        if(BackV >= downBracket && BackV <= upBracket && resultBack != 1.0f)  //Back
             toVisit.push_front(Vector(x,y,back));
     }
 

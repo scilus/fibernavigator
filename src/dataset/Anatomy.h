@@ -33,6 +33,7 @@ public:
    std::vector<float>* getFloatDataset();
    MySlider            *m_psliderFlood;
    MySlider            *m_psliderGraphSigma;
+   wxStaticText          *m_pTextThres;
   
    GLuint getGLuint();
    void setRGBZero( int x, int y, int z );

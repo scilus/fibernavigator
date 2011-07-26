@@ -15,7 +15,7 @@
 MenuBar::MenuBar()
 {
     m_menuFile = new wxMenu();
-    m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Load\tCtrl-L"));
+    m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Open\tCtrl-O"));
     //m_itemReloadShader = m_menuFile->Append(wxID_ANY, wxT("Reload Shader"));
     m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
     m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));
@@ -47,8 +47,13 @@ MenuBar::MenuBar()
     m_itemNavigateSlizeY = m_menuNavigate->AppendCheckItem(wxID_ANY, wxT("Axial"));
     m_itemNavigateSlizeZ = m_menuNavigate->AppendCheckItem(wxID_ANY, wxT("Coronal"));
     m_menuView->AppendSeparator();
-
-    m_itemRotateZ = m_menuView->AppendCheckItem(wxID_ANY, wxT("Rotate (Z axis)"));
+    
+    m_menuRotate = new wxMenu();
+    m_menuView->AppendSubMenu(m_menuRotate, wxT("Rotate"));
+    m_itemRotateX = m_menuRotate->AppendCheckItem(wxID_ANY, wxT("X axis"));
+    m_itemRotateY = m_menuRotate->AppendCheckItem(wxID_ANY, wxT("Y axis"));
+    m_itemRotateZ = m_menuRotate->AppendCheckItem(wxID_ANY, wxT("Z axis"));
+    m_menuView->AppendSeparator();
 
     m_itemToggleShowCrosshair = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Crosshair"));
     m_itemToggleShowAxes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Axes"));
@@ -191,6 +196,8 @@ void MenuBar::initMenuBar( MainFrame *mf )
     //mf->Connect(m_itemCoronalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieCor));
     //mf->Connect(m_itemSagittalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieSag));
     mf->Connect(m_itemRotateZ->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnRotateZ));
+    mf->Connect(m_itemRotateY->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnRotateY));
+    mf->Connect(m_itemRotateX->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnRotateX));
    
     
 }

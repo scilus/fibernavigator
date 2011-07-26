@@ -81,10 +81,9 @@ bool Shader::compile(GLuint* shaderId, wxString codeString)
     glCompileShader(*shaderId);
     GLint compiled;
     glGetShaderiv (*shaderId, GL_COMPILE_STATUS, &compiled);
-    if (!compiled) {
-        return false;
-    }
-    return true;
+
+	free(temp);
+    return compiled;
 }
 
 bool Shader::loadCode(wxString filename)

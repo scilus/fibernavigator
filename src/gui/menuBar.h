@@ -43,7 +43,10 @@ public:
             wxMenuItem  *m_itemNavigateSlizeX;
             wxMenuItem  *m_itemNavigateSlizeY;
             wxMenuItem  *m_itemNavigateSlizeZ;
-        wxMenuItem  *m_itemRotateZ;
+        wxMenu      *m_menuRotate;
+            wxMenuItem  *m_itemRotateZ;
+            wxMenuItem  *m_itemRotateY;
+            wxMenuItem  *m_itemRotateX;
         wxMenuItem  *m_itemReset;
         wxMenuItem  *m_itemLeft;
         wxMenuItem  *m_itemRight;

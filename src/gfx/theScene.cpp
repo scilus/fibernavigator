@@ -37,13 +37,17 @@ TheScene::TheScene( DatasetHelper* i_datasetHelper ) :
         m_modelview[i]  = 0.0f;
     }
     m_isRotateZ = false;
+    m_isRotateY = false;
+    m_isRotateX = false;
     m_isNavSagital = false;
     m_isNavCoronal = false;
     m_isNavAxial = false;
     m_posAxial = 0;
     m_posCoronal = 0;
     m_posSagital = 0;
-    m_rotAngle = 0;
+    m_rotAngleX = 0;
+    m_rotAngleY = 0;
+    m_rotAngleZ = 0;
 
 }
 
@@ -175,11 +179,31 @@ void TheScene::renderScene()
     //Animate
 	if(m_isRotateZ)
     {
-	    if (m_rotAngle>360) 
-		    m_rotAngle=0;
+	    if (m_rotAngleZ>360) 
+		    m_rotAngleZ=0;
 
     	glTranslatef(m_datasetHelper->m_columns / 2 * m_datasetHelper->m_xVoxel,m_datasetHelper->m_rows / 2 * m_datasetHelper->m_yVoxel,m_datasetHelper->m_frames / 2 * m_datasetHelper->m_zVoxel);
-	    glRotatef(m_rotAngle,0,0,1);
+	    glRotatef(m_rotAngleZ,0,0,1);
+	    glTranslatef(-m_datasetHelper->m_columns / 2 * m_datasetHelper->m_xVoxel,-m_datasetHelper->m_rows / 2 * m_datasetHelper->m_yVoxel,-m_datasetHelper->m_frames / 2 * m_datasetHelper->m_zVoxel);
+    }
+
+    if(m_isRotateY)
+    {
+	    if (m_rotAngleY>360) 
+		    m_rotAngleY=0;
+
+    	glTranslatef(m_datasetHelper->m_columns / 2 * m_datasetHelper->m_xVoxel,m_datasetHelper->m_rows / 2 * m_datasetHelper->m_yVoxel,m_datasetHelper->m_frames / 2 * m_datasetHelper->m_zVoxel);
+	    glRotatef(m_rotAngleY,0,1,0);
+	    glTranslatef(-m_datasetHelper->m_columns / 2 * m_datasetHelper->m_xVoxel,-m_datasetHelper->m_rows / 2 * m_datasetHelper->m_yVoxel,-m_datasetHelper->m_frames / 2 * m_datasetHelper->m_zVoxel);
+    }
+
+    if(m_isRotateX)
+    {
+	    if (m_rotAngleX>360) 
+		    m_rotAngleX=0;
+
+    	glTranslatef(m_datasetHelper->m_columns / 2 * m_datasetHelper->m_xVoxel,m_datasetHelper->m_rows / 2 * m_datasetHelper->m_yVoxel,m_datasetHelper->m_frames / 2 * m_datasetHelper->m_zVoxel);
+	    glRotatef(m_rotAngleX,1,0,0);
 	    glTranslatef(-m_datasetHelper->m_columns / 2 * m_datasetHelper->m_xVoxel,-m_datasetHelper->m_rows / 2 * m_datasetHelper->m_yVoxel,-m_datasetHelper->m_frames / 2 * m_datasetHelper->m_zVoxel);
     }
 

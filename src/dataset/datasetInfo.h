@@ -17,6 +17,12 @@
 #include "../gui/myListCtrl.h"
 #include <GL/glew.h>
 
+union converterByteINT16 
+{
+    wxUint8 b[2];
+    wxUint16 i;
+};
+
 union converterByteINT32 
 {
     wxUint8 b[4];

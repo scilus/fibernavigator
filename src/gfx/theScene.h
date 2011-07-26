@@ -52,10 +52,14 @@ public:
     void         renderScene     ();
     void         setMainGLContext( wxGLContext* i_context )         { m_mainGLContext = i_context; };
 	bool         m_isRotateZ;
+    bool         m_isRotateY;
+    bool         m_isRotateX;
     bool         m_isNavSagital;
     bool         m_isNavAxial;
     bool         m_isNavCoronal;
-    float        m_rotAngle;
+    float        m_rotAngleX;
+    float        m_rotAngleY;
+    float        m_rotAngleZ;
     float        m_posSagital;
     float        m_posCoronal;
     float        m_posAxial;

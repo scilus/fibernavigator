@@ -311,10 +311,10 @@ private:
     wxToggleButton  *m_ptoggleCalculatesFibersInfo;
     wxButton        *m_pbtnNewFibersDensityVolume;
     wxButton        *m_pbtnNewFibersColorVolume;    
-    //wxGrid          *m_pgridfibersInfo;
+    wxGrid          *m_pgridfibersInfo;
     wxToggleButton  *m_ptoggleDisplayMeanFiber;
-    //wxButton        *m_pbtnDisplayCrossSections;
-    //wxButton        *m_pbtnDisplayDispersionTube;
+    wxButton        *m_pbtnDisplayCrossSections;
+    wxButton        *m_pbtnDisplayDispersionTube;
     wxButton        *m_pbtnSetAsDistanceAnchor;
     wxButton        *m_pbtnFlipNormal;
     wxBitmapButton  *m_pbtnSelectColor;

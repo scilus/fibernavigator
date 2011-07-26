@@ -289,8 +289,8 @@ MainFrame::~MainFrame()
 {
     m_timer->Stop();
     m_datasetHelper->printDebug( _T( "main frame destructor" ), 0 );
-    m_datasetHelper->printDebug( _T( "timer stoped" ), 0 );    
-    
+    m_datasetHelper->printDebug( _T( "timer stopped" ), 0 );
+		if (m_timer)		delete m_timer;    
     if( m_datasetHelper )               
         delete m_datasetHelper;
 }
@@ -702,6 +702,7 @@ void MainFrame::deleteSceneObject()
     m_currentListItem = -1;
     m_lastSelectedListItem = -1;
     m_propertiesWindow->GetSizer()->Layout();
+    doOnSize();
 }
 
 void MainFrame::DisplayPropertiesSheet()
@@ -733,10 +734,10 @@ void MainFrame::DisplayPropertiesSheet()
             {
                 m_propertiesWindow->GetSizer()->Add(m_currentSizer, 0, wxLeft | wxFIXED_MINSIZE, 0 );
                 m_propertiesWindow->GetSizer()->Show( m_currentSizer, true, true );                
-            }  
-            m_currentSceneObject->updatePropertiesSizer();
+            }             
             doOnSize();            
-        } 
+        }        
+        m_currentSceneObject->updatePropertiesSizer();
         m_lastSelectedSceneObject = NULL;
     }     
 }
@@ -1294,6 +1295,7 @@ void MainFrame::refreshAllGLWidgets()
 {
     updateStatusBar();
     updateMenus();
+
     refreshViews();   
     if (m_datasetHelper->m_isRulerToolActive){
         wxString sbString1 = wxString::Format( wxT("%4.1fmm (%2.1fmm)" ), m_datasetHelper->m_rulerFullLength, m_datasetHelper->m_rulerPartialLength );
@@ -1417,7 +1419,6 @@ void MainFrame::deleteListItem()
         m_listCtrl->DeleteItem( tmp );
         m_datasetHelper->updateLoadStatus();
         refreshAllGLWidgets();
-        doOnSize();
     }
 }
 
@@ -1672,6 +1673,18 @@ void MainFrame::OnRotateZ( wxCommandEvent& event )
     setTimerSpeed();
 }
 
+void MainFrame::OnRotateY( wxCommandEvent& event )
+{
+    m_datasetHelper->m_theScene->m_isRotateY = !m_datasetHelper->m_theScene->m_isRotateY; 
+    setTimerSpeed();
+}
+
+void MainFrame::OnRotateX( wxCommandEvent& event )
+{
+    m_datasetHelper->m_theScene->m_isRotateX = !m_datasetHelper->m_theScene->m_isRotateX; 
+    setTimerSpeed();
+}
+
 void MainFrame::OnNavigateAxial( wxCommandEvent& event )
 {
     m_datasetHelper->m_theScene->m_isNavAxial = !m_datasetHelper->m_theScene->m_isNavAxial;
@@ -1693,7 +1706,8 @@ void MainFrame::OnNavigateCoronal( wxCommandEvent& event )
 void MainFrame::setTimerSpeed()
 {
     m_timer->Stop();
-    if(m_datasetHelper->m_theScene->m_isNavCoronal || m_datasetHelper->m_theScene->m_isNavAxial || m_datasetHelper->m_theScene->m_isNavSagital || m_datasetHelper->m_theScene->m_isRotateZ)
+    if(m_datasetHelper->m_theScene->m_isNavCoronal || m_datasetHelper->m_theScene->m_isNavAxial || m_datasetHelper->m_theScene->m_isNavSagital || m_datasetHelper->m_theScene->m_isRotateZ
+        || m_datasetHelper->m_theScene->m_isRotateY || m_datasetHelper->m_theScene->m_isRotateX)
     {        
         m_timer->Start( 50 );
     }
@@ -1821,7 +1835,13 @@ void MainFrame::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
 {    
     //Rotate animation
     if(m_datasetHelper->m_theScene->m_isRotateZ)
-        m_datasetHelper->m_theScene->m_rotAngle++;
+        m_datasetHelper->m_theScene->m_rotAngleZ++;
+
+    if(m_datasetHelper->m_theScene->m_isRotateY)
+        m_datasetHelper->m_theScene->m_rotAngleY++;
+
+    if(m_datasetHelper->m_theScene->m_isRotateX)
+        m_datasetHelper->m_theScene->m_rotAngleX++;
 
     
     //Navigate through slizes sagital
