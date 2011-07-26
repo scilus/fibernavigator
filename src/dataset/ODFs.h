@@ -43,7 +43,7 @@ public:
 
     void setShBasis(int value){m_sh_basis = value;}
     void changeShBasis(ODFs*,DatasetHelper*, int);
-    void extractMaximas   ();
+    void extractMaximas();
     
 
     std::vector<Vector> getODFmaxNotNorm(vector < float >  coefs,const FMatrix & SHmatrix, 
@@ -65,12 +65,12 @@ public:
     double angle;
     float m_axisThreshold;
     std::vector<std::pair<float,int> >* Nbors;
-    std::vector<std::vector<Vector> > mainDirections;
+    std::vector<std::vector<Vector> >   mainDirections;
 
-    MySlider            *m_psliderFlood;
-    wxStaticText          *m_pTextThres;
+    MySlider        *m_psliderFlood;
+    wxStaticText    *m_pTextThres;
     wxTextCtrl      *m_ptxtThresBox;
-    wxButton  *m_pbtnMainDir;
+    wxButton        *m_pbtnMainDir;
 
 private:
     // From Glyph

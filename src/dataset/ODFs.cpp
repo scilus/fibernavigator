@@ -33,8 +33,8 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     m_radiusAttribLoc( 0    ),
     m_radiusBuffer   ( NULL ),
     m_sh_basis       ( 0 ),
-    isMaximasSet ( false ),
-    m_axisThreshold ( 0.5f )
+    isMaximasSet     ( false ),
+    m_axisThreshold  ( 0.5f )
 {
     m_scalingFactor = 0.0f;
 
@@ -144,17 +144,21 @@ void ODFs::extractMaximas()
     Nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection.at(NB_OF_LOD - 1).getDimensionY()]; // Set number of points to maximum details
     angle = setAngle(90.0f);
     m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to maximum details
-    setNbors(m_phiThetaDirection.at(NB_OF_LOD - 1),Nbors); // Create neighboring system
+    setNbors(m_phiThetaDirection.at(LOD_6),Nbors); // Create neighboring system
     mainDirections.resize(m_datasetHelper.m_frames*m_datasetHelper.m_rows*m_datasetHelper.m_columns);
     
+    int currentIdx;
+
     for( int z = 0; z < m_datasetHelper.m_frames; z++ )
         for( int y = 0; y < m_datasetHelper.m_rows; y++ )
             for( int x = 0; x < m_datasetHelper.m_columns; x++ )
             {
-                int  currentIdx = getGlyphIndex( z, y, x );
+                currentIdx = getGlyphIndex( z, y, x );
 
                 if(m_coefficients.at(currentIdx)[0] != 0)
-                    mainDirections[currentIdx] = getODFmaxNotNorm(m_coefficients.at(currentIdx),m_shMatrix[NB_OF_LOD - 1],m_phiThetaDirection[NB_OF_LOD - 1],m_axisThreshold,angle,Nbors);
+                {
+                    mainDirections[currentIdx] = getODFmaxNotNorm(m_coefficients.at(currentIdx),m_shMatrix[LOD_6],m_phiThetaDirection[LOD_6],m_axisThreshold,angle,Nbors);
+                }
             }
      
 }
@@ -291,19 +295,18 @@ void ODFs::computeRadiiArray( const FMatrix &i_B, vector< float > &i_C, vector< 
 
 double ODFs::setAngle(double angle)
 { 
-    
     std::vector<std::pair<float,float> > vectUnique;
     std::pair<float,float> res;
     
 	for(unsigned int i=0; i < m_phiThetaDirection[NB_OF_LOD -1].getDimensionY(); i++)
     {   // Remove all recurrent point of phiThetaDir in vectUnique
-        bool unique = true;
-        for(unsigned int j=0; j < vectUnique.size(); j++)
+        bool isUnique = true;
+        for(unsigned int j=0; j < vectUnique.size() && isUnique ; j++)
         {
             if(m_phiThetaDirection[NB_OF_LOD -1](i,0) == vectUnique[j].first && m_phiThetaDirection[NB_OF_LOD -1](i,1) == vectUnique[j].second)
-                unique = false;
+                isUnique = false;
         }
-        if(unique)
+        if(isUnique)
         {
             res.first = m_phiThetaDirection[NB_OF_LOD -1](i,0);
             res.second = m_phiThetaDirection[NB_OF_LOD -1](i,1);
@@ -382,7 +385,7 @@ void ODFs::setNbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,int
                         bool diff = true;
                         if(Nbors[i].size() !=0)
                         {
-                          for(unsigned int n=0; n< Nbors[i].size(); n++)
+                          for(unsigned int n=0; n< Nbors[i].size() && diff ; n++)
                           {
                               if(m_phiThetaDirection[NB_OF_LOD -1](j,0) == m_phiThetaDirection[NB_OF_LOD -1](Nbors[i][n].second,0) && 
                                   m_phiThetaDirection[NB_OF_LOD -1](j,1) == m_phiThetaDirection[NB_OF_LOD -1](Nbors[i][n].second,1))
@@ -417,7 +420,7 @@ void ODFs::setNbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,int
                         if(max>=0 && max > ang)
                         {
 							bool diff = true;
-							for(unsigned int n=0; n< Nbors[i].size(); n++)
+							for(unsigned int n=0; n< Nbors[i].size() && diff ; n++)
 							{
 								if(m_phiThetaDirection[NB_OF_LOD -1](j,0) == m_phiThetaDirection[NB_OF_LOD -1](Nbors[i][n].second,0) && 
 									m_phiThetaDirection[NB_OF_LOD -1](j,1) == m_phiThetaDirection[NB_OF_LOD -1](Nbors[i][n].second,1))
@@ -451,7 +454,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
     pair< float, float > l_minMax;
 	std::vector<float> norm_hemisODF;
 
-    computeRadiiArray( SHmatrix, coefs, ODF, l_minMax ); // Projection of shperical harmonics on the sphere
+    computeRadiiArray( SHmatrix, coefs, ODF, l_minMax ); // Projection of spherical harmonics on the sphere
 
 	if(l_minMax.first<0 )
 	{   // Eliminate negative values on the sphere if min < 0
@@ -508,14 +511,14 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
                with ODF value close to the thresh
             */
             candidate = true;
-          }
-          else 
-          {                /* wrong candidate */
-            candidate = false;
-            break;
-          }
+            }
+            else 
+            {                /* wrong candidate */
+                candidate = false;
+                break;
+            }
         }
-      }
+     }
 
       if(candidate)
       {
@@ -531,7 +534,7 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
           
           if( max_dir.size() != 0)
           {
-              for(unsigned int n=0; n< max_dir.size(); n++)
+              for(unsigned int n=0; n< max_dir.size() && diff ; n++)
               {
                   if(dd.x == max_dir.at(n).x && dd.y == max_dir.at(n).y && dd.z == max_dir.at(n).z)
                       diff = false;
@@ -549,9 +552,6 @@ std::vector<Vector> ODFs::getODFmaxNotNorm(vector < float > coefs, const FMatrix
    
     return max_dir;
 }
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will draw the tensors.
