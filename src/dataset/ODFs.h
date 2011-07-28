@@ -43,16 +43,8 @@ public:
 
     void setShBasis(int value){m_sh_basis = value;}
     void changeShBasis(ODFs*,DatasetHelper*, int);
-    void extractMaximas();
     
-
-    std::vector<Vector> getODFmax(vector < float >  coefs,const FMatrix & SHmatrix, 
-                       const FMatrix & grad,
-                       const float & max_thresh,
-                       const std::vector<std::pair<float,int> >* m_nbors);
-    
-    void			  set_m_nbors(FMatrix i_phiThetaDirection, std::vector<std::pair<float,int> >* m_nbors);
-    double            get_min_angle();
+	void			  extractMaximas();
 
     //Vars
     wxString    m_lastODF_path;
@@ -60,11 +52,8 @@ public:
     struct direction_value { double x,y,z,v; };
     struct direction { double x,y,z; };
 
-    bool								m_isMaximasSet;
-    double								m_angle_min;
-    float								m_axisThreshold;
-    std::vector<std::pair<float,int> >* m_nbors;
-    std::vector<std::vector<Vector> >   m_mainDirections;
+	bool   m_isMaximasSet;
+	float  m_axisThreshold;
 
     MySlider        *m_psliderFlood;
     wxStaticText    *m_pTextThres;
@@ -110,7 +99,12 @@ private:
     void             reloadRadiusBuffer         ( AxisType i_axis );
 
     
-
+	
+    std::vector<Vector> getODFmax(vector < float >  coefs,const FMatrix & SHmatrix, 
+                                  const FMatrix & grad,
+								  const float & max_thresh);
+    void			    set_nbors(FMatrix i_phiThetaDirection, std::vector<std::pair<float,int> >* m_nbors);
+    float               get_min_angle();
     
 
 
@@ -125,17 +119,18 @@ private:
     
 
 
-    vector< vector < float > >        m_coefficients;
-    vector< vector < float > >        m_radius;
-    vector< FMatrix >                 m_shMatrix;
-    vector< FMatrix >                 m_phiThetaDirection;    
-    vector< float >                   m_meshPts;    
-    map< int, pair< float, float > >  m_radiiMinMaxMap;
-    FMatrix                              phiThetaUnique;
+    vector< vector < float > >          m_coefficients;
+    vector< vector < float > >          m_radius;
+    vector< FMatrix >                   m_shMatrix;
+    vector< FMatrix >                   m_phiThetaDirection;    
+    vector< float >                     m_meshPts;    
+    map< int, pair< float, float > >    m_radiiMinMaxMap;
+  
+    float								m_angle_min;
+    std::vector<std::pair<float,int> >* m_nbors;
+    std::vector<std::vector<Vector> >   m_mainDirections;
 
-    
-
-    int                               m_sh_basis;
+	int                                 m_sh_basis;
 };
 
 #endif /* ODFS_H_ */
