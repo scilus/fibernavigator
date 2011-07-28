@@ -49,6 +49,11 @@ ODFs::~ODFs()
         glDeleteBuffers( 1, m_radiusBuffer );
         delete [] m_radiusBuffer;        
     }
+	if( m_nbors )
+	{
+		delete m_nbors;
+		m_nbors = NULL;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -144,7 +149,7 @@ void ODFs::extractMaximas()
     m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection.at(LOD_6).getDimensionY()]; // Set number of points to maximum details
     m_angle_min = get_min_angle();
     m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to maximum details
-    set_nbors(m_phiThetaDirection.at(LOD_6),m_nbors); // Create neighboring system
+    set_nbors(m_phiThetaDirection.at(LOD_6)); // Create neighboring system
     m_mainDirections.resize(m_datasetHelper.m_frames*m_datasetHelper.m_rows*m_datasetHelper.m_columns);
     
     int currentIdx;
@@ -354,9 +359,9 @@ float ODFs::get_min_angle()
 }
 
 /*
-    Set m_nbors for Max Dir
+    Set m_m_nbors for Max Dir
 */
-void ODFs::set_nbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,int> >* nbors)
+void ODFs::set_nbors(FMatrix o_phiThetaDirection)
 {
     // find neighbors to all mesh points 
     direction d,d2; /*current direction*/
@@ -391,12 +396,12 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,in
                 if(angle_found >= m_angle_min)
                 {
 					/* If not full capacity add another neighbors*/
-                    if(nbors[i].size() < 8)
+                    if(m_nbors[i].size() < 8)
                     {
                         bool isDiff = true;
-                        if(nbors[i].size() !=0)
+                        if(m_nbors[i].size() !=0)
                         {
-                          for(unsigned int n=0; n< nbors[i].size() && isDiff ; n++)
+                          for(unsigned int n=0; n< m_nbors[i].size() && isDiff ; n++)
                           {
                               if(m_phiThetaDirection[LOD_6](j,0) == m_phiThetaDirection[LOD_6](m_nbors[i][n].second,0) && 
                                   m_phiThetaDirection[LOD_6](j,1) == m_phiThetaDirection[LOD_6](m_nbors[i][n].second,1))
@@ -407,13 +412,13 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,in
                           if(isDiff)
                           {
                             std::pair<float,int> element(angle_found,j);
-                            nbors[i].push_back(element);
+                            m_nbors[i].push_back(element);
                           }
                         }
                         else
                         {
                             std::pair<float,int> element(angle_found,j);
-                            nbors[i].push_back(element);
+                            m_nbors[i].push_back(element);
                         }
                     }
                     else
@@ -421,9 +426,9 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,in
                         float max = -1;
                         int indice = 0;
 
-                        for(unsigned int k=0; k < nbors[i].size() ; k++)
+                        for(unsigned int k=0; k < m_nbors[i].size() ; k++)
                         {
-                            if(nbors[i][k].first > max)
+                            if(m_nbors[i][k].first > max)
                             {
                                 max = m_nbors[i][k].first;
                                 indice = k;
@@ -433,10 +438,10 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,in
                         if(max>=0 && max > angle_found)
                         {
 							bool isDiff = true;
-							for(unsigned int n=0; n< nbors[i].size() && isDiff ; n++)
+							for(unsigned int n=0; n< m_nbors[i].size() && isDiff ; n++)
 							{
-								if(m_phiThetaDirection[LOD_6](j,0) == m_phiThetaDirection[LOD_6](nbors[i][n].second,0) && 
-									m_phiThetaDirection[LOD_6](j,1) == m_phiThetaDirection[LOD_6](nbors[i][n].second,1))
+								if(m_phiThetaDirection[LOD_6](j,0) == m_phiThetaDirection[LOD_6](m_nbors[i][n].second,0) && 
+									m_phiThetaDirection[LOD_6](j,1) == m_phiThetaDirection[LOD_6](m_nbors[i][n].second,1))
 								{
 									isDiff = false;
 								}
@@ -444,7 +449,7 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection, std::vector<std::pair<float,in
 							if(isDiff)
 							{
 	                            std::pair<float,int> element(angle_found,j);
-								nbors[i][indice] = element;
+								m_nbors[i][indice] = element;
 							}
                         }
                     }

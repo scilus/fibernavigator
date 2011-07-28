@@ -103,7 +103,7 @@ private:
     std::vector<Vector> getODFmax(vector < float >  coefs,const FMatrix & SHmatrix, 
                                   const FMatrix & grad,
 								  const float & max_thresh);
-    void			    set_nbors(FMatrix i_phiThetaDirection, std::vector<std::pair<float,int> >* m_nbors);
+    void			    set_nbors(FMatrix i_phiThetaDirection);
     float               get_min_angle();
     
 
