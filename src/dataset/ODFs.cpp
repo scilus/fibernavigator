@@ -359,7 +359,7 @@ float ODFs::get_min_angle()
 }
 
 /*
-    Set m_m_nbors for Max Dir
+    Set m_nbors for Max Dir
 */
 void ODFs::set_nbors(FMatrix o_phiThetaDirection)
 {
