@@ -18,6 +18,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cmath>
 #include <wx/tokenzr.h>
 
 #include "Anatomy.h"
@@ -75,6 +76,9 @@ bool Fibers::load( wxString i_filename )
 
     if( i_filename.AfterLast( '.' ) == _T( "trk" ) )
         res = loadTRK( i_filename );
+
+    if ( i_filename.AfterLast( '.' ) == _T("tck") )
+        return loadMRtrix( i_filename );
 
     return res;
 }
@@ -543,6 +547,200 @@ bool Fibers::loadCamino( wxString i_filename )
     m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 
     return true;
+}
+
+bool Fibers::loadMRtrix( wxString i_filename )
+{
+    m_dh->printDebug( _T("start loading MRtrix file"), 1 );
+    wxFile l_dataFile;
+    long int nSize = 0;
+    long int pc = 0, nodes=0;
+    converterByteFloat cbf;
+    float x, y, z, x2, y2, z2;
+    std::vector< float > tmpPoints;
+	vector<vector<float> > lines;
+
+	//Open file
+    FILE *fs = fopen ( i_filename.ToAscii(), "r" ) ;
+
+	////
+	// read header
+	////
+	char line_buffer[200];
+
+	for (int i = 0; i < 22; ++i )
+	{
+	    fgets(line_buffer,200,fs);
+		std::string s0 (line_buffer);
+		std::cout << s0;
+
+		if (s0.find("file")!=std::string::npos)
+		{
+		
+			sscanf(line_buffer, "file: . %ld", &pc);
+
+		if (s0.find("count")!=std::string::npos) 
+			sscanf(line_buffer, "count: %i", &m_countLines);
+	}
+	fclose(fs);
+
+
+
+    if ( l_dataFile.Open( i_filename ) )
+    {
+        nSize = l_dataFile.Length();
+        if ( nSize < 1 )
+            return false;
+    }
+
+    //printf("\nLines: %d\n", m_countLines);
+    //printf(" File size: %ld : Header: %ld,  %ld \n", (long int)nSize, (long int)pc, (long int)nSize-pc);
+    nSize-=pc;
+    l_dataFile.Seek (pc);
+
+    wxUint8* buffer = new wxUint8[nSize];
+    l_dataFile.Read( buffer, nSize );
+
+    l_dataFile.Close();
+
+    //printf(" Numbers: %.2f Points: %.2f", (float)nSize/4.0, (float)nSize/12.0 );
+    nSize/=4;
+    printf(" Read fibers:\n");
+
+    pc=0;
+    m_countPoints = 0; // number of points
+	
+    for (int i = 0; i < m_countLines; i++ ) {
+		tmpPoints.clear();
+        nodes=0;
+        // rean one tract
+        cbf.b[0] = buffer[pc++];
+        cbf.b[1] = buffer[pc++];
+        cbf.b[2] = buffer[pc++];
+        cbf.b[3] = buffer[pc++];
+        x = cbf.f;
+        cbf.b[0] = buffer[pc++];
+        cbf.b[1] = buffer[pc++];
+        cbf.b[2] = buffer[pc++];
+        cbf.b[3] = buffer[pc++];
+        y = cbf.f;
+        cbf.b[0] = buffer[pc++];
+        cbf.b[1] = buffer[pc++];
+        cbf.b[2] = buffer[pc++];
+        cbf.b[3] = buffer[pc++];
+        z = cbf.f;
+        //add first point
+        tmpPoints.push_back( x );
+        tmpPoints.push_back( y );
+        tmpPoints.push_back( z );
+        ++nodes;
+        x2=x;
+
+		cbf.f = x2;
+
+		while (!(cbf.b[0]==0x00 && cbf.b[1]==0x00 && cbf.b[2]==0xC0 && cbf.b[3]==0x7F)) 
+		{
+            cbf.b[0] = buffer[pc++];   // get next float
+            cbf.b[1] = buffer[pc++];
+            cbf.b[2] = buffer[pc++];
+            cbf.b[3] = buffer[pc++];
+            x2 = cbf.f;
+            cbf.b[0] = buffer[pc++];
+            cbf.b[1] = buffer[pc++];
+            cbf.b[2] = buffer[pc++];
+            cbf.b[3] = buffer[pc++];
+            y2 = cbf.f;
+            cbf.b[0] = buffer[pc++];
+            cbf.b[1] = buffer[pc++];
+            cbf.b[2] = buffer[pc++];
+            cbf.b[3] = buffer[pc++];
+            z2 = cbf.f;
+            
+			// downsample fibers: take only points in distance of min 0.75 mm
+            if ( ( (x-x2)*(x-x2) + (y-y2)*(y-y2) + (z-z2)*(z-z2) )>= 0.2) 
+            {
+                x=x2; y=y2; z=z2;
+                tmpPoints.push_back( x );
+                tmpPoints.push_back( y );
+                tmpPoints.push_back( z );
+                ++nodes;
+            }
+			cbf.f = x2;
+        }
+        // put the tract in the line array
+		lines.push_back(tmpPoints);
+
+        for ( int i = 0; i < nodes ; i++ ) 
+		{ 
+            m_countPoints++; 
+        }
+    }
+
+    //printf("pc: %ld nSize: %ld m_countLines: %d m_countPoints:%d (subsampled)\n", pc, nSize, m_countLines, m_countPoints) ;
+
+    delete[] buffer;
+
+	////
+    //POST PROCESS: set all the data in the right format for the navigator
+	////
+    //m_dh->printDebug( wxT( "Setting data in right format for the navigator..." ), 1 );
+
+ 
+    m_dh->m_countFibers = m_countLines;   
+    m_pointArray.max_size();
+    m_linePointers.resize( m_countLines + 1 );
+    m_pointArray.resize( m_countPoints * 3 );
+    m_linePointers[m_countLines] = m_countPoints;
+    m_reverse.resize( m_countPoints );
+    m_selected.resize( m_countLines, false );
+    m_filtered.resize( m_countLines, false );
+    
+    m_linePointers[0] = 0;
+    for( int i = 0; i < m_countLines; ++i )
+        m_linePointers[i+1] = m_linePointers[i]+ lines[i].size()/3;
+
+    int l_lineCounter = 0;
+    for( int i = 0; i < m_countPoints; ++i )
+    {
+        if( i == m_linePointers[l_lineCounter + 1] )
+            ++l_lineCounter;
+        m_reverse[i] = l_lineCounter;
+    }
+
+
+    unsigned int pos=0;
+    vector< vector<float> >::iterator it;
+
+    for (it=lines.begin(); it<lines.end(); it++){
+        vector<float>::iterator it2;
+        for (it2=(*it).begin(); it2<(*it).end(); it2++){
+            m_pointArray[pos++] = *it2;
+        }
+    }
+
+    for ( int i = 0; i < m_countPoints * 3; ++i )
+    {
+		m_pointArray[i] = m_pointArray[i] + 0.5 + m_dh->m_columns/2;
+        ++i;
+        m_pointArray[i] = m_pointArray[i] + 0.5 + m_dh->m_rows/2;
+        ++i;
+        m_pointArray[i] = m_pointArray[i] + 0.5 + m_dh->m_frames/2;
+    }
+
+	m_dh->printDebug(wxT("End loading TCK file"), 1 );
+
+    createColorArray( false );
+    m_type = FIBERS;
+    m_fullPath = i_filename;
+    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
+#ifdef __WXMSW__
+	m_name = i_filename.AfterLast( '\\' );
+#else
+	m_name = i_filename.AfterLast( '/' );
+#endif
+    
+	return true;
 }
 
 bool Fibers::loadPTK( wxString l_fileName )
