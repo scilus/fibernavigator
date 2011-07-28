@@ -552,7 +552,7 @@ bool Fibers::loadCamino( wxString i_filename )
 bool Fibers::loadMRtrix( wxString i_filename )
 {
     m_dh->printDebug( _T("start loading MRtrix file"), 1 );
-    wxFile l_dataFile;
+    wxFile dataFile;
     long int nSize = 0;
     long int pc = 0, nodes=0;
     converterByteFloat cbf;
@@ -562,7 +562,6 @@ bool Fibers::loadMRtrix( wxString i_filename )
 
 	//Open file
     FILE *fs = fopen ( i_filename.ToAscii(), "r" ) ;
-
 	////
 	// read header
 	////
@@ -576,41 +575,37 @@ bool Fibers::loadMRtrix( wxString i_filename )
 
 		if (s0.find("file")!=std::string::npos)
 		{
-		
 			sscanf(line_buffer, "file: . %ld", &pc);
-
+		}
 		if (s0.find("count")!=std::string::npos) 
+		{
 			sscanf(line_buffer, "count: %i", &m_countLines);
+		}
 	}
 	fclose(fs);
 
-
-
-    if ( l_dataFile.Open( i_filename ) )
+    if ( dataFile.Open( i_filename ) )
     {
-        nSize = l_dataFile.Length();
+        nSize = dataFile.Length();
         if ( nSize < 1 )
+		{
             return false;
+		}
     }
 
-    //printf("\nLines: %d\n", m_countLines);
-    //printf(" File size: %ld : Header: %ld,  %ld \n", (long int)nSize, (long int)pc, (long int)nSize-pc);
     nSize-=pc;
-    l_dataFile.Seek (pc);
+    dataFile.Seek(pc);
 
     wxUint8* buffer = new wxUint8[nSize];
-    l_dataFile.Read( buffer, nSize );
-
-    l_dataFile.Close();
-
-    //printf(" Numbers: %.2f Points: %.2f", (float)nSize/4.0, (float)nSize/12.0 );
-    nSize/=4;
-    printf(" Read fibers:\n");
+    dataFile.Read( buffer, nSize );
+	dataFile.Close();
+    cout << " Read fibers:\n";
 
     pc=0;
     m_countPoints = 0; // number of points
 	
-    for (int i = 0; i < m_countLines; i++ ) {
+    for (int i = 0; i < m_countLines; i++ )
+	{
 		tmpPoints.clear();
         nodes=0;
         // rean one tract
@@ -675,17 +670,11 @@ bool Fibers::loadMRtrix( wxString i_filename )
             m_countPoints++; 
         }
     }
-
-    //printf("pc: %ld nSize: %ld m_countLines: %d m_countPoints:%d (subsampled)\n", pc, nSize, m_countLines, m_countPoints) ;
-
     delete[] buffer;
 
 	////
     //POST PROCESS: set all the data in the right format for the navigator
-	////
-    //m_dh->printDebug( wxT( "Setting data in right format for the navigator..." ), 1 );
-
- 
+	//// 
     m_dh->m_countFibers = m_countLines;   
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
@@ -697,13 +686,17 @@ bool Fibers::loadMRtrix( wxString i_filename )
     
     m_linePointers[0] = 0;
     for( int i = 0; i < m_countLines; ++i )
+	{
         m_linePointers[i+1] = m_linePointers[i]+ lines[i].size()/3;
+	}
 
     int l_lineCounter = 0;
     for( int i = 0; i < m_countPoints; ++i )
     {
         if( i == m_linePointers[l_lineCounter + 1] )
+		{
             ++l_lineCounter;
+		}
         m_reverse[i] = l_lineCounter;
     }
 
@@ -711,9 +704,11 @@ bool Fibers::loadMRtrix( wxString i_filename )
     unsigned int pos=0;
     vector< vector<float> >::iterator it;
 
-    for (it=lines.begin(); it<lines.end(); it++){
+    for (it=lines.begin(); it<lines.end(); it++)
+	{
         vector<float>::iterator it2;
-        for (it2=(*it).begin(); it2<(*it).end(); it2++){
+        for (it2=(*it).begin(); it2<(*it).end(); it2++)
+		{
             m_pointArray[pos++] = *it2;
         }
     }
