@@ -64,7 +64,7 @@ public:
     bool    loadTRK             ( wxString i_fileName );
     bool    loadCamino          ( wxString i_filename );
     bool    loadPTK             ( wxString i_filename );
-	bool    loadMRtrix			(wxString filename);
+	bool    loadMRtrix			( wxString filename   );
     void    loadTestFibers      ();
     bool    loadVTK             ( wxString i_filename );
     bool    loadDmri            ( wxString i_fileName ); 
