@@ -311,6 +311,7 @@ bool Fibers::loadTRK(wxString i_fileName)
     vector<vector<float> > lines;
     m_countPoints = 0;
 
+	vector<float> colors;
     for (int i=0; i!=n_count; ++i)
     {
         //Number of points in this track. [4 bytes]
@@ -330,9 +331,14 @@ bool Fibers::loadTRK(wxString i_fileName)
             //Read coordinates (x,y,z) and scalars associated to each point.
             for (int k=0; k!=ptsSize; ++k)
             {
-                if (k > 3) break; //TODO: incorporate scalars in the navigator.
-                memcpy(l_cbf.b, &l_buffer[4*(j*ptsSize+k)], 4);
-                cur_line.push_back(l_cbf.f);
+				memcpy(l_cbf.b, &l_buffer[4*(j*ptsSize+k)], 4);
+
+				if (k >= 6)  //TODO: incorporate other scalars in the navigator.
+					break;
+				else if (k >= 3) //RGB color of each point.
+					colors.push_back(l_cbf.f);
+                else
+					cur_line.push_back(l_cbf.f);
             }
         }
 
@@ -355,8 +361,10 @@ bool Fibers::loadTRK(wxString i_fileName)
     m_countLines = lines.size();
     m_dh->m_countFibers = m_countLines;   
     m_pointArray.max_size();
+	m_colorArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
+	m_colorArray.resize( m_countPoints * 3 );
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
@@ -383,9 +391,12 @@ bool Fibers::loadTRK(wxString i_fileName)
 
     unsigned int pos=0;
     vector< vector<float> >::iterator it;
-    for (it=lines.begin(); it<lines.end(); it++){
+    for (it=lines.begin(); it<lines.end(); it++)
+	{
         vector<float>::iterator it2;
-        for (it2=(*it).begin(); it2<(*it).end(); it2++){
+        for (it2=(*it).begin(); it2<(*it).end(); it2++)
+		{
+			m_colorArray[pos] = colors[pos] / 255.;
             m_pointArray[pos++] = *it2;
         }
     }
@@ -407,22 +418,27 @@ bool Fibers::loadTRK(wxString i_fileName)
 		origin[2] = m_dh->m_frames/2;
 	}
 
-    int flipX = (!invert_x)? 1: -1;
-    int flipY = (!invert_y)? 1: -1;
-    int flipZ = (!invert_z)? 1: -1;
+    float flipX = (invert_x)? -1.: 1.;
+    float flipY = (invert_y)? -1.: 1.;
+    float flipZ = (invert_z)? -1.: 1.;
+
+	float anatomy[3];
+	anatomy[0] = ((flipX-1.) * m_dh->m_columns * m_dh->m_xVoxel) / -2.;
+	anatomy[1] = ((flipY-1.) * m_dh->m_rows * m_dh->m_yVoxel) / -2.;
+	anatomy[2] = ((flipZ-1.) * m_dh->m_frames * m_dh->m_zVoxel) / -2.;
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = ((flipX * m_pointArray[i] + origin[0]) / voxel_size[0]) * m_dh->m_xVoxel;
-        ++i;
-        m_pointArray[i] = ((flipY * m_pointArray[i] + origin[1]) / voxel_size[1]) * m_dh->m_yVoxel;
-        ++i;
-        m_pointArray[i] = ((flipZ * m_pointArray[i] + origin[2]) / voxel_size[2]) * m_dh->m_zVoxel;
+		m_pointArray[i] = flipX * (m_pointArray[i] - origin[0]) * (m_dh->m_xVoxel / voxel_size[0]) + anatomy[0];
+		++i;
+		m_pointArray[i] = flipY * (m_pointArray[i] - origin[1]) * (m_dh->m_yVoxel / voxel_size[1]) + anatomy[1];
+		++i;
+		m_pointArray[i] = flipZ * (m_pointArray[i] - origin[2]) * (m_dh->m_zVoxel / voxel_size[2]) + anatomy[2];
     }
 
 	m_dh->printDebug(wxT("End loading TRK file"), 1 );
 
-    createColorArray( false );
+	createColorArray(colors.size() > 0);
     m_type = FIBERS;
     m_fullPath = i_fileName;
     m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
