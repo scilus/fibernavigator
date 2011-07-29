@@ -187,6 +187,7 @@ private:
     void OnLoadFibers                       ( wxCommandEvent& event );
     void OnLoadTensors                      ( wxCommandEvent& event );
     void OnLoadODFs                         ( wxCommandEvent& event );
+    
     bool loadIndex                          ( int i_index );
     
 private:
