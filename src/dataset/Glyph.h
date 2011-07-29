@@ -71,6 +71,7 @@ public:
     void         refreshSlidersValues();
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
+    int          getGlyphIndex       ( int i_zVoxel, int i_yVoxel, int i_xVoxel );
 
     // Items related to the glyph options sizer.
     wxSlider           *m_psliderMinHueValue;
@@ -92,6 +93,7 @@ public:
     wxRadioButton      *m_pradiobtnNormal;
     wxRadioButton      *m_pradiobtnMapOnSphere;
     wxRadioButton      *m_pradiobtnMainAxis;
+    
 protected:
     // From DatasetInfo
     virtual void    activateLIC()      {};
@@ -117,7 +119,7 @@ protected:
     void            fillColorDataset    ( float i_minHueAngle, float i_maxHueAngle, float i_saturationValue, float i_luminanceValue );
     void            generateColorTexture( float i_minHue, float i_maxHue, float i_saturation, float i_luminance );
     void            generateSpherePoints( float i_scalingFactor );
-    int             getGlyphIndex       ( int i_zVoxel, int i_yVoxel, int i_xVoxel );
+    
     int             getLODNbOfPoints    ( const LODChoices i_LODChoices );
     void            getSpherePoints     ( LODChoices            i_LOD,
                                           float                 i_scalingFactor,
@@ -147,6 +149,7 @@ protected:
 
 
 
+
     int   m_currentSliderPos[3];   // Current sliders positions [x, y, z].
     bool  m_flippedAxes[3];        // Are axes flipped or not, true if flipped, false otherwise [x, y, z].
     float m_lightPosition[3];      // Light's position [x, y, z]
@@ -154,6 +157,7 @@ protected:
     vector< float >            m_floatColorDataset;
     vector< float >             m_axesPoints;       //the 6 points describing the 3 axes
     vector< vector < float > > m_LODspheres;           // Stores the hemispheres for all LODs.
+    
 };
 
 #endif /* GLYPH_H_ */

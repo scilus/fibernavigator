@@ -565,7 +565,6 @@ void PropertiesWindow::OnGlyphLODSliderMoved( wxCommandEvent& WXUNUSED(event) )
         if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
         {
             ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_mainFrame->m_currentSceneObject)->m_psliderLODValue->GetValue() );
-            ((ODFs*)l_info)->isAngleNborsEstimated = false;
         }
     }
 }
@@ -738,7 +737,12 @@ void PropertiesWindow::OnGlyphMainAxisSelected( wxCommandEvent& event )
 {
     if( m_mainFrame->m_currentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
     {
+        if(((DatasetInfo*)m_mainFrame->m_currentSceneObject)->getType() == ODFS && !((ODFs*)m_mainFrame->m_currentSceneObject)->m_isMaximasSet)
+        {
+            ((ODFs*)m_mainFrame->m_currentSceneObject)->extractMaximas();
+        }
         ((Glyph*)m_mainFrame->m_currentSceneObject)->setDisplayShape( AXIS );
+        ((Glyph*)m_mainFrame->m_currentSceneObject)->updatePropertiesSizer();
     }
 }
 
@@ -789,7 +793,9 @@ void PropertiesWindow::OnDisplayCrossSections( wxCommandEvent& WXUNUSED(event) )
 {
     ((SelectionObject*)m_mainFrame->m_currentSceneObject)->m_displayCrossSections = (CrossSectionsDisplay)( ( (int)((SelectionObject*)m_mainFrame->m_currentSceneObject)->m_displayCrossSections ) + 1 );
     if( ((SelectionObject*)m_mainFrame->m_currentSceneObject)->m_displayCrossSections == CS_NB_OF_CHOICES )
+	{
         ((SelectionObject*)m_mainFrame->m_currentSceneObject)->m_displayCrossSections = CS_NOTHING;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -800,7 +806,9 @@ void PropertiesWindow::OnDisplayDispersionTube( wxCommandEvent& WXUNUSED(event) 
 {
     ((SelectionObject*)m_mainFrame->m_currentSceneObject)->m_displayDispersionCone = (DispersionConeDisplay)( ( (int)((SelectionObject*)m_mainFrame->m_currentSceneObject)->m_displayDispersionCone ) + 1 );
     if( ((SelectionObject*)m_mainFrame->m_currentSceneObject)->m_displayDispersionCone == DC_NB_OF_CHOICES )
+	{
         ((SelectionObject*)m_mainFrame->m_currentSceneObject)->m_displayDispersionCone = DC_NOTHING;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -818,7 +826,9 @@ void PropertiesWindow::OnRenameBox( wxCommandEvent& WXUNUSED(event) )
         dialog.SetValue( l_box->getName() );
 
         if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
+		{
             l_box->setName( dialog.GetValue() );
+		}
 
         m_mainFrame->m_treeWidget->SetItemText( l_treeBoxId, l_box->getName() );
     }
@@ -1197,4 +1207,29 @@ void PropertiesWindow::OnBoxSizeZ( wxCommandEvent &event )
     currSize = ((SelectionObject*)m_mainFrame->m_currentSceneObject)->getSize();
     currSize.z = sizeZ/m_mainFrame->m_datasetHelper->m_zVoxel;
     ((SelectionObject*)m_mainFrame->m_currentSceneObject)->setSize(currSize);
+}
+
+void PropertiesWindow::OnSliderAxisMoved( wxCommandEvent& WXUNUSED(event) )
+{
+    float l_sliderValue = ((ODFs*)m_mainFrame->m_currentSceneObject)->m_psliderFlood->GetValue() / 10.0f;
+    ((ODFs*)m_mainFrame->m_currentSceneObject)->m_axisThreshold = l_sliderValue;
+    ((ODFs*)m_mainFrame->m_currentSceneObject)->m_ptxtThresBox->SetValue(wxString::Format( wxT( "%.1f"), l_sliderValue));
+
+    std::cout << ((ODFs*)m_mainFrame->m_currentSceneObject)->m_axisThreshold << std::endl;
+}
+
+void PropertiesWindow::OnRecalcMainDir( wxCommandEvent& WXUNUSED(event) )
+{   
+    ((ODFs*)m_mainFrame->m_currentSceneObject)->extractMaximas();
+
+    /*for( int z = 0; z < m_mainFrame->m_datasetHelper->m_frames; z++ )
+        for( int y = 0; y < m_mainFrame->m_datasetHelper->m_rows; y++ )
+            for( int x = 0; x < m_mainFrame->m_datasetHelper->m_columns; x++ )
+            {
+                int  currentIdx = ((Glyph*)m_mainFrame->m_currentSceneObject)->getGlyphIndex( z, y, x );
+
+                if(((ODFs*)m_mainFrame->m_currentSceneObject)->getCoeffs().at(currentIdx)[0] != 0)
+                    ((ODFs*)m_mainFrame->m_currentSceneObject)->mainDirections[currentIdx] = ((ODFs*)m_mainFrame->m_currentSceneObject)->getODFmaxNotNorm(((ODFs*)m_mainFrame->m_currentSceneObject)->getCoeffs().at(currentIdx),
+                    ((ODFs*)m_mainFrame->m_currentSceneObject)->getShMatrix()[NB_OF_LOD - 1], ((ODFs*)m_mainFrame->m_currentSceneObject)->getPhiTheta()[NB_OF_LOD - 1],((ODFs*)m_mainFrame->m_currentSceneObject)->m_axisThreshold,((ODFs*)m_mainFrame->m_currentSceneObject)->angle,((ODFs*)m_mainFrame->m_currentSceneObject)->m_nbors);
+            }*/
 }
