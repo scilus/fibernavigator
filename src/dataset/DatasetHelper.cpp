@@ -181,7 +181,7 @@ bool DatasetHelper::load( const int i_index )
 {
     wxArrayString l_fileNames;
     wxString l_caption          = wxT( "Choose a file" );
-    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
+	wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
     wxString l_defaultDir       = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
     wxFileDialog dialog( m_mainFrame, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
@@ -345,7 +345,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
         }
         return false;
     }
-    else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) )
+    else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
     {
         if( ! m_anatomyLoaded )
         {

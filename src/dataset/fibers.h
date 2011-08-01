@@ -64,6 +64,7 @@ public:
     bool    loadTRK             ( wxString i_fileName );
     bool    loadCamino          ( wxString i_filename );
     bool    loadPTK             ( wxString i_filename );
+	bool    loadMRtrix			( wxString filename   );
     void    loadTestFibers      ();
     bool    loadVTK             ( wxString i_filename );
     bool    loadDmri            ( wxString i_fileName ); 
@@ -120,7 +121,7 @@ private:
     vector< float > m_colorArray;
     int             m_count;
     int             m_countLines;
-    int                m_countPoints;
+    int             m_countPoints;
     bool            m_isInitialized;
     KdTree*         m_kdTree;
     vector< int >   m_lineArray;
