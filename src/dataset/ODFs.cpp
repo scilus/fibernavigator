@@ -686,13 +686,13 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "showAxis", 0 );
     if (isDisplayShape(AXIS))
     {
+        DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "showAxis", 1 );
         if(m_coefficients.at(currentIdx)[0] != 0)
         {
             for(unsigned int i =0; i < m_mainDirections[currentIdx].size(); i++)
             {
                 if(m_mainDirections[currentIdx].size() != 0)
-                {
-                    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "showAxis", 1 );
+                {  
                     glBegin(GL_LINES);  
                         glVertex3f(-m_mainDirections[currentIdx][i][0],-m_mainDirections[currentIdx][i][1],-m_mainDirections[currentIdx][i][2]);
                         glVertex3f(m_mainDirections[currentIdx][i][0],m_mainDirections[currentIdx][i][1],m_mainDirections[currentIdx][i][2]);       
