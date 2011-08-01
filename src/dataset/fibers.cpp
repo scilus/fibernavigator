@@ -200,7 +200,7 @@ bool Fibers::loadTRK(wxString i_fileName)
     }
 
     //Reserved space for future version. [444 bytes]
-    char reserved[444]; //Not used.
+    //char reserved[444];
     //l_buffer[504]...
 
     //Storing order of the original image data. [4 bytes]
