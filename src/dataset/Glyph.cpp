@@ -38,7 +38,7 @@ Glyph::Glyph( DatasetHelper* i_datasetHelper,
     m_colorSaturation       ( i_saturation ),
     m_colorLuminance        ( i_luminance ),
     m_lighAttenuation       ( 0.5f ),
-    m_currentLOD            ( LOD_0 )
+    m_currentLOD            ( LOD_2 )
 {
     generateColorTexture( m_colorMinHue, m_colorMaxHue, m_colorSaturation, m_colorLuminance );
 

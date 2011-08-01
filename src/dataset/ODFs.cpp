@@ -149,7 +149,7 @@ void ODFs::extractMaximas()
     std::cout << "Extracting maximas ... please wait 30sec \n";
     m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection.at(LOD_6).getDimensionY()]; // Set number of points to maximum details
     m_angle_min = get_min_angle();
-    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to maximum details
+    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to maximum details for C*B mult
     set_nbors(m_phiThetaDirection.at(LOD_6)); // Create neighboring system
     m_mainDirections.resize(m_datasetHelper.m_frames*m_datasetHelper.m_rows*m_datasetHelper.m_columns);
     
@@ -166,6 +166,8 @@ void ODFs::extractMaximas()
                     m_mainDirections[currentIdx] = getODFmax(m_coefficients.at(currentIdx),m_shMatrix[LOD_6],m_phiThetaDirection[LOD_6],m_axisThreshold);
                 }
             }
+
+    m_nbPointsPerGlyph = getLODNbOfPoints( m_currentLOD ); //Set nb point back to currentLOD
      
 }
 ///////////////////////////////////////////////////////////////////////////
