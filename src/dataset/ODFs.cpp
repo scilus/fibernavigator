@@ -146,6 +146,7 @@ bool ODFs::loadNifti( wxString i_fileName )
 
 void ODFs::extractMaximas()
 {
+    std::cout << "Extracting maximas ... please wait 30sec \n";
     m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection.at(LOD_6).getDimensionY()]; // Set number of points to maximum details
     m_angle_min = get_min_angle();
     m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to maximum details
@@ -196,12 +197,17 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
 	{
 		case 0 :
 			cout << "Using RR5768 SH basis (as in DMRI)\n";
+            break;
 		case 1 :
 			cout << "Using Max's Thesis SH basis\n";
+            break;
 		case 2 :	
 			cout << "Using Tournier's SH basis\n";
+            break;
 		case 3 :
 			cout << "Using PTK SH basis\n";
+            break;
+        default: return false; // We do nothing incase the param was not good.
 	}
 
     for( unsigned int i = 0; i < NB_OF_LOD; ++i )
@@ -396,7 +402,7 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
                 if(angle_found >= m_angle_min)
                 {
 					/* If not full capacity add another neighbors*/
-                    if(m_nbors[i].size() < 8)
+                    if(m_nbors[i].size() < 15) //Change this value for +/- #directions
                     {
                         bool isDiff = true;
                         if(m_nbors[i].size() !=0)
