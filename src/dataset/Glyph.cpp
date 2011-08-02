@@ -709,7 +709,7 @@ void Glyph::createPropertiesSizer(PropertiesWindow *parent)
     m_psizerDisplay->Add(m_pradiobtnNormal);
     m_pradiobtnMapOnSphere  = new wxRadioButton(parent, wxID_ANY, _T( "Map On Sphere" ), wxDefaultPosition, wxSize(132,-1));
     m_psizerDisplay->Add(m_pradiobtnMapOnSphere);
-    m_pradiobtnMainAxis = new wxRadioButton(parent, wxID_ANY, _T( "Main Diffusion Axis" ), wxDefaultPosition, wxSize(132,-1));    
+    m_pradiobtnMainAxis = new wxRadioButton(parent, wxID_ANY, _T( "Maximas" ), wxDefaultPosition, wxSize(132,-1));    
     m_psizerDisplay->Add(m_pradiobtnMainAxis);
     m_propertiesSizer->Add(m_psizerDisplay,0,wxALIGN_CENTER);
 
@@ -720,6 +720,9 @@ void Glyph::createPropertiesSizer(PropertiesWindow *parent)
     m_pradiobtnNormal->SetValue        (isDisplayShape(NORMAL));
     m_pradiobtnMapOnSphere->SetValue   (isDisplayShape(SPHERE));
     m_pradiobtnMainAxis->SetValue      (isDisplayShape(AXIS));
+
+    if(m_type == ODFS)
+        setColorWithPosition(true);
 
 
 
