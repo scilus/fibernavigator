@@ -4,12 +4,13 @@ uniform int 		colorWithPos;
 varying float 		texturePosition;
 varying vec3 		vertexPos;
 uniform int			showAxis;
+uniform vec3		coloring;
 
 void main()
 {	
 	if(showAxis == 1)
 	{
-		gl_FragColor = vec4 (abs(vertexPos),1.0) ;
+		gl_FragColor = vec4 (abs(coloring),1.0);
 	}
 	else
 	{
