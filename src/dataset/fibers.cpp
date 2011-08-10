@@ -310,7 +310,7 @@ bool Fibers::loadTRK(wxString i_fileName)
     m_countPoints = 0;
 
     vector<float> colors;
-    for (int i=0; i!=n_count; ++i)
+    for (unsigned int i=0; i!=n_count; ++i)
     {
         //Number of points in this track. [4 bytes]
         wxUint32 n_points;
@@ -324,10 +324,10 @@ bool Fibers::loadTRK(wxString i_fileName)
         l_dataFile.Read(l_buffer, tractSize);
 
         vector<float> cur_line;
-        for (int j=0; j!=n_points; ++j)
+        for (unsigned int j=0; j!=n_points; ++j)
         {
             //Read coordinates (x,y,z) and scalars associated to each point.
-            for (int k=0; k!=ptsSize; ++k)
+            for (unsigned int k=0; k!=ptsSize; ++k)
             {
                 memcpy(l_cbf.b, &l_buffer[4*(j*ptsSize+k)], 4);
 
@@ -340,7 +340,7 @@ bool Fibers::loadTRK(wxString i_fileName)
             }
         }
 
-        for (int j=0; j!=n_properties; ++j) {} //TODO: incorporate properties in the navigator.
+        for (unsigned int j=0; j!=n_properties; ++j) {} //TODO: incorporate properties in the navigator.
 
         m_countPoints += cur_line.size()/3;
         lines.push_back(cur_line);

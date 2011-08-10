@@ -855,6 +855,7 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
                 // Simple interpolation.
                 o_meanFiberPoints[i_nbPoints-j-1] += ( ( i_fibersPoints[i][l_pointBelow]     * ( 1.0 - l_currentPointInterpolationRatio ) ) + 
                                         ( i_fibersPoints[i][l_pointBelow + 1] *           l_currentPointInterpolationRatio ) );
+
             }            
         }
     }
@@ -1183,31 +1184,33 @@ bool SelectionObject::getFibersMeanCurvatureAndTorsion( const vector< vector< Ve
                                                               float                      &o_meanCurvature, 
                                                               float                      &o_meanTorsion )
 {
-    float l_currentFiberCurvature, l_currentFiberTorsion;
-    o_meanCurvature = 0.0f;
-    o_meanTorsion   = 0.0f;
 
-    if( i_fiberVector.size() == 0 )
-        return false;
+   o_meanCurvature = 0.0f;
+   o_meanTorsion   = 0.0f;
 
+   if( i_fiberVector.size() == 0 )
+    return false;
+
+	//Curvature and torsion are now calculated from mean fiber
 	getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, m_meanFiberPoints);
 	getFiberMeanCurvatureAndTorsion(m_meanFiberPoints, o_meanCurvature, o_meanTorsion );
 
-    //for( unsigned int i = 0; i < i_fiberVector.size(); ++i )
-    //{
-    //    l_currentFiberCurvature = 0.0f;
-    //    l_currentFiberTorsion   = 0.0f;
 
-    //    getFiberMeanCurvatureAndTorsion( i_fiberVector[i], l_currentFiberCurvature, l_currentFiberTorsion );
+	//Curvature and torsion are now calculated from mean fiber
+   //float l_currentFiberCurvature, l_currentFiberTorsion;
+   //for( unsigned int i = 0; i < i_fiberVector.size(); ++i )
+   //{
+   //    l_currentFiberCurvature = 0.0f;
+   //    l_currentFiberTorsion   = 0.0f;
+   //    getFiberMeanCurvatureAndTorsion( i_fiberVector[i], l_currentFiberCurvature, l_currentFiberTorsion );
+   //    o_meanCurvature += l_currentFiberCurvature;
+   //    o_meanTorsion   += l_currentFiberTorsion;
+   //}
 
-    //    o_meanCurvature += l_currentFiberCurvature;
-    //    o_meanTorsion   += l_currentFiberTorsion;
-    //}
+   //o_meanCurvature /= i_fiberVector.size();
+   //o_meanTorsion   /= i_fiberVector.size();
 
-    //o_meanCurvature /= i_fiberVector.size();
-    //o_meanTorsion   /= i_fiberVector.size();
-
-    return true;
+   return true;
 }
 
 

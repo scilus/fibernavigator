@@ -29,12 +29,12 @@
 ///////////////////////////////////////////////////////////////////////////
 ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     Glyph            ( i_datasetHelper ), 
-    m_order          ( 0    ),
+	 m_isMaximasSet   ( false ),
+    m_axisThreshold  ( 0.5f ),
+	 m_order          ( 0    ),
     m_radiusAttribLoc( 0    ),
-    m_radiusBuffer   ( NULL ),
-    m_sh_basis       ( 0 ),
-    m_isMaximasSet     ( false ),
-    m_axisThreshold  ( 0.5f )
+	 m_radiusBuffer   ( NULL ),    
+    m_sh_basis       ( 0 )
 {
     m_scalingFactor = 0.0f;
 
@@ -1128,6 +1128,7 @@ void ODFs::getSphericalHarmonicMatrixPTK( const vector< float > &i_meshPts,
 
         o_phiThetaDirection( i, 0 ) = l_sphericalDir[1]; // Phi
         o_phiThetaDirection( i, 1 ) = l_sphericalDir[2]; // Theta
+
 
         for( int l = 0; l <= m_order; l+=2 )
             for( int m = -l; m <= l; ++m ) 

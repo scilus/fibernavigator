@@ -598,7 +598,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
 
     float tpicked = 0;
     int picked = 0;
-    long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    //long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     //Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
     hitResult hr =
     { false, 0.0f, 0, NULL };

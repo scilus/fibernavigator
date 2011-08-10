@@ -1763,8 +1763,6 @@ void MainFrame::OnKdTreeThreadFinished( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::OnGLEvent( wxCommandEvent &event )
 {
     wxPoint l_pos, l_newPos;
-    float l_max = wxMax( m_datasetHelper->m_columns, wxMax( m_datasetHelper->m_rows, m_datasetHelper->m_frames ) );    
-
     int NAV_GL_SIZE = m_gl0->GetSize().x;
 
     switch( event.GetInt() )
