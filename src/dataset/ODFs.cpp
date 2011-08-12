@@ -147,10 +147,10 @@ bool ODFs::loadNifti( wxString i_fileName )
 void ODFs::extractMaximas()
 {
     std::cout << "Extracting maximas ... please wait 30sec \n";
-    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection.at(LOD_6).getDimensionY()]; // Set number of points to maximum details
+    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_6].getDimensionY()]; // Set number of points to maximum details
     m_angle_min = get_min_angle();
     m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to maximum details for C*B mult
-    set_nbors(m_phiThetaDirection.at(LOD_6)); // Create neighboring system
+    set_nbors(m_phiThetaDirection[LOD_6]); // Create neighboring system
     m_mainDirections.resize(m_datasetHelper.m_frames*m_datasetHelper.m_rows*m_datasetHelper.m_columns);
     
     int currentIdx;
@@ -161,9 +161,9 @@ void ODFs::extractMaximas()
             {
                 currentIdx = getGlyphIndex( z, y, x );
 
-                if(m_coefficients.at(currentIdx)[0] != 0)
+                if(m_coefficients[currentIdx][0] != 0)
                 {
-                    m_mainDirections[currentIdx] = getODFmax(m_coefficients.at(currentIdx),m_shMatrix[LOD_6],m_phiThetaDirection[LOD_6],m_axisThreshold);
+                    m_mainDirections[currentIdx] = getODFmax(m_coefficients[currentIdx],m_shMatrix[LOD_6],m_phiThetaDirection[LOD_6],m_axisThreshold);
                 }
             }
 
@@ -340,9 +340,9 @@ float ODFs::get_min_angle()
     /* approx angle between two discrete samplings on the sphere */    
     direction d1;
           
-    d1.x = std::cos(vectUnique.at(2).first)*std::sin(vectUnique.at(2).second);
-    d1.y = std::sin(vectUnique.at(2).first)*std::sin(vectUnique.at(2).second);
-    d1.z = std::cos(vectUnique.at(2).second);
+    d1.x = std::cos(vectUnique[2].first)*std::sin(vectUnique[2].second);
+    d1.y = std::sin(vectUnique[2].first)*std::sin(vectUnique[2].second);
+    d1.z = std::cos(vectUnique[2].second);
       
     /* finding minimum angle between samplings */
     for(unsigned int i = 0; i < vectUnique.size(); i++) 
@@ -350,9 +350,9 @@ float ODFs::get_min_angle()
 	    if(i != 2) 
         {
 		    direction d2;
-            d2.x = std::cos(vectUnique.at(i).first)*std::sin(vectUnique.at(i).second);
-		    d2.y = std::sin(vectUnique.at(i).first)*std::sin(vectUnique.at(i).second);
-			d2.z = std::cos(vectUnique.at(i).second);
+            d2.x = std::cos(vectUnique[i].first)*std::sin(vectUnique[i].second);
+		    d2.y = std::sin(vectUnique[i].first)*std::sin(vectUnique[i].second);
+			d2.z = std::cos(vectUnique[i].second);
                    
             float dot = d1.x*d2.x + d1.y*d2.y + d1.z*d2.z;
             dot = 180*std::acos(dot)/M_PI;
@@ -486,9 +486,9 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 	{   // Eliminate negative values on the sphere if min < 0
 		for(unsigned int i = 0; i < ODF.size(); i++) 
 		{
-			if(ODF.at(i) < 0) 
+			if(ODF[i] < 0) 
 			{
-	            ODF.at(i)=0;
+	            ODF[i]=0;
 			}
 			if(ODF[i] > max)
 			{
@@ -558,7 +558,7 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
           {
               for(unsigned int n=0; n< max_dir.size() && isDiff ; n++)
               {
-                  if(dd.x == max_dir.at(n).x && dd.y == max_dir.at(n).y && dd.z == max_dir.at(n).z)
+                  if(dd.x == max_dir[n].x && dd.y == max_dir[n].y && dd.z == max_dir[n].z)
 				  {
                       isDiff = false;
 				  }
@@ -696,7 +696,7 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     {
         DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "showAxis", 1 );
         
-        if(m_coefficients.at(currentIdx)[0] != 0)
+        if(m_coefficients[currentIdx][0] != 0)
         {
             for(unsigned int i =0; i < m_mainDirections[currentIdx].size(); i++)
             {
