@@ -72,9 +72,17 @@ INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_PATH} )
 INCLUDE( ${wxWidgets_USE_FILE} )
 INCLUDE_DIRECTORIES( . ${wxWidgets_INCLUDE_DIRS} )
 
-IF (UNIX)
+IF (UNIX AND NOT "${CMAKE_GENERATOR}" MATCHES Xcode)
 ADD_DEFINITIONS( `${wxWidgets_CONFIG_EXECUTABLE} --cppflags` )
-ENDIF (UNIX)
+ENDIF (UNIX AND NOT "${CMAKE_GENERATOR}" MATCHES Xcode)
+
+# This is needed because Xcode does not understand the "`" syntax to execute the wxconfig command.
+# Therefore, when the projet was built, it failed because the command was not executed and only
+# considered as a compiler flag, which was not understood.
+IF("${CMAKE_GENERATOR}" MATCHES Xcode)
+  EXEC_PROGRAM( ${wxWidgets_CONFIG_EXECUTABLE} ARGS --cxxflags OUTPUT_VARIABLE CMAKE_WXWINDOWS_CXX_FLAGS )
+  ADD_DEFINITIONS(${CMAKE_WXWINDOWS_CXX_FLAGS})
+ENDIF("${CMAKE_GENERATOR}" MATCHES Xcode)
 
 # To shut up a few warnings on Visual Studio 9 MS deprecated C. This removes all 1.276E1265 security warnings. Copied for ITK CMakeList
 if (WIN32)
