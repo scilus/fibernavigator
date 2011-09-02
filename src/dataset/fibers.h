@@ -26,6 +26,7 @@
 #include "splinePoint.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/Fantom/FVector.h"
+#include "Octree.h"
 
 enum FiberFileType 
 {
@@ -76,6 +77,7 @@ public:
     void    updateFibersColors  ();
     void    updateLinesShown    ();  
     void    updateFibersFilters ();
+    void    generateKdTree      ();
 
     void    generateFiberVolume();
     void    setFibersLength();
@@ -97,7 +99,7 @@ private:
     bool            m_isSpecialFiberDisplay;
     
     void            barycenterTest          ( int, int, int               );
-    void            boxTest                 ( int, int, int               );
+    void            ObjectTest                 ( SelectionObject* );
     void            calculateLinePointers   ();
     void            colorWithCurvature      ( float* i_colorData          );
     void            colorWithTorsion        ( float* i_colorData          );
@@ -106,7 +108,6 @@ private:
     void            createColorArray        ( bool i_colorsLoadedFromFile );
     void            drawFakeTubes           ();
     void            drawSortedLines         ();
-    void            ellipsoidTest           ( int, int, int               );
     void            freeArrays              ();
     vector< bool >  getLinesShown           ( SelectionObject*            );
     string          intToString             ( int i_number                );
@@ -136,8 +137,9 @@ private:
     float           m_maxLength;
     float           m_minLength;
     vector<float  > m_localizedAlpha;
-
     float           m_cachedThreshold;
+
+    Octree* m_octree;
 };
 
 #endif /* FIBERS_H_ */

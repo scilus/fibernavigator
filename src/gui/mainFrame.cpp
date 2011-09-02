@@ -861,6 +861,14 @@ void MainFrame::OnUseMorph( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::OnNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 {
+    //Generate KdTree for Spline Surface
+    Fibers* pTmpFib = NULL;
+    m_datasetHelper->getFiberDataset(pTmpFib);
+    if(pTmpFib != NULL)
+    {
+        pTmpFib->generateKdTree();
+    }
+
     if( ! m_datasetHelper->m_theScene || m_datasetHelper->m_surfaceLoaded )
         return;
 
