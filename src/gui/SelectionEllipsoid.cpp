@@ -67,13 +67,175 @@ void SelectionEllipsoid::drawObject( GLfloat* i_color )
 ///////////////////////////////////////////////////////////////////////////
 hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
 {    
-    hitResult l_hitResult;    
-    l_hitResult.hit    = false;
-    l_hitResult.object = NULL;
-    l_hitResult.picked = 0;
-    l_hitResult.tmin   = 0.0f;
+    hitResult hr = { false, 0.0f, 0, NULL };
 
-    return l_hitResult;
+    if( m_isVisible && m_isActive && m_objectType == ELLIPSOID_TYPE ) 
+    {
+        int   picked  = 0;
+        float tpicked = 0;
+        float cx = m_center.x;
+        float cy = m_center.y;
+        float cz = m_center.z;
+        float sx = m_size.x * m_datasetHelper->m_xVoxel;
+        float sy = m_size.y * m_datasetHelper->m_yVoxel;
+        float sz = m_size.z * m_datasetHelper->m_zVoxel;
+
+           if( wxGetKeyState( WXK_CONTROL ) )
+        {
+               BoundingBox *bb = new BoundingBox( cx, cy, cz, sx, sy, sz );
+
+            bb->setCenter( m_minX , cy, cz );
+            bb->setSize( sx, sy, sz );
+            bb->setSizeX( m_datasetHelper->m_xVoxel );
+            hr = bb->hitTest( i_ray );
+            if( hr.hit )
+            {
+
+                if( picked == 0 )
+                {
+                    picked = 11;
+                    tpicked = hr.tmin;
+                }
+                else 
+                {
+                    if( hr.tmin < tpicked )
+                    {
+                        picked = 11;
+                        tpicked = hr.tmin;
+                    }
+                }
+            }
+            bb->setCenter( m_maxX, cy, cz );
+            hr = bb->hitTest( i_ray );
+            if( hr.hit ) 
+            {
+                if( picked == 0 ) 
+                {
+                    picked = 12;
+                    tpicked = hr.tmin;
+                }
+                else 
+                {
+                    if( hr.tmin < tpicked ) 
+                    {
+                        picked  = 12;
+                        tpicked = hr.tmin;
+                    }
+                }
+            }
+            bb->setCenter( cx, m_minY, cz );
+            bb->setSize( sx, sy, sz);
+            bb->setSizeY( m_datasetHelper->m_yVoxel );
+            hr = bb->hitTest( i_ray );
+            if( hr.hit )
+            {
+                if( picked == 0 )
+                {
+                    picked = 13;
+                    tpicked = hr.tmin;
+                }
+                else 
+                {
+                    if( hr.tmin < tpicked ) 
+                    {
+                        picked = 13;
+                        tpicked = hr.tmin;
+                    }
+                }
+            }
+            bb->setCenter( cx, m_maxY, cz );
+            hr = bb->hitTest( i_ray );
+            if( hr.hit)
+            {
+                if( picked == 0 )
+                {
+                    picked = 14;
+                    tpicked = hr.tmin;
+                }
+                else 
+                {
+                    if( hr.tmin < tpicked ) 
+                    {
+                        picked = 14;
+                        tpicked = hr.tmin;
+                    }
+                }
+            }
+            bb->setCenter( cx, cy, m_minZ );
+            bb->setSize( sx, sy, sz );
+            bb->setSizeZ( m_datasetHelper->m_zVoxel );
+            hr = bb->hitTest( i_ray );
+            if( hr.hit ) 
+            {
+                if( picked == 0 )
+                {
+                    picked  = 15;
+                    tpicked = hr.tmin;
+                }
+                else 
+                {
+                    if( hr.tmin < tpicked )
+                    {
+                        picked = 15;
+                        tpicked = hr.tmin;
+                    }
+                }
+            }
+            bb->setCenter( cx, cy, m_maxZ );
+            hr = bb->hitTest( i_ray );
+            if( hr.hit )
+            {
+                if( picked == 0 ) 
+                {
+                    picked = 16;
+                    tpicked = hr.tmin;
+                }
+                else 
+                {
+                    if( hr.tmin < tpicked ) 
+                    {
+                        picked = 16;
+                        tpicked = hr.tmin;
+                    }
+                }
+            }
+
+        }
+        else  // if (wxGetKeyState(WXK_CONTROL))
+        {
+            BoundingBox *bb = new BoundingBox( cx, cy, cz, sx, sy, sz );
+            hr = bb->hitTest( i_ray );
+            if( hr.hit )
+            {
+                if( picked == 0 )
+                {
+                    picked = 10;
+                    tpicked = hr.tmin;
+
+                }
+                else 
+                {
+                    if( hr.tmin < tpicked )
+                    {
+                        picked = 10;
+                        tpicked = hr.tmin;
+                    }
+                }
+            }
+        }
+        if( picked != 0 )
+        {
+            hr.hit = true;
+            hr.tmin = tpicked;
+            hr.picked = picked;
+            hr.object = this;
+        }
+
+    }
+
+    m_hitResult = hr;
+
+    return hr;
 }
 
 ///////////////////////////////////////////////////////////////////////////

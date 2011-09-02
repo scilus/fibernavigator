@@ -50,7 +50,16 @@ Fibers::~Fibers()
     m_colorArray.clear();
 
     if( m_kdTree )
+    {
         delete m_kdTree;
+        m_kdTree = NULL;
+    }
+
+    if( m_octree )
+    {
+        delete m_octree;
+        m_octree = NULL;
+    }
 
     m_lineArray.clear();
     m_linePointers.clear();
@@ -79,6 +88,9 @@ bool Fibers::load( wxString i_filename )
 
     if ( i_filename.AfterLast( '.' ) == _T("tck") )
         return loadMRtrix( i_filename );
+
+    /* OcTree points classification */
+    m_octree = new Octree(2,&m_pointArray[0],m_countPoints,m_dh);
 
     return res;
 }
@@ -439,7 +451,7 @@ bool Fibers::loadTRK(wxString i_fileName)
     createColorArray(colors.size() > 0);
     m_type = FIBERS;
     m_fullPath = i_fileName;
-    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
     m_name = i_fileName.AfterLast( '\\' );
 #else
@@ -558,7 +570,7 @@ bool Fibers::loadCamino( wxString i_filename )
     m_name = i_filename.AfterLast( '/' );
 #endif
 
-    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 
     return true;
 }
@@ -740,7 +752,7 @@ bool Fibers::loadMRtrix( wxString i_filename )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = i_filename;
-    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 
 #ifdef __WXMSW__
     m_name = i_filename.AfterLast( '\\' );
@@ -867,7 +879,7 @@ bool Fibers::loadPTK( wxString l_fileName )
     m_name = l_fileName.AfterLast( '/' );
 #endif
 
-    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
     return true;
 }
 
@@ -1128,7 +1140,7 @@ bool Fibers::loadVTK( wxString i_fileName )
     m_name = i_fileName.AfterLast( '/' );
 #endif
 
-    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 
     delete[] l_buffer;
     delete[] l_temp;
@@ -1232,7 +1244,7 @@ bool Fibers::loadDmri(wxString i_fileName)
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = i_fileName;
-    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
     m_name = i_fileName.AfterLast( '\\' );
 #else
@@ -1309,7 +1321,7 @@ void Fibers::loadTestFibers()
 
     m_type = FIBERS;
 
-    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2140,8 +2152,7 @@ void Fibers::resetColorArray()
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::resetLinesShown()
 {
-    for( int i = 0; i < m_countLines; ++i )
-        m_selected[i] = 0;
+    m_selected.assign(m_countLines, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2227,7 +2238,7 @@ void Fibers::updateLinesShown()
                     {
                         for( int k = 0; k < m_countLines; ++k )
                         {
-                            l_selectionObjects[i][0]->m_inBranch[k] = l_selectionObjects[i][0]->m_inBranch[k] & ! l_selectionObjects[i][j]->m_inBox[k];
+                            l_selectionObjects[i][0]->m_inBranch[k] = l_selectionObjects[i][0]->m_inBranch[k] & !l_selectionObjects[i][j]->m_inBox[k];
                         }
                     }
                 }
@@ -2337,15 +2348,10 @@ vector< bool > Fibers::getLinesShown( SelectionObject* i_selectionObject )
         m_boxMax[1] = l_center.y + l_size.y / 2 * m_dh->m_yVoxel;
         m_boxMin[2] = l_center.z - l_size.z / 2 * m_dh->m_zVoxel;
         m_boxMax[2] = l_center.z + l_size.z / 2 * m_dh->m_zVoxel;
+        
+        //Get and Set selected lines to visible
+        ObjectTest( i_selectionObject ); 
 
-        if( i_selectionObject->getSelectionType() == ELLIPSOID_TYPE )
-        {
-            ellipsoidTest( 0, m_countPoints - 1, 0 );
-        }
-        else
-        {
-            boxTest( 0, m_countPoints - 1, 0 );
-        }
     }
     else
     {
@@ -2372,80 +2378,28 @@ vector< bool > Fibers::getLinesShown( SelectionObject* i_selectionObject )
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// COMMENT
-//
-// i_left       :
-// i_right      :
-// i_axis       :
+// Get points that are inside the selection object and
+// set selected fibers according to those points.
 ///////////////////////////////////////////////////////////////////////////
-void Fibers::boxTest( int i_left, int i_right, int i_axis )
+void Fibers::ObjectTest(SelectionObject* i_selection)
 {
-    // Abort condition.
-    if( i_left > i_right )
-        return;
+    vector<int> pointsInside = m_octree->getPointsInside(i_selection); //Get points inside the selection object
 
-    int l_root       = i_left + ( ( i_right - i_left ) / 2 );
-    int l_axis1      = ( i_axis + 1 ) % 3;
-    int l_pointIndex = m_kdTree->m_tree[l_root] * 3;
-
-    if( m_pointArray[l_pointIndex + i_axis] < m_boxMin[i_axis] )
-        boxTest( l_root + 1, i_right, l_axis1 );
-    else if( m_pointArray[l_pointIndex + i_axis] > m_boxMax[i_axis] )
-        boxTest( i_left, l_root - 1, l_axis1 );
-    else
+    int indice,id;
+    for(unsigned int i=0; i < pointsInside.size(); i++)
     {
-        int l_axis2 = ( i_axis + 2 ) % 3;
-        if ( m_pointArray[l_pointIndex + l_axis1] <= m_boxMax[l_axis1] && 
-            m_pointArray[l_pointIndex + l_axis1] >= m_boxMin[l_axis1] && 
-            m_pointArray[l_pointIndex + l_axis2] <= m_boxMax[l_axis2] && 
-            m_pointArray[l_pointIndex + l_axis2] >= m_boxMin[l_axis2] )
-        {
-            m_selected[getLineForPoint( m_kdTree->m_tree[l_root] )] = 1;
-        }
-
-        boxTest( i_left, l_root - 1, l_axis1 );
-        boxTest( l_root + 1, i_right, l_axis1 );
-    }
+        indice = pointsInside[i];
+        id = m_reverse[indice];//Fiber ID according to current point
+        m_selected[id] = 1; //Fiber to be in bundle (TRUE)      
+    }  
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This function is exactly the same as boxTest with the simple modification that to set 
-// a fiber to selected, we test with the ellipsoid detectioninstead of the quare detection.
+//Fill KdTree
 ///////////////////////////////////////////////////////////////////////////
-void Fibers::ellipsoidTest( int i_left, int i_right, int i_axis )
+void Fibers::generateKdTree()
 {
-    // Abort condition.
-    if( i_left > i_right )
-        return;
-
-    int l_root  = i_left + ( ( i_right - i_left ) / 2 );
-    int l_axis1 = ( i_axis + 1 ) % 3;
-    int l_pointIndex = m_kdTree->m_tree[l_root] * 3;
-
-    if( m_pointArray[l_pointIndex + i_axis] < m_boxMin[i_axis] )
-        ellipsoidTest( l_root + 1, i_right, l_axis1 );
-    else if( m_pointArray[l_pointIndex + i_axis] > m_boxMax[i_axis] )
-        ellipsoidTest( i_left, l_root - 1, l_axis1 );
-    else
-    {
-        int l_axis2 = ( i_axis + 2 ) % 3;
-        float l_axisRadius  = ( m_boxMax[i_axis]  - m_boxMin[i_axis]  ) / 2.0f;
-        float l_axis1Radius = ( m_boxMax[l_axis1] - m_boxMin[l_axis1] ) / 2.0f;
-        float l_axis2Radius = ( m_boxMax[l_axis2] - m_boxMin[l_axis2] ) / 2.0f;
-        float l_axisCenter  = m_boxMax[i_axis]  - l_axisRadius;
-        float l_axis1Center = m_boxMax[l_axis1] - l_axis1Radius;
-        float l_axis2Center = m_boxMax[l_axis2] - l_axis2Radius;
-        // This if will set a fibers to be selected if its inside the ellipsoid.
-        if( ( pow( m_pointArray[l_pointIndex + i_axis]  - l_axisCenter,  2.0f ) ) / ( l_axisRadius  * l_axisRadius  ) + 
-            ( pow( m_pointArray[l_pointIndex + l_axis1] - l_axis1Center, 2.0f ) ) / ( l_axis1Radius * l_axis1Radius ) + 
-            ( pow( m_pointArray[l_pointIndex + l_axis2] - l_axis2Center, 2.0f ) ) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f )
-        {
-            m_selected[getLineForPoint( m_kdTree->m_tree[l_root] )] = 1;
-        }
-
-        ellipsoidTest( i_left, l_root - 1, l_axis1 );
-        ellipsoidTest( l_root + 1, i_right, l_axis1 );
-    }
+    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 }
 
 ///////////////////////////////////////////////////////////////////////////

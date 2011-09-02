@@ -20,6 +20,7 @@
 #include "Tensors.h"
 #include "../gui/myListCtrl.h"
 #include "../gui/SelectionBox.h"
+#include "../gui/SelectionEllipsoid.h"
 
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "surface.h"
@@ -613,7 +614,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
             wxXmlNode* l_boxNode = l_child->GetChildren();
             wxTreeItemId l_currentMasterId;
 
-            wxString l_name, l_type, l_active, l_visible;
+            wxString l_name, l_type, l_active, l_visible, l_isBox;
             double cx, cy, cz, ix, iy, iz;
             double _cx, _cy, _cz, _ix, _iy, _iz;
             cx = cy = cz = ix = iy = iz = 0;
@@ -629,6 +630,8 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                         l_type    = l_infoNode->GetPropVal( wxT( "type" ),    wxT( "MASTER" ) );
                         l_active  = l_infoNode->GetPropVal( wxT( "active" ),  wxT( "yes" ) );
                         l_visible = l_infoNode->GetPropVal( wxT( "visible" ), wxT( "yes" ) );
+                        l_isBox   = l_infoNode->GetPropVal( wxT( "isBox" ), wxT( "yes" ) );
+
                     }
                     if( l_infoNode->GetName() == wxT( "name" ) )
                     {
@@ -670,8 +673,12 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 //DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( l_item );
                 //if( l_info->getType() > OVERLAY )
                 //    return false;
+                SelectionObject* l_selectionObject;
+                if( l_isBox == _T( "yes" ) )
+                    l_selectionObject = new SelectionBox( l_vc, l_vs, this );
+                else
+                    l_selectionObject = new SelectionEllipsoid( l_vc, l_vs, this );
 
-                SelectionObject* l_selectionObject = new SelectionBox( l_vc, l_vs, this );
                 l_selectionObject->setName( l_name );
                 l_selectionObject->setIsActive ( l_active  == _T( "yes" ) );
                 l_selectionObject->setIsVisible( l_visible == _T( "yes" ) );
@@ -806,7 +813,8 @@ void DatasetHelper::save( const wxString i_fileName )
 
             wxXmlProperty* l_propActive  = new wxXmlProperty( wxT( "active" ),  l_currentSelectionObject->getIsActive()       ? wxT( "yes" ) : wxT( "no" ), l_propType );
             wxXmlProperty* l_propVisible = new wxXmlProperty( wxT( "visible" ), l_currentSelectionObject->getIsVisible()      ? wxT( "yes" ) : wxT( "no" ), l_propActive );
-            wxXmlProperty* l_propIsBox   = new wxXmlProperty( wxT( "isBox" ),   l_currentSelectionObject->isSelectionObject() ? wxT( "yes" ) : wxT( "no" ), l_propVisible );
+            wxXmlProperty* l_propIsBox   = new wxXmlProperty( wxT( "isBox" ),   (l_currentSelectionObject->getSelectionType() == BOX_TYPE) ? wxT( "yes" ) : wxT( "no" ), l_propVisible );
+            
             status->AddProperty( l_propIsBox );
         }
     }
