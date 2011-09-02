@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:            fibers.h
+// Name:            Fibers.h
 // Author:          ---
 // Creation Date:   ---
 //
@@ -20,10 +20,10 @@
 
 #include <vector>
 
-#include "datasetInfo.h"
+#include "DatasetInfo.h"
 #include <GL/glew.h>
 #include "KdTree.h"
-#include "splinePoint.h"
+#include "SplinePoint.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/Fantom/FVector.h"
 #include "Octree.h"

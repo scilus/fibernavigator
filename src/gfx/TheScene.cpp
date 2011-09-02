@@ -9,13 +9,13 @@
 //      by : Imagicien - 12/11/2009
 /////////////////////////////////////////////////////////////////////////////
 
-#include "theScene.h"
+#include "TheScene.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/AnatomyHelper.h"
-#include "../dataset/fibers.h"
-#include "../dataset/splinePoint.h"
-#include "../dataset/surface.h"
-#include "../gui/myListCtrl.h"
+#include "../dataset/Fibers.h"
+#include "../dataset/SplinePoint.h"
+#include "../dataset/Surface.h"
+#include "../gui/MyListCtrl.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 

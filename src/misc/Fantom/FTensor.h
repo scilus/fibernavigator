@@ -12,7 +12,7 @@
 #ifndef __FTensor_hh
 #define __FTensor_hh
 
-#include "stdAliases.h"
+#include "StdAliases.h"
 #include "FArray.h"
 #include "FMultiIndex.h"
 

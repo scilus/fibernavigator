@@ -1,6 +1,6 @@
-#include "myListCtrl.h"
-#include "../dataset/datasetInfo.h"
-#include "mainFrame.h"
+#include "MyListCtrl.h"
+#include "../dataset/DatasetInfo.h"
+#include "MainFrame.h"
 #include "SelectionObject.h"
 
 BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)

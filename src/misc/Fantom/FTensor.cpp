@@ -11,7 +11,7 @@
 
 #include "FTensor.h"
 #include <iostream>
-#include "binio.h"
+#include "BinIO.h"
 
 #include <cmath>
 

@@ -9,8 +9,8 @@
 //      
 /////////////////////////////////////////////////////////////////////////////
 
-#include "toolBar.h"
-#include "mainFrame.h"
+#include "ToolBar.h"
+#include "MainFrame.h"
 #include "../main.h"
 
 ToolBar::ToolBar(wxWindow *parent)

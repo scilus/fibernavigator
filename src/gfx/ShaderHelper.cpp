@@ -7,7 +7,7 @@
 
 #include "ShaderHelper.h"
 #include "../dataset/DatasetHelper.h"
-#include "../dataset/surface.h"
+#include "../dataset/Surface.h"
 
 ShaderHelper::ShaderHelper( DatasetHelper* dh ) :
     m_dh( dh )

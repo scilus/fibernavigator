@@ -1,6 +1,6 @@
 // TriangleMesh.cpp
-#include "triangleMesh.h"
-#include "loopSubD.h"
+#include "TriangleMesh.h"
+#include "LoopSubD.h"
 #include <string.h>
 
 // Construction

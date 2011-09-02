@@ -8,8 +8,8 @@
 #endif
 
 #include <GL/glew.h>
-#include "../gui/boundingBox.h"
-#include "../gui/sceneObject.h"
+#include "../gui/BoundingBox.h"
+#include "../gui/SceneObject.h"
 #include "DatasetHelper.h"
 
 class DatasetHelper;

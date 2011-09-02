@@ -14,7 +14,7 @@
 
 #include <wx/wx.h>
 
-#include "propertiesWindow.h"
+#include "PropertiesWindow.h"
 
 class SceneObject
 {

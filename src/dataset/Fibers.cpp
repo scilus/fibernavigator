@@ -10,7 +10,7 @@
 //      by : Marc-Alexandre Côté - 30/03/2011
 /////////////////////////////////////////////////////////////////////////////
 
-#include "fibers.h"
+#include "Fibers.h"
 
 #include <iostream>
 #include <fstream>

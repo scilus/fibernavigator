@@ -11,10 +11,10 @@
 #include <wx/tglbtn.h>
 #include "DatasetHelper.h"
 
-#include "../misc/IsoSurface/triangleMesh.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
 #include "../misc/Algorithms/Helper.h"
-#include "../gui/sceneObject.h"
-#include "../gui/myListCtrl.h"
+#include "../gui/SceneObject.h"
+#include "../gui/MyListCtrl.h"
 #include <GL/glew.h>
 
 union converterByteINT16 

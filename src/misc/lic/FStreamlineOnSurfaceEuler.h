@@ -24,7 +24,7 @@
 
 #include "../../dataset/DatasetHelper.h"
 #include "TensorField.h"
-#include "../IsoSurface/triangleMesh.h"
+#include "../IsoSurface/TriangleMesh.h"
 
 class FDataSet;
 class FGrid;

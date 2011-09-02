@@ -7,10 +7,10 @@
 #include "wx/wx.h"
 #endif
 
-#include "../gfx/theScene.h"
+#include "../gfx/TheScene.h"
 #include "wx/glcanvas.h"
 
-#include "boundingBox.h"
+#include "BoundingBox.h"
 #include "../dataset/DatasetHelper.h"
 #include "wx/math.h"
 #include "../misc/Fantom/FArray.h"

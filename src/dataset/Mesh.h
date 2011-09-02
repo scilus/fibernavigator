@@ -1,9 +1,9 @@
 #ifndef MESH_H_
 #define MESH_H_
 
-#include "datasetInfo.h"
+#include "DatasetInfo.h"
 #include "DatasetHelper.h"
-#include "../misc/IsoSurface/triangleMesh.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
 
 #include "wx/wxprec.h"
 

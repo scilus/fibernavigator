@@ -18,8 +18,8 @@
 #include "wx/wx.h"
 #endif
 
-#include "boundingBox.h"
-#include "sceneObject.h"
+#include "BoundingBox.h"
+#include "SceneObject.h"
 #include <GL/glew.h>
 #include <vector>
 #include <wx/grid.h>

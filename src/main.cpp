@@ -17,9 +17,9 @@
 #include "wx/filename.h"
 
 #include "main.h"
-#include "gui/mainFrame.h"
-#include "gui/toolBar.h"
-#include "gui/menuBar.h"
+#include "gui/MainFrame.h"
+#include "gui/ToolBar.h"
+#include "gui/MenuBar.h"
 
 #include <exception>
 

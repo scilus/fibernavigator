@@ -1,14 +1,14 @@
 #ifndef SURFACE_H_
 #define SURFACE_H_
 
-#include "datasetInfo.h"
+#include "DatasetInfo.h"
 
 #include <vector>
 #include "../misc/Fantom/FTensor.h"
 #include "../misc/Fantom/FBSplineSurface.h"
 #include "DatasetHelper.h"
 #include "KdTree.h"
-#include "../misc/IsoSurface/triangleMesh.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
 
 class DatasetHelper;
 class MainFrame;

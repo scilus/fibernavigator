@@ -5,25 +5,25 @@
  *      Author: ralph
  */
 #include "DatasetHelper.h"
-#include "../gui/mainFrame.h"
+#include "../gui/MainFrame.h"
 
 #include <memory>
 
 #include "Anatomy.h"
 #include "ODFs.h"
-#include "fibers.h"
+#include "Fibers.h"
 #include "KdTree.h"
 #include "../main.h"
-#include "mesh.h"
-#include "splinePoint.h"
-#include "surface.h"
+#include "Mesh.h"
+#include "SplinePoint.h"
+#include "Surface.h"
 #include "Tensors.h"
-#include "../gui/myListCtrl.h"
+#include "../gui/MyListCtrl.h"
 #include "../gui/SelectionBox.h"
 #include "../gui/SelectionEllipsoid.h"
 
 #include "../misc/IsoSurface/CIsoSurface.h"
-#include "surface.h"
+#include "Surface.h"
 #include "../misc/nifti/nifti1_io.h"
 
 

@@ -17,7 +17,7 @@
 #include "FgeGLTexture.h"
 
 #include "../../gfx/Shader.h"
-#include "../../dataset/datasetInfo.h"
+#include "../../dataset/DatasetInfo.h"
 #include "../../dataset/DatasetHelper.h"
 
 #include <vector>

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:            mainFrame.h
+// Name:            MainFrame.h
 // Author:          ---
 // Creation Date:   ---
 //
@@ -16,13 +16,13 @@
 #include <wx/grid.h>
 #include <wx/treectrl.h>
 
-#include "mainCanvas.h"
-#include "myListCtrl.h"
+#include "MainCanvas.h"
+#include "MyListCtrl.h"
 #include "SelectionObject.h"
 
 
 #include "../dataset/DatasetHelper.h"
-#include "../dataset/datasetInfo.h"
+#include "../dataset/DatasetInfo.h"
 #include "../misc/Algorithms/Helper.h"
 
 class DatasetHelper;

@@ -1,4 +1,4 @@
-#include "splinePoint.h"
+#include "SplinePoint.h"
 #include "../gui/SelectionObject.h"
 #include "../main.h"
 

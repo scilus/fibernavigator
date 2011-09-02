@@ -10,7 +10,7 @@
 
 #include "FStreamlineOnSurfaceEuler.h"
 #include "../../dataset/DatasetHelper.h"
-#include "../IsoSurface/triangleMesh.h"
+#include "../IsoSurface/TriangleMesh.h"
 
 class SurfaceLIC {
 public:

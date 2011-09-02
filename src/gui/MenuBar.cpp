@@ -9,8 +9,8 @@
 //      
 /////////////////////////////////////////////////////////////////////////////
 
-#include "menuBar.h"
-#include "mainFrame.h"
+#include "MenuBar.h"
+#include "MainFrame.h"
 
 MenuBar::MenuBar()
 {

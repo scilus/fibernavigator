@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:            theScene.h
+// Name:            TheScene.h
 // Author:          ---
 // Creation Date:   ---
 //
@@ -19,7 +19,7 @@
 #endif
 
 #include "../gui/ArcBall.h"
-#include "../dataset/datasetInfo.h"
+#include "../dataset/DatasetInfo.h"
 #include "../dataset/DatasetHelper.h"
 #include "wx/glcanvas.h"
 

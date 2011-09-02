@@ -6,9 +6,9 @@
  */
 
 #include "Anatomy.h"
-#include "fibers.h"
+#include "Fibers.h"
 
-#include "../gui/mainFrame.h"
+#include "../gui/MainFrame.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/nifti/nifti1_io.h"
 

@@ -13,7 +13,7 @@
 
 #include <GL/glew.h>
 #include "../misc/nifti/nifti1_io.h"
-#include "../gui/mainFrame.h"
+#include "../gui/MainFrame.h"
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor

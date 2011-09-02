@@ -12,12 +12,12 @@
 #include "SelectionObject.h"
 
 #include "../dataset/Anatomy.h"
-#include "../dataset/fibers.h"
+#include "../dataset/Fibers.h"
 #include "../misc/Algorithms/BSpline.h"
 #include "../misc/Algorithms/ConvexHull.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../main.h"
-#include "../gui/mainFrame.h"
+#include "../gui/MainFrame.h"
 #include <wx/textctrl.h>
 
 #include <iostream>

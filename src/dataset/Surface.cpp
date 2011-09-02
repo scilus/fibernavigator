@@ -1,13 +1,13 @@
 #include <math.h>
 #include <fstream>
 
-#include "surface.h"
+#include "Surface.h"
 #include "../misc/Fantom/FMatrix.h"
-#include "surface.h"
-#include "splinePoint.h"
-#include "../gui/myListCtrl.h"
+#include "Surface.h"
+#include "SplinePoint.h"
+#include "../gui/MyListCtrl.h"
 #include "Anatomy.h"
-#include "../gui/mainFrame.h"
+#include "../gui/MainFrame.h"
 #include <GL/glew.h>
 #include "../misc/lic/SurfaceLIC.h"
 #include "../main.h"

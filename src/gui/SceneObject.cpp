@@ -9,7 +9,7 @@
 //      
 /////////////////////////////////////////////////////////////////////////////
 
-#include "sceneObject.h"
+#include "SceneObject.h"
 SceneObject::SceneObject()
 {
     m_propertiesSizer = NULL;

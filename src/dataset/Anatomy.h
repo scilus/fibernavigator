@@ -8,8 +8,8 @@
 #ifndef ANATOMY_H_
 #define ANATOMY_H_
 
-#include "datasetInfo.h"
-#include "surface.h"
+#include "DatasetInfo.h"
+#include "Surface.h"
 #include "../misc/lic/TensorField.h"
 
 class SelectionObject;

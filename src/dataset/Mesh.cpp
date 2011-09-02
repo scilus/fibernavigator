@@ -1,8 +1,8 @@
-#include "mesh.h"
+#include "Mesh.h"
 
 #include "wx/wfstream.h"
 #include "wx/datstrm.h"
-#include "../gui/mainFrame.h"
+#include "../gui/MainFrame.h"
 #include "../main.h"
 
 Mesh::Mesh(DatasetHelper* dh) : DatasetInfo(dh)

@@ -11,7 +11,7 @@
 #ifndef ODFS_H_
 #define ODFS_H_
 
-#include "datasetInfo.h"
+#include "DatasetInfo.h"
 #include "Glyph.h"
 
 #include <complex>

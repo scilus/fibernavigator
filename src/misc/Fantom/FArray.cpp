@@ -18,7 +18,7 @@ using namespace std;
 #include "FException.h"
 #include "FMatrix.h"
 
-#include "binio.h"
+#include "BinIO.h"
 
 #ifdef OUTLINE
 #include "FArray.icc"

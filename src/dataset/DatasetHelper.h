@@ -23,14 +23,14 @@
 
 #include <vector>
 
-#include "datasetInfo.h"
+#include "DatasetInfo.h"
 
 
 #include "../gui/SelectionObject.h"
 
-#include "../gui/mainFrame.h"
-#include "../gfx/theScene.h"
-#include "splinePoint.h"
+#include "../gui/MainFrame.h"
+#include "../gfx/TheScene.h"
+#include "SplinePoint.h"
 
 #include "AnatomyHelper.h"
 #include "../gfx/ShaderHelper.h"

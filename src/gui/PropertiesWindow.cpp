@@ -1,13 +1,13 @@
 #include <wx/colordlg.h>
 
-#include "propertiesWindow.h"
+#include "PropertiesWindow.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
 #include "../dataset/Anatomy.h"
-#include "../dataset/fibers.h"
+#include "../dataset/Fibers.h"
 #include "../dataset/ODFs.h"
-#include "../dataset/splinePoint.h"
-#include "../dataset/surface.h"
+#include "../dataset/SplinePoint.h"
+#include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 

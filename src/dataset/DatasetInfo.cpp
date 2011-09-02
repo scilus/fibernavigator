@@ -1,5 +1,5 @@
-#include "datasetInfo.h"
-#include "../gui/mainFrame.h"
+#include "DatasetInfo.h"
+#include "../gui/MainFrame.h"
 #include "../main.h"
 
 DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) : 

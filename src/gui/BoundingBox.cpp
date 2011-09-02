@@ -1,4 +1,4 @@
-#include "boundingBox.h"
+#include "BoundingBox.h"
 
 #include "wx/wxprec.h"
 
