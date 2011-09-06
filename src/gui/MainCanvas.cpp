@@ -852,7 +852,7 @@ void MainCanvas::render()
 
             if ( m_dh->m_mainFrame->m_listCtrl->GetItemCount() != 0 )
             {
-                m_dh->m_anatomyHelper->renderNav( m_view, m_dh->m_shaderHelper->m_textureShader );
+                m_dh->m_anatomyHelper->renderNav( m_view, m_dh->m_shaderHelper->m_pTextureShader );
                 if ( m_dh->GLError() )
                     m_dh->printGLError( wxT( "render nav view" ) );
             }

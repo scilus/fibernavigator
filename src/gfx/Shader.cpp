@@ -8,7 +8,7 @@
 #include "Shader.h"
 #include "../main.h"
 
-Shader::Shader(wxString fileName)
+Shader::Shader(const wxString &fileName)
 :   m_shaderProgram(0),
     m_vertex(0),
     m_fragment(0)
@@ -43,11 +43,11 @@ bool Shader::link()
 {
     glAttachShader(m_shaderProgram, m_vertex);
     glAttachShader(m_shaderProgram, m_fragment);
-    glDeleteShader( m_vertex);
-    glDeleteShader( m_fragment);
+    glDeleteShader(m_vertex);
+    glDeleteShader(m_fragment);
     glLinkProgram(m_shaderProgram);
     GLint linked;
-    glGetProgramiv (m_shaderProgram, GL_LINK_STATUS, &linked);
+    glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &linked);
     printProgramLog(m_shaderProgram);
     if (!linked) {
         return false;
@@ -70,7 +70,7 @@ void Shader::release()
     glUseProgram(0);
 }
  
-bool Shader::compile(GLuint* shaderId, wxString codeString)
+bool Shader::compile(GLuint* shaderId, const wxString &codeString)
 {
     char *temp;
     temp = (char*) malloc(codeString.Length()+1);
@@ -86,7 +86,7 @@ bool Shader::compile(GLuint* shaderId, wxString codeString)
     return compiled;
 }
 
-bool Shader::loadCode(wxString filename)
+bool Shader::loadCode(const wxString &filename)
 {
     wxString codeStringVS;
     wxString codeStringFS;
@@ -117,7 +117,7 @@ bool Shader::loadCode(wxString filename)
     return true;
 }
 
-bool Shader::loadFromFile(wxString* code, wxString fileName)
+bool Shader::loadFromFile(wxString* code, const wxString &fileName)
 {
     wxTextFile file;
     *code = wxT("");
@@ -163,7 +163,7 @@ void Shader::printCompilerLog(GLuint shader)
     GLint charsWritten = 0;
     GLchar *infoLog;
 
-    glGetShaderiv (shader, GL_INFO_LOG_LENGTH, &infologLen);
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLen);
     if (infologLen > 1)
     {
         infoLog = (GLchar*) malloc (infologLen);
@@ -179,7 +179,7 @@ void Shader::printProgramLog(GLuint program)
     GLint charsWritten = 0;
     GLchar *infoLog;
 
-    glGetProgramiv (program, GL_INFO_LOG_LENGTH, &infologLen);
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infologLen);
     if (infologLen > 1)
     {
         infoLog = (GLchar*) malloc (infologLen);
@@ -189,7 +189,7 @@ void Shader::printProgramLog(GLuint program)
     }
 }
 
-void Shader::printwxT(wxString string)
+void Shader::printwxT(const wxString &string)
 {
     char* cstring;
     cstring = (char*)malloc(string.length());
@@ -223,7 +223,7 @@ void Shader::setUniArrayInt(const GLchar* name, GLint* value, const GLint size)
     glUniform1iv (texLoc, size, value);
 }
 
-void Shader::setUni3Int( const GLchar* name, GLint values[3] )
+void Shader::setUni3Int(const GLchar* name, GLint values[3])
 {
     GLint texLoc = glGetUniformLocation( m_shaderProgram, name );
     glUniform3i( texLoc, values[0], values[1], values[2] );
@@ -235,19 +235,19 @@ void Shader::setUniArray1Float(const GLchar* name, GLfloat* value, const int siz
     glUniform1fv (texLoc, size, value);
 }
 
-void Shader::setUni2Float( const GLchar* name, std::pair< GLfloat, GLfloat > values )
+void Shader::setUni2Float(const GLchar* name, std::pair< GLfloat, GLfloat > values)
 {
     GLint texLoc = glGetUniformLocation( m_shaderProgram, name );
     glUniform2f( texLoc, values.first, values.second );
 }
 
-void Shader::setUni3Float( const GLchar* name, GLfloat values[3] )
+void Shader::setUni3Float(const GLchar* name, GLfloat values[3])
 {
     GLint texLoc = glGetUniformLocation( m_shaderProgram, name );
     glUniform3f( texLoc, values[0], values[1], values[2] );
 }
 
-void Shader::setUniMatrix3f( const GLchar* name, const FMatrix &values )
+void Shader::setUniMatrix3f(const GLchar* name, const FMatrix &values)
 {
     float* l_valueCast = new float[9];
 
@@ -275,7 +275,7 @@ void Shader::setAttribFloat(const GLchar* name, const GLfloat value)
     glVertexAttrib1f (attrib, value);
 }
 
-void Shader::setUniSampler( const GLchar* name, const GLint value )
+void Shader::setUniSampler(const GLchar* name, const GLint value)
 {
     GLint location = glGetUniformLocation( m_shaderProgram, name );
     glUniform1i( location, value );
