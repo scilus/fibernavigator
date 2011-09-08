@@ -1706,14 +1706,14 @@ void Fibers::generateFiberVolume()
 
     tmpAnatomy->setName(wxT("Fiber-Density Volume"));
 
-    m_dh->m_mainFrame->m_listCtrl->InsertItem(0, wxT(""),0);
-    m_dh->m_mainFrame->m_listCtrl->SetItem(0,1, tmpAnatomy->getName());
-    m_dh->m_mainFrame->m_listCtrl->SetItem(0,2, wxT("1.0"));
-    m_dh->m_mainFrame->m_listCtrl->SetItem(0,3, wxT(""),1);
+    m_dh->m_mainFrame->m_pListCtrl->InsertItem(0, wxT(""),0);
+    m_dh->m_mainFrame->m_pListCtrl->SetItem(0,1, tmpAnatomy->getName());
+    m_dh->m_mainFrame->m_pListCtrl->SetItem(0,2, wxT("1.0"));
+    m_dh->m_mainFrame->m_pListCtrl->SetItem(0,3, wxT(""),1);
 
-    m_dh->m_mainFrame->m_listCtrl->SetItemData(0,(long) tmpAnatomy);
+    m_dh->m_mainFrame->m_pListCtrl->SetItemData(0,(long) tmpAnatomy);
 
-    m_dh->m_mainFrame->m_listCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
+    m_dh->m_mainFrame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
 
     m_dh->updateLoadStatus();
     m_dh->m_mainFrame->refreshAllGLWidgets();

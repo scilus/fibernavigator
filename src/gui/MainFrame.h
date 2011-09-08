@@ -1,12 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:            MainFrame.h
-// Author:          ---
-// Creation Date:   ---
-//
-// Description: mainFrame class.
-//
-// Last modifications:
-//      by : ggirard - 02-2011
+// Description: mainFrame class. Contains every elements of the GUI, and frame events
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef MAINFRAME_H_
@@ -18,11 +11,7 @@
 
 #include "MainCanvas.h"
 #include "MyListCtrl.h"
-#include "SelectionObject.h"
 
-
-#include "../dataset/DatasetHelper.h"
-#include "../dataset/DatasetInfo.h"
 #include "../misc/Algorithms/Helper.h"
 
 class DatasetHelper;
@@ -36,189 +25,164 @@ class MainFrame : public wxFrame
 {
     friend class ToolBar;
     friend class MenuBar;
-    friend class DatasetInfo;
-    friend class Anatomy;
-    friend class Surface;
-    friend class CIsoSurface;
-    friend class Mesh;
-    friend class Fibers;
-    friend class Glyph;
-    friend class Tensors;
-    friend class ODFs;
-    friend class SelectionObject;
-    friend class SplinePoint;
     friend class PropertiesWindow;
 
 public:
-    MainFrame( wxWindow* i_parent, const wxWindowID i_id, const wxString& i_title, const wxPoint& i_pos, const wxSize& i_size, const long i_style);
+    MainFrame( wxWindow *i_parent, const wxWindowID i_id, const wxString &i_title, const wxPoint &i_pos, const wxSize &i_size, const long i_style);
     ~MainFrame();
 
-    void DisplayPropertiesSheet();
+    void displayPropertiesSheet();
     void deleteSceneObject();
     void deleteListItem();
     void deleteTreeItem();
     void refreshAllGLWidgets();
     void refreshViews();
     void renewAllGLWidgets();
-    void Screenshot                         ( wxString         i_fileName    );
-    void SetGlyphOptionsValues              ( DatasetInfo*     i_tensors     );
-    void OnTreeChange();
-    void OnMouseEvent                       ( wxMouseEvent&   event );
-    void OnLoad                             ( wxCommandEvent& event );
+    void screenshot                         ( wxString      i_fileName    );
+    void onTreeChange();
+    void onMouseEvent                       ( wxMouseEvent&   event );
+    void onLoad                             ( wxCommandEvent& event );
     
 private:
-    void OnReloadShaders                    ( wxCommandEvent& event );
-    void OnSave                             ( wxCommandEvent& event );
-    void OnSaveFibers                       ( wxCommandEvent& event );
-    void OnSaveSurface                      ( wxCommandEvent& event );
-    void OnSaveDataset                      ( wxCommandEvent& event );
-    void OnQuit                             ( wxCommandEvent& event );
-    void OnClose                            ( wxCloseEvent&   event );
-    // View
-    void OnMenuViewReset                    ( wxCommandEvent& event );
-    void OnMenuViewLeft                     ( wxCommandEvent& event );
-    void OnMenuViewRight                    ( wxCommandEvent& event );
-    void OnMenuViewTop                      ( wxCommandEvent& event );
-    void OnMenuViewBottom                   ( wxCommandEvent& event );
-    void OnMenuViewFront                    ( wxCommandEvent& event );
-    void OnMenuViewBack                     ( wxCommandEvent& event );
-    void OnMenuViewCrosshair                ( wxCommandEvent& event );
-    void OnMenuViewAxes                     ( wxCommandEvent& event );
-    void OnMenuLock                         ( wxCommandEvent& event );
-    void OnSceneLock                        ( wxCommandEvent& event );
-    // Voi
-    void OnToggleSelectionObjects           ( wxCommandEvent& event );
-    void OnNewSelectionBox                  ( wxCommandEvent& event );
-    void OnNewSelectionEllipsoid            ( wxCommandEvent& event );
-    void OnHideSelectionObjects             ( wxCommandEvent& event );
-    void OnActivateSelectionObjects         ( wxCommandEvent& event );
-    void OnUseMorph                         ( wxCommandEvent& event );
-    
-    // Spline Surface
-    void OnNewSplineSurface                 ( wxCommandEvent& event );
-    void OnToggleNormal                     ( wxCommandEvent& event );
-    void OnToggleDrawVectors                ( wxCommandEvent& event );
-    // Options
-    void OnResetColor                       ( wxCommandEvent& event );
-    void OnToggleLighting                   ( wxCommandEvent& event );
-    void OnInvertFibers                     ( wxCommandEvent& event );
-    void OnUseFakeTubes                     ( wxCommandEvent& event );
-    void OnClearToBlack                     ( wxCommandEvent& event );
-    void OnRulerTool                        ( wxCommandEvent& event );
-    void OnRulerToolClear                   ( wxCommandEvent& event );
-    void OnRulerToolAdd                     ( wxCommandEvent& event );
-    void OnRulerToolDel                     ( wxCommandEvent& event );
-    void OnUseTransparency                  ( wxCommandEvent& event );
-    void OnToggleTextureFiltering           ( wxCommandEvent& event );
-    void OnToggleBlendTexOnMesh             ( wxCommandEvent& event );
-    void OnToggleFilterIso                  ( wxCommandEvent& event );
-    void OnToggleColorMapLegend             ( wxCommandEvent& event );
-    
-    void OnSetCMap0                         ( wxCommandEvent& event );
-    void OnSetCMap1                         ( wxCommandEvent& event );
-    void OnSetCMap2                         ( wxCommandEvent& event );
-    void OnSetCMap3                         ( wxCommandEvent& event );
-    void OnSetCMap4                         ( wxCommandEvent& event );
-    void OnSetCMap5                         ( wxCommandEvent& event );
-    void OnSetCMapNo                        ( wxCommandEvent& event );
+    // File menu
+    void onReloadShaders                    ( wxCommandEvent& event );
+    void onSave                             ( wxCommandEvent& event );
+    void onSaveFibers                       ( wxCommandEvent& event );
+    void onSaveSurface                      ( wxCommandEvent& event );
+    void onSaveDataset                      ( wxCommandEvent& event );
+    void onQuit                             ( wxCommandEvent& event );
+    void onClose                            ( wxCloseEvent&   event );
+    // View menu
+    void onMenuViewReset                    ( wxCommandEvent& event );
+    void onMenuViewLeft                     ( wxCommandEvent& event );
+    void onMenuViewRight                    ( wxCommandEvent& event );
+    void onMenuViewTop                      ( wxCommandEvent& event );
+    void onMenuViewBottom                   ( wxCommandEvent& event );
+    void onMenuViewFront                    ( wxCommandEvent& event );
+    void onMenuViewBack                     ( wxCommandEvent& event );
+    void onMenuViewCrosshair                ( wxCommandEvent& event );
+    void onMenuViewAxes                     ( wxCommandEvent& event );
+    void onMenuLock                         ( wxCommandEvent& event );
+    void onSceneLock                        ( wxCommandEvent& event );
+    void onRotateZ                          ( wxCommandEvent& event );
+    void onRotateY                          ( wxCommandEvent& event );
+    void onRotateX                          ( wxCommandEvent& event );
+    void onNavigateSagital                  ( wxCommandEvent& event );
+    void onNavigateAxial                    ( wxCommandEvent& event );
+    void onNavigateCoronal                  ( wxCommandEvent& event );
+    void onToggleShowAxial                  ( wxCommandEvent& event );
+    void onToggleShowCoronal                ( wxCommandEvent& event );
+    void onToggleShowSagittal               ( wxCommandEvent& event );
 
-    // Help
-    void OnAbout                            ( wxCommandEvent& event );
-    void OnShortcuts                        ( wxCommandEvent& event );
-    void OnScreenshot                       ( wxCommandEvent& event );
-    void OnSlizeMovieSag                    ( wxCommandEvent& event );
-    void OnSlizeMovieCor                    ( wxCommandEvent& event );
-    void OnSlizeMovieAxi                    ( wxCommandEvent& event );
+    // Voi menu
+    void onToggleSelectionObjects           ( wxCommandEvent& event );
+    void onNewSelectionBox                  ( wxCommandEvent& event );
+    void onNewSelectionEllipsoid            ( wxCommandEvent& event );
+    void onHideSelectionObjects             ( wxCommandEvent& event );
+    void onActivateSelectionObjects         ( wxCommandEvent& event );
+    void onUseMorph                         ( wxCommandEvent& event );    
+    // Fibers menu
+    void onInvertFibers                     ( wxCommandEvent& event );
+    void onUseFakeTubes                     ( wxCommandEvent& event );
+    void onResetColor                       ( wxCommandEvent& event );
+    void onUseTransparency                  ( wxCommandEvent& event );
+    // surface menu
+    void onNewSplineSurface                 ( wxCommandEvent& event );
+    void onMoveBoundaryPointsLeft           ( wxCommandEvent& event );
+    void onMoveBoundaryPointsRight          ( wxCommandEvent& event );
+    void moveBoundaryPoints( int i_value);
+    // Options menu
+    void onToggleLighting                   ( wxCommandEvent& event );
+    void onClearToBlack                     ( wxCommandEvent& event );
+    void onRulerTool                        ( wxCommandEvent& event );
+    void onRulerToolClear                   ( wxCommandEvent& event );
+    void onRulerToolAdd                     ( wxCommandEvent& event );
+    void onRulerToolDel                     ( wxCommandEvent& event );
+    void onToggleTextureFiltering           ( wxCommandEvent& event );
+    void onToggleBlendTexOnMesh             ( wxCommandEvent& event );
+    void onToggleFilterIso                  ( wxCommandEvent& event );
+    void onToggleColorMapLegend             ( wxCommandEvent& event );    
+    void onSetCMap0                         ( wxCommandEvent& event );
+    void onSetCMap1                         ( wxCommandEvent& event );
+    void onSetCMap2                         ( wxCommandEvent& event );
+    void onSetCMap3                         ( wxCommandEvent& event );
+    void onSetCMap4                         ( wxCommandEvent& event );
+    void onSetCMap5                         ( wxCommandEvent& event );
+    void onSetCMapNo                        ( wxCommandEvent& event );
+    void onToggleNormal                     ( wxCommandEvent& event );
+    void onToggleDrawVectors                ( wxCommandEvent& event );
+    void onToggleAlpha                      ( wxCommandEvent& event );
+    void onToggleDrawPointsMode             ( wxCommandEvent& event );
+    // Help menu
+    void onAbout                            ( wxCommandEvent& event );
+    void onShortcuts                        ( wxCommandEvent& event );
+    void onScreenshot                       ( wxCommandEvent& event );
+    void onSlizeMovieSag                    ( wxCommandEvent& event );
+    void onSlizeMovieCor                    ( wxCommandEvent& event );
+    void onSlizeMovieAxi                    ( wxCommandEvent& event );
 
-    void OnSize                             ( wxSizeEvent&    event );
-    void doOnSize();
-    void OnGLEvent                          ( wxCommandEvent& event );
-    
-    void OnSliderMoved                      ( wxCommandEvent& event );
-    
-    void OnToggleShowAxial                  ( wxCommandEvent& event );
-    void OnToggleShowCoronal                ( wxCommandEvent& event );
-    void OnToggleShowSagittal               ( wxCommandEvent& event );
-    void OnToggleAlpha                      ( wxCommandEvent& event );
-    
-    void OnRotateZ                          ( wxCommandEvent& event );
-    void OnRotateY                          ( wxCommandEvent& event );
-    void OnRotateX                          ( wxCommandEvent& event );
-    void OnNavigateSagital                  ( wxCommandEvent& event );
-    void OnNavigateAxial                    ( wxCommandEvent& event );
-    void OnNavigateCoronal                  ( wxCommandEvent& event );
-    void setTimerSpeed                      ();
-    /*
+    // List widget event functions     
+    void onActivateListItem                 ( wxListEvent&    event );
+    void onSelectListItem                   ( wxListEvent&    event );
+    void onListMenuName                     ( wxCommandEvent& event );
 
-     * List widget event functions
-     */
-    void OnActivateListItem                 ( wxListEvent&    event );
-    void OnSelectListItem                   ( wxListEvent&    event );
-
-    void OnListMenuName                     ( wxCommandEvent& event );
-
-    /*
-     * Tree widget event functions
-     */
-    void OnDeleteTreeItem                   ( wxTreeEvent&    event );
-    void OnSelectTreeItem                   ( wxTreeEvent&    event );
-    void OnRightClickTreeItem               ( wxTreeEvent&    event );
-    void OnUnSelectTreeItem                 ( wxTreeEvent&    event );
-    void OnActivateTreeItem                 ( wxTreeEvent&    event );
-    void OnTreeLabelEdit                    ( wxTreeEvent&    event );
+    // Tree widget event functions
+    void onDeleteTreeItem                   ( wxTreeEvent&    event );
+    void onSelectTreeItem                   ( wxTreeEvent&    event );
+    void onRightClickTreeItem               ( wxTreeEvent&    event );
+    void onUnSelectTreeItem                 ( wxTreeEvent&    event );
+    void onActivateTreeItem                 ( wxTreeEvent&    event );
+    void onTreeLabelEdit                    ( wxTreeEvent&    event );
     int  treeSelected                       ( wxTreeItemId    i_id  ); 
-    /*
-     * System functions
-     */
-    void OnKdTreeThreadFinished             ( wxCommandEvent& event );
+    
+    // System functions
+    void onSize                             ( wxSizeEvent&    event );
+    void doOnSize();
+    void onGLEvent                          ( wxCommandEvent& event );    
+    void onSliderMoved                      ( wxCommandEvent& event );
+    void onKdTreeThreadFinished             ( wxCommandEvent& event );
     void updateStatusBar();
     void updateMenus();
-    void OnTimerEvent                       ( wxTimerEvent&   event );
-
-    void CreateNewSelectionObject( ObjectType i_newSelectionObjectType );
-    
-    void OnToggleDrawPointsMode             ( wxCommandEvent& event );
-    void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );
-    void OnMoveBoundaryPointsRight          ( wxCommandEvent& event );
-    void moveBoundaryPoints( int i_value);
-
-    void OnLoadDatasets                     ( wxCommandEvent& event );
-    void OnLoadMeshes                       ( wxCommandEvent& event );
-    void OnLoadFibers                       ( wxCommandEvent& event );
-    void OnLoadTensors                      ( wxCommandEvent& event );
-    void OnLoadODFs                         ( wxCommandEvent& event );
-    
+    void onTimerEvent                       ( wxTimerEvent&   event );
+    void setTimerSpeed();
+    void createNewSelectionObject( ObjectType i_newSelectionObjectType );    
+    void onLoadDatasets                     ( wxCommandEvent& event );
+    void onLoadMeshes                       ( wxCommandEvent& event );
+    void onLoadFibers                       ( wxCommandEvent& event );
+    void onLoadTensors                      ( wxCommandEvent& event );
+    void onLoadODFs                         ( wxCommandEvent& event );    
     bool loadIndex                          ( int i_index );
     
+    
 private:
-    ToolBar             *m_toolBar;
-    MenuBar             *m_menuBar;       
-    wxBoxSizer          *m_currentSizer;
-    SceneObject         *m_currentSceneObject;
-    SceneObject         *m_lastSelectedSceneObject;
+    ToolBar             *m_pToolBar;
+    MenuBar             *m_pMenuBar;       
+    wxBoxSizer          *m_pCurrentSizer;
+    SceneObject         *m_pCurrentSceneObject;
+    SceneObject         *m_pLastSelectedSceneObject;
     long                m_currentListItem;
     long                m_lastSelectedListItem;
 
-    wxBoxSizer          *m_mainSizer;
-    wxBoxSizer          *m_listSizer;
-    wxBoxSizer          *m_objectSizer;
-    wxBoxSizer          *m_leftMainSizer;
-    wxBoxSizer          *m_navSizer;
+    wxBoxSizer          *m_pMainSizer;
+    wxBoxSizer          *m_pListSizer;
+    wxBoxSizer          *m_pObjectSizer;
+    wxBoxSizer          *m_pLeftMainSizer;
+    wxBoxSizer          *m_pNavSizer;
 
-    wxTimer             *m_timer;
+    wxTimer             *m_pTimer;
 
 public:
-    PropertiesWindow   *m_propertiesWindow;
-    MainCanvas*         m_mainGL;
-    MainCanvas*         m_gl0;
-    MainCanvas*         m_gl1;
-    MainCanvas*         m_gl2;
-    MyListCtrl*         m_listCtrl;
-    MyTreeCtrl*         m_treeWidget;
-    wxSlider*           m_xSlider;
-    wxSlider*           m_ySlider;
-    wxSlider*           m_zSlider;
-    DatasetHelper*      m_datasetHelper;
+    PropertiesWindow    *m_pPropertiesWindow;
+    MainCanvas          *m_pMainGL;
+    MainCanvas          *m_pGL0;
+    MainCanvas          *m_pGL1;
+    MainCanvas          *m_pGL2;
+    MyListCtrl          *m_pListCtrl;
+    MyTreeCtrl          *m_pTreeWidget;
+    wxSlider            *m_pXSlider;
+    wxSlider            *m_pYSlider;
+    wxSlider            *m_pZSlider;
+    DatasetHelper       *m_pDatasetHelper;
     wxTreeItemId        m_tRootId;
     wxTreeItemId        m_tPointId;
     wxTreeItemId        m_tSelectionObjectsId;

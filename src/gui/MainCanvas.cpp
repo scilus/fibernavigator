@@ -162,9 +162,9 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     int newY = (int) ( getEventCenter().y + 0.5 );
                     int newZ = (int) ( getEventCenter().z + 0.5 );
                     m_dh->updateView( newX, newY, newZ );
-                    m_dh->m_mainFrame->m_xSlider->SetValue( newX );
-                    m_dh->m_mainFrame->m_ySlider->SetValue( newY );
-                    m_dh->m_mainFrame->m_zSlider->SetValue( newZ );
+                    m_dh->m_mainFrame->m_pXSlider->SetValue( newX );
+                    m_dh->m_mainFrame->m_pYSlider->SetValue( newY );
+                    m_dh->m_mainFrame->m_pZSlider->SetValue( newZ );
                     m_dh->m_mainFrame->refreshAllGLWidgets();
                 }
                 else if ( wxGetKeyState( WXK_CONTROL ) && m_dh->getPointMode() )
@@ -174,7 +174,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     {
                         m_hr.picked = 20;
                         SplinePoint *point = new SplinePoint( getEventCenter(), m_dh );
-                        wxTreeItemId pId = m_dh->m_mainFrame->m_treeWidget->AppendItem(
+                        wxTreeItemId pId = m_dh->m_mainFrame->m_pTreeWidget->AppendItem(
                                 m_dh->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
                         point->setTreeId( pId );
 
@@ -219,12 +219,12 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 
                 if ( !m_dh->m_ismDragging)
                 {
-                    long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+                    long l_item = m_dh->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
                     
                     if(l_item != -1 && !m_dh->m_isRulerToolActive)
                     {
-                        DatasetInfo* l_type = (DatasetInfo*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
-                        Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
+                        DatasetInfo* l_type = (DatasetInfo*)m_dh->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+                        Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_pListCtrl->GetItemData( l_item );
 
                         if (l_info->isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
                         {
@@ -694,17 +694,17 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
     {
         wxTreeItemId id, childid;
         wxTreeItemIdValue cookie = 0;
-        id = m_dh->m_mainFrame->m_treeWidget->GetFirstChild( m_dh->m_mainFrame->m_tPointId, cookie );
+        id = m_dh->m_mainFrame->m_pTreeWidget->GetFirstChild( m_dh->m_mainFrame->m_tPointId, cookie );
         while ( id.IsOk() )
         {
-            SplinePoint *point = (SplinePoint*) ( m_dh->m_mainFrame->m_treeWidget->GetItemData( id ) );
+            SplinePoint *point = (SplinePoint*) ( m_dh->m_mainFrame->m_pTreeWidget->GetItemData( id ) );
             hitResult hr1 = point->hitTest( ray );
             if ( hr1.hit && !hr.hit )
                 hr = hr1;
             else if ( hr1.hit && hr.hit && ( hr1.tmin < hr.tmin ) )
                 hr = hr1;
 
-            id = m_dh->m_mainFrame->m_treeWidget->GetNextChild( m_dh->m_mainFrame->m_tPointId, cookie );
+            id = m_dh->m_mainFrame->m_pTreeWidget->GetNextChild( m_dh->m_mainFrame->m_tPointId, cookie );
         }
     }
 
@@ -850,7 +850,7 @@ void MainCanvas::render()
             glLoadIdentity();
             glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
 
-            if ( m_dh->m_mainFrame->m_listCtrl->GetItemCount() != 0 )
+            if ( m_dh->m_mainFrame->m_pListCtrl->GetItemCount() != 0 )
             {
                 m_dh->m_anatomyHelper->renderNav( m_view, m_dh->m_shaderHelper->m_pTextureShader );
                 if ( m_dh->GLError() )
@@ -1008,7 +1008,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             } else if (m_dh->m_isRulerToolActive && m_dh->m_rulerPts.size()>0){
                 m_dh->m_rulerPts.back().x -= m_dh->m_xVoxel;
             } else {
-                m_dh->m_mainFrame->m_xSlider->SetValue( wxMax(0, m_dh->m_mainFrame->m_xSlider->GetValue() - 1) );
+                m_dh->m_mainFrame->m_pXSlider->SetValue( wxMax(0, m_dh->m_mainFrame->m_pXSlider->GetValue() - 1) );
             }
             break;
         case WXK_RIGHT:
@@ -1024,8 +1024,8 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             else if (m_dh->m_isRulerToolActive && m_dh->m_rulerPts.size()>0){
                 m_dh->m_rulerPts.back().x += m_dh->m_xVoxel;
             } else {
-                m_dh->m_mainFrame->m_xSlider->SetValue(
-                        wxMin(m_dh->m_mainFrame->m_xSlider->GetValue() + 1, m_dh->m_columns) );
+                m_dh->m_mainFrame->m_pXSlider->SetValue(
+                        wxMin(m_dh->m_mainFrame->m_pXSlider->GetValue() + 1, m_dh->m_columns) );
             }
             break;
         case WXK_DOWN:
@@ -1041,7 +1041,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             else if (m_dh->m_isRulerToolActive && m_dh->m_rulerPts.size()>0){
                 m_dh->m_rulerPts.back().y += m_dh->m_yVoxel;
             } else {
-                m_dh->m_mainFrame->m_ySlider->SetValue( wxMax(0, m_dh->m_mainFrame->m_ySlider->GetValue() - 1) );
+                m_dh->m_mainFrame->m_pYSlider->SetValue( wxMax(0, m_dh->m_mainFrame->m_pYSlider->GetValue() - 1) );
             }
             break;
         case WXK_UP:
@@ -1057,28 +1057,28 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             else if (m_dh->m_isRulerToolActive && m_dh->m_rulerPts.size()>0){
                 m_dh->m_rulerPts.back().y -= m_dh->m_yVoxel;
             } else {
-                m_dh->m_mainFrame->m_ySlider->SetValue(
-                        wxMin(m_dh->m_mainFrame->m_ySlider->GetValue() + 1, m_dh->m_rows) );
+                m_dh->m_mainFrame->m_pYSlider->SetValue(
+                        wxMin(m_dh->m_mainFrame->m_pYSlider->GetValue() + 1, m_dh->m_rows) );
             }
             break;
         case WXK_PAGEDOWN:
             if (m_dh->m_isRulerToolActive && m_dh->m_rulerPts.size()>0){
                 m_dh->m_rulerPts.back().z -= m_dh->m_zVoxel;
             } else {
-                m_dh->m_mainFrame->m_zSlider->SetValue( wxMax( 0, m_dh->m_mainFrame->m_zSlider->GetValue() - 1 ) );
+                m_dh->m_mainFrame->m_pZSlider->SetValue( wxMax( 0, m_dh->m_mainFrame->m_pZSlider->GetValue() - 1 ) );
             }
             break;
         case WXK_PAGEUP:
             if (m_dh->m_isRulerToolActive && m_dh->m_rulerPts.size()>0){
                 m_dh->m_rulerPts.back().z += m_dh->m_zVoxel;
             } else {
-                m_dh->m_mainFrame->m_zSlider->SetValue( wxMin( m_dh->m_mainFrame->m_zSlider->GetValue() + 1, m_dh->m_frames ) );
+                m_dh->m_mainFrame->m_pZSlider->SetValue( wxMin( m_dh->m_mainFrame->m_pZSlider->GetValue() + 1, m_dh->m_frames ) );
             }
             break;
         case WXK_HOME:
-            m_dh->m_mainFrame->m_xSlider->SetValue( m_dh->m_columns / 2 );
-            m_dh->m_mainFrame->m_ySlider->SetValue( m_dh->m_rows / 2 );
-            m_dh->m_mainFrame->m_zSlider->SetValue( m_dh->m_frames / 2 );
+            m_dh->m_mainFrame->m_pXSlider->SetValue( m_dh->m_columns / 2 );
+            m_dh->m_mainFrame->m_pYSlider->SetValue( m_dh->m_rows / 2 );
+            m_dh->m_mainFrame->m_pZSlider->SetValue( m_dh->m_frames / 2 );
             break;
         case WXK_DELETE:
             if (m_dh->m_isRulerToolActive && m_dh->m_rulerPts.size()>0){
@@ -1100,9 +1100,9 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             return;
     }
 
-    m_dh->updateView( m_dh->m_mainFrame->m_xSlider->GetValue(), 
-                      m_dh->m_mainFrame->m_ySlider->GetValue(),
-                      m_dh->m_mainFrame->m_zSlider->GetValue() );
+    m_dh->updateView( m_dh->m_mainFrame->m_pXSlider->GetValue(), 
+                      m_dh->m_mainFrame->m_pYSlider->GetValue(),
+                      m_dh->m_mainFrame->m_pZSlider->GetValue() );
     m_dh->m_mainFrame->refreshAllGLWidgets();
 }
 
@@ -1499,8 +1499,8 @@ void MainCanvas::segmentTumor()
     int dataLength = m_dh->m_rows * m_dh->m_columns * m_dh->m_frames;
 
     // get selected l_anatomy dataset
-    long l_item = m_dh->m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_listCtrl->GetItemData( l_item );
+    long l_item = m_dh->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_pListCtrl->GetItemData( l_item );
     
     
     //1D vector with the normalized brightness ( 0 to 1 )
@@ -1545,12 +1545,12 @@ void MainCanvas::segmentTumor()
     l_newAnatomy->setType(2);
     l_newAnatomy->setDataType(4);
     l_newAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
-    m_dh->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
-    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00") );
-    m_dh->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
-    m_dh->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
-    m_dh->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_dh->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
+    m_dh->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
+    m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     
     

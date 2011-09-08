@@ -86,9 +86,9 @@ void SelectionObject::lockToCrosshair()
         m_datasetHelper->m_boxAtCrosshair = this;
         m_datasetHelper->m_semaphore      = true;
         m_datasetHelper->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
-        m_datasetHelper->m_mainFrame->m_xSlider->SetValue( (int)m_center.x );
-        m_datasetHelper->m_mainFrame->m_ySlider->SetValue( (int)m_center.y );
-        m_datasetHelper->m_mainFrame->m_zSlider->SetValue( (int)m_center.z );
+        m_datasetHelper->m_mainFrame->m_pXSlider->SetValue( (int)m_center.x );
+        m_datasetHelper->m_mainFrame->m_pYSlider->SetValue( (int)m_center.y );
+        m_datasetHelper->m_mainFrame->m_pZSlider->SetValue( (int)m_center.z );
         m_datasetHelper->m_semaphore      = false;
         m_datasetHelper->m_mainFrame->refreshAllGLWidgets();
     }
@@ -317,9 +317,9 @@ void SelectionObject::select( bool i_flag )
     {
         if( i_flag )
         {
-            m_datasetHelper->m_mainFrame->m_treeWidget->SelectItem( m_treeId );
-            m_datasetHelper->m_mainFrame->m_treeWidget->EnsureVisible( m_treeId );
-            m_datasetHelper->m_mainFrame->m_treeWidget->SetFocus();
+            m_datasetHelper->m_mainFrame->m_pTreeWidget->SelectItem( m_treeId );
+            m_datasetHelper->m_mainFrame->m_pTreeWidget->EnsureVisible( m_treeId );
+            m_datasetHelper->m_mainFrame->m_pTreeWidget->SetFocus();
         }
 
         m_isSelected = true;
@@ -336,9 +336,9 @@ void SelectionObject::update()
     {
         m_datasetHelper->m_semaphore = true;
         m_datasetHelper->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
-        m_datasetHelper->m_mainFrame->m_xSlider->SetValue( (int)m_center.x );
-        m_datasetHelper->m_mainFrame->m_ySlider->SetValue( (int)m_center.y );
-        m_datasetHelper->m_mainFrame->m_zSlider->SetValue( (int)m_center.z );
+        m_datasetHelper->m_mainFrame->m_pXSlider->SetValue( (int)m_center.x );
+        m_datasetHelper->m_mainFrame->m_pYSlider->SetValue( (int)m_center.y );
+        m_datasetHelper->m_mainFrame->m_pZSlider->SetValue( (int)m_center.z );
         m_datasetHelper->m_semaphore = false;
     }
 
@@ -1539,7 +1539,7 @@ void SelectionObject::drawFibersInfo()
 {
     if( ! m_isMaster )
     {
-        wxTreeCtrl*      l_treeWidget   = m_datasetHelper->m_mainFrame->m_treeWidget;
+        wxTreeCtrl*      l_treeWidget   = m_datasetHelper->m_mainFrame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
 
         l_masterObject->drawFibersInfo();
@@ -1746,7 +1746,7 @@ void SelectionObject::SetFiberInfoGridValues()
 {
     if( ! m_isMaster )
     {
-        wxTreeCtrl*      l_treeWidget   = m_datasetHelper->m_mainFrame->m_treeWidget;
+        wxTreeCtrl*      l_treeWidget   = m_datasetHelper->m_mainFrame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );        
         l_masterObject->SetFiberInfoGridValues();
         return;

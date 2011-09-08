@@ -402,49 +402,49 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
-    long l_id = m_mainFrame->m_listCtrl->GetItemCount();
+    long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
     long l_id = 0;
 #endif
-    m_mainFrame->m_listCtrl->InsertItem( l_id, wxT( "" ), 0 );
+    m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
 
     if( i_info->getShow() )
-        m_mainFrame->m_listCtrl->SetItem( l_id, 0, wxT( "" ), 0 );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 0 );
     else
-        m_mainFrame->m_listCtrl->SetItem( l_id, 0, wxT( "" ), 1 );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 1 );
 
     if( ! i_info->getShowFS() )
-        m_mainFrame->m_listCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
     else
-        m_mainFrame->m_listCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ));
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ));
 
     if( ! i_info->getUseTex() )
-        m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), ( i_info->getThreshold() ) * i_info->getOldMax() ) + wxT( ")" ) );
+        m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), ( i_info->getThreshold() ) * i_info->getOldMax() ) + wxT( ")" ) );
     else
-        m_mainFrame->m_listCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
 
-    m_mainFrame->m_listCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-    m_mainFrame->m_listCtrl->SetItemData( l_id, (long)i_info );
-    m_mainFrame->m_listCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+    m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
+    m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     m_mainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
     m_mainFrame->GetStatusBar()->SetStatusText( i_info->getName() + wxT( " loaded" ), 2 );
 
-    if( m_mainFrame->m_listCtrl->GetItemCount() == 1 )
+    if( m_mainFrame->m_pListCtrl->GetItemCount() == 1 )
     {
-        m_mainFrame->m_xSlider->SetMax( wxMax( 2, m_columns - 1 ) );
-        m_mainFrame->m_xSlider->SetValue( m_columns / 2 );
-        m_mainFrame->m_ySlider->SetMax( wxMax( 2, m_rows - 1 ) );
-        m_mainFrame->m_ySlider->SetValue( m_rows / 2 );
-        m_mainFrame->m_zSlider->SetMax( wxMax( 2, m_frames - 1 ) );
-        m_mainFrame->m_zSlider->SetValue( m_frames / 2 );
+        m_mainFrame->m_pXSlider->SetMax( wxMax( 2, m_columns - 1 ) );
+        m_mainFrame->m_pXSlider->SetValue( m_columns / 2 );
+        m_mainFrame->m_pYSlider->SetMax( wxMax( 2, m_rows - 1 ) );
+        m_mainFrame->m_pYSlider->SetValue( m_rows / 2 );
+        m_mainFrame->m_pZSlider->SetMax( wxMax( 2, m_frames - 1 ) );
+        m_mainFrame->m_pZSlider->SetValue( m_frames / 2 );
         
-        updateView( m_mainFrame->m_xSlider->GetValue(), m_mainFrame->m_ySlider->GetValue(), m_mainFrame->m_zSlider->GetValue() );
+        updateView( m_mainFrame->m_pXSlider->GetValue(), m_mainFrame->m_pYSlider->GetValue(), m_mainFrame->m_pZSlider->GetValue() );
 
-        m_mainFrame->m_mainGL->changeOrthoSize();
-        m_mainFrame->m_gl0->changeOrthoSize();
-        m_mainFrame->m_gl1->changeOrthoSize();
-        m_mainFrame->m_gl2->changeOrthoSize();
+        m_mainFrame->m_pMainGL->changeOrthoSize();
+        m_mainFrame->m_pGL0->changeOrthoSize();
+        m_mainFrame->m_pGL1->changeOrthoSize();
+        m_mainFrame->m_pGL2->changeOrthoSize();
     }
 
     updateLoadStatus();
@@ -454,14 +454,14 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
 
 bool DatasetHelper::fileNameExists( const wxString i_fileName )
 {
-    int l_countDataSets = m_mainFrame->m_listCtrl->GetItemCount();
+    int l_countDataSets = m_mainFrame->m_pListCtrl->GetItemCount();
 
     if( l_countDataSets == 0 )
         return false;
 
     for( int i = 0; i < l_countDataSets; ++i )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
         if ( l_info->getPath() == i_fileName )
         {
             return true;
@@ -587,26 +587,26 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 l_sz.ToDouble( &l_z );
 
                 SplinePoint* l_point = new SplinePoint( l_x, l_y, l_z, this );
-                m_mainFrame->m_treeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "point" ), -1, -1, l_point );
+                m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "point" ), -1, -1, l_point );
                 l_pNode = l_pNode->GetNext();
             }
 
-            if( m_mainFrame->m_treeWidget->GetChildrenCount( m_mainFrame->m_tPointId ) > 0 )
+            if( m_mainFrame->m_pTreeWidget->GetChildrenCount( m_mainFrame->m_tPointId ) > 0 )
             {
                 Surface* l_surface = new Surface( this );
 #ifdef __WXMAC__
                 // insert at zero is a well-known bug on OSX, so we append there...
                 // http://trac.wxwidgets.org/ticket/4492
-                long l_id = m_mainFrame->m_listCtrl->GetItemCount();
+                long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
                 long l_id = 0;
 #endif
-                m_mainFrame->m_listCtrl->InsertItem( l_id, wxT( "" ), 0 );
-                m_mainFrame->m_listCtrl->SetItem( l_id, 1, _T( "spline surface" ) );
-                m_mainFrame->m_listCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
-                m_mainFrame->m_listCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-                m_mainFrame->m_listCtrl->SetItemData( l_id, (long)l_surface );
-                m_mainFrame->m_listCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+                m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+                m_mainFrame->m_pListCtrl->SetItem( l_id, 1, _T( "spline surface" ) );
+                m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
+                m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+                m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)l_surface );
+                m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
             }
         }
         else if( l_child->GetName() == wxT( "selection_objects" ) )
@@ -666,7 +666,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 Vector l_vs( _ix, _iy, _iz );
 
                 // get selected l_anatomy dataset
-                long l_item = m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+                long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
                 if( l_item == -1 )
                     return false;
 
@@ -686,23 +686,23 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 if( l_type == wxT( "MASTER" ) )
                 {
                     l_selectionObject->setIsMaster( true );
-                    l_currentMasterId = m_mainFrame->m_treeWidget->AppendItem( m_mainFrame->m_tSelectionObjectsId, l_selectionObject->getName(), 0, -1, l_selectionObject );
-                    m_mainFrame->m_treeWidget->EnsureVisible( l_currentMasterId );
-                    m_mainFrame->m_treeWidget->SetItemImage( l_currentMasterId, l_selectionObject->getIcon() );
-                    m_mainFrame->m_treeWidget->SetItemBackgroundColour( l_currentMasterId, *wxCYAN );
+                    l_currentMasterId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tSelectionObjectsId, l_selectionObject->getName(), 0, -1, l_selectionObject );
+                    m_mainFrame->m_pTreeWidget->EnsureVisible( l_currentMasterId );
+                    m_mainFrame->m_pTreeWidget->SetItemImage( l_currentMasterId, l_selectionObject->getIcon() );
+                    m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( l_currentMasterId, *wxCYAN );
                     l_selectionObject->setTreeId( l_currentMasterId );
                 }
                 else
                 {
                     l_selectionObject->setIsNOT( l_type == _T( "NOT" ) );
-                    wxTreeItemId boxId = m_mainFrame->m_treeWidget->AppendItem( l_currentMasterId, l_selectionObject->getName(), 0, -1, l_selectionObject );
-                    m_mainFrame->m_treeWidget->EnsureVisible( boxId );
-                    m_mainFrame->m_treeWidget->SetItemImage( boxId, l_selectionObject->getIcon() );
+                    wxTreeItemId boxId = m_mainFrame->m_pTreeWidget->AppendItem( l_currentMasterId, l_selectionObject->getName(), 0, -1, l_selectionObject );
+                    m_mainFrame->m_pTreeWidget->EnsureVisible( boxId );
+                    m_mainFrame->m_pTreeWidget->SetItemImage( boxId, l_selectionObject->getIcon() );
 
                     if( l_selectionObject->getIsNOT() )
-                        m_mainFrame->m_treeWidget->SetItemBackgroundColour( boxId, *wxRED );
+                        m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( boxId, *wxRED );
                     else
-                        m_mainFrame->m_treeWidget->SetItemBackgroundColour( boxId, *wxGREEN );
+                        m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( boxId, *wxGREEN );
 
                     l_selectionObject->setTreeId( boxId );
                 }
@@ -712,9 +712,9 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
         l_child = l_child->GetNext();
     }
 
-    m_mainFrame->m_xSlider->SetValue( xp );
-    m_mainFrame->m_ySlider->SetValue( yp );
-    m_mainFrame->m_zSlider->SetValue( zp );
+    m_mainFrame->m_pXSlider->SetValue( xp );
+    m_mainFrame->m_pYSlider->SetValue( yp );
+    m_mainFrame->m_pZSlider->SetValue( zp );
     updateView( xp, yp, zp );
 
     /*m_transform.s.M00 = r00;
@@ -758,14 +758,14 @@ void DatasetHelper::save( const wxString i_fileName )
     wxXmlProperty* l_rot22 = new wxXmlProperty( wxT( "rot22" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M22 ), l_rot12 );
     l_rotation->AddProperty( l_rot22 );
 
-    int l_countPoints = m_mainFrame->m_treeWidget->GetChildrenCount( m_mainFrame->m_tPointId, true );
+    int l_countPoints = m_mainFrame->m_pTreeWidget->GetChildrenCount( m_mainFrame->m_tPointId, true );
     wxTreeItemId l_id, l_childId;
     wxTreeItemIdValue l_cookie = 0;
 
     for( int i = 0; i < l_countPoints; ++i )
     {
-        l_id = m_mainFrame->m_treeWidget->GetNextChild( m_mainFrame->m_tPointId, l_cookie );
-        SplinePoint* l_point = (SplinePoint*)( m_mainFrame->m_treeWidget->GetItemData( l_id ) );
+        l_id = m_mainFrame->m_pTreeWidget->GetNextChild( m_mainFrame->m_tPointId, l_cookie );
+        SplinePoint* l_point = (SplinePoint*)( m_mainFrame->m_pTreeWidget->GetItemData( l_id ) );
         wxXmlNode* l_pointNode = new wxXmlNode( l_nodePoints, wxXML_ELEMENT_NODE, wxT( "point" ) );
 
         wxXmlProperty* l_propZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%f" ), l_point->getCenter().z ) );
@@ -819,14 +819,14 @@ void DatasetHelper::save( const wxString i_fileName )
         }
     }
 
-    int l_countTextures = m_mainFrame->m_listCtrl->GetItemCount();
+    int l_countTextures = m_mainFrame->m_pListCtrl->GetItemCount();
 
     if( l_countTextures == 0 )
         return;
 
     for( int i = 0; i < l_countTextures; ++i )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
 
         if( l_info->getType() < SURFACE )
         {
@@ -845,9 +845,9 @@ void DatasetHelper::save( const wxString i_fileName )
         }
     }
 
-    wxXmlProperty* l_propPosX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_xSlider->GetValue() ) );
-    wxXmlProperty* l_propPosY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_ySlider->GetValue() ), l_propPosX );
-    wxXmlProperty* l_propPosZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_zSlider->GetValue() ), l_propPosY );
+    wxXmlProperty* l_propPosX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pXSlider->GetValue() ) );
+    wxXmlProperty* l_propPosY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pYSlider->GetValue() ), l_propPosX );
+    wxXmlProperty* l_propPosZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pZSlider->GetValue() ), l_propPosY );
     l_anatomyPos->AddProperty( l_propPosZ );
 
     wxXmlDocument l_xmlDoc;
@@ -866,22 +866,22 @@ std::vector< std::vector< SelectionObject* > > DatasetHelper::getSelectionObject
     wxTreeItemId l_id, l_childId;
     wxTreeItemIdValue l_cookie = 0;
 
-    l_id = m_mainFrame->m_treeWidget->GetFirstChild( m_mainFrame->m_tSelectionObjectsId, l_cookie );
+    l_id = m_mainFrame->m_pTreeWidget->GetFirstChild( m_mainFrame->m_tSelectionObjectsId, l_cookie );
 
     while( l_id.IsOk() )
     {
         std::vector< SelectionObject* > l_b;
-        l_b.push_back( (SelectionObject*)( m_mainFrame->m_treeWidget->GetItemData( l_id ) ) );
+        l_b.push_back( (SelectionObject*)( m_mainFrame->m_pTreeWidget->GetItemData( l_id ) ) );
         wxTreeItemIdValue childcookie = 0;
-        l_childId = m_mainFrame->m_treeWidget->GetFirstChild( l_id, childcookie );
+        l_childId = m_mainFrame->m_pTreeWidget->GetFirstChild( l_id, childcookie );
 
         while( l_childId.IsOk() )
         {
-            l_b.push_back( (SelectionObject*)( m_mainFrame->m_treeWidget->GetItemData( l_childId ) ) );
-            l_childId = m_mainFrame->m_treeWidget->GetNextChild( l_id, childcookie );
+            l_b.push_back( (SelectionObject*)( m_mainFrame->m_pTreeWidget->GetItemData( l_childId ) ) );
+            l_childId = m_mainFrame->m_pTreeWidget->GetNextChild( l_id, childcookie );
         }
 
-        l_id = m_mainFrame->m_treeWidget->GetNextChild( m_mainFrame->m_tSelectionObjectsId, l_cookie );
+        l_id = m_mainFrame->m_pTreeWidget->GetNextChild( m_mainFrame->m_tSelectionObjectsId, l_cookie );
         l_selectionObjects.push_back( l_b );
     }
 
@@ -908,7 +908,7 @@ void DatasetHelper::deleteAllSelectionObjects()
     for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
         for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
         {
-            m_mainFrame->m_treeWidget->Delete(l_selectionObjects[i][j]->GetId());      
+            m_mainFrame->m_pTreeWidget->Delete(l_selectionObjects[i][j]->GetId());      
         }
 }
 
@@ -919,29 +919,29 @@ void DatasetHelper::deleteAllPoints()
     wxTreeItemId l_id, l_childId;
     wxTreeItemIdValue l_cookie = 0;
 
-    l_id = m_mainFrame->m_treeWidget->GetFirstChild( m_mainFrame->m_tPointId, l_cookie );
+    l_id = m_mainFrame->m_pTreeWidget->GetFirstChild( m_mainFrame->m_tPointId, l_cookie );
 
     while( l_id.IsOk() )
     {
         std::vector< SplinePoint* > l_b;
-        l_b.push_back( (SplinePoint*)( m_mainFrame->m_treeWidget->GetItemData( l_id ) ) );
+        l_b.push_back( (SplinePoint*)( m_mainFrame->m_pTreeWidget->GetItemData( l_id ) ) );
         wxTreeItemIdValue childcookie = 0;
-        l_childId = m_mainFrame->m_treeWidget->GetFirstChild( l_id, childcookie );
+        l_childId = m_mainFrame->m_pTreeWidget->GetFirstChild( l_id, childcookie );
 
         while( l_childId.IsOk() )
         {
-            l_b.push_back( (SplinePoint*)( m_mainFrame->m_treeWidget->GetItemData( l_childId ) ) );
-            l_childId = m_mainFrame->m_treeWidget->GetNextChild( l_id, childcookie );
+            l_b.push_back( (SplinePoint*)( m_mainFrame->m_pTreeWidget->GetItemData( l_childId ) ) );
+            l_childId = m_mainFrame->m_pTreeWidget->GetNextChild( l_id, childcookie );
         }
 
-        l_id = m_mainFrame->m_treeWidget->GetNextChild( m_mainFrame->m_tPointId, l_cookie );
+        l_id = m_mainFrame->m_pTreeWidget->GetNextChild( m_mainFrame->m_tPointId, l_cookie );
         l_points.push_back( l_b );
     }
 
     for( unsigned int i = 0; i < l_points.size(); ++i )
         for( unsigned int j = 0; j < l_points[i].size(); ++j )
         {
-            m_mainFrame->m_treeWidget->Delete(l_points[i][j]->GetId());      
+            m_mainFrame->m_pTreeWidget->Delete(l_points[i][j]->GetId());      
         }
 }
 
@@ -1020,11 +1020,11 @@ void DatasetHelper::createIsoSurface()
         return;
 
     // get selected l_anatomy dataset
-    long l_item = m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( l_item );
+    DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( l_item );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1045,16 +1045,16 @@ void DatasetHelper::createIsoSurface()
 #ifdef __WXMAC__
         // insert at zero is a well-known bug on OSX, so we append there...
         // http://trac.wxwidgets.org/ticket/4492
-        long l_id = m_mainFrame->m_listCtrl->GetItemCount();
+        long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
         long l_id = 0;
 #endif
-        m_mainFrame->m_listCtrl->InsertItem( l_id, wxT( "" ), 0 );
-        m_mainFrame->m_listCtrl->SetItem( l_id, 1, isosurf->getName() );
-        m_mainFrame->m_listCtrl->SetItem( l_id, 2, wxT( "0.40" ) );
-        m_mainFrame->m_listCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-        m_mainFrame->m_listCtrl->SetItemData( l_id, (long) isosurf );
-        m_mainFrame->m_listCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+        m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.40" ) );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+        m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) isosurf );
+        m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
     }
     else
     {
@@ -1072,11 +1072,11 @@ void DatasetHelper::createDistanceMapAndIso()
         return;
 
     // get selected l_anatomy dataset
-    long l_item = m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_listCtrl->GetItemData( l_item );
+    DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( l_item );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1100,7 +1100,7 @@ void DatasetHelper::createDistanceMapAndIso()
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
-    long l_id = m_mainFrame->m_listCtrl->GetItemCount();
+    long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
     long l_id = 0;
 #endif
@@ -1109,12 +1109,12 @@ void DatasetHelper::createDistanceMapAndIso()
     {
         isosurf->setName( anatomyName + wxT( " (offset)" ) );
 
-        m_mainFrame->m_listCtrl->InsertItem( l_id, wxT( "" ), 0 );
-        m_mainFrame->m_listCtrl->SetItem( l_id, 1, isosurf->getName() );
-        m_mainFrame->m_listCtrl->SetItem( l_id, 2, wxT( "0.10" ) );
-        m_mainFrame->m_listCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-        m_mainFrame->m_listCtrl->SetItemData( l_id, (long) isosurf );
-        m_mainFrame->m_listCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+        m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.10" ) );
+        m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+        m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) isosurf );
+        m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     }
     else
@@ -1134,11 +1134,11 @@ void DatasetHelper::createDistanceMap()
         return;
 
     // get selected l_anatomy dataset
-    long l_item = m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_listCtrl->GetItemData( l_item );
+    DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( l_item );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1154,14 +1154,14 @@ void DatasetHelper::createDistanceMap()
     l_newAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT("_DistMap"));
 
     //Feed the distance to the objects list
-    m_mainFrame->m_listCtrl->InsertItem(0, wxT(""),0);
-    m_mainFrame->m_listCtrl->SetItem(0,1, l_newAnatomy->getName());
-    m_mainFrame->m_listCtrl->SetItem(0,2, wxT("1.0"));
-    m_mainFrame->m_listCtrl->SetItem(0,3, wxT(""),1);
+    m_mainFrame->m_pListCtrl->InsertItem(0, wxT(""),0);
+    m_mainFrame->m_pListCtrl->SetItem(0,1, l_newAnatomy->getName());
+    m_mainFrame->m_pListCtrl->SetItem(0,2, wxT("1.0"));
+    m_mainFrame->m_pListCtrl->SetItem(0,3, wxT(""),1);
 
-    m_mainFrame->m_listCtrl->SetItemData(0,(long) l_newAnatomy);
+    m_mainFrame->m_pListCtrl->SetItemData(0,(long) l_newAnatomy);
 
-    m_mainFrame->m_listCtrl->SetItemState(
+    m_mainFrame->m_pListCtrl->SetItemState(
         0,
         wxLIST_STATE_SELECTED,
         wxLIST_STATE_SELECTED);
@@ -1177,11 +1177,11 @@ void DatasetHelper::createCutDataset()
         return;
 
     // get selected l_anatomy dataset
-    long l_item = m_mainFrame->m_listCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( l_item == -1 )
         return;
 
-    DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_listCtrl->GetItemData( l_item );
+    DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( l_item );
     if ( info->getType() > OVERLAY )
         return;
 
@@ -1234,12 +1234,12 @@ void DatasetHelper::createCutDataset()
     l_newAnatomy->setDataType(l_anatomy->getDataType());
     l_newAnatomy->setNewMax(l_anatomy->getNewMax());
 
-    m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
-    m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-    m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00" ) );
-    m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( "" ), 1 );
-    m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
-    m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
+    m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+    m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00" ) );
+    m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
+    m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
+    m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
@@ -1278,11 +1278,11 @@ void DatasetHelper::updateView( const float i_x, const float i_y, const float i_
     if( m_boxLockIsOn && ! m_semaphore )
         m_boxAtCrosshair->setCenter( i_x, i_y, i_z );
 
-    for( int i = 0; i < m_mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
         if( l_datasetInfo->getType() == TENSORS || l_datasetInfo->getType() == ODFS  )
-            ( (Glyph*)m_mainFrame->m_listCtrl->GetItemData( i ) )->refreshSlidersValues();
+            ( (Glyph*)m_mainFrame->m_pListCtrl->GetItemData( i ) )->refreshSlidersValues();
     }
 }
 
@@ -1290,12 +1290,12 @@ bool DatasetHelper::getFiberDataset( Fibers* &io_f )
 {
     io_f = NULL;
 
-    for( int i = 0; i < m_mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
         if( l_datasetInfo->getType() == FIBERS )
         {
-            io_f = (Fibers*)m_mainFrame->m_listCtrl->GetItemData( i );
+            io_f = (Fibers*)m_mainFrame->m_pListCtrl->GetItemData( i );
             return true;
         }
     }
@@ -1306,12 +1306,12 @@ bool DatasetHelper::getSurfaceDataset( Surface *&io_s )
 {
     io_s = NULL;
 
-    for( int i = 0; i < m_mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
         if( l_datasetInfo->getType() == SURFACE )
         {
-            io_s = (Surface*)m_mainFrame->m_listCtrl->GetItemData( i );
+            io_s = (Surface*)m_mainFrame->m_pListCtrl->GetItemData( i );
             return true;
         }
     }
@@ -1323,12 +1323,12 @@ std::vector< float >* DatasetHelper::getVectorDataset()
     if( ! m_vectorsLoaded )
         return NULL;
 
-    for( int i = 0; i < m_mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
         if( l_datasetInfo->getType() == VECTORS )
         {
-            Anatomy* l_anatomy = (Anatomy*)m_mainFrame->m_listCtrl->GetItemData( i );
+            Anatomy* l_anatomy = (Anatomy*)m_mainFrame->m_pListCtrl->GetItemData( i );
             return l_anatomy->getFloatDataset();
         }
     }
@@ -1342,12 +1342,12 @@ TensorField* DatasetHelper::getTensorField()
     if( ! m_tensorsFieldLoaded )
         return NULL;
 
-    for( int i = 0; i < m_mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
         if( l_datasetInfo->getType() == TENSOR_FIELD || l_datasetInfo->getType() == VECTORS )
         {
-            Anatomy* l_anatomy = (Anatomy*)m_mainFrame->m_listCtrl->GetItemData( i );
+            Anatomy* l_anatomy = (Anatomy*)m_mainFrame->m_pListCtrl->GetItemData( i );
             return l_anatomy->getTensorField();
         }
     }
@@ -1397,9 +1397,9 @@ void DatasetHelper::updateLoadStatus()
     m_ODFsLoaded         = false;
     m_surfaceLoaded      = false;
 
-    for( int i = 0; i < m_mainFrame->m_listCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_listCtrl->GetItemData( i );
+        DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
         switch( info->getType() )
         {
             case HEAD_BYTE:
@@ -1523,27 +1523,27 @@ void DatasetHelper::licMovieHelper()
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
-    long l_id = m_mainFrame->m_listCtrl->GetItemCount();
+    long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
     long l_id = 0;
 #endif
 
-    m_mainFrame->m_listCtrl->InsertItem( l_id, wxT( "" ), 0 );
-    m_mainFrame->m_listCtrl->SetItem( l_id, 1, l_surface->getName() );
-    m_mainFrame->m_listCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
-    m_mainFrame->m_listCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-    m_mainFrame->m_listCtrl->SetItemData( l_id, (long)l_surface );
-    m_mainFrame->m_listCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+    m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_surface->getName() );
+    m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
+    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+    m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)l_surface );
+    m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     m_surfaceLoaded = true;
     l_surface->activateLIC();
 
     m_scheduledScreenshot = true;
-    m_mainFrame->m_mainGL->render();
-    m_mainFrame->m_mainGL->render();
+    m_mainFrame->m_pMainGL->render();
+    m_mainFrame->m_pMainGL->render();
 
     delete l_surface;
-    m_mainFrame->m_listCtrl->DeleteItem( l_id );
+    m_mainFrame->m_pListCtrl->DeleteItem( l_id );
 
 }
 
@@ -1552,7 +1552,7 @@ void DatasetHelper::createLicSliceSag( int i_slize )
     int l_xs = (int)( i_slize * m_xVoxel );
 
     //delete all existing points
-    m_mainFrame->m_treeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+    m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
 
     for( int i = 0; i < 11; ++i )
     {
@@ -1566,7 +1566,7 @@ void DatasetHelper::createLicSliceSag( int i_slize )
 
             if ( i == 0 || i == 10 || j == 0 || j == 10 )
             {
-                wxTreeItemId l_treeId = m_mainFrame->m_treeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
+                wxTreeItemId l_treeId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
                 l_point->setTreeId( l_treeId );
                 l_point->setIsBoundary( true );
             }
@@ -1580,7 +1580,7 @@ void DatasetHelper::createLicSliceCor( int i_slize )
     int l_ys = (int)( i_slize * m_yVoxel );
 
     //delete all existing points
-    m_mainFrame->m_treeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+    m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
 
     for( int i = 0; i < 11; ++i )
     {
@@ -1594,7 +1594,7 @@ void DatasetHelper::createLicSliceCor( int i_slize )
 
             if( i == 0 || i == 10 || j == 0 || j == 10 )
             {
-                wxTreeItemId l_treeId = m_mainFrame->m_treeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
+                wxTreeItemId l_treeId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
                 l_point->setTreeId( l_treeId );
                 l_point->setIsBoundary( true );
             }
@@ -1609,7 +1609,7 @@ void DatasetHelper::createLicSliceAxi( int i_slize )
     int l_zs = (int)( i_slize * m_zVoxel );
 
     //delete all existing points
-    m_mainFrame->m_treeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+    m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
 
     for( int i = 0; i < 11; ++i )
     {
@@ -1623,7 +1623,7 @@ void DatasetHelper::createLicSliceAxi( int i_slize )
 
             if( i == 0 || i == 10 || j == 0 || j == 10 )
             {
-                wxTreeItemId l_treeId = m_mainFrame->m_treeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
+                wxTreeItemId l_treeId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
                 l_point->setTreeId( l_treeId );
                 l_point->setIsBoundary( true );
             }

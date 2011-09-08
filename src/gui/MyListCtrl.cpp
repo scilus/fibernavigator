@@ -248,7 +248,7 @@ void MyTreeCtrl::OnDeleteBox(wxCommandEvent& WXUNUSED(event))
         ((SelectionObject*) ((GetItemData(GetItemParent(GetSelection())))))->setIsDirty(true);
     }
     Delete(GetSelection());
-    m_mainFrame->OnTreeChange();
+    m_mainFrame->onTreeChange();
 }
 
 BEGIN_EVENT_TABLE(MySlider, wxSlider)
