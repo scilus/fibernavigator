@@ -1318,16 +1318,16 @@ void ODFs::createPropertiesSizer(PropertiesWindow *parent)
     Glyph::createPropertiesSizer(parent);
     wxSizer *l_sizer;
 
-    m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_psliderFlood->SetValue(5);
-    m_ptxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.5") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
+    m_pSliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    m_pSliderFlood->SetValue(5);
+    m_pTxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.5") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pTextThres = new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
     l_sizer->Add(m_pTextThres,0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
-    l_sizer->Add(m_ptxtThresBox,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pSliderFlood,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pTxtThresBox,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
+    parent->Connect(m_pSliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
 
     m_pbtnMainDir = new wxButton(parent, wxID_ANY,wxT("Recalculate"),wxDefaultPosition, wxSize(140,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -1393,15 +1393,15 @@ void ODFs::updatePropertiesSizer()
     if(!isDisplayShape(AXIS))
     {
         m_pTextThres->Hide();
-        m_psliderFlood->Hide();
-        m_ptxtThresBox->Hide();
+        m_pSliderFlood->Hide();
+        m_pTxtThresBox->Hide();
         m_pbtnMainDir->Hide();
     }
     else
     {
         m_pTextThres->Show();
-        m_psliderFlood->Show();
-        m_ptxtThresBox->Show();
+        m_pSliderFlood->Show();
+        m_pTxtThresBox->Show();
         m_pbtnMainDir->Show();
     }
 

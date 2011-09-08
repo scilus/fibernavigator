@@ -62,9 +62,9 @@ SelectionBox::~SelectionBox()
     if( m_objectType == CISO_SURFACE_TYPE )
     {
         delete m_isosurface;
-        if( m_sourceAnatomy && m_sourceAnatomy->m_roi == this)
+        if( m_sourceAnatomy && m_sourceAnatomy->m_pRoi == this)
         {
-            m_sourceAnatomy->m_roi = NULL;
+            m_sourceAnatomy->m_pRoi = NULL;
         }
     }
 }

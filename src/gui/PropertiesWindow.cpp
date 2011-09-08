@@ -113,8 +113,8 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
         if( l_current->getType() < RGB )
         {
             Anatomy* a = (Anatomy*)l_current;
-            if( a->m_roi )
-                a->m_roi->setThreshold( l_threshold );
+            if( a->m_pRoi )
+                a->m_pRoi->setThreshold( l_threshold );
         }
         // This slider will set the Brightness level. Currently only the glyphs uses this value.
         l_current->setBrightness( 1.0f - l_threshold );
@@ -236,7 +236,7 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
         l_selectionObject->setTreeId( l_treeNewObjectId );
         l_selectionObject->setIsMaster( true );        
     }
-    l_anatomy->m_roi = l_selectionObject;
+    l_anatomy->m_pRoi = l_selectionObject;
 
     m_mainFrame->m_pDatasetHelper->m_selBoxChanged = true;
     m_mainFrame->refreshAllGLWidgets();
@@ -269,15 +269,15 @@ void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
 
 void PropertiesWindow::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    float l_sliderValue = ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->m_psliderFlood->GetValue() / 200.0f;
+    float l_sliderValue = ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->m_pSliderFlood->GetValue() / 200.0f;
     ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->setFloodThreshold(l_sliderValue);
-    ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->m_ptxtThresBox->SetValue(wxString::Format( wxT( "%.2f"), l_sliderValue));
+    ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->m_pTxtThresBox->SetValue(wxString::Format( wxT( "%.2f"), l_sliderValue));
 }
 
 void PropertiesWindow::OnSliderGraphSigmaMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->setGraphSigma(((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->m_psliderGraphSigma->GetValue());
-    std::cout << (((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->m_psliderGraphSigma->GetValue()) << endl;
+    ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->setGraphSigma(((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->m_pSliderGraphSigma->GetValue());
+    std::cout << (((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->m_pSliderGraphSigma->GetValue()) << endl;
 }
 
 void PropertiesWindow::OnKmeans( wxCommandEvent& WXUNUSED(event) )
@@ -1211,9 +1211,9 @@ void PropertiesWindow::OnBoxSizeZ( wxCommandEvent &event )
 
 void PropertiesWindow::OnSliderAxisMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    float l_sliderValue = ((ODFs*)m_mainFrame->m_pCurrentSceneObject)->m_psliderFlood->GetValue() / 10.0f;
+    float l_sliderValue = ((ODFs*)m_mainFrame->m_pCurrentSceneObject)->m_pSliderFlood->GetValue() / 10.0f;
     ((ODFs*)m_mainFrame->m_pCurrentSceneObject)->m_axisThreshold = l_sliderValue;
-    ((ODFs*)m_mainFrame->m_pCurrentSceneObject)->m_ptxtThresBox->SetValue(wxString::Format( wxT( "%.1f"), l_sliderValue));
+    ((ODFs*)m_mainFrame->m_pCurrentSceneObject)->m_pTxtThresBox->SetValue(wxString::Format( wxT( "%.1f"), l_sliderValue));
 
     std::cout << ((ODFs*)m_mainFrame->m_pCurrentSceneObject)->m_axisThreshold << std::endl;
 }

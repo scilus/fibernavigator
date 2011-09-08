@@ -226,7 +226,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                         DatasetInfo* l_type = (DatasetInfo*)m_dh->m_mainFrame->m_pListCtrl->GetItemData( l_item );
                         Anatomy* l_info = (Anatomy*)m_dh->m_mainFrame->m_pListCtrl->GetItemData( l_item );
 
-                        if (l_info->isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
+                        if (l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
                         {
                             m_dh->m_isSegmentActive = true;
                             m_hr = pick(event.GetPosition(), true);
@@ -241,7 +241,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                         //TODO HACK to be corrected
                         m_hr = pick(event.GetPosition(), true);
                     }
-                    /*else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && (Anatomy*)l_info->isSegmentOn) //Prepare Drag for selectObj-GraphCut
+                    /*else if (!m_dh->m_isRulerToolActive && !m_dh->m_isSelectBckActive && m_dh->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectObj-GraphCut
                     {
                         m_hr = pick(event.GetPosition(), true);
 
@@ -253,7 +253,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                         object.push_back(current);
                         
                     }
-                    else if (!m_dh->m_isRulerToolActive && m_dh->m_isSelectBckActive && !m_dh->m_isSelectObjActive && (Anatomy*)l_info->isSegmentOn) //Prepare Drag for selectBck-GraphCut
+                    else if (!m_dh->m_isRulerToolActive && m_dh->m_isSelectBckActive && !m_dh->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectBck-GraphCut
                     {
                         m_hr = pick(event.GetPosition(), true);
 
@@ -276,7 +276,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->moveScene( xDrag, yDrag );
                     Refresh( false );
                 }
-                /*else if(!m_dh->m_isRulerToolActive && (Anatomy*)l_info->isSegmentOn && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
+                /*else if(!m_dh->m_isRulerToolActive && (Anatomy*)l_info->m_isSegmentOn && m_dh->m_isSelectObjActive && !m_dh->m_isSelectBckActive) //Dragging for selectObj-Graphcut
                 {
                     m_hr = pick(event.GetPosition(), true);
 
@@ -293,7 +293,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_dh->m_isObjfilled = true;
                     m_dh->m_isObjCreated = true;
                 }
-                else if(!m_dh->m_isRulerToolActive && (Anatomy*)l_info->isSegmentOn && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
+                else if(!m_dh->m_isRulerToolActive && (Anatomy*)l_info->m_isSegmentOn && !m_dh->m_isSelectObjActive &&m_dh->m_isSelectBckActive) //Dragging for selectBck-Graphcut
                 {
                     m_hr = pick(event.GetPosition(), true);
 

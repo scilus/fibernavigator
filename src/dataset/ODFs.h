@@ -55,9 +55,9 @@ public:
 	bool   m_isMaximasSet;
 	float  m_axisThreshold;
 
-    MySlider        *m_psliderFlood;
+    MySlider        *m_pSliderFlood;
     wxStaticText    *m_pTextThres;
-    wxTextCtrl      *m_ptxtThresBox;
+    wxTextCtrl      *m_pTxtThresBox;
     wxButton        *m_pbtnMainDir;
 
 private:
