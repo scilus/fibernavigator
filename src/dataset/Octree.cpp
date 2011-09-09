@@ -5,7 +5,7 @@
 //////////////////////////////////////////
 /*Constructor*/
 //////////////////////////////////////////
-Octree::Octree( int lvl, float *pointArray, int nb, DatasetHelper* dh )
+Octree::Octree( int lvl, const std::vector< float > &pointArray, int nb, DatasetHelper* dh )
 :   m_dh(dh),
     m_level(lvl),
     m_countPoints(nb),

@@ -15,7 +15,7 @@
 
 class Octree {
 public:
-    Octree(int lvl,float* pointArray,int nb, DatasetHelper* dh); //Constructor
+    Octree(int lvl,const std::vector< float > &pointArray,int nb, DatasetHelper* dh); //Constructor
     ~Octree(); //Destructor
 
     //Functions
@@ -47,7 +47,7 @@ private:
     float m_minPointX; //Quad corner
     float m_minPointY; //Quad corner
     float m_minPointZ; //Quad corner
-    float *m_pointArray; // Points (x,y,z)
+    const vector< float > &m_pointArray; // Points (x,y,z)
     vector< float > m_boxMax; //SelectionObject
     vector< float > m_boxMin; //SelectionObject
     

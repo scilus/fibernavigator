@@ -90,7 +90,7 @@ bool Fibers::load( wxString i_filename )
         return loadMRtrix( i_filename );
 
     /* OcTree points classification */
-    m_octree = new Octree(2,&m_pointArray[0],m_countPoints,m_dh);
+    m_octree = new Octree(2, m_pointArray,m_countPoints,m_dh);
 
     return res;
 }
