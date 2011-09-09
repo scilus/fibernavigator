@@ -9,7 +9,7 @@ struct hitResult {
     bool    hit;
     float   tmin;
     int     picked;
-    void*   object;
+    void    *object;
 };
 
 class Ray {

@@ -283,7 +283,7 @@ void PropertiesWindow::OnSliderGraphSigmaMoved( wxCommandEvent& WXUNUSED(event) 
 void PropertiesWindow::OnKmeans( wxCommandEvent& WXUNUSED(event) )
 {
     m_mainFrame->m_pDatasetHelper->m_SegmentMethod = 2;
-    m_mainFrame->m_pMainGL->segmentTumor();
+    m_mainFrame->m_pMainGL->segment();
 }
 
 void PropertiesWindow::OnSelectObj(wxCommandEvent& WXUNUSED(event))
@@ -306,7 +306,7 @@ void PropertiesWindow::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
 {
     m_mainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
     m_mainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
-    m_mainFrame->m_pMainGL->segmentTumor();    
+    m_mainFrame->m_pMainGL->segment();    
 }
 
 
