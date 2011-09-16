@@ -11,7 +11,7 @@
 #ifndef GLYPH_H_
 #define GLYPH_H_
 
-#include "datasetInfo.h"
+#include "DatasetInfo.h"
 #include "../misc/Algorithms/Helper.h"
 
 using namespace std;

@@ -1,13 +1,13 @@
 #include <math.h>
 #include <fstream>
 
-#include "surface.h"
+#include "Surface.h"
 #include "../misc/Fantom/FMatrix.h"
-#include "surface.h"
-#include "splinePoint.h"
-#include "../gui/myListCtrl.h"
+#include "Surface.h"
+#include "SplinePoint.h"
+#include "../gui/MyListCtrl.h"
 #include "Anatomy.h"
-#include "../gui/mainFrame.h"
+#include "../gui/MainFrame.h"
 #include <GL/glew.h>
 #include "../misc/lic/SurfaceLIC.h"
 #include "../main.h"
@@ -39,7 +39,7 @@ Surface::Surface(DatasetHelper* dh) : DatasetInfo(dh)
 
 Surface::~Surface()
 {
-    m_dh->m_mainFrame->m_treeWidget->DeleteChildren(m_dh->m_mainFrame->m_tPointId);
+    m_dh->m_mainFrame->m_pTreeWidget->DeleteChildren(m_dh->m_mainFrame->m_tPointId);
     m_dh->m_surfaceLoaded = false;
     m_tMesh->clearMesh();
     delete m_tMesh;
@@ -171,24 +171,24 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 void Surface::execute ()
 {
     std::vector< std::vector< double > > givenPoints;
-    int countPoints = m_dh->m_mainFrame->m_treeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId, true);
+    int countPoints = m_dh->m_mainFrame->m_pTreeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId, true);
     if (countPoints == 0) return;
     if (m_tMesh) delete m_tMesh;
     m_tMesh = new TriangleMesh(m_dh);
     wxTreeItemId id, childid;
     wxTreeItemIdValue cookie = 0;
-    id = m_dh->m_mainFrame->m_treeWidget->GetFirstChild(m_dh->m_mainFrame->m_tPointId, cookie);
-    givenPoints.reserve(m_dh->m_mainFrame->m_treeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId));
+    id = m_dh->m_mainFrame->m_pTreeWidget->GetFirstChild(m_dh->m_mainFrame->m_tPointId, cookie);
+    givenPoints.reserve(m_dh->m_mainFrame->m_pTreeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId));
     while ( id.IsOk() )
     {
-        SplinePoint *point = (SplinePoint*)(m_dh->m_mainFrame->m_treeWidget->GetItemData(id));
+        SplinePoint *point = (SplinePoint*)(m_dh->m_mainFrame->m_pTreeWidget->GetItemData(id));
         std::vector< double > p(3);
         p[0] = point->getCenter().x;
         p[1] = point->getCenter().y;
         p[2] = point->getCenter().z;
         givenPoints.push_back(p);
 
-        id = m_dh->m_mainFrame->m_treeWidget->GetNextChild(m_dh->m_mainFrame->m_tPointId, cookie);
+        id = m_dh->m_mainFrame->m_pTreeWidget->GetNextChild(m_dh->m_mainFrame->m_tPointId, cookie);
     }
 
     std::vector< std::vector< double > > deBoorPoints;
@@ -335,14 +335,14 @@ void Surface::draw()
 
 void Surface::movePoints()
 {
-    int countPoints = m_dh->m_mainFrame->m_treeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId, true);
+    int countPoints = m_dh->m_mainFrame->m_pTreeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId, true);
 
     wxTreeItemId id, childid;
     wxTreeItemIdValue cookie = 0;
     for (int i = 0 ; i < countPoints ; ++i)
     {
-        id = m_dh->m_mainFrame->m_treeWidget->GetNextChild(m_dh->m_mainFrame->m_tPointId, cookie);
-        SplinePoint *point = (SplinePoint*)m_dh->m_mainFrame->m_treeWidget->GetItemData(id);
+        id = m_dh->m_mainFrame->m_pTreeWidget->GetNextChild(m_dh->m_mainFrame->m_tPointId, cookie);
+        SplinePoint *point = (SplinePoint*)m_dh->m_mainFrame->m_pTreeWidget->GetItemData(id);
         point->move(2.0 * m_threshold);
     }
     execute();

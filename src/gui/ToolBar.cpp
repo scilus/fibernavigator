@@ -9,8 +9,8 @@
 //      
 /////////////////////////////////////////////////////////////////////////////
 
-#include "toolBar.h"
-#include "mainFrame.h"
+#include "ToolBar.h"
+#include "MainFrame.h"
 #include "../main.h"
 
 ToolBar::ToolBar(wxWindow *parent)
@@ -90,23 +90,23 @@ ToolBar::ToolBar(wxWindow *parent)
 
 void ToolBar::initToolBar( MainFrame *mf )
 {
-    mf->Connect(m_btnOpen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnLoad));
-    mf->Connect(m_toggleShowAxial->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowAxial));
-    mf->Connect(m_toggleShowCoronal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowCoronal));
-    mf->Connect(m_toggleShowSagittal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleShowSagittal));
-    mf->Connect(m_toggleAlphaBlending->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleAlpha));
-    mf->Connect(m_btnNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNewSelectionBox));
-    mf->Connect(m_toggleShowAllSelectionObjects->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnHideSelectionObjects));
-    mf->Connect(m_toggleInverseSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnInvertFibers));
-    mf->Connect(m_toggleActivateAllSelectionObjects->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnActivateSelectionObjects));
+    mf->Connect(m_btnOpen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLoad));
+    mf->Connect(m_toggleShowAxial->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleShowAxial));
+    mf->Connect(m_toggleShowCoronal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleShowCoronal));
+    mf->Connect(m_toggleShowSagittal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleShowSagittal));
+    mf->Connect(m_toggleAlphaBlending->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleAlpha));
+    mf->Connect(m_btnNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionBox));
+    mf->Connect(m_toggleShowAllSelectionObjects->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onHideSelectionObjects));
+    mf->Connect(m_toggleInverseSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertFibers));
+    mf->Connect(m_toggleActivateAllSelectionObjects->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onActivateSelectionObjects));
     //mf->Connect(m_btnNewSplineSurface->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNewSplineSurface));
     //mf->Connect(m_toggleDrawPoints->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleDrawPointsMode));
     //mf->Connect(m_btnMoveBoundaryPointLeft->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMoveBoundaryPointsLeft));
     //mf->Connect(m_btnMoveBoundaryPointRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMoveBoundaryPointsRight));
-    mf->Connect(m_toggleLighting->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleLighting));
-    mf->Connect(m_toggleFakeTubes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnUseFakeTubes));
-    mf->Connect(m_toggleClearToBlack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnClearToBlack));
-    mf->Connect(m_toggleRuler->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnRulerTool)); 
+    mf->Connect(m_toggleLighting->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleLighting));
+    mf->Connect(m_toggleFakeTubes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseFakeTubes));
+    mf->Connect(m_toggleClearToBlack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onClearToBlack));
+    mf->Connect(m_toggleRuler->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRulerTool)); 
 }
 
 void ToolBar::updateToolBar( MainFrame *mf )
@@ -114,17 +114,17 @@ void ToolBar::updateToolBar( MainFrame *mf )
     //EnableTool(m_btnNewSplineSurface->GetId(),mf->m_datasetHelper->m_anatomyLoaded && !mf->m_datasetHelper->m_surfaceLoaded);
     //EnableTool(m_btnMoveBoundaryPointLeft->GetId(),mf->m_datasetHelper->m_surfaceLoaded);
     //EnableTool(m_btnMoveBoundaryPointRight->GetId(),mf->m_datasetHelper->m_surfaceLoaded);
-    ToggleTool(m_toggleShowAxial->GetId(), mf->m_datasetHelper->m_showAxial);
-    ToggleTool(m_toggleShowCoronal->GetId(), mf->m_datasetHelper->m_showCoronal);
-    ToggleTool(m_toggleShowSagittal->GetId(), mf->m_datasetHelper->m_showSagittal);
-    ToggleTool(m_toggleAlphaBlending->GetId(), mf->m_datasetHelper->m_blendAlpha);
-    ToggleTool(m_toggleLighting->GetId(), mf->m_datasetHelper->m_lighting);
-    ToggleTool(m_toggleShowAllSelectionObjects->GetId(), mf->m_datasetHelper->m_showObjects);
-    ToggleTool(m_toggleActivateAllSelectionObjects->GetId(), !mf->m_datasetHelper->m_activateObjects);
-    ToggleTool(m_toggleFakeTubes->GetId(), mf->m_datasetHelper->m_useFakeTubes);
+    ToggleTool(m_toggleShowAxial->GetId(), mf->m_pDatasetHelper->m_showAxial);
+    ToggleTool(m_toggleShowCoronal->GetId(), mf->m_pDatasetHelper->m_showCoronal);
+    ToggleTool(m_toggleShowSagittal->GetId(), mf->m_pDatasetHelper->m_showSagittal);
+    ToggleTool(m_toggleAlphaBlending->GetId(), mf->m_pDatasetHelper->m_blendAlpha);
+    ToggleTool(m_toggleLighting->GetId(), mf->m_pDatasetHelper->m_lighting);
+    ToggleTool(m_toggleShowAllSelectionObjects->GetId(), mf->m_pDatasetHelper->m_showObjects);
+    ToggleTool(m_toggleActivateAllSelectionObjects->GetId(), !mf->m_pDatasetHelper->m_activateObjects);
+    ToggleTool(m_toggleFakeTubes->GetId(), mf->m_pDatasetHelper->m_useFakeTubes);
     //ToggleTool(m_toggleDrawPoints->GetId(), mf->m_datasetHelper->m_pointMode);
-    ToggleTool(m_toggleRuler->GetId(), mf->m_datasetHelper->m_isRulerToolActive);
-    ToggleTool(m_toggleClearToBlack->GetId(), mf->m_datasetHelper->m_clearToBlack);
+    ToggleTool(m_toggleRuler->GetId(), mf->m_pDatasetHelper->m_isRulerToolActive);
+    ToggleTool(m_toggleClearToBlack->GetId(), mf->m_pDatasetHelper->m_clearToBlack);
     //EnableTool(m_btnNewSelectionBox->GetId(), mf->m_datasetHelper->m_fibersLoaded);
-    ToggleTool(m_toggleInverseSelection->GetId(), mf->m_datasetHelper->m_fibersInverted);     
+    ToggleTool(m_toggleInverseSelection->GetId(), mf->m_pDatasetHelper->m_fibersInverted);     
 }

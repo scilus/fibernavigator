@@ -589,26 +589,26 @@ void ODFs::draw()
         return;
 
     // Enable the shader.
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->bind();
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->bind();
     glBindTexture( GL_TEXTURE_1D, m_textureId );
 
     // This is the color look up table texture.
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniSampler( "clut",        0                           );
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniSampler( "clut",        0                           );
     
     // This is the brightness level of the odf.
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniFloat(   "brightness",  DatasetInfo::m_brightness   );
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniFloat(   "brightness",  DatasetInfo::m_brightness   );
 
     // This is the alpha level of the odf.
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniFloat(   "alpha",       DatasetInfo::m_alpha        );
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniFloat(   "alpha",       DatasetInfo::m_alpha        );
 
     // If m_mapOnSphere is true then the color will be set on a sphere instead of a deformed mesh.
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt(      "mapOnSphere", (GLint)isDisplayShape(SPHERE)      );
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniInt(      "mapOnSphere", (GLint)isDisplayShape(SPHERE)      );
 
     // If m_colorWithPosition is true then the glyph will be colored with the position of the vertex.
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt(      "colorWithPos", (GLint)m_colorWithPosition );
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniInt(      "colorWithPos", (GLint)m_colorWithPosition );
  
     // Get the radius attribute location
-    m_radiusAttribLoc = glGetAttribLocation( DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->getProgramObject(),
+    m_radiusAttribLoc = glGetAttribLocation( DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->getProgramObject(),
                         "radius" );
     Glyph::draw();
 
@@ -616,7 +616,7 @@ void ODFs::draw()
     glDisableVertexAttribArray( m_radiusAttribLoc);
 
     // Disable the tensor color shader.
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->release();
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->release();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -645,10 +645,10 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     // Odf offset.
     GLfloat l_offset[3];
     getVoxelOffset( i_zVoxel, i_yVoxel, i_xVoxel, l_offset );
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUni3Float( "offset", l_offset );
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUni3Float( "offset", l_offset );
 
     // Lets set the min max radii for this odf.
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUni2Float( "radiusMinMax", m_radiiMinMaxMap[currentIdx] );    
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUni2Float( "radiusMinMax", m_radiiMinMaxMap[currentIdx] );    
 
     // Enable attribute
     glEnableVertexAttribArray( m_radiusAttribLoc );
@@ -690,11 +690,11 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     //} 
     // Need a global flip in X on top of that, which is done above
 
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUni3Float(   "axisFlip",    l_flippedAxes               );
-    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "showAxis", 0 );
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUni3Float(   "axisFlip",    l_flippedAxes               );
+    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniInt( "showAxis", 0 );
     if (isDisplayShape(AXIS))
     {
-        DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "showAxis", 1 );
+        DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniInt( "showAxis", 1 );
         
         if(m_coefficients[currentIdx][0] != 0)
         {
@@ -707,7 +707,7 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
                     l_coloring[1] = m_mainDirections[currentIdx][i][1];
                     l_coloring[2] = m_mainDirections[currentIdx][i][2];
 
-                    DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUni3Float( "coloring", l_coloring );
+                    DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUni3Float( "coloring", l_coloring );
                     glBegin(GL_LINES);  
                         glVertex3f(-m_mainDirections[currentIdx][i][0],-m_mainDirections[currentIdx][i][1],-m_mainDirections[currentIdx][i][2]);
                         glVertex3f(m_mainDirections[currentIdx][i][0],m_mainDirections[currentIdx][i][1],m_mainDirections[currentIdx][i][2]);       
@@ -718,12 +718,12 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     }
     else
     {
-        DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "swapRadius", 0 );
+        DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniInt( "swapRadius", 0 );
         // Draw the first half of the odfs.
         glDrawArrays( GL_TRIANGLE_STRIP, 0, m_nbPointsPerGlyph );
 
         // Lets set the radius modifier.
-        DatasetInfo::m_dh->m_shaderHelper->m_odfsShader->setUniInt( "swapRadius", 1 );
+        DatasetInfo::m_dh->m_shaderHelper->m_pOdfsShader->setUniInt( "swapRadius", 1 );
         // Draw the other half of the odfs.
         glDrawArrays( GL_TRIANGLE_STRIP, 0, m_nbPointsPerGlyph );
 
@@ -1318,16 +1318,16 @@ void ODFs::createPropertiesSizer(PropertiesWindow *parent)
     Glyph::createPropertiesSizer(parent);
     wxSizer *l_sizer;
 
-    m_psliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_psliderFlood->SetValue(5);
-    m_ptxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.5") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
+    m_pSliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    m_pSliderFlood->SetValue(5);
+    m_pTxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.5") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pTextThres = new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
     l_sizer->Add(m_pTextThres,0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderFlood,0,wxALIGN_CENTER);
-    l_sizer->Add(m_ptxtThresBox,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pSliderFlood,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pTxtThresBox,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
+    parent->Connect(m_pSliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
 
     m_pbtnMainDir = new wxButton(parent, wxID_ANY,wxT("Recalculate"),wxDefaultPosition, wxSize(140,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -1393,15 +1393,15 @@ void ODFs::updatePropertiesSizer()
     if(!isDisplayShape(AXIS))
     {
         m_pTextThres->Hide();
-        m_psliderFlood->Hide();
-        m_ptxtThresBox->Hide();
+        m_pSliderFlood->Hide();
+        m_pTxtThresBox->Hide();
         m_pbtnMainDir->Hide();
     }
     else
     {
         m_pTextThres->Show();
-        m_psliderFlood->Show();
-        m_ptxtThresBox->Show();
+        m_pSliderFlood->Show();
+        m_pTxtThresBox->Show();
         m_pbtnMainDir->Show();
     }
 

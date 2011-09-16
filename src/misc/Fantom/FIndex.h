@@ -12,7 +12,7 @@
 #ifndef __FIndex_hh
 #define __FIndex_hh
 
-#include "stdAliases.h"
+#include "StdAliases.h"
 #include "FString.h"
 #include "FException.h"
 

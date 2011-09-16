@@ -11,7 +11,7 @@
 #ifndef TENSORS_H_
 #define TENSORS_H_
 
-#include "datasetInfo.h"
+#include "DatasetInfo.h"
 #include "Glyph.h"
 #include "../misc/lic/TensorField.h"
 #include "../misc/Fantom/FVector.h"

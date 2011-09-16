@@ -1,4 +1,4 @@
-#include "splinePoint.h"
+#include "SplinePoint.h"
 #include "../gui/SelectionObject.h"
 #include "../main.h"
 
@@ -103,9 +103,9 @@ void SplinePoint::select( bool flag )
 
     if( m_treeId && flag )
     {
-        m_dh->m_mainFrame->m_treeWidget->SelectItem(m_treeId);
-        m_dh->m_mainFrame->m_treeWidget->EnsureVisible(m_treeId);
-        m_dh->m_mainFrame->m_treeWidget->SetFocus();
+        m_dh->m_mainFrame->m_pTreeWidget->SelectItem(m_treeId);
+        m_dh->m_mainFrame->m_pTreeWidget->EnsureVisible(m_treeId);
+        m_dh->m_mainFrame->m_pTreeWidget->SetFocus();
     }
 }
 

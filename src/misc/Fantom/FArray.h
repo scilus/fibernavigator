@@ -15,7 +15,7 @@
 #include <vector>
 #include <cstring>
 
-#include "stdAliases.h"
+#include "StdAliases.h"
 
 class FMatrix;
 

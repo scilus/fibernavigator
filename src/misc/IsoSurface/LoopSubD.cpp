@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "loopSubD.h"
-#include "triangleMesh.h"
+#include "LoopSubD.h"
+#include "TriangleMesh.h"
 
 #include "wx/wxprec.h"
 

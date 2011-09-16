@@ -24,7 +24,7 @@ public:
     /**
      * Create an empty shader object
      */
-    Shader(wxString);
+    Shader(const wxString &fileName);
 
     /**
      * Destroy shader object, unlinks it, if needed
@@ -77,15 +77,15 @@ private:
     /**
      * compile a vertex or fragment shader program
      */
-    bool compile(GLuint*, wxString);
+    bool compile(GLuint* shaderId, const wxString &codeString);
 
-    void printCompilerLog(GLuint);
-    void printProgramLog(GLuint);
-    void printwxT(wxString);
+    void printCompilerLog(GLuint shader);
+    void printProgramLog(GLuint program);
+    void printwxT(const wxString &string);
 
 
-    bool loadCode (wxString);
-    bool loadFromFile(wxString*, wxString);
+    bool loadCode (const wxString &fileName);
+    bool loadFromFile(wxString* code, const wxString &fileName);
 };
 
 #endif /* SHADER_H_ */

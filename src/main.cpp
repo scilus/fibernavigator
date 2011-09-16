@@ -17,9 +17,9 @@
 #include "wx/filename.h"
 
 #include "main.h"
-#include "gui/mainFrame.h"
-#include "gui/toolBar.h"
-#include "gui/menuBar.h"
+#include "gui/MainFrame.h"
+#include "gui/ToolBar.h"
+#include "gui/MenuBar.h"
 
 #include <exception>
 
@@ -169,19 +169,19 @@ bool MyApp::OnInit( void )
                 if ( cmdParser.Found(_T("d")) &&  ( i == 0 ) )
                 {
                     // We pass -1 in the load function because there is no index because this is call from the cmd line.
-                    frame->m_datasetHelper->load( cmdFileName, -1 );
-                    frame->m_listCtrl->SetItemState(0,wxLIST_STATE_SELECTED, wxALL);
-                    frame->m_datasetHelper->updateLoadStatus();
-                    frame->m_datasetHelper->createDistanceMapAndIso();
+                    frame->m_pDatasetHelper->load( cmdFileName, -1 );
+                    frame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED, wxALL);
+                    frame->m_pDatasetHelper->updateLoadStatus();
+                    frame->m_pDatasetHelper->createDistanceMapAndIso();
                 }
                 else if ( cmdParser.Found( _T( "p" ) ) &&  ( i == cmdParser.GetParamCount() -1 ) )
                 {
-                    frame->Screenshot( cmdFileName );
+                    frame->screenshot( cmdFileName );
                 }
                 else
                 {
                     // We pass -1 in the load function because there is no index because this is call from the cmd line.
-                    frame->m_datasetHelper->load( cmdFileName, -1 );
+                    frame->m_pDatasetHelper->load( cmdFileName, -1 );
                 }
             }
         }

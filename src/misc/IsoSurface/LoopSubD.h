@@ -1,4 +1,4 @@
-// loopSubD.h: interface for the loopSubD class.
+// LoopSubD.h: interface for the loopSubD class.
 //
 //////////////////////////////////////////////////////////////////////
 

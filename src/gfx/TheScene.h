@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:            theScene.h
+// Name:            TheScene.h
 // Author:          ---
 // Creation Date:   ---
 //
@@ -19,7 +19,6 @@
 #endif
 
 #include "../gui/ArcBall.h"
-#include "../dataset/datasetInfo.h"
 #include "../dataset/DatasetHelper.h"
 #include "wx/glcanvas.h"
 
@@ -35,7 +34,6 @@ enum
 };
 
 class DatasetHelper;
-class FgeImageSpaceLIC;
 
 class TheScene
 {
@@ -46,11 +44,13 @@ public:
 
     // Functions
     void         bindTextures    ();
-    void         drawSphere      ( float, float, float, float );
-    wxGLContext* getMainGLContext()                                 { return m_mainGLContext; };
-    void         initGL          ( int );
+    void         drawSphere      ( float xPos, float yPos, float zPos, float ray );
+    wxGLContext* getMainGLContext()
+        { return m_pMainGLContext; };
+    void         initGL          ( int whichView );
     void         renderScene     ();
-    void         setMainGLContext( wxGLContext* i_context )         { m_mainGLContext = i_context; };
+    void         setMainGLContext( wxGLContext* pContext )         
+        { m_pMainGLContext = pContext; };
 	bool         m_isRotateZ;
     bool         m_isRotateY;
     bool         m_isRotateX;
@@ -79,13 +79,13 @@ private:
     void renderFibers           ();
     void renderMesh             ();
     void renderODFs             ();
-    void renderSlizes           ();
+    void renderSlices           ();
     void renderSplineSurface    ();
     void renderTensors          ();
 
     // Variables
-    DatasetHelper*  m_datasetHelper;
-    wxGLContext*    m_mainGLContext;
+    DatasetHelper*  m_pDatasetHelper;
+    wxGLContext*    m_pMainGLContext;
     float           m_modelview[16];  // Variable for the frustum calculation.
     float           m_projection[16]; // Variable for the frustum calculation.
 };

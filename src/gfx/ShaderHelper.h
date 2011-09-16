@@ -8,13 +8,14 @@
 #ifndef SHADERHELPER_H_
 #define SHADERHELPER_H_
 
-//#include "GLSL/GLSLShaderProgram.h"
 #include "Shader.h"
 #include "../dataset/DatasetHelper.h"
 
+#include <vector>
+
 class ShaderHelper {
 public:
-    ShaderHelper(DatasetHelper*);
+    ShaderHelper(DatasetHelper* pDh);
     virtual ~ShaderHelper();
 
     void initializeArrays();
@@ -24,26 +25,26 @@ public:
     void setFiberShaderVars();
     void setSplineSurfaceShaderVars();
 
-    Shader *m_textureShader;
-    Shader *m_meshShader;
-    Shader *m_fiberShader;
-    Shader *m_fakeTubeShader;
-    Shader *m_splineSurfShader;
-    Shader *m_vectorShader;
-    Shader *m_legendShader;
-    Shader *m_graphShader;
-    Shader *m_tensorsShader;
-    Shader *m_odfsShader;
+    Shader *m_pTextureShader;
+    Shader *m_pMeshShader;
+    Shader *m_pFiberShader;
+    Shader *m_pFakeTubeShader;
+    Shader *m_pSplineSurfShader;
+    Shader *m_pVectorShader;
+    Shader *m_pLegendShader;
+    Shader *m_pGraphShader;
+    Shader *m_pTensorsShader;
+    Shader *m_pOdfsShader;
 
 private:
-    DatasetHelper* m_dh;
+    DatasetHelper* m_pDh;
 
     int m_textureCount;
     GLuint m_cutTex;
-    std::vector<GLint> m_tex;
+    std::vector<GLint>   m_tex;
     std::vector<GLfloat> m_threshold;
     std::vector<GLfloat> m_alpha;
-    std::vector<GLint> m_type;
+    std::vector<GLint>   m_type;
 };
 
 #endif /* SHADERHELPER_H_ */

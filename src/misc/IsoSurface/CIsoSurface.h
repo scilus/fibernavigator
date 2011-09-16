@@ -13,7 +13,7 @@
 #include <map>
 #include <vector>
 
-#include "../../dataset/datasetInfo.h"
+#include "../../dataset/DatasetInfo.h"
 #include "../../dataset/DatasetHelper.h"
 
 #include "wx/wxprec.h"
