@@ -1,14 +1,7 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:            fibers.cpp
-// Author:          ---
-// Creation Date:   ---
-//
-// Description: This is the implementation file for fibers class.
-//
-// Last modifications:
-//      by : ggirard - 29/12/2010
-//      by : Marc-Alexandre Côté - 30/03/2011
-/////////////////////////////////////////////////////////////////////////////
+/*
+ *  The Fibers class implementation.
+ *
+ */
 
 #include "Fibers.h"
 
@@ -24,17 +17,18 @@
 #include "Anatomy.h"
 #include "../main.h"
 
+// TODO replace by const
 #define LINEAR_GRADIENT_THRESHOLD 0.085f
 #define MIN_ALPHA_VALUE 0.017f
 
-Fibers::Fibers( DatasetHelper* i_datasetHelper ) :
-DatasetInfo( i_datasetHelper )
+Fibers::Fibers( DatasetHelper *pDatasetHelper )
+    : DatasetInfo( pDatasetHelper ),
+      m_isSpecialFiberDisplay( false ),
+      m_isInitialized( false ),
+      m_normalsPositive( false ),
+      m_cachedThreshold( 0.0f )
 {
-    m_isInitialized         = false;
-    m_normalsPositive       = false;
     m_bufferObjects         = new GLuint[3];
-    m_cachedThreshold       = 0.0f;
-    m_isSpecialFiberDisplay = false;
 }
 
 Fibers::~Fibers()
@@ -43,333 +37,374 @@ Fibers::~Fibers()
     m_dh->m_fibersLoaded = false;
 
     if( m_dh->m_useVBO )
-        glDeleteBuffers( 3, m_bufferObjects );
-
-    m_pointArray.clear();
-    m_normalArray.clear();
-    m_colorArray.clear();
-
-    if( m_kdTree )
     {
-        delete m_kdTree;
-        m_kdTree = NULL;
+        glDeleteBuffers( 3, m_bufferObjects );
     }
 
-    if( m_octree )
+    if( m_pKdTree )
     {
-        delete m_octree;
-        m_octree = NULL;
+        delete m_pKdTree;
+        m_pKdTree = NULL;
+    }
+
+    if( m_pOctree )
+    {
+        delete m_pOctree;
+        m_pOctree = NULL;
     }
 
     m_lineArray.clear();
     m_linePointers.clear();
     m_reverse.clear();
+    m_pointArray.clear();
+    m_normalArray.clear();
+    m_colorArray.clear();
 }
 
-bool Fibers::load( wxString i_filename )
+bool Fibers::load( wxString filename )
 {
     bool res = false;
-    if( i_filename.AfterLast( '.' ) == _T( "fib" ) )
+
+    if( filename.AfterLast( '.' ) == _T( "fib" ) )
     {
-        if (loadVTK( i_filename ))
+        if( loadVTK( filename ) )
+        {
             res = true;
+        }
         else
-            res = loadDmri(i_filename);
+        {
+            res = loadDmri( filename );
+        }
     }
 
-    if( i_filename.AfterLast( '.' ) == _T( "bundlesdata" ) )
-        res = loadPTK( i_filename );
+    if( filename.AfterLast( '.' ) == _T( "bundlesdata" ) )
+    {
+        res = loadPTK( filename );
+    }
 
-    if( i_filename.AfterLast( '.' ) == _T( "Bfloat" ) )
-        res = loadCamino( i_filename );
+    if( filename.AfterLast( '.' ) == _T( "Bfloat" ) )
+    {
+        res = loadCamino( filename );
+    }
 
-    if( i_filename.AfterLast( '.' ) == _T( "trk" ) )
-        res = loadTRK( i_filename );
+    if( filename.AfterLast( '.' ) == _T( "trk" ) )
+    {
+        res = loadTRK( filename );
+    }
 
-    if ( i_filename.AfterLast( '.' ) == _T("tck") )
-        return loadMRtrix( i_filename );
+    if( filename.AfterLast( '.' ) == _T( "tck" ) )
+    {
+        res = loadMRtrix( filename );
+    }
 
     /* OcTree points classification */
-    m_octree = new Octree(2, m_pointArray,m_countPoints,m_dh);
-
+    m_pOctree = new Octree( 2, m_pointArray, m_countPoints, m_dh );
     return res;
 }
 
-bool Fibers::loadTRK(wxString i_fileName)
+bool Fibers::loadTRK( const wxString &filename )
 {
     stringstream ss;
-    m_dh->printDebug(wxT("Start loading TRK file..."), 1 );
+    m_dh->printDebug( wxT( "Start loading TRK file..." ), 1 );
+    wxFile dataFile;
+    wxFileOffset nSize( 0 );
+    converterByteINT16 cbi;
+    converterByteINT32 cbi32;
+    converterByteFloat cbf;
 
-    wxFile l_dataFile;
-    wxFileOffset l_nSize = 0;
-    converterByteINT16 l_cbi;
-    converterByteINT32 l_cbi32;
-    converterByteFloat l_cbf;
+    if( !dataFile.Open( filename ) )
+    {
+        return false;
+    }
 
-    if(!l_dataFile.Open(i_fileName)) return false;
-    
-    l_nSize = l_dataFile.Length();
-    if( l_nSize == wxInvalidOffset ) return false;
+    nSize = dataFile.Length();
+
+    if( nSize == wxInvalidOffset )
+    {
+        return false;
+    }
 
     ////
     // READ HEADER
     ////
-
     //Read file header. [1000 bytes]
-    wxUint8* l_buffer = new wxUint8[1000];
-    l_dataFile.Read( l_buffer, (size_t)1000 );
-
-    //ID String for track file. The first 5 characters must match "TRACK". [6 bytes]
-    char id_string[6];
-    memcpy(id_string, &l_buffer[0], 6);
-    ss.str("");
-    ss << "Type: " << id_string;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-    if (strncmp(id_string, "TRACK", 5) != 0) return false;    
+    wxUint8 *pBuffer = new wxUint8[1000];
+    dataFile.Read( pBuffer, ( size_t )1000 );
     
+    //ID String for track file. The first 5 characters must match "TRACK". [6 bytes]
+    char idString[6];
+    memcpy( idString, &pBuffer[0], 6 );
+    ss.str( "" );
+    ss << "Type: " << idString;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+
+    if( strncmp( idString, "TRACK", 5 ) != 0 ) 
+    {
+        return false;
+    }
+
     //Dimension of the image volume. [6 bytes]
     wxUint16 dim[3];
-    for (int i=0; i!=3;++i)
-    {
-        memcpy(l_cbi.b, &l_buffer[6 + (i*2)], 2);
-        dim[i] = l_cbi.i;
-    }
-    ss.str("");
-    ss << "Dim: " << dim[0] << "x" << dim[1] << "x" << dim[2];
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
 
-    //Voxel size of the image volume. [12 bytes]
-    float voxel_size[3];
-    for (int i=0; i!=3;++i)
+    for( int i = 0; i != 3; ++i )
     {
-        memcpy(l_cbf.b, &l_buffer[12 + (i*4)], 4);
-        voxel_size[i] = l_cbf.f;
+        memcpy( cbi.b, &pBuffer[6 + ( i * 2 )], 2 );
+        dim[i] = cbi.i;
     }
-    ss.str("");
-    ss << "Voxel size: " << voxel_size[0] << "x" << voxel_size[1] << "x" << voxel_size[2];
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+    ss.str( "" );
+    ss << "Dim: " << dim[0] << "x" << dim[1] << "x" << dim[2];
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
+    //Voxel size of the image volume. [12 bytes]
+    float voxelSize[3];
+
+    for( int i = 0; i != 3; ++i )
+    {
+        memcpy( cbf.b, &pBuffer[12 + ( i * 4 )], 4 );
+        voxelSize[i] = cbf.f;
+    }
+
+    ss.str( "" );
+    ss << "Voxel size: " << voxelSize[0] << "x" << voxelSize[1] << "x" << voxelSize[2];
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     //Origin of the image volume. [12 bytes]
     float origin[3];
-    for (int i=0; i!=3;++i)
+
+    for( int i = 0; i != 3; ++i )
     {
-        memcpy(l_cbf.b, &l_buffer[24 + (i*4)], 4);
-        origin[i] = l_cbf.f;
+        memcpy( cbf.b, &pBuffer[24 + ( i * 4 )], 4 );
+        origin[i] = cbf.f;
     }
-    ss.str("");
+
+    ss.str( "" );
     ss << "Origin: (" << origin[0] << "," << origin[1] << "," << origin[2] << ")";
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
     //Number of scalars saved at each track point. [2 bytes]
-    wxUint16 n_scalars;
-    memcpy(l_cbi.b, &l_buffer[36], 2);
-    n_scalars = l_cbi.i;
-    ss.str("");
-    ss << "Nb. scalars: " << n_scalars;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-
+    wxUint16 nbScalars;
+    memcpy( cbi.b, &pBuffer[36], 2 );
+    nbScalars = cbi.i;
+    ss.str( "" );
+    ss << "Nb. scalars: " << nbScalars;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
     //Name of each scalar. (20 characters max each, max 10 names) [200 bytes]
-    char scalar_name[10][20];
-    memcpy(scalar_name, &l_buffer[38], 200);
-    for (int i=0; i!=10;++i)
+    char scalarNames[10][20];
+    memcpy( scalarNames, &pBuffer[38], 200 );
+
+    for( int i = 0; i != 10; ++i )
     {
-        ss.str("");
-        ss << "Scalar name #" << i << ": " << scalar_name[i];
-        m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+        ss.str( "" );
+        ss << "Scalar name #" << i << ": " << scalarNames[i];
+        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
     }
 
     //Number of properties saved at each track. [2 bytes]
-    wxUint16 n_properties;
-    memcpy(l_cbi.b, &l_buffer[238], 2);
-    n_properties = l_cbi.i;
-    ss.str("");
-    ss << "Nb. properties: " << n_properties;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-
+    wxUint16 nbProperties;
+    memcpy( cbi.b, &pBuffer[238], 2 );
+    nbProperties = cbi.i;
+    ss.str( "" );
+    ss << "Nb. properties: " << nbProperties;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
     //Name of each property. (20 characters max each, max 10 names) [200 bytes]
-    char property_name[10][20];
-    memcpy(property_name, &l_buffer[240], 200);
-    for (int i=0; i!=10;++i)
+    char propertyNames[10][20];
+    memcpy( propertyNames, &pBuffer[240], 200 );
+
+    for( int i = 0; i != 10; ++i )
     {
-        ss.str("");
-        ss << "Property name #" << i << ": " << property_name[i];
+        ss.str( "" );
+        ss << "Property name #" << i << ": " << propertyNames[i];
     }
 
-    //4x4 matrix for voxel to RAS (crs to xyz) transformation. 
+    //4x4 matrix for voxel to RAS (crs to xyz) transformation.
     // If vox_to_ras[3][3] is 0, it means the matrix is not recorded.
     // This field is added from version 2. [64 bytes]
-    float vox_to_ras[4][4];
-    for (int i=0; i != 4; ++i)
+    float voxToRas[4][4];
+
+    for( int i = 0; i != 4; ++i )
     {
-        ss.str("");
-        for (int j=0; j != 4; ++j)
+        ss.str( "" );
+
+        for( int j = 0; j != 4; ++j )
         {
-            memcpy(l_cbf.b, &l_buffer[440 + (i*4+j)], 4);
-            vox_to_ras[i][j] = l_cbf.f;
-            ss << vox_to_ras[i][j] << " ";
+            memcpy( cbf.b, &pBuffer[440 + ( i * 4 + j )], 4 );
+            voxToRas[i][j] = cbf.f;
+            ss << voxToRas[i][j] << " ";
         }
-        m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+
+        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
     }
 
     //Reserved space for future version. [444 bytes]
     //char reserved[444];
-    //l_buffer[504]...
-
+    //pBuffer[504]...
     //Storing order of the original image data. [4 bytes]
-    char voxel_order[4];
-    memcpy(voxel_order, &l_buffer[948], 4);
-    ss.str("");
-    ss << "Voxel order: " << voxel_order;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-
+    char voxelOrder[4];
+    memcpy( voxelOrder, &pBuffer[948], 4 );
+    ss.str( "" );
+    ss << "Voxel order: " << voxelOrder;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
     //Paddings [4 bytes]
     char pad2[4];
-    memcpy(pad2, &l_buffer[952], 4);
-    ss.str("");
+    memcpy( pad2, &pBuffer[952], 4 );
+    ss.str( "" );
     ss << "Pad #2: " << pad2;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
     //Image orientation of the original image. As defined in the DICOM header. [24 bytes]
-    float image_orientation_patient[6];
-    ss.str("");
+    float imageOrientationPatient[6];
+    ss.str( "" );
     ss << "Image orientation patient: ";
-    for (int i=0; i != 6; ++i)
-    {
-        memcpy(l_cbf.b, &l_buffer[956 + (i*4)], 4);
-        image_orientation_patient[i] = l_cbf.f;
-        ss << image_orientation_patient[i] << " ";
-    }
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
 
+    for( int i = 0; i != 6; ++i )
+    {
+        memcpy( cbf.b, &pBuffer[956 + ( i * 4 )], 4 );
+        imageOrientationPatient[i] = cbf.f;
+        ss << imageOrientationPatient[i] << " ";
+    }
+
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
     //Paddings. [2 bytes]
     char pad1[2];
-    memcpy(pad1, &l_buffer[980], 2);
-    ss.str("");
+    memcpy( pad1, &pBuffer[980], 2 );
+    ss.str( "" );
     ss << "Pad #1: " << pad1;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
+    //Inversion/rotation flags used to generate this track file. [1 byte]
+    bool invertX = pBuffer[982] > 0;
+    ss.str( "" );
+    ss << "Invert X: " << invertX;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
-    bool invert_x = l_buffer[982] > 0;
-    ss.str("");
-    ss << "Invert X: " << invert_x;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    bool invertY = pBuffer[983] > 0;
+    ss.str( "" );
+    ss << "Invert Y: " << invertY;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
-    bool invert_y = l_buffer[983] > 0;
-    ss.str("");
-    ss << "Invert Y: " << invert_y;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    bool invertZ = pBuffer[984] > 0;
+    ss.str( "" );
+    ss << "Invert Z: " << invertZ;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
-    bool invert_z = l_buffer[984] > 0;
-    ss.str("");
-    ss << "Invert Z: " << invert_z;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    bool swapXY = pBuffer[985] > 0;
+    ss.str( "" );
+    ss << "Swap XY: " << swapXY;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
-    bool swap_xy = l_buffer[985] > 0;
-    ss.str("");
-    ss << "Swap XY: " << swap_xy;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    bool swapYZ = pBuffer[986] > 0;
+    ss.str( "" );
+    ss << "Swap YZ: " << swapYZ;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
-    bool swap_yz = l_buffer[986] > 0;
-    ss.str("");
-    ss << "Swap YZ: " << swap_yz;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-
-    //Inversion/rotation flags used to generate this track file. [1 byte]
-    bool swap_zx = l_buffer[987] > 0;
-    ss.str("");
-    ss << "Swap ZX: " << swap_zx;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    bool swapZX = pBuffer[987] > 0;
+    ss.str( "" );
+    ss << "Swap ZX: " << swapZX;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     //Number of tracks stored in this track file. 0 means the number was NOT stored. [4 bytes]
-    wxUint32 n_count;
-    memcpy(l_cbi32.b, &l_buffer[988], 4);
-    n_count = l_cbi32.i;
-    ss.str("");
-    ss << "Nb. tracks: " << n_count;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    wxUint32 nbCount;
+    memcpy( cbi32.b, &pBuffer[988], 4 );
+    nbCount = cbi32.i;
+    ss.str( "" );
+    ss << "Nb. tracks: " << nbCount;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     //Version number. Current version is 2. [4 bytes]
     wxUint32 version;
-    memcpy(l_cbi32.b, &l_buffer[992], 4);
-    version = l_cbi32.i;
-    ss.str("");
+    memcpy( cbi32.b, &pBuffer[992], 4 );
+    version = cbi32.i;
+    ss.str( "" );
     ss << "Version: " << version;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    
     //Size of the header. Used to determine byte swap. Should be 1000. [4 bytes]
-    wxUint32 hdr_size;
-    memcpy(l_cbi32.b, &l_buffer[996], 4);
-    hdr_size = l_cbi32.i;
-    ss.str("");
-    ss << "HDR size: " << hdr_size;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
+    wxUint32 hdrSize;
+    memcpy( cbi32.b, &pBuffer[996], 4 );
+    hdrSize = cbi32.i;
+    ss.str( "" );
+    ss << "HDR size: " << hdrSize;
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
 
     ////
     // READ DATA
     ////
-    delete[] l_buffer;
-    l_buffer = NULL;
+    delete[] pBuffer;
+    pBuffer = NULL;
+    vector<float> tmpPoints;
 
-    vector<float> l_tmpPoints;
+    if( nbCount == 0 )
+    {
+        return false; //TODO: handle it. (0 means the number was NOT stored.)
+    }
 
-    if (n_count == 0) return false; //TODO: handle it. (0 means the number was NOT stored.)
-
-    vector<vector<float> > lines;
+    vector< vector< float > > lines;
     m_countPoints = 0;
+    vector< float > colors;
 
-    vector<float> colors;
-    for (unsigned int i=0; i!=n_count; ++i)
+    for( unsigned int i = 0; i != nbCount; ++i )
     {
         //Number of points in this track. [4 bytes]
-        wxUint32 n_points;
-        l_dataFile.Read(l_cbi32.b, (size_t)4);
-        n_points = l_cbi32.i;
-
+        wxUint32 nbPoints;
+        dataFile.Read( cbi32.b, ( size_t )4 );
+        nbPoints = cbi32.i;
+        
         //Read data of one track.
-        size_t ptsSize = 3+n_scalars;
-        size_t tractSize = 4*(n_points*(ptsSize) + n_properties);
-        l_buffer = new wxUint8[tractSize];
-        l_dataFile.Read(l_buffer, tractSize);
+        size_t ptsSize = 3 + nbScalars;
+        size_t tractSize = 4 * ( nbPoints * ( ptsSize ) + nbProperties );
+        pBuffer = new wxUint8[tractSize];
+        dataFile.Read( pBuffer, tractSize );
+        vector< float > curLine;
 
-        vector<float> cur_line;
-        for (unsigned int j=0; j!=n_points; ++j)
+        for( unsigned int j = 0; j != nbPoints; ++j )
         {
             //Read coordinates (x,y,z) and scalars associated to each point.
-            for (unsigned int k=0; k!=ptsSize; ++k)
+            for( unsigned int k = 0; k != ptsSize; ++k )
             {
-                memcpy(l_cbf.b, &l_buffer[4*(j*ptsSize+k)], 4);
+                memcpy( cbf.b, &pBuffer[4 * ( j * ptsSize + k )], 4 );
 
-                if (k >= 6)  //TODO: incorporate other scalars in the navigator.
+                if( k >= 6 ) //TODO: incorporate other scalars in the navigator.
+                {
                     break;
-                else if (k >= 3) //RGB color of each point.
-                    colors.push_back(l_cbf.f);
+                }
+                else if( k >= 3 ) //RGB color of each point.
+                {
+                    colors.push_back( cbf.f );
+                }
                 else
-                    cur_line.push_back(l_cbf.f);
+                {
+                    curLine.push_back( cbf.f );
+                }
             }
         }
 
-        for (unsigned int j=0; j!=n_properties; ++j) {} //TODO: incorporate properties in the navigator.
+        for( unsigned int j = 0; j != nbProperties; ++j ) 
+        {} //TODO: incorporate properties in the navigator.
 
-        m_countPoints += cur_line.size()/3;
-        lines.push_back(cur_line);
-
-        delete[] l_buffer;
-        l_buffer = NULL;
+        m_countPoints += curLine.size() / 3;
+        lines.push_back( curLine );
+        delete[] pBuffer;
+        pBuffer = NULL;
     }
 
-    l_dataFile.Close();
-
+    dataFile.Close();
+    
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
     m_dh->printDebug( wxT( "Setting data in right format for the navigator..." ), 1 );
-
     m_countLines = lines.size();
-    m_dh->m_countFibers = m_countLines;   
+    m_dh->m_countFibers = m_countLines;
     m_pointArray.max_size();
     m_colorArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
@@ -379,169 +414,168 @@ bool Fibers::loadTRK(wxString i_fileName)
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
     m_filtered.resize( m_countLines, false );
-
-    ss.str("");
+    ss.str( "" );
     ss << "m_countLines: " << m_countLines;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-    ss.str("");
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    ss.str( "" );
     ss << "m_countPoints: " << m_countPoints;
-    m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
     m_linePointers[0] = 0;
-    for( int i = 0; i < m_countLines; ++i )
-        m_linePointers[i+1] = m_linePointers[i]+ lines[i].size()/3;
 
-    int l_lineCounter = 0;
-    for( int i = 0; i < m_countPoints; ++i )
+    for( int i = 0; i < m_countLines; ++i )
     {
-        if( i == m_linePointers[l_lineCounter + 1] )
-            ++l_lineCounter;
-        m_reverse[i] = l_lineCounter;
+        m_linePointers[i + 1] = m_linePointers[i] + lines[i].size() / 3;
     }
 
-    unsigned int pos=0;
-    vector< vector<float> >::iterator it;
-    for (it=lines.begin(); it<lines.end(); it++)
+    int lineCounter = 0;
+
+    for( int i = 0; i < m_countPoints; ++i )
     {
-        vector<float>::iterator it2;
-        for (it2=(*it).begin(); it2<(*it).end(); it2++)
+        if( i == m_linePointers[lineCounter + 1] )
+        {
+            ++lineCounter;
+        }
+
+        m_reverse[i] = lineCounter;
+    }
+
+    unsigned int pos( 0 );
+    vector< vector< float > >::iterator it;
+
+    for( it = lines.begin(); it < lines.end(); it++ )
+    {
+        vector< float >::iterator it2;
+
+        for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
         {
             m_colorArray[pos] = colors[pos] / 255.;
             m_pointArray[pos++] = *it2;
         }
     }
 
-    if (voxel_size[0] == 0 && voxel_size[1] == 0 && voxel_size[2] == 0)
+    if( voxelSize[0] == 0 && voxelSize[1] == 0 && voxelSize[2] == 0 )
     {
-        ss.str("");
+        ss.str( "" );
         ss << "Using anatomy's voxel size: [" << m_dh->m_xVoxel << "," << m_dh->m_yVoxel << "," << m_dh->m_zVoxel << "]";
-        m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-        voxel_size[0] = m_dh->m_xVoxel;
-        voxel_size[1] = m_dh->m_yVoxel;
-        voxel_size[2] = m_dh->m_zVoxel;
-
-        ss.str("");
-        ss << "Centering with respect to the anatomy: [" << m_dh->m_columns/2 << "," << m_dh->m_rows/2 << "," << m_dh->m_frames/2 << "]";
-        m_dh->printDebug(wxString(ss.str().c_str(), wxConvUTF8), 1 );
-        origin[0] = m_dh->m_columns/2;
-        origin[1] = m_dh->m_rows/2;
-        origin[2] = m_dh->m_frames/2;
+        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+        voxelSize[0] = m_dh->m_xVoxel;
+        voxelSize[1] = m_dh->m_yVoxel;
+        voxelSize[2] = m_dh->m_zVoxel;
+        ss.str( "" );
+        ss << "Centering with respect to the anatomy: [" << m_dh->m_columns / 2 << "," << m_dh->m_rows / 2 << "," << m_dh->m_frames / 2 << "]";
+        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+        origin[0] = m_dh->m_columns / 2;
+        origin[1] = m_dh->m_rows / 2;
+        origin[2] = m_dh->m_frames / 2;
     }
 
-    float flipX = (invert_x)? -1.: 1.;
-    float flipY = (invert_y)? -1.: 1.;
-    float flipZ = (invert_z)? -1.: 1.;
-
+    float flipX = ( invertX ) ? -1. : 1.;
+    float flipY = ( invertY ) ? -1. : 1.;
+    float flipZ = ( invertZ ) ? -1. : 1.;
     float anatomy[3];
-    anatomy[0] = ((flipX-1.) * m_dh->m_columns * m_dh->m_xVoxel) / -2.;
-    anatomy[1] = ((flipY-1.) * m_dh->m_rows * m_dh->m_yVoxel) / -2.;
-    anatomy[2] = ((flipZ-1.) * m_dh->m_frames * m_dh->m_zVoxel) / -2.;
+    anatomy[0] = ( ( flipX - 1. ) * m_dh->m_columns * m_dh->m_xVoxel ) / -2.;
+    anatomy[1] = ( ( flipY - 1. ) * m_dh->m_rows * m_dh->m_yVoxel ) / -2.;
+    anatomy[2] = ( ( flipZ - 1. ) * m_dh->m_frames * m_dh->m_zVoxel ) / -2.;
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = flipX * (m_pointArray[i] - origin[0]) * (m_dh->m_xVoxel / voxel_size[0]) + anatomy[0];
+        m_pointArray[i] = flipX * ( m_pointArray[i] - origin[0] ) * ( m_dh->m_xVoxel / voxelSize[0] ) + anatomy[0];
         ++i;
-        m_pointArray[i] = flipY * (m_pointArray[i] - origin[1]) * (m_dh->m_yVoxel / voxel_size[1]) + anatomy[1];
+        m_pointArray[i] = flipY * ( m_pointArray[i] - origin[1] ) * ( m_dh->m_yVoxel / voxelSize[1] ) + anatomy[1];
         ++i;
-        m_pointArray[i] = flipZ * (m_pointArray[i] - origin[2]) * (m_dh->m_zVoxel / voxel_size[2]) + anatomy[2];
+        m_pointArray[i] = flipZ * ( m_pointArray[i] - origin[2] ) * ( m_dh->m_zVoxel / voxelSize[2] ) + anatomy[2];
     }
 
-    m_dh->printDebug(wxT("End loading TRK file"), 1 );
-
-    createColorArray(colors.size() > 0);
+    m_dh->printDebug( wxT( "End loading TRK file" ), 1 );
+    createColorArray( colors.size() > 0 );
     m_type = FIBERS;
-    m_fullPath = i_fileName;
-    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    m_fullPath = filename;
+    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
-    m_name = i_fileName.AfterLast( '\\' );
+    m_name = filename.AfterLast( '\\' );
 #else
-    m_name = i_fileName.AfterLast( '/' );
+    m_name = filename.AfterLast( '/' );
 #endif
     return true;
 }
 
-bool Fibers::loadCamino( wxString i_filename )
+bool Fibers::loadCamino( const wxString &filename )
 {
     m_dh->printDebug( _T( "start loading Camino file" ), 1 );
+    wxFile dataFile;
+    wxFileOffset nSize = 0;
 
-    wxFile l_dataFile;
-    wxFileOffset l_nSize = 0;
-
-    if( l_dataFile.Open( i_filename ) )
+    if( dataFile.Open( filename ) )
     {
-        l_nSize = l_dataFile.Length();
+        nSize = dataFile.Length();
 
-        if( l_nSize == wxInvalidOffset )
+        if( nSize == wxInvalidOffset )
+        {
             return false;
+        }
     }
 
-    wxUint8* l_buffer = new wxUint8[l_nSize];
-    l_dataFile.Read( l_buffer, l_nSize );
-
-    l_dataFile.Close();
-
+    wxUint8 *pBuffer = new wxUint8[nSize];
+    dataFile.Read( pBuffer, nSize );
+    dataFile.Close();
     m_countLines  = 0; // Number of lines.
     m_countPoints = 0; // Number of points.
+    int cl = 0;
+    int pc = 0;
+    converterByteFloat cbf;
+    vector< float > tmpPoints;
 
-    int l_cl = 0;
-    int l_pc = 0;
-    converterByteFloat l_cbf;
-    vector< float > l_tmpPoints;
-
-    while( l_pc < l_nSize )
+    while( pc < nSize )
     {
         ++m_countLines;
+        cbf.b[3] = pBuffer[pc++];
+        cbf.b[2] = pBuffer[pc++];
+        cbf.b[1] = pBuffer[pc++];
+        cbf.b[0] = pBuffer[pc++];
+        cl = ( int )cbf.f;
+        m_lineArray.push_back( cl );
+        pc += 4;
 
-        l_cbf.b[3] = l_buffer[l_pc++];
-        l_cbf.b[2] = l_buffer[l_pc++];
-        l_cbf.b[1] = l_buffer[l_pc++];
-        l_cbf.b[0] = l_buffer[l_pc++];
-
-        l_cl = (int)l_cbf.f;
-        m_lineArray.push_back( l_cl );
-
-        l_pc += 4;
-        for( int i = 0; i < l_cl; ++i )
+        for( int i = 0; i < cl; ++i )
         {
             m_lineArray.push_back( m_countPoints );
             ++m_countPoints;
+            cbf.b[3] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[0] = pBuffer[pc++];
+            tmpPoints.push_back( cbf.f );
+            cbf.b[3] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[0] = pBuffer[pc++];
+            tmpPoints.push_back( cbf.f );
+            cbf.b[3] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[0] = pBuffer[pc++];
+            tmpPoints.push_back( cbf.f );
 
-            l_cbf.b[3] = l_buffer[l_pc++];
-            l_cbf.b[2] = l_buffer[l_pc++];
-            l_cbf.b[1] = l_buffer[l_pc++];
-            l_cbf.b[0] = l_buffer[l_pc++];
-            l_tmpPoints.push_back( l_cbf.f );
-
-            l_cbf.b[3] = l_buffer[l_pc++];
-            l_cbf.b[2] = l_buffer[l_pc++];
-            l_cbf.b[1] = l_buffer[l_pc++];
-            l_cbf.b[0] = l_buffer[l_pc++];
-            l_tmpPoints.push_back( l_cbf.f );
-
-            l_cbf.b[3] = l_buffer[l_pc++];
-            l_cbf.b[2] = l_buffer[l_pc++];
-            l_cbf.b[1] = l_buffer[l_pc++];
-            l_cbf.b[0] = l_buffer[l_pc++];
-            l_tmpPoints.push_back( l_cbf.f );
-
-            if( l_pc > l_nSize )
+            if( pc > nSize )
+            {
                 break;
+            }
         }
     }
 
     m_linePointers.resize( m_countLines + 1 );
     m_linePointers[m_countLines] = m_countPoints;
-
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
-    m_filtered.resize(m_countLines, false);
-    m_pointArray.resize( l_tmpPoints.size() );
+    m_filtered.resize( m_countLines, false );
+    m_pointArray.resize( tmpPoints.size() );
 
-    for( size_t i = 0; i < l_tmpPoints.size(); ++i )
-        m_pointArray[i] = l_tmpPoints[i];
+    for( size_t i = 0; i < tmpPoints.size(); ++i )
+    {
+        m_pointArray[i] = tmpPoints[i];
+    }
 
     printf( "%d lines and %d points \n", m_countLines, m_countPoints );
-
     m_dh->printDebug( _T( "move vertices" ), 1 );
 
     for( int i = 0; i < m_countPoints * 3; ++i )
@@ -556,152 +590,155 @@ bool Fibers::loadCamino( wxString i_filename )
     calculateLinePointers();
     createColorArray( false );
     m_dh->printDebug( _T( "read all" ), 1 );
-
-    delete[] l_buffer;
-
+    delete[] pBuffer;
+    pBuffer = NULL;
+    
     m_dh->m_countFibers = m_countLines;
-
     m_type = FIBERS;
-    m_fullPath = i_filename;
-
+    m_fullPath = filename;
 #ifdef __WXMSW__
-    m_name = i_filename.AfterLast('\\');
+    m_name = filename.AfterLast( '\\' );
 #else
-    m_name = i_filename.AfterLast( '/' );
+    m_name = filename.AfterLast( '/' );
 #endif
-
-    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
-
+    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
     return true;
 }
 
-bool Fibers::loadMRtrix( wxString i_filename )
+bool Fibers::loadMRtrix( const wxString &filename )
 {
-    m_dh->printDebug( _T("start loading MRtrix file"), 1 );
+    m_dh->printDebug( _T( "start loading MRtrix file" ), 1 );
     wxFile dataFile;
     long int nSize = 0;
-    long int pc = 0, nodes=0;
+    long int pc = 0, nodes = 0;
     converterByteFloat cbf;
     float x, y, z, x2, y2, z2;
     std::vector< float > tmpPoints;
-    vector<vector<float> > lines;
+    vector< vector< float > > lines;
 
     //Open file
-    FILE *fs = fopen ( i_filename.ToAscii(), "r" ) ;
+    FILE *pFs = fopen( filename.ToAscii(), "r" ) ;
     ////
     // read header
     ////
-    char line_buffer[200];
+    char lineBuffer[200];
 
-    for (int i = 0; i < 22; ++i )
+    for( int i = 0; i < 22; ++i )
     {
-        fgets(line_buffer,200,fs);
-        std::string s0 (line_buffer);
+        fgets( lineBuffer, 200, pFs );
+        std::string s0( lineBuffer );
 
-        if (s0.find("file")!=std::string::npos)
+        if( s0.find( "file" ) != std::string::npos )
         {
-            sscanf(line_buffer, "file: . %ld", &pc);
+            sscanf( lineBuffer, "file: . %ld", &pc );
         }
-        if (s0.find("count")!=std::string::npos) 
+
+        if( s0.find( "count" ) != std::string::npos )
         {
-            sscanf(line_buffer, "count: %i", &m_countLines);
+            sscanf( lineBuffer, "count: %i", &m_countLines );
         }
     }
-    fclose(fs);
 
-    if ( dataFile.Open( i_filename ) )
+    fclose( pFs );
+
+    if( dataFile.Open( filename ) )
     {
         nSize = dataFile.Length();
-        if ( nSize < 1 )
+
+        if( nSize < 1 )
         {
             return false;
         }
     }
 
-    nSize-=pc;
-    dataFile.Seek(pc);
-
-    wxUint8* buffer = new wxUint8[nSize];
-    dataFile.Read( buffer, nSize );
+    nSize -= pc;
+    dataFile.Seek( pc );
+    wxUint8 *pBuffer = new wxUint8[nSize];
+    dataFile.Read( pBuffer, nSize );
     dataFile.Close();
-    cout << " Read fibers:\n";
-
-    pc=0;
-    m_countPoints = 0; // number of points
     
-    for (int i = 0; i < m_countLines; i++ )
+    cout << " Read fibers:\n";
+    pc = 0;
+    m_countPoints = 0; // number of points
+
+    for( int i = 0; i < m_countLines; i++ )
     {
         tmpPoints.clear();
-        nodes=0;
+        nodes = 0;
         // read one tract
-        cbf.b[0] = buffer[pc++];
-        cbf.b[1] = buffer[pc++];
-        cbf.b[2] = buffer[pc++];
-        cbf.b[3] = buffer[pc++];
+        cbf.b[0] = pBuffer[pc++];
+        cbf.b[1] = pBuffer[pc++];
+        cbf.b[2] = pBuffer[pc++];
+        cbf.b[3] = pBuffer[pc++];
         x = cbf.f;
-        cbf.b[0] = buffer[pc++];
-        cbf.b[1] = buffer[pc++];
-        cbf.b[2] = buffer[pc++];
-        cbf.b[3] = buffer[pc++];
+        cbf.b[0] = pBuffer[pc++];
+        cbf.b[1] = pBuffer[pc++];
+        cbf.b[2] = pBuffer[pc++];
+        cbf.b[3] = pBuffer[pc++];
         y = cbf.f;
-        cbf.b[0] = buffer[pc++];
-        cbf.b[1] = buffer[pc++];
-        cbf.b[2] = buffer[pc++];
-        cbf.b[3] = buffer[pc++];
+        cbf.b[0] = pBuffer[pc++];
+        cbf.b[1] = pBuffer[pc++];
+        cbf.b[2] = pBuffer[pc++];
+        cbf.b[3] = pBuffer[pc++];
         z = cbf.f;
         //add first point
         tmpPoints.push_back( x );
         tmpPoints.push_back( y );
         tmpPoints.push_back( z );
         ++nodes;
-        x2=x;
-
+        x2 = x;
         cbf.f = x2;
 
         //Read points (x,y,z) until x2 equals NaN (0x0000C07F), meaning end of the tract.
-        while (!(cbf.b[0]==0x00 && cbf.b[1]==0x00 && cbf.b[2]==0xC0 && cbf.b[3]==0x7F)) 
+        while( !( cbf.b[0] == 0x00 && cbf.b[1] == 0x00 && cbf.b[2] == 0xC0 && cbf.b[3] == 0x7F ) )
         {
-            cbf.b[0] = buffer[pc++];   // get next float
-            cbf.b[1] = buffer[pc++];
-            cbf.b[2] = buffer[pc++];
-            cbf.b[3] = buffer[pc++];
+            cbf.b[0] = pBuffer[pc++];   // get next float
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[3] = pBuffer[pc++];
             x2 = cbf.f;
-            cbf.b[0] = buffer[pc++];
-            cbf.b[1] = buffer[pc++];
-            cbf.b[2] = buffer[pc++];
-            cbf.b[3] = buffer[pc++];
+            cbf.b[0] = pBuffer[pc++];
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[3] = pBuffer[pc++];
             y2 = cbf.f;
-            cbf.b[0] = buffer[pc++];
-            cbf.b[1] = buffer[pc++];
-            cbf.b[2] = buffer[pc++];
-            cbf.b[3] = buffer[pc++];
+            cbf.b[0] = pBuffer[pc++];
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[3] = pBuffer[pc++];
             z2 = cbf.f;
-            
+
             // downsample fibers: take only points in distance of min 0.75 mm
-            if ( ( (x-x2)*(x-x2) + (y-y2)*(y-y2) + (z-z2)*(z-z2) )>= 0.2) 
+            if( ( ( x - x2 ) * ( x - x2 ) + ( y - y2 ) * ( y - y2 ) + ( z - z2 ) * ( z - z2 ) ) >= 0.2 )
             {
-                x=x2; y=y2; z=z2;
+                x = x2;
+                y = y2;
+                z = z2;
                 tmpPoints.push_back( x );
                 tmpPoints.push_back( y );
                 tmpPoints.push_back( z );
                 ++nodes;
             }
+
             cbf.f = x2;
         }
-        // put the tract in the line array
-        lines.push_back(tmpPoints);
 
-        for ( int i = 0; i < nodes ; i++ ) 
-        { 
-            m_countPoints++; 
+        // put the tract in the line array
+        lines.push_back( tmpPoints );
+
+        for( int i = 0; i < nodes ; i++ )
+        {
+            m_countPoints++;
         }
     }
-    delete[] buffer;
 
+    delete[] pBuffer;
+    pBuffer = NULL;
+    
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
-    m_dh->m_countFibers = m_countLines;   
+    m_dh->m_countFibers = m_countLines;
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -709,134 +746,128 @@ bool Fibers::loadMRtrix( wxString i_filename )
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
     m_filtered.resize( m_countLines, false );
-    
     m_linePointers[0] = 0;
+
     for( int i = 0; i < m_countLines; ++i )
     {
-        m_linePointers[i+1] = m_linePointers[i]+ lines[i].size()/3;
+        m_linePointers[i + 1] = m_linePointers[i] + lines[i].size() / 3;
     }
 
-    int l_lineCounter = 0;
+    int lineCounter = 0;
+
     for( int i = 0; i < m_countPoints; ++i )
     {
-        if( i == m_linePointers[l_lineCounter + 1] )
+        if( i == m_linePointers[lineCounter + 1] )
         {
-            ++l_lineCounter;
+            ++lineCounter;
         }
-        m_reverse[i] = l_lineCounter;
+
+        m_reverse[i] = lineCounter;
     }
 
-    unsigned int pos=0;
-    vector< vector<float> >::iterator it;
+    unsigned int pos = 0;
+    vector< vector< float > >::iterator it;
 
-    for (it=lines.begin(); it<lines.end(); it++)
+    for( it = lines.begin(); it < lines.end(); it++ )
     {
-        vector<float>::iterator it2;
-        for (it2=(*it).begin(); it2<(*it).end(); it2++)
+        vector< float >::iterator it2;
+
+        for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
         {
             m_pointArray[pos++] = *it2;
         }
     }
 
-    for ( int i = 0; i < m_countPoints * 3; ++i )
+    for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_pointArray[i] + 0.5 + (m_dh->m_columns/2)*m_dh->m_xVoxel;
+        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_columns / 2 ) * m_dh->m_xVoxel;
         ++i;
-		m_pointArray[i] = m_pointArray[i] + 0.5 + (m_dh->m_rows/2)*m_dh->m_yVoxel ;
+        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_rows / 2 ) * m_dh->m_yVoxel ;
         ++i;
-        m_pointArray[i] = m_pointArray[i] + 0.5 + (m_dh->m_frames/2)*m_dh->m_zVoxel;
+        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_frames / 2 ) * m_dh->m_zVoxel;
     }
 
-    m_dh->printDebug(wxT("End loading TCK file"), 1 );
-
+    m_dh->printDebug( wxT( "End loading TCK file" ), 1 );
     createColorArray( false );
     m_type = FIBERS;
-    m_fullPath = i_filename;
-    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
-
+    m_fullPath = filename;
+    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
-    m_name = i_filename.AfterLast( '\\' );
+    m_name = filename.AfterLast( '\\' );
 #else
-    m_name = i_filename.AfterLast( '/' );
+    m_name = filename.AfterLast( '/' );
 #endif
-
     return true;
 }
 
-bool Fibers::loadPTK( wxString l_fileName )
+bool Fibers::loadPTK( const wxString &filename )
 {
     m_dh->printDebug( _T( "start loading PTK file" ), 1 );
-    wxFile l_dataFile;
-    wxFileOffset l_nSize = 0;
-    int l_pc = 0;
-    converterByteINT32 l_cbi;
-    converterByteFloat l_cbf;
-    vector< float > l_tmpPoints;
+    wxFile dataFile;
+    wxFileOffset nSize = 0;
+    int pc = 0;
+    converterByteINT32 cbi;
+    converterByteFloat cbf;
+    vector< float > tmpPoints;
 
-    if( l_dataFile.Open( l_fileName ) )
+    if( dataFile.Open( filename ) )
     {
-        l_nSize = l_dataFile.Length();
-        if( l_nSize == wxInvalidOffset )
+        nSize = dataFile.Length();
+
+        if( nSize == wxInvalidOffset )
             return false;
     }
 
-    wxUint8* l_buffer = new wxUint8[l_nSize];
-    l_dataFile.Read( l_buffer, l_nSize );
-
+    wxUint8 *pBuffer = new wxUint8[nSize];
+    dataFile.Read( pBuffer, nSize );
     m_countLines  = 0; // Number of lines.
     m_countPoints = 0; // Number of points.
 
-    while( l_pc < l_nSize )
+    while( pc < nSize )
     {
         ++m_countLines;
+        cbi.b[0] = pBuffer[pc++];
+        cbi.b[1] = pBuffer[pc++];
+        cbi.b[2] = pBuffer[pc++];
+        cbi.b[3] = pBuffer[pc++];
+        m_lineArray.push_back( cbi.i );
 
-        l_cbi.b[0] = l_buffer[l_pc++];
-        l_cbi.b[1] = l_buffer[l_pc++];
-        l_cbi.b[2] = l_buffer[l_pc++];
-        l_cbi.b[3] = l_buffer[l_pc++];
-
-        m_lineArray.push_back( l_cbi.i );
-
-        for( size_t i = 0; i < l_cbi.i; ++i )
+        for( size_t i = 0; i < cbi.i; ++i )
         {
             m_lineArray.push_back( m_countPoints );
             ++m_countPoints;
-
-            l_cbf.b[0] = l_buffer[l_pc++];
-            l_cbf.b[1] = l_buffer[l_pc++];
-            l_cbf.b[2] = l_buffer[l_pc++];
-            l_cbf.b[3] = l_buffer[l_pc++];
-            l_tmpPoints.push_back( l_cbf.f );
-
-            l_cbf.b[0] = l_buffer[l_pc++];
-            l_cbf.b[1] = l_buffer[l_pc++];
-            l_cbf.b[2] = l_buffer[l_pc++];
-            l_cbf.b[3] = l_buffer[l_pc++];
-            l_tmpPoints.push_back( l_cbf.f );
-
-            l_cbf.b[0] = l_buffer[l_pc++];
-            l_cbf.b[1] = l_buffer[l_pc++];
-            l_cbf.b[2] = l_buffer[l_pc++];
-            l_cbf.b[3] = l_buffer[l_pc++];
-            l_tmpPoints.push_back( l_cbf.f );
+            cbf.b[0] = pBuffer[pc++];
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[3] = pBuffer[pc++];
+            tmpPoints.push_back( cbf.f );
+            cbf.b[0] = pBuffer[pc++];
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[3] = pBuffer[pc++];
+            tmpPoints.push_back( cbf.f );
+            cbf.b[0] = pBuffer[pc++];
+            cbf.b[1] = pBuffer[pc++];
+            cbf.b[2] = pBuffer[pc++];
+            cbf.b[3] = pBuffer[pc++];
+            tmpPoints.push_back( cbf.f );
         }
-
     }
 
     m_linePointers.resize( m_countLines + 1 );
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
-    m_filtered.resize(m_countLines, false);
+    m_filtered.resize( m_countLines, false );
+    m_pointArray.resize( tmpPoints.size() );
 
-    m_pointArray.resize( l_tmpPoints.size() );
-
-    for( size_t i = 0; i < l_tmpPoints.size(); ++i )
-        m_pointArray[i] = l_tmpPoints[i];
+    for( size_t i = 0; i < tmpPoints.size(); ++i )
+    {
+        m_pointArray[i] = tmpPoints[i];
+    }
 
     printf( "%d lines and %d points \n", m_countLines, m_countPoints );
     m_dh->printDebug( _T( "move vertices" ), 1 );
-
 
     /*for( int i = 0; i < m_countPoints * 3; ++i )
     {
@@ -849,276 +880,290 @@ bool Fibers::loadPTK( wxString l_fileName )
     /********************************************************************
     * This is a fix for the visContest
     * Only tested on -visContest fibers
-    *                -PGuevara datas    
+    *                -PGuevara datas
     *
     * Hypothesis: If bundles computed in ptk, coordinates (x,y,z) are
-    * already in the space of the dataset. Good voxel size and origin 
+    * already in the space of the dataset. Good voxel size and origin
     *
     ********************************************************************/
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_dh->m_columns* m_dh->m_xVoxel - m_pointArray[i];
+        m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_rows   * m_dh->m_yVoxel - m_pointArray[i];
+        m_pointArray[i] = m_dh->m_rows    * m_dh->m_yVoxel - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_frames * m_dh->m_zVoxel - m_pointArray[i];
+        m_pointArray[i] = m_dh->m_frames  * m_dh->m_zVoxel - m_pointArray[i];
     }
+
     calculateLinePointers();
     createColorArray( false );
     m_dh->printDebug( _T( "read all" ), 1 );
-
-    delete[] l_buffer;
-
+    
+    delete[] pBuffer;
+    pBuffer = NULL;
+    
     m_dh->m_countFibers = m_countLines;
     m_type = FIBERS;
-    m_fullPath = l_fileName;
-
+    m_fullPath = filename;
 #ifdef __WXMSW__
-    m_name = l_fileName.AfterLast('\\');
+    m_name = filename.AfterLast( '\\' );
 #else
-    m_name = l_fileName.AfterLast( '/' );
+    m_name = filename.AfterLast( '/' );
 #endif
-
-    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
     return true;
 }
 
-bool Fibers::loadVTK( wxString i_fileName )
+bool Fibers::loadVTK( const wxString &filename )
 {
     m_dh->printDebug( _T( "start loading VTK file" ), 1 );
-    wxFile l_dataFile;
-    wxFileOffset l_nSize = 0;
+    wxFile dataFile;
+    wxFileOffset nSize = 0;
 
-    if( l_dataFile.Open( i_fileName ) )
+    if( dataFile.Open( filename ) )
     {
-        l_nSize = l_dataFile.Length();
+        nSize = dataFile.Length();
 
-        if ( l_nSize == wxInvalidOffset )
+        if( nSize == wxInvalidOffset )
             return false;
     }
 
-    wxUint8* l_buffer = new wxUint8[255];
-    l_dataFile.Read( l_buffer, (size_t)255 );
+    wxUint8 *pBuffer = new wxUint8[255];
+    dataFile.Read( pBuffer, ( size_t )255 );
+    
+    int pointOffset         = 0;
+    int lineOffset          = 0;
+    int pointColorOffset    = 0;
+    int lineColorOffset     = 0;
+    int fileOffset          = 0;
+    int j                   = 0;
 
-    int l_pointOffset         = 0;
-    int l_lineOffset          = 0;
-    int l_pointColorOffset    = 0;
-    int l_lineColorOffset     = 0;
-    int l_fileOffset          = 0;
-    int l_j                   = 0;
-    bool colorsLoadedFromFile = false;
-    char* l_temp              = new char[256];
+    bool colorsLoadedFromFile( false );
 
-    // Ignore the first 3 lines.
-    while( l_buffer[l_fileOffset] != '\n' )
-        ++l_fileOffset;
+    char *pTemp = new char[256];
 
-    ++l_fileOffset;
+    // Ignore the first 2 lines.
+    while( pBuffer[fileOffset] != '\n' )
+    {
+        ++fileOffset;
+    }
 
-    while( l_buffer[l_fileOffset] != '\n' )
-        ++l_fileOffset;
+    ++fileOffset;
 
-    ++l_fileOffset;
+    while( pBuffer[fileOffset] != '\n' )
+    {
+        ++fileOffset;
+    }
+
+    ++fileOffset;
 
     // Check the file type.
-    while( l_buffer[l_fileOffset] != '\n' )
+    while( pBuffer[fileOffset] != '\n' )
     {
-        l_temp[l_j] = l_buffer[l_fileOffset];
-        ++l_fileOffset;
-        ++l_j;
+        pTemp[j] = pBuffer[fileOffset];
+        ++fileOffset;
+        ++j;
     }
-    ++l_fileOffset;
 
-    l_temp[l_j] = 0;
-    wxString type( l_temp, wxConvUTF8 );
+    ++fileOffset;
+    pTemp[j] = 0;
+    wxString type( pTemp, wxConvUTF8 );
 
     if( type == wxT( "ASCII" ) )
+    {
         // ASCII file, maybe later.
         return false;
+    }
 
     if( type != wxT( "BINARY" ) )
+    {
         // Something else, don't know what to do.
         return false;
+    }
 
     // Ignore line DATASET POLYDATA.
-    while( l_buffer[l_fileOffset] != '\n' )
-        ++l_fileOffset;
-    ++l_fileOffset;
+    while( pBuffer[fileOffset] != '\n' )
+    {
+        ++fileOffset;
+    }
 
-    l_j = 0;
+    ++fileOffset;
+    j = 0;
+
     // Read POINTS.
-    while( l_buffer[l_fileOffset] != '\n' )
+    while( pBuffer[fileOffset] != '\n' )
     {
-        l_temp[l_j] = l_buffer[l_fileOffset];
-        ++l_fileOffset;
-        ++l_j;
+        pTemp[j] = pBuffer[fileOffset];
+        ++fileOffset;
+        ++j;
     }
-    ++l_fileOffset;
 
-    l_temp[l_j] = 0;
-    wxString l_points( l_temp, wxConvUTF8 );
+    ++fileOffset;
+    pTemp[j] = 0;
+    wxString points( pTemp, wxConvUTF8 );
+    points = points.AfterFirst( ' ' );
+    points = points.BeforeFirst( ' ' );
+    long tempValue = 0;
 
-    l_points = l_points.AfterFirst( ' ' );
-    l_points = l_points.BeforeFirst( ' ' );
-
-    long l_tempValue = 0;
-
-    if( ! l_points.ToLong( &l_tempValue, 10 ) )
+    if( ! points.ToLong( &tempValue, 10 ) )
+    {
         return false; // Can't read point count.
-
-    int l_countPoints = (int)l_tempValue;
-
-    // Start position of the point array in the file.
-    l_pointOffset = l_fileOffset;
-
-    // Jump to postion after point array.
-    l_fileOffset += ( 12 * l_countPoints ) + 1;
-    l_j = 0;
-    l_dataFile.Seek( l_fileOffset );
-    l_dataFile.Read( l_buffer, (size_t) 255 );
-
-    while( l_buffer[l_j] != '\n' )
-    {
-        l_temp[l_j] = l_buffer[l_j];
-        ++l_fileOffset;
-        ++l_j;
     }
-    ++l_fileOffset;
 
-    l_temp[l_j] = 0;
+    int countPoints = ( int )tempValue;
+    // Start position of the point array in the file.
+    pointOffset = fileOffset;
+    // Jump to postion after point array.
+    fileOffset += ( 12 * countPoints ) + 1;
+    j = 0;
+    dataFile.Seek( fileOffset );
+    dataFile.Read( pBuffer, ( size_t ) 255 );
 
-    wxString l_sLines( l_temp, wxConvUTF8 );
-    wxString l_sLengthLines = l_sLines.AfterLast( ' ' );
+    while( pBuffer[j] != '\n' )
+    {
+        pTemp[j] = pBuffer[j];
+        ++fileOffset;
+        ++j;
+    }
 
-    if( ! l_sLengthLines.ToLong( &l_tempValue, 10 ) )
+    ++fileOffset;
+    pTemp[j] = 0;
+    wxString sLines( pTemp, wxConvUTF8 );
+    wxString sLengthLines = sLines.AfterLast( ' ' );
+
+    if( ! sLengthLines.ToLong( &tempValue, 10 ) )
+    {
         return false; // Can't read size of lines array.
+    }
 
-    int l_lengthLines = ( int( l_tempValue ) );
-    l_sLines = l_sLines.AfterFirst( ' ' );
-    l_sLines = l_sLines.BeforeFirst( ' ' );
+    int lengthLines = ( int( tempValue ) );
+    sLines = sLines.AfterFirst( ' ' );
+    sLines = sLines.BeforeFirst( ' ' );
 
-    if( ! l_sLines.ToLong( &l_tempValue, 10 ) )
+    if( ! sLines.ToLong( &tempValue, 10 ) )
+    {
         return false; // Can't read lines.
+    }
 
-    int countLines = (int) l_tempValue;
-
+    int countLines = ( int ) tempValue;
     // Start postion of the line array in the file.
-    l_lineOffset = l_fileOffset;
-
+    lineOffset = fileOffset;
     // Jump to postion after line array.
-    l_fileOffset += ( l_lengthLines * 4 ) + 1;
-    l_dataFile.Seek( l_fileOffset );
-    l_dataFile.Read( l_buffer, (size_t) 255 );
-
-    l_j = 0;
-    int l_k = 0;
+    fileOffset += ( lengthLines * 4 ) + 1;
+    dataFile.Seek( fileOffset );
+    dataFile.Read( pBuffer, ( size_t ) 255 );
+    j = 0;
+    int k = 0;
 
     // TODO test if there's really a color array.
-    while( l_buffer[l_k] != '\n' )
+    while( pBuffer[k] != '\n' )
     {
-        l_temp[l_j] = l_buffer[l_k];
-        ++l_fileOffset;
-        ++l_j;
-        ++l_k;
+        pTemp[j] = pBuffer[k];
+        ++fileOffset;
+        ++j;
+        ++k;
     }
-    ++l_k;
-    ++l_fileOffset;
-    l_temp[l_j] = 0;
-    wxString tmpString( l_temp, wxConvUTF8 );
 
-    l_j = 0;
-    while( l_buffer[l_k] != '\n' )
+    ++k;
+    ++fileOffset;
+    pTemp[j] = 0;
+    wxString tmpString( pTemp, wxConvUTF8 );
+    j = 0;
+
+    while( pBuffer[k] != '\n' )
     {
-        l_temp[l_j] = l_buffer[l_k];
-        ++l_fileOffset;
-        ++l_j;
-        ++l_k;
+        pTemp[j] = pBuffer[k];
+        ++fileOffset;
+        ++j;
+        ++k;
     }
-    ++l_fileOffset;
-    l_temp[l_j] = 0;
-    wxString tmpString2( l_temp, wxConvUTF8 );
+
+    ++fileOffset;
+    pTemp[j] = 0;
+    wxString tmpString2( pTemp, wxConvUTF8 );
 
     if( tmpString.BeforeFirst( ' ' ) == _T( "CELL_DATA" ) )
     {
-        l_lineColorOffset = l_fileOffset;
-        l_fileOffset += ( countLines * 3 ) + 1;
-        l_dataFile.Seek( l_fileOffset );
-        l_dataFile.Read( l_buffer, (size_t) 255 );
+        lineColorOffset = fileOffset;
+        fileOffset += ( countLines * 3 ) + 1;
+        dataFile.Seek( fileOffset );
+        dataFile.Read( pBuffer, ( size_t ) 255 );
+        // aa 2009/06/26 workaround if the pBuffer doesn't contain a string.
+        pBuffer[254] = '\n';
+        int k = j = 0;
 
-        // aa 2009/06/26 workaround if the l_buffer doesn't contain a string.
-        l_buffer[254] = '\n';
-
-        int l_k = l_j = 0;
         // TODO test if there's really a color array.
-        while( l_buffer[l_k] != '\n' )
+        while( pBuffer[k] != '\n' )
         {
-            l_temp[l_j] = l_buffer[l_k];
-            ++l_fileOffset;
-            ++l_j;
-            ++l_k;
+            pTemp[j] = pBuffer[k];
+            ++fileOffset;
+            ++j;
+            ++k;
         }
-        ++l_k;
-        ++l_fileOffset;
-        l_temp[l_j] = 0;
-        wxString tmpString3( l_temp, wxConvUTF8 );
-        tmpString = tmpString3;
 
-        l_j = 0;
-        while( l_buffer[l_k] != '\n' )
+        ++k;
+        ++fileOffset;
+        pTemp[j] = 0;
+        wxString tmpString3( pTemp, wxConvUTF8 );
+        tmpString = tmpString3;
+        j = 0;
+
+        while( pBuffer[k] != '\n' )
         {
-            l_temp[l_j] = l_buffer[l_k];
-            ++l_fileOffset;
-            ++l_j;
-            ++l_k;
+            pTemp[j] = pBuffer[k];
+            ++fileOffset;
+            ++j;
+            ++k;
         }
-        ++l_fileOffset;
-        l_temp[l_j] = 0;
-        wxString tmpString4( l_temp, wxConvUTF8 );
+
+        ++fileOffset;
+        pTemp[j] = 0;
+        wxString tmpString4( pTemp, wxConvUTF8 );
         tmpString2 = tmpString4;
     }
 
     if( tmpString.BeforeFirst( ' ' ) == _T( "POINT_DATA" ) && tmpString2.BeforeFirst( ' ' ) == _T( "COLOR_SCALARS" ) )
-        l_pointColorOffset = l_fileOffset;
+    {
+        pointColorOffset = fileOffset;
+    }
 
-    m_dh->printDebug( wxString::Format( _T( "loading %d l_points and %d lines." ), l_countPoints, countLines ), 1 );
-
+    m_dh->printDebug( wxString::Format( _T( "loading %d points and %d lines." ), countPoints, countLines ), 1 );
     m_countLines        = countLines;
     m_dh->m_countFibers = m_countLines;
-    m_countPoints       = l_countPoints;
-
+    m_countPoints       = countPoints;
+    
     m_linePointers.resize( m_countLines + 1 );
-    m_linePointers[countLines] = l_countPoints;
-    m_reverse.resize( l_countPoints );
-    m_filtered.resize(countLines, false);
+    m_linePointers[countLines] = countPoints;
+    m_reverse.resize( countPoints );
+    m_filtered.resize( countLines, false );
     m_selected.resize( countLines, false );
+    m_pointArray.resize( countPoints * 3 );
+    m_lineArray.resize( lengthLines * 4 );
+    m_colorArray.resize( countPoints * 3 );
+    
+    dataFile.Seek( pointOffset );
+    dataFile.Read( &m_pointArray[0], ( size_t )countPoints * 12 );
+    dataFile.Seek( lineOffset );
+    dataFile.Read( &m_lineArray[0], ( size_t )lengthLines * 4 );
 
-    m_pointArray.resize( l_countPoints * 3 );
-    m_lineArray.resize ( l_lengthLines * 4 );
-    m_colorArray.resize( l_countPoints * 3 );
-
-    l_dataFile.Seek( l_pointOffset );
-    l_dataFile.Read( &m_pointArray[0], (size_t)l_countPoints * 12 );
-
-    l_dataFile.Seek( l_lineOffset );
-    l_dataFile.Read( &m_lineArray[0], (size_t)l_lengthLines * 4 );
-
-    if( l_pointColorOffset != 0 )
+    if( pointColorOffset != 0 )
     {
-        vector< wxUint8 > tmpColorArray( l_countPoints * 3, 0 );
-        l_dataFile.Seek( l_pointColorOffset );
-        l_dataFile.Read( &tmpColorArray[0], (size_t) l_countPoints * 3 );
+        vector< wxUint8 > tmpColorArray( countPoints * 3, 0 );
+        dataFile.Seek( pointColorOffset );
+        dataFile.Read( &tmpColorArray[0], ( size_t ) countPoints * 3 );
 
         for( size_t i = 0; i < tmpColorArray.size(); ++i )
         {
             m_colorArray[i] = tmpColorArray[i] / 255.;
         }
+
         colorsLoadedFromFile = true;
     }
-    toggleEndianess();
 
+    toggleEndianess();
     m_dh->printDebug( _T( "move vertices" ), 1 );
 
-    for( int i = 0; i < l_countPoints * 3; ++i )
+    for( int i = 0; i < countPoints * 3; ++i )
     {
         m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
         ++i;
@@ -1130,88 +1175,109 @@ bool Fibers::loadVTK( wxString i_fileName )
     calculateLinePointers();
     createColorArray( colorsLoadedFromFile );
     m_dh->printDebug( _T( "read all" ), 1 );
-
     m_type      = FIBERS;
-    m_fullPath  = i_fileName;
-
+    m_fullPath  = filename;
 #ifdef __WXMSW__
-    m_name = i_fileName.AfterLast( '\\' );
+    m_name = filename.AfterLast( '\\' );
 #else
-    m_name = i_fileName.AfterLast( '/' );
+    m_name = filename.AfterLast( '/' );
 #endif
-
-    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
-
-    delete[] l_buffer;
-    delete[] l_temp;
+    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    delete[] pBuffer;
+    delete[] pTemp;
     return true;
 }
 
-bool Fibers::loadDmri(wxString i_fileName)
+bool Fibers::loadDmri( const wxString &filename )
 {
-    FILE *l_file;    
+    FILE *pFile;
+    pFile = fopen( filename.mb_str(), "r" );
 
-    l_file = fopen(i_fileName.mb_str(),"r");
-    if (l_file == NULL) return false;
-    char *s1 = new char[10];
-    char *s2 = new char[10];
-    char *s3 = new char[10];
-    char *s4 = new char[10];
-    float f1,f2,f3,f4,f5;
+    if( pFile == NULL ) 
+    {   
+        return false;
+    }
+
+    char *pS1 = new char[10];
+    char *pS2 = new char[10];
+    char *pS3 = new char[10];
+    char *pS4 = new char[10];
+    float f1, f2, f3, f4, f5;
     int res;
+    
     // the header
-    res = fscanf(l_file, "%f %s", &f1, s1);
-    res = fscanf(l_file, "%f %s %s %s %s", &f1, s1, s2, s3, s4);
-    res = fscanf(l_file, "%f", &f1);
-    res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);    
-    res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
-    res = fscanf(l_file, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5);
-    res = fscanf(l_file, "%d %f", &m_countLines, &f2);
-
+    res = fscanf( pFile, "%f %s", &f1, pS1 );
+    res = fscanf( pFile, "%f %s %s %s %s", &f1, pS1, pS2, pS3, pS4 );
+    res = fscanf( pFile, "%f", &f1 );
+    res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
+    res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
+    res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
+    res = fscanf( pFile, "%d %f", &m_countLines, &f2 );
+    
+    delete[] pS1;
+    delete[] pS2;
+    delete[] pS3;
+    delete[] pS4;
+    
+    pS1 = NULL;
+    pS2 = NULL;
+    pS3 = NULL;
+    pS4 = NULL;
+    
     // the list of points
-    vector< vector<float> > lines;
+    vector< vector< float > > lines;
     m_countPoints = 0;
-    float back,front;
-    for (int i=0; i<m_countLines; i++){        
-        res = fscanf(l_file, "%f %f %f", &back, &front, &f1);
+    float back, front;
 
-        int nbpoints = back+front;
-        if (back!=0 && front!=0)
+    for( int i = 0; i < m_countLines; i++ )
+    {
+        res = fscanf( pFile, "%f %f %f", &back, &front, &f1 );
+        int nbpoints = back + front;
+
+        if( back != 0 && front != 0 )
         {
             nbpoints--;
         }
-        if (nbpoints>0){        
-            vector<float> cur_line;
-            
-            cur_line.resize(nbpoints*3);  
-            
+
+        if( nbpoints > 0 )
+        {
+            vector< float > curLine;
+            curLine.resize( nbpoints * 3 );
+
             //back
-            for(int j=back-1;j>=0;j--){
-                res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);                
-                cur_line[j*3]  = f1;
-                cur_line[j*3+1]= f2;
-                cur_line[j*3+2]= f3;                
+            for( int j = back - 1; j >= 0; j-- )
+            {
+                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
+                curLine[j * 3]  = f1;
+                curLine[j * 3 + 1] = f2;
+                curLine[j * 3 + 2] = f3;
             }
-            if (back !=0 && front!=0)
+
+            if( back != 0 && front != 0 )
             {
                 //repeated pts
-                res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);  
+                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
             }
-            //front    
-            for (int j=back;j<nbpoints;j++){
-                res = fscanf(l_file, "%f %f %f %f", &f1, &f2, &f3, &f4);                    
-                cur_line[j*3]  = f1;
-                cur_line[j*3+1]= f2;
-                cur_line[j*3+2]= f3;
-            }            
-            m_countPoints += cur_line.size()/3;
-            lines.push_back(cur_line);            
-        } 
+
+            //front
+            for( int j = back; j < nbpoints; j++ )
+            {
+                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
+                curLine[j * 3]  = f1;
+                curLine[j * 3 + 1] = f2;
+                curLine[j * 3 + 2] = f3;
+            }
+
+            m_countPoints += curLine.size() / 3;
+            lines.push_back( curLine );
+        }
     }
-    fclose(l_file);
+
+    fclose( pFile );
+    
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
-    m_dh->m_countFibers = m_countLines + 1;   
+    m_dh->m_countFibers = m_countLines + 1;
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -1219,148 +1285,200 @@ bool Fibers::loadDmri(wxString i_fileName)
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
     m_filtered.resize( m_countLines, false );
-
     m_linePointers[0] = 0;
-    for( int i = 0; i < m_countLines; ++i )
-        m_linePointers[i+1] = m_linePointers[i]+ lines[i].size()/3;
 
-    int l_lineCounter = 0;
-    for( int i = 0; i < m_countPoints; ++i )
+    for( int i = 0; i < m_countLines; ++i )
     {
-        if( i == m_linePointers[l_lineCounter + 1] )
-            ++l_lineCounter;
-        m_reverse[i] = l_lineCounter;
+        m_linePointers[i + 1] = m_linePointers[i] + lines[i].size() / 3;
     }
 
-    unsigned int pos=0;
-    vector< vector<float> >::iterator it;
-    for (it=lines.begin(); it<lines.end(); it++){
-        vector<float>::iterator it2;
-        for (it2=(*it).begin(); it2<(*it).end(); it2++){
+    int lineCounter = 0;
+
+    for( int i = 0; i < m_countPoints; ++i )
+    {
+        if( i == m_linePointers[lineCounter + 1] )
+        {
+            ++lineCounter;
+        }
+
+        m_reverse[i] = lineCounter;
+    }
+
+    unsigned int pos = 0;
+    vector< vector< float > >::iterator it;
+
+    for( it = lines.begin(); it < lines.end(); it++ )
+    {
+        vector< float >::iterator it2;
+
+        for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
+        {
             m_pointArray[pos++] = *it2;
         }
     }
 
     createColorArray( false );
     m_type = FIBERS;
-    m_fullPath = i_fileName;
-    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    m_fullPath = filename;
+    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
-    m_name = i_fileName.AfterLast( '\\' );
+    m_name = filename.AfterLast( '\\' );
 #else
-    m_name = i_fileName.AfterLast( '/' );
+    m_name = filename.AfterLast( '/' );
 #endif
     return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This function was made for debug purposes, it will create a fake set of 
+// This function was made for debug purposes, it will create a fake set of
 // fibers with hardcoded value to be able to test different things.
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::loadTestFibers()
 {
     m_countLines        = 2;  // The number of fibers you want to display.
-    int l_lengthLines   = 10; // The number of points each fiber will have.
+    int lengthLines   = 10; // The number of points each fiber will have.
     int pos = 0;
-
     m_dh->m_countFibers = m_countLines;
-    m_countPoints       = m_countLines * l_lengthLines;
-
+    m_countPoints       = m_countLines * lengthLines;
+    
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
-    m_filtered.resize(m_countLines, false);
-
-    // Because you need to load an anatomy file first in order to load this fake set of fibers, 
+    m_filtered.resize( m_countLines, false );
+    
+    // Because you need to load an anatomy file first in order to load this fake set of fibers,
     // the points composing your fibers have to be between [0,159] in x, [0,199] in y and [0,159] in z.
     // This is for a straight line.
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 100.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 110.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 120.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 130.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 140.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 150.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 160.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 170.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 180.0f; m_pointArray[pos++] = 60.0f;
-    m_pointArray[pos++] = 60.0f; m_pointArray[pos++] = 190.0f; m_pointArray[pos++] = 60.0f;
-
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 110.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 120.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 130.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 140.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 150.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 160.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 170.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 180.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 60.0f;
+    m_pointArray[pos++] = 190.0f;
+    m_pointArray[pos++] = 60.0f;
+    
     // This is for a circle in 2D (Z never changes).
-    float l_circleRadius = 10.0f;
-    float l_offset       = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI *  0.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI *  0.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 10.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 10.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 20.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 20.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 30.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 30.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 40.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 40.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 50.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 50.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 60.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 60.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 70.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 70.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 80.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 80.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-    m_pointArray[pos++] = l_circleRadius * sin( M_PI * 90.0f / 180.0f ) + l_offset; m_pointArray[pos++] = l_circleRadius * cos( M_PI * 90.0f / 180.0f ) + l_offset; m_pointArray[pos++] = 100.0f;
-
+    float circleRadius = 10.0f;
+    float offset       = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI *  0.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI *  0.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 10.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 10.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 20.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 20.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 30.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 30.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 40.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 40.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 50.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 50.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 60.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 60.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 70.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 70.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 80.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 80.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
+    m_pointArray[pos++] = circleRadius * sin( M_PI * 90.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = circleRadius * cos( M_PI * 90.0f / 180.0f ) + offset;
+    m_pointArray[pos++] = 100.0f;
 
     // No need to modify the rest of this function if you only want to add a test fiber.
     for( int i = 0; i < m_countLines; ++i )
-        m_linePointers[i] = i * l_lengthLines;
+    {
+        m_linePointers[i] = i * lengthLines;
+    }
+    
 
-    int l_lineCounter = 0;
+    int lineCounter = 0;
+
     for( int i = 0; i < m_countPoints; ++i )
     {
-        if( i == m_linePointers[l_lineCounter + 1] )
-            ++l_lineCounter;
+        if( i == m_linePointers[lineCounter + 1] )
+        {
+            ++lineCounter;
+        }
 
-        m_reverse[i] = l_lineCounter;
+        m_reverse[i] = lineCounter;
     }
 
     m_pointArray.resize( m_countPoints * 3 );
-
     createColorArray( false );
-
     m_type = FIBERS;
-
-    //m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will call the proper coloring function for the fibers.
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::updateFibersColors()
-{    
+{
     if( m_dh->m_fiberColorationMode == NORMAL_COLOR )
     {
         resetColorArray();
     }
     else
     {
-        float* l_colorData    = NULL;
+        float *pColorData    = NULL;
+
         if( m_dh->m_useVBO )
         {
             glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-            l_colorData  = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+            pColorData  = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
         }
         else
         {
-            l_colorData  = &m_colorArray[0];
+            pColorData  = &m_colorArray[0];
         }
 
         if( m_dh->m_fiberColorationMode == CURVATURE_COLOR )
         {
-            colorWithCurvature( l_colorData );
+            colorWithCurvature( pColorData );
         }
         else if( m_dh->m_fiberColorationMode == TORSION_COLOR )
         {
-            colorWithTorsion( l_colorData );
+            colorWithTorsion( pColorData );
         }
-        else if( m_dh->m_fiberColorationMode == DISTANCE_COLOR)
+        else if( m_dh->m_fiberColorationMode == DISTANCE_COLOR )
         {
-            colorWithDistance( l_colorData );
+            colorWithDistance( pColorData );
         }
-        else if( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR)
+        else if( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR )
         {
-            colorWithMinDistance( l_colorData);
+            colorWithMinDistance( pColorData );
         }
 
         if( m_dh->m_useVBO )
@@ -1373,71 +1491,95 @@ void Fibers::updateFibersColors()
 ///////////////////////////////////////////////////////////////////////////
 // This function will color the fibers depending on their torsion value.
 //
-// i_colorData      : A pointer to the fiber color info.
+// pColorData      : A pointer to the fiber color info.
 ///////////////////////////////////////////////////////////////////////////
-void Fibers::colorWithTorsion( float* i_colorData )
+void Fibers::colorWithTorsion( float *pColorData )
 {
-    if( i_colorData == NULL )
+    if( pColorData == NULL )
+    {
         return;
+    }
 
-    int    l_pc = 0;
-    Vector l_firstDerivative, l_secondDerivative, l_thirdDerivative;
+    int    pc = 0;
+    // TODO remove
+    //Vector firstDerivative, secondDerivative, thirdDerivative;
 
     // For each fibers.
     for( int i = 0; i < getLineCount(); ++i )
     {
-        double l_color        = 0.0f;
-        int    l_index        = 0;
-        float  l_progression  = 0.0f;
-        int    l_pointPerLine = getPointsPerLine( i );
+        double color        = 0.0f;
+        int    index        = 0;
+        float  progression  = 0.0f;
+        int    pointPerLine = getPointsPerLine( i );
 
-        // We cannot calculate the torsion for a fiber that as less that 5 points. 
+        // We cannot calculate the torsion for a fiber that as less that 5 points.
         // So we simply do not cange the color for this fiber
-        if( l_pointPerLine < 5 )
+        if( pointPerLine < 5 )
+        {
             continue;
+        }
 
         // For each points of this fiber.
-        for( int j = 0; j < l_pointPerLine; ++j )
+        for( int j = 0; j < pointPerLine; ++j )
         {
-            if     ( j == 0 )                  { l_index = 6;                          l_progression = 0.0f;  } // For the first point of each fiber.
-            else if( j == 1 )                  { l_index = 6;                          l_progression = 0.25f; } // For the second point of each fiber.
-            else if( j == l_pointPerLine - 2 ) { l_index = ( l_pointPerLine - 2 ) * 3; l_progression = 0.75f; } // For the before last point of each fiber.
-            else if( j == l_pointPerLine - 1 ) { l_index = ( l_pointPerLine - 2 ) * 3; l_progression = 1.0f;  } // For the last point of each fiber.
-            else                               {                                       l_progression = 0.5f;  } // For every other points.
-
-            m_dh->m_lastSelectedObject->getProgressionTorsion( Vector( m_pointArray[l_index-6], m_pointArray[l_index-5], m_pointArray[l_index-4] ), 
-                Vector( m_pointArray[l_index-3], m_pointArray[l_index-2], m_pointArray[l_index-1] ),
-                Vector( m_pointArray[l_index],   m_pointArray[l_index+1], m_pointArray[l_index+2] ),
-                Vector( m_pointArray[l_index+3], m_pointArray[l_index+4], m_pointArray[l_index+5] ),
-                Vector( m_pointArray[l_index+6], m_pointArray[l_index+7], m_pointArray[l_index+8] ),
-                l_progression, l_color );
-
-            // Lets apply a specific harcoded coloration for the torsion.
-            float l_realColor;
-            if( l_color <= 0.01f ) // Those points have no torsion so we simply but them pure blue.
+            if( j == 0 )
             {
-                i_colorData[l_pc]     = 0.0f;
-                i_colorData[l_pc + 1] = 0.0f;
-                i_colorData[l_pc + 2] = 1.0f;
+                index = 6;                             // For the first point of each fiber.
+                progression = 0.0f;
             }
-            else if( l_color < 0.1f  ) // The majority of the values are here.
+            else if( j == 1 )
             {
-                double l_normalizedValue = ( l_color - 0.01f ) / ( 0.1f - 0.01f );
-                l_realColor = ( pow( (double)2.71828182845904523536, l_normalizedValue ) ) - 1.0f;
+                index = 6;                             // For the second point of each fiber.
+                progression = 0.25f;
+            }
+            else if( j == pointPerLine - 2 )
+            {
+                index = ( pointPerLine - 2 ) * 3;    // For the before last point of each fiber.
+                progression = 0.75f;
+            }
+            else if( j == pointPerLine - 1 )
+            {
+                index = ( pointPerLine - 2 ) * 3;    // For the last point of each fiber.
+                progression = 1.0f;
+            }
+            else
+            {
+                progression = 0.5f;     // For every other points.
+            }
 
-                i_colorData[l_pc]     = 0.0f;
-                i_colorData[l_pc + 1] = l_realColor;
-                i_colorData[l_pc + 2] = 1.0f - l_realColor;
+            m_dh->m_lastSelectedObject->getProgressionTorsion( Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
+                    Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
+                    Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
+                    Vector( m_pointArray[index + 3], m_pointArray[index + 4], m_pointArray[index + 5] ),
+                    Vector( m_pointArray[index + 6], m_pointArray[index + 7], m_pointArray[index + 8] ),
+                    progression, color );
+            
+            // Lets apply a specific harcoded coloration for the torsion.
+            float realColor;
+
+            if( color <= 0.01f ) // Those points have no torsion so we simply but them pure blue.
+            {
+                pColorData[pc]     = 0.0f;
+                pColorData[pc + 1] = 0.0f;
+                pColorData[pc + 2] = 1.0f;
+            }
+            else if( color < 0.1f )  // The majority of the values are here.
+            {
+                double normalizedValue = ( color - 0.01f ) / ( 0.1f - 0.01f );
+                realColor = ( pow( ( double )2.71828182845904523536, normalizedValue ) ) - 1.0f;
+                pColorData[pc]     = 0.0f;
+                pColorData[pc + 1] = realColor;
+                pColorData[pc + 2] = 1.0f - realColor;
             }
             else // All the rest is simply pure green.
             {
-                i_colorData[l_pc]     = 0.0f;
-                i_colorData[l_pc + 1] = 1.0f;
-                i_colorData[l_pc + 2] = 0.0f;
+                pColorData[pc]     = 0.0f;
+                pColorData[pc + 1] = 1.0f;
+                pColorData[pc + 2] = 0.0f;
             }
 
-            l_pc    += 3;
-            l_index += 3;
+            pc    += 3;
+            index += 3;
         }
     }
 }
@@ -1445,71 +1587,95 @@ void Fibers::colorWithTorsion( float* i_colorData )
 ///////////////////////////////////////////////////////////////////////////
 // This function will color the fibers depending on their curvature value.
 //
-// i_colorData      : A pointer to the fiber color info.
+// pColorData      : A pointer to the fiber color info.
 ///////////////////////////////////////////////////////////////////////////
-void Fibers::colorWithCurvature( float* i_colorData )
+void Fibers::colorWithCurvature( float *pColorData )
 {
-    if( i_colorData == NULL )
+    if( pColorData == NULL )
+    {
         return;
+    }
 
-    int    l_pc = 0;
-    Vector l_firstDerivative, l_secondDerivative, l_thirdDerivative;
+    int    pc = 0;
+    // TODO remove
+    //Vector firstDerivative, secondDerivative, thirdDerivative;
 
     // For each fibers.
     for( int i = 0; i < getLineCount(); ++i )
     {
-        double l_color        = 0.0f;
-        int    l_index        = 0;
-        float  l_progression  = 0.0f;
-        int    l_pointPerLine = getPointsPerLine( i );
+        double color        = 0.0f;
+        int    index        = 0;
+        float  progression  = 0.0f;
+        int    pointPerLine = getPointsPerLine( i );
 
-        // We cannot calculate the curvature for a fiber that as less that 5 points. 
+        // We cannot calculate the curvature for a fiber that as less that 5 points.
         // So we simply do not cange the color for this fiber
-        if( l_pointPerLine < 5 )
-            continue;
-
-        // For each points of this fiber.
-        for( int j = 0; j < l_pointPerLine; ++j )
+        if( pointPerLine < 5 )
         {
-            if     ( j == 0 )                  { l_index = 6;                          l_progression = 0.0f;  } // For the first point of each fiber.
-            else if( j == 1 )                  { l_index = 6;                          l_progression = 0.25f; } // For the second point of each fiber.
-            else if( j == l_pointPerLine - 2 ) { l_index = ( l_pointPerLine - 2 ) * 3; l_progression = 0.75f; } // For the before last point of each fiber.
-            else if( j == l_pointPerLine - 1 ) { l_index = ( l_pointPerLine - 2 ) * 3; l_progression = 1.0f;  } // For the last point of each fiber.
-            else                               {                                       l_progression = 0.5f;  } // For every other points.
+            continue;
+        }
 
-            m_dh->m_lastSelectedObject->getProgressionCurvature( Vector( m_pointArray[l_index-6], m_pointArray[l_index-5], m_pointArray[l_index-4] ), 
-                Vector( m_pointArray[l_index-3], m_pointArray[l_index-2], m_pointArray[l_index-1] ),
-                Vector( m_pointArray[l_index],   m_pointArray[l_index+1], m_pointArray[l_index+2] ),
-                Vector( m_pointArray[l_index+3], m_pointArray[l_index+4], m_pointArray[l_index+5] ),
-                Vector( m_pointArray[l_index+6], m_pointArray[l_index+7], m_pointArray[l_index+8] ),
-                l_progression, l_color );
-
-            // Lets apply a specific harcoded coloration for the curvature.
-            float l_realColor;
-            if( l_color <= 0.01f ) // Those points have no curvature so we simply but them pure blue.
+        // For each point of this fiber.
+        for( int j = 0; j < pointPerLine; ++j )
+        {
+            if( j == 0 )
             {
-                i_colorData[l_pc]     = 0.0f;
-                i_colorData[l_pc + 1] = 0.0f;
-                i_colorData[l_pc + 2] = 1.0f;
+                index = 6;                             // For the first point of each fiber.
+                progression = 0.0f;
             }
-            else if( l_color < 0.1f  ) // The majority of the values are here.
+            else if( j == 1 )
             {
-                double l_normalizedValue = ( l_color - 0.01f ) / ( 0.1f - 0.01f );
-                l_realColor = ( pow( (double)2.71828182845904523536, l_normalizedValue ) ) - 1.0f;
+                index = 6;                             // For the second point of each fiber.
+                progression = 0.25f;
+            }
+            else if( j == pointPerLine - 2 )
+            {
+                index = ( pointPerLine - 2 ) * 3;    // For the before last point of each fiber.
+                progression = 0.75f;
+            }
+            else if( j == pointPerLine - 1 )
+            {
+                index = ( pointPerLine - 2 ) * 3;    // For the last point of each fiber.
+                progression = 1.0f;
+            }
+            else
+            {
+                progression = 0.5f;     // For every other points.
+            }
 
-                i_colorData[l_pc]     = 0.0f;
-                i_colorData[l_pc + 1] = l_realColor;
-                i_colorData[l_pc + 2] = 1.0f - l_realColor;
+            m_dh->m_lastSelectedObject->getProgressionCurvature( Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
+                    Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
+                    Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
+                    Vector( m_pointArray[index + 3], m_pointArray[index + 4], m_pointArray[index + 5] ),
+                    Vector( m_pointArray[index + 6], m_pointArray[index + 7], m_pointArray[index + 8] ),
+                    progression, color );
+            
+            // Lets apply a specific harcoded coloration for the curvature.
+            float realColor;
+
+            if( color <= 0.01f ) // Those points have no curvature so we simply but them pure blue.
+            {
+                pColorData[pc]     = 0.0f;
+                pColorData[pc + 1] = 0.0f;
+                pColorData[pc + 2] = 1.0f;
+            }
+            else if( color < 0.1f )  // The majority of the values are here.
+            {
+                double normalizedValue = ( color - 0.01f ) / ( 0.1f - 0.01f );
+                realColor = ( pow( ( double )2.71828182845904523536, normalizedValue ) ) - 1.0f;
+                pColorData[pc]     = 0.0f;
+                pColorData[pc + 1] = realColor;
+                pColorData[pc + 2] = 1.0f - realColor;
             }
             else // All the rest is simply pure green.
             {
-                i_colorData[l_pc]     = 0.0f;
-                i_colorData[l_pc + 1] = 1.0f;
-                i_colorData[l_pc + 2] = 0.0f;
+                pColorData[pc]     = 0.0f;
+                pColorData[pc + 1] = 1.0f;
+                pColorData[pc + 2] = 0.0f;
             }
 
-            l_pc    += 3;
-            l_index += 3;
+            pc    += 3;
+            index += 3;
         }
     }
 }
@@ -1518,150 +1684,141 @@ void Fibers::colorWithCurvature( float* i_colorData )
 // This function will color the fibers depending on their distance to the
 // flagged distance anchors voi.
 //
-// i_colorData      : A pointer to the fiber color info.
+// pColorData      : A pointer to the fiber color info.
 ///////////////////////////////////////////////////////////////////////////
-void Fibers::colorWithDistance( float* i_colorData )
+void Fibers::colorWithDistance( float *pColorData )
 {
     SelectionObjectList selObjs =  m_dh->getSelectionObjects();
+    vector< SelectionObject* > simplifiedList;
 
-    vector<SelectionObject*> simplifiedList;
-
-    for(unsigned int i = 0; i < selObjs.size(); ++i)
+    for( unsigned int i = 0; i < selObjs.size(); ++i )
     {
-        for(unsigned int j = 0; j < selObjs[i].size(); ++j)
+        for( unsigned int j = 0; j < selObjs[i].size(); ++j )
         {
-            if( selObjs[i][j]->IsUsedForDistanceColoring())
+            if( selObjs[i][j]->IsUsedForDistanceColoring() )
             {
-                simplifiedList.push_back(selObjs[i][j]); 
+                simplifiedList.push_back( selObjs[i][j] );
             }
         }
     }
 
-    for(int i = 0; i < getPointCount(); ++i)
+    for( int i = 0; i < getPointCount(); ++i )
     {
         float minDistance = FLT_MAX;
+        int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
+        int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
+        int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
+        int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
 
-        int l_x     = (int)wxMin( m_dh->m_columns -1, wxMax( 0, m_pointArray[i * 3 ]/ m_dh->m_xVoxel    ) ) ;
-        int l_y     = (int)wxMin( m_dh->m_rows    -1, wxMax( 0, m_pointArray[i * 3 + 1]/ m_dh->m_yVoxel ) ) ;
-        int l_z     = (int)wxMin( m_dh->m_frames  -1, wxMax( 0, m_pointArray[i * 3 + 2]/ m_dh->m_zVoxel ) ) ;
-
-        int l_index = l_x + l_y * m_dh->m_columns + l_z * m_dh->m_rows * m_dh->m_columns;
-
-        for(unsigned int j = 0; j < simplifiedList.size(); ++j)
+        for( unsigned int j = 0; j < simplifiedList.size(); ++j )
         {
-            if(simplifiedList[j]->m_sourceAnatomy != NULL)
+            if( simplifiedList[j]->m_sourceAnatomy != NULL )
             {
-                float Value = simplifiedList[j]->m_sourceAnatomy->at( l_index );
+                float curValue = simplifiedList[j]->m_sourceAnatomy->at( index );
 
-                if( Value < minDistance)
+                if( curValue < minDistance )
                 {
-                    minDistance = Value;
+                    minDistance = curValue;
                 }
             }
         }
 
-        float thresh = m_threshold/2.0f;
+        float thresh = m_threshold / 2.0f;
 
-        if(minDistance > (thresh) && minDistance < (thresh + LINEAR_GRADIENT_THRESHOLD))
+        if( minDistance > ( thresh ) && minDistance < ( thresh + LINEAR_GRADIENT_THRESHOLD ) )
         {
-            float Green = (minDistance-thresh)/ LINEAR_GRADIENT_THRESHOLD;
-            float Red = 1 - Green;
-
-            i_colorData[3 * i]      = Red;
-            i_colorData[3 * i + 1]  = Green;
-            i_colorData[3 * i + 2]  = 0.0f;
+            float greenVal = ( minDistance - thresh ) / LINEAR_GRADIENT_THRESHOLD;
+            float redVal = 1 - greenVal;
+            pColorData[3 * i]      = redVal;
+            pColorData[3 * i + 1]  = greenVal;
+            pColorData[3 * i + 2]  = 0.0f;
         }
-        else if(minDistance > (thresh + LINEAR_GRADIENT_THRESHOLD))
+        else if( minDistance > ( thresh + LINEAR_GRADIENT_THRESHOLD ) )
         {
-            i_colorData[3 * i ]     = 0.0f;
-            i_colorData[3 * i + 1]  = 1.0f;
-            i_colorData[3 * i + 2]  = 0.0f;
+            pColorData[3 * i ]     = 0.0f;
+            pColorData[3 * i + 1]  = 1.0f;
+            pColorData[3 * i + 2]  = 0.0f;
         }
         else
         {
-            i_colorData[3 * i ]     = 1.0f;
-            i_colorData[3 * i + 1]  = 0.0f;
-            i_colorData[3 * i + 2]  = 0.0f;
+            pColorData[3 * i ]     = 1.0f;
+            pColorData[3 * i + 1]  = 0.0f;
+            pColorData[3 * i + 2]  = 0.0f;
         }
     }
 }
 
-void Fibers::colorWithMinDistance( float* i_colorData )
+void Fibers::colorWithMinDistance( float *pColorData )
 {
     SelectionObjectList selObjs =  m_dh->getSelectionObjects();
+    vector< SelectionObject* > simplifiedList;
 
-    vector<SelectionObject*> simplifiedList;
-
-    for(unsigned int i = 0; i < selObjs.size(); ++i)
+    for( unsigned int i = 0; i < selObjs.size(); ++i )
     {
-        for(unsigned int j = 0; j < selObjs[i].size(); ++j)
+        for( unsigned int j = 0; j < selObjs[i].size(); ++j )
         {
-            if( selObjs[i][j]->IsUsedForDistanceColoring())
+            if( selObjs[i][j]->IsUsedForDistanceColoring() )
             {
-                simplifiedList.push_back(selObjs[i][j]); 
+                simplifiedList.push_back( selObjs[i][j] );
             }
         }
     }
 
-    for(int i = 0; i < getLineCount(); ++i)
+    for( int i = 0; i < getLineCount(); ++i )
     {
-        int NbPointsInLine = getPointsPerLine(i);
-        int Index = getStartIndexForLine(i);
-
+        int nbPointsInLine = getPointsPerLine( i );
+        int index = getStartIndexForLine( i );
         float minDistance = FLT_MAX;
 
-        for(int j = 0; j < NbPointsInLine; ++j)
+        for( int j = 0; j < nbPointsInLine; ++j )
         {
-            int l_x     = (int)wxMin( m_dh->m_columns -1, wxMax( 0, m_pointArray[(Index + j) * 3 ]/ m_dh->m_xVoxel    ) ) ;
-            int l_y     = (int)wxMin( m_dh->m_rows    -1, wxMax( 0, m_pointArray[(Index + j) * 3 + 1]/ m_dh->m_yVoxel ) ) ;
-            int l_z     = (int)wxMin( m_dh->m_frames  -1, wxMax( 0, m_pointArray[(Index + j) * 3 + 2]/ m_dh->m_zVoxel ) ) ;
+            int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[( index + j ) * 3 ] / m_dh->m_xVoxel ) ) ;
+            int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[( index + j ) * 3 + 1] / m_dh->m_yVoxel ) ) ;
+            int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[( index + j ) * 3 + 2] / m_dh->m_zVoxel ) ) ;
+            int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
 
-            int l_index = l_x + l_y * m_dh->m_columns + l_z * m_dh->m_rows * m_dh->m_columns;
-
-            for(unsigned int k = 0; k < simplifiedList.size(); ++k)
+            for( unsigned int k = 0; k < simplifiedList.size(); ++k )
             {
-                float Value = simplifiedList[k]->m_sourceAnatomy->at( l_index );
+                float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
 
-                if( Value < minDistance)
+                if( curValue < minDistance )
                 {
-                    minDistance = Value;
-                } 
+                    minDistance = curValue;
+                }
             }
         }
 
-        float thresh = m_threshold/2.0f;
+        float thresh = m_threshold / 2.0f;
         Vector theColor;
         float theAlpha;
 
-        if(m_localizedAlpha.size() != (unsigned int) getPointCount())
+        if( m_localizedAlpha.size() != ( unsigned int ) getPointCount() )
         {
-            m_localizedAlpha = vector<float>(getPointCount());
+            m_localizedAlpha = vector< float >( getPointCount() );
         }
 
-        if(minDistance > (thresh) && minDistance < (thresh + LINEAR_GRADIENT_THRESHOLD))
+        if( minDistance > ( thresh ) && minDistance < ( thresh + LINEAR_GRADIENT_THRESHOLD ) )
         {
-            float Green = (minDistance-thresh)/ LINEAR_GRADIENT_THRESHOLD;
-            float Red = 1 - Green;
-
-            theColor.x  = Red;
+            float greenVal = ( minDistance - thresh ) / LINEAR_GRADIENT_THRESHOLD;
+            float redVal = 1 - greenVal;
+            theColor.x  = redVal;
             theColor.y  = 0.9f;
             theColor.z  = 0.0f;
 
-            if(Red < MIN_ALPHA_VALUE)
+            if( redVal < MIN_ALPHA_VALUE )
             {
                 theAlpha = MIN_ALPHA_VALUE;
             }
             else
             {
-                theAlpha = pow(Red,6.0f);
+                theAlpha = pow( redVal, 6.0f );
             }
         }
-        else if(minDistance > (thresh + LINEAR_GRADIENT_THRESHOLD))
+        else if( minDistance > ( thresh + LINEAR_GRADIENT_THRESHOLD ) )
         {
             theColor.x  = 0.0f;
             theColor.y  = 1.0f;
             theColor.z  = 0.0f;
-
             theAlpha = MIN_ALPHA_VALUE;
         }
         else
@@ -1669,93 +1826,96 @@ void Fibers::colorWithMinDistance( float* i_colorData )
             theColor.x  = 1.0f;
             theColor.y  = 0.0f;
             theColor.z  = 0.0f;
-
             theAlpha = 1.0;
         }
 
-        for(int j = 0; j < NbPointsInLine; ++j)
+        for( int j = 0; j < nbPointsInLine; ++j )
         {
-            i_colorData[(Index + j)*3]     = theColor.x;
-            i_colorData[(Index + j)*3 + 1] = theColor.y;
-            i_colorData[(Index + j)*3 + 2] = theColor.z;
-
-            m_localizedAlpha[Index + j] = theAlpha;
+            pColorData[( index + j ) * 3]     = theColor.x;
+            pColorData[( index + j ) * 3 + 1] = theColor.y;
+            pColorData[( index + j ) * 3 + 2] = theColor.z;
+            m_localizedAlpha[index + j] = theAlpha;
         }
     }
 }
 
 void Fibers::generateFiberVolume()
 {
-    float* l_colorData    = NULL;
+    float *pColorData( NULL );
+
     if( m_dh->m_useVBO )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-        l_colorData  = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        pColorData  = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
-        l_colorData  = &m_colorArray[0];
+        pColorData  = &m_colorArray[0];
     }
 
-    if(m_localizedAlpha.size() != (unsigned int)getPointCount())
+    if( m_localizedAlpha.size() != ( unsigned int )getPointCount() )
     {
-        m_localizedAlpha = vector<float>(getPointCount(),1);
+        m_localizedAlpha = vector< float >( getPointCount(), 1 );
     }
 
-    Anatomy* tmpAnatomy = new Anatomy(m_dh,RGB);
-
-    tmpAnatomy->setName(wxT("Fiber-Density Volume"));
-
-    m_dh->m_mainFrame->m_pListCtrl->InsertItem(0, wxT(""),0);
-    m_dh->m_mainFrame->m_pListCtrl->SetItem(0,1, tmpAnatomy->getName());
-    m_dh->m_mainFrame->m_pListCtrl->SetItem(0,2, wxT("1.0"));
-    m_dh->m_mainFrame->m_pListCtrl->SetItem(0,3, wxT(""),1);
-
-    m_dh->m_mainFrame->m_pListCtrl->SetItemData(0,(long) tmpAnatomy);
-
-    m_dh->m_mainFrame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
-
+    Anatomy *pTmpAnatomy = new Anatomy( m_dh, RGB );
+    pTmpAnatomy->setName( wxT( "Fiber-Density Volume" ) );
+    
+    m_dh->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 1, pTmpAnatomy->getName() );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "1.0" ) );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
+    m_dh->m_mainFrame->m_pListCtrl->SetItemData( 0, ( long ) pTmpAnatomy );
+    m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    
     m_dh->updateLoadStatus();
     m_dh->m_mainFrame->refreshAllGLWidgets();
 
-    for(int i = 0; i < getPointCount(); ++i)
+    for( int i = 0; i < getPointCount(); ++i )
     {
-        int l_x     = (int)wxMin( m_dh->m_columns -1, wxMax( 0, m_pointArray[i * 3 ]/ m_dh->m_xVoxel    ) ) ;
-        int l_y     = (int)wxMin( m_dh->m_rows    -1, wxMax( 0, m_pointArray[i * 3 + 1]/ m_dh->m_yVoxel ) ) ;
-        int l_z     = (int)wxMin( m_dh->m_frames  -1, wxMax( 0, m_pointArray[i * 3 + 2]/ m_dh->m_zVoxel ) ) ;
-
-        int l_index = l_x + l_y * m_dh->m_columns + l_z * m_dh->m_rows * m_dh->m_columns;
-
-        (*tmpAnatomy->getFloatDataset())[l_index*3] += l_colorData[i * 3] * m_localizedAlpha[i];
-        (*tmpAnatomy->getFloatDataset())[l_index*3+1] += l_colorData[i * 3+1] * m_localizedAlpha[i];
-        (*tmpAnatomy->getFloatDataset())[l_index*3+2] += l_colorData[i * 3+2] * m_localizedAlpha[i];
+        int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
+        int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
+        int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
+        int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+        
+        ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3] * m_localizedAlpha[i];
+        ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 1] += pColorData[i * 3 + 1] * m_localizedAlpha[i];
+        ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
     }
+
     if( m_dh->m_useVBO )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
 }
 
-void Fibers::save( wxString i_fileName )
+/**
+ * Save using the VTK binary format.
+ */
+void Fibers::save( wxString filename )
 {
-    vector<float>   l_pointsToSave;
-    vector<int>     l_linesToSave;
-    vector<wxUint8> l_colorsToSave;
-    int l_pointIndex = 0;
-    int l_countLines = 0;
+    vector< float >   pointsToSave;
+    vector< int >     linesToSave;
+    vector< wxUint8 > colorsToSave;
 
-    if( i_fileName.AfterLast( '.' ) != _T( "fib" ) )
-        i_fileName += _T( ".fib" );
+    int pointIndex( 0 );
+    int countLines( 0 );
 
-    float* l_colorData = NULL;
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    {
+        filename += _T( ".fib" );
+    }
+
+    float *pColorData( NULL );
+
     if( m_dh->m_useVBO )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-        l_colorData = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
-        l_colorData = &m_colorArray[0];
+        pColorData = &m_colorArray[0];
     }
 
     for( int l = 0; l < m_countLines; ++l )
@@ -1763,48 +1923,49 @@ void Fibers::save( wxString i_fileName )
         if( m_selected[l] && !m_filtered[l] )
         {
             unsigned int pc = getStartIndexForLine( l ) * 3;
-            l_linesToSave.push_back( getPointsPerLine( l ) );
+            linesToSave.push_back( getPointsPerLine( l ) );
 
-            for ( int j = 0; j < getPointsPerLine( l ); ++j )
+            for( int j = 0; j < getPointsPerLine( l ); ++j )
             {
-                l_pointsToSave.push_back( m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[pc] );
-                l_colorsToSave.push_back( (wxUint8) ( l_colorData[pc] * 255 ) );
+                pointsToSave.push_back( m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[pc] );
+                colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
-
-                l_pointsToSave.push_back( m_dh->m_rows * m_dh->m_yVoxel - m_pointArray[pc] );
-                l_colorsToSave.push_back( (wxUint8) ( l_colorData[pc] * 255 ) );
+                pointsToSave.push_back( m_dh->m_rows * m_dh->m_yVoxel - m_pointArray[pc] );
+                colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
-
-                l_pointsToSave.push_back( m_pointArray[pc] );
-                l_colorsToSave.push_back( (wxUint8) ( l_colorData[pc] * 255 ) );
+                pointsToSave.push_back( m_pointArray[pc] );
+                colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
-
-                l_linesToSave.push_back( l_pointIndex );
-                ++l_pointIndex;
+                linesToSave.push_back( pointIndex );
+                ++pointIndex;
             }
-            ++l_countLines;
+
+            ++countLines;
         }
     }
 
     if( m_dh->m_useVBO )
+    {
         glUnmapBuffer( GL_ARRAY_BUFFER );
+    }
 
     converterByteINT32 c;
     converterByteFloat f;
-
     ofstream myfile;
     vector< char > vBuffer;
-
+    
     string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
-    header1 += intToString( l_pointsToSave.size() / 3 );
+    header1 += intToString( pointsToSave.size() / 3 );
     header1 += " float\n";
 
     for( unsigned int i = 0; i < header1.size(); ++i )
-        vBuffer.push_back( header1[i] );
-
-    for( unsigned int i = 0; i < l_pointsToSave.size(); ++i )
     {
-        f.f = l_pointsToSave[i];
+        vBuffer.push_back( header1[i] );
+    }
+
+    for( unsigned int i = 0; i < pointsToSave.size(); ++i )
+    {
+        f.f = pointsToSave[i];
         vBuffer.push_back( f.b[3] );
         vBuffer.push_back( f.b[2] );
         vBuffer.push_back( f.b[1] );
@@ -1812,14 +1973,16 @@ void Fibers::save( wxString i_fileName )
     }
 
     vBuffer.push_back( '\n' );
-    string header2 = "LINES " + intToString( l_countLines ) + " " + intToString( l_linesToSave.size() )+ "\n";
+    string header2 = "LINES " + intToString( countLines ) + " " + intToString( linesToSave.size() ) + "\n";
 
     for( unsigned int i = 0; i < header2.size(); ++i )
-        vBuffer.push_back( header2[i] );
-
-    for( unsigned int i = 0; i < l_linesToSave.size(); ++i )
     {
-        c.i = l_linesToSave[i];
+        vBuffer.push_back( header2[i] );
+    }
+
+    for( unsigned int i = 0; i < linesToSave.size(); ++i )
+    {
+        c.i = linesToSave[i];
         vBuffer.push_back( c.b[3] );
         vBuffer.push_back( c.b[2] );
         vBuffer.push_back( c.b[1] );
@@ -1827,171 +1990,186 @@ void Fibers::save( wxString i_fileName )
     }
 
     vBuffer.push_back( '\n' );
-
     string header3 = "POINT_DATA ";
-    header3 += intToString( l_pointsToSave.size() / 3 );
+    header3 += intToString( pointsToSave.size() / 3 );
     header3 += " float\n";
     header3 += "COLOR_SCALARS scalars 3\n";
 
     for( unsigned int i = 0; i < header3.size(); ++i )
+    {
         vBuffer.push_back( header3[i] );
+    }
 
-    for( unsigned int i = 0; i < l_colorsToSave.size(); ++i )
-        vBuffer.push_back( l_colorsToSave[i] );
+    for( unsigned int i = 0; i < colorsToSave.size(); ++i )
+    {
+        vBuffer.push_back( colorsToSave[i] );
+    }
 
     vBuffer.push_back( '\n' );
-
+    
     // Finally put the buffer vector into a char* array.
-    char* l_buffer;
-    l_buffer = new char[vBuffer.size()];
+    char *pBuffer;
+    pBuffer = new char[vBuffer.size()];
 
     for( unsigned int i = 0; i < vBuffer.size(); ++i )
-        l_buffer[i] = vBuffer[i];
+    {
+        pBuffer[i] = vBuffer[i];
+    }
 
-    char* l_fn;
-    l_fn = (char*) malloc( i_fileName.length() );
-    strcpy( l_fn, (const char*) i_fileName.mb_str( wxConvUTF8 ) );
-
-    myfile.open( l_fn, ios::binary );
-    myfile.write( l_buffer, vBuffer.size() );
-
+    char *pFn;
+    pFn = ( char * ) malloc( filename.length() );
+    strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
+    myfile.open( pFn, ios::binary );
+    myfile.write( pBuffer, vBuffer.size() );
     myfile.close();
+    
+    delete[] pBuffer;
+    pBuffer = NULL;
+    
+    free(pFn);
+    pFn = NULL;
 }
 
-void Fibers::saveDMRI( wxString i_fileName )
+void Fibers::saveDMRI( wxString filename )
 {
-    int l_countLines = 0;
+    int countLines = 0;
 
-    if( i_fileName.AfterLast( '.' ) != _T( "fib" ) )
-        i_fileName += _T( ".fib" );
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    {
+        filename += _T( ".fib" );
+    }
 
-    int nbrlines=0;
+    int nbrlines = 0;
+
     for( int l = 0; l < m_countLines; ++l )
     {
-        if( m_selected[l] && !m_filtered[l])
+        if( m_selected[l] && !m_filtered[l] )
         {
             nbrlines++;
         }
     }
 
     ofstream myfile;
-    char* l_fn;
-    l_fn = (char*) malloc( i_fileName.length() );
-    strcpy( l_fn, (const char*) i_fileName.mb_str( wxConvUTF8 ) );
-    myfile.open( l_fn, ios::out );
-
+    char *pFn;
+    pFn = ( char * ) malloc( filename.length() );
+    strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
+    myfile.open( pFn, ios::out );
+    
     float dist = 0.5;
-
     myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
-    myfile << nbrlines << " " << dist <<"\n";
+    myfile << nbrlines << " " << dist << "\n";
 
     for( int l = 0; l < m_countLines; ++l )
     {
-        if( m_selected[l] && !m_filtered[l])
+        if( m_selected[l] && !m_filtered[l] )
         {
-            unsigned int pc = getStartIndexForLine( l ) * 3;            
+            unsigned int pc = getStartIndexForLine( l ) * 3;
             myfile << getPointsPerLine( l ) << " 1\n1\n";
-            for ( int j = 0; j < getPointsPerLine( l ); ++j )
+
+            for( int j = 0; j < getPointsPerLine( l ); ++j )
             {
-                myfile <<  m_pointArray[pc] << " " <<  m_pointArray[pc+1] << " " <<  m_pointArray[pc+2] << " 0\n";  
-                pc+=3;
+                myfile <<  m_pointArray[pc] << " " <<  m_pointArray[pc + 1] << " " <<  m_pointArray[pc + 2] << " 0\n";
+                pc += 3;
             }
-            pc = getStartIndexForLine( l ) * 3;  
-            myfile <<  m_pointArray[pc] << " " <<  m_pointArray[pc+1] << " " <<  m_pointArray[pc+2] << " 0\n";  
-            ++l_countLines;
+
+            pc = getStartIndexForLine( l ) * 3;
+            myfile <<  m_pointArray[pc] << " " <<  m_pointArray[pc + 1] << " " <<  m_pointArray[pc + 2] << " 0\n";
+            ++countLines;
         }
     }
+
     myfile.close();
+    
+    free(pFn);
+    pFn = NULL;
 }
 
-string Fibers::intToString( int i_number )
+string Fibers::intToString( const int number )
 {
-    stringstream out; 
-    out << i_number;
+    stringstream out;
+    out << number;
     return out.str();
 }
 
 void Fibers::toggleEndianess()
 {
     m_dh->printDebug( _T( "toggle Endianess" ), 1 );
-
-    wxUint8 l_temp = 0;
-    wxUint8* l_pointBytes = (wxUint8*)&m_pointArray[0];
+    wxUint8 temp = 0;
+    wxUint8 *pPointBytes = ( wxUint8 * )&m_pointArray[0];
 
     for( int i = 0; i < m_countPoints * 12; i += 4 )
     {
-        l_temp = l_pointBytes[i];
-        l_pointBytes[i] = l_pointBytes[i + 3];
-        l_pointBytes[i + 3] = l_temp;
-
-        l_temp = l_pointBytes[i + 1];
-        l_pointBytes[i + 1] = l_pointBytes[i + 2];
-        l_pointBytes[i + 2] = l_temp;
+        temp = pPointBytes[i];
+        pPointBytes[i] = pPointBytes[i + 3];
+        pPointBytes[i + 3] = temp;
+        temp = pPointBytes[i + 1];
+        pPointBytes[i + 1] = pPointBytes[i + 2];
+        pPointBytes[i + 2] = temp;
     }
 
     // Toggle endianess for the line array.
-    wxUint8* l_lineBytes = (wxUint8*)&m_lineArray[0];
+    wxUint8 *pLineBytes = ( wxUint8 * )&m_lineArray[0];
 
     for( size_t i = 0; i < m_lineArray.size() * 4; i += 4 )
     {
-        l_temp = l_lineBytes[i];
-        l_lineBytes[i] = l_lineBytes[i + 3];
-        l_lineBytes[i + 3] = l_temp;
-
-        l_temp = l_lineBytes[i + 1];
-        l_lineBytes[i + 1] = l_lineBytes[i + 2];
-        l_lineBytes[i + 2] = l_temp;
+        temp = pLineBytes[i];
+        pLineBytes[i] = pLineBytes[i + 3];
+        pLineBytes[i + 3] = temp;
+        temp = pLineBytes[i + 1];
+        pLineBytes[i + 1] = pLineBytes[i + 2];
+        pLineBytes[i + 2] = temp;
     }
 }
 
-int Fibers::getPointsPerLine( int i_line )
+int Fibers::getPointsPerLine( const int lineId )
 {
-    return ( m_linePointers[i_line + 1] - m_linePointers[i_line] );
+    return ( m_linePointers[lineId + 1] - m_linePointers[lineId] );
 }
 
-int Fibers::getStartIndexForLine( int i_line )
+int Fibers::getStartIndexForLine( const int lineId )
 {
-    return m_linePointers[i_line];
+    return m_linePointers[lineId];
 }
 
-int Fibers::getLineForPoint( int i_point )
+int Fibers::getLineForPoint( const int pointIdx )
 {
-    return m_reverse[i_point];
+    return m_reverse[pointIdx];
 }
 
 void Fibers::calculateLinePointers()
 {
     m_dh->printDebug( _T( "calculate line pointers" ), 1 );
-
-    int l_pc = 0;
-    int l_lc = 0;
-    int l_tc = 0;
+    int pc = 0;
+    int lc = 0;
+    int tc = 0;
 
     for( int i = 0; i < m_countLines; ++i )
     {
-        m_linePointers[i] = l_tc;
-        l_lc = m_lineArray[l_pc];
-        l_tc += l_lc;
-        l_pc += ( l_lc + 1 );
+        m_linePointers[i] = tc;
+        lc = m_lineArray[pc];
+        tc += lc;
+        pc += ( lc + 1 );
     }
 
-    l_lc = 0;
-    l_pc = 0;
+    lc = 0;
+    pc = 0;
 
     for( int i = 0; i < m_countPoints; ++i )
     {
-        if( i == m_linePointers[l_lc + 1] )
-            ++l_lc;
+        if( i == m_linePointers[lc + 1] )
+        {
+            ++lc;
+        }
 
-        m_reverse[i] = l_lc;
+        m_reverse[i] = lc;
     }
 }
 
-void Fibers::createColorArray( bool i_colorsLoadedFromFile )
+void Fibers::createColorArray( const bool colorsLoadedFromFile )
 {
     m_dh->printDebug( _T( "create color arrays" ), 1 );
 
-    if( ! i_colorsLoadedFromFile )
+    if( !colorsLoadedFromFile )
     {
         m_colorArray.clear();
         m_colorArray.resize( m_countPoints * 3 );
@@ -1999,78 +2177,88 @@ void Fibers::createColorArray( bool i_colorsLoadedFromFile )
 
     m_normalArray.clear();
     m_normalArray.resize( m_countPoints * 3 );
-
-    int   l_pc = 0;    
-    float l_x1, l_x2, l_y1, l_y2, l_z1, l_z2 = 0.0f;
-    float l_r, l_g, l_b, l_rr, l_gg, l_bb    = 0.0f;
-    float l_lastX, l_lastY, l_lastZ          = 0.0f;
+    int   pc = 0;
+    
+    float x1, x2, y1, y2, z1, z2 = 0.0f;
+    float r, g, b, rr, gg, bb    = 0.0f;
+    float lastX, lastY, lastZ          = 0.0f;
 
     for( int i = 0; i < getLineCount(); ++i )
     {
-        l_x1 = m_pointArray[l_pc];
-        l_y1 = m_pointArray[l_pc + 1];
-        l_z1 = m_pointArray[l_pc + 2];
-        l_x2 = m_pointArray[l_pc + getPointsPerLine( i ) * 3 - 3];
-        l_y2 = m_pointArray[l_pc + getPointsPerLine( i ) * 3 - 2];
-        l_z2 = m_pointArray[l_pc + getPointsPerLine( i ) * 3 - 1];
+        x1 = m_pointArray[pc];
+        y1 = m_pointArray[pc + 1];
+        z1 = m_pointArray[pc + 2];
+        x2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 3];
+        y2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 2];
+        z2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 1];
+        r = ( x1 ) - ( x2 );
+        g = ( y1 ) - ( y2 );
+        b = ( z1 ) - ( z2 );
 
-        l_r = ( l_x1 ) - ( l_x2 );
-        l_g = ( l_y1 ) - ( l_y2 );
-        l_b = ( l_z1 ) - ( l_z2 );
+        if( r < 0.0 )
+        {
+            r *= -1.0;
+        }
 
-        if( l_r < 0.0 )
-            l_r *= -1.0;
+        if( g < 0.0 )
+        {
+            g *= -1.0;
+        }
 
-        if( l_g < 0.0 )
-            l_g *= -1.0;
+        if( b < 0.0 )
+        {
+            b *= -1.0;
+        }
 
-        if( l_b < 0.0 )
-            l_b *= -1.0;
-
-        float norm = sqrt( l_r * l_r + l_g * l_g + l_b * l_b );
-        l_r *= 1.0 / norm;
-        l_g *= 1.0 / norm;
-        l_b *= 1.0 / norm;
-
-        l_lastX = m_pointArray[l_pc]     + ( m_pointArray[l_pc]     - m_pointArray[l_pc + 3] );
-        l_lastY = m_pointArray[l_pc + 1] + ( m_pointArray[l_pc + 1] - m_pointArray[l_pc + 4] );
-        l_lastZ = m_pointArray[l_pc + 2] + ( m_pointArray[l_pc + 2] - m_pointArray[l_pc + 5] );
+        float norm = sqrt( r * r + g * g + b * b );
+        r *= 1.0 / norm;
+        g *= 1.0 / norm;
+        b *= 1.0 / norm;
+        
+        lastX = m_pointArray[pc]     + ( m_pointArray[pc]     - m_pointArray[pc + 3] );
+        lastY = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
+        lastZ = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
         for( int j = 0; j < getPointsPerLine( i ); ++j )
         {
-            l_rr = l_lastX - m_pointArray[l_pc];
-            l_gg = l_lastY - m_pointArray[l_pc + 1];
-            l_bb = l_lastZ - m_pointArray[l_pc + 2];
+            rr = lastX - m_pointArray[pc];
+            gg = lastY - m_pointArray[pc + 1];
+            bb = lastZ - m_pointArray[pc + 2];
+            lastX = m_pointArray[pc];
+            lastY = m_pointArray[pc + 1];
+            lastZ = m_pointArray[pc + 2];
 
-            l_lastX = m_pointArray[l_pc];
-            l_lastY = m_pointArray[l_pc + 1];
-            l_lastZ = m_pointArray[l_pc + 2];
-
-            if( l_rr < 0.0 )
-                l_rr *= -1.0;
-
-            if( l_gg < 0.0 )
-                l_gg *= -1.0;
-
-            if( l_bb < 0.0 )
-                l_bb *= -1.0;
-
-            float norm = sqrt( l_rr * l_rr + l_gg * l_gg + l_bb * l_bb );
-            l_rr *= 1.0 / norm;
-            l_gg *= 1.0 / norm;
-            l_bb *= 1.0 / norm;
-
-            m_normalArray[l_pc]     = l_rr;
-            m_normalArray[l_pc + 1] = l_gg;
-            m_normalArray[l_pc + 2] = l_bb;
-
-            if( ! i_colorsLoadedFromFile )
+            if( rr < 0.0 )
             {
-                m_colorArray[l_pc]     = l_r;
-                m_colorArray[l_pc + 1] = l_g;
-                m_colorArray[l_pc + 2] = l_b;
+                rr *= -1.0;
             }
-            l_pc += 3;
+
+            if( gg < 0.0 )
+            {
+                gg *= -1.0;
+            }
+
+            if( bb < 0.0 )
+            {
+                bb *= -1.0;
+            }
+
+            float norm = sqrt( rr * rr + gg * gg + bb * bb );
+            rr *= 1.0 / norm;
+            gg *= 1.0 / norm;
+            bb *= 1.0 / norm;
+            m_normalArray[pc]     = rr;
+            m_normalArray[pc + 1] = gg;
+            m_normalArray[pc + 2] = bb;
+
+            if( ! colorsLoadedFromFile )
+            {
+                m_colorArray[pc]     = r;
+                m_colorArray[pc + 1] = g;
+                m_colorArray[pc + 2] = b;
+            }
+
+            pc += 3;
         }
     }
 }
@@ -2078,89 +2266,89 @@ void Fibers::createColorArray( bool i_colorsLoadedFromFile )
 void Fibers::resetColorArray()
 {
     m_dh->printDebug( _T( "reset color arrays" ), 1 );
-
-    float* l_colorData =  NULL;
-    float* l_colorData2 = NULL;
+    float *pColorData =  NULL;
+    float *pColorData2 = NULL;
 
     if( m_dh->m_useVBO )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-        l_colorData  = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-        l_colorData2 = &m_colorArray[0];
+        pColorData  = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        pColorData2 = &m_colorArray[0];
     }
     else
     {
-        l_colorData  = &m_colorArray[0];
-        l_colorData2 = &m_colorArray[0];
+        pColorData  = &m_colorArray[0];
+        pColorData2 = &m_colorArray[0];
     }
 
-    int l_pc = 0;
-    float l_r, l_g, l_b, l_x1, l_x2, l_y1, l_y2, l_z1, l_z2, l_lastX, l_lastY, l_lastZ = 0.0f;
+    int pc = 0;
+    float r, g, b, x1, x2, y1, y2, z1, z2, lastX, lastY, lastZ = 0.0f;
 
     for( int i = 0; i < getLineCount(); ++i )
     {
-        l_x1 = m_pointArray[l_pc];
-        l_y1 = m_pointArray[l_pc + 1];
-        l_z1 = m_pointArray[l_pc + 2];
-        l_x2 = m_pointArray[l_pc + getPointsPerLine( i ) * 3 - 3];
-        l_y2 = m_pointArray[l_pc + getPointsPerLine( i ) * 3 - 2];
-        l_z2 = m_pointArray[l_pc + getPointsPerLine( i ) * 3 - 1];
+        x1 = m_pointArray[pc];
+        y1 = m_pointArray[pc + 1];
+        z1 = m_pointArray[pc + 2];
+        x2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 3];
+        y2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 2];
+        z2 = m_pointArray[pc + getPointsPerLine( i ) * 3 - 1];
+        r = ( x1 ) - ( x2 );
+        g = ( y1 ) - ( y2 );
+        b = ( z1 ) - ( z2 );
 
-        l_r = ( l_x1 ) - ( l_x2 );
-        l_g = ( l_y1 ) - ( l_y2 );
-        l_b = ( l_z1 ) - ( l_z2 );
+        if( r < 0.0 )
+        {
+            r *= -1.0;
+        }
 
-        if( l_r < 0.0 )
-            l_r *= -1.0;
+        if( g < 0.0 )
+        {
+            g *= -1.0;
+        }
 
-        if( l_g < 0.0 )
-            l_g *= -1.0;
+        if( b < 0.0 )
+        {
+            b *= -1.0;
+        }
 
-        if( l_b < 0.0 )
-            l_b *= -1.0;
-
-        float l_norm = sqrt( l_r * l_r + l_g * l_g + l_b * l_b );
-        l_r *= 1.0 / l_norm;
-        l_g *= 1.0 / l_norm;
-        l_b *= 1.0 / l_norm;
-
-        l_lastX = m_pointArray[l_pc] + ( m_pointArray[l_pc] - m_pointArray[l_pc + 3] );
-        l_lastY = m_pointArray[l_pc + 1] + ( m_pointArray[l_pc + 1] - m_pointArray[l_pc + 4] );
-        l_lastZ = m_pointArray[l_pc + 2] + ( m_pointArray[l_pc + 2] - m_pointArray[l_pc + 5] );
+        float norm = sqrt( r * r + g * g + b * b );
+        r *= 1.0 / norm;
+        g *= 1.0 / norm;
+        b *= 1.0 / norm;
+        
+        lastX = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
+        lastY = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
+        lastZ = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
         for( int j = 0; j < getPointsPerLine( i ); ++j )
         {
-            l_colorData[l_pc] = l_r;
-            l_colorData[l_pc + 1] = l_g;
-            l_colorData[l_pc + 2] = l_b;
-
-            l_colorData2[l_pc] = l_r;
-            l_colorData2[l_pc + 1] = l_g;
-            l_colorData2[l_pc + 2] = l_b;
-            l_pc += 3;
+            pColorData[pc] = r;
+            pColorData[pc + 1] = g;
+            pColorData[pc + 2] = b;
+            pColorData2[pc] = r;
+            pColorData2[pc + 1] = g;
+            pColorData2[pc + 2] = b;
+            pc += 3;
         }
     }
 
     if( m_dh->m_useVBO )
+    {
         glUnmapBuffer( GL_ARRAY_BUFFER );
+    }
 
     m_dh->m_fiberColorationMode = NORMAL_COLOR;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
+
 void Fibers::resetLinesShown()
 {
-    m_selected.assign(m_countLines, false);
+    m_selected.assign( m_countLines, false );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
 void Fibers::updateLinesShown()
 {
-    vector< vector< SelectionObject* > > l_selectionObjects = m_dh->getSelectionObjects();
+    vector< vector< SelectionObject * > > selectionObjects = m_dh->getSelectionObjects();
 
     for( int i = 0; i < m_countLines; ++i )
     {
@@ -2170,15 +2358,15 @@ void Fibers::updateLinesShown()
     int activeCount = 0;
 
     //First pass to make sure there is at least one intersection volume active;
-    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+    for( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
-        if( l_selectionObjects[i][0]->getIsActive() )
+        if( selectionObjects[i][0]->getIsActive() )
         {
             activeCount++;
 
-            for( unsigned int j = 1; j < l_selectionObjects[i].size(); ++j )
+            for( unsigned int j = 1; j < selectionObjects[i].size(); ++j )
             {
-                if( l_selectionObjects[i][j]->getIsActive() )
+                if( selectionObjects[i][j]->getIsActive() )
                 {
                     activeCount++;
                 }
@@ -2186,132 +2374,140 @@ void Fibers::updateLinesShown()
         }
     }
 
-    if(activeCount == 0)
+    if( activeCount == 0 )
     {
         return;
     }
 
-
-
     // For all the master selection objects.
-    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+    for( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
-        if( l_selectionObjects[i][0]->getIsActive() )
+        if( selectionObjects[i][0]->getIsActive() )
         {
-
-            if( l_selectionObjects[i][0]->getIsDirty() )
+            if( selectionObjects[i][0]->getIsDirty() )
             {
-                l_selectionObjects[i][0]->m_inBox.clear();
-                l_selectionObjects[i][0]->m_inBox.resize( m_countLines );
-                l_selectionObjects[i][0]->m_inBranch.clear();
-                l_selectionObjects[i][0]->m_inBranch.resize( m_countLines );
+                selectionObjects[i][0]->m_inBox.clear();
+                selectionObjects[i][0]->m_inBox.resize( m_countLines );
+                selectionObjects[i][0]->m_inBranch.clear();
+                selectionObjects[i][0]->m_inBranch.resize( m_countLines );
+
                 // Sets the fibers that are inside this object to true in the m_inBox vector.
-                l_selectionObjects[i][0]->m_inBox = getLinesShown( l_selectionObjects[i][0] );
-                l_selectionObjects[i][0]->setIsDirty( false );
+                selectionObjects[i][0]->m_inBox = getLinesShown( selectionObjects[i][0] );
+                selectionObjects[i][0]->setIsDirty( false );
             }
 
             for( int k = 0; k < m_countLines; ++k )
-                l_selectionObjects[i][0]->m_inBranch[k] = l_selectionObjects[i][0]->m_inBox[k];
+            {
+                selectionObjects[i][0]->m_inBranch[k] = selectionObjects[i][0]->m_inBox[k];
+            }
 
             // For all its child box.
-            for( unsigned int j = 1; j < l_selectionObjects[i].size(); ++j )
+            for( unsigned int j = 1; j < selectionObjects[i].size(); ++j )
             {
-                if( l_selectionObjects[i][j]->getIsActive() )
+                if( selectionObjects[i][j]->getIsActive() )
                 {
-                    if( l_selectionObjects[i][j]->getIsDirty() )
+                    if( selectionObjects[i][j]->getIsDirty() )
                     {
-                        l_selectionObjects[i][j]->m_inBox.clear();
-                        l_selectionObjects[i][j]->m_inBox.resize( m_countLines );
+                        selectionObjects[i][j]->m_inBox.clear();
+                        selectionObjects[i][j]->m_inBox.resize( m_countLines );
+                        
                         // Sets the fibers that are inside this object to true in the m_inBox vector.
-                        l_selectionObjects[i][j]->m_inBox = getLinesShown( l_selectionObjects[i][j] );
-                        l_selectionObjects[i][j]->setIsDirty( false );
+                        selectionObjects[i][j]->m_inBox = getLinesShown( selectionObjects[i][j] );
+                        selectionObjects[i][j]->setIsDirty( false );
                     }
+
                     // Sets the fibers that are INSIDE this child object and INSIDE its master to be in branch.
-                    if( ! l_selectionObjects[i][j]->getIsNOT() )
+                    if( ! selectionObjects[i][j]->getIsNOT() )
                     {
                         for( int k = 0; k < m_countLines; ++k )
                         {
-                            l_selectionObjects[i][0]->m_inBranch[k] = l_selectionObjects[i][0]->m_inBranch[k] & l_selectionObjects[i][j]->m_inBox[k];
+                            selectionObjects[i][0]->m_inBranch[k] = selectionObjects[i][0]->m_inBranch[k] & selectionObjects[i][j]->m_inBox[k];
                         }
                     }
                     else // Sets the fibers that are NOT INSIDE this child object and INSIDE its master to be in branch.
                     {
                         for( int k = 0; k < m_countLines; ++k )
                         {
-                            l_selectionObjects[i][0]->m_inBranch[k] = l_selectionObjects[i][0]->m_inBranch[k] & !l_selectionObjects[i][j]->m_inBox[k];
+                            selectionObjects[i][0]->m_inBranch[k] = selectionObjects[i][0]->m_inBranch[k] & !selectionObjects[i][j]->m_inBox[k];
                         }
                     }
                 }
             }
         }
 
-        if( l_selectionObjects[i].size() > 0 && l_selectionObjects[i][0]->isColorChanged() )
+        if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->isColorChanged() )
         {
-            float* l_colorData  = NULL;
-            float* l_colorData2 = NULL;
+            float *pColorData  = NULL;
+            float *pColorData2 = NULL;
 
             if( m_dh->m_useVBO )
             {
                 glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-                l_colorData  = (float*) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-                l_colorData2 = &m_colorArray[0];
+                pColorData  = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+                pColorData2 = &m_colorArray[0];
             }
             else
             {
-                l_colorData  = &m_colorArray[0];
-                l_colorData2 = &m_colorArray[0];
+                pColorData  = &m_colorArray[0];
+                pColorData2 = &m_colorArray[0];
             }
-            wxColour l_col = l_selectionObjects[i][0]->getFiberColor();
+
+            wxColour col = selectionObjects[i][0]->getFiberColor();
 
             for( int l = 0; l < m_countLines; ++l )
             {
-                if( l_selectionObjects[i][0]->m_inBranch[l] )
+                if( selectionObjects[i][0]->m_inBranch[l] )
                 {
                     unsigned int pc = getStartIndexForLine( l ) * 3;
 
                     for( int j = 0; j < getPointsPerLine( l ); ++j )
                     {
-                        l_colorData[pc]      = ( (float) l_col.Red() )   / 255.0f;
-                        l_colorData[pc + 1]  = ( (float) l_col.Green() ) / 255.0f;
-                        l_colorData[pc + 2]  = ( (float) l_col.Blue() )  / 255.0f;
-
-                        l_colorData2[pc]     = ( (float) l_col.Red() )   / 255.0f;
-                        l_colorData2[pc + 1] = ( (float) l_col.Green() ) / 255.0f;
-                        l_colorData2[pc + 2] = ( (float) l_col.Blue() )  / 255.0f;
+                        pColorData[pc]      = ( ( float ) col.Red() )   / 255.0f;
+                        pColorData[pc + 1]  = ( ( float ) col.Green() ) / 255.0f;
+                        pColorData[pc + 2]  = ( ( float ) col.Blue() )  / 255.0f;
+                        pColorData2[pc]     = ( ( float ) col.Red() )   / 255.0f;
+                        pColorData2[pc + 1] = ( ( float ) col.Green() ) / 255.0f;
+                        pColorData2[pc + 2] = ( ( float ) col.Blue() )  / 255.0f;
                         pc += 3;
                     }
                 }
             }
 
             if( m_dh->m_useVBO )
+            {
                 glUnmapBuffer( GL_ARRAY_BUFFER );
+            }
 
-            l_selectionObjects[i][0]->setColorChanged( false );
+            selectionObjects[i][0]->setColorChanged( false );
         }
     }
 
     resetLinesShown();
+    bool boxWasUpdated( false );
 
-    bool l_boxWasUpdated = false;
-    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+    for( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
-        if( l_selectionObjects[i].size() > 0 && l_selectionObjects[i][0]->getIsActive() )
+        if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->getIsActive() )
         {
-            for ( int k = 0; k < m_countLines; ++k )
-                m_selected[k] = m_selected[k] | l_selectionObjects[i][0]->m_inBranch[k];
+            for( int k = 0; k < m_countLines; ++k )
+            {
+                m_selected[k] = m_selected[k] | selectionObjects[i][0]->m_inBranch[k];
+            }
         }
 
-        l_boxWasUpdated = true;
+        boxWasUpdated = true;
     }
 
     if( m_dh->m_fibersInverted )
     {
         for( int k = 0; k < m_countLines; ++k )
+        {
             m_selected[k] = ! m_selected[k];
+        }
     }
 
     // This is to update the information display in the fiber grid info.
-    if( l_boxWasUpdated && m_dh->m_lastSelectedObject!=NULL )
+    if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
     {
         m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
     }
@@ -2320,57 +2516,52 @@ void Fibers::updateLinesShown()
 ///////////////////////////////////////////////////////////////////////////
 // Will return the fibers that are inside the selection object passed in argument.
 //
-// i_selectionObject        : The selection object to test with.
+// pSelectionObject        : The selection object to test with.
 //
-// Return a vector of bool, a value of TRUE indicate that this fiber is inside the selection object passed in argument.
+// Return a vector of bool, a value of TRUE indicates that this fiber is inside the selection object passed in argument.
 // A value of false, indicate that this fiber is not inside the selection object.
 ///////////////////////////////////////////////////////////////////////////
-vector< bool > Fibers::getLinesShown( SelectionObject* i_selectionObject )
+vector< bool > Fibers::getLinesShown( SelectionObject *pSelectionObject )
 {
-    if( ! i_selectionObject->isSelectionObject() && ! i_selectionObject->m_sourceAnatomy )
+    if( ! pSelectionObject->isSelectionObject() && ! pSelectionObject->m_sourceAnatomy )
     {
-        return i_selectionObject->m_inBox;
+        return pSelectionObject->m_inBox;
     }
 
     resetLinesShown();
 
-    if( i_selectionObject->getSelectionType() == BOX_TYPE || i_selectionObject->getSelectionType() == ELLIPSOID_TYPE )
+    if( pSelectionObject->getSelectionType() == BOX_TYPE || pSelectionObject->getSelectionType() == ELLIPSOID_TYPE )
     {
-        Vector l_center = i_selectionObject->getCenter();
-        Vector l_size   = i_selectionObject->getSize();
-
+        Vector center = pSelectionObject->getCenter();
+        Vector size   = pSelectionObject->getSize();
         m_boxMin.resize( 3 );
         m_boxMax.resize( 3 );
+        m_boxMin[0] = center.x - size.x / 2 * m_dh->m_xVoxel;
+        m_boxMax[0] = center.x + size.x / 2 * m_dh->m_xVoxel;
+        m_boxMin[1] = center.y - size.y / 2 * m_dh->m_yVoxel;
+        m_boxMax[1] = center.y + size.y / 2 * m_dh->m_yVoxel;
+        m_boxMin[2] = center.z - size.z / 2 * m_dh->m_zVoxel;
+        m_boxMax[2] = center.z + size.z / 2 * m_dh->m_zVoxel;
 
-        m_boxMin[0] = l_center.x - l_size.x / 2 * m_dh->m_xVoxel;
-        m_boxMax[0] = l_center.x + l_size.x / 2 * m_dh->m_xVoxel;
-        m_boxMin[1] = l_center.y - l_size.y / 2 * m_dh->m_yVoxel;
-        m_boxMax[1] = l_center.y + l_size.y / 2 * m_dh->m_yVoxel;
-        m_boxMin[2] = l_center.z - l_size.z / 2 * m_dh->m_zVoxel;
-        m_boxMax[2] = l_center.z + l_size.z / 2 * m_dh->m_zVoxel;
-        
         //Get and Set selected lines to visible
-        ObjectTest( i_selectionObject ); 
-
+        objectTest( pSelectionObject );
     }
     else
     {
         for( int i = 0; i < m_countPoints; ++i )
         {
-            if(m_selected[getLineForPoint(i)] != 1)
+            if( m_selected[getLineForPoint( i )] != 1 )
             {
-                int l_x     = (int)wxMin( m_dh->m_columns -1, wxMax( 0, m_pointArray[i * 3 ]/ m_dh->m_xVoxel    ) ) ;
-                int l_y     = (int)wxMin( m_dh->m_rows    -1, wxMax( 0, m_pointArray[i * 3 + 1]/ m_dh->m_yVoxel ) ) ;
-                int l_z     = (int)wxMin( m_dh->m_frames  -1, wxMax( 0, m_pointArray[i * 3 + 2]/ m_dh->m_zVoxel ) ) ;
+                int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
+                int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
+                int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
+                int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
 
-                int l_index = l_x + l_y * m_dh->m_columns + l_z * m_dh->m_rows * m_dh->m_columns;
-
-                if( ( i_selectionObject->m_sourceAnatomy->at( l_index ) > i_selectionObject->getThreshold() ))
+                if( ( pSelectionObject->m_sourceAnatomy->at( index ) > pSelectionObject->getThreshold() ) )
                 {
-                    m_selected[getLineForPoint( i )] = 1;            
+                    m_selected[getLineForPoint( i )] = 1;
                 }
             }
-
         }
     }
 
@@ -2381,17 +2572,17 @@ vector< bool > Fibers::getLinesShown( SelectionObject* i_selectionObject )
 // Get points that are inside the selection object and
 // set selected fibers according to those points.
 ///////////////////////////////////////////////////////////////////////////
-void Fibers::ObjectTest(SelectionObject* i_selection)
+void Fibers::objectTest( SelectionObject *pSelectionObject )
 {
-    vector<int> pointsInside = m_octree->getPointsInside(i_selection); //Get points inside the selection object
+    vector<int> pointsInside = m_pOctree->getPointsInside( pSelectionObject ); //Get points inside the selection object
+    int indice, id;
 
-    int indice,id;
-    for(unsigned int i=0; i < pointsInside.size(); i++)
+    for( unsigned int i = 0; i < pointsInside.size(); i++ )
     {
         indice = pointsInside[i];
         id = m_reverse[indice];//Fiber ID according to current point
-        m_selected[id] = 1; //Fiber to be in bundle (TRUE)      
-    }  
+        m_selected[id] = 1; //Fiber to be in bundle (TRUE)
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2399,7 +2590,7 @@ void Fibers::ObjectTest(SelectionObject* i_selection)
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::generateKdTree()
 {
-    m_kdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2407,41 +2598,37 @@ void Fibers::generateKdTree()
 //
 // i_point      :
 ///////////////////////////////////////////////////////////////////////////
-bool Fibers::getBarycenter( SplinePoint* i_point )
+bool Fibers::getBarycenter( SplinePoint *pPoint )
 {
     // Number of fibers needed to keep a i_point.
-    int l_threshold = 20;
-
+    int threshold = 20;
+    
     // Multiplier for moving the i_point towards the barycenter.
     m_boxMin.resize( 3 );
     m_boxMax.resize( 3 );
-    m_boxMin[0] = i_point->X() - 25.0 / 2;
-    m_boxMax[0] = i_point->X() + 25.0 / 2;
-    m_boxMin[1] = i_point->Y() - 5.0 / 2;
-    m_boxMax[1] = i_point->Y() + 5.0 / 2;
-    m_boxMin[2] = i_point->Z() - 5.0 / 2;
-    m_boxMax[2] = i_point->Z() + 5.0 / 2;
-
+    m_boxMin[0] = pPoint->X() - 25.0 / 2;
+    m_boxMax[0] = pPoint->X() + 25.0 / 2;
+    m_boxMin[1] = pPoint->Y() - 5.0 / 2;
+    m_boxMax[1] = pPoint->Y() + 5.0 / 2;
+    m_boxMin[2] = pPoint->Z() - 5.0 / 2;
+    m_boxMax[2] = pPoint->Z() + 5.0 / 2;
     m_barycenter.x = m_barycenter.y = m_barycenter.z = m_count = 0;
-
     barycenterTest( 0, m_countPoints - 1, 0 );
-    if( m_count > l_threshold )
+
+    if( m_count > threshold )
     {
         m_barycenter.x /= m_count;
         m_barycenter.y /= m_count;
         m_barycenter.z /= m_count;
+        float x1 = ( m_barycenter.x - pPoint->X() );
+        float y1 = ( m_barycenter.y - pPoint->Y() );
+        float z1 = ( m_barycenter.z - pPoint->Z() );
 
-        float l_x1 = ( m_barycenter.x - i_point->X() );
-        float l_y1 = ( m_barycenter.y - i_point->Y() );
-        float l_z1 = ( m_barycenter.z - i_point->Z() );
-
-        Vector l_vector( l_x1, l_y1, l_z1 );
-        i_point->setOffsetVector( l_vector );
-
-        i_point->setX( i_point->X() + l_x1 );
-        i_point->setY( i_point->Y() + l_y1 );
-        i_point->setZ( i_point->Z() + l_z1 );
-
+        Vector vector( x1, y1, z1 );
+        pPoint->setOffsetVector( vector );
+        pPoint->setX( pPoint->X() + x1 );
+        pPoint->setY( pPoint->Y() + y1 );
+        pPoint->setZ( pPoint->Z() + z1 );
         return true;
     }
     else
@@ -2450,59 +2637,60 @@ bool Fibers::getBarycenter( SplinePoint* i_point )
     }
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
-void Fibers::barycenterTest( int i_left, int i_right, int i_axis )
+void Fibers::barycenterTest( int left, int right, int axis )
 {
     // Abort condition.
-    if( i_left > i_right )
+    if( left > right )
+    {
         return;
+    }
 
-    int l_root  = i_left + ( ( i_right - i_left ) / 2 );
-    int l_axis1 = ( i_axis + 1 ) % 3;
-    int l_pointIndex = m_kdTree->m_tree[l_root] * 3;
+    int root  = left + ( ( right - left ) / 2 );
+    int axis1 = ( axis + 1 ) % 3;
+    int pointIndex = m_pKdTree->m_tree[root] * 3;
 
-    if( m_pointArray[l_pointIndex + i_axis] < m_boxMin[i_axis] )
-        barycenterTest( l_root + 1, i_right, l_axis1 );
-    else if( m_pointArray[l_pointIndex + i_axis] > m_boxMax[i_axis] )
-        barycenterTest( i_left, l_root - 1, l_axis1 );
+    if( m_pointArray[pointIndex + axis] < m_boxMin[axis] )
+    {
+        barycenterTest( root + 1, right, axis1 );
+    }
+    else if( m_pointArray[pointIndex + axis] > m_boxMax[axis] )
+    {
+        barycenterTest( left, root - 1, axis1 );
+    }
     else
     {
-        int l_axis2 = ( i_axis + 2 ) % 3;
+        int axis2 = ( axis + 2 ) % 3;
 
-        if ( m_selected[getLineForPoint( m_kdTree->m_tree[l_root] )] == 1 && 
-            m_pointArray[l_pointIndex + l_axis1] <= m_boxMax[l_axis1]    && 
-            m_pointArray[l_pointIndex + l_axis1] >= m_boxMin[l_axis1]    && 
-            m_pointArray[l_pointIndex + l_axis2] <= m_boxMax[l_axis2]    && 
-            m_pointArray[l_pointIndex + l_axis2] >= m_boxMin[l_axis2] )
+        if( m_selected[getLineForPoint( m_pKdTree->m_tree[root] )] == 1 &&
+            m_pointArray[pointIndex + axis1] <= m_boxMax[axis1]    &&
+            m_pointArray[pointIndex + axis1] >= m_boxMin[axis1]    &&
+            m_pointArray[pointIndex + axis2] <= m_boxMax[axis2]    &&
+            m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )
         {
-            m_barycenter[0] += m_pointArray[m_kdTree->m_tree[l_root] * 3];
-            m_barycenter[1] += m_pointArray[m_kdTree->m_tree[l_root] * 3 + 1];
-            m_barycenter[2] += m_pointArray[m_kdTree->m_tree[l_root] * 3 + 2];
+            m_barycenter[0] += m_pointArray[m_pKdTree->m_tree[root] * 3];
+            m_barycenter[1] += m_pointArray[m_pKdTree->m_tree[root] * 3 + 1];
+            m_barycenter[2] += m_pointArray[m_pKdTree->m_tree[root] * 3 + 2];
             m_count++;
         }
 
-        barycenterTest( i_left, l_root - 1, l_axis1 );
-        barycenterTest( l_root + 1, i_right, l_axis1 );
+        barycenterTest( left, root - 1, axis1 );
+        barycenterTest( root + 1, right, axis1 );
     }
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
 void Fibers::initializeBuffer()
 {
     if( m_isInitialized || ! m_dh->m_useVBO )
+    {
         return;
+    }
 
     m_isInitialized = true;
-
     bool isOK = true;
-
+    
     glGenBuffers( 3, m_bufferObjects );
     glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
-    glBufferData( GL_ARRAY_BUFFER, sizeof(GLfloat) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
 
     if( m_dh->GLError() )
     {
@@ -2513,9 +2701,9 @@ void Fibers::initializeBuffer()
     if( isOK )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-        glBufferData( GL_ARRAY_BUFFER, sizeof(GLfloat) * m_countPoints * 3, &m_colorArray[0], GL_STATIC_DRAW );
+        glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_colorArray[0], GL_STATIC_DRAW );
 
-        if ( m_dh->GLError() )
+        if( m_dh->GLError() )
         {
             m_dh->printGLError( wxT( "initialize vbo colors" ) );
             isOK = false;
@@ -2525,7 +2713,7 @@ void Fibers::initializeBuffer()
     if( isOK )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
-        glBufferData( GL_ARRAY_BUFFER, sizeof(GLfloat) * m_countPoints * 3, &m_normalArray[0], GL_STATIC_DRAW );
+        glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_normalArray[0], GL_STATIC_DRAW );
 
         if( m_dh->GLError() )
         {
@@ -2551,8 +2739,7 @@ void Fibers::initializeBuffer()
 
 void Fibers::draw()
 {
-
-    if( m_cachedThreshold != m_threshold)
+    if( m_cachedThreshold != m_threshold )
     {
         updateFibersColors();
         m_cachedThreshold = m_threshold;
@@ -2568,19 +2755,17 @@ void Fibers::draw()
 
     if( m_dh->m_useTransparency )
     {
-        glPushAttrib(GL_ALL_ATTRIB_BITS);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-        glDepthMask(GL_FALSE);
-
+        glPushAttrib( GL_ALL_ATTRIB_BITS );
+        glEnable( GL_BLEND );
+        glBlendFunc( GL_ONE, GL_ONE );
+        glDepthMask( GL_FALSE );
         drawSortedLines();
         glPopAttrib();
-
         return;
     }
 
     glEnableClientState( GL_VERTEX_ARRAY );
-    glEnableClientState( GL_COLOR_ARRAY  );
+    glEnableClientState( GL_COLOR_ARRAY );
     glEnableClientState( GL_NORMAL_ARRAY );
 
     if( ! m_dh->m_useVBO )
@@ -2588,9 +2773,13 @@ void Fibers::draw()
         glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
 
         if( m_showFS )
+        {
             glColorPointer( 3, GL_FLOAT, 0, &m_colorArray[0] );  // Global colors.
+        }
         else
+        {
             glColorPointer( 3, GL_FLOAT, 0, &m_normalArray[0] ); // Local colors.
+        }
 
         glNormalPointer( GL_FLOAT, 0, &m_normalArray[0] );
     }
@@ -2616,8 +2805,10 @@ void Fibers::draw()
 
     for( int i = 0; i < m_countLines; ++i )
     {
-        if ( (m_selected[i] || !m_dh->m_activateObjects) && !m_filtered[i])
+        if( ( m_selected[i] || !m_dh->m_activateObjects ) && !m_filtered[i] )
+        {
             glDrawArrays( GL_LINE_STRIP, getStartIndexForLine( i ), getPointsPerLine( i ) );
+        }
     }
 
     glDisableClientState( GL_VERTEX_ARRAY );
@@ -2630,10 +2821,10 @@ void Fibers::draw()
 ///////////////////////////////////////////////////////////////////////////
 namespace
 {
-    template< class T > struct IndirectComp
-    {
-        IndirectComp( const T &zvals ) :
-    zvals( zvals )
+template< class T > struct IndirectComp
+{
+    IndirectComp( const T &zvals ) :
+        zvals( zvals )
     {
     }
 
@@ -2644,49 +2835,51 @@ namespace
         return zvals[i1] > zvals[i2];
     }
 
-    private:
-        const T &zvals;
-    };
+private:
+    const T &zvals;
+};
 }
 
 
 void Fibers::drawFakeTubes()
 {
     if( ! m_normalsPositive )
+    {
         switchNormals( false );
+    }
 
-    GLfloat* l_colors  = NULL;
-    GLfloat* l_normals = NULL;
-
-    l_colors  = &m_colorArray[0];
-    l_normals = &m_normalArray[0];
+    GLfloat *pColors  = NULL;
+    GLfloat *pNormals = NULL;
+    pColors  = &m_colorArray[0];
+    pNormals = &m_normalArray[0];
 
     if( m_dh->getPointMode() )
+    {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    }
     else
+    {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
+    }
 
     for( int i = 0; i < m_countLines; ++i )
     {
         if( m_selected[i] && !m_filtered[i] )
         {
             int idx = getStartIndexForLine( i ) * 3;
-
             glBegin( GL_QUAD_STRIP );
 
             for( int k = 0; k < getPointsPerLine( i ); ++k )
             {
-                glNormal3f( l_normals[idx], l_normals[idx + 1], l_normals[idx + 2] );
-                glColor3f( l_colors[idx],  l_colors[idx + 1],  l_colors[idx + 2] );
-                glTexCoord2f(-1.0f, 0.0f);
-
-                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2]);
-                glTexCoord2f(1.0f, 0.0f);
-
-                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2]);
-                idx += 3;                
+                glNormal3f( pNormals[idx], pNormals[idx + 1], pNormals[idx + 2] );
+                glColor3f( pColors[idx],  pColors[idx + 1],  pColors[idx + 2] );
+                glTexCoord2f( -1.0f, 0.0f );
+                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                glTexCoord2f( 1.0f, 0.0f );
+                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                idx += 3;
             }
+
             glEnd();
         }
     }
@@ -2695,211 +2888,217 @@ void Fibers::drawFakeTubes()
 void Fibers::drawSortedLines()
 {
     // Only sort those lines we see.
-    unsigned int *l_snippletSort = NULL;
-    unsigned int *l_lineIds      = NULL;
-    int l_nbSnipplets = 0;
+    unsigned int *pSnippletSort = NULL;
+    unsigned int *pLineIds      = NULL;
+    
+    int nbSnipplets = 0;
 
     // Estimate memory required for arrays.
     for( int i = 0; i < m_countLines; ++i )
     {
-        if ( m_selected[i] && !m_filtered[i])
-            l_nbSnipplets += getPointsPerLine( i ) - 1;
+        if( m_selected[i] && !m_filtered[i] )
+        {
+            nbSnipplets += getPointsPerLine( i ) - 1;
+        }
     }
 
-    l_snippletSort = new unsigned int[l_nbSnipplets + 1]; // +1 just to be sure because of fancy problems with some sort functions.
-    l_lineIds      = new unsigned int[l_nbSnipplets * 2];
-
+    pSnippletSort = new unsigned int[nbSnipplets + 1]; // +1 just to be sure because of fancy problems with some sort functions.
+    pLineIds      = new unsigned int[nbSnipplets * 2];
     // Build data structure for sorting.
-    int l_snp = 0;
+    int snp = 0;
+
     for( int i = 0; i < m_countLines; ++i )
     {
-        if (!(m_selected[i] && !m_filtered[i]))
-            continue;
-
-        const unsigned int l_p = getPointsPerLine( i );
-
-        // TODO: update l_lineIds and l_snippletSort size only when fiber selection changes.
-        for( unsigned int k = 0; k < l_p - 1; ++k )
+        if( !( m_selected[i] && !m_filtered[i] ) )
         {
-            l_lineIds[l_snp << 1] = getStartIndexForLine( i ) + k;
-            l_lineIds[( l_snp << 1 ) + 1] = getStartIndexForLine( i ) + k + 1;
-
-            l_snippletSort[l_snp] = l_snp;
-            l_snp++;
+            continue;
         }
-    }    
 
-    GLfloat l_matrix[16];
-    glGetFloatv( GL_PROJECTION_MATRIX, l_matrix );
+        const unsigned int p = getPointsPerLine( i );
 
-    // Compute z values of lines (in our case: starting points only).
-    vector< float > l_zVal( l_nbSnipplets );
-    for( int i = 0; i < l_nbSnipplets; ++i )
-    {
-        const int id = l_lineIds[i << 1] * 3;
-        l_zVal[i] = ( m_pointArray[id + 0] * l_matrix[2] + m_pointArray[id + 1] * l_matrix[6]
-        + m_pointArray[id + 2] * l_matrix[10] + l_matrix[14] ) / ( m_pointArray[id + 0] * l_matrix[3]
-        + m_pointArray[id + 1] * l_matrix[7] + m_pointArray[id + 2] * l_matrix[11] + l_matrix[15] );
+        // TODO: update pLineIds and pSnippletSort size only when fiber selection changes.
+        for( unsigned int k = 0; k < p - 1; ++k )
+        {
+            pLineIds[snp << 1] = getStartIndexForLine( i ) + k;
+            pLineIds[( snp << 1 ) + 1] = getStartIndexForLine( i ) + k + 1;
+            pSnippletSort[snp] = snp;
+            snp++;
+        }
     }
 
-    sort( &l_snippletSort[0], &l_snippletSort[l_nbSnipplets], IndirectComp< vector< float > > ( l_zVal ) );
+    GLfloat projMatrix[16];
+    glGetFloatv( GL_PROJECTION_MATRIX, projMatrix );
+    
+    // Compute z values of lines (in our case: starting points only).
+    vector< float > zVals( nbSnipplets );
 
-    float* l_colors  = NULL;
-    float* l_normals = NULL;
+    for( int i = 0; i < nbSnipplets; ++i )
+    {
+        const int id = pLineIds[i << 1] * 3;
+        zVals[i] = ( m_pointArray[id + 0] * projMatrix[2] + m_pointArray[id + 1] * projMatrix[6]
+                      + m_pointArray[id + 2] * projMatrix[10] + projMatrix[14] ) / ( m_pointArray[id + 0] * projMatrix[3]
+                              + m_pointArray[id + 1] * projMatrix[7] + m_pointArray[id + 2] * projMatrix[11] + projMatrix[15] );
+    }
+
+    sort( &pSnippletSort[0], &pSnippletSort[nbSnipplets], IndirectComp< vector< float > > ( zVals ) );
+    
+    float *pColors  = NULL;
+    float *pNormals = NULL;
 
     if( m_dh->m_useVBO )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-        l_colors = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
+        pColors = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
         glUnmapBuffer( GL_ARRAY_BUFFER );
-
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
-        l_normals = (float *) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
+        pNormals = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
     else
     {
-        l_colors  = &m_colorArray[0];
-        l_normals = &m_normalArray[0];
+        pColors  = &m_colorArray[0];
+        pNormals = &m_normalArray[0];
     }
 
     if( m_dh->getPointMode() )
+    {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    }
     else
+    {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    }
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glBegin( GL_LINES );
 
-    if(m_dh->m_fiberColorationMode == MINDISTANCE_COLOR)
+    if( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR )
     {
-
         int i = 0;
-        for( int c = 0; c < l_nbSnipplets; ++c )
+
+        for( int c = 0; c < nbSnipplets; ++c )
         {
             i = c;
-            int l_idx  = l_lineIds[l_snippletSort[i] << 1];
-            int l_idx3 = l_idx * 3;
-            int l_id2  = l_lineIds[( l_snippletSort[i] << 1 ) + 1];
-            int l_id23 = l_id2 * 3;
-
-            glColor4f ( l_colors[l_idx3 + 0],       l_colors[l_idx3 + 1],       l_colors[l_idx3 + 2],   m_localizedAlpha[l_idx] * m_alpha);
-            glNormal3f( l_normals[l_idx3 + 0],      l_normals[l_idx3 + 1],      l_normals[l_idx3 + 2] );
-            glVertex3f( m_pointArray[l_idx3 + 0],   m_pointArray[l_idx3 + 1],   m_pointArray[l_idx3 + 2] );
-
-            glColor4f ( l_colors[l_id23 + 0], l_colors[l_id23 + 1], l_colors[l_id23 + 2], m_localizedAlpha[l_id2] * m_alpha);
-            glNormal3f( l_normals[l_id23 + 0], l_normals[l_id23 + 1], l_normals[l_id23 + 2] );
-            glVertex3f( m_pointArray[l_id23 + 0], m_pointArray[l_id23 + 1], m_pointArray[l_id23 + 2] );
+            int idx  = pLineIds[pSnippletSort[i] << 1];
+            int idx3 = idx * 3;
+            int id2  = pLineIds[( pSnippletSort[i] << 1 ) + 1];
+            int id23 = id2 * 3;
+            glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   m_localizedAlpha[idx] * m_alpha );
+            glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
+            glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
+            glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   m_localizedAlpha[id2] * m_alpha );
+            glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
+            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
         }
     }
     else
     {
         int i = 0;
-        for( int c = 0; c < l_nbSnipplets; ++c )
+
+        for( int c = 0; c < nbSnipplets; ++c )
         {
             i = c;
-            int l_idx  = l_lineIds[l_snippletSort[i] << 1];
-            int l_idx3 = l_idx * 3;
-            int l_id2  = l_lineIds[( l_snippletSort[i] << 1 ) + 1];
-            int l_id23 = l_id2 * 3;
-
-            glColor4f ( l_colors[l_idx3 + 0],       l_colors[l_idx3 + 1],       l_colors[l_idx3 + 2],   m_alpha );
-            glNormal3f( l_normals[l_idx3 + 0],      l_normals[l_idx3 + 1],      l_normals[l_idx3 + 2] );
-            glVertex3f( m_pointArray[l_idx3 + 0],   m_pointArray[l_idx3 + 1],   m_pointArray[l_idx3 + 2] );
-
-            glColor4f ( l_colors[l_id23 + 0], l_colors[l_id23 + 1], l_colors[l_id23 + 2], m_alpha );
-            glNormal3f( l_normals[l_id23 + 0], l_normals[l_id23 + 1], l_normals[l_id23 + 2] );
-            glVertex3f( m_pointArray[l_id23 + 0], m_pointArray[l_id23 + 1], m_pointArray[l_id23 + 2] );
+            int idx  = pLineIds[pSnippletSort[i] << 1];
+            int idx3 = idx * 3;
+            int id2  = pLineIds[( pSnippletSort[i] << 1 ) + 1];
+            int id23 = id2 * 3;
+            glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   m_alpha );
+            glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
+            glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
+            glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   m_alpha );
+            glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
+            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
         }
     }
 
     glEnd();
     glDisable( GL_BLEND );
-
+    
     // FIXME: store these later on!
-    delete[] l_snippletSort;
-    delete[] l_lineIds;
+    delete[] pSnippletSort;
+    delete[] pLineIds;
 }
 
-void Fibers::switchNormals( bool i_positive )
+void Fibers::switchNormals( bool positive )
 {
-    float* l_normals = NULL;
+    float *pNormals = NULL;
+    pNormals = &m_normalArray[0];
 
-    l_normals = &m_normalArray[0];
-
-    if( i_positive )
+    if( positive )
     {
-        int l_pc = 0;
-        float l_rr, l_gg, l_bb, l_lastx, l_lasty, l_lastz = 0.0f;
+        int pc = 0;
+        float rr, gg, bb, lastX, lastY, lastZ = 0.0f;
 
         for( int i = 0; i < getLineCount(); ++i )
         {
-            l_lastx = m_pointArray[l_pc] + ( m_pointArray[l_pc] - m_pointArray[l_pc + 3] );
-            l_lasty = m_pointArray[l_pc + 1] + ( m_pointArray[l_pc + 1] - m_pointArray[l_pc + 4] );
-            l_lastz = m_pointArray[l_pc + 2] + ( m_pointArray[l_pc + 2] - m_pointArray[l_pc + 5] );
+            lastX = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
+            lastY = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
+            lastZ = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
             for( int j = 0; j < getPointsPerLine( i ); ++j )
             {
-                l_rr = l_lastx - m_pointArray[l_pc];
-                l_gg = l_lasty - m_pointArray[l_pc + 1];
-                l_bb = l_lastz - m_pointArray[l_pc + 2];
+                rr = lastX - m_pointArray[pc];
+                gg = lastY - m_pointArray[pc + 1];
+                bb = lastZ - m_pointArray[pc + 2];
+                lastX = m_pointArray[pc];
+                lastY = m_pointArray[pc + 1];
+                lastZ = m_pointArray[pc + 2];
 
-                l_lastx = m_pointArray[l_pc];
-                l_lasty = m_pointArray[l_pc + 1];
-                l_lastz = m_pointArray[l_pc + 2];
+                if( rr < 0.0 )
+                {
+                    rr *= -1.0;
+                }
 
-                if( l_rr < 0.0 )
-                    l_rr *= -1.0;
+                if( gg < 0.0 )
+                {
+                    gg *= -1.0;
+                }
 
-                if( l_gg < 0.0 )
-                    l_gg *= -1.0;
+                if( bb < 0.0 )
+                {
+                    bb *= -1.0;
+                }
 
-                if( l_bb < 0.0 )
-                    l_bb *= -1.0;
-
-                float norm = sqrt( l_rr * l_rr + l_gg * l_gg + l_bb * l_bb );
-                l_rr *= 1.0 / norm;
-                l_gg *= 1.0 / norm;
-                l_bb *= 1.0 / norm;
-
-                l_normals[l_pc] = l_rr;
-                l_normals[l_pc + 1] = l_gg;
-                l_normals[l_pc + 2] = l_bb;
-
-                l_pc += 3;
+                float norm = sqrt( rr * rr + gg * gg + bb * bb );
+                rr *= 1.0 / norm;
+                gg *= 1.0 / norm;
+                bb *= 1.0 / norm;
+                pNormals[pc] = rr;
+                pNormals[pc + 1] = gg;
+                pNormals[pc + 2] = bb;
+                pc += 3;
             }
         }
+
         m_normalsPositive = true;
     }
     else
     {
-        int l_pc = 0;
-        float l_rr, l_gg, l_bb, l_lastx, l_lasty, l_lastz = 0.0f;
+        int pc = 0;
+        float rr, gg, bb, lastX, lastY, lastZ = 0.0f;
 
         for( int i = 0; i < getLineCount(); ++i )
         {
-            l_lastx = m_pointArray[l_pc] + ( m_pointArray[l_pc] - m_pointArray[l_pc + 3] );
-            l_lasty = m_pointArray[l_pc + 1] + ( m_pointArray[l_pc + 1] - m_pointArray[l_pc + 4] );
-            l_lastz = m_pointArray[l_pc + 2] + ( m_pointArray[l_pc + 2] - m_pointArray[l_pc + 5] );
+            lastX = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
+            lastY = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
+            lastZ = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
             for( int j = 0; j < getPointsPerLine( i ); ++j )
             {
-                l_rr = l_lastx - m_pointArray[l_pc];
-                l_gg = l_lasty - m_pointArray[l_pc + 1];
-                l_bb = l_lastz - m_pointArray[l_pc + 2];
-
-                l_lastx = m_pointArray[l_pc];
-                l_lasty = m_pointArray[l_pc + 1];
-                l_lastz = m_pointArray[l_pc + 2];
-
-                l_normals[l_pc] = l_rr;
-                l_normals[l_pc + 1] = l_gg;
-                l_normals[l_pc + 2] = l_bb;
-
-                l_pc += 3;
+                rr = lastX - m_pointArray[pc];
+                gg = lastY - m_pointArray[pc + 1];
+                bb = lastZ - m_pointArray[pc + 2];
+                lastX = m_pointArray[pc];
+                lastY = m_pointArray[pc + 1];
+                lastZ = m_pointArray[pc + 2];
+                pNormals[pc] = rr;
+                pNormals[pc + 1] = gg;
+                pNormals[pc + 2] = bb;
+                pc += 3;
             }
         }
+
         m_normalsPositive = false;
     }
 }
@@ -2911,9 +3110,9 @@ void Fibers::freeArrays()
     //m_normalArray.clear();
 }
 
-float Fibers::getPointValue( int i_index )
+float Fibers::getPointValue( int ptIndex )
 {
-    return m_pointArray[i_index];
+    return m_pointArray[ptIndex];
 }
 
 int Fibers::getLineCount()
@@ -2926,170 +3125,188 @@ int Fibers::getPointCount()
     return m_countPoints;
 }
 
-bool Fibers::isSelected( int i_fiber )
+bool Fibers::isSelected( int fiberId )
 {
-    return m_selected[i_fiber];
+    return m_selected[fiberId];
 }
 
 void Fibers::setFibersLength()
 {
-    m_length.resize(m_countLines,false);
-    vector< Vector >           l_currentFiberPoints;
-    vector< vector< Vector > > l_FibersPoints;
-    for (int i=0;i<m_countLines;i++){
-        if (getFiberCoordValues(i, l_currentFiberPoints)){
-            l_FibersPoints.push_back(l_currentFiberPoints);
-            l_currentFiberPoints.clear();
-        } 
-    }    
+    m_length.resize( m_countLines, false );
+    
+    vector< Vector >           currentFiberPoints;
+    vector< vector< Vector > > fibersPoints;
 
-    float l_dx,l_dy, l_dz;
-    m_maxLength=0;
-    m_minLength=1000000;
-    for( unsigned int j = 0 ; j< l_FibersPoints.size(); j++){
-        l_currentFiberPoints = l_FibersPoints[j];
-        m_length[j] = 0;
-        for( unsigned int i = 1; i < l_currentFiberPoints.size(); ++i )
+    for( int i = 0; i < m_countLines; i++ )
+    {
+        if( getFiberCoordValues( i, currentFiberPoints ) )
         {
-            // The values are in pixel, we need to set them in millimeters using the spacing 
-            // specified in the anatomy file ( m_datasetHelper->xVoxel... ).
-            l_dx = ( l_currentFiberPoints[i].x - l_currentFiberPoints[i-1].x ) * m_dh->m_xVoxel;
-            l_dy = ( l_currentFiberPoints[i].y - l_currentFiberPoints[i-1].y ) * m_dh->m_yVoxel;
-            l_dz = ( l_currentFiberPoints[i].z - l_currentFiberPoints[i-1].z ) * m_dh->m_zVoxel;
-
-            FArray currentVector( l_dx, l_dy, l_dz );
-            m_length[j] += (float)currentVector.norm();
+            fibersPoints.push_back( currentFiberPoints );
+            currentFiberPoints.clear();
         }
-        if (m_length[j]>m_maxLength) m_maxLength = m_length[j];
-        if (m_length[j]<m_minLength) m_minLength = m_length[j];
+    }
+
+    float dx, dy, dz;
+    m_maxLength = 0;
+    m_minLength = 1000000;
+
+    for( unsigned int j = 0 ; j < fibersPoints.size(); j++ )
+    {
+        currentFiberPoints = fibersPoints[j];
+        m_length[j] = 0;
+
+        for( unsigned int i = 1; i < currentFiberPoints.size(); ++i )
+        {
+            // The values are in pixel, we need to set them in millimeters using the spacing
+            // specified in the anatomy file ( m_datasetHelper->xVoxel... ).
+            dx = ( currentFiberPoints[i].x - currentFiberPoints[i - 1].x ) * m_dh->m_xVoxel;
+            dy = ( currentFiberPoints[i].y - currentFiberPoints[i - 1].y ) * m_dh->m_yVoxel;
+            dz = ( currentFiberPoints[i].z - currentFiberPoints[i - 1].z ) * m_dh->m_zVoxel;
+            FArray currentVector( dx, dy, dz );
+            m_length[j] += ( float )currentVector.norm();
+        }
+
+        if( m_length[j] > m_maxLength ) m_maxLength = m_length[j];
+
+        if( m_length[j] < m_minLength ) m_minLength = m_length[j];
     }
 }
 
-bool Fibers::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
+bool Fibers::getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints )
 {
-    Fibers* l_fibers = NULL;
-    m_dh->getFiberDataset( l_fibers );
+    Fibers *pFibers = NULL;
+    m_dh->getFiberDataset( pFibers );
 
-    if( l_fibers == NULL || i_fiberIndex < 0 )
-        return false;
-
-    int l_index = l_fibers->getStartIndexForLine( i_fiberIndex ) * 3;
-    Vector l_point3D;
-    for( int i = 0; i < l_fibers->getPointsPerLine( i_fiberIndex ); ++i )
+    if( pFibers == NULL || fiberIndex < 0 )
     {
-        l_point3D.x = l_fibers->getPointValue( l_index );
-        l_point3D.y = l_fibers->getPointValue( l_index + 1);
-        l_point3D.z = l_fibers->getPointValue( l_index + 2 );
-        o_fiberPoints.push_back( l_point3D );
-
-        l_index += 3;                
+        return false;
     }
+
+    int index = pFibers->getStartIndexForLine( fiberIndex ) * 3;
+    Vector point3D;
+
+    for( int i = 0; i < pFibers->getPointsPerLine( fiberIndex ); ++i )
+    {
+        point3D.x = pFibers->getPointValue( index );
+        point3D.y = pFibers->getPointValue( index + 1 );
+        point3D.z = pFibers->getPointValue( index + 2 );
+        fiberPoints.push_back( point3D );
+        index += 3;
+    }
+
     return true;
 }
 
 void Fibers::updateFibersFilters()
 {
-    int min = m_psliderFibersFilterMin->GetValue();
-    int max = m_psliderFibersFilterMax->GetValue();
-    int subSampling = m_psliderFibersSampling->GetValue();
-    int maxSubSampling = m_psliderFibersSampling->GetMax()+1;
+    int min = m_pSliderFibersFilterMin->GetValue();
+    int max = m_pSliderFibersFilterMax->GetValue();
+    int subSampling = m_pSliderFibersSampling->GetValue();
+    int maxSubSampling = m_pSliderFibersSampling->GetMax() + 1;
 
-    for ( int i = 0; i < m_countLines; ++i )
-        m_filtered[i]=!((i%maxSubSampling)>=subSampling && m_length[i]>=min && m_length[i]<=max);     
+    for( int i = 0; i < m_countLines; ++i )
+    {
+        m_filtered[i] = !( ( i % maxSubSampling ) >= subSampling && m_length[i] >= min && m_length[i] <= max );
+    }
 }
 
-void Fibers::createPropertiesSizer(PropertiesWindow *parent)
+void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 {
     setFibersLength();
-    DatasetInfo::createPropertiesSizer(parent);    
-    wxSizer *l_sizer;
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Min Length"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
-    m_psliderFibersFilterMin = new wxSlider(parent, wxID_ANY, getMinFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    l_sizer->Add(m_psliderFibersFilterMin,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderFibersFilterMin->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnFibersFilter));
-
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Max Length"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
-    m_psliderFibersFilterMax = new wxSlider(parent, wxID_ANY, getMaxFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    l_sizer->Add(m_psliderFibersFilterMax,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderFibersFilterMax->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnFibersFilter));
-
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY ,wxT("Subsampling"),wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE),0,wxALIGN_CENTER);
-    m_psliderFibersSampling = new wxSlider(parent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140,-1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    l_sizer->Add(m_psliderFibersSampling,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);    
-    parent->Connect(m_psliderFibersSampling->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnFibersFilter));
-
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pGeneratesFibersDensityVolume = new wxButton(parent, wxID_ANY,wxT("New Density Volume"),wxDefaultPosition, wxSize(140,-1));
-    l_sizer->Add(m_pGeneratesFibersDensityVolume,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pGeneratesFibersDensityVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGenerateFiberVolume));
-
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_ptoggleLocalColoring = new wxToggleButton(parent, wxID_ANY,wxT("Local Coloring"),wxDefaultPosition, wxSize(140,-1));
-    l_sizer->Add(m_ptoggleLocalColoring,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleLocalColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListMenuThreshold));
-
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_ptoggleNormalColoring = new wxToggleButton(parent, wxID_ANY,wxT("Color With Overley"),wxDefaultPosition, wxSize(140,-1));
-    l_sizer->Add(m_ptoggleNormalColoring,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleNormalColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));
-
-    m_propertiesSizer->AddSpacer(8);
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(8,1,0);
-    m_pradioNormalColoring = new wxRadioButton(parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize(132,-1));
-    l_sizer->Add(m_pradioNormalColoring);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    m_pradioDistanceAnchoring  = new wxRadioButton(parent, wxID_ANY, _T( "Dist. Anchoring" ), wxDefaultPosition, wxSize(132,-1));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(68,1,0);
-    l_sizer->Add(m_pradioDistanceAnchoring);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    m_pradioMinDistanceAnchoring  = new wxRadioButton(parent, wxID_ANY, _T( "Min Dist. Anchoring" ), wxDefaultPosition, wxSize(132,-1));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(68,1,0);
-    l_sizer->Add(m_pradioMinDistanceAnchoring);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    m_pradioCurvature  = new wxRadioButton(parent, wxID_ANY, _T( "Curvature" ), wxDefaultPosition, wxSize(132,-1));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(68,1,0);
-    l_sizer->Add(m_pradioCurvature);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    m_pradioTorsion  = new wxRadioButton(parent, wxID_ANY, _T( "Torsion" ), wxDefaultPosition, wxSize(132,-1));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(68,1,0);
-    l_sizer->Add(m_pradioTorsion);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pradioNormalColoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnNormalColoring));
-    parent->Connect(m_pradioDistanceAnchoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnListMenuDistance));
-    parent->Connect(m_pradioMinDistanceAnchoring->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnListMenuMinDistance));
-    parent->Connect(m_pradioTorsion->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnColorWithTorsion));
-    parent->Connect(m_pradioCurvature->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnColorWithCurvature));
-
-    m_pradioNormalColoring->SetValue(m_dh->m_fiberColorationMode == NORMAL_COLOR);
+    DatasetInfo::createPropertiesSizer( pParent );
+    
+    wxSizer *pSizer;
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Min Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
+    
+    m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, getMinFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    pSizer->Add( m_pSliderFibersFilterMin, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderFibersFilterMin->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Max Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
+    m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, getMaxFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    pSizer->Add( m_pSliderFibersFilterMax, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderFibersFilterMax->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Subsampling" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
+    m_pSliderFibersSampling = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    pSizer->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pGeneratesFibersDensityVolume, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pGeneratesFibersDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pToggleLocalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Local Coloring" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pToggleLocalColoring, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
+    
+    m_propertiesSizer->AddSpacer( 8 );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
+    pSizer->Add( 8, 1, 0 );
+    m_pRadioNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    pSizer->Add( m_pRadioNormalColoring );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    m_pRadioDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 1, 0 );
+    pSizer->Add( m_pRadioDistanceAnchoring );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    m_pRadioMinDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Min Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 1, 0 );
+    pSizer->Add( m_pRadioMinDistanceAnchoring );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    m_pRadioCurvature  = new wxRadioButton( pParent, wxID_ANY, _T( "Curvature" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 1, 0 );
+    pSizer->Add( m_pRadioCurvature );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    m_pRadioTorsion  = new wxRadioButton( pParent, wxID_ANY, _T( "Torsion" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 1, 0 );
+    pSizer->Add( m_pRadioTorsion );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pRadioNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalColoring ) );
+    pParent->Connect( m_pRadioDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuDistance ) );
+    pParent->Connect( m_pRadioMinDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuMinDistance ) );
+    pParent->Connect( m_pRadioTorsion->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithTorsion ) );
+    pParent->Connect( m_pRadioCurvature->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithCurvature ) );
+    m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );
 }
 
 void Fibers::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
-
-    m_ptoggleFiltering->Enable(false);
-    m_ptoggleFiltering->SetValue(false);
-    m_psliderOpacity->SetValue(m_psliderOpacity->GetMin());
-    m_psliderOpacity->Enable(false);
-    m_ptoggleNormalColoring->SetValue(!getShowFS());
-    m_pradioNormalColoring->Enable(getShowFS());
-    m_pradioCurvature->Enable(getShowFS());
-    m_pradioDistanceAnchoring->Enable(getShowFS());
-    m_pradioMinDistanceAnchoring->Enable(getShowFS());
-    m_pradioTorsion->Enable(getShowFS());
+    m_ptoggleFiltering->Enable( false );
+    m_ptoggleFiltering->SetValue( false );
+    m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
+    m_psliderOpacity->Enable( false );
+    m_pToggleNormalColoring->SetValue( !getShowFS() );
+    m_pRadioNormalColoring->Enable( getShowFS() );
+    m_pRadioCurvature->Enable( getShowFS() );
+    m_pRadioDistanceAnchoring->Enable( getShowFS() );
+    m_pRadioMinDistanceAnchoring->Enable( getShowFS() );
+    m_pRadioTorsion->Enable( getShowFS() );
 }

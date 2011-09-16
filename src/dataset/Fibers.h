@@ -1,13 +1,7 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:            Fibers.h
-// Author:          ---
-// Creation Date:   ---
-//
-// Description: fibers class.
-//
-// Last modifications:
-//      by : ggirard - 29/12/2010
-/////////////////////////////////////////////////////////////////////////////
+/*
+ *  The Fibers class declaration.
+ *
+ */
 
 #ifndef FIBERS_H_
 #define FIBERS_H_
@@ -28,7 +22,7 @@
 #include "../misc/Fantom/FVector.h"
 #include "Octree.h"
 
-enum FiberFileType 
+enum FiberFileType
 {
     ASCII_FIBER = 0,
     ASCII_VTK   = 1,
@@ -37,85 +31,117 @@ enum FiberFileType
 
 using namespace std;
 
-class Fibers : public DatasetInfo , public wxTreeItemData
+/**
+ * This class represents a set of fibers.
+ * It supports loading different fibers file types.
+ * It holds the fibers data, and can also be used to
+ * compute statistics and selected fibers data.
+ */
+class Fibers : public DatasetInfo, public wxTreeItemData
 {
 public:
-    Fibers( DatasetHelper* );
+    Fibers( DatasetHelper *pDatasetHelper );
+    // TODO copy constructors: should they be allowed?
     virtual ~Fibers();
 
-    void    activateLIC         ()                          {};
-    void    clean               ()                          {};
-    void    draw                ();
-    void    drawVectors         ()                          {};
-    void    generateTexture     ()                          {};
-    void    generateGeometry    ()                          {};
-    bool    getBarycenter       ( SplinePoint*        );
-    GLuint  getGLuint           (                     )     { return 0; };
-    float   getMaxFibersLength() {return m_maxLength;}
-    float   getMinFibersLength() {return m_minLength;}
-    int     getLineCount        ();
-    int     getLineForPoint     ( int                 );
-    int     getPointCount       ();
-    int     getPointsPerLine    ( int                 );
-    float   getPointValue       ( int      i_index    );
-    int     getStartIndexForLine( int                 );
-    void    initializeBuffer    ();
-    bool    isSelected          ( int      i_fiber    );
-    bool    load                ( wxString i_filename );
-    bool    loadTRK             ( wxString i_fileName );
-    bool    loadCamino          ( wxString i_filename );
-    bool    loadPTK             ( wxString i_filename );
-	bool    loadMRtrix			( wxString filename   );
-    void    loadTestFibers      ();
-    bool    loadVTK             ( wxString i_filename );
-    bool    loadDmri            ( wxString i_fileName ); 
-    void    resetColorArray     ();
-    void    save                ( wxString i_filename );
-    void    saveDMRI            ( wxString i_filename );
-    void    smooth              ()                          {};
-    void    switchNormals       ( bool     i_positive );
-    void    updateFibersColors  ();
-    void    updateLinesShown    ();  
-    void    updateFibersFilters ();
-    void    generateKdTree      ();
-
+    // Fibers loading methods
+    bool    load(             wxString  filename );
+    bool    loadTRK(    const wxString &filename );
+    bool    loadCamino( const wxString &filename );
+    bool    loadMRtrix( const wxString &filename );
+    bool    loadPTK(    const wxString &filename );
+    bool    loadVTK(    const wxString &filename );
+    bool    loadDmri(   const wxString &filename );
+    void    loadTestFibers();
+    
+    void    updateFibersColors();
+    
     void    generateFiberVolume();
+    
+    void    save( wxString filename );
+    void    saveDMRI( wxString filename );
+    
+    int     getPointsPerLine(     const int lineId );
+    int     getStartIndexForLine( const int lineId );
+    
+    int     getLineForPoint( const int pointIdx );
+    
+    void    resetColorArray();
+    
+    void    updateLinesShown();
+
+    void    generateKdTree();
+    bool    getBarycenter( SplinePoint *pPoint );
+    
+    void    initializeBuffer();
+
+    void    draw();    
+    void    switchNormals( bool positive );
+
+    float   getPointValue( int  ptIndex );
+    int     getLineCount();
+    int     getPointCount();
+    bool    isSelected(    int  fiberId );
+    
     void    setFibersLength();
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    
+    void    updateFibersFilters();
+    
+    virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
 
-private:
-    wxButton       *m_pGeneratesFibersDensityVolume;
-    wxSlider       *m_psliderFibersFilterMin;
-    wxSlider       *m_psliderFibersFilterMax;
-    wxSlider       *m_psliderFibersSampling;
-    wxToggleButton *m_ptoggleLocalColoring;
-    wxToggleButton *m_ptoggleNormalColoring;
-    wxRadioButton  *m_pradioNormalColoring;
-    wxRadioButton  *m_pradioDistanceAnchoring;
-    wxRadioButton  *m_pradioMinDistanceAnchoring;
-    wxRadioButton  *m_pradioCurvature;
-    wxRadioButton  *m_pradioTorsion;
-    bool            m_isSpecialFiberDisplay;
+
+    GLuint  getGLuint( )
+    {
+        return 0;
+    };
     
-    void            barycenterTest          ( int, int, int               );
-    void            ObjectTest                 ( SelectionObject* );
-    void            calculateLinePointers   ();
-    void            colorWithCurvature      ( float* i_colorData          );
-    void            colorWithTorsion        ( float* i_colorData          );
-    void            colorWithDistance       ( float* i_colorData          );
-    void            colorWithMinDistance    ( float* i_colorData          );
-    void            createColorArray        ( bool i_colorsLoadedFromFile );
-    void            drawFakeTubes           ();
-    void            drawSortedLines         ();
-    void            freeArrays              ();
-    vector< bool >  getLinesShown           ( SelectionObject*            );
-    string          intToString             ( int i_number                );
-    void            resetLinesShown         ();    
-    void            toggleEndianess         ();
-    bool            getFiberCoordValues     ( int fiberIndex, vector< Vector > &o_fiberPoints);
+    float   getMaxFibersLength()
+    {
+        return m_maxLength;
+    }
+    
+    float   getMinFibersLength()
+    {
+        return m_minLength;
+    }
+    
+    // Empty derived methods
+    void    activateLIC()      {};
+    void    clean()            {};
+    
+    void    drawVectors()      {};
+    void    generateTexture()  {};
+    void    generateGeometry() {};
+    void    smooth()           {};
+
+private:
+    void            colorWithTorsion(     float *pColorData );
+    void            colorWithCurvature(   float *pColorData );
+    void            colorWithDistance(    float *pColorData );
+    void            colorWithMinDistance( float *pColorData );
+    
+    string          intToString( const int number );
+    void            toggleEndianess();
+    
+    void            calculateLinePointers();
+    void            createColorArray( const bool colorsLoadedFromFile );
+    
+    void            resetLinesShown();
+    vector< bool >  getLinesShown( SelectionObject *pSelectionObject );
+    void            objectTest(    SelectionObject *pSelectionObject );
+    
+    void            barycenterTest( int left, int right, int axis );
+
+    void            drawFakeTubes();
+    void            drawSortedLines();
+
+    void            freeArrays();
+
+    bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
 
     // Variables
+    bool            m_isSpecialFiberDisplay;
     Vector          m_barycenter;
     vector< float > m_boxMax;
     vector< float > m_boxMin;
@@ -124,7 +150,6 @@ private:
     int             m_countLines;
     int             m_countPoints;
     bool            m_isInitialized;
-    KdTree*         m_kdTree;
     vector< int >   m_lineArray;
     vector< int >   m_linePointers;
     vector< float > m_pointArray;
@@ -139,7 +164,21 @@ private:
     vector<float  > m_localizedAlpha;
     float           m_cachedThreshold;
 
-    Octree* m_octree;
+    KdTree          *m_pKdTree;
+    Octree          *m_pOctree;
+    
+    // GUI members
+    wxButton       *m_pGeneratesFibersDensityVolume;
+    wxSlider       *m_pSliderFibersFilterMin;
+    wxSlider       *m_pSliderFibersFilterMax;
+    wxSlider       *m_pSliderFibersSampling;
+    wxToggleButton *m_pToggleLocalColoring;
+    wxToggleButton *m_pToggleNormalColoring;
+    wxRadioButton  *m_pRadioNormalColoring;
+    wxRadioButton  *m_pRadioDistanceAnchoring;
+    wxRadioButton  *m_pRadioMinDistanceAnchoring;
+    wxRadioButton  *m_pRadioCurvature;
+    wxRadioButton  *m_pRadioTorsion;
 };
 
 #endif /* FIBERS_H_ */
