@@ -837,9 +837,9 @@ void CIsoSurface::RenameVerticesAndTriangles()
     m_tMesh->resizeVerts( m_i2pt3idVertices.size() );
     m_tMesh->resizeTriangles( m_trivecTriangles.size() );
 
-    float xOff = 0.5f;
-    float yOff = 0.5f;
-    float zOff = 0.5f;
+    float xOff = m_dh->m_xVoxel/2;
+    float yOff = m_dh->m_yVoxel/2;
+    float zOff = m_dh->m_zVoxel/2;
 
     // Rename vertices.
     while ( mapIterator != m_i2pt3idVertices.end() )

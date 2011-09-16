@@ -100,7 +100,7 @@ protected:
     virtual void    clean()            {};
     virtual void    smooth()           {};    
     virtual void    generateGeometry() {};
-    virtual GLuint  getGLuint()        { return NULL; };
+    virtual GLuint  getGLuint()        { return 0; };
     virtual void    initializeBuffer() {};
     virtual void    generateTexture()  {};
 
