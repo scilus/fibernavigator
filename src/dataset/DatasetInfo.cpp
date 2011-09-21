@@ -69,6 +69,12 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     parent->Connect(m_pbtnUp->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemUp));
     parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnDeleteListItem));
     
+	m_pBtnRename = new wxButton(parent, wxID_ANY, wxT("Rename"), wxDefaultPosition, wxSize(90,-1) );
+	m_propertiesSizer->Add( m_pBtnRename, 0, wxALIGN_CENTER );
+	parent->Connect( m_pBtnRename->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler ( PropertiesWindow::OnRenameAnatomy ) );
+
+
+
     m_ptoggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(90,-1));
     m_ptoggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Interpolation"),wxDefaultPosition, wxSize(90,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);

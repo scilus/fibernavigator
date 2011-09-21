@@ -132,6 +132,28 @@ void PropertiesWindow::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(e
     }
 }
 
+void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) ){
+	if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
+	{
+		wxTextEntryDialog dialog(this, _T( "Please enter a new name" ) );
+		DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
+		
+		dialog.SetValue( l_info->getName().BeforeFirst( '.' ) );
+
+		wxString ext=l_info->getName().AfterFirst( '.' );
+        if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
+		{
+			l_info->setName( dialog.GetValue() + ext);
+		}
+		wxTreeItemId l_infoId = m_mainFrame->m_pTreeWidget->GetSelection();
+		m_mainFrame->m_pListCtrl->SetItemText(l_infoId, l_info->getName().BeforeFirst( '.' ) );
+	}
+
+	m_mainFrame->refreshAllGLWidgets();
+
+}
+
+
 void PropertiesWindow::OnDilateDataset( wxCommandEvent& WXUNUSED(event) )
 {
     if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )

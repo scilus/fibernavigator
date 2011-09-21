@@ -106,6 +106,7 @@ public:
     wxTextCtrl      *m_ptxtName;
     MySlider        *m_psliderThresholdIntensity;
     MySlider        *m_psliderOpacity;
+	wxButton		*m_pBtnRename;
     wxToggleButton  *m_ptoggleVisibility;
     wxToggleButton  *m_ptoggleFiltering;
     wxBitmapButton  *m_pbtnDelete;

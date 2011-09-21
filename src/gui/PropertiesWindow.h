@@ -39,6 +39,8 @@ public:
 
     void OnSliderIntensityThresholdMoved    ( wxCommandEvent& event );
     void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
+	
+	void OnRename							( wxCommandEvent& event  ); 
 
     void OnDilateDataset                    ( wxCommandEvent& event );
     void OnErodeDataset                     ( wxCommandEvent& event );

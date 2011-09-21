@@ -1021,10 +1021,10 @@ TensorField* Anatomy::getTensorField()
 void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
 {
     DatasetInfo::createPropertiesSizer(pParentWindow);  
-    
+
     m_pBtnDilate = new wxButton(pParentWindow, wxID_ANY, wxT("Dilate"),wxDefaultPosition, wxSize(85,-1));
     m_pBtnErode  = new wxButton(pParentWindow, wxID_ANY, wxT("Erode"),wxDefaultPosition, wxSize(85,-1));
-    
+
     wxSizer *pSizer;
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );
