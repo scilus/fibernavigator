@@ -1186,6 +1186,7 @@ void Anatomy::equalizeHistogram()
 {
     //TODO: Check format for gray scale value
     //TODO: Add support for RGB
+    //TODO: Add background worker thread to boost loading time
     static const unsigned int GRAY_SCALE(256);
     unsigned int size(m_rows * m_columns);
 
@@ -1229,7 +1230,7 @@ void Anatomy::equalizeHistogram()
                 cdfMin = currentCdf;
                 isCdfMinFound = true;
    
-                if (0 == size - cdfMin)
+                if(0 == size - cdfMin)
                 {
                     // Division by zero, cancel calculation
                     // Log error
@@ -1238,7 +1239,7 @@ void Anatomy::equalizeHistogram()
             }
 
             // Calculate the lookup table for equalized values
-            if (isCdfMinFound)
+            if(isCdfMinFound)
             {
                 // Since our dataset is normalized, we can strip the round and the * (L - 1)
                 float result = static_cast<double>(currentCdf - cdfMin) / (size - cdfMin);
@@ -1258,6 +1259,8 @@ void Anatomy::equalizeHistogram()
 
 //////////////////////////////////////////////////////////////////////////
 
+static bool useEqualizedDataset(false);
+
 void Anatomy::generateTexture()
 {
     glPixelStorei  ( GL_UNPACK_ALIGNMENT, 1 );
@@ -1274,11 +1277,11 @@ void Anatomy::generateTexture()
         case HEAD_BYTE:
         case HEAD_SHORT:
         case OVERLAY:
-            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_LUMINANCE, GL_FLOAT, &m_floatDataset[0] );
+            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_LUMINANCE, GL_FLOAT, useEqualizedDataset ? &m_equalizedDataset[0] : &m_floatDataset[0] );
             break;
 
         case RGB:
-            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT, &m_floatDataset[0] );
+            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT, useEqualizedDataset ? &m_equalizedDataset[0] : &m_floatDataset[0] );
             break;
 
         case VECTORS:
