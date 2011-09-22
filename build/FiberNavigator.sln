@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcproj", "{B32D519E-3189-44E9-962B-C27901A236EA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4A2E0F05-E3A7-477C-A63E-82E3E1B6205B} = {4A2E0F05-E3A7-477C-A63E-82E3E1B6205B}
+		{0E30C172-96C2-4846-AB62-6D76461EB036} = {0E30C172-96C2-4846-AB62-6D76461EB036}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZERO_CHECK", "ZERO_CHECK.vcproj", "{4A2E0F05-E3A7-477C-A63E-82E3E1B6205B}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fibernavigator", "fibernavigator.vcproj", "{0E30C172-96C2-4846-AB62-6D76461EB036}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4A2E0F05-E3A7-477C-A63E-82E3E1B6205B} = {4A2E0F05-E3A7-477C-A63E-82E3E1B6205B}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B32D519E-3189-44E9-962B-C27901A236EA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B32D519E-3189-44E9-962B-C27901A236EA}.Release|Win32.ActiveCfg = Release|Win32
+		{4A2E0F05-E3A7-477C-A63E-82E3E1B6205B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4A2E0F05-E3A7-477C-A63E-82E3E1B6205B}.Debug|Win32.Build.0 = Debug|Win32
+		{4A2E0F05-E3A7-477C-A63E-82E3E1B6205B}.Release|Win32.ActiveCfg = Release|Win32
+		{4A2E0F05-E3A7-477C-A63E-82E3E1B6205B}.Release|Win32.Build.0 = Release|Win32
+		{0E30C172-96C2-4846-AB62-6D76461EB036}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0E30C172-96C2-4846-AB62-6D76461EB036}.Debug|Win32.Build.0 = Debug|Win32
+		{0E30C172-96C2-4846-AB62-6D76461EB036}.Release|Win32.ActiveCfg = Release|Win32
+		{0E30C172-96C2-4846-AB62-6D76461EB036}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

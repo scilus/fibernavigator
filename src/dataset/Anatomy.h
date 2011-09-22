@@ -36,6 +36,7 @@ public:
    
     float at( const int i );
     std::vector<float>* getFloatDataset();
+    std::vector<float>* getEqualizedDataset();
 
     MySlider            *m_pSliderFlood;
     MySlider            *m_pSliderGraphSigma;
@@ -104,6 +105,8 @@ private:
     
     void dilateInternal( std::vector<bool> &workData, int curIndex );
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
+
+    void equalizeHistogram();
     
     void generateTexture();
     void generateGeometry() {};
@@ -113,6 +116,7 @@ private:
     float                   m_floodThreshold;
     float                   m_graphSigma;
     std::vector<float>      m_floatDataset;
+    std::vector<float>      m_equalizedDataset; // Dataset having its histogram equalized
     int                     m_dataType;
     TensorField             *m_pTensorField;
 };
