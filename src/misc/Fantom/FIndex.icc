@@ -1,0 +1,460 @@
+//---------------------------------------------------------------------------
+//
+// Project:   FAnToM
+// Module:    $RCSfile: FIndex.icc,v $
+// Language:  C++
+// Date:      $Date: 2002/09/27 15:49:08 $
+// Author:    $Author: bobach $
+// Version:   $Revision: 1.9 $
+//
+//--------------------------------------------------------------------------- 
+
+#ifdef OUTLINE
+#define inline
+#endif
+
+inline FIndex::FIndex()
+{
+  index = FIndex::invalid;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex::FIndex(positive value)
+{
+  if (value == FIndex::invalid)
+    setToInvalid ();
+  else
+    index = value;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex::FIndex(const FIndex& id)
+{
+  index = id.index;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline positive FIndex::getIndex() const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif
+  return index;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex& FIndex::operator=(const FIndex& id)
+{
+  index = id.index;
+
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex& FIndex::operator=(positive value)
+{
+  if (value == FIndex::invalid)
+    THROW_EXCEPTION(FException, "ERROR: invalid index!");
+
+  index = value;
+
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator==(const FIndex& id) const
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif
+
+  return (index == id.index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator==(positive value) const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif
+  return (index == value);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator!=(const FIndex& id) const
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif
+  return (index != id.index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator!=(positive value) const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif
+  
+  return (index != value);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator<(const FIndex& id) const
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid)
+    THROW_EXCEPTION(FException, "ERROR: invalid index!");
+#endif
+  return (index < id.index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator<(positive value) const 
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif
+  return (index < value);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator<=(const FIndex& id) const
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid)
+    THROW_EXCEPTION(FException, "ERROR: invalid index!");
+#endif
+  return (index <= id.index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator<=(positive value) const 
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif  
+  return (index <= value);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator>(const FIndex& id) const
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid)
+    THROW_EXCEPTION(FException, "ERROR: invalid index!");
+#endif
+  return (index > id.index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator>(positive value) const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif  
+  return (index > value);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator>=(const FIndex& id) const
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid)
+    THROW_EXCEPTION(FException, "ERROR: invalid index!");
+#endif
+  return (index >= id.index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::operator>=(positive value) const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid)
+    THROW_EXCEPTION(FException, "ERROR: invalid index!");
+#endif
+  return (index >= value);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex FIndex::operator+(const FIndex& id) const
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid)
+    THROW_EXCEPTION(FException, "ERROR: invalid index!");
+#endif
+  return FIndex(index + id.index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex FIndex::operator+(positive value) const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid)
+    THROW_EXCEPTION( FException, "ERROR: invalid index!");
+#endif
+  return FIndex(value + index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex & FIndex::operator+=(const FIndex& id)
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex& FIndex::operator+=(const FIndex& id)");
+    throw e;
+  }
+#endif
+  index += id.index;
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex & FIndex::operator+=(positive value)
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex& FIndex::operator+=(positive value) ");
+    throw e;
+  }
+#endif
+  index += value;
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex FIndex::operator-(const FIndex& id) const
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex FIndex::operator-(const FIndex& id) const");
+    throw e;
+  }
+
+  if (index < id.index) {
+    FException e("ERROR: negative result");
+    e.addTraceMessage("FIndex FIndex::operator-(const FIndex& id) const");
+    throw e;
+  }
+#endif
+  return FIndex(index - id.index);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex FIndex::operator-(positive value) const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex FIndex::operator-(positive value) const");
+    throw e;
+  }
+
+  if (index < value) {
+    FException e("ERROR: negative result");
+    e.addTraceMessage("FIndex FIndex::operator-(positive value) const");
+    throw e;
+  }
+#endif
+  return FIndex(index - value);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex & FIndex::operator-=(const FIndex& id)
+{
+#ifndef NODEBUG
+  if (id.index == FIndex::invalid || index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex& FIndex::operator-=(const FIndex& id)");
+    throw e;
+  }
+#endif
+  index -= id.index;
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex & FIndex::operator-=(positive value)
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex& FIndex::operator-=(positive value)");
+    throw e;
+  }
+#endif
+  index -= value;
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex& FIndex::operator++()
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex& FIndex::operator++()");
+    throw e;
+  }
+#endif
+  index++;
+
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex& FIndex::operator++(int)
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex& FIndex::operator++(int)");
+    throw e;
+  }
+#endif
+  index++;
+
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex& FIndex::operator--()
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex& FIndex::operator--()");
+    throw e;
+  }
+
+  if (index == 0) {
+    FException e("ERROR: negative result");
+    e.addTraceMessage("FIndex& FIndex::operator--()");
+    throw e;
+  }
+#endif 
+  index--;
+
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex& FIndex::operator--(int)
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex& FIndex::operator--(int)");
+    throw e;
+  }
+
+  if (index == 0) {
+    FException e("ERROR: negative result");
+    e.addTraceMessage("FIndex& FIndex::operator--(int)");
+    throw e;
+  }
+#endif
+  index--;
+
+  return *this;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex FIndex::operator*(positive value) const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex FIndex::operator*(positive value) const");
+    throw e;
+  }
+#endif
+  return FIndex(index * value);
+}
+
+//--------------------------------------------------------------------------- 
+
+// inline FIndex::operator unsigned long (void) const
+// {
+// #ifndef NODEBUG
+//   if (index == FIndex::invalid) {
+//     FException e("ERROR: invalid index!");
+//     e.addTraceMessage("FIndex FIndex::operator int(void) const");
+//     throw e;
+//   }
+// #endif
+//   return index;
+// }
+
+//--------------------------------------------------------------------------- 
+
+inline FIndex::operator positive (void) const
+{
+#ifndef NODEBUG
+  if (index == FIndex::invalid) {
+    FException e("ERROR: invalid index!");
+    e.addTraceMessage("FIndex::operator positive(void) const");
+    throw e;
+  }
+#endif
+  return index;
+}
+
+//--------------------------------------------------------------------------- 
+
+inline bool FIndex::isValid() const
+{
+  return (index != FIndex::invalid);
+}
+
+//--------------------------------------------------------------------------- 
+
+inline void FIndex::setToInvalid()
+{
+  index = FIndex::invalid;
+}
+
+//--------------------------------------------------------------------------- 
+
+#undef inline
