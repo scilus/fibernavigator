@@ -13,6 +13,7 @@
 #include <wx/textfile.h>
 #include <GL/glew.h>
 #include <cassert>
+#include <iomanip>
 
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
@@ -1188,25 +1189,30 @@ void Anatomy::equalizeHistogram()
     //TODO: Add support for RGB
     //TODO: Add background worker thread to boost loading time
     static const unsigned int GRAY_SCALE(256);
-    unsigned int size(m_rows * m_columns);
+    static const unsigned int GRAY_LEVEL_THRESHOLD(15);
+    static const double CDF_THRESHOLD(0.45);
 
+    unsigned int size(m_frames * m_rows * m_columns);
+    
     m_equalizedDataset.resize(m_floatDataset.size(), 0.0f);
 
-    if(0 == size)
+    if(0 == size || 1 != m_bands)
     {
         return;
     }
 
-    for(unsigned int frame(0); frame < static_cast<unsigned int>(m_frames); ++frame)
-    {
+//     for(unsigned int frame(0); frame < static_cast<unsigned int>(m_frames); ++frame)
+//     {
         bool isCdfMinFound(false);
+        unsigned int threshold(GRAY_LEVEL_THRESHOLD);
         unsigned int currentCdf(0);
         unsigned int prevCdf(0);
         unsigned int cdfMin(0);
+        unsigned int cdf[GRAY_SCALE]         = { 0 };
         unsigned int pixelCount[GRAY_SCALE]  = { 0 };
         float equalizedHistogram[GRAY_SCALE] = { 0 }; // Index is the original dataset gray value
 
-        for(unsigned int i(frame * size); i < (frame + 1) * size; ++i)
+        for(unsigned int i(0); i < size; ++i)
         {
             unsigned int pixelValue(static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1)));
 
@@ -1216,12 +1222,43 @@ void Anatomy::equalizeHistogram()
                 return;
             }
 
-            // TODO: Check if this is valid
             pixelCount[pixelValue]++;
         }
 
+// 		if(frame == m_frames / 2)
+// 		{
+            // Print the histogram on the console
+			unsigned int cdfCount(0);
+			std::cout << "Level | Nb pixels | CDF" << std::endl;
+			std::cout << "---------------------------" << std::endl;
+			std::cout << setfill(' ');
+			for(int i(0); i < GRAY_SCALE; ++i)
+			{
+				cdfCount += pixelCount[i];
+                cdf[i] = cdfCount;
+				cout << setw(5) << i << " | " << setw(9) << pixelCount[i] << " | " << setprecision(5) << static_cast<double>(cdfCount) / size << endl;
+			}
+//		}
+
+
+        // Eliminate background noise
+        while(cdf[threshold] / static_cast<double>(size) < CDF_THRESHOLD)
+        {
+            threshold++;
+        }
+
+        unsigned int nbPixelsEliminated(0);
+        for (unsigned int i(0); i < threshold; ++i)
+        {
+            nbPixelsEliminated += pixelCount[i];
+        }
+
         // Calculate cdf and equalized histogram
-        for(unsigned int i(0); i < GRAY_SCALE; ++i)
+        for (unsigned int i(0); i < threshold; ++i)
+        {
+            equalizedHistogram[i] = 1.0f / (GRAY_SCALE - 1);
+        }
+        for(unsigned int i(threshold); i < GRAY_SCALE; ++i)
         {
             currentCdf = prevCdf + pixelCount[i];
             
@@ -1230,7 +1267,7 @@ void Anatomy::equalizeHistogram()
                 cdfMin = currentCdf;
                 isCdfMinFound = true;
    
-                if(0 == size - cdfMin)
+                if(0 == size - nbPixelsEliminated - cdfMin)
                 {
                     // Division by zero, cancel calculation
                     // Log error
@@ -1242,7 +1279,11 @@ void Anatomy::equalizeHistogram()
             if(isCdfMinFound)
             {
                 // Since our dataset is normalized, we can strip the round and the * (L - 1)
-                float result = static_cast<double>(currentCdf - cdfMin) / (size - cdfMin);
+                float result = static_cast<double>(currentCdf - cdfMin) / (size - nbPixelsEliminated - cdfMin);
+                if (0 == result)
+                {
+                    result = 1.0f / (GRAY_SCALE - 1);
+                }
                 equalizedHistogram[i] = result;
             }
 
@@ -1250,11 +1291,11 @@ void Anatomy::equalizeHistogram()
         }
 
         // Calculate the equalized frame
-        for(unsigned int i(frame * size); i < (frame + 1) * size; ++i)
+        for(unsigned int i(0); i < size; ++i)
         {
             m_equalizedDataset[i] = equalizedHistogram[static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1))];
         }
-    }
+//    }
 }
 
 //////////////////////////////////////////////////////////////////////////
