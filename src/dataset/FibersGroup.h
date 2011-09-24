@@ -38,7 +38,8 @@ public:
 
 private:    
     // Variables
-    bool            m_isInitialized;
+	std::vector<Fibers*> m_fibersSets;
+    bool				 m_isInitialized;
     
     // GUI members
     wxButton       *m_pGeneratesFibersDensityVolume;
