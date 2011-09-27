@@ -1,0 +1,32 @@
+#! /bin/sh
+ARGS=`echo $*`
+
+################################################################################
+# Start script to find directory containing this script (across symbolic links)
+prog='
+import sys,os
+p=sys.argv[1]
+while os.path.islink(p): p=os.path.join(os.path.dirname(p),os.readlink(p))
+if not p: p="."
+print os.path.dirname(p)'
+python=`which python | grep python`
+current=`$python -c "$prog" "$0"`
+if [ -z "$current" ]; then
+  current="."
+fi
+
+if [ $1 ] ; then 
+
+if [ $1 = '-in' ] ; then
+shift 
+fi
+
+if [ $1 = '-i' ] ; then 
+shift 
+fi
+
+fi
+
+export FNPATH=$current
+
+$current/main $*

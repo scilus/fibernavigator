@@ -1,0 +1,57 @@
+
+//BUILDING ON LINUX
+////////////////////////////////////////////////////////////////
+
+Building on linux utilizes cmake and make.
+
+The project should be built in the "build" directory. Assuming 
+the currect working directory to be project's main directory, 
+the following steps should do the trick:
+
+> cd build
+> ccmake ../src
+PRESS 'c' for configuration
+PRESS 'c' again for further configuration
+PRESS 'g' to generate the build system including the Makefiles.
+> make
+
+Now the subdirectory "bin" of the "build" directory should contain an executable named fibernavigator.
+Inside "build" the program can be started with the following command:
+
+> bin/fibernavigator
+
+
+//BUILDING ON WINDOWS
+////////////////////////////////////////////////////////////////
+
+For the time being, building on windows utilizes the visual studio solution provided in the root folder of fibernavigator.
+
+If you already have wxWidgets compiled and installed with support for openGL enabled, you can skip to step 7.
+
+1- Install wxWidgets (version 2.8.10)
+
+2- Go to your wxWidgets directory and open the file "setup.h" located in folder : /include/wx/msw/
+
+3- Find the preprocessor definition "USE_GLCANVAS". It should be set to 0 by default. Set it to 1 to enable openGL support in wxWidgets.
+
+4- Open wxWidget's visual studio workspace (wx_dll.dsw) located in directory : build/msw (Visual studio might ask to convert or update it to a newer version, proceed to the conversion.)
+
+5- Select build configuration "DLL Unicode Debug" and press the build button (ctrl+shif+b). wxWidgets' compiling sequence is currently broken. You might have to build multiple times until everything builds correctly. The "dbgrid" project requires some external dependencies, it's normal if it doesn't build and it is not required for fibernavigator.
+
+6- Do step 5 again, this time selecting the build configuration "DLL Unicode Release". The information concerning the project "dbgrid" also applies in this case.
+
+7- If it wasn't already created, create the "WXWIN" environment variable. Make sure it points to your current wxWidgets installation directory.
+
+8- Add the complete wxWidgets library path (.../lib/vc_dll) to the environment variable named "Path".
+
+9- Install Glew (your glew installation should have the .dll and .lib files in the root directory and the header files in a sub-directory called GL).
+
+10- Create an environment variable called "GLEWDIR" pointing to your GLEW installation directory.
+
+11- Add the environment variable "GLEWDIR" (using "%GLEWDIR%;") to the environment variable named "Path".
+
+12- Generate the visual studio solution using cmake. *Change the build-type configuration to DEBUG;release if needed.
+
+Known issues with the windows build :
+
+a- There is a rendering delay in debug and release mode when moving the red crosshair in the axial/saggital/coronal view. (Might be due to the use of the "refresh" method instead of "render".
