@@ -106,7 +106,6 @@ public:
     wxTextCtrl      *m_ptxtName;
     MySlider        *m_psliderThresholdIntensity;
     MySlider        *m_psliderOpacity;
-	wxButton		*m_pBtnRename;
     wxToggleButton  *m_ptoggleVisibility;
     wxToggleButton  *m_ptoggleFiltering;
     wxBitmapButton  *m_pbtnDelete;
@@ -114,6 +113,10 @@ public:
     wxBitmapButton  *m_pbtnDown;
     wxButton        *m_pbtnSmoothLoop;
     wxButton        *m_pbtnClean;
+	wxButton		*m_pBtnRename;
+	wxButton		*m_pBtnFlipX;
+	wxButton		*m_pBtnFlipY;
+	wxButton		*m_pBtnFlipZ;
     wxToggleButton  *m_ptoggleLIC;
 
     

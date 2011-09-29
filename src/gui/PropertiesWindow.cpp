@@ -140,16 +140,24 @@ void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) ){
 		
 		dialog.SetValue( l_info->getName().BeforeFirst( '.' ) );
 
-		wxString ext=l_info->getName().AfterFirst( '.' );
+		wxString ext = l_info->getName().AfterFirst( '.' );
+		
         if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
 		{
-			l_info->setName( dialog.GetValue() + ext);
+			l_info->setName( dialog.GetValue() + wxT( "." ) + ext );
+			
+			//Change the name on the widget in the GUI
+			long item = m_mainFrame->m_currentListItem;
+			m_mainFrame->m_pListCtrl->SetItem(item, 1, l_info->getName().BeforeFirst( '.' ) );
+			
+			DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
+			info->m_ptxtName->Clear();
+			*info->m_ptxtName << l_info->getName();
 		}
-		wxTreeItemId l_infoId = m_mainFrame->m_pTreeWidget->GetSelection();
-		m_mainFrame->m_pListCtrl->SetItemText(l_infoId, l_info->getName().BeforeFirst( '.' ) );
 	}
 
 	m_mainFrame->refreshAllGLWidgets();
+	
 
 }
 
