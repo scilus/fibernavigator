@@ -75,17 +75,28 @@ ToolBar::ToolBar(wxWindow *parent)
 
 
     wxImage bmpRuler (MyApp::iconsPath+ wxT("rulertool.png"), wxBITMAP_TYPE_PNG);
-    
-    m_toggleRuler = this->AddCheckTool( wxID_ANY, wxT("Toggle Ruler" ), bmpRuler, wxNullBitmap, wxT("Toggle Ruler"));
-    m_txtRuler = new wxTextCtrl(this, wxID_ANY,wxT("0.00mm (0.00mm)"),wxDefaultPosition, wxSize( 160, 24 ), wxTE_LEFT | wxTE_READONLY);
-    m_txtRuler->Disable();
+	wxImage bmpDrawer (MyApp::iconsPath+ wxT("drawertool.png"), wxBITMAP_TYPE_PNG);
+
+	m_selectRuler = this->AddRadioTool( wxID_ANY, wxT("Ruler" ), bmpRuler, wxNullBitmap, wxT("Ruler"));
+	m_selectDrawer = this->AddRadioTool( wxID_ANY, wxT("Drawer" ), bmpDrawer, wxNullBitmap, wxT("Drawer"));
+	this->AddSeparator();
+
+	m_txtRuler = new wxTextCtrl(this, wxID_ANY,wxT("0.00mm (0.00mm)"), wxDefaultPosition, wxSize( 160, 24 ), wxTE_LEFT | wxTE_READONLY);
     m_txtRuler->SetForegroundColour(wxColour(wxT("#222222")));
     m_txtRuler->SetBackgroundColour(*wxWHITE);
     wxFont font = m_txtRuler->GetFont();
     font.SetPointSize(10);
     font.SetWeight(wxBOLD);
     m_txtRuler->SetFont(font);
-    this->AddControl(m_txtRuler);
+	this->AddControl(m_txtRuler);
+
+	wxImage bmpPen (MyApp::iconsPath+ wxT("draw_pen.png"), wxBITMAP_TYPE_PNG);
+	wxImage bmpEraser (MyApp::iconsPath+ wxT("draw_eraser.png"), wxBITMAP_TYPE_PNG);
+
+	m_selectPen = this->AddRadioTool( wxID_ANY, wxT("Use Pen" ), bmpPen, wxNullBitmap, wxT("Use Pen"));
+    EnableTool(m_selectPen->GetId(), false);
+	m_selectEraser = this->AddRadioTool( wxID_ANY, wxT("Use Eraser" ), bmpEraser, wxNullBitmap, wxT("Use Eraser"));
+	EnableTool(m_selectEraser->GetId(), false);
 }
 
 void ToolBar::initToolBar( MainFrame *mf )
@@ -106,7 +117,10 @@ void ToolBar::initToolBar( MainFrame *mf )
     mf->Connect(m_toggleLighting->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleLighting));
     mf->Connect(m_toggleFakeTubes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseFakeTubes));
     mf->Connect(m_toggleClearToBlack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onClearToBlack));
-    mf->Connect(m_toggleRuler->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRulerTool)); 
+    mf->Connect(m_selectRuler->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectRuler)); 
+	mf->Connect(m_selectDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectDrawer)); 
+	mf->Connect(m_selectPen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectPen)); 
+	mf->Connect(m_selectEraser->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectEraser)); 
 }
 
 void ToolBar::updateToolBar( MainFrame *mf )
@@ -123,8 +137,11 @@ void ToolBar::updateToolBar( MainFrame *mf )
     ToggleTool(m_toggleActivateAllSelectionObjects->GetId(), !mf->m_pDatasetHelper->m_activateObjects);
     ToggleTool(m_toggleFakeTubes->GetId(), mf->m_pDatasetHelper->m_useFakeTubes);
     //ToggleTool(m_toggleDrawPoints->GetId(), mf->m_datasetHelper->m_pointMode);
-    ToggleTool(m_toggleRuler->GetId(), mf->m_pDatasetHelper->m_isRulerToolActive);
-    ToggleTool(m_toggleClearToBlack->GetId(), mf->m_pDatasetHelper->m_clearToBlack);
-    //EnableTool(m_btnNewSelectionBox->GetId(), mf->m_datasetHelper->m_fibersLoaded);
-    ToggleTool(m_toggleInverseSelection->GetId(), mf->m_pDatasetHelper->m_fibersInverted);     
+	ToggleTool(m_toggleClearToBlack->GetId(), mf->m_pDatasetHelper->m_clearToBlack);
+	//EnableTool(m_btnNewSelectionBox->GetId(), mf->m_pDatasetHelper->m_fibersLoaded);
+	ToggleTool(m_selectRuler->GetId(), mf->m_pDatasetHelper->m_isRulerToolActive);
+	ToggleTool(m_selectDrawer->GetId(), mf->m_pDatasetHelper->m_isDrawerToolActive);
+	ToggleTool(m_selectPen->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
+	ToggleTool(m_selectEraser->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
+	ToggleTool(m_toggleInverseSelection->GetId(), mf->m_pDatasetHelper->m_fibersInverted);
 }

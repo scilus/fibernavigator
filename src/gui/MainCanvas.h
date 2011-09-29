@@ -53,7 +53,8 @@ public:
     void invalidate();
     void renderTestRay();
     void renderAxes();
-    void renderRulerDisplay();
+	void renderRulerDisplay();
+	void renderDrawerDisplay();
     void segment();
     void KMeans(float i_means[2],float i_stddev[2],float i_apriori[2],std::vector<float>*,std::vector<float>*);
     void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);

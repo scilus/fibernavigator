@@ -80,7 +80,11 @@ public:
             wxMenuItem  *m_itemToggleRuler;
             wxMenuItem  *m_itemRulerClear;
             wxMenuItem  *m_itemRulerAdd;
-            wxMenuItem  *m_itemRulerRemove;
+			wxMenuItem  *m_itemRulerRemove;
+		wxMenu      *m_menuDrawer;
+			wxMenuItem  *m_itemToggleDrawer;
+			wxMenuItem  *m_itemDrawPen;
+			wxMenuItem  *m_itemDrawEraser;
         wxMenu      *m_menuColorMaps;
             wxMenuItem  *m_itemGray;
             wxMenuItem  *m_itemBlueGreenPurple;
@@ -88,9 +92,9 @@ public:
             wxMenuItem  *m_itemHotIron;
             wxMenuItem  *m_itemRedYellow;
             wxMenuItem  *m_itemBlueLightblue;
-
-        wxMenuItem  *m_itemToggleDrawPoints;
-        wxMenuItem  *m_itemToggleDrawVectors;
+		
+		wxMenuItem  *m_itemToggleDrawPoints;
+		wxMenuItem  *m_itemToggleDrawVectors;
         wxMenuItem  *m_itemToggleLighting;
         wxMenuItem  *m_itemToggleClearToBlack;
         wxMenuItem  *m_itemToggleBlendTextureOnMesh;

@@ -647,6 +647,45 @@ void MainFrame::onToggleDrawPointsMode( wxCommandEvent& event )
     refreshAllGLWidgets();
 }
 
+void MainFrame::onSelectDrawer( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+
+	m_pDatasetHelper->m_isRulerToolActive = false;
+	m_pDatasetHelper->m_isDrawerToolActive = true;
+
+	m_pToolBar->m_txtRuler->Disable();
+	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), true);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), true);
+
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectPen( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_PEN;
+
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectEraser( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_ERASER;
+
+	refreshAllGLWidgets();
+}
+
 void MainFrame::onMoveBoundaryPointsLeft( wxCommandEvent& WXUNUSED(event) )
 {
     moveBoundaryPoints(5);
@@ -1088,17 +1127,19 @@ void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
 }
 
-void MainFrame::onRulerTool( wxCommandEvent& WXUNUSED(event) )
+void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_isRulerToolActive = !m_pDatasetHelper->m_isRulerToolActive;    
-    if (m_pDatasetHelper->m_isRulerToolActive)
-    {
-        m_pToolBar->m_txtRuler->Enable();
-    } 
-    else 
-    {
-        m_pToolBar->m_txtRuler->Disable();
-    }
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+
+	m_pDatasetHelper->m_isRulerToolActive = true;
+	m_pDatasetHelper->m_isDrawerToolActive = false;
+
+    m_pToolBar->m_txtRuler->Enable();
+	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
     refreshAllGLWidgets();
 }
 

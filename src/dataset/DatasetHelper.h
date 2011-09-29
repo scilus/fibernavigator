@@ -228,6 +228,15 @@ public:
     bool  m_displayGlyphOptions;
     FibersColorationMode   m_fiberColorationMode;
 
+	bool  m_isDrawerToolActive;
+	enum  DrawMode
+	{
+		DRAWMODE_PEN = 0,
+		DRAWMODE_ERASER = 1,
+        DRAWMODE_INVALID
+	};
+	DrawMode m_drawMode;
+
     bool  m_morphing;
 
     bool  m_boxLockIsOn;

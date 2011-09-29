@@ -233,6 +233,10 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     {                        
                         m_hr = pick(event.GetPosition(), true);
                     }
+					else if (m_pDatasetHelper->m_isDrawerToolActive)
+					{                        
+						//m_hr = pick(event.GetPosition(), true);
+					}
                     /*else if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isSelectBckActive && m_pDatasetHelper->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectObj-GraphCut
                     {
                         m_hr = pick(event.GetPosition(), true);
@@ -260,7 +264,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_pDatasetHelper->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
                 }
-                else  if (!m_pDatasetHelper->m_isRulerToolActive && !m_isSceneLocked) //Move Scene
+                else  if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isDrawerToolActive && !m_isSceneLocked) //Move Scene
                 {                    
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -815,7 +819,7 @@ void MainCanvas::render()
                     {
                         Vector lastPts = m_pDatasetHelper->m_rulerPts.back();
                         if( lastPts != m_hitPts)
-                        {                            
+                        {
                             m_pDatasetHelper->m_rulerPts.push_back(m_hitPts);                            
                         }
                     } 
@@ -825,6 +829,23 @@ void MainCanvas::render()
                     }
                     m_isRulerHit = false;
                 }
+				/*else if ( m_pDatasetHelper->m_isDrawerToolActive && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
+				{
+					if (m_pDatasetHelper->m_rulerPts.size()>0 )
+					{
+						Vector lastPts = m_pDatasetHelper->m_rulerPts.back();
+						if( lastPts != m_hitPts)
+						{
+							m_pDatasetHelper->m_rulerPts.push_back(m_hitPts);                            
+						}
+					} 
+					else 
+					{
+						m_pDatasetHelper->m_rulerPts.push_back(m_hitPts);
+					}
+					m_isRulerHit = false;
+				}*/
+
                 //renderTestRay();
                 if (m_pDatasetHelper->m_isShowAxes)
                 {
@@ -834,6 +855,11 @@ void MainCanvas::render()
                 {
                     renderRulerDisplay();
                 }
+				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					//TODO
+					renderDrawerDisplay();
+				}
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
                 glGetIntegerv( GL_VIEWPORT,m_viewport );
@@ -909,6 +935,32 @@ void::MainCanvas::renderRulerDisplay()
         }
     }
     glLineWidth (1);
+}
+
+void::MainCanvas::renderDrawerDisplay()
+{
+	/*glColor3f( 0.95f, 0.6f, 0.0f );
+	glLineWidth (1);
+	float sphereSize = 0.35f;
+	if (m_pDatasetHelper->m_rulerPts.size() > 0){        
+		Vector pts;
+		m_pDatasetHelper->m_rulerFullLength = 0;
+		
+		glBegin (GL_TRIANGLE_STRIP);
+		for (unsigned int i=0; i < m_pDatasetHelper->m_rulerPts.size();i++)
+		{
+			if (i== m_pDatasetHelper->m_rulerPts.size()-2)
+			{
+				sphereSize = 0.45f;
+			}
+			pts = m_pDatasetHelper->m_rulerPts[i];
+
+			glVertex3f (pts.x, pts.y, pts.z);
+
+			//m_pDatasetHelper->m_theScene->drawSphere( pts.x, pts.y, pts.z, sphereSize);
+		}
+		glEnd ();
+	}*/
 }
 
 void MainCanvas::renderAxes()

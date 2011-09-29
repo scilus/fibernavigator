@@ -40,8 +40,11 @@ public:
     wxToolBarToolBase *m_toggleLighting;
     wxToolBarToolBase *m_toggleFakeTubes;
     wxToolBarToolBase *m_toggleClearToBlack;
-    wxToolBarToolBase *m_toggleRuler;
-    wxTextCtrl        *m_txtRuler;
+	wxToolBarToolBase *m_selectRuler;
+	wxToolBarToolBase *m_selectDrawer;
+	wxTextCtrl        *m_txtRuler;
+	wxToolBarToolBase *m_selectPen;
+	wxToolBarToolBase *m_selectEraser;
 };
 
 

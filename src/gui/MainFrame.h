@@ -94,7 +94,7 @@ private:
     // Options menu
     void onToggleLighting                   ( wxCommandEvent& event );
     void onClearToBlack                     ( wxCommandEvent& event );
-    void onRulerTool                        ( wxCommandEvent& event );
+    void onSelectRuler                      ( wxCommandEvent& event );
     void onRulerToolClear                   ( wxCommandEvent& event );
     void onRulerToolAdd                     ( wxCommandEvent& event );
     void onRulerToolDel                     ( wxCommandEvent& event );
@@ -152,7 +152,11 @@ private:
     void onLoadTensors                      ( wxCommandEvent& event );
     void onLoadODFs                         ( wxCommandEvent& event );    
     bool loadIndex                          ( int i_index );
-    
+
+	void onSelectDrawer                     ( wxCommandEvent& event );
+	void onSelectPen                        ( wxCommandEvent& event );
+	void onSelectEraser                     ( wxCommandEvent& event );
+
     
 private:
     ToolBar             *m_pToolBar;
