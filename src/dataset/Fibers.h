@@ -86,6 +86,8 @@ public:
     void    setFibersLength();
     
     void    updateFibersFilters();
+
+	void    flipAxis(AxisType i_axe);
     
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();

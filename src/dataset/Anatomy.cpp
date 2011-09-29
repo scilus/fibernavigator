@@ -895,6 +895,54 @@ void Anatomy::minimize()
     m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 }
 
+
+void Anatomy::flipAxis(AxisType axe){
+
+	int datasetSize(m_columns * m_rows * m_frames);
+    std::vector<float> tmp( datasetSize, false );
+	int curIndex, flipIndex;
+
+	if (axe == AXIS_UNDEFINED)
+		return;
+
+	for( int c(1); c < m_columns - 1; ++c )
+    {
+        for( int r(1); r < m_rows - 1; ++r )
+        {
+            for( int f(1); f < m_frames - 1; ++f )
+            {
+                curIndex = c + r * m_columns + f * m_columns * m_rows;
+
+				//Compute the index of the value that will be replace by the one define by our current index
+					switch (axe){
+						case X_AXIS:
+							flipIndex = (m_columns -c) + r * m_columns + f * m_columns * m_rows;
+							break;
+						case Y_AXIS:
+							flipIndex = c + (m_rows-r) * m_columns + f * m_columns * m_rows;
+							break;
+						case Z_AXIS:
+							flipIndex = c + r * m_columns + (m_frames - f) * m_columns * m_rows;
+							break;
+						default:
+							break;
+					}
+				tmp[flipIndex] = m_floatDataset[curIndex];
+            }
+        }
+    }
+
+	for( int i(0); i < datasetSize; ++i){
+		if (tmp[i] != 0)
+			m_floatDataset[i] = tmp[i];
+	}
+
+	const GLuint* pTexId = &m_GLuint;
+    glDeleteTextures( 1, pTexId );
+    generateTexture();
+
+}
+
 void Anatomy::dilate()
 {
     int datasetSize(m_columns * m_rows * m_frames);

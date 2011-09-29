@@ -63,6 +63,10 @@ public:
     unsigned int getCountPolygons() { return m_countPolygons; };
     unsigned int getPolygonDim()     { return m_polygonDim; };
 
+protected:
+	//From datasetInfo
+	virtual void flipAxis(AxisType i_axe){};
+
 private:
     
     void    generateTexture()  {};

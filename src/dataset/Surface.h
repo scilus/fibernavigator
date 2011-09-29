@@ -37,6 +37,11 @@ public:
     std::vector<Vector> getSurfaceVoxelPositions();
 
     bool save( wxString filename )const;
+
+protected:
+	//From DataSetInfo
+	void flipAxis(AxisType axe){};
+
 private:
     void generateTexture() {}
     void generateGeometry();

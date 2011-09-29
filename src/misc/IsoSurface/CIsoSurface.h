@@ -71,6 +71,9 @@ public:
     bool save( wxString filename )const;
 
 protected:
+	//From DataSetInfo
+	void flipAxis(AxisType i_axe){};
+
     // The number of vertices which make up the isosurface.
     unsigned int m_nVertices;
 

@@ -3210,6 +3210,11 @@ void Fibers::updateFibersFilters()
     }
 }
 
+void Fibers::flipAxis( AxisType i_axe)
+{
+	//TODO - This should flip the fiber mesh on the given axis
+}
+
 void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 {
     setFibersLength();

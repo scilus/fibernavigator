@@ -51,12 +51,13 @@ public:
     void dilate();
     void erode();
     void minimize();
+	void flipAxis(AxisType axe);
     
     void draw(){};
     
     bool load     ( wxString fileName );
     bool loadNifti( wxString fileName );
-    void saveNifti( wxString fileName );    
+    void saveNifti( wxString fileName );
 
     void setDataType( const int type) { m_dataType = type; }
     int  getDataType()                { return m_dataType; }
@@ -109,6 +110,10 @@ private:
     void generateGeometry() {};
     void initializeBuffer() {};
     void smooth()           {};
+
+	void flipXAxis();
+	void flipYAxis();
+	void flipZAxis();
     
     float                   m_floodThreshold;
     float                   m_graphSigma;

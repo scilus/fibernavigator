@@ -52,6 +52,7 @@ public:
     virtual void   draw()=0;
     virtual void   clean()=0;
     virtual void   smooth()=0;
+	virtual void   flipAxis(AxisType i_axe)=0;
     virtual void   activateLIC()=0;
     virtual GLuint getGLuint()=0;
 

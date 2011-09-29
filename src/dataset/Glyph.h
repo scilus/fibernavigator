@@ -98,7 +98,8 @@ protected:
     // From DatasetInfo
     virtual void    activateLIC()      {};
     virtual void    clean()            {};
-    virtual void    smooth()           {};    
+	virtual void    flipAxis(AxisType i_axe){};
+    virtual void    smooth()           {};
     virtual void    generateGeometry() {};
     virtual GLuint  getGLuint()        { return 0; };
     virtual void    initializeBuffer() {};
