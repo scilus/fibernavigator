@@ -3212,7 +3212,29 @@ void Fibers::updateFibersFilters()
 
 void Fibers::flipAxis( AxisType i_axe)
 {
+	int i;
+	switch (i_axe){
+		case X_AXIS:
+			i =0;
+			break;
+		case Y_AXIS:
+			i=1;
+			break;
+		case Z_AXIS:
+			i=2;
+			break;
+		default:
+			return;
+	}
+
+
 	//TODO - This should flip the fiber mesh on the given axis
+	for (int i(0); i<m_pointArray.size();i+=3){
+		m_pointArray[i] = -m_pointArray[i];
+	}
+	m_pointArray.clear();
+	calculateLinePointers();
+	updateLinesShown();
 }
 
 void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
