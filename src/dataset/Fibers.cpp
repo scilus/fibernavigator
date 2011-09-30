@@ -3227,14 +3227,27 @@ void Fibers::flipAxis( AxisType i_axe)
 			return;
 	}
 
-
-	//TODO - This should flip the fiber mesh on the given axis
-	for (int i(0); i<m_pointArray.size();i+=3){
-		m_pointArray[i] = -m_pointArray[i];
+	//Computing mesh center for the given axis
+	int center;
+	float maxVal= -9999999;
+	float minVal = 9999999;
+	for (int j(i); j<m_pointArray.size();j+=3){
+		minVal = min(m_pointArray[j], minVal);
+		maxVal = max(m_pointArray[j], maxVal);
 	}
-	m_pointArray.clear();
-	calculateLinePointers();
-	updateLinesShown();
+	center = (minVal + maxVal)/2; 
+
+	//Translate mesh at origin, flip it and move it back;
+	for (i; i<m_pointArray.size();i+=3){
+		m_pointArray[i] = -(m_pointArray[i]-center) + center;
+	}
+
+
+	//Translate back to original position
+
+	glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
+
 }
 
 void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
