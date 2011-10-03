@@ -164,19 +164,19 @@ void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) ){
 void PropertiesWindow::OnFlipX( wxCommandEvent& WXUNUSED(event) )
 {
 	DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
-	info->flipAxis(AxisType::X_AXIS);
+	info->flipAxis(X_AXIS);
 }
 
 void PropertiesWindow::OnFlipY( wxCommandEvent& WXUNUSED(event) )
 {
 	DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
-	info->flipAxis(AxisType::Y_AXIS);
+	info->flipAxis(Y_AXIS);
 }
 
 void PropertiesWindow::OnFlipZ( wxCommandEvent& WXUNUSED(event) )
 {
 	DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
-	info->flipAxis(AxisType::Z_AXIS);
+	info->flipAxis(Z_AXIS);
 }
 
 
