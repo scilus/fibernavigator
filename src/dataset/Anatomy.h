@@ -103,8 +103,8 @@ private:
     void createOffset( const std::vector<float> &sourceDataset );
     double xxgauss( const double x, const double sigma );   
     
-    void dilateInternal( std::vector<bool> &workData, int curIndex );
-    void erodeInternal(  std::vector<bool> &workData, int curIndex );
+	void dilateInternal( std::vector<float> &dataset, std::vector<bool> &workData, int curIndex );
+    void erodeInternal(  std::vector<float> &dataset, std::vector<bool> &workData, int curIndex );
 
     void equalizeHistogram();
     

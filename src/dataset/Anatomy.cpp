@@ -18,6 +18,8 @@
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 
+static bool useEqualizedDataset(true);
+
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper ) 
 : DatasetInfo ( pDatasetHelper ),
   m_isSegmentOn( false ),  
@@ -93,10 +95,6 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
 
         m_floatDataset.resize( m_columns * m_frames * m_rows * 3, 0.0f );
 
-//         for(unsigned int i = 0; i < m_floatDataset.size(); ++i )
-//         {
-//             m_floatDataset[i] = 0;
-//         }
         equalizeHistogram();
     }
     else
@@ -130,7 +128,7 @@ std::vector< float >* Anatomy::getEqualizedDataset()
 
 GLuint Anatomy::getGLuint()
 {
-    if( ! m_GLuint )
+    if(0 == m_GLuint)
     {
         generateTexture();
     }
@@ -155,11 +153,6 @@ void Anatomy::setZero( const int sizeX,
     m_floatDataset.resize( datasetSize, 0.0f );
     m_equalizedDataset.clear();
     m_equalizedDataset.resize( datasetSize, 0.0f );
-
-    /*for( int i(0); i < datasetSize; ++i )
-    {
-        m_floatDataset[i] = 0.0f;
-    }*/
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -180,11 +173,6 @@ void Anatomy::setRGBZero( const int sizeX,
     m_equalizedDataset.clear();
     m_equalizedDataset.resize( datasetSize * m_bands, 0.0f );
 
-//     for ( int i(0); i < datasetSize * m_bands; ++i )
-//     {
-//         m_floatDataset[i] = 0.0f;
-//     }
-
     m_dataType = 2;
     m_type = RGB;
 }
@@ -202,6 +190,7 @@ void Anatomy::dilate()
 {
     int datasetSize(m_columns * m_rows * m_frames);
     std::vector<bool> tmp( datasetSize, false );
+	std::vector<bool> tmpEqualized(datasetSize, false);
     int curIndex;
 
     for( int c(1); c < m_columns - 1; ++c )
@@ -213,8 +202,12 @@ void Anatomy::dilate()
                 curIndex = c + r * m_columns + f * m_columns * m_rows;
                 if( m_floatDataset[curIndex] == 1.0 )
                 {
-                    dilateInternal( tmp, curIndex );
+                    dilateInternal( m_floatDataset, tmp, curIndex );
                 }
+				if (m_equalizedDataset[curIndex] == 1.0)
+				{
+					dilateInternal( m_equalizedDataset, tmpEqualized, curIndex);
+				}
             }
         }
     }
@@ -222,7 +215,13 @@ void Anatomy::dilate()
     for( int i(0); i < datasetSize; ++i )
     {
         if ( tmp[i] )
+		{
             m_floatDataset[i] = 1.0;
+		}
+		if (tmpEqualized[i])
+		{
+			m_equalizedDataset[i] = 1.0;
+		}
     }
 
     const GLuint* pTexId = &m_GLuint;
@@ -236,6 +235,7 @@ void Anatomy::erode()
 {
     int datasetSize = m_columns * m_rows * m_frames;
     std::vector<bool> tmp( datasetSize, false );
+    std::vector<bool> tmpEqualized( datasetSize, false );
     int curIndex;
 
     for( int c(1); c < m_columns - 1; ++c )
@@ -246,15 +246,27 @@ void Anatomy::erode()
             {
                 curIndex = c + r * m_columns + f * m_columns * m_rows;
                 if( m_floatDataset[curIndex] == 1.0 )
-                    erodeInternal( tmp, curIndex );
+                {
+                    erodeInternal(m_floatDataset, tmp, curIndex );
+                }
+                if( m_equalizedDataset[curIndex] == 1.0 )
+                {
+                    erodeInternal(m_equalizedDataset, tmpEqualized, curIndex );
+                }
             }
         }
     }
 
     for( int i(0); i < datasetSize; ++i )
     {
-        if ( !tmp[i] )
+        if( !tmp[i] )
+        {
             m_floatDataset[i] = 0.0;
+        }
+        if( !tmpEqualized[i] )
+        {
+            m_equalizedDataset[i] = 0.0;
+        }
     }
 
     const GLuint* pTexId = &m_GLuint;
@@ -1123,7 +1135,7 @@ double Anatomy::xxgauss( const double x, const double sigma )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::dilateInternal( std::vector< bool > &workData, int curIndex )
+void Anatomy::dilateInternal( std::vector<float> &dataset, std::vector<bool> &workData, int curIndex )
 {
     workData.at( curIndex - 1 )                              = true;
     workData.at( curIndex )                                  = true;
@@ -1148,26 +1160,30 @@ void Anatomy::dilateInternal( std::vector< bool > &workData, int curIndex )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
+void Anatomy::erodeInternal( std::vector<float> &dataset, std::vector<bool> &workData, int curIndex )
 {
-    float acc  = m_floatDataset[curIndex - 1] + m_floatDataset[curIndex] + m_floatDataset[curIndex + 1]
-    + m_floatDataset[curIndex - m_columns - 1] + m_floatDataset[curIndex - m_columns]
-    + m_floatDataset[curIndex - m_columns + 1] + m_floatDataset[curIndex + m_columns - 1]
-    + m_floatDataset[curIndex + m_columns] + m_floatDataset[curIndex + m_columns + 1]
-    + m_floatDataset[curIndex - m_columns * m_rows - 1] 
-    + m_floatDataset[curIndex - m_columns * m_rows]
-    + m_floatDataset[curIndex - m_columns * m_rows + 1] 
-    + m_floatDataset[curIndex + m_columns * m_rows - 1]
-    + m_floatDataset[curIndex + m_columns * m_rows] 
-    + m_floatDataset[curIndex + m_columns * m_rows + 1]
-    + m_floatDataset[curIndex - m_columns * m_rows - m_columns] 
-    + m_floatDataset[curIndex - m_columns * m_rows + m_columns] 
-    + m_floatDataset[curIndex + m_columns * m_rows - m_columns]
-    + m_floatDataset[curIndex + m_columns * m_rows + m_columns];
+    float acc  = dataset[curIndex - 1]
+	+ dataset[curIndex] + dataset[curIndex + 1]
+    + dataset[curIndex - m_columns - 1]
+	+ dataset[curIndex - m_columns]
+    + dataset[curIndex - m_columns + 1]
+	+ dataset[curIndex + m_columns - 1]
+    + dataset[curIndex + m_columns]
+	+ dataset[curIndex + m_columns + 1]
+    + dataset[curIndex - m_columns * m_rows - 1]
+    + dataset[curIndex - m_columns * m_rows]
+    + dataset[curIndex - m_columns * m_rows + 1]
+    + dataset[curIndex + m_columns * m_rows - 1]
+    + dataset[curIndex + m_columns * m_rows]
+    + dataset[curIndex + m_columns * m_rows + 1]
+    + dataset[curIndex - m_columns * m_rows - m_columns]
+    + dataset[curIndex - m_columns * m_rows + m_columns]
+    + dataset[curIndex + m_columns * m_rows - m_columns]
+    + dataset[curIndex + m_columns * m_rows + m_columns];
 
     if( acc == 19.0 )
     {
-        workData.at( curIndex ) = 1.0;
+        workData.at( curIndex ) = true;
     }
 }
 
@@ -1185,7 +1201,6 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 /************************************************************************/
 void Anatomy::equalizeHistogram()
 {
-    //TODO: Check format for gray scale value
     //TODO: Add support for RGB
     //TODO: Add background worker thread to boost loading time
     static const unsigned int GRAY_SCALE(256);
@@ -1201,106 +1216,94 @@ void Anatomy::equalizeHistogram()
         return;
     }
 
-//     for(unsigned int frame(0); frame < static_cast<unsigned int>(m_frames); ++frame)
-//     {
-        bool isCdfMinFound(false);
-        unsigned int threshold(GRAY_LEVEL_THRESHOLD);
-        unsigned int currentCdf(0);
-        unsigned int prevCdf(0);
-        unsigned int cdfMin(0);
-        unsigned int cdf[GRAY_SCALE]         = { 0 };
-        unsigned int pixelCount[GRAY_SCALE]  = { 0 };
-        float equalizedHistogram[GRAY_SCALE] = { 0 }; // Index is the original dataset gray value
+    bool isCdfMinFound(false);
+    unsigned int threshold(GRAY_LEVEL_THRESHOLD);
+    unsigned int currentCdf(0);
+    unsigned int prevCdf(0);
+    unsigned int cdfMin(0);
+    unsigned int cdf[GRAY_SCALE]         = { 0 };
+    unsigned int pixelCount[GRAY_SCALE]  = { 0 };
+    float equalizedHistogram[GRAY_SCALE] = { 0 }; // Index is the original dataset gray value
 
-        for(unsigned int i(0); i < size; ++i)
+    for(unsigned int i(0); i < size; ++i)
+    {
+        unsigned int pixelValue(static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1)));
+
+        if(pixelValue < GRAY_SCALE)
         {
-            unsigned int pixelValue(static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1)));
-
-            if(pixelValue >= GRAY_SCALE)
-            {
-                // log error?
-                return;
-            }
-
             pixelCount[pixelValue]++;
         }
+		else
+		{
+			//log error?
+		}
+    }
 
-// 		if(frame == m_frames / 2)
-// 		{
-            // Print the histogram on the console
-			unsigned int cdfCount(0);
-			std::cout << "Level | Nb pixels | CDF" << std::endl;
-			std::cout << "---------------------------" << std::endl;
-			std::cout << setfill(' ');
-			for(int i(0); i < GRAY_SCALE; ++i)
-			{
-				cdfCount += pixelCount[i];
-                cdf[i] = cdfCount;
-				cout << setw(5) << i << " | " << setw(9) << pixelCount[i] << " | " << setprecision(5) << static_cast<double>(cdfCount) / size << endl;
-			}
-//		}
+    // DEBUG: Print the histogram on the console
+	unsigned int cdfCount(0);
+// 	std::cout << "Level | Nb pixels | CDF" << std::endl;
+// 	std::cout << "---------------------------" << std::endl;
+// 	std::cout << setfill(' ');
+	for(int i(0); i < GRAY_SCALE; ++i)
+	{
+		cdfCount += pixelCount[i];
+        cdf[i] = cdfCount;
+//		cout << setw(5) << i << " | " << setw(9) << pixelCount[i] << " | " << setprecision(5) << static_cast<double>(cdfCount) / size << endl;
+	}
 
+    // Eliminate background noise
+    while(cdf[threshold] / static_cast<double>(size) < CDF_THRESHOLD)
+    {
+        threshold++;
+    }
 
-        // Eliminate background noise
-        while(cdf[threshold] / static_cast<double>(size) < CDF_THRESHOLD)
+    unsigned int nbPixelsEliminated(0);
+    for (unsigned int i(0); i < threshold; ++i)
+    {
+        nbPixelsEliminated += pixelCount[i];
+    }
+
+    // Calculate cdf and equalized histogram
+    for (unsigned int i(0); i < threshold; ++i)
+    {
+        equalizedHistogram[i] = 1.0f / (GRAY_SCALE - 1);
+    }
+    for(unsigned int i(threshold); i < GRAY_SCALE; ++i)
+    {
+        currentCdf = prevCdf + pixelCount[i];
+        
+        if(!isCdfMinFound && 0 != currentCdf)
         {
-            threshold++;
-        }
+            cdfMin = currentCdf;
+            isCdfMinFound = true;
 
-        unsigned int nbPixelsEliminated(0);
-        for (unsigned int i(0); i < threshold; ++i)
-        {
-            nbPixelsEliminated += pixelCount[i];
-        }
-
-        // Calculate cdf and equalized histogram
-        for (unsigned int i(0); i < threshold; ++i)
-        {
-            equalizedHistogram[i] = 1.0f / (GRAY_SCALE - 1);
-        }
-        for(unsigned int i(threshold); i < GRAY_SCALE; ++i)
-        {
-            currentCdf = prevCdf + pixelCount[i];
-            
-            if(!isCdfMinFound && 0 != currentCdf)
+            if(0 == size - nbPixelsEliminated - cdfMin)
             {
-                cdfMin = currentCdf;
-                isCdfMinFound = true;
-   
-                if(0 == size - nbPixelsEliminated - cdfMin)
-                {
-                    // Division by zero, cancel calculation
-                    // Log error
-                    return;
-                }
+                // Division by zero, cancel calculation
+                // Log error
+                return;
             }
-
-            // Calculate the lookup table for equalized values
-            if(isCdfMinFound)
-            {
-                // Since our dataset is normalized, we can strip the round and the * (L - 1)
-                float result = static_cast<double>(currentCdf - cdfMin) / (size - nbPixelsEliminated - cdfMin);
-                if (0 == result)
-                {
-                    result = 1.0f / (GRAY_SCALE - 1);
-                }
-                equalizedHistogram[i] = result;
-            }
-
-            prevCdf = currentCdf;
         }
 
-        // Calculate the equalized frame
-        for(unsigned int i(0); i < size; ++i)
+        // Calculate the lookup table for equalized values
+        if(isCdfMinFound)
         {
-            m_equalizedDataset[i] = equalizedHistogram[static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1))];
+            // Since our dataset is normalized, we can strip the round and the * (L - 1)
+            float result = static_cast<double>(currentCdf - cdfMin) / (size - nbPixelsEliminated - cdfMin);
+            equalizedHistogram[i] = result;
         }
-//    }
+
+        prevCdf = currentCdf;
+    }
+
+    // Calculate the equalized frame
+    for(unsigned int i(0); i < size; ++i)
+    {
+        m_equalizedDataset[i] = equalizedHistogram[static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1))];
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
-
-static bool useEqualizedDataset(false);
 
 void Anatomy::generateTexture()
 {
