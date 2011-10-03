@@ -3212,20 +3212,7 @@ void Fibers::updateFibersFilters()
 
 void Fibers::flipAxis( AxisType i_axe)
 {
-	int i;
-	switch (i_axe){
-		case X_AXIS:
-			i =0;
-			break;
-		case Y_AXIS:
-			i=1;
-			break;
-		case Z_AXIS:
-			i=2;
-			break;
-		default:
-			return;
-	}
+	int i = (int)i_axe;
 
 	//Computing mesh center for the given axis
 	int center;
@@ -3240,7 +3227,7 @@ void Fibers::flipAxis( AxisType i_axe)
 	//Translate mesh at origin, flip it and move it back;
 	float posOffset;
 	for (i; i<m_pointArray.size();i+=3){
-		posOffset = -maxVal - minVal + 2*center;//( -(maxVal-center) -(minVal-center) );
+		posOffset = -maxVal - minVal + 2*center;
 		m_pointArray[i] = -( m_pointArray[i]-center  + posOffset ) + center;
 		
 	}
