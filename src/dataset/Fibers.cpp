@@ -3212,13 +3212,25 @@ void Fibers::updateFibersFilters()
 
 void Fibers::flipAxis( AxisType i_axe)
 {
-	int i = (int)i_axe;
+	unsigned int i = 0;
+
+	switch (i_axe){
+		case X_AXIS:
+			i = 0;
+			break;
+		case Y_AXIS:
+			i = 1;
+		case Z_AXIS:
+			i = 2;
+		default:
+			return; //No axis specified - Cannot flip
+	}
 
 	//Computing mesh center for the given axis
 	int center;
 	float maxVal= -9999999;
 	float minVal = 9999999;
-	for (int j(i); j<m_pointArray.size();j+=3){
+	for (unsigned int j(i); j<m_pointArray.size();j+=3){
 		minVal = min(m_pointArray[j], minVal);
 		maxVal = max(m_pointArray[j], maxVal);
 	}
@@ -3234,7 +3246,8 @@ void Fibers::flipAxis( AxisType i_axe)
 
 	glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
     glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
-
+	
+	m_dh->updateAllSelectionObjects();
 }
 
 void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
