@@ -160,6 +160,10 @@ public:
     float m_xVoxel;
     float m_yVoxel;
     float m_zVoxel;
+    
+    float m_xOrigin;
+    float m_yOrigin;
+    float m_zOrigin;
 
     unsigned int m_countFibers;
 

@@ -173,6 +173,10 @@ bool Anatomy::loadNifti( wxString fileName )
             return false;
         }
     }
+    
+    m_dh->m_xOrigin = pImage->sto_xyz.m[0][3];
+    m_dh->m_yOrigin = pImage->sto_xyz.m[1][3];
+    m_dh->m_zOrigin = pImage->sto_xyz.m[2][3];
 
     m_dh->m_xVoxel = pImage->dx;
     m_dh->m_yVoxel = pImage->dy;
