@@ -18,14 +18,13 @@
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 
-static bool useEqualizedDataset(true);
-
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper ) 
 : DatasetInfo ( pDatasetHelper ),
   m_isSegmentOn( false ),  
   m_pRoi( NULL ),
   m_dataType( 2 ),
-  m_pTensorField( NULL )
+  m_pTensorField( NULL ),
+  m_useEqualizedDataset( false )
 {
     m_bands = 1;
 }
@@ -36,7 +35,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
                  m_isSegmentOn( false ),
                  m_pRoi( NULL ),
                  m_dataType( 2 ),
-                 m_pTensorField( NULL )
+                 m_pTensorField( NULL ),
+                 m_useEqualizedDataset( false )
 {
     m_columns       = m_dh->m_columns;
     m_frames        = m_dh->m_frames;
@@ -56,7 +56,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
   m_dataType( 2 ),
-  m_pTensorField( NULL )
+  m_pTensorField( NULL ),
+  m_useEqualizedDataset( false )
 {
     m_columns = m_dh->m_columns;
     m_frames  = m_dh->m_frames;
@@ -82,7 +83,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
   m_dataType( 2 ),
-  m_pTensorField( NULL )
+  m_pTensorField( NULL ),
+  m_useEqualizedDataset( false )
 {
     if(type == RGB)
     {
@@ -200,14 +202,10 @@ void Anatomy::dilate()
             for( int f(1); f < m_frames - 1; ++f )
             {
                 curIndex = c + r * m_columns + f * m_columns * m_rows;
-                if( m_floatDataset[curIndex] == 1.0 )
+                if( m_floatDataset[curIndex] == 1.0f )
                 {
-                    dilateInternal( m_floatDataset, tmp, curIndex );
+                    dilateInternal( tmp, curIndex );
                 }
-				if (m_equalizedDataset[curIndex] == 1.0)
-				{
-					dilateInternal( m_equalizedDataset, tmpEqualized, curIndex);
-				}
             }
         }
     }
@@ -216,12 +214,9 @@ void Anatomy::dilate()
     {
         if ( tmp[i] )
 		{
-            m_floatDataset[i] = 1.0;
-		}
-		if (tmpEqualized[i])
-		{
-			m_equalizedDataset[i] = 1.0;
-		}
+            m_floatDataset[i] = 1.0f;
+            m_equalizedDataset[i] = 1.0f;
+        }
     }
 
     const GLuint* pTexId = &m_GLuint;
@@ -245,13 +240,9 @@ void Anatomy::erode()
             for( int f(1); f < m_frames - 1; ++f )
             {
                 curIndex = c + r * m_columns + f * m_columns * m_rows;
-                if( m_floatDataset[curIndex] == 1.0 )
+                if( m_floatDataset[curIndex] == 1.0f )
                 {
-                    erodeInternal(m_floatDataset, tmp, curIndex );
-                }
-                if( m_equalizedDataset[curIndex] == 1.0 )
-                {
-                    erodeInternal(m_equalizedDataset, tmpEqualized, curIndex );
+                    erodeInternal(tmp, curIndex );
                 }
             }
         }
@@ -261,11 +252,8 @@ void Anatomy::erode()
     {
         if( !tmp[i] )
         {
-            m_floatDataset[i] = 0.0;
-        }
-        if( !tmpEqualized[i] )
-        {
-            m_equalizedDataset[i] = 0.0;
+            m_floatDataset[i] = 0.0f;
+            m_equalizedDataset[i] = 0.0f;
         }
     }
 
@@ -683,12 +671,12 @@ void Anatomy::saveNifti( wxString fileName )
 
 void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
 {
-    DatasetInfo::createPropertiesSizer(pParentWindow);  
-    
+    DatasetInfo::createPropertiesSizer(pParentWindow); 
+
     m_pBtnDilate = new wxButton(pParentWindow, wxID_ANY, wxT("Dilate"),wxDefaultPosition, wxSize(85,-1));
     m_pBtnErode  = new wxButton(pParentWindow, wxID_ANY, wxT("Erode"),wxDefaultPosition, wxSize(85,-1));
     
-    wxSizer *pSizer;
+	wxSizer *pSizer;
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );
     pSizer->Add( m_pBtnErode,  0, wxALIGN_CENTER );
@@ -710,16 +698,19 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
     pParentWindow->Connect( m_pBtnMinimize->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
     pParentWindow->Connect( m_pBtnCut->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
 
+	m_pEqualize      = new wxToggleButton( pParentWindow, wxID_ANY, wxT("Equalize"),		   wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewDistanceMap =   new wxButton( pParentWindow, wxID_ANY, wxT("New Distance Map"),   wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewIsoSurface  =   new wxButton( pParentWindow, wxID_ANY, wxT("New Iso Surface"),    wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewOffsetSurface = new wxButton( pParentWindow, wxID_ANY, wxT("New Offset Surface"), wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewVOI =           new wxButton( pParentWindow, wxID_ANY, wxT("New VOI"),            wxDefaultPosition, wxSize(140, -1) );
 
+	m_propertiesSizer->Add( m_pEqualize,			0, wxALIGN_CENTER );
     m_propertiesSizer->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER );
     m_propertiesSizer->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER );
     m_propertiesSizer->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( m_pBtnNewVOI,           0, wxALIGN_CENTER );
 
+	pParentWindow->Connect( m_pEqualize->GetId(),			 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED,  wxEventHandler(PropertiesWindow::OnEqualizeDataset) );
     pParentWindow->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewIsoSurface) );
     pParentWindow->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewDistanceMap) );
     pParentWindow->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewOffsetSurface) );
@@ -804,6 +795,7 @@ void Anatomy::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
     
+    m_pEqualize->Enable(    1 == m_bands );
     m_pBtnMinimize->Enable( m_dh->m_fibersLoaded );
     m_pBtnCut->Enable(      m_dh->getSelectionObjects().size() > 0 );
 
@@ -828,6 +820,19 @@ void Anatomy::updatePropertiesSizer()
         m_pTxtThresBox->Show();
     }
     
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+bool Anatomy::toggleEqualization()
+{
+    m_useEqualizedDataset = !m_useEqualizedDataset;
+
+    const GLuint* pTexId = &m_GLuint;
+    glDeleteTextures( 1, pTexId );
+    generateTexture();
+
+    return m_useEqualizedDataset;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1135,7 +1140,7 @@ double Anatomy::xxgauss( const double x, const double sigma )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::dilateInternal( std::vector<float> &dataset, std::vector<bool> &workData, int curIndex )
+void Anatomy::dilateInternal( std::vector<bool> &workData, int curIndex )
 {
     workData.at( curIndex - 1 )                              = true;
     workData.at( curIndex )                                  = true;
@@ -1160,26 +1165,26 @@ void Anatomy::dilateInternal( std::vector<float> &dataset, std::vector<bool> &wo
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::erodeInternal( std::vector<float> &dataset, std::vector<bool> &workData, int curIndex )
+void Anatomy::erodeInternal( std::vector<bool> &workData, int curIndex )
 {
-    float acc  = dataset[curIndex - 1]
-	+ dataset[curIndex] + dataset[curIndex + 1]
-    + dataset[curIndex - m_columns - 1]
-	+ dataset[curIndex - m_columns]
-    + dataset[curIndex - m_columns + 1]
-	+ dataset[curIndex + m_columns - 1]
-    + dataset[curIndex + m_columns]
-	+ dataset[curIndex + m_columns + 1]
-    + dataset[curIndex - m_columns * m_rows - 1]
-    + dataset[curIndex - m_columns * m_rows]
-    + dataset[curIndex - m_columns * m_rows + 1]
-    + dataset[curIndex + m_columns * m_rows - 1]
-    + dataset[curIndex + m_columns * m_rows]
-    + dataset[curIndex + m_columns * m_rows + 1]
-    + dataset[curIndex - m_columns * m_rows - m_columns]
-    + dataset[curIndex - m_columns * m_rows + m_columns]
-    + dataset[curIndex + m_columns * m_rows - m_columns]
-    + dataset[curIndex + m_columns * m_rows + m_columns];
+    float acc  = m_floatDataset[curIndex - 1]
+	+ m_floatDataset[curIndex] + m_floatDataset[curIndex + 1]
+    + m_floatDataset[curIndex - m_columns - 1]
+	+ m_floatDataset[curIndex - m_columns]
+    + m_floatDataset[curIndex - m_columns + 1]
+	+ m_floatDataset[curIndex + m_columns - 1]
+    + m_floatDataset[curIndex + m_columns]
+	+ m_floatDataset[curIndex + m_columns + 1]
+    + m_floatDataset[curIndex - m_columns * m_rows - 1]
+    + m_floatDataset[curIndex - m_columns * m_rows]
+    + m_floatDataset[curIndex - m_columns * m_rows + 1]
+    + m_floatDataset[curIndex + m_columns * m_rows - 1]
+    + m_floatDataset[curIndex + m_columns * m_rows]
+    + m_floatDataset[curIndex + m_columns * m_rows + 1]
+    + m_floatDataset[curIndex - m_columns * m_rows - m_columns]
+    + m_floatDataset[curIndex - m_columns * m_rows + m_columns]
+    + m_floatDataset[curIndex + m_columns * m_rows - m_columns]
+    + m_floatDataset[curIndex + m_columns * m_rows + m_columns];
 
     if( acc == 19.0 )
     {
@@ -1290,6 +1295,10 @@ void Anatomy::equalizeHistogram()
         {
             // Since our dataset is normalized, we can strip the round and the * (L - 1)
             float result = static_cast<double>(currentCdf - cdfMin) / (size - nbPixelsEliminated - cdfMin);
+            if(0 == result)
+            {
+                result = 1.0f / (GRAY_SCALE - 1);
+            }
             equalizedHistogram[i] = result;
         }
 
@@ -1321,11 +1330,11 @@ void Anatomy::generateTexture()
         case HEAD_BYTE:
         case HEAD_SHORT:
         case OVERLAY:
-            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_LUMINANCE, GL_FLOAT, useEqualizedDataset ? &m_equalizedDataset[0] : &m_floatDataset[0] );
+            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_LUMINANCE, GL_FLOAT, m_useEqualizedDataset ? &m_equalizedDataset[0] : &m_floatDataset[0] );
             break;
 
         case RGB:
-            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT, useEqualizedDataset ? &m_equalizedDataset[0] : &m_floatDataset[0] );
+            glTexImage3D( GL_TEXTURE_3D, 0, GL_RGBA, m_columns, m_rows, m_frames, 0, GL_RGB, GL_FLOAT, m_useEqualizedDataset ? &m_equalizedDataset[0] : &m_floatDataset[0] );
             break;
 
         case VECTORS:

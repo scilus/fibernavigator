@@ -40,6 +40,7 @@ public:
     void OnSliderIntensityThresholdMoved    ( wxCommandEvent& event );
     void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
 
+	void OnEqualizeDataset					( wxEvent& event );
     void OnDilateDataset                    ( wxCommandEvent& event );
     void OnErodeDataset                     ( wxCommandEvent& event );
     void OnMinimizeDataset                  ( wxCommandEvent& event );

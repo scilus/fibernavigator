@@ -76,6 +76,8 @@ public:
         m_isSegmentOn = !m_isSegmentOn; 
         m_pToggleSegment->SetValue(m_isSegmentOn); 
     }
+
+    bool toggleEqualization();
    
 public:
     SelectionObject *m_pRoi;
@@ -90,6 +92,7 @@ private:
     wxButton        *m_pBtnNewOffsetSurface;
     wxButton        *m_pBtnNewVOI;
     wxToggleButton  *m_pToggleSegment;
+	wxToggleButton  *m_pEqualize;
     wxRadioButton   *m_pRadioBtnFlood;
     wxRadioButton   *m_pRadioBtnBck;
     wxRadioButton   *m_pRadioBtnObj;
@@ -103,8 +106,8 @@ private:
     void createOffset( const std::vector<float> &sourceDataset );
     double xxgauss( const double x, const double sigma );   
     
-	void dilateInternal( std::vector<float> &dataset, std::vector<bool> &workData, int curIndex );
-    void erodeInternal(  std::vector<float> &dataset, std::vector<bool> &workData, int curIndex );
+    void dilateInternal( std::vector<bool> &workData, int curIndex );
+    void erodeInternal( std::vector<bool> &workData, int curIndex );
 
     void equalizeHistogram();
     
@@ -119,6 +122,7 @@ private:
     std::vector<float>      m_equalizedDataset; // Dataset having its histogram equalized
     int                     m_dataType;
     TensorField             *m_pTensorField;
+    bool                    m_useEqualizedDataset;
 };
 
 #endif /* ANATOMY_H_ */
