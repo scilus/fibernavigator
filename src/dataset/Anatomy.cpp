@@ -1200,18 +1200,19 @@ void Anatomy::erodeInternal( std::vector<bool> &workData, int curIndex )
 
 /************************************************************************/
 /* Formula:
-   h(i) = round[ (cdf(i) - cdfMin) / (M * N - cdfMin) * (L - 1) ]
-   where   cdf is the cumulative distribution function
-           cdfMin is the lowest cdf value other than 0
-           M is the number of rows
-           N is the number of columns
-           L is the total number of gray levels (typically 256)
+   h(i) =  (cdf(i) - cdfMin) / (R * C * F - n - cdfMin)
+   where   - cdf is the cumulative distribution function
+           - cdfMin is the lowest cdf value other than 0, with at least 45% 
+             pixels ignored and i >= 15
+           - R is the number of rows
+           - C is the number of columns
+           - F is the number of frames
+           - n is the number of pixels ignored
 */
 /************************************************************************/
 void Anatomy::equalizeHistogram()
 {
     //TODO: Add support for RGB
-    //TODO: Add background worker thread to boost loading time
     static const unsigned int GRAY_SCALE(256);
     static const unsigned int GRAY_LEVEL_THRESHOLD(15);
     static const double CDF_THRESHOLD(0.45);
