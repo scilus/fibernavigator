@@ -48,6 +48,7 @@ public:
     void draw();
     void clean();
     void smooth();
+    void flipAxis( AxisType i_axe ){};
     void activateLIC();
     std::vector<Vector> getSurfaceVoxelPositions();
 
@@ -71,9 +72,6 @@ public:
     bool save( wxString filename )const;
 
 protected:
-	//From DataSetInfo
-	void flipAxis(AxisType i_axe){};
-
     // The number of vertices which make up the isosurface.
     unsigned int m_nVertices;
 

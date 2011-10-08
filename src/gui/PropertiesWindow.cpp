@@ -132,27 +132,28 @@ void PropertiesWindow::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(e
     }
 }
 
-void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) ){
+void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) )
+{
 	if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
 	{
-		wxTextEntryDialog dialog(this, _T( "Please enter a new name" ) );
-		DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
+		wxTextEntryDialog dialog( this, _T( "Please enter a new name" ) );
+		DatasetInfo* pinfo = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
 		
-		dialog.SetValue( l_info->getName().BeforeFirst( '.' ) );
+		dialog.SetValue( pinfo->getName().BeforeFirst( '.' ) );
 
-		wxString ext = l_info->getName().AfterFirst( '.' );
+		wxString ext = pinfo->getName().AfterFirst( '.' );
 		
         if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
 		{
-			l_info->setName( dialog.GetValue() + wxT( "." ) + ext );
+			pinfo->setName( dialog.GetValue() + wxT( "." ) + ext );
 			
 			//Change the name on the widget in the GUI
 			long item = m_mainFrame->m_currentListItem;
-			m_mainFrame->m_pListCtrl->SetItem(item, 1, l_info->getName().BeforeFirst( '.' ) );
+			m_mainFrame->m_pListCtrl->SetItem(item, 1, pinfo->getName().BeforeFirst( '.' ) );
 			
 			DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
 			info->m_ptxtName->Clear();
-			*info->m_ptxtName << l_info->getName();
+			*info->m_ptxtName << pinfo->getName();
 		}
 	}
 
@@ -163,19 +164,19 @@ void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) ){
 
 void PropertiesWindow::OnFlipX( wxCommandEvent& WXUNUSED(event) )
 {
-	DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
+	DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem );
 	info->flipAxis(X_AXIS);
 }
 
 void PropertiesWindow::OnFlipY( wxCommandEvent& WXUNUSED(event) )
 {
-	DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
+	DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem );
 	info->flipAxis(Y_AXIS);
 }
 
 void PropertiesWindow::OnFlipZ( wxCommandEvent& WXUNUSED(event) )
 {
-	DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
+	DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem );
 	info->flipAxis(Z_AXIS);
 }
 

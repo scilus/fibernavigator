@@ -51,7 +51,7 @@ public:
     void dilate();
     void erode();
     void minimize();
-	void flipAxis(AxisType axe);
+	void flipAxis( AxisType axe );
     
     void draw(){};
     

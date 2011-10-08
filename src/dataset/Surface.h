@@ -25,6 +25,7 @@ public:
 
     void clean() {};
     void smooth();
+    void flipAxis( AxisType axe ){};
     void activateLIC();
     GLuint getCutTex() {return m_CutTex;};
 
@@ -38,9 +39,6 @@ public:
 
     bool save( wxString filename )const;
 
-protected:
-	//From DataSetInfo
-	void flipAxis(AxisType axe){};
 
 private:
     void generateTexture() {}
