@@ -3234,15 +3234,15 @@ void Fibers::flipAxis( AxisType i_axe )
 	float center;
 	float maxVal= -9999999;
 	float minVal = 9999999;
-	for ( unsigned int j(i); j < m_pointArray.size(); j+=3)
+	for ( unsigned int j(i); j < m_pointArray.size(); j += 3 )
     {
 		minVal = min( m_pointArray[j], minVal );
 		maxVal = max( m_pointArray[j], maxVal );
 	}
-	center = ( minVal + maxVal )/2; 
+	center = ( minVal + maxVal ) / 2; 
 
 	//Translate mesh at origin, flip it and move it back;
-	for ( i; i < m_pointArray.size(); i+=3)
+	for ( ; i < m_pointArray.size(); i += 3 )
     {
 		m_pointArray[i] = -( m_pointArray[i]-center ) + center;
 		
