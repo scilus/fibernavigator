@@ -35,6 +35,10 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_frames        ( 1    ),
     m_floatDataset  ( NULL ),
 
+    m_xOrigin    ( 0.0f ),
+    m_yOrigin    ( 0.0f ),
+    m_zOrigin    ( 0.0f ),
+
     m_xVoxel     ( 1.0f ),
     m_yVoxel     ( 1.0f ),
     m_zVoxel     ( 1.0f ),

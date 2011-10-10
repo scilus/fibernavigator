@@ -780,11 +780,11 @@ bool Fibers::loadMRtrix( const wxString &filename )
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_columns / 2 ) * m_dh->m_xVoxel;
+        m_pointArray[i] = m_pointArray[i] - m_dh->m_xOrigin;
         ++i;
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_rows / 2 ) * m_dh->m_yVoxel ;
+        m_pointArray[i] = m_pointArray[i] - m_dh->m_yOrigin;
         ++i;
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_frames / 2 ) * m_dh->m_zVoxel;
+        m_pointArray[i] = m_pointArray[i] - m_dh->m_zOrigin;
     }
 
     m_dh->printDebug( wxT( "End loading TCK file" ), 1 );
