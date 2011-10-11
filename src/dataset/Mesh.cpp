@@ -451,4 +451,9 @@ void Mesh::updatePropertiesSizer()
     m_ptoggleCutFrontSector->SetValue(!getShowFS());
     m_psliderThresholdIntensity->SetValue(m_psliderThresholdIntensity->GetMin());
     m_psliderThresholdIntensity->Enable(false);
+    
+    // Disabled for the moment, not implemented.
+    m_pBtnFlipX->Enable( false );
+    m_pBtnFlipY->Enable( false );
+    m_pBtnFlipZ->Enable( false );
 }
