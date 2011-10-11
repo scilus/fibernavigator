@@ -25,6 +25,7 @@ public:
 
     void clean() {};
     void smooth();
+    void flipAxis( AxisType axe ){};
     void activateLIC();
     GLuint getCutTex() {return m_CutTex;};
 
@@ -37,6 +38,8 @@ public:
     std::vector<Vector> getSurfaceVoxelPositions();
 
     bool save( wxString filename )const;
+
+
 private:
     void generateTexture() {}
     void generateGeometry();

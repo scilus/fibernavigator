@@ -899,6 +899,69 @@ void Anatomy::minimize()
     m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 }
 
+
+void Anatomy::flipAxis( AxisType axe ){
+
+    float tmp;
+	int curIndex, flipIndex;
+
+    int row(m_rows), col(m_columns), frames(m_frames);
+    
+    switch (axe)
+    {
+        case X_AXIS:
+            col /=2;
+            break;
+        case Y_AXIS:
+            row/=2;
+            break;
+        case Z_AXIS:
+            frames/=2;
+            break;
+	    default:
+            m_dh->printDebug(_T("Cannot flip axis. The given axis is undefined."), 2);
+            return;
+	}
+
+	for( int f(0); f < frames; ++f )
+    {
+        for( int r(0); r < row; ++r )
+        {
+            for( int c(0); c < col; ++c )
+            {
+                curIndex = (c + r * m_columns + f * m_columns * m_rows) * m_bands;
+
+				//Compute the index of the value that will be replaced by the one defined by our current index
+				switch (axe)
+                {
+				    case X_AXIS:
+					    flipIndex = ((m_columns - 1 - c) + r * m_columns + f * m_columns * m_rows) * m_bands;
+						break;
+					case Y_AXIS:
+						flipIndex = (c + (m_rows - 1 - r) * m_columns + f * m_columns * m_rows) * m_bands;
+						break;
+					case Z_AXIS:
+						flipIndex = (c + r * m_columns + (m_frames - 1 - f) * m_columns * m_rows) * m_bands;
+						break;
+					default:
+						break;
+				}
+
+                for ( int i(0); i < m_bands; ++i )
+                { 
+				    tmp = m_floatDataset[curIndex + i];
+                    m_floatDataset[curIndex + i] = m_floatDataset[flipIndex + i];
+                    m_floatDataset[flipIndex + i] = tmp;
+                }
+            }
+        }
+    }
+
+	const GLuint* pTexId = &m_GLuint;
+    glDeleteTextures( 1, pTexId );
+    generateTexture();
+}
+
 void Anatomy::dilate()
 {
     int datasetSize(m_columns * m_rows * m_frames);
@@ -1025,10 +1088,10 @@ TensorField* Anatomy::getTensorField()
 void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
 {
     DatasetInfo::createPropertiesSizer(pParentWindow);  
-    
+
     m_pBtnDilate = new wxButton(pParentWindow, wxID_ANY, wxT("Dilate"),wxDefaultPosition, wxSize(85,-1));
     m_pBtnErode  = new wxButton(pParentWindow, wxID_ANY, wxT("Erode"),wxDefaultPosition, wxSize(85,-1));
-    
+
     wxSizer *pSizer;
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );

@@ -737,5 +737,10 @@ void Surface::updatePropertiesSizer()
     m_psliderThresholdIntensity->Enable(false);
     m_psliderThresholdIntensity->SetValue(m_psliderThresholdIntensity->GetMin());
     m_ptoggleDrawPoints->SetValue(m_dh->m_pointMode);
+    
+    // Disabled for the moment, not implemented.
+    m_pBtnFlipX->Enable( false );
+    m_pBtnFlipY->Enable( false );
+    m_pBtnFlipZ->Enable( false );
 }
 

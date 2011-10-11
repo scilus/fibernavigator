@@ -132,6 +132,53 @@ void PropertiesWindow::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(e
     }
 }
 
+void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) )
+{
+    if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
+    {
+        wxTextEntryDialog dialog( this, _T( "Please enter a new name" ) );
+        DatasetInfo* pInfo = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
+
+        dialog.SetValue( pInfo->getName().BeforeFirst( '.' ) );
+
+        wxString ext = pInfo->getName().AfterFirst( '.' );
+
+        if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
+        {
+            pInfo->setName( dialog.GetValue() + wxT( "." ) + ext );
+
+            //Change the name on the widget in the GUI
+            long item = m_mainFrame->m_currentListItem;
+            m_mainFrame->m_pListCtrl->SetItem(item, 1, pInfo->getName().BeforeFirst( '.' ) );
+
+            DatasetInfo* info = ( (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem ) );
+            info->m_ptxtName->Clear();
+            *info->m_ptxtName << pInfo->getName();
+        }
+    }
+
+    m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnFlipX( wxCommandEvent& WXUNUSED(event) )
+{
+    DatasetInfo* pInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem );
+    pInfo->flipAxis(X_AXIS);
+}
+
+void PropertiesWindow::OnFlipY( wxCommandEvent& WXUNUSED(event) )
+{
+    DatasetInfo* pInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem );
+    pInfo->flipAxis(Y_AXIS);
+}
+
+void PropertiesWindow::OnFlipZ( wxCommandEvent& WXUNUSED(event) )
+{
+    DatasetInfo* pInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem );
+    pInfo->flipAxis(Z_AXIS);
+}
+
+
 void PropertiesWindow::OnDilateDataset( wxCommandEvent& WXUNUSED(event) )
 {
     if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
