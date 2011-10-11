@@ -923,7 +923,6 @@ void Anatomy::flipAxis( AxisType axe ){
             return;
 	}
 
-
 	for( int f(0); f < frames; ++f )
     {
         for( int r(0); r < row; ++r )
@@ -932,14 +931,14 @@ void Anatomy::flipAxis( AxisType axe ){
             {
                 curIndex = (c + r * m_columns + f * m_columns * m_rows) * m_bands;
 
-				//Compute the index of the value that will be replace by the one define by our current index
+				//Compute the index of the value that will be replaced by the one defined by our current index
 				switch (axe)
                 {
 				    case X_AXIS:
-					    flipIndex = ((m_columns - 1 -c) + r * m_columns + f * m_columns * m_rows) * m_bands;
+					    flipIndex = ((m_columns - 1 - c) + r * m_columns + f * m_columns * m_rows) * m_bands;
 						break;
 					case Y_AXIS:
-						flipIndex = (c + (m_rows - 1 -r) * m_columns + f * m_columns * m_rows) * m_bands;
+						flipIndex = (c + (m_rows - 1 - r) * m_columns + f * m_columns * m_rows) * m_bands;
 						break;
 					case Z_AXIS:
 						flipIndex = (c + r * m_columns + (m_frames - 1 - f) * m_columns * m_rows) * m_bands;
@@ -947,20 +946,20 @@ void Anatomy::flipAxis( AxisType axe ){
 					default:
 						break;
 				}
-                for ( int i(0); i < m_bands; ++i ){ 
-				    tmp = m_floatDataset[curIndex+i];
-                    m_floatDataset[curIndex+i] = m_floatDataset[flipIndex+i];
-                    m_floatDataset[flipIndex+i] = tmp;
+
+                for ( int i(0); i < m_bands; ++i )
+                { 
+				    tmp = m_floatDataset[curIndex + i];
+                    m_floatDataset[curIndex + i] = m_floatDataset[flipIndex + i];
+                    m_floatDataset[flipIndex + i] = tmp;
                 }
             }
         }
     }
 
-
 	const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
     generateTexture();
-
 }
 
 void Anatomy::dilate()

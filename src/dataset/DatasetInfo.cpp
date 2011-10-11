@@ -69,21 +69,21 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     parent->Connect(m_pbtnUp->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemUp));
     parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnDeleteListItem));
 
-	m_pBtnRename = new wxButton(parent, wxID_ANY, wxT("Rename"), wxDefaultPosition, wxSize(90,-1) );
-	m_propertiesSizer->Add( m_pBtnRename, 0, wxALIGN_CENTER );
-	parent->Connect( m_pBtnRename->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler ( PropertiesWindow::OnRename) );
+    m_pBtnRename = new wxButton(parent, wxID_ANY, wxT("Rename"), wxDefaultPosition, wxSize(90,-1) );
+    m_propertiesSizer->Add( m_pBtnRename, 0, wxALIGN_CENTER );
+    parent->Connect( m_pBtnRename->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler ( PropertiesWindow::OnRename) );
 
-	m_pBtnFlipX = new wxButton(parent, wxID_ANY, wxT("Flip x"), wxDefaultPosition, wxSize(60, -1) );
-	m_pBtnFlipY = new wxButton(parent, wxID_ANY, wxT("Flip y"), wxDefaultPosition, wxSize(60,-1) );
-	m_pBtnFlipZ = new wxButton(parent, wxID_ANY, wxT("Flip z"), wxDefaultPosition, wxSize(60,-1) );
-	l_sizer = new wxBoxSizer(wxHORIZONTAL);
-	l_sizer->Add( m_pBtnFlipX, 0, wxALIGN_CENTER );
-	l_sizer->Add( m_pBtnFlipY, 0, wxALIGN_CENTER );
-	l_sizer->Add( m_pBtnFlipZ, 0, wxALIGN_CENTER );
-	m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
-	parent->Connect(m_pBtnFlipX->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipX));
-	parent->Connect(m_pBtnFlipY->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipY));
-	parent->Connect(m_pBtnFlipZ->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipZ));
+    m_pBtnFlipX = new wxButton(parent, wxID_ANY, wxT("Flip x"), wxDefaultPosition, wxSize(60, -1) );
+    m_pBtnFlipY = new wxButton(parent, wxID_ANY, wxT("Flip y"), wxDefaultPosition, wxSize(60,-1) );
+    m_pBtnFlipZ = new wxButton(parent, wxID_ANY, wxT("Flip z"), wxDefaultPosition, wxSize(60,-1) );
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add( m_pBtnFlipX, 0, wxALIGN_CENTER );
+    l_sizer->Add( m_pBtnFlipY, 0, wxALIGN_CENTER );
+    l_sizer->Add( m_pBtnFlipZ, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    parent->Connect(m_pBtnFlipX->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipX));
+    parent->Connect(m_pBtnFlipY->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipY));
+    parent->Connect(m_pBtnFlipZ->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipZ));
 
     m_ptoggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(90,-1));
     m_ptoggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Interpolation"),wxDefaultPosition, wxSize(90,-1));

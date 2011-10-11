@@ -51,7 +51,7 @@ public:
     void dilate();
     void erode();
     void minimize();
-	void flipAxis( AxisType axe );
+    void flipAxis( AxisType axe );
     
     void draw(){};
     
@@ -110,10 +110,6 @@ private:
     void generateGeometry() {};
     void initializeBuffer() {};
     void smooth()           {};
-
-	void flipXAxis();
-	void flipYAxis();
-	void flipZAxis();
     
     float                   m_floodThreshold;
     float                   m_graphSigma;
