@@ -749,7 +749,10 @@ void Glyph::updatePropertiesSizer()
     m_ptoggleAxisFlipY->SetValue       (isAxisFlipped( Y_AXIS ));
     m_ptoggleAxisFlipZ->SetValue       (isAxisFlipped( Z_AXIS ));
     m_ptoggleColorWithPosition->SetValue(getColorWithPosition());
-
     
+    // Disabled for the moment, not implemented.
+    m_pBtnFlipX->Enable( false );
+    m_pBtnFlipY->Enable( false );
+    m_pBtnFlipZ->Enable( false );
 }
 

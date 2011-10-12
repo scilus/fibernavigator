@@ -466,6 +466,10 @@ void Tensors::updatePropertiesSizer()
     Glyph::updatePropertiesSizer();
 
     m_pbtnNormalize->SetValue(m_isNormalized);
-
+    
+    // Disabled for the moment, not implemented.
+    m_pBtnFlipX->Enable( false );
+    m_pBtnFlipY->Enable( false );
+    m_pBtnFlipZ->Enable( false );
 }
 

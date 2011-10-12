@@ -13,7 +13,6 @@
 #include <wx/textfile.h>
 #include <GL/glew.h>
 #include <cassert>
-#include <iomanip>
 
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
@@ -31,18 +30,18 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper )
 
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
                  std::vector< float >* pDataset)
-                 : DatasetInfo( pDatasetHelper ),
-                 m_isSegmentOn( false ),
-                 m_pRoi( NULL ),
-                 m_dataType( 2 ),
-                 m_pTensorField( NULL ),
-                 m_useEqualizedDataset( false )
+: DatasetInfo( pDatasetHelper ),
+  m_isSegmentOn( false ),
+  m_pRoi( NULL ),
+  m_dataType( 2 ),
+  m_pTensorField( NULL ),
+  m_useEqualizedDataset( false )
 {
     m_columns       = m_dh->m_columns;
     m_frames        = m_dh->m_frames;
     m_rows          = m_dh->m_rows;
     m_bands         = 1;
-    m_isLoaded      = true;   
+    m_isLoaded      = true;
     m_type          = HEAD_BYTE;
 
     createOffset( *pDataset );
@@ -141,8 +140,8 @@ GLuint Anatomy::getGLuint()
 //////////////////////////////////////////////////////////////////////////
 
 void Anatomy::setZero( const int sizeX, 
-                      const int sizeY, 
-                      const int sizeZ )
+                       const int sizeY, 
+                       const int sizeZ )
 {
     m_columns = sizeX;
     m_rows    = sizeY;
@@ -160,8 +159,8 @@ void Anatomy::setZero( const int sizeX,
 //////////////////////////////////////////////////////////////////////////
 
 void Anatomy::setRGBZero( const int sizeX, 
-                         const int sizeY, 
-                         const int sizeZ )
+                          const int sizeY, 
+                          const int sizeZ )
 {
     m_columns = sizeX;
     m_rows    = sizeY;
@@ -192,7 +191,6 @@ void Anatomy::dilate()
 {
     int datasetSize(m_columns * m_rows * m_frames);
     std::vector<bool> tmp( datasetSize, false );
-    std::vector<bool> tmpEqualized(datasetSize, false);
     int curIndex;
 
     for( int c(1); c < m_columns - 1; ++c )
@@ -230,7 +228,6 @@ void Anatomy::erode()
 {
     int datasetSize = m_columns * m_rows * m_frames;
     std::vector<bool> tmp( datasetSize, false );
-    std::vector<bool> tmpEqualized( datasetSize, false );
     int curIndex;
 
     for( int c(1); c < m_columns - 1; ++c )
@@ -282,7 +279,7 @@ void Anatomy::minimize()
         if( pFibers->isSelected( i ) )
         {
             for( int j = pFibers->getStartIndexForLine( i ); 
-                j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); )
+                     j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); )
             {
                 curX = wxMin( m_dh->m_columns - 1, wxMax( 0, (int) pFibers->getPointValue( j * 3 ) / m_dh->m_xVoxel ) );
                 curY = wxMin( m_dh->m_rows    - 1, wxMax( 0, (int) pFibers->getPointValue( j * 3 + 1) / m_dh->m_yVoxel ) );
@@ -318,6 +315,73 @@ void Anatomy::minimize()
     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
     m_dh->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)pNewAnatomy );
     m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Anatomy::flipAxis( AxisType axe )
+{
+    float tmp;
+    int curIndex;
+    int flipIndex;
+
+    int row(m_rows);
+    int col(m_columns);
+    int frames(m_frames);
+
+    switch (axe)
+    {
+        case X_AXIS:
+            col /= 2;
+            break;
+        case Y_AXIS:
+            row /= 2;
+            break;
+        case Z_AXIS:
+            frames /= 2;
+            break;
+        default:
+            m_dh->printDebug(_T("Cannot flip axis. The given axis is undefined."), 2);
+            return;
+    }
+
+    for( int f(0); f < frames; ++f )
+    {
+        for( int r(0); r < row; ++r )
+        {
+            for( int c(0); c < col; ++c )
+            {
+                curIndex = (c + r * m_columns + f * m_columns * m_rows) * m_bands;
+
+                //Compute the index of the value that will be replaced by the one defined by our current index
+                switch (axe)
+                {
+                    case X_AXIS:
+                        flipIndex = ((m_columns - 1 - c) + r * m_columns + f * m_columns * m_rows) * m_bands;
+                        break;
+                    case Y_AXIS:
+                        flipIndex = (c + (m_rows - 1 - r) * m_columns + f * m_columns * m_rows) * m_bands;
+                        break;
+                    case Z_AXIS:
+                        flipIndex = (c + r * m_columns + (m_frames - 1 - f) * m_columns * m_rows) * m_bands;
+                        break;
+                    default:
+                        break;
+                }
+
+                for ( int i(0); i < m_bands; ++i )
+                { 
+                    tmp = m_floatDataset[curIndex + i];
+                    m_floatDataset[curIndex + i] = m_floatDataset[flipIndex + i];
+                    m_floatDataset[flipIndex + i] = tmp;
+                }
+            }
+        }
+    }
+
+    const GLuint* pTexId = &m_GLuint;
+    glDeleteTextures( 1, pTexId );
+    generateTexture();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -521,7 +585,7 @@ bool Anatomy::loadNifti( wxString fileName )
                 if (m_floatDataset[i] > dataMax)
                 {
                     dataMax = m_floatDataset[i];
-                }   
+                }
             }
 
             for( int i(0); i < datasetSize; ++i )
@@ -675,11 +739,11 @@ void Anatomy::saveNifti( wxString fileName )
 
 void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
 {
-    DatasetInfo::createPropertiesSizer(pParentWindow); 
+    DatasetInfo::createPropertiesSizer(pParentWindow);
 
     m_pBtnDilate = new wxButton(pParentWindow, wxID_ANY, wxT("Dilate"),wxDefaultPosition, wxSize(85,-1));
     m_pBtnErode  = new wxButton(pParentWindow, wxID_ANY, wxT("Erode"),wxDefaultPosition, wxSize(85,-1));
-    
+
     wxSizer *pSizer;
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );
@@ -719,7 +783,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
     pParentWindow->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewDistanceMap) );
     pParentWindow->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewOffsetSurface) );
     pParentWindow->Connect( m_pBtnNewVOI->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewVoiFromOverlay) );
-    
+
     m_pToggleSegment = new wxToggleButton( pParentWindow, wxID_ANY,wxT("Floodfill"), wxDefaultPosition, wxSize(140, -1) );
 
     pSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -1144,7 +1208,7 @@ double Anatomy::xxgauss( const double x, const double sigma )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::dilateInternal( std::vector<bool> &workData, int curIndex )
+void Anatomy::dilateInternal( std::vector< bool > &workData, int curIndex )
 {
     workData.at( curIndex - 1 )                              = true;
     workData.at( curIndex )                                  = true;
@@ -1169,7 +1233,7 @@ void Anatomy::dilateInternal( std::vector<bool> &workData, int curIndex )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::erodeInternal( std::vector<bool> &workData, int curIndex )
+void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 {
     float acc  = m_floatDataset[curIndex - 1]
     + m_floatDataset[curIndex] + m_floatDataset[curIndex + 1]
@@ -1218,7 +1282,7 @@ void Anatomy::equalizeHistogram()
     static const double CDF_THRESHOLD(0.45);
 
     unsigned int size(m_frames * m_rows * m_columns);
-    
+
     m_equalizedDataset.resize(m_floatDataset.size(), 0.0f);
 
     if(0 == size || 1 != m_bands)
