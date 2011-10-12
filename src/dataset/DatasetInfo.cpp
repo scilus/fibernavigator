@@ -81,7 +81,8 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     m_psliderThresholdIntensity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderThresholdIntensity->SetValue((int)(getThreshold()*100));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Intensity "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+	m_pIntensityText = new wxStaticText(parent, wxID_ANY, wxT("Intensity "), wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
+    l_sizer->Add(m_pIntensityText, 0, wxALIGN_CENTER);
     l_sizer->Add(m_psliderThresholdIntensity,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderThresholdIntensity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderIntensityThresholdMoved));
@@ -89,7 +90,8 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     m_psliderOpacity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderOpacity->SetValue((int)(getAlpha()*100));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Opacity "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+	m_pOpacityText = new wxStaticText(parent, wxID_ANY, wxT("Opacity "), wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
+    l_sizer->Add(m_pOpacityText, 0, wxALIGN_CENTER);
     l_sizer->Add(m_psliderOpacity,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderOpacity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderOpacityThresholdMoved));

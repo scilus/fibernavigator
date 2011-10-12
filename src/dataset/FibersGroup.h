@@ -24,31 +24,55 @@ using namespace std;
  * It is useful to load several sets of fibers and can be used to
  * apply a characteristic to all set of fibers that are in the group.
  */
-class FibersGroup : public DatasetInfo
+class FibersGroup : public DatasetInfo, public wxTreeItemData
 {
 public:
     FibersGroup( DatasetHelper *pDatasetHelper );
     // TODO copy constructors: should they be allowed?
     virtual ~FibersGroup();
     
+	void	addFibersSet(Fibers* pFibers);
+	Fibers* getFibersSet(int num);
+
     void    updateGroupFilters();
 	
+	// Empty derived methods
+	bool    load( wxString  filename ) { return false; };
+	void    draw()			   {};
+	void    smooth()           {};
+    void    activateLIC()      {};
+    void    clean()            {};
+    void    drawVectors()      {};
+    void    generateTexture()  {};
+    void    generateGeometry() {};
+	void    initializeBuffer() {};
+	
+	GLuint  getGLuint( )
+    {
+        return 0;
+    };
+
 	virtual void createPropertiesSizer( PropertiesWindow *pParent );
 	virtual void updatePropertiesSizer();
 
 private:    
     // Variables
 	std::vector<Fibers*> m_fibersSets;
-    bool				 m_isInitialized;
     
     // GUI members
-    wxButton       *m_pGeneratesFibersDensityVolume;
+	wxToggleButton *m_ptoggleIntensity;
+	wxToggleButton *m_ptoggleOpacity;
+	wxToggleButton *m_ptoggleMinMaxLength;
+	wxToggleButton *m_ptoggleSubsampling;
+	wxToggleButton *m_ptoggleColorMode;
+    wxToggleButton *m_pToggleLocalColoring;
+    wxToggleButton *m_pToggleNormalColoring;
+
+	wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
-    wxToggleButton *m_pToggleLocalColoring;
-    wxToggleButton *m_pToggleNormalColoring;
-    wxRadioButton  *m_pRadioNormalColoring;
+	wxRadioButton  *m_pRadioNormalColoring;
     wxRadioButton  *m_pRadioDistanceAnchoring;
     wxRadioButton  *m_pRadioMinDistanceAnchoring;
     wxRadioButton  *m_pRadioCurvature;

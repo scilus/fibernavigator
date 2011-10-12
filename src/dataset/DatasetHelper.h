@@ -25,7 +25,6 @@
 
 #include "DatasetInfo.h"
 
-
 #include "../gui/SelectionObject.h"
 
 #include "../gui/MainFrame.h"
@@ -45,6 +44,7 @@ class ShaderHelper;
 class SplinePoint;
 class SelectionObject;
 class Fibers;
+class FibersGroup;
 class TensorField;
 class Surface;
 
@@ -111,7 +111,8 @@ public:
 
     void doMatrixManipulation();
 
-    bool getFiberDataset  ( Fibers*  &i_fiber );
+	bool getFibersGroupDataset( FibersGroup* &i_fiberGroup );
+	bool getFiberDataset  ( Fibers*  &i_fiber );
     bool getSurfaceDataset( Surface* &i_surface );
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
@@ -167,7 +168,8 @@ public:
     bool m_scnFileLoaded;
     bool m_anatomyLoaded;
     bool m_meshLoaded;
-    bool m_fibersLoaded;
+    bool m_fibersGroupLoaded;
+	bool m_fibersLoaded;
     bool m_vectorsLoaded;
     bool m_tensorsFieldLoaded;
     bool m_tensorsLoaded;

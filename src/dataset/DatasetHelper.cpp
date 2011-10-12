@@ -12,6 +12,8 @@
 #include "Anatomy.h"
 #include "ODFs.h"
 #include "Fibers.h"
+#include "FibersGroup.h"
+
 #include "KdTree.h"
 #include "../main.h"
 #include "Mesh.h"
@@ -42,6 +44,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_scnFileLoaded      ( false ),
     m_anatomyLoaded      ( false ),
+	m_fibersGroupLoaded	 ( false ),
     m_fibersLoaded       ( false ),
     m_vectorsLoaded      ( false ),
     m_tensorsFieldLoaded ( false ),
@@ -353,17 +356,27 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
             m_lastError = wxT( "no anatomy file loaded" );
             return false;
         }
-        if( m_fibersLoaded )
+        /*if( m_fibersLoaded )
         {
             m_lastError = wxT( "fibers already loaded" );
             return false;
-        }
+        }*/
 
-        Fibers* l_fibers = new Fibers( this );
+		Fibers* l_fibers = new Fibers( this );
 
         if( l_fibers->load( i_fileName ) )
         {
-            m_fibersLoaded = true;
+			if( m_fibersGroupLoaded == false )
+			{
+				FibersGroup* l_fibersGroup = new FibersGroup( this );
+				l_fibersGroup->setName( wxT( "Fibers Group" ) );
+				l_fibersGroup->setShow(false);
+				finishLoading( l_fibersGroup );
+
+				m_fibersGroupLoaded = true;
+			}
+
+			//m_fibersLoaded = true;
 
             std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
             for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
@@ -385,7 +398,17 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
             l_fibers->setShowFS   ( i_showFS );
             l_fibers->setuseTex   ( i_useTex );            
             finishLoading         ( l_fibers );
-            
+
+			if( m_fibersGroupLoaded )
+			{
+				FibersGroup* pFibersGroup;
+				getFibersGroupDataset(pFibersGroup);
+
+				if( pFibersGroup != NULL )
+				{
+					pFibersGroup->addFibersSet( l_fibers );
+				}
+			}            
             return true;
         }
         return false;
@@ -423,7 +446,7 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
     else
         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
 
-    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), -1 );
     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
     m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
@@ -1296,6 +1319,22 @@ bool DatasetHelper::getFiberDataset( Fibers* &io_f )
         if( l_datasetInfo->getType() == FIBERS )
         {
             io_f = (Fibers*)m_mainFrame->m_pListCtrl->GetItemData( i );
+            return true;
+        }
+    }
+    return false;
+}
+
+bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
+{
+    io_fg = NULL;
+
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    {
+        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
+        if( l_datasetInfo->getType() == FIBERSGROUP )
+        {
+            io_fg = (FibersGroup*)m_mainFrame->m_pListCtrl->GetItemData( i );
             return true;
         }
     }
