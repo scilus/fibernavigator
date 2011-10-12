@@ -374,6 +374,9 @@ void Anatomy::flipAxis( AxisType axe )
                     tmp = m_floatDataset[curIndex + i];
                     m_floatDataset[curIndex + i] = m_floatDataset[flipIndex + i];
                     m_floatDataset[flipIndex + i] = tmp;
+                    tmp = m_equalizedDataset[curIndex + i];
+                    m_equalizedDataset[curIndex + i] = m_equalizedDataset[flipIndex + i];
+                    m_equalizedDataset[flipIndex + i] = tmp;
                 }
             }
         }
