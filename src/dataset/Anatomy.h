@@ -92,7 +92,7 @@ private:
     wxButton        *m_pBtnNewOffsetSurface;
     wxButton        *m_pBtnNewVOI;
     wxToggleButton  *m_pToggleSegment;
-	wxToggleButton  *m_pEqualize;
+    wxToggleButton  *m_pEqualize;
     wxRadioButton   *m_pRadioBtnFlood;
     wxRadioButton   *m_pRadioBtnBck;
     wxRadioButton   *m_pRadioBtnObj;

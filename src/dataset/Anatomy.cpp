@@ -192,7 +192,7 @@ void Anatomy::dilate()
 {
     int datasetSize(m_columns * m_rows * m_frames);
     std::vector<bool> tmp( datasetSize, false );
-	std::vector<bool> tmpEqualized(datasetSize, false);
+    std::vector<bool> tmpEqualized(datasetSize, false);
     int curIndex;
 
     for( int c(1); c < m_columns - 1; ++c )
@@ -213,7 +213,7 @@ void Anatomy::dilate()
     for( int i(0); i < datasetSize; ++i )
     {
         if ( tmp[i] )
-		{
+        {
             m_floatDataset[i] = 1.0f;
             m_equalizedDataset[i] = 1.0f;
         }
@@ -680,7 +680,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
     m_pBtnDilate = new wxButton(pParentWindow, wxID_ANY, wxT("Dilate"),wxDefaultPosition, wxSize(85,-1));
     m_pBtnErode  = new wxButton(pParentWindow, wxID_ANY, wxT("Erode"),wxDefaultPosition, wxSize(85,-1));
     
-	wxSizer *pSizer;
+    wxSizer *pSizer;
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );
     pSizer->Add( m_pBtnErode,  0, wxALIGN_CENTER );
@@ -702,19 +702,19 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
     pParentWindow->Connect( m_pBtnMinimize->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
     pParentWindow->Connect( m_pBtnCut->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
 
-	m_pEqualize      = new wxToggleButton( pParentWindow, wxID_ANY, wxT("Equalize"),		   wxDefaultPosition, wxSize(140, -1) );
+    m_pEqualize      = new wxToggleButton( pParentWindow, wxID_ANY, wxT("Equalize"),           wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewDistanceMap =   new wxButton( pParentWindow, wxID_ANY, wxT("New Distance Map"),   wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewIsoSurface  =   new wxButton( pParentWindow, wxID_ANY, wxT("New Iso Surface"),    wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewOffsetSurface = new wxButton( pParentWindow, wxID_ANY, wxT("New Offset Surface"), wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewVOI =           new wxButton( pParentWindow, wxID_ANY, wxT("New VOI"),            wxDefaultPosition, wxSize(140, -1) );
 
-	m_propertiesSizer->Add( m_pEqualize,			0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( m_pEqualize,            0, wxALIGN_CENTER );
     m_propertiesSizer->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER );
     m_propertiesSizer->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER );
     m_propertiesSizer->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( m_pBtnNewVOI,           0, wxALIGN_CENTER );
 
-	pParentWindow->Connect( m_pEqualize->GetId(),			 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED,  wxEventHandler(PropertiesWindow::OnEqualizeDataset) );
+    pParentWindow->Connect( m_pEqualize->GetId(),             wxEVT_COMMAND_TOGGLEBUTTON_CLICKED,  wxEventHandler(PropertiesWindow::OnEqualizeDataset) );
     pParentWindow->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewIsoSurface) );
     pParentWindow->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewDistanceMap) );
     pParentWindow->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewOffsetSurface) );
@@ -1172,13 +1172,13 @@ void Anatomy::dilateInternal( std::vector<bool> &workData, int curIndex )
 void Anatomy::erodeInternal( std::vector<bool> &workData, int curIndex )
 {
     float acc  = m_floatDataset[curIndex - 1]
-	+ m_floatDataset[curIndex] + m_floatDataset[curIndex + 1]
+    + m_floatDataset[curIndex] + m_floatDataset[curIndex + 1]
     + m_floatDataset[curIndex - m_columns - 1]
-	+ m_floatDataset[curIndex - m_columns]
+    + m_floatDataset[curIndex - m_columns]
     + m_floatDataset[curIndex - m_columns + 1]
-	+ m_floatDataset[curIndex + m_columns - 1]
+    + m_floatDataset[curIndex + m_columns - 1]
     + m_floatDataset[curIndex + m_columns]
-	+ m_floatDataset[curIndex + m_columns + 1]
+    + m_floatDataset[curIndex + m_columns + 1]
     + m_floatDataset[curIndex - m_columns * m_rows - 1]
     + m_floatDataset[curIndex - m_columns * m_rows]
     + m_floatDataset[curIndex - m_columns * m_rows + 1]
@@ -1243,23 +1243,18 @@ void Anatomy::equalizeHistogram()
         {
             pixelCount[pixelValue]++;
         }
-		else
-		{
-			//log error?
-		}
+        else
+        {
+            //log error?
+        }
     }
 
-    // DEBUG: Print the histogram on the console
-	unsigned int cdfCount(0);
-// 	std::cout << "Level | Nb pixels | CDF" << std::endl;
-// 	std::cout << "---------------------------" << std::endl;
-// 	std::cout << setfill(' ');
-	for(int i(0); i < GRAY_SCALE; ++i)
-	{
-		cdfCount += pixelCount[i];
+    unsigned int cdfCount(0);
+    for(int i(0); i < GRAY_SCALE; ++i)
+    {
+        cdfCount += pixelCount[i];
         cdf[i] = cdfCount;
-//		cout << setw(5) << i << " | " << setw(9) << pixelCount[i] << " | " << setprecision(5) << static_cast<double>(cdfCount) / size << endl;
-	}
+    }
 
     // Eliminate background noise
     while(cdf[threshold] / static_cast<double>(size) < CDF_THRESHOLD)
@@ -1300,10 +1295,6 @@ void Anatomy::equalizeHistogram()
         {
             // Since our dataset is normalized, we can strip the round and the * (L - 1)
             float result = static_cast<double>(currentCdf - cdfMin) / (size - nbPixelsEliminated - cdfMin);
-            if(0 == result)
-            {
-                result = 1.0f / (GRAY_SCALE - 1);
-            }
             equalizedHistogram[i] = result;
         }
 
