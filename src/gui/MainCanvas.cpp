@@ -62,7 +62,8 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
     m_orthoModX = 0;
     m_orthoModY = 0;
     m_hitPts =Vector(0,0,0);
-    m_isRulerHit = false;
+	m_isRulerHit = false;
+	m_isDrawerHit = false;
     m_isSlizesLocked = false;
     m_isSceneLocked = false;
 }
@@ -189,22 +190,30 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 m_mousePt.s.X = clickX;
                 m_mousePt.s.Y = clickY;
                 
-                if ( !m_pDatasetHelper->m_isDragging ) // Not Dragging
-                {
-                    m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
-                    m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
-                    m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
-                }
-                else if(!m_isSceneLocked)
-                {                    
-                    Quat4fT ThisQuat;
-                    m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
-                    Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
-                    Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                    Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+				if (m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					m_hr = pick(event.GetPosition(), true);
+					drawOnAnatomy();
 				}
-                updateView();
-                Refresh( false );
+				else
+				{
+					if ( !m_pDatasetHelper->m_isDragging ) // Not Dragging
+					{
+						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
+						m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
+						m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
+					}
+					else if(!m_isSceneLocked)
+					{                    
+						Quat4fT ThisQuat;
+						m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
+						Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
+						Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
+						Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+					}
+				}
+				updateView();
+				Refresh( false );
             }
             else
             {
@@ -224,19 +233,15 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                         if (l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
                         {
                             m_pDatasetHelper->m_isSegmentActive = true;
-                            m_hr = pick(event.GetPosition(), true);
-                            segment();                        
+                            m_hr = pick(event.GetPosition(), false);
+                            segment();
                             l_info->toggleSegment();                        
                         }
-                    }                    
+                    }
                     else if (m_pDatasetHelper->m_isRulerToolActive)
-                    {                        
+                    {
                         m_hr = pick(event.GetPosition(), true);
                     }
-					else if (m_pDatasetHelper->m_isDrawerToolActive)
-					{                        
-						//m_hr = pick(event.GetPosition(), true);
-					}
                     /*else if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isSelectBckActive && m_pDatasetHelper->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectObj-GraphCut
                     {
                         m_hr = pick(event.GetPosition(), true);
@@ -432,7 +437,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                                 case SAGITTAL:
                                     n.x = 1.0;
                                     break;
-                            }                     
+                            }
                             
                             float delta = wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),10),-10);
                             float mult = wxMin( m_pDatasetHelper->m_xVoxel, wxMin( m_pDatasetHelper->m_yVoxel, m_pDatasetHelper->m_zVoxel ) );
@@ -554,7 +559,7 @@ float MainCanvas::getAxisParallelMovement( int x1, int y1, int x2, int y2, Vecto
     return bb / nb;
 }
 
-hitResult MainCanvas::pick( wxPoint click, bool isRuler)
+hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
 {
     //glPushMatrix();
 
@@ -610,9 +615,14 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
             {
                 m_hitPts = bb->hitCoordinate(ray,CORONAL);
-                m_isRulerHit = isRuler;
+                m_isRulerHit = isRulerOrDrawer;
                 m_pDatasetHelper->m_isSegmentActive = false;
             }
+			else if (m_pDatasetHelper->m_isDrawerToolActive)
+			{
+				m_hitPts = bb->hitCoordinate(ray,CORONAL);
+				m_isDrawerHit = isRulerOrDrawer;
+			}
         }
         bb->setSizeZ( zSize );
         bb->setCenterZ( zPos );
@@ -632,9 +642,14 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
                 if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
                 {
                     m_hitPts = bb->hitCoordinate(ray,AXIAL);
-                    m_isRulerHit = isRuler;
+                    m_isRulerHit = isRulerOrDrawer;
                     m_pDatasetHelper->m_isSegmentActive = false;
                 }
+				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					m_hitPts = bb->hitCoordinate(ray,AXIAL);
+					m_isDrawerHit = isRulerOrDrawer;
+				}
             }            
         }
         bb->setSizeY( ySize );
@@ -652,11 +667,17 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             {
                 picked = SAGITTAL;
                 tpicked = hr.tmin;
-                if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive){
+                if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
+				{
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
-                    m_isRulerHit = isRuler;
+                    m_isRulerHit = isRulerOrDrawer;
                     m_pDatasetHelper->m_isSegmentActive = false;
-                }                
+                }
+				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
+					m_isDrawerHit = isRulerOrDrawer;
+				}
             }
         }
     }
@@ -752,6 +773,19 @@ void MainCanvas::render()
     {
         case MAIN_VIEW:
         {
+			/*if (m_pDatasetHelper->m_isRulerToolActive)
+			{
+				SetCursor( wxCursor( wxCURSOR_CROSS ) );
+			}
+			else if (m_pDatasetHelper->m_isDrawerToolActive)
+			{
+				SetCursor( wxCursor( wxCURSOR_PENCIL ) );
+			}
+			else
+			{
+				SetCursor( wxCursor( wxCURSOR_ARROW ) );
+			}*/
+
             if ( m_pDatasetHelper->m_scheduledScreenshot )
             {
                 int size = 0;        
@@ -829,22 +863,12 @@ void MainCanvas::render()
                     }
                     m_isRulerHit = false;
                 }
-				/*else if ( m_pDatasetHelper->m_isDrawerToolActive && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
+				else if ( m_pDatasetHelper->m_isDrawerToolActive && m_isDrawerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
 				{
-					if (m_pDatasetHelper->m_rulerPts.size()>0 )
-					{
-						Vector lastPts = m_pDatasetHelper->m_rulerPts.back();
-						if( lastPts != m_hitPts)
-						{
-							m_pDatasetHelper->m_rulerPts.push_back(m_hitPts);                            
-						}
-					} 
-					else 
-					{
-						m_pDatasetHelper->m_rulerPts.push_back(m_hitPts);
-					}
-					m_isRulerHit = false;
-				}*/
+					//TODO
+
+					m_isDrawerHit = false;
+				}
 
                 //renderTestRay();
                 if (m_pDatasetHelper->m_isShowAxes)
@@ -857,8 +881,8 @@ void MainCanvas::render()
                 }
 				else if (m_pDatasetHelper->m_isDrawerToolActive)
 				{
-					//TODO
-					renderDrawerDisplay();
+					//TODO, may be useful later
+					//renderDrawerDisplay();
 				}
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
@@ -935,32 +959,6 @@ void::MainCanvas::renderRulerDisplay()
         }
     }
     glLineWidth (1);
-}
-
-void::MainCanvas::renderDrawerDisplay()
-{
-	/*glColor3f( 0.95f, 0.6f, 0.0f );
-	glLineWidth (1);
-	float sphereSize = 0.35f;
-	if (m_pDatasetHelper->m_rulerPts.size() > 0){        
-		Vector pts;
-		m_pDatasetHelper->m_rulerFullLength = 0;
-		
-		glBegin (GL_TRIANGLE_STRIP);
-		for (unsigned int i=0; i < m_pDatasetHelper->m_rulerPts.size();i++)
-		{
-			if (i== m_pDatasetHelper->m_rulerPts.size()-2)
-			{
-				sphereSize = 0.45f;
-			}
-			pts = m_pDatasetHelper->m_rulerPts[i];
-
-			glVertex3f (pts.x, pts.y, pts.z);
-
-			//m_pDatasetHelper->m_theScene->drawSphere( pts.x, pts.y, pts.z, sphereSize);
-		}
-		glEnd ();
-	}*/
 }
 
 void MainCanvas::renderAxes()
@@ -1189,6 +1187,59 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 {
     float value = (*vect)[i+(j*m_pDatasetHelper->m_columns)+(k*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_columns)];
     return value;
+}
+
+void MainCanvas::drawOnAnatomy() 
+{
+	/*//If this is the first time the user uses this tool, create the Anatomy
+	if(m_pDatasetHelper->m_drawAnatomy == NULL)
+	{
+	m_pDatasetHelper->m_drawAnatomy = new Anatomy( m_pDatasetHelper );
+	m_pDatasetHelper->m_drawAnatomy->setZero( m_pDatasetHelper->m_columns, m_pDatasetHelper->m_rows, m_pDatasetHelper->m_frames );
+	m_pDatasetHelper->m_drawAnatomy->setDataType( 16 );
+	m_pDatasetHelper->m_drawAnatomy->setType( OVERLAY );
+	m_pDatasetHelper->m_drawAnatomy->setName( wxT(" (paintings)" ) );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 1, m_drawAnatomy->getName() );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00" ) );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( 0, (long) m_drawAnatomy );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	}*/
+
+	/*if( m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject != NULL && m_pDatasetHelper->m_mainFrame->m_currentListItem != -1 )
+	{
+		if( ((DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject)->getType() < MESH )
+		{
+			Anatomy* currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject;*/
+
+	//int dataLength = m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_frames;
+
+	// get selected anatomy dataset (that's the one we draw on)
+	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );    
+
+	double xClick = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
+	double yClick = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
+	double zClick = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
+
+	//1D vector with the normalized brightness ( 0 to 1 )
+	std::vector<float>* sourceData = l_currentAnatomy->getFloatDataset();
+	//std::vector<float>* resultData = new std::vector<float>;
+	//resultData->resize(dataLength);  
+
+	if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_PEN)
+	{
+		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick);
+	}
+	else if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_ERASER)
+	{
+		l_currentAnatomy->eraseVoxel((int)xClick, (int)yClick, (int)zClick);
+	}
+	else if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_SCISSOR)
+	{
+		//TODO
+	}
 }
 
 //Kmeans Segmentation

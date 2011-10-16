@@ -660,6 +660,7 @@ void MainFrame::onSelectDrawer( wxCommandEvent& event )
 	m_pToolBar->m_txtRuler->Disable();
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), true);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), true);
 
 	refreshAllGLWidgets();
 }
@@ -682,6 +683,17 @@ void MainFrame::onSelectEraser( wxCommandEvent& event )
 		return;
 	}
 	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_ERASER;
+
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectScissor( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_SCISSOR;
 
 	refreshAllGLWidgets();
 }
@@ -1127,6 +1139,23 @@ void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
 }
 
+void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+
+	m_pDatasetHelper->m_isRulerToolActive = false;
+	m_pDatasetHelper->m_isDrawerToolActive = false;
+
+	m_pToolBar->m_txtRuler->Disable();
+	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);
+	refreshAllGLWidgets();
+}
+
 void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 {
 	if( m_pDatasetHelper->m_theScene == NULL )
@@ -1140,6 +1169,7 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
     m_pToolBar->m_txtRuler->Enable();
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);
     refreshAllGLWidgets();
 }
 

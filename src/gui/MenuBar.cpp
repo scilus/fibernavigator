@@ -89,6 +89,7 @@ MenuBar::MenuBar()
 	m_itemToggleDrawer = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Activate Drawer"));
 	m_itemDrawPen = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Pen"));
 	m_itemDrawEraser = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Eraser"));
+	m_itemDrawScissor = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Scissor"));
 	m_menuOptions->AppendSubMenu(m_menuDrawer,wxT("Drawer"));  
 
     m_menuColorMaps = new wxMenu();
@@ -192,6 +193,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
 	mf->Connect(m_itemToggleDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectDrawer));
 	mf->Connect(m_itemDrawPen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectPen));
 	mf->Connect(m_itemDrawEraser->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectEraser));
+	mf->Connect(m_itemDrawScissor->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectScissor));
     mf->Connect(m_itemGray->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetCMapNo));
     mf->Connect(m_itemBlueGreenPurple->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetCMap0));
     mf->Connect(m_itemRainbow->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetCMap1));
@@ -238,6 +240,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
 	m_itemToggleDrawer->Check(mf->m_pDatasetHelper->m_isDrawerToolActive);
 	m_itemDrawPen->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
 	m_itemDrawEraser->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
+	m_itemDrawScissor->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_SCISSOR);
 	m_itemNewSplineSurface->Enable(mf->m_pDatasetHelper->m_anatomyLoaded && !mf->m_pDatasetHelper->m_surfaceLoaded);
     
 }

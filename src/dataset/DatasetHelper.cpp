@@ -76,7 +76,8 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_showAxial   ( true ),
 
     m_showCrosshair( false ),
-    m_isRulerToolActive( false ),
+	m_isRulerToolActive( false ),
+	m_isDrawerToolActive( false ),
     m_isSegmentActive( false ),
     m_isFloodfillActive ( true ),
     m_isSelectBckActive ( false ),

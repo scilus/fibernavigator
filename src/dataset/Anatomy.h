@@ -51,7 +51,12 @@ public:
     void dilate();
     void erode();
     void minimize();
-    
+
+	void writeVoxel( Vector v ) { writeVoxel(v.x, v.y, v.z); };
+	void eraseVoxel( Vector v ) { writeVoxel(v.x, v.y, v.z); };
+	void writeVoxel( const int x, const int y, const int z );
+	void eraseVoxel( const int x, const int y, const int z );
+
     void draw(){};
     
     bool load     ( wxString fileName );

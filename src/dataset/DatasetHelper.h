@@ -233,9 +233,11 @@ public:
 	{
 		DRAWMODE_PEN = 0,
 		DRAWMODE_ERASER = 1,
+		DRAWMODE_SCISSOR = 2,
         DRAWMODE_INVALID
 	};
 	DrawMode m_drawMode;
+	//Anatomy* m_drawAnatomy;
 
     bool  m_morphing;
 

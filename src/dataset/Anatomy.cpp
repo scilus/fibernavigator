@@ -17,6 +17,10 @@
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 
+#define MAX(a,b) ((a) > (b) ? (a) : (b)) 
+#define MIN(a,b) ((a) < (b) ? (a) : (b)) 
+#define BLACK 0.0f; //0.00390625f;
+
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper ) 
 : DatasetInfo ( pDatasetHelper ),
   m_isSegmentOn( false ),  
@@ -238,7 +242,7 @@ bool Anatomy::loadNifti( wxString fileName )
             }
 
             flag = true;
-            m_oldMax = 255;            
+            m_oldMax = 255;
         }
         break;
 
@@ -1001,6 +1005,61 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
     {
         workData.at( curIndex ) = 1.0;
     }
+}
+
+void Anatomy::writeVoxel( const int x, const int y, const int z )
+{
+	//1D vector with the normalized colors ( 0 to 1 )
+	std::vector<float>* sourceData = getFloatDataset();
+	int curIndex = x + y * m_columns + z * m_columns * m_rows;
+
+	if( m_type == HEAD_BYTE )
+	{
+		sourceData->at(curIndex) = 1.0f; //white
+	}
+	else if( m_type == RGB )
+	{
+		//TODO
+	}
+	//refresh view
+	generateTexture();
+}
+
+void Anatomy::eraseVoxel( const int x, const int y, const int z )
+{
+	//1D vector with the normalized colors ( 0 to 1 )
+	std::vector<float>* sourceData = getFloatDataset();
+	int curIndex = x + y * m_columns + z * m_columns * m_rows;
+
+	if( m_type == HEAD_BYTE )
+	{
+		sourceData->at(curIndex) = BLACK; //black (but not 0.0f, or it becomes transparent)
+		//all around clicked voxel
+		float left = MAX(0,x-1);
+		curIndex = left + y * m_columns + z * m_columns * m_rows;
+		sourceData->at(curIndex) = BLACK;
+		float right = MIN(m_columns-1,x+1);
+		curIndex = right + y * m_columns + z * m_columns * m_rows;
+		sourceData->at(curIndex) = BLACK;
+		float up = MAX(0,y-1);
+		curIndex = x + up * m_columns + z * m_columns * m_rows;
+		sourceData->at(curIndex) = BLACK;
+		float down = MIN(m_rows-1,y+1);
+		curIndex = x + down * m_columns + z * m_columns * m_rows;
+		sourceData->at(curIndex) = BLACK;
+		float front = MAX(0,z-1);
+		curIndex = x + y * m_columns + front * m_columns * m_rows;
+		sourceData->at(curIndex) = BLACK;
+		float back = MIN(m_frames-1,z+1);
+		curIndex = x + y * m_columns + back * m_columns * m_rows;
+		sourceData->at(curIndex) = BLACK;
+	}
+	else if( m_type == RGB )
+	{
+		//TODO
+	}
+	//refresh view
+	generateTexture();
 }
 
 std::vector< float >* Anatomy::getFloatDataset()

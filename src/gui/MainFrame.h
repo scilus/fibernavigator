@@ -93,7 +93,8 @@ private:
     void moveBoundaryPoints( int i_value);
     // Options menu
     void onToggleLighting                   ( wxCommandEvent& event );
-    void onClearToBlack                     ( wxCommandEvent& event );
+	void onClearToBlack                     ( wxCommandEvent& event );
+	void onSelectNormalPointer              ( wxCommandEvent& event );
     void onSelectRuler                      ( wxCommandEvent& event );
     void onRulerToolClear                   ( wxCommandEvent& event );
     void onRulerToolAdd                     ( wxCommandEvent& event );
@@ -156,6 +157,7 @@ private:
 	void onSelectDrawer                     ( wxCommandEvent& event );
 	void onSelectPen                        ( wxCommandEvent& event );
 	void onSelectEraser                     ( wxCommandEvent& event );
+	void onSelectScissor                    ( wxCommandEvent& event );
 
     
 private:
