@@ -26,7 +26,9 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_isSpecialFiberDisplay( false ),
       m_isInitialized( false ),
       m_normalsPositive( false ),
-      m_cachedThreshold( 0.0f )
+      m_cachedThreshold( 0.0f ),
+      m_pKdTree( NULL ),
+      m_pOctree( NULL )
 {
     m_bufferObjects         = new GLuint[3];
 }
