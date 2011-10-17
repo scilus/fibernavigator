@@ -42,7 +42,8 @@ class MainFrame;
 class DatasetInfo : public SceneObject
 {
 public:
-    DatasetInfo( DatasetHelper* datasetHelper ); 
+    DatasetInfo( DatasetHelper* datasetHelper );
+    virtual ~DatasetInfo(){};
     
     virtual void createPropertiesSizer(PropertiesWindow *parent); 
     virtual void updatePropertiesSizer();
