@@ -1317,7 +1317,7 @@ void Anatomy::equalizeHistogram()
     }
 
     unsigned int cdfCount(0);
-    for(int i(0); i < GRAY_SCALE; ++i)
+    for(unsigned int i(0); i < GRAY_SCALE; ++i)
     {
         cdfCount += pixelCount[i];
         cdf[i] = cdfCount;
