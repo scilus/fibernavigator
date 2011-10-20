@@ -34,6 +34,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
 	 m_order          ( 0    ),
     m_radiusAttribLoc( 0    ),
 	 m_radiusBuffer   ( NULL ),    
+    m_nbors          ( NULL ),
     m_sh_basis       ( 0 )
 {
     m_scalingFactor = 0.0f;
@@ -49,7 +50,8 @@ ODFs::~ODFs()
         glDeleteBuffers( 1, m_radiusBuffer );
         delete [] m_radiusBuffer;        
     }
-	if( m_nbors )
+	
+    if( m_nbors != NULL )
 	{
 		delete m_nbors;
 		m_nbors = NULL;

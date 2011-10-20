@@ -39,6 +39,8 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_yOrigin    ( 0.0f ),
     m_zOrigin    ( 0.0f ),
 
+    m_niftiTransform( 4, 4 ),
+
     m_xVoxel     ( 1.0f ),
     m_yVoxel     ( 1.0f ),
     m_zVoxel     ( 1.0f ),

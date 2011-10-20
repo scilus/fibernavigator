@@ -451,9 +451,27 @@ bool Anatomy::loadNifti( wxString fileName )
         }
     }
     
+    // TODO remove
     m_dh->m_xOrigin = pImage->sto_xyz.m[0][3];
     m_dh->m_yOrigin = pImage->sto_xyz.m[1][3];
     m_dh->m_zOrigin = pImage->sto_xyz.m[2][3];
+    
+    m_dh->m_niftiTransform( 0, 0 ) = pImage->sto_xyz.m[0][0];
+    m_dh->m_niftiTransform( 0, 1 ) = pImage->sto_xyz.m[0][1];
+    m_dh->m_niftiTransform( 0, 2 ) = pImage->sto_xyz.m[0][2];
+    m_dh->m_niftiTransform( 0, 3 ) = pImage->sto_xyz.m[0][3];
+    m_dh->m_niftiTransform( 1, 0 ) = pImage->sto_xyz.m[1][0];
+    m_dh->m_niftiTransform( 1, 1 ) = pImage->sto_xyz.m[1][1];
+    m_dh->m_niftiTransform( 1, 2 ) = pImage->sto_xyz.m[1][2];
+    m_dh->m_niftiTransform( 1, 3 ) = pImage->sto_xyz.m[1][3];
+    m_dh->m_niftiTransform( 2, 0 ) = pImage->sto_xyz.m[2][0];
+    m_dh->m_niftiTransform( 2, 1 ) = pImage->sto_xyz.m[2][1];
+    m_dh->m_niftiTransform( 2, 2 ) = pImage->sto_xyz.m[2][2];
+    m_dh->m_niftiTransform( 2, 3 ) = pImage->sto_xyz.m[2][3];
+    m_dh->m_niftiTransform( 3, 0 ) = pImage->sto_xyz.m[3][0];
+    m_dh->m_niftiTransform( 3, 1 ) = pImage->sto_xyz.m[3][1];
+    m_dh->m_niftiTransform( 3, 2 ) = pImage->sto_xyz.m[3][2];
+    m_dh->m_niftiTransform( 3, 3 ) = pImage->sto_xyz.m[3][3];
 
     m_dh->m_xVoxel = pImage->dx;
     m_dh->m_yVoxel = pImage->dy;
