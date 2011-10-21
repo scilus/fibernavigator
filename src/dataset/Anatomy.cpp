@@ -450,12 +450,9 @@ bool Anatomy::loadNifti( wxString fileName )
             return false;
         }
     }
-    
-    // TODO remove
-    m_dh->m_xOrigin = pImage->sto_xyz.m[0][3];
-    m_dh->m_yOrigin = pImage->sto_xyz.m[1][3];
-    m_dh->m_zOrigin = pImage->sto_xyz.m[2][3];
-    
+
+    // Get the transformation to put the anatomy file in world space.
+    // We currently only use it when loading Mrtrix fibers.
     m_dh->m_niftiTransform( 0, 0 ) = pImage->sto_xyz.m[0][0];
     m_dh->m_niftiTransform( 0, 1 ) = pImage->sto_xyz.m[0][1];
     m_dh->m_niftiTransform( 0, 2 ) = pImage->sto_xyz.m[0][2];
