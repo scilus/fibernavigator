@@ -740,8 +740,8 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
     
     // Once the vector is filled up with the points data we can calculate the fibers info grid items.
     getFibersCount                  ( o_gridInfo.m_count             );
-    getMeanFiberValue               ( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanValue         );
+    //getMeanFiberValue               ( l_selectedFibersPoints, 
+    //                                  o_gridInfo.m_meanValue         );
     getMeanMaxMinFiberLength        ( l_selectedFibersPoints, 
                                       o_gridInfo.m_meanLength, 
                                       o_gridInfo.m_maxLength, 
@@ -864,6 +864,19 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
         o_meanFiberPoints[i] /= i_fibersPoints.size();
 
     return true;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Check if stats are show
+//return true if they are, false otherwise
+///////////////////////////////////////////////////////////////////////////
+bool SelectionObject::getShowStats()
+{
+    Fibers* l_fibers = NULL;
+    m_datasetHelper->getFiberDataset( l_fibers );
+    if ( l_fibers == NULL )
+        return false;
+    return m_ptoggleCalculatesFibersInfo->GetValue() && l_fibers->getShow();;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1771,6 +1784,10 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
         //m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
     }
+   else if ( m_ptoggleDisplayMeanFiber ){
+        //Erase the means fiber
+       m_meanFiberPoints.clear();
+    }
     }
 
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
@@ -1838,7 +1855,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     parent->Connect(m_pbtnSetAsDistanceAnchor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDistanceAnchorSet));
     m_propertiesSizer->AddSpacer(8);
     
-    m_ptoggleCalculatesFibersInfo = new wxToggleButton(parent, wxID_ANY, wxT("Calculates Fibers Stats"), wxDefaultPosition, wxSize(140,-1));
+    m_ptoggleCalculatesFibersInfo = new wxToggleButton(parent, wxID_ANY, wxT("Calculate Fibers Stats"), wxDefaultPosition, wxSize(140,-1));
     m_propertiesSizer->Add(m_ptoggleCalculatesFibersInfo,0,wxALIGN_CENTER);      
     parent->Connect(m_ptoggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayFibersInfo));
 
@@ -1884,7 +1901,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     //parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections));
     //parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
 
-    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster() && m_objectType != CISO_SURFACE_TYPE); //bug with some fibers dataset sets
+    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster()); //bug with some fibers dataset sets
     
     
     m_pbtnNewFibersColorVolume->Enable(getIsMaster());
@@ -1956,8 +1973,9 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleVisibility->SetValue(getIsVisible());
     m_ptoggleActivate->SetValue(getIsActive());
     m_ptxtName->SetValue(getName());
-    m_pgridfibersInfo->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
-    m_ptoggleDisplayMeanFiber->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    m_pgridfibersInfo->Enable(getShowStats());
+    m_ptoggleDisplayMeanFiber->Enable(getShowStats());
+
     //m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
     //m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
 

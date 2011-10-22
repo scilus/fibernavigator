@@ -290,6 +290,8 @@ protected:
                                                      double                      i_progression,
                                                      double                     &o_curvature,
                                                      double                     &o_torsion                 );
+
+    bool   getShowStats                      (); 
     
     vector< float >             m_crossSectionsAreas;   // All the cross sections areas value.
     vector< Vector >            m_crossSectionsNormals; // All the cross sections normals value.
