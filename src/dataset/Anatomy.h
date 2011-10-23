@@ -108,7 +108,7 @@ private:
     double xxgauss( const double x, const double sigma );   
     
     void dilateInternal( std::vector<bool> &workData, int curIndex );
-    void erodeInternal( std::vector<bool> &workData, int curIndex );
+    void erodeInternal(  std::vector<bool> &workData, int curIndex );
 
     void equalizeHistogram();
     
