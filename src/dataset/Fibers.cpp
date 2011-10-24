@@ -3072,17 +3072,20 @@ void Fibers::drawSortedLines()
     delete[] pLineIds;
 }
 
+static float minRangeModifier = 0.25f;
+static float maxRangeModifier = 0.75f;
 void Fibers::drawCrossingFibers()
 {
     // Assuming fiber points are normalized [0, 1]
 
     // Determine X, Y and Z range
-    const float xMin( m_dh->m_xSlize - 0.5f );
-    const float xMax( m_dh->m_xSlize + 0.5f );
-    const float yMin( m_dh->m_ySlize - 0.5f );
-    const float yMax( m_dh->m_ySlize + 0.5f );
-    const float zMin( m_dh->m_zSlize - 0.5f );
-    const float zMax( m_dh->m_zSlize + 0.5f );
+    
+    const float xMin( m_dh->m_xSlize + minRangeModifier );
+    const float xMax( m_dh->m_xSlize + maxRangeModifier );
+    const float yMin( m_dh->m_ySlize + minRangeModifier );
+    const float yMax( m_dh->m_ySlize + maxRangeModifier );
+    const float zMin( m_dh->m_zSlize + minRangeModifier );
+    const float zMax( m_dh->m_zSlize + maxRangeModifier );
 
     //static int fiberToDraw(7);
 
@@ -3099,10 +3102,31 @@ void Fibers::drawCrossingFibers()
         // Draw fibers
         for ( unsigned int line(0); line < m_countLines; ++line )
         {
-            unsigned int index( getStartIndexForLine(line) );
+            // TODO: Refactor getStartIndexForLine to return the index * 3
+            unsigned int index( getStartIndexForLine(line) * 3 );
             for ( unsigned int point(0); point < getPointsPerLine(line); ++point, index += 3)
             {
                 if ( xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
+                {
+                    if ( !lineStarted )
+                    {
+                        lineStarted = true;
+                        m_crossingFibers.push_back(vector<unsigned int>());
+                    }
+
+                    m_crossingFibers.back().push_back(index);
+                }
+                else if ( yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
+                {
+                    if ( !lineStarted )
+                    {
+                        lineStarted = true;
+                        m_crossingFibers.push_back(vector<unsigned int>());
+                    }
+
+                    m_crossingFibers.back().push_back(index);
+                }
+                else if ( zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
                 {
                     if ( !lineStarted )
                     {
