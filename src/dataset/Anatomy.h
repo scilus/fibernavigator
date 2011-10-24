@@ -36,6 +36,7 @@ public:
    
     float at( const int i );
     std::vector<float>* getFloatDataset();
+    std::vector<float>* getEqualizedDataset();
 
     MySlider            *m_pSliderFlood;
     MySlider            *m_pSliderGraphSigma;
@@ -76,6 +77,8 @@ public:
         m_isSegmentOn = !m_isSegmentOn; 
         m_pToggleSegment->SetValue(m_isSegmentOn); 
     }
+
+    bool toggleEqualization();
    
 public:
     SelectionObject *m_pRoi;
@@ -90,6 +93,7 @@ private:
     wxButton        *m_pBtnNewOffsetSurface;
     wxButton        *m_pBtnNewVOI;
     wxToggleButton  *m_pToggleSegment;
+    wxToggleButton  *m_pEqualize;
     wxRadioButton   *m_pRadioBtnFlood;
     wxRadioButton   *m_pRadioBtnBck;
     wxRadioButton   *m_pRadioBtnObj;
@@ -105,6 +109,8 @@ private:
     
     void dilateInternal( std::vector<bool> &workData, int curIndex );
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
+
+    void equalizeHistogram();
     
     void generateTexture();
     void generateGeometry() {};
@@ -114,8 +120,10 @@ private:
     float                   m_floodThreshold;
     float                   m_graphSigma;
     std::vector<float>      m_floatDataset;
+    std::vector<float>      m_equalizedDataset; // Dataset having its histogram equalized
     int                     m_dataType;
     TensorField             *m_pTensorField;
+    bool                    m_useEqualizedDataset;
 };
 
 #endif /* ANATOMY_H_ */

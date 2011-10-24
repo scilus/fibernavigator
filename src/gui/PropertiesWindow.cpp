@@ -132,6 +132,18 @@ void PropertiesWindow::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(e
     }
 }
 
+
+void PropertiesWindow::OnEqualizeDataset( wxEvent& WXUNUSED(event) )
+{
+	if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
+	{
+        if( ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject)->getType() < MESH )
+        {
+            ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->toggleEqualization();
+        }
+	}
+}
+
 void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) )
 {
     if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
@@ -829,7 +841,8 @@ void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 {
-
+    ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->computeMeanFiber();
+    m_mainFrame->refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////

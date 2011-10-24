@@ -17,6 +17,8 @@
 #include "Anatomy.h"
 #include "../main.h"
 
+#include "../misc/Fantom/FMatrix.h"
+
 // TODO replace by const
 #define LINEAR_GRADIENT_THRESHOLD 0.085f
 #define MIN_ALPHA_VALUE 0.017f
@@ -26,7 +28,9 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_isSpecialFiberDisplay( false ),
       m_isInitialized( false ),
       m_normalsPositive( false ),
-      m_cachedThreshold( 0.0f )
+      m_cachedThreshold( 0.0f ),
+      m_pKdTree( NULL ),
+      m_pOctree( NULL )
 {
     m_bufferObjects         = new GLuint[3];
 }
@@ -777,14 +781,55 @@ bool Fibers::loadMRtrix( const wxString &filename )
             m_pointArray[pos++] = *it2;
         }
     }
+    
+    // The MrTrix fibers are defined in the same geometric reference
+    // as the anatomical file. That is, the fibers coordinates are related to 
+    // the anatomy in world space. The transformation from local to world space
+    // for the anatomy is encoded in the m_dh->m_niftiTransform member.
+    // Since we do not consider this tranform when loading the anatomy, we must 
+    // bring back the fibers in the same reference, using the inverse of the 
+    // local to world transformation. A further problem arises when loading an
+    // anatomy that has voxels with dimensions differing from 1x1x1. The 
+    // scaling factor is encoded in the transformation matrix, but we do not,
+    // for the moment, use this scaling. Therefore, we must remove it from the
+    // the transformation matrix before computing its inverse.
+    FMatrix localToWorld = m_dh->m_niftiTransform;
+    
+    if( m_dh->m_xVoxel != 1.0 ||
+        m_dh->m_yVoxel != 1.0 ||
+        m_dh->m_zVoxel != 1.0 )
+    {
+        FMatrix rotMat( 3, 3 );
+        localToWorld.getSubMatrix( rotMat, 0, 0 );
+        
+        FMatrix scaleInversion( 3, 3 );
+        scaleInversion( 0, 0 ) = 1.0 / m_dh->m_xVoxel;
+        scaleInversion( 1, 1 ) = 1.0 / m_dh->m_yVoxel;
+        scaleInversion( 2, 2 ) = 1.0 / m_dh->m_zVoxel;
+        
+        rotMat = scaleInversion * rotMat;
+        
+        localToWorld.setSubMatrix( 0, 0, rotMat );
+    }
+       
+    FMatrix invertedTransform( 4, 4 );
+    invertedTransform = invert( localToWorld );
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_pointArray[i] - m_dh->m_xOrigin;
-        ++i;
-        m_pointArray[i] = m_pointArray[i] - m_dh->m_yOrigin;
-        ++i;
-        m_pointArray[i] = m_pointArray[i] - m_dh->m_zOrigin;
+        FMatrix curPoint( 4, 1 );
+        curPoint( 0, 0 ) = m_pointArray[i];
+        curPoint( 1, 0 ) = m_pointArray[i + 1];
+        curPoint( 2, 0 ) = m_pointArray[i + 2];
+        curPoint( 3, 0 ) = 1;
+        
+        FMatrix invertedPoint = invertedTransform * curPoint;
+        
+        m_pointArray[i] = invertedPoint( 0, 0 );
+        m_pointArray[i + 1] = invertedPoint( 1, 0 );
+        m_pointArray[i + 2] = invertedPoint( 2, 0 );
+        
+        i += 2;
     }
 
     m_dh->printDebug( wxT( "End loading TCK file" ), 1 );
@@ -2506,10 +2551,12 @@ void Fibers::updateLinesShown()
         }
     }
 
-    // This is to update the information display in the fiber grid info.
+    // This is to update the information display in the fiber grid info and the mean fiber
     if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
     {
         m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
+        m_dh->m_lastSelectedObject->computeMeanFiber();
+
     }
 }
 

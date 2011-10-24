@@ -217,6 +217,7 @@ protected :
 public:
     // Functions
     void   calculateGridParams               (       FibersInfoGridParams       &io_gridInfo               );
+    void   computeMeanFiber                  ();
     void   getProgressionCurvature           ( const Vector                     &i_point0, 
                                                const Vector                     &i_point1, 
                                                const Vector                     &i_point2, 
@@ -291,7 +292,9 @@ protected:
                                                      double                     &o_curvature,
                                                      double                     &o_torsion                 );
 
-    bool   getShowStats                      (); 
+    bool   getShowFibers                      (); 
+
+    vector< vector< Vector > >   getSelectedFibersPoints ();
     
     vector< float >             m_crossSectionsAreas;   // All the cross sections areas value.
     vector< Vector >            m_crossSectionsNormals; // All the cross sections normals value.

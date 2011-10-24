@@ -683,6 +683,55 @@ void SelectionObject::drawPolygon( const vector< Vector > &i_polygonPoints )
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
 {
+    vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+   
+    // Once the vector is filled up with the points data we can calculate the fibers info grid items.
+    getFibersCount                  ( o_gridInfo.m_count             );
+    //getMeanFiberValue               ( l_selectedFibersPoints, 
+    //                                  o_gridInfo.m_meanValue         );
+    getMeanMaxMinFiberLength        ( l_selectedFibersPoints, 
+                                      o_gridInfo.m_meanLength, 
+                                      o_gridInfo.m_maxLength, 
+                                      o_gridInfo.m_minLength         );
+    //getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
+    //                                  m_meanFiberPoints,
+    //                                  o_gridInfo.m_meanCrossSection, 
+    //                                  o_gridInfo.m_maxCrossSection,
+    //                                  o_gridInfo.m_minCrossSection   );
+    getFibersMeanCurvatureAndTorsion( l_selectedFibersPoints, 
+                                      o_gridInfo.m_meanCurvature, 
+                                      o_gridInfo.m_meanTorsion       );
+    //getFiberDispersion              ( o_gridInfo.m_dispersion        );
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// Computes the mean fiber
+// Point that make the mean fiber will be in the vector m_meanFiberPoints
+//
+///////////////////////////////////////////////////////////////////////////
+void SelectionObject::computeMeanFiber(){
+    if (getShowFibers() && m_ptoggleDisplayMeanFiber->GetValue()){
+        // We calculate the mean fiber of the selected fibers.
+        m_meanFiberPoints.clear();
+        getMeanFiber( getSelectedFibersPoints(), MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
+
+        /* Ecriture directe du fichier txt concernant la mean fiber */
+        /*ofstream fichier("test.txt", ios::out | ios::trunc);  //déclaration du flux et ouverture du fichier
+        if(fichier)  // si l'ouverture a réussi
+        {
+            for (int i = 0 ; i < MEAN_FIBER_NB_POINTS ; i++)
+            fichier << m_meanFiberPoints[i].x << " " <<  m_meanFiberPoints[i].y << " " << m_meanFiberPoints[i].z << "\n";
+        }
+        fichier.close();*/
+    }
+    else
+        m_meanFiberPoints.clear();
+}
+
+
+vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
+    
     vector< Vector >           l_currentFiberPoints;
     vector< Vector >           l_currentSwappedFiberPoints;
     vector< vector< Vector > > l_selectedFibersPoints;
@@ -698,11 +747,18 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
             // could have there coordinated in the data completly inversed ( first fiber 0,0,0 - 1,1,1 ),  
             // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
             // verification and if the order of the fiber points are wrong we switch them.
-            if( l_selectedFibersPoints.size() > 0 )
+            /*if( l_selectedFibersPoints.size() > 0 )
             {
                 for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
                     l_meanStart += l_selectedFibersPoints[j][0];
                 l_meanStart /= l_selectedFibersPoints.size();
+            }*/
+
+            if( l_currentFiberPoints.size() > 0 )
+            {
+                for( unsigned int j = 0; j < l_currentFiberPoints.size(); ++j )
+                    l_meanStart += l_currentFiberPoints[j];
+                l_meanStart /= l_currentFiberPoints.size();
             }
 
             // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
@@ -725,36 +781,7 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
         }
     }
 
-    // We calculate the mean fiber of the selected fibers.
-    m_meanFiberPoints.clear();
-    getMeanFiber( l_selectedFibersPoints, MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
-
-    /* Ecriture directe du fichier txt concernant la mean fiber */
-    ofstream fichier("test.txt", ios::out | ios::trunc);  //déclaration du flux et ouverture du fichier
-    if(fichier)  // si l'ouverture a réussi
-    {
-        for (int i = 0 ; i < MEAN_FIBER_NB_POINTS ; i++)
-        fichier << m_meanFiberPoints[i].x << " " <<  m_meanFiberPoints[i].y << " " << m_meanFiberPoints[i].z << "\n";
-    }
-    fichier.close();
-    
-    // Once the vector is filled up with the points data we can calculate the fibers info grid items.
-    getFibersCount                  ( o_gridInfo.m_count             );
-    //getMeanFiberValue               ( l_selectedFibersPoints, 
-    //                                  o_gridInfo.m_meanValue         );
-    getMeanMaxMinFiberLength        ( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanLength, 
-                                      o_gridInfo.m_maxLength, 
-                                      o_gridInfo.m_minLength         );
-    //getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
-    //                                  m_meanFiberPoints,
-    //                                  o_gridInfo.m_meanCrossSection, 
-    //                                  o_gridInfo.m_maxCrossSection,
-    //                                  o_gridInfo.m_minCrossSection   );
-    getFibersMeanCurvatureAndTorsion( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanCurvature, 
-                                      o_gridInfo.m_meanTorsion       );
-    //getFiberDispersion              ( o_gridInfo.m_dispersion        );
+    return l_selectedFibersPoints;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -867,16 +894,16 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Check if stats are show
+// Check if fibers are show
 //return true if they are, false otherwise
 ///////////////////////////////////////////////////////////////////////////
-bool SelectionObject::getShowStats()
+bool SelectionObject::getShowFibers()
 {
     Fibers* l_fibers = NULL;
     m_datasetHelper->getFiberDataset( l_fibers );
     if ( l_fibers == NULL )
         return false;
-    return m_ptoggleCalculatesFibersInfo->GetValue() && l_fibers->getShow();;
+    return l_fibers->getShow();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1784,11 +1811,7 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
         //m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
     }
-   else if ( m_ptoggleDisplayMeanFiber ){
-        //Erase the means fiber
-       m_meanFiberPoints.clear();
-    }
-    }
+}
 
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 {
@@ -1973,8 +1996,14 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleVisibility->SetValue(getIsVisible());
     m_ptoggleActivate->SetValue(getIsActive());
     m_ptxtName->SetValue(getName());
-    m_pgridfibersInfo->Enable(getShowStats());
-    m_ptoggleDisplayMeanFiber->Enable(getShowStats());
+    m_ptoggleCalculatesFibersInfo->Enable(getShowFibers());
+    m_pgridfibersInfo->Enable(getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue());
+    m_ptoggleDisplayMeanFiber->Enable(getShowFibers());
+
+    if (!getShowFibers() && m_meanFiberPoints.size() > 0){
+        //Hide the mean fiber if fibers are invisible and the box is moved
+        computeMeanFiber();
+    }
 
     //m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
     //m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
