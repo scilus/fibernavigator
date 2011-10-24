@@ -146,7 +146,7 @@ public:
     double                m_rulerPartialLength;
     int                   m_fibersSamplingFactor;
     bool                  m_isSegmentActive;
-    int                      m_SegmentMethod;
+    int                   m_SegmentMethod;
     bool                  m_isFloodfillActive;
     bool                  m_isSelectBckActive;
     bool                  m_isSelectObjActive;

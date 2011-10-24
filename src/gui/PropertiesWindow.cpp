@@ -1292,3 +1292,14 @@ void PropertiesWindow::OnRecalcMainDir( wxCommandEvent& WXUNUSED(event) )
                     ((ODFs*)m_mainFrame->m_currentSceneObject)->getShMatrix()[NB_OF_LOD - 1], ((ODFs*)m_mainFrame->m_currentSceneObject)->getPhiTheta()[NB_OF_LOD - 1],((ODFs*)m_mainFrame->m_currentSceneObject)->m_axisThreshold,((ODFs*)m_mainFrame->m_currentSceneObject)->angle,((ODFs*)m_mainFrame->m_currentSceneObject)->m_nbors);
             }*/
 }
+
+void PropertiesWindow::OnToggleCrossingFibers( wxEvent& WXUNUSED(event) )
+{
+    if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
+    {
+        if( ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject)->getType() == FIBERS )
+        {
+            ((Fibers*)m_mainFrame->m_pCurrentSceneObject)->toggleCrossingFibers();
+        }
+    }
+}

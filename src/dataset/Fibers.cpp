@@ -30,7 +30,8 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_normalsPositive( false ),
       m_cachedThreshold( 0.0f ),
       m_pKdTree( NULL ),
-      m_pOctree( NULL )
+      m_pOctree( NULL ),
+      m_useCrossingFibers( false )
 {
     m_bufferObjects         = new GLuint[3];
 }
@@ -2809,6 +2810,12 @@ void Fibers::draw()
         return;
     }
 
+    if ( m_useCrossingFibers )
+    {
+        drawCrossingFibers();
+        return;
+    }
+
     glEnableClientState( GL_VERTEX_ARRAY );
     glEnableClientState( GL_COLOR_ARRAY );
     glEnableClientState( GL_NORMAL_ARRAY );
@@ -3063,6 +3070,73 @@ void Fibers::drawSortedLines()
     // FIXME: store these later on!
     delete[] pSnippletSort;
     delete[] pLineIds;
+}
+
+void Fibers::drawCrossingFibers()
+{
+    // Assuming fiber points are normalized [0, 1]
+
+    // Determine X, Y and Z range
+    const float xMin( m_dh->m_xSlize - 0.5f );
+    const float xMax( m_dh->m_xSlize + 0.5f );
+    const float yMin( m_dh->m_ySlize - 0.5f );
+    const float yMax( m_dh->m_ySlize + 0.5f );
+    const float zMin( m_dh->m_zSlize - 0.5f );
+    const float zMax( m_dh->m_zSlize + 0.5f );
+
+    //static int fiberToDraw(7);
+
+    bool lineStarted( false );
+
+    if ( m_xDrawn != m_dh->m_xSlize || m_yDrawn != m_dh->m_ySlize || m_zDrawn != m_dh->m_zSlize)
+    {
+        m_xDrawn = m_dh->m_xSlize;
+        m_yDrawn = m_dh->m_ySlize;
+        m_zDrawn = m_dh->m_zSlize;
+
+        m_crossingFibers.clear();
+
+        // Draw fibers
+        for ( unsigned int line(0); line < m_countLines; ++line )
+        {
+            unsigned int index( getStartIndexForLine(line) );
+            for ( unsigned int point(0); point < getPointsPerLine(line); ++point, index += 3)
+            {
+                if ( xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
+                {
+                    if ( !lineStarted )
+                    {
+                        lineStarted = true;
+                        m_crossingFibers.push_back(vector<unsigned int>());
+                    }
+
+                    m_crossingFibers.back().push_back(index);
+                }
+                else
+                {
+                    lineStarted = false;
+                }
+            }
+
+            lineStarted = false;
+        }
+    }
+
+    for ( vector< vector<unsigned int> >::iterator line = m_crossingFibers.begin(); line != m_crossingFibers.end(); ++line )
+    {
+        if ( 1 < line->size() )
+        {
+            glBegin(GL_LINE_STRIP);
+            for ( vector<unsigned int>::iterator point = line->begin(); point != line->end(); ++point )
+            {
+                unsigned int index = *point;
+                glNormal3f( m_normalArray[index], m_normalArray[index + 1], m_normalArray[index + 2] );
+                glColor4f(  m_colorArray[index],  m_colorArray[index + 1],  m_colorArray[index + 2], m_alpha );
+                glVertex3f( m_pointArray[index],  m_pointArray[index + 1],  m_pointArray[index + 2] );
+            }
+            glEnd();
+        }
+    }
 }
 
 void Fibers::switchNormals( bool positive )
@@ -3343,7 +3417,13 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
-    
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pToggleCrossingFibers = new wxToggleButton( pParent, wxID_ANY, wxT( "Crossing Fibers" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pToggleCrossingFibers, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pToggleCrossingFibers->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleCrossingFibers ) );
+
     m_propertiesSizer->AddSpacer( 8 );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -3389,6 +3469,7 @@ void Fibers::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
     m_ptoggleFiltering->Enable( false );
     m_ptoggleFiltering->SetValue( false );
+    m_pToggleCrossingFibers->Enable( true );
     m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
     m_psliderOpacity->Enable( false );
     m_pToggleNormalColoring->SetValue( !getShowFS() );

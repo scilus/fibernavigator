@@ -92,7 +92,6 @@ public:
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
 
-
     GLuint  getGLuint( )
     {
         return 0;
@@ -117,6 +116,8 @@ public:
     void    generateGeometry() {};
     void    smooth()           {};
 
+    void    toggleCrossingFibers() { m_useCrossingFibers = !m_useCrossingFibers; }
+
 private:
     void            colorWithTorsion(     float *pColorData );
     void            colorWithCurvature(   float *pColorData );
@@ -137,11 +138,12 @@ private:
 
     void            drawFakeTubes();
     void            drawSortedLines();
+    void            drawCrossingFibers();
 
     void            freeArrays();
 
     bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
-
+    
     // Variables
     bool            m_isSpecialFiberDisplay;
     Vector          m_barycenter;
@@ -156,6 +158,10 @@ private:
     vector< int >   m_linePointers;
     vector< float > m_pointArray;
     vector< float > m_normalArray;
+    vector< vector< unsigned int > > m_crossingFibers;
+    float           m_xDrawn;
+    float           m_yDrawn;
+    float           m_zDrawn;
     bool            m_normalsPositive;
     vector< int >   m_reverse;
     vector< bool >  m_selected;
@@ -169,6 +175,8 @@ private:
     KdTree          *m_pKdTree;
     Octree          *m_pOctree;
     
+    bool            m_useCrossingFibers;
+
     // GUI members
     wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
@@ -176,6 +184,7 @@ private:
     wxSlider       *m_pSliderFibersSampling;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
+    wxToggleButton *m_pToggleCrossingFibers;
     wxRadioButton  *m_pRadioNormalColoring;
     wxRadioButton  *m_pRadioDistanceAnchoring;
     wxRadioButton  *m_pRadioMinDistanceAnchoring;
