@@ -66,7 +66,6 @@ Fibers::~Fibers()
     m_pointArray.clear();
     m_normalArray.clear();
     m_colorArray.clear();
-    m_crossingFibers.clear();
 }
 
 bool Fibers::load( wxString filename )
@@ -1186,7 +1185,6 @@ bool Fibers::loadVTK( const wxString &filename )
     m_reverse.resize( countPoints );
     m_filtered.resize( countLines, false );
     m_selected.resize( countLines, false );
-    m_crossingFibers.resize( countPoints, false );
     m_pointArray.resize( countPoints * 3 );
     m_lineArray.resize( lengthLines * 4 );
     m_colorArray.resize( countPoints * 3 );
@@ -2402,7 +2400,7 @@ void Fibers::updateLinesShown()
 
     for( int i = 0; i < m_countLines; ++i )
     {
-        m_selected[i] = 1;
+        m_selected[i] = true;
     }
 
     int activeCount = 0;
@@ -2918,25 +2916,54 @@ void Fibers::drawFakeTubes()
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     }
 
-    for( int i = 0; i < m_countLines; ++i )
+    if ( m_useCrossingFibers )
     {
-        if( m_selected[i] && !m_filtered[i] )
+        findCrossingFibers();
+
+        for( int i = 0; i < m_cfStartOfLine.size(); ++i )
         {
-            int idx = getStartIndexForLine( i ) * 3;
-            glBegin( GL_QUAD_STRIP );
-
-            for( int k = 0; k < getPointsPerLine( i ); ++k )
+            if ( 1 < m_cfPointsPerLine[i] )
             {
-                glNormal3f( pNormals[idx], pNormals[idx + 1], pNormals[idx + 2] );
-                glColor3f( pColors[idx],  pColors[idx + 1],  pColors[idx + 2] );
-                glTexCoord2f( -1.0f, 0.0f );
-                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
-                glTexCoord2f( 1.0f, 0.0f );
-                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
-                idx += 3;
-            }
+                int index = i * 3;
+                glBegin( GL_QUAD_STRIP );
 
-            glEnd();
+                for( int k = 0; k < m_cfPointsPerLine[i]; ++k, index += 3 )
+                {
+                    glNormal3f( m_normalArray[index], m_normalArray[index + 1], m_normalArray[index + 2] );
+                    glColor3f( m_colorArray[index],  m_colorArray[index + 1],  m_colorArray[index + 2] );
+                    glTexCoord2f( -1.0f, 0.0f );
+                    glVertex3f( m_pointArray[index], m_pointArray[index + 1], m_pointArray[index + 2] );
+                    glTexCoord2f( 1.0f, 0.0f );
+                    glVertex3f( m_pointArray[index], m_pointArray[index + 1], m_pointArray[index + 2] );
+                }
+
+                glEnd();
+                //if (i > 2500) break;
+            }
+        }
+    }
+    else
+    {
+        for( int i = 0; i < m_countLines; ++i )
+        {
+            if( m_selected[i] && !m_filtered[i] )
+            {
+                int idx = getStartIndexForLine( i ) * 3;
+                glBegin( GL_QUAD_STRIP );
+
+                for( int k = 0; k < getPointsPerLine( i ); ++k )
+                {
+                    glNormal3f( pNormals[idx], pNormals[idx + 1], pNormals[idx + 2] );
+                    glColor3f( pColors[idx],  pColors[idx + 1],  pColors[idx + 2] );
+                    glTexCoord2f( -1.0f, 0.0f );
+                    glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                    glTexCoord2f( 1.0f, 0.0f );
+                    glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                    idx += 3;
+                }
+
+                glEnd();
+            }
         }
     }
 }
@@ -3078,61 +3105,7 @@ void Fibers::drawSortedLines()
 
 void Fibers::drawCrossingFibers()
 {
-    // Determine X, Y and Z range
-    const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
-    const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
-    const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
-    const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
-    const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
-    const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
-
-    bool lineStarted(false);
-    vector<unsigned int> startOfLine;
-    vector<unsigned int> pointsPerLine;
-
-    unsigned int index( 0 );
-    unsigned int point( 0 );
-    for ( unsigned int line( 0 ); line < m_countLines; ++line )
-    {
-        for ( unsigned int i( 0 ); i < getPointsPerLine(line); ++i, ++point, index += 3)
-        {
-            if ( xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
-            {
-                if ( !lineStarted )
-                {
-                    startOfLine.push_back(point);
-                    pointsPerLine.push_back(0);
-                    lineStarted = true;
-                }
-                ++pointsPerLine.back();
-            }
-            else if ( yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
-            {
-                if ( !lineStarted )
-                {
-                    startOfLine.push_back(point);
-                    pointsPerLine.push_back(0);
-                    lineStarted = true;
-                }
-                ++pointsPerLine.back();
-            }
-            else if ( zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
-            {
-                if ( !lineStarted )
-                {
-                    startOfLine.push_back(point);
-                    pointsPerLine.push_back(0);
-                    lineStarted = true;
-                }
-                ++pointsPerLine.back();
-            }
-            else
-            {
-                lineStarted = false;
-            }
-        }
-        lineStarted = false;
-    }
+    findCrossingFibers();
 
     glEnableClientState( GL_VERTEX_ARRAY );
     glEnableClientState( GL_COLOR_ARRAY );
@@ -3174,11 +3147,11 @@ void Fibers::drawCrossingFibers()
     }
 
     //unsigned int calls(0);
-    for( int i = 0; i < startOfLine.size(); ++i )
+    for( int i = 0; i < m_cfStartOfLine.size(); ++i )
     {
-        if ( 1 < pointsPerLine[i] )
+        if ( 1 < m_cfPointsPerLine[i] )
         {
-            glDrawArrays( GL_LINE_STRIP, startOfLine[i], pointsPerLine[i] );
+            glDrawArrays( GL_LINE_STRIP, m_cfStartOfLine[i], m_cfPointsPerLine[i] );
             //++calls;
         }
     }
@@ -3189,7 +3162,7 @@ void Fibers::drawCrossingFibers()
 
     //cout << "Calls to glDrawArrays: " << calls << endl;
 
-    //if ( m_drawDirty || m_dh->m_xSlize || m_yDrawn != m_dh->m_ySlize || m_zDrawn != m_dh->m_zSlize )
+    //if ( m_drawDirty || m_xDrawn != m_dh->m_xSlize || m_yDrawn != m_dh->m_ySlize || m_zDrawn != m_dh->m_zSlize )
     //{
     //    m_xDrawn = m_dh->m_xSlize;
     //    m_yDrawn = m_dh->m_ySlize;
@@ -3615,4 +3588,83 @@ void Fibers::updateCrossingFibersThickness()
     {
         m_thickness = m_pSliderCrossingFibersThickness->GetValue() * 0.25f; 
         m_drawDirty = true;
-    }}
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Fibers::findCrossingFibers() 
+{
+    if ( m_drawDirty || m_xDrawn != m_dh->m_xSlize || m_yDrawn != m_dh->m_ySlize || m_zDrawn != m_dh->m_zSlize )
+    {
+        m_xDrawn = m_dh->m_xSlize;
+        m_yDrawn = m_dh->m_ySlize;
+        m_zDrawn = m_dh->m_zSlize;
+        m_drawDirty = false;
+
+        // Determine X, Y and Z range
+        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
+        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
+        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
+        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
+        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
+        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+
+        bool lineStarted(false);
+
+        m_cfStartOfLine.clear();
+        m_cfPointsPerLine.clear();
+
+        unsigned int index( 0 );
+        unsigned int point( 0 );
+        for ( unsigned int line( 0 ); line < m_countLines; ++line )
+        {
+            if ( m_selected[line] && !m_filtered[line] )
+            {
+                for ( unsigned int i( 0 ); i < getPointsPerLine(line); ++i, ++point, index += 3)
+                {
+                    if ( xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else if ( yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else if ( zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else
+                    {
+                        lineStarted = false;
+                    }
+                }
+                lineStarted = false;
+            }
+            else
+            {
+                point += getPointsPerLine(line);
+                index += getPointsPerLine(line) * 3;
+            }
+        }
+    }
+}

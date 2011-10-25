@@ -144,6 +144,7 @@ private:
     void            freeArrays();
 
     bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
+    void            findCrossingFibers();
 
     // Variables
     bool            m_isSpecialFiberDisplay;
@@ -176,10 +177,11 @@ private:
     bool            m_drawDirty;
     bool            m_useCrossingFibers;
     float           m_thickness;
-    vector< bool >  m_crossingFibers;
     float           m_xDrawn;
     float           m_yDrawn;
     float           m_zDrawn;
+    vector<unsigned int> m_cfStartOfLine;
+    vector<unsigned int> m_cfPointsPerLine;
 
 
     // GUI members
