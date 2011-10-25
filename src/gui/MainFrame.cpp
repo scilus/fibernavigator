@@ -1450,6 +1450,10 @@ void MainFrame::deleteListItem()
     if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {       
         long tmp = m_currentListItem;
+		if ((((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERSGROUP))
+		{
+			return;
+		}
         if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
         {            
             m_pDatasetHelper->m_selBoxChanged = true;
