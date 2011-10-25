@@ -5,6 +5,7 @@
 #include "SelectionEllipsoid.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
+#include "../dataset/FibersGroup.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
@@ -58,6 +59,160 @@ void PropertiesWindow::OnListItemDown( wxCommandEvent& WXUNUSED(event) )
 void PropertiesWindow::OnDeleteListItem( wxEvent& WXUNUSED(event) )
 {
     m_mainFrame->deleteListItem();
+}
+
+void PropertiesWindow::OnToggleIntensityBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnToggleIntensityBtn();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnToggleOpacityBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnToggleOpacityBtn();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnToggleMinMaxLengthBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnToggleMinMaxLengthBtn();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnToggleSubsamplingBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnToggleSubsamplingBtn();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnToggleColorModeBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnToggleColorModeBtn();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnClickApplyBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnClickApplyBtn();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnClickCancelBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnClickCancelBtn();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleShowFS( wxEvent& WXUNUSED(event) )

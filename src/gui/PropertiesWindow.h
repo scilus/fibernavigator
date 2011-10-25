@@ -37,6 +37,15 @@ public:
 
     void OnToggleShowFS                     ( wxEvent& event );
 
+	void OnToggleIntensityBtn				( wxEvent& event );
+	void OnToggleOpacityBtn					( wxEvent& event );
+	void OnToggleMinMaxLengthBtn			( wxEvent& event );
+	void OnToggleSubsamplingBtn				( wxEvent& event );
+	void OnToggleColorModeBtn				( wxEvent& event );
+	
+	void OnClickApplyBtn					( wxEvent& event );
+	void OnClickCancelBtn					( wxEvent& event );
+
     void OnSliderIntensityThresholdMoved    ( wxCommandEvent& event );
     void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
 
