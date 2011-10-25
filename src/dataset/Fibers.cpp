@@ -31,7 +31,9 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_cachedThreshold( 0.0f ),
       m_pKdTree( NULL ),
       m_pOctree( NULL ),
-      m_useCrossingFibers( false )
+      m_drawDirty( true ),
+      m_useCrossingFibers( false ),
+      m_thickness( 0.25f )
 {
     m_bufferObjects         = new GLuint[3];
 }
@@ -64,6 +66,7 @@ Fibers::~Fibers()
     m_pointArray.clear();
     m_normalArray.clear();
     m_colorArray.clear();
+    m_crossingFibers.clear();
 }
 
 bool Fibers::load( wxString filename )
@@ -1183,6 +1186,7 @@ bool Fibers::loadVTK( const wxString &filename )
     m_reverse.resize( countPoints );
     m_filtered.resize( countLines, false );
     m_selected.resize( countLines, false );
+    m_crossingFibers.resize( countPoints, false );
     m_pointArray.resize( countPoints * 3 );
     m_lineArray.resize( lengthLines * 4 );
     m_colorArray.resize( countPoints * 3 );
@@ -3072,95 +3076,185 @@ void Fibers::drawSortedLines()
     delete[] pLineIds;
 }
 
-static float minRangeModifier = 0.25f;
-static float maxRangeModifier = 0.75f;
 void Fibers::drawCrossingFibers()
 {
-    // Assuming fiber points are normalized [0, 1]
-
     // Determine X, Y and Z range
+    const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
+    const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
+    const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
+    const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
+    const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
+    const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+
+    bool lineStarted(false);
+    vector<unsigned int> startOfLine;
+    vector<unsigned int> pointsPerLine;
+
+    unsigned int index( 0 );
+    unsigned int point( 0 );
+    for ( unsigned int line( 0 ); line < m_countLines; ++line )
+    {
+        for ( unsigned int i( 0 ); i < getPointsPerLine(line); ++i, ++point, index += 3)
+        {
+            if ( xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
+            {
+                if ( !lineStarted )
+                {
+                    startOfLine.push_back(point);
+                    pointsPerLine.push_back(0);
+                    lineStarted = true;
+                }
+                ++pointsPerLine.back();
+            }
+            else if ( yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
+            {
+                if ( !lineStarted )
+                {
+                    startOfLine.push_back(point);
+                    pointsPerLine.push_back(0);
+                    lineStarted = true;
+                }
+                ++pointsPerLine.back();
+            }
+            else if ( zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
+            {
+                if ( !lineStarted )
+                {
+                    startOfLine.push_back(point);
+                    pointsPerLine.push_back(0);
+                    lineStarted = true;
+                }
+                ++pointsPerLine.back();
+            }
+            else
+            {
+                lineStarted = false;
+            }
+        }
+        lineStarted = false;
+    }
+
+    glEnableClientState( GL_VERTEX_ARRAY );
+    glEnableClientState( GL_COLOR_ARRAY );
+    glEnableClientState( GL_NORMAL_ARRAY );
+
+    if( ! m_dh->m_useVBO )
+    {
+        glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
+
+        if( m_showFS )
+        {
+            glColorPointer( 3, GL_FLOAT, 0, &m_colorArray[0] );  // Global colors.
+        }
+        else
+        {
+            glColorPointer( 3, GL_FLOAT, 0, &m_normalArray[0] ); // Local colors.
+        }
+
+        glNormalPointer( GL_FLOAT, 0, &m_normalArray[0] );
+    }
+    else
+    {
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+        glVertexPointer( 3, GL_FLOAT, 0, 0 );
+
+        if( m_showFS )
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
+        }
+        else
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
+        }
+
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        glNormalPointer( GL_FLOAT, 0, 0 );
+    }
+
+    //unsigned int calls(0);
+    for( int i = 0; i < startOfLine.size(); ++i )
+    {
+        if ( 1 < pointsPerLine[i] )
+        {
+            glDrawArrays( GL_LINE_STRIP, startOfLine[i], pointsPerLine[i] );
+            //++calls;
+        }
+    }
+
+    glDisableClientState( GL_VERTEX_ARRAY );
+    glDisableClientState( GL_COLOR_ARRAY );
+    glDisableClientState( GL_NORMAL_ARRAY );
+
+    //cout << "Calls to glDrawArrays: " << calls << endl;
+
+    //if ( m_drawDirty || m_dh->m_xSlize || m_yDrawn != m_dh->m_ySlize || m_zDrawn != m_dh->m_zSlize )
+    //{
+    //    m_xDrawn = m_dh->m_xSlize;
+    //    m_yDrawn = m_dh->m_ySlize;
+    //    m_zDrawn = m_dh->m_zSlize;
+
+    //    // Draw fibers
+    //    unsigned int point(0);
+    //    for ( unsigned int line(0); line < m_countLines; ++line )
+    //    {
+    //        unsigned int index( point * 3 );
+    //        for ( unsigned int i(0); i < getPointsPerLine(line); ++i, ++point, index += 3)
+    //        {
+    //            if ( xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
+    //            {
+    //                m_crossingFibers[point] = true;
+    //            }
+    //            else if ( yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
+    //            {
+    //                m_crossingFibers[point] = true;
+    //            }
+    //            else if ( zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
+    //            {
+    //                m_crossingFibers[point] = true;
+    //            }
+    //            else
+    //            {
+    //                m_crossingFibers[point] = false;
+    //            }
+    //        }
+    //    }
+
+    //    m_drawDirty = false;
+    //}
+
+    //static bool useVertexCalls = true;
+
+    //if ( useVertexCalls )
+    //{
+    //    unsigned int nbVertexCalls(0);
+    //    unsigned int nbglBegin(0);
+    //    unsigned int point(0);
+    //    while ( point < m_crossingFibers.size() )
+    //    {
+    //        if ( m_crossingFibers[point] )
+    //        {
+    //            glBegin( GL_LINE_STRIP );
+    //            do
+    //            {
+    //                unsigned int index(point * 3);
+    //                glNormal3f( m_normalArray[index], m_normalArray[index + 1], m_normalArray[index + 2] );
+    //                glColor4f(  m_colorArray[index],  m_colorArray[index + 1],  m_colorArray[index + 2], m_alpha );
+    //                glVertex3f( m_pointArray[index],  m_pointArray[index + 1],  m_pointArray[index + 2] );
+    //                ++point;
+    //                ++nbVertexCalls;
+    //            }
+    //            while ( point < m_crossingFibers.size() && m_crossingFibers[point] );
+    //            glEnd();
+    //            ++nbglBegin;
+    //        }
+    //        
+    //        ++point;
+    //    }
+    //    cout << "Calls to glVertex: " << nbVertexCalls << endl << "Calls to glBegin: " << nbglBegin << endl;
+    //}
     
-    const float xMin( m_dh->m_xSlize + minRangeModifier );
-    const float xMax( m_dh->m_xSlize + maxRangeModifier );
-    const float yMin( m_dh->m_ySlize + minRangeModifier );
-    const float yMax( m_dh->m_ySlize + maxRangeModifier );
-    const float zMin( m_dh->m_zSlize + minRangeModifier );
-    const float zMax( m_dh->m_zSlize + maxRangeModifier );
-
-    //static int fiberToDraw(7);
-
-    bool lineStarted( false );
-
-    if ( m_xDrawn != m_dh->m_xSlize || m_yDrawn != m_dh->m_ySlize || m_zDrawn != m_dh->m_zSlize)
-    {
-        m_xDrawn = m_dh->m_xSlize;
-        m_yDrawn = m_dh->m_ySlize;
-        m_zDrawn = m_dh->m_zSlize;
-
-        m_crossingFibers.clear();
-
-        // Draw fibers
-        for ( unsigned int line(0); line < m_countLines; ++line )
-        {
-            // TODO: Refactor getStartIndexForLine to return the index * 3
-            unsigned int index( getStartIndexForLine(line) * 3 );
-            for ( unsigned int point(0); point < getPointsPerLine(line); ++point, index += 3)
-            {
-                if ( xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
-                {
-                    if ( !lineStarted )
-                    {
-                        lineStarted = true;
-                        m_crossingFibers.push_back(vector<unsigned int>());
-                    }
-
-                    m_crossingFibers.back().push_back(index);
-                }
-                else if ( yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
-                {
-                    if ( !lineStarted )
-                    {
-                        lineStarted = true;
-                        m_crossingFibers.push_back(vector<unsigned int>());
-                    }
-
-                    m_crossingFibers.back().push_back(index);
-                }
-                else if ( zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
-                {
-                    if ( !lineStarted )
-                    {
-                        lineStarted = true;
-                        m_crossingFibers.push_back(vector<unsigned int>());
-                    }
-
-                    m_crossingFibers.back().push_back(index);
-                }
-                else
-                {
-                    lineStarted = false;
-                }
-            }
-
-            lineStarted = false;
-        }
-    }
-
-    for ( vector< vector<unsigned int> >::iterator line = m_crossingFibers.begin(); line != m_crossingFibers.end(); ++line )
-    {
-        if ( 1 < line->size() )
-        {
-            glBegin(GL_LINE_STRIP);
-            for ( vector<unsigned int>::iterator point = line->begin(); point != line->end(); ++point )
-            {
-                unsigned int index = *point;
-                glNormal3f( m_normalArray[index], m_normalArray[index + 1], m_normalArray[index + 2] );
-                glColor4f(  m_colorArray[index],  m_colorArray[index + 1],  m_colorArray[index + 2], m_alpha );
-                glVertex3f( m_pointArray[index],  m_pointArray[index + 1],  m_pointArray[index + 2] );
-            }
-            glEnd();
-        }
-    }
 }
 
 void Fibers::switchNormals( bool positive )
@@ -3423,6 +3517,14 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Thickness" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
+    m_pSliderCrossingFibersThickness = new wxSlider( pParent, wxID_ANY, 1, 1, 20, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    pSizer->Add( m_pSliderCrossingFibersThickness, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderCrossingFibersThickness->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
+
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 140, -1 ) );
@@ -3437,7 +3539,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overlay" ), wxDefaultPosition, wxSize( 140, -1 ) );
     pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
@@ -3496,6 +3598,7 @@ void Fibers::updatePropertiesSizer()
     m_pToggleCrossingFibers->Enable( true );
     m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
     m_psliderOpacity->Enable( false );
+    m_pSliderCrossingFibersThickness->Enable( m_useCrossingFibers );
     m_pToggleNormalColoring->SetValue( !getShowFS() );
     m_pRadioNormalColoring->Enable( getShowFS() );
     m_pRadioCurvature->Enable( getShowFS() );
@@ -3503,3 +3606,13 @@ void Fibers::updatePropertiesSizer()
     m_pRadioMinDistanceAnchoring->Enable( getShowFS() );
     m_pRadioTorsion->Enable( getShowFS() );
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+void Fibers::updateCrossingFibersThickness() 
+{
+    if ( NULL != m_pSliderCrossingFibersThickness )
+    {
+        m_thickness = m_pSliderCrossingFibersThickness->GetValue() * 0.25f; 
+        m_drawDirty = true;
+    }}

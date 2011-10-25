@@ -1303,3 +1303,14 @@ void PropertiesWindow::OnToggleCrossingFibers( wxEvent& WXUNUSED(event) )
         }
     }
 }
+
+void PropertiesWindow::OnCrossingFibersThicknessChange( wxCommandEvent& WXUNUSED(event) )
+{
+    if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
+    {
+        if( ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject)->getType() == FIBERS )
+        {
+            ((Fibers*)m_mainFrame->m_pCurrentSceneObject)->updateCrossingFibersThickness();
+        }
+    }
+}

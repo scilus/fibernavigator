@@ -117,6 +117,7 @@ public:
     void    smooth()           {};
 
     void    toggleCrossingFibers() { m_useCrossingFibers = !m_useCrossingFibers; }
+    void    updateCrossingFibersThickness();
 
 private:
     void            colorWithTorsion(     float *pColorData );
@@ -143,7 +144,7 @@ private:
     void            freeArrays();
 
     bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
-    
+
     // Variables
     bool            m_isSpecialFiberDisplay;
     Vector          m_barycenter;
@@ -158,10 +159,7 @@ private:
     vector< int >   m_linePointers;
     vector< float > m_pointArray;
     vector< float > m_normalArray;
-    vector< vector< unsigned int > > m_crossingFibers;
-    float           m_xDrawn;
-    float           m_yDrawn;
-    float           m_zDrawn;
+    
     bool            m_normalsPositive;
     vector< int >   m_reverse;
     vector< bool >  m_selected;
@@ -174,14 +172,22 @@ private:
 
     KdTree          *m_pKdTree;
     Octree          *m_pOctree;
-    
+
+    bool            m_drawDirty;
     bool            m_useCrossingFibers;
+    float           m_thickness;
+    vector< bool >  m_crossingFibers;
+    float           m_xDrawn;
+    float           m_yDrawn;
+    float           m_zDrawn;
+
 
     // GUI members
     wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
+    wxSlider       *m_pSliderCrossingFibersThickness;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxToggleButton *m_pToggleCrossingFibers;
