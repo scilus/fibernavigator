@@ -93,6 +93,9 @@ public:
 	bool	 toggleSubsamplingBtn()				 { m_showSubsampling	= ! m_showSubsampling;		return m_showSubsampling;	};
 	bool	 toggleColorModeBtn()				 { m_showColorMode		= ! m_showColorMode;		return m_showColorMode;		};
 
+	void	 setParent( DatasetInfo* pParent)	 { m_pParent = pParent; };
+	DatasetInfo* getParent()					 { return m_pParent;	};
+
     void     setShow       ( bool i_show   )     { m_show        = i_show;   };
     void     setShowFS     ( bool i_show   )     { m_showFS      = i_show;   };
     void     setuseTex     ( bool i_useTex )     { m_useTex      = i_useTex; };
@@ -161,7 +164,9 @@ protected:
 	bool		m_showOpacity;
 	bool		m_showMinMaxLengths;
 	bool		m_showSubsampling;
-	bool		m_showColorMode;	
+	bool		m_showColorMode;
+
+	DatasetInfo* m_pParent;
     
     // If false use colormap on threshold value.
     bool        m_isGlyph;

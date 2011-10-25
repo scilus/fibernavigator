@@ -19,6 +19,11 @@
 FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 	: DatasetInfo( pDatasetHelper )
 {
+	m_isIntensityToggled = false;
+	m_isOpacityToggled = false;
+	m_isMinMaxLengthToggled = false;
+	m_isSubsamplingToggled = false;
+	m_isColorModeToggled = false;
 }
 
 FibersGroup::~FibersGroup()
@@ -60,6 +65,15 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     
 	wxSizer *pSizer;
 
+	m_pApplyBtn = new wxButton(pParent, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxSize(90, -1));
+	m_pCancelBtn = new wxButton(pParent, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxSize(90, -1));
+	pSizer = new wxBoxSizer(wxHORIZONTAL);
+    pSizer->Add(m_pApplyBtn,0, wxALIGN_CENTER);
+	pSizer->Add(m_pCancelBtn, 0, wxALIGN_CENTER);
+	m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+	pParent->Connect( m_pApplyBtn->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnClickApplyBtn ) );
+	pParent->Connect( m_pCancelBtn->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnClickCancelBtn ) );
+
     m_ptoggleIntensity = new wxToggleButton(pParent, wxID_ANY, wxT("Intensity"),wxDefaultPosition, wxSize(90,-1));
     pSizer = new wxBoxSizer(wxHORIZONTAL);
     pSizer->Add(m_ptoggleIntensity,0,wxALIGN_LEFT);
@@ -89,7 +103,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add(m_ptoggleColorMode,0,wxALIGN_LEFT);
 	m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
 	pParent->Connect( m_ptoggleColorMode->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleColorModeBtn ) );
-    
+
     /*pSizer = new wxBoxSizer( wxHORIZONTAL );
     m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 140, -1 ) );
     pSizer->Add( m_pGeneratesFibersDensityVolume, 0, wxALIGN_CENTER );
@@ -148,21 +162,200 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );*/
 }
 
+void FibersGroup::OnToggleIntensityBtn()
+{
+	m_isIntensityToggled = true;
+
+	// Show intensity controls
+	DatasetInfo::m_pIntensityText->Show();
+	DatasetInfo::m_psliderThresholdIntensity->Show();
+	m_pApplyBtn->Show();
+	m_pCancelBtn->Show();
+
+	// Disable other toggleButtons
+	m_ptoggleIntensity->Hide();
+	m_ptoggleOpacity->Disable();
+	m_ptoggleMinMaxLength->Disable();
+	m_ptoggleSubsampling->Disable();
+	m_ptoggleColorMode->Disable();
+}
+
+void FibersGroup::OnToggleOpacityBtn()
+{
+	m_isOpacityToggled = true;
+
+	// Show opacity controls
+	DatasetInfo::m_pOpacityText->Show();
+	DatasetInfo::m_psliderOpacity->Show();
+	m_pApplyBtn->Show();
+	m_pCancelBtn->Show();
+
+	// Disable other toggleButtons
+	m_ptoggleOpacity->Hide();
+	m_ptoggleIntensity->Disable();
+	m_ptoggleMinMaxLength->Disable();
+	m_ptoggleSubsampling->Disable();
+	m_ptoggleColorMode->Disable();	
+}
+
+void FibersGroup::OnToggleMinMaxLengthBtn()
+{
+	m_isMinMaxLengthToggled = true;
+
+	// Show Min / Max Length controls
+	m_pSliderFibersFilterMin->Show();
+	m_pSliderFibersFilterMax->Show();
+	m_pApplyBtn->Show();
+	m_pCancelBtn->Show();
+	
+	// Disable other toggleButtons
+	m_ptoggleMinMaxLength->Hide();
+	m_ptoggleIntensity->Disable();
+	m_ptoggleOpacity->Disable();
+	m_ptoggleSubsampling->Disable();
+	m_ptoggleColorMode->Disable();	
+}
+
+void FibersGroup::OnToggleSubsamplingBtn()
+{
+	m_isSubsamplingToggled = true;
+
+	// Show subsampling controls
+	m_pSliderFibersSampling->Show();
+	m_pApplyBtn->Show();
+	m_pCancelBtn->Show();
+
+	// Disable other toggleButtons
+	m_ptoggleSubsampling->Hide();
+	m_ptoggleOpacity->Disable();
+	m_ptoggleIntensity->Disable();
+	m_ptoggleMinMaxLength->Disable();
+	m_ptoggleColorMode->Disable();	
+}
+
+void FibersGroup::OnToggleColorModeBtn()
+{
+	m_isColorModeToggled = true;
+
+	// Show ColorMode controls
+
+	// Disable other toggleButtons
+}
+
+void FibersGroup::OnClickApplyBtn()
+{
+	m_pApplyBtn->Hide();
+	m_pCancelBtn->Hide();
+
+	m_isIntensityToggled = false;
+	m_isOpacityToggled = false;
+	m_isMinMaxLengthToggled = false;
+	m_isSubsamplingToggled = false;
+	m_isColorModeToggled = false;
+}
+
+void FibersGroup::OnClickCancelBtn()
+{
+	m_pApplyBtn->Hide();
+	m_pCancelBtn->Hide();
+
+	m_isIntensityToggled = false;
+	m_isOpacityToggled = false;
+	m_isMinMaxLengthToggled = false;
+	m_isSubsamplingToggled = false;
+	m_isColorModeToggled = false;
+}
+
 void FibersGroup::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
 
-	// Hide items that are not required for fibersGroup
 	DatasetInfo::m_ptoggleVisibility->Hide();
 	DatasetInfo::m_ptoggleFiltering->Hide();
 	DatasetInfo::m_pbtnDelete->Hide();
 	DatasetInfo::m_pbtnDown->Hide();
 	DatasetInfo::m_pbtnUp->Hide();
-	DatasetInfo::m_pIntensityText->Hide();
-	DatasetInfo::m_psliderThresholdIntensity->Hide();
-	DatasetInfo::m_pOpacityText->Hide();
-	DatasetInfo::m_psliderOpacity->Hide();
-    
+
+	if( m_isIntensityToggled )
+	{
+		m_ptoggleIntensity->Hide();
+		DatasetInfo::m_pIntensityText->Show();
+		DatasetInfo::m_psliderThresholdIntensity->Show();
+	}
+	else
+	{
+		DatasetInfo::m_pIntensityText->Hide();
+		DatasetInfo::m_psliderThresholdIntensity->Hide();
+		m_ptoggleIntensity->SetValue(false);
+		m_ptoggleIntensity->Enable();
+		m_ptoggleIntensity->Show();
+	}
+
+	if( m_isOpacityToggled )
+	{
+		m_ptoggleOpacity->Hide();
+		DatasetInfo::m_pOpacityText->Show();
+		DatasetInfo::m_psliderOpacity->Show();
+	}
+	else
+	{
+		DatasetInfo::m_pOpacityText->Hide();
+		DatasetInfo::m_psliderOpacity->Hide();
+		m_ptoggleOpacity->SetValue(false);
+		m_ptoggleOpacity->Enable();
+		m_ptoggleOpacity->Show();
+	}
+
+	if( m_isMinMaxLengthToggled )
+	{
+		m_ptoggleMinMaxLength->Hide();
+		//m_pSliderFibersFilterMin->Show();
+		//m_pSliderFibersFilterMax->Show();
+	}
+	else
+	{
+		m_ptoggleMinMaxLength->SetValue(false);
+		m_ptoggleMinMaxLength->Enable();
+		m_ptoggleMinMaxLength->Show();
+		//m_pSliderFibersFilterMin->Hide();
+		//m_pSliderFibersFilterMax->Hide();
+	}
+
+	if( m_isSubsamplingToggled )
+	{
+		m_ptoggleSubsampling->Hide();
+		//m_pSliderFibersSampling->Show();
+	}
+	else
+	{
+		m_ptoggleSubsampling->SetValue(false);
+		m_ptoggleSubsampling->Enable();
+		m_ptoggleSubsampling->Show();
+		//m_pSliderFibersSampling->Hide();
+	}
+
+	if( m_isColorModeToggled )
+	{
+		m_ptoggleColorMode->Hide();
+	}
+	else
+	{
+		m_ptoggleColorMode->SetValue(false);
+		m_ptoggleColorMode->Enable();
+		m_ptoggleColorMode->Show();
+	}
+
+	if(m_isIntensityToggled || m_isOpacityToggled || m_isMinMaxLengthToggled || m_isSubsamplingToggled || m_isColorModeToggled )
+	{
+		m_pApplyBtn->Show();
+		m_pCancelBtn->Show();
+	}
+	else
+	{
+		m_pApplyBtn->Hide();
+		m_pCancelBtn->Hide();
+	}	
+
 	/*m_ptoggleFiltering->Enable( false );
     m_ptoggleFiltering->SetValue( false );
     m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );

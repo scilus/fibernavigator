@@ -35,6 +35,14 @@ public:
 	Fibers* getFibersSet(int num);
 
     void    updateGroupFilters();
+
+	void	OnToggleIntensityBtn();
+	void	OnToggleOpacityBtn();
+	void	OnToggleMinMaxLengthBtn();
+	void	OnToggleSubsamplingBtn();
+	void	OnToggleColorModeBtn();
+	void	OnClickApplyBtn();
+	void	OnClickCancelBtn();
 	
 	// Empty derived methods
 	bool    load( wxString  filename ) { return false; };
@@ -58,6 +66,12 @@ public:
 private:    
     // Variables
 	std::vector<Fibers*> m_fibersSets;
+
+	bool m_isIntensityToggled;
+	bool m_isOpacityToggled;
+	bool m_isMinMaxLengthToggled;
+	bool m_isSubsamplingToggled;
+	bool m_isColorModeToggled;
     
     // GUI members
 	wxToggleButton *m_ptoggleIntensity;
@@ -67,6 +81,9 @@ private:
 	wxToggleButton *m_ptoggleColorMode;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
+
+	wxButton	   *m_pApplyBtn;
+	wxButton	   *m_pCancelBtn;
 
 	wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;

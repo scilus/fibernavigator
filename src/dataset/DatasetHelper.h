@@ -66,7 +66,7 @@ public:
                const bool  i_showFS    = true, 
                const bool  i_useTex    = true, 
                const float i_alpha     = 1.0f );
-    void finishLoading ( DatasetInfo* );
+    void finishLoading ( DatasetInfo*, bool isChild = false );
     bool loadScene     ( const wxString i_filename );
     bool loadTextFile  ( wxString* i_string, const wxString i_filename );
     bool fileNameExists( const wxString i_filename );

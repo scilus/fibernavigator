@@ -371,12 +371,11 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				FibersGroup* l_fibersGroup = new FibersGroup( this );
 				l_fibersGroup->setName( wxT( "Fibers Group" ) );
 				l_fibersGroup->setShow(false);
+				l_fibersGroup->setType(FIBERSGROUP);
 				finishLoading( l_fibersGroup );
 
 				m_fibersGroupLoaded = true;
 			}
-
-			//m_fibersLoaded = true;
 
             std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
             for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
@@ -396,8 +395,9 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
             l_fibers->setThreshold( i_threshold );
             l_fibers->setShow     ( i_active );
             l_fibers->setShowFS   ( i_showFS );
-            l_fibers->setuseTex   ( i_useTex );            
-            finishLoading         ( l_fibers );
+            l_fibers->setuseTex   ( i_useTex );
+			finishLoading( l_fibers, true );
+			m_fibersLoaded = true;
 
 			if( m_fibersGroupLoaded )
 			{
@@ -408,7 +408,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				{
 					pFibersGroup->addFibersSet( l_fibers );
 				}
-			}            
+			}
             return true;
         }
         return false;
@@ -419,7 +419,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
     return false;
 }
 
-void DatasetHelper::finishLoading( DatasetInfo* i_info )
+void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 {
     m_guiBlocked = true;
 #ifdef __WXMAC__
@@ -428,8 +428,8 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
     long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
     long l_id = 0;
-#endif
-    m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+#endif    
+	m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
 
     if( i_info->getShow() )
         m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 0 );
@@ -449,6 +449,11 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
     m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), -1 );
     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
     m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+	if( isChild )
+	{
+		m_mainFrame->m_pListCtrl->moveItemDown( l_id );
+	}
 
     m_mainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
     m_mainFrame->GetStatusBar()->SetStatusText( i_info->getName() + wxT( " loaded" ), 2 );
@@ -1461,6 +1466,9 @@ void DatasetHelper::updateLoadStatus()
             case FIBERS:
                 m_fibersLoaded       = true;
                 break;
+			case FIBERSGROUP:
+				m_fibersGroupLoaded	 = true;
+				break;
             case SURFACE:
                 m_surfaceLoaded      = true;
                 break;
