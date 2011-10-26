@@ -513,7 +513,7 @@ void PropertiesWindow::OnMoveBoundaryPointsRight(wxCommandEvent& event)
 void PropertiesWindow::OnFibersFilter( wxCommandEvent& event)
 {
     Fibers* pTmpFib = NULL;
-    m_mainFrame->m_pDatasetHelper->getFiberDataset(pTmpFib);    
+    m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pTmpFib);    
     if(pTmpFib != NULL)
     {
         pTmpFib->updateFibersFilters();
@@ -523,7 +523,7 @@ void PropertiesWindow::OnFibersFilter( wxCommandEvent& event)
 void PropertiesWindow::OnGenerateFiberVolume( wxCommandEvent& WXUNUSED(event) )
 {
     Fibers* pTmpFib = NULL;
-    m_mainFrame->m_pDatasetHelper->getFiberDataset(pTmpFib);
+    m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pTmpFib);
     if(pTmpFib != NULL)
     {
         pTmpFib->generateFiberVolume();
@@ -1200,7 +1200,7 @@ void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(ev
 {
     Fibers* l_fibers = NULL;
 
-    if( ! m_mainFrame->m_pDatasetHelper->getFiberDataset(l_fibers) )
+    if( ! m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(l_fibers) )
         return ;
 
     int l_x,l_y,l_z;
@@ -1259,7 +1259,7 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
 {
     Fibers* l_fibers = NULL;
 
-    if( !m_mainFrame->m_pDatasetHelper->getFiberDataset(l_fibers) )
+    if( !m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(l_fibers) )
         return ;
 
     int l_x,l_y,l_z;
