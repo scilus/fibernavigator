@@ -19,6 +19,7 @@
 FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 	: DatasetInfo( pDatasetHelper )
 {
+	m_fibersCount = 0;
 	m_isIntensityToggled = false;
 	m_isOpacityToggled = false;
 	m_isMinMaxLengthToggled = false;
@@ -34,6 +35,7 @@ FibersGroup::~FibersGroup()
 void FibersGroup::addFibersSet(Fibers* pFibers)
 {
 	m_fibersSets.push_back(pFibers);
+	m_fibersCount++;
 }
 
 Fibers* FibersGroup::getFibersSet(int num)
@@ -64,6 +66,30 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     DatasetInfo::createPropertiesSizer( pParent );
     
 	wxSizer *pSizer;
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+	m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pMinLengthText = new wxStaticText( pParent, wxID_ANY , wxT( "Min Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+    pSizer->Add( m_pMinLengthText , 0, wxALIGN_CENTER );
+    pSizer->Add( m_pSliderFibersFilterMin, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderFibersFilterMin->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+	m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pMaxLengthText = new wxStaticText( pParent, wxID_ANY , wxT( "Max Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+    pSizer->Add( m_pMaxLengthText , 0, wxALIGN_CENTER );
+    pSizer->Add( m_pSliderFibersFilterMax, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderFibersFilterMax->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pSliderFibersSampling = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSubsamplingText = new wxStaticText( pParent, wxID_ANY , wxT( "Subsampling" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+	pSizer->Add( m_pSubsamplingText , 0, wxALIGN_CENTER );
+    pSizer->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
 
 	m_pApplyBtn = new wxButton(pParent, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxSize(90, -1));
 	m_pCancelBtn = new wxButton(pParent, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxSize(90, -1));
@@ -203,7 +229,9 @@ void FibersGroup::OnToggleMinMaxLengthBtn()
 	m_isMinMaxLengthToggled = true;
 
 	// Show Min / Max Length controls
+	m_pMinLengthText->Show();
 	m_pSliderFibersFilterMin->Show();
+	m_pMaxLengthText->Show();
 	m_pSliderFibersFilterMax->Show();
 	m_pApplyBtn->Show();
 	m_pCancelBtn->Show();
@@ -221,6 +249,7 @@ void FibersGroup::OnToggleSubsamplingBtn()
 	m_isSubsamplingToggled = true;
 
 	// Show subsampling controls
+	m_pSubsamplingText->Show();
 	m_pSliderFibersSampling->Show();
 	m_pApplyBtn->Show();
 	m_pCancelBtn->Show();
@@ -309,29 +338,35 @@ void FibersGroup::updatePropertiesSizer()
 	if( m_isMinMaxLengthToggled )
 	{
 		m_ptoggleMinMaxLength->Hide();
-		//m_pSliderFibersFilterMin->Show();
-		//m_pSliderFibersFilterMax->Show();
+		m_pMinLengthText->Show();
+		m_pSliderFibersFilterMin->Show();
+		m_pMaxLengthText->Show();
+		m_pSliderFibersFilterMax->Show();
 	}
 	else
 	{
+		m_pMinLengthText->Hide();
+		m_pSliderFibersFilterMin->Hide();
+		m_pMaxLengthText->Hide();
+		m_pSliderFibersFilterMax->Hide();
 		m_ptoggleMinMaxLength->SetValue(false);
 		m_ptoggleMinMaxLength->Enable();
 		m_ptoggleMinMaxLength->Show();
-		//m_pSliderFibersFilterMin->Hide();
-		//m_pSliderFibersFilterMax->Hide();
 	}
 
 	if( m_isSubsamplingToggled )
 	{
 		m_ptoggleSubsampling->Hide();
-		//m_pSliderFibersSampling->Show();
+		m_pSubsamplingText->Show();
+		m_pSliderFibersSampling->Show();
 	}
 	else
 	{
+		m_pSubsamplingText->Hide();
+		m_pSliderFibersSampling->Hide();
 		m_ptoggleSubsampling->SetValue(false);
 		m_ptoggleSubsampling->Enable();
 		m_ptoggleSubsampling->Show();
-		//m_pSliderFibersSampling->Hide();
 	}
 
 	if( m_isColorModeToggled )

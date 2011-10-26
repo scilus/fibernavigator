@@ -3175,7 +3175,7 @@ void Fibers::setFibersLength()
 bool Fibers::getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints )
 {
     Fibers *pFibers = NULL;
-    m_dh->getFiberDataset( pFibers );
+    m_dh->getSelectedFiberDataset( pFibers );
 
     if( pFibers == NULL || fiberIndex < 0 )
     {

@@ -113,6 +113,7 @@ public:
 
 	bool getFibersGroupDataset( FibersGroup* &i_fiberGroup );
 	bool getFiberDataset  ( Fibers*  &i_fiber );
+	bool getSelectedFiberDataset ( Fibers* &i_fiber );
     bool getSurfaceDataset( Surface* &i_surface );
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
@@ -145,7 +146,7 @@ public:
     double                m_rulerPartialLength;
     int                   m_fibersSamplingFactor;
     bool                  m_isSegmentActive;
-    int                      m_SegmentMethod;
+    int                   m_SegmentMethod;
     bool                  m_isFloodfillActive;
     bool                  m_isSelectBckActive;
     bool                  m_isSelectObjActive;

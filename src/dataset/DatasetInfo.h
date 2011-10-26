@@ -87,15 +87,6 @@ public:
     bool     toggleUseTex()                      { m_useTex      = ! m_useTex;        return m_useTex;      };
     bool     toggleUseLIC()                      { m_useLIC      = ! m_useLIC;        return m_useLIC;      };
 
-	bool	 toggleIntensityBtn()				 { m_showIntensity		= ! m_showIntensity;		return m_showIntensity;		};
-	bool	 toggleOpacityBtn()					 { m_showOpacity		= ! m_showOpacity;			return m_showOpacity;		};
-	bool	 toggleMinMaxLengthBtn()			 { m_showMinMaxLengths  = ! m_showMinMaxLengths;	return m_showMinMaxLengths;	};
-	bool	 toggleSubsamplingBtn()				 { m_showSubsampling	= ! m_showSubsampling;		return m_showSubsampling;	};
-	bool	 toggleColorModeBtn()				 { m_showColorMode		= ! m_showColorMode;		return m_showColorMode;		};
-
-	void	 setParent( DatasetInfo* pParent)	 { m_pParent = pParent; };
-	DatasetInfo* getParent()					 { return m_pParent;	};
-
     void     setShow       ( bool i_show   )     { m_show        = i_show;   };
     void     setShowFS     ( bool i_show   )     { m_showFS      = i_show;   };
     void     setuseTex     ( bool i_useTex )     { m_useTex      = i_useTex; };
@@ -159,14 +150,6 @@ protected:
     bool        m_show;
     bool        m_showFS;       // Show front sector for meshs.
     bool        m_useTex;        // Color mesh with textures loaded.
-
-	bool		m_showIntensity;
-	bool		m_showOpacity;
-	bool		m_showMinMaxLengths;
-	bool		m_showSubsampling;
-	bool		m_showColorMode;
-
-	DatasetInfo* m_pParent;
     
     // If false use colormap on threshold value.
     bool        m_isGlyph;

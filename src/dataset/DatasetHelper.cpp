@@ -398,6 +398,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
             l_fibers->setuseTex   ( i_useTex );
 			finishLoading( l_fibers, true );
 			m_fibersLoaded = true;
+			m_selBoxChanged = true;
 
 			if( m_fibersGroupLoaded )
 			{
@@ -406,7 +407,8 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 				if( pFibersGroup != NULL )
 				{
-					pFibersGroup->addFibersSet( l_fibers );
+					pFibersGroup->addFibersSet( l_fibers ); 
+					int test = 0;
 				}
 			}
             return true;
@@ -1322,6 +1324,23 @@ bool DatasetHelper::getFiberDataset( Fibers* &io_f )
     {
         DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
         if( l_datasetInfo->getType() == FIBERS )
+        {
+            io_f = (Fibers*)m_mainFrame->m_pListCtrl->GetItemData( i );
+            return true;
+        }
+    }
+    return false;
+}
+
+bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
+{
+	io_f = NULL;
+
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    {
+        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
+		long item = m_mainFrame->m_pListCtrl->GetItemState( i, wxLIST_STATE_SELECTED);
+        if( l_datasetInfo->getType() == FIBERS && item != -1)
         {
             io_f = (Fibers*)m_mainFrame->m_pListCtrl->GetItemData( i );
             return true;

@@ -34,6 +34,8 @@ public:
 	void	addFibersSet(Fibers* pFibers);
 	Fibers* getFibersSet(int num);
 
+	int		getFibersCount() { return m_fibersCount; };
+
     void    updateGroupFilters();
 
 	void	OnToggleIntensityBtn();
@@ -67,6 +69,8 @@ private:
     // Variables
 	std::vector<Fibers*> m_fibersSets;
 
+	int	 m_fibersCount;
+
 	bool m_isIntensityToggled;
 	bool m_isOpacityToggled;
 	bool m_isMinMaxLengthToggled;
@@ -94,6 +98,11 @@ private:
     wxRadioButton  *m_pRadioMinDistanceAnchoring;
     wxRadioButton  *m_pRadioCurvature;
     wxRadioButton  *m_pRadioTorsion;
+
+	wxStaticText	*m_pMinLengthText;
+	wxStaticText	*m_pMaxLengthText;
+	wxStaticText	*m_pSubsamplingText;
+	wxStaticText	*m_pColorModeText;
 };
 
 #endif /* FIBERSGROUP_H_ */
