@@ -877,7 +877,7 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
 {
     Fibers* l_fibers = NULL;
-    m_datasetHelper->getFiberDataset( l_fibers );
+    m_datasetHelper->getSelectedFiberDataset( l_fibers );
 
     if( l_fibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
         return false;
