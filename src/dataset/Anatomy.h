@@ -110,7 +110,9 @@ private:
     void dilateInternal( std::vector<bool> &workData, int curIndex );
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
     
-    void generateTexture();
+	void generateTexture();
+	void updateTexture( const int x, const int y, const int z, int size );
+
     void generateGeometry() {};
     void initializeBuffer() {};
     void smooth()           {};

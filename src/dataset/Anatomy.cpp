@@ -491,6 +491,52 @@ void Anatomy::generateTexture()
     }
 }
 
+void Anatomy::updateTexture( const int x, const int y, const int z, int size ) 
+{
+	int width = size;
+	int height = size;
+	int depth = size;
+	int xoffset = MIN( MAX(x-width/2, 0),  m_columns-width );
+	int yoffset = MIN( MAX(y-height/2, 0), m_rows-height );
+	int zoffset = MIN( MAX(z-depth/2, 0),  m_frames-depth );
+	int datasetSize = width*height*depth;
+
+	//create the modified region's vector in white
+	std::vector<float>* subData = new vector<float>( datasetSize, 1.0f );
+
+	//if(shape != CUBE)
+
+	//glGetTexImage( GL_TEXTURE_3D, 0, GL_LUMINANCE, GL_FLOAT, sourceData); 
+	/*
+    for( int f = 0; f < depth; ++f )
+    {
+        for( int r = 0; r < height; ++r )
+        {
+			for( int c = 0; c < width; ++c )
+			{
+				int sourceIndex = (c+xoffset) + (r+yoffset) * m_columns + (f+zoffset) * m_columns * m_rows;
+				int subIndex = c + r * width + f * width * height;
+				if(subIndex < 0)
+					subIndex += datasetSize;
+
+				//inside sphere: update subImage and source
+				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
+				{
+					subData->at(subIndex) = 1.0f;
+					//m_floatDataset[sourceIndex] = 1.0f;
+				}
+				else //outside sphere: copy source values in the subImage
+				{
+					subData->at(subIndex) = m_floatDataset[sourceIndex];
+				}
+			}
+		}
+	}*/
+
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we have already created
+	glTexSubImage3D( GL_TEXTURE_3D, 0, GLint(xoffset), GLint(yoffset), GLint(zoffset), GLint(width), GLint(height), GLint(depth), GL_LUMINANCE, GL_FLOAT, &subData[0] );
+}
+
 GLuint Anatomy::getGLuint()
 {
     if( ! m_GLuint )
@@ -1009,20 +1055,16 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 
 void Anatomy::writeVoxel( const int x, const int y, const int z )
 {
-	//1D vector with the normalized colors ( 0 to 1 )
-	std::vector<float>* sourceData = getFloatDataset();
-	int curIndex = x + y * m_columns + z * m_columns * m_rows;
-
+	
 	if( m_type == HEAD_BYTE )
 	{
-		sourceData->at(curIndex) = 1.0f; //white
+		updateTexture(x, y, z, 7);
+		//generateTexture();
 	}
 	else if( m_type == RGB )
 	{
 		//TODO
 	}
-	//refresh view
-	generateTexture();
 }
 
 void Anatomy::eraseVoxel( const int x, const int y, const int z )
@@ -1058,8 +1100,8 @@ void Anatomy::eraseVoxel( const int x, const int y, const int z )
 	{
 		//TODO
 	}
-	//refresh view
-	generateTexture();
+	//apply changes to the texture
+	updateTexture(x, y, z, 7);
 }
 
 std::vector< float >* Anatomy::getFloatDataset()

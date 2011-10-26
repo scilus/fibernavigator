@@ -672,7 +672,8 @@ void MainFrame::onSelectPen( wxCommandEvent& event )
 		return;
 	}
 	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_PEN;
-
+	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
+	
 	refreshAllGLWidgets();
 }
 
@@ -683,6 +684,7 @@ void MainFrame::onSelectEraser( wxCommandEvent& event )
 		return;
 	}
 	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_ERASER;
+	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
 
 	refreshAllGLWidgets();
 }
