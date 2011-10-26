@@ -390,7 +390,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
         return;
     }
     Fibers* l_fibers = NULL;
-    m_pDatasetHelper->getFiberDataset( l_fibers );
+    m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
 
     wxString caption         = wxT( "Choose a file" );
     wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
@@ -866,7 +866,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 {
     //Generate KdTree for Spline Surface
     Fibers* pTmpFib = NULL;
-    m_pDatasetHelper->getFiberDataset(pTmpFib);
+    m_pDatasetHelper->getSelectedFiberDataset(pTmpFib);
     if(pTmpFib != NULL)
     {
         pTmpFib->generateKdTree();
@@ -886,7 +886,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 
     if( m_pDatasetHelper->m_fibersLoaded )
     {
-        m_pDatasetHelper->getFiberDataset( l_fibers );
+        m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
     }
     if( m_pDatasetHelper->m_showSagittal )
     {
@@ -1063,7 +1063,7 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 {
     m_pDatasetHelper->m_useFakeTubes = !m_pDatasetHelper->m_useFakeTubes;
     Fibers* l_fiber;
-    if( m_pDatasetHelper->getFiberDataset( l_fiber ) )
+    if( m_pDatasetHelper->getSelectedFiberDataset( l_fiber ) )
     {
         l_fiber->switchNormals( !m_pDatasetHelper->m_useFakeTubes );
     }
@@ -1137,7 +1137,7 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 {
     Fibers* l_fibers = NULL; // Initalize it quiet compiler.
-    if( m_pDatasetHelper->getFiberDataset( l_fibers ) == NULL)
+    if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) == NULL)
     {
         return;
     }
