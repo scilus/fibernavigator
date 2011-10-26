@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <cfloat>
+#include <limits>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
@@ -3263,12 +3264,15 @@ void Fibers::flipAxis( AxisType i_axe )
     {
         case X_AXIS:
             i = 0;
+            m_pOctree->flipX();
             break;
         case Y_AXIS:
             i = 1;
+            m_pOctree->flipY();
             break;
         case Z_AXIS:
             i = 2;
+            m_pOctree->flipZ();
             break;
         default:
             m_dh->printDebug( _T("Cannot flip fibers. The specified axis is undefined"), 2 );
