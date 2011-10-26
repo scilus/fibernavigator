@@ -15,6 +15,7 @@
 #include "../dataset/DatasetHelper.h"
 #include "../dataset/DatasetInfo.h"
 #include "../dataset/Fibers.h"
+#include "../dataset/FibersGroup.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
 #include "../gui/ArcBall.h"
@@ -267,12 +268,17 @@ void TheScene::renderScene()
     
     renderMesh();
 
-    if( m_pDatasetHelper->m_fibersLoaded )
-    {
-        if ( m_pDatasetHelper->m_useFakeTubes )
-            renderFakeTubes();
-        else
-            renderFibers();
+	FibersGroup* pFibersGroup;
+    m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+	if( pFibersGroup )
+	{
+		if( pFibersGroup->getFibersCount() > 0)
+		{
+			if ( m_pDatasetHelper->m_useFakeTubes )
+				renderFakeTubes();
+			else
+				renderFibers();
+		}
     }
     
     if( m_pDatasetHelper->m_showObjects )
