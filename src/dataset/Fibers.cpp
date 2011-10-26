@@ -3204,9 +3204,14 @@ void Fibers::updateFibersFilters()
     int subSampling = m_pSliderFibersSampling->GetValue();
     int maxSubSampling = m_pSliderFibersSampling->GetMax() + 1;
 
-    for( int i = 0; i < m_countLines; ++i )
+	updateFibersFilters(min, max, subSampling, maxSubSampling);
+}
+
+void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling)
+{
+	for( int i = 0; i < m_countLines; ++i )
     {
-        m_filtered[i] = !( ( i % maxSubSampling ) >= subSampling && m_length[i] >= min && m_length[i] <= max );
+        m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
 }
 

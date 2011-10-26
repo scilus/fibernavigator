@@ -86,6 +86,7 @@ public:
     void    setFibersLength();
     
     void    updateFibersFilters();
+	void	updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
     
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
@@ -105,6 +106,11 @@ public:
     {
         return m_minLength;
     }
+
+	void	setThreshold(int threshold)	
+	{
+		m_cachedThreshold = threshold;
+	}
     
     // Empty derived methods
     void    activateLIC()      {};

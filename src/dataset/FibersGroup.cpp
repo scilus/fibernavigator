@@ -76,7 +76,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMin->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-	m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, 100, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pMaxLengthText = new wxStaticText( pParent, wxID_ANY , wxT( "Max Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
     pSizer->Add( m_pMaxLengthText , 0, wxALIGN_CENTER );
     pSizer->Add( m_pSliderFibersFilterMax, 0, wxALIGN_CENTER );
@@ -276,6 +276,29 @@ void FibersGroup::OnClickApplyBtn()
 	m_pApplyBtn->Hide();
 	m_pCancelBtn->Hide();
 
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		if( m_isIntensityToggled )
+		{
+			m_fibersSets[i]->setThreshold( DatasetInfo::m_psliderThresholdIntensity->GetValue() );
+		}
+		if( m_isOpacityToggled )
+		{
+			m_fibersSets[i]->setAlpha( (float)DatasetInfo::m_psliderOpacity->GetValue() / 100.0f );
+		}
+		if( m_isMinMaxLengthToggled ||  m_isSubsamplingToggled)
+		{
+			int minLength = m_pSliderFibersFilterMin->GetValue();
+			int maxLength = m_pSliderFibersFilterMax->GetValue();
+			int minSubsampling = m_pSliderFibersSampling->GetValue();
+			int maxSubsampling = m_pSliderFibersSampling->GetMax();
+			m_fibersSets[i]->updateFibersFilters( minLength, maxLength, minSubsampling, maxSubsampling);
+		}
+		if( m_isColorModeToggled )
+		{
+		}
+	}
+
 	m_isIntensityToggled = false;
 	m_isOpacityToggled = false;
 	m_isMinMaxLengthToggled = false;
@@ -305,18 +328,28 @@ void FibersGroup::updatePropertiesSizer()
 	DatasetInfo::m_pbtnDown->Hide();
 	DatasetInfo::m_pbtnUp->Hide();
 
+	m_ptoggleIntensity->Enable();
+	m_ptoggleOpacity->Enable();
+	m_ptoggleMinMaxLength->Enable();
+	m_ptoggleSubsampling->Enable();
+	m_ptoggleColorMode->Enable();
+
+
 	if( m_isIntensityToggled )
 	{
 		m_ptoggleIntensity->Hide();
 		DatasetInfo::m_pIntensityText->Show();
 		DatasetInfo::m_psliderThresholdIntensity->Show();
+		m_ptoggleOpacity->Disable();
+		m_ptoggleMinMaxLength->Disable();
+		m_ptoggleSubsampling->Disable();
+		m_ptoggleColorMode->Disable();
 	}
 	else
 	{
 		DatasetInfo::m_pIntensityText->Hide();
 		DatasetInfo::m_psliderThresholdIntensity->Hide();
 		m_ptoggleIntensity->SetValue(false);
-		m_ptoggleIntensity->Enable();
 		m_ptoggleIntensity->Show();
 	}
 
@@ -325,13 +358,16 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleOpacity->Hide();
 		DatasetInfo::m_pOpacityText->Show();
 		DatasetInfo::m_psliderOpacity->Show();
+		m_ptoggleIntensity->Disable();
+		m_ptoggleMinMaxLength->Disable();
+		m_ptoggleSubsampling->Disable();
+		m_ptoggleColorMode->Disable();
 	}
 	else
 	{
 		DatasetInfo::m_pOpacityText->Hide();
 		DatasetInfo::m_psliderOpacity->Hide();
 		m_ptoggleOpacity->SetValue(false);
-		m_ptoggleOpacity->Enable();
 		m_ptoggleOpacity->Show();
 	}
 
@@ -342,6 +378,10 @@ void FibersGroup::updatePropertiesSizer()
 		m_pSliderFibersFilterMin->Show();
 		m_pMaxLengthText->Show();
 		m_pSliderFibersFilterMax->Show();
+		m_ptoggleIntensity->Disable();
+		m_ptoggleOpacity->Disable();
+		m_ptoggleSubsampling->Disable();
+		m_ptoggleColorMode->Disable();
 	}
 	else
 	{
@@ -349,8 +389,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_pSliderFibersFilterMin->Hide();
 		m_pMaxLengthText->Hide();
 		m_pSliderFibersFilterMax->Hide();
-		m_ptoggleMinMaxLength->SetValue(false);
-		m_ptoggleMinMaxLength->Enable();
+		m_ptoggleMinMaxLength->SetValue(false);;
 		m_ptoggleMinMaxLength->Show();
 	}
 
@@ -359,24 +398,30 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleSubsampling->Hide();
 		m_pSubsamplingText->Show();
 		m_pSliderFibersSampling->Show();
+		m_ptoggleIntensity->Disable();
+		m_ptoggleOpacity->Disable();
+		m_ptoggleMinMaxLength->Disable();
+		m_ptoggleColorMode->Disable();
 	}
 	else
 	{
 		m_pSubsamplingText->Hide();
 		m_pSliderFibersSampling->Hide();
 		m_ptoggleSubsampling->SetValue(false);
-		m_ptoggleSubsampling->Enable();
 		m_ptoggleSubsampling->Show();
 	}
 
 	if( m_isColorModeToggled )
 	{
 		m_ptoggleColorMode->Hide();
+		m_ptoggleIntensity->Disable();
+		m_ptoggleOpacity->Disable();
+		m_ptoggleMinMaxLength->Disable();
+		m_ptoggleSubsampling->Disable();
 	}
 	else
 	{
 		m_ptoggleColorMode->SetValue(false);
-		m_ptoggleColorMode->Enable();
 		m_ptoggleColorMode->Show();
 	}
 

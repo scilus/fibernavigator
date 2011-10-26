@@ -36,6 +36,12 @@ public:
 
 	int		getFibersCount() { return m_fibersCount; };
 
+	bool	isOneBtnToggled()
+	{
+		return m_isIntensityToggled && m_isOpacityToggled && m_isMinMaxLengthToggled 
+			   && m_isSubsamplingToggled && m_isColorModeToggled;
+	}
+
     void    updateGroupFilters();
 
 	void	OnToggleIntensityBtn();
