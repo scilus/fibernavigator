@@ -703,8 +703,7 @@ void MainFrame::displayPropertiesSheet()
     if (m_pLastSelectedSceneObject == NULL && m_pCurrentSceneObject == NULL)
     {
         if (m_pCurrentSizer != NULL)
-        {
-           m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);
+        {m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);
         }
     }
     else

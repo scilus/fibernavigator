@@ -3257,6 +3257,10 @@ void Fibers::updateFibersFilters()
     }
 }
 
+vector< bool > Fibers::getFilteredFibers(){
+    return m_filtered;
+}
+
 void Fibers::flipAxis( AxisType i_axe )
 {
     unsigned int i = 0;

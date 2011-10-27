@@ -687,8 +687,9 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
    
     // Once the vector is filled up with the points data we can calculate the fibers info grid items.
     getFibersCount                  ( o_gridInfo.m_count             );
-    //getMeanFiberValue               ( l_selectedFibersPoints, 
-    //                                  o_gridInfo.m_meanValue         );
+    o_gridInfo.m_count = l_selectedFibersPoints.size();
+    getMeanFiberValue               ( l_selectedFibersPoints, 
+                                      o_gridInfo.m_meanValue         );
     getMeanMaxMinFiberLength        ( l_selectedFibersPoints, 
                                       o_gridInfo.m_meanLength, 
                                       o_gridInfo.m_maxLength, 
@@ -732,14 +733,23 @@ void SelectionObject::computeMeanFiber(){
 
 vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     
+    bool getOnlyVisibleFiber = true;
     vector< Vector >           l_currentFiberPoints;
     vector< Vector >           l_currentSwappedFiberPoints;
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
+    vector< bool > filteredFiber;
+    Fibers* l_fibers = NULL;
+
+    m_datasetHelper->getFiberDataset(l_fibers);
+    l_fibers->updateFibersFilters();
+    filteredFiber = l_fibers->getFilteredFibers();
+
+    //bool visible = l_fibers.m_filtered;
 
     for( unsigned int i = 0; i < m_inBranch.size(); ++i )
     {
-        if( m_inBranch[i] )
+        if( m_inBranch[i] && !filteredFiber[i])
         {
             getFiberCoordValues( i, l_currentFiberPoints );
 
@@ -747,18 +757,11 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
             // could have there coordinated in the data completly inversed ( first fiber 0,0,0 - 1,1,1 ),  
             // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
             // verification and if the order of the fiber points are wrong we switch them.
-            /*if( l_selectedFibersPoints.size() > 0 )
+            if( l_selectedFibersPoints.size() > 0 )
             {
                 for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
                     l_meanStart += l_selectedFibersPoints[j][0];
                 l_meanStart /= l_selectedFibersPoints.size();
-            }*/
-
-            if( l_currentFiberPoints.size() > 0 )
-            {
-                for( unsigned int j = 0; j < l_currentFiberPoints.size(); ++j )
-                    l_meanStart += l_currentFiberPoints[j];
-                l_meanStart /= l_currentFiberPoints.size();
             }
 
             // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
@@ -981,7 +984,7 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fib
         {
             l_pos = i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel +
                     i_fibersPoints[i][j].y * m_datasetHelper->m_columns / m_datasetHelper->m_yVoxel +
-                    i_fibersPoints[i][j].z * m_datasetHelper->m_columns * m_datasetHelper->m_rows / (m_datasetHelper->m_yVoxel*m_datasetHelper->m_zVoxel);
+                    i_fibersPoints[i][j].z * m_datasetHelper->m_frames * m_datasetHelper->m_rows / (m_datasetHelper->m_yVoxel*m_datasetHelper->m_zVoxel);
 
             Vector test = i_fibersPoints[i][j];
             
@@ -1810,6 +1813,8 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
         m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
         //m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
+
+        computeMeanFiber(); //Fast fix to make sure the mean fiber won't move when stats are compute
     }
 }
 
