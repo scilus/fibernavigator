@@ -3255,6 +3255,10 @@ void Fibers::updateFibersFilters()
     {
         m_filtered[i] = !( ( i % maxSubSampling ) >= subSampling && m_length[i] >= min && m_length[i] <= max );
     }
+    //Update stats and mean fiber
+    m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
+    m_dh->m_lastSelectedObject->computeMeanFiber();
+
 }
 
 vector< bool > Fibers::getFilteredFibers(){

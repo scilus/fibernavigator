@@ -413,11 +413,11 @@ void SelectionObject::setColor( wxColour i_color )
 
 ///////////////////////////////////////////////////////////////////////////
 // To avoid to much complication by inserting the SelectionObject class, this 
-// will simply return true if this selection object is of box type or ellipsoid type
+// will simply return true if this selection object is of box type, ellipsoid type or IsoSurface
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::isSelectionObject()
 {
-    if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE )
+    if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE || m_objectType == CISO_SURFACE_TYPE)
         return true;
 
     return false;
@@ -686,7 +686,6 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
     vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
    
     // Once the vector is filled up with the points data we can calculate the fibers info grid items.
-    getFibersCount                  ( o_gridInfo.m_count             );
     o_gridInfo.m_count = l_selectedFibersPoints.size();
     getMeanFiberValue               ( l_selectedFibersPoints, 
                                       o_gridInfo.m_meanValue         );
@@ -716,24 +715,18 @@ void SelectionObject::computeMeanFiber(){
         // We calculate the mean fiber of the selected fibers.
         m_meanFiberPoints.clear();
         getMeanFiber( getSelectedFibersPoints(), MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
-
-        /* Ecriture directe du fichier txt concernant la mean fiber */
-        /*ofstream fichier("test.txt", ios::out | ios::trunc);  //déclaration du flux et ouverture du fichier
-        if(fichier)  // si l'ouverture a réussi
-        {
-            for (int i = 0 ; i < MEAN_FIBER_NB_POINTS ; i++)
-            fichier << m_meanFiberPoints[i].x << " " <<  m_meanFiberPoints[i].y << " " << m_meanFiberPoints[i].z << "\n";
-        }
-        fichier.close();*/
     }
     else
         m_meanFiberPoints.clear();
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+//Return all the visible fibers that pass through the selection object
+//
+///////////////////////////////////////////////////////////////////////////
 vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
-    
-    bool getOnlyVisibleFiber = true;
+
     vector< Vector >           l_currentFiberPoints;
     vector< Vector >           l_currentSwappedFiberPoints;
     vector< vector< Vector > > l_selectedFibersPoints;
@@ -742,10 +735,7 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     Fibers* l_fibers = NULL;
 
     m_datasetHelper->getFiberDataset(l_fibers);
-    l_fibers->updateFibersFilters();
     filteredFiber = l_fibers->getFilteredFibers();
-
-    //bool visible = l_fibers.m_filtered;
 
     for( unsigned int i = 0; i < m_inBranch.size(); ++i )
     {
@@ -984,7 +974,7 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fib
         {
             l_pos = i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel +
                     i_fibersPoints[i][j].y * m_datasetHelper->m_columns / m_datasetHelper->m_yVoxel +
-                    i_fibersPoints[i][j].z * m_datasetHelper->m_frames * m_datasetHelper->m_rows / (m_datasetHelper->m_yVoxel*m_datasetHelper->m_zVoxel);
+                    i_fibersPoints[i][j].z * m_datasetHelper->m_columns * m_datasetHelper->m_rows / m_datasetHelper->m_zVoxel;//(m_datasetHelper->m_yVoxel*m_datasetHelper->m_zVoxel);
 
             Vector test = i_fibersPoints[i][j];
             
@@ -1886,7 +1876,6 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_ptoggleCalculatesFibersInfo = new wxToggleButton(parent, wxID_ANY, wxT("Calculate Fibers Stats"), wxDefaultPosition, wxSize(140,-1));
     m_propertiesSizer->Add(m_ptoggleCalculatesFibersInfo,0,wxALIGN_CENTER);      
     parent->Connect(m_ptoggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayFibersInfo));
-
     m_propertiesSizer->AddSpacer(2);
 
     // Initialize the grid.
@@ -1921,6 +1910,11 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->Add( m_pgridfibersInfo,0,wxALL,0);
     
     m_propertiesSizer->AddSpacer(2);
+
+    m_pCBSelectDataSet = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxSize(140,-1));
+    m_propertiesSizer->Add(m_pCBSelectDataSet, 0, wxALIGN_CENTER);
+    m_propertiesSizer->AddSpacer(2);
+
     m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
     //m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
     //m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
@@ -2004,6 +1998,8 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleCalculatesFibersInfo->Enable(getShowFibers());
     m_pgridfibersInfo->Enable(getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue());
     m_ptoggleDisplayMeanFiber->Enable(getShowFibers());
+
+    m_pCBSelectDataSet->Show(m_ptoggleCalculatesFibersInfo->GetValue());
 
     if (!getShowFibers() && m_meanFiberPoints.size() > 0){
         //Hide the mean fiber if fibers are invisible and the box is moved

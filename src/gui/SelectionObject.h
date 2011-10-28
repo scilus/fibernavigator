@@ -324,6 +324,7 @@ private:
     wxButton        *m_pbtnFlipNormal;
     wxBitmapButton  *m_pbtnSelectColor;
     wxButton        *m_pbtnSelectColorFibers;
+    wxChoice        *m_pCBSelectDataSet;
 public:
     wxTextCtrl      *m_ctrlBoxX;
     wxTextCtrl      *m_ctrlBoxY;
