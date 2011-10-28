@@ -111,7 +111,8 @@ private:
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
     
 	void generateTexture();
-	void updateTexture( const int x, const int y, const int z, int size );
+	void updateTexture( const int x, const int y, const int z, float color, int size );
+	void updateTexture( const int x, const int y, const int z, float* colorRGB, int size );
 
     void generateGeometry() {};
     void initializeBuffer() {};

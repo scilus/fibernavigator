@@ -491,8 +491,14 @@ void Anatomy::generateTexture()
     }
 }
 
-void Anatomy::updateTexture( const int x, const int y, const int z, int size ) 
+void Anatomy::updateTexture( const int x, const int y, const int z, float color, int size ) 
 {
+	//hit detection can be a pixel offset I think, but negative pos crashes
+	if(x < 0 || y < 0 || z < 0)
+	{
+		return;
+	}
+
 	int width = size;
 	int height = size;
 	int depth = size;
@@ -500,9 +506,9 @@ void Anatomy::updateTexture( const int x, const int y, const int z, int size )
 	int yoffset = MIN( MAX(y-height/2, 0), m_rows-height );
 	int zoffset = MIN( MAX(z-depth/2, 0),  m_frames-depth );
 	int datasetSize = width*height*depth;
-
-	//create the modified region's vector in white
-	std::vector<float>* subData = new vector<float>( datasetSize, 1.0f );
+	
+	//create the modified region's vector in the right color
+	std::vector<float>* subData = new vector<float>( datasetSize, color );
 
 	//if(shape != CUBE)
 
@@ -522,8 +528,8 @@ void Anatomy::updateTexture( const int x, const int y, const int z, int size )
 				//inside sphere: update subImage and source
 				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
 				{
-					subData->at(subIndex) = 1.0f;
-					//m_floatDataset[sourceIndex] = 1.0f;
+					subData->at(subIndex) = color;
+					//m_floatDataset[sourceIndex] = color;
 				}
 				else //outside sphere: copy source values in the subImage
 				{
@@ -535,6 +541,61 @@ void Anatomy::updateTexture( const int x, const int y, const int z, int size )
 
 	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we have already created
 	glTexSubImage3D( GL_TEXTURE_3D, 0, GLint(xoffset), GLint(yoffset), GLint(zoffset), GLint(width), GLint(height), GLint(depth), GL_LUMINANCE, GL_FLOAT, &subData[0] );
+}
+
+void Anatomy::updateTexture( const int x, const int y, const int z, float* colorRGB, int size ) 
+{
+	//hit detection can be a pixel offset I think, but negative pos crashes
+	if(x < 0 || y < 0 || z < 0)
+	{
+		return;
+	}
+	
+	int width = size;
+	int height = size;
+	int depth = size;
+	int xoffset = MIN( MAX(x-width/2, 0),  m_columns-width );
+	int yoffset = MIN( MAX(y-height/2, 0), m_rows-height );
+	int zoffset = MIN( MAX(z-depth/2, 0),  m_frames-depth );
+	int datasetSize = width*height*depth*3;
+	
+	//create the modified region's vector and put the right color
+	std::vector<float>* subData = new vector<float>( datasetSize, 0.0f );
+	for( int i=0; i < datasetSize; i+=3 )
+    {
+        subData->at(i) = colorRGB[0];
+        subData->at(i+1) = colorRGB[1];
+        subData->at(i+2) = colorRGB[2];
+    }
+	
+    for( int f = 0; f < depth; ++f )
+    {
+        for( int r = 0; r < height; ++r )
+        {
+			for( int c = 0; c < width; ++c )
+			{
+				int sourceIndex = (c+xoffset) + (r+yoffset) * m_columns + (f+zoffset) * m_columns * m_rows;
+				int subIndex = c + r * width + f * width * height;
+
+				//inside sphere: update subImage and source
+				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
+				{
+					subData->at(subIndex*3 ) = colorRGB[0];
+					subData->at(subIndex*3 + 1) = colorRGB[1];
+					subData->at(subIndex*3 + 2) = colorRGB[2];
+				}
+				else //outside sphere: copy source values in the subImage
+				{
+					subData->at(subIndex*3) = m_floatDataset[sourceIndex*3];
+					subData->at(subIndex*3 + 1) = m_floatDataset[sourceIndex*3 + 1];
+					subData->at(subIndex*3 + 2) = m_floatDataset[sourceIndex*3 + 2];
+				}
+			}
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we have already created
+	glTexSubImage3D( GL_TEXTURE_3D, 0, GLint(xoffset), GLint(yoffset), GLint(zoffset), GLint(width), GLint(height), GLint(depth), GL_RGB, GL_FLOAT, &subData[0] );
 }
 
 GLuint Anatomy::getGLuint()
@@ -1056,52 +1117,64 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 void Anatomy::writeVoxel( const int x, const int y, const int z )
 {
 	
-	if( m_type == HEAD_BYTE )
-	{
-		updateTexture(x, y, z, 7);
-		//generateTexture();
-	}
-	else if( m_type == RGB )
-	{
-		//TODO
+    switch( m_type )
+    {
+		case HEAD_BYTE:
+		case HEAD_SHORT:
+        case OVERLAY:
+		{
+			float white = 1.0f;
+			updateTexture(x, y, z, white, 7);
+			//generateTexture();
+			break;
+		}
+		case RGB:
+		{
+			float whiteRGB[3];
+			whiteRGB[0] = 1.0f;
+			whiteRGB[1] = 1.0f;
+			whiteRGB[2] = 1.0f;
+
+			updateTexture(x, y, z, whiteRGB, 7);
+			//generateTexture();
+			break;
+		}
+		case VECTORS:
+		{
+			break;
+		}
 	}
 }
 
 void Anatomy::eraseVoxel( const int x, const int y, const int z )
 {
-	//1D vector with the normalized colors ( 0 to 1 )
-	std::vector<float>* sourceData = getFloatDataset();
-	int curIndex = x + y * m_columns + z * m_columns * m_rows;
+    switch( m_type )
+    {
+		case HEAD_BYTE:
+		case HEAD_SHORT:
+        case OVERLAY:
+		{
+			float black = 0.0f;
+			updateTexture(x, y, z, black, 7);
+			//generateTexture();
+			break;
+		}
+		case RGB:
+		{
+			float blackRGB[3];
+			blackRGB[0] = 0.0f;
+			blackRGB[1] = 0.0f;
+			blackRGB[2] = 0.0f;
 
-	if( m_type == HEAD_BYTE )
-	{
-		sourceData->at(curIndex) = BLACK; //black (but not 0.0f, or it becomes transparent)
-		//all around clicked voxel
-		float left = MAX(0,x-1);
-		curIndex = left + y * m_columns + z * m_columns * m_rows;
-		sourceData->at(curIndex) = BLACK;
-		float right = MIN(m_columns-1,x+1);
-		curIndex = right + y * m_columns + z * m_columns * m_rows;
-		sourceData->at(curIndex) = BLACK;
-		float up = MAX(0,y-1);
-		curIndex = x + up * m_columns + z * m_columns * m_rows;
-		sourceData->at(curIndex) = BLACK;
-		float down = MIN(m_rows-1,y+1);
-		curIndex = x + down * m_columns + z * m_columns * m_rows;
-		sourceData->at(curIndex) = BLACK;
-		float front = MAX(0,z-1);
-		curIndex = x + y * m_columns + front * m_columns * m_rows;
-		sourceData->at(curIndex) = BLACK;
-		float back = MIN(m_frames-1,z+1);
-		curIndex = x + y * m_columns + back * m_columns * m_rows;
-		sourceData->at(curIndex) = BLACK;
+			updateTexture(x, y, z, blackRGB, 7);
+			//generateTexture();
+			break;
+		}
+		case VECTORS:
+		{
+			break;
+		}
 	}
-	else if( m_type == RGB )
-	{
-		//TODO
-	}
-	//apply changes to the texture
-	updateTexture(x, y, z, 7);
 }
 
 std::vector< float >* Anatomy::getFloatDataset()
