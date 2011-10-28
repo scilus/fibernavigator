@@ -841,7 +841,7 @@ void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 {
-    ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->computeMeanFiber();
+    ( (SelectionObject*)m_mainFrame->m_pCurrentSceneObject )->computeMeanFiber();
     m_mainFrame->refreshAllGLWidgets();
 }
 

@@ -413,11 +413,11 @@ void SelectionObject::setColor( wxColour i_color )
 
 ///////////////////////////////////////////////////////////////////////////
 // To avoid to much complication by inserting the SelectionObject class, this 
-// will simply return true if this selection object is of box type, ellipsoid type or IsoSurface
+// will simply return true if this selection object is of box type or ellipsoid type
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::isSelectionObject()
 {
-    if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE || m_objectType == CISO_SURFACE_TYPE)
+    if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE)
         return true;
 
     return false;
@@ -1485,7 +1485,9 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::draw()
 {
-    if( ! m_isActive || ! isSelectionObject()) 
+    if( ! m_isActive || ! isSelectionObject())
+        if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
+            drawFibersInfo();
         return;
 
     // We only display those if the current box is the selected one and if we are supposed to display them.
