@@ -710,8 +710,10 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
 // Point that make the mean fiber will be in the vector m_meanFiberPoints
 //
 ///////////////////////////////////////////////////////////////////////////
-void SelectionObject::computeMeanFiber(){
-    if (getShowFibers() && m_ptoggleDisplayMeanFiber->GetValue()){
+void SelectionObject::computeMeanFiber()
+{
+    if ( getShowFibers() && m_ptoggleDisplayMeanFiber->GetValue() )
+    {
         // We calculate the mean fiber of the selected fibers.
         m_meanFiberPoints.clear();
         getMeanFiber( getSelectedFibersPoints(), MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
@@ -739,7 +741,7 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
 
     for( unsigned int i = 0; i < m_inBranch.size(); ++i )
     {
-        if( m_inBranch[i] && !filteredFiber[i])
+        if( m_inBranch[i] && !filteredFiber[i] )
         {
             getFiberCoordValues( i, l_currentFiberPoints );
 
@@ -972,13 +974,10 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fib
     {
         for( unsigned int j = 0; j < i_fibersPoints[i].size(); j++ )
         {
-            l_pos = i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel +
-                    i_fibersPoints[i][j].y * m_datasetHelper->m_columns / m_datasetHelper->m_yVoxel +
-                    i_fibersPoints[i][j].z * m_datasetHelper->m_columns * m_datasetHelper->m_rows / m_datasetHelper->m_zVoxel;//(m_datasetHelper->m_yVoxel*m_datasetHelper->m_zVoxel);
-
-            Vector test = i_fibersPoints[i][j];
+            l_pos = static_cast<int>( i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel ) +
+                    static_cast<int>( i_fibersPoints[i][j].y / m_datasetHelper->m_yVoxel ) * m_datasetHelper->m_columns  +
+                    static_cast<int>( i_fibersPoints[i][j].z / m_datasetHelper->m_zVoxel ) * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
             
-
             o_meanValue += (* ( m_datasetHelper->m_floatDataset ) )[l_pos];
 
             l_count++;
@@ -986,7 +985,6 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fib
     }
     
     o_meanValue /= l_count;
-    
     return true;
 }
 
@@ -1225,8 +1223,9 @@ bool SelectionObject::getFibersMeanCurvatureAndTorsion( const vector< vector< Ve
     return false;
 
 	//Curvature and torsion are now calculated from mean fiber
-	getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, m_meanFiberPoints);
-	getFiberMeanCurvatureAndTorsion(m_meanFiberPoints, o_meanCurvature, o_meanTorsion );
+   vector< Vector > meanFiberPoint;
+	getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, meanFiberPoint);
+	getFiberMeanCurvatureAndTorsion(meanFiberPoint, o_meanCurvature, o_meanTorsion );
 
 
 	//Curvature and torsion are now calculated from mean fiber
@@ -1803,8 +1802,6 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
         m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
         //m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
-
-        computeMeanFiber(); //Fast fix to make sure the mean fiber won't move when stats are compute
     }
 }
 
@@ -1989,6 +1986,22 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 
 }
 
+void SelectionObject::UpdateMeanValueTypeBox()
+{
+    vector< DatasetInfo* > dataSets;
+    m_datasetHelper->getAllOpenDataset(dataSets);
+    
+    //FIXME - This must be done only if the content of the combo box has change
+    m_pCBSelectDataSet->Clear();
+    for (int i = 0; i<dataSets.size(); i++){
+        if (dataSets[i]->getType() != FIBERS){
+            m_pCBSelectDataSet->Insert(dataSets[i]->getName(), m_pCBSelectDataSet->GetCount());
+        }
+    }
+}
+
+
+
 void SelectionObject::updatePropertiesSizer()
 {
     SceneObject::updatePropertiesSizer();
@@ -1999,7 +2012,9 @@ void SelectionObject::updatePropertiesSizer()
     m_pgridfibersInfo->Enable(getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue());
     m_ptoggleDisplayMeanFiber->Enable(getShowFibers());
 
-    m_pCBSelectDataSet->Show(m_ptoggleCalculatesFibersInfo->GetValue());
+    m_pCBSelectDataSet->Show(false);//m_ptoggleCalculatesFibersInfo->GetValue());
+    if ( m_ptoggleCalculatesFibersInfo->GetValue() )
+        UpdateMeanValueTypeBox();
 
     if (!getShowFibers() && m_meanFiberPoints.size() > 0){
         //Hide the mean fiber if fibers are invisible and the box is moved

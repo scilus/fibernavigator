@@ -292,7 +292,8 @@ protected:
                                                      double                     &o_curvature,
                                                      double                     &o_torsion                 );
 
-    bool   getShowFibers                      (); 
+    bool   getShowFibers                      ();
+    void   UpdateMeanValueTypeBox             ();
 
     vector< vector< Vector > >   getSelectedFibersPoints ();
     

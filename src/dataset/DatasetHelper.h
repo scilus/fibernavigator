@@ -115,6 +115,7 @@ public:
 
     bool getFiberDataset  ( Fibers*  &i_fiber );
     bool getSurfaceDataset( Surface* &i_surface );
+    bool getAllOpenDataset( std::vector< DatasetInfo* > &o_types ); 
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
 

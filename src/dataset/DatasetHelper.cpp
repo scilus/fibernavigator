@@ -1340,6 +1340,17 @@ std::vector< float >* DatasetHelper::getVectorDataset()
     return NULL;
 }
 
+bool DatasetHelper::getAllOpenDataset( vector< DatasetInfo* > &o_types )
+{
+    o_types.clear();
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    {
+        o_types.push_back( (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i ) );
+    }
+    return true;
+}
+
+
 TensorField* DatasetHelper::getTensorField()
 {
     if( ! m_tensorsFieldLoaded )
