@@ -171,6 +171,50 @@ void PropertiesWindow::OnToggleColorModeBtn( wxEvent& WXUNUSED(event) )
 	m_mainFrame->refreshAllGLWidgets();
 }
 
+void PropertiesWindow::OnToggleLocalColoringBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnToggleLocalColoring();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnToggleNormalColoringBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnToggleNormalColoring();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
 void PropertiesWindow::OnClickApplyBtn( wxEvent& WXUNUSED(event) )
 {
 	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)

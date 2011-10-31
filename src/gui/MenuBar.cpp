@@ -208,11 +208,31 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     
     m_itemToggleLighting->Check(mf->m_pDatasetHelper->m_lighting);
     m_itemToggleRuler->Check(mf->m_pDatasetHelper->m_isRulerToolActive);
-    m_itemToogleInvertFibersSelection->Check(mf->m_pDatasetHelper->m_fibersInverted);
-    m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
+    
+	bool isFiberSelected = false;
+	bool isFibersGroupSelected = false; 
+	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
+
+        if( pDatasetInfo->getType() == FIBERS )
+        {
+            isFiberSelected = true;
+		}
+		else if ( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			isFibersGroupSelected = true;
+		}
+	}
+	m_itemResetFibersColors->Enable(isFiberSelected || isFibersGroupSelected);
+	m_itemToogleInvertFibersSelection->Enable(isFiberSelected);
+	m_itemToogleInvertFibersSelection->Check(mf->m_pDatasetHelper->m_fibersInverted);
+	m_itemToggleUseTransparency->Enable(isFiberSelected);
     m_itemToggleUseTransparency->Check(mf->m_pDatasetHelper->m_useTransparency);
-    m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
-    m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
+    m_itemToggleUseFakeTubes->Enable(isFiberSelected);
+	m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
+    
+	m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
     m_itemToggleShowCrosshair->Check(mf->m_pDatasetHelper->m_showCrosshair);
     m_itemToggleShowAxial->Check(mf->m_pDatasetHelper->m_showAxial);
     m_itemToggleShowCoronal->Check(mf->m_pDatasetHelper->m_showCoronal);

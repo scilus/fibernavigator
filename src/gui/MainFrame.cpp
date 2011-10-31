@@ -21,6 +21,7 @@
 #include "SelectionEllipsoid.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
+#include "../dataset/FibersGroup.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
@@ -1136,12 +1137,30 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 {
-    Fibers* l_fibers = NULL; // Initalize it quiet compiler.
-    if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) == NULL)
+	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {
-        return;
-    }
-    l_fibers->resetColorArray();
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+
+        if( pDatasetInfo->getType() == FIBERS )
+        {
+            Fibers* l_fibers = NULL; // Initalize it quiet compiler.
+			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) == NULL)
+			{
+				return;
+			}
+			l_fibers->resetColorArray();
+		}
+		else if ( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			FibersGroup* l_fibersGroup = NULL;
+			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) == NULL )
+			{
+				return;
+			}
+			l_fibersGroup->resetFibersColor();
+		}
+	}
+    
     m_pDatasetHelper->m_selBoxChanged = true;
     refreshAllGLWidgets();
 }
@@ -1456,7 +1475,18 @@ void MainFrame::deleteListItem()
 		}
         if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
         {            
-            m_pDatasetHelper->m_selBoxChanged = true;
+			FibersGroup* pFibersGroup = NULL;
+			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+			if(pFibersGroup != NULL)
+			{
+				Fibers* pFibers = NULL;
+				m_pDatasetHelper->getSelectedFiberDataset(pFibers);
+				if(pFibers != NULL)
+				{
+					pFibersGroup->removeFibersSet(pFibers);
+				}
+			}
+			m_pDatasetHelper->m_selBoxChanged = true;
         }
         else if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == SURFACE)
         {
