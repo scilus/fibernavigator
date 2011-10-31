@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <cfloat>
+#include <limits>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +17,8 @@
 
 #include "Anatomy.h"
 #include "../main.h"
+
+#include "../misc/Fantom/FMatrix.h"
 
 // TODO replace by const
 #define LINEAR_GRADIENT_THRESHOLD 0.085f
@@ -26,7 +29,9 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_isSpecialFiberDisplay( false ),
       m_isInitialized( false ),
       m_normalsPositive( false ),
-      m_cachedThreshold( 0.0f )
+      m_cachedThreshold( 0.0f ),
+      m_pKdTree( NULL ),
+      m_pOctree( NULL )
 {
     m_bufferObjects         = new GLuint[3];
 }
@@ -777,14 +782,55 @@ bool Fibers::loadMRtrix( const wxString &filename )
             m_pointArray[pos++] = *it2;
         }
     }
+    
+    // The MrTrix fibers are defined in the same geometric reference
+    // as the anatomical file. That is, the fibers coordinates are related to 
+    // the anatomy in world space. The transformation from local to world space
+    // for the anatomy is encoded in the m_dh->m_niftiTransform member.
+    // Since we do not consider this tranform when loading the anatomy, we must 
+    // bring back the fibers in the same reference, using the inverse of the 
+    // local to world transformation. A further problem arises when loading an
+    // anatomy that has voxels with dimensions differing from 1x1x1. The 
+    // scaling factor is encoded in the transformation matrix, but we do not,
+    // for the moment, use this scaling. Therefore, we must remove it from the
+    // the transformation matrix before computing its inverse.
+    FMatrix localToWorld = m_dh->m_niftiTransform;
+    
+    if( m_dh->m_xVoxel != 1.0 ||
+        m_dh->m_yVoxel != 1.0 ||
+        m_dh->m_zVoxel != 1.0 )
+    {
+        FMatrix rotMat( 3, 3 );
+        localToWorld.getSubMatrix( rotMat, 0, 0 );
+        
+        FMatrix scaleInversion( 3, 3 );
+        scaleInversion( 0, 0 ) = 1.0 / m_dh->m_xVoxel;
+        scaleInversion( 1, 1 ) = 1.0 / m_dh->m_yVoxel;
+        scaleInversion( 2, 2 ) = 1.0 / m_dh->m_zVoxel;
+        
+        rotMat = scaleInversion * rotMat;
+        
+        localToWorld.setSubMatrix( 0, 0, rotMat );
+    }
+       
+    FMatrix invertedTransform( 4, 4 );
+    invertedTransform = invert( localToWorld );
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_columns / 2 ) * m_dh->m_xVoxel;
-        ++i;
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_rows / 2 ) * m_dh->m_yVoxel ;
-        ++i;
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_frames / 2 ) * m_dh->m_zVoxel;
+        FMatrix curPoint( 4, 1 );
+        curPoint( 0, 0 ) = m_pointArray[i];
+        curPoint( 1, 0 ) = m_pointArray[i + 1];
+        curPoint( 2, 0 ) = m_pointArray[i + 2];
+        curPoint( 3, 0 ) = 1;
+        
+        FMatrix invertedPoint = invertedTransform * curPoint;
+        
+        m_pointArray[i] = invertedPoint( 0, 0 );
+        m_pointArray[i + 1] = invertedPoint( 1, 0 );
+        m_pointArray[i + 2] = invertedPoint( 2, 0 );
+        
+        i += 2;
     }
 
     m_dh->printDebug( wxT( "End loading TCK file" ), 1 );
@@ -3213,6 +3259,52 @@ void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsamplin
     {
         m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
+}
+
+void Fibers::flipAxis( AxisType i_axe )
+{
+    unsigned int i = 0;
+
+    switch ( i_axe )
+    {
+        case X_AXIS:
+            i = 0;
+            m_pOctree->flipX();
+            break;
+        case Y_AXIS:
+            i = 1;
+            m_pOctree->flipY();
+            break;
+        case Z_AXIS:
+            i = 2;
+            m_pOctree->flipZ();
+            break;
+        default:
+            m_dh->printDebug( _T("Cannot flip fibers. The specified axis is undefined"), 2 );
+            return; //No axis specified - Cannot flip
+    }
+
+    //Computing mesh center for the given axis
+    float center;
+    float maxVal= -9999999;
+    float minVal = 9999999;
+    for ( unsigned int j(i); j < m_pointArray.size(); j += 3 )
+    {
+        minVal = min( m_pointArray[j], minVal );
+        maxVal = max( m_pointArray[j], maxVal );
+    }
+    center = ( minVal + maxVal ) / 2; 
+
+    //Translate mesh at origin, flip it and move it back;
+    for ( ; i < m_pointArray.size(); i += 3 )
+    {
+        m_pointArray[i] = -( m_pointArray[i] - center ) + center;
+    }
+
+    glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
+
+    m_dh->updateAllSelectionObjects();
 }
 
 void Fibers::createPropertiesSizer( PropertiesWindow *pParent )

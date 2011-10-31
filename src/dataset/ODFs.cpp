@@ -34,6 +34,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
 	 m_order          ( 0    ),
     m_radiusAttribLoc( 0    ),
 	 m_radiusBuffer   ( NULL ),    
+    m_nbors          ( NULL ),
     m_sh_basis       ( 0 )
 {
     m_scalingFactor = 0.0f;
@@ -49,7 +50,8 @@ ODFs::~ODFs()
         glDeleteBuffers( 1, m_radiusBuffer );
         delete [] m_radiusBuffer;        
     }
-	if( m_nbors )
+	
+    if( m_nbors != NULL )
 	{
 		delete m_nbors;
 		m_nbors = NULL;
@@ -1299,9 +1301,9 @@ void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
             l_dataset->setLightPosition    (Z_AXIS, getLightPosition( Z_AXIS ));
             l_dataset->setDisplayFactor    (getDisplayFactor());
             l_dataset->setScalingFactor    (getScalingFactor());
-            l_dataset->flipAxis               (X_AXIS, isAxisFlipped( X_AXIS ));
-            l_dataset->flipAxis               (Y_AXIS, isAxisFlipped( Y_AXIS ));
-            l_dataset->flipAxis               (Z_AXIS, isAxisFlipped( Z_AXIS ));
+            l_dataset->flipAxis            (X_AXIS, isAxisFlipped( X_AXIS ));
+            l_dataset->flipAxis            (Y_AXIS, isAxisFlipped( Y_AXIS ));
+            l_dataset->flipAxis            (Z_AXIS, isAxisFlipped( Z_AXIS ));
             l_dataset->setColorWithPosition(getColorWithPosition());
             
             m_dh->m_mainFrame->deleteListItem();
@@ -1405,6 +1407,10 @@ void ODFs::updatePropertiesSizer()
         m_pbtnMainDir->Show();
     }
 
+    // Disabled for the moment, not implemented.
+    m_pBtnFlipX->Enable( false );
+    m_pBtnFlipY->Enable( false );
+    m_pBtnFlipZ->Enable( false );
 }
 
 

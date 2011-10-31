@@ -61,14 +61,15 @@ public:
 	
 	// Empty derived methods
 	bool    load( wxString  filename ) { return false; };
-	void    draw()			   {};
-	void    smooth()           {};
-    void    activateLIC()      {};
-    void    clean()            {};
-    void    drawVectors()      {};
-    void    generateTexture()  {};
-    void    generateGeometry() {};
-	void    initializeBuffer() {};
+	void    draw()						{};
+	void    smooth()					{};
+	void	flipAxis( AxisType i_axe )	{};
+    void    activateLIC()				{};
+    void    clean()						{};
+    void    drawVectors()				{};
+    void    generateTexture()			{};
+    void    generateGeometry()			{};
+	void    initializeBuffer()			{};
 	
 	GLuint  getGLuint( )
     {

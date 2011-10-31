@@ -87,6 +87,7 @@ public:
     
     void    updateFibersFilters();
 	void	updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
+    void    flipAxis( AxisType i_axe );
     
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
@@ -107,27 +108,27 @@ public:
         return m_minLength;
     }
 
-	void	updateSliderMinLength( int value )
+	void	updateSliderMinLength( bool value )
 	{
 		m_pSliderFibersFilterMin->SetValue( value );
 	}
 
-	void	updateSliderMaxLength( int value )
+	void	updateSliderMaxLength( bool value )
 	{
 		m_pSliderFibersFilterMax->SetValue( value );
 	}
 
-	void	updateSliderSubsampling( int value )
+	void	updateSliderSubsampling( bool value )
 	{
 		m_pSliderFibersSampling->SetValue( value );
 	}
 
-	void	updateToggleLocalColoring( int value )
+	void	updateToggleLocalColoring( bool value )
 	{
 		m_pToggleLocalColoring->SetValue( value );
 	}
 
-	void	updateToggleNormalColoring( int value )
+	void	updateToggleNormalColoring( bool value )
 	{
 		m_pToggleNormalColoring->SetValue( value );
 	}

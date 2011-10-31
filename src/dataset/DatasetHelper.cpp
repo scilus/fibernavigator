@@ -40,6 +40,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_xVoxel     ( 1.0f ),
     m_yVoxel     ( 1.0f ),
     m_zVoxel     ( 1.0f ),
+
+    m_niftiTransform( 4, 4 ),
+
     m_countFibers( 0    ),
 
     m_scnFileLoaded      ( false ),

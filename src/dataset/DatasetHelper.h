@@ -36,6 +36,8 @@
 
 #include "../misc/lic/TensorField.h"
 
+#include "../misc/Fantom/FMatrix.h"
+
 class MainFrame;
 class DatasetInfo;
 class TheScene;
@@ -162,6 +164,8 @@ public:
     float m_xVoxel;
     float m_yVoxel;
     float m_zVoxel;
+    
+    FMatrix m_niftiTransform;
 
     unsigned int m_countFibers;
 
