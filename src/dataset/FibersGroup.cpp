@@ -19,12 +19,14 @@
 FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 	: DatasetInfo( pDatasetHelper )
 {
-	m_fibersCount = 0;
+	m_pDatasetHelper = pDatasetHelper;
 	m_isIntensityToggled = false;
 	m_isOpacityToggled = false;
 	m_isMinMaxLengthToggled = false;
 	m_isSubsamplingToggled = false;
 	m_isColorModeToggled = false;
+	m_isNormalColoringStateChanged = false;
+	m_isLocalColoringStateChanged = false;
 }
 
 FibersGroup::~FibersGroup()
@@ -35,7 +37,20 @@ FibersGroup::~FibersGroup()
 void FibersGroup::addFibersSet(Fibers* pFibers)
 {
 	m_fibersSets.push_back(pFibers);
-	m_fibersCount++;
+}
+
+bool FibersGroup::removeFibersSet(Fibers* pFibers)
+{
+	std::vector<Fibers*>::iterator it;
+	for(it = m_fibersSets.begin(); it != m_fibersSets.end(); it++)
+	{
+		if((*it) == pFibers)
+		{
+			m_fibersSets.erase(it);
+			return true;
+		}
+	}
+	return false;
 }
 
 Fibers* FibersGroup::getFibersSet(int num)
@@ -48,17 +63,12 @@ Fibers* FibersGroup::getFibersSet(int num)
 	return pFibers;
 }
 
-void FibersGroup::updateGroupFilters()
+void FibersGroup::resetFibersColor()
 {
-    /*int min = m_pSliderFibersFilterMin->GetValue();
-    int max = m_pSliderFibersFilterMax->GetValue();
-    int subSampling = m_pSliderFibersSampling->GetValue();
-    int maxSubSampling = m_pSliderFibersSampling->GetMax() + 1;
-
-    for( int i = 0; i < m_countLines; ++i )
-    {
-        m_filtered[i] = !( ( i % maxSubSampling ) >= subSampling && m_length[i] >= min && m_length[i] <= max );
-    }*/
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		m_fibersSets[i]->resetColorArray();
+	}
 }
 
 void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
@@ -76,7 +86,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMin->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-	m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, 100, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, INT_MAX, 0, INT_MAX, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pMaxLengthText = new wxStaticText( pParent, wxID_ANY , wxT( "Max Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
     pSizer->Add( m_pMaxLengthText , 0, wxALIGN_CENTER );
     pSizer->Add( m_pSliderFibersFilterMax, 0, wxALIGN_CENTER );
@@ -84,12 +94,67 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMax->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pSliderFibersSampling = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersSampling = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSubsamplingText = new wxStaticText( pParent, wxID_ANY , wxT( "Subsampling" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
 	pSizer->Add( m_pSubsamplingText , 0, wxALIGN_CENTER );
     pSizer->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+
+	/*pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pGeneratesFibersDensityVolume, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pGeneratesFibersDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
+    */
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pToggleLocalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Local Coloring" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pToggleLocalColoring, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+	pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleLocalColoringBtn ) );
+    
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+	pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleNormalColoringBtn ) );
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+	m_pColoringText = new wxStaticText( pParent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT );
+    pSizer->Add( m_pColoringText, 0, wxALIGN_CENTER );
+    pSizer->Add( 8, 1, 0 );
+    m_pRadioNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );
+	pSizer->Add( m_pRadioNormalColoring );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    
+	m_pRadioDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 1, 0 );
+    pSizer->Add( m_pRadioDistanceAnchoring );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    
+	m_pRadioMinDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Min Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 1, 0 );
+    pSizer->Add( m_pRadioMinDistanceAnchoring );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    
+	m_pRadioCurvature  = new wxRadioButton( pParent, wxID_ANY, _T( "Curvature" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 1, 0 );
+    pSizer->Add( m_pRadioCurvature );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    
+	m_pRadioTorsion  = new wxRadioButton( pParent, wxID_ANY, _T( "Torsion" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 1, 0 );
+    pSizer->Add( m_pRadioTorsion );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+
+	pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( 68, 8, 0 );
+	m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
 
 	m_pApplyBtn = new wxButton(pParent, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxSize(90, -1));
 	m_pCancelBtn = new wxButton(pParent, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxSize(90, -1));
@@ -99,6 +164,8 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 	m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
 	pParent->Connect( m_pApplyBtn->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnClickApplyBtn ) );
 	pParent->Connect( m_pCancelBtn->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnClickCancelBtn ) );
+
+	m_propertiesSizer->AddSpacer( 8 );
 
     m_ptoggleIntensity = new wxToggleButton(pParent, wxID_ANY, wxT("Intensity"),wxDefaultPosition, wxSize(90,-1));
     pSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -129,63 +196,6 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add(m_ptoggleColorMode,0,wxALIGN_LEFT);
 	m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
 	pParent->Connect( m_ptoggleColorMode->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleColorModeBtn ) );
-
-    /*pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 140, -1 ) );
-    pSizer->Add( m_pGeneratesFibersDensityVolume, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pGeneratesFibersDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleLocalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Local Coloring" ), wxDefaultPosition, wxSize( 140, -1 ) );
-    pSizer->Add( m_pToggleLocalColoring, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 140, -1 ) );
-    pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
-    
-    m_propertiesSizer->AddSpacer( 8 );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( new wxStaticText( pParent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
-    pSizer->Add( 8, 1, 0 );
-    m_pRadioNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
-    pSizer->Add( m_pRadioNormalColoring );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( 68, 1, 0 );
-    pSizer->Add( m_pRadioDistanceAnchoring );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioMinDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Min Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( 68, 1, 0 );
-    pSizer->Add( m_pRadioMinDistanceAnchoring );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioCurvature  = new wxRadioButton( pParent, wxID_ANY, _T( "Curvature" ), wxDefaultPosition, wxSize( 132, -1 ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( 68, 1, 0 );
-    pSizer->Add( m_pRadioCurvature );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioTorsion  = new wxRadioButton( pParent, wxID_ANY, _T( "Torsion" ), wxDefaultPosition, wxSize( 132, -1 ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( 68, 1, 0 );
-    pSizer->Add( m_pRadioTorsion );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pRadioNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalColoring ) );
-    pParent->Connect( m_pRadioDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuDistance ) );
-    pParent->Connect( m_pRadioMinDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuMinDistance ) );
-    pParent->Connect( m_pRadioTorsion->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithTorsion ) );
-    pParent->Connect( m_pRadioCurvature->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithCurvature ) );
-    m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );*/
 }
 
 void FibersGroup::OnToggleIntensityBtn()
@@ -228,6 +238,17 @@ void FibersGroup::OnToggleMinMaxLengthBtn()
 {
 	m_isMinMaxLengthToggled = true;
 
+	// Compute min/max values from all fibers bundles
+	int minLength = INT_MAX;
+	int maxLength = INT_MIN;
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		minLength = std::min( minLength, (int)m_fibersSets[i]->getMinFibersLength() );
+		maxLength = std::max( maxLength, (int)m_fibersSets[i]->getMaxFibersLength() );
+	}
+	m_pSliderFibersFilterMin->SetRange( minLength, maxLength );
+	m_pSliderFibersFilterMax->SetRange( minLength, maxLength );
+
 	// Show Min / Max Length controls
 	m_pMinLengthText->Show();
 	m_pSliderFibersFilterMin->Show();
@@ -267,8 +288,93 @@ void FibersGroup::OnToggleColorModeBtn()
 	m_isColorModeToggled = true;
 
 	// Show ColorMode controls
+	m_pToggleLocalColoring->Show();
+	m_pToggleNormalColoring->Show();
+	m_pColoringText->Show();
+	m_pRadioNormalColoring->Show();
+	m_pRadioDistanceAnchoring->Show();
+	m_pRadioMinDistanceAnchoring->Show();
+	m_pRadioCurvature->Show();
+	m_pRadioTorsion->Show();
+	m_pApplyBtn->Show();
+	m_pCancelBtn->Show();
+
+	m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );
+	m_pRadioDistanceAnchoring->SetValue( m_dh->m_fiberColorationMode == DISTANCE_COLOR );
+	m_pRadioMinDistanceAnchoring->SetValue( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR );
+	m_pRadioCurvature->SetValue( m_dh->m_fiberColorationMode == CURVATURE_COLOR );
+	m_pRadioTorsion->SetValue( m_dh->m_fiberColorationMode == TORSION_COLOR );
 
 	// Disable other toggleButtons
+	m_ptoggleIntensity->Disable();
+	m_ptoggleOpacity->Disable();
+	m_ptoggleMinMaxLength->Disable();
+	m_ptoggleSubsampling->Disable();
+	m_ptoggleColorMode->Hide();	
+}
+
+void FibersGroup::updateGroupFilters()
+{
+    int min = m_pSliderFibersFilterMin->GetValue();
+    int max = m_pSliderFibersFilterMax->GetValue();
+    int subSampling = m_pSliderFibersSampling->GetValue();
+    int maxSubSampling = m_pSliderFibersSampling->GetMax() + 1;
+
+	for(int j = 0; j < (int)m_fibersSets.size(); j++)
+	{
+		int minLength = std::max( min, (int)m_fibersSets[j]->getMinFibersLength() );
+		int maxLength = std::min( max, (int)m_fibersSets[j]->getMaxFibersLength() );
+		m_fibersSets[j]->updateFibersFilters( minLength, maxLength, subSampling, maxSubSampling);
+		m_fibersSets[j]->updateSliderMinLength( minLength );
+		m_fibersSets[j]->updateSliderMaxLength( maxLength );
+		m_fibersSets[j]->updateSliderSubsampling( subSampling );
+	}
+}
+
+void FibersGroup::fibersLocalColoring()
+{
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		for(long j = 0; j < (long)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
+		{
+			if( (Fibers*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
+			{
+				if( ! m_fibersSets[i]->toggleUseTex() && m_pToggleLocalColoring->GetValue() )
+				{
+					m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax()) + wxT( ")" ) );
+				}
+				else
+				{
+					m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax() ) );
+				}
+				m_fibersSets[i]->updateToggleLocalColoring( m_pToggleLocalColoring->GetValue());
+				break;
+			} 
+		}
+	}
+}
+
+void FibersGroup::fibersNormalColoring()
+{
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		for(long j = 0; j < (long)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
+		{
+			if( (Fibers*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
+			{
+				if( ! m_fibersSets[i]->toggleShowFS() && m_pToggleLocalColoring->GetValue())
+				{
+					m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName().BeforeFirst( '.' ) + wxT( "*" ) );
+				}
+				else
+				{
+					m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName().BeforeFirst( '.' ) );
+				}
+				m_fibersSets[i]->updateToggleNormalColoring( m_pToggleNormalColoring->GetValue());
+				break;
+			} 
+		}
+	}
 }
 
 void FibersGroup::OnClickApplyBtn()
@@ -276,26 +382,62 @@ void FibersGroup::OnClickApplyBtn()
 	m_pApplyBtn->Hide();
 	m_pCancelBtn->Hide();
 
-	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	if( m_isIntensityToggled )
 	{
-		if( m_isIntensityToggled )
+		for(int i = 0; i < (int)m_fibersSets.size(); i++)
 		{
-			m_fibersSets[i]->setThreshold( DatasetInfo::m_psliderThresholdIntensity->GetValue() );
+			m_fibersSets[i]->setThreshold(	getThreshold() );
+			m_fibersSets[i]->setBrightness( getBrightness() );
 		}
-		if( m_isOpacityToggled )
+	}
+	if( m_isOpacityToggled )
+	{
+		for(int i = 0; i < (int)m_fibersSets.size(); i++)
 		{
 			m_fibersSets[i]->setAlpha( (float)DatasetInfo::m_psliderOpacity->GetValue() / 100.0f );
 		}
-		if( m_isMinMaxLengthToggled ||  m_isSubsamplingToggled)
+	}
+	if( m_isMinMaxLengthToggled ||  m_isSubsamplingToggled)
+	{
+		updateGroupFilters();
+	}
+	if( m_isColorModeToggled )
+	{
+		if( m_isLocalColoringStateChanged )
 		{
-			int minLength = m_pSliderFibersFilterMin->GetValue();
-			int maxLength = m_pSliderFibersFilterMax->GetValue();
-			int minSubsampling = m_pSliderFibersSampling->GetValue();
-			int maxSubsampling = m_pSliderFibersSampling->GetMax();
-			m_fibersSets[i]->updateFibersFilters( minLength, maxLength, minSubsampling, maxSubsampling);
+			fibersLocalColoring();
+			m_isLocalColoringStateChanged = false;
 		}
-		if( m_isColorModeToggled )
+		if( m_isNormalColoringStateChanged )
 		{
+			fibersNormalColoring();
+			m_isNormalColoringStateChanged = false;
+		}
+
+		if( m_pRadioNormalColoring->GetValue() )
+		{
+			m_dh->m_fiberColorationMode = NORMAL_COLOR;
+		}
+		else if( m_pRadioDistanceAnchoring->GetValue() )
+		{
+			m_dh->m_fiberColorationMode  = DISTANCE_COLOR;
+		}
+		else if( m_pRadioMinDistanceAnchoring->GetValue() )
+		{
+			m_dh->m_fiberColorationMode = MINDISTANCE_COLOR;
+		}
+		else if( m_pRadioCurvature->GetValue() )
+		{
+			m_dh->m_fiberColorationMode = CURVATURE_COLOR;
+		}
+		else if( m_pRadioTorsion->GetValue() )
+		{
+			m_dh->m_fiberColorationMode = TORSION_COLOR;
+		}			
+		
+		for(int i = 0; i < (int)m_fibersSets.size(); i++)
+		{
+			m_fibersSets[i]->updateFibersColors();  
 		}
 	}
 
@@ -304,6 +446,16 @@ void FibersGroup::OnClickApplyBtn()
 	m_isMinMaxLengthToggled = false;
 	m_isSubsamplingToggled = false;
 	m_isColorModeToggled = false;
+}
+
+void FibersGroup::OnToggleLocalColoring()
+{
+	m_isLocalColoringStateChanged = true;
+}
+
+void FibersGroup::OnToggleNormalColoring()
+{
+	m_isNormalColoringStateChanged = true;
 }
 
 void FibersGroup::OnClickCancelBtn()
@@ -328,12 +480,29 @@ void FibersGroup::updatePropertiesSizer()
 	DatasetInfo::m_pbtnDown->Hide();
 	DatasetInfo::m_pbtnUp->Hide();
 
-	m_ptoggleIntensity->Enable();
-	m_ptoggleOpacity->Enable();
-	m_ptoggleMinMaxLength->Enable();
-	m_ptoggleSubsampling->Enable();
-	m_ptoggleColorMode->Enable();
+	if(m_fibersSets.size() > 0)
+	{
+		m_ptoggleIntensity->Enable();
+		m_ptoggleOpacity->Enable();
+		m_ptoggleMinMaxLength->Enable();
+		m_ptoggleSubsampling->Enable();
+		m_ptoggleColorMode->Enable();
+	}
+	else
+	{
+		m_ptoggleIntensity->Disable();
+		m_ptoggleOpacity->Disable();
+		m_ptoggleMinMaxLength->Disable();
+		m_ptoggleSubsampling->Disable();
+		m_ptoggleColorMode->Disable();
+	}
 
+	m_psliderOpacity->Enable( false );
+	m_pRadioNormalColoring->Enable( DatasetInfo::getShowFS() );
+    m_pRadioCurvature->Enable( DatasetInfo::getShowFS() );
+    m_pRadioDistanceAnchoring->Enable( DatasetInfo::getShowFS() );
+    m_pRadioMinDistanceAnchoring->Enable( DatasetInfo::getShowFS() );
+    m_pRadioTorsion->Enable( DatasetInfo::getShowFS() );
 
 	if( m_isIntensityToggled )
 	{
@@ -362,6 +531,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleMinMaxLength->Disable();
 		m_ptoggleSubsampling->Disable();
 		m_ptoggleColorMode->Disable();
+		m_psliderOpacity->SetValue( getAlpha()*100 );
 	}
 	else
 	{
@@ -413,6 +583,14 @@ void FibersGroup::updatePropertiesSizer()
 
 	if( m_isColorModeToggled )
 	{
+		m_pToggleLocalColoring->Show();
+		m_pToggleNormalColoring->Show();
+		m_pColoringText->Show();
+		m_pRadioNormalColoring->Show();
+		m_pRadioDistanceAnchoring->Show();
+		m_pRadioMinDistanceAnchoring->Show();
+		m_pRadioCurvature->Show();
+		m_pRadioTorsion->Show();
 		m_ptoggleColorMode->Hide();
 		m_ptoggleIntensity->Disable();
 		m_ptoggleOpacity->Disable();
@@ -421,6 +599,14 @@ void FibersGroup::updatePropertiesSizer()
 	}
 	else
 	{
+		m_pToggleLocalColoring->Hide();
+		m_pToggleNormalColoring->Hide();
+		m_pColoringText->Hide();
+		m_pRadioNormalColoring->Hide();
+		m_pRadioDistanceAnchoring->Hide();
+		m_pRadioMinDistanceAnchoring->Hide();
+		m_pRadioCurvature->Hide();
+		m_pRadioTorsion->Hide();
 		m_ptoggleColorMode->SetValue(false);
 		m_ptoggleColorMode->Show();
 	}
@@ -435,15 +621,4 @@ void FibersGroup::updatePropertiesSizer()
 		m_pApplyBtn->Hide();
 		m_pCancelBtn->Hide();
 	}	
-
-	/*m_ptoggleFiltering->Enable( false );
-    m_ptoggleFiltering->SetValue( false );
-    m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
-    m_psliderOpacity->Enable( false );
-    m_pToggleNormalColoring->SetValue( !getShowFS() );
-    m_pRadioNormalColoring->Enable( getShowFS() );
-    m_pRadioCurvature->Enable( getShowFS() );
-    m_pRadioDistanceAnchoring->Enable( getShowFS() );
-    m_pRadioMinDistanceAnchoring->Enable( getShowFS() );
-    m_pRadioTorsion->Enable( getShowFS() );*/
 }

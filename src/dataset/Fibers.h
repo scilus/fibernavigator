@@ -107,9 +107,29 @@ public:
         return m_minLength;
     }
 
-	void	setThreshold(int threshold)	
+	void	updateSliderMinLength( int value )
 	{
-		m_cachedThreshold = threshold;
+		m_pSliderFibersFilterMin->SetValue( value );
+	}
+
+	void	updateSliderMaxLength( int value )
+	{
+		m_pSliderFibersFilterMax->SetValue( value );
+	}
+
+	void	updateSliderSubsampling( int value )
+	{
+		m_pSliderFibersSampling->SetValue( value );
+	}
+
+	void	updateToggleLocalColoring( int value )
+	{
+		m_pToggleLocalColoring->SetValue( value );
+	}
+
+	void	updateToggleNormalColoring( int value )
+	{
+		m_pToggleNormalColoring->SetValue( value );
 	}
     
     // Empty derived methods

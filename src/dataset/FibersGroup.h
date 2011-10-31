@@ -32,9 +32,10 @@ public:
     virtual ~FibersGroup();
     
 	void	addFibersSet(Fibers* pFibers);
+	bool	removeFibersSet(Fibers* pFibers);
 	Fibers* getFibersSet(int num);
 
-	int		getFibersCount() { return m_fibersCount; };
+	int		getFibersCount() { return (int)m_fibersSets.size(); };
 
 	bool	isOneBtnToggled()
 	{
@@ -43,12 +44,18 @@ public:
 	}
 
     void    updateGroupFilters();
+	void	resetFibersColor();
+
+	void	fibersLocalColoring();
+	void	fibersNormalColoring();
 
 	void	OnToggleIntensityBtn();
 	void	OnToggleOpacityBtn();
 	void	OnToggleMinMaxLengthBtn();
 	void	OnToggleSubsamplingBtn();
 	void	OnToggleColorModeBtn();
+	void	OnToggleLocalColoring();
+	void	OnToggleNormalColoring();
 	void	OnClickApplyBtn();
 	void	OnClickCancelBtn();
 	
@@ -71,17 +78,19 @@ public:
 	virtual void createPropertiesSizer( PropertiesWindow *pParent );
 	virtual void updatePropertiesSizer();
 
-private:    
-    // Variables
+private: 
+	// Variables
+	DatasetHelper *m_pDatasetHelper;
 	std::vector<Fibers*> m_fibersSets;
-
-	int	 m_fibersCount;
 
 	bool m_isIntensityToggled;
 	bool m_isOpacityToggled;
 	bool m_isMinMaxLengthToggled;
 	bool m_isSubsamplingToggled;
 	bool m_isColorModeToggled;
+
+	bool m_isNormalColoringStateChanged;
+	bool m_isLocalColoringStateChanged;
     
     // GUI members
 	wxToggleButton *m_ptoggleIntensity;
@@ -95,7 +104,7 @@ private:
 	wxButton	   *m_pApplyBtn;
 	wxButton	   *m_pCancelBtn;
 
-	wxButton       *m_pGeneratesFibersDensityVolume;
+	//wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
@@ -109,6 +118,7 @@ private:
 	wxStaticText	*m_pMaxLengthText;
 	wxStaticText	*m_pSubsamplingText;
 	wxStaticText	*m_pColorModeText;
+	wxStaticText	*m_pColoringText;
 };
 
 #endif /* FIBERSGROUP_H_ */

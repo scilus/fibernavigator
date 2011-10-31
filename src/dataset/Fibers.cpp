@@ -3306,7 +3306,6 @@ void Fibers::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
     m_ptoggleFiltering->Enable( false );
     m_ptoggleFiltering->SetValue( false );
-    m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
     m_psliderOpacity->Enable( false );
     m_pToggleNormalColoring->SetValue( !getShowFS() );
     m_pRadioNormalColoring->Enable( getShowFS() );
@@ -3314,4 +3313,13 @@ void Fibers::updatePropertiesSizer()
     m_pRadioDistanceAnchoring->Enable( getShowFS() );
     m_pRadioMinDistanceAnchoring->Enable( getShowFS() );
     m_pRadioTorsion->Enable( getShowFS() );
+	m_psliderThresholdIntensity->SetValue( getThreshold()*100 );
+	m_psliderOpacity->SetValue( getAlpha()*100 );
+
+	m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );
+	m_pRadioCurvature->SetValue( m_dh->m_fiberColorationMode == CURVATURE_COLOR );
+	m_pRadioDistanceAnchoring->SetValue( m_dh->m_fiberColorationMode == DISTANCE_COLOR );
+    m_pRadioMinDistanceAnchoring->SetValue( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR );
+    m_pRadioTorsion->SetValue( m_dh->m_fiberColorationMode == TORSION_COLOR );
+	
 }
