@@ -2922,9 +2922,9 @@ void Fibers::drawFakeTubes()
 
         for( int i = 0; i < m_cfStartOfLine.size(); ++i )
         {
-            if ( 1 < m_cfPointsPerLine[i] )
+            if ( 3 < m_cfPointsPerLine[i] )
             {
-                int index = i * 3;
+                int index = m_cfStartOfLine[i] * 3;
                 glBegin( GL_QUAD_STRIP );
 
                 for( int k = 0; k < m_cfPointsPerLine[i]; ++k, index += 3 )
@@ -2938,7 +2938,6 @@ void Fibers::drawFakeTubes()
                 }
 
                 glEnd();
-                //if (i > 2500) break;
             }
         }
     }
@@ -3409,6 +3408,7 @@ bool Fibers::getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints 
 
 void Fibers::updateFibersFilters()
 {
+    m_drawDirty = true;
     int min = m_pSliderFibersFilterMin->GetValue();
     int max = m_pSliderFibersFilterMax->GetValue();
     int subSampling = m_pSliderFibersSampling->GetValue();
