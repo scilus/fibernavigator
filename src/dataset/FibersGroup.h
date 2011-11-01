@@ -43,8 +43,13 @@ public:
 			   && m_isSubsamplingToggled && m_isColorModeToggled;
 	}
 
+	void    save( wxString filename );
+    void    saveDMRI( wxString filename );
+
     void    updateGroupFilters();
 	void	resetFibersColor();
+	void	useFakeTubes();
+	void	useTransparency();
 
 	void	fibersLocalColoring();
 	void	fibersNormalColoring();

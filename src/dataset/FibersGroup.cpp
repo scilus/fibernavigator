@@ -63,11 +63,227 @@ Fibers* FibersGroup::getFibersSet(int num)
 	return pFibers;
 }
 
+void FibersGroup::saveDMRI( wxString filename )
+{
+    /*int countLines = 0;
+
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    {
+        filename += _T( ".fib" );
+    }
+
+	int nbrlines = 0;
+	ofstream myfile;
+	char *pFn;
+	pFn = ( char * ) malloc( filename.length() );
+	strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
+	myfile.open( pFn, ios::out );
+
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		for( int l = 0; l < m_fibersSets[i]->getLineCount(); ++l )
+		{
+			if( m_fibersSets[i]->isSelected(l) && !m_fibersSets[i]->isFiltered(l) )
+			{
+				nbrlines++;
+			}
+		}
+		float dist = 0.5;
+		myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
+		myfile << nbrlines << " " << dist << "\n";
+
+		for( int l = 0; l < m_fibersSets[i]->getLineCount(); ++l )
+		{
+			if( m_fibersSets[i]->isSelected(l) && !m_fibersSets[i]->isFiltered(l) )
+			{
+				unsigned int pc = m_fibersSets[i]->getStartIndexForLine( l ) * 3;
+				myfile << m_fibersSets[i]->getPointsPerLine( l ) << " 1\n1\n";
+
+				for( int j = 0; j < m_fibersSets[i]->getPointsPerLine( l ); ++j )
+				{
+					myfile <<  m_fibersSets[i]->getPointValue(pc) << " " <<  m_fibersSets[i]->getPointValue(pc + 1) << " " <<  m_fibersSets[i]->getPointValue(pc + 2) << " 0\n";
+					pc += 3;
+				}
+
+				pc = m_fibersSets[i]->getStartIndexForLine( l ) * 3;
+				myfile <<  m_fibersSets[i]->getPointValue(pc) << " " <<  m_fibersSets[i]->getPointValue(pc + 1) << " " <<  m_fibersSets[i]->getPointValue(pc + 2) << " 0\n";
+				++countLines;
+			}
+		}
+	}
+    myfile.close();
+    
+    free(pFn);
+    pFn = NULL;*/
+}
+
+/**
+ * Save using the VTK binary format.
+ */
+void FibersGroup::save( wxString filename )
+{/*
+    vector< float >   pointsToSave;
+    vector< int >     linesToSave;
+    vector< wxUint8 > colorsToSave;
+
+    int pointIndex( 0 );
+    int countLines( 0 );
+
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    {
+        filename += _T( ".fib" );
+    }
+
+    float *pColorData( NULL );
+	converterByteINT32 c;
+	converterByteFloat f;
+	ofstream myfile;
+	vector< char > vBuffer;
+	char *pBuffer;
+
+	char *pFn;
+    pFn = ( char * ) malloc( filename.length() );
+    strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
+    myfile.open( pFn, ios::binary );
+
+	for(int m = 0; m < (int)m_fibersSets.size(); m++)
+	{
+		if( m_dh->m_useVBO )
+		{
+			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+			pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+		}
+		else
+		{
+			float value = m_fibersSets[m]->getPointValue(0);
+			pColorData = &value;
+		}
+
+		for( int l = 0; l < m_fibersSets[m]->getLineCount(); ++l )
+		{
+			if( m_fibersSets[m]->isSelected(l) && !m_fibersSets[m]->isFiltered(l) )
+			{
+				unsigned int pc = m_fibersSets[m]->getStartIndexForLine( l ) * 3;
+				linesToSave.push_back( m_fibersSets[m]->getPointsPerLine( l ) );
+
+				for( int j = 0; j < m_fibersSets[m]->getPointsPerLine( l ); ++j )
+				{
+					pointsToSave.push_back( m_dh->m_columns * m_dh->m_xVoxel - m_fibersSets[m]->getPointValue(pc) );
+					colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
+					++pc;
+					pointsToSave.push_back( m_dh->m_rows * m_dh->m_yVoxel - m_fibersSets[m]->getPointValue(pc) );
+					colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
+					++pc;
+					pointsToSave.push_back( m_fibersSets[m]->getPointValue(pc) );
+					colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
+					++pc;
+					linesToSave.push_back( pointIndex );
+					++pointIndex;
+				}
+
+				++countLines;
+			}
+		}
+
+		if( m_dh->m_useVBO )
+		{
+			glUnmapBuffer( GL_ARRAY_BUFFER );
+		}
+	    
+		string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
+		header1 += m_fibersSets[m]->intToString( pointsToSave.size() / 3 );
+		header1 += " float\n";
+
+		for( unsigned int i = 0; i < header1.size(); ++i )
+		{
+			vBuffer.push_back( header1[i] );
+		}
+
+		for( unsigned int i = 0; i < pointsToSave.size(); ++i )
+		{
+			f.f = pointsToSave[i];
+			vBuffer.push_back( f.b[3] );
+			vBuffer.push_back( f.b[2] );
+			vBuffer.push_back( f.b[1] );
+			vBuffer.push_back( f.b[0] );
+		}
+
+		vBuffer.push_back( '\n' );
+		string header2 = "LINES " + m_fibersSets[m]->intToString( countLines ) + " " + m_fibersSets[m]->intToString( linesToSave.size() ) + "\n";
+
+		for( unsigned int i = 0; i < header2.size(); ++i )
+		{
+			vBuffer.push_back( header2[i] );
+		}
+
+		for( unsigned int i = 0; i < linesToSave.size(); ++i )
+		{
+			c.i = linesToSave[i];
+			vBuffer.push_back( c.b[3] );
+			vBuffer.push_back( c.b[2] );
+			vBuffer.push_back( c.b[1] );
+			vBuffer.push_back( c.b[0] );
+		}
+
+		vBuffer.push_back( '\n' );
+		string header3 = "POINT_DATA ";
+		header3 += m_fibersSets[m]->intToString( pointsToSave.size() / 3 );
+		header3 += " float\n";
+		header3 += "COLOR_SCALARS scalars 3\n";
+
+		for( unsigned int i = 0; i < header3.size(); ++i )
+		{
+			vBuffer.push_back( header3[i] );
+		}
+
+		for( unsigned int i = 0; i < colorsToSave.size(); ++i )
+		{
+			vBuffer.push_back( colorsToSave[i] );
+		}
+
+		vBuffer.push_back( '\n' );
+	    
+		// Finally put the buffer vector into a char* array.
+		pBuffer = new char[vBuffer.size()];
+
+		for( unsigned int i = 0; i < vBuffer.size(); ++i )
+		{
+			pBuffer[i] = vBuffer[i];
+		}
+	}
+
+	myfile.write( pBuffer, vBuffer.size() );
+    myfile.close();
+    
+    delete[] pBuffer;
+    pBuffer = NULL;
+    
+    free(pFn);
+    pFn = NULL;*/
+}
+
 void FibersGroup::resetFibersColor()
 {
 	for(int i = 0; i < (int)m_fibersSets.size(); i++)
 	{
 		m_fibersSets[i]->resetColorArray();
+	}
+}
+
+void FibersGroup::useFakeTubes()
+{
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		//m_fibersSets[i]->m_useFakeTubes = !m_fibersSets[i]->m_useFakeTubes;
+		//m_fibersSets[i]->switchNormals( m_fibersSets[i]->m_useFakeTubes );
+	}
+}
+
+void FibersGroup::useTransparency()
+{
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		//m_fibersSets[i]->m_useTransparency = !m_fibersSets[i]->m_useTransparency;
 	}
 }
 
@@ -479,6 +695,10 @@ void FibersGroup::updatePropertiesSizer()
 	DatasetInfo::m_pbtnDelete->Hide();
 	DatasetInfo::m_pbtnDown->Hide();
 	DatasetInfo::m_pbtnUp->Hide();
+	DatasetInfo::m_pBtnFlipX->Hide();
+	DatasetInfo::m_pBtnFlipY->Hide();
+	DatasetInfo::m_pBtnFlipZ->Hide();
+	DatasetInfo::m_pBtnRename->Hide();
 
 	if(m_fibersSets.size() > 0)
 	{

@@ -65,6 +65,7 @@ public:
     int     getStartIndexForLine( const int lineId );
     
     int     getLineForPoint( const int pointIdx );
+	string  intToString( const int number );
     
     void    resetColorArray();
     
@@ -82,6 +83,7 @@ public:
     int     getLineCount();
     int     getPointCount();
     bool    isSelected(    int  fiberId );
+	bool	isFiltered(	int fiberId );
     
     void    setFibersLength();
     
@@ -108,17 +110,17 @@ public:
         return m_minLength;
     }
 
-	void	updateSliderMinLength( bool value )
+	void	updateSliderMinLength( int value )
 	{
 		m_pSliderFibersFilterMin->SetValue( value );
 	}
 
-	void	updateSliderMaxLength( bool value )
+	void	updateSliderMaxLength( int value )
 	{
 		m_pSliderFibersFilterMax->SetValue( value );
 	}
 
-	void	updateSliderSubsampling( bool value )
+	void	updateSliderSubsampling( int value )
 	{
 		m_pSliderFibersSampling->SetValue( value );
 	}
@@ -148,7 +150,6 @@ private:
     void            colorWithDistance(    float *pColorData );
     void            colorWithMinDistance( float *pColorData );
     
-    string          intToString( const int number );
     void            toggleEndianess();
     
     void            calculateLinePointers();
@@ -190,6 +191,9 @@ private:
     float           m_minLength;
     vector<float  > m_localizedAlpha;
     float           m_cachedThreshold;
+	bool			m_fibersInverted;
+    bool			m_useFakeTubes;
+	bool			m_useTransparency;
 
     KdTree          *m_pKdTree;
     Octree          *m_pOctree;
