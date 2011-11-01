@@ -19,11 +19,13 @@ public:
     ~Octree(); //Destructor
 
     //Functions
-    vector<int> getPointsInside(SelectionObject* selectionObject);
-    void boxTest( int i_minx, int i_miny, int i_minz, int i_maxx, int i_maxy, int i_maxz, int lvl, const vector<vector<int > >& currSub);
-    void ellipsoidTest( int i_minx, int i_miny, int i_minz, int i_maxx, int i_maxy, int i_maxz, int lvl, const vector<vector<int > >& currSub);
-
-
+    vector< int > getPointsInside(SelectionObject* selectionObject);
+    vector< int > getPointsInBoundingBox( int xMin, int yMin, int zMin, int xMax, int yMax, int zMax );
+    
+    // Updates the data to represent the fiber structure when fibers are flipped.
+    void flipX();
+    void flipY();
+    void flipZ();
 
 private:
     //Octree divisions
@@ -54,6 +56,13 @@ private:
     void findBoundingBox(); //BB of the points
     void classifyPoints(); //Classify the points according to their position
     void subClassifyPoints(vector<int> i_bigVolume, int i_xmin, int i_ymin, int i_zmin, int i_xmax, int i_ymax, int i_zmax, vector<vector<int > >& o_tree); //Subclassify for lvl 2
+    
+    void flipXInternalVector( vector< vector< int > > &vectToFlip );
+    void flipYInternalVector( vector< vector< int > > &vectToFlip );
+    void flipZInternalVector( vector< vector< int > > &vectToFlip );
+    
+    void boxTest( int i_minx, int i_miny, int i_minz, int i_maxx, int i_maxy, int i_maxz, int lvl, const vector<vector<int > >& currSub);
+    void ellipsoidTest( int i_minx, int i_miny, int i_minz, int i_maxx, int i_maxy, int i_maxz, int lvl, const vector<vector<int > >& currSub);
     
 };
 
