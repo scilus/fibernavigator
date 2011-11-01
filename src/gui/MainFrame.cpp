@@ -390,9 +390,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     {
         return;
     }
-    Fibers* l_fibers = NULL;
-    m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
-
+ 
     wxString caption         = wxT( "Choose a file" );
     wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
@@ -401,19 +399,47 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
 
-    if( dialog.ShowModal() == wxID_OK )
+	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {
-        m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
-        printf("%d\n",dialog.GetFilterIndex());
-        if (dialog.GetFilterIndex()==1)
-        {
-             l_fibers->saveDMRI( dialog.GetPath() );
-        }
-        else
-        {
-            l_fibers->save( dialog.GetPath() );
-        }
-    }
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+		if( dialog.ShowModal() == wxID_OK )
+		{
+			m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
+			printf("%d\n",dialog.GetFilterIndex());
+			
+			if( pDatasetInfo->getType() == FIBERS )
+			{
+				Fibers* l_fibers = NULL;
+				m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
+				if( l_fibers )
+				{
+					if (dialog.GetFilterIndex()==1)
+					{
+						l_fibers->saveDMRI( dialog.GetPath() );	
+					}
+					else
+					{
+						l_fibers->save( dialog.GetPath() );
+					}
+				}
+			}
+			else if( pDatasetInfo->getType() == FIBERSGROUP )
+			{
+				FibersGroup* l_fibersGroup = NULL;
+				m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+				
+				if (dialog.GetFilterIndex()==1)
+				{
+					l_fibersGroup->saveDMRI( dialog.GetPath() );	
+				}
+				else
+				{
+					l_fibersGroup->save( dialog.GetPath() );
+				}
+			}
+			
+		}
+	}
 }
 
 
@@ -1055,6 +1081,27 @@ void MainFrame::onToggleFilterIso( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 {
+	/*if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+		if( pDatasetInfo->getType() == FIBERS )
+		{
+			Fibers* l_fibers = NULL;
+			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
+			{
+				l_fibers->resetColorArray();
+			}
+		}
+		else if ( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			FibersGroup* l_fibersGroup = NULL;
+			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) != NULL )
+			{
+				l_fibersGroup->resetFibersColor();
+			}			
+		}
+	}*/
+
     m_pDatasetHelper->invertFibers();
     m_pDatasetHelper->m_selBoxChanged = true;
     refreshAllGLWidgets();
@@ -1062,12 +1109,27 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_useFakeTubes = !m_pDatasetHelper->m_useFakeTubes;
-    Fibers* l_fiber;
-    if( m_pDatasetHelper->getSelectedFiberDataset( l_fiber ) )
+	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {
-        l_fiber->switchNormals( !m_pDatasetHelper->m_useFakeTubes );
-    }
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+		if( pDatasetInfo->getType() == FIBERS )
+		{
+			Fibers* l_fibers = NULL;
+			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
+			{
+				l_fibers->switchNormals( !m_pDatasetHelper->m_useFakeTubes );
+				//l_fibers->m_useFakeTubes = !l_fibers->m_useFakeTubes;
+			}
+		}
+		else if ( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			FibersGroup* l_fibersGroup = NULL;
+			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) != NULL )
+			{
+				//l_fibersGroup->useFakeTubes( !m_pDatasetHelper->m_useFakeTubes );
+			}			
+		}
+	}
     refreshAllGLWidgets();
 }
 
@@ -1130,8 +1192,28 @@ void MainFrame::onRulerToolDel( wxCommandEvent& WXUNUSED(event) )
 }
 
 void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->m_useTransparency = !m_pDatasetHelper->m_useTransparency;
+{    
+	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+		if( pDatasetInfo->getType() == FIBERS )
+		{
+			Fibers* l_fibers = NULL;
+			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
+			{
+				l_fibers->switchNormals( !m_pDatasetHelper->m_useFakeTubes );
+
+			}
+		}
+		else if ( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			FibersGroup* l_fibersGroup = NULL;
+			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) != NULL )
+			{
+				l_fibersGroup->useTransparency();
+			}			
+		}
+	}
     refreshAllGLWidgets();
 }
 

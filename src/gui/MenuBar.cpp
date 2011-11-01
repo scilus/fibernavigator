@@ -210,21 +210,16 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleRuler->Check(mf->m_pDatasetHelper->m_isRulerToolActive);
     
 	bool isFiberSelected = false;
-	bool isFibersGroupSelected = false; 
 	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListItem != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
 
-        if( pDatasetInfo->getType() == FIBERS )
+        if( pDatasetInfo->getType() == FIBERS || pDatasetInfo->getType() == FIBERSGROUP )
         {
             isFiberSelected = true;
 		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			isFibersGroupSelected = true;
-		}
 	}
-	m_itemResetFibersColors->Enable(isFiberSelected || isFibersGroupSelected);
+	m_itemResetFibersColors->Enable(isFiberSelected);
 	m_itemToogleInvertFibersSelection->Enable(isFiberSelected);
 	m_itemToogleInvertFibersSelection->Check(mf->m_pDatasetHelper->m_fibersInverted);
 	m_itemToggleUseTransparency->Enable(isFiberSelected);
