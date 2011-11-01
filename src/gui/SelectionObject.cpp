@@ -751,6 +751,7 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
             // verification and if the order of the fiber points are wrong we switch them.
             if( l_selectedFibersPoints.size() > 0 )
             {
+                l_meanStart.zero();
                 for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
                     l_meanStart += l_selectedFibersPoints[j][0];
                 l_meanStart /= l_selectedFibersPoints.size();
@@ -964,21 +965,30 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fib
 {
     o_meanValue = 0.0f;
     
+    if ( ( m_pCBSelectDataSet->GetCount() == 0 ) || ( m_pCBSelectDataSet->GetCurrentSelection() == -1 ) )
+        return false; //No anatomy file loaded
+
     if( i_fibersPoints.size() == 0 )
         return false;
 
     unsigned int l_count = 0;
     unsigned int l_pos   = 0;
-    
+    vector<DatasetInfo*> datasets;
+    m_datasetHelper->getTextureDataset(datasets);
+    Anatomy* l_anatomy = (Anatomy*)datasets[m_pCBSelectDataSet->GetSelection()];
+    //TEST
+    printf(l_anatomy->getName().mb_str());
+    printf("\n");
     for( unsigned int i = 0; i < i_fibersPoints.size(); i++ )
     {
         for( unsigned int j = 0; j < i_fibersPoints[i].size(); j++ )
         {
-            l_pos = static_cast<int>( i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel ) +
-                    static_cast<int>( i_fibersPoints[i][j].y / m_datasetHelper->m_yVoxel ) * m_datasetHelper->m_columns  +
-                    static_cast<int>( i_fibersPoints[i][j].z / m_datasetHelper->m_zVoxel ) * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
+            l_pos = ( static_cast<int>( i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel ) +
+                    static_cast<int>( i_fibersPoints[i][j].y / m_datasetHelper->m_yVoxel ) * l_anatomy->getColumns()  +
+                    static_cast<int>( i_fibersPoints[i][j].z / m_datasetHelper->m_zVoxel ) * l_anatomy->getColumns() * l_anatomy->getRows() ) * l_anatomy->getBands();
             
-            o_meanValue += (* ( m_datasetHelper->m_floatDataset ) )[l_pos];
+            for (int i(0); i < l_anatomy->getBands(); i++)
+                o_meanValue += (* ( l_anatomy->getFloatDataset() ) )[l_pos + i];
 
             l_count++;
         }
@@ -1913,7 +1923,12 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->AddSpacer(2);
 
     m_pCBSelectDataSet = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->Add(m_pCBSelectDataSet, 0, wxALIGN_CENTER);
+    m_pLabelAnatomy = new wxStaticText(parent, wxID_ANY, wxT("Anatomy file : "));
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add( m_pLabelAnatomy, 0, wxALIGN_CENTER );
+    l_sizer->Add( m_pCBSelectDataSet, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add(l_sizer, 0, wxALIGN_CENTER);
+    parent->Connect( m_pCBSelectDataSet->GetId(), wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMeanComboBoxSelectionChange ) );
     m_propertiesSizer->AddSpacer(2);
 
     m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
@@ -1993,14 +2008,22 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 void SelectionObject::UpdateMeanValueTypeBox()
 {
     vector< DatasetInfo* > dataSets;
-    m_datasetHelper->getAllOpenDataset(dataSets);
+    m_datasetHelper->getTextureDataset(dataSets);
     
-    //FIXME - This must be done only if the content of the combo box has change
-    m_pCBSelectDataSet->Clear();
-    for (int i = 0; i<dataSets.size(); i++){
-        if (dataSets[i]->getType() != FIBERS){
-            m_pCBSelectDataSet->Insert(dataSets[i]->getName(), m_pCBSelectDataSet->GetCount());
+    if (dataSets.size() != m_pCBSelectDataSet->GetCount()){
+        int oldIndex = -1;
+        wxString oldName = m_pCBSelectDataSet->GetStringSelection();
+        m_pCBSelectDataSet->Clear();
+        for (int i = 0; i<dataSets.size(); i++){
+            m_pCBSelectDataSet->Insert(dataSets[i]->getName().BeforeFirst('.'), m_pCBSelectDataSet->GetCount());
+            if (oldName == dataSets[i]->getName().BeforeFirst('.'))
+                oldIndex = i;
         }
+        if (oldIndex<0)
+            oldIndex = 0;
+        if (oldIndex>=m_pCBSelectDataSet->GetCount())
+            oldIndex = m_pCBSelectDataSet->GetCount() - 1;
+        m_pCBSelectDataSet->SetSelection(oldIndex);
     }
 }
 
@@ -2016,7 +2039,8 @@ void SelectionObject::updatePropertiesSizer()
     m_pgridfibersInfo->Enable(getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue());
     m_ptoggleDisplayMeanFiber->Enable(getShowFibers());
 
-    m_pCBSelectDataSet->Show(false);//m_ptoggleCalculatesFibersInfo->GetValue());
+    m_pCBSelectDataSet->Show(m_ptoggleCalculatesFibersInfo->GetValue());
+    m_pLabelAnatomy->Show(m_ptoggleCalculatesFibersInfo->GetValue());
     if ( m_ptoggleCalculatesFibersInfo->GetValue() )
         UpdateMeanValueTypeBox();
 

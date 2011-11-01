@@ -1340,12 +1340,15 @@ std::vector< float >* DatasetHelper::getVectorDataset()
     return NULL;
 }
 
-bool DatasetHelper::getAllOpenDataset( vector< DatasetInfo* > &o_types )
+bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
 {
     o_types.clear();
+    DatasetInfo* l_datasetInfo;
     for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
-        o_types.push_back( (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i ) );
+        l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+        if ( ( l_datasetInfo->getType() > 0 ) && ( l_datasetInfo->getType() < 6) ) 
+            o_types.push_back( l_datasetInfo );
     }
     return true;
 }

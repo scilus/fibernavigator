@@ -233,6 +233,7 @@ public:
                                                      double                      i_progression,
                                                      double                     &o_torsion                 );
     void   SetFiberInfoGridValues();
+    void   UpdateMeanValueTypeBox             ();
 protected:
     void   drawCrossSections                 ();
     void   drawCrossSectionsPolygons         ();
@@ -293,7 +294,6 @@ protected:
                                                      double                     &o_torsion                 );
 
     bool   getShowFibers                      ();
-    void   UpdateMeanValueTypeBox             ();
 
     vector< vector< Vector > >   getSelectedFibersPoints ();
     
@@ -326,6 +326,7 @@ private:
     wxBitmapButton  *m_pbtnSelectColor;
     wxButton        *m_pbtnSelectColorFibers;
     wxChoice        *m_pCBSelectDataSet;
+    wxStaticText    *m_pLabelAnatomy;
 public:
     wxTextCtrl      *m_ctrlBoxX;
     wxTextCtrl      *m_ctrlBoxY;
