@@ -174,7 +174,10 @@ private:
     KdTree          *m_pKdTree;
     Octree          *m_pOctree;
 
-    bool            m_drawDirty;
+    bool            m_cfDrawDirty;
+    bool            m_axialShown;
+    bool            m_coronalShown;
+    bool            m_sagittalShown;
     bool            m_useCrossingFibers;
     float           m_thickness;
     float           m_xDrawn;

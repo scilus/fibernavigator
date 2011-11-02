@@ -32,7 +32,10 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_cachedThreshold( 0.0f ),
       m_pKdTree( NULL ),
       m_pOctree( NULL ),
-      m_drawDirty( true ),
+      m_cfDrawDirty( true ),
+      m_axialShown( pDatasetHelper->m_showAxial ),
+      m_coronalShown( pDatasetHelper->m_showCoronal ),
+      m_sagittalShown( pDatasetHelper->m_showSagittal ),
       m_useCrossingFibers( false ),
       m_thickness( 0.25f )
 {
@@ -2788,6 +2791,26 @@ void Fibers::initializeBuffer()
 
 void Fibers::draw()
 {
+    if ( !m_cfDrawDirty )
+    {
+        if (   m_xDrawn != m_dh->m_xSlize
+            || m_yDrawn != m_dh->m_ySlize
+            || m_zDrawn != m_dh->m_zSlize
+            || m_axialShown != m_dh->m_showAxial
+            || m_coronalShown != m_dh->m_showCoronal
+            || m_sagittalShown != m_dh->m_showSagittal )
+        {
+            m_xDrawn = m_dh->m_xSlize;
+            m_yDrawn = m_dh->m_ySlize;
+            m_zDrawn = m_dh->m_zSlize;
+            m_axialShown = m_dh->m_showAxial;
+            m_coronalShown = m_dh->m_showCoronal;
+            m_sagittalShown = m_dh->m_showSagittal;
+
+            m_cfDrawDirty = true;
+        }
+    }
+
     if( m_cachedThreshold != m_threshold )
     {
         updateFibersColors();
@@ -3409,7 +3432,7 @@ bool Fibers::getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints 
 
 void Fibers::updateFibersFilters()
 {
-    m_drawDirty = true;
+    m_cfDrawDirty = true;
     int min = m_pSliderFibersFilterMin->GetValue();
     int max = m_pSliderFibersFilterMax->GetValue();
     int subSampling = m_pSliderFibersSampling->GetValue();
@@ -3591,7 +3614,7 @@ void Fibers::updateCrossingFibersThickness()
     if ( NULL != m_pSliderCrossingFibersThickness )
     {
         m_thickness = m_pSliderCrossingFibersThickness->GetValue() * 0.25f; 
-        m_drawDirty = true;
+        m_cfDrawDirty = true;
     }
 }
 
@@ -3599,12 +3622,9 @@ void Fibers::updateCrossingFibersThickness()
 
 void Fibers::findCrossingFibers() 
 {
-    if ( m_drawDirty || m_xDrawn != m_dh->m_xSlize || m_yDrawn != m_dh->m_ySlize || m_zDrawn != m_dh->m_zSlize )
+    if ( m_cfDrawDirty )
     {
-        m_xDrawn = m_dh->m_xSlize;
-        m_yDrawn = m_dh->m_ySlize;
-        m_zDrawn = m_dh->m_zSlize;
-        m_drawDirty = false;
+        m_cfDrawDirty = false;
 
         // Determine X, Y and Z range
         const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
@@ -3627,7 +3647,7 @@ void Fibers::findCrossingFibers()
             {
                 for ( unsigned int i( 0 ); i < getPointsPerLine(line); ++i, ++point, index += 3)
                 {
-                    if ( xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
+                    if ( m_sagittalShown && xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
                     {
                         if ( !lineStarted )
                         {
@@ -3637,7 +3657,7 @@ void Fibers::findCrossingFibers()
                         }
                         ++m_cfPointsPerLine.back();
                     }
-                    else if ( yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
+                    else if ( m_coronalShown && yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
                     {
                         if ( !lineStarted )
                         {
@@ -3647,7 +3667,7 @@ void Fibers::findCrossingFibers()
                         }
                         ++m_cfPointsPerLine.back();
                     }
-                    else if ( zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
+                    else if ( m_axialShown && zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
                     {
                         if ( !lineStarted )
                         {
