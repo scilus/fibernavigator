@@ -595,9 +595,7 @@ void TheScene::renderFibers()
 					if( m_pDatasetHelper->m_selBoxChanged )
 					{
 						pFibers->updateLinesShown();
-						m_pDatasetHelper->m_selBoxChanged = false;
 					}
-
 					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->bind();
 					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniInt  ( "globalColor", pFibers->getShowFS() );
 					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
@@ -632,7 +630,6 @@ void TheScene::renderFibers()
 					if( m_pDatasetHelper->m_selBoxChanged )
 					{
 						pFibers->updateLinesShown();
-						m_pDatasetHelper->m_selBoxChanged = false;
 					}
 					pFibers->draw();
 					m_pDatasetHelper->m_shaderHelper->m_pFiberShader->release();
@@ -643,6 +640,10 @@ void TheScene::renderFibers()
 				}
 			}
 		}
+	}
+	if( m_pDatasetHelper->m_selBoxChanged )
+	{
+		m_pDatasetHelper->m_selBoxChanged = false;
 	}
 	glPopAttrib();
 }
