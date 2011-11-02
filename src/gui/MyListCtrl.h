@@ -35,6 +35,7 @@ public:
     MyListCtrl(MainFrame *parent, const wxWindowID id, const wxPoint& pos,
             const wxSize& size, long style);
 
+	long GetSelectedItem();
     void OnLeftClick(wxMouseEvent& event);
     void OnRightClick(wxMouseEvent& event);
     int getColClicked();

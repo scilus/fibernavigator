@@ -26,6 +26,11 @@ bool MyListCtrl::DeleteItem( long itemIdx)
     return wxListCtrl::DeleteItem( itemIdx );
 }
 
+long MyListCtrl::GetSelectedItem()
+{
+  return GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+}
+
 void MyListCtrl::OnLeftClick(wxMouseEvent& event)
 {
     int col;

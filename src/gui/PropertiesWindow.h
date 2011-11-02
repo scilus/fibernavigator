@@ -45,6 +45,7 @@ public:
 	void OnToggleLocalColoringBtn			( wxEvent& event );
 	void OnToggleNormalColoringBtn			( wxEvent& event );
 	
+	void OnClickGenerateFiberVolumeBtn		( wxEvent& event );
 	void OnClickApplyBtn					( wxEvent& event );
 	void OnClickCancelBtn					( wxEvent& event );
 

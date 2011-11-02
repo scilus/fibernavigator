@@ -259,6 +259,28 @@ void PropertiesWindow::OnClickCancelBtn( wxEvent& WXUNUSED(event) )
 	m_mainFrame->refreshAllGLWidgets();
 }
 
+void PropertiesWindow::OnClickGenerateFiberVolumeBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnClickGenerateFiberVolumeBtn();
+				}
+			}
+		}
+	}
+	m_mainFrame->refreshAllGLWidgets();
+}
+
 void PropertiesWindow::OnToggleShowFS( wxEvent& WXUNUSED(event) )
 {
     if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)

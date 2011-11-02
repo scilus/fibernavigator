@@ -58,6 +58,10 @@ public:
     
     void    generateFiberVolume();
     
+	void	getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines );
+	void	getNbLines( int& nbLines );
+	void	loadDMRIFibersInFile( ofstream& myfile );
+
     void    save( wxString filename );
     void    saveDMRI( wxString filename );
     
@@ -65,7 +69,6 @@ public:
     int     getStartIndexForLine( const int lineId );
     
     int     getLineForPoint( const int pointIdx );
-	string  intToString( const int number );
     
     void    resetColorArray();
     
@@ -83,7 +86,6 @@ public:
     int     getLineCount();
     int     getPointCount();
     bool    isSelected(    int  fiberId );
-	bool	isFiltered(	int fiberId );
     
     void    setFibersLength();
     
@@ -94,6 +96,13 @@ public:
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
 
+	bool isUsingFakeTubes()		{ return m_useFakeTubes; };
+	bool isUsingTransparency()	{ return m_useTransparency; };
+	bool isFibersInverted()		{ return m_fibersInverted; };
+
+	void useFakeTubes();
+	void useTransparency();
+    bool invertFibers()		{ return m_fibersInverted = ! m_fibersInverted; };
 
     GLuint  getGLuint( )
     {
@@ -151,6 +160,7 @@ private:
     void            colorWithMinDistance( float *pColorData );
     
     void            toggleEndianess();
+	string			intToString( const int number );
     
     void            calculateLinePointers();
     void            createColorArray( const bool colorsLoadedFromFile );

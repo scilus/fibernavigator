@@ -36,6 +36,7 @@
 
 #include "../misc/lic/TensorField.h"
 
+#include "../misc/Fantom/FMatrix.h"
 
 class MainFrame;
 class DatasetInfo;
@@ -81,8 +82,6 @@ public:
     void   updateAllSelectionObjects();
     Vector mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);
     Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);    
-
-    bool invertFibers() { return m_fibersInverted = ! m_fibersInverted; };
 
     void createIsoSurface();
     void createDistanceMapAndIso();
@@ -163,6 +162,8 @@ public:
     float m_xVoxel;
     float m_yVoxel;
     float m_zVoxel;
+    
+    FMatrix m_niftiTransform;
 
     unsigned int m_countFibers;
 
@@ -221,10 +222,7 @@ public:
     bool  m_useLic;           // Show the lic texture on spline surface.
     bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
     float m_normalDirection;  // Normal direction of the spline surface.
-    bool  m_fibersInverted;
-    bool  m_useFakeTubes;
     bool  m_clearToBlack;
-    bool  m_useTransparency;
     bool  m_filterIsoSurf;
     int   m_colorMap;
     bool  m_showColorMapLegend;

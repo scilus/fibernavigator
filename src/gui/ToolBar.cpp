@@ -12,6 +12,7 @@
 #include "ToolBar.h"
 #include "MainFrame.h"
 #include "../main.h"
+#include "../dataset/Fibers.h"
 
 ToolBar::ToolBar(wxWindow *parent)
     :wxToolBar( parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL | wxNO_BORDER )    
@@ -121,10 +122,29 @@ void ToolBar::updateToolBar( MainFrame *mf )
     ToggleTool(m_toggleLighting->GetId(), mf->m_pDatasetHelper->m_lighting);
     ToggleTool(m_toggleShowAllSelectionObjects->GetId(), mf->m_pDatasetHelper->m_showObjects);
     ToggleTool(m_toggleActivateAllSelectionObjects->GetId(), !mf->m_pDatasetHelper->m_activateObjects);
-    ToggleTool(m_toggleFakeTubes->GetId(), mf->m_pDatasetHelper->m_useFakeTubes);
     //ToggleTool(m_toggleDrawPoints->GetId(), mf->m_datasetHelper->m_pointMode);
     ToggleTool(m_toggleRuler->GetId(), mf->m_pDatasetHelper->m_isRulerToolActive);
     ToggleTool(m_toggleClearToBlack->GetId(), mf->m_pDatasetHelper->m_clearToBlack);
     //EnableTool(m_btnNewSelectionBox->GetId(), mf->m_datasetHelper->m_fibersLoaded);
-    ToggleTool(m_toggleInverseSelection->GetId(), mf->m_pDatasetHelper->m_fibersInverted);     
+
+	bool isFiberSelected = false;
+	bool isFiberUsingFakeTubes = false;
+	bool isFiberInverted = false;
+	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
+
+        if( pDatasetInfo->getType() == FIBERS || pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            isFiberSelected = true;
+			Fibers* pFibers = (Fibers*)pDatasetInfo;
+			if( pFibers )
+			{
+				isFiberUsingFakeTubes = pFibers->isUsingFakeTubes();
+				isFiberInverted = pFibers->isFibersInverted();
+			}
+		}
+	}
+	ToggleTool(m_toggleFakeTubes->GetId(), isFiberSelected && isFiberUsingFakeTubes);
+	ToggleTool(m_toggleInverseSelection->GetId(), isFiberSelected && isFiberInverted);
 }

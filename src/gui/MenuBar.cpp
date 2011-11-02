@@ -11,6 +11,8 @@
 
 #include "MenuBar.h"
 #include "MainFrame.h"
+#include "../dataset/Fibers.h"
+#include "../dataset/FibersGroup.h"
 
 MenuBar::MenuBar()
 {
@@ -210,22 +212,58 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleRuler->Check(mf->m_pDatasetHelper->m_isRulerToolActive);
     
 	bool isFiberSelected = false;
+	bool isFiberUsingFakeTubes = false;
+	bool isFiberUsingTransparency = false;
+	bool isFiberInverted = false;
 	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListItem != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
 
-        if( pDatasetInfo->getType() == FIBERS || pDatasetInfo->getType() == FIBERSGROUP )
+        if( pDatasetInfo->getType() == FIBERS )
         {
             isFiberSelected = true;
+			Fibers* pFibers = (Fibers*)pDatasetInfo;
+			if( pFibers )
+			{
+				isFiberUsingFakeTubes = pFibers->isUsingFakeTubes();
+				isFiberUsingTransparency = pFibers->isUsingTransparency();
+				isFiberInverted = pFibers->isFibersInverted();
+			}
+		}
+		else if( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			isFiberSelected = true;
+			FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
+			if( pFibersGroup )
+			{
+				int useFakeTubesNb = 0;
+				int useTransparencyNb = 0;
+				int isInvertedNb = 0;
+				for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
+				{
+					Fibers* pFibers = pFibersGroup->getFibersSet(i);
+					
+					if( pFibers->isUsingFakeTubes())
+						useFakeTubesNb++;
+					if( pFibers->isUsingTransparency() )
+						useTransparencyNb++;
+					if( pFibers->isFibersInverted() )
+						isInvertedNb++;
+				}
+				isFiberUsingFakeTubes = ( useFakeTubesNb == pFibersGroup->getFibersCount() );
+				isFiberUsingTransparency = ( useTransparencyNb == pFibersGroup->getFibersCount() );
+				isFiberInverted = ( isInvertedNb == pFibersGroup->getFibersCount() );
+			}
 		}
 	}
+	m_itemSaveSelectedFibers->Enable(isFiberSelected);
 	m_itemResetFibersColors->Enable(isFiberSelected);
 	m_itemToogleInvertFibersSelection->Enable(isFiberSelected);
-	m_itemToogleInvertFibersSelection->Check(mf->m_pDatasetHelper->m_fibersInverted);
+	m_itemToogleInvertFibersSelection->Check(isFiberInverted);
 	m_itemToggleUseTransparency->Enable(isFiberSelected);
-    m_itemToggleUseTransparency->Check(mf->m_pDatasetHelper->m_useTransparency);
+    m_itemToggleUseTransparency->Check(isFiberUsingTransparency);
     m_itemToggleUseFakeTubes->Enable(isFiberSelected);
-	m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
+	m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
     
 	m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
     m_itemToggleShowCrosshair->Check(mf->m_pDatasetHelper->m_showCrosshair);

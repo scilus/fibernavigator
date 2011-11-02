@@ -1896,22 +1896,10 @@ void Fibers::generateFiberVolume()
     }
 }
 
-/**
- * Save using the VTK binary format.
- */
-void Fibers::save( wxString filename )
+void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines )
 {
-    vector< float >   pointsToSave;
-    vector< int >     linesToSave;
-    vector< wxUint8 > colorsToSave;
-
     int pointIndex( 0 );
-    int countLines( 0 );
-
-    if( filename.AfterLast( '.' ) != _T( "fib" ) )
-    {
-        filename += _T( ".fib" );
-    }
+    countLines = 0;
 
     float *pColorData( NULL );
 
@@ -1946,7 +1934,6 @@ void Fibers::save( wxString filename )
                 linesToSave.push_back( pointIndex );
                 ++pointIndex;
             }
-
             ++countLines;
         }
     }
@@ -1955,118 +1942,24 @@ void Fibers::save( wxString filename )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
-
-    converterByteINT32 c;
-    converterByteFloat f;
-    ofstream myfile;
-    vector< char > vBuffer;
-    
-    string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
-    header1 += intToString( pointsToSave.size() / 3 );
-    header1 += " float\n";
-
-    for( unsigned int i = 0; i < header1.size(); ++i )
-    {
-        vBuffer.push_back( header1[i] );
-    }
-
-    for( unsigned int i = 0; i < pointsToSave.size(); ++i )
-    {
-        f.f = pointsToSave[i];
-        vBuffer.push_back( f.b[3] );
-        vBuffer.push_back( f.b[2] );
-        vBuffer.push_back( f.b[1] );
-        vBuffer.push_back( f.b[0] );
-    }
-
-    vBuffer.push_back( '\n' );
-    string header2 = "LINES " + intToString( countLines ) + " " + intToString( linesToSave.size() ) + "\n";
-
-    for( unsigned int i = 0; i < header2.size(); ++i )
-    {
-        vBuffer.push_back( header2[i] );
-    }
-
-    for( unsigned int i = 0; i < linesToSave.size(); ++i )
-    {
-        c.i = linesToSave[i];
-        vBuffer.push_back( c.b[3] );
-        vBuffer.push_back( c.b[2] );
-        vBuffer.push_back( c.b[1] );
-        vBuffer.push_back( c.b[0] );
-    }
-
-    vBuffer.push_back( '\n' );
-    string header3 = "POINT_DATA ";
-    header3 += intToString( pointsToSave.size() / 3 );
-    header3 += " float\n";
-    header3 += "COLOR_SCALARS scalars 3\n";
-
-    for( unsigned int i = 0; i < header3.size(); ++i )
-    {
-        vBuffer.push_back( header3[i] );
-    }
-
-    for( unsigned int i = 0; i < colorsToSave.size(); ++i )
-    {
-        vBuffer.push_back( colorsToSave[i] );
-    }
-
-    vBuffer.push_back( '\n' );
-    
-    // Finally put the buffer vector into a char* array.
-    char *pBuffer;
-    pBuffer = new char[vBuffer.size()];
-
-    for( unsigned int i = 0; i < vBuffer.size(); ++i )
-    {
-        pBuffer[i] = vBuffer[i];
-    }
-
-    char *pFn;
-    pFn = ( char * ) malloc( filename.length() );
-    strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
-    myfile.open( pFn, ios::binary );
-    myfile.write( pBuffer, vBuffer.size() );
-    myfile.close();
-    
-    delete[] pBuffer;
-    pBuffer = NULL;
-    
-    free(pFn);
-    pFn = NULL;
 }
 
-void Fibers::saveDMRI( wxString filename )
+void Fibers::getNbLines( int& nbLines )
 {
-    int countLines = 0;
-
-    if( filename.AfterLast( '.' ) != _T( "fib" ) )
-    {
-        filename += _T( ".fib" );
-    }
-
-    int nbrlines = 0;
+	nbLines = 0;
 
     for( int l = 0; l < m_countLines; ++l )
     {
         if( m_selected[l] && !m_filtered[l] )
         {
-            nbrlines++;
+            nbLines++;
         }
     }
+}
 
-    ofstream myfile;
-    char *pFn;
-    pFn = ( char * ) malloc( filename.length() );
-    strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
-    myfile.open( pFn, ios::out );
-    
-    float dist = 0.5;
-    myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
-    myfile << nbrlines << " " << dist << "\n";
-
-    for( int l = 0; l < m_countLines; ++l )
+void Fibers::loadDMRIFibersInFile( ofstream& myfile )
+{
+	for( int l = 0; l < m_countLines; ++l )
     {
         if( m_selected[l] && !m_filtered[l] )
         {
@@ -2081,14 +1974,120 @@ void Fibers::saveDMRI( wxString filename )
 
             pc = getStartIndexForLine( l ) * 3;
             myfile <<  m_pointArray[pc] << " " <<  m_pointArray[pc + 1] << " " <<  m_pointArray[pc + 2] << " 0\n";
-            ++countLines;
         }
     }
+}
 
+/**
+ * Save using the VTK binary format.
+ */
+void Fibers::save( wxString filename )
+{
+	ofstream myfile;
+    char *pFn;
+	vector<char> vBuffer;
+	converterByteINT32 c;
+    converterByteFloat f;
+	vector<float> pointsToSave;
+	vector<int> linesToSave;
+	vector<int> colorsToSave;
+	int countLines = 0;
+
+	if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    {
+        filename += _T( ".fib" );
+    }
+
+    pFn = ( char * ) malloc( filename.length() );
+    strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
+    myfile.open( pFn, ios::binary );
+
+	getFibersInfoToSave( pointsToSave, linesToSave, colorsToSave, countLines );
+
+	string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
+	header1 += intToString( pointsToSave.size() / 3 );
+	header1 += " float\n";
+	for( unsigned int i = 0; i < header1.size(); ++i )
+	{
+		vBuffer.push_back( header1[i] );
+	}
+	for( unsigned int i = 0; i < pointsToSave.size(); ++i )
+	{
+		f.f = pointsToSave[i];
+		vBuffer.push_back( f.b[3] );
+		vBuffer.push_back( f.b[2] );
+		vBuffer.push_back( f.b[1] );
+		vBuffer.push_back( f.b[0] );
+	}
+	
+	vBuffer.push_back( '\n' );
+	string header2 = "LINES " + intToString( countLines ) + " " + intToString( linesToSave.size() ) + "\n";
+    for( unsigned int i = 0; i < header2.size(); ++i )
+    {
+        vBuffer.push_back( header2[i] );
+    }
+	for( unsigned int i = 0; i < linesToSave.size(); ++i )
+	{
+		c.i = linesToSave[i];
+		vBuffer.push_back( c.b[3] );
+		vBuffer.push_back( c.b[2] );
+		vBuffer.push_back( c.b[1] );
+		vBuffer.push_back( c.b[0] );
+	}
+    
+	vBuffer.push_back( '\n' );
+    string header3 = "POINT_DATA ";
+    header3 += intToString( pointsToSave.size() / 3 );
+    header3 += " float\n";
+    header3 += "COLOR_SCALARS scalars 3\n";
+    for( unsigned int i = 0; i < header3.size(); ++i )
+    {
+        vBuffer.push_back( header3[i] );
+    }
+	for( unsigned int i = 0; i < colorsToSave.size(); ++i )
+	{
+		vBuffer.push_back( colorsToSave[i] );
+	}
+	vBuffer.push_back( '\n' );
+
+	// Put the buffer vector into a char* array.
+    char* pBuffer = new char[vBuffer.size()];
+
+    for( unsigned int i = 0; i < vBuffer.size(); ++i )
+    {
+        pBuffer[i] = vBuffer[i];
+    }
+	
+	myfile.write( pBuffer, vBuffer.size() );
     myfile.close();
     
-    free(pFn);
-    pFn = NULL;
+    delete[] pBuffer;
+    pBuffer = NULL;
+}
+
+void Fibers::saveDMRI( wxString filename )
+{
+    ofstream myfile;
+	int nbrlines;
+    char *pFn;
+	float dist = 0.5;
+
+	if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    {
+        filename += _T( ".fib" );
+    }
+
+    pFn = ( char * ) malloc( filename.length() );
+    strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
+    myfile.open( pFn, ios::out );
+   
+	getNbLines( nbrlines );
+
+	myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
+	myfile << nbrlines << " " << dist << "\n";
+	loadDMRIFibersInFile( myfile);
+
+    myfile.close();
 }
 
 string Fibers::intToString( const int number )
@@ -2505,7 +2504,7 @@ void Fibers::updateLinesShown()
         boxWasUpdated = true;
     }
 
-    if( m_dh->m_fibersInverted )
+    if( m_fibersInverted )
     {
         for( int k = 0; k < m_countLines; ++k )
         {
@@ -2754,13 +2753,13 @@ void Fibers::draw()
 
     initializeBuffer();
 
-    if( m_dh->m_useFakeTubes )
+    if( m_useFakeTubes )
     {
         drawFakeTubes();
         return;
     }
 
-    if( m_dh->m_useTransparency )
+    if( m_useTransparency )
     {
         glPushAttrib( GL_ALL_ATTRIB_BITS );
         glEnable( GL_BLEND );
@@ -3027,6 +3026,17 @@ void Fibers::drawSortedLines()
     delete[] pLineIds;
 }
 
+void Fibers::useFakeTubes()
+{
+	m_useFakeTubes = ! m_useFakeTubes;
+	switchNormals( m_useFakeTubes );
+}
+
+void Fibers::useTransparency()
+{
+	m_useTransparency = ! m_useTransparency;
+}
+
 void Fibers::switchNormals( bool positive )
 {
     float *pNormals = NULL;
@@ -3135,11 +3145,6 @@ int Fibers::getPointCount()
 bool Fibers::isSelected( int fiberId )
 {
     return m_selected[fiberId];
-}
-
-bool Fibers::isFiltered( int fiberId )
-{
-	return m_filtered[fiberId];
 }
 
 void Fibers::setFibersLength()

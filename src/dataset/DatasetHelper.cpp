@@ -40,6 +40,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_xVoxel     ( 1.0f ),
     m_yVoxel     ( 1.0f ),
     m_zVoxel     ( 1.0f ),
+
+	m_niftiTransform( 4, 4 ),
+
     m_countFibers( 0    ),
 
     m_scnFileLoaded      ( false ),
@@ -106,10 +109,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_normalDirection( 1.0 ),
 
-    m_fibersInverted ( false ),
-    m_useFakeTubes   ( false ),
     m_clearToBlack   ( false ),
-    m_useTransparency( false ),
     m_filterIsoSurf  ( false ),
 
     m_colorMap( 0 ),
@@ -1336,15 +1336,13 @@ bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
 {
 	io_f = NULL;
 
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+	long selItem = m_mainFrame->m_pListCtrl->GetSelectedItem();
+
+    DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( selItem );
+    if( l_datasetInfo->getType() == FIBERS)
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
-		long item = m_mainFrame->m_pListCtrl->GetItemState( i, wxLIST_STATE_SELECTED);
-        if( l_datasetInfo->getType() == FIBERS && item != -1)
-        {
-            io_f = (Fibers*)m_mainFrame->m_pListCtrl->GetItemData( i );
-            return true;
-        }
+        io_f = (Fibers*)l_datasetInfo;
+        return true;
     }
     return false;
 }
@@ -1358,7 +1356,7 @@ bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
         DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
         if( l_datasetInfo->getType() == FIBERSGROUP )
         {
-            io_fg = (FibersGroup*)m_mainFrame->m_pListCtrl->GetItemData( i );
+            io_fg = (FibersGroup*)l_datasetInfo;
             return true;
         }
     }

@@ -13,9 +13,7 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetHelper.h"
-#include "../dataset/DatasetInfo.h"
 #include "../dataset/Fibers.h"
-#include "../dataset/FibersGroup.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
 #include "../gui/ArcBall.h"
@@ -267,19 +265,7 @@ void TheScene::renderScene()
         renderODFs();
     
     renderMesh();
-
-	FibersGroup* pFibersGroup;
-    m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
-	if( pFibersGroup )
-	{
-		if( pFibersGroup->getFibersCount() > 0)
-		{
-			if ( m_pDatasetHelper->m_useFakeTubes )
-				renderFakeTubes();
-			else
-				renderFibers();
-		}
-    }
+	renderFibers();
     
     if( m_pDatasetHelper->m_showObjects )
         drawSelectionObjects();
@@ -599,80 +585,66 @@ void TheScene::renderFibers()
     {
         DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
 
-        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow() )
+        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow())
         {
-            lightsOff();
+			Fibers* pFibers = (Fibers*)pDsInfo;
+			if( pFibers != NULL )
+			{
+				if( pFibers->isUsingFakeTubes() )
+				{
+					if( m_pDatasetHelper->m_selBoxChanged )
+					{
+						pFibers->updateLinesShown();
+						m_pDatasetHelper->m_selBoxChanged = false;
+					}
 
-            if( m_pDatasetHelper->m_lighting )
-            {
-                lightsOn();
-                GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-                glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
+					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->bind();
+					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniInt  ( "globalColor", pFibers->getShowFS() );
+					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
+					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
+					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "thickness", GLfloat( 3.175 ) );
 
-            }
-            if( ! pDsInfo->getUseTex() )
-            {
-                bindTextures();
-                m_pDatasetHelper->m_shaderHelper->m_pFiberShader->bind();
-                m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
-                m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useTex", !pDsInfo->getUseTex() );
-                m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-                m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useOverlay", pDsInfo->getShowFS() );
-            }
-            if( m_pDatasetHelper->m_selBoxChanged )
-            {
-                ( (Fibers*)pDsInfo )->updateLinesShown();
-                m_pDatasetHelper->m_selBoxChanged = false;
-            }
-            pDsInfo->draw();
+					pFibers->draw();
+					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->release();
 
-            m_pDatasetHelper->m_shaderHelper->m_pFiberShader->release();
+					if( m_pDatasetHelper->GLError() )
+						m_pDatasetHelper->printGLError( wxT( "draw fake tubes" ) );
+				}
+				else // render normally
+				{
+					lightsOff();
 
-            lightsOff();
-        }
-    }
+					if( m_pDatasetHelper->m_lighting )
+					{
+						lightsOn();
+						GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+						glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
+					}
+					if( ! pFibers->getUseTex() )
+					{
+						bindTextures();
+						m_pDatasetHelper->m_shaderHelper->m_pFiberShader->bind();
+						m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
+						m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useTex", !pFibers->getUseTex() );
+						m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+						m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useOverlay", pFibers->getShowFS() );
+					}
+					if( m_pDatasetHelper->m_selBoxChanged )
+					{
+						pFibers->updateLinesShown();
+						m_pDatasetHelper->m_selBoxChanged = false;
+					}
+					pFibers->draw();
+					m_pDatasetHelper->m_shaderHelper->m_pFiberShader->release();
+					lightsOff();
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw fibers" ) );
-
-    glPopAttrib();
-}
-
-///////////////////////////////////////////////////////////////////////////
-// This function will render the fibers as fake tubes in theScene.
-///////////////////////////////////////////////////////////////////////////
-void TheScene::renderFakeTubes()
-{
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
-    {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
-
-        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow() )
-        {
-            if( m_pDatasetHelper->m_selBoxChanged )
-            {
-                ( (Fibers*) pDsInfo )->updateLinesShown();
-                m_pDatasetHelper->m_selBoxChanged = false;
-            }
-
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->bind();
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniInt  ( "globalColor", pDsInfo->getShowFS() );
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "thickness", GLfloat( 3.175 ) );
-
-            pDsInfo->draw();
-
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->release();
-        }
-    }
-
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw fake tubes" ) );
-
-    glPopAttrib();
+					if( m_pDatasetHelper->GLError() )
+					m_pDatasetHelper->printGLError( wxT( "draw fibers" ) );
+				}
+			}
+		}
+	}
+	glPopAttrib();
 }
 
 ///////////////////////////////////////////////////////////////////////////

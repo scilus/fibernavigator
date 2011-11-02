@@ -75,8 +75,7 @@ private:
     void drawVectors            ();
     void lightsOff              ();
     void lightsOn               ();
-    void renderFakeTubes        ();
-    void renderFibers           ();
+	void renderFibers           ();
     void renderMesh             ();
     void renderODFs             ();
     void renderSlices           ();

@@ -48,6 +48,7 @@ public:
 
     void    updateGroupFilters();
 	void	resetFibersColor();
+	void	invertFibers();
 	void	useFakeTubes();
 	void	useTransparency();
 
@@ -61,6 +62,7 @@ public:
 	void	OnToggleColorModeBtn();
 	void	OnToggleLocalColoring();
 	void	OnToggleNormalColoring();
+	void	OnClickGenerateFiberVolumeBtn();
 	void	OnClickApplyBtn();
 	void	OnClickCancelBtn();
 	
@@ -97,6 +99,8 @@ private:
 
 	bool m_isNormalColoringStateChanged;
 	bool m_isLocalColoringStateChanged;
+
+	string intToString( const int number );
     
     // GUI members
 	wxToggleButton *m_ptoggleIntensity;
@@ -110,7 +114,7 @@ private:
 	wxButton	   *m_pApplyBtn;
 	wxButton	   *m_pCancelBtn;
 
-	//wxButton       *m_pGeneratesFibersDensityVolume;
+	wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;

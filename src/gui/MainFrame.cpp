@@ -1081,7 +1081,7 @@ void MainFrame::onToggleFilterIso( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 {
-	/*if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
@@ -1089,7 +1089,7 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 			Fibers* l_fibers = NULL;
 			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
 			{
-				l_fibers->resetColorArray();
+				l_fibers->invertFibers();
 			}
 		}
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
@@ -1097,12 +1097,11 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 			FibersGroup* l_fibersGroup = NULL;
 			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) != NULL )
 			{
-				l_fibersGroup->resetFibersColor();
+				l_fibersGroup->invertFibers();
 			}			
 		}
-	}*/
+	}
 
-    m_pDatasetHelper->invertFibers();
     m_pDatasetHelper->m_selBoxChanged = true;
     refreshAllGLWidgets();
 }
@@ -1117,8 +1116,7 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 			Fibers* l_fibers = NULL;
 			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
 			{
-				l_fibers->switchNormals( !m_pDatasetHelper->m_useFakeTubes );
-				//l_fibers->m_useFakeTubes = !l_fibers->m_useFakeTubes;
+				l_fibers->useFakeTubes();
 			}
 		}
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
@@ -1126,7 +1124,7 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 			FibersGroup* l_fibersGroup = NULL;
 			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) != NULL )
 			{
-				//l_fibersGroup->useFakeTubes( !m_pDatasetHelper->m_useFakeTubes );
+				l_fibersGroup->useFakeTubes();
 			}			
 		}
 	}
@@ -1201,7 +1199,7 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 			Fibers* l_fibers = NULL;
 			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
 			{
-				l_fibers->switchNormals( !m_pDatasetHelper->m_useFakeTubes );
+				l_fibers->useTransparency();
 
 			}
 		}
