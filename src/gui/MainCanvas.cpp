@@ -190,18 +190,28 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 m_mousePt.s.X = clickX;
                 m_mousePt.s.Y = clickY;
                 
-				if (m_pDatasetHelper->m_isDrawerToolActive)
+				//use Control key for advanced left click actions
+				if ( wxGetKeyState( WXK_CONTROL ))
 				{
-					m_hr = pick(event.GetPosition(), true);
-					drawOnAnatomy();
+					if (m_pDatasetHelper->m_isDrawerToolActive)
+					{
+						m_hr = pick(event.GetPosition(), true);
+						drawOnAnatomy();
+					}
+					else if (m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isDragging)
+					{
+						m_hr = pick(event.GetPosition(), true);
+						m_lastPos = event.GetPosition();
+						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
+					}
 				}
 				else
 				{
 					if ( !m_pDatasetHelper->m_isDragging ) // Not Dragging
 					{
-						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
 						m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
 						m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
+						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
 					}
 					else if(!m_isSceneLocked)
 					{                    
@@ -225,7 +235,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 {
                     long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
                     
-                    if(l_item != -1 && !m_pDatasetHelper->m_isRulerToolActive)
+                    if(l_item != -1)
                     {
                         DatasetInfo* l_type = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
                         Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
@@ -237,10 +247,6 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                             segment();
                             l_info->toggleSegment();                        
                         }
-                    }
-                    else if (m_pDatasetHelper->m_isRulerToolActive)
-                    {
-                        m_hr = pick(event.GetPosition(), true);
                     }
                     /*else if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isSelectBckActive && m_pDatasetHelper->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectObj-GraphCut
                     {
@@ -270,7 +276,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_lastPos = event.GetPosition();
                 }
                 else  if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isDrawerToolActive && !m_isSceneLocked) //Move Scene
-                {                    
+                {
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
                     m_lastPos = event.GetPosition();

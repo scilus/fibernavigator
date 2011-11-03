@@ -493,12 +493,13 @@ void Anatomy::generateTexture()
 
 void Anatomy::updateTexture( const int x, const int y, const int z, float color, int size ) 
 {
-	//hit detection can be a pixel offset I think, but negative pos crashes
+	//security check: hit detection can be a pixel offset, negative positions crash
 	if(x < 0 || y < 0 || z < 0)
 	{
 		return;
 	}
 
+	//TODO: more size parameters
 	int width = size;
 	int height = size;
 	int depth = size;
@@ -508,12 +509,8 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float color,
 	int datasetSize = width*height*depth;
 	
 	//create the modified region's vector in the right color
-	std::vector<float>* subData = new vector<float>( datasetSize, color );
-
-	//if(shape != CUBE)
-
-	//glGetTexImage( GL_TEXTURE_3D, 0, GL_LUMINANCE, GL_FLOAT, sourceData); 
-	/*
+	std::vector<float> subData( datasetSize, color );
+	
     for( int f = 0; f < depth; ++f )
     {
         for( int r = 0; r < height; ++r )
@@ -522,35 +519,33 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float color,
 			{
 				int sourceIndex = (c+xoffset) + (r+yoffset) * m_columns + (f+zoffset) * m_columns * m_rows;
 				int subIndex = c + r * width + f * width * height;
-				if(subIndex < 0)
-					subIndex += datasetSize;
 
-				//inside sphere: update subImage and source
+				//inside sphere: update source
 				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
 				{
-					subData->at(subIndex) = color;
-					//m_floatDataset[sourceIndex] = color;
+					m_floatDataset[sourceIndex] = color;
 				}
 				else //outside sphere: copy source values in the subImage
 				{
-					subData->at(subIndex) = m_floatDataset[sourceIndex];
+					subData[subIndex] = m_floatDataset[sourceIndex];
 				}
 			}
 		}
-	}*/
+	}
 
-	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we have already created
-	glTexSubImage3D( GL_TEXTURE_3D, 0, GLint(xoffset), GLint(yoffset), GLint(zoffset), GLint(width), GLint(height), GLint(depth), GL_LUMINANCE, GL_FLOAT, &subData[0] );
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The last texture we created (TODO: not last, but currently selected)
+	glTexSubImage3D( GL_TEXTURE_3D, 0, xoffset, yoffset, zoffset, width, height, depth, GL_LUMINANCE, GL_FLOAT, &subData[0] );
 }
 
 void Anatomy::updateTexture( const int x, const int y, const int z, float* colorRGB, int size ) 
 {
-	//hit detection can be a pixel offset I think, but negative pos crashes
+	//security check: hit detection can be a pixel offset, negative positions crash
 	if(x < 0 || y < 0 || z < 0)
 	{
 		return;
 	}
 	
+	//TODO: more size parameters
 	int width = size;
 	int height = size;
 	int depth = size;
@@ -560,12 +555,12 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float* color
 	int datasetSize = width*height*depth*3;
 	
 	//create the modified region's vector and put the right color
-	std::vector<float>* subData = new vector<float>( datasetSize, 0.0f );
+	std::vector<float> subData( datasetSize, colorRGB[0] );
 	for( int i=0; i < datasetSize; i+=3 )
     {
-        subData->at(i) = colorRGB[0];
-        subData->at(i+1) = colorRGB[1];
-        subData->at(i+2) = colorRGB[2];
+        //subData[i] = colorRGB[0]; //done at declaration
+        subData[i+1] = colorRGB[1];
+        subData[i+2] = colorRGB[2];
     }
 	
     for( int f = 0; f < depth; ++f )
@@ -580,22 +575,22 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float* color
 				//inside sphere: update subImage and source
 				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
 				{
-					subData->at(subIndex*3 ) = colorRGB[0];
-					subData->at(subIndex*3 + 1) = colorRGB[1];
-					subData->at(subIndex*3 + 2) = colorRGB[2];
+					m_floatDataset[sourceIndex*3] = colorRGB[0];
+					m_floatDataset[sourceIndex*3 + 1] = colorRGB[1];
+					m_floatDataset[sourceIndex*3 + 2] = colorRGB[2];
 				}
 				else //outside sphere: copy source values in the subImage
 				{
-					subData->at(subIndex*3) = m_floatDataset[sourceIndex*3];
-					subData->at(subIndex*3 + 1) = m_floatDataset[sourceIndex*3 + 1];
-					subData->at(subIndex*3 + 2) = m_floatDataset[sourceIndex*3 + 2];
+					subData[subIndex*3] = m_floatDataset[sourceIndex*3];
+					subData[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
+					subData[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
 				}
 			}
 		}
 	}
 
-	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we have already created
-	glTexSubImage3D( GL_TEXTURE_3D, 0, GLint(xoffset), GLint(yoffset), GLint(zoffset), GLint(width), GLint(height), GLint(depth), GL_RGB, GL_FLOAT, &subData[0] );
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The last texture we created (TODO: not last, but currently selected)
+	glTexSubImage3D( GL_TEXTURE_3D, 0, xoffset, yoffset, zoffset, width, height, depth, GL_RGB, GL_FLOAT, &subData[0] );
 }
 
 GLuint Anatomy::getGLuint()
@@ -1124,8 +1119,7 @@ void Anatomy::writeVoxel( const int x, const int y, const int z )
         case OVERLAY:
 		{
 			float white = 1.0f;
-			updateTexture(x, y, z, white, 7);
-			//generateTexture();
+			updateTexture(x, y, z, white, 5);
 			break;
 		}
 		case RGB:
@@ -1135,8 +1129,7 @@ void Anatomy::writeVoxel( const int x, const int y, const int z )
 			whiteRGB[1] = 1.0f;
 			whiteRGB[2] = 1.0f;
 
-			updateTexture(x, y, z, whiteRGB, 7);
-			//generateTexture();
+			updateTexture(x, y, z, whiteRGB, 5);
 			break;
 		}
 		case VECTORS:
@@ -1155,8 +1148,7 @@ void Anatomy::eraseVoxel( const int x, const int y, const int z )
         case OVERLAY:
 		{
 			float black = 0.0f;
-			updateTexture(x, y, z, black, 7);
-			//generateTexture();
+			updateTexture(x, y, z, black, 5);
 			break;
 		}
 		case RGB:
@@ -1166,8 +1158,7 @@ void Anatomy::eraseVoxel( const int x, const int y, const int z )
 			blackRGB[1] = 0.0f;
 			blackRGB[2] = 0.0f;
 
-			updateTexture(x, y, z, blackRGB, 7);
-			//generateTexture();
+			updateTexture(x, y, z, blackRGB, 5);
 			break;
 		}
 		case VECTORS:
