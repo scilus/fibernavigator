@@ -17,61 +17,61 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     m_threshold.resize( 10 );
     m_alpha.resize( 10 );
 
-    m_pDh->printDebug( _T("initializing texture shader"), 1 );
+    m_pDh->printDebug( _T("initializing texture shader"), MESSAGELEVEL );
     m_pTextureShader = new Shader( wxT("anatomy") );
     m_pTextureShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup anatomy shader") );
 
-    m_pDh->printDebug( _T("initializing mesh shader"), 1 );
+    m_pDh->printDebug( _T("initializing mesh shader"), MESSAGELEVEL );
     m_pMeshShader = new Shader( wxT("mesh") );
     m_pMeshShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup mesh shader") );
 
-    m_pDh->printDebug( _T("initializing fiber shader"), 1 );
+    m_pDh->printDebug( _T("initializing fiber shader"), MESSAGELEVEL );
     m_pFiberShader = new Shader( wxT("fibers") );
     m_pFiberShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup fiber shader") );
 
-    m_pDh->printDebug( _T("initializing fake tube shader"), 1 );
+    m_pDh->printDebug( _T("initializing fake tube shader"), MESSAGELEVEL );
     m_pFakeTubeShader = new Shader( wxT("fake-tubes") );
     m_pFakeTubeShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup fake tube shader") );
 
-    m_pDh->printDebug( _T("initializing spline surface shader"), 1 );
+    m_pDh->printDebug( _T("initializing spline surface shader"), MESSAGELEVEL );
     m_pSplineSurfShader = new Shader( wxT("splineSurf") );
     m_pSplineSurfShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup spline surface shader") );
 /*
-    m_pDh->printDebug( _T("initializing vector shader"), 1 );
+    m_pDh->printDebug( _T("initializing vector shader"), MESSAGELEVEL );
     m_pVectorShader = new Shader( wxT("vectors") );
     m_pVectorShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup vectors shader") );
 */
-    m_pDh->printDebug( _T("initializing legend shader"), 1 );
+    m_pDh->printDebug( _T("initializing legend shader"), MESSAGELEVEL );
     m_pLegendShader = new Shader( wxT("legend") );
     m_pLegendShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup legend shader") );
 
-    m_pDh->printDebug( _T("initializing graph shader"), 1 );
+    m_pDh->printDebug( _T("initializing graph shader"), MESSAGELEVEL );
     m_pGraphShader = new Shader( wxT("graph") );
     m_pGraphShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup graph shader") );
 
-    m_pDh->printDebug( _T("initializing tensors shader"), 1 );
+    m_pDh->printDebug( _T("initializing tensors shader"), MESSAGELEVEL );
     m_pTensorsShader = new Shader( wxT("tensors") );
     m_pTensorsShader->bind();
     if ( m_pDh->GLError() )
         m_pDh->printGLError( wxT("setup tensors shader") );
 
-    m_pDh->printDebug( _T("initializing odfs shader"), 1 );
+    m_pDh->printDebug( _T("initializing odfs shader"), MESSAGELEVEL );
     m_pOdfsShader = new Shader( wxT("odfs") );
     m_pOdfsShader->bind();
     if ( m_pDh->GLError() )
@@ -80,7 +80,7 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
 
 ShaderHelper::~ShaderHelper()
 {
-    m_pDh->printDebug( _T("execute shader helper destructor\n"), 0 );
+    m_pDh->printDebug( _T("execute shader helper destructor\n"), DEBUGLEVEL );
     delete m_pTextureShader;
     delete m_pMeshShader;
     delete m_pFiberShader;
@@ -91,7 +91,7 @@ ShaderHelper::~ShaderHelper()
 	delete m_pGraphShader;
 	delete m_pLegendShader;
 
-    m_pDh->printDebug( _T("shader helper destructor done\n"), 0 );
+    m_pDh->printDebug( _T("shader helper destructor done\n"), DEBUGLEVEL );
 }
 
 void ShaderHelper::initializeArrays()

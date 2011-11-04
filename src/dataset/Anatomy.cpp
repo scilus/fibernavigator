@@ -341,7 +341,7 @@ void Anatomy::flipAxis( AxisType axe )
             frames /= 2;
             break;
         default:
-            m_dh->printDebug(_T("Cannot flip axis. The given axis is undefined."), 2);
+            m_dh->printDebug( _T("Cannot flip axis. The given axis is undefined."), ERRORLEVEL );
             return;
     }
 
@@ -432,7 +432,7 @@ bool Anatomy::loadNifti( wxString fileName )
         m_dh->m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
         return false;
     }
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
     //nifti_1_header *l_tmphdr = nifti_read_header( l_hdrFile, 0, 0 );
     //disp_nifti_1_header( "", l_tmphdr );
 #endif

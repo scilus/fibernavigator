@@ -124,7 +124,7 @@ bool MyApp::OnInit( void )
 
 #endif
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
 
         // this crashes on windows
         printwx( _T( "Warning: This version of Fibernavigator is debug compiled."), _T( "For better performance please compile a Release version.") );

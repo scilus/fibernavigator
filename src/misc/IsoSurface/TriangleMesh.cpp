@@ -556,7 +556,7 @@ void TriangleMesh::printInfo()
     printf("[%02d:%02d:%02d] ", dt1.GetHour(), dt1.GetMinute(), dt1.GetSecond());
     printf("Triangle Mesh uses %d bytes.\n", bytes);
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
     printf("vertices: %d\n",(int)vertices.size());
     printf("vertNormals: %d\n",(int)vertNormals.size());
     printf("triangles: %d\n",(int)triangles.size());

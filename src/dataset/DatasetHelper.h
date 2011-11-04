@@ -25,7 +25,6 @@
 
 #include "DatasetInfo.h"
 
-
 #include "../gui/SelectionObject.h"
 
 #include "../gui/MainFrame.h"
@@ -51,6 +50,9 @@ class TensorField;
 class Surface;
 
 typedef std::vector< std::vector< SelectionObject* > > SelectionObjectList;
+
+// printDebug levels
+enum LogLevel { DEBUGLEVEL, MESSAGELEVEL, ERRORLEVEL };
 
 class DatasetHelper 
 {
@@ -99,7 +101,7 @@ public:
      */
     void printTime();
     void printwxT  ( const wxString i_string );
-    void printDebug( const wxString i_string, const int i_level );
+    void printDebug( const wxString i_string, const LogLevel i_level );
     /*
      * Check for GL error
      */
@@ -147,7 +149,7 @@ public:
     double                m_rulerPartialLength;
     int                   m_fibersSamplingFactor;
     bool                  m_isSegmentActive;
-    int                      m_SegmentMethod;
+    int                   m_SegmentMethod;
     bool                  m_isFloodfillActive;
     bool                  m_isSelectBckActive;
     bool                  m_isSelectObjActive;
@@ -203,7 +205,7 @@ public:
 
     int       m_debugLevel;
 
-    float     m_frustum[6][4]; // Countains the information of the planes forming the frustum.
+    float     m_frustum[6][4]; // Contains the information of the planes forming the frustum.
     /////////////////////////////////////////////////////////////////////////////////
     // state variables for menu entries
     /////////////////////////////////////////////////////////////////////////////////
