@@ -272,8 +272,8 @@ protected:
     bool   getMeanFiber                      ( const vector< vector< Vector > > &i_fibersPoints,
                                                      unsigned int                i_nbPoints,
                                                      vector< Vector >           &o_meanFiber               );
-    bool   getMeanFiberValue                 ( const vector< vector< Vector > > &i_fibersPoints, 
-                                                     float                      &o_meanValue               );
+    bool   getMeanFiberValue                 ( const vector< vector< Vector > > &fibersPoints, 
+                                                     float                      &computedMeanValue               );
     
     bool   getMeanMaxMinFiberCrossSection    ( const vector< vector< Vector > > &i_fibersPoints,
                                                const vector< Vector >           &i_meanFiberPoints,
@@ -325,8 +325,8 @@ private:
     wxButton        *m_pbtnFlipNormal;
     wxBitmapButton  *m_pbtnSelectColor;
     wxButton        *m_pbtnSelectColorFibers;
-    wxChoice        *m_pCBSelectDataSet;
     wxStaticText    *m_pLabelAnatomy;
+    wxChoice        *m_pCBSelectDataSet;
 public:
     wxTextCtrl      *m_ctrlBoxX;
     wxTextCtrl      *m_ctrlBoxY;

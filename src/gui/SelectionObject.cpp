@@ -26,7 +26,9 @@
 
 SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ):
     m_displayCrossSections     ( CS_NOTHING   ),
-    m_displayDispersionCone    ( DC_NOTHING   )
+    m_displayDispersionCone    ( DC_NOTHING   ),
+    m_pLabelAnatomy( NULL ),
+    m_pCBSelectDataSet( NULL )
 {
     wxColour  l_color( 240, 30, 30 );
     hitResult l_hr = { false, 0.0f, 0, NULL };
@@ -961,40 +963,62 @@ bool SelectionObject::getFibersCount( int &o_count )
 //
 // Returns true if successful, false otherwise.
 ///////////////////////////////////////////////////////////////////////////
-bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fibersPoints, float &o_meanValue )
+bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &fibersPoints, float &computedMeanValue )
 {
-    o_meanValue = 0.0f;
-    
-    if ( ( m_pCBSelectDataSet->GetCount() == 0 ) || ( m_pCBSelectDataSet->GetCurrentSelection() == -1 ) )
-        return false; //No anatomy file loaded
+    computedMeanValue = 0.0f;
 
-    if( i_fibersPoints.size() == 0 )
-        return false;
-
-    unsigned int l_count = 0;
-    unsigned int l_pos   = 0;
-    vector<DatasetInfo*> datasets;
-    m_datasetHelper->getTextureDataset(datasets);
-    Anatomy* l_anatomy = (Anatomy*)datasets[m_pCBSelectDataSet->GetSelection()];
-    //TEST
-    printf(l_anatomy->getName().mb_str());
-    printf("\n");
-    for( unsigned int i = 0; i < i_fibersPoints.size(); i++ )
+    if( fibersPoints.size() == 0 )
     {
-        for( unsigned int j = 0; j < i_fibersPoints[i].size(); j++ )
-        {
-            l_pos = ( static_cast<int>( i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel ) +
-                    static_cast<int>( i_fibersPoints[i][j].y / m_datasetHelper->m_yVoxel ) * l_anatomy->getColumns()  +
-                    static_cast<int>( i_fibersPoints[i][j].z / m_datasetHelper->m_zVoxel ) * l_anatomy->getColumns() * l_anatomy->getRows() ) * l_anatomy->getBands();
-            
-            for (int i(0); i < l_anatomy->getBands(); i++)
-                o_meanValue += (* ( l_anatomy->getFloatDataset() ) )[l_pos + i];
+        return false;
+    }
+    
+    Anatomy *pCurrentAnatomy( NULL );
 
-            l_count++;
+    vector< DatasetInfo* > datasets;
+    m_datasetHelper->getTextureDataset(datasets);
+
+    if( m_pCBSelectDataSet == NULL && datasets.size() > 0 )
+    {
+        // Select the first dataset in the list
+        pCurrentAnatomy = (Anatomy*)datasets[0];
+    }
+    else if( m_pCBSelectDataSet != NULL && 
+             m_pCBSelectDataSet->GetCount() > 0 && 
+             m_pCBSelectDataSet->GetCurrentSelection() != -1 )
+    {
+        // Get the currently selected dataset.
+        pCurrentAnatomy = (Anatomy*)datasets[ m_pCBSelectDataSet->GetSelection() ];
+    }
+    else
+    {
+        return false;
+    }
+
+    unsigned int pointsCount( 0 );
+    unsigned int datasetPos ( 0 );
+    
+    //TEST
+    printf(pCurrentAnatomy->getName().mb_str());
+    printf("\n");
+
+    for( unsigned int i = 0; i < fibersPoints.size(); ++i )
+    {
+        for( unsigned int j = 0; j < fibersPoints[i].size(); ++j )
+        {
+            datasetPos = ( static_cast<int>( fibersPoints[i][j].x / m_datasetHelper->m_xVoxel ) +
+                           static_cast<int>( fibersPoints[i][j].y / m_datasetHelper->m_yVoxel ) * pCurrentAnatomy->getColumns() +
+                           static_cast<int>( fibersPoints[i][j].z / m_datasetHelper->m_zVoxel ) * pCurrentAnatomy->getColumns() * pCurrentAnatomy->getRows() ) * pCurrentAnatomy->getBands();
+            
+            for (int i(0); i < pCurrentAnatomy->getBands(); i++)
+            {
+                computedMeanValue += (* ( pCurrentAnatomy->getFloatDataset() ) )[datasetPos + i];
+            }
+
+            ++pointsCount;
         }
     }
     
-    o_meanValue /= l_count;
+    computedMeanValue /= pointsCount;
     return true;
 }
 
@@ -1922,6 +1946,9 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     
     m_propertiesSizer->AddSpacer(2);
 
+// Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
+// Will have to be fixed.
+#ifndef __WXMSW__    
     m_pCBSelectDataSet = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxSize(140,-1));
     m_pLabelAnatomy = new wxStaticText(parent, wxID_ANY, wxT("Anatomy file : "));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -1930,6 +1957,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->Add(l_sizer, 0, wxALIGN_CENTER);
     parent->Connect( m_pCBSelectDataSet->GetId(), wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMeanComboBoxSelectionChange ) );
     m_propertiesSizer->AddSpacer(2);
+#endif
 
     m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
     //m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
@@ -2039,10 +2067,14 @@ void SelectionObject::updatePropertiesSizer()
     m_pgridfibersInfo->Enable(getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue());
     m_ptoggleDisplayMeanFiber->Enable(getShowFibers());
 
+// Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
+// Will have to be fixed.
+#ifndef __WXMSW__
     m_pCBSelectDataSet->Show(m_ptoggleCalculatesFibersInfo->GetValue());
     m_pLabelAnatomy->Show(m_ptoggleCalculatesFibersInfo->GetValue());
     if ( m_ptoggleCalculatesFibersInfo->GetValue() )
         UpdateMeanValueTypeBox();
+#endif
 
     if (!getShowFibers() && m_meanFiberPoints.size() > 0){
         //Hide the mean fiber if fibers are invisible and the box is moved

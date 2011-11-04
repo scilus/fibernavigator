@@ -1347,7 +1347,7 @@ bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
     for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
         l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
-        if ( ( l_datasetInfo->getType() > 0 ) && ( l_datasetInfo->getType() < 6) ) 
+        if ( ( l_datasetInfo->getType() >= HEAD_BYTE ) && ( l_datasetInfo->getType() <= TENSOR_FIELD ) ) 
             o_types.push_back( l_datasetInfo );
     }
     return true;

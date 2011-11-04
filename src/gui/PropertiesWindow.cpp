@@ -831,7 +831,10 @@ void PropertiesWindow::OnNormalizeTensors( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 {
+// TODO remove when the bug with the wxChoice in Windows is fixed.
+#ifndef __WXMSW__
     ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->UpdateMeanValueTypeBox();
+#endif
     ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->SetFiberInfoGridValues();
     m_mainFrame->refreshAllGLWidgets();
 }
