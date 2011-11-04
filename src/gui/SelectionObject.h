@@ -217,6 +217,7 @@ protected :
 public:
     // Functions
     void   calculateGridParams               (       FibersInfoGridParams       &io_gridInfo               );
+    void   computeMeanFiber                  ();
     void   getProgressionCurvature           ( const Vector                     &i_point0, 
                                                const Vector                     &i_point1, 
                                                const Vector                     &i_point2, 
@@ -232,6 +233,7 @@ public:
                                                      double                      i_progression,
                                                      double                     &o_torsion                 );
     void   SetFiberInfoGridValues();
+    void   UpdateMeanValueTypeBox             ();
 protected:
     void   drawCrossSections                 ();
     void   drawCrossSectionsPolygons         ();
@@ -270,8 +272,8 @@ protected:
     bool   getMeanFiber                      ( const vector< vector< Vector > > &i_fibersPoints,
                                                      unsigned int                i_nbPoints,
                                                      vector< Vector >           &o_meanFiber               );
-    bool   getMeanFiberValue                 ( const vector< vector< Vector > > &i_fibersPoints, 
-                                                     float                      &o_meanValue               );
+    bool   getMeanFiberValue                 ( const vector< vector< Vector > > &fibersPoints, 
+                                                     float                      &computedMeanValue               );
     
     bool   getMeanMaxMinFiberCrossSection    ( const vector< vector< Vector > > &i_fibersPoints,
                                                const vector< Vector >           &i_meanFiberPoints,
@@ -290,6 +292,10 @@ protected:
                                                      double                      i_progression,
                                                      double                     &o_curvature,
                                                      double                     &o_torsion                 );
+
+    bool   getShowFibers                      ();
+
+    vector< vector< Vector > >   getSelectedFibersPoints ();
     
     vector< float >             m_crossSectionsAreas;   // All the cross sections areas value.
     vector< Vector >            m_crossSectionsNormals; // All the cross sections normals value.
@@ -319,6 +325,8 @@ private:
     wxButton        *m_pbtnFlipNormal;
     wxBitmapButton  *m_pbtnSelectColor;
     wxButton        *m_pbtnSelectColorFibers;
+    wxStaticText    *m_pLabelAnatomy;
+    wxChoice        *m_pCBSelectDataSet;
 public:
     wxTextCtrl      *m_ctrlBoxX;
     wxTextCtrl      *m_ctrlBoxY;

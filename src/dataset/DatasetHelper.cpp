@@ -1340,6 +1340,20 @@ std::vector< float >* DatasetHelper::getVectorDataset()
     return NULL;
 }
 
+bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
+{
+    o_types.clear();
+    DatasetInfo* l_datasetInfo;
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    {
+        l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+        if ( ( l_datasetInfo->getType() >= HEAD_BYTE ) && ( l_datasetInfo->getType() <= TENSOR_FIELD ) ) 
+            o_types.push_back( l_datasetInfo );
+    }
+    return true;
+}
+
+
 TensorField* DatasetHelper::getTensorField()
 {
     if( ! m_tensorsFieldLoaded )

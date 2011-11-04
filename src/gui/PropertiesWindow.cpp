@@ -831,6 +831,10 @@ void PropertiesWindow::OnNormalizeTensors( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 {
+// TODO remove when the bug with the wxChoice in Windows is fixed.
+#ifndef __WXMSW__
+    ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->UpdateMeanValueTypeBox();
+#endif
     ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->SetFiberInfoGridValues();
     m_mainFrame->refreshAllGLWidgets();
 }
@@ -841,7 +845,8 @@ void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 {
-
+    ( (SelectionObject*)m_mainFrame->m_pCurrentSceneObject )->computeMeanFiber();
+    m_mainFrame->refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1208,6 +1213,12 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
     m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
     m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
     m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnMeanComboBoxSelectionChange( wxCommandEvent& event)
+{
+    ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->SetFiberInfoGridValues();
     m_mainFrame->refreshAllGLWidgets();
 }
 

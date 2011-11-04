@@ -2552,10 +2552,12 @@ void Fibers::updateLinesShown()
         }
     }
 
-    // This is to update the information display in the fiber grid info.
+    // This is to update the information display in the fiber grid info and the mean fiber
     if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
     {
         m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
+        m_dh->m_lastSelectedObject->computeMeanFiber();
+
     }
 }
 
@@ -3254,6 +3256,15 @@ void Fibers::updateFibersFilters()
     {
         m_filtered[i] = !( ( i % maxSubSampling ) >= subSampling && m_length[i] >= min && m_length[i] <= max );
     }
+    //Update stats and mean fiber
+    m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
+    m_dh->m_lastSelectedObject->computeMeanFiber();
+
+}
+
+vector< bool > Fibers::getFilteredFibers()
+{
+    return m_filtered;
 }
 
 void Fibers::flipAxis( AxisType i_axe )
