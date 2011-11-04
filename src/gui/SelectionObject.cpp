@@ -25,10 +25,10 @@
 
 
 SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ):
-    m_displayCrossSections     ( CS_NOTHING   ),
-    m_displayDispersionCone    ( DC_NOTHING   ),
-    m_pLabelAnatomy( NULL ),
-    m_pCBSelectDataSet( NULL )
+    m_pLabelAnatomy   ( NULL ),
+    m_pCBSelectDataSet( NULL ),
+    m_displayCrossSections ( CS_NOTHING   ),
+    m_displayDispersionCone( DC_NOTHING   )
 {
     wxColour  l_color( 240, 30, 30 );
     hitResult l_hr = { false, 0.0f, 0, NULL };
@@ -996,10 +996,6 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &fiber
 
     unsigned int pointsCount( 0 );
     unsigned int datasetPos ( 0 );
-    
-    //TEST
-    printf(pCurrentAnatomy->getName().mb_str());
-    printf("\n");
 
     for( unsigned int i = 0; i < fibersPoints.size(); ++i )
     {
@@ -2036,21 +2032,33 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 void SelectionObject::UpdateMeanValueTypeBox()
 {
     vector< DatasetInfo* > dataSets;
-    m_datasetHelper->getTextureDataset(dataSets);
+    m_datasetHelper->getTextureDataset( dataSets );
     
-    if (dataSets.size() != m_pCBSelectDataSet->GetCount()){
+    if( dataSets.size() != m_pCBSelectDataSet->GetCount() )
+    {
         int oldIndex = -1;
         wxString oldName = m_pCBSelectDataSet->GetStringSelection();
+        
         m_pCBSelectDataSet->Clear();
-        for (int i = 0; i<dataSets.size(); i++){
-            m_pCBSelectDataSet->Insert(dataSets[i]->getName().BeforeFirst('.'), m_pCBSelectDataSet->GetCount());
-            if (oldName == dataSets[i]->getName().BeforeFirst('.'))
+        
+        for( unsigned int i( 0 ); i < dataSets.size(); ++i )
+        {
+            m_pCBSelectDataSet->Insert( dataSets[i]->getName().BeforeFirst('.'), m_pCBSelectDataSet->GetCount() );
+            if( oldName == dataSets[i]->getName().BeforeFirst('.') )
+            {
                 oldIndex = i;
+            }
         }
-        if (oldIndex<0)
+        
+        if( oldIndex < 0 )
+        {
             oldIndex = 0;
-        if (oldIndex>=m_pCBSelectDataSet->GetCount())
+        }
+        else if( static_cast<unsigned int>( oldIndex ) >= m_pCBSelectDataSet->GetCount() )
+        {
             oldIndex = m_pCBSelectDataSet->GetCount() - 1;
+        }
+        
         m_pCBSelectDataSet->SetSelection(oldIndex);
     }
 }
@@ -2060,23 +2068,26 @@ void SelectionObject::UpdateMeanValueTypeBox()
 void SelectionObject::updatePropertiesSizer()
 {
     SceneObject::updatePropertiesSizer();
-    m_ptoggleVisibility->SetValue(getIsVisible());
-    m_ptoggleActivate->SetValue(getIsActive());
-    m_ptxtName->SetValue(getName());
-    m_ptoggleCalculatesFibersInfo->Enable(getShowFibers());
-    m_pgridfibersInfo->Enable(getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue());
-    m_ptoggleDisplayMeanFiber->Enable(getShowFibers());
+    m_ptoggleVisibility->SetValue( getIsVisible() );
+    m_ptoggleActivate->SetValue( getIsActive() );
+    m_ptxtName->SetValue( getName() );
+    m_ptoggleCalculatesFibersInfo->Enable( getShowFibers() );
+    m_pgridfibersInfo->Enable( getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue() );
+    m_ptoggleDisplayMeanFiber->Enable( getShowFibers() );
 
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.
 #ifndef __WXMSW__
-    m_pCBSelectDataSet->Show(m_ptoggleCalculatesFibersInfo->GetValue());
-    m_pLabelAnatomy->Show(m_ptoggleCalculatesFibersInfo->GetValue());
-    if ( m_ptoggleCalculatesFibersInfo->GetValue() )
+    m_pCBSelectDataSet->Show( m_ptoggleCalculatesFibersInfo->GetValue() );
+    m_pLabelAnatomy->Show( m_ptoggleCalculatesFibersInfo->GetValue() );
+    if( m_ptoggleCalculatesFibersInfo->GetValue() )
+    {
         UpdateMeanValueTypeBox();
+    }
 #endif
 
-    if (!getShowFibers() && m_meanFiberPoints.size() > 0){
+    if( !getShowFibers() && m_meanFiberPoints.size() > 0 )
+    {
         //Hide the mean fiber if fibers are invisible and the box is moved
         computeMeanFiber();
     }
@@ -2084,7 +2095,7 @@ void SelectionObject::updatePropertiesSizer()
     //m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
     //m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
 
-    if(m_boxMoved)
+    if( m_boxMoved )
     {
         m_ctrlBoxX->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.x));
         m_ctrlBoxY->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.y));
@@ -2092,7 +2103,7 @@ void SelectionObject::updatePropertiesSizer()
         m_boxMoved = false;
     }
 
-    if(m_boxResized)
+    if( m_boxResized )
     {
         m_ctrlBoxSizeX->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel));
         m_ctrlBoxSizeY->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel));
