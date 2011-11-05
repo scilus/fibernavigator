@@ -144,6 +144,17 @@ void PropertiesWindow::OnEqualizeDataset( wxEvent& WXUNUSED(event) )
 	}
 }
 
+void PropertiesWindow::OnEqualizationChange( wxCommandEvent& WXUNUSED(event) )
+{
+    if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
+    {
+        if( ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject)->getType() < MESH )
+        {
+            ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->equalizationSliderChange();
+        }
+    }
+}
+
 void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) )
 {
     if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )

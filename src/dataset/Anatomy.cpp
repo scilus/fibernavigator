@@ -23,7 +23,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper )
   m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
-  m_useEqualizedDataset( false )
+  m_useEqualizedDataset( false ),
+  m_cdfThreshold( 0.45f )
 {
     m_bands = 1;
 }
@@ -35,7 +36,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
-  m_useEqualizedDataset( false )
+  m_useEqualizedDataset( false ),
+  m_cdfThreshold( 0.45f )
 {
     m_columns       = m_dh->m_columns;
     m_frames        = m_dh->m_frames;
@@ -56,7 +58,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
-  m_useEqualizedDataset( false )
+  m_useEqualizedDataset( false ),
+  m_cdfThreshold( 0.45f )
 {
     m_columns = m_dh->m_columns;
     m_frames  = m_dh->m_frames;
@@ -83,7 +86,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
-  m_useEqualizedDataset( false )
+  m_useEqualizedDataset( false ),
+  m_cdfThreshold( 0.45f )
 {
     if(type == RGB)
     {
@@ -341,7 +345,7 @@ void Anatomy::flipAxis( AxisType axe )
             frames /= 2;
             break;
         default:
-            m_dh->printDebug(_T("Cannot flip axis. The given axis is undefined."), 2);
+            m_dh->printDebug( _T("Cannot flip axis. The given axis is undefined."), 2 );
             return;
     }
 
@@ -757,12 +761,20 @@ void Anatomy::saveNifti( wxString fileName )
 
 void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
 {
-    DatasetInfo::createPropertiesSizer(pParentWindow);
-
-    m_pBtnDilate = new wxButton(pParentWindow, wxID_ANY, wxT("Dilate"),wxDefaultPosition, wxSize(85,-1));
-    m_pBtnErode  = new wxButton(pParentWindow, wxID_ANY, wxT("Erode"),wxDefaultPosition, wxSize(85,-1));
+    DatasetInfo::createPropertiesSizer( pParentWindow );
 
     wxSizer *pSizer;
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pEqualizationSlider = new wxSlider( pParentWindow, wxID_ANY, m_cdfThreshold * 100, 0, 95, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    pSizer->Add( new wxStaticText( pParentWindow, wxID_ANY, wxT( "Threshold " ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
+    pSizer->Add( m_pEqualizationSlider, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParentWindow->Connect( m_pEqualizationSlider->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnEqualizationChange ) );
+
+    m_pBtnDilate = new wxButton( pParentWindow, wxID_ANY, wxT( "Dilate" ),wxDefaultPosition, wxSize( 85, -1 ) );
+    m_pBtnErode  = new wxButton( pParentWindow, wxID_ANY, wxT( "Erode" ),wxDefaultPosition, wxSize( 85, -1 ) );
+
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );
     pSizer->Add( m_pBtnErode,  0, wxALIGN_CENTER );
@@ -881,6 +893,7 @@ void Anatomy::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
     
+    m_pEqualizationSlider->Enable( 1 == m_bands );
     m_pEqualize->Enable(    1 == m_bands );
     m_pBtnMinimize->Enable( m_dh->m_fibersLoaded );
     m_pBtnCut->Enable(      m_dh->getSelectionObjects().size() > 0 );
@@ -914,11 +927,32 @@ bool Anatomy::toggleEqualization()
 {
     m_useEqualizedDataset = !m_useEqualizedDataset;
 
+    if ( m_useEqualizedDataset && m_currentEqualizationThreshold != m_cdfThreshold )
+    {
+        equalizeHistogram();
+    }
+
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
     generateTexture();
 
     return m_useEqualizedDataset;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Anatomy::equalizationSliderChange()
+{
+    m_cdfThreshold = m_pEqualizationSlider->GetValue() / 100.0f;
+    if ( m_useEqualizedDataset && m_cdfThreshold != m_currentEqualizationThreshold )
+    {
+        m_dh->printDebug(_T("calling equalizeHistogram"), 1);
+        equalizeHistogram();
+
+        const GLuint* pTexId = &m_GLuint;
+        glDeleteTextures( 1, pTexId );
+        generateTexture();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1294,93 +1328,88 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 /************************************************************************/
 void Anatomy::equalizeHistogram()
 {
+    clock_t startTime(clock());
+
     //TODO: Add support for RGB
     static const unsigned int GRAY_SCALE(256);
-    static const unsigned int GRAY_LEVEL_THRESHOLD(15);
-    static const double CDF_THRESHOLD(0.45);
-
     unsigned int size(m_frames * m_rows * m_columns);
-
-    m_equalizedDataset.resize(m_floatDataset.size(), 0.0f);
 
     if(0 == size || 1 != m_bands)
     {
+        m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() Anatomy not supported" ), wxConvUTF8 ), 0 );
         return;
     }
 
-    bool isCdfMinFound(false);
-    unsigned int threshold(GRAY_LEVEL_THRESHOLD);
+    m_currentEqualizationThreshold = m_cdfThreshold;
+
+    if ( m_equalizedDataset.size() != size )
+    {
+        m_equalizedDataset.clear();
+        m_equalizedDataset.resize(size, 0.0f);
+
+        unsigned int pixelCount[GRAY_SCALE]  = { 0 };
+
+        for(unsigned int i(0); i < size; ++i)
+        {
+            unsigned int pixelValue(static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1)));
+
+            if( pixelValue < GRAY_SCALE )
+            {
+                pixelCount[pixelValue]++;
+            }
+            else
+            {
+                m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() pixel value out of range" ), wxConvUTF8 ), 2 );
+            }
+        }
+
+        unsigned int cdfCount(0);
+        for(unsigned int i(0); i < GRAY_SCALE; ++i)
+        {
+            cdfCount += pixelCount[i];
+            m_cdf[i] = cdfCount;
+        }
+    }
+
+    unsigned int threshold(0);
     unsigned int currentCdf(0);
     unsigned int prevCdf(0);
     unsigned int cdfMin(0);
-    unsigned int cdf[GRAY_SCALE]         = { 0 };
-    unsigned int pixelCount[GRAY_SCALE]  = { 0 };
-    float equalizedHistogram[GRAY_SCALE] = { 0 }; // Index is the original dataset gray value
-
-    for(unsigned int i(0); i < size; ++i)
-    {
-        unsigned int pixelValue(static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1)));
-
-        if(pixelValue < GRAY_SCALE)
-        {
-            pixelCount[pixelValue]++;
-        }
-        else
-        {
-            //log error?
-        }
-    }
-
-    unsigned int cdfCount(0);
-    for(unsigned int i(0); i < GRAY_SCALE; ++i)
-    {
-        cdfCount += pixelCount[i];
-        cdf[i] = cdfCount;
-    }
+    bool isCdfMinFound(false);
+    float equalizedHistogram[GRAY_SCALE] = { 0 };
 
     // Eliminate background noise
-    while(cdf[threshold] / static_cast<double>(size) < CDF_THRESHOLD)
+    while(m_cdf[threshold] / static_cast<double>(size) < m_cdfThreshold)
     {
         threshold++;
+        equalizedHistogram[threshold] = 1.0f / (GRAY_SCALE - 1);
     }
 
-    unsigned int nbPixelsEliminated(0);
-    for (unsigned int i(0); i < threshold; ++i)
-    {
-        nbPixelsEliminated += pixelCount[i];
-    }
+    unsigned int nbPixelsEliminated(m_cdf[threshold]);
 
-    // Calculate cdf and equalized histogram
-    for (unsigned int i(0); i < threshold; ++i)
+    for( unsigned int i(threshold+1); i < GRAY_SCALE; ++i )
     {
-        equalizedHistogram[i] = 1.0f / (GRAY_SCALE - 1);
-    }
-    for(unsigned int i(threshold); i < GRAY_SCALE; ++i)
-    {
-        currentCdf = prevCdf + pixelCount[i];
-        
-        if(!isCdfMinFound && 0 != currentCdf)
+        currentCdf = m_cdf[i] - m_cdf[threshold];
+
+        if( !isCdfMinFound && 0 != currentCdf )
         {
             cdfMin = currentCdf;
             isCdfMinFound = true;
 
-            if(0 == size - nbPixelsEliminated - cdfMin)
+            if( 0 == size - nbPixelsEliminated - cdfMin )
             {
                 // Division by zero, cancel calculation
-                // Log error
+                m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() division by zero" ), wxConvUTF8 ), 2 );
                 return;
             }
         }
 
         // Calculate the lookup table for equalized values
-        if(isCdfMinFound)
+        if( isCdfMinFound )
         {
-            // Since our dataset is normalized, we can strip the round and the * (L - 1)
             float result = static_cast<double>(currentCdf - cdfMin) / (size - nbPixelsEliminated - cdfMin);
             equalizedHistogram[i] = result;
         }
-
-        prevCdf = currentCdf;
     }
 
     // Calculate the equalized frame
@@ -1388,6 +1417,14 @@ void Anatomy::equalizeHistogram()
     {
         m_equalizedDataset[i] = equalizedHistogram[static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1))];
     }
+
+    clock_t endTime(clock());
+
+    ostringstream oss;
+    oss << "Anatomy::equalizeHistogram() took ";
+    oss << static_cast<float>(endTime - startTime) / CLOCKS_PER_SEC;
+    oss << " seconds."; 
+    m_dh->printDebug( wxString( oss.str().c_str(), wxConvUTF8 ), 0 );
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -79,6 +79,7 @@ public:
     }
 
     bool toggleEqualization();
+    void equalizationSliderChange();
    
 public:
     SelectionObject *m_pRoi;
@@ -100,6 +101,7 @@ private:
     wxButton        *m_pBtnGraphCut;
     wxButton        *m_pBtnKmeans;
     wxTextCtrl      *m_pTxtThresBox;
+    wxSlider        *m_pEqualizationSlider;
 
     void activateLIC() {};
     void clean()       {};
@@ -124,6 +126,10 @@ private:
     int                     m_dataType;
     TensorField             *m_pTensorField;
     bool                    m_useEqualizedDataset;
+    float                   m_cdfThreshold;
+    float                   m_currentEqualizationThreshold;
+    unsigned int            m_cdf[256];
+
 };
 
 #endif /* ANATOMY_H_ */
