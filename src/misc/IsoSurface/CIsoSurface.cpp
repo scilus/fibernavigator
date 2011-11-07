@@ -1128,7 +1128,7 @@ bool CIsoSurface::save( wxString filename ) const
         return false;
     }
 
-    m_dh->printDebug( _T("start writing file)"), MESSAGELEVEL );
+    m_dh->printDebug( _T("start writing file)"), LOGLEVEL_MESSAGE );
     dataFile << ( "# vtk DataFile Version 2.0\n" );
     dataFile << ( "generated using FiberNavigator\n" );
     dataFile << ( "ASCII\n" );

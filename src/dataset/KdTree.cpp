@@ -12,7 +12,7 @@ KdTree::KdTree(int size, float *pointArray, DatasetHelper* dh)
     for (int i = 0 ; i < size ;  ++i)
         m_tree[i] = i;
 
-    m_dh->printDebug(_T("build kd tree..."), MESSAGELEVEL );
+    m_dh->printDebug(_T("build kd tree..."), LOGLEVEL_MESSAGE );
 
     int root = ( size - 1 )/2;
     std::nth_element( m_tree.begin(), m_tree.begin()+root, m_tree.end(), lessy( m_pointArray, 0 ) );

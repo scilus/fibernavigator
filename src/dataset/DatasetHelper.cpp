@@ -157,7 +157,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
 DatasetHelper::~DatasetHelper()
 {
-    printDebug( _T( "execute dataset helper destructor" ), DEBUGLEVEL );
+    printDebug( _T( "execute dataset helper destructor" ), LOGLEVEL_DEBUG );
 
     if ( m_theScene )
         delete m_theScene;
@@ -178,7 +178,7 @@ DatasetHelper::~DatasetHelper()
 	//if ( m_mainFrame )
 	//	delete m_mainFrame;
     
-    printDebug( _T( "dataset helper destructor done" ), DEBUGLEVEL );
+    printDebug( _T( "dataset helper destructor done" ), LOGLEVEL_DEBUG );
 }
 
 bool DatasetHelper::load( const int i_index )
@@ -898,7 +898,7 @@ void DatasetHelper::treeFinished()
     if ( m_threadsActive > 0 )
         return;
 
-    printDebug( _T( "tree finished" ), MESSAGELEVEL );
+    printDebug( _T( "tree finished" ), LOGLEVEL_MESSAGE );
     m_fibersLoaded = true;
     updateAllSelectionObjects();
     m_selBoxChanged = true;
@@ -1033,11 +1033,11 @@ void DatasetHelper::createIsoSurface()
 
     Anatomy* l_anatomy = (Anatomy*) l_info;
 
-    printDebug( _T( "start generating iso surface..." ), MESSAGELEVEL );
+    printDebug( _T( "start generating iso surface..." ), LOGLEVEL_MESSAGE );
     CIsoSurface* isosurf = new CIsoSurface( this, l_anatomy ); 
     isosurf->GenerateSurface( 0.4f );
 
-    printDebug( _T( "iso surface done" ), MESSAGELEVEL );
+    printDebug( _T( "iso surface done" ), LOGLEVEL_MESSAGE );
 
     wxString l_anatomyName = l_anatomy->getName().BeforeFirst( '.' );
 
@@ -1061,7 +1061,7 @@ void DatasetHelper::createIsoSurface()
     }
     else
     {
-        printDebug( _T( "***ERROR*** surface is not valid" ), ERRORLEVEL );
+        printDebug( _T( "***ERROR*** surface is not valid" ), LOGLEVEL_ERROR );
     }
 
     updateLoadStatus();
@@ -1085,18 +1085,18 @@ void DatasetHelper::createDistanceMapAndIso()
 
     Anatomy* l_anatomy = (Anatomy*)l_info;
 
-    printDebug( _T( "start generating distance map..." ), MESSAGELEVEL );
+    printDebug( _T( "start generating distance map..." ), LOGLEVEL_MESSAGE );
 
     Anatomy* l_newAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
 
-    printDebug( _T( "distance map done" ), MESSAGELEVEL );
+    printDebug( _T( "distance map done" ), LOGLEVEL_MESSAGE );
 
-    printDebug( _T( "start generating iso surface..." ), MESSAGELEVEL );
+    printDebug( _T( "start generating iso surface..." ), LOGLEVEL_MESSAGE );
 
     CIsoSurface* isosurf = new CIsoSurface( this, l_newAnatomy );
     isosurf->GenerateSurface( 0.2f );
 
-    printDebug( _T( "iso surface done" ), MESSAGELEVEL );
+    printDebug( _T( "iso surface done" ), LOGLEVEL_MESSAGE );
 
     wxString anatomyName = l_anatomy->getName().BeforeFirst( '.' );
 
@@ -1122,7 +1122,7 @@ void DatasetHelper::createDistanceMapAndIso()
     }
     else
     {
-        printDebug( _T( "***ERROR*** surface is not valid" ), ERRORLEVEL );
+        printDebug( _T( "***ERROR*** surface is not valid" ), LOGLEVEL_ERROR );
     }
 
     delete l_newAnatomy;
@@ -1147,11 +1147,11 @@ void DatasetHelper::createDistanceMap()
 
     Anatomy* l_anatomy = (Anatomy*)l_info;
 
-    printDebug( _T( "start generating distance map..." ), MESSAGELEVEL );
+    printDebug( _T( "start generating distance map..." ), LOGLEVEL_MESSAGE );
 
     Anatomy* l_newAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
 
-    printDebug( _T( "distance map done" ), MESSAGELEVEL );
+    printDebug( _T( "distance map done" ), LOGLEVEL_MESSAGE );
 
     
     l_newAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT("_DistMap"));
@@ -1375,7 +1375,7 @@ TensorField* DatasetHelper::getTensorField()
 
 void DatasetHelper::printGLError( const wxString i_function )
 {
-    printDebug( _T( "***ERROR***: " ) + i_function, ERRORLEVEL );
+    printDebug( _T( "***ERROR***: " ) + i_function, LOGLEVEL_ERROR );
     printf( " : ERROR: %s\n", gluErrorString( m_lastGLError ) );
 }
 
@@ -1401,13 +1401,16 @@ void DatasetHelper::printDebug( const wxString i_string, const LogLevel i_level 
     wxString prefix;
     switch (i_level)
     {
-    case DEBUGLEVEL:
+    case LOGLEVEL_DEBUG:
         prefix = _T( "DEBUG: " );
         break;
-    case ERRORLEVEL:
+    case LOGLEVEL_ERROR:
         prefix = _T( "ERROR: " );
         break;
-    case MESSAGELEVEL: // same as default
+    case LOGLEVEL_WARNING:
+        prefix = _T( "WARNING: " );
+        break;
+    case LOGLEVEL_MESSAGE: // same as default
     default:
         prefix = _T( "" );
     }

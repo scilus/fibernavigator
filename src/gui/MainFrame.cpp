@@ -144,7 +144,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     /*
      * Set OpenGL attributes
      */
-    m_pDatasetHelper->printDebug( _T( "Initializing OpenGL" ), MESSAGELEVEL );
+    m_pDatasetHelper->printDebug( _T( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
     GLboolean doubleBuffer = GL_TRUE;
 #ifdef __WXMSW__
     int *gl_attrib = NULL;
@@ -160,7 +160,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 #endif
     if( ! doubleBuffer )
     {
-        m_pDatasetHelper->printDebug( _T( "don't have double buffer, disabling" ), MESSAGELEVEL );
+        m_pDatasetHelper->printDebug( _T( "don't have double buffer, disabling" ), LOGLEVEL_MESSAGE );
 #ifdef __WXGTK__
         gl_attrib[9] = None;
 #endif
@@ -268,8 +268,8 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 MainFrame::~MainFrame()
 {
     m_pTimer->Stop();
-    m_pDatasetHelper->printDebug( _T( "main frame destructor" ), DEBUGLEVEL );
-    m_pDatasetHelper->printDebug( _T( "timer stopped" ), DEBUGLEVEL );
+    m_pDatasetHelper->printDebug( _T( "main frame destructor" ), LOGLEVEL_DEBUG );
+    m_pDatasetHelper->printDebug( _T( "timer stopped" ), LOGLEVEL_DEBUG );
 	if (m_pTimer != NULL)
     {
         delete m_pTimer;

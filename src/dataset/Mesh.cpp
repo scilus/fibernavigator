@@ -29,7 +29,7 @@ bool Mesh::load( wxString i_filename )
 
 bool Mesh::loadDip( wxString filename )
 {
-    m_dh->printDebug( _T( "start loading DIP mesh file" ), MESSAGELEVEL );
+    m_dh->printDebug( _T( "start loading DIP mesh file" ), LOGLEVEL_MESSAGE );
     wxTextFile file;
     wxString line;
     wxString numberString, xString, yString, zString;
@@ -124,7 +124,7 @@ bool Mesh::loadDip( wxString filename )
 
 bool Mesh::loadSurf(wxString filename)
 {
-    m_dh->printDebug( _T("start loading freesurfer mesh file"), MESSAGELEVEL );
+    m_dh->printDebug( _T("start loading freesurfer mesh file"), LOGLEVEL_MESSAGE );
     wxFile dataFile;
     wxFileOffset nSize = 0;
     int pc = 3;

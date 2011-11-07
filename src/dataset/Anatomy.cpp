@@ -341,7 +341,7 @@ void Anatomy::flipAxis( AxisType axe )
             frames /= 2;
             break;
         default:
-            m_dh->printDebug( _T("Cannot flip axis. The given axis is undefined."), ERRORLEVEL );
+            m_dh->printDebug( _T("Cannot flip axis. The given axis is undefined."), LOGLEVEL_ERROR );
             return;
     }
 

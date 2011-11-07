@@ -302,7 +302,7 @@ void Surface::execute ()
         m_tMesh->doLoopSubD();
         m_tMesh->doLoopSubD();
         subDCount = 5;
-        m_dh->printDebug( _T("initiating lic"), MESSAGELEVEL );
+        m_dh->printDebug( _T("initiating lic"), LOGLEVEL_MESSAGE );
         SurfaceLIC lic(m_dh, m_tMesh);
         lic.execute();
 
@@ -568,7 +568,7 @@ bool Surface::save(wxString filename ) const
         return false;
     }
 
-    m_dh->printDebug( _T("start writing file)"), MESSAGELEVEL );
+    m_dh->printDebug( _T("start writing file)"), LOGLEVEL_MESSAGE );
     dataFile << ("# vtk DataFile Version 2.0\n");
     dataFile << ("generated using FiberNavigator\n");
     dataFile << ("ASCII\n");

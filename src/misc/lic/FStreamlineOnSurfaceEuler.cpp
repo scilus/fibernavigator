@@ -52,14 +52,14 @@ FStreamlineOnSurfaceEuler::FStreamlineOnSurfaceEuler(DatasetHelper* dh, Triangle
         FArray mean;
         FTensor tensortensor;
 
-        m_dh->printDebug( _T("interpolate vectors..."), MESSAGELEVEL );
+        m_dh->printDebug( _T("interpolate vectors..."), LOGLEVEL_MESSAGE );
         for (unsigned int i = 0; i < nbCells; ++i)
         {
             Vector center (m_grid->getTriangleCenter(i));
             FTensor t = m_tensorField->getInterpolatedVector(center.x, center.y, center.z);
             cell_vectors[i] = FArray(t).normalize();
         }
-        m_dh->printDebug( _T("done"), MESSAGELEVEL );
+        m_dh->printDebug( _T("done"), LOGLEVEL_MESSAGE );
 
 #ifdef __DEBUG__
         std::cout << "FStreamlineOnSurfaceEuler: exit" << std::endl
@@ -1189,7 +1189,7 @@ bool FStreamlineOnSurfaceEuler::isInside(const FIndex& cellId, const FArray& pos
         return false;
     } catch (FException& e)
     {
-        m_dh->printDebug( _T("caught exception in isInside:\n "), ERRORLEVEL );
+        m_dh->printDebug( _T("caught exception in isInside:\n "), LOGLEVEL_ERROR );
         std::cout << "caught exception in isInside: " << e << std::endl;
         return false;
     }
