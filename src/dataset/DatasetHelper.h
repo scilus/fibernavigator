@@ -52,7 +52,7 @@ class Surface;
 typedef std::vector< std::vector< SelectionObject* > > SelectionObjectList;
 
 // printDebug levels
-enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_ERROR, LOGLEVEL_WARNING };
+enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_WARNING, LOGLEVEL_ERROR };
 
 class DatasetHelper 
 {

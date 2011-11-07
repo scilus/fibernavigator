@@ -1404,11 +1404,11 @@ void DatasetHelper::printDebug( const wxString i_string, const LogLevel i_level 
     case LOGLEVEL_DEBUG:
         prefix = _T( "DEBUG: " );
         break;
-    case LOGLEVEL_ERROR:
-        prefix = _T( "ERROR: " );
-        break;
     case LOGLEVEL_WARNING:
         prefix = _T( "WARNING: " );
+        break;
+    case LOGLEVEL_ERROR:
+        prefix = _T( "ERROR: " );
         break;
     case LOGLEVEL_MESSAGE: // same as default
     default:
