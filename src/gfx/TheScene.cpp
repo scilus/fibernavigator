@@ -59,7 +59,7 @@ TheScene::TheScene( DatasetHelper* pDatasetHelper ) :
 //////////////////////////////////////////////////////////////////////////////////
 TheScene::~TheScene()
 {
-    m_pDatasetHelper->printDebug( _T( "execute theScene destructor" ), 0 );
+    m_pDatasetHelper->printDebug( _T( "execute theScene destructor" ), LOGLEVEL_DEBUG );
 
 #ifndef __WXMAC__
     // On mac, this is just a pointer to the original object that is deleted with the widgets.
@@ -69,7 +69,7 @@ TheScene::~TheScene()
         m_pMainGLContext = NULL;
     }
 #endif
-    m_pDatasetHelper->printDebug( _T( "theScene destructor done" ), 0 );
+    m_pDatasetHelper->printDebug( _T( "theScene destructor done" ), LOGLEVEL_DEBUG );
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -86,12 +86,12 @@ void TheScene::initGL( int whichView )
         if( GLEW_OK != errorCode )
         {
             // Problem: glewInit failed, something is seriously wrong.
-            m_pDatasetHelper->printDebug( _T( "Error: " ) + wxString::FromAscii( (char*)glewGetErrorString( errorCode ) ), 2 );
+            m_pDatasetHelper->printDebug( _T( "Error: " ) + wxString::FromAscii( (char*)glewGetErrorString( errorCode ) ), LOGLEVEL_ERROR );
             exit( false );
         }
         if( whichView == MAIN_VIEW )
         {
-            m_pDatasetHelper->printDebug( _T( "Status: Using GLEW " ) + wxString::FromAscii( (char*)glewGetString( GLEW_VERSION ) ), 1 );
+            m_pDatasetHelper->printDebug( _T( "Status: Using GLEW " ) + wxString::FromAscii( (char*)glewGetString( GLEW_VERSION ) ), LOGLEVEL_MESSAGE );
 
             wxString vendorId;
             wxString rendererId;
@@ -105,7 +105,7 @@ void TheScene::initGL( int whichView )
             else if ( rendererId.Contains( _T( "GeForce 8" ) ) || rendererId.Contains( _T( "GeForce GTX 2" ) ) )
                 m_pDatasetHelper->m_geforceLevel = 8;
 
-            m_pDatasetHelper->printDebug( vendorId + _T( " " ) + rendererId, 1 );
+            m_pDatasetHelper->printDebug( vendorId + _T( " " ) + rendererId, LOGLEVEL_MESSAGE );
 
             if( ! glewIsSupported( "GL_ARB_shader_objects" ) )
             {

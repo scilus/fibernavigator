@@ -83,7 +83,7 @@ bool Shader::compile(GLuint* shaderId, const wxString &codeString)
     glGetShaderiv (*shaderId, GL_COMPILE_STATUS, &compiled);
 
 	free(temp);
-    return compiled;
+    return 0 != compiled; // removes casting warning
 }
 
 bool Shader::loadCode(const wxString &filename)
