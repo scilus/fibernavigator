@@ -92,6 +92,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
     m_fibersSamplingFactor(1),
+	
+	m_drawColor(255, 255, 255),
+	m_drawColorIcon(16, 16, true),
 
     m_xSlize( 0.5 ),
     m_ySlize( 0.5 ),

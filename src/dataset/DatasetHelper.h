@@ -238,6 +238,8 @@ public:
 	};
 	DrawMode m_drawMode;
 	//Anatomy* m_drawAnatomy;
+	wxColor m_drawColor;
+	wxImage m_drawColorIcon;
 
     bool  m_morphing;
 

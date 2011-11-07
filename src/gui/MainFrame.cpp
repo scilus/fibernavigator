@@ -658,11 +658,83 @@ void MainFrame::onSelectDrawer( wxCommandEvent& event )
 	m_pDatasetHelper->m_isDrawerToolActive = true;
 
 	m_pToolBar->m_txtRuler->Disable();
+	m_pToolBar->EnableTool(m_pToolBar->m_selectDropper->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), true);
 
 	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectDropper( wxCommandEvent& event )
+{
+    if( m_pDatasetHelper->m_theScene == NULL )
+	{
+        return;
+	}
+
+    wxColourData l_colorData;
+
+    for( int i = 0; i < 10; ++i )
+    {
+        wxColour l_color(i * 28, i * 28, i * 28);
+        l_colorData.SetCustomColour(i, l_color);
+    }
+
+    int i = 10;
+    wxColour l_color ( 255, 0, 0 );
+    l_colorData.SetCustomColour( i++, l_color );
+    wxColour l_color1( 0, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color1 );
+    wxColour l_color2( 0, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color2 );
+    wxColour l_color3( 255, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color3 );
+    wxColour l_color4( 255, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color4 );
+    wxColour l_color5( 0, 255, 255 );
+    l_colorData.SetCustomColour( i++, l_color5 );
+
+    wxColourDialog dialog( this, &l_colorData );
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        wxColourData l_retData = dialog.GetColourData();
+        m_pDatasetHelper->m_drawColor = l_retData.GetColour();
+		wxRect fullImage(0, 0, 16, 16);
+		m_pDatasetHelper->m_drawColorIcon.SetRGB(fullImage, 
+											     m_pDatasetHelper->m_drawColor.Red(), 
+											     m_pDatasetHelper->m_drawColor.Green(), 
+											     m_pDatasetHelper->m_drawColor.Blue() );
+    }
+    else
+    {
+        return;
+    }
+
+/*
+    if( m_mainFrame->m_currentListItem != -1 )
+    {
+        DatasetInfo *l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
+        if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
+        {
+            l_info->setColor( l_col );
+            l_info->setuseTex( false );
+            m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListItem, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
+        }
+    }
+    else if ( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject != NULL )
+    {
+        SelectionObject *l_selObj = (SelectionObject*)m_mainFrame->m_pCurrentSceneObject;
+        if (!l_selObj->getIsMaster())
+        {
+            wxTreeItemId l_parentId = m_mainFrame->m_pTreeWidget->GetItemParent( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject->GetId());
+            l_selObj = (SelectionObject*)m_mainFrame->m_pTreeWidget->GetItemData(l_parentId);
+        }
+        l_selObj->setFiberColor( l_col);
+        l_selObj->setIsDirty( true );
+        m_mainFrame->m_pDatasetHelper->m_selBoxChanged = true;
+    }    
+    m_mainFrame->refreshAllGLWidgets();*/
 }
 
 void MainFrame::onSelectPen( wxCommandEvent& event )
@@ -1152,6 +1224,7 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 	m_pDatasetHelper->m_isDrawerToolActive = false;
 
 	m_pToolBar->m_txtRuler->Disable();
+	m_pToolBar->EnableTool(m_pToolBar->m_selectDropper->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);
@@ -1169,6 +1242,7 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 	m_pDatasetHelper->m_isDrawerToolActive = false;
 
     m_pToolBar->m_txtRuler->Enable();
+	m_pToolBar->EnableTool(m_pToolBar->m_selectDropper->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);

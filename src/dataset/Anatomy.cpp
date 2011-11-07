@@ -520,7 +520,7 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float color,
 				int sourceIndex = (c+xoffset) + (r+yoffset) * m_columns + (f+zoffset) * m_columns * m_rows;
 				int subIndex = c + r * width + f * width * height;
 
-				//inside sphere: update source
+				//inside sphere: put color in the source
 				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
 				{
 					m_floatDataset[sourceIndex] = color;
@@ -533,11 +533,11 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float color,
 		}
 	}
 
-	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The last texture we created (TODO: not last, but currently selected)
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
 	glTexSubImage3D( GL_TEXTURE_3D, 0, xoffset, yoffset, zoffset, width, height, depth, GL_LUMINANCE, GL_FLOAT, &subData[0] );
 }
 
-void Anatomy::updateTexture( const int x, const int y, const int z, float* colorRGB, int size ) 
+void Anatomy::updateTexture( const int x, const int y, const int z, wxColor colorRGB, int size ) 
 {
 	//security check: hit detection can be a pixel offset, negative positions crash
 	if(x < 0 || y < 0 || z < 0)
@@ -555,12 +555,12 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float* color
 	int datasetSize = width*height*depth*3;
 	
 	//create the modified region's vector and put the right color
-	std::vector<float> subData( datasetSize, colorRGB[0] );
+	std::vector<float> subData( datasetSize, colorRGB.Red() );
 	for( int i=0; i < datasetSize; i+=3 )
     {
-        //subData[i] = colorRGB[0]; //done at declaration
-        subData[i+1] = colorRGB[1];
-        subData[i+2] = colorRGB[2];
+        //subData[i] = colorRGB.Red(); //done at declaration
+        subData[i+1] = colorRGB.Green();
+        subData[i+2] = colorRGB.Blue();
     }
 	
     for( int f = 0; f < depth; ++f )
@@ -572,12 +572,12 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float* color
 				int sourceIndex = (c+xoffset) + (r+yoffset) * m_columns + (f+zoffset) * m_columns * m_rows;
 				int subIndex = c + r * width + f * width * height;
 
-				//inside sphere: update subImage and source
+				//inside sphere: put color in the source
 				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
 				{
-					m_floatDataset[sourceIndex*3] = colorRGB[0];
-					m_floatDataset[sourceIndex*3 + 1] = colorRGB[1];
-					m_floatDataset[sourceIndex*3 + 2] = colorRGB[2];
+					m_floatDataset[sourceIndex*3] = colorRGB.Red();
+					m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
+					m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
 				}
 				else //outside sphere: copy source values in the subImage
 				{
@@ -589,7 +589,7 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float* color
 		}
 	}
 
-	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The last texture we created (TODO: not last, but currently selected)
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
 	glTexSubImage3D( GL_TEXTURE_3D, 0, xoffset, yoffset, zoffset, width, height, depth, GL_RGB, GL_FLOAT, &subData[0] );
 }
 
@@ -1109,7 +1109,7 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
     }
 }
 
-void Anatomy::writeVoxel( const int x, const int y, const int z )
+void Anatomy::writeVoxel( const int x, const int y, const int z, wxColor colorRGB )
 {
 	
     switch( m_type )
@@ -1119,17 +1119,17 @@ void Anatomy::writeVoxel( const int x, const int y, const int z )
         case OVERLAY:
 		{
 			float white = 1.0f;
-			updateTexture(x, y, z, white, 5);
+			updateTexture(x, y, z, white, 7);
 			break;
 		}
 		case RGB:
 		{
-			float whiteRGB[3];
-			whiteRGB[0] = 1.0f;
-			whiteRGB[1] = 1.0f;
-			whiteRGB[2] = 1.0f;
+			//float whiteRGB[3];
+			//whiteRGB[0] = 1.0f;
+			//whiteRGB[1] = 1.0f;
+			//whiteRGB[2] = 1.0f;
 
-			updateTexture(x, y, z, whiteRGB, 5);
+			updateTexture(x, y, z, colorRGB, 7);
 			break;
 		}
 		case VECTORS:
@@ -1148,17 +1148,13 @@ void Anatomy::eraseVoxel( const int x, const int y, const int z )
         case OVERLAY:
 		{
 			float black = 0.0f;
-			updateTexture(x, y, z, black, 5);
+			updateTexture(x, y, z, black, 7);
 			break;
 		}
 		case RGB:
 		{
-			float blackRGB[3];
-			blackRGB[0] = 0.0f;
-			blackRGB[1] = 0.0f;
-			blackRGB[2] = 0.0f;
-
-			updateTexture(x, y, z, blackRGB, 5);
+			wxColor blackRGB(0.0f, 0.0f, 0.0f);
+			updateTexture(x, y, z, blackRGB, 7);
 			break;
 		}
 		case VECTORS:

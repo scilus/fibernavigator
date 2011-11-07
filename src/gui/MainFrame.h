@@ -155,6 +155,7 @@ private:
     bool loadIndex                          ( int i_index );
 
 	void onSelectDrawer                     ( wxCommandEvent& event );
+	void onSelectDropper                    ( wxCommandEvent& event );
 	void onSelectPen                        ( wxCommandEvent& event );
 	void onSelectEraser                     ( wxCommandEvent& event );
 	void onSelectScissor                    ( wxCommandEvent& event );

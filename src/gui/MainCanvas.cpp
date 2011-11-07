@@ -198,9 +198,29 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 						m_hr = pick(event.GetPosition(), true);
 						drawOnAnatomy();
 					}
-					else if (m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isDragging)
+					else if(!m_pDatasetHelper->m_isDragging)
 					{
-						m_hr = pick(event.GetPosition(), true);
+						if (m_pDatasetHelper->m_isRulerToolActive)
+						{
+							m_hr = pick(event.GetPosition(), true);
+						}
+						else
+						{
+							long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+							if(l_item != -1)
+							{
+								DatasetInfo* l_type = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+								Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+
+								if (l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
+								{
+									m_pDatasetHelper->m_isSegmentActive = true;
+									m_hr = pick(event.GetPosition(), false);
+									segment();
+									l_info->toggleSegment();                        
+								}
+							}
+						}
 						m_lastPos = event.GetPosition();
 						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
 					}
@@ -233,21 +253,6 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
             {               
                 if ( !m_pDatasetHelper->m_ismDragging)
                 {
-                    long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-                    
-                    if(l_item != -1)
-                    {
-                        DatasetInfo* l_type = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-                        Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-
-                        if (l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
-                        {
-                            m_pDatasetHelper->m_isSegmentActive = true;
-                            m_hr = pick(event.GetPosition(), false);
-                            segment();
-                            l_info->toggleSegment();                        
-                        }
-                    }
                     /*else if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isSelectBckActive && m_pDatasetHelper->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectObj-GraphCut
                     {
                         m_hr = pick(event.GetPosition(), true);
@@ -272,10 +277,10 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                         background.push_back(current);
                         
                     }*/
-                    m_pDatasetHelper->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
+                    m_pDatasetHelper->m_ismDragging = true;
                 }
-                else  if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isDrawerToolActive && !m_isSceneLocked) //Move Scene
+                else  if (!m_isSceneLocked) //Move Scene
                 {
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -1217,13 +1222,15 @@ void MainCanvas::drawOnAnatomy()
 	{
 		if( ((DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject)->getType() < MESH )
 		{
-			Anatomy* currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject;*/
+			Anatomy* currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject;
+		}
+	}*/
 
 	//int dataLength = m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_frames;
 
 	// get selected anatomy dataset (that's the one we draw on)
 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );    
+	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
 
 	double xClick = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
 	double yClick = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
@@ -1236,7 +1243,7 @@ void MainCanvas::drawOnAnatomy()
 
 	if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_PEN)
 	{
-		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick);
+		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, m_pDatasetHelper->m_drawColor);
 	}
 	else if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_ERASER)
 	{

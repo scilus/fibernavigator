@@ -92,6 +92,11 @@ ToolBar::ToolBar(wxWindow *parent)
     m_txtRuler->SetFont(font);
 	this->AddControl(m_txtRuler);
 
+	//no wxImage
+    
+	m_selectDropper = this->AddTool(wxID_ANY, wxT("Dropper" ), bmpClearColor, wxNullBitmap, wxITEM_NORMAL, wxT("Dropper"));
+    EnableTool(m_selectDropper->GetId(), false);
+
 	wxImage bmpPen (MyApp::iconsPath+ wxT("draw_pen.png"), wxBITMAP_TYPE_PNG);
 	wxImage bmpEraser (MyApp::iconsPath+ wxT("draw_eraser.png"), wxBITMAP_TYPE_PNG);
 	wxImage bmpScissor (MyApp::iconsPath+ wxT("draw_brush.png"), wxBITMAP_TYPE_PNG);
@@ -125,6 +130,7 @@ void ToolBar::initToolBar( MainFrame *mf )
 	mf->Connect(m_selectNormalPointer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectNormalPointer)); 
     mf->Connect(m_selectRuler->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectRuler)); 
 	mf->Connect(m_selectDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectDrawer)); 
+	mf->Connect(m_selectDropper->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectDropper)); 
 	mf->Connect(m_selectPen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectPen)); 
 	mf->Connect(m_selectEraser->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectEraser)); 
 	mf->Connect(m_selectScissor->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectScissor)); 
@@ -149,6 +155,10 @@ void ToolBar::updateToolBar( MainFrame *mf )
 	ToggleTool(m_selectNormalPointer->GetId(), !(mf->m_pDatasetHelper->m_isRulerToolActive || mf->m_pDatasetHelper->m_isDrawerToolActive));
 	ToggleTool(m_selectRuler->GetId(), mf->m_pDatasetHelper->m_isRulerToolActive);
 	ToggleTool(m_selectDrawer->GetId(), mf->m_pDatasetHelper->m_isDrawerToolActive);
+	//ToggleTool(m_selectDropper->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
+	//FindById(m_selectDropper->GetId())->SetNormalBitmap(wxBitmap(mf->m_pDatasetHelper->m_drawColorIcon));
+	SetToolNormalBitmap(m_selectDropper->GetId(), wxBitmap(mf->m_pDatasetHelper->m_drawColorIcon));
+
 	ToggleTool(m_selectPen->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
 	ToggleTool(m_selectEraser->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
 	ToggleTool(m_selectScissor->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_SCISSOR);

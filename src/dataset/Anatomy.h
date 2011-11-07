@@ -52,9 +52,9 @@ public:
     void erode();
     void minimize();
 
-	void writeVoxel( Vector v ) { writeVoxel(v.x, v.y, v.z); };
-	void eraseVoxel( Vector v ) { writeVoxel(v.x, v.y, v.z); };
-	void writeVoxel( const int x, const int y, const int z );
+	void writeVoxel( Vector v, wxColor colorRGB ) { writeVoxel(v.x, v.y, v.z, colorRGB); };
+	void eraseVoxel( Vector v ) { eraseVoxel(v.x, v.y, v.z); };
+	void writeVoxel( const int x, const int y, const int z, wxColor colorRGB );
 	void eraseVoxel( const int x, const int y, const int z );
 
     void draw(){};
@@ -112,7 +112,7 @@ private:
     
 	void generateTexture();
 	void updateTexture( const int x, const int y, const int z, float color, int size );
-	void updateTexture( const int x, const int y, const int z, float* colorRGB, int size );
+	void updateTexture( const int x, const int y, const int z, wxColor colorRGB, int size );
 
     void generateGeometry() {};
     void initializeBuffer() {};
