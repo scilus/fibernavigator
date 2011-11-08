@@ -82,6 +82,14 @@ public:
     void OnColorWithTorsion                 ( wxCommandEvent& event );
     void ColorFibers();
 
+    void OnNormalMeanFiberColoring          ( wxCommandEvent& event );
+    void OnMeanFiberListMenuDistance        ( wxCommandEvent& event );
+    void OnMeanFiberListMenuMinDistance     ( wxCommandEvent& event );
+    void OnColorMeanFiberWithTorsion        ( wxCommandEvent& event );
+    void OnColorMeanFiberWithCurvature      ( wxCommandEvent& event );
+    void OnCustomMeanFiberColoring          ( wxCommandEvent& event );
+    void OnMeanFiberOpacityChange           ( wxCommandEvent& event );
+
     void OnGlyphMinHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
     void OnGlyphMaxHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
     void OnGlyphSaturationSliderMoved       ( wxCommandEvent& event ); // The coloration.
@@ -123,6 +131,7 @@ public:
     void OnDistanceAnchorSet                ( wxCommandEvent& event );
     void OnDisplayFibersInfo                ( wxCommandEvent& event );
     void OnDisplayMeanFiber                 ( wxCommandEvent& event );
+    void OnMeanFiberColorChange             ( wxCommandEvent& event );
     void OnDisplayCrossSections             ( wxCommandEvent& event );
     void OnDisplayDispersionTube            ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );

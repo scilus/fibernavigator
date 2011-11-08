@@ -582,7 +582,25 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     
-    glColor4f( 0.25f, 0.25f, 0.25f, 0.35f ); // Grayish
+    //Get the mean fiber color
+    switch ( m_meanFiberColorationMode ){
+        case CURVATURE_COLOR:
+            break;
+        case DISTANCE_COLOR:
+            break;
+        case MINDISTANCE_COLOR:
+            break;
+        case NORMAL_COLOR:
+            break;
+        case TORSION_COLOR:
+            break;
+        case CUSTOM_COLOR:
+            //Use custom color
+            glColor4f( (float)m_meanFiberColor.Red()/255.0f, (float)m_meanFiberColor.Green()/255.0f, (float)m_meanFiberColor.Blue()/255.0f, m_meanFiberOpacity );
+            break;
+        default:
+            glColor4f( 0.25f, 0.25f, 0.25f, m_meanFiberOpacity ); // Grayish
+    }
 
     Vector l_normal;
 
@@ -607,6 +625,9 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
         glBegin( GL_QUAD_STRIP );
             for( unsigned int j = 0; j < l_circlesPoints.size(); ++j )
             {
+                if ( m_meanFiberColorVector.size() != 0 )
+                    glColor4f((float)j/(float)l_circlesPoints.size(), 0, 0, m_meanFiberOpacity );
+
                 glVertex3f( l_circlesPoints[j][i].x, l_circlesPoints[j][i].y, l_circlesPoints[j][i].z );
                 if( i+1 == i_nmTubeEdge )
                     glVertex3f( l_circlesPoints[j][0].x, l_circlesPoints[j][0].y, l_circlesPoints[j][0].z );
@@ -618,6 +639,7 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
 
     glDisable( GL_BLEND );
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Draws all the cross sections.
@@ -1839,6 +1861,59 @@ void SelectionObject::SetFiberInfoGridValues()
     }
 }
 
+void SelectionObject::UpdateMeanValueTypeBox()
+{
+    vector< DatasetInfo* > dataSets;
+    m_datasetHelper->getTextureDataset( dataSets );
+    
+    if( dataSets.size() != m_pCBSelectDataSet->GetCount() )
+    {
+        int oldIndex = -1;
+        wxString oldName = m_pCBSelectDataSet->GetStringSelection();
+        
+        m_pCBSelectDataSet->Clear();
+        
+        for( unsigned int i( 0 ); i < dataSets.size(); ++i )
+        {
+            m_pCBSelectDataSet->Insert( dataSets[i]->getName().BeforeFirst('.'), m_pCBSelectDataSet->GetCount() );
+            if( oldName == dataSets[i]->getName().BeforeFirst('.') )
+            {
+                oldIndex = i;
+            }
+        }
+        
+        if( oldIndex < 0 )
+        {
+            oldIndex = 0;
+        }
+        else if( static_cast<unsigned int>( oldIndex ) >= m_pCBSelectDataSet->GetCount() )
+        {
+            oldIndex = m_pCBSelectDataSet->GetCount() - 1;
+        }
+        
+        m_pCBSelectDataSet->SetSelection(oldIndex);
+    }
+}
+
+void SelectionObject::setShowMeanFiberOption( bool i_val )
+{
+    m_plblColoring->Show( i_val );
+    m_pRadioCustomColoring->Show( i_val );
+    m_pRadioNormalColoring->Show( i_val );
+    m_pRadioDistanceAnchoring->Show( i_val );
+    m_pRadioMinDistanceAnchoring->Show( i_val );
+    m_pRadioCurvature->Show( i_val );
+    m_pRadioTorsion->Show( i_val );
+    m_pLblMeanFiberOpacity->Show( i_val );
+    m_psliderMeanFiberOpacity->Show( i_val );
+}
+
+void SelectionObject::updateMeanFiberOpacity()
+{
+    setMeanFiberOpacity( ( m_psliderMeanFiberOpacity->GetValue() + (float)m_psliderMeanFiberOpacity->GetMin() ) / (float)m_psliderMeanFiberOpacity->GetMax() );
+}
+
+
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 {
     SceneObject::createPropertiesSizer(parent);  
@@ -1955,11 +2030,77 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->AddSpacer(2);
 #endif
 
-    m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
+    wxImage bmpMeanFiberColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
+    m_pbtnSelectMeanFiberColor = new wxBitmapButton(parent, wxID_ANY, bmpMeanFiberColor, wxDefaultPosition, wxSize(40,-1));
+    l_sizer->Add(m_pbtnSelectMeanFiberColor,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+
+    //Mean fiber coloring option
+    m_propertiesSizer->AddSpacer( 8 );
+    
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_plblColoring = new wxStaticText( parent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT );
+    l_sizer->Add( m_plblColoring, 0, wxALIGN_CENTER );
+    l_sizer->Add( 8, 1, 0 );
+    m_pRadioCustomColoring = new wxRadioButton( parent, wxID_ANY, _T( "Custom" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    l_sizer->Add(m_pRadioCustomColoring);
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+
+    m_pRadioNormalColoring = new wxRadioButton( parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( 68, 1, 0 );
+    l_sizer->Add( m_pRadioNormalColoring );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+
+    m_pRadioDistanceAnchoring  = new wxRadioButton( parent, wxID_ANY, _T( "Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( 68, 1, 0 );
+    l_sizer->Add( m_pRadioDistanceAnchoring );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    m_pRadioMinDistanceAnchoring  = new wxRadioButton( parent, wxID_ANY, _T( "Min Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( 68, 1, 0 );
+    l_sizer->Add( m_pRadioMinDistanceAnchoring );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    m_pRadioCurvature  = new wxRadioButton( parent, wxID_ANY, _T( "Curvature" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( 68, 1, 0 );
+    l_sizer->Add( m_pRadioCurvature );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    m_pRadioTorsion  = new wxRadioButton( parent, wxID_ANY, _T( "Torsion" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( 68, 1, 0 );
+    l_sizer->Add( m_pRadioTorsion );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pLblMeanFiberOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+    l_sizer->Add( m_pLblMeanFiberOpacity, 0, wxALIGN_CENTER );
+    m_psliderMeanFiberOpacity = new wxSlider(parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    l_sizer->Add( m_psliderMeanFiberOpacity, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+
+    parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
+    parent->Connect(m_pbtnSelectMeanFiberColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMeanFiberColorChange));
+    parent->Connect( m_pRadioCustomColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnCustomMeanFiberColoring ) );
+    parent->Connect( m_pRadioNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalMeanFiberColoring ) );
+    parent->Connect( m_pRadioDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberListMenuDistance ) );
+    parent->Connect( m_pRadioMinDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberListMenuMinDistance ) );
+    parent->Connect( m_pRadioTorsion->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorMeanFiberWithTorsion ) );
+    parent->Connect( m_pRadioCurvature->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorMeanFiberWithCurvature ) );
+    parent->Connect( m_psliderMeanFiberOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberOpacityChange ) );
+    m_pRadioNormalColoring->SetValue( true );
+
+
+
     //m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
     //m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
 
-    parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
     //parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections));
     //parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
 
@@ -2029,41 +2170,6 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 
 }
 
-void SelectionObject::UpdateMeanValueTypeBox()
-{
-    vector< DatasetInfo* > dataSets;
-    m_datasetHelper->getTextureDataset( dataSets );
-    
-    if( dataSets.size() != m_pCBSelectDataSet->GetCount() )
-    {
-        int oldIndex = -1;
-        wxString oldName = m_pCBSelectDataSet->GetStringSelection();
-        
-        m_pCBSelectDataSet->Clear();
-        
-        for( unsigned int i( 0 ); i < dataSets.size(); ++i )
-        {
-            m_pCBSelectDataSet->Insert( dataSets[i]->getName().BeforeFirst('.'), m_pCBSelectDataSet->GetCount() );
-            if( oldName == dataSets[i]->getName().BeforeFirst('.') )
-            {
-                oldIndex = i;
-            }
-        }
-        
-        if( oldIndex < 0 )
-        {
-            oldIndex = 0;
-        }
-        else if( static_cast<unsigned int>( oldIndex ) >= m_pCBSelectDataSet->GetCount() )
-        {
-            oldIndex = m_pCBSelectDataSet->GetCount() - 1;
-        }
-        
-        m_pCBSelectDataSet->SetSelection(oldIndex);
-    }
-}
-
-
 
 void SelectionObject::updatePropertiesSizer()
 {
@@ -2074,6 +2180,8 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleCalculatesFibersInfo->Enable( getShowFibers() );
     m_pgridfibersInfo->Enable( getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue() );
     m_ptoggleDisplayMeanFiber->Enable( getShowFibers() );
+    m_pbtnSelectMeanFiberColor->Enable( m_ptoggleDisplayMeanFiber->GetValue() );
+    setShowMeanFiberOption( m_ptoggleDisplayMeanFiber->GetValue() );
 
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.

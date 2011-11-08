@@ -510,6 +510,37 @@ void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+
+void PropertiesWindow::OnNormalMeanFiberColoring( wxCommandEvent& event )
+{
+   ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(NORMAL_COLOR); 
+}
+void PropertiesWindow::OnMeanFiberListMenuDistance( wxCommandEvent& event )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(DISTANCE_COLOR);
+}
+void PropertiesWindow::OnMeanFiberListMenuMinDistance( wxCommandEvent& event )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(MINDISTANCE_COLOR);
+}
+void PropertiesWindow::OnColorMeanFiberWithTorsion( wxCommandEvent& event )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(TORSION_COLOR);
+}
+void PropertiesWindow::OnColorMeanFiberWithCurvature( wxCommandEvent& event )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(CURVATURE_COLOR);
+}
+void PropertiesWindow::OnCustomMeanFiberColoring( wxCommandEvent& event )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(CUSTOM_COLOR);
+}
+
+void PropertiesWindow::OnMeanFiberOpacityChange( wxCommandEvent& event )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->updateMeanFiberOpacity();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user clicks on the "Set as distance
 // anchor" option.
@@ -846,6 +877,75 @@ void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 {
     ( (SelectionObject*)m_mainFrame->m_pCurrentSceneObject )->computeMeanFiber();
+    m_mainFrame->refreshAllGLWidgets();
+}
+
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user click on the color palette
+// button that is located aside of the Show mean fiber button
+///////////////////////////////////////////////////////////////////////////
+void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
+{
+    if( ! m_mainFrame->m_pDatasetHelper->m_theScene )
+        return;
+
+    wxColourData l_colorData;
+
+    for( int i = 0; i < 10; ++i )
+    {
+        wxColour l_color(i * 28, i * 28, i * 28);
+        l_colorData.SetCustomColour(i, l_color);
+    }
+
+    int i = 10;
+    wxColour l_color ( 255, 0, 0 );
+    l_colorData.SetCustomColour( i++, l_color );
+    wxColour l_color1( 0, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color1 );
+    wxColour l_color2( 0, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color2 );
+    wxColour l_color3( 255, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color3 );
+    wxColour l_color4( 255, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color4 );
+    wxColour l_color5( 0, 255, 255 );
+    l_colorData.SetCustomColour( i++, l_color5 );
+
+    wxColourDialog dialog( this, &l_colorData );
+    wxColour l_col;
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        wxColourData l_retData = dialog.GetColourData();
+        l_col = l_retData.GetColour();
+    }
+    else
+    {
+        return;
+    }
+
+    ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->setMeanFiberColor( l_col);
+    /*if( m_mainFrame->m_currentListItem != -1 )
+    {
+        DatasetInfo *l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
+        if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
+        {
+            l_info->setColor( l_col );
+            l_info->setuseTex( false );
+            m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListItem, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
+        }
+    }
+    else if ( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject != NULL )
+    {
+        SelectionObject *l_selObj = (SelectionObject*)m_mainFrame->m_pCurrentSceneObject;
+        if (!l_selObj->getIsMaster())
+        {
+            wxTreeItemId l_parentId = m_mainFrame->m_pTreeWidget->GetItemParent( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject->GetId());
+            l_selObj = (SelectionObject*)m_mainFrame->m_pTreeWidget->GetItemData(l_parentId);
+        }
+        l_selObj->setFiberColor( l_col);
+        l_selObj->setIsDirty( true );
+        m_mainFrame->m_pDatasetHelper->m_selBoxChanged = true;
+    }*/    
     m_mainFrame->refreshAllGLWidgets();
 }
 
