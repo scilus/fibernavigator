@@ -452,23 +452,54 @@ bool Anatomy::loadNifti( wxString fileName )
     }
 
     // Get the transformation to put the anatomy file in world space.
+    // The transformation used depends on the one used in the nifti image.
     // We currently only use it when loading Mrtrix fibers.
-    m_dh->m_niftiTransform( 0, 0 ) = pImage->sto_xyz.m[0][0];
-    m_dh->m_niftiTransform( 0, 1 ) = pImage->sto_xyz.m[0][1];
-    m_dh->m_niftiTransform( 0, 2 ) = pImage->sto_xyz.m[0][2];
-    m_dh->m_niftiTransform( 0, 3 ) = pImage->sto_xyz.m[0][3];
-    m_dh->m_niftiTransform( 1, 0 ) = pImage->sto_xyz.m[1][0];
-    m_dh->m_niftiTransform( 1, 1 ) = pImage->sto_xyz.m[1][1];
-    m_dh->m_niftiTransform( 1, 2 ) = pImage->sto_xyz.m[1][2];
-    m_dh->m_niftiTransform( 1, 3 ) = pImage->sto_xyz.m[1][3];
-    m_dh->m_niftiTransform( 2, 0 ) = pImage->sto_xyz.m[2][0];
-    m_dh->m_niftiTransform( 2, 1 ) = pImage->sto_xyz.m[2][1];
-    m_dh->m_niftiTransform( 2, 2 ) = pImage->sto_xyz.m[2][2];
-    m_dh->m_niftiTransform( 2, 3 ) = pImage->sto_xyz.m[2][3];
-    m_dh->m_niftiTransform( 3, 0 ) = pImage->sto_xyz.m[3][0];
-    m_dh->m_niftiTransform( 3, 1 ) = pImage->sto_xyz.m[3][1];
-    m_dh->m_niftiTransform( 3, 2 ) = pImage->sto_xyz.m[3][2];
-    m_dh->m_niftiTransform( 3, 3 ) = pImage->sto_xyz.m[3][3];
+    if( pImage->sform_code > 0 )
+    {
+        m_dh->m_niftiTransform( 0, 0 ) = pImage->sto_xyz.m[0][0];
+        m_dh->m_niftiTransform( 0, 1 ) = pImage->sto_xyz.m[0][1];
+        m_dh->m_niftiTransform( 0, 2 ) = pImage->sto_xyz.m[0][2];
+        m_dh->m_niftiTransform( 0, 3 ) = pImage->sto_xyz.m[0][3];
+        m_dh->m_niftiTransform( 1, 0 ) = pImage->sto_xyz.m[1][0];
+        m_dh->m_niftiTransform( 1, 1 ) = pImage->sto_xyz.m[1][1];
+        m_dh->m_niftiTransform( 1, 2 ) = pImage->sto_xyz.m[1][2];
+        m_dh->m_niftiTransform( 1, 3 ) = pImage->sto_xyz.m[1][3];
+        m_dh->m_niftiTransform( 2, 0 ) = pImage->sto_xyz.m[2][0];
+        m_dh->m_niftiTransform( 2, 1 ) = pImage->sto_xyz.m[2][1];
+        m_dh->m_niftiTransform( 2, 2 ) = pImage->sto_xyz.m[2][2];
+        m_dh->m_niftiTransform( 2, 3 ) = pImage->sto_xyz.m[2][3];
+        m_dh->m_niftiTransform( 3, 0 ) = pImage->sto_xyz.m[3][0];
+        m_dh->m_niftiTransform( 3, 1 ) = pImage->sto_xyz.m[3][1];
+        m_dh->m_niftiTransform( 3, 2 ) = pImage->sto_xyz.m[3][2];
+        m_dh->m_niftiTransform( 3, 3 ) = pImage->sto_xyz.m[3][3];
+    }
+    else if( pImage->qform_code > 0 )
+    {
+        m_dh->m_niftiTransform( 0, 0 ) = pImage->qto_xyz.m[0][0];
+        m_dh->m_niftiTransform( 0, 1 ) = pImage->qto_xyz.m[0][1];
+        m_dh->m_niftiTransform( 0, 2 ) = pImage->qto_xyz.m[0][2];
+        m_dh->m_niftiTransform( 0, 3 ) = pImage->qto_xyz.m[0][3];
+        m_dh->m_niftiTransform( 1, 0 ) = pImage->qto_xyz.m[1][0];
+        m_dh->m_niftiTransform( 1, 1 ) = pImage->qto_xyz.m[1][1];
+        m_dh->m_niftiTransform( 1, 2 ) = pImage->qto_xyz.m[1][2];
+        m_dh->m_niftiTransform( 1, 3 ) = pImage->qto_xyz.m[1][3];
+        m_dh->m_niftiTransform( 2, 0 ) = pImage->qto_xyz.m[2][0];
+        m_dh->m_niftiTransform( 2, 1 ) = pImage->qto_xyz.m[2][1];
+        m_dh->m_niftiTransform( 2, 2 ) = pImage->qto_xyz.m[2][2];
+        m_dh->m_niftiTransform( 2, 3 ) = pImage->qto_xyz.m[2][3];
+        m_dh->m_niftiTransform( 3, 0 ) = pImage->qto_xyz.m[3][0];
+        m_dh->m_niftiTransform( 3, 1 ) = pImage->qto_xyz.m[3][1];
+        m_dh->m_niftiTransform( 3, 2 ) = pImage->qto_xyz.m[3][2];
+        m_dh->m_niftiTransform( 3, 3 ) = pImage->qto_xyz.m[3][3];
+    }
+    else
+    {
+        m_dh->printDebug( wxT( "No transformation encoded in the nifti file. Using identity transform." ), LOGLEVEL_WARNING );
+
+        // This is not a typo, the method is called makeIdendity in FMatrix.
+        m_dh->m_niftiTransform.makeIdendity();
+    }
+    
 
     m_dh->m_xVoxel = pImage->dx;
     m_dh->m_yVoxel = pImage->dy;
