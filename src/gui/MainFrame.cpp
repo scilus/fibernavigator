@@ -1210,6 +1210,7 @@ void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
     date = date.BeforeLast( '$' );
     (void)wxMessageBox( _T("Fiber Navigator\nAuthors:http://code.google.com/p/fibernavigator/people/list \n\n" )
                         + rev + _T( "\n" ) + date, _T( "About Fiber Navigator" ) );
+    
 }
 
 void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
