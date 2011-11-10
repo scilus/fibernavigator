@@ -1582,11 +1582,11 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     {
         case MASTER_OBJECT:
         case CHILD_OBJECT:
-            if ( m_pDatasetHelper->m_lastSelectedObject )
+            if ( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
             }
-            if ( m_pDatasetHelper->m_lastSelectedPoint )
+            if ( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
                 m_pDatasetHelper->m_lastSelectedPoint = NULL;
@@ -1600,11 +1600,11 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             break;
 
         case POINT_DATASET:
-            if( m_pDatasetHelper->m_lastSelectedPoint )
+            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
             }
-            if( m_pDatasetHelper->m_lastSelectedObject )
+            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
                 m_pDatasetHelper->m_lastSelectedObject = NULL;
@@ -1618,12 +1618,12 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             break;
 
         default:
-            if( m_pDatasetHelper->m_lastSelectedPoint )
+            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
                 m_pDatasetHelper->m_lastSelectedPoint = NULL;
             }
-            if( m_pDatasetHelper->m_lastSelectedObject )
+            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
                 m_pDatasetHelper->m_lastSelectedObject = NULL;

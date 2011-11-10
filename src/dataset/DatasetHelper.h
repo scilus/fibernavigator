@@ -271,9 +271,10 @@ public:
     SelectionObject* m_boxAtCrosshair;
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
-    MainFrame*       m_mainFrame;
     TheScene*        m_theScene;
     ShaderHelper*    m_shaderHelper;
+    
+    MainFrame*       m_mainFrame;
 };
 
 #define ID_KDTREE_FINISHED    50
