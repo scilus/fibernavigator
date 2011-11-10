@@ -658,7 +658,7 @@ void MainFrame::onSelectDrawer( wxCommandEvent& event )
 	m_pDatasetHelper->m_isDrawerToolActive = true;
 
 	m_pToolBar->m_txtRuler->Disable();
-	m_pToolBar->EnableTool(m_pToolBar->m_selectDropper->GetId(), true);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), true);
@@ -666,7 +666,7 @@ void MainFrame::onSelectDrawer( wxCommandEvent& event )
 	refreshAllGLWidgets();
 }
 
-void MainFrame::onSelectDropper( wxCommandEvent& event )
+void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 {
     if( m_pDatasetHelper->m_theScene == NULL )
 	{
@@ -700,11 +700,12 @@ void MainFrame::onSelectDropper( wxCommandEvent& event )
     {
         wxColourData l_retData = dialog.GetColourData();
         m_pDatasetHelper->m_drawColor = l_retData.GetColour();
-		wxRect fullImage(0, 0, 16, 16);
+		wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
 		m_pDatasetHelper->m_drawColorIcon.SetRGB(fullImage, 
 											     m_pDatasetHelper->m_drawColor.Red(), 
 											     m_pDatasetHelper->m_drawColor.Green(), 
 											     m_pDatasetHelper->m_drawColor.Blue() );
+		m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap(m_pDatasetHelper->m_drawColorIcon));
     }
     else
     {
@@ -1224,7 +1225,7 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 	m_pDatasetHelper->m_isDrawerToolActive = false;
 
 	m_pToolBar->m_txtRuler->Disable();
-	m_pToolBar->EnableTool(m_pToolBar->m_selectDropper->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);
@@ -1242,7 +1243,7 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 	m_pDatasetHelper->m_isDrawerToolActive = false;
 
     m_pToolBar->m_txtRuler->Enable();
-	m_pToolBar->EnableTool(m_pToolBar->m_selectDropper->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);

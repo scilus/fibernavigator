@@ -83,6 +83,7 @@ public:
 			wxMenuItem  *m_itemRulerRemove;
 		wxMenu      *m_menuDrawer;
 			wxMenuItem  *m_itemToggleDrawer;
+			wxMenuItem  *m_itemDrawColorPicker;
 			wxMenuItem  *m_itemDrawPen;
 			wxMenuItem  *m_itemDrawEraser;
 			wxMenuItem  *m_itemDrawScissor;

@@ -87,6 +87,7 @@ MenuBar::MenuBar()
 
 	m_menuDrawer = new wxMenu();
 	m_itemToggleDrawer = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Activate Drawer"));
+	m_itemDrawColorPicker = m_menuDrawer->Append(wxID_ANY, wxT("Color Picker"));
 	m_itemDrawPen = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Pen"));
 	m_itemDrawEraser = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Eraser"));
 	m_itemDrawScissor = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Scissor"));
@@ -191,6 +192,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemMoveBoundaryPointRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMoveBoundaryPointsRight));
     mf->Connect(m_itemToggleUseTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseTransparency));
 	mf->Connect(m_itemToggleDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectDrawer));
+	mf->Connect(m_itemDrawColorPicker->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectColorPicker));
 	mf->Connect(m_itemDrawPen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectPen));
 	mf->Connect(m_itemDrawEraser->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectEraser));
 	mf->Connect(m_itemDrawScissor->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectScissor));
@@ -238,6 +240,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleDrawPoints->Check(mf->m_pDatasetHelper->m_pointMode);
     m_itemToggleDrawVectors->Check(mf->m_pDatasetHelper->m_drawVectors);
 	m_itemToggleDrawer->Check(mf->m_pDatasetHelper->m_isDrawerToolActive);
+	//m_itemDrawColorPicker->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_INVALID);
 	m_itemDrawPen->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
 	m_itemDrawEraser->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
 	m_itemDrawScissor->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_SCISSOR);

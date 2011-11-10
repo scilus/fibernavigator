@@ -44,7 +44,7 @@ public:
 	wxToolBarToolBase *m_selectRuler;
 	wxToolBarToolBase *m_selectDrawer;
 	wxTextCtrl        *m_txtRuler;
-	wxToolBarToolBase *m_selectDropper;
+	wxToolBarToolBase *m_selectColorPicker;
 	wxToolBarToolBase *m_selectPen;
 	wxToolBarToolBase *m_selectEraser;
 	wxToolBarToolBase *m_selectScissor;
