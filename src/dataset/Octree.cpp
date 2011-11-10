@@ -12,12 +12,12 @@ Octree::Octree( int lvl, const std::vector< float > &pointArray, int nb, Dataset
     m_pointArray(pointArray)    
 {
 
-    m_dh->printDebug(_T("Building Octree..."), 1);
+    m_dh->printDebug( _T("Building Octree..."), LOGLEVEL_MESSAGE );
     
     findBoundingBox();
     classifyPoints();
     
-    m_dh->printDebug(_T("Octree done"), 1);
+    m_dh->printDebug( _T("Octree done"), LOGLEVEL_MESSAGE );
 }
 
 //////////////////////////////////////////

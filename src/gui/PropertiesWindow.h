@@ -128,6 +128,7 @@ public:
     void OnDisplayDispersionTube            ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );
     void OnCreateFibersDensityTexture       ( wxCommandEvent& event );
+    void OnMeanComboBoxSelectionChange      ( wxCommandEvent& event );
     void OnBoxPositionX                     ( wxCommandEvent& event );
     void OnBoxPositionY                     ( wxCommandEvent& event );
     void OnBoxPositionZ                     ( wxCommandEvent& event );

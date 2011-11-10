@@ -345,7 +345,7 @@ void Anatomy::flipAxis( AxisType axe )
             frames /= 2;
             break;
         default:
-            m_dh->printDebug( _T("Cannot flip axis. The given axis is undefined."), 2 );
+            m_dh->printDebug( _T("Cannot flip axis. The given axis is undefined."), LOGLEVEL_ERROR );
             return;
     }
 
@@ -436,7 +436,7 @@ bool Anatomy::loadNifti( wxString fileName )
         m_dh->m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
         return false;
     }
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
     //nifti_1_header *l_tmphdr = nifti_read_header( l_hdrFile, 0, 0 );
     //disp_nifti_1_header( "", l_tmphdr );
 #endif
@@ -456,23 +456,54 @@ bool Anatomy::loadNifti( wxString fileName )
     }
 
     // Get the transformation to put the anatomy file in world space.
+    // The transformation used depends on the one used in the nifti image.
     // We currently only use it when loading Mrtrix fibers.
-    m_dh->m_niftiTransform( 0, 0 ) = pImage->sto_xyz.m[0][0];
-    m_dh->m_niftiTransform( 0, 1 ) = pImage->sto_xyz.m[0][1];
-    m_dh->m_niftiTransform( 0, 2 ) = pImage->sto_xyz.m[0][2];
-    m_dh->m_niftiTransform( 0, 3 ) = pImage->sto_xyz.m[0][3];
-    m_dh->m_niftiTransform( 1, 0 ) = pImage->sto_xyz.m[1][0];
-    m_dh->m_niftiTransform( 1, 1 ) = pImage->sto_xyz.m[1][1];
-    m_dh->m_niftiTransform( 1, 2 ) = pImage->sto_xyz.m[1][2];
-    m_dh->m_niftiTransform( 1, 3 ) = pImage->sto_xyz.m[1][3];
-    m_dh->m_niftiTransform( 2, 0 ) = pImage->sto_xyz.m[2][0];
-    m_dh->m_niftiTransform( 2, 1 ) = pImage->sto_xyz.m[2][1];
-    m_dh->m_niftiTransform( 2, 2 ) = pImage->sto_xyz.m[2][2];
-    m_dh->m_niftiTransform( 2, 3 ) = pImage->sto_xyz.m[2][3];
-    m_dh->m_niftiTransform( 3, 0 ) = pImage->sto_xyz.m[3][0];
-    m_dh->m_niftiTransform( 3, 1 ) = pImage->sto_xyz.m[3][1];
-    m_dh->m_niftiTransform( 3, 2 ) = pImage->sto_xyz.m[3][2];
-    m_dh->m_niftiTransform( 3, 3 ) = pImage->sto_xyz.m[3][3];
+    if( pImage->sform_code > 0 )
+    {
+        m_dh->m_niftiTransform( 0, 0 ) = pImage->sto_xyz.m[0][0];
+        m_dh->m_niftiTransform( 0, 1 ) = pImage->sto_xyz.m[0][1];
+        m_dh->m_niftiTransform( 0, 2 ) = pImage->sto_xyz.m[0][2];
+        m_dh->m_niftiTransform( 0, 3 ) = pImage->sto_xyz.m[0][3];
+        m_dh->m_niftiTransform( 1, 0 ) = pImage->sto_xyz.m[1][0];
+        m_dh->m_niftiTransform( 1, 1 ) = pImage->sto_xyz.m[1][1];
+        m_dh->m_niftiTransform( 1, 2 ) = pImage->sto_xyz.m[1][2];
+        m_dh->m_niftiTransform( 1, 3 ) = pImage->sto_xyz.m[1][3];
+        m_dh->m_niftiTransform( 2, 0 ) = pImage->sto_xyz.m[2][0];
+        m_dh->m_niftiTransform( 2, 1 ) = pImage->sto_xyz.m[2][1];
+        m_dh->m_niftiTransform( 2, 2 ) = pImage->sto_xyz.m[2][2];
+        m_dh->m_niftiTransform( 2, 3 ) = pImage->sto_xyz.m[2][3];
+        m_dh->m_niftiTransform( 3, 0 ) = pImage->sto_xyz.m[3][0];
+        m_dh->m_niftiTransform( 3, 1 ) = pImage->sto_xyz.m[3][1];
+        m_dh->m_niftiTransform( 3, 2 ) = pImage->sto_xyz.m[3][2];
+        m_dh->m_niftiTransform( 3, 3 ) = pImage->sto_xyz.m[3][3];
+    }
+    else if( pImage->qform_code > 0 )
+    {
+        m_dh->m_niftiTransform( 0, 0 ) = pImage->qto_xyz.m[0][0];
+        m_dh->m_niftiTransform( 0, 1 ) = pImage->qto_xyz.m[0][1];
+        m_dh->m_niftiTransform( 0, 2 ) = pImage->qto_xyz.m[0][2];
+        m_dh->m_niftiTransform( 0, 3 ) = pImage->qto_xyz.m[0][3];
+        m_dh->m_niftiTransform( 1, 0 ) = pImage->qto_xyz.m[1][0];
+        m_dh->m_niftiTransform( 1, 1 ) = pImage->qto_xyz.m[1][1];
+        m_dh->m_niftiTransform( 1, 2 ) = pImage->qto_xyz.m[1][2];
+        m_dh->m_niftiTransform( 1, 3 ) = pImage->qto_xyz.m[1][3];
+        m_dh->m_niftiTransform( 2, 0 ) = pImage->qto_xyz.m[2][0];
+        m_dh->m_niftiTransform( 2, 1 ) = pImage->qto_xyz.m[2][1];
+        m_dh->m_niftiTransform( 2, 2 ) = pImage->qto_xyz.m[2][2];
+        m_dh->m_niftiTransform( 2, 3 ) = pImage->qto_xyz.m[2][3];
+        m_dh->m_niftiTransform( 3, 0 ) = pImage->qto_xyz.m[3][0];
+        m_dh->m_niftiTransform( 3, 1 ) = pImage->qto_xyz.m[3][1];
+        m_dh->m_niftiTransform( 3, 2 ) = pImage->qto_xyz.m[3][2];
+        m_dh->m_niftiTransform( 3, 3 ) = pImage->qto_xyz.m[3][3];
+    }
+    else
+    {
+        m_dh->printDebug( wxT( "No transformation encoded in the nifti file. Using identity transform." ), LOGLEVEL_WARNING );
+
+        // This is not a typo, the method is called makeIdendity in FMatrix.
+        m_dh->m_niftiTransform.makeIdendity();
+    }
+    
 
     m_dh->m_xVoxel = pImage->dx;
     m_dh->m_yVoxel = pImage->dy;
@@ -946,7 +977,7 @@ void Anatomy::equalizationSliderChange()
     m_cdfThreshold = m_pEqualizationSlider->GetValue() / 100.0f;
     if ( m_useEqualizedDataset && m_cdfThreshold != m_currentEqualizationThreshold )
     {
-        m_dh->printDebug(_T("calling equalizeHistogram"), 1);
+        m_dh->printDebug(_T("calling equalizeHistogram"), LOGLEVEL_DEBUG);
         equalizeHistogram();
 
         const GLuint* pTexId = &m_GLuint;
@@ -1336,7 +1367,7 @@ void Anatomy::equalizeHistogram()
 
     if(0 == size || 1 != m_bands)
     {
-        m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() Anatomy not supported" ), wxConvUTF8 ), 0 );
+        m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() Anatomy not supported" ), wxConvUTF8 ), LOGLEVEL_WARNING );
         return;
     }
 
@@ -1359,7 +1390,7 @@ void Anatomy::equalizeHistogram()
             }
             else
             {
-                m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() pixel value out of range" ), wxConvUTF8 ), 2 );
+                m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() pixel value out of range" ), wxConvUTF8 ), LOGLEVEL_ERROR );
             }
         }
 
@@ -1399,7 +1430,7 @@ void Anatomy::equalizeHistogram()
             if( 0 == size - nbPixelsEliminated - cdfMin )
             {
                 // Division by zero, cancel calculation
-                m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() division by zero" ), wxConvUTF8 ), 2 );
+                m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() division by zero" ), wxConvUTF8 ), LOGLEVEL_ERROR );
                 return;
             }
         }
@@ -1424,7 +1455,7 @@ void Anatomy::equalizeHistogram()
     oss << "Anatomy::equalizeHistogram() took ";
     oss << static_cast<float>(endTime - startTime) / CLOCKS_PER_SEC;
     oss << " seconds."; 
-    m_dh->printDebug( wxString( oss.str().c_str(), wxConvUTF8 ), 0 );
+    m_dh->printDebug( wxString( oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
 }
 
 //////////////////////////////////////////////////////////////////////////
