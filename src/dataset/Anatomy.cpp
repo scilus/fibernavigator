@@ -1399,7 +1399,6 @@ void Anatomy::equalizeHistogram()
 
     unsigned int threshold(0);
     unsigned int currentCdf(0);
-    unsigned int prevCdf(0);
     unsigned int cdfMin(0);
     bool isCdfMinFound(false);
     float equalizedHistogram[GRAY_SCALE] = { 0 };
