@@ -47,7 +47,6 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     m_type          = HEAD_BYTE;
 
     createOffset( *pDataset );
-    equalizeHistogram();
 }
 
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
@@ -76,7 +75,6 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     {
         m_floatDataset[i] = pDataset->at(i);
     }
-    equalizeHistogram();
 }
 
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
@@ -99,8 +97,6 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
         m_type          = type;
 
         m_floatDataset.resize( m_columns * m_frames * m_rows * 3, 0.0f );
-
-        equalizeHistogram();
     }
     else
     {
@@ -703,8 +699,6 @@ bool Anatomy::loadNifti( wxString fileName )
         m_dh->m_columns         = m_columns;
         m_dh->m_frames          = m_frames;
         m_dh->m_anatomyLoaded   = true;
-
-        equalizeHistogram();
     }
     
     free(pHdrFile);
@@ -977,7 +971,7 @@ void Anatomy::equalizationSliderChange()
     m_cdfThreshold = m_pEqualizationSlider->GetValue() / 100.0f;
     if ( m_useEqualizedDataset && m_cdfThreshold != m_currentEqualizationThreshold )
     {
-        m_dh->printDebug(_T("calling equalizeHistogram"), LOGLEVEL_DEBUG);
+        m_dh->printDebug( _T("calling equalizeHistogram"), LOGLEVEL_DEBUG );
         equalizeHistogram();
 
         const GLuint* pTexId = &m_GLuint;
@@ -1359,13 +1353,14 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 /************************************************************************/
 void Anatomy::equalizeHistogram()
 {
+    m_dh->printDebug( _T( "Anatomy::equalizeHistogram() Starting equalization..." ), LOGLEVEL_DEBUG );
     clock_t startTime(clock());
 
     //TODO: Add support for RGB
     static const unsigned int GRAY_SCALE(256);
     unsigned int size(m_frames * m_rows * m_columns);
 
-    if(0 == size || 1 != m_bands)
+    if( 0 == size || 1 != m_bands )
     {
         m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() Anatomy not supported" ), wxConvUTF8 ), LOGLEVEL_WARNING );
         return;
@@ -1378,15 +1373,15 @@ void Anatomy::equalizeHistogram()
         m_equalizedDataset.clear();
         m_equalizedDataset.resize(size, 0.0f);
 
-        unsigned int pixelCount[GRAY_SCALE]  = { 0 };
+        unsigned int pixelCount[GRAY_SCALE] = { 0 };
 
-        for(unsigned int i(0); i < size; ++i)
+        for( unsigned int i(0); i < size; ++i )
         {
-            unsigned int pixelValue(static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1)));
+            unsigned int pixelValue( static_cast< unsigned int >( m_floatDataset.at( i ) * ( GRAY_SCALE - 1 ) ) );
 
             if( pixelValue < GRAY_SCALE )
             {
-                pixelCount[pixelValue]++;
+                ++pixelCount[pixelValue];
             }
             else
             {

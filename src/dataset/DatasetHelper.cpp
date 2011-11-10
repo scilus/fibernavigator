@@ -1375,7 +1375,7 @@ TensorField* DatasetHelper::getTensorField()
 
 void DatasetHelper::printGLError( const wxString i_function )
 {
-    printDebug( _T( "***ERROR***: " ) + i_function, LOGLEVEL_ERROR );
+    printDebug( _T( "GLError within " ) + i_function, LOGLEVEL_ERROR );
     printf( " : ERROR: %s\n", gluErrorString( m_lastGLError ) );
 }
 
