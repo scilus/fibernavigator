@@ -25,7 +25,6 @@
 
 #include "DatasetInfo.h"
 
-
 #include "../gui/SelectionObject.h"
 
 #include "../gui/MainFrame.h"
@@ -51,6 +50,9 @@ class TensorField;
 class Surface;
 
 typedef std::vector< std::vector< SelectionObject* > > SelectionObjectList;
+
+// printDebug levels
+enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_WARNING, LOGLEVEL_ERROR };
 
 class DatasetHelper 
 {
@@ -99,7 +101,7 @@ public:
      */
     void printTime();
     void printwxT  ( const wxString i_string );
-    void printDebug( const wxString i_string, const int i_level );
+    void printDebug( const wxString i_string, const LogLevel i_level );
     /*
      * Check for GL error
      */
@@ -115,6 +117,7 @@ public:
 
     bool getFiberDataset  ( Fibers*  &i_fiber );
     bool getSurfaceDataset( Surface* &i_surface );
+    bool getTextureDataset( std::vector< DatasetInfo* > &o_types ); 
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
 
@@ -202,7 +205,7 @@ public:
 
     int       m_debugLevel;
 
-    float     m_frustum[6][4]; // Countains the information of the planes forming the frustum.
+    float     m_frustum[6][4]; // Contains the information of the planes forming the frustum.
     /////////////////////////////////////////////////////////////////////////////////
     // state variables for menu entries
     /////////////////////////////////////////////////////////////////////////////////
@@ -268,9 +271,10 @@ public:
     SelectionObject* m_boxAtCrosshair;
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
-    MainFrame*       m_mainFrame;
     TheScene*        m_theScene;
     ShaderHelper*    m_shaderHelper;
+    
+    MainFrame*       m_mainFrame;
 };
 
 #define ID_KDTREE_FINISHED    50
