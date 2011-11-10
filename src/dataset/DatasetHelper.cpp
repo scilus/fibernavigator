@@ -143,12 +143,12 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_screenshotPath( _T( "" ) ),
     m_screenshotName( _T( "" ) ),
 
-    m_lastSelectedPoint ( 0 ),
-    m_lastSelectedObject( 0 ),
+    m_anatomyHelper     ( 0 ),    
     m_boxAtCrosshair    ( 0 ),
-    m_anatomyHelper     ( 0 ),
-    m_shaderHelper      ( 0 ),
+    m_lastSelectedPoint ( NULL ),
+    m_lastSelectedObject( NULL ),
     m_theScene          ( 0 ),
+    m_shaderHelper      ( 0 ),
 
     m_mainFrame( mf )
 {
