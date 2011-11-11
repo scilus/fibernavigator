@@ -101,7 +101,8 @@ private:
     wxButton        *m_pBtnGraphCut;
     wxButton        *m_pBtnKmeans;
     wxTextCtrl      *m_pTxtThresBox;
-    wxSlider        *m_pEqualizationSlider;
+    wxSlider        *m_pLowerEqSlider;
+    wxSlider        *m_pUpperEqSlider;
 
     void activateLIC() {};
     void clean()       {};
@@ -126,8 +127,10 @@ private:
     int                     m_dataType;
     TensorField             *m_pTensorField;
     bool                    m_useEqualizedDataset;
-    float                   m_cdfThreshold;
-    float                   m_currentEqualizationThreshold;
+    unsigned int            m_lowerEqThreshold;
+    unsigned int            m_upperEqThreshold;
+    unsigned int            m_currentLowerEqThreshold;
+    unsigned int            m_currentUpperEqThreshold;
     unsigned int            m_cdf[256];
 
 };

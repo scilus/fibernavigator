@@ -24,7 +24,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper )
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_cdfThreshold( 0.45f )
+  m_lowerEqThreshold( 20 ),
+  m_upperEqThreshold( 255 )
 {
     m_bands = 1;
 }
@@ -37,7 +38,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_cdfThreshold( 0.45f )
+  m_lowerEqThreshold( 20 ),
+  m_upperEqThreshold( 255 )
 {
     m_columns       = m_dh->m_columns;
     m_frames        = m_dh->m_frames;
@@ -58,7 +60,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_cdfThreshold( 0.45f )
+  m_lowerEqThreshold( 20 ),
+  m_upperEqThreshold( 255 )
 {
     m_columns = m_dh->m_columns;
     m_frames  = m_dh->m_frames;
@@ -85,7 +88,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_cdfThreshold( 0.45f )
+  m_lowerEqThreshold( 20 ),
+  m_upperEqThreshold( 255 )
 {
     if(type == RGB)
     {
@@ -788,81 +792,79 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
 {
     DatasetInfo::createPropertiesSizer( pParentWindow );
 
-    wxSizer *pSizer;
-
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pEqualizationSlider = new wxSlider( pParentWindow, wxID_ANY, m_cdfThreshold * 100, 0, 95, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    pSizer->Add( new wxStaticText( pParentWindow, wxID_ANY, wxT( "Threshold " ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
-    pSizer->Add( m_pEqualizationSlider, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParentWindow->Connect( m_pEqualizationSlider->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnEqualizationChange ) );
-
+    // Init widgets
+    m_pLowerEqSlider = new wxSlider( pParentWindow, wxID_ANY, m_lowerEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pUpperEqSlider = new wxSlider( pParentWindow, wxID_ANY, m_upperEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pEqualize      = new wxToggleButton( pParentWindow, wxID_ANY, wxT("Equalize"),           wxDefaultPosition, wxSize(140, -1) );
     m_pBtnDilate = new wxButton( pParentWindow, wxID_ANY, wxT( "Dilate" ),wxDefaultPosition, wxSize( 85, -1 ) );
     m_pBtnErode  = new wxButton( pParentWindow, wxID_ANY, wxT( "Erode" ),wxDefaultPosition, wxSize( 85, -1 ) );
-
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );
-    pSizer->Add( m_pBtnErode,  0, wxALIGN_CENTER );
-    
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-
-    pParentWindow->Connect( m_pBtnDilate->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDilateDataset ) );
-    pParentWindow->Connect( m_pBtnErode->GetId(),  wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnErodeDataset ) );
-
     m_pBtnCut =      new wxButton( pParentWindow, wxID_ANY, wxT("Cut (boxes)"), wxDefaultPosition, wxSize(85, -1) );
     m_pBtnMinimize = new wxButton( pParentWindow, wxID_ANY, wxT("Minimize (fibers)"), wxDefaultPosition, wxSize(85, -1) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( m_pBtnCut,      0, wxALIGN_CENTER );
-    pSizer->Add( m_pBtnMinimize, 0, wxALIGN_CENTER );
-
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-
-    pParentWindow->Connect( m_pBtnMinimize->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
-    pParentWindow->Connect( m_pBtnCut->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
-
-    m_pEqualize      = new wxToggleButton( pParentWindow, wxID_ANY, wxT("Equalize"),           wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewDistanceMap =   new wxButton( pParentWindow, wxID_ANY, wxT("New Distance Map"),   wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewIsoSurface  =   new wxButton( pParentWindow, wxID_ANY, wxT("New Iso Surface"),    wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewOffsetSurface = new wxButton( pParentWindow, wxID_ANY, wxT("New Offset Surface"), wxDefaultPosition, wxSize(140, -1) );
     m_pBtnNewVOI =           new wxButton( pParentWindow, wxID_ANY, wxT("New VOI"),            wxDefaultPosition, wxSize(140, -1) );
-
-    m_propertiesSizer->Add( m_pEqualize,            0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( m_pBtnNewVOI,           0, wxALIGN_CENTER );
-
-    pParentWindow->Connect( m_pEqualize->GetId(),             wxEVT_COMMAND_TOGGLEBUTTON_CLICKED,  wxEventHandler(PropertiesWindow::OnEqualizeDataset) );
-    pParentWindow->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewIsoSurface) );
-    pParentWindow->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewDistanceMap) );
-    pParentWindow->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewOffsetSurface) );
-    pParentWindow->Connect( m_pBtnNewVOI->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnNewVoiFromOverlay) );
-
-    m_pToggleSegment = new wxToggleButton( pParentWindow, wxID_ANY,wxT("Floodfill"), wxDefaultPosition, wxSize(140, -1) );
-
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( m_pToggleSegment, 0, wxALIGN_CENTER );
-
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-
-    pParentWindow->Connect( m_pToggleSegment->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFloodFill) );
-
+    m_pToggleSegment = new wxToggleButton( pParentWindow, wxID_ANY,wxT("Floodfill"), wxDefaultPosition, wxSize(140, -1) );  
+    
     m_pSliderFlood = new MySlider( pParentWindow, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFlood->SetValue( 40 );
     setFloodThreshold( 0.2f );
 
     m_pTxtThresBox = new wxTextCtrl( pParentWindow, wxID_ANY, wxT("0.20"),       wxDefaultPosition, wxSize(40, -1), wxTE_CENTRE | wxTE_READONLY );
     m_pTextThres = new wxStaticText( pParentWindow, wxID_ANY, wxT("Threshold "), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
-    
+
+    // Position widgets in sizer
+
+    wxSizer *pSizer;
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParentWindow, wxID_ANY, wxT( "Lower Threshold" ), wxDefaultPosition, wxSize( 80, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
+    pSizer->Add( m_pLowerEqSlider, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParentWindow, wxID_ANY, wxT( "Upper Threshold" ), wxDefaultPosition, wxSize( 80, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
+    pSizer->Add( m_pUpperEqSlider, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+
+    m_propertiesSizer->Add( m_pEqualize,            0, wxALIGN_CENTER );
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );
+    pSizer->Add( m_pBtnErode,  0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( m_pBtnCut,      0, wxALIGN_CENTER );
+    pSizer->Add( m_pBtnMinimize, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+
+    m_propertiesSizer->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( m_pBtnNewVOI,           0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( m_pToggleSegment,       0, wxALIGN_CENTER );
+
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( m_pTextThres,   0, wxALIGN_CENTER );
     pSizer->Add( m_pSliderFlood, 0, wxALIGN_CENTER );
     pSizer->Add( m_pTxtThresBox, 0, wxALIGN_CENTER );
-
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
 
-    pParentWindow->Connect( m_pSliderFlood->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderFloodMoved) );
+    // Connect widgets with callback function
+    pParentWindow->Connect( m_pLowerEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationChange ) );
+    pParentWindow->Connect( m_pUpperEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationChange ) );
+    pParentWindow->Connect( m_pEqualize->GetId(),            wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler       ( PropertiesWindow::OnEqualizeDataset) );
+    pParentWindow->Connect( m_pBtnDilate->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnDilateDataset ) );
+    pParentWindow->Connect( m_pBtnErode->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnErodeDataset ) );
+    pParentWindow->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
+    pParentWindow->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
+    pParentWindow->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
+    pParentWindow->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewIsoSurface ) );
+    pParentWindow->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
+    pParentWindow->Connect( m_pBtnNewVOI->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewVoiFromOverlay ) );
+    pParentWindow->Connect( m_pToggleSegment->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFloodFill ) );
+    pParentWindow->Connect( m_pSliderFlood->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderFloodMoved ) );
     
     // The following interface objects are related to flood fill and graph cuts.
     // They are kept here temporiraly, but will need to be implemented or removed.
@@ -918,7 +920,7 @@ void Anatomy::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
     
-    m_pEqualizationSlider->Enable( 1 == m_bands );
+    m_pLowerEqSlider->Enable( 1 == m_bands );
     m_pEqualize->Enable(    1 == m_bands );
     m_pBtnMinimize->Enable( m_dh->m_fibersLoaded );
     m_pBtnCut->Enable(      m_dh->getSelectionObjects().size() > 0 );
@@ -952,7 +954,7 @@ bool Anatomy::toggleEqualization()
 {
     m_useEqualizedDataset = !m_useEqualizedDataset;
 
-    if ( m_useEqualizedDataset && m_currentEqualizationThreshold != m_cdfThreshold )
+    if ( m_useEqualizedDataset && m_currentLowerEqThreshold != m_lowerEqThreshold )
     {
         equalizeHistogram();
     }
@@ -968,8 +970,9 @@ bool Anatomy::toggleEqualization()
 
 void Anatomy::equalizationSliderChange()
 {
-    m_cdfThreshold = m_pEqualizationSlider->GetValue() / 100.0f;
-    if ( m_useEqualizedDataset && m_cdfThreshold != m_currentEqualizationThreshold )
+    m_lowerEqThreshold = m_pLowerEqSlider->GetValue() * 5;
+    m_upperEqThreshold = m_pUpperEqSlider->GetValue() * 5;
+    if ( m_useEqualizedDataset && ( m_lowerEqThreshold != m_currentLowerEqThreshold || m_upperEqThreshold != m_currentUpperEqThreshold ) )
     {
         m_dh->printDebug( _T("calling equalizeHistogram"), LOGLEVEL_DEBUG );
         equalizeHistogram();
@@ -1343,8 +1346,7 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 /* Formula:
    h(i) =  (cdf(i) - cdfMin) / (R * C * F - n - cdfMin)
    where   - cdf is the cumulative distribution function
-           - cdfMin is the lowest cdf value other than 0, with at least 45% 
-             pixels ignored and i >= 15
+           - cdfMin is the lowest cdf value other than 0, with i >= m_lowerEqThreshold
            - R is the number of rows
            - C is the number of columns
            - F is the number of frames
@@ -1366,7 +1368,8 @@ void Anatomy::equalizeHistogram()
         return;
     }
 
-    m_currentEqualizationThreshold = m_cdfThreshold;
+    m_currentLowerEqThreshold = m_lowerEqThreshold;
+    m_currentUpperEqThreshold = m_upperEqThreshold;
 
     if ( m_equalizedDataset.size() != size )
     {
@@ -1397,24 +1400,22 @@ void Anatomy::equalizeHistogram()
         }
     }
 
-    unsigned int threshold(0);
     unsigned int currentCdf(0);
     unsigned int cdfMin(0);
     bool isCdfMinFound(false);
     float equalizedHistogram[GRAY_SCALE] = { 0 };
 
     // Eliminate background noise
-    while(m_cdf[threshold] / static_cast<double>(size) < m_cdfThreshold)
+    for ( unsigned int i(0); i < m_lowerEqThreshold; ++i )
     {
-        threshold++;
-        equalizedHistogram[threshold] = 1.0f / (GRAY_SCALE - 1);
+        equalizedHistogram[i] = 1.0f / ( GRAY_SCALE - 1 );
     }
 
-    unsigned int nbPixelsEliminated(m_cdf[threshold]);
+    unsigned int nbPixelsEliminated(m_cdf[m_lowerEqThreshold] + m_cdf[GRAY_SCALE - 1] - m_cdf[m_upperEqThreshold]);
 
-    for( unsigned int i(threshold+1); i < GRAY_SCALE; ++i )
+    for( unsigned int i(m_lowerEqThreshold+1); i <= m_upperEqThreshold; ++i )
     {
-        currentCdf = m_cdf[i] - m_cdf[threshold];
+        currentCdf = m_cdf[i] - m_cdf[m_lowerEqThreshold];
 
         if( !isCdfMinFound && 0 != currentCdf )
         {
@@ -1435,6 +1436,11 @@ void Anatomy::equalizeHistogram()
             float result = static_cast<double>(currentCdf - cdfMin) / (size - nbPixelsEliminated - cdfMin);
             equalizedHistogram[i] = result;
         }
+    }
+
+    for ( unsigned int i(m_upperEqThreshold+1); i < GRAY_SCALE; ++i )
+    {
+        equalizedHistogram[i] = 1.0f;
     }
 
     // Calculate the equalized frame
