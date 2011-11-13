@@ -214,7 +214,7 @@ protected :
     
     //Mean fiber coloring variables
     wxColour m_meanFiberColor; //Custom color chose by the user
-    vector<wxColour> m_meanFiberColorVector; //Vector of colour compute by the program
+    vector< Vector > m_meanFiberColorVector; //Vector of colour compute by the program
     float m_meanFiberOpacity; //Between 0 and 1
     FibersColorationMode m_meanFiberColorationMode;
 
@@ -255,6 +255,7 @@ protected:
     void   drawCrossSectionsPolygons         ();
     void   drawDispersionCone                ();
     void   drawFibersInfo                    ();
+    void   setNormalColorArray               (const vector< Vector > &i_fiberPoints);
     void   setShowMeanFiberOption            ( bool i_val );
     void   drawPolygon                       ( const vector< Vector >           &i_crossSectionPoints      );
     void   drawSimpleCircles                 ( const vector< vector< Vector > > &i_allCirclesPoints        );
@@ -340,12 +341,8 @@ private:
     wxStaticText    *m_plblColoring;
     wxRadioButton   *m_pRadioCustomColoring;
     wxRadioButton   *m_pRadioNormalColoring;
-    wxRadioButton   *m_pRadioDistanceAnchoring;
-    wxRadioButton   *m_pRadioCurvature;
-    wxRadioButton   *m_pRadioTorsion;
     wxStaticText    *m_pLblMeanFiberOpacity;
     wxSlider        *m_psliderMeanFiberOpacity;
-    wxRadioButton   *m_pRadioMinDistanceAnchoring;
     wxButton        *m_pbtnDisplayCrossSections;
     wxButton        *m_pbtnDisplayDispersionTube;
     wxButton        *m_pbtnSetAsDistanceAnchor;

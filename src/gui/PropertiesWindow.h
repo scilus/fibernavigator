@@ -83,10 +83,6 @@ public:
     void ColorFibers();
 
     void OnNormalMeanFiberColoring          ( wxCommandEvent& event );
-    void OnMeanFiberListMenuDistance        ( wxCommandEvent& event );
-    void OnMeanFiberListMenuMinDistance     ( wxCommandEvent& event );
-    void OnColorMeanFiberWithTorsion        ( wxCommandEvent& event );
-    void OnColorMeanFiberWithCurvature      ( wxCommandEvent& event );
     void OnCustomMeanFiberColoring          ( wxCommandEvent& event );
     void OnMeanFiberOpacityChange           ( wxCommandEvent& event );
 

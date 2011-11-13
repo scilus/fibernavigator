@@ -510,32 +510,28 @@ void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user click on the normal coloring radio
+// button located in the mean fiber coloring option
+///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnNormalMeanFiberColoring( wxCommandEvent& event )
 {
    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(NORMAL_COLOR); 
 }
-void PropertiesWindow::OnMeanFiberListMenuDistance( wxCommandEvent& event )
-{
-    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(DISTANCE_COLOR);
-}
-void PropertiesWindow::OnMeanFiberListMenuMinDistance( wxCommandEvent& event )
-{
-    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(MINDISTANCE_COLOR);
-}
-void PropertiesWindow::OnColorMeanFiberWithTorsion( wxCommandEvent& event )
-{
-    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(TORSION_COLOR);
-}
-void PropertiesWindow::OnColorMeanFiberWithCurvature( wxCommandEvent& event )
-{
-    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(CURVATURE_COLOR);
-}
+
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user click on the custom coloring radio
+// button located in the mean fiber coloring option
+///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnCustomMeanFiberColoring( wxCommandEvent& event )
 {
     ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(CUSTOM_COLOR);
 }
 
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user move the slider
+// button located in the mean fiber coloring option
+///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnMeanFiberOpacityChange( wxCommandEvent& event )
 {
     ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->updateMeanFiberOpacity();
