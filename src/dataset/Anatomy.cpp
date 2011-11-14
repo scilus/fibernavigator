@@ -25,7 +25,9 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper )
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
   m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 )
+  m_upperEqThreshold( 255 ),
+  m_currentLowerEqThreshold( -1 ),
+  m_currentUpperEqThreshold( -1 )
 {
     m_bands = 1;
 }
@@ -39,7 +41,9 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
   m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 )
+  m_upperEqThreshold( 255 ),
+  m_currentLowerEqThreshold( -1 ),
+  m_currentUpperEqThreshold( -1 )
 {
     m_columns       = m_dh->m_columns;
     m_frames        = m_dh->m_frames;
@@ -61,7 +65,9 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
   m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 )
+  m_upperEqThreshold( 255 ),
+  m_currentLowerEqThreshold( -1 ),
+  m_currentUpperEqThreshold( -1 )
 {
     m_columns = m_dh->m_columns;
     m_frames  = m_dh->m_frames;
@@ -89,7 +95,9 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
   m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 )
+  m_upperEqThreshold( 255 ),
+  m_currentLowerEqThreshold( -1 ),
+  m_currentUpperEqThreshold( -1 )
 {
     if(type == RGB)
     {
@@ -921,6 +929,7 @@ void Anatomy::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
     
     m_pLowerEqSlider->Enable( 1 == m_bands );
+    m_pUpperEqSlider->Enable( 1 == m_bands );
     m_pEqualize->Enable(    1 == m_bands );
     m_pBtnMinimize->Enable( m_dh->m_fibersLoaded );
     m_pBtnCut->Enable(      m_dh->getSelectionObjects().size() > 0 );
@@ -954,7 +963,7 @@ bool Anatomy::toggleEqualization()
 {
     m_useEqualizedDataset = !m_useEqualizedDataset;
 
-    if ( m_useEqualizedDataset && m_currentLowerEqThreshold != m_lowerEqThreshold )
+    if ( m_useEqualizedDataset && ( m_lowerEqThreshold != m_currentLowerEqThreshold || m_upperEqThreshold != m_currentUpperEqThreshold ) )
     {
         equalizeHistogram();
     }
@@ -1356,11 +1365,11 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 void Anatomy::equalizeHistogram()
 {
     m_dh->printDebug( _T( "Anatomy::equalizeHistogram() Starting equalization..." ), LOGLEVEL_DEBUG );
-    clock_t startTime(clock());
+    clock_t startTime( clock() );
 
     //TODO: Add support for RGB
-    static const unsigned int GRAY_SCALE(256);
-    unsigned int size(m_frames * m_rows * m_columns);
+    static const unsigned int GRAY_SCALE( 256 );
+    unsigned int size( m_frames * m_rows * m_columns );
 
     if( 0 == size || 1 != m_bands )
     {
@@ -1371,14 +1380,14 @@ void Anatomy::equalizeHistogram()
     m_currentLowerEqThreshold = m_lowerEqThreshold;
     m_currentUpperEqThreshold = m_upperEqThreshold;
 
-    if ( m_equalizedDataset.size() != size )
+    if( m_equalizedDataset.size() != size )
     {
         m_equalizedDataset.clear();
-        m_equalizedDataset.resize(size, 0.0f);
+        m_equalizedDataset.resize( size, 0.0f );
 
         unsigned int pixelCount[GRAY_SCALE] = { 0 };
 
-        for( unsigned int i(0); i < size; ++i )
+        for( unsigned int i( 0 ); i < size; ++i )
         {
             unsigned int pixelValue( static_cast< unsigned int >( m_floatDataset.at( i ) * ( GRAY_SCALE - 1 ) ) );
 
@@ -1392,28 +1401,28 @@ void Anatomy::equalizeHistogram()
             }
         }
 
-        unsigned int cdfCount(0);
-        for(unsigned int i(0); i < GRAY_SCALE; ++i)
+        unsigned int cdfCount( 0 );
+        for( unsigned int i( 0 ); i < GRAY_SCALE; ++i )
         {
             cdfCount += pixelCount[i];
             m_cdf[i] = cdfCount;
         }
     }
 
-    unsigned int currentCdf(0);
-    unsigned int cdfMin(0);
-    bool isCdfMinFound(false);
+    unsigned int currentCdf( 0 );
+    unsigned int cdfMin( 0 );
+    bool isCdfMinFound( false );
     float equalizedHistogram[GRAY_SCALE] = { 0 };
 
     // Eliminate background noise
-    for ( unsigned int i(0); i < m_lowerEqThreshold; ++i )
+    for ( unsigned int i( 0 ); i < m_lowerEqThreshold; ++i )
     {
         equalizedHistogram[i] = 1.0f / ( GRAY_SCALE - 1 );
     }
 
-    unsigned int nbPixelsEliminated(m_cdf[m_lowerEqThreshold] + m_cdf[GRAY_SCALE - 1] - m_cdf[m_upperEqThreshold]);
+    unsigned int nbPixelsEliminated( m_cdf[m_lowerEqThreshold] + m_cdf[GRAY_SCALE - 1] - m_cdf[m_upperEqThreshold] );
 
-    for( unsigned int i(m_lowerEqThreshold+1); i <= m_upperEqThreshold; ++i )
+    for( unsigned int i( m_lowerEqThreshold + 1 ); i <= m_upperEqThreshold; ++i )
     {
         currentCdf = m_cdf[i] - m_cdf[m_lowerEqThreshold];
 
@@ -1433,23 +1442,23 @@ void Anatomy::equalizeHistogram()
         // Calculate the lookup table for equalized values
         if( isCdfMinFound )
         {
-            float result = static_cast<double>(currentCdf - cdfMin) / (size - nbPixelsEliminated - cdfMin);
+            float result = static_cast<double>( currentCdf - cdfMin ) / ( size - nbPixelsEliminated - cdfMin );
             equalizedHistogram[i] = result;
         }
     }
 
-    for ( unsigned int i(m_upperEqThreshold+1); i < GRAY_SCALE; ++i )
+    for ( unsigned int i( m_upperEqThreshold + 1 ); i < GRAY_SCALE; ++i )
     {
         equalizedHistogram[i] = 1.0f;
     }
 
     // Calculate the equalized frame
-    for(unsigned int i(0); i < size; ++i)
+    for( unsigned int i( 0 ); i < size; ++i )
     {
-        m_equalizedDataset[i] = equalizedHistogram[static_cast<unsigned int>(m_floatDataset.at(i) * (GRAY_SCALE - 1))];
+        m_equalizedDataset[i] = equalizedHistogram[static_cast< unsigned int >( m_floatDataset.at( i ) * ( GRAY_SCALE - 1 ) )];
     }
 
-    clock_t endTime(clock());
+    clock_t endTime( clock() );
 
     ostringstream oss;
     oss << "Anatomy::equalizeHistogram() took ";
