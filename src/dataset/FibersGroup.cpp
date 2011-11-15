@@ -114,9 +114,9 @@ void FibersGroup::save( wxString filename )
 	converterByteINT32 c;
     converterByteFloat f;
 	vector<char> vBuffer;
-	vector<vector<float>> allPointsToSave;
-	vector<vector<int>> allLinesToSave;
-	vector<vector<int>> allColorsToSave;
+	vector<vector< float > > allPointsToSave;
+	vector<vector< int > > allLinesToSave;
+	vector<vector< int > > allColorsToSave;
 	int allCountLines = 0;
 	float pointsSize = 0.0;
 	int linesSize = 0;
@@ -637,6 +637,7 @@ void FibersGroup::OnClickApplyBtn()
 		}
 	}
 
+    resetAllValues();
 	m_isIntensityToggled = false;
 	m_isOpacityToggled = false;
 	m_isMinMaxLengthToggled = false;
@@ -664,6 +665,18 @@ void FibersGroup::OnClickCancelBtn()
 	m_isMinMaxLengthToggled = false;
 	m_isSubsamplingToggled = false;
 	m_isColorModeToggled = false;
+}
+
+void FibersGroup::resetAllValues()
+{
+    DatasetInfo::m_psliderThresholdIntensity->SetValue( DatasetInfo::m_psliderThresholdIntensity->GetMin() );
+    DatasetInfo::m_psliderOpacity->SetValue( DatasetInfo::m_psliderOpacity->GetMin() );
+    m_pSliderFibersFilterMin->SetValue( m_pSliderFibersFilterMin->GetMin() );
+    m_pSliderFibersFilterMax->SetValue( m_pSliderFibersFilterMax->GetMax() );
+    m_pSliderFibersSampling->SetValue( m_pSliderFibersSampling->GetMin() );
+    m_pToggleLocalColoring->SetValue(false);
+    m_pToggleNormalColoring->SetValue(false);
+    m_dh->m_fiberColorationMode = NORMAL_COLOR;
 }
 
 void FibersGroup::updatePropertiesSizer()
@@ -764,7 +777,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_pSliderFibersFilterMin->Hide();
 		m_pMaxLengthText->Hide();
 		m_pSliderFibersFilterMax->Hide();
-		m_ptoggleMinMaxLength->SetValue(false);;
+		m_ptoggleMinMaxLength->SetValue(false);
 		m_ptoggleMinMaxLength->Show();
 	}
 

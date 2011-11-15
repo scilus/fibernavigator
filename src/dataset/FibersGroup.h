@@ -51,6 +51,8 @@ public:
 	void	invertFibers();
 	void	useFakeTubes();
 	void	useTransparency();
+    
+    void    resetAllValues();
 
 	void	fibersLocalColoring();
 	void	fibersNormalColoring();

@@ -29,11 +29,11 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_isInitialized( false ),
       m_normalsPositive( false ),
       m_cachedThreshold( 0.0f ),
-      m_pKdTree( NULL ),
-      m_pOctree( NULL ),
 	  m_fibersInverted( false ),
 	  m_useFakeTubes( false ),
-	  m_useTransparency( false )
+	  m_useTransparency( false ),
+      m_pKdTree( NULL ),
+      m_pOctree( NULL )
 {
     m_bufferObjects         = new GLuint[3];
 }
@@ -3191,22 +3191,14 @@ void Fibers::setFibersLength()
 
 bool Fibers::getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints )
 {
-    Fibers *pFibers = NULL;
-    m_dh->getSelectedFiberDataset( pFibers );
-
-    if( pFibers == NULL || fiberIndex < 0 )
-    {
-        return false;
-    }
-
-    int index = pFibers->getStartIndexForLine( fiberIndex ) * 3;
+    int index = getStartIndexForLine( fiberIndex ) * 3;
     Vector point3D;
 
-    for( int i = 0; i < pFibers->getPointsPerLine( fiberIndex ); ++i )
+    for( int i = 0; i < getPointsPerLine( fiberIndex ); ++i )
     {
-        point3D.x = pFibers->getPointValue( index );
-        point3D.y = pFibers->getPointValue( index + 1 );
-        point3D.z = pFibers->getPointValue( index + 2 );
+        point3D.x = getPointValue( index );
+        point3D.y = getPointValue( index + 1 );
+        point3D.z = getPointValue( index + 2 );
         fiberPoints.push_back( point3D );
         index += 3;
     }

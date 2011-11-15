@@ -408,7 +408,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				if( pFibersGroup != NULL )
 				{
 					pFibersGroup->addFibersSet( l_fibers ); 
-					int test = 0;
 				}
 			}
             return true;
