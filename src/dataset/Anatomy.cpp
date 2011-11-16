@@ -860,8 +860,8 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
 
     // Connect widgets with callback function
-    pParentWindow->Connect( m_pLowerEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationChange ) );
-    pParentWindow->Connect( m_pUpperEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationChange ) );
+    pParentWindow->Connect( m_pLowerEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
+    pParentWindow->Connect( m_pUpperEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
     pParentWindow->Connect( m_pEqualize->GetId(),            wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler       ( PropertiesWindow::OnEqualizeDataset) );
     pParentWindow->Connect( m_pBtnDilate->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnDilateDataset ) );
     pParentWindow->Connect( m_pBtnErode->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnErodeDataset ) );
@@ -930,7 +930,7 @@ void Anatomy::updatePropertiesSizer()
     
     m_pLowerEqSlider->Enable( 1 == m_bands );
     m_pUpperEqSlider->Enable( 1 == m_bands );
-    m_pEqualize->Enable(    1 == m_bands );
+    m_pEqualize->Enable(      1 == m_bands );
     m_pBtnMinimize->Enable( m_dh->m_fibersLoaded );
     m_pBtnCut->Enable(      m_dh->getSelectionObjects().size() > 0 );
 

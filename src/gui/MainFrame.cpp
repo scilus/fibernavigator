@@ -1408,6 +1408,8 @@ void MainFrame::updateStatusBar()
 
 void MainFrame::onActivateListItem( wxListEvent& event )
 {
+    Log::getInstance()->printDebug( _T( "event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
+
     int l_item = event.GetIndex();
     m_pTreeWidget->UnselectAll();
     DatasetInfo* l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item );

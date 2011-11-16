@@ -38,6 +38,8 @@
 
 #include "../misc/Fantom/FMatrix.h"
 
+#include "../Log.h"
+
 class MainFrame;
 class DatasetInfo;
 class TheScene;
@@ -51,8 +53,10 @@ class Surface;
 
 typedef std::vector< std::vector< SelectionObject* > > SelectionObjectList;
 
+#pragma deprecated(printTime, printwxT, printDebug, printGLError)
+
 // printDebug levels
-enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_WARNING, LOGLEVEL_ERROR };
+//enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_WARNING, LOGLEVEL_ERROR };
 
 class DatasetHelper 
 {
@@ -99,13 +103,18 @@ public:
     /*
      * Helper functions
      */
+
+    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
     void printTime();
+    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
     void printwxT  ( const wxString i_string );
+    // Deprecated: Use Log::printDebug instead.
     void printDebug( const wxString i_string, const LogLevel i_level );
     /*
      * Check for GL error
      */
     bool GLError();
+    // Deprecated: Use Log::printGLError instead.
     void printGLError( const wxString function = wxT( "" ) );
 
     void updateView( const float i_x, const float i_y, const float i_z );
