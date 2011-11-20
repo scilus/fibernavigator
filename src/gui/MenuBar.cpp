@@ -98,6 +98,7 @@ MenuBar::MenuBar()
 		m_itemDrawS5 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 5"));
 		m_itemDrawS7 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 7"));
 		m_itemDrawS10 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 10"));
+		m_itemDrawS2->Check();
 		m_menuOptions->AppendSubMenu(m_menuStrokeSize, wxT("Stroke Size"));
 	m_itemDrawPen = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Pen"));
 	m_itemDrawEraser = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Eraser"));

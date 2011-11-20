@@ -11,10 +11,20 @@
 #include "../misc/lic/TensorField.h"
 
 #include <vector>
+#include <deque>
 
 class SelectionObject;
 class MainFrame;
 class PropertiesWindow;
+
+struct SubTextureBox {
+    int x;
+	int y;
+	int z;
+	int width;
+	int height;
+	int depth;
+};
 
 /**
 * This class represents a dataset related to an anatomy file.
@@ -56,7 +66,7 @@ public:
 	//void eraseVoxel( Vector v, float ds, bool dr, bool d3d ) { eraseVoxel(v.x, v.y, v.z, ds, dr, d3d); };
 	void writeVoxel( const int x, const int y, const int z, const int layer, const int size, const bool isRound, const bool draw3d, wxColor colorRGB );
 	//void eraseVoxel( const int x, const int y, const int z, const int size, const bool isRound, const bool draw3d );
-	Vector getStrokeDim( const int layer, const int size, const bool draw3d );
+	SubTextureBox getStrokeBox( const int x, const int y, const int z, const int layer, const int size, const bool draw3d );
 
     void draw(){};
     
@@ -112,18 +122,19 @@ private:
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
     
 	void generateTexture();
-	void updateTexture( const int x, const int y, const int z, const int width, const int height, const int depth, const bool isRound, float color );
-	void updateTexture( const int x, const int y, const int z, const int width, const int height, const int depth, const bool isRound, wxColor colorRGB );
+	void updateTexture( const SubTextureBox drawZone, const bool isRound, float color );
+	void updateTexture( const SubTextureBox drawZone, const bool isRound, wxColor colorRGB );
 
     void generateGeometry() {};
     void initializeBuffer() {};
     void smooth()           {};
     
-    float                   m_floodThreshold;
-    float                   m_graphSigma;
-    std::vector<float>      m_floatDataset;
-    int                     m_dataType;
-    TensorField             *m_pTensorField;
+    float						m_floodThreshold;
+    float						m_graphSigma;
+    std::vector<float>			m_floatDataset;
+    int							m_dataType;
+    TensorField					*m_pTensorField;
+	std::deque<SubTextureBox>	m_drawHistory;
 };
 
 #endif /* ANATOMY_H_ */
