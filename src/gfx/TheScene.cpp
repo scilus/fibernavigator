@@ -113,6 +113,11 @@ void TheScene::initGL( int whichView )
                 printf( "*** Please check your OpenGL installation...exiting.\n" );
                 exit( false );
             }
+            else if ( !glewIsSupported( "GL_VERSION_3_2" ) && !glewIsSupported( "GL_ARB_geometry_shader4" ) && !glewIsExtensionSupported( "GL_EXT_geometry_shader4" ) )
+            {
+                m_pDatasetHelper->printDebug( _T( "Geometry shaders not supported. Some operations may run slower and use more CPU." ), LOGLEVEL_WARNING );
+                // TODO: Set some sort of global variable to indicate geometry shaders are not supported
+            }
         }
         glEnable( GL_DEPTH_TEST );
 

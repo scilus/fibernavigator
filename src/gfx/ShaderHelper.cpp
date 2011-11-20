@@ -8,6 +8,7 @@
 #include "ShaderHelper.h"
 #include "../dataset/DatasetHelper.h"
 #include "../dataset/Surface.h"
+#include "Program.h"
 
 ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     m_pDh( pDh )
@@ -17,11 +18,16 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     m_threshold.resize( 10 );
     m_alpha.resize( 10 );
 
-    m_pDh->printDebug( _T("initializing texture shader"), LOGLEVEL_MESSAGE );
-    m_pTextureShader = new Shader( wxT("anatomy") );
-    m_pTextureShader->bind();
-    if ( m_pDh->GLError() )
-        m_pDh->printGLError( wxT("setup anatomy shader") );
+    Program anatomy( wxT( "anatomy" ) );
+    anatomy.load();
+    anatomy.compileAndLink();
+    anatomy.bind();
+
+    //m_pDh->printDebug( _T("initializing texture shader"), LOGLEVEL_MESSAGE );
+    //m_pTextureShader = new Shader( wxT("anatomy") );
+    //m_pTextureShader->bind();
+    //if ( m_pDh->GLError() )
+    //    m_pDh->printGLError( wxT("setup anatomy shader") );
 
     m_pDh->printDebug( _T("initializing mesh shader"), LOGLEVEL_MESSAGE );
     m_pMeshShader = new Shader( wxT("mesh") );

@@ -32,7 +32,7 @@ public:
     ~Shader();
 
     /**
-     * link a vertex and a fragement program to the shader
+     * link a vertex and a fragment program to the shader
      */
     bool link();
 
@@ -54,7 +54,7 @@ public:
     /**
      * get program object
      */
-    GLuint getProgramObject() {return m_shaderProgram;};
+    GLuint getProgramObject() { return m_shaderProgram; };
 
 
     void setUniInt        ( const GLchar* name, const GLint value );
@@ -82,7 +82,6 @@ private:
     void printCompilerLog(GLuint shader);
     void printProgramLog(GLuint program);
     void printwxT(const wxString &string);
-
 
     bool loadCode (const wxString &fileName);
     bool loadFromFile(wxString* code, const wxString &fileName);
