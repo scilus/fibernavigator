@@ -1607,6 +1607,14 @@ void MainFrame::onSelectListItem( wxListEvent& event )
             m_pListCtrl->SetItem( l_item,2,wxString::Format( wxT( "%.2f" ), l_info->getThreshold() * l_info->getOldMax() ) );
         }            
     }
+	if( l_info->getType() == FIBERS )
+	{
+		Fibers* pFibers = (Fibers*)l_info;
+		if( pFibers )
+		{
+			pFibers->updateColorationMode();
+		}
+	}
     m_pLastSelectedSceneObject = l_info;
     m_lastSelectedListItem = l_item;
     refreshAllGLWidgets();

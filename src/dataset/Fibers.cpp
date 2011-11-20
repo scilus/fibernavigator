@@ -32,6 +32,8 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
 	  m_fibersInverted( false ),
 	  m_useFakeTubes( false ),
 	  m_useTransparency( false ),
+	  m_isColorationUpdated( false ),
+	  m_fiberColorationMode( NORMAL_COLOR ),
       m_pKdTree( NULL ),
       m_pOctree( NULL )
 {
@@ -1453,7 +1455,7 @@ void Fibers::loadTestFibers()
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::updateFibersColors()
 {
-    if( m_dh->m_fiberColorationMode == NORMAL_COLOR )
+    if( m_fiberColorationMode == NORMAL_COLOR )
     {
         resetColorArray();
     }
@@ -1471,19 +1473,19 @@ void Fibers::updateFibersColors()
             pColorData  = &m_colorArray[0];
         }
 
-        if( m_dh->m_fiberColorationMode == CURVATURE_COLOR )
+        if( m_fiberColorationMode == CURVATURE_COLOR )
         {
             colorWithCurvature( pColorData );
         }
-        else if( m_dh->m_fiberColorationMode == TORSION_COLOR )
+        else if( m_fiberColorationMode == TORSION_COLOR )
         {
             colorWithTorsion( pColorData );
         }
-        else if( m_dh->m_fiberColorationMode == DISTANCE_COLOR )
+        else if( m_fiberColorationMode == DISTANCE_COLOR )
         {
             colorWithDistance( pColorData );
         }
-        else if( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR )
+        else if( m_fiberColorationMode == MINDISTANCE_COLOR )
         {
             colorWithMinDistance( pColorData );
         }
@@ -2343,7 +2345,7 @@ void Fibers::resetColorArray()
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
 
-    m_dh->m_fiberColorationMode = NORMAL_COLOR;
+    m_fiberColorationMode = NORMAL_COLOR;
 }
 
 
@@ -2979,7 +2981,7 @@ void Fibers::drawSortedLines()
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glBegin( GL_LINES );
 
-    if( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR )
+    if( m_fiberColorationMode == MINDISTANCE_COLOR )
     {
         int i = 0;
 
@@ -3353,7 +3355,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pRadioMinDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuMinDistance ) );
     pParent->Connect( m_pRadioTorsion->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithTorsion ) );
     pParent->Connect( m_pRadioCurvature->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithCurvature ) );
-    m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );
+    m_pRadioNormalColoring->SetValue( true );
 }
 
 void Fibers::updatePropertiesSizer()
@@ -3371,10 +3373,13 @@ void Fibers::updatePropertiesSizer()
 	m_psliderThresholdIntensity->SetValue( getThreshold()*100 );
 	m_psliderOpacity->SetValue( getAlpha()*100 );
 
-	m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );
-	m_pRadioCurvature->SetValue( m_dh->m_fiberColorationMode == CURVATURE_COLOR );
-	m_pRadioDistanceAnchoring->SetValue( m_dh->m_fiberColorationMode == DISTANCE_COLOR );
-    m_pRadioMinDistanceAnchoring->SetValue( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR );
-    m_pRadioTorsion->SetValue( m_dh->m_fiberColorationMode == TORSION_COLOR );
-	
+	if(m_isColorationUpdated)
+	{
+		m_pRadioNormalColoring->SetValue( m_fiberColorationMode == NORMAL_COLOR );
+		m_pRadioCurvature->SetValue( m_fiberColorationMode == CURVATURE_COLOR );
+		m_pRadioDistanceAnchoring->SetValue( m_fiberColorationMode == DISTANCE_COLOR );
+		m_pRadioMinDistanceAnchoring->SetValue( m_fiberColorationMode == MINDISTANCE_COLOR );
+		m_pRadioTorsion->SetValue( m_fiberColorationMode == TORSION_COLOR );
+		m_isColorationUpdated = false;
+	}
 }

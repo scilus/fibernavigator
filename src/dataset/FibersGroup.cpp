@@ -301,7 +301,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add( m_pColoringText, 0, wxALIGN_CENTER );
     pSizer->Add( 8, 1, 0 );
     m_pRadioNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
-    m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );
+    m_pRadioNormalColoring->SetValue( true );
 	pSizer->Add( m_pRadioNormalColoring );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     
@@ -486,11 +486,22 @@ void FibersGroup::OnToggleColorModeBtn()
 	m_pApplyBtn->Show();
 	m_pCancelBtn->Show();
 
-	m_pRadioNormalColoring->SetValue( m_dh->m_fiberColorationMode == NORMAL_COLOR );
-	m_pRadioDistanceAnchoring->SetValue( m_dh->m_fiberColorationMode == DISTANCE_COLOR );
-	m_pRadioMinDistanceAnchoring->SetValue( m_dh->m_fiberColorationMode == MINDISTANCE_COLOR );
-	m_pRadioCurvature->SetValue( m_dh->m_fiberColorationMode == CURVATURE_COLOR );
-	m_pRadioTorsion->SetValue( m_dh->m_fiberColorationMode == TORSION_COLOR );
+	FibersColorationMode colorationMode = m_fibersSets[0]->getColorationMode();
+
+	for(int i = 1; i < (int)m_fibersSets.size(); i++)
+	{
+		if( colorationMode != m_fibersSets[i]->getColorationMode())
+		{
+			colorationMode = NORMAL_COLOR;
+			break;
+		}
+	}
+
+	m_pRadioNormalColoring->SetValue( colorationMode == NORMAL_COLOR );
+	m_pRadioDistanceAnchoring->SetValue( colorationMode == DISTANCE_COLOR );
+	m_pRadioMinDistanceAnchoring->SetValue( colorationMode == MINDISTANCE_COLOR );
+	m_pRadioCurvature->SetValue( colorationMode == CURVATURE_COLOR );
+	m_pRadioTorsion->SetValue( colorationMode == TORSION_COLOR );
 
 	// Disable other toggleButtons
 	m_ptoggleIntensity->Disable();
@@ -610,29 +621,31 @@ void FibersGroup::OnClickApplyBtn()
 			m_isNormalColoringStateChanged = false;
 		}
 
+		FibersColorationMode colorationMode = NORMAL_COLOR;
 		if( m_pRadioNormalColoring->GetValue() )
 		{
-			m_dh->m_fiberColorationMode = NORMAL_COLOR;
+			colorationMode = NORMAL_COLOR;
 		}
 		else if( m_pRadioDistanceAnchoring->GetValue() )
 		{
-			m_dh->m_fiberColorationMode  = DISTANCE_COLOR;
+			colorationMode  = DISTANCE_COLOR;
 		}
 		else if( m_pRadioMinDistanceAnchoring->GetValue() )
 		{
-			m_dh->m_fiberColorationMode = MINDISTANCE_COLOR;
+			colorationMode = MINDISTANCE_COLOR;
 		}
 		else if( m_pRadioCurvature->GetValue() )
 		{
-			m_dh->m_fiberColorationMode = CURVATURE_COLOR;
+			colorationMode = CURVATURE_COLOR;
 		}
 		else if( m_pRadioTorsion->GetValue() )
 		{
-			m_dh->m_fiberColorationMode = TORSION_COLOR;
+			colorationMode = TORSION_COLOR;
 		}			
 		
 		for(int i = 0; i < (int)m_fibersSets.size(); i++)
 		{
+			m_fibersSets[i]->setColorationMode(colorationMode);
 			m_fibersSets[i]->updateFibersColors();  
 		}
 	}
@@ -676,7 +689,6 @@ void FibersGroup::resetAllValues()
     m_pSliderFibersSampling->SetValue( m_pSliderFibersSampling->GetMin() );
     m_pToggleLocalColoring->SetValue(false);
     m_pToggleNormalColoring->SetValue(false);
-    m_dh->m_fiberColorationMode = NORMAL_COLOR;
 }
 
 void FibersGroup::updatePropertiesSizer()

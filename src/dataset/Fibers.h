@@ -85,7 +85,7 @@ public:
     float   getPointValue( int  ptIndex );
     int     getLineCount();
     int     getPointCount();
-    bool    isSelected(    int  fiberId );
+	bool    isSelected( int  fiberId );
     
     void    setFibersLength();
     
@@ -99,6 +99,10 @@ public:
 	bool isUsingFakeTubes()		{ return m_useFakeTubes; };
 	bool isUsingTransparency()	{ return m_useTransparency; };
 	bool isFibersInverted()		{ return m_fibersInverted; };
+
+	void updateColorationMode()	{ m_isColorationUpdated = true; };
+	FibersColorationMode getColorationMode() { return m_fiberColorationMode; };
+	void setColorationMode(FibersColorationMode value) { m_fiberColorationMode = value; };
 
 	void useFakeTubes();
 	void useTransparency();
@@ -179,31 +183,34 @@ private:
     bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
 
     // Variables
-    bool            m_isSpecialFiberDisplay;
-    Vector          m_barycenter;
-    vector< float > m_boxMax;
-    vector< float > m_boxMin;
-    vector< float > m_colorArray;
-    int             m_count;
-    int             m_countLines;
-    int             m_countPoints;
-    bool            m_isInitialized;
-    vector< int >   m_lineArray;
-    vector< int >   m_linePointers;
-    vector< float > m_pointArray;
-    vector< float > m_normalArray;
-    bool            m_normalsPositive;
-    vector< int >   m_reverse;
-    vector< bool >  m_selected;
-    vector< bool >  m_filtered;
-    vector< float > m_length;
-    float           m_maxLength;
-    float           m_minLength;
-    vector<float  > m_localizedAlpha;
-    float           m_cachedThreshold;
-	bool			m_fibersInverted;
-    bool			m_useFakeTubes;
-	bool			m_useTransparency;
+    bool				 m_isSpecialFiberDisplay;
+    Vector				 m_barycenter;
+    vector< float >		 m_boxMax;
+    vector< float >		 m_boxMin;
+    vector< float >		 m_colorArray;
+    int					 m_count;
+    int					 m_countLines;
+    int					 m_countPoints;
+    bool				 m_isInitialized;
+    vector< int >		 m_lineArray;
+    vector< int >		 m_linePointers;
+    vector< float >		 m_pointArray;
+    vector< float >		 m_normalArray;
+    bool				 m_normalsPositive;
+    vector< int >		 m_reverse;
+    vector< bool >		 m_selected;
+    vector< bool >		 m_filtered;
+    vector< float >		 m_length;
+    float				 m_maxLength;
+    float				 m_minLength;
+    vector<float  >		 m_localizedAlpha;
+    float				 m_cachedThreshold;
+	bool				 m_fibersInverted;
+    bool				 m_useFakeTubes;
+	bool				 m_useTransparency;
+
+	bool				 m_isColorationUpdated;
+	FibersColorationMode m_fiberColorationMode;
 
     KdTree          *m_pKdTree;
     Octree          *m_pOctree;

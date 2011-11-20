@@ -675,10 +675,16 @@ void PropertiesWindow::OnListMenuThreshold( wxCommandEvent&  WXUNUSED(event) )
 //////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 {
-    if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != DISTANCE_COLOR)
+	Fibers* pFibers = NULL;
+    m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pFibers);
+    if(pFibers != NULL)
     {
-        m_mainFrame->m_pDatasetHelper->m_fiberColorationMode = DISTANCE_COLOR;
-        ColorFibers();
+		if(pFibers->getColorationMode() != DISTANCE_COLOR)
+		{
+			pFibers->setColorationMode( DISTANCE_COLOR );
+			pFibers->updateFibersColors();  
+			pFibers->updateColorationMode();
+		}
     }
 }
 
@@ -688,10 +694,16 @@ void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 //////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
 {
-    if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != MINDISTANCE_COLOR)
+	Fibers* pFibers = NULL;
+    m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pFibers);
+    if(pFibers != NULL)
     {
-        m_mainFrame->m_pDatasetHelper->m_fiberColorationMode = MINDISTANCE_COLOR;
-        ColorFibers();
+		if(pFibers->getColorationMode() != MINDISTANCE_COLOR)
+		{
+			pFibers->setColorationMode( MINDISTANCE_COLOR );
+			pFibers->updateFibersColors();
+			pFibers->updateColorationMode();
+		}
     }
 }
 
@@ -702,10 +714,16 @@ void PropertiesWindow::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnColorWithCurvature( wxCommandEvent& WXUNUSED(event) )
 {
-    if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != CURVATURE_COLOR)
+	Fibers* pFibers = NULL;
+    m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pFibers);
+    if(pFibers != NULL)
     {
-        m_mainFrame->m_pDatasetHelper->m_fiberColorationMode = CURVATURE_COLOR;
-        ColorFibers();
+		if(pFibers->getColorationMode() != CURVATURE_COLOR)
+		{
+			pFibers->setColorationMode( CURVATURE_COLOR );
+			pFibers->updateFibersColors();
+			pFibers->updateColorationMode();
+		}
     }
 }
 
@@ -715,19 +733,31 @@ void PropertiesWindow::OnColorWithCurvature( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnColorWithTorsion( wxCommandEvent& WXUNUSED(event) )
 {
-    if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != TORSION_COLOR)
+	Fibers* pFibers = NULL;
+    m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pFibers);
+    if(pFibers != NULL)
     {
-        m_mainFrame->m_pDatasetHelper->m_fiberColorationMode = TORSION_COLOR;
-        ColorFibers();
+		if(pFibers->getColorationMode() != TORSION_COLOR)
+		{
+			pFibers->setColorationMode( TORSION_COLOR );
+			pFibers->updateFibersColors();
+			pFibers->updateColorationMode();
+		}
     }
 }
 
 void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
 {
-    if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != NORMAL_COLOR)
+	Fibers* pFibers = NULL;
+    m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pFibers);
+    if(pFibers != NULL)
     {
-        m_mainFrame->m_pDatasetHelper->m_fiberColorationMode = NORMAL_COLOR;
-        ColorFibers();
+		if(pFibers->getColorationMode() != NORMAL_COLOR)
+		{
+			pFibers->setColorationMode( NORMAL_COLOR );
+			pFibers->updateFibersColors();
+			pFibers->updateColorationMode();
+		}
     }
 }
 

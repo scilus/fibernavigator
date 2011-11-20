@@ -228,7 +228,6 @@ public:
     bool  m_showColorMapLegend;
     bool  m_displayMinMaxCrossSection;
     bool  m_displayGlyphOptions;
-    FibersColorationMode   m_fiberColorationMode;
 
     bool  m_morphing;
 

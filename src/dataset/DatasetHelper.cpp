@@ -116,7 +116,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_showColorMapLegend       ( false        ),
     m_displayMinMaxCrossSection( false        ),
     m_displayGlyphOptions      ( false        ),
-    m_fiberColorationMode      ( NORMAL_COLOR ),
 
     m_morphing     ( false ),
     m_boxLockIsOn  ( false ),
