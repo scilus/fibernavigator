@@ -93,6 +93,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_rulerPartialLength(0),
     m_fibersSamplingFactor(1),
 	
+	m_drawSize(3),
+	m_drawRound ( true ),
+	m_draw3d ( false ),
 	m_drawColor(255, 255, 255),
 	m_drawColorIcon(16, 16, true),
 

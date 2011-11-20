@@ -238,6 +238,9 @@ public:
 	};
 	DrawMode m_drawMode;
 	//Anatomy* m_drawAnatomy;
+	int     m_drawSize;
+	bool    m_drawRound;
+	bool    m_draw3d;
 	wxColor m_drawColor;
 	wxImage m_drawColorIcon;
 

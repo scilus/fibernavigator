@@ -155,7 +155,16 @@ private:
     bool loadIndex                          ( int i_index );
 
 	void onSelectDrawer                     ( wxCommandEvent& event );
-	void onSelectColorPicker                    ( wxCommandEvent& event );
+	void onToggleDrawRound                  ( wxCommandEvent& event );
+	void onToggleDraw3d                     ( wxCommandEvent& event );
+	void onSelectColorPicker                ( wxCommandEvent& event );
+	void onSelectStroke1                    ( wxCommandEvent& event );
+	void onSelectStroke2                    ( wxCommandEvent& event );
+	void onSelectStroke3                    ( wxCommandEvent& event );
+	void onSelectStroke4                    ( wxCommandEvent& event );
+	void onSelectStroke5                    ( wxCommandEvent& event );
+	void onSelectStroke7                    ( wxCommandEvent& event );
+	void onSelectStroke10                   ( wxCommandEvent& event );
 	void onSelectPen                        ( wxCommandEvent& event );
 	void onSelectEraser                     ( wxCommandEvent& event );
 	void onSelectScissor                    ( wxCommandEvent& event );

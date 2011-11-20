@@ -97,6 +97,13 @@ ToolBar::ToolBar(wxWindow *parent)
 	m_selectColorPicker = this->AddTool(wxID_ANY, wxT("Color Picker" ), bmpClearColor, wxNullBitmap, wxITEM_NORMAL, wxT("Color Picker"));
     EnableTool(m_selectColorPicker->GetId(), false);
 
+	wxImage bmpRound (MyApp::iconsPath+ wxT("draw_round.png"), wxBITMAP_TYPE_PNG);
+	wxImage bmp3d (MyApp::iconsPath+ wxT("draw3D.png"), wxBITMAP_TYPE_PNG);
+
+	m_toggleDrawRound = this->AddCheckTool( wxID_ANY, wxT( "Round Shape" ), bmpRound, wxNullBitmap, wxT("Round Shape"));
+    m_toggleDraw3d = this->AddCheckTool( wxID_ANY, wxT( "Draw in 3d" ), bmp3d, wxNullBitmap, wxT("Draw in 3d"));
+    this->AddSeparator();
+
 	wxImage bmpPen (MyApp::iconsPath+ wxT("draw_pen.png"), wxBITMAP_TYPE_PNG);
 	wxImage bmpEraser (MyApp::iconsPath+ wxT("draw_eraser.png"), wxBITMAP_TYPE_PNG);
 	wxImage bmpScissor (MyApp::iconsPath+ wxT("draw_brush.png"), wxBITMAP_TYPE_PNG);
@@ -130,11 +137,14 @@ void ToolBar::initToolBar( MainFrame *mf )
 	mf->Connect(m_selectNormalPointer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectNormalPointer)); 
     mf->Connect(m_selectRuler->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectRuler)); 
 	mf->Connect(m_selectDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectDrawer)); 
+	//mf->Connect(m_selectDrawRound->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawRound)); 
+	//mf->Connect(m_selectDraw3d->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDraw3d)); 
 	mf->Connect(m_selectColorPicker->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectColorPicker)); 
+	mf->Connect(m_toggleDrawRound->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawRound)); 
+	mf->Connect(m_toggleDraw3d->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDraw3d)); 
 	mf->Connect(m_selectPen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectPen)); 
 	mf->Connect(m_selectEraser->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectEraser)); 
-	mf->Connect(m_selectScissor->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectScissor)); 
-
+	
 	//set ColorPicker's initial color to white
 	mf->m_pDatasetHelper->m_drawColor = wxColour(255, 255, 255);
 	wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
@@ -164,7 +174,9 @@ void ToolBar::updateToolBar( MainFrame *mf )
 	//ToggleTool(m_selectColorPicker->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
 	//SetToolNormalBitmap(m_selectColorPicker->GetId(), wxBitmap(mf->m_pDatasetHelper->m_drawColorIcon));
 
-	ToggleTool(m_selectPen->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
+	ToggleTool(m_toggleDrawRound->GetId(), mf->m_pDatasetHelper->m_drawRound);
+    ToggleTool(m_toggleDraw3d->GetId(), mf->m_pDatasetHelper->m_draw3d);
+    ToggleTool(m_selectPen->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
 	ToggleTool(m_selectEraser->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
 	ToggleTool(m_selectScissor->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_SCISSOR);
 	ToggleTool(m_toggleInverseSelection->GetId(), mf->m_pDatasetHelper->m_fibersInverted);

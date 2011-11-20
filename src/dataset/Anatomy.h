@@ -52,16 +52,17 @@ public:
     void erode();
     void minimize();
 
-	void writeVoxel( Vector v, wxColor colorRGB ) { writeVoxel(v.x, v.y, v.z, colorRGB); };
-	void eraseVoxel( Vector v ) { eraseVoxel(v.x, v.y, v.z); };
-	void writeVoxel( const int x, const int y, const int z, wxColor colorRGB );
-	void eraseVoxel( const int x, const int y, const int z );
+	void writeVoxel( Vector v, int layer, int ds, bool dr, bool d3d, wxColor colorRGB ) { writeVoxel(v.x, v.y, v.z, layer, ds, dr, d3d, colorRGB); };
+	//void eraseVoxel( Vector v, float ds, bool dr, bool d3d ) { eraseVoxel(v.x, v.y, v.z, ds, dr, d3d); };
+	void writeVoxel( const int x, const int y, const int z, const int layer, const int size, const bool isRound, const bool draw3d, wxColor colorRGB );
+	//void eraseVoxel( const int x, const int y, const int z, const int size, const bool isRound, const bool draw3d );
+	Vector getStrokeDim( const int layer, const int size, const bool draw3d );
 
     void draw(){};
     
     bool load     ( wxString fileName );
     bool loadNifti( wxString fileName );
-    void saveNifti( wxString fileName );    
+    void saveNifti( wxString fileName );
 
     void setDataType( const int type) { m_dataType = type; }
     int  getDataType()                { return m_dataType; }
@@ -111,8 +112,8 @@ private:
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
     
 	void generateTexture();
-	void updateTexture( const int x, const int y, const int z, float color, int size );
-	void updateTexture( const int x, const int y, const int z, wxColor colorRGB, int size );
+	void updateTexture( const int x, const int y, const int z, const int width, const int height, const int depth, const bool isRound, float color );
+	void updateTexture( const int x, const int y, const int z, const int width, const int height, const int depth, const bool isRound, wxColor colorRGB );
 
     void generateGeometry() {};
     void initializeBuffer() {};

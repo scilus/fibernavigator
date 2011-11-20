@@ -491,18 +491,8 @@ void Anatomy::generateTexture()
     }
 }
 
-void Anatomy::updateTexture( const int x, const int y, const int z, float color, int size ) 
+void Anatomy::updateTexture( const int x, const int y, const int z, const int width, const int height, const int depth, const bool isRound, float color ) 
 {
-	//security check: hit detection can be a pixel offset, negative positions crash
-	if(x < 0 || y < 0 || z < 0)
-	{
-		return;
-	}
-
-	//TODO: more size parameters
-	int width = size;
-	int height = size;
-	int depth = size;
 	int xoffset = MIN( MAX(x-width/2, 0),  m_columns-width );
 	int yoffset = MIN( MAX(y-height/2, 0), m_rows-height );
 	int zoffset = MIN( MAX(z-depth/2, 0),  m_frames-depth );
@@ -520,14 +510,24 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float color,
 				int sourceIndex = (c+xoffset) + (r+yoffset) * m_columns + (f+zoffset) * m_columns * m_rows;
 				int subIndex = c + r * width + f * width * height;
 
-				//inside sphere: put color in the source
-				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
+				if(isRound)
+				{
+					//we might have one direction without proper size (flat), but never 2
+					double radius = (double)(max(width, height) - 1) / 2.0;
+
+					//inside sphere: put color in the source
+					if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
+					{
+						m_floatDataset[sourceIndex] = color;
+					}
+					else //outside sphere: copy source values in the subImage
+					{
+						subData[subIndex] = m_floatDataset[sourceIndex];
+					}
+				}
+				else
 				{
 					m_floatDataset[sourceIndex] = color;
-				}
-				else //outside sphere: copy source values in the subImage
-				{
-					subData[subIndex] = m_floatDataset[sourceIndex];
 				}
 			}
 		}
@@ -537,18 +537,8 @@ void Anatomy::updateTexture( const int x, const int y, const int z, float color,
 	glTexSubImage3D( GL_TEXTURE_3D, 0, xoffset, yoffset, zoffset, width, height, depth, GL_LUMINANCE, GL_FLOAT, &subData[0] );
 }
 
-void Anatomy::updateTexture( const int x, const int y, const int z, wxColor colorRGB, int size ) 
+void Anatomy::updateTexture( const int x, const int y, const int z, const int width, const int height, const int depth, const bool isRound, wxColor colorRGB ) 
 {
-	//security check: hit detection can be a pixel offset, negative positions crash
-	if(x < 0 || y < 0 || z < 0)
-	{
-		return;
-	}
-	
-	//TODO: more size parameters
-	int width = size;
-	int height = size;
-	int depth = size;
 	int xoffset = MIN( MAX(x-width/2, 0),  m_columns-width );
 	int yoffset = MIN( MAX(y-height/2, 0), m_rows-height );
 	int zoffset = MIN( MAX(z-depth/2, 0),  m_frames-depth );
@@ -572,18 +562,30 @@ void Anatomy::updateTexture( const int x, const int y, const int z, wxColor colo
 				int sourceIndex = (c+xoffset) + (r+yoffset) * m_columns + (f+zoffset) * m_columns * m_rows;
 				int subIndex = c + r * width + f * width * height;
 
-				//inside sphere: put color in the source
-				if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() < double(size)/2.0)
+				if(isRound)
+				{
+					//we might have one direction without proper size (flat), but never 2
+					double radius = (double)(max(width, height) - 1) / 2.0;
+
+					//inside sphere: put color in the source
+					if(( Vector(double(width)/2.0, double(height)/2.0, double(depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
+					{
+						m_floatDataset[sourceIndex*3] = colorRGB.Red();
+						m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
+						m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
+					}
+					else //outside sphere: copy source values in the subImage
+					{
+						subData[subIndex*3] = m_floatDataset[sourceIndex*3];
+						subData[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
+						subData[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
+					}
+				}
+				else 
 				{
 					m_floatDataset[sourceIndex*3] = colorRGB.Red();
 					m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
 					m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
-				}
-				else //outside sphere: copy source values in the subImage
-				{
-					subData[subIndex*3] = m_floatDataset[sourceIndex*3];
-					subData[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
-					subData[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
 				}
 			}
 		}
@@ -1109,27 +1111,31 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
     }
 }
 
-void Anatomy::writeVoxel( const int x, const int y, const int z, wxColor colorRGB )
+void Anatomy::writeVoxel( const int x, const int y, const int z, const int layer, const int size, const bool isRound, const bool draw3d, wxColor colorRGB )
 {
-	
+	Vector dim = getStrokeDim(layer, size, draw3d);
+
     switch( m_type )
     {
 		case HEAD_BYTE:
 		case HEAD_SHORT:
         case OVERLAY:
 		{
-			float white = 1.0f;
-			updateTexture(x, y, z, white, 7);
+			if(colorRGB == wxColor(0,0,0)) // erase
+			{
+				float transparent = 0.0f;
+				updateTexture(x, y, z, (int)dim.x, (int)dim.y, (int)dim.z, isRound, transparent);
+			}
+			else // draw, always white (or always purple for an overlay)
+			{
+				float white = 1.0f;
+				updateTexture(x, y, z, (int)dim.x, (int)dim.y, (int)dim.z, isRound, white);
+			}
 			break;
 		}
-		case RGB:
+		case RGB: //draw in color
 		{
-			//float whiteRGB[3];
-			//whiteRGB[0] = 1.0f;
-			//whiteRGB[1] = 1.0f;
-			//whiteRGB[2] = 1.0f;
-
-			updateTexture(x, y, z, colorRGB, 7);
+			updateTexture(x, y, z, (int)dim.x, (int)dim.y, (int)dim.z, isRound, colorRGB);
 			break;
 		}
 		case VECTORS:
@@ -1139,29 +1145,31 @@ void Anatomy::writeVoxel( const int x, const int y, const int z, wxColor colorRG
 	}
 }
 
-void Anatomy::eraseVoxel( const int x, const int y, const int z )
+
+Vector Anatomy::getStrokeDim( const int layer, const int size, const bool draw3d )
 {
-    switch( m_type )
-    {
-		case HEAD_BYTE:
-		case HEAD_SHORT:
-        case OVERLAY:
+	int width = size+1;
+	int height = size+1;
+	int depth = size+1;
+	if(!draw3d)
+	{
+		switch(layer)
 		{
-			float black = 0.0f;
-			updateTexture(x, y, z, black, 7);
+		case AXIAL:
+			depth = 1;
 			break;
-		}
-		case RGB:
-		{
-			wxColor blackRGB(0.0f, 0.0f, 0.0f);
-			updateTexture(x, y, z, blackRGB, 7);
+		case CORONAL:
+			height = 1;
 			break;
-		}
-		case VECTORS:
-		{
+		case SAGITTAL:
+			width = 1;
+			break;
+		default:
 			break;
 		}
 	}
+
+	return Vector( (double)width, (double)height, (double)depth );
 }
 
 std::vector< float >* Anatomy::getFloatDataset()

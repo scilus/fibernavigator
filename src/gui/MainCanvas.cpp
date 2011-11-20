@@ -1073,7 +1073,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
                 m_pDatasetHelper->m_rulerPts.back().x -= m_pDatasetHelper->m_xVoxel;
-            } 
+            }
             else 
             {
                 m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( wxMax(0, m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue() - 1) );
@@ -1113,6 +1113,10 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_pDatasetHelper->m_rulerPts.back().y += m_pDatasetHelper->m_yVoxel;
             } 
+			else if (m_pDatasetHelper->m_isDrawerToolActive && m_pDatasetHelper->m_drawSize > 2)
+            {
+                m_pDatasetHelper->m_drawSize -= 1;
+            }
             else 
             {
                 m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( wxMax(0, m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() - 1) );
@@ -1132,6 +1136,10 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_pDatasetHelper->m_rulerPts.back().y -= m_pDatasetHelper->m_yVoxel;
             } 
+			else if (m_pDatasetHelper->m_isDrawerToolActive)
+            {
+                m_pDatasetHelper->m_drawSize += 1;
+            }
             else 
             {
                 m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue(wxMin(m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() + 1, m_pDatasetHelper->m_rows) );
@@ -1235,19 +1243,27 @@ void MainCanvas::drawOnAnatomy()
 	double xClick = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
 	double yClick = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
 	double zClick = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
+	int layer = m_hr.picked;
 
 	//1D vector with the normalized brightness ( 0 to 1 )
 	std::vector<float>* sourceData = l_currentAnatomy->getFloatDataset();
 	//std::vector<float>* resultData = new std::vector<float>;
-	//resultData->resize(dataLength);  
+	//resultData->resize(dataLength);
+
+	//security check: hit detection can be a pixel offset, but negative positions crash
+	if(xClick < 0 || yClick < 0 || zClick < 0)
+	{
+		return;
+	}
 
 	if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_PEN)
 	{
-		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, m_pDatasetHelper->m_drawColor);
+		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, m_pDatasetHelper->m_drawColor);
 	}
 	else if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_ERASER)
 	{
-		l_currentAnatomy->eraseVoxel((int)xClick, (int)yClick, (int)zClick);
+		wxColor transparent(0,0,0);
+		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, transparent);
 	}
 	else if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_SCISSOR)
 	{

@@ -68,6 +68,12 @@ EVT_SLIDER( ID_X_SLIDER,                                    MainFrame::onSliderM
 EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
 
+// mouse click in one of the three navigation windows
+EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+
 // KDTREE thread finished
 EVT_MENU( KDTREE_EVENT,                                     MainFrame::onKdTreeThreadFinished )
 
@@ -659,11 +665,33 @@ void MainFrame::onSelectDrawer( wxCommandEvent& event )
 
 	m_pToolBar->m_txtRuler->Disable();
 	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), true);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), true);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), true);
 
 	refreshAllGLWidgets();
+}
+
+void MainFrame::onToggleDrawRound( wxCommandEvent& event )
+{
+    if( m_pDatasetHelper->m_theScene == NULL )
+    {
+        return;
+    }
+    m_pDatasetHelper->m_drawRound = !m_pDatasetHelper->m_drawRound;
+    refreshAllGLWidgets();
+}
+
+void MainFrame::onToggleDraw3d( wxCommandEvent& event )
+{
+    if( m_pDatasetHelper->m_theScene == NULL )
+    {
+        return;
+    }
+    m_pDatasetHelper->m_draw3d = !m_pDatasetHelper->m_draw3d;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectColorPicker( wxCommandEvent& event )
@@ -736,6 +764,83 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
         m_mainFrame->m_pDatasetHelper->m_selBoxChanged = true;
     }    
     m_mainFrame->refreshAllGLWidgets();*/
+}
+
+void MainFrame::onSelectStroke1( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 1;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke2( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 2;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke3( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 3;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke4( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 4;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke5( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 5;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke7( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 7;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke10( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 10;
+	
+	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectPen( wxCommandEvent& event )
@@ -1226,6 +1331,8 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 
 	m_pToolBar->m_txtRuler->Disable();
 	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);
@@ -1244,6 +1351,8 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 
     m_pToolBar->m_txtRuler->Enable();
 	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);
