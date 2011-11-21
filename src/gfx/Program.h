@@ -24,7 +24,10 @@ public:
     bool compileAndLink();
     // Binds the program to opengl
     void bind();
+    // Releases the program from opengl
+    void release();
 
+    GLuint getId();
 
     void setUniInt        ( const GLchar* name, const GLint value );
     void setUniFloat      ( const GLchar* name, const GLfloat value );

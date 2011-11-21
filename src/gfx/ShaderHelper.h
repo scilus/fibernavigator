@@ -8,7 +8,7 @@
 #ifndef SHADERHELPER_H_
 #define SHADERHELPER_H_
 
-#include "Shader.h"
+#include "Program.h"
 #include "../dataset/DatasetHelper.h"
 
 #include <vector>
@@ -25,16 +25,16 @@ public:
     void setFiberShaderVars();
     void setSplineSurfaceShaderVars();
 
-    Shader *m_pTextureShader;
-    Shader *m_pMeshShader;
-    Shader *m_pFiberShader;
-    Shader *m_pFakeTubeShader;
-    Shader *m_pSplineSurfShader;
-    Shader *m_pVectorShader;
-    Shader *m_pLegendShader;
-    Shader *m_pGraphShader;
-    Shader *m_pTensorsShader;
-    Shader *m_pOdfsShader;
+    Program m_anatomy;
+    Program m_mesh;
+    Program m_fibers;
+    Program m_fakeTubes;
+    Program m_splineSurf;
+    Program m_vector;
+    Program m_legend;
+    Program m_graph;
+    Program m_tensors;
+    Program m_odfs;
 
 private:
     DatasetHelper* m_pDh;

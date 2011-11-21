@@ -26,7 +26,7 @@ AnatomyHelper::~AnatomyHelper()
 
 ///////////////////////////////////////////////////////////////////////////
 // COMMENT
-void AnatomyHelper::renderNav( int i_view, Shader* i_shader )
+void AnatomyHelper::renderNav( int i_view, Program *i_shader )
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 

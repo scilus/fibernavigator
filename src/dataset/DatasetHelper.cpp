@@ -1373,18 +1373,20 @@ TensorField* DatasetHelper::getTensorField()
     return NULL;
 }
 
+// Deprecated: Use Log::printGLError instead.
 void DatasetHelper::printGLError( const wxString i_function )
-{
-    printDebug( _T( "***ERROR***: " ) + i_function, LOGLEVEL_ERROR );
-    printf( " : ERROR: %s\n", gluErrorString( m_lastGLError ) );
+{    
+    Log::getInstance()->printGLError( i_function, m_lastGLError );
 }
 
+// Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
 void DatasetHelper::printTime()
 {
     wxDateTime l_dataTime = wxDateTime::Now();
     printf( "[%02d:%02d:%02d] ", l_dataTime.GetHour(), l_dataTime.GetMinute(), l_dataTime.GetSecond() );
 }
 
+// Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
 void DatasetHelper::printwxT( const wxString i_string )
 {
     char* l_cstring = (char*)malloc( i_string.length() + 1 );
@@ -1393,30 +1395,10 @@ void DatasetHelper::printwxT( const wxString i_string )
     free( l_cstring );
 }
 
+// Deprecated: Use Log::printDebug instead.
 void DatasetHelper::printDebug( const wxString i_string, const LogLevel i_level )
 {
-    if ( m_debugLevel > (int)i_level )
-        return;
-
-    wxString prefix;
-    switch (i_level)
-    {
-    case LOGLEVEL_DEBUG:
-        prefix = _T( "DEBUG: " );
-        break;
-    case LOGLEVEL_WARNING:
-        prefix = _T( "WARNING: " );
-        break;
-    case LOGLEVEL_ERROR:
-        prefix = _T( "ERROR: " );
-        break;
-    case LOGLEVEL_MESSAGE: // same as default
-    default:
-        prefix = _T( "" );
-    }
-
-    printTime();
-    printwxT( prefix + i_string + _T( "\n" ) );
+    Log::getInstance()->printDebug( i_string, i_level );
 }
 
 
