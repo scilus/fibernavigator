@@ -1,10 +1,10 @@
 /*
- *  The Log class declaration.
+ *  The Logger class declaration.
  *
  */
 
-#ifndef LOG_H_
-#define LOG_H_
+#ifndef LOGGER_H_
+#define LOGGER_H_
 
 #include <GL/glew.h>
 #include <wx/string.h>
@@ -12,26 +12,26 @@
 // printDebug levels
 enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_WARNING, LOGLEVEL_ERROR, LOGLEVEL_GLERROR };
 
-class Log
+class Logger
 {
 public:
-    ~Log();
+    ~Logger();
 
-    static Log * getInstance();
+    static Logger * getInstance();
 
     void printDebug( const wxString i_string, const LogLevel i_level );
     void printGLError( const wxString i_string, const GLenum i_errorCode );
     void setMessageLevel( int i_level );
 
 protected:
-    Log();
+    Logger();
 
 private:
     void printTime();
     void printwxT( const wxString i_string );
 
-    static Log *m_pInstance;
+    static Logger *m_pInstance;
     int m_level;
 };
 
-#endif LOG_H_
+#endif LOGGER_H_

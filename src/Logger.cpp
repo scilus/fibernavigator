@@ -1,12 +1,12 @@
-#include "Log.h"
+#include "Logger.h"
 
 #include <GL/glew.h>
 #include <wx/datetime.h>
 
 
-Log * Log::m_pInstance = NULL;
+Logger * Logger::m_pInstance = NULL;
 
-Log::Log()
+Logger::Logger()
 :
 #if defined( DEBUG ) || defined( _DEBUG )
     m_level( 0 )
@@ -19,11 +19,11 @@ Log::Log()
 
 //////////////////////////////////////////////////////////////////////////
 
-Log * Log::getInstance()
+Logger * Logger::getInstance()
 {
     if ( NULL == m_pInstance )
     {
-        m_pInstance = new Log();
+        m_pInstance = new Logger();
     }
 
     return m_pInstance;
@@ -31,7 +31,7 @@ Log * Log::getInstance()
 
 //////////////////////////////////////////////////////////////////////////
 
-void Log::printDebug( const wxString i_string, const LogLevel i_level )
+void Logger::printDebug( const wxString i_string, const LogLevel i_level )
 {
     if ( m_level > (int)i_level )
         return;
@@ -62,7 +62,7 @@ void Log::printDebug( const wxString i_string, const LogLevel i_level )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Log::printGLError( const wxString i_string, const GLenum i_errorCode )
+void Logger::printGLError( const wxString i_string, const GLenum i_errorCode )
 {
     printDebug( i_string, LOGLEVEL_GLERROR );
     printf( "%s\n", gluErrorString( i_errorCode ) );
@@ -70,14 +70,14 @@ void Log::printGLError( const wxString i_string, const GLenum i_errorCode )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Log::setMessageLevel( int i_level )
+void Logger::setMessageLevel( int i_level )
 {
     m_level = i_level;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Log::printTime()
+void Logger::printTime()
 {
     wxDateTime l_dataTime = wxDateTime::Now();
     printf( "[%02d:%02d:%02d] ", l_dataTime.GetHour(), l_dataTime.GetMinute(), l_dataTime.GetSecond() );
@@ -85,7 +85,7 @@ void Log::printTime()
 
 //////////////////////////////////////////////////////////////////////////
 
-void Log::printwxT( const wxString i_string )
+void Logger::printwxT( const wxString i_string )
 {
     char* l_cstring = (char*)malloc( i_string.length() + 1 );
     strcpy( l_cstring, (const char*)i_string.mb_str( wxConvUTF8 ) );
@@ -95,7 +95,7 @@ void Log::printwxT( const wxString i_string )
 
 //////////////////////////////////////////////////////////////////////////
 
-Log::~Log()
+Logger::~Logger()
 {
 
 }

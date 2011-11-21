@@ -1373,20 +1373,20 @@ TensorField* DatasetHelper::getTensorField()
     return NULL;
 }
 
-// Deprecated: Use Log::printGLError instead.
+// Deprecated: Use Logger::printGLError instead.
 void DatasetHelper::printGLError( const wxString i_function )
 {    
-    Log::getInstance()->printGLError( i_function, m_lastGLError );
+    Logger::getInstance()->printGLError( i_function, m_lastGLError );
 }
 
-// Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+// Deprecated: Should use Logger::printDebug(message, LOGLEVEL_MESSAGE) instead.
 void DatasetHelper::printTime()
 {
     wxDateTime l_dataTime = wxDateTime::Now();
     printf( "[%02d:%02d:%02d] ", l_dataTime.GetHour(), l_dataTime.GetMinute(), l_dataTime.GetSecond() );
 }
 
-// Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+// Deprecated: Use Logger::printDebug(message, LOGLEVEL_MESSAGE) instead.
 void DatasetHelper::printwxT( const wxString i_string )
 {
     char* l_cstring = (char*)malloc( i_string.length() + 1 );
@@ -1395,10 +1395,10 @@ void DatasetHelper::printwxT( const wxString i_string )
     free( l_cstring );
 }
 
-// Deprecated: Use Log::printDebug instead.
+// Deprecated: Use Logger::printDebug instead.
 void DatasetHelper::printDebug( const wxString i_string, const LogLevel i_level )
 {
-    Log::getInstance()->printDebug( i_string, i_level );
+    Logger::getInstance()->printDebug( i_string, i_level );
 }
 
 
