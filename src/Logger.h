@@ -3,8 +3,8 @@
  *
  */
 
-#ifndef LOG_H_
-#define LOG_H_
+#ifndef LOGGER_H_
+#define LOGGER_H_
 
 #include <GL/glew.h>
 #include <wx/string.h>
@@ -34,4 +34,4 @@ private:
     int m_level;
 };
 
-#endif LOG_H_
+#endif LOGGER_H_
