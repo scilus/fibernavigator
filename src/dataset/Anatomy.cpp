@@ -726,11 +726,19 @@ bool Anatomy::loadNifti( wxString fileName )
 //////////////////////////////////////////////////////////////////////////
 
 void Anatomy::saveNifti( wxString fileName )
-{    
+{
+    // Prevents copying the whole vector
+    vector<float> *pDataset = m_useEqualizedDataset ? &m_equalizedDataset : &m_floatDataset;
+
     int dims[] = { 4, m_columns, m_rows, m_frames, m_bands, 0, 0, 0 };
     nifti_image* pImage(NULL);
     pImage = nifti_make_new_nim( dims, m_dataType, 1 );
     
+    if( !fileName.EndsWith( _T( ".nii" ) ) && !fileName.EndsWith( _T( ".nii.gz" ) ) )
+    {
+        fileName += _T( ".nii.gz" );
+    }   
+
     char fn[1024];
     strcpy( fn, (const char*)fileName.mb_str( wxConvUTF8 ) );
 
@@ -743,10 +751,10 @@ void Anatomy::saveNifti( wxString fileName )
 
     if( m_type == HEAD_BYTE )
     {
-        vector<unsigned char> tmp( m_floatDataset.size() );
-        for(unsigned int i(0); i < m_floatDataset.size(); ++i )
+        vector<unsigned char> tmp( pDataset->size() );
+        for(unsigned int i(0); i < pDataset->size(); ++i )
         {
-            tmp[i] = m_floatDataset[i] * 255;
+            tmp[i] = (*pDataset)[i] * 255;
         }
         
         // Do not move the call to nifti_image_write out of the 
@@ -757,10 +765,10 @@ void Anatomy::saveNifti( wxString fileName )
     }
     else if( m_type == HEAD_SHORT )
     {
-        vector<short> tmp( m_floatDataset.size() );
-        for(unsigned int i(0); i < m_floatDataset.size(); ++i )
+        vector<short> tmp( pDataset->size() );
+        for(unsigned int i(0); i < pDataset->size(); ++i )
         {
-            tmp[i] = (short)(m_floatDataset[i] * m_newMax);
+            tmp[i] = (short)( (*pDataset)[i] * m_newMax );
         }
         
         // Do not move the call to nifti_image_write out of the 
@@ -771,13 +779,13 @@ void Anatomy::saveNifti( wxString fileName )
     }
     else if( m_type == RGB )
     {
-        vector<unsigned char> tmp( m_floatDataset.size() );
-        int datasetSize = m_floatDataset.size()/3;
+        vector<unsigned char> tmp( pDataset->size() );
+        int datasetSize = pDataset->size()/3;
         for( int i(0); i < datasetSize; ++i )
         {
-            tmp[i]                   = m_floatDataset[i * 3]     * 255.0f;
-            tmp[datasetSize + i]     = m_floatDataset[i * 3 + 1] * 255.0f;
-            tmp[2 * datasetSize + i] = m_floatDataset[i * 3 + 2] * 255.0f;
+            tmp[i]                   = (*pDataset)[i * 3]     * 255.0f;
+            tmp[datasetSize + i]     = (*pDataset)[i * 3 + 1] * 255.0f;
+            tmp[2 * datasetSize + i] = (*pDataset)[i * 3 + 2] * 255.0f;
         }
         
         // Do not move the call to nifti_image_write out of the 
@@ -791,7 +799,7 @@ void Anatomy::saveNifti( wxString fileName )
         // Do not move the call to nifti_image_write out of the 
         // if, because it will crash, since the temp vector will
         // not exist anymore, and pImage->data will point to garbage.
-        pImage->data = &m_floatDataset[0];
+        pImage->data = &(*pDataset)[0];
         nifti_image_write( pImage );
     }
 }
