@@ -38,7 +38,7 @@
 
 #include "../misc/Fantom/FMatrix.h"
 
-#include "../Log.h"
+#include "../Logger.h"
 
 class MainFrame;
 class DatasetInfo;

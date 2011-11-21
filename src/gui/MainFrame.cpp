@@ -27,7 +27,7 @@
 #include "../dataset/Tensors.h"
 #include "../gfx/TheScene.h"
 #include "../main.h"
-#include "../Log.h"
+#include "../Logger.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
 #define FIBERS_INFO_GRID_COL_SIZE              1
@@ -362,7 +362,7 @@ void MainFrame::onReloadShaders( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
 {
-    Log::getInstance()->printDebug( _T("event triggered - MainFrame::onSave"), LOGLEVEL_DEBUG );
+    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSave"), LOGLEVEL_DEBUG );
 
     wxString caption         = wxT( "Choose a file" );
     wxString wildcard        = wxT( "Scene files (*.scn)|*.scn|*.*|*.*" );
@@ -388,7 +388,7 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 {
-    Log::getInstance()->printDebug( _T("event triggered - MainFrame::onSaveFibers"), LOGLEVEL_DEBUG );
+    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSaveFibers"), LOGLEVEL_DEBUG );
 
     if( !m_pDatasetHelper->m_fibersLoaded )
     {
@@ -422,7 +422,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
 {
-    Log::getInstance()->printDebug( _T("event triggered - MainFrame::onSaveDataset"), LOGLEVEL_DEBUG );
+    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSaveDataset"), LOGLEVEL_DEBUG );
 
     if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
     {
@@ -1414,7 +1414,7 @@ void MainFrame::updateStatusBar()
 
 void MainFrame::onActivateListItem( wxListEvent& event )
 {
-    Log::getInstance()->printDebug( _T( "event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->printDebug( _T( "event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
 
     int l_item = event.GetIndex();
     m_pTreeWidget->UnselectAll();

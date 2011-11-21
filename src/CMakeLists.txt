@@ -138,10 +138,10 @@ file( GLOB LIC_SRC "misc/lic/*.cpp" )
 file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 
 IF( WIN32 )
- ADD_EXECUTABLE( ${target} WIN32 main.cpp Log.h Log.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} 
+ ADD_EXECUTABLE( ${target} WIN32 main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} 
                                           ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${NIFTI_HDR} )
 ELSE( WIN32 )
- ADD_EXECUTABLE( ${target} main.cpp Log.h Log.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC}
+ ADD_EXECUTABLE( ${target} main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC}
                                     ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${NIFTI_HDR} )
 ENDIF( WIN32 )
 
