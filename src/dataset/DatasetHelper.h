@@ -60,6 +60,7 @@ public:
     virtual ~DatasetHelper();
 
     // Functions
+    //void out_of_memory(); 
     bool load( const int i_index );
     bool load( wxString    i_filename, 
                int   i_index     = -1, 

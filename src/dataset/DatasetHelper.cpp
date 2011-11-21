@@ -8,6 +8,9 @@
 #include "../gui/MainFrame.h"
 
 #include <memory>
+#include <exception>
+#include <stdexcept>
+#include <new>
 
 #include "Anatomy.h"
 #include "ODFs.h"
@@ -28,6 +31,11 @@
 #include "Surface.h"
 #include "../misc/nifti/nifti1_io.h"
 
+void out_of_memory() 
+{
+    cerr << "Error : Out of memory! \n";
+    throw bad_alloc();
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -210,218 +218,226 @@ bool DatasetHelper::load( const int i_index )
 
 bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha )
 {
-
-    // check if i_fileName is valid
-    if( ! wxFile::Exists( i_fileName ) )
+	std::set_new_handler(&out_of_memory);
+	
+    try 
     {
-        printf( "File " );
-        printwxT( i_fileName );
-        printf( " doesn't exist!\n" );
-        m_lastError = wxT( "File doesn't exist!" );
-        return false;
-    }
+		// check if i_fileName is valid
+		if( ! wxFile::Exists( i_fileName ) )
+		{
+			printf( "File " );
+			printwxT( i_fileName );
+			printf( " doesn't exist!\n" );
+			m_lastError = wxT( "File doesn't exist!" );
+			return false;
+		}
 
-    // If the file is in compressed formed, we check what kinda file it is.
-    wxString l_ext = i_fileName.AfterLast( '.' );
-    if( l_ext == _T( "gz" ) )
-    {
-        wxString l_tmpName = i_fileName.BeforeLast( '.' );
-        l_ext = l_tmpName.AfterLast( '.' );
-    }
+		// If the file is in compressed formed, we check what kinda file it is.
+		wxString l_ext = i_fileName.AfterLast( '.' );
+		if( l_ext == _T( "gz" ) )
+		{
+			wxString l_tmpName = i_fileName.BeforeLast( '.' );
+			l_ext = l_tmpName.AfterLast( '.' );
+		}
 
-    if( l_ext == wxT( "scn" ) )
-    {
-        if( ! loadScene( i_fileName ) )
-        {
-            return false;
-        }
-
-        m_selBoxChanged = true;
-        m_mainFrame->refreshAllGLWidgets();
-
-#ifdef __WXMSW__
-        m_scnFileName = i_fileName.AfterLast ( '\\' );
-        m_scenePath   = i_fileName.BeforeLast( '\\' );
-#else
-        m_scnFileName = i_fileName.AfterLast ( '/' );
-        m_scenePath   = i_fileName.BeforeLast( '/' );
-#endif
-        m_scnFileLoaded = true;
-        return true;
-    }   
-    else if( l_ext == _T( "nii" ) )
-    {
-        char* l_hdrFile;
-        l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
-        strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
-
-        nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
-
-        free(l_hdrFile);
-
-        if( ! l_image )
-        {
-            m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
-            return false;
-        }
-
-        if (l_image->datatype == 16 && l_image->ndim == 4 && l_image->dim[4] == 6)
-        {
-            i_index=8;
-        }
-        else if (l_image->datatype == 16 && l_image->ndim == 4 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
-        {
-            i_index=9;
-        }
-
-        DatasetInfo *l_dataset = NULL;
-        if (i_index==8)
-        {
-            if( ! m_anatomyLoaded )
-            {
-                m_lastError = wxT( "no anatomy file loaded" );
-                return false;
-            }
-
-            if( m_tensorsLoaded )
-            {
-                m_lastError = wxT( "tensors already loaded" );
-                return false;
-            }
-            l_dataset = new Tensors( this );            
-        }
-        else if (i_index==9)
-        {
-            if( ! m_anatomyLoaded )
-            {
-                m_lastError = wxT( "no anatomy file loaded" );
-                return false;
-            }
-            l_dataset = new ODFs( this );            
-        }
-        else
-        {
-            l_dataset = new Anatomy( this );
-        }
-        if( l_dataset->load(i_fileName ))
-        {
-            l_dataset->setThreshold( i_threshold );
-            l_dataset->setAlpha    ( i_alpha );
-            l_dataset->setShow     ( i_active );
-            l_dataset->setShowFS   ( i_showFS );
-            l_dataset->setuseTex   ( i_useTex );
-            finishLoading( l_dataset );        
-            if (i_index==8)
-            {
-                m_tensorsLoaded = true;
-            }
-            else if (i_index == 9)
-            {
-                m_ODFsLoaded = true;
-            }
-            else
-            {
-                m_floatDataset = ((Anatomy*)l_dataset)->getFloatDataset();
-            }
-            return true;
-        }
-        return false;
-    }
-    else if( l_ext == _T( "mesh" ) || l_ext == _T( "surf" ) || l_ext == _T( "dip" ) )
-    {
-        if( ! m_anatomyLoaded )
-        {
-            m_lastError = wxT( "no anatomy file loaded" );
-            return false;
-        }
-
-        Mesh *l_mesh = new Mesh( this );
-
-        if( l_mesh->load( i_fileName ) )
-        {
-            l_mesh->setThreshold( i_threshold );
-            l_mesh->setShow     ( i_active );
-            l_mesh->setShowFS   ( i_showFS );
-            l_mesh->setuseTex   ( i_useTex );
-            finishLoading       ( l_mesh );
-            return true;
-        }
-        return false;
-    }
-    else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
-    {
-        if( ! m_anatomyLoaded )
-        {
-            m_lastError = wxT( "no anatomy file loaded" );
-            return false;
-        }
-
-		Fibers* l_fibers = new Fibers( this );
-
-        if( l_fibers->load( i_fileName ) )
-        {
-			if( m_fibersGroupLoaded == false )
+		if( l_ext == wxT( "scn" ) )
+		{
+			if( ! loadScene( i_fileName ) )
 			{
-				FibersGroup* l_fibersGroup = new FibersGroup( this );
-				l_fibersGroup->setName( wxT( "Fibers Group" ) );
-				l_fibersGroup->setShow(false);
-				l_fibersGroup->setType(FIBERSGROUP);
-				finishLoading( l_fibersGroup );
-
-				m_fibersGroupLoaded = true;
+				return false;
 			}
 
-            std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-            for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-            {
-                for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-                {
-                    l_selectionObjects[i][j]->m_inBox.resize( m_countFibers, sizeof(bool) );
-                    for( unsigned int k = 0; k < m_countFibers; ++k )
-                    {
-                        l_selectionObjects[i][j]->m_inBox[k] = 0;
-                    }
-
-                    l_selectionObjects[i][j]->setIsDirty( true );
-                }
-            }
-
-            l_fibers->setThreshold( i_threshold );
-            //l_fibers->setShow     ( i_active );
-            l_fibers->setShowFS   ( i_showFS );
-            l_fibers->setuseTex   ( i_useTex );
-			
-			if( m_fibersGroupLoaded )
-			{
-				FibersGroup* pFibersGroup;
-				getFibersGroupDataset(pFibersGroup);
-
-				if( pFibersGroup != NULL )
-				{
-					if(pFibersGroup->getFibersCount() > 0)
-					{
-						l_fibers->setShow( false );
-					}
-					else
-					{
-						l_fibers->setShow( i_active );
-					}
-					pFibersGroup->addFibersSet( l_fibers );
-				}
-			}			
-
-			finishLoading( l_fibers, true );
-			m_fibersLoaded = true;
 			m_selBoxChanged = true;
+			m_mainFrame->refreshAllGLWidgets();
 
-            return true;
-        }
-        return false;
-    }
+		#ifdef __WXMSW__
+			m_scnFileName = i_fileName.AfterLast ( '\\' );
+			m_scenePath   = i_fileName.BeforeLast( '\\' );
+		#else
+			m_scnFileName = i_fileName.AfterLast ( '/' );
+			m_scenePath   = i_fileName.BeforeLast( '/' );
+		#endif
+			m_scnFileLoaded = true;
+			return true;
+		}   
+		else if( l_ext == _T( "nii" ) )
+		{
+			char* l_hdrFile;
+			l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
+			strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
 
-    m_lastError = wxT( "unsupported file format" );
+			nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
 
-    return false;
+			free(l_hdrFile);
+
+			if( ! l_image )
+			{
+				m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
+				return false;
+			}
+
+			if (l_image->datatype == 16 && l_image->ndim == 4 && l_image->dim[4] == 6)
+			{
+				i_index=8;
+			}
+			else if (l_image->datatype == 16 && l_image->ndim == 4 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
+			{
+				i_index=9;
+			}
+
+			DatasetInfo *l_dataset = NULL;
+			if (i_index==8)
+			{
+				if( ! m_anatomyLoaded )
+				{
+					m_lastError = wxT( "no anatomy file loaded" );
+					return false;
+				}
+
+				if( m_tensorsLoaded )
+				{
+					m_lastError = wxT( "tensors already loaded" );
+					return false;
+				}
+				l_dataset = new Tensors( this );            
+			}
+			else if (i_index==9)
+			{
+				if( ! m_anatomyLoaded )
+				{
+					m_lastError = wxT( "no anatomy file loaded" );
+					return false;
+				}
+				l_dataset = new ODFs( this );            
+			}
+			else
+			{
+				l_dataset = new Anatomy( this );
+			}
+			if( l_dataset->load(i_fileName ))
+			{
+				l_dataset->setThreshold( i_threshold );
+				l_dataset->setAlpha    ( i_alpha );
+				l_dataset->setShow     ( i_active );
+				l_dataset->setShowFS   ( i_showFS );
+				l_dataset->setuseTex   ( i_useTex );
+				finishLoading( l_dataset );        
+				if (i_index==8)
+				{
+					m_tensorsLoaded = true;
+				}
+				else if (i_index == 9)
+				{
+					m_ODFsLoaded = true;
+				}
+				else
+				{
+					m_floatDataset = ((Anatomy*)l_dataset)->getFloatDataset();
+				}
+				return true;
+			}
+			return false;
+		}
+		else if( l_ext == _T( "mesh" ) || l_ext == _T( "surf" ) || l_ext == _T( "dip" ) )
+		{
+			if( ! m_anatomyLoaded )
+			{
+				m_lastError = wxT( "no anatomy file loaded" );
+				return false;
+			}
+
+			Mesh *l_mesh = new Mesh( this );
+
+			if( l_mesh->load( i_fileName ) )
+			{
+				l_mesh->setThreshold( i_threshold );
+				l_mesh->setShow     ( i_active );
+				l_mesh->setShowFS   ( i_showFS );
+				l_mesh->setuseTex   ( i_useTex );
+				finishLoading       ( l_mesh );
+				return true;
+			}
+			return false;
+		}
+		else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
+		{
+			if( ! m_anatomyLoaded )
+			{
+				m_lastError = wxT( "no anatomy file loaded" );
+				return false;
+			}
+
+			Fibers* l_fibers = new Fibers( this );
+
+			if( l_fibers->load( i_fileName ) )
+			{
+				if( m_fibersGroupLoaded == false )
+				{
+					FibersGroup* l_fibersGroup = new FibersGroup( this );
+					l_fibersGroup->setName( wxT( "Fibers Group" ) );
+					l_fibersGroup->setShow(false);
+					l_fibersGroup->setType(FIBERSGROUP);
+					finishLoading( l_fibersGroup );
+
+					m_fibersGroupLoaded = true;
+				}
+
+				std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
+				for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+				{
+					for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+					{
+						l_selectionObjects[i][j]->m_inBox.resize( m_countFibers, sizeof(bool) );
+						for( unsigned int k = 0; k < m_countFibers; ++k )
+						{
+							l_selectionObjects[i][j]->m_inBox[k] = 0;
+						}
+
+						l_selectionObjects[i][j]->setIsDirty( true );
+					}
+				}
+
+				l_fibers->setThreshold( i_threshold );
+				//l_fibers->setShow     ( i_active );
+				l_fibers->setShowFS   ( i_showFS );
+				l_fibers->setuseTex   ( i_useTex );
+				
+				if( m_fibersGroupLoaded )
+				{
+					FibersGroup* pFibersGroup;
+					getFibersGroupDataset(pFibersGroup);
+
+					if( pFibersGroup != NULL )
+					{
+						if(pFibersGroup->getFibersCount() > 0)
+						{
+							l_fibers->setShow( false );
+						}
+						else
+						{
+							l_fibers->setShow( i_active );
+						}
+						pFibersGroup->addFibersSet( l_fibers );
+					}
+				}			
+
+				finishLoading( l_fibers, true );
+				m_fibersLoaded = true;
+				m_selBoxChanged = true;
+
+				return true;
+			}
+			return false;
+		}
+		m_lastError = wxT( "unsupported file format" );
+		
+		return false;
+	}
+	catch (const exception &e)
+	{
+		cerr << "Exception: " << e.what() << endl;
+		exit(1);
+	}
 }
 
 void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
