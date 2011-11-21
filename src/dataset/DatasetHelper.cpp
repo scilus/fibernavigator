@@ -355,11 +355,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
             m_lastError = wxT( "no anatomy file loaded" );
             return false;
         }
-        /*if( m_fibersLoaded )
-        {
-            m_lastError = wxT( "fibers already loaded" );
-            return false;
-        }*/
 
 		Fibers* l_fibers = new Fibers( this );
 
@@ -392,13 +387,10 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
             }
 
             l_fibers->setThreshold( i_threshold );
-            l_fibers->setShow     ( i_active );
+            //l_fibers->setShow     ( i_active );
             l_fibers->setShowFS   ( i_showFS );
             l_fibers->setuseTex   ( i_useTex );
-			finishLoading( l_fibers, true );
-			m_fibersLoaded = true;
-			m_selBoxChanged = true;
-
+			
 			if( m_fibersGroupLoaded )
 			{
 				FibersGroup* pFibersGroup;
@@ -406,9 +398,22 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 				if( pFibersGroup != NULL )
 				{
-					pFibersGroup->addFibersSet( l_fibers ); 
+					if(pFibersGroup->getFibersCount() > 0)
+					{
+						l_fibers->setShow( false );
+					}
+					else
+					{
+						l_fibers->setShow( i_active );
+					}
+					pFibersGroup->addFibersSet( l_fibers );
 				}
-			}
+			}			
+
+			finishLoading( l_fibers, true );
+			m_fibersLoaded = true;
+			m_selBoxChanged = true;
+
             return true;
         }
         return false;
@@ -419,7 +424,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
     return false;
 }
 
-void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
+void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
 {
     m_guiBlocked = true;
 #ifdef __WXMAC__

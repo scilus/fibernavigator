@@ -575,7 +575,7 @@ void TheScene::renderMesh()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This function will render the fibers in normal mode (not fake tubes) in theScene.
+// This function will render the fibers in theScene.
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::renderFibers()
 {
