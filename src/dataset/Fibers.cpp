@@ -1870,13 +1870,21 @@ void Fibers::generateFiberVolume()
     Anatomy *pTmpAnatomy = new Anatomy( m_dh, RGB );
     pTmpAnatomy->setName( wxT( "Fiber-Density Volume" ) );
     
-    m_dh->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 1, pTmpAnatomy->getName() );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "1.0" ) );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemData( 0, ( long ) pTmpAnatomy );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-    
+	#ifdef __WXMAC__
+		// insert at zero is a well-known bug on OSX, so we append there...
+		// http://trac.wxwidgets.org/ticket/4492
+		long l_id = m_dh->m_mainFrame->m_pListCtrl->GetItemCount();
+	#else
+		long l_id = 0;
+	#endif 
+	
+    m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pTmpAnatomy->getName() );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
+    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+    m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pTmpAnatomy );
+    m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	
     m_dh->updateLoadStatus();
     m_dh->m_mainFrame->refreshAllGLWidgets();
 
@@ -3147,6 +3155,11 @@ int Fibers::getPointCount()
 bool Fibers::isSelected( int fiberId )
 {
     return m_selected[fiberId];
+}
+
+float Fibers::getLocalizedAlpha( int index )
+{
+	return m_localizedAlpha[index];
 }
 
 void Fibers::setFibersLength()

@@ -14,6 +14,7 @@
 #include <cmath>
 #include <wx/tokenzr.h>
 
+#include "Anatomy.h"
 #include "../main.h"
 
 FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
@@ -26,7 +27,6 @@ FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 	m_isNormalColoringStateChanged ( false ),
 	m_isLocalColoringStateChanged ( false )
 {
-	m_pDatasetHelper = pDatasetHelper;
 	m_bufferObjects = new GLuint[3];
 }
 
@@ -534,17 +534,17 @@ void FibersGroup::fibersLocalColoring()
 {
 	for(int i = 0; i < (int)m_fibersSets.size(); i++)
 	{
-		for(long j = 0; j < (long)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
+		for(long j = 0; j < (long)m_dh->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
 		{
-			if( (Fibers*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
+			if( (Fibers*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
 			{
 				if( ! m_fibersSets[i]->toggleUseTex() && m_pToggleLocalColoring->GetValue() )
 				{
-					m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax()) + wxT( ")" ) );
+					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax()) + wxT( ")" ) );
 				}
 				else
 				{
-					m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax() ) );
+					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax() ) );
 				}
 				m_fibersSets[i]->updateToggleLocalColoring( m_pToggleLocalColoring->GetValue());
 				break;
@@ -557,17 +557,17 @@ void FibersGroup::fibersNormalColoring()
 {
 	for(int i = 0; i < (int)m_fibersSets.size(); i++)
 	{
-		for(long j = 0; j < (long)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
+		for(long j = 0; j < (long)m_dh->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
 		{
-			if( (Fibers*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
+			if( (Fibers*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
 			{
 				if( ! m_fibersSets[i]->toggleShowFS() && m_pToggleLocalColoring->GetValue())
 				{
-					m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName().BeforeFirst( '.' ) + wxT( "*" ) );
+					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName().BeforeFirst( '.' ) + wxT( "*" ) );
 				}
 				else
 				{
-					m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName().BeforeFirst( '.' ) );
+					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName().BeforeFirst( '.' ) );
 				}
 				m_fibersSets[i]->updateToggleNormalColoring( m_pToggleNormalColoring->GetValue());
 				break;
@@ -577,10 +577,54 @@ void FibersGroup::fibersNormalColoring()
 }
 
 void FibersGroup::OnClickGenerateFiberVolumeBtn()
-{
+{	
+	// Generate fiber volume for individual bundle
 	for(int j = 0; j < (int)m_fibersSets.size(); j++)
 	{
 		m_fibersSets[j]->generateFiberVolume();
+	}
+	
+	generateGlobalFiberVolume();
+}
+
+void FibersGroup::generateGlobalFiberVolume()
+{
+	Anatomy* pGlobalAnatomy = new Anatomy( m_dh, RGB );
+	
+	pGlobalAnatomy->setName( wxT( "Global Fiber-Density Volume" ) );
+	
+	
+	#ifdef __WXMAC__
+		// insert at zero is a well-known bug on OSX, so we append there...
+		// http://trac.wxwidgets.org/ticket/4492
+		long l_id = m_dh->m_mainFrame->m_pListCtrl->GetItemCount();
+	#else
+		long l_id = 0;
+	#endif
+	
+	m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pGlobalAnatomy->getName() );
+	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
+	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+	m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pGlobalAnatomy );
+	m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	
+	m_dh->updateLoadStatus();
+	m_dh->m_mainFrame->refreshAllGLWidgets();
+
+	for(int j = 0; j < (int)m_fibersSets.size(); j++)
+	{
+		for( int i = 0; i < m_fibersSets[j]->getPointCount(); ++i )
+		{
+			int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_fibersSets[j]->getPointValue(i * 3) / m_dh->m_xVoxel ) ) ;
+			int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_fibersSets[j]->getPointValue(i * 3 + 1) / m_dh->m_yVoxel ) ) ;
+			int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_fibersSets[j]->getPointValue(i * 3 + 2) / m_dh->m_zVoxel ) ) ;
+			int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+			
+			( *pGlobalAnatomy->getFloatDataset() )[index * 3]     += m_fibersSets[j]->getPointValue(i * 3) * m_fibersSets[j]->getLocalizedAlpha(i);
+			( *pGlobalAnatomy->getFloatDataset() )[index * 3 + 1] += m_fibersSets[j]->getPointValue(i * 3 + 1) * m_fibersSets[j]->getLocalizedAlpha(i);
+			( *pGlobalAnatomy->getFloatDataset() )[index * 3 + 2] += m_fibersSets[j]->getPointValue(i * 3 + 2) * m_fibersSets[j]->getLocalizedAlpha(i);
+		}
 	}
 }
 

@@ -56,6 +56,8 @@ public:
 
 	void	fibersLocalColoring();
 	void	fibersNormalColoring();
+	
+	void	generateGlobalFiberVolume();
 
 	void	OnToggleIntensityBtn();
 	void	OnToggleOpacityBtn();
@@ -90,7 +92,6 @@ public:
 
 private: 
 	// Variables
-	DatasetHelper *m_pDatasetHelper;
 	std::vector<Fibers*> m_fibersSets;
 
 	bool m_isIntensityToggled;

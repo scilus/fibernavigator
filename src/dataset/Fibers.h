@@ -56,7 +56,7 @@ public:
     
     void    updateFibersColors();
     
-    void    generateFiberVolume();
+    void	generateFiberVolume();
     
 	void	getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines );
 	void	getNbLines( int& nbLines );
@@ -87,6 +87,8 @@ public:
     int     getPointCount();
 	bool    isSelected( int  fiberId );
     
+	float	getLocalizedAlpha( int index );
+	
     void    setFibersLength();
     
     void    updateFibersFilters();

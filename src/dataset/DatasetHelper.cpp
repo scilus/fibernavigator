@@ -1482,46 +1482,49 @@ void DatasetHelper::updateLoadStatus()
     for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
         DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
-        switch( info->getType() )
-        {
-            case HEAD_BYTE:
-            case HEAD_SHORT:
-            case OVERLAY:
-            case RGB:
-                m_anatomyLoaded      = true;
-                break;
-            case VECTORS:
-                m_anatomyLoaded      = true;
-                m_vectorsLoaded      = true;
-                m_tensorsFieldLoaded = true;
-                break;
-            case MESH:
-                m_meshLoaded         = true;
-                break;
-            case TENSOR_FIELD:
-                m_tensorsFieldLoaded = true;
-                break;
-            case FIBERS:
-                m_fibersLoaded       = true;
-                break;
-			case FIBERSGROUP:
-				m_fibersGroupLoaded	 = true;
-				break;
-            case SURFACE:
-                m_surfaceLoaded      = true;
-                break;
-            case ISO_SURFACE:
-                m_meshLoaded         = true;
-                break;
-            case TENSORS:
-                m_tensorsLoaded      = true;
-                break;
-            case ODFS:
-                m_ODFsLoaded         = true;
-                break;
-            default:
-                break;
-        }
+		if(info != NULL)
+		{
+			switch( info->getType() )
+			{
+				case HEAD_BYTE:
+				case HEAD_SHORT:
+				case OVERLAY:
+				case RGB:
+					m_anatomyLoaded      = true;
+					break;
+				case VECTORS:
+					m_anatomyLoaded      = true;
+					m_vectorsLoaded      = true;
+					m_tensorsFieldLoaded = true;
+					break;
+				case MESH:
+					m_meshLoaded         = true;
+					break;
+				case TENSOR_FIELD:
+					m_tensorsFieldLoaded = true;
+					break;
+				case FIBERS:
+					m_fibersLoaded       = true;
+					break;
+				case FIBERSGROUP:
+					m_fibersGroupLoaded	 = true;
+					break;
+				case SURFACE:
+					m_surfaceLoaded      = true;
+					break;
+				case ISO_SURFACE:
+					m_meshLoaded         = true;
+					break;
+				case TENSORS:
+					m_tensorsLoaded      = true;
+					break;
+				case ODFS:
+					m_ODFsLoaded         = true;
+					break;
+				default:
+					break;
+			}
+		}
     }
 }
 
