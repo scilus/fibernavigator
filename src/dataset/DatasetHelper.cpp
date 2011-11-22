@@ -421,6 +421,8 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 					}
 				}			
 
+				l_fibers->updateLinesShown();
+				
 				finishLoading( l_fibers, true );
 				m_fibersLoaded = true;
 				m_selBoxChanged = true;
