@@ -57,7 +57,7 @@ public:
 	void	fibersLocalColoring();
 	void	fibersNormalColoring();
 	
-	void	generateGlobalFiberVolume();
+	void	generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies);
 
 	void	OnToggleIntensityBtn();
 	void	OnToggleOpacityBtn();

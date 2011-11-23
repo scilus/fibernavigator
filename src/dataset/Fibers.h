@@ -56,7 +56,7 @@ public:
     
     void    updateFibersColors();
     
-    void	generateFiberVolume();
+    Anatomy* generateFiberVolume();
     
 	void	getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines );
 	void	getNbLines( int& nbLines );

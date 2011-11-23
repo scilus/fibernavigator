@@ -578,16 +578,18 @@ void FibersGroup::fibersNormalColoring()
 
 void FibersGroup::OnClickGenerateFiberVolumeBtn()
 {	
+	std::vector<Anatomy*> vAnatomies;
 	// Generate fiber volume for individual bundle
 	for(int j = 0; j < (int)m_fibersSets.size(); j++)
 	{
-		m_fibersSets[j]->generateFiberVolume();
+		Anatomy* pAnatomy = m_fibersSets[j]->generateFiberVolume();
+		vAnatomies.push_back(pAnatomy);
 	}
 	
-	generateGlobalFiberVolume();
+	generateGlobalFiberVolume(vAnatomies);
 }
 
-void FibersGroup::generateGlobalFiberVolume()
+void FibersGroup::generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies)
 {
 	Anatomy* pGlobalAnatomy = new Anatomy( m_dh, RGB );
 	
@@ -612,19 +614,9 @@ void FibersGroup::generateGlobalFiberVolume()
 	m_dh->updateLoadStatus();
 	m_dh->m_mainFrame->refreshAllGLWidgets();
 
-	for(int j = 0; j < (int)m_fibersSets.size(); j++)
+	for(int i = 0; i < (int)vAnatomies.size(); i++)
 	{
-		for( int i = 0; i < m_fibersSets[j]->getPointCount(); ++i )
-		{
-			int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_fibersSets[j]->getPointValue(i * 3) / m_dh->m_xVoxel ) ) ;
-			int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_fibersSets[j]->getPointValue(i * 3 + 1) / m_dh->m_yVoxel ) ) ;
-			int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_fibersSets[j]->getPointValue(i * 3 + 2) / m_dh->m_zVoxel ) ) ;
-			int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
-			
-			( *pGlobalAnatomy->getFloatDataset() )[index * 3]     += m_fibersSets[j]->getPointValue(i * 3) * m_fibersSets[j]->getLocalizedAlpha(i);
-			( *pGlobalAnatomy->getFloatDataset() )[index * 3 + 1] += m_fibersSets[j]->getPointValue(i * 3 + 1) * m_fibersSets[j]->getLocalizedAlpha(i);
-			( *pGlobalAnatomy->getFloatDataset() )[index * 3 + 2] += m_fibersSets[j]->getPointValue(i * 3 + 2) * m_fibersSets[j]->getLocalizedAlpha(i);
-		}
+		pGlobalAnatomy->add( vAnatomies[i] );
 	}
 }
 

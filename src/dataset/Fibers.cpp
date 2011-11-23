@@ -1848,7 +1848,7 @@ void Fibers::colorWithMinDistance( float *pColorData )
     }
 }
 
-void Fibers::generateFiberVolume()
+Anatomy* Fibers::generateFiberVolume()
 {
     float *pColorData( NULL );
 
@@ -1904,6 +1904,8 @@ void Fibers::generateFiberVolume()
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
+	
+	return pTmpAnatomy;
 }
 
 void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines )
