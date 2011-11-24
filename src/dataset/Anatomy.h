@@ -96,7 +96,6 @@ public:
     }
 
 	void pushHistory();
-	void fillHistory();
 	void popHistory();
    
 public:
@@ -131,18 +130,19 @@ private:
 	void generateTexture();
 	void updateTexture( SubTextureBox drawZone, const bool isRound, float color );
 	void updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB );
-	void updateDrawHistoryTop(const SubTextureBox drawZone, bool isRGB);
+	void fillHistory(const SubTextureBox drawZone, bool isRGB);
 
     void generateGeometry() {};
     void initializeBuffer() {};
     void smooth()           {};
     
-    float						m_floodThreshold;
-    float						m_graphSigma;
-    std::vector<float>			m_floatDataset;
-    int							m_dataType;
-    TensorField					*m_pTensorField;
-	std::stack<SubTextureBox>	m_drawHistory;
+    float				m_floodThreshold;
+    float				m_graphSigma;
+    std::vector<float>	m_floatDataset;
+    int					m_dataType;
+    TensorField			*m_pTensorField;
+
+	stack< stack<SubTextureBox>>	m_drawHistory;
 };
 
 #endif /* ANATOMY_H_ */

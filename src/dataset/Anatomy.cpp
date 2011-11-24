@@ -494,11 +494,12 @@ void Anatomy::generateTexture()
 void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, float color ) 
 {
 	drawZone.datasize = drawZone.width * drawZone.height * drawZone.depth;
-	drawZone.data.resize(drawZone.datasize);
-	
+	//save this zone on top of history before we change anything
+	fillHistory(drawZone, false);
+
 	//create the modified region's vector in the right color
 	std::vector<float> subData( drawZone.datasize, color );
-	
+
     for( int f = 0; f < drawZone.depth; ++f )
     {
         for( int r = 0; r < drawZone.height; ++r )
@@ -509,7 +510,7 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, float c
 				int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
 
 				//save a backup in the history data
-				drawZone.data[subIndex] = m_floatDataset[sourceIndex];
+				//drawZone.data[subIndex] = m_floatDataset[sourceIndex];
 
 				//update values
 				if(isRound)
@@ -537,14 +538,13 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, float c
 
 	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
 	glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_LUMINANCE, GL_FLOAT, &subData[0] );
-
-	//note subtexture properties on top of history
-	updateDrawHistoryTop(drawZone, false);
 }
 
 void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB ) 
 {
 	drawZone.datasize = drawZone.width * drawZone.height * drawZone.depth * 3;
+	//save this zone on top of history before we change anything
+	fillHistory(drawZone, true);
 	
 	//create the modified region's vector and put the right color
 	std::vector<float> subData( drawZone.datasize, colorRGB.Red() );
@@ -565,9 +565,9 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor
 				int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
 
 				//save a backup in the history data
-				drawZone.data[subIndex*3] = m_floatDataset[sourceIndex*3];
-				drawZone.data[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
-				drawZone.data[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
+				//drawZone.data[subIndex*3] = m_floatDataset[sourceIndex*3];
+				//drawZone.data[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
+				//drawZone.data[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
 
 				if(isRound)
 				{
@@ -600,9 +600,6 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor
 
 	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
 	glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_RGB, GL_FLOAT, &subData[0] );
-
-	//note subtexture properties on top of history
-	updateDrawHistoryTop(drawZone, true);
 }
 
 GLuint Anatomy::getGLuint()
@@ -1352,121 +1349,49 @@ void Anatomy::updatePropertiesSizer()
     
 }
 
-//title: updateDrawHistoryTop
-//desc: This function only updates the englobing region of last change, not the data itself
-void Anatomy::updateDrawHistoryTop( const SubTextureBox drawZone, bool isRGB) 
+void Anatomy::pushHistory()
 {
-	//first, check if we are updating from initial state
-	//(a width/height/depth of zero is only possible after init)
-	if(m_drawHistory.top().depth == 0)
+	m_drawHistory.push(stack<SubTextureBox>());
+	//m_drawHistory.top().x = 0;
+	//m_drawHistory.top().y = 0;
+	//m_drawHistory.top().z = 0;
+	//m_drawHistory.top().width = 0;
+	//m_drawHistory.top().height = 0;
+	//m_drawHistory.top().depth = 0;
+	//m_drawHistory.top().datasize = 0;
+	//m_drawHistory.top().data = vector<float>();
+}
+
+void Anatomy::fillHistory( const SubTextureBox drawZone, bool isRGB) 
+{
+	//push current subtexture's properties
+	m_drawHistory.top().push(drawZone);
+	//init buffer size
+	m_drawHistory.top().top().data.resize(drawZone.datasize);
+
+	//fill with texture values
+	for( int z = 0; z < drawZone.depth; ++z )
 	{
-		//copy
-		m_drawHistory.top() = drawZone;
-	}
-	else
-	{
-		SubTextureBox oldTopCopy = m_drawHistory.top();
-
-		int xNewIndex = MAX(drawZone.x - oldTopCopy.x, 0);
-		int yNewIndex = MAX(drawZone.y - oldTopCopy.y, 0);
-		int zNewIndex = MAX(drawZone.z - oldTopCopy.z, 0);
-		int xOldIndex = MAX(oldTopCopy.x - drawZone.x, 0);
-		int yOldIndex = MAX(oldTopCopy.y - drawZone.y, 0);
-		int zOldIndex = MAX(oldTopCopy.z - drawZone.z, 0);
-
-		int xNewEnd = drawZone.x + drawZone.width;
-		int yNewEnd = drawZone.y + drawZone.height;
-		int zNewEnd = drawZone.z + drawZone.depth;
-		int xOldEnd = oldTopCopy.x + oldTopCopy.width;
-		int yOldEnd = oldTopCopy.y + oldTopCopy.height;
-		int zOldEnd = oldTopCopy.z + oldTopCopy.depth;
-
-		//combined region
-		m_drawHistory.top().x = MIN( oldTopCopy.x, drawZone.x );
-		m_drawHistory.top().y = MIN( oldTopCopy.y, drawZone.y );
-		m_drawHistory.top().z = MIN( oldTopCopy.z, drawZone.z );
-		m_drawHistory.top().width  = MAX(xOldEnd, xNewEnd) - m_drawHistory.top().x;
-		m_drawHistory.top().height = MAX(yOldEnd, yNewEnd) - m_drawHistory.top().y;
-		m_drawHistory.top().depth  = MAX(zOldEnd, zNewEnd) - m_drawHistory.top().z;
-
-		m_drawHistory.top().datasize = m_drawHistory.top().width * m_drawHistory.top().height * m_drawHistory.top().depth;
-		if(isRGB)
+		for( int y = 0; y < drawZone.height; ++y )
 		{
-			m_drawHistory.top().datasize *= 3;
-		}
-		m_drawHistory.top().data.resize(m_drawHistory.top().datasize);
-
-		//add data where we enlarged
-		for( int z = 0; z < m_drawHistory.top().depth; ++z )
-		{
-			for( int y = 0; y < m_drawHistory.top().height; ++y )
+			for( int x = 0; x < drawZone.width; ++x )
 			{
-				for( int x = 0; x < m_drawHistory.top().width; ++x )
-				{
-					int historyIndex = x + y * m_drawHistory.top().width + z * m_drawHistory.top().width * m_drawHistory.top().height;
+				int sourceIndex = (x +drawZone.x) + (y + drawZone.y) * m_columns + (z + drawZone.z) * m_columns * m_rows;
+				int subIndex = x + y * drawZone.width + z * drawZone.width * drawZone.height;
 
-					//is it in the old region? (it has priority over the new)
-					if( x >= xOldIndex && x < xOldIndex + oldTopCopy.width &&
-						y >= yOldIndex && y < yOldIndex + oldTopCopy.height &&
-						z >= zOldIndex && z < zOldIndex + oldTopCopy.depth )
-					{
-						int sourceIndex = (x - xOldIndex) + (y - yOldIndex) * oldTopCopy.width + (z - zOldIndex) * oldTopCopy.width * oldTopCopy.height;
-						m_drawHistory.top().data[historyIndex] = oldTopCopy.data[sourceIndex];
-					}
-					//is it in the new region?
-					else if( x >= xNewIndex && x < xNewIndex + drawZone.width &&
-							 y >= yNewIndex && y < yNewIndex + drawZone.height &&
-							 z >= zNewIndex && z < zNewIndex + drawZone.depth )
-					{
-						int sourceIndex = (x - xNewIndex) + (y - yNewIndex) * drawZone.width + (z - zNewIndex) * drawZone.width * drawZone.height;
-						m_drawHistory.top().data[historyIndex] = drawZone.data[sourceIndex];
-					}
-					else
-					{
-						//take the value from anatomy's full Dataset
-						int sourceIndex = (x + m_drawHistory.top().x) + (y + m_drawHistory.top().y) * m_columns + (z + m_drawHistory.top().z) * m_columns * m_rows;
-						m_drawHistory.top().data[historyIndex] = m_floatDataset[sourceIndex];
-					}
+				if(isRGB)
+				{
+					m_drawHistory.top().top().data[subIndex*3] = m_floatDataset[sourceIndex*3];
+					m_drawHistory.top().top().data[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
+					m_drawHistory.top().top().data[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
+				}
+				else
+				{
+					m_drawHistory.top().top().data[subIndex] = m_floatDataset[sourceIndex];
 				}
 			}
 		}
 	}
-}
-
-void Anatomy::pushHistory()
-{
-	m_drawHistory.push(SubTextureBox());
-	//initialize values
-	m_drawHistory.top().x = 0;
-	m_drawHistory.top().y = 0;
-	m_drawHistory.top().z = 0;
-	m_drawHistory.top().width = 0;
-	m_drawHistory.top().height = 0;
-	m_drawHistory.top().depth = 0;
-	m_drawHistory.top().datasize = 0;
-	m_drawHistory.top().data = vector<float>();
-}
-
-void Anatomy::fillHistory()
-{
-	SubTextureBox* topPtr = &m_drawHistory.top();
-	std::vector<float> dataTemp( topPtr->datasize, 0.0f );
-
-    for( int f = 0; f < topPtr->depth; ++f )
-    {
-        for( int r = 0; r < topPtr->height; ++r )
-        {
-			for( int c = 0; c < topPtr->width; ++c )
-			{
-				int sourceIndex = (c+topPtr->x) + (r+topPtr->y) * m_columns + (f+topPtr->z) * m_columns * m_rows;
-				int subIndex = c + r * topPtr->width + f * topPtr->width * topPtr->height;
-
-				dataTemp[subIndex] = m_floatDataset[sourceIndex];
-			}
-		}
-	}
-
-	m_drawHistory.top().data = dataTemp;
 }
 
 void Anatomy::popHistory()
@@ -1476,25 +1401,34 @@ void Anatomy::popHistory()
 		return;
 	}
 
-	//get the data from top of history
-    SubTextureBox* topPtr = &m_drawHistory.top();
-
-    for( int f = 0; f < topPtr->depth; ++f )
+	//restore the data from top of history
+    while( !m_drawHistory.top().empty() )
     {
-        for( int r = 0; r < topPtr->height; ++r )
-        {
-			for( int c = 0; c < topPtr->width; ++c )
-			{
-				int sourceIndex = (c+topPtr->x) + (r+topPtr->y) * m_columns + (f+topPtr->z) * m_columns * m_rows;
-				int subIndex = c + r * topPtr->width + f * topPtr->width * topPtr->height;
+		//the top contains a list of every subtextures made in one click,
+		//we need to get them back from top to bottom
+		SubTextureBox* topPtr = &(m_drawHistory.top().top());
 
-				m_floatDataset[sourceIndex] = topPtr->data[subIndex];
+		for( int f = 0; f < topPtr->depth; ++f )
+		{
+			for( int r = 0; r < topPtr->height; ++r )
+			{
+				for( int c = 0; c < topPtr->width; ++c )
+				{
+					int sourceIndex = (c+topPtr->x) + (r+topPtr->y) * m_columns + (f+topPtr->z) * m_columns * m_rows;
+					int subIndex = c + r * topPtr->width + f * topPtr->width * topPtr->height;
+
+					m_floatDataset[sourceIndex] = topPtr->data[subIndex];
+				}
 			}
 		}
+		//restore texture with the data
+		glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+		glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_LUMINANCE, GL_FLOAT, &(topPtr->data[0]) );
+		//discard this subtexture
+		topPtr = NULL;
+		m_drawHistory.top().pop();
 	}
 
-	//restore texture with the data
-	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
-	glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_LUMINANCE, GL_FLOAT, &(topPtr->data[0]) );
+	//discard top of history
 	m_drawHistory.pop();
 }

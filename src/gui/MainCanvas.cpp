@@ -1306,15 +1306,6 @@ void MainCanvas::pushAnatomyHistory()
 	l_currentAnatomy->pushHistory();
 }
 
-void MainCanvas::fillAnatomyHistory()
-{
-	// get selected anatomy dataset (that's the one we draw on)
-	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-
-	l_currentAnatomy->fillHistory();
-}
-
 void MainCanvas::popAnatomyHistory()
 {
 	// get selected anatomy dataset (that's the one we draw on)

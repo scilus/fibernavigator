@@ -63,7 +63,6 @@ public:
     float getElement(int,int,int,std::vector<float>*);
 
 	void pushAnatomyHistory();
-	void fillAnatomyHistory();
 	void popAnatomyHistory();
 
     hitResult pick(wxPoint, bool i_isRulerOrDrawer);
