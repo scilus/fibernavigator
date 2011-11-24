@@ -11,7 +11,7 @@
 #include "../misc/lic/TensorField.h"
 
 #include <vector>
-#include <deque>
+#include <stack>
 
 class SelectionObject;
 class MainFrame;
@@ -24,6 +24,9 @@ struct SubTextureBox {
 	int width;
 	int height;
 	int depth;
+
+	int datasize;
+	std::vector<float> data;
 };
 
 /**
@@ -91,6 +94,10 @@ public:
         m_isSegmentOn = !m_isSegmentOn; 
         m_pToggleSegment->SetValue(m_isSegmentOn); 
     }
+
+	void pushHistory();
+	void fillHistory();
+	void popHistory();
    
 public:
     SelectionObject *m_pRoi;
@@ -122,8 +129,9 @@ private:
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
     
 	void generateTexture();
-	void updateTexture( const SubTextureBox drawZone, const bool isRound, float color );
-	void updateTexture( const SubTextureBox drawZone, const bool isRound, wxColor colorRGB );
+	void updateTexture( SubTextureBox drawZone, const bool isRound, float color );
+	void updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB );
+	void updateDrawHistoryTop(const SubTextureBox drawZone, bool isRGB);
 
     void generateGeometry() {};
     void initializeBuffer() {};
@@ -134,7 +142,7 @@ private:
     std::vector<float>			m_floatDataset;
     int							m_dataType;
     TensorField					*m_pTensorField;
-	std::deque<SubTextureBox>	m_drawHistory;
+	std::stack<SubTextureBox>	m_drawHistory;
 };
 
 #endif /* ANATOMY_H_ */

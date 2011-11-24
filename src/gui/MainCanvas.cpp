@@ -167,19 +167,27 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( newZ );
                     m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();
                 }
-                else if ( wxGetKeyState( WXK_CONTROL ) && m_pDatasetHelper->getPointMode() )
+                else if ( wxGetKeyState( WXK_CONTROL ) )
                 {
-                    m_hr = pick( event.GetPosition(),false );
-                    if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
-                    {
-                        m_hr.picked = 20;
-                        SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
-                        wxTreeItemId pId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->AppendItem(
-                                m_pDatasetHelper->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
-                        point->setTreeId( pId );
+					if(m_pDatasetHelper->getPointMode())
+					{
+						m_hr = pick( event.GetPosition(),false );
+						if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
+						{
+							m_hr.picked = 20;
+							SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
+							wxTreeItemId pId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->AppendItem(
+									m_pDatasetHelper->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
+							point->setTreeId( pId );
 
-                        GetEventHandler()->ProcessEvent( event1 );
-                    }
+							GetEventHandler()->ProcessEvent( event1 );
+						}
+					}
+					else if(m_pDatasetHelper->m_isDrawerToolActive && m_pDatasetHelper->m_drawMode != m_pDatasetHelper->DRAWMODE_INVALID)
+					{
+						//save last drawing buffer in history
+						//fillAnatomyHistory();
+					}
                 }
 
             }
@@ -193,14 +201,15 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 				//use Control key for advanced left click actions
 				if ( wxGetKeyState( WXK_CONTROL ))
 				{
-					if (m_pDatasetHelper->m_isDrawerToolActive)
+					if(!m_pDatasetHelper->m_isDragging)
 					{
-						m_hr = pick(event.GetPosition(), true);
-						drawOnAnatomy();
-					}
-					else if(!m_pDatasetHelper->m_isDragging)
-					{
-						if (m_pDatasetHelper->m_isRulerToolActive)
+						if (m_pDatasetHelper->m_isDrawerToolActive)
+						{
+							pushAnatomyHistory();
+							m_hr = pick(event.GetPosition(), true);
+							drawOnAnatomy();
+						}
+						else if (m_pDatasetHelper->m_isRulerToolActive)
 						{
 							m_hr = pick(event.GetPosition(), true);
 						}
@@ -223,6 +232,14 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 						}
 						m_lastPos = event.GetPosition();
 						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
+					}
+					else
+					{
+						if (m_pDatasetHelper->m_isDrawerToolActive)
+						{
+							m_hr = pick(event.GetPosition(), true);
+							drawOnAnatomy();
+						}
 					}
 				}
 				else
@@ -1189,6 +1206,15 @@ void MainCanvas::OnChar( wxKeyEvent& event )
         case WXK_END:
             m_pDatasetHelper->m_rulerPts.clear();
             break; 
+		case 'z': case 'Z': //ctrl-z
+			//if ( wxGetKeyState( WXK_CONTROL ) )
+            //{
+				if(m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					popAnatomyHistory();
+					break; 
+				}
+			//}
         default:
             event.Skip();
             return;
@@ -1269,6 +1295,33 @@ void MainCanvas::drawOnAnatomy()
 	{
 		//TODO
 	}
+}
+
+void MainCanvas::pushAnatomyHistory()
+{
+	// get selected anatomy dataset (that's the one we draw on)
+	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+
+	l_currentAnatomy->pushHistory();
+}
+
+void MainCanvas::fillAnatomyHistory()
+{
+	// get selected anatomy dataset (that's the one we draw on)
+	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+
+	l_currentAnatomy->fillHistory();
+}
+
+void MainCanvas::popAnatomyHistory()
+{
+	// get selected anatomy dataset (that's the one we draw on)
+	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+
+	l_currentAnatomy->popHistory();
 }
 
 //Kmeans Segmentation

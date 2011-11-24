@@ -62,6 +62,10 @@ public:
     void graphCut(std::vector<float>*, std::vector<float>*, float);
     float getElement(int,int,int,std::vector<float>*);
 
+	void pushAnatomyHistory();
+	void fillAnatomyHistory();
+	void popAnatomyHistory();
+
     hitResult pick(wxPoint, bool i_isRulerOrDrawer);
     float getAxisParallelMovement(int, int, int, int, Vector);
     Vector getEventCenter();
