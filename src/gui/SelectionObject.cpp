@@ -638,15 +638,16 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
 // Fill the color array use to display the mean fiber base on the mean fiber direction
 //      i_fiberPoints : All points of the mean fiber
 ///////////////////////////////////////////////////////////////////////////
-void SelectionObject::setNormalColorArray(const vector< Vector > &i_fiberPoints){
+void SelectionObject::setNormalColorArray(const vector< Vector > &i_fiberPoints)
+{
     m_meanFiberColorVector.clear();
     Vector color;
 
-    if (i_fiberPoints.size() < 2)
+    if ( i_fiberPoints.size() < 2 )
         return;
-    for ( int i(0); i < i_fiberPoints.size(); i++ )
+    for ( unsigned int i(0); i < i_fiberPoints.size(); i++ )
     {
-        if (i==0)
+        if ( i==0 )
             color = i_fiberPoints[i+1] - i_fiberPoints[i];
         else
             color = i_fiberPoints[i] - i_fiberPoints[i-1];

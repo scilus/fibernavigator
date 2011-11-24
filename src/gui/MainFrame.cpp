@@ -144,7 +144,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     /*
      * Set OpenGL attributes
      */
-    m_pDatasetHelper->printDebug( _T( "Initializing OpenGL" ), 1 );
+    m_pDatasetHelper->printDebug( _T( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
     GLboolean doubleBuffer = GL_TRUE;
 #ifdef __WXMSW__
     int *gl_attrib = NULL;
@@ -160,7 +160,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 #endif
     if( ! doubleBuffer )
     {
-        m_pDatasetHelper->printDebug( _T( "don't have double buffer, disabling" ), 1 );
+        m_pDatasetHelper->printDebug( _T( "don't have double buffer, disabling" ), LOGLEVEL_MESSAGE );
 #ifdef __WXGTK__
         gl_attrib[9] = None;
 #endif
@@ -268,8 +268,8 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 MainFrame::~MainFrame()
 {
     m_pTimer->Stop();
-    m_pDatasetHelper->printDebug( _T( "main frame destructor" ), 0 );
-    m_pDatasetHelper->printDebug( _T( "timer stopped" ), 0 );
+    m_pDatasetHelper->printDebug( _T( "main frame destructor" ), LOGLEVEL_DEBUG );
+    m_pDatasetHelper->printDebug( _T( "timer stopped" ), LOGLEVEL_DEBUG );
 	if (m_pTimer != NULL)
     {
         delete m_pTimer;
@@ -1210,6 +1210,7 @@ void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
     date = date.BeforeLast( '$' );
     (void)wxMessageBox( _T("Fiber Navigator\nAuthors:http://code.google.com/p/fibernavigator/people/list \n\n" )
                         + rev + _T( "\n" ) + date, _T( "About Fiber Navigator" ) );
+    
 }
 
 void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
@@ -1581,11 +1582,11 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     {
         case MASTER_OBJECT:
         case CHILD_OBJECT:
-            if ( m_pDatasetHelper->m_lastSelectedObject )
+            if ( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
             }
-            if ( m_pDatasetHelper->m_lastSelectedPoint )
+            if ( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
                 m_pDatasetHelper->m_lastSelectedPoint = NULL;
@@ -1599,11 +1600,11 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             break;
 
         case POINT_DATASET:
-            if( m_pDatasetHelper->m_lastSelectedPoint )
+            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
             }
-            if( m_pDatasetHelper->m_lastSelectedObject )
+            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
                 m_pDatasetHelper->m_lastSelectedObject = NULL;
@@ -1617,12 +1618,12 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             break;
 
         default:
-            if( m_pDatasetHelper->m_lastSelectedPoint )
+            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
                 m_pDatasetHelper->m_lastSelectedPoint = NULL;
             }
-            if( m_pDatasetHelper->m_lastSelectedObject )
+            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
                 m_pDatasetHelper->m_lastSelectedObject = NULL;
