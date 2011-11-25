@@ -3397,4 +3397,46 @@ void Fibers::updatePropertiesSizer()
 		m_pRadioTorsion->SetValue( m_fiberColorationMode == TORSION_COLOR );
 		m_isColorationUpdated = false;
 	}
+	
+	DatasetInfo* pDatasetInfo = NULL;
+	
+	long nextItemId = m_dh->m_mainFrame->m_pListCtrl->GetNextItem(m_dh->m_mainFrame->getCurrentListItem());
+
+	pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( nextItemId ));
+	if( pDatasetInfo != NULL)
+	{
+		if(pDatasetInfo->getType() != FIBERS)
+		{
+			DatasetInfo::m_pbtnDown->Disable();
+		}
+		else
+		{
+			DatasetInfo::m_pbtnDown->Enable();
+		}
+	}
+	else
+	{
+		DatasetInfo::m_pbtnDown->Disable();
+	}
+	
+	long prevItemId = m_dh->m_mainFrame->getCurrentListItem() - 1;
+	
+	pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( prevItemId ));
+	if( pDatasetInfo != NULL)
+	{
+		if(pDatasetInfo->getType() != FIBERS)
+		{
+			DatasetInfo::m_pbtnUp->Disable();
+		}
+		else
+		{
+			DatasetInfo::m_pbtnUp->Enable();
+		}
+	}
+	else
+	{
+		DatasetInfo::m_pbtnUp->Disable();
+	}
+
+	
 }

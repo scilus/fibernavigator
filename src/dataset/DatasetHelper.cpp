@@ -375,7 +375,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				{
 					FibersGroup* l_fibersGroup = new FibersGroup( this );
 					l_fibersGroup->setName( wxT( "Fibers Group" ) );
-					l_fibersGroup->setShow(false);
+					l_fibersGroup->setShow(true);
 					l_fibersGroup->setType(FIBERSGROUP);
 					finishLoading( l_fibersGroup );
 
@@ -422,6 +422,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				}			
 
 				l_fibers->updateLinesShown();
+				m_mainFrame->refreshAllGLWidgets();
 				
 				finishLoading( l_fibers, true );
 				m_fibersLoaded = true;
@@ -469,7 +470,7 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
     else
         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
 
-    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), -1 );
+    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 0 );
     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
     m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 

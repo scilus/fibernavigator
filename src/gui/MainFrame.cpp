@@ -281,6 +281,11 @@ MainFrame::~MainFrame()
     }
 }
 
+long MainFrame::getCurrentListItem()
+{
+	return m_currentListItem;
+}
+
 void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
     if( ! m_pDatasetHelper->load( 0 ) )

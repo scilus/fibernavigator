@@ -51,7 +51,9 @@ void PropertiesWindow::OnListItemUp(wxCommandEvent& WXUNUSED(event))
 
 void PropertiesWindow::OnListItemDown( wxCommandEvent& WXUNUSED(event) )
 {
-    m_mainFrame->m_pListCtrl->moveItemDown(m_mainFrame->m_currentListItem);
+
+	m_mainFrame->m_pListCtrl->moveItemDown(m_mainFrame->m_currentListItem);
+	
     m_mainFrame->m_pListCtrl->EnsureVisible(m_mainFrame->m_currentListItem);
     m_mainFrame->refreshAllGLWidgets();
 }

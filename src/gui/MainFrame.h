@@ -42,6 +42,7 @@ public:
     void onTreeChange();
     void onMouseEvent                       ( wxMouseEvent&   event );
     void onLoad                             ( wxCommandEvent& event );
+	long getCurrentListItem();
     
 private:
     // File menu
