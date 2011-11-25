@@ -1344,8 +1344,13 @@ void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onWarningsInformations( wxCommandEvent& WXUNUSED(event) )
 {
 	wxString nl = _T( "\n" );
-    (void)wxMessageBox(_T( "Warnings Informations" ) );
-
+    (void)wxMessageBox(
+		_T("Please take note that the values of the settings used when using the fibers group may not reflect the current value of the settings of all fibers.") 
+		+ nl + nl
+		+ _T("Since it is possible to modify a setting globally, then to modify it locally to a fiber bundle, it is impossible to have only one value reflecting the different values of each bundle.") 
+		+ nl + nl
+		+ _T("Therefore, when using the fibers group, all settings are set to their default values. For example, if you want to set the minimal length of the displayed fibers to the lowest possible value, even if the slider is displayed as being to the lowest value, you have to click the Apply button to make sure that it is applied."),
+		"Warnings Informations about Fibers Group functionalities");
 }
 
 void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
@@ -1570,7 +1575,12 @@ void MainFrame::deleteListItem()
         long tmp = m_currentListItem;
 		if ((((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERSGROUP))
 		{
-			return;
+			FibersGroup* pFibersGroup = NULL;
+			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+			if(pFibersGroup != NULL)
+			{
+				pFibersGroup->OnDeleteFibers();
+			}
 		}
         if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
         {            

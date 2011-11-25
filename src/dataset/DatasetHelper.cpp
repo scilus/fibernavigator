@@ -86,26 +86,25 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
             m_debugLevel( 1 ),
 #endif
 
-    m_showSagittal( true ),
-    m_showCoronal ( true ),
-    m_showAxial   ( true ),
-
-    m_showCrosshair( false ),
     m_isRulerToolActive( false ),
-    m_isSegmentActive( false ),
-    m_isFloodfillActive ( true ),
-    m_isSelectBckActive ( false ),
-    m_isSelectObjActive ( false ),
-    m_isObjfilled ( false ),
-    m_isBckfilled ( false ),
-    m_isObjCreated ( false ),
-    m_isBckCreated ( false ),
-    m_isBoxCreated ( false ),
-    m_thresSliderMoved ( false ),
-    m_SegmentMethod(0),
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
     m_fibersSamplingFactor(1),
+    m_isSegmentActive( false ),
+	m_SegmentMethod(0),
+	m_isFloodfillActive ( true ),
+	m_isSelectBckActive ( false ),
+	m_isSelectObjActive ( false ),
+	m_isObjfilled ( false ),
+	m_isBckfilled ( false ),
+	m_isObjCreated ( false ),
+	m_isBckCreated ( false ),
+	m_isBoxCreated ( false ),
+	m_thresSliderMoved ( false ),
+	m_showSagittal( true ),
+	m_showCoronal ( true ),
+	m_showAxial   ( true ),	
+	m_showCrosshair( false ),
 
     m_xSlize( 0.5 ),
     m_ySlize( 0.5 ),
@@ -151,14 +150,13 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_screenshotPath( _T( "" ) ),
     m_screenshotName( _T( "" ) ),
 
-    m_lastSelectedPoint ( 0 ),
-    m_lastSelectedObject( 0 ),
-    m_boxAtCrosshair    ( 0 ),
     m_anatomyHelper     ( 0 ),
-    m_shaderHelper      ( 0 ),
+	m_boxAtCrosshair    ( 0 ),
+	m_lastSelectedPoint ( 0 ),
+	m_lastSelectedObject( 0 ),
+    m_mainFrame			( mf ),
     m_theScene          ( 0 ),
-
-    m_mainFrame( mf )
+	m_shaderHelper      ( 0 )
 {
     Matrix4fSetIdentity( &m_transform );
 }
@@ -399,7 +397,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				}
 
 				l_fibers->setThreshold( i_threshold );
-				//l_fibers->setShow     ( i_active );
+				l_fibers->setShow     ( i_active );
 				l_fibers->setShowFS   ( i_showFS );
 				l_fibers->setuseTex   ( i_useTex );
 				
@@ -413,10 +411,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 						if(pFibersGroup->getFibersCount() > 0)
 						{
 							l_fibers->setShow( false );
-						}
-						else
-						{
-							l_fibers->setShow( i_active );
 						}
 						pFibersGroup->addFibersSet( l_fibers );
 					}
@@ -453,7 +447,9 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
     long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
     long l_id = 0;
-#endif    
+#endif
+	i_info->setListCtrlItemId(l_id);
+	
 	m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
 
     if( i_info->getShow() )
@@ -473,8 +469,12 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
 
     m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 0 );
     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
-    m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-
+	
+	if( i_info->getType() != FIBERSGROUP )
+	{
+		m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	}
+	
 	if( isChild )
 	{
 		m_mainFrame->m_pListCtrl->moveItemDown( l_id );

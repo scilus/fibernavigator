@@ -305,6 +305,15 @@ void PropertiesWindow::OnListItemShow( wxCommandEvent&  WXUNUSED(event) )
         m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListItem, 0, wxT( "" ), 0 );
     else
         m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListItem, 0, wxT( "" ), 1 );
+	
+	if(l_info->getType() == FIBERSGROUP)
+	{
+		FibersGroup* pFibersGroup = (FibersGroup*)l_info;
+		if(pFibersGroup != NULL)
+		{
+			pFibersGroup->OnToggleVisibleBtn();
+		}
+	}
 
     m_mainFrame->refreshAllGLWidgets();
 }

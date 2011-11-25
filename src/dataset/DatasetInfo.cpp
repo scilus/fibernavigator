@@ -22,6 +22,7 @@ DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) :
             m_brightness      ( 1.0f ),
             m_oldMax          ( 1.0 ),
             m_newMax          ( 1.0 ),
+			m_itemId		  ( 0 ),
 
             m_color           ( wxColour( 128, 10, 10 ) ),
             m_GLuint          ( 0 ),

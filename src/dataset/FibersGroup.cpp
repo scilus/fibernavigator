@@ -385,6 +385,38 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 	pParent->Connect( m_ptoggleColorMode->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleColorModeBtn ) );
 }
 
+void FibersGroup::OnDeleteFibers()
+{
+	int answer = wxMessageBox("Are you sure you want to delete the fibersgroup and all fibers?", "Confirmation", 
+								 wxYES_NO | wxICON_QUESTION);
+					   
+	if( answer == wxYES )
+	{
+		for(int i = (int)m_fibersSets.size(); i >= 0 ; i--)
+		{
+			long itemId = m_fibersSets[i]->getListCtrlItemId();
+			m_dh->m_mainFrame->m_pListCtrl->DeleteItem( itemId );
+		}
+		m_fibersSets.clear();
+		m_dh->m_fibersGroupLoaded = false;
+	}
+}
+
+void FibersGroup::OnToggleVisibleBtn()
+{
+	bool show = getShow();
+	
+	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+	{
+		m_fibersSets[i]->setShow(show);
+		
+		if( show )
+			m_dh->m_mainFrame->m_pListCtrl->SetItem( m_fibersSets[i]->getListCtrlItemId(), 0, wxT( "" ), 0 );
+		else
+			m_dh->m_mainFrame->m_pListCtrl->SetItem( m_fibersSets[i]->getListCtrlItemId(), 0, wxT( "" ), 1 );
+	}
+}
+
 void FibersGroup::OnToggleIntensityBtn()
 {
 	m_isIntensityToggled = true;
@@ -735,15 +767,12 @@ void FibersGroup::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
 
-	DatasetInfo::m_ptoggleVisibility->Hide();
 	DatasetInfo::m_ptoggleFiltering->Hide();
-	DatasetInfo::m_pbtnDelete->Hide();
 	DatasetInfo::m_pbtnDown->Hide();
 	DatasetInfo::m_pbtnUp->Hide();
 	DatasetInfo::m_pBtnFlipX->Hide();
 	DatasetInfo::m_pBtnFlipY->Hide();
 	DatasetInfo::m_pBtnFlipZ->Hide();
-	DatasetInfo::m_pBtnRename->Hide();
 
 	// Hide temporarily opacity functionality
 	m_ptoggleOpacity->Hide();
