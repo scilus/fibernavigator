@@ -44,6 +44,27 @@ void PropertiesWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
 void PropertiesWindow::OnListItemUp(wxCommandEvent& WXUNUSED(event))
 {
+	long prevItemId = m_mainFrame->m_currentListItem - 1;
+	if(prevItemId > -1)
+	{
+		DatasetInfo* pPrevDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(prevItemId));
+		if( pPrevDatasetInfo != NULL)
+		{
+			if( pPrevDatasetInfo->getType() == FIBERS )
+			{
+				FibersGroup* pFibersGroup;
+				m_mainFrame->m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup != NULL)
+				{
+					int nbChilds = pFibersGroup->getFibersCount();
+					m_mainFrame->m_pListCtrl->moveItemAt(m_mainFrame->m_currentListItem, prevItemId - nbChilds);
+					m_mainFrame->m_pListCtrl->EnsureVisible(prevItemId - nbChilds);
+					m_mainFrame->refreshAllGLWidgets();
+					return;
+				}
+			}
+		}
+	}
     m_mainFrame->m_pListCtrl->moveItemUp(m_mainFrame->m_currentListItem);
     m_mainFrame->m_pListCtrl->EnsureVisible(m_mainFrame->m_currentListItem);   
     m_mainFrame->refreshAllGLWidgets();
@@ -51,9 +72,24 @@ void PropertiesWindow::OnListItemUp(wxCommandEvent& WXUNUSED(event))
 
 void PropertiesWindow::OnListItemDown( wxCommandEvent& WXUNUSED(event) )
 {
-
+	long nextItemId = m_mainFrame->m_pListCtrl->GetNextItem(m_mainFrame->m_currentListItem);
+	if(nextItemId > -1)
+	{
+		DatasetInfo* pNextDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(nextItemId));
+		if( pNextDatasetInfo != NULL)
+		{
+			if( pNextDatasetInfo->getType() == FIBERSGROUP )
+			{
+				FibersGroup* pFibersGroup = (FibersGroup*)pNextDatasetInfo;
+				int nbChilds = pFibersGroup->getFibersCount();
+				m_mainFrame->m_pListCtrl->moveItemAt(m_mainFrame->m_currentListItem, nextItemId + nbChilds);
+				m_mainFrame->m_pListCtrl->EnsureVisible(nextItemId + nbChilds);
+				m_mainFrame->refreshAllGLWidgets();
+				return;
+			}
+		}
+	}
 	m_mainFrame->m_pListCtrl->moveItemDown(m_mainFrame->m_currentListItem);
-	
     m_mainFrame->m_pListCtrl->EnsureVisible(m_mainFrame->m_currentListItem);
     m_mainFrame->refreshAllGLWidgets();
 }

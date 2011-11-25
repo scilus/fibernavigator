@@ -98,6 +98,33 @@ void MyListCtrl::moveItemDown(long item)
     SetItemState(item + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
+void MyListCtrl::moveItemAt(long item, long pos)
+{
+	if( pos < 0 || pos > GetItemCount() || item == pos) return;
+	
+	SetItemState(item, 0, wxLIST_STATE_SELECTED);
+	while(item != pos)
+	{
+		if( item < pos )
+		{
+			swap(item, ++item);
+		}
+		else
+		{
+			swap(item, --item);
+		}
+	}
+	SetItemState(pos, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+}
+
+void MyListCtrl::unselectAll()
+{
+	for(int i = 0; i < GetItemCount(); i++)
+	{
+		SetItemState(i, 0, wxLIST_STATE_SELECTED);
+	}
+}
+
 
 BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
     EVT_CHAR(MyTreeCtrl::OnChar)

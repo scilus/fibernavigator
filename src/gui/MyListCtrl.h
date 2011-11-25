@@ -42,6 +42,8 @@ public:
     int getColActivated();
     void moveItemUp(long);
     void moveItemDown(long);
+	void moveItemAt(long item, long pos);
+	void unselectAll();
     
     bool DeleteItem(long item);
 

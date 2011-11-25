@@ -470,10 +470,8 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
     m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 0 );
     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
 	
-	if( i_info->getType() != FIBERSGROUP )
-	{
-		m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-	}
+	m_mainFrame->m_pListCtrl->unselectAll();
+	m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 	
 	if( isChild )
 	{
