@@ -77,6 +77,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_blendAlpha   ( false ),
     m_pointMode    ( false ),
     m_isShowAxes   ( false ),
+	m_pColorData   ( NULL ),
     m_animationStep( 0     ),
 
 #ifdef DEBUG

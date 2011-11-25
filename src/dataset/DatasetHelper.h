@@ -199,6 +199,8 @@ public:
     bool      m_blendAlpha;
     bool      m_pointMode;
     bool      m_isShowAxes;
+	
+	float	  *m_pColorData;
 
     int       m_animationStep;
 

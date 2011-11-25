@@ -1461,13 +1461,19 @@ void Fibers::updateFibersColors()
     }
     else
     {
-        float *pColorData    = NULL;
-
-        if( m_dh->m_useVBO )
-        {
-            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-            pColorData  = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-        }
+		bool glMapBufferUsed( false );
+		float *pColorData( NULL );
+		
+		if( m_dh->m_useVBO )
+		{
+			if( m_dh->m_pColorData == NULL)
+			{
+				glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+				m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+				glMapBufferUsed = true;
+			}
+			pColorData = m_dh->m_pColorData;
+		}
         else
         {
             pColorData  = &m_colorArray[0];
@@ -1490,7 +1496,7 @@ void Fibers::updateFibersColors()
             colorWithMinDistance( pColorData );
         }
 
-        if( m_dh->m_useVBO )
+        if( m_dh->m_useVBO && glMapBufferUsed )
         {
             glUnmapBuffer( GL_ARRAY_BUFFER );
         }
@@ -1850,12 +1856,17 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
 Anatomy* Fibers::generateFiberVolume()
 {
-    float *pColorData( NULL );
-
-    if( m_dh->m_useVBO )
+	bool glMapBufferUsed( false );
+	float* pColorData( NULL );
+	if( m_dh->m_useVBO )
     {
-        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-        pColorData  = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+		if( m_dh->m_pColorData == NULL)
+		{
+			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+			m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+			glMapBufferUsed = true;
+		}
+		pColorData = m_dh->m_pColorData;
     }
     else
     {
@@ -1868,7 +1879,7 @@ Anatomy* Fibers::generateFiberVolume()
     }
 
     Anatomy *pTmpAnatomy = new Anatomy( m_dh, RGB );
-    pTmpAnatomy->setName( wxT( "Fiber-Density Volume" ) );
+    pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
     
 	#ifdef __WXMAC__
 		// insert at zero is a well-known bug on OSX, so we append there...
@@ -1900,7 +1911,7 @@ Anatomy* Fibers::generateFiberVolume()
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
     }
 
-    if( m_dh->m_useVBO )
+    if( m_dh->m_useVBO && glMapBufferUsed)
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -1913,12 +1924,18 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
     int pointIndex( 0 );
     countLines = 0;
 
-    float *pColorData( NULL );
-
-    if( m_dh->m_useVBO )
+    bool glMapBufferUsed( false );
+	float *pColorData( NULL );
+	
+	if( m_dh->m_useVBO )
     {
-        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+		if( m_dh->m_pColorData == NULL)
+		{
+			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+			m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+			glMapBufferUsed = true;
+		}
+		pColorData = m_dh->m_pColorData;
     }
     else
     {
@@ -1950,7 +1967,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
         }
     }
 
-    if( m_dh->m_useVBO )
+    if( m_dh->m_useVBO && glMapBufferUsed)
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2284,14 +2301,20 @@ void Fibers::createColorArray( const bool colorsLoadedFromFile )
 void Fibers::resetColorArray()
 {
     m_dh->printDebug( _T( "reset color arrays" ), 1 );
-    float *pColorData =  NULL;
-    float *pColorData2 = NULL;
-
-    if( m_dh->m_useVBO )
+    float *pColorData( NULL );
+    float *pColorData2( NULL );
+	bool glMapBufferUsed( false );
+	
+	if( m_dh->m_useVBO )
     {
-        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-        pColorData  = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-        pColorData2 = &m_colorArray[0];
+		if( m_dh->m_pColorData == NULL)
+		{
+			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+			m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+			glMapBufferUsed = true;
+		}
+		pColorData = m_dh->m_pColorData;
+		pColorData2 = &m_colorArray[0];
     }
     else
     {
@@ -2350,7 +2373,7 @@ void Fibers::resetColorArray()
         }
     }
 
-    if( m_dh->m_useVBO )
+    if( m_dh->m_useVBO && glMapBufferUsed )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2455,15 +2478,21 @@ void Fibers::updateLinesShown()
 
         if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->isColorChanged() )
         {
-            float *pColorData  = NULL;
-            float *pColorData2 = NULL;
-
-            if( m_dh->m_useVBO )
-            {
-                glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-                pColorData  = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-                pColorData2 = &m_colorArray[0];
-            }
+			float *pColorData( NULL );
+			float *pColorData2( NULL );
+			bool glMapBufferUsed( false );
+			
+			if( m_dh->m_useVBO )
+			{
+				if( m_dh->m_pColorData == NULL)
+				{
+					glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+					m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+					glMapBufferUsed = true;
+				}
+				pColorData = m_dh->m_pColorData;
+				pColorData2 = &m_colorArray[0];
+			}
             else
             {
                 pColorData  = &m_colorArray[0];
@@ -2491,7 +2520,7 @@ void Fibers::updateLinesShown()
                 }
             }
 
-            if( m_dh->m_useVBO )
+            if( m_dh->m_useVBO && glMapBufferUsed )
             {
                 glUnmapBuffer( GL_ARRAY_BUFFER );
             }
@@ -3425,22 +3454,24 @@ void Fibers::updatePropertiesSizer()
 	
 	long prevItemId = m_dh->m_mainFrame->getCurrentListItem() - 1;
 	
-	pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( prevItemId ));
-	if( pDatasetInfo != NULL)
+	if( prevItemId != -1)
 	{
-		if(pDatasetInfo->getType() != FIBERS)
+		pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( prevItemId ));
+		if( pDatasetInfo != NULL)
 		{
-			DatasetInfo::m_pbtnUp->Disable();
+			if(pDatasetInfo->getType() != FIBERS)
+			{
+				DatasetInfo::m_pbtnUp->Disable();
+			}
+			else
+			{
+				DatasetInfo::m_pbtnUp->Enable();
+			}
 		}
 		else
 		{
-			DatasetInfo::m_pbtnUp->Enable();
+			DatasetInfo::m_pbtnUp->Disable();
 		}
 	}
-	else
-	{
-		DatasetInfo::m_pbtnUp->Disable();
-	}
-
 	
 }
