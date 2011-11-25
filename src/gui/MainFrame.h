@@ -117,6 +117,7 @@ private:
     void onAbout                            ( wxCommandEvent& event );
     void onShortcuts                        ( wxCommandEvent& event );
     void onScreenshot                       ( wxCommandEvent& event );
+	void onWarningsInformations				( wxCommandEvent& event );
     void onSlizeMovieSag                    ( wxCommandEvent& event );
     void onSlizeMovieCor                    ( wxCommandEvent& event );
     void onSlizeMovieAxi                    ( wxCommandEvent& event );

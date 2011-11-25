@@ -105,6 +105,7 @@ public:
         wxMenuItem  *m_itemAbout;
         wxMenuItem  *m_itemKeyboardShortcuts;
         wxMenuItem  *m_itemScreenShot;
+		wxMenuItem	*m_itemWarningsInfo;
         wxMenu      *m_menuMovie;
             wxMenuItem  *m_itemAxialMovie;
             wxMenuItem  *m_itemCoronalMovie;

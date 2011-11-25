@@ -110,6 +110,7 @@ MenuBar::MenuBar()
     m_menuHelp = new wxMenu();
     m_itemKeyboardShortcuts = m_menuHelp->Append(wxID_ANY, wxT("Keyboard Shortcut"));
     m_itemScreenShot = m_menuHelp->Append(wxID_ANY, wxT("ScreenShot"));
+	m_itemWarningsInfo = m_menuHelp->Append(wxID_ANY, wxT("Warnings Informations"));
     //m_menuMovie = new  wxMenu();
     //m_itemAxialMovie = m_menuMovie->Append(wxID_ANY, wxT("Axial"));
     //m_itemCoronalMovie = m_menuMovie->Append(wxID_ANY, wxT("Coronal"));
@@ -194,6 +195,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemAbout->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onAbout));
     mf->Connect(m_itemKeyboardShortcuts->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onShortcuts));
     mf->Connect(m_itemScreenShot->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshot));
+	mf->Connect(m_itemWarningsInfo->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onWarningsInformations));
     //mf->Connect(m_itemAxialMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieAxi));
     //mf->Connect(m_itemCoronalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieCor));
     //mf->Connect(m_itemSagittalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieSag));

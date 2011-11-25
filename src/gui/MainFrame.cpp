@@ -1087,7 +1087,8 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 		if( pDatasetInfo->getType() == FIBERS )
 		{
 			Fibers* l_fibers = NULL;
-			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
+			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
+			if( l_fibers != NULL)
 			{
 				l_fibers->invertFibers();
 			}
@@ -1095,7 +1096,8 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
 		{
 			FibersGroup* l_fibersGroup = NULL;
-			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) != NULL )
+			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+			if( l_fibersGroup != NULL )
 			{
 				l_fibersGroup->invertFibers();
 			}			
@@ -1114,7 +1116,8 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 		if( pDatasetInfo->getType() == FIBERS )
 		{
 			Fibers* l_fibers = NULL;
-			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
+			m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) ;
+			if(l_fibers != NULL)
 			{
 				l_fibers->useFakeTubes();
 			}
@@ -1122,7 +1125,8 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
 		{
 			FibersGroup* l_fibersGroup = NULL;
-			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) != NULL )
+			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+			if( l_fibersGroup != NULL )
 			{
 				l_fibersGroup->useFakeTubes();
 			}			
@@ -1197,7 +1201,8 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 		if( pDatasetInfo->getType() == FIBERS )
 		{
 			Fibers* l_fibers = NULL;
-			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) != NULL)
+			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
+			if( l_fibers != NULL)
 			{
 				l_fibers->useTransparency();
 
@@ -1206,7 +1211,8 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
 		{
 			FibersGroup* l_fibersGroup = NULL;
-			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) != NULL )
+			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+			if( l_fibersGroup != NULL )
 			{
 				l_fibersGroup->useTransparency();
 			}			
@@ -1223,21 +1229,22 @@ void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 
         if( pDatasetInfo->getType() == FIBERS )
         {
-            Fibers* l_fibers = NULL; // Initalize it quiet compiler.
-			if( m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) == NULL)
+            Fibers* l_fibers = NULL;
+			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
+			if( l_fibers  != NULL)
 			{
-				return;
+				l_fibers->resetColorArray();
 			}
-			l_fibers->resetColorArray();
 		}
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
 		{
 			FibersGroup* l_fibersGroup = NULL;
-			if( m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup ) == NULL )
+			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+			if( l_fibersGroup != NULL )
 			{
-				return;
+				l_fibersGroup->resetFibersColor();
 			}
-			l_fibersGroup->resetFibersColor();
+
 		}
 	}
     
@@ -1327,6 +1334,13 @@ void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
                     + _T( "   ctrl + shift + cursor up/down/left/right, page up/down" )
                     + nl + _T( "Delete selected object and all sub objects:" ) + nl
                     + _T( "   del" ) + nl );
+}
+
+void MainFrame::onWarningsInformations( wxCommandEvent& WXUNUSED(event) )
+{
+	wxString nl = _T( "\n" );
+    (void)wxMessageBox(_T( "Warnings Informations" ) );
+
 }
 
 void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )

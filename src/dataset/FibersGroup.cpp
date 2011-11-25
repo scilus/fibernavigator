@@ -256,11 +256,15 @@ void FibersGroup::useTransparency()
 
 void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    DatasetInfo::createPropertiesSizer( pParent );
-    
 	wxSizer *pSizer;
+	pSizer = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxStaticText* pWarningMsg = new wxStaticText( pParent, wxID_ANY , wxT( "Warning: initial state of settings may not represent the current state of all fibers bundles. \n"), wxDefaultPosition, wxSize( 200, -1 ), wxALIGN_CENTRE );
+	pSizer->Add( pWarningMsg , 0, wxALIGN_CENTER );
+	
+	
+    DatasetInfo::createPropertiesSizer( pParent );
 
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
 	m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pMinLengthText = new wxStaticText( pParent, wxID_ANY , wxT( "Min Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
     pSizer->Add( m_pMinLengthText , 0, wxALIGN_CENTER );
