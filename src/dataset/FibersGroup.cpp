@@ -745,6 +745,9 @@ void FibersGroup::updatePropertiesSizer()
 	DatasetInfo::m_pBtnFlipZ->Hide();
 	DatasetInfo::m_pBtnRename->Hide();
 
+	// Hide temporarily opacity functionality
+	m_ptoggleOpacity->Hide();
+	
 	if(m_fibersSets.size() > 0)
 	{
 		m_ptoggleIntensity->Enable();
@@ -807,7 +810,8 @@ void FibersGroup::updatePropertiesSizer()
 		DatasetInfo::m_pOpacityText->Hide();
 		DatasetInfo::m_psliderOpacity->Hide();
 		m_ptoggleOpacity->SetValue(false);
-		m_ptoggleOpacity->Show();
+		// Hide temporarily opacity functionality
+		//m_ptoggleOpacity->Show();
 	}
 
 	if( m_isMinMaxLengthToggled )

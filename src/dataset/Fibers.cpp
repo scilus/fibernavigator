@@ -3388,6 +3388,10 @@ void Fibers::updatePropertiesSizer()
 	m_psliderThresholdIntensity->SetValue( getThreshold()*100 );
 	m_psliderOpacity->SetValue( getAlpha()*100 );
 
+	// Hide temporarily opacity functionality
+	m_psliderOpacity->Hide();
+	m_pOpacityText->Hide();
+	
 	if(m_isColorationUpdated)
 	{
 		m_pRadioNormalColoring->SetValue( m_fiberColorationMode == NORMAL_COLOR );
