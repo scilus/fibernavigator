@@ -22,7 +22,12 @@ bool MyListCtrl::DeleteItem( long itemIdx)
     pDataset = NULL;
     
     SetItemData( itemIdx, 0 );
-    
+	
+	for(int i = itemIdx + 1; i < GetItemCount(); i++)
+	{
+		DatasetInfo *pDataset = reinterpret_cast< DatasetInfo* >( GetItemData( i ) );
+		pDataset->setListCtrlItemId(pDataset->getListCtrlItemId() - 1);
+    }
     return wxListCtrl::DeleteItem( itemIdx );
 }
 
