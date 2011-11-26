@@ -44,13 +44,25 @@ void PropertiesWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
 void PropertiesWindow::OnListItemUp(wxCommandEvent& WXUNUSED(event))
 {
+	DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(m_mainFrame->m_currentListItem));
+	if(pDatasetInfo != NULL)
+	{
+		if( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
+			pFibersGroup->OnMoveUp();
+			m_mainFrame->refreshAllGLWidgets();
+			return;
+		}
+	}
+	
 	long prevItemId = m_mainFrame->m_currentListItem - 1;
 	if(prevItemId > -1)
 	{
 		DatasetInfo* pPrevDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(prevItemId));
 		if( pPrevDatasetInfo != NULL)
 		{
-			if( pPrevDatasetInfo->getType() == FIBERS )
+			if( pPrevDatasetInfo->getType() == FIBERS && pDatasetInfo->getType() != FIBERS )
 			{
 				FibersGroup* pFibersGroup;
 				m_mainFrame->m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
@@ -72,7 +84,19 @@ void PropertiesWindow::OnListItemUp(wxCommandEvent& WXUNUSED(event))
 
 void PropertiesWindow::OnListItemDown( wxCommandEvent& WXUNUSED(event) )
 {
-	long nextItemId = m_mainFrame->m_pListCtrl->GetNextItem(m_mainFrame->m_currentListItem);
+	DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(m_mainFrame->m_currentListItem));
+	if(pDatasetInfo != NULL)
+	{
+		if( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
+			pFibersGroup->OnMoveDown();
+			m_mainFrame->refreshAllGLWidgets();
+			return;
+		}
+	}
+	
+	long nextItemId = m_mainFrame->m_currentListItem + 1;
 	if(nextItemId > -1)
 	{
 		DatasetInfo* pNextDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(nextItemId));

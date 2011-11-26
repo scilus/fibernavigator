@@ -73,13 +73,17 @@ void MyListCtrl::swap(long a, long b)
     DatasetInfo *infoA = (DatasetInfo*) GetItemData(a);
     DatasetInfo *infoB = (DatasetInfo*) GetItemData(b);
 
+	long idA = infoA->getListCtrlItemId();
+	infoA->setListCtrlItemId(infoB->getListCtrlItemId());
+	infoB->setListCtrlItemId(idA);
+	
     SetItem(a, 0, wxT(""), infoB->getShow() ? 0 : 1);
-    SetItem(a, 1, infoB->getName());
+    SetItem(a, 1, infoB->getName().BeforeFirst( '.' ));
     SetItem(a, 2, wxString::Format(wxT("%.2f"), infoB->getThreshold()));
     SetItemData(a, (long)infoB);
 
     SetItem(b, 0, wxT(""), infoA->getShow() ? 0 : 1);
-    SetItem(b, 1, infoA->getName());
+    SetItem(b, 1, infoA->getName().BeforeFirst( '.' ));
     SetItem(b, 2, wxString::Format(wxT("%.2f"), infoA->getThreshold()));
     SetItemData(b, (long)infoA);
 }
@@ -88,6 +92,7 @@ void MyListCtrl::moveItemUp(long item)
 {
     if (item == 0) return;
     swap (item - 1, item);
+	unselectAll();
     SetItemState(item - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
@@ -95,6 +100,7 @@ void MyListCtrl::moveItemDown(long item)
 {
     if (item == GetItemCount() - 1) return;
     swap (item, item +1);
+	unselectAll();
     SetItemState(item + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
@@ -114,6 +120,7 @@ void MyListCtrl::moveItemAt(long item, long pos)
 			swap(item, --item);
 		}
 	}
+	unselectAll();
 	SetItemState(pos, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 

@@ -385,6 +385,43 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 	pParent->Connect( m_ptoggleColorMode->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleColorModeBtn ) );
 }
 
+void FibersGroup::OnMoveUp()
+{
+	if( getListCtrlItemId() <= 0)
+		return;
+	
+	// Move fibergroup up
+	m_dh->m_mainFrame->m_pListCtrl->moveItemUp(getListCtrlItemId());
+	
+	// Move all fibers up
+	for(int i = 0; i < (int)m_fibersSets.size() ; i++)
+	{
+		m_dh->m_mainFrame->m_pListCtrl->moveItemUp(m_fibersSets[i]->getListCtrlItemId());
+	}
+	
+	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
+	m_dh->m_mainFrame->m_pListCtrl->SetItemState(getListCtrlItemId(), wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
+
+}
+
+void FibersGroup::OnMoveDown()
+{
+	if( getListCtrlItemId() + getFibersCount() == m_dh->m_mainFrame->m_pListCtrl->GetItemCount() -1)
+		return;
+	   
+	// Move all fibers down
+	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
+	{
+		m_dh->m_mainFrame->m_pListCtrl->moveItemDown(m_fibersSets[i]->getListCtrlItemId());
+	}
+	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
+	
+	// Move fibergroup down
+	m_dh->m_mainFrame->m_pListCtrl->moveItemDown(getListCtrlItemId());
+	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
+}
+
 void FibersGroup::OnDeleteFibers()
 {
 	int answer = wxMessageBox("Are you sure you want to delete the fibersgroup and all fibers?", "Confirmation", 
@@ -599,11 +636,11 @@ void FibersGroup::fibersNormalColoring()
 			{
 				if( ! m_fibersSets[i]->toggleShowFS() && m_pToggleLocalColoring->GetValue())
 				{
-					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName().BeforeFirst( '.' ) + wxT( "*" ) );
+					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName() + wxT( "*" ) );
 				}
 				else
 				{
-					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName().BeforeFirst( '.' ) );
+					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName() );
 				}
 				m_fibersSets[i]->updateToggleNormalColoring( m_pToggleNormalColoring->GetValue());
 				break;
@@ -768,8 +805,6 @@ void FibersGroup::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
 
 	DatasetInfo::m_ptoggleFiltering->Hide();
-	DatasetInfo::m_pbtnDown->Hide();
-	DatasetInfo::m_pbtnUp->Hide();
 	DatasetInfo::m_pBtnFlipX->Hide();
 	DatasetInfo::m_pBtnFlipY->Hide();
 	DatasetInfo::m_pBtnFlipZ->Hide();
