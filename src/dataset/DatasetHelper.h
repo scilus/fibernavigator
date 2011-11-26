@@ -125,6 +125,7 @@ public:
     bool getPointMode()           { return m_pointMode; };
 
     void updateLoadStatus();
+	void updateItemsId();
 
     void doLicMovie       ( int i_mode );
     void createLicSliceSag( int i_slize );

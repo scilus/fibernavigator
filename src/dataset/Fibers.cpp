@@ -3435,16 +3435,23 @@ void Fibers::updatePropertiesSizer()
 	
 	long nextItemId = m_dh->m_mainFrame->m_pListCtrl->GetNextItem(m_dh->m_mainFrame->getCurrentListItem());
 
-	pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( nextItemId ));
-	if( pDatasetInfo != NULL)
+	if( nextItemId >= 0)
 	{
-		if(pDatasetInfo->getType() != FIBERS)
+		pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( nextItemId ));
+		if( pDatasetInfo != NULL)
 		{
-			DatasetInfo::m_pbtnDown->Disable();
+			if(pDatasetInfo->getType() != FIBERS)
+			{
+				DatasetInfo::m_pbtnDown->Disable();
+			}
+			else
+			{
+				DatasetInfo::m_pbtnDown->Enable();
+			}
 		}
 		else
 		{
-			DatasetInfo::m_pbtnDown->Enable();
+			DatasetInfo::m_pbtnDown->Disable();
 		}
 	}
 	else

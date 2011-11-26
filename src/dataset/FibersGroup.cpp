@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cmath>
+#include <list>
 #include <wx/tokenzr.h>
 
 #include "Anatomy.h"
@@ -392,13 +393,26 @@ void FibersGroup::OnMoveUp()
 	
 	// Move fibergroup up
 	m_dh->m_mainFrame->m_pListCtrl->moveItemUp(getListCtrlItemId());
-	
+
 	// Move all fibers up
-	for(int i = 0; i < (int)m_fibersSets.size() ; i++)
+	std::list<long> idsList;
+	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
 	{
-		m_dh->m_mainFrame->m_pListCtrl->moveItemUp(m_fibersSets[i]->getListCtrlItemId());
+		long itemId = m_fibersSets[i]->getListCtrlItemId();
+		idsList.push_back(itemId);
 	}
-	
+	idsList.sort();
+
+	while( idsList.size() != 0)
+	{
+		long itemId = idsList.front();
+		idsList.pop_front();
+		if( itemId >= 0)
+		{
+			m_dh->m_mainFrame->m_pListCtrl->moveItemUp( itemId );
+		}
+	}
+
 	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
 	m_dh->m_mainFrame->m_pListCtrl->SetItemState(getListCtrlItemId(), wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
@@ -411,9 +425,22 @@ void FibersGroup::OnMoveDown()
 		return;
 	   
 	// Move all fibers down
+	std::list<long> idsList;
 	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
 	{
-		m_dh->m_mainFrame->m_pListCtrl->moveItemDown(m_fibersSets[i]->getListCtrlItemId());
+		long itemId = m_fibersSets[i]->getListCtrlItemId();
+		idsList.push_back(itemId);
+	}
+	idsList.sort();
+
+	while( idsList.size() != 0)
+	{
+		long itemId = idsList.back();
+		idsList.pop_back();
+		if( itemId >= 0)
+		{
+			m_dh->m_mainFrame->m_pListCtrl->moveItemDown( itemId );
+		}
 	}
 	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
 	
@@ -429,10 +456,22 @@ void FibersGroup::OnDeleteFibers()
 					   
 	if( answer == wxYES )
 	{
-		for(int i = (int)m_fibersSets.size(); i >= 0 ; i--)
+		std::list<long> idsList;
+		for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
 		{
 			long itemId = m_fibersSets[i]->getListCtrlItemId();
-			m_dh->m_mainFrame->m_pListCtrl->DeleteItem( itemId );
+			idsList.push_back(itemId);
+		}
+		idsList.sort();
+
+		while( idsList.size() != 0)
+		{
+			long itemId = idsList.back();
+			idsList.pop_back();
+			if( itemId >= 0)
+			{
+				m_dh->m_mainFrame->m_pListCtrl->DeleteItem( itemId );
+			}
 		}
 		m_fibersSets.clear();
 		m_dh->m_fibersGroupLoaded = false;

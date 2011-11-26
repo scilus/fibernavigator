@@ -438,6 +438,18 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 	}
 }
 
+void DatasetHelper::updateItemsId()
+{
+	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+	{
+		DatasetInfo* pDatasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+		if(pDatasetInfo != NULL)
+		{
+			pDatasetInfo->setListCtrlItemId(pDatasetInfo->getListCtrlItemId() + 1);
+		}
+	}
+}
+
 void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
 {
     m_guiBlocked = true;
@@ -447,6 +459,7 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
     long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
     long l_id = 0;
+	updateItemsId();
 #endif
 	i_info->setListCtrlItemId(l_id);
 	

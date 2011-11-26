@@ -73,7 +73,7 @@ void MyListCtrl::swap(long a, long b)
     DatasetInfo *infoA = (DatasetInfo*) GetItemData(a);
     DatasetInfo *infoB = (DatasetInfo*) GetItemData(b);
 
-	long idA = infoA->getListCtrlItemId();
+	int idA = infoA->getListCtrlItemId();
 	infoA->setListCtrlItemId(infoB->getListCtrlItemId());
 	infoB->setListCtrlItemId(idA);
 	
@@ -106,18 +106,19 @@ void MyListCtrl::moveItemDown(long item)
 
 void MyListCtrl::moveItemAt(long item, long pos)
 {
-	if( pos < 0 || pos > GetItemCount() || item == pos) return;
+	if( pos < 0 || pos >= GetItemCount() || item == pos) return;
 	
-	SetItemState(item, 0, wxLIST_STATE_SELECTED);
 	while(item != pos)
 	{
 		if( item < pos )
 		{
-			swap(item, ++item);
+			swap(item, item + 1);
+			item++;
 		}
 		else
 		{
-			swap(item, --item);
+			swap(item - 1, item);
+			item--;
 		}
 	}
 	unselectAll();
