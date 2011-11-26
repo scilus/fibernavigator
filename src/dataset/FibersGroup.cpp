@@ -424,7 +424,7 @@ void FibersGroup::OnMoveDown()
 
 void FibersGroup::OnDeleteFibers()
 {
-	int answer = wxMessageBox("Are you sure you want to delete the fibersgroup and all fibers?", "Confirmation", 
+	int answer = wxMessageBox(wxT("Are you sure you want to delete the fibersgroup and all fibers?"), wxT("Confirmation"), 
 								 wxYES_NO | wxICON_QUESTION);
 					   
 	if( answer == wxYES )
