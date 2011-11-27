@@ -1,10 +1,9 @@
-#ifndef SHADER2_H_
-#define SHADER2_H_
+#ifndef SHADER_H_
+#define SHADER_H_
 
 #include <sstream>
 
 #include <GL/glew.h>
-#include <wx/wxprec.h>
 #include <wx/string.h>
 
 enum SHADERTYPE { SHADERTYPE_VERTEX, SHADERTYPE_GEOMETRY, SHADERTYPE_FRAGMENT };
@@ -31,4 +30,4 @@ private:
     std::ostringstream m_oss;
 };
 
-#endif // SHADER2_H_
+#endif // SHADER_H_

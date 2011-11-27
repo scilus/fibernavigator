@@ -7,7 +7,6 @@ using std::ifstream;
 using std::ostringstream;
 
 #include <GL/glew.h>
-#include <wx/wxprec.h>
 #include <wx/string.h>
 #include <wx/textfile.h>
 

@@ -3,6 +3,11 @@
 // Author:      Ralph Schurade
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef MAIN_H_
+#define MAIN_H_
+
+#include "wx/app.h"
+
 class MyApp : public wxApp
 {
 public:
@@ -20,3 +25,5 @@ public:
     static wxString shaderPath;
     static wxString iconsPath;
 };
+
+#endif // MAIN_H_
