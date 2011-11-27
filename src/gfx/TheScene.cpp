@@ -83,6 +83,8 @@ void TheScene::initGL( int whichView )
     {
         GLenum errorCode = glewInit();
 
+        bool useGeometry( true );
+
         if( GLEW_OK != errorCode )
         {
             // Problem: glewInit failed, something is seriously wrong.
@@ -113,12 +115,19 @@ void TheScene::initGL( int whichView )
                 printf( "*** Please check your OpenGL installation...exiting.\n" );
                 exit( false );
             }
+            else if ( !glewIsSupported( "GL_VERSION_3_2" ) && !glewIsSupported( "GL_ARB_geometry_shader4" ) && !glewIsExtensionSupported( "GL_EXT_geometry_shader4" ) )
+            {
+                m_pDatasetHelper->printDebug( _T( "Geometry shaders not supported. Some operations may run slower and use more CPU." ), LOGLEVEL_WARNING );
+                m_pDatasetHelper->m_geometryShadersSupported = false;
+                useGeometry = false;
+                // TODO: Set some sort of global variable to indicate geometry shaders are not supported
+            }
         }
         glEnable( GL_DEPTH_TEST );
 
         if( ! m_pDatasetHelper->m_texAssigned )
         {
-            m_pDatasetHelper->m_shaderHelper = new ShaderHelper( m_pDatasetHelper );
+            m_pDatasetHelper->m_shaderHelper = new ShaderHelper( m_pDatasetHelper, useGeometry );
             m_pDatasetHelper->m_texAssigned  = true;
         }
 
@@ -436,15 +445,15 @@ void TheScene::renderSlices()
     glAlphaFunc( GL_GREATER, 0.001f ); // Adjust your prefered threshold here.
 
     bindTextures();
-    m_pDatasetHelper->m_shaderHelper->m_pTextureShader->bind();
+    m_pDatasetHelper->m_shaderHelper->m_anatomyShader.bind();
     m_pDatasetHelper->m_shaderHelper->setTextureShaderVars();
-    m_pDatasetHelper->m_shaderHelper->m_pTextureShader->setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+    m_pDatasetHelper->m_shaderHelper->m_anatomyShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
 
     m_pDatasetHelper->m_anatomyHelper->renderMain();
 
     glDisable( GL_BLEND );
 
-    m_pDatasetHelper->m_shaderHelper->m_pTextureShader->release();
+    m_pDatasetHelper->m_shaderHelper->m_anatomyShader.release();
 
     if( m_pDatasetHelper->m_showCrosshair )
         m_pDatasetHelper->m_anatomyHelper->renderCrosshair();
@@ -473,17 +482,17 @@ void TheScene::renderSplineSurface()
 
             lightsOn();
 
-            m_pDatasetHelper->m_shaderHelper->m_pSplineSurfShader->bind();
+            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.bind();
             m_pDatasetHelper->m_shaderHelper->setSplineSurfaceShaderVars();
             wxColor color = pDsInfo->getColor();
             glColor3f( (float) color.Red() / 255.0, (float) color.Green() / 255.0, (float) color.Blue() / 255.0 );
-            m_pDatasetHelper->m_shaderHelper->m_pSplineSurfShader->setUniInt( "useTex", !pDsInfo->getUseTex() );
-            m_pDatasetHelper->m_shaderHelper->m_pSplineSurfShader->setUniInt( "useLic", pDsInfo->getUseLIC() );
-            m_pDatasetHelper->m_shaderHelper->m_pSplineSurfShader->setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
+            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.setUniInt( "useLic", pDsInfo->getUseLIC() );
+            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
 
             pDsInfo->draw();
 
-            m_pDatasetHelper->m_shaderHelper->m_pSplineSurfShader->release();
+            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.release();
 
             lightsOff();
 
@@ -509,7 +518,7 @@ void TheScene::renderMesh()
 
     bindTextures();
 
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->bind();
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.bind();
     m_pDatasetHelper->m_shaderHelper->setMeshShaderVars();
 
     if( m_pDatasetHelper->m_pointMode )
@@ -524,10 +533,10 @@ void TheScene::renderMesh()
     glColor3f( 1.0f, 0.0f, 0.0f );
     std::vector< std::vector< SelectionObject* > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
 
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt  ( "showFS", true );
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt  ( "useTex", false );
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniFloat( "alpha_", 1.0 );
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt  ( "useLic", false );
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "showFS", true );
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useTex", false );
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniFloat( "alpha_", 1.0 );
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useLic", false );
 
     for( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
@@ -551,11 +560,11 @@ void TheScene::renderMesh()
                 wxColor color = pDsInfo->getColor();
                 glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
 
-                m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt  ( "showFS",  pDsInfo->getShowFS() );
-                m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt  ( "useTex",  pDsInfo->getUseTex() );
-                m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniFloat( "alpha_",  pDsInfo->getAlpha() );
-                m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt  ( "useLic",  pDsInfo->getUseLIC() );
-                m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
+                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "showFS",  pDsInfo->getShowFS() );
+                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useTex",  pDsInfo->getUseTex() );
+                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniFloat( "alpha_",  pDsInfo->getAlpha() );
+                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useLic",  pDsInfo->getUseLIC() );
+                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
 
                 if(pDsInfo->getAlpha() < 0.99)
                 {
@@ -572,7 +581,7 @@ void TheScene::renderMesh()
         }
     }
     
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->release();
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.release();
 
     lightsOff();
 
@@ -607,11 +616,11 @@ void TheScene::renderFibers()
             if( ! pDsInfo->getUseTex() )
             {
                 bindTextures();
-                m_pDatasetHelper->m_shaderHelper->m_pFiberShader->bind();
+                m_pDatasetHelper->m_shaderHelper->m_fibersShader.bind();
                 m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
-                m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useTex", !pDsInfo->getUseTex() );
-                m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-                m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useOverlay", pDsInfo->getShowFS() );
+                m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
+                m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+                m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
             }
             if( m_pDatasetHelper->m_selBoxChanged )
             {
@@ -620,7 +629,7 @@ void TheScene::renderFibers()
             }
             pDsInfo->draw();
 
-            m_pDatasetHelper->m_shaderHelper->m_pFiberShader->release();
+            m_pDatasetHelper->m_shaderHelper->m_fibersShader.release();
 
             lightsOff();
         }
@@ -651,15 +660,15 @@ void TheScene::renderFakeTubes()
                 m_pDatasetHelper->m_selBoxChanged = false;
             }
 
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->bind();
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniInt  ( "globalColor", pDsInfo->getShowFS() );
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "thickness", GLfloat( 3.175 ) );
+            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.bind();
+            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", pDsInfo->getShowFS() );
+            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
+            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
+            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
 
             pDsInfo->draw();
 
-            m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->release();
+            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.release();
         }
     }
 
@@ -823,12 +832,12 @@ void TheScene::drawPoints()
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
     lightsOn();
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->bind();
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.bind();
     m_pDatasetHelper->m_shaderHelper->setMeshShaderVars();
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt( "showFS", true );
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt( "useTex", false );
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt( "cutAtSurface", false );
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->setUniInt( "lightOn", true );
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt( "showFS", true );
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt( "useTex", false );
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt( "cutAtSurface", false );
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt( "lightOn", true );
 
     wxTreeItemId treeId;
     wxTreeItemIdValue cookie = 0;
@@ -842,7 +851,7 @@ void TheScene::drawPoints()
     }
 
     lightsOff();
-    m_pDatasetHelper->m_shaderHelper->m_pMeshShader->release();
+    m_pDatasetHelper->m_shaderHelper->m_meshShader.release();
     glPopAttrib();
 
     if ( m_pDatasetHelper->GLError() )
@@ -861,8 +870,8 @@ void TheScene::drawColorMapLegend()
     int maxSize = wxMax(wxMax(m_pDatasetHelper->m_rows, m_pDatasetHelper->m_columns), m_pDatasetHelper->m_frames );
     glOrtho( 0, maxSize, 0, maxSize, -3000, 3000 );
 
-    m_pDatasetHelper->m_shaderHelper->m_pLegendShader->bind();
-    m_pDatasetHelper->m_shaderHelper->m_pLegendShader->setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+    m_pDatasetHelper->m_shaderHelper->m_legendShader.bind();
+    m_pDatasetHelper->m_shaderHelper->m_legendShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
 
     glColor3f( 0.0f, 0.0f, 0.0f );
     glLineWidth( 5.0f );
@@ -873,7 +882,7 @@ void TheScene::drawColorMapLegend()
     glVertex3i( maxSize - 20, 10, 2900 );
     glEnd();
 
-    m_pDatasetHelper->m_shaderHelper->m_pLegendShader->release();
+    m_pDatasetHelper->m_shaderHelper->m_legendShader.release();
 
     glLineWidth( 1.0f );
     glColor3f( 0.0f, 0.0f, 0.0f );
@@ -890,7 +899,7 @@ void TheScene::drawColorMapLegend()
     glVertex3i( maxSize - 20, 12, 2900 );
     glEnd();
 
-    m_pDatasetHelper->m_shaderHelper->m_pLegendShader->release();
+    m_pDatasetHelper->m_shaderHelper->m_legendShader.release();
 
     glPopMatrix();
     glPopAttrib();
@@ -1274,11 +1283,11 @@ void TheScene::drawGraph()
         treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetNextChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
     }
 
-    m_pDatasetHelper->m_shaderHelper->m_pGraphShader->bind();
-    m_pDatasetHelper->m_shaderHelper->m_pGraphShader->setUniInt  ( "globalColor", false );
-    m_pDatasetHelper->m_shaderHelper->m_pGraphShader->setUniFloat( "animation", (float)m_pDatasetHelper->m_animationStep );
-    m_pDatasetHelper->m_shaderHelper->m_pGraphShader->setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-    m_pDatasetHelper->m_shaderHelper->m_pGraphShader->setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
+    m_pDatasetHelper->m_shaderHelper->m_graphShader.bind();
+    m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniInt  ( "globalColor", false );
+    m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniFloat( "animation", (float)m_pDatasetHelper->m_animationStep );
+    m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
+    m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
 
     int countPoints = graphPoints.size() / 3;
     glColor3f( 1.0f, 0.0f, 0.0f );
@@ -1293,7 +1302,7 @@ void TheScene::drawGraph()
                                       ( graphPoints[i*3+1] - graphPoints[j*3+1] ) * ( graphPoints[i*3+1] - graphPoints[j*3+1] ) +
                                       ( graphPoints[i*3+2] - graphPoints[j*3+2] ) * ( graphPoints[i*3+2] - graphPoints[j*3+2] ) );
 
-                m_pDatasetHelper->m_shaderHelper->m_pGraphShader->setUniFloat( "thickness", (float)( i+1 )*2 );
+                m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniFloat( "thickness", (float)( i+1 )*2 );
                 glColor3f( i/10.0f, j/10.0f, i+j/20.0f );
                 glBegin( GL_QUADS );
                     glTexCoord3f( -1.0f, 0, length );
@@ -1313,7 +1322,7 @@ void TheScene::drawGraph()
         }
     }
 
-    m_pDatasetHelper->m_shaderHelper->m_pGraphShader->release();
+    m_pDatasetHelper->m_shaderHelper->m_graphShader.release();
 
     glPopAttrib();
 }
