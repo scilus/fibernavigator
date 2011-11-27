@@ -31,13 +31,13 @@ Logger * Logger::getInstance()
 
 //////////////////////////////////////////////////////////////////////////
 
-void Logger::printDebug( const wxString i_string, const LogLevel i_level )
+void Logger::printDebug( const wxString str, const LogLevel level )
 {
-    if ( m_level > (int)i_level )
+    if ( m_level > (int)level )
         return;
 
     wxString prefix;
-    switch (i_level)
+    switch (level)
     {
     case LOGLEVEL_DEBUG:
         prefix = _T( "DEBUG: " );
@@ -57,40 +57,40 @@ void Logger::printDebug( const wxString i_string, const LogLevel i_level )
     }
 
     printTime();
-    printwxT( prefix + i_string + _T( "\n" ) );
+    printwxT( prefix + str + _T( "\n" ) );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Logger::printGLError( const wxString i_string, const GLenum i_errorCode )
+void Logger::printGLError( const wxString str, const GLenum errorCode )
 {
-    printDebug( i_string, LOGLEVEL_GLERROR );
-    printf( "%s\n", gluErrorString( i_errorCode ) );
+    printDebug( str, LOGLEVEL_GLERROR );
+    printf( "%s\n", gluErrorString( errorCode ) );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Logger::setMessageLevel( int i_level )
+void Logger::setMessageLevel( int level )
 {
-    m_level = i_level;
+    m_level = level;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 void Logger::printTime()
 {
-    wxDateTime l_dataTime = wxDateTime::Now();
-    printf( "[%02d:%02d:%02d] ", l_dataTime.GetHour(), l_dataTime.GetMinute(), l_dataTime.GetSecond() );
+    wxDateTime time = wxDateTime::Now();
+    printf( "[%02d:%02d:%02d] ", time.GetHour(), time.GetMinute(), time.GetSecond() );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Logger::printwxT( const wxString i_string )
+void Logger::printwxT( const wxString str )
 {
-    char* l_cstring = (char*)malloc( i_string.length() + 1 );
-    strcpy( l_cstring, (const char*)i_string.mb_str( wxConvUTF8 ) );
-    printf( "%s", l_cstring );
-    free( l_cstring );
+    char* pStr = (char*)malloc( str.length() + 1 );
+    strcpy( pStr, (const char*)str.mb_str( wxConvUTF8 ) );
+    printf( "%s", pStr );
+    free( pStr );
 }
 
 //////////////////////////////////////////////////////////////////////////

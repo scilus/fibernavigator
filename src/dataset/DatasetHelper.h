@@ -53,11 +53,6 @@ class Surface;
 
 typedef std::vector< std::vector< SelectionObject* > > SelectionObjectList;
 
-#pragma deprecated(printTime, printwxT, printDebug, printGLError)
-
-// printDebug levels
-//enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_WARNING, LOGLEVEL_ERROR };
-
 class DatasetHelper 
 {
 public:
@@ -104,12 +99,24 @@ public:
      * Helper functions
      */
 
+#ifndef __GNUC__
+    #pragma deprecated(printTime, printwxT, printDebug, printGLError)
+    
     // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
     void printTime();
     // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
-    void printwxT  ( const wxString i_string );
+    void printwxT  ( const wxString string );
     // Deprecated: Use Log::printDebug instead.
-    void printDebug( const wxString i_string, const LogLevel i_level );
+    void printDebug( const wxString string, const LogLevel level );
+#else
+    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printTime() __attribute__((deprecated));
+    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printwxT  ( const wxString string ) __attribute__((deprecated));
+    // Deprecated: Use Log::printDebug instead.
+    void printDebug( const wxString string, const LogLevel level ) __attribute__((deprecated));
+#endif
+
     /*
      * Check for GL error
      */
