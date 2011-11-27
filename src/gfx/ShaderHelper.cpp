@@ -7,25 +7,25 @@
 
 #include "ShaderHelper.h"
 
-#include "Program.h"
+#include "ShaderProgram.h"
 
 #include "../dataset/DatasetHelper.h"
 #include "../dataset/Surface.h"
 
 #include "../Logger.h"
 
-ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
-    m_pDh( pDh ),
-    m_anatomy( wxT( "anatomy" ) ),
-    m_mesh( wxT( "mesh" ) ),
-    m_fibers( wxT( "fibers" ) ),
-    m_fakeTubes( wxT( "fake-tubes") ),
-    m_splineSurf( wxT( "splineSurf" ) ),
-    m_vector( wxT( "vectors" ) ),
-    m_legend( wxT( "legend" ) ),
-    m_graph( wxT( "graph" ) ),
-    m_tensors( wxT( "tensors" ) ),
-    m_odfs( wxT( "odfs" ) )
+ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool useGeometryShaders ) :
+    m_anatomyShader( wxT( "anatomy" )/*, useGeometryShaders ? true : false*/ ),
+    m_meshShader( wxT( "mesh" ) ),
+    m_fibersShader( wxT( "fibers" ) ),
+    m_fakeTubesShader( wxT( "fake-tubes") ),
+    m_splineSurfShader( wxT( "splineSurf" ) ),
+    m_vectorShader( wxT( "vectors" ) ),
+    m_legendShader( wxT( "legend" ) ),
+    m_graphShader( wxT( "graph" ) ),
+    m_tensorsShader( wxT( "tensors" ) ),
+    m_odfsShader( wxT( "odfs" ) ),
+    m_pDh( pDh )
 {
     m_tex.resize( 10 );
     m_type.resize( 10 );
@@ -33,9 +33,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     m_alpha.resize( 10 );
 
     Logger::getInstance()->printDebug( _T( "Initializing anatomy shader..." ), LOGLEVEL_MESSAGE );
-    if( m_anatomy.load() && m_anatomy.compileAndLink() )
+    if( m_anatomyShader.load() && m_anatomyShader.compileAndLink() )
     {
-        m_anatomy.bind();
+        m_anatomyShader.bind();
         Logger::getInstance()->printDebug( _T( "Anatomy shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -44,9 +44,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing mesh shader..." ), LOGLEVEL_MESSAGE );
-    if( m_mesh.load() && m_mesh.compileAndLink() )
+    if( m_meshShader.load() && m_meshShader.compileAndLink() )
     {
-        m_mesh.bind();
+        m_meshShader.bind();
         Logger::getInstance()->printDebug( _T( "Mesh shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -55,9 +55,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing fibers shader..." ), LOGLEVEL_MESSAGE );
-    if( m_fibers.load() && m_fibers.compileAndLink() )
+    if( m_fibersShader.load() && m_fibersShader.compileAndLink() )
     {
-        m_fibers.bind();
+        m_fibersShader.bind();
         Logger::getInstance()->printDebug( _T( "Fibers shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -66,9 +66,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing fake tubes shader..." ), LOGLEVEL_MESSAGE );
-    if( m_fakeTubes.load() && m_fakeTubes.compileAndLink() )
+    if( m_fakeTubesShader.load() && m_fakeTubesShader.compileAndLink() )
     {
-        m_fakeTubes.bind();
+        m_fakeTubesShader.bind();
         Logger::getInstance()->printDebug( _T( "Fake Tubes shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -77,9 +77,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing spline surf shader..." ), LOGLEVEL_MESSAGE );
-    if( m_splineSurf.load() && m_splineSurf.compileAndLink() )
+    if( m_splineSurfShader.load() && m_splineSurfShader.compileAndLink() )
     {
-        m_splineSurf.bind();
+        m_splineSurfShader.bind();
         Logger::getInstance()->printDebug( _T( "Spline surf shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -88,9 +88,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     }
 
     //Logger::getInstance()->printDebug( _T( "Initializing vector shader..." ), LOGLEVEL_MESSAGE );
-    //if( m_vector.load() && m_vector.compileAndLink() )
+    //if( m_vectorShader.load() && m_vectorShader.compileAndLink() )
     //{
-    //    m_vector.bind();
+    //    m_vectorShader.bind();
     //    Logger::getInstance()->printDebug( _T( "Vector shader initialized." ), LOGLEVEL_MESSAGE );
     //}
     //else
@@ -99,9 +99,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     //}
 
     Logger::getInstance()->printDebug( _T( "Initializing legend shader..." ), LOGLEVEL_MESSAGE );
-    if( m_legend.load() && m_legend.compileAndLink() )
+    if( m_legendShader.load() && m_legendShader.compileAndLink() )
     {
-        m_legend.bind();
+        m_legendShader.bind();
         Logger::getInstance()->printDebug( _T( "Legend shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -110,9 +110,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing graph shader..." ), LOGLEVEL_MESSAGE );
-    if( m_graph.load() && m_graph.compileAndLink() )
+    if( m_graphShader.load() && m_graphShader.compileAndLink() )
     {
-        m_graph.bind();
+        m_graphShader.bind();
         Logger::getInstance()->printDebug( _T( "Graph shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -121,9 +121,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing tensors shader..." ), LOGLEVEL_MESSAGE );
-    if( m_tensors.load() && m_tensors.compileAndLink() )
+    if( m_tensorsShader.load() && m_tensorsShader.compileAndLink() )
     {
-        m_tensors.bind();
+        m_tensorsShader.bind();
         Logger::getInstance()->printDebug( _T( "Tensors shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -132,9 +132,9 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh ) :
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing odfs shader..." ), LOGLEVEL_MESSAGE );
-    if( m_odfs.load() && m_odfs.compileAndLink() )
+    if( m_odfsShader.load() && m_odfsShader.compileAndLink() )
     {
-        m_odfs.bind();
+        m_odfsShader.bind();
         Logger::getInstance()->printDebug( _T( "Odfs shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
@@ -174,69 +174,69 @@ void ShaderHelper::initializeArrays()
 
 void ShaderHelper::setTextureShaderVars()
 {
-    m_anatomy.setUniInt( "tex0", 0 );
-    m_anatomy.setUniInt( "tex1", 1 );
-    m_anatomy.setUniInt( "tex2", 2 );
-    m_anatomy.setUniInt( "tex3", 3 );
-    m_anatomy.setUniInt( "tex4", 4 );
-    m_anatomy.setUniInt( "tex5", 5 );
-    m_anatomy.setUniInt( "tex6", 6 );
-    m_anatomy.setUniInt( "tex7", 7 );
-    m_anatomy.setUniInt( "tex8", 8 );
-    m_anatomy.setUniInt( "tex9", 9 );
+    m_anatomyShader.setUniInt( "tex0", 0 );
+    m_anatomyShader.setUniInt( "tex1", 1 );
+    m_anatomyShader.setUniInt( "tex2", 2 );
+    m_anatomyShader.setUniInt( "tex3", 3 );
+    m_anatomyShader.setUniInt( "tex4", 4 );
+    m_anatomyShader.setUniInt( "tex5", 5 );
+    m_anatomyShader.setUniInt( "tex6", 6 );
+    m_anatomyShader.setUniInt( "tex7", 7 );
+    m_anatomyShader.setUniInt( "tex8", 8 );
+    m_anatomyShader.setUniInt( "tex9", 9 );
 
-    m_anatomy.setUniInt( "type0", m_type[0] );
-    m_anatomy.setUniInt( "type1", m_type[1] );
-    m_anatomy.setUniInt( "type2", m_type[2] );
-    m_anatomy.setUniInt( "type3", m_type[3] );
-    m_anatomy.setUniInt( "type4", m_type[4] );
-    m_anatomy.setUniInt( "type5", m_type[5] );
-    m_anatomy.setUniInt( "type6", m_type[6] );
-    m_anatomy.setUniInt( "type7", m_type[7] );
-    m_anatomy.setUniInt( "type8", m_type[8] );
-    m_anatomy.setUniInt( "type9", m_type[9] );
+    m_anatomyShader.setUniInt( "type0", m_type[0] );
+    m_anatomyShader.setUniInt( "type1", m_type[1] );
+    m_anatomyShader.setUniInt( "type2", m_type[2] );
+    m_anatomyShader.setUniInt( "type3", m_type[3] );
+    m_anatomyShader.setUniInt( "type4", m_type[4] );
+    m_anatomyShader.setUniInt( "type5", m_type[5] );
+    m_anatomyShader.setUniInt( "type6", m_type[6] );
+    m_anatomyShader.setUniInt( "type7", m_type[7] );
+    m_anatomyShader.setUniInt( "type8", m_type[8] );
+    m_anatomyShader.setUniInt( "type9", m_type[9] );
 
-    m_anatomy.setUniFloat( "threshold0", m_threshold[0] );
-    m_anatomy.setUniFloat( "threshold1", m_threshold[1] );
-    m_anatomy.setUniFloat( "threshold2", m_threshold[2] );
-    m_anatomy.setUniFloat( "threshold3", m_threshold[3] );
-    m_anatomy.setUniFloat( "threshold4", m_threshold[4] );
-    m_anatomy.setUniFloat( "threshold5", m_threshold[5] );
-    m_anatomy.setUniFloat( "threshold6", m_threshold[6] );
-    m_anatomy.setUniFloat( "threshold7", m_threshold[7] );
-    m_anatomy.setUniFloat( "threshold8", m_threshold[8] );
-    m_anatomy.setUniFloat( "threshold9", m_threshold[9] );
+    m_anatomyShader.setUniFloat( "threshold0", m_threshold[0] );
+    m_anatomyShader.setUniFloat( "threshold1", m_threshold[1] );
+    m_anatomyShader.setUniFloat( "threshold2", m_threshold[2] );
+    m_anatomyShader.setUniFloat( "threshold3", m_threshold[3] );
+    m_anatomyShader.setUniFloat( "threshold4", m_threshold[4] );
+    m_anatomyShader.setUniFloat( "threshold5", m_threshold[5] );
+    m_anatomyShader.setUniFloat( "threshold6", m_threshold[6] );
+    m_anatomyShader.setUniFloat( "threshold7", m_threshold[7] );
+    m_anatomyShader.setUniFloat( "threshold8", m_threshold[8] );
+    m_anatomyShader.setUniFloat( "threshold9", m_threshold[9] );
 
-    m_anatomy.setUniFloat( "alpha0", m_alpha[0] );
-    m_anatomy.setUniFloat( "alpha1", m_alpha[1] );
-    m_anatomy.setUniFloat( "alpha2", m_alpha[2] );
-    m_anatomy.setUniFloat( "alpha3", m_alpha[3] );
-    m_anatomy.setUniFloat( "alpha4", m_alpha[4] );
-    m_anatomy.setUniFloat( "alpha5", m_alpha[5] );
-    m_anatomy.setUniFloat( "alpha6", m_alpha[6] );
-    m_anatomy.setUniFloat( "alpha7", m_alpha[7] );
-    m_anatomy.setUniFloat( "alpha8", m_alpha[8] );
-    m_anatomy.setUniFloat( "alpha9", m_alpha[9] );
+    m_anatomyShader.setUniFloat( "alpha0", m_alpha[0] );
+    m_anatomyShader.setUniFloat( "alpha1", m_alpha[1] );
+    m_anatomyShader.setUniFloat( "alpha2", m_alpha[2] );
+    m_anatomyShader.setUniFloat( "alpha3", m_alpha[3] );
+    m_anatomyShader.setUniFloat( "alpha4", m_alpha[4] );
+    m_anatomyShader.setUniFloat( "alpha5", m_alpha[5] );
+    m_anatomyShader.setUniFloat( "alpha6", m_alpha[6] );
+    m_anatomyShader.setUniFloat( "alpha7", m_alpha[7] );
+    m_anatomyShader.setUniFloat( "alpha8", m_alpha[8] );
+    m_anatomyShader.setUniFloat( "alpha9", m_alpha[9] );
 }
 
 void ShaderHelper::setMeshShaderVars()
 {
-    m_mesh.setUniInt( "blendTex", m_pDh->m_blendTexOnMesh );
+    m_meshShader.setUniInt( "blendTex", m_pDh->m_blendTexOnMesh );
 
-    m_mesh.setUniInt( "cutAtSurface", m_pDh->m_surfaceLoaded );
-    m_mesh.setUniInt( "lightOn", m_pDh->m_lighting );
+    m_meshShader.setUniInt( "cutAtSurface", m_pDh->m_surfaceLoaded );
+    m_meshShader.setUniInt( "lightOn", m_pDh->m_lighting );
 
-    m_mesh.setUniInt( "dimX", m_pDh->m_columns );
-    m_mesh.setUniInt( "dimY", m_pDh->m_rows );
-    m_mesh.setUniInt( "dimZ", m_pDh->m_frames );
-    m_mesh.setUniFloat( "voxX", m_pDh->m_xVoxel );
-    m_mesh.setUniFloat( "voxY", m_pDh->m_yVoxel );
-    m_mesh.setUniFloat( "voxZ", m_pDh->m_zVoxel );
+    m_meshShader.setUniInt( "dimX", m_pDh->m_columns );
+    m_meshShader.setUniInt( "dimY", m_pDh->m_rows );
+    m_meshShader.setUniInt( "dimZ", m_pDh->m_frames );
+    m_meshShader.setUniFloat( "voxX", m_pDh->m_xVoxel );
+    m_meshShader.setUniFloat( "voxY", m_pDh->m_yVoxel );
+    m_meshShader.setUniFloat( "voxZ", m_pDh->m_zVoxel );
 
-    m_mesh.setUniInt( "sector", m_pDh->m_quadrant );
-    m_mesh.setUniFloat( "cutX", m_pDh->m_xSlize + 0.5f );
-    m_mesh.setUniFloat( "cutY", m_pDh->m_ySlize + 0.5f );
-    m_mesh.setUniFloat( "cutZ", m_pDh->m_zSlize + 0.5f );
+    m_meshShader.setUniInt( "sector", m_pDh->m_quadrant );
+    m_meshShader.setUniFloat( "cutX", m_pDh->m_xSlize + 0.5f );
+    m_meshShader.setUniFloat( "cutY", m_pDh->m_ySlize + 0.5f );
+    m_meshShader.setUniFloat( "cutZ", m_pDh->m_zSlize + 0.5f );
 
 
     for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
@@ -255,45 +255,45 @@ void ShaderHelper::setMeshShaderVars()
             m_type[9] = 5;
         }
     }
-    m_mesh.setUniInt( "cutTex", 9 );
+    m_meshShader.setUniInt( "cutTex", 9 );
 
-    m_mesh.setUniInt( "tex0", 0 );
-    m_mesh.setUniInt( "tex1", 1 );
-    m_mesh.setUniInt( "tex2", 2 );
-    m_mesh.setUniInt( "tex3", 3 );
-    m_mesh.setUniInt( "tex4", 4 );
-    m_mesh.setUniInt( "tex5", 5 );
+    m_meshShader.setUniInt( "tex0", 0 );
+    m_meshShader.setUniInt( "tex1", 1 );
+    m_meshShader.setUniInt( "tex2", 2 );
+    m_meshShader.setUniInt( "tex3", 3 );
+    m_meshShader.setUniInt( "tex4", 4 );
+    m_meshShader.setUniInt( "tex5", 5 );
 
-    m_mesh.setUniInt( "type0", m_type[0] );
-    m_mesh.setUniInt( "type1", m_type[1] );
-    m_mesh.setUniInt( "type2", m_type[2] );
-    m_mesh.setUniInt( "type3", m_type[3] );
-    m_mesh.setUniInt( "type4", m_type[4] );
-    m_mesh.setUniInt( "type5", m_type[5] );
+    m_meshShader.setUniInt( "type0", m_type[0] );
+    m_meshShader.setUniInt( "type1", m_type[1] );
+    m_meshShader.setUniInt( "type2", m_type[2] );
+    m_meshShader.setUniInt( "type3", m_type[3] );
+    m_meshShader.setUniInt( "type4", m_type[4] );
+    m_meshShader.setUniInt( "type5", m_type[5] );
 
-    m_mesh.setUniFloat( "threshold0", m_threshold[0] );
-    m_mesh.setUniFloat( "threshold1", m_threshold[1] );
-    m_mesh.setUniFloat( "threshold2", m_threshold[2] );
-    m_mesh.setUniFloat( "threshold3", m_threshold[3] );
-    m_mesh.setUniFloat( "threshold4", m_threshold[4] );
-    m_mesh.setUniFloat( "threshold5", m_threshold[5] );
+    m_meshShader.setUniFloat( "threshold0", m_threshold[0] );
+    m_meshShader.setUniFloat( "threshold1", m_threshold[1] );
+    m_meshShader.setUniFloat( "threshold2", m_threshold[2] );
+    m_meshShader.setUniFloat( "threshold3", m_threshold[3] );
+    m_meshShader.setUniFloat( "threshold4", m_threshold[4] );
+    m_meshShader.setUniFloat( "threshold5", m_threshold[5] );
 
-    m_mesh.setUniFloat( "alpha0", m_alpha[0] );
-    m_mesh.setUniFloat( "alpha1", m_alpha[1] );
-    m_mesh.setUniFloat( "alpha2", m_alpha[2] );
-    m_mesh.setUniFloat( "alpha3", m_alpha[3] );
-    m_mesh.setUniFloat( "alpha4", m_alpha[4] );
-    m_mesh.setUniFloat( "alpha5", m_alpha[5] );
+    m_meshShader.setUniFloat( "alpha0", m_alpha[0] );
+    m_meshShader.setUniFloat( "alpha1", m_alpha[1] );
+    m_meshShader.setUniFloat( "alpha2", m_alpha[2] );
+    m_meshShader.setUniFloat( "alpha3", m_alpha[3] );
+    m_meshShader.setUniFloat( "alpha4", m_alpha[4] );
+    m_meshShader.setUniFloat( "alpha5", m_alpha[5] );
 }
 
 void ShaderHelper::setFiberShaderVars()
 {
-    m_fibers.setUniInt( "dimX", m_pDh->m_columns );
-    m_fibers.setUniInt( "dimY", m_pDh->m_rows );
-    m_fibers.setUniInt( "dimZ", m_pDh->m_frames );
-    m_fibers.setUniFloat( "voxX", m_pDh->m_xVoxel );
-    m_fibers.setUniFloat( "voxY", m_pDh->m_yVoxel );
-    m_fibers.setUniFloat( "voxZ", m_pDh->m_zVoxel );
+    m_fibersShader.setUniInt( "dimX", m_pDh->m_columns );
+    m_fibersShader.setUniInt( "dimY", m_pDh->m_rows );
+    m_fibersShader.setUniInt( "dimZ", m_pDh->m_frames );
+    m_fibersShader.setUniFloat( "voxX", m_pDh->m_xVoxel );
+    m_fibersShader.setUniFloat( "voxY", m_pDh->m_yVoxel );
+    m_fibersShader.setUniFloat( "voxZ", m_pDh->m_zVoxel );
 
     int tex = 0;
     int show = 0;
@@ -320,46 +320,46 @@ void ShaderHelper::setFiberShaderVars()
             break;
     }
 
-    m_fibers.setUniInt( "tex", tex );
-    m_fibers.setUniInt( "type", type );
-    m_fibers.setUniFloat( "threshold", threshold );
+    m_fibersShader.setUniInt( "tex", tex );
+    m_fibersShader.setUniInt( "type", type );
+    m_fibersShader.setUniFloat( "threshold", threshold );
 }
 
 void ShaderHelper::setSplineSurfaceShaderVars()
 {
-    m_splineSurf.setUniInt( "dimX", m_pDh->m_columns );
-    m_splineSurf.setUniInt( "dimY", m_pDh->m_rows );
-    m_splineSurf.setUniInt( "dimZ", m_pDh->m_frames );
-    m_splineSurf.setUniFloat( "voxX", m_pDh->m_xVoxel );
-    m_splineSurf.setUniFloat( "voxY", m_pDh->m_yVoxel );
-    m_splineSurf.setUniFloat( "voxZ", m_pDh->m_zVoxel );
+    m_splineSurfShader.setUniInt( "dimX", m_pDh->m_columns );
+    m_splineSurfShader.setUniInt( "dimY", m_pDh->m_rows );
+    m_splineSurfShader.setUniInt( "dimZ", m_pDh->m_frames );
+    m_splineSurfShader.setUniFloat( "voxX", m_pDh->m_xVoxel );
+    m_splineSurfShader.setUniFloat( "voxY", m_pDh->m_yVoxel );
+    m_splineSurfShader.setUniFloat( "voxZ", m_pDh->m_zVoxel );
 
-    m_splineSurf.setUniInt( "tex0", 0 );
-    m_splineSurf.setUniInt( "tex1", 1 );
-    m_splineSurf.setUniInt( "tex2", 2 );
-    m_splineSurf.setUniInt( "tex3", 3 );
-    m_splineSurf.setUniInt( "tex4", 4 );
-    m_splineSurf.setUniInt( "tex5", 5 );
+    m_splineSurfShader.setUniInt( "tex0", 0 );
+    m_splineSurfShader.setUniInt( "tex1", 1 );
+    m_splineSurfShader.setUniInt( "tex2", 2 );
+    m_splineSurfShader.setUniInt( "tex3", 3 );
+    m_splineSurfShader.setUniInt( "tex4", 4 );
+    m_splineSurfShader.setUniInt( "tex5", 5 );
 
-    m_splineSurf.setUniInt( "type0", m_type[0] );
-    m_splineSurf.setUniInt( "type1", m_type[1] );
-    m_splineSurf.setUniInt( "type2", m_type[2] );
-    m_splineSurf.setUniInt( "type3", m_type[3] );
-    m_splineSurf.setUniInt( "type4", m_type[4] );
-    m_splineSurf.setUniInt( "type5", m_type[5] );
+    m_splineSurfShader.setUniInt( "type0", m_type[0] );
+    m_splineSurfShader.setUniInt( "type1", m_type[1] );
+    m_splineSurfShader.setUniInt( "type2", m_type[2] );
+    m_splineSurfShader.setUniInt( "type3", m_type[3] );
+    m_splineSurfShader.setUniInt( "type4", m_type[4] );
+    m_splineSurfShader.setUniInt( "type5", m_type[5] );
 
-    m_splineSurf.setUniFloat( "threshold0", m_threshold[0] );
-    m_splineSurf.setUniFloat( "threshold1", m_threshold[1] );
-    m_splineSurf.setUniFloat( "threshold2", m_threshold[2] );
-    m_splineSurf.setUniFloat( "threshold3", m_threshold[3] );
-    m_splineSurf.setUniFloat( "threshold4", m_threshold[4] );
-    m_splineSurf.setUniFloat( "threshold5", m_threshold[5] );
+    m_splineSurfShader.setUniFloat( "threshold0", m_threshold[0] );
+    m_splineSurfShader.setUniFloat( "threshold1", m_threshold[1] );
+    m_splineSurfShader.setUniFloat( "threshold2", m_threshold[2] );
+    m_splineSurfShader.setUniFloat( "threshold3", m_threshold[3] );
+    m_splineSurfShader.setUniFloat( "threshold4", m_threshold[4] );
+    m_splineSurfShader.setUniFloat( "threshold5", m_threshold[5] );
 
-    m_splineSurf.setUniFloat( "alpha0", m_alpha[0] );
-    m_splineSurf.setUniFloat( "alpha1", m_alpha[1] );
-    m_splineSurf.setUniFloat( "alpha2", m_alpha[2] );
-    m_splineSurf.setUniFloat( "alpha3", m_alpha[3] );
-    m_splineSurf.setUniFloat( "alpha4", m_alpha[4] );
-    m_splineSurf.setUniFloat( "alpha5", m_alpha[5] );
+    m_splineSurfShader.setUniFloat( "alpha0", m_alpha[0] );
+    m_splineSurfShader.setUniFloat( "alpha1", m_alpha[1] );
+    m_splineSurfShader.setUniFloat( "alpha2", m_alpha[2] );
+    m_splineSurfShader.setUniFloat( "alpha3", m_alpha[3] );
+    m_splineSurfShader.setUniFloat( "alpha4", m_alpha[4] );
+    m_splineSurfShader.setUniFloat( "alpha5", m_alpha[5] );
 }
 

@@ -15,7 +15,8 @@ using std::ostringstream;
 #include "../Logger.h"
 
 Shader2::Shader2( wxString filename, SHADERTYPE type )
-: m_filename( filename )
+: m_filename( filename ),
+  m_id( NULL )
 {
     switch ( type )
     {
@@ -29,7 +30,14 @@ Shader2::Shader2( wxString filename, SHADERTYPE type )
         m_id = glCreateShader( GL_FRAGMENT_SHADER );
         break;
     default:
-        Logger::getInstance()->printDebug( _T( "Shader type not supported."), LOGLEVEL_ERROR );
+        Logger::getInstance()->printDebug( _T( "Shader type not supported." ), LOGLEVEL_ERROR );
+    }
+
+    if( NULL == m_id )
+    {
+        m_oss << "Failed to create shader " << m_filename.char_str() << ".";
+        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_GLERROR );
+        m_oss.str( "" );
     }
 }
 
@@ -41,25 +49,29 @@ bool Shader2::load()
     Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
     m_oss.str( "" );
 
-    if( fileExists() )
+    if( NULL != m_id )
     {
-        if ( loadFromFile( &m_code, m_filename ) )
+        if( fileExists() )
         {
-            m_oss << "Shader " << m_filename.char_str() << " finished loading.";
-            Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+            if( loadFromFile( &m_code, m_filename ) )
+            {
+                m_oss << "Shader " << m_filename.char_str() << " finished loading.";
+                Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+                m_oss.str( "" );
+                return true;
+            }
+
+            m_oss << "Could not load file " << m_filename.char_str();
+            Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
             m_oss.str( "" );
-            return true;
+            return false;
         }
 
-        m_oss << "Could not load file " << m_filename.char_str();
-        Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
+        m_oss << "File " << m_filename.char_str() << " not found.";
+        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_WARNING );
         m_oss.str( "" );
         return false;
     }
-
-    m_oss << "File " << m_filename.char_str() << " not found.";
-    Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_WARNING );
-    m_oss.str( "" );
     return false;
 }
 
@@ -67,28 +79,32 @@ bool Shader2::load()
 
 bool Shader2::compile()
 {
-    GLuint *id = &m_id;
+    if( NULL != m_id )
+    {
+        GLuint *pId = &m_id;
 
-    m_oss << "Shader " << m_filename.char_str() << " starting to compile...";
-    Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
-    m_oss.str( "" );
+        m_oss << "Shader " << m_filename.char_str() << " starting to compile...";
+        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+        m_oss.str( "" );
 
-    char *temp;
-    temp = ( char* ) malloc( m_code.Length() + 1 );
-    strcpy( temp, ( const char* ) m_code.mb_str( wxConvUTF8 ) );
-    const char* code = temp;
+        char *pTemp;
+        pTemp = ( char* ) malloc( m_code.Length() + 1 );
+        strcpy( pTemp, ( const char* ) m_code.mb_str( wxConvUTF8 ) );
+        const char* pCode = pTemp;
 
-    glShaderSource( *id, 1, &code, NULL );
-    glCompileShader( *id );
-    GLint compiled;
-    glGetShaderiv( *id, GL_COMPILE_STATUS, &compiled );
+        glShaderSource( *pId, 1, &pCode, NULL );
+        glCompileShader( *pId );
+        GLint compiled;
+        glGetShaderiv( *pId, GL_COMPILE_STATUS, &compiled );
 
-    m_oss << "Shader " << m_filename.char_str() << " finished compiling.";
-    Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
-    m_oss.str( "" );
+        m_oss << "Shader " << m_filename.char_str() << " finished compiling.";
+        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+        m_oss.str( "" );
 
-    free( temp );
-    return 0 != compiled; // removes casting warning
+        free( pTemp );
+        return 0 != compiled; // removes casting warning
+    }
+    return false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -107,24 +123,24 @@ const GLuint & Shader2::getId()
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Shader2::loadFromFile(wxString *code, const wxString &filename)
+bool Shader2::loadFromFile( wxString *pCode, const wxString &filename )
 {
     wxTextFile file;
-    *code = wxT("");
+    *pCode = wxT( "" );
 
-    if (file.Open(MyApp::shaderPath + filename))
+    if( file.Open( MyApp::shaderPath + filename ) )
     {
         for( size_t i( 0 ); i < file.GetLineCount(); ++i )
         {
             if( file.GetLine( i ).BeforeFirst( ' ' ) == wxT( "#include" ) )
             {
                 wxString include = wxT( "" );
-                loadFromFile(&include, file.GetLine( i ).AfterFirst( ' ' ));
-                *code += include;
+                loadFromFile( &include, file.GetLine( i ).AfterFirst( ' ' ) );
+                *pCode += include;
             }
             else
             {
-                wxString line = file.GetLine(i);
+                wxString line = file.GetLine( i );
                 line.Trim();
                 line.Trim( true );
 
@@ -136,12 +152,12 @@ bool Shader2::loadFromFile(wxString *code, const wxString &filename)
                         {
                             if( line.GetChar( k ) == '*' && line.GetChar( k+1 ) == '/' )
                             {
-                                *code += _T( "*/" );
+                                *pCode += _T( "*/" );
                             }
                         }
                         break;
                     }
-                    *code += line.GetChar( j );
+                    *pCode += line.GetChar( j );
                 }
             }
         }
@@ -156,7 +172,7 @@ bool Shader2::fileExists()
 {
     bool result;
     ifstream file;
-    file.open(MyApp::shaderPath + m_filename); 
+    file.open( MyApp::shaderPath + m_filename ); 
     result = file.fail() ? false : true;
     file.close();
     return result;

@@ -26,91 +26,91 @@ AnatomyHelper::~AnatomyHelper()
 
 ///////////////////////////////////////////////////////////////////////////
 // COMMENT
-void AnatomyHelper::renderNav( int i_view, Program *i_shader )
+void AnatomyHelper::renderNav( int pView, ShaderProgram *pShader )
 {
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushAttrib( GL_ALL_ATTRIB_BITS );
 
     m_datasetHelper->m_theScene->bindTextures();
-    i_shader->bind();
+    pShader->bind();
     m_datasetHelper->m_shaderHelper->initializeArrays();
     m_datasetHelper->m_shaderHelper->setTextureShaderVars();
 
     glEnable( GL_ALPHA_TEST );
     glAlphaFunc( GL_GREATER, 0.0001f );
 
-    float l_xLine = 0;
-    float l_yLine = 0;
+    float xLine = 0;
+    float yLine = 0;
 
-    float l_max = (float)wxMax( m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel, 
-                         wxMax( m_datasetHelper->m_rows    * m_datasetHelper->m_yVoxel, m_datasetHelper->m_frames * m_datasetHelper->m_zVoxel ) );
+    float max = ( float ) wxMax( m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel, 
+                          wxMax( m_datasetHelper->m_rows  * m_datasetHelper->m_yVoxel, m_datasetHelper->m_frames * m_datasetHelper->m_zVoxel ) );
 
-    float l_x = m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel;
-    float l_y = m_datasetHelper->m_rows    * m_datasetHelper->m_yVoxel;
-    float l_z = m_datasetHelper->m_frames  * m_datasetHelper->m_zVoxel;
+    float x = m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel;
+    float y = m_datasetHelper->m_rows    * m_datasetHelper->m_yVoxel;
+    float z = m_datasetHelper->m_frames  * m_datasetHelper->m_zVoxel;
 
-    float l_xo = ( l_max - l_x ) / 2.0;
-    float l_yo = ( l_max - l_y ) / 2.0;
-    float l_zo = ( l_max - l_z ) / 2.0;
+    float xo = ( max - x ) / 2.0f;
+    float yo = ( max - y ) / 2.0f;
+    float zo = ( max - z ) / 2.0f;
 
-    float l_quadZ = -0.1f;
-    float l_lineZ = 0.0f;
+    float quadZ = -0.1f;
+    float lineZ = 0.0f;
 
-    switch(i_view )
+    switch( pView )
     {
         case AXIAL: 
          {
             glBegin( GL_QUADS );
-                glTexCoord3f( 0.0, 0.0, ( (float)m_datasetHelper->m_zSlize + 0.5f) / (float)m_datasetHelper->m_frames ); glVertex3f( 0   + l_xo, 0   + l_yo, l_quadZ );
-                glTexCoord3f( 1.0, 0.0, ( (float)m_datasetHelper->m_zSlize + 0.5f) / (float)m_datasetHelper->m_frames ); glVertex3f( l_x + l_xo, 0   + l_yo, l_quadZ );
-                glTexCoord3f( 1.0, 1.0, ( (float)m_datasetHelper->m_zSlize + 0.5f) / (float)m_datasetHelper->m_frames ); glVertex3f( l_x + l_xo, l_y + l_yo, l_quadZ );
-                glTexCoord3f( 0.0, 1.0, ( (float)m_datasetHelper->m_zSlize + 0.5f) / (float)m_datasetHelper->m_frames ); glVertex3f( 0   + l_xo, l_y + l_yo, l_quadZ );
+                glTexCoord3f( 0.0f, 0.0f, ( ( float ) m_datasetHelper->m_zSlize + 0.5f ) / ( float ) m_datasetHelper->m_frames ); glVertex3f( 0 + xo, 0 + yo, quadZ );
+                glTexCoord3f( 1.0f, 0.0f, ( ( float ) m_datasetHelper->m_zSlize + 0.5f ) / ( float ) m_datasetHelper->m_frames ); glVertex3f( x + xo, 0 + yo, quadZ );
+                glTexCoord3f( 1.0f, 1.0f, ( ( float ) m_datasetHelper->m_zSlize + 0.5f ) / ( float ) m_datasetHelper->m_frames ); glVertex3f( x + xo, y + yo, quadZ );
+                glTexCoord3f( 0.0f, 1.0f, ( ( float ) m_datasetHelper->m_zSlize + 0.5f ) / ( float ) m_datasetHelper->m_frames ); glVertex3f( 0 + xo, y + yo, quadZ );
             glEnd();
 
-            l_xLine = m_datasetHelper->m_xSlize * m_datasetHelper->m_xVoxel + l_xo;
-            l_yLine = m_datasetHelper->m_ySlize * m_datasetHelper->m_yVoxel + l_yo;
+            xLine = m_datasetHelper->m_xSlize * m_datasetHelper->m_xVoxel + xo;
+            yLine = m_datasetHelper->m_ySlize * m_datasetHelper->m_yVoxel + yo;
         } break;
 
         case CORONAL: 
         {
             glBegin( GL_QUADS );
-                glTexCoord3f( 0.0, ( (float)m_datasetHelper->m_ySlize + 0.5f ) / (float)m_datasetHelper->m_rows, 0.0 ); glVertex3f( 0   + l_xo, 0   + l_zo, l_quadZ );
-                glTexCoord3f( 0.0, ( (float)m_datasetHelper->m_ySlize + 0.5f ) / (float)m_datasetHelper->m_rows, 1.0 ); glVertex3f( 0   + l_xo, l_z + l_zo, l_quadZ );
-                glTexCoord3f( 1.0, ( (float)m_datasetHelper->m_ySlize + 0.5f ) / (float)m_datasetHelper->m_rows, 1.0 ); glVertex3f( l_x + l_xo, l_z + l_zo, l_quadZ );
-                glTexCoord3f( 1.0, ( (float)m_datasetHelper->m_ySlize + 0.5f ) / (float)m_datasetHelper->m_rows, 0.0 ); glVertex3f( l_x + l_xo, 0   + l_zo, l_quadZ );
+                glTexCoord3f( 0.0f, ( ( float ) m_datasetHelper->m_ySlize + 0.5f ) / ( float ) m_datasetHelper->m_rows, 0.0f ); glVertex3f( 0 + xo, 0 + zo, quadZ );
+                glTexCoord3f( 0.0f, ( ( float ) m_datasetHelper->m_ySlize + 0.5f ) / ( float ) m_datasetHelper->m_rows, 1.0f ); glVertex3f( 0 + xo, z + zo, quadZ );
+                glTexCoord3f( 1.0f, ( ( float ) m_datasetHelper->m_ySlize + 0.5f ) / ( float ) m_datasetHelper->m_rows, 1.0f ); glVertex3f( x + xo, z + zo, quadZ );
+                glTexCoord3f( 1.0f, ( ( float ) m_datasetHelper->m_ySlize + 0.5f ) / ( float ) m_datasetHelper->m_rows, 0.0f ); glVertex3f( x + xo, 0 + zo, quadZ );
             glEnd();
 
-            l_xLine = m_datasetHelper->m_xSlize * m_datasetHelper->m_xVoxel + l_xo;
-            l_yLine = m_datasetHelper->m_zSlize * m_datasetHelper->m_zVoxel + l_zo;
+            xLine = m_datasetHelper->m_xSlize * m_datasetHelper->m_xVoxel + xo;
+            yLine = m_datasetHelper->m_zSlize * m_datasetHelper->m_zVoxel + zo;
         } break;
 
         case SAGITTAL: 
         {
             glBegin( GL_QUADS );
-                glTexCoord3f( ( (float)m_datasetHelper->m_xSlize + 0.5f ) / (float)m_datasetHelper->m_columns, 1.0, 0.0 ); glVertex3f( 0   + l_yo, 0   + l_zo, l_quadZ );
-                glTexCoord3f( ( (float)m_datasetHelper->m_xSlize + 0.5f ) / (float)m_datasetHelper->m_columns, 1.0, 1.0 ); glVertex3f( 0   + l_yo, l_z + l_zo, l_quadZ );
-                glTexCoord3f( ( (float)m_datasetHelper->m_xSlize + 0.5f ) / (float)m_datasetHelper->m_columns, 0.0, 1.0 ); glVertex3f( l_y + l_yo, l_z + l_zo, l_quadZ );
-                glTexCoord3f( ( (float)m_datasetHelper->m_xSlize + 0.5f ) / (float)m_datasetHelper->m_columns, 0.0, 0.0 ); glVertex3f( l_y + l_yo, 0 +   l_zo, l_quadZ );
+                glTexCoord3f( ( ( float ) m_datasetHelper->m_xSlize + 0.5f ) / ( float ) m_datasetHelper->m_columns, 1.0f, 0.0f ); glVertex3f( 0 + yo, 0 + zo, quadZ );
+                glTexCoord3f( ( ( float ) m_datasetHelper->m_xSlize + 0.5f ) / ( float ) m_datasetHelper->m_columns, 1.0f, 1.0f ); glVertex3f( 0 + yo, z + zo, quadZ );
+                glTexCoord3f( ( ( float ) m_datasetHelper->m_xSlize + 0.5f ) / ( float ) m_datasetHelper->m_columns, 0.0f, 1.0f ); glVertex3f( y + yo, z + zo, quadZ );
+                glTexCoord3f( ( ( float ) m_datasetHelper->m_xSlize + 0.5f ) / ( float ) m_datasetHelper->m_columns, 0.0f, 0.0f ); glVertex3f( y + yo, 0 + zo, quadZ );
             glEnd();
 
-            l_xLine = l_max - m_datasetHelper->m_ySlize * m_datasetHelper->m_yVoxel;
-            l_yLine = m_datasetHelper->m_zSlize * m_datasetHelper->m_zVoxel + l_zo;
+            xLine = max - m_datasetHelper->m_ySlize * m_datasetHelper->m_yVoxel;
+            yLine = m_datasetHelper->m_zSlize * m_datasetHelper->m_zVoxel + zo;
         } break;
     }
 
     glDisable( GL_TEXTURE_3D );
-    i_shader->release();
+    pShader->release();
     glPopAttrib();
 
-    glLineWidth( 1.0 );
-    glColor3f( 1.0, 0.0, 0.0 );
+    glLineWidth( 1.0f );
+    glColor3f( 1.0f, 0.0f, 0.0f );
     glBegin( GL_LINES );
-        glVertex3f( 0      , l_yLine, l_lineZ );
-        glVertex3f( l_max  , l_yLine, l_lineZ );
-        glVertex3f( l_xLine, 0      , l_lineZ );
-        glVertex3f( l_xLine, l_max  , l_lineZ );
+        glVertex3f( 0    , yLine, lineZ );
+        glVertex3f( max  , yLine, lineZ );
+        glVertex3f( xLine, 0    , lineZ );
+        glVertex3f( xLine, max  , lineZ );
     glEnd();
 
-    glColor3f( 1.0, 1.0, 1.0 );
+    glColor3f( 1.0f, 1.0f, 1.0f );
 }
 
 ///////////////////////////////////////////////////////////////////////////

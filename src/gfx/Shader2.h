@@ -31,4 +31,4 @@ private:
     std::ostringstream m_oss;
 };
 
-#endif SHADER2_H_
+#endif // SHADER2_H_

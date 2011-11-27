@@ -1,4 +1,4 @@
-#include "Program.h"
+#include "ShaderProgram.h"
 
 #include <sstream>
 using std::ostringstream;
@@ -11,8 +11,9 @@ using std::ostringstream;
 
 #include "../Logger.h"
 
-Program::Program( wxString filename, bool useGeometryShader )
-: m_name( filename ),
+ShaderProgram::ShaderProgram( wxString filename, bool useGeometryShader )
+: m_id( NULL ),
+  m_name( filename ),
   m_pVertex( NULL ),
   m_pGeometry( NULL ),
   m_pFragment( NULL ),
@@ -30,7 +31,7 @@ Program::Program( wxString filename, bool useGeometryShader )
 //////////////////////////////////////////////////////////////////////////
 
 // Loads the various shaders from their respective files
-bool Program::load()
+bool ShaderProgram::load()
 {
     m_oss << "Shader " << m_name.char_str() << " starting to load...";
     Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
@@ -38,21 +39,21 @@ bool Program::load()
 
     if( !m_pVertex->load() )
     {
-        m_oss << "Program::load() could not load vertex shader " << m_pVertex->getFilename().char_str();
+        m_oss << "ShaderProgram::load() could not load vertex shader " << m_pVertex->getFilename().char_str();
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
         return false;
     }
     if( m_useGeometry && !m_pGeometry->load() )
     {
-        m_oss << "Program::load() could not load geometry shader " << m_pGeometry->getFilename().char_str();
+        m_oss << "ShaderProgram::load() could not load geometry shader " << m_pGeometry->getFilename().char_str();
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
         return false;
     }
     if( !m_pFragment->load() )
     {
-        m_oss << "Program::load() could not load fragment shader " << m_pFragment->getFilename().char_str();
+        m_oss << "ShaderProgram::load() could not load fragment shader " << m_pFragment->getFilename().char_str();
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
         return false;
@@ -67,7 +68,7 @@ bool Program::load()
 //////////////////////////////////////////////////////////////////////////
 
 // Compiles and links the shaders that form the program
-bool Program::compileAndLink()
+bool ShaderProgram::compileAndLink()
 {
     m_oss << "Shader " << m_name.char_str() << " starting to compile...";
     Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
@@ -75,7 +76,7 @@ bool Program::compileAndLink()
 
     if( !m_pVertex->compile() )
     {
-        m_oss << "Program::compile() could not compile vertex shader " << m_pVertex->getFilename().char_str();
+        m_oss << "ShaderProgram::compile() could not compile vertex shader " << m_pVertex->getFilename().char_str();
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
 
@@ -84,7 +85,7 @@ bool Program::compileAndLink()
     }
     if( m_useGeometry && !m_pGeometry->compile() )
     {
-        m_oss << "Program::compile() could not compile geometry shader " << m_pGeometry->getFilename().char_str();
+        m_oss << "ShaderProgram::compile() could not compile geometry shader " << m_pGeometry->getFilename().char_str();
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
 
@@ -93,7 +94,7 @@ bool Program::compileAndLink()
     }
     if( !m_pFragment->compile() )
     {
-        m_oss << "Program::compile() could not compile fragment shader " << m_pFragment->getFilename().char_str();
+        m_oss << "ShaderProgram::compile() could not compile fragment shader " << m_pFragment->getFilename().char_str();
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
 
@@ -125,14 +126,14 @@ bool Program::compileAndLink()
 
     if( linked )
     {
-        m_oss << "Program " << m_name.char_str() << " successfully linked.";
+        m_oss << "ShaderProgram " << m_name.char_str() << " successfully linked.";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
         
         return true;
     }
     
-    m_oss << "Program " << m_name.char_str() << " could not link.";
+    m_oss << "ShaderProgram " << m_name.char_str() << " could not link.";
     Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
     m_oss.str( "" );
     return false;
@@ -141,33 +142,33 @@ bool Program::compileAndLink()
 //////////////////////////////////////////////////////////////////////////
 
 // Binds the program to opengl
-void Program::bind()
+void ShaderProgram::bind()
 {
     glUseProgram( m_id );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::release()
+void ShaderProgram::release()
 {
-    glUseProgram(0);
+    glUseProgram( 0 );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-GLuint Program::getId()
+GLuint ShaderProgram::getId()
 {
     return m_id;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUniInt(const GLchar* name, const GLint value)
+void ShaderProgram::setUniInt( const GLchar* pName, const GLint value )
 {
-    GLint loc = glGetUniformLocation( m_id, name );
+    GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -176,12 +177,12 @@ void Program::setUniInt(const GLchar* name, const GLint value)
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUniFloat(const GLchar* name, const GLfloat value)
+void ShaderProgram::setUniFloat( const GLchar* pName, const GLfloat value )
 {
-    GLint loc = glGetUniformLocation( m_id, name );
+    GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -190,26 +191,26 @@ void Program::setUniFloat(const GLchar* name, const GLfloat value)
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUniArrayInt(const GLchar* name, GLint* value, const GLint size)
+void ShaderProgram::setUniArrayInt( const GLchar* pName, GLint* pValue, const GLint size )
 {
-    GLint loc = glGetUniformLocation( m_id, name );
+    GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
-    glUniform1iv( loc, size, value );
+    glUniform1iv( loc, size, pValue );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUni3Int(const GLchar* name, GLint values[3])
+void ShaderProgram::setUni3Int( const GLchar* pName, GLint values[3] )
 {
-    GLint loc = glGetUniformLocation( m_id, name );
+    GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -218,26 +219,26 @@ void Program::setUni3Int(const GLchar* name, GLint values[3])
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUniArray1Float(const GLchar* name, GLfloat* value, const int size)
+void ShaderProgram::setUniArray1Float( const GLchar* pName, GLfloat* pValue, const int size )
 {
-    GLint loc = glGetUniformLocation( m_id, name );
+    GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
-    glUniform1fv( loc, size, value );
+    glUniform1fv( loc, size, pValue );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUni2Float(const GLchar* name, std::pair< GLfloat, GLfloat > values)
+void ShaderProgram::setUni2Float( const GLchar* pName, std::pair< GLfloat, GLfloat > values )
 {
-    GLint loc = glGetUniformLocation( m_id, name );
+    GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -246,12 +247,12 @@ void Program::setUni2Float(const GLchar* name, std::pair< GLfloat, GLfloat > val
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUni3Float(const GLchar* name, GLfloat values[3])
+void ShaderProgram::setUni3Float( const GLchar* pName, GLfloat values[3] )
 {
-    GLint loc = glGetUniformLocation( m_id, name );
+    GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -260,12 +261,12 @@ void Program::setUni3Float(const GLchar* name, GLfloat values[3])
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setAttribFloat(const GLchar* name, const GLfloat value)
+void ShaderProgram::setAttribFloat( const GLchar* pName, const GLfloat value )
 {
-    GLint attrib = glGetAttribLocation( m_id, name );
+    GLint attrib = glGetAttribLocation( m_id, pName );
     if( -1 == attrib )
     {
-        m_oss << "No such attribute named \"" << name << "\"";
+        m_oss << "No such attribute named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -274,40 +275,40 @@ void Program::setAttribFloat(const GLchar* name, const GLfloat value)
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUniMatrix3f(const GLchar* name, const FMatrix &values)
+void ShaderProgram::setUniMatrix3f( const GLchar* pName, const FMatrix &values )
 {
-    float* l_valueCast = new float[9];
+    float* pValueCast = new float[9];
 
-    l_valueCast[0] = values(0,0);
-    l_valueCast[1] = values(0,1);
-    l_valueCast[2] = values(0,2);
-    l_valueCast[3] = values(1,0);
-    l_valueCast[4] = values(1,1);
-    l_valueCast[5] = values(1,2);
-    l_valueCast[6] = values(2,0);
-    l_valueCast[7] = values(2,1);
-    l_valueCast[8] = values(2,2);
+    pValueCast[0] = values(0,0);
+    pValueCast[1] = values(0,1);
+    pValueCast[2] = values(0,2);
+    pValueCast[3] = values(1,0);
+    pValueCast[4] = values(1,1);
+    pValueCast[5] = values(1,2);
+    pValueCast[6] = values(2,0);
+    pValueCast[7] = values(2,1);
+    pValueCast[8] = values(2,2);
 
-    GLint loc = glGetUniformLocation( m_id, name );
+    GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
-    glUniformMatrix3fv( loc, 1, GL_TRUE, l_valueCast );
+    glUniformMatrix3fv( loc, 1, GL_TRUE, pValueCast );
 
-    delete[] l_valueCast;
+    delete[] pValueCast;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::setUniSampler(const GLchar* name, const GLint value)
+void ShaderProgram::setUniSampler( const GLchar* pName, const GLint value )
 {
-    GLint loc = glGetUniformLocation( m_id, name );
-    if (loc == -1)
+    GLint loc = glGetUniformLocation( m_id, pName );
+    if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << name << "\"";
+        m_oss << "No such uniform named \"" << pName << "\"";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -316,61 +317,61 @@ void Program::setUniSampler(const GLchar* name, const GLint value)
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::printCompilerLog( GLuint shaderId )
+void ShaderProgram::printCompilerLog( GLuint shaderId )
 {
-    GLint infologLen = 0;
+    GLint infoLogLen = 0;
     GLint charsWritten = 0;
-    GLchar *infoLog;
+    GLchar *pInfoLog;
 
-    glGetShaderiv( shaderId, GL_INFO_LOG_LENGTH, &infologLen );
+    glGetShaderiv( shaderId, GL_INFO_LOG_LENGTH, &infoLogLen );
 
-    if( infologLen > 1 )
+    if( 1 < infoLogLen )
     {
-        infoLog = ( GLchar* ) malloc( infologLen );
-        glGetShaderInfoLog( shaderId, infologLen, &charsWritten, infoLog );
+        pInfoLog = ( GLchar* ) malloc( infoLogLen );
+        glGetShaderInfoLog( shaderId, infoLogLen, &charsWritten, pInfoLog );
         
-        m_oss << "Compiler Logger:\n";
+        m_oss << "Compiler Log:\n";
         m_oss << "===========================================================\n";
-        m_oss << infoLog << "\n";
+        m_oss << pInfoLog << "\n";
         m_oss << "===========================================================";
         
         Logger::getInstance()->printDebug( wxString ( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_GLERROR );
         m_oss.str( "" );
 
-        free( infoLog );
+        free( pInfoLog );
     }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Program::printProgramLog( GLuint id )
+void ShaderProgram::printProgramLog( GLuint programId )
 {
-    GLint infologLen = 0;
+    GLint infoLogLen = 0;
     GLint charsWritten = 0;
-    GLchar *infoLog;
+    GLchar *pInfoLog;
 
-    glGetProgramiv( id, GL_INFO_LOG_LENGTH, &infologLen );
+    glGetProgramiv( programId, GL_INFO_LOG_LENGTH, &infoLogLen );
     
-    if( infologLen > 1 )
+    if( 1 < infoLogLen )
     {
-        infoLog = ( GLchar* ) malloc( infologLen );
-        glGetProgramInfoLog( id, infologLen, &charsWritten, infoLog );
+        pInfoLog = ( GLchar* ) malloc( infoLogLen );
+        glGetProgramInfoLog( programId, infoLogLen, &charsWritten, pInfoLog );
         
-        m_oss << "Program Logger:\n";
+        m_oss << "ShaderProgram Log:\n";
         m_oss << "===========================================================\n";
-        m_oss << infoLog << "\n";
+        m_oss << pInfoLog << "\n";
         m_oss << "===========================================================";
 
         Logger::getInstance()->printDebug( wxString ( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_GLERROR );
         m_oss.str( "" );
 
-        free (infoLog);
+        free( pInfoLog );
     }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-Program::~Program()
+ShaderProgram::~ShaderProgram()
 {
     if( NULL != m_pVertex )
     {

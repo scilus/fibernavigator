@@ -270,27 +270,27 @@ void Tensors::normalize()
 void Tensors::draw()
 {      
     // Enable the tensor shader.    
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.bind();
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.bind();
     
     glBindTexture( GL_TEXTURE_1D, m_textureId );
 
     // This is the color look up table texture.
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniSampler( "clut",          0                         );
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniSampler( "clut",          0                         );
     // This is the alpha level of the tensors.
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniFloat  ( "alpha",         DatasetInfo::m_alpha      );
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniFloat  ( "alpha",         DatasetInfo::m_alpha      );
     // This is the value for the lighting attenuation.
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniFloat  ( "attenuation",   m_lighAttenuation         );
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniFloat  ( "attenuation",   m_lighAttenuation         );
     // This is the value for the light direction.
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUni3Float ( "lightPosition", m_lightPosition           );
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUni3Float ( "lightPosition", m_lightPosition           );
     // This is the brightness level of the tensors.
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniFloat  ( "brightness",    DatasetInfo::m_brightness );
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniFloat  ( "brightness",    DatasetInfo::m_brightness );
     // If m_colorWithPosition is true then the glyph will be colored with the position of the vertex.
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniInt    ( "colorWithPos", (GLint)m_colorWithPosition );
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniInt    ( "colorWithPos", (GLint)m_colorWithPosition );
  
     Glyph::draw();
 
     // Disable the tensor color shader.
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.release();
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.release();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -328,10 +328,10 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
     // Lets set the offset of this tensor.
     GLfloat l_offset[3];
     getVoxelOffset( i_zVoxel, i_yVoxel, i_xVoxel, l_offset );
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUni3Float( "offset", l_offset );
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUni3Float( "offset", l_offset );
 
     // Lets set the color to draw this tensor.
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setAttribFloat( "color", l_tensorFA );
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setAttribFloat( "color", l_tensorFA );
 
     // Set axis flip.
     GLfloat l_flippedAxes[3];
@@ -339,7 +339,7 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
     m_flippedAxes[1] ? l_flippedAxes[1] = -1.0f : l_flippedAxes[1] = 1.0f;
     m_flippedAxes[2] ? l_flippedAxes[2] = -1.0f : l_flippedAxes[2] = 1.0f;
     
-    DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUni3Float(   "axisFlip",    
+    DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUni3Float(   "axisFlip",    
                                                                         l_flippedAxes);
 
 
@@ -360,10 +360,10 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             l_noDeformMatrix( 2, 1 ) = 0.0f;
             l_noDeformMatrix( 2, 2 ) = factor;
             // Lets set the matrix of this tensor so the shader will be able to deform it properly.
-            DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniMatrix3f( "tensorMatrix", l_noDeformMatrix );
+            DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniMatrix3f( "tensorMatrix", l_noDeformMatrix );
         } else {
             // Lets set the matrix of this tensor so the shader will be able to deform it properly.
-            DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
+            DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
         }
         if( ! m_datasetHelper.m_useVBO  )
         {
@@ -375,14 +375,14 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             glVertexPointer( 3, GL_FLOAT, 0, 0 );
         } 
         // Lets set the radius modifier.
-        DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniInt( "displayControl", 0 );
+        DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniInt( "displayControl", 0 );
         // Depending on the orientation of the glyph we do a front or back face culling.
         m_axisFlippedToggled ? glCullFace( GL_FRONT ) : glCullFace( GL_BACK );
         // Draw the first half of the tensor.
         glDrawArrays( GL_TRIANGLE_STRIP, 0, m_nbPointsPerGlyph );
 
         // Lets set the radius modifier.
-        DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniInt( "displayControl", 1 );
+        DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniInt( "displayControl", 1 );
         // Depending on the orientation of the glyph we do a front or back face culling.
         m_axisFlippedToggled ? glCullFace( GL_BACK ) : glCullFace( GL_FRONT );
         // Draw the other half of the tensor.
@@ -391,7 +391,7 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
     else if (isDisplayShape(AXES) || isDisplayShape(AXIS)){
         glDisable( GL_CULL_FACE );
         // Lets set the matrix of this tensor so the shader will be able to deform it properly.
-        DatasetInfo::m_dh->m_shaderHelper->m_tensors.setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
+        DatasetInfo::m_dh->m_shaderHelper->m_tensorsShader.setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
         
         float l_factor = m_scalingFactor/3;
         if (isDisplayShape(AXIS)){
