@@ -139,21 +139,7 @@ bool Shader::loadFromFile( wxString *pCode, const wxString &filename )
                 line.Trim();
                 line.Trim( true );
 
-                for( unsigned int j( 0 ); j < line.Length(); ++j )
-                {
-                    if( line.GetChar( j ) == '/' && line.GetChar( j+1 ) == '/' )
-                    {
-                        for( unsigned int k( j ); k < line.Length(); ++k )
-                        {
-                            if( line.GetChar( k ) == '*' && line.GetChar( k+1 ) == '/' )
-                            {
-                                *pCode += _T( "*/" );
-                            }
-                        }
-                        break;
-                    }
-                    *pCode += line.GetChar( j );
-                }
+                *pCode += line + wxT( '\n' );
             }
         }
         return true;
