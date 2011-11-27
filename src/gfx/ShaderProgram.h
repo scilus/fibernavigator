@@ -46,9 +46,9 @@ private:
 
     GLuint m_id;
     wxString  m_name;
-    Shader2 *m_pVertex;
-    Shader2 *m_pGeometry;
-    Shader2 *m_pFragment;
+    Shader *m_pVertex;
+    Shader *m_pGeometry;
+    Shader *m_pFragment;
     bool m_useGeometry;
     std::ostringstream m_oss;
 };

@@ -8,11 +8,11 @@
 
 enum SHADERTYPE { SHADERTYPE_VERTEX, SHADERTYPE_GEOMETRY, SHADERTYPE_FRAGMENT };
 
-class Shader2
+class Shader
 {
 public:
-    Shader2( wxString filename, SHADERTYPE type );
-    ~Shader2();
+    Shader( wxString filename, SHADERTYPE type );
+    ~Shader();
 
     bool load();
     bool compile();
