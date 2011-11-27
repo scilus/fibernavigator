@@ -6,7 +6,7 @@ using std::ostringstream;
 #include <GL/glew.h>
 #include <wx/string.h>
 
-#include "Shader2.h"
+#include "Shader.h"
 #include "../misc/Fantom/FMatrix.h"
 
 #include "../Logger.h"
