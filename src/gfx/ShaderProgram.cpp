@@ -20,12 +20,12 @@ ShaderProgram::ShaderProgram( wxString filename, bool useGeometryShader )
   m_useGeometry ( useGeometryShader )
 {
     m_id = glCreateProgram();
-    m_pVertex = new Shader2( filename + _T( ".vs" ), SHADERTYPE_VERTEX );
+    m_pVertex = new Shader( filename + _T( ".vs" ), SHADERTYPE_VERTEX );
     if( m_useGeometry ) 
     {
-        m_pGeometry = new Shader2( filename + _T( ".gs" ), SHADERTYPE_GEOMETRY );
+        m_pGeometry = new Shader( filename + _T( ".gs" ), SHADERTYPE_GEOMETRY );
     }
-    m_pFragment = new Shader2( filename + _T( ".fs" ), SHADERTYPE_FRAGMENT );
+    m_pFragment = new Shader( filename + _T( ".fs" ), SHADERTYPE_FRAGMENT );
 }
 
 //////////////////////////////////////////////////////////////////////////

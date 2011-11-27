@@ -13,7 +13,7 @@ using std::ostringstream;
 #include "../main.h"
 #include "../Logger.h"
 
-Shader2::Shader2( wxString filename, SHADERTYPE type )
+Shader::Shader( wxString filename, SHADERTYPE type )
 : m_filename( filename ),
   m_id( NULL )
 {
@@ -42,7 +42,7 @@ Shader2::Shader2( wxString filename, SHADERTYPE type )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Shader2::load()
+bool Shader::load()
 {
     m_oss << "Shader " << m_filename.char_str() << " starting to load...";
     Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
@@ -76,7 +76,7 @@ bool Shader2::load()
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Shader2::compile()
+bool Shader::compile()
 {
     if( NULL != m_id )
     {
@@ -108,21 +108,21 @@ bool Shader2::compile()
 
 //////////////////////////////////////////////////////////////////////////
 
-const wxString & Shader2::getFilename()
+const wxString & Shader::getFilename()
 {
     return m_filename;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-const GLuint & Shader2::getId()
+const GLuint & Shader::getId()
 {
     return m_id;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Shader2::loadFromFile( wxString *pCode, const wxString &filename )
+bool Shader::loadFromFile( wxString *pCode, const wxString &filename )
 {
     wxTextFile file;
     *pCode = wxT( "" );
@@ -167,7 +167,7 @@ bool Shader2::loadFromFile( wxString *pCode, const wxString &filename )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Shader2::fileExists()
+bool Shader::fileExists()
 {
     bool result;
     ifstream file;
@@ -179,7 +179,7 @@ bool Shader2::fileExists()
 
 //////////////////////////////////////////////////////////////////////////
 
-Shader2::~Shader2()
+Shader::~Shader()
 {
     if( 0 != m_id )
     {
