@@ -19,16 +19,16 @@ public:
 
     static Logger * getInstance();
 
-    void printDebug( const wxString i_string, const LogLevel i_level );
-    void printGLError( const wxString i_string, const GLenum i_errorCode );
-    void setMessageLevel( int i_level );
+    void printDebug( const wxString str, const LogLevel level );
+    void printGLError( const wxString str, const GLenum errorCode );
+    void setMessageLevel( int level );
 
 protected:
     Logger();
 
 private:
     void printTime();
-    void printwxT( const wxString i_string );
+    void printwxT( const wxString str );
 
     static Logger *m_pInstance;
     int m_level;
