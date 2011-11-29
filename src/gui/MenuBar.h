@@ -26,6 +26,7 @@ public:
 //private:
     wxMenu      *m_menuFile;
         wxMenuItem  *m_itemLoad;
+        wxMenuItem  *m_itemNewAnatomy;
         wxMenuItem  *m_itemReloadShader;
         wxMenuItem  *m_itemSaveSCN;
         wxMenuItem  *m_itemSaveSelectedFibers;

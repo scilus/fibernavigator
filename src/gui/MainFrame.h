@@ -45,6 +45,7 @@ public:
     
 private:
     // File menu
+    void onNewAnatomy                       ( wxCommandEvent& event );
     void onReloadShaders                    ( wxCommandEvent& event );
     void onSave                             ( wxCommandEvent& event );
     void onSaveFibers                       ( wxCommandEvent& event );

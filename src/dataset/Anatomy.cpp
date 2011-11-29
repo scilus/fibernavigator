@@ -564,11 +564,6 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor
 				int sourceIndex = (c+drawZone.x) + (r+drawZone.y) * m_columns + (f+drawZone.z) * m_columns * m_rows;
 				int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
 
-				//save a backup in the history data
-				//drawZone.data[subIndex*3] = m_floatDataset[sourceIndex*3];
-				//drawZone.data[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
-				//drawZone.data[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
-
 				if(isRound)
 				{
 					//we might have one direction without proper size (flat), but never 2
@@ -1352,14 +1347,6 @@ void Anatomy::updatePropertiesSizer()
 void Anatomy::pushHistory()
 {
 	m_drawHistory.push(stack<SubTextureBox>());
-	//m_drawHistory.top().x = 0;
-	//m_drawHistory.top().y = 0;
-	//m_drawHistory.top().z = 0;
-	//m_drawHistory.top().width = 0;
-	//m_drawHistory.top().height = 0;
-	//m_drawHistory.top().depth = 0;
-	//m_drawHistory.top().datasize = 0;
-	//m_drawHistory.top().data = vector<float>();
 }
 
 void Anatomy::fillHistory( const SubTextureBox drawZone, bool isRGB) 

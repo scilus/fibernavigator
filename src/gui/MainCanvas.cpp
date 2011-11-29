@@ -167,26 +167,18 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( newZ );
                     m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();
                 }
-                else if ( wxGetKeyState( WXK_CONTROL ) )
+                else if ( wxGetKeyState( WXK_CONTROL ) && m_pDatasetHelper->getPointMode())
                 {
-					if(m_pDatasetHelper->getPointMode())
+					m_hr = pick( event.GetPosition(),false );
+					if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
 					{
-						m_hr = pick( event.GetPosition(),false );
-						if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
-						{
-							m_hr.picked = 20;
-							SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
-							wxTreeItemId pId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->AppendItem(
-									m_pDatasetHelper->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
-							point->setTreeId( pId );
+						m_hr.picked = 20;
+						SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
+						wxTreeItemId pId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->AppendItem(
+								m_pDatasetHelper->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
+						point->setTreeId( pId );
 
-							GetEventHandler()->ProcessEvent( event1 );
-						}
-					}
-					else if(m_pDatasetHelper->m_isDrawerToolActive && m_pDatasetHelper->m_drawMode != m_pDatasetHelper->DRAWMODE_INVALID)
-					{
-						//save last drawing buffer in history
-						//fillAnatomyHistory();
+						GetEventHandler()->ProcessEvent( event1 );
 					}
                 }
 
@@ -1236,32 +1228,6 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 
 void MainCanvas::drawOnAnatomy() 
 {
-	/*//If this is the first time the user uses this tool, create the Anatomy
-	if(m_pDatasetHelper->m_drawAnatomy == NULL)
-	{
-	m_pDatasetHelper->m_drawAnatomy = new Anatomy( m_pDatasetHelper );
-	m_pDatasetHelper->m_drawAnatomy->setZero( m_pDatasetHelper->m_columns, m_pDatasetHelper->m_rows, m_pDatasetHelper->m_frames );
-	m_pDatasetHelper->m_drawAnatomy->setDataType( 16 );
-	m_pDatasetHelper->m_drawAnatomy->setType( OVERLAY );
-	m_pDatasetHelper->m_drawAnatomy->setName( wxT(" (paintings)" ) );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 1, m_drawAnatomy->getName() );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00" ) );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( 0, (long) m_drawAnatomy );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-	}*/
-
-	/*if( m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject != NULL && m_pDatasetHelper->m_mainFrame->m_currentListItem != -1 )
-	{
-		if( ((DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject)->getType() < MESH )
-		{
-			Anatomy* currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pCurrentSceneObject;
-		}
-	}*/
-
-	//int dataLength = m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_frames;
-
 	// get selected anatomy dataset (that's the one we draw on)
 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
 	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
@@ -1273,8 +1239,6 @@ void MainCanvas::drawOnAnatomy()
 
 	//1D vector with the normalized brightness ( 0 to 1 )
 	std::vector<float>* sourceData = l_currentAnatomy->getFloatDataset();
-	//std::vector<float>* resultData = new std::vector<float>;
-	//resultData->resize(dataLength);
 
 	//security check: hit detection can be a pixel offset, but negative positions crash
 	if(xClick < 0 || yClick < 0 || zClick < 0)

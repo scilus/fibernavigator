@@ -359,6 +359,24 @@ bool MainFrame::loadIndex( int i_index )
     return true;
 }
 
+//
+//This function creates an Anatomy from scratch
+//
+void MainFrame::onNewAnatomy( wxCommandEvent& WXUNUSED(event) )
+{
+	Anatomy* l_newAnatomy = new Anatomy( m_pDatasetHelper, RGB );
+	l_newAnatomy->setRGBZero( m_pDatasetHelper->m_columns, m_pDatasetHelper->m_rows, m_pDatasetHelper->m_frames );
+	l_newAnatomy->setName( wxT("*paintings" ) );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00" ) );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( 0, (long) l_newAnatomy );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+    refreshAllGLWidgets();
+}
+
 void MainFrame::onReloadShaders( wxCommandEvent& WXUNUSED(event) )
 {
     m_pDatasetHelper->m_scheduledReloadShaders = true;

@@ -237,7 +237,6 @@ public:
         DRAWMODE_INVALID
 	};
 	DrawMode m_drawMode;
-	//Anatomy* m_drawAnatomy;
 	int     m_drawSize;
 	bool    m_drawRound;
 	bool    m_draw3d;
