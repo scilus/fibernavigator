@@ -367,12 +367,20 @@ void MainFrame::onNewAnatomy( wxCommandEvent& WXUNUSED(event) )
 	Anatomy* l_newAnatomy = new Anatomy( m_pDatasetHelper, RGB );
 	l_newAnatomy->setRGBZero( m_pDatasetHelper->m_columns, m_pDatasetHelper->m_rows, m_pDatasetHelper->m_frames );
 	l_newAnatomy->setName( wxT("*paintings" ) );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00" ) );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( 0, (long) l_newAnatomy );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+#ifdef __WXMAC__
+    // insert at zero is a well-known bug on OSX, so we append there...
+    // http://trac.wxwidgets.org/ticket/4492
+    long l_id = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount();
+#else
+    long l_id = 0;
+#endif
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_newAnatomy->getName() );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.00" ) );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) l_newAnatomy );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     refreshAllGLWidgets();
 }

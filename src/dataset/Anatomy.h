@@ -142,7 +142,7 @@ private:
     int					m_dataType;
     TensorField			*m_pTensorField;
 
-	stack< stack<SubTextureBox>>	m_drawHistory;
+	stack< stack< SubTextureBox > >	m_drawHistory;
 };
 
 #endif /* ANATOMY_H_ */
