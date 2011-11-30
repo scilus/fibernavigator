@@ -1381,7 +1381,7 @@ void Anatomy::fillHistory( const SubTextureBox drawZone, bool isRGB)
 	}
 }
 
-void Anatomy::popHistory()
+void Anatomy::popHistory(bool isRGB)
 {
 	if(m_drawHistory.empty())
 	{
@@ -1395,22 +1395,38 @@ void Anatomy::popHistory()
 		//we need to get them back from top to bottom
 		SubTextureBox* topPtr = &(m_drawHistory.top().top());
 
-		for( int f = 0; f < topPtr->depth; ++f )
+		for( int z = 0; z < topPtr->depth; ++z )
 		{
-			for( int r = 0; r < topPtr->height; ++r )
+			for( int y = 0; y < topPtr->height; ++y )
 			{
-				for( int c = 0; c < topPtr->width; ++c )
+				for( int x = 0; x < topPtr->width; ++x )
 				{
-					int sourceIndex = (c+topPtr->x) + (r+topPtr->y) * m_columns + (f+topPtr->z) * m_columns * m_rows;
-					int subIndex = c + r * topPtr->width + f * topPtr->width * topPtr->height;
+					int sourceIndex = (x+topPtr->x) + (y+topPtr->y) * m_columns + (z+topPtr->z) * m_columns * m_rows;
+					int subIndex = x + y * topPtr->width + z * topPtr->width * topPtr->height;
 
-					m_floatDataset[sourceIndex] = topPtr->data[subIndex];
+					if(isRGB)
+					{
+						m_floatDataset[sourceIndex*3] = topPtr->data[subIndex*3];
+						m_floatDataset[sourceIndex*3 + 1] = topPtr->data[subIndex*3 + 1];
+						m_floatDataset[sourceIndex*3 + 2] = topPtr->data[subIndex*3 + 2];
+					}
+					else
+					{
+						m_floatDataset[sourceIndex] = topPtr->data[subIndex];
+					}
 				}
 			}
 		}
 		//restore texture with the data
 		glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
-		glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_LUMINANCE, GL_FLOAT, &(topPtr->data[0]) );
+		if(isRGB)
+		{
+			glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_RGB, GL_FLOAT, &(topPtr->data[0]) );
+		}
+		else
+		{
+			glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_LUMINANCE, GL_FLOAT, &(topPtr->data[0]) );
+		}
 		//discard this subtexture
 		topPtr = NULL;
 		m_drawHistory.top().pop();

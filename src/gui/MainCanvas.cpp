@@ -1255,10 +1255,6 @@ void MainCanvas::drawOnAnatomy()
 		wxColor transparent(0,0,0);
 		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, transparent);
 	}
-	else if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_SCISSOR)
-	{
-		//TODO
-	}
 }
 
 void MainCanvas::pushAnatomyHistory()
@@ -1275,8 +1271,11 @@ void MainCanvas::popAnatomyHistory()
 	// get selected anatomy dataset (that's the one we draw on)
 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
 	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+	
+	//is this Anatomy in RGB or not?
+	bool isRGB = (l_currentAnatomy->getType() == RGB);
 
-	l_currentAnatomy->popHistory();
+	l_currentAnatomy->popHistory(isRGB);
 }
 
 //Kmeans Segmentation

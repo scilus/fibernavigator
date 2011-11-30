@@ -97,7 +97,6 @@ public:
 				wxMenuItem  *m_itemDrawS10;
 			wxMenuItem  *m_itemDrawPen;
 			wxMenuItem  *m_itemDrawEraser;
-			wxMenuItem  *m_itemDrawScissor;
         wxMenu      *m_menuColorMaps;
             wxMenuItem  *m_itemGray;
             wxMenuItem  *m_itemBlueGreenPurple;

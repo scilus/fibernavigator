@@ -49,7 +49,6 @@ public:
     wxToolBarToolBase *m_toggleDraw3d;
 	wxToolBarToolBase *m_selectPen;
 	wxToolBarToolBase *m_selectEraser;
-	wxToolBarToolBase *m_selectScissor;
 };
 
 

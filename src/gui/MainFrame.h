@@ -168,7 +168,6 @@ private:
 	void onSelectStroke10                   ( wxCommandEvent& event );
 	void onSelectPen                        ( wxCommandEvent& event );
 	void onSelectEraser                     ( wxCommandEvent& event );
-	void onSelectScissor                    ( wxCommandEvent& event );
 
     
 private:

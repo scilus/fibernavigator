@@ -96,7 +96,7 @@ public:
     }
 
 	void pushHistory();
-	void popHistory();
+	void popHistory(bool isRGB);
    
 public:
     SelectionObject *m_pRoi;

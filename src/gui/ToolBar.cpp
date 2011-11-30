@@ -101,19 +101,18 @@ ToolBar::ToolBar(wxWindow *parent)
 	wxImage bmp3d (MyApp::iconsPath+ wxT("draw3D.png"), wxBITMAP_TYPE_PNG);
 
 	m_toggleDrawRound = this->AddCheckTool( wxID_ANY, wxT( "Round Shape" ), bmpRound, wxNullBitmap, wxT("Round Shape"));
+    EnableTool(m_toggleDrawRound->GetId(), false);
     m_toggleDraw3d = this->AddCheckTool( wxID_ANY, wxT( "Draw in 3d" ), bmp3d, wxNullBitmap, wxT("Draw in 3d"));
+    EnableTool(m_toggleDraw3d->GetId(), false);
     this->AddSeparator();
 
 	wxImage bmpPen (MyApp::iconsPath+ wxT("draw_pen.png"), wxBITMAP_TYPE_PNG);
 	wxImage bmpEraser (MyApp::iconsPath+ wxT("draw_eraser.png"), wxBITMAP_TYPE_PNG);
-	wxImage bmpScissor (MyApp::iconsPath+ wxT("draw_brush.png"), wxBITMAP_TYPE_PNG);
 
 	m_selectPen = this->AddRadioTool( wxID_ANY, wxT("Use Pen" ), bmpPen, wxNullBitmap, wxT("Use Pen"));
     EnableTool(m_selectPen->GetId(), false);
 	m_selectEraser = this->AddRadioTool( wxID_ANY, wxT("Use Eraser" ), bmpEraser, wxNullBitmap, wxT("Use Eraser"));
 	EnableTool(m_selectEraser->GetId(), false);
-	m_selectScissor = this->AddRadioTool( wxID_ANY, wxT("Use Scissor" ), bmpScissor, wxNullBitmap, wxT("Use Scissor"));
-	EnableTool(m_selectScissor->GetId(), false);
 }
 
 void ToolBar::initToolBar( MainFrame *mf )
@@ -178,6 +177,5 @@ void ToolBar::updateToolBar( MainFrame *mf )
     ToggleTool(m_toggleDraw3d->GetId(), mf->m_pDatasetHelper->m_draw3d);
     ToggleTool(m_selectPen->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
 	ToggleTool(m_selectEraser->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
-	ToggleTool(m_selectScissor->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_SCISSOR);
 	ToggleTool(m_toggleInverseSelection->GetId(), mf->m_pDatasetHelper->m_fibersInverted);
 }

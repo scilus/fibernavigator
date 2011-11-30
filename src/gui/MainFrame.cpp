@@ -364,9 +364,19 @@ bool MainFrame::loadIndex( int i_index )
 //
 void MainFrame::onNewAnatomy( wxCommandEvent& WXUNUSED(event) )
 {
+	// ask user for a name
+	wxString l_givenName = wxT("Anatomy");
+    wxTextEntryDialog dialog(this, _T( "Please enter a new name" ) );
+    dialog.SetValue( l_givenName );
+    if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
+	{
+        l_givenName = dialog.GetValue();
+	}
+
+	//create the anatomy
 	Anatomy* l_newAnatomy = new Anatomy( m_pDatasetHelper, RGB );
 	l_newAnatomy->setRGBZero( m_pDatasetHelper->m_columns, m_pDatasetHelper->m_rows, m_pDatasetHelper->m_frames );
-	l_newAnatomy->setName( wxT("*paintings" ) );
+	l_newAnatomy->setName( l_givenName );
 
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
@@ -695,7 +705,6 @@ void MainFrame::onSelectDrawer( wxCommandEvent& event )
 	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), true);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), true);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), true);
 
 	refreshAllGLWidgets();
 }
@@ -889,17 +898,6 @@ void MainFrame::onSelectEraser( wxCommandEvent& event )
 	}
 	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_ERASER;
 	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
-
-	refreshAllGLWidgets();
-}
-
-void MainFrame::onSelectScissor( wxCommandEvent& event )
-{
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_SCISSOR;
 
 	refreshAllGLWidgets();
 }
@@ -1361,7 +1359,6 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);
 	refreshAllGLWidgets();
 }
 
@@ -1381,7 +1378,6 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
 	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectScissor->GetId(), false);
     refreshAllGLWidgets();
 }
 
