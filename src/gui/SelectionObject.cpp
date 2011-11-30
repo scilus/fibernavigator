@@ -61,6 +61,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_boxMoved                = false;
     m_boxResized            = false;
 
+    m_isCompute = false;
     //Distance coloring
     m_DistColoring          = false;
 
@@ -582,7 +583,7 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     
-    glColor4f( 0.25f, 0.25f, 0.25f, 0.35f ); // Grayish
+    glColor4f( 0.25f, 0.25f, 0.25f, 1 ); // Grayish
 
     Vector l_normal;
 
@@ -617,6 +618,63 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
     }
 
     glDisable( GL_BLEND );
+
+    drawConvexHull();
+}
+
+void SelectionObject::drawConvexHull()
+{
+    if (m_center == m_oldCenter && !m_isCompute){
+
+        vector< Vector > pts;
+        /*vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+        for (int i(0); i< l_selectedFibersPoints.size(); i++)
+            pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());*/
+
+        pts.push_back(Vector(0,5,5));
+        pts.push_back(Vector(0,0,0));
+        pts.push_back(Vector(5,0,5));
+        pts.push_back(Vector(0,5,0));
+        pts.push_back(Vector(5,0,0));
+        pts.push_back(Vector(0,0,5));
+        pts.push_back(Vector(5,5,5));
+        pts.push_back(Vector(5,5,0));
+
+        m_hullPoint.clear();
+        ConvexHullIncremental hull(pts);
+        hull.buildHull( m_hullPoint );
+        m_isCompute = true;
+    }
+
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    glColor4f( 1.0f, 0.0f, 0.0f, 1 ); // Grayish
+
+    Vector normal;
+    glBegin( GL_TRIANGLES );
+        for( unsigned int i = 0; i < m_hullPoint.size(); i+=3 )
+        {
+            //Vector normal;
+            //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
+            //normal.normalize();
+            //glNormal3f(normal[0], normal[1], normal[2]);
+            glVertex3f( m_hullPoint[i].x, m_hullPoint[i].y, m_hullPoint[0].z );
+
+            //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
+            //normal.normalize();
+            //glNormal3f(normal[0], normal[1], normal[2]);
+            glVertex3f( m_hullPoint[i+1].x, m_hullPoint[i+1].y, m_hullPoint[i+1].z );
+
+            //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
+            //normal.normalize();
+            //glNormal3f(normal[0], normal[1], normal[2]);
+            glVertex3f( m_hullPoint[i+2].x, m_hullPoint[i+2].y, m_hullPoint[i+2].z );
+        }
+    glEnd();
+
+    if (m_oldCenter != m_center)
+        m_isCompute = false;
+
+    m_oldCenter = m_center;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -704,6 +762,8 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
                                       o_gridInfo.m_meanCurvature, 
                                       o_gridInfo.m_meanTorsion       );
     //getFiberDispersion              ( o_gridInfo.m_dispersion        );
+
+
 }
 
 
@@ -1136,7 +1196,7 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
         if( ! ( Helper::convert3DPlanePointsTo2D( l_planeNormal, l_intersectionPoints ) ) )
             continue;
 
-        ConvexHull hull( l_intersectionPoints );
+        ConvexGrahamHull hull( l_intersectionPoints );
        
         // Let's build the convex hull.
         vector < Vector > l_hullPoints;

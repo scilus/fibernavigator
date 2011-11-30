@@ -179,6 +179,12 @@ protected :
     float getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] );
     
     Vector          m_center;
+    
+    Vector          m_oldCenter;
+    bool            m_isCompute;
+    vector<Vector>  m_hullPoint;
+
+
     wxColour        m_color;         // Used for coloring the isosurface.
     bool            m_colorChanged;
     wxColour        m_fiberColor;    // Used for the selected fibers.
@@ -244,6 +250,7 @@ protected:
     void   drawThickFiber                    ( const vector< Vector >           &i_fiberPoints,
                                                      float                      i_thickness, 
                                                      int                        i_nmTubeEdge               );
+    void   drawConvexHull                    ();
     void   drawTube                          ( const vector< vector< Vector > > &i_allCirclesPoints,
                                                       GLenum                      i_tubeType               );
     void   getCrossSectionAreaColor          (       unsigned int                i_index                   );
