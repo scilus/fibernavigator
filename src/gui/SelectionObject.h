@@ -22,7 +22,9 @@
 #include "SceneObject.h"
 #include <GL/glew.h>
 #include <vector>
+#include <list>
 #include <wx/grid.h>
+#include "../misc/Algorithms/Face3D.h"
 #include "../dataset/DatasetHelper.h"
 #include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/Vector.h"
@@ -180,10 +182,7 @@ protected :
     
     Vector          m_center;
     
-    Vector          m_oldCenter;
-    bool            m_isCompute;
-    vector<Vector>  m_hullPoint;
-
+    list< Face3D >  m_hullTriangles;
 
     wxColour        m_color;         // Used for coloring the isosurface.
     bool            m_colorChanged;
@@ -224,6 +223,7 @@ public:
     // Functions
     void   calculateGridParams               (       FibersInfoGridParams       &io_gridInfo               );
     void   computeMeanFiber                  ();
+    void   computeConvexHull                 ();
     void   getProgressionCurvature           ( const Vector                     &i_point0, 
                                                const Vector                     &i_point1, 
                                                const Vector                     &i_point2, 
@@ -326,6 +326,7 @@ private:
     wxButton        *m_pbtnNewFibersColorVolume;    
     wxGrid          *m_pgridfibersInfo;
     wxToggleButton  *m_ptoggleDisplayMeanFiber;
+    wxToggleButton  *m_ptoggleDisplayConvexHull;
     wxButton        *m_pbtnDisplayCrossSections;
     wxButton        *m_pbtnDisplayDispersionTube;
     wxButton        *m_pbtnSetAsDistanceAnchor;

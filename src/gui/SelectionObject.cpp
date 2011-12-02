@@ -14,7 +14,8 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../misc/Algorithms/BSpline.h"
-#include "../misc/Algorithms/ConvexHull.h"
+#include "../misc/Algorithms/ConvexHullIncremental.h"
+#include "../misc/Algorithms/ConvexGrahamHull.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../main.h"
 #include "../gui/MainFrame.h"
@@ -61,7 +62,6 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_boxMoved                = false;
     m_boxResized            = false;
 
-    m_isCompute = false;
     //Distance coloring
     m_DistColoring          = false;
 
@@ -619,62 +619,58 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
 
     glDisable( GL_BLEND );
 
-    drawConvexHull();
+}
+
+void SelectionObject::computeConvexHull()
+{
+    if ( m_ptoggleDisplayConvexHull->GetValue() )
+    {
+            vector< Vector > pts;
+            vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+            for (unsigned int i(0); i< l_selectedFibersPoints.size(); i++)
+                pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());
+
+            m_hullTriangles.clear();
+            ConvexHullIncremental hull(pts);
+            hull.buildHull();
+            hull.getHullTriangles( m_hullTriangles );
+    }
 }
 
 void SelectionObject::drawConvexHull()
 {
-    if (m_center == m_oldCenter && !m_isCompute){
+    if ( m_ptoggleDisplayConvexHull->GetValue() && m_ptoggleDisplayConvexHull->IsEnabled() )
+    {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        glEnable( GL_BLEND );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glColor4f( 1.0f, 0.0f, 1.0f, 0.5f ); // Red
 
-        vector< Vector > pts;
-        /*vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
-        for (int i(0); i< l_selectedFibersPoints.size(); i++)
-            pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());*/
+        Vector normal;
+        glBegin( GL_TRIANGLES );
+        list< Face3D >::iterator it;
+            for( it = m_hullTriangles.begin(); it != m_hullTriangles.end(); it++ )
+            {
+                //Vector normal;
+                //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt1().x, it->getPt1().y, it->getPt1().z );
 
-        pts.push_back(Vector(0,5,5));
-        pts.push_back(Vector(0,0,0));
-        pts.push_back(Vector(5,0,5));
-        pts.push_back(Vector(0,5,0));
-        pts.push_back(Vector(5,0,0));
-        pts.push_back(Vector(0,0,5));
-        pts.push_back(Vector(5,5,5));
-        pts.push_back(Vector(5,5,0));
+                //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt2().x, it->getPt2().y, it->getPt2().z );
 
-        m_hullPoint.clear();
-        ConvexHullIncremental hull(pts);
-        hull.buildHull( m_hullPoint );
-        m_isCompute = true;
+                //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt3().x, it->getPt3().y, it->getPt3().z );
+            }
+        glEnd();
+
+        glDisable( GL_BLEND );
     }
-
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-    glColor4f( 1.0f, 0.0f, 0.0f, 1 ); // Grayish
-
-    Vector normal;
-    glBegin( GL_TRIANGLES );
-        for( unsigned int i = 0; i < m_hullPoint.size(); i+=3 )
-        {
-            //Vector normal;
-            //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
-            //normal.normalize();
-            //glNormal3f(normal[0], normal[1], normal[2]);
-            glVertex3f( m_hullPoint[i].x, m_hullPoint[i].y, m_hullPoint[0].z );
-
-            //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
-            //normal.normalize();
-            //glNormal3f(normal[0], normal[1], normal[2]);
-            glVertex3f( m_hullPoint[i+1].x, m_hullPoint[i+1].y, m_hullPoint[i+1].z );
-
-            //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
-            //normal.normalize();
-            //glNormal3f(normal[0], normal[1], normal[2]);
-            glVertex3f( m_hullPoint[i+2].x, m_hullPoint[i+2].y, m_hullPoint[i+2].z );
-        }
-    glEnd();
-
-    if (m_oldCenter != m_center)
-        m_isCompute = false;
-
-    m_oldCenter = m_center;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1200,9 +1196,9 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
        
         // Let's build the convex hull.
         vector < Vector > l_hullPoints;
-        if( ! ( hull.buildHull( l_hullPoints ) ) )
+        if( ! ( hull.buildHull() ) )
             continue;
-
+        hull.getHullPoints( l_hullPoints );
         // Computing the surface area of the hull.
         double l_hullArea = 0.0f;
         if( ! ( hull.area( l_hullArea ) ) )
@@ -1676,6 +1672,7 @@ void SelectionObject::drawFibersInfo()
     
     // Draw the mean fiber.
     drawThickFiber( m_meanFiberPoints, (float)THICK_FIBER_THICKNESS/100.0f, THICK_FIBER_NB_TUBE_EDGE );
+    drawConvexHull();
     drawCrossSections();
     drawDispersionCone();
 
@@ -2025,6 +2022,9 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 
     m_ptoggleCalculatesFibersInfo->Enable(getIsMaster()); //bug with some fibers dataset sets
     
+    m_ptoggleDisplayConvexHull = new wxToggleButton( parent, wxID_ANY, wxT("Display convex hull"), wxDefaultPosition, wxSize(140,-1) );
+    m_propertiesSizer->Add( m_ptoggleDisplayConvexHull, 0, wxALIGN_CENTER );
+    parent->Connect( m_ptoggleDisplayConvexHull->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
     
     m_pbtnNewFibersColorVolume->Enable(getIsMaster());
     m_pbtnNewFibersDensityVolume->Enable(getIsMaster());
@@ -2134,6 +2134,7 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleCalculatesFibersInfo->Enable( getShowFibers() );
     m_pgridfibersInfo->Enable( getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue() );
     m_ptoggleDisplayMeanFiber->Enable( getShowFibers() );
+    m_ptoggleDisplayConvexHull->Enable( getShowFibers() );
 
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.

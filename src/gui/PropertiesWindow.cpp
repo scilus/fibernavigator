@@ -849,6 +849,13 @@ void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
     m_mainFrame->refreshAllGLWidgets();
 }
 
+
+void PropertiesWindow::OnDisplayConvexHull( wxCommandEvent& WXUNUSED(event) )
+{
+    ( (SelectionObject*)m_mainFrame->m_pCurrentSceneObject )->computeConvexHull();
+    m_mainFrame->refreshAllGLWidgets();
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the display cross sections
 // button that is located in the m_fibersInfoSizer.
