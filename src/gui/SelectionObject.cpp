@@ -61,6 +61,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_treeId                = NULL;
     m_boxMoved                = false;
     m_boxResized            = false;
+    m_mustUpdateConvexHull  = true;
 
     //Distance coloring
     m_DistColoring          = false;
@@ -623,7 +624,8 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
 
 void SelectionObject::computeConvexHull()
 {
-    if ( m_ptoggleDisplayConvexHull->GetValue() )
+    m_mustUpdateConvexHull = true;
+    if ( m_ptoggleDisplayConvexHull->GetValue() && m_convexHullOpacity != 0)
     {
             vector< Vector > pts;
             vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
@@ -634,17 +636,21 @@ void SelectionObject::computeConvexHull()
             ConvexHullIncremental hull(pts);
             hull.buildHull();
             hull.getHullTriangles( m_hullTriangles );
+            m_mustUpdateConvexHull = false;
     }
 }
 
 void SelectionObject::drawConvexHull()
 {
-    if ( m_ptoggleDisplayConvexHull->GetValue() && m_ptoggleDisplayConvexHull->IsEnabled() )
+    if ( m_ptoggleDisplayConvexHull->GetValue() && m_ptoggleDisplayConvexHull->IsEnabled() && m_convexHullOpacity != 0)
     {
+        if (m_mustUpdateConvexHull)
+            computeConvexHull();
+
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glColor4f( 1.0f, 0.0f, 1.0f, 0.5f ); // Red
+        glColor4f( (float)m_convexHullColor.Red() / 255.0f, (float)m_convexHullColor.Green() / 255.0f, (float)m_convexHullColor.Blue() / 255.0f, m_convexHullOpacity );
 
         Vector normal;
         glBegin( GL_TRIANGLES );
@@ -671,6 +677,11 @@ void SelectionObject::drawConvexHull()
 
         glDisable( GL_BLEND );
     }
+}
+
+void SelectionObject::updateConvexHullOpacity()
+{
+    setConvexHullOpacity( ( m_pSliderConvexHullOpacity->GetValue() + (float)m_pSliderConvexHullOpacity->GetMin() ) / (float)m_pSliderConvexHullOpacity->GetMax() );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1896,6 +1907,13 @@ void SelectionObject::SetFiberInfoGridValues()
     }
 }
 
+void SelectionObject::setShowConvexHullOption( bool i_val )
+{
+    m_plblConvexHullOpacity->Show( i_val );
+    m_pSliderConvexHullOpacity->Show( i_val);
+    m_pbtnSelectConvexHullColor->Enable( i_val );
+}
+
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 {
     SceneObject::createPropertiesSizer(parent);  
@@ -2022,10 +2040,26 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 
     m_ptoggleCalculatesFibersInfo->Enable(getIsMaster()); //bug with some fibers dataset sets
     
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
     m_ptoggleDisplayConvexHull = new wxToggleButton( parent, wxID_ANY, wxT("Display convex hull"), wxDefaultPosition, wxSize(140,-1) );
-    m_propertiesSizer->Add( m_ptoggleDisplayConvexHull, 0, wxALIGN_CENTER );
+    l_sizer->Add( m_ptoggleDisplayConvexHull, 0, wxALIGN_CENTER );
+    wxImage bmpConvexHullColor(MyApp::iconsPath+ wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+    m_pbtnSelectConvexHullColor = new wxBitmapButton( parent, wxID_ANY, bmpConvexHullColor, wxDefaultPosition, wxSize(40,-1) );
+    l_sizer->Add(m_pbtnSelectConvexHullColor);
+
+    m_propertiesSizer->Add(l_sizer);
     parent->Connect( m_ptoggleDisplayConvexHull->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
-    
+    parent->Connect( m_pbtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
+
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_plblConvexHullOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+    l_sizer->Add( m_plblConvexHullOpacity, 0, wxALIGN_CENTER );
+    m_pSliderConvexHullOpacity = new wxSlider( parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    l_sizer->Add( m_pSliderConvexHullOpacity, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    m_convexHullOpacity = 0.35f;
+    parent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
+
     m_pbtnNewFibersColorVolume->Enable(getIsMaster());
     m_pbtnNewFibersDensityVolume->Enable(getIsMaster());
     m_ptoggleAndNot->Enable(!getIsMaster() && m_objectType != CISO_SURFACE_TYPE);
@@ -2135,6 +2169,7 @@ void SelectionObject::updatePropertiesSizer()
     m_pgridfibersInfo->Enable( getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue() );
     m_ptoggleDisplayMeanFiber->Enable( getShowFibers() );
     m_ptoggleDisplayConvexHull->Enable( getShowFibers() );
+    setShowConvexHullOption( m_ptoggleDisplayConvexHull->GetValue() );
 
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.

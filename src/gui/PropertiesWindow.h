@@ -124,6 +124,8 @@ public:
     void OnDisplayFibersInfo                ( wxCommandEvent& event );
     void OnDisplayMeanFiber                 ( wxCommandEvent& event );
     void OnDisplayConvexHull                ( wxCommandEvent& event );
+    void OnConvexHullColorChange            ( wxCommandEvent& event );
+    void OnConvexHullOpacityChange          ( wxCommandEvent& event );
     void OnDisplayCrossSections             ( wxCommandEvent& event );
     void OnDisplayDispersionTube            ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );
