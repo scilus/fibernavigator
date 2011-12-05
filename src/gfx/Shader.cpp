@@ -171,7 +171,7 @@ bool Shader::fileExists()
 {
     bool result;
     ifstream file;
-    file.open( MyApp::shaderPath + m_filename ); 
+    file.open( ( MyApp::shaderPath + m_filename ).c_str() ); 
     result = file.fail() ? false : true;
     file.close();
     return result;
