@@ -14,8 +14,8 @@ using std::ostringstream;
 #include "../Logger.h"
 
 Shader::Shader( wxString filename, SHADERTYPE type )
-: m_filename( filename ),
-  m_id( NULL )
+: m_id( NULL ),
+  m_filename( filename )  
 {
     switch ( type )
     {
@@ -32,7 +32,7 @@ Shader::Shader( wxString filename, SHADERTYPE type )
         Logger::getInstance()->printDebug( _T( "Shader type not supported." ), LOGLEVEL_ERROR );
     }
 
-    if( NULL == m_id )
+    if( 0 == m_id )
     {
         m_oss << "Failed to create shader " << m_filename.char_str() << ".";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_GLERROR );
@@ -48,7 +48,7 @@ bool Shader::load()
     Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
     m_oss.str( "" );
 
-    if( NULL != m_id )
+    if( 0 != m_id )
     {
         if( fileExists() )
         {
@@ -78,7 +78,7 @@ bool Shader::load()
 
 bool Shader::compile()
 {
-    if( NULL != m_id )
+    if( 0 != m_id )
     {
         GLuint *pId = &m_id;
 
@@ -187,7 +187,3 @@ Shader::~Shader()
         m_id = 0;
     }
 }
-
-
-
-
