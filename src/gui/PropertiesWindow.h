@@ -41,6 +41,7 @@ public:
     void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
 
 	void OnEqualizeDataset					( wxEvent& event );
+    void OnEqualizationSliderChange               ( wxCommandEvent& event );
     void OnRename                           ( wxCommandEvent& event );
     void OnFlipX                            ( wxCommandEvent& event );
     void OnFlipY                            ( wxCommandEvent& event );
