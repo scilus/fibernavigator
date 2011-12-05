@@ -1382,7 +1382,7 @@ void DatasetHelper::printGLError( const wxString i_function )
 
 // Deprecated: Should use Logger::printDebug(message, LOGLEVEL_MESSAGE) instead.
 void DatasetHelper::printTime()
-{
+{    
     wxDateTime l_dataTime = wxDateTime::Now();
     printf( "[%02d:%02d:%02d] ", l_dataTime.GetHour(), l_dataTime.GetMinute(), l_dataTime.GetSecond() );
 }
