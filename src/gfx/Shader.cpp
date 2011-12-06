@@ -14,8 +14,8 @@ using std::ostringstream;
 #include "../Logger.h"
 
 Shader::Shader( wxString filename, SHADERTYPE type )
-: m_filename( filename ),
-  m_id( NULL )
+: m_id( NULL ),
+  m_filename( filename )  
 {
     switch ( type )
     {
@@ -32,7 +32,7 @@ Shader::Shader( wxString filename, SHADERTYPE type )
         Logger::getInstance()->printDebug( _T( "Shader type not supported." ), LOGLEVEL_ERROR );
     }
 
-    if( NULL == m_id )
+    if( 0 == m_id )
     {
         m_oss << "Failed to create shader " << m_filename.char_str() << ".";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_GLERROR );
@@ -48,7 +48,7 @@ bool Shader::load()
     Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
     m_oss.str( "" );
 
-    if( NULL != m_id )
+    if( 0 != m_id )
     {
         if( fileExists() )
         {
@@ -78,11 +78,11 @@ bool Shader::load()
 
 bool Shader::compile()
 {
-    if( NULL != m_id )
+    if( 0 != m_id )
     {
         GLuint *pId = &m_id;
 
-        m_oss << "Shader " << m_filename.char_str() << " compiling...";
+        m_oss << "Shader " << m_filename.char_str() << " starting to compile...";
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
 
@@ -95,6 +95,10 @@ bool Shader::compile()
         glCompileShader( *pId );
         GLint compiled;
         glGetShaderiv( *pId, GL_COMPILE_STATUS, &compiled );
+
+        m_oss << "Shader " << m_filename.char_str() << " finished compiling.";
+        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+        m_oss.str( "" );
 
         free( pTemp );
         return 0 != compiled; // removes casting warning
@@ -153,7 +157,9 @@ bool Shader::fileExists()
 {
     bool result;
     ifstream file;
-    file.open( MyApp::shaderPath + m_filename ); 
+    m_oss << MyApp::shaderPath.char_str() << m_filename.char_str();
+    file.open( m_oss.str().c_str() );
+    m_oss.str("");
     result = file.fail() ? false : true;
     file.close();
     return result;
@@ -169,7 +175,3 @@ Shader::~Shader()
         m_id = 0;
     }
 }
-
-
-
-
