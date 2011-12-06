@@ -14,12 +14,12 @@
 
 #include "../Logger.h"
 
-ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool useGeometryShaders ) :
-    m_anatomyShader( wxT( "anatomy" )/*, useGeometryShaders ? true : false*/ ),
+ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) :
+    m_anatomyShader( wxT( "anatomy" )/*, geometryShadersSupported ? true : false*/ ),
     m_meshShader( wxT( "mesh" ) ),
     m_fibersShader( wxT( "fibers" ) ),
     m_fakeTubesShader( wxT( "fake-tubes") ),
-    m_crossingFibersShader( wxT( "crossing_fibers" ), useGeometryShaders ? true : false ),
+    m_crossingFibersShader( wxT( "crossing_fibers" ), geometryShadersSupported ? true : false ),
     m_splineSurfShader( wxT( "splineSurf" ) ),
     m_vectorShader( wxT( "vectors" ) ),
     m_legendShader( wxT( "legend" ) ),
@@ -77,15 +77,22 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool useGeometryShaders ) :
         Logger::getInstance()->printDebug( _T( "Could not initialize fake Tubes shader." ), LOGLEVEL_ERROR );
     }
 
-    Logger::getInstance()->printDebug( _T( "Initializing crossing fibers shader..." ), LOGLEVEL_MESSAGE );
-    if( m_crossingFibersShader.load() && m_crossingFibersShader.compileAndLink() )
+    if ( geometryShadersSupported )
     {
-        m_crossingFibersShader.bind();
-        Logger::getInstance()->printDebug( _T( "Crossing fibers shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->printDebug( _T( "Initializing crossing fibers shader..." ), LOGLEVEL_MESSAGE );
+        if( m_crossingFibersShader.load() && m_crossingFibersShader.compileAndLink() )
+        {
+            m_crossingFibersShader.bind();
+            Logger::getInstance()->printDebug( _T( "Crossing fibers shader initialized." ), LOGLEVEL_MESSAGE );
+        }
+        else
+        {
+            Logger::getInstance()->printDebug( _T( "Could not initialize crossing fibers shader." ), LOGLEVEL_ERROR );
+        }
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize crossing fibers shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->printDebug( _T( "Geometry shaders are not supported. Cannot load crossing fibers shader." ), LOGLEVEL_WARNING );
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing spline surf shader..." ), LOGLEVEL_MESSAGE );
