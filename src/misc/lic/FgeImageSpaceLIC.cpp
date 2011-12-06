@@ -16,22 +16,29 @@
 
 #include "wx/wxprec.h"
 
+#include "../../Logger.h"
+
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif
 
 using namespace std;
 
-FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
+FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* pDh) 
+:  m_transformShader( wxT("transform") ),
+   m_edgeShader( wxT( "edgedetection" ) ),
+   m_advectionShader( wxT( "advection" ) ),
+   m_clippingShader( wxT( "clipping" ) )
+{
 
-    m_dh = dh;
+    m_dh = pDh;
 
-    minX = 0.0;
-    minY = 0.0;
-    minZ = 0.0;
-    maxX = 1.0;
-    maxY = 1.0;
-    maxZ = 1.0;
+    minX = 0.0f;
+    minY = 0.0f;
+    minZ = 0.0f;
+    maxX = 1.0f;
+    maxY = 1.0f;
+    maxZ = 1.0f;
 
     // init the shaders
     m_dh->m_scheduledReloadShaders = true;
@@ -45,7 +52,7 @@ FgeImageSpaceLIC::FgeImageSpaceLIC(DatasetHelper* dh) {
     colormapBlend = 0.3f;
 
     // default scaler
-    tensorAdvectionScale = 2.0;
+    tensorAdvectionScale = 2.0f;
 
     // there is no previously advected texture
     previousAdvectedTexture = NULL;
@@ -163,7 +170,7 @@ void FgeImageSpaceLIC::setTensorAdvectionScale(float tas) {
 /**
  * \par Description
  * Gets the currently set scaling value used for scaling the advection vectors
- * \retunr the scale value
+ * \return the scale value
  */
 float FgeImageSpaceLIC::getTensorAdvectionScale() {
     return tensorAdvectionScale;
@@ -175,67 +182,73 @@ float FgeImageSpaceLIC::getTensorAdvectionScale() {
  */
 void FgeImageSpaceLIC::reloadShaders() {
 
-    std::cout << "reloading shaders" << std::endl;
+    Logger::getInstance()->printDebug( _T( "Reloading shaders..." ), LOGLEVEL_MESSAGE );
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Transformation Shader
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    m_dh->printTime();
-    printf("initializing  LIC texture shader\n");
+    m_transformShader.release();
 
-    m_transformShader = new Shader(wxT("transform"));
-    m_transformShader->bind();
-
-    if (m_dh->GLError())
-        m_dh->printGLError(wxT("LIC setup transform shader"));
-
-    m_transformShader->release();
+    Logger::getInstance()->printDebug( _T( "Initializing LIC texture shader..." ), LOGLEVEL_MESSAGE );
+    if( m_transformShader.load() && m_transformShader.compileAndLink() )
+    {
+        Logger::getInstance()->printDebug( _T( "LIC texture shader initialized." ), LOGLEVEL_MESSAGE );
+    }
+    else
+    {
+        Logger::getInstance()->printDebug( _T( "Could not initialize LIC texture shader." ), LOGLEVEL_ERROR );
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Edge Detection Shader
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    m_dh->printTime();
-    printf("initializing  LIC edge shader\n");
+    m_edgeShader.release();
 
-    m_edgeShader = new Shader(wxT("edgedetection"));
-    m_edgeShader->bind();
-
-    if (m_dh->GLError())
-        m_dh->printGLError(wxT("LIC setup edge shader"));
-
-    m_edgeShader->release();
+    Logger::getInstance()->printDebug( _T( "Initializing LIC edge shader..." ), LOGLEVEL_MESSAGE );
+    if( m_edgeShader.load() && m_edgeShader.compileAndLink() )
+    {
+        Logger::getInstance()->printDebug( _T( "LIC edge shader initialized." ), LOGLEVEL_MESSAGE );
+    }
+    else
+    {
+        Logger::getInstance()->printDebug( _T( "Could not initialize LIC edge shader." ), LOGLEVEL_ERROR );
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Advection Shader
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    m_dh->printTime();
-    printf("initializing  LIC advection shader\n");
+    m_advectionShader.release();
 
-    m_advectionShader = new Shader(wxT("advection"));
-    m_advectionShader->bind();
-
-    if (m_dh->GLError())
-        m_dh->printGLError(wxT("LIC setup advection shader"));
-
-    m_advectionShader->release();
+    Logger::getInstance()->printDebug( _T( "Initializing LIC advection shader..." ), LOGLEVEL_MESSAGE );
+    if( m_advectionShader.load() && m_advectionShader.compileAndLink() )
+    {
+        Logger::getInstance()->printDebug( _T( "LIC advection shader initialized." ), LOGLEVEL_MESSAGE );
+    }
+    else
+    {
+        Logger::getInstance()->printDebug( _T( "Could not initialize LIC advection shader." ), LOGLEVEL_ERROR );
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Clipping Shader
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    m_dh->printTime();
-    printf("initializing  LIC clipping shader\n");
+    m_clippingShader.release();
 
-    m_clippingShader = new Shader(wxT("clipping"));
-    m_clippingShader->bind();
+    Logger::getInstance()->printDebug( _T( "Initializing LIC clipping shader..." ), LOGLEVEL_MESSAGE );
+    if( m_clippingShader.load() && m_clippingShader.compileAndLink() )
+    {
+        Logger::getInstance()->printDebug( _T( "LIC clipping shader initialized." ), LOGLEVEL_MESSAGE );
+    }
+    else
+    {
+        Logger::getInstance()->printDebug( _T( "Could not initialize LIC clipping shader." ), LOGLEVEL_ERROR );
+    }
 
-    if (m_dh->GLError())
-        m_dh->printGLError(wxT("LIC setup clipping shader"));
-
-    m_clippingShader->release();
+    Logger::getInstance()->printDebug( _T( "Finished reloading shaders." ), LOGLEVEL_MESSAGE );
 }
 
 void FgeImageSpaceLIC::render(DatasetInfo *info) {
@@ -307,20 +320,20 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     // PASS 1b -- render geometry
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    m_transformShader->bind();
+    m_transformShader.bind();
 
     // give the min max infos
-    m_transformShader->setUniFloat("minX", minX);
-    m_transformShader->setUniFloat("maxX", maxX);
-    m_transformShader->setUniFloat("minY", minY);
-    m_transformShader->setUniFloat("maxY", maxY);
-    m_transformShader->setUniFloat("minZ", minZ);
-    m_transformShader->setUniFloat("maxZ", maxZ);
+    m_transformShader.setUniFloat("minX", minX);
+    m_transformShader.setUniFloat("maxX", maxX);
+    m_transformShader.setUniFloat("minY", minY);
+    m_transformShader.setUniFloat("maxY", maxY);
+    m_transformShader.setUniFloat("minZ", minZ);
+    m_transformShader.setUniFloat("maxZ", maxZ);
 
 
-    m_transformShader->setUniInt("dimX", m_dh->m_columns);
-    m_transformShader->setUniInt("dimY", m_dh->m_rows);
-    m_transformShader->setUniInt("dimZ", m_dh->m_frames);
+    m_transformShader.setUniInt("dimX", m_dh->m_columns);
+    m_transformShader.setUniInt("dimY", m_dh->m_rows);
+    m_transformShader.setUniInt("dimZ", m_dh->m_frames);
 
     GLint* tex = new GLint[10];
     float* threshold = new float[10];
@@ -337,15 +350,15 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
         }
     }
 
-    m_transformShader->setUniArrayInt("texes", tex, c);
-    m_transformShader->setUniArrayInt("type", type, c);
-    m_transformShader->setUniArray1Float("threshold", threshold, c);
-    m_transformShader->setUniInt("countTextures", c);
+    m_transformShader.setUniArrayInt("texes", tex, c);
+    m_transformShader.setUniArrayInt("type", type, c);
+    m_transformShader.setUniArray1Float("threshold", threshold, c);
+    m_transformShader.setUniInt("countTextures", c);
 
     // render -> the shader does all the work for us
     info->draw();
 
-    m_transformShader->release();
+    m_transformShader.release();
 
     fbo.deactivate();
 
@@ -375,12 +388,12 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     fbo.activate();
 
     // now just render a quad with the depth texture to apply a edge detection filter, use the first created depth tex
-    m_edgeShader->bind();
-    m_edgeShader->setUniFloat("textureSizeW", fbo.getTextureWidth());
-    m_edgeShader->setUniFloat("textureSizeH", fbo.getTextureHeight());
+    m_edgeShader.bind();
+    m_edgeShader.setUniFloat("textureSizeW", fbo.getTextureWidth());
+    m_edgeShader.setUniFloat("textureSizeH", fbo.getTextureHeight());
     fbo.renderDepthTexture(geometryDepth);
 
-    m_edgeShader->release();
+    m_edgeShader.release();
 
     fbo.deactivate();
 
@@ -458,32 +471,32 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     // use advection shader now
-    m_advectionShader->bind();
+    m_advectionShader.bind();
 
     wxDateTime dt = wxDateTime::Now();
     int time = dt.GetMillisecond();
-    m_advectionShader->setUniInt("fantom_time", time);
+    m_advectionShader.setUniInt("fantom_time", time);
 
     // set texture unit numbers
-    m_advectionShader->setUniFloat("textureSizeW", fbo.getTextureWidth());
-    m_advectionShader->setUniFloat("textureSizeH", fbo.getTextureHeight());
-    m_advectionShader->setUniFloat("textureAreaSizeW", fbo.getTextureAreaWidth());
-    m_advectionShader->setUniFloat("textureAreaSizeH", fbo.getTextureAreaHeight());
+    m_advectionShader.setUniFloat("textureSizeW", fbo.getTextureWidth());
+    m_advectionShader.setUniFloat("textureSizeH", fbo.getTextureHeight());
+    m_advectionShader.setUniFloat("textureAreaSizeW", fbo.getTextureAreaWidth());
+    m_advectionShader.setUniFloat("textureAreaSizeH", fbo.getTextureAreaHeight());
 
-    m_advectionShader->setUniInt("tex0", 0);
-    m_advectionShader->setUniInt("tex1", 1);
-    m_advectionShader->setUniInt("tex2", 2);
-    m_advectionShader->setUniInt("tex3", 3);
+    m_advectionShader.setUniInt("tex0", 0);
+    m_advectionShader.setUniInt("tex1", 1);
+    m_advectionShader.setUniInt("tex2", 2);
+    m_advectionShader.setUniInt("tex3", 3);
 
     // give the blending and scaling parameters
-    m_advectionShader->setUniFloat("noiseBlend", noiseBlend);
-    m_advectionShader->setUniFloat("tensorAdvectionScale", tensorAdvectionScale * info->getAlpha()*5);
+    m_advectionShader.setUniFloat("noiseBlend", noiseBlend);
+    m_advectionShader.setUniFloat("tensorAdvectionScale", tensorAdvectionScale * info->getAlpha()*5);
 
     // animation flag
-    //m_advectionShader->setUniFloat("advectionAnimation", advectionAnimation ? 1.0 : 0.0);
-    m_advectionShader->setUniFloat("advectionAnimation", 1.0 );
+    //m_advectionShader.setUniFloat("advectionAnimation", advectionAnimation ? 1.0 : 0.0);
+    m_advectionShader.setUniFloat("advectionAnimation", 1.0 );
 
-    m_advectionShader->release();
+    m_advectionShader.release();
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // PASS 4b -- setup texture list
@@ -507,7 +520,7 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     /////////////////////////////////////////////////////////////////////////////////////////////
     // PASS 4c -- iterate over the advected image
     /////////////////////////////////////////////////////////////////////////////////////////////
-    m_advectionShader->bind();
+    m_advectionShader.bind();
 
     // iterate
     for (unsigned int i = 0; i < iterations; i++) {
@@ -525,7 +538,7 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
 
     }
 
-    m_advectionShader->release();
+    m_advectionShader.release();
 
     // now make the advected texture permanent
     fbo.setTexturePermanent(iterations % 2 ? advectedImage2 : advectedImage1);
@@ -549,16 +562,16 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     // now just render a quad with the former result advection image and use depth map to clip
-    m_clippingShader->bind();
-    m_clippingShader->setUniFloat("textureSizeW", fbo.getTextureWidth());
-    m_clippingShader->setUniFloat("textureSizeH", fbo.getTextureHeight());
-    m_clippingShader->setUniInt("tex0", 0);
-    m_clippingShader->setUniInt("tex1", 1);
-    m_clippingShader->setUniInt("tex2", 2);
-    m_clippingShader->setUniInt("tex3", 3);
+    m_clippingShader.bind();
+    m_clippingShader.setUniFloat("textureSizeW", fbo.getTextureWidth());
+    m_clippingShader.setUniFloat("textureSizeH", fbo.getTextureHeight());
+    m_clippingShader.setUniInt("tex0", 0);
+    m_clippingShader.setUniInt("tex1", 1);
+    m_clippingShader.setUniInt("tex2", 2);
+    m_clippingShader.setUniInt("tex3", 3);
 
     // blending parameters
-    m_clippingShader->setUniFloat("colormapBlend", colormapBlend);
+    m_clippingShader.setUniFloat("colormapBlend", colormapBlend);
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // PASS 5b -- setup texture list and render to quad
@@ -581,7 +594,7 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
                                  -frameSize / 2, 
                                  -frameSize / 2 );
 
-    m_clippingShader->release();
+    m_clippingShader.release();
 
     //m_dh->m_mainFrame->m_gl0->testRender(fbo.getDepthTexID(geometryDepth));
     //m_dh->m_mainFrame->m_gl1->testRender(fbo.getTexID(advectedImage1));

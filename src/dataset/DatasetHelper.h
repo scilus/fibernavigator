@@ -242,6 +242,7 @@ public:
     float m_normalDirection;  // Normal direction of the spline surface.
     bool  m_fibersInverted;
     bool  m_useFakeTubes;
+    bool  m_geometryShadersSupported;
     bool  m_clearToBlack;
     bool  m_useTransparency;
     bool  m_filterIsoSurf;

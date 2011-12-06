@@ -69,9 +69,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_animationStep( 0     ),
 
 #if defined(DEBUG) || defined(_DEBUG)
-            m_debugLevel( 0 ),
+    m_debugLevel( 0 ),
 #else
-            m_debugLevel( 1 ),
+    m_debugLevel( 1 ),
 #endif
 
     m_showSagittal( true ),
@@ -108,6 +108,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_fibersInverted ( false ),
     m_useFakeTubes   ( false ),
+    m_geometryShadersSupported( true ),
     m_clearToBlack   ( false ),
     m_useTransparency( false ),
     m_filterIsoSurf  ( false ),
