@@ -42,10 +42,12 @@ public:
     void onTreeChange();
     void onMouseEvent                       ( wxMouseEvent&   event );
     void onLoad                             ( wxCommandEvent& event );
+	void createNewAnatomy					( int dataType );
     
 private:
     // File menu
-    void onNewAnatomy                       ( wxCommandEvent& event );
+    void onNewAnatomyByte                   ( wxCommandEvent& event );
+    void onNewAnatomyRGB                    ( wxCommandEvent& event );
     void onReloadShaders                    ( wxCommandEvent& event );
     void onSave                             ( wxCommandEvent& event );
     void onSaveFibers                       ( wxCommandEvent& event );

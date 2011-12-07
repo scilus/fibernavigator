@@ -16,7 +16,10 @@ MenuBar::MenuBar()
 {
     m_menuFile = new wxMenu();
 	m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Open\tCtrl-O"));
-	m_itemNewAnatomy = m_menuFile->Append(wxID_ANY, wxT("New Empty Anatomy"));
+    m_menuNewAnatomy = new wxMenu();
+	m_itemNewAnatomyByte = m_menuNewAnatomy->Append(wxID_ANY, wxT("New White"));
+	m_itemNewAnatomyRGB = m_menuNewAnatomy->Append(wxID_ANY, wxT("New RGB"));
+    m_menuFile->AppendSubMenu(m_menuNewAnatomy, wxT("New Empty Anatomy"));
 	//m_itemReloadShader = m_menuFile->Append(wxID_ANY, wxT("Reload Shader"));
 	m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
 	m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));
@@ -156,7 +159,8 @@ MenuBar::MenuBar()
 void MenuBar::initMenuBar( MainFrame *mf )
 {
     mf->Connect(m_itemLoad->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLoad));
-	mf->Connect(m_itemNewAnatomy->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomy));
+	mf->Connect(m_itemNewAnatomyByte->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyByte));
+	mf->Connect(m_itemNewAnatomyRGB->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyRGB));
     //mf->Connect(m_itemReloadShader->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnReloadShaders));
     mf->Connect(m_itemSaveSCN->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSave));
     mf->Connect(m_itemSaveSelectedFibers->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSaveFibers));

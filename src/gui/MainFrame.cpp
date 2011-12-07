@@ -362,7 +362,7 @@ bool MainFrame::loadIndex( int i_index )
 //
 //This function creates an Anatomy from scratch
 //
-void MainFrame::onNewAnatomy( wxCommandEvent& WXUNUSED(event) )
+void MainFrame::createNewAnatomy( int dataType )
 {
 	// ask user for a name
 	wxString l_givenName = wxT("Anatomy");
@@ -374,8 +374,7 @@ void MainFrame::onNewAnatomy( wxCommandEvent& WXUNUSED(event) )
 	}
 
 	//create the anatomy
-	Anatomy* l_newAnatomy = new Anatomy( m_pDatasetHelper, RGB );
-	l_newAnatomy->setRGBZero( m_pDatasetHelper->m_columns, m_pDatasetHelper->m_rows, m_pDatasetHelper->m_frames );
+	Anatomy* l_newAnatomy = new Anatomy( m_pDatasetHelper, dataType );
 	l_newAnatomy->setName( l_givenName );
 
 #ifdef __WXMAC__
@@ -393,6 +392,16 @@ void MainFrame::onNewAnatomy( wxCommandEvent& WXUNUSED(event) )
 	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     refreshAllGLWidgets();
+}
+
+void MainFrame::onNewAnatomyByte( wxCommandEvent& WXUNUSED(event) )
+{
+	createNewAnatomy( HEAD_BYTE );
+}
+
+void MainFrame::onNewAnatomyRGB( wxCommandEvent& WXUNUSED(event) )
+{
+	createNewAnatomy( RGB );
 }
 
 void MainFrame::onReloadShaders( wxCommandEvent& WXUNUSED(event) )

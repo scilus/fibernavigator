@@ -99,6 +99,22 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
             m_floatDataset[i] = 0;
         }
     }
+    else if(type == HEAD_BYTE)
+    {
+        m_columns       = m_dh->m_columns;
+        m_frames        = m_dh->m_frames;
+        m_rows          = m_dh->m_rows;
+        m_bands         = 1;
+        m_isLoaded      = true;   
+        m_type          = type;
+
+        m_floatDataset.resize( m_columns * m_frames * m_rows );
+
+        for(unsigned int i = 0; i < m_floatDataset.size(); ++i )
+        {
+            m_floatDataset[i] = 0;
+        }
+    }
     else
     {
         assert(false);
