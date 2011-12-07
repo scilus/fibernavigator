@@ -63,12 +63,14 @@ public:
     //void out_of_memory(); 
     bool load( const int i_index );
     bool load( wxString    i_filename, 
-               int   i_index     = -1, 
-               const float i_threshold = 0.0f, 
-               const bool  i_active    = true,
-               const bool  i_showFS    = true, 
-               const bool  i_useTex    = true, 
-               const float i_alpha     = 1.0f );
+               int   i_index			= -1, 
+               const float i_threshold  = 0.0f, 
+               const bool  i_active		= true,
+               const bool  i_showFS		= true, 
+               const bool  i_useTex		= true, 
+               const float i_alpha		= 1.0f, 
+			   const long  i_pos		= 0,
+			   const bool  i_isScene	= false);
     void finishLoading ( DatasetInfo*, bool isChild = false );
     bool loadScene     ( const wxString i_filename );
     bool loadTextFile  ( wxString* i_string, const wxString i_filename );
@@ -126,6 +128,7 @@ public:
 
     void updateLoadStatus();
 	void updateItemsId();
+	void updateItemsPosition();
 
     void doLicMovie       ( int i_mode );
     void createLicSliceSag( int i_slize );

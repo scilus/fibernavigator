@@ -1579,7 +1579,8 @@ void MainFrame::deleteListItem()
 			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
 			if(pFibersGroup != NULL)
 			{
-				pFibersGroup->OnDeleteFibers();
+				if(!pFibersGroup->OnDeleteFibers())
+					return;
 			}
 		}
         if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)

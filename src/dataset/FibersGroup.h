@@ -61,7 +61,7 @@ public:
 
 	void	OnMoveUp();
 	void	OnMoveDown();
-	void	OnDeleteFibers();
+	bool	OnDeleteFibers();
 	void	OnToggleVisibleBtn();
 	void	OnToggleIntensityBtn();
 	void	OnToggleOpacityBtn();

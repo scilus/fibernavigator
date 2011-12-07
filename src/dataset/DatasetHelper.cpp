@@ -215,7 +215,7 @@ bool DatasetHelper::load( const int i_index )
     return l_flag;
 }
 
-bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha )
+bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha, const long i_pos, const bool i_isScene )
 {
 	std::set_new_handler(&out_of_memory);
 	
@@ -320,7 +320,11 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_dataset->setShow     ( i_active );
 				l_dataset->setShowFS   ( i_showFS );
 				l_dataset->setuseTex   ( i_useTex );
-				finishLoading( l_dataset );        
+				finishLoading( l_dataset );
+				
+				if(i_isScene)
+					l_dataset->setListCtrlItemId(i_pos);
+				
 				if (i_index==8)
 				{
 					m_tensorsLoaded = true;
@@ -353,7 +357,10 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_mesh->setShow     ( i_active );
 				l_mesh->setShowFS   ( i_showFS );
 				l_mesh->setuseTex   ( i_useTex );
-				finishLoading       ( l_mesh );
+				finishLoading       ( l_mesh);
+				
+				if(i_isScene)
+					l_mesh->setListCtrlItemId(i_pos);
 				return true;
 			}
 			return false;
@@ -408,7 +415,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 					if( pFibersGroup != NULL )
 					{
-						if(pFibersGroup->getFibersCount() > 0)
+						if(pFibersGroup->getFibersCount() > 0 && !i_isScene)
 						{
 							l_fibers->setShow( false );
 						}
@@ -419,7 +426,11 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_fibers->updateLinesShown();
 				m_mainFrame->refreshAllGLWidgets();
 				
-				finishLoading( l_fibers, true );
+				finishLoading( l_fibers, true);
+				
+				if(i_isScene)
+					l_fibers->setListCtrlItemId(i_pos);
+				
 				m_fibersLoaded = true;
 				m_selBoxChanged = true;
 
@@ -450,7 +461,55 @@ void DatasetHelper::updateItemsId()
 	}
 }
 
-void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild )
+void DatasetHelper::updateItemsPosition()
+{	
+	// Adjust fibergroup position with fibers
+	std::list<int> fibersPosList;
+	
+	FibersGroup* pFibersGroup = NULL;
+	getFibersGroupDataset(pFibersGroup);
+	if( pFibersGroup != NULL )
+	{
+		for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
+		{
+			long id = pFibersGroup->getFibersSet(i)->getListCtrlItemId();
+			fibersPosList.push_back(id);
+		}
+		
+		fibersPosList.sort();
+		
+		int currentPos = pFibersGroup->getListCtrlItemId();
+		pFibersGroup->setListCtrlItemId(fibersPosList.front());
+		m_mainFrame->m_pListCtrl->moveItemAt(currentPos, fibersPosList.front() - 1);
+	}
+	
+	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+	{
+		DatasetInfo* pInfoA = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+		if(pInfoA != NULL)
+		{
+			long id = pInfoA->getListCtrlItemId();
+			if( i != id)
+			{
+				DatasetInfo *pInfoB = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(id);
+				if(pInfoA != NULL)
+				{
+					m_mainFrame->m_pListCtrl->SetItem(i, 0, wxT(""), pInfoB->getShow() ? 0 : 1);
+					m_mainFrame->m_pListCtrl->SetItem(i, 1, pInfoB->getName().BeforeFirst( '.' ));
+					m_mainFrame->m_pListCtrl->SetItem(i, 2, wxString::Format(wxT("%.2f"), pInfoB->getThreshold()));
+					m_mainFrame->m_pListCtrl->SetItemData(i, (long)pInfoB);
+					
+					m_mainFrame->m_pListCtrl->SetItem(id, 0, wxT(""), pInfoA->getShow() ? 0 : 1);
+					m_mainFrame->m_pListCtrl->SetItem(id, 1, pInfoA->getName().BeforeFirst( '.' ));
+					m_mainFrame->m_pListCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), pInfoA->getThreshold()));
+					m_mainFrame->m_pListCtrl->SetItemData(id, (long)pInfoA);
+				}
+			}
+		}
+	}
+}
+
+void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 {
     m_guiBlocked = true;
 #ifdef __WXMAC__
@@ -612,6 +671,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 bool l_showFS       = true;
                 double l_threshold  = 0.0;
                 double l_alpha      = 1.0;
+				long l_pos			= 0;
                 wxString l_path;
 
                 while( l_nodes )
@@ -623,6 +683,10 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                         l_showFS = ( l_nodes->GetPropVal( _T( "showFS" ), _T( "yes" ) ) == _T( "yes" ) );
                         ( l_nodes->GetPropVal( wxT( "threshold"), wxT( "0.0" ) ) ).ToDouble( &l_threshold );
                         ( l_nodes->GetPropVal( wxT( "alpha"),     wxT( "0.0" ) ) ).ToDouble( &l_alpha );
+						if( l_nodes->GetPropVal( wxT( "position"), wxT( "0" ) ) )
+						{
+							l_nodes->GetPropVal( wxT( "position"), wxT( "0" ) ).ToLong( &l_pos );
+						}
                     }
                     else if( l_nodes->GetName() == _T( "path" ) )
                     {
@@ -631,7 +695,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 
                     l_nodes = l_nodes->GetNext();
                 }
-                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha );
+                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha, l_pos, true );
                 l_dataSetNode = l_dataSetNode->GetNext();
             }
         }
@@ -792,7 +856,9 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
     m_transform.s.M22 = r22;
     m_mainFrame->m_mainGL->setRotation();*/
 
+	updateItemsPosition();
     updateLoadStatus();
+	
     return true;
 }
 
@@ -888,11 +954,20 @@ void DatasetHelper::save( const wxString i_fileName )
     if( l_countTextures == 0 )
         return;
 
-    for( int i = 0; i < l_countTextures; ++i )
+	
+	std::vector<int> anatomyPositions;
+	
+    for( int i = l_countTextures - 1; i >= 0 ; i-- )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
-
-        if( l_info->getType() < SURFACE )
+		DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+		
+		if(l_info->getType() < MESH)
+		{
+			anatomyPositions.push_back(i);
+			continue;
+		}
+		
+        if( l_info->getType() < SURFACE)
         {
             wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
 
@@ -900,7 +975,9 @@ void DatasetHelper::save( const wxString i_fileName )
             new wxXmlNode( l_pathNode, wxXML_TEXT_NODE, wxT( "path" ), l_info->getPath() );
 
             wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
-            wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) );
+			
+			wxXmlProperty* l_propP  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+            wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ), l_propP );
             wxXmlProperty* l_propTA = new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), l_info->getAlpha() ), l_propT );
             wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
             wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
@@ -908,6 +985,27 @@ void DatasetHelper::save( const wxString i_fileName )
             l_statusNode->AddProperty( l_propU );
         }
     }
+	
+	// Save anatomies at the end so they would always be at the beginning of data
+	for( int i = 0; i < (int)anatomyPositions.size(); i++ )
+    {
+		DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( anatomyPositions[i] );
+		
+		wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
+		
+		wxXmlNode* l_pathNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "path" ) );
+		new wxXmlNode( l_pathNode, wxXML_TEXT_NODE, wxT( "path" ), l_info->getPath() );
+		
+		wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
+		
+		wxXmlProperty* l_propId  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+		wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ), l_propId );
+		wxXmlProperty* l_propTA = new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), l_info->getAlpha() ), l_propT );
+		wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
+		wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
+		wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
+		l_statusNode->AddProperty( l_propU );
+	}
 
     wxXmlProperty* l_propPosX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pXSlider->GetValue() ) );
     wxXmlProperty* l_propPosY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pYSlider->GetValue() ), l_propPosX );

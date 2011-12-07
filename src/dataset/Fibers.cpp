@@ -501,9 +501,9 @@ bool Fibers::loadTRK( const wxString &filename )
     m_fullPath = filename;
     //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
-    m_name = filename.AfterLast( '\\' );
+    m_name = "-" + filename.AfterLast( '\\' );
 #else
-    m_name = filename.AfterLast( '/' );
+    m_name = "-" + filename.AfterLast( '/' );
 #endif
     return true;
 }
@@ -606,9 +606,9 @@ bool Fibers::loadCamino( const wxString &filename )
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
-    m_name = filename.AfterLast( '\\' );
+    m_name = "-" + filename.AfterLast( '\\' );
 #else
-    m_name = filename.AfterLast( '/' );
+    m_name = "-" + filename.AfterLast( '/' );
 #endif
     //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
     return true;
@@ -802,9 +802,9 @@ bool Fibers::loadMRtrix( const wxString &filename )
     m_fullPath = filename;
     //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
-    m_name = filename.AfterLast( '\\' );
+    m_name = "-" + filename.AfterLast( '\\' );
 #else
-    m_name = filename.AfterLast( '/' );
+    m_name = "-" + filename.AfterLast( '/' );
 #endif
     return true;
 }
@@ -915,9 +915,9 @@ bool Fibers::loadPTK( const wxString &filename )
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
-    m_name = filename.AfterLast( '\\' );
+    m_name = "-" + filename.AfterLast( '\\' );
 #else
-    m_name = filename.AfterLast( '/' );
+    m_name = "-" + filename.AfterLast( '/' );
 #endif
     //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
     return true;
@@ -1187,9 +1187,9 @@ bool Fibers::loadVTK( const wxString &filename )
     m_type      = FIBERS;
     m_fullPath  = filename;
 #ifdef __WXMSW__
-    m_name = filename.AfterLast( '\\' );
+    m_name = "-" + filename.AfterLast( '\\' );
 #else
-    m_name = filename.AfterLast( '/' );
+    m_name = "-" + filename.AfterLast( '/' );
 #endif
     //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
     delete[] pBuffer;
@@ -1331,9 +1331,9 @@ bool Fibers::loadDmri( const wxString &filename )
     m_fullPath = filename;
     //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
-    m_name = filename.AfterLast( '\\' );
+    m_name = "-" + filename.AfterLast( '\\' );
 #else
-    m_name = filename.AfterLast( '/' );
+    m_name = "-" + filename.AfterLast( '/' );
 #endif
     return true;
 }
@@ -1461,18 +1461,18 @@ void Fibers::updateFibersColors()
     }
     else
     {
-		bool glMapBufferUsed( false );
+		//bool glMapBufferUsed( false );
 		float *pColorData( NULL );
 		
 		if( m_dh->m_useVBO )
 		{
-			if( m_dh->m_pColorData == NULL)
-			{
+			//if( m_dh->m_pColorData == NULL)
+			//{
 				glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-				m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-				glMapBufferUsed = true;
-			}
-			pColorData = m_dh->m_pColorData;
+				/*m_dh->m_*/pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+				//glMapBufferUsed = true;
+			//}
+			//pColorData = m_dh->m_pColorData;
 		}
         else
         {
@@ -1496,7 +1496,7 @@ void Fibers::updateFibersColors()
             colorWithMinDistance( pColorData );
         }
 
-        if( m_dh->m_useVBO && glMapBufferUsed )
+        if( m_dh->m_useVBO /*&& glMapBufferUsed*/ )
         {
             glUnmapBuffer( GL_ARRAY_BUFFER );
         }
@@ -1924,18 +1924,18 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
     int pointIndex( 0 );
     countLines = 0;
 
-    bool glMapBufferUsed( false );
+    //bool glMapBufferUsed( false );
 	float *pColorData( NULL );
 	
 	if( m_dh->m_useVBO )
     {
-		if( m_dh->m_pColorData == NULL)
-		{
+		//if( m_dh->m_pColorData == NULL)
+		//{
 			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-			glMapBufferUsed = true;
-		}
-		pColorData = m_dh->m_pColorData;
+			/*m_dh->m_*/pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+			//glMapBufferUsed = true;
+		//}
+		//pColorData = m_dh->m_pColorData;
     }
     else
     {
@@ -1967,7 +1967,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
         }
     }
 
-    if( m_dh->m_useVBO && glMapBufferUsed)
+    if( m_dh->m_useVBO /*&& glMapBufferUsed*/)
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2303,16 +2303,16 @@ void Fibers::resetColorArray()
     m_dh->printDebug( _T( "reset color arrays" ), 1 );
     float *pColorData( NULL );
     float *pColorData2( NULL );
-	bool glMapBufferUsed( false );
+	//bool glMapBufferUsed( false );
 	
 	if( m_dh->m_useVBO )
     {
-		if( m_dh->m_pColorData == NULL)
-		{
+		//if( m_dh->m_pColorData == NULL)
+		//{
 			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-			glMapBufferUsed = true;
-		}
+			/*m_dh->m_*/pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+			//glMapBufferUsed = true;
+		//}
 		pColorData = m_dh->m_pColorData;
 		pColorData2 = &m_colorArray[0];
     }
@@ -2373,7 +2373,7 @@ void Fibers::resetColorArray()
         }
     }
 
-    if( m_dh->m_useVBO && glMapBufferUsed )
+    if( m_dh->m_useVBO /*&& glMapBufferUsed*/ )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2480,16 +2480,16 @@ void Fibers::updateLinesShown()
         {
 			float *pColorData( NULL );
 			float *pColorData2( NULL );
-			bool glMapBufferUsed( false );
+			//bool glMapBufferUsed( false );
 			
 			if( m_dh->m_useVBO )
 			{
-				if( m_dh->m_pColorData == NULL)
-				{
+				//if( m_dh->m_pColorData == NULL)
+				//{
 					glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-					m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-					glMapBufferUsed = true;
-				}
+					/*m_dh->m_*/pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+					//glMapBufferUsed = true;
+				//}
 				pColorData = m_dh->m_pColorData;
 				pColorData2 = &m_colorArray[0];
 			}
@@ -2520,7 +2520,7 @@ void Fibers::updateLinesShown()
                 }
             }
 
-            if( m_dh->m_useVBO && glMapBufferUsed )
+            if( m_dh->m_useVBO /*&& glMapBufferUsed*/ )
             {
                 glUnmapBuffer( GL_ARRAY_BUFFER );
             }
@@ -3345,19 +3345,19 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 145, -1 ) );
     pSizer->Add( m_pGeneratesFibersDensityVolume, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pGeneratesFibersDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleLocalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Local Coloring" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pToggleLocalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Local Coloring" ), wxDefaultPosition, wxSize( 145, -1 ) );
     pSizer->Add( m_pToggleLocalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 145, -1 ) );
     pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
@@ -3367,28 +3367,28 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( new wxStaticText( pParent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
     pSizer->Add( 8, 1, 0 );
-    m_pRadioNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    m_pRadioNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 145, -1 ) );
     pSizer->Add( m_pRadioNormalColoring );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    m_pRadioDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Dist. Anchoring" ), wxDefaultPosition, wxSize( 145, -1 ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( 68, 1, 0 );
     pSizer->Add( m_pRadioDistanceAnchoring );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioMinDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Min Dist. Anchoring" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    m_pRadioMinDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Min Dist. Anchoring" ), wxDefaultPosition, wxSize( 145, -1 ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( 68, 1, 0 );
     pSizer->Add( m_pRadioMinDistanceAnchoring );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioCurvature  = new wxRadioButton( pParent, wxID_ANY, _T( "Curvature" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    m_pRadioCurvature  = new wxRadioButton( pParent, wxID_ANY, _T( "Curvature" ), wxDefaultPosition, wxSize( 145, -1 ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( 68, 1, 0 );
     pSizer->Add( m_pRadioCurvature );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioTorsion  = new wxRadioButton( pParent, wxID_ANY, _T( "Torsion" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    m_pRadioTorsion  = new wxRadioButton( pParent, wxID_ANY, _T( "Torsion" ), wxDefaultPosition, wxSize( 145, -1 ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     pSizer->Add( 68, 1, 0 );
