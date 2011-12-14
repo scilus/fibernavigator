@@ -19,7 +19,7 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) 
     m_meshShader( wxT( "mesh" ) ),
     m_fibersShader( wxT( "fibers" ) ),
     m_fakeTubesShader( wxT( "fake-tubes") ),
-    m_crossingFibersShader( wxT( "crossing_fibers" ), geometryShadersSupported ? true : false ),
+    m_crossingFibersShader( wxT( "crossing_fibers" ), false, false), //true, geometryShadersSupported ),
     m_splineSurfShader( wxT( "splineSurf" ) ),
     m_vectorShader( wxT( "vectors" ) ),
     m_legendShader( wxT( "legend" ) ),
@@ -83,6 +83,8 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) 
         if( m_crossingFibersShader.load() && m_crossingFibersShader.compileAndLink() )
         {
             m_crossingFibersShader.bind();
+            glProgramParameteriEXT(m_crossingFibersShader.getId(), GL_GEOMETRY_INPUT_TYPE_EXT, GL_POINTS);
+            glProgramParameteriEXT(m_crossingFibersShader.getId(), GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_LINE_STRIP);
             Logger::getInstance()->printDebug( _T( "Crossing fibers shader initialized." ), LOGLEVEL_MESSAGE );
         }
         else

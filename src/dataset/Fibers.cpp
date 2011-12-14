@@ -2793,6 +2793,8 @@ void Fibers::initializeBuffer()
 
 void Fibers::draw()
 {
+    setShader();
+
     if( m_cachedThreshold != m_threshold )
     {
         updateFibersColors();
@@ -2874,6 +2876,8 @@ void Fibers::draw()
     glDisableClientState( GL_VERTEX_ARRAY );
     glDisableClientState( GL_COLOR_ARRAY );
     glDisableClientState( GL_NORMAL_ARRAY );
+
+    releaseShader();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3626,5 +3630,57 @@ void Fibers::findCrossingFibers()
                 index += getPointsPerLine(line) * 3;
             }
         }
+    }
+}
+
+void Fibers::setShader()
+{
+    DatasetInfo *pDsInfo = (DatasetInfo*) this;
+
+    if( m_dh->m_useFakeTubes )
+    {
+
+    }
+    else if( m_useCrossingFibers )
+    {
+        // Determine X, Y and Z range
+        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
+        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
+        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
+        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
+        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
+        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+
+        m_dh->m_shaderHelper->m_crossingFibersShader.bind();
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", xMin);
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", xMax);
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", yMin);
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", yMax);
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", zMin);
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", zMax);
+    }
+    else if ( !m_useTex )
+    {
+        m_dh->m_shaderHelper->m_fibersShader.bind();
+        m_dh->m_shaderHelper->setFiberShaderVars();
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_dh->m_colorMap );
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
+    }
+}
+
+void Fibers::releaseShader()
+{
+    if( m_dh->m_useFakeTubes )
+    {
+        m_dh->m_shaderHelper->m_fakeTubesShader.release();
+    }
+    else if( m_useCrossingFibers )
+    {
+        m_dh->m_shaderHelper->m_crossingFibersShader.release();
+    }
+    else if( !m_useTex )
+    {
+        m_dh->m_shaderHelper->m_fibersShader.release();
     }
 }

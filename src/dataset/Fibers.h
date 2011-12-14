@@ -147,6 +147,9 @@ private:
 
     bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
     void            findCrossingFibers();
+    
+    void            setShader();
+    void            releaseShader();
 
     // Variables
     bool            m_isSpecialFiberDisplay;

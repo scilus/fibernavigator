@@ -616,11 +616,11 @@ void TheScene::renderFibers()
             if( ! pDsInfo->getUseTex() )
             {
                 bindTextures();
-                m_pDatasetHelper->m_shaderHelper->m_fibersShader.bind();
-                m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
-                m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-                m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-                m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
+                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.bind();
+                //m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
+                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
+                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
             }
             if( m_pDatasetHelper->m_selBoxChanged )
             {
@@ -629,7 +629,7 @@ void TheScene::renderFibers()
             }
             pDsInfo->draw();
 
-            m_pDatasetHelper->m_shaderHelper->m_fibersShader.release();
+            //m_pDatasetHelper->m_shaderHelper->m_fibersShader.release();
 
             lightsOff();
         }

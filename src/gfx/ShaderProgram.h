@@ -15,7 +15,7 @@
 class ShaderProgram
 {
 public:
-    ShaderProgram( wxString name, bool useGeometryShader = false );
+    ShaderProgram( wxString name, bool useGeometryShader = false, bool geometryShadersSupported = false );
     ~ShaderProgram();
 
     // Loads the various shaders from their respective files
@@ -50,6 +50,7 @@ private:
     Shader *m_pGeometry;
     Shader *m_pFragment;
     bool m_useGeometry;
+    bool m_geometrySupported;
     std::ostringstream m_oss;
 };
 

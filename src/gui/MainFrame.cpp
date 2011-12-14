@@ -1487,6 +1487,8 @@ void MainFrame::deleteListItem()
 
 void MainFrame::onSelectListItem( wxListEvent& event )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
+
     int l_item = event.GetIndex();
     m_pTreeWidget->UnselectAll();
     DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
