@@ -8,14 +8,14 @@
 #ifndef SHADERHELPER_H_
 #define SHADERHELPER_H_
 
-#include "Shader.h"
+#include "ShaderProgram.h"
 #include "../dataset/DatasetHelper.h"
 
 #include <vector>
 
 class ShaderHelper {
 public:
-    ShaderHelper(DatasetHelper* pDh);
+    ShaderHelper( DatasetHelper* pDh, bool useGeometryShaders );
     virtual ~ShaderHelper();
 
     void initializeArrays();
@@ -25,16 +25,16 @@ public:
     void setFiberShaderVars();
     void setSplineSurfaceShaderVars();
 
-    Shader *m_pTextureShader;
-    Shader *m_pMeshShader;
-    Shader *m_pFiberShader;
-    Shader *m_pFakeTubeShader;
-    Shader *m_pSplineSurfShader;
-    Shader *m_pVectorShader;
-    Shader *m_pLegendShader;
-    Shader *m_pGraphShader;
-    Shader *m_pTensorsShader;
-    Shader *m_pOdfsShader;
+    ShaderProgram m_anatomyShader;
+    ShaderProgram m_meshShader;
+    ShaderProgram m_fibersShader;
+    ShaderProgram m_fakeTubesShader;
+    ShaderProgram m_splineSurfShader;
+    ShaderProgram m_vectorShader;
+    ShaderProgram m_legendShader;
+    ShaderProgram m_graphShader;
+    ShaderProgram m_tensorsShader;
+    ShaderProgram m_odfsShader;
 
 private:
     DatasetHelper* m_pDh;

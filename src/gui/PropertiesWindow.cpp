@@ -10,6 +10,7 @@
 #include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+#include "../Logger.h"
 
 IMPLEMENT_DYNAMIC_CLASS(PropertiesWindow, wxScrolledWindow)
 
@@ -62,6 +63,8 @@ void PropertiesWindow::OnDeleteListItem( wxEvent& WXUNUSED(event) )
 
 void PropertiesWindow::OnToggleShowFS( wxEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnToggleShowFS" ), LOGLEVEL_DEBUG );
+
     if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
     {
         if( ! ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject)->toggleShowFS())
@@ -74,6 +77,8 @@ void PropertiesWindow::OnToggleShowFS( wxEvent& WXUNUSED(event) )
 
 void PropertiesWindow::OnListItemShow( wxCommandEvent&  WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnListItemShow" ), LOGLEVEL_DEBUG );
+
     if( m_mainFrame->m_pCurrentSceneObject == NULL && m_mainFrame->m_currentListItem != -1)
         return;
 
@@ -135,13 +140,28 @@ void PropertiesWindow::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(e
 
 void PropertiesWindow::OnEqualizeDataset( wxEvent& WXUNUSED(event) )
 {
-	if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnEqualizeDataset" ), LOGLEVEL_DEBUG );
+
+    if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
 	{
         if( ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject)->getType() < MESH )
         {
             ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->toggleEqualization();
         }
 	}
+}
+
+void PropertiesWindow::OnEqualizationSliderChange( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnEqualizationSliderChange" ), LOGLEVEL_DEBUG );
+
+    if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
+    {
+        if( ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject)->getType() < MESH )
+        {
+            ((Anatomy*)m_mainFrame->m_pCurrentSceneObject)->equalizationSliderChange();
+        }
+    }
 }
 
 void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) )
@@ -189,7 +209,6 @@ void PropertiesWindow::OnFlipZ( wxCommandEvent& WXUNUSED(event) )
     DatasetInfo* pInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( m_mainFrame->m_currentListItem );
     pInfo->flipAxis(Z_AXIS);
 }
-
 
 void PropertiesWindow::OnDilateDataset( wxCommandEvent& WXUNUSED(event) )
 {
@@ -347,6 +366,8 @@ void PropertiesWindow::OnKmeans( wxCommandEvent& WXUNUSED(event) )
 
 void PropertiesWindow::OnSelectObj(wxCommandEvent& WXUNUSED(event))
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnSelectObj" ), LOGLEVEL_DEBUG );
+
     m_mainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
     m_mainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
     m_mainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
@@ -355,6 +376,8 @@ void PropertiesWindow::OnSelectObj(wxCommandEvent& WXUNUSED(event))
 
 void PropertiesWindow::OnSelectBck(wxCommandEvent& WXUNUSED(event))
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnSelectBck" ), LOGLEVEL_DEBUG );
+
     m_mainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
     m_mainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
     m_mainFrame->m_pDatasetHelper->m_isSelectBckActive = true;
@@ -392,6 +415,8 @@ void PropertiesWindow::OnLoop( wxCommandEvent& WXUNUSED(event) )
 
 void PropertiesWindow::OnToggleLIC( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnToggleLIC" ), LOGLEVEL_DEBUG );
+
     if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 && m_mainFrame->m_pDatasetHelper->m_vectorsLoaded )
     {
         ((DatasetInfo*) m_mainFrame->m_pCurrentSceneObject)->activateLIC();
@@ -401,7 +426,9 @@ void PropertiesWindow::OnToggleLIC( wxCommandEvent& WXUNUSED(event) )
 
 void PropertiesWindow::OnToggleDrawPointsMode( wxCommandEvent& event )
 {
-   m_mainFrame->onToggleDrawPointsMode(event);
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnToggleDrawPointsMode" ), LOGLEVEL_DEBUG );
+
+    m_mainFrame->onToggleDrawPointsMode(event);
 }
 
 void PropertiesWindow::OnMoveBoundaryPointsLeft( wxCommandEvent& event )
@@ -436,6 +463,8 @@ void PropertiesWindow::OnGenerateFiberVolume( wxCommandEvent& WXUNUSED(event) )
 
 void PropertiesWindow::OnListMenuThreshold( wxCommandEvent&  WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnListMenuThreshold" ), LOGLEVEL_DEBUG );
+
     if( m_mainFrame->m_pCurrentSceneObject == NULL && m_mainFrame->m_currentListItem != -1)
         return;
     DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
@@ -454,6 +483,8 @@ void PropertiesWindow::OnListMenuThreshold( wxCommandEvent&  WXUNUSED(event) )
 //////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
+
     if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != DISTANCE_COLOR)
     {
         m_mainFrame->m_pDatasetHelper->m_fiberColorationMode = DISTANCE_COLOR;
@@ -467,6 +498,8 @@ void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 //////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnListMenuMinDistance" ), LOGLEVEL_DEBUG );
+
     if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != MINDISTANCE_COLOR)
     {
         m_mainFrame->m_pDatasetHelper->m_fiberColorationMode = MINDISTANCE_COLOR;
@@ -858,6 +891,8 @@ void PropertiesWindow::OnNormalizeTensors( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnDisplayFibersInfo" ), LOGLEVEL_DEBUG );
+
 // TODO remove when the bug with the wxChoice in Windows is fixed.
 #ifndef __WXMSW__
     ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->UpdateMeanValueTypeBox();
@@ -872,6 +907,8 @@ void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnDisplayMeanFiber" ), LOGLEVEL_DEBUG );
+
     ( (SelectionObject*)m_mainFrame->m_pCurrentSceneObject )->computeMeanFiber();
     m_mainFrame->refreshAllGLWidgets();
 }
@@ -951,6 +988,8 @@ void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayCrossSections( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnDisplayCrossSections" ), LOGLEVEL_DEBUG );
+
     ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->m_displayCrossSections = (CrossSectionsDisplay)( ( (int)((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->m_displayCrossSections ) + 1 );
     if( ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->m_displayCrossSections == CS_NB_OF_CHOICES )
 	{
@@ -964,6 +1003,8 @@ void PropertiesWindow::OnDisplayCrossSections( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayDispersionTube( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnDisplayDispersionTube" ), LOGLEVEL_DEBUG );
+
     ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->m_displayDispersionCone = (DispersionConeDisplay)( ( (int)((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->m_displayDispersionCone ) + 1 );
     if( ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->m_displayDispersionCone == DC_NB_OF_CHOICES )
 	{
@@ -997,6 +1038,8 @@ void PropertiesWindow::OnRenameBox( wxCommandEvent& WXUNUSED(event) )
 
 void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
+
     if( !m_mainFrame->m_pDatasetHelper->m_theScene)
         return;
 
@@ -1092,11 +1135,15 @@ void PropertiesWindow::OnDeleteTreeItem( wxTreeEvent&    event )
 
 void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent&    event )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnActivateTreeItem" ), LOGLEVEL_DEBUG );
+
     m_mainFrame->onActivateTreeItem(event);
 }
 
 void PropertiesWindow::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnToggleShowSelectionObject" ), LOGLEVEL_DEBUG );
+
     if( !m_mainFrame->m_pDatasetHelper->m_theScene)
         return;
 
@@ -1174,7 +1221,6 @@ void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
     {
         return;
     }
-
 
     if( m_mainFrame->m_currentListItem != -1 )
     {
@@ -1302,6 +1348,7 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
             }
         }
     }
+
     l_newAnatomy->setName( wxT( " (fiber_colors)" ) );
     m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
     m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
@@ -1314,6 +1361,8 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
 
 void PropertiesWindow::OnMeanComboBoxSelectionChange( wxCommandEvent& event)
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnMeanComboBoxSelectionChange" ), LOGLEVEL_DEBUG );
+
     ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->SetFiberInfoGridValues();
     m_mainFrame->refreshAllGLWidgets();
 }
