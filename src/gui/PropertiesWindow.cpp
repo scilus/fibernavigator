@@ -543,6 +543,33 @@ void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user click on the normal coloring radio
+// button located in the mean fiber coloring option
+///////////////////////////////////////////////////////////////////////////
+void PropertiesWindow::OnNormalMeanFiberColoring( wxCommandEvent& event )
+{
+   ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(NORMAL_COLOR); 
+}
+
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user click on the custom coloring radio
+// button located in the mean fiber coloring option
+///////////////////////////////////////////////////////////////////////////
+void PropertiesWindow::OnCustomMeanFiberColoring( wxCommandEvent& event )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(CUSTOM_COLOR);
+}
+
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user move the slider
+// button located in the mean fiber coloring option
+///////////////////////////////////////////////////////////////////////////
+void PropertiesWindow::OnMeanFiberOpacityChange( wxCommandEvent& event )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->updateMeanFiberOpacity();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user clicks on the "Set as distance
 // anchor" option.
@@ -883,6 +910,54 @@ void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
     Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnDisplayMeanFiber" ), LOGLEVEL_DEBUG );
 
     ( (SelectionObject*)m_mainFrame->m_pCurrentSceneObject )->computeMeanFiber();
+    m_mainFrame->refreshAllGLWidgets();
+}
+
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user click on the color palette
+// button that is located aside of the Show mean fiber button
+///////////////////////////////////////////////////////////////////////////
+void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
+{
+    if( ! m_mainFrame->m_pDatasetHelper->m_theScene )
+        return;
+
+    wxColourData l_colorData;
+
+    for( int i = 0; i < 10; ++i )
+    {
+        wxColour l_color(i * 28, i * 28, i * 28);
+        l_colorData.SetCustomColour(i, l_color);
+    }
+
+    int i = 10;
+    wxColour l_color ( 255, 0, 0 );
+    l_colorData.SetCustomColour( i++, l_color );
+    wxColour l_color1( 0, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color1 );
+    wxColour l_color2( 0, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color2 );
+    wxColour l_color3( 255, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color3 );
+    wxColour l_color4( 255, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color4 );
+    wxColour l_color5( 0, 255, 255 );
+    l_colorData.SetCustomColour( i++, l_color5 );
+
+    wxColourDialog dialog( this, &l_colorData );
+    wxColour l_col;
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        wxColourData l_retData = dialog.GetColourData();
+        l_col = l_retData.GetColour();
+    }
+    else
+    {
+        return;
+    }
+
+    ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->setMeanFiberColor( l_col);
+    
     m_mainFrame->refreshAllGLWidgets();
 }
 
