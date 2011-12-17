@@ -1461,18 +1461,12 @@ void Fibers::updateFibersColors()
     }
     else
     {
-		//bool glMapBufferUsed( false );
 		float *pColorData( NULL );
 		
 		if( m_dh->m_useVBO )
 		{
-			//if( m_dh->m_pColorData == NULL)
-			//{
-				glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-				/*m_dh->m_*/pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-				//glMapBufferUsed = true;
-			//}
-			//pColorData = m_dh->m_pColorData;
+			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+			pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 		}
         else
         {
@@ -1496,7 +1490,7 @@ void Fibers::updateFibersColors()
             colorWithMinDistance( pColorData );
         }
 
-        if( m_dh->m_useVBO /*&& glMapBufferUsed*/ )
+        if( m_dh->m_useVBO)
         {
             glUnmapBuffer( GL_ARRAY_BUFFER );
         }
@@ -1924,18 +1918,12 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
     int pointIndex( 0 );
     countLines = 0;
 
-    //bool glMapBufferUsed( false );
 	float *pColorData( NULL );
 	
 	if( m_dh->m_useVBO )
     {
-		//if( m_dh->m_pColorData == NULL)
-		//{
-			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			/*m_dh->m_*/pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-			//glMapBufferUsed = true;
-		//}
-		//pColorData = m_dh->m_pColorData;
+		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
@@ -1967,7 +1955,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
         }
     }
 
-    if( m_dh->m_useVBO /*&& glMapBufferUsed*/)
+    if( m_dh->m_useVBO)
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2303,17 +2291,11 @@ void Fibers::resetColorArray()
     m_dh->printDebug( _T( "reset color arrays" ), 1 );
     float *pColorData( NULL );
     float *pColorData2( NULL );
-	//bool glMapBufferUsed( false );
 	
 	if( m_dh->m_useVBO )
     {
-		//if( m_dh->m_pColorData == NULL)
-		//{
-			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			/*m_dh->m_*/pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-			//glMapBufferUsed = true;
-		//}
-		pColorData = m_dh->m_pColorData;
+		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 		pColorData2 = &m_colorArray[0];
     }
     else
@@ -2373,7 +2355,7 @@ void Fibers::resetColorArray()
         }
     }
 
-    if( m_dh->m_useVBO /*&& glMapBufferUsed*/ )
+    if( m_dh->m_useVBO)
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2480,17 +2462,11 @@ void Fibers::updateLinesShown()
         {
 			float *pColorData( NULL );
 			float *pColorData2( NULL );
-			//bool glMapBufferUsed( false );
 			
 			if( m_dh->m_useVBO )
 			{
-				//if( m_dh->m_pColorData == NULL)
-				//{
-					glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-					/*m_dh->m_*/pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-					//glMapBufferUsed = true;
-				//}
-				pColorData = m_dh->m_pColorData;
+				glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+				pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 				pColorData2 = &m_colorArray[0];
 			}
             else
@@ -2520,7 +2496,7 @@ void Fibers::updateLinesShown()
                 }
             }
 
-            if( m_dh->m_useVBO /*&& glMapBufferUsed*/ )
+            if( m_dh->m_useVBO )
             {
                 glUnmapBuffer( GL_ARRAY_BUFFER );
             }
