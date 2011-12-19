@@ -26,7 +26,7 @@ std::vector<Vector> ConvexHullIncremental::getFourFirstPoint()
     
     Vector tmp;
     //Searching for the third point. It must not be on the line between the first and second point
-    for ( int(i) = 2; i < m_allPoints.size(); i++ )
+    for ( unsigned int(i) = 2; i < m_allPoints.size(); i++ )
     {
         tmp = ( m_allPoints[1] - m_allPoints[0] ).Cross( m_allPoints[i] - m_allPoints[0] );
         if ( ( tmp.x!=0 ) || ( tmp.y != 0 ) || ( tmp.z != 0) )
@@ -43,7 +43,7 @@ std::vector<Vector> ConvexHullIncremental::getFourFirstPoint()
         Plane p;
         p.computePlane( points[0], points[1], points[2] );
         //Seaching for the fourth point. It must not be on the plane between the three point
-        for (int(i) = 3; i<m_allPoints.size(); i++)
+        for ( unsigned int(i) = 3; i<m_allPoints.size(); i++ )
         {
             if ( !p.isOnPlane(m_allPoints[i]) )
             {
@@ -221,4 +221,5 @@ bool ConvexHullIncremental::getHullTriangles ( std::list< Face3D > &o_faces )
     if (m_hullTriangles.size() == 0)
         return false;
     o_faces = m_hullTriangles;
+    return true;
 }

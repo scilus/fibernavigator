@@ -33,7 +33,7 @@ bool convexDivideAndConquerHull::buildHull( std::vector< Vector > &o_points )
 }
 
 
-std::vector< std::vector<Vector> > convexDivideAndConquerHull::buildHull( int i_first, int i_last ){
+std::vector< std::vector< Vector > > convexDivideAndConquerHull::buildHull( int i_first, int i_last ){
     if ( i_last - i_first < 2 )
         return std::vector< std::vector< Vector > >();
 
@@ -122,21 +122,17 @@ std::vector< std::vector<Vector> > convexDivideAndConquerHull::buildHull( int i_
 }
 
 
-void convexDivideAndConquerHull::deleteTriangles( std::vector<std::vector<Vector>> triangles, int first, int last )
+void convexDivideAndConquerHull::deleteTriangles( std::vector< std::vector< Vector > > triangles, int first, int last )
 {
-    if (triangles.size() >= 0)
+    for ( unsigned int i(0); i < triangles.size(); i++ )
     {
-        for ( unsigned int i(0); i < triangles.size(); i++ )
+	    if (isValidTriangle(triangles[i], first, last)) 
         {
-	        if (isValidTriangle(triangles[i], first, last)) 
-            {
-	            //Remove the triangle
-                triangles.erase(triangles.begin() + i);
-	        }
+	        //Remove the triangle
+            triangles.erase(triangles.begin() + i);
+	    }
 	        
-        }
-    }
-  
+    } 
 }
 
 

@@ -20,14 +20,14 @@ public:
     bool    buildHull( std::vector< Vector > &o_points );
     void    draw();
 
-    std::vector< std::vector<Vector> > getTriangles(){return m_triangles;};
+    std::vector< std::vector< Vector > > getTriangles(){return m_triangles;};
 
 private:
     //Methods
     void                                    sortPoints          ();
-    std::vector< std::vector<Vector> >      buildHull           ( int i_firs, int i_last );
-    std::vector<Vector>                     makeTriangle        ( Vector pts1, Vector pts2, Vector pts3 );
-    void                                    deleteTriangles     ( std::vector<std::vector<Vector>> triangles, int first, int last );
+    std::vector< std::vector< Vector > >      buildHull           ( int i_firs, int i_last );
+    std::vector< Vector >                     makeTriangle        ( Vector pts1, Vector pts2, Vector pts3 );
+    void                                    deleteTriangles     ( std::vector< std::vector< Vector> > triangles, int first, int last );
     bool                                    isValidTriangle     ( std::vector<Vector> t, int first, int last );
 
     //Variable
