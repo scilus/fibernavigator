@@ -9,7 +9,7 @@
 //      This class uses the incremental algorithm to calculate the convex
 //      hull of a batch of points in 3D
 //////////////////////////////////////////////////////////////////////////////////
-class ConvexHullIncremental : ConvexHull
+class ConvexHullIncremental : public ConvexHull
 {
 public:
 

@@ -1,7 +1,7 @@
 #include "ConvexHullIncremental.h"
 
 ConvexHullIncremental::ConvexHullIncremental( std::vector< Vector > &i_pointsVector ) :
-ConvexHull(i_pointsVector)
+    ConvexHull( i_pointsVector )
 {}
 
 
@@ -119,7 +119,7 @@ bool ConvexHullIncremental::buildHull()
         visiblesFaces.clear();
         //Check if the vertice i is visible from all valid face
         std::list< Face3D >::iterator it = m_hullTriangles.begin();
-        for ( it; it != m_hullTriangles.end(); it++ )
+        for ( ; it != m_hullTriangles.end(); it++ )
         {
             if ( it->isVisible( m_allPoints[i] ) )
                 visiblesFaces.push_back( *it );

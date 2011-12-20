@@ -10,7 +10,7 @@
 // FIXME - Right now, this class is not working. The hull that is compute is not
 //         good.
 //////////////////////////////////////////////////////////////////////////////////
-class convexDivideAndConquerHull : ConvexHull
+class convexDivideAndConquerHull : public ConvexHull
 {
 public:
     //Constructor/Destructor
