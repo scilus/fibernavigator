@@ -162,6 +162,15 @@ public :
     void       setConvexHullOpacity( float i_opacity) { m_convexHullOpacity = i_opacity;         };
     float      getConvexHullOpacity()                 { return m_convexHullOpacity;              };
 
+    void       setMeanFiberColor( wxColour i_color )  { m_meanFiberColor = i_color;            }; 
+    wxColour   getMeanFiberColor()                    { return m_meanFiberColor;               };
+
+    void       setMeanFiberOpacity( float i_opacity) { m_meanFiberOpacity = i_opacity;         };
+    float      getMeanFiberOpacity()                 { return m_meanFiberOpacity;              };
+
+    void       setMeanFiberColorMode( FibersColorationMode i_mode ) { m_meanFiberColorationMode = i_mode; };
+    FibersColorationMode getMeanFiberColorMode()     { return m_meanFiberColorationMode;        };
+
     //Distance coloring setup
     bool        IsUsedForDistanceColoring() const;
     void        UseForDistanceColoring(bool aUse);
@@ -218,6 +227,12 @@ protected :
     wxColour m_convexHullColor;
     float    m_convexHullOpacity; //Betweem 0 and 1
     
+    //Mean fiber coloring variables
+    wxColour m_meanFiberColor; //Custom color chose by the user
+    vector< Vector > m_meanFiberColorVector; //Vector of colour compute by the program
+    float m_meanFiberOpacity; //Between 0 and 1
+    FibersColorationMode m_meanFiberColorationMode;
+
     // Those variables represent the min/max value in pixel of the object.
     float m_minX;
     float m_minY;
@@ -249,6 +264,7 @@ public:
                                                      double                      i_progression,
                                                      double                     &o_torsion                 );
     void   SetFiberInfoGridValues             ();
+    void   updateMeanFiberOpacity             ();
     void   UpdateMeanValueTypeBox             ();
     void   updateConvexHullOpacity            ();
 protected:
@@ -256,6 +272,8 @@ protected:
     void   drawCrossSectionsPolygons         ();
     void   drawDispersionCone                ();
     void   drawFibersInfo                    ();
+    void   setNormalColorArray               (const vector< Vector > &i_fiberPoints);
+    void   setShowMeanFiberOption            ( bool i_val );
     void   drawPolygon                       ( const vector< Vector >           &i_crossSectionPoints      );
     void   drawSimpleCircles                 ( const vector< vector< Vector > > &i_allCirclesPoints        );
     void   drawThickFiber                    ( const vector< Vector >           &i_fiberPoints,
@@ -342,6 +360,12 @@ private:
     wxBitmapButton  *m_pbtnSelectConvexHullColor;
     wxStaticText    *m_plblConvexHullOpacity;
     wxSlider        *m_pSliderConvexHullOpacity;
+    wxBitmapButton  *m_pbtnSelectMeanFiberColor;
+    wxStaticText    *m_plblColoring;
+    wxRadioButton   *m_pRadioCustomColoring;
+    wxRadioButton   *m_pRadioNormalColoring;
+    wxStaticText    *m_pLblMeanFiberOpacity;
+    wxSlider        *m_psliderMeanFiberOpacity;
     wxButton        *m_pbtnDisplayCrossSections;
     wxButton        *m_pbtnDisplayDispersionTube;
     wxButton        *m_pbtnSetAsDistanceAnchor;

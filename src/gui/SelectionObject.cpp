@@ -584,7 +584,19 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     
-    glColor4f( 0.25f, 0.25f, 0.25f, 1 ); // Grayish
+    //Get the mean fiber color
+    m_meanFiberColorVector.clear();
+    switch ( m_meanFiberColorationMode ){
+        case NORMAL_COLOR:
+            setNormalColorArray( i_fiberPoints );
+            break;
+        case CUSTOM_COLOR:
+            //Use custom color
+            glColor4f( (float)m_meanFiberColor.Red() / 255.0f, (float)m_meanFiberColor.Green() / 255.0f, (float)m_meanFiberColor.Blue() / 255.0f, m_meanFiberOpacity );
+            break;
+        default:
+            glColor4f( 0.25f, 0.25f, 0.25f, m_meanFiberOpacity ); // Grayish
+    }
 
     Vector l_normal;
 
@@ -609,6 +621,9 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
         glBegin( GL_QUAD_STRIP );
             for( unsigned int j = 0; j < l_circlesPoints.size(); ++j )
             {
+                if ( m_meanFiberColorVector.size() != 0 && m_meanFiberColorVector.size() == l_circlesPoints.size() )
+                    glColor4f( m_meanFiberColorVector[j][0], m_meanFiberColorVector[j][1], m_meanFiberColorVector[j][2], m_meanFiberOpacity );
+
                 glVertex3f( l_circlesPoints[j][i].x, l_circlesPoints[j][i].y, l_circlesPoints[j][i].z );
                 if( i+1 == i_nmTubeEdge )
                     glVertex3f( l_circlesPoints[j][0].x, l_circlesPoints[j][0].y, l_circlesPoints[j][0].z );
@@ -683,6 +698,31 @@ void SelectionObject::updateConvexHullOpacity()
 {
     setConvexHullOpacity( ( m_pSliderConvexHullOpacity->GetValue() + (float)m_pSliderConvexHullOpacity->GetMin() ) / (float)m_pSliderConvexHullOpacity->GetMax() );
 }
+
+///////////////////////////////////////////////////////////////////////////
+// Fill the color array use to display the mean fiber base on the mean fiber direction
+//      i_fiberPoints : All points of the mean fiber
+///////////////////////////////////////////////////////////////////////////
+void SelectionObject::setNormalColorArray(const vector< Vector > &i_fiberPoints)
+{
+    m_meanFiberColorVector.clear();
+    Vector color;
+
+    if ( i_fiberPoints.size() < 2 )
+        return;
+    for ( unsigned int i(0); i < i_fiberPoints.size(); i++ )
+    {
+        if ( i==0 )
+            color = i_fiberPoints[i+1] - i_fiberPoints[i];
+        else
+            color = i_fiberPoints[i] - i_fiberPoints[i-1];
+        
+        color.normalize();
+        m_meanFiberColorVector.push_back( color );
+            
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Draws all the cross sections.
@@ -1914,6 +1954,54 @@ void SelectionObject::setShowConvexHullOption( bool i_val )
     m_pbtnSelectConvexHullColor->Enable( i_val );
 }
 
+void SelectionObject::UpdateMeanValueTypeBox()
+{
+    vector< DatasetInfo* > dataSets;
+    m_datasetHelper->getTextureDataset( dataSets );
+    
+    if( dataSets.size() != m_pCBSelectDataSet->GetCount() )
+    {
+        int oldIndex = -1;
+        wxString oldName = m_pCBSelectDataSet->GetStringSelection();
+        
+        m_pCBSelectDataSet->Clear();
+        
+        for( unsigned int i( 0 ); i < dataSets.size(); ++i )
+        {
+            m_pCBSelectDataSet->Insert( dataSets[i]->getName().BeforeFirst('.'), m_pCBSelectDataSet->GetCount() );
+            if( oldName == dataSets[i]->getName().BeforeFirst('.') )
+            {
+                oldIndex = i;
+            }
+        }
+        
+        if( oldIndex < 0 )
+        {
+            oldIndex = 0;
+        }
+        else if( static_cast<unsigned int>( oldIndex ) >= m_pCBSelectDataSet->GetCount() )
+        {
+            oldIndex = m_pCBSelectDataSet->GetCount() - 1;
+        }
+        
+        m_pCBSelectDataSet->SetSelection(oldIndex);
+    }
+}
+
+void SelectionObject::setShowMeanFiberOption( bool i_val )
+{
+    m_plblColoring->Show( i_val );
+    m_pRadioCustomColoring->Show( i_val );
+    m_pRadioNormalColoring->Show( i_val );
+    m_pLblMeanFiberOpacity->Show( i_val );
+    m_psliderMeanFiberOpacity->Show( i_val );
+}
+
+void SelectionObject::updateMeanFiberOpacity()
+{
+    setMeanFiberOpacity( ( m_psliderMeanFiberOpacity->GetValue() + (float)m_psliderMeanFiberOpacity->GetMin() ) / (float)m_psliderMeanFiberOpacity->GetMax() );
+}
+
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 {
     SceneObject::createPropertiesSizer(parent);  
@@ -2030,11 +2118,51 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->AddSpacer(2);
 #endif
 
-    m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
+    wxImage bmpMeanFiberColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
+    m_pbtnSelectMeanFiberColor = new wxBitmapButton(parent, wxID_ANY, bmpMeanFiberColor, wxDefaultPosition, wxSize(40,-1));
+    l_sizer->Add(m_pbtnSelectMeanFiberColor,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+
+    //Mean fiber coloring option
+    m_propertiesSizer->AddSpacer( 8 );
+    
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_plblColoring = new wxStaticText( parent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT );
+    l_sizer->Add( m_plblColoring, 0, wxALIGN_CENTER );
+    l_sizer->Add( 8, 1, 0 );
+    m_pRadioCustomColoring = new wxRadioButton( parent, wxID_ANY, _T( "Custom" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    l_sizer->Add(m_pRadioCustomColoring);
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+
+    m_pRadioNormalColoring = new wxRadioButton( parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( 68, 1, 0 );
+    l_sizer->Add( m_pRadioNormalColoring );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pLblMeanFiberOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+    l_sizer->Add( m_pLblMeanFiberOpacity, 0, wxALIGN_CENTER );
+    m_psliderMeanFiberOpacity = new wxSlider(parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    l_sizer->Add( m_psliderMeanFiberOpacity, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    m_meanFiberOpacity = 0.35f;
+
+    parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
+    parent->Connect(m_pbtnSelectMeanFiberColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMeanFiberColorChange));
+    parent->Connect( m_pRadioCustomColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnCustomMeanFiberColoring ) );
+    parent->Connect( m_pRadioNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalMeanFiberColoring ) );
+    parent->Connect( m_psliderMeanFiberOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberOpacityChange ) );
+    m_meanFiberColorationMode = NORMAL_COLOR;
+    m_pRadioNormalColoring->SetValue( true );
+
+
+
     //m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
     //m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
 
-    parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
     //parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections));
     //parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
 
@@ -2123,41 +2251,6 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 
 }
 
-void SelectionObject::UpdateMeanValueTypeBox()
-{
-    vector< DatasetInfo* > dataSets;
-    m_datasetHelper->getTextureDataset( dataSets );
-    
-    if( dataSets.size() != m_pCBSelectDataSet->GetCount() )
-    {
-        int oldIndex = -1;
-        wxString oldName = m_pCBSelectDataSet->GetStringSelection();
-        
-        m_pCBSelectDataSet->Clear();
-        
-        for( unsigned int i( 0 ); i < dataSets.size(); ++i )
-        {
-            m_pCBSelectDataSet->Insert( dataSets[i]->getName().BeforeFirst('.'), m_pCBSelectDataSet->GetCount() );
-            if( oldName == dataSets[i]->getName().BeforeFirst('.') )
-            {
-                oldIndex = i;
-            }
-        }
-        
-        if( oldIndex < 0 )
-        {
-            oldIndex = 0;
-        }
-        else if( static_cast<unsigned int>( oldIndex ) >= m_pCBSelectDataSet->GetCount() )
-        {
-            oldIndex = m_pCBSelectDataSet->GetCount() - 1;
-        }
-        
-        m_pCBSelectDataSet->SetSelection(oldIndex);
-    }
-}
-
-
 
 void SelectionObject::updatePropertiesSizer()
 {
@@ -2170,6 +2263,9 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleDisplayMeanFiber->Enable( getShowFibers() );
     m_ptoggleDisplayConvexHull->Enable( getShowFibers() );
     setShowConvexHullOption( m_ptoggleDisplayConvexHull->GetValue() );
+
+    m_pbtnSelectMeanFiberColor->Enable( m_ptoggleDisplayMeanFiber->GetValue() );
+    setShowMeanFiberOption( m_ptoggleDisplayMeanFiber->GetValue() );
 
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.
