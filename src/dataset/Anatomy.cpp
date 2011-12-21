@@ -14,12 +14,10 @@
 #include <GL/glew.h>
 #include <cassert>
 
+#include <algorithm>
+
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
-
-#define MAX(a,b) ((a) > (b) ? (a) : (b)) 
-#define MIN(a,b) ((a) < (b) ? (a) : (b)) 
-#define BLACK 0.0f; //0.00390625f;
 
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper ) 
 : DatasetInfo ( pDatasetHelper ),
@@ -1191,9 +1189,9 @@ SubTextureBox Anatomy::getStrokeBox( const int x, const int y, const int z, cons
 	}
 
 	//set position of the box
-	box.x = MIN( MAX(x-box.width/2, 0),  m_columns-box.width );
-	box.y = MIN( MAX(y-box.height/2, 0), m_rows-box.height );
-	box.z = MIN( MAX(z-box.depth/2, 0),  m_frames-box.depth );
+	box.x = std::min( std::max( x-box.width / 2, 0 ),  m_columns-box.width );
+	box.y = std::min( std::max( y-box.height / 2, 0 ), m_rows-box.height );
+	box.z = std::min( std::max( z-box.depth / 2, 0 ),  m_frames-box.depth );
 
 	return box;
 }

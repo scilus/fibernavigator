@@ -885,8 +885,6 @@ void MainCanvas::render()
                 }
 				else if ( m_pDatasetHelper->m_isDrawerToolActive && m_isDrawerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
 				{
-					//TODO
-
 					m_isDrawerHit = false;
 				}
 
@@ -1236,9 +1234,6 @@ void MainCanvas::drawOnAnatomy()
 	double yClick = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
 	double zClick = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
 	int layer = m_hr.picked;
-
-	//1D vector with the normalized brightness ( 0 to 1 )
-	std::vector<float>* sourceData = l_currentAnatomy->getFloatDataset();
 
 	//security check: hit detection can be a pixel offset, but negative positions crash
 	if(xClick < 0 || yClick < 0 || zClick < 0)
