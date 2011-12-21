@@ -15,6 +15,17 @@ MyListCtrl::MyListCtrl(MainFrame *parent, const wxWindowID id, const wxPoint& po
     m_mainFrame = parent;
 }
 
+bool MyListCtrl::DeleteItem( long itemIdx)
+{
+    DatasetInfo *pDataset = reinterpret_cast< DatasetInfo* >( GetItemData( itemIdx ) );
+    delete pDataset;
+    pDataset = NULL;
+    
+    SetItemData( itemIdx, 0 );
+    
+    return wxListCtrl::DeleteItem( itemIdx );
+}
+
 void MyListCtrl::OnLeftClick(wxMouseEvent& event)
 {
     int col;

@@ -138,10 +138,10 @@ file( GLOB LIC_SRC "misc/lic/*.cpp" )
 file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 
 IF( WIN32 )
- ADD_EXECUTABLE( ${target} WIN32 main.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} 
+ ADD_EXECUTABLE( ${target} WIN32 main.h main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} 
                                           ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${NIFTI_HDR} )
 ELSE( WIN32 )
- ADD_EXECUTABLE( ${target} main.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC}
+ ADD_EXECUTABLE( ${target} main.h main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC}
                                     ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${NIFTI_HDR} )
 ENDIF( WIN32 )
 
@@ -179,7 +179,7 @@ ELSE(APPLE)
       execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/icons ${CMAKE_BINARY_DIR}/bin/${BUILD_TYPE}/icons)
     ENDFOREACH(BUILD_TYPE ${CMAKE_BUILD_TYPE})
   ELSE(WIN32)
-    TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8) 
+    TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8 libGL.so libz.so libGLU.so ) 
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/icons ${CMAKE_BINARY_DIR}/bin/icons)
   ENDIF(WIN32)

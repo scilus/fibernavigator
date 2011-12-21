@@ -41,6 +41,8 @@ public:
     int getColActivated();
     void moveItemUp(long);
     void moveItemDown(long);
+    
+    bool DeleteItem(long item);
 
 private:
     MainFrame *m_mainFrame;

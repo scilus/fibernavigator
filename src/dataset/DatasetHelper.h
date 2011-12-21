@@ -25,7 +25,6 @@
 
 #include "DatasetInfo.h"
 
-
 #include "../gui/SelectionObject.h"
 
 #include "../gui/MainFrame.h"
@@ -36,6 +35,10 @@
 #include "../gfx/ShaderHelper.h"
 
 #include "../misc/lic/TensorField.h"
+
+#include "../misc/Fantom/FMatrix.h"
+
+#include "../Logger.h"
 
 class MainFrame;
 class DatasetInfo;
@@ -95,13 +98,30 @@ public:
     /*
      * Helper functions
      */
+
+#ifndef __GNUC__
+    #pragma deprecated(printTime, printwxT, printDebug, printGLError)
+    
+    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
     void printTime();
-    void printwxT  ( const wxString i_string );
-    void printDebug( const wxString i_string, const int i_level );
+    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printwxT  ( const wxString string );
+    // Deprecated: Use Log::printDebug instead.
+    void printDebug( const wxString string, const LogLevel level );
+#else
+    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printTime() __attribute__((deprecated));
+    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printwxT  ( const wxString string ) __attribute__((deprecated));
+    // Deprecated: Use Log::printDebug instead.
+    void printDebug( const wxString string, const LogLevel level ) __attribute__((deprecated));
+#endif
+
     /*
      * Check for GL error
      */
     bool GLError();
+    // Deprecated: Use Log::printGLError instead.
     void printGLError( const wxString function = wxT( "" ) );
 
     void updateView( const float i_x, const float i_y, const float i_z );
@@ -113,6 +133,7 @@ public:
 
     bool getFiberDataset  ( Fibers*  &i_fiber );
     bool getSurfaceDataset( Surface* &i_surface );
+    bool getTextureDataset( std::vector< DatasetInfo* > &o_types ); 
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
 
@@ -144,7 +165,7 @@ public:
     double                m_rulerPartialLength;
     int                   m_fibersSamplingFactor;
     bool                  m_isSegmentActive;
-    int                      m_SegmentMethod;
+    int                   m_SegmentMethod;
     bool                  m_isFloodfillActive;
     bool                  m_isSelectBckActive;
     bool                  m_isSelectObjActive;
@@ -160,6 +181,8 @@ public:
     float m_xVoxel;
     float m_yVoxel;
     float m_zVoxel;
+    
+    FMatrix m_niftiTransform;
 
     unsigned int m_countFibers;
 
@@ -198,7 +221,7 @@ public:
 
     int       m_debugLevel;
 
-    float     m_frustum[6][4]; // Countains the information of the planes forming the frustum.
+    float     m_frustum[6][4]; // Contains the information of the planes forming the frustum.
     /////////////////////////////////////////////////////////////////////////////////
     // state variables for menu entries
     /////////////////////////////////////////////////////////////////////////////////
@@ -219,6 +242,7 @@ public:
     float m_normalDirection;  // Normal direction of the spline surface.
     bool  m_fibersInverted;
     bool  m_useFakeTubes;
+    bool  m_geometryShadersSupported;
     bool  m_clearToBlack;
     bool  m_useTransparency;
     bool  m_filterIsoSurf;
@@ -278,9 +302,10 @@ public:
     SelectionObject* m_boxAtCrosshair;
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
-    MainFrame*       m_mainFrame;
     TheScene*        m_theScene;
     ShaderHelper*    m_shaderHelper;
+    
+    MainFrame*       m_mainFrame;
 };
 
 #define ID_KDTREE_FINISHED    50

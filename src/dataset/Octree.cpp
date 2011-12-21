@@ -12,12 +12,12 @@ Octree::Octree( int lvl, const std::vector< float > &pointArray, int nb, Dataset
     m_pointArray(pointArray)    
 {
 
-    m_dh->printDebug(_T("Building Octree..."), 1);
+    m_dh->printDebug( _T("Building Octree..."), LOGLEVEL_MESSAGE );
     
     findBoundingBox();
     classifyPoints();
     
-    m_dh->printDebug(_T("Octree done"), 1);
+    m_dh->printDebug( _T("Octree done"), LOGLEVEL_MESSAGE );
 }
 
 //////////////////////////////////////////
@@ -228,6 +228,103 @@ vector<int> Octree::getPointsInside( SelectionObject* i_selectionObject )
 
     return m_id;
 
+}
+
+//////////////////////////////////////////
+// Return points that are inside a bounding box
+// defined from the coordinates of its corners.
+//////////////////////////////////////////
+vector< int > Octree::getPointsInBoundingBox( int xMin, int yMin, int zMin, int xMax, int yMax, int zMax )
+{
+    m_id.clear();
+    m_boxMin.resize( 3 );
+    m_boxMax.resize( 3 );
+    
+    m_boxMin[0] = xMin * m_dh->m_xVoxel;
+    m_boxMin[1] = yMin * m_dh->m_yVoxel;
+    m_boxMin[2] = zMin * m_dh->m_zVoxel;
+    m_boxMax[0] = xMax * m_dh->m_xVoxel;
+    m_boxMax[1] = yMax * m_dh->m_yVoxel;
+    m_boxMax[2] = zMax * m_dh->m_zVoxel;
+    
+    boxTest( m_minPointX, m_minPointY, m_minPointZ, m_maxPointX, m_maxPointY, m_maxPointZ, 0, m_quad1 );
+    
+    return m_id;
+}
+
+void Octree::flipX()
+{
+    std::swap( m_quad1, m_quad3 );
+    std::swap( m_quad2, m_quad4 );
+    std::swap( m_quad5, m_quad7 );
+    std::swap( m_quad6, m_quad8 );
+    
+    flipXInternalVector( m_quad1 );
+    flipXInternalVector( m_quad2 );
+    flipXInternalVector( m_quad3 );
+    flipXInternalVector( m_quad4 );
+    flipXInternalVector( m_quad5 );
+    flipXInternalVector( m_quad6 );
+    flipXInternalVector( m_quad7 );
+    flipXInternalVector( m_quad8 );
+}
+
+void Octree::flipY()
+{
+    std::swap( m_quad1, m_quad2 );
+    std::swap( m_quad3, m_quad4 );
+    std::swap( m_quad5, m_quad6 );
+    std::swap( m_quad7, m_quad8 );
+    
+    flipYInternalVector( m_quad1 );
+    flipYInternalVector( m_quad2 );
+    flipYInternalVector( m_quad3 );
+    flipYInternalVector( m_quad4 );
+    flipYInternalVector( m_quad5 );
+    flipYInternalVector( m_quad6 );
+    flipYInternalVector( m_quad7 );
+    flipYInternalVector( m_quad8 );
+}
+
+void Octree::flipZ()
+{
+    std::swap( m_quad1, m_quad5 );
+    std::swap( m_quad3, m_quad7 );
+    std::swap( m_quad2, m_quad6 );
+    std::swap( m_quad4, m_quad8 );
+    
+    flipZInternalVector( m_quad1 );
+    flipZInternalVector( m_quad2 );
+    flipZInternalVector( m_quad3 );
+    flipZInternalVector( m_quad4 );
+    flipZInternalVector( m_quad5 );
+    flipZInternalVector( m_quad6 );
+    flipZInternalVector( m_quad7 );
+    flipZInternalVector( m_quad8 );
+}
+
+void Octree::flipXInternalVector( vector< vector< int > > &vectToFlip )
+{
+    std::swap( vectToFlip[0], vectToFlip[2] );
+    std::swap( vectToFlip[1], vectToFlip[3] );
+    std::swap( vectToFlip[4], vectToFlip[6] );
+    std::swap( vectToFlip[5], vectToFlip[7] );
+}
+
+void Octree::flipYInternalVector( vector< vector< int > > &vectToFlip )
+{
+    std::swap( vectToFlip[0], vectToFlip[1] );
+    std::swap( vectToFlip[2], vectToFlip[3] );
+    std::swap( vectToFlip[4], vectToFlip[5] );
+    std::swap( vectToFlip[6], vectToFlip[7] );
+}
+
+void Octree::flipZInternalVector( vector< vector< int > > &vectToFlip )
+{
+    std::swap( vectToFlip[0], vectToFlip[4] );
+    std::swap( vectToFlip[2], vectToFlip[6] );
+    std::swap( vectToFlip[1], vectToFlip[5] );
+    std::swap( vectToFlip[3], vectToFlip[7] );
 }
 
 //////////////////////////////////////////

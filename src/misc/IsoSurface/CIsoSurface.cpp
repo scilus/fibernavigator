@@ -1128,7 +1128,7 @@ bool CIsoSurface::save( wxString filename ) const
         return false;
     }
 
-    m_dh->printDebug( _T("start writing file)"), 1 );
+    m_dh->printDebug( _T("start writing file)"), LOGLEVEL_MESSAGE );
     dataFile << ( "# vtk DataFile Version 2.0\n" );
     dataFile << ( "generated using FiberNavigator\n" );
     dataFile << ( "ASCII\n" );
@@ -1187,5 +1187,8 @@ void CIsoSurface::updatePropertiesSizer()
     m_ptoggleUseColoring->SetValue(!getUseTex());
     m_ptoggleCutFrontSector->SetValue(!getShowFS());
 
-    
+    // Disabled for the moment, not implemented.
+    m_pBtnFlipX->Enable( false );
+    m_pBtnFlipY->Enable( false );
+    m_pBtnFlipZ->Enable( false );
 }

@@ -14,7 +14,8 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../misc/Algorithms/BSpline.h"
-#include "../misc/Algorithms/ConvexHull.h"
+#include "../misc/Algorithms/ConvexHullIncremental.h"
+#include "../misc/Algorithms/ConvexGrahamHull.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../main.h"
 #include "../gui/MainFrame.h"
@@ -25,8 +26,10 @@
 
 
 SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ):
-    m_displayCrossSections     ( CS_NOTHING   ),
-    m_displayDispersionCone    ( DC_NOTHING   )
+    m_pLabelAnatomy   ( NULL ),
+    m_pCBSelectDataSet( NULL ),
+    m_displayCrossSections ( CS_NOTHING   ),
+    m_displayDispersionCone( DC_NOTHING   )
 {
     wxColour  l_color( 240, 30, 30 );
     hitResult l_hr = { false, 0.0f, 0, NULL };
@@ -58,6 +61,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_treeId                = NULL;
     m_boxMoved                = false;
     m_boxResized            = false;
+    m_mustUpdateConvexHull  = true;
 
     //Distance coloring
     m_DistColoring          = false;
@@ -580,7 +584,19 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     
-    glColor4f( 0.25f, 0.25f, 0.25f, 0.35f ); // Grayish
+    //Get the mean fiber color
+    m_meanFiberColorVector.clear();
+    switch ( m_meanFiberColorationMode ){
+        case NORMAL_COLOR:
+            setNormalColorArray( i_fiberPoints );
+            break;
+        case CUSTOM_COLOR:
+            //Use custom color
+            glColor4f( (float)m_meanFiberColor.Red() / 255.0f, (float)m_meanFiberColor.Green() / 255.0f, (float)m_meanFiberColor.Blue() / 255.0f, m_meanFiberOpacity );
+            break;
+        default:
+            glColor4f( 0.25f, 0.25f, 0.25f, m_meanFiberOpacity ); // Grayish
+    }
 
     Vector l_normal;
 
@@ -605,6 +621,9 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
         glBegin( GL_QUAD_STRIP );
             for( unsigned int j = 0; j < l_circlesPoints.size(); ++j )
             {
+                if ( m_meanFiberColorVector.size() != 0 && m_meanFiberColorVector.size() == l_circlesPoints.size() )
+                    glColor4f( m_meanFiberColorVector[j][0], m_meanFiberColorVector[j][1], m_meanFiberColorVector[j][2], m_meanFiberOpacity );
+
                 glVertex3f( l_circlesPoints[j][i].x, l_circlesPoints[j][i].y, l_circlesPoints[j][i].z );
                 if( i+1 == i_nmTubeEdge )
                     glVertex3f( l_circlesPoints[j][0].x, l_circlesPoints[j][0].y, l_circlesPoints[j][0].z );
@@ -615,7 +634,95 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
     }
 
     glDisable( GL_BLEND );
+
 }
+
+void SelectionObject::computeConvexHull()
+{
+    m_mustUpdateConvexHull = true;
+    if ( m_ptoggleDisplayConvexHull->GetValue() && m_convexHullOpacity != 0)
+    {
+            vector< Vector > pts;
+            vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+            for (unsigned int i(0); i< l_selectedFibersPoints.size(); i++)
+                pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());
+
+            m_hullTriangles.clear();
+            ConvexHullIncremental hull(pts);
+            hull.buildHull();
+            hull.getHullTriangles( m_hullTriangles );
+            m_mustUpdateConvexHull = false;
+    }
+}
+
+void SelectionObject::drawConvexHull()
+{
+    if ( m_ptoggleDisplayConvexHull->GetValue() && m_ptoggleDisplayConvexHull->IsEnabled() && m_convexHullOpacity != 0)
+    {
+        if (m_mustUpdateConvexHull)
+            computeConvexHull();
+
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        glEnable( GL_BLEND );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glColor4f( (float)m_convexHullColor.Red() / 255.0f, (float)m_convexHullColor.Green() / 255.0f, (float)m_convexHullColor.Blue() / 255.0f, m_convexHullOpacity );
+
+        Vector normal;
+        glBegin( GL_TRIANGLES );
+        list< Face3D >::iterator it;
+            for( it = m_hullTriangles.begin(); it != m_hullTriangles.end(); it++ )
+            {
+                //Vector normal;
+                //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt1().x, it->getPt1().y, it->getPt1().z );
+
+                //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt2().x, it->getPt2().y, it->getPt2().z );
+
+                //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt3().x, it->getPt3().y, it->getPt3().z );
+            }
+        glEnd();
+
+        glDisable( GL_BLEND );
+    }
+}
+
+void SelectionObject::updateConvexHullOpacity()
+{
+    setConvexHullOpacity( ( m_pSliderConvexHullOpacity->GetValue() + (float)m_pSliderConvexHullOpacity->GetMin() ) / (float)m_pSliderConvexHullOpacity->GetMax() );
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Fill the color array use to display the mean fiber base on the mean fiber direction
+//      i_fiberPoints : All points of the mean fiber
+///////////////////////////////////////////////////////////////////////////
+void SelectionObject::setNormalColorArray(const vector< Vector > &i_fiberPoints)
+{
+    m_meanFiberColorVector.clear();
+    Vector color;
+
+    if ( i_fiberPoints.size() < 2 )
+        return;
+    for ( unsigned int i(0); i < i_fiberPoints.size(); i++ )
+    {
+        if ( i==0 )
+            color = i_fiberPoints[i+1] - i_fiberPoints[i];
+        else
+            color = i_fiberPoints[i] - i_fiberPoints[i-1];
+        
+        color.normalize();
+        m_meanFiberColorVector.push_back( color );
+            
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Draws all the cross sections.
@@ -683,14 +790,67 @@ void SelectionObject::drawPolygon( const vector< Vector > &i_polygonPoints )
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
 {
+    vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+   
+    // Once the vector is filled up with the points data we can calculate the fibers info grid items.
+    o_gridInfo.m_count = l_selectedFibersPoints.size();
+    getMeanFiberValue               ( l_selectedFibersPoints, 
+                                      o_gridInfo.m_meanValue         );
+    getMeanMaxMinFiberLength        ( l_selectedFibersPoints, 
+                                      o_gridInfo.m_meanLength, 
+                                      o_gridInfo.m_maxLength, 
+                                      o_gridInfo.m_minLength         );
+    //getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
+    //                                  m_meanFiberPoints,
+    //                                  o_gridInfo.m_meanCrossSection, 
+    //                                  o_gridInfo.m_maxCrossSection,
+    //                                  o_gridInfo.m_minCrossSection   );
+    getFibersMeanCurvatureAndTorsion( l_selectedFibersPoints, 
+                                      o_gridInfo.m_meanCurvature, 
+                                      o_gridInfo.m_meanTorsion       );
+    //getFiberDispersion              ( o_gridInfo.m_dispersion        );
+
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// Computes the mean fiber
+// Point that make the mean fiber will be in the vector m_meanFiberPoints
+//
+///////////////////////////////////////////////////////////////////////////
+void SelectionObject::computeMeanFiber()
+{
+    if ( getShowFibers() && m_ptoggleDisplayMeanFiber->GetValue() )
+    {
+        // We calculate the mean fiber of the selected fibers.
+        m_meanFiberPoints.clear();
+        getMeanFiber( getSelectedFibersPoints(), MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
+    }
+    else
+        m_meanFiberPoints.clear();
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//Return all the visible fibers that pass through the selection object
+//
+///////////////////////////////////////////////////////////////////////////
+vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
+
     vector< Vector >           l_currentFiberPoints;
     vector< Vector >           l_currentSwappedFiberPoints;
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
+    vector< bool > filteredFiber;
+    Fibers* l_fibers = NULL;
+
+    m_datasetHelper->getFiberDataset(l_fibers);
+    filteredFiber = l_fibers->getFilteredFibers();
 
     for( unsigned int i = 0; i < m_inBranch.size(); ++i )
     {
-        if( m_inBranch[i] )
+        if( m_inBranch[i] && !filteredFiber[i] )
         {
             getFiberCoordValues( i, l_currentFiberPoints );
 
@@ -700,6 +860,7 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
             // verification and if the order of the fiber points are wrong we switch them.
             if( l_selectedFibersPoints.size() > 0 )
             {
+                l_meanStart.zero();
                 for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
                     l_meanStart += l_selectedFibersPoints[j][0];
                 l_meanStart /= l_selectedFibersPoints.size();
@@ -725,36 +886,7 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
         }
     }
 
-    // We calculate the mean fiber of the selected fibers.
-    m_meanFiberPoints.clear();
-    getMeanFiber( l_selectedFibersPoints, MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
-
-    /* Ecriture directe du fichier txt concernant la mean fiber */
-    ofstream fichier("test.txt", ios::out | ios::trunc);  //déclaration du flux et ouverture du fichier
-    if(fichier)  // si l'ouverture a réussi
-    {
-        for (int i = 0 ; i < MEAN_FIBER_NB_POINTS ; i++)
-        fichier << m_meanFiberPoints[i].x << " " <<  m_meanFiberPoints[i].y << " " << m_meanFiberPoints[i].z << "\n";
-    }
-    fichier.close();
-    
-    // Once the vector is filled up with the points data we can calculate the fibers info grid items.
-    getFibersCount                  ( o_gridInfo.m_count             );
-    getMeanFiberValue               ( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanValue         );
-    getMeanMaxMinFiberLength        ( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanLength, 
-                                      o_gridInfo.m_maxLength, 
-                                      o_gridInfo.m_minLength         );
-    //getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
-    //                                  m_meanFiberPoints,
-    //                                  o_gridInfo.m_meanCrossSection, 
-    //                                  o_gridInfo.m_maxCrossSection,
-    //                                  o_gridInfo.m_minCrossSection   );
-    getFibersMeanCurvatureAndTorsion( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanCurvature, 
-                                      o_gridInfo.m_meanTorsion       );
-    //getFiberDispersion              ( o_gridInfo.m_dispersion        );
+    return l_selectedFibersPoints;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -867,6 +999,19 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// Check if fibers are show
+//return true if they are, false otherwise
+///////////////////////////////////////////////////////////////////////////
+bool SelectionObject::getShowFibers()
+{
+    Fibers* l_fibers = NULL;
+    m_datasetHelper->getFiberDataset( l_fibers );
+    if ( l_fibers == NULL )
+        return false;
+    return l_fibers->getShow();
+}
+
+///////////////////////////////////////////////////////////////////////////
 // Fills the o_fiberPoints vector with the points that compose a given fiber.
 //
 // i_fiberIndex             : The index of the given fiber.
@@ -925,35 +1070,58 @@ bool SelectionObject::getFibersCount( int &o_count )
 //
 // Returns true if successful, false otherwise.
 ///////////////////////////////////////////////////////////////////////////
-bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &i_fibersPoints, float &o_meanValue )
+bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &fibersPoints, float &computedMeanValue )
 {
-    o_meanValue = 0.0f;
-    
-    if( i_fibersPoints.size() == 0 )
-        return false;
+    computedMeanValue = 0.0f;
 
-    unsigned int l_count = 0;
-    unsigned int l_pos   = 0;
-    
-    for( unsigned int i = 0; i < i_fibersPoints.size(); i++ )
+    if( fibersPoints.size() == 0 )
     {
-        for( unsigned int j = 0; j < i_fibersPoints[i].size(); j++ )
+        return false;
+    }
+    
+    Anatomy *pCurrentAnatomy( NULL );
+
+    vector< DatasetInfo* > datasets;
+    m_datasetHelper->getTextureDataset(datasets);
+
+    if( m_pCBSelectDataSet == NULL && datasets.size() > 0 )
+    {
+        // Select the first dataset in the list
+        pCurrentAnatomy = (Anatomy*)datasets[0];
+    }
+    else if( m_pCBSelectDataSet != NULL && 
+             m_pCBSelectDataSet->GetCount() > 0 && 
+             m_pCBSelectDataSet->GetCurrentSelection() != -1 )
+    {
+        // Get the currently selected dataset.
+        pCurrentAnatomy = (Anatomy*)datasets[ m_pCBSelectDataSet->GetSelection() ];
+    }
+    else
+    {
+        return false;
+    }
+
+    unsigned int pointsCount( 0 );
+    unsigned int datasetPos ( 0 );
+
+    for( unsigned int i = 0; i < fibersPoints.size(); ++i )
+    {
+        for( unsigned int j = 0; j < fibersPoints[i].size(); ++j )
         {
-            l_pos = i_fibersPoints[i][j].x / m_datasetHelper->m_xVoxel +
-                    i_fibersPoints[i][j].y * m_datasetHelper->m_columns / m_datasetHelper->m_yVoxel +
-                    i_fibersPoints[i][j].z * m_datasetHelper->m_columns * m_datasetHelper->m_rows / (m_datasetHelper->m_yVoxel*m_datasetHelper->m_zVoxel);
-
-            Vector test = i_fibersPoints[i][j];
+            datasetPos = ( static_cast<int>( fibersPoints[i][j].x / m_datasetHelper->m_xVoxel ) +
+                           static_cast<int>( fibersPoints[i][j].y / m_datasetHelper->m_yVoxel ) * pCurrentAnatomy->getColumns() +
+                           static_cast<int>( fibersPoints[i][j].z / m_datasetHelper->m_zVoxel ) * pCurrentAnatomy->getColumns() * pCurrentAnatomy->getRows() ) * pCurrentAnatomy->getBands();
             
+            for (int i(0); i < pCurrentAnatomy->getBands(); i++)
+            {
+                computedMeanValue += (* ( pCurrentAnatomy->getFloatDataset() ) )[datasetPos + i];
+            }
 
-            o_meanValue += (* ( m_datasetHelper->m_floatDataset ) )[l_pos];
-
-            l_count++;
+            ++pointsCount;
         }
     }
     
-    o_meanValue /= l_count;
-    
+    computedMeanValue /= pointsCount;
     return true;
 }
 
@@ -1075,13 +1243,13 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
         if( ! ( Helper::convert3DPlanePointsTo2D( l_planeNormal, l_intersectionPoints ) ) )
             continue;
 
-        ConvexHull hull( l_intersectionPoints );
+        ConvexGrahamHull hull( l_intersectionPoints );
        
         // Let's build the convex hull.
         vector < Vector > l_hullPoints;
-        if( ! ( hull.buildHull( l_hullPoints ) ) )
+        if( ! ( hull.buildHull() ) )
             continue;
-
+        hull.getHullPoints( l_hullPoints );
         // Computing the surface area of the hull.
         double l_hullArea = 0.0f;
         if( ! ( hull.area( l_hullArea ) ) )
@@ -1192,8 +1360,9 @@ bool SelectionObject::getFibersMeanCurvatureAndTorsion( const vector< vector< Ve
     return false;
 
 	//Curvature and torsion are now calculated from mean fiber
-	getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, m_meanFiberPoints);
-	getFiberMeanCurvatureAndTorsion(m_meanFiberPoints, o_meanCurvature, o_meanTorsion );
+   vector< Vector > meanFiberPoint;
+	getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, meanFiberPoint);
+	getFiberMeanCurvatureAndTorsion(meanFiberPoint, o_meanCurvature, o_meanTorsion );
 
 
 	//Curvature and torsion are now calculated from mean fiber
@@ -1453,8 +1622,12 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::draw()
 {
-    if( ! m_isActive || ! isSelectionObject()) 
+    if( ! m_isActive || ! isSelectionObject())
+    {
+        if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
+            drawFibersInfo();
         return;
+    }
 
     // We only display those if the current box is the selected one and if we are supposed to display them.
     if( m_isSelected )
@@ -1550,6 +1723,7 @@ void SelectionObject::drawFibersInfo()
     
     // Draw the mean fiber.
     drawThickFiber( m_meanFiberPoints, (float)THICK_FIBER_THICKNESS/100.0f, THICK_FIBER_NB_TUBE_EDGE );
+    drawConvexHull();
     drawCrossSections();
     drawDispersionCone();
 
@@ -1771,7 +1945,62 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
         //m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
     }
+}
+
+void SelectionObject::setShowConvexHullOption( bool i_val )
+{
+    m_plblConvexHullOpacity->Show( i_val );
+    m_pSliderConvexHullOpacity->Show( i_val);
+    m_pbtnSelectConvexHullColor->Enable( i_val );
+}
+
+void SelectionObject::UpdateMeanValueTypeBox()
+{
+    vector< DatasetInfo* > dataSets;
+    m_datasetHelper->getTextureDataset( dataSets );
+    
+    if( dataSets.size() != m_pCBSelectDataSet->GetCount() )
+    {
+        int oldIndex = -1;
+        wxString oldName = m_pCBSelectDataSet->GetStringSelection();
+        
+        m_pCBSelectDataSet->Clear();
+        
+        for( unsigned int i( 0 ); i < dataSets.size(); ++i )
+        {
+            m_pCBSelectDataSet->Insert( dataSets[i]->getName().BeforeFirst('.'), m_pCBSelectDataSet->GetCount() );
+            if( oldName == dataSets[i]->getName().BeforeFirst('.') )
+            {
+                oldIndex = i;
+            }
+        }
+        
+        if( oldIndex < 0 )
+        {
+            oldIndex = 0;
+        }
+        else if( static_cast<unsigned int>( oldIndex ) >= m_pCBSelectDataSet->GetCount() )
+        {
+            oldIndex = m_pCBSelectDataSet->GetCount() - 1;
+        }
+        
+        m_pCBSelectDataSet->SetSelection(oldIndex);
     }
+}
+
+void SelectionObject::setShowMeanFiberOption( bool i_val )
+{
+    m_plblColoring->Show( i_val );
+    m_pRadioCustomColoring->Show( i_val );
+    m_pRadioNormalColoring->Show( i_val );
+    m_pLblMeanFiberOpacity->Show( i_val );
+    m_psliderMeanFiberOpacity->Show( i_val );
+}
+
+void SelectionObject::updateMeanFiberOpacity()
+{
+    setMeanFiberOpacity( ( m_psliderMeanFiberOpacity->GetValue() + (float)m_psliderMeanFiberOpacity->GetMin() ) / (float)m_psliderMeanFiberOpacity->GetMax() );
+}
 
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 {
@@ -1838,10 +2067,9 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     parent->Connect(m_pbtnSetAsDistanceAnchor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDistanceAnchorSet));
     m_propertiesSizer->AddSpacer(8);
     
-    m_ptoggleCalculatesFibersInfo = new wxToggleButton(parent, wxID_ANY, wxT("Calculates Fibers Stats"), wxDefaultPosition, wxSize(140,-1));
+    m_ptoggleCalculatesFibersInfo = new wxToggleButton(parent, wxID_ANY, wxT("Calculate Fibers Stats"), wxDefaultPosition, wxSize(140,-1));
     m_propertiesSizer->Add(m_ptoggleCalculatesFibersInfo,0,wxALIGN_CENTER);      
     parent->Connect(m_ptoggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayFibersInfo));
-
     m_propertiesSizer->AddSpacer(2);
 
     // Initialize the grid.
@@ -1876,17 +2104,90 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->Add( m_pgridfibersInfo,0,wxALL,0);
     
     m_propertiesSizer->AddSpacer(2);
-    m_propertiesSizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
+
+// Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
+// Will have to be fixed.
+#ifndef __WXMSW__    
+    m_pCBSelectDataSet = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxSize(140,-1));
+    m_pLabelAnatomy = new wxStaticText(parent, wxID_ANY, wxT("Anatomy file : "));
+    l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    l_sizer->Add( m_pLabelAnatomy, 0, wxALIGN_CENTER );
+    l_sizer->Add( m_pCBSelectDataSet, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add(l_sizer, 0, wxALIGN_CENTER);
+    parent->Connect( m_pCBSelectDataSet->GetId(), wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMeanComboBoxSelectionChange ) );
+    m_propertiesSizer->AddSpacer(2);
+#endif
+
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
+    wxImage bmpMeanFiberColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
+    m_pbtnSelectMeanFiberColor = new wxBitmapButton(parent, wxID_ANY, bmpMeanFiberColor, wxDefaultPosition, wxSize(40,-1));
+    l_sizer->Add(m_pbtnSelectMeanFiberColor,0,wxALIGN_CENTER);
+    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+
+    //Mean fiber coloring option
+    m_propertiesSizer->AddSpacer( 8 );
+    
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_plblColoring = new wxStaticText( parent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT );
+    l_sizer->Add( m_plblColoring, 0, wxALIGN_CENTER );
+    l_sizer->Add( 8, 1, 0 );
+    m_pRadioCustomColoring = new wxRadioButton( parent, wxID_ANY, _T( "Custom" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    l_sizer->Add(m_pRadioCustomColoring);
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+
+    m_pRadioNormalColoring = new wxRadioButton( parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    l_sizer->Add( 68, 1, 0 );
+    l_sizer->Add( m_pRadioNormalColoring );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pLblMeanFiberOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+    l_sizer->Add( m_pLblMeanFiberOpacity, 0, wxALIGN_CENTER );
+    m_psliderMeanFiberOpacity = new wxSlider(parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    l_sizer->Add( m_psliderMeanFiberOpacity, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    m_meanFiberOpacity = 0.35f;
+
+    parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
+    parent->Connect(m_pbtnSelectMeanFiberColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMeanFiberColorChange));
+    parent->Connect( m_pRadioCustomColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnCustomMeanFiberColoring ) );
+    parent->Connect( m_pRadioNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalMeanFiberColoring ) );
+    parent->Connect( m_psliderMeanFiberOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberOpacityChange ) );
+    m_meanFiberColorationMode = NORMAL_COLOR;
+    m_pRadioNormalColoring->SetValue( true );
+
+
+
     //m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
     //m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
 
-    parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
     //parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections));
     //parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
 
-    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster() && m_objectType != CISO_SURFACE_TYPE); //bug with some fibers dataset sets
+    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster()); //bug with some fibers dataset sets
     
-    
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_ptoggleDisplayConvexHull = new wxToggleButton( parent, wxID_ANY, wxT("Display convex hull"), wxDefaultPosition, wxSize(140,-1) );
+    l_sizer->Add( m_ptoggleDisplayConvexHull, 0, wxALIGN_CENTER );
+    wxImage bmpConvexHullColor(MyApp::iconsPath+ wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+    m_pbtnSelectConvexHullColor = new wxBitmapButton( parent, wxID_ANY, bmpConvexHullColor, wxDefaultPosition, wxSize(40,-1) );
+    l_sizer->Add(m_pbtnSelectConvexHullColor);
+
+    m_propertiesSizer->Add(l_sizer);
+    parent->Connect( m_ptoggleDisplayConvexHull->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
+    parent->Connect( m_pbtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
+
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_plblConvexHullOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+    l_sizer->Add( m_plblConvexHullOpacity, 0, wxALIGN_CENTER );
+    m_pSliderConvexHullOpacity = new wxSlider( parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    l_sizer->Add( m_pSliderConvexHullOpacity, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    m_convexHullOpacity = 0.35f;
+    parent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
+
     m_pbtnNewFibersColorVolume->Enable(getIsMaster());
     m_pbtnNewFibersDensityVolume->Enable(getIsMaster());
     m_ptoggleAndNot->Enable(!getIsMaster() && m_objectType != CISO_SURFACE_TYPE);
@@ -1950,18 +2251,43 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 
 }
 
+
 void SelectionObject::updatePropertiesSizer()
 {
     SceneObject::updatePropertiesSizer();
-    m_ptoggleVisibility->SetValue(getIsVisible());
-    m_ptoggleActivate->SetValue(getIsActive());
-    m_ptxtName->SetValue(getName());
-    m_pgridfibersInfo->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
-    m_ptoggleDisplayMeanFiber->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    m_ptoggleVisibility->SetValue( getIsVisible() );
+    m_ptoggleActivate->SetValue( getIsActive() );
+    m_ptxtName->SetValue( getName() );
+    m_ptoggleCalculatesFibersInfo->Enable( getShowFibers() );
+    m_pgridfibersInfo->Enable( getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue() );
+    m_ptoggleDisplayMeanFiber->Enable( getShowFibers() );
+    m_ptoggleDisplayConvexHull->Enable( getShowFibers() );
+    setShowConvexHullOption( m_ptoggleDisplayConvexHull->GetValue() );
+
+    m_pbtnSelectMeanFiberColor->Enable( m_ptoggleDisplayMeanFiber->GetValue() );
+    setShowMeanFiberOption( m_ptoggleDisplayMeanFiber->GetValue() );
+
+// Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
+// Will have to be fixed.
+#ifndef __WXMSW__
+    m_pCBSelectDataSet->Show( m_ptoggleCalculatesFibersInfo->GetValue() );
+    m_pLabelAnatomy->Show( m_ptoggleCalculatesFibersInfo->GetValue() );
+    if( m_ptoggleCalculatesFibersInfo->GetValue() )
+    {
+        UpdateMeanValueTypeBox();
+    }
+#endif
+
+    if( !getShowFibers() && m_meanFiberPoints.size() > 0 )
+    {
+        //Hide the mean fiber if fibers are invisible and the box is moved
+        computeMeanFiber();
+    }
+
     //m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
     //m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
 
-    if(m_boxMoved)
+    if( m_boxMoved )
     {
         m_ctrlBoxX->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.x));
         m_ctrlBoxY->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.y));
@@ -1969,7 +2295,7 @@ void SelectionObject::updatePropertiesSizer()
         m_boxMoved = false;
     }
 
-    if(m_boxResized)
+    if( m_boxResized )
     {
         m_ctrlBoxSizeX->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel));
         m_ctrlBoxSizeY->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel));

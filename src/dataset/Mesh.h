@@ -47,6 +47,7 @@ public:
     void draw();
     void clean()                        { m_tMesh->cleanUp(); };
     void smooth()                       { m_tMesh->doLoopSubD(); };
+    virtual void flipAxis( AxisType i_axe ){};
     void activateLIC();
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
@@ -62,6 +63,7 @@ public:
     unsigned int getCountNormals()     { return m_countNormals; };
     unsigned int getCountPolygons() { return m_countPolygons; };
     unsigned int getPolygonDim()     { return m_polygonDim; };
+
 
 private:
     

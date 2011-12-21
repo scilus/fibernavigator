@@ -29,7 +29,7 @@ bool Mesh::load( wxString i_filename )
 
 bool Mesh::loadDip( wxString filename )
 {
-    m_dh->printDebug( _T( "start loading DIP mesh file" ), 1 );
+    m_dh->printDebug( _T( "start loading DIP mesh file" ), LOGLEVEL_MESSAGE );
     wxTextFile file;
     wxString line;
     wxString numberString, xString, yString, zString;
@@ -124,7 +124,7 @@ bool Mesh::loadDip( wxString filename )
 
 bool Mesh::loadSurf(wxString filename)
 {
-    m_dh->printDebug(_T("start loading freesurfer mesh file"), 1);
+    m_dh->printDebug( _T("start loading freesurfer mesh file"), LOGLEVEL_MESSAGE );
     wxFile dataFile;
     wxFileOffset nSize = 0;
     int pc = 3;
@@ -451,4 +451,9 @@ void Mesh::updatePropertiesSizer()
     m_ptoggleCutFrontSector->SetValue(!getShowFS());
     m_psliderThresholdIntensity->SetValue(m_psliderThresholdIntensity->GetMin());
     m_psliderThresholdIntensity->Enable(false);
+    
+    // Disabled for the moment, not implemented.
+    m_pBtnFlipX->Enable( false );
+    m_pBtnFlipY->Enable( false );
+    m_pBtnFlipZ->Enable( false );
 }

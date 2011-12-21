@@ -42,7 +42,8 @@ class MainFrame;
 class DatasetInfo : public SceneObject
 {
 public:
-    DatasetInfo( DatasetHelper* datasetHelper ); 
+    DatasetInfo( DatasetHelper* datasetHelper );
+    virtual ~DatasetInfo(){};
     
     virtual void createPropertiesSizer(PropertiesWindow *parent); 
     virtual void updatePropertiesSizer();
@@ -52,6 +53,7 @@ public:
     virtual void   draw()=0;
     virtual void   clean()=0;
     virtual void   smooth()=0;
+    virtual void   flipAxis( AxisType i_axe )=0;
     virtual void   activateLIC()=0;
     virtual GLuint getGLuint()=0;
 
@@ -113,10 +115,11 @@ public:
     wxBitmapButton  *m_pbtnDown;
     wxButton        *m_pbtnSmoothLoop;
     wxButton        *m_pbtnClean;
+    wxButton        *m_pBtnRename;
+    wxToggleButton  *m_pBtnFlipX;
+    wxToggleButton  *m_pBtnFlipY;
+    wxToggleButton  *m_pBtnFlipZ;
     wxToggleButton  *m_ptoggleLIC;
-
-    
-
 
 protected:
     virtual void generateTexture()=0;

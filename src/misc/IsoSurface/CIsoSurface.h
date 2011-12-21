@@ -48,6 +48,7 @@ public:
     void draw();
     void clean();
     void smooth();
+    void flipAxis( AxisType i_axe ){};
     void activateLIC();
     std::vector<Vector> getSurfaceVoxelPositions();
 

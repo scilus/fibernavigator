@@ -27,6 +27,7 @@
 #include "../dataset/Tensors.h"
 #include "../gfx/TheScene.h"
 #include "../main.h"
+#include "../Logger.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
 #define FIBERS_INFO_GRID_COL_SIZE              1
@@ -150,7 +151,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     /*
      * Set OpenGL attributes
      */
-    m_pDatasetHelper->printDebug( _T( "Initializing OpenGL" ), 1 );
+    m_pDatasetHelper->printDebug( _T( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
     GLboolean doubleBuffer = GL_TRUE;
 #ifdef __WXMSW__
     int *gl_attrib = NULL;
@@ -166,7 +167,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 #endif
     if( ! doubleBuffer )
     {
-        m_pDatasetHelper->printDebug( _T( "don't have double buffer, disabling" ), 1 );
+        m_pDatasetHelper->printDebug( _T( "don't have double buffer, disabling" ), LOGLEVEL_MESSAGE );
 #ifdef __WXGTK__
         gl_attrib[9] = None;
 #endif
@@ -274,8 +275,8 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 MainFrame::~MainFrame()
 {
     m_pTimer->Stop();
-    m_pDatasetHelper->printDebug( _T( "main frame destructor" ), 0 );
-    m_pDatasetHelper->printDebug( _T( "timer stopped" ), 0 );
+    m_pDatasetHelper->printDebug( _T( "main frame destructor" ), LOGLEVEL_DEBUG );
+    m_pDatasetHelper->printDebug( _T( "timer stopped" ), LOGLEVEL_DEBUG );
 	if (m_pTimer != NULL)
     {
         delete m_pTimer;
@@ -412,6 +413,8 @@ void MainFrame::onReloadShaders( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSave"), LOGLEVEL_DEBUG );
+
     wxString caption         = wxT( "Choose a file" );
     wxString wildcard        = wxT( "Scene files (*.scn)|*.scn|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
@@ -436,6 +439,8 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSaveFibers"), LOGLEVEL_DEBUG );
+
     if( !m_pDatasetHelper->m_fibersLoaded )
     {
         return;
@@ -466,9 +471,10 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-
 void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSaveDataset"), LOGLEVEL_DEBUG );
+
     if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
     {
         if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() < MESH )
@@ -1498,6 +1504,7 @@ void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
     date = date.BeforeLast( '$' );
     (void)wxMessageBox( _T("Fiber Navigator\nAuthors:http://code.google.com/p/fibernavigator/people/list \n\n" )
                         + rev + _T( "\n" ) + date, _T( "About Fiber Navigator" ) );
+    
 }
 
 void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
@@ -1695,6 +1702,8 @@ void MainFrame::updateStatusBar()
 
 void MainFrame::onActivateListItem( wxListEvent& event )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
+
     int l_item = event.GetIndex();
     m_pTreeWidget->UnselectAll();
     DatasetInfo* l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item );
@@ -1869,11 +1878,11 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     {
         case MASTER_OBJECT:
         case CHILD_OBJECT:
-            if ( m_pDatasetHelper->m_lastSelectedObject )
+            if ( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
             }
-            if ( m_pDatasetHelper->m_lastSelectedPoint )
+            if ( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
                 m_pDatasetHelper->m_lastSelectedPoint = NULL;
@@ -1887,11 +1896,11 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             break;
 
         case POINT_DATASET:
-            if( m_pDatasetHelper->m_lastSelectedPoint )
+            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
             }
-            if( m_pDatasetHelper->m_lastSelectedObject )
+            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
                 m_pDatasetHelper->m_lastSelectedObject = NULL;
@@ -1905,12 +1914,12 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             break;
 
         default:
-            if( m_pDatasetHelper->m_lastSelectedPoint )
+            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedPoint->unselect();
                 m_pDatasetHelper->m_lastSelectedPoint = NULL;
             }
-            if( m_pDatasetHelper->m_lastSelectedObject )
+            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
             {
                 m_pDatasetHelper->m_lastSelectedObject->unselect();
                 m_pDatasetHelper->m_lastSelectedObject = NULL;

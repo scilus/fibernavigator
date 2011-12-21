@@ -38,6 +38,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_xVoxel     ( 1.0f ),
     m_yVoxel     ( 1.0f ),
     m_zVoxel     ( 1.0f ),
+
+    m_niftiTransform( 4, 4 ),
+
     m_countFibers( 0    ),
 
     m_scnFileLoaded      ( false ),
@@ -65,10 +68,10 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_isShowAxes   ( false ),
     m_animationStep( 0     ),
 
-#ifdef DEBUG
-            m_debugLevel( 0 ),
+#if defined(DEBUG) || defined(_DEBUG)
+    m_debugLevel( 0 ),
 #else
-            m_debugLevel( 1 ),
+    m_debugLevel( 1 ),
 #endif
 
     m_showSagittal( true ),
@@ -112,6 +115,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_fibersInverted ( false ),
     m_useFakeTubes   ( false ),
+    m_geometryShadersSupported( true ),
     m_clearToBlack   ( false ),
     m_useTransparency( false ),
     m_filterIsoSurf  ( false ),
@@ -147,12 +151,12 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_screenshotPath( _T( "" ) ),
     m_screenshotName( _T( "" ) ),
 
-    m_lastSelectedPoint ( 0 ),
-    m_lastSelectedObject( 0 ),
+    m_anatomyHelper     ( 0 ),    
     m_boxAtCrosshair    ( 0 ),
-    m_anatomyHelper     ( 0 ),
-    m_shaderHelper      ( 0 ),
+    m_lastSelectedPoint ( NULL ),
+    m_lastSelectedObject( NULL ),
     m_theScene          ( 0 ),
+    m_shaderHelper      ( 0 ),
 
     m_mainFrame( mf )
 {
@@ -161,7 +165,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
 DatasetHelper::~DatasetHelper()
 {
-    printDebug( _T( "execute dataset helper destructor" ), 0 );
+    printDebug( _T( "execute dataset helper destructor" ), LOGLEVEL_DEBUG );
 
     if ( m_theScene )
         delete m_theScene;
@@ -182,7 +186,7 @@ DatasetHelper::~DatasetHelper()
 	//if ( m_mainFrame )
 	//	delete m_mainFrame;
     
-    printDebug( _T( "dataset helper destructor done" ), 0 );
+    printDebug( _T( "dataset helper destructor done" ), LOGLEVEL_DEBUG );
 }
 
 bool DatasetHelper::load( const int i_index )
@@ -902,7 +906,7 @@ void DatasetHelper::treeFinished()
     if ( m_threadsActive > 0 )
         return;
 
-    printDebug( _T( "tree finished" ), 1 );
+    printDebug( _T( "tree finished" ), LOGLEVEL_MESSAGE );
     m_fibersLoaded = true;
     updateAllSelectionObjects();
     m_selBoxChanged = true;
@@ -1037,11 +1041,11 @@ void DatasetHelper::createIsoSurface()
 
     Anatomy* l_anatomy = (Anatomy*) l_info;
 
-    printDebug( _T( "start generating iso surface..." ), 1 );
+    printDebug( _T( "start generating iso surface..." ), LOGLEVEL_MESSAGE );
     CIsoSurface* isosurf = new CIsoSurface( this, l_anatomy ); 
     isosurf->GenerateSurface( 0.4f );
 
-    printDebug( _T( "iso surface done" ), 1 );
+    printDebug( _T( "iso surface done" ), LOGLEVEL_MESSAGE );
 
     wxString l_anatomyName = l_anatomy->getName().BeforeFirst( '.' );
 
@@ -1065,7 +1069,7 @@ void DatasetHelper::createIsoSurface()
     }
     else
     {
-        printDebug( _T( "***ERROR*** surface is not valid" ), 2 );
+        printDebug( _T( "***ERROR*** surface is not valid" ), LOGLEVEL_ERROR );
     }
 
     updateLoadStatus();
@@ -1089,18 +1093,18 @@ void DatasetHelper::createDistanceMapAndIso()
 
     Anatomy* l_anatomy = (Anatomy*)l_info;
 
-    printDebug( _T( "start generating distance map..." ), 1 );
+    printDebug( _T( "start generating distance map..." ), LOGLEVEL_MESSAGE );
 
     Anatomy* l_newAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
 
-    printDebug( _T( "distance map done" ), 1 );
+    printDebug( _T( "distance map done" ), LOGLEVEL_MESSAGE );
 
-    printDebug( _T( "start generating iso surface..." ), 1 );
+    printDebug( _T( "start generating iso surface..." ), LOGLEVEL_MESSAGE );
 
     CIsoSurface* isosurf = new CIsoSurface( this, l_newAnatomy );
     isosurf->GenerateSurface( 0.2f );
 
-    printDebug( _T( "iso surface done" ), 1 );
+    printDebug( _T( "iso surface done" ), LOGLEVEL_MESSAGE );
 
     wxString anatomyName = l_anatomy->getName().BeforeFirst( '.' );
 
@@ -1126,7 +1130,7 @@ void DatasetHelper::createDistanceMapAndIso()
     }
     else
     {
-        printDebug( _T( "***ERROR*** surface is not valid" ), 2 );
+        printDebug( _T( "***ERROR*** surface is not valid" ), LOGLEVEL_ERROR );
     }
 
     delete l_newAnatomy;
@@ -1151,11 +1155,11 @@ void DatasetHelper::createDistanceMap()
 
     Anatomy* l_anatomy = (Anatomy*)l_info;
 
-    printDebug( _T( "start generating distance map..." ), 1 );
+    printDebug( _T( "start generating distance map..." ), LOGLEVEL_MESSAGE );
 
     Anatomy* l_newAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
 
-    printDebug( _T( "distance map done" ), 1 );
+    printDebug( _T( "distance map done" ), LOGLEVEL_MESSAGE );
 
     
     l_newAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT("_DistMap"));
@@ -1344,6 +1348,20 @@ std::vector< float >* DatasetHelper::getVectorDataset()
     return NULL;
 }
 
+bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
+{
+    o_types.clear();
+    DatasetInfo* l_datasetInfo;
+    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    {
+        l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+        if ( ( l_datasetInfo->getType() >= HEAD_BYTE ) && ( l_datasetInfo->getType() <= TENSOR_FIELD ) ) 
+            o_types.push_back( l_datasetInfo );
+    }
+    return true;
+}
+
+
 TensorField* DatasetHelper::getTensorField()
 {
     if( ! m_tensorsFieldLoaded )
@@ -1363,18 +1381,20 @@ TensorField* DatasetHelper::getTensorField()
     return NULL;
 }
 
+// Deprecated: Use Logger::printGLError instead.
 void DatasetHelper::printGLError( const wxString i_function )
-{
-    printDebug( _T( "***ERROR***: " ) + i_function, 2 );
-    printf( " : ERROR: %s\n", gluErrorString( m_lastGLError ) );
+{    
+    Logger::getInstance()->printGLError( i_function, m_lastGLError );
 }
 
+// Deprecated: Should use Logger::printDebug(message, LOGLEVEL_MESSAGE) instead.
 void DatasetHelper::printTime()
-{
+{    
     wxDateTime l_dataTime = wxDateTime::Now();
     printf( "[%02d:%02d:%02d] ", l_dataTime.GetHour(), l_dataTime.GetMinute(), l_dataTime.GetSecond() );
 }
 
+// Deprecated: Use Logger::printDebug(message, LOGLEVEL_MESSAGE) instead.
 void DatasetHelper::printwxT( const wxString i_string )
 {
     char* l_cstring = (char*)malloc( i_string.length() + 1 );
@@ -1383,13 +1403,10 @@ void DatasetHelper::printwxT( const wxString i_string )
     free( l_cstring );
 }
 
-void DatasetHelper::printDebug( const wxString i_string, const int i_level )
+// Deprecated: Use Logger::printDebug instead.
+void DatasetHelper::printDebug( const wxString i_string, const LogLevel i_level )
 {
-    if ( m_debugLevel > i_level )
-        return;
-
-    printTime();
-    printwxT( i_string + _T( "\n" ) );
+    Logger::getInstance()->printDebug( i_string, i_level );
 }
 
 

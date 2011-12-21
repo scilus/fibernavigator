@@ -49,6 +49,7 @@ public:
    
     float at( const int i );
     std::vector<float>* getFloatDataset();
+    std::vector<float>* getEqualizedDataset();
 
     MySlider            *m_pSliderFlood;
     MySlider            *m_pSliderGraphSigma;
@@ -71,7 +72,9 @@ public:
 	//void eraseVoxel( const int x, const int y, const int z, const int size, const bool isRound, const bool draw3d );
 	SubTextureBox getStrokeBox( const int x, const int y, const int z, const int layer, const int size, const bool draw3d );
 
-    void draw(){};
+    void flipAxis( AxisType axe );
+
+	void draw(){};
     
     bool load     ( wxString fileName );
     bool loadNifti( wxString fileName );
@@ -97,6 +100,9 @@ public:
 
 	void pushHistory();
 	void popHistory(bool isRGB);
+
+    bool toggleEqualization();
+    void equalizationSliderChange();
    
 public:
     SelectionObject *m_pRoi;
@@ -111,12 +117,15 @@ private:
     wxButton        *m_pBtnNewOffsetSurface;
     wxButton        *m_pBtnNewVOI;
     wxToggleButton  *m_pToggleSegment;
+    wxToggleButton  *m_pEqualize;
     wxRadioButton   *m_pRadioBtnFlood;
     wxRadioButton   *m_pRadioBtnBck;
     wxRadioButton   *m_pRadioBtnObj;
     wxButton        *m_pBtnGraphCut;
     wxButton        *m_pBtnKmeans;
     wxTextCtrl      *m_pTxtThresBox;
+    wxSlider        *m_pLowerEqSlider;
+    wxSlider        *m_pUpperEqSlider;
 
     void activateLIC() {};
     void clean()       {};
@@ -126,6 +135,8 @@ private:
     
     void dilateInternal( std::vector<bool> &workData, int curIndex );
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
+
+    void equalizeHistogram();
     
 	void generateTexture();
 	void updateTexture( SubTextureBox drawZone, const bool isRound, float color );
@@ -135,14 +146,23 @@ private:
     void generateGeometry() {};
     void initializeBuffer() {};
     void smooth()           {};
-    
-    float				m_floodThreshold;
-    float				m_graphSigma;
-    std::vector<float>	m_floatDataset;
-    int					m_dataType;
-    TensorField			*m_pTensorField;
 
 	stack< stack< SubTextureBox > >	m_drawHistory;
+
+    float                   m_floodThreshold;
+    float                   m_graphSigma;
+    std::vector<float>      m_floatDataset;
+    std::vector<float>      m_equalizedDataset; // Dataset having its histogram equalized
+    int                     m_dataType;
+    TensorField             *m_pTensorField;
+
+    bool                    m_useEqualizedDataset;
+    unsigned int            m_lowerEqThreshold;
+    unsigned int            m_upperEqThreshold;
+    unsigned int            m_currentLowerEqThreshold;
+    unsigned int            m_currentUpperEqThreshold;
+    unsigned int            m_cdf[256];
+
 };
 
 #endif /* ANATOMY_H_ */

@@ -16,7 +16,7 @@
 #include "FgeOffscreen.h"
 #include "FgeGLTexture.h"
 
-#include "../../gfx/Shader.h"
+#include "../../gfx/ShaderProgram.h"
 #include "../../dataset/DatasetInfo.h"
 #include "../../dataset/DatasetHelper.h"
 
@@ -81,16 +81,16 @@ class  FgeImageSpaceLIC
     float minX, minY, minZ, maxX, maxY, maxZ;
 
     //! the transform shader program
-    Shader* m_transformShader;
+    ShaderProgram m_transformShader;
 
     //! the edge detection shader program
-    Shader* m_edgeShader;
+    ShaderProgram m_edgeShader;
 
     //! the advection shader program
-    Shader* m_advectionShader;
+    ShaderProgram m_advectionShader;
 
     //! the clipping shader program
-    Shader* m_clippingShader;
+    ShaderProgram m_clippingShader;
 
     //! reloads and binds the shaders. also dumps errors
     void reloadShaders();
