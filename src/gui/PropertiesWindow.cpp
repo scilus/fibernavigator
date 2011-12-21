@@ -914,6 +914,69 @@ void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user click on the display convex hull
+// button that is located in the m_fibersInfoSizer.
+///////////////////////////////////////////////////////////////////////////
+void PropertiesWindow::OnDisplayConvexHull( wxCommandEvent& WXUNUSED(event) )
+{
+    ( (SelectionObject*)m_mainFrame->m_pCurrentSceneObject )->computeConvexHull();
+    m_mainFrame->refreshAllGLWidgets();
+}
+
+///////////////////////////////////////////////////////////////////////////
+// This function will be triggered when the user click on the color button
+// beside the display convex hull button that is located in the m_fibersInfoSizer.
+///////////////////////////////////////////////////////////////////////////
+void PropertiesWindow::OnConvexHullColorChange( wxCommandEvent& WXUNUSED(event) )
+{
+    if( ! m_mainFrame->m_pDatasetHelper->m_theScene )
+        return;
+
+    wxColourData l_colorData;
+
+    for( int i = 0; i < 10; ++i )
+    {
+        wxColour l_color(i * 28, i * 28, i * 28);
+        l_colorData.SetCustomColour(i, l_color);
+    }
+
+    int i = 10;
+    wxColour l_color ( 255, 0, 0 );
+    l_colorData.SetCustomColour( i++, l_color );
+    wxColour l_color1( 0, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color1 );
+    wxColour l_color2( 0, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color2 );
+    wxColour l_color3( 255, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color3 );
+    wxColour l_color4( 255, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color4 );
+    wxColour l_color5( 0, 255, 255 );
+    l_colorData.SetCustomColour( i++, l_color5 );
+
+    wxColourDialog dialog( this, &l_colorData );
+    wxColour l_col;
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        wxColourData l_retData = dialog.GetColourData();
+        l_col = l_retData.GetColour();
+    }
+    else
+    {
+        return;
+    }
+
+    ((SelectionObject*)m_mainFrame->m_pCurrentSceneObject)->setConvexHullColor( l_col );
+  
+    m_mainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnConvexHullOpacityChange( wxCommandEvent& WXUNUSED(event) )
+{
+    ( (SelectionObject*) m_mainFrame->m_pCurrentSceneObject )->updateConvexHullOpacity();
+}
+
+///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the color palette
 // button that is located aside of the Show mean fiber button
 ///////////////////////////////////////////////////////////////////////////

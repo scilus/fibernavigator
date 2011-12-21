@@ -2557,7 +2557,7 @@ void Fibers::updateLinesShown()
     {
         m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
         m_dh->m_lastSelectedObject->computeMeanFiber();
-
+        m_dh->m_lastSelectedObject->computeConvexHull();
     }
 }
 
@@ -3257,11 +3257,12 @@ void Fibers::updateFibersFilters()
         m_filtered[i] = !( ( i % maxSubSampling ) >= subSampling && m_length[i] >= min && m_length[i] <= max );
     }
     
-    //Update stats and mean fiber only if an object is selected.
+    //Update stats, mean fiber and convexhull only if an object is selected.
     if( m_dh->m_lastSelectedObject != NULL )
     {
         m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
         m_dh->m_lastSelectedObject->computeMeanFiber();
+        m_dh->m_lastSelectedObject->computeConvexHull();
     }
 
 }

@@ -22,7 +22,9 @@
 #include "SceneObject.h"
 #include <GL/glew.h>
 #include <vector>
+#include <list>
 #include <wx/grid.h>
+#include "../misc/Algorithms/Face3D.h"
 #include "../dataset/DatasetHelper.h"
 #include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/Vector.h"
@@ -154,6 +156,12 @@ public :
     void       setIsVisible( bool i_isVisible )       { m_isVisible = i_isVisible;             };
     bool       getIsVisible()                         { return m_isVisible;                    };
 
+    void       setConvexHullColor( wxColour i_color ) { m_convexHullColor = i_color;            }; 
+    wxColour   getConvexHullColor()                   { return m_convexHullColor;               };
+
+    void       setConvexHullOpacity( float i_opacity) { m_convexHullOpacity = i_opacity;         };
+    float      getConvexHullOpacity()                 { return m_convexHullOpacity;              };
+
     void       setMeanFiberColor( wxColour i_color )  { m_meanFiberColor = i_color;            }; 
     wxColour   getMeanFiberColor()                    { return m_meanFiberColor;               };
 
@@ -188,9 +196,13 @@ protected :
     float getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] );
     
     Vector          m_center;
+    
+    list< Face3D >  m_hullTriangles;
+
     wxColour        m_color;         // Used for coloring the isosurface.
     bool            m_colorChanged;
     wxColour        m_fiberColor;    // Used for the selected fibers.
+    bool            m_mustUpdateConvexHull;
     bool            m_gfxDirty;
     float           m_handleRadius;
     hitResult       m_hitResult;
@@ -211,6 +223,9 @@ protected :
 
     //Distance coloring switch
     bool            m_DistColoring;
+
+    wxColour m_convexHullColor;
+    float    m_convexHullOpacity; //Betweem 0 and 1
     
     //Mean fiber coloring variables
     wxColour m_meanFiberColor; //Custom color chose by the user
@@ -233,6 +248,7 @@ public:
     // Functions
     void   calculateGridParams               (       FibersInfoGridParams       &io_gridInfo               );
     void   computeMeanFiber                  ();
+    void   computeConvexHull                 ();
     void   getProgressionCurvature           ( const Vector                     &i_point0, 
                                                const Vector                     &i_point1, 
                                                const Vector                     &i_point2, 
@@ -247,9 +263,10 @@ public:
                                                const Vector                     &i_point4,
                                                      double                      i_progression,
                                                      double                     &o_torsion                 );
+    void   SetFiberInfoGridValues             ();
     void   updateMeanFiberOpacity             ();
-    void   SetFiberInfoGridValues();
     void   UpdateMeanValueTypeBox             ();
+    void   updateConvexHullOpacity            ();
 protected:
     void   drawCrossSections                 ();
     void   drawCrossSectionsPolygons         ();
@@ -262,6 +279,8 @@ protected:
     void   drawThickFiber                    ( const vector< Vector >           &i_fiberPoints,
                                                      float                      i_thickness, 
                                                      int                        i_nmTubeEdge               );
+    void   drawConvexHull                    ();
+    void   setShowConvexHullOption           (bool i_val);
     void   drawTube                          ( const vector< vector< Vector > > &i_allCirclesPoints,
                                                       GLenum                      i_tubeType               );
     void   getCrossSectionAreaColor          (       unsigned int                i_index                   );
@@ -337,6 +356,10 @@ private:
     wxButton        *m_pbtnNewFibersColorVolume;    
     wxGrid          *m_pgridfibersInfo;
     wxToggleButton  *m_ptoggleDisplayMeanFiber;
+    wxToggleButton  *m_ptoggleDisplayConvexHull;
+    wxBitmapButton  *m_pbtnSelectConvexHullColor;
+    wxStaticText    *m_plblConvexHullOpacity;
+    wxSlider        *m_pSliderConvexHullOpacity;
     wxBitmapButton  *m_pbtnSelectMeanFiberColor;
     wxStaticText    *m_plblColoring;
     wxRadioButton   *m_pRadioCustomColoring;

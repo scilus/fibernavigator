@@ -41,7 +41,7 @@ public:
     void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
 
 	void OnEqualizeDataset					( wxEvent& event );
-    void OnEqualizationSliderChange               ( wxCommandEvent& event );
+    void OnEqualizationSliderChange         ( wxCommandEvent& event );
     void OnRename                           ( wxCommandEvent& event );
     void OnFlipX                            ( wxCommandEvent& event );
     void OnFlipY                            ( wxCommandEvent& event );
@@ -128,6 +128,9 @@ public:
     void OnDistanceAnchorSet                ( wxCommandEvent& event );
     void OnDisplayFibersInfo                ( wxCommandEvent& event );
     void OnDisplayMeanFiber                 ( wxCommandEvent& event );
+    void OnDisplayConvexHull                ( wxCommandEvent& event );
+    void OnConvexHullColorChange            ( wxCommandEvent& event );
+    void OnConvexHullOpacityChange          ( wxCommandEvent& event );
     void OnMeanFiberColorChange             ( wxCommandEvent& event );
     void OnDisplayCrossSections             ( wxCommandEvent& event );
     void OnDisplayDispersionTube            ( wxCommandEvent& event );

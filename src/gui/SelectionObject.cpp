@@ -14,7 +14,8 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../misc/Algorithms/BSpline.h"
-#include "../misc/Algorithms/ConvexHull.h"
+#include "../misc/Algorithms/ConvexHullIncremental.h"
+#include "../misc/Algorithms/ConvexGrahamHull.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../main.h"
 #include "../gui/MainFrame.h"
@@ -60,6 +61,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_treeId                = NULL;
     m_boxMoved                = false;
     m_boxResized            = false;
+    m_mustUpdateConvexHull  = true;
 
     //Distance coloring
     m_DistColoring          = false;
@@ -632,6 +634,69 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
     }
 
     glDisable( GL_BLEND );
+
+}
+
+void SelectionObject::computeConvexHull()
+{
+    m_mustUpdateConvexHull = true;
+    if ( m_ptoggleDisplayConvexHull->GetValue() && m_convexHullOpacity != 0)
+    {
+            vector< Vector > pts;
+            vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+            for (unsigned int i(0); i< l_selectedFibersPoints.size(); i++)
+                pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());
+
+            m_hullTriangles.clear();
+            ConvexHullIncremental hull(pts);
+            hull.buildHull();
+            hull.getHullTriangles( m_hullTriangles );
+            m_mustUpdateConvexHull = false;
+    }
+}
+
+void SelectionObject::drawConvexHull()
+{
+    if ( m_ptoggleDisplayConvexHull->GetValue() && m_ptoggleDisplayConvexHull->IsEnabled() && m_convexHullOpacity != 0)
+    {
+        if (m_mustUpdateConvexHull)
+            computeConvexHull();
+
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        glEnable( GL_BLEND );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glColor4f( (float)m_convexHullColor.Red() / 255.0f, (float)m_convexHullColor.Green() / 255.0f, (float)m_convexHullColor.Blue() / 255.0f, m_convexHullOpacity );
+
+        Vector normal;
+        glBegin( GL_TRIANGLES );
+        list< Face3D >::iterator it;
+            for( it = m_hullTriangles.begin(); it != m_hullTriangles.end(); it++ )
+            {
+                //Vector normal;
+                //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt1().x, it->getPt1().y, it->getPt1().z );
+
+                //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt2().x, it->getPt2().y, it->getPt2().z );
+
+                //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
+                //normal.normalize();
+                //glNormal3f(normal[0], normal[1], normal[2]);
+                glVertex3f( it->getPt3().x, it->getPt3().y, it->getPt3().z );
+            }
+        glEnd();
+
+        glDisable( GL_BLEND );
+    }
+}
+
+void SelectionObject::updateConvexHullOpacity()
+{
+    setConvexHullOpacity( ( m_pSliderConvexHullOpacity->GetValue() + (float)m_pSliderConvexHullOpacity->GetMin() ) / (float)m_pSliderConvexHullOpacity->GetMax() );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -744,6 +809,8 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
                                       o_gridInfo.m_meanCurvature, 
                                       o_gridInfo.m_meanTorsion       );
     //getFiberDispersion              ( o_gridInfo.m_dispersion        );
+
+
 }
 
 
@@ -1176,13 +1243,13 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
         if( ! ( Helper::convert3DPlanePointsTo2D( l_planeNormal, l_intersectionPoints ) ) )
             continue;
 
-        ConvexHull hull( l_intersectionPoints );
+        ConvexGrahamHull hull( l_intersectionPoints );
        
         // Let's build the convex hull.
         vector < Vector > l_hullPoints;
-        if( ! ( hull.buildHull( l_hullPoints ) ) )
+        if( ! ( hull.buildHull() ) )
             continue;
-
+        hull.getHullPoints( l_hullPoints );
         // Computing the surface area of the hull.
         double l_hullArea = 0.0f;
         if( ! ( hull.area( l_hullArea ) ) )
@@ -1656,6 +1723,7 @@ void SelectionObject::drawFibersInfo()
     
     // Draw the mean fiber.
     drawThickFiber( m_meanFiberPoints, (float)THICK_FIBER_THICKNESS/100.0f, THICK_FIBER_NB_TUBE_EDGE );
+    drawConvexHull();
     drawCrossSections();
     drawDispersionCone();
 
@@ -1879,6 +1947,13 @@ void SelectionObject::SetFiberInfoGridValues()
     }
 }
 
+void SelectionObject::setShowConvexHullOption( bool i_val )
+{
+    m_plblConvexHullOpacity->Show( i_val );
+    m_pSliderConvexHullOpacity->Show( i_val);
+    m_pbtnSelectConvexHullColor->Enable( i_val );
+}
+
 void SelectionObject::UpdateMeanValueTypeBox()
 {
     vector< DatasetInfo* > dataSets;
@@ -1926,7 +2001,6 @@ void SelectionObject::updateMeanFiberOpacity()
 {
     setMeanFiberOpacity( ( m_psliderMeanFiberOpacity->GetValue() + (float)m_psliderMeanFiberOpacity->GetMin() ) / (float)m_psliderMeanFiberOpacity->GetMax() );
 }
-
 
 void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 {
@@ -2094,7 +2168,26 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 
     m_ptoggleCalculatesFibersInfo->Enable(getIsMaster()); //bug with some fibers dataset sets
     
-    
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_ptoggleDisplayConvexHull = new wxToggleButton( parent, wxID_ANY, wxT("Display convex hull"), wxDefaultPosition, wxSize(140,-1) );
+    l_sizer->Add( m_ptoggleDisplayConvexHull, 0, wxALIGN_CENTER );
+    wxImage bmpConvexHullColor(MyApp::iconsPath+ wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+    m_pbtnSelectConvexHullColor = new wxBitmapButton( parent, wxID_ANY, bmpConvexHullColor, wxDefaultPosition, wxSize(40,-1) );
+    l_sizer->Add(m_pbtnSelectConvexHullColor);
+
+    m_propertiesSizer->Add(l_sizer);
+    parent->Connect( m_ptoggleDisplayConvexHull->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
+    parent->Connect( m_pbtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
+
+    l_sizer = new wxBoxSizer( wxHORIZONTAL );
+    m_plblConvexHullOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+    l_sizer->Add( m_plblConvexHullOpacity, 0, wxALIGN_CENTER );
+    m_pSliderConvexHullOpacity = new wxSlider( parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    l_sizer->Add( m_pSliderConvexHullOpacity, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    m_convexHullOpacity = 0.35f;
+    parent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
+
     m_pbtnNewFibersColorVolume->Enable(getIsMaster());
     m_pbtnNewFibersDensityVolume->Enable(getIsMaster());
     m_ptoggleAndNot->Enable(!getIsMaster() && m_objectType != CISO_SURFACE_TYPE);
@@ -2168,6 +2261,9 @@ void SelectionObject::updatePropertiesSizer()
     m_ptoggleCalculatesFibersInfo->Enable( getShowFibers() );
     m_pgridfibersInfo->Enable( getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue() );
     m_ptoggleDisplayMeanFiber->Enable( getShowFibers() );
+    m_ptoggleDisplayConvexHull->Enable( getShowFibers() );
+    setShowConvexHullOption( m_ptoggleDisplayConvexHull->GetValue() );
+
     m_pbtnSelectMeanFiberColor->Enable( m_ptoggleDisplayMeanFiber->GetValue() );
     setShowMeanFiberOption( m_ptoggleDisplayMeanFiber->GetValue() );
 
