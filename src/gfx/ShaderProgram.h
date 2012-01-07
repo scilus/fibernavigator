@@ -39,6 +39,7 @@ public:
     void setAttribFloat   ( const GLchar* pName, const GLfloat value );
     void setUniMatrix3f   ( const GLchar* pName, const FMatrix &values );
     void setUniSampler    ( const GLchar* pName, const GLint value );
+    void setUniBool       ( const GLchar* pName, const bool value );
     
 private:
     void printCompilerLog( GLuint shaderId );

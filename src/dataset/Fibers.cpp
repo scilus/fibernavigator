@@ -37,7 +37,7 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_coronalShown( pDatasetHelper->m_showCoronal ),
       m_sagittalShown( pDatasetHelper->m_showSagittal ),
       m_useCrossingFibers( false ),
-      m_thickness( 0.5f )
+      m_thickness( 2.5f )
 {
     m_bufferObjects         = new GLuint[3];
 }
@@ -2820,7 +2820,9 @@ void Fibers::draw()
         return;
     }
 
-    if ( m_useCrossingFibers )
+    // If geometry shaders are supported, the shader will take care of the filtering
+    // Otherwise, use the drawCrossingFibers
+    if ( !m_dh->m_geometryShadersSupported && m_useCrossingFibers )
     {
         drawCrossingFibers();
         return;
@@ -3472,7 +3474,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
 
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleCrossingFibers = new wxToggleButton( pParent, wxID_ANY, wxT( "Crossing Fibers" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pToggleCrossingFibers = new wxToggleButton( pParent, wxID_ANY, wxT( "Intersected Fibers" ), wxDefaultPosition, wxSize( 140, -1 ) );
     pSizer->Add( m_pToggleCrossingFibers, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pToggleCrossingFibers->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleCrossingFibers ) );
@@ -3641,7 +3643,7 @@ void Fibers::setShader()
     {
 
     }
-    else if( m_useCrossingFibers )
+    else if( m_dh->m_geometryShadersSupported && m_useCrossingFibers )
     {
         // Determine X, Y and Z range
         const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
@@ -3658,6 +3660,9 @@ void Fibers::setShader()
         m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", yMax);
         m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", zMin);
         m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", zMax);
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniBool("axialShown", m_dh->m_showAxial);
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniBool("coronalShown", m_dh->m_showCoronal);
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniBool("sagittalShown", m_dh->m_showSagittal);
     }
     else if ( !m_useTex )
     {
@@ -3675,7 +3680,7 @@ void Fibers::releaseShader()
     {
         m_dh->m_shaderHelper->m_fakeTubesShader.release();
     }
-    else if( m_useCrossingFibers )
+    else if( m_dh->m_geometryShadersSupported && m_useCrossingFibers )
     {
         m_dh->m_shaderHelper->m_crossingFibersShader.release();
     }

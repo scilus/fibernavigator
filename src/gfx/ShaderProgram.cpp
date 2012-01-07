@@ -348,6 +348,13 @@ void ShaderProgram::setUniSampler( const GLchar* pName, const GLint value )
 
 //////////////////////////////////////////////////////////////////////////
 
+void ShaderProgram::setUniBool( const GLchar* pName, const bool value )
+{
+    setUniInt( pName, value );
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void ShaderProgram::printCompilerLog( GLuint shaderId )
 {
     GLint infoLogLen = 0;
