@@ -190,8 +190,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 m_mousePt.s.X = clickX;
                 m_mousePt.s.Y = clickY;
                 
-				//use Control key for advanced left click actions
-				if ( wxGetKeyState( WXK_CONTROL ))
+				// Use Control (or Command on Mac) key for advanced left click actions
+                if( event.CmdDown() )
 				{
 					if(!m_pDatasetHelper->m_isDragging)
 					{
