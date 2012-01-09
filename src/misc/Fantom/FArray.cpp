@@ -198,7 +198,7 @@ void FArray::resize(unsigned int s, bool keepContent)
       if (sizeOfArray > s) sizeOfArray = s;
       memcpy(dmy, comp, sizeOfArray * sizeof(double));
       if ( s > sizeOfArray )
-        memset( dmy+sizeOfArray, ( s-sizeOfArray ) * sizeof( double ), 0 );
+        memset( dmy+sizeOfArray, 0, ( s-sizeOfArray ) * sizeof( double ) );
       sizeOfArray = s;
       delete [] comp;
       comp = dmy;
@@ -211,7 +211,7 @@ void FArray::resize(unsigned int s, bool keepContent)
   }
   else {
     comp = new double [s];
-    memset(comp, s * sizeof(double), 0);
+    memset(comp, 0, s * sizeof(double));
     sizeOfArray = s;
   }
 }
