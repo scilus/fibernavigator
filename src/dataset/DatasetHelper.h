@@ -263,6 +263,7 @@ public:
 	int     m_drawSize;
 	bool    m_drawRound;
 	bool    m_draw3d;
+    bool    m_canUseColorPicker;
 	wxColor m_drawColor;
 	wxImage m_drawColorIcon;
 

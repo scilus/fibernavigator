@@ -158,6 +158,7 @@ private:
     bool loadIndex                          ( int i_index );
 
 	void onSelectDrawer                     ( wxCommandEvent& event );
+    void onSwitchDrawer                     ( wxCommandEvent& event );
 	void onToggleDrawRound                  ( wxCommandEvent& event );
 	void onToggleDraw3d                     ( wxCommandEvent& event );
 	void onSelectColorPicker                ( wxCommandEvent& event );
@@ -170,6 +171,9 @@ private:
 	void onSelectStroke10                   ( wxCommandEvent& event );
 	void onSelectPen                        ( wxCommandEvent& event );
 	void onSelectEraser                     ( wxCommandEvent& event );
+                        
+    // Utility
+    void updateDrawerToolbar();
 
     
 private:

@@ -90,7 +90,7 @@ MenuBar::MenuBar()
     m_menuOptions->AppendSubMenu(m_menuRuler, wxT("Ruler"));
 
 	m_menuDrawer = new wxMenu();
-	m_itemToggleDrawer = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Activate Drawer"));
+	m_itemToggleDrawer = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Drawer Activated"));
 	m_itemToggleDrawRound = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Round Shape"));
 	m_itemToggleDraw3d = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Draw 3d"));
 	m_itemDrawColorPicker = m_menuDrawer->Append(wxID_ANY, wxT("Color Picker"));
@@ -208,7 +208,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemMoveBoundaryPointLeft->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMoveBoundaryPointsLeft));
     mf->Connect(m_itemMoveBoundaryPointRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMoveBoundaryPointsRight));
     mf->Connect(m_itemToggleUseTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseTransparency));
-	mf->Connect(m_itemToggleDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectDrawer));
+	mf->Connect(m_itemToggleDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSwitchDrawer));
 	mf->Connect(m_itemToggleDrawRound->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawRound));
 	mf->Connect(m_itemToggleDraw3d->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDraw3d));
 	mf->Connect(m_itemDrawColorPicker->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectColorPicker));
@@ -264,11 +264,21 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemMoveBoundaryPointRight->Enable(mf->m_pDatasetHelper->m_surfaceLoaded);
     m_itemToggleDrawPoints->Check(mf->m_pDatasetHelper->m_pointMode);
     m_itemToggleDrawVectors->Check(mf->m_pDatasetHelper->m_drawVectors);
-	m_itemToggleDrawer->Check(mf->m_pDatasetHelper->m_isDrawerToolActive);
+	
+    m_itemToggleDrawer->Check(mf->m_pDatasetHelper->m_isDrawerToolActive);
 	m_itemToggleDrawRound->Check(mf->m_pDatasetHelper->m_drawRound);
 	m_itemToggleDraw3d->Check(mf->m_pDatasetHelper->m_draw3d);
 	m_itemDrawPen->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
 	m_itemDrawEraser->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
-	m_itemNewSplineSurface->Enable(mf->m_pDatasetHelper->m_anatomyLoaded && !mf->m_pDatasetHelper->m_surfaceLoaded);
+	
+    m_itemToggleDrawRound->Enable( mf->m_pDatasetHelper->m_isDrawerToolActive );
+    m_itemToggleDraw3d->Enable(    mf->m_pDatasetHelper->m_isDrawerToolActive );
+    m_itemDrawPen->Enable(         mf->m_pDatasetHelper->m_isDrawerToolActive );
+    m_itemDrawEraser->Enable(      mf->m_pDatasetHelper->m_isDrawerToolActive );
+    m_itemDrawColorPicker->Enable( mf->m_pDatasetHelper->m_isDrawerToolActive &&
+                                   mf->m_pDatasetHelper->m_canUseColorPicker &&
+                                   mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN );
+    
+    m_itemNewSplineSurface->Enable(mf->m_pDatasetHelper->m_anatomyLoaded && !mf->m_pDatasetHelper->m_surfaceLoaded);
     
 }

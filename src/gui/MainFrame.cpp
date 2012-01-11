@@ -711,16 +711,47 @@ void MainFrame::onSelectDrawer( wxCommandEvent& event )
 		return;
 	}
 
-	m_pDatasetHelper->m_isRulerToolActive = false;
 	m_pDatasetHelper->m_isDrawerToolActive = true;
 
-	m_pToolBar->m_txtRuler->Disable();
-	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), true);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), true);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), true);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), true);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), true);
+    updateDrawerToolbar();
+}
 
+void MainFrame::onSwitchDrawer( wxCommandEvent& event )
+{
+    if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+    
+    m_pDatasetHelper->m_isDrawerToolActive = !m_pDatasetHelper->m_isDrawerToolActive;
+    
+    updateDrawerToolbar();
+}
+
+void MainFrame::updateDrawerToolbar()
+{
+    m_pDatasetHelper->m_isRulerToolActive = false;
+    
+    m_pToolBar->m_txtRuler->Disable();
+    
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+    
+    // Check if the current anatomy supports RGB
+    Anatomy *pTempAnat = (Anatomy*) m_pCurrentSceneObject;
+    
+    if( pTempAnat != NULL && pTempAnat->getType() == RGB )
+    {
+        m_pDatasetHelper->m_canUseColorPicker = true;
+    }
+    else
+    {
+        m_pDatasetHelper->m_canUseColorPicker = false;
+    }
+    
 	refreshAllGLWidgets();
 }
 
@@ -1792,10 +1823,19 @@ void MainFrame::onSelectListItem( wxListEvent& event )
     }
     m_pLastSelectedSceneObject = l_info;
     m_lastSelectedListItem = l_item;
+    
+    // Check if it is RGB
+    if( l_info->getType() == RGB )
+    {
+        m_pDatasetHelper->m_canUseColorPicker = true;
+    }
+    else
+    {
+        m_pDatasetHelper->m_canUseColorPicker = false;
+    }
+    
     refreshAllGLWidgets();
 }
-
-
 
 void MainFrame::onListMenuName( wxCommandEvent&  WXUNUSED(event) )
 {

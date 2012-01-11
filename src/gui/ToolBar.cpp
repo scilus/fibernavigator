@@ -170,12 +170,15 @@ void ToolBar::updateToolBar( MainFrame *mf )
 	ToggleTool(m_selectNormalPointer->GetId(), !(mf->m_pDatasetHelper->m_isRulerToolActive || mf->m_pDatasetHelper->m_isDrawerToolActive));
 	ToggleTool(m_selectRuler->GetId(), mf->m_pDatasetHelper->m_isRulerToolActive);
 	ToggleTool(m_selectDrawer->GetId(), mf->m_pDatasetHelper->m_isDrawerToolActive);
-	//ToggleTool(m_selectColorPicker->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
-	//SetToolNormalBitmap(m_selectColorPicker->GetId(), wxBitmap(mf->m_pDatasetHelper->m_drawColorIcon));
+    //SetToolNormalBitmap(m_selectColorPicker->GetId(), wxBitmap(mf->m_pDatasetHelper->m_drawColorIcon));
 
 	ToggleTool(m_toggleDrawRound->GetId(), mf->m_pDatasetHelper->m_drawRound);
     ToggleTool(m_toggleDraw3d->GetId(), mf->m_pDatasetHelper->m_draw3d);
     ToggleTool(m_selectPen->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
 	ToggleTool(m_selectEraser->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
 	ToggleTool(m_toggleInverseSelection->GetId(), mf->m_pDatasetHelper->m_fibersInverted);
+    
+    // Check if the currently selected anatomy can use the Color Picker.
+    EnableTool(m_selectColorPicker->GetId(), mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN && mf->m_pDatasetHelper->m_canUseColorPicker);
+
 }

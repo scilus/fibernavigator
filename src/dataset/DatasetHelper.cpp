@@ -99,6 +99,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 	m_drawSize(2),
 	m_drawRound ( true ),
 	m_draw3d ( false ),
+    m_canUseColorPicker( false ),
 	m_drawColor(255, 255, 255),
 	m_drawColorIcon(16, 16, true),
 
