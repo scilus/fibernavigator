@@ -2822,7 +2822,7 @@ void Fibers::draw()
 
     // If geometry shaders are supported, the shader will take care of the filtering
     // Otherwise, use the drawCrossingFibers
-    if ( !m_dh->m_geometryShadersSupported && m_useCrossingFibers )
+    if ( !m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
     {
         drawCrossingFibers();
         return;
@@ -3643,7 +3643,7 @@ void Fibers::setShader()
     {
 
     }
-    else if( m_dh->m_geometryShadersSupported && m_useCrossingFibers )
+    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
     {
         // Determine X, Y and Z range
         const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
@@ -3704,7 +3704,7 @@ void Fibers::releaseShader()
     {
         m_dh->m_shaderHelper->m_fakeTubesShader.release();
     }
-    else if( m_dh->m_geometryShadersSupported && m_useCrossingFibers )
+    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
     {
         m_dh->m_shaderHelper->m_crossingFibersShader.release();
     }

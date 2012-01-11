@@ -8,7 +8,7 @@ void main( void )
 {
     for( int i = 0 ; i < gl_VerticesIn ; ++i )
     {
-	gl_FrontColor = gl_FrontColorIn[i];
+        gl_FrontColor = gl_FrontColorIn[i];
         gl_Position = gl_ModelViewProjectionMatrix * gl_PositionIn[i];
 
         if ( xMax > gl_PositionIn[i].x && xMin < gl_PositionIn[i].x )

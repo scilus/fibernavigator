@@ -1140,6 +1140,16 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onUseGeometryShader( wxCommandEvent& event )
+{
+    m_pDatasetHelper->m_useFibersGeometryShader = !m_pDatasetHelper->m_useFibersGeometryShader;
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 {
     Fibers* l_fibers = NULL; // Initalize it quiet compiler.
