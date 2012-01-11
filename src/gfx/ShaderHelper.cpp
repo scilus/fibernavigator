@@ -80,10 +80,12 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) 
     if ( geometryShadersSupported )
     {
         Logger::getInstance()->printDebug( _T( "Initializing crossing fibers shader..." ), LOGLEVEL_MESSAGE );
-        glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_INPUT_TYPE_EXT, GL_LINES );
+        
+		glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_INPUT_TYPE_EXT, GL_LINES );
         glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_LINE_STRIP );
-        glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_VERTICES_OUT_EXT, 10 );
-        if( m_crossingFibersShader.load() && m_crossingFibersShader.compileAndLink() )
+        glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_VERTICES_OUT_EXT, 50 );
+        
+		if( m_crossingFibersShader.load() && m_crossingFibersShader.compileAndLink() )
         {
             m_crossingFibersShader.bind();
             Logger::getInstance()->printDebug( _T( "Crossing fibers shader initialized." ), LOGLEVEL_MESSAGE );

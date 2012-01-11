@@ -3654,15 +3654,39 @@ void Fibers::setShader()
         const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
 
         m_dh->m_shaderHelper->m_crossingFibersShader.bind();
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", xMin);
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", xMax);
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", yMin);
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", yMax);
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", zMin);
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", zMax);
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniBool("axialShown", m_dh->m_showAxial);
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniBool("coronalShown", m_dh->m_showCoronal);
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniBool("sagittalShown", m_dh->m_showSagittal);
+
+		if (m_dh->m_showSagittal)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", xMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", xMax);
+		}
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", 0);
+		}
+		
+		if (m_dh->m_showCoronal)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", yMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", yMax);
+        }
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", 0);
+        }
+
+		if (m_dh->m_showAxial)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", zMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", zMax);
+		}
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", 0);
+        }
     }
     else if ( !m_useTex )
     {

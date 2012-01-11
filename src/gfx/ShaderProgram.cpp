@@ -421,7 +421,7 @@ ShaderProgram::~ShaderProgram()
     }
     if( NULL != m_pFragment )
     {
-        delete m_pGeometry;
+		delete m_pFragment;
     }
 }
 
