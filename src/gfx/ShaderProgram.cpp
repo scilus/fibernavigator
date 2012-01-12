@@ -15,7 +15,9 @@ ShaderProgram::ShaderProgram( wxString filename, bool useGeometryShader, bool ge
 : m_id( NULL ),
   m_name( filename ),
   m_pVertex( NULL ),
+#if _COMPILE_GEO_SHADERS
   m_pGeometry( NULL ),
+#endif
   m_pFragment( NULL ),
   m_useGeometry( useGeometryShader ),
   m_geometrySupported( geometryShadersSupported )
@@ -24,10 +26,12 @@ ShaderProgram::ShaderProgram( wxString filename, bool useGeometryShader, bool ge
     {
         m_id = glCreateProgram();
         m_pVertex = new Shader( filename + _T( ".vs" ), SHADERTYPE_VERTEX );
+#if _COMPILE_GEO_SHADERS
         if( m_useGeometry ) 
         {
             m_pGeometry = new Shader( filename + _T( ".gs" ), SHADERTYPE_GEOMETRY );
         }
+#endif
         m_pFragment = new Shader( filename + _T( ".fs" ), SHADERTYPE_FRAGMENT );
     }
     else
@@ -56,6 +60,7 @@ bool ShaderProgram::load()
             m_oss.str( "" );
             return false;
         }
+#if _COMPILE_GEO_SHADERS
         if( m_useGeometry && !m_pGeometry->load() )
         {
             m_oss << "ShaderProgram::load() could not load geometry shader " << m_pGeometry->getFilename().char_str();
@@ -63,6 +68,7 @@ bool ShaderProgram::load()
             m_oss.str( "" );
             return false;
         }
+#endif
         if( !m_pFragment->load() )
         {
             m_oss << "ShaderProgram::load() could not load fragment shader " << m_pFragment->getFilename().char_str();
@@ -105,6 +111,7 @@ bool ShaderProgram::compileAndLink()
             printCompilerLog( m_pVertex->getId() );
             return false;
         }
+#if _COMPILE_GEO_SHADERS
         if( m_useGeometry && !m_pGeometry->compile() )
         {
             m_oss << "ShaderProgram::compile() could not compile geometry shader " << m_pGeometry->getFilename().char_str();
@@ -114,6 +121,7 @@ bool ShaderProgram::compileAndLink()
             printCompilerLog( m_pGeometry->getId() );
             return false;
         }
+#endif
         if( !m_pFragment->compile() )
         {
             m_oss << "ShaderProgram::compile() could not compile fragment shader " << m_pFragment->getFilename().char_str();
@@ -134,10 +142,13 @@ bool ShaderProgram::compileAndLink()
 
         glAttachShader( m_id, m_pVertex->getId() );
         glAttachShader( m_id, m_pFragment->getId() );
+
+#if _COMPILE_GEO_SHADERS
         if( m_useGeometry )
         {
             glAttachShader( m_id, m_pGeometry->getId() );
         }
+#endif
 
         glLinkProgram( m_id );
         
@@ -159,7 +170,6 @@ bool ShaderProgram::compileAndLink()
         Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
         return false;
-
     }
     else
     {
@@ -415,10 +425,12 @@ ShaderProgram::~ShaderProgram()
     {
         delete m_pVertex;
     }
+#if _COMPILE_GEO_SHADERS
     if( NULL != m_pGeometry )
     {
         delete m_pGeometry;
-    }
+    } 
+#endif
     if( NULL != m_pFragment )
     {
 		delete m_pFragment;

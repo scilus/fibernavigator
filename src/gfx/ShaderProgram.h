@@ -48,7 +48,9 @@ private:
     GLuint m_id;
     wxString  m_name;
     Shader *m_pVertex;
+#if _COMPILE_GEO_SHADERS
     Shader *m_pGeometry;
+#endif
     Shader *m_pFragment;
     bool m_useGeometry;
     bool m_geometrySupported;
