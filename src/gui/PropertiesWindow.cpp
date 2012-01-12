@@ -89,9 +89,13 @@ void PropertiesWindow::OnListItemDown( wxCommandEvent& WXUNUSED(event) )
 	{
 		if( pDatasetInfo->getType() == FIBERSGROUP )
 		{
-			FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
-			pFibersGroup->OnMoveDown();
-			m_mainFrame->refreshAllGLWidgets();
+			DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(m_mainFrame->m_pListCtrl->GetItemCount() - 1);
+			if(pDataset->getType() != FIBERS ) // if the last item in the list is not a fiber (child), then move down
+			{
+				FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
+				pFibersGroup->OnMoveDown();
+				m_mainFrame->refreshAllGLWidgets();
+			}
 			return;
 		}
 	}

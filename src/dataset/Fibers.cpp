@@ -1331,9 +1331,9 @@ bool Fibers::loadDmri( const wxString &filename )
     m_fullPath = filename;
     //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 #ifdef __WXMSW__
-    m_name = "-" + filename.AfterLast( '\\' );
+    m_name = /*"-"+*/ filename.AfterLast( '\\' );
 #else
-    m_name = "-" + filename.AfterLast( '/' );
+    m_name = /*"-" +*/ filename.AfterLast( '/' );
 #endif
     return true;
 }

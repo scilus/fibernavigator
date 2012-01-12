@@ -44,6 +44,7 @@ public:
     void moveItemDown(long);
 	void moveItemAt(long item, long pos);
 	void unselectAll();
+	void swap(long, long);
     
     bool DeleteItem(long item);
 
@@ -51,7 +52,6 @@ private:
     MainFrame *m_mainFrame;
     int m_col_clicked;
     int m_col_activated;
-    void swap(long, long);
 
     DECLARE_EVENT_TABLE()
 }    ;

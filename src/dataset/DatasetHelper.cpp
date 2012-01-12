@@ -215,12 +215,27 @@ bool DatasetHelper::load( const int i_index )
     return l_flag;
 }
 
-bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha, const long i_pos, const bool i_isScene )
+bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha, wxString i_name, const bool noFiberGroup, const bool isFiberGroup, const bool i_isScene )
 {
 	std::set_new_handler(&out_of_memory);
 	
     try 
     {
+		// if it is a fibergroup to add, only add it and do nothing else
+		if( isFiberGroup && i_isScene )
+		{
+			FibersGroup* l_fibersGroup = new FibersGroup( this );
+			l_fibersGroup->setName	   ( i_name );
+			l_fibersGroup->setShow     ( i_active );
+			l_fibersGroup->setShowFS   ( i_showFS );
+			l_fibersGroup->setuseTex   ( i_useTex );
+			l_fibersGroup->setType	   ( FIBERSGROUP );
+			
+			finishLoading( l_fibersGroup );
+			
+			m_fibersGroupLoaded = true;
+			return true;
+		}
 		// check if i_fileName is valid
 		if( ! wxFile::Exists( i_fileName ) )
 		{
@@ -241,6 +256,23 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 		if( l_ext == wxT( "scn" ) )
 		{
+			if( m_mainFrame->m_pListCtrl->GetItemCount() > 0 )
+			{
+				int answer = wxMessageBox(wxT("Are you sure you want to open a new scene? All objects loaded in the current scene will be deleted."), wxT("Confirmation"), 
+										  wxYES_NO | wxICON_QUESTION);
+				
+				if( answer == wxNO )
+				{
+					return true;
+				}
+				// Delete all items in the scene
+				for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++ )
+				{
+					m_mainFrame->m_pListCtrl->SetItemState(i, wxLIST_MASK_STATE, wxLIST_STATE_SELECTED);
+					m_mainFrame->deleteListItem();
+				}
+			}
+			
 			if( ! loadScene( i_fileName ) )
 			{
 				return false;
@@ -320,10 +352,12 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_dataset->setShow     ( i_active );
 				l_dataset->setShowFS   ( i_showFS );
 				l_dataset->setuseTex   ( i_useTex );
-				finishLoading( l_dataset );
 				
-				if(i_isScene)
-					l_dataset->setListCtrlItemId(i_pos);
+				if( i_isScene )
+				{
+					l_dataset->setName ( i_name );
+				}
+				finishLoading( l_dataset );
 				
 				if (i_index==8)
 				{
@@ -359,8 +393,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_mesh->setuseTex   ( i_useTex );
 				finishLoading       ( l_mesh);
 				
-				if(i_isScene)
-					l_mesh->setListCtrlItemId(i_pos);
 				return true;
 			}
 			return false;
@@ -377,14 +409,14 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 			if( l_fibers->load( i_fileName ) )
 			{
-				if( m_fibersGroupLoaded == false )
+				if( m_fibersGroupLoaded == false && noFiberGroup )
 				{
 					FibersGroup* l_fibersGroup = new FibersGroup( this );
 					l_fibersGroup->setName( wxT( "Fibers Group" ) );
-					l_fibersGroup->setShow(true);
+					l_fibersGroup->setShow(l_fibers->getShow());
 					l_fibersGroup->setType(FIBERSGROUP);
 					finishLoading( l_fibersGroup );
-
+					
 					m_fibersGroupLoaded = true;
 				}
 
@@ -404,9 +436,11 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				}
 
 				l_fibers->setThreshold( i_threshold );
+				l_fibers->setAlpha	  ( i_alpha );
 				l_fibers->setShow     ( i_active );
 				l_fibers->setShowFS   ( i_showFS );
 				l_fibers->setuseTex   ( i_useTex );
+				l_fibers->setName	  ( i_name );
 				
 				if( m_fibersGroupLoaded )
 				{
@@ -427,9 +461,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				m_mainFrame->refreshAllGLWidgets();
 				
 				finishLoading( l_fibers, true);
-				
-				if(i_isScene)
-					l_fibers->setListCtrlItemId(i_pos);
 				
 				m_fibersLoaded = true;
 				m_selBoxChanged = true;
@@ -463,26 +494,6 @@ void DatasetHelper::updateItemsId()
 
 void DatasetHelper::updateItemsPosition()
 {	
-	// Adjust fibergroup position with fibers
-	std::list<int> fibersPosList;
-	
-	FibersGroup* pFibersGroup = NULL;
-	getFibersGroupDataset(pFibersGroup);
-	if( pFibersGroup != NULL )
-	{
-		for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
-		{
-			long id = pFibersGroup->getFibersSet(i)->getListCtrlItemId();
-			fibersPosList.push_back(id);
-		}
-		
-		fibersPosList.sort();
-		
-		int currentPos = pFibersGroup->getListCtrlItemId();
-		pFibersGroup->setListCtrlItemId(fibersPosList.front());
-		m_mainFrame->m_pListCtrl->moveItemAt(currentPos, fibersPosList.front() - 1);
-	}
-	
 	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
 	{
 		DatasetInfo* pInfoA = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
@@ -506,6 +517,25 @@ void DatasetHelper::updateItemsPosition()
 				}
 			}
 		}
+	}
+	// Adjust fibergroup position with fibers
+	std::list<int> fibersPosList;
+	
+	FibersGroup* pFibersGroup = NULL;
+	getFibersGroupDataset(pFibersGroup);
+	if( pFibersGroup != NULL )
+	{
+		for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
+		{
+			long id = pFibersGroup->getFibersSet(i)->getListCtrlItemId();
+			fibersPosList.push_back(id);
+		}
+		
+		fibersPosList.sort();
+		
+		int currentPos = pFibersGroup->getListCtrlItemId();
+		pFibersGroup->setListCtrlItemId(fibersPosList.front());
+		m_mainFrame->m_pListCtrl->moveItemAt(currentPos, fibersPosList.front() - 1);
 	}
 }
 
@@ -609,7 +639,11 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
     wxXmlDocument l_xmlDoc;
     if( ! l_xmlDoc.Load( i_fileName ) )
         return false;
-
+	
+	wxString xmlVersion = l_xmlDoc.GetVersion();
+	long version;
+	xmlVersion.ToLong(&version);
+	
     wxXmlNode* l_child = l_xmlDoc.GetRoot()->GetChildren();
     while( l_child )
     {
@@ -661,11 +695,16 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 
         else if( l_child->GetName() == wxT( "data" ) )
         {
+			std::vector<long> v_positions;
+			bool fibersGroupTreated = false;
+			
             wxXmlNode *l_dataSetNode = l_child->GetChildren();
             while( l_dataSetNode )
             {
                 wxXmlNode *l_nodes  = l_dataSetNode->GetChildren();
                 // initialize to mute compiler
+				bool l_noFiberGroup = true;
+				bool l_isfiberGroup	= false;
                 bool l_active       = true;
                 bool l_useTex       = true;
                 bool l_showFS       = true;
@@ -673,11 +712,21 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 double l_alpha      = 1.0;
 				long l_pos			= 0;
                 wxString l_path;
-
+				wxString l_name;
+				
                 while( l_nodes )
                 {
                     if( l_nodes->GetName() == _T( "status" ) )
                     {
+						if( version > 1 )
+						{
+							l_isfiberGroup = ( l_nodes->GetPropVal( _T( "isFiberGroup" ), _T( "yes" ) ) == _T( "yes" ) );
+							if(l_isfiberGroup)
+							{
+								l_noFiberGroup = false;
+							}
+							l_nodes->GetPropVal( _T( "name" ), &l_name );
+						}
                         l_active = ( l_nodes->GetPropVal( _T( "active" ), _T( "yes" ) ) == _T( "yes" ) );
                         l_useTex = ( l_nodes->GetPropVal( _T( "useTex" ), _T( "yes" ) ) == _T( "yes" ) );
                         l_showFS = ( l_nodes->GetPropVal( _T( "showFS" ), _T( "yes" ) ) == _T( "yes" ) );
@@ -695,9 +744,45 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 
                     l_nodes = l_nodes->GetNext();
                 }
-                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha, l_pos, true );
+                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha, l_name, l_noFiberGroup, l_isfiberGroup, true );
+				
+				if( version == 1 ) // in the old version, no fibersgroup were saved
+				{
+					long lastItemPos = m_mainFrame->m_pListCtrl->GetItemCount() - 1;
+					if(lastItemPos >= 0 && !fibersGroupTreated)
+					{
+						DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(lastItemPos);
+						// if the last inserted item is a fiber, than a fibergroup has been inserted before
+						if(pDataset->getType() == FIBERS)
+						{
+							if(l_pos - 1 >= 0 )
+							{
+								v_positions.push_back(l_pos - 1);
+								fibersGroupTreated = true;
+							}
+						}
+					}
+				}
+				
+				v_positions.push_back(l_pos);
+
                 l_dataSetNode = l_dataSetNode->GetNext();
             }
+			
+			// Reassign dataset to the good position
+			int cpt = 1;
+			while(cpt != m_mainFrame->m_pListCtrl->GetItemCount())
+			{ 
+				m_mainFrame->m_pListCtrl->swap(0, v_positions[0]);
+				
+				//DatasetInfo* dataset1 = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
+				//DatasetInfo* dataset2 = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(v_positions[0]);
+				//dataset1->setListCtrlItemId(0);
+				//dataset2->setListCtrlItemId(v_positions[0]);
+				
+				std::swap(v_positions[0], v_positions[v_positions[0]]);
+				cpt++;
+			}
         }
         else if( l_child->GetName() == wxT( "points" ) )
         {
@@ -856,7 +941,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
     m_transform.s.M22 = r22;
     m_mainFrame->m_mainGL->setRotation();*/
 
-	updateItemsPosition();
     updateLoadStatus();
 	
     return true;
@@ -982,8 +1066,24 @@ void DatasetHelper::save( const wxString i_fileName )
             wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
             wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
             wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
-            l_statusNode->AddProperty( l_propU );
+			wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+			wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "no" ), l_propN );
+            l_statusNode->AddProperty( l_propI );
         }
+		if(l_info->getType() == FIBERSGROUP)
+		{
+			wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
+			
+            wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
+
+			wxXmlProperty* l_propP  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+            wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propP );
+            wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
+            wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
+			wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+            wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "yes" ), l_propN );
+			l_statusNode->AddProperty( l_propI );
+		}
     }
 	
 	// Save anatomies at the end so they would always be at the beginning of data
@@ -1004,7 +1104,9 @@ void DatasetHelper::save( const wxString i_fileName )
 		wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
 		wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
 		wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
-		l_statusNode->AddProperty( l_propU );
+		wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+		wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "no" ), l_propN );
+		l_statusNode->AddProperty( l_propI );
 	}
 
     wxXmlProperty* l_propPosX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pXSlider->GetValue() ) );
@@ -1014,6 +1116,8 @@ void DatasetHelper::save( const wxString i_fileName )
 
     wxXmlDocument l_xmlDoc;
     l_xmlDoc.SetRoot( l_root );
+	
+	l_xmlDoc.SetVersion( _T("2.0") );
 
     if ( i_fileName.AfterLast( '.' ) != _T( "scn" ) )
         l_xmlDoc.Save( i_fileName + _T( ".scn" ), 2 );
