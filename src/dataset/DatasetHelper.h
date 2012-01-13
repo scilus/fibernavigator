@@ -70,7 +70,7 @@ public:
                const bool  i_useTex		= true, 
                const float i_alpha		= 1.0f,
 			   wxString    i_name		= _T( ""),
-			   const bool  i_noFiberGroup = true,
+			   int		   i_version	= 1,
 			   const bool  i_isFiberGroup = false,
 			   const bool  i_isScene = false );
     void finishLoading ( DatasetInfo*, bool isChild = false );

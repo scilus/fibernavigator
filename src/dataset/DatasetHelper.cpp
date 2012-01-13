@@ -7,6 +7,7 @@
 #include "DatasetHelper.h"
 #include "../gui/MainFrame.h"
 
+#include <deque>
 #include <memory>
 #include <exception>
 #include <stdexcept>
@@ -215,7 +216,7 @@ bool DatasetHelper::load( const int i_index )
     return l_flag;
 }
 
-bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha, wxString i_name, const bool noFiberGroup, const bool isFiberGroup, const bool i_isScene )
+bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha, wxString i_name, const int version, const bool isFiberGroup, const bool i_isScene )
 {
 	std::set_new_handler(&out_of_memory);
 	
@@ -353,7 +354,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_dataset->setShowFS   ( i_showFS );
 				l_dataset->setuseTex   ( i_useTex );
 				
-				if( i_isScene )
+				if( i_isScene && version >= 2 )
 				{
 					l_dataset->setName ( i_name );
 				}
@@ -409,7 +410,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 			if( l_fibers->load( i_fileName ) )
 			{
-				if( m_fibersGroupLoaded == false && noFiberGroup )
+				if( m_fibersGroupLoaded == false && version < 2 )
 				{
 					FibersGroup* l_fibersGroup = new FibersGroup( this );
 					l_fibersGroup->setName( wxT( "Fibers Group" ) );
@@ -440,7 +441,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_fibers->setShow     ( i_active );
 				l_fibers->setShowFS   ( i_showFS );
 				l_fibers->setuseTex   ( i_useTex );
-				l_fibers->setName	  ( i_name );
 				
 				if( m_fibersGroupLoaded )
 				{
@@ -695,7 +695,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 
         else if( l_child->GetName() == wxT( "data" ) )
         {
-			std::vector<long> v_positions;
+			std::map<DatasetInfo*, long> realPositions;
 			bool fibersGroupTreated = false;
 			
             wxXmlNode *l_dataSetNode = l_child->GetChildren();
@@ -703,7 +703,6 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
             {
                 wxXmlNode *l_nodes  = l_dataSetNode->GetChildren();
                 // initialize to mute compiler
-				bool l_noFiberGroup = true;
 				bool l_isfiberGroup	= false;
                 bool l_active       = true;
                 bool l_useTex       = true;
@@ -718,13 +717,9 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
                 {
                     if( l_nodes->GetName() == _T( "status" ) )
                     {
-						if( version > 1 )
+						if( version >= 2 )
 						{
 							l_isfiberGroup = ( l_nodes->GetPropVal( _T( "isFiberGroup" ), _T( "yes" ) ) == _T( "yes" ) );
-							if(l_isfiberGroup)
-							{
-								l_noFiberGroup = false;
-							}
 							l_nodes->GetPropVal( _T( "name" ), &l_name );
 						}
                         l_active = ( l_nodes->GetPropVal( _T( "active" ), _T( "yes" ) ) == _T( "yes" ) );
@@ -744,44 +739,69 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 
                     l_nodes = l_nodes->GetNext();
                 }
-                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha, l_name, l_noFiberGroup, l_isfiberGroup, true );
+                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha, l_name, version, l_isfiberGroup, true );
 				
-				if( version == 1 ) // in the old version, no fibersgroup were saved
+				if( version < 2 ) // in the old version, no fibersgroup were saved
 				{
-					long lastItemPos = m_mainFrame->m_pListCtrl->GetItemCount() - 1;
-					if(lastItemPos >= 0 && !fibersGroupTreated)
-					{
-						DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(lastItemPos);
-						// if the last inserted item is a fiber, than a fibergroup has been inserted before
-						if(pDataset->getType() == FIBERS)
+					long lastItemPos;
+
+					#ifdef __WXMAC__
+						lastItemPos = m_mainFrame->m_pListCtrl->GetItemCount() - 1;
+					#else
+						lastItemPos = 1;
+					#endif
+						if(lastItemPos >= 0  && lastItemPos < m_mainFrame->m_pListCtrl->GetItemCount() && !fibersGroupTreated)
 						{
-							if(l_pos - 1 >= 0 )
+							DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(lastItemPos);
+							// if the last inserted item is a fiber, than a fibergroup has been inserted before
+							if(pDataset->getType() == FIBERS)
 							{
-								v_positions.push_back(l_pos - 1);
+								if(l_pos - 1 >= 0 )
+								{
+									DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(lastItemPos - 1);
+									// insert fibersgroup position
+									realPositions.insert(pair<DatasetInfo*, long>(pDataset, l_pos - 1));
+								}
 								fibersGroupTreated = true;
 							}
 						}
 					}
-				}
-				
-				v_positions.push_back(l_pos);
+
+				DatasetInfo* pDataset;
+				#ifdef __WXMAC__
+					pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(m_mainFrame->m_pListCtrl->GetItemCount() - 1);
+				#else
+					if(m_fibersGroupLoaded && !l_isfiberGroup)
+					{
+						pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(1);
+						if(!pDataset->getType() == FIBERS)
+						{
+							pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
+						}
+					}
+					else
+					{
+						pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
+					}
+				#endif
+				realPositions.insert(pair<DatasetInfo*, long>(pDataset, l_pos));
 
                 l_dataSetNode = l_dataSetNode->GetNext();
             }
 			
 			// Reassign dataset to the good position
-			int cpt = 1;
-			while(cpt != m_mainFrame->m_pListCtrl->GetItemCount())
-			{ 
-				m_mainFrame->m_pListCtrl->swap(0, v_positions[0]);
+			for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+			{
+				DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+				std::map<DatasetInfo*, long>::iterator it = realPositions.find( pDataset );
 				
-				//DatasetInfo* dataset1 = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
-				//DatasetInfo* dataset2 = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(v_positions[0]);
-				//dataset1->setListCtrlItemId(0);
-				//dataset2->setListCtrlItemId(v_positions[0]);
-				
-				std::swap(v_positions[0], v_positions[v_positions[0]]);
-				cpt++;
+				long currentPos = pDataset->getListCtrlItemId();
+				long realPos = it->second;
+
+				if( currentPos != realPos)
+				{
+					m_mainFrame->m_pListCtrl->swap(currentPos, realPos);
+				}
 			}
         }
         else if( l_child->GetName() == wxT( "points" ) )
