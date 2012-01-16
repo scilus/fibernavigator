@@ -1850,17 +1850,18 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
 Anatomy* Fibers::generateFiberVolume()
 {
-	bool glMapBufferUsed( false );
 	float* pColorData( NULL );
 	if( m_dh->m_useVBO )
     {
 		if( m_dh->m_pColorData == NULL)
 		{
 			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			m_dh->m_pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-			glMapBufferUsed = true;
+			
+			#ifdef __WXMAC__
+				glBufferData(GL_ARRAY_BUFFER, getPointCount()*3 + 2, NULL, GL_STREAM_DRAW);
+			#endif
+			pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 		}
-		pColorData = m_dh->m_pColorData;
     }
     else
     {
@@ -1900,12 +1901,13 @@ Anatomy* Fibers::generateFiberVolume()
         int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
         int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
         
+		int test = (*pTmpAnatomy->getFloatDataset()).size();
         ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3] * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 1] += pColorData[i * 3 + 1] * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
     }
 
-    if( m_dh->m_useVBO && glMapBufferUsed)
+    if( m_dh->m_useVBO )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
