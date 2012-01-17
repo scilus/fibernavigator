@@ -790,17 +790,20 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
             }
 			
 			// Reassign dataset to the good position
-			for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+			if( version > 1 ) 
 			{
-				DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
-				std::map<DatasetInfo*, long>::iterator it = realPositions.find( pDataset );
-				
-				long currentPos = pDataset->getListCtrlItemId();
-				long realPos = it->second;
-
-				if( currentPos != realPos)
+				for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
 				{
-					m_mainFrame->m_pListCtrl->swap(currentPos, realPos);
+					DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+					std::map<DatasetInfo*, long>::iterator it = realPositions.find( pDataset );
+					
+					long currentPos = pDataset->getListCtrlItemId();
+					long realPos = it->second;
+
+					if( currentPos != realPos)
+					{
+						m_mainFrame->m_pListCtrl->swap(currentPos, realPos);
+					}
 				}
 			}
         }

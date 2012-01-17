@@ -1454,7 +1454,7 @@ void Fibers::loadTestFibers()
 // This function will call the proper coloring function for the fibers.
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::updateFibersColors()
-{
+{	
     if( m_fiberColorationMode == NORMAL_COLOR )
     {
         resetColorArray();
