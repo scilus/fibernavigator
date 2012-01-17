@@ -1697,6 +1697,11 @@ void Fibers::colorWithCurvature( float *pColorData )
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::colorWithDistance( float *pColorData )
 {
+	if( pColorData == NULL )
+    {
+        return;
+    }
+	
     SelectionObjectList selObjs =  m_dh->getSelectionObjects();
     vector< SelectionObject* > simplifiedList;
 
@@ -1759,6 +1764,11 @@ void Fibers::colorWithDistance( float *pColorData )
 
 void Fibers::colorWithMinDistance( float *pColorData )
 {
+	if( pColorData == NULL )
+    {
+        return;
+    }
+	
     SelectionObjectList selObjs =  m_dh->getSelectionObjects();
     vector< SelectionObject* > simplifiedList;
 
