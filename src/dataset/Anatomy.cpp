@@ -14,6 +14,8 @@
 #include <GL/glew.h>
 #include <cassert>
 
+#include <algorithm>
+
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 
@@ -109,6 +111,22 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
         m_type          = type;
 
         m_floatDataset.resize( m_columns * m_frames * m_rows * 3, 0.0f );
+    }
+    else if(type == HEAD_BYTE)
+    {
+        m_columns       = m_dh->m_columns;
+        m_frames        = m_dh->m_frames;
+        m_rows          = m_dh->m_rows;
+        m_bands         = 1;
+        m_isLoaded      = true;   
+        m_type          = type;
+
+        m_floatDataset.resize( m_columns * m_frames * m_rows );
+
+        for(unsigned int i = 0; i < m_floatDataset.size(); ++i )
+        {
+            m_floatDataset[i] = 0;
+        }
     }
     else
     {
@@ -220,7 +238,7 @@ void Anatomy::dilate()
         }
     }
 
-    for( int i(0); i < datasetSize; ++i )
+	for( int i(0); i < datasetSize; ++i )
     {
         if ( tmp[i] )
         {
@@ -579,7 +597,7 @@ bool Anatomy::loadNifti( wxString fileName )
             }
 
             flag = true;
-            m_oldMax = 255;            
+            m_oldMax = 255;
         }
         break;
 
@@ -965,6 +983,112 @@ void Anatomy::updatePropertiesSizer()
         m_pTxtThresBox->Show();
     }
     
+}
+
+void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, float color ) 
+{
+	drawZone.datasize = drawZone.width * drawZone.height * drawZone.depth;
+	//save this zone on top of history before we change anything
+	fillHistory(drawZone, false);
+
+	//create the modified region's vector in the right color
+	std::vector<float> subData( drawZone.datasize, color );
+
+    for( int f = 0; f < drawZone.depth; ++f )
+    {
+        for( int r = 0; r < drawZone.height; ++r )
+        {
+			for( int c = 0; c < drawZone.width; ++c )
+			{
+				int sourceIndex = (c+drawZone.x) + (r+drawZone.y) * m_columns + (f+drawZone.z) * m_columns * m_rows;
+				int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
+
+				//save a backup in the history data
+				//drawZone.data[subIndex] = m_floatDataset[sourceIndex];
+
+				//update values
+				if(isRound)
+				{
+					//we might have one direction without proper size (flat), but never 2
+					double radius = (double)(max(drawZone.width, drawZone.height) - 1) / 2.0;
+
+					//inside sphere: put color in the source
+					if(( Vector(double(drawZone.width)/2.0, double(drawZone.height)/2.0, double(drawZone.depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
+					{
+						m_floatDataset[sourceIndex] = color;
+					}
+					else //outside sphere: copy source values in the subImage
+					{
+						subData[subIndex] = m_floatDataset[sourceIndex];
+					}
+				}
+				else
+				{
+					m_floatDataset[sourceIndex] = color;
+				}
+			}
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+	glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_LUMINANCE, GL_FLOAT, &subData[0] );
+}
+
+void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB ) 
+{
+	drawZone.datasize = drawZone.width * drawZone.height * drawZone.depth * 3;
+	//save this zone on top of history before we change anything
+	fillHistory(drawZone, true);
+	
+	//create the modified region's vector and put the right color
+	std::vector<float> subData( drawZone.datasize, colorRGB.Red() );
+	for( int i=0; i < drawZone.datasize; i+=3 )
+    {
+        //subData[i] = colorRGB.Red(); //done at declaration
+        subData[i+1] = colorRGB.Green();
+        subData[i+2] = colorRGB.Blue();
+    }
+	
+    for( int f = 0; f < drawZone.depth; ++f )
+    {
+        for( int r = 0; r < drawZone.height; ++r )
+        {
+			for( int c = 0; c < drawZone.width; ++c )
+			{
+				int sourceIndex = (c+drawZone.x) + (r+drawZone.y) * m_columns + (f+drawZone.z) * m_columns * m_rows;
+				int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
+
+				if(isRound)
+				{
+					//we might have one direction without proper size (flat), but never 2
+					double radius = (double)(max(drawZone.width, drawZone.height) - 1) / 2.0;
+
+					//inside sphere: put color in the source
+					if(( Vector(double(drawZone.width)/2.0, double(drawZone.height)/2.0, double(drawZone.depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
+					{
+						m_floatDataset[sourceIndex*3] = colorRGB.Red();
+						m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
+						m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
+					}
+					else //outside sphere: copy source values in the subImage
+					{
+						subData[subIndex*3] = m_floatDataset[sourceIndex*3];
+						subData[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
+						subData[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
+					}
+				}
+				else 
+				{
+					m_floatDataset[sourceIndex*3] = colorRGB.Red();
+					m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
+					m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
+				}
+			}
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+	glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_RGB, GL_FLOAT, &subData[0] );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1478,6 +1602,74 @@ void Anatomy::equalizeHistogram()
 }
 
 //////////////////////////////////////////////////////////////////////////
+void Anatomy::writeVoxel( const int x, const int y, const int z, const int layer, const int size, const bool isRound, const bool draw3d, wxColor colorRGB )
+{
+	SubTextureBox l_stb = getStrokeBox(x, y, z, layer, size, draw3d);
+
+    switch( m_type )
+    {
+		case HEAD_BYTE:
+		case HEAD_SHORT:
+        case OVERLAY:
+		{
+			if(colorRGB == wxColor(0,0,0)) // erase
+			{
+				float transparent = 0.0f;
+				updateTexture(l_stb, isRound, transparent);
+			}
+			else // draw, always white (or always purple for an overlay)
+			{
+				float white = 1.0f;
+				updateTexture(l_stb, isRound, white);
+			}
+			break;
+		}
+		case RGB: //draw in color
+		{
+			updateTexture(l_stb, isRound, colorRGB);
+			break;
+		}
+		case VECTORS:
+		{
+			break;
+		}
+	}
+}
+
+
+SubTextureBox Anatomy::getStrokeBox( const int x, const int y, const int z, const int layer, const int size, const bool draw3d )
+{
+	SubTextureBox box;
+
+	//set dimensions of the box
+	box.width = size+1;
+	box.height = size+1;
+	box.depth = size+1;
+	if(!draw3d)
+	{
+		switch(layer)
+		{
+		case AXIAL:
+			box.depth = 1;
+			break;
+		case CORONAL:
+			box.height = 1;
+			break;
+		case SAGITTAL:
+			box.width = 1;
+			break;
+		default:
+			break;
+		}
+	}
+
+	//set position of the box
+	box.x = std::min( std::max( x-box.width / 2, 0 ),  m_columns-box.width );
+	box.y = std::min( std::max( y-box.height / 2, 0 ), m_rows-box.height );
+	box.z = std::min( std::max( z-box.depth / 2, 0 ),  m_frames-box.depth );
+
+	return box;
+}
 
 void Anatomy::generateTexture()
 {
@@ -1528,4 +1720,96 @@ Anatomy::~Anatomy()
     }
 
     m_dh->updateLoadStatus();
+}
+
+void Anatomy::pushHistory()
+{
+	m_drawHistory.push(stack<SubTextureBox>());
+}
+
+void Anatomy::fillHistory( const SubTextureBox drawZone, bool isRGB) 
+{
+	//push current subtexture's properties
+	m_drawHistory.top().push(drawZone);
+	//init buffer size
+	m_drawHistory.top().top().data.resize(drawZone.datasize);
+
+	//fill with texture values
+	for( int z = 0; z < drawZone.depth; ++z )
+	{
+		for( int y = 0; y < drawZone.height; ++y )
+		{
+			for( int x = 0; x < drawZone.width; ++x )
+			{
+				int sourceIndex = (x +drawZone.x) + (y + drawZone.y) * m_columns + (z + drawZone.z) * m_columns * m_rows;
+				int subIndex = x + y * drawZone.width + z * drawZone.width * drawZone.height;
+
+				if(isRGB)
+				{
+					m_drawHistory.top().top().data[subIndex*3] = m_floatDataset[sourceIndex*3];
+					m_drawHistory.top().top().data[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
+					m_drawHistory.top().top().data[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
+				}
+				else
+				{
+					m_drawHistory.top().top().data[subIndex] = m_floatDataset[sourceIndex];
+				}
+			}
+		}
+	}
+}
+
+void Anatomy::popHistory(bool isRGB)
+{
+	if(m_drawHistory.empty())
+	{
+		return;
+	}
+
+	//restore the data from top of history
+    while( !m_drawHistory.top().empty() )
+    {
+		//the top contains a list of every subtextures made in one click,
+		//we need to get them back from top to bottom
+		SubTextureBox* topPtr = &(m_drawHistory.top().top());
+
+		for( int z = 0; z < topPtr->depth; ++z )
+		{
+			for( int y = 0; y < topPtr->height; ++y )
+			{
+				for( int x = 0; x < topPtr->width; ++x )
+				{
+					int sourceIndex = (x+topPtr->x) + (y+topPtr->y) * m_columns + (z+topPtr->z) * m_columns * m_rows;
+					int subIndex = x + y * topPtr->width + z * topPtr->width * topPtr->height;
+
+					if(isRGB)
+					{
+						m_floatDataset[sourceIndex*3] = topPtr->data[subIndex*3];
+						m_floatDataset[sourceIndex*3 + 1] = topPtr->data[subIndex*3 + 1];
+						m_floatDataset[sourceIndex*3 + 2] = topPtr->data[subIndex*3 + 2];
+					}
+					else
+					{
+						m_floatDataset[sourceIndex] = topPtr->data[subIndex];
+					}
+				}
+			}
+		}
+		//restore texture with the data
+		glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+		if(isRGB)
+		{
+			glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_RGB, GL_FLOAT, &(topPtr->data[0]) );
+		}
+		else
+		{
+			glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_LUMINANCE, GL_FLOAT, &(topPtr->data[0]) );
+		}
+		//discard this subtexture
+		topPtr = NULL;
+		m_drawHistory.top().pop();
+	}
+
+	//discard top of history
+	m_drawHistory.pop();
 }

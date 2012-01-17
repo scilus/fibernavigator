@@ -252,6 +252,21 @@ public:
     bool  m_displayGlyphOptions;
     FibersColorationMode   m_fiberColorationMode;
 
+	bool  m_isDrawerToolActive;
+	enum  DrawMode
+	{
+		DRAWMODE_PEN = 0,
+		DRAWMODE_ERASER = 1,
+        DRAWMODE_INVALID
+	};
+	DrawMode m_drawMode;
+	int     m_drawSize;
+	bool    m_drawRound;
+	bool    m_draw3d;
+    bool    m_canUseColorPicker;
+	wxColor m_drawColor;
+	wxImage m_drawColorIcon;
+
     bool  m_morphing;
 
     bool  m_boxLockIsOn;
