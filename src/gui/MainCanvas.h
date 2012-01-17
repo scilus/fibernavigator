@@ -44,7 +44,8 @@ public:
     void changeOrthoSize();
     void OnEraseBackground(wxEraseEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
-    wxPoint getMousePos() {return m_clicked;};
+
+	wxPoint getMousePos() {return m_clicked;};
     float getDelta() {return m_delta;};
     int getPicked() {return m_hr.picked;};
     void updateView();
@@ -53,14 +54,18 @@ public:
     void invalidate();
     void renderTestRay();
     void renderAxes();
-    void renderRulerDisplay();
+	void renderRulerDisplay();
+	void drawOnAnatomy();
     void segment();
     void KMeans(float i_means[2],float i_stddev[2],float i_apriori[2],std::vector<float>*,std::vector<float>*);
     void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);
     void graphCut(std::vector<float>*, std::vector<float>*, float);
     float getElement(int,int,int,std::vector<float>*);
 
-    hitResult pick(wxPoint, bool i_isRuler);
+	void pushAnatomyHistory();
+	void popAnatomyHistory();
+
+    hitResult pick(wxPoint, bool i_isRulerOrDrawer);
     float getAxisParallelMovement(int, int, int, int, Vector);
     Vector getEventCenter();
     void setRotation();
@@ -80,7 +85,8 @@ private:
      float       m_delta;
      hitResult   m_hr;
      Vector      m_hitPts;
-     bool        m_isRulerHit;
+	 bool        m_isRulerHit;
+	 bool        m_isDrawerHit;
      
      GLdouble m_pos1X, m_pos1Y, m_pos1Z;    // point of origin for picking
      GLdouble m_pos2X, m_pos2Y, m_pos2Z;    // distant point for picking

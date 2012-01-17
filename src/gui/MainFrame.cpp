@@ -69,6 +69,12 @@ EVT_SLIDER( ID_X_SLIDER,                                    MainFrame::onSliderM
 EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
 
+// mouse click in one of the three navigation windows
+EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+
 // KDTREE thread finished
 EVT_MENU( KDTREE_EVENT,                                     MainFrame::onKdTreeThreadFinished )
 
@@ -352,6 +358,51 @@ bool MainFrame::loadIndex( int i_index )
         m_pDatasetHelper->m_selBoxChanged = true;
     } 
     return true;
+}
+
+//
+//This function creates an Anatomy from scratch
+//
+void MainFrame::createNewAnatomy( int dataType )
+{
+	// ask user for a name
+	wxString l_givenName = wxT("Anatomy");
+    wxTextEntryDialog dialog(this, _T( "Please enter a new name" ) );
+    dialog.SetValue( l_givenName );
+    if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
+	{
+        l_givenName = dialog.GetValue();
+	}
+
+	//create the anatomy
+	Anatomy* l_newAnatomy = new Anatomy( m_pDatasetHelper, dataType );
+	l_newAnatomy->setName( l_givenName );
+
+#ifdef __WXMAC__
+    // insert at zero is a well-known bug on OSX, so we append there...
+    // http://trac.wxwidgets.org/ticket/4492
+    long l_id = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount();
+#else
+    long l_id = 0;
+#endif
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_newAnatomy->getName() );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.00" ) );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) l_newAnatomy );
+	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+    refreshAllGLWidgets();
+}
+
+void MainFrame::onNewAnatomyByte( wxCommandEvent& WXUNUSED(event) )
+{
+	createNewAnatomy( HEAD_BYTE );
+}
+
+void MainFrame::onNewAnatomyRGB( wxCommandEvent& WXUNUSED(event) )
+{
+	createNewAnatomy( RGB );
 }
 
 void MainFrame::onReloadShaders( wxCommandEvent& WXUNUSED(event) )
@@ -651,6 +702,250 @@ void MainFrame::onToggleDrawPointsMode( wxCommandEvent& event )
     }
     m_pDatasetHelper->togglePointMode();
     refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectDrawer( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+
+	m_pDatasetHelper->m_isDrawerToolActive = true;
+
+    updateDrawerToolbar();
+}
+
+void MainFrame::onSwitchDrawer( wxCommandEvent& event )
+{
+    if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+    
+    m_pDatasetHelper->m_isDrawerToolActive = !m_pDatasetHelper->m_isDrawerToolActive;
+    
+    updateDrawerToolbar();
+}
+
+void MainFrame::updateDrawerToolbar()
+{
+    m_pDatasetHelper->m_isRulerToolActive = false;
+    
+    m_pToolBar->m_txtRuler->Disable();
+    
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+    
+    // Check if the current anatomy supports RGB
+    Anatomy *pTempAnat = (Anatomy*) m_pCurrentSceneObject;
+    
+    if( pTempAnat != NULL && pTempAnat->getType() == RGB )
+    {
+        m_pDatasetHelper->m_canUseColorPicker = true;
+    }
+    else
+    {
+        m_pDatasetHelper->m_canUseColorPicker = false;
+    }
+    
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onToggleDrawRound( wxCommandEvent& event )
+{
+    if( m_pDatasetHelper->m_theScene == NULL )
+    {
+        return;
+    }
+    m_pDatasetHelper->m_drawRound = !m_pDatasetHelper->m_drawRound;
+    refreshAllGLWidgets();
+}
+
+void MainFrame::onToggleDraw3d( wxCommandEvent& event )
+{
+    if( m_pDatasetHelper->m_theScene == NULL )
+    {
+        return;
+    }
+    m_pDatasetHelper->m_draw3d = !m_pDatasetHelper->m_draw3d;
+    refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectColorPicker( wxCommandEvent& event )
+{
+    if( m_pDatasetHelper->m_theScene == NULL )
+	{
+        return;
+	}
+
+    wxColourData l_colorData;
+
+    for( int i = 0; i < 10; ++i )
+    {
+        wxColour l_color(i * 28, i * 28, i * 28);
+        l_colorData.SetCustomColour(i, l_color);
+    }
+
+    int i = 10;
+    wxColour l_color ( 255, 0, 0 );
+    l_colorData.SetCustomColour( i++, l_color );
+    wxColour l_color1( 0, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color1 );
+    wxColour l_color2( 0, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color2 );
+    wxColour l_color3( 255, 255, 0 );
+    l_colorData.SetCustomColour( i++, l_color3 );
+    wxColour l_color4( 255, 0, 255 );
+    l_colorData.SetCustomColour( i++, l_color4 );
+    wxColour l_color5( 0, 255, 255 );
+    l_colorData.SetCustomColour( i++, l_color5 );
+
+    wxColourDialog dialog( this, &l_colorData );
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        wxColourData l_retData = dialog.GetColourData();
+        m_pDatasetHelper->m_drawColor = l_retData.GetColour();
+		wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
+		m_pDatasetHelper->m_drawColorIcon.SetRGB(fullImage, 
+											     m_pDatasetHelper->m_drawColor.Red(), 
+											     m_pDatasetHelper->m_drawColor.Green(), 
+											     m_pDatasetHelper->m_drawColor.Blue() );
+		m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap(m_pDatasetHelper->m_drawColorIcon));
+    }
+    else
+    {
+        return;
+    }
+
+/*
+    if( m_mainFrame->m_currentListItem != -1 )
+    {
+        DatasetInfo *l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
+        if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
+        {
+            l_info->setColor( l_col );
+            l_info->setuseTex( false );
+            m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListItem, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
+        }
+    }
+    else if ( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject != NULL )
+    {
+        SelectionObject *l_selObj = (SelectionObject*)m_mainFrame->m_pCurrentSceneObject;
+        if (!l_selObj->getIsMaster())
+        {
+            wxTreeItemId l_parentId = m_mainFrame->m_pTreeWidget->GetItemParent( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject->GetId());
+            l_selObj = (SelectionObject*)m_mainFrame->m_pTreeWidget->GetItemData(l_parentId);
+        }
+        l_selObj->setFiberColor( l_col);
+        l_selObj->setIsDirty( true );
+        m_mainFrame->m_pDatasetHelper->m_selBoxChanged = true;
+    }    
+    m_mainFrame->refreshAllGLWidgets();*/
+}
+
+void MainFrame::onSelectStroke1( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 1;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke2( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 2;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke3( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 3;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke4( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 4;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke5( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 5;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke7( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 7;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectStroke10( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawSize = 10;
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectPen( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_PEN;
+	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
+	
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectEraser( wxCommandEvent& event )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_ERASER;
+	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
+
+	refreshAllGLWidgets();
 }
 
 void MainFrame::onMoveBoundaryPointsLeft( wxCommandEvent& WXUNUSED(event) )
@@ -1094,17 +1389,41 @@ void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
 }
 
-void MainFrame::onRulerTool( wxCommandEvent& WXUNUSED(event) )
+void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_isRulerToolActive = !m_pDatasetHelper->m_isRulerToolActive;    
-    if (m_pDatasetHelper->m_isRulerToolActive)
-    {
-        m_pToolBar->m_txtRuler->Enable();
-    } 
-    else 
-    {
-        m_pToolBar->m_txtRuler->Disable();
-    }
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+
+	m_pDatasetHelper->m_isRulerToolActive = false;
+	m_pDatasetHelper->m_isDrawerToolActive = false;
+
+	m_pToolBar->m_txtRuler->Disable();
+	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+	refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
+{
+	if( m_pDatasetHelper->m_theScene == NULL )
+	{
+		return;
+	}
+
+	m_pDatasetHelper->m_isRulerToolActive = true;
+	m_pDatasetHelper->m_isDrawerToolActive = false;
+
+    m_pToolBar->m_txtRuler->Enable();
+	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
+	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
     refreshAllGLWidgets();
 }
 
@@ -1516,10 +1835,19 @@ void MainFrame::onSelectListItem( wxListEvent& event )
     }
     m_pLastSelectedSceneObject = l_info;
     m_lastSelectedListItem = l_item;
+    
+    // Check if it is RGB
+    if( l_info->getType() == RGB )
+    {
+        m_pDatasetHelper->m_canUseColorPicker = true;
+    }
+    else
+    {
+        m_pDatasetHelper->m_canUseColorPicker = false;
+    }
+    
     refreshAllGLWidgets();
 }
-
-
 
 void MainFrame::onListMenuName( wxCommandEvent&  WXUNUSED(event) )
 {

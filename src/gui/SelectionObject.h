@@ -22,7 +22,9 @@
 #include "SceneObject.h"
 #include <GL/glew.h>
 #include <vector>
+#include <list>
 #include <wx/grid.h>
+#include "../misc/Algorithms/Face3D.h"
 #include "../dataset/DatasetHelper.h"
 #include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/Vector.h"
@@ -154,6 +156,21 @@ public :
     void       setIsVisible( bool i_isVisible )       { m_isVisible = i_isVisible;             };
     bool       getIsVisible()                         { return m_isVisible;                    };
 
+    void       setConvexHullColor( wxColour i_color ) { m_convexHullColor = i_color;            }; 
+    wxColour   getConvexHullColor()                   { return m_convexHullColor;               };
+
+    void       setConvexHullOpacity( float i_opacity) { m_convexHullOpacity = i_opacity;         };
+    float      getConvexHullOpacity()                 { return m_convexHullOpacity;              };
+
+    void       setMeanFiberColor( wxColour i_color )  { m_meanFiberColor = i_color;            }; 
+    wxColour   getMeanFiberColor()                    { return m_meanFiberColor;               };
+
+    void       setMeanFiberOpacity( float i_opacity) { m_meanFiberOpacity = i_opacity;         };
+    float      getMeanFiberOpacity()                 { return m_meanFiberOpacity;              };
+
+    void       setMeanFiberColorMode( FibersColorationMode i_mode ) { m_meanFiberColorationMode = i_mode; };
+    FibersColorationMode getMeanFiberColorMode()     { return m_meanFiberColorationMode;        };
+
     //Distance coloring setup
     bool        IsUsedForDistanceColoring() const;
     void        UseForDistanceColoring(bool aUse);
@@ -179,9 +196,13 @@ protected :
     float getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] );
     
     Vector          m_center;
+    
+    list< Face3D >  m_hullTriangles;
+
     wxColour        m_color;         // Used for coloring the isosurface.
     bool            m_colorChanged;
     wxColour        m_fiberColor;    // Used for the selected fibers.
+    bool            m_mustUpdateConvexHull;
     bool            m_gfxDirty;
     float           m_handleRadius;
     hitResult       m_hitResult;
@@ -202,7 +223,16 @@ protected :
 
     //Distance coloring switch
     bool            m_DistColoring;
+
+    wxColour m_convexHullColor;
+    float    m_convexHullOpacity; //Betweem 0 and 1
     
+    //Mean fiber coloring variables
+    wxColour m_meanFiberColor; //Custom color chose by the user
+    vector< Vector > m_meanFiberColorVector; //Vector of colour compute by the program
+    float m_meanFiberOpacity; //Between 0 and 1
+    FibersColorationMode m_meanFiberColorationMode;
+
     // Those variables represent the min/max value in pixel of the object.
     float m_minX;
     float m_minY;
@@ -218,6 +248,7 @@ public:
     // Functions
     void   calculateGridParams               (       FibersInfoGridParams       &io_gridInfo               );
     void   computeMeanFiber                  ();
+    void   computeConvexHull                 ();
     void   getProgressionCurvature           ( const Vector                     &i_point0, 
                                                const Vector                     &i_point1, 
                                                const Vector                     &i_point2, 
@@ -232,18 +263,24 @@ public:
                                                const Vector                     &i_point4,
                                                      double                      i_progression,
                                                      double                     &o_torsion                 );
-    void   SetFiberInfoGridValues();
+    void   SetFiberInfoGridValues             ();
+    void   updateMeanFiberOpacity             ();
     void   UpdateMeanValueTypeBox             ();
+    void   updateConvexHullOpacity            ();
 protected:
     void   drawCrossSections                 ();
     void   drawCrossSectionsPolygons         ();
     void   drawDispersionCone                ();
     void   drawFibersInfo                    ();
+    void   setNormalColorArray               (const vector< Vector > &i_fiberPoints);
+    void   setShowMeanFiberOption            ( bool i_val );
     void   drawPolygon                       ( const vector< Vector >           &i_crossSectionPoints      );
     void   drawSimpleCircles                 ( const vector< vector< Vector > > &i_allCirclesPoints        );
     void   drawThickFiber                    ( const vector< Vector >           &i_fiberPoints,
                                                      float                      i_thickness, 
                                                      int                        i_nmTubeEdge               );
+    void   drawConvexHull                    ();
+    void   setShowConvexHullOption           (bool i_val);
     void   drawTube                          ( const vector< vector< Vector > > &i_allCirclesPoints,
                                                       GLenum                      i_tubeType               );
     void   getCrossSectionAreaColor          (       unsigned int                i_index                   );
@@ -319,6 +356,16 @@ private:
     wxButton        *m_pbtnNewFibersColorVolume;    
     wxGrid          *m_pgridfibersInfo;
     wxToggleButton  *m_ptoggleDisplayMeanFiber;
+    wxToggleButton  *m_ptoggleDisplayConvexHull;
+    wxBitmapButton  *m_pbtnSelectConvexHullColor;
+    wxStaticText    *m_plblConvexHullOpacity;
+    wxSlider        *m_pSliderConvexHullOpacity;
+    wxBitmapButton  *m_pbtnSelectMeanFiberColor;
+    wxStaticText    *m_plblColoring;
+    wxRadioButton   *m_pRadioCustomColoring;
+    wxRadioButton   *m_pRadioNormalColoring;
+    wxStaticText    *m_pLblMeanFiberOpacity;
+    wxSlider        *m_psliderMeanFiberOpacity;
     wxButton        *m_pbtnDisplayCrossSections;
     wxButton        *m_pbtnDisplayDispersionTube;
     wxButton        *m_pbtnSetAsDistanceAnchor;
