@@ -33,7 +33,7 @@ FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 
 FibersGroup::~FibersGroup()
 {
-    m_dh->printDebug( _T( "executing FibersGroup destructor" ), 1 );
+    m_dh->printDebug( _T( "executing FibersGroup destructor" ), LOGLEVEL_MESSAGE );
 }
 
 string FibersGroup::intToString( const int number )

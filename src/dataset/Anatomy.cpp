@@ -308,7 +308,7 @@ void Anatomy::minimize()
 
     std::vector<bool> workData( m_columns * m_rows * m_frames, false );
     Fibers* pFibers( NULL );
-    m_dh->getFiberDataset( pFibers );
+    m_dh->getSelectedFiberDataset( pFibers );
 
     int curX, curY, curZ, index;
 

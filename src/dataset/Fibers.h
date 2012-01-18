@@ -100,13 +100,10 @@ public:
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
 
-<<<<<<< .working
 	bool isUsingFakeTubes()		{ return m_useFakeTubes; };
 	bool isUsingTransparency()	{ return m_useTransparency; };
 	bool isFibersInverted()		{ return m_fibersInverted; };
 
-=======
->>>>>>> .merge-right.r1376
 	void updateColorationMode()	{ m_isColorationUpdated = true; };
 	FibersColorationMode getColorationMode() { return m_fiberColorationMode; };
 	void setColorationMode(FibersColorationMode value) { m_fiberColorationMode = value; };
@@ -198,7 +195,6 @@ private:
     void            releaseShader();
 
     // Variables
-<<<<<<< .working
     bool				 m_isSpecialFiberDisplay;
     Vector				 m_barycenter;
     vector< float >		 m_boxMax;
@@ -224,30 +220,6 @@ private:
 	bool				 m_fibersInverted;
     bool				 m_useFakeTubes;
 	bool				 m_useTransparency;
-=======
-    bool            m_isSpecialFiberDisplay;
-    Vector          m_barycenter;
-    vector< float > m_boxMax;
-    vector< float > m_boxMin;
-    vector< float > m_colorArray;
-    int             m_count;
-    int             m_countLines;
-    int             m_countPoints;
-    bool            m_isInitialized;
-    vector< int >   m_lineArray;
-    vector< int >   m_linePointers;
-    vector< float > m_pointArray;
-    vector< float > m_normalArray;
-    
-    bool            m_normalsPositive;
-    vector< int >   m_reverse;
-    vector< bool >  m_selected;
-    vector< bool >  m_filtered;
-    vector< float > m_length;
-    float           m_maxLength;
-    float           m_minLength;
-    vector<float  > m_localizedAlpha;
-    float           m_cachedThreshold;
 
 	bool				 m_isColorationUpdated;
 	FibersColorationMode m_fiberColorationMode;

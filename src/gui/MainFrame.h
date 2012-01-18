@@ -42,9 +42,7 @@ public:
     void onTreeChange();
     void onMouseEvent                       ( wxMouseEvent&   event );
     void onLoad                             ( wxCommandEvent& event );
-<<<<<<< .working
 	long getCurrentListItem();
-=======
 	void createNewAnatomy					( int dataType );
     
 private:

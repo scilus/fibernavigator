@@ -88,7 +88,7 @@ public:
     void   deleteAllSelectionObjects();
     void   updateAllSelectionObjects();
     Vector mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);
-    Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);    
+    Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);   
 
     void createIsoSurface();
     void createDistanceMapAndIso();
@@ -136,7 +136,6 @@ public:
     void doMatrixManipulation();
 
 	bool getFibersGroupDataset( FibersGroup* &i_fiberGroup );
-	bool getFiberDataset  ( Fibers*  &i_fiber );
 	bool getSelectedFiberDataset ( Fibers* &i_fiber );
     bool getSurfaceDataset( Surface* &i_surface );
     bool getTextureDataset( std::vector< DatasetInfo* > &o_types ); 
@@ -225,8 +224,6 @@ public:
     bool      m_blendAlpha;
     bool      m_pointMode;
     bool      m_isShowAxes;
-	
-	float	  *m_pColorData;
 
     int       m_animationStep;
 

@@ -606,41 +606,21 @@ void TheScene::renderFibers()
 					{
 						pFibers->updateLinesShown();
 					}
-					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->bind();
-					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniInt  ( "globalColor", pFibers->getShowFS() );
-					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
-					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->setUniFloat( "thickness", GLfloat( 3.175 ) );
+					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.bind();
+					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", pDsInfo->getShowFS() );
+					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
+					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
+					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
 
 					pFibers->draw();
-					m_pDatasetHelper->m_shaderHelper->m_pFakeTubeShader->release();
+					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.release();
 
-<<<<<<< .working
 					if( m_pDatasetHelper->GLError() )
 						m_pDatasetHelper->printGLError( wxT( "draw fake tubes" ) );
 				}
 				else // render normally
 				{
-					lightsOff();
-=======
-            }
-            if( ! pDsInfo->getUseTex() )
-            {
-                bindTextures();
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.bind();
-                //m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
-            }
-            if( m_pDatasetHelper->m_selBoxChanged )
-            {
-                ( (Fibers*)pDsInfo )->updateLinesShown();
-                m_pDatasetHelper->m_selBoxChanged = false;
-            }
-            pDsInfo->draw();
 
-<<<<<<< .working
 					if( m_pDatasetHelper->m_lighting )
 					{
 						lightsOn();
@@ -650,24 +630,24 @@ void TheScene::renderFibers()
 					if( ! pFibers->getUseTex() )
 					{
 						bindTextures();
-						m_pDatasetHelper->m_shaderHelper->m_pFiberShader->bind();
-						m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
-						m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useTex", !pFibers->getUseTex() );
-						m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-						m_pDatasetHelper->m_shaderHelper->m_pFiberShader->setUniInt( "useOverlay", pFibers->getShowFS() );
+						//m_pDatasetHelper->m_shaderHelper->m_fibersShader.bind();
+						//m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
+						//m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
+						//m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+						//m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
 					}
 					if( m_pDatasetHelper->m_selBoxChanged )
 					{
 						pFibers->updateLinesShown();
 					}
 					pFibers->draw();
-					m_pDatasetHelper->m_shaderHelper->m_pFiberShader->release();
 					lightsOff();
-=======
-            //m_pDatasetHelper->m_shaderHelper->m_fibersShader.release();
-
+					//m_pDatasetHelper->m_shaderHelper->m_fibersShader.release();
+					
 					if( m_pDatasetHelper->GLError() )
-					m_pDatasetHelper->printGLError( wxT( "draw fibers" ) );
+					{
+						m_pDatasetHelper->printGLError( wxT( "draw fibers" ) );
+					}
 				}
 			}
 		}
@@ -679,42 +659,6 @@ void TheScene::renderFibers()
 	glPopAttrib();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// This function will render the fibers as fake tubes in theScene.
-///////////////////////////////////////////////////////////////////////////
-void TheScene::renderFakeTubes()
-{
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
-    {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
-
-        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow() )
-        {
-            if( m_pDatasetHelper->m_selBoxChanged )
-            {
-                ( (Fibers*) pDsInfo )->updateLinesShown();
-                m_pDatasetHelper->m_selBoxChanged = false;
-            }
-
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.bind();
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", pDsInfo->getShowFS() );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
-
-            pDsInfo->draw();
-
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.release();
-        }
-    }
-
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw fake tubes" ) );
-
-    glPopAttrib();
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will render the tensors in theScene.

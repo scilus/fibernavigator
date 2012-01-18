@@ -90,7 +90,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
     m_fibersSamplingFactor(1),
-<<<<<<< .working
     m_isSegmentActive( false ),
 	m_SegmentMethod(0),
 	m_isFloodfillActive ( true ),
@@ -106,7 +105,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 	m_showCoronal ( true ),
 	m_showAxial   ( true ),	
 	m_showCrosshair( false ),
-=======
 	
 	m_drawSize(2),
 	m_drawRound ( true ),
@@ -166,9 +164,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_lastSelectedPoint ( NULL ),
     m_lastSelectedObject( NULL ),
     m_theScene          ( 0 ),
-	m_boxAtCrosshair    ( 0 ),
-	m_lastSelectedPoint ( 0 ),
-	m_lastSelectedObject( 0 ),
     m_mainFrame			( mf ),
 	m_shaderHelper      ( 0 )
 {
@@ -1585,22 +1580,6 @@ void DatasetHelper::updateView( const float i_x, const float i_y, const float i_
         if( l_datasetInfo->getType() == TENSORS || l_datasetInfo->getType() == ODFS  )
             ( (Glyph*)m_mainFrame->m_pListCtrl->GetItemData( i ) )->refreshSlidersValues();
     }
-}
-
-bool DatasetHelper::getFiberDataset( Fibers* &io_f )
-{
-    io_f = NULL;
-
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
-    {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
-        if( l_datasetInfo->getType() == FIBERS )
-        {
-            io_f = (Fibers*)m_mainFrame->m_pListCtrl->GetItemData( i );
-            return true;
-        }
-    }
-    return false;
 }
 
 bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )

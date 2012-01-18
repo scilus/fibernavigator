@@ -251,7 +251,6 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     
     m_itemToggleLighting->Check(mf->m_pDatasetHelper->m_lighting);
     m_itemToggleRuler->Check(mf->m_pDatasetHelper->m_isRulerToolActive);
-<<<<<<< .working
     
 	bool isFiberSelected = false;
 	bool isFiberUsingFakeTubes = false;
@@ -308,17 +307,12 @@ void MenuBar::updateMenuBar( MainFrame *mf )
 	m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
     
 	m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
-=======
-    m_itemToogleInvertFibersSelection->Check(mf->m_pDatasetHelper->m_fibersInverted);
-    m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
-    m_itemToggleUseTransparency->Check(mf->m_pDatasetHelper->m_useTransparency);
     m_itemToggleUseGeometryShader->Check(mf->m_pDatasetHelper->m_useFibersGeometryShader);
 #if _COMPILE_GEO_SHADERS
     m_itemToggleUseGeometryShader->Enable(mf->m_pDatasetHelper->m_geometryShadersSupported);
 #else
     m_itemToggleUseGeometryShader->Enable(false);
 #endif
-    m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
     m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
     m_itemToggleShowCrosshair->Check(mf->m_pDatasetHelper->m_showCrosshair);
     m_itemToggleShowAxial->Check(mf->m_pDatasetHelper->m_showAxial);

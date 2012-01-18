@@ -779,23 +779,19 @@ void PropertiesWindow::OnListMenuThreshold( wxCommandEvent&  WXUNUSED(event) )
 //////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 {
-<<<<<<< .working
 	Fibers* pFibers = NULL;
     m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pFibers);
     if(pFibers != NULL)
-=======
-    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
+	{
+		Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
 
-    if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != DISTANCE_COLOR)
->>>>>>> .merge-right.r1376
-    {
 		if(pFibers->getColorationMode() != DISTANCE_COLOR)
 		{
 			pFibers->setColorationMode( DISTANCE_COLOR );
 			pFibers->updateFibersColors();  
 			pFibers->updateColorationMode();
 		}
-    }
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -804,16 +800,12 @@ void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 //////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
 {
-<<<<<<< .working
 	Fibers* pFibers = NULL;
     m_mainFrame->m_pDatasetHelper->getSelectedFiberDataset(pFibers);
     if(pFibers != NULL)
-=======
-    Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnListMenuMinDistance" ), LOGLEVEL_DEBUG );
+	{
+		Logger::getInstance()->printDebug( _T( "event triggered - PropertiesWindow::OnListMenuMinDistance" ), LOGLEVEL_DEBUG );
 
-    if(m_mainFrame->m_pDatasetHelper->m_fiberColorationMode != MINDISTANCE_COLOR)
->>>>>>> .merge-right.r1376
-    {
 		if(pFibers->getColorationMode() != MINDISTANCE_COLOR)
 		{
 			pFibers->setColorationMode( MINDISTANCE_COLOR );

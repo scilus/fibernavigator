@@ -845,7 +845,7 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< bool > filteredFiber;
     Fibers* l_fibers = NULL;
 
-    m_datasetHelper->getFiberDataset(l_fibers);
+    m_datasetHelper->getSelectedFiberDataset(l_fibers);
     filteredFiber = l_fibers->getFilteredFibers();
 
     for( unsigned int i = 0; i < m_inBranch.size(); ++i )
@@ -1005,7 +1005,7 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 bool SelectionObject::getShowFibers()
 {
     Fibers* l_fibers = NULL;
-    m_datasetHelper->getFiberDataset( l_fibers );
+    m_datasetHelper->getSelectedFiberDataset( l_fibers );
     if ( l_fibers == NULL )
         return false;
     return l_fibers->getShow();

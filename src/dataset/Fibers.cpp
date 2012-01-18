@@ -1911,15 +1911,12 @@ Anatomy* Fibers::generateFiberVolume()
 	float* pColorData( NULL );
 	if( m_dh->m_useVBO )
     {
-		if( m_dh->m_pColorData == NULL)
-		{
-			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
 			
-			#ifdef __WXMAC__
-				glBufferData(GL_ARRAY_BUFFER, getPointCount()*3 + 2, NULL, GL_STREAM_DRAW);
-			#endif
-			pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-		}
+		#ifdef __WXMAC__
+			//glBufferData(GL_ARRAY_BUFFER, getPointCount()*3 + 2, NULL, GL_STREAM_DRAW);
+		#endif
+		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
@@ -3144,7 +3141,6 @@ void Fibers::drawSortedLines()
     delete[] pLineIds;
 }
 
-<<<<<<< .working
 void Fibers::useFakeTubes()
 {
 	m_useFakeTubes = ! m_useFakeTubes;
@@ -3156,7 +3152,6 @@ void Fibers::useTransparency()
 	m_useTransparency = ! m_useTransparency;
 }
 
-=======
 void Fibers::drawCrossingFibers()
 {
     findCrossingFibers();
@@ -3514,9 +3509,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-<<<<<<< .working
     m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 145, -1 ) );
-=======
     m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overlay" ), wxDefaultPosition, wxSize( 140, -1 ) );
     pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
@@ -3755,7 +3748,7 @@ void Fibers::setShader()
 {
     DatasetInfo *pDsInfo = (DatasetInfo*) this;
 
-    if( m_dh->m_useFakeTubes )
+    if( m_useFakeTubes )
     {
 
     }
@@ -3816,7 +3809,7 @@ void Fibers::setShader()
 
 void Fibers::releaseShader()
 {
-    if( m_dh->m_useFakeTubes )
+    if( m_useFakeTubes )
     {
         m_dh->m_shaderHelper->m_fakeTubesShader.release();
     }
