@@ -9,7 +9,7 @@ SplinePoint::SplinePoint( Vector center, DatasetHelper* dh )
     m_offsetVector( Vector( 0.0, 0.0, 0.0 ) ),
     m_selected( false ),
     m_isBoundary( false ),
-    m_treeId( 0 ),
+    m_treeId( (long int)0 ),
     m_name(wxT(""))
 {
     m_dh->m_surfaceIsDirty = true;
@@ -22,7 +22,7 @@ SplinePoint::SplinePoint( double x, double y, double z, DatasetHelper* dh )
     m_offsetVector( Vector( 0.0, 0.0, 0.0 ) ),
     m_selected( false ),
     m_isBoundary( false ),
-    m_treeId( 0 ),
+    m_treeId( (long int)0 ),
     m_name(wxT(""))
 {
     m_dh->m_surfaceIsDirty = true;

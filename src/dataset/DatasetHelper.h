@@ -38,6 +38,8 @@
 
 #include "../misc/Fantom/FMatrix.h"
 
+#include "../Logger.h"
+
 class MainFrame;
 class DatasetInfo;
 class TheScene;
@@ -100,13 +102,30 @@ public:
     /*
      * Helper functions
      */
+
+#ifndef __GNUC__
+    #pragma deprecated(printTime, printwxT, printDebug, printGLError)
+    
+    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
     void printTime();
-    void printwxT  ( const wxString i_string );
-    void printDebug( const wxString i_string, const int i_level );
+    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printwxT  ( const wxString string );
+    // Deprecated: Use Log::printDebug instead.
+    void printDebug( const wxString string, const LogLevel level );
+#else
+    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printTime() __attribute__((deprecated));
+    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printwxT  ( const wxString string ) __attribute__((deprecated));
+    // Deprecated: Use Log::printDebug instead.
+    void printDebug( const wxString string, const LogLevel level ) __attribute__((deprecated));
+#endif
+
     /*
      * Check for GL error
      */
     bool GLError();
+    // Deprecated: Use Log::printGLError instead.
     void printGLError( const wxString function = wxT( "" ) );
 
     void updateView( const float i_x, const float i_y, const float i_z );
@@ -120,6 +139,7 @@ public:
 	bool getFiberDataset  ( Fibers*  &i_fiber );
 	bool getSelectedFiberDataset ( Fibers* &i_fiber );
     bool getSurfaceDataset( Surface* &i_surface );
+    bool getTextureDataset( std::vector< DatasetInfo* > &o_types ); 
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
 
@@ -212,7 +232,7 @@ public:
 
     int       m_debugLevel;
 
-    float     m_frustum[6][4]; // Countains the information of the planes forming the frustum.
+    float     m_frustum[6][4]; // Contains the information of the planes forming the frustum.
     /////////////////////////////////////////////////////////////////////////////////
     // state variables for menu entries
     /////////////////////////////////////////////////////////////////////////////////
@@ -231,12 +251,29 @@ public:
     bool  m_useLic;           // Show the lic texture on spline surface.
     bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
     float m_normalDirection;  // Normal direction of the spline surface.
+    bool  m_geometryShadersSupported;
     bool  m_clearToBlack;
+    bool  m_useFibersGeometryShader;
     bool  m_filterIsoSurf;
     int   m_colorMap;
     bool  m_showColorMapLegend;
     bool  m_displayMinMaxCrossSection;
     bool  m_displayGlyphOptions;
+
+	bool  m_isDrawerToolActive;
+	enum  DrawMode
+	{
+		DRAWMODE_PEN = 0,
+		DRAWMODE_ERASER = 1,
+        DRAWMODE_INVALID
+	};
+	DrawMode m_drawMode;
+	int     m_drawSize;
+	bool    m_drawRound;
+	bool    m_draw3d;
+    bool    m_canUseColorPicker;
+	wxColor m_drawColor;
+	wxImage m_drawColorIcon;
 
     bool  m_morphing;
 
@@ -274,9 +311,10 @@ public:
     SelectionObject* m_boxAtCrosshair;
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
-    MainFrame*       m_mainFrame;
     TheScene*        m_theScene;
     ShaderHelper*    m_shaderHelper;
+    
+    MainFrame*       m_mainFrame;
 };
 
 #define ID_KDTREE_FINISHED    50

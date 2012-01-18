@@ -8,7 +8,7 @@
 #ifndef ANATOMYHELPER_H_
 #define ANATOMYHELPER_H_
 
-#include "../gfx/Shader.h"
+#include "../gfx/ShaderProgram.h"
 #include "DatasetHelper.h"
 
 class DatasetHelper;
@@ -23,7 +23,7 @@ public:
     void render() {};
     void renderCrosshair();
     void renderMain();
-    void renderNav( int, Shader* );
+    void renderNav( int, ShaderProgram* );
     
 private:
     //functions

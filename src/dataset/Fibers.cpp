@@ -18,6 +18,7 @@
 #include "Anatomy.h"
 #include "../main.h"
 
+#include "../misc/Fantom/FMatrix.h"
 
 // TODO replace by const
 #define LINEAR_GRADIENT_THRESHOLD 0.085f
@@ -35,14 +36,20 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
 	  m_isColorationUpdated( false ),
 	  m_fiberColorationMode( NORMAL_COLOR ),
       m_pKdTree( NULL ),
-      m_pOctree( NULL )
+      m_pOctree( NULL ),
+      m_cfDrawDirty( true ),
+      m_axialShown( pDatasetHelper->m_showAxial ),
+      m_coronalShown( pDatasetHelper->m_showCoronal ),
+      m_sagittalShown( pDatasetHelper->m_showSagittal ),
+      m_useCrossingFibers( false ),
+      m_thickness( 2.5f )
 {
     m_bufferObjects         = new GLuint[3];
 }
 
 Fibers::~Fibers()
 {
-    m_dh->printDebug( _T( "executing fibers destructor" ), 1 );
+    m_dh->printDebug( _T( "executing fibers destructor" ), LOGLEVEL_MESSAGE );
     m_dh->m_fibersLoaded = false;
 
     if( m_dh->m_useVBO )
@@ -114,7 +121,7 @@ bool Fibers::load( wxString filename )
 bool Fibers::loadTRK( const wxString &filename )
 {
     stringstream ss;
-    m_dh->printDebug( wxT( "Start loading TRK file..." ), 1 );
+    m_dh->printDebug( wxT( "Start loading TRK file..." ), LOGLEVEL_MESSAGE );
     wxFile dataFile;
     wxFileOffset nSize( 0 );
     converterByteINT16 cbi;
@@ -145,7 +152,7 @@ bool Fibers::loadTRK( const wxString &filename )
     memcpy( idString, &pBuffer[0], 6 );
     ss.str( "" );
     ss << "Type: " << idString;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     if( strncmp( idString, "TRACK", 5 ) != 0 ) 
     {
@@ -163,7 +170,7 @@ bool Fibers::loadTRK( const wxString &filename )
 
     ss.str( "" );
     ss << "Dim: " << dim[0] << "x" << dim[1] << "x" << dim[2];
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Voxel size of the image volume. [12 bytes]
     float voxelSize[3];
@@ -176,7 +183,7 @@ bool Fibers::loadTRK( const wxString &filename )
 
     ss.str( "" );
     ss << "Voxel size: " << voxelSize[0] << "x" << voxelSize[1] << "x" << voxelSize[2];
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     //Origin of the image volume. [12 bytes]
     float origin[3];
@@ -189,7 +196,7 @@ bool Fibers::loadTRK( const wxString &filename )
 
     ss.str( "" );
     ss << "Origin: (" << origin[0] << "," << origin[1] << "," << origin[2] << ")";
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Number of scalars saved at each track point. [2 bytes]
     wxUint16 nbScalars;
@@ -197,7 +204,7 @@ bool Fibers::loadTRK( const wxString &filename )
     nbScalars = cbi.i;
     ss.str( "" );
     ss << "Nb. scalars: " << nbScalars;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Name of each scalar. (20 characters max each, max 10 names) [200 bytes]
     char scalarNames[10][20];
@@ -207,7 +214,7 @@ bool Fibers::loadTRK( const wxString &filename )
     {
         ss.str( "" );
         ss << "Scalar name #" << i << ": " << scalarNames[i];
-        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     }
 
     //Number of properties saved at each track. [2 bytes]
@@ -216,7 +223,7 @@ bool Fibers::loadTRK( const wxString &filename )
     nbProperties = cbi.i;
     ss.str( "" );
     ss << "Nb. properties: " << nbProperties;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Name of each property. (20 characters max each, max 10 names) [200 bytes]
     char propertyNames[10][20];
@@ -244,7 +251,7 @@ bool Fibers::loadTRK( const wxString &filename )
             ss << voxToRas[i][j] << " ";
         }
 
-        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     }
 
     //Reserved space for future version. [444 bytes]
@@ -255,14 +262,14 @@ bool Fibers::loadTRK( const wxString &filename )
     memcpy( voxelOrder, &pBuffer[948], 4 );
     ss.str( "" );
     ss << "Voxel order: " << voxelOrder;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Paddings [4 bytes]
     char pad2[4];
     memcpy( pad2, &pBuffer[952], 4 );
     ss.str( "" );
     ss << "Pad #2: " << pad2;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Image orientation of the original image. As defined in the DICOM header. [24 bytes]
     float imageOrientationPatient[6];
@@ -276,50 +283,50 @@ bool Fibers::loadTRK( const wxString &filename )
         ss << imageOrientationPatient[i] << " ";
     }
 
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Paddings. [2 bytes]
     char pad1[2];
     memcpy( pad1, &pBuffer[980], 2 );
     ss.str( "" );
     ss << "Pad #1: " << pad1;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Inversion/rotation flags used to generate this track file. [1 byte]
     bool invertX = pBuffer[982] > 0;
     ss.str( "" );
     ss << "Invert X: " << invertX;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
     bool invertY = pBuffer[983] > 0;
     ss.str( "" );
     ss << "Invert Y: " << invertY;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
     bool invertZ = pBuffer[984] > 0;
     ss.str( "" );
     ss << "Invert Z: " << invertZ;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
     bool swapXY = pBuffer[985] > 0;
     ss.str( "" );
     ss << "Swap XY: " << swapXY;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
     bool swapYZ = pBuffer[986] > 0;
     ss.str( "" );
     ss << "Swap YZ: " << swapYZ;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     //Inversion/rotation flags used to generate this track file. [1 byte]
     bool swapZX = pBuffer[987] > 0;
     ss.str( "" );
     ss << "Swap ZX: " << swapZX;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     //Number of tracks stored in this track file. 0 means the number was NOT stored. [4 bytes]
     wxUint32 nbCount;
@@ -327,7 +334,7 @@ bool Fibers::loadTRK( const wxString &filename )
     nbCount = cbi32.i;
     ss.str( "" );
     ss << "Nb. tracks: " << nbCount;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     //Version number. Current version is 2. [4 bytes]
     wxUint32 version;
@@ -335,7 +342,7 @@ bool Fibers::loadTRK( const wxString &filename )
     version = cbi32.i;
     ss.str( "" );
     ss << "Version: " << version;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     
     //Size of the header. Used to determine byte swap. Should be 1000. [4 bytes]
     wxUint32 hdrSize;
@@ -343,7 +350,7 @@ bool Fibers::loadTRK( const wxString &filename )
     hdrSize = cbi32.i;
     ss.str( "" );
     ss << "HDR size: " << hdrSize;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
     ////
     // READ DATA
@@ -411,7 +418,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
-    m_dh->printDebug( wxT( "Setting data in right format for the navigator..." ), 1 );
+    m_dh->printDebug( wxT( "Setting data in right format for the navigator..." ), LOGLEVEL_MESSAGE );
     m_countLines = lines.size();
     m_dh->m_countFibers = m_countLines;
     m_pointArray.max_size();
@@ -425,10 +432,10 @@ bool Fibers::loadTRK( const wxString &filename )
     m_filtered.resize( m_countLines, false );
     ss.str( "" );
     ss << "m_countLines: " << m_countLines;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     ss.str( "" );
     ss << "m_countPoints: " << m_countPoints;
-    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+    m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
     m_linePointers[0] = 0;
 
     for( int i = 0; i < m_countLines; ++i )
@@ -466,13 +473,13 @@ bool Fibers::loadTRK( const wxString &filename )
     {
         ss.str( "" );
         ss << "Using anatomy's voxel size: [" << m_dh->m_xVoxel << "," << m_dh->m_yVoxel << "," << m_dh->m_zVoxel << "]";
-        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
         voxelSize[0] = m_dh->m_xVoxel;
         voxelSize[1] = m_dh->m_yVoxel;
         voxelSize[2] = m_dh->m_zVoxel;
         ss.str( "" );
         ss << "Centering with respect to the anatomy: [" << m_dh->m_columns / 2 << "," << m_dh->m_rows / 2 << "," << m_dh->m_frames / 2 << "]";
-        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), 1 );
+        m_dh->printDebug( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
         origin[0] = m_dh->m_columns / 2;
         origin[1] = m_dh->m_rows / 2;
         origin[2] = m_dh->m_frames / 2;
@@ -495,7 +502,7 @@ bool Fibers::loadTRK( const wxString &filename )
         m_pointArray[i] = flipZ * ( m_pointArray[i] - origin[2] ) * ( m_dh->m_zVoxel / voxelSize[2] ) + anatomy[2];
     }
 
-    m_dh->printDebug( wxT( "End loading TRK file" ), 1 );
+    m_dh->printDebug( wxT( "End loading TRK file" ), LOGLEVEL_MESSAGE );
     createColorArray( colors.size() > 0 );
     m_type = FIBERS;
     m_fullPath = filename;
@@ -510,7 +517,7 @@ bool Fibers::loadTRK( const wxString &filename )
 
 bool Fibers::loadCamino( const wxString &filename )
 {
-    m_dh->printDebug( _T( "start loading Camino file" ), 1 );
+    m_dh->printDebug( _T( "start loading Camino file" ), LOGLEVEL_MESSAGE );
     wxFile dataFile;
     wxFileOffset nSize = 0;
 
@@ -585,7 +592,7 @@ bool Fibers::loadCamino( const wxString &filename )
     }
 
     printf( "%d lines and %d points \n", m_countLines, m_countPoints );
-    m_dh->printDebug( _T( "move vertices" ), 1 );
+    m_dh->printDebug( _T( "move vertices" ), LOGLEVEL_MESSAGE );
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
@@ -598,7 +605,7 @@ bool Fibers::loadCamino( const wxString &filename )
 
     calculateLinePointers();
     createColorArray( false );
-    m_dh->printDebug( _T( "read all" ), 1 );
+    m_dh->printDebug( _T( "read all" ), LOGLEVEL_MESSAGE );
     delete[] pBuffer;
     pBuffer = NULL;
     
@@ -616,7 +623,7 @@ bool Fibers::loadCamino( const wxString &filename )
 
 bool Fibers::loadMRtrix( const wxString &filename )
 {
-    m_dh->printDebug( _T( "start loading MRtrix file" ), 1 );
+    m_dh->printDebug( _T( "start loading MRtrix file" ), LOGLEVEL_MESSAGE );
     wxFile dataFile;
     long int nSize = 0;
     long int pc = 0, nodes = 0;
@@ -786,17 +793,58 @@ bool Fibers::loadMRtrix( const wxString &filename )
             m_pointArray[pos++] = *it2;
         }
     }
+    
+    // The MrTrix fibers are defined in the same geometric reference
+    // as the anatomical file. That is, the fibers coordinates are related to 
+    // the anatomy in world space. The transformation from local to world space
+    // for the anatomy is encoded in the m_dh->m_niftiTransform member.
+    // Since we do not consider this tranform when loading the anatomy, we must 
+    // bring back the fibers in the same reference, using the inverse of the 
+    // local to world transformation. A further problem arises when loading an
+    // anatomy that has voxels with dimensions differing from 1x1x1. The 
+    // scaling factor is encoded in the transformation matrix, but we do not,
+    // for the moment, use this scaling. Therefore, we must remove it from the
+    // the transformation matrix before computing its inverse.
+    FMatrix localToWorld = m_dh->m_niftiTransform;
+    
+    if( m_dh->m_xVoxel != 1.0 ||
+        m_dh->m_yVoxel != 1.0 ||
+        m_dh->m_zVoxel != 1.0 )
+    {
+        FMatrix rotMat( 3, 3 );
+        localToWorld.getSubMatrix( rotMat, 0, 0 );
+        
+        FMatrix scaleInversion( 3, 3 );
+        scaleInversion( 0, 0 ) = 1.0 / m_dh->m_xVoxel;
+        scaleInversion( 1, 1 ) = 1.0 / m_dh->m_yVoxel;
+        scaleInversion( 2, 2 ) = 1.0 / m_dh->m_zVoxel;
+        
+        rotMat = scaleInversion * rotMat;
+        
+        localToWorld.setSubMatrix( 0, 0, rotMat );
+    }
+       
+    FMatrix invertedTransform( 4, 4 );
+    invertedTransform = invert( localToWorld );
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_columns / 2 ) * m_dh->m_xVoxel;
-        ++i;
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_rows / 2 ) * m_dh->m_yVoxel ;
-        ++i;
-        m_pointArray[i] = m_pointArray[i] + 0.5 + ( m_dh->m_frames / 2 ) * m_dh->m_zVoxel;
+        FMatrix curPoint( 4, 1 );
+        curPoint( 0, 0 ) = m_pointArray[i];
+        curPoint( 1, 0 ) = m_pointArray[i + 1];
+        curPoint( 2, 0 ) = m_pointArray[i + 2];
+        curPoint( 3, 0 ) = 1;
+        
+        FMatrix invertedPoint = invertedTransform * curPoint;
+        
+        m_pointArray[i] = invertedPoint( 0, 0 );
+        m_pointArray[i + 1] = invertedPoint( 1, 0 );
+        m_pointArray[i + 2] = invertedPoint( 2, 0 );
+        
+        i += 2;
     }
 
-    m_dh->printDebug( wxT( "End loading TCK file" ), 1 );
+    m_dh->printDebug( wxT( "End loading TCK file" ), LOGLEVEL_MESSAGE );
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = filename;
@@ -811,7 +859,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
 
 bool Fibers::loadPTK( const wxString &filename )
 {
-    m_dh->printDebug( _T( "start loading PTK file" ), 1 );
+    m_dh->printDebug( _T( "start loading PTK file" ), LOGLEVEL_MESSAGE );
     wxFile dataFile;
     wxFileOffset nSize = 0;
     int pc = 0;
@@ -876,7 +924,7 @@ bool Fibers::loadPTK( const wxString &filename )
     }
 
     printf( "%d lines and %d points \n", m_countLines, m_countPoints );
-    m_dh->printDebug( _T( "move vertices" ), 1 );
+    m_dh->printDebug( _T( "move vertices" ), LOGLEVEL_MESSAGE );
 
     /*for( int i = 0; i < m_countPoints * 3; ++i )
     {
@@ -906,7 +954,7 @@ bool Fibers::loadPTK( const wxString &filename )
 
     calculateLinePointers();
     createColorArray( false );
-    m_dh->printDebug( _T( "read all" ), 1 );
+    m_dh->printDebug( _T( "read all" ), LOGLEVEL_MESSAGE );
     
     delete[] pBuffer;
     pBuffer = NULL;
@@ -925,7 +973,7 @@ bool Fibers::loadPTK( const wxString &filename )
 
 bool Fibers::loadVTK( const wxString &filename )
 {
-    m_dh->printDebug( _T( "start loading VTK file" ), 1 );
+    m_dh->printDebug( _T( "start loading VTK file" ), LOGLEVEL_MESSAGE );
     wxFile dataFile;
     wxFileOffset nSize = 0;
 
@@ -1136,7 +1184,7 @@ bool Fibers::loadVTK( const wxString &filename )
         pointColorOffset = fileOffset;
     }
 
-    m_dh->printDebug( wxString::Format( _T( "loading %d points and %d lines." ), countPoints, countLines ), 1 );
+    m_dh->printDebug( wxString::Format( _T( "loading %d points and %d lines." ), countPoints, countLines ), LOGLEVEL_MESSAGE );
     m_countLines        = countLines;
     m_dh->m_countFibers = m_countLines;
     m_countPoints       = countPoints;
@@ -1170,7 +1218,7 @@ bool Fibers::loadVTK( const wxString &filename )
     }
 
     toggleEndianess();
-    m_dh->printDebug( _T( "move vertices" ), 1 );
+    m_dh->printDebug( _T( "move vertices" ), LOGLEVEL_MESSAGE );
 
     for( int i = 0; i < countPoints * 3; ++i )
     {
@@ -1183,7 +1231,7 @@ bool Fibers::loadVTK( const wxString &filename )
 
     calculateLinePointers();
     createColorArray( colorsLoadedFromFile );
-    m_dh->printDebug( _T( "read all" ), 1 );
+    m_dh->printDebug( _T( "read all" ), LOGLEVEL_MESSAGE );
     m_type      = FIBERS;
     m_fullPath  = filename;
 #ifdef __WXMSW__
@@ -1911,7 +1959,6 @@ Anatomy* Fibers::generateFiberVolume()
         int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
         int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
         
-		int test = (*pTmpAnatomy->getFloatDataset()).size();
         ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3] * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 1] += pColorData[i * 3 + 1] * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
@@ -2128,7 +2175,7 @@ string Fibers::intToString( const int number )
 
 void Fibers::toggleEndianess()
 {
-    m_dh->printDebug( _T( "toggle Endianess" ), 1 );
+    m_dh->printDebug( _T( "toggle Endianess" ), LOGLEVEL_MESSAGE );
     wxUint8 temp = 0;
     wxUint8 *pPointBytes = ( wxUint8 * )&m_pointArray[0];
 
@@ -2173,7 +2220,7 @@ int Fibers::getLineForPoint( const int pointIdx )
 
 void Fibers::calculateLinePointers()
 {
-    m_dh->printDebug( _T( "calculate line pointers" ), 1 );
+    m_dh->printDebug( _T( "calculate line pointers" ), LOGLEVEL_MESSAGE );
     int pc = 0;
     int lc = 0;
     int tc = 0;
@@ -2202,7 +2249,7 @@ void Fibers::calculateLinePointers()
 
 void Fibers::createColorArray( const bool colorsLoadedFromFile )
 {
-    m_dh->printDebug( _T( "create color arrays" ), 1 );
+    m_dh->printDebug( _T( "create color arrays" ), LOGLEVEL_MESSAGE );
 
     if( !colorsLoadedFromFile )
     {
@@ -2300,7 +2347,7 @@ void Fibers::createColorArray( const bool colorsLoadedFromFile )
 
 void Fibers::resetColorArray()
 {
-    m_dh->printDebug( _T( "reset color arrays" ), 1 );
+    m_dh->printDebug( _T( "reset color arrays" ), LOGLEVEL_MESSAGE );
     float *pColorData( NULL );
     float *pColorData2( NULL );
 	
@@ -2387,7 +2434,7 @@ void Fibers::updateLinesShown()
 
     for( int i = 0; i < m_countLines; ++i )
     {
-        m_selected[i] = 1;
+        m_selected[i] = true;
     }
 
     int activeCount = 0;
@@ -2541,10 +2588,12 @@ void Fibers::updateLinesShown()
         }
     }
 
-    // This is to update the information display in the fiber grid info.
+    // This is to update the information display in the fiber grid info and the mean fiber
     if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
     {
         m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
+        m_dh->m_lastSelectedObject->computeMeanFiber();
+        m_dh->m_lastSelectedObject->computeConvexHull();
     }
 }
 
@@ -2765,15 +2814,17 @@ void Fibers::initializeBuffer()
     }
     else
     {
-        m_dh->printDebug( _T( "Not enough memory on your gfx card. Using vertex arrays." ),            2 );
-        m_dh->printDebug( _T( "This shouldn't concern you. Perfomance just will be slightly worse." ), 2 );
-        m_dh->printDebug( _T( "Get a better graphics card if you want more juice." ),                  2 );
+        m_dh->printDebug( _T( "Not enough memory on your gfx card. Using vertex arrays." ),            LOGLEVEL_ERROR );
+        m_dh->printDebug( _T( "This shouldn't concern you. Perfomance just will be slightly worse." ), LOGLEVEL_ERROR );
+        m_dh->printDebug( _T( "Get a better graphics card if you want more juice." ),                  LOGLEVEL_ERROR );
         glDeleteBuffers( 3, m_bufferObjects );
     }
 }
 
 void Fibers::draw()
 {
+    setShader();
+
     if( m_cachedThreshold != m_threshold )
     {
         updateFibersColors();
@@ -2796,6 +2847,14 @@ void Fibers::draw()
         glDepthMask( GL_FALSE );
         drawSortedLines();
         glPopAttrib();
+        return;
+    }
+
+    // If geometry shaders are supported, the shader will take care of the filtering
+    // Otherwise, use the drawCrossingFibers
+    if ( !m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    {
+        drawCrossingFibers();
         return;
     }
 
@@ -2849,6 +2908,8 @@ void Fibers::draw()
     glDisableClientState( GL_VERTEX_ARRAY );
     glDisableClientState( GL_COLOR_ARRAY );
     glDisableClientState( GL_NORMAL_ARRAY );
+
+    releaseShader();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2897,25 +2958,53 @@ void Fibers::drawFakeTubes()
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     }
 
-    for( int i = 0; i < m_countLines; ++i )
+    if ( m_useCrossingFibers )
     {
-        if( m_selected[i] && !m_filtered[i] )
+        findCrossingFibers();
+
+        for( unsigned int i = 0; i < m_cfStartOfLine.size(); ++i )
         {
-            int idx = getStartIndexForLine( i ) * 3;
-            glBegin( GL_QUAD_STRIP );
-
-            for( int k = 0; k < getPointsPerLine( i ); ++k )
+            if ( 3 < m_cfPointsPerLine[i] )
             {
-                glNormal3f( pNormals[idx], pNormals[idx + 1], pNormals[idx + 2] );
-                glColor3f( pColors[idx],  pColors[idx + 1],  pColors[idx + 2] );
-                glTexCoord2f( -1.0f, 0.0f );
-                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
-                glTexCoord2f( 1.0f, 0.0f );
-                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
-                idx += 3;
-            }
+                int index = m_cfStartOfLine[i] * 3;
+                glBegin( GL_QUAD_STRIP );
 
-            glEnd();
+                for( unsigned int k = 0; k < m_cfPointsPerLine[i]; ++k, index += 3 )
+                {
+                    glNormal3f( m_normalArray[index], m_normalArray[index + 1], m_normalArray[index + 2] );
+                    glColor3f( m_colorArray[index],  m_colorArray[index + 1],  m_colorArray[index + 2] );
+                    glTexCoord2f( -1.0f, 0.0f );
+                    glVertex3f( m_pointArray[index], m_pointArray[index + 1], m_pointArray[index + 2] );
+                    glTexCoord2f( 1.0f, 0.0f );
+                    glVertex3f( m_pointArray[index], m_pointArray[index + 1], m_pointArray[index + 2] );
+                }
+
+                glEnd();
+            }
+        }
+    }
+    else
+    {
+        for( int i = 0; i < m_countLines; ++i )
+        {
+            if( m_selected[i] && !m_filtered[i] )
+            {
+                int idx = getStartIndexForLine( i ) * 3;
+                glBegin( GL_QUAD_STRIP );
+
+                for( int k = 0; k < getPointsPerLine( i ); ++k )
+                {
+                    glNormal3f( pNormals[idx], pNormals[idx + 1], pNormals[idx + 2] );
+                    glColor3f( pColors[idx],  pColors[idx + 1],  pColors[idx + 2] );
+                    glTexCoord2f( -1.0f, 0.0f );
+                    glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                    glTexCoord2f( 1.0f, 0.0f );
+                    glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                    idx += 3;
+                }
+
+                glEnd();
+            }
         }
     }
 }
@@ -3055,6 +3144,7 @@ void Fibers::drawSortedLines()
     delete[] pLineIds;
 }
 
+<<<<<<< .working
 void Fibers::useFakeTubes()
 {
 	m_useFakeTubes = ! m_useFakeTubes;
@@ -3064,6 +3154,63 @@ void Fibers::useFakeTubes()
 void Fibers::useTransparency()
 {
 	m_useTransparency = ! m_useTransparency;
+}
+
+=======
+void Fibers::drawCrossingFibers()
+{
+    findCrossingFibers();
+
+    glEnableClientState( GL_VERTEX_ARRAY );
+    glEnableClientState( GL_COLOR_ARRAY );
+    glEnableClientState( GL_NORMAL_ARRAY );
+
+    if( ! m_dh->m_useVBO )
+    {
+        glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
+
+        if( m_showFS )
+        {
+            glColorPointer( 3, GL_FLOAT, 0, &m_colorArray[0] );  // Global colors.
+        }
+        else
+        {
+            glColorPointer( 3, GL_FLOAT, 0, &m_normalArray[0] ); // Local colors.
+        }
+
+        glNormalPointer( GL_FLOAT, 0, &m_normalArray[0] );
+    }
+    else
+    {
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+        glVertexPointer( 3, GL_FLOAT, 0, 0 );
+
+        if( m_showFS )
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
+        }
+        else
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
+        }
+
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        glNormalPointer( GL_FLOAT, 0, 0 );
+    }
+
+    for( unsigned int i = 0; i < m_cfStartOfLine.size(); ++i )
+    {
+        if ( 1 < m_cfPointsPerLine[i] )
+        {
+            glDrawArrays( GL_LINE_STRIP, m_cfStartOfLine[i], m_cfPointsPerLine[i] );
+        }
+    }
+
+    glDisableClientState( GL_VERTEX_ARRAY );
+    glDisableClientState( GL_COLOR_ARRAY );
+    glDisableClientState( GL_NORMAL_ARRAY );
 }
 
 void Fibers::switchNormals( bool positive )
@@ -3242,6 +3389,7 @@ bool Fibers::getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints 
 
 void Fibers::updateFibersFilters()
 {
+    m_cfDrawDirty = true;
     int min = m_pSliderFibersFilterMin->GetValue();
     int max = m_pSliderFibersFilterMax->GetValue();
     int subSampling = m_pSliderFibersSampling->GetValue();
@@ -3256,6 +3404,20 @@ void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsamplin
     {
         m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
+    
+    //Update stats, mean fiber and convexhull only if an object is selected.
+    if( m_dh->m_lastSelectedObject != NULL )
+    {
+        m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
+        m_dh->m_lastSelectedObject->computeMeanFiber();
+        m_dh->m_lastSelectedObject->computeConvexHull();
+    }
+
+}
+
+vector< bool > Fibers::getFilteredFibers()
+{
+    return m_filtered;
 }
 
 void Fibers::flipAxis( AxisType i_axe )
@@ -3277,7 +3439,7 @@ void Fibers::flipAxis( AxisType i_axe )
             m_pOctree->flipZ();
             break;
         default:
-            m_dh->printDebug( _T("Cannot flip fibers. The specified axis is undefined"), 2 );
+            m_dh->printDebug( _T("Cannot flip fibers. The specified axis is undefined"), LOGLEVEL_ERROR );
             return; //No axis specified - Cannot flip
     }
 
@@ -3331,6 +3493,13 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Thickness" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
+    m_pSliderCrossingFibersThickness = new wxSlider( pParent, wxID_ANY, m_thickness * 4, 1, 20, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    pSizer->Add( m_pSliderCrossingFibersThickness, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderCrossingFibersThickness->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 145, -1 ) );
@@ -3345,11 +3514,20 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
+<<<<<<< .working
     m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 145, -1 ) );
+=======
+    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overlay" ), wxDefaultPosition, wxSize( 140, -1 ) );
     pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
-    
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pToggleCrossingFibers = new wxToggleButton( pParent, wxID_ANY, wxT( "Intersected Fibers" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pToggleCrossingFibers, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pToggleCrossingFibers->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleCrossingFibers ) );
+
     m_propertiesSizer->AddSpacer( 8 );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -3395,7 +3573,10 @@ void Fibers::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
     m_ptoggleFiltering->Enable( false );
     m_ptoggleFiltering->SetValue( false );
+    m_pToggleCrossingFibers->Enable( true );
+    m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
     m_psliderOpacity->Enable( false );
+    m_pSliderCrossingFibersThickness->Enable( m_useCrossingFibers );
     m_pToggleNormalColoring->SetValue( !getShowFS() );
     m_pRadioNormalColoring->Enable( getShowFS() );
     m_pRadioCurvature->Enable( getShowFS() );
@@ -3469,4 +3650,182 @@ void Fibers::updatePropertiesSizer()
 		}
 	}
 	
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Fibers::updateCrossingFibersThickness() 
+{
+    if ( NULL != m_pSliderCrossingFibersThickness )
+    {
+        m_thickness = m_pSliderCrossingFibersThickness->GetValue() * 0.25f; 
+        m_cfDrawDirty = true;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Fibers::findCrossingFibers() 
+{
+    if (   m_cfDrawDirty
+        || m_xDrawn != m_dh->m_xSlize
+        || m_yDrawn != m_dh->m_ySlize
+        || m_zDrawn != m_dh->m_zSlize
+        || m_axialShown != m_dh->m_showAxial
+        || m_coronalShown != m_dh->m_showCoronal
+        || m_sagittalShown != m_dh->m_showSagittal )
+    {
+        m_xDrawn = m_dh->m_xSlize;
+        m_yDrawn = m_dh->m_ySlize;
+        m_zDrawn = m_dh->m_zSlize;
+        m_axialShown = m_dh->m_showAxial;
+        m_coronalShown = m_dh->m_showCoronal;
+        m_sagittalShown = m_dh->m_showSagittal;
+
+        m_cfDrawDirty = true;
+
+        // Determine X, Y and Z range
+        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
+        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
+        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
+        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
+        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
+        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+
+        bool lineStarted(false);
+
+        m_cfStartOfLine.clear();
+        m_cfPointsPerLine.clear();
+
+        unsigned int index( 0 );
+        unsigned int point( 0 );
+        for ( unsigned int line( 0 ); line < m_countLines; ++line )
+        {
+            if ( m_selected[line] && !m_filtered[line] )
+            {
+                for ( unsigned int i( 0 ); i < getPointsPerLine(line); ++i, ++point, index += 3 )
+                {
+                    if ( m_sagittalShown && xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else if ( m_coronalShown && yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else if ( m_axialShown && zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else
+                    {
+                        lineStarted = false;
+                    }
+                }
+                lineStarted = false;
+            }
+            else
+            {
+                point += getPointsPerLine(line);
+                index += getPointsPerLine(line) * 3;
+            }
+        }
+    }
+}
+
+void Fibers::setShader()
+{
+    DatasetInfo *pDsInfo = (DatasetInfo*) this;
+
+    if( m_dh->m_useFakeTubes )
+    {
+
+    }
+    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    {
+        // Determine X, Y and Z range
+        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
+        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
+        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
+        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
+        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
+        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+
+        m_dh->m_shaderHelper->m_crossingFibersShader.bind();
+
+		if (m_dh->m_showSagittal)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", xMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", xMax);
+		}
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", 0);
+		}
+		
+		if (m_dh->m_showCoronal)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", yMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", yMax);
+        }
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", 0);
+        }
+
+		if (m_dh->m_showAxial)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", zMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", zMax);
+		}
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", 0);
+        }
+    }
+    else if ( !m_useTex )
+    {
+        m_dh->m_shaderHelper->m_fibersShader.bind();
+        m_dh->m_shaderHelper->setFiberShaderVars();
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_dh->m_colorMap );
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
+    }
+}
+
+void Fibers::releaseShader()
+{
+    if( m_dh->m_useFakeTubes )
+    {
+        m_dh->m_shaderHelper->m_fakeTubesShader.release();
+    }
+    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    {
+        m_dh->m_shaderHelper->m_crossingFibersShader.release();
+    }
+    else if( !m_useTex )
+    {
+        m_dh->m_shaderHelper->m_fibersShader.release();
+    }
 }

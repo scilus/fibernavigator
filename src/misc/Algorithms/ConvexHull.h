@@ -14,6 +14,7 @@
 #define CONVEXHULL_H_
 
 #include <vector>
+#include <list>
 
 #include "Helper.h"
 #include "../IsoSurface/Vector.h"
@@ -59,45 +60,58 @@ private:
     AxisType m_comparisonAxis;
 };
 
+
 //////////////////////////////////////////////////////////////////////////////////
 // Description :
-//      This class uses the Graham scan algorithm to calculate the convex
-//      hull of a batch of points in 3D, on a specific plane (x, y or z)
+//      Represent a halfspace in 3D space
 //////////////////////////////////////////////////////////////////////////////////
+struct HalfSpace{
+    Vector normal ; // normal to boundary plane
+    double d; // eqn of half space is normal.x - d > 0
+  
+    // Create a half space
+    HalfSpace( Vector a, Vector b, Vector c )
+    {
+        normal = ((b - a).Cross(c - a));
+        normal.normalize();
+        d = normal.Dot(a);
+    }
 
+    //Create a half space parallel to z axis
+    HalfSpace(Vector a, Vector b)
+    {
+        normal = (b - a).Cross(Vector(0,0,1));
+        normal.normalize();
+        d = normal.Dot(a);
+    }
+
+    
+    bool inside (Vector x)
+    {
+        return normal.Dot(x) > d;
+    }
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// Description :
+//      This is the base class for all convex hull algorithm
+//////////////////////////////////////////////////////////////////////////////////
 class ConvexHull
 {
+public:
+    //Constructor/Destructor
+    ConvexHull(std::vector< Vector > &i_pointsVector);
+    ~ConvexHull(){};
 
-public :
+    virtual bool    buildHull       () = 0;
+    virtual bool    getHullPoints   ( std::vector< Vector > &o_points );
 
-    // Constructor / Destructor
-    ConvexHull  ( std::vector< Vector > &i_pointsVector );
-    ~ConvexHull (){};
+protected:
+    //Variable
+    std::vector< Vector > m_allPoints;   //The convex hull is around those point
+    std::vector< Vector > m_hullPoints;  //Point forming the hull
 
-    // Functions
-    bool    area( double & o_surfaceArea );
-    bool    buildHull( std::vector< Vector > &o_points );
-    bool    getHullPoints( std::vector< Vector > &o_points );
-
-private:
-
-    // Functions    
-    void    buildHalfHull( std::vector< Vector > &i_points, std::vector< Vector > &o_points, const int i_factor );    
-    double  direction( const Vector &i_p0, const Vector &i_p1, const Vector &i_p2 );
-    void    partitionPoints();
-    double  triangleArea( const Vector &i_p0, const Vector &i_p1, const Vector &i_p2 );
-    
-private :
-
-    // Variables
-    Vector m_farLeftPoint;                      // Leftmost point
-    Vector m_farRightPoint;                     // Rightmost point
-    std::vector< Vector > m_allPoints;          // All the inputted points
-    std::vector< Vector > m_hullPoints;         // Points forming the hull
-    std::vector< Vector > m_upperPartitionPts;  // Upper partition points
-    std::vector< Vector > m_lowerPartitionPts;  // Lower partition points
-    std::vector< Vector > m_lowerHullPts;       // Lower hull points
-    std::vector< Vector > m_upperHullPts;       // Upper hull points
 };
 
 #endif // CONVEXHULL_H_

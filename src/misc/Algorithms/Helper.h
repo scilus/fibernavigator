@@ -106,6 +106,7 @@ enum FibersColorationMode
     TORSION_COLOR       = 2,
     DISTANCE_COLOR      = 3,
     MINDISTANCE_COLOR   = 4,
+    CUSTOM_COLOR        = 5,
 };
 
 ///////////////////////////////////////////////////////////////////////////

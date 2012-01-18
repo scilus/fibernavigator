@@ -124,7 +124,7 @@ bool MyApp::OnInit( void )
 
 #endif
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
 
         // this crashes on windows
         printwx( _T( "Warning: This version of Fibernavigator is debug compiled."), _T( "For better performance please compile a Release version.") );
@@ -135,7 +135,7 @@ bool MyApp::OnInit( void )
 #endif
 
         // Create the main frame window
-        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 965"), wxPoint( 0, 0 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
+        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 1219"), wxPoint( 0, 0 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
         // Give it an icon (this is ignored in MDI mode: uses resources)
 
 #ifdef __WXMSW__

@@ -117,16 +117,13 @@ public:
     wxBitmapButton  *m_pbtnDown;
     wxButton        *m_pbtnSmoothLoop;
     wxButton        *m_pbtnClean;
-    wxButton		*m_pBtnRename;
-    wxButton		*m_pBtnFlipX;
-    wxButton		*m_pBtnFlipY;
-    wxButton		*m_pBtnFlipZ;
+    wxButton        *m_pBtnRename;
+    wxToggleButton  *m_pBtnFlipX;
+    wxToggleButton  *m_pBtnFlipY;
+    wxToggleButton  *m_pBtnFlipZ;
     wxToggleButton  *m_ptoggleLIC;
 	wxStaticText	*m_pIntensityText;
 	wxStaticText	*m_pOpacityText;
-
-    
-
 
 protected:
     virtual void generateTexture()=0;

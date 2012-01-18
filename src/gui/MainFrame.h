@@ -42,10 +42,15 @@ public:
     void onTreeChange();
     void onMouseEvent                       ( wxMouseEvent&   event );
     void onLoad                             ( wxCommandEvent& event );
+<<<<<<< .working
 	long getCurrentListItem();
+=======
+	void createNewAnatomy					( int dataType );
     
 private:
     // File menu
+    void onNewAnatomyByte                   ( wxCommandEvent& event );
+    void onNewAnatomyRGB                    ( wxCommandEvent& event );
     void onReloadShaders                    ( wxCommandEvent& event );
     void onSave                             ( wxCommandEvent& event );
     void onSaveFibers                       ( wxCommandEvent& event );
@@ -87,6 +92,7 @@ private:
     void onUseFakeTubes                     ( wxCommandEvent& event );
     void onResetColor                       ( wxCommandEvent& event );
     void onUseTransparency                  ( wxCommandEvent& event );
+    void onUseGeometryShader                ( wxCommandEvent& event );
     // surface menu
     void onNewSplineSurface                 ( wxCommandEvent& event );
     void onMoveBoundaryPointsLeft           ( wxCommandEvent& event );
@@ -94,8 +100,9 @@ private:
     void moveBoundaryPoints( int i_value);
     // Options menu
     void onToggleLighting                   ( wxCommandEvent& event );
-    void onClearToBlack                     ( wxCommandEvent& event );
-    void onRulerTool                        ( wxCommandEvent& event );
+	void onClearToBlack                     ( wxCommandEvent& event );
+	void onSelectNormalPointer              ( wxCommandEvent& event );
+    void onSelectRuler                      ( wxCommandEvent& event );
     void onRulerToolClear                   ( wxCommandEvent& event );
     void onRulerToolAdd                     ( wxCommandEvent& event );
     void onRulerToolDel                     ( wxCommandEvent& event );
@@ -154,7 +161,25 @@ private:
     void onLoadTensors                      ( wxCommandEvent& event );
     void onLoadODFs                         ( wxCommandEvent& event );    
     bool loadIndex                          ( int i_index );
-    
+
+	void onSelectDrawer                     ( wxCommandEvent& event );
+    void onSwitchDrawer                     ( wxCommandEvent& event );
+	void onToggleDrawRound                  ( wxCommandEvent& event );
+	void onToggleDraw3d                     ( wxCommandEvent& event );
+	void onSelectColorPicker                ( wxCommandEvent& event );
+	void onSelectStroke1                    ( wxCommandEvent& event );
+	void onSelectStroke2                    ( wxCommandEvent& event );
+	void onSelectStroke3                    ( wxCommandEvent& event );
+	void onSelectStroke4                    ( wxCommandEvent& event );
+	void onSelectStroke5                    ( wxCommandEvent& event );
+	void onSelectStroke7                    ( wxCommandEvent& event );
+	void onSelectStroke10                   ( wxCommandEvent& event );
+	void onSelectPen                        ( wxCommandEvent& event );
+	void onSelectEraser                     ( wxCommandEvent& event );
+                        
+    // Utility
+    void updateDrawerToolbar();
+
     
 private:
     ToolBar             *m_pToolBar;
