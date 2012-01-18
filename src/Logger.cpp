@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <wx/datetime.h>
 
-
 Logger * Logger::m_pInstance = NULL;
 
 Logger::Logger()

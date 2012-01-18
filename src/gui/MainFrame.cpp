@@ -1459,6 +1459,16 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onUseGeometryShader( wxCommandEvent& event )
+{
+    m_pDatasetHelper->m_useFibersGeometryShader = !m_pDatasetHelper->m_useFibersGeometryShader;
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 {
     Fibers* l_fibers = NULL; // Initalize it quiet compiler.
@@ -1806,6 +1816,8 @@ void MainFrame::deleteListItem()
 
 void MainFrame::onSelectListItem( wxListEvent& event )
 {
+    Logger::getInstance()->printDebug( _T( "event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
+
     int l_item = event.GetIndex();
     m_pTreeWidget->UnselectAll();
     DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;

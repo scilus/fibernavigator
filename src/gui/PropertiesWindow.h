@@ -146,6 +146,9 @@ public:
     void OnSliderAxisMoved                  ( wxCommandEvent& event );
     void OnRecalcMainDir                    ( wxCommandEvent& event );
 
+    void OnToggleCrossingFibers             ( wxEvent& event );
+    void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );
+
     MainFrame *m_mainFrame;
 
 private:

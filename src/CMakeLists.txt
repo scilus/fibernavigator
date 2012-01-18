@@ -100,6 +100,19 @@ if (WIN32)
             )
 ENDIF (WIN32)
 
+# Disables all geometry shader support from code when OpenGL version does not support it
+# Presented as an advanced option to the user.
+
+OPTION(USE_GEOMETRY_SHADERS "Compile and use geometry shaders" ON)
+
+IF(USE_GEOMETRY_SHADERS)
+    ADD_DEFINITIONS( -D_COMPILE_GEO_SHADERS=1 )
+ELSE(USE_GEOMETRY_SHADERS)
+    ADD_DEFINITIONS( -D_COMPILE_GEO_SHADERS=0 )
+ENDIF(USE_GEOMETRY_SHADERS)
+
+MARK_AS_ADVANCED( USE_GEOMETRY_SHADERS )
+
 #hiding this for now
 MARK_AS_ADVANCED( wxWidgets_wxrc_EXECUTABLE )
 MARK_AS_ADVANCED( wxWidgets_USE_DEBUG )

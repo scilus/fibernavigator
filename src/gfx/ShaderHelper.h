@@ -29,6 +29,7 @@ public:
     ShaderProgram m_meshShader;
     ShaderProgram m_fibersShader;
     ShaderProgram m_fakeTubesShader;
+    ShaderProgram m_crossingFibersShader;
     ShaderProgram m_splineSurfShader;
     ShaderProgram m_vectorShader;
     ShaderProgram m_legendShader;

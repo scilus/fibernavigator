@@ -15,7 +15,7 @@
 class ShaderProgram
 {
 public:
-    ShaderProgram( wxString name, bool useGeometryShader = false );
+    ShaderProgram( wxString name, bool useGeometryShader = false, bool geometryShadersSupported = false );
     ~ShaderProgram();
 
     // Loads the various shaders from their respective files
@@ -39,6 +39,7 @@ public:
     void setAttribFloat   ( const GLchar* pName, const GLfloat value );
     void setUniMatrix3f   ( const GLchar* pName, const FMatrix &values );
     void setUniSampler    ( const GLchar* pName, const GLint value );
+    void setUniBool       ( const GLchar* pName, const bool value );
     
 private:
     void printCompilerLog( GLuint shaderId );
@@ -47,9 +48,12 @@ private:
     GLuint m_id;
     wxString  m_name;
     Shader *m_pVertex;
+#if _COMPILE_GEO_SHADERS
     Shader *m_pGeometry;
+#endif
     Shader *m_pFragment;
     bool m_useGeometry;
+    bool m_geometrySupported;
     std::ostringstream m_oss;
 };
 

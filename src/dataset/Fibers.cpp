@@ -31,7 +31,13 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_normalsPositive( false ),
       m_cachedThreshold( 0.0f ),
       m_pKdTree( NULL ),
-      m_pOctree( NULL )
+      m_pOctree( NULL ),
+      m_cfDrawDirty( true ),
+      m_axialShown( pDatasetHelper->m_showAxial ),
+      m_coronalShown( pDatasetHelper->m_showCoronal ),
+      m_sagittalShown( pDatasetHelper->m_showSagittal ),
+      m_useCrossingFibers( false ),
+      m_thickness( 2.5f )
 {
     m_bufferObjects         = new GLuint[3];
 }
@@ -2398,7 +2404,7 @@ void Fibers::updateLinesShown()
 
     for( int i = 0; i < m_countLines; ++i )
     {
-        m_selected[i] = 1;
+        m_selected[i] = true;
     }
 
     int activeCount = 0;
@@ -2787,6 +2793,8 @@ void Fibers::initializeBuffer()
 
 void Fibers::draw()
 {
+    setShader();
+
     if( m_cachedThreshold != m_threshold )
     {
         updateFibersColors();
@@ -2809,6 +2817,14 @@ void Fibers::draw()
         glDepthMask( GL_FALSE );
         drawSortedLines();
         glPopAttrib();
+        return;
+    }
+
+    // If geometry shaders are supported, the shader will take care of the filtering
+    // Otherwise, use the drawCrossingFibers
+    if ( !m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    {
+        drawCrossingFibers();
         return;
     }
 
@@ -2862,6 +2878,8 @@ void Fibers::draw()
     glDisableClientState( GL_VERTEX_ARRAY );
     glDisableClientState( GL_COLOR_ARRAY );
     glDisableClientState( GL_NORMAL_ARRAY );
+
+    releaseShader();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2910,25 +2928,53 @@ void Fibers::drawFakeTubes()
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     }
 
-    for( int i = 0; i < m_countLines; ++i )
+    if ( m_useCrossingFibers )
     {
-        if( m_selected[i] && !m_filtered[i] )
+        findCrossingFibers();
+
+        for( unsigned int i = 0; i < m_cfStartOfLine.size(); ++i )
         {
-            int idx = getStartIndexForLine( i ) * 3;
-            glBegin( GL_QUAD_STRIP );
-
-            for( int k = 0; k < getPointsPerLine( i ); ++k )
+            if ( 3 < m_cfPointsPerLine[i] )
             {
-                glNormal3f( pNormals[idx], pNormals[idx + 1], pNormals[idx + 2] );
-                glColor3f( pColors[idx],  pColors[idx + 1],  pColors[idx + 2] );
-                glTexCoord2f( -1.0f, 0.0f );
-                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
-                glTexCoord2f( 1.0f, 0.0f );
-                glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
-                idx += 3;
-            }
+                int index = m_cfStartOfLine[i] * 3;
+                glBegin( GL_QUAD_STRIP );
 
-            glEnd();
+                for( unsigned int k = 0; k < m_cfPointsPerLine[i]; ++k, index += 3 )
+                {
+                    glNormal3f( m_normalArray[index], m_normalArray[index + 1], m_normalArray[index + 2] );
+                    glColor3f( m_colorArray[index],  m_colorArray[index + 1],  m_colorArray[index + 2] );
+                    glTexCoord2f( -1.0f, 0.0f );
+                    glVertex3f( m_pointArray[index], m_pointArray[index + 1], m_pointArray[index + 2] );
+                    glTexCoord2f( 1.0f, 0.0f );
+                    glVertex3f( m_pointArray[index], m_pointArray[index + 1], m_pointArray[index + 2] );
+                }
+
+                glEnd();
+            }
+        }
+    }
+    else
+    {
+        for( int i = 0; i < m_countLines; ++i )
+        {
+            if( m_selected[i] && !m_filtered[i] )
+            {
+                int idx = getStartIndexForLine( i ) * 3;
+                glBegin( GL_QUAD_STRIP );
+
+                for( int k = 0; k < getPointsPerLine( i ); ++k )
+                {
+                    glNormal3f( pNormals[idx], pNormals[idx + 1], pNormals[idx + 2] );
+                    glColor3f( pColors[idx],  pColors[idx + 1],  pColors[idx + 2] );
+                    glTexCoord2f( -1.0f, 0.0f );
+                    glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                    glTexCoord2f( 1.0f, 0.0f );
+                    glVertex3f( m_pointArray[idx], m_pointArray[idx + 1], m_pointArray[idx + 2] );
+                    idx += 3;
+                }
+
+                glEnd();
+            }
         }
     }
 }
@@ -3066,6 +3112,62 @@ void Fibers::drawSortedLines()
     // FIXME: store these later on!
     delete[] pSnippletSort;
     delete[] pLineIds;
+}
+
+void Fibers::drawCrossingFibers()
+{
+    findCrossingFibers();
+
+    glEnableClientState( GL_VERTEX_ARRAY );
+    glEnableClientState( GL_COLOR_ARRAY );
+    glEnableClientState( GL_NORMAL_ARRAY );
+
+    if( ! m_dh->m_useVBO )
+    {
+        glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
+
+        if( m_showFS )
+        {
+            glColorPointer( 3, GL_FLOAT, 0, &m_colorArray[0] );  // Global colors.
+        }
+        else
+        {
+            glColorPointer( 3, GL_FLOAT, 0, &m_normalArray[0] ); // Local colors.
+        }
+
+        glNormalPointer( GL_FLOAT, 0, &m_normalArray[0] );
+    }
+    else
+    {
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+        glVertexPointer( 3, GL_FLOAT, 0, 0 );
+
+        if( m_showFS )
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
+        }
+        else
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
+        }
+
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
+        glNormalPointer( GL_FLOAT, 0, 0 );
+    }
+
+    for( unsigned int i = 0; i < m_cfStartOfLine.size(); ++i )
+    {
+        if ( 1 < m_cfPointsPerLine[i] )
+        {
+            glDrawArrays( GL_LINE_STRIP, m_cfStartOfLine[i], m_cfPointsPerLine[i] );
+        }
+    }
+
+    glDisableClientState( GL_VERTEX_ARRAY );
+    glDisableClientState( GL_COLOR_ARRAY );
+    glDisableClientState( GL_NORMAL_ARRAY );
 }
 
 void Fibers::switchNormals( bool positive )
@@ -3247,6 +3349,7 @@ bool Fibers::getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints 
 
 void Fibers::updateFibersFilters()
 {
+    m_cfDrawDirty = true;
     int min = m_pSliderFibersFilterMin->GetValue();
     int max = m_pSliderFibersFilterMax->GetValue();
     int subSampling = m_pSliderFibersSampling->GetValue();
@@ -3345,6 +3448,13 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Thickness" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
+    m_pSliderCrossingFibersThickness = new wxSlider( pParent, wxID_ANY, m_thickness * 4, 1, 20, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    pSizer->Add( m_pSliderCrossingFibersThickness, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pSliderCrossingFibersThickness->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 140, -1 ) );
@@ -3359,11 +3469,17 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overlay" ), wxDefaultPosition, wxSize( 140, -1 ) );
     pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
-    
+
+    pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pToggleCrossingFibers = new wxToggleButton( pParent, wxID_ANY, wxT( "Intersected Fibers" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    pSizer->Add( m_pToggleCrossingFibers, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pParent->Connect( m_pToggleCrossingFibers->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleCrossingFibers ) );
+
     m_propertiesSizer->AddSpacer( 8 );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -3409,12 +3525,192 @@ void Fibers::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
     m_ptoggleFiltering->Enable( false );
     m_ptoggleFiltering->SetValue( false );
+    m_pToggleCrossingFibers->Enable( true );
     m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
     m_psliderOpacity->Enable( false );
+    m_pSliderCrossingFibersThickness->Enable( m_useCrossingFibers );
     m_pToggleNormalColoring->SetValue( !getShowFS() );
     m_pRadioNormalColoring->Enable( getShowFS() );
     m_pRadioCurvature->Enable( getShowFS() );
     m_pRadioDistanceAnchoring->Enable( getShowFS() );
     m_pRadioMinDistanceAnchoring->Enable( getShowFS() );
     m_pRadioTorsion->Enable( getShowFS() );
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Fibers::updateCrossingFibersThickness() 
+{
+    if ( NULL != m_pSliderCrossingFibersThickness )
+    {
+        m_thickness = m_pSliderCrossingFibersThickness->GetValue() * 0.25f; 
+        m_cfDrawDirty = true;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Fibers::findCrossingFibers() 
+{
+    if (   m_cfDrawDirty
+        || m_xDrawn != m_dh->m_xSlize
+        || m_yDrawn != m_dh->m_ySlize
+        || m_zDrawn != m_dh->m_zSlize
+        || m_axialShown != m_dh->m_showAxial
+        || m_coronalShown != m_dh->m_showCoronal
+        || m_sagittalShown != m_dh->m_showSagittal )
+    {
+        m_xDrawn = m_dh->m_xSlize;
+        m_yDrawn = m_dh->m_ySlize;
+        m_zDrawn = m_dh->m_zSlize;
+        m_axialShown = m_dh->m_showAxial;
+        m_coronalShown = m_dh->m_showCoronal;
+        m_sagittalShown = m_dh->m_showSagittal;
+
+        m_cfDrawDirty = true;
+
+        // Determine X, Y and Z range
+        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
+        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
+        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
+        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
+        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
+        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+
+        bool lineStarted(false);
+
+        m_cfStartOfLine.clear();
+        m_cfPointsPerLine.clear();
+
+        unsigned int index( 0 );
+        unsigned int point( 0 );
+        for ( unsigned int line( 0 ); line < m_countLines; ++line )
+        {
+            if ( m_selected[line] && !m_filtered[line] )
+            {
+                for ( unsigned int i( 0 ); i < getPointsPerLine(line); ++i, ++point, index += 3 )
+                {
+                    if ( m_sagittalShown && xMin <= m_pointArray[index] && xMax >= m_pointArray[index] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else if ( m_coronalShown && yMin <= m_pointArray[index + 1] && yMax >= m_pointArray[index + 1] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else if ( m_axialShown && zMin <= m_pointArray[index + 2] && zMax >= m_pointArray[index + 2] )
+                    {
+                        if ( !lineStarted )
+                        {
+                            m_cfStartOfLine.push_back(point);
+                            m_cfPointsPerLine.push_back(0);
+                            lineStarted = true;
+                        }
+                        ++m_cfPointsPerLine.back();
+                    }
+                    else
+                    {
+                        lineStarted = false;
+                    }
+                }
+                lineStarted = false;
+            }
+            else
+            {
+                point += getPointsPerLine(line);
+                index += getPointsPerLine(line) * 3;
+            }
+        }
+    }
+}
+
+void Fibers::setShader()
+{
+    DatasetInfo *pDsInfo = (DatasetInfo*) this;
+
+    if( m_dh->m_useFakeTubes )
+    {
+
+    }
+    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    {
+        // Determine X, Y and Z range
+        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
+        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
+        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
+        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
+        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
+        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+
+        m_dh->m_shaderHelper->m_crossingFibersShader.bind();
+
+		if (m_dh->m_showSagittal)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", xMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", xMax);
+		}
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", 0);
+		}
+		
+		if (m_dh->m_showCoronal)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", yMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", yMax);
+        }
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", 0);
+        }
+
+		if (m_dh->m_showAxial)
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", zMin);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", zMax);
+		}
+		else
+		{
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", 0);
+			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", 0);
+        }
+    }
+    else if ( !m_useTex )
+    {
+        m_dh->m_shaderHelper->m_fibersShader.bind();
+        m_dh->m_shaderHelper->setFiberShaderVars();
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_dh->m_colorMap );
+        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
+    }
+}
+
+void Fibers::releaseShader()
+{
+    if( m_dh->m_useFakeTubes )
+    {
+        m_dh->m_shaderHelper->m_fakeTubesShader.release();
+    }
+    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    {
+        m_dh->m_shaderHelper->m_crossingFibersShader.release();
+    }
+    else if( !m_useTex )
+    {
+        m_dh->m_shaderHelper->m_fibersShader.release();
+    }
 }

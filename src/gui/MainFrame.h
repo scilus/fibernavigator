@@ -89,6 +89,7 @@ private:
     void onUseFakeTubes                     ( wxCommandEvent& event );
     void onResetColor                       ( wxCommandEvent& event );
     void onUseTransparency                  ( wxCommandEvent& event );
+    void onUseGeometryShader                ( wxCommandEvent& event );
     // surface menu
     void onNewSplineSurface                 ( wxCommandEvent& event );
     void onMoveBoundaryPointsLeft           ( wxCommandEvent& event );

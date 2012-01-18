@@ -94,7 +94,6 @@ public:
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
 
-
     GLuint  getGLuint( )
     {
         return 0;
@@ -119,6 +118,9 @@ public:
     void    generateGeometry() {};
     void    smooth()           {};
 
+    void    toggleCrossingFibers() { m_useCrossingFibers = !m_useCrossingFibers; }
+    void    updateCrossingFibersThickness();
+
 private:
     void            colorWithTorsion(     float *pColorData );
     void            colorWithCurvature(   float *pColorData );
@@ -139,10 +141,15 @@ private:
 
     void            drawFakeTubes();
     void            drawSortedLines();
+    void            drawCrossingFibers();
 
     void            freeArrays();
 
     bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
+    void            findCrossingFibers();
+    
+    void            setShader();
+    void            releaseShader();
 
     // Variables
     bool            m_isSpecialFiberDisplay;
@@ -158,6 +165,7 @@ private:
     vector< int >   m_linePointers;
     vector< float > m_pointArray;
     vector< float > m_normalArray;
+    
     bool            m_normalsPositive;
     vector< int >   m_reverse;
     vector< bool >  m_selected;
@@ -170,14 +178,29 @@ private:
 
     KdTree          *m_pKdTree;
     Octree          *m_pOctree;
-    
+
+    bool            m_cfDrawDirty;
+    bool            m_axialShown;
+    bool            m_coronalShown;
+    bool            m_sagittalShown;
+    bool            m_useCrossingFibers;
+    float           m_thickness;
+    float           m_xDrawn;
+    float           m_yDrawn;
+    float           m_zDrawn;
+    vector<unsigned int> m_cfStartOfLine;
+    vector<unsigned int> m_cfPointsPerLine;
+
+
     // GUI members
     wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
+    wxSlider       *m_pSliderCrossingFibersThickness;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
+    wxToggleButton *m_pToggleCrossingFibers;
     wxRadioButton  *m_pRadioNormalColoring;
     wxRadioButton  *m_pRadioDistanceAnchoring;
     wxRadioButton  *m_pRadioMinDistanceAnchoring;

@@ -75,6 +75,7 @@ MenuBar::MenuBar()
     m_itemToogleInvertFibersSelection = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Inverse Fibers Selection"));
     m_itemToggleUseFakeTubes = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Fake Tubes"));
     m_itemToggleUseTransparency = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Transparent Fibers"));
+	m_itemToggleUseGeometryShader = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Geometry Shader"));
  
     m_menuSurface = new wxMenu();
     m_itemNewSplineSurface = m_menuSurface->Append(wxID_ANY, wxT("New Spline Surface"));
@@ -208,19 +209,20 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemMoveBoundaryPointLeft->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMoveBoundaryPointsLeft));
     mf->Connect(m_itemMoveBoundaryPointRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMoveBoundaryPointsRight));
     mf->Connect(m_itemToggleUseTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseTransparency));
-	mf->Connect(m_itemToggleDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSwitchDrawer));
-	mf->Connect(m_itemToggleDrawRound->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawRound));
-	mf->Connect(m_itemToggleDraw3d->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDraw3d));
-	mf->Connect(m_itemDrawColorPicker->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectColorPicker));
-	mf->Connect(m_itemDrawS1->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke1));
-	mf->Connect(m_itemDrawS2->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke2));
-	mf->Connect(m_itemDrawS3->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke3));
-	mf->Connect(m_itemDrawS4->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke4));
-	mf->Connect(m_itemDrawS5->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke5));
-	mf->Connect(m_itemDrawS7->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke7));
-	mf->Connect(m_itemDrawS10->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke10));
-	mf->Connect(m_itemDrawPen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectPen));
-	mf->Connect(m_itemDrawEraser->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectEraser));
+    mf->Connect(m_itemToggleUseGeometryShader->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseGeometryShader));
+    mf->Connect(m_itemToggleDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSwitchDrawer));
+    mf->Connect(m_itemToggleDrawRound->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawRound));
+    mf->Connect(m_itemToggleDraw3d->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDraw3d));
+    mf->Connect(m_itemDrawColorPicker->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectColorPicker));
+    mf->Connect(m_itemDrawS1->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke1));
+    mf->Connect(m_itemDrawS2->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke2));
+    mf->Connect(m_itemDrawS3->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke3));
+    mf->Connect(m_itemDrawS4->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke4));
+    mf->Connect(m_itemDrawS5->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke5));
+    mf->Connect(m_itemDrawS7->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke7));
+    mf->Connect(m_itemDrawS10->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectStroke10));
+    mf->Connect(m_itemDrawPen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectPen));
+    mf->Connect(m_itemDrawEraser->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectEraser));
     mf->Connect(m_itemGray->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetCMapNo));
     mf->Connect(m_itemBlueGreenPurple->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetCMap0));
     mf->Connect(m_itemRainbow->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetCMap1));
@@ -236,8 +238,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemRotateZ->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateZ));
     mf->Connect(m_itemRotateY->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateY));
     mf->Connect(m_itemRotateX->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateX));
-   
-    
+
 }
 
 void MenuBar::updateMenuBar( MainFrame *mf )
@@ -249,6 +250,12 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToogleInvertFibersSelection->Check(mf->m_pDatasetHelper->m_fibersInverted);
     m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
     m_itemToggleUseTransparency->Check(mf->m_pDatasetHelper->m_useTransparency);
+    m_itemToggleUseGeometryShader->Check(mf->m_pDatasetHelper->m_useFibersGeometryShader);
+#if _COMPILE_GEO_SHADERS
+    m_itemToggleUseGeometryShader->Enable(mf->m_pDatasetHelper->m_geometryShadersSupported);
+#else
+    m_itemToggleUseGeometryShader->Enable(false);
+#endif
     m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
     m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
     m_itemToggleShowCrosshair->Check(mf->m_pDatasetHelper->m_showCrosshair);
@@ -280,5 +287,4 @@ void MenuBar::updateMenuBar( MainFrame *mf )
                                    mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN );
     
     m_itemNewSplineSurface->Enable(mf->m_pDatasetHelper->m_anatomyLoaded && !mf->m_pDatasetHelper->m_surfaceLoaded);
-    
 }

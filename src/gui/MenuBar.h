@@ -72,6 +72,7 @@ public:
         wxMenuItem  *m_itemToggleUseTransparency;
         wxMenuItem  *m_itemToogleInvertFibersSelection;
         wxMenuItem  *m_itemToggleUseFakeTubes;
+        wxMenuItem  *m_itemToggleUseGeometryShader;
 
     wxMenu      *m_menuSurface;
         wxMenuItem  *m_itemNewSplineSurface;

@@ -14,11 +14,12 @@
 
 #include "../Logger.h"
 
-ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool useGeometryShaders ) :
-    m_anatomyShader( wxT( "anatomy" )/*, useGeometryShaders ? true : false*/ ),
+ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) :
+    m_anatomyShader( wxT( "anatomy" )/*, geometryShadersSupported ? true : false*/ ),
     m_meshShader( wxT( "mesh" ) ),
     m_fibersShader( wxT( "fibers" ) ),
     m_fakeTubesShader( wxT( "fake-tubes") ),
+    m_crossingFibersShader( wxT( "crossing_fibers" ), true, geometryShadersSupported ),
     m_splineSurfShader( wxT( "splineSurf" ) ),
     m_vectorShader( wxT( "vectors" ) ),
     m_legendShader( wxT( "legend" ) ),
@@ -74,6 +75,29 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool useGeometryShaders ) :
     else
     {
         Logger::getInstance()->printDebug( _T( "Could not initialize fake Tubes shader." ), LOGLEVEL_ERROR );
+    }
+
+    if ( geometryShadersSupported )
+    {
+        Logger::getInstance()->printDebug( _T( "Initializing crossing fibers shader..." ), LOGLEVEL_MESSAGE );
+        
+		glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_INPUT_TYPE_EXT, GL_LINES );
+        glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_LINE_STRIP );
+        glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_VERTICES_OUT_EXT, 50 );
+        
+		if( m_crossingFibersShader.load() && m_crossingFibersShader.compileAndLink() )
+        {
+            m_crossingFibersShader.bind();
+            Logger::getInstance()->printDebug( _T( "Crossing fibers shader initialized." ), LOGLEVEL_MESSAGE );
+        }
+        else
+        {
+            Logger::getInstance()->printDebug( _T( "Could not initialize crossing fibers shader." ), LOGLEVEL_ERROR );
+        }
+    }
+    else
+    {
+        Logger::getInstance()->printDebug( _T( "Geometry shaders are not supported. Cannot load crossing fibers shader." ), LOGLEVEL_WARNING );
     }
 
     Logger::getInstance()->printDebug( _T( "Initializing spline surf shader..." ), LOGLEVEL_MESSAGE );

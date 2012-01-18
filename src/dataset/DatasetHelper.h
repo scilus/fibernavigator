@@ -245,6 +245,7 @@ public:
     bool  m_geometryShadersSupported;
     bool  m_clearToBlack;
     bool  m_useTransparency;
+    bool  m_useFibersGeometryShader;
     bool  m_filterIsoSurf;
     int   m_colorMap;
     bool  m_showColorMapLegend;
