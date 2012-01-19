@@ -2429,10 +2429,7 @@ void Fibers::updateLinesShown()
 {
     vector< vector< SelectionObject * > > selectionObjects = m_dh->getSelectionObjects();
 
-    for( int i = 0; i < m_countLines; ++i )
-    {
-        m_selected[i] = true;
-    }
+    m_selected.assign( m_countLines, true );
 
     int activeCount = 0;
 
@@ -2472,7 +2469,6 @@ void Fibers::updateLinesShown()
 
                 // Sets the fibers that are inside this object to true in the m_inBox vector.
                 selectionObjects[i][0]->m_inBox = getLinesShown( selectionObjects[i][0] );
-                selectionObjects[i][0]->setIsDirty( false );
             }
 
             for( int k = 0; k < m_countLines; ++k )
@@ -2492,7 +2488,6 @@ void Fibers::updateLinesShown()
                         
                         // Sets the fibers that are inside this object to true in the m_inBox vector.
                         selectionObjects[i][j]->m_inBox = getLinesShown( selectionObjects[i][j] );
-                        selectionObjects[i][j]->setIsDirty( false );
                     }
 
                     // Sets the fibers that are INSIDE this child object and INSIDE its master to be in branch.
@@ -3509,8 +3504,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overley" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overlay" ), wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overlay" ), wxDefaultPosition, wxSize( 145, -1 ) );
     pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
@@ -3750,7 +3744,11 @@ void Fibers::setShader()
 
     if( m_useFakeTubes )
     {
-
+        m_dh->m_shaderHelper->m_fakeTubesShader.bind();
+        m_dh->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", getShowFS() );
+        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().x );
+        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().y );
+        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
     }
     else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
     {

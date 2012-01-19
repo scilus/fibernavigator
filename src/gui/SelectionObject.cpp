@@ -66,9 +66,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     //Distance coloring
     m_DistColoring          = false;
 
-    m_inBox.resize( m_datasetHelper->m_countFibers, sizeof(bool) );
-    for( unsigned int i = 0; i < m_datasetHelper->m_countFibers ; ++i )
-        m_inBox[i] = false;
+    m_inBox.resize( m_datasetHelper->m_countFibers, false );
 }
 
 SelectionObject::~SelectionObject( )

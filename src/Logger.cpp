@@ -86,10 +86,7 @@ void Logger::printTime()
 
 void Logger::printwxT( const wxString str )
 {
-    char* pStr = (char*)malloc( str.length() + 1 );
-    strcpy( pStr, (const char*)str.mb_str( wxConvUTF8 ) );
-    printf( "%s", pStr );
-    free( pStr );
+    printf(str.char_str());
 }
 
 //////////////////////////////////////////////////////////////////////////

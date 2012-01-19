@@ -222,7 +222,7 @@ void TheScene::renderScene()
 	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
     }
 
-    //Navigate trhoug slices
+    //Navigate through slices
     if(m_isNavSagital) 
     {
 	    if (m_posSagital > m_pDatasetHelper->m_columns) 
@@ -600,27 +600,20 @@ void TheScene::renderFibers()
 			Fibers* pFibers = (Fibers*)pDsInfo;
 			if( pFibers != NULL )
 			{
+                if( m_pDatasetHelper->m_selBoxChanged )
+                {
+                    pFibers->updateLinesShown();
+                }
+
 				if( pFibers->isUsingFakeTubes() )
 				{
-					if( m_pDatasetHelper->m_selBoxChanged )
-					{
-						pFibers->updateLinesShown();
-					}
-					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.bind();
-					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", pDsInfo->getShowFS() );
-					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
-					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
-
 					pFibers->draw();
-					m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.release();
 
 					if( m_pDatasetHelper->GLError() )
 						m_pDatasetHelper->printGLError( wxT( "draw fake tubes" ) );
 				}
 				else // render normally
 				{
-
 					if( m_pDatasetHelper->m_lighting )
 					{
 						lightsOn();
@@ -630,19 +623,10 @@ void TheScene::renderFibers()
 					if( ! pFibers->getUseTex() )
 					{
 						bindTextures();
-						//m_pDatasetHelper->m_shaderHelper->m_fibersShader.bind();
-						//m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
-						//m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-						//m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-						//m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
 					}
-					if( m_pDatasetHelper->m_selBoxChanged )
-					{
-						pFibers->updateLinesShown();
-					}
+					
 					pFibers->draw();
 					lightsOff();
-					//m_pDatasetHelper->m_shaderHelper->m_fibersShader.release();
 					
 					if( m_pDatasetHelper->GLError() )
 					{
@@ -652,10 +636,18 @@ void TheScene::renderFibers()
 			}
 		}
 	}
-	if( m_pDatasetHelper->m_selBoxChanged )
-	{
-		m_pDatasetHelper->m_selBoxChanged = false;
-	}
+
+	m_pDatasetHelper->m_selBoxChanged = false;
+
+    vector< vector< SelectionObject * > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
+    for( vector< vector< SelectionObject *> >::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )
+    {
+        for( vector< SelectionObject *>::iterator itChild = itMaster->begin(); itChild != itMaster->end(); ++itChild )
+        {
+            (*itChild)->setIsDirty( false );
+        }
+    }
+
 	glPopAttrib();
 }
 

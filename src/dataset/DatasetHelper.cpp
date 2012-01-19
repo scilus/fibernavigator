@@ -1588,13 +1588,16 @@ bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
 
 	long selItem = m_mainFrame->m_pListCtrl->GetSelectedItem();
 
-    DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( selItem );
-    if( l_datasetInfo->getType() == FIBERS)
+    if (-1 != selItem)
     {
-        io_f = (Fibers*)l_datasetInfo;
-        return true;
+        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( selItem );
+        if( l_datasetInfo->getType() == FIBERS)
+        {
+            io_f = (Fibers*)l_datasetInfo;
+            return true;
+        }
+        return false;
     }
-    return false;
 }
 
 bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
