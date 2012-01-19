@@ -2460,7 +2460,9 @@ void Fibers::updateLinesShown()
     {
         if( selectionObjects[i][0]->getIsActive() )
         {
-            if( selectionObjects[i][0]->getIsDirty() )
+            // NOTE: this is currently commented while waiting for JF's
+            // refactoring and JC's selection branch.
+            //if( selectionObjects[i][0]->getIsDirty() )
             {
                 selectionObjects[i][0]->m_inBox.clear();
                 selectionObjects[i][0]->m_inBox.resize( m_countLines );
@@ -2481,7 +2483,9 @@ void Fibers::updateLinesShown()
             {
                 if( selectionObjects[i][j]->getIsActive() )
                 {
-                    if( selectionObjects[i][j]->getIsDirty() )
+                    // NOTE: this is currently commented while waiting for JF's
+                    // refactoring and JC's selection branch.                  
+                    //if( selectionObjects[i][j]->getIsDirty() )
                     {
                         selectionObjects[i][j]->m_inBox.clear();
                         selectionObjects[i][j]->m_inBox.resize( m_countLines );
