@@ -99,35 +99,6 @@ public:
      */
     void treeFinished();
 
-    /*
-     * Helper functions
-     */
-
-#ifndef __GNUC__
-    #pragma deprecated(printTime, printwxT, printDebug, printGLError)
-    
-    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
-    void printTime();
-    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
-    void printwxT  ( const wxString string );
-    // Deprecated: Use Log::printDebug instead.
-    void printDebug( const wxString string, const LogLevel level );
-#else
-    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
-    void printTime() __attribute__((deprecated));
-    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
-    void printwxT  ( const wxString string ) __attribute__((deprecated));
-    // Deprecated: Use Log::printDebug instead.
-    void printDebug( const wxString string, const LogLevel level ) __attribute__((deprecated));
-#endif
-
-    /*
-     * Check for GL error
-     */
-    bool GLError();
-    // Deprecated: Use Log::printGLError instead.
-    void printGLError( const wxString function = wxT( "" ) );
-
     void updateView( const float i_x, const float i_y, const float i_z );
 
     void changeZoom( const int i_z );
@@ -211,7 +182,6 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     Matrix4fT m_transform;
     bool      m_useVBO;
-    GLenum    m_lastGLError;
     int       m_quadrant;
     int       m_textures;
     //! if set the shaders will be reloaded during next render() call

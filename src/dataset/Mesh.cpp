@@ -1,9 +1,12 @@
 #include "Mesh.h"
 
-#include "wx/wfstream.h"
-#include "wx/datstrm.h"
-#include "../gui/MainFrame.h"
 #include "../main.h"
+#include "../Logger.h"
+#include "../gui/MainFrame.h"
+
+#include <wx/datstrm.h>
+#include <wx/wfstream.h>
+
 
 Mesh::Mesh(DatasetHelper* dh) : DatasetInfo(dh)
 {
@@ -29,7 +32,7 @@ bool Mesh::load( wxString i_filename )
 
 bool Mesh::loadDip( wxString filename )
 {
-    m_dh->printDebug( _T( "start loading DIP mesh file" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Loading DIP mesh file" ), LOGLEVEL_MESSAGE );
     wxTextFile file;
     wxString line;
     wxString numberString, xString, yString, zString;
@@ -124,7 +127,7 @@ bool Mesh::loadDip( wxString filename )
 
 bool Mesh::loadSurf(wxString filename)
 {
-    m_dh->printDebug( _T("start loading freesurfer mesh file"), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Loading freesurfer mesh file" ), LOGLEVEL_MESSAGE );
     wxFile dataFile;
     wxFileOffset nSize = 0;
     int pc = 3;

@@ -33,53 +33,53 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) 
     m_threshold.resize( 10 );
     m_alpha.resize( 10 );
 
-    Logger::getInstance()->printDebug( _T( "Initializing anatomy shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing anatomy shader..." ), LOGLEVEL_MESSAGE );
     if( m_anatomyShader.load() && m_anatomyShader.compileAndLink() )
     {
         m_anatomyShader.bind();
-        Logger::getInstance()->printDebug( _T( "Anatomy shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Anatomy shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize anatomy shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize anatomy shader." ), LOGLEVEL_ERROR );
     }
 
-    Logger::getInstance()->printDebug( _T( "Initializing mesh shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing mesh shader..." ), LOGLEVEL_MESSAGE );
     if( m_meshShader.load() && m_meshShader.compileAndLink() )
     {
         m_meshShader.bind();
-        Logger::getInstance()->printDebug( _T( "Mesh shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Mesh shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize mesh shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize mesh shader." ), LOGLEVEL_ERROR );
     }
 
-    Logger::getInstance()->printDebug( _T( "Initializing fibers shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing fibers shader..." ), LOGLEVEL_MESSAGE );
     if( m_fibersShader.load() && m_fibersShader.compileAndLink() )
     {
         m_fibersShader.bind();
-        Logger::getInstance()->printDebug( _T( "Fibers shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Fibers shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize fibers shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize fibers shader." ), LOGLEVEL_ERROR );
     }
 
-    Logger::getInstance()->printDebug( _T( "Initializing fake tubes shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing fake tubes shader..." ), LOGLEVEL_MESSAGE );
     if( m_fakeTubesShader.load() && m_fakeTubesShader.compileAndLink() )
     {
         m_fakeTubesShader.bind();
-        Logger::getInstance()->printDebug( _T( "Fake Tubes shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Fake Tubes shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize fake Tubes shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize fake Tubes shader." ), LOGLEVEL_ERROR );
     }
 
     if ( geometryShadersSupported )
     {
-        Logger::getInstance()->printDebug( _T( "Initializing crossing fibers shader..." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Initializing crossing fibers shader..." ), LOGLEVEL_MESSAGE );
         
 		glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_INPUT_TYPE_EXT, GL_LINES );
         glProgramParameteriEXT( m_crossingFibersShader.getId(), GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_LINE_STRIP );
@@ -88,82 +88,82 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) 
 		if( m_crossingFibersShader.load() && m_crossingFibersShader.compileAndLink() )
         {
             m_crossingFibersShader.bind();
-            Logger::getInstance()->printDebug( _T( "Crossing fibers shader initialized." ), LOGLEVEL_MESSAGE );
+            Logger::getInstance()->print( _T( "Crossing fibers shader initialized." ), LOGLEVEL_MESSAGE );
         }
         else
         {
-            Logger::getInstance()->printDebug( _T( "Could not initialize crossing fibers shader." ), LOGLEVEL_ERROR );
+            Logger::getInstance()->print( _T( "Could not initialize crossing fibers shader." ), LOGLEVEL_ERROR );
         }
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Geometry shaders are not supported. Cannot load crossing fibers shader." ), LOGLEVEL_WARNING );
+        Logger::getInstance()->print( _T( "Geometry shaders are not supported. Cannot load crossing fibers shader." ), LOGLEVEL_WARNING );
     }
 
-    Logger::getInstance()->printDebug( _T( "Initializing spline surf shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing spline surf shader..." ), LOGLEVEL_MESSAGE );
     if( m_splineSurfShader.load() && m_splineSurfShader.compileAndLink() )
     {
         m_splineSurfShader.bind();
-        Logger::getInstance()->printDebug( _T( "Spline surf shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Spline surf shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize spline surf shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize spline surf shader." ), LOGLEVEL_ERROR );
     }
 
-    //Logger::getInstance()->printDebug( _T( "Initializing vector shader..." ), LOGLEVEL_MESSAGE );
+    //Logger::getInstance()->print( _T( "Initializing vector shader..." ), LOGLEVEL_MESSAGE );
     //if( m_vectorShader.load() && m_vectorShader.compileAndLink() )
     //{
     //    m_vectorShader.bind();
-    //    Logger::getInstance()->printDebug( _T( "Vector shader initialized." ), LOGLEVEL_MESSAGE );
+    //    Logger::getInstance()->print( _T( "Vector shader initialized." ), LOGLEVEL_MESSAGE );
     //}
     //else
     //{
-    //    Logger::getInstance()->printDebug( _T( "Could not initialize vector shader." ), LOGLEVEL_ERROR );
+    //    Logger::getInstance()->print( _T( "Could not initialize vector shader." ), LOGLEVEL_ERROR );
     //}
 
-    Logger::getInstance()->printDebug( _T( "Initializing legend shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing legend shader..." ), LOGLEVEL_MESSAGE );
     if( m_legendShader.load() && m_legendShader.compileAndLink() )
     {
         m_legendShader.bind();
-        Logger::getInstance()->printDebug( _T( "Legend shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Legend shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize legend shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize legend shader." ), LOGLEVEL_ERROR );
     }
 
-    Logger::getInstance()->printDebug( _T( "Initializing graph shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing graph shader..." ), LOGLEVEL_MESSAGE );
     if( m_graphShader.load() && m_graphShader.compileAndLink() )
     {
         m_graphShader.bind();
-        Logger::getInstance()->printDebug( _T( "Graph shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Graph shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize graph shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize graph shader." ), LOGLEVEL_ERROR );
     }
 
-    Logger::getInstance()->printDebug( _T( "Initializing tensors shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing tensors shader..." ), LOGLEVEL_MESSAGE );
     if( m_tensorsShader.load() && m_tensorsShader.compileAndLink() )
     {
         m_tensorsShader.bind();
-        Logger::getInstance()->printDebug( _T( "Tensors shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Tensors shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize tensors shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize tensors shader." ), LOGLEVEL_ERROR );
     }
 
-    Logger::getInstance()->printDebug( _T( "Initializing odfs shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing odfs shader..." ), LOGLEVEL_MESSAGE );
     if( m_odfsShader.load() && m_odfsShader.compileAndLink() )
     {
         m_odfsShader.bind();
-        Logger::getInstance()->printDebug( _T( "Odfs shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "Odfs shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize odfs shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize odfs shader." ), LOGLEVEL_ERROR );
     }
 
 }

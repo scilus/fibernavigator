@@ -182,7 +182,7 @@ float FgeImageSpaceLIC::getTensorAdvectionScale() {
  */
 void FgeImageSpaceLIC::reloadShaders() {
 
-    Logger::getInstance()->printDebug( _T( "Reloading shaders..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Reloading shaders..." ), LOGLEVEL_MESSAGE );
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Transformation Shader
@@ -190,14 +190,14 @@ void FgeImageSpaceLIC::reloadShaders() {
 
     m_transformShader.release();
 
-    Logger::getInstance()->printDebug( _T( "Initializing LIC texture shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing LIC texture shader..." ), LOGLEVEL_MESSAGE );
     if( m_transformShader.load() && m_transformShader.compileAndLink() )
     {
-        Logger::getInstance()->printDebug( _T( "LIC texture shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "LIC texture shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize LIC texture shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize LIC texture shader." ), LOGLEVEL_ERROR );
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -206,14 +206,14 @@ void FgeImageSpaceLIC::reloadShaders() {
 
     m_edgeShader.release();
 
-    Logger::getInstance()->printDebug( _T( "Initializing LIC edge shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing LIC edge shader..." ), LOGLEVEL_MESSAGE );
     if( m_edgeShader.load() && m_edgeShader.compileAndLink() )
     {
-        Logger::getInstance()->printDebug( _T( "LIC edge shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "LIC edge shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize LIC edge shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize LIC edge shader." ), LOGLEVEL_ERROR );
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,14 +222,14 @@ void FgeImageSpaceLIC::reloadShaders() {
 
     m_advectionShader.release();
 
-    Logger::getInstance()->printDebug( _T( "Initializing LIC advection shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing LIC advection shader..." ), LOGLEVEL_MESSAGE );
     if( m_advectionShader.load() && m_advectionShader.compileAndLink() )
     {
-        Logger::getInstance()->printDebug( _T( "LIC advection shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "LIC advection shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize LIC advection shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize LIC advection shader." ), LOGLEVEL_ERROR );
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -238,17 +238,17 @@ void FgeImageSpaceLIC::reloadShaders() {
 
     m_clippingShader.release();
 
-    Logger::getInstance()->printDebug( _T( "Initializing LIC clipping shader..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Initializing LIC clipping shader..." ), LOGLEVEL_MESSAGE );
     if( m_clippingShader.load() && m_clippingShader.compileAndLink() )
     {
-        Logger::getInstance()->printDebug( _T( "LIC clipping shader initialized." ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( _T( "LIC clipping shader initialized." ), LOGLEVEL_MESSAGE );
     }
     else
     {
-        Logger::getInstance()->printDebug( _T( "Could not initialize LIC clipping shader." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Could not initialize LIC clipping shader." ), LOGLEVEL_ERROR );
     }
 
-    Logger::getInstance()->printDebug( _T( "Finished reloading shaders." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( _T( "Finished reloading shaders." ), LOGLEVEL_MESSAGE );
 }
 
 void FgeImageSpaceLIC::render(DatasetInfo *info) {

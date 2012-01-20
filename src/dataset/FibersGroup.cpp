@@ -16,6 +16,7 @@
 #include <wx/tokenzr.h>
 
 #include "Anatomy.h"
+#include "../Logger.h"
 #include "../main.h"
 
 FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
@@ -34,7 +35,7 @@ FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 
 FibersGroup::~FibersGroup()
 {
-    m_dh->printDebug( _T( "executing FibersGroup destructor" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "executing FibersGroup destructor" ), LOGLEVEL_MESSAGE );
 }
 
 string FibersGroup::intToString( const int number )

@@ -31,6 +31,8 @@
 #include "Surface.h"
 #include "../misc/nifti/nifti1_io.h"
 
+#include "../Logger.h"
+
 void out_of_memory() 
 {
     cerr << "Error : Out of memory! \n";
@@ -65,7 +67,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_surfaceIsDirty     ( true  ),
 
     m_useVBO( true ),
-    m_lastGLError( GL_NO_ERROR ),
     m_quadrant( 6 ),
     m_textures( 0 ),
 
@@ -172,7 +173,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
 DatasetHelper::~DatasetHelper()
 {
-    printDebug( _T( "execute dataset helper destructor" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Execute DatasetHelper destructor" ), LOGLEVEL_DEBUG );
 
     if ( m_theScene )
         delete m_theScene;
@@ -193,7 +194,7 @@ DatasetHelper::~DatasetHelper()
 	//if ( m_mainFrame )
 	//	delete m_mainFrame;
     
-    printDebug( _T( "dataset helper destructor done" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "DatasetHelper destructor done" ), LOGLEVEL_DEBUG );
 }
 
 bool DatasetHelper::load( const int i_index )
@@ -248,9 +249,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 		// check if i_fileName is valid
 		if( ! wxFile::Exists( i_fileName ) )
 		{
-			printf( "File " );
-			printwxT( i_fileName );
-			printf( " doesn't exist!\n" );
+            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), i_fileName ), LOGLEVEL_ERROR );
 			m_lastError = wxT( "File doesn't exist!" );
 			return false;
 		}
@@ -779,9 +778,9 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 				#ifdef __WXMAC__
 					pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(m_mainFrame->m_pListCtrl->GetItemCount() - 1);
 				#else
-					if(m_fibersGroupLoaded && !l_isfiberGroup)
+					if( m_fibersGroupLoaded && !l_isfiberGroup )
 					{
-						pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(1);
+						pDataset = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData(1);
 						if(!pDataset->getType() == FIBERS)
 						{
 							pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
@@ -1191,7 +1190,7 @@ void DatasetHelper::treeFinished()
     if ( m_threadsActive > 0 )
         return;
 
-    printDebug( _T( "tree finished" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
     m_fibersLoaded = true;
     updateAllSelectionObjects();
     m_selBoxChanged = true;
@@ -1282,17 +1281,6 @@ Vector DatasetHelper::mapMouse2WorldBack( const int i_x, const int i_y,GLdouble 
     return l_vector;
 }
 
-
-bool DatasetHelper::GLError()
-{
-    m_lastGLError = glGetError();
-
-    if( m_lastGLError == GL_NO_ERROR )
-        return false;
-
-    return true;
-}
-
 bool DatasetHelper::loadTextFile( wxString* i_string, const wxString i_fileName )
 {
     wxTextFile l_file;
@@ -1326,11 +1314,11 @@ void DatasetHelper::createIsoSurface()
 
     Anatomy* l_anatomy = (Anatomy*) l_info;
 
-    printDebug( _T( "start generating iso surface..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
     CIsoSurface* isosurf = new CIsoSurface( this, l_anatomy ); 
     isosurf->GenerateSurface( 0.4f );
 
-    printDebug( _T( "iso surface done" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Iso surface done" ), LOGLEVEL_MESSAGE );
 
     wxString l_anatomyName = l_anatomy->getName().BeforeFirst( '.' );
 
@@ -1354,7 +1342,7 @@ void DatasetHelper::createIsoSurface()
     }
     else
     {
-        printDebug( _T( "***ERROR*** surface is not valid" ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
     }
 
     updateLoadStatus();
@@ -1378,18 +1366,18 @@ void DatasetHelper::createDistanceMapAndIso()
 
     Anatomy* l_anatomy = (Anatomy*)l_info;
 
-    printDebug( _T( "start generating distance map..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
     Anatomy* l_newAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
 
-    printDebug( _T( "distance map done" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
 
-    printDebug( _T( "start generating iso surface..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
 
     CIsoSurface* isosurf = new CIsoSurface( this, l_newAnatomy );
     isosurf->GenerateSurface( 0.2f );
 
-    printDebug( _T( "iso surface done" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Iso surface done" ), LOGLEVEL_MESSAGE );
 
     wxString anatomyName = l_anatomy->getName().BeforeFirst( '.' );
 
@@ -1415,7 +1403,7 @@ void DatasetHelper::createDistanceMapAndIso()
     }
     else
     {
-        printDebug( _T( "***ERROR*** surface is not valid" ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
     }
 
     delete l_newAnatomy;
@@ -1440,11 +1428,11 @@ void DatasetHelper::createDistanceMap()
 
     Anatomy* l_anatomy = (Anatomy*)l_info;
 
-    printDebug( _T( "start generating distance map..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
     Anatomy* l_newAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
 
-    printDebug( _T( "distance map done" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
 
     
     l_newAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT("_DistMap"));
@@ -1596,8 +1584,8 @@ bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
             io_f = (Fibers*)l_datasetInfo;
             return true;
         }
-        return false;
     }
+    return false;
 }
 
 bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
@@ -1683,35 +1671,6 @@ TensorField* DatasetHelper::getTensorField()
     m_tensorsFieldLoaded = false;
     return NULL;
 }
-
-// Deprecated: Use Logger::printGLError instead.
-void DatasetHelper::printGLError( const wxString i_function )
-{    
-    Logger::getInstance()->printGLError( i_function, m_lastGLError );
-}
-
-// Deprecated: Should use Logger::printDebug(message, LOGLEVEL_MESSAGE) instead.
-void DatasetHelper::printTime()
-{    
-    wxDateTime l_dataTime = wxDateTime::Now();
-    printf( "[%02d:%02d:%02d] ", l_dataTime.GetHour(), l_dataTime.GetMinute(), l_dataTime.GetSecond() );
-}
-
-// Deprecated: Use Logger::printDebug(message, LOGLEVEL_MESSAGE) instead.
-void DatasetHelper::printwxT( const wxString i_string )
-{
-    char* l_cstring = (char*)malloc( i_string.length() + 1 );
-    strcpy( l_cstring, (const char*)i_string.mb_str( wxConvUTF8 ) );
-    printf( "%s", l_cstring );
-    free( l_cstring );
-}
-
-// Deprecated: Use Logger::printDebug instead.
-void DatasetHelper::printDebug( const wxString i_string, const LogLevel i_level )
-{
-    Logger::getInstance()->printDebug( i_string, i_level );
-}
-
 
 void DatasetHelper::updateLoadStatus()
 {

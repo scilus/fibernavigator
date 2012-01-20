@@ -29,13 +29,13 @@ Shader::Shader( wxString filename, SHADERTYPE type )
         m_id = glCreateShader( GL_FRAGMENT_SHADER );
         break;
     default:
-        Logger::getInstance()->printDebug( _T( "Shader type not supported." ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( _T( "Shader type not supported." ), LOGLEVEL_ERROR );
     }
 
     if( 0 == m_id )
     {
         m_oss << "Failed to create shader " << m_filename.char_str() << ".";
-        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_GLERROR );
+        Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_GLERROR );
         m_oss.str( "" );
     }
 }
@@ -45,7 +45,7 @@ Shader::Shader( wxString filename, SHADERTYPE type )
 bool Shader::load()
 {
     m_oss << "Shader " << m_filename.char_str() << " starting to load...";
-    Logger::getInstance()->printDebug(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print(wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
     m_oss.str( "" );
 
     if( 0 != m_id )
@@ -55,19 +55,19 @@ bool Shader::load()
             if( loadFromFile( &m_code, m_filename ) )
             {
                 m_oss << "Shader " << m_filename.char_str() << " finished loading.";
-                Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+                Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
                 m_oss.str( "" );
                 return true;
             }
 
             m_oss << "Could not load file " << m_filename.char_str();
-            Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
+            Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
             m_oss.str( "" );
             return false;
         }
 
         m_oss << "File " << m_filename.char_str() << " not found.";
-        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_WARNING );
+        Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_WARNING );
         m_oss.str( "" );
         return false;
     }
@@ -83,7 +83,7 @@ bool Shader::compile()
         GLuint *pId = &m_id;
 
         m_oss << "Shader " << m_filename.char_str() << " starting to compile...";
-        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
 
         char *pTemp;
@@ -97,7 +97,7 @@ bool Shader::compile()
         glGetShaderiv( *pId, GL_COMPILE_STATUS, &compiled );
 
         m_oss << "Shader " << m_filename.char_str() << " finished compiling.";
-        Logger::getInstance()->printDebug( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
 
         free( pTemp );

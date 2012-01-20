@@ -16,6 +16,7 @@
 #include <math.h>
 #include <fstream> 
 
+#include "../Logger.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/Fantom/FMatrix.h"
 
@@ -872,9 +873,8 @@ void ODFs::loadRadiusBuffer( AxisType i_axis )
                   GL_DYNAMIC_DRAW );
 
     // There was a problem loading this buffer into video memory!
-    if( DatasetInfo::m_dh->GLError() )
+    if( Logger::getInstance()->printIfGLError( wxT( "Initialize vbo points for tensors" ) ) )
     {
-        DatasetInfo::m_dh->printGLError( wxT( "initialize vbo points for tensors" ) );
         m_datasetHelper.m_useVBO = false;
         delete [] m_radiusBuffer;
     }

@@ -152,7 +152,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     /*
      * Set OpenGL attributes
      */
-    m_pDatasetHelper->printDebug( _T( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
     GLboolean doubleBuffer = GL_TRUE;
 #ifdef __WXMSW__
     int *gl_attrib = NULL;
@@ -168,7 +168,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 #endif
     if( ! doubleBuffer )
     {
-        m_pDatasetHelper->printDebug( _T( "don't have double buffer, disabling" ), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( wxT( "Do not have double buffer, disabling" ), LOGLEVEL_MESSAGE );
 #ifdef __WXGTK__
         gl_attrib[9] = None;
 #endif
@@ -276,8 +276,8 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 MainFrame::~MainFrame()
 {
     m_pTimer->Stop();
-    m_pDatasetHelper->printDebug( _T( "main frame destructor" ), LOGLEVEL_DEBUG );
-    m_pDatasetHelper->printDebug( _T( "timer stopped" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "MainFrame destructor" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Timer stopped" ), LOGLEVEL_DEBUG );
 	if (m_pTimer != NULL)
     {
         delete m_pTimer;
@@ -419,7 +419,7 @@ void MainFrame::onReloadShaders( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
 {
-    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSave"), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T("Event triggered - MainFrame::onSave"), LOGLEVEL_DEBUG );
 
     wxString caption         = wxT( "Choose a file" );
     wxString wildcard        = wxT( "Scene files (*.scn)|*.scn|*.*|*.*" );
@@ -445,7 +445,7 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 {
-    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSaveFibers"), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T("Event triggered - MainFrame::onSaveFibers"), LOGLEVEL_DEBUG );
 
     if( !m_pDatasetHelper->m_fibersLoaded )
     {
@@ -505,7 +505,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
 {
-    Logger::getInstance()->printDebug( _T("event triggered - MainFrame::onSaveDataset"), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T("Event triggered - MainFrame::onSaveDataset"), LOGLEVEL_DEBUG );
 
     if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
     {
@@ -1866,7 +1866,7 @@ void MainFrame::updateStatusBar()
 
 void MainFrame::onActivateListItem( wxListEvent& event )
 {
-    Logger::getInstance()->printDebug( _T( "event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
 
     int l_item = event.GetIndex();
     m_pTreeWidget->UnselectAll();
@@ -1960,7 +1960,7 @@ void MainFrame::deleteListItem()
 
 void MainFrame::onSelectListItem( wxListEvent& event )
 {
-    Logger::getInstance()->printDebug( _T( "event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
 
     int l_item = event.GetIndex();
     m_pTreeWidget->UnselectAll();
