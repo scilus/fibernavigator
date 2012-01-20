@@ -25,6 +25,7 @@ FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 	m_isMinMaxLengthToggled ( false ),
 	m_isSubsamplingToggled ( false ),
 	m_isColorModeToggled ( false ),
+	m_isCrossingFibersToggled( false ),
 	m_isNormalColoringStateChanged ( false ),
 	m_isLocalColoringStateChanged ( false )
 {
@@ -287,6 +288,13 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
     pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+	
+	pSizer = new wxBoxSizer( wxHORIZONTAL );
+	m_pSliderThickness = new wxSlider( pParent, wxID_ANY, 10, 1, 20, wxDefaultPosition, wxSize( 145, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pThicknessText = new wxStaticText( pParent, wxID_ANY , wxT( "Thickness" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
+	pSizer->Add( m_pThicknessText , 0, wxALIGN_CENTER );
+    pSizer->Add( m_pSliderThickness, 0, wxALIGN_CENTER );
+    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
 
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     m_pToggleLocalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Local Coloring" ), wxDefaultPosition, wxSize( 145, -1 ) );
@@ -371,6 +379,12 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pSizer->Add(m_ptoggleSubsampling,0,wxALIGN_LEFT);
 	m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
 	pParent->Connect( m_ptoggleSubsampling->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleSubsamplingBtn ) );
+	
+	m_pToggleCrossingFibers = new wxToggleButton(pParent, wxID_ANY, wxT("Intersected Fibers"),wxDefaultPosition, wxSize(145,-1));
+	pSizer = new wxBoxSizer(wxHORIZONTAL);
+    pSizer->Add(m_pToggleCrossingFibers,0,wxALIGN_LEFT);
+	m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+	pParent->Connect( m_pToggleCrossingFibers->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleCrossingFibersBtn ) );
 
 	m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 145, -1 ) );
 	pSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -589,6 +603,26 @@ void FibersGroup::OnToggleSubsamplingBtn()
 	m_ptoggleColorMode->Disable();	
 }
 
+void FibersGroup::OnToggleCrossingFibersBtn()
+{
+	m_isCrossingFibersToggled = true;
+	
+	// Show crossing fibers controls
+	m_pThicknessText->Show();
+	m_pSliderThickness->Show();
+	m_pApplyBtn->Show();
+	m_pCancelBtn->Show();
+	
+	// Disable other toggleButtons
+	m_pToggleCrossingFibers->Hide();
+	m_ptoggleSubsampling->Disable();
+	m_ptoggleOpacity->Disable();
+	m_ptoggleIntensity->Disable();
+	m_ptoggleMinMaxLength->Disable();
+	m_pGeneratesFibersDensityVolume->Disable();
+	m_ptoggleColorMode->Disable();	
+}
+
 void FibersGroup::OnToggleColorModeBtn()
 {
 	m_isColorModeToggled = true;
@@ -637,6 +671,7 @@ void FibersGroup::updateGroupFilters()
     int max = m_pSliderFibersFilterMax->GetValue();
     int subSampling = m_pSliderFibersSampling->GetValue();
     int maxSubSampling = m_pSliderFibersSampling->GetMax() + 1;
+	int thickness = m_pSliderThickness->GetValue();
 
 	for(int j = 0; j < (int)m_fibersSets.size(); j++)
 	{
@@ -646,6 +681,7 @@ void FibersGroup::updateGroupFilters()
 		m_fibersSets[j]->updateSliderMinLength( minLength );
 		m_fibersSets[j]->updateSliderMaxLength( maxLength );
 		m_fibersSets[j]->updateSliderSubsampling( subSampling );
+		m_fibersSets[j]->updateSliderThickness( thickness );
 	}
 }
 
@@ -763,9 +799,17 @@ void FibersGroup::OnClickApplyBtn()
 	{
 		updateGroupFilters();
 	}
+	if( m_isCrossingFibersToggled )
+	{
+		for(int i = 0; i < (int)m_fibersSets.size(); i++)
+		{
+			m_fibersSets[i]->updateSliderThickness( m_pSliderThickness->GetValue());
+			m_fibersSets[i]->updateCrossingFibersThickness();
+			m_fibersSets[i]->toggleCrossingFibers();
+		}
+	}
 	if( m_isColorModeToggled )
 	{
-
 		FibersColorationMode colorationMode = NORMAL_COLOR;
 		if( m_pRadioNormalColoring->GetValue() )
 		{
@@ -811,6 +855,7 @@ void FibersGroup::OnClickApplyBtn()
 	m_isOpacityToggled = false;
 	m_isMinMaxLengthToggled = false;
 	m_isSubsamplingToggled = false;
+	m_isCrossingFibersToggled = false;
 	m_isColorModeToggled = false;
 }
 
@@ -833,6 +878,7 @@ void FibersGroup::OnClickCancelBtn()
 	m_isOpacityToggled = false;
 	m_isMinMaxLengthToggled = false;
 	m_isSubsamplingToggled = false;
+	m_isCrossingFibersToggled = false;
 	m_isColorModeToggled = false;
 }
 
@@ -843,6 +889,7 @@ void FibersGroup::resetAllValues()
     m_pSliderFibersFilterMin->SetValue( m_pSliderFibersFilterMin->GetMin() );
     m_pSliderFibersFilterMax->SetValue( m_pSliderFibersFilterMax->GetMax() );
     m_pSliderFibersSampling->SetValue( m_pSliderFibersSampling->GetMin() );
+	m_pSliderThickness->SetValue( 10.0 );
     m_pToggleLocalColoring->SetValue(false);
     m_pToggleNormalColoring->SetValue(false);
 }
@@ -865,6 +912,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleOpacity->Enable();
 		m_ptoggleMinMaxLength->Enable();
 		m_ptoggleSubsampling->Enable();
+		m_pToggleCrossingFibers->Enable();
 		m_pGeneratesFibersDensityVolume->Enable();
 		m_ptoggleColorMode->Enable();
 	}
@@ -874,6 +922,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleOpacity->Disable();
 		m_ptoggleMinMaxLength->Disable();
 		m_ptoggleSubsampling->Disable();
+		m_pToggleCrossingFibers->Disable();
 		m_pGeneratesFibersDensityVolume->Disable();
 		m_ptoggleColorMode->Disable();
 	}
@@ -893,6 +942,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleOpacity->Disable();
 		m_ptoggleMinMaxLength->Disable();
 		m_ptoggleSubsampling->Disable();
+		m_pToggleCrossingFibers->Disable();
 		m_pGeneratesFibersDensityVolume->Disable();
 		m_ptoggleColorMode->Disable();
 	}
@@ -912,6 +962,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleIntensity->Disable();
 		m_ptoggleMinMaxLength->Disable();
 		m_ptoggleSubsampling->Disable();
+		m_pToggleCrossingFibers->Disable();
 		m_pGeneratesFibersDensityVolume->Disable();
 		m_ptoggleColorMode->Disable();
 		m_psliderOpacity->SetValue( getAlpha()*100 );
@@ -935,6 +986,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleIntensity->Disable();
 		m_ptoggleOpacity->Disable();
 		m_ptoggleSubsampling->Disable();
+		m_pToggleCrossingFibers->Disable();
 		m_pGeneratesFibersDensityVolume->Disable();
 		m_ptoggleColorMode->Disable();
 	}
@@ -956,6 +1008,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleIntensity->Disable();
 		m_ptoggleOpacity->Disable();
 		m_ptoggleMinMaxLength->Disable();
+		m_pToggleCrossingFibers->Disable();
 		m_pGeneratesFibersDensityVolume->Disable();
 		m_ptoggleColorMode->Disable();
 	}
@@ -965,6 +1018,26 @@ void FibersGroup::updatePropertiesSizer()
 		m_pSliderFibersSampling->Hide();
 		m_ptoggleSubsampling->SetValue(false);
 		m_ptoggleSubsampling->Show();
+	}
+	
+	if( m_isCrossingFibersToggled )
+	{
+		m_pToggleCrossingFibers->Hide();
+		m_pThicknessText->Show();
+		m_pSliderThickness->Show();
+		m_ptoggleIntensity->Disable();
+		m_ptoggleOpacity->Disable();
+		m_ptoggleMinMaxLength->Disable();
+		m_ptoggleSubsampling->Disable();
+		m_pGeneratesFibersDensityVolume->Disable();
+		m_ptoggleColorMode->Disable();
+	}
+	else
+	{
+		m_pThicknessText->Hide();
+		m_pSliderThickness->Hide();
+		m_pToggleCrossingFibers->SetValue(false);
+		m_pToggleCrossingFibers->Show();
 	}
 
 	if( m_isColorModeToggled )
@@ -982,6 +1055,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleOpacity->Disable();
 		m_ptoggleMinMaxLength->Disable();
 		m_ptoggleSubsampling->Disable();
+		m_pToggleCrossingFibers->Disable();
 		m_pGeneratesFibersDensityVolume->Disable();
 	}
 	else
@@ -998,7 +1072,7 @@ void FibersGroup::updatePropertiesSizer()
 		m_ptoggleColorMode->Show();
 	}
 
-	if(m_isIntensityToggled || m_isOpacityToggled || m_isMinMaxLengthToggled || m_isSubsamplingToggled || m_isColorModeToggled )
+	if(m_isIntensityToggled || m_isOpacityToggled || m_isMinMaxLengthToggled || m_isSubsamplingToggled || m_isCrossingFibersToggled || m_isColorModeToggled )
 	{
 		m_pApplyBtn->Show();
 		m_pCancelBtn->Show();

@@ -3565,6 +3565,7 @@ void Fibers::updatePropertiesSizer()
     m_ptoggleFiltering->Enable( false );
     m_ptoggleFiltering->SetValue( false );
     m_pToggleCrossingFibers->Enable( true );
+	m_pToggleCrossingFibers->SetValue( m_useCrossingFibers );
     m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
     m_psliderOpacity->Enable( false );
     m_pSliderCrossingFibersThickness->Enable( m_useCrossingFibers );

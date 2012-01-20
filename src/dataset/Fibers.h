@@ -111,6 +111,8 @@ public:
 	void useFakeTubes();
 	void useTransparency();
     bool invertFibers()		{ return m_fibersInverted = ! m_fibersInverted; };
+	
+	void findCrossingFibers();
 
     GLuint  getGLuint( )
     {
@@ -151,6 +153,11 @@ public:
 	{
 		m_pToggleNormalColoring->SetValue( value );
 	}
+	
+	void	updateSliderThickness( int value )
+	{
+		m_pSliderCrossingFibersThickness->SetValue( value );
+	}
     
     // Empty derived methods
     void    activateLIC()      {};
@@ -189,7 +196,6 @@ private:
     void            freeArrays();
 
     bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
-    void            findCrossingFibers();
     
     void            setShader();
     void            releaseShader();

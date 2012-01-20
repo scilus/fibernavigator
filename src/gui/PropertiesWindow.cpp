@@ -216,6 +216,27 @@ void PropertiesWindow::OnToggleSubsamplingBtn( wxEvent& WXUNUSED(event) )
 	m_mainFrame->refreshAllGLWidgets();
 }
 
+void PropertiesWindow::OnToggleCrossingFibersBtn( wxEvent& WXUNUSED(event) )
+{
+	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_mainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+		{
+			DatasetHelper* pDatasetHelper = m_mainFrame->m_pDatasetHelper;
+			if(pDatasetHelper)
+			{
+				FibersGroup* pFibersGroup;
+				pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+				if(pFibersGroup)
+				{
+					pFibersGroup->OnToggleCrossingFibersBtn();
+				}
+			}
+		}
+	}
+}
+
 void PropertiesWindow::OnToggleColorModeBtn( wxEvent& WXUNUSED(event) )
 {
 	if (m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1)

@@ -41,6 +41,7 @@ public:
 	void OnToggleOpacityBtn					( wxEvent& event );
 	void OnToggleMinMaxLengthBtn			( wxEvent& event );
 	void OnToggleSubsamplingBtn				( wxEvent& event );
+	void OnToggleCrossingFibersBtn          ( wxEvent& event );
 	void OnToggleColorModeBtn				( wxEvent& event );
 	void OnToggleLocalColoringBtn			( wxEvent& event );
 	void OnToggleNormalColoringBtn			( wxEvent& event );

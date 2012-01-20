@@ -67,6 +67,7 @@ public:
 	void	OnToggleOpacityBtn();
 	void	OnToggleMinMaxLengthBtn();
 	void	OnToggleSubsamplingBtn();
+	void	OnToggleCrossingFibersBtn();
 	void	OnToggleColorModeBtn();
 	void	OnToggleLocalColoring();
 	void	OnToggleNormalColoring();
@@ -103,6 +104,7 @@ private:
 	bool m_isMinMaxLengthToggled;
 	bool m_isSubsamplingToggled;
 	bool m_isColorModeToggled;
+	bool m_isCrossingFibersToggled;
 
 	bool m_isNormalColoringStateChanged;
 	bool m_isLocalColoringStateChanged;
@@ -117,6 +119,7 @@ private:
 	wxToggleButton *m_ptoggleColorMode;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
+	wxToggleButton *m_pToggleCrossingFibers;
 
 	wxButton	   *m_pApplyBtn;
 	wxButton	   *m_pCancelBtn;
@@ -125,6 +128,7 @@ private:
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
+	wxSlider	   *m_pSliderThickness;
 	wxRadioButton  *m_pRadioNormalColoring;
     wxRadioButton  *m_pRadioDistanceAnchoring;
     wxRadioButton  *m_pRadioMinDistanceAnchoring;
@@ -136,6 +140,7 @@ private:
 	wxStaticText	*m_pSubsamplingText;
 	wxStaticText	*m_pColorModeText;
 	wxStaticText	*m_pColoringText;
+	wxStaticText    *m_pThicknessText;
 };
 
 #endif /* FIBERSGROUP_H_ */
