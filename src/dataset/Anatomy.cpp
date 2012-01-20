@@ -134,6 +134,14 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     }
 }
 
+void Anatomy::add( Anatomy* pAnatomy)
+{
+	for(int i = 0; i < (int)m_floatDataset.size(); i++)
+	{
+		m_floatDataset[i] += pAnatomy->m_floatDataset[i];
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 float Anatomy::at( const int pos )
@@ -300,7 +308,7 @@ void Anatomy::minimize()
 
     std::vector<bool> workData( m_columns * m_rows * m_frames, false );
     Fibers* pFibers( NULL );
-    m_dh->getFiberDataset( pFibers );
+    m_dh->getSelectedFiberDataset( pFibers );
 
     int curX, curY, curZ, index;
 

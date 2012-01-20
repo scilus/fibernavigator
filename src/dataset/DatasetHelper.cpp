@@ -8,10 +8,15 @@
 #include "../gui/MainFrame.h"
 
 #include <memory>
+#include <exception>
+#include <stdexcept>
+#include <new>
 
 #include "Anatomy.h"
 #include "ODFs.h"
 #include "Fibers.h"
+#include "FibersGroup.h"
+
 #include "KdTree.h"
 #include "../main.h"
 #include "Mesh.h"
@@ -26,6 +31,11 @@
 #include "Surface.h"
 #include "../misc/nifti/nifti1_io.h"
 
+void out_of_memory() 
+{
+    cerr << "Error : Out of memory! \n";
+    throw bad_alloc();
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -39,12 +49,13 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_yVoxel     ( 1.0f ),
     m_zVoxel     ( 1.0f ),
 
-    m_niftiTransform( 4, 4 ),
+	m_niftiTransform( 4, 4 ),
 
     m_countFibers( 0    ),
 
     m_scnFileLoaded      ( false ),
     m_anatomyLoaded      ( false ),
+	m_fibersGroupLoaded	 ( false ),
     m_fibersLoaded       ( false ),
     m_vectorsLoaded      ( false ),
     m_tensorsFieldLoaded ( false ),
@@ -74,27 +85,26 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_debugLevel( 1 ),
 #endif
 
-    m_showSagittal( true ),
-    m_showCoronal ( true ),
-    m_showAxial   ( true ),
-
-    m_showCrosshair( false ),
 	m_isRulerToolActive( false ),
 	m_isDrawerToolActive( false ),
-    m_isSegmentActive( false ),
-    m_isFloodfillActive ( true ),
-    m_isSelectBckActive ( false ),
-    m_isSelectObjActive ( false ),
-    m_isObjfilled ( false ),
-    m_isBckfilled ( false ),
-    m_isObjCreated ( false ),
-    m_isBckCreated ( false ),
-    m_isBoxCreated ( false ),
-    m_thresSliderMoved ( false ),
-    m_SegmentMethod(0),
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
     m_fibersSamplingFactor(1),
+    m_isSegmentActive( false ),
+	m_SegmentMethod(0),
+	m_isFloodfillActive ( true ),
+	m_isSelectBckActive ( false ),
+	m_isSelectObjActive ( false ),
+	m_isObjfilled ( false ),
+	m_isBckfilled ( false ),
+	m_isObjCreated ( false ),
+	m_isBckCreated ( false ),
+	m_isBoxCreated ( false ),
+	m_thresSliderMoved ( false ),
+	m_showSagittal( true ),
+	m_showCoronal ( true ),
+	m_showAxial   ( true ),	
+	m_showCrosshair( false ),
 	
 	m_drawSize(2),
 	m_drawRound ( true ),
@@ -114,11 +124,8 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_normalDirection( 1.0 ),
 
-    m_fibersInverted ( false ),
-    m_useFakeTubes   ( false ),
     m_geometryShadersSupported( true ),
     m_clearToBlack   ( false ),
-    m_useTransparency( false ),
     m_useFibersGeometryShader( false ),
     m_filterIsoSurf  ( false ),
 
@@ -126,7 +133,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_showColorMapLegend       ( false        ),
     m_displayMinMaxCrossSection( false        ),
     m_displayGlyphOptions      ( false        ),
-    m_fiberColorationMode      ( NORMAL_COLOR ),
 
     m_morphing     ( false ),
     m_boxLockIsOn  ( false ),
@@ -158,9 +164,8 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_lastSelectedPoint ( NULL ),
     m_lastSelectedObject( NULL ),
     m_theScene          ( 0 ),
-    m_shaderHelper      ( 0 ),
-
-    m_mainFrame( mf )
+    m_mainFrame			( mf ),
+	m_shaderHelper      ( 0 )
 {
     Matrix4fSetIdentity( &m_transform );
 }
@@ -219,197 +224,330 @@ bool DatasetHelper::load( const int i_index )
     return l_flag;
 }
 
-bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha )
+bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha, wxString i_name, const int version, const bool isFiberGroup, const bool i_isScene )
 {
-
-    // check if i_fileName is valid
-    if( ! wxFile::Exists( i_fileName ) )
+	std::set_new_handler(&out_of_memory);
+	
+    try 
     {
-        printf( "File " );
-        printwxT( i_fileName );
-        printf( " doesn't exist!\n" );
-        m_lastError = wxT( "File doesn't exist!" );
-        return false;
-    }
+		// if it is a fibergroup to add, only add it and do nothing else
+		if( isFiberGroup && i_isScene )
+		{
+			FibersGroup* l_fibersGroup = new FibersGroup( this );
+			l_fibersGroup->setName	   ( i_name );
+			l_fibersGroup->setShow     ( i_active );
+			l_fibersGroup->setShowFS   ( i_showFS );
+			l_fibersGroup->setuseTex   ( i_useTex );
+			l_fibersGroup->setType	   ( FIBERSGROUP );
+			
+			finishLoading( l_fibersGroup );
+			
+			m_fibersGroupLoaded = true;
+			return true;
+		}
+		// check if i_fileName is valid
+		if( ! wxFile::Exists( i_fileName ) )
+		{
+			printf( "File " );
+			printwxT( i_fileName );
+			printf( " doesn't exist!\n" );
+			m_lastError = wxT( "File doesn't exist!" );
+			return false;
+		}
 
-    // If the file is in compressed formed, we check what kinda file it is.
-    wxString l_ext = i_fileName.AfterLast( '.' );
-    if( l_ext == _T( "gz" ) )
-    {
-        wxString l_tmpName = i_fileName.BeforeLast( '.' );
-        l_ext = l_tmpName.AfterLast( '.' );
-    }
+		// If the file is in compressed formed, we check what kinda file it is.
+		wxString l_ext = i_fileName.AfterLast( '.' );
+		if( l_ext == _T( "gz" ) )
+		{
+			wxString l_tmpName = i_fileName.BeforeLast( '.' );
+			l_ext = l_tmpName.AfterLast( '.' );
+		}
 
-    if( l_ext == wxT( "scn" ) )
-    {
-        if( ! loadScene( i_fileName ) )
-        {
-            return false;
-        }
+		if( l_ext == wxT( "scn" ) )
+		{
+			if( m_mainFrame->m_pListCtrl->GetItemCount() > 0 )
+			{
+				int answer = wxMessageBox(wxT("Are you sure you want to open a new scene? All objects loaded in the current scene will be deleted."), wxT("Confirmation"), 
+										  wxYES_NO | wxICON_QUESTION);
+				
+				if( answer == wxNO )
+				{
+					return true;
+				}
+				// Delete all items in the scene
+				for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++ )
+				{
+					m_mainFrame->m_pListCtrl->SetItemState(i, wxLIST_MASK_STATE, wxLIST_STATE_SELECTED);
+					m_mainFrame->deleteListItem();
+				}
+			}
+			
+			if( ! loadScene( i_fileName ) )
+			{
+				return false;
+			}
 
-        m_selBoxChanged = true;
-        m_mainFrame->refreshAllGLWidgets();
+			m_selBoxChanged = true;
+			m_mainFrame->refreshAllGLWidgets();
 
-#ifdef __WXMSW__
-        m_scnFileName = i_fileName.AfterLast ( '\\' );
-        m_scenePath   = i_fileName.BeforeLast( '\\' );
-#else
-        m_scnFileName = i_fileName.AfterLast ( '/' );
-        m_scenePath   = i_fileName.BeforeLast( '/' );
-#endif
-        m_scnFileLoaded = true;
-        return true;
-    }   
-    else if( l_ext == _T( "nii" ) )
-    {
-        char* l_hdrFile;
-        l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
-        strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
+		#ifdef __WXMSW__
+			m_scnFileName = i_fileName.AfterLast ( '\\' );
+			m_scenePath   = i_fileName.BeforeLast( '\\' );
+		#else
+			m_scnFileName = i_fileName.AfterLast ( '/' );
+			m_scenePath   = i_fileName.BeforeLast( '/' );
+		#endif
+			m_scnFileLoaded = true;
+			return true;
+		}   
+		else if( l_ext == _T( "nii" ) )
+		{
+			char* l_hdrFile;
+			l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
+			strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
 
-        nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
+			nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
 
-        free(l_hdrFile);
+			free(l_hdrFile);
 
-        if( ! l_image )
-        {
-            m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
-            return false;
-        }
+			if( ! l_image )
+			{
+				m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
+				return false;
+			}
 
-        if (l_image->datatype == 16 && l_image->ndim == 4 && l_image->dim[4] == 6)
-        {
-            i_index=8;
-        }
-        else if (l_image->datatype == 16 && l_image->ndim == 4 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
-        {
-            i_index=9;
-        }
+			if (l_image->datatype == 16 && l_image->ndim == 4 && l_image->dim[4] == 6)
+			{
+				i_index=8;
+			}
+			else if (l_image->datatype == 16 && l_image->ndim == 4 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
+			{
+				i_index=9;
+			}
 
-        DatasetInfo *l_dataset = NULL;
-        if (i_index==8)
-        {
-            if( ! m_anatomyLoaded )
-            {
-                m_lastError = wxT( "no anatomy file loaded" );
-                return false;
-            }
+			DatasetInfo *l_dataset = NULL;
+			if (i_index==8)
+			{
+				if( ! m_anatomyLoaded )
+				{
+					m_lastError = wxT( "no anatomy file loaded" );
+					return false;
+				}
 
-            if( m_tensorsLoaded )
-            {
-                m_lastError = wxT( "tensors already loaded" );
-                return false;
-            }
-            l_dataset = new Tensors( this );            
-        }
-        else if (i_index==9)
-        {
-            if( ! m_anatomyLoaded )
-            {
-                m_lastError = wxT( "no anatomy file loaded" );
-                return false;
-            }
-            l_dataset = new ODFs( this );            
-        }
-        else
-        {
-            l_dataset = new Anatomy( this );
-        }
-        if( l_dataset->load(i_fileName ))
-        {
-            l_dataset->setThreshold( i_threshold );
-            l_dataset->setAlpha    ( i_alpha );
-            l_dataset->setShow     ( i_active );
-            l_dataset->setShowFS   ( i_showFS );
-            l_dataset->setuseTex   ( i_useTex );
-            finishLoading( l_dataset );        
-            if (i_index==8)
-            {
-                m_tensorsLoaded = true;
-            }
-            else if (i_index == 9)
-            {
-                m_ODFsLoaded = true;
-            }
-            else
-            {
-                m_floatDataset = ((Anatomy*)l_dataset)->getFloatDataset();
-            }
-            return true;
-        }
-        return false;
-    }
-    else if( l_ext == _T( "mesh" ) || l_ext == _T( "surf" ) || l_ext == _T( "dip" ) )
-    {
-        if( ! m_anatomyLoaded )
-        {
-            m_lastError = wxT( "no anatomy file loaded" );
-            return false;
-        }
+				if( m_tensorsLoaded )
+				{
+					m_lastError = wxT( "tensors already loaded" );
+					return false;
+				}
+				l_dataset = new Tensors( this );            
+			}
+			else if (i_index==9)
+			{
+				if( ! m_anatomyLoaded )
+				{
+					m_lastError = wxT( "no anatomy file loaded" );
+					return false;
+				}
+				l_dataset = new ODFs( this );            
+			}
+			else
+			{
+				l_dataset = new Anatomy( this );
+			}
+			if( l_dataset->load(i_fileName ))
+			{
+				l_dataset->setThreshold( i_threshold );
+				l_dataset->setAlpha    ( i_alpha );
+				l_dataset->setShow     ( i_active );
+				l_dataset->setShowFS   ( i_showFS );
+				l_dataset->setuseTex   ( i_useTex );
+				
+				if( i_isScene && version >= 2 )
+				{
+					l_dataset->setName ( i_name );
+				}
+				finishLoading( l_dataset );
+				
+				if (i_index==8)
+				{
+					m_tensorsLoaded = true;
+				}
+				else if (i_index == 9)
+				{
+					m_ODFsLoaded = true;
+				}
+				else
+				{
+					m_floatDataset = ((Anatomy*)l_dataset)->getFloatDataset();
+				}
+				return true;
+			}
+			return false;
+		}
+		else if( l_ext == _T( "mesh" ) || l_ext == _T( "surf" ) || l_ext == _T( "dip" ) )
+		{
+			if( ! m_anatomyLoaded )
+			{
+				m_lastError = wxT( "no anatomy file loaded" );
+				return false;
+			}
 
-        Mesh *l_mesh = new Mesh( this );
+			Mesh *l_mesh = new Mesh( this );
 
-        if( l_mesh->load( i_fileName ) )
-        {
-            l_mesh->setThreshold( i_threshold );
-            l_mesh->setShow     ( i_active );
-            l_mesh->setShowFS   ( i_showFS );
-            l_mesh->setuseTex   ( i_useTex );
-            finishLoading       ( l_mesh );
-            return true;
-        }
-        return false;
-    }
-    else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
-    {
-        if( ! m_anatomyLoaded )
-        {
-            m_lastError = wxT( "no anatomy file loaded" );
-            return false;
-        }
-        if( m_fibersLoaded )
-        {
-            m_lastError = wxT( "fibers already loaded" );
-            return false;
-        }
+			if( l_mesh->load( i_fileName ) )
+			{
+				l_mesh->setThreshold( i_threshold );
+				l_mesh->setShow     ( i_active );
+				l_mesh->setShowFS   ( i_showFS );
+				l_mesh->setuseTex   ( i_useTex );
+				finishLoading       ( l_mesh);
+				
+				return true;
+			}
+			return false;
+		}
+		else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
+		{
+			if( ! m_anatomyLoaded )
+			{
+				m_lastError = wxT( "no anatomy file loaded" );
+				return false;
+			}
 
-        Fibers* l_fibers = new Fibers( this );
+			Fibers* l_fibers = new Fibers( this );
 
-        if( l_fibers->load( i_fileName ) )
-        {
-            m_fibersLoaded = true;
+			if( l_fibers->load( i_fileName ) )
+			{
+				if( m_fibersGroupLoaded == false && version < 2 )
+				{
+					FibersGroup* l_fibersGroup = new FibersGroup( this );
+					l_fibersGroup->setName( wxT( "Fibers Group" ) );
+					l_fibersGroup->setShow(l_fibers->getShow());
+					l_fibersGroup->setType(FIBERSGROUP);
+					finishLoading( l_fibersGroup );
+					
+					m_fibersGroupLoaded = true;
+				}
 
-            std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-            for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-            {
-                for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-                {
-                    l_selectionObjects[i][j]->m_inBox.resize( m_countFibers, sizeof(bool) );
-                    for( unsigned int k = 0; k < m_countFibers; ++k )
-                    {
-                        l_selectionObjects[i][j]->m_inBox[k] = 0;
-                    }
+				std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
+				for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+				{
+					for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+					{
+						l_selectionObjects[i][j]->m_inBox.resize( m_countFibers, sizeof(bool) );
+						for( unsigned int k = 0; k < m_countFibers; ++k )
+						{
+							l_selectionObjects[i][j]->m_inBox[k] = 0;
+						}
 
-                    l_selectionObjects[i][j]->setIsDirty( true );
-                }
-            }
+						l_selectionObjects[i][j]->setIsDirty( true );
+					}
+				}
 
-            l_fibers->setThreshold( i_threshold );
-            l_fibers->setShow     ( i_active );
-            l_fibers->setShowFS   ( i_showFS );
-            l_fibers->setuseTex   ( i_useTex );            
-            finishLoading         ( l_fibers );
-            
-            return true;
-        }
-        return false;
-    }
+				l_fibers->setThreshold( i_threshold );
+				l_fibers->setAlpha	  ( i_alpha );
+				l_fibers->setShow     ( i_active );
+				l_fibers->setShowFS   ( i_showFS );
+				l_fibers->setuseTex   ( i_useTex );
+				
+				if( m_fibersGroupLoaded )
+				{
+					FibersGroup* pFibersGroup;
+					getFibersGroupDataset(pFibersGroup);
 
-    m_lastError = wxT( "unsupported file format" );
+					if( pFibersGroup != NULL )
+					{
+						if(pFibersGroup->getFibersCount() > 0 && !i_isScene)
+						{
+							l_fibers->setShow( false );
+						}
+						pFibersGroup->addFibersSet( l_fibers );
+					}
+				}			
 
-    return false;
+				l_fibers->updateLinesShown();
+				m_mainFrame->refreshAllGLWidgets();
+				
+				finishLoading( l_fibers, true);
+				
+				m_fibersLoaded = true;
+				m_selBoxChanged = true;
+
+				return true;
+			}
+			return false;
+		}
+		m_lastError = wxT( "unsupported file format" );
+		
+		return false;
+	}
+	catch (const exception &e)
+	{
+		cerr << "Exception: " << e.what() << endl;
+		exit(1);
+	}
 }
 
-void DatasetHelper::finishLoading( DatasetInfo* i_info )
+void DatasetHelper::updateItemsId()
+{
+	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+	{
+		DatasetInfo* pDatasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+		if(pDatasetInfo != NULL)
+		{
+			pDatasetInfo->setListCtrlItemId(pDatasetInfo->getListCtrlItemId() + 1);
+		}
+	}
+}
+
+void DatasetHelper::updateItemsPosition()
+{	
+	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+	{
+		DatasetInfo* pInfoA = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+		if(pInfoA != NULL)
+		{
+			long id = pInfoA->getListCtrlItemId();
+			if( i != id)
+			{
+				DatasetInfo *pInfoB = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(id);
+				if(pInfoA != NULL)
+				{
+					m_mainFrame->m_pListCtrl->SetItem(i, 0, wxT(""), pInfoB->getShow() ? 0 : 1);
+					m_mainFrame->m_pListCtrl->SetItem(i, 1, pInfoB->getName().BeforeFirst( '.' ));
+					m_mainFrame->m_pListCtrl->SetItem(i, 2, wxString::Format(wxT("%.2f"), pInfoB->getThreshold()));
+					m_mainFrame->m_pListCtrl->SetItemData(i, (long)pInfoB);
+					
+					m_mainFrame->m_pListCtrl->SetItem(id, 0, wxT(""), pInfoA->getShow() ? 0 : 1);
+					m_mainFrame->m_pListCtrl->SetItem(id, 1, pInfoA->getName().BeforeFirst( '.' ));
+					m_mainFrame->m_pListCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), pInfoA->getThreshold()));
+					m_mainFrame->m_pListCtrl->SetItemData(id, (long)pInfoA);
+				}
+			}
+		}
+	}
+	// Adjust fibergroup position with fibers
+	std::list<int> fibersPosList;
+	
+	FibersGroup* pFibersGroup = NULL;
+	getFibersGroupDataset(pFibersGroup);
+	if( pFibersGroup != NULL )
+	{
+		for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
+		{
+			long id = pFibersGroup->getFibersSet(i)->getListCtrlItemId();
+			fibersPosList.push_back(id);
+		}
+		
+		fibersPosList.sort();
+		
+		int currentPos = pFibersGroup->getListCtrlItemId();
+		pFibersGroup->setListCtrlItemId(fibersPosList.front());
+		m_mainFrame->m_pListCtrl->moveItemAt(currentPos, fibersPosList.front() - 1);
+	}
+}
+
+void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 {
     m_guiBlocked = true;
 #ifdef __WXMAC__
@@ -418,8 +556,11 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
     long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
 #else
     long l_id = 0;
+	updateItemsId();
 #endif
-    m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+	i_info->setListCtrlItemId(l_id);
+	
+	m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
 
     if( i_info->getShow() )
         m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 0 );
@@ -436,9 +577,16 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info )
     else
         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
 
-    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 0 );
     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
-    m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	
+	m_mainFrame->m_pListCtrl->unselectAll();
+	m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+	
+	if( isChild )
+	{
+		m_mainFrame->m_pListCtrl->moveItemDown( l_id );
+	}
 
     m_mainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
     m_mainFrame->GetStatusBar()->SetStatusText( i_info->getName() + wxT( " loaded" ), 2 );
@@ -499,7 +647,11 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
     wxXmlDocument l_xmlDoc;
     if( ! l_xmlDoc.Load( i_fileName ) )
         return false;
-
+	
+	wxString xmlVersion = l_xmlDoc.GetVersion();
+	long version;
+	xmlVersion.ToLong(&version);
+	
     wxXmlNode* l_child = l_xmlDoc.GetRoot()->GetChildren();
     while( l_child )
     {
@@ -551,27 +703,42 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 
         else if( l_child->GetName() == wxT( "data" ) )
         {
+			std::map<DatasetInfo*, long> realPositions;
+			bool fibersGroupTreated = false;
+			
             wxXmlNode *l_dataSetNode = l_child->GetChildren();
             while( l_dataSetNode )
             {
                 wxXmlNode *l_nodes  = l_dataSetNode->GetChildren();
                 // initialize to mute compiler
+				bool l_isfiberGroup	= false;
                 bool l_active       = true;
                 bool l_useTex       = true;
                 bool l_showFS       = true;
                 double l_threshold  = 0.0;
                 double l_alpha      = 1.0;
+				long l_pos			= 0;
                 wxString l_path;
-
+				wxString l_name;
+				
                 while( l_nodes )
                 {
                     if( l_nodes->GetName() == _T( "status" ) )
                     {
+						if( version >= 2 )
+						{
+							l_isfiberGroup = ( l_nodes->GetPropVal( _T( "isFiberGroup" ), _T( "yes" ) ) == _T( "yes" ) );
+							l_nodes->GetPropVal( _T( "name" ), &l_name );
+						}
                         l_active = ( l_nodes->GetPropVal( _T( "active" ), _T( "yes" ) ) == _T( "yes" ) );
                         l_useTex = ( l_nodes->GetPropVal( _T( "useTex" ), _T( "yes" ) ) == _T( "yes" ) );
                         l_showFS = ( l_nodes->GetPropVal( _T( "showFS" ), _T( "yes" ) ) == _T( "yes" ) );
                         ( l_nodes->GetPropVal( wxT( "threshold"), wxT( "0.0" ) ) ).ToDouble( &l_threshold );
                         ( l_nodes->GetPropVal( wxT( "alpha"),     wxT( "0.0" ) ) ).ToDouble( &l_alpha );
+						if( l_nodes->GetPropVal( wxT( "position"), wxT( "0" ) ) )
+						{
+							l_nodes->GetPropVal( wxT( "position"), wxT( "0" ) ).ToLong( &l_pos );
+						}
                     }
                     else if( l_nodes->GetName() == _T( "path" ) )
                     {
@@ -580,9 +747,73 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 
                     l_nodes = l_nodes->GetNext();
                 }
-                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha );
+                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha, l_name, version, l_isfiberGroup, true );
+				
+				if( version < 2 ) // in the old version, no fibersgroup were saved
+				{
+					long lastItemPos;
+
+					#ifdef __WXMAC__
+						lastItemPos = m_mainFrame->m_pListCtrl->GetItemCount() - 1;
+					#else
+						lastItemPos = 1;
+					#endif
+						if(lastItemPos >= 0  && lastItemPos < m_mainFrame->m_pListCtrl->GetItemCount() && !fibersGroupTreated)
+						{
+							DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(lastItemPos);
+							// if the last inserted item is a fiber, than a fibergroup has been inserted before
+							if(pDataset->getType() == FIBERS)
+							{
+								if(l_pos - 1 >= 0 )
+								{
+									DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(lastItemPos - 1);
+									// insert fibersgroup position
+									realPositions.insert(pair<DatasetInfo*, long>(pDataset, l_pos - 1));
+								}
+								fibersGroupTreated = true;
+							}
+						}
+					}
+
+				DatasetInfo* pDataset;
+				#ifdef __WXMAC__
+					pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(m_mainFrame->m_pListCtrl->GetItemCount() - 1);
+				#else
+					if(m_fibersGroupLoaded && !l_isfiberGroup)
+					{
+						pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(1);
+						if(!pDataset->getType() == FIBERS)
+						{
+							pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
+						}
+					}
+					else
+					{
+						pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
+					}
+				#endif
+				realPositions.insert(pair<DatasetInfo*, long>(pDataset, l_pos));
+
                 l_dataSetNode = l_dataSetNode->GetNext();
             }
+			
+			// Reassign dataset to the good position
+			if( version > 1 ) 
+			{
+				for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+				{
+					DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+					std::map<DatasetInfo*, long>::iterator it = realPositions.find( pDataset );
+					
+					long currentPos = pDataset->getListCtrlItemId();
+					long realPos = it->second;
+
+					if( currentPos != realPos)
+					{
+						m_mainFrame->m_pListCtrl->swap(currentPos, realPos);
+					}
+				}
+			}
         }
         else if( l_child->GetName() == wxT( "points" ) )
         {
@@ -837,11 +1068,20 @@ void DatasetHelper::save( const wxString i_fileName )
     if( l_countTextures == 0 )
         return;
 
-    for( int i = 0; i < l_countTextures; ++i )
+	
+	std::vector<int> anatomyPositions;
+	
+    for( int i = l_countTextures - 1; i >= 0 ; i-- )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
-
-        if( l_info->getType() < SURFACE )
+		DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+		
+		if(l_info->getType() < MESH)
+		{
+			anatomyPositions.push_back(i);
+			continue;
+		}
+		
+        if( l_info->getType() < SURFACE)
         {
             wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
 
@@ -849,14 +1089,55 @@ void DatasetHelper::save( const wxString i_fileName )
             new wxXmlNode( l_pathNode, wxXML_TEXT_NODE, wxT( "path" ), l_info->getPath() );
 
             wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
-            wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) );
+			
+			wxXmlProperty* l_propP  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+            wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ), l_propP );
             wxXmlProperty* l_propTA = new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), l_info->getAlpha() ), l_propT );
             wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
             wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
             wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
-            l_statusNode->AddProperty( l_propU );
+			wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+			wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "no" ), l_propN );
+            l_statusNode->AddProperty( l_propI );
         }
+		if(l_info->getType() == FIBERSGROUP)
+		{
+			wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
+			
+            wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
+
+			wxXmlProperty* l_propP  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+            wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propP );
+            wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
+            wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
+			wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+            wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "yes" ), l_propN );
+			l_statusNode->AddProperty( l_propI );
+		}
     }
+	
+	// Save anatomies at the end so they would always be at the beginning of data
+	for( int i = 0; i < (int)anatomyPositions.size(); i++ )
+    {
+		DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( anatomyPositions[i] );
+		
+		wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
+		
+		wxXmlNode* l_pathNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "path" ) );
+		new wxXmlNode( l_pathNode, wxXML_TEXT_NODE, wxT( "path" ), l_info->getPath() );
+		
+		wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
+		
+		wxXmlProperty* l_propId  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+		wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ), l_propId );
+		wxXmlProperty* l_propTA = new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), l_info->getAlpha() ), l_propT );
+		wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
+		wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
+		wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
+		wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+		wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "no" ), l_propN );
+		l_statusNode->AddProperty( l_propI );
+	}
 
     wxXmlProperty* l_propPosX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pXSlider->GetValue() ) );
     wxXmlProperty* l_propPosY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pYSlider->GetValue() ), l_propPosX );
@@ -865,6 +1146,8 @@ void DatasetHelper::save( const wxString i_fileName )
 
     wxXmlDocument l_xmlDoc;
     l_xmlDoc.SetRoot( l_root );
+	
+	l_xmlDoc.SetVersion( _T("2.0") );
 
     if ( i_fileName.AfterLast( '.' ) != _T( "scn" ) )
         l_xmlDoc.Save( i_fileName + _T( ".scn" ), 2 );
@@ -1299,16 +1582,34 @@ void DatasetHelper::updateView( const float i_x, const float i_y, const float i_
     }
 }
 
-bool DatasetHelper::getFiberDataset( Fibers* &io_f )
+bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
 {
-    io_f = NULL;
+	io_f = NULL;
+
+	long selItem = m_mainFrame->m_pListCtrl->GetSelectedItem();
+
+    if (-1 != selItem)
+    {
+        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( selItem );
+        if( l_datasetInfo->getType() == FIBERS)
+        {
+            io_f = (Fibers*)l_datasetInfo;
+            return true;
+        }
+        return false;
+    }
+}
+
+bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
+{
+    io_fg = NULL;
 
     for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
         DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
-        if( l_datasetInfo->getType() == FIBERS )
+        if( l_datasetInfo->getType() == FIBERSGROUP )
         {
-            io_f = (Fibers*)m_mainFrame->m_pListCtrl->GetItemData( i );
+            io_fg = (FibersGroup*)l_datasetInfo;
             return true;
         }
     }
@@ -1426,43 +1727,49 @@ void DatasetHelper::updateLoadStatus()
     for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
     {
         DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
-        switch( info->getType() )
-        {
-            case HEAD_BYTE:
-            case HEAD_SHORT:
-            case OVERLAY:
-            case RGB:
-                m_anatomyLoaded      = true;
-                break;
-            case VECTORS:
-                m_anatomyLoaded      = true;
-                m_vectorsLoaded      = true;
-                m_tensorsFieldLoaded = true;
-                break;
-            case MESH:
-                m_meshLoaded         = true;
-                break;
-            case TENSOR_FIELD:
-                m_tensorsFieldLoaded = true;
-                break;
-            case FIBERS:
-                m_fibersLoaded       = true;
-                break;
-            case SURFACE:
-                m_surfaceLoaded      = true;
-                break;
-            case ISO_SURFACE:
-                m_meshLoaded         = true;
-                break;
-            case TENSORS:
-                m_tensorsLoaded      = true;
-                break;
-            case ODFS:
-                m_ODFsLoaded         = true;
-                break;
-            default:
-                break;
-        }
+		if(info != NULL)
+		{
+			switch( info->getType() )
+			{
+				case HEAD_BYTE:
+				case HEAD_SHORT:
+				case OVERLAY:
+				case RGB:
+					m_anatomyLoaded      = true;
+					break;
+				case VECTORS:
+					m_anatomyLoaded      = true;
+					m_vectorsLoaded      = true;
+					m_tensorsFieldLoaded = true;
+					break;
+				case MESH:
+					m_meshLoaded         = true;
+					break;
+				case TENSOR_FIELD:
+					m_tensorsFieldLoaded = true;
+					break;
+				case FIBERS:
+					m_fibersLoaded       = true;
+					break;
+				case FIBERSGROUP:
+					m_fibersGroupLoaded	 = true;
+					break;
+				case SURFACE:
+					m_surfaceLoaded      = true;
+					break;
+				case ISO_SURFACE:
+					m_meshLoaded         = true;
+					break;
+				case TENSORS:
+					m_tensorsLoaded      = true;
+					break;
+				case ODFS:
+					m_ODFsLoaded         = true;
+					break;
+				default:
+					break;
+			}
+		}
     }
 }
 

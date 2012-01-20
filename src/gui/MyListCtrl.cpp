@@ -22,8 +22,18 @@ bool MyListCtrl::DeleteItem( long itemIdx)
     pDataset = NULL;
     
     SetItemData( itemIdx, 0 );
-    
+	
+	for(int i = itemIdx + 1; i < GetItemCount(); i++)
+	{
+		DatasetInfo *pDataset = reinterpret_cast< DatasetInfo* >( GetItemData( i ) );
+		pDataset->setListCtrlItemId(pDataset->getListCtrlItemId() - 1);
+    }
     return wxListCtrl::DeleteItem( itemIdx );
+}
+
+long MyListCtrl::GetSelectedItem()
+{
+  return GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 }
 
 void MyListCtrl::OnLeftClick(wxMouseEvent& event)
@@ -68,13 +78,17 @@ void MyListCtrl::swap(long a, long b)
     DatasetInfo *infoA = (DatasetInfo*) GetItemData(a);
     DatasetInfo *infoB = (DatasetInfo*) GetItemData(b);
 
+	int idA = infoA->getListCtrlItemId();
+	infoA->setListCtrlItemId(infoB->getListCtrlItemId());
+	infoB->setListCtrlItemId(idA);
+	
     SetItem(a, 0, wxT(""), infoB->getShow() ? 0 : 1);
-    SetItem(a, 1, infoB->getName());
+    SetItem(a, 1, infoB->getName().BeforeFirst( '.' ));
     SetItem(a, 2, wxString::Format(wxT("%.2f"), infoB->getThreshold()));
     SetItemData(a, (long)infoB);
 
     SetItem(b, 0, wxT(""), infoA->getShow() ? 0 : 1);
-    SetItem(b, 1, infoA->getName());
+    SetItem(b, 1, infoA->getName().BeforeFirst( '.' ));
     SetItem(b, 2, wxString::Format(wxT("%.2f"), infoA->getThreshold()));
     SetItemData(b, (long)infoA);
 }
@@ -83,6 +97,7 @@ void MyListCtrl::moveItemUp(long item)
 {
     if (item == 0) return;
     swap (item - 1, item);
+	unselectAll();
     SetItemState(item - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
@@ -90,7 +105,37 @@ void MyListCtrl::moveItemDown(long item)
 {
     if (item == GetItemCount() - 1) return;
     swap (item, item +1);
+	unselectAll();
     SetItemState(item + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+}
+
+void MyListCtrl::moveItemAt(long item, long pos)
+{
+	if( pos < 0 || pos >= GetItemCount() || item == pos) return;
+	
+	while(item != pos)
+	{
+		if( item < pos )
+		{
+			swap(item, item + 1);
+			item++;
+		}
+		else
+		{
+			swap(item - 1, item);
+			item--;
+		}
+	}
+	unselectAll();
+	SetItemState(pos, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+}
+
+void MyListCtrl::unselectAll()
+{
+	for(int i = 0; i < GetItemCount(); i++)
+	{
+		SetItemState(i, 0, wxLIST_STATE_SELECTED);
+	}
 }
 
 

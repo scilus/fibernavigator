@@ -222,7 +222,7 @@ void TheScene::renderScene()
 	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
     }
 
-    //Navigate trhoug slices
+    //Navigate through slices
     if(m_isNavSagital) 
     {
 	    if (m_posSagital > m_pDatasetHelper->m_columns) 
@@ -275,14 +275,7 @@ void TheScene::renderScene()
         renderODFs();
     
     renderMesh();
-
-    if( m_pDatasetHelper->m_fibersLoaded )
-    {
-        if ( m_pDatasetHelper->m_useFakeTubes )
-            renderFakeTubes();
-        else
-            renderFibers();
-    }
+	renderFibers();
     
     if( m_pDatasetHelper->m_showObjects )
         drawSelectionObjects();
@@ -592,7 +585,7 @@ void TheScene::renderMesh()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This function will render the fibers in normal mode (not fake tubes) in theScene.
+// This function will render the fibers in theScene.
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::renderFibers()
 {
@@ -602,81 +595,62 @@ void TheScene::renderFibers()
     {
         DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
 
-        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow() )
+        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow())
         {
-            lightsOff();
+			Fibers* pFibers = (Fibers*)pDsInfo;
+			if( pFibers != NULL )
+			{
+                if( m_pDatasetHelper->m_selBoxChanged )
+                {
+                    pFibers->updateLinesShown();
+                }
 
-            if( m_pDatasetHelper->m_lighting )
-            {
-                lightsOn();
-                GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-                glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
+				if( pFibers->isUsingFakeTubes() )
+				{
+					pFibers->draw();
 
-            }
-            if( ! pDsInfo->getUseTex() )
-            {
-                bindTextures();
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.bind();
-                //m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
-            }
-            if( m_pDatasetHelper->m_selBoxChanged )
-            {
-                ( (Fibers*)pDsInfo )->updateLinesShown();
-                m_pDatasetHelper->m_selBoxChanged = false;
-            }
-            pDsInfo->draw();
+					if( m_pDatasetHelper->GLError() )
+						m_pDatasetHelper->printGLError( wxT( "draw fake tubes" ) );
+				}
+				else // render normally
+				{
+					if( m_pDatasetHelper->m_lighting )
+					{
+						lightsOn();
+						GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+						glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
+					}
+					if( ! pFibers->getUseTex() )
+					{
+						bindTextures();
+					}
+					
+					pFibers->draw();
+					lightsOff();
+					
+					if( m_pDatasetHelper->GLError() )
+					{
+						m_pDatasetHelper->printGLError( wxT( "draw fibers" ) );
+					}
+				}
+			}
+		}
+	}
 
-            //m_pDatasetHelper->m_shaderHelper->m_fibersShader.release();
+	m_pDatasetHelper->m_selBoxChanged = false;
 
-            lightsOff();
-        }
-    }
-
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw fibers" ) );
-
-    glPopAttrib();
-}
-
-///////////////////////////////////////////////////////////////////////////
-// This function will render the fibers as fake tubes in theScene.
-///////////////////////////////////////////////////////////////////////////
-void TheScene::renderFakeTubes()
-{
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    vector< vector< SelectionObject * > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
+    for( vector< vector< SelectionObject *> >::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )
     {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
-
-        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow() )
+        for( vector< SelectionObject *>::iterator itChild = itMaster->begin(); itChild != itMaster->end(); ++itChild )
         {
-            if( m_pDatasetHelper->m_selBoxChanged )
-            {
-                ( (Fibers*) pDsInfo )->updateLinesShown();
-                m_pDatasetHelper->m_selBoxChanged = false;
-            }
-
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.bind();
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", pDsInfo->getShowFS() );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
-
-            pDsInfo->draw();
-
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.release();
+            (*itChild)->setIsDirty( false );
         }
     }
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw fake tubes" ) );
-
-    glPopAttrib();
+	glPopAttrib();
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will render the tensors in theScene.
