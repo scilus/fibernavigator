@@ -22,6 +22,7 @@ DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) :
             m_brightness      ( 1.0f ),
             m_oldMax          ( 1.0 ),
             m_newMax          ( 1.0 ),
+			m_itemId		  ( 0 ),
 
             m_color           ( wxColour( 128, 10, 10 ) ),
             m_GLuint          ( 0 ),
@@ -73,17 +74,17 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->Add( m_pBtnRename, 0, wxALIGN_CENTER );
     parent->Connect( m_pBtnRename->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler ( PropertiesWindow::OnRename) );
 
-    m_pBtnFlipX = new wxButton(parent, wxID_ANY, wxT("Flip x"), wxDefaultPosition, wxSize(60, -1) );
-    m_pBtnFlipY = new wxButton(parent, wxID_ANY, wxT("Flip y"), wxDefaultPosition, wxSize(60,-1) );
-    m_pBtnFlipZ = new wxButton(parent, wxID_ANY, wxT("Flip z"), wxDefaultPosition, wxSize(60,-1) );
+    m_pBtnFlipX = new wxToggleButton(parent, wxID_ANY, wxT("Flip x"), wxDefaultPosition, wxSize(60, -1) );
+    m_pBtnFlipY = new wxToggleButton(parent, wxID_ANY, wxT("Flip y"), wxDefaultPosition, wxSize(60,-1) );
+    m_pBtnFlipZ = new wxToggleButton(parent, wxID_ANY, wxT("Flip z"), wxDefaultPosition, wxSize(60,-1) );
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add( m_pBtnFlipX, 0, wxALIGN_CENTER );
     l_sizer->Add( m_pBtnFlipY, 0, wxALIGN_CENTER );
     l_sizer->Add( m_pBtnFlipZ, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
-    parent->Connect(m_pBtnFlipX->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipX));
-    parent->Connect(m_pBtnFlipY->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipY));
-    parent->Connect(m_pBtnFlipZ->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipZ));
+    parent->Connect(m_pBtnFlipX->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipX));
+    parent->Connect(m_pBtnFlipY->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipY));
+    parent->Connect(m_pBtnFlipZ->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipZ));
 
     m_ptoggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(90,-1));
     m_ptoggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Interpolation"),wxDefaultPosition, wxSize(90,-1));
@@ -97,7 +98,8 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     m_psliderThresholdIntensity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderThresholdIntensity->SetValue((int)(getThreshold()*100));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Intensity "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+	m_pIntensityText = new wxStaticText(parent, wxID_ANY, wxT("Intensity "), wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
+    l_sizer->Add(m_pIntensityText, 0, wxALIGN_CENTER);
     l_sizer->Add(m_psliderThresholdIntensity,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderThresholdIntensity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderIntensityThresholdMoved));
@@ -105,7 +107,8 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     m_psliderOpacity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderOpacity->SetValue((int)(getAlpha()*100));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Opacity "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+	m_pOpacityText = new wxStaticText(parent, wxID_ANY, wxT("Opacity "), wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
+    l_sizer->Add(m_pOpacityText, 0, wxALIGN_CENTER);
     l_sizer->Add(m_psliderOpacity,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_psliderOpacity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderOpacityThresholdMoved));

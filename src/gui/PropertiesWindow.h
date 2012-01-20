@@ -37,10 +37,24 @@ public:
 
     void OnToggleShowFS                     ( wxEvent& event );
 
+	void OnToggleIntensityBtn				( wxEvent& event );
+	void OnToggleOpacityBtn					( wxEvent& event );
+	void OnToggleMinMaxLengthBtn			( wxEvent& event );
+	void OnToggleSubsamplingBtn				( wxEvent& event );
+	void OnToggleCrossingFibersBtn          ( wxEvent& event );
+	void OnToggleColorModeBtn				( wxEvent& event );
+	void OnToggleLocalColoringBtn			( wxEvent& event );
+	void OnToggleNormalColoringBtn			( wxEvent& event );
+	
+	void OnClickGenerateFiberVolumeBtn		( wxEvent& event );
+	void OnClickApplyBtn					( wxEvent& event );
+	void OnClickCancelBtn					( wxEvent& event );
+
     void OnSliderIntensityThresholdMoved    ( wxCommandEvent& event );
     void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
 
 	void OnEqualizeDataset					( wxEvent& event );
+    void OnEqualizationSliderChange         ( wxCommandEvent& event );
     void OnRename                           ( wxCommandEvent& event );
     void OnFlipX                            ( wxCommandEvent& event );
     void OnFlipY                            ( wxCommandEvent& event );
@@ -81,6 +95,10 @@ public:
     void OnNormalColoring                   ( wxCommandEvent& event );
     void OnColorWithTorsion                 ( wxCommandEvent& event );
     void ColorFibers();
+
+    void OnNormalMeanFiberColoring          ( wxCommandEvent& event );
+    void OnCustomMeanFiberColoring          ( wxCommandEvent& event );
+    void OnMeanFiberOpacityChange           ( wxCommandEvent& event );
 
     void OnGlyphMinHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
     void OnGlyphMaxHueSliderMoved           ( wxCommandEvent& event ); // The coloration.
@@ -123,6 +141,10 @@ public:
     void OnDistanceAnchorSet                ( wxCommandEvent& event );
     void OnDisplayFibersInfo                ( wxCommandEvent& event );
     void OnDisplayMeanFiber                 ( wxCommandEvent& event );
+    void OnDisplayConvexHull                ( wxCommandEvent& event );
+    void OnConvexHullColorChange            ( wxCommandEvent& event );
+    void OnConvexHullOpacityChange          ( wxCommandEvent& event );
+    void OnMeanFiberColorChange             ( wxCommandEvent& event );
     void OnDisplayCrossSections             ( wxCommandEvent& event );
     void OnDisplayDispersionTube            ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );
@@ -136,6 +158,9 @@ public:
     void OnBoxSizeZ                         ( wxCommandEvent& event );
     void OnSliderAxisMoved                  ( wxCommandEvent& event );
     void OnRecalcMainDir                    ( wxCommandEvent& event );
+
+    void OnToggleCrossingFibers             ( wxEvent& event );
+    void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );
 
     MainFrame *m_mainFrame;
 

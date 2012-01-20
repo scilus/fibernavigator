@@ -62,7 +62,8 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
     m_orthoModX = 0;
     m_orthoModY = 0;
     m_hitPts =Vector(0,0,0);
-    m_isRulerHit = false;
+	m_isRulerHit = false;
+	m_isDrawerHit = false;
     m_isSlizesLocked = false;
     m_isSceneLocked = false;
 }
@@ -166,19 +167,19 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                     m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( newZ );
                     m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();
                 }
-                else if ( wxGetKeyState( WXK_CONTROL ) && m_pDatasetHelper->getPointMode() )
+                else if ( wxGetKeyState( WXK_CONTROL ) && m_pDatasetHelper->getPointMode())
                 {
-                    m_hr = pick( event.GetPosition(),false );
-                    if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
-                    {
-                        m_hr.picked = 20;
-                        SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
-                        wxTreeItemId pId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->AppendItem(
-                                m_pDatasetHelper->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
-                        point->setTreeId( pId );
+					m_hr = pick( event.GetPosition(),false );
+					if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
+					{
+						m_hr.picked = 20;
+						SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
+						wxTreeItemId pId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->AppendItem(
+								m_pDatasetHelper->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
+						point->setTreeId( pId );
 
-                        GetEventHandler()->ProcessEvent( event1 );
-                    }
+						GetEventHandler()->ProcessEvent( event1 );
+					}
                 }
 
             }
@@ -189,22 +190,69 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 m_mousePt.s.X = clickX;
                 m_mousePt.s.Y = clickY;
                 
-                if ( !m_pDatasetHelper->m_isDragging ) // Not Dragging
-                {
-                    m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
-                    m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
-                    m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
-                }
-                else if(!m_isSceneLocked)
-                {                    
-                    Quat4fT ThisQuat;
-                    m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
-                    Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
-                    Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                    Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+				// Use Control (or Command on Mac) key for advanced left click actions
+                if( event.CmdDown() )
+				{
+					if(!m_pDatasetHelper->m_isDragging)
+					{
+						if (m_pDatasetHelper->m_isDrawerToolActive)
+						{
+							pushAnatomyHistory();
+							m_hr = pick(event.GetPosition(), true);
+							drawOnAnatomy();
+						}
+						else if (m_pDatasetHelper->m_isRulerToolActive)
+						{
+							m_hr = pick(event.GetPosition(), true);
+						}
+						else
+						{
+							long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+							if(l_item != -1)
+							{
+								DatasetInfo* l_type = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+								Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+
+								if (l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
+								{
+									m_pDatasetHelper->m_isSegmentActive = true;
+									m_hr = pick(event.GetPosition(), false);
+									segment();
+									l_info->toggleSegment();                        
+								}
+							}
+						}
+						m_lastPos = event.GetPosition();
+						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
+					}
+					else
+					{
+						if (m_pDatasetHelper->m_isDrawerToolActive)
+						{
+							m_hr = pick(event.GetPosition(), true);
+							drawOnAnatomy();
+						}
+					}
 				}
-                updateView();
-                Refresh( false );
+				else
+				{
+					if ( !m_pDatasetHelper->m_isDragging ) // Not Dragging
+					{
+						m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
+						m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
+						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
+					}
+					else if(!m_isSceneLocked)
+					{                    
+						Quat4fT ThisQuat;
+						m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
+						Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
+						Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
+						Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+					}
+				}
+				updateView();
+				Refresh( false );
             }
             else
             {
@@ -214,25 +262,6 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
             {               
                 if ( !m_pDatasetHelper->m_ismDragging)
                 {
-                    long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-                    
-                    if(l_item != -1 && !m_pDatasetHelper->m_isRulerToolActive)
-                    {
-                        DatasetInfo* l_type = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-                        Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-
-                        if (l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
-                        {
-                            m_pDatasetHelper->m_isSegmentActive = true;
-                            m_hr = pick(event.GetPosition(), true);
-                            segment();                        
-                            l_info->toggleSegment();                        
-                        }
-                    }                    
-                    else if (m_pDatasetHelper->m_isRulerToolActive)
-                    {                        
-                        m_hr = pick(event.GetPosition(), true);
-                    }
                     /*else if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isSelectBckActive && m_pDatasetHelper->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectObj-GraphCut
                     {
                         m_hr = pick(event.GetPosition(), true);
@@ -257,11 +286,11 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                         background.push_back(current);
                         
                     }*/
-                    m_pDatasetHelper->m_ismDragging = true;
                     m_lastPos = event.GetPosition();
+                    m_pDatasetHelper->m_ismDragging = true;
                 }
-                else  if (!m_pDatasetHelper->m_isRulerToolActive && !m_isSceneLocked) //Move Scene
-                {                    
+                else  if (!m_isSceneLocked) //Move Scene
+                {
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
                     m_lastPos = event.GetPosition();
@@ -428,7 +457,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                                 case SAGITTAL:
                                     n.x = 1.0;
                                     break;
-                            }                     
+                            }
                             
                             float delta = wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),10),-10);
                             float mult = wxMin( m_pDatasetHelper->m_xVoxel, wxMin( m_pDatasetHelper->m_yVoxel, m_pDatasetHelper->m_zVoxel ) );
@@ -550,7 +579,7 @@ float MainCanvas::getAxisParallelMovement( int x1, int y1, int x2, int y2, Vecto
     return bb / nb;
 }
 
-hitResult MainCanvas::pick( wxPoint click, bool isRuler)
+hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
 {
     //glPushMatrix();
 
@@ -606,9 +635,14 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
             {
                 m_hitPts = bb->hitCoordinate(ray,CORONAL);
-                m_isRulerHit = isRuler;
+                m_isRulerHit = isRulerOrDrawer;
                 m_pDatasetHelper->m_isSegmentActive = false;
             }
+			else if (m_pDatasetHelper->m_isDrawerToolActive)
+			{
+				m_hitPts = bb->hitCoordinate(ray,CORONAL);
+				m_isDrawerHit = isRulerOrDrawer;
+			}
         }
         bb->setSizeZ( zSize );
         bb->setCenterZ( zPos );
@@ -628,9 +662,14 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
                 if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
                 {
                     m_hitPts = bb->hitCoordinate(ray,AXIAL);
-                    m_isRulerHit = isRuler;
+                    m_isRulerHit = isRulerOrDrawer;
                     m_pDatasetHelper->m_isSegmentActive = false;
                 }
+				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					m_hitPts = bb->hitCoordinate(ray,AXIAL);
+					m_isDrawerHit = isRulerOrDrawer;
+				}
             }            
         }
         bb->setSizeY( ySize );
@@ -648,11 +687,17 @@ hitResult MainCanvas::pick( wxPoint click, bool isRuler)
             {
                 picked = SAGITTAL;
                 tpicked = hr.tmin;
-                if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive){
+                if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
+				{
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
-                    m_isRulerHit = isRuler;
+                    m_isRulerHit = isRulerOrDrawer;
                     m_pDatasetHelper->m_isSegmentActive = false;
-                }                
+                }
+				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
+					m_isDrawerHit = isRulerOrDrawer;
+				}
             }
         }
     }
@@ -748,6 +793,19 @@ void MainCanvas::render()
     {
         case MAIN_VIEW:
         {
+			/*if (m_pDatasetHelper->m_isRulerToolActive)
+			{
+				SetCursor( wxCursor( wxCURSOR_CROSS ) );
+			}
+			else if (m_pDatasetHelper->m_isDrawerToolActive)
+			{
+				SetCursor( wxCursor( wxCURSOR_PENCIL ) );
+			}
+			else
+			{
+				SetCursor( wxCursor( wxCURSOR_ARROW ) );
+			}*/
+
             if ( m_pDatasetHelper->m_scheduledScreenshot )
             {
                 int size = 0;        
@@ -815,7 +873,7 @@ void MainCanvas::render()
                     {
                         Vector lastPts = m_pDatasetHelper->m_rulerPts.back();
                         if( lastPts != m_hitPts)
-                        {                            
+                        {
                             m_pDatasetHelper->m_rulerPts.push_back(m_hitPts);                            
                         }
                     } 
@@ -825,6 +883,11 @@ void MainCanvas::render()
                     }
                     m_isRulerHit = false;
                 }
+				else if ( m_pDatasetHelper->m_isDrawerToolActive && m_isDrawerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
+				{
+					m_isDrawerHit = false;
+				}
+
                 //renderTestRay();
                 if (m_pDatasetHelper->m_isShowAxes)
                 {
@@ -834,6 +897,11 @@ void MainCanvas::render()
                 {
                     renderRulerDisplay();
                 }
+				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					//TODO, may be useful later
+					//renderDrawerDisplay();
+				}
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
                 glGetIntegerv( GL_VIEWPORT,m_viewport );
@@ -850,7 +918,7 @@ void MainCanvas::render()
 
             if ( m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount() != 0 )
             {
-                m_pDatasetHelper->m_anatomyHelper->renderNav( m_view, m_pDatasetHelper->m_shaderHelper->m_pTextureShader );
+                m_pDatasetHelper->m_anatomyHelper->renderNav( m_view, &m_pDatasetHelper->m_shaderHelper->m_anatomyShader );
                 if ( m_pDatasetHelper->GLError() )
                 {
                     m_pDatasetHelper->printGLError( wxT( "render nav view" ) );
@@ -1012,7 +1080,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
                 m_pDatasetHelper->m_rulerPts.back().x -= m_pDatasetHelper->m_xVoxel;
-            } 
+            }
             else 
             {
                 m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( wxMax(0, m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue() - 1) );
@@ -1052,6 +1120,10 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_pDatasetHelper->m_rulerPts.back().y += m_pDatasetHelper->m_yVoxel;
             } 
+			else if (m_pDatasetHelper->m_isDrawerToolActive && m_pDatasetHelper->m_drawSize > 2)
+            {
+                m_pDatasetHelper->m_drawSize -= 1;
+            }
             else 
             {
                 m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( wxMax(0, m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() - 1) );
@@ -1071,6 +1143,10 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_pDatasetHelper->m_rulerPts.back().y -= m_pDatasetHelper->m_yVoxel;
             } 
+			else if (m_pDatasetHelper->m_isDrawerToolActive)
+            {
+                m_pDatasetHelper->m_drawSize += 1;
+            }
             else 
             {
                 m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue(wxMin(m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() + 1, m_pDatasetHelper->m_rows) );
@@ -1120,6 +1196,15 @@ void MainCanvas::OnChar( wxKeyEvent& event )
         case WXK_END:
             m_pDatasetHelper->m_rulerPts.clear();
             break; 
+		case 'z': case 'Z': //ctrl-z
+			//if ( wxGetKeyState( WXK_CONTROL ) )
+            //{
+				if(m_pDatasetHelper->m_isDrawerToolActive)
+				{
+					popAnatomyHistory();
+					break; 
+				}
+			//}
         default:
             event.Skip();
             return;
@@ -1137,6 +1222,55 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 {
     float value = (*vect)[i+(j*m_pDatasetHelper->m_columns)+(k*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_columns)];
     return value;
+}
+
+void MainCanvas::drawOnAnatomy() 
+{
+	// get selected anatomy dataset (that's the one we draw on)
+	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+
+	double xClick = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
+	double yClick = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
+	double zClick = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
+	int layer = m_hr.picked;
+
+	//security check: hit detection can be a pixel offset, but negative positions crash
+	if(xClick < 0 || yClick < 0 || zClick < 0)
+	{
+		return;
+	}
+
+	if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_PEN)
+	{
+		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, m_pDatasetHelper->m_drawColor);
+	}
+	else if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_ERASER)
+	{
+		wxColor transparent(0,0,0);
+		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, transparent);
+	}
+}
+
+void MainCanvas::pushAnatomyHistory()
+{
+	// get selected anatomy dataset (that's the one we draw on)
+	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+
+	l_currentAnatomy->pushHistory();
+}
+
+void MainCanvas::popAnatomyHistory()
+{
+	// get selected anatomy dataset (that's the one we draw on)
+	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+	
+	//is this Anatomy in RGB or not?
+	bool isRGB = (l_currentAnatomy->getType() == RGB);
+
+	l_currentAnatomy->popHistory(isRGB);
 }
 
 //Kmeans Segmentation

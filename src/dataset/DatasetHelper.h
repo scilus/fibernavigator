@@ -38,6 +38,8 @@
 
 #include "../misc/Fantom/FMatrix.h"
 
+#include "../Logger.h"
+
 class MainFrame;
 class DatasetInfo;
 class TheScene;
@@ -46,13 +48,11 @@ class ShaderHelper;
 class SplinePoint;
 class SelectionObject;
 class Fibers;
+class FibersGroup;
 class TensorField;
 class Surface;
 
 typedef std::vector< std::vector< SelectionObject* > > SelectionObjectList;
-
-// printDebug levels
-enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_WARNING, LOGLEVEL_ERROR };
 
 class DatasetHelper 
 {
@@ -62,15 +62,20 @@ public:
     virtual ~DatasetHelper();
 
     // Functions
+    //void out_of_memory(); 
     bool load( const int i_index );
-    bool load( wxString    i_filename, 
-               int   i_index     = -1, 
-               const float i_threshold = 0.0f, 
-               const bool  i_active    = true,
-               const bool  i_showFS    = true, 
-               const bool  i_useTex    = true, 
-               const float i_alpha     = 1.0f );
-    void finishLoading ( DatasetInfo* );
+    bool load( wxString    i_filename,
+               int         i_index		= -1, 
+               const float i_threshold  = 0.0f, 
+               const bool  i_active		= true,
+               const bool  i_showFS		= true, 
+               const bool  i_useTex		= true, 
+               const float i_alpha		= 1.0f,
+			   wxString    i_name		= _T( ""),
+			   int		   i_version	= 1,
+			   const bool  i_isFiberGroup = false,
+			   const bool  i_isScene = false );
+    void finishLoading ( DatasetInfo*, bool isChild = false );
     bool loadScene     ( const wxString i_filename );
     bool loadTextFile  ( wxString* i_string, const wxString i_filename );
     bool fileNameExists( const wxString i_filename );
@@ -83,9 +88,7 @@ public:
     void   deleteAllSelectionObjects();
     void   updateAllSelectionObjects();
     Vector mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);
-    Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);    
-
-    bool invertFibers() { return m_fibersInverted = ! m_fibersInverted; };
+    Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);   
 
     void createIsoSurface();
     void createDistanceMapAndIso();
@@ -99,13 +102,30 @@ public:
     /*
      * Helper functions
      */
+
+#ifndef __GNUC__
+    #pragma deprecated(printTime, printwxT, printDebug, printGLError)
+    
+    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
     void printTime();
-    void printwxT  ( const wxString i_string );
-    void printDebug( const wxString i_string, const LogLevel i_level );
+    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printwxT  ( const wxString string );
+    // Deprecated: Use Log::printDebug instead.
+    void printDebug( const wxString string, const LogLevel level );
+#else
+    // Deprecated: Should use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printTime() __attribute__((deprecated));
+    // Deprecated: Use Log::printDebug(message, LOGLEVEL_MESSAGE) instead.
+    void printwxT  ( const wxString string ) __attribute__((deprecated));
+    // Deprecated: Use Log::printDebug instead.
+    void printDebug( const wxString string, const LogLevel level ) __attribute__((deprecated));
+#endif
+
     /*
      * Check for GL error
      */
     bool GLError();
+    // Deprecated: Use Log::printGLError instead.
     void printGLError( const wxString function = wxT( "" ) );
 
     void updateView( const float i_x, const float i_y, const float i_z );
@@ -115,7 +135,8 @@ public:
 
     void doMatrixManipulation();
 
-    bool getFiberDataset  ( Fibers*  &i_fiber );
+	bool getFibersGroupDataset( FibersGroup* &i_fiberGroup );
+	bool getSelectedFiberDataset ( Fibers* &i_fiber );
     bool getSurfaceDataset( Surface* &i_surface );
     bool getTextureDataset( std::vector< DatasetInfo* > &o_types ); 
     std::vector< float >* getVectorDataset();
@@ -127,6 +148,8 @@ public:
     bool getPointMode()           { return m_pointMode; };
 
     void updateLoadStatus();
+	void updateItemsId();
+	void updateItemsPosition();
 
     void doLicMovie       ( int i_mode );
     void createLicSliceSag( int i_slize );
@@ -174,7 +197,8 @@ public:
     bool m_scnFileLoaded;
     bool m_anatomyLoaded;
     bool m_meshLoaded;
-    bool m_fibersLoaded;
+    bool m_fibersGroupLoaded;
+	bool m_fibersLoaded;
     bool m_vectorsLoaded;
     bool m_tensorsFieldLoaded;
     bool m_tensorsLoaded;
@@ -224,16 +248,29 @@ public:
     bool  m_useLic;           // Show the lic texture on spline surface.
     bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
     float m_normalDirection;  // Normal direction of the spline surface.
-    bool  m_fibersInverted;
-    bool  m_useFakeTubes;
+    bool  m_geometryShadersSupported;
     bool  m_clearToBlack;
-    bool  m_useTransparency;
+    bool  m_useFibersGeometryShader;
     bool  m_filterIsoSurf;
     int   m_colorMap;
     bool  m_showColorMapLegend;
     bool  m_displayMinMaxCrossSection;
     bool  m_displayGlyphOptions;
-    FibersColorationMode   m_fiberColorationMode;
+
+	bool  m_isDrawerToolActive;
+	enum  DrawMode
+	{
+		DRAWMODE_PEN = 0,
+		DRAWMODE_ERASER = 1,
+        DRAWMODE_INVALID
+	};
+	DrawMode m_drawMode;
+	int     m_drawSize;
+	bool    m_drawRound;
+	bool    m_draw3d;
+    bool    m_canUseColorPicker;
+	wxColor m_drawColor;
+	wxImage m_drawColorIcon;
 
     bool  m_morphing;
 
@@ -271,9 +308,10 @@ public:
     SelectionObject* m_boxAtCrosshair;
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
-    MainFrame*       m_mainFrame;
     TheScene*        m_theScene;
     ShaderHelper*    m_shaderHelper;
+    
+    MainFrame*       m_mainFrame;
 };
 
 #define ID_KDTREE_FINISHED    50

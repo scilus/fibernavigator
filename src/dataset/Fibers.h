@@ -56,8 +56,12 @@ public:
     
     void    updateFibersColors();
     
-    void    generateFiberVolume();
+    Anatomy* generateFiberVolume();
     
+	void	getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines );
+	void	getNbLines( int& nbLines );
+	void	loadDMRIFibersInFile( ofstream& myfile );
+
     void    save( wxString filename );
     void    saveDMRI( wxString filename );
     
@@ -81,12 +85,14 @@ public:
     float   getPointValue( int  ptIndex );
     int     getLineCount();
     int     getPointCount();
-    bool    isSelected(    int  fiberId );
+	bool    isSelected( int  fiberId );
     
+	float	getLocalizedAlpha( int index );
+	
     void    setFibersLength();
     
     void    updateFibersFilters();
-
+	void	updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
     vector< bool >  getFilteredFibers();
 
     void    flipAxis( AxisType i_axe );
@@ -94,6 +100,19 @@ public:
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
 
+	bool isUsingFakeTubes()		{ return m_useFakeTubes; };
+	bool isUsingTransparency()	{ return m_useTransparency; };
+	bool isFibersInverted()		{ return m_fibersInverted; };
+
+	void updateColorationMode()	{ m_isColorationUpdated = true; };
+	FibersColorationMode getColorationMode() { return m_fiberColorationMode; };
+	void setColorationMode(FibersColorationMode value) { m_fiberColorationMode = value; };
+
+	void useFakeTubes();
+	void useTransparency();
+    bool invertFibers()		{ return m_fibersInverted = ! m_fibersInverted; };
+	
+	void findCrossingFibers();
 
     GLuint  getGLuint( )
     {
@@ -109,6 +128,36 @@ public:
     {
         return m_minLength;
     }
+
+	void	updateSliderMinLength( int value )
+	{
+		m_pSliderFibersFilterMin->SetValue( value );
+	}
+
+	void	updateSliderMaxLength( int value )
+	{
+		m_pSliderFibersFilterMax->SetValue( value );
+	}
+
+	void	updateSliderSubsampling( int value )
+	{
+		m_pSliderFibersSampling->SetValue( value );
+	}
+
+	void	updateToggleLocalColoring( bool value )
+	{
+		m_pToggleLocalColoring->SetValue( value );
+	}
+
+	void	updateToggleNormalColoring( bool value )
+	{
+		m_pToggleNormalColoring->SetValue( value );
+	}
+	
+	void	updateSliderThickness( int value )
+	{
+		m_pSliderCrossingFibersThickness->SetValue( value );
+	}
     
     // Empty derived methods
     void    activateLIC()      {};
@@ -119,14 +168,17 @@ public:
     void    generateGeometry() {};
     void    smooth()           {};
 
+    void    toggleCrossingFibers() { m_useCrossingFibers = !m_useCrossingFibers; }
+    void    updateCrossingFibersThickness();
+
 private:
     void            colorWithTorsion(     float *pColorData );
     void            colorWithCurvature(   float *pColorData );
     void            colorWithDistance(    float *pColorData );
     void            colorWithMinDistance( float *pColorData );
     
-    string          intToString( const int number );
     void            toggleEndianess();
+	string			intToString( const int number );
     
     void            calculateLinePointers();
     void            createColorArray( const bool colorsLoadedFromFile );
@@ -139,45 +191,70 @@ private:
 
     void            drawFakeTubes();
     void            drawSortedLines();
+    void            drawCrossingFibers();
 
     void            freeArrays();
 
     bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
+    
+    void            setShader();
+    void            releaseShader();
 
     // Variables
-    bool            m_isSpecialFiberDisplay;
-    Vector          m_barycenter;
-    vector< float > m_boxMax;
-    vector< float > m_boxMin;
-    vector< float > m_colorArray;
-    int             m_count;
-    int             m_countLines;
-    int             m_countPoints;
-    bool            m_isInitialized;
-    vector< int >   m_lineArray;
-    vector< int >   m_linePointers;
-    vector< float > m_pointArray;
-    vector< float > m_normalArray;
-    bool            m_normalsPositive;
-    vector< int >   m_reverse;
-    vector< bool >  m_selected;
-    vector< bool >  m_filtered;
-    vector< float > m_length;
-    float           m_maxLength;
-    float           m_minLength;
-    vector<float  > m_localizedAlpha;
-    float           m_cachedThreshold;
+    bool				 m_isSpecialFiberDisplay;
+    Vector				 m_barycenter;
+    vector< float >		 m_boxMax;
+    vector< float >		 m_boxMin;
+    vector< float >		 m_colorArray;
+    int					 m_count;
+    int					 m_countLines;
+    int					 m_countPoints;
+    bool				 m_isInitialized;
+    vector< int >		 m_lineArray;
+    vector< int >		 m_linePointers;
+    vector< float >		 m_pointArray;
+    vector< float >		 m_normalArray;
+    bool				 m_normalsPositive;
+    vector< int >		 m_reverse;
+    vector< bool >		 m_selected;
+    vector< bool >		 m_filtered;
+    vector< float >		 m_length;
+    float				 m_maxLength;
+    float				 m_minLength;
+    vector<float  >		 m_localizedAlpha;
+    float				 m_cachedThreshold;
+	bool				 m_fibersInverted;
+    bool				 m_useFakeTubes;
+	bool				 m_useTransparency;
+
+	bool				 m_isColorationUpdated;
+	FibersColorationMode m_fiberColorationMode;
 
     KdTree          *m_pKdTree;
     Octree          *m_pOctree;
-    
+
+    bool            m_cfDrawDirty;
+    bool            m_axialShown;
+    bool            m_coronalShown;
+    bool            m_sagittalShown;
+    bool            m_useCrossingFibers;
+    float           m_thickness;
+    float           m_xDrawn;
+    float           m_yDrawn;
+    float           m_zDrawn;
+    vector<unsigned int> m_cfStartOfLine;
+    vector<unsigned int> m_cfPointsPerLine;
+
+
     // GUI members
     wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
+    wxSlider       *m_pSliderCrossingFibersThickness;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
+    wxToggleButton *m_pToggleCrossingFibers;
     wxRadioButton  *m_pRadioNormalColoring;
     wxRadioButton  *m_pRadioDistanceAnchoring;
     wxRadioButton  *m_pRadioMinDistanceAnchoring;

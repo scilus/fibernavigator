@@ -44,7 +44,8 @@ enum DatasetType
     POINT_DATASET, //POINT is already defined in WinDef.h so we cannot use this name in this enum.
     LABEL_POINTS,
     LABEL_SELECTION_OBJECTS,
-    NOT_INITIALIZED
+    NOT_INITIALIZED,
+	FIBERSGROUP
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -105,6 +106,7 @@ enum FibersColorationMode
     TORSION_COLOR       = 2,
     DISTANCE_COLOR      = 3,
     MINDISTANCE_COLOR   = 4,
+    CUSTOM_COLOR        = 5,
 };
 
 ///////////////////////////////////////////////////////////////////////////
