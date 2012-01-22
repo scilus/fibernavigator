@@ -1,13 +1,17 @@
 #include "MainCanvas.h"
+
+#include "MainFrame.h"
 #include "MyListCtrl.h"
-#include "wx/utils.h"
+#include "../Logger.h"
+#include "../dataset/Anatomy.h"
 #include "../dataset/SplinePoint.h"
 #include "../misc/lic/FgeOffscreen.h"
-#include "MainFrame.h"
-#include "../dataset/Anatomy.h"
+
 #include "math.h"
 #include <list>
 #include <limits>
+
+#include <wx/utils.h>
 
 typedef std::vector<float> image1D;
 typedef std::vector<image1D> image2D;
@@ -919,10 +923,7 @@ void MainCanvas::render()
             if ( m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount() != 0 )
             {
                 m_pDatasetHelper->m_anatomyHelper->renderNav( m_view, &m_pDatasetHelper->m_shaderHelper->m_anatomyShader );
-                if ( m_pDatasetHelper->GLError() )
-                {
-                    m_pDatasetHelper->printGLError( wxT( "render nav view" ) );
-                }
+                Logger::getInstance()->printIfGLError( wxT( "Render nav view" ) );
             }
     }    
     //glFlush();

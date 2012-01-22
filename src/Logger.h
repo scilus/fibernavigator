@@ -8,8 +8,9 @@
 
 #include <GL/glew.h>
 #include <wx/string.h>
+#include <sstream>
 
-// printDebug levels
+// print levels
 enum LogLevel { LOGLEVEL_DEBUG, LOGLEVEL_MESSAGE, LOGLEVEL_WARNING, LOGLEVEL_ERROR, LOGLEVEL_GLERROR };
 
 class Logger
@@ -19,19 +20,17 @@ public:
 
     static Logger * getInstance();
 
-    void printDebug( const wxString str, const LogLevel level );
-    void printGLError( const wxString str, const GLenum errorCode );
+    void print( const wxString &str, const LogLevel level );
+    bool printIfGLError( wxString str );
     void setMessageLevel( int level );
 
 protected:
     Logger();
 
 private:
-    void printTime();
-    void printwxT( const wxString str );
-
     static Logger *m_pInstance;
     int m_level;
+    std::ostringstream m_oss;
 };
 
 #endif // LOGGER_H_
