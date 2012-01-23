@@ -66,9 +66,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     //Distance coloring
     m_DistColoring          = false;
 
-    m_inBox.resize( m_datasetHelper->m_countFibers, sizeof(bool) );
-    for( unsigned int i = 0; i < m_datasetHelper->m_countFibers ; ++i )
-        m_inBox[i] = false;
+    m_inBox.resize( m_datasetHelper->m_countFibers, false );
 }
 
 SelectionObject::~SelectionObject( )
@@ -845,7 +843,7 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< bool > filteredFiber;
     Fibers* l_fibers = NULL;
 
-    m_datasetHelper->getFiberDataset(l_fibers);
+    m_datasetHelper->getSelectedFiberDataset(l_fibers);
     filteredFiber = l_fibers->getFilteredFibers();
 
     for( unsigned int i = 0; i < m_inBranch.size(); ++i )
@@ -1005,7 +1003,7 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 bool SelectionObject::getShowFibers()
 {
     Fibers* l_fibers = NULL;
-    m_datasetHelper->getFiberDataset( l_fibers );
+    m_datasetHelper->getSelectedFiberDataset( l_fibers );
     if ( l_fibers == NULL )
         return false;
     return l_fibers->getShow();
@@ -1022,7 +1020,7 @@ bool SelectionObject::getShowFibers()
 bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
 {
     Fibers* l_fibers = NULL;
-    m_datasetHelper->getFiberDataset( l_fibers );
+    m_datasetHelper->getSelectedFiberDataset( l_fibers );
 
     if( l_fibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
         return false;

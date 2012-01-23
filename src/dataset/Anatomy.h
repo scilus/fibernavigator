@@ -46,6 +46,7 @@ public:
     Anatomy( DatasetHelper *pDatasetHelper, const int type );
     virtual ~Anatomy();
    
+	void add( Anatomy* anatomy);
    
     float at( const int i );
     std::vector<float>* getFloatDataset();

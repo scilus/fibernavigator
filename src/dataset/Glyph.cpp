@@ -11,9 +11,12 @@
 
 #include "Glyph.h"
 
-#include <GL/glew.h>
-#include "../misc/nifti/nifti1_io.h"
+#include "../Logger.h"
 #include "../gui/MainFrame.h"
+#include "../misc/nifti/nifti1_io.h"
+
+#include <GL/glew.h>
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -584,9 +587,8 @@ void Glyph::loadBuffer()
         GL_STATIC_DRAW );    
 
     // There was a problem loading this buffer into video memory!
-    if( DatasetInfo::m_dh->GLError() )
+    if( Logger::getInstance()->printIfGLError( wxT( "Initialize vbo points for tensors" ) ) )
     {
-        DatasetInfo::m_dh->printGLError( wxT( "initialize vbo points for tensors" ) );
         m_datasetHelper.m_useVBO = false;
         delete m_hemisphereBuffer;
     }

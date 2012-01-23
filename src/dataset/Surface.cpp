@@ -1,16 +1,19 @@
-#include <math.h>
-#include <fstream>
 
 #include "Surface.h"
-#include "../misc/Fantom/FMatrix.h"
-#include "Surface.h"
-#include "SplinePoint.h"
-#include "../gui/MyListCtrl.h"
+
 #include "Anatomy.h"
-#include "../gui/MainFrame.h"
-#include <GL/glew.h>
-#include "../misc/lic/SurfaceLIC.h"
+#include "SplinePoint.h"
+#include "Surface.h"
 #include "../main.h"
+#include "../Logger.h"
+#include "../gui/MyListCtrl.h"
+#include "../gui/MainFrame.h"
+#include "../misc/Fantom/FMatrix.h"
+#include "../misc/lic/SurfaceLIC.h"
+
+#include <fstream>
+#include <math.h>
+#include <GL/glew.h>
 
 
 Surface::Surface(DatasetHelper* dh) : DatasetInfo(dh)
@@ -302,7 +305,7 @@ void Surface::execute ()
         m_tMesh->doLoopSubD();
         m_tMesh->doLoopSubD();
         subDCount = 5;
-        m_dh->printDebug( _T("initiating lic"), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print( wxT( "Initiating lic" ), LOGLEVEL_MESSAGE );
         SurfaceLIC lic(m_dh, m_tMesh);
         lic.execute();
 
@@ -568,7 +571,7 @@ bool Surface::save(wxString filename ) const
         return false;
     }
 
-    m_dh->printDebug( _T("start writing file)"), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Writing file" ), LOGLEVEL_MESSAGE );
     dataFile << ("# vtk DataFile Version 2.0\n");
     dataFile << ("generated using FiberNavigator\n");
     dataFile << ("ASCII\n");

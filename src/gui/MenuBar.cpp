@@ -11,6 +11,8 @@
 
 #include "MenuBar.h"
 #include "MainFrame.h"
+#include "../dataset/Fibers.h"
+#include "../dataset/FibersGroup.h"
 
 MenuBar::MenuBar()
 {
@@ -132,6 +134,7 @@ MenuBar::MenuBar()
     m_menuHelp = new wxMenu();
     m_itemKeyboardShortcuts = m_menuHelp->Append(wxID_ANY, wxT("Keyboard Shortcut"));
     m_itemScreenShot = m_menuHelp->Append(wxID_ANY, wxT("ScreenShot"));
+	m_itemWarningsInfo = m_menuHelp->Append(wxID_ANY, wxT("Warnings Informations"));
     //m_menuMovie = new  wxMenu();
     //m_itemAxialMovie = m_menuMovie->Append(wxID_ANY, wxT("Axial"));
     //m_itemCoronalMovie = m_menuMovie->Append(wxID_ANY, wxT("Coronal"));
@@ -232,6 +235,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemAbout->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onAbout));
     mf->Connect(m_itemKeyboardShortcuts->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onShortcuts));
     mf->Connect(m_itemScreenShot->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshot));
+	mf->Connect(m_itemWarningsInfo->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onWarningsInformations));
     //mf->Connect(m_itemAxialMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieAxi));
     //mf->Connect(m_itemCoronalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieCor));
     //mf->Connect(m_itemSagittalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieSag));
@@ -247,16 +251,68 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     
     m_itemToggleLighting->Check(mf->m_pDatasetHelper->m_lighting);
     m_itemToggleRuler->Check(mf->m_pDatasetHelper->m_isRulerToolActive);
-    m_itemToogleInvertFibersSelection->Check(mf->m_pDatasetHelper->m_fibersInverted);
-    m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
-    m_itemToggleUseTransparency->Check(mf->m_pDatasetHelper->m_useTransparency);
+    
+	bool isFiberSelected = false;
+	bool isFiberUsingFakeTubes = false;
+	bool isFiberUsingTransparency = false;
+	bool isFiberInverted = false;
+	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListItem != -1)
+    {
+		DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
+
+        if( pDatasetInfo->getType() == FIBERS )
+        {
+            isFiberSelected = true;
+			Fibers* pFibers = (Fibers*)pDatasetInfo;
+			if( pFibers )
+			{
+				isFiberUsingFakeTubes = pFibers->isUsingFakeTubes();
+				isFiberUsingTransparency = pFibers->isUsingTransparency();
+				isFiberInverted = pFibers->isFibersInverted();
+			}
+		}
+		else if( pDatasetInfo->getType() == FIBERSGROUP )
+		{
+			isFiberSelected = true;
+			FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
+			if( pFibersGroup )
+			{
+				int useFakeTubesNb = 0;
+				int useTransparencyNb = 0;
+				int isInvertedNb = 0;
+				for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
+				{
+					Fibers* pFibers = pFibersGroup->getFibersSet(i);
+					
+					if( pFibers->isUsingFakeTubes())
+						useFakeTubesNb++;
+					if( pFibers->isUsingTransparency() )
+						useTransparencyNb++;
+					if( pFibers->isFibersInverted() )
+						isInvertedNb++;
+				}
+				isFiberUsingFakeTubes = ( useFakeTubesNb == pFibersGroup->getFibersCount() );
+				isFiberUsingTransparency = ( useTransparencyNb == pFibersGroup->getFibersCount() );
+				isFiberInverted = ( isInvertedNb == pFibersGroup->getFibersCount() );
+			}
+		}
+	}
+	m_itemSaveSelectedFibers->Enable(isFiberSelected);
+	m_itemResetFibersColors->Enable(isFiberSelected);
+	m_itemToogleInvertFibersSelection->Enable(isFiberSelected);
+	m_itemToogleInvertFibersSelection->Check(isFiberInverted);
+	m_itemToggleUseTransparency->Enable(isFiberSelected);
+    m_itemToggleUseTransparency->Check(isFiberUsingTransparency);
+    m_itemToggleUseFakeTubes->Enable(isFiberSelected);
+	m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
+    
+	m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
     m_itemToggleUseGeometryShader->Check(mf->m_pDatasetHelper->m_useFibersGeometryShader);
 #if _COMPILE_GEO_SHADERS
     m_itemToggleUseGeometryShader->Enable(mf->m_pDatasetHelper->m_geometryShadersSupported);
 #else
     m_itemToggleUseGeometryShader->Enable(false);
 #endif
-    m_itemToggleUseFakeTubes->Check(mf->m_pDatasetHelper->m_useFakeTubes);
     m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
     m_itemToggleShowCrosshair->Check(mf->m_pDatasetHelper->m_showCrosshair);
     m_itemToggleShowAxial->Check(mf->m_pDatasetHelper->m_showAxial);

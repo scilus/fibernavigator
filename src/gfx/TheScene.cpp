@@ -10,6 +10,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "TheScene.h"
+
+#include "../Logger.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetHelper.h"
@@ -59,7 +61,7 @@ TheScene::TheScene( DatasetHelper* pDatasetHelper ) :
 //////////////////////////////////////////////////////////////////////////////////
 TheScene::~TheScene()
 {
-    m_pDatasetHelper->printDebug( _T( "execute theScene destructor" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Execute TheScene destructor" ), LOGLEVEL_DEBUG );
 
 #ifndef __WXMAC__
     // On mac, this is just a pointer to the original object that is deleted with the widgets.
@@ -69,7 +71,7 @@ TheScene::~TheScene()
         m_pMainGLContext = NULL;
     }
 #endif
-    m_pDatasetHelper->printDebug( _T( "theScene destructor done" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "TheScene destructor done" ), LOGLEVEL_DEBUG );
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -88,12 +90,12 @@ void TheScene::initGL( int whichView )
         if( GLEW_OK != errorCode )
         {
             // Problem: glewInit failed, something is seriously wrong.
-            m_pDatasetHelper->printDebug( _T( "Error: " ) + wxString::FromAscii( (char*)glewGetErrorString( errorCode ) ), LOGLEVEL_ERROR );
+            Logger::getInstance()->print( wxT( "Error: " ) + wxString::FromAscii( (char*)glewGetErrorString( errorCode ) ), LOGLEVEL_ERROR );
             exit( false );
         }
         if( whichView == MAIN_VIEW )
         {
-            m_pDatasetHelper->printDebug( _T( "Status: Using GLEW " ) + wxString::FromAscii( (char*)glewGetString( GLEW_VERSION ) ), LOGLEVEL_MESSAGE );
+            Logger::getInstance()->print( wxT( "Status: Using GLEW " ) + wxString::FromAscii( (char*)glewGetString( GLEW_VERSION ) ), LOGLEVEL_MESSAGE );
 
             wxString vendorId;
             wxString rendererId;
@@ -107,7 +109,7 @@ void TheScene::initGL( int whichView )
             else if ( rendererId.Contains( _T( "GeForce 8" ) ) || rendererId.Contains( _T( "GeForce GTX 2" ) ) )
                 m_pDatasetHelper->m_geforceLevel = 8;
 
-            m_pDatasetHelper->printDebug( vendorId + _T( " " ) + rendererId, LOGLEVEL_MESSAGE );
+            Logger::getInstance()->print( vendorId + _T( " " ) + rendererId, LOGLEVEL_MESSAGE );
 
             if( ! glewIsSupported( "GL_ARB_shader_objects" ) )
             {
@@ -117,7 +119,7 @@ void TheScene::initGL( int whichView )
             }
             else if ( !glewIsSupported( "GL_VERSION_3_2" ) && !glewIsSupported( "GL_ARB_geometry_shader4" ) && !glewIsExtensionSupported( "GL_EXT_geometry_shader4" ) )
             {
-                m_pDatasetHelper->printDebug( _T( "Geometry shaders not supported. Some operations may run slower and use more CPU." ), LOGLEVEL_WARNING );
+                Logger::getInstance()->print( wxT( "Geometry shaders not supported. Some operations may run slower and use more CPU." ), LOGLEVEL_WARNING );
                 m_pDatasetHelper->m_geometryShadersSupported = false;
                 useGeometry = false;
                 // TODO: Set some sort of global variable to indicate geometry shaders are not supported
@@ -138,8 +140,7 @@ void TheScene::initGL( int whichView )
         glOrtho( 0, view1, 0, view1, -3000, 3000 );
     } catch ( ... )
     {
-        if( m_pDatasetHelper->GLError() )
-            m_pDatasetHelper->printGLError( wxT( "init" ) );
+        Logger::getInstance()->printIfGLError( wxT( "Init" ) );
     }
 }
 
@@ -174,8 +175,8 @@ void TheScene::bindTextures()
         }
 
     }
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "bind textures" ) );
+    
+    Logger::getInstance()->printIfGLError( wxT( "Bind textures") );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -222,7 +223,7 @@ void TheScene::renderScene()
 	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
     }
 
-    //Navigate trhoug slices
+    //Navigate through slices
     if(m_isNavSagital) 
     {
 	    if (m_posSagital > m_pDatasetHelper->m_columns) 
@@ -275,22 +276,14 @@ void TheScene::renderScene()
         renderODFs();
     
     renderMesh();
-
-    if( m_pDatasetHelper->m_fibersLoaded )
-    {
-        if ( m_pDatasetHelper->m_useFakeTubes )
-            renderFakeTubes();
-        else
-            renderFibers();
-    }
+	renderFibers();
     
     if( m_pDatasetHelper->m_showObjects )
+    {
         drawSelectionObjects();
+    }
 
-    
-
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "render theScene" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Render theScene" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -458,8 +451,7 @@ void TheScene::renderSlices()
     if( m_pDatasetHelper->m_showCrosshair )
         m_pDatasetHelper->m_anatomyHelper->renderCrosshair();
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "render slizes" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Render slices" ) );
 
     glPopAttrib();
 }
@@ -496,9 +488,7 @@ void TheScene::renderSplineSurface()
 
             lightsOff();
 
-            if ( m_pDatasetHelper->GLError() )
-                m_pDatasetHelper->printGLError( wxT( "draw surface" ) );
-
+            Logger::getInstance()->printIfGLError( wxT( "Draw surface" ) );
             glPopAttrib();
         }
     }
@@ -585,14 +575,13 @@ void TheScene::renderMesh()
 
     lightsOff();
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw mesh" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Draw mesh " ) );
 
     glPopAttrib();
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This function will render the fibers in normal mode (not fake tubes) in theScene.
+// This function will render the fibers in theScene.
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::renderFibers()
 {
@@ -602,81 +591,58 @@ void TheScene::renderFibers()
     {
         DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
 
-        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow() )
+        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow())
         {
-            lightsOff();
+			Fibers* pFibers = (Fibers*)pDsInfo;
+			if( pFibers != NULL )
+			{
+                if( m_pDatasetHelper->m_selBoxChanged )
+                {
+                    pFibers->updateLinesShown();
+                }
 
-            if( m_pDatasetHelper->m_lighting )
-            {
-                lightsOn();
-                GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-                glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
+				if( pFibers->isUsingFakeTubes() )
+				{
+					pFibers->draw();
 
-            }
-            if( ! pDsInfo->getUseTex() )
-            {
-                bindTextures();
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.bind();
-                //m_pDatasetHelper->m_shaderHelper->setFiberShaderVars();
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-                //m_pDatasetHelper->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
-            }
-            if( m_pDatasetHelper->m_selBoxChanged )
-            {
-                ( (Fibers*)pDsInfo )->updateLinesShown();
-                m_pDatasetHelper->m_selBoxChanged = false;
-            }
-            pDsInfo->draw();
+                    Logger::getInstance()->printIfGLError( wxT( "Draw fake tubes" ) );
+				}
+				else // render normally
+				{
+					if( m_pDatasetHelper->m_lighting )
+					{
+						lightsOn();
+						GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+						glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
+					}
+					if( ! pFibers->getUseTex() )
+					{
+						bindTextures();
+					}
+					
+					pFibers->draw();
+					lightsOff();
 
-            //m_pDatasetHelper->m_shaderHelper->m_fibersShader.release();
+                    Logger::getInstance()->printIfGLError( wxT( "Draw fibers" ) );
+				}
+			}
+		}
+	}
 
-            lightsOff();
-        }
-    }
+	m_pDatasetHelper->m_selBoxChanged = false;
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw fibers" ) );
-
-    glPopAttrib();
-}
-
-///////////////////////////////////////////////////////////////////////////
-// This function will render the fibers as fake tubes in theScene.
-///////////////////////////////////////////////////////////////////////////
-void TheScene::renderFakeTubes()
-{
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    vector< vector< SelectionObject * > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
+    for( vector< vector< SelectionObject *> >::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )
     {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
-
-        if( pDsInfo->getType() == FIBERS && pDsInfo->getShow() )
+        for( vector< SelectionObject *>::iterator itChild = itMaster->begin(); itChild != itMaster->end(); ++itChild )
         {
-            if( m_pDatasetHelper->m_selBoxChanged )
-            {
-                ( (Fibers*) pDsInfo )->updateLinesShown();
-                m_pDatasetHelper->m_selBoxChanged = false;
-            }
-
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.bind();
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", pDsInfo->getShowFS() );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
-
-            pDsInfo->draw();
-
-            m_pDatasetHelper->m_shaderHelper->m_fakeTubesShader.release();
+            (*itChild)->setIsDirty( false );
         }
     }
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw fake tubes" ) );
-
-    glPopAttrib();
+	glPopAttrib();
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will render the tensors in theScene.
@@ -702,9 +668,7 @@ void TheScene::renderTensors()
         }
     }
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw tensors" ) );
-
+    Logger::getInstance()->printIfGLError( wxT( "Draw tensors" ) );
     glPopAttrib();
 }
 
@@ -732,9 +696,7 @@ void TheScene::renderODFs()
         }
     }
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw ODFs" ) );
-
+    Logger::getInstance()->printIfGLError( wxT( "Draw ODFs" ) );
     glPopAttrib();
 }
 
@@ -767,8 +729,7 @@ void TheScene::lightsOn()
     glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specRef );
     glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 32 );
 
-    if ( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "setup lights" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Setup lights" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -798,8 +759,7 @@ void TheScene::drawSphere( float xPos, float yPos, float zPos, float ray )
     gluSphere( pQuadric, ray, 32, 32 );
     glPopMatrix();
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw sphere" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Draw sphere" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -820,8 +780,7 @@ void TheScene::drawSelectionObjects()
         }
     }
 
-    if ( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw selection objects" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Draw selection objects" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -854,8 +813,7 @@ void TheScene::drawPoints()
     m_pDatasetHelper->m_shaderHelper->m_meshShader.release();
     glPopAttrib();
 
-    if ( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw points" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Draw points" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1254,8 +1212,7 @@ void TheScene::drawVectors()
         }
     }
 
-    if( m_pDatasetHelper->GLError() )
-        m_pDatasetHelper->printGLError( wxT( "draw vectors" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Draw vectors" ) );
 
     glDisable( GL_BLEND );
 

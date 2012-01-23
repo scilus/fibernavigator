@@ -2,11 +2,14 @@
 
 #include <GL/glew.h>
 #include <wx/datetime.h>
+#include <iomanip>
+using std::setw;
+using std::setfill;
 
 Logger * Logger::m_pInstance = NULL;
 
 Logger::Logger()
-:
+:  
 #if defined( DEBUG ) || defined( _DEBUG )
     m_level( 0 )
 #else
@@ -23,6 +26,7 @@ Logger * Logger::getInstance()
     if ( NULL == m_pInstance )
     {
         m_pInstance = new Logger();
+        m_pInstance->m_oss << setfill('0');
     }
 
     return m_pInstance;
@@ -30,7 +34,7 @@ Logger * Logger::getInstance()
 
 //////////////////////////////////////////////////////////////////////////
 
-void Logger::printDebug( const wxString str, const LogLevel level )
+void Logger::print( const wxString &str, const LogLevel level )
 {
     if ( m_level > (int)level )
         return;
@@ -55,16 +59,27 @@ void Logger::printDebug( const wxString str, const LogLevel level )
         prefix = _T( "" );
     }
 
-    printTime();
-    printwxT( prefix + str + _T( "\n" ) );
+    wxDateTime time = wxDateTime::Now();
+    m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.char_str() << str.char_str() << "\n";
+    printf( m_oss.str().c_str() );
+    m_oss.str( "" );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Logger::printGLError( const wxString str, const GLenum errorCode )
+bool Logger::printIfGLError( wxString str )
 {
-    printDebug( str, LOGLEVEL_GLERROR );
-    printf( "%s\n", gluErrorString( errorCode ) );
+    GLenum error = glGetError();
+    if( GL_NO_ERROR != error )
+    {
+        str.Append( wxT( "\n" ) );
+        m_oss << gluErrorString( error );
+        str.Append( wxString( m_oss.str().c_str(), wxConvUTF8 ) );
+        m_oss.str( "" );
+        print( str, LOGLEVEL_GLERROR );
+        return true;
+    }
+    return false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -72,24 +87,6 @@ void Logger::printGLError( const wxString str, const GLenum errorCode )
 void Logger::setMessageLevel( int level )
 {
     m_level = level;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-void Logger::printTime()
-{
-    wxDateTime time = wxDateTime::Now();
-    printf( "[%02d:%02d:%02d] ", time.GetHour(), time.GetMinute(), time.GetSecond() );
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-void Logger::printwxT( const wxString str )
-{
-    char* pStr = (char*)malloc( str.length() + 1 );
-    strcpy( pStr, (const char*)str.mb_str( wxConvUTF8 ) );
-    printf( "%s", pStr );
-    free( pStr );
 }
 
 //////////////////////////////////////////////////////////////////////////

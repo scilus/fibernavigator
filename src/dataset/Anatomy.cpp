@@ -6,6 +6,7 @@
 #include "Anatomy.h"
 #include "Fibers.h"
 
+#include "../Logger.h"
 #include "../gui/MainFrame.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/nifti/nifti1_io.h"
@@ -132,6 +133,14 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     {
         assert(false);
     }
+}
+
+void Anatomy::add( Anatomy* pAnatomy)
+{
+	for(int i = 0; i < (int)m_floatDataset.size(); i++)
+	{
+		m_floatDataset[i] += pAnatomy->m_floatDataset[i];
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -300,7 +309,7 @@ void Anatomy::minimize()
 
     std::vector<bool> workData( m_columns * m_rows * m_frames, false );
     Fibers* pFibers( NULL );
-    m_dh->getFiberDataset( pFibers );
+    m_dh->getSelectedFiberDataset( pFibers );
 
     int curX, curY, curZ, index;
 
@@ -371,7 +380,7 @@ void Anatomy::flipAxis( AxisType axe )
             frames /= 2;
             break;
         default:
-            m_dh->printDebug( _T("Cannot flip axis. The given axis is undefined."), LOGLEVEL_ERROR );
+            Logger::getInstance()->print( wxT( "Cannot flip axis. The given axis is undefined." ), LOGLEVEL_ERROR );
             return;
     }
 
@@ -526,7 +535,7 @@ bool Anatomy::loadNifti( wxString fileName )
     }
     else
     {
-        m_dh->printDebug( wxT( "No transformation encoded in the nifti file. Using identity transform." ), LOGLEVEL_WARNING );
+        Logger::getInstance()->print( wxT( "No transformation encoded in the nifti file. Using identity transform." ), LOGLEVEL_WARNING );
 
         // This is not a typo, the method is called makeIdendity in FMatrix.
         m_dh->m_niftiTransform.makeIdendity();
@@ -1117,7 +1126,7 @@ void Anatomy::equalizationSliderChange()
     m_upperEqThreshold = m_pUpperEqSlider->GetValue() * 5;
     if ( m_useEqualizedDataset && ( m_lowerEqThreshold != m_currentLowerEqThreshold || m_upperEqThreshold != m_currentUpperEqThreshold ) )
     {
-        m_dh->printDebug( _T("calling equalizeHistogram"), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxT( "Calling equalizeHistogram" ), LOGLEVEL_DEBUG );
         equalizeHistogram();
 
         const GLuint* pTexId = &m_GLuint;
@@ -1498,7 +1507,7 @@ void Anatomy::erodeInternal( std::vector< bool > &workData, int curIndex )
 /************************************************************************/
 void Anatomy::equalizeHistogram()
 {
-    m_dh->printDebug( _T( "Anatomy::equalizeHistogram() Starting equalization..." ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Anatomy::equalizeHistogram() Starting equalization..." ), LOGLEVEL_DEBUG );
     clock_t startTime( clock() );
 
     //TODO: Add support for RGB
@@ -1507,7 +1516,7 @@ void Anatomy::equalizeHistogram()
 
     if( 0 == size || 1 != m_bands )
     {
-        m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() Anatomy not supported" ), wxConvUTF8 ), LOGLEVEL_WARNING );
+        Logger::getInstance()->print( wxT( "Anatomy::equalizeHistogram() Anatomy not supported" ), LOGLEVEL_WARNING );
         return;
     }
 
@@ -1531,7 +1540,7 @@ void Anatomy::equalizeHistogram()
             }
             else
             {
-                m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() pixel value out of range" ), wxConvUTF8 ), LOGLEVEL_ERROR );
+                Logger::getInstance()->print( wxT( "Anatomy::equalizeHistogram() pixel value out of range" ), LOGLEVEL_ERROR );
             }
         }
 
@@ -1568,7 +1577,7 @@ void Anatomy::equalizeHistogram()
             if( 0 == size - nbPixelsEliminated - cdfMin )
             {
                 // Division by zero, cancel calculation
-                m_dh->printDebug( wxString( _T( "Anatomy::equalizeHistogram() division by zero" ), wxConvUTF8 ), LOGLEVEL_ERROR );
+                Logger::getInstance()->print( wxT( "Anatomy::equalizeHistogram() division by zero" ), LOGLEVEL_ERROR );
                 return;
             }
         }
@@ -1598,7 +1607,7 @@ void Anatomy::equalizeHistogram()
     oss << "Anatomy::equalizeHistogram() took ";
     oss << static_cast<float>(endTime - startTime) / CLOCKS_PER_SEC;
     oss << " seconds."; 
-    m_dh->printDebug( wxString( oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxString( oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
 }
 
 //////////////////////////////////////////////////////////////////////////

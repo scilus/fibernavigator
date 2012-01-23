@@ -7,6 +7,7 @@
 
 #include "SurfaceLIC.h"
 #include "../Fantom/FTensor.h"
+#include "../../Logger.h"
 
 SurfaceLIC::SurfaceLIC(DatasetHelper* dh, TriangleMesh* grid)
 {
@@ -66,7 +67,7 @@ void SurfaceLIC::execute()
         streamline = new MyLICStreamline(m_dh, m_grid);
         streamline->setParams(&hit_texture, min_length, threshold);
 
-        m_dh->printDebug(_T("start calculating lic"), LOGLEVEL_MESSAGE );
+        Logger::getInstance()->print(_T("Calculating LIC"), LOGLEVEL_MESSAGE );
 
         // iterate over all texture points
         positive m, q, n = 0;
@@ -74,22 +75,29 @@ void SurfaceLIC::execute()
         q = (m_grid->getNumTriangles() - 1) % modulo;
 
         for (positive i = 0; i <= q; ++i)
+        {
             for (positive j = 0; j <= m; ++j, ++n)
             {
                 calculatePixelLuminance(FIndex(modulo * j + i));
             }
+        }
 
         for (positive i = q + 1; i < modulo; ++i)
+        {
             for (positive j = 0; j < m; ++j, ++n)
             {
                 calculatePixelLuminance(FIndex(modulo * j + i));
             }
-        m_dh->printDebug( _T("lic done"), LOGLEVEL_MESSAGE );
+        }
+        Logger::getInstance()->print( wxT("LIC done"), LOGLEVEL_MESSAGE );
+        
 
     } catch (FException& e)
     {
-        if (streamline)
+        if( streamline )
+        {
             delete streamline;
+        }
 
         e.addTraceMessage("void SurfaceLIC::execute ()");
         throw ;
