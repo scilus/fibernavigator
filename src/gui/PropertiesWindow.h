@@ -19,7 +19,7 @@
 #include "../misc/Algorithms/Helper.h"
 
 class MainFrame;
-class PropertiesWindow: public wxScrolledWindow
+class PropertiesWindow : public wxScrolledWindow
 {
 public:
     PropertiesWindow(){};

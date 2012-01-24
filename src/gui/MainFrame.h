@@ -47,6 +47,9 @@ public:
 	void createNewAnatomy					( int dataType );
     
 private:
+    void initOpenGl();
+    void initLayout();
+
     // File menu
     void onNewAnatomyByte                   ( wxCommandEvent& event );
     void onNewAnatomyRGB                    ( wxCommandEvent& event );
@@ -214,6 +217,7 @@ public:
     wxTreeItemId        m_tSelectionObjectsId;
 
 DECLARE_EVENT_TABLE()
+
 };
 
 /*

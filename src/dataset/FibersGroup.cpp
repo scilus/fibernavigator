@@ -30,6 +30,10 @@ FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 	m_isNormalColoringStateChanged ( false ),
 	m_isLocalColoringStateChanged ( false )
 {
+    m_name = wxT( "Fibers Group" );
+    m_show = true ;
+    m_type = FIBERSGROUP;
+
 	m_bufferObjects = new GLuint[3];
 }
 

@@ -28,9 +28,8 @@ PropertiesWindow::PropertiesWindow( MainFrame *parent, wxWindowID id,
     m_mainFrame = parent;
     SetBackgroundColour( *wxLIGHT_GREY );
     SetCursor( wxCursor( wxCURSOR_HAND ) );
-    propertiesSizer = new wxBoxSizer( wxVERTICAL );
-    SetSizer( propertiesSizer );
-    SetAutoLayout(true);
+    SetSizer( new wxBoxSizer( wxVERTICAL ) );
+    SetAutoLayout( true );
 }
 
 void PropertiesWindow::OnSize( wxSizeEvent &WXUNUSED(event) )

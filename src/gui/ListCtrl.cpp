@@ -2,6 +2,7 @@
 
 #include "../Logger.h"
 #include "../dataset/DatasetInfo.h"
+#include "../dataset/FibersGroup.h"
 
 #include <wx/imaglist.h>
 #include <wx/string.h>
@@ -16,7 +17,8 @@ END_EVENT_TABLE()
 
 ListCtrl::ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size, const long style )
 : wxListCtrl( pParent, ID_LIST_CTRL2, point, size, style ),
-  m_column( 0 )
+  m_column( 0 ),
+  m_isFiberGroupPresent( false )
 {
 }
 
@@ -42,15 +44,18 @@ void ListCtrl::InsertItem( const DatasetInfo * const pDataset )
         return;
     }
 
-#ifdef __WXMAC__
+    if( FIBERS == pDataset->getType() && !m_isFiberGroupPresent )
+    {
+        InsertItem( new FibersGroup(NULL) );
+        m_isFiberGroupPresent = true;
+    }
+
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
+    // To have the same behavior on all platforms, we add to the end of the list
     long index = GetItemCount();
-#else
-    long index = 0;
-#endif
 
-    wxListCtrl::InsertItem( index, wxT( "Display" ), pDataset->getShow() ? 0 : 1 );
+    wxListCtrl::InsertItem( index, pDataset->getShow() ? 0 : 1 );
     SetItemData( index, (long)pDataset );
     SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
     Update( index );
@@ -136,10 +141,11 @@ void ListCtrl::UpdateSelected()
 void ListCtrl::Update( long index )
 {
     DatasetInfo *pDataset = (DatasetInfo *)GetItemData( index );
-    SetItem( index, 0, wxT( "Display" ), pDataset->getShow() ? 0 : 1 );
-    SetItem( index, 1, pDataset->getName() + ( pDataset->getShowFS() ? wxT( "" ) : wxT( "*" ) ) );
-    SetItem( index, 2, wxString::Format( pDataset->getType() < MESH && pDataset->getUseTex() ? wxT( "%.2f" ) : wxT( "(%.2f)" ), pDataset->getThreshold() * pDataset->getOldMax() ) );
-    SetItem( index, 3, wxT( "Delete" ), 2 );
+    SetItem( index, 0, wxT( "" ), pDataset->getShow() ? 0 : 1 );
+    SetItem( index, 1, pDataset->getName().BeforeFirst('.') + ( pDataset->getShowFS() ? wxT( "" ) : wxT( "*" ) ) );
+    Logger::getInstance()->print(wxString::Format( wxT( "%s::Threshold: %f" ), pDataset->getName(), pDataset->getThreshold() * pDataset->getOldMax() ), LOGLEVEL_DEBUG );
+    SetItem( index, 2, wxString::Format( 2 != m_column && pDataset->getType() < MESH && pDataset->getUseTex() ? wxT( "%.2f" ) : wxT( "(%.2f)" ), pDataset->getThreshold() * pDataset->getOldMax() ) );
+    SetItem( index, 3, wxT( "" ), 2 );
 }
 
 //////////////////////////////////////////////////////////////////////////

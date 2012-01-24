@@ -235,11 +235,8 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 		if( isFiberGroup && i_isScene )
 		{
 			FibersGroup* l_fibersGroup = new FibersGroup( this );
-			l_fibersGroup->setName	   ( i_name );
-			l_fibersGroup->setShow     ( i_active );
 			l_fibersGroup->setShowFS   ( i_showFS );
 			l_fibersGroup->setuseTex   ( i_useTex );
-			l_fibersGroup->setType	   ( FIBERSGROUP );
 			
 			finishLoading( l_fibersGroup );
 			
@@ -365,6 +362,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				{
 					l_dataset->setName ( i_name );
 				}
+                m_mainFrame->m_pListCtrl2->InsertItem( l_dataset );
 				finishLoading( l_dataset );
 				
 				if (i_index==8)
@@ -400,6 +398,8 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_mesh->setShowFS   ( i_showFS );
 				l_mesh->setuseTex   ( i_useTex );
 				finishLoading       ( l_mesh);
+
+                m_mainFrame->m_pListCtrl2->InsertItem( l_mesh );
 				
 				return true;
 			}
@@ -420,9 +420,6 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				if( m_fibersGroupLoaded == false && version < 2 )
 				{
 					FibersGroup* l_fibersGroup = new FibersGroup( this );
-					l_fibersGroup->setName( wxT( "Fibers Group" ) );
-					l_fibersGroup->setShow(l_fibers->getShow());
-					l_fibersGroup->setType(FIBERSGROUP);
 					finishLoading( l_fibersGroup );
 					
 					m_fibersGroupLoaded = true;
@@ -468,6 +465,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				m_mainFrame->refreshAllGLWidgets();
 				
 				finishLoading( l_fibers, true);
+                m_mainFrame->m_pListCtrl2->InsertItem( l_fibers );
 				
 				m_fibersLoaded = true;
 				m_selBoxChanged = true;
@@ -559,7 +557,7 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 #endif
 	i_info->setListCtrlItemId(l_id);
 	
-    m_mainFrame->m_pListCtrl2->InsertItem( i_info );
+//     m_mainFrame->m_pListCtrl2->InsertItem( i_info );
 	m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
 
     if( i_info->getShow() )

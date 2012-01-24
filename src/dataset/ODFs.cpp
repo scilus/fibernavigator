@@ -1306,7 +1306,8 @@ void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
             l_dataset->setColorWithPosition(getColorWithPosition());
             
             m_dh->m_mainFrame->deleteListItem();
-            m_data->finishLoading( l_dataset );        
+            m_data->finishLoading( l_dataset ); 
+            m_data->m_mainFrame->m_pListCtrl2->InsertItem( l_dataset );
             m_data->m_ODFsLoaded = true;
 
 

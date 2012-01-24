@@ -31,6 +31,121 @@
 #include "../Logger.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
+namespace
+{
+// Properties to define GUI elements
+#define NOT_DEFINED         -1
+
+#define CANVAS_AXI_WIDTH    175
+#define CANVAS_AXI_HEIGHT   175
+#define CANVAS_COR_WIDTH    175
+#define CANVAS_COR_HEIGHT   175
+#define CANVAS_SAG_WIDTH    175
+#define CANVAS_SAG_HEIGHT   175
+
+#define LIST_WIDTH          250 //268
+#define LIST_HEIGHT         125
+#define LIST_COL0_WIDTH     34
+#define LIST_COL1_WIDTH     160
+#define LIST_COL2_WIDTH     50
+#define LIST_COL3_WIDTH     20
+
+#define PROP_WND_WIDTH      260
+#define PROP_WND_HEIGHT     350
+
+#define SLIDER_AXI_WIDTH    CANVAS_AXI_WIDTH
+#define SLIDER_AXI_HEIGHT   NOT_DEFINED
+#define SLIDER_COR_WIDTH    CANVAS_COR_WIDTH
+#define SLIDER_COR_HEIGHT   NOT_DEFINED
+#define SLIDER_SAG_WIDTH    CANVAS_SAG_WIDTH
+#define SLIDER_SAG_HEIGHT   NOT_DEFINED
+
+#define TREE_WIDTH          250 //268
+#define TREE_HEIGHT         NOT_DEFINED
+
+    void initMyListCtrl( MyListCtrl * &myListCtrl )
+    {
+        myListCtrl->SetMaxSize( wxSize( LIST_WIDTH, LIST_HEIGHT ) );
+        myListCtrl->SetMinSize( wxSize( LIST_WIDTH, LIST_HEIGHT ) );
+
+        wxImageList* imageList = new wxImageList( 16, 16 );
+
+        imageList->Add( ( wxImage( MyApp::respath +_T( "icons/eyes.png"   ), wxBITMAP_TYPE_PNG ) ) );
+        imageList->Add( ( wxImage( MyApp::respath +_T( "icons/delete.png" ), wxBITMAP_TYPE_PNG ) ) );
+
+        myListCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
+
+        wxListItem itemCol;
+        itemCol.SetText( wxT( "" ) );
+        myListCtrl->InsertColumn( 0, itemCol );
+
+        itemCol.SetText( wxT( "Name" ) );
+        itemCol.SetAlign( wxLIST_FORMAT_CENTRE );
+        myListCtrl->InsertColumn( 1, itemCol );
+
+        itemCol.SetText( wxT( "Threshold" ) );
+        itemCol.SetAlign( wxLIST_FORMAT_RIGHT );
+        myListCtrl->InsertColumn( 2, itemCol) ;
+
+        itemCol.SetText( wxT( "" ) );
+        myListCtrl->InsertColumn( 3, itemCol );
+
+        myListCtrl->SetColumnWidth( 0, LIST_COL0_WIDTH );
+        myListCtrl->SetColumnWidth( 1, LIST_COL1_WIDTH );
+        myListCtrl->SetColumnWidth( 2, LIST_COL2_WIDTH );
+        myListCtrl->SetColumnWidth( 3, LIST_COL3_WIDTH );
+    }
+
+    void initMyTreeCtrl( MyTreeCtrl * &myTreeCtrl )
+    {
+        myTreeCtrl->SetMaxSize( wxSize( TREE_WIDTH, TREE_HEIGHT ) );
+        myTreeCtrl->SetMinSize( wxSize( TREE_WIDTH, 100 ) );
+
+        wxImageList* tImageList = new wxImageList( 16, 16 );
+
+        tImageList->Add( wxImage( MyApp::respath + _T( "icons/delete.png" ), wxBITMAP_TYPE_PNG ) );
+        tImageList->Add( wxImage( MyApp::respath + _T( "icons/eyes.png" ),   wxBITMAP_TYPE_PNG ) );
+
+        myTreeCtrl->AssignImageList( tImageList );
+    }
+
+    void initListCtrl( ListCtrl * &lstCtrl )
+    {
+        lstCtrl->SetMaxSize( wxSize( LIST_WIDTH, LIST_HEIGHT ) );
+        lstCtrl->SetMinSize( wxSize( LIST_WIDTH, LIST_HEIGHT ) );
+
+        wxImageList* pImageList = new wxImageList( 16, 16 );
+
+        pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/eyes.png"   ),      wxBITMAP_TYPE_PNG ) ) );
+        pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/eyes_hidden.png" ), wxBITMAP_TYPE_PNG ) ) );
+        pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/delete.png" ),      wxBITMAP_TYPE_PNG ) ) );
+
+        lstCtrl->AssignImageList(pImageList, wxIMAGE_LIST_SMALL);
+
+        wxListItem displayCol, nameCol, thresholdCol, deleteCol;
+
+        displayCol.SetText( wxT( "Display" ) );
+
+        nameCol.SetText( wxT( "Name" ) );
+        nameCol.SetAlign( wxLIST_FORMAT_LEFT );
+
+        thresholdCol.SetText( wxT( "Threshold" ) );
+        thresholdCol.SetAlign( wxLIST_FORMAT_RIGHT );
+
+        deleteCol.SetText( wxT( "Delete" ) );
+
+        lstCtrl->InsertColumn( 0, displayCol );
+        lstCtrl->InsertColumn( 1, nameCol );
+        lstCtrl->InsertColumn( 2, thresholdCol ) ;
+        lstCtrl->InsertColumn( 3, deleteCol );
+
+        lstCtrl->SetColumnWidth( 0, LIST_COL0_WIDTH );
+        lstCtrl->SetColumnWidth( 1, LIST_COL1_WIDTH );
+        lstCtrl->SetColumnWidth( 2, LIST_COL2_WIDTH );
+        lstCtrl->SetColumnWidth( 3, LIST_COL3_WIDTH );
+    }
+}
+
 #define FIBERS_INFO_GRID_COL_SIZE              1
 #define FIBERS_INFO_GRID_ROW_SIZE              11
 #define FIBERS_INFO_GRID_TITLE_LABEL_SIZE      150
@@ -88,209 +203,52 @@ MainFrame::MainFrame(wxWindow           *i_parent,
                      const wxString     &i_title, 
                      const wxPoint      &i_pos, 
                      const wxSize       &i_size, 
-                     const long         i_style) :
-    wxFrame( i_parent, i_id, i_title, i_pos, i_size, i_style )
+                     const long         i_style)
+:   wxFrame( i_parent, i_id, i_title, i_pos, i_size, i_style ),
+    m_pLastSelectedSceneObject( NULL ),
+    m_lastSelectedListItem( -1 ),
+    m_pCurrentSceneObject( NULL ),
+    m_currentListItem( -1 ),
+    m_pCurrentSizer( NULL )
+
 {
     wxImage::AddHandler(new wxPNGHandler);
-    m_pLastSelectedSceneObject = NULL;
-    m_lastSelectedListItem = -1;
-    m_pCurrentSceneObject = NULL;
-    m_currentListItem = -1;   
-    m_pCurrentSizer = NULL;
-    m_pXSlider  = new wxSlider( this, ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 175, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pYSlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 175, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pZSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 175, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-      
-    m_pListCtrl   = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( 308, 125 ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
-    m_pListCtrl->SetMaxSize( wxSize( 308, 125 ) );
-    m_pListCtrl->SetMinSize( wxSize( 308, 125 ) );
-
-    m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition,wxSize( 308, -1 ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS );
-    m_pTreeWidget->SetMaxSize( wxSize( 308, -1 ) );
-    m_pTreeWidget->SetMinSize( wxSize( 308, 100 ) );
-
-    // ListCtrl initialization
-    m_pListCtrl2 = new ListCtrl( this, wxDefaultPosition, wxSize( 308, 125 ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
-
-    wxImageList* pImageList = new wxImageList( 16, 16 );
-
-    pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/eyes.png"   ),      wxBITMAP_TYPE_PNG ) ) );
-    pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/eyes_hidden.png" ), wxBITMAP_TYPE_PNG ) ) );
-    pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/delete.png" ),      wxBITMAP_TYPE_PNG ) ) );
-
-    m_pListCtrl2->AssignImageList(pImageList, wxIMAGE_LIST_SMALL);
-
-    wxListItem displayCol, nameCol, thresholdCol, deleteCol;
-
-    displayCol.SetText( wxT( "Display" ) );
-
-    nameCol.SetText( wxT( "Name" ) );
-    nameCol.SetAlign( wxLIST_FORMAT_CENTRE );
-
-    thresholdCol.SetText( wxT( "Threshold" ) );
-    thresholdCol.SetAlign( wxLIST_FORMAT_RIGHT );
-
-    deleteCol.SetText( wxT( "Delete" ) );
-
-    m_pListCtrl2->InsertColumn( 0, displayCol );
-    m_pListCtrl2->InsertColumn( 1, nameCol );
-    m_pListCtrl2->InsertColumn( 2, thresholdCol ) ;
-    m_pListCtrl2->InsertColumn( 3, deleteCol );
-
-    m_pListCtrl2->SetColumnWidth( 0, 20  );
-    m_pListCtrl2->SetColumnWidth( 1, 194 );
-    m_pListCtrl2->SetColumnWidth( 2, 70  );
-    m_pListCtrl2->SetColumnWidth( 3, 20  );
-
-    // ListCtrl initialized
-
-
-    wxImageList* imageList = new wxImageList( 16, 16 );
-
-    imageList->Add( ( wxImage( MyApp::respath +_T( "icons/eyes.png"   ), wxBITMAP_TYPE_PNG ) ) );
-    imageList->Add( ( wxImage( MyApp::respath +_T( "icons/delete.png" ), wxBITMAP_TYPE_PNG ) ) );
-
-    m_pListCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
-
-    wxListItem itemCol;
-    itemCol.SetText( wxT( "" ) );
-    m_pListCtrl->InsertColumn( 0, itemCol );
-
-    itemCol.SetText( wxT( "Name" ) );
-    itemCol.SetAlign( wxLIST_FORMAT_CENTRE );
-    m_pListCtrl->InsertColumn( 1, itemCol );
-
-    itemCol.SetText( wxT( "Threshold" ) );
-    itemCol.SetAlign( wxLIST_FORMAT_RIGHT );
-    m_pListCtrl->InsertColumn( 2, itemCol) ;
-
-    itemCol.SetText( wxT( "" ) );
-    m_pListCtrl->InsertColumn( 3, itemCol );
-
-    m_pListCtrl->SetColumnWidth( 0, 20  );
-    m_pListCtrl->SetColumnWidth( 1, 194 );
-    m_pListCtrl->SetColumnWidth( 2, 70  );
-    m_pListCtrl->SetColumnWidth( 3, 20  );
-
-    wxImageList* tImageList = new wxImageList( 16, 16 );
-
-    tImageList->Add( wxImage( MyApp::respath + _T( "icons/delete.png" ), wxBITMAP_TYPE_PNG ) );
-    tImageList->Add( wxImage( MyApp::respath + _T( "icons/eyes.png" ),   wxBITMAP_TYPE_PNG ) );
-
-    m_pTreeWidget->AssignImageList( tImageList );
-
-    m_tRootId  = m_pTreeWidget->AddRoot( wxT( "Scene" ), -1, -1, NULL );
-    m_tPointId = m_pTreeWidget->AppendItem( m_tRootId, wxT( "points" ), -1, -1, NULL );
-    m_tSelectionObjectsId = m_pTreeWidget->AppendItem( m_tRootId, wxT( "selection objects" ), -1, -1, NULL );
 
     m_pDatasetHelper = new DatasetHelper( this );
-
-    /*
-     * Set OpenGL attributes
-     */
-    Logger::getInstance()->print( wxT( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
-    GLboolean doubleBuffer = GL_TRUE;
-#ifdef __WXMSW__
-    int *gl_attrib = NULL;
-#else
-    int gl_attrib[20] =
-    { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1, WX_GL_MIN_BLUE, 1,
-            WX_GL_DEPTH_SIZE, 1, WX_GL_DOUBLEBUFFER,
-#if defined(__WXMAC__) || defined(__WXCOCOA__)
-            GL_NONE};
-#else
-            None };
-#endif
-#endif
-    if( ! doubleBuffer )
-    {
-        Logger::getInstance()->print( wxT( "Do not have double buffer, disabling" ), LOGLEVEL_MESSAGE );
-#ifdef __WXGTK__
-        gl_attrib[9] = None;
-#endif
-        doubleBuffer = GL_FALSE;
-    }
     m_pDatasetHelper->m_theScene = new TheScene( m_pDatasetHelper );
 
-    m_pMainGL = new MainCanvas( m_pDatasetHelper, MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize,      0, _T( "MainGLCanvas" ), gl_attrib );
-
-#ifndef CTX
-    m_pGL0 = new MainCanvas( m_pDatasetHelper,       AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
-    m_pGL1 = new MainCanvas( m_pDatasetHelper,     CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );    
-    m_pGL2 = new MainCanvas( m_pDatasetHelper,    SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
-#else
-    m_pGL0 = new MainCanvas( m_pDatasetHelper, axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL->GetContext() );
-    m_pGL1 = new MainCanvas( m_pDatasetHelper, coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL->GetContext() );
-    m_pGL2 = new MainCanvas( m_pDatasetHelper, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL->GetContext() );
-#endif
-
-    m_pGL0->SetMaxSize( wxSize( 175, 175 ) );
-    m_pGL1->SetMaxSize( wxSize( 175, 175 ) );
-    m_pGL2->SetMaxSize( wxSize( 175, 175 ) );
-
-#ifndef __WXMAC__
-    m_pDatasetHelper->m_theScene->setMainGLContext( new wxGLContext( m_pMainGL ) );
-#else
-    m_pDatasetHelper->m_theScene->setMainGLContext( m_pMainGL->GetContext() );
-#endif
-
-    m_pMainSizer         = new wxBoxSizer( wxHORIZONTAL ); // Contains everything in the UI.
-    m_pLeftMainSizer     = new wxBoxSizer( wxVERTICAL   ); // Contains the navSizer adn the objectsizer.
-    m_pNavSizer          = new wxBoxSizer( wxHORIZONTAL ); // Contains the 3 navigation windows with there respectiv sliders.
-    m_pListSizer         = new wxBoxSizer( wxVERTICAL   ); // Contains the list and the tree
-    m_pObjectSizer       = new wxBoxSizer( wxHORIZONTAL ); // Contains the listSizer and the propertiesSizer
-
-    wxBoxSizer *l_xSizer= new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *l_ySizer= new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *l_zSizer= new wxBoxSizer( wxVERTICAL );
-
-    wxBoxSizer *l_propSizer = new wxBoxSizer( wxVERTICAL );
-    
-    m_pPropertiesWindow = new PropertiesWindow(this, wxID_ANY, wxDefaultPosition, wxSize(220,350)); // Contains Scene Objects properties
-    
+    m_pPropertiesWindow = new PropertiesWindow(this, wxID_ANY, wxDefaultPosition, wxSize(PROP_WND_WIDTH, PROP_WND_HEIGHT)); // Contains Scene Objects properties
     m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
-    m_pPropertiesWindow->EnableScrolling(false,true);
-
-    l_zSizer->Add( m_pGL0,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_zSizer->Add( m_pZSlider, 0, wxALL,                   2 );
-    l_ySizer->Add( m_pGL1,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_ySizer->Add( m_pYSlider, 0, wxALL,                   2 );
-    l_xSizer->Add( m_pGL2,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_xSizer->Add( m_pXSlider, 0, wxALL ,                  2 );
-
-    m_pNavSizer->Add( l_zSizer, 0, wxALL | wxFIXED_MINSIZE, 1);
-    m_pNavSizer->Add( l_ySizer, 0, wxALL | wxFIXED_MINSIZE, 1);
-    m_pNavSizer->Add( l_xSizer, 0, wxALL | wxFIXED_MINSIZE, 1);
-    m_pNavSizer->SetMinSize( wxSize(520,15));
+    m_pPropertiesWindow->EnableScrolling( false, true );
     
-    m_pListSizer->Add( m_pListCtrl,               0, wxALL | wxEXPAND, 1 );
-    m_pListSizer->Add( (wxWindow *)m_pListCtrl2,  1, wxALL | wxEXPAND, 1);
-    m_pListSizer->Add( m_pTreeWidget,             2, wxALL | wxEXPAND, 1 );
+    //////////////////////////////////////////////////////////////////////////
+    // MyListCtrl initialization
+    m_pListCtrl = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    initMyListCtrl( m_pListCtrl );
+
+    //////////////////////////////////////////////////////////////////////////
+    // MyTreeCtrl initialization
+    m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS );
+    initMyTreeCtrl( m_pTreeWidget );
+
+    m_tRootId             = m_pTreeWidget->AddRoot( wxT( "Scene" ), -1, -1, NULL );
+    m_tPointId            = m_pTreeWidget->AppendItem( m_tRootId, wxT( "Points" ), -1, -1, NULL );
+    m_tSelectionObjectsId = m_pTreeWidget->AppendItem( m_tRootId, wxT( "Selection Objects" ), -1, -1, NULL );
+
+    //////////////////////////////////////////////////////////////////////////
+    // ListCtrl initialization
+    m_pListCtrl2 = new ListCtrl( this, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    initListCtrl( m_pListCtrl2 );
+
+    //////////////////////////////////////////////////////////////////////////
+    // OpenGL initialization
+    initOpenGl();
+
+    //////////////////////////////////////////////////////////////////////////
+    // initLayout
+    initLayout();
+
     
-    l_propSizer->Add(m_pPropertiesWindow, 0, wxALL | wxEXPAND, 0);
-
-    m_pObjectSizer->Add(m_pListSizer, 1, wxALL | wxEXPAND, 0);
-    m_pObjectSizer->Add(l_propSizer, 0, wxALL | wxEXPAND, 0);
-    wxBoxSizer *l_spaceSizer = new wxBoxSizer(wxVERTICAL);
-    l_spaceSizer->SetMinSize(wxSize(15,-1));
-    m_pObjectSizer->Add(l_spaceSizer, 0, wxALL | wxFIXED_MINSIZE, 0);
-
-    l_propSizer->Layout();
-    
-    m_pObjectSizer->SetMinSize( wxSize(520,15));
-
-    m_pLeftMainSizer->Add( m_pNavSizer,  0, wxALL | wxFIXED_MINSIZE, 0 );
-    m_pLeftMainSizer->Add( m_pObjectSizer,  1, wxALL | wxEXPAND, 0 );
-    m_pLeftMainSizer->SetMinSize( wxSize(520,15));
-    
-    m_pMainSizer->Add( m_pLeftMainSizer,  0,  wxALL | wxEXPAND, 0 );
-    m_pMainSizer->Add( m_pMainGL, 1, wxEXPAND | wxALL, 2 );
-
-    m_pPropertiesWindow->Fit();
-    this->SetBackgroundColour(*wxLIGHT_GREY);
-    this->SetSizer( m_pMainSizer );
-    m_pMainSizer->SetSizeHints( this );
-    SetAutoLayout(true);
 
     m_pTimer = new wxTimer( this );
     m_pTimer->Start( 100 );
@@ -310,20 +268,160 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     GetStatusBar()->Show(); 
 }
 
-MainFrame::~MainFrame()
+
+void MainFrame::initOpenGl()
 {
-    m_pTimer->Stop();
-    Logger::getInstance()->print( wxT( "MainFrame destructor" ), LOGLEVEL_DEBUG );
-    Logger::getInstance()->print( wxT( "Timer stopped" ), LOGLEVEL_DEBUG );
-	if (m_pTimer != NULL)
-    {
-        delete m_pTimer;
-    }
-    if( m_pDatasetHelper != NULL)
-    {
-        delete m_pDatasetHelper;
-    }
+    Logger::getInstance()->print( wxT( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
+
+#ifdef __WXMSW__
+    int *gl_attrib = NULL;
+#else
+    int gl_attrib[20] = 
+    { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1, WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1, WX_GL_DOUBLEBUFFER,
+    #if defined(__WXMAC__) || defined(__WXCOCOA__)
+        GL_NONE };
+    #else
+        None };
+    #endif
+#endif
+
+    m_pMainGL = new MainCanvas( m_pDatasetHelper, MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize,     0, _T( "MainGLCanvas" ), gl_attrib );
+
+#ifndef CTX
+    m_pGL0 = new MainCanvas( m_pDatasetHelper,       AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
+    m_pGL1 = new MainCanvas( m_pDatasetHelper,     CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );
+    m_pGL2 = new MainCanvas( m_pDatasetHelper,    SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
+#else
+    m_pGL0 = new MainCanvas( m_pDatasetHelper, axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGTH ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL->GetContext() );
+    m_pGL1 = new MainCanvas( m_pDatasetHelper, coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL->GetContext() );
+    m_pGL2 = new MainCanvas( m_pDatasetHelper, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL->GetContext() );
+#endif
+
+    m_pGL0->SetMaxSize( wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ) );
+    m_pGL1->SetMaxSize( wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ) );
+    m_pGL2->SetMaxSize( wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ) );
+
+#ifndef __WXMAC__
+    m_pDatasetHelper->m_theScene->setMainGLContext( new wxGLContext( m_pMainGL ) );
+#else
+    m_pDatasetHelper->m_theScene->setMainGLContext( m_pMainGL->GetContext() );
+#endif
+
 }
+
+void MainFrame::initLayout()
+{
+    //////////////////////////////////////////////////////////////////////////
+    // Slider initialization
+    m_pXSlider  = new wxSlider( this, ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_SAG_WIDTH, SLIDER_SAG_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pYSlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_COR_WIDTH, SLIDER_COR_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pZSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_AXI_WIDTH, SLIDER_AXI_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+    //////////////////////////////////////////////////////////////////////////
+    // Sizer initialization
+    wxBoxSizer *xSzr       = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *ySzr       = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *zSzr       = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *axesSzr    = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *lstSzr     = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *propSzr    = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *lwrLeftSzr = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *leftSzr    = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *mainSzr    = new wxBoxSizer( wxHORIZONTAL );
+
+    xSzr->Add( m_pGL2,     0, wxALL | wxFIXED_MINSIZE, 2 );
+    xSzr->Add( m_pXSlider, 0, wxALL | wxFIXED_MINSIZE, 2 );
+    xSzr->SetMinSize( wxSize( SLIDER_SAG_WIDTH + 4, CANVAS_SAG_HEIGHT + 4 + 16 ) );
+
+    ySzr->Add( m_pGL1,     0, wxALL | wxFIXED_MINSIZE, 2 );
+    ySzr->Add( m_pYSlider, 0, wxALL | wxFIXED_MINSIZE, 2 );
+    ySzr->SetMinSize( wxSize( SLIDER_COR_WIDTH + 4, CANVAS_COR_HEIGHT + 4 + 16 ) );
+
+    zSzr->Add( m_pGL0,     0, wxALL | wxFIXED_MINSIZE, 2 );
+    zSzr->Add( m_pZSlider, 0, wxALL | wxFIXED_MINSIZE, 2 );
+    zSzr->SetMinSize( wxSize( SLIDER_AXI_WIDTH + 4, CANVAS_AXI_HEIGHT + 4 + 16 ) );
+
+    axesSzr->Add( xSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
+    axesSzr->Add( ySzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
+    axesSzr->Add( zSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
+
+    lstSzr->Add( m_pListCtrl, 0, wxALL | wxFIXED_MINSIZE, 2 );
+    lstSzr->Add( (wxWindow *)m_pListCtrl2, 0, wxALL | wxFIXED_MINSIZE, 2 );
+    lstSzr->Add( m_pTreeWidget, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
+
+    propSzr->Add( m_pPropertiesWindow, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
+
+    lwrLeftSzr->Add( lstSzr, 0, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
+    lwrLeftSzr->Add( propSzr, 1, wxALL | wxEXPAND, 2 );
+
+    leftSzr->Add( axesSzr, 0, wxALL | wxFIXED_MINSIZE, 2 );
+    leftSzr->Add( lwrLeftSzr, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 0);
+
+    mainSzr->Add( leftSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
+    mainSzr->Add( m_pMainGL, 1, wxALL | wxEXPAND, 2 );
+
+    SetSizer( mainSzr );
+    SetBackgroundColour( *wxLIGHT_GREY );
+    SetAutoLayout( true );
+    Layout();
+    Fit();
+
+    return;
+
+    m_pMainSizer             = new wxBoxSizer( wxHORIZONTAL ); // Contains everything in the UI.
+    m_pLeftMainSizer         = new wxBoxSizer( wxVERTICAL   ); // Contains the navSizer and the objectsizer.
+    m_pNavSizer              = new wxBoxSizer( wxHORIZONTAL ); // Contains the 3 navigation windows with there respective sliders.
+    m_pListSizer             = new wxBoxSizer( wxVERTICAL   ); // Contains the list and the tree
+    m_pObjectSizer           = new wxBoxSizer( wxHORIZONTAL ); // Contains the listSizer and the propertiesSizer
+
+    wxBoxSizer *l_xSizer     = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *l_ySizer     = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *l_zSizer     = new wxBoxSizer( wxVERTICAL );
+    //wxBoxSizer *l_spaceSizer = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *l_propSizer  = new wxBoxSizer( wxVERTICAL );
+
+    l_zSizer->Add( m_pGL0,     1, wxALL | wxFIXED_MINSIZE, 2 );
+    l_zSizer->Add( m_pZSlider, 0, wxALL,                   2 );
+    l_ySizer->Add( m_pGL1,     1, wxALL | wxFIXED_MINSIZE, 2 );
+    l_ySizer->Add( m_pYSlider, 0, wxALL,                   2 );
+    l_xSizer->Add( m_pGL2,     1, wxALL | wxFIXED_MINSIZE, 2 );
+    l_xSizer->Add( m_pXSlider, 0, wxALL ,                  2 );
+
+    m_pNavSizer->Add( l_zSizer, 0, wxALL | wxFIXED_MINSIZE, 1 );
+    m_pNavSizer->Add( l_ySizer, 0, wxALL | wxFIXED_MINSIZE, 1 );
+    m_pNavSizer->Add( l_xSizer, 0, wxALL | wxFIXED_MINSIZE, 1 );
+    //m_pNavSizer->SetMinSize( wxSize( CANVAS_AXI_WIDTH + CANVAS_COR_WIDTH + CANVAS_SAG_WIDTH, 15 ) );
+
+    m_pListSizer->Add( m_pListCtrl,               1, wxALL /*| wxEXPAND*/, 1 );
+    m_pListSizer->Add( (wxWindow *)m_pListCtrl2,  1, wxALL /*| wxEXPAND*/, 1);
+    m_pListSizer->Add( m_pTreeWidget,             2, wxALL | wxEXPAND, 1 );
+
+    l_propSizer->Add(m_pPropertiesWindow, 0, wxALL /*| wxEXPAND*/, 0);
+
+    m_pObjectSizer->Add(m_pListSizer, 1, wxALL /*| wxEXPAND*/, 0);
+    m_pObjectSizer->Add(l_propSizer, 0, wxALL /*| wxEXPAND*/, 0);
+
+    //l_spaceSizer->SetMinSize(wxSize(15,-1));
+    //m_pObjectSizer->Add(l_spaceSizer, 0, wxALL | wxFIXED_MINSIZE, 0);
+
+    l_propSizer->Layout();
+
+    //m_pObjectSizer->SetMinSize( wxSize(520,15));
+
+    m_pLeftMainSizer->Add( m_pNavSizer,  0, wxALL | wxFIXED_MINSIZE, 0 );
+    m_pLeftMainSizer->Add( m_pObjectSizer,  1, wxALL | wxEXPAND, 0 );
+    //m_pLeftMainSizer->SetMinSize( wxSize(520,15));
+
+    m_pMainSizer->Add( m_pLeftMainSizer,  0,  wxALL | wxEXPAND, 0 );
+    m_pMainSizer->Add( m_pMainGL, 1, wxEXPAND | wxALL, 2 );
+
+    m_pPropertiesWindow->Fit();
+    this->SetBackgroundColour(*wxLIGHT_GREY);
+    this->SetSizer( m_pMainSizer );
+    m_pMainSizer->SetSizeHints( this );
+    SetAutoLayout(true);
+}
+
 
 long MainFrame::getCurrentListItem()
 {
@@ -2464,4 +2562,21 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
     refreshViews();
     m_pDatasetHelper->increaseAnimationStep();    
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+MainFrame::~MainFrame()
+{
+    m_pTimer->Stop();
+    Logger::getInstance()->print( wxT( "MainFrame destructor" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Timer stopped" ), LOGLEVEL_DEBUG );
+    if (m_pTimer != NULL)
+    {
+        delete m_pTimer;
+    }
+    if( m_pDatasetHelper != NULL)
+    {
+        delete m_pDatasetHelper;
+    }
 }

@@ -27,6 +27,7 @@ private:
 
 private:
     int m_column;
+    bool m_isFiberGroupPresent;
 
     DECLARE_EVENT_TABLE()
 };
