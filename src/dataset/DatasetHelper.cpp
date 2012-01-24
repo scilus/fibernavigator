@@ -559,6 +559,7 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 #endif
 	i_info->setListCtrlItemId(l_id);
 	
+    m_mainFrame->m_pListCtrl2->InsertItem( i_info );
 	m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
 
     if( i_info->getShow() )
@@ -781,7 +782,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 					if( m_fibersGroupLoaded && !l_isfiberGroup )
 					{
 						pDataset = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData(1);
-						if(!pDataset->getType() == FIBERS)
+						if( pDataset->getType() != FIBERS )
 						{
 							pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
 						}
@@ -844,6 +845,9 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 #else
                 long l_id = 0;
 #endif
+    
+                m_mainFrame->m_pListCtrl2->InsertItem( l_surface );
+
                 m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
                 m_mainFrame->m_pListCtrl->SetItem( l_id, 1, _T( "spline surface" ) );
                 m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
@@ -1333,6 +1337,9 @@ void DatasetHelper::createIsoSurface()
 #else
         long l_id = 0;
 #endif
+
+        m_mainFrame->m_pListCtrl2->InsertItem( isosurf );
+
         m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.40" ) );
@@ -1393,6 +1400,8 @@ void DatasetHelper::createDistanceMapAndIso()
     {
         isosurf->setName( anatomyName + wxT( " (offset)" ) );
 
+        m_mainFrame->m_pListCtrl2->InsertItem( isosurf );
+
         m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.10" ) );
@@ -1436,6 +1445,8 @@ void DatasetHelper::createDistanceMap()
 
     
     l_newAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT("_DistMap"));
+
+    m_mainFrame->m_pListCtrl2->InsertItem( l_newAnatomy );
 
     //Feed the distance to the objects list
     m_mainFrame->m_pListCtrl->InsertItem(0, wxT(""),0);

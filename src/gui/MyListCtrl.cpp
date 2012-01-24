@@ -104,6 +104,30 @@ void MyListCtrl::moveItemUp(long item)
 void MyListCtrl::moveItemDown(long item)
 {
     if (item == GetItemCount() - 1) return;
+
+    long index = GetNextItem(0, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+
+    wxListItem lstItemCol1, lstItemCol2, lstItemCol3, lstItemCol4;
+    lstItemCol1.SetId(index);
+    lstItemCol1.SetColumn(0);
+    lstItemCol1.SetMask( wxLIST_MASK_STATE | wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE | wxLIST_MASK_DATA );
+    GetItem(lstItemCol1);
+
+    lstItemCol2.SetId(index);
+    lstItemCol2.SetColumn(1);
+    lstItemCol2.SetMask( wxLIST_MASK_STATE | wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE | wxLIST_MASK_DATA );
+    GetItem(lstItemCol2);
+
+    lstItemCol3.SetId(index);
+    lstItemCol3.SetColumn(2);
+    lstItemCol3.SetMask( wxLIST_MASK_STATE | wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE | wxLIST_MASK_DATA );
+    GetItem(lstItemCol3);
+
+    lstItemCol4.SetId(index);
+    lstItemCol4.SetColumn(3);
+    lstItemCol4.SetMask( wxLIST_MASK_STATE | wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE | wxLIST_MASK_DATA );
+    GetItem(lstItemCol4);
+
     swap (item, item +1);
 	unselectAll();
     SetItemState(item + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);

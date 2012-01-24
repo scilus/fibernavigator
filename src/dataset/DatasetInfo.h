@@ -58,33 +58,33 @@ public:
     virtual GLuint getGLuint()=0;
 
 
-    wxString getName()                           { return m_name;               };
-    wxString getPath()                           { return m_fullPath;           };
+    wxString getName() const                     { return m_name;               };
+    wxString getPath() const                     { return m_fullPath;           };
     void     setName(wxString name)              { m_name = name;               };
-    int      getType()                           { return m_type;               };
+    int      getType() const                     { return m_type;               };
     void     setType(int type)                   { m_type = type;               };
-    float    getHighestValue()                   { return m_highest_value;      };
+    float    getHighestValue() const             { return m_highest_value;      };
     void     setHighestValue(float value)        { m_highest_value = value;     };
-    float    getThreshold()                      { return m_threshold;          };
-    float    getOldMax()                         { return m_oldMax;             };
+    float    getThreshold() const                { return m_threshold;          };
+    float    getOldMax() const                   { return m_oldMax;             };
     void     setOldMax(float v)                  { m_oldMax = v;                };
     void     setNewMax(float v)                  { m_newMax = v;                };
-    float    getNewMax()                         { return m_newMax;             };
-	long	 getListCtrlItemId()				 { return m_itemId;				};
-	void	 setListCtrlItemId(long value)		 { m_itemId = value;			};
+    float    getNewMax() const                   { return m_newMax;             };
+	long	 getListCtrlItemId() const           { return m_itemId;				};
+	void	 setListCtrlItemId(long value)       { m_itemId = value;			};
     void     setThreshold(float value)           { m_threshold = value;         };
-    float    getAlpha()                          { return m_alpha;              };
+    float    getAlpha() const                    { return m_alpha;              };
     void     setAlpha(float v)                   { m_alpha = v;                 };
-    float    getBrightness()                     { return m_brightness;         };
+    float    getBrightness() const               { return m_brightness;         };
     void     setBrightness( float i_brightness ) { m_brightness = i_brightness; };
 
-    int      getLength()                         { return m_length;   };
-    int      getBands()                          { return m_bands;    };
-    int      getFrames()                         { return m_frames;   };
-    int      getRows()                           { return m_rows;     };
-    int      getColumns()                        { return m_columns;  };
+    int      getLength() const                   { return m_length;   };
+    int      getBands() const                    { return m_bands;    };
+    int      getFrames() const                   { return m_frames;   };
+    int      getRows() const                     { return m_rows;     };
+    int      getColumns() const                  { return m_columns;  };
 
-    wxString getRpn()                            { return m_repn; };
+    wxString getRpn() const                      { return m_repn; };
 
     bool     toggleShow()                        { m_show        = ! m_show;          return m_show;        };
     bool     toggleShowFS()                      { m_showFS      = ! m_showFS;        return m_showFS;      };
@@ -94,15 +94,15 @@ public:
     void     setShow       ( bool i_show   )     { m_show        = i_show;   };
     void     setShowFS     ( bool i_show   )     { m_showFS      = i_show;   };
     void     setuseTex     ( bool i_useTex )     { m_useTex      = i_useTex; };
-    bool     getShow()                           { return m_show;            };
-    bool     getShowFS()                         { return m_showFS;          };
-    bool     getUseTex()                         { return m_useTex;          };
-    bool     getUseLIC()                         { return m_useLIC;          };
-    bool     getIsGlyph()                        { return m_isGlyph;         };
+    bool     getShow() const                     { return m_show;            };
+    bool     getShowFS() const                   { return m_showFS;          };
+    bool     getUseTex() const                   { return m_useTex;          };
+    bool     getUseLIC() const                   { return m_useLIC;          };
+    bool     getIsGlyph() const                  { return m_isGlyph;         };
 
     void     setGLuint( GLuint value )           { m_GLuint = value; };
     void     setColor ( wxColour color )         { m_color  = color; };
-    wxColour getColor()                          { return m_color;   };
+    wxColour getColor() const                    { return m_color;   };
 
     // Trianglemesh
     TriangleMesh* m_tMesh;

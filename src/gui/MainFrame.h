@@ -11,6 +11,7 @@
 
 #include "MainCanvas.h"
 #include "MyListCtrl.h"
+#include "ListCtrl.h"
 
 #include "../misc/Algorithms/Helper.h"
 
@@ -131,7 +132,6 @@ private:
     // List widget event functions     
     void onActivateListItem                 ( wxListEvent&    event );
     void onSelectListItem                   ( wxListEvent&    event );
-    void onListMenuName                     ( wxCommandEvent& event );
 
     // Tree widget event functions
     void onDeleteTreeItem                   ( wxTreeEvent&    event );
@@ -203,6 +203,7 @@ public:
     MainCanvas          *m_pGL1;
     MainCanvas          *m_pGL2;
     MyListCtrl          *m_pListCtrl;
+    ListCtrl            *m_pListCtrl2;
     MyTreeCtrl          *m_pTreeWidget;
     wxSlider            *m_pXSlider;
     wxSlider            *m_pYSlider;

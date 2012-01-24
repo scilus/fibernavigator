@@ -101,13 +101,49 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pYSlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 175, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pZSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 175, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
       
-    m_pListCtrl   = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( 308, 250 ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
-    m_pListCtrl->SetMaxSize( wxSize( 308, 250 ) );
-    m_pListCtrl->SetMinSize( wxSize( 308, 250 ) );
+    m_pListCtrl   = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( 308, 125 ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    m_pListCtrl->SetMaxSize( wxSize( 308, 125 ) );
+    m_pListCtrl->SetMinSize( wxSize( 308, 125 ) );
 
     m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition,wxSize( 308, -1 ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS );
     m_pTreeWidget->SetMaxSize( wxSize( 308, -1 ) );
     m_pTreeWidget->SetMinSize( wxSize( 308, 100 ) );
+
+    // ListCtrl initialization
+    m_pListCtrl2 = new ListCtrl( this, wxDefaultPosition, wxSize( 308, 125 ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+
+    wxImageList* pImageList = new wxImageList( 16, 16 );
+
+    pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/eyes.png"   ),      wxBITMAP_TYPE_PNG ) ) );
+    pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/eyes_hidden.png" ), wxBITMAP_TYPE_PNG ) ) );
+    pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/delete.png" ),      wxBITMAP_TYPE_PNG ) ) );
+
+    m_pListCtrl2->AssignImageList(pImageList, wxIMAGE_LIST_SMALL);
+
+    wxListItem displayCol, nameCol, thresholdCol, deleteCol;
+
+    displayCol.SetText( wxT( "Display" ) );
+
+    nameCol.SetText( wxT( "Name" ) );
+    nameCol.SetAlign( wxLIST_FORMAT_CENTRE );
+
+    thresholdCol.SetText( wxT( "Threshold" ) );
+    thresholdCol.SetAlign( wxLIST_FORMAT_RIGHT );
+
+    deleteCol.SetText( wxT( "Delete" ) );
+
+    m_pListCtrl2->InsertColumn( 0, displayCol );
+    m_pListCtrl2->InsertColumn( 1, nameCol );
+    m_pListCtrl2->InsertColumn( 2, thresholdCol ) ;
+    m_pListCtrl2->InsertColumn( 3, deleteCol );
+
+    m_pListCtrl2->SetColumnWidth( 0, 20  );
+    m_pListCtrl2->SetColumnWidth( 1, 194 );
+    m_pListCtrl2->SetColumnWidth( 2, 70  );
+    m_pListCtrl2->SetColumnWidth( 3, 20  );
+
+    // ListCtrl initialized
+
 
     wxImageList* imageList = new wxImageList( 16, 16 );
 
@@ -227,8 +263,9 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pNavSizer->Add( l_xSizer, 0, wxALL | wxFIXED_MINSIZE, 1);
     m_pNavSizer->SetMinSize( wxSize(520,15));
     
-    m_pListSizer->Add( m_pListCtrl,    0, wxALL | wxEXPAND,  1 );
-    m_pListSizer->Add( m_pTreeWidget,   1, wxALL | wxEXPAND,  1 );
+    m_pListSizer->Add( m_pListCtrl,               0, wxALL | wxEXPAND, 1 );
+    m_pListSizer->Add( (wxWindow *)m_pListCtrl2,  1, wxALL | wxEXPAND, 1);
+    m_pListSizer->Add( m_pTreeWidget,             2, wxALL | wxEXPAND, 1 );
     
     l_propSizer->Add(m_pPropertiesWindow, 0, wxALL | wxEXPAND, 0);
 
@@ -391,6 +428,8 @@ void MainFrame::createNewAnatomy( int dataType )
 #else
     long l_id = 0;
 #endif
+    m_pListCtrl2->InsertItem( l_newAnatomy );
+
 	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
 	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_newAnatomy->getName() );
 	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.00" ) );
@@ -1309,6 +1348,8 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
     Surface* l_surface = new Surface(m_pDatasetHelper);
     l_surface->execute();
 
+    m_pListCtrl2->InsertItem( l_surface );
+
     m_pListCtrl->InsertItem( id, wxT( "" ), 0 );
     m_pListCtrl->SetItem( id, 1, l_surface->getName() );
     m_pListCtrl->SetItem( id, 2, wxT( "0.50" ) );
@@ -1335,6 +1376,8 @@ void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
 {
     m_pDatasetHelper->m_normalDirection *= -1.0;
 
+    // TODO: Update method once DatasetManager exists
+
     for( int i = 0; i < m_pListCtrl->GetItemCount(); ++i )
     {
         DatasetInfo* l_info = (DatasetInfo*) m_pListCtrl->GetItemData( i );
@@ -1354,14 +1397,7 @@ void MainFrame::onToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
         DatasetInfo* l_info = (DatasetInfo*)m_pCurrentSceneObject;
         if( l_info->getType() < MESH )
         {
-            if ( !l_info->toggleShowFS() )
-            {
-                m_pListCtrl->SetItem( m_currentListItem, 1, l_info->getName() + wxT( "*" ) );
-            }
-            else
-            {
-                m_pListCtrl->SetItem( m_currentListItem, 1, l_info->getName() );
-            }
+            m_pListCtrl->SetItem( m_currentListItem, 1, l_info->getName() + ( l_info->toggleShowFS() ? wxT( "" ) : wxT( "*" ) ) );
         }
     }
     refreshAllGLWidgets();
@@ -1908,6 +1944,7 @@ void MainFrame::onActivateListItem( wxListEvent& event )
 
 void MainFrame::deleteListItem()
 {
+
     if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {       
         long tmp = m_currentListItem;
@@ -1967,15 +2004,8 @@ void MainFrame::onSelectListItem( wxListEvent& event )
     DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
     int l_col = m_pListCtrl->getColClicked();
     if (l_col == 12 && l_info->getType() >= MESH)
-    {        
-        if( ! l_info->toggleUseTex())
-        {
-            m_pListCtrl->SetItem( l_item, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() * l_info->getOldMax() ) + wxT( ")" ) );
-        }
-        else
-        {
-            m_pListCtrl->SetItem( l_item,2,wxString::Format( wxT( "%.2f" ), l_info->getThreshold() * l_info->getOldMax() ) );
-        }            
+    {
+        m_pListCtrl->SetItem( l_item, 2, wxString::Format( l_info->toggleUseTex() ? wxT( "%.2f" ) : wxT( "(%.2f)" ), l_info->getThreshold() * l_info->getOldMax() ) );
     }
 	if( l_info->getType() == FIBERS )
 	{
@@ -1999,25 +2029,6 @@ void MainFrame::onSelectListItem( wxListEvent& event )
     }
     
     refreshAllGLWidgets();
-}
-
-void MainFrame::onListMenuName( wxCommandEvent&  WXUNUSED(event) )
-{
-    long l_item = m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item == -1 )
-    {
-        return;
-    }
-    DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
-
-    if( ! l_info->toggleShowFS() )
-    {
-        m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
-    }
-    else
-    {
-        m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
-    }
 }
 
 /****************************************************************************************************

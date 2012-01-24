@@ -348,6 +348,8 @@ void Anatomy::minimize()
     pNewAnatomy->setType( HEAD_BYTE );
     pNewAnatomy->setDataType( 2 );
 
+    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pNewAnatomy );
+
     m_dh->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 1, pNewAnatomy->getName() );
     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
