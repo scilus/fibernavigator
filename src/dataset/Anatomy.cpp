@@ -20,6 +20,9 @@
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 
+#define LOWER_EQ_THRES  20
+#define UPPER_EQ_THRES  255
+
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper ) 
 : DatasetInfo ( pDatasetHelper ),
   m_isSegmentOn( false ),  
@@ -27,12 +30,34 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper )
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
     m_bands = 1;
+}
+
+Anatomy::Anatomy( DatasetHelper* pDatasetHelper, const wxString &filename ) 
+: DatasetInfo ( pDatasetHelper ),
+  m_isSegmentOn( false ),  
+  m_pRoi( NULL ),
+  m_dataType( 2 ),
+  m_pTensorField( NULL ),
+  m_useEqualizedDataset( false ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
+  m_currentLowerEqThreshold( -1 ),
+  m_currentUpperEqThreshold( -1 )
+{
+    m_bands = 1;
+
+    m_fullPath = filename;
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
 }
 
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
@@ -43,8 +68,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
@@ -67,8 +92,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
@@ -97,8 +122,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
@@ -462,6 +487,287 @@ bool Anatomy::load( wxString fileName )
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
+{
+    
+// #if defined(DEBUG) || defined(_DEBUG)
+//     //nifti_1_header *l_tmphdr = nifti_read_header( l_hdrFile, 0, 0 );
+//     //disp_nifti_1_header( "", l_tmphdr );
+// #endif
+    m_columns   = pHeader->dim[1]; 
+    m_rows      = pHeader->dim[2]; 
+    m_frames    = pHeader->dim[3]; 
+    m_bands     = pHeader->dim[4];
+    m_dataType  = pHeader->datatype;
+
+//     if( m_dh->m_anatomyLoaded )
+//     {
+//         if( m_rows != m_dh->m_rows || m_columns != m_dh->m_columns || m_frames != m_dh->m_frames )
+//         {
+//             m_dh->m_lastError = wxT( "dimensions of loaded files must be the same" );
+//             return false;
+//         }
+//     }
+
+    // Get the transformation to put the anatomy file in world space.
+    // The transformation used depends on the one used in the nifti image.
+    // We currently only use it when loading Mrtrix fibers.
+    if( pHeader->sform_code > 0 )
+    {
+        m_dh->m_niftiTransform( 0, 0 ) = pHeader->sto_xyz.m[0][0];
+        m_dh->m_niftiTransform( 0, 1 ) = pHeader->sto_xyz.m[0][1];
+        m_dh->m_niftiTransform( 0, 2 ) = pHeader->sto_xyz.m[0][2];
+        m_dh->m_niftiTransform( 0, 3 ) = pHeader->sto_xyz.m[0][3];
+        m_dh->m_niftiTransform( 1, 0 ) = pHeader->sto_xyz.m[1][0];
+        m_dh->m_niftiTransform( 1, 1 ) = pHeader->sto_xyz.m[1][1];
+        m_dh->m_niftiTransform( 1, 2 ) = pHeader->sto_xyz.m[1][2];
+        m_dh->m_niftiTransform( 1, 3 ) = pHeader->sto_xyz.m[1][3];
+        m_dh->m_niftiTransform( 2, 0 ) = pHeader->sto_xyz.m[2][0];
+        m_dh->m_niftiTransform( 2, 1 ) = pHeader->sto_xyz.m[2][1];
+        m_dh->m_niftiTransform( 2, 2 ) = pHeader->sto_xyz.m[2][2];
+        m_dh->m_niftiTransform( 2, 3 ) = pHeader->sto_xyz.m[2][3];
+        m_dh->m_niftiTransform( 3, 0 ) = pHeader->sto_xyz.m[3][0];
+        m_dh->m_niftiTransform( 3, 1 ) = pHeader->sto_xyz.m[3][1];
+        m_dh->m_niftiTransform( 3, 2 ) = pHeader->sto_xyz.m[3][2];
+        m_dh->m_niftiTransform( 3, 3 ) = pHeader->sto_xyz.m[3][3];
+    }
+    else if( pHeader->qform_code > 0 )
+    {
+        m_dh->m_niftiTransform( 0, 0 ) = pHeader->qto_xyz.m[0][0];
+        m_dh->m_niftiTransform( 0, 1 ) = pHeader->qto_xyz.m[0][1];
+        m_dh->m_niftiTransform( 0, 2 ) = pHeader->qto_xyz.m[0][2];
+        m_dh->m_niftiTransform( 0, 3 ) = pHeader->qto_xyz.m[0][3];
+        m_dh->m_niftiTransform( 1, 0 ) = pHeader->qto_xyz.m[1][0];
+        m_dh->m_niftiTransform( 1, 1 ) = pHeader->qto_xyz.m[1][1];
+        m_dh->m_niftiTransform( 1, 2 ) = pHeader->qto_xyz.m[1][2];
+        m_dh->m_niftiTransform( 1, 3 ) = pHeader->qto_xyz.m[1][3];
+        m_dh->m_niftiTransform( 2, 0 ) = pHeader->qto_xyz.m[2][0];
+        m_dh->m_niftiTransform( 2, 1 ) = pHeader->qto_xyz.m[2][1];
+        m_dh->m_niftiTransform( 2, 2 ) = pHeader->qto_xyz.m[2][2];
+        m_dh->m_niftiTransform( 2, 3 ) = pHeader->qto_xyz.m[2][3];
+        m_dh->m_niftiTransform( 3, 0 ) = pHeader->qto_xyz.m[3][0];
+        m_dh->m_niftiTransform( 3, 1 ) = pHeader->qto_xyz.m[3][1];
+        m_dh->m_niftiTransform( 3, 2 ) = pHeader->qto_xyz.m[3][2];
+        m_dh->m_niftiTransform( 3, 3 ) = pHeader->qto_xyz.m[3][3];
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "No transformation encoded in the nifti file. Using identity transform." ), LOGLEVEL_WARNING );
+
+        // This is not a typo, the method is called makeIdendity in FMatrix.
+        m_dh->m_niftiTransform.makeIdendity();
+    }
+    
+
+    m_dh->m_xVoxel = pHeader->dx;
+    m_dh->m_yVoxel = pHeader->dy;
+    m_dh->m_zVoxel = pHeader->dz;
+    
+    if( pHeader->datatype == 2 )
+    {
+        if( pHeader->dim[4] == 1 )
+        {
+            m_type = HEAD_BYTE;
+        }
+        else if( pHeader->dim[4] == 3 )
+        {
+            m_type = RGB;
+        }
+        else
+        {
+            m_type = BOT_INITIALIZED;
+        }
+    }
+    else if( pHeader->datatype == 4 )
+    {
+        m_type = HEAD_SHORT;
+    }
+
+    else if( pHeader->datatype == 16 )
+    {
+        if( pHeader->dim[4] == 3 )
+        {
+            m_type = VECTORS;
+        }
+        else
+        {
+            m_type = OVERLAY;
+        }
+    }
+    else
+    {
+        m_type = BOT_INITIALIZED;
+    }
+
+//     nifti_image *pFileData = nifti_image_read( pHdrFile, 1 );
+//     if( !pFileData )
+//     {
+//         m_dh->m_lastError = wxT( "nifti file corrupt" );
+//         return false;
+//     }
+    
+    int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
+
+    bool flag = false;
+
+    switch( m_type )
+    {
+        case HEAD_BYTE:
+        {
+            unsigned char* pData = (unsigned char*)pBody->data;
+            m_floatDataset.resize( datasetSize );
+
+            for( int i(0); i < datasetSize; ++i )
+            {
+                m_floatDataset[i] = (float)pData[i] / 255.0;
+            }
+
+            flag = true;
+            m_oldMax = 255;
+        }
+        break;
+
+        case HEAD_SHORT:
+        {
+            short int* pData = (short int*)pBody->data;
+            int dataMax = 0;
+            std::vector<int> histo( 65536, 0 );
+
+            for( int i(0); i < datasetSize; ++i )
+            {
+                dataMax = wxMax(dataMax, pData[i]);
+                ++histo[pData[i]];
+            }
+
+            int fivePercent   = (int)( datasetSize * 0.001 );
+            int newMax        = 65535;
+            int adder         = 0;
+
+            for( int i(65535); i > 0; --i )
+            {
+                adder += histo[i];
+                newMax = i;
+
+                if( adder > fivePercent )
+                {
+                    break;
+                }
+            }
+            
+            for( int i(0); i < datasetSize; ++i )
+            {
+                if ( pData[i] > newMax )
+                {
+                    pData[i] = newMax;
+                }
+            }
+
+            m_floatDataset.resize ( datasetSize );
+
+            for( int i(0); i < datasetSize; ++i )
+            {
+                m_floatDataset[i] = (float)pData[i] / (float)newMax;
+            }
+
+            m_oldMax    = dataMax;
+            m_newMax    = newMax;
+            flag        = true;
+        }
+        break;
+
+        case OVERLAY:
+        {
+            float* pData = (float*)pBody->data;
+
+            m_floatDataset.resize( datasetSize );
+            
+            for( int i(0); i < datasetSize; ++i )
+            {
+                m_floatDataset[i] = (float)pData[i];
+            }
+
+            float dataMax = 0.0f;
+            for( int i(0); i < datasetSize; ++i )
+            {
+                if (m_floatDataset[i] > dataMax)
+                {
+                    dataMax = m_floatDataset[i];
+                }
+            }
+
+            for( int i(0); i < datasetSize; ++i )
+            {
+                m_floatDataset[i] = m_floatDataset[i] / dataMax;
+            }
+
+            m_oldMax    = dataMax;
+            m_newMax    = 1.0;
+            flag        = true;
+        }
+        break;
+
+        case RGB:
+        {
+            unsigned char* pData = (unsigned char*)pBody->data;
+
+            m_floatDataset.resize( datasetSize * 3 );
+
+            for( int i(0); i < datasetSize; ++i )
+            {
+                m_floatDataset[i * 3]       = (float)pData[i]  / 255.0f;
+                m_floatDataset[i * 3 + 1]   = (float)pData[datasetSize + i] / 255.0f;
+                m_floatDataset[i * 3 + 2]   = (float)pData[(2 * datasetSize) + i] / 255.0f;
+            }
+
+            flag = true;
+        }
+        break;
+
+        case VECTORS:
+        {
+            float* pData = (float*)pBody->data;
+            m_floatDataset.resize( datasetSize * 3 );
+
+            for( int i(0); i < datasetSize; ++i )
+            {
+                m_floatDataset[i * 3]       = pData[i];
+                m_floatDataset[i * 3 + 1]   = pData[datasetSize + i];
+                m_floatDataset[i * 3 + 2]   = pData[(2 * datasetSize) + i];
+            }
+
+            m_pTensorField             = new TensorField( m_dh, &m_floatDataset, 1, 3 );
+            m_dh->m_tensorsFieldLoaded = true;
+            m_dh->m_vectorsLoaded      = true;
+            m_dh->m_surfaceIsDirty     = true;
+            flag                       = true;
+        }
+        break;
+
+        default:
+        {
+            m_dh->m_lastError = wxT( "unsuported file format" );
+            flag = false;
+            // Will not return now to make sure the pHdrFile pointer is freed.
+        }
+    }
+
+    if( flag )
+    {
+        m_dh->m_rows            = m_rows;
+        m_dh->m_columns         = m_columns;
+        m_dh->m_frames          = m_frames;
+        m_dh->m_anatomyLoaded   = true;
+    }
+    
+//     free(pHdrFile);
+//     pHdrFile = NULL;
+
+    m_isLoaded = flag;
+
+    return flag;
+}
+
 
 bool Anatomy::loadNifti( wxString fileName )
 {

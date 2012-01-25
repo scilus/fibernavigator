@@ -9,6 +9,7 @@
 #include "DatasetInfo.h"
 #include "Surface.h"
 #include "../misc/lic/TensorField.h"
+#include "../misc/nifti/nifti1_io.h"
 
 #include <vector>
 #include <stack>
@@ -41,6 +42,7 @@ friend class PropertiesWindow;
 public:
     //constructor/destructor
     Anatomy( DatasetHelper *pDatasetHelper );
+    Anatomy( DatasetHelper *pDatasetHelper, const wxString &filename );
     Anatomy( DatasetHelper *pDatasetHelper, std::vector<float> *pDataset );
     Anatomy( DatasetHelper *pDatasetHelper, std::vector<float> *pDataset, const int sample );
     Anatomy( DatasetHelper *pDatasetHelper, const int type );
@@ -76,8 +78,9 @@ public:
     void flipAxis( AxisType axe );
 
 	void draw(){};
-    
+
     bool load     ( wxString fileName );
+    bool load     ( nifti_image *pHeader, nifti_image *pBody );	
     bool loadNifti( wxString fileName );
     void saveNifti( wxString fileName );
 

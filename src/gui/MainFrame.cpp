@@ -20,6 +20,7 @@
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
 #include "../dataset/Anatomy.h"
+#include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/FibersGroup.h"
 #include "../dataset/ODFs.h"
@@ -217,7 +218,10 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     wxImage::AddHandler(new wxPNGHandler);
 
     m_pDatasetHelper = new DatasetHelper( this );
+    // TODO: Remove dependency to DatasetHelper
+    DatasetManager::getInstance()->setDatasetHelper( m_pDatasetHelper );
     m_pDatasetHelper->m_theScene = new TheScene( m_pDatasetHelper );
+
 
     //////////////////////////////////////////////////////////////////////////
     // MyListCtrl initialization
