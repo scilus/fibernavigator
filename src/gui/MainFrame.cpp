@@ -161,6 +161,8 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
 // List widget events
 EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL,                    MainFrame::onActivateListItem   )
 EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL,                    MainFrame::onSelectListItem     )
+EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL2,                   MainFrame::onActivateListItem2  )
+EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL2,                   MainFrame::onSelectListItem2    )
 
 // Tree widget events
 EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
@@ -217,10 +219,6 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pDatasetHelper = new DatasetHelper( this );
     m_pDatasetHelper->m_theScene = new TheScene( m_pDatasetHelper );
 
-    m_pPropertiesWindow = new PropertiesWindow(this, wxID_ANY, wxDefaultPosition, wxSize(PROP_WND_WIDTH, PROP_WND_HEIGHT)); // Contains Scene Objects properties
-    m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
-    m_pPropertiesWindow->EnableScrolling( false, true );
-    
     //////////////////////////////////////////////////////////////////////////
     // MyListCtrl initialization
     m_pListCtrl = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
@@ -239,6 +237,13 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     // ListCtrl initialization
     m_pListCtrl2 = new ListCtrl( this, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
     initListCtrl( m_pListCtrl2 );
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // PropertiesWindow initialization
+    m_pPropertiesWindow = new PropertiesWindow( this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), m_pListCtrl2 ); // Contains Scene Objects properties
+    m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pPropertiesWindow->EnableScrolling( false, true );
 
     //////////////////////////////////////////////////////////////////////////
     // OpenGL initialization
@@ -349,7 +354,7 @@ void MainFrame::initLayout()
     lstSzr->Add( (wxWindow *)m_pListCtrl2, 0, wxALL | wxFIXED_MINSIZE, 2 );
     lstSzr->Add( m_pTreeWidget, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
 
-    propSzr->Add( m_pPropertiesWindow, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
+    propSzr->Add( m_pPropertiesWindow, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 4 );
 
     lwrLeftSzr->Add( lstSzr, 0, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
     lwrLeftSzr->Add( propSzr, 1, wxALL | wxEXPAND, 2 );
@@ -365,61 +370,6 @@ void MainFrame::initLayout()
     SetAutoLayout( true );
     Layout();
     Fit();
-
-    return;
-
-    m_pMainSizer             = new wxBoxSizer( wxHORIZONTAL ); // Contains everything in the UI.
-    m_pLeftMainSizer         = new wxBoxSizer( wxVERTICAL   ); // Contains the navSizer and the objectsizer.
-    m_pNavSizer              = new wxBoxSizer( wxHORIZONTAL ); // Contains the 3 navigation windows with there respective sliders.
-    m_pListSizer             = new wxBoxSizer( wxVERTICAL   ); // Contains the list and the tree
-    m_pObjectSizer           = new wxBoxSizer( wxHORIZONTAL ); // Contains the listSizer and the propertiesSizer
-
-    wxBoxSizer *l_xSizer     = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *l_ySizer     = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *l_zSizer     = new wxBoxSizer( wxVERTICAL );
-    //wxBoxSizer *l_spaceSizer = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *l_propSizer  = new wxBoxSizer( wxVERTICAL );
-
-    l_zSizer->Add( m_pGL0,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_zSizer->Add( m_pZSlider, 0, wxALL,                   2 );
-    l_ySizer->Add( m_pGL1,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_ySizer->Add( m_pYSlider, 0, wxALL,                   2 );
-    l_xSizer->Add( m_pGL2,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_xSizer->Add( m_pXSlider, 0, wxALL ,                  2 );
-
-    m_pNavSizer->Add( l_zSizer, 0, wxALL | wxFIXED_MINSIZE, 1 );
-    m_pNavSizer->Add( l_ySizer, 0, wxALL | wxFIXED_MINSIZE, 1 );
-    m_pNavSizer->Add( l_xSizer, 0, wxALL | wxFIXED_MINSIZE, 1 );
-    //m_pNavSizer->SetMinSize( wxSize( CANVAS_AXI_WIDTH + CANVAS_COR_WIDTH + CANVAS_SAG_WIDTH, 15 ) );
-
-    m_pListSizer->Add( m_pListCtrl,               1, wxALL /*| wxEXPAND*/, 1 );
-    m_pListSizer->Add( (wxWindow *)m_pListCtrl2,  1, wxALL /*| wxEXPAND*/, 1);
-    m_pListSizer->Add( m_pTreeWidget,             2, wxALL | wxEXPAND, 1 );
-
-    l_propSizer->Add(m_pPropertiesWindow, 0, wxALL /*| wxEXPAND*/, 0);
-
-    m_pObjectSizer->Add(m_pListSizer, 1, wxALL /*| wxEXPAND*/, 0);
-    m_pObjectSizer->Add(l_propSizer, 0, wxALL /*| wxEXPAND*/, 0);
-
-    //l_spaceSizer->SetMinSize(wxSize(15,-1));
-    //m_pObjectSizer->Add(l_spaceSizer, 0, wxALL | wxFIXED_MINSIZE, 0);
-
-    l_propSizer->Layout();
-
-    //m_pObjectSizer->SetMinSize( wxSize(520,15));
-
-    m_pLeftMainSizer->Add( m_pNavSizer,  0, wxALL | wxFIXED_MINSIZE, 0 );
-    m_pLeftMainSizer->Add( m_pObjectSizer,  1, wxALL | wxEXPAND, 0 );
-    //m_pLeftMainSizer->SetMinSize( wxSize(520,15));
-
-    m_pMainSizer->Add( m_pLeftMainSizer,  0,  wxALL | wxEXPAND, 0 );
-    m_pMainSizer->Add( m_pMainGL, 1, wxEXPAND | wxALL, 2 );
-
-    m_pPropertiesWindow->Fit();
-    this->SetBackgroundColour(*wxLIGHT_GREY);
-    this->SetSizer( m_pMainSizer );
-    m_pMainSizer->SetSizeHints( this );
-    SetAutoLayout(true);
 }
 
 
@@ -1878,7 +1828,7 @@ void MainFrame::onSlizeMovieAxi( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
     m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
-    refreshAllGLWidgets();
+    updateStatusBar();
 }
 
 void MainFrame::onToggleShowAxial( wxCommandEvent& WXUNUSED(event) )
@@ -1920,7 +1870,6 @@ void MainFrame::onToggleAlpha( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::refreshAllGLWidgets()
 {
-    updateStatusBar();
     updateMenus();
     refreshViews();   
     if (m_pDatasetHelper->m_isRulerToolActive){
@@ -1975,16 +1924,11 @@ void MainFrame::renewAllGLWidgets()
     refreshAllGLWidgets();
 }
 
+// TODO: Call this method when done loading
 void MainFrame::updateStatusBar()
 {
-    wxString sbString0 = wxT( "" );
-    sbString0 = wxString::Format( wxT("Position: %d  %d  %d" ),
-                                  m_pXSlider->GetValue(),
-                                  m_pYSlider->GetValue(),
-                                  m_pZSlider->GetValue() );
-    GetStatusBar()->SetStatusText( sbString0, 0 );
-
-
+    GetStatusBar()->SetStatusText( wxString::Format( 
+        wxT("Position: %d  %d  %d" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue() ) );
 }
 
 /****************************************************************************************************
@@ -1999,6 +1943,13 @@ void MainFrame::updateStatusBar()
  *
  ****************************************************************************************************/
 
+void MainFrame::onActivateListItem2( wxListEvent& evt )
+{
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem2" ), LOGLEVEL_DEBUG );
+
+    refreshAllGLWidgets();
+}
+
 void MainFrame::onActivateListItem( wxListEvent& event )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
@@ -2011,32 +1962,32 @@ void MainFrame::onActivateListItem( wxListEvent& event )
     int l_col = m_pListCtrl->getColActivated();
     switch( l_col )
     {        
-        case 10:
-            if (l_info->toggleShow())
-            {
-                m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 0 );
-            }
-            else
-            {
-                m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 1 );
-            }
-            break;
-        case 11:
-            if( ! l_info->toggleShowFS())
-            {
-                m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
-            }
-            else
-            {
-                m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
-            }
-            break;
-        case 13:
-             deleteListItem();
-            break;
-        default:
-            return;
-            break;
+    case 10:
+        if (l_info->toggleShow())
+        {
+            m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 0 );
+        }
+        else
+        {
+            m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 1 );
+        }
+        break;
+    case 11:
+        if( ! l_info->toggleShowFS())
+        {
+            m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
+        }
+        else
+        {
+            m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
+        }
+        break;
+    case 13:
+        deleteListItem();
+        break;
+    default:
+        return;
+        break;
     }
     refreshAllGLWidgets();
 }
@@ -2094,11 +2045,11 @@ void MainFrame::deleteListItem()
     }
 }
 
-void MainFrame::onSelectListItem( wxListEvent& event )
+void MainFrame::onSelectListItem( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
 
-    int l_item = event.GetIndex();
+    int l_item = evt.GetIndex();
     m_pTreeWidget->UnselectAll();
     DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
     int l_col = m_pListCtrl->getColClicked();
@@ -2127,6 +2078,36 @@ void MainFrame::onSelectListItem( wxListEvent& event )
         m_pDatasetHelper->m_canUseColorPicker = false;
     }
     
+    refreshAllGLWidgets();
+}
+
+void MainFrame::onSelectListItem2( wxListEvent& evt )
+{
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem2" ), LOGLEVEL_DEBUG );
+
+    int index = evt.GetIndex();
+    m_pTreeWidget->UnselectAll();
+    DatasetInfo * pInfo = m_pListCtrl2->GetItem( index );
+
+    if( NULL == pInfo )
+    {
+        Logger::getInstance()->print( wxT( "Null pointer" ), LOGLEVEL_DEBUG );
+        return;
+    }
+
+    m_pLastSelectedSceneObject = pInfo;
+    m_lastSelectedListItem = index;
+
+    // Check if it is RGB
+    if( RGB == pInfo->getType() )
+    {
+        m_pDatasetHelper->m_canUseColorPicker = true;
+    }
+    else
+    {
+        m_pDatasetHelper->m_canUseColorPicker = false;
+    }
+
     refreshAllGLWidgets();
 }
 
@@ -2503,7 +2484,6 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
                 }                
     }
     m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
-    updateStatusBar();
     refreshAllGLWidgets();
 }
 

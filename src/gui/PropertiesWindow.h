@@ -19,12 +19,12 @@
 #include "../misc/Algorithms/Helper.h"
 
 class MainFrame;
+class ListCtrl;
+
 class PropertiesWindow : public wxScrolledWindow
 {
 public:
-    PropertiesWindow(){};
-    PropertiesWindow( MainFrame *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
-    ~PropertiesWindow(){};
+    PropertiesWindow( MainFrame *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, ListCtrl *lstCtrl );
 
     void OnListItemUp                       ( wxCommandEvent& event );
     void OnListItemDown                     ( wxCommandEvent& event );
@@ -160,12 +160,15 @@ public:
     void OnToggleCrossingFibers             ( wxEvent& event );
     void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );
 
-    MainFrame *m_mainFrame;
+private:
+    PropertiesWindow() { }
+    PropertiesWindow(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
 
 private:
-    wxSizer *propertiesSizer;
-    PropertiesWindow(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
+    MainFrame *m_pMainFrame;
+    ListCtrl  *m_pListCtrl;
+    
     DECLARE_DYNAMIC_CLASS(PropertiesWindow)
 };
 
-#endif /*PROPERTUIESWINDOW*/
+#endif // PROPERTIESWINDOW_H_

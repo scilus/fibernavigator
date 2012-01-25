@@ -7,8 +7,6 @@
 #include <wx/imaglist.h>
 #include <wx/string.h>
 
-#define ID_LIST_CTRL2 292
-
 BEGIN_EVENT_TABLE( ListCtrl, wxListCtrl )
     EVT_LEFT_DOWN( ListCtrl::onLeftClick )
     EVT_LIST_ITEM_ACTIVATED( ID_LIST_CTRL2, ListCtrl::onActivate )
@@ -27,6 +25,29 @@ ListCtrl::ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size,
 void ListCtrl::AssignImageList( wxImageList *imageList, int which )
 {
     wxListCtrl::AssignImageList( imageList, which );
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void ListCtrl::DeleteSelectedItem()
+{
+    long index = GetNextItem( 0, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    if( -1 != index )
+    {
+        DeleteItem( index );
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+DatasetInfo * ListCtrl::GetItem( long index )
+{
+    if( 0 > index || index >= GetItemCount() )
+    {
+        return NULL;
+    }
+
+    return (DatasetInfo *)GetItemData( index );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -87,6 +108,8 @@ void ListCtrl::onActivate( wxListEvent& evt )
     default:
         break;
     }
+
+    evt.Skip();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -133,7 +156,10 @@ void ListCtrl::SetMinSize( const wxSize &size )
 void ListCtrl::UpdateSelected()
 {
     long index = GetNextItem( 0, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    Update( index );
+    if( -1 != index )
+    {
+        Update( index );
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////

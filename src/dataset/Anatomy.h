@@ -34,7 +34,7 @@ struct SubTextureBox {
 * This can either be a T1 acquisition, or any other 
 * acquisition modality that can be used as an anatomy reference.
 */
-class Anatomy : public DatasetInfo , public wxTreeItemData
+class Anatomy : public DatasetInfo
 {
 friend class PropertiesWindow;
 

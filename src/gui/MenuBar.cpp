@@ -252,10 +252,11 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleLighting->Check(mf->m_pDatasetHelper->m_lighting);
     m_itemToggleRuler->Check(mf->m_pDatasetHelper->m_isRulerToolActive);
     
-	bool isFiberSelected = false;
-	bool isFiberUsingFakeTubes = false;
-	bool isFiberUsingTransparency = false;
-	bool isFiberInverted = false;
+	bool isFiberSelected( false );
+	bool isFiberUsingFakeTubes( false );
+	bool isFiberUsingTransparency( false );
+	bool isFiberInverted( false );
+
 	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListItem != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
