@@ -18,14 +18,16 @@
 
 class SceneObject
 {
-
 public:
     SceneObject();
-    wxBoxSizer  *m_propertiesSizer;
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
-    virtual void updatePropertiesSizer();
-    wxBoxSizer* getProprietiesSizer();   
     
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void updatePropertiesSizer() { }
+
+    wxBoxSizer* getPropertiesSizer() { return m_propertiesSizer; }
+
+public:
+    wxBoxSizer  *m_propertiesSizer;
 };
 
 #endif

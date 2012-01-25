@@ -143,8 +143,7 @@ void ListCtrl::Update( long index )
     DatasetInfo *pDataset = (DatasetInfo *)GetItemData( index );
     SetItem( index, 0, wxT( "" ), pDataset->getShow() ? 0 : 1 );
     SetItem( index, 1, pDataset->getName().BeforeFirst('.') + ( pDataset->getShowFS() ? wxT( "" ) : wxT( "*" ) ) );
-    Logger::getInstance()->print(wxString::Format( wxT( "%s::Threshold: %f" ), pDataset->getName(), pDataset->getThreshold() * pDataset->getOldMax() ), LOGLEVEL_DEBUG );
-    SetItem( index, 2, wxString::Format( 2 != m_column && pDataset->getType() < MESH && pDataset->getUseTex() ? wxT( "%.2f" ) : wxT( "(%.2f)" ), pDataset->getThreshold() * pDataset->getOldMax() ) );
+    SetItem( index, 2, wxString::Format( wxT( "%.2f" ), pDataset->getThreshold() * pDataset->getOldMax() ) );
     SetItem( index, 3, wxT( "" ), 2 );
 }
 

@@ -43,7 +43,7 @@ namespace
 #define CANVAS_SAG_WIDTH    175
 #define CANVAS_SAG_HEIGHT   175
 
-#define LIST_WIDTH          250 //268
+#define LIST_WIDTH          268
 #define LIST_HEIGHT         125
 #define LIST_COL0_WIDTH     34
 #define LIST_COL1_WIDTH     160
@@ -60,7 +60,7 @@ namespace
 #define SLIDER_SAG_WIDTH    CANVAS_SAG_WIDTH
 #define SLIDER_SAG_HEIGHT   NOT_DEFINED
 
-#define TREE_WIDTH          250 //268
+#define TREE_WIDTH          268
 #define TREE_HEIGHT         NOT_DEFINED
 
     void initMyListCtrl( MyListCtrl * &myListCtrl )
@@ -1185,14 +1185,15 @@ void MainFrame::displayPropertiesSheet()
             {
                 m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);                 
             }
-            if (!m_pLastSelectedSceneObject->getProprietiesSizer())
+            if (!m_pLastSelectedSceneObject->getPropertiesSizer())
             {
                 m_pLastSelectedSceneObject->createPropertiesSizer(m_pPropertiesWindow);
             }   
-            m_pCurrentSizer = m_pLastSelectedSceneObject->getProprietiesSizer();
+            m_pCurrentSizer = m_pLastSelectedSceneObject->getPropertiesSizer();
             
             m_pCurrentSceneObject = m_pLastSelectedSceneObject;
             m_currentListItem = m_lastSelectedListItem;
+
             if (!m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true ))
             {
                 m_pPropertiesWindow->GetSizer()->Add(m_pCurrentSizer, 0, wxLeft | wxFIXED_MINSIZE, 0 );

@@ -15,31 +15,14 @@
 
 IMPLEMENT_DYNAMIC_CLASS(PropertiesWindow, wxScrolledWindow)
 
-BEGIN_EVENT_TABLE(PropertiesWindow, wxScrolledWindow)
-EVT_PAINT(      PropertiesWindow::OnPaint)
-EVT_SIZE(       PropertiesWindow::OnSize)
-END_EVENT_TABLE()
-
-
-PropertiesWindow::PropertiesWindow( MainFrame *parent, wxWindowID id,
-                    const wxPoint &pos, const wxSize &size )
-        : wxScrolledWindow( parent, id, pos, size, wxBORDER_NONE, _T("test canvas") )
+PropertiesWindow::PropertiesWindow( MainFrame *parent, wxWindowID id, const wxPoint &pos, const wxSize &size )
+:   wxScrolledWindow( parent, id, pos, size, wxBORDER_NONE, _T( "test canvas" ) )
 {
     m_mainFrame = parent;
     SetBackgroundColour( *wxLIGHT_GREY );
     SetCursor( wxCursor( wxCURSOR_HAND ) );
     SetSizer( new wxBoxSizer( wxVERTICAL ) );
     SetAutoLayout( true );
-}
-
-void PropertiesWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
-{
-
-}
-
-void PropertiesWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
-{
-    wxPaintDC dc( this );
 }
 
 void PropertiesWindow::OnListItemUp(wxCommandEvent& WXUNUSED(event))

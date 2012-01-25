@@ -25,8 +25,6 @@ public:
     PropertiesWindow(){};
     PropertiesWindow( MainFrame *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
     ~PropertiesWindow(){};
-    void OnPaint( wxPaintEvent &event );
-    void OnSize( wxSizeEvent &event ); 
 
     void OnListItemUp                       ( wxCommandEvent& event );
     void OnListItemDown                     ( wxCommandEvent& event );
@@ -168,7 +166,6 @@ private:
     wxSizer *propertiesSizer;
     PropertiesWindow(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
     DECLARE_DYNAMIC_CLASS(PropertiesWindow)
-    DECLARE_EVENT_TABLE()
 };
 
 #endif /*PROPERTUIESWINDOW*/
