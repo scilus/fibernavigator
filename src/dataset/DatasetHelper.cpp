@@ -261,40 +261,41 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 		if( l_ext == wxT( "scn" ) )
 		{
-			if( m_mainFrame->m_pListCtrl->GetItemCount() > 0 )
-			{
-				int answer = wxMessageBox(wxT("Are you sure you want to open a new scene? All objects loaded in the current scene will be deleted."), wxT("Confirmation"), 
-										  wxYES_NO | wxICON_QUESTION);
-				
-				if( answer == wxNO )
-				{
-					return true;
-				}
-				// Delete all items in the scene
-				for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++ )
-				{
-					m_mainFrame->m_pListCtrl->SetItemState(i, wxLIST_MASK_STATE, wxLIST_STATE_SELECTED);
-					m_mainFrame->deleteListItem();
-				}
-			}
-			
-			if( ! loadScene( i_fileName ) )
-			{
-				return false;
-			}
-
-			m_selBoxChanged = true;
-			m_mainFrame->refreshAllGLWidgets();
-
-		#ifdef __WXMSW__
-			m_scnFileName = i_fileName.AfterLast ( '\\' );
-			m_scenePath   = i_fileName.BeforeLast( '\\' );
-		#else
-			m_scnFileName = i_fileName.AfterLast ( '/' );
-			m_scenePath   = i_fileName.BeforeLast( '/' );
-		#endif
-			m_scnFileLoaded = true;
-			return true;
+            // TODO: Review in DatasetManager
+// 			if( m_mainFrame->m_pListCtrl->GetItemCount() > 0 )
+// 			{
+// 				int answer = wxMessageBox(wxT("Are you sure you want to open a new scene? All objects loaded in the current scene will be deleted."), wxT("Confirmation"), 
+// 										  wxYES_NO | wxICON_QUESTION);
+// 				
+// 				if( answer == wxNO )
+// 				{
+// 					return true;
+// 				}
+// 				// Delete all items in the scene
+// 				for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++ )
+// 				{
+// 					m_mainFrame->m_pListCtrl->SetItemState(i, wxLIST_MASK_STATE, wxLIST_STATE_SELECTED);
+// 					m_mainFrame->deleteListItem();
+// 				}
+// 			}
+// 			
+// 			if( ! loadScene( i_fileName ) )
+// 			{
+// 				return false;
+// 			}
+// 
+// 			m_selBoxChanged = true;
+// 			m_mainFrame->refreshAllGLWidgets();
+// 
+// 		#ifdef __WXMSW__
+// 			m_scnFileName = i_fileName.AfterLast ( '\\' );
+// 			m_scenePath   = i_fileName.BeforeLast( '\\' );
+// 		#else
+// 			m_scnFileName = i_fileName.AfterLast ( '/' );
+// 			m_scenePath   = i_fileName.BeforeLast( '/' );
+// 		#endif
+// 			m_scnFileLoaded = true;
+// 			return true;
 		}   
 		else if( l_ext == _T( "nii" ) )
 		{
@@ -487,61 +488,65 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 void DatasetHelper::updateItemsId()
 {
-	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
-	{
-		DatasetInfo* pDatasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
-		if(pDatasetInfo != NULL)
-		{
-			pDatasetInfo->setListCtrlItemId(pDatasetInfo->getListCtrlItemId() + 1);
-		}
-	}
+    // TODO: Review but shouldn't be necessary later on
+// 	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+// 	{
+// 		DatasetInfo* pDatasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+// 		if(pDatasetInfo != NULL)
+// 		{
+// 			pDatasetInfo->setListCtrlItemId(pDatasetInfo->getListCtrlItemId() + 1);
+// 		}
+// 	}
 }
 
 void DatasetHelper::updateItemsPosition()
-{	
-	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
-	{
-		DatasetInfo* pInfoA = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
-		if(pInfoA != NULL)
-		{
-			long id = pInfoA->getListCtrlItemId();
-			if( i != id)
-			{
-				DatasetInfo *pInfoB = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(id);
-				if(pInfoA != NULL)
-				{
-					m_mainFrame->m_pListCtrl->SetItem(i, 0, wxT(""), pInfoB->getShow() ? 0 : 1);
-					m_mainFrame->m_pListCtrl->SetItem(i, 1, pInfoB->getName().BeforeFirst( '.' ));
-					m_mainFrame->m_pListCtrl->SetItem(i, 2, wxString::Format(wxT("%.2f"), pInfoB->getThreshold()));
-					m_mainFrame->m_pListCtrl->SetItemData(i, (long)pInfoB);
-					
-					m_mainFrame->m_pListCtrl->SetItem(id, 0, wxT(""), pInfoA->getShow() ? 0 : 1);
-					m_mainFrame->m_pListCtrl->SetItem(id, 1, pInfoA->getName().BeforeFirst( '.' ));
-					m_mainFrame->m_pListCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), pInfoA->getThreshold()));
-					m_mainFrame->m_pListCtrl->SetItemData(id, (long)pInfoA);
-				}
-			}
-		}
-	}
-	// Adjust fibergroup position with fibers
-	std::list<int> fibersPosList;
-	
-	FibersGroup* pFibersGroup = NULL;
-	getFibersGroupDataset(pFibersGroup);
-	if( pFibersGroup != NULL )
-	{
-		for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
-		{
-			long id = pFibersGroup->getFibersSet(i)->getListCtrlItemId();
-			fibersPosList.push_back(id);
-		}
-		
-		fibersPosList.sort();
-		
-		int currentPos = pFibersGroup->getListCtrlItemId();
-		pFibersGroup->setListCtrlItemId(fibersPosList.front());
-		m_mainFrame->m_pListCtrl->moveItemAt(currentPos, fibersPosList.front() - 1);
-	}
+{
+    // TODO: Shouldn't be necessary either
+
+// 	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
+// 	{
+// 		DatasetInfo* pInfoA = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+// 		if(pInfoA != NULL)
+// 		{
+// 			long id = pInfoA->getListCtrlItemId();
+// 			if( i != id)
+// 			{
+// 				DatasetInfo *pInfoB = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(id);
+// 				if(pInfoA != NULL)
+// 				{
+// 					m_mainFrame->m_pListCtrl->SetItem(i, 0, wxT(""), pInfoB->getShow() ? 0 : 1);
+// 					m_mainFrame->m_pListCtrl->SetItem(i, 1, pInfoB->getName().BeforeFirst( '.' ));
+// 					m_mainFrame->m_pListCtrl->SetItem(i, 2, wxString::Format(wxT("%.2f"), pInfoB->getThreshold()));
+// 					m_mainFrame->m_pListCtrl->SetItemData(i, (long)pInfoB);
+// 					
+// 					m_mainFrame->m_pListCtrl->SetItem(id, 0, wxT(""), pInfoA->getShow() ? 0 : 1);
+// 					m_mainFrame->m_pListCtrl->SetItem(id, 1, pInfoA->getName().BeforeFirst( '.' ));
+// 					m_mainFrame->m_pListCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), pInfoA->getThreshold()));
+// 					m_mainFrame->m_pListCtrl->SetItemData(id, (long)pInfoA);
+// 				}
+// 			}
+// 		}
+// 	}
+// 
+// 	// Adjust fibergroup position with fibers
+// 	std::list<int> fibersPosList;
+// 	
+// 	FibersGroup* pFibersGroup = NULL;
+// 	getFibersGroupDataset(pFibersGroup);
+// 	if( pFibersGroup != NULL )
+// 	{
+// 		for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
+// 		{
+// 			long id = pFibersGroup->getFibersSet(i)->getListCtrlItemId();
+// 			fibersPosList.push_back(id);
+// 		}
+// 		
+// 		fibersPosList.sort();
+// 		
+// 		int currentPos = pFibersGroup->getListCtrlItemId();
+// 		pFibersGroup->setListCtrlItemId(fibersPosList.front());
+// 		m_mainFrame->m_pListCtrl->moveItemAt(currentPos, fibersPosList.front() - 1);
+// 	}
 }
 
 void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
@@ -558,38 +563,38 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 	i_info->setListCtrlItemId(l_id);
 	
 //     m_mainFrame->m_pListCtrl2->InsertItem( i_info );
-	m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+// 	m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+// 
+//     if( i_info->getShow() )
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 0 );
+//     else
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 1 );
+// 
+//     if( ! i_info->getShowFS() )
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
+//     else
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ));
+// 
+//     if( ! i_info->getUseTex() )
+//         m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), ( i_info->getThreshold() ) * i_info->getOldMax() ) + wxT( ")" ) );
+//     else
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
+// 
+//     m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 0 );
+//     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
+// 	
+// 	m_mainFrame->m_pListCtrl->unselectAll();
+// 	m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+// 	
+// 	if( isChild )
+// 	{
+// 		m_mainFrame->m_pListCtrl->moveItemDown( l_id );
+// 	}
+// 
+//     m_mainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
+//     m_mainFrame->GetStatusBar()->SetStatusText( i_info->getName() + wxT( " loaded" ), 2 );
 
-    if( i_info->getShow() )
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 0 );
-    else
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 1 );
-
-    if( ! i_info->getShowFS() )
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
-    else
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ));
-
-    if( ! i_info->getUseTex() )
-        m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), ( i_info->getThreshold() ) * i_info->getOldMax() ) + wxT( ")" ) );
-    else
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
-
-    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 0 );
-    m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
-	
-	m_mainFrame->m_pListCtrl->unselectAll();
-	m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-	
-	if( isChild )
-	{
-		m_mainFrame->m_pListCtrl->moveItemDown( l_id );
-	}
-
-    m_mainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
-    m_mainFrame->GetStatusBar()->SetStatusText( i_info->getName() + wxT( " loaded" ), 2 );
-
-    if( m_mainFrame->m_pListCtrl->GetItemCount() == 1 )
+    if( m_mainFrame->m_pListCtrl2->GetItemCount() == 1 )
     {
         m_mainFrame->m_pXSlider->SetMax( wxMax( 2, m_columns - 1 ) );
         m_mainFrame->m_pXSlider->SetValue( m_columns / 2 );
@@ -613,14 +618,14 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 
 bool DatasetHelper::fileNameExists( const wxString i_fileName )
 {
-    int l_countDataSets = m_mainFrame->m_pListCtrl->GetItemCount();
+    int l_countDataSets = m_mainFrame->m_pListCtrl2->GetItemCount();
 
     if( l_countDataSets == 0 )
         return false;
 
     for( int i = 0; i < l_countDataSets; ++i )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( i );
         if ( l_info->getPath() == i_fileName )
         {
             return true;
@@ -633,527 +638,533 @@ bool DatasetHelper::fileNameExists( const wxString i_fileName )
 bool DatasetHelper::loadScene( const wxString i_fileName )
 {
     /*
-     * Variables to store the slice postions in, have to be set after loading
+     * Variables to store the slice positions in, have to be set after loading
      * the anatomy files
      */
-    long xp, yp, zp;
-    xp = yp = zp = 0;
-    double r00, r10, r20, r01, r11, r21, r02, r12, r22;
-    r10 = r20 = r01 = r21 = r02 = r12 = 0;
-    r00 = r11 = r22 = 1;
 
-    wxXmlDocument l_xmlDoc;
-    if( ! l_xmlDoc.Load( i_fileName ) )
-        return false;
-	
-	wxString xmlVersion = l_xmlDoc.GetVersion();
-	long version;
-	xmlVersion.ToLong(&version);
-	
-    wxXmlNode* l_child = l_xmlDoc.GetRoot()->GetChildren();
-    while( l_child )
-    {
-        if( l_child->GetName() == wxT( "anatomy" ) )
-        {
-            wxString srows      = l_child->GetPropVal( wxT( "rows" ),    wxT( "1" ) );
-            wxString scolumns   = l_child->GetPropVal( wxT( "columns" ), wxT( "1" ) );
-            wxString sframes    = l_child->GetPropVal( wxT( "frames" ),  wxT( "1" ) );
+    // TODO: Review once in SceneManager
+    return false;
 
-            long l_rows, l_columns, l_frames;
-
-            srows.ToLong   ( &l_rows, 10 );
-            scolumns.ToLong( &l_columns, 10 );
-            sframes.ToLong ( &l_frames, 10 );
-            if( m_anatomyLoaded )
-            {
-                if( ( l_rows != m_rows ) || ( l_columns != m_columns ) || ( l_frames != m_frames ) )
-                {
-                    m_lastError = wxT( "dimensions of loaded files must be the same" );
-                    return false;
-                }
-            }
-            else
-            {
-                m_rows            = l_rows;
-                m_columns         = l_columns;
-                m_frames          = l_frames;
-                m_anatomyLoaded   = true;
-            }
-        }
-        else if( l_child->GetName() == wxT( "position" ) )
-        {
-            l_child->GetPropVal( wxT( "x" ), wxT( "1" ) ).ToLong( &xp, 10 );
-            l_child->GetPropVal( wxT( "y" ), wxT( "1" ) ).ToLong( &yp, 10 );
-            l_child->GetPropVal( wxT( "z" ), wxT( "1" ) ).ToLong( &zp, 10 );
-        }
-        else if( l_child->GetName() == wxT( "rotation" ) )
-        {
-            //l_child->GetPropVal( wxT( "rot00" ), wxT( "1" ) ).ToDouble( &r00 );
-            //l_child->GetPropVal( wxT( "rot10" ), wxT( "1" ) ).ToDouble( &r10 );
-            //l_child->GetPropVal( wxT( "rot20" ), wxT( "1" ) ).ToDouble( &r20 );
-            //l_child->GetPropVal( wxT( "rot01" ), wxT( "1" ) ).ToDouble( &r01 );
-            //l_child->GetPropVal( wxT( "rot11" ), wxT( "1" ) ).ToDouble( &r11 );
-            //l_child->GetPropVal( wxT( "rot21" ), wxT( "1" ) ).ToDouble( &r21 );
-            //l_child->GetPropVal( wxT( "rot02" ), wxT( "1" ) ).ToDouble( &r02 );
-            //l_child->GetPropVal( wxT( "rot12" ), wxT( "1" ) ).ToDouble( &r12 );
-            //l_child->GetPropVal( wxT( "rot22" ), wxT( "1" ) ).ToDouble( &r22 );
-        }
-
-        else if( l_child->GetName() == wxT( "data" ) )
-        {
-			std::map<DatasetInfo*, long> realPositions;
-			bool fibersGroupTreated = false;
-			
-            wxXmlNode *l_dataSetNode = l_child->GetChildren();
-            while( l_dataSetNode )
-            {
-                wxXmlNode *l_nodes  = l_dataSetNode->GetChildren();
-                // initialize to mute compiler
-				bool l_isfiberGroup	= false;
-                bool l_active       = true;
-                bool l_useTex       = true;
-                bool l_showFS       = true;
-                double l_threshold  = 0.0;
-                double l_alpha      = 1.0;
-				long l_pos			= 0;
-                wxString l_path;
-				wxString l_name;
-				
-                while( l_nodes )
-                {
-                    if( l_nodes->GetName() == _T( "status" ) )
-                    {
-						if( version >= 2 )
-						{
-							l_isfiberGroup = ( l_nodes->GetPropVal( _T( "isFiberGroup" ), _T( "yes" ) ) == _T( "yes" ) );
-							l_nodes->GetPropVal( _T( "name" ), &l_name );
-						}
-                        l_active = ( l_nodes->GetPropVal( _T( "active" ), _T( "yes" ) ) == _T( "yes" ) );
-                        l_useTex = ( l_nodes->GetPropVal( _T( "useTex" ), _T( "yes" ) ) == _T( "yes" ) );
-                        l_showFS = ( l_nodes->GetPropVal( _T( "showFS" ), _T( "yes" ) ) == _T( "yes" ) );
-                        ( l_nodes->GetPropVal( wxT( "threshold"), wxT( "0.0" ) ) ).ToDouble( &l_threshold );
-                        ( l_nodes->GetPropVal( wxT( "alpha"),     wxT( "0.0" ) ) ).ToDouble( &l_alpha );
-						if( l_nodes->GetPropVal( wxT( "position"), wxT( "0" ) ) )
-						{
-							l_nodes->GetPropVal( wxT( "position"), wxT( "0" ) ).ToLong( &l_pos );
-						}
-                    }
-                    else if( l_nodes->GetName() == _T( "path" ) )
-                    {
-                        l_path = l_nodes->GetNodeContent();
-                    }
-
-                    l_nodes = l_nodes->GetNext();
-                }
-                load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha, l_name, version, l_isfiberGroup, true );
-				
-				if( version < 2 ) // in the old version, no fibersgroup were saved
-				{
-					long lastItemPos;
-
-					#ifdef __WXMAC__
-						lastItemPos = m_mainFrame->m_pListCtrl->GetItemCount() - 1;
-					#else
-						lastItemPos = 1;
-					#endif
-						if(lastItemPos >= 0  && lastItemPos < m_mainFrame->m_pListCtrl->GetItemCount() && !fibersGroupTreated)
-						{
-							DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(lastItemPos);
-							// if the last inserted item is a fiber, than a fibergroup has been inserted before
-							if(pDataset->getType() == FIBERS)
-							{
-								if(l_pos - 1 >= 0 )
-								{
-									DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(lastItemPos - 1);
-									// insert fibersgroup position
-									realPositions.insert(pair<DatasetInfo*, long>(pDataset, l_pos - 1));
-								}
-								fibersGroupTreated = true;
-							}
-						}
-					}
-
-				DatasetInfo* pDataset;
-				#ifdef __WXMAC__
-					pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(m_mainFrame->m_pListCtrl->GetItemCount() - 1);
-				#else
-					if( m_fibersGroupLoaded && !l_isfiberGroup )
-					{
-						pDataset = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData(1);
-						if( pDataset->getType() != FIBERS )
-						{
-							pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
-						}
-					}
-					else
-					{
-						pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(0);
-					}
-				#endif
-				realPositions.insert(pair<DatasetInfo*, long>(pDataset, l_pos));
-
-                l_dataSetNode = l_dataSetNode->GetNext();
-            }
-			
-			// Reassign dataset to the good position
-			if( version > 1 ) 
-			{
-				for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
-				{
-					DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
-					std::map<DatasetInfo*, long>::iterator it = realPositions.find( pDataset );
-					
-					long currentPos = pDataset->getListCtrlItemId();
-					long realPos = it->second;
-
-					if( currentPos != realPos)
-					{
-						m_mainFrame->m_pListCtrl->swap(currentPos, realPos);
-					}
-				}
-			}
-        }
-        else if( l_child->GetName() == wxT( "points" ) )
-        {
-            wxXmlNode* l_pNode = l_child->GetChildren();
-            while( l_pNode )
-            {
-                wxString l_sx = l_pNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) );
-                wxString l_sy = l_pNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) );
-                wxString l_sz = l_pNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) );
-
-                double l_x, l_y, l_z;
-
-                l_sx.ToDouble( &l_x );
-                l_sy.ToDouble( &l_y );
-                l_sz.ToDouble( &l_z );
-
-                SplinePoint* l_point = new SplinePoint( l_x, l_y, l_z, this );
-                m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "point" ), -1, -1, l_point );
-                l_pNode = l_pNode->GetNext();
-            }
-
-            if( m_mainFrame->m_pTreeWidget->GetChildrenCount( m_mainFrame->m_tPointId ) > 0 )
-            {
-                Surface* l_surface = new Surface( this );
-#ifdef __WXMAC__
-                // insert at zero is a well-known bug on OSX, so we append there...
-                // http://trac.wxwidgets.org/ticket/4492
-                long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
-#else
-                long l_id = 0;
-#endif
-    
-                m_mainFrame->m_pListCtrl2->InsertItem( l_surface );
-
-                m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-                m_mainFrame->m_pListCtrl->SetItem( l_id, 1, _T( "spline surface" ) );
-                m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
-                m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-                m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)l_surface );
-                m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-            }
-        }
-        else if( l_child->GetName() == wxT( "selection_objects" ) )
-        {
-            wxXmlNode* l_boxNode = l_child->GetChildren();
-            wxTreeItemId l_currentMasterId;
-
-            wxString l_name, l_type, l_active, l_visible, l_isBox;
-            double cx, cy, cz, ix, iy, iz;
-            double _cx, _cy, _cz, _ix, _iy, _iz;
-            cx = cy = cz = ix = iy = iz = 0;
-            _cx = _cy = _cz = _ix = _iy = _iz = 0;
-
-            while( l_boxNode )
-            {
-                wxXmlNode* l_infoNode = l_boxNode->GetChildren();
-                while( l_infoNode )
-                {
-                    if( l_infoNode->GetName() == wxT( "status" ) )
-                    {
-                        l_type    = l_infoNode->GetPropVal( wxT( "type" ),    wxT( "MASTER" ) );
-                        l_active  = l_infoNode->GetPropVal( wxT( "active" ),  wxT( "yes" ) );
-                        l_visible = l_infoNode->GetPropVal( wxT( "visible" ), wxT( "yes" ) );
-                        l_isBox   = l_infoNode->GetPropVal( wxT( "isBox" ), wxT( "yes" ) );
-
-                    }
-                    if( l_infoNode->GetName() == wxT( "name" ) )
-                    {
-                        l_name = l_infoNode->GetPropVal( wxT( "string" ), wxT( "object" ) );
-
-                    }
-                    if( l_infoNode->GetName() == wxT( "size" ) )
-                    {
-                        wxString sx = l_infoNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) );
-                        wxString sy = l_infoNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) );
-                        wxString sz = l_infoNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) );
-
-                        sx.ToDouble( &_ix );
-                        sy.ToDouble( &_iy );
-                        sz.ToDouble( &_iz );
-                    }
-                    if( l_infoNode->GetName() == wxT( "center" ) )
-                    {
-                        wxString sx = l_infoNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) );
-                        wxString sy = l_infoNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) );
-                        wxString sz = l_infoNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) );
-
-                        sx.ToDouble( &_cx );
-                        sy.ToDouble( &_cy );
-                        sz.ToDouble( &_cz );
-                    }
-
-                    l_infoNode = l_infoNode->GetNext();
-                }
-
-                Vector l_vc( _cx, _cy, _cz );
-                Vector l_vs( _ix, _iy, _iz );
-
-                // get selected l_anatomy dataset
-                long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-                if( l_item == -1 )
-                    return false;
-
-                //DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( l_item );
-                //if( l_info->getType() > OVERLAY )
-                //    return false;
-                SelectionObject* l_selectionObject;
-                if( l_isBox == _T( "yes" ) )
-                    l_selectionObject = new SelectionBox( l_vc, l_vs, this );
-                else
-                    l_selectionObject = new SelectionEllipsoid( l_vc, l_vs, this );
-
-                l_selectionObject->setName( l_name );
-                l_selectionObject->setIsActive ( l_active  == _T( "yes" ) );
-                l_selectionObject->setIsVisible( l_visible == _T( "yes" ) );
-
-                if( l_type == wxT( "MASTER" ) )
-                {
-                    l_selectionObject->setIsMaster( true );
-                    l_currentMasterId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tSelectionObjectsId, l_selectionObject->getName(), 0, -1, l_selectionObject );
-                    m_mainFrame->m_pTreeWidget->EnsureVisible( l_currentMasterId );
-                    m_mainFrame->m_pTreeWidget->SetItemImage( l_currentMasterId, l_selectionObject->getIcon() );
-                    m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( l_currentMasterId, *wxCYAN );
-                    l_selectionObject->setTreeId( l_currentMasterId );
-                }
-                else
-                {
-                    l_selectionObject->setIsNOT( l_type == _T( "NOT" ) );
-                    wxTreeItemId boxId = m_mainFrame->m_pTreeWidget->AppendItem( l_currentMasterId, l_selectionObject->getName(), 0, -1, l_selectionObject );
-                    m_mainFrame->m_pTreeWidget->EnsureVisible( boxId );
-                    m_mainFrame->m_pTreeWidget->SetItemImage( boxId, l_selectionObject->getIcon() );
-
-                    if( l_selectionObject->getIsNOT() )
-                        m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( boxId, *wxRED );
-                    else
-                        m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( boxId, *wxGREEN );
-
-                    l_selectionObject->setTreeId( boxId );
-                }
-                l_boxNode = l_boxNode->GetNext();
-            }
-        }
-        l_child = l_child->GetNext();
-    }
-
-    m_mainFrame->m_pXSlider->SetValue( xp );
-    m_mainFrame->m_pYSlider->SetValue( yp );
-    m_mainFrame->m_pZSlider->SetValue( zp );
-    updateView( xp, yp, zp );
-
-    /*m_transform.s.M00 = r00;
-    m_transform.s.M10 = r10;
-    m_transform.s.M20 = r20;
-    m_transform.s.M01 = r01;
-    m_transform.s.M11 = r11;
-    m_transform.s.M21 = r21;
-    m_transform.s.M02 = r02;
-    m_transform.s.M12 = r12;
-    m_transform.s.M22 = r22;
-    m_mainFrame->m_mainGL->setRotation();*/
-
-    updateLoadStatus();
-    return true;
+//     long xp, yp, zp;
+//     xp = yp = zp = 0;
+//     double r00, r10, r20, r01, r11, r21, r02, r12, r22;
+//     r10 = r20 = r01 = r21 = r02 = r12 = 0;
+//     r00 = r11 = r22 = 1;
+// 
+//     wxXmlDocument l_xmlDoc;
+//     if( !l_xmlDoc.Load( i_fileName ) )
+//         return false;
+// 	
+// 	wxString xmlVersion = l_xmlDoc.GetVersion();
+// 	long version;
+// 	xmlVersion.ToLong(&version);
+// 	
+//     wxXmlNode* l_child = l_xmlDoc.GetRoot()->GetChildren();
+//     while( l_child )
+//     {
+//         if( l_child->GetName() == wxT( "anatomy" ) )
+//         {
+//             wxString srows      = l_child->GetPropVal( wxT( "rows" ),    wxT( "1" ) );
+//             wxString scolumns   = l_child->GetPropVal( wxT( "columns" ), wxT( "1" ) );
+//             wxString sframes    = l_child->GetPropVal( wxT( "frames" ),  wxT( "1" ) );
+// 
+//             long l_rows, l_columns, l_frames;
+// 
+//             srows.ToLong   ( &l_rows, 10 );
+//             scolumns.ToLong( &l_columns, 10 );
+//             sframes.ToLong ( &l_frames, 10 );
+//             if( m_anatomyLoaded )
+//             {
+//                 if( ( l_rows != m_rows ) || ( l_columns != m_columns ) || ( l_frames != m_frames ) )
+//                 {
+//                     m_lastError = wxT( "dimensions of loaded files must be the same" );
+//                     return false;
+//                 }
+//             }
+//             else
+//             {
+//                 m_rows            = l_rows;
+//                 m_columns         = l_columns;
+//                 m_frames          = l_frames;
+//                 m_anatomyLoaded   = true;
+//             }
+//         }
+//         else if( l_child->GetName() == wxT( "position" ) )
+//         {
+//             l_child->GetPropVal( wxT( "x" ), wxT( "1" ) ).ToLong( &xp, 10 );
+//             l_child->GetPropVal( wxT( "y" ), wxT( "1" ) ).ToLong( &yp, 10 );
+//             l_child->GetPropVal( wxT( "z" ), wxT( "1" ) ).ToLong( &zp, 10 );
+//         }
+//         else if( l_child->GetName() == wxT( "rotation" ) )
+//         {
+//             //l_child->GetPropVal( wxT( "rot00" ), wxT( "1" ) ).ToDouble( &r00 );
+//             //l_child->GetPropVal( wxT( "rot10" ), wxT( "1" ) ).ToDouble( &r10 );
+//             //l_child->GetPropVal( wxT( "rot20" ), wxT( "1" ) ).ToDouble( &r20 );
+//             //l_child->GetPropVal( wxT( "rot01" ), wxT( "1" ) ).ToDouble( &r01 );
+//             //l_child->GetPropVal( wxT( "rot11" ), wxT( "1" ) ).ToDouble( &r11 );
+//             //l_child->GetPropVal( wxT( "rot21" ), wxT( "1" ) ).ToDouble( &r21 );
+//             //l_child->GetPropVal( wxT( "rot02" ), wxT( "1" ) ).ToDouble( &r02 );
+//             //l_child->GetPropVal( wxT( "rot12" ), wxT( "1" ) ).ToDouble( &r12 );
+//             //l_child->GetPropVal( wxT( "rot22" ), wxT( "1" ) ).ToDouble( &r22 );
+//         }
+// 
+//         else if( l_child->GetName() == wxT( "data" ) )
+//         {
+// 			std::map<DatasetInfo*, long> realPositions;
+// 			bool fibersGroupTreated = false;
+// 			
+//             wxXmlNode *l_dataSetNode = l_child->GetChildren();
+//             while( l_dataSetNode )
+//             {
+//                 wxXmlNode *l_nodes  = l_dataSetNode->GetChildren();
+//                 // initialize to mute compiler
+// 				bool l_isfiberGroup	= false;
+//                 bool l_active       = true;
+//                 bool l_useTex       = true;
+//                 bool l_showFS       = true;
+//                 double l_threshold  = 0.0;
+//                 double l_alpha      = 1.0;
+// 				long l_pos			= 0;
+//                 wxString l_path;
+// 				wxString l_name;
+// 				
+//                 while( l_nodes )
+//                 {
+//                     if( l_nodes->GetName() == _T( "status" ) )
+//                     {
+// 						if( version >= 2 )
+// 						{
+// 							l_isfiberGroup = ( l_nodes->GetPropVal( _T( "isFiberGroup" ), _T( "yes" ) ) == _T( "yes" ) );
+// 							l_nodes->GetPropVal( _T( "name" ), &l_name );
+// 						}
+//                         l_active = ( l_nodes->GetPropVal( _T( "active" ), _T( "yes" ) ) == _T( "yes" ) );
+//                         l_useTex = ( l_nodes->GetPropVal( _T( "useTex" ), _T( "yes" ) ) == _T( "yes" ) );
+//                         l_showFS = ( l_nodes->GetPropVal( _T( "showFS" ), _T( "yes" ) ) == _T( "yes" ) );
+//                         ( l_nodes->GetPropVal( wxT( "threshold"), wxT( "0.0" ) ) ).ToDouble( &l_threshold );
+//                         ( l_nodes->GetPropVal( wxT( "alpha"),     wxT( "0.0" ) ) ).ToDouble( &l_alpha );
+// 						if( l_nodes->GetPropVal( wxT( "position"), wxT( "0" ) ) )
+// 						{
+// 							l_nodes->GetPropVal( wxT( "position"), wxT( "0" ) ).ToLong( &l_pos );
+// 						}
+//                     }
+//                     else if( l_nodes->GetName() == _T( "path" ) )
+//                     {
+//                         l_path = l_nodes->GetNodeContent();
+//                     }
+// 
+//                     l_nodes = l_nodes->GetNext();
+//                 }
+//                 load( l_path, -1, l_threshold, l_active, l_showFS, l_useTex, l_alpha, l_name, version, l_isfiberGroup, true );
+// 				
+// 				if( version < 2 ) // in the old version, no fibersgroup were saved
+// 				{
+// 					long lastItemPos;
+// 
+// 					#ifdef __WXMAC__
+// 						lastItemPos = m_mainFrame->m_pListCtrl2->GetItemCount() - 1;
+// 					#else
+// 						lastItemPos = 1;
+// 					#endif
+// 						if(lastItemPos >= 0  && lastItemPos < m_mainFrame->m_pListCtrl2->GetItemCount() && !fibersGroupTreated)
+// 						{
+// 							DatasetInfo* pDataset = m_mainFrame->m_pListCtrl2->GetItem( lastItemPos );
+// 							// if the last inserted item is a fiber, than a fibergroup has been inserted before
+// 							if(pDataset->getType() == FIBERS)
+// 							{
+// 								if(l_pos - 1 >= 0 )
+// 								{
+// 									DatasetInfo* pDataset = m_mainFrame->m_pListCtrl2->GetItem(lastItemPos - 1);
+// 									// insert fibersgroup position
+// 									realPositions.insert( pair<DatasetInfo *, long>(pDataset, l_pos - 1) );
+// 								}
+// 								fibersGroupTreated = true;
+// 							}
+// 						}
+// 					}
+// 
+// 				DatasetInfo* pDataset;
+// 				#ifdef __WXMAC__
+// 					pDataset = m_mainFrame->m_pListCtrl2->GetItem(m_mainFrame->m_pListCtrl2->GetItemCount() - 1);
+// 				#else
+// 					if( m_fibersGroupLoaded && !l_isfiberGroup )
+// 					{
+// 						pDataset = m_mainFrame->m_pListCtrl2->GetItem(1);
+// 						if( pDataset->getType() != FIBERS )
+// 						{
+// 							pDataset = m_mainFrame->m_pListCtrl2->GetItem(0);
+// 						}
+// 					}
+// 					else
+// 					{
+// 						pDataset = m_mainFrame->m_pListCtrl2->GetItem(0);
+// 					}
+// 				#endif
+// 				realPositions.insert(pair<DatasetInfo*, long>(pDataset, l_pos));
+// 
+//                 l_dataSetNode = l_dataSetNode->GetNext();
+//             }
+// 			
+// 			// Reassign dataset to the good position
+// 			if( version > 1 ) 
+// 			{
+// 				for( long i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); i++)
+// 				{
+// 					DatasetInfo* pDataset = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
+// 					std::map<DatasetInfo*, long>::iterator it = realPositions.find( pDataset );
+// 					
+// 					long currentPos = pDataset->getListCtrlItemId();
+// 					long realPos = it->second;
+// 
+// 					if( currentPos != realPos)
+// 					{
+// 						m_mainFrame->m_pListCtrl->swap(currentPos, realPos);
+// 					}
+// 				}
+// 			}
+//         }
+//         else if( l_child->GetName() == wxT( "points" ) )
+//         {
+//             wxXmlNode* l_pNode = l_child->GetChildren();
+//             while( l_pNode )
+//             {
+//                 wxString l_sx = l_pNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) );
+//                 wxString l_sy = l_pNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) );
+//                 wxString l_sz = l_pNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) );
+// 
+//                 double l_x, l_y, l_z;
+// 
+//                 l_sx.ToDouble( &l_x );
+//                 l_sy.ToDouble( &l_y );
+//                 l_sz.ToDouble( &l_z );
+// 
+//                 SplinePoint* l_point = new SplinePoint( l_x, l_y, l_z, this );
+//                 m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "point" ), -1, -1, l_point );
+//                 l_pNode = l_pNode->GetNext();
+//             }
+// 
+//             if( m_mainFrame->m_pTreeWidget->GetChildrenCount( m_mainFrame->m_tPointId ) > 0 )
+//             {
+//                 Surface* l_surface = new Surface( this );
+// #ifdef __WXMAC__
+//                 // insert at zero is a well-known bug on OSX, so we append there...
+//                 // http://trac.wxwidgets.org/ticket/4492
+//                 long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
+// #else
+//                 long l_id = 0;
+// #endif
+//     
+//                 m_mainFrame->m_pListCtrl2->InsertItem( l_surface );
+// 
+//                 m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+//                 m_mainFrame->m_pListCtrl->SetItem( l_id, 1, _T( "spline surface" ) );
+//                 m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
+//                 m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+//                 m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)l_surface );
+//                 m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+//             }
+//         }
+//         else if( l_child->GetName() == wxT( "selection_objects" ) )
+//         {
+//             wxXmlNode* l_boxNode = l_child->GetChildren();
+//             wxTreeItemId l_currentMasterId;
+// 
+//             wxString l_name, l_type, l_active, l_visible, l_isBox;
+//             double cx, cy, cz, ix, iy, iz;
+//             double _cx, _cy, _cz, _ix, _iy, _iz;
+//             cx = cy = cz = ix = iy = iz = 0;
+//             _cx = _cy = _cz = _ix = _iy = _iz = 0;
+// 
+//             while( l_boxNode )
+//             {
+//                 wxXmlNode* l_infoNode = l_boxNode->GetChildren();
+//                 while( l_infoNode )
+//                 {
+//                     if( l_infoNode->GetName() == wxT( "status" ) )
+//                     {
+//                         l_type    = l_infoNode->GetPropVal( wxT( "type" ),    wxT( "MASTER" ) );
+//                         l_active  = l_infoNode->GetPropVal( wxT( "active" ),  wxT( "yes" ) );
+//                         l_visible = l_infoNode->GetPropVal( wxT( "visible" ), wxT( "yes" ) );
+//                         l_isBox   = l_infoNode->GetPropVal( wxT( "isBox" ), wxT( "yes" ) );
+// 
+//                     }
+//                     if( l_infoNode->GetName() == wxT( "name" ) )
+//                     {
+//                         l_name = l_infoNode->GetPropVal( wxT( "string" ), wxT( "object" ) );
+// 
+//                     }
+//                     if( l_infoNode->GetName() == wxT( "size" ) )
+//                     {
+//                         wxString sx = l_infoNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) );
+//                         wxString sy = l_infoNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) );
+//                         wxString sz = l_infoNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) );
+// 
+//                         sx.ToDouble( &_ix );
+//                         sy.ToDouble( &_iy );
+//                         sz.ToDouble( &_iz );
+//                     }
+//                     if( l_infoNode->GetName() == wxT( "center" ) )
+//                     {
+//                         wxString sx = l_infoNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) );
+//                         wxString sy = l_infoNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) );
+//                         wxString sz = l_infoNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) );
+// 
+//                         sx.ToDouble( &_cx );
+//                         sy.ToDouble( &_cy );
+//                         sz.ToDouble( &_cz );
+//                     }
+// 
+//                     l_infoNode = l_infoNode->GetNext();
+//                 }
+// 
+//                 Vector l_vc( _cx, _cy, _cz );
+//                 Vector l_vs( _ix, _iy, _iz );
+// 
+//                 // get selected l_anatomy dataset
+//                 long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+//                 if( l_item == -1 )
+//                     return false;
+// 
+//                 //DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_listCtrl->GetItemData( l_item );
+//                 //if( l_info->getType() > OVERLAY )
+//                 //    return false;
+//                 SelectionObject* l_selectionObject;
+//                 if( l_isBox == _T( "yes" ) )
+//                     l_selectionObject = new SelectionBox( l_vc, l_vs, this );
+//                 else
+//                     l_selectionObject = new SelectionEllipsoid( l_vc, l_vs, this );
+// 
+//                 l_selectionObject->setName( l_name );
+//                 l_selectionObject->setIsActive ( l_active  == _T( "yes" ) );
+//                 l_selectionObject->setIsVisible( l_visible == _T( "yes" ) );
+// 
+//                 if( l_type == wxT( "MASTER" ) )
+//                 {
+//                     l_selectionObject->setIsMaster( true );
+//                     l_currentMasterId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tSelectionObjectsId, l_selectionObject->getName(), 0, -1, l_selectionObject );
+//                     m_mainFrame->m_pTreeWidget->EnsureVisible( l_currentMasterId );
+//                     m_mainFrame->m_pTreeWidget->SetItemImage( l_currentMasterId, l_selectionObject->getIcon() );
+//                     m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( l_currentMasterId, *wxCYAN );
+//                     l_selectionObject->setTreeId( l_currentMasterId );
+//                 }
+//                 else
+//                 {
+//                     l_selectionObject->setIsNOT( l_type == _T( "NOT" ) );
+//                     wxTreeItemId boxId = m_mainFrame->m_pTreeWidget->AppendItem( l_currentMasterId, l_selectionObject->getName(), 0, -1, l_selectionObject );
+//                     m_mainFrame->m_pTreeWidget->EnsureVisible( boxId );
+//                     m_mainFrame->m_pTreeWidget->SetItemImage( boxId, l_selectionObject->getIcon() );
+// 
+//                     if( l_selectionObject->getIsNOT() )
+//                         m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( boxId, *wxRED );
+//                     else
+//                         m_mainFrame->m_pTreeWidget->SetItemBackgroundColour( boxId, *wxGREEN );
+// 
+//                     l_selectionObject->setTreeId( boxId );
+//                 }
+//                 l_boxNode = l_boxNode->GetNext();
+//             }
+//         }
+//         l_child = l_child->GetNext();
+//     }
+// 
+//     m_mainFrame->m_pXSlider->SetValue( xp );
+//     m_mainFrame->m_pYSlider->SetValue( yp );
+//     m_mainFrame->m_pZSlider->SetValue( zp );
+//     updateView( xp, yp, zp );
+// 
+//     /*m_transform.s.M00 = r00;
+//     m_transform.s.M10 = r10;
+//     m_transform.s.M20 = r20;
+//     m_transform.s.M01 = r01;
+//     m_transform.s.M11 = r11;
+//     m_transform.s.M21 = r21;
+//     m_transform.s.M02 = r02;
+//     m_transform.s.M12 = r12;
+//     m_transform.s.M22 = r22;
+//     m_mainFrame->m_mainGL->setRotation();*/
+// 
+//     updateLoadStatus();
+//     return true;
 }
 
 void DatasetHelper::save( const wxString i_fileName )
 {
-    wxXmlNode* l_root                 = new wxXmlNode( NULL,   wxXML_ELEMENT_NODE, wxT( "theScene" ) );
-    wxXmlNode* l_nodeSelectionObjects = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "selection_objects" ) );
-    wxXmlNode* l_nodePoints           = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "points" ) );
-    wxXmlNode* l_data                 = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "data" ) );
-    wxXmlNode* l_anatomy              = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "anatomy" ) );
-    wxXmlNode* l_rotation             = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "rotation" ) );
-    wxXmlNode* l_anatomyPos           = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "position" ) );
+    // TODO: Review once in DatasetManager
 
-    wxXmlProperty* l_prop1 = new wxXmlProperty( wxT( "rows" ),    wxString::Format( wxT( "%d" ), m_rows ) );
-    wxXmlProperty* l_prop2 = new wxXmlProperty( wxT( "columns" ), wxString::Format( wxT( "%d" ), m_columns ), l_prop1 );
-    wxXmlProperty* l_prop3 = new wxXmlProperty( wxT( "frames" ),  wxString::Format( wxT( "%d" ), m_frames ), l_prop2 );
-    l_anatomy->AddProperty( l_prop3 );
-
-    wxXmlProperty* l_rot00 = new wxXmlProperty( wxT( "rot00" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M00 ) );
-    wxXmlProperty* l_rot10 = new wxXmlProperty( wxT( "rot10" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M10 ), l_rot00 );
-    wxXmlProperty* l_rot20 = new wxXmlProperty( wxT( "rot20" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M20 ), l_rot10 );
-    wxXmlProperty* l_rot01 = new wxXmlProperty( wxT( "rot01" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M01 ), l_rot20 );
-    wxXmlProperty* l_rot11 = new wxXmlProperty( wxT( "rot11" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M11 ), l_rot01 );
-    wxXmlProperty* l_rot21 = new wxXmlProperty( wxT( "rot21" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M21 ), l_rot11 );
-    wxXmlProperty* l_rot02 = new wxXmlProperty( wxT( "rot02" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M02 ), l_rot21 );
-    wxXmlProperty* l_rot12 = new wxXmlProperty( wxT( "rot12" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M12 ), l_rot02 );
-    wxXmlProperty* l_rot22 = new wxXmlProperty( wxT( "rot22" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M22 ), l_rot12 );
-    l_rotation->AddProperty( l_rot22 );
-
-    int l_countPoints = m_mainFrame->m_pTreeWidget->GetChildrenCount( m_mainFrame->m_tPointId, true );
-    wxTreeItemId l_id, l_childId;
-    wxTreeItemIdValue l_cookie = 0;
-
-    for( int i = 0; i < l_countPoints; ++i )
-    {
-        l_id = m_mainFrame->m_pTreeWidget->GetNextChild( m_mainFrame->m_tPointId, l_cookie );
-        SplinePoint* l_point = (SplinePoint*)( m_mainFrame->m_pTreeWidget->GetItemData( l_id ) );
-        wxXmlNode* l_pointNode = new wxXmlNode( l_nodePoints, wxXML_ELEMENT_NODE, wxT( "point" ) );
-
-        wxXmlProperty* l_propZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%f" ), l_point->getCenter().z ) );
-        wxXmlProperty* l_propY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%f" ), l_point->getCenter().y ), l_propZ );
-        wxXmlProperty* l_propX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%f" ), l_point->getCenter().x ), l_propY );
-        l_pointNode->AddProperty( l_propX );
-    }
-
-    SelectionObject* l_currentSelectionObject;
-    std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-
-    for( unsigned int i = l_selectionObjects.size(); i > 0; --i )
-    {
-        for( unsigned int j = l_selectionObjects[i - 1].size(); j > 0; --j )
-        {
-            wxXmlNode* l_selectionObject = new wxXmlNode( l_nodeSelectionObjects, wxXML_ELEMENT_NODE, wxT( "object" ) );
-            l_currentSelectionObject = l_selectionObjects[i - 1][j - 1];
-
-            if( ! l_currentSelectionObject->isSelectionObject() )
-                continue;
-
-            wxXmlNode* l_center    = new wxXmlNode( l_selectionObject, wxXML_ELEMENT_NODE, wxT( "center" ) );
-            wxXmlProperty *l_propZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getCenter().z ) );
-            wxXmlProperty *l_propY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getCenter().y ), l_propZ );
-            wxXmlProperty *l_propX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getCenter().x ), l_propY );
-            l_center->AddProperty( l_propX );
-
-            wxXmlNode* l_size = new wxXmlNode( l_selectionObject, wxXML_ELEMENT_NODE, wxT( "size" ) );
-            l_propZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getSize().z ) );
-            l_propY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getSize().y ), l_propZ );
-            l_propX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getSize().x ), l_propY );
-            l_size->AddProperty( l_propX );
-
-            wxXmlNode* l_name = new wxXmlNode( l_selectionObject, wxXML_ELEMENT_NODE, wxT( "name" ) );
-            wxXmlProperty* l_propName = new wxXmlProperty( wxT( "string" ), l_currentSelectionObject->getName() );
-            l_name->AddProperty( l_propName );
-
-            wxXmlNode *status = new wxXmlNode( l_selectionObject, wxXML_ELEMENT_NODE, wxT( "status" ) );
-            wxXmlProperty *l_propType;
-
-            if( j - 1 == 0 )
-                l_propType = new wxXmlProperty( wxT( "type" ), wxT( "MASTER" ) );
-            else
-                l_propType = new wxXmlProperty( wxT( "type" ), l_currentSelectionObject->getIsNOT() ? wxT( "NOT" ) : wxT( "AND" ) );
-
-            wxXmlProperty* l_propActive  = new wxXmlProperty( wxT( "active" ),  l_currentSelectionObject->getIsActive()       ? wxT( "yes" ) : wxT( "no" ), l_propType );
-            wxXmlProperty* l_propVisible = new wxXmlProperty( wxT( "visible" ), l_currentSelectionObject->getIsVisible()      ? wxT( "yes" ) : wxT( "no" ), l_propActive );
-            wxXmlProperty* l_propIsBox   = new wxXmlProperty( wxT( "isBox" ),   (l_currentSelectionObject->getSelectionType() == BOX_TYPE) ? wxT( "yes" ) : wxT( "no" ), l_propVisible );
-            
-            status->AddProperty( l_propIsBox );
-        }
-    }
-
-    int l_countTextures = m_mainFrame->m_pListCtrl->GetItemCount();
-
-    if( l_countTextures == 0 )
-        return;
-
-	
-	std::vector<int> anatomyPositions;
-	
-    for( int i = l_countTextures - 1; i >= 0 ; i-- )
-    {
-		DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
-		
-		if(l_info->getType() < MESH)
-		{
-			anatomyPositions.push_back(i);
-			continue;
-		}
-		
-        if( l_info->getType() < SURFACE)
-        {
-            wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
-
-            wxXmlNode* l_pathNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "path" ) );
-            new wxXmlNode( l_pathNode, wxXML_TEXT_NODE, wxT( "path" ), l_info->getPath() );
-
-            wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
-			
-			wxXmlProperty* l_propP  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
-            wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ), l_propP );
-            wxXmlProperty* l_propTA = new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), l_info->getAlpha() ), l_propT );
-            wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
-            wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
-            wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
-			wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
-			wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "no" ), l_propN );
-            l_statusNode->AddProperty( l_propI );
-        }
-		if(l_info->getType() == FIBERSGROUP)
-		{
-			wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
-			
-            wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
-
-			wxXmlProperty* l_propP  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
-            wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propP );
-            wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
-            wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
-			wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
-            wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "yes" ), l_propN );
-			l_statusNode->AddProperty( l_propI );
-		}
-    }
-	
-	// Save anatomies at the end so they would always be at the beginning of data
-	for( int i = 0; i < (int)anatomyPositions.size(); i++ )
-    {
-		DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( anatomyPositions[i] );
-		
-		wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
-		
-		wxXmlNode* l_pathNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "path" ) );
-		new wxXmlNode( l_pathNode, wxXML_TEXT_NODE, wxT( "path" ), l_info->getPath() );
-		
-		wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
-		
-		wxXmlProperty* l_propId  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
-		wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ), l_propId );
-		wxXmlProperty* l_propTA = new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), l_info->getAlpha() ), l_propT );
-		wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
-		wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
-		wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
-		wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
-		wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "no" ), l_propN );
-		l_statusNode->AddProperty( l_propI );
-	}
-
-    wxXmlProperty* l_propPosX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pXSlider->GetValue() ) );
-    wxXmlProperty* l_propPosY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pYSlider->GetValue() ), l_propPosX );
-    wxXmlProperty* l_propPosZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pZSlider->GetValue() ), l_propPosY );
-    l_anatomyPos->AddProperty( l_propPosZ );
-
-    wxXmlDocument l_xmlDoc;
-    l_xmlDoc.SetRoot( l_root );
-	
-	l_xmlDoc.SetVersion( _T("2.0") );
-
-    if ( i_fileName.AfterLast( '.' ) != _T( "scn" ) )
-        l_xmlDoc.Save( i_fileName + _T( ".scn" ), 2 );
-    else
-        l_xmlDoc.Save( i_fileName, 2 );
+//     wxXmlNode* l_root                 = new wxXmlNode( NULL,   wxXML_ELEMENT_NODE, wxT( "theScene" ) );
+//     wxXmlNode* l_nodeSelectionObjects = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "selection_objects" ) );
+//     wxXmlNode* l_nodePoints           = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "points" ) );
+//     wxXmlNode* l_data                 = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "data" ) );
+//     wxXmlNode* l_anatomy              = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "anatomy" ) );
+//     wxXmlNode* l_rotation             = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "rotation" ) );
+//     wxXmlNode* l_anatomyPos           = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "position" ) );
+// 
+//     wxXmlProperty* l_prop1 = new wxXmlProperty( wxT( "rows" ),    wxString::Format( wxT( "%d" ), m_rows ) );
+//     wxXmlProperty* l_prop2 = new wxXmlProperty( wxT( "columns" ), wxString::Format( wxT( "%d" ), m_columns ), l_prop1 );
+//     wxXmlProperty* l_prop3 = new wxXmlProperty( wxT( "frames" ),  wxString::Format( wxT( "%d" ), m_frames ), l_prop2 );
+//     l_anatomy->AddProperty( l_prop3 );
+// 
+//     wxXmlProperty* l_rot00 = new wxXmlProperty( wxT( "rot00" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M00 ) );
+//     wxXmlProperty* l_rot10 = new wxXmlProperty( wxT( "rot10" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M10 ), l_rot00 );
+//     wxXmlProperty* l_rot20 = new wxXmlProperty( wxT( "rot20" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M20 ), l_rot10 );
+//     wxXmlProperty* l_rot01 = new wxXmlProperty( wxT( "rot01" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M01 ), l_rot20 );
+//     wxXmlProperty* l_rot11 = new wxXmlProperty( wxT( "rot11" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M11 ), l_rot01 );
+//     wxXmlProperty* l_rot21 = new wxXmlProperty( wxT( "rot21" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M21 ), l_rot11 );
+//     wxXmlProperty* l_rot02 = new wxXmlProperty( wxT( "rot02" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M02 ), l_rot21 );
+//     wxXmlProperty* l_rot12 = new wxXmlProperty( wxT( "rot12" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M12 ), l_rot02 );
+//     wxXmlProperty* l_rot22 = new wxXmlProperty( wxT( "rot22" ), wxString::Format( wxT( "%.8f" ), m_transform.s.M22 ), l_rot12 );
+//     l_rotation->AddProperty( l_rot22 );
+// 
+//     int l_countPoints = m_mainFrame->m_pTreeWidget->GetChildrenCount( m_mainFrame->m_tPointId, true );
+//     wxTreeItemId l_id, l_childId;
+//     wxTreeItemIdValue l_cookie = 0;
+// 
+//     for( int i = 0; i < l_countPoints; ++i )
+//     {
+//         l_id = m_mainFrame->m_pTreeWidget->GetNextChild( m_mainFrame->m_tPointId, l_cookie );
+//         SplinePoint* l_point = (SplinePoint*)( m_mainFrame->m_pTreeWidget->GetItemData( l_id ) );
+//         wxXmlNode* l_pointNode = new wxXmlNode( l_nodePoints, wxXML_ELEMENT_NODE, wxT( "point" ) );
+// 
+//         wxXmlProperty* l_propZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%f" ), l_point->getCenter().z ) );
+//         wxXmlProperty* l_propY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%f" ), l_point->getCenter().y ), l_propZ );
+//         wxXmlProperty* l_propX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%f" ), l_point->getCenter().x ), l_propY );
+//         l_pointNode->AddProperty( l_propX );
+//     }
+// 
+//     SelectionObject* l_currentSelectionObject;
+//     std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
+// 
+//     for( unsigned int i = l_selectionObjects.size(); i > 0; --i )
+//     {
+//         for( unsigned int j = l_selectionObjects[i - 1].size(); j > 0; --j )
+//         {
+//             wxXmlNode* l_selectionObject = new wxXmlNode( l_nodeSelectionObjects, wxXML_ELEMENT_NODE, wxT( "object" ) );
+//             l_currentSelectionObject = l_selectionObjects[i - 1][j - 1];
+// 
+//             if( ! l_currentSelectionObject->isSelectionObject() )
+//                 continue;
+// 
+//             wxXmlNode* l_center    = new wxXmlNode( l_selectionObject, wxXML_ELEMENT_NODE, wxT( "center" ) );
+//             wxXmlProperty *l_propZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getCenter().z ) );
+//             wxXmlProperty *l_propY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getCenter().y ), l_propZ );
+//             wxXmlProperty *l_propX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getCenter().x ), l_propY );
+//             l_center->AddProperty( l_propX );
+// 
+//             wxXmlNode* l_size = new wxXmlNode( l_selectionObject, wxXML_ELEMENT_NODE, wxT( "size" ) );
+//             l_propZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getSize().z ) );
+//             l_propY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getSize().y ), l_propZ );
+//             l_propX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%f" ), l_currentSelectionObject->getSize().x ), l_propY );
+//             l_size->AddProperty( l_propX );
+// 
+//             wxXmlNode* l_name = new wxXmlNode( l_selectionObject, wxXML_ELEMENT_NODE, wxT( "name" ) );
+//             wxXmlProperty* l_propName = new wxXmlProperty( wxT( "string" ), l_currentSelectionObject->getName() );
+//             l_name->AddProperty( l_propName );
+// 
+//             wxXmlNode *status = new wxXmlNode( l_selectionObject, wxXML_ELEMENT_NODE, wxT( "status" ) );
+//             wxXmlProperty *l_propType;
+// 
+//             if( j - 1 == 0 )
+//                 l_propType = new wxXmlProperty( wxT( "type" ), wxT( "MASTER" ) );
+//             else
+//                 l_propType = new wxXmlProperty( wxT( "type" ), l_currentSelectionObject->getIsNOT() ? wxT( "NOT" ) : wxT( "AND" ) );
+// 
+//             wxXmlProperty* l_propActive  = new wxXmlProperty( wxT( "active" ),  l_currentSelectionObject->getIsActive()       ? wxT( "yes" ) : wxT( "no" ), l_propType );
+//             wxXmlProperty* l_propVisible = new wxXmlProperty( wxT( "visible" ), l_currentSelectionObject->getIsVisible()      ? wxT( "yes" ) : wxT( "no" ), l_propActive );
+//             wxXmlProperty* l_propIsBox   = new wxXmlProperty( wxT( "isBox" ),   (l_currentSelectionObject->getSelectionType() == BOX_TYPE) ? wxT( "yes" ) : wxT( "no" ), l_propVisible );
+//             
+//             status->AddProperty( l_propIsBox );
+//         }
+//     }
+// 
+//     int l_countTextures = m_mainFrame->m_pListCtrl2->GetItemCount();
+// 
+//     if( l_countTextures == 0 )
+//         return;
+// 
+// 	
+// 	std::vector<int> anatomyPositions;
+// 	
+//     for( int i( l_countTextures - 1 ); i >= 0; --i )
+//     {
+// 		DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( i );
+// 		
+// 		if(l_info->getType() < MESH)
+// 		{
+// 			anatomyPositions.push_back(i);
+// 			continue;
+// 		}
+// 		
+//         if( l_info->getType() < SURFACE)
+//         {
+//             wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
+// 
+//             wxXmlNode* l_pathNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "path" ) );
+//             new wxXmlNode( l_pathNode, wxXML_TEXT_NODE, wxT( "path" ), l_info->getPath() );
+// 
+//             wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
+// 			
+// 			wxXmlProperty* l_propP  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+//             wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ), l_propP );
+//             wxXmlProperty* l_propTA = new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), l_info->getAlpha() ), l_propT );
+//             wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
+//             wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
+//             wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
+// 			wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+// 			wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "no" ), l_propN );
+//             l_statusNode->AddProperty( l_propI );
+//         }
+// 		if(l_info->getType() == FIBERSGROUP)
+// 		{
+// 			wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
+// 			
+//             wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
+// 
+// 			wxXmlProperty* l_propP  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+//             wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propP );
+//             wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
+//             wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
+// 			wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+//             wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "yes" ), l_propN );
+// 			l_statusNode->AddProperty( l_propI );
+// 		}
+//     }
+// 	
+// 	// Save anatomies at the end so they would always be at the beginning of data
+// 	for( int i = 0; i < (int)anatomyPositions.size(); i++ )
+//     {
+// 		DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( anatomyPositions[i] );
+// 		
+// 		wxXmlNode* l_dataSetNode = new wxXmlNode( l_data, wxXML_ELEMENT_NODE, wxT( "dataset" ) );
+// 		
+// 		wxXmlNode* l_pathNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "path" ) );
+// 		new wxXmlNode( l_pathNode, wxXML_TEXT_NODE, wxT( "path" ), l_info->getPath() );
+// 		
+// 		wxXmlNode* l_statusNode = new wxXmlNode( l_dataSetNode, wxXML_ELEMENT_NODE, wxT( "status" ) );
+// 		
+// 		wxXmlProperty* l_propId  = new wxXmlProperty( wxT( "position" ), wxString::Format( wxT( "%ld" ), l_info->getListCtrlItemId() ) );
+// 		wxXmlProperty* l_propT  = new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ), l_propId );
+// 		wxXmlProperty* l_propTA = new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), l_info->getAlpha() ), l_propT );
+// 		wxXmlProperty* l_propA  = new wxXmlProperty( wxT( "active" ), l_info->getShow()   ? _T( "yes" ) : _T( "no" ), l_propTA );
+// 		wxXmlProperty* l_propF  = new wxXmlProperty( wxT( "showFS" ), l_info->getShowFS() ? _T( "yes" ) : _T( "no" ), l_propA );
+// 		wxXmlProperty* l_propU  = new wxXmlProperty( wxT( "useTex" ), l_info->getUseTex() ? _T( "yes" ) : _T( "no" ), l_propF );
+// 		wxXmlProperty* l_propN	= new wxXmlProperty( wxT( "name" ), l_info->getName().BeforeFirst( '.' ), l_propU );
+// 		wxXmlProperty* l_propI	= new wxXmlProperty( wxT( "isFiberGroup" ), _T( "no" ), l_propN );
+// 		l_statusNode->AddProperty( l_propI );
+// 	}
+// 
+//     wxXmlProperty* l_propPosX = new wxXmlProperty( wxT( "x" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pXSlider->GetValue() ) );
+//     wxXmlProperty* l_propPosY = new wxXmlProperty( wxT( "y" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pYSlider->GetValue() ), l_propPosX );
+//     wxXmlProperty* l_propPosZ = new wxXmlProperty( wxT( "z" ), wxString::Format( wxT( "%d" ), m_mainFrame->m_pZSlider->GetValue() ), l_propPosY );
+//     l_anatomyPos->AddProperty( l_propPosZ );
+// 
+//     wxXmlDocument l_xmlDoc;
+//     l_xmlDoc.SetRoot( l_root );
+// 	
+// 	l_xmlDoc.SetVersion( _T("2.0") );
+// 
+//     if ( i_fileName.AfterLast( '.' ) != _T( "scn" ) )
+//         l_xmlDoc.Save( i_fileName + _T( ".scn" ), 2 );
+//     else
+//         l_xmlDoc.Save( i_fileName, 2 );
 }
 
 std::vector< std::vector< SelectionObject* > > DatasetHelper::getSelectionObjects()
@@ -1302,15 +1313,16 @@ bool DatasetHelper::loadTextFile( wxString* i_string, const wxString i_fileName 
 void DatasetHelper::createIsoSurface()
 {
     // check l_anatomy - quit if not present
-    if( ! m_anatomyLoaded )
+    if( !m_anatomyLoaded )
         return;
 
     // get selected l_anatomy dataset
-    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+//    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long l_item = m_mainFrame->getCurrentListItem();
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( l_item );
+    DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( l_item );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1338,12 +1350,12 @@ void DatasetHelper::createIsoSurface()
 
         m_mainFrame->m_pListCtrl2->InsertItem( isosurf );
 
-        m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.40" ) );
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-        m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) isosurf );
-        m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+//         m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.40" ) );
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+//         m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) isosurf );
+//         m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
     }
     else
     {
@@ -1361,11 +1373,12 @@ void DatasetHelper::createDistanceMapAndIso()
         return;
 
     // get selected l_anatomy dataset
-    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    //long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long l_item = m_mainFrame->getCurrentListItem();
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( l_item );
+    DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( l_item );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1400,12 +1413,12 @@ void DatasetHelper::createDistanceMapAndIso()
 
         m_mainFrame->m_pListCtrl2->InsertItem( isosurf );
 
-        m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.10" ) );
-        m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-        m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) isosurf );
-        m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+//         m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.10" ) );
+//         m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+//         m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) isosurf );
+//         m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     }
     else
@@ -1425,11 +1438,12 @@ void DatasetHelper::createDistanceMap()
         return;
 
     // get selected l_anatomy dataset
-    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    // long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long l_item = m_mainFrame->getCurrentListItem();
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( l_item );
+    DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( l_item );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1447,17 +1461,12 @@ void DatasetHelper::createDistanceMap()
     m_mainFrame->m_pListCtrl2->InsertItem( l_newAnatomy );
 
     //Feed the distance to the objects list
-    m_mainFrame->m_pListCtrl->InsertItem(0, wxT(""),0);
-    m_mainFrame->m_pListCtrl->SetItem(0,1, l_newAnatomy->getName());
-    m_mainFrame->m_pListCtrl->SetItem(0,2, wxT("1.0"));
-    m_mainFrame->m_pListCtrl->SetItem(0,3, wxT(""),1);
-
-    m_mainFrame->m_pListCtrl->SetItemData(0,(long) l_newAnatomy);
-
-    m_mainFrame->m_pListCtrl->SetItemState(
-        0,
-        wxLIST_STATE_SELECTED,
-        wxLIST_STATE_SELECTED);
+//     m_mainFrame->m_pListCtrl->InsertItem(0, wxT(""),0);
+//     m_mainFrame->m_pListCtrl->SetItem(0,1, l_newAnatomy->getName());
+//     m_mainFrame->m_pListCtrl->SetItem(0,2, wxT("1.0"));
+//     m_mainFrame->m_pListCtrl->SetItem(0,3, wxT(""),1);
+//     m_mainFrame->m_pListCtrl->SetItemData(0,(long) l_newAnatomy);
+//     m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
@@ -1470,11 +1479,12 @@ void DatasetHelper::createCutDataset()
         return;
 
     // get selected l_anatomy dataset
-    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+//    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long l_item = m_mainFrame->getCurrentListItem();
     if( l_item == -1 )
         return;
 
-    DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( l_item );
+    DatasetInfo* info = m_mainFrame->m_pListCtrl2->GetItem( l_item );
     if ( info->getType() > OVERLAY )
         return;
 
@@ -1527,12 +1537,14 @@ void DatasetHelper::createCutDataset()
     l_newAnatomy->setDataType(l_anatomy->getDataType());
     l_newAnatomy->setNewMax(l_anatomy->getNewMax());
 
-    m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-    m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-    m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00" ) );
-    m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
-    m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
-    m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_mainFrame->m_pListCtrl2->InsertItem( l_newAnatomy );
+
+//     m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
+//     m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+//     m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00" ) );
+//     m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
+//     m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
+//     m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
@@ -1571,11 +1583,13 @@ void DatasetHelper::updateView( const float i_x, const float i_y, const float i_
     if( m_boxLockIsOn && ! m_semaphore )
         m_boxAtCrosshair->setCenter( i_x, i_y, i_z );
 
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
         if( l_datasetInfo->getType() == TENSORS || l_datasetInfo->getType() == ODFS  )
-            ( (Glyph*)m_mainFrame->m_pListCtrl->GetItemData( i ) )->refreshSlidersValues();
+        {
+            ((Glyph*)l_datasetInfo)->refreshSlidersValues();
+        }
     }
 }
 
@@ -1583,11 +1597,13 @@ bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
 {
 	io_f = NULL;
 
-	long selItem = m_mainFrame->m_pListCtrl->GetSelectedItem();
+    // TODO: Check changes
+	// long selItem = m_mainFrame->m_pListCtrl->GetSelectedItem();
+    long selItem = m_mainFrame->getCurrentListItem();
 
     if (-1 != selItem)
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( selItem );
+        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( selItem );
         if( l_datasetInfo->getType() == FIBERS)
         {
             io_f = (Fibers*)l_datasetInfo;
@@ -1601,9 +1617,9 @@ bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
 {
     io_fg = NULL;
 
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
         if( l_datasetInfo->getType() == FIBERSGROUP )
         {
             io_fg = (FibersGroup*)l_datasetInfo;
@@ -1617,12 +1633,12 @@ bool DatasetHelper::getSurfaceDataset( Surface *&io_s )
 {
     io_s = NULL;
 
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
         if( l_datasetInfo->getType() == SURFACE )
         {
-            io_s = (Surface*)m_mainFrame->m_pListCtrl->GetItemData( i );
+            io_s = (Surface*)l_datasetInfo; //m_mainFrame->m_pListCtrl->GetItemData( i );
             return true;
         }
     }
@@ -1634,12 +1650,12 @@ std::vector< float >* DatasetHelper::getVectorDataset()
     if( ! m_vectorsLoaded )
         return NULL;
 
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
         if( l_datasetInfo->getType() == VECTORS )
         {
-            Anatomy* l_anatomy = (Anatomy*)m_mainFrame->m_pListCtrl->GetItemData( i );
+            Anatomy* l_anatomy = (Anatomy*)l_datasetInfo; //m_mainFrame->m_pListCtrl->GetItemData( i );
             return l_anatomy->getFloatDataset();
         }
     }
@@ -1652,11 +1668,13 @@ bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
 {
     o_types.clear();
     DatasetInfo* l_datasetInfo;
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
-        if ( ( l_datasetInfo->getType() >= HEAD_BYTE ) && ( l_datasetInfo->getType() <= TENSOR_FIELD ) ) 
+        l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
+        if( l_datasetInfo->getType() >= HEAD_BYTE && l_datasetInfo->getType() <= TENSOR_FIELD ) 
+        {
             o_types.push_back( l_datasetInfo );
+        }
     }
     return true;
 }
@@ -1667,12 +1685,12 @@ TensorField* DatasetHelper::getTensorField()
     if( ! m_tensorsFieldLoaded )
         return NULL;
 
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
     {
-        DatasetInfo* l_datasetInfo = (DatasetInfo*) m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
         if( l_datasetInfo->getType() == TENSOR_FIELD || l_datasetInfo->getType() == VECTORS )
         {
-            Anatomy* l_anatomy = (Anatomy*)m_mainFrame->m_pListCtrl->GetItemData( i );
+            Anatomy* l_anatomy = (Anatomy*) l_datasetInfo;
             return l_anatomy->getTensorField();
         }
     }
@@ -1692,9 +1710,9 @@ void DatasetHelper::updateLoadStatus()
     m_ODFsLoaded         = false;
     m_surfaceLoaded      = false;
 
-    for( int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
     {
-        DatasetInfo* info = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* info = m_mainFrame->m_pListCtrl2->GetItem( i );
 		if(info != NULL)
 		{
 			switch( info->getType() )
@@ -1829,12 +1847,15 @@ void DatasetHelper::licMovieHelper()
     long l_id = 0;
 #endif
 
-    m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-    m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_surface->getName() );
-    m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
-    m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-    m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)l_surface );
-    m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    // TODO: Verify this. Added to list, rendered, then removed from list. Is this necessary?
+    m_mainFrame->m_pListCtrl2->InsertItem( l_surface );
+
+//     m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+//     m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_surface->getName() );
+//     m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
+//     m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+//     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)l_surface );
+//     m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     m_surfaceLoaded = true;
     l_surface->activateLIC();
@@ -1844,7 +1865,7 @@ void DatasetHelper::licMovieHelper()
     m_mainFrame->m_pMainGL->render();
 
     delete l_surface;
-    m_mainFrame->m_pListCtrl->DeleteItem( l_id );
+    m_mainFrame->m_pListCtrl2->DeleteItem( l_id );
 
 }
 

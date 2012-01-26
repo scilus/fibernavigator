@@ -181,9 +181,9 @@ void ShaderHelper::initializeArrays()
     m_threshold.resize( 10, 0 );
     m_alpha.resize( 10, 0 );
 
-    for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = (DatasetInfo*) m_pDh->m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* pInfo = m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i );
         if ( pInfo->getType() < MESH && pInfo->getShow() )
         {
             m_threshold[m_textureCount] = pInfo->getThreshold();
@@ -263,13 +263,13 @@ void ShaderHelper::setMeshShaderVars()
     m_meshShader.setUniFloat( "cutZ", m_pDh->m_zSlize + 0.5f );
 
 
-    for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = (DatasetInfo*) m_pDh->m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* pInfo = m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i );
 
         if ( pInfo->getType() == SURFACE )
         {
-            Surface* pS = (Surface*) m_pDh->m_mainFrame->m_pListCtrl->GetItemData( i );
+            Surface* pS = (Surface*) pInfo; //m_pDh->m_mainFrame->m_pListCtrl->GetItemData( i );
             m_cutTex = pS->getCutTex();
 
             glActiveTexture( GL_TEXTURE0 + 9 );
@@ -325,9 +325,9 @@ void ShaderHelper::setFiberShaderVars()
     int type = 0;
 
     int c = 0;
-    for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = (DatasetInfo*) m_pDh->m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* pInfo = m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i );
         if ( pInfo->getType() < MESH )
         {
             if ( ( pInfo->getType() == OVERLAY ) && pInfo->getShow() )

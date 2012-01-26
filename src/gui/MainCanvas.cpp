@@ -147,21 +147,21 @@ void MainCanvas::OnShow(wxShowEvent& WXUNUSED(event) )
     m_pArcBall->setBounds( (GLfloat) w, (GLfloat) h );    
 }
 
-void MainCanvas::OnMouseEvent( wxMouseEvent& event )
+void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 {
-    wxCommandEvent event1( wxEVT_NAVGL_EVENT, GetId() );
-    event1.SetInt( m_view );
-    int clickX = event.GetPosition().x;
-    int clickY = event.GetPosition().y;
+    wxCommandEvent evt1( wxEVT_NAVGL_EVENT, GetId() );
+    evt1.SetInt( m_view );
+    int clickX = evt.GetPosition().x;
+    int clickY = evt.GetPosition().y;
     switch ( m_view )
     {
         case MAIN_VIEW:
         {
-            if ( event.LeftUp() )
+            if ( evt.LeftUp() )
             {
                 if ( wxGetKeyState( WXK_SHIFT ) && !m_pDatasetHelper->getPointMode() )
                 {
-                    m_hr = pick( event.GetPosition(), false );
+                    m_hr = pick( evt.GetPosition(), false );
                     int newX = (int) ( getEventCenter().x + 0.5 );
                     int newY = (int) ( getEventCenter().y + 0.5 );
                     int newZ = (int) ( getEventCenter().z + 0.5 );
@@ -173,7 +173,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 }
                 else if ( wxGetKeyState( WXK_CONTROL ) && m_pDatasetHelper->getPointMode())
                 {
-					m_hr = pick( event.GetPosition(),false );
+					m_hr = pick( evt.GetPosition(),false );
 					if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
 					{
 						m_hr.picked = 20;
@@ -182,58 +182,60 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
 								m_pDatasetHelper->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
 						point->setTreeId( pId );
 
-						GetEventHandler()->ProcessEvent( event1 );
+						GetEventHandler()->ProcessEvent( evt1 );
 					}
                 }
 
             }
 
-            if ( event.LeftIsDown() )
+            if ( evt.LeftIsDown() )
             {
                 SetFocus();
                 m_mousePt.s.X = clickX;
                 m_mousePt.s.Y = clickY;
                 
 				// Use Control (or Command on Mac) key for advanced left click actions
-                if( event.CmdDown() )
+                if( evt.CmdDown() )
 				{
 					if(!m_pDatasetHelper->m_isDragging)
 					{
 						if (m_pDatasetHelper->m_isDrawerToolActive)
 						{
 							pushAnatomyHistory();
-							m_hr = pick(event.GetPosition(), true);
+							m_hr = pick(evt.GetPosition(), true);
 							drawOnAnatomy();
 						}
 						else if (m_pDatasetHelper->m_isRulerToolActive)
 						{
-							m_hr = pick(event.GetPosition(), true);
+							m_hr = pick(evt.GetPosition(), true);
 						}
 						else
 						{
-							long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-							if(l_item != -1)
-							{
-								DatasetInfo* l_type = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-								Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+// 							long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+// 							if(l_item != -1)
+// 							{
+                                // TODO: Test changes
+                                long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
+                                Anatomy *pAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
+                                //Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
 
-								if (l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
+								if( pAnatomy->getType() < MESH && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
 								{
 									m_pDatasetHelper->m_isSegmentActive = true;
-									m_hr = pick(event.GetPosition(), false);
+									m_hr = pick(evt.GetPosition(), false);
 									segment();
-									l_info->toggleSegment();                        
+									pAnatomy->toggleSegment();                        
 								}
-							}
+//							}
 						}
-						m_lastPos = event.GetPosition();
+						m_lastPos = evt.GetPosition();
 						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
 					}
 					else
 					{
 						if (m_pDatasetHelper->m_isDrawerToolActive)
 						{
-							m_hr = pick(event.GetPosition(), true);
+							m_hr = pick(evt.GetPosition(), true);
 							drawOnAnatomy();
 						}
 					}
@@ -262,147 +264,34 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
             {
                 m_pDatasetHelper->m_isDragging = false;
             }
-            if ( event.MiddleIsDown() )
+            if ( evt.MiddleIsDown() )
             {               
                 if ( !m_pDatasetHelper->m_ismDragging)
                 {
-                    /*else if (!m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_isSelectBckActive && m_pDatasetHelper->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectObj-GraphCut
-                    {
-                        m_hr = pick(event.GetPosition(), true);
-
-                        Vector current;
-                        current[0] = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
-                        current[1] = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
-                        current[2] = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
-
-                        object.push_back(current);
-                        
-                    }
-                    else if (!m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_isSelectBckActive && !m_pDatasetHelper->m_isSelectObjActive && (Anatomy*)l_info->m_isSegmentOn) //Prepare Drag for selectBck-GraphCut
-                    {
-                        m_hr = pick(event.GetPosition(), true);
-
-                        Vector current;
-                        current[0] = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
-                        current[1] = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
-                        current[2] = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
-
-                        background.push_back(current);
-                        
-                    }*/
-                    m_lastPos = event.GetPosition();
+                    m_lastPos = evt.GetPosition();
                     m_pDatasetHelper->m_ismDragging = true;
                 }
                 else  if (!m_isSceneLocked) //Move Scene
                 {
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
-                    m_lastPos = event.GetPosition();
+                    m_lastPos = evt.GetPosition();
                     m_pDatasetHelper->moveScene( xDrag, yDrag );
                     Refresh( false );
                 }
-                /*else if(!m_pDatasetHelper->m_isRulerToolActive && (Anatomy*)l_info->m_isSegmentOn && m_pDatasetHelper->m_isSelectObjActive && !m_pDatasetHelper->m_isSelectBckActive) //Dragging for selectObj-Graphcut
-                {
-                    m_hr = pick(event.GetPosition(), true);
-
-                    Vector current;
-                    current[0] = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
-                    current[1] = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
-                    current[2] = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
-                    
-                    
-
-                    if(current[0] != object.back()[0] || current[1] != object.back()[1] || current[2] != object.back()[2])
-                        object.push_back(current);
-                    
-                    m_pDatasetHelper->m_isObjfilled = true;
-                    m_pDatasetHelper->m_isObjCreated = true;
-                }
-                else if(!m_pDatasetHelper->m_isRulerToolActive && (Anatomy*)l_info->m_isSegmentOn && !m_pDatasetHelper->m_isSelectObjActive &&m_pDatasetHelper->m_isSelectBckActive) //Dragging for selectBck-Graphcut
-                {
-                    m_hr = pick(event.GetPosition(), true);
-
-                    Vector current;
-                    current[0] = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
-                    current[1] = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
-                    current[2] = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
-                    
-                    
-
-                    if(current[0] != background.back()[0] || current[1] != background.back()[1] || current[2] != background.back()[2])
-                        background.push_back(current);
-
-                    m_pDatasetHelper->m_isBckfilled = true;
-                    m_pDatasetHelper->m_isBckCreated = true;
-                }*/
             }
             else
             {
                 m_pDatasetHelper->m_ismDragging = false;
             }
-            /*if ( !event.MiddleIsDown() && m_pDatasetHelper->m_isObjfilled && m_pDatasetHelper->m_isObjCreated)
+            
+            if ( evt.GetWheelDelta() != 0 && !m_isSceneLocked)
             {
-                std::vector<float>* result = new std::vector<float>;
-                result->resize(m_pDatasetHelper->m_columns*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_frames);
-                for(unsigned int i = 0; i < object.size(); i++)
-                {
-                    int x = object.at(i)[0];
-                    int y = object.at(i)[1];
-                    int z = object.at(i)[2];
-
-                    result->at(x+(y*m_pDatasetHelper->m_columns)+(z*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_columns)) = 1.0f;
-                
-                }
-
-                Anatomy* l_newAnatomy = new Anatomy(m_pDatasetHelper, result, 0);
-                l_newAnatomy->setShowFS(false);
-                l_newAnatomy->setType(OVERLAY);
-                l_newAnatomy->setName( _T( "(Object)" ) );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00") );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-                
-                m_pDatasetHelper->m_isObjCreated = false;
-            }
-
-            if ( !event.MiddleIsDown() && m_pDatasetHelper->m_isBckfilled && m_pDatasetHelper->m_isBckCreated)
-            {
-                std::vector<float>* result = new std::vector<float>;
-                result->resize(m_pDatasetHelper->m_columns*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_frames);
-                for(unsigned int i = 0; i < background.size(); i++)
-                {
-                    int x = background.at(i)[0];
-                    int y = background.at(i)[1];
-                    int z = background.at(i)[2];
-
-                    result->at(x+(y*m_pDatasetHelper->m_columns)+(z*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_columns)) = 0.5f;
-                
-                }
-
-                Anatomy* l_newAnatomy = new Anatomy(m_pDatasetHelper, result, 0);
-                l_newAnatomy->setShowFS(false);
-                l_newAnatomy->setType(OVERLAY);
-                l_newAnatomy->setName( _T( "(Background)" ) );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->InsertItem( 0, wxT( "" ), 0 );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItem( 0, 2, wxT( "0.00") );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItem( 0, 3, wxT( ""), 1 );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItemData( 0, (long)l_newAnatomy );
-                m_pDatasetHelper->m_mainFrame->m_listCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-
-                m_pDatasetHelper->m_isBckCreated = false;
-            }*/
-
-            if ( event.GetWheelDelta() != 0 && !m_isSceneLocked)
-            {
-                m_pDatasetHelper->changeZoom( event.GetWheelRotation() );
+                m_pDatasetHelper->changeZoom( evt.GetWheelRotation() );
                 Refresh( false );
             }
 
-            if ( event.RightIsDown() )
+            if ( evt.RightIsDown() )
             {
                 if ( !m_pDatasetHelper->m_isrDragging ) // Not Dragging
                 {
@@ -416,8 +305,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                                 m_pDatasetHelper->m_transform.M[8] );
                     }
                     m_pDatasetHelper->m_isrDragging = true; // Prepare For Dragging
-                    m_lastPos = event.GetPosition();
-                    m_hr = pick( event.GetPosition(), false);
+                    m_lastPos = evt.GetPosition();
+                    m_hr = pick( evt.GetPosition(), false);
 
                     SetFocus();
 
@@ -441,7 +330,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                 }
                 else
                 {
-                    if ( event.Dragging() && m_hr.picked < 10 && !m_isSlizesLocked)
+                    if ( evt.Dragging() && m_hr.picked < 10 && !m_isSlizesLocked)
                     {
                         int xDrag = m_lastPos.x - clickX;
                         int yDrag = m_lastPos.y - clickY;
@@ -488,19 +377,19 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
                             }
                         }
                         
-                        GetEventHandler()->ProcessEvent( event1 );
+                        GetEventHandler()->ProcessEvent( evt1 );
                     }
-                    else if ( event.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20 )
+                    else if ( evt.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20 )
                     {
-                        ( (SelectionObject*) m_hr.object )->processDrag( event.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
+                        ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
                         m_pDatasetHelper->m_selBoxChanged = true;
                     }
-                    else if ( event.Dragging() && m_hr.picked == 20 )
+                    else if ( evt.Dragging() && m_hr.picked == 20 )
                     {
-                        ( (SplinePoint*) m_hr.object )->drag( event.GetPosition(), m_projection, m_viewport, m_modelview );
+                        ( (SplinePoint*) m_hr.object )->drag( evt.GetPosition(), m_projection, m_viewport, m_modelview );
                     }
                 }
-                m_lastPos = event.GetPosition();
+                m_lastPos = evt.GetPosition();
                 Refresh( false );
             }
             else
@@ -514,14 +403,14 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& event )
         case AXIAL:
         case CORONAL:
         case SAGITTAL:
-            m_clicked = event.GetPosition();
-            if ( event.LeftUp() || event.Dragging() )
+            m_clicked = evt.GetPosition();
+            if ( evt.LeftUp() || evt.Dragging() )
             {
-                GetEventHandler()->ProcessEvent( event1 );
+                GetEventHandler()->ProcessEvent( evt1 );
             }
             break;
         default:
-            ;
+            break;
     }
 }
 
@@ -920,7 +809,7 @@ void MainCanvas::render()
             glLoadIdentity();
             glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
 
-            if ( m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount() != 0 )
+            if ( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount() != 0 )
             {
                 m_pDatasetHelper->m_anatomyHelper->renderNav( m_view, &m_pDatasetHelper->m_shaderHelper->m_anatomyShader );
                 Logger::getInstance()->printIfGLError( wxT( "Render nav view" ) );
@@ -1228,27 +1117,32 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 void MainCanvas::drawOnAnatomy() 
 {
 	// get selected anatomy dataset (that's the one we draw on)
-	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
 
-	double xClick = floor(m_hitPts[0]/m_pDatasetHelper->m_xVoxel);
-	double yClick = floor(m_hitPts[1]/m_pDatasetHelper->m_yVoxel);
-	double zClick = floor(m_hitPts[2]/m_pDatasetHelper->m_zVoxel);
+    // TODO: Test changes
+    long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
+ 	Anatomy* l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
+
+// 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+// 	Anatomy* l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+
+	double xClick = floor( m_hitPts[0] / m_pDatasetHelper->m_xVoxel );
+	double yClick = floor( m_hitPts[1] / m_pDatasetHelper->m_yVoxel );
+	double zClick = floor( m_hitPts[2] / m_pDatasetHelper->m_zVoxel );
 	int layer = m_hr.picked;
 
 	//security check: hit detection can be a pixel offset, but negative positions crash
-	if(xClick < 0 || yClick < 0 || zClick < 0)
+	if( xClick < 0 || yClick < 0 || zClick < 0 )
 	{
 		return;
 	}
 
-	if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_PEN)
+	if( m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_PEN )
 	{
 		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, m_pDatasetHelper->m_drawColor);
 	}
-	else if(m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_ERASER)
+	else if( m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_ERASER )
 	{
-		wxColor transparent(0,0,0);
+		wxColor transparent(0, 0, 0);
 		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, transparent);
 	}
 }
@@ -1256,8 +1150,12 @@ void MainCanvas::drawOnAnatomy()
 void MainCanvas::pushAnatomyHistory()
 {
 	// get selected anatomy dataset (that's the one we draw on)
-	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+    // TODO: Test changes
+    long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
+    Anatomy *l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
+
+// 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+// 	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
 
 	l_currentAnatomy->pushHistory();
 }
@@ -1265,13 +1163,14 @@ void MainCanvas::pushAnatomyHistory()
 void MainCanvas::popAnatomyHistory()
 {
 	// get selected anatomy dataset (that's the one we draw on)
-	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-	
-	//is this Anatomy in RGB or not?
-	bool isRGB = (l_currentAnatomy->getType() == RGB);
+    // TODO: Test changes
+    long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
+    Anatomy *l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
 
-	l_currentAnatomy->popHistory(isRGB);
+// 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+// 	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+	
+	l_currentAnatomy->popHistory( RGB == l_currentAnatomy->getType() );
 }
 
 //Kmeans Segmentation
@@ -1656,8 +1555,12 @@ void MainCanvas::segment()
     int dataLength = m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_frames;
 
     // get selected l_anatomy dataset
-    long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );    
+    // TODO: Test changes
+    long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
+    Anatomy *l_info = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
+
+//     long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+//     Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );    
     
     //1D vector with the normalized brightness ( 0 to 1 )
     std::vector<float>* sourceData = l_info->getFloatDataset();
@@ -1699,11 +1602,12 @@ void MainCanvas::segment()
     l_newAnatomy->setType(2);
     l_newAnatomy->setDataType(4);
     l_newAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_pDatasetHelper->m_mainFrame->m_pListCtrl2->InsertItem( l_newAnatomy );
+//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
+//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
+//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
+//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
+//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
+//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 }
 

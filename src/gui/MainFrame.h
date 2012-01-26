@@ -43,7 +43,7 @@ public:
     void onTreeChange();
     void onMouseEvent                       ( wxMouseEvent&   evt );
     void onLoad                             ( wxCommandEvent& evt );
-	long getCurrentListItem();
+    long getCurrentListItem() const         { return m_currentListItem; }
 	void createNewAnatomy					( int dataType );
     
 private:
@@ -137,6 +137,7 @@ private:
     void onSelectListItem                   ( wxListEvent&    evt );
     void onActivateListItem2                ( wxListEvent&    evt );
     void onSelectListItem2                  ( wxListEvent&    evt );
+    void onDeselectListItem2                ( wxListEvent&    evt );
 
     // Tree widget event functions
     void onDeleteTreeItem                   ( wxTreeEvent&    evt );
@@ -207,7 +208,7 @@ public:
     MainCanvas          *m_pGL0;
     MainCanvas          *m_pGL1;
     MainCanvas          *m_pGL2;
-    MyListCtrl          *m_pListCtrl;
+//    MyListCtrl          *m_pListCtrl;
     ListCtrl            *m_pListCtrl2;
     MyTreeCtrl          *m_pTreeWidget;
     wxSlider            *m_pXSlider;
@@ -232,7 +233,7 @@ DECLARE_EVENT_TABLE()
 #define ID_GL_NAV_Z                                 273
 #define ID_GL_MAIN                                  290
 
-#define ID_LIST_CTRL                                291
+//#define ID_LIST_CTRL                                291
 #define ID_TREE_CTRL                                300
 
 #define ID_X_SLIDER                                 301

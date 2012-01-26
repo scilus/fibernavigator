@@ -13,11 +13,15 @@ public:
     ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size, const long style );
 
     void AssignImageList( wxImageList *pImageList, int which );
+    bool DeleteItem( long index );
     void DeleteSelectedItem();
-    DatasetInfo *GetItem( long index );
+    DatasetInfo * GetItem( long index ) const;
+    int GetItemCount() const { return wxListCtrl::GetItemCount(); }
     long InsertColumn( long col, const wxListItem& info );
     // TODO: Change for index in DatasetManager, once it is created
     void InsertItem( const DatasetInfo * const pDataset );
+    void MoveItemDown();
+    void MoveItemUp();
     void onActivate( wxListEvent& evt );
     void onLeftClick( wxMouseEvent& evt );
     bool SetColumnWidth( int col, int width );

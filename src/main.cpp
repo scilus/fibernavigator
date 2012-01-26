@@ -170,7 +170,7 @@ bool MyApp::OnInit( void )
                 {
                     // We pass -1 in the load function because there is no index because this is call from the cmd line.
                     frame->m_pDatasetHelper->load( cmdFileName, -1 );
-                    frame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED, wxALL);
+//                    frame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED, wxALL);
                     frame->m_pDatasetHelper->updateLoadStatus();
                     frame->m_pDatasetHelper->createDistanceMapAndIso();
                 }

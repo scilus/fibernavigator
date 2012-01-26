@@ -160,10 +160,11 @@ extern const wxEventType wxEVT_NAVGL_EVENT;
  ****************************************************************************************************/
 BEGIN_EVENT_TABLE( MainFrame, wxFrame )
 // List widget events
-EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL,                    MainFrame::onActivateListItem   )
-EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL,                    MainFrame::onSelectListItem     )
+// EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL,                    MainFrame::onActivateListItem   )
+// EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL,                    MainFrame::onSelectListItem     )
 EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL2,                   MainFrame::onActivateListItem2  )
 EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL2,                   MainFrame::onSelectListItem2    )
+EVT_LIST_ITEM_DESELECTED ( ID_LIST_CTRL2,                   MainFrame::onDeselectListItem2  )
 
 // Tree widget events
 EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
@@ -225,8 +226,8 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 
     //////////////////////////////////////////////////////////////////////////
     // MyListCtrl initialization
-    m_pListCtrl = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
-    initMyListCtrl( m_pListCtrl );
+//     m_pListCtrl = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+//     initMyListCtrl( m_pListCtrl );
 
     //////////////////////////////////////////////////////////////////////////
     // MyTreeCtrl initialization
@@ -354,7 +355,7 @@ void MainFrame::initLayout()
     axesSzr->Add( ySzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
     axesSzr->Add( zSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
 
-    lstSzr->Add( m_pListCtrl, 0, wxALL | wxFIXED_MINSIZE, 2 );
+//    lstSzr->Add( m_pListCtrl, 0, wxALL | wxFIXED_MINSIZE, 2 );
     lstSzr->Add( (wxWindow *)m_pListCtrl2, 0, wxALL | wxFIXED_MINSIZE, 2 );
     lstSzr->Add( m_pTreeWidget, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
 
@@ -376,11 +377,6 @@ void MainFrame::initLayout()
     Fit();
 }
 
-
-long MainFrame::getCurrentListItem()
-{
-	return m_currentListItem;
-}
 
 void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
@@ -482,12 +478,12 @@ void MainFrame::createNewAnatomy( int dataType )
 #endif
     m_pListCtrl2->InsertItem( l_newAnatomy );
 
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_newAnatomy->getName() );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.00" ) );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) l_newAnatomy );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+// 	m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+// 	m_pListCtrl->SetItem( l_id, 1, l_newAnatomy->getName() );
+// 	m_pListCtrl->SetItem( l_id, 2, wxT( "0.00" ) );
+// 	m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+// 	m_pListCtrl->SetItemData( l_id, (long) l_newAnatomy );
+// 	m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     refreshAllGLWidgets();
 }
@@ -1403,12 +1399,12 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 
     m_pListCtrl2->InsertItem( l_surface );
 
-    m_pListCtrl->InsertItem( id, wxT( "" ), 0 );
-    m_pListCtrl->SetItem( id, 1, l_surface->getName() );
-    m_pListCtrl->SetItem( id, 2, wxT( "0.50" ) );
-    m_pListCtrl->SetItem( id, 3, wxT( "" ), 1 );
-    m_pListCtrl->SetItemData( id, (long)l_surface );
-    m_pListCtrl->SetItemState( id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+//     m_pListCtrl->InsertItem( id, wxT( "" ), 0 );
+//     m_pListCtrl->SetItem( id, 1, l_surface->getName() );
+//     m_pListCtrl->SetItem( id, 2, wxT( "0.50" ) );
+//     m_pListCtrl->SetItem( id, 3, wxT( "" ), 1 );
+//     m_pListCtrl->SetItemData( id, (long)l_surface );
+//     m_pListCtrl->SetItemState( id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     m_pDatasetHelper->m_surfaceLoaded = true;
     refreshAllGLWidgets();
@@ -1431,13 +1427,12 @@ void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
 
     // TODO: Update method once DatasetManager exists
 
-    for( int i = 0; i < m_pListCtrl->GetItemCount(); ++i )
+    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_pListCtrl2->GetItemCount() ); ++i )
     {
-        DatasetInfo* l_info = (DatasetInfo*) m_pListCtrl->GetItemData( i );
+        DatasetInfo* l_info = m_pListCtrl2->GetItem( i );
         if( l_info->getType() == SURFACE )
         {
-            Surface* l_surf = (Surface*)m_pListCtrl->GetItemData( i );
-            l_surf->flipNormals();
+            ((Surface*)l_info)->flipNormals();
         }
     }
     refreshAllGLWidgets();
@@ -1450,7 +1445,8 @@ void MainFrame::onToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
         DatasetInfo* l_info = (DatasetInfo*)m_pCurrentSceneObject;
         if( l_info->getType() < MESH )
         {
-            m_pListCtrl->SetItem( m_currentListItem, 1, l_info->getName() + ( l_info->toggleShowFS() ? wxT( "" ) : wxT( "*" ) ) );
+            l_info->toggleShowFS();
+            m_pListCtrl2->UpdateSelected();
         }
     }
     refreshAllGLWidgets();
@@ -1954,47 +1950,47 @@ void MainFrame::onActivateListItem2( wxListEvent& evt )
     refreshAllGLWidgets();
 }
 
-void MainFrame::onActivateListItem( wxListEvent& event )
-{
-    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
-
-    int l_item = event.GetIndex();
-    m_pTreeWidget->UnselectAll();
-    DatasetInfo* l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item );
-    m_pLastSelectedSceneObject = l_info;
-    m_lastSelectedListItem = l_item;
-    int l_col = m_pListCtrl->getColActivated();
-    switch( l_col )
-    {        
-    case 10:
-        if (l_info->toggleShow())
-        {
-            m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 0 );
-        }
-        else
-        {
-            m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 1 );
-        }
-        break;
-    case 11:
-        if( ! l_info->toggleShowFS())
-        {
-            m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
-        }
-        else
-        {
-            m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
-        }
-        break;
-    case 13:
-        deleteListItem();
-        break;
-    default:
-        return;
-        break;
-    }
-    refreshAllGLWidgets();
-}
+// void MainFrame::onActivateListItem( wxListEvent& event )
+// {
+//     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
+// 
+//     int l_item = event.GetIndex();
+//     m_pTreeWidget->UnselectAll();
+//     DatasetInfo* l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item );
+//     m_pLastSelectedSceneObject = l_info;
+//     m_lastSelectedListItem = l_item;
+//     int l_col = m_pListCtrl->getColActivated();
+//     switch( l_col )
+//     {        
+//     case 10:
+//         if (l_info->toggleShow())
+//         {
+//             m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 0 );
+//         }
+//         else
+//         {
+//             m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 1 );
+//         }
+//         break;
+//     case 11:
+//         if( ! l_info->toggleShowFS())
+//         {
+//             m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
+//         }
+//         else
+//         {
+//             m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
+//         }
+//         break;
+//     case 13:
+//         deleteListItem();
+//         break;
+//     default:
+//         return;
+//         break;
+//     }
+//     refreshAllGLWidgets();
+// }
 
 void MainFrame::deleteListItem()
 {
@@ -2002,17 +1998,18 @@ void MainFrame::deleteListItem()
     if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {       
         long tmp = m_currentListItem;
-		if ((((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERSGROUP))
+        DatasetInfo * pInfo = m_pListCtrl2->GetItem( m_currentListItem );
+		if( FIBERSGROUP == pInfo->getType() )
 		{
 			FibersGroup* pFibersGroup = NULL;
 			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
-			if(pFibersGroup != NULL)
+			if( pFibersGroup != NULL )
 			{
-				if(!pFibersGroup->OnDeleteFibers())
+				if( !pFibersGroup->OnDeleteFibers() )
 					return;
 			}
 		}
-        if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
+        else if( FIBERS == pInfo->getType() )
         {            
 			FibersGroup* pFibersGroup = NULL;
 			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
@@ -2027,62 +2024,73 @@ void MainFrame::deleteListItem()
 			}
 			m_pDatasetHelper->m_selBoxChanged = true;
         }
-        else if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == SURFACE)
+        else if( SURFACE == pInfo->getType() )
         {
             m_pDatasetHelper->deleteAllPoints();
         }
-        if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getName() == _T( "(Object)" ))
+
+        if ( wxT( "(Object)" ) == pInfo->getName() )
         {            
             m_pDatasetHelper->m_isObjCreated = false;
             m_pDatasetHelper->m_isObjfilled = false;
     
         }
-        if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getName() == _T( "(Background)" ))
+        else if( wxT( "(Background)" ) == pInfo->getName() )
         {            
             m_pDatasetHelper->m_isBckCreated = false;
             m_pDatasetHelper->m_isBckfilled = false;
         }
+
         deleteSceneObject();
-        m_pListCtrl->DeleteItem( tmp );
+        m_pListCtrl2->DeleteItem( tmp );
         m_pDatasetHelper->updateLoadStatus();
         refreshAllGLWidgets();
     }
 }
 
-void MainFrame::onSelectListItem( wxListEvent& evt )
-{
-    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
+// void MainFrame::onSelectListItem( wxListEvent& evt )
+// {
+//     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
+// 
+//     int l_item = evt.GetIndex();
+//     m_pTreeWidget->UnselectAll();
+//     DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
+//     int l_col = m_pListCtrl->getColClicked();
+//     if (l_col == 12 && l_info->getType() >= MESH)
+//     {
+//         m_pListCtrl->SetItem( l_item, 2, wxString::Format( l_info->toggleUseTex() ? wxT( "%.2f" ) : wxT( "(%.2f)" ), l_info->getThreshold() * l_info->getOldMax() ) );
+//     }
+// 	if( l_info->getType() == FIBERS )
+// 	{
+// 		Fibers* pFibers = (Fibers*)l_info;
+// 		if( pFibers )
+// 		{
+// 			pFibers->updateColorationMode();
+// 		}
+// 	}
+//     m_pLastSelectedSceneObject = l_info;
+//     m_lastSelectedListItem = l_item;
+//     
+//     // Check if it is RGB
+//     if( l_info->getType() == RGB )
+//     {
+//         m_pDatasetHelper->m_canUseColorPicker = true;
+//     }
+//     else
+//     {
+//         m_pDatasetHelper->m_canUseColorPicker = false;
+//     }
+//     
+//     refreshAllGLWidgets();
+// }
 
-    int l_item = evt.GetIndex();
-    m_pTreeWidget->UnselectAll();
-    DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
-    int l_col = m_pListCtrl->getColClicked();
-    if (l_col == 12 && l_info->getType() >= MESH)
-    {
-        m_pListCtrl->SetItem( l_item, 2, wxString::Format( l_info->toggleUseTex() ? wxT( "%.2f" ) : wxT( "(%.2f)" ), l_info->getThreshold() * l_info->getOldMax() ) );
-    }
-	if( l_info->getType() == FIBERS )
-	{
-		Fibers* pFibers = (Fibers*)l_info;
-		if( pFibers )
-		{
-			pFibers->updateColorationMode();
-		}
-	}
-    m_pLastSelectedSceneObject = l_info;
-    m_lastSelectedListItem = l_item;
-    
-    // Check if it is RGB
-    if( l_info->getType() == RGB )
-    {
-        m_pDatasetHelper->m_canUseColorPicker = true;
-    }
-    else
-    {
-        m_pDatasetHelper->m_canUseColorPicker = false;
-    }
-    
-    refreshAllGLWidgets();
+void MainFrame::onDeselectListItem2( wxListEvent& evt )
+{
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeselectListItem2" ), LOGLEVEL_DEBUG );
+
+    // TODO: Test this
+    m_pLastSelectedSceneObject = NULL;
+    m_lastSelectedListItem = -1;
 }
 
 void MainFrame::onSelectListItem2( wxListEvent& evt )
@@ -2227,8 +2235,9 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     }    
 #ifdef __WXMSW__
     if (m_currentListItem != -1)
-    {       
-        m_pListCtrl->SetItemState(m_currentListItem,0,wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED);  
+    {
+        // TODO: Review this
+        // m_pListCtrl->SetItemState(m_currentListItem,0,wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED);  
     }
 #endif
     refreshAllGLWidgets();

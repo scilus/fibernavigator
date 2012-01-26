@@ -29,6 +29,14 @@ void ListCtrl::AssignImageList( wxImageList *imageList, int which )
 
 //////////////////////////////////////////////////////////////////////////
 
+bool ListCtrl::DeleteItem( long index )
+{
+    return wxListCtrl::DeleteItem( index );
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+
 void ListCtrl::DeleteSelectedItem()
 {
     long index = GetNextItem( 0, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
@@ -40,9 +48,9 @@ void ListCtrl::DeleteSelectedItem()
 
 //////////////////////////////////////////////////////////////////////////
 
-DatasetInfo * ListCtrl::GetItem( long index )
+DatasetInfo * ListCtrl::GetItem( long index ) const
 {
-    if( 0 > index || index >= GetItemCount() )
+    if( 0 > index || index >= wxListCtrl::GetItemCount() )
     {
         return NULL;
     }
@@ -84,6 +92,21 @@ void ListCtrl::InsertItem( const DatasetInfo * const pDataset )
 
 //////////////////////////////////////////////////////////////////////////
 
+void ListCtrl::MoveItemDown()
+{
+    throw std::exception("The method or operation is not implemented.");
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void ListCtrl::MoveItemUp()
+{
+    throw std::exception("The method or operation is not implemented.");
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+
 void ListCtrl::onActivate( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - ListCtrl::onActivate" ), LOGLEVEL_DEBUG );
@@ -114,6 +137,7 @@ void ListCtrl::onActivate( wxListEvent& evt )
 
 //////////////////////////////////////////////////////////////////////////
 
+// TODO: Change event from left down to evt_list_col_click
 void ListCtrl::onLeftClick( wxMouseEvent& evt )
 {
     int posX = evt.GetPosition().x;
@@ -155,7 +179,7 @@ void ListCtrl::SetMinSize( const wxSize &size )
 
 void ListCtrl::UpdateSelected()
 {
-    long index = GetNextItem( 0, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( -1 != index )
     {
         Update( index );

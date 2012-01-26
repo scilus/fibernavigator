@@ -1939,13 +1939,14 @@ Anatomy* Fibers::generateFiberVolume()
 	#else
 		long l_id = 0;
 	#endif 
-	
-    m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pTmpAnatomy->getName() );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pTmpAnatomy );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+        m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pTmpAnatomy );
+//     m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pTmpAnatomy->getName() );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pTmpAnatomy );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 	
     m_dh->updateLoadStatus();
     m_dh->m_mainFrame->refreshAllGLWidgets();
@@ -3583,11 +3584,11 @@ void Fibers::updatePropertiesSizer()
 	
 	DatasetInfo* pDatasetInfo = NULL;
 	
-	long nextItemId = m_dh->m_mainFrame->m_pListCtrl->GetNextItem(m_dh->m_mainFrame->getCurrentListItem());
+	long nextItemId = m_dh->m_mainFrame->getCurrentListItem(); // m_pListCtrl->GetNextItem(m_dh->m_mainFrame->getCurrentListItem());
 
 	if( nextItemId >= 0)
 	{
-		pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( nextItemId ));
+		pDatasetInfo = m_dh->m_mainFrame->m_pListCtrl2->GetItem( nextItemId );
 		if( pDatasetInfo != NULL)
 		{
 			if(pDatasetInfo->getType() != FIBERS)
@@ -3613,7 +3614,7 @@ void Fibers::updatePropertiesSizer()
 	
 	if( prevItemId != -1)
 	{
-		pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( prevItemId ));
+		pDatasetInfo = m_dh->m_mainFrame->m_pListCtrl2->GetItem( prevItemId );
 		if( pDatasetInfo != NULL)
 		{
 			if(pDatasetInfo->getType() != FIBERS)

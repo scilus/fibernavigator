@@ -339,13 +339,14 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     float* threshold = new float[10];
     GLint* type = new GLint[10];
     int c = 0;
-    for (int i = 0 ; i < m_dh->m_mainFrame->m_pListCtrl->GetItemCount() ; ++i)
+    for (int i = 0 ; i < m_dh->m_mainFrame->m_pListCtrl2->GetItemCount() ; ++i)
     {
-        DatasetInfo* info = (DatasetInfo*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(i);
-        if(info->getType() < MESH) {
+//        DatasetInfo* info = (DatasetInfo*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(i);
+        DatasetInfo *pInfo = m_dh->m_mainFrame->m_pListCtrl2->GetItem( i );
+        if( pInfo && pInfo->getType() < MESH) {
             tex[c] = c;
-            threshold[c] = info->getThreshold();
-            type[c] = info->getType();
+            threshold[c] = pInfo->getThreshold();
+            type[c] = pInfo->getType();
             ++c;
         }
     }

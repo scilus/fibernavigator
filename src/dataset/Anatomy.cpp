@@ -375,12 +375,12 @@ void Anatomy::minimize()
 
     m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pNewAnatomy );
 
-    m_dh->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 1, pNewAnatomy->getName() );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)pNewAnatomy );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+//     m_dh->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 1, pNewAnatomy->getName() );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)pNewAnatomy );
+//     m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -412,95 +412,101 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 
 void FibersGroup::OnMoveUp()
 {
-	if( getListCtrlItemId() <= 0)
-		return;
-	
-	// Move fibergroup up
-	m_dh->m_mainFrame->m_pListCtrl->moveItemUp(getListCtrlItemId());
+    // TODO: Review this method if still necessary once MoveItemUp and MoveItemDown are implemented in the list
 
-	// Move all fibers up
-	std::list<long> idsList;
-	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
-	{
-		long itemId = m_fibersSets[i]->getListCtrlItemId();
-		idsList.push_back(itemId);
-	}
-	idsList.sort();
-
-	while( idsList.size() != 0)
-	{
-		long itemId = idsList.front();
-		idsList.pop_front();
-		if( itemId >= 0)
-		{
-			m_dh->m_mainFrame->m_pListCtrl->moveItemUp( itemId );
-		}
-	}
-
-	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
-	m_dh->m_mainFrame->m_pListCtrl->SetItemState(getListCtrlItemId(), wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
+// 	if( getListCtrlItemId() <= 0)
+// 		return;
+// 	
+// 	// Move fibergroup up
+// 	m_dh->m_mainFrame->m_pListCtrl->moveItemUp(getListCtrlItemId());
+// 
+// 	// Move all fibers up
+// 	std::list<long> idsList;
+// 	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
+// 	{
+// 		long itemId = m_fibersSets[i]->getListCtrlItemId();
+// 		idsList.push_back(itemId);
+// 	}
+// 	idsList.sort();
+// 
+// 	while( idsList.size() != 0)
+// 	{
+// 		long itemId = idsList.front();
+// 		idsList.pop_front();
+// 		if( itemId >= 0)
+// 		{
+// 			m_dh->m_mainFrame->m_pListCtrl->moveItemUp( itemId );
+// 		}
+// 	}
+// 
+// 	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
+// 	m_dh->m_mainFrame->m_pListCtrl->SetItemState(getListCtrlItemId(), wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+// 	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
 
 }
 
 void FibersGroup::OnMoveDown()
 {
-	if( getListCtrlItemId() + getFibersCount() == m_dh->m_mainFrame->m_pListCtrl->GetItemCount() -1)
-		return;
-	   
-	// Move all fibers down
-	std::list<long> idsList;
-	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
-	{
-		long itemId = m_fibersSets[i]->getListCtrlItemId();
-		idsList.push_back(itemId);
-	}
-	idsList.sort();
+    // TODO: Review this method if still necessary once MoveItemUp and MoveItemDown are implemented in the list
 
-	while( idsList.size() != 0)
-	{
-		long itemId = idsList.back();
-		idsList.pop_back();
-		if( itemId >= 0)
-		{
-			m_dh->m_mainFrame->m_pListCtrl->moveItemDown( itemId );
-		}
-	}
-	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
-	
-	// Move fibergroup down
-	m_dh->m_mainFrame->m_pListCtrl->moveItemDown(getListCtrlItemId());
-	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
+// 	if( getListCtrlItemId() + getFibersCount() == m_dh->m_mainFrame->m_pListCtrl->GetItemCount() -1)
+// 		return;
+// 	   
+// 	// Move all fibers down
+// 	std::list<long> idsList;
+// 	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
+// 	{
+// 		long itemId = m_fibersSets[i]->getListCtrlItemId();
+// 		idsList.push_back(itemId);
+// 	}
+// 	idsList.sort();
+// 
+// 	while( idsList.size() != 0)
+// 	{
+// 		long itemId = idsList.back();
+// 		idsList.pop_back();
+// 		if( itemId >= 0)
+// 		{
+// 			m_dh->m_mainFrame->m_pListCtrl->moveItemDown( itemId );
+// 		}
+// 	}
+// 	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
+// 	
+// 	// Move fibergroup down
+// 	m_dh->m_mainFrame->m_pListCtrl->moveItemDown(getListCtrlItemId());
+// 	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
 }
 
 bool FibersGroup::OnDeleteFibers()
 {
-	int answer = wxMessageBox(wxT("Are you sure you want to delete the fibersgroup and all fibers?"), wxT("Confirmation"), 
-								 wxYES_NO | wxICON_QUESTION);
-					   
-	if( answer == wxYES )
-	{
-		std::list<long> idsList;
-		for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
-		{
-			long itemId = m_fibersSets[i]->getListCtrlItemId();
-			idsList.push_back(itemId);
-		}
-		idsList.sort();
+    // TODO: Review method
 
-		while( idsList.size() != 0)
-		{
-			long itemId = idsList.back();
-			idsList.pop_back();
-			if( itemId >= 0)
-			{
-				m_dh->m_mainFrame->m_pListCtrl->DeleteItem( itemId );
-			}
-		}
-		m_fibersSets.clear();
-		m_dh->m_fibersGroupLoaded = false;
-		return true;
-	}
+// 	int answer = wxMessageBox(wxT("Are you sure you want to delete the fibersgroup and all fibers?"), wxT("Confirmation"), 
+// 								 wxYES_NO | wxICON_QUESTION);
+// 					   
+// 	if( answer == wxYES )
+// 	{
+// 		std::list<long> idsList;
+// 		for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
+// 		{
+// 			long itemId = m_fibersSets[i]->getListCtrlItemId();
+// 			idsList.push_back(itemId);
+// 		}
+// 		idsList.sort();
+// 
+// 		while( idsList.size() != 0)
+// 		{
+// 			long itemId = idsList.back();
+// 			idsList.pop_back();
+// 			if( itemId >= 0)
+// 			{
+// 				m_dh->m_mainFrame->m_pListCtrl->DeleteItem( itemId );
+// 			}
+// 		}
+// 		m_fibersSets.clear();
+// 		m_dh->m_fibersGroupLoaded = false;
+// 		return true;
+// 	}
 	return false;
 }
 
@@ -508,14 +514,15 @@ void FibersGroup::OnToggleVisibleBtn()
 {
 	bool show = getShow();
 	
-	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+    for( vector<Fibers *>::iterator it = m_fibersSets.begin(); it != m_fibersSets.end(); ++it)
 	{
-		m_fibersSets[i]->setShow(show);
+        (*it)->setShow( show );
+        // TODO: Verify that the UpdateSelected is called by the caller
 		
-		if( show )
-			m_dh->m_mainFrame->m_pListCtrl->SetItem( m_fibersSets[i]->getListCtrlItemId(), 0, wxT( "" ), 0 );
-		else
-			m_dh->m_mainFrame->m_pListCtrl->SetItem( m_fibersSets[i]->getListCtrlItemId(), 0, wxT( "" ), 1 );
+// 		if( show )
+// 			m_dh->m_mainFrame->m_pListCtrl->SetItem( m_fibersSets[i]->getListCtrlItemId(), 0, wxT( "" ), 0 );
+// 		else
+// 			m_dh->m_mainFrame->m_pListCtrl->SetItem( m_fibersSets[i]->getListCtrlItemId(), 0, wxT( "" ), 1 );
 	}
 }
 
@@ -692,48 +699,62 @@ void FibersGroup::updateGroupFilters()
 
 void FibersGroup::fibersLocalColoring()
 {
-	for(int i = 0; i < (int)m_fibersSets.size(); i++)
-	{
-		for(long j = 0; j < (long)m_dh->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
-		{
-			if( (Fibers*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
-			{
-				if( ! m_fibersSets[i]->toggleUseTex() && m_pToggleLocalColoring->GetValue() )
-				{
-					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax()) + wxT( ")" ) );
-				}
-				else
-				{
-					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax() ) );
-				}
-				m_fibersSets[i]->updateToggleLocalColoring( m_pToggleLocalColoring->GetValue());
-				break;
-			} 
-		}
-	}
+    for( vector<Fibers *>::iterator it = m_fibersSets.begin(); it != m_fibersSets.end(); ++it )
+    {
+        // TODO: Verify that UpdateSelected is called for each of the fibers by the caller
+        (*it)->toggleUseTex();
+        (*it)->updateToggleLocalColoring( m_pToggleLocalColoring->GetValue() );
+    }
+//	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+//	{
+// 		for(long j = 0; j < (long)m_dh->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
+// 		{
+// 			if( (Fibers*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
+// 			{
+//              m_fibersSets[i]->toggleUseTex();
+//              if( ! m_fibersSets[i]->toggleUseTex() && m_pToggleLocalColoring->GetValue() )
+//              {
+// 					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax()) + wxT( ")" ) );
+// 				}
+// 				else
+// 				{
+// 					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax() ) );
+// 				}
+//				m_fibersSets[i]->updateToggleLocalColoring( m_pToggleLocalColoring->GetValue());
+// 				break;
+// 			} 
+//		}
+//	}
 }
 
 void FibersGroup::fibersNormalColoring()
 {
-	for(int i = 0; i < (int)m_fibersSets.size(); i++)
-	{
-		for(long j = 0; j < (long)m_dh->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
-		{
-			if( (Fibers*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
-			{
-				if( ! m_fibersSets[i]->toggleShowFS() && m_pToggleLocalColoring->GetValue())
-				{
-					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName() + wxT( "*" ) );
-				}
-				else
-				{
-					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName() );
-				}
-				m_fibersSets[i]->updateToggleNormalColoring( m_pToggleNormalColoring->GetValue());
-				break;
-			} 
-		}
-	}
+    for( vector<Fibers *>::iterator it = m_fibersSets.begin(); it != m_fibersSets.end(); ++it )
+    {
+        // TODO: Verify that UpdateSelected is called for each of the fibers by the caller
+        (*it)->toggleShowFS();
+        (*it)->updateToggleNormalColoring( m_pToggleNormalColoring->GetValue() );
+    }
+
+// 	for(int i = 0; i < (int)m_fibersSets.size(); i++)
+// 	{
+// 		for(long j = 0; j < (long)m_dh->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
+// 		{
+// 			if( (Fibers*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
+// 			{
+// 				if( ! m_fibersSets[i]->toggleShowFS() && m_pToggleLocalColoring->GetValue())
+// 				{
+// 					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName() + wxT( "*" ) );
+// 				}
+// 				else
+// 				{
+// 					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName() );
+// 				}
+// 				m_fibersSets[i]->updateToggleNormalColoring( m_pToggleNormalColoring->GetValue());
+// 				break;
+// 			} 
+// 		}
+// 	}
 }
 
 void FibersGroup::OnClickGenerateFiberVolumeBtn()
@@ -764,12 +785,13 @@ void FibersGroup::generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies)
 		long l_id = 0;
 	#endif
 	
-	m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pGlobalAnatomy->getName() );
-	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
-	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-	m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pGlobalAnatomy );
-	m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pGlobalAnatomy );
+// 	m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
+// 	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pGlobalAnatomy->getName() );
+// 	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
+// 	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
+// 	m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pGlobalAnatomy );
+// 	m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 	
 	m_dh->updateLoadStatus();
 	m_dh->m_mainFrame->refreshAllGLWidgets();
