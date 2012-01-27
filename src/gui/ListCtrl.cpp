@@ -4,6 +4,11 @@
 #include "../dataset/DatasetInfo.h"
 #include "../dataset/FibersGroup.h"
 
+#include <set>
+using std::set;
+
+#include "../dataset/DatasetManager.h"
+
 #include <wx/imaglist.h>
 #include <wx/string.h>
 
@@ -13,6 +18,10 @@ BEGIN_EVENT_TABLE( ListCtrl, wxListCtrl )
 END_EVENT_TABLE()
 
 
+//////////////////////////////////////////////////////////////////////////
+// CONSTRUCTORS
+//////////////////////////////////////////////////////////////////////////
+
 ListCtrl::ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size, const long style )
 : wxListCtrl( pParent, ID_LIST_CTRL2, point, size, style ),
   m_column( 0 ),
@@ -20,6 +29,8 @@ ListCtrl::ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size,
 {
 }
 
+//////////////////////////////////////////////////////////////////////////
+// PUBLIC METHODS
 //////////////////////////////////////////////////////////////////////////
 
 void ListCtrl::AssignImageList( wxImageList *imageList, int which )
@@ -39,23 +50,11 @@ bool ListCtrl::DeleteItem( long index )
 
 void ListCtrl::DeleteSelectedItem()
 {
-    long index = GetNextItem( 0, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( -1 != index )
     {
         DeleteItem( index );
     }
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-DatasetInfo * ListCtrl::GetItem( long index ) const
-{
-    if( 0 > index || index >= wxListCtrl::GetItemCount() )
-    {
-        return NULL;
-    }
-
-    return (DatasetInfo *)GetItemData( index );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,7 +74,7 @@ void ListCtrl::InsertItem( const DatasetInfo * const pDataset )
 
     if( FIBERS == pDataset->getType() && !m_isFiberGroupPresent )
     {
-        InsertItem( new FibersGroup(NULL) );
+        InsertItem( new FibersGroup( DatasetManager::getInstance()->m_pDatasetHelper ) );
         m_isFiberGroupPresent = true;
     }
 
@@ -87,6 +86,7 @@ void ListCtrl::InsertItem( const DatasetInfo * const pDataset )
     wxListCtrl::InsertItem( index, pDataset->getShow() ? 0 : 1 );
     SetItemData( index, (long)pDataset );
     SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
     Update( index );
 }
 
@@ -94,17 +94,183 @@ void ListCtrl::InsertItem( const DatasetInfo * const pDataset )
 
 void ListCtrl::MoveItemDown()
 {
-    throw std::exception("The method or operation is not implemented.");
+    long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    if( index < GetItemCount() - 1 )
+    {
+        set<long> refreshNeeded;
+
+        DatasetInfo *pDataset = GetItem( index );
+
+        if( FIBERSGROUP == pDataset->getType() )
+        {
+            long from( index + 2 );
+            while( from < GetItemCount() && FIBERS == GetItem( from )->getType() )
+            {
+                ++from;
+            }
+
+            if( from != GetItemCount() )
+            {
+                DatasetInfo *pDatasetToMove = GetItem( from );
+                wxListCtrl::InsertItem( index, pDatasetToMove->getShow() ? 0 : 1 );
+                SetItemData( index, (long)pDatasetToMove );
+                SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+                DeleteItem( from + 1 );
+
+                refreshNeeded.insert( index );
+            }
+        }
+        else if( FIBERS == pDataset->getType() )
+        {
+            if( FIBERS == GetItem( index + 1 )->getType() )
+            {
+                Swap( index, index + 1 );
+                refreshNeeded.insert( index );
+                refreshNeeded.insert( index + 1);
+            }
+
+            SetItemState( index + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+        }
+        else
+        {
+            if( FIBERSGROUP == GetItem( index + 1 )->getType() )
+            {
+                long to( index + 2 );
+                while( to < GetItemCount() && FIBERS == GetItem( to )->getType() )
+                {
+                    ++to;
+                }
+            
+                wxListCtrl::InsertItem( to, pDataset->getShow() ? 0 : 1 );
+                SetItemData( to, (long)pDataset );
+                SetItemState( to, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+                DeleteItem( index );
+
+                refreshNeeded.insert( to - 1 );
+            }
+            else
+            {                
+                Swap( index, index + 1 );
+                refreshNeeded.insert( index );
+                refreshNeeded.insert( index + 1);
+
+                SetItemState( index + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+            }
+        }
+
+        // Refresh items
+        for( set<long>::iterator it = refreshNeeded.begin(); it != refreshNeeded.end(); ++it )
+        {
+            Update( *it );
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 void ListCtrl::MoveItemUp()
 {
-    throw std::exception("The method or operation is not implemented.");
+    long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    if( 0 < index )
+    {
+        set<long> refreshNeeded;
+
+        DatasetInfo *pDataset = GetItem( index );
+
+        if( FIBERSGROUP == pDataset->getType() )
+        {
+            // Move fiber group
+            Swap( index, index - 1 );
+            SetItemState( index - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+            refreshNeeded.insert( index );
+            refreshNeeded.insert( index - 1);
+
+            ++index;
+
+            while( index < GetItemCount() && FIBERS == GetItem( index )->getType() )
+            {
+                // Move fibers
+                Swap( index, index - 1 );
+                refreshNeeded.insert( index );
+
+                ++index;
+            }
+        }
+        else if( FIBERS == pDataset->getType() )
+        {
+            if( FIBERS == GetItem( index - 1 )->getType() )
+            {
+                Swap( index, index - 1 );
+                refreshNeeded.insert( index );
+                refreshNeeded.insert( index - 1);
+                SetItemState( index - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+            }
+        }
+        else
+        {
+            if( FIBERS == GetItem( index - 1 )->getType() )
+            {
+                long to( index - 2 );
+                while( FIBERSGROUP != GetItem( to )->getType() )
+                {
+                    --to;
+                }
+
+                wxListCtrl::InsertItem( to, pDataset->getShow() ? 0 : 1 );
+                SetItemData( to, (long)pDataset );
+                SetItemState( to, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+
+                DeleteItem( index + 1 );
+
+                refreshNeeded.insert( to );
+            }
+            else
+            {                
+                Swap( index, index - 1 );
+                refreshNeeded.insert( index );
+                refreshNeeded.insert( index - 1);
+                SetItemState( index - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+            }
+        }
+
+        // Refresh items
+        for( set<long>::iterator it = refreshNeeded.begin(); it != refreshNeeded.end(); ++it )
+        {
+            Update( *it );
+        }
+    }
 }
 
+//////////////////////////////////////////////////////////////////////////
 
+void ListCtrl::UpdateSelected()
+{
+    long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    if( -1 != index )
+    {
+        Update( index );
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+// GETTERS/SETTERS
+//////////////////////////////////////////////////////////////////////////
+
+DatasetInfo * ListCtrl::GetItem( long index ) const
+{
+    if( 0 > index || index >= wxListCtrl::GetItemCount() )
+    {
+        return NULL;
+    }
+
+    return (DatasetInfo *)GetItemData( index );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// EVENTS
 //////////////////////////////////////////////////////////////////////////
 
 void ListCtrl::onActivate( wxListEvent& evt )
@@ -112,7 +278,7 @@ void ListCtrl::onActivate( wxListEvent& evt )
     Logger::getInstance()->print( _T( "Event triggered - ListCtrl::onActivate" ), LOGLEVEL_DEBUG );
 
     int index = evt.GetIndex();
-    DatasetInfo *pDataset = (DatasetInfo *)GetItemData( index );
+    DatasetInfo *pDataset = GetItem( index );
 
     switch( m_column )
     {        
@@ -137,7 +303,6 @@ void ListCtrl::onActivate( wxListEvent& evt )
 
 //////////////////////////////////////////////////////////////////////////
 
-// TODO: Change event from left down to evt_list_col_click
 void ListCtrl::onLeftClick( wxMouseEvent& evt )
 {
     int posX = evt.GetPosition().x;
@@ -155,42 +320,19 @@ void ListCtrl::onLeftClick( wxMouseEvent& evt )
 }
 
 //////////////////////////////////////////////////////////////////////////
-
-bool ListCtrl::SetColumnWidth( int col, int width )
-{
-    return wxListCtrl::SetColumnWidth( col, width );
-}
-
+// PRIVATE METHODS
 //////////////////////////////////////////////////////////////////////////
 
-void ListCtrl::SetMaxSize( const wxSize &size )
+void ListCtrl::Swap( long i, long j )
 {
-    wxListCtrl::SetMaxSize( size );
+    long tmp = GetItemData( i );
+    SetItemData( i, GetItemData( j ) );
+    SetItemData( j, tmp );
 }
-
-//////////////////////////////////////////////////////////////////////////
-
-void ListCtrl::SetMinSize( const wxSize &size )
-{
-    wxListCtrl::SetMinSize( size );
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-void ListCtrl::UpdateSelected()
-{
-    long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( -1 != index )
-    {
-        Update( index );
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////
 
 void ListCtrl::Update( long index )
 {
-    DatasetInfo *pDataset = (DatasetInfo *)GetItemData( index );
+    DatasetInfo *pDataset = GetItem( index );
     SetItem( index, 0, wxT( "" ), pDataset->getShow() ? 0 : 1 );
     SetItem( index, 1, pDataset->getName().BeforeFirst('.') + ( pDataset->getShowFS() ? wxT( "" ) : wxT( "*" ) ) );
     SetItem( index, 2, wxString::Format( wxT( "%.2f" ), pDataset->getThreshold() * pDataset->getOldMax() ) );

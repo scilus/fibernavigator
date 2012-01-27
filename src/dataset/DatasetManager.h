@@ -55,11 +55,12 @@ private:
     // Loads tensors. Extension supported: .nii and .nii.gz
     int loadTensors( const wxString &filename );
 
-private:
-    static DatasetManager *m_pInstance;
-
+public:
     // temporary
     DatasetHelper *m_pDatasetHelper;
+
+private:
+    static DatasetManager *m_pInstance;
 
     unsigned int m_maxIndex;
     std::set<unsigned int> m_freeIndexes;

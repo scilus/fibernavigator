@@ -12,26 +12,33 @@ class ListCtrl : protected wxListCtrl
 public:
     ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size, const long style );
 
+    // Methods
     void AssignImageList( wxImageList *pImageList, int which );
     bool DeleteItem( long index );
     void DeleteSelectedItem();
-    DatasetInfo * GetItem( long index ) const;
-    int GetItemCount() const { return wxListCtrl::GetItemCount(); }
     long InsertColumn( long col, const wxListItem& info );
     // TODO: Change for index in DatasetManager, once it is created
     void InsertItem( const DatasetInfo * const pDataset );
     void MoveItemDown();
     void MoveItemUp();
+    void UpdateSelected();
+    
+    // Getters/Setters
+    DatasetInfo * GetItem( long index ) const;
+    int GetItemCount() const                        { return wxListCtrl::GetItemCount(); }
+    bool SetColumnWidth( int col, int width )       { return wxListCtrl::SetColumnWidth( col, width ); }
+    void SetMaxSize( const wxSize &size )           { wxListCtrl::SetMaxSize( size ); }
+    void SetMinSize( const wxSize &size )           { wxListCtrl::SetMinSize( size ); }
+
+    // Events
     void onActivate( wxListEvent& evt );
     void onLeftClick( wxMouseEvent& evt );
-    bool SetColumnWidth( int col, int width );
-    void SetMaxSize( const wxSize &size );
-    void SetMinSize( const wxSize &size );
-    void UpdateSelected();
 
-    operator wxWindow *() { return (wxWindow *)this; }
+    // Operators
+    operator wxWindow *()                           { return (wxWindow *)this; }
 
 private:
+    void Swap( long i, long j );
     void Update( long index );
 
 private:
