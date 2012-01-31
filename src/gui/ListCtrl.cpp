@@ -81,16 +81,40 @@ void ListCtrl::InsertItem( const DatasetInfo * const pDataset )
         return;
     }
 
-    if( FIBERS == pDataset->getType() && !m_isFiberGroupPresent )
-    {
-        InsertItem( new FibersGroup( DatasetManager::getInstance()->m_pDatasetHelper ) );
-        m_isFiberGroupPresent = true;
-    }
-
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
     // To have the same behavior on all platforms, we add to the end of the list
-    long index = GetItemCount();
+    long index( -1 );
+
+    if( FIBERS == pDataset->getType() ) 
+    {
+        if( !m_isFiberGroupPresent )
+        {
+            InsertItem( new FibersGroup( DatasetManager::getInstance()->m_pDatasetHelper ) );
+            m_isFiberGroupPresent = true;
+            index = GetItemCount();
+        }
+        else
+        {
+            for( int i( 0 ); i < GetItemCount(); ++i )
+            {
+                if( FIBERSGROUP == GetItem( i )->getType() )
+                {
+                    index = i + 1;
+                    break;
+                }
+            }
+
+            while( index < GetItemCount() && FIBERS == GetItem( index )->getType() )
+            {
+                ++index;
+            }
+        }
+    }
+    else
+    {
+        index = GetItemCount();
+    }
 
     wxListCtrl::InsertItem( index, pDataset->getShow() ? 0 : 1 );
     SetItemData( index, (long)pDataset );

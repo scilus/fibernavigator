@@ -1586,9 +1586,12 @@ void DatasetHelper::updateView( const float i_x, const float i_y, const float i_
     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
     {
         DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
-        if( l_datasetInfo->getType() == TENSORS || l_datasetInfo->getType() == ODFS  )
+        if( l_datasetInfo ) 
         {
-            ((Glyph*)l_datasetInfo)->refreshSlidersValues();
+            if( l_datasetInfo->getType() == TENSORS || l_datasetInfo->getType() == ODFS )
+            {
+                ((Glyph*)l_datasetInfo)->refreshSlidersValues();
+            }
         }
     }
 }

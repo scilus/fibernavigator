@@ -7,6 +7,12 @@ BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
     EVT_LEFT_DOWN(MyListCtrl::OnLeftClick)
 END_EVENT_TABLE()
 
+namespace
+{
+    const wxString strSelectionObj = wxT( "Selection Objects" );
+    const wxString strPoints = wxT( "Points" );
+}
+
 MyListCtrl::MyListCtrl(MainFrame *parent, const wxWindowID id, const wxPoint& pos, const wxSize& size, long style) :
         wxListCtrl(parent, id, pos, size, style)
 {
@@ -181,23 +187,23 @@ int MyTreeCtrl::getSelectedType()
     wxTreeItemId treeid = GetSelection();
     if( ! treeid.IsOk() ) 
         return 0;
-    if( GetItemText( treeid ) == _T( "points" ) || GetItemText(treeid) == _T( "selection objects" ) ) 
+    if( GetItemText( treeid ) == strPoints || GetItemText(treeid) == strSelectionObj ) 
         return 0;
 
     wxTreeItemId pId = GetItemParent( treeid );
     wxTreeItemId ppId = GetItemParent( pId );
 
-    if( GetItemText(pId) == _T( "selection objects" ) )
+    if( GetItemText(pId) == strSelectionObj )
         return MASTER_OBJECT;
-    else if( GetItemText(pId) == _T( "points" ) )
+    else if( GetItemText(pId) == strPoints )
             return POINT_DATASET;
-    else if( GetItemText(ppId) == _T( "selection objects" ) )
+    else if( GetItemText(ppId) == strSelectionObj )
         return CHILD_OBJECT;
 
     else return 0;
 }
 
-void MyTreeCtrl::OnChar( wxKeyEvent& event )
+void MyTreeCtrl::OnChar( wxKeyEvent& evt )
 {
     int selected = getSelectedType();
 
@@ -206,14 +212,14 @@ void MyTreeCtrl::OnChar( wxKeyEvent& event )
     wxTreeItemId pId  = GetItemParent( treeid );
     wxTreeItemId ppId = GetItemParent( pId );
 
-    if( event.GetKeyCode() == WXK_DELETE)
+    if( evt.GetKeyCode() == WXK_DELETE)
     {
         m_mainFrame->deleteTreeItem();
     }
 
     else if (selected == MASTER_OBJECT || selected == CHILD_OBJECT)
     {
-        switch( event.GetKeyCode() )
+        switch( evt.GetKeyCode() )
         {
         case WXK_LEFT:
              if (wxGetKeyState(WXK_CONTROL))
@@ -255,13 +261,13 @@ void MyTreeCtrl::OnChar( wxKeyEvent& event )
             ((SelectionObject*) (GetItemData(treeid)))->lockToCrosshair();
             break;
         default:
-            event.Skip();
+            evt.Skip();
             return;
         }
     }
     else if( selected == POINT_DATASET )
     {
-        switch( event.GetKeyCode() )
+        switch( evt.GetKeyCode() )
         {
         case WXK_LEFT:
              if (wxGetKeyState(WXK_CONTROL))
@@ -303,7 +309,7 @@ void MyTreeCtrl::OnChar( wxKeyEvent& event )
             //((SplinePoint*) (GetItemData(treeid)))->lockToCrosshair();
             break;
         default:
-            event.Skip();
+            evt.Skip();
             return;
         }
     }
@@ -335,19 +341,19 @@ BEGIN_EVENT_TABLE(MySlider, wxSlider)
     EVT_MOUSE_EVENTS(MySlider::OnMouseEvent)
 END_EVENT_TABLE()
 
-void MySlider::OnMouseEvent(wxMouseEvent& event)
+void MySlider::OnMouseEvent(wxMouseEvent& evt)
 {
-    if ( event.LeftDown())
+    if ( evt.LeftDown())
     {
         m_leftIsDown = true;
     }
-    if ( event.LeftUp())
+    if ( evt.LeftUp())
     {
         m_leftIsDown = false;
     }
-    if ( event.LeftIsDown())
+    if ( evt.LeftIsDown())
     {
         m_leftIsDown = true;
     }
-    event.Skip();    
+    evt.Skip();    
 }
