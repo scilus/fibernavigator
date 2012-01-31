@@ -20,6 +20,7 @@ class SceneObject
 {
 public:
     SceneObject();
+    ~SceneObject();
     
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer() { }
@@ -28,6 +29,10 @@ public:
 
 public:
     wxBoxSizer  *m_propertiesSizer;
+
+private:
+    SceneObject( const SceneObject & );
+    SceneObject & operator=( const SceneObject & );
 };
 
 #endif

@@ -10,6 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "SceneObject.h"
+
 SceneObject::SceneObject()
 :   m_propertiesSizer( NULL )
 {
@@ -21,4 +22,15 @@ void SceneObject::createPropertiesSizer( PropertiesWindow *parent )
 {
     m_propertiesSizer = new wxBoxSizer( wxVERTICAL );
     m_propertiesSizer->SetMinSize( wxSize(210,15));
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+SceneObject::~SceneObject()
+{
+    if( NULL != m_propertiesSizer )
+    {
+        m_propertiesSizer->Clear( true );
+        delete m_propertiesSizer;
+    }
 }

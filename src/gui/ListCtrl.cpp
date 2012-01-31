@@ -42,6 +42,15 @@ void ListCtrl::AssignImageList( wxImageList *imageList, int which )
 
 bool ListCtrl::DeleteItem( long index )
 {
+    DatasetInfo *pDataset = GetItem( index );
+    if( FIBERSGROUP == pDataset->getType() )
+    {
+        while( index + 1 < GetItemCount() && FIBERS == GetItem( index + 1 )->getType() )
+        {
+            delete GetItem( index + 1 );
+            wxListCtrl::DeleteItem( index + 1 );
+        }
+    }
     return wxListCtrl::DeleteItem( index );
 }
 
@@ -251,6 +260,15 @@ void ListCtrl::UpdateSelected()
     long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( -1 != index )
     {
+        DatasetInfo *pDataset = GetItem( index );
+        if( FIBERSGROUP == pDataset->getType() )
+        {
+            for( long i( index + 1); FIBERS == GetItem( i )->getType(); ++i )
+            {
+                Update( i );
+            }
+        }
+
         Update( index );
     }
 }
@@ -292,8 +310,8 @@ void ListCtrl::onActivate( wxListEvent& evt )
         break;
     case 3:
         // TODO: Delete item
-        DeleteItem( index );
-        break;
+        //DeleteItem( index );
+        // Deletion comes from mainframe
     default:
         break;
     }
@@ -340,3 +358,9 @@ void ListCtrl::Update( long index )
 }
 
 //////////////////////////////////////////////////////////////////////////
+// DESTRUCTOR
+//////////////////////////////////////////////////////////////////////////
+
+ListCtrl::~ListCtrl()
+{
+}

@@ -1947,6 +1947,11 @@ void MainFrame::onActivateListItem2( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem2" ), LOGLEVEL_DEBUG );
 
+    if( 3 == m_pListCtrl2->GetColumnClicked() )
+    {
+        deleteListItem();
+    }
+
     refreshAllGLWidgets();
 }
 
@@ -1994,15 +1999,14 @@ void MainFrame::onActivateListItem2( wxListEvent& evt )
 
 void MainFrame::deleteListItem()
 {
-
     if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {       
         long tmp = m_currentListItem;
         DatasetInfo * pInfo = m_pListCtrl2->GetItem( m_currentListItem );
-		if( FIBERSGROUP == pInfo->getType() )
+		/*if( FIBERSGROUP == pInfo->getType() )
 		{
-			FibersGroup* pFibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
+			FibersGroup* pFibersGroup( NULL );
+			m_pDatasetHelper->getFibersGroupDataset( pFibersGroup );
 			if( pFibersGroup != NULL )
 			{
 				if( !pFibersGroup->OnDeleteFibers() )
@@ -2024,7 +2028,7 @@ void MainFrame::deleteListItem()
 			}
 			m_pDatasetHelper->m_selBoxChanged = true;
         }
-        else if( SURFACE == pInfo->getType() )
+        else */if( SURFACE == pInfo->getType() )
         {
             m_pDatasetHelper->deleteAllPoints();
         }

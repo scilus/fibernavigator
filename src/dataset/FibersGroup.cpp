@@ -410,73 +410,6 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 	pSizer->Add( pWarningMsg , 0, wxALIGN_CENTER );
 }
 
-void FibersGroup::OnMoveUp()
-{
-    // TODO: Review this method if still necessary once MoveItemUp and MoveItemDown are implemented in the list
-
-// 	if( getListCtrlItemId() <= 0)
-// 		return;
-// 	
-// 	// Move fibergroup up
-// 	m_dh->m_mainFrame->m_pListCtrl->moveItemUp(getListCtrlItemId());
-// 
-// 	// Move all fibers up
-// 	std::list<long> idsList;
-// 	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
-// 	{
-// 		long itemId = m_fibersSets[i]->getListCtrlItemId();
-// 		idsList.push_back(itemId);
-// 	}
-// 	idsList.sort();
-// 
-// 	while( idsList.size() != 0)
-// 	{
-// 		long itemId = idsList.front();
-// 		idsList.pop_front();
-// 		if( itemId >= 0)
-// 		{
-// 			m_dh->m_mainFrame->m_pListCtrl->moveItemUp( itemId );
-// 		}
-// 	}
-// 
-// 	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
-// 	m_dh->m_mainFrame->m_pListCtrl->SetItemState(getListCtrlItemId(), wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-// 	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
-
-}
-
-void FibersGroup::OnMoveDown()
-{
-    // TODO: Review this method if still necessary once MoveItemUp and MoveItemDown are implemented in the list
-
-// 	if( getListCtrlItemId() + getFibersCount() == m_dh->m_mainFrame->m_pListCtrl->GetItemCount() -1)
-// 		return;
-// 	   
-// 	// Move all fibers down
-// 	std::list<long> idsList;
-// 	for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
-// 	{
-// 		long itemId = m_fibersSets[i]->getListCtrlItemId();
-// 		idsList.push_back(itemId);
-// 	}
-// 	idsList.sort();
-// 
-// 	while( idsList.size() != 0)
-// 	{
-// 		long itemId = idsList.back();
-// 		idsList.pop_back();
-// 		if( itemId >= 0)
-// 		{
-// 			m_dh->m_mainFrame->m_pListCtrl->moveItemDown( itemId );
-// 		}
-// 	}
-// 	m_dh->m_mainFrame->m_pListCtrl->unselectAll();
-// 	
-// 	// Move fibergroup down
-// 	m_dh->m_mainFrame->m_pListCtrl->moveItemDown(getListCtrlItemId());
-// 	m_dh->m_mainFrame->m_pListCtrl->EnsureVisible(getListCtrlItemId());
-}
-
 bool FibersGroup::OnDeleteFibers()
 {
     // TODO: Review method
@@ -514,15 +447,9 @@ void FibersGroup::OnToggleVisibleBtn()
 {
 	bool show = getShow();
 	
-    for( vector<Fibers *>::iterator it = m_fibersSets.begin(); it != m_fibersSets.end(); ++it)
+    for( vector<Fibers *>::iterator it = m_fibersSets.begin(); it != m_fibersSets.end(); ++it )
 	{
         (*it)->setShow( show );
-        // TODO: Verify that the UpdateSelected is called by the caller
-		
-// 		if( show )
-// 			m_dh->m_mainFrame->m_pListCtrl->SetItem( m_fibersSets[i]->getListCtrlItemId(), 0, wxT( "" ), 0 );
-// 		else
-// 			m_dh->m_mainFrame->m_pListCtrl->SetItem( m_fibersSets[i]->getListCtrlItemId(), 0, wxT( "" ), 1 );
 	}
 }
 

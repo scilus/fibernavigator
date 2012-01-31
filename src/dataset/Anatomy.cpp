@@ -776,7 +776,7 @@ bool Anatomy::loadNifti( wxString fileName )
     strcpy( pHdrFile, (const char*)fileName.mb_str( wxConvUTF8 ) );
 
     nifti_image *pImage = nifti_image_read( pHdrFile, 0 );
-    if( ! pImage )
+    if( !pImage )
     {
         m_dh->m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
         return false;

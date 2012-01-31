@@ -5,7 +5,6 @@
 // Created:     03/27/08
 /////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
@@ -17,6 +16,7 @@
 #include "wx/filename.h"
 
 #include "main.h"
+#include "dataset/DatasetManager.h"
 #include "gui/MainFrame.h"
 #include "gui/ToolBar.h"
 #include "gui/MenuBar.h"
@@ -46,27 +46,27 @@ static const wxCmdLineEntryDesc desc[] =
 
 namespace
 {
+    void printwx( const wxString& str )
+    {
+        char* cstring = NULL;
+        cstring = (char*) malloc( str.length() + 1 );
+        strcpy( cstring, (const char*) str.mb_str( wxConvUTF8 ) );
+        printf( "%s\n", cstring );
+        free( cstring );
+    }
 
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
 
-void printwx( const wxString& str )
-{
-    char* cstring = NULL;
-    cstring = (char*) malloc( str.length() + 1 );
-    strcpy( cstring, (const char*) str.mb_str( wxConvUTF8 ) );
-    printf( "%s\n", cstring );
-    free( cstring );
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-void printwx( const wxString& str1, const wxString& str2 )
-{
-    printwx( str1 );
-    printwx( str2 );
-}
-
+    void printwx( const wxString& str1, const wxString& str2 )
+    {
+        printwx( str1 );
+        printwx( str2 );
+    }
 } // namespace
+
+MyApp::MyApp()
+{
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Initialise this in OnInit, not statically
@@ -284,6 +284,10 @@ wxString MyApp::wxFindAppPath( const wxString& argv0, const wxString& cwd, const
 
 int MyApp::OnExit()
 {
+    // Deleting singletons
+    delete DatasetManager::getInstance();
+    delete Logger::getInstance();
+
     cout << "exiting" << endl;
     return 0;
 }

@@ -59,8 +59,6 @@ public:
 	
 	void	generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies);
 
-	void	OnMoveUp();
-	void	OnMoveDown();
 	bool	OnDeleteFibers();
 	void	OnToggleVisibleBtn();
 	void	OnToggleIntensityBtn();

@@ -11,6 +11,7 @@ class ListCtrl : protected wxListCtrl
 {
 public:
     ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size, const long style );
+    ~ListCtrl();
 
     // Methods
     void AssignImageList( wxImageList *pImageList, int which );
@@ -24,6 +25,7 @@ public:
     void UpdateSelected();
     
     // Getters/Setters
+    int GetColumnClicked() const                    { return m_column; }
     DatasetInfo * GetItem( long index ) const;
     int GetItemCount() const                        { return wxListCtrl::GetItemCount(); }
     bool SetColumnWidth( int col, int width )       { return wxListCtrl::SetColumnWidth( col, width ); }
@@ -38,6 +40,9 @@ public:
     operator wxWindow *()                           { return (wxWindow *)this; }
 
 private:
+    ListCtrl( const ListCtrl & );
+    ListCtrl & operator= ( const ListCtrl & );
+
     void Swap( long i, long j );
     void Update( long index );
 
