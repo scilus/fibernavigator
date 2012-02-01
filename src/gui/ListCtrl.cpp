@@ -147,7 +147,7 @@ void ListCtrl::MoveItemDown()
                 DatasetInfo *pDatasetToMove = GetItem( from );
                 wxListCtrl::InsertItem( index, pDatasetToMove->getShow() ? 0 : 1 );
                 SetItemData( index, (long)pDatasetToMove );
-                SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+                SetItemState( index + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
                 DeleteItem( from + 1 );
 
