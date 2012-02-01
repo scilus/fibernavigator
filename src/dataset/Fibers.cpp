@@ -464,8 +464,11 @@ bool Fibers::loadTRK( const wxString &filename )
         vector< float >::iterator it2;
 
         for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
-        {
-            m_colorArray[pos] = colors[pos] / 255.;
+        {   
+				if (colors.size() > 0)
+				{
+	            m_colorArray[pos] = colors[pos] / 255.;
+				}
             m_pointArray[pos++] = *it2;
         }
     }
