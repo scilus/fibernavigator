@@ -472,7 +472,8 @@ void MainFrame::createNewAnatomy( int dataType )
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
-    long l_id = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount();
+    //long l_id = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount();
+    long l_id = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount();
 #else
     long l_id = 0;
 #endif
@@ -1389,7 +1390,8 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
-    long id = m_pListCtrl->GetItemCount();
+    //long id = m_pListCtrl->GetItemCount();
+    long id = m_pListCtrl2->GetItemCount();
 #else
     long id = 0;
 #endif

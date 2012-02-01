@@ -707,7 +707,8 @@ void FibersGroup::generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies)
 	#ifdef __WXMAC__
 		// insert at zero is a well-known bug on OSX, so we append there...
 		// http://trac.wxwidgets.org/ticket/4492
-		long l_id = m_dh->m_mainFrame->m_pListCtrl->GetItemCount();
+		//long l_id = m_dh->m_mainFrame->m_pListCtrl->GetItemCount();
+        long l_id = m_dh->m_mainFrame->m_pListCtrl2->GetItemCount();
 	#else
 		long l_id = 0;
 	#endif

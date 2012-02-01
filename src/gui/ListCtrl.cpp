@@ -68,7 +68,7 @@ void ListCtrl::DeleteSelectedItem()
 
 //////////////////////////////////////////////////////////////////////////
 
-long ListCtrl::InsertColumn( long col, const wxListItem& info )
+long ListCtrl::InsertColumn( long col, wxListItem& info )
 {
     return wxListCtrl::InsertColumn( col, info );
 }

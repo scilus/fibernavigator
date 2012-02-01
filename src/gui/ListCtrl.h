@@ -17,7 +17,7 @@ public:
     void AssignImageList( wxImageList *pImageList, int which );
     bool DeleteItem( long index );
     void DeleteSelectedItem();
-    long InsertColumn( long col, const wxListItem& info );
+    long InsertColumn( long col, wxListItem& info );
     // TODO: Change for index in DatasetManager, once it is created
     void InsertItem( const DatasetInfo * const pDataset );
     void MoveItemDown();
