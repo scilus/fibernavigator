@@ -32,6 +32,55 @@
 #include "../Logger.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
+extern const wxEventType wxEVT_NAVGL_EVENT;
+
+/****************************************************************************************************
+ *
+ * Event Table
+ *
+ ****************************************************************************************************/
+BEGIN_EVENT_TABLE( MainFrame, wxFrame )
+// List widget events
+EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL2,                   MainFrame::onActivateListItem2  )
+EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL2,                   MainFrame::onSelectListItem2    )
+EVT_LIST_ITEM_DESELECTED ( ID_LIST_CTRL2,                   MainFrame::onDeselectListItem2  )
+
+// Tree widget events
+EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
+EVT_TREE_SEL_CHANGED     ( ID_TREE_CTRL,                    MainFrame::onSelectTreeItem     )
+EVT_TREE_ITEM_ACTIVATED  ( ID_TREE_CTRL,                    MainFrame::onActivateTreeItem   )
+EVT_TREE_ITEM_RIGHT_CLICK( ID_TREE_CTRL,                    MainFrame::onRightClickTreeItem )
+EVT_TREE_END_LABEL_EDIT  ( ID_TREE_CTRL,                    MainFrame::onTreeLabelEdit      )
+
+//Interface events
+EVT_SIZE(                                                   MainFrame::onSize               )
+EVT_MOUSE_EVENTS(                                           MainFrame::onMouseEvent         )
+EVT_CLOSE(                                                  MainFrame::onClose              )
+
+// mouse click in one of the three navigation windows
+EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+
+// slider events
+EVT_SLIDER( ID_X_SLIDER,                                    MainFrame::onSliderMoved        )
+EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderMoved        )
+EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
+
+// mouse click in one of the three navigation windows
+EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+
+// KDTREE thread finished
+EVT_MENU( KDTREE_EVENT,                                     MainFrame::onKdTreeThreadFinished )
+
+EVT_TIMER( -1,                                              MainFrame::onTimerEvent )
+
+END_EVENT_TABLE()
+
 namespace
 {
 // Properties to define GUI elements
@@ -63,39 +112,6 @@ namespace
 
 #define TREE_WIDTH          268
 #define TREE_HEIGHT         NOT_DEFINED
-
-    void initMyListCtrl( MyListCtrl * &myListCtrl )
-    {
-        myListCtrl->SetMaxSize( wxSize( LIST_WIDTH, LIST_HEIGHT ) );
-        myListCtrl->SetMinSize( wxSize( LIST_WIDTH, LIST_HEIGHT ) );
-
-        wxImageList* imageList = new wxImageList( 16, 16 );
-
-        imageList->Add( ( wxImage( MyApp::respath +_T( "icons/eyes.png"   ), wxBITMAP_TYPE_PNG ) ) );
-        imageList->Add( ( wxImage( MyApp::respath +_T( "icons/delete.png" ), wxBITMAP_TYPE_PNG ) ) );
-
-        myListCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
-
-        wxListItem itemCol;
-        itemCol.SetText( wxT( "" ) );
-        myListCtrl->InsertColumn( 0, itemCol );
-
-        itemCol.SetText( wxT( "Name" ) );
-        itemCol.SetAlign( wxLIST_FORMAT_CENTRE );
-        myListCtrl->InsertColumn( 1, itemCol );
-
-        itemCol.SetText( wxT( "Threshold" ) );
-        itemCol.SetAlign( wxLIST_FORMAT_RIGHT );
-        myListCtrl->InsertColumn( 2, itemCol) ;
-
-        itemCol.SetText( wxT( "" ) );
-        myListCtrl->InsertColumn( 3, itemCol );
-
-        myListCtrl->SetColumnWidth( 0, LIST_COL0_WIDTH );
-        myListCtrl->SetColumnWidth( 1, LIST_COL1_WIDTH );
-        myListCtrl->SetColumnWidth( 2, LIST_COL2_WIDTH );
-        myListCtrl->SetColumnWidth( 3, LIST_COL3_WIDTH );
-    }
 
     void initMyTreeCtrl( MyTreeCtrl * &myTreeCtrl )
     {
@@ -151,56 +167,67 @@ namespace
 #define FIBERS_INFO_GRID_ROW_SIZE              11
 #define FIBERS_INFO_GRID_TITLE_LABEL_SIZE      150
 
-extern const wxEventType wxEVT_NAVGL_EVENT;
 
-/****************************************************************************************************
- *
- * Event Table
- *
- ****************************************************************************************************/
-BEGIN_EVENT_TABLE( MainFrame, wxFrame )
-// List widget events
-// EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL,                    MainFrame::onActivateListItem   )
-// EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL,                    MainFrame::onSelectListItem     )
-EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL2,                   MainFrame::onActivateListItem2  )
-EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL2,                   MainFrame::onSelectListItem2    )
-EVT_LIST_ITEM_DESELECTED ( ID_LIST_CTRL2,                   MainFrame::onDeselectListItem2  )
+class Loader
+{
+private:
+    ListCtrl *m_pListCtrl;
+    bool m_error;
+    int m_index;
+public:
+    Loader(ListCtrl *lstCtrl, int index) 
+        : m_pListCtrl( lstCtrl ), 
+          m_index( index ),
+          m_error( false )
+    { }
 
-// Tree widget events
-EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
-EVT_TREE_SEL_CHANGED     ( ID_TREE_CTRL,                    MainFrame::onSelectTreeItem     )
-EVT_TREE_ITEM_ACTIVATED  ( ID_TREE_CTRL,                    MainFrame::onActivateTreeItem   )
-EVT_TREE_ITEM_RIGHT_CLICK( ID_TREE_CTRL,                    MainFrame::onRightClickTreeItem )
-EVT_TREE_END_LABEL_EDIT  ( ID_TREE_CTRL,                    MainFrame::onTreeLabelEdit      )
+    bool getError() { return m_error; }
 
-//Interface events
-EVT_SIZE(                                                   MainFrame::onSize               )
-EVT_MOUSE_EVENTS(                                           MainFrame::onMouseEvent         )
-EVT_CLOSE(                                                  MainFrame::onClose              )
+    void operator()( const wxString &filename )
+    {
+        // check if i_fileName is valid
+        if( ! wxFile::Exists( filename ) )
+        {
+            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), filename ), LOGLEVEL_ERROR );
+        }
+        else
+        {
+            // If the file is in compressed formed, we check what kinda file it is.
+            wxString extension = filename.AfterLast( '.' );
+            if( wxT( "gz" ) == extension )
+            {
+                extension = filename.BeforeLast( '.' ).AfterLast( '.' );
+            }
 
-// mouse click in one of the three navigation windows
-EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
+            if( wxT( "scn" ) == extension )
+            {
+//                 if( !SceneManager::getInstance()->load( filename ) )
+//                 {
+//                     m_error = true;
+//                 }
+            }
+            else
+            {
+                int result = DatasetManager::getInstance()->load( filename, extension );
+                if( -1 != result )
+                {
+                    DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
+                    m_pListCtrl->InsertItem( pDataset );
+                }
+                else
+                {
+                    m_error = true;
+                }
+            }
 
-// slider events
-EVT_SLIDER( ID_X_SLIDER,                                    MainFrame::onSliderMoved        )
-EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderMoved        )
-EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
+//             if ( !m_dh->load( filename, m_index ) )
+//             {
+//                 m_error = true;
+//             }
+        }
+    }
+};
 
-// mouse click in one of the three navigation windows
-EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-
-// KDTREE thread finished
-EVT_MENU( KDTREE_EVENT,                                     MainFrame::onKdTreeThreadFinished )
-
-EVT_TIMER( -1,                                              MainFrame::onTimerEvent )
-
-END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow           *i_parent, 
                      const wxWindowID   i_id, 
@@ -213,7 +240,8 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_lastSelectedListItem( -1 ),
     m_pCurrentSceneObject( NULL ),
     m_currentListItem( -1 ),
-    m_pCurrentSizer( NULL )
+    m_pCurrentSizer( NULL ),
+    m_lastPath( wxT("") )
 
 {
     wxImage::AddHandler(new wxPNGHandler);
@@ -222,12 +250,6 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     // TODO: Remove dependency to DatasetHelper
     DatasetManager::getInstance()->setDatasetHelper( m_pDatasetHelper );
     m_pDatasetHelper->m_theScene = new TheScene( m_pDatasetHelper );
-
-
-    //////////////////////////////////////////////////////////////////////////
-    // MyListCtrl initialization
-//     m_pListCtrl = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
-//     initMyListCtrl( m_pListCtrl );
 
     //////////////////////////////////////////////////////////////////////////
     // MyTreeCtrl initialization
@@ -257,8 +279,6 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     //////////////////////////////////////////////////////////////////////////
     // initLayout
     initLayout();
-
-    
 
     m_pTimer = new wxTimer( this );
     m_pTimer->Start( 100 );
@@ -380,81 +400,52 @@ void MainFrame::initLayout()
 
 void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
-    if( ! m_pDatasetHelper->load( 0 ) )
+    wxArrayString l_fileNames;
+    wxString l_caption          = wxT( "Choose a file" );
+    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
+    wxString l_defaultDir       = wxEmptyString;
+    wxString l_defaultFileName  = wxEmptyString;
+    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
+    dialog.SetFilterIndex( 0 );
+    dialog.SetDirectory( m_lastPath );
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        m_lastPath = dialog.GetDirectory();
+        dialog.GetPaths( l_fileNames );
+    }
+
+    if ( for_each( l_fileNames.begin(), l_fileNames.end(), Loader( m_pListCtrl2, 0 ) ).getError() )
     {
         wxMessageBox( wxT( "ERROR\n" ) + m_pDatasetHelper->m_lastError, wxT( "" ), wxOK | wxICON_INFORMATION, NULL );
         GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
         GetStatusBar()->SetStatusText( m_pDatasetHelper->m_lastError, 2 );
         return;
     }
-     refreshAllGLWidgets();
-}
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load Datasets button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadDatasets( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 1 );
-}
-
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load Meshes button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadMeshes( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 2 );
-}
-
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load Fibers button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadFibers( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 5 );
-}
-
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load Tensors button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadTensors( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 8 );
-}
-
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load ODFs button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadODFs( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 9 );
-}
-//////////////////////////////////////////////////////////////////////////
-// This function will load a specific type specified by the index in argument.
-//
-// i_index          : The index we are trying to load.
-//
-// Returns true if there was no errors, false otherwise.
-//////////////////////////////////////////////////////////////////////////
-bool MainFrame::loadIndex( int i_index )
-{
-    if( ! m_pDatasetHelper->load( i_index ) )
+    
+    if( DatasetManager::getInstance()->isAnatomyLoaded() )
     {
-        wxMessageBox( wxT( "ERROR\n" ) + m_pDatasetHelper->m_lastError, wxT( "" ), wxOK | wxICON_INFORMATION, NULL );
-        GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
-        GetStatusBar()->SetStatusText( m_pDatasetHelper->m_lastError, 2 );
-        return false;
+        m_pXSlider->SetMax( wxMax( 2, m_pDatasetHelper->m_columns - 1 ) );
+        m_pXSlider->SetValue( m_pDatasetHelper->m_columns / 2 );
+        m_pYSlider->SetMax( wxMax( 2, m_pDatasetHelper->m_rows - 1 ) );
+        m_pYSlider->SetValue( m_pDatasetHelper->m_rows / 2 );
+        m_pZSlider->SetMax( wxMax( 2, m_pDatasetHelper->m_frames - 1 ) );
+        m_pZSlider->SetValue( m_pDatasetHelper->m_frames / 2 );
+
+        m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
+
+        m_pMainGL->changeOrthoSize();
+        m_pGL0->changeOrthoSize();
+        m_pGL1->changeOrthoSize();
+        m_pGL2->changeOrthoSize();
     }
-    else
-    {
-        m_pDatasetHelper->m_selBoxChanged = true;
-    } 
-    return true;
+
+    refreshAllGLWidgets();
 }
 
 //
 //This function creates an Anatomy from scratch
 //
-void MainFrame::createNewAnatomy( int dataType )
+void MainFrame::createNewAnatomy( DatasetType dataType )
 {
 	// ask user for a name
 	wxString l_givenName = wxT("Anatomy");
@@ -466,25 +457,11 @@ void MainFrame::createNewAnatomy( int dataType )
 	}
 
 	//create the anatomy
-	Anatomy* l_newAnatomy = new Anatomy( m_pDatasetHelper, dataType );
-	l_newAnatomy->setName( l_givenName );
+    int index = DatasetManager::getInstance()->createAnatomy( dataType );
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+	pNewAnatomy->setName( l_givenName );
 
-#ifdef __WXMAC__
-    // insert at zero is a well-known bug on OSX, so we append there...
-    // http://trac.wxwidgets.org/ticket/4492
-    //long l_id = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount();
-    long l_id = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount();
-#else
-    long l_id = 0;
-#endif
-    m_pListCtrl2->InsertItem( l_newAnatomy );
-
-// 	m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-// 	m_pListCtrl->SetItem( l_id, 1, l_newAnatomy->getName() );
-// 	m_pListCtrl->SetItem( l_id, 2, wxT( "0.00" ) );
-// 	m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-// 	m_pListCtrl->SetItemData( l_id, (long) l_newAnatomy );
-// 	m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_pListCtrl2->InsertItem( pNewAnatomy );
 
     refreshAllGLWidgets();
 }
@@ -642,7 +619,7 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
             Surface *l_surface = (Surface*)m_pCurrentSceneObject;
 
             wxString caption         = wxT( "Choose a file" );
-            wxString wildcard        = wxT( "surfae files (*.vtk)|*.vtk" );
+            wxString wildcard        = wxT( "surface files (*.vtk)|*.vtk" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
@@ -659,7 +636,7 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
             CIsoSurface *l_surface = (CIsoSurface*)m_pCurrentSceneObject;
 
             wxString caption         = wxT( "Choose a file" );
-            wxString wildcard        = wxT( "surfae files (*.vtk)|*.vtk" );
+            wxString wildcard        = wxT( "surface files (*.vtk)|*.vtk" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
@@ -1427,8 +1404,6 @@ void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
 {
     m_pDatasetHelper->m_normalDirection *= -1.0;
 
-    // TODO: Update method once DatasetManager exists
-
     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_pListCtrl2->GetItemCount() ); ++i )
     {
         DatasetInfo* l_info = m_pListCtrl2->GetItem( i );
@@ -2005,32 +1980,8 @@ void MainFrame::deleteListItem()
     {       
         long tmp = m_currentListItem;
         DatasetInfo * pInfo = m_pListCtrl2->GetItem( m_currentListItem );
-		/*if( FIBERSGROUP == pInfo->getType() )
-		{
-			FibersGroup* pFibersGroup( NULL );
-			m_pDatasetHelper->getFibersGroupDataset( pFibersGroup );
-			if( pFibersGroup != NULL )
-			{
-				if( !pFibersGroup->OnDeleteFibers() )
-					return;
-			}
-		}
-        else if( FIBERS == pInfo->getType() )
-        {            
-			FibersGroup* pFibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
-			if(pFibersGroup != NULL)
-			{
-				Fibers* pFibers = NULL;
-				m_pDatasetHelper->getSelectedFiberDataset(pFibers);
-				if(pFibers != NULL)
-				{
-					pFibersGroup->removeFibersSet(pFibers);
-				}
-			}
-			m_pDatasetHelper->m_selBoxChanged = true;
-        }
-        else */if( SURFACE == pInfo->getType() )
+		
+        if( SURFACE == pInfo->getType() )
         {
             m_pDatasetHelper->deleteAllPoints();
         }
@@ -2048,6 +1999,7 @@ void MainFrame::deleteListItem()
         }
 
         deleteSceneObject();
+        //DatasetManager::getInstance()->remove()
         m_pListCtrl2->DeleteItem( tmp );
         m_pDatasetHelper->updateLoadStatus();
         refreshAllGLWidgets();
@@ -2094,7 +2046,6 @@ void MainFrame::onDeselectListItem2( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeselectListItem2" ), LOGLEVEL_DEBUG );
 
-    // TODO: Test this
     m_pLastSelectedSceneObject = NULL;
     m_lastSelectedListItem = -1;
 }
@@ -2240,10 +2191,9 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             break;
     }    
 #ifdef __WXMSW__
-    if (m_currentListItem != -1)
+    if( m_currentListItem != -1 )
     {
-        // TODO: Review this
-        // m_pListCtrl->SetItemState(m_currentListItem,0,wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED);  
+        m_pListCtrl2->UnselectAll();
     }
 #endif
     refreshAllGLWidgets();

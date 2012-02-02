@@ -295,7 +295,7 @@ void Surface::execute ()
     }
 
     licCalculated = false;
-//TODO
+
     for (int i = 0 ; i < 3 ; ++i)
         m_tMesh->doLoopSubD();
     subDCount = 3;
@@ -733,8 +733,8 @@ void Surface::createPropertiesSizer(PropertiesWindow *parent)
 void Surface::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
-    m_ptoggleFiltering->Enable(false);
-    m_ptoggleFiltering->SetValue(false);
+    m_pToggleFiltering->Enable(false);
+    m_pToggleFiltering->SetValue(false);
     m_psliderOpacity->Enable(false);
     m_psliderOpacity->SetValue(m_psliderOpacity->GetMin());
     m_psliderThresholdIntensity->Enable(false);

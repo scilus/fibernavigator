@@ -149,7 +149,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_texAssigned  ( false ),
     m_selBoxChanged( true ),
-    m_guiBlocked   ( false ),
 
     m_geforceLevel( 6 ),
 
@@ -236,7 +235,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 		{
 			FibersGroup* l_fibersGroup = new FibersGroup( this );
 			l_fibersGroup->setShowFS   ( i_showFS );
-			l_fibersGroup->setuseTex   ( i_useTex );
+			l_fibersGroup->setUseTex   ( i_useTex );
 			
 			finishLoading( l_fibersGroup );
 			
@@ -357,7 +356,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_dataset->setAlpha    ( i_alpha );
 				l_dataset->setShow     ( i_active );
 				l_dataset->setShowFS   ( i_showFS );
-				l_dataset->setuseTex   ( i_useTex );
+				l_dataset->setUseTex   ( i_useTex );
 				
 				if( i_isScene && version >= 2 )
 				{
@@ -397,7 +396,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_mesh->setThreshold( i_threshold );
 				l_mesh->setShow     ( i_active );
 				l_mesh->setShowFS   ( i_showFS );
-				l_mesh->setuseTex   ( i_useTex );
+				l_mesh->setUseTex   ( i_useTex );
 				finishLoading       ( l_mesh);
 
                 m_mainFrame->m_pListCtrl2->InsertItem( l_mesh );
@@ -445,7 +444,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 				l_fibers->setAlpha	  ( i_alpha );
 				l_fibers->setShow     ( i_active );
 				l_fibers->setShowFS   ( i_showFS );
-				l_fibers->setuseTex   ( i_useTex );
+				l_fibers->setUseTex   ( i_useTex );
 				
 				if( m_fibersGroupLoaded )
 				{
@@ -486,115 +485,9 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 	}
 }
 
-void DatasetHelper::updateItemsId()
-{
-    // TODO: Review but shouldn't be necessary later on
-// 	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
-// 	{
-// 		DatasetInfo* pDatasetInfo = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
-// 		if(pDatasetInfo != NULL)
-// 		{
-// 			pDatasetInfo->setListCtrlItemId(pDatasetInfo->getListCtrlItemId() + 1);
-// 		}
-// 	}
-}
-
-void DatasetHelper::updateItemsPosition()
-{
-    // TODO: Shouldn't be necessary either
-
-// 	for(int i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++)
-// 	{
-// 		DatasetInfo* pInfoA = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(i);
-// 		if(pInfoA != NULL)
-// 		{
-// 			long id = pInfoA->getListCtrlItemId();
-// 			if( i != id)
-// 			{
-// 				DatasetInfo *pInfoB = (DatasetInfo*)m_mainFrame->m_pListCtrl->GetItemData(id);
-// 				if(pInfoA != NULL)
-// 				{
-// 					m_mainFrame->m_pListCtrl->SetItem(i, 0, wxT(""), pInfoB->getShow() ? 0 : 1);
-// 					m_mainFrame->m_pListCtrl->SetItem(i, 1, pInfoB->getName().BeforeFirst( '.' ));
-// 					m_mainFrame->m_pListCtrl->SetItem(i, 2, wxString::Format(wxT("%.2f"), pInfoB->getThreshold()));
-// 					m_mainFrame->m_pListCtrl->SetItemData(i, (long)pInfoB);
-// 					
-// 					m_mainFrame->m_pListCtrl->SetItem(id, 0, wxT(""), pInfoA->getShow() ? 0 : 1);
-// 					m_mainFrame->m_pListCtrl->SetItem(id, 1, pInfoA->getName().BeforeFirst( '.' ));
-// 					m_mainFrame->m_pListCtrl->SetItem(id, 2, wxString::Format(wxT("%.2f"), pInfoA->getThreshold()));
-// 					m_mainFrame->m_pListCtrl->SetItemData(id, (long)pInfoA);
-// 				}
-// 			}
-// 		}
-// 	}
-// 
-// 	// Adjust fibergroup position with fibers
-// 	std::list<int> fibersPosList;
-// 	
-// 	FibersGroup* pFibersGroup = NULL;
-// 	getFibersGroupDataset(pFibersGroup);
-// 	if( pFibersGroup != NULL )
-// 	{
-// 		for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
-// 		{
-// 			long id = pFibersGroup->getFibersSet(i)->getListCtrlItemId();
-// 			fibersPosList.push_back(id);
-// 		}
-// 		
-// 		fibersPosList.sort();
-// 		
-// 		int currentPos = pFibersGroup->getListCtrlItemId();
-// 		pFibersGroup->setListCtrlItemId(fibersPosList.front());
-// 		m_mainFrame->m_pListCtrl->moveItemAt(currentPos, fibersPosList.front() - 1);
-// 	}
-}
 
 void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 {
-    m_guiBlocked = true;
-#ifdef __WXMAC__
-    // insert at zero is a well-known bug on OSX, so we append there...
-    // http://trac.wxwidgets.org/ticket/4492
-    //long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
-    long l_id = m_mainFrame->m_pListCtrl2->GetItemCount();
-#else
-    long l_id = 0;
-	updateItemsId();
-#endif
-	i_info->setListCtrlItemId(l_id);
-	
-//     m_mainFrame->m_pListCtrl2->InsertItem( i_info );
-// 	m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-// 
-//     if( i_info->getShow() )
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 0 );
-//     else
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 0, wxT( "" ), 1 );
-// 
-//     if( ! i_info->getShowFS() )
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
-//     else
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, i_info->getName().BeforeFirst( '.' ));
-// 
-//     if( ! i_info->getUseTex() )
-//         m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), ( i_info->getThreshold() ) * i_info->getOldMax() ) + wxT( ")" ) );
-//     else
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxString::Format( wxT( "%.2f" ), i_info->getThreshold() * i_info->getOldMax() ) );
-// 
-//     m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 0 );
-//     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)i_info );
-// 	
-// 	m_mainFrame->m_pListCtrl->unselectAll();
-// 	m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-// 	
-// 	if( isChild )
-// 	{
-// 		m_mainFrame->m_pListCtrl->moveItemDown( l_id );
-// 	}
-// 
-//     m_mainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
-//     m_mainFrame->GetStatusBar()->SetStatusText( i_info->getName() + wxT( " loaded" ), 2 );
-
     if( m_mainFrame->m_pListCtrl2->GetItemCount() == 1 )
     {
         m_mainFrame->m_pXSlider->SetMax( wxMax( 2, m_columns - 1 ) );
@@ -613,7 +506,6 @@ void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
     }
 
     updateLoadStatus();
-    m_guiBlocked = false;
     m_mainFrame->refreshAllGLWidgets();
 }
 
@@ -1603,14 +1495,12 @@ bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
 {
 	io_f = NULL;
 
-    // TODO: Check changes
-	// long selItem = m_mainFrame->m_pListCtrl->GetSelectedItem();
     long selItem = m_mainFrame->getCurrentListItem();
 
     if (-1 != selItem)
     {
         DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( selItem );
-        if( l_datasetInfo->getType() == FIBERS)
+        if( l_datasetInfo && l_datasetInfo->getType() == FIBERS)
         {
             io_f = (Fibers*)l_datasetInfo;
             return true;

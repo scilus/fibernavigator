@@ -279,6 +279,27 @@ void ListCtrl::MoveItemUp()
 
 //////////////////////////////////////////////////////////////////////////
 
+void ListCtrl::UnselectAll()
+{
+    long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
+    wxListCtrl::SetItemState( index, 0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED );
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void ListCtrl::UpdateFibers()
+{
+    for( long index( 0 ); index < GetItemCount(); ++index )
+    {
+        if( FIBERS == GetItem( index )->getType() )
+        {
+            Update( index );
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void ListCtrl::UpdateSelected()
 {
     long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
@@ -333,9 +354,6 @@ void ListCtrl::onActivate( wxListEvent& evt )
         Update( index );
         break;
     case 3:
-        // TODO: Delete item
-        //DeleteItem( index );
-        // Deletion comes from mainframe
     default:
         break;
     }
@@ -375,7 +393,7 @@ void ListCtrl::Swap( long i, long j )
 void ListCtrl::Update( long index )
 {
     DatasetInfo *pDataset = GetItem( index );
-    SetItem( index, 0, wxT( "" ), pDataset->getShow() ? 0 : 1 );
+    SetItem( index, 0, wxT( "" ), pDataset->getShow() ? 0 : 2 );
     SetItem( index, 1, pDataset->getName().BeforeFirst('.') + ( pDataset->getShowFS() ? wxT( "" ) : wxT( "*" ) ) );
     SetItem( index, 2, wxString::Format( wxT( "%.2f" ), pDataset->getThreshold() * pDataset->getOldMax() ) );
     SetItem( index, 3, wxT( "" ), 2 );

@@ -18,6 +18,7 @@
 #include "Anatomy.h"
 #include "../Logger.h"
 #include "../main.h"
+#include "../dataset/DatasetManager.h"
 
 FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 	: DatasetInfo( pDatasetHelper ),
@@ -52,20 +53,6 @@ string FibersGroup::intToString( const int number )
 void FibersGroup::addFibersSet(Fibers* pFibers)
 {
 	m_fibersSets.push_back(pFibers);
-}
-
-bool FibersGroup::removeFibersSet(Fibers* pFibers)
-{
-	std::vector<Fibers*>::iterator it;
-	for(it = m_fibersSets.begin(); it != m_fibersSets.end(); it++)
-	{
-		if((*it) == pFibers)
-		{
-			m_fibersSets.erase(it);
-			return true;
-		}
-	}
-	return false;
 }
 
 Fibers* FibersGroup::getFibersSet(int num)
@@ -410,39 +397,6 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 	pSizer->Add( pWarningMsg , 0, wxALIGN_CENTER );
 }
 
-bool FibersGroup::OnDeleteFibers()
-{
-    // TODO: Review method
-
-// 	int answer = wxMessageBox(wxT("Are you sure you want to delete the fibersgroup and all fibers?"), wxT("Confirmation"), 
-// 								 wxYES_NO | wxICON_QUESTION);
-// 					   
-// 	if( answer == wxYES )
-// 	{
-// 		std::list<long> idsList;
-// 		for(int i = (int)m_fibersSets.size() - 1; i >= 0 ; i--)
-// 		{
-// 			long itemId = m_fibersSets[i]->getListCtrlItemId();
-// 			idsList.push_back(itemId);
-// 		}
-// 		idsList.sort();
-// 
-// 		while( idsList.size() != 0)
-// 		{
-// 			long itemId = idsList.back();
-// 			idsList.pop_back();
-// 			if( itemId >= 0)
-// 			{
-// 				m_dh->m_mainFrame->m_pListCtrl->DeleteItem( itemId );
-// 			}
-// 		}
-// 		m_fibersSets.clear();
-// 		m_dh->m_fibersGroupLoaded = false;
-// 		return true;
-// 	}
-	return false;
-}
-
 void FibersGroup::OnToggleVisibleBtn()
 {
 	bool show = getShow();
@@ -628,60 +582,18 @@ void FibersGroup::fibersLocalColoring()
 {
     for( vector<Fibers *>::iterator it = m_fibersSets.begin(); it != m_fibersSets.end(); ++it )
     {
-        // TODO: Verify that UpdateSelected is called for each of the fibers by the caller
         (*it)->toggleUseTex();
         (*it)->updateToggleLocalColoring( m_pToggleLocalColoring->GetValue() );
     }
-//	for(int i = 0; i < (int)m_fibersSets.size(); i++)
-//	{
-// 		for(long j = 0; j < (long)m_dh->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
-// 		{
-// 			if( (Fibers*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
-// 			{
-//              m_fibersSets[i]->toggleUseTex();
-//              if( ! m_fibersSets[i]->toggleUseTex() && m_pToggleLocalColoring->GetValue() )
-//              {
-// 					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax()) + wxT( ")" ) );
-// 				}
-// 				else
-// 				{
-// 					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 2, wxString::Format( wxT( "%.2f" ), m_fibersSets[i]->getThreshold() * m_fibersSets[i]->getOldMax() ) );
-// 				}
-//				m_fibersSets[i]->updateToggleLocalColoring( m_pToggleLocalColoring->GetValue());
-// 				break;
-// 			} 
-//		}
-//	}
 }
 
 void FibersGroup::fibersNormalColoring()
 {
     for( vector<Fibers *>::iterator it = m_fibersSets.begin(); it != m_fibersSets.end(); ++it )
     {
-        // TODO: Verify that UpdateSelected is called for each of the fibers by the caller
         (*it)->toggleShowFS();
         (*it)->updateToggleNormalColoring( m_pToggleNormalColoring->GetValue() );
     }
-
-// 	for(int i = 0; i < (int)m_fibersSets.size(); i++)
-// 	{
-// 		for(long j = 0; j < (long)m_dh->m_mainFrame->m_pListCtrl->GetItemCount(); j++)
-// 		{
-// 			if( (Fibers*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(j) == m_fibersSets[i] )
-// 			{
-// 				if( ! m_fibersSets[i]->toggleShowFS() && m_pToggleLocalColoring->GetValue())
-// 				{
-// 					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName() + wxT( "*" ) );
-// 				}
-// 				else
-// 				{
-// 					m_dh->m_mainFrame->m_pListCtrl->SetItem( j, 1, m_fibersSets[i]->getName() );
-// 				}
-// 				m_fibersSets[i]->updateToggleNormalColoring( m_pToggleNormalColoring->GetValue());
-// 				break;
-// 			} 
-// 		}
-// 	}
 }
 
 void FibersGroup::OnClickGenerateFiberVolumeBtn()
@@ -699,27 +611,12 @@ void FibersGroup::OnClickGenerateFiberVolumeBtn()
 
 void FibersGroup::generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies)
 {
-	Anatomy* pGlobalAnatomy = new Anatomy( m_dh, RGB );
+    int index = DatasetManager::getInstance()->createAnatomy( RGB );
+    Anatomy* pGlobalAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 	
 	pGlobalAnatomy->setName( wxT( "Global Fiber-Density Volume" ) );
 	
-	
-	#ifdef __WXMAC__
-		// insert at zero is a well-known bug on OSX, so we append there...
-		// http://trac.wxwidgets.org/ticket/4492
-		//long l_id = m_dh->m_mainFrame->m_pListCtrl->GetItemCount();
-        long l_id = m_dh->m_mainFrame->m_pListCtrl2->GetItemCount();
-	#else
-		long l_id = 0;
-	#endif
-	
     m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pGlobalAnatomy );
-// 	m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-// 	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pGlobalAnatomy->getName() );
-// 	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
-// 	m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-// 	m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pGlobalAnatomy );
-// 	m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 	
 	m_dh->updateLoadStatus();
 	m_dh->m_mainFrame->refreshAllGLWidgets();
@@ -853,7 +750,7 @@ void FibersGroup::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
 
-	DatasetInfo::m_ptoggleFiltering->Hide();
+	DatasetInfo::m_pToggleFiltering->Hide();
 	DatasetInfo::m_pBtnFlipX->Hide();
 	DatasetInfo::m_pBtnFlipY->Hide();
 	DatasetInfo::m_pBtnFlipZ->Hide();

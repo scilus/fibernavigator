@@ -4,6 +4,7 @@
 #include "MyListCtrl.h"
 #include "../Logger.h"
 #include "../dataset/Anatomy.h"
+#include "../dataset/DatasetManager.h"
 #include "../dataset/SplinePoint.h"
 #include "../misc/lic/FgeOffscreen.h"
 
@@ -1596,18 +1597,13 @@ void MainCanvas::segment()
     }
         
     //Create a new anatomy for the tumor
-    std::cout << "Creating anatomy" << std::endl;
-    Anatomy* l_newAnatomy = new Anatomy(m_pDatasetHelper, resultData, 0);
-    l_newAnatomy->setShowFS(false);
-    l_newAnatomy->setType(2);
-    l_newAnatomy->setDataType(4);
-    l_newAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl2->InsertItem( l_newAnatomy );
-//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
-//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
-//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
-//     m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    int indx = DatasetManager::getInstance()->createAnatomy( resultData, HEAD_SHORT );
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
+    pNewAnatomy->setShowFS(false);
+    // TODO: Change hard coded value and use enum instead
+    pNewAnatomy->setType(2);
+    pNewAnatomy->setDataType(4);
+    pNewAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
+    m_pDatasetHelper->m_mainFrame->m_pListCtrl2->InsertItem( pNewAnatomy );
 }
 

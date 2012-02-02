@@ -13,10 +13,10 @@
 
 #include "DatasetInfo.h"
 #include "Glyph.h"
+#include "../misc/nifti/nifti1_io.h"
 
 #include <complex>
 #include <map>
-
 
 using namespace std;
 
@@ -25,11 +25,13 @@ class ODFs : public Glyph
 public:
     // Constructor/Destructor
     ODFs( DatasetHelper* datasetHelper );
+    ODFs( DatasetHelper* datasetHelper, const wxString &filename );
     virtual ~ODFs();
 
     // From DatasetInfo
     void draw       ();
     bool load       ( wxString i_fileName );
+    bool load       ( nifti_image *pHeader, nifti_image *pBody );
 
     // Functions
     bool loadNifti  ( wxString i_fileName );

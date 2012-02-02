@@ -16,7 +16,9 @@
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetHelper.h"
 #include "../dataset/DatasetInfo.h"
+#include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
+#include "../dataset/ODFs.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
 #include "../gui/ArcBall.h"
@@ -272,6 +274,9 @@ void TheScene::renderScene()
     if( m_pDatasetHelper->m_tensorsLoaded )
         renderTensors();
     
+    if( DatasetManager::getInstance()->isOdfsLoaded() )
+        renderODFs();
+
     if( m_pDatasetHelper->m_ODFsLoaded )
         renderODFs();
     
@@ -679,21 +684,24 @@ void TheScene::renderODFs()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    // This will check if we are suppose to draw the odfs usung GL_LINE or GL_FILL.
+    // This will check if we are suppose to draw the odfs using GL_LINE or GL_FILL.
     if( m_pDatasetHelper->m_pointMode )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
+    vector<ODFs *> v = DatasetManager::getInstance()->getOdfs();
+    for(vector<ODFs *>::iterator it = v.begin(); it != v.end(); ++it )
+    //for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
-
-        if( pDsInfo->getType() == ODFS && pDsInfo->getShow() )
-        {
+//         DatasetInfo* pDsInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
+// 
+//         if( pDsInfo->getType() == ODFS && pDsInfo->getShow() )
+//         {
             lightsOff();
-            pDsInfo->draw();
-        }
+            //pDsInfo->draw();
+            (*it)->draw();
+//         }
     }
 
     Logger::getInstance()->printIfGLError( wxT( "Draw ODFs" ) );

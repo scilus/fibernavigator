@@ -19,6 +19,7 @@
 #include "../main.h"
 #include "../Logger.h"
 
+#include "../dataset/DatasetManager.h"
 #include "../misc/Fantom/FMatrix.h"
 
 // TODO replace by const
@@ -405,8 +406,9 @@ bool Fibers::loadTRK( const wxString &filename )
             }
         }
 
-        for( unsigned int j = 0; j != nbProperties; ++j ) 
-        {} //TODO: incorporate properties in the navigator.
+        //TODO: incorporate properties in the navigator.
+//         for( unsigned int j = 0; j != nbProperties; ++j ) 
+//         {}
 
         m_countPoints += curLine.size() / 3;
         lines.push_back( curLine );
@@ -1929,25 +1931,11 @@ Anatomy* Fibers::generateFiberVolume()
         m_localizedAlpha = vector< float >( getPointCount(), 1 );
     }
 
-    Anatomy *pTmpAnatomy = new Anatomy( m_dh, RGB );
+    int index = DatasetManager::getInstance()->createAnatomy( RGB );
+    Anatomy *pTmpAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
     pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
     
-	#ifdef __WXMAC__
-		// insert at zero is a well-known bug on OSX, so we append there...
-		// http://trac.wxwidgets.org/ticket/4492
-		//long l_id = m_dh->m_mainFrame->m_pListCtrl->GetItemCount();
-        long l_id = m_dh->m_mainFrame->m_pListCtrl2->GetItemCount();
-	#else
-		long l_id = 0;
-	#endif 
-
-        m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pTmpAnatomy );
-//     m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pTmpAnatomy->getName() );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pTmpAnatomy );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pTmpAnatomy );
 	
     m_dh->updateLoadStatus();
     m_dh->m_mainFrame->refreshAllGLWidgets();
@@ -3496,7 +3484,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pToggleLocalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Local Coloring" ), wxDefaultPosition, wxSize( 145, -1 ) );
     pSizer->Add( m_pToggleLocalColoring, 0, wxALIGN_CENTER );
     m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
+    pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
     
     pSizer = new wxBoxSizer( wxHORIZONTAL );
     m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overlay" ), wxDefaultPosition, wxSize( 145, -1 ) );
@@ -3553,8 +3541,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 void Fibers::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
-    m_ptoggleFiltering->Enable( false );
-    m_ptoggleFiltering->SetValue( false );
+    m_pToggleFiltering->Enable( false );
+    m_pToggleFiltering->SetValue( false );
     m_pToggleCrossingFibers->Enable( true );
 	m_pToggleCrossingFibers->SetValue( m_useCrossingFibers );
     m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );

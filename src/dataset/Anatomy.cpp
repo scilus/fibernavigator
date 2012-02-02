@@ -7,6 +7,7 @@
 #include "Fibers.h"
 
 #include "../Logger.h"
+#include "../dataset/DatasetManager.h"
 #include "../gui/MainFrame.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/nifti/nifti1_io.h"
@@ -53,6 +54,7 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper, const wxString &filename )
     m_bands = 1;
 
     m_fullPath = filename;
+
 #ifdef __WXMSW__
     m_name = filename.AfterLast( '\\' );
 #else
@@ -61,7 +63,7 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper, const wxString &filename )
 }
 
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
-                 std::vector< float >* pDataset)
+                  std::vector< float >* pDataset )
 : DatasetInfo( pDatasetHelper ),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
@@ -356,7 +358,8 @@ void Anatomy::minimize()
         }
     }
 
-    Anatomy* pNewAnatomy = new Anatomy( m_dh );
+    int indx = DatasetManager::getInstance()->createAnatomy();
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
     pNewAnatomy->setZero( m_columns, m_rows, m_frames );
 
     std::vector<float> *pNewAnatDataset = pNewAnatomy->getFloatDataset();
@@ -374,13 +377,6 @@ void Anatomy::minimize()
     pNewAnatomy->setDataType( 2 );
 
     m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pNewAnatomy );
-
-//     m_dh->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 1, pNewAnatomy->getName() );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)pNewAnatomy );
-//     m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -1176,15 +1176,15 @@ void CIsoSurface::createPropertiesSizer(PropertiesWindow *parent)
     l_sizer->Add(m_ptoggleUseColoring,0,wxALIGN_CENTER);
     l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListMenuThreshold));
+    parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleUseTex));
     parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
 }
 
 void CIsoSurface::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
-    m_ptoggleFiltering->Enable(false);
-    m_ptoggleFiltering->SetValue(false);
+    m_pToggleFiltering->Enable(false);
+    m_pToggleFiltering->SetValue(false);
     m_ptoggleUseColoring->SetValue(!getUseTex());
     m_ptoggleCutFrontSector->SetValue(!getShowFS());
 

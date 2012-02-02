@@ -11,6 +11,7 @@
 
 #include "MenuBar.h"
 #include "MainFrame.h"
+#include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/FibersGroup.h"
 
@@ -281,20 +282,22 @@ void MenuBar::updateMenuBar( MainFrame *mf )
 				int useFakeTubesNb = 0;
 				int useTransparencyNb = 0;
 				int isInvertedNb = 0;
-				for(int i = 0; i < pFibersGroup->getFibersCount(); i++)
-				{
-					Fibers* pFibers = pFibersGroup->getFibersSet(i);
-					
-					if( pFibers->isUsingFakeTubes())
-						useFakeTubesNb++;
-					if( pFibers->isUsingTransparency() )
-						useTransparencyNb++;
-					if( pFibers->isFibersInverted() )
-						isInvertedNb++;
-				}
-				isFiberUsingFakeTubes = ( useFakeTubesNb == pFibersGroup->getFibersCount() );
-				isFiberUsingTransparency = ( useTransparencyNb == pFibersGroup->getFibersCount() );
-				isFiberInverted = ( isInvertedNb == pFibersGroup->getFibersCount() );
+                
+                vector<Fibers *> v = DatasetManager::getInstance()->getFibers();
+                
+                for(vector<Fibers *>::const_iterator it = v.begin(); it != v.end(); ++it )
+                {
+                    if( (*it)->isUsingFakeTubes())
+                        ++useFakeTubesNb;
+                    if( (*it)->isUsingTransparency() )
+                        ++useTransparencyNb;
+                    if( (*it)->isFibersInverted() )
+                        ++isInvertedNb;
+                }
+
+                isFiberUsingFakeTubes = ( useFakeTubesNb == v.size() );
+				isFiberUsingTransparency = ( useTransparencyNb == v.size() );
+				isFiberInverted = ( isInvertedNb == v.size() );
 			}
 		}
 	}

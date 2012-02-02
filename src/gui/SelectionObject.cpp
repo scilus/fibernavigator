@@ -1923,25 +1923,18 @@ void SelectionObject::SetFiberInfoGridValues()
         l_masterObject->SetFiberInfoGridValues();
         return;
     }
-   if (m_ptoggleCalculatesFibersInfo->GetValue())
+    if (m_ptoggleCalculatesFibersInfo->GetValue())
     {
         FibersInfoGridParams l_params;
         calculateGridParams( l_params );
 
-        m_pgridfibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ), l_params.m_count              ) );
+        m_pgridfibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ),   l_params.m_count            ) );
         m_pgridfibersInfo->SetCellValue( 1,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanValue        ) );
         m_pgridfibersInfo->SetCellValue( 2,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanLength       ) );
         m_pgridfibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minLength        ) );
         m_pgridfibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxLength        ) );
-        //m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanCrossSection ) );
-        //if ( l_params.m_minCrossSection > l_params.m_count )
-        //    m_pgridfibersInfo->SetCellValue( 6,  0, wxT( "INF") );
-        //else    
-        //    m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minCrossSection  ) );
-		  //    m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxCrossSection  ) );
         m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
         m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
-        //m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
     }
 }
 

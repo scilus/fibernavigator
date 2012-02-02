@@ -28,17 +28,41 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
-    Glyph            ( i_datasetHelper ), 
-	 m_isMaximasSet   ( false ),
+ODFs::ODFs( DatasetHelper* i_datasetHelper )
+:   Glyph( i_datasetHelper ), 
+	m_isMaximasSet   ( false ),
     m_axisThreshold  ( 0.5f ),
-	 m_order          ( 0    ),
-    m_radiusAttribLoc( 0    ),
-	 m_radiusBuffer   ( NULL ),    
+	m_order          ( 0 ),
+    m_radiusAttribLoc( 0 ),
+	m_radiusBuffer   ( NULL ),    
     m_nbors          ( NULL ),
     m_sh_basis       ( 0 )
 {
     m_scalingFactor = 0.0f;
+
+    // Generating hemispheres
+    generateSpherePoints( m_scalingFactor );
+}
+
+
+ODFs::ODFs( DatasetHelper* i_datasetHelper, const wxString &filename )
+:   Glyph( i_datasetHelper ), 
+    m_isMaximasSet   ( false ),
+    m_axisThreshold  ( 0.5f ),
+    m_order          ( 0 ),
+    m_radiusAttribLoc( 0 ),
+    m_radiusBuffer   ( NULL ),    
+    m_nbors          ( NULL ),
+    m_sh_basis       ( 0 )
+{
+    m_scalingFactor = 0.0f;
+    m_fullPath = filename;
+
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
 
     // Generating hemispheres
     generateSpherePoints( m_scalingFactor );
@@ -77,6 +101,60 @@ bool ODFs::load( wxString i_fileName )
 
     return loadNifti( i_fileName );
 }
+
+bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
+{
+    m_datasetHelper.m_columns = pHeader->dim[1]; //80
+    m_datasetHelper.m_rows    = pHeader->dim[2]; //1
+    m_datasetHelper.m_frames  = pHeader->dim[3]; //72
+    m_bands                   = pHeader->dim[4];
+
+    m_datasetHelper.m_xVoxel = pHeader->dx;
+    m_datasetHelper.m_yVoxel = pHeader->dy;
+    m_datasetHelper.m_zVoxel = pHeader->dz;
+
+    m_type = ODFS;
+
+    // Order has to be between 0 and 16 (0, 2, 4, 6, 8, 10, 12, 14, 16)
+//     if( pHeader->datatype != 16  || !( m_bands == 0   || m_bands == 15 || m_bands == 28 || 
+//         m_bands == 45  || m_bands == 66 || m_bands == 91 || 
+//         m_bands == 120 || m_bands == 153 ) )
+//     {
+//         DatasetInfo::m_dh->m_lastError = wxT( "Not a valid ODFs file format" );
+//         return false;
+//     }
+
+//     nifti_image* l_fileData = nifti_image_read( l_hdrFile, 1 );
+//     if( ! l_fileData )
+//     {
+//         DatasetInfo::m_dh->m_lastError = wxT( "nifti file corrupt" );
+//         return false;
+//     }
+
+    int l_nSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
+
+    float* l_data = (float*)pBody->data;
+
+    std::vector< float > l_fileFloatData( l_nSize * m_bands );
+
+    // We need to do a bit of moving around with the data in order to have it like we want.
+    for( int i( 0 ); i < l_nSize; ++i )
+    {
+        for( int j( 0 ); j < m_bands; ++j )
+        {
+            l_fileFloatData[i * m_bands + j] = l_data[j * l_nSize + i];
+        }
+    }
+
+    // Once the file has been read successfully, we need to create the structure 
+    // that will contain all the sphere points representing the ODFs.
+    createStructure( l_fileFloatData );
+
+    m_isLoaded = true;
+
+    return true;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will load a ODFs type Nifty file.
@@ -1284,16 +1362,16 @@ void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
     if( l_dataset->load(m_lastODF_path)) //Reloads the ODFs
         {
             //Copy all params modifications
-            l_dataset->setThreshold           ( getThreshold() );
-            l_dataset->setAlpha               ( getAlpha() );
-            l_dataset->setShow               ( getShow() );
+            l_dataset->setThreshold        ( getThreshold() );
+            l_dataset->setAlpha            ( getAlpha() );
+            l_dataset->setShow             ( getShow() );
             l_dataset->setShowFS           ( getShowFS() );
-            l_dataset->setuseTex           ( getUseTex() );
-            l_dataset->setColor               ( MIN_HUE, getColor( MIN_HUE ) );
-            l_dataset->setColor               ( MAX_HUE, getColor( MAX_HUE ) );
-            l_dataset->setColor               ( SATURATION, getColor( SATURATION ) );
-            l_dataset->setColor               ( LUMINANCE, getColor( LUMINANCE ) );
-            l_dataset->setLOD               (getLOD());
+            l_dataset->setUseTex           ( getUseTex() );
+            l_dataset->setColor            ( MIN_HUE, getColor( MIN_HUE ) );
+            l_dataset->setColor            ( MAX_HUE, getColor( MAX_HUE ) );
+            l_dataset->setColor            ( SATURATION, getColor( SATURATION ) );
+            l_dataset->setColor            ( LUMINANCE, getColor( LUMINANCE ) );
+            l_dataset->setLOD              (getLOD());
             l_dataset->setLighAttenuation  (getLightAttenuation());
             l_dataset->setLightPosition    (X_AXIS, getLightPosition( X_AXIS ));
             l_dataset->setLightPosition    (Y_AXIS, getLightPosition( Y_AXIS ));
@@ -1379,15 +1457,15 @@ void ODFs::updatePropertiesSizer()
     Glyph::updatePropertiesSizer();
     //set to min.
     //m_pradiobtnMainAxis->Enable(false);
-    m_psliderLightAttenuation->SetValue(m_psliderLightAttenuation->GetMin());
+    //m_psliderLightAttenuation->SetValue(m_psliderLightAttenuation->GetMin());
     m_psliderLightAttenuation->Enable(false);
-    m_psliderLightXPosition->SetValue(m_psliderLightXPosition->GetMin());
+    //m_psliderLightXPosition->SetValue(m_psliderLightXPosition->GetMin());
     m_psliderLightXPosition->Enable(false);
-    m_psliderLightYPosition->SetValue(m_psliderLightYPosition->GetMin());
+    //m_psliderLightYPosition->SetValue(m_psliderLightYPosition->GetMin());
     m_psliderLightYPosition->Enable(false);
-    m_psliderLightZPosition->SetValue(m_psliderLightZPosition->GetMin());
+    //m_psliderLightZPosition->SetValue(m_psliderLightZPosition->GetMin());
     m_psliderLightZPosition->Enable(false);
-    m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
+    //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
     m_psliderScalingFactor->Enable (false);
     m_pRadiobtnPTKBasis->Enable(false);
     m_pradiobtnMainAxis->Enable(true);
@@ -1408,9 +1486,9 @@ void ODFs::updatePropertiesSizer()
     }
 
     // Disabled for the moment, not implemented.
-    m_pBtnFlipX->Enable( false );
-    m_pBtnFlipY->Enable( false );
-    m_pBtnFlipZ->Enable( false );
+//     m_pBtnFlipX->Enable( false );
+//     m_pBtnFlipY->Enable( false );
+//     m_pBtnFlipZ->Enable( false );
 }
 
 

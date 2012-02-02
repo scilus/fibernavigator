@@ -100,9 +100,9 @@ public:
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
 
-	bool isUsingFakeTubes()		{ return m_useFakeTubes; };
-	bool isUsingTransparency()	{ return m_useTransparency; };
-	bool isFibersInverted()		{ return m_fibersInverted; };
+	bool isUsingFakeTubes()	const       { return m_useFakeTubes; };
+	bool isUsingTransparency() const    { return m_useTransparency; };
+	bool isFibersInverted()	const       { return m_fibersInverted; };
 
 	void updateColorationMode()	{ m_isColorationUpdated = true; };
 	FibersColorationMode getColorationMode() { return m_fiberColorationMode; };

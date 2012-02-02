@@ -6,6 +6,7 @@
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
 #include "../dataset/Anatomy.h"
+#include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/FibersGroup.h"
 #include "../dataset/ODFs.h"
@@ -258,6 +259,7 @@ void PropertiesWindow::OnClickApplyBtn( wxEvent& WXUNUSED(event) )
 				if(pFibersGroup)
 				{
 					pFibersGroup->OnClickApplyBtn();
+                    m_pListCtrl->UpdateFibers();
 				}
 			}
 		}
@@ -328,10 +330,9 @@ void PropertiesWindow::OnToggleShowFS( wxEvent& WXUNUSED(event) )
     }
 }
 
-void PropertiesWindow::OnListItemShow( wxCommandEvent&  WXUNUSED(event) )
+void PropertiesWindow::OnToggleVisibility( wxCommandEvent&  WXUNUSED(event) )
 {
-    // TODO: Change method name - onVisibilityChange would probably be more accurate
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnListItemShow" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleVisibility" ), LOGLEVEL_DEBUG );
 
     if( m_pMainFrame->m_pCurrentSceneObject == NULL && m_pMainFrame->m_currentListItem != -1)
         return;
@@ -773,11 +774,10 @@ void PropertiesWindow::OnGenerateFiberVolume( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-void PropertiesWindow::OnListMenuThreshold( wxCommandEvent&  WXUNUSED(event) )
+void PropertiesWindow::OnToggleUseTex( wxCommandEvent&  WXUNUSED(event) )
 {
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnListMenuThreshold" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleUseTex" ), LOGLEVEL_DEBUG );
 
-    // TODO: Find new meaningful name
     if( m_pMainFrame->m_pCurrentSceneObject == NULL && m_pMainFrame->m_currentListItem != -1)
     {
         return;
@@ -805,7 +805,7 @@ void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 	{
 		Logger::getInstance()->print( _T( "Event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
 
-		if(pFibers->getColorationMode() != DISTANCE_COLOR)
+		if( pFibers->getColorationMode() != DISTANCE_COLOR )
 		{
 			pFibers->setColorationMode( DISTANCE_COLOR );
 			pFibers->updateFibersColors();  
@@ -1700,7 +1700,7 @@ void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
         if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
         {
             l_info->setColor( l_col );
-            l_info->setuseTex( false );
+            l_info->setUseTex( false );
             m_pListCtrl->UpdateSelected();
         }
     }
@@ -1730,17 +1730,19 @@ void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(ev
 
     int l_x,l_y,l_z;
 
-    Anatomy* l_newAnatomy = new Anatomy( m_pMainFrame->m_pDatasetHelper );
-    l_newAnatomy->setZero( m_pMainFrame->m_pDatasetHelper->m_columns, m_pMainFrame->m_pDatasetHelper->m_rows, m_pMainFrame->m_pDatasetHelper->m_frames );
-    l_newAnatomy->setDataType( 16 );
-    l_newAnatomy->setType( OVERLAY );
+    int index = DatasetManager::getInstance()->createAnatomy();
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    pNewAnatomy->setZero( m_pMainFrame->m_pDatasetHelper->m_columns, m_pMainFrame->m_pDatasetHelper->m_rows, m_pMainFrame->m_pDatasetHelper->m_frames );
+    pNewAnatomy->setDataType( 16 );
+    pNewAnatomy->setType( OVERLAY );
     float l_max = 0.0f;
     wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
     if( m_pMainFrame->treeSelected( l_treeObjectId ) == MASTER_OBJECT )
     {
         SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
 
-        std::vector<float>* l_dataset = l_newAnatomy->getFloatDataset();
+        std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
 
         for( int l = 0; l < l_fibers->getLineCount(); ++l )
         {
@@ -1769,10 +1771,10 @@ void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(ev
         }
     }
 
-    l_newAnatomy->setName( wxT(" (fiber_density)" ) );
-    l_newAnatomy->setOldMax( l_max );
+    pNewAnatomy->setName( wxT(" (fiber_density)" ) );
+    pNewAnatomy->setOldMax( l_max );
     
-    m_pListCtrl->InsertItem( l_newAnatomy );
+    m_pListCtrl->InsertItem( pNewAnatomy );
 
     m_pMainFrame->refreshAllGLWidgets();
 }
@@ -1787,8 +1789,11 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
         return ;
 
     int l_x,l_y,l_z;
-    Anatomy* l_newAnatomy = new Anatomy( m_pMainFrame->m_pDatasetHelper );
-    l_newAnatomy->setRGBZero( m_pMainFrame->m_pDatasetHelper->m_columns, m_pMainFrame->m_pDatasetHelper->m_rows, m_pMainFrame->m_pDatasetHelper->m_frames );
+    
+    int index = DatasetManager::getInstance()->createAnatomy();
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    pNewAnatomy->setRGBZero( m_pMainFrame->m_pDatasetHelper->m_columns, m_pMainFrame->m_pDatasetHelper->m_rows, m_pMainFrame->m_pDatasetHelper->m_frames );
 
     wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
     if(m_pMainFrame-> treeSelected( l_treeObjectId ) == MASTER_OBJECT )
@@ -1796,7 +1801,7 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
         SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
         wxColour l_color = l_object->getFiberColor();
 
-        std::vector<float>* l_dataset = l_newAnatomy->getFloatDataset();
+        std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
 
         for( int l = 0; l < l_fibers->getLineCount(); ++l )
         {
@@ -1822,9 +1827,9 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
         }
     }
 
-    l_newAnatomy->setName( wxT( " (fiber_colors)" ) );
+    pNewAnatomy->setName( wxT( " (fiber_colors)" ) );
     
-    m_pListCtrl->InsertItem( l_newAnatomy );
+    m_pListCtrl->InsertItem( pNewAnatomy );
     
     m_pMainFrame->refreshAllGLWidgets();
 }

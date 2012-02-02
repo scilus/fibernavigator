@@ -70,8 +70,6 @@ public:
     void     setOldMax(float v)                  { m_oldMax = v;                };
     void     setNewMax(float v)                  { m_newMax = v;                };
     float    getNewMax() const                   { return m_newMax;             };
-	long	 getListCtrlItemId() const           { return m_itemId;				};
-	void	 setListCtrlItemId(long value)       { m_itemId = value;			};
     void     setThreshold(float value)           { m_threshold = value;         };
     float    getAlpha() const                    { return m_alpha;              };
     void     setAlpha(float v)                   { m_alpha = v;                 };
@@ -86,14 +84,14 @@ public:
 
     wxString getRpn() const                      { return m_repn; };
 
-    bool     toggleShow()                        { m_show        = ! m_show;          return m_show;        };
-    bool     toggleShowFS()                      { m_showFS      = ! m_showFS;        return m_showFS;      };
-    bool     toggleUseTex()                      { m_useTex      = ! m_useTex;        return m_useTex;      };
-    bool     toggleUseLIC()                      { m_useLIC      = ! m_useLIC;        return m_useLIC;      };
+    bool     toggleShow()                        { m_show        = !m_show;          return m_show;        };
+    bool     toggleShowFS()                      { m_showFS      = !m_showFS;        return m_showFS;      };
+    bool     toggleUseTex()                      { m_useTex      = !m_useTex;        return m_useTex;      };
+    bool     toggleUseLIC()                      { m_useLIC      = !m_useLIC;        return m_useLIC;      };
 
     void     setShow       ( bool i_show   )     { m_show        = i_show;   };
     void     setShowFS     ( bool i_show   )     { m_showFS      = i_show;   };
-    void     setuseTex     ( bool i_useTex )     { m_useTex      = i_useTex; };
+    void     setUseTex     ( bool i_useTex )     { m_useTex      = i_useTex; };
     bool     getShow() const                     { return m_show;            };
     bool     getShowFS() const                   { return m_showFS;          };
     bool     getUseTex() const                   { return m_useTex;          };
@@ -105,13 +103,13 @@ public:
     wxColour getColor() const                    { return m_color;   };
 
     // Trianglemesh
-    TriangleMesh* m_tMesh;
+    TriangleMesh    *m_tMesh;
 
     wxTextCtrl      *m_ptxtName;
     MySlider        *m_psliderThresholdIntensity;
     MySlider        *m_psliderOpacity;
-    wxToggleButton  *m_ptoggleVisibility;
-    wxToggleButton  *m_ptoggleFiltering;
+    wxToggleButton  *m_pToggleVisibility;
+    wxToggleButton  *m_pToggleFiltering;
     wxBitmapButton  *m_pbtnDelete;
     wxBitmapButton  *m_pbtnUp;
     wxBitmapButton  *m_pbtnDown;
@@ -148,7 +146,6 @@ protected:
     float       m_brightness;
     float       m_oldMax;
     float       m_newMax;
-	long		m_itemId;
 
     wxColour    m_color;
     GLuint      m_GLuint;

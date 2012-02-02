@@ -22,7 +22,6 @@ DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) :
             m_brightness      ( 1.0f ),
             m_oldMax          ( 1.0 ),
             m_newMax          ( 1.0 ),
-			m_itemId		  ( 0 ),
 
             m_color           ( wxColour( 128, 10, 10 ) ),
             m_GLuint          ( 0 ),
@@ -86,14 +85,14 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     parent->Connect(m_pBtnFlipY->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipY));
     parent->Connect(m_pBtnFlipZ->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipZ));
 
-    m_ptoggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(90,-1));
-    m_ptoggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Interpolation"),wxDefaultPosition, wxSize(90,-1));
+    m_pToggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(90,-1));
+    m_pToggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Interpolation"),wxDefaultPosition, wxSize(90,-1));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(m_ptoggleVisibility,0,wxALIGN_CENTER);
-    l_sizer->Add(m_ptoggleFiltering,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pToggleVisibility,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pToggleFiltering,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleVisibility->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemShow));   
-    parent->Connect(m_ptoggleFiltering->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
+    parent->Connect(m_pToggleVisibility->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleVisibility));   
+    parent->Connect(m_pToggleFiltering->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
     
     m_psliderThresholdIntensity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
     m_psliderThresholdIntensity->SetValue((int)(getThreshold()*100));
@@ -132,8 +131,8 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
 void DatasetInfo::updatePropertiesSizer()
 {
     SceneObject::updatePropertiesSizer();
-    m_ptoggleVisibility->SetValue(getShow());
-    m_ptoggleFiltering->SetValue(getShowFS());
+    m_pToggleVisibility->SetValue(getShow());
+    m_pToggleFiltering->SetValue(getShowFS());
     //m_ptoggleLIC->SetValue(getUseLIC());
     
 }

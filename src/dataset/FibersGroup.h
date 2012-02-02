@@ -32,7 +32,6 @@ public:
     virtual ~FibersGroup();
     
 	void	addFibersSet(Fibers* pFibers);
-	bool	removeFibersSet(Fibers* pFibers);
 	Fibers* getFibersSet(int num);
 
 	int		getFibersCount() { return (int)m_fibersSets.size(); };
@@ -59,7 +58,6 @@ public:
 	
 	void	generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies);
 
-	bool	OnDeleteFibers();
 	void	OnToggleVisibleBtn();
 	void	OnToggleIntensityBtn();
 	void	OnToggleOpacityBtn();

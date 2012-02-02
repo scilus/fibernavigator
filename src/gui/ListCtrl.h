@@ -22,6 +22,8 @@ public:
     void InsertItem( const DatasetInfo * const pDataset );
     void MoveItemDown();
     void MoveItemUp();
+    void UnselectAll();
+    void UpdateFibers();
     void UpdateSelected();
     
     // Getters/Setters

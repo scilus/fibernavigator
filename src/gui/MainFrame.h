@@ -44,7 +44,7 @@ public:
     void onMouseEvent                       ( wxMouseEvent&   evt );
     void onLoad                             ( wxCommandEvent& evt );
     long getCurrentListItem() const         { return m_currentListItem; }
-	void createNewAnatomy					( int dataType );
+	void createNewAnatomy					( DatasetType dataType );
     
 private:
     void initOpenGl();
@@ -158,13 +158,7 @@ private:
     void updateMenus();
     void onTimerEvent                       ( wxTimerEvent&   evt );
     void setTimerSpeed();
-    void createNewSelectionObject( ObjectType i_newSelectionObjectType );    
-    void onLoadDatasets                     ( wxCommandEvent& evt );
-    void onLoadMeshes                       ( wxCommandEvent& evt );
-    void onLoadFibers                       ( wxCommandEvent& evt );
-    void onLoadTensors                      ( wxCommandEvent& evt );
-    void onLoadODFs                         ( wxCommandEvent& evt );    
-    bool loadIndex                          ( int i_index );
+    void createNewSelectionObject( ObjectType i_newSelectionObjectType );
 
 	void onSelectDrawer                     ( wxCommandEvent& evt );
     void onSwitchDrawer                     ( wxCommandEvent& evt );
@@ -199,6 +193,8 @@ private:
     wxBoxSizer          *m_pObjectSizer;
     wxBoxSizer          *m_pLeftMainSizer;
     wxBoxSizer          *m_pNavSizer;
+
+    wxString            m_lastPath;
 
     wxTimer             *m_pTimer;
 

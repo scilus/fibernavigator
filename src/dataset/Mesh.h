@@ -72,9 +72,9 @@ private:
     void    initializeBuffer() {};
     GLuint  getGLuint();
 
-    wxToggleButton *m_ptoggleCutFrontSector;
-    wxToggleButton *m_ptoggleUseColoring;
-    wxBitmapButton *m_pbtnSelectColor;
+    wxToggleButton *m_pToggleCutFrontSector;
+    wxToggleButton *m_pToggleUseColoring;
+    wxBitmapButton *m_pBtnSelectColor;
     
     unsigned int m_filetype;
     unsigned int m_countVerts;

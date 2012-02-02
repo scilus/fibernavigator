@@ -28,7 +28,7 @@ public:
 
     void OnListItemUp                       ( wxCommandEvent& event );
     void OnListItemDown                     ( wxCommandEvent& event );
-    void OnListItemShow                     ( wxCommandEvent& event );
+    void OnToggleVisibility                     ( wxCommandEvent& event );
     void OnListItemCutOut                   ( wxCommandEvent& event );
 
     void OnDeleteListItem                   ( wxEvent& event );
@@ -86,7 +86,7 @@ public:
     
     void OnFibersFilter                     ( wxCommandEvent& event );
     void OnGenerateFiberVolume              ( wxCommandEvent& event );
-    void OnListMenuThreshold                ( wxCommandEvent& event );
+    void OnToggleUseTex                ( wxCommandEvent& event );
     void OnListMenuDistance                 ( wxCommandEvent& event );
     void OnListMenuMinDistance              ( wxCommandEvent& event );
     void OnColorWithCurvature               ( wxCommandEvent& event );

@@ -4,7 +4,11 @@
 #include "DatasetHelper.h"
 
 #include "../Logger.h"
+#include "../dataset/ODFs.h"
 #include "../misc/nifti/nifti1_io.h"
+
+#include <vector>
+using std::vector;
 
 namespace
 {
@@ -52,6 +56,30 @@ DatasetInfo * DatasetManager::getDataset( int index )
 
 //////////////////////////////////////////////////////////////////////////
 
+std::vector<Fibers *> DatasetManager::getFibers()
+{
+    vector<Fibers *> v;
+    for( map<unsigned int, Fibers *>::const_iterator it = m_fibers.begin(); it != m_fibers.end(); ++it )
+    {
+        v.push_back( it->second );
+    }
+    return v;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+std::vector<ODFs *> DatasetManager::getOdfs()
+{
+    vector<ODFs *> v;
+    for( map<unsigned int, ODFs *>::const_iterator it = m_odfs.begin(); it != m_odfs.end(); ++it )
+    {
+        v.push_back( it->second );
+    }
+    return v;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 int DatasetManager::load( const wxString &filename, const wxString &extension )
 {
     if( wxT( "nii" ) == extension )
@@ -90,15 +118,19 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
                 Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
                 return -1;
             }
-            result = loadODF( filename );
+            result = loadODF( filename, pHeader, pBody );
+//             if( -1 != result )
+//             {
+//                 m_pDatasetHelper->m_ODFsLoaded = true;
+//             }
         }
         else
         {
             result = loadAnatomy( filename, pHeader, pBody );
         }
 
-        delete pHeader;
-        delete pBody;
+        nifti_image_free( pHeader );
+        nifti_image_free( pBody );
 
         return result;
     }
@@ -131,7 +163,7 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
 //             l_mesh->setThreshold( i_threshold );
 //             l_mesh->setShow     ( i_active );
 //             l_mesh->setShowFS   ( i_showFS );
-//             l_mesh->setuseTex   ( i_useTex );
+//             l_mesh->setUseTex   ( i_useTex );
 //             finishLoading       ( l_mesh );
 //             return true;
 //         }
@@ -174,7 +206,7 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
 //             l_fibers->setThreshold( i_threshold );
 //             l_fibers->setShow     ( i_active );
 //             l_fibers->setShowFS   ( i_showFS );
-//             l_fibers->setuseTex   ( i_useTex );            
+//             l_fibers->setUseTex   ( i_useTex );            
 //             finishLoading         ( l_fibers );
 // 
 //             return true;
@@ -226,6 +258,18 @@ int DatasetManager::insert( Anatomy * pAnatomy )
 
 //////////////////////////////////////////////////////////////////////////
 
+int DatasetManager::insert( ODFs * pOdfs )
+{
+    int index = getNextAvailableIndex();
+
+    m_datasets[index]  = pOdfs;
+    m_odfs[index]      = pOdfs;
+
+    return index;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 // Loads an anatomy. Extension supported: .nii and .nii.gz
 int DatasetManager::loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
 {
@@ -238,7 +282,7 @@ int DatasetManager::loadAnatomy( const wxString &filename, nifti_image *pHeader,
         pAnatomy->setAlpha( ALPHA );
         pAnatomy->setShow( SHOW );
         pAnatomy->setShowFS( SHOW_FS );
-        pAnatomy->setuseTex( USE_TEX );
+        pAnatomy->setUseTex( USE_TEX );
 
         int index = insert( pAnatomy );
 
@@ -268,8 +312,27 @@ int DatasetManager::loadMesh( const wxString &filename )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::loadODF( const wxString &filename )
+int DatasetManager::loadODF( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
 {
+    Logger::getInstance()->print( wxT( "Loading ODF" ), LOGLEVEL_MESSAGE );
+
+    ODFs *pOdfs = new ODFs( m_pDatasetHelper, filename );
+    if( pOdfs->load( pHeader, pBody ) )
+    {
+        Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
+        pOdfs->setThreshold( THRESHOLD );
+        pOdfs->setAlpha( ALPHA );
+        pOdfs->setShow( SHOW );
+        pOdfs->setShowFS( SHOW_FS );
+        pOdfs->setUseTex( USE_TEX );
+
+        int index = insert( pOdfs );
+
+        m_pDatasetHelper->finishLoading( pOdfs );
+
+        return index;
+    }
+
     return -1;
 }
 
@@ -285,6 +348,8 @@ int DatasetManager::loadTensors( const wxString &filename )
 
 DatasetManager::~DatasetManager(void)
 {
-    // TODO: Free all space used by the different datasets
+    for( map<unsigned int, DatasetInfo *>::iterator it = m_datasets.begin(); it != m_datasets.end(); ++it )
+    {
+        delete it->second;
+    }
 }
-

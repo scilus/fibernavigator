@@ -119,8 +119,6 @@ public:
     bool getPointMode()           { return m_pointMode; };
 
     void updateLoadStatus();
-	void updateItemsId();
-	void updateItemsPosition();
 
     void doLicMovie       ( int i_mode );
     void createLicSliceSag( int i_slize );
@@ -260,7 +258,6 @@ public:
 
     bool  m_texAssigned;
     bool  m_selBoxChanged;
-    bool  m_guiBlocked;
 
     int   m_geforceLevel;
 
