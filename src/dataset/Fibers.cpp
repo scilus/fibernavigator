@@ -360,17 +360,21 @@ bool Fibers::loadTRK( const wxString &filename )
     pBuffer = NULL;
     vector<float> tmpPoints;
 
-    if( nbCount == 0 )
-    {
-        return false; //TODO: handle it. (0 means the number was NOT stored.)
-    }
+    //File size - header size (used when the number of fiber was not stored)
+    int remainingBytes = nSize - hdrSize;
 
     vector< vector< float > > lines;
     m_countPoints = 0;
     vector< float > colors;
 
-    for( unsigned int i = 0; i != nbCount; ++i )
-    {
+	 //if( nbCount == 0 )
+    //{
+    //   return false; //TODO: handle it. (0 means the number was NOT stored.)
+    //}
+
+    for( unsigned int i = 0; i < nbCount || remainingBytes > 0; ++i )
+    //for( unsigned int i = 0; i != nbCount ; ++i )
+	 {
         //Number of points in this track. [4 bytes]
         wxUint32 nbPoints;
         dataFile.Read( cbi32.b, ( size_t )4 );
@@ -412,6 +416,13 @@ bool Fibers::loadTRK( const wxString &filename )
         lines.push_back( curLine );
         delete[] pBuffer;
         pBuffer = NULL;
+
+       //Adjust remainingBytes
+       remainingBytes -= 1*4; //Number of points (4 bytes)
+       remainingBytes -= 3*nbPoints * 4; //Coordinates (4 bytes)
+       remainingBytes -= nbScalars*nbPoints * 4; //Scalars (4 bytes)
+       remainingBytes -= nbProperties * 4; //Properties (4 bytes)
+		 //cout <<  "i : " << i << ", remainingBytes : " << remainingBytes << "\n";
     }
 
     dataFile.Close();
