@@ -271,14 +271,17 @@ void TheScene::renderScene()
     if( m_pDatasetHelper->m_showColorMapLegend )
         drawColorMapLegend();
 
-    if( m_pDatasetHelper->m_tensorsLoaded )
+    if( DatasetManager::getInstance()->isTensorsLoaded() )
         renderTensors();
+
+//     if( m_pDatasetHelper->m_tensorsLoaded )
+//         renderTensors();
     
     if( DatasetManager::getInstance()->isOdfsLoaded() )
         renderODFs();
 
-    if( m_pDatasetHelper->m_ODFsLoaded )
-        renderODFs();
+//     if( m_pDatasetHelper->m_ODFsLoaded )
+//         renderODFs();
     
     renderMesh();
 	renderFibers();
@@ -538,7 +541,7 @@ void TheScene::renderMesh()
         for( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
-            if( ! selectionObjects[i][j]->isSelectionObject() && m_pDatasetHelper->m_showObjects)
+            if( !selectionObjects[i][j]->isSelectionObject() && m_pDatasetHelper->m_showObjects)
                 selectionObjects[i][j]->drawIsoSurface();
             glPopAttrib();
         }

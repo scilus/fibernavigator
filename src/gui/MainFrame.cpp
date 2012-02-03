@@ -512,7 +512,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( _T("Event triggered - MainFrame::onSaveFibers"), LOGLEVEL_DEBUG );
 
-    if( !m_pDatasetHelper->m_fibersLoaded )
+    if( !DatasetManager::getInstance()->isFibersLoaded() )
     {
         return;
     }
@@ -1283,10 +1283,11 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
     m_pTreeWidget->DeleteChildren( m_tPointId );
     Fibers* l_fibers = NULL;
 
-    if( m_pDatasetHelper->m_fibersLoaded )
+    if( DatasetManager::getInstance()->isFibersLoaded() )
     {
         m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
     }
+
     if( m_pDatasetHelper->m_showSagittal )
     {
         for( int i = 0; i < 11; ++i )
@@ -1309,7 +1310,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
                 }
                 else
                 {
-                    if( m_pDatasetHelper->m_fibersLoaded && l_fibers->getBarycenter( l_point ) )
+                    if( DatasetManager::getInstance()->isFibersLoaded() && l_fibers->getBarycenter( l_point ) )
                     {
                         wxString l_name = wxT( "l_point" );
                         wxTreeItemId tId = m_pTreeWidget->AppendItem( m_tPointId, l_name, -1, -1, l_point );

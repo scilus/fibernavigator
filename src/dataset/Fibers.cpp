@@ -81,9 +81,10 @@ Fibers::~Fibers()
 
 bool Fibers::load( wxString filename )
 {
-    bool res = false;
+    bool res( false );
 
-    if( filename.AfterLast( '.' ) == _T( "fib" ) )
+    wxString extension = filename.AfterLast( '.' );
+    if( wxT( "fib" ) == extension )
     {
         if( loadVTK( filename ) )
         {
@@ -94,23 +95,19 @@ bool Fibers::load( wxString filename )
             res = loadDmri( filename );
         }
     }
-
-    if( filename.AfterLast( '.' ) == _T( "bundlesdata" ) )
+    else if( wxT( "bundlesdata" ) == extension )
     {
         res = loadPTK( filename );
     }
-
-    if( filename.AfterLast( '.' ) == _T( "Bfloat" ) )
+    else if( wxT( "Bfloat" ) == extension )
     {
         res = loadCamino( filename );
     }
-
-    if( filename.AfterLast( '.' ) == _T( "trk" ) )
+    else if( wxT( "trk" ) == extension )
     {
         res = loadTRK( filename );
     }
-
-    if( filename.AfterLast( '.' ) == _T( "tck" ) )
+    else if( wxT( "tck" ) == extension )
     {
         res = loadMRtrix( filename );
     }

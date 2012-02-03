@@ -329,7 +329,7 @@ void Anatomy::erode()
 
 void Anatomy::minimize()
 {
-    if( ! m_dh->m_fibersLoaded )
+    if( !DatasetManager::getInstance()->isFibersLoaded() )
     {
         return;
     }
@@ -1272,7 +1272,7 @@ void Anatomy::updatePropertiesSizer()
     m_pLowerEqSlider->Enable( 1 == m_bands );
     m_pUpperEqSlider->Enable( 1 == m_bands );
     m_pEqualize->Enable(      1 == m_bands );
-    m_pBtnMinimize->Enable( m_dh->m_fibersLoaded );
+    m_pBtnMinimize->Enable( DatasetManager::getInstance()->isFibersLoaded() );
     m_pBtnCut->Enable(      m_dh->getSelectionObjects().size() > 0 );
 
     m_pBtnNewIsoSurface->Enable(    getType() <= OVERLAY );

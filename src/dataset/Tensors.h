@@ -15,21 +15,23 @@
 #include "Glyph.h"
 #include "../misc/lic/TensorField.h"
 #include "../misc/Fantom/FVector.h"
+#include "../misc/nifti/nifti1_io.h"
 
 using namespace std;
 
 class Tensors : public Glyph
 {
-
 public:
     // Constructor/Destructor
     Tensors( DatasetHelper* i_datasetHelper );
+    Tensors( DatasetHelper* i_datasetHelper, const wxString &filename );
     virtual ~Tensors();
         
     void draw(); // From DatasetInfo
 
     bool loadNifti( wxString i_fileName );
     bool load     ( wxString i_fileName );
+    bool load     ( nifti_image *pHeader, nifti_image *pBody );
     void normalize();
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();

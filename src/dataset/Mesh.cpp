@@ -8,9 +8,24 @@
 #include <wx/wfstream.h>
 
 
-Mesh::Mesh(DatasetHelper* dh) : DatasetInfo(dh)
+Mesh::Mesh(DatasetHelper* dh)
+:   DatasetInfo( dh )
 {
     m_tMesh = new TriangleMesh(m_dh);
+}
+
+Mesh::Mesh( DatasetHelper* dh, const wxString &filename )
+:   DatasetInfo( dh )
+{
+    m_tMesh = new TriangleMesh( m_dh );
+
+    m_fullPath = filename;
+
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
 }
 
 Mesh::~Mesh()
@@ -41,8 +56,7 @@ bool Mesh::loadDip( wxString filename )
     float minMagnitude = 100000;
     float maxMagnitude = 0;
 
-
-    if( file.Open(filename) )
+    if( file.Open( filename ) )
     {
         line = file.GetFirstLine();
         while( ! file.Eof() )
@@ -113,12 +127,6 @@ bool Mesh::loadDip( wxString filename )
         }
     }
 
-    m_fullPath = filename;
-    #ifdef __WXMSW__
-    m_name = filename.AfterLast( '\\' );
-    #else
-    m_name = filename.AfterLast( '/' );
-    #endif
     m_type = MESH;
     m_isGlyph = true;
 

@@ -12,6 +12,7 @@
 class DatasetHelper;
 class DatasetInfo;
 class Fibers;
+class Mesh;
 class ODFs;
 class Tensors;
 
@@ -27,7 +28,9 @@ public:
     unsigned int            getFibersCount()            { return m_fibers.size(); }
     std::vector<ODFs *>     getOdfs();
     bool                    isAnatomyLoaded()           { return !m_anatomies.empty(); }
+    bool                    isFibersLoaded()            { return !m_fibers.empty(); }
     bool                    isOdfsLoaded()              { return !m_odfs.empty(); }
+    bool                    isTensorsLoaded()           { return !m_tensors.empty(); }
 
     // -1 if load unsuccessful, index of the dataset otherwise
     int load( const wxString &filename, const wxString &extension );
@@ -49,9 +52,12 @@ private:
     // Gets the next available index when loading new datasets
     int getNextAvailableIndex();
 
-    // Inserts an anatomy into m_datasets and m_anatomies
+    // Inserts the datasets in their corresponding maps
     int insert( Anatomy * pAnatomy );
+    int insert( Fibers * pFibers );
+    int insert( Mesh * pMesh );
     int insert( ODFs * pOdfs );
+    int insert( Tensors * pTensors );
 
     // Loads an anatomy. Extension supported: .nii and .nii.gz
     int loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
@@ -60,13 +66,13 @@ private:
     int loadFibers( const wxString &filename );
 
     // Loads a mesh. Extension supported: .mesh, .surf and .dip
-    int loadMesh( const wxString &filename );
+    int loadMesh( const wxString &filename, const wxString &extension );
 
     // Loads an ODF. Extension supported: .nii and .nii.gz
     int loadODF( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
 
     // Loads tensors. Extension supported: .nii and .nii.gz
-    int loadTensors( const wxString &filename );
+    int loadTensors( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
 
 public:
     // temporary
@@ -81,6 +87,7 @@ private:
     std::map<unsigned int, DatasetInfo *> m_datasets;
     std::map<unsigned int, Anatomy *> m_anatomies;
     std::map<unsigned int, Fibers *> m_fibers;
+    std::map<unsigned int, Mesh *> m_meshes;
     std::map<unsigned int, ODFs *> m_odfs;
     std::map<unsigned int, Tensors *> m_tensors;
 };

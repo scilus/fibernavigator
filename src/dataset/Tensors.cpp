@@ -18,15 +18,33 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-Tensors::Tensors( DatasetHelper* i_datasetHelper ) :
-    Glyph              ( i_datasetHelper )
+Tensors::Tensors( DatasetHelper* i_datasetHelper )
+:   Glyph( i_datasetHelper )
 {
     m_isNormalized = false;
     m_scalingFactor = 5.0f;
     m_currentLOD = LOD_3;
     // Generating hemispheres
     generateSpherePoints( m_scalingFactor/5 );
-    }
+}
+
+Tensors::Tensors( DatasetHelper *i_datasetHelper, const wxString &filename )
+:   Glyph( i_datasetHelper )
+{
+    m_fullPath = filename;
+
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
+
+    m_isNormalized = false;
+    m_scalingFactor = 5.0f;
+    m_currentLOD = LOD_3;
+    // Generating hemispheres
+    generateSpherePoints( m_scalingFactor/5 );
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Destructor
@@ -51,6 +69,40 @@ bool Tensors::load( wxString i_fileName )
 #endif
 
     return loadNifti( i_fileName );
+}
+
+bool Tensors::load( nifti_image *pHeader, nifti_image *pBody )
+{
+    m_datasetHelper.m_columns = pHeader->dim[1]; //93
+    m_datasetHelper.m_rows    = pHeader->dim[2]; //116
+    m_datasetHelper.m_frames  = pHeader->dim[3]; //93
+    m_bands                   = pHeader->dim[4];
+
+    m_datasetHelper.m_xVoxel = pHeader->dx;
+    m_datasetHelper.m_yVoxel = pHeader->dy;
+    m_datasetHelper.m_zVoxel = pHeader->dz;
+
+    m_type = TENSORS;
+
+    int l_nSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
+
+    float* l_data = (float*)pBody->data;
+
+    vector< float > l_fileFloatData( l_nSize * m_bands );
+
+    // We need to do a bit of moving around with the data in order to have it like we want.
+    for( int i = 0; i < l_nSize; ++i )
+        for( int j = 0; j < m_bands; ++j )
+            l_fileFloatData[i * m_bands + j] = l_data[(j * l_nSize) + i];
+
+    // Once the file has been read successfully, we need to create the structure 
+    // that will contain all the sphere points representing the tensors.
+    if( !createStructure( l_fileFloatData ) )
+        return false;
+
+    m_isLoaded = true;
+    normalize();
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////

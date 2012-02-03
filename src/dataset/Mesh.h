@@ -37,7 +37,8 @@ class Mesh : public DatasetInfo , public wxTreeItemData
 {
 
 public:
-    Mesh( DatasetHelper* );
+    Mesh( DatasetHelper *datasetHelper );
+    Mesh( DatasetHelper *datasetHelper, const wxString &filename );
     virtual ~Mesh();
 
     bool load    ( wxString filename );
