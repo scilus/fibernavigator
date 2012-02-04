@@ -36,7 +36,8 @@ struct TRIANGLE {
 
 typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
 
-class CIsoSurface  : public DatasetInfo {
+class CIsoSurface : public DatasetInfo
+{
 public:
     // Constructor and destructor.
     CIsoSurface(DatasetHelper*, Anatomy* anatomy);

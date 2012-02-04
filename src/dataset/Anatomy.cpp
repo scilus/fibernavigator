@@ -376,7 +376,7 @@ void Anatomy::minimize()
     pNewAnatomy->setType( HEAD_BYTE );
     pNewAnatomy->setDataType( 2 );
 
-    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pNewAnatomy );
+    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( indx );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -733,8 +733,6 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
             }
 
             m_pTensorField             = new TensorField( m_dh, &m_floatDataset, 1, 3 );
-            m_dh->m_tensorsFieldLoaded = true;
-            m_dh->m_vectorsLoaded      = true;
             m_dh->m_surfaceIsDirty     = true;
             flag                       = true;
         }
@@ -753,11 +751,7 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
         m_dh->m_rows            = m_rows;
         m_dh->m_columns         = m_columns;
         m_dh->m_frames          = m_frames;
-        m_dh->m_anatomyLoaded   = true;
     }
-    
-//     free(pHdrFile);
-//     pHdrFile = NULL;
 
     m_isLoaded = flag;
 
@@ -787,7 +781,7 @@ bool Anatomy::loadNifti( wxString fileName )
     m_bands     = pImage->dim[4];
     m_dataType  = pImage->datatype;
 
-    if( m_dh->m_anatomyLoaded )
+    if( DatasetManager::getInstance()->isAnatomyLoaded() )
     {
         if( m_rows != m_dh->m_rows || m_columns != m_dh->m_columns || m_frames != m_dh->m_frames )
         {
@@ -1023,8 +1017,6 @@ bool Anatomy::loadNifti( wxString fileName )
             }
 
             m_pTensorField             = new TensorField( m_dh, &m_floatDataset, 1, 3 );
-            m_dh->m_tensorsFieldLoaded = true;
-            m_dh->m_vectorsLoaded      = true;
             m_dh->m_surfaceIsDirty     = true;
             flag                       = true;
         }
@@ -1043,7 +1035,6 @@ bool Anatomy::loadNifti( wxString fileName )
         m_dh->m_rows            = m_rows;
         m_dh->m_columns         = m_columns;
         m_dh->m_frames          = m_frames;
-        m_dh->m_anatomyLoaded   = true;
     }
     
     free(pHdrFile);

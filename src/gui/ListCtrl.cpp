@@ -24,8 +24,7 @@ END_EVENT_TABLE()
 
 ListCtrl::ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size, const long style )
 : wxListCtrl( pParent, ID_LIST_CTRL2, point, size, style ),
-  m_column( 0 ),
-  m_isFiberGroupPresent( false )
+  m_column( 0 )
 {
 }
 
@@ -42,12 +41,12 @@ void ListCtrl::AssignImageList( wxImageList *imageList, int which )
 
 bool ListCtrl::DeleteItem( long index )
 {
-    DatasetInfo *pDataset = GetItem( index );
+    DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
+
     if( FIBERSGROUP == pDataset->getType() )
     {
-        while( index + 1 < GetItemCount() && FIBERS == GetItem( index + 1 )->getType() )
+        while( index + 1 < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index + 1 ) )->getType() )
         {
-            delete GetItem( index + 1 );
             wxListCtrl::DeleteItem( index + 1 );
         }
     }
@@ -74,50 +73,22 @@ long ListCtrl::InsertColumn( long col, wxListItem& info )
 }
 
 //////////////////////////////////////////////////////////////////////////
-void ListCtrl::InsertItem( const DatasetInfo * const pDataset )
+void ListCtrl::InsertItem( unsigned int datasetIndex )
 {
-    if( NULL == pDataset )
-    {
-        return;
-    }
+//     if( NULL == pDataset )
+//     {
+//         return;
+//     }
 
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
     // To have the same behavior on all platforms, we add to the end of the list
-    long index( -1 );
+    long index( GetItemCount() );
 
-    if( FIBERS == pDataset->getType() ) 
-    {
-        if( !m_isFiberGroupPresent )
-        {
-            InsertItem( new FibersGroup( DatasetManager::getInstance()->m_pDatasetHelper ) );
-            m_isFiberGroupPresent = true;
-            index = GetItemCount();
-        }
-        else
-        {
-            for( int i( 0 ); i < GetItemCount(); ++i )
-            {
-                if( FIBERSGROUP == GetItem( i )->getType() )
-                {
-                    index = i + 1;
-                    break;
-                }
-            }
-
-            while( index < GetItemCount() && FIBERS == GetItem( index )->getType() )
-            {
-                ++index;
-            }
-        }
-    }
-    else
-    {
-        index = GetItemCount();
-    }
+    DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( datasetIndex );
 
     wxListCtrl::InsertItem( index, pDataset->getShow() ? 0 : 1 );
-    SetItemData( index, (long)pDataset );
+    SetItemData( index, datasetIndex );
     SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     Update( index );
@@ -132,19 +103,19 @@ void ListCtrl::MoveItemDown()
     {
         set<long> refreshNeeded;
 
-        DatasetInfo *pDataset = GetItem( index );
+        DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
 
         if( FIBERSGROUP == pDataset->getType() )
         {
             long from( index + 2 );
-            while( from < GetItemCount() && FIBERS == GetItem( from )->getType() )
+            while( from < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( from ) )->getType() )
             {
                 ++from;
             }
 
             if( from != GetItemCount() )
             {
-                DatasetInfo *pDatasetToMove = GetItem( from );
+                DatasetInfo *pDatasetToMove = DatasetManager::getInstance()->getDataset( GetItem( from ) );
                 wxListCtrl::InsertItem( index, pDatasetToMove->getShow() ? 0 : 1 );
                 SetItemData( index, (long)pDatasetToMove );
                 SetItemState( index + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
@@ -156,7 +127,7 @@ void ListCtrl::MoveItemDown()
         }
         else if( FIBERS == pDataset->getType() )
         {
-            if( FIBERS == GetItem( index + 1 )->getType() )
+            if( FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index + 1 ) )->getType() )
             {
                 Swap( index, index + 1 );
                 refreshNeeded.insert( index );
@@ -167,10 +138,10 @@ void ListCtrl::MoveItemDown()
         }
         else
         {
-            if( FIBERSGROUP == GetItem( index + 1 )->getType() )
+            if( FIBERSGROUP == DatasetManager::getInstance()->getDataset( GetItem( index + 1 ) )->getType() )
             {
                 long to( index + 2 );
-                while( to < GetItemCount() && FIBERS == GetItem( to )->getType() )
+                while( to < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( to ) )->getType() )
                 {
                     ++to;
                 }
@@ -210,7 +181,7 @@ void ListCtrl::MoveItemUp()
     {
         set<long> refreshNeeded;
 
-        DatasetInfo *pDataset = GetItem( index );
+        DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
 
         if( FIBERSGROUP == pDataset->getType() )
         {
@@ -223,7 +194,7 @@ void ListCtrl::MoveItemUp()
 
             ++index;
 
-            while( index < GetItemCount() && FIBERS == GetItem( index )->getType() )
+            while( index < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index ) )->getType() )
             {
                 // Move fibers
                 Swap( index, index - 1 );
@@ -234,7 +205,7 @@ void ListCtrl::MoveItemUp()
         }
         else if( FIBERS == pDataset->getType() )
         {
-            if( FIBERS == GetItem( index - 1 )->getType() )
+            if( FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index - 1 ) )->getType() )
             {
                 Swap( index, index - 1 );
                 refreshNeeded.insert( index );
@@ -244,10 +215,10 @@ void ListCtrl::MoveItemUp()
         }
         else
         {
-            if( FIBERS == GetItem( index - 1 )->getType() )
+            if( FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index - 1 ) )->getType() )
             {
                 long to( index - 2 );
-                while( FIBERSGROUP != GetItem( to )->getType() )
+                while( FIBERSGROUP != DatasetManager::getInstance()->getDataset( GetItem( to ) )->getType() )
                 {
                     --to;
                 }
@@ -291,7 +262,7 @@ void ListCtrl::UpdateFibers()
 {
     for( long index( 0 ); index < GetItemCount(); ++index )
     {
-        if( FIBERS == GetItem( index )->getType() )
+        if( FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index ) )->getType() )
         {
             Update( index );
         }
@@ -305,10 +276,10 @@ void ListCtrl::UpdateSelected()
     long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( -1 != index )
     {
-        DatasetInfo *pDataset = GetItem( index );
+        DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
         if( FIBERSGROUP == pDataset->getType() )
         {
-            for( long i( index + 1); FIBERS == GetItem( i )->getType(); ++i )
+            for( long i( index + 1); FIBERS == DatasetManager::getInstance()->getDataset( GetItem( i ) )->getType(); ++i )
             {
                 Update( i );
             }
@@ -322,14 +293,14 @@ void ListCtrl::UpdateSelected()
 // GETTERS/SETTERS
 //////////////////////////////////////////////////////////////////////////
 
-DatasetInfo * ListCtrl::GetItem( long index ) const
+int ListCtrl::GetItem( long index ) const
 {
     if( 0 > index || index >= wxListCtrl::GetItemCount() )
     {
-        return NULL;
+        return -1;
     }
 
-    return (DatasetInfo *)GetItemData( index );
+    return GetItemData( index );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -341,7 +312,7 @@ void ListCtrl::onActivate( wxListEvent& evt )
     Logger::getInstance()->print( _T( "Event triggered - ListCtrl::onActivate" ), LOGLEVEL_DEBUG );
 
     int index = evt.GetIndex();
-    DatasetInfo *pDataset = GetItem( index );
+    DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
 
     switch( m_column )
     {        
@@ -392,7 +363,7 @@ void ListCtrl::Swap( long i, long j )
 
 void ListCtrl::Update( long index )
 {
-    DatasetInfo *pDataset = GetItem( index );
+    DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
     SetItem( index, 0, wxT( "" ), pDataset->getShow() ? 0 : 2 );
     SetItem( index, 1, pDataset->getName().BeforeFirst('.') + ( pDataset->getShowFS() ? wxT( "" ) : wxT( "*" ) ) );
     SetItem( index, 2, wxString::Format( wxT( "%.2f" ), pDataset->getThreshold() * pDataset->getOldMax() ) );

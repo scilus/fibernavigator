@@ -52,7 +52,6 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
 Fibers::~Fibers()
 {
     Logger::getInstance()->print( wxT( "executing fibers destructor" ), LOGLEVEL_MESSAGE );
-    m_dh->m_fibersLoaded = false;
 
     if( m_dh->m_useVBO )
     {
@@ -1932,7 +1931,7 @@ Anatomy* Fibers::generateFiberVolume()
     Anatomy *pTmpAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
     pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
     
-    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( pTmpAnatomy );
+    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( index );
 	
     m_dh->updateLoadStatus();
     m_dh->m_mainFrame->refreshAllGLWidgets();
@@ -3574,7 +3573,7 @@ void Fibers::updatePropertiesSizer()
 
 	if( nextItemId >= 0)
 	{
-		pDatasetInfo = m_dh->m_mainFrame->m_pListCtrl2->GetItem( nextItemId );
+		pDatasetInfo = DatasetManager::getInstance()->getDataset( m_dh->m_mainFrame->m_pListCtrl2->GetItem( nextItemId ) );
 		if( pDatasetInfo != NULL)
 		{
 			if(pDatasetInfo->getType() != FIBERS)
@@ -3600,7 +3599,7 @@ void Fibers::updatePropertiesSizer()
 	
 	if( prevItemId != -1)
 	{
-		pDatasetInfo = m_dh->m_mainFrame->m_pListCtrl2->GetItem( prevItemId );
+		pDatasetInfo = DatasetManager::getInstance()->getDataset( m_dh->m_mainFrame->m_pListCtrl2->GetItem( prevItemId ) );
 		if( pDatasetInfo != NULL)
 		{
 			if(pDatasetInfo->getType() != FIBERS)

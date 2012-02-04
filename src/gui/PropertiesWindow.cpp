@@ -338,7 +338,8 @@ void PropertiesWindow::OnToggleVisibility( wxCommandEvent&  WXUNUSED(event) )
         return;
 
     
-    DatasetInfo* pInfo = m_pListCtrl->GetItem( m_pMainFrame->m_currentListItem );
+    int index = m_pListCtrl->GetItem( m_pMainFrame->m_currentListItem );
+    DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( index );
     pInfo->toggleShow();
 
     if( FIBERSGROUP == pInfo->getType() )
@@ -722,7 +723,7 @@ void PropertiesWindow::OnToggleLIC( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleLIC" ), LOGLEVEL_DEBUG );
 
-    if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 && m_pMainFrame->m_pDatasetHelper->m_vectorsLoaded )
+    if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 && DatasetManager::getInstance()->isVectorsLoaded() )
     {
         ((DatasetInfo*) m_pMainFrame->m_pCurrentSceneObject)->activateLIC();
     }
@@ -960,35 +961,44 @@ void PropertiesWindow::OnOriginalShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnOriginalShBasis" ), LOGLEVEL_DEBUG );
 
-    ODFs* l_dataset = new ODFs( m_pMainFrame->m_pDatasetHelper );
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis(l_dataset, m_pMainFrame->m_pDatasetHelper, 0);
-
+    int index = DatasetManager::getInstance()->createODFs();
+    ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
+    
+    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 0 );
+    m_pMainFrame->m_pListCtrl2->InsertItem( index );
 }
 
 void PropertiesWindow::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDescoteauxShBasis" ), LOGLEVEL_DEBUG );
 
-    ODFs* l_dataset = new ODFs( m_pMainFrame->m_pDatasetHelper );
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis(l_dataset, m_pMainFrame->m_pDatasetHelper, 1);
+    int index = DatasetManager::getInstance()->createODFs();
+    ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
 
+    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 1 );
+    m_pMainFrame->m_pListCtrl2->InsertItem( index );
 }
 
 void PropertiesWindow::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnTournierShBasis" ), LOGLEVEL_DEBUG );
 
-    ODFs* l_dataset = new ODFs( m_pMainFrame->m_pDatasetHelper );
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis(l_dataset, m_pMainFrame->m_pDatasetHelper, 2);
+    int index = DatasetManager::getInstance()->createODFs();
+    ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
 
+    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 2 );
+    m_pMainFrame->m_pListCtrl2->InsertItem( index );
 }
 
 void PropertiesWindow::OnPTKShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnPTKShBasis" ), LOGLEVEL_DEBUG );
 
-    ODFs* l_dataset = new ODFs( m_pMainFrame->m_pDatasetHelper );
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis(l_dataset, m_pMainFrame->m_pDatasetHelper, 3);
+    int index = DatasetManager::getInstance()->createODFs();
+    ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
+
+    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 3 );
+    m_pMainFrame->m_pListCtrl2->InsertItem( index );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1774,7 +1784,7 @@ void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(ev
     pNewAnatomy->setName( wxT(" (fiber_density)" ) );
     pNewAnatomy->setOldMax( l_max );
     
-    m_pListCtrl->InsertItem( pNewAnatomy );
+    m_pListCtrl->InsertItem( index );
 
     m_pMainFrame->refreshAllGLWidgets();
 }
@@ -1829,7 +1839,7 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
 
     pNewAnatomy->setName( wxT( " (fiber_colors)" ) );
     
-    m_pListCtrl->InsertItem( pNewAnatomy );
+    m_pListCtrl->InsertItem( index );
     
     m_pMainFrame->refreshAllGLWidgets();
 }

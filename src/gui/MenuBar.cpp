@@ -327,8 +327,8 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleFilterISO->Check(mf->m_pDatasetHelper->m_filterIsoSurf);
     m_itemToggleShowAxes->Check(mf->m_pDatasetHelper->m_isShowAxes);
     //m_itemToggleColorMapLegend->Check(mf->m_datasetHelper->m_colorMap);
-    m_itemMoveBoundaryPointLeft->Enable(mf->m_pDatasetHelper->m_surfaceLoaded);
-    m_itemMoveBoundaryPointRight->Enable(mf->m_pDatasetHelper->m_surfaceLoaded);
+    m_itemMoveBoundaryPointLeft->Enable(DatasetManager::getInstance()->isSurfaceLoaded());
+    m_itemMoveBoundaryPointRight->Enable(DatasetManager::getInstance()->isSurfaceLoaded());
     m_itemToggleDrawPoints->Check(mf->m_pDatasetHelper->m_pointMode);
     m_itemToggleDrawVectors->Check(mf->m_pDatasetHelper->m_drawVectors);
 	
@@ -346,5 +346,5 @@ void MenuBar::updateMenuBar( MainFrame *mf )
                                    mf->m_pDatasetHelper->m_canUseColorPicker &&
                                    mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN );
     
-    m_itemNewSplineSurface->Enable(mf->m_pDatasetHelper->m_anatomyLoaded && !mf->m_pDatasetHelper->m_surfaceLoaded);
+    m_itemNewSplineSurface->Enable(DatasetManager::getInstance()->isAnatomyLoaded() && !DatasetManager::getInstance()->isSurfaceLoaded());
 }

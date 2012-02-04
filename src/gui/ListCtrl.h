@@ -6,6 +6,12 @@
 #define ID_LIST_CTRL2 292
 
 class DatasetInfo;
+class Anatomy;
+class Fibers;
+class FibersGroup;
+class Mesh;
+class ODFs;
+class Tensors;
 
 class ListCtrl : protected wxListCtrl
 {
@@ -19,7 +25,7 @@ public:
     void DeleteSelectedItem();
     long InsertColumn( long col, wxListItem& info );
     // TODO: Change for index in DatasetManager, once it is created
-    void InsertItem( const DatasetInfo * const pDataset );
+    void InsertItem( unsigned int datasetIndex );
     void MoveItemDown();
     void MoveItemUp();
     void UnselectAll();
@@ -28,7 +34,7 @@ public:
     
     // Getters/Setters
     int GetColumnClicked() const                    { return m_column; }
-    DatasetInfo * GetItem( long index ) const;
+    int GetItem( long index ) const;
     int GetItemCount() const                        { return wxListCtrl::GetItemCount(); }
     bool SetColumnWidth( int col, int width )       { return wxListCtrl::SetColumnWidth( col, width ); }
     void SetMaxSize( const wxSize &size )           { wxListCtrl::SetMaxSize( size ); }
@@ -50,7 +56,7 @@ private:
 
 private:
     int m_column;
-    bool m_isFiberGroupPresent;
+    //bool m_isFiberGroupPresent;
 
     DECLARE_EVENT_TABLE()
 };

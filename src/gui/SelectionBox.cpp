@@ -12,6 +12,7 @@
 #include "SelectionBox.h"
 
 #include "../dataset/Anatomy.h"
+#include "../dataset/DatasetManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -39,9 +40,10 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size, DatasetHelper* i_dat
 SelectionBox::SelectionBox( DatasetHelper* i_datasetHelper, Anatomy* i_anatomy ) :
    SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ), i_datasetHelper )
 {
-    
    m_isMaster      = true;
-   m_isosurface    = new CIsoSurface( m_datasetHelper, i_anatomy );
+
+   int index = DatasetManager::getInstance()->createCIsoSurface( i_anatomy );
+   m_isosurface = (CIsoSurface *)DatasetManager::getInstance()->getDataset( index );
    
    wxString mystring(wxT("[VOI] - ") + i_anatomy->getName());
    m_name          =  mystring;

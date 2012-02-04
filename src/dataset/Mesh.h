@@ -33,7 +33,7 @@ struct polygon {
 };
 
 class MainFrame;
-class Mesh : public DatasetInfo , public wxTreeItemData
+class Mesh : public DatasetInfo
 {
 
 public:

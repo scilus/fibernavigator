@@ -12,8 +12,8 @@
 
 class DatasetHelper;
 class MainFrame;
-class Surface : public DatasetInfo{
-
+class Surface : public DatasetInfo
+{
 public:
     Surface(DatasetHelper*);
     virtual ~Surface();

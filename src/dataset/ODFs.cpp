@@ -1355,42 +1355,35 @@ complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, fl
 */
 void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
 {
-    
     l_dataset->setShBasis( basis ); // Uses the current Spherical Harmonics basis selected
 
-
     if( l_dataset->load(m_lastODF_path)) //Reloads the ODFs
-        {
-            //Copy all params modifications
-            l_dataset->setThreshold        ( getThreshold() );
-            l_dataset->setAlpha            ( getAlpha() );
-            l_dataset->setShow             ( getShow() );
-            l_dataset->setShowFS           ( getShowFS() );
-            l_dataset->setUseTex           ( getUseTex() );
-            l_dataset->setColor            ( MIN_HUE, getColor( MIN_HUE ) );
-            l_dataset->setColor            ( MAX_HUE, getColor( MAX_HUE ) );
-            l_dataset->setColor            ( SATURATION, getColor( SATURATION ) );
-            l_dataset->setColor            ( LUMINANCE, getColor( LUMINANCE ) );
-            l_dataset->setLOD              (getLOD());
-            l_dataset->setLighAttenuation  (getLightAttenuation());
-            l_dataset->setLightPosition    (X_AXIS, getLightPosition( X_AXIS ));
-            l_dataset->setLightPosition    (Y_AXIS, getLightPosition( Y_AXIS ));
-            l_dataset->setLightPosition    (Z_AXIS, getLightPosition( Z_AXIS ));
-            l_dataset->setDisplayFactor    (getDisplayFactor());
-            l_dataset->setScalingFactor    (getScalingFactor());
-            l_dataset->flipAxis            (X_AXIS, isAxisFlipped( X_AXIS ));
-            l_dataset->flipAxis            (Y_AXIS, isAxisFlipped( Y_AXIS ));
-            l_dataset->flipAxis            (Z_AXIS, isAxisFlipped( Z_AXIS ));
-            l_dataset->setColorWithPosition(getColorWithPosition());
-            
-            m_dh->m_mainFrame->deleteListItem();
-            m_data->finishLoading( l_dataset ); 
-            m_data->m_mainFrame->m_pListCtrl2->InsertItem( l_dataset );
-            m_data->m_ODFsLoaded = true;
-
-
-
-        }
+    {
+        //Copy all params modifications
+        l_dataset->setThreshold        ( getThreshold() );
+        l_dataset->setAlpha            ( getAlpha() );
+        l_dataset->setShow             ( getShow() );
+        l_dataset->setShowFS           ( getShowFS() );
+        l_dataset->setUseTex           ( getUseTex() );
+        l_dataset->setColor            ( MIN_HUE, getColor( MIN_HUE ) );
+        l_dataset->setColor            ( MAX_HUE, getColor( MAX_HUE ) );
+        l_dataset->setColor            ( SATURATION, getColor( SATURATION ) );
+        l_dataset->setColor            ( LUMINANCE, getColor( LUMINANCE ) );
+        l_dataset->setLOD              (getLOD());
+        l_dataset->setLighAttenuation  (getLightAttenuation());
+        l_dataset->setLightPosition    (X_AXIS, getLightPosition( X_AXIS ));
+        l_dataset->setLightPosition    (Y_AXIS, getLightPosition( Y_AXIS ));
+        l_dataset->setLightPosition    (Z_AXIS, getLightPosition( Z_AXIS ));
+        l_dataset->setDisplayFactor    (getDisplayFactor());
+        l_dataset->setScalingFactor    (getScalingFactor());
+        l_dataset->flipAxis            (X_AXIS, isAxisFlipped( X_AXIS ));
+        l_dataset->flipAxis            (Y_AXIS, isAxisFlipped( Y_AXIS ));
+        l_dataset->flipAxis            (Z_AXIS, isAxisFlipped( Z_AXIS ));
+        l_dataset->setColorWithPosition(getColorWithPosition());
+        
+        m_dh->m_mainFrame->deleteListItem();
+        m_data->finishLoading( l_dataset );
+    }
 }
 
 void ODFs::createPropertiesSizer(PropertiesWindow *parent)

@@ -10,6 +10,7 @@
 #include "ShaderProgram.h"
 
 #include "../dataset/DatasetHelper.h"
+#include "../dataset/DatasetManager.h"
 #include "../dataset/Surface.h"
 
 #include "../Logger.h"
@@ -183,7 +184,7 @@ void ShaderHelper::initializeArrays()
 
     for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if ( pInfo->getType() < MESH && pInfo->getShow() )
         {
             m_threshold[m_textureCount] = pInfo->getThreshold();
@@ -247,7 +248,7 @@ void ShaderHelper::setMeshShaderVars()
 {
     m_meshShader.setUniInt( "blendTex", m_pDh->m_blendTexOnMesh );
 
-    m_meshShader.setUniInt( "cutAtSurface", m_pDh->m_surfaceLoaded );
+    m_meshShader.setUniInt( "cutAtSurface", DatasetManager::getInstance()->isSurfaceLoaded() );
     m_meshShader.setUniInt( "lightOn", m_pDh->m_lighting );
 
     m_meshShader.setUniInt( "dimX", m_pDh->m_columns );
@@ -265,7 +266,7 @@ void ShaderHelper::setMeshShaderVars()
 
     for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i ) );
 
         if ( pInfo->getType() == SURFACE )
         {
@@ -327,7 +328,7 @@ void ShaderHelper::setFiberShaderVars()
     int c = 0;
     for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( m_pDh->m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if ( pInfo->getType() < MESH )
         {
             if ( ( pInfo->getType() == OVERLAY ) && pInfo->getShow() )

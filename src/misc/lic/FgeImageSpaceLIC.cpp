@@ -17,6 +17,7 @@
 #include "wx/wxprec.h"
 
 #include "../../Logger.h"
+#include "../../dataset/DatasetManager.h"
 
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
@@ -341,8 +342,8 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     int c = 0;
     for (int i = 0 ; i < m_dh->m_mainFrame->m_pListCtrl2->GetItemCount() ; ++i)
     {
-//        DatasetInfo* info = (DatasetInfo*)m_dh->m_mainFrame->m_pListCtrl->GetItemData(i);
-        DatasetInfo *pInfo = m_dh->m_mainFrame->m_pListCtrl2->GetItem( i );
+        int index = m_dh->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo *pInfo = DatasetManager::getInstance()->getDataset( index );
         if( pInfo && pInfo->getType() < MESH) {
             tex[c] = c;
             threshold[c] = pInfo->getThreshold();

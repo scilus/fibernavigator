@@ -24,7 +24,7 @@ using namespace std;
  * It is useful to load several sets of fibers and can be used to
  * apply a characteristic to all set of fibers that are in the group.
  */
-class FibersGroup : public DatasetInfo, public wxTreeItemData
+class FibersGroup : public DatasetInfo
 {
 public:
     FibersGroup( DatasetHelper *pDatasetHelper );

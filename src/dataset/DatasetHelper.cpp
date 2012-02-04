@@ -5,6 +5,7 @@
  *      Author: ralph
  */
 #include "DatasetHelper.h"
+#include "DatasetManager.h"
 #include "../gui/MainFrame.h"
 
 #include <memory>
@@ -56,14 +57,14 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_countFibers( 0    ),
 
     m_scnFileLoaded      ( false ),
-    m_anatomyLoaded      ( false ),
-	m_fibersGroupLoaded	 ( false ),
-    m_fibersLoaded       ( false ),
-    m_vectorsLoaded      ( false ),
-    m_tensorsFieldLoaded ( false ),
-    m_tensorsLoaded      ( false ),
-    m_ODFsLoaded         ( false ),
-    m_surfaceLoaded      ( false ),
+    m_fibersGroupLoaded	 ( false ),
+//     m_anatomyLoaded      ( false ),
+//     m_fibersLoaded       ( false ),
+//     m_vectorsLoaded      ( false ),
+//     m_tensorsFieldLoaded ( false ),
+//     m_tensorsLoaded      ( false ),
+//     m_ODFsLoaded         ( false ),
+//     m_surfaceLoaded      ( false ),
     m_surfaceIsDirty     ( true  ),
 
     m_useVBO( true ),
@@ -226,41 +227,43 @@ bool DatasetHelper::load( const int i_index )
 
 bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha, wxString i_name, const int version, const bool isFiberGroup, const bool i_isScene )
 {
-	std::set_new_handler(&out_of_memory);
-	
-    try 
-    {
-		// if it is a fibergroup to add, only add it and do nothing else
-		if( isFiberGroup && i_isScene )
-		{
-			FibersGroup* l_fibersGroup = new FibersGroup( this );
-			l_fibersGroup->setShowFS   ( i_showFS );
-			l_fibersGroup->setUseTex   ( i_useTex );
-			
-			finishLoading( l_fibersGroup );
-			
-			m_fibersGroupLoaded = true;
-			return true;
-		}
-		// check if i_fileName is valid
-		if( ! wxFile::Exists( i_fileName ) )
-		{
-            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), i_fileName ), LOGLEVEL_ERROR );
-			m_lastError = wxT( "File doesn't exist!" );
-			return false;
-		}
+    return false;
 
-		// If the file is in compressed formed, we check what kinda file it is.
-		wxString l_ext = i_fileName.AfterLast( '.' );
-		if( l_ext == _T( "gz" ) )
-		{
-			wxString l_tmpName = i_fileName.BeforeLast( '.' );
-			l_ext = l_tmpName.AfterLast( '.' );
-		}
-
-		if( l_ext == wxT( "scn" ) )
-		{
-            // TODO: Review in DatasetManager
+// 	std::set_new_handler(&out_of_memory);
+// 	
+//     try 
+//     {
+// 		// if it is a fibergroup to add, only add it and do nothing else
+// 		if( isFiberGroup && i_isScene )
+// 		{
+// 			FibersGroup* l_fibersGroup = new FibersGroup( this );
+// 			l_fibersGroup->setShowFS   ( i_showFS );
+// 			l_fibersGroup->setUseTex   ( i_useTex );
+// 			
+// 			finishLoading( l_fibersGroup );
+// 			
+// 			m_fibersGroupLoaded = true;
+// 			return true;
+// 		}
+// 		// check if i_fileName is valid
+// 		if( ! wxFile::Exists( i_fileName ) )
+// 		{
+//             Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), i_fileName ), LOGLEVEL_ERROR );
+// 			m_lastError = wxT( "File doesn't exist!" );
+// 			return false;
+// 		}
+// 
+// 		// If the file is in compressed formed, we check what kinda file it is.
+// 		wxString l_ext = i_fileName.AfterLast( '.' );
+// 		if( l_ext == _T( "gz" ) )
+// 		{
+// 			wxString l_tmpName = i_fileName.BeforeLast( '.' );
+// 			l_ext = l_tmpName.AfterLast( '.' );
+// 		}
+// 
+// 		if( l_ext == wxT( "scn" ) )
+// 		{
+//             // TODO: Review in DatasetManager
 // 			if( m_mainFrame->m_pListCtrl->GetItemCount() > 0 )
 // 			{
 // 				int answer = wxMessageBox(wxT("Are you sure you want to open a new scene? All objects loaded in the current scene will be deleted."), wxT("Confirmation"), 
@@ -295,194 +298,194 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 // 		#endif
 // 			m_scnFileLoaded = true;
 // 			return true;
-		}   
-		else if( l_ext == _T( "nii" ) )
-		{
-			char* l_hdrFile;
-			l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
-			strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
-
-			nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
-
-			free(l_hdrFile);
-
-			if( ! l_image )
-			{
-				m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
-				return false;
-			}
-
-			if (l_image->datatype == 16 && l_image->ndim == 4 && l_image->dim[4] == 6)
-			{
-				i_index=8;
-			}
-			else if (l_image->datatype == 16 && l_image->ndim == 4 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
-			{
-				i_index=9;
-			}
-
-			DatasetInfo *l_dataset = NULL;
-			if (i_index==8)
-			{
-				if( ! m_anatomyLoaded )
-				{
-					m_lastError = wxT( "no anatomy file loaded" );
-					return false;
-				}
-
-				if( m_tensorsLoaded )
-				{
-					m_lastError = wxT( "tensors already loaded" );
-					return false;
-				}
-				l_dataset = new Tensors( this );            
-			}
-			else if (i_index==9)
-			{
-				if( ! m_anatomyLoaded )
-				{
-					m_lastError = wxT( "no anatomy file loaded" );
-					return false;
-				}
-				l_dataset = new ODFs( this );            
-			}
-			else
-			{
-				l_dataset = new Anatomy( this );
-			}
-			if( l_dataset->load(i_fileName ))
-			{
-				l_dataset->setThreshold( i_threshold );
-				l_dataset->setAlpha    ( i_alpha );
-				l_dataset->setShow     ( i_active );
-				l_dataset->setShowFS   ( i_showFS );
-				l_dataset->setUseTex   ( i_useTex );
-				
-				if( i_isScene && version >= 2 )
-				{
-					l_dataset->setName ( i_name );
-				}
-                m_mainFrame->m_pListCtrl2->InsertItem( l_dataset );
-				finishLoading( l_dataset );
-				
-				if (i_index==8)
-				{
-					m_tensorsLoaded = true;
-				}
-				else if (i_index == 9)
-				{
-					m_ODFsLoaded = true;
-				}
-				else
-				{
-					m_floatDataset = ((Anatomy*)l_dataset)->getFloatDataset();
-				}
-				return true;
-			}
-			return false;
-		}
-		else if( l_ext == _T( "mesh" ) || l_ext == _T( "surf" ) || l_ext == _T( "dip" ) )
-		{
-			if( ! m_anatomyLoaded )
-			{
-				m_lastError = wxT( "no anatomy file loaded" );
-				return false;
-			}
-
-			Mesh *l_mesh = new Mesh( this );
-
-			if( l_mesh->load( i_fileName ) )
-			{
-				l_mesh->setThreshold( i_threshold );
-				l_mesh->setShow     ( i_active );
-				l_mesh->setShowFS   ( i_showFS );
-				l_mesh->setUseTex   ( i_useTex );
-				finishLoading       ( l_mesh);
-
-                m_mainFrame->m_pListCtrl2->InsertItem( l_mesh );
-				
-				return true;
-			}
-			return false;
-		}
-		else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
-		{
-			if( ! m_anatomyLoaded )
-			{
-				m_lastError = wxT( "no anatomy file loaded" );
-				return false;
-			}
-
-			Fibers* l_fibers = new Fibers( this );
-
-			if( l_fibers->load( i_fileName ) )
-			{
-				if( m_fibersGroupLoaded == false && version < 2 )
-				{
-					FibersGroup* l_fibersGroup = new FibersGroup( this );
-					finishLoading( l_fibersGroup );
-					
-					m_fibersGroupLoaded = true;
-				}
-
-				std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-				for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-				{
-					for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-					{
-						l_selectionObjects[i][j]->m_inBox.resize( m_countFibers, sizeof(bool) );
-						for( unsigned int k = 0; k < m_countFibers; ++k )
-						{
-							l_selectionObjects[i][j]->m_inBox[k] = 0;
-						}
-
-						l_selectionObjects[i][j]->setIsDirty( true );
-					}
-				}
-
-				l_fibers->setThreshold( i_threshold );
-				l_fibers->setAlpha	  ( i_alpha );
-				l_fibers->setShow     ( i_active );
-				l_fibers->setShowFS   ( i_showFS );
-				l_fibers->setUseTex   ( i_useTex );
-				
-				if( m_fibersGroupLoaded )
-				{
-					FibersGroup* pFibersGroup;
-					getFibersGroupDataset(pFibersGroup);
-
-					if( pFibersGroup != NULL )
-					{
-						if(pFibersGroup->getFibersCount() > 0 && !i_isScene)
-						{
-							l_fibers->setShow( false );
-						}
-						pFibersGroup->addFibersSet( l_fibers );
-					}
-				}			
-
-				l_fibers->updateLinesShown();
-				m_mainFrame->refreshAllGLWidgets();
-				
-				finishLoading( l_fibers, true);
-                m_mainFrame->m_pListCtrl2->InsertItem( l_fibers );
-				
-				m_fibersLoaded = true;
-				m_selBoxChanged = true;
-
-				return true;
-			}
-			return false;
-		}
-		m_lastError = wxT( "unsupported file format" );
-		
-		return false;
-	}
-	catch (const exception &e)
-	{
-		cerr << "Exception: " << e.what() << endl;
-		exit(1);
-	}
+// 		}   
+// 		else if( l_ext == _T( "nii" ) )
+// 		{
+// 			char* l_hdrFile;
+// 			l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
+// 			strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
+// 
+// 			nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
+// 
+// 			free(l_hdrFile);
+// 
+// 			if( ! l_image )
+// 			{
+// 				m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
+// 				return false;
+// 			}
+// 
+// 			if (l_image->datatype == 16 && l_image->ndim == 4 && l_image->dim[4] == 6)
+// 			{
+// 				i_index=8;
+// 			}
+// 			else if (l_image->datatype == 16 && l_image->ndim == 4 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
+// 			{
+// 				i_index=9;
+// 			}
+// 
+// 			DatasetInfo *l_dataset = NULL;
+// 			if (i_index==8)
+// 			{
+//                 if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+// 				{
+// 					m_lastError = wxT( "no anatomy file loaded" );
+// 					return false;
+// 				}
+// 
+// 				if( DatasetManager::getInstance()->isTensorsLoaded() )
+// 				{
+// 					m_lastError = wxT( "tensors already loaded" );
+// 					return false;
+// 				}
+// 				l_dataset = new Tensors( this );            
+// 			}
+// 			else if (i_index==9)
+// 			{
+// 				if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+// 				{
+// 					m_lastError = wxT( "no anatomy file loaded" );
+// 					return false;
+// 				}
+// 				l_dataset = new ODFs( this );            
+// 			}
+// 			else
+// 			{
+// 				l_dataset = new Anatomy( this );
+// 			}
+// 			if( l_dataset->load(i_fileName ))
+// 			{
+// 				l_dataset->setThreshold( i_threshold );
+// 				l_dataset->setAlpha    ( i_alpha );
+// 				l_dataset->setShow     ( i_active );
+// 				l_dataset->setShowFS   ( i_showFS );
+// 				l_dataset->setUseTex   ( i_useTex );
+// 				
+// 				if( i_isScene && version >= 2 )
+// 				{
+// 					l_dataset->setName ( i_name );
+// 				}
+//                 m_mainFrame->m_pListCtrl2->InsertItem( l_dataset );
+// 				finishLoading( l_dataset );
+// 				
+// 				if (i_index==8)
+// 				{
+// 					m_tensorsLoaded = true;
+// 				}
+// 				else if (i_index == 9)
+// 				{
+// 					m_ODFsLoaded = true;
+// 				}
+// 				else
+// 				{
+// 					m_floatDataset = ((Anatomy*)l_dataset)->getFloatDataset();
+// 				}
+// 				return true;
+// 			}
+// 			return false;
+// 		}
+// 		else if( l_ext == _T( "mesh" ) || l_ext == _T( "surf" ) || l_ext == _T( "dip" ) )
+// 		{
+// 			if( ! m_anatomyLoaded )
+// 			{
+// 				m_lastError = wxT( "no anatomy file loaded" );
+// 				return false;
+// 			}
+// 
+// 			Mesh *l_mesh = new Mesh( this );
+// 
+// 			if( l_mesh->load( i_fileName ) )
+// 			{
+// 				l_mesh->setThreshold( i_threshold );
+// 				l_mesh->setShow     ( i_active );
+// 				l_mesh->setShowFS   ( i_showFS );
+// 				l_mesh->setUseTex   ( i_useTex );
+// 				finishLoading       ( l_mesh);
+// 
+//                 m_mainFrame->m_pListCtrl2->InsertItem( l_mesh );
+// 				
+// 				return true;
+// 			}
+// 			return false;
+// 		}
+// 		else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
+// 		{
+// 			if( ! m_anatomyLoaded )
+// 			{
+// 				m_lastError = wxT( "no anatomy file loaded" );
+// 				return false;
+// 			}
+// 
+// 			Fibers* l_fibers = new Fibers( this );
+// 
+// 			if( l_fibers->load( i_fileName ) )
+// 			{
+// 				if( m_fibersGroupLoaded == false && version < 2 )
+// 				{
+// 					FibersGroup* l_fibersGroup = new FibersGroup( this );
+// 					finishLoading( l_fibersGroup );
+// 					
+// 					m_fibersGroupLoaded = true;
+// 				}
+// 
+// 				std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
+// 				for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+// 				{
+// 					for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+// 					{
+// 						l_selectionObjects[i][j]->m_inBox.resize( m_countFibers, sizeof(bool) );
+// 						for( unsigned int k = 0; k < m_countFibers; ++k )
+// 						{
+// 							l_selectionObjects[i][j]->m_inBox[k] = 0;
+// 						}
+// 
+// 						l_selectionObjects[i][j]->setIsDirty( true );
+// 					}
+// 				}
+// 
+// 				l_fibers->setThreshold( i_threshold );
+// 				l_fibers->setAlpha	  ( i_alpha );
+// 				l_fibers->setShow     ( i_active );
+// 				l_fibers->setShowFS   ( i_showFS );
+// 				l_fibers->setUseTex   ( i_useTex );
+// 				
+// 				if( m_fibersGroupLoaded )
+// 				{
+// 					FibersGroup* pFibersGroup;
+// 					getFibersGroupDataset(pFibersGroup);
+// 
+// 					if( pFibersGroup != NULL )
+// 					{
+// 						if(pFibersGroup->getFibersCount() > 0 && !i_isScene)
+// 						{
+// 							l_fibers->setShow( false );
+// 						}
+// 						pFibersGroup->addFibersSet( l_fibers );
+// 					}
+// 				}			
+// 
+// 				l_fibers->updateLinesShown();
+// 				m_mainFrame->refreshAllGLWidgets();
+// 				
+// 				finishLoading( l_fibers, true);
+//                 m_mainFrame->m_pListCtrl2->InsertItem( l_fibers );
+// 				
+// 				m_fibersLoaded = true;
+// 				m_selBoxChanged = true;
+// 
+// 				return true;
+// 			}
+// 			return false;
+// 		}
+// 		m_lastError = wxT( "unsupported file format" );
+// 		
+// 		return false;
+// 	}
+// 	catch (const exception &e)
+// 	{
+// 		cerr << "Exception: " << e.what() << endl;
+// 		exit(1);
+// 	}
 }
 
 
@@ -518,7 +521,7 @@ bool DatasetHelper::fileNameExists( const wxString i_fileName )
 
     for( int i = 0; i < l_countDataSets; ++i )
     {
-        DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if ( l_info->getPath() == i_fileName )
         {
             return true;
@@ -1097,7 +1100,6 @@ void DatasetHelper::treeFinished()
         return;
 
     Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
-    m_fibersLoaded = true;
     updateAllSelectionObjects();
     m_selBoxChanged = true;
     m_mainFrame->refreshAllGLWidgets();
@@ -1206,50 +1208,34 @@ bool DatasetHelper::loadTextFile( wxString* i_string, const wxString i_fileName 
 void DatasetHelper::createIsoSurface()
 {
     // check l_anatomy - quit if not present
-    if( !m_anatomyLoaded )
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
         return;
 
-    // get selected l_anatomy dataset
-//    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     long l_item = m_mainFrame->getCurrentListItem();
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( l_item );
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( l_item ) );
     if( l_info->getType() > OVERLAY )
         return;
 
-    Anatomy* l_anatomy = (Anatomy*) l_info;
+    Anatomy *l_anatomy = (Anatomy *)l_info;
 
     Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
-    CIsoSurface* isosurf = new CIsoSurface( this, l_anatomy ); 
-    isosurf->GenerateSurface( 0.4f );
+
+    int index = DatasetManager::getInstance()->createCIsoSurface( l_anatomy );
+    CIsoSurface *pIsoSurf = (CIsoSurface *)DatasetManager::getInstance()->getDataset( index );
+    pIsoSurf->GenerateSurface( 0.4f );
 
     Logger::getInstance()->print( wxT( "Iso surface done" ), LOGLEVEL_MESSAGE );
 
     wxString l_anatomyName = l_anatomy->getName().BeforeFirst( '.' );
 
-    if ( isosurf->IsSurfaceValid() )
+    if( pIsoSurf->IsSurfaceValid() )
     {
-        isosurf->setName( l_anatomyName + wxT( " (iso surface)" ) );
+        pIsoSurf->setName( l_anatomyName + wxT( " (iso surface)" ) );
 
-#ifdef __WXMAC__
-        // insert at zero is a well-known bug on OSX, so we append there...
-        // http://trac.wxwidgets.org/ticket/4492
-        //long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
-        long l_id = m_mainFrame->m_pListCtrl2->GetItemCount();
-#else
-        long l_id = 0;
-#endif
-
-        m_mainFrame->m_pListCtrl2->InsertItem( isosurf );
-
-//         m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.40" ) );
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-//         m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) isosurf );
-//         m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+        m_mainFrame->m_pListCtrl2->InsertItem( index );
     }
     else
     {
@@ -1263,16 +1249,14 @@ void DatasetHelper::createIsoSurface()
 void DatasetHelper::createDistanceMapAndIso()
 {
     // check l_anatomy - quit if not present
-    if( ! m_anatomyLoaded )
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
         return;
 
-    // get selected l_anatomy dataset
-    //long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     long l_item = m_mainFrame->getCurrentListItem();
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( l_item );
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( l_item ) );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1280,48 +1264,31 @@ void DatasetHelper::createDistanceMapAndIso()
 
     Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
-    Anatomy* l_newAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
+    Anatomy* l_tmpAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
 
     Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
-
     Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
 
-    CIsoSurface* isosurf = new CIsoSurface( this, l_newAnatomy );
-    isosurf->GenerateSurface( 0.2f );
+    int index = DatasetManager::getInstance()->createCIsoSurface( l_tmpAnatomy );
+    CIsoSurface *pIsoSurf = (CIsoSurface *)DatasetManager::getInstance()->getDataset( index );
+    delete l_tmpAnatomy;
+
+    pIsoSurf->GenerateSurface( 0.2f );
 
     Logger::getInstance()->print( wxT( "Iso surface done" ), LOGLEVEL_MESSAGE );
 
     wxString anatomyName = l_anatomy->getName().BeforeFirst( '.' );
 
-#ifdef __WXMAC__
-    // insert at zero is a well-known bug on OSX, so we append there...
-    // http://trac.wxwidgets.org/ticket/4492
-    //long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
-    long l_id = m_mainFrame->m_pListCtrl2->GetItemCount();
-#else
-    long l_id = 0;
-#endif
-
-    if( isosurf->IsSurfaceValid() )
+    if( pIsoSurf->IsSurfaceValid() )
     {
-        isosurf->setName( anatomyName + wxT( " (offset)" ) );
+        pIsoSurf->setName( anatomyName + wxT( " (offset)" ) );
 
-        m_mainFrame->m_pListCtrl2->InsertItem( isosurf );
-
-//         m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 1, isosurf->getName() );
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.10" ) );
-//         m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-//         m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) isosurf );
-//         m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-
+        m_mainFrame->m_pListCtrl2->InsertItem( index );
     }
     else
     {
         Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
     }
-
-    delete l_newAnatomy;
 
     updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
@@ -1329,16 +1296,14 @@ void DatasetHelper::createDistanceMapAndIso()
 
 void DatasetHelper::createDistanceMap()
 {
-    if( ! m_anatomyLoaded )
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
         return;
 
-    // get selected l_anatomy dataset
-    // long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     long l_item = m_mainFrame->getCurrentListItem();
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = m_mainFrame->m_pListCtrl2->GetItem( l_item );
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( l_item ) );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1346,22 +1311,14 @@ void DatasetHelper::createDistanceMap()
 
     Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
-    Anatomy* l_newAnatomy = new Anatomy( this, l_anatomy->getFloatDataset() );
+    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy->getFloatDataset() );
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 
     Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
 
-    
-    l_newAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT("_DistMap"));
+    pNewAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT("_DistMap"));
 
-    m_mainFrame->m_pListCtrl2->InsertItem( l_newAnatomy );
-
-    //Feed the distance to the objects list
-//     m_mainFrame->m_pListCtrl->InsertItem(0, wxT(""),0);
-//     m_mainFrame->m_pListCtrl->SetItem(0,1, l_newAnatomy->getName());
-//     m_mainFrame->m_pListCtrl->SetItem(0,2, wxT("1.0"));
-//     m_mainFrame->m_pListCtrl->SetItem(0,3, wxT(""),1);
-//     m_mainFrame->m_pListCtrl->SetItemData(0,(long) l_newAnatomy);
-//     m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_mainFrame->m_pListCtrl2->InsertItem( index );
 
     updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
@@ -1370,22 +1327,23 @@ void DatasetHelper::createDistanceMap()
 void DatasetHelper::createCutDataset()
 {
     // check l_anatomy - quit if not present
-    if( !m_anatomyLoaded )
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
         return;
 
-    // get selected l_anatomy dataset
-//    long l_item = m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     long l_item = m_mainFrame->getCurrentListItem();
     if( l_item == -1 )
         return;
 
-    DatasetInfo* info = m_mainFrame->m_pListCtrl2->GetItem( l_item );
+    DatasetInfo* info = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( l_item ) );
     if ( info->getType() > OVERLAY )
         return;
 
     Anatomy* l_anatomy = (Anatomy*) info;
-    Anatomy* l_newAnatomy = new Anatomy( this );
-    l_newAnatomy->setZero( m_columns, m_rows, m_frames );
+
+    int index = DatasetManager::getInstance()->createAnatomy();
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    pNewAnatomy->setZero( m_columns, m_rows, m_frames );
 
     std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
     int x1, x2, y1, y2, z1, z2;
@@ -1411,7 +1369,7 @@ void DatasetHelper::createCutDataset()
                 z2 = wxMax(0, wxMin(z2, m_frames));
 
                 std::vector< float >* l_src = l_anatomy->getFloatDataset();
-                std::vector< float >* l_dst = l_newAnatomy->getFloatDataset();
+                std::vector< float >* l_dst = pNewAnatomy->getFloatDataset();
 
                 for( int b = z1; b < z2; ++b )
                 {
@@ -1427,19 +1385,12 @@ void DatasetHelper::createCutDataset()
         }
     }
 
-    l_newAnatomy->setName( l_anatomy->getName().BeforeFirst( '.' ) + wxT( " (cut)" ) );
-    l_newAnatomy->setType( l_anatomy->getType() );
-    l_newAnatomy->setDataType(l_anatomy->getDataType());
-    l_newAnatomy->setNewMax(l_anatomy->getNewMax());
+    pNewAnatomy->setName( l_anatomy->getName().BeforeFirst( '.' ) + wxT( " (cut)" ) );
+    pNewAnatomy->setType( l_anatomy->getType() );
+    pNewAnatomy->setDataType(l_anatomy->getDataType());
+    pNewAnatomy->setNewMax(l_anatomy->getNewMax());
 
-    m_mainFrame->m_pListCtrl2->InsertItem( l_newAnatomy );
-
-//     m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-//     m_mainFrame->m_pListCtrl->SetItem( 0, 1, l_newAnatomy->getName() );
-//     m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00" ) );
-//     m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( "" ), 1 );
-//     m_mainFrame->m_pListCtrl->SetItemData( 0, (long)l_newAnatomy );
-//     m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_mainFrame->m_pListCtrl2->InsertItem( index );
 
     updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
@@ -1480,7 +1431,7 @@ void DatasetHelper::updateView( const float i_x, const float i_y, const float i_
 
     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
     {
-        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( l_datasetInfo ) 
         {
             if( l_datasetInfo->getType() == TENSORS || l_datasetInfo->getType() == ODFS )
@@ -1499,7 +1450,7 @@ bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
 
     if (-1 != selItem)
     {
-        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( selItem );
+        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( selItem ) );
         if( l_datasetInfo && l_datasetInfo->getType() == FIBERS)
         {
             io_f = (Fibers*)l_datasetInfo;
@@ -1515,7 +1466,7 @@ bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
 
     for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( l_datasetInfo->getType() == FIBERSGROUP )
         {
             io_fg = (FibersGroup*)l_datasetInfo;
@@ -1531,7 +1482,7 @@ bool DatasetHelper::getSurfaceDataset( Surface *&io_s )
 
     for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( l_datasetInfo->getType() == SURFACE )
         {
             io_s = (Surface*)l_datasetInfo; //m_mainFrame->m_pListCtrl->GetItemData( i );
@@ -1543,12 +1494,12 @@ bool DatasetHelper::getSurfaceDataset( Surface *&io_s )
 
 std::vector< float >* DatasetHelper::getVectorDataset()
 {
-    if( ! m_vectorsLoaded )
+    if( !DatasetManager::getInstance()->isVectorsLoaded() )
         return NULL;
 
     for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( l_datasetInfo->getType() == VECTORS )
         {
             Anatomy* l_anatomy = (Anatomy*)l_datasetInfo; //m_mainFrame->m_pListCtrl->GetItemData( i );
@@ -1556,7 +1507,6 @@ std::vector< float >* DatasetHelper::getVectorDataset()
         }
     }
 
-    m_vectorsLoaded = false;
     return NULL;
 }
 
@@ -1566,7 +1516,7 @@ bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
     DatasetInfo* l_datasetInfo;
     for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
+        l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( l_datasetInfo->getType() >= HEAD_BYTE && l_datasetInfo->getType() <= TENSOR_FIELD ) 
         {
             o_types.push_back( l_datasetInfo );
@@ -1578,12 +1528,12 @@ bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
 
 TensorField* DatasetHelper::getTensorField()
 {
-    if( ! m_tensorsFieldLoaded )
+    if( !DatasetManager::getInstance()->isTensorsFieldLoaded() )
         return NULL;
 
     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
     {
-        DatasetInfo* l_datasetInfo = m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( l_datasetInfo->getType() == TENSOR_FIELD || l_datasetInfo->getType() == VECTORS )
         {
             Anatomy* l_anatomy = (Anatomy*) l_datasetInfo;
@@ -1591,68 +1541,67 @@ TensorField* DatasetHelper::getTensorField()
         }
     }
 
-    m_tensorsFieldLoaded = false;
     return NULL;
 }
 
 void DatasetHelper::updateLoadStatus()
 {
-    m_anatomyLoaded      = false;
-    m_meshLoaded         = false;
-    m_fibersLoaded       = false;
-    m_vectorsLoaded      = false;
-    m_tensorsFieldLoaded = false;
-    m_tensorsLoaded      = false;
-    m_ODFsLoaded         = false;
-    m_surfaceLoaded      = false;
-
-    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
-    {
-        DatasetInfo* info = m_mainFrame->m_pListCtrl2->GetItem( i );
-		if(info != NULL)
-		{
-			switch( info->getType() )
-			{
-				case HEAD_BYTE:
-				case HEAD_SHORT:
-				case OVERLAY:
-				case RGB:
-					m_anatomyLoaded      = true;
-					break;
-				case VECTORS:
-					m_anatomyLoaded      = true;
-					m_vectorsLoaded      = true;
-					m_tensorsFieldLoaded = true;
-					break;
-				case MESH:
-					m_meshLoaded         = true;
-					break;
-				case TENSOR_FIELD:
-					m_tensorsFieldLoaded = true;
-					break;
-				case FIBERS:
-					m_fibersLoaded       = true;
-					break;
-				case FIBERSGROUP:
-					m_fibersGroupLoaded	 = true;
-					break;
-				case SURFACE:
-					m_surfaceLoaded      = true;
-					break;
-				case ISO_SURFACE:
-					m_meshLoaded         = true;
-					break;
-				case TENSORS:
-					m_tensorsLoaded      = true;
-					break;
-				case ODFS:
-					m_ODFsLoaded         = true;
-					break;
-				default:
-					break;
-			}
-		}
-    }
+//     m_anatomyLoaded      = false;
+//     m_meshLoaded         = false;
+//     m_fibersLoaded       = false;
+//     m_vectorsLoaded      = false;
+//     m_tensorsFieldLoaded = false;
+//     m_tensorsLoaded      = false;
+//     m_ODFsLoaded         = false;
+//     m_surfaceLoaded      = false;
+// 
+//     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
+//     {
+//         DatasetInfo* info = m_mainFrame->m_pListCtrl2->GetItem( i );
+// 		if(info != NULL)
+// 		{
+// 			switch( info->getType() )
+// 			{
+// 				case HEAD_BYTE:
+// 				case HEAD_SHORT:
+// 				case OVERLAY:
+// 				case RGB:
+// 					m_anatomyLoaded      = true;
+// 					break;
+// 				case VECTORS:
+// 					m_anatomyLoaded      = true;
+// 					m_vectorsLoaded      = true;
+// 					m_tensorsFieldLoaded = true;
+// 					break;
+// 				case MESH:
+// 					m_meshLoaded         = true;
+// 					break;
+// 				case TENSOR_FIELD:
+// 					m_tensorsFieldLoaded = true;
+// 					break;
+// 				case FIBERS:
+// 					m_fibersLoaded       = true;
+// 					break;
+// 				case FIBERSGROUP:
+// 					m_fibersGroupLoaded	 = true;
+// 					break;
+// 				case SURFACE:
+// 					m_surfaceLoaded      = true;
+// 					break;
+// 				case ISO_SURFACE:
+// 					m_meshLoaded         = true;
+// 					break;
+// 				case TENSORS:
+// 					m_tensorsLoaded      = true;
+// 					break;
+// 				case ODFS:
+// 					m_ODFsLoaded         = true;
+// 					break;
+// 				default:
+// 					break;
+// 			}
+// 		}
+//     }
 }
 
 void DatasetHelper::doLicMovie( int i_mode )
@@ -1732,7 +1681,8 @@ void DatasetHelper::doLicMovie( int i_mode )
 
 void DatasetHelper::licMovieHelper()
 {
-    Surface* l_surface = new Surface( this );
+    unsigned int index = DatasetManager::getInstance()->createSurface();
+    Surface* l_surface = (Surface *)DatasetManager::getInstance()->getDataset( index );
     l_surface->execute();
 
 #ifdef __WXMAC__
@@ -1745,25 +1695,15 @@ void DatasetHelper::licMovieHelper()
 #endif
 
     // TODO: Verify this. Added to list, rendered, then removed from list. Is this necessary?
-    m_mainFrame->m_pListCtrl2->InsertItem( l_surface );
+    m_mainFrame->m_pListCtrl2->InsertItem( index );
 
-//     m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-//     m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_surface->getName() );
-//     m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.50" ) );
-//     m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-//     m_mainFrame->m_pListCtrl->SetItemData( l_id, (long)l_surface );
-//     m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-
-    m_surfaceLoaded = true;
     l_surface->activateLIC();
 
     m_scheduledScreenshot = true;
     m_mainFrame->m_pMainGL->render();
     m_mainFrame->m_pMainGL->render();
 
-    delete l_surface;
     m_mainFrame->m_pListCtrl2->DeleteItem( l_id );
-
 }
 
 void DatasetHelper::createLicSliceSag( int i_slize )

@@ -154,7 +154,7 @@ void TheScene::bindTextures()
 
     for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( pDsInfo->getType() < MESH && pDsInfo->getShow() )
         {
             glActiveTexture( GL_TEXTURE0 + allocatedTextureCount );
@@ -253,19 +253,16 @@ void TheScene::renderScene()
         m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue(m_posAxial);
     }
 
-
-	
-	
     // Opaque objects.
     renderSlices();
 
-    if( m_pDatasetHelper->m_surfaceLoaded )
+    if( DatasetManager::getInstance()->isSurfaceLoaded() )
         renderSplineSurface();
 
     if( m_pDatasetHelper->m_pointMode )
         drawPoints();
 
-    if( m_pDatasetHelper->m_vectorsLoaded )
+    if( DatasetManager::getInstance()->isVectorsLoaded() )
         drawVectors();
 
     if( m_pDatasetHelper->m_showColorMapLegend )
@@ -273,15 +270,9 @@ void TheScene::renderScene()
 
     if( DatasetManager::getInstance()->isTensorsLoaded() )
         renderTensors();
-
-//     if( m_pDatasetHelper->m_tensorsLoaded )
-//         renderTensors();
     
     if( DatasetManager::getInstance()->isOdfsLoaded() )
         renderODFs();
-
-//     if( m_pDatasetHelper->m_ODFsLoaded )
-//         renderODFs();
     
     renderMesh();
 	renderFibers();
@@ -468,7 +459,7 @@ void TheScene::renderSplineSurface()
 {
     for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( pDsInfo->getType() == SURFACE && pDsInfo->getShow() )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
@@ -550,7 +541,7 @@ void TheScene::renderMesh()
     //Render meshes
     for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
         if( pDsInfo->getType() == MESH || pDsInfo->getType() == ISO_SURFACE )
         {
             if( pDsInfo->getShow() )
@@ -597,7 +588,7 @@ void TheScene::renderFibers()
 
     for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
 
         if( pDsInfo->getType() == FIBERS && pDsInfo->getShow())
         {
@@ -667,7 +658,7 @@ void TheScene::renderTensors()
 
     for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
 
         if( pDsInfo->getType() == TENSORS && pDsInfo->getShow() )
         {
@@ -889,7 +880,7 @@ void TheScene::drawVectors()
 
     for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
 
         if( pInfo->getType() == VECTORS && pInfo->getShow() )
         {
@@ -1155,7 +1146,7 @@ void TheScene::drawVectors()
 
             for( int j = 0; j < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++j )
             {
-                DatasetInfo* pMesh = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( j );
+                DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( j ) );
 
                 if ( pMesh->getType() == ISO_SURFACE && pMesh->getShow() )
                 {

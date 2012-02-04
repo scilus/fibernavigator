@@ -164,15 +164,15 @@ public:
 
     bool m_loadDataset;
     bool m_scnFileLoaded;
-    bool m_anatomyLoaded;
-    bool m_meshLoaded;
+//     bool m_anatomyLoaded;
+//     bool m_meshLoaded;
     bool m_fibersGroupLoaded;
-	bool m_fibersLoaded;
-    bool m_vectorsLoaded;
-    bool m_tensorsFieldLoaded;
-    bool m_tensorsLoaded;
-    bool m_ODFsLoaded;
-    bool m_surfaceLoaded;
+// 	bool m_fibersLoaded;
+//     bool m_vectorsLoaded;
+//     bool m_tensorsFieldLoaded;
+//     bool m_tensorsLoaded;
+//     bool m_ODFsLoaded;
+//     bool m_surfaceLoaded;
     bool m_surfaceIsDirty;
 
     /////////////////////////////////////////////////////////////////////////////////

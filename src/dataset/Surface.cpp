@@ -2,6 +2,7 @@
 #include "Surface.h"
 
 #include "Anatomy.h"
+#include "DatasetManager.h"
 #include "SplinePoint.h"
 #include "Surface.h"
 #include "../main.h"
@@ -43,7 +44,6 @@ Surface::Surface(DatasetHelper* dh) : DatasetInfo(dh)
 Surface::~Surface()
 {
     m_dh->m_mainFrame->m_pTreeWidget->DeleteChildren(m_dh->m_mainFrame->m_tPointId);
-    m_dh->m_surfaceLoaded = false;
     m_tMesh->clearMesh();
     delete m_tMesh;
     if (m_kdTree)
@@ -300,7 +300,7 @@ void Surface::execute ()
         m_tMesh->doLoopSubD();
     subDCount = 3;
 
-    if (m_dh->m_vectorsLoaded && m_useLIC)
+    if( DatasetManager::getInstance()->isVectorsLoaded() && m_useLIC )
     {
         m_tMesh->doLoopSubD();
         m_tMesh->doLoopSubD();

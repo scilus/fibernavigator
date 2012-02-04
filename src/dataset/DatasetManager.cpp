@@ -25,12 +25,8 @@ namespace
 DatasetManager * DatasetManager::m_pInstance = NULL;
 
 DatasetManager::DatasetManager(void)
-: m_maxIndex( 8 )
+: m_nextIndex( 0 )
 {
-    for (unsigned int i( 0 ); i < m_maxIndex + 1; ++i )
-    {
-        m_freeIndexes.insert( i );
-    }    
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -47,7 +43,7 @@ DatasetManager * DatasetManager::getInstance()
 
 //////////////////////////////////////////////////////////////////////////
 
-DatasetInfo * DatasetManager::getDataset( int index )
+DatasetInfo * DatasetManager::getDataset( unsigned int index )
 {
     if( m_datasets.find( index ) != m_datasets.end() )
     {
@@ -85,17 +81,16 @@ std::vector<ODFs *> DatasetManager::getOdfs()
 
 int DatasetManager::load( const wxString &filename, const wxString &extension )
 {
+    int result( -1 );
+
     if( wxT( "nii" ) == extension )
     {
-        int result( -1 );
-
         nifti_image *pHeader = nifti_image_read( filename.char_str(), 0 );
         nifti_image *pBody   = nifti_image_read( filename.char_str(), 1 );
 
         if( NULL == pHeader || NULL == pBody )
         {
             Logger::getInstance()->print( wxT( "nifti file corrupt, cannot create nifti image from header" ), LOGLEVEL_ERROR );
-            return -1;
         }
 
         if( 16 == pHeader->datatype && 4 == pHeader->ndim && 6 == pHeader->dim[4] )
@@ -103,14 +98,15 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
             if ( m_anatomies.empty() )
             {
                 Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
-                return -1;
             }
             else if ( !m_tensors.empty() )
             {
                 Logger::getInstance()->print( wxT( "Tensors already loaded" ), LOGLEVEL_ERROR );
-                return -1;
             }
-            result = loadTensors( filename, pHeader, pBody );
+            else
+            {
+                result = loadTensors( filename, pHeader, pBody );
+            }
         }
         else if( 16 == pHeader->datatype && 4 == pHeader->ndim && ( 
             0 == pHeader->dim[4] || 15 == pHeader->dim[4] || 28 == pHeader->dim[4] || 45 == pHeader->dim[4] || 
@@ -119,9 +115,11 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
             if ( m_anatomies.empty() )
             {
                 Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
-                return -1;
             }
-            result = loadODF( filename, pHeader, pBody );
+            else
+            {
+                result = loadODF( filename, pHeader, pBody );
+            }
         }
         else
         {
@@ -130,82 +128,92 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
 
         nifti_image_free( pHeader );
         nifti_image_free( pBody );
-
-        return result;
     }
     else if( wxT("mesh") == extension || wxT( "surf" ) == extension || wxT( "dip" ) == extension )
     {
         if( !isAnatomyLoaded() )
         {
             Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
-            return -1;
         }
-
-        return loadMesh( filename, extension );
+        else
+        {
+            result = loadMesh( filename, extension );
+        }
     }
     else if( wxT( "fib" ) == extension || wxT( "trk" ) == extension || wxT( "bundlesdata" ) == extension || wxT( "Bfloat" ) == extension || wxT( "tck" ) == extension )
     {
         if( !isAnatomyLoaded() )
         {
             Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
-            return -1;
         }
-        
-        return loadFibers( filename );
+        else
+        {
+            result = loadFibers( filename );
+        }
     }
     else
     {
         Logger::getInstance()->print( wxString::Format( wxT( "Unsupported file format \"%s\"" ), extension ), LOGLEVEL_ERROR );
     }
 
-//     else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
-//     {
-//         if( ! m_anatomyLoaded )
-//         {
-//             m_lastError = wxT( "no anatomy file loaded" );
-//             return false;
-//         }
-//         if( m_fibersLoaded )
-//         {
-//             m_lastError = wxT( "fibers already loaded" );
-//             return false;
-//         }
-// 
-//         Fibers* l_fibers = new Fibers( this );
-// 
-//         if( l_fibers->load( i_fileName ) )
-//         {
-//             m_fibersLoaded = true;
-// 
-//             std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-//             for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-//             {
-//                 for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-//                 {
-//                     l_selectionObjects[i][j]->m_inBox.resize( m_countFibers, sizeof(bool) );
-//                     for( unsigned int k = 0; k < m_countFibers; ++k )
-//                     {
-//                         l_selectionObjects[i][j]->m_inBox[k] = 0;
-//                     }
-// 
-//                     l_selectionObjects[i][j]->setIsDirty( true );
-//                 }
-//             }
-// 
-//             l_fibers->setThreshold( i_threshold );
-//             l_fibers->setShow     ( i_active );
-//             l_fibers->setShowFS   ( i_showFS );
-//             l_fibers->setUseTex   ( i_useTex );            
-//             finishLoading         ( l_fibers );
-// 
-//             return true;
-//         }
-//         return false;
-//     }
-// 
-//     m_lastError = wxT( "unsupported file format" );
+    return result;
+}
 
-    return -1;
+//////////////////////////////////////////////////////////////////////////
+
+void DatasetManager::remove( const long ptr )
+{
+    unsigned int index( -1 );
+    for( map<unsigned int, DatasetInfo *>::iterator it = m_datasets.begin(); it != m_datasets.end(); ++it )
+    {
+        if( ptr == (long)it->second )
+        {
+            index = it->first;
+            break;
+        }
+    }
+
+    if( -1 != index )
+    {
+        map<unsigned int, DatasetInfo *>::iterator it = m_datasets.find( index );
+        
+        switch( it->second->getType() )
+        {
+        case HEAD_BYTE:
+        case HEAD_SHORT:
+        case OVERLAY:
+        case RGB:
+            m_anatomies.erase( m_anatomies.find( index ) );
+            break;
+        case TENSOR_FIELD:
+            break;
+        case MESH:
+            m_meshes.erase( m_meshes.find( index ) );
+            break;
+        case VECTORS:
+            break;
+        case TENSORS:
+            m_tensors.erase( m_tensors.find( index ) );
+            break;
+        case ODFS:
+            m_odfs.erase( m_odfs.find( index ) );
+            break;
+        case FIBERS:
+            m_fibers.erase( m_fibers.find( index ) );
+            break;
+        case SURFACE:
+            m_surfaces.erase( m_surfaces.find( index ) );
+            break;
+        case ISO_SURFACE:
+            break;
+        case FIBERSGROUP:
+            m_fibersGroup.erase( m_fibersGroup.find( index ) );
+            break;
+        }
+
+        delete it->second;
+        m_datasets.erase( it );
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -213,24 +221,6 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
 void DatasetManager::setDatasetHelper( DatasetHelper * dh )
 {
     m_pDatasetHelper = dh;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-int DatasetManager::getNextAvailableIndex()
-{
-    if( m_freeIndexes.empty() )
-    {
-        for( unsigned int i( m_maxIndex + 1 ); i < 2 * m_maxIndex + 1; ++i )
-        {
-            m_freeIndexes.insert( i );
-        }
-        m_maxIndex *= 2;
-    }
-
-    int result = *m_freeIndexes.begin();
-    m_freeIndexes.erase(m_freeIndexes.begin());
-    return result;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -247,12 +237,36 @@ int DatasetManager::insert( Anatomy * pAnatomy )
 
 //////////////////////////////////////////////////////////////////////////
 
+int DatasetManager::insert( CIsoSurface * pCIsoSurface )
+{
+    int index = getNextAvailableIndex();
+
+    m_datasets[index]  = pCIsoSurface;
+    // Verify if a new map is needed for this type
+
+    return index;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 int DatasetManager::insert( Fibers * pFibers )
 {
     int index = getNextAvailableIndex();
 
     m_datasets[index]  = pFibers;
-    m_fibers[index] = pFibers;
+    m_fibers[index]    = pFibers;
+
+    return index;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+int DatasetManager::insert( FibersGroup * pFibersGroup )
+{
+    int index = getNextAvailableIndex();
+
+    m_datasets[index]    = pFibersGroup;
+    m_fibersGroup[index] = pFibersGroup;
 
     return index;
 }
@@ -277,6 +291,18 @@ int DatasetManager::insert( ODFs * pOdfs )
 
     m_datasets[index]  = pOdfs;
     m_odfs[index]      = pOdfs;
+
+    return index;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+int DatasetManager::insert( Surface * pSurface )
+{
+    int index = getNextAvailableIndex();
+
+    m_datasets[index]  = pSurface;
+    m_surfaces[index]  = pSurface;
 
     return index;
 }
@@ -316,6 +342,7 @@ int DatasetManager::loadAnatomy( const wxString &filename, nifti_image *pHeader,
         return index;
     }
     
+    delete pAnatomy;
     return -1;
 }
 
@@ -359,6 +386,7 @@ int DatasetManager::loadFibers( const wxString &filename )
         return index;
     }
 
+    delete l_fibers;
     return -1;
 }
 
@@ -399,6 +427,7 @@ int DatasetManager::loadMesh( const wxString &filename, const wxString &extensio
         return index;
     }
 
+    delete pMesh;
     return -1;
 }
 
@@ -425,6 +454,7 @@ int DatasetManager::loadODF( const wxString &filename, nifti_image *pHeader, nif
         return index;
     }
 
+    delete pOdfs;
     return -1;
 }
 
@@ -451,6 +481,7 @@ int DatasetManager::loadTensors( const wxString &filename, nifti_image *pHeader,
         return index;
     }
 
+    delete pTensors;
     return -1;
 }
 
@@ -459,8 +490,10 @@ int DatasetManager::loadTensors( const wxString &filename, nifti_image *pHeader,
 
 DatasetManager::~DatasetManager(void)
 {
+    Logger::getInstance()->print( wxT( "DatasetManager destruction starting..." ), LOGLEVEL_DEBUG );
     for( map<unsigned int, DatasetInfo *>::iterator it = m_datasets.begin(); it != m_datasets.end(); ++it )
     {
         delete it->second;
     }
+    Logger::getInstance()->print( wxT( "DatasetManager destruction done." ), LOGLEVEL_DEBUG );
 }

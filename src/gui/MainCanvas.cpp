@@ -417,7 +417,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 
 void MainCanvas::updateView()
 {
-    float *dots = new float[8];
+    float dots[8];
     Vector3fT v1 =
     {
     { 0, 0, 1 } };
@@ -1604,6 +1604,6 @@ void MainCanvas::segment()
     pNewAnatomy->setType(2);
     pNewAnatomy->setDataType(4);
     pNewAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl2->InsertItem( pNewAnatomy );
+    m_pDatasetHelper->m_mainFrame->m_pListCtrl2->InsertItem( indx );
 }
 

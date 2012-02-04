@@ -30,7 +30,6 @@ SceneObject::~SceneObject()
 {
     if( NULL != m_propertiesSizer )
     {
-        m_propertiesSizer->Clear( true );
-        delete m_propertiesSizer;
+        //delete m_propertiesSizer;
     }
 }

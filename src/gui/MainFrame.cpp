@@ -44,6 +44,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
 EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL2,                   MainFrame::onActivateListItem2  )
 EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL2,                   MainFrame::onSelectListItem2    )
 EVT_LIST_ITEM_DESELECTED ( ID_LIST_CTRL2,                   MainFrame::onDeselectListItem2  )
+EVT_LIST_DELETE_ITEM     ( ID_LIST_CTRL2,                   MainFrame::onDeleteListItem2    )
 
 // Tree widget events
 EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
@@ -212,7 +213,15 @@ public:
                 if( -1 != result )
                 {
                     DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
-                    m_pListCtrl->InsertItem( pDataset );
+
+                    if( FIBERS == pDataset->getType() && !DatasetManager::getInstance()->isFibersGroupLoaded() )
+                    {
+                        int result = DatasetManager::getInstance()->createFibersGroup();
+                        DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
+                        m_pListCtrl->InsertItem( result );
+                    }
+
+                    m_pListCtrl->InsertItem( result );
                 }
                 else
                 {
@@ -461,7 +470,7 @@ void MainFrame::createNewAnatomy( DatasetType dataType )
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 	pNewAnatomy->setName( l_givenName );
 
-    m_pListCtrl2->InsertItem( pNewAnatomy );
+    m_pListCtrl2->InsertItem( index );
 
     refreshAllGLWidgets();
 }
@@ -1271,7 +1280,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
         pTmpFib->generateKdTree();
     }
 
-    if( ! m_pDatasetHelper->m_theScene || m_pDatasetHelper->m_surfaceLoaded )
+    if( ! m_pDatasetHelper->m_theScene || DatasetManager::getInstance()->isSurfaceLoaded() )
     {
         return;
     }
@@ -1365,28 +1374,12 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
         }
     }
 
-#ifdef __WXMAC__
-    // insert at zero is a well-known bug on OSX, so we append there...
-    // http://trac.wxwidgets.org/ticket/4492
-    //long id = m_pListCtrl->GetItemCount();
-    long id = m_pListCtrl2->GetItemCount();
-#else
-    long id = 0;
-#endif
+    int index = DatasetManager::getInstance()->createSurface();
+    Surface *pSurface = (Surface *)DatasetManager::getInstance()->getDataset( index );
+    pSurface->execute();
 
-    Surface* l_surface = new Surface(m_pDatasetHelper);
-    l_surface->execute();
+    m_pListCtrl2->InsertItem( index );
 
-    m_pListCtrl2->InsertItem( l_surface );
-
-//     m_pListCtrl->InsertItem( id, wxT( "" ), 0 );
-//     m_pListCtrl->SetItem( id, 1, l_surface->getName() );
-//     m_pListCtrl->SetItem( id, 2, wxT( "0.50" ) );
-//     m_pListCtrl->SetItem( id, 3, wxT( "" ), 1 );
-//     m_pListCtrl->SetItemData( id, (long)l_surface );
-//     m_pListCtrl->SetItemState( id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-
-    m_pDatasetHelper->m_surfaceLoaded = true;
     refreshAllGLWidgets();
 }
 
@@ -1407,7 +1400,7 @@ void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
 
     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_pListCtrl2->GetItemCount() ); ++i )
     {
-        DatasetInfo* l_info = m_pListCtrl2->GetItem( i );
+        DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( i ) );
         if( l_info->getType() == SURFACE )
         {
             ((Surface*)l_info)->flipNormals();
@@ -1933,54 +1926,12 @@ void MainFrame::onActivateListItem2( wxListEvent& evt )
     refreshAllGLWidgets();
 }
 
-// void MainFrame::onActivateListItem( wxListEvent& event )
-// {
-//     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
-// 
-//     int l_item = event.GetIndex();
-//     m_pTreeWidget->UnselectAll();
-//     DatasetInfo* l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item );
-//     m_pLastSelectedSceneObject = l_info;
-//     m_lastSelectedListItem = l_item;
-//     int l_col = m_pListCtrl->getColActivated();
-//     switch( l_col )
-//     {        
-//     case 10:
-//         if (l_info->toggleShow())
-//         {
-//             m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 0 );
-//         }
-//         else
-//         {
-//             m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 1 );
-//         }
-//         break;
-//     case 11:
-//         if( ! l_info->toggleShowFS())
-//         {
-//             m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
-//         }
-//         else
-//         {
-//             m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
-//         }
-//         break;
-//     case 13:
-//         deleteListItem();
-//         break;
-//     default:
-//         return;
-//         break;
-//     }
-//     refreshAllGLWidgets();
-// }
-
 void MainFrame::deleteListItem()
 {
     if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {       
         long tmp = m_currentListItem;
-        DatasetInfo * pInfo = m_pListCtrl2->GetItem( m_currentListItem );
+        DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( m_currentListItem ) );
 		
         if( SURFACE == pInfo->getType() )
         {
@@ -2000,7 +1951,6 @@ void MainFrame::deleteListItem()
         }
 
         deleteSceneObject();
-        //DatasetManager::getInstance()->remove()
         m_pListCtrl2->DeleteItem( tmp );
         m_pDatasetHelper->updateLoadStatus();
         refreshAllGLWidgets();
@@ -2043,6 +1993,19 @@ void MainFrame::deleteListItem()
 //     refreshAllGLWidgets();
 // }
 
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onDeleteListItem2( wxListEvent& evt )
+{
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteListItem2" ), LOGLEVEL_DEBUG );
+
+    long data = evt.GetData();
+    // TODO: Delete in DatasetManager once ListCtrl contains index instead of pointers
+    DatasetManager::getInstance()->remove( data );
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void MainFrame::onDeselectListItem2( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeselectListItem2" ), LOGLEVEL_DEBUG );
@@ -2051,13 +2014,15 @@ void MainFrame::onDeselectListItem2( wxListEvent& evt )
     m_lastSelectedListItem = -1;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 void MainFrame::onSelectListItem2( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem2" ), LOGLEVEL_DEBUG );
 
     int index = evt.GetIndex();
     m_pTreeWidget->UnselectAll();
-    DatasetInfo * pInfo = m_pListCtrl2->GetItem( index );
+    DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( index ) );
 
     if( NULL == pInfo )
     {

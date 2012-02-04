@@ -37,7 +37,7 @@ using namespace std;
  * It holds the fibers data, and can also be used to
  * compute statistics and selected fibers data.
  */
-class Fibers : public DatasetInfo, public wxTreeItemData
+class Fibers : public DatasetInfo
 {
 public:
     Fibers( DatasetHelper *pDatasetHelper );

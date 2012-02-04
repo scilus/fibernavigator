@@ -22,7 +22,7 @@ using namespace std;
 enum DisplayShape { NORMAL, SPHERE, AXES, AXIS };
 
 class MainFrame;
-class Glyph : public DatasetInfo , public wxTreeItemData
+class Glyph : public DatasetInfo
 {
 public:
     // Constructor/Destructor
