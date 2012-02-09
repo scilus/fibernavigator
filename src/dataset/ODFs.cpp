@@ -1200,7 +1200,7 @@ void ODFs::getSphericalHarmonicMatrixTournier( const vector< float > &i_meshPts,
                   o_shMatrix(i,j) = real(cplx_1);
                }
                else { // /* negative "m" SH  */
-                  o_shMatrix(i,j) = pow(-1,m+1)*imag(cplx_1);
+                  o_shMatrix(i,j) = pow(-(float)1, m+1)*imag(cplx_1);
                }
                ++j;
             } 
