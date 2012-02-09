@@ -690,6 +690,7 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     //if( i_axis == Y_AXIS ) { //Coronal: flip x
     //   l_flippedAxes[0] *= -1.0f;  
     //} 
+
     // Need a global flip in X on top of that, which is done above
 
     DatasetInfo::m_dh->m_shaderHelper->m_odfsShader.setUni3Float(   "axisFlip",    l_flippedAxes               );
@@ -1199,7 +1200,7 @@ void ODFs::getSphericalHarmonicMatrixTournier( const vector< float > &i_meshPts,
                   o_shMatrix(i,j) = real(cplx_1);
                }
                else { // /* negative "m" SH  */
-                  o_shMatrix(i,j) = imag(cplx_1);
+                  o_shMatrix(i,j) = pow(-1,m+1)*imag(cplx_1);
                }
                ++j;
             } 
