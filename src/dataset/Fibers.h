@@ -45,14 +45,7 @@ public:
     virtual ~Fibers();
 
     // Fibers loading methods
-    bool    load(             wxString  filename );
-    bool    loadTRK(    const wxString &filename );
-    bool    loadCamino( const wxString &filename );
-    bool    loadMRtrix( const wxString &filename );
-    bool    loadPTK(    const wxString &filename );
-    bool    loadVTK(    const wxString &filename );
-    bool    loadDmri(   const wxString &filename );
-    void    loadTestFibers();
+    bool    load( const wxString &filename );
     
     void    updateFibersColors();
     
@@ -172,6 +165,14 @@ public:
     void    updateCrossingFibersThickness();
 
 private:
+    bool            loadTRK(    const wxString &filename );
+    bool            loadCamino( const wxString &filename );
+    bool            loadMRtrix( const wxString &filename );
+    bool            loadPTK(    const wxString &filename );
+    bool            loadVTK(    const wxString &filename );
+    bool            loadDmri(   const wxString &filename );
+    void            loadTestFibers();
+
     void            colorWithTorsion(     float *pColorData );
     void            colorWithCurvature(   float *pColorData );
     void            colorWithDistance(    float *pColorData );

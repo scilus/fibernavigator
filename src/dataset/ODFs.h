@@ -30,11 +30,9 @@ public:
 
     // From DatasetInfo
     void draw       ();
-    bool load       ( wxString i_fileName );
     bool load       ( nifti_image *pHeader, nifti_image *pBody );
 
     // Functions
-    bool loadNifti  ( wxString i_fileName );
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
     

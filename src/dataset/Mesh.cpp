@@ -34,18 +34,6 @@ Mesh::~Mesh()
     delete m_tMesh;
 }
 
-bool Mesh::load( wxString i_filename )
-{
-    if( i_filename.AfterLast( '.' )      == _T( "mesh" ) )
-        return loadMesh( i_filename );
-    else if( i_filename.AfterLast( '.' ) == _T( "surf" ) )
-        return loadSurf( i_filename );
-    else if( i_filename.AfterLast( '.' ) == _T( "dip" ) )
-        return loadDip( i_filename) ;
-
-    return true;
-}
-
 bool Mesh::loadDip( wxString filename )
 {
     Logger::getInstance()->print( wxT( "Loading DIP mesh file" ), LOGLEVEL_MESSAGE );

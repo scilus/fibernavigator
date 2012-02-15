@@ -87,25 +87,6 @@ ODFs::~ODFs()
     Logger::getInstance()->print( wxT( "ODFs destructor done." ), LOGLEVEL_DEBUG );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// This function will load a ODFs type Nifty file.
-//
-// i_fileName       : The name of the file to load.
-///////////////////////////////////////////////////////////////////////////
-bool ODFs::load( wxString i_fileName )
-{
-    m_fullPath = i_fileName;
-    m_lastODF_path = i_fileName;
-
-#ifdef __WXMSW__
-    m_name = i_fileName.AfterLast( '\\' );
-#else
-    m_name = i_fileName.AfterLast( '/' );
-#endif
-
-    return loadNifti( i_fileName );
-}
-
 bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
 {
     m_columns = pHeader->dim[1]; //80
@@ -159,76 +140,6 @@ bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
             l_fileFloatData[i * m_bands + j] = l_data[j * l_nSize + i];
         }
     }
-
-    // Once the file has been read successfully, we need to create the structure 
-    // that will contain all the sphere points representing the ODFs.
-    createStructure( l_fileFloatData );
-
-    m_isLoaded = true;
-
-    return true;
-}
-
-
-///////////////////////////////////////////////////////////////////////////
-// This function will load a ODFs type Nifty file.
-//
-// i_fileName       : The name of the file to load.
-// Returns true if successful, false otherwise.
-///////////////////////////////////////////////////////////////////////////
-bool ODFs::loadNifti( wxString i_fileName )
-{
-    char* l_hdrFile;
-    l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
-    strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
-
-    nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
-
-    if( ! l_image )
-    {
-        DatasetInfo::m_dh->m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
-        return false;
-    }
-
-    m_columns = l_image->dim[1]; //80
-    m_rows    = l_image->dim[2]; //1
-    m_frames  = l_image->dim[3]; //72
-    m_bands   = l_image->dim[4];
-
-    m_voxelSizeX = l_image->dx;
-    m_voxelSizeY = l_image->dy;
-    m_voxelSizeZ = l_image->dz;
-
-    m_type = ODFS;
-
-    // Order has to be between 0 and 16 (0, 2, 4, 6, 8, 10, 12, 14, 16)
-    if( l_image->datatype != 16  || !( m_bands == 0   || m_bands == 15 || m_bands == 28 || 
-                                       m_bands == 45  || m_bands == 66 || m_bands == 91 || 
-                                       m_bands == 120 || m_bands == 153 ) )
-    {
-        DatasetInfo::m_dh->m_lastError = wxT( "not a valid ODFs file format" );
-        return false;
-    }    
-
-    nifti_image* l_fileData = nifti_image_read( l_hdrFile, 1 );
-    if( ! l_fileData )
-    {
-        DatasetInfo::m_dh->m_lastError = wxT( "nifti file corrupt" );
-        return false;
-    }
-
-    int l_nSize = l_image->dim[1] * l_image->dim[2] * l_image->dim[3];
-
-    float* l_data = (float*)l_fileData->data;
-    
-    std::vector< float > l_fileFloatData;
-    l_fileFloatData.resize( l_nSize * m_bands );
-
-    // We need to do a bit of moving around with the data in order to have it like we want.
-    for( int i = 0; i < l_nSize; ++i )
-        for( int j = 0; j < m_bands; ++j )
-            l_fileFloatData[i * m_bands + j] = l_data[(j * l_nSize) + i];
-
 
     // Once the file has been read successfully, we need to create the structure 
     // that will contain all the sphere points representing the ODFs.
@@ -1396,35 +1307,36 @@ complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, fl
 */
 void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
 {
-    l_dataset->setShBasis( basis ); // Uses the current Spherical Harmonics basis selected
-
-    if( l_dataset->load(m_lastODF_path)) //Reloads the ODFs
-    {
-        //Copy all params modifications
-        l_dataset->setThreshold        ( getThreshold() );
-        l_dataset->setAlpha            ( getAlpha() );
-        l_dataset->setShow             ( getShow() );
-        l_dataset->setShowFS           ( getShowFS() );
-        l_dataset->setUseTex           ( getUseTex() );
-        l_dataset->setColor            ( MIN_HUE, getColor( MIN_HUE ) );
-        l_dataset->setColor            ( MAX_HUE, getColor( MAX_HUE ) );
-        l_dataset->setColor            ( SATURATION, getColor( SATURATION ) );
-        l_dataset->setColor            ( LUMINANCE, getColor( LUMINANCE ) );
-        l_dataset->setLOD              (getLOD());
-        l_dataset->setLighAttenuation  (getLightAttenuation());
-        l_dataset->setLightPosition    (X_AXIS, getLightPosition( X_AXIS ));
-        l_dataset->setLightPosition    (Y_AXIS, getLightPosition( Y_AXIS ));
-        l_dataset->setLightPosition    (Z_AXIS, getLightPosition( Z_AXIS ));
-        l_dataset->setDisplayFactor    (getDisplayFactor());
-        l_dataset->setScalingFactor    (getScalingFactor());
-        l_dataset->flipAxis            (X_AXIS, isAxisFlipped( X_AXIS ));
-        l_dataset->flipAxis            (Y_AXIS, isAxisFlipped( Y_AXIS ));
-        l_dataset->flipAxis            (Z_AXIS, isAxisFlipped( Z_AXIS ));
-        l_dataset->setColorWithPosition(getColorWithPosition());
-        
-        m_dh->m_mainFrame->deleteListItem();
-        m_data->finishLoading( l_dataset );
-    }
+    // TODO: Review how to do this without using another ODF
+//     l_dataset->setShBasis( basis ); // Uses the current Spherical Harmonics basis selected
+// 
+//     if( l_dataset->load(m_lastODF_path)) //Reloads the ODFs
+//     {
+//         //Copy all params modifications
+//         l_dataset->setThreshold        ( getThreshold() );
+//         l_dataset->setAlpha            ( getAlpha() );
+//         l_dataset->setShow             ( getShow() );
+//         l_dataset->setShowFS           ( getShowFS() );
+//         l_dataset->setUseTex           ( getUseTex() );
+//         l_dataset->setColor            ( MIN_HUE, getColor( MIN_HUE ) );
+//         l_dataset->setColor            ( MAX_HUE, getColor( MAX_HUE ) );
+//         l_dataset->setColor            ( SATURATION, getColor( SATURATION ) );
+//         l_dataset->setColor            ( LUMINANCE, getColor( LUMINANCE ) );
+//         l_dataset->setLOD              (getLOD());
+//         l_dataset->setLighAttenuation  (getLightAttenuation());
+//         l_dataset->setLightPosition    (X_AXIS, getLightPosition( X_AXIS ));
+//         l_dataset->setLightPosition    (Y_AXIS, getLightPosition( Y_AXIS ));
+//         l_dataset->setLightPosition    (Z_AXIS, getLightPosition( Z_AXIS ));
+//         l_dataset->setDisplayFactor    (getDisplayFactor());
+//         l_dataset->setScalingFactor    (getScalingFactor());
+//         l_dataset->flipAxis            (X_AXIS, isAxisFlipped( X_AXIS ));
+//         l_dataset->flipAxis            (Y_AXIS, isAxisFlipped( Y_AXIS ));
+//         l_dataset->flipAxis            (Z_AXIS, isAxisFlipped( Z_AXIS ));
+//         l_dataset->setColorWithPosition(getColorWithPosition());
+//         
+//         m_dh->m_mainFrame->deleteListItem();
+//         m_data->finishLoading( l_dataset );
+//     }
 }
 
 void ODFs::createPropertiesSizer(PropertiesWindow *parent)

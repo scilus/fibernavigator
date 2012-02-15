@@ -29,8 +29,6 @@ public:
         
     void draw(); // From DatasetInfo
 
-    bool loadNifti( wxString i_fileName );
-    bool load     ( wxString i_fileName );
     bool load     ( nifti_image *pHeader, nifti_image *pBody );
     void normalize();
     virtual void createPropertiesSizer(PropertiesWindow *parent);

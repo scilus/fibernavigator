@@ -36,9 +36,6 @@ public:
     // From DatasetInfo
     virtual void draw();
 
-    // Pure virtual functions
-    virtual bool loadNifti( wxString i_fileName ) = 0;
-
     // Functions
     void         flipAxis     ( AxisType i_axisType, bool i_isFlipped );
     bool         isAxisFlipped( AxisType i_axisType );

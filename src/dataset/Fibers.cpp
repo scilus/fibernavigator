@@ -81,7 +81,7 @@ Fibers::~Fibers()
     m_colorArray.clear();
 }
 
-bool Fibers::load( wxString filename )
+bool Fibers::load( const wxString &filename )
 {
     bool res( false );
 

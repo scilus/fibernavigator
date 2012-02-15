@@ -57,24 +57,6 @@ Tensors::~Tensors()
     Logger::getInstance()->print( wxT( "Tensors destructor called but nothing to do." ), LOGLEVEL_DEBUG );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// This function will load a ODFs type Nifty file.
-//
-// i_fileName       : The name of the file to load.
-///////////////////////////////////////////////////////////////////////////
-bool Tensors::load( wxString i_fileName )
-{
-    m_fullPath = i_fileName;
-
-#ifdef __WXMSW__
-    m_name = i_fileName.AfterLast( '\\' );
-#else
-    m_name = i_fileName.AfterLast( '/' );
-#endif
-
-    return loadNifti( i_fileName );
-}
-
 bool Tensors::load( nifti_image *pHeader, nifti_image *pBody )
 {
     m_columns = pHeader->dim[1]; //93
@@ -119,71 +101,6 @@ bool Tensors::load( nifti_image *pHeader, nifti_image *pBody )
     return true;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// This function will load a tensor type Nifty file.
-//
-// i_fileName       : The name of the file to load.
-// Returns true if successful, false otherwise.
-///////////////////////////////////////////////////////////////////////////
-bool Tensors::loadNifti( wxString i_fileName )
-{
-    char* l_hdrFile;
-    l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
-    strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
-
-    nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
-
-    if( ! l_image )
-    {
-        DatasetInfo::m_dh->m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
-        return false;
-    }
-
-    m_columns = l_image->dim[1]; //93
-    m_rows    = l_image->dim[2]; //116
-    m_frames  = l_image->dim[3]; //93
-    m_bands   = l_image->dim[4];
-
-    m_voxelSizeX = l_image->dx;
-    m_voxelSizeY = l_image->dy;
-    m_voxelSizeZ = l_image->dz;
-
-    if( l_image->datatype != 16  || m_bands != 6 )
-    {
-        DatasetInfo::m_dh->m_lastError = wxT( "not a valid tensor file format" );
-        return false;
-    }
-
-    m_type = TENSORS;
-
-    nifti_image* l_fileData = nifti_image_read( l_hdrFile, 1 );
-    if( ! l_fileData )
-    {
-        DatasetInfo::m_dh->m_lastError = wxT( "nifti file corrupt" );
-        return false;
-    }
-
-    int l_nSize = l_image->dim[1] * l_image->dim[2] * l_image->dim[3];
-
-    float* l_data = (float*)l_fileData->data;
-    
-    vector< float > l_fileFloatData;    
-    l_fileFloatData.resize( l_nSize * m_bands );
-
-    // We need to do a bit of moving around with the data in order to have it like we want.
-    for( int i = 0; i < l_nSize; ++i )
-        for( int j = 0; j < m_bands; ++j )
-            l_fileFloatData[i * m_bands + j] = l_data[(j * l_nSize) + i];
-
-    // Once the file has been read successfully, we need to create the structure 
-    // that will contain all the sphere points representing the tensors.
-    if( ! createStructure( l_fileFloatData ) )
-       return false;
-    
-    m_isLoaded = true;
-    normalize();
-    return true;
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will fill up m_tensorsMatrix and m_tensorsFA with the data 

@@ -79,9 +79,7 @@ public:
 
 	void draw(){};
 
-    bool load     ( wxString fileName );
-    bool load     ( nifti_image *pHeader, nifti_image *pBody );	
-    bool loadNifti( wxString fileName );
+    bool load     ( nifti_image *pHeader, nifti_image *pBody );
     void saveNifti( wxString fileName );
 
     void setDataType( const int type) { m_dataType = type; }

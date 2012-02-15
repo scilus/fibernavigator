@@ -41,7 +41,6 @@ public:
     Mesh( DatasetHelper *datasetHelper, const wxString &filename );
     virtual ~Mesh();
 
-    bool load    ( wxString filename );
     bool loadMesh( wxString filename );
     bool loadSurf( wxString filename );
     bool loadDip ( wxString filename );

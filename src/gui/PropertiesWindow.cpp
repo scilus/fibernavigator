@@ -961,44 +961,48 @@ void PropertiesWindow::OnOriginalShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnOriginalShBasis" ), LOGLEVEL_DEBUG );
 
-    int index = DatasetManager::getInstance()->createODFs();
-    ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
-    
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 0 );
-    m_pMainFrame->m_pListCtrl2->InsertItem( index );
+    // TODO: Review this without making new ODF
+//     int index = DatasetManager::getInstance()->createODFs();
+//     ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
+//     
+//     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 0 );
+//     m_pMainFrame->m_pListCtrl2->InsertItem( index );
 }
 
 void PropertiesWindow::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDescoteauxShBasis" ), LOGLEVEL_DEBUG );
 
-    int index = DatasetManager::getInstance()->createODFs();
-    ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
-
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 1 );
-    m_pMainFrame->m_pListCtrl2->InsertItem( index );
+    // TODO: Review this without making new ODF
+//     int index = DatasetManager::getInstance()->createODFs();
+//     ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
+// 
+//     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 1 );
+//     m_pMainFrame->m_pListCtrl2->InsertItem( index );
 }
 
 void PropertiesWindow::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnTournierShBasis" ), LOGLEVEL_DEBUG );
 
-    int index = DatasetManager::getInstance()->createODFs();
-    ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
-
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 2 );
-    m_pMainFrame->m_pListCtrl2->InsertItem( index );
+    // TODO: Review this without making new ODF
+//     int index = DatasetManager::getInstance()->createODFs();
+//     ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
+// 
+//     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 2 );
+//     m_pMainFrame->m_pListCtrl2->InsertItem( index );
 }
 
 void PropertiesWindow::OnPTKShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnPTKShBasis" ), LOGLEVEL_DEBUG );
 
-    int index = DatasetManager::getInstance()->createODFs();
-    ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
-
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 3 );
-    m_pMainFrame->m_pListCtrl2->InsertItem( index );
+    // TODO: Review this without making new ODF
+//     int index = DatasetManager::getInstance()->createODFs();
+//     ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
+// 
+//     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 3 );
+//     m_pMainFrame->m_pListCtrl2->InsertItem( index );
 }
 
 ///////////////////////////////////////////////////////////////////////////
