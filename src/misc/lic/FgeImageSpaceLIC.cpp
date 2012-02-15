@@ -5,22 +5,21 @@
 //   //  // /////       File     :   $RCSfile: $
 //   //  // //          Language :   C++
 //    /////  ////       Date     :   $Date: $
-//             Author   :   $Author: wiebel $
+//       //             Author   :   $Author: wiebel $
 //////////              Revision :   $Revision: 8815 $
 
 #include "FgeImageSpaceLIC.h"
 
 #include "FgeFramebufferObject.h"
-#include "FgeRenderbuffer.h"
 #include "FgeGLTexture.h"
-
-#include "wx/wxprec.h"
+#include "FgeRenderbuffer.h"
 
 #include "../../Logger.h"
 #include "../../dataset/DatasetManager.h"
 
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 using namespace std;
@@ -332,9 +331,9 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     m_transformShader.setUniFloat("maxZ", maxZ);
 
 
-    m_transformShader.setUniInt("dimX", m_dh->m_columns);
-    m_transformShader.setUniInt("dimY", m_dh->m_rows);
-    m_transformShader.setUniInt("dimZ", m_dh->m_frames);
+    m_transformShader.setUniInt("dimX", DatasetManager::getInstance()->getColumns() );
+    m_transformShader.setUniInt("dimY", DatasetManager::getInstance()->getRows() );
+    m_transformShader.setUniInt("dimZ", DatasetManager::getInstance()->getFrames() );
 
     GLint* tex = new GLint[10];
     float* threshold = new float[10];

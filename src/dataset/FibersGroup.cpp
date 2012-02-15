@@ -40,7 +40,7 @@ FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 
 FibersGroup::~FibersGroup()
 {
-    Logger::getInstance()->print( wxT( "executing FibersGroup destructor" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Executing FibersGroup destructor" ), LOGLEVEL_DEBUG );
 }
 
 string FibersGroup::intToString( const int number )

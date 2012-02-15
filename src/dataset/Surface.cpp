@@ -353,9 +353,12 @@ void Surface::movePoints()
 
 void Surface::createCutTexture()
 {
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
 
-    int xDim = m_dh->m_rows;
-    int yDim = m_dh->m_frames;
+    int xDim = rows;
+    int yDim = frames;
     int numPoints = m_renderpointsPerCol * m_renderpointsPerRow;
 
     m_pointArray= new float[numPoints*3];
@@ -375,8 +378,7 @@ void Surface::createCutTexture()
     {
         for ( int y = 0 ; y < yDim ; ++y)
         {
-            cutTex[x + y*xDim] = getXValue(x, y, numPoints) / (float) m_dh->m_columns;
-
+            cutTex[x + y * xDim] = getXValue(x, y, numPoints) / columns;
         }
     }
 
@@ -397,7 +399,7 @@ float Surface::getXValue(int y, int z, int numPoints)
     m_boxMin = new float[3];
     m_boxMax = new float[3];
     m_boxMin[0] = 0;
-    m_boxMax[0] = m_dh->m_columns;
+    m_boxMax[0] = DatasetManager::getInstance()->getColumns();
     m_boxMin[1] = y - 3;
     m_boxMax[1] = y + 3;
     m_boxMin[2] = z - 3;
@@ -405,7 +407,7 @@ float Surface::getXValue(int y, int z, int numPoints)
 
     m_xValue = 0.0;
     m_count = 0;
-    boxTest(0, numPoints-1, 0);
+    boxTest(0, numPoints - 1, 0);
     if (m_count > 0)
         return m_xValue / m_count;
     else {
@@ -419,7 +421,7 @@ float Surface::getXValue(int y, int z, int numPoints)
             if (m_count > 0)
                 return m_xValue / m_count;
         }
-        return m_dh->m_columns / 2;
+        return DatasetManager::getInstance()->getColumns() / 2;
     }
 }
 
@@ -649,23 +651,31 @@ std::vector<Vector> Surface::getSurfaceVoxelPositions()
     if (!m_positionsCalculated)
     {
         Vector v(0, 0, 0);
-        size_t nSize = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
+        size_t nSize = DatasetManager::getInstance()->getColumns() * DatasetManager::getInstance()->getRows() * DatasetManager::getInstance()->getFrames();
         std::vector<Vector> accu(nSize, v);
         std::vector<int> hits(nSize, 0);
         std::vector<Vector> vertices = m_tMesh->getVerts();
         m_svPositions.clear();
 
-        for (size_t i = 0; i < vertices.size(); ++i)
+        float columns = DatasetManager::getInstance()->getColumns();
+        float rows    = DatasetManager::getInstance()->getRows();
+        float frames  = DatasetManager::getInstance()->getFrames();
+
+        for( vector< Vector >::iterator v = vertices.begin(); v != vertices.end(); ++v )
         {
-            v = vertices[i];
-            int index = (int) v.x + (int) v.y * m_dh->m_columns + (int) v.z * m_dh->m_columns * m_dh->m_rows;
-            if ( !(index < 0 || index > m_dh->m_columns * m_dh->m_rows * m_dh->m_frames || v.x <  0 ||
-                    v.x > m_dh->m_columns || v.y < 0 || v.z > m_dh->m_rows || v.z < 0 || v.z > m_dh->m_frames) )
+            int index = (int)( v->x + v->y * columns + v->z * columns * rows );
+
+            if( 0 <= index && index < columns * rows * frames )
             {
-                accu[index].x += v.x;
-                accu[index].y += v.y;
-                accu[index].z += v.z;
-                hits[index] += 1;
+                if( 0 <= v->x && v->x < columns && 
+                    0 <= v->y && v->y < rows    && 
+                    0 <= v->z && v->z < frames  )
+                {
+                    accu[index].x += v->x;
+                    accu[index].y += v->y;
+                    accu[index].z += v->z;
+                    hits[index]   += 1;
+                }
             }
         }
 

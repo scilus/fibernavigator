@@ -2,25 +2,24 @@
 
 #include "MainFrame.h"
 #include "MyListCtrl.h"
+#include "SceneManager.h"
 #include "../Logger.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/SplinePoint.h"
 #include "../misc/lic/FgeOffscreen.h"
 
-#include "math.h"
-#include <list>
-#include <limits>
 
+#include <wx/math.h>
 #include <wx/utils.h>
+
+#include <algorithm>
+#include <limits>
+#include <list>
 
 typedef std::vector<float> image1D;
 typedef std::vector<image1D> image2D;
 typedef std::vector<image2D> image3D;
-
-#define MAX(a,b) ((a) > (b) ? (a) : (b)) 
-#define MIN(a,b) ((a) < (b) ? (a) : (b)) 
-
 
 extern const wxEventType wxEVT_NAVGL_EVENT = wxNewEventType();
 
@@ -87,7 +86,14 @@ void MainCanvas::init()
 
 void MainCanvas::changeOrthoSize()
 {
-    m_orthoSizeNormal = (int) ( wxMax( wxMax( m_pDatasetHelper->m_columns * m_pDatasetHelper->m_xVoxel, m_pDatasetHelper->m_rows * m_pDatasetHelper->m_yVoxel), m_pDatasetHelper->m_frames * m_pDatasetHelper->m_zVoxel) );
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    m_orthoSizeNormal = (int) ( std::max( std::max( columns * voxelX, rows * voxelY ), frames * voxelZ ) );
 
     if( m_view == MAIN_VIEW )
     {
@@ -154,6 +160,11 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
     evt1.SetInt( m_view );
     int clickX = evt.GetPosition().x;
     int clickY = evt.GetPosition().y;
+
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     switch ( m_view )
     {
         case MAIN_VIEW:
@@ -353,8 +364,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
                                     break;
                             }
                             
-                            float delta = wxMax(wxMin(getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ),10),-10);
-                            float mult = wxMin( m_pDatasetHelper->m_xVoxel, wxMin( m_pDatasetHelper->m_yVoxel, m_pDatasetHelper->m_zVoxel ) );
+                            float delta = std::max( std::min( getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ), 10.0f ), -10.0f );
+                            float mult = std::min( voxelX, std::min( voxelY, voxelZ ) );
                             if ( mult < 1.0 )
                             {
                                 delta /= mult;
@@ -482,10 +493,15 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
     
     //GLdouble modelview[16];    
     GLfloat winX, winY;
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
     //glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
     
-
     winX = (float) click.x;
     winY = (float) m_viewport[3] - (float) click.y;
 
@@ -495,17 +511,17 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
     //glPopMatrix();
     Ray *ray = new Ray( m_pos1X, m_pos1Y, m_pos1Z, m_pos2X, m_pos2Y, m_pos2Z );
 
-    float xx = (m_pDatasetHelper->m_xSlize+0.5) * m_pDatasetHelper->m_xVoxel;
-    float yy = (m_pDatasetHelper->m_ySlize+0.5) * m_pDatasetHelper->m_yVoxel;
-    float zz = (m_pDatasetHelper->m_zSlize+0.5) * m_pDatasetHelper->m_zVoxel;
+    float xx = ( SceneManager::getInstance()->getSliceX() + 0.5f ) * voxelX;
+    float yy = ( SceneManager::getInstance()->getSliceY() + 0.5f ) * voxelY;
+    float zz = ( SceneManager::getInstance()->getSliceZ() + 0.5f ) * voxelZ;
 
-    float xPos = m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel;
-    float yPos = m_pDatasetHelper->m_rows    / 2 * m_pDatasetHelper->m_yVoxel;
-    float zPos = m_pDatasetHelper->m_frames  / 2 * m_pDatasetHelper->m_zVoxel;
+    float xPos = columns / 2 * voxelX;
+    float yPos = rows    / 2 * voxelY;
+    float zPos = frames  / 2 * voxelZ;
 
-    float xSize = m_pDatasetHelper->m_columns * m_pDatasetHelper->m_xVoxel;
-    float ySize = m_pDatasetHelper->m_rows    * m_pDatasetHelper->m_yVoxel;
-    float zSize = m_pDatasetHelper->m_frames  * m_pDatasetHelper->m_zVoxel;
+    float xSize = columns * voxelX;
+    float ySize = rows    * voxelY;
+    float zSize = frames  * voxelZ;
 
     BoundingBox *bb = new BoundingBox( xPos, yPos, zPos, xSize, ySize, zSize );
 
@@ -905,7 +921,7 @@ void MainCanvas::renderTestRay()
     m_pDatasetHelper->m_theScene->drawSphere( m_pos1X + m_hr.tmin * dir.x, 
                                   m_pos1Y + m_hr.tmin * dir.y,
                                   m_pos1Z + m_hr.tmin * dir.z,
-                                  3.0 * m_pDatasetHelper->m_xVoxel );
+                                  3.0 * DatasetManager::getInstance()->getVoxelX() );
 }
 
 Vector MainCanvas::getEventCenter()
@@ -956,6 +972,13 @@ void MainCanvas::OnChar( wxKeyEvent& event )
         m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
     }
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     switch ( event.GetKeyCode() )
     {
         case WXK_LEFT:
@@ -970,11 +993,11 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             } 
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
-                m_pDatasetHelper->m_rulerPts.back().x -= m_pDatasetHelper->m_xVoxel;
+                m_pDatasetHelper->m_rulerPts.back().x -= voxelX;
             }
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( wxMax(0, m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue() - 1) );
+                m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( std::max(0, m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue() - 1) );
             }
             break;
         case WXK_RIGHT:
@@ -989,12 +1012,12 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             }
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
-                m_pDatasetHelper->m_rulerPts.back().x += m_pDatasetHelper->m_xVoxel;
+                m_pDatasetHelper->m_rulerPts.back().x += voxelX;
             } 
-            else 
+            else
             {
                 m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue(
-                        wxMin(m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue() + 1, m_pDatasetHelper->m_columns) );
+                    std::min( m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue() + 1.0f, columns ) );
             }
             break;
         case WXK_DOWN:
@@ -1009,7 +1032,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             }
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
-                m_pDatasetHelper->m_rulerPts.back().y += m_pDatasetHelper->m_yVoxel;
+                m_pDatasetHelper->m_rulerPts.back().y += voxelY;
             } 
 			else if (m_pDatasetHelper->m_isDrawerToolActive && m_pDatasetHelper->m_drawSize > 2)
             {
@@ -1017,7 +1040,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             }
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( wxMax(0, m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() - 1) );
+                m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( std::max(0, m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() - 1) );
             }
             break;
         case WXK_UP:
@@ -1032,7 +1055,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             }
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
-                m_pDatasetHelper->m_rulerPts.back().y -= m_pDatasetHelper->m_yVoxel;
+                m_pDatasetHelper->m_rulerPts.back().y -= voxelY;
             } 
 			else if (m_pDatasetHelper->m_isDrawerToolActive)
             {
@@ -1040,33 +1063,33 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             }
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue(wxMin(m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() + 1, m_pDatasetHelper->m_rows) );
+                m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( std::min( m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() + 1.0f, rows ) );
             }
             break;
         case WXK_PAGEDOWN:
             if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
-                m_pDatasetHelper->m_rulerPts.back().z -= m_pDatasetHelper->m_zVoxel;
+                m_pDatasetHelper->m_rulerPts.back().z -= voxelZ;
             } 
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( wxMax( 0, m_pDatasetHelper->m_mainFrame->m_pZSlider->GetValue() - 1 ) );
+                m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( std::max( 0, m_pDatasetHelper->m_mainFrame->m_pZSlider->GetValue() - 1 ) );
             }
             break;
         case WXK_PAGEUP:
             if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
-                m_pDatasetHelper->m_rulerPts.back().z += m_pDatasetHelper->m_zVoxel;
+                m_pDatasetHelper->m_rulerPts.back().z += voxelZ;
             } 
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( wxMin( m_pDatasetHelper->m_mainFrame->m_pZSlider->GetValue() + 1, m_pDatasetHelper->m_frames ) );
+                m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( std::min( m_pDatasetHelper->m_mainFrame->m_pZSlider->GetValue() + 1.0f, frames ) );
             }
             break;
         case WXK_HOME:
-            m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( m_pDatasetHelper->m_columns / 2 );
-            m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( m_pDatasetHelper->m_rows / 2 );
-            m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( m_pDatasetHelper->m_frames / 2 );
+            m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( columns / 2 );
+            m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( rows / 2 );
+            m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( frames / 2 );
             break;
         case WXK_DELETE:
             if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
@@ -1081,7 +1104,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             } 
             else 
             {
-                m_pDatasetHelper->m_rulerPts.push_back(Vector(m_pDatasetHelper->m_columns*m_pDatasetHelper->m_xVoxel/2,m_pDatasetHelper->m_rows*m_pDatasetHelper->m_yVoxel/2,m_pDatasetHelper->m_frames*m_pDatasetHelper->m_zVoxel/2));
+                m_pDatasetHelper->m_rulerPts.push_back( Vector( columns * voxelX / 2, rows * voxelY / 2, frames * voxelZ / 2));
             }
             break;
         case WXK_END:
@@ -1111,8 +1134,10 @@ void MainCanvas::OnChar( wxKeyEvent& event )
 //Returns the element at position [x][y][z] in 3D space
 float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 {
-    float value = (*vect)[i+(j*m_pDatasetHelper->m_columns)+(k*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_columns)];
-    return value;
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    
+    return (*vect)[ i + ( j * columns ) + ( k * rows * columns ) ];
 }
 
 void MainCanvas::drawOnAnatomy() 
@@ -1126,9 +1151,9 @@ void MainCanvas::drawOnAnatomy()
 // 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
 // 	Anatomy* l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
 
-	double xClick = floor( m_hitPts[0] / m_pDatasetHelper->m_xVoxel );
-	double yClick = floor( m_hitPts[1] / m_pDatasetHelper->m_yVoxel );
-	double zClick = floor( m_hitPts[2] / m_pDatasetHelper->m_zVoxel );
+    int xClick = floor( m_hitPts[0] / DatasetManager::getInstance()->getVoxelX() );
+    int yClick = floor( m_hitPts[1] / DatasetManager::getInstance()->getVoxelY() );
+    int zClick = floor( m_hitPts[2] / DatasetManager::getInstance()->getVoxelZ() );
 	int layer = m_hr.picked;
 
 	//security check: hit detection can be a pixel offset, but negative positions crash
@@ -1139,12 +1164,12 @@ void MainCanvas::drawOnAnatomy()
 
 	if( m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_PEN )
 	{
-		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, m_pDatasetHelper->m_drawColor);
+		l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, m_pDatasetHelper->m_drawColor);
 	}
 	else if( m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_ERASER )
 	{
 		wxColor transparent(0, 0, 0);
-		l_currentAnatomy->writeVoxel((int)xClick, (int)yClick, (int)zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, transparent);
+		l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, transparent);
 	}
 }
 
@@ -1182,11 +1207,15 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 
     /* Variables */
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
     float lastMeans[2];
     float nbPixel[2];
     bool stop;
     int labelClass;
-    int length = m_pDatasetHelper->m_columns * m_pDatasetHelper->m_rows * m_pDatasetHelper->m_frames;
+    int length( columns * rows * frames );
 
     /* Step 0 : Take two random pixels */
     means[0] = 0.0f;
@@ -1194,7 +1223,7 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
     
     /* 
     The two first means must not be equal.
-    If using Graphcut, we want the means to be choosen from the obj/bck 
+    If using Graphcut, we want the means to be chosen from the obj/bck 
     */
     while(means[0] == means[1])
     {
@@ -1281,14 +1310,18 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, Vector click, float range)
 {
     //Get the user clicked voxel
-    double xClick = floor(click[0]/m_pDatasetHelper->m_xVoxel);
-    double yClick = floor(click[1]/m_pDatasetHelper->m_yVoxel);
-    double zClick = floor(click[2]/m_pDatasetHelper->m_zVoxel);
+    int xClick = floor( click[0] / DatasetManager::getInstance()->getVoxelX() );
+    int yClick = floor( click[1] / DatasetManager::getInstance()->getVoxelY() );
+    int zClick = floor( click[2] / DatasetManager::getInstance()->getVoxelZ() );
+
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
     
     std::cout << "FloodFill" << endl;
 
     //Intensity of the current voxel
-    float value = getElement(xClick,yClick,zClick,src);
+    float value = getElement( xClick, yClick, zClick, src );
     float upBracket = value+range;
     float downBracket = value-range;
 
@@ -1308,28 +1341,28 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
         z = toVisit.front()[2];
         toVisit.pop_front();
 
-        result->at(x+(y*m_pDatasetHelper->m_columns)+(z*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_columns)) = 1.0f; //Mark as read
+        result->at( x + y * columns + z * rows * columns ) = 1.0f; //Mark as read
 
-        north = MAX(0,y-1);
-        south = MIN(m_pDatasetHelper->m_rows-1,y+1);
-        east = MIN(m_pDatasetHelper->m_columns-1,x+1);
-        west = MAX(0,x-1);
-        front = MAX(0,z-1);
-        back = MIN(m_pDatasetHelper->m_frames-1,z+1);
+        north = std::max( 0, y - 1 );
+        south = std::min( rows - 1, y + 1 );
+        east  = std::min( columns - 1, x + 1 );
+        west  = std::max( 0, x - 1 );
+        front = std::max( 0, z - 1 );
+        back  = std::min( frames - 1, z + 1 );
 
-        NorthV = getElement(x,north,z,src);
-        SouthV = getElement(x,south,z,src);
-        EastV = getElement(east,y,z,src);
-        WestV = getElement(west,y,z,src);
-        FrontV = getElement(x,y,front,src);
-        BackV = getElement(x,y,back,src);
+        NorthV = getElement( x, north, z, src );
+        SouthV = getElement( x, south, z, src );
+        EastV = getElement( east, y, z, src );
+        WestV = getElement( west, y, z, src );
+        FrontV = getElement( x, y, front, src );
+        BackV = getElement( x, y, back, src );
 
-        resultNorth = getElement(x,north,z,result);
-        resultSouth = getElement(x,south,z,result);
-        resultEast = getElement(east,y,z,result); 
-        resultWest = getElement(west,y,z,result);
-        resultFront = getElement(x,y,front,result);
-        resultBack = getElement(x,y,back,result);
+        resultNorth = getElement( x, north, z, result );
+        resultSouth = getElement( x, south, z, result );
+        resultEast = getElement( east, y, z, result );
+        resultWest = getElement( west, y, z, result );
+        resultFront = getElement( x, y, front, result );
+        resultBack = getElement( x, y, back, result );
         
         if(NorthV >= downBracket && NorthV <= upBracket && resultNorth != 1.0f) //North
         {
@@ -1553,7 +1586,11 @@ void MainCanvas::segment()
 {
     std::cout << "Segment method: ";
     
-    int dataLength = m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_frames;
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
+
+    int dataLength( rows * columns * frames );
 
     // get selected l_anatomy dataset
     // TODO: Test changes

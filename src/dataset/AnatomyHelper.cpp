@@ -6,13 +6,19 @@
  */
 #include "AnatomyHelper.h"
 
+#include "DatasetManager.h"
+#include "../gui/SceneManager.h"
+
 #include <GL/glew.h>
 
+#include <algorithm>
+#include <vector>
+using std::vector;
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 AnatomyHelper::AnatomyHelper( DatasetHelper* l_datasetHelper )
-    : m_datasetHelper(l_datasetHelper)
+:   m_datasetHelper(l_datasetHelper)
 {
 
 }
@@ -38,15 +44,21 @@ void AnatomyHelper::renderNav( int pView, ShaderProgram *pShader )
     glEnable( GL_ALPHA_TEST );
     glAlphaFunc( GL_GREATER, 0.0001f );
 
-    float xLine = 0;
-    float yLine = 0;
+    float xLine( 0.0f );
+    float yLine( 0.0f );
 
-    float max = ( float ) wxMax( m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel, 
-                          wxMax( m_datasetHelper->m_rows  * m_datasetHelper->m_yVoxel, m_datasetHelper->m_frames * m_datasetHelper->m_zVoxel ) );
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
 
-    float x = m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel;
-    float y = m_datasetHelper->m_rows    * m_datasetHelper->m_yVoxel;
-    float z = m_datasetHelper->m_frames  * m_datasetHelper->m_zVoxel;
+    float x = columns * voxelX;
+    float y = rows    * voxelY;
+    float z = frames  * voxelZ;
+
+    float max = std::max( x, std::max( y, z ) );
 
     float xo = ( max - x ) / 2.0f;
     float yo = ( max - y ) / 2.0f;
@@ -58,43 +70,49 @@ void AnatomyHelper::renderNav( int pView, ShaderProgram *pShader )
     switch( pView )
     {
         case AXIAL: 
-         {
+        {
+            float sliceZ = SceneManager::getInstance()->getSliceZ();
             glBegin( GL_QUADS );
-                glTexCoord3f( 0.0f, 0.0f, ( ( float ) m_datasetHelper->m_zSlize + 0.5f ) / ( float ) m_datasetHelper->m_frames ); glVertex3f( 0 + xo, 0 + yo, quadZ );
-                glTexCoord3f( 1.0f, 0.0f, ( ( float ) m_datasetHelper->m_zSlize + 0.5f ) / ( float ) m_datasetHelper->m_frames ); glVertex3f( x + xo, 0 + yo, quadZ );
-                glTexCoord3f( 1.0f, 1.0f, ( ( float ) m_datasetHelper->m_zSlize + 0.5f ) / ( float ) m_datasetHelper->m_frames ); glVertex3f( x + xo, y + yo, quadZ );
-                glTexCoord3f( 0.0f, 1.0f, ( ( float ) m_datasetHelper->m_zSlize + 0.5f ) / ( float ) m_datasetHelper->m_frames ); glVertex3f( 0 + xo, y + yo, quadZ );
+                glTexCoord3f( 0.0f, 0.0f, ( sliceZ + 0.5f ) / frames ); glVertex3f( 0 + xo, 0 + yo, quadZ );
+                glTexCoord3f( 1.0f, 0.0f, ( sliceZ + 0.5f ) / frames ); glVertex3f( x + xo, 0 + yo, quadZ );
+                glTexCoord3f( 1.0f, 1.0f, ( sliceZ + 0.5f ) / frames ); glVertex3f( x + xo, y + yo, quadZ );
+                glTexCoord3f( 0.0f, 1.0f, ( sliceZ + 0.5f ) / frames ); glVertex3f( 0 + xo, y + yo, quadZ );
             glEnd();
 
-            xLine = m_datasetHelper->m_xSlize * m_datasetHelper->m_xVoxel + xo;
-            yLine = m_datasetHelper->m_ySlize * m_datasetHelper->m_yVoxel + yo;
-        } break;
+            xLine = SceneManager::getInstance()->getSliceX() * voxelX + xo;
+            yLine = SceneManager::getInstance()->getSliceY() * voxelY + yo;
+            break;
+        }
 
         case CORONAL: 
         {
+            float sliceY = SceneManager::getInstance()->getSliceY();
             glBegin( GL_QUADS );
-                glTexCoord3f( 0.0f, ( ( float ) m_datasetHelper->m_ySlize + 0.5f ) / ( float ) m_datasetHelper->m_rows, 0.0f ); glVertex3f( 0 + xo, 0 + zo, quadZ );
-                glTexCoord3f( 0.0f, ( ( float ) m_datasetHelper->m_ySlize + 0.5f ) / ( float ) m_datasetHelper->m_rows, 1.0f ); glVertex3f( 0 + xo, z + zo, quadZ );
-                glTexCoord3f( 1.0f, ( ( float ) m_datasetHelper->m_ySlize + 0.5f ) / ( float ) m_datasetHelper->m_rows, 1.0f ); glVertex3f( x + xo, z + zo, quadZ );
-                glTexCoord3f( 1.0f, ( ( float ) m_datasetHelper->m_ySlize + 0.5f ) / ( float ) m_datasetHelper->m_rows, 0.0f ); glVertex3f( x + xo, 0 + zo, quadZ );
+                glTexCoord3f( 0.0f, ( sliceY + 0.5f ) / rows, 0.0f ); glVertex3f( 0 + xo, 0 + zo, quadZ );
+                glTexCoord3f( 0.0f, ( sliceY + 0.5f ) / rows, 1.0f ); glVertex3f( 0 + xo, z + zo, quadZ );
+                glTexCoord3f( 1.0f, ( sliceY + 0.5f ) / rows, 1.0f ); glVertex3f( x + xo, z + zo, quadZ );
+                glTexCoord3f( 1.0f, ( sliceY + 0.5f ) / rows, 0.0f ); glVertex3f( x + xo, 0 + zo, quadZ );
             glEnd();
 
-            xLine = m_datasetHelper->m_xSlize * m_datasetHelper->m_xVoxel + xo;
-            yLine = m_datasetHelper->m_zSlize * m_datasetHelper->m_zVoxel + zo;
-        } break;
+            xLine = SceneManager::getInstance()->getSliceX() * voxelX + xo;
+            yLine = SceneManager::getInstance()->getSliceZ() * voxelZ + zo;
+            break;
+        }
 
         case SAGITTAL: 
         {
+            float sliceX = SceneManager::getInstance()->getSliceX();
             glBegin( GL_QUADS );
-                glTexCoord3f( ( ( float ) m_datasetHelper->m_xSlize + 0.5f ) / ( float ) m_datasetHelper->m_columns, 1.0f, 0.0f ); glVertex3f( 0 + yo, 0 + zo, quadZ );
-                glTexCoord3f( ( ( float ) m_datasetHelper->m_xSlize + 0.5f ) / ( float ) m_datasetHelper->m_columns, 1.0f, 1.0f ); glVertex3f( 0 + yo, z + zo, quadZ );
-                glTexCoord3f( ( ( float ) m_datasetHelper->m_xSlize + 0.5f ) / ( float ) m_datasetHelper->m_columns, 0.0f, 1.0f ); glVertex3f( y + yo, z + zo, quadZ );
-                glTexCoord3f( ( ( float ) m_datasetHelper->m_xSlize + 0.5f ) / ( float ) m_datasetHelper->m_columns, 0.0f, 0.0f ); glVertex3f( y + yo, 0 + zo, quadZ );
+                glTexCoord3f( ( sliceX + 0.5f ) / columns, 1.0f, 0.0f ); glVertex3f( 0 + yo, 0 + zo, quadZ );
+                glTexCoord3f( ( sliceX + 0.5f ) / columns, 1.0f, 1.0f ); glVertex3f( 0 + yo, z + zo, quadZ );
+                glTexCoord3f( ( sliceX + 0.5f ) / columns, 0.0f, 1.0f ); glVertex3f( y + yo, z + zo, quadZ );
+                glTexCoord3f( ( sliceX + 0.5f ) / columns, 0.0f, 0.0f ); glVertex3f( y + yo, 0 + zo, quadZ );
             glEnd();
 
-            xLine = max - m_datasetHelper->m_ySlize * m_datasetHelper->m_yVoxel;
-            yLine = m_datasetHelper->m_zSlize * m_datasetHelper->m_zVoxel + zo;
-        } break;
+            xLine = max - SceneManager::getInstance()->getSliceY() * voxelY;
+            yLine = SceneManager::getInstance()->getSliceZ() * voxelZ + zo;
+            break;
+        }
     }
 
     glDisable( GL_TEXTURE_3D );
@@ -117,18 +135,26 @@ void AnatomyHelper::renderNav( int pView, ShaderProgram *pShader )
 // COMMENT
 void AnatomyHelper::renderMain()
 {
-    m_x = ( m_datasetHelper->m_xSlize * m_datasetHelper->m_xVoxel ) + 0.5f * m_datasetHelper->m_xVoxel;
-    m_y = ( m_datasetHelper->m_ySlize * m_datasetHelper->m_yVoxel ) + 0.5f * m_datasetHelper->m_yVoxel;
-    m_z = ( m_datasetHelper->m_zSlize * m_datasetHelper->m_zVoxel ) + 0.5f * m_datasetHelper->m_zVoxel;
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+    m_x = ( SceneManager::getInstance()->getSliceX() + 0.5f ) * voxelX;
+    m_y = ( SceneManager::getInstance()->getSliceY() + 0.5f ) * voxelY;
+    m_z = ( SceneManager::getInstance()->getSliceZ() + 0.5f ) * voxelZ;
 
     // m_xc, m_yc and m_zc will yield a number between 0 and 1.
-    m_xc = ( (float)m_datasetHelper->m_xSlize + 0.5f ) / (float)m_datasetHelper->m_columns;
-    m_yc = ( (float)m_datasetHelper->m_ySlize + 0.5f ) / (float)m_datasetHelper->m_rows;
-    m_zc = ( (float)m_datasetHelper->m_zSlize + 0.5f ) / (float)m_datasetHelper->m_frames;
+    m_xc = ( SceneManager::getInstance()->getSliceX() + 0.5f ) / columns;
+    m_yc = ( SceneManager::getInstance()->getSliceY() + 0.5f ) / rows;
+    m_zc = ( SceneManager::getInstance()->getSliceZ() + 0.5f ) / frames;
 
-    m_xb = m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel ;
-    m_yb = m_datasetHelper->m_rows    * m_datasetHelper->m_yVoxel ;
-    m_zb = m_datasetHelper->m_frames  * m_datasetHelper->m_zVoxel ;
+    m_xb = columns * voxelX;
+    m_yb = rows    * voxelY;
+    m_zb = frames  * voxelZ;
+
 #if 1
     renderAxial();
     renderCoronal();

@@ -5,21 +5,23 @@
 // Created:     03/27/08
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
-#include "wx/wxprec.h"
-#include "wx/mdi.h"
-#include "wx/filefn.h"
-#include "wx/cmdline.h"
-#include "wx/filename.h"
-
 #include "main.h"
+
 #include "dataset/DatasetManager.h"
 #include "gui/MainFrame.h"
-#include "gui/ToolBar.h"
 #include "gui/MenuBar.h"
+#include "gui/SceneManager.h"
+#include "gui/ToolBar.h"
+
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
+
+#include <wx/cmdline.h>
+#include <wx/filefn.h>
+#include <wx/filename.h>
+#include <wx/mdi.h>
+#include <wx/wxprec.h>
 
 #include <exception>
 
@@ -136,12 +138,13 @@ bool MyApp::OnInit( void )
 
         // Create the main frame window
         frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 1219"), wxPoint( 50, 50 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
-        // Give it an icon (this is ignored in MDI mode: uses resources)
+
+        SceneManager::getInstance()->setMainFrame( frame );
+        SceneManager::getInstance()->setTreeCtrl( frame->m_pTreeWidget );
 
 #ifdef __WXMSW__
-
+        // Give it an icon (this is ignored in MDI mode: uses resources)
         frame->SetIcon( wxIcon( _T( "sashtest_icn" ) ) );
-
 #endif
         
         frame->SetMinSize( wxSize( 800, 600 ) );
@@ -284,10 +287,11 @@ wxString MyApp::wxFindAppPath( const wxString& argv0, const wxString& cwd, const
 
 int MyApp::OnExit()
 {
+    Logger::getInstance()->print( wxT( "Exiting..." ), LOGLEVEL_MESSAGE );
+
     // Deleting singletons
     delete DatasetManager::getInstance();
+	delete SceneManager::getInstance();
     delete Logger::getInstance();
-
-    cout << "exiting" << endl;
     return 0;
 }

@@ -101,7 +101,6 @@ class TriangleMesh
         
 
     private:
-
         // Functions
         Vector calcTriangleNormal( const Triangle );
         Vector calcTriangleNormal( const int triNum );
@@ -110,7 +109,6 @@ class TriangleMesh
         void   calcNeighbors();
         void   calcVertNormals();
 
-        int   calcTriangleTensor( const int triNum );
         void  calcNeighbor( const int triangleNum );
 
         // Variables

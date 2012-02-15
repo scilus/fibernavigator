@@ -1743,13 +1743,22 @@ void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(ev
     int index = DatasetManager::getInstance()->createAnatomy();
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 
-    pNewAnatomy->setZero( m_pMainFrame->m_pDatasetHelper->m_columns, m_pMainFrame->m_pDatasetHelper->m_rows, m_pMainFrame->m_pDatasetHelper->m_frames );
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
+
+    pNewAnatomy->setZero( columns, rows, frames );
     pNewAnatomy->setDataType( 16 );
     pNewAnatomy->setType( OVERLAY );
     float l_max = 0.0f;
     wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
+
     if( m_pMainFrame->treeSelected( l_treeObjectId ) == MASTER_OBJECT )
     {
+        float voxelX = DatasetManager::getInstance()->getVoxelX();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
         SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
 
         std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
@@ -1762,20 +1771,20 @@ void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(ev
 
                 for( int j = 0; j < l_fibers->getPointsPerLine(l) ; ++j )
                 {
-                    l_x = (int)( l_fibers->getPointValue(pc) / m_pMainFrame->m_pDatasetHelper->m_xVoxel );
+                    l_x = (int)( l_fibers->getPointValue(pc) / voxelX );
                     ++pc;
-                    l_y = (int)( l_fibers->getPointValue(pc) / m_pMainFrame->m_pDatasetHelper->m_yVoxel );
+                    l_y = (int)( l_fibers->getPointValue(pc) / voxelY );
                     ++pc;
-                    l_z = (int)( l_fibers->getPointValue(pc) / m_pMainFrame->m_pDatasetHelper->m_zVoxel );
+                    l_z = (int)( l_fibers->getPointValue(pc) / voxelZ );
                     ++pc;
 
-                    int index =( l_x + l_y * m_pMainFrame->m_pDatasetHelper->m_columns + l_z * m_pMainFrame->m_pDatasetHelper->m_columns * m_pMainFrame->m_pDatasetHelper->m_rows );
+                    int index = l_x + l_y * columns + l_z * columns * rows;
                     l_dataset->at(index) += 1.0;
                     l_max = wxMax( l_max,l_dataset->at(index) );
                 }
             }
         }
-        for( int i = 0 ; i < m_pMainFrame->m_pDatasetHelper->m_columns * m_pMainFrame->m_pDatasetHelper->m_rows * m_pMainFrame->m_pDatasetHelper->m_frames ; ++i )
+        for( int i( 0 ); i < columns * rows * frames; ++i )
         {
             l_dataset->at(i) /= l_max;
         }
@@ -1803,11 +1812,19 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
     int index = DatasetManager::getInstance()->createAnatomy();
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 
-    pNewAnatomy->setRGBZero( m_pMainFrame->m_pDatasetHelper->m_columns, m_pMainFrame->m_pDatasetHelper->m_rows, m_pMainFrame->m_pDatasetHelper->m_frames );
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
+
+    pNewAnatomy->setRGBZero( columns, rows, frames );
 
     wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
     if(m_pMainFrame-> treeSelected( l_treeObjectId ) == MASTER_OBJECT )
     {
+        float voxelX = DatasetManager::getInstance()->getVoxelX();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
         SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
         wxColour l_color = l_object->getFiberColor();
 
@@ -1821,14 +1838,14 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
 
                 for( int j = 0; j < l_fibers->getPointsPerLine( l ) ; ++j )
                 {
-                    l_x = (int)( l_fibers->getPointValue( pc ) / m_pMainFrame->m_pDatasetHelper->m_xVoxel );
+                    l_x = (int)( l_fibers->getPointValue( pc ) / voxelX );
                     ++pc;
-                    l_y = (int)( l_fibers->getPointValue( pc ) / m_pMainFrame->m_pDatasetHelper->m_yVoxel );
+                    l_y = (int)( l_fibers->getPointValue( pc ) / voxelY );
                     ++pc;
-                    l_z = (int)( l_fibers->getPointValue( pc ) / m_pMainFrame->m_pDatasetHelper->m_zVoxel );
+                    l_z = (int)( l_fibers->getPointValue( pc ) / voxelZ );
                     ++pc;
 
-                    int index = ( l_x + l_y * m_pMainFrame->m_pDatasetHelper->m_columns + l_z *m_pMainFrame-> m_pDatasetHelper->m_columns * m_pMainFrame->m_pDatasetHelper->m_rows ) * 3;
+                    int index = 3 * ( l_x + l_y * columns + l_z * columns * rows );
                     l_dataset->at( index )     = l_color.Red()   / 255.0f;
                     l_dataset->at( index + 1 ) = l_color.Green() / 255.0f;
                     l_dataset->at( index + 2 ) = l_color.Blue()  / 255.0f;
@@ -1892,7 +1909,7 @@ void PropertiesWindow::OnBoxSizeX( wxCommandEvent &event )
     Vector currSize;
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxSizeX->GetValue().ToDouble(&sizeX);  
     currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
-    currSize.x = sizeX/m_pMainFrame->m_pDatasetHelper->m_xVoxel;
+    currSize.x = sizeX / DatasetManager::getInstance()->getVoxelX();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);
 }
 
@@ -1904,7 +1921,7 @@ void PropertiesWindow::OnBoxSizeY( wxCommandEvent &event )
     Vector currSize;
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxSizeY->GetValue().ToDouble(&sizeY);  
     currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
-    currSize.y = sizeY/m_pMainFrame->m_pDatasetHelper->m_yVoxel;
+    currSize.y = sizeY / DatasetManager::getInstance()->getVoxelY();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);
 }
 
@@ -1916,7 +1933,7 @@ void PropertiesWindow::OnBoxSizeZ( wxCommandEvent &event )
     Vector currSize;
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxSizeZ->GetValue().ToDouble(&sizeZ);  
     currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
-    currSize.z = sizeZ/m_pMainFrame->m_pDatasetHelper->m_zVoxel;
+    currSize.z = sizeZ / DatasetManager::getInstance()->getVoxelZ();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);
 }
 

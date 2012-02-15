@@ -6,16 +6,19 @@
 //
 // Description: This is the implementation file for the CIsoSurface class.
 
-#include <math.h>
 #include "CIsoSurface.h"
-#include <algorithm>
-#include "../lic/SurfaceLIC.h"
-#include "../../dataset/Anatomy.h"
-#include "../../main.h"
-#include "../../Logger.h"
 
-#include <fstream>
+#include "../lic/SurfaceLIC.h"
+#include "../../Logger.h"
+#include "../../main.h"
+#include "../../dataset/Anatomy.h"
+#include "../../dataset/DatasetManager.h"
+
+#include <algorithm>
 #include <ctime>
+#include <fstream>
+#include <math.h>
+
 
 const unsigned int CIsoSurface::m_edgeTable[256] =
 { 0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
@@ -297,17 +300,25 @@ const int CIsoSurface::m_triTable[256][16] =
 { 0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } };
 
-CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy ) :
-    DatasetInfo( dh )
+CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy )
+:   DatasetInfo( dh )
 {
-    m_nCellsX = m_dh->m_columns - 1;
-    m_nCellsY = m_dh->m_rows - 1;
-    m_nCellsZ = m_dh->m_frames - 1;
-    m_fCellLengthX = m_dh->m_xVoxel;
-    m_fCellLengthY = m_dh->m_yVoxel;
-    m_fCellLengthZ = m_dh->m_zVoxel;
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
 
-    int size = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
+
+    m_nCellsX = columns - 1;
+    m_nCellsY = rows - 1;
+    m_nCellsZ = frames - 1;
+    m_fCellLengthX = voxelX;
+    m_fCellLengthY = voxelY;
+    m_fCellLengthZ = voxelZ;
+
+    int size = columns * rows * frames;
     m_ptScalarField.resize( size );
     for ( int i = 0; i < size; ++i )
         m_ptScalarField[i] = anatomy->at( i );
@@ -321,26 +332,18 @@ CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy ) :
                     std::vector< float > list;
                     for ( unsigned int zz = z - 1; zz < z + 2; ++zz )
                     {
-                        list.push_back( anatomy->at( x + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows
-                                * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows
-                                * zz ) );
-                        list.push_back( anatomy->at( x + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
+                        list.push_back( anatomy->at( x + columns * y + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + columns * y + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + 1 + columns * y + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + columns * ( y - 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + columns * ( y - 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + 1 + columns * ( y - 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + columns * ( y + 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + columns * ( y + 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + 1 + columns * ( y + 1 ) + columns * rows * zz ) );
                     }
                     nth_element( list.begin(), list.begin() + 13, list.end() );
-                    m_ptScalarField[x + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows * z] = list[13];
+                    m_ptScalarField[x + columns * y + columns * rows * z] = list[13];
                 }
     }
     m_type = ISO_SURFACE;
@@ -838,9 +841,9 @@ void CIsoSurface::RenameVerticesAndTriangles()
     m_tMesh->resizeVerts( m_i2pt3idVertices.size() );
     m_tMesh->resizeTriangles( m_trivecTriangles.size() );
 
-    float xOff = m_dh->m_xVoxel/2;
-    float yOff = m_dh->m_yVoxel/2;
-    float zOff = m_dh->m_zVoxel/2;
+    float xOff = DatasetManager::getInstance()->getVoxelX() * 0.5f;
+    float yOff = DatasetManager::getInstance()->getVoxelY() * 0.5f;
+    float zOff = DatasetManager::getInstance()->getVoxelZ() * 0.5f;
 
     // Rename vertices.
     while ( mapIterator != m_i2pt3idVertices.end() )
@@ -1008,8 +1011,12 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
 
     if ( !m_positionsCalculated )
     {
+        float columns = DatasetManager::getInstance()->getColumns();
+        float rows    = DatasetManager::getInstance()->getRows();
+        float frames  = DatasetManager::getInstance()->getFrames();
+
         Vector v( 0, 0, 0 );
-        size_t nSize = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
+        size_t nSize = columns * rows * frames;
         std::vector< Vector > accu( nSize, v );
         std::vector< int > hits( nSize, 0 );
         std::vector< Vector > vertices = m_tMesh->getVerts();
@@ -1018,8 +1025,8 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
         for ( size_t i = 0; i < vertices.size(); ++i )
         {
             v = vertices[i];
-            int index = (int) v.x + (int) v.y * m_dh->m_columns + (int) v.z * m_dh->m_columns * m_dh->m_rows;
-            if ( !( index < 0 || index > m_dh->m_columns * m_dh->m_rows * m_dh->m_frames ) )
+            int index = (int) v.x + (int) v.y * columns + (int) v.z * columns * rows;
+            if ( !( index < 0 || index > columns * rows * frames ) )
             {
                 accu[index].x += v.x;
                 accu[index].y += v.y;
@@ -1052,9 +1059,9 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
                 accu[i].z /= hits[i];
                 if ( (int) accu[i].x )
                 {
-                    accu[i].x = wxMin( m_dh->m_columns, wxMax ( accu[i].x, 0 ) );
-                    accu[i].y = wxMin( m_dh->m_rows, wxMax ( accu[i].y, 0 ) );
-                    accu[i].z = wxMin( m_dh->m_frames, wxMax ( accu[i].z, 0 ) );
+                    accu[i].x = wxMin( columns, wxMax ( accu[i].x, 0 ) );
+                    accu[i].y = wxMin( rows, wxMax ( accu[i].y, 0 ) );
+                    accu[i].z = wxMin( frames, wxMax ( accu[i].z, 0 ) );
 
                     Vector v( accu[i].x, accu[i].y, accu[i].z );
                     m_svPositions.push_back( v );

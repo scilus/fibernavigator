@@ -79,6 +79,91 @@ std::vector<ODFs *> DatasetManager::getOdfs()
 
 //////////////////////////////////////////////////////////////////////////
 
+vector<Tensors *> DatasetManager::getTensors()
+{
+    vector<Tensors *> v;
+    for( map<unsigned int, Tensors *>::const_iterator it = m_tensors.begin(); it != m_tensors.end(); ++it )
+    {
+        v.push_back( it->second );
+    }
+    return v;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+
+int DatasetManager::getColumns() const
+{
+    if( !m_anatomies.empty() )
+    {
+        map<unsigned int, Anatomy *>::const_iterator it = m_anatomies.begin();
+        return it->second->getColumns();
+    }
+    return 1;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+int DatasetManager::getFrames() const
+{
+    if( !m_anatomies.empty() )
+    {
+        map<unsigned int, Anatomy *>::const_iterator it = m_anatomies.begin();
+        return it->second->getFrames();
+    }
+    return 1;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+int DatasetManager::getRows() const
+{
+    if( !m_anatomies.empty() )
+    {
+        map<unsigned int, Anatomy *>::const_iterator it = m_anatomies.begin();
+        return it->second->getRows();
+    }
+    return 1;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+float DatasetManager::getVoxelX() const
+{
+    if( !m_anatomies.empty() )
+    {
+        map<unsigned int, Anatomy *>::const_iterator it = m_anatomies.begin();
+        return it->second->getVoxelSizeX();
+    }
+    return 0.0f;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+float DatasetManager::getVoxelY() const
+{
+    if( !m_anatomies.empty() )
+    {
+        map<unsigned int, Anatomy *>::const_iterator it = m_anatomies.begin();
+        return it->second->getVoxelSizeY();
+    }
+    return 0.0f;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+float DatasetManager::getVoxelZ() const
+{
+    if( !m_anatomies.empty() )
+    {
+        map<unsigned int, Anatomy *>::const_iterator it = m_anatomies.begin();
+        return it->second->getVoxelSizeZ();
+    }
+    return 0.0f;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 int DatasetManager::load( const wxString &filename, const wxString &extension )
 {
     int result( -1 );
@@ -161,20 +246,25 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
 
 //////////////////////////////////////////////////////////////////////////
 
-void DatasetManager::remove( const long ptr )
+void DatasetManager::remove( const DatasetIndex index )
 {
-    unsigned int index( -1 );
-    for( map<unsigned int, DatasetInfo *>::iterator it = m_datasets.begin(); it != m_datasets.end(); ++it )
-    {
-        if( ptr == (long)it->second )
-        {
-            index = it->first;
-            break;
-        }
-    }
+//     DatasetInfo *pDatasetInfo = m_datasets[index];
+//     
+//     remove( index, pDatasetInfo );
+//     m_datasets.erase( index );
 
-    if( -1 != index )
-    {
+//     unsigned int index( -1 );
+//     for( map<unsigned int, DatasetInfo *>::iterator it = m_datasets.begin(); it != m_datasets.end(); ++it )
+//     {
+//         if( ptr == (long)it->second )
+//         {
+//             index = it->first;
+//             break;
+//         }
+//     }
+// 
+//     if( -1 != index )
+//     {
         map<unsigned int, DatasetInfo *>::iterator it = m_datasets.find( index );
         
         switch( it->second->getType() )
@@ -183,37 +273,47 @@ void DatasetManager::remove( const long ptr )
         case HEAD_SHORT:
         case OVERLAY:
         case RGB:
+            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Anatomy" ) ), LOGLEVEL_DEBUG );
             m_anatomies.erase( m_anatomies.find( index ) );
             break;
-        case TENSOR_FIELD:
-            break;
+//         case TENSOR_FIELD:
+//             break;
         case MESH:
+            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Mesh" ) ), LOGLEVEL_DEBUG );
             m_meshes.erase( m_meshes.find( index ) );
             break;
-        case VECTORS:
-            break;
+//         case VECTORS:
+//             break;
         case TENSORS:
+            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Tensors" ) ), LOGLEVEL_DEBUG );
             m_tensors.erase( m_tensors.find( index ) );
             break;
         case ODFS:
+            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "ODFs" ) ), LOGLEVEL_DEBUG );
             m_odfs.erase( m_odfs.find( index ) );
             break;
         case FIBERS:
+            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Fibers" ) ), LOGLEVEL_DEBUG );
             m_fibers.erase( m_fibers.find( index ) );
             break;
         case SURFACE:
+            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Surface" ) ), LOGLEVEL_DEBUG );
             m_surfaces.erase( m_surfaces.find( index ) );
             break;
-        case ISO_SURFACE:
-            break;
+//         case ISO_SURFACE:
+//             break;
         case FIBERSGROUP:
+            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "FibersGroup" ) ), LOGLEVEL_DEBUG );
             m_fibersGroup.erase( m_fibersGroup.find( index ) );
+            break;
+        default:
+            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "DatasetInfo" ) ), LOGLEVEL_DEBUG );
             break;
         }
 
         delete it->second;
         m_datasets.erase( it );
-    }
+//     }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -225,9 +325,9 @@ void DatasetManager::setDatasetHelper( DatasetHelper * dh )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::insert( Anatomy * pAnatomy )
+DatasetIndex DatasetManager::insert( Anatomy * pAnatomy )
 {
-    int index = getNextAvailableIndex();
+    DatasetIndex index = getNextAvailableIndex();
 
     m_datasets[index]  = pAnatomy;
     m_anatomies[index] = pAnatomy;
@@ -237,9 +337,9 @@ int DatasetManager::insert( Anatomy * pAnatomy )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::insert( CIsoSurface * pCIsoSurface )
+DatasetIndex DatasetManager::insert( CIsoSurface * pCIsoSurface )
 {
-    int index = getNextAvailableIndex();
+    DatasetIndex index = getNextAvailableIndex();
 
     m_datasets[index]  = pCIsoSurface;
     // Verify if a new map is needed for this type
@@ -249,9 +349,9 @@ int DatasetManager::insert( CIsoSurface * pCIsoSurface )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::insert( Fibers * pFibers )
+DatasetIndex DatasetManager::insert( Fibers * pFibers )
 {
-    int index = getNextAvailableIndex();
+    DatasetIndex index = getNextAvailableIndex();
 
     m_datasets[index]  = pFibers;
     m_fibers[index]    = pFibers;
@@ -261,9 +361,9 @@ int DatasetManager::insert( Fibers * pFibers )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::insert( FibersGroup * pFibersGroup )
+DatasetIndex DatasetManager::insert( FibersGroup * pFibersGroup )
 {
-    int index = getNextAvailableIndex();
+    DatasetIndex index = getNextAvailableIndex();
 
     m_datasets[index]    = pFibersGroup;
     m_fibersGroup[index] = pFibersGroup;
@@ -273,9 +373,9 @@ int DatasetManager::insert( FibersGroup * pFibersGroup )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::insert( Mesh * pMesh )
+DatasetIndex DatasetManager::insert( Mesh * pMesh )
 {
-    int index = getNextAvailableIndex();
+    DatasetIndex index = getNextAvailableIndex();
 
     m_datasets[index]  = pMesh;
     m_meshes[index]    = pMesh;
@@ -285,9 +385,9 @@ int DatasetManager::insert( Mesh * pMesh )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::insert( ODFs * pOdfs )
+DatasetIndex DatasetManager::insert( ODFs * pOdfs )
 {
-    int index = getNextAvailableIndex();
+    DatasetIndex index = getNextAvailableIndex();
 
     m_datasets[index]  = pOdfs;
     m_odfs[index]      = pOdfs;
@@ -297,9 +397,9 @@ int DatasetManager::insert( ODFs * pOdfs )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::insert( Surface * pSurface )
+DatasetIndex DatasetManager::insert( Surface * pSurface )
 {
-    int index = getNextAvailableIndex();
+    DatasetIndex index = getNextAvailableIndex();
 
     m_datasets[index]  = pSurface;
     m_surfaces[index]  = pSurface;
@@ -309,9 +409,9 @@ int DatasetManager::insert( Surface * pSurface )
 
 //////////////////////////////////////////////////////////////////////////
 
-int DatasetManager::insert( Tensors * pTensors )
+DatasetIndex DatasetManager::insert( Tensors * pTensors )
 {
-    int index = getNextAvailableIndex();
+    DatasetIndex index = getNextAvailableIndex();
 
     m_datasets[index]  = (DatasetInfo *)pTensors;
     m_tensors[index]   = pTensors;
@@ -335,7 +435,7 @@ int DatasetManager::loadAnatomy( const wxString &filename, nifti_image *pHeader,
         pAnatomy->setShowFS( SHOW_FS );
         pAnatomy->setUseTex( USE_TEX );
 
-        int index = insert( pAnatomy );
+        DatasetIndex index = insert( pAnatomy );
 
         m_pDatasetHelper->finishLoading( pAnatomy );
 
@@ -356,12 +456,12 @@ int DatasetManager::loadFibers( const wxString &filename )
     if( l_fibers->load( filename ) )
     {
         std::vector< std::vector< SelectionObject* > > l_selectionObjects = m_pDatasetHelper->getSelectionObjects();
-        for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+        for( DatasetIndex i( 0 ); i < l_selectionObjects.size(); ++i )
         {
-            for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+            for( DatasetIndex j( 0 ); j < l_selectionObjects[i].size(); ++j )
             {
                 l_selectionObjects[i][j]->m_inBox.resize( m_pDatasetHelper->m_countFibers, sizeof(bool) );
-                for( unsigned int k = 0; k < m_pDatasetHelper->m_countFibers; ++k )
+                for( DatasetIndex k( 0 ); k < m_pDatasetHelper->m_countFibers; ++k )
                 {
                     l_selectionObjects[i][j]->m_inBox[k] = 0;
                 }
@@ -375,7 +475,7 @@ int DatasetManager::loadFibers( const wxString &filename )
         l_fibers->setShowFS   ( SHOW_FS );
         l_fibers->setUseTex   ( USE_TEX );
 
-        int index = insert( l_fibers );
+        DatasetIndex index = insert( l_fibers );
 
         m_pDatasetHelper->finishLoading( l_fibers );
 
@@ -420,7 +520,7 @@ int DatasetManager::loadMesh( const wxString &filename, const wxString &extensio
         pMesh->setShowFS   ( SHOW_FS );
         pMesh->setUseTex   ( USE_TEX );
 
-        int index = insert( pMesh );
+        DatasetIndex index = insert( pMesh );
 
         m_pDatasetHelper->finishLoading( pMesh );
 
@@ -447,7 +547,7 @@ int DatasetManager::loadODF( const wxString &filename, nifti_image *pHeader, nif
         pOdfs->setShowFS( SHOW_FS );
         pOdfs->setUseTex( USE_TEX );
 
-        int index = insert( pOdfs );
+        DatasetIndex index = insert( pOdfs );
 
         m_pDatasetHelper->finishLoading( pOdfs );
 
@@ -474,7 +574,7 @@ int DatasetManager::loadTensors( const wxString &filename, nifti_image *pHeader,
         pTensors->setShowFS( SHOW_FS );
         pTensors->setUseTex( USE_TEX );
 
-        int index = insert( pTensors );
+        DatasetIndex index = insert( pTensors );
 
         m_pDatasetHelper->finishLoading( pTensors );
 
@@ -485,15 +585,17 @@ int DatasetManager::loadTensors( const wxString &filename, nifti_image *pHeader,
     return -1;
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 
 DatasetManager::~DatasetManager(void)
 {
     Logger::getInstance()->print( wxT( "DatasetManager destruction starting..." ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Cleaning ressources..." ), LOGLEVEL_MESSAGE );
     for( map<unsigned int, DatasetInfo *>::iterator it = m_datasets.begin(); it != m_datasets.end(); ++it )
     {
         delete it->second;
     }
+    Logger::getInstance()->print( wxT( "Ressources cleaned." ), LOGLEVEL_MESSAGE );
+    m_pInstance = NULL;
     Logger::getInstance()->print( wxT( "DatasetManager destruction done." ), LOGLEVEL_DEBUG );
 }

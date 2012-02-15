@@ -11,8 +11,10 @@
 
 #include "Glyph.h"
 
+#include "DatasetManager.h"
 #include "../Logger.h"
 #include "../gui/MainFrame.h"
+#include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
 
 #include <GL/glew.h>
@@ -25,9 +27,8 @@ Glyph::Glyph( DatasetHelper* i_datasetHelper,
               float i_minHue     , 
               float i_maxHue     , 
               float i_saturation , 
-              float i_luminance ) :
-    DatasetInfo             ( i_datasetHelper ),
-    m_datasetHelper         ( NULL ),
+              float i_luminance )
+:   DatasetInfo             ( i_datasetHelper ),
     m_hemisphereBuffer      ( NULL ),
     m_textureId             ( 0 ),    
     m_nbPointsPerGlyph      ( 0 ),    
@@ -56,11 +57,13 @@ Glyph::Glyph( DatasetHelper* i_datasetHelper,
 ///////////////////////////////////////////////////////////////////////////
 Glyph::~Glyph()
 {
-    if( m_datasetHelper.m_useVBO && m_hemisphereBuffer )
+    Logger::getInstance()->print( wxT( "Executing Glyph destructor..." ), LOGLEVEL_DEBUG );
+    if( m_dh->m_useVBO && m_hemisphereBuffer )
     {
         glDeleteBuffers( 1, m_hemisphereBuffer );
         delete m_hemisphereBuffer;
     }
+    Logger::getInstance()->print( wxT( "Glyph destructor done." ), LOGLEVEL_DEBUG );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -94,23 +97,35 @@ void Glyph::draw()
 ///////////////////////////////////////////////////////////////////////////
 void Glyph::drawAxial()
 {
-    for( int y = 0; y < m_datasetHelper.m_rows; y++ )
-        for( int x = 0; x < m_datasetHelper.m_columns; x++ )
-            // We only draw the glyphs if the test for our display factor is succesfull.
-            if ((x+y)%m_displayFactor==0)
+    for( int y( 0 ); y < m_rows; ++y )
+    {
+        for( int x( 0 ); x < m_columns; ++x )
+        {
+            // We only draw the glyphs if the test for our display factor is successful.
+            if( ( x + y ) % m_displayFactor == 0 )
+            {
                 drawGlyph( m_currentSliderPos[2], y, x, Z_AXIS );
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will display the Coronal slice of the loaded glyphs.
 ///////////////////////////////////////////////////////////////////////////
 void Glyph::drawCoronal()
-{  
-    for( int z = 0; z < m_datasetHelper.m_frames; z++ )
-        for( int x = 0; x < m_datasetHelper.m_columns; x++ )
-            // We only draw the glyphs if the test for our display factor is succesfull.
-            if ((x+z)%m_displayFactor==0)
+{
+    for( int z( 0 ); z < m_frames; ++z )
+    {
+        for( int x( 0 ); x < m_columns; ++x )
+        {
+            // We only draw the glyphs if the test for our display factor is successful.
+            if( ( x + z ) % m_displayFactor == 0 )
+            {
                 drawGlyph( z, m_currentSliderPos[1], x, Y_AXIS );
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -118,11 +133,17 @@ void Glyph::drawCoronal()
 ///////////////////////////////////////////////////////////////////////////
 void Glyph::drawSagittal()
 {
-    for( int z = 0; z < m_datasetHelper.m_frames; z++ )
-        for( int y = 0; y < m_datasetHelper.m_rows; y++ )
-            // We only draw the glyphs if the test for our display factor is succesfull.
-            if ((y+z)%m_displayFactor==0)
+    for( int z( 0 ); z < m_frames; ++z )
+    {
+        for( int y( 0 ); y < m_rows; ++y )
+        {
+            // We only draw the glyphs if the test for our display factor is successful.
+            if( ( y + z ) % m_displayFactor == 0 )
+            {
                 drawGlyph( z, y, m_currentSliderPos[0], X_AXIS );
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -137,7 +158,7 @@ void Glyph::refreshSlidersValues()
     // For all 3 axes
     for( int i = 0; i < 3; ++i )
     {        
-        if( m_currentSliderPos[i] !=  l_currentPos[i] )
+        if( m_currentSliderPos[i] != l_currentPos[i] )
         {
             m_currentSliderPos[i] = l_currentPos[i];
             sliderPosChanged( (AxisType)i );
@@ -146,21 +167,21 @@ void Glyph::refreshSlidersValues()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This function computes the current sliders postionss (all 3 axes)
+// This function computes the current sliders positions (all 3 axes)
 ///////////////////////////////////////////////////////////////////////////
 void Glyph::getSlidersPositions( int o_slidersPos[3] )
 {
     // For the X axis.
-    float l_xSliderRatio  = (float)DatasetInfo::m_dh->m_xSlize / ( (float)DatasetInfo::m_dh->m_columns - 1 );
-    o_slidersPos[0]       = ( l_xSliderRatio * ( (float)m_datasetHelper.m_columns - 1 ) );
+    float l_xSliderRatio  = SceneManager::getInstance()->getSliceX() / ( DatasetManager::getInstance()->getColumns() - 1 );
+    o_slidersPos[0]       = l_xSliderRatio * ( m_columns - 1 );
 
     // For the Y axis.
-    float l_ySliderRatio  = (float)DatasetInfo::m_dh->m_ySlize / ( (float)DatasetInfo::m_dh->m_rows - 1 );
-    o_slidersPos[1]       = ( l_ySliderRatio * ( (float)m_datasetHelper.m_rows - 1 ) );
+    float l_ySliderRatio  = SceneManager::getInstance()->getSliceY() / ( DatasetManager::getInstance()->getRows() - 1 );
+    o_slidersPos[1]       = l_ySliderRatio * ( m_rows - 1 );
 
     // For the Z axis.
-    float l_zSliderRatio  = (float)DatasetInfo::m_dh->m_zSlize / ( (float)DatasetInfo::m_dh->m_frames - 1 );    
-    o_slidersPos[2]       = ( l_zSliderRatio * ( (float)m_datasetHelper.m_frames - 1 ) );
+    float l_zSliderRatio  = SceneManager::getInstance()->getSliceZ() / ( DatasetManager::getInstance()->getFrames() - 1 );    
+    o_slidersPos[2]       = l_zSliderRatio * ( m_frames - 1 );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -172,10 +193,11 @@ void Glyph::getSlidersPositions( int o_slidersPos[3] )
 ///////////////////////////////////////////////////////////////////////////
 int Glyph::getGlyphIndex( int i_zVoxel, int i_yVoxel, int i_xVoxel )
 {
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+
     // Get the current tensors index in the coeffs's buffer
-    return( i_zVoxel * m_datasetHelper.m_columns * m_datasetHelper.m_rows + 
-            i_yVoxel * m_datasetHelper.m_columns +
-            i_xVoxel );    
+    return i_zVoxel * columns * rows + i_yVoxel * columns + i_xVoxel;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -327,9 +349,9 @@ void Glyph::getVoxelOffset( int i_zVoxelIndex, int i_yVoxelIndex, int i_xVoxelIn
 {
     // The offset values is to return the points in the pixel world and not in the voxel world.
     // The + 0.5f is because we want to place the glyph in the middle of its voxel.
-    o_offset[2] = ( i_zVoxelIndex + 0.5f ) * m_datasetHelper.m_zVoxel;
-    o_offset[1] = ( i_yVoxelIndex + 0.5f ) * m_datasetHelper.m_yVoxel;
-    o_offset[0] = ( i_xVoxelIndex + 0.5f ) * m_datasetHelper.m_xVoxel;
+    o_offset[2] = ( i_zVoxelIndex + 0.5f ) * m_voxelSizeZ;
+    o_offset[1] = ( i_yVoxelIndex + 0.5f ) * m_voxelSizeY;
+    o_offset[0] = ( i_xVoxelIndex + 0.5f ) * m_voxelSizeX;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -346,7 +368,7 @@ void Glyph::fillColorDataset( float i_minHue, float i_maxHue, float i_saturation
 {  
     // This is to make sure that we will generate a texture no matter
     // how messed up the i_minHue and i_maxHue values are.
-    // Make sure that there is enought distance between the i_minHue and the i_maxHue.
+    // Make sure that there is enough distance between the i_minHue and the i_maxHue.
     if( fabs( i_maxHue - i_minHue ) < HUE_MINIMUM_DISTANCE )
     {
         if( i_maxHue >= i_minHue )
@@ -568,7 +590,7 @@ void Glyph::setLOD( LODChoices i_LOD )
 void Glyph::loadBuffer()
 {
     // We need to (re)load the buffer in video memory only if we are using VBO.
-    if( !m_datasetHelper.m_useVBO )
+    if( !m_dh->m_useVBO )
         return;        
 
     // Sphere buffers
@@ -589,7 +611,7 @@ void Glyph::loadBuffer()
     // There was a problem loading this buffer into video memory!
     if( Logger::getInstance()->printIfGLError( wxT( "Initialize vbo points for tensors" ) ) )
     {
-        m_datasetHelper.m_useVBO = false;
+        m_dh->m_useVBO = false;
         delete m_hemisphereBuffer;
     }
 }
@@ -628,7 +650,7 @@ void Glyph::createPropertiesSizer(PropertiesWindow *parent)
 
     m_psliderLuminanceValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Luminace" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Luminance" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     l_sizer->Add(m_psliderLuminanceValue,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
     parent->Connect(m_psliderLuminanceValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLuminanceSliderMoved)); 

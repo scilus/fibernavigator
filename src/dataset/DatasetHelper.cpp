@@ -25,6 +25,7 @@
 #include "Surface.h"
 #include "Tensors.h"
 #include "../gui/MyListCtrl.h"
+#include "../gui/SceneManager.h"
 #include "../gui/SelectionBox.h"
 #include "../gui/SelectionEllipsoid.h"
 
@@ -33,6 +34,8 @@
 #include "../misc/nifti/nifti1_io.h"
 
 #include "../Logger.h"
+
+#include <algorithm>
 
 void out_of_memory() 
 {
@@ -43,14 +46,7 @@ void out_of_memory()
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper( MainFrame *mf ) :
-    m_rows          ( 1    ),
-    m_columns       ( 1    ),
-    m_frames        ( 1    ),
     m_floatDataset  ( NULL ),
-
-    m_xVoxel     ( 1.0f ),
-    m_yVoxel     ( 1.0f ),
-    m_zVoxel     ( 1.0f ),
 
 	m_niftiTransform( 4, 4 ),
 
@@ -114,10 +110,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_canUseColorPicker( false ),
 	m_drawColor(255, 255, 255),
 	m_drawColorIcon(16, 16, true),
-
-    m_xSlize( 0.5 ),
-    m_ySlize( 0.5 ),
-    m_zSlize( 0.5 ),
 
     m_lighting      ( true ),
     m_blendTexOnMesh( true ),
@@ -491,25 +483,25 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 
 void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
 {
-    if( m_mainFrame->m_pListCtrl2->GetItemCount() == 1 )
-    {
-        m_mainFrame->m_pXSlider->SetMax( wxMax( 2, m_columns - 1 ) );
-        m_mainFrame->m_pXSlider->SetValue( m_columns / 2 );
-        m_mainFrame->m_pYSlider->SetMax( wxMax( 2, m_rows - 1 ) );
-        m_mainFrame->m_pYSlider->SetValue( m_rows / 2 );
-        m_mainFrame->m_pZSlider->SetMax( wxMax( 2, m_frames - 1 ) );
-        m_mainFrame->m_pZSlider->SetValue( m_frames / 2 );
-        
-        updateView( m_mainFrame->m_pXSlider->GetValue(), m_mainFrame->m_pYSlider->GetValue(), m_mainFrame->m_pZSlider->GetValue() );
-
-        m_mainFrame->m_pMainGL->changeOrthoSize();
-        m_mainFrame->m_pGL0->changeOrthoSize();
-        m_mainFrame->m_pGL1->changeOrthoSize();
-        m_mainFrame->m_pGL2->changeOrthoSize();
-    }
-
-    updateLoadStatus();
-    m_mainFrame->refreshAllGLWidgets();
+//     if( m_mainFrame->m_pListCtrl2->GetItemCount() == 1 )
+//     {
+//         m_mainFrame->m_pXSlider->SetMax( wxMax( 2, m_columns - 1 ) );
+//         m_mainFrame->m_pXSlider->SetValue( m_columns / 2 );
+//         m_mainFrame->m_pYSlider->SetMax( wxMax( 2, m_rows - 1 ) );
+//         m_mainFrame->m_pYSlider->SetValue( m_rows / 2 );
+//         m_mainFrame->m_pZSlider->SetMax( wxMax( 2, m_frames - 1 ) );
+//         m_mainFrame->m_pZSlider->SetValue( m_frames / 2 );
+//         
+//         updateView( m_mainFrame->m_pXSlider->GetValue(), m_mainFrame->m_pYSlider->GetValue(), m_mainFrame->m_pZSlider->GetValue() );
+// 
+//         m_mainFrame->m_pMainGL->changeOrthoSize();
+//         m_mainFrame->m_pGL0->changeOrthoSize();
+//         m_mainFrame->m_pGL1->changeOrthoSize();
+//         m_mainFrame->m_pGL2->changeOrthoSize();
+//     }
+// 
+//     updateLoadStatus();
+//     m_mainFrame->refreshAllGLWidgets();
 }
 
 bool DatasetHelper::fileNameExists( const wxString i_fileName )
@@ -1107,12 +1099,13 @@ void DatasetHelper::treeFinished()
 
 void DatasetHelper::deleteAllSelectionObjects()
 {
-    std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-        for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-        {
-            m_mainFrame->m_pTreeWidget->Delete(l_selectionObjects[i][j]->GetId());      
-        }
+    SceneManager::getInstance()->deleteAllSelectionObjects();
+//     std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
+//     for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+//         for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+//         {
+//             m_mainFrame->m_pTreeWidget->Delete(l_selectionObjects[i][j]->GetId());      
+//         }
 }
 
 void DatasetHelper::deleteAllPoints()
@@ -1150,10 +1143,11 @@ void DatasetHelper::deleteAllPoints()
 
 void DatasetHelper::updateAllSelectionObjects()
 {
-    std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-        for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-            l_selectionObjects[i][j]->setIsDirty( true );
+    SceneManager::getInstance()->updateAllSelectionObjects();
+//     std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
+//     for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+//         for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+//             l_selectionObjects[i][j]->setIsDirty( true );
 }
 
 
@@ -1343,9 +1337,16 @@ void DatasetHelper::createCutDataset()
     int index = DatasetManager::getInstance()->createAnatomy();
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 
-    pNewAnatomy->setZero( m_columns, m_rows, m_frames );
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
 
-    std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
+    pNewAnatomy->setZero( columns, rows, frames );
+
+    SelectionObjList l_selectionObjects = getSelectionObjects();
     int x1, x2, y1, y2, z1, z2;
 
     for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
@@ -1354,19 +1355,19 @@ void DatasetHelper::createCutDataset()
         {
             if( l_selectionObjects[i][j]->getIsVisible() )
             {
-                x1 = (int)( l_selectionObjects[i][j]->getCenter().x / m_xVoxel - l_selectionObjects[i][j]->getSize().x / 2 );
-                x2 = (int)( l_selectionObjects[i][j]->getCenter().x / m_xVoxel + l_selectionObjects[i][j]->getSize().x / 2 );
-                y1 = (int)( l_selectionObjects[i][j]->getCenter().y / m_yVoxel - l_selectionObjects[i][j]->getSize().y / 2 );
-                y2 = (int)( l_selectionObjects[i][j]->getCenter().y / m_yVoxel + l_selectionObjects[i][j]->getSize().y / 2 );
-                z1 = (int)( l_selectionObjects[i][j]->getCenter().z / m_zVoxel - l_selectionObjects[i][j]->getSize().z / 2 );
-                z2 = (int)( l_selectionObjects[i][j]->getCenter().z / m_zVoxel + l_selectionObjects[i][j]->getSize().z / 2 );
+                x1 = (int)( l_selectionObjects[i][j]->getCenter().x / voxelX - l_selectionObjects[i][j]->getSize().x / 2 );
+                x2 = (int)( l_selectionObjects[i][j]->getCenter().x / voxelX + l_selectionObjects[i][j]->getSize().x / 2 );
+                y1 = (int)( l_selectionObjects[i][j]->getCenter().y / voxelY - l_selectionObjects[i][j]->getSize().y / 2 );
+                y2 = (int)( l_selectionObjects[i][j]->getCenter().y / voxelY + l_selectionObjects[i][j]->getSize().y / 2 );
+                z1 = (int)( l_selectionObjects[i][j]->getCenter().z / voxelZ - l_selectionObjects[i][j]->getSize().z / 2 );
+                z2 = (int)( l_selectionObjects[i][j]->getCenter().z / voxelZ + l_selectionObjects[i][j]->getSize().z / 2 );
 
-                x1 = wxMax(0, wxMin(x1, m_columns));
-                x2 = wxMax(0, wxMin(x2, m_columns));
-                y1 = wxMax(0, wxMin(y1, m_rows));
-                y2 = wxMax(0, wxMin(y2, m_rows));
-                z1 = wxMax(0, wxMin(z1, m_frames));
-                z2 = wxMax(0, wxMin(z2, m_frames));
+                x1 = std::max( 0, std::min( x1, columns ) );
+                x2 = std::max( 0, std::min( x2, columns ) );
+                y1 = std::max( 0, std::min( y1, rows ) );
+                y2 = std::max( 0, std::min( y2, rows ) );
+                z1 = std::max( 0, std::min( z1, frames ) );
+                z2 = std::max( 0, std::min( z2, frames ) );
 
                 std::vector< float >* l_src = l_anatomy->getFloatDataset();
                 std::vector< float >* l_dst = pNewAnatomy->getFloatDataset();
@@ -1377,7 +1378,7 @@ void DatasetHelper::createCutDataset()
                     {
                         for( int c = x1; c < x2; ++c )
                         {
-                            l_dst->at( b * m_rows * m_columns + r * m_columns + c ) = l_src->at( b * m_rows * m_columns + r * m_columns + c );
+                            l_dst->at( b * rows * columns + r * columns + c ) = l_src->at( b * rows * columns + r * columns + c );
                         }
                     }
                 }
@@ -1404,8 +1405,15 @@ void DatasetHelper::changeZoom( const int i_z )
 
 void DatasetHelper::moveScene( int i_x, int i_y )
 {
-    float l_max = (float)wxMax( m_columns * m_xVoxel, wxMax( m_rows * m_yVoxel, m_frames * m_zVoxel ) );
-    float l_div = 500.0 / l_max;
+    float columns = DatasetManager::getInstance()->getColumns();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+    float l_max = std::max( columns * voxelX, std::max( rows * voxelY, frames * voxelZ ) );
+    float l_div = 500.0f / l_max;
 
     m_xMove -= (float)i_x / l_div;
     m_yMove += (float)i_y / l_div;
@@ -1413,33 +1421,41 @@ void DatasetHelper::moveScene( int i_x, int i_y )
 
 void DatasetHelper::doMatrixManipulation()
 {
-    float l_max = (float)wxMax( m_columns * m_xVoxel, wxMax( m_rows * m_yVoxel, m_frames * m_zVoxel) ) / 2.0;
+    float columns = DatasetManager::getInstance()->getColumns();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+    float l_max = std::max( columns * voxelX, std::max( rows * voxelY, frames * voxelZ ) ) * 0.5f;
     glTranslatef( l_max + m_xMove, l_max + m_yMove, l_max );
     glScalef( m_zoom, m_zoom, m_zoom );
     glMultMatrixf( m_transform.M );
-    glTranslatef( -m_columns * m_xVoxel / 2.0, -m_rows * m_yVoxel / 2.0, -m_frames * m_zVoxel / 2.0 );
+    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
 }
 
 void DatasetHelper::updateView( const float i_x, const float i_y, const float i_z )
 {
-    m_xSlize = i_x;
-    m_ySlize = i_y;
-    m_zSlize = i_z;
-
-    if( m_boxLockIsOn && ! m_semaphore )
-        m_boxAtCrosshair->setCenter( i_x, i_y, i_z );
-
-    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
-    {
-        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
-        if( l_datasetInfo ) 
-        {
-            if( l_datasetInfo->getType() == TENSORS || l_datasetInfo->getType() == ODFS )
-            {
-                ((Glyph*)l_datasetInfo)->refreshSlidersValues();
-            }
-        }
-    }
+    SceneManager::getInstance()->updateView( i_x, i_y, i_z );
+//     m_xSlize = i_x;
+//     m_ySlize = i_y;
+//     m_zSlize = i_z;
+// 
+//     if( m_boxLockIsOn && !m_semaphore )
+//         m_boxAtCrosshair->setCenter( i_x, i_y, i_z );
+// 
+//     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
+//     {
+//         DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
+//         if( l_datasetInfo ) 
+//         {
+//             if( l_datasetInfo->getType() == TENSORS || l_datasetInfo->getType() == ODFS )
+//             {
+//                 ((Glyph*)l_datasetInfo)->refreshSlidersValues();
+//             }
+//         }
+//     }
 }
 
 bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
@@ -1631,47 +1647,36 @@ void DatasetHelper::doLicMovie( int i_mode )
     switch( i_mode )
     {
         case 0:
-            for( int i = 0; i < m_columns; ++i )
+        {
+            float columns = DatasetManager::getInstance()->getColumns();
+            for( int i( 0 ); i < columns; ++i )
             {
-                if( i < 100 )
-                    m_screenshotName = l_tmpFileName + _T( "0" ) + wxString::Format( wxT( "%d" ), i ) + _T( ".ppm" );
-                else
-                    m_screenshotName = l_tmpFileName + wxString::Format( wxT( "%d" ), i ) + _T( ".ppm" );
-
-                if( i < 10 )
-                    m_screenshotName = l_tmpFileName + _T( "00" ) + wxString::Format( wxT( "%d" ), i ) + _T( ".ppm" );
-
+                m_screenshotName = l_tmpFileName + wxString::Format( wxT( "%03d" ), i ) + _T( ".ppm" );
                 createLicSliceSag( i );
-            }break;
+            }
+            break;
+        }
 
         case 1:
-            for( int i = 0; i < m_rows; ++i )
+        {
+            float rows = DatasetManager::getInstance()->getRows();
+            for( int i = 0; i < rows; ++i )
             {
-                if ( i < 100 )
-                    m_screenshotName = l_tmpFileName + _T( "0" ) + wxString::Format( wxT( "%d" ), i ) + _T( ".ppm" );
-                else
-                    m_screenshotName = l_tmpFileName + wxString::Format( wxT( "%d" ), i ) + _T( ".ppm" );
-
-                if ( i < 10 )
-                    m_screenshotName = l_tmpFileName + _T( "00" ) + wxString::Format( wxT("%d"), i ) + _T( ".ppm" );
-
+                m_screenshotName = l_tmpFileName + wxString::Format( wxT( "%03d" ), i ) + _T( ".ppm" );
                 createLicSliceCor( i );
-            } break;
-
+            }
+            break;
+        }
         case 2:
-            for ( int i = 0; i < m_frames; ++i )
+        {
+            float frames = DatasetManager::getInstance()->getFrames();
+            for ( int i = 0; i < frames; ++i )
             {
-                if ( i < 100 )
-                    m_screenshotName = l_tmpFileName + _T( "0" ) + wxString::Format( wxT( "%d" ), i ) + _T( ".ppm" );
-                else
-                    m_screenshotName = l_tmpFileName + wxString::Format( wxT( "%d" ), i ) + _T( ".ppm" );
-
-                if ( i < 10 )
-                    m_screenshotName = l_tmpFileName + _T( "00" ) + wxString::Format( wxT( "%d" ), i ) + _T( ".ppm" );
-
+                m_screenshotName = l_tmpFileName + wxString::Format( wxT( "%03d" ), i ) + _T( ".ppm" );
                 createLicSliceAxi( i );
-            }break;
-
+            }
+            break;
+        }
         default:
             break;
     }
@@ -1708,17 +1713,24 @@ void DatasetHelper::licMovieHelper()
 
 void DatasetHelper::createLicSliceSag( int i_slize )
 {
-    int l_xs = (int)( i_slize * m_xVoxel );
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    int l_xs = (int)( i_slize * voxelX );
 
     //delete all existing points
     m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+
+    float rows   = DatasetManager::getInstance()->getRows();
+    float frames = DatasetManager::getInstance()->getFrames();
 
     for( int i = 0; i < 11; ++i )
     {
         for( int j = 0; j < 11; ++j )
         {
-            int yy = (int)( ( m_rows   / 10 * m_yVoxel ) * i );
-            int zz = (int)( ( m_frames / 10 * m_zVoxel ) * j );
+            int yy = (int)( rows   / 10 * voxelY * i );
+            int zz = (int)( frames / 10 * voxelZ * j );
 
             // create the l_point
             SplinePoint* l_point = new SplinePoint( l_xs, yy, zz, this );
@@ -1736,17 +1748,24 @@ void DatasetHelper::createLicSliceSag( int i_slize )
 
 void DatasetHelper::createLicSliceCor( int i_slize )
 {
-    int l_ys = (int)( i_slize * m_yVoxel );
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    int l_ys = (int)( i_slize * voxelY );
 
     //delete all existing points
     m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+
+    float columns = DatasetManager::getInstance()->getColumns();
+    float frames  = DatasetManager::getInstance()->getFrames();
 
     for( int i = 0; i < 11; ++i )
     {
         for( int j = 0; j < 11; ++j )
         {
-            int xx = (int) ( ( m_columns / 10 * m_xVoxel ) * i );
-            int zz = (int) ( ( m_frames  / 10 * m_zVoxel ) * j );
+            int xx = (int) ( columns / 10 * voxelX * i );
+            int zz = (int) ( frames  / 10 * voxelZ * j );
 
             // create the point
             SplinePoint* l_point = new SplinePoint( xx, l_ys, zz, this );
@@ -1765,17 +1784,24 @@ void DatasetHelper::createLicSliceCor( int i_slize )
 
 void DatasetHelper::createLicSliceAxi( int i_slize )
 {
-    int l_zs = (int)( i_slize * m_zVoxel );
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    int l_zs = (int)( i_slize * voxelZ );
 
     //delete all existing points
     m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
 
     for( int i = 0; i < 11; ++i )
     {
         for( int j = 0; j < 11; ++j )
         {
-            int xx = (int)( ( m_columns / 10 * m_xVoxel ) * i );
-            int yy = (int)( ( m_rows    / 10 * m_yVoxel ) * j );
+            int xx = (int)( columns / 10 * voxelX * i );
+            int yy = (int)( rows    / 10 * voxelY * j );
 
             // create the l_point
             SplinePoint *l_point = new SplinePoint( xx, yy, l_zs, this );

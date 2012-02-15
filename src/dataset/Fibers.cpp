@@ -5,22 +5,25 @@
 
 #include "Fibers.h"
 
-#include <iostream>
-#include <fstream>
-#include <cfloat>
-#include <limits>
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cmath>
-#include <wx/tokenzr.h>
-
 #include "Anatomy.h"
+#include "DatasetManager.h"
+
 #include "../main.h"
 #include "../Logger.h"
-
-#include "../dataset/DatasetManager.h"
+#include "../gui/SceneManager.h"
 #include "../misc/Fantom/FMatrix.h"
+
+#include <wx/tokenzr.h>
+
+#include <algorithm>
+#include <cfloat>
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
 
 // TODO replace by const
 #define LINEAR_GRADIENT_THRESHOLD 0.085f
@@ -51,7 +54,7 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
 
 Fibers::~Fibers()
 {
-    Logger::getInstance()->print( wxT( "executing fibers destructor" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
 
     if( m_dh->m_useVBO )
     {
@@ -468,37 +471,44 @@ bool Fibers::loadTRK( const wxString &filename )
         }
     }
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     if( voxelSize[0] == 0 && voxelSize[1] == 0 && voxelSize[2] == 0 )
     {
         ss.str( "" );
-        ss << "Using anatomy's voxel size: [" << m_dh->m_xVoxel << "," << m_dh->m_yVoxel << "," << m_dh->m_zVoxel << "]";
+        ss << "Using anatomy's voxel size: [" << voxelX << ", " << voxelY << ", " << voxelZ << "]";
         Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-        voxelSize[0] = m_dh->m_xVoxel;
-        voxelSize[1] = m_dh->m_yVoxel;
-        voxelSize[2] = m_dh->m_zVoxel;
+        voxelSize[0] = voxelX;
+        voxelSize[1] = voxelY;
+        voxelSize[2] = voxelZ;
         ss.str( "" );
-        ss << "Centering with respect to the anatomy: [" << m_dh->m_columns / 2 << "," << m_dh->m_rows / 2 << "," << m_dh->m_frames / 2 << "]";
+        ss << "Centering with respect to the anatomy: [" << columns / 2 << "," << rows / 2 << "," << frames / 2 << "]";
         Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-        origin[0] = m_dh->m_columns / 2;
-        origin[1] = m_dh->m_rows / 2;
-        origin[2] = m_dh->m_frames / 2;
+        origin[0] = columns / 2;
+        origin[1] = rows / 2;
+        origin[2] = frames / 2;
     }
 
     float flipX = ( invertX ) ? -1. : 1.;
     float flipY = ( invertY ) ? -1. : 1.;
     float flipZ = ( invertZ ) ? -1. : 1.;
     float anatomy[3];
-    anatomy[0] = ( ( flipX - 1. ) * m_dh->m_columns * m_dh->m_xVoxel ) / -2.;
-    anatomy[1] = ( ( flipY - 1. ) * m_dh->m_rows * m_dh->m_yVoxel ) / -2.;
-    anatomy[2] = ( ( flipZ - 1. ) * m_dh->m_frames * m_dh->m_zVoxel ) / -2.;
+    anatomy[0] = ( flipX - 1. ) * columns * voxelX / -2.;
+    anatomy[1] = ( flipY - 1. ) * rows    * voxelY / -2.;
+    anatomy[2] = ( flipZ - 1. ) * frames  * voxelZ / -2.;
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = flipX * ( m_pointArray[i] - origin[0] ) * ( m_dh->m_xVoxel / voxelSize[0] ) + anatomy[0];
+        m_pointArray[i] = flipX * ( m_pointArray[i] - origin[0] ) * voxelX / voxelSize[0] + anatomy[0];
         ++i;
-        m_pointArray[i] = flipY * ( m_pointArray[i] - origin[1] ) * ( m_dh->m_yVoxel / voxelSize[1] ) + anatomy[1];
+        m_pointArray[i] = flipY * ( m_pointArray[i] - origin[1] ) * voxelY / voxelSize[1] + anatomy[1];
         ++i;
-        m_pointArray[i] = flipZ * ( m_pointArray[i] - origin[2] ) * ( m_dh->m_zVoxel / voxelSize[2] ) + anatomy[2];
+        m_pointArray[i] = flipZ * ( m_pointArray[i] - origin[2] ) * voxelZ / voxelSize[2] + anatomy[2];
     }
 
     Logger::getInstance()->print( wxT( "TRK file loaded" ), LOGLEVEL_MESSAGE );
@@ -593,13 +603,20 @@ bool Fibers::loadCamino( const wxString &filename )
     printf( "%d lines and %d points \n", m_countLines, m_countPoints );
     Logger::getInstance()->print( wxT( "Move vertices" ), LOGLEVEL_MESSAGE );
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
+        m_pointArray[i] = columns * voxelX - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_rows * m_dh->m_yVoxel - m_pointArray[i];
+        m_pointArray[i] = rows    * voxelY - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_frames * m_dh->m_zVoxel - m_pointArray[i];
+        m_pointArray[i] = frames  * voxelZ - m_pointArray[i];
     }
 
     calculateLinePointers();
@@ -805,18 +822,20 @@ bool Fibers::loadMRtrix( const wxString &filename )
     // for the moment, use this scaling. Therefore, we must remove it from the
     // the transformation matrix before computing its inverse.
     FMatrix localToWorld = m_dh->m_niftiTransform;
-    
-    if( m_dh->m_xVoxel != 1.0 ||
-        m_dh->m_yVoxel != 1.0 ||
-        m_dh->m_zVoxel != 1.0 )
+
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    if( voxelX != 1.0 || voxelY != 1.0 || voxelZ != 1.0 )
     {
         FMatrix rotMat( 3, 3 );
         localToWorld.getSubMatrix( rotMat, 0, 0 );
         
         FMatrix scaleInversion( 3, 3 );
-        scaleInversion( 0, 0 ) = 1.0 / m_dh->m_xVoxel;
-        scaleInversion( 1, 1 ) = 1.0 / m_dh->m_yVoxel;
-        scaleInversion( 2, 2 ) = 1.0 / m_dh->m_zVoxel;
+        scaleInversion( 0, 0 ) = 1.0 / voxelX;
+        scaleInversion( 1, 1 ) = 1.0 / voxelY;
+        scaleInversion( 2, 2 ) = 1.0 / voxelZ;
         
         rotMat = scaleInversion * rotMat;
         
@@ -942,13 +961,20 @@ bool Fibers::loadPTK( const wxString &filename )
     * already in the space of the dataset. Good voxel size and origin
     *
     ********************************************************************/
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+    
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
+        m_pointArray[i] = columns * voxelX - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_rows    * m_dh->m_yVoxel - m_pointArray[i];
+        m_pointArray[i] = rows    * voxelY - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_frames  * m_dh->m_zVoxel - m_pointArray[i];
+        m_pointArray[i] = frames  * voxelZ - m_pointArray[i];
     }
 
     calculateLinePointers();
@@ -1219,13 +1245,20 @@ bool Fibers::loadVTK( const wxString &filename )
     toggleEndianess();
     Logger::getInstance()->print( wxT( "Move vertices" ), LOGLEVEL_MESSAGE );
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int i = 0; i < countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
+        m_pointArray[i] = columns * voxelX - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_rows    * m_dh->m_yVoxel - m_pointArray[i];
+        m_pointArray[i] = rows    * voxelY - m_pointArray[i];
         ++i;
-        //m_pointArray[i] = m_dh->m_frames - m_pointArray[i];
+        //m_pointArray[i] = frames - m_pointArray[i];
     }
 
     calculateLinePointers();
@@ -1763,13 +1796,20 @@ void Fibers::colorWithDistance( float *pColorData )
         }
     }
 
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int i = 0; i < getPointCount(); ++i )
     {
         float minDistance = FLT_MAX;
-        int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
-        int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
-        int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
-        int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+        int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[i * 3 ]    / voxelX ) ) );
+        int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) );
+        int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) );
+        int index = x + y * columns + z * rows * columns;
 
         for( unsigned int j = 0; j < simplifiedList.size(); ++j )
         {
@@ -1830,6 +1870,13 @@ void Fibers::colorWithMinDistance( float *pColorData )
         }
     }
 
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int i = 0; i < getLineCount(); ++i )
     {
         int nbPointsInLine = getPointsPerLine( i );
@@ -1838,10 +1885,10 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
         for( int j = 0; j < nbPointsInLine; ++j )
         {
-            int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[( index + j ) * 3 ] / m_dh->m_xVoxel ) ) ;
-            int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[( index + j ) * 3 + 1] / m_dh->m_yVoxel ) ) ;
-            int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[( index + j ) * 3 + 2] / m_dh->m_zVoxel ) ) ;
-            int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+            int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[( index + j ) * 3 ]    / voxelX ) ) ) ;
+            int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[( index + j ) * 3 + 1] / voxelY ) ) ) ;
+            int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[( index + j ) * 3 + 2] / voxelZ ) ) ) ;
+            int index = x + y * columns + z * rows * columns;
 
             for( unsigned int k = 0; k < simplifiedList.size(); ++k )
             {
@@ -1936,14 +1983,21 @@ Anatomy* Fibers::generateFiberVolume()
     m_dh->updateLoadStatus();
     m_dh->m_mainFrame->refreshAllGLWidgets();
 
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int i = 0; i < getPointCount(); ++i )
     {
-        int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
-        int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
-        int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
-        int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+        int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[i * 3 ]    / voxelX ) ) ) ;
+        int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) ) ;
+        int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) ) ;
+        int index = x + y * columns + z * rows * columns;
         
-        ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3] * m_localizedAlpha[i];
+        ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3]     * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 1] += pColorData[i * 3 + 1] * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
     }
@@ -1973,6 +2027,12 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
         pColorData = &m_colorArray[0];
     }
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int l = 0; l < m_countLines; ++l )
     {
         if( m_selected[l] && !m_filtered[l] )
@@ -1982,10 +2042,10 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
 
             for( int j = 0; j < getPointsPerLine( l ); ++j )
             {
-                pointsToSave.push_back( m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[pc] );
+                pointsToSave.push_back( columns * voxelX - m_pointArray[pc] );
                 colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
-                pointsToSave.push_back( m_dh->m_rows * m_dh->m_yVoxel - m_pointArray[pc] );
+                pointsToSave.push_back( rows * voxelY - m_pointArray[pc] );
                 colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
                 pointsToSave.push_back( m_pointArray[pc] );
@@ -2597,32 +2657,40 @@ vector< bool > Fibers::getLinesShown( SelectionObject *pSelectionObject )
 
     resetLinesShown();
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     if( pSelectionObject->getSelectionType() == BOX_TYPE || pSelectionObject->getSelectionType() == ELLIPSOID_TYPE )
     {
         Vector center = pSelectionObject->getCenter();
         Vector size   = pSelectionObject->getSize();
         m_boxMin.resize( 3 );
         m_boxMax.resize( 3 );
-        m_boxMin[0] = center.x - size.x / 2 * m_dh->m_xVoxel;
-        m_boxMax[0] = center.x + size.x / 2 * m_dh->m_xVoxel;
-        m_boxMin[1] = center.y - size.y / 2 * m_dh->m_yVoxel;
-        m_boxMax[1] = center.y + size.y / 2 * m_dh->m_yVoxel;
-        m_boxMin[2] = center.z - size.z / 2 * m_dh->m_zVoxel;
-        m_boxMax[2] = center.z + size.z / 2 * m_dh->m_zVoxel;
+        m_boxMin[0] = center.x - size.x * 0.5 * voxelX;
+        m_boxMax[0] = center.x + size.x * 0.5 * voxelX;
+        m_boxMin[1] = center.y - size.y * 0.5 * voxelY;
+        m_boxMax[1] = center.y + size.y * 0.5 * voxelY;
+        m_boxMin[2] = center.z - size.z * 0.5 * voxelZ;
+        m_boxMax[2] = center.z + size.z * 0.5 * voxelZ;
 
         //Get and Set selected lines to visible
         objectTest( pSelectionObject );
     }
     else
     {
+        int columns = DatasetManager::getInstance()->getColumns();
+        int rows    = DatasetManager::getInstance()->getRows();
+        int frames  = DatasetManager::getInstance()->getFrames();
+
         for( int i = 0; i < m_countPoints; ++i )
         {
             if( m_selected[getLineForPoint( i )] != 1 )
             {
-                int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
-                int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
-                int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
-                int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+                int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[i * 3 ]    / voxelX ) ) );
+                int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) );
+                int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) );
+                int index = x + y * columns + z * rows * columns;
 
                 if( ( pSelectionObject->m_sourceAnatomy->at( index ) > pSelectionObject->getThreshold() ) )
                 {
@@ -3317,6 +3385,10 @@ void Fibers::setFibersLength()
     m_maxLength = 0;
     m_minLength = 1000000;
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     for( unsigned int j = 0 ; j < fibersPoints.size(); j++ )
     {
         currentFiberPoints = fibersPoints[j];
@@ -3326,9 +3398,9 @@ void Fibers::setFibersLength()
         {
             // The values are in pixel, we need to set them in millimeters using the spacing
             // specified in the anatomy file ( m_datasetHelper->xVoxel... ).
-            dx = ( currentFiberPoints[i].x - currentFiberPoints[i - 1].x ) * m_dh->m_xVoxel;
-            dy = ( currentFiberPoints[i].y - currentFiberPoints[i - 1].y ) * m_dh->m_yVoxel;
-            dz = ( currentFiberPoints[i].z - currentFiberPoints[i - 1].z ) * m_dh->m_zVoxel;
+            dx = ( currentFiberPoints[i].x - currentFiberPoints[i - 1].x ) * voxelX;
+            dy = ( currentFiberPoints[i].y - currentFiberPoints[i - 1].y ) * voxelY;
+            dz = ( currentFiberPoints[i].z - currentFiberPoints[i - 1].z ) * voxelZ;
             FArray currentVector( dx, dy, dz );
             m_length[j] += ( float )currentVector.norm();
         }
@@ -3635,16 +3707,16 @@ void Fibers::updateCrossingFibersThickness()
 void Fibers::findCrossingFibers() 
 {
     if (   m_cfDrawDirty
-        || m_xDrawn != m_dh->m_xSlize
-        || m_yDrawn != m_dh->m_ySlize
-        || m_zDrawn != m_dh->m_zSlize
+        || m_xDrawn != SceneManager::getInstance()->getSliceX()
+        || m_yDrawn != SceneManager::getInstance()->getSliceY()
+        || m_zDrawn != SceneManager::getInstance()->getSliceZ()
         || m_axialShown != m_dh->m_showAxial
         || m_coronalShown != m_dh->m_showCoronal
         || m_sagittalShown != m_dh->m_showSagittal )
     {
-        m_xDrawn = m_dh->m_xSlize;
-        m_yDrawn = m_dh->m_ySlize;
-        m_zDrawn = m_dh->m_zSlize;
+        m_xDrawn = SceneManager::getInstance()->getSliceX();
+        m_yDrawn = SceneManager::getInstance()->getSliceY();
+        m_zDrawn = SceneManager::getInstance()->getSliceZ();
         m_axialShown = m_dh->m_showAxial;
         m_coronalShown = m_dh->m_showCoronal;
         m_sagittalShown = m_dh->m_showSagittal;
@@ -3652,12 +3724,12 @@ void Fibers::findCrossingFibers()
         m_cfDrawDirty = true;
 
         // Determine X, Y and Z range
-        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
-        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
-        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
-        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
-        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
-        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+        const float xMin( m_xDrawn + 0.5f - m_thickness );
+        const float xMax( m_xDrawn + 0.5f + m_thickness );
+        const float yMin( m_yDrawn + 0.5f - m_thickness );
+        const float yMax( m_yDrawn + 0.5f + m_thickness );
+        const float zMin( m_zDrawn + 0.5f - m_thickness );
+        const float zMax( m_zDrawn + 0.5f + m_thickness );
 
         bool lineStarted(false);
 
@@ -3733,47 +3805,23 @@ void Fibers::setShader()
     else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
     {
         // Determine X, Y and Z range
-        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
-        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
-        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
-        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
-        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
-        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+        const float xMin( SceneManager::getInstance()->getSliceX() + 0.5f - m_thickness );
+        const float xMax( SceneManager::getInstance()->getSliceX() + 0.5f + m_thickness );
+        const float yMin( SceneManager::getInstance()->getSliceY() + 0.5f - m_thickness );
+        const float yMax( SceneManager::getInstance()->getSliceY() + 0.5f + m_thickness );
+        const float zMin( SceneManager::getInstance()->getSliceZ() + 0.5f - m_thickness );
+        const float zMax( SceneManager::getInstance()->getSliceZ() + 0.5f + m_thickness );
 
         m_dh->m_shaderHelper->m_crossingFibersShader.bind();
 
-		if (m_dh->m_showSagittal)
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", xMin);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", xMax);
-		}
-		else
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", 0);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", 0);
-		}
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", m_dh->m_showSagittal ? xMin : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", m_dh->m_showSagittal ? xMax : 0 );
 		
-		if (m_dh->m_showCoronal)
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", yMin);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", yMax);
-        }
-		else
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", 0);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", 0);
-        }
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", m_dh->m_showCoronal ? yMin : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", m_dh->m_showCoronal ? yMax : 0 );
 
-		if (m_dh->m_showAxial)
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", zMin);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", zMax);
-		}
-		else
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", 0);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", 0);
-        }
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", m_dh->m_showAxial ? zMin : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", m_dh->m_showAxial ? zMax : 0 );
     }
     else if ( !m_useTex )
     {

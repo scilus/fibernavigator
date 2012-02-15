@@ -23,8 +23,46 @@
 #include "../dataset/Surface.h"
 #include "../gui/ArcBall.h"
 #include "../gui/MyListCtrl.h"
+#include "../gui/SceneManager.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+
+#include <algorithm>
+
+namespace
+{
+    void drawVectorsHelper( const vector< Vector > &positions, const Anatomy * const pVecs, const float bright )
+    {
+        float columns = DatasetManager::getInstance()->getColumns();
+        float rows    = DatasetManager::getInstance()->getRows();
+
+        for( vector< Vector >::const_iterator it = positions.begin(); it != positions.end(); ++it )
+        {
+            float r, g, b, a;
+            int index = 3 * ((int)it->x + (int)( it->y * columns ) + (int)( it->z * rows * columns ) );
+
+            float x = pVecs->at( index );
+            float y = pVecs->at( index + 1 );
+            float z = pVecs->at( index + 2 );
+
+            if( pVecs->getUseTex() )
+            {
+                r = wxMin(1.0, fabs(x)* bright);
+                g = wxMin(1.0, fabs(y)* bright);
+                b = wxMin(1.0, fabs(z)* bright);
+                a = sqrt( r * r + g * g + b * b );
+                r /= a;
+                g /= a;
+                b /= a;
+            }
+
+            glColor4f( r, g, b, 1.0 );
+            glVertex3f( it->x - x / 2., it->y - y / 2., it->z - z / 2. );
+            glVertex3f( it->x + x / 2., it->y + y / 2., it->z + z / 2. );
+        }
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -194,15 +232,22 @@ void TheScene::renderScene()
 
     m_pDatasetHelper->m_shaderHelper->initializeArrays();
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     //Animate
 	if(m_isRotateZ)
     {
 	    if (m_rotAngleZ>360) 
 		    m_rotAngleZ=0;
 
-    	glTranslatef(m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
-	    glRotatef(m_rotAngleZ,0,0,1);
-	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
+    	glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+	    glRotatef( m_rotAngleZ, 0, 0, 1 );
+	    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
     if(m_isRotateY)
@@ -210,9 +255,9 @@ void TheScene::renderScene()
 	    if (m_rotAngleY>360) 
 		    m_rotAngleY=0;
 
-    	glTranslatef(m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
-	    glRotatef(m_rotAngleY,0,1,0);
-	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
+    	glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+	    glRotatef( m_rotAngleY, 0, 1, 0 );
+	    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
     if(m_isRotateX)
@@ -220,37 +265,41 @@ void TheScene::renderScene()
 	    if (m_rotAngleX>360) 
 		    m_rotAngleX=0;
 
-    	glTranslatef(m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
-	    glRotatef(m_rotAngleX,1,0,0);
-	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
+    	glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+	    glRotatef( m_rotAngleX, 1, 0, 0 );
+	    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
+
+    float sliceX = SceneManager::getInstance()->getSliceX();
+    float sliceY = SceneManager::getInstance()->getSliceY();
+    float sliceZ = SceneManager::getInstance()->getSliceZ();
 
     //Navigate through slices
     if(m_isNavSagital) 
     {
-	    if (m_posSagital > m_pDatasetHelper->m_columns) 
-		    m_posSagital=0;
+	    if (m_posSagital > columns) 
+		    m_posSagital = 0;
 
-        m_pDatasetHelper->updateView(m_posSagital,m_pDatasetHelper->m_ySlize,m_pDatasetHelper->m_zSlize);
-        m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue(m_posSagital);
+        m_pDatasetHelper->updateView( m_posSagital, sliceY, sliceZ );
+        m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( m_posSagital );
     }
 
     if(m_isNavCoronal)
     {
-	    if (m_posCoronal > m_pDatasetHelper->m_rows) 
-		    m_posCoronal=0;
+	    if (m_posCoronal > rows) 
+		    m_posCoronal = 0;
 
-        m_pDatasetHelper->updateView(m_pDatasetHelper->m_xSlize,m_posCoronal,m_pDatasetHelper->m_zSlize);
-        m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue(m_posCoronal);
+        m_pDatasetHelper->updateView( sliceX, m_posCoronal, sliceZ );
+        m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( m_posCoronal );
     }
 
     if(m_isNavAxial)
     {
-	    if (m_posAxial > m_pDatasetHelper->m_frames) 
-		    m_posAxial=0;
+	    if (m_posAxial > frames) 
+		    m_posAxial = 0;
 
-        m_pDatasetHelper->updateView(m_pDatasetHelper->m_xSlize,m_pDatasetHelper->m_ySlize,m_posAxial);
-        m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue(m_posAxial);
+        m_pDatasetHelper->updateView( sliceX, sliceY, m_posAxial );
+        m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( m_posAxial );
     }
 
     // Opaque objects.
@@ -434,7 +483,7 @@ void TheScene::renderSlices()
         glEnable( GL_ALPHA_TEST );
     }
 
-    glAlphaFunc( GL_GREATER, 0.001f ); // Adjust your prefered threshold here.
+    glAlphaFunc( GL_GREATER, 0.001f ); // Adjust your preferred threshold here.
 
     bindTextures();
     m_pDatasetHelper->m_shaderHelper->m_anatomyShader.bind();
@@ -686,16 +735,13 @@ void TheScene::renderODFs()
 
     vector<ODFs *> v = DatasetManager::getInstance()->getOdfs();
     for(vector<ODFs *>::iterator it = v.begin(); it != v.end(); ++it )
-    //for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
-//         DatasetInfo* pDsInfo = m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i );
-// 
-//         if( pDsInfo->getType() == ODFS && pDsInfo->getShow() )
-//         {
+        ODFs *pOdfs = *it;
+        if( pOdfs->getShow() )
+        {
             lightsOff();
-            //pDsInfo->draw();
-            (*it)->draw();
-//         }
+            pOdfs->draw();
+        }
     }
 
     Logger::getInstance()->printIfGLError( wxT( "Draw ODFs" ) );
@@ -823,11 +869,15 @@ void TheScene::drawPoints()
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::drawColorMapLegend()
 {
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
     glPushAttrib( GL_ALL_ATTRIB_BITS );
     glPushMatrix();
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    int maxSize = wxMax(wxMax(m_pDatasetHelper->m_rows, m_pDatasetHelper->m_columns), m_pDatasetHelper->m_frames );
+    int maxSize = std::max( std::max( rows, columns ), frames );
     glOrtho( 0, maxSize, 0, maxSize, -3000, 3000 );
 
     m_pDatasetHelper->m_shaderHelper->m_legendShader.bind();
@@ -895,8 +945,8 @@ void TheScene::drawVectors()
             b = pVecs->getColor().Blue()  / 255.;
             a = 1.0;
 
-            float bright = 1.2f;
-            float dull = 0.7f;
+            float bright( 1.2f );
+            float dull( 0.7f );
 
             bool topview = m_pDatasetHelper->m_quadrant == 2 || 
                            m_pDatasetHelper->m_quadrant == 3 || 
@@ -913,14 +963,20 @@ void TheScene::drawVectors()
                              m_pDatasetHelper->m_quadrant == 5 || 
                              m_pDatasetHelper->m_quadrant == 6;
 
+            float columns = DatasetManager::getInstance()->getColumns();
+            float rows    = DatasetManager::getInstance()->getRows();
+            float frames  = DatasetManager::getInstance()->getFrames();
+
             if( m_pDatasetHelper->m_showAxial )
             {
-                for( int i = 0; i < m_pDatasetHelper->m_columns; ++i )
+                float sliceZ = SceneManager::getInstance()->getSliceZ();
+
+                for( int i = 0; i < columns; ++i )
                 {
-                    for( int j = 0; j < m_pDatasetHelper->m_rows; ++j )
+                    for( int j = 0; j < rows; ++j )
                     {
-                        int slice = (int) ( m_pDatasetHelper->m_zSlize * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_rows * 3 );
-                        int index = i * 3 + j * m_pDatasetHelper->m_columns * 3 + slice;
+                        int slice = (int) ( sliceZ * columns * rows * 3 );
+                        int index = i * 3 + j * columns * 3 + slice;
 
                         float x = pVecs->at( index );
                         float y = pVecs->at( index + 1 );
@@ -940,8 +996,8 @@ void TheScene::drawVectors()
                         if( ! pVecs->getShowFS() )
                         {
                             glColor4f( r, g, b, a );
-                            glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .5 + z / 2. );
-                            glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .5 - z / 2. );
+                            glVertex3f( (GLfloat) i + .5f + x / 2.f, (GLfloat) j + .5f + y / 2.f, (GLfloat) sliceZ + .5f + z / 2.f );
+                            glVertex3f( (GLfloat) i + .5f - x / 2.f, (GLfloat) j + .5f - y / 2.f, (GLfloat) sliceZ + .5f - z / 2.f );
                         }
                         else
                         {
@@ -950,19 +1006,19 @@ void TheScene::drawVectors()
                                 glColor4f( r, g, b, a );
                                 if( topview )
                                 {
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) sliceZ + .4 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .4 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) sliceZ + .4 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .4 );
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) sliceZ + .6 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .6 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) sliceZ + .6 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .6 );
                                 }
                             }
                             else
@@ -970,33 +1026,36 @@ void TheScene::drawVectors()
                                 glColor4f( r * dull, g * dull, b * dull, a );
                                 if ( topview )
                                 {
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) sliceZ + .4 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .4 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) sliceZ + .4 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .4 );
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) sliceZ + .6 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .6 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) sliceZ + .6 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .6 );
                                 }
                             }
                         }
                     }
                 }
             }
+
             if( m_pDatasetHelper->m_showCoronal )
             {
-                for( int i = 0; i < m_pDatasetHelper->m_columns; ++i )
+                float sliceY = SceneManager::getInstance()->getSliceY();
+
+                for( int i = 0; i < columns; ++i )
                 {
-                    for( int j = 0; j < m_pDatasetHelper->m_frames; ++j )
+                    for( int j = 0; j < frames; ++j )
                     {
-                        int slice = (int) ( m_pDatasetHelper->m_ySlize * m_pDatasetHelper->m_columns * 3 );
-                        int index = i * 3 + slice + j * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_rows * 3;
+                        int slice = (int) ( sliceY * columns * 3 );
+                        int index = i * 3 + slice + j * columns * rows * 3;
 
                         float x = pVecs->at( index );
                         float y = pVecs->at( index + 1 );
@@ -1015,8 +1074,8 @@ void TheScene::drawVectors()
                         if( ! pVecs->getShowFS() )
                         {
                             glColor4f( r, g, b, a );
-                            glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                            glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                            glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                            glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
                         }
                         else
                         {
@@ -1025,19 +1084,19 @@ void TheScene::drawVectors()
                                 glColor4f( r, g, b, a );
                                 if( frontview )
                                 {
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .4, (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .4, (GLfloat) j + .5 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .4, (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .4, (GLfloat) j + .5 );
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .6, (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .6, (GLfloat) j + .5 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .6, (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .6, (GLfloat) j + .5 );
                                 }
                             }
 
@@ -1046,34 +1105,37 @@ void TheScene::drawVectors()
                                 glColor4f( r * dull, g * dull, b * dull, a );
                                 if ( frontview )
                                 {
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .4, (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .4, (GLfloat) j + .5 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .4, (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .4, (GLfloat) j + .5 );
 
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .6, (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .6, (GLfloat) j + .5 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .6, (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .6, (GLfloat) j + .5 );
                                 }
                             }
                         }
                     }
                 }
             }
+
             if( m_pDatasetHelper->m_showSagittal )
             {
-                for( int i = 0; i < m_pDatasetHelper->m_rows; ++i )
+                float sliceX = SceneManager::getInstance()->getSliceX();
+
+                for( int i = 0; i < rows; ++i )
                 {
-                    for( int j = 0; j < m_pDatasetHelper->m_frames; ++j )
+                    for( int j = 0; j < frames; ++j )
                     {
-                        int slice = (int) ( m_pDatasetHelper->m_xSlize * 3 );
-                        int index = slice + i * m_pDatasetHelper->m_columns * 3 + j * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_rows * 3;
+                        int slice = (int) ( sliceX * 3 );
+                        int index = slice + i * columns * 3 + j * columns * rows * 3;
 
                         float x = pVecs->at( index );
                         float y = pVecs->at( index + 1 );
@@ -1092,8 +1154,8 @@ void TheScene::drawVectors()
                         if( ! pVecs->getShowFS() )
                         {
                             glColor4f( r, g, b, a );
-                            glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .5 + x / 2., (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                            glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .5 - x / 2., (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                            glVertex3f( (GLfloat) sliceX + .5 + x / 2., (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                            glVertex3f( (GLfloat) sliceX + .5 - x / 2., (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
                         }
                         else
                         {
@@ -1102,20 +1164,20 @@ void TheScene::drawVectors()
                                 glColor4f( r, g, b, a );
                                 if ( leftview )
                                 {
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
 
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
                                 }
                             }
                             else
@@ -1123,20 +1185,20 @@ void TheScene::drawVectors()
                                 glColor4f( r * dull, g * dull, b * dull, a );
                                 if( leftview )
                                 {
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
 
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
                                 }
                             }
                         }
@@ -1151,63 +1213,12 @@ void TheScene::drawVectors()
                 if ( pMesh->getType() == ISO_SURFACE && pMesh->getShow() )
                 {
                     CIsoSurface* pSurf = (CIsoSurface*) pMesh;
-                    std::vector< Vector > positions = pSurf->getSurfaceVoxelPositions();
-                    for ( size_t k = 0; k < positions.size(); ++k )
-                    {
-                        int index = (int) positions[k].x * 3 + (int) positions[k].y * m_pDatasetHelper->m_columns * 3
-                                + (int) positions[k].z * m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * 3;
-
-                        float x = pVecs->at( index );
-                        float y = pVecs->at( index + 1 );
-                        float z = pVecs->at( index + 2 );
-
-                        if ( pVecs->getUseTex() )
-                        {
-                            r = wxMin(1.0, fabs(x)* bright);
-                            g = wxMin(1.0, fabs(y)* bright);
-                            b = wxMin(1.0, fabs(z)* bright);
-                            a = sqrt( r * r + g * g + b * b );
-                            r /= a;
-                            g /= a;
-                            b /= a;
-                        }
-
-                        glColor4f( r, g, b, 1.0 );
-                        glVertex3f( positions[k].x - x / 2., positions[k].y - y / 2., positions[k].z - z / 2. );
-                        glVertex3f( positions[k].x + x / 2., positions[k].y + y / 2., positions[k].z + z / 2. );
-                    }
+                    drawVectorsHelper( pSurf->getSurfaceVoxelPositions(), pVecs, bright );
                 }
-
                 else if( pMesh->getType() == SURFACE && pMesh->getShow() )
                 {
                     Surface* pSurf = (Surface*) pMesh;
-                    std::vector< Vector > positions = pSurf->getSurfaceVoxelPositions();
-
-                    for( size_t k = 0; k < positions.size(); ++k )
-                    {
-                        int index = (int)positions[k].x * 3 + 
-                                    (int) positions[k].y * m_pDatasetHelper->m_columns * 3 +
-                                    (int) positions[k].z * m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * 3;
-
-                        float x = pVecs->at( index );
-                        float y = pVecs->at( index + 1 );
-                        float z = pVecs->at( index + 2 );
-
-                        if( pVecs->getUseTex() )
-                        {
-                            r = wxMin(1.0, fabs(x)* bright);
-                            g = wxMin(1.0, fabs(y)* bright);
-                            b = wxMin(1.0, fabs(z)* bright);
-                            a = sqrt( r * r + g * g + b * b );
-                            r /= a;
-                            g /= a;
-                            b /= a;
-                        }
-
-                        glColor4f( r, g, b, 1.0 );
-                        glVertex3f( positions[k].x - x / 2., positions[k].y - y / 2., positions[k].z - z / 2. );
-                        glVertex3f( positions[k].x + x / 2., positions[k].y + y / 2., positions[k].z + z / 2. );
-                    }
+                    drawVectorsHelper( pSurf->getSurfaceVoxelPositions(), pVecs, bright );
                 }
             }
             glEnd();

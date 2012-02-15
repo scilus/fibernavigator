@@ -1,5 +1,6 @@
 #include "Mesh.h"
 
+#include "DatasetManager.h"
 #include "../main.h"
 #include "../Logger.h"
 #include "../gui/MainFrame.h"
@@ -56,6 +57,11 @@ bool Mesh::loadDip( wxString filename )
     float minMagnitude = 100000;
     float maxMagnitude = 0;
 
+    float rows   = DatasetManager::getInstance()->getRows();
+    float frames = DatasetManager::getInstance()->getFrames();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+    
     if( file.Open( filename ) )
     {
         line = file.GetFirstLine();
@@ -79,10 +85,10 @@ bool Mesh::loadDip( wxString filename )
                     xString.ToDouble( &x );
                     yString.ToDouble( &y );
                     zString.ToDouble( &z );
-                    m_tMesh->addVert( x, m_dh->m_rows * m_dh->m_yVoxel - y, m_dh->m_frames * m_dh->m_zVoxel - z );
+                    m_tMesh->addVert(   x, rows * voxelY - y, frames * voxelZ - z );
                 }
             }
-            if( line == _T( "Magnitudes" ) )
+            else if( line == _T( "Magnitudes" ) )
             {
                 std::vector<float>tmpMagnitudes( m_countVerts, 0 );
                 for( size_t i = 0 ; i < m_countVerts ; ++i )
@@ -173,23 +179,30 @@ bool Mesh::loadSurf(wxString filename)
     cbi.b[0] = buffer[pc++];
     setCountPolygons(cbi.i);
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for (unsigned int i = 0 ; i < m_countVerts ; ++i)
     {
         cbf.b[3] = buffer[pc++];
         cbf.b[2] = buffer[pc++];
         cbf.b[1] = buffer[pc++];
         cbf.b[0] = buffer[pc++];
-        float x = cbf.f + 0.5  * m_dh->m_xVoxel + m_dh->m_columns/2 * m_dh->m_xVoxel;
+        float x = cbf.f + 0.5f * voxelX + columns * 0.5f * voxelX;
         cbf.b[3] = buffer[pc++];
         cbf.b[2] = buffer[pc++];
         cbf.b[1] = buffer[pc++];
         cbf.b[0] = buffer[pc++];
-        float y = cbf.f + 0.5 * m_dh->m_yVoxel + m_dh->m_rows/2  * m_dh->m_yVoxel;
+        float y = cbf.f + 0.5f * voxelY + rows * 0.5f * voxelY;
         cbf.b[3] = buffer[pc++];
         cbf.b[2] = buffer[pc++];
         cbf.b[1] = buffer[pc++];
         cbf.b[0] = buffer[pc++];
-        float z = cbf.f + 0.5 * m_dh->m_zVoxel + m_dh->m_frames/2  * m_dh->m_zVoxel;
+        float z = cbf.f + 0.5f * voxelZ + frames * 0.5f * voxelZ;
         m_tMesh->addVert(x, y, z);
     }
 
@@ -283,6 +296,11 @@ bool Mesh::loadMesh( wxString filename )
         // number of vertices
         setCountVerts(c.i);
 
+        float rows   = DatasetManager::getInstance()->getRows();
+        float frames = DatasetManager::getInstance()->getFrames();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
         fp += 4;
         for (unsigned int i = 0 ; i < c.i ; ++i)
         {
@@ -296,13 +314,13 @@ bool Mesh::loadMesh( wxString filename )
             f.b[1] = buffer[fp+1];
             f.b[2] = buffer[fp+2];
             f.b[3] = buffer[fp+3];
-            float y = m_dh->m_rows * m_dh->m_yVoxel - f.f;
+            float y = rows * voxelY - f.f;
             fp += 4;
             f.b[0] = buffer[fp];
             f.b[1] = buffer[fp+1];
             f.b[2] = buffer[fp+2];
             f.b[3] = buffer[fp+3];
-            float z = m_dh->m_frames * m_dh->m_zVoxel - f.f;
+            float z = frames * voxelZ - f.f;
             fp += 4;
             m_tMesh->addVert(x, y, z);
         }

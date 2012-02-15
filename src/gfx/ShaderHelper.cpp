@@ -9,11 +9,11 @@
 
 #include "ShaderProgram.h"
 
+#include "../Logger.h"
 #include "../dataset/DatasetHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Surface.h"
-
-#include "../Logger.h"
+#include "../gui/SceneManager.h"
 
 ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) :
     m_anatomyShader( wxT( "anatomy" )/*, geometryShadersSupported ? true : false*/ ),
@@ -251,18 +251,18 @@ void ShaderHelper::setMeshShaderVars()
     m_meshShader.setUniInt( "cutAtSurface", DatasetManager::getInstance()->isSurfaceLoaded() );
     m_meshShader.setUniInt( "lightOn", m_pDh->m_lighting );
 
-    m_meshShader.setUniInt( "dimX", m_pDh->m_columns );
-    m_meshShader.setUniInt( "dimY", m_pDh->m_rows );
-    m_meshShader.setUniInt( "dimZ", m_pDh->m_frames );
-    m_meshShader.setUniFloat( "voxX", m_pDh->m_xVoxel );
-    m_meshShader.setUniFloat( "voxY", m_pDh->m_yVoxel );
-    m_meshShader.setUniFloat( "voxZ", m_pDh->m_zVoxel );
+    m_meshShader.setUniInt( "dimX", DatasetManager::getInstance()->getColumns() );
+    m_meshShader.setUniInt( "dimY", DatasetManager::getInstance()->getRows() );
+    m_meshShader.setUniInt( "dimZ", DatasetManager::getInstance()->getFrames() );
+
+    m_meshShader.setUniFloat( "voxX", DatasetManager::getInstance()->getVoxelX() );
+    m_meshShader.setUniFloat( "voxY", DatasetManager::getInstance()->getVoxelY() );
+    m_meshShader.setUniFloat( "voxZ", DatasetManager::getInstance()->getVoxelZ() );
 
     m_meshShader.setUniInt( "sector", m_pDh->m_quadrant );
-    m_meshShader.setUniFloat( "cutX", m_pDh->m_xSlize + 0.5f );
-    m_meshShader.setUniFloat( "cutY", m_pDh->m_ySlize + 0.5f );
-    m_meshShader.setUniFloat( "cutZ", m_pDh->m_zSlize + 0.5f );
-
+    m_meshShader.setUniFloat( "cutX", SceneManager::getInstance()->getSliceX() + 0.5f );
+    m_meshShader.setUniFloat( "cutY", SceneManager::getInstance()->getSliceY() + 0.5f );
+    m_meshShader.setUniFloat( "cutZ", SceneManager::getInstance()->getSliceZ() + 0.5f );
 
     for ( int i = 0; i < m_pDh->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
     {
@@ -313,12 +313,12 @@ void ShaderHelper::setMeshShaderVars()
 
 void ShaderHelper::setFiberShaderVars()
 {
-    m_fibersShader.setUniInt( "dimX", m_pDh->m_columns );
-    m_fibersShader.setUniInt( "dimY", m_pDh->m_rows );
-    m_fibersShader.setUniInt( "dimZ", m_pDh->m_frames );
-    m_fibersShader.setUniFloat( "voxX", m_pDh->m_xVoxel );
-    m_fibersShader.setUniFloat( "voxY", m_pDh->m_yVoxel );
-    m_fibersShader.setUniFloat( "voxZ", m_pDh->m_zVoxel );
+    m_fibersShader.setUniInt( "dimX", DatasetManager::getInstance()->getColumns() );
+    m_fibersShader.setUniInt( "dimY", DatasetManager::getInstance()->getRows() );
+    m_fibersShader.setUniInt( "dimZ", DatasetManager::getInstance()->getFrames() );
+    m_fibersShader.setUniFloat( "voxX", DatasetManager::getInstance()->getVoxelX() );
+    m_fibersShader.setUniFloat( "voxY", DatasetManager::getInstance()->getVoxelY() );
+    m_fibersShader.setUniFloat( "voxZ", DatasetManager::getInstance()->getVoxelZ() );
 
     int tex = 0;
     int show = 0;
@@ -352,12 +352,13 @@ void ShaderHelper::setFiberShaderVars()
 
 void ShaderHelper::setSplineSurfaceShaderVars()
 {
-    m_splineSurfShader.setUniInt( "dimX", m_pDh->m_columns );
-    m_splineSurfShader.setUniInt( "dimY", m_pDh->m_rows );
-    m_splineSurfShader.setUniInt( "dimZ", m_pDh->m_frames );
-    m_splineSurfShader.setUniFloat( "voxX", m_pDh->m_xVoxel );
-    m_splineSurfShader.setUniFloat( "voxY", m_pDh->m_yVoxel );
-    m_splineSurfShader.setUniFloat( "voxZ", m_pDh->m_zVoxel );
+    m_splineSurfShader.setUniInt( "dimX", DatasetManager::getInstance()->getColumns() );
+    m_splineSurfShader.setUniInt( "dimY", DatasetManager::getInstance()->getRows() );
+    m_splineSurfShader.setUniInt( "dimZ", DatasetManager::getInstance()->getFrames() );
+
+    m_splineSurfShader.setUniFloat( "voxX", DatasetManager::getInstance()->getVoxelX() );
+    m_splineSurfShader.setUniFloat( "voxY", DatasetManager::getInstance()->getVoxelY() );
+    m_splineSurfShader.setUniFloat( "voxZ", DatasetManager::getInstance()->getVoxelZ() );
 
     m_splineSurfShader.setUniInt( "tex0", 0 );
     m_splineSurfShader.setUniInt( "tex1", 1 );

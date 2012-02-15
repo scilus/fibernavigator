@@ -11,14 +11,16 @@
 
 #include "ODFs.h"
 
-#include <algorithm>
-#include <GL/glew.h>
-#include <math.h>
-#include <fstream> 
-
+#include "DatasetManager.h"
 #include "../Logger.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/Fantom/FMatrix.h"
+
+#include <GL/glew.h>
+#include <wx/math.h>
+
+#include <algorithm>
+#include <fstream>
 
 // m_sh_basis
 // 0: Original Descoteaux et al RR 5768 basis (default in dmri)
@@ -70,6 +72,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper, const wxString &filename )
 
 ODFs::~ODFs()
 {
+    Logger::getInstance()->print( wxT( "Executing ODFs destructor..." ), LOGLEVEL_DEBUG );
     if( m_radiusBuffer )
     {
         glDeleteBuffers( 1, m_radiusBuffer );
@@ -81,6 +84,7 @@ ODFs::~ODFs()
 		delete m_nbors;
 		m_nbors = NULL;
 	}
+    Logger::getInstance()->print( wxT( "ODFs destructor done." ), LOGLEVEL_DEBUG );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -104,14 +108,24 @@ bool ODFs::load( wxString i_fileName )
 
 bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
 {
-    m_datasetHelper.m_columns = pHeader->dim[1]; //80
-    m_datasetHelper.m_rows    = pHeader->dim[2]; //1
-    m_datasetHelper.m_frames  = pHeader->dim[3]; //72
-    m_bands                   = pHeader->dim[4];
+    m_columns = pHeader->dim[1]; //80
+    m_rows    = pHeader->dim[2]; //1
+    m_frames  = pHeader->dim[3]; //72
+    m_bands   = pHeader->dim[4];
 
-    m_datasetHelper.m_xVoxel = pHeader->dx;
-    m_datasetHelper.m_yVoxel = pHeader->dy;
-    m_datasetHelper.m_zVoxel = pHeader->dz;
+    m_voxelSizeX = pHeader->dx;
+    m_voxelSizeY = pHeader->dy;
+    m_voxelSizeZ = pHeader->dz;
+
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
+    {
+        Logger::getInstance()->print( wxT( "Voxel size different from anatomy." ), LOGLEVEL_ERROR );
+        return false;
+    }
 
     m_type = ODFS;
 
@@ -160,7 +174,7 @@ bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
 // This function will load a ODFs type Nifty file.
 //
 // i_fileName       : The name of the file to load.
-// Returns true if succesfull, false otherwise.
+// Returns true if successful, false otherwise.
 ///////////////////////////////////////////////////////////////////////////
 bool ODFs::loadNifti( wxString i_fileName )
 {
@@ -176,14 +190,14 @@ bool ODFs::loadNifti( wxString i_fileName )
         return false;
     }
 
-    m_datasetHelper.m_columns = l_image->dim[1]; //80
-    m_datasetHelper.m_rows    = l_image->dim[2]; //1
-    m_datasetHelper.m_frames  = l_image->dim[3]; //72
-    m_bands                   = l_image->dim[4];
+    m_columns = l_image->dim[1]; //80
+    m_rows    = l_image->dim[2]; //1
+    m_frames  = l_image->dim[3]; //72
+    m_bands   = l_image->dim[4];
 
-    m_datasetHelper.m_xVoxel = l_image->dx;
-    m_datasetHelper.m_yVoxel = l_image->dy;
-    m_datasetHelper.m_zVoxel = l_image->dz;
+    m_voxelSizeX = l_image->dx;
+    m_voxelSizeY = l_image->dy;
+    m_voxelSizeZ = l_image->dz;
 
     m_type = ODFS;
 
@@ -216,7 +230,7 @@ bool ODFs::loadNifti( wxString i_fileName )
             l_fileFloatData[i * m_bands + j] = l_data[(j * l_nSize) + i];
 
 
-    // Once the file has been read succesfully, we need to create the structure 
+    // Once the file has been read successfully, we need to create the structure 
     // that will contain all the sphere points representing the ODFs.
     createStructure( l_fileFloatData );
 
@@ -227,26 +241,34 @@ bool ODFs::loadNifti( wxString i_fileName )
 
 void ODFs::extractMaximas()
 {
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
     std::cout << "Extracting maximas ... please wait 30sec \n";
     m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_6].getDimensionY()]; // Set number of points to maximum details
     m_angle_min = get_min_angle();
     m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to maximum details for C*B mult
     set_nbors(m_phiThetaDirection[LOD_6]); // Create neighboring system
-    m_mainDirections.resize(m_datasetHelper.m_frames*m_datasetHelper.m_rows*m_datasetHelper.m_columns);
+    m_mainDirections.resize( frames * rows * columns );
     
     int currentIdx;
 
-    for( int z = 0; z < m_datasetHelper.m_frames; z++ )
-        for( int y = 0; y < m_datasetHelper.m_rows; y++ )
-            for( int x = 0; x < m_datasetHelper.m_columns; x++ )
+    for( int z( 0 ); z < frames; ++z )
+    {
+        for( int y( 0 ); y < rows; ++y )
+        {
+            for( int x( 0 ); x < columns; ++x )
             {
                 currentIdx = getGlyphIndex( z, y, x );
 
-                if(m_coefficients[currentIdx][0] != 0)
+                if( m_coefficients[currentIdx][0] != 0 )
                 {
-                    m_mainDirections[currentIdx] = getODFmax(m_coefficients[currentIdx],m_shMatrix[LOD_6],m_phiThetaDirection[LOD_6],m_axisThreshold);
+                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_6], m_phiThetaDirection[LOD_6], m_axisThreshold );
                 }
             }
+        }
+    }
 
     m_nbPointsPerGlyph = getLODNbOfPoints( m_currentLOD ); //Set nb point back to currentLOD
      
@@ -257,12 +279,12 @@ void ODFs::extractMaximas()
 // the color of the tensors (m_tensorsFA).
 //
 // i_fileFloatData  : The coefficients read from the loaded nifti file.
-// Returns true if succesfull, false otherwise.
+// Returns true if successful, false otherwise.
 ///////////////////////////////////////////////////////////////////////////
 bool ODFs::createStructure( vector< float >& i_fileFloatData )
 {
     m_nbPointsPerGlyph = getLODNbOfPoints( m_currentLOD );
-    m_nbGlyphs         = m_datasetHelper.m_columns * m_datasetHelper.m_rows * m_datasetHelper.m_frames;
+    m_nbGlyphs         = DatasetManager::getInstance()->getColumns() * DatasetManager::getInstance()->getRows() * DatasetManager::getInstance()->getFrames();
     m_order            = (int)(-3.0f / 2.0f + sqrt( 9.0f / 4.0f - 2.0f * ( 1 - m_bands ) ) );
 
     m_coefficients.resize( m_nbGlyphs );
@@ -276,21 +298,22 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
 	}
 
 	/*cout SH basis name */
-	switch(m_sh_basis)
+	switch( m_sh_basis )
 	{
-		case 0 :
-			cout << "Using RR5768 SH basis (as in DMRI)\n";
+		case 0:
+            Logger::getInstance()->print( wxT( "Using RR5768 SH basis (as in DMRI)" ), LOGLEVEL_MESSAGE );
             break;
-		case 1 :
-			cout << "Using Max's Thesis SH basis\n";
+		case 1:
+            Logger::getInstance()->print( wxT( "Using Max's Thesis SH basis" ), LOGLEVEL_MESSAGE );
             break;
-		case 2 :	
-			cout << "Using Tournier's SH basis\n";
+		case 2:
+            Logger::getInstance()->print( wxT( "Using Tournier's SH basis" ), LOGLEVEL_MESSAGE );
             break;
-		case 3 :
-			cout << "Using PTK SH basis\n";
+		case 3:
+            Logger::getInstance()->print( wxT( "Using PTK SH basis" ), LOGLEVEL_MESSAGE );
             break;
-        default: return false; // We do nothing incase the param was not good.
+        default:
+            return false; // We do nothing incase the param was not good.
 	}
 
     for( unsigned int i = 0; i < NB_OF_LOD; ++i )
@@ -666,7 +689,7 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 void ODFs::draw()
 {
     // We need VBOs for ODFs, particularly to store the radii
-    if( ! m_datasetHelper.m_useVBO  )
+    if( !m_dh->m_useVBO  )
         return;
 
     // Enable the shader.
@@ -710,13 +733,13 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
 {
     // Before we start calculating everything, lets make sure that the glyph is visible on the screen (inside the frustum).
     // To make things faster and easier, we use the glyph voxel as its bounding box.
-    // The first vector represent the voxel center and the second one represend the tensor size.
-    if( ! boxInFrustum( Vector( ( i_xVoxel + 0.5f ) * m_datasetHelper.m_xVoxel,
-                                ( i_yVoxel + 0.5f ) * m_datasetHelper.m_yVoxel,
-                                ( i_zVoxel + 0.5f ) * m_datasetHelper.m_zVoxel ),
-                        Vector( m_datasetHelper.m_xVoxel / 2.0f,
-                                m_datasetHelper.m_yVoxel / 2.0f,
-                                m_datasetHelper.m_zVoxel / 2.0f ) ) )
+    // The first vector represent the voxel center and the second one represent the tensor size.
+    if( ! boxInFrustum( Vector( ( i_xVoxel + 0.5f ) * m_voxelSizeX,
+                                ( i_yVoxel + 0.5f ) * m_voxelSizeY,
+                                ( i_zVoxel + 0.5f ) * m_voxelSizeZ ),
+                        Vector( m_voxelSizeX * 0.5f,
+                                m_voxelSizeY * 0.5f,
+                                m_voxelSizeZ * 0.5f ) ) )
         return;
 
     // Get the current tensors index in the coeffs's buffer
@@ -739,14 +762,17 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     // The index of the radii for the current glyph
     int l_radiiIdx = 0;
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+
     if( i_axis == X_AXIS )
-        l_radiiIdx = m_nbPointsPerGlyph * ( i_zVoxel * m_datasetHelper.m_rows    + i_yVoxel );
+        l_radiiIdx = m_nbPointsPerGlyph * ( i_zVoxel * rows    + i_yVoxel );
 
     else if( i_axis == Y_AXIS )
-        l_radiiIdx = m_nbPointsPerGlyph * ( i_zVoxel * m_datasetHelper.m_columns + i_xVoxel );
+        l_radiiIdx = m_nbPointsPerGlyph * ( i_zVoxel * columns + i_xVoxel );
 
     else if( i_axis == Z_AXIS )
-        l_radiiIdx = m_nbPointsPerGlyph * ( i_yVoxel * m_datasetHelper.m_columns + i_xVoxel );
+        l_radiiIdx = m_nbPointsPerGlyph * ( i_yVoxel * columns + i_xVoxel );
 
     // One radius per vertex
     glVertexAttribPointer( m_radiusAttribLoc, 1, GL_FLOAT, GL_FALSE, 0, (GLvoid*) (l_radiiIdx * sizeof( float )) );
@@ -840,8 +866,12 @@ void ODFs::computeXRadiusSlice()
 
     m_radius[X_AXIS].clear();
 
-    for( int z = 0; z <  m_datasetHelper.m_frames; ++z )
-        for( int y = 0; y <  m_datasetHelper.m_rows; ++y )
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
+
+    for( int z( 0 ); z < frames; ++z )
+    {
+        for( int y( 0 ); y < rows; ++y )
         {
             l_idx = getGlyphIndex( z, y, m_currentSliderPos[0] );
 
@@ -852,6 +882,7 @@ void ODFs::computeXRadiusSlice()
 
             m_radius[X_AXIS].insert( m_radius[X_AXIS].end(), l_radius.begin(), l_radius.end() );
         }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -865,8 +896,12 @@ void ODFs::computeYRadiusSlice()
 
     m_radius[Y_AXIS].clear();
 
-    for( int z = 0; z <  m_datasetHelper.m_frames; ++z )
-        for( int x = 0; x <  m_datasetHelper.m_columns; ++x )
+    int columns = DatasetManager::getInstance()->getColumns();
+    int frames  = DatasetManager::getInstance()->getFrames();
+
+    for( int z( 0 ); z < frames; ++z )
+    {
+        for( int x( 0 ); x < columns; ++x )
         {
             l_idx = getGlyphIndex( z, m_currentSliderPos[1], x );
 
@@ -877,6 +912,7 @@ void ODFs::computeYRadiusSlice()
 
             m_radius[Y_AXIS].insert( m_radius[Y_AXIS].end(), l_radius.begin(), l_radius.end() );
         }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -890,8 +926,12 @@ void ODFs::computeZRadiusSlice()
 
     m_radius[Z_AXIS].clear();
 
-    for( int y = 0; y <  m_datasetHelper.m_rows; ++y )
-        for( int x = 0; x <  m_datasetHelper.m_columns; ++x )
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+
+    for( int y( 0 ); y < rows; ++y )
+    {
+        for( int x( 0 ); x < columns; ++x )
         {
             l_idx = getGlyphIndex( m_currentSliderPos[2], y, x );
 
@@ -899,9 +939,10 @@ void ODFs::computeZRadiusSlice()
             computeRadiiArray( m_shMatrix[m_currentLOD], m_coefficients[l_idx], l_radius, l_minMax );
 
             m_radiiMinMaxMap[l_idx] = l_minMax;
-            
+
             m_radius[Z_AXIS].insert( m_radius[Z_AXIS].end(), l_radius.begin(), l_radius.end() );
         }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -913,7 +954,7 @@ void ODFs::computeZRadiusSlice()
 void ODFs::loadBuffer()
 {
     // We need to (re)load the buffer in video memory only if we are using VBO.
-    if( !m_datasetHelper.m_useVBO )
+    if( !m_dh->m_useVBO )
         return;        
 
     computeXRadiusSlice();
@@ -953,7 +994,7 @@ void ODFs::loadRadiusBuffer( AxisType i_axis )
     // There was a problem loading this buffer into video memory!
     if( Logger::getInstance()->printIfGLError( wxT( "Initialize vbo points for tensors" ) ) )
     {
-        m_datasetHelper.m_useVBO = false;
+        m_dh->m_useVBO = false;
         delete [] m_radiusBuffer;
     }
 }
@@ -1448,6 +1489,7 @@ void ODFs::createPropertiesSizer(PropertiesWindow *parent)
 void ODFs::updatePropertiesSizer()
 {
     Glyph::updatePropertiesSizer();
+
     //set to min.
     //m_pradiobtnMainAxis->Enable(false);
     //m_psliderLightAttenuation->SetValue(m_psliderLightAttenuation->GetMin());

@@ -45,6 +45,7 @@ public:
     void onLoad                             ( wxCommandEvent& evt );
     long getCurrentListItem() const         { return m_currentListItem; }
 	void createNewAnatomy					( DatasetType dataType );
+    void updateSliders();
     
 private:
     void initOpenGl();
@@ -217,7 +218,6 @@ public:
     wxTreeItemId        m_tSelectionObjectsId;
 
 DECLARE_EVENT_TABLE()
-
 };
 
 /*

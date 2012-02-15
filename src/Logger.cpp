@@ -93,6 +93,6 @@ void Logger::setMessageLevel( int level )
 
 Logger::~Logger()
 {
-
+    m_pInstance = NULL;
 }
 

@@ -87,6 +87,19 @@ void ListCtrl::InsertItem( unsigned int datasetIndex )
 
     DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( datasetIndex );
 
+    if( FIBERS == pDataset->getType() && DatasetManager::getInstance()->isFibersGroupLoaded() )
+    {
+        for( long pos( 0 ); pos < GetItemCount(); ++pos )
+        {
+            DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( pos ) );
+            if ( FIBERSGROUP == pDataset->getType() )
+            {
+                index = pos + 1;
+                break;
+            }
+        }
+    }
+
     wxListCtrl::InsertItem( index, pDataset->getShow() ? 0 : 1 );
     SetItemData( index, datasetIndex );
     SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );

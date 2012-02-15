@@ -1,5 +1,6 @@
 #include "Octree.h"
 
+#include "DatasetManager.h"
 #include "../Logger.h"
 
 #include <algorithm>
@@ -214,19 +215,22 @@ vector<int> Octree::getPointsInside( SelectionObject* i_selectionObject )
     m_boxMin.resize( 3 );
     m_boxMax.resize( 3 );
 
-    m_boxMin[0] = l_center.x - l_size.x / 2 * m_dh->m_xVoxel;
-    m_boxMax[0] = l_center.x + l_size.x / 2 * m_dh->m_xVoxel;
-    m_boxMin[1] = l_center.y - l_size.y / 2 * m_dh->m_yVoxel;
-    m_boxMax[1] = l_center.y + l_size.y / 2 * m_dh->m_yVoxel;
-    m_boxMin[2] = l_center.z - l_size.z / 2 * m_dh->m_zVoxel;
-    m_boxMax[2] = l_center.z + l_size.z / 2 * m_dh->m_zVoxel;
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    m_boxMin[0] = l_center.x - l_size.x / 2 * voxelX;
+    m_boxMax[0] = l_center.x + l_size.x / 2 * voxelX;
+    m_boxMin[1] = l_center.y - l_size.y / 2 * voxelY;
+    m_boxMax[1] = l_center.y + l_size.y / 2 * voxelY;
+    m_boxMin[2] = l_center.z - l_size.z / 2 * voxelZ;
+    m_boxMax[2] = l_center.z + l_size.z / 2 * voxelZ;
     
     m_id.clear();
     if(i_selectionObject->getSelectionType() == BOX_TYPE)
         boxTest( m_minPointX, m_minPointY, m_minPointZ, m_maxPointX, m_maxPointY, m_maxPointZ, 0, m_quad1 );
     else
         ellipsoidTest( m_minPointX, m_minPointY, m_minPointZ, m_maxPointX, m_maxPointY, m_maxPointZ, 0, m_quad1 );
-
 
     return m_id;
 
@@ -242,12 +246,16 @@ vector< int > Octree::getPointsInBoundingBox( int xMin, int yMin, int zMin, int 
     m_boxMin.resize( 3 );
     m_boxMax.resize( 3 );
     
-    m_boxMin[0] = xMin * m_dh->m_xVoxel;
-    m_boxMin[1] = yMin * m_dh->m_yVoxel;
-    m_boxMin[2] = zMin * m_dh->m_zVoxel;
-    m_boxMax[0] = xMax * m_dh->m_xVoxel;
-    m_boxMax[1] = yMax * m_dh->m_yVoxel;
-    m_boxMax[2] = zMax * m_dh->m_zVoxel;
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    m_boxMin[0] = xMin * voxelX;
+    m_boxMin[1] = yMin * voxelY;
+    m_boxMin[2] = zMin * voxelZ;
+    m_boxMax[0] = xMax * voxelX;
+    m_boxMax[1] = yMax * voxelY;
+    m_boxMax[2] = zMax * voxelZ;
     
     boxTest( m_minPointX, m_minPointY, m_minPointZ, m_maxPointX, m_maxPointY, m_maxPointZ, 0, m_quad1 );
     

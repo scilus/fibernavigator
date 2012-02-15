@@ -2,23 +2,19 @@
 // Description: mainFrame class. Contains every elements of the GUI, and frame events
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
 
-#include <wx/colordlg.h>
-#include <wx/filedlg.h>
-#include <wx/statbmp.h>
-#include <wx/vscroll.h>
 
 #include "MainFrame.h"
-#include "PropertiesWindow.h"
-#include "ToolBar.h"
-#include "MenuBar.h"
+
+
 #include "MainCanvas.h"
+#include "MenuBar.h"
+#include "PropertiesWindow.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
+#include "ToolBar.h"
+#include "../main.h"
+#include "../Logger.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
@@ -28,9 +24,18 @@
 #include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
 #include "../gfx/TheScene.h"
-#include "../main.h"
-#include "../Logger.h"
+#include "../gui/SceneManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
+#include <wx/colordlg.h>
+#include <wx/filedlg.h>
+#include <wx/statbmp.h>
+#include <wx/vscroll.h>
 
 extern const wxEventType wxEVT_NAVGL_EVENT;
 
@@ -68,12 +73,6 @@ EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent
 EVT_SLIDER( ID_X_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
-
-// mouse click in one of the three navigation windows
-EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 
 // KDTREE thread finished
 EVT_MENU( KDTREE_EVENT,                                     MainFrame::onKdTreeThreadFinished )
@@ -172,14 +171,16 @@ namespace
 class Loader
 {
 private:
+    MainFrame *m_pMainFrame;
     ListCtrl *m_pListCtrl;
     bool m_error;
     int m_index;
 public:
-    Loader(ListCtrl *lstCtrl, int index) 
-        : m_pListCtrl( lstCtrl ), 
-          m_index( index ),
-          m_error( false )
+    Loader( MainFrame *pMainFrame, ListCtrl *pListCtrl, int index) 
+    :   m_pMainFrame( pMainFrame ),
+        m_pListCtrl( pListCtrl ), 
+        m_index( index ),
+        m_error( false )
     { }
 
     bool getError() { return m_error; }
@@ -214,11 +215,31 @@ public:
                 {
                     DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
 
-                    if( FIBERS == pDataset->getType() && !DatasetManager::getInstance()->isFibersGroupLoaded() )
+                    switch( pDataset->getType() )
                     {
-                        int result = DatasetManager::getInstance()->createFibersGroup();
-                        DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
-                        m_pListCtrl->InsertItem( result );
+                        case HEAD_BYTE:
+                        case HEAD_SHORT:
+                        case OVERLAY:
+                        case RGB:
+                        {
+                            if( 1 == DatasetManager::getInstance()->getAnatomyCount() )
+                            {
+                                m_pMainFrame->updateSliders();
+                            }
+                            break;
+                        }
+                        case FIBERS:
+                        {
+                            if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
+                            {
+                                int result = DatasetManager::getInstance()->createFibersGroup();
+                                DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
+                                m_pListCtrl->InsertItem( result );
+                            }
+                            break;
+                        }
+                        default:
+                            break;
                     }
 
                     m_pListCtrl->InsertItem( result );
@@ -262,7 +283,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 
     //////////////////////////////////////////////////////////////////////////
     // MyTreeCtrl initialization
-    m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS );
+    m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT );
     initMyTreeCtrl( m_pTreeWidget );
 
     m_tRootId             = m_pTreeWidget->AddRoot( wxT( "Scene" ), -1, -1, NULL );
@@ -423,29 +444,12 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
         dialog.GetPaths( l_fileNames );
     }
 
-    if ( for_each( l_fileNames.begin(), l_fileNames.end(), Loader( m_pListCtrl2, 0 ) ).getError() )
+    if ( for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl2, 0 ) ).getError() )
     {
         wxMessageBox( wxT( "ERROR\n" ) + m_pDatasetHelper->m_lastError, wxT( "" ), wxOK | wxICON_INFORMATION, NULL );
         GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
         GetStatusBar()->SetStatusText( m_pDatasetHelper->m_lastError, 2 );
         return;
-    }
-    
-    if( DatasetManager::getInstance()->isAnatomyLoaded() )
-    {
-        m_pXSlider->SetMax( wxMax( 2, m_pDatasetHelper->m_columns - 1 ) );
-        m_pXSlider->SetValue( m_pDatasetHelper->m_columns / 2 );
-        m_pYSlider->SetMax( wxMax( 2, m_pDatasetHelper->m_rows - 1 ) );
-        m_pYSlider->SetValue( m_pDatasetHelper->m_rows / 2 );
-        m_pZSlider->SetMax( wxMax( 2, m_pDatasetHelper->m_frames - 1 ) );
-        m_pZSlider->SetValue( m_pDatasetHelper->m_frames / 2 );
-
-        m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
-
-        m_pMainGL->changeOrthoSize();
-        m_pGL0->changeOrthoSize();
-        m_pGL1->changeOrthoSize();
-        m_pGL2->changeOrthoSize();
     }
 
     refreshAllGLWidgets();
@@ -474,6 +478,31 @@ void MainFrame::createNewAnatomy( DatasetType dataType )
 
     refreshAllGLWidgets();
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::updateSliders()
+{
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
+    m_pXSlider->SetMax( wxMax( 2, columns - 1 ) );
+    m_pXSlider->SetValue( columns / 2 );
+    m_pYSlider->SetMax( wxMax( 2, rows - 1 ) );
+    m_pYSlider->SetValue( rows / 2 );
+    m_pZSlider->SetMax( wxMax( 2, frames - 1 ) );
+    m_pZSlider->SetValue( frames / 2 );
+
+    SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
+
+    m_pMainGL->changeOrthoSize();
+    m_pGL0->changeOrthoSize();
+    m_pGL1->changeOrthoSize();
+    m_pGL2->changeOrthoSize();
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void MainFrame::onNewAnatomyByte( wxCommandEvent& WXUNUSED(event) )
 {
@@ -1176,14 +1205,19 @@ void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
     {
         return;
     }
-    Vector l_center( m_pXSlider->GetValue() * m_pDatasetHelper->m_xVoxel, 
-                     m_pYSlider->GetValue() * m_pDatasetHelper->m_yVoxel, 
-                     m_pZSlider->GetValue() * m_pDatasetHelper->m_zVoxel );
+
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    Vector l_center( m_pXSlider->GetValue() * voxelX, 
+                     m_pYSlider->GetValue() * voxelY, 
+                     m_pZSlider->GetValue() * voxelZ );
     float l_sizeV = 10;
 
-    Vector l_size( l_sizeV / m_pDatasetHelper->m_xVoxel, 
-                   l_sizeV / m_pDatasetHelper->m_yVoxel,
-                   l_sizeV / m_pDatasetHelper->m_zVoxel );
+    Vector l_size( l_sizeV / voxelX, 
+                   l_sizeV / voxelY,
+                   l_sizeV / voxelZ );
     
 
     SelectionObject* l_newSelectionObject;
@@ -1206,7 +1240,7 @@ void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
     
     if( treeSelected( l_treeSelectionId ) == MASTER_OBJECT )
     {
-        // Our new seleciton object is under another master selection object.
+        // Our new selection object is under another master selection object.
         l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_treeSelectionId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
         m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxGREEN );
     }
@@ -1214,13 +1248,13 @@ void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
     {
         wxTreeItemId l_parentId = m_pTreeWidget->GetItemParent( l_treeSelectionId );
 
-        // Our new seleciton object is under another child selection object.
+        // Our new selection object is under another child selection object.
         l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_parentId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
         m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxGREEN );
     }
     else
     {
-        // Our new seleciton object is on top.
+        // Our new selection object is on top.
         l_newSelectionObject->setIsMaster( true );
         l_newSelectionObjectId = m_pTreeWidget->AppendItem( m_tSelectionObjectsId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
         m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxCYAN );
@@ -1272,6 +1306,11 @@ void MainFrame::onUseMorph( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 {
+    if( !m_pDatasetHelper->m_theScene || DatasetManager::getInstance()->isSurfaceLoaded() )
+    {
+        return;
+    }
+
     //Generate KdTree for Spline Surface
     Fibers* pTmpFib = NULL;
     m_pDatasetHelper->getSelectedFiberDataset(pTmpFib);
@@ -1280,13 +1319,13 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
         pTmpFib->generateKdTree();
     }
 
-    if( ! m_pDatasetHelper->m_theScene || DatasetManager::getInstance()->isSurfaceLoaded() )
-    {
-        return;
-    }
-    int l_xs = (int)( m_pXSlider->GetValue() * m_pDatasetHelper->m_xVoxel );
-    int l_ys = (int)( m_pYSlider->GetValue() * m_pDatasetHelper->m_yVoxel );
-    int l_zs = (int)( m_pZSlider->GetValue() * m_pDatasetHelper->m_zVoxel );
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    int l_xs = (int)( m_pXSlider->GetValue() * voxelX );
+    int l_ys = (int)( m_pYSlider->GetValue() * voxelY );
+    int l_zs = (int)( m_pZSlider->GetValue() * voxelZ );
 
     // Delete all existing points.
     m_pTreeWidget->DeleteChildren( m_tPointId );
@@ -1297,14 +1336,18 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
         m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
     }
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
     if( m_pDatasetHelper->m_showSagittal )
     {
         for( int i = 0; i < 11; ++i )
         {
             for( int j = 0; j < 11; ++j )
             {
-                int yy = (int)( ( m_pDatasetHelper->m_rows   / 10 * m_pDatasetHelper->m_yVoxel ) * i );
-                int zz = (int)( ( m_pDatasetHelper->m_frames / 10 * m_pDatasetHelper->m_zVoxel ) * j );
+                int yy = (int)( rows   * 0.1f * voxelY * i );
+                int zz = (int)( frames * 0.1f * voxelZ * j );
 
                 // Create the point.
                 SplinePoint* l_point = new SplinePoint( l_xs, yy, zz, m_pDatasetHelper );
@@ -1337,8 +1380,8 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
         {
             for( int j = 0; j < 11; ++j )
             {
-                int l_xx = (int)( ( m_pDatasetHelper->m_columns / 10 * m_pDatasetHelper->m_xVoxel ) * i );
-                int l_zz = (int)( ( m_pDatasetHelper->m_frames  / 10 * m_pDatasetHelper->m_zVoxel ) * j );
+                int l_xx = (int)( columns * 0.1f * voxelX * i );
+                int l_zz = (int)( frames  * 0.1f * voxelZ * j );
 
                 // Create the point.
                 SplinePoint* l_point = new SplinePoint( l_xx, l_ys, l_zz, m_pDatasetHelper );
@@ -1358,8 +1401,8 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
         {
             for( int j = 0; j < 11; ++j )
             {
-                int l_xx = (int)( ( m_pDatasetHelper->m_columns / 10 * m_pDatasetHelper->m_xVoxel ) * i );
-                int l_yy = (int)( ( m_pDatasetHelper->m_rows    / 10 * m_pDatasetHelper->m_yVoxel ) * j );
+                int l_xx = (int)( columns * 0.1f * voxelX * i );
+                int l_yy = (int)( rows    * 0.1f * voxelY * j );
 
                 // Create the point.
                 SplinePoint* l_point = new SplinePoint( l_xx, l_yy, l_zs, m_pDatasetHelper );
@@ -1895,6 +1938,8 @@ void MainFrame::renewAllGLWidgets()
     refreshAllGLWidgets();
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 // TODO: Call this method when done loading
 void MainFrame::updateStatusBar()
 {
@@ -1999,9 +2044,9 @@ void MainFrame::onDeleteListItem2( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteListItem2" ), LOGLEVEL_DEBUG );
 
-    long data = evt.GetData();
+    DatasetIndex index = (DatasetIndex)evt.GetData();
     // TODO: Delete in DatasetManager once ListCtrl contains index instead of pointers
-    DatasetManager::getInstance()->remove( data );
+    DatasetManager::getInstance()->remove( index );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2371,13 +2416,17 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
     wxPoint l_pos, l_newPos;
     int NAV_GL_SIZE = m_pGL0->GetSize().x;
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
     switch( event.GetInt() )
     {
         case AXIAL:
         {
             l_pos = m_pGL0->getMousePos();
-            float x = ( (float)l_pos.x / NAV_GL_SIZE * m_pDatasetHelper->m_columns );
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_pDatasetHelper->m_rows );
+            float x = ( (float)l_pos.x / NAV_GL_SIZE * columns );
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * rows );
 
             m_pXSlider->SetValue( (int)( x ) );
             m_pYSlider->SetValue( (int)( y ) );
@@ -2386,8 +2435,8 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
         case CORONAL:
         {
             l_pos = m_pGL1->getMousePos();
-            float x = ( (float)l_pos.x / NAV_GL_SIZE ) * m_pDatasetHelper->m_columns;
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_pDatasetHelper->m_frames );
+            float x = ( (float)l_pos.x / NAV_GL_SIZE ) * columns;
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * frames );
 
             m_pXSlider->SetValue( (int)( x ) );
             m_pZSlider->SetValue( (int)( y ) );
@@ -2396,27 +2445,30 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
         case SAGITTAL:
         {
             l_pos = m_pGL2->getMousePos();
-            float x = ( (float)( NAV_GL_SIZE - l_pos.x ) / NAV_GL_SIZE ) * m_pDatasetHelper->m_rows;
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_pDatasetHelper->m_frames );
+            float x = ( (float)( NAV_GL_SIZE - l_pos.x ) / NAV_GL_SIZE ) * rows;
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * frames );
 
             m_pYSlider->SetValue( (int)( x ) );
             m_pZSlider->SetValue( (int)( y ) );
             break;
         }
         case MAIN_VIEW:
-            int delta = (int) m_pMainGL->getDelta();
-                switch( m_pMainGL->getPicked() )
-                {
-                    case AXIAL:
-                        m_pZSlider->SetValue( (int) wxMin( wxMax( m_pZSlider->GetValue() + delta, 0 ), m_pZSlider->GetMax() ) );
-                        break;
-                    case CORONAL:
-                        m_pYSlider->SetValue( (int) wxMin( wxMax( m_pYSlider->GetValue() + delta, 0 ), m_pYSlider->GetMax() ) );
-                        break;
-                    case SAGITTAL:
-                        m_pXSlider->SetValue( (int) wxMin( wxMax( m_pXSlider->GetValue() + delta, 0 ), m_pXSlider->GetMax() ) );
-                        break;
-                }                
+        {
+            int delta = (int)m_pMainGL->getDelta();
+            switch( m_pMainGL->getPicked() )
+            {
+            case AXIAL:
+                m_pZSlider->SetValue( (int) wxMin( wxMax( m_pZSlider->GetValue() + delta, 0 ), m_pZSlider->GetMax() ) );
+                break;
+            case CORONAL:
+                m_pYSlider->SetValue( (int) wxMin( wxMax( m_pYSlider->GetValue() + delta, 0 ), m_pYSlider->GetMax() ) );
+                break;
+            case SAGITTAL:
+                m_pXSlider->SetValue( (int) wxMin( wxMax( m_pXSlider->GetValue() + delta, 0 ), m_pXSlider->GetMax() ) );
+                break;
+            }
+            break;
+        }
     }
     m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
     refreshAllGLWidgets();
@@ -2455,7 +2507,7 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
     }
     else
     {
-        m_pDatasetHelper->m_theScene->m_posSagital = m_pDatasetHelper->m_xSlize;
+        m_pDatasetHelper->m_theScene->m_posSagital = SceneManager::getInstance()->getSliceX();
     }
     //Navigate through slizes axial
     if(m_pDatasetHelper->m_theScene->m_isNavAxial)
@@ -2464,7 +2516,7 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
     }
     else
     {
-        m_pDatasetHelper->m_theScene->m_posAxial = m_pDatasetHelper->m_zSlize;
+        m_pDatasetHelper->m_theScene->m_posAxial = SceneManager::getInstance()->getSliceZ();
     }
     //Navigate through slizes coronal
     if(m_pDatasetHelper->m_theScene->m_isNavCoronal)
@@ -2473,7 +2525,7 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
     }
     else
     {
-        m_pDatasetHelper->m_theScene->m_posCoronal = m_pDatasetHelper->m_ySlize;
+        m_pDatasetHelper->m_theScene->m_posCoronal = SceneManager::getInstance()->getSliceY();
     }
     refreshAllGLWidgets();
     refreshViews();

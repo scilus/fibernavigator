@@ -76,7 +76,7 @@ class SelectionObject : public SceneObject, public wxTreeItemData
 {
 public :
     SelectionObject ( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper );
-    ~SelectionObject();
+    virtual ~SelectionObject();
 
     virtual hitResult hitTest( Ray* i_ray ) = 0;
 

@@ -6,16 +6,25 @@
  */
 
 #include "TensorField.h"
+
 #include "../Fantom/FVector.h"
+#include "../../dataset/DatasetManager.h"
+
+#include <algorithm>
+#include <vector>
+using std::vector;
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-TensorField::TensorField( DatasetHelper* i_datasetHelper, std::vector<float>* i_tensorData, int i_order, int i_posDim )
-    : m_order( i_order ), m_posDim( i_posDim )
+TensorField::TensorField( int columns, int rows, int frames, vector< float > *pTensorData, int order, int posDim )
+:   m_columns( columns ),
+    m_rows( rows ),
+    m_frames( frames ),
+    m_order( order ), 
+    m_posDim( posDim )
 {
-    m_datasetHelper = i_datasetHelper;
-    m_cells         = m_datasetHelper->m_rows * m_datasetHelper->m_frames * m_datasetHelper->m_columns;
+    m_cells = m_columns * m_rows * m_frames;
 
     m_theField.clear();
     m_theField.reserve( m_cells );
@@ -26,9 +35,9 @@ TensorField::TensorField( DatasetHelper* i_datasetHelper, std::vector<float>* i_
         {
             FTensor l_tensor( 3, 1, true );
 
-            l_tensor.setValue( 0, i_tensorData->at( i * 3     ) );
-            l_tensor.setValue( 1, i_tensorData->at( i * 3 + 1 ) );
-            l_tensor.setValue( 2, i_tensorData->at( i * 3 + 2 ) );
+            l_tensor.setValue( 0, pTensorData->at( i * 3     ) );
+            l_tensor.setValue( 1, pTensorData->at( i * 3 + 1 ) );
+            l_tensor.setValue( 2, pTensorData->at( i * 3 + 2 ) );
 
             m_theField.push_back( l_tensor );
         }
@@ -39,15 +48,15 @@ TensorField::TensorField( DatasetHelper* i_datasetHelper, std::vector<float>* i_
         {
             FTensor l_tensor( 3, 2, true );
 
-            l_tensor.setValue( 0, 0, i_tensorData->at( i * 6     ) );
-            l_tensor.setValue( 1, 0, i_tensorData->at( i * 6 + 1 ) );
-            l_tensor.setValue( 2, 0, i_tensorData->at( i * 6 + 2 ) );
-            l_tensor.setValue( 0, 1, i_tensorData->at( i * 6 + 1 ) );
-            l_tensor.setValue( 1, 1, i_tensorData->at( i * 6 + 3 ) );
-            l_tensor.setValue( 2, 1, i_tensorData->at( i * 6 + 4 ) );
-            l_tensor.setValue( 0, 2, i_tensorData->at( i * 6 + 2 ) );
-            l_tensor.setValue( 1, 2, i_tensorData->at( i * 6 + 4 ) );
-            l_tensor.setValue( 2, 2, i_tensorData->at( i * 6 + 5 ) );
+            l_tensor.setValue( 0, 0, pTensorData->at( i * 6     ) );
+            l_tensor.setValue( 1, 0, pTensorData->at( i * 6 + 1 ) );
+            l_tensor.setValue( 2, 0, pTensorData->at( i * 6 + 2 ) );
+            l_tensor.setValue( 0, 1, pTensorData->at( i * 6 + 1 ) );
+            l_tensor.setValue( 1, 1, pTensorData->at( i * 6 + 3 ) );
+            l_tensor.setValue( 2, 1, pTensorData->at( i * 6 + 4 ) );
+            l_tensor.setValue( 0, 2, pTensorData->at( i * 6 + 2 ) );
+            l_tensor.setValue( 1, 2, pTensorData->at( i * 6 + 4 ) );
+            l_tensor.setValue( 2, 2, pTensorData->at( i * 6 + 5 ) );
 
             m_theField.push_back( l_tensor );
         }
@@ -57,11 +66,14 @@ TensorField::TensorField( DatasetHelper* i_datasetHelper, std::vector<float>* i_
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-TensorField::TensorField( DatasetHelper* i_datasetHelper, float* i_tensorData, int i_order, int i_posDim )
-    : m_order( i_order ), m_posDim( i_posDim )
+TensorField::TensorField( int columns, int rows, int frames, float *pTensorData, int order, int posDim )
+:   m_columns( columns ),
+    m_rows( rows ),
+    m_frames( frames ),
+    m_order( order ), 
+    m_posDim( posDim )
 {
-    m_datasetHelper = i_datasetHelper;
-    m_cells         = m_datasetHelper->m_rows * m_datasetHelper->m_frames * m_datasetHelper->m_columns;
+    m_cells = m_columns * m_rows * m_frames;
 
     m_theField.clear();
     m_theField.reserve( m_cells );
@@ -72,9 +84,9 @@ TensorField::TensorField( DatasetHelper* i_datasetHelper, float* i_tensorData, i
         {
             FTensor l_tensor( 3, 1, true );
 
-            l_tensor.setValue( 0, i_tensorData[ i * 3     ] );
-            l_tensor.setValue( 1, i_tensorData[ i * 3 + 1 ] );
-            l_tensor.setValue( 2, i_tensorData[ i * 3 + 2 ] );
+            l_tensor.setValue( 0, pTensorData[ i * 3     ] );
+            l_tensor.setValue( 1, pTensorData[ i * 3 + 1 ] );
+            l_tensor.setValue( 2, pTensorData[ i * 3 + 2 ] );
 
             m_theField.push_back( l_tensor );
         }
@@ -85,15 +97,15 @@ TensorField::TensorField( DatasetHelper* i_datasetHelper, float* i_tensorData, i
         {
             FTensor l_tensor( 3, 2, true );
 
-            l_tensor.setValue( 0, 0, i_tensorData[  i * 6     ] );
-            l_tensor.setValue( 1, 0, i_tensorData[  i * 6 + 1 ] );
-            l_tensor.setValue( 2, 0, i_tensorData[  i * 6 + 2 ] );
-            l_tensor.setValue( 0, 1, i_tensorData[  i * 6 + 1 ] );
-            l_tensor.setValue( 1, 1, i_tensorData[  i * 6 + 3 ] );
-            l_tensor.setValue( 2, 1, i_tensorData[  i * 6 + 4 ] );
-            l_tensor.setValue( 0, 2, i_tensorData[  i * 6 + 2 ] );
-            l_tensor.setValue( 1, 2, i_tensorData[  i * 6 + 4 ] );
-            l_tensor.setValue( 2, 2, i_tensorData[  i * 6 + 5 ] );
+            l_tensor.setValue( 0, 0, pTensorData[  i * 6     ] );
+            l_tensor.setValue( 1, 0, pTensorData[  i * 6 + 1 ] );
+            l_tensor.setValue( 2, 0, pTensorData[  i * 6 + 2 ] );
+            l_tensor.setValue( 0, 1, pTensorData[  i * 6 + 1 ] );
+            l_tensor.setValue( 1, 1, pTensorData[  i * 6 + 3 ] );
+            l_tensor.setValue( 2, 1, pTensorData[  i * 6 + 4 ] );
+            l_tensor.setValue( 0, 2, pTensorData[  i * 6 + 2 ] );
+            l_tensor.setValue( 1, 2, pTensorData[  i * 6 + 4 ] );
+            l_tensor.setValue( 2, 2, pTensorData[  i * 6 + 5 ] );
 
             m_theField.push_back( l_tensor );
         }
@@ -114,26 +126,33 @@ TensorField::~TensorField()
 ///////////////////////////////////////////////////////////////////////////
 FTensor TensorField::getInterpolatedVector( float i_x, float i_y, float i_z )
 {
-    int nx = wxMin( m_datasetHelper->m_columns - 1, wxMax( 0,(int)i_x ) );
-    int ny = wxMin( m_datasetHelper->m_rows    - 1, wxMax( 0,(int)i_y ) );
-    int nz = wxMin( m_datasetHelper->m_frames  - 1, wxMax( 0,(int)i_z ) );
+    using std::min;
+    using std::max;
+
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
+
+    int nx = std::min( columns - 1, std::max( 0, (int)i_x ) );
+    int ny = std::min( rows    - 1, std::max( 0, (int)i_y ) );
+    int nz = std::min( frames  - 1, std::max( 0, (int)i_z ) );
 
     float xMult = i_x - (int)i_x;
     float yMult = i_y - (int)i_y;
     float zMult = i_z - (int)i_z;
 
-    int nextX = wxMin( m_datasetHelper->m_columns - 1, nx + 1 );
-    int nextY = wxMin( m_datasetHelper->m_rows    - 1, ny + 1 );
-    int nextZ = wxMin( m_datasetHelper->m_frames  - 1, nz + 1 );
+    int nextX = std::min( columns - 1, nx + 1 );
+    int nextY = std::min( rows    - 1, ny + 1 );
+    int nextZ = std::min( frames  - 1, nz + 1 );
 
-    int xyzIndex    = nx    + ny    * m_datasetHelper->m_columns + nz    * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
-    int x1yzIndex   = nextX + ny    * m_datasetHelper->m_columns + nz    * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
-    int xy1zIndex   = nx    + nextY * m_datasetHelper->m_columns + nz    * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
-    int x1y1zIndex  = nextX + nextY * m_datasetHelper->m_columns + nz    * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
-    int xyz1Index   = nx    + ny    * m_datasetHelper->m_columns + nextZ * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
-    int x1yz1Index  = nextX + ny    * m_datasetHelper->m_columns + nextZ * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
-    int xy1z1Index  = nx    + nextY * m_datasetHelper->m_columns + nextZ * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
-    int x1y1z1Index = nextX + nextY * m_datasetHelper->m_columns + nextZ * m_datasetHelper->m_columns * m_datasetHelper->m_rows;
+    int xyzIndex    = nx    + ny    * columns + nz    * columns * rows;
+    int x1yzIndex   = nextX + ny    * columns + nz    * columns * rows;
+    int xy1zIndex   = nx    + nextY * columns + nz    * columns * rows;
+    int x1y1zIndex  = nextX + nextY * columns + nz    * columns * rows;
+    int xyz1Index   = nx    + ny    * columns + nextZ * columns * rows;
+    int x1yz1Index  = nextX + ny    * columns + nextZ * columns * rows;
+    int xy1z1Index  = nx    + nextY * columns + nextZ * columns * rows;
+    int x1y1z1Index = nextX + nextY * columns + nextZ * columns * rows;
 
     FTensor txyz    = getTensorAtIndex( xyzIndex    );
     FTensor tx1yz   = getTensorAtIndex( x1yzIndex   );

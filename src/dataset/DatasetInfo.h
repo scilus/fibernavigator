@@ -102,6 +102,10 @@ public:
     void     setColor ( wxColour color )         { m_color  = color; };
     wxColour getColor() const                    { return m_color;   };
 
+    int getVoxelSizeX() const                    { return m_voxelSizeX; }
+    int getVoxelSizeY() const                    { return m_voxelSizeY; }
+    int getVoxelSizeZ() const                    { return m_voxelSizeZ; }
+
     // Trianglemesh
     TriangleMesh    *m_tMesh;
 
@@ -159,6 +163,10 @@ protected:
     bool        licCalculated;
     bool        m_useLIC;
     GLuint*     m_bufferObjects;
+
+    float m_voxelSizeX;
+    float m_voxelSizeY;
+    float m_voxelSizeZ;
 };
 
 #endif /*DATASETINFO_H_*/

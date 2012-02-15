@@ -8,15 +8,18 @@
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
+#include <wx/string.h>
+
 #include <map>
 #include <vector>
-#include <wx/string.h>
 
 class DatasetHelper;
 class DatasetInfo;
 class Fibers;
 class Mesh;
 class Tensors;
+
+typedef unsigned int DatasetIndex;
 
 class DatasetManager
 {
@@ -25,10 +28,19 @@ public:
 
     static DatasetManager * getInstance();
 
-    DatasetInfo *           getDataset( unsigned int index );
+    size_t                  getAnatomyCount() const { return m_anatomies.size(); }
+    DatasetInfo *           getDataset( DatasetIndex index );
     std::vector<Fibers *>   getFibers();
-    unsigned int            getFibersCount() const { return m_fibers.size(); }
+    size_t                  getFibersCount() const { return m_fibers.size(); }
     std::vector<ODFs *>     getOdfs();
+    std::vector<Tensors *>  getTensors();
+
+    int                     getColumns() const;
+    int                     getFrames() const;
+    int                     getRows() const;
+    float                   getVoxelX() const;
+    float                   getVoxelY() const;
+    float                   getVoxelZ() const;
 
     bool                    isAnatomyLoaded() const         { return !m_anatomies.empty(); }
     bool                    isFibersLoaded() const          { return !m_fibers.empty(); }
@@ -45,16 +57,16 @@ public:
     int load( const wxString &filename, const wxString &extension );
 
     // return index of the created dataset
-    unsigned int createAnatomy()                                                 { return insert( new Anatomy( m_pDatasetHelper ) ); }
-    unsigned int createAnatomy( DatasetType type )                               { return insert( new Anatomy( m_pDatasetHelper, type ) ); }
-    unsigned int createAnatomy( vector<float> *pDataset )                        { return insert( new Anatomy( m_pDatasetHelper, pDataset ) ); }
-    unsigned int createAnatomy( vector<float> *pDataset, DatasetType type )      { return insert( new Anatomy( m_pDatasetHelper, pDataset, type ) ); }
-    unsigned int createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( m_pDatasetHelper, pAnatomy ) ); }
-    unsigned int createFibersGroup()                                             { return insert( new FibersGroup( m_pDatasetHelper ) ); }
-    unsigned int createODFs()                                                    { return insert( new ODFs( m_pDatasetHelper ) ); }
-    unsigned int createSurface()                                                 { return insert( new Surface( m_pDatasetHelper ) ); }
+    DatasetIndex createAnatomy()                                                 { return insert( new Anatomy( m_pDatasetHelper ) ); }
+    DatasetIndex createAnatomy( DatasetType type )                               { return insert( new Anatomy( m_pDatasetHelper, type ) ); }
+    DatasetIndex createAnatomy( vector<float> *pDataset )                        { return insert( new Anatomy( m_pDatasetHelper, pDataset ) ); }
+    DatasetIndex createAnatomy( vector<float> *pDataset, DatasetType type )      { return insert( new Anatomy( m_pDatasetHelper, pDataset, type ) ); }
+    DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( m_pDatasetHelper, pAnatomy ) ); }
+    DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup( m_pDatasetHelper ) ); }
+    DatasetIndex createODFs()                                                    { return insert( new ODFs( m_pDatasetHelper ) ); }
+    DatasetIndex createSurface()                                                 { return insert( new Surface( m_pDatasetHelper ) ); }
 
-    void remove( const long ptr );
+    void remove( const DatasetIndex index );
 
     // temporary
     void setDatasetHelper( DatasetHelper * dh );
@@ -70,17 +82,17 @@ private:
     DatasetManager &operator=(const DatasetManager &);
 
     // Gets the next available index when loading new datasets
-    int getNextAvailableIndex() { return m_nextIndex++; }
+    DatasetIndex getNextAvailableIndex() { return m_nextIndex++; }
 
     // Inserts the datasets in their corresponding maps
-    int insert( Anatomy * pAnatomy );
-    int insert( CIsoSurface * pCIsoSurface );
-    int insert( Fibers * pFibers );
-    int insert( FibersGroup * pFibersGroup );
-    int insert( Mesh * pMesh );
-    int insert( ODFs * pOdfs );
-    int insert( Surface * pSurface );
-    int insert( Tensors * pTensors );
+    DatasetIndex insert( Anatomy * pAnatomy );
+    DatasetIndex insert( CIsoSurface * pCIsoSurface );
+    DatasetIndex insert( Fibers * pFibers );
+    DatasetIndex insert( FibersGroup * pFibersGroup );
+    DatasetIndex insert( Mesh * pMesh );
+    DatasetIndex insert( ODFs * pOdfs );
+    DatasetIndex insert( Surface * pSurface );
+    DatasetIndex insert( Tensors * pTensors );
 
     // Loads an anatomy. Extension supported: .nii and .nii.gz
     int loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
@@ -104,16 +116,16 @@ public:
 private:
     static DatasetManager *m_pInstance;
 
-    unsigned int m_nextIndex;
+    DatasetIndex m_nextIndex;
 
-    std::map<unsigned int, DatasetInfo *> m_datasets;
-    std::map<unsigned int, Anatomy *> m_anatomies;
-    std::map<unsigned int, Fibers *> m_fibers;
-    std::map<unsigned int, FibersGroup *> m_fibersGroup;
-    std::map<unsigned int, Mesh *> m_meshes;
-    std::map<unsigned int, ODFs *> m_odfs;
-    std::map<unsigned int, Surface *> m_surfaces;
-    std::map<unsigned int, Tensors *> m_tensors;
+    std::map<DatasetIndex, DatasetInfo *> m_datasets;
+    std::map<DatasetIndex, Anatomy *> m_anatomies;
+    std::map<DatasetIndex, Fibers *> m_fibers;
+    std::map<DatasetIndex, FibersGroup *> m_fibersGroup;
+    std::map<DatasetIndex, Mesh *> m_meshes;
+    std::map<DatasetIndex, ODFs *> m_odfs;
+    std::map<DatasetIndex, Surface *> m_surfaces;
+    std::map<DatasetIndex, Tensors *> m_tensors;
 };
 
 #endif DATASETMANAGER_H_

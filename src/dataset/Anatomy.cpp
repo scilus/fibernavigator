@@ -17,6 +17,7 @@
 #include <cassert>
 
 #include <algorithm>
+using std::fill;
 
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
@@ -75,9 +76,6 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
-    m_columns       = m_dh->m_columns;
-    m_frames        = m_dh->m_frames;
-    m_rows          = m_dh->m_rows;
     m_bands         = 1;
     m_isLoaded      = true;
     m_type          = HEAD_BYTE;
@@ -99,9 +97,6 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
-    m_columns = m_dh->m_columns;
-    m_frames  = m_dh->m_frames;
-    m_rows    = m_dh->m_rows;
     m_bands   = 1;
     
     m_type    = HEAD_BYTE;
@@ -131,9 +126,6 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
 {
     if(type == RGB)
     {
-        m_columns       = m_dh->m_columns;
-        m_frames        = m_dh->m_frames;
-        m_rows          = m_dh->m_rows;
         m_bands         = 3;
         m_isLoaded      = true;   
         m_type          = type;
@@ -142,19 +134,12 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     }
     else if(type == HEAD_BYTE)
     {
-        m_columns       = m_dh->m_columns;
-        m_frames        = m_dh->m_frames;
-        m_rows          = m_dh->m_rows;
         m_bands         = 1;
         m_isLoaded      = true;   
         m_type          = type;
 
         m_floatDataset.resize( m_columns * m_frames * m_rows );
-
-        for(unsigned int i = 0; i < m_floatDataset.size(); ++i )
-        {
-            m_floatDataset[i] = 0;
-        }
+        fill( m_floatDataset.begin(), m_floatDataset.end(), 0.0f );
     }
     else
     {
@@ -172,7 +157,7 @@ void Anatomy::add( Anatomy* pAnatomy)
 
 //////////////////////////////////////////////////////////////////////////
 
-float Anatomy::at( const int pos )
+float Anatomy::at( const int pos ) const
 {
     return m_floatDataset[pos];
 }
@@ -345,15 +330,15 @@ void Anatomy::minimize()
         if( pFibers->isSelected( i ) )
         {
             for( int j = pFibers->getStartIndexForLine( i ); 
-                     j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); )
+                     j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); j += 3 )
             {
-                curX = wxMin( m_dh->m_columns - 1, wxMax( 0, (int) pFibers->getPointValue( j * 3 ) / m_dh->m_xVoxel ) );
-                curY = wxMin( m_dh->m_rows    - 1, wxMax( 0, (int) pFibers->getPointValue( j * 3 + 1) / m_dh->m_yVoxel ) );
-                curZ = wxMin( m_dh->m_frames  - 1, wxMax( 0, (int) pFibers->getPointValue( j * 3 + 2) / m_dh->m_zVoxel) );
+                // TODO: Verify that changing from dh to current obj m_rows & al. is ok
+                curX = std::min( m_columns - 1, std::max( 0, (int)(pFibers->getPointValue( j * 3 )    / m_voxelSizeX) ) ); // m_dh->m_xVoxel ) );
+                curY = std::min( m_rows    - 1, std::max( 0, (int)(pFibers->getPointValue( j * 3 + 1) / m_voxelSizeY) ) ); // m_dh->m_yVoxel ) );
+                curZ = std::min( m_frames  - 1, std::max( 0, (int)(pFibers->getPointValue( j * 3 + 2) / m_voxelSizeZ) ) ); // m_dh->m_zVoxel ) );
 
-                index = curX + curY * m_dh->m_columns + curZ * m_dh->m_rows * m_dh->m_columns;
+                index = curX + curY * m_columns + curZ * m_rows * m_columns;
                 workData[index] = true;
-                j += 3;
             }
         }
     }
@@ -497,14 +482,30 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     m_bands     = pHeader->dim[4];
     m_dataType  = pHeader->datatype;
 
-//     if( m_dh->m_anatomyLoaded )
-//     {
-//         if( m_rows != m_dh->m_rows || m_columns != m_dh->m_columns || m_frames != m_dh->m_frames )
-//         {
-//             m_dh->m_lastError = wxT( "dimensions of loaded files must be the same" );
-//             return false;
-//         }
-//     }
+    m_voxelSizeX = pHeader->dx;
+    m_voxelSizeY = pHeader->dy;
+    m_voxelSizeZ = pHeader->dz;
+
+    if( DatasetManager::getInstance()->isAnatomyLoaded() )
+    {
+        int   columns = DatasetManager::getInstance()->getColumns();
+        int   rows    = DatasetManager::getInstance()->getRows();
+        int   frames  = DatasetManager::getInstance()->getFrames();
+        float voxelX  = DatasetManager::getInstance()->getVoxelX();
+        float voxelY  = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+        if( m_rows != rows || m_columns != columns || m_frames != frames )
+        {
+            Logger::getInstance()->print( wxT( "Dimensions of loaded files must be the same" ), LOGLEVEL_ERROR );
+            return false;
+        }
+        else if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
+        {
+            Logger::getInstance()->print( wxT( "Voxel size different from anatomy" ), LOGLEVEL_ERROR );
+            return false;
+        }
+    }
 
     // Get the transformation to put the anatomy file in world space.
     // The transformation used depends on the one used in the nifti image.
@@ -554,11 +555,6 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
         // This is not a typo, the method is called makeIdendity in FMatrix.
         m_dh->m_niftiTransform.makeIdendity();
     }
-    
-
-    m_dh->m_xVoxel = pHeader->dx;
-    m_dh->m_yVoxel = pHeader->dy;
-    m_dh->m_zVoxel = pHeader->dz;
     
     if( pHeader->datatype == 2 )
     {
@@ -729,10 +725,10 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
             {
                 m_floatDataset[i * 3]       = pData[i];
                 m_floatDataset[i * 3 + 1]   = pData[datasetSize + i];
-                m_floatDataset[i * 3 + 2]   = pData[(2 * datasetSize) + i];
+                m_floatDataset[i * 3 + 2]   = pData[2 * datasetSize + i];
             }
 
-            m_pTensorField             = new TensorField( m_dh, &m_floatDataset, 1, 3 );
+            m_pTensorField             = new TensorField( m_columns, m_rows, m_frames, &m_floatDataset, 1, 3 );
             m_dh->m_surfaceIsDirty     = true;
             flag                       = true;
         }
@@ -744,13 +740,6 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
             flag = false;
             // Will not return now to make sure the pHdrFile pointer is freed.
         }
-    }
-
-    if( flag )
-    {
-        m_dh->m_rows            = m_rows;
-        m_dh->m_columns         = m_columns;
-        m_dh->m_frames          = m_frames;
     }
 
     m_isLoaded = flag;
@@ -783,9 +772,9 @@ bool Anatomy::loadNifti( wxString fileName )
 
     if( DatasetManager::getInstance()->isAnatomyLoaded() )
     {
-        if( m_rows != m_dh->m_rows || m_columns != m_dh->m_columns || m_frames != m_dh->m_frames )
+        if( m_rows != DatasetManager::getInstance()->getRows() || m_columns != DatasetManager::getInstance()->getColumns() || m_frames != DatasetManager::getInstance()->getFrames() )
         {
-            m_dh->m_lastError = wxT( "dimensions of loaded files must be the same" );
+            m_dh->m_lastError = wxT( "Dimensions of loaded files must be the same" );
             return false;
         }
     }
@@ -839,10 +828,9 @@ bool Anatomy::loadNifti( wxString fileName )
         m_dh->m_niftiTransform.makeIdendity();
     }
     
-
-    m_dh->m_xVoxel = pImage->dx;
-    m_dh->m_yVoxel = pImage->dy;
-    m_dh->m_zVoxel = pImage->dz;
+    m_voxelSizeX = pImage->dx;
+    m_voxelSizeY = pImage->dy;
+    m_voxelSizeZ = pImage->dz;
     
     if( pImage->datatype == 2 )
     {
@@ -1016,7 +1004,7 @@ bool Anatomy::loadNifti( wxString fileName )
                 m_floatDataset[i * 3 + 2]   = pData[(2 * datasetSize) + i];
             }
 
-            m_pTensorField             = new TensorField( m_dh, &m_floatDataset, 1, 3 );
+            m_pTensorField             = new TensorField( m_columns, m_rows, m_frames, &m_floatDataset, 1, 3 );
             m_dh->m_surfaceIsDirty     = true;
             flag                       = true;
         }
@@ -1028,13 +1016,6 @@ bool Anatomy::loadNifti( wxString fileName )
             flag = false;
             // Will not return now to make sure the pHdrFile pointer is freed.
         }
-    }
-
-    if( flag )
-    {
-        m_dh->m_rows            = m_rows;
-        m_dh->m_columns         = m_columns;
-        m_dh->m_frames          = m_frames;
     }
     
     free(pHdrFile);
@@ -1067,9 +1048,9 @@ void Anatomy::saveNifti( wxString fileName )
     pImage->qform_code = 1;    
     pImage->datatype   = m_dataType;
     pImage->fname = fn;
-    pImage->dx = m_dh->m_xVoxel;
-    pImage->dy = m_dh->m_yVoxel;
-    pImage->dz = m_dh->m_zVoxel;
+    pImage->dx = m_voxelSizeX;
+    pImage->dy = m_voxelSizeY;
+    pImage->dz = m_voxelSizeZ;
 
     if( m_type == HEAD_BYTE )
     {
@@ -1314,7 +1295,7 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, float c
 				if(isRound)
 				{
 					//we might have one direction without proper size (flat), but never 2
-					double radius = (double)(max(drawZone.width, drawZone.height) - 1) / 2.0;
+					double radius = (double)( std::max(drawZone.width, drawZone.height) - 1 ) / 2.0;
 
 					//inside sphere: put color in the source
 					if(( Vector(double(drawZone.width)/2.0, double(drawZone.height)/2.0, double(drawZone.depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
@@ -1365,7 +1346,7 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor
 				if(isRound)
 				{
 					//we might have one direction without proper size (flat), but never 2
-					double radius = (double)(max(drawZone.width, drawZone.height) - 1) / 2.0;
+					double radius = (double)(std::max( drawZone.width, drawZone.height ) - 1) / 2.0;
 
 					//inside sphere: put color in the source
 					if(( Vector(double(drawZone.width)/2.0, double(drawZone.height)/2.0, double(drawZone.depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
@@ -2015,6 +1996,7 @@ void Anatomy::generateTexture()
 
 Anatomy::~Anatomy()
 {
+    Logger::getInstance()->print( wxT( "Executing Anatomy destructor..." ), LOGLEVEL_DEBUG );
     const GLuint* tex = &m_GLuint;
     glDeleteTextures( 1, tex );
 
@@ -2024,6 +2006,7 @@ Anatomy::~Anatomy()
     }
 
     m_dh->updateLoadStatus();
+    Logger::getInstance()->print( wxT( "Anatomy destructor done." ), LOGLEVEL_DEBUG );
 }
 
 void Anatomy::pushHistory()

@@ -131,9 +131,6 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // general info about the datasets
     /////////////////////////////////////////////////////////////////////////////////
-    int                   m_rows;
-    int                   m_columns;
-    int                   m_frames;
     std::vector< float >* m_floatDataset;
     std::vector<Vector>   m_rulerPts;
     bool                  m_isRulerToolActive;
@@ -153,11 +150,6 @@ public:
     bool                  m_thresSliderMoved;
     bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled && m_isBoxCreated); };
 
-
-    float m_xVoxel;
-    float m_yVoxel;
-    float m_zVoxel;
-    
     FMatrix m_niftiTransform;
 
     unsigned int m_countFibers;
@@ -206,10 +198,6 @@ public:
     bool m_showAxial;
 
     bool m_showCrosshair;
-
-    float m_xSlize;
-    float m_ySlize;
-    float m_zSlize;
 
     bool  m_lighting;         // m_lighting for fibers.
     bool  m_blendTexOnMesh;   // Ignore threshold for textures on meshes.

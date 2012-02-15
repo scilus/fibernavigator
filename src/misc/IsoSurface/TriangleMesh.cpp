@@ -1,7 +1,49 @@
 // TriangleMesh.cpp
 #include "TriangleMesh.h"
+
 #include "LoopSubD.h"
-#include <string.h>
+#include "../../dataset/DatasetManager.h"
+
+#include <algorithm>
+using std::for_each;
+
+#include <string>
+
+namespace
+{
+    class TriangleTensorCalculator
+    {
+    public:
+        TriangleTensorCalculator( TriangleMesh *pTriMesh, float columns, float rows, float frames )
+        :   m_pTriMesh( pTriMesh ),
+            m_columns( columns ),
+            m_frames( frames ),
+            m_rows( rows )
+        {
+        }
+
+        int operator()( const int i )
+        {
+            using std::min;
+            using std::max;
+
+            Vector p = m_pTriMesh->getTriangleCenter( i );
+            int x = min( (int)(m_columns - 1), max( 0, (int)( p[0] + 0.5 ) ) );
+            int y = min( (int)(m_rows    - 1), max( 0, (int)( p[1] + 0.5 ) ) );
+            int z = min( (int)(m_frames  - 1), max( 0, (int)( p[2] + 0.5 ) ) );
+            return x + y * m_columns + z * m_columns * m_rows;
+        }
+    private:
+        TriangleTensorCalculator();
+
+    private:
+        TriangleMesh *m_pTriMesh;
+        const float m_columns;
+        const float m_frames;
+        const float m_rows;
+    };
+}
+
 
 // Construction
 TriangleMesh::TriangleMesh (DatasetHelper* dh)
@@ -305,24 +347,14 @@ int TriangleMesh::getTriangleTensor(const int triNum)
     return triangleTensor[triNum];
 }
 
-int TriangleMesh::calcTriangleTensor(const int triNum)
-{
-    Vector p = getTriangleCenter(triNum);
-    //int x = wxMin(m_dh->m_columns-1, wxMax(0,(int)(p[0] + 0.5)));
-    int x = wxMin(m_dh->m_columns-1, wxMax(0,(int)(p[0] + 0.5)));
-    int y = wxMin(m_dh->m_rows   -1, wxMax(0,(int)(p[1] + 0.5)));
-    int z = wxMin(m_dh->m_frames -1, wxMax(0,(int)(p[2] + 0.5)));
-    return  x + y * m_dh->m_columns + z * m_dh->m_columns * m_dh->m_rows;
-}
-
 void TriangleMesh::calcTriangleTensors()
 {
-    triangleTensor.clear();
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    
     triangleTensor.resize(numTris);
-    for( int i = 0 ; i < numTris ; ++i)
-    {
-        triangleTensor[i] = calcTriangleTensor(i);
-    }
+    for_each( triangleTensor.begin(), triangleTensor.end(), TriangleTensorCalculator( this, columns, rows, frames ) );
     m_triangleTensorsCalculated = true;
 }
 

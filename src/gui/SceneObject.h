@@ -20,7 +20,7 @@ class SceneObject
 {
 public:
     SceneObject();
-    ~SceneObject();
+    virtual ~SceneObject();
     
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer() { }

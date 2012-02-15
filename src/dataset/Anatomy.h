@@ -50,7 +50,7 @@ public:
    
 	void add( Anatomy* anatomy);
    
-    float at( const int i );
+    float at( const int i ) const;
     std::vector<float>* getFloatDataset();
     std::vector<float>* getEqualizedDataset();
 

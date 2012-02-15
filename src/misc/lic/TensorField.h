@@ -8,15 +8,16 @@
 #ifndef TENSORFIELD_H_
 #define TENSORFIELD_H_
 
-#include "../../dataset/DatasetHelper.h"
 #include "../Fantom/FTensor.h"
+
+#include <vector>
 
 class TensorField
 {
 public:
     // Constructor/Destructor
-    TensorField( DatasetHelper* i_datasetHelper, std::vector< float >* i_tensorData, int i_order, int i_posDim );
-    TensorField( DatasetHelper* i_datasetHelper, float*                i_tensorData, int i_order, int i_posDim );
+    TensorField( int columns, int rows, int frames, std::vector< float > *pTensorData, int order, int posDim );
+    TensorField( int columns, int rows, int frames, float                *pTensorData, int order, int posDim );
     virtual ~TensorField();
 
     // Get Functions
@@ -35,7 +36,9 @@ private:
     FMatrix createMatrix( FTensor i_lhs, FTensor i_rhs );
 
     // Variables
-    DatasetHelper*         m_datasetHelper;
+    int m_columns;
+    int m_rows;
+    int m_frames;
     std::vector< FTensor > m_theField;
 
     int m_cells;

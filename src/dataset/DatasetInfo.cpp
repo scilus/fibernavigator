@@ -6,9 +6,9 @@ DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) :
             m_dh              ( datasetHelper ),
             m_length          ( 0 ),
             m_bands           ( 0 ),
-            m_frames          ( 0 ),
-            m_rows            ( 0 ),
-            m_columns         ( 0 ),
+            m_frames          ( 1 ),
+            m_rows            ( 1 ),
+            m_columns         ( 1 ),
             m_type            ( BOT_INITIALIZED ),
             m_repn            ( _T( "" ) ),
             m_isLoaded        ( false ),
@@ -34,9 +34,12 @@ DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) :
 
             licCalculated     ( false ),
             m_useLIC          ( false ),
-            m_bufferObjects   ( 0 )
-{
+            m_bufferObjects   ( 0 ),
 
+            m_voxelSizeX( 0.0f ),
+            m_voxelSizeY( 0.0f ),
+            m_voxelSizeZ( 0.0f )
+{
 }
 
 void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)

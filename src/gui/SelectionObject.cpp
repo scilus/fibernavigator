@@ -12,6 +12,7 @@
 #include "SelectionObject.h"
 
 #include "../dataset/Anatomy.h"
+#include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
 #include "../misc/Algorithms/BSpline.h"
 #include "../misc/Algorithms/ConvexHullIncremental.h"
@@ -101,7 +102,7 @@ void SelectionObject::lockToCrosshair()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::moveBack()
 {
-    if( m_center.y > m_datasetHelper->m_rows * m_datasetHelper->m_yVoxel ) 
+    if( m_center.y > DatasetManager::getInstance()->getRows() * DatasetManager::getInstance()->getVoxelY() ) 
         return;
 
     m_center.y = (int)m_center.y + 1.0;
@@ -118,7 +119,7 @@ void SelectionObject::moveBack()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::moveDown()
 {
-    if( m_center.z > m_datasetHelper->m_frames * m_datasetHelper->m_zVoxel )
+    if( m_center.z > DatasetManager::getInstance()->getFrames() * DatasetManager::getInstance()->getVoxelZ() )
         return;
 
     m_center.z = (int)m_center.z + 1.0;
@@ -169,7 +170,7 @@ void SelectionObject::moveLeft()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::moveRight()
 {
-    if( m_center.x > m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel ) 
+    if( m_center.x > DatasetManager::getInstance()->getColumns() * DatasetManager::getInstance()->getVoxelX() ) 
         return;
 
     m_center.x = (int)m_center.x + 1.0;
@@ -245,7 +246,7 @@ void SelectionObject::resizeDown()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::resizeForward()
 {
-    if( m_size.y > m_datasetHelper->m_rows ) 
+    if( m_size.y > DatasetManager::getInstance()->getRows() ) 
         return;
 
     m_size.y += 1.0;
@@ -279,7 +280,7 @@ void SelectionObject::resizeLeft()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::resizeRight()
 {
-    if( m_size.x > m_datasetHelper->m_columns )
+    if( m_size.x > DatasetManager::getInstance()->getColumns() )
         return;
 
     m_size.x += 1.0;
@@ -296,7 +297,7 @@ void SelectionObject::resizeRight()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::resizeUp()
 {
-    if( m_size.z > m_datasetHelper->m_frames )
+    if( m_size.z > DatasetManager::getInstance()->getFrames() )
         return;
 
     m_size.z += 1.0;
@@ -349,13 +350,17 @@ void SelectionObject::update()
     m_datasetHelper->m_selBoxChanged = true;
     m_datasetHelper->m_mainFrame->refreshAllGLWidgets();
 
-    // Update the min/max position in x,y and z of the object.
-    m_minX = m_center.x - ( m_size.x / 2.0f * m_datasetHelper->m_xVoxel );
-    m_maxX = m_center.x + ( m_size.x / 2.0f * m_datasetHelper->m_xVoxel );
-    m_minY = m_center.y - ( m_size.y / 2.0f * m_datasetHelper->m_yVoxel );
-    m_maxY = m_center.y + ( m_size.y / 2.0f * m_datasetHelper->m_yVoxel );
-    m_minZ = m_center.z - ( m_size.z / 2.0f * m_datasetHelper->m_zVoxel );
-    m_maxZ = m_center.z + ( m_size.z / 2.0f * m_datasetHelper->m_zVoxel );
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    // Update the min/max position in x, y and z of the object.
+    m_minX = m_center.x - ( m_size.x * 0.5f * voxelX );
+    m_maxX = m_center.x + ( m_size.x * 0.5f * voxelX );
+    m_minY = m_center.y - ( m_size.y * 0.5f * voxelY );
+    m_maxY = m_center.y + ( m_size.y * 0.5f * voxelY );
+    m_minZ = m_center.z - ( m_size.z * 0.5f * voxelZ );
+    m_maxZ = m_center.z + ( m_size.z * 0.5f * voxelZ );
 
     objectUpdate();
 }
@@ -535,17 +540,17 @@ void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_pro
     if( m_hitResult.picked == 11 || m_hitResult.picked == 12 ) 
     {
         float newX = m_size.x + l_delta;
-        m_size.x = wxMin( wxMax( newX, 1 ), m_datasetHelper->m_columns );
+        m_size.x = wxMin( wxMax( newX, 1 ), DatasetManager::getInstance()->getColumns() );
     }
     if( m_hitResult.picked == 13 || m_hitResult.picked == 14 ) 
     {
         float newY = m_size.y + l_delta;
-        m_size.y = wxMin(wxMax(newY, 1), m_datasetHelper->m_rows);
+        m_size.y = wxMin(wxMax(newY, 1), DatasetManager::getInstance()->getRows() );
     }
     if( m_hitResult.picked == 15 || m_hitResult.picked == 16 ) 
     {
         float newZ = m_size.z + l_delta;
-        m_size.z = wxMin( wxMax( newZ, 1 ), m_datasetHelper->m_frames );
+        m_size.z = wxMin( wxMax( newZ, 1 ), DatasetManager::getInstance()->getFrames() );
     }
     
     m_boxResized = true;
@@ -903,13 +908,17 @@ bool SelectionObject::getFiberLength( const vector< Vector > &i_fiberPoints, flo
     float l_dx,l_dy, l_dz;
     o_length = 0.0;
     
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     for( unsigned int i = 1; i < i_fiberPoints.size(); ++i )
     {
         // The values are in pixel, we need to set them in millimeters using the spacing 
         // specified in the anatomy file ( m_datasetHelper->xVoxel... ).
-        l_dx = ( i_fiberPoints[i].x - i_fiberPoints[i-1].x ) * m_datasetHelper->m_xVoxel;
-        l_dy = ( i_fiberPoints[i].y - i_fiberPoints[i-1].y ) * m_datasetHelper->m_yVoxel;
-        l_dz = ( i_fiberPoints[i].z - i_fiberPoints[i-1].z ) * m_datasetHelper->m_zVoxel;
+        l_dx = ( i_fiberPoints[i].x - i_fiberPoints[i-1].x ) * voxelX;
+        l_dy = ( i_fiberPoints[i].y - i_fiberPoints[i-1].y ) * voxelY;
+        l_dz = ( i_fiberPoints[i].z - i_fiberPoints[i-1].z ) * voxelZ;
 
         FArray currentVector( l_dx, l_dy, l_dz );
         o_length += (float)currentVector.norm();
@@ -1102,13 +1111,17 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &fiber
     unsigned int pointsCount( 0 );
     unsigned int datasetPos ( 0 );
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     for( unsigned int i = 0; i < fibersPoints.size(); ++i )
     {
         for( unsigned int j = 0; j < fibersPoints[i].size(); ++j )
         {
-            datasetPos = ( static_cast<int>( fibersPoints[i][j].x / m_datasetHelper->m_xVoxel ) +
-                           static_cast<int>( fibersPoints[i][j].y / m_datasetHelper->m_yVoxel ) * pCurrentAnatomy->getColumns() +
-                           static_cast<int>( fibersPoints[i][j].z / m_datasetHelper->m_zVoxel ) * pCurrentAnatomy->getColumns() * pCurrentAnatomy->getRows() ) * pCurrentAnatomy->getBands();
+            datasetPos = ( static_cast<int>( fibersPoints[i][j].x / voxelX ) +
+                           static_cast<int>( fibersPoints[i][j].y / voxelY ) * pCurrentAnatomy->getColumns() +
+                           static_cast<int>( fibersPoints[i][j].z / voxelZ ) * pCurrentAnatomy->getColumns() * pCurrentAnatomy->getRows() ) * pCurrentAnatomy->getBands();
             
             for (int i(0); i < pCurrentAnatomy->getBands(); i++)
             {
@@ -1281,8 +1294,12 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
      
     o_meanCrossSection /= i_meanFiberPoints.size();
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     // We want to return the values in millimeters so we need to multiply them by the spacing in the anatomy file.
-    float l_spacing = m_datasetHelper->m_xVoxel * m_datasetHelper->m_yVoxel * m_datasetHelper->m_zVoxel;
+    float l_spacing = voxelX * voxelY * voxelZ;
 
     o_maxCrossSection  *= l_spacing;
     o_minCrossSection  *= l_spacing;
@@ -1689,14 +1706,18 @@ void SelectionObject::drawIsoSurface()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::updateStatusBar()
 {
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     m_datasetHelper->m_mainFrame->GetStatusBar()->SetStatusText( m_name, 1 );
     m_datasetHelper->m_mainFrame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "Position %.2f, %.2f, %.2f  Size: %.2f, %.2f, %.2f" ),
                                                                  m_center.x, 
                                                                  m_center.y,
                                                                  m_center.z,
-                                                                 m_size.x * m_datasetHelper->m_xVoxel,
-                                                                 m_size.y * m_datasetHelper->m_yVoxel,
-                                                                 m_size.z * m_datasetHelper->m_zVoxel ),
+                                                                 m_size.x * voxelX,
+                                                                 m_size.y * voxelY,
+                                                                 m_size.z * voxelZ ),
                                                                  2 );
 }
 
@@ -2220,18 +2241,22 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     m_propertiesSizer->AddSpacer(1);
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_ctrlBoxSizeX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel), wxDefaultPosition, wxSize(45,-1));
+    m_ctrlBoxSizeX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.x * voxelX ), wxDefaultPosition, wxSize(45,-1));
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
     l_sizer->Add(m_ctrlBoxSizeX,0,wxALIGN_CENTER);
     
     
-    m_ctrlBoxSizeY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel), wxDefaultPosition, wxSize(45,-1));
+    m_ctrlBoxSizeY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.y * voxelY ), wxDefaultPosition, wxSize(45,-1));
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
     l_sizer->Add(m_ctrlBoxSizeY,0,wxALIGN_CENTER);
 
 
-    m_ctrlBoxSizeZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel), wxDefaultPosition, wxSize(45,-1));
+    m_ctrlBoxSizeZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.z * voxelZ ), wxDefaultPosition, wxSize(45,-1));
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
     l_sizer->Add(m_ctrlBoxSizeZ,0,wxALIGN_CENTER);
 
@@ -2288,9 +2313,13 @@ void SelectionObject::updatePropertiesSizer()
 
     if( m_boxResized )
     {
-        m_ctrlBoxSizeX->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel));
-        m_ctrlBoxSizeY->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel));
-        m_ctrlBoxSizeZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel));
+        float voxelX = DatasetManager::getInstance()->getVoxelX();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+        m_ctrlBoxSizeX->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.x * voxelX ) );
+        m_ctrlBoxSizeY->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.y * voxelY ) );
+        m_ctrlBoxSizeZ->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.z * voxelZ ) );
         m_boxResized = false;
     }
 }

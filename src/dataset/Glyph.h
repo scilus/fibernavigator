@@ -132,7 +132,6 @@ protected:
     virtual void    sliderPosChanged    ( AxisType i_axis ) {};
        
     // Variables
-    DatasetHelper   m_datasetHelper;
     GLuint*         m_hemisphereBuffer;     // For the buffer containing the points of a hemisphere (stored in video memory) 
     GLuint          m_textureId;
     int             m_nbPointsPerGlyph;      // Nb of points per glyph    
@@ -157,7 +156,7 @@ protected:
     float m_lightPosition[3];      // Light's position [x, y, z]
 
     vector< float >            m_floatColorDataset;
-    vector< float >             m_axesPoints;       //the 6 points describing the 3 axes
+    vector< float >            m_axesPoints;           //the 6 points describing the 3 axes
     vector< vector < float > > m_LODspheres;           // Stores the hemispheres for all LODs.
     
 };
