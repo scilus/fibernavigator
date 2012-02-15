@@ -2,10 +2,7 @@
 // Description: mainFrame class. Contains every elements of the GUI, and frame events
 /////////////////////////////////////////////////////////////////////////////
 
-
-
 #include "MainFrame.h"
-
 
 #include "MainCanvas.h"
 #include "MenuBar.h"
@@ -19,6 +16,7 @@
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/FibersGroup.h"
+#include "../dataset/Loader.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
@@ -168,97 +166,6 @@ namespace
 #define FIBERS_INFO_GRID_TITLE_LABEL_SIZE      150
 
 
-class Loader
-{
-private:
-    MainFrame *m_pMainFrame;
-    ListCtrl *m_pListCtrl;
-    bool m_error;
-    int m_index;
-public:
-    Loader( MainFrame *pMainFrame, ListCtrl *pListCtrl, int index) 
-    :   m_pMainFrame( pMainFrame ),
-        m_pListCtrl( pListCtrl ), 
-        m_index( index ),
-        m_error( false )
-    { }
-
-    bool getError() { return m_error; }
-
-    void operator()( const wxString &filename )
-    {
-        // check if i_fileName is valid
-        if( ! wxFile::Exists( filename ) )
-        {
-            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), filename ), LOGLEVEL_ERROR );
-        }
-        else
-        {
-            // If the file is in compressed formed, we check what kinda file it is.
-            wxString extension = filename.AfterLast( '.' );
-            if( wxT( "gz" ) == extension )
-            {
-                extension = filename.BeforeLast( '.' ).AfterLast( '.' );
-            }
-
-            if( wxT( "scn" ) == extension )
-            {
-//                 if( !SceneManager::getInstance()->load( filename ) )
-//                 {
-//                     m_error = true;
-//                 }
-            }
-            else
-            {
-                int result = DatasetManager::getInstance()->load( filename, extension );
-                if( -1 != result )
-                {
-                    DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
-
-                    switch( pDataset->getType() )
-                    {
-                        case HEAD_BYTE:
-                        case HEAD_SHORT:
-                        case OVERLAY:
-                        case RGB:
-                        {
-                            if( 1 == DatasetManager::getInstance()->getAnatomyCount() )
-                            {
-                                m_pMainFrame->updateSliders();
-                            }
-                            break;
-                        }
-                        case FIBERS:
-                        {
-                            if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
-                            {
-                                int result = DatasetManager::getInstance()->createFibersGroup();
-                                DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
-                                m_pListCtrl->InsertItem( result );
-                            }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-
-                    m_pListCtrl->InsertItem( result );
-                }
-                else
-                {
-                    m_error = true;
-                }
-            }
-
-//             if ( !m_dh->load( filename, m_index ) )
-//             {
-//                 m_error = true;
-//             }
-        }
-    }
-};
-
-
 MainFrame::MainFrame(wxWindow           *i_parent, 
                      const wxWindowID   i_id, 
                      const wxString     &i_title, 
@@ -271,7 +178,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pCurrentSceneObject( NULL ),
     m_currentListItem( -1 ),
     m_pCurrentSizer( NULL ),
-    m_lastPath( wxT("") )
+    m_lastPath( MyApp::respath + _T( "data" ) )
 
 {
     wxImage::AddHandler(new wxPNGHandler);
@@ -444,11 +351,11 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
         dialog.GetPaths( l_fileNames );
     }
 
-    if ( for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl2, 0 ) ).getError() )
+    if ( for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl2 ) ).getError() )
     {
-        wxMessageBox( wxT( "ERROR\n" ) + m_pDatasetHelper->m_lastError, wxT( "" ), wxOK | wxICON_INFORMATION, NULL );
+        wxMessageBox( Logger::getInstance()->getLastError(), wxT( "Error while loading" ), wxOK | wxICON_INFORMATION, NULL );
         GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
-        GetStatusBar()->SetStatusText( m_pDatasetHelper->m_lastError, 2 );
+        GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
         return;
     }
 
@@ -530,7 +437,7 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
     dialog.SetFilterIndex( 0 );
-    dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+    dialog.SetDirectory( m_lastPath );
 
     if( m_pDatasetHelper->m_scnFileLoaded )
     {
@@ -561,15 +468,14 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
     dialog.SetFilterIndex( 0 );
-    dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+    dialog.SetDirectory( m_lastPath );
 
 	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( dialog.ShowModal() == wxID_OK )
 		{
-			m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
-			printf("%d\n",dialog.GetFilterIndex());
+            m_lastPath = dialog.GetDirectory();
 			
 			if( pDatasetInfo->getType() == FIBERS )
 			{
@@ -622,11 +528,11 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
             dialog.SetFilterIndex( 0 );
-            dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+            dialog.SetDirectory( m_lastPath );
 
             if( dialog.ShowModal() == wxID_OK )
             {
-                m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
+                m_lastPath = dialog.GetDirectory();
                 l_anatomy->saveNifti( dialog.GetPath() );
             }
         }
@@ -662,10 +568,10 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
             dialog.SetFilterIndex( 0 );
-            dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+            dialog.SetDirectory( m_lastPath );
             if( dialog.ShowModal() == wxID_OK )
             {
-                m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
+                m_lastPath = dialog.GetDirectory();
                 l_surface->save( dialog.GetPath() );
             }
         }
@@ -679,10 +585,10 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
             dialog.SetFilterIndex( 0 );
-            dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+            dialog.SetDirectory( m_lastPath );
             if( dialog.ShowModal() == wxID_OK )
             {
-                m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
+                m_lastPath = dialog.GetDirectory();
                 l_surface->save( dialog.GetPath() );
             }
         }
@@ -1997,7 +1903,6 @@ void MainFrame::deleteListItem()
 
         deleteSceneObject();
         m_pListCtrl2->DeleteItem( tmp );
-        m_pDatasetHelper->updateLoadStatus();
         refreshAllGLWidgets();
     }
 }

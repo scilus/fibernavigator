@@ -8,6 +8,7 @@
 #include "main.h"
 
 #include "dataset/DatasetManager.h"
+#include "dataset/Loader.h"
 #include "gui/MainFrame.h"
 #include "gui/MenuBar.h"
 #include "gui/SceneManager.h"
@@ -161,7 +162,7 @@ bool MyApp::OnInit( void )
         
         if ( cmdParser.GetParamCount() > 0 )
         {
-            
+            Loader loader = Loader(frame, frame->m_pListCtrl2 );
             for ( size_t i = 0; i < cmdParser.GetParamCount(); ++i )
             {
                 cmd = cmdParser.GetParam( i );
@@ -171,10 +172,8 @@ bool MyApp::OnInit( void )
 
                 if ( cmdParser.Found(_T("d")) &&  ( i == 0 ) )
                 {
-                    // We pass -1 in the load function because there is no index because this is call from the cmd line.
-                    frame->m_pDatasetHelper->load( cmdFileName, -1 );
+                    loader( cmdFileName );
 //                    frame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED, wxALL);
-                    frame->m_pDatasetHelper->updateLoadStatus();
                     frame->m_pDatasetHelper->createDistanceMapAndIso();
                 }
                 else if ( cmdParser.Found( _T( "p" ) ) &&  ( i == cmdParser.GetParamCount() -1 ) )
@@ -183,8 +182,7 @@ bool MyApp::OnInit( void )
                 }
                 else
                 {
-                    // We pass -1 in the load function because there is no index because this is call from the cmd line.
-                    frame->m_pDatasetHelper->load( cmdFileName, -1 );
+                    loader( cmdFileName );
                 }
             }
         }
@@ -198,10 +196,10 @@ bool MyApp::OnInit( void )
     } 
     catch ( ... )
     {
-        printf( "something went wrong, terribly wrong\n" );
+        Logger::getInstance()->print( wxT( "Something went wrong, terribly wrong" ), LOGLEVEL_ERROR );
         return false;
     }
-    printf( "end on init main\n" );
+    Logger::getInstance()->print( wxT( "End on init main" ), LOGLEVEL_DEBUG );
 }
 
 /////////////////////////////////////////////////////////////////////////////

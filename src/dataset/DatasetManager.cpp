@@ -8,6 +8,7 @@
 #include "Tensors.h"
 
 #include "../Logger.h"
+#include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
 
 #include <vector>
@@ -437,8 +438,6 @@ int DatasetManager::loadAnatomy( const wxString &filename, nifti_image *pHeader,
 
         DatasetIndex index = insert( pAnatomy );
 
-        m_pDatasetHelper->finishLoading( pAnatomy );
-
         return index;
     }
     
@@ -455,18 +454,18 @@ int DatasetManager::loadFibers( const wxString &filename )
 
     if( l_fibers->load( filename ) )
     {
-        std::vector< std::vector< SelectionObject* > > l_selectionObjects = m_pDatasetHelper->getSelectionObjects();
-        for( DatasetIndex i( 0 ); i < l_selectionObjects.size(); ++i )
+        SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+        for( DatasetIndex i( 0 ); i < selectionObjects.size(); ++i )
         {
-            for( DatasetIndex j( 0 ); j < l_selectionObjects[i].size(); ++j )
+            for( DatasetIndex j( 0 ); j < selectionObjects[i].size(); ++j )
             {
-                l_selectionObjects[i][j]->m_inBox.resize( m_pDatasetHelper->m_countFibers, sizeof(bool) );
+                selectionObjects[i][j]->m_inBox.resize( m_pDatasetHelper->m_countFibers, sizeof(bool) );
                 for( DatasetIndex k( 0 ); k < m_pDatasetHelper->m_countFibers; ++k )
                 {
-                    l_selectionObjects[i][j]->m_inBox[k] = 0;
+                    selectionObjects[i][j]->m_inBox[k] = 0;
                 }
 
-                l_selectionObjects[i][j]->setIsDirty( true );
+                selectionObjects[i][j]->setIsDirty( true );
             }
         }
 
@@ -476,8 +475,6 @@ int DatasetManager::loadFibers( const wxString &filename )
         l_fibers->setUseTex   ( USE_TEX );
 
         DatasetIndex index = insert( l_fibers );
-
-        m_pDatasetHelper->finishLoading( l_fibers );
 
         l_fibers->updateLinesShown();
 
@@ -522,8 +519,6 @@ int DatasetManager::loadMesh( const wxString &filename, const wxString &extensio
 
         DatasetIndex index = insert( pMesh );
 
-        m_pDatasetHelper->finishLoading( pMesh );
-
         return index;
     }
 
@@ -549,8 +544,6 @@ int DatasetManager::loadODF( const wxString &filename, nifti_image *pHeader, nif
 
         DatasetIndex index = insert( pOdfs );
 
-        m_pDatasetHelper->finishLoading( pOdfs );
-
         return index;
     }
 
@@ -575,8 +568,6 @@ int DatasetManager::loadTensors( const wxString &filename, nifti_image *pHeader,
         pTensors->setUseTex( USE_TEX );
 
         DatasetIndex index = insert( pTensors );
-
-        m_pDatasetHelper->finishLoading( pTensors );
 
         return index;
     }

@@ -9,7 +9,6 @@
 #include "../dataset/SplinePoint.h"
 #include "../misc/lic/FgeOffscreen.h"
 
-
 #include <wx/math.h>
 #include <wx/utils.h>
 
@@ -623,12 +622,12 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
      */
     if ( m_pDatasetHelper->m_showObjects )
     {
-        std::vector< std::vector< SelectionObject* > > l_selectionObjects = m_pDatasetHelper->getSelectionObjects();
-        for ( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+        SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+        for ( unsigned int i = 0; i < selectionObjects.size(); ++i )
         {
-            for ( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+            for ( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
             {
-                hitResult hr1 = l_selectionObjects[i][j]->hitTest( ray );
+                hitResult hr1 = selectionObjects[i][j]->hitTest( ray );
                 if ( hr1.hit && !hr.hit )
                 {
                     hr = hr1;

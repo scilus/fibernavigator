@@ -53,14 +53,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_countFibers( 0    ),
 
     m_scnFileLoaded      ( false ),
-    m_fibersGroupLoaded	 ( false ),
-//     m_anatomyLoaded      ( false ),
-//     m_fibersLoaded       ( false ),
-//     m_vectorsLoaded      ( false ),
-//     m_tensorsFieldLoaded ( false ),
-//     m_tensorsLoaded      ( false ),
-//     m_ODFsLoaded         ( false ),
-//     m_surfaceLoaded      ( false ),
     m_surfaceIsDirty     ( true  ),
 
     m_useVBO( true ),
@@ -145,8 +137,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_geforceLevel( 6 ),
 
-    m_lastError     ( _T( "" ) ),
-    m_lastPath      ( MyApp::respath + _T( "data" ) ),
     m_scenePath     ( _T( "" ) ),
     m_scnFileName   ( _T( "" ) ),
     m_screenshotPath( _T( "" ) ),
@@ -187,321 +177,6 @@ DatasetHelper::~DatasetHelper()
 	//	delete m_mainFrame;
     
     Logger::getInstance()->print( wxT( "DatasetHelper destructor done" ), LOGLEVEL_DEBUG );
-}
-
-bool DatasetHelper::load( const int i_index )
-{
-    wxArrayString l_fileNames;
-    wxString l_caption          = wxT( "Choose a file" );
-	wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
-    wxString l_defaultDir       = wxEmptyString;
-    wxString l_defaultFileName  = wxEmptyString;
-    wxFileDialog dialog( m_mainFrame, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
-    dialog.SetFilterIndex( i_index );
-    dialog.SetDirectory( m_lastPath );
-    if( dialog.ShowModal() == wxID_OK )
-    {
-        m_lastPath = dialog.GetDirectory();
-        dialog.GetPaths( l_fileNames );
-    }
-    else
-        return true;
-
-    bool l_flag = true;
-    for( size_t i = 0; i < l_fileNames.size(); ++i )
-    {
-        if( ! load( l_fileNames[i], i_index ) && l_flag )
-            l_flag = false;
-    }
-
-    return l_flag;
-}
-
-bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_threshold, const bool i_active, const bool i_showFS, const bool i_useTex, const float i_alpha, wxString i_name, const int version, const bool isFiberGroup, const bool i_isScene )
-{
-    return false;
-
-// 	std::set_new_handler(&out_of_memory);
-// 	
-//     try 
-//     {
-// 		// if it is a fibergroup to add, only add it and do nothing else
-// 		if( isFiberGroup && i_isScene )
-// 		{
-// 			FibersGroup* l_fibersGroup = new FibersGroup( this );
-// 			l_fibersGroup->setShowFS   ( i_showFS );
-// 			l_fibersGroup->setUseTex   ( i_useTex );
-// 			
-// 			finishLoading( l_fibersGroup );
-// 			
-// 			m_fibersGroupLoaded = true;
-// 			return true;
-// 		}
-// 		// check if i_fileName is valid
-// 		if( ! wxFile::Exists( i_fileName ) )
-// 		{
-//             Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), i_fileName ), LOGLEVEL_ERROR );
-// 			m_lastError = wxT( "File doesn't exist!" );
-// 			return false;
-// 		}
-// 
-// 		// If the file is in compressed formed, we check what kinda file it is.
-// 		wxString l_ext = i_fileName.AfterLast( '.' );
-// 		if( l_ext == _T( "gz" ) )
-// 		{
-// 			wxString l_tmpName = i_fileName.BeforeLast( '.' );
-// 			l_ext = l_tmpName.AfterLast( '.' );
-// 		}
-// 
-// 		if( l_ext == wxT( "scn" ) )
-// 		{
-//             // TODO: Review in DatasetManager
-// 			if( m_mainFrame->m_pListCtrl->GetItemCount() > 0 )
-// 			{
-// 				int answer = wxMessageBox(wxT("Are you sure you want to open a new scene? All objects loaded in the current scene will be deleted."), wxT("Confirmation"), 
-// 										  wxYES_NO | wxICON_QUESTION);
-// 				
-// 				if( answer == wxNO )
-// 				{
-// 					return true;
-// 				}
-// 				// Delete all items in the scene
-// 				for( long i = 0; i < m_mainFrame->m_pListCtrl->GetItemCount(); i++ )
-// 				{
-// 					m_mainFrame->m_pListCtrl->SetItemState(i, wxLIST_MASK_STATE, wxLIST_STATE_SELECTED);
-// 					m_mainFrame->deleteListItem();
-// 				}
-// 			}
-// 			
-// 			if( ! loadScene( i_fileName ) )
-// 			{
-// 				return false;
-// 			}
-// 
-// 			m_selBoxChanged = true;
-// 			m_mainFrame->refreshAllGLWidgets();
-// 
-// 		#ifdef __WXMSW__
-// 			m_scnFileName = i_fileName.AfterLast ( '\\' );
-// 			m_scenePath   = i_fileName.BeforeLast( '\\' );
-// 		#else
-// 			m_scnFileName = i_fileName.AfterLast ( '/' );
-// 			m_scenePath   = i_fileName.BeforeLast( '/' );
-// 		#endif
-// 			m_scnFileLoaded = true;
-// 			return true;
-// 		}   
-// 		else if( l_ext == _T( "nii" ) )
-// 		{
-// 			char* l_hdrFile;
-// 			l_hdrFile = (char*)malloc( i_fileName.length() + 1 );
-// 			strcpy( l_hdrFile, (const char*)i_fileName.mb_str( wxConvUTF8 ) );
-// 
-// 			nifti_image* l_image = nifti_image_read( l_hdrFile, 0 );
-// 
-// 			free(l_hdrFile);
-// 
-// 			if( ! l_image )
-// 			{
-// 				m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
-// 				return false;
-// 			}
-// 
-// 			if (l_image->datatype == 16 && l_image->ndim == 4 && l_image->dim[4] == 6)
-// 			{
-// 				i_index=8;
-// 			}
-// 			else if (l_image->datatype == 16 && l_image->ndim == 4 && (l_image->dim[4] == 0 || l_image->dim[4] == 15 || l_image->dim[4] == 28 || l_image->dim[4] == 45 || l_image->dim[4] == 66 || l_image->dim[4] == 91 || l_image->dim[4] == 120 || l_image->dim[4] == 153 ))
-// 			{
-// 				i_index=9;
-// 			}
-// 
-// 			DatasetInfo *l_dataset = NULL;
-// 			if (i_index==8)
-// 			{
-//                 if( !DatasetManager::getInstance()->isAnatomyLoaded() )
-// 				{
-// 					m_lastError = wxT( "no anatomy file loaded" );
-// 					return false;
-// 				}
-// 
-// 				if( DatasetManager::getInstance()->isTensorsLoaded() )
-// 				{
-// 					m_lastError = wxT( "tensors already loaded" );
-// 					return false;
-// 				}
-// 				l_dataset = new Tensors( this );            
-// 			}
-// 			else if (i_index==9)
-// 			{
-// 				if( !DatasetManager::getInstance()->isAnatomyLoaded() )
-// 				{
-// 					m_lastError = wxT( "no anatomy file loaded" );
-// 					return false;
-// 				}
-// 				l_dataset = new ODFs( this );            
-// 			}
-// 			else
-// 			{
-// 				l_dataset = new Anatomy( this );
-// 			}
-// 			if( l_dataset->load(i_fileName ))
-// 			{
-// 				l_dataset->setThreshold( i_threshold );
-// 				l_dataset->setAlpha    ( i_alpha );
-// 				l_dataset->setShow     ( i_active );
-// 				l_dataset->setShowFS   ( i_showFS );
-// 				l_dataset->setUseTex   ( i_useTex );
-// 				
-// 				if( i_isScene && version >= 2 )
-// 				{
-// 					l_dataset->setName ( i_name );
-// 				}
-//                 m_mainFrame->m_pListCtrl2->InsertItem( l_dataset );
-// 				finishLoading( l_dataset );
-// 				
-// 				if (i_index==8)
-// 				{
-// 					m_tensorsLoaded = true;
-// 				}
-// 				else if (i_index == 9)
-// 				{
-// 					m_ODFsLoaded = true;
-// 				}
-// 				else
-// 				{
-// 					m_floatDataset = ((Anatomy*)l_dataset)->getFloatDataset();
-// 				}
-// 				return true;
-// 			}
-// 			return false;
-// 		}
-// 		else if( l_ext == _T( "mesh" ) || l_ext == _T( "surf" ) || l_ext == _T( "dip" ) )
-// 		{
-// 			if( ! m_anatomyLoaded )
-// 			{
-// 				m_lastError = wxT( "no anatomy file loaded" );
-// 				return false;
-// 			}
-// 
-// 			Mesh *l_mesh = new Mesh( this );
-// 
-// 			if( l_mesh->load( i_fileName ) )
-// 			{
-// 				l_mesh->setThreshold( i_threshold );
-// 				l_mesh->setShow     ( i_active );
-// 				l_mesh->setShowFS   ( i_showFS );
-// 				l_mesh->setUseTex   ( i_useTex );
-// 				finishLoading       ( l_mesh);
-// 
-//                 m_mainFrame->m_pListCtrl2->InsertItem( l_mesh );
-// 				
-// 				return true;
-// 			}
-// 			return false;
-// 		}
-// 		else if( l_ext == _T( "fib" ) || l_ext == _T( "trk" ) || l_ext == _T( "bundlesdata" ) || l_ext == _T( "Bfloat" ) || l_ext == _T("tck") )
-// 		{
-// 			if( ! m_anatomyLoaded )
-// 			{
-// 				m_lastError = wxT( "no anatomy file loaded" );
-// 				return false;
-// 			}
-// 
-// 			Fibers* l_fibers = new Fibers( this );
-// 
-// 			if( l_fibers->load( i_fileName ) )
-// 			{
-// 				if( m_fibersGroupLoaded == false && version < 2 )
-// 				{
-// 					FibersGroup* l_fibersGroup = new FibersGroup( this );
-// 					finishLoading( l_fibersGroup );
-// 					
-// 					m_fibersGroupLoaded = true;
-// 				}
-// 
-// 				std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-// 				for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-// 				{
-// 					for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-// 					{
-// 						l_selectionObjects[i][j]->m_inBox.resize( m_countFibers, sizeof(bool) );
-// 						for( unsigned int k = 0; k < m_countFibers; ++k )
-// 						{
-// 							l_selectionObjects[i][j]->m_inBox[k] = 0;
-// 						}
-// 
-// 						l_selectionObjects[i][j]->setIsDirty( true );
-// 					}
-// 				}
-// 
-// 				l_fibers->setThreshold( i_threshold );
-// 				l_fibers->setAlpha	  ( i_alpha );
-// 				l_fibers->setShow     ( i_active );
-// 				l_fibers->setShowFS   ( i_showFS );
-// 				l_fibers->setUseTex   ( i_useTex );
-// 				
-// 				if( m_fibersGroupLoaded )
-// 				{
-// 					FibersGroup* pFibersGroup;
-// 					getFibersGroupDataset(pFibersGroup);
-// 
-// 					if( pFibersGroup != NULL )
-// 					{
-// 						if(pFibersGroup->getFibersCount() > 0 && !i_isScene)
-// 						{
-// 							l_fibers->setShow( false );
-// 						}
-// 						pFibersGroup->addFibersSet( l_fibers );
-// 					}
-// 				}			
-// 
-// 				l_fibers->updateLinesShown();
-// 				m_mainFrame->refreshAllGLWidgets();
-// 				
-// 				finishLoading( l_fibers, true);
-//                 m_mainFrame->m_pListCtrl2->InsertItem( l_fibers );
-// 				
-// 				m_fibersLoaded = true;
-// 				m_selBoxChanged = true;
-// 
-// 				return true;
-// 			}
-// 			return false;
-// 		}
-// 		m_lastError = wxT( "unsupported file format" );
-// 		
-// 		return false;
-// 	}
-// 	catch (const exception &e)
-// 	{
-// 		cerr << "Exception: " << e.what() << endl;
-// 		exit(1);
-// 	}
-}
-
-
-void DatasetHelper::finishLoading( DatasetInfo* i_info, bool isChild)
-{
-//     if( m_mainFrame->m_pListCtrl2->GetItemCount() == 1 )
-//     {
-//         m_mainFrame->m_pXSlider->SetMax( wxMax( 2, m_columns - 1 ) );
-//         m_mainFrame->m_pXSlider->SetValue( m_columns / 2 );
-//         m_mainFrame->m_pYSlider->SetMax( wxMax( 2, m_rows - 1 ) );
-//         m_mainFrame->m_pYSlider->SetValue( m_rows / 2 );
-//         m_mainFrame->m_pZSlider->SetMax( wxMax( 2, m_frames - 1 ) );
-//         m_mainFrame->m_pZSlider->SetValue( m_frames / 2 );
-//         
-//         updateView( m_mainFrame->m_pXSlider->GetValue(), m_mainFrame->m_pYSlider->GetValue(), m_mainFrame->m_pZSlider->GetValue() );
-// 
-//         m_mainFrame->m_pMainGL->changeOrthoSize();
-//         m_mainFrame->m_pGL0->changeOrthoSize();
-//         m_mainFrame->m_pGL1->changeOrthoSize();
-//         m_mainFrame->m_pGL2->changeOrthoSize();
-//     }
-// 
-//     updateLoadStatus();
-//     m_mainFrame->refreshAllGLWidgets();
 }
 
 bool DatasetHelper::fileNameExists( const wxString i_fileName )
@@ -876,7 +551,7 @@ bool DatasetHelper::loadScene( const wxString i_fileName )
 
 void DatasetHelper::save( const wxString i_fileName )
 {
-    // TODO: Review once in DatasetManager
+    // TODO: Review once in SceneManager
 
 //     wxXmlNode* l_root                 = new wxXmlNode( NULL,   wxXML_ELEMENT_NODE, wxT( "theScene" ) );
 //     wxXmlNode* l_nodeSelectionObjects = new wxXmlNode( l_root, wxXML_ELEMENT_NODE, wxT( "selection_objects" ) );
@@ -1055,34 +730,10 @@ void DatasetHelper::save( const wxString i_fileName )
 //         l_xmlDoc.Save( i_fileName, 2 );
 }
 
-std::vector< std::vector< SelectionObject* > > DatasetHelper::getSelectionObjects()
-{
-    std::vector< std::vector< SelectionObject* > > l_selectionObjects;
-
-    wxTreeItemId l_id, l_childId;
-    wxTreeItemIdValue l_cookie = 0;
-
-    l_id = m_mainFrame->m_pTreeWidget->GetFirstChild( m_mainFrame->m_tSelectionObjectsId, l_cookie );
-
-    while( l_id.IsOk() )
-    {
-        std::vector< SelectionObject* > l_b;
-        l_b.push_back( (SelectionObject*)( m_mainFrame->m_pTreeWidget->GetItemData( l_id ) ) );
-        wxTreeItemIdValue childcookie = 0;
-        l_childId = m_mainFrame->m_pTreeWidget->GetFirstChild( l_id, childcookie );
-
-        while( l_childId.IsOk() )
-        {
-            l_b.push_back( (SelectionObject*)( m_mainFrame->m_pTreeWidget->GetItemData( l_childId ) ) );
-            l_childId = m_mainFrame->m_pTreeWidget->GetNextChild( l_id, childcookie );
-        }
-
-        l_id = m_mainFrame->m_pTreeWidget->GetNextChild( m_mainFrame->m_tSelectionObjectsId, l_cookie );
-        l_selectionObjects.push_back( l_b );
-    }
-
-    return l_selectionObjects;
-}
+// std::vector< std::vector< SelectionObject* > > DatasetHelper::getSelectionObjects()
+// {
+//     return SceneManager::getInstance()->getSelectionObjects();
+// }
 
 void DatasetHelper::treeFinished()
 {
@@ -1100,12 +751,6 @@ void DatasetHelper::treeFinished()
 void DatasetHelper::deleteAllSelectionObjects()
 {
     SceneManager::getInstance()->deleteAllSelectionObjects();
-//     std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-//     for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-//         for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-//         {
-//             m_mainFrame->m_pTreeWidget->Delete(l_selectionObjects[i][j]->GetId());      
-//         }
 }
 
 void DatasetHelper::deleteAllPoints()
@@ -1144,12 +789,7 @@ void DatasetHelper::deleteAllPoints()
 void DatasetHelper::updateAllSelectionObjects()
 {
     SceneManager::getInstance()->updateAllSelectionObjects();
-//     std::vector< std::vector< SelectionObject* > > l_selectionObjects = getSelectionObjects();
-//     for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-//         for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-//             l_selectionObjects[i][j]->setIsDirty( true );
 }
-
 
 Vector DatasetHelper::mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16])
 {
@@ -1236,7 +876,6 @@ void DatasetHelper::createIsoSurface()
         Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
     }
 
-    updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
 }
 
@@ -1284,7 +923,6 @@ void DatasetHelper::createDistanceMapAndIso()
         Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
     }
 
-    updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
 }
 
@@ -1314,7 +952,6 @@ void DatasetHelper::createDistanceMap()
 
     m_mainFrame->m_pListCtrl2->InsertItem( index );
 
-    updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
 }
 
@@ -1346,7 +983,7 @@ void DatasetHelper::createCutDataset()
 
     pNewAnatomy->setZero( columns, rows, frames );
 
-    SelectionObjList l_selectionObjects = getSelectionObjects();
+    SelectionObjList l_selectionObjects = SceneManager::getInstance()->getSelectionObjects();
     int x1, x2, y1, y2, z1, z2;
 
     for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
@@ -1393,7 +1030,6 @@ void DatasetHelper::createCutDataset()
 
     m_mainFrame->m_pListCtrl2->InsertItem( index );
 
-    updateLoadStatus();
     m_mainFrame->refreshAllGLWidgets();
 }
 
@@ -1560,65 +1196,6 @@ TensorField* DatasetHelper::getTensorField()
     return NULL;
 }
 
-void DatasetHelper::updateLoadStatus()
-{
-//     m_anatomyLoaded      = false;
-//     m_meshLoaded         = false;
-//     m_fibersLoaded       = false;
-//     m_vectorsLoaded      = false;
-//     m_tensorsFieldLoaded = false;
-//     m_tensorsLoaded      = false;
-//     m_ODFsLoaded         = false;
-//     m_surfaceLoaded      = false;
-// 
-//     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
-//     {
-//         DatasetInfo* info = m_mainFrame->m_pListCtrl2->GetItem( i );
-// 		if(info != NULL)
-// 		{
-// 			switch( info->getType() )
-// 			{
-// 				case HEAD_BYTE:
-// 				case HEAD_SHORT:
-// 				case OVERLAY:
-// 				case RGB:
-// 					m_anatomyLoaded      = true;
-// 					break;
-// 				case VECTORS:
-// 					m_anatomyLoaded      = true;
-// 					m_vectorsLoaded      = true;
-// 					m_tensorsFieldLoaded = true;
-// 					break;
-// 				case MESH:
-// 					m_meshLoaded         = true;
-// 					break;
-// 				case TENSOR_FIELD:
-// 					m_tensorsFieldLoaded = true;
-// 					break;
-// 				case FIBERS:
-// 					m_fibersLoaded       = true;
-// 					break;
-// 				case FIBERSGROUP:
-// 					m_fibersGroupLoaded	 = true;
-// 					break;
-// 				case SURFACE:
-// 					m_surfaceLoaded      = true;
-// 					break;
-// 				case ISO_SURFACE:
-// 					m_meshLoaded         = true;
-// 					break;
-// 				case TENSORS:
-// 					m_tensorsLoaded      = true;
-// 					break;
-// 				case ODFS:
-// 					m_ODFsLoaded         = true;
-// 					break;
-// 				default:
-// 					break;
-// 			}
-// 		}
-//     }
-}
 
 void DatasetHelper::doLicMovie( int i_mode )
 {

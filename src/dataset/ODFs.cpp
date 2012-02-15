@@ -119,13 +119,6 @@ bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
 //         return false;
 //     }
 
-//     nifti_image* l_fileData = nifti_image_read( l_hdrFile, 1 );
-//     if( ! l_fileData )
-//     {
-//         DatasetInfo::m_dh->m_lastError = wxT( "nifti file corrupt" );
-//         return false;
-//     }
-
     int l_nSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
 
     float* l_data = (float*)pBody->data;

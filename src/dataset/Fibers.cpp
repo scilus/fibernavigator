@@ -1782,7 +1782,7 @@ void Fibers::colorWithDistance( float *pColorData )
         return;
     }
 	
-    SelectionObjectList selObjs =  m_dh->getSelectionObjects();
+    SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
     vector< SelectionObject* > simplifiedList;
 
     for( unsigned int i = 0; i < selObjs.size(); ++i )
@@ -1856,7 +1856,7 @@ void Fibers::colorWithMinDistance( float *pColorData )
         return;
     }
 	
-    SelectionObjectList selObjs =  m_dh->getSelectionObjects();
+    SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
     vector< SelectionObject* > simplifiedList;
 
     for( unsigned int i = 0; i < selObjs.size(); ++i )
@@ -1979,8 +1979,7 @@ Anatomy* Fibers::generateFiberVolume()
     pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
     
     m_dh->m_mainFrame->m_pListCtrl2->InsertItem( index );
-	
-    m_dh->updateLoadStatus();
+
     m_dh->m_mainFrame->refreshAllGLWidgets();
 
     int   columns = DatasetManager::getInstance()->getColumns();
@@ -2474,7 +2473,7 @@ void Fibers::resetLinesShown()
 
 void Fibers::updateLinesShown()
 {
-    vector< vector< SelectionObject * > > selectionObjects = m_dh->getSelectionObjects();
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
     m_selected.assign( m_countLines, true );
 

@@ -118,7 +118,7 @@ bool Tensors::createStructure( vector< float >& i_fileFloatData )
 
     if( l_tensorField.getCells() != m_nbGlyphs )
     {
-        m_dh->m_lastError = wxT( "problem initializing the tensor field" );
+        Logger::getInstance()->print( wxT( "Problem initializing the tensor field" ), LOGLEVEL_ERROR );
         return false;
     }
 

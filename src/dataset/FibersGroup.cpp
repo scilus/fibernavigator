@@ -613,18 +613,17 @@ void FibersGroup::generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies)
 {
     int index = DatasetManager::getInstance()->createAnatomy( RGB );
     Anatomy* pGlobalAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
-	
-	pGlobalAnatomy->setName( wxT( "Global Fiber-Density Volume" ) );
-	
-    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( index );
-	
-	m_dh->updateLoadStatus();
-	m_dh->m_mainFrame->refreshAllGLWidgets();
 
-	for(int i = 0; i < (int)vAnatomies.size(); i++)
-	{
-		pGlobalAnatomy->add( vAnatomies[i] );
-	}
+    pGlobalAnatomy->setName( wxT( "Global Fiber-Density Volume" ) );
+
+    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( index );
+
+    m_dh->m_mainFrame->refreshAllGLWidgets();
+
+    for(int i = 0; i < (int)vAnatomies.size(); i++)
+    {
+        pGlobalAnatomy->add( vAnatomies[i] );
+    }
 }
 
 void FibersGroup::OnClickApplyBtn()

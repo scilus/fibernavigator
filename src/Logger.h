@@ -22,6 +22,8 @@ public:
 
     void print( const wxString &str, const LogLevel level );
     bool printIfGLError( wxString str );
+
+    wxString getLastError() const { return m_lastError; }
     void setMessageLevel( int level );
 
 protected:
@@ -31,6 +33,7 @@ private:
     static Logger *m_pInstance;
     int m_level;
     std::ostringstream m_oss;
+    wxString m_lastError;
 };
 
 #endif // LOGGER_H_

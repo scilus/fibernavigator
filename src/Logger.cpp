@@ -9,14 +9,14 @@ using std::setfill;
 Logger * Logger::m_pInstance = NULL;
 
 Logger::Logger()
-:  
+:
 #if defined( DEBUG ) || defined( _DEBUG )
     m_level( 0 )
 #else
     m_level( 1 )
 #endif
 {
-
+    m_lastError = wxT( "No error to report" );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ void Logger::print( const wxString &str, const LogLevel level )
         return;
 
     wxString prefix;
-    switch (level)
+    switch( level )
     {
     case LOGLEVEL_DEBUG:
         prefix = _T( "DEBUG: " );
@@ -61,6 +61,12 @@ void Logger::print( const wxString &str, const LogLevel level )
 
     wxDateTime time = wxDateTime::Now();
     m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.char_str() << str.char_str() << "\n";
+    
+    if( LOGLEVEL_ERROR == level || LOGLEVEL_GLERROR == level )
+    {
+        m_lastError = prefix + str;
+    }
+
     printf( m_oss.str().c_str() );
     m_oss.str( "" );
 }

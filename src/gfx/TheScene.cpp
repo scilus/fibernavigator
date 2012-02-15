@@ -569,7 +569,7 @@ void TheScene::renderMesh()
 
     //Render selection objects
     glColor3f( 1.0f, 0.0f, 0.0f );
-    std::vector< std::vector< SelectionObject* > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
     m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "showFS", true );
     m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useTex", false );
@@ -679,8 +679,8 @@ void TheScene::renderFibers()
 
 	m_pDatasetHelper->m_selBoxChanged = false;
 
-    vector< vector< SelectionObject * > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
-    for( vector< vector< SelectionObject *> >::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+    for( SelectionObjList::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )
     {
         for( vector< SelectionObject *>::iterator itChild = itMaster->begin(); itChild != itMaster->end(); ++itChild )
         {
@@ -815,15 +815,13 @@ void TheScene::drawSphere( float xPos, float yPos, float zPos, float ray )
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::drawSelectionObjects()
 {
-    std::vector< std::vector< SelectionObject* > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
     for ( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
         for ( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
-
             selectionObjects[i][j]->draw();
-
             glPopAttrib();
         }
     }

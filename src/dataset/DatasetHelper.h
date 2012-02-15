@@ -52,8 +52,6 @@ class FibersGroup;
 class TensorField;
 class Surface;
 
-typedef std::vector< std::vector< SelectionObject* > > SelectionObjectList;
-
 class DatasetHelper 
 {
 public:
@@ -62,20 +60,6 @@ public:
     virtual ~DatasetHelper();
 
     // Functions
-    //void out_of_memory(); 
-    bool load( const int i_index );
-    bool load( wxString    i_filename,
-               int         i_index		= -1, 
-               const float i_threshold  = 0.0f, 
-               const bool  i_active		= true,
-               const bool  i_showFS		= true, 
-               const bool  i_useTex		= true, 
-               const float i_alpha		= 1.0f,
-			   wxString    i_name		= _T( ""),
-			   int		   i_version	= 1,
-			   const bool  i_isFiberGroup = false,
-			   const bool  i_isScene = false );
-    void finishLoading ( DatasetInfo*, bool isChild = false );
     bool loadScene     ( const wxString i_filename );
     bool loadTextFile  ( wxString* i_string, const wxString i_filename );
     bool fileNameExists( const wxString i_filename );
@@ -83,7 +67,6 @@ public:
     //! Saves the current scene to an xml file
     void save( const wxString filename );
 
-    SelectionObjectList getSelectionObjects();
     void   deleteAllPoints();
     void   deleteAllSelectionObjects();
     void   updateAllSelectionObjects();
@@ -117,8 +100,6 @@ public:
     void toggleActivateAllSelectionObjects() { m_activateObjects = ! m_activateObjects; };
     bool togglePointMode()        { return m_pointMode = ! m_pointMode; };
     bool getPointMode()           { return m_pointMode; };
-
-    void updateLoadStatus();
 
     void doLicMovie       ( int i_mode );
     void createLicSliceSag( int i_slize );
@@ -156,15 +137,6 @@ public:
 
     bool m_loadDataset;
     bool m_scnFileLoaded;
-//     bool m_anatomyLoaded;
-//     bool m_meshLoaded;
-    bool m_fibersGroupLoaded;
-// 	bool m_fibersLoaded;
-//     bool m_vectorsLoaded;
-//     bool m_tensorsFieldLoaded;
-//     bool m_tensorsLoaded;
-//     bool m_ODFsLoaded;
-//     bool m_surfaceLoaded;
     bool m_surfaceIsDirty;
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -249,8 +221,6 @@ public:
 
     int   m_geforceLevel;
 
-    wxString m_lastError;
-    wxString m_lastPath;
     wxString m_scenePath;
     wxString m_scnFileName;
     wxString m_screenshotPath;

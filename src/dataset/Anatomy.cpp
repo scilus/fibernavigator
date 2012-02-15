@@ -9,6 +9,7 @@
 #include "../Logger.h"
 #include "../dataset/DatasetManager.h"
 #include "../gui/MainFrame.h"
+#include "../gui/SceneManager.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/nifti/nifti1_io.h"
 
@@ -586,8 +587,8 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
 
             flag = true;
             m_oldMax = 255;
+            break;
         }
-        break;
 
         case HEAD_SHORT:
         {
@@ -634,8 +635,8 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
             m_oldMax    = dataMax;
             m_newMax    = newMax;
             flag        = true;
+            break;
         }
-        break;
 
         case OVERLAY:
         {
@@ -665,8 +666,8 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
             m_oldMax    = dataMax;
             m_newMax    = 1.0;
             flag        = true;
+            break;
         }
-        break;
 
         case RGB:
         {
@@ -682,8 +683,8 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
             }
 
             flag = true;
+            break;
         }
-        break;
 
         case VECTORS:
         {
@@ -700,12 +701,12 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
             m_pTensorField             = new TensorField( m_columns, m_rows, m_frames, &m_floatDataset, 1, 3 );
             m_dh->m_surfaceIsDirty     = true;
             flag                       = true;
+            break;
         }
-        break;
 
         default:
         {
-            m_dh->m_lastError = wxT( "unsuported file format" );
+            Logger::getInstance()->print( wxT( "Unsupported file format" ), LOGLEVEL_ERROR );
             flag = false;
             // Will not return now to make sure the pHdrFile pointer is freed.
         }
@@ -878,7 +879,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
     pParentWindow->Connect( m_pSliderFlood->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderFloodMoved ) );
     
     // The following interface objects are related to flood fill and graph cuts.
-    // They are kept here temporiraly, but will need to be implemented or removed.
+    // They are kept here temporarily, but will need to be implemented or removed.
     // Please also note that the coding standard has not been applied to these lines, 
     // so please apply it if you re enable them.
     /*pSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -935,7 +936,7 @@ void Anatomy::updatePropertiesSizer()
     m_pUpperEqSlider->Enable( 1 == m_bands );
     m_pEqualize->Enable(      1 == m_bands );
     m_pBtnMinimize->Enable( DatasetManager::getInstance()->isFibersLoaded() );
-    m_pBtnCut->Enable(      m_dh->getSelectionObjects().size() > 0 );
+    m_pBtnCut->Enable(      SceneManager::getInstance()->getSelectionObjects().size() > 0 );
 
     m_pBtnNewIsoSurface->Enable(    getType() <= OVERLAY );
     m_pBtnNewDistanceMap->Enable(   getType() <= OVERLAY );
@@ -1695,7 +1696,6 @@ Anatomy::~Anatomy()
         m_pRoi->m_sourceAnatomy = NULL;
     }
 
-    m_dh->updateLoadStatus();
     Logger::getInstance()->print( wxT( "Anatomy destructor done." ), LOGLEVEL_DEBUG );
 }
 
