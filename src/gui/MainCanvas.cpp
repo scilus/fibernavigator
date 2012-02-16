@@ -176,7 +176,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
                     int newX = (int) ( getEventCenter().x + 0.5 );
                     int newY = (int) ( getEventCenter().y + 0.5 );
                     int newZ = (int) ( getEventCenter().z + 0.5 );
-                    m_pDatasetHelper->updateView( newX, newY, newZ );
+                    SceneManager::getInstance()->updateView( newX, newY, newZ );
                     m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( newX );
                     m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( newY );
                     m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( newZ );
@@ -1123,7 +1123,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             return;
     }
 
-    m_pDatasetHelper->updateView( m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue(), 
+    SceneManager::getInstance()->updateView( m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue(), 
                       m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue(),
                       m_pDatasetHelper->m_mainFrame->m_pZSlider->GetValue() );
     m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();

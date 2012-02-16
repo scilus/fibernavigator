@@ -521,29 +521,28 @@ void PropertiesWindow::OnListItemCutOut( wxCommandEvent&  WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnListItemCutOut" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->m_pDatasetHelper->createCutDataset();
-    m_pMainFrame->refreshAllGLWidgets();
+    m_pMainFrame->createCutDataset();
 }
 
 void PropertiesWindow::OnNewIsoSurface( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNewIsoSurface" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->m_pDatasetHelper->createIsoSurface();
+    m_pMainFrame->createIsoSurface();
 }
 
 void PropertiesWindow::OnNewOffsetSurface( wxCommandEvent& WXUNUSED(event ))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNewOffsetSurface" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->m_pDatasetHelper->createDistanceMapAndIso();
+    m_pMainFrame->createDistanceMapAndIso();
 }
 
 void PropertiesWindow::OnNewDistanceMap (wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNewDistanceMap" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->m_pDatasetHelper->createDistanceMap();
+    m_pMainFrame->createDistanceMap();
 }
 
 void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )

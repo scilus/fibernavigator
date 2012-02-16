@@ -64,8 +64,9 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper, const wxString &filename )
 #endif
 }
 
+// Seems to be used for the create a Distance Map
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
-                  std::vector< float >* pDataset )
+                  const Anatomy * const pAnatomy )
 : DatasetInfo( pDatasetHelper ),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
@@ -77,11 +78,14 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
+    m_columns = pAnatomy->m_columns;
+    m_rows    = pAnatomy->m_rows;
+    m_frames  = pAnatomy->m_frames;
     m_bands         = 1;
     m_isLoaded      = true;
     m_type          = HEAD_BYTE;
 
-    createOffset( *pDataset );
+    createOffset( pAnatomy );
 }
 
 Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
@@ -1104,7 +1108,7 @@ void Anatomy::equalizationSliderChange()
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::createOffset( const std::vector<float> &sourceDataset )
+void Anatomy::createOffset( const Anatomy * const pAnatomy )
 {
     int b, r, c, bb, rr, r0, b0, c0;
     int i, istart, iend;
@@ -1128,7 +1132,7 @@ void Anatomy::createOffset( const std::vector<float> &sourceDataset )
     bool *pBitMask = new bool[nbPixels];
     for( int i(0); i < nbPixels; ++i )
     {
-        if( sourceDataset.at(i) < 0.01 )
+        if( pAnatomy->at(i) < 0.01 )
         {
             pBitMask[i] = true;
         }

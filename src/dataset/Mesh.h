@@ -66,7 +66,6 @@ public:
 
 
 private:
-    
     void    generateTexture()  {};
     void    generateGeometry();
     void    initializeBuffer() {};

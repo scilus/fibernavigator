@@ -59,7 +59,7 @@ public:
     // return index of the created dataset
     DatasetIndex createAnatomy()                                                 { return insert( new Anatomy( m_pDatasetHelper ) ); }
     DatasetIndex createAnatomy( DatasetType type )                               { return insert( new Anatomy( m_pDatasetHelper, type ) ); }
-    DatasetIndex createAnatomy( vector<float> *pDataset )                        { return insert( new Anatomy( m_pDatasetHelper, pDataset ) ); }
+    DatasetIndex createAnatomy( const Anatomy * const pAnatomy )                 { return insert( new Anatomy( m_pDatasetHelper, pAnatomy ) ); }
     DatasetIndex createAnatomy( vector<float> *pDataset, DatasetType type )      { return insert( new Anatomy( m_pDatasetHelper, pDataset, type ) ); }
     DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( m_pDatasetHelper, pAnatomy ) ); }
     DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup( m_pDatasetHelper ) ); }

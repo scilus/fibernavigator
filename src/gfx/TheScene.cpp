@@ -280,7 +280,7 @@ void TheScene::renderScene()
 	    if (m_posSagital > columns) 
 		    m_posSagital = 0;
 
-        m_pDatasetHelper->updateView( m_posSagital, sliceY, sliceZ );
+        SceneManager::getInstance()->updateView( m_posSagital, sliceY, sliceZ );
         m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( m_posSagital );
     }
 
@@ -289,7 +289,7 @@ void TheScene::renderScene()
 	    if (m_posCoronal > rows) 
 		    m_posCoronal = 0;
 
-        m_pDatasetHelper->updateView( sliceX, m_posCoronal, sliceZ );
+        SceneManager::getInstance()->updateView( sliceX, m_posCoronal, sliceZ );
         m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( m_posCoronal );
     }
 
@@ -298,7 +298,7 @@ void TheScene::renderScene()
 	    if (m_posAxial > frames) 
 		    m_posAxial = 0;
 
-        m_pDatasetHelper->updateView( sliceX, sliceY, m_posAxial );
+        SceneManager::getInstance()->updateView( sliceX, sliceY, m_posAxial );
         m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( m_posAxial );
     }
 

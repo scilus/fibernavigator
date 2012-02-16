@@ -61,8 +61,6 @@ public:
 
     // Functions
     bool loadScene     ( const wxString i_filename );
-    bool loadTextFile  ( wxString* i_string, const wxString i_filename );
-    bool fileNameExists( const wxString i_filename );
 
     //! Saves the current scene to an xml file
     void save( const wxString filename );
@@ -71,16 +69,10 @@ public:
     Vector mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);
     Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);   
 
-    void createIsoSurface();
-    void createDistanceMapAndIso();
-    void createDistanceMap();
-    void createCutDataset();
     /*
      * Called from MainFrame when a kdTree thread signals it's finished
      */
     void treeFinished();
-
-    void updateView( const float i_x, const float i_y, const float i_z );
 
     void changeZoom( const int i_z );
     void moveScene ( int i_x, int i_y );

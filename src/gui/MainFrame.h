@@ -32,6 +32,10 @@ public:
     MainFrame( wxWindow *i_parent, const wxWindowID i_id, const wxString &i_title, const wxPoint &i_pos, const wxSize &i_size, const long i_style);
     ~MainFrame();
 
+    void createCutDataset();
+    void createDistanceMap();
+    void createDistanceMapAndIso();
+    void createIsoSurface();
     void displayPropertiesSheet();
     void deleteSceneObject();
     void deleteListItem();

@@ -43,7 +43,7 @@ public:
     //constructor/destructor
     Anatomy( DatasetHelper *pDatasetHelper );
     Anatomy( DatasetHelper *pDatasetHelper, const wxString &filename );
-    Anatomy( DatasetHelper *pDatasetHelper, std::vector<float> *pDataset );
+    Anatomy( DatasetHelper *pDatasetHelper, const Anatomy * const pAnatomy );
     Anatomy( DatasetHelper *pDatasetHelper, std::vector<float> *pDataset, const int sample );
     Anatomy( DatasetHelper *pDatasetHelper, const int type );
     virtual ~Anatomy();
@@ -132,7 +132,7 @@ private:
     void activateLIC() {};
     void clean()       {};
 
-    void createOffset( const std::vector<float> &sourceDataset );
+    void createOffset( const Anatomy * const pAnatomy );
     double xxgauss( const double x, const double sigma );   
     
     void dilateInternal( std::vector<bool> &workData, int curIndex );

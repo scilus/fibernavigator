@@ -44,19 +44,21 @@ class DatasetInfo : public SceneObject
 public:
     DatasetInfo( DatasetHelper* datasetHelper );
     virtual ~DatasetInfo(){};
-    
+
+    // Pure Virtual functions
+    virtual void   draw()                       = 0;
+    virtual void   clean()                      = 0;
+    virtual void   smooth()                     = 0;
+    virtual void   flipAxis( AxisType i_axe )   = 0;
+    virtual void   activateLIC()                = 0;
+    virtual GLuint getGLuint()                  = 0;
+
+    // Virtual functions
     virtual void createPropertiesSizer(PropertiesWindow *parent); 
     virtual void updatePropertiesSizer();
+    virtual bool save( wxString filename ) const { return false; }
 
-    virtual bool   save( wxString filename )const{ return false; }
-    virtual void   draw()=0;
-    virtual void   clean()=0;
-    virtual void   smooth()=0;
-    virtual void   flipAxis( AxisType i_axe )=0;
-    virtual void   activateLIC()=0;
-    virtual GLuint getGLuint()=0;
-
-
+    // Functions
     wxString getName() const                     { return m_name;               };
     wxString getPath() const                     { return m_fullPath;           };
     void     setName(wxString name)              { m_name = name;               };
@@ -127,9 +129,9 @@ public:
 	wxStaticText	*m_pOpacityText;
 
 protected:
-    virtual void generateTexture()=0;
-    virtual void generateGeometry()=0;
-    virtual void initializeBuffer()=0;
+    virtual void generateTexture()  = 0;
+    virtual void generateGeometry() = 0;
+    virtual void initializeBuffer() = 0;
 
     DatasetHelper* m_dh;
 

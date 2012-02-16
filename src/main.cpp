@@ -174,7 +174,7 @@ bool MyApp::OnInit( void )
                 {
                     loader( cmdFileName );
 //                    frame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED, wxALL);
-                    frame->m_pDatasetHelper->createDistanceMapAndIso();
+                    frame->createDistanceMapAndIso();
                 }
                 else if ( cmdParser.Found( _T( "p" ) ) &&  ( i == cmdParser.GetParamCount() -1 ) )
                 {

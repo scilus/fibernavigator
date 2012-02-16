@@ -522,8 +522,8 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
         {
             Anatomy* l_anatomy = (Anatomy*)m_pCurrentSceneObject;
 
-            wxString caption         = wxT( "Choose l_anatomy file" );
-            wxString wildcard        = wxT( "nifti files (*.nii)|*.nii*|*.*|*.*" );
+            wxString caption         = wxT( "Choose a file" );
+            wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
@@ -1039,6 +1039,207 @@ void MainFrame::deleteSceneObject()
     m_pPropertiesWindow->GetSizer()->Layout();
     doOnSize();
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::createCutDataset()
+{
+    // check l_anatomy - quit if not present
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListItem();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( l_item ) );
+    if ( info->getType() > OVERLAY )
+        return;
+
+    Anatomy* l_anatomy = (Anatomy*) info;
+
+    int index = DatasetManager::getInstance()->createAnatomy();
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+    pNewAnatomy->setZero( columns, rows, frames );
+
+    SelectionObjList l_selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+    int x1, x2, y1, y2, z1, z2;
+
+    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+    {
+        for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+        {
+            if( l_selectionObjects[i][j]->getIsVisible() )
+            {
+                x1 = (int)( l_selectionObjects[i][j]->getCenter().x / voxelX - l_selectionObjects[i][j]->getSize().x / 2 );
+                x2 = (int)( l_selectionObjects[i][j]->getCenter().x / voxelX + l_selectionObjects[i][j]->getSize().x / 2 );
+                y1 = (int)( l_selectionObjects[i][j]->getCenter().y / voxelY - l_selectionObjects[i][j]->getSize().y / 2 );
+                y2 = (int)( l_selectionObjects[i][j]->getCenter().y / voxelY + l_selectionObjects[i][j]->getSize().y / 2 );
+                z1 = (int)( l_selectionObjects[i][j]->getCenter().z / voxelZ - l_selectionObjects[i][j]->getSize().z / 2 );
+                z2 = (int)( l_selectionObjects[i][j]->getCenter().z / voxelZ + l_selectionObjects[i][j]->getSize().z / 2 );
+
+                x1 = std::max( 0, std::min( x1, columns ) );
+                x2 = std::max( 0, std::min( x2, columns ) );
+                y1 = std::max( 0, std::min( y1, rows ) );
+                y2 = std::max( 0, std::min( y2, rows ) );
+                z1 = std::max( 0, std::min( z1, frames ) );
+                z2 = std::max( 0, std::min( z2, frames ) );
+
+                std::vector< float >* l_src = l_anatomy->getFloatDataset();
+                std::vector< float >* l_dst = pNewAnatomy->getFloatDataset();
+
+                for( int b = z1; b < z2; ++b )
+                {
+                    for( int r = y1; r < y2; ++r )
+                    {
+                        for( int c = x1; c < x2; ++c )
+                        {
+                            l_dst->at( b * rows * columns + r * columns + c ) = l_src->at( b * rows * columns + r * columns + c );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    pNewAnatomy->setName( l_anatomy->getName().BeforeFirst( '.' ) + wxT( " (cut)" ) );
+    pNewAnatomy->setType( l_anatomy->getType() );
+    pNewAnatomy->setDataType(l_anatomy->getDataType());
+    pNewAnatomy->setNewMax(l_anatomy->getNewMax());
+
+    m_pListCtrl2->InsertItem( index );
+
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::createDistanceMap()
+{
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListItem();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( l_item ) );
+    if( l_info->getType() > OVERLAY )
+        return;
+
+    Anatomy* l_anatomy = (Anatomy*)l_info;
+
+    Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
+
+    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy );
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
+
+    pNewAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT(" (Distance Map)"));
+
+    m_pListCtrl2->InsertItem( index );
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::createDistanceMapAndIso()
+{
+    // check l_anatomy - quit if not present
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListItem();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( l_item ) );
+    if( l_info->getType() > OVERLAY )
+        return;
+
+    Anatomy* l_anatomy = (Anatomy*)l_info;
+
+    Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
+
+    Anatomy* l_tmpAnatomy = new Anatomy( m_pDatasetHelper, l_anatomy );
+
+    Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
+
+    int index = DatasetManager::getInstance()->createCIsoSurface( l_tmpAnatomy );
+    CIsoSurface *pIsoSurf = (CIsoSurface *)DatasetManager::getInstance()->getDataset( index );
+    delete l_tmpAnatomy;
+
+    pIsoSurf->GenerateSurface( 0.2f );
+
+    Logger::getInstance()->print( wxT( "Iso surface done" ), LOGLEVEL_MESSAGE );
+
+    if( pIsoSurf->IsSurfaceValid() )
+    {
+        wxString anatomyName = l_anatomy->getName().BeforeFirst( '.' );
+        pIsoSurf->setName( anatomyName + wxT( " (Offset)" ) );
+
+        m_pListCtrl2->InsertItem( index );
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
+    }
+
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::createIsoSurface()
+{
+    // check l_anatomy - quit if not present
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListItem();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( l_item ) );
+    if( l_info->getType() > OVERLAY )
+        return;
+
+    Anatomy *l_anatomy = (Anatomy *)l_info;
+
+    Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
+
+    int index = DatasetManager::getInstance()->createCIsoSurface( l_anatomy );
+    CIsoSurface *pIsoSurf = (CIsoSurface *)DatasetManager::getInstance()->getDataset( index );
+    pIsoSurf->GenerateSurface( 0.4f );
+
+    Logger::getInstance()->print( wxT( "Iso surface done" ), LOGLEVEL_MESSAGE );
+
+    if( pIsoSurf->IsSurfaceValid() )
+    {
+        wxString l_anatomyName = l_anatomy->getName().BeforeFirst( '.' );
+        pIsoSurf->setName( l_anatomyName + wxT( " (Iso Surface)" ) );
+
+        m_pListCtrl2->InsertItem( index );
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
+    }
+
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void MainFrame::displayPropertiesSheet()
 {   
@@ -1747,7 +1948,7 @@ void MainFrame::onSlizeMovieAxi( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
+    SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
     updateStatusBar();
 }
 
@@ -2375,7 +2576,7 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
             break;
         }
     }
-    m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
+    SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
     refreshAllGLWidgets();
 }
 
