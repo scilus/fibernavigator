@@ -68,8 +68,6 @@ public:
     void save( const wxString filename );
 
     void   deleteAllPoints();
-    void   deleteAllSelectionObjects();
-    void   updateAllSelectionObjects();
     Vector mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);
     Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);   
 

@@ -3503,7 +3503,7 @@ void Fibers::flipAxis( AxisType i_axe )
     glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
     glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
 
-    m_dh->updateAllSelectionObjects();
+    SceneManager::getInstance()->updateAllSelectionObjects();
 }
 
 void Fibers::createPropertiesSizer( PropertiesWindow *pParent )

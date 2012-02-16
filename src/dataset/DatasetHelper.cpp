@@ -743,14 +743,9 @@ void DatasetHelper::treeFinished()
         return;
 
     Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
-    updateAllSelectionObjects();
+    SceneManager::getInstance()->updateAllSelectionObjects();
     m_selBoxChanged = true;
     m_mainFrame->refreshAllGLWidgets();
-}
-
-void DatasetHelper::deleteAllSelectionObjects()
-{
-    SceneManager::getInstance()->deleteAllSelectionObjects();
 }
 
 void DatasetHelper::deleteAllPoints()
@@ -784,11 +779,6 @@ void DatasetHelper::deleteAllPoints()
         {
             m_mainFrame->m_pTreeWidget->Delete(l_points[i][j]->GetId());      
         }
-}
-
-void DatasetHelper::updateAllSelectionObjects()
-{
-    SceneManager::getInstance()->updateAllSelectionObjects();
 }
 
 Vector DatasetHelper::mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16])
