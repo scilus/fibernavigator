@@ -23,8 +23,8 @@
 #include <fstream>
 
 // m_sh_basis
-// 0: Original Descoteaux et al RR 5768 basis (default in dmri)
-// 1: Descoteaux PhD thesis basis definition
+// 0: Original Descoteaux et al RR 5768 basis 
+// 1: Descoteaux PhD thesis basis definition (default in dmri)
 // 2: Tournier
 // 3: PTK
 ///////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper )
     m_radiusAttribLoc( 0 ),
 	m_radiusBuffer   ( NULL ),    
     m_nbors          ( NULL ),
-    m_sh_basis       ( 0 )
+    m_sh_basis       ( 1 )
 {
     m_scalingFactor = 0.0f;
 
@@ -698,6 +698,7 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     //if( i_axis == Y_AXIS ) { //Coronal: flip x
     //   l_flippedAxes[0] *= -1.0f;  
     //} 
+
     // Need a global flip in X on top of that, which is done above
 
     DatasetInfo::m_dh->m_shaderHelper->m_odfsShader.setUni3Float(   "axisFlip",    l_flippedAxes               );
@@ -1023,7 +1024,7 @@ void ODFs::getSphericalHarmonicMatrixRR5768( const vector< float > &i_meshPts,
                     
                     ++j;
 
-                    o_shMatrix(i, j) = real( cplx_2 );
+                    o_shMatrix(i, j) = sign*real( cplx_2 );
 
                 } // else
 
@@ -1222,7 +1223,7 @@ void ODFs::getSphericalHarmonicMatrixTournier( const vector< float > &i_meshPts,
                   o_shMatrix(i,j) = real(cplx_1);
                }
                else { // /* negative "m" SH  */
-                  o_shMatrix(i,j) = imag(cplx_1);
+                  o_shMatrix(i,j) = pow(-(float)1, m+1)*imag(cplx_1);
                }
                ++j;
             } 
@@ -1360,34 +1361,36 @@ void ODFs::createPropertiesSizer(PropertiesWindow *parent)
     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Sh Basis "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_LEFT);
 
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadiobtnOriginalBasis = new wxRadioButton(parent, wxID_ANY, _T( "RR5768" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
-    l_sizer->Add(m_pRadiobtnOriginalBasis);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pRadiobtnOriginalBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnOriginalShBasis));
+    // l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    // m_pRadiobtnOriginalBasis = new wxRadioButton(parent, wxID_ANY, _T( "RR5768" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
+    // l_sizer->Add(m_pRadiobtnOriginalBasis);
+    // m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    // parent->Connect(m_pRadiobtnOriginalBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnOriginalShBasis));
     
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadiobtnDescoteauxBasis = new wxRadioButton(parent, wxID_ANY, _T( "Descoteaux" ), wxDefaultPosition, wxSize(132,-1));
+    m_pRadiobtnDescoteauxBasis = new wxRadioButton(parent, wxID_ANY, _T( "Descoteaux" ), \
+                                                   wxDefaultPosition, wxSize(132,-1));
     l_sizer->Add(m_pRadiobtnDescoteauxBasis);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_pRadiobtnDescoteauxBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnDescoteauxShBasis));
 
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadiobtnTournierBasis = new wxRadioButton(parent, wxID_ANY, _T( "Tournier" ), wxDefaultPosition, wxSize(132,-1));
+    m_pRadiobtnTournierBasis = new wxRadioButton(parent, wxID_ANY, _T( "MRtrix" ), 
+                                                 wxDefaultPosition, wxSize(132,-1));
     l_sizer->Add(m_pRadiobtnTournierBasis);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     parent->Connect(m_pRadiobtnTournierBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnTournierShBasis));
 
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadiobtnPTKBasis = new wxRadioButton(parent, wxID_ANY, _T( "PTK" ), wxDefaultPosition, wxSize(132,-1));
-    l_sizer->Add(m_pRadiobtnPTKBasis);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnPTKShBasis));
+    // l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    // m_pRadiobtnPTKBasis = new wxRadioButton(parent, wxID_ANY, _T( "PTK" ), wxDefaultPosition, wxSize(132,-1));
+    // l_sizer->Add(m_pRadiobtnPTKBasis);
+    // m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    // parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnPTKShBasis));
     
-    m_pRadiobtnOriginalBasis->SetValue           (isShBasis(0));
+    //m_pRadiobtnOriginalBasis->SetValue           (isShBasis(0));
     m_pRadiobtnDescoteauxBasis->SetValue         (isShBasis(1));
     m_pRadiobtnTournierBasis->SetValue           (isShBasis(2));
-    m_pRadiobtnPTKBasis->SetValue                (isShBasis(3));
+    //m_pRadiobtnPTKBasis->SetValue                (isShBasis(3));
     
 }
 
@@ -1407,7 +1410,7 @@ void ODFs::updatePropertiesSizer()
     m_psliderLightZPosition->Enable(false);
     //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
     m_psliderScalingFactor->Enable (false);
-    m_pRadiobtnPTKBasis->Enable(false);
+    //m_pRadiobtnPTKBasis->Enable(false);
     m_pradiobtnMainAxis->Enable(true);
 
     if(!isDisplayShape(AXIS))
