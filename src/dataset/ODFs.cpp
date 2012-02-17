@@ -38,7 +38,7 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper ) :
     m_nbors          ( NULL ),
     m_sh_basis       ( 1 )
 {
-    m_scalingFactor = 0.0f;
+    m_scalingFactor = 5.0f;
 
     // Generating hemispheres
     generateSpherePoints( m_scalingFactor );
@@ -1314,7 +1314,17 @@ void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
 
         }
 }
-
+///////////////////////////////////////////////////////////////////////////
+// This function will set a specific scaling factor for the glyph.
+//
+// i_scalingFactor      : The glyph scaling factor.
+///////////////////////////////////////////////////////////////////////////
+void ODFs::setScalingFactor( float i_scalingFactor )
+{
+    m_scalingFactor = i_scalingFactor;
+    generateSpherePoints( m_scalingFactor/5 );   
+    loadBuffer();
+}
 void ODFs::createPropertiesSizer(PropertiesWindow *parent)
 {
     Glyph::createPropertiesSizer(parent);
@@ -1389,8 +1399,8 @@ void ODFs::updatePropertiesSizer()
     m_psliderLightYPosition->Enable(false);
     m_psliderLightZPosition->SetValue(m_psliderLightZPosition->GetMin());
     m_psliderLightZPosition->Enable(false);
-    m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
-    m_psliderScalingFactor->Enable (false);
+    //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
+    //m_psliderScalingFactor->Enable (false);
     //m_pRadiobtnPTKBasis->Enable(false);
     m_pradiobtnMainAxis->Enable(true);
 

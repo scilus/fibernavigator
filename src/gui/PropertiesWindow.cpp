@@ -1114,7 +1114,7 @@ void PropertiesWindow::OnGlyphScalingFactorSliderMoved( wxCommandEvent& WXUNUSED
 {
     if( m_mainFrame->m_pCurrentSceneObject != NULL && m_mainFrame->m_currentListItem != -1 )
     {
-        ((Glyph*)m_mainFrame->m_pCurrentSceneObject)->setScalingFactor( ((Glyph*)m_mainFrame->m_pCurrentSceneObject)->m_psliderScalingFactor->GetValue());
+        ((Glyph*)m_mainFrame->m_pCurrentSceneObject)->setScalingFactor( ((Glyph*)m_mainFrame->m_pCurrentSceneObject)->m_psliderScalingFactor->GetValue()/10.0f);
     }
 }
 
