@@ -45,12 +45,10 @@ public:
     // Functions
     void         bindTextures    ();
     void         drawSphere      ( float xPos, float yPos, float zPos, float ray );
-    wxGLContext* getMainGLContext()
-        { return m_pMainGLContext; };
+    wxGLContext* getMainGLContext() { return m_pMainGLContext; };
     void         initGL          ( int whichView );
     void         renderScene     ();
-    void         setMainGLContext( wxGLContext* pContext )         
-        { m_pMainGLContext = pContext; };
+    void         setMainGLContext( wxGLContext* pContext ) { m_pMainGLContext = pContext; };
 	bool         m_isRotateZ;
     bool         m_isRotateY;
     bool         m_isRotateX;

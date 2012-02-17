@@ -249,7 +249,7 @@ void ShaderHelper::setMeshShaderVars()
     m_meshShader.setUniInt( "blendTex", m_pDh->m_blendTexOnMesh );
 
     m_meshShader.setUniInt( "cutAtSurface", DatasetManager::getInstance()->isSurfaceLoaded() );
-    m_meshShader.setUniInt( "lightOn", m_pDh->m_lighting );
+    m_meshShader.setUniInt( "lightOn",      SceneManager::getInstance()->isLightingActive() );
 
     m_meshShader.setUniInt( "dimX", DatasetManager::getInstance()->getColumns() );
     m_meshShader.setUniInt( "dimY", DatasetManager::getInstance()->getRows() );

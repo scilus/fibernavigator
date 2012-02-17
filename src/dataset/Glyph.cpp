@@ -77,13 +77,13 @@ void Glyph::draw()
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    if( DatasetInfo::m_dh-> m_showAxial )
+    if( SceneManager::getInstance()->isAxialDisplayed() )
         drawAxial();
 
-    if( DatasetInfo::m_dh-> m_showCoronal )
+    if( SceneManager::getInstance()->isCoronalDisplayed() )
         drawCoronal();
 
-    if( DatasetInfo::m_dh-> m_showSagittal )
+    if( SceneManager::getInstance()->isSagittalDisplayed() )
         drawSagittal();
 
     glDisableClientState( GL_VERTEX_ARRAY );

@@ -10,7 +10,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "ToolBar.h"
+
 #include "MainFrame.h"
+#include "SceneManager.h"
 #include "../main.h"
 #include "../dataset/Fibers.h"
 
@@ -157,13 +159,13 @@ void ToolBar::updateToolBar( MainFrame *mf )
     //EnableTool(m_btnNewSplineSurface->GetId(),mf->m_datasetHelper->m_anatomyLoaded && !mf->m_datasetHelper->m_surfaceLoaded);
     //EnableTool(m_btnMoveBoundaryPointLeft->GetId(),mf->m_datasetHelper->m_surfaceLoaded);
     //EnableTool(m_btnMoveBoundaryPointRight->GetId(),mf->m_datasetHelper->m_surfaceLoaded);
-    ToggleTool(m_toggleShowAxial->GetId(), mf->m_pDatasetHelper->m_showAxial);
-    ToggleTool(m_toggleShowCoronal->GetId(), mf->m_pDatasetHelper->m_showCoronal);
-    ToggleTool(m_toggleShowSagittal->GetId(), mf->m_pDatasetHelper->m_showSagittal);
-    ToggleTool(m_toggleAlphaBlending->GetId(), mf->m_pDatasetHelper->m_blendAlpha);
-    ToggleTool(m_toggleLighting->GetId(), mf->m_pDatasetHelper->m_lighting);
-    ToggleTool(m_toggleShowAllSelectionObjects->GetId(), mf->m_pDatasetHelper->m_showObjects);
-    ToggleTool(m_toggleActivateAllSelectionObjects->GetId(), !mf->m_pDatasetHelper->m_activateObjects);
+    ToggleTool( m_toggleShowAxial->GetId(),     SceneManager::getInstance()->isAxialDisplayed() );
+    ToggleTool( m_toggleShowCoronal->GetId(),   SceneManager::getInstance()->isCoronalDisplayed() );
+    ToggleTool( m_toggleShowSagittal->GetId(),  SceneManager::getInstance()->isSagittalDisplayed() );
+    ToggleTool( m_toggleAlphaBlending->GetId(), mf->m_pDatasetHelper->m_blendAlpha);
+    ToggleTool( m_toggleLighting->GetId(),      SceneManager::getInstance()->isLightingActive() );
+    ToggleTool( m_toggleShowAllSelectionObjects->GetId(), mf->m_pDatasetHelper->m_showObjects);
+    ToggleTool( m_toggleActivateAllSelectionObjects->GetId(), !mf->m_pDatasetHelper->m_activateObjects);
     //ToggleTool(m_toggleDrawPoints->GetId(), mf->m_datasetHelper->m_pointMode);
     //EnableTool(m_btnNewSelectionBox->GetId(), mf->m_datasetHelper->m_fibersLoaded);
 	

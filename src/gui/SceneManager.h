@@ -49,6 +49,23 @@ public:
     void    setMainFrame( MainFrame *pMainFrame ) { m_pMainFrame = pMainFrame; }
     void    setTreeCtrl ( MyTreeCtrl *pTreeCtrl ) { m_pTreeView  = pTreeCtrl; }
 
+    bool toggleLightingDisplay()        { return m_lighting      = !m_lighting; }
+    bool toggleAxialDisplay()           { return m_showAxial     = !m_showAxial; }
+    bool toggleCoronalDisplay()         { return m_showCoronal   = !m_showCoronal; }
+    bool toggleSagittalDisplay()        { return m_showSagittal  = !m_showSagittal; }
+    bool toggleCrosshairDisplay()       { return m_showCrosshair = !m_showCrosshair; }
+
+//////////////////////////////////////////////////////////////////////////
+//  GETTERS / SETTERS
+//////////////////////////////////////////////////////////////////////////
+
+    bool areGeometryShadersSupported()  { return m_geometryShadersSupported; }
+    bool isLightingActive()             { return m_lighting; }
+    bool isAxialDisplayed()             { return m_showAxial; }
+    bool isCoronalDisplayed()           { return m_showCoronal; }
+    bool isSagittalDisplayed()          { return m_showSagittal; }
+    bool isCrosshairDisplayed()         { return m_showCrosshair; }
+
     float getSliceX() const     { return m_sliceX; }
     float getSliceY() const     { return m_sliceY; }
     float getSliceZ() const     { return m_sliceZ; }
@@ -69,6 +86,17 @@ private:
 
     MyTreeCtrl *m_pTreeView;
     MainFrame  *m_pMainFrame;
+
+    bool  m_geometryShadersSupported;
+    bool  m_useFibersGeometryShader;
+
+    bool  m_lighting;
+
+    bool  m_showAxial;
+    bool  m_showCoronal;
+    bool  m_showSagittal;
+
+    bool  m_showCrosshair;
 
     float m_sliceX;
     float m_sliceY;

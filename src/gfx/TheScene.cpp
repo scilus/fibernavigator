@@ -124,7 +124,6 @@ void TheScene::initGL( int whichView )
     try
     {
         GLenum errorCode = glewInit();
-
         bool useGeometry( true );
 
         if( GLEW_OK != errorCode )
@@ -196,6 +195,7 @@ void TheScene::bindTextures()
         if( pDsInfo->getType() < MESH && pDsInfo->getShow() )
         {
             glActiveTexture( GL_TEXTURE0 + allocatedTextureCount );
+            GLuint name = pDsInfo->getGLuint();
             glBindTexture( GL_TEXTURE_3D, pDsInfo->getGLuint() );
             if( pDsInfo->getShowFS() )
             {
@@ -209,11 +209,10 @@ void TheScene::bindTextures()
             }
             if ( ++allocatedTextureCount == 10 )
             {
-                printf( "reached 10 textures\n" );
+                Logger::getInstance()->print( wxT( "Reached 10 textures!" ), LOGLEVEL_WARNING );
                 break;
             }
         }
-
     }
     
     Logger::getInstance()->printIfGLError( wxT( "Bind textures") );
@@ -224,6 +223,7 @@ void TheScene::bindTextures()
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::renderScene()
 {
+    Logger::getInstance()->printIfGLError( wxT( "Error before renderScene" ) );
     // This will put the frustum information up to date for any render that needs it. 
     extractFrustum();
     
@@ -331,7 +331,7 @@ void TheScene::renderScene()
         drawSelectionObjects();
     }
 
-    Logger::getInstance()->printIfGLError( wxT( "Render theScene" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Rendering Scene" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -496,7 +496,7 @@ void TheScene::renderSlices()
 
     m_pDatasetHelper->m_shaderHelper->m_anatomyShader.release();
 
-    if( m_pDatasetHelper->m_showCrosshair )
+    if( SceneManager::getInstance()->isCrosshairDisplayed() )
         m_pDatasetHelper->m_anatomyHelper->renderCrosshair();
 
     Logger::getInstance()->printIfGLError( wxT( "Render slices" ) );
@@ -549,7 +549,7 @@ void TheScene::renderMesh()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    if( m_pDatasetHelper->m_lighting )
+    if( SceneManager::getInstance()->isLightingActive() )
     {
         lightsOn();
     }
@@ -657,7 +657,7 @@ void TheScene::renderFibers()
 				}
 				else // render normally
 				{
-					if( m_pDatasetHelper->m_lighting )
+					if( SceneManager::getInstance()->isLightingActive() )
 					{
 						lightsOn();
 						GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
@@ -965,7 +965,7 @@ void TheScene::drawVectors()
             float rows    = DatasetManager::getInstance()->getRows();
             float frames  = DatasetManager::getInstance()->getFrames();
 
-            if( m_pDatasetHelper->m_showAxial )
+            if( SceneManager::getInstance()->isAxialDisplayed() )
             {
                 float sliceZ = SceneManager::getInstance()->getSliceZ();
 
@@ -1044,7 +1044,7 @@ void TheScene::drawVectors()
                 }
             }
 
-            if( m_pDatasetHelper->m_showCoronal )
+            if( SceneManager::getInstance()->isCoronalDisplayed() )
             {
                 float sliceY = SceneManager::getInstance()->getSliceY();
 
@@ -1124,7 +1124,7 @@ void TheScene::drawVectors()
                 }
             }
 
-            if( m_pDatasetHelper->m_showSagittal )
+            if( SceneManager::getInstance()->isSagittalDisplayed() )
             {
                 float sliceX = SceneManager::getInstance()->getSliceX();
 

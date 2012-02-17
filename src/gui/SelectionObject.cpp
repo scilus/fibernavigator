@@ -88,12 +88,12 @@ void SelectionObject::lockToCrosshair()
         m_isLockedToCrosshair             = true;
         m_datasetHelper->m_boxLockIsOn    = true;
         m_datasetHelper->m_boxAtCrosshair = this;
-        m_datasetHelper->m_semaphore      = true;
+        //m_datasetHelper->m_semaphore      = true;
         SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
         m_datasetHelper->m_mainFrame->m_pXSlider->SetValue( (int)m_center.x );
         m_datasetHelper->m_mainFrame->m_pYSlider->SetValue( (int)m_center.y );
         m_datasetHelper->m_mainFrame->m_pZSlider->SetValue( (int)m_center.z );
-        m_datasetHelper->m_semaphore      = false;
+        //m_datasetHelper->m_semaphore      = false;
         m_datasetHelper->m_mainFrame->refreshAllGLWidgets();
     }
 }
@@ -338,12 +338,12 @@ void SelectionObject::update()
 {
     if( m_isLockedToCrosshair )
     {
-        m_datasetHelper->m_semaphore = true;
+//        m_datasetHelper->m_semaphore = true;
         SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
         m_datasetHelper->m_mainFrame->m_pXSlider->SetValue( (int)m_center.x );
         m_datasetHelper->m_mainFrame->m_pYSlider->SetValue( (int)m_center.y );
         m_datasetHelper->m_mainFrame->m_pZSlider->SetValue( (int)m_center.z );
-        m_datasetHelper->m_semaphore = false;
+//        m_datasetHelper->m_semaphore = false;
     }
 
     updateStatusBar();

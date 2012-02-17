@@ -88,9 +88,9 @@ void MainCanvas::changeOrthoSize()
     float columns = DatasetManager::getInstance()->getColumns();
     float rows    = DatasetManager::getInstance()->getRows();
     float frames  = DatasetManager::getInstance()->getFrames();
-    float voxelX = DatasetManager::getInstance()->getVoxelX();
-    float voxelY = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
 
     m_orthoSizeNormal = (int) ( std::max( std::max( columns * voxelX, rows * voxelY ), frames * voxelZ ) );
 
@@ -98,9 +98,9 @@ void MainCanvas::changeOrthoSize()
     {
         m_orthoModX = 0;
         m_orthoModY = 0;
-        int xSize = GetSize().x;
-        int ySize = GetSize().y;
-        float ratio = (float) xSize / (float) ySize;
+        float xSize = GetSize().x;
+        float ySize = GetSize().y;
+        float ratio = xSize / ySize;
         if ( ratio > 1.0 )
             m_orthoModX = ( (int) ( m_orthoSizeNormal * ratio ) - m_orthoSizeNormal ) / 2;
         else
@@ -131,6 +131,7 @@ void MainCanvas::OnSize( wxSizeEvent& event )
 
 void MainCanvas::OnShow(wxShowEvent& WXUNUSED(event) )
 {
+    Logger::getInstance()->print( wxT( "MainCanvas::OnShow is used!!" ), LOGLEVEL_MESSAGE );
 #if defined( __WXMAC__ )
     SetCurrent();
 #elif defined ( __WXMSW__ )
@@ -532,7 +533,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
     int picked = 0;
     hitResult hr =
     { false, 0.0f, 0, NULL };
-    if ( m_pDatasetHelper->m_showAxial )
+    if( SceneManager::getInstance()->isAxialDisplayed() )
     {
         bb->setSizeZ( 0.0001f );
         bb->setCenterZ( zz );
@@ -557,7 +558,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
         bb->setCenterZ( zPos );
     }
 
-    if ( m_pDatasetHelper->m_showCoronal )
+    if ( SceneManager::getInstance()->isCoronalDisplayed() )
     {
         bb->setSizeY( 0.0001f );
         bb->setCenterY( yy );
@@ -585,7 +586,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
         bb->setCenterY( yPos );
     }
 
-    if ( m_pDatasetHelper->m_showSagittal )
+    if( SceneManager::getInstance()->isSagittalDisplayed() )
     {
         bb->setSizeX( 0.0001f );
         bb->setCenterX( xx );
@@ -670,18 +671,19 @@ void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event)  )
 void MainCanvas::render()
 {   
     wxPaintDC dc( this );
-    
+
 #ifndef __WXMAC__
     SetCurrent(*m_pDatasetHelper->m_theScene->getMainGLContext());
 #else
     SetCurrent();
 #endif
+
     int w, h;
     GetClientSize( &w, &h );
     glViewport( 0, 0, (GLint) w, (GLint) h );
 
     // Init OpenGL once, but after SetCurrent
-    if ( ! m_init )
+    if ( !m_init )
     {
         init();
     }
@@ -697,6 +699,10 @@ void MainCanvas::render()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glColor3f( 1.0, 1.0, 1.0 );
+
+    // Prevents to do a lot of unnecessary work since nothing to draw
+    if( !DatasetManager::getInstance()->isDatasetLoaded() )
+        return;
 
     switch ( m_view )
     {
@@ -768,6 +774,7 @@ void MainCanvas::render()
                 glMatrixMode( GL_PROJECTION );
                 glLoadIdentity();
                 glOrtho( -m_orthoModX, m_orthoSizeNormal + m_orthoModX, -m_orthoModY, m_orthoSizeNormal + m_orthoModY, -500, 500 );
+                Logger::getInstance()->printIfGLError( wxT( "Error before glOrtho" ) );
 
                 glPushMatrix();
                 m_pDatasetHelper->doMatrixManipulation();

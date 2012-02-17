@@ -43,9 +43,9 @@ Fibers::Fibers( DatasetHelper *pDatasetHelper )
       m_pKdTree( NULL ),
       m_pOctree( NULL ),
       m_cfDrawDirty( true ),
-      m_axialShown( pDatasetHelper->m_showAxial ),
-      m_coronalShown( pDatasetHelper->m_showCoronal ),
-      m_sagittalShown( pDatasetHelper->m_showSagittal ),
+      m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
+      m_coronalShown(  SceneManager::getInstance()->isCoronalDisplayed() ),
+      m_sagittalShown( SceneManager::getInstance()->isSagittalDisplayed() ),
       m_useCrossingFibers( false ),
       m_thickness( 2.5f )
 {
@@ -3723,16 +3723,16 @@ void Fibers::findCrossingFibers()
         || m_xDrawn != SceneManager::getInstance()->getSliceX()
         || m_yDrawn != SceneManager::getInstance()->getSliceY()
         || m_zDrawn != SceneManager::getInstance()->getSliceZ()
-        || m_axialShown != m_dh->m_showAxial
-        || m_coronalShown != m_dh->m_showCoronal
-        || m_sagittalShown != m_dh->m_showSagittal )
+        || m_axialShown    != SceneManager::getInstance()->isAxialDisplayed()
+        || m_coronalShown  != SceneManager::getInstance()->isCoronalDisplayed()
+        || m_sagittalShown != SceneManager::getInstance()->isSagittalDisplayed() )
     {
         m_xDrawn = SceneManager::getInstance()->getSliceX();
         m_yDrawn = SceneManager::getInstance()->getSliceY();
         m_zDrawn = SceneManager::getInstance()->getSliceZ();
-        m_axialShown = m_dh->m_showAxial;
-        m_coronalShown = m_dh->m_showCoronal;
-        m_sagittalShown = m_dh->m_showSagittal;
+        m_axialShown    = SceneManager::getInstance()->isAxialDisplayed();
+        m_coronalShown  = SceneManager::getInstance()->isCoronalDisplayed();
+        m_sagittalShown = SceneManager::getInstance()->isSagittalDisplayed();
 
         m_cfDrawDirty = true;
 
@@ -3827,14 +3827,14 @@ void Fibers::setShader()
 
         m_dh->m_shaderHelper->m_crossingFibersShader.bind();
 
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", m_dh->m_showSagittal ? xMin : 0 );
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", m_dh->m_showSagittal ? xMax : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", SceneManager::getInstance()->isSagittalDisplayed() ? xMin : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", SceneManager::getInstance()->isSagittalDisplayed() ? xMax : 0 );
 		
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", m_dh->m_showCoronal ? yMin : 0 );
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", m_dh->m_showCoronal ? yMax : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", SceneManager::getInstance()->isCoronalDisplayed() ? yMin : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", SceneManager::getInstance()->isCoronalDisplayed() ? yMax : 0 );
 
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", m_dh->m_showAxial ? zMin : 0 );
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", m_dh->m_showAxial ? zMax : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", SceneManager::getInstance()->isAxialDisplayed() ? zMin : 0 );
+        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", SceneManager::getInstance()->isAxialDisplayed() ? zMax : 0 );
     }
     else if ( !m_useTex )
     {

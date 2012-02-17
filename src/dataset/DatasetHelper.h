@@ -60,11 +60,6 @@ public:
     virtual ~DatasetHelper();
 
     // Functions
-    bool loadScene     ( const wxString i_filename );
-
-    //! Saves the current scene to an xml file
-    void save( const wxString filename );
-
     void   deleteAllPoints();
     Vector mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);
     Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);   
@@ -102,30 +97,30 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // general info about the datasets
     /////////////////////////////////////////////////////////////////////////////////
-    std::vector< float >* m_floatDataset;
+    //std::vector< float >* m_floatDataset;
     std::vector<Vector>   m_rulerPts;
     bool                  m_isRulerToolActive;
     double                m_rulerFullLength;
     double                m_rulerPartialLength;
-    int                   m_fibersSamplingFactor;
-    bool                  m_isSegmentActive;
-    int                   m_SegmentMethod;
-    bool                  m_isFloodfillActive;
-    bool                  m_isSelectBckActive;
-    bool                  m_isSelectObjActive;
-    bool                  m_isObjfilled;
-    bool                  m_isBckfilled;
-    bool                  m_isObjCreated;
-    bool                  m_isBckCreated;
-    bool                  m_isBoxCreated;
-    bool                  m_thresSliderMoved;
-    bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled && m_isBoxCreated); };
+    //int                   m_fibersSamplingFactor;
+    bool                  m_isSegmentActive; // SceneManager
+    int                   m_SegmentMethod; // SceneManager - Add enum
+    //bool                  m_isFloodfillActive;
+    //bool                  m_isSelectBckActive;
+    //bool                  m_isSelectObjActive;
+    //bool                  m_isObjfilled;
+    //bool                  m_isBckfilled;
+    //bool                  m_isObjCreated;
+    //bool                  m_isBckCreated;
+    //bool                  m_isBoxCreated;
+    //bool                  m_thresSliderMoved;
+    //bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled && m_isBoxCreated); };
 
     FMatrix m_niftiTransform;
 
     unsigned int m_countFibers;
 
-    bool m_loadDataset;
+    //bool m_loadDataset;
     bool m_scnFileLoaded;
     bool m_surfaceIsDirty;
 
@@ -135,7 +130,7 @@ public:
     Matrix4fT m_transform;
     bool      m_useVBO;
     int       m_quadrant;
-    int       m_textures;
+    //int       m_textures;
     //! if set the shaders will be reloaded during next render() call
     bool      m_scheduledReloadShaders;
     // the screenshot button has been pressed, next render pass it will be executed
@@ -149,21 +144,21 @@ public:
 
     int       m_animationStep;
 
-    int       m_debugLevel;
+    //int       m_debugLevel;
 
     float     m_frustum[6][4]; // Contains the information of the planes forming the frustum.
     /////////////////////////////////////////////////////////////////////////////////
     // state variables for menu entries
     /////////////////////////////////////////////////////////////////////////////////
-    bool m_showSagittal;
-    bool m_showCoronal;
-    bool m_showAxial;
+    //bool m_showSagittal;
+    //bool m_showCoronal;
+    //bool m_showAxial;
 
-    bool m_showCrosshair;
+    //bool m_showCrosshair;
 
-    bool  m_lighting;         // m_lighting for fibers.
+    //bool  m_lighting;         // m_lighting for fibers.
     bool  m_blendTexOnMesh;   // Ignore threshold for textures on meshes.
-    bool  m_useLic;           // Show the lic texture on spline surface.
+    //bool  m_useLic;           // Show the lic texture on spline surface.
     bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
     float m_normalDirection;  // Normal direction of the spline surface.
     bool  m_geometryShadersSupported;
@@ -172,8 +167,8 @@ public:
     bool  m_filterIsoSurf;
     int   m_colorMap;
     bool  m_showColorMapLegend;
-    bool  m_displayMinMaxCrossSection;
-    bool  m_displayGlyphOptions;
+    //bool  m_displayMinMaxCrossSection;
+    //bool  m_displayGlyphOptions;
 
 	bool  m_isDrawerToolActive;
 	enum  DrawMode
@@ -190,10 +185,10 @@ public:
 	wxColor m_drawColor;
 	wxImage m_drawColorIcon;
 
-    bool  m_morphing;
+    //bool  m_morphing;
 
     bool  m_boxLockIsOn;
-    bool  m_semaphore;
+    //bool  m_semaphore;
     int   m_threadsActive;
 
    /////////////////////////////////////////////////////////////////////////////////

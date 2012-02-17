@@ -320,7 +320,7 @@ void AnatomyHelper::renderCrosshair()
 // COMMENT
 void AnatomyHelper::renderAxial()
 {
-    if( ! m_datasetHelper->m_showAxial )
+    if( !SceneManager::getInstance()->isAxialDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -335,7 +335,7 @@ void AnatomyHelper::renderAxial()
 // COMMENT
 void AnatomyHelper::renderCoronal()
 {
-    if( ! m_datasetHelper->m_showCoronal )
+    if( !SceneManager::getInstance()->isCoronalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -350,7 +350,7 @@ void AnatomyHelper::renderCoronal()
 // COMMENT
 void AnatomyHelper::renderSagittal()
 {
-    if( ! m_datasetHelper->m_showSagittal )
+    if( !SceneManager::getInstance()->isSagittalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -365,7 +365,7 @@ void AnatomyHelper::renderSagittal()
 // COMMENT
 void AnatomyHelper::renderA1()
 {
-    if( ! m_datasetHelper->m_showAxial ) 
+    if( !SceneManager::getInstance()->isAxialDisplayed() ) 
         return;
 
     glBegin( GL_QUADS );
@@ -380,7 +380,7 @@ void AnatomyHelper::renderA1()
 // COMMENT
 void AnatomyHelper::renderA2()
 {
-    if( ! m_datasetHelper->m_showAxial )
+    if( !SceneManager::getInstance()->isAxialDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -395,7 +395,7 @@ void AnatomyHelper::renderA2()
 // COMMENT
 void AnatomyHelper::renderA3()
 {
-    if( ! m_datasetHelper->m_showAxial)
+    if( !SceneManager::getInstance()->isAxialDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -410,7 +410,7 @@ void AnatomyHelper::renderA3()
 // COMMENT
 void AnatomyHelper::renderA4()
 {
-    if( ! m_datasetHelper->m_showAxial)
+    if( !SceneManager::getInstance()->isAxialDisplayed() )
         return;
     glBegin( GL_QUADS );
         glTexCoord3f( m_xc, m_yc, m_zc ); glVertex3f( m_x,  m_y,  m_z + 0.5f );
@@ -425,7 +425,7 @@ void AnatomyHelper::renderA4()
 // COMMENT
 void AnatomyHelper::renderC1()
 {
-    if( ! m_datasetHelper->m_showCoronal )
+    if( !SceneManager::getInstance()->isCoronalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -440,7 +440,7 @@ void AnatomyHelper::renderC1()
 // COMMENT
 void AnatomyHelper::renderC2()
 {
-    if( ! m_datasetHelper->m_showCoronal )
+    if( !SceneManager::getInstance()->isCoronalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -455,7 +455,7 @@ void AnatomyHelper::renderC2()
 // COMMENT
 void AnatomyHelper::renderC3()
 {
-    if( ! m_datasetHelper->m_showCoronal)
+    if( !SceneManager::getInstance()->isCoronalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -470,7 +470,7 @@ void AnatomyHelper::renderC3()
 // COMMENT
 void AnatomyHelper::renderC4()
 {
-    if( ! m_datasetHelper->m_showCoronal)
+    if( !SceneManager::getInstance()->isCoronalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -485,7 +485,7 @@ void AnatomyHelper::renderC4()
 // COMMENT
 void AnatomyHelper::renderS1()
 {
-    if( ! m_datasetHelper->m_showSagittal )
+    if( !SceneManager::getInstance()->isSagittalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -500,7 +500,7 @@ void AnatomyHelper::renderS1()
 // COMMENT
 void AnatomyHelper::renderS2()
 {
-    if( ! m_datasetHelper->m_showSagittal )
+    if( !SceneManager::getInstance()->isSagittalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -515,7 +515,7 @@ void AnatomyHelper::renderS2()
 // COMMENT
 void AnatomyHelper::renderS3()
 {
-    if( ! m_datasetHelper->m_showSagittal )
+    if( !SceneManager::getInstance()->isSagittalDisplayed() )
         return;
 
     glBegin( GL_QUADS );
@@ -530,7 +530,7 @@ void AnatomyHelper::renderS3()
 // COMMENT
 void AnatomyHelper::renderS4()
 {
-    if( ! m_datasetHelper->m_showSagittal )
+    if( !SceneManager::getInstance()->isSagittalDisplayed() )
         return;
 
     glBegin( GL_QUADS );

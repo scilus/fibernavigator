@@ -28,12 +28,16 @@ public:
 
     static DatasetManager * getInstance();
 
-    size_t                  getAnatomyCount() const { return m_anatomies.size(); }
-    DatasetInfo *           getDataset( DatasetIndex index );
-    std::vector<Fibers *>   getFibers();
-    size_t                  getFibersCount() const { return m_fibers.size(); }
-    std::vector<ODFs *>     getOdfs();
-    std::vector<Tensors *>  getTensors();
+    std::vector<Anatomy *>  getAnatomies() const;
+    size_t                  getAnatomyCount() const         { return m_anatomies.size(); }
+    DatasetInfo *           getDataset( DatasetIndex index ) const;
+    std::vector<Fibers *>   getFibers() const;
+    FibersGroup *           getFibersGroup() const;
+    size_t                  getFibersCount() const          { return m_fibers.size(); }
+    std::vector<ODFs *>     getOdfs() const;
+    Fibers *                getSelectedFibers( DatasetIndex index ) const;
+    Surface *               getSurface() const;
+    std::vector<Tensors *>  getTensors() const;
 
     int                     getColumns() const;
     int                     getFrames() const;
@@ -42,6 +46,7 @@ public:
     float                   getVoxelY() const;
     float                   getVoxelZ() const;
 
+    bool                    isDatasetLoaded() const         { return !m_datasets.empty(); }
     bool                    isAnatomyLoaded() const         { return !m_anatomies.empty(); }
     bool                    isFibersLoaded() const          { return !m_fibers.empty(); }
     bool                    isFibersGroupLoaded() const     { return !m_fibersGroup.empty(); }

@@ -65,7 +65,7 @@ public:
     wxMenu      *m_menuVoi;
         wxMenuItem  *m_itemNewSelectionBox;
         wxMenuItem  *m_itemNewSelectionEllipsoid;
-        wxMenuItem  *m_itemToggleUseMorphing;
+        //wxMenuItem  *m_itemToggleUseMorphing;
 
     wxMenu      *m_menuFibers;
         wxMenuItem  *m_itemResetFibersColors;

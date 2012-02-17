@@ -136,10 +136,8 @@ bool MyApp::OnInit( void )
 
 
 #endif
-
         // Create the main frame window
         frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 1219"), wxPoint( 50, 50 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
-
         SceneManager::getInstance()->setMainFrame( frame );
         SceneManager::getInstance()->setTreeCtrl( frame->m_pTreeWidget );
 

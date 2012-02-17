@@ -270,6 +270,7 @@ void MainFrame::initOpenGl()
 
 #ifndef __WXMAC__
     m_pDatasetHelper->m_theScene->setMainGLContext( new wxGLContext( m_pMainGL ) );
+    glGetError(); // Removes the error code so we don't have an error message the first time we check it
 #else
     m_pDatasetHelper->m_theScene->setMainGLContext( m_pMainGL->GetContext() );
 #endif
@@ -449,7 +450,7 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
     if( dialog.ShowModal() == wxID_OK )
     {
         m_pDatasetHelper->m_scenePath = dialog.GetDirectory();
-        m_pDatasetHelper->save(dialog.GetPath());
+        SceneManager::getInstance()->save( dialog.GetPath() );
     }
 }
 
@@ -684,7 +685,8 @@ void MainFrame::onMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_showCrosshair = !m_pDatasetHelper->m_showCrosshair;
+    SceneManager::getInstance()->toggleCrosshairDisplay();
+    //m_pDatasetHelper->m_showCrosshair = !m_pDatasetHelper->m_showCrosshair;
     refreshAllGLWidgets();
 }
 
@@ -1287,7 +1289,7 @@ void MainFrame::displayPropertiesSheet()
 void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 {
     createNewSelectionObject( ELLIPSOID_TYPE );
-    m_pDatasetHelper->m_isBoxCreated = true;
+//     m_pDatasetHelper->m_isBoxCreated = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1298,7 +1300,7 @@ void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
     createNewSelectionObject( BOX_TYPE );    
-    m_pDatasetHelper->m_isBoxCreated = true;
+//     m_pDatasetHelper->m_isBoxCreated = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1402,7 +1404,7 @@ void MainFrame::onUseMorph( wxCommandEvent& WXUNUSED(event) )
     {
         return;
     }
-    m_pDatasetHelper->m_morphing = ! m_pDatasetHelper->m_morphing;
+//    m_pDatasetHelper->m_morphing = ! m_pDatasetHelper->m_morphing;
 }
 
 /****************************************************************************************************
@@ -1447,7 +1449,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
     float rows    = DatasetManager::getInstance()->getRows();
     float frames  = DatasetManager::getInstance()->getFrames();
 
-    if( m_pDatasetHelper->m_showSagittal )
+    if( SceneManager::getInstance()->isSagittalDisplayed() )
     {
         for( int i = 0; i < 11; ++i )
         {
@@ -1481,7 +1483,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
             }
         }
     }
-    else if( m_pDatasetHelper->m_showCoronal )
+    else if( SceneManager::getInstance()->isCoronalDisplayed() )
     {
         for( int i = 0; i < 11; ++i )
         {
@@ -1575,7 +1577,8 @@ void MainFrame::onToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleLighting( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_lighting =! m_pDatasetHelper->m_lighting;
+    SceneManager::getInstance()->toggleLightingDisplay();
+//    m_pDatasetHelper->m_lighting =! m_pDatasetHelper->m_lighting;
     refreshAllGLWidgets();
 }
 
@@ -1954,32 +1957,35 @@ void MainFrame::onSliderMoved( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleShowAxial( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->m_showAxial = ! m_pDatasetHelper->m_showAxial;
-    m_pMainGL->Refresh();
+    SceneManager::getInstance()->toggleAxialDisplay();
+//     if (m_pDatasetHelper->m_theScene == NULL)
+//     {
+//         return;
+//     }
+//     m_pDatasetHelper->m_showAxial = ! m_pDatasetHelper->m_showAxial;
+//     m_pMainGL->Refresh();
 }
 
 void MainFrame::onToggleShowCoronal( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->m_showCoronal = ! m_pDatasetHelper->m_showCoronal;
-    m_pMainGL->Refresh();
+    SceneManager::getInstance()->toggleCoronalDisplay();
+//     if (m_pDatasetHelper->m_theScene == NULL)
+//     {
+//         return;
+//     }
+//     m_pDatasetHelper->m_showCoronal = ! m_pDatasetHelper->m_showCoronal;
+//     m_pMainGL->Refresh();
 }
 
 void MainFrame::onToggleShowSagittal( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->m_showSagittal = ! m_pDatasetHelper->m_showSagittal;
-    m_pMainGL->Refresh();
+    SceneManager::getInstance()->toggleSagittalDisplay();
+//     if (m_pDatasetHelper->m_theScene == NULL)
+//     {
+//         return;
+//     }
+//     m_pDatasetHelper->m_showSagittal = ! m_pDatasetHelper->m_showSagittal;
+//     m_pMainGL->Refresh();
 }
 
 void MainFrame::onToggleAlpha( wxCommandEvent& WXUNUSED(event) )
@@ -2090,17 +2096,17 @@ void MainFrame::deleteListItem()
             m_pDatasetHelper->deleteAllPoints();
         }
 
-        if ( wxT( "(Object)" ) == pInfo->getName() )
-        {            
-            m_pDatasetHelper->m_isObjCreated = false;
-            m_pDatasetHelper->m_isObjfilled = false;
-    
-        }
-        else if( wxT( "(Background)" ) == pInfo->getName() )
-        {            
-            m_pDatasetHelper->m_isBckCreated = false;
-            m_pDatasetHelper->m_isBckfilled = false;
-        }
+//         if ( wxT( "(Object)" ) == pInfo->getName() )
+//         {            
+//             m_pDatasetHelper->m_isObjCreated = false;
+//             m_pDatasetHelper->m_isObjfilled = false;
+//     
+//         }
+//         else if( wxT( "(Background)" ) == pInfo->getName() )
+//         {            
+//             m_pDatasetHelper->m_isBckCreated = false;
+//             m_pDatasetHelper->m_isBckfilled = false;
+//         }
 
         deleteSceneObject();
         m_pListCtrl2->DeleteItem( tmp );
@@ -2151,7 +2157,6 @@ void MainFrame::onDeleteListItem2( wxListEvent& evt )
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteListItem2" ), LOGLEVEL_DEBUG );
 
     DatasetIndex index = (DatasetIndex)evt.GetData();
-    // TODO: Delete in DatasetManager once ListCtrl contains index instead of pointers
     DatasetManager::getInstance()->remove( index );
 }
 

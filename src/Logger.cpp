@@ -5,6 +5,8 @@
 #include <iomanip>
 using std::setw;
 using std::setfill;
+#include <string>
+using std::string;
 
 Logger * Logger::m_pInstance = NULL;
 
@@ -78,9 +80,15 @@ bool Logger::printIfGLError( wxString str )
     GLenum error = glGetError();
     if( GL_NO_ERROR != error )
     {
-        str.Append( wxT( "\n" ) );
+        //str.Append( wxT( "\n" ) );
         m_oss << gluErrorString( error );
-        str.Append( wxString( m_oss.str().c_str(), wxConvUTF8 ) );
+
+        if( !m_oss.str().empty())
+        {
+            str.Append( wxT( " - " ) );
+            str.Append( wxString( m_oss.str().c_str(), wxConvUTF8 ) );
+        }
+
         m_oss.str( "" );
         print( str, LOGLEVEL_GLERROR );
         return true;

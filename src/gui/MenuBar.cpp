@@ -10,7 +10,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "MenuBar.h"
+
 #include "MainFrame.h"
+#include "SceneManager.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/FibersGroup.h"
@@ -71,7 +73,7 @@ MenuBar::MenuBar()
     m_itemNewSelectionBox = m_menuVoi->Append(wxID_ANY, wxT("New Selection Box"));
     m_itemNewSelectionEllipsoid = m_menuVoi->Append(wxID_ANY, wxT("New Selection Ellipsoid"));
     m_menuVoi->AppendSeparator();
-    m_itemToggleUseMorphing = m_menuVoi->AppendCheckItem(wxID_ANY, wxT("Morphing"));
+//    m_itemToggleUseMorphing = m_menuVoi->AppendCheckItem(wxID_ANY, wxT("Morphing"));
 
     m_menuFibers = new wxMenu();
     m_itemResetFibersColors = m_menuFibers->Append(wxID_ANY, wxT("Reset Color on Fibers"));
@@ -193,7 +195,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemToggleShowAxes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuViewAxes));
     mf->Connect(m_itemNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionBox));
     mf->Connect(m_itemNewSelectionEllipsoid->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionEllipsoid));
-    mf->Connect(m_itemToggleUseMorphing->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseMorph));
+//    mf->Connect(m_itemToggleUseMorphing->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseMorph));
     mf->Connect(m_itemResetFibersColors->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResetColor));
     mf->Connect(m_itemToggleLighting->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleLighting));    
     mf->Connect(m_itemToogleInvertFibersSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertFibers));
@@ -250,7 +252,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
 {
     //m_itemSaveSelectedDataset->Enable(mf->m_currentListItem != -1 && (((DatasetInfo*)mf->m_currentFNObject)->getType()==HEAD_BYTE || ((DatasetInfo*)mf->m_currentFNObject)->getType()==HEAD_SHORT));
     
-    m_itemToggleLighting->Check(mf->m_pDatasetHelper->m_lighting);
+    m_itemToggleLighting->Check( SceneManager::getInstance()->isLightingActive() );
     m_itemToggleRuler->Check(mf->m_pDatasetHelper->m_isRulerToolActive);
     
 	bool isFiberSelected( false );
@@ -310,18 +312,18 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleUseFakeTubes->Enable(isFiberSelected);
 	m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
     
-	m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
+//   m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
     m_itemToggleUseGeometryShader->Check(mf->m_pDatasetHelper->m_useFibersGeometryShader);
 #if _COMPILE_GEO_SHADERS
     m_itemToggleUseGeometryShader->Enable(mf->m_pDatasetHelper->m_geometryShadersSupported);
 #else
     m_itemToggleUseGeometryShader->Enable(false);
 #endif
-    m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
-    m_itemToggleShowCrosshair->Check(mf->m_pDatasetHelper->m_showCrosshair);
-    m_itemToggleShowAxial->Check(mf->m_pDatasetHelper->m_showAxial);
-    m_itemToggleShowCoronal->Check(mf->m_pDatasetHelper->m_showCoronal);
-    m_itemToggleShowSagittal->Check(mf->m_pDatasetHelper->m_showSagittal);
+//   m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
+    m_itemToggleShowCrosshair->Check( SceneManager::getInstance()->isCrosshairDisplayed() );
+    m_itemToggleShowAxial->Check( SceneManager::getInstance()->isAxialDisplayed() );
+    m_itemToggleShowCoronal->Check( SceneManager::getInstance()->isCoronalDisplayed() );
+    m_itemToggleShowSagittal->Check( SceneManager::getInstance()->isSagittalDisplayed() );
     m_itemToggleClearToBlack->Check(mf->m_pDatasetHelper->m_clearToBlack);
     m_itemToggleBlendTextureOnMesh->Check(mf->m_pDatasetHelper->m_blendTexOnMesh);
     m_itemToggleFilterISO->Check(mf->m_pDatasetHelper->m_filterIsoSurf);

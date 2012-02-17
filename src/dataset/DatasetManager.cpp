@@ -44,11 +44,24 @@ DatasetManager * DatasetManager::getInstance()
 
 //////////////////////////////////////////////////////////////////////////
 
-DatasetInfo * DatasetManager::getDataset( unsigned int index )
+std::vector<Anatomy *> DatasetManager::getAnatomies() const
 {
-    if( m_datasets.find( index ) != m_datasets.end() )
+    vector<Anatomy *> v;
+    for( map<unsigned int, Anatomy *>::const_iterator it = m_anatomies.begin(); it != m_anatomies.end(); ++it )
     {
-        return m_datasets[index];
+        v.push_back( it->second );
+    }
+    return v;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+DatasetInfo * DatasetManager::getDataset( unsigned int index ) const
+{
+    map<DatasetIndex, DatasetInfo *>::const_iterator it = m_datasets.find( index );
+    if( it != m_datasets.end() )
+    {
+        return it->second;
     }
 
     return NULL;
@@ -56,7 +69,7 @@ DatasetInfo * DatasetManager::getDataset( unsigned int index )
 
 //////////////////////////////////////////////////////////////////////////
 
-std::vector<Fibers *> DatasetManager::getFibers()
+std::vector<Fibers *> DatasetManager::getFibers() const
 {
     vector<Fibers *> v;
     for( map<unsigned int, Fibers *>::const_iterator it = m_fibers.begin(); it != m_fibers.end(); ++it )
@@ -68,7 +81,19 @@ std::vector<Fibers *> DatasetManager::getFibers()
 
 //////////////////////////////////////////////////////////////////////////
 
-std::vector<ODFs *> DatasetManager::getOdfs()
+FibersGroup * DatasetManager::getFibersGroup() const
+{
+    map<DatasetIndex, FibersGroup *>::const_iterator it = m_fibersGroup.begin();
+    if( it != m_fibersGroup.end() )
+    {
+        return it->second;
+    }
+    return NULL;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+std::vector<ODFs *> DatasetManager::getOdfs() const
 {
     vector<ODFs *> v;
     for( map<unsigned int, ODFs *>::const_iterator it = m_odfs.begin(); it != m_odfs.end(); ++it )
@@ -80,7 +105,31 @@ std::vector<ODFs *> DatasetManager::getOdfs()
 
 //////////////////////////////////////////////////////////////////////////
 
-vector<Tensors *> DatasetManager::getTensors()
+Fibers * DatasetManager::getSelectedFibers( DatasetIndex index ) const
+{
+    map<DatasetIndex, Fibers *>::const_iterator it = m_fibers.find( index );
+    if( it != m_fibers.end() )
+    {
+        return it->second;
+    }
+    return NULL;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+Surface * DatasetManager::getSurface() const
+{
+    map<DatasetIndex, Surface *>::const_iterator it = m_surfaces.begin();
+    if( it != m_surfaces.end() )
+    {
+        return it->second;
+    }
+    return NULL;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+vector<Tensors *> DatasetManager::getTensors() const
 {
     vector<Tensors *> v;
     for( map<unsigned int, Tensors *>::const_iterator it = m_tensors.begin(); it != m_tensors.end(); ++it )
@@ -249,72 +298,54 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
 
 void DatasetManager::remove( const DatasetIndex index )
 {
-//     DatasetInfo *pDatasetInfo = m_datasets[index];
-//     
-//     remove( index, pDatasetInfo );
-//     m_datasets.erase( index );
+    map<unsigned int, DatasetInfo *>::iterator it = m_datasets.find( index );
+    
+    switch( it->second->getType() )
+    {
+    case HEAD_BYTE:
+    case HEAD_SHORT:
+    case OVERLAY:
+    case RGB:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Anatomy" ) ), LOGLEVEL_DEBUG );
+        m_anatomies.erase( m_anatomies.find( index ) );
+        break;
+//     case TENSOR_FIELD:
+//         break;
+    case MESH:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Mesh" ) ), LOGLEVEL_DEBUG );
+        m_meshes.erase( m_meshes.find( index ) );
+        break;
+//     case VECTORS:
+//         break;
+    case TENSORS:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Tensors" ) ), LOGLEVEL_DEBUG );
+        m_tensors.erase( m_tensors.find( index ) );
+        break;
+    case ODFS:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "ODFs" ) ), LOGLEVEL_DEBUG );
+        m_odfs.erase( m_odfs.find( index ) );
+        break;
+    case FIBERS:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Fibers" ) ), LOGLEVEL_DEBUG );
+        m_fibers.erase( m_fibers.find( index ) );
+        break;
+    case SURFACE:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Surface" ) ), LOGLEVEL_DEBUG );
+        m_surfaces.erase( m_surfaces.find( index ) );
+        break;
+//     case ISO_SURFACE:
+//         break;
+    case FIBERSGROUP:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "FibersGroup" ) ), LOGLEVEL_DEBUG );
+        m_fibersGroup.erase( m_fibersGroup.find( index ) );
+        break;
+    default:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "DatasetInfo" ) ), LOGLEVEL_DEBUG );
+        break;
+    }
 
-//     unsigned int index( -1 );
-//     for( map<unsigned int, DatasetInfo *>::iterator it = m_datasets.begin(); it != m_datasets.end(); ++it )
-//     {
-//         if( ptr == (long)it->second )
-//         {
-//             index = it->first;
-//             break;
-//         }
-//     }
-// 
-//     if( -1 != index )
-//     {
-        map<unsigned int, DatasetInfo *>::iterator it = m_datasets.find( index );
-        
-        switch( it->second->getType() )
-        {
-        case HEAD_BYTE:
-        case HEAD_SHORT:
-        case OVERLAY:
-        case RGB:
-            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Anatomy" ) ), LOGLEVEL_DEBUG );
-            m_anatomies.erase( m_anatomies.find( index ) );
-            break;
-//         case TENSOR_FIELD:
-//             break;
-        case MESH:
-            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Mesh" ) ), LOGLEVEL_DEBUG );
-            m_meshes.erase( m_meshes.find( index ) );
-            break;
-//         case VECTORS:
-//             break;
-        case TENSORS:
-            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Tensors" ) ), LOGLEVEL_DEBUG );
-            m_tensors.erase( m_tensors.find( index ) );
-            break;
-        case ODFS:
-            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "ODFs" ) ), LOGLEVEL_DEBUG );
-            m_odfs.erase( m_odfs.find( index ) );
-            break;
-        case FIBERS:
-            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Fibers" ) ), LOGLEVEL_DEBUG );
-            m_fibers.erase( m_fibers.find( index ) );
-            break;
-        case SURFACE:
-            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Surface" ) ), LOGLEVEL_DEBUG );
-            m_surfaces.erase( m_surfaces.find( index ) );
-            break;
-//         case ISO_SURFACE:
-//             break;
-        case FIBERSGROUP:
-            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "FibersGroup" ) ), LOGLEVEL_DEBUG );
-            m_fibersGroup.erase( m_fibersGroup.find( index ) );
-            break;
-        default:
-            Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "DatasetInfo" ) ), LOGLEVEL_DEBUG );
-            break;
-        }
-
-        delete it->second;
-        m_datasets.erase( it );
-//     }
+    delete it->second;
+    m_datasets.erase( it );
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -319,8 +319,9 @@ void PropertiesWindow::OnToggleShowFS( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleShowFS" ), LOGLEVEL_DEBUG );
 
-    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1)
+    if( NULL != m_pMainFrame->m_pCurrentSceneObject&& -1 != m_pMainFrame->m_currentListItem )
     {
+        ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->toggleShowFS();
         m_pListCtrl->UpdateSelected();
 //         if( ! ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->toggleShowFS())
 //             m_pMainFrame->m_pListCtrl->SetItem( m_pMainFrame->m_currentListItem, 1, ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getName().BeforeFirst( '.' ) + wxT( "*" ) );
@@ -621,10 +622,10 @@ void PropertiesWindow::OnSegment(wxCommandEvent& WXUNUSED(event))
         m_pMainFrame->m_pMainGL->background.clear();
     }
 
-    m_pMainFrame->m_pDatasetHelper->m_isObjfilled = false;
-    m_pMainFrame->m_pDatasetHelper->m_isBckfilled = false;
-    m_pMainFrame->m_pDatasetHelper->m_isObjCreated = false;
-    m_pMainFrame->m_pDatasetHelper->m_isBckCreated = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isObjfilled = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isBckfilled = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isObjCreated = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isBckCreated = false;
 }
 
 void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
@@ -632,9 +633,9 @@ void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFloodFill" ), LOGLEVEL_DEBUG );
 
     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 0;
-    m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = true;
-    m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
-    m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = true;
+//     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = false;
     ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->toggleSegment();
 }
 
@@ -668,9 +669,9 @@ void PropertiesWindow::OnSelectObj(wxCommandEvent& WXUNUSED(event))
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSelectObj" ), LOGLEVEL_DEBUG );
 
     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
-    m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
-    m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
-    m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = true;
+//     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = true;
 }
 
 void PropertiesWindow::OnSelectBck(wxCommandEvent& WXUNUSED(event))
@@ -678,9 +679,9 @@ void PropertiesWindow::OnSelectBck(wxCommandEvent& WXUNUSED(event))
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSelectBck" ), LOGLEVEL_DEBUG );
 
     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
-    m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
-    m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = true;
-    m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = false;    
+//     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = true;
+//     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = false;    
 }
 
 void PropertiesWindow::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
@@ -688,7 +689,7 @@ void PropertiesWindow::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnbtnGraphCut" ), LOGLEVEL_DEBUG );
 
     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
-    m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
+//     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
     m_pMainFrame->m_pMainGL->segment();    
 }
 

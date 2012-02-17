@@ -1,6 +1,16 @@
 #ifndef LOADER_H_
 #define LOADER_H_
 
+#include "DatasetInfo.h"
+#include "DatasetManager.h"
+#include "../Logger.h"
+#include "../gui/ListCtrl.h"
+#include "../gui/MainFrame.h"
+#include "../gui/SceneManager.h"
+
+#include <wx/file.h>
+#include <wx/string.h>
+
 class Loader
 {
 private:
@@ -12,7 +22,8 @@ public:
     :   m_pMainFrame( pMainFrame ),
         m_pListCtrl( pListCtrl ),
         m_error( false )
-    { }
+    {
+    }
 
     bool getError() { return m_error; }
 
@@ -34,10 +45,10 @@ public:
 
             if( wxT( "scn" ) == extension )
             {
-//                 if( !SceneManager::getInstance()->load( filename ) )
-//                 {
-//                     m_error = true;
-//                 }
+                if( !SceneManager::getInstance()->load( filename ) )
+                {
+                    m_error = true;
+                }
             }
             else
             {
