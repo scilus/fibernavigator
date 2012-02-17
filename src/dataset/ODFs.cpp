@@ -710,10 +710,12 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
                     l_coloring[1] = m_mainDirections[currentIdx][i][1];
                     l_coloring[2] = m_mainDirections[currentIdx][i][2];
 
+                    float halfScale = m_scalingFactor/5.0f;
+
                     DatasetInfo::m_dh->m_shaderHelper->m_odfsShader.setUni3Float( "coloring", l_coloring );
                     glBegin(GL_LINES);  
-                        glVertex3f(-m_mainDirections[currentIdx][i][0],-m_mainDirections[currentIdx][i][1],-m_mainDirections[currentIdx][i][2]);
-                        glVertex3f(m_mainDirections[currentIdx][i][0],m_mainDirections[currentIdx][i][1],m_mainDirections[currentIdx][i][2]);       
+                    glVertex3f(-halfScale*m_mainDirections[currentIdx][i][0],-halfScale*m_mainDirections[currentIdx][i][1],-halfScale*m_mainDirections[currentIdx][i][2]);
+                        glVertex3f(halfScale*m_mainDirections[currentIdx][i][0],halfScale*m_mainDirections[currentIdx][i][1],halfScale*m_mainDirections[currentIdx][i][2]);       
                     glEnd();
                 }
             }
