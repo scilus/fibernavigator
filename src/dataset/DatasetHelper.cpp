@@ -249,7 +249,7 @@ bool DatasetHelper::load( wxString i_fileName, int i_index, const float i_thresh
 		// check if i_fileName is valid
 		if( ! wxFile::Exists( i_fileName ) )
 		{
-            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), i_fileName ), LOGLEVEL_ERROR );
+            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), i_fileName.c_str() ), LOGLEVEL_ERROR );
 			m_lastError = wxT( "File doesn't exist!" );
 			return false;
 		}
