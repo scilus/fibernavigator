@@ -1192,7 +1192,7 @@ bool FStreamlineOnSurfaceEuler::isInside(const FIndex& cellId, const FArray& pos
         return false;
     } catch (FException& e)
     {
-        Logger::getInstance()->print( wxString::Format( wxT( "Caught exception in FStreamlineOnSurfaceEuler::isInside: %s" ), e.getMessage() ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( wxString::Format( wxT( "Caught exception in FStreamlineOnSurfaceEuler::isInside: %s" ), e.getMessage().c_str() ), LOGLEVEL_ERROR );
         return false;
     }
 }
