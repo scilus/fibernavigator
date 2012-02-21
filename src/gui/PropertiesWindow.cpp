@@ -1,10 +1,10 @@
-#include <wx/colordlg.h>
-
 #include "ListCtrl.h"
 #include "MainFrame.h"
 #include "PropertiesWindow.h"
+#include "SceneManager.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
+#include "../Logger.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
@@ -14,8 +14,8 @@
 #include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
-#include "../Logger.h"
 
+#include <wx/colordlg.h>
 
 IMPLEMENT_DYNAMIC_CLASS(PropertiesWindow, wxScrolledWindow)
 
@@ -611,7 +611,7 @@ void PropertiesWindow::OnSegment(wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSegment" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->m_pDatasetHelper->m_isSegmentActive = !m_pMainFrame->m_pDatasetHelper->m_isSegmentActive;
+    SceneManager::getInstance()->toggleSegmentActive();
 
     if( !m_pMainFrame->m_pMainGL->object.empty() )
     {
@@ -632,7 +632,9 @@ void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFloodFill" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 0;
+    SceneManager::getInstance()->setSegmentMethod( FLOODFILL );
+
+//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 0;
 //     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = true;
 //     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
 //     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = false;
@@ -660,15 +662,16 @@ void PropertiesWindow::OnKmeans( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnKmeans" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 2;
+    SceneManager::getInstance()->setSegmentMethod( KMEANS );
+//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 2;
     m_pMainFrame->m_pMainGL->segment();
 }
 
 void PropertiesWindow::OnSelectObj(wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSelectObj" ), LOGLEVEL_DEBUG );
-
-    m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
+    SceneManager::getInstance()->setSegmentMethod( GRAPHCUT );
+//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
 //     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
 //     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
 //     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = true;
@@ -677,8 +680,8 @@ void PropertiesWindow::OnSelectObj(wxCommandEvent& WXUNUSED(event))
 void PropertiesWindow::OnSelectBck(wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSelectBck" ), LOGLEVEL_DEBUG );
-
-    m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
+    SceneManager::getInstance()->setSegmentMethod( GRAPHCUT );
+//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
 //     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
 //     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = true;
 //     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = false;    
@@ -687,8 +690,9 @@ void PropertiesWindow::OnSelectBck(wxCommandEvent& WXUNUSED(event))
 void PropertiesWindow::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnbtnGraphCut" ), LOGLEVEL_DEBUG );
+    SceneManager::getInstance()->setSegmentMethod( GRAPHCUT );
 
-    m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
+//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
 //     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
     m_pMainFrame->m_pMainGL->segment();    
 }

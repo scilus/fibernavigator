@@ -35,7 +35,9 @@ SceneManager::SceneManager(void)
     m_sliceY( 0.0f ),
     m_sliceZ( 0.0f ),
     m_useVBO( true ),
-    m_quadrant( 6 )
+    m_quadrant( 6 ),
+    m_segmentActive( false ),
+    m_segmentMethod( FLOODFILL )
 {
 }
 

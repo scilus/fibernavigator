@@ -16,6 +16,8 @@ class TheScene;
 
 typedef std::vector< std::vector< SelectionObject * > > SelectionObjList;
 
+enum SEGMETHOD { FLOODFILL = 0, GRAPHCUT, KMEANS };
+
 class SceneManager
 {
 public:
@@ -97,6 +99,13 @@ public:
     int   getQuadrant() const       { return m_quadrant; }
     void  setQuadrant( int quad )   { m_quadrant = quad; }
 
+    bool  isSegmentActive() const   { return m_segmentActive; }
+    void  setSegmentActive( bool active )   { m_segmentActive = active; }
+    bool  toggleSegmentActive()     { return m_segmentActive = !m_segmentActive; }
+
+    SEGMETHOD getSegmentMethod() const          { return m_segmentMethod; }
+    void setSegmentMethod( SEGMETHOD method )   { m_segmentMethod = method; }
+
 protected:
     SceneManager(void);
 
@@ -131,6 +140,9 @@ private:
 
     bool  m_useVBO;
     int   m_quadrant;
+
+    bool  m_segmentActive;
+    SEGMETHOD m_segmentMethod;
 };
 
 #endif SCENEMANAGER_H_

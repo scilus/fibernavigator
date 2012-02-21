@@ -233,7 +233,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 
 								if( pAnatomy->getType() < MESH && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
 								{
-									m_pDatasetHelper->m_isSegmentActive = true;
+                                    SceneManager::getInstance()->setSegmentActive( true );
+									//m_pDatasetHelper->m_isSegmentActive = true;
 									m_hr = pick(evt.GetPosition(), false);
 									segment();
 									pAnatomy->toggleSegment();                        
@@ -543,11 +544,12 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
         {
             tpicked = hr.tmin;
             picked = AXIAL;
-            if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
+            if (m_pDatasetHelper->m_isRulerToolActive || SceneManager::getInstance()->isSegmentActive() )
             {
                 m_hitPts = bb->hitCoordinate(ray,CORONAL);
                 m_isRulerHit = isRulerOrDrawer;
-                m_pDatasetHelper->m_isSegmentActive = false;
+                SceneManager::getInstance()->setSegmentActive( false );
+                //m_pDatasetHelper->m_isSegmentActive = false;
             }
 			else if (m_pDatasetHelper->m_isDrawerToolActive)
 			{
@@ -570,11 +572,11 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
             {
                 picked = CORONAL;
                 tpicked = hr.tmin;
-                if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
+                if (m_pDatasetHelper->m_isRulerToolActive || SceneManager::getInstance()->isSegmentActive() )
                 {
                     m_hitPts = bb->hitCoordinate(ray,AXIAL);
                     m_isRulerHit = isRulerOrDrawer;
-                    m_pDatasetHelper->m_isSegmentActive = false;
+                    SceneManager::getInstance()->setSegmentActive( false );
                 }
 				else if (m_pDatasetHelper->m_isDrawerToolActive)
 				{
@@ -598,11 +600,12 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
             {
                 picked = SAGITTAL;
                 tpicked = hr.tmin;
-                if (m_pDatasetHelper->m_isRulerToolActive || m_pDatasetHelper->m_isSegmentActive)
+                if (m_pDatasetHelper->m_isRulerToolActive || SceneManager::getInstance()->isSegmentActive() )
 				{
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
                     m_isRulerHit = isRulerOrDrawer;
-                    m_pDatasetHelper->m_isSegmentActive = false;
+                    SceneManager::getInstance()->setSegmentActive( false );
+                    //m_pDatasetHelper->m_isSegmentActive = false;
                 }
 				else if (m_pDatasetHelper->m_isDrawerToolActive)
 				{
@@ -1234,7 +1237,7 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
     */
     while(means[0] == means[1])
     {
-        if(m_pDatasetHelper->m_SegmentMethod == 1)
+        if( GRAPHCUT == SceneManager::getInstance()->getSegmentMethod() )
         {
             means[0] = getElement(object[0][0],object[0][1],object[0][2],src);    // Mean of the first class
             means[1] = getElement(background[0][0],background[0][1],background[0][2],src); // // Mean of the second class    
@@ -1616,28 +1619,28 @@ void MainCanvas::segment()
     //Case 0 : Floodfill
     //Case 1 : Graph Cut
     //Case 2 : KMeans
-    switch(m_pDatasetHelper->m_SegmentMethod)
+    switch( SceneManager::getInstance()->getSegmentMethod() )
     {
-        case 0 :
-            {
-                float threshold = l_info->getFloodThreshold();
-                floodFill(sourceData, resultData, m_hitPts, threshold);
-                break;
-            }
+        case FLOODFILL:
+        {
+            float threshold = l_info->getFloodThreshold();
+            floodFill(sourceData, resultData, m_hitPts, threshold);
+            break;
+        }
 
-        case 1 :
-            {
-                float sigma = l_info->getGraphSigma();
-                graphCut(sourceData, resultData,sigma);
-                break;
-            }
+        case GRAPHCUT:
+        {
+            float sigma = l_info->getGraphSigma();
+            graphCut(sourceData, resultData,sigma);
+            break;
+        }
 
-        case 2 :
-            {
-                float means[2], stddev[2], apriori[2];
-                KMeans(means,stddev,apriori,sourceData,resultData);
-                break;
-            }
+        case KMEANS:
+        {
+            float means[2], stddev[2], apriori[2];
+            KMeans(means,stddev,apriori,sourceData,resultData);
+            break;
+        }
     }
         
     //Create a new anatomy for the tumor

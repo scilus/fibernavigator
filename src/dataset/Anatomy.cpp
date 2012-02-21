@@ -886,48 +886,48 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
     // They are kept here temporarily, but will need to be implemented or removed.
     // Please also note that the coding standard has not been applied to these lines, 
     // so please apply it if you re enable them.
-    /*pSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadioBtnFlood = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Click region" ), wxDefaultPosition, wxSize(80,-1));
-    pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Floodfill   "),wxDefaultPosition, wxSize(50,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    pSizer->Add(m_pRadioBtnFlood);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pRadioBtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnFloodFill));*/
-
-    /*pSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadioBtnObj = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Select Class 1" ), wxDefaultPosition, wxSize(85,-1));
-    pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    pSizer->Add(m_pRadioBtnObj);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pRadioBtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectObj));
-    
-    pSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadioBtnBck = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Select Class 2" ), wxDefaultPosition, wxSize(85,-1));
-    pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    pSizer->Add(m_pRadioBtnBck);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pRadioBtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectBck));
-
-    m_pSliderGraphSigma = new MySlider(pParentWindow, wxID_ANY,0,0,500, wxDefaultPosition, wxSize(80,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_pSliderGraphSigma->SetValue(200);
-    setGraphSigma(200.0f);
-    pSizer = new wxBoxSizer(wxHORIZONTAL);
-    pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Sigma "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    pSizer->Add(m_pSliderGraphSigma,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pSliderGraphSigma->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderGraphSigmaMoved));
-
-    m_pBtnGraphCut = new wxButton(pParentWindow, wxID_ANY, wxT("Generate Graphcut"), wxDefaultPosition, wxSize(120,-1));
-    pSizer = new wxBoxSizer(wxHORIZONTAL);
-    pSizer->Add(m_pBtnGraphCut,0,wxALIGN_CENTER);
-    m_pBtnGraphCut->Enable(m_dh->graphcutReady());
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pBtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnbtnGraphCut));*/
-
-    /*m_pBtnKmeans = new wxButton(pParentWindow, wxID_ANY, wxT("K-Means"), wxDefaultPosition, wxSize(132,-1));
-    pSizer = new wxBoxSizer(wxHORIZONTAL);
-    pSizer->Add(m_pBtnKmeans,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pBtnKmeans->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnKmeans));*/
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pRadioBtnFlood = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Click region" ), wxDefaultPosition, wxSize(80,-1));
+//     pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Floodfill   "),wxDefaultPosition, wxSize(50,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     pSizer->Add(m_pRadioBtnFlood);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pRadioBtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnFloodFill));
+// 
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pRadioBtnObj = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Select Class 1" ), wxDefaultPosition, wxSize(85,-1));
+//     pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     pSizer->Add(m_pRadioBtnObj);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pRadioBtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectObj));
+//     
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pRadioBtnBck = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Select Class 2" ), wxDefaultPosition, wxSize(85,-1));
+//     pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     pSizer->Add(m_pRadioBtnBck);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pRadioBtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectBck));
+// 
+//     m_pSliderGraphSigma = new MySlider(pParentWindow, wxID_ANY,0,0,500, wxDefaultPosition, wxSize(80,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+//     m_pSliderGraphSigma->SetValue(200);
+//     setGraphSigma(200.0f);
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Sigma "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     pSizer->Add(m_pSliderGraphSigma,0,wxALIGN_CENTER);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pSliderGraphSigma->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderGraphSigmaMoved));
+// 
+//     m_pBtnGraphCut = new wxButton(pParentWindow, wxID_ANY, wxT("Generate Graphcut"), wxDefaultPosition, wxSize(120,-1));
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     pSizer->Add(m_pBtnGraphCut,0,wxALIGN_CENTER);
+//     m_pBtnGraphCut->Enable(m_dh->graphcutReady());
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pBtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnbtnGraphCut));
+// 
+//     m_pBtnKmeans = new wxButton(pParentWindow, wxID_ANY, wxT("K-Means"), wxDefaultPosition, wxSize(132,-1));
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     pSizer->Add(m_pBtnKmeans,0,wxALIGN_CENTER);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pBtnKmeans->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnKmeans));
 }
 
 //////////////////////////////////////////////////////////////////////////

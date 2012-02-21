@@ -103,8 +103,8 @@ public:
     double                m_rulerFullLength;
     double                m_rulerPartialLength;
     //int                   m_fibersSamplingFactor;
-    bool                  m_isSegmentActive; // SceneManager
-    int                   m_SegmentMethod; // SceneManager - Add enum
+    //bool                  m_isSegmentActive; // SceneManager
+    //int                   m_SegmentMethod;   // SceneManager - Add enum
     //bool                  m_isFloodfillActive;
     //bool                  m_isSelectBckActive;
     //bool                  m_isSelectObjActive;
