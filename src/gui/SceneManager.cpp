@@ -18,7 +18,7 @@ SceneManager * SceneManager::m_pInstance = NULL;
 SceneManager::SceneManager(void)
 :   m_pMainFrame( NULL ),
     m_pTreeView ( NULL ),
-    m_geometryShadersSupported( false ),
+    m_geometryShadersSupported( true ),
     m_useFibersGeometryShader( false ),
     m_lighting( true ),
     m_showAxial( true ),

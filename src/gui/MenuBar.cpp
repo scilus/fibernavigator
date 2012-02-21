@@ -313,9 +313,9 @@ void MenuBar::updateMenuBar( MainFrame *mf )
 	m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
     
 //   m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
-    m_itemToggleUseGeometryShader->Check(mf->m_pDatasetHelper->m_useFibersGeometryShader);
+    m_itemToggleUseGeometryShader->Check( SceneManager::getInstance()->isFibersGeomShaderActive() );
 #if _COMPILE_GEO_SHADERS
-    m_itemToggleUseGeometryShader->Enable(mf->m_pDatasetHelper->m_geometryShadersSupported);
+    m_itemToggleUseGeometryShader->Enable( SceneManager::getInstance()->areGeometryShadersSupported() );
 #else
     m_itemToggleUseGeometryShader->Enable(false);
 #endif

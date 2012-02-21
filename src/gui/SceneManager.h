@@ -49,23 +49,28 @@ public:
     void    setMainFrame( MainFrame *pMainFrame ) { m_pMainFrame = pMainFrame; }
     void    setTreeCtrl ( MyTreeCtrl *pTreeCtrl ) { m_pTreeView  = pTreeCtrl; }
 
+//////////////////////////////////////////////////////////////////////////
+//  GETTERS / SETTERS
+//////////////////////////////////////////////////////////////////////////
+
+    bool areGeometryShadersSupported() const    { return m_geometryShadersSupported; }
+    bool isFibersGeomShaderActive() const       { return m_useFibersGeometryShader; }
+
+    void setGeometryShaderSupported( bool supported )   { m_geometryShadersSupported = supported; }
+    bool toggleFibersGeomShaderActive()     { return m_useFibersGeometryShader = !m_useFibersGeometryShader; }
+
+    bool isLightingActive() const           { return m_lighting; }
+    bool isAxialDisplayed() const           { return m_showAxial; }
+    bool isCoronalDisplayed() const         { return m_showCoronal; }
+    bool isSagittalDisplayed() const        { return m_showSagittal; }
+    bool isCrosshairDisplayed() const       { return m_showCrosshair; }
+
     bool toggleLightingDisplay()        { return m_lighting      = !m_lighting; }
     bool toggleAxialDisplay()           { return m_showAxial     = !m_showAxial; }
     bool toggleCoronalDisplay()         { return m_showCoronal   = !m_showCoronal; }
     bool toggleSagittalDisplay()        { return m_showSagittal  = !m_showSagittal; }
     bool toggleCrosshairDisplay()       { return m_showCrosshair = !m_showCrosshair; }
-
-//////////////////////////////////////////////////////////////////////////
-//  GETTERS / SETTERS
-//////////////////////////////////////////////////////////////////////////
-
-    bool areGeometryShadersSupported()  { return m_geometryShadersSupported; }
-    bool isLightingActive()             { return m_lighting; }
-    bool isAxialDisplayed()             { return m_showAxial; }
-    bool isCoronalDisplayed()           { return m_showCoronal; }
-    bool isSagittalDisplayed()          { return m_showSagittal; }
-    bool isCrosshairDisplayed()         { return m_showCrosshair; }
-
+    
     float getSliceX() const     { return m_sliceX; }
     float getSliceY() const     { return m_sliceY; }
     float getSliceZ() const     { return m_sliceZ; }

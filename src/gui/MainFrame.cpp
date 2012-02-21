@@ -1764,7 +1764,7 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onUseGeometryShader( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_useFibersGeometryShader = !m_pDatasetHelper->m_useFibersGeometryShader;
+    SceneManager::getInstance()->toggleFibersGeomShaderActive();
     refreshAllGLWidgets();
 }
 

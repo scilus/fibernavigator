@@ -2904,7 +2904,7 @@ void Fibers::draw()
 
     // If geometry shaders are supported, the shader will take care of the filtering
     // Otherwise, use the drawCrossingFibers
-    if ( !m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    if ( !SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
     {
         drawCrossingFibers();
         return;
@@ -3815,7 +3815,7 @@ void Fibers::setShader()
         m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().y );
         m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
     }
-    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
     {
         // Determine X, Y and Z range
         const float xMin( SceneManager::getInstance()->getSliceX() + 0.5f - m_thickness );
@@ -3852,7 +3852,7 @@ void Fibers::releaseShader()
     {
         m_dh->m_shaderHelper->m_fakeTubesShader.release();
     }
-    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
     {
         m_dh->m_shaderHelper->m_crossingFibersShader.release();
     }

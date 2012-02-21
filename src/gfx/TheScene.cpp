@@ -150,7 +150,7 @@ void TheScene::initGL( int whichView )
 
             Logger::getInstance()->print( vendorId + _T( " " ) + rendererId, LOGLEVEL_MESSAGE );
 
-            if( ! glewIsSupported( "GL_ARB_shader_objects" ) )
+            if( !glewIsSupported( "GL_ARB_shader_objects" ) )
             {
                 printf( "*** ERROR no support for shader objects found.\n" );
                 printf( "*** Please check your OpenGL installation...exiting.\n" );
@@ -159,14 +159,13 @@ void TheScene::initGL( int whichView )
             else if ( !glewIsSupported( "GL_VERSION_3_2" ) && !glewIsSupported( "GL_ARB_geometry_shader4" ) && !glewIsExtensionSupported( "GL_EXT_geometry_shader4" ) )
             {
                 Logger::getInstance()->print( wxT( "Geometry shaders not supported. Some operations may run slower and use more CPU." ), LOGLEVEL_WARNING );
-                m_pDatasetHelper->m_geometryShadersSupported = false;
+                SceneManager::getInstance()->setGeometryShaderSupported( false );
                 useGeometry = false;
-                // TODO: Set some sort of global variable to indicate geometry shaders are not supported
             }
         }
         glEnable( GL_DEPTH_TEST );
 
-        if( ! m_pDatasetHelper->m_texAssigned )
+        if( !m_pDatasetHelper->m_texAssigned )
         {
             m_pDatasetHelper->m_shaderHelper = new ShaderHelper( m_pDatasetHelper, useGeometry );
             m_pDatasetHelper->m_texAssigned  = true;

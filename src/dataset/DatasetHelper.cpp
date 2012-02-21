@@ -110,9 +110,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_normalDirection( 1.0 ),
 
-    m_geometryShadersSupported( true ),
+//    m_geometryShadersSupported( true ),
     m_clearToBlack   ( false ),
-    m_useFibersGeometryShader( false ),
+//    m_useFibersGeometryShader( false ),
     m_filterIsoSurf  ( false ),
 
     m_colorMap( 0 ),

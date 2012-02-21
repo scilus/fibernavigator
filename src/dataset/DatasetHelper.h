@@ -161,9 +161,9 @@ public:
     //bool  m_useLic;           // Show the lic texture on spline surface.
     bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
     float m_normalDirection;  // Normal direction of the spline surface.
-    bool  m_geometryShadersSupported;
+    //bool  m_geometryShadersSupported;
     bool  m_clearToBlack;
-    bool  m_useFibersGeometryShader;
+    //bool  m_useFibersGeometryShader;
     bool  m_filterIsoSurf;
     int   m_colorMap;
     bool  m_showColorMapLegend;
