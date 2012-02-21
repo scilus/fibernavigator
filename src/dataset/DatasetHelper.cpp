@@ -65,9 +65,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_showObjects  ( true  ),
     m_activateObjects ( true),
 //    m_blendAlpha   ( false ),
-    m_pointMode    ( false ),
-    m_isShowAxes   ( false ),
-    m_animationStep( 0     ),
+//     m_pointMode    ( false ),
+//     m_isShowAxes   ( false ),
+//     m_animationStep( 0     ),
 
 // #if defined(DEBUG) || defined(_DEBUG)
 //     m_debugLevel( 0 ),
@@ -106,9 +106,9 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 //    m_lighting      ( true ),
 //    m_blendTexOnMesh( true ),
 //    m_useLic        ( false ),
-    m_drawVectors   ( false ),
-
-    m_normalDirection( 1.0 ),
+//     m_drawVectors   ( false ),
+// 
+//     m_normalDirection( 1.0 ),
 
 //    m_geometryShadersSupported( true ),
     m_clearToBlack   ( false ),
@@ -601,9 +601,4 @@ void DatasetHelper::createLicSliceAxi( int i_slize )
     }
 
     licMovieHelper();
-}
-
-void DatasetHelper::increaseAnimationStep()
-{
-    m_animationStep = ( m_animationStep + 1 ) % 1000000;
 }

@@ -9,6 +9,7 @@
 #include "../Logger.h"
 #include "../gui/MyListCtrl.h"
 #include "../gui/MainFrame.h"
+#include "../gui/SceneManager.h"
 #include "../misc/Fantom/FMatrix.h"
 #include "../misc/lic/SurfaceLIC.h"
 
@@ -640,9 +641,12 @@ void Surface::generateLICGeometry()
 
 void Surface::flipNormals()
 {
-    m_normalDirection = m_dh->m_normalDirection;
-    if (m_GLuint) glDeleteLists(m_GLuint, 1);
-    m_GLuint = 0;
+    m_normalDirection = SceneManager::getInstance()->getNormalDirection();
+    if( m_GLuint )
+    {
+        glDeleteLists(m_GLuint, 1);
+        m_GLuint = 0;
+    }
     m_positionsCalculated = false;
 }
 
@@ -749,7 +753,7 @@ void Surface::updatePropertiesSizer()
     m_psliderOpacity->SetValue(m_psliderOpacity->GetMin());
     m_psliderThresholdIntensity->Enable(false);
     m_psliderThresholdIntensity->SetValue(m_psliderThresholdIntensity->GetMin());
-    m_ptoggleDrawPoints->SetValue(m_dh->m_pointMode);
+    m_ptoggleDrawPoints->SetValue( SceneManager::getInstance()->isPointMode() );
     
     // Disabled for the moment, not implemented.
     m_pBtnFlipX->Enable( false );

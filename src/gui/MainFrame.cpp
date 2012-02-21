@@ -680,7 +680,7 @@ void MainFrame::onMenuViewBack( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_isShowAxes = !m_pDatasetHelper->m_isShowAxes;
+    SceneManager::getInstance()->toggleAxesDisplay();
 }
 
 void MainFrame::onMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
@@ -734,7 +734,7 @@ void MainFrame::onToggleSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleDrawPointsMode( wxCommandEvent& event )
 {
-    m_pDatasetHelper->togglePointMode();
+    SceneManager::getInstance()->togglePointMode();
     refreshAllGLWidgets();
 }
 
@@ -1437,13 +1437,16 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleDrawVectors( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_drawVectors = !m_pDatasetHelper->m_drawVectors;
+    SceneManager::getInstance()->toggleVectorsDisplay();
+    //m_pDatasetHelper->m_drawVectors = !m_pDatasetHelper->m_drawVectors;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
 {
-    m_pDatasetHelper->m_normalDirection *= -1.0;
+    float normal = SceneManager::getInstance()->getNormalDirection();
+    SceneManager::getInstance()->setNormalDirection( -normal );
+    //m_pDatasetHelper->m_normalDirection *= -1.0;
 
     for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_pListCtrl2->GetItemCount() ); ++i )
     {
@@ -2514,22 +2517,25 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
 
     refreshAllGLWidgets();
     refreshViews();
-    m_pDatasetHelper->increaseAnimationStep();    
+    SceneManager::getInstance()->increaseAnimStep();
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 MainFrame::~MainFrame()
 {
-    m_pTimer->Stop();
     Logger::getInstance()->print( wxT( "MainFrame destructor" ), LOGLEVEL_DEBUG );
+    m_pTimer->Stop();
     Logger::getInstance()->print( wxT( "Timer stopped" ), LOGLEVEL_DEBUG );
+
     if (m_pTimer != NULL)
     {
         delete m_pTimer;
+        m_pTimer = NULL;
     }
     if( m_pDatasetHelper != NULL)
     {
         delete m_pDatasetHelper;
+        m_pDatasetHelper = NULL;
     }
 }

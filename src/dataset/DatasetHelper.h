@@ -83,8 +83,8 @@ public:
 
     void toggleShowAllSelectionObjects() { m_showObjects = ! m_showObjects; };
     void toggleActivateAllSelectionObjects() { m_activateObjects = ! m_activateObjects; };
-    bool togglePointMode()        { return m_pointMode = ! m_pointMode; };
-    bool getPointMode()           { return m_pointMode; };
+//    bool togglePointMode()        { return m_pointMode = ! m_pointMode; };
+//    bool getPointMode()           { return m_pointMode; };
 
     void doLicMovie       ( int i_mode );
     void createLicSliceSag( int i_slize );
@@ -92,7 +92,7 @@ public:
     void createLicSliceAxi( int i_slize );
     void licMovieHelper();
 
-    void increaseAnimationStep();
+    //void increaseAnimationStep();
 
     /////////////////////////////////////////////////////////////////////////////////
     // general info about the datasets
@@ -138,11 +138,11 @@ public:
 
     bool      m_showObjects;
     bool      m_activateObjects;
-//    bool      m_blendAlpha;
-    bool      m_pointMode;
-    bool      m_isShowAxes;
+//     bool      m_blendAlpha;
+//     bool      m_pointMode;
+//     bool      m_isShowAxes;
 
-    int       m_animationStep;
+//    int       m_animationStep;
 
     //int       m_debugLevel;
 
@@ -159,8 +159,8 @@ public:
     //bool  m_lighting;         // m_lighting for fibers.
     //bool  m_blendTexOnMesh;   // Ignore threshold for textures on meshes.
     //bool  m_useLic;           // Show the lic texture on spline surface.
-    bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
-    float m_normalDirection;  // Normal direction of the spline surface.
+    //bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
+    //float m_normalDirection;  // Normal direction of the spline surface.
     //bool  m_geometryShadersSupported;
     bool  m_clearToBlack;
     //bool  m_useFibersGeometryShader;

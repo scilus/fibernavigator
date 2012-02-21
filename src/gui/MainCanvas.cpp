@@ -171,7 +171,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
         {
             if ( evt.LeftUp() )
             {
-                if ( wxGetKeyState( WXK_SHIFT ) && !m_pDatasetHelper->getPointMode() )
+                if ( wxGetKeyState( WXK_SHIFT ) && !SceneManager::getInstance()->isPointMode() )
                 {
                     m_hr = pick( evt.GetPosition(), false );
                     int newX = (int) ( getEventCenter().x + 0.5 );
@@ -183,7 +183,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
                     m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( newZ );
                     m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();
                 }
-                else if ( wxGetKeyState( WXK_CONTROL ) && m_pDatasetHelper->getPointMode())
+                else if ( wxGetKeyState( WXK_CONTROL ) && SceneManager::getInstance()->isPointMode() )
                 {
 					m_hr = pick( evt.GetPosition(),false );
 					if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
@@ -647,7 +647,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
     /*
      * check for hits with points for spline surface
      */
-    if ( m_pDatasetHelper->m_pointMode )
+    if ( SceneManager::getInstance()->isPointMode() )
     {
         wxTreeItemId id, childid;
         wxTreeItemIdValue cookie = 0;
@@ -809,11 +809,12 @@ void MainCanvas::render()
 				}
 
                 //renderTestRay();
-                if (m_pDatasetHelper->m_isShowAxes)
+                if( SceneManager::getInstance()->areAxesDisplayed() )
                 {
                     renderAxes();
                 }
-                if (m_pDatasetHelper->m_isRulerToolActive)
+
+                if(m_pDatasetHelper->m_isRulerToolActive)
                 {
                     renderRulerDisplay();
                 }

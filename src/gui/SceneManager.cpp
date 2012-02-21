@@ -31,13 +31,16 @@ SceneManager::SceneManager(void)
     m_showCoronal( true ),
     m_showSagittal( true ),
     m_showCrosshair( false ),
+    m_showAxes( false ),
     m_sliceX( 0.0f ),
     m_sliceY( 0.0f ),
     m_sliceZ( 0.0f ),
     m_useVBO( true ),
     m_quadrant( 6 ),
     m_segmentActive( false ),
-    m_segmentMethod( FLOODFILL )
+    m_segmentMethod( FLOODFILL ),
+    m_animationStep( 0 ),
+    m_pointMode( false )
 {
 }
 

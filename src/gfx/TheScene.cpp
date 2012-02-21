@@ -307,7 +307,7 @@ void TheScene::renderScene()
     if( DatasetManager::getInstance()->isSurfaceLoaded() )
         renderSplineSurface();
 
-    if( m_pDatasetHelper->m_pointMode )
+    if( SceneManager::getInstance()->isPointMode() )
         drawPoints();
 
     if( DatasetManager::getInstance()->isVectorsLoaded() )
@@ -512,7 +512,7 @@ void TheScene::renderSplineSurface()
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-            if ( m_pDatasetHelper->m_pointMode )
+            if ( SceneManager::getInstance()->isPointMode() )
                 glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             else
                 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -558,7 +558,7 @@ void TheScene::renderMesh()
     SceneManager::getInstance()->getShaderHelper()->m_meshShader.bind();
     SceneManager::getInstance()->getShaderHelper()->setMeshShaderVars();
 
-    if( m_pDatasetHelper->m_pointMode )
+    if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -699,7 +699,7 @@ void TheScene::renderTensors()
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
     // This will check if we are suppose to draw the tensor using GL_LINE or GL_FILL.
-    if( m_pDatasetHelper->m_pointMode )
+    if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -727,7 +727,7 @@ void TheScene::renderODFs()
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
     // This will check if we are suppose to draw the odfs using GL_LINE or GL_FILL.
-    if( m_pDatasetHelper->m_pointMode )
+    if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -1254,7 +1254,7 @@ void TheScene::drawGraph()
 
     SceneManager::getInstance()->getShaderHelper()->m_graphShader.bind();
     SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniInt  ( "globalColor", false );
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "animation", (float)m_pDatasetHelper->m_animationStep );
+    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "animation", (float)SceneManager::getInstance()->getAnimationStep() );
     SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
     SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
 

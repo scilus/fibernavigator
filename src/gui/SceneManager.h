@@ -45,7 +45,6 @@ public:
                                 GLint viewport[4], 
                                 GLdouble modelview[16] );
 
-    void    increaseAnimationStep();
     void    doMatrixManipulation();
 
     SelectionObjList getSelectionObjects();
@@ -58,10 +57,6 @@ public:
 
     TheScene * getScene() const             { return m_pTheScene; }
     ShaderHelper * getShaderHelper() const  { return m_pShaderHelper; }
-
-//////////////////////////////////////////////////////////////////////////
-//  GETTERS / SETTERS
-//////////////////////////////////////////////////////////////////////////
 
     bool areGeometryShadersSupported() const    { return m_geometryShadersSupported; }
     bool isFibersGeomShaderActive() const       { return m_useFibersGeometryShader; }
@@ -76,6 +71,7 @@ public:
     bool isCoronalDisplayed() const         { return m_showCoronal; }
     bool isSagittalDisplayed() const        { return m_showSagittal; }
     bool isCrosshairDisplayed() const       { return m_showCrosshair; }
+    bool areAxesDisplayed() const           { return m_showAxes; }
 
     bool toggleLightingDisplay()        { return m_lighting       = !m_lighting; }
     bool toggleAlphaBlend()             { return m_blendAlpha     = !m_blendAlpha; }
@@ -84,6 +80,7 @@ public:
     bool toggleCoronalDisplay()         { return m_showCoronal    = !m_showCoronal; }
     bool toggleSagittalDisplay()        { return m_showSagittal   = !m_showSagittal; }
     bool toggleCrosshairDisplay()       { return m_showCrosshair  = !m_showCrosshair; }
+    bool toggleAxesDisplay()            { return m_showAxes       = !m_showAxes; }
     
     float getSliceX() const         { return m_sliceX; }
     float getSliceY() const         { return m_sliceY; }
@@ -99,12 +96,23 @@ public:
     int   getQuadrant() const       { return m_quadrant; }
     void  setQuadrant( int quad )   { m_quadrant = quad; }
 
-    bool  isSegmentActive() const   { return m_segmentActive; }
+    bool  isSegmentActive() const           { return m_segmentActive; }
     void  setSegmentActive( bool active )   { m_segmentActive = active; }
-    bool  toggleSegmentActive()     { return m_segmentActive = !m_segmentActive; }
+    bool  toggleSegmentActive()             { return m_segmentActive = !m_segmentActive; }
 
-    SEGMETHOD getSegmentMethod() const          { return m_segmentMethod; }
-    void setSegmentMethod( SEGMETHOD method )   { m_segmentMethod = method; }
+    SEGMETHOD   getSegmentMethod() const                { return m_segmentMethod; }
+    void        setSegmentMethod( SEGMETHOD method )    { m_segmentMethod = method; }
+
+    int   getAnimationStep() const   { return m_animationStep; }
+    void  increaseAnimStep()         { m_animationStep = ( m_animationStep + 1 ) % 1000000; }
+    void  setAnimationStep(int step) { m_animationStep = step; }
+    bool  isPointMode() const        { return m_pointMode; }
+    bool  togglePointMode()          { return m_pointMode = !m_pointMode; }
+
+    bool  areVectorsDisplayed() const   { return m_drawVectors; }
+    bool  toggleVectorsDisplay()        { return m_drawVectors = !m_drawVectors; }
+    float getNormalDirection() const    { return m_normalDirection; }
+    void  setNormalDirection( float dir )   { m_normalDirection = dir; }
 
 protected:
     SceneManager(void);
@@ -133,6 +141,7 @@ private:
     bool  m_showSagittal;
 
     bool  m_showCrosshair;
+    bool  m_showAxes;
 
     float m_sliceX;
     float m_sliceY;
@@ -143,6 +152,12 @@ private:
 
     bool  m_segmentActive;
     SEGMETHOD m_segmentMethod;
+
+    int   m_animationStep;
+    bool  m_pointMode;
+
+    bool  m_drawVectors;
+    float m_normalDirection;
 };
 
 #endif SCENEMANAGER_H_

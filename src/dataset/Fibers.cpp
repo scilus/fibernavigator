@@ -3001,7 +3001,7 @@ void Fibers::drawFakeTubes()
     pColors  = &m_colorArray[0];
     pNormals = &m_normalArray[0];
 
-    if( m_dh->getPointMode() )
+    if( SceneManager::getInstance()->isPointMode() )
     {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     }
@@ -3136,7 +3136,7 @@ void Fibers::drawSortedLines()
         pNormals = &m_normalArray[0];
     }
 
-    if( m_dh->getPointMode() )
+    if( SceneManager::getInstance()->isPointMode() )
     {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     }

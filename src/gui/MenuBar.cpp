@@ -327,12 +327,12 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleClearToBlack->Check(mf->m_pDatasetHelper->m_clearToBlack);
     m_itemToggleBlendTextureOnMesh->Check( SceneManager::getInstance()->isTexBlendOnMesh() );
     m_itemToggleFilterISO->Check(mf->m_pDatasetHelper->m_filterIsoSurf);
-    m_itemToggleShowAxes->Check(mf->m_pDatasetHelper->m_isShowAxes);
+    m_itemToggleShowAxes->Check( SceneManager::getInstance()->areAxesDisplayed() );
     //m_itemToggleColorMapLegend->Check(mf->m_datasetHelper->m_colorMap);
-    m_itemMoveBoundaryPointLeft->Enable(DatasetManager::getInstance()->isSurfaceLoaded());
-    m_itemMoveBoundaryPointRight->Enable(DatasetManager::getInstance()->isSurfaceLoaded());
-    m_itemToggleDrawPoints->Check(mf->m_pDatasetHelper->m_pointMode);
-    m_itemToggleDrawVectors->Check(mf->m_pDatasetHelper->m_drawVectors);
+    m_itemMoveBoundaryPointLeft->Enable( DatasetManager::getInstance()->isSurfaceLoaded() );
+    m_itemMoveBoundaryPointRight->Enable( DatasetManager::getInstance()->isSurfaceLoaded() );
+    m_itemToggleDrawPoints->Check( SceneManager::getInstance()->isPointMode() );
+    m_itemToggleDrawVectors->Check( SceneManager::getInstance()->areVectorsDisplayed() );
 	
     m_itemToggleDrawer->Check(mf->m_pDatasetHelper->m_isDrawerToolActive);
 	m_itemToggleDrawRound->Check(mf->m_pDatasetHelper->m_drawRound);
