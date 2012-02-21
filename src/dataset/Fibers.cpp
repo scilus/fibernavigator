@@ -56,7 +56,7 @@ Fibers::~Fibers()
 {
     Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
 
-    if( m_dh->m_useVBO )
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glDeleteBuffers( 3, m_bufferObjects );
     }
@@ -1557,7 +1557,7 @@ void Fibers::updateFibersColors()
     {
 		float *pColorData( NULL );
 		
-		if( m_dh->m_useVBO )
+		if( SceneManager::getInstance()->isUsingVBO() )
 		{
 			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
 			pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
@@ -1584,7 +1584,7 @@ void Fibers::updateFibersColors()
             colorWithMinDistance( pColorData );
         }
 
-        if( m_dh->m_useVBO)
+        if( SceneManager::getInstance()->isUsingVBO() )
         {
             glUnmapBuffer( GL_ARRAY_BUFFER );
         }
@@ -1969,7 +1969,7 @@ void Fibers::colorWithMinDistance( float *pColorData )
 Anatomy* Fibers::generateFiberVolume()
 {
 	float* pColorData( NULL );
-	if( m_dh->m_useVBO )
+	if( SceneManager::getInstance()->isUsingVBO() )
     {
 		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
 			
@@ -2015,7 +2015,7 @@ Anatomy* Fibers::generateFiberVolume()
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
     }
 
-    if( m_dh->m_useVBO )
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2030,7 +2030,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
 
 	float *pColorData( NULL );
 	
-	if( m_dh->m_useVBO )
+	if( SceneManager::getInstance()->isUsingVBO() )
     {
 		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
 		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
@@ -2071,7 +2071,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
         }
     }
 
-    if( m_dh->m_useVBO)
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2408,7 +2408,7 @@ void Fibers::resetColorArray()
     float *pColorData( NULL );
     float *pColorData2( NULL );
 	
-	if( m_dh->m_useVBO )
+	if( SceneManager::getInstance()->isUsingVBO() )
     {
 		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
 		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
@@ -2471,7 +2471,7 @@ void Fibers::resetColorArray()
         }
     }
 
-    if( m_dh->m_useVBO)
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2578,7 +2578,7 @@ void Fibers::updateLinesShown()
 			float *pColorData( NULL );
 			float *pColorData2( NULL );
 			
-			if( m_dh->m_useVBO )
+			if( SceneManager::getInstance()->isUsingVBO() )
 			{
 				glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
 				pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
@@ -2611,7 +2611,7 @@ void Fibers::updateLinesShown()
                 }
             }
 
-            if( m_dh->m_useVBO )
+            if( SceneManager::getInstance()->isUsingVBO() )
             {
                 glUnmapBuffer( GL_ARRAY_BUFFER );
             }
@@ -2828,7 +2828,7 @@ void Fibers::barycenterTest( int left, int right, int axis )
 
 void Fibers::initializeBuffer()
 {
-    if( m_isInitialized || ! m_dh->m_useVBO )
+    if( m_isInitialized || !SceneManager::getInstance()->isUsingVBO()  )
     {
         return;
     }
@@ -2858,7 +2858,7 @@ void Fibers::initializeBuffer()
         isOK = !Logger::getInstance()->printIfGLError( wxT( "initialize vbo normals" ) );
     }
 
-    m_dh->m_useVBO = isOK;
+    SceneManager::getInstance()->setUsingVBO( isOK );
 
     if( isOK )
     {
@@ -2914,7 +2914,7 @@ void Fibers::draw()
     glEnableClientState( GL_COLOR_ARRAY );
     glEnableClientState( GL_NORMAL_ARRAY );
 
-    if( ! m_dh->m_useVBO )
+    if( !SceneManager::getInstance()->isUsingVBO() )
     {
         glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
 
@@ -3121,7 +3121,7 @@ void Fibers::drawSortedLines()
     float *pColors  = NULL;
     float *pNormals = NULL;
 
-    if( m_dh->m_useVBO )
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
         pColors = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
@@ -3215,7 +3215,7 @@ void Fibers::drawCrossingFibers()
     glEnableClientState( GL_COLOR_ARRAY );
     glEnableClientState( GL_NORMAL_ARRAY );
 
-    if( ! m_dh->m_useVBO )
+    if( !SceneManager::getInstance()->isUsingVBO() )
     {
         glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
 

@@ -594,7 +594,7 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 void ODFs::draw()
 {
     // We need VBOs for ODFs, particularly to store the radii
-    if( !m_dh->m_useVBO  )
+    if( !SceneManager::getInstance()->isUsingVBO() )
         return;
 
     // Enable the shader.
@@ -860,7 +860,7 @@ void ODFs::computeZRadiusSlice()
 void ODFs::loadBuffer()
 {
     // We need to (re)load the buffer in video memory only if we are using VBO.
-    if( !m_dh->m_useVBO )
+    if( !SceneManager::getInstance()->isUsingVBO() )
         return;        
 
     computeXRadiusSlice();
@@ -900,7 +900,7 @@ void ODFs::loadRadiusBuffer( AxisType i_axis )
     // There was a problem loading this buffer into video memory!
     if( Logger::getInstance()->printIfGLError( wxT( "Initialize vbo points for tensors" ) ) )
     {
-        m_dh->m_useVBO = false;
+        SceneManager::getInstance()->setUsingVBO( false );
         delete [] m_radiusBuffer;
     }
 }

@@ -83,13 +83,19 @@ public:
     bool toggleSagittalDisplay()        { return m_showSagittal   = !m_showSagittal; }
     bool toggleCrosshairDisplay()       { return m_showCrosshair  = !m_showCrosshair; }
     
-    float getSliceX() const     { return m_sliceX; }
-    float getSliceY() const     { return m_sliceY; }
-    float getSliceZ() const     { return m_sliceZ; }
+    float getSliceX() const         { return m_sliceX; }
+    float getSliceY() const         { return m_sliceY; }
+    float getSliceZ() const         { return m_sliceZ; }
 
-    void  setSliceX( float x )  { m_sliceX = x; }
-    void  setSliceY( float y )  { m_sliceY = y; }
-    void  setSliceZ( float z )  { m_sliceZ = z; }
+    void  setSliceX( float x )      { m_sliceX = x; }
+    void  setSliceY( float y )      { m_sliceY = y; }
+    void  setSliceZ( float z )      { m_sliceZ = z; }
+
+    bool  isUsingVBO() const        { return m_useVBO; }
+    void  setUsingVBO( bool state ) { m_useVBO = state; }
+
+    int   getQuadrant() const       { return m_quadrant; }
+    void  setQuadrant( int quad )   { m_quadrant = quad; }
 
 protected:
     SceneManager(void);
@@ -122,6 +128,9 @@ private:
     float m_sliceX;
     float m_sliceY;
     float m_sliceZ;
+
+    bool  m_useVBO;
+    int   m_quadrant;
 };
 
 #endif SCENEMANAGER_H_

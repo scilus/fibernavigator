@@ -128,8 +128,8 @@ public:
     // state variables for rendering
     /////////////////////////////////////////////////////////////////////////////////
     Matrix4fT m_transform;
-    bool      m_useVBO;
-    int       m_quadrant;
+//     bool      m_useVBO;
+//     int       m_quadrant;
     //int       m_textures;
     //! if set the shaders will be reloaded during next render() call
     bool      m_scheduledReloadShaders;

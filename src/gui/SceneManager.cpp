@@ -33,7 +33,9 @@ SceneManager::SceneManager(void)
     m_showCrosshair( false ),
     m_sliceX( 0.0f ),
     m_sliceY( 0.0f ),
-    m_sliceZ( 0.0f )
+    m_sliceZ( 0.0f ),
+    m_useVBO( true ),
+    m_quadrant( 6 )
 {
 }
 

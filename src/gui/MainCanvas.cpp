@@ -471,7 +471,8 @@ void MainCanvas::updateView()
             quadrant = i + 1;
         }
     }
-    m_pDatasetHelper->m_quadrant = quadrant;
+
+    SceneManager::getInstance()->setQuadrant( quadrant );
 }
 
 float MainCanvas::getAxisParallelMovement( int x1, int y1, int x2, int y2, Vector n )

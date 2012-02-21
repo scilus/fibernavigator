@@ -945,20 +945,22 @@ void TheScene::drawVectors()
             float bright( 1.2f );
             float dull( 0.7f );
 
-            bool topview = m_pDatasetHelper->m_quadrant == 2 || 
-                           m_pDatasetHelper->m_quadrant == 3 || 
-                           m_pDatasetHelper->m_quadrant == 6 || 
-                           m_pDatasetHelper->m_quadrant == 7;
+            int quadrant = SceneManager::getInstance()->getQuadrant();
 
-            bool leftview = m_pDatasetHelper->m_quadrant == 5 || 
-                            m_pDatasetHelper->m_quadrant == 6 ||
-                            m_pDatasetHelper->m_quadrant == 7 || 
-                            m_pDatasetHelper->m_quadrant == 8;
+            bool topview = quadrant == 2 || 
+                           quadrant == 3 || 
+                           quadrant == 6 || 
+                           quadrant == 7;
 
-            bool frontview = m_pDatasetHelper->m_quadrant == 3 || 
-                             m_pDatasetHelper->m_quadrant == 4 || 
-                             m_pDatasetHelper->m_quadrant == 5 || 
-                             m_pDatasetHelper->m_quadrant == 6;
+            bool leftview = quadrant == 5 || 
+                            quadrant == 6 ||
+                            quadrant == 7 || 
+                            quadrant == 8;
+
+            bool frontview = quadrant == 3 || 
+                             quadrant == 4 || 
+                             quadrant == 5 || 
+                             quadrant == 6;
 
             float columns = DatasetManager::getInstance()->getColumns();
             float rows    = DatasetManager::getInstance()->getRows();

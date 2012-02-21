@@ -58,7 +58,7 @@ Glyph::Glyph( DatasetHelper* i_datasetHelper,
 Glyph::~Glyph()
 {
     Logger::getInstance()->print( wxT( "Executing Glyph destructor..." ), LOGLEVEL_DEBUG );
-    if( m_dh->m_useVBO && m_hemisphereBuffer )
+    if( SceneManager::getInstance()->isUsingVBO() && m_hemisphereBuffer )
     {
         glDeleteBuffers( 1, m_hemisphereBuffer );
         delete m_hemisphereBuffer;
@@ -590,7 +590,7 @@ void Glyph::setLOD( LODChoices i_LOD )
 void Glyph::loadBuffer()
 {
     // We need to (re)load the buffer in video memory only if we are using VBO.
-    if( !m_dh->m_useVBO )
+    if( !SceneManager::getInstance()->isUsingVBO() )
         return;        
 
     // Sphere buffers
@@ -611,7 +611,7 @@ void Glyph::loadBuffer()
     // There was a problem loading this buffer into video memory!
     if( Logger::getInstance()->printIfGLError( wxT( "Initialize vbo points for tensors" ) ) )
     {
-        m_dh->m_useVBO = false;
+        SceneManager::getInstance()->setUsingVBO( false );
         delete m_hemisphereBuffer;
     }
 }

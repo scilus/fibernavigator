@@ -259,7 +259,7 @@ void ShaderHelper::setMeshShaderVars()
     m_meshShader.setUniFloat( "voxY", DatasetManager::getInstance()->getVoxelY() );
     m_meshShader.setUniFloat( "voxZ", DatasetManager::getInstance()->getVoxelZ() );
 
-    m_meshShader.setUniInt( "sector", m_pDh->m_quadrant );
+    m_meshShader.setUniInt( "sector", SceneManager::getInstance()->getQuadrant() );
     m_meshShader.setUniFloat( "cutX", SceneManager::getInstance()->getSliceX() + 0.5f );
     m_meshShader.setUniFloat( "cutY", SceneManager::getInstance()->getSliceY() + 0.5f );
     m_meshShader.setUniFloat( "cutZ", SceneManager::getInstance()->getSliceZ() + 0.5f );

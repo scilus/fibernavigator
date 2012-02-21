@@ -55,8 +55,8 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_scnFileLoaded      ( false ),
     m_surfaceIsDirty     ( true  ),
 
-    m_useVBO( true ),
-    m_quadrant( 6 ),
+//     m_useVBO( true ),
+//     m_quadrant( 6 ),
 //    m_textures( 0 ),
 
     m_scheduledReloadShaders( true  ),

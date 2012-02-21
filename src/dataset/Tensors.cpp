@@ -353,7 +353,7 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
         }
 
-        if( !m_dh->m_useVBO )
+        if( !SceneManager::getInstance()->isUsingVBO() )
         {
             glVertexPointer( 3, GL_FLOAT, 0, &m_LODspheres[m_currentLOD][0] ); 
         }

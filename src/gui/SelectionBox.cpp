@@ -11,6 +11,7 @@
 
 #include "SelectionBox.h"
 
+#include "SceneManager.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
@@ -116,15 +117,15 @@ void SelectionBox::drawObject( GLfloat* i_color )
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     glBegin( GL_QUADS );
-        switch( m_datasetHelper->m_quadrant )
+    switch( SceneManager::getInstance()->getQuadrant() )
         {
             case 1: draw2(); draw4(); draw6(); draw1(); draw3(); draw5(); break;    
-            case 2: draw2(); draw4(); draw5(); draw1();    draw3(); draw6(); break;
+            case 2: draw2(); draw4(); draw5(); draw1(); draw3(); draw6(); break;
             case 3: draw2(); draw3(); draw5(); draw1(); draw4(); draw6(); break;
             case 4: draw2(); draw3(); draw6(); draw1(); draw4(); draw5(); break;
             case 5: draw1(); draw3(); draw6(); draw2(); draw4(); draw5(); break;
-            case 6:    draw1(); draw3(); draw5(); draw2(); draw4(); draw6(); break;
-            case 7:    draw1(); draw4(); draw5(); draw2(); draw3(); draw6(); break;
+            case 6: draw1(); draw3(); draw5(); draw2(); draw4(); draw6(); break;
+            case 7: draw1(); draw4(); draw5(); draw2(); draw3(); draw6(); break;
             case 8: draw1(); draw4(); draw6(); draw2(); draw3(); draw5(); break;
         }
 
