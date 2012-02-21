@@ -218,7 +218,7 @@ public:
     SelectionObject* m_boxAtCrosshair;
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
-    TheScene*        m_theScene;
+    //TheScene*        m_theScene;
     ShaderHelper*    m_shaderHelper;
     
     MainFrame*       m_mainFrame;

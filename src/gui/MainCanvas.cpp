@@ -79,7 +79,7 @@ MainCanvas::~MainCanvas()
 
 void MainCanvas::init()
 {
-    m_pDatasetHelper->m_theScene->initGL( m_view );
+    SceneManager::getInstance()->getScene()->initGL( m_view );
     m_init = true;
 }
 
@@ -143,7 +143,7 @@ void MainCanvas::OnShow(wxShowEvent& WXUNUSED(event) )
     }
     else
     {
-        wxGLCanvas::SetCurrent( *m_pDatasetHelper->m_theScene->getMainGLContext() );
+        wxGLCanvas::SetCurrent( *SceneManager::getInstance()->getScene()->getMainGLContext() );
     }
 #endif
     
@@ -673,7 +673,7 @@ void MainCanvas::render()
     wxPaintDC dc( this );
 
 #ifndef __WXMAC__
-    SetCurrent(*m_pDatasetHelper->m_theScene->getMainGLContext());
+    SetCurrent(*SceneManager::getInstance()->getScene()->getMainGLContext());
 #else
     SetCurrent();
 #endif
@@ -762,7 +762,7 @@ void MainCanvas::render()
                 glPushMatrix();
                 m_pDatasetHelper->doMatrixManipulation();
 				
-                m_pDatasetHelper->m_theScene->renderScene();
+                SceneManager::getInstance()->getScene()->renderScene();
                 glPopMatrix();
 
                 fbo.getTexObject( 1 )->saveImageToPPM( ( m_pDatasetHelper->m_screenshotName ).mb_str() );
@@ -779,7 +779,7 @@ void MainCanvas::render()
                 glPushMatrix();
                 m_pDatasetHelper->doMatrixManipulation();
 
-                m_pDatasetHelper->m_theScene->renderScene();
+                SceneManager::getInstance()->getScene()->renderScene();
 
                 //add the hit Point to ruler point list
                 
@@ -848,11 +848,11 @@ void MainCanvas::invalidate()
     if ( m_pDatasetHelper->m_texAssigned )
     {
 #ifndef __WXMAC__
-        SetCurrent( *m_pDatasetHelper->m_theScene->getMainGLContext() );
+        SetCurrent( *SceneManager::getInstance()->getScene()->getMainGLContext() );
 #else
         SetCurrent();
 #endif
-        //m_pDatasetHelper->m_theScene->releaseTextures();
+        //SceneManager::getInstance()->getScene()->releaseTextures();
         m_pDatasetHelper->m_texAssigned = false;
     }
     m_init = false;
@@ -882,7 +882,7 @@ void::MainCanvas::renderRulerDisplay()
             glEnd ();    
 
             
-            m_pDatasetHelper->m_theScene->drawSphere( pts.x, pts.y, pts.z, sphereSize);
+            SceneManager::getInstance()->getScene()->drawSphere( pts.x, pts.y, pts.z, sphereSize);
             
             m_pDatasetHelper->m_rulerPartialLength = (lastPts - pts).getLength();
             m_pDatasetHelper->m_rulerFullLength += m_pDatasetHelper->m_rulerPartialLength;
@@ -924,7 +924,7 @@ void MainCanvas::renderTestRay()
     glVertex3f( m_pos2X, m_pos2Y, m_pos2Z );
     glEnd();
     Vector dir( m_pos2X - m_pos1X, m_pos2Y - m_pos1Y, m_pos2Z - m_pos1Z );
-    m_pDatasetHelper->m_theScene->drawSphere( m_pos1X + m_hr.tmin * dir.x, 
+    SceneManager::getInstance()->getScene()->drawSphere( m_pos1X + m_hr.tmin * dir.x, 
                                   m_pos1Y + m_hr.tmin * dir.y,
                                   m_pos1Z + m_hr.tmin * dir.z,
                                   3.0 * DatasetManager::getInstance()->getVoxelX() );

@@ -36,7 +36,7 @@ void AnatomyHelper::renderNav( int pView, ShaderProgram *pShader )
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    m_datasetHelper->m_theScene->bindTextures();
+    SceneManager::getInstance()->getScene()->bindTextures();
     pShader->bind();
     m_datasetHelper->m_shaderHelper->initializeArrays();
     m_datasetHelper->m_shaderHelper->setTextureShaderVars();

@@ -49,6 +49,14 @@ public:
     void         initGL          ( int whichView );
     void         renderScene     ();
     void         setMainGLContext( wxGLContext* pContext ) { m_pMainGLContext = pContext; };
+
+    bool toggleIsRotateX()      { return m_isRotateX    = !m_isRotateX; }
+    bool toggleIsRotateY()      { return m_isRotateY    = !m_isRotateY; }
+    bool toggleIsRotateZ()      { return m_isRotateZ    = !m_isRotateZ; }
+    bool toggleIsNavAxial()     { return m_isNavAxial   = !m_isNavAxial; }
+    bool toggleIsNavCoronal()   { return m_isNavCoronal = !m_isNavCoronal; }
+    bool toggleIsNavSagittal()  { return m_isNavSagital = !m_isNavSagital; }
+
 	bool         m_isRotateZ;
     bool         m_isRotateY;
     bool         m_isRotateX;

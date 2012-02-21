@@ -186,7 +186,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pDatasetHelper = new DatasetHelper( this );
     // TODO: Remove dependency to DatasetHelper
     DatasetManager::getInstance()->setDatasetHelper( m_pDatasetHelper );
-    m_pDatasetHelper->m_theScene = new TheScene( m_pDatasetHelper );
+    SceneManager::getInstance()->setTheScene( new TheScene( m_pDatasetHelper ) );
 
     //////////////////////////////////////////////////////////////////////////
     // MyTreeCtrl initialization
@@ -269,10 +269,10 @@ void MainFrame::initOpenGl()
     m_pGL2->SetMaxSize( wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ) );
 
 #ifndef __WXMAC__
-    m_pDatasetHelper->m_theScene->setMainGLContext( new wxGLContext( m_pMainGL ) );
+    SceneManager::getInstance()->getScene()->setMainGLContext( new wxGLContext( m_pMainGL ) );
     glGetError(); // Removes the error code so we don't have an error message the first time we check it
 #else
-    m_pDatasetHelper->m_theScene->setMainGLContext( m_pMainGL->GetContext() );
+    SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
 #endif
 
 }
@@ -698,11 +698,6 @@ void MainFrame::onMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-
     // Get the selection object is selected.
     wxTreeItemId l_selectionObjectTreeId = m_pTreeWidget->GetSelection();
 
@@ -739,35 +734,19 @@ void MainFrame::onToggleSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleDrawPointsMode( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-    {
-        return;
-    }
     m_pDatasetHelper->togglePointMode();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectDrawer( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-
 	m_pDatasetHelper->m_isDrawerToolActive = true;
-
     updateDrawerToolbar();
 }
 
 void MainFrame::onSwitchDrawer( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-    
     m_pDatasetHelper->m_isDrawerToolActive = !m_pDatasetHelper->m_isDrawerToolActive;
-    
     updateDrawerToolbar();
 }
 
@@ -800,31 +779,18 @@ void MainFrame::updateDrawerToolbar()
 
 void MainFrame::onToggleDrawRound( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-    {
-        return;
-    }
     m_pDatasetHelper->m_drawRound = !m_pDatasetHelper->m_drawRound;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleDraw3d( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-    {
-        return;
-    }
     m_pDatasetHelper->m_draw3d = !m_pDatasetHelper->m_draw3d;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-	{
-        return;
-	}
-
     wxColourData l_colorData;
 
     for( int i = 0; i < 10; ++i )
@@ -892,102 +858,57 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 
 void MainFrame::onSelectStroke1( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawSize = 1;
-	
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke2( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawSize = 2;
-	
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke3( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawSize = 3;
-	
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke4( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawSize = 4;
-	
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke5( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawSize = 5;
-	
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke7( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawSize = 7;
-	
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke10( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawSize = 10;
-	
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectPen( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_PEN;
 	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
-	
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectEraser( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
 	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_ERASER;
 	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
-
 	refreshAllGLWidgets();
 }
 
@@ -1310,11 +1231,6 @@ void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
 {
-    if( m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
@@ -1380,31 +1296,14 @@ void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
 
 void MainFrame::onHideSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-    {
-        return;
-    }
     m_pDatasetHelper->toggleShowAllSelectionObjects();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onActivateSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
     m_pDatasetHelper->toggleActivateAllSelectionObjects();
     refreshAllGLWidgets();
-}
-
-void MainFrame::onUseMorph( wxCommandEvent& WXUNUSED(event) )
-{
-    if( m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-//    m_pDatasetHelper->m_morphing = ! m_pDatasetHelper->m_morphing;
 }
 
 /****************************************************************************************************
@@ -1415,7 +1314,7 @@ void MainFrame::onUseMorph( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 {
-    if( !m_pDatasetHelper->m_theScene || DatasetManager::getInstance()->isSurfaceLoaded() )
+    if( DatasetManager::getInstance()->isSurfaceLoaded() )
     {
         return;
     }
@@ -1538,10 +1437,6 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleDrawVectors( wxCommandEvent& WXUNUSED(event) )
 {
-    if(m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
     m_pDatasetHelper->m_drawVectors = !m_pDatasetHelper->m_drawVectors;
     refreshAllGLWidgets();
 }
@@ -1670,11 +1565,6 @@ void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-
 	m_pDatasetHelper->m_isRulerToolActive = false;
 	m_pDatasetHelper->m_isDrawerToolActive = false;
 
@@ -1689,11 +1579,6 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-
 	m_pDatasetHelper->m_isRulerToolActive = true;
 	m_pDatasetHelper->m_isDrawerToolActive = false;
 
@@ -1958,34 +1843,16 @@ void MainFrame::onSliderMoved( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onToggleShowAxial( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->toggleAxialDisplay();
-//     if (m_pDatasetHelper->m_theScene == NULL)
-//     {
-//         return;
-//     }
-//     m_pDatasetHelper->m_showAxial = ! m_pDatasetHelper->m_showAxial;
-//     m_pMainGL->Refresh();
 }
 
 void MainFrame::onToggleShowCoronal( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->toggleCoronalDisplay();
-//     if (m_pDatasetHelper->m_theScene == NULL)
-//     {
-//         return;
-//     }
-//     m_pDatasetHelper->m_showCoronal = ! m_pDatasetHelper->m_showCoronal;
-//     m_pMainGL->Refresh();
 }
 
 void MainFrame::onToggleShowSagittal( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->toggleSagittalDisplay();
-//     if (m_pDatasetHelper->m_theScene == NULL)
-//     {
-//         return;
-//     }
-//     m_pDatasetHelper->m_showSagittal = ! m_pDatasetHelper->m_showSagittal;
-//     m_pMainGL->Refresh();
 }
 
 void MainFrame::onToggleAlpha( wxCommandEvent& WXUNUSED(event) )
@@ -2430,45 +2297,49 @@ int MainFrame::treeSelected( wxTreeItemId i_id )
 }
 void MainFrame::onRotateZ( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isRotateZ = !m_pDatasetHelper->m_theScene->m_isRotateZ; 
+    SceneManager::getInstance()->getScene()->toggleIsRotateZ();
     setTimerSpeed();
 }
 
 void MainFrame::onRotateY( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isRotateY = !m_pDatasetHelper->m_theScene->m_isRotateY; 
+    SceneManager::getInstance()->getScene()->toggleIsRotateY();
     setTimerSpeed();
 }
 
 void MainFrame::onRotateX( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isRotateX = !m_pDatasetHelper->m_theScene->m_isRotateX; 
+    SceneManager::getInstance()->getScene()->toggleIsRotateX();
     setTimerSpeed();
 }
 
 void MainFrame::onNavigateAxial( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isNavAxial = !m_pDatasetHelper->m_theScene->m_isNavAxial;
+    SceneManager::getInstance()->getScene()->toggleIsNavAxial();
     setTimerSpeed();
 }
 
 void MainFrame::onNavigateSagital( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isNavSagital = !m_pDatasetHelper->m_theScene->m_isNavSagital;    
+    SceneManager::getInstance()->getScene()->toggleIsNavSagittal();
     setTimerSpeed();  
 }
 
 void MainFrame::onNavigateCoronal( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isNavCoronal = !m_pDatasetHelper->m_theScene->m_isNavCoronal;
+    SceneManager::getInstance()->getScene()->toggleIsNavCoronal();
     setTimerSpeed();
 }
 
 void MainFrame::setTimerSpeed()
 {
     m_pTimer->Stop();
-    if(m_pDatasetHelper->m_theScene->m_isNavCoronal || m_pDatasetHelper->m_theScene->m_isNavAxial || m_pDatasetHelper->m_theScene->m_isNavSagital || m_pDatasetHelper->m_theScene->m_isRotateZ
-        || m_pDatasetHelper->m_theScene->m_isRotateY || m_pDatasetHelper->m_theScene->m_isRotateX)
+    if(    SceneManager::getInstance()->getScene()->m_isNavAxial 
+        || SceneManager::getInstance()->getScene()->m_isNavCoronal
+        || SceneManager::getInstance()->getScene()->m_isNavSagital 
+        || SceneManager::getInstance()->getScene()->m_isRotateX
+        || SceneManager::getInstance()->getScene()->m_isRotateY 
+        || SceneManager::getInstance()->getScene()->m_isRotateZ )
     {        
         m_pTimer->Start( 50 );
     }
@@ -2479,7 +2350,7 @@ void MainFrame::setTimerSpeed()
 }
 /****************************************************************************************************
  *
- * System event funtions
+ * System event functions
  *
  *
  ****************************************************************************************************/
@@ -2599,45 +2470,49 @@ void MainFrame::updateMenus()
 void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
 {    
     //Rotate animation
-    if(m_pDatasetHelper->m_theScene->m_isRotateZ)
+    if( SceneManager::getInstance()->getScene()->m_isRotateZ )
     {
-        m_pDatasetHelper->m_theScene->m_rotAngleZ++;
+        SceneManager::getInstance()->getScene()->m_rotAngleZ++;
     }
-    if(m_pDatasetHelper->m_theScene->m_isRotateY)
+    if( SceneManager::getInstance()->getScene()->m_isRotateY )
     {
-        m_pDatasetHelper->m_theScene->m_rotAngleY++;
+        SceneManager::getInstance()->getScene()->m_rotAngleY++;
     }
-    if(m_pDatasetHelper->m_theScene->m_isRotateX)
+    if( SceneManager::getInstance()->getScene()->m_isRotateX )
     {
-        m_pDatasetHelper->m_theScene->m_rotAngleX++;
-    }    
-    //Navigate through slizes sagital
-    if(m_pDatasetHelper->m_theScene->m_isNavSagital)
+        SceneManager::getInstance()->getScene()->m_rotAngleX++;
+    } 
+
+    //Navigate through slices sagittal
+    if( SceneManager::getInstance()->getScene()->m_isNavSagital )
     {
-        m_pDatasetHelper->m_theScene->m_posSagital++;
-    }
-    else
-    {
-        m_pDatasetHelper->m_theScene->m_posSagital = SceneManager::getInstance()->getSliceX();
-    }
-    //Navigate through slizes axial
-    if(m_pDatasetHelper->m_theScene->m_isNavAxial)
-    {
-        m_pDatasetHelper->m_theScene->m_posAxial++;
+        SceneManager::getInstance()->getScene()->m_posSagital++;
     }
     else
     {
-        m_pDatasetHelper->m_theScene->m_posAxial = SceneManager::getInstance()->getSliceZ();
+        SceneManager::getInstance()->getScene()->m_posSagital = SceneManager::getInstance()->getSliceX();
     }
-    //Navigate through slizes coronal
-    if(m_pDatasetHelper->m_theScene->m_isNavCoronal)
+
+    //Navigate through slices axial
+    if( SceneManager::getInstance()->getScene()->m_isNavAxial )
     {
-        m_pDatasetHelper->m_theScene->m_posCoronal++;
+        SceneManager::getInstance()->getScene()->m_posAxial++;
     }
     else
     {
-        m_pDatasetHelper->m_theScene->m_posCoronal = SceneManager::getInstance()->getSliceY();
+        SceneManager::getInstance()->getScene()->m_posAxial = SceneManager::getInstance()->getSliceZ();
     }
+
+    //Navigate through slices coronal
+    if( SceneManager::getInstance()->getScene()->m_isNavCoronal )
+    {
+        SceneManager::getInstance()->getScene()->m_posCoronal++;
+    }
+    else
+    {
+        SceneManager::getInstance()->getScene()->m_posCoronal = SceneManager::getInstance()->getSliceY();
+    }
+
     refreshAllGLWidgets();
     refreshViews();
     m_pDatasetHelper->increaseAnimationStep();    

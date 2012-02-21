@@ -1359,9 +1359,6 @@ void PropertiesWindow::OnConvexHullColorChange( wxCommandEvent& WXUNUSED(event) 
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnConvexHullColorChange" ), LOGLEVEL_DEBUG );
 
-    if( ! m_pMainFrame->m_pDatasetHelper->m_theScene )
-        return;
-
     wxColourData l_colorData;
 
     for( int i = 0; i < 10; ++i )
@@ -1415,9 +1412,6 @@ void PropertiesWindow::OnConvexHullOpacityChange( wxCommandEvent& WXUNUSED(event
 void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMeanFiberColorChange" ), LOGLEVEL_DEBUG );
-
-    if( !m_pMainFrame->m_pDatasetHelper->m_theScene )
-        return;
 
     wxColourData l_colorData;
 
@@ -1518,9 +1512,6 @@ void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
 
-    if( !m_pMainFrame->m_pDatasetHelper->m_theScene)
-        return;
-
     // Get what selection object is selected.
     wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
 
@@ -1547,9 +1538,6 @@ void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 void PropertiesWindow::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorRoi" ), LOGLEVEL_DEBUG );
-
-    if( ! m_pMainFrame->m_pDatasetHelper->m_theScene )
-        return;
 
     // Get the currently selected object.
     wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
@@ -1628,9 +1616,6 @@ void PropertiesWindow::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(eve
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleShowSelectionObject" ), LOGLEVEL_DEBUG );
 
-    if( !m_pMainFrame->m_pDatasetHelper->m_theScene)
-        return;
-
     // Get the selected selection object.
     wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
 
@@ -1670,9 +1655,6 @@ void PropertiesWindow::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(eve
 void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnAssignColor" ), LOGLEVEL_DEBUG );
-
-    if( ! m_pMainFrame->m_pDatasetHelper->m_theScene )
-        return;
 
     wxColourData l_colorData;
 

@@ -3,6 +3,7 @@
 #include "MainFrame.h"
 #include "MyListCtrl.h"
 #include "SelectionObject.h"
+#include "TheScene.h"
 
 #include "../Logger.h"
 #include "../dataset/DatasetManager.h"
@@ -673,5 +674,8 @@ SelectionObjList SceneManager::getSelectionObjects()
 
 SceneManager::~SceneManager(void)
 {
+    delete m_pTheScene;
+    m_pTheScene = NULL;
+
     m_pInstance = NULL;
 }

@@ -146,7 +146,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_boxAtCrosshair    ( 0 ),
     m_lastSelectedPoint ( NULL ),
     m_lastSelectedObject( NULL ),
-    m_theScene          ( 0 ),
+//    m_theScene          ( 0 ),
     m_mainFrame			( mf ),
 	m_shaderHelper      ( 0 )
 {
@@ -156,9 +156,6 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 DatasetHelper::~DatasetHelper()
 {
     Logger::getInstance()->print( wxT( "Execute DatasetHelper destructor" ), LOGLEVEL_DEBUG );
-
-    if ( m_theScene )
-        delete m_theScene;
 
     if ( m_anatomyHelper )
         delete m_anatomyHelper;
