@@ -3809,11 +3809,11 @@ void Fibers::setShader()
 
     if( m_useFakeTubes )
     {
-        m_dh->m_shaderHelper->m_fakeTubesShader.bind();
-        m_dh->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", getShowFS() );
-        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().x );
-        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().y );
-        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
+        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.bind();
+        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniInt  ( "globalColor", getShowFS() );
+        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "dimX", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().x );
+        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "dimY", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().y );
+        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
     }
     else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
     {
@@ -3825,24 +3825,24 @@ void Fibers::setShader()
         const float zMin( SceneManager::getInstance()->getSliceZ() + 0.5f - m_thickness );
         const float zMax( SceneManager::getInstance()->getSliceZ() + 0.5f + m_thickness );
 
-        m_dh->m_shaderHelper->m_crossingFibersShader.bind();
+        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.bind();
 
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", SceneManager::getInstance()->isSagittalDisplayed() ? xMin : 0 );
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", SceneManager::getInstance()->isSagittalDisplayed() ? xMax : 0 );
+        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("xMin", SceneManager::getInstance()->isSagittalDisplayed() ? xMin : 0 );
+        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("xMax", SceneManager::getInstance()->isSagittalDisplayed() ? xMax : 0 );
 		
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", SceneManager::getInstance()->isCoronalDisplayed() ? yMin : 0 );
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", SceneManager::getInstance()->isCoronalDisplayed() ? yMax : 0 );
+        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("yMin", SceneManager::getInstance()->isCoronalDisplayed() ? yMin : 0 );
+        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("yMax", SceneManager::getInstance()->isCoronalDisplayed() ? yMax : 0 );
 
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", SceneManager::getInstance()->isAxialDisplayed() ? zMin : 0 );
-        m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", SceneManager::getInstance()->isAxialDisplayed() ? zMax : 0 );
+        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("zMin", SceneManager::getInstance()->isAxialDisplayed() ? zMin : 0 );
+        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("zMax", SceneManager::getInstance()->isAxialDisplayed() ? zMax : 0 );
     }
     else if ( !m_useTex )
     {
-        m_dh->m_shaderHelper->m_fibersShader.bind();
-        m_dh->m_shaderHelper->setFiberShaderVars();
-        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_dh->m_colorMap );
-        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
+        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.bind();
+        SceneManager::getInstance()->getShaderHelper()->setFiberShaderVars();
+        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
+        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useColorMap", m_dh->m_colorMap );
+        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
     }
 }
 
@@ -3850,14 +3850,14 @@ void Fibers::releaseShader()
 {
     if( m_useFakeTubes )
     {
-        m_dh->m_shaderHelper->m_fakeTubesShader.release();
+        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.release();
     }
     else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
     {
-        m_dh->m_shaderHelper->m_crossingFibersShader.release();
+        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.release();
     }
     else if( !m_useTex )
     {
-        m_dh->m_shaderHelper->m_fibersShader.release();
+        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.release();
     }
 }

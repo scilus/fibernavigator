@@ -11,6 +11,7 @@
 class MainFrame;
 class MyTreeCtrl;
 class SelectionObject;
+class ShaderHelper;
 class TheScene;
 
 typedef std::vector< std::vector< SelectionObject * > > SelectionObjList;
@@ -47,11 +48,14 @@ public:
 
     SelectionObjList getSelectionObjects();
 
-    void    setMainFrame( MainFrame *pMainFrame ) { m_pMainFrame = pMainFrame; }
-    void    setTreeCtrl ( MyTreeCtrl *pTreeCtrl ) { m_pTreeView  = pTreeCtrl; }
+    void    setMainFrame( MainFrame *pMainFrame )           { m_pMainFrame = pMainFrame; }
+    void    setShaderHelper( ShaderHelper *pShaderHelper )  { m_pShaderHelper = pShaderHelper; }
+    void    setTreeCtrl ( MyTreeCtrl *pTreeCtrl )           { m_pTreeView  = pTreeCtrl; }
     // TODO: Remove this temporary getter/setter once TheScene is created directly in the constructor of the SceneManager
-    void    setTheScene ( TheScene *pTheScene )   { m_pTheScene  = pTheScene; }
-    TheScene * getScene() const                   { return m_pTheScene; }
+    void    setTheScene ( TheScene *pTheScene )             { m_pTheScene  = pTheScene; }
+
+    TheScene * getScene() const             { return m_pTheScene; }
+    ShaderHelper * getShaderHelper() const  { return m_pShaderHelper; }
 
 //////////////////////////////////////////////////////////////////////////
 //  GETTERS / SETTERS
@@ -95,6 +99,7 @@ private:
 
     MyTreeCtrl *m_pTreeView;
     MainFrame  *m_pMainFrame;
+    ShaderHelper *m_pShaderHelper;
     TheScene   *m_pTheScene;
 
     bool  m_geometryShadersSupported;

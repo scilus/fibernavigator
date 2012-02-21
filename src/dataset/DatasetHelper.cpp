@@ -147,8 +147,8 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_lastSelectedPoint ( NULL ),
     m_lastSelectedObject( NULL ),
 //    m_theScene          ( 0 ),
-    m_mainFrame			( mf ),
-	m_shaderHelper      ( 0 )
+    m_mainFrame			( mf )
+//	m_shaderHelper      ( 0 )
 {
     Matrix4fSetIdentity( &m_transform );
 }
@@ -159,9 +159,6 @@ DatasetHelper::~DatasetHelper()
 
     if ( m_anatomyHelper )
         delete m_anatomyHelper;
-
-	if ( m_shaderHelper )
-        delete m_shaderHelper;
 
 	//Not causing Memory leaks for now!!! But should be deleted, if allocated.
 	//if ( m_boxAtCrosshair )

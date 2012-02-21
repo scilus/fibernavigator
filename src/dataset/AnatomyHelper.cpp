@@ -38,8 +38,8 @@ void AnatomyHelper::renderNav( int pView, ShaderProgram *pShader )
 
     SceneManager::getInstance()->getScene()->bindTextures();
     pShader->bind();
-    m_datasetHelper->m_shaderHelper->initializeArrays();
-    m_datasetHelper->m_shaderHelper->setTextureShaderVars();
+    SceneManager::getInstance()->getShaderHelper()->initializeArrays();
+    SceneManager::getInstance()->getShaderHelper()->setTextureShaderVars();
 
     glEnable( GL_ALPHA_TEST );
     glAlphaFunc( GL_GREATER, 0.0001f );

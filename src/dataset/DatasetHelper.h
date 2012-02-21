@@ -219,7 +219,7 @@ public:
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
     //TheScene*        m_theScene;
-    ShaderHelper*    m_shaderHelper;
+    //ShaderHelper*    m_shaderHelper;
     
     MainFrame*       m_mainFrame;
 };
