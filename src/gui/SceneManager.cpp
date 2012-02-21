@@ -25,6 +25,8 @@ SceneManager::SceneManager(void)
     m_geometryShadersSupported( true ),
     m_useFibersGeometryShader( false ),
     m_lighting( true ),
+    m_blendAlpha( false ),
+    m_blendTexOnMesh( true ),
     m_showAxial( true ),
     m_showCoronal( true ),
     m_showSagittal( true ),

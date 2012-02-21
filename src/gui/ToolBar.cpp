@@ -162,7 +162,7 @@ void ToolBar::updateToolBar( MainFrame *mf )
     ToggleTool( m_toggleShowAxial->GetId(),     SceneManager::getInstance()->isAxialDisplayed() );
     ToggleTool( m_toggleShowCoronal->GetId(),   SceneManager::getInstance()->isCoronalDisplayed() );
     ToggleTool( m_toggleShowSagittal->GetId(),  SceneManager::getInstance()->isSagittalDisplayed() );
-    ToggleTool( m_toggleAlphaBlending->GetId(), mf->m_pDatasetHelper->m_blendAlpha);
+    ToggleTool( m_toggleAlphaBlending->GetId(), SceneManager::getInstance()->isAlphaBlend() );
     ToggleTool( m_toggleLighting->GetId(),      SceneManager::getInstance()->isLightingActive() );
     ToggleTool( m_toggleShowAllSelectionObjects->GetId(), mf->m_pDatasetHelper->m_showObjects);
     ToggleTool( m_toggleActivateAllSelectionObjects->GetId(), !mf->m_pDatasetHelper->m_activateObjects);

@@ -246,7 +246,7 @@ void ShaderHelper::setTextureShaderVars()
 
 void ShaderHelper::setMeshShaderVars()
 {
-    m_meshShader.setUniInt( "blendTex", m_pDh->m_blendTexOnMesh );
+    m_meshShader.setUniInt( "blendTex", SceneManager::getInstance()->isTexBlendOnMesh() );
 
     m_meshShader.setUniInt( "cutAtSurface", DatasetManager::getInstance()->isSurfaceLoaded() );
     m_meshShader.setUniInt( "lightOn",      SceneManager::getInstance()->isLightingActive() );

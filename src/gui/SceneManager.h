@@ -68,16 +68,20 @@ public:
     bool toggleFibersGeomShaderActive()     { return m_useFibersGeometryShader = !m_useFibersGeometryShader; }
 
     bool isLightingActive() const           { return m_lighting; }
+    bool isAlphaBlend() const               { return m_blendAlpha; }
+    bool isTexBlendOnMesh() const           { return m_blendTexOnMesh; }
     bool isAxialDisplayed() const           { return m_showAxial; }
     bool isCoronalDisplayed() const         { return m_showCoronal; }
     bool isSagittalDisplayed() const        { return m_showSagittal; }
     bool isCrosshairDisplayed() const       { return m_showCrosshair; }
 
-    bool toggleLightingDisplay()        { return m_lighting      = !m_lighting; }
-    bool toggleAxialDisplay()           { return m_showAxial     = !m_showAxial; }
-    bool toggleCoronalDisplay()         { return m_showCoronal   = !m_showCoronal; }
-    bool toggleSagittalDisplay()        { return m_showSagittal  = !m_showSagittal; }
-    bool toggleCrosshairDisplay()       { return m_showCrosshair = !m_showCrosshair; }
+    bool toggleLightingDisplay()        { return m_lighting       = !m_lighting; }
+    bool toggleAlphaBlend()             { return m_blendAlpha     = !m_blendAlpha; }
+    bool toggleTexBlendOnMesh()         { return m_blendTexOnMesh = !m_blendTexOnMesh; }
+    bool toggleAxialDisplay()           { return m_showAxial      = !m_showAxial; }
+    bool toggleCoronalDisplay()         { return m_showCoronal    = !m_showCoronal; }
+    bool toggleSagittalDisplay()        { return m_showSagittal   = !m_showSagittal; }
+    bool toggleCrosshairDisplay()       { return m_showCrosshair  = !m_showCrosshair; }
     
     float getSliceX() const     { return m_sliceX; }
     float getSliceY() const     { return m_sliceY; }
@@ -106,6 +110,8 @@ private:
     bool  m_useFibersGeometryShader;
 
     bool  m_lighting;
+    bool  m_blendAlpha;
+    bool  m_blendTexOnMesh;
 
     bool  m_showAxial;
     bool  m_showCoronal;

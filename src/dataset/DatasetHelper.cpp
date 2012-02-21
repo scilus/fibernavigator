@@ -64,7 +64,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 
     m_showObjects  ( true  ),
     m_activateObjects ( true),
-    m_blendAlpha   ( false ),
+//    m_blendAlpha   ( false ),
     m_pointMode    ( false ),
     m_isShowAxes   ( false ),
     m_animationStep( 0     ),
@@ -104,7 +104,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_drawColorIcon(16, 16, true),
 
 //    m_lighting      ( true ),
-    m_blendTexOnMesh( true ),
+//    m_blendTexOnMesh( true ),
 //    m_useLic        ( false ),
     m_drawVectors   ( false ),
 

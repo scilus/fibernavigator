@@ -1473,13 +1473,12 @@ void MainFrame::onToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onToggleLighting( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->toggleLightingDisplay();
-//    m_pDatasetHelper->m_lighting =! m_pDatasetHelper->m_lighting;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleBlendTexOnMesh( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_blendTexOnMesh =! m_pDatasetHelper->m_blendTexOnMesh;
+    SceneManager::getInstance()->toggleTexBlendOnMesh();
     refreshAllGLWidgets();
 }
 
@@ -1857,9 +1856,9 @@ void MainFrame::onToggleShowSagittal( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleAlpha( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_blendAlpha = !m_pDatasetHelper->m_blendAlpha;
-    refreshAllGLWidgets();
-    this->Update(); 
+    SceneManager::getInstance()->toggleAlphaBlend();
+//    refreshAllGLWidgets();
+//    this->Update(); 
 }
 
 void MainFrame::refreshAllGLWidgets()

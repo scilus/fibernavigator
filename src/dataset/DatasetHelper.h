@@ -138,7 +138,7 @@ public:
 
     bool      m_showObjects;
     bool      m_activateObjects;
-    bool      m_blendAlpha;
+//    bool      m_blendAlpha;
     bool      m_pointMode;
     bool      m_isShowAxes;
 
@@ -157,7 +157,7 @@ public:
     //bool m_showCrosshair;
 
     //bool  m_lighting;         // m_lighting for fibers.
-    bool  m_blendTexOnMesh;   // Ignore threshold for textures on meshes.
+    //bool  m_blendTexOnMesh;   // Ignore threshold for textures on meshes.
     //bool  m_useLic;           // Show the lic texture on spline surface.
     bool  m_drawVectors;      // Draw vectors as small lines on spline surface.
     float m_normalDirection;  // Normal direction of the spline surface.

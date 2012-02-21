@@ -473,7 +473,7 @@ void TheScene::renderSlices()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    if( m_pDatasetHelper->m_blendAlpha )
+    if( SceneManager::getInstance()->isAlphaBlend() )
     {
         glDisable( GL_ALPHA_TEST );
     }

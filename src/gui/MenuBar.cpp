@@ -325,7 +325,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleShowCoronal->Check( SceneManager::getInstance()->isCoronalDisplayed() );
     m_itemToggleShowSagittal->Check( SceneManager::getInstance()->isSagittalDisplayed() );
     m_itemToggleClearToBlack->Check(mf->m_pDatasetHelper->m_clearToBlack);
-    m_itemToggleBlendTextureOnMesh->Check(mf->m_pDatasetHelper->m_blendTexOnMesh);
+    m_itemToggleBlendTextureOnMesh->Check( SceneManager::getInstance()->isTexBlendOnMesh() );
     m_itemToggleFilterISO->Check(mf->m_pDatasetHelper->m_filterIsoSurf);
     m_itemToggleShowAxes->Check(mf->m_pDatasetHelper->m_isShowAxes);
     //m_itemToggleColorMapLegend->Check(mf->m_datasetHelper->m_colorMap);
