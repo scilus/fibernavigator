@@ -711,10 +711,6 @@ void MainCanvas::render()
 
     glColor3f( 1.0, 1.0, 1.0 );
 
-    // Prevents to do a lot of unnecessary work since nothing to draw
-    if( !DatasetManager::getInstance()->isDatasetLoaded() )
-        return;
-
     switch ( m_view )
     {
         case MAIN_VIEW:
@@ -785,7 +781,7 @@ void MainCanvas::render()
                 glMatrixMode( GL_PROJECTION );
                 glLoadIdentity();
                 glOrtho( -m_orthoModX, m_orthoSizeNormal + m_orthoModX, -m_orthoModY, m_orthoSizeNormal + m_orthoModY, -500, 500 );
-                Logger::getInstance()->printIfGLError( wxT( "Error before glOrtho" ) );
+                glGetError(); // Removes the error when m_orthoModX, m_orthoSizeNormal and the rest are not yet initialized
 
                 glPushMatrix();
                 SceneManager::getInstance()->doMatrixManipulation();
