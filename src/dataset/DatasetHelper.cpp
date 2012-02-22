@@ -74,7 +74,6 @@ DatasetHelper::DatasetHelper() :
     m_scnFileName   ( _T( "" ) ),
     m_screenshotPath( _T( "" ) ),
     m_screenshotName( _T( "" ) ),
-    m_anatomyHelper     ( 0 ), 
     m_boxAtCrosshair    ( 0 ),
     m_lastSelectedPoint ( NULL ),
     m_lastSelectedObject( NULL )
@@ -84,9 +83,6 @@ DatasetHelper::DatasetHelper() :
 DatasetHelper::~DatasetHelper()
 {
     Logger::getInstance()->print( wxT( "Execute DatasetHelper destructor" ), LOGLEVEL_DEBUG );
-
-    if ( m_anatomyHelper )
-        delete m_anatomyHelper;
 
     Logger::getInstance()->print( wxT( "DatasetHelper destructor done" ), LOGLEVEL_DEBUG );
 }

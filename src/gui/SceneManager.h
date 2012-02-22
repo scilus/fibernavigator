@@ -9,6 +9,7 @@
 
 #include <vector>
 
+class AnatomyHelper;
 class MainFrame;
 class MyTreeCtrl;
 class SelectionObject;
@@ -56,7 +57,8 @@ public:
     // TODO: Remove this temporary getter/setter once TheScene is created directly in the constructor of the SceneManager
     void    setTheScene ( TheScene *pTheScene )             { m_pTheScene  = pTheScene; }
 
-    TheScene * getScene() const             { return m_pTheScene; }
+    AnatomyHelper* getAnatomyHelper() const { return m_pAnatomyHelper; }
+    TheScene *     getScene() const         { return m_pTheScene; }
     ShaderHelper * getShaderHelper() const  { return m_pShaderHelper; }
 
     bool areGeometryShadersSupported() const    { return m_geometryShadersSupported; }
@@ -133,6 +135,7 @@ private:
 private:
     static SceneManager *m_pInstance;
 
+    AnatomyHelper *m_pAnatomyHelper;
     MyTreeCtrl *m_pTreeView;
     MainFrame  *m_pMainFrame;
     ShaderHelper *m_pShaderHelper;

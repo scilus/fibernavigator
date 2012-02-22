@@ -846,7 +846,7 @@ void MainCanvas::render()
 
             if ( MyApp::frame->m_pListCtrl2->GetItemCount() != 0 )
             {
-                m_pDatasetHelper->m_anatomyHelper->renderNav( m_view, &SceneManager::getInstance()->getShaderHelper()->m_anatomyShader );
+                SceneManager::getInstance()->getAnatomyHelper()->renderNav( m_view );
                 Logger::getInstance()->printIfGLError( wxT( "Render nav view" ) );
             }
     }    

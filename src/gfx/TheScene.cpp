@@ -87,8 +87,6 @@ TheScene::TheScene( DatasetHelper* pDatasetHelper ) :
     m_pDatasetHelper( pDatasetHelper ), 
     m_pMainGLContext( NULL )
 {
-    m_pDatasetHelper->m_anatomyHelper = new AnatomyHelper( m_pDatasetHelper );
-
     // Initialize those to 0.0f to make sure that by some really odd chance, they cannot
     // be initialized to the same values as the real projection and modelview matrix.
     for( int i = 0; i < 16; ++i )
@@ -491,14 +489,16 @@ void TheScene::renderSlices()
     SceneManager::getInstance()->getShaderHelper()->setTextureShaderVars();
     SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
 
-    m_pDatasetHelper->m_anatomyHelper->renderMain();
+    SceneManager::getInstance()->getAnatomyHelper()->renderMain();
 
     glDisable( GL_BLEND );
 
     SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.release();
 
     if( SceneManager::getInstance()->isCrosshairDisplayed() )
-        m_pDatasetHelper->m_anatomyHelper->renderCrosshair();
+    {
+        SceneManager::getInstance()->getAnatomyHelper()->renderCrosshair();
+    }
 
     Logger::getInstance()->printIfGLError( wxT( "Render slices" ) );
 

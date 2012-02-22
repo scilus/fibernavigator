@@ -19,7 +19,8 @@ using std::vector;
 SceneManager * SceneManager::m_pInstance = NULL;
 
 SceneManager::SceneManager(void)
-:   m_pMainFrame( NULL ),
+:   m_pAnatomyHelper( NULL ),
+    m_pMainFrame( NULL ),
     m_pShaderHelper( NULL ),
     m_pTheScene( NULL ),
     m_pTreeView ( NULL ),
@@ -46,6 +47,7 @@ SceneManager::SceneManager(void)
     m_moveX( 0.0f ),
     m_moveY( 0.0f )
 {
+    m_pAnatomyHelper = new AnatomyHelper();
     Matrix4fSetIdentity( &m_transform );
 }
 
@@ -744,6 +746,12 @@ SelectionObjList SceneManager::getSelectionObjects()
 SceneManager::~SceneManager(void)
 {
     Logger::getInstance()->print( wxT( "Executing SceneManager destructor" ), LOGLEVEL_DEBUG );
+    if( m_pAnatomyHelper )
+    {
+        delete m_pAnatomyHelper;
+        m_pAnatomyHelper = NULL;
+    }
+
     if( m_pTheScene )
     {
         delete m_pTheScene;

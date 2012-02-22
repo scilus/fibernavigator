@@ -16,33 +16,19 @@ class DatasetHelper;
 class AnatomyHelper {
 public:
     //constructor/destructor
-    AnatomyHelper( DatasetHelper* );
+    AnatomyHelper();
     virtual ~AnatomyHelper();
 
     //functions
-    void render() {};
     void renderCrosshair();
     void renderMain();
-    void renderNav( int, ShaderProgram* );
+    void renderNav( int );
     
 private:
     //functions
     void renderAxial();
     void renderCoronal();
     void renderSagittal();
-
-    void renderA1();
-    void renderA2();
-    void renderA3();
-    void renderA4();
-    void renderC1();
-    void renderC2();
-    void renderC3();
-    void renderC4();
-    void renderS1();
-    void renderS2();
-    void renderS3();
-    void renderS4();
 
     //variables
     float m_x;
@@ -54,8 +40,6 @@ private:
     float m_xc;
     float m_yc;
     float m_zc;
-
-    DatasetHelper* m_datasetHelper;
 };
 
 #endif /* ANATOMYHELPER_H_ */
