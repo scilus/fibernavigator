@@ -178,8 +178,14 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pCurrentSceneObject( NULL ),
     m_currentListItem( -1 ),
     m_pCurrentSizer( NULL ),
-    m_lastPath( MyApp::respath + _T( "data" ) )
-
+    m_lastPath( MyApp::respath + _T( "data" ) ),
+    m_isDrawerToolActive( false ),
+    m_drawSize(2),
+    m_drawRound ( true ),
+    m_draw3d ( false ),
+    m_canUseColorPicker( false ),
+    m_drawColor(255, 255, 255),
+    m_drawColorIcon(16, 16, true)
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -781,13 +787,13 @@ void MainFrame::onToggleDrawPointsMode( wxCommandEvent& event )
 
 void MainFrame::onSelectDrawer( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_isDrawerToolActive = true;
+	m_isDrawerToolActive = true;
     updateDrawerToolbar();
 }
 
 void MainFrame::onSwitchDrawer( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_isDrawerToolActive = !m_pDatasetHelper->m_isDrawerToolActive;
+    m_isDrawerToolActive = !m_isDrawerToolActive;
     updateDrawerToolbar();
 }
 
@@ -797,22 +803,22 @@ void MainFrame::updateDrawerToolbar()
     
     m_pToolBar->m_txtRuler->Disable();
     
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+	m_pToolBar->EnableTool( m_pToolBar->m_toggleDrawRound->GetId(), m_isDrawerToolActive );
+	m_pToolBar->EnableTool( m_pToolBar->m_toggleDraw3d->GetId(), m_isDrawerToolActive );
+	m_pToolBar->EnableTool( m_pToolBar->m_selectPen->GetId(), m_isDrawerToolActive );
+	m_pToolBar->EnableTool( m_pToolBar->m_selectEraser->GetId(), m_isDrawerToolActive );
+    m_pToolBar->EnableTool( m_pToolBar->m_selectColorPicker->GetId(), m_isDrawerToolActive );
     
     // Check if the current anatomy supports RGB
     Anatomy *pTempAnat = (Anatomy*) m_pCurrentSceneObject;
     
     if( pTempAnat != NULL && pTempAnat->getType() == RGB )
     {
-        m_pDatasetHelper->m_canUseColorPicker = true;
+        m_canUseColorPicker = true;
     }
     else
     {
-        m_pDatasetHelper->m_canUseColorPicker = false;
+        m_canUseColorPicker = false;
     }
     
 	refreshAllGLWidgets();
@@ -820,13 +826,13 @@ void MainFrame::updateDrawerToolbar()
 
 void MainFrame::onToggleDrawRound( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_drawRound = !m_pDatasetHelper->m_drawRound;
+    m_drawRound = !m_drawRound;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleDraw3d( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_draw3d = !m_pDatasetHelper->m_draw3d;
+    m_draw3d = !m_draw3d;
     refreshAllGLWidgets();
 }
 
@@ -858,13 +864,13 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
     if( dialog.ShowModal() == wxID_OK )
     {
         wxColourData l_retData = dialog.GetColourData();
-        m_pDatasetHelper->m_drawColor = l_retData.GetColour();
-		wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
-		m_pDatasetHelper->m_drawColorIcon.SetRGB(fullImage, 
-											     m_pDatasetHelper->m_drawColor.Red(), 
-											     m_pDatasetHelper->m_drawColor.Green(), 
-											     m_pDatasetHelper->m_drawColor.Blue() );
-		m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap(m_pDatasetHelper->m_drawColorIcon));
+        m_drawColor = l_retData.GetColour();
+        wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
+        m_drawColorIcon.SetRGB( fullImage, 
+                                m_drawColor.Red(), 
+                                m_drawColor.Green(), 
+                                m_drawColor.Blue() );
+        m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap( m_drawColorIcon ) );
     }
     else
     {
@@ -899,56 +905,56 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 
 void MainFrame::onSelectStroke1( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawSize = 1;
+	m_drawSize = 1;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke2( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawSize = 2;
+	m_drawSize = 2;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke3( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawSize = 3;
+	m_drawSize = 3;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke4( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawSize = 4;
+	m_drawSize = 4;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke5( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawSize = 5;
+	m_drawSize = 5;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke7( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawSize = 7;
+	m_drawSize = 7;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke10( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawSize = 10;
+	m_drawSize = 10;
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectPen( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_PEN;
+	m_drawMode = DRAWMODE_PEN;
 	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
 	refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectEraser( wxCommandEvent& event )
 {
-	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_ERASER;
+	m_drawMode = DRAWMODE_ERASER;
 	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
 	refreshAllGLWidgets();
 }
@@ -1608,29 +1614,29 @@ void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 {
-	m_pDatasetHelper->m_isRulerToolActive = false;
-	m_pDatasetHelper->m_isDrawerToolActive = false;
+    m_pDatasetHelper->m_isRulerToolActive = false;
+    m_isDrawerToolActive = false;
 
-	m_pToolBar->m_txtRuler->Disable();
-	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
-	refreshAllGLWidgets();
+    m_pToolBar->m_txtRuler->Disable();
+    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 {
-	m_pDatasetHelper->m_isRulerToolActive = true;
-	m_pDatasetHelper->m_isDrawerToolActive = false;
+    m_pDatasetHelper->m_isRulerToolActive = true;
+    m_isDrawerToolActive = false;
 
     m_pToolBar->m_txtRuler->Enable();
-	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
     refreshAllGLWidgets();
 }
 
@@ -2102,11 +2108,11 @@ void MainFrame::onSelectListItem2( wxListEvent& evt )
     // Check if it is RGB
     if( RGB == pInfo->getType() )
     {
-        m_pDatasetHelper->m_canUseColorPicker = true;
+        m_canUseColorPicker = true;
     }
     else
     {
-        m_pDatasetHelper->m_canUseColorPicker = false;
+        m_canUseColorPicker = false;
     }
 
     refreshAllGLWidgets();

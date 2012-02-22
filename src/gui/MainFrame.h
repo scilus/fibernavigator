@@ -22,6 +22,13 @@ class ToolBar;
 class MenuBar;
 class SceneObject;
 
+enum DrawMode
+{
+    DRAWMODE_PEN = 0,
+    DRAWMODE_ERASER = 1,
+    DRAWMODE_INVALID
+};
+
 class MainFrame : public wxFrame
 {
     friend class ToolBar;
@@ -50,7 +57,20 @@ public:
     long getCurrentListItem() const         { return m_currentListItem; }
 	void createNewAnatomy					( DatasetType dataType );
     void updateSliders();
-    
+
+    bool canDraw3D() const          { return m_draw3d; }
+    bool canDrawRound() const       { return m_drawRound; }
+    bool canUseColorPicker() const  { return m_canUseColorPicker; }
+    bool isDrawerToolActive() const { return m_isDrawerToolActive; }
+
+    wxColour  getDrawColor() const  { return m_drawColor; }
+    wxImage & getDrawIcon()         { return m_drawColorIcon; }
+    DrawMode  getDrawMode() const   { return m_drawMode; }
+    int       getDrawSize() const   { return m_drawSize; }
+
+    void      setDrawColor( const wxColour &color )   { m_drawColor = color; }
+    void      setDrawSize( const int size ) { m_drawSize = size; }
+
 private:
     void initOpenGl();
     void initLayout();
@@ -184,7 +204,6 @@ private:
     // Utility
     void updateDrawerToolbar();
 
-    
 private:
     ToolBar             *m_pToolBar;
     MenuBar             *m_pMenuBar;       
@@ -204,13 +223,21 @@ private:
 
     wxTimer             *m_pTimer;
 
+    bool     m_isDrawerToolActive;
+    DrawMode m_drawMode;
+    int      m_drawSize;
+    bool     m_drawRound;
+    bool     m_draw3d;
+    bool     m_canUseColorPicker;
+    wxColor  m_drawColor;
+    wxImage  m_drawColorIcon;
+
 public:
     PropertiesWindow    *m_pPropertiesWindow;
     MainCanvas          *m_pMainGL;
     MainCanvas          *m_pGL0;
     MainCanvas          *m_pGL1;
     MainCanvas          *m_pGL2;
-//    MyListCtrl          *m_pListCtrl;
     ListCtrl            *m_pListCtrl2;
     MyTreeCtrl          *m_pTreeWidget;
     wxSlider            *m_pXSlider;

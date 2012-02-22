@@ -215,7 +215,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 				{
 					if(!m_pDatasetHelper->m_isDragging)
 					{
-						if (m_pDatasetHelper->m_isDrawerToolActive)
+                        if( MyApp::frame->isDrawerToolActive() )
 						{
 							pushAnatomyHistory();
 							m_hr = pick(evt.GetPosition(), true);
@@ -247,7 +247,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 					}
 					else
 					{
-						if (m_pDatasetHelper->m_isDrawerToolActive)
+						if( MyApp::frame->isDrawerToolActive() )
 						{
 							m_hr = pick(evt.GetPosition(), true);
 							drawOnAnatomy();
@@ -558,7 +558,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
                 SceneManager::getInstance()->setSegmentActive( false );
                 //m_pDatasetHelper->m_isSegmentActive = false;
             }
-			else if (m_pDatasetHelper->m_isDrawerToolActive)
+			else if( MyApp::frame->isDrawerToolActive() )
 			{
 				m_hitPts = bb->hitCoordinate(ray,CORONAL);
 				m_isDrawerHit = isRulerOrDrawer;
@@ -585,7 +585,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
                     m_isRulerHit = isRulerOrDrawer;
                     SceneManager::getInstance()->setSegmentActive( false );
                 }
-				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				else if( MyApp::frame->isDrawerToolActive() )
 				{
 					m_hitPts = bb->hitCoordinate(ray,AXIAL);
 					m_isDrawerHit = isRulerOrDrawer;
@@ -614,7 +614,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
                     SceneManager::getInstance()->setSegmentActive( false );
                     //m_pDatasetHelper->m_isSegmentActive = false;
                 }
-				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				else if( MyApp::frame->isDrawerToolActive() )
 				{
 					m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
 					m_isDrawerHit = isRulerOrDrawer;
@@ -810,7 +810,7 @@ void MainCanvas::render()
                     }
                     m_isRulerHit = false;
                 }
-				else if ( m_pDatasetHelper->m_isDrawerToolActive && m_isDrawerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
+				else if( MyApp::frame->isDrawerToolActive() && m_isDrawerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
 				{
 					m_isDrawerHit = false;
 				}
@@ -825,7 +825,7 @@ void MainCanvas::render()
                 {
                     renderRulerDisplay();
                 }
-				else if (m_pDatasetHelper->m_isDrawerToolActive)
+				else if( MyApp::frame->isDrawerToolActive() )
 				{
 					//TODO, may be useful later
 					//renderDrawerDisplay();
@@ -1054,9 +1054,9 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_pDatasetHelper->m_rulerPts.back().y += voxelY;
             } 
-			else if (m_pDatasetHelper->m_isDrawerToolActive && m_pDatasetHelper->m_drawSize > 2)
+			else if( MyApp::frame->isDrawerToolActive() && MyApp::frame->getDrawSize() > 2)
             {
-                m_pDatasetHelper->m_drawSize -= 1;
+                MyApp::frame->setDrawSize( MyApp::frame->getDrawSize() - 1 );
             }
             else 
             {
@@ -1077,9 +1077,9 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_pDatasetHelper->m_rulerPts.back().y -= voxelY;
             } 
-			else if (m_pDatasetHelper->m_isDrawerToolActive)
+			else if( MyApp::frame->isDrawerToolActive() )
             {
-                m_pDatasetHelper->m_drawSize += 1;
+                MyApp::frame->setDrawSize( MyApp::frame->getDrawSize() + 1 );
             }
             else 
             {
@@ -1133,7 +1133,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
 		case 'z': case 'Z': //ctrl-z
 			//if ( wxGetKeyState( WXK_CONTROL ) )
             //{
-				if(m_pDatasetHelper->m_isDrawerToolActive)
+				if( MyApp::frame->isDrawerToolActive() )
 				{
 					popAnatomyHistory();
 					break; 
@@ -1176,14 +1176,14 @@ void MainCanvas::drawOnAnatomy()
 		return;
 	}
 
-	if( m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_PEN )
+	if( DRAWMODE_PEN == MyApp::frame->getDrawMode() )
 	{
-		l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, m_pDatasetHelper->m_drawColor);
+		l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, MyApp::frame->getDrawSize(), MyApp::frame->canDrawRound(), MyApp::frame->canDraw3D(), MyApp::frame->getDrawColor() );
 	}
-	else if( m_pDatasetHelper->m_drawMode == m_pDatasetHelper->DRAWMODE_ERASER )
+	else if( DRAWMODE_ERASER == MyApp::frame->getDrawMode() )
 	{
 		wxColor transparent(0, 0, 0);
-		l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, m_pDatasetHelper->m_drawSize, m_pDatasetHelper->m_drawRound, m_pDatasetHelper->m_draw3d, transparent);
+		l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, MyApp::frame->getDrawSize(), MyApp::frame->canDrawRound(), MyApp::frame->canDraw3D(), transparent);
 	}
 }
 

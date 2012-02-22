@@ -334,19 +334,19 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleDrawPoints->Check( SceneManager::getInstance()->isPointMode() );
     m_itemToggleDrawVectors->Check( SceneManager::getInstance()->areVectorsDisplayed() );
 	
-    m_itemToggleDrawer->Check(mf->m_pDatasetHelper->m_isDrawerToolActive);
-	m_itemToggleDrawRound->Check(mf->m_pDatasetHelper->m_drawRound);
-	m_itemToggleDraw3d->Check(mf->m_pDatasetHelper->m_draw3d);
-	m_itemDrawPen->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN);
-	m_itemDrawEraser->Check(mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_ERASER);
+    m_itemToggleDrawer->Check( mf->isDrawerToolActive() );
+	m_itemToggleDrawRound->Check( mf->canDrawRound() );
+	m_itemToggleDraw3d->Check( mf->canDraw3D() );
+	m_itemDrawPen->Check( DRAWMODE_PEN == mf->getDrawMode() );
+	m_itemDrawEraser->Check( DRAWMODE_ERASER == mf->getDrawMode() );
 	
-    m_itemToggleDrawRound->Enable( mf->m_pDatasetHelper->m_isDrawerToolActive );
-    m_itemToggleDraw3d->Enable(    mf->m_pDatasetHelper->m_isDrawerToolActive );
-    m_itemDrawPen->Enable(         mf->m_pDatasetHelper->m_isDrawerToolActive );
-    m_itemDrawEraser->Enable(      mf->m_pDatasetHelper->m_isDrawerToolActive );
-    m_itemDrawColorPicker->Enable( mf->m_pDatasetHelper->m_isDrawerToolActive &&
-                                   mf->m_pDatasetHelper->m_canUseColorPicker &&
-                                   mf->m_pDatasetHelper->m_drawMode == mf->m_pDatasetHelper->DRAWMODE_PEN );
+    m_itemToggleDrawRound->Enable( mf->isDrawerToolActive() );
+    m_itemToggleDraw3d->Enable(    mf->isDrawerToolActive() );
+    m_itemDrawPen->Enable(         mf->isDrawerToolActive() );
+    m_itemDrawEraser->Enable(      mf->isDrawerToolActive() );
+    m_itemDrawColorPicker->Enable( mf->isDrawerToolActive() &&
+                                   mf->canUseColorPicker() &&
+                                   DRAWMODE_PEN == mf->getDrawMode() );
     
     m_itemNewSplineSurface->Enable(DatasetManager::getInstance()->isAnatomyLoaded() && !DatasetManager::getInstance()->isSurfaceLoaded());
 }
