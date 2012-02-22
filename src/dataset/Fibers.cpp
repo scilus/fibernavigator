@@ -653,18 +653,20 @@ bool Fibers::loadMRtrix( const wxString &filename )
     // read header
     ////
     char lineBuffer[200];
+    std::string readLine("");
 
-    for( int i = 0; i < 22; ++i )
+    while(readLine.find( "END" ) == std::string::npos)
     {
         fgets( lineBuffer, 200, pFs );
-        std::string s0( lineBuffer );
 
-        if( s0.find( "file" ) != std::string::npos )
+        readLine = std::string( lineBuffer );
+
+        if( readLine.find( "file" ) != std::string::npos )
         {
             sscanf( lineBuffer, "file: . %ld", &pc );
         }
 
-        if( s0.find( "count" ) != std::string::npos )
+        if( readLine.find( "count" ) != std::string::npos )
         {
             sscanf( lineBuffer, "count: %i", &m_countLines );
         }
