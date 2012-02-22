@@ -605,57 +605,90 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onMenuViewReset( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_zoom  = 1;
-    m_pDatasetHelper->m_xMove = 0;
-    m_pDatasetHelper->m_yMove = 0;
+    SceneManager::getInstance()->setZoom( 1.0f );
+    SceneManager::getInstance()->setMoveX( 0.0f );
+    SceneManager::getInstance()->setMoveY( 0.0f );
+//     m_pDatasetHelper->m_zoom  = 1;
+//     m_pDatasetHelper->m_xMove = 0;
+//     m_pDatasetHelper->m_yMove = 0;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onMenuViewLeft( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M00 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M20 = -1.0f;
-    m_pDatasetHelper->m_transform.s.M01 = -1.0f;
-    m_pDatasetHelper->m_transform.s.M12 =  1.0f;
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = 0.0f;
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M20 = -1.0f;
+    transform.s.M01 = -1.0f;
+    transform.s.M12 =  1.0f;
+
+//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
+//     m_pDatasetHelper->m_transform.s.M00 =  0.0f;
+//     m_pDatasetHelper->m_transform.s.M11 =  0.0f;
+//     m_pDatasetHelper->m_transform.s.M22 =  0.0f;
+//     m_pDatasetHelper->m_transform.s.M20 = -1.0f;
+//     m_pDatasetHelper->m_transform.s.M01 = -1.0f;
+//     m_pDatasetHelper->m_transform.s.M12 =  1.0f;
     m_pMainGL->setRotation();
 }
 
 void MainFrame::onMenuViewRight( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M00 = 0.0f;
-    m_pDatasetHelper->m_transform.s.M11 = 0.0f;
-    m_pDatasetHelper->m_transform.s.M22 = 0.0f;
-    m_pDatasetHelper->m_transform.s.M20 = 1.0f;
-    m_pDatasetHelper->m_transform.s.M01 = 1.0f;
-    m_pDatasetHelper->m_transform.s.M12 = 1.0f;
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = 0.0f;
+    transform.s.M11 = 0.0f;
+    transform.s.M22 = 0.0f;
+    transform.s.M20 = 1.0f;
+    transform.s.M01 = 1.0f;
+    transform.s.M12 = 1.0f;
+
+//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
+//     m_pDatasetHelper->m_transform.s.M00 = 0.0f;
+//     m_pDatasetHelper->m_transform.s.M11 = 0.0f;
+//     m_pDatasetHelper->m_transform.s.M22 = 0.0f;
+//     m_pDatasetHelper->m_transform.s.M20 = 1.0f;
+//     m_pDatasetHelper->m_transform.s.M01 = 1.0f;
+//     m_pDatasetHelper->m_transform.s.M12 = 1.0f;
     m_pMainGL->setRotation();
 }
 
 void MainFrame::onMenuViewTop( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
+    Matrix4fSetIdentity( &SceneManager::getInstance()->getTransform() );
     m_pMainGL->setRotation();
 }
 
 void MainFrame::onMenuViewBottom( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M00 = -1.0f;
-    m_pDatasetHelper->m_transform.s.M22 = -1.0f;
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = -1.0f;
+    transform.s.M22 = -1.0f;
+
+//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
+//     m_pDatasetHelper->m_transform.s.M00 = -1.0f;
+//     m_pDatasetHelper->m_transform.s.M22 = -1.0f;
     m_pMainGL->setRotation();
 }
 
 void MainFrame::onMenuViewFront( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M12 =  1.0f;
-    m_pDatasetHelper->m_transform.s.M21 = -1.0f;
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M12 =  1.0f;
+    transform.s.M21 = -1.0f;
+
+//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
+//     m_pDatasetHelper->m_transform.s.M11 =  0.0f;
+//     m_pDatasetHelper->m_transform.s.M22 =  0.0f;
+//     m_pDatasetHelper->m_transform.s.M12 =  1.0f;
+//     m_pDatasetHelper->m_transform.s.M21 = -1.0f;
     m_pMainGL->setRotation();
 }
 void MainFrame::onMenuLock( wxCommandEvent& WXUNUSED(event) )
@@ -669,12 +702,20 @@ void MainFrame::onSceneLock( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onMenuViewBack( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M00 = -1.0f;
-    m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M21 =  1.0f;
-    m_pDatasetHelper->m_transform.s.M12 =  1.0f;
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = -1.0f;
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M21 =  1.0f;
+    transform.s.M12 =  1.0f;
+
+//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
+//     m_pDatasetHelper->m_transform.s.M00 = -1.0f;
+//     m_pDatasetHelper->m_transform.s.M11 =  0.0f;
+//     m_pDatasetHelper->m_transform.s.M22 =  0.0f;
+//     m_pDatasetHelper->m_transform.s.M21 =  1.0f;
+//     m_pDatasetHelper->m_transform.s.M12 =  1.0f;
     m_pMainGL->setRotation();
 }
 

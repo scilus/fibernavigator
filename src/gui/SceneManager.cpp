@@ -11,6 +11,7 @@
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
 
+#include <algorithm>
 #include <assert.h>
 #include <vector>
 using std::vector;
@@ -40,8 +41,12 @@ SceneManager::SceneManager(void)
     m_segmentActive( false ),
     m_segmentMethod( FLOODFILL ),
     m_animationStep( 0 ),
-    m_pointMode( false )
+    m_pointMode( false ),
+    m_zoom( 1.0f ),
+    m_moveX( 0.0f ),
+    m_moveY( 0.0f )
 {
+    Matrix4fSetIdentity( &m_transform );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -646,6 +651,58 @@ void SceneManager::updateView( const float x, const float y, const float z )
     {
         (*it)->refreshSlidersValues();
     }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void SceneManager::changeZoom( const int z )
+{
+        float delta = (int)m_zoom * 0.1f;
+        if( 0 <= z )
+        {
+            m_zoom = std::min( 50.0f, m_zoom + delta );
+        }
+        else
+        {
+            m_zoom = std::max( 1.0f, m_zoom - delta );
+        }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void SceneManager::moveScene ( const int x, const int y )
+{
+    float columns = DatasetManager::getInstance()->getColumns();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+    float max = std::max( columns * voxelX, std::max( rows * voxelY, frames * voxelZ ) );
+    float div = 500.0f / max;
+
+    m_moveX -= (float)x / div;
+    m_moveY += (float)y / div;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void SceneManager::doMatrixManipulation()
+{
+    float columns = DatasetManager::getInstance()->getColumns();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+    float max = std::max( columns * voxelX, std::max( rows * voxelY, frames * voxelZ ) ) * 0.5f;
+    glTranslatef( max + m_moveX, max + m_moveY, max );
+    glScalef( m_zoom, m_zoom, m_zoom );
+    glMultMatrixf( m_transform.M );
+    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
+    Logger::getInstance()->printIfGLError( wxT( "SceneManager::doMatrixManipulation" ) );
 }
 
 //////////////////////////////////////////////////////////////////////////

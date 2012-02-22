@@ -37,120 +37,49 @@
 
 #include <algorithm>
 
-void out_of_memory() 
-{
-    cerr << "Error : Out of memory! \n";
-    throw bad_alloc();
-}
-
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper( MainFrame *mf ) :
-//    m_floatDataset  ( NULL ),
-
     m_niftiTransform( 4, 4 ),
-
     m_countFibers( 0    ),
-
     m_scnFileLoaded      ( false ),
     m_surfaceIsDirty     ( true  ),
-
-//     m_useVBO( true ),
-//     m_quadrant( 6 ),
-//    m_textures( 0 ),
-
     m_scheduledReloadShaders( true  ),
     m_scheduledScreenshot   ( false ),
-
     m_showObjects  ( true  ),
     m_activateObjects ( true),
-//    m_blendAlpha   ( false ),
-//     m_pointMode    ( false ),
-//     m_isShowAxes   ( false ),
-//     m_animationStep( 0     ),
-
-// #if defined(DEBUG) || defined(_DEBUG)
-//     m_debugLevel( 0 ),
-// #else
-//     m_debugLevel( 1 ),
-// #endif
-
     m_isRulerToolActive( false ),
     m_isDrawerToolActive( false ),
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
-//     m_fibersSamplingFactor(1),
-//     m_isSegmentActive( false ),
-//     m_SegmentMethod(0),
-//     m_isFloodfillActive ( true ),
-//     m_isSelectBckActive ( false ),
-//     m_isSelectObjActive ( false ),
-//     m_isObjfilled ( false ),
-//     m_isBckfilled ( false ),
-//     m_isObjCreated ( false ),
-//     m_isBckCreated ( false ),
-//     m_isBoxCreated ( false ),
-//     m_thresSliderMoved ( false ),
-//     m_showSagittal( true ),
-//     m_showCoronal ( true ),
-//     m_showAxial   ( true ),	
-//     m_showCrosshair( false ),
-	
     m_drawSize(2),
     m_drawRound ( true ),
     m_draw3d ( false ),
     m_canUseColorPicker( false ),
     m_drawColor(255, 255, 255),
     m_drawColorIcon(16, 16, true),
-
-//    m_lighting      ( true ),
-//    m_blendTexOnMesh( true ),
-//    m_useLic        ( false ),
-//     m_drawVectors   ( false ),
-// 
-//     m_normalDirection( 1.0 ),
-
-//    m_geometryShadersSupported( true ),
     m_clearToBlack   ( false ),
-//    m_useFibersGeometryShader( false ),
     m_filterIsoSurf  ( false ),
-
     m_colorMap( 0 ),
     m_showColorMapLegend       ( false        ),
-//     m_displayMinMaxCrossSection( false        ),
-//     m_displayGlyphOptions      ( false        ),
-
-//    m_morphing     ( false ),
     m_boxLockIsOn  ( false ),
-//    m_semaphore    ( false ),
     m_threadsActive( 0 ),
-
     m_isDragging ( false ),
     m_isrDragging( false ),
     m_ismDragging( false ),
-    m_zoom ( 1 ),
-    m_xMove( 0 ),
-    m_yMove( 0 ),
-
     m_texAssigned  ( false ),
     m_selBoxChanged( true ),
-
     m_geforceLevel( 6 ),
-
     m_scenePath     ( _T( "" ) ),
     m_scnFileName   ( _T( "" ) ),
     m_screenshotPath( _T( "" ) ),
     m_screenshotName( _T( "" ) ),
-
-    m_anatomyHelper     ( 0 ),    
+    m_anatomyHelper     ( 0 ), 
     m_boxAtCrosshair    ( 0 ),
     m_lastSelectedPoint ( NULL ),
     m_lastSelectedObject( NULL ),
-//    m_theScene          ( 0 ),
     m_mainFrame			( mf )
-//	m_shaderHelper      ( 0 )
 {
-    Matrix4fSetIdentity( &m_transform );
 }
 
 DatasetHelper::~DatasetHelper()
@@ -160,16 +89,6 @@ DatasetHelper::~DatasetHelper()
     if ( m_anatomyHelper )
         delete m_anatomyHelper;
 
-	//Not causing Memory leaks for now!!! But should be deleted, if allocated.
-	//if ( m_boxAtCrosshair )
-	//	delete m_boxAtCrosshair;
-	//if ( m_lastSelectedPoint )
-	//	delete m_lastSelectedPoint;
-	//if ( m_lastSelectedObject )
-	//	delete m_lastSelectedObject;
-	//if ( m_mainFrame )
-	//	delete m_mainFrame;
-    
     Logger::getInstance()->print( wxT( "DatasetHelper destructor done" ), LOGLEVEL_DEBUG );
 }
 
@@ -213,16 +132,18 @@ void DatasetHelper::deleteAllPoints()
     }
 
     for( unsigned int i = 0; i < l_points.size(); ++i )
+    {
         for( unsigned int j = 0; j < l_points[i].size(); ++j )
         {
             m_mainFrame->m_pTreeWidget->Delete(l_points[i][j]->GetId());      
         }
+    }
 }
 
 Vector DatasetHelper::mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16])
 {
     glPushMatrix();
-    doMatrixManipulation();
+    SceneManager::getInstance()->doMatrixManipulation();
  
     GLfloat l_winX, l_winY;
 
@@ -251,101 +172,22 @@ Vector DatasetHelper::mapMouse2WorldBack( const int i_x, const int i_y,GLdouble 
     return l_vector;
 }
 
-
-
-void DatasetHelper::changeZoom( const int i_z )
-{
-    float delta = ( (int)m_zoom ) * 0.1f;
-    i_z >= 0 ? m_zoom = wxMin( 50, m_zoom+delta ) : m_zoom = wxMax( 1, m_zoom-delta );
-}
-
-void DatasetHelper::moveScene( int i_x, int i_y )
-{
-    float columns = DatasetManager::getInstance()->getColumns();
-    float frames  = DatasetManager::getInstance()->getFrames();
-    float rows    = DatasetManager::getInstance()->getRows();
-    float voxelX  = DatasetManager::getInstance()->getVoxelX();
-    float voxelY  = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
-
-    float l_max = std::max( columns * voxelX, std::max( rows * voxelY, frames * voxelZ ) );
-    float l_div = 500.0f / l_max;
-
-    m_xMove -= (float)i_x / l_div;
-    m_yMove += (float)i_y / l_div;
-}
-
-void DatasetHelper::doMatrixManipulation()
-{
-    float columns = DatasetManager::getInstance()->getColumns();
-    float frames  = DatasetManager::getInstance()->getFrames();
-    float rows    = DatasetManager::getInstance()->getRows();
-    float voxelX  = DatasetManager::getInstance()->getVoxelX();
-    float voxelY  = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
-
-    float l_max = std::max( columns * voxelX, std::max( rows * voxelY, frames * voxelZ ) ) * 0.5f;
-    glTranslatef( l_max + m_xMove, l_max + m_yMove, l_max );
-    glScalef( m_zoom, m_zoom, m_zoom );
-    glMultMatrixf( m_transform.M );
-    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
-    Logger::getInstance()->printIfGLError( wxT( "Error in doMatrixManipulation" ) );
-}
-
 bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
 {
     io_f = DatasetManager::getInstance()->getSelectedFibers( m_mainFrame->getCurrentListItem() );
     return NULL != io_f;
-
-// 	io_f = NULL;
-// 
-//     long selItem = m_mainFrame->getCurrentListItem();
-// 
-//     if (-1 != selItem)
-//     {
-//         DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( selItem ) );
-//         if( l_datasetInfo && l_datasetInfo->getType() == FIBERS)
-//         {
-//             io_f = (Fibers*)l_datasetInfo;
-//             return true;
-//         }
-//     }
-//     return false;
 }
 
 bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
 {
     io_fg = DatasetManager::getInstance()->getFibersGroup();
     return NULL != io_fg;
-//     io_fg = NULL;
-// 
-//     for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
-//     {
-//         DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
-//         if( l_datasetInfo->getType() == FIBERSGROUP )
-//         {
-//             io_fg = (FibersGroup*)l_datasetInfo;
-//             return true;
-//         }
-//     }
-//     return false;
 }
 
 bool DatasetHelper::getSurfaceDataset( Surface *&io_s )
 {
     io_s = DatasetManager::getInstance()->getSurface();
     return NULL != io_s;
-
-//     for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
-//     {
-//         DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
-//         if( l_datasetInfo->getType() == SURFACE )
-//         {
-//             io_s = (Surface*)l_datasetInfo; //m_mainFrame->m_pListCtrl->GetItemData( i );
-//             return true;
-//         }
-//     }
-//     return false;
 }
 
 std::vector< float >* DatasetHelper::getVectorDataset()
@@ -371,18 +213,6 @@ bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
     vector<Anatomy *> v = DatasetManager::getInstance()->getAnatomies();
     o_types = vector<DatasetInfo *>(v.begin(), v.end());
     return true;
-
-//     o_types.clear();
-//     DatasetInfo* l_datasetInfo;
-//     for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
-//     {
-//         l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
-//         if( l_datasetInfo->getType() >= HEAD_BYTE && l_datasetInfo->getType() <= TENSOR_FIELD ) 
-//         {
-//             o_types.push_back( l_datasetInfo );
-//         }
-//     }
-//     return true;
 }
 
 

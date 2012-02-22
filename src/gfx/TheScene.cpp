@@ -758,7 +758,7 @@ void TheScene::lightsOn()
     GLfloat specRef[]       = { 0.5f, 0.5f, 0.5f, 0.5f };
     Vector3fT v1 = { { 0, 0, -1 } };
     Vector3fT l;
-    Vector3fMultMat4( &l, &v1, &m_pDatasetHelper->m_transform );
+    Vector3fMultMat4( &l, &v1, &SceneManager::getInstance()->getTransform() );
 
     GLfloat lightPosition0[] = { l.s.X, l.s.Y, l.s.Z, 0.0 };
 

@@ -1,6 +1,7 @@
 #ifndef SCENEMANAGER_H_
 #define SCENEMANAGER_H_
 
+#include "ArcBall.h"
 #include "../misc/IsoSurface/Vector.h"
 
 #include <GL/glew.h>
@@ -114,6 +115,14 @@ public:
     float getNormalDirection() const    { return m_normalDirection; }
     void  setNormalDirection( float dir )   { m_normalDirection = dir; }
 
+    Matrix4fT & getTransform() { return m_transform; }
+    float getZoom() const   { return m_zoom; }
+    float getMoveX() const  { return m_moveX; }
+    float getMoveY() const  { return m_moveY; }
+    void  setZoom( float zoom ) { m_zoom = zoom; } 
+    void  setMoveX( float x )   { m_moveX = x; }
+    void  setMoveY( float y )   { m_moveY = y; }
+
 protected:
     SceneManager(void);
 
@@ -158,6 +167,11 @@ private:
 
     bool  m_drawVectors;
     float m_normalDirection;
+
+    Matrix4fT m_transform;
+    float     m_zoom;
+    float     m_moveX;
+    float     m_moveY;
 };
 
 #endif SCENEMANAGER_H_

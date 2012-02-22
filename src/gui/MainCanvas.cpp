@@ -53,10 +53,13 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
     m_lastRot.M[3] = -0.74149495363235473633f; m_lastRot.M[4] = -0.46842813491821289062f; m_lastRot.M[5] = 0.48037606477737426758f;
     m_lastRot.M[6] = -0.07932166755199432373f; m_lastRot.M[7] = 0.77213370800018310547f; m_lastRot.M[8] = 0.63048923015594482422f;
 
-    Matrix4fSetIdentity(&m_pDatasetHelper->m_transform);
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+
+    //Matrix4fSetIdentity(&m_pDatasetHelper->m_transform);
     Matrix3fSetIdentity(&m_thisRot);
     Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
-    Matrix4fSetRotationFromMatrix3f(&m_pDatasetHelper->m_transform, &m_lastRot);
+    Matrix4fSetRotationFromMatrix3f(&transform, &m_lastRot);
 
     m_delta   = 0;
     m_pArcBall = new ArcBallT(640.0f, 480.0f);
@@ -267,7 +270,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 						m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
 						Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
 						Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-						Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                        Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
 					}
 				}
 				updateView();
@@ -289,7 +292,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
                     m_lastPos = evt.GetPosition();
-                    m_pDatasetHelper->moveScene( xDrag, yDrag );
+                    SceneManager::getInstance()->moveScene( xDrag, yDrag );
                     Refresh( false );
                 }
             }
@@ -300,7 +303,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
             
             if ( evt.GetWheelDelta() != 0 && !m_isSceneLocked)
             {
-                m_pDatasetHelper->changeZoom( evt.GetWheelRotation() );
+                SceneManager::getInstance()->changeZoom( evt.GetWheelRotation() );
                 Refresh( false );
             }
 
@@ -310,12 +313,18 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
                 {
                     if ( wxGetKeyState( WXK_CONTROL ) && wxGetKeyState( WXK_SHIFT ) )
                     {
-                        printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[0], m_pDatasetHelper->m_transform.M[1],
-                                m_pDatasetHelper->m_transform.M[2] );
-                        printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[3], m_pDatasetHelper->m_transform.M[4],
-                                m_pDatasetHelper->m_transform.M[5] );
-                        printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[6], m_pDatasetHelper->m_transform.M[7],
-                                m_pDatasetHelper->m_transform.M[8] );
+                        Matrix4fT transform = SceneManager::getInstance()->getTransform();
+                        Logger::getInstance()->print( wxString::Format( wxT( "Transform matrix:\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f" ), 
+                                transform.M[0], transform.M[1], transform.M[2],
+                                transform.M[3], transform.M[4], transform.M[5],
+                                transform.M[6], transform.M[7], transform.M[8]
+                            ), LOGLEVEL_DEBUG );
+//                         printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[0], m_pDatasetHelper->m_transform.M[1],
+//                                 m_pDatasetHelper->m_transform.M[2] );
+//                         printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[3], m_pDatasetHelper->m_transform.M[4],
+//                                 m_pDatasetHelper->m_transform.M[5] );
+//                         printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[6], m_pDatasetHelper->m_transform.M[7],
+//                                 m_pDatasetHelper->m_transform.M[8] );
                     }
                     m_pDatasetHelper->m_isrDragging = true; // Prepare For Dragging
                     m_lastPos = evt.GetPosition();
@@ -438,7 +447,7 @@ void MainCanvas::updateView()
     { 1, 1, 1 } };
     Vector3fT view;
 
-    Vector3fMultMat4( &view, &v1, &m_pDatasetHelper->m_transform );
+    Vector3fMultMat4( &view, &v1, &SceneManager::getInstance()->getTransform() );
     dots[0] = Vector3fDot( &v2, &view );
 
     v2.s.Z = -1;
@@ -764,7 +773,7 @@ void MainCanvas::render()
                 glViewport( 0, 0, size, size );
 
                 glPushMatrix();
-                m_pDatasetHelper->doMatrixManipulation();
+                SceneManager::getInstance()->doMatrixManipulation();
 				
                 SceneManager::getInstance()->getScene()->renderScene();
                 glPopMatrix();
@@ -781,7 +790,7 @@ void MainCanvas::render()
                 Logger::getInstance()->printIfGLError( wxT( "Error before glOrtho" ) );
 
                 glPushMatrix();
-                m_pDatasetHelper->doMatrixManipulation();
+                SceneManager::getInstance()->doMatrixManipulation();
 
                 SceneManager::getInstance()->getScene()->renderScene();
 
@@ -951,19 +960,21 @@ Vector MainCanvas::getEventCenter()
 
 void MainCanvas::setRotation()
 {
-    m_thisRot.s.M00 = m_pDatasetHelper->m_transform.s.M00;
-    m_thisRot.s.M01 = m_pDatasetHelper->m_transform.s.M01;
-    m_thisRot.s.M02 = m_pDatasetHelper->m_transform.s.M02;
-    m_thisRot.s.M10 = m_pDatasetHelper->m_transform.s.M10;
-    m_thisRot.s.M11 = m_pDatasetHelper->m_transform.s.M11;
-    m_thisRot.s.M12 = m_pDatasetHelper->m_transform.s.M12;
-    m_thisRot.s.M20 = m_pDatasetHelper->m_transform.s.M20;
-    m_thisRot.s.M21 = m_pDatasetHelper->m_transform.s.M21;
-    m_thisRot.s.M22 = m_pDatasetHelper->m_transform.s.M22;
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
 
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
+    m_thisRot.s.M00 = transform.s.M00;
+    m_thisRot.s.M01 = transform.s.M01;
+    m_thisRot.s.M02 = transform.s.M02;
+    m_thisRot.s.M10 = transform.s.M10;
+    m_thisRot.s.M11 = transform.s.M11;
+    m_thisRot.s.M12 = transform.s.M12;
+    m_thisRot.s.M20 = transform.s.M20;
+    m_thisRot.s.M21 = transform.s.M21;
+    m_thisRot.s.M22 = transform.s.M22;
+
+    Matrix4fSetIdentity( &transform );
     Matrix3fSetIdentity( &m_lastRot );
-    Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot );
+    Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot );
 
     updateView();
     m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();
@@ -1000,7 +1011,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
                 Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
             } 
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
@@ -1019,7 +1030,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
                 Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
             }
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
@@ -1039,7 +1050,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
                 Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
             }
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
@@ -1062,7 +1073,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
                 Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                Matrix4fSetRotationFromMatrix3f( &m_pDatasetHelper->m_transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
             }
             else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
             {
