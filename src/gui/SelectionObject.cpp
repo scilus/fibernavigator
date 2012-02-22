@@ -90,11 +90,11 @@ void SelectionObject::lockToCrosshair()
         m_datasetHelper->m_boxAtCrosshair = this;
         //m_datasetHelper->m_semaphore      = true;
         SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
-        m_datasetHelper->m_mainFrame->m_pXSlider->SetValue( (int)m_center.x );
-        m_datasetHelper->m_mainFrame->m_pYSlider->SetValue( (int)m_center.y );
-        m_datasetHelper->m_mainFrame->m_pZSlider->SetValue( (int)m_center.z );
+        MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
+        MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
+        MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
         //m_datasetHelper->m_semaphore      = false;
-        m_datasetHelper->m_mainFrame->refreshAllGLWidgets();
+        MyApp::frame->refreshAllGLWidgets();
     }
 }
 
@@ -321,9 +321,9 @@ void SelectionObject::select( bool i_flag )
     {
         if( i_flag )
         {
-            m_datasetHelper->m_mainFrame->m_pTreeWidget->SelectItem( m_treeId );
-            m_datasetHelper->m_mainFrame->m_pTreeWidget->EnsureVisible( m_treeId );
-            m_datasetHelper->m_mainFrame->m_pTreeWidget->SetFocus();
+            MyApp::frame->m_pTreeWidget->SelectItem( m_treeId );
+            MyApp::frame->m_pTreeWidget->EnsureVisible( m_treeId );
+            MyApp::frame->m_pTreeWidget->SetFocus();
         }
 
         m_isSelected = true;
@@ -340,16 +340,16 @@ void SelectionObject::update()
     {
 //        m_datasetHelper->m_semaphore = true;
         SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
-        m_datasetHelper->m_mainFrame->m_pXSlider->SetValue( (int)m_center.x );
-        m_datasetHelper->m_mainFrame->m_pYSlider->SetValue( (int)m_center.y );
-        m_datasetHelper->m_mainFrame->m_pZSlider->SetValue( (int)m_center.z );
+        MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
+        MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
+        MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
 //        m_datasetHelper->m_semaphore = false;
     }
 
     updateStatusBar();
     m_isDirty = true;
     m_datasetHelper->m_selBoxChanged = true;
-    m_datasetHelper->m_mainFrame->refreshAllGLWidgets();
+    MyApp::frame->refreshAllGLWidgets();
 
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
@@ -1711,14 +1711,10 @@ void SelectionObject::updateStatusBar()
     float voxelY = DatasetManager::getInstance()->getVoxelY();
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
-    m_datasetHelper->m_mainFrame->GetStatusBar()->SetStatusText( m_name, 1 );
-    m_datasetHelper->m_mainFrame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "Position %.2f, %.2f, %.2f  Size: %.2f, %.2f, %.2f" ),
-                                                                 m_center.x, 
-                                                                 m_center.y,
-                                                                 m_center.z,
-                                                                 m_size.x * voxelX,
-                                                                 m_size.y * voxelY,
-                                                                 m_size.z * voxelZ ),
+    MyApp::frame->GetStatusBar()->SetStatusText( m_name, 1 );
+    MyApp::frame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "Position %.2f, %.2f, %.2f  Size: %.2f, %.2f, %.2f" ),
+                                                                 m_center.x, m_center.y, m_center.z,
+                                                                 m_size.x * voxelX, m_size.y * voxelY, m_size.z * voxelZ ),
                                                                  2 );
 }
 
@@ -1732,7 +1728,7 @@ void SelectionObject::drawFibersInfo()
 {
     if( ! m_isMaster )
     {
-        wxTreeCtrl*      l_treeWidget   = m_datasetHelper->m_mainFrame->m_pTreeWidget;
+        wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
 
         l_masterObject->drawFibersInfo();
@@ -1940,7 +1936,7 @@ void SelectionObject::SetFiberInfoGridValues()
 {
     if( ! m_isMaster )
     {
-        wxTreeCtrl*      l_treeWidget   = m_datasetHelper->m_mainFrame->m_pTreeWidget;
+        wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );        
         l_masterObject->SetFiberInfoGridValues();
         return;

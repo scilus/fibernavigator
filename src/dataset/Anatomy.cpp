@@ -7,6 +7,7 @@
 #include "Fibers.h"
 
 #include "../Logger.h"
+#include "../main.h"
 #include "../dataset/DatasetManager.h"
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
@@ -366,7 +367,7 @@ void Anatomy::minimize()
     pNewAnatomy->setType( HEAD_BYTE );
     pNewAnatomy->setDataType( 2 );
 
-    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( indx );
+    MyApp::frame->m_pListCtrl2->InsertItem( indx );
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -1992,9 +1992,9 @@ Anatomy* Fibers::generateFiberVolume()
     Anatomy *pTmpAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
     pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
     
-    m_dh->m_mainFrame->m_pListCtrl2->InsertItem( index );
+    MyApp::frame->m_pListCtrl2->InsertItem( index );
 
-    m_dh->m_mainFrame->refreshAllGLWidgets();
+    MyApp::frame->refreshAllGLWidgets();
 
     int   columns = DatasetManager::getInstance()->getColumns();
     int   rows    = DatasetManager::getInstance()->getRows();
@@ -3654,11 +3654,11 @@ void Fibers::updatePropertiesSizer()
 	
 	DatasetInfo* pDatasetInfo = NULL;
 	
-	long nextItemId = m_dh->m_mainFrame->getCurrentListItem(); // m_pListCtrl->GetNextItem(m_dh->m_mainFrame->getCurrentListItem());
+	long nextItemId = MyApp::frame->getCurrentListItem();
 
 	if( nextItemId >= 0)
 	{
-		pDatasetInfo = DatasetManager::getInstance()->getDataset( m_dh->m_mainFrame->m_pListCtrl2->GetItem( nextItemId ) );
+		pDatasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( nextItemId ) );
 		if( pDatasetInfo != NULL)
 		{
 			if(pDatasetInfo->getType() != FIBERS)
@@ -3680,11 +3680,11 @@ void Fibers::updatePropertiesSizer()
 		DatasetInfo::m_pbtnDown->Disable();
 	}
 	
-	long prevItemId = m_dh->m_mainFrame->getCurrentListItem() - 1;
+	long prevItemId = MyApp::frame->getCurrentListItem() - 1;
 	
 	if( prevItemId != -1)
 	{
-		pDatasetInfo = DatasetManager::getInstance()->getDataset( m_dh->m_mainFrame->m_pListCtrl2->GetItem( prevItemId ) );
+		pDatasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( prevItemId ) );
 		if( pDatasetInfo != NULL)
 		{
 			if(pDatasetInfo->getType() != FIBERS)
@@ -3811,8 +3811,8 @@ void Fibers::setShader()
     {
         SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.bind();
         SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniInt  ( "globalColor", getShowFS() );
-        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "dimX", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().x );
-        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "dimY", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().y );
+        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
+        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
         SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
     }
     else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )

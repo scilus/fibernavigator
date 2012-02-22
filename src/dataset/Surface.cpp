@@ -44,7 +44,7 @@ Surface::Surface(DatasetHelper* dh) : DatasetInfo(dh)
 
 Surface::~Surface()
 {
-    m_dh->m_mainFrame->m_pTreeWidget->DeleteChildren(m_dh->m_mainFrame->m_tPointId);
+    MyApp::frame->m_pTreeWidget->DeleteChildren( MyApp::frame->m_tPointId );
     m_tMesh->clearMesh();
     delete m_tMesh;
     if (m_kdTree)
@@ -175,24 +175,24 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
 void Surface::execute ()
 {
     std::vector< std::vector< double > > givenPoints;
-    int countPoints = m_dh->m_mainFrame->m_pTreeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId, true);
+    int countPoints = MyApp::frame->m_pTreeWidget->GetChildrenCount( MyApp::frame->m_tPointId, true );
     if (countPoints == 0) return;
     if (m_tMesh) delete m_tMesh;
     m_tMesh = new TriangleMesh(m_dh);
     wxTreeItemId id, childid;
     wxTreeItemIdValue cookie = 0;
-    id = m_dh->m_mainFrame->m_pTreeWidget->GetFirstChild(m_dh->m_mainFrame->m_tPointId, cookie);
-    givenPoints.reserve(m_dh->m_mainFrame->m_pTreeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId));
+    id = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
+    givenPoints.reserve( MyApp::frame->m_pTreeWidget->GetChildrenCount( MyApp::frame->m_tPointId ) );
     while ( id.IsOk() )
     {
-        SplinePoint *point = (SplinePoint*)(m_dh->m_mainFrame->m_pTreeWidget->GetItemData(id));
+        SplinePoint *point = (SplinePoint*)( MyApp::frame->m_pTreeWidget->GetItemData( id ) );
         std::vector< double > p(3);
         p[0] = point->getCenter().x;
         p[1] = point->getCenter().y;
         p[2] = point->getCenter().z;
         givenPoints.push_back(p);
 
-        id = m_dh->m_mainFrame->m_pTreeWidget->GetNextChild(m_dh->m_mainFrame->m_tPointId, cookie);
+        id = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
     }
 
     std::vector< std::vector< double > > deBoorPoints;
@@ -339,14 +339,14 @@ void Surface::draw()
 
 void Surface::movePoints()
 {
-    int countPoints = m_dh->m_mainFrame->m_pTreeWidget->GetChildrenCount(m_dh->m_mainFrame->m_tPointId, true);
+    int countPoints = MyApp::frame->m_pTreeWidget->GetChildrenCount( MyApp::frame->m_tPointId, true );
 
     wxTreeItemId id, childid;
     wxTreeItemIdValue cookie = 0;
     for (int i = 0 ; i < countPoints ; ++i)
     {
-        id = m_dh->m_mainFrame->m_pTreeWidget->GetNextChild(m_dh->m_mainFrame->m_tPointId, cookie);
-        SplinePoint *point = (SplinePoint*)m_dh->m_mainFrame->m_pTreeWidget->GetItemData(id);
+        id = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
+        SplinePoint *point = (SplinePoint*)MyApp::frame->m_pTreeWidget->GetItemData( id );
         point->move(2.0 * m_threshold);
     }
     execute();

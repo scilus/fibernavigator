@@ -39,7 +39,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
-DatasetHelper::DatasetHelper( MainFrame *mf ) :
+DatasetHelper::DatasetHelper() :
     m_niftiTransform( 4, 4 ),
     m_countFibers( 0    ),
     m_scnFileLoaded      ( false ),
@@ -77,8 +77,7 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
     m_anatomyHelper     ( 0 ), 
     m_boxAtCrosshair    ( 0 ),
     m_lastSelectedPoint ( NULL ),
-    m_lastSelectedObject( NULL ),
-    m_mainFrame			( mf )
+    m_lastSelectedObject( NULL )
 {
 }
 
@@ -102,7 +101,7 @@ void DatasetHelper::treeFinished()
     Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
     SceneManager::getInstance()->updateAllSelectionObjects();
     m_selBoxChanged = true;
-    m_mainFrame->refreshAllGLWidgets();
+    MyApp::frame->refreshAllGLWidgets();
 }
 
 void DatasetHelper::deleteAllPoints()
@@ -112,22 +111,22 @@ void DatasetHelper::deleteAllPoints()
     wxTreeItemId l_id, l_childId;
     wxTreeItemIdValue l_cookie = 0;
 
-    l_id = m_mainFrame->m_pTreeWidget->GetFirstChild( m_mainFrame->m_tPointId, l_cookie );
+    l_id = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, l_cookie );
 
     while( l_id.IsOk() )
     {
         std::vector< SplinePoint* > l_b;
-        l_b.push_back( (SplinePoint*)( m_mainFrame->m_pTreeWidget->GetItemData( l_id ) ) );
+        l_b.push_back( (SplinePoint*)( MyApp::frame->m_pTreeWidget->GetItemData( l_id ) ) );
         wxTreeItemIdValue childcookie = 0;
-        l_childId = m_mainFrame->m_pTreeWidget->GetFirstChild( l_id, childcookie );
+        l_childId = MyApp::frame->m_pTreeWidget->GetFirstChild( l_id, childcookie );
 
         while( l_childId.IsOk() )
         {
-            l_b.push_back( (SplinePoint*)( m_mainFrame->m_pTreeWidget->GetItemData( l_childId ) ) );
-            l_childId = m_mainFrame->m_pTreeWidget->GetNextChild( l_id, childcookie );
+            l_b.push_back( (SplinePoint*)( MyApp::frame->m_pTreeWidget->GetItemData( l_childId ) ) );
+            l_childId = MyApp::frame->m_pTreeWidget->GetNextChild( l_id, childcookie );
         }
 
-        l_id = m_mainFrame->m_pTreeWidget->GetNextChild( m_mainFrame->m_tPointId, l_cookie );
+        l_id = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, l_cookie );
         l_points.push_back( l_b );
     }
 
@@ -135,7 +134,7 @@ void DatasetHelper::deleteAllPoints()
     {
         for( unsigned int j = 0; j < l_points[i].size(); ++j )
         {
-            m_mainFrame->m_pTreeWidget->Delete(l_points[i][j]->GetId());      
+            MyApp::frame->m_pTreeWidget->Delete(l_points[i][j]->GetId());      
         }
     }
 }
@@ -174,7 +173,7 @@ Vector DatasetHelper::mapMouse2WorldBack( const int i_x, const int i_y,GLdouble 
 
 bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
 {
-    io_f = DatasetManager::getInstance()->getSelectedFibers( m_mainFrame->getCurrentListItem() );
+    io_f = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
     return NULL != io_f;
 }
 
@@ -195,12 +194,12 @@ std::vector< float >* DatasetHelper::getVectorDataset()
     if( !DatasetManager::getInstance()->isVectorsLoaded() )
         return NULL;
 
-    for( int i = 0; i < m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
         if( l_datasetInfo->getType() == VECTORS )
         {
-            Anatomy* l_anatomy = (Anatomy*)l_datasetInfo; //m_mainFrame->m_pListCtrl->GetItemData( i );
+            Anatomy* l_anatomy = (Anatomy*)l_datasetInfo;
             return l_anatomy->getFloatDataset();
         }
     }
@@ -221,9 +220,9 @@ TensorField* DatasetHelper::getTensorField()
     if( !DatasetManager::getInstance()->isTensorsFieldLoaded() )
         return NULL;
 
-    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_mainFrame->m_pListCtrl2->GetItemCount() ); ++i )
+    for( unsigned int i( 0 ); i < static_cast<unsigned int>( MyApp::frame->m_pListCtrl2->GetItemCount() ); ++i )
     {
-        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( m_mainFrame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
         if( l_datasetInfo->getType() == TENSOR_FIELD || l_datasetInfo->getType() == VECTORS )
         {
             Anatomy* l_anatomy = (Anatomy*) l_datasetInfo;
@@ -241,7 +240,7 @@ void DatasetHelper::doLicMovie( int i_mode )
     wxString l_wildcard         = wxT( "PPM files (*.ppm)|*.ppm|*.*|*.*" );
     wxString defaultDir         = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
-    wxFileDialog l_dialog( m_mainFrame, l_caption, defaultDir, l_defaultFileName, l_wildcard, wxSAVE );
+    wxFileDialog l_dialog( MyApp::frame, l_caption, defaultDir, l_defaultFileName, l_wildcard, wxSAVE );
     wxString l_tmpFileName      = _T( "" );
 
     l_dialog.SetFilterIndex( 0 );
@@ -308,22 +307,22 @@ void DatasetHelper::licMovieHelper()
 #ifdef __WXMAC__
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
-    //long l_id = m_mainFrame->m_pListCtrl->GetItemCount();
-    long l_id = m_mainFrame->m_pListCtrl2->GetItemCount();
+    //long l_id = MyApp::frame->m_pListCtrl->GetItemCount();
+    long l_id = MyApp::frame->m_pListCtrl2->GetItemCount();
 #else
     long l_id = 0;
 #endif
 
     // TODO: Verify this. Added to list, rendered, then removed from list. Is this necessary?
-    m_mainFrame->m_pListCtrl2->InsertItem( index );
+    MyApp::frame->m_pListCtrl2->InsertItem( index );
 
     l_surface->activateLIC();
 
     m_scheduledScreenshot = true;
-    m_mainFrame->m_pMainGL->render();
-    m_mainFrame->m_pMainGL->render();
+    MyApp::frame->m_pMainGL->render();
+    MyApp::frame->m_pMainGL->render();
 
-    m_mainFrame->m_pListCtrl2->DeleteItem( l_id );
+    MyApp::frame->m_pListCtrl2->DeleteItem( l_id );
 }
 
 void DatasetHelper::createLicSliceSag( int i_slize )
@@ -335,7 +334,7 @@ void DatasetHelper::createLicSliceSag( int i_slize )
     int l_xs = (int)( i_slize * voxelX );
 
     //delete all existing points
-    m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+    MyApp::frame->m_pTreeWidget->DeleteChildren( MyApp::frame->m_tPointId );
 
     float rows   = DatasetManager::getInstance()->getRows();
     float frames = DatasetManager::getInstance()->getFrames();
@@ -352,7 +351,7 @@ void DatasetHelper::createLicSliceSag( int i_slize )
 
             if ( i == 0 || i == 10 || j == 0 || j == 10 )
             {
-                wxTreeItemId l_treeId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
+                wxTreeItemId l_treeId = MyApp::frame->m_pTreeWidget->AppendItem( MyApp::frame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
                 l_point->setTreeId( l_treeId );
                 l_point->setIsBoundary( true );
             }
@@ -370,7 +369,7 @@ void DatasetHelper::createLicSliceCor( int i_slize )
     int l_ys = (int)( i_slize * voxelY );
 
     //delete all existing points
-    m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+    MyApp::frame->m_pTreeWidget->DeleteChildren( MyApp::frame->m_tPointId );
 
     float columns = DatasetManager::getInstance()->getColumns();
     float frames  = DatasetManager::getInstance()->getFrames();
@@ -387,7 +386,7 @@ void DatasetHelper::createLicSliceCor( int i_slize )
 
             if( i == 0 || i == 10 || j == 0 || j == 10 )
             {
-                wxTreeItemId l_treeId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
+                wxTreeItemId l_treeId = MyApp::frame->m_pTreeWidget->AppendItem( MyApp::frame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
                 l_point->setTreeId( l_treeId );
                 l_point->setIsBoundary( true );
             }
@@ -406,7 +405,7 @@ void DatasetHelper::createLicSliceAxi( int i_slize )
     int l_zs = (int)( i_slize * voxelZ );
 
     //delete all existing points
-    m_mainFrame->m_pTreeWidget->DeleteChildren( m_mainFrame->m_tPointId );
+    MyApp::frame->m_pTreeWidget->DeleteChildren( MyApp::frame->m_tPointId );
 
     float columns = DatasetManager::getInstance()->getColumns();
     float rows    = DatasetManager::getInstance()->getRows();
@@ -423,7 +422,7 @@ void DatasetHelper::createLicSliceAxi( int i_slize )
 
             if( i == 0 || i == 10 || j == 0 || j == 10 )
             {
-                wxTreeItemId l_treeId = m_mainFrame->m_pTreeWidget->AppendItem( m_mainFrame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
+                wxTreeItemId l_treeId = MyApp::frame->m_pTreeWidget->AppendItem( MyApp::frame->m_tPointId, wxT( "boundary point" ), -1, -1, l_point );
                 l_point->setTreeId( l_treeId );
                 l_point->setIsBoundary( true );
             }

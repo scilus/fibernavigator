@@ -12,6 +12,7 @@
 #include "TheScene.h"
 
 #include "../Logger.h"
+#include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetHelper.h"
@@ -188,9 +189,9 @@ void TheScene::bindTextures()
 
     int allocatedTextureCount = 0;
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
         if( pDsInfo->getType() < MESH && pDsInfo->getShow() )
         {
             glActiveTexture( GL_TEXTURE0 + allocatedTextureCount );
@@ -226,7 +227,7 @@ void TheScene::renderScene()
     // This will put the frustum information up to date for any render that needs it. 
     extractFrustum();
     
-    if( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount() == 0 )
+    if( MyApp::frame->m_pListCtrl2->GetItemCount() == 0 )
         return;
 
     SceneManager::getInstance()->getShaderHelper()->initializeArrays();
@@ -280,7 +281,7 @@ void TheScene::renderScene()
 		    m_posSagital = 0;
 
         SceneManager::getInstance()->updateView( m_posSagital, sliceY, sliceZ );
-        m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( m_posSagital );
+        MyApp::frame->m_pXSlider->SetValue( m_posSagital );
     }
 
     if(m_isNavCoronal)
@@ -289,7 +290,7 @@ void TheScene::renderScene()
 		    m_posCoronal = 0;
 
         SceneManager::getInstance()->updateView( sliceX, m_posCoronal, sliceZ );
-        m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( m_posCoronal );
+        MyApp::frame->m_pYSlider->SetValue( m_posCoronal );
     }
 
     if(m_isNavAxial)
@@ -298,7 +299,7 @@ void TheScene::renderScene()
 		    m_posAxial = 0;
 
         SceneManager::getInstance()->updateView( sliceX, sliceY, m_posAxial );
-        m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( m_posAxial );
+        MyApp::frame->m_pZSlider->SetValue( m_posAxial );
     }
 
     // Opaque objects.
@@ -505,9 +506,9 @@ void TheScene::renderSlices()
 
 void TheScene::renderSplineSurface()
 {
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
         if( pDsInfo->getType() == SURFACE && pDsInfo->getShow() )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
@@ -587,9 +588,9 @@ void TheScene::renderMesh()
     }
 
     //Render meshes
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
         if( pDsInfo->getType() == MESH || pDsInfo->getType() == ISO_SURFACE )
         {
             if( pDsInfo->getShow() )
@@ -634,9 +635,9 @@ void TheScene::renderFibers()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
 
         if( pDsInfo->getType() == FIBERS && pDsInfo->getShow())
         {
@@ -704,9 +705,9 @@ void TheScene::renderTensors()
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
 
         if( pDsInfo->getType() == TENSORS && pDsInfo->getShow() )
         {
@@ -845,13 +846,13 @@ void TheScene::drawPoints()
 
     wxTreeItemId treeId;
     wxTreeItemIdValue cookie = 0;
-    treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetFirstChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
+    treeId = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
     while( treeId.IsOk() )
     {
-        SplinePoint* pCurPoint = (SplinePoint*) ( m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetItemData( treeId ) );
+        SplinePoint* pCurPoint = (SplinePoint*) ( MyApp::frame->m_pTreeWidget->GetItemData( treeId ) );
         pCurPoint->draw();
 
-        treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetNextChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
+        treeId = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
     }
 
     lightsOff();
@@ -925,9 +926,9 @@ void TheScene::drawVectors()
     glEnable( GL_LINE_SMOOTH );
     glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
 
         if( pInfo->getType() == VECTORS && pInfo->getShow() )
         {
@@ -1205,9 +1206,9 @@ void TheScene::drawVectors()
                 }
             }
 
-            for( int j = 0; j < m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount(); ++j )
+            for( int j = 0; j < MyApp::frame->m_pListCtrl2->GetItemCount(); ++j )
             {
-                DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( j ) );
+                DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( j ) );
 
                 if ( pMesh->getType() == ISO_SURFACE && pMesh->getShow() )
                 {
@@ -1242,21 +1243,21 @@ void TheScene::drawGraph()
 
     wxTreeItemId treeId;
     wxTreeItemIdValue cookie = 0;
-    treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetFirstChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
+    treeId = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
     while ( treeId.IsOk() )
     {
-        SplinePoint* pPoint = (SplinePoint*)( m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetItemData( treeId ) );
+        SplinePoint* pPoint = (SplinePoint*)( MyApp::frame->m_pTreeWidget->GetItemData( treeId ) );
         graphPoints.push_back( pPoint->X() );
         graphPoints.push_back( pPoint->Y() );
         graphPoints.push_back( pPoint->Z() );
-        treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetNextChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
+        treeId = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
     }
 
     SceneManager::getInstance()->getShaderHelper()->m_graphShader.bind();
     SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniInt  ( "globalColor", false );
     SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "animation", (float)SceneManager::getInstance()->getAnimationStep() );
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
+    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
+    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
 
     int countPoints = graphPoints.size() / 3;
     glColor3f( 1.0f, 0.0f, 0.0f );

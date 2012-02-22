@@ -7,6 +7,7 @@
 
 #include "main.h"
 
+#include "Logger.h"
 #include "dataset/DatasetManager.h"
 #include "dataset/Loader.h"
 #include "gui/MainFrame.h"
@@ -26,16 +27,15 @@
 
 #include <exception>
 
-wxString MyApp::respath;
-wxString MyApp::shaderPath;
-wxString MyApp::iconsPath;
-
-MainFrame* frame = NULL;
+wxString    MyApp::respath;
+wxString    MyApp::shaderPath;
+wxString    MyApp::iconsPath;
+MainFrame * MyApp::frame = NULL;
 
 const wxString MyApp::APP_NAME   = _T( "main" );
 const wxString MyApp::APP_VENDOR = _T( "Ralph S. & Mario H." );
 
-IMPLEMENT_APP(MyApp)
+IMPLEMENT_APP( MyApp )
 
 static const wxCmdLineEntryDesc desc[] =
 {
@@ -47,32 +47,12 @@ static const wxCmdLineEntryDesc desc[] =
     { wxCMD_LINE_NONE } 
 };
 
-namespace
-{
-    void printwx( const wxString& str )
-    {
-        char* cstring = NULL;
-        cstring = (char*) malloc( str.length() + 1 );
-        strcpy( cstring, (const char*) str.mb_str( wxConvUTF8 ) );
-        printf( "%s\n", cstring );
-        free( cstring );
-    }
-
-    /////////////////////////////////////////////////////////////////////////////
-
-    void printwx( const wxString& str1, const wxString& str2 )
-    {
-        printwx( str1 );
-        printwx( str2 );
-    }
-} // namespace
-
 MyApp::MyApp()
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// Initialise this in OnInit, not statically
+// Initialize this in OnInit, not statically
 
 bool MyApp::OnInit( void )
 {
@@ -127,15 +107,11 @@ bool MyApp::OnInit( void )
 
 #endif
 
-#if defined(DEBUG) || defined(_DEBUG)
+        Logger::getInstance()->print( wxT( "Warning: This version of Fibernavigator is debug compiled." ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxT( "For better performance please compile a Release version."), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "respath: %s" ), respath ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "shader: %s" ), shaderPath ), LOGLEVEL_DEBUG );
 
-        // this crashes on windows
-        printwx( _T( "Warning: This version of Fibernavigator is debug compiled."), _T( "For better performance please compile a Release version.") );
-        printwx( _T( "respath:" ), respath );
-        printwx( _T( "shader:" ), shaderPath );
-
-
-#endif
         // Create the main frame window
         frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 1219"), wxPoint( 50, 50 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
         SceneManager::getInstance()->setMainFrame( frame );
@@ -148,8 +124,7 @@ bool MyApp::OnInit( void )
         
         frame->SetMinSize( wxSize( 800, 600 ) );
         frame->SetSize( wxSize( 1024, 768 ) );
-        
-       // frame->init();            
+                
         frame->Show( true );
         SetTopWindow( frame );
 
@@ -171,7 +146,6 @@ bool MyApp::OnInit( void )
                 if ( cmdParser.Found(_T("d")) &&  ( i == 0 ) )
                 {
                     loader( cmdFileName );
-//                    frame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED, wxALL);
                     frame->createDistanceMapAndIso();
                 }
                 else if ( cmdParser.Found( _T( "p" ) ) &&  ( i == cmdParser.GetParamCount() -1 ) )

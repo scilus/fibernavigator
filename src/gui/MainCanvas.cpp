@@ -4,6 +4,7 @@
 #include "MyListCtrl.h"
 #include "SceneManager.h"
 #include "../Logger.h"
+#include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/SplinePoint.h"
@@ -181,10 +182,10 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
                     int newY = (int) ( getEventCenter().y + 0.5 );
                     int newZ = (int) ( getEventCenter().z + 0.5 );
                     SceneManager::getInstance()->updateView( newX, newY, newZ );
-                    m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( newX );
-                    m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( newY );
-                    m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( newZ );
-                    m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();
+                    MyApp::frame->m_pXSlider->SetValue( newX );
+                    MyApp::frame->m_pYSlider->SetValue( newY );
+                    MyApp::frame->m_pZSlider->SetValue( newZ );
+                    MyApp::frame->refreshAllGLWidgets();
                 }
                 else if ( wxGetKeyState( WXK_CONTROL ) && SceneManager::getInstance()->isPointMode() )
                 {
@@ -193,8 +194,8 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 					{
 						m_hr.picked = 20;
 						SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
-						wxTreeItemId pId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->AppendItem(
-								m_pDatasetHelper->m_mainFrame->m_tPointId, wxT("point"), -1, -1, point );
+						wxTreeItemId pId = MyApp::frame->m_pTreeWidget->AppendItem(
+								MyApp::frame->m_tPointId, wxT("point"), -1, -1, point );
 						point->setTreeId( pId );
 
 						GetEventHandler()->ProcessEvent( evt1 );
@@ -226,23 +227,20 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 						}
 						else
 						{
-// 							long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-// 							if(l_item != -1)
-// 							{
-                                // TODO: Test changes
-                                long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
-                                Anatomy *pAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
-                                //Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+                            long index = MyApp::frame->getCurrentListItem();
+                            if( -1 != index )
+                            {
+                                Anatomy *pAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
 
-								if( pAnatomy->getType() < MESH && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
-								{
+                                if( pAnatomy->getType() < MESH && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
+                                {
                                     SceneManager::getInstance()->setSegmentActive( true );
-									//m_pDatasetHelper->m_isSegmentActive = true;
-									m_hr = pick(evt.GetPosition(), false);
-									segment();
-									pAnatomy->toggleSegment();                        
-								}
-//							}
+                                    //m_pDatasetHelper->m_isSegmentActive = true;
+                                    m_hr = pick(evt.GetPosition(), false);
+                                    segment();
+                                    pAnatomy->toggleSegment();                        
+                                }
+                            }
 						}
 						m_lastPos = evt.GetPosition();
 						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
@@ -660,17 +658,17 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
     {
         wxTreeItemId id, childid;
         wxTreeItemIdValue cookie = 0;
-        id = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetFirstChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
+        id = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
         while ( id.IsOk() )
         {
-            SplinePoint *point = (SplinePoint*) ( m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetItemData( id ) );
+            SplinePoint *point = (SplinePoint*) ( MyApp::frame->m_pTreeWidget->GetItemData( id ) );
             hitResult hr1 = point->hitTest( ray );
             if ( hr1.hit && !hr.hit )
                 hr = hr1;
             else if ( hr1.hit && hr.hit && ( hr1.tmin < hr.tmin ) )
                 hr = hr1;
 
-            id = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetNextChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
+            id = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
         }
     }
     return hr;
@@ -846,7 +844,7 @@ void MainCanvas::render()
             glLoadIdentity();
             glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
 
-            if ( m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItemCount() != 0 )
+            if ( MyApp::frame->m_pListCtrl2->GetItemCount() != 0 )
             {
                 m_pDatasetHelper->m_anatomyHelper->renderNav( m_view, &SceneManager::getInstance()->getShaderHelper()->m_anatomyShader );
                 Logger::getInstance()->printIfGLError( wxT( "Render nav view" ) );
@@ -977,7 +975,7 @@ void MainCanvas::setRotation()
     Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot );
 
     updateView();
-    m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();
+    MyApp::frame->refreshAllGLWidgets();
 }
 
 void MainCanvas::OnChar( wxKeyEvent& event )
@@ -1019,7 +1017,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             }
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( std::max(0, m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue() - 1) );
+                MyApp::frame->m_pXSlider->SetValue( std::max(0, MyApp::frame->m_pXSlider->GetValue() - 1) );
             }
             break;
         case WXK_RIGHT:
@@ -1038,8 +1036,8 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             } 
             else
             {
-                m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue(
-                    std::min( m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue() + 1.0f, columns ) );
+                MyApp::frame->m_pXSlider->SetValue(
+                    std::min( MyApp::frame->m_pXSlider->GetValue() + 1.0f, columns ) );
             }
             break;
         case WXK_DOWN:
@@ -1062,7 +1060,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             }
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( std::max(0, m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() - 1) );
+                MyApp::frame->m_pYSlider->SetValue( std::max(0, MyApp::frame->m_pYSlider->GetValue() - 1) );
             }
             break;
         case WXK_UP:
@@ -1085,7 +1083,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             }
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( std::min( m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue() + 1.0f, rows ) );
+                MyApp::frame->m_pYSlider->SetValue( std::min( MyApp::frame->m_pYSlider->GetValue() + 1.0f, rows ) );
             }
             break;
         case WXK_PAGEDOWN:
@@ -1095,7 +1093,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             } 
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( std::max( 0, m_pDatasetHelper->m_mainFrame->m_pZSlider->GetValue() - 1 ) );
+                MyApp::frame->m_pZSlider->SetValue( std::max( 0, MyApp::frame->m_pZSlider->GetValue() - 1 ) );
             }
             break;
         case WXK_PAGEUP:
@@ -1105,13 +1103,13 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             } 
             else 
             {
-                m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( std::min( m_pDatasetHelper->m_mainFrame->m_pZSlider->GetValue() + 1.0f, frames ) );
+                MyApp::frame->m_pZSlider->SetValue( std::min( MyApp::frame->m_pZSlider->GetValue() + 1.0f, frames ) );
             }
             break;
         case WXK_HOME:
-            m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue( columns / 2 );
-            m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue( rows / 2 );
-            m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue( frames / 2 );
+            MyApp::frame->m_pXSlider->SetValue( columns / 2 );
+            MyApp::frame->m_pYSlider->SetValue( rows / 2 );
+            MyApp::frame->m_pZSlider->SetValue( frames / 2 );
             break;
         case WXK_DELETE:
             if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
@@ -1146,10 +1144,10 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             return;
     }
 
-    SceneManager::getInstance()->updateView( m_pDatasetHelper->m_mainFrame->m_pXSlider->GetValue(), 
-                      m_pDatasetHelper->m_mainFrame->m_pYSlider->GetValue(),
-                      m_pDatasetHelper->m_mainFrame->m_pZSlider->GetValue() );
-    m_pDatasetHelper->m_mainFrame->refreshAllGLWidgets();
+    SceneManager::getInstance()->updateView( MyApp::frame->m_pXSlider->GetValue(), 
+                      MyApp::frame->m_pYSlider->GetValue(),
+                      MyApp::frame->m_pZSlider->GetValue() );
+    MyApp::frame->refreshAllGLWidgets();
 }
 
 
@@ -1164,14 +1162,8 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 
 void MainCanvas::drawOnAnatomy() 
 {
-	// get selected anatomy dataset (that's the one we draw on)
-
-    // TODO: Test changes
-    long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
- 	Anatomy* l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
-
-// 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-// 	Anatomy* l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
+    long index = MyApp::frame->getCurrentListItem();
+ 	Anatomy* l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
 
     int xClick = floor( m_hitPts[0] / DatasetManager::getInstance()->getVoxelX() );
     int yClick = floor( m_hitPts[1] / DatasetManager::getInstance()->getVoxelY() );
@@ -1197,27 +1189,15 @@ void MainCanvas::drawOnAnatomy()
 
 void MainCanvas::pushAnatomyHistory()
 {
-	// get selected anatomy dataset (that's the one we draw on)
-    // TODO: Test changes
-    long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
-    Anatomy *l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
-
-// 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-// 	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-
+    long index = MyApp::frame->getCurrentListItem();
+    Anatomy *l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
 	l_currentAnatomy->pushHistory();
 }
 
 void MainCanvas::popAnatomyHistory()
 {
-	// get selected anatomy dataset (that's the one we draw on)
-    // TODO: Test changes
-    long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
-    Anatomy *l_currentAnatomy = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
-
-// 	long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-// 	Anatomy* l_currentAnatomy = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );
-	
+    long index = MyApp::frame->getCurrentListItem();
+    Anatomy *l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
 	l_currentAnatomy->popHistory( RGB == l_currentAnatomy->getType() );
 }
 
@@ -1614,14 +1594,9 @@ void MainCanvas::segment()
 
     int dataLength( rows * columns * frames );
 
-    // get selected l_anatomy dataset
-    // TODO: Test changes
-    long index = m_pDatasetHelper->m_mainFrame->getCurrentListItem();
-    Anatomy *l_info = (Anatomy *)m_pDatasetHelper->m_mainFrame->m_pListCtrl2->GetItem( index );
+    long index = MyApp::frame->getCurrentListItem();
+    Anatomy *l_info = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
 
-//     long l_item = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-//     Anatomy* l_info = (Anatomy*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( l_item );    
-    
     //1D vector with the normalized brightness ( 0 to 1 )
     std::vector<float>* sourceData = l_info->getFloatDataset();
     std::vector<float>* resultData = new std::vector<float>;
@@ -1663,6 +1638,6 @@ void MainCanvas::segment()
     pNewAnatomy->setType(2);
     pNewAnatomy->setDataType(4);
     pNewAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
-    m_pDatasetHelper->m_mainFrame->m_pListCtrl2->InsertItem( indx );
+    MyApp::frame->m_pListCtrl2->InsertItem( indx );
 }
 

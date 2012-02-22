@@ -8,7 +8,9 @@
 
 //#include <vld.h> 
 
-#include "wx/app.h"
+#include <wx/app.h>
+
+class MainFrame;
 
 class MyApp : public wxApp
 {
@@ -27,6 +29,7 @@ public:
     static wxString respath;
     static wxString shaderPath;
     static wxString iconsPath;
+    static MainFrame * frame;
 };
 
 #endif // MAIN_H_

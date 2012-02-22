@@ -28,7 +28,6 @@
 #include "../gui/SelectionObject.h"
 
 #include "../gui/MainFrame.h"
-#include "../gfx/TheScene.h"
 #include "SplinePoint.h"
 
 #include "AnatomyHelper.h"
@@ -42,7 +41,6 @@
 
 class MainFrame;
 class DatasetInfo;
-class TheScene;
 class AnatomyHelper;
 class ShaderHelper;
 class SplinePoint;
@@ -56,7 +54,7 @@ class DatasetHelper
 {
 public:
     // Constructor/destructor
-    DatasetHelper( MainFrame* i_mainFrame );
+    DatasetHelper();
     virtual ~DatasetHelper();
 
     // Functions
@@ -163,7 +161,7 @@ public:
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
     
-    MainFrame*       m_mainFrame;
+    //MainFrame*       m_mainFrame;
 };
 
 #define ID_KDTREE_FINISHED    50

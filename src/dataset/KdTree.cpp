@@ -1,6 +1,7 @@
 #include "KdTree.h"
 
 #include "../Logger.h"
+#include "../main.h"
 
 #include <algorithm>
 
@@ -85,7 +86,7 @@ void* KdTreeThread::Entry()
     buildTree(m_left, m_right, m_axis);
 
     wxCommandEvent event( wxEVT_COMMAND_MENU_SELECTED, KDTREE_EVENT );
-    wxPostEvent( m_dh->m_mainFrame, event );
+    wxPostEvent( MyApp::frame, event );
 
     return NULL;
 }

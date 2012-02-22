@@ -183,7 +183,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 {
     wxImage::AddHandler(new wxPNGHandler);
 
-    m_pDatasetHelper = new DatasetHelper( this );
+    m_pDatasetHelper = new DatasetHelper();
     // TODO: Remove dependency to DatasetHelper
     DatasetManager::getInstance()->setDatasetHelper( m_pDatasetHelper );
     SceneManager::getInstance()->setTheScene( new TheScene( m_pDatasetHelper ) );

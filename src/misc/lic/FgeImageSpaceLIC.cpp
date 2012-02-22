@@ -15,6 +15,7 @@
 #include "FgeRenderbuffer.h"
 
 #include "../../Logger.h"
+#include "../../main.h"
 #include "../../dataset/DatasetManager.h"
 
 #include <wx/wxprec.h>
@@ -339,9 +340,9 @@ void FgeImageSpaceLIC::render(DatasetInfo *info) {
     float* threshold = new float[10];
     GLint* type = new GLint[10];
     int c = 0;
-    for (int i = 0 ; i < m_dh->m_mainFrame->m_pListCtrl2->GetItemCount() ; ++i)
+    for (int i = 0 ; i < MyApp::frame->m_pListCtrl2->GetItemCount() ; ++i)
     {
-        int index = m_dh->m_mainFrame->m_pListCtrl2->GetItem( i );
+        int index = MyApp::frame->m_pListCtrl2->GetItem( i );
         DatasetInfo *pInfo = DatasetManager::getInstance()->getDataset( index );
         if( pInfo && pInfo->getType() < MESH) {
             tex[c] = c;
