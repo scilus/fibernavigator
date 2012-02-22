@@ -10,6 +10,7 @@
 
 #include "../main.h"
 #include "../Logger.h"
+#include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 #include "../misc/Fantom/FMatrix.h"
 

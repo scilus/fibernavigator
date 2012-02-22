@@ -7,6 +7,7 @@
 #include "AnatomyHelper.h"
 
 #include "DatasetManager.h"
+#include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 
 #include <GL/glew.h>
@@ -20,7 +21,6 @@ using std::vector;
 AnatomyHelper::AnatomyHelper( DatasetHelper* l_datasetHelper )
 :   m_datasetHelper(l_datasetHelper)
 {
-
 }
 
 ///////////////////////////////////////////////////////////////////////////

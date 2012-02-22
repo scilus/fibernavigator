@@ -2,6 +2,7 @@
 
 #include "../Logger.h"
 #include "../main.h"
+#include "../gui/MainFrame.h"
 
 #include <algorithm>
 

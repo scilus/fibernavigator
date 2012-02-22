@@ -1,6 +1,8 @@
 #include "SplinePoint.h"
-#include "../gui/SelectionObject.h"
+
 #include "../main.h"
+#include "../gui/MainFrame.h"
+#include "../gui/SelectionObject.h"
 
 SplinePoint::SplinePoint( Vector center, DatasetHelper* dh )
 :   m_dh( dh),

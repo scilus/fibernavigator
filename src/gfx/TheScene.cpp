@@ -23,6 +23,7 @@
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
 #include "../gui/ArcBall.h"
+#include "../gui/MainFrame.h"
 #include "../gui/MyListCtrl.h"
 #include "../gui/SceneManager.h"
 #include "../gui/SelectionObject.h"

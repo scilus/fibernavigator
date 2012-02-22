@@ -14,6 +14,7 @@
 #include "../dataset/DatasetHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Surface.h"
+#include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 
 ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) :

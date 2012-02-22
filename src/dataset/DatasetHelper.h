@@ -27,19 +27,14 @@
 
 #include "../gui/SelectionObject.h"
 
-#include "../gui/MainFrame.h"
 #include "SplinePoint.h"
 
 #include "AnatomyHelper.h"
 #include "../gfx/ShaderHelper.h"
 
 #include "../misc/lic/TensorField.h"
-
 #include "../misc/Fantom/FMatrix.h"
 
-#include "../Logger.h"
-
-class MainFrame;
 class DatasetInfo;
 class AnatomyHelper;
 class ShaderHelper;
@@ -160,8 +155,6 @@ public:
     SelectionObject* m_boxAtCrosshair;
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
-    
-    //MainFrame*       m_mainFrame;
 };
 
 #define ID_KDTREE_FINISHED    50

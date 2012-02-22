@@ -12,6 +12,7 @@
 #include "Tensors.h"
 
 #include "DatasetManager.h"
+#include "../Logger.h"
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"

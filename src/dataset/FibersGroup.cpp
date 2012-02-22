@@ -5,20 +5,22 @@
 
 #include "FibersGroup.h"
 
-#include <iostream>
-#include <fstream>
-#include <cfloat>
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cmath>
-#include <list>
-#include <wx/tokenzr.h>
-
 #include "Anatomy.h"
+#include "DatasetManager.h"
 #include "../Logger.h"
 #include "../main.h"
-#include "../dataset/DatasetManager.h"
+#include "../gui/MainFrame.h"
+
+#include <wx/tokenzr.h>
+
+#include <cmath>
+#include <cfloat>
+#include <fstream>
+#include <iostream>
+#include <list>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
 
 FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
 	: DatasetInfo( pDatasetHelper ),

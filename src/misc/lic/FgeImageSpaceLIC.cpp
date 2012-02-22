@@ -17,6 +17,7 @@
 #include "../../Logger.h"
 #include "../../main.h"
 #include "../../dataset/DatasetManager.h"
+#include "../../gui/MainFrame.h"
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
