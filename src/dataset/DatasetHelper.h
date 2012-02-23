@@ -69,9 +69,6 @@ public:
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
 
-    void toggleShowAllSelectionObjects() { m_showObjects = ! m_showObjects; };
-    void toggleActivateAllSelectionObjects() { m_activateObjects = ! m_activateObjects; };
-
     void doLicMovie       ( int i_mode );
     void createLicSliceSag( int i_slize );
     void createLicSliceCor( int i_slize );
@@ -98,9 +95,6 @@ public:
     bool      m_scheduledReloadShaders;
     // the screenshot button has been pressed, next render pass it will be executed
     bool      m_scheduledScreenshot;
-
-    bool      m_showObjects;
-    bool      m_activateObjects;
 
     float     m_frustum[6][4]; // Contains the information of the planes forming the frustum.
     /////////////////////////////////////////////////////////////////////////////////

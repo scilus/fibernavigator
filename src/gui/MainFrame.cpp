@@ -1343,13 +1343,13 @@ void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
 
 void MainFrame::onHideSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->toggleShowAllSelectionObjects();
+    SceneManager::getInstance()->toggleShowAllSelObj();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onActivateSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->toggleActivateAllSelectionObjects();
+    SceneManager::getInstance()->toggleActivateAllSelObj();
     refreshAllGLWidgets();
 }
 

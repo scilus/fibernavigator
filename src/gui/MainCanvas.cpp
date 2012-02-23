@@ -633,7 +633,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
     /*
      * check for hits with the selection object sizers
      */
-    if ( m_pDatasetHelper->m_showObjects )
+    if( SceneManager::getInstance()->getShowAllSelObj() )
     {
         SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
         for ( unsigned int i = 0; i < selectionObjects.size(); ++i )

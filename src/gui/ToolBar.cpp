@@ -164,8 +164,8 @@ void ToolBar::updateToolBar( MainFrame *mf )
     ToggleTool( m_toggleShowSagittal->GetId(),  SceneManager::getInstance()->isSagittalDisplayed() );
     ToggleTool( m_toggleAlphaBlending->GetId(), SceneManager::getInstance()->isAlphaBlend() );
     ToggleTool( m_toggleLighting->GetId(),      SceneManager::getInstance()->isLightingActive() );
-    ToggleTool( m_toggleShowAllSelectionObjects->GetId(), mf->m_pDatasetHelper->m_showObjects);
-    ToggleTool( m_toggleActivateAllSelectionObjects->GetId(), !mf->m_pDatasetHelper->m_activateObjects);
+    ToggleTool( m_toggleShowAllSelectionObjects->GetId(), SceneManager::getInstance()->getShowAllSelObj() );
+    ToggleTool( m_toggleActivateAllSelectionObjects->GetId(), !SceneManager::getInstance()->getActivateAllSelObj() );
     //ToggleTool(m_toggleDrawPoints->GetId(), mf->m_datasetHelper->m_pointMode);
     //EnableTool(m_btnNewSelectionBox->GetId(), mf->m_datasetHelper->m_fibersLoaded);
 	

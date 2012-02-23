@@ -2952,7 +2952,7 @@ void Fibers::draw()
 
     for( int i = 0; i < m_countLines; ++i )
     {
-        if( ( m_selected[i] || !m_dh->m_activateObjects ) && !m_filtered[i] )
+        if( ( m_selected[i] || !SceneManager::getInstance()->getActivateAllSelObj() ) && !m_filtered[i] )
         {
             glDrawArrays( GL_LINE_STRIP, getStartIndexForLine( i ), getPointsPerLine( i ) );
         }

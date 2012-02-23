@@ -125,6 +125,12 @@ public:
     void  setMoveX( float x )   { m_moveX = x; }
     void  setMoveY( float y )   { m_moveY = y; }
 
+    bool  toggleShowAllSelObj()         { return m_showObjects = !m_showObjects; }
+    bool  toggleActivateAllSelObj()     { return m_activateObjects = !m_activateObjects; }
+
+    bool  getShowAllSelObj() const      { return m_showObjects; }
+    bool  getActivateAllSelObj() const  { return m_activateObjects;}
+
 protected:
     SceneManager(void);
 
@@ -175,6 +181,9 @@ private:
     float     m_zoom;
     float     m_moveX;
     float     m_moveY;
+
+    bool  m_showObjects;
+    bool  m_activateObjects;
 };
 
 #endif SCENEMANAGER_H_

@@ -325,7 +325,7 @@ void TheScene::renderScene()
     renderMesh();
 	renderFibers();
     
-    if( m_pDatasetHelper->m_showObjects )
+    if( SceneManager::getInstance()->getShowAllSelObj() )
     {
         drawSelectionObjects();
     }
@@ -582,7 +582,7 @@ void TheScene::renderMesh()
         for( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
-            if( !selectionObjects[i][j]->isSelectionObject() && m_pDatasetHelper->m_showObjects)
+            if( SceneManager::getInstance()->getShowAllSelObj() && !selectionObjects[i][j]->isSelectionObject() )
                 selectionObjects[i][j]->drawIsoSurface();
             glPopAttrib();
         }

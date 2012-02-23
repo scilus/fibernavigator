@@ -45,8 +45,6 @@ DatasetHelper::DatasetHelper() :
     m_surfaceIsDirty     ( true  ),
     m_scheduledReloadShaders( true  ),
     m_scheduledScreenshot   ( false ),
-    m_showObjects  ( true  ),
-    m_activateObjects ( true),
     m_isRulerToolActive( false ),
     m_rulerFullLength(0),
     m_rulerPartialLength(0),
