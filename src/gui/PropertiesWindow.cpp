@@ -664,18 +664,6 @@ void PropertiesWindow::OnLoop( wxCommandEvent& WXUNUSED(event) )
     m_pMainFrame->refreshAllGLWidgets();
 }
 
-
-void PropertiesWindow::OnToggleLIC( wxCommandEvent& WXUNUSED(event) )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleLIC" ), LOGLEVEL_DEBUG );
-
-    if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 && DatasetManager::getInstance()->isVectorsLoaded() )
-    {
-        ((DatasetInfo*) m_pMainFrame->m_pCurrentSceneObject)->activateLIC();
-    }
-    m_pMainFrame->refreshAllGLWidgets();
-}
-
 void PropertiesWindow::OnToggleDrawPointsMode( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleDrawPointsMode" ), LOGLEVEL_DEBUG );

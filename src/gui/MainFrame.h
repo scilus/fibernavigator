@@ -153,9 +153,6 @@ private:
     void onShortcuts                        ( wxCommandEvent& evt );
     void onScreenshot                       ( wxCommandEvent& evt );
 	void onWarningsInformations				( wxCommandEvent& evt );
-    void onSlizeMovieSag                    ( wxCommandEvent& evt );
-    void onSlizeMovieCor                    ( wxCommandEvent& evt );
-    void onSlizeMovieAxi                    ( wxCommandEvent& evt );
 
     // List widget event functions     
     void onActivateListItem                 ( wxListEvent&    evt );

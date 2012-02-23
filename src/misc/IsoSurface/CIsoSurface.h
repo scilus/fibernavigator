@@ -50,7 +50,6 @@ public:
     void clean();
     void smooth();
     void flipAxis( AxisType i_axe ){};
-    void activateLIC();
     std::vector<Vector> getSurfaceVoxelPositions();
 
     void GenerateWithThreshold();
@@ -129,8 +128,7 @@ protected:
 private:
     GLuint getGLuint() {return 0;};
     void generateTexture() {};
-    void generateGeometry() ;
-    void generateLICGeometry() ;
+    void generateGeometry();
     void initializeBuffer() {};
 
     wxToggleButton *m_ptoggleCutFrontSector;
@@ -140,7 +138,6 @@ private:
 
     bool m_positionsCalculated;
     std::vector<Vector>m_svPositions;
-
 };
 #endif // CISOSURFACE_H
 

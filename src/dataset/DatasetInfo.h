@@ -50,7 +50,6 @@ public:
     virtual void   clean()                      = 0;
     virtual void   smooth()                     = 0;
     virtual void   flipAxis( AxisType i_axe )   = 0;
-    virtual void   activateLIC()                = 0;
     virtual GLuint getGLuint()                  = 0;
 
     // Virtual functions
@@ -88,7 +87,6 @@ public:
     bool     toggleShow()                        { m_show        = !m_show;          return m_show;        };
     bool     toggleShowFS()                      { m_showFS      = !m_showFS;        return m_showFS;      };
     bool     toggleUseTex()                      { m_useTex      = !m_useTex;        return m_useTex;      };
-    bool     toggleUseLIC()                      { m_useLIC      = !m_useLIC;        return m_useLIC;      };
 
     void     setShow       ( bool i_show   )     { m_show        = i_show;   };
     void     setShowFS     ( bool i_show   )     { m_showFS      = i_show;   };
@@ -96,7 +94,6 @@ public:
     bool     getShow() const                     { return m_show;            };
     bool     getShowFS() const                   { return m_showFS;          };
     bool     getUseTex() const                   { return m_useTex;          };
-    bool     getUseLIC() const                   { return m_useLIC;          };
     bool     getIsGlyph() const                  { return m_isGlyph;         };
 
     void     setGLuint( GLuint value )           { m_GLuint = value; };
@@ -124,7 +121,6 @@ public:
     wxToggleButton  *m_pBtnFlipX;
     wxToggleButton  *m_pBtnFlipY;
     wxToggleButton  *m_pBtnFlipZ;
-    wxToggleButton  *m_ptoggleLIC;
 	wxStaticText	*m_pIntensityText;
 	wxStaticText	*m_pOpacityText;
 
@@ -161,8 +157,6 @@ protected:
     
     // If false use colormap on threshold value.
     bool        m_isGlyph;
-    bool        licCalculated;
-    bool        m_useLIC;
     GLuint*     m_bufferObjects;
 
     float m_voxelSizeX;

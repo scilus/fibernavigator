@@ -1857,21 +1857,6 @@ void MainFrame::screenshot( wxString i_fileName )
     m_pMainGL->render();
 }
 
-void MainFrame::onSlizeMovieSag( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->doLicMovie( 0 );
-}
-
-void MainFrame::onSlizeMovieCor( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->doLicMovie(1);
-}
-
-void MainFrame::onSlizeMovieAxi( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->doLicMovie( 2 );
-}
-
 void MainFrame::onSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );

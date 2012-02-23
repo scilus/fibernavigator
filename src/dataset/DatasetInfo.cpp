@@ -31,9 +31,6 @@ DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) :
             m_useTex          ( true ),
 
             m_isGlyph         ( false ),
-
-            licCalculated     ( false ),
-            m_useLIC          ( false ),
             m_bufferObjects   ( 0 ),
 
             m_voxelSizeX( 0.0f ),

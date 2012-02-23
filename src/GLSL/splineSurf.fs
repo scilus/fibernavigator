@@ -6,7 +6,6 @@ uniform int dimX, dimY, dimZ;
 uniform float voxX, voxY, voxZ;
 
 uniform int countTextures;
-uniform bool useLic;
 
 #include functions.fs
 
@@ -47,24 +46,5 @@ void main()
 
 	color = clamp(color, 0.0, 1.0);
 
-	if (useLic)
-	{
-	    // gl_Color.r = LIC texture gray value
-        // gl_Color.g = scalar product of triangle normal and input vector
-        // gl_Color.b = FA value
-        // gl_Color.a = noise texture gray value
-	   float fa = clamp( (gl_Color.b - 0.1) * 3., 0., 1. );
-
-	   float licBlend = (1.0 - gl_Color.g) * fa;
-	   vec4 tempColor = vec4(gl_Color.r, gl_Color.r, gl_Color.r, (1.0 - gl_Color.g) );
-	   vec4 licColor = clamp( tempColor * 1.8 - vec4(0.4), 0., 1.);
-
-
-       float noiseBlend = clamp((gl_Color.g - 0.6),0., 1.) * clamp((fa - 0.2),0., 1.) * 3.;
-       vec4 noiseColor = vec4( gl_Color.a );
-
-       gl_FragColor = ((noiseColor - vec4(0.5)) * color * noiseBlend) + ((licColor - vec4(0.5)) * color * licBlend) + color;
-    }
-	else
-		gl_FragColor = color;
+	gl_FragColor = color;
 }

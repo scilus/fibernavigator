@@ -20,10 +20,10 @@ SceneManager * SceneManager::m_pInstance = NULL;
 
 SceneManager::SceneManager(void)
 :   m_pAnatomyHelper( NULL ),
+    m_pTreeView ( NULL ),
     m_pMainFrame( NULL ),
     m_pShaderHelper( NULL ),
     m_pTheScene( NULL ),
-    m_pTreeView ( NULL ),
     m_geometryShadersSupported( true ),
     m_useFibersGeometryShader( false ),
     m_lighting( true ),
@@ -43,9 +43,13 @@ SceneManager::SceneManager(void)
     m_segmentMethod( FLOODFILL ),
     m_animationStep( 0 ),
     m_pointMode( false ),
+    m_drawVectors( false ),
+    m_normalDirection( 1.0f ),
     m_zoom( 1.0f ),
     m_moveX( 0.0f ),
-    m_moveY( 0.0f )
+    m_moveY( 0.0f ),
+    m_showObjects( true ),
+    m_activateObjects( true )
 {
     m_pAnatomyHelper = new AnatomyHelper();
     Matrix4fSetIdentity( &m_transform );

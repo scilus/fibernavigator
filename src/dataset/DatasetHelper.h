@@ -65,12 +65,6 @@ public:
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
 
-    void doLicMovie       ( int i_mode );
-    void createLicSliceSag( int i_slize );
-    void createLicSliceCor( int i_slize );
-    void createLicSliceAxi( int i_slize );
-    void licMovieHelper();
-
     /////////////////////////////////////////////////////////////////////////////////
     // general info about the datasets
     /////////////////////////////////////////////////////////////////////////////////

@@ -36,11 +36,14 @@ MainCanvas::MainCanvas(DatasetHelper* i_pDatasetHelper, int i_view, wxWindow *i_
 #ifdef CTX
         const wxPoint& i_pos, const wxSize& i_size, long i_style, const wxString& i_name, int* i_gl_attrib, wxGLContext*i_pCtx)
 : wxGLCanvas(i_pParent, i_pCtx, i_id,
-        wxDefaultPosition, wxDefaultSize, 0, i_name) // gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name )
+        wxDefaultPosition, wxDefaultSize, 0, i_name) // gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name ),
 #else
 const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name, int* i_gl_attrib, wxGLCanvas*shared )
-: wxGLCanvas(i_pParent, shared, i_id, i_pos, i_size, i_style|wxFULL_REPAINT_ON_RESIZE, i_name, i_gl_attrib )
+: wxGLCanvas(i_pParent, shared, i_id, i_pos, i_size, i_style|wxFULL_REPAINT_ON_RESIZE, i_name, i_gl_attrib ),
 #endif
+    m_isDragging( false ),
+    m_isrDragging( false ),
+    m_ismDragging( false )
 {
     m_init = false;
     m_view = i_view;

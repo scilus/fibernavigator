@@ -11,7 +11,6 @@
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 #include "../misc/Fantom/FMatrix.h"
-#include "../misc/lic/SurfaceLIC.h"
 
 #include <fstream>
 #include <math.h>
@@ -172,7 +171,7 @@ void Surface::getSplineSurfaceDeBoorPoints(std::vector< std::vector< double > > 
   return;
 }
 
-void Surface::execute ()
+void Surface::execute()
 {
     std::vector< std::vector< double > > givenPoints;
     int countPoints = MyApp::frame->m_pTreeWidget->GetChildrenCount( MyApp::frame->m_tPointId, true );
@@ -295,23 +294,10 @@ void Surface::execute ()
             }
     }
 
-    licCalculated = false;
-
     for (int i = 0 ; i < 3 ; ++i)
         m_tMesh->doLoopSubD();
     subDCount = 3;
 
-    if( DatasetManager::getInstance()->isVectorsLoaded() && m_useLIC )
-    {
-        m_tMesh->doLoopSubD();
-        m_tMesh->doLoopSubD();
-        subDCount = 5;
-        Logger::getInstance()->print( wxT( "Initiating lic" ), LOGLEVEL_MESSAGE );
-        SurfaceLIC lic(m_dh, m_tMesh);
-        lic.execute();
-
-        licCalculated = true;
-    }
     m_dh->m_surfaceIsDirty = false;
 
 #ifndef __WXMAC__
@@ -456,35 +442,11 @@ void Surface::boxTest(int left, int right, int axis)
     }
 }
 
-void Surface::activateLIC()
-{
-    m_useLIC = !m_useLIC;
-    if (!m_useLIC || licCalculated) return;
-
-    for (int i = subDCount ; i < 5 ; ++i)
-        m_tMesh->doLoopSubD();
-    subDCount = 5;
-
-    SurfaceLIC lic(m_dh, m_tMesh);
-    lic.execute();
-
-    if (m_GLuint)
-        glDeleteLists(m_GLuint, 1);
-    m_GLuint = 0;
-    m_positionsCalculated = false;
-
-    licCalculated = true;
-}
-
 void Surface::generateGeometry()
 {
-    if (m_useLIC)
-    {
-        generateLICGeometry();
-        return;
-    }
+    if (m_GLuint) 
+        glDeleteLists(m_GLuint, 1);
 
-    if (m_GLuint) glDeleteLists(m_GLuint, 1);
     GLuint dl = glGenLists(1);
     glNewList (dl, GL_COMPILE);
 
@@ -723,7 +685,6 @@ void Surface::smooth()
     m_positionsCalculated = false;
     m_tMesh->doLoopSubD();
     ++subDCount;
-    licCalculated = false;
 }
 
 void Surface::createPropertiesSizer(PropertiesWindow *parent)

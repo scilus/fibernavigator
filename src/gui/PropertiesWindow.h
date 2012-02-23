@@ -78,7 +78,6 @@ public:
 
     void OnClean                            ( wxCommandEvent& event );
     void OnLoop                             ( wxCommandEvent& event );
-    void OnToggleLIC                        ( wxCommandEvent& event );
 
     void OnToggleDrawPointsMode             ( wxCommandEvent& event );
     void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );

@@ -26,7 +26,8 @@ namespace
 DatasetManager * DatasetManager::m_pInstance = NULL;
 
 DatasetManager::DatasetManager(void)
-: m_nextIndex( 0 )
+:   m_nextIndex( 0 ),
+    m_niftiTransform( 4, 4 )
 {
 }
 

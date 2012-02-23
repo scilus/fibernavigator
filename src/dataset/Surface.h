@@ -26,7 +26,6 @@ public:
     void clean() {};
     void smooth();
     void flipAxis( AxisType axe ){};
-    void activateLIC();
     GLuint getCutTex() {return m_CutTex;};
 
     void movePoints();

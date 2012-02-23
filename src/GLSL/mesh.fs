@@ -17,7 +17,6 @@ uniform bool isGlyph;
 
 uniform bool cutAtSurface;
 uniform sampler2D cutTex;
-uniform bool useLic;
 
 uniform bool lightOn;
 
@@ -121,8 +120,5 @@ void main()
 	color.a = alpha_;
 	color = clamp(color, 0.0, 1.0);
 
-	if (useLic)
-	    gl_FragColor = (0.7  * gl_Color) + (0.3 * color);
-    else
-        gl_FragColor = color;
+    gl_FragColor = color;
 }

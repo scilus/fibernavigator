@@ -528,7 +528,6 @@ void TheScene::renderSplineSurface()
             wxColor color = pDsInfo->getColor();
             glColor3f( (float) color.Red() / 255.0, (float) color.Green() / 255.0, (float) color.Blue() / 255.0 );
             SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-            SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.setUniInt( "useLic", pDsInfo->getUseLIC() );
             SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
 
             pDsInfo->draw();
@@ -602,7 +601,6 @@ void TheScene::renderMesh()
                 SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "showFS",  pDsInfo->getShowFS() );
                 SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "useTex",  pDsInfo->getUseTex() );
                 SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniFloat( "alpha_",  pDsInfo->getAlpha() );
-                SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "useLic",  pDsInfo->getUseLIC() );
                 SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
 
                 if(pDsInfo->getAlpha() < 0.99)

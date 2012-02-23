@@ -8,7 +8,6 @@
 
 #include "CIsoSurface.h"
 
-#include "../lic/SurfaceLIC.h"
 #include "../../Logger.h"
 #include "../../main.h"
 #include "../../dataset/Anatomy.h"
@@ -870,8 +869,6 @@ void CIsoSurface::RenameVerticesAndTriangles()
 
     m_i2pt3idVertices.clear();
     m_trivecTriangles.clear();
-    licCalculated = false;
-    m_useLIC = false;
 }
 
 void CIsoSurface::GenerateWithThreshold()
@@ -881,28 +878,6 @@ void CIsoSurface::GenerateWithThreshold()
         glDeleteLists( m_GLuint, 1 );
     m_GLuint = 0;
     m_positionsCalculated = false;
-}
-
-void CIsoSurface::activateLIC()
-{
-    m_useLIC = !m_useLIC;
-    if ( !m_useLIC )
-    {
-        generateGeometry();
-        return;
-    }
-    if ( !licCalculated )
-    {
-        for ( int i = 0; i < 0; ++i )
-            m_tMesh->doLoopSubD();
-
-        SurfaceLIC lic( m_dh, m_tMesh );
-        lic.execute();
-        licCalculated = true;
-    }
-    if ( m_GLuint )
-        glDeleteLists( m_GLuint, 1 );
-    m_GLuint = 0;
 }
 
 void CIsoSurface::clean()
@@ -925,14 +900,9 @@ void CIsoSurface::smooth()
 
 void CIsoSurface::generateGeometry()
 {
-    if ( m_useLIC )
-    {
-        generateLICGeometry();
-        return;
-    }
-
     if ( m_GLuint )
         glDeleteLists( m_GLuint, 1 );
+
     GLuint dl = glGenLists( 1 );
     glNewList( dl, GL_COMPILE );
 
@@ -949,38 +919,6 @@ void CIsoSurface::generateGeometry()
             pointNormal = m_tMesh->getVertNormal( triangleEdges.pointID[j] );
             //Flip the normals by default since most isosurface loaded need their normals flipped.
             glNormal3d( -pointNormal.x, -pointNormal.y, -pointNormal.z); 
-            point = m_tMesh->getVertex( triangleEdges.pointID[j] );
-            glVertex3d( point.x, point.y, point.z );
-        }
-    }
-    glEnd();
-
-    glEndList();
-    m_GLuint = dl;
-}
-
-void CIsoSurface::generateLICGeometry()
-{
-    if ( m_GLuint )
-        glDeleteLists( m_GLuint, 1 );
-    GLuint dl = glGenLists( 1 );
-    glNewList( dl, GL_COMPILE );
-
-    Triangle triangleEdges;
-    Vector point;
-    Vector pointNormal;
-    wxColour color;
-
-    glBegin( GL_TRIANGLES );
-    for ( int i = 0; i < m_tMesh->getNumTriangles(); ++i )
-    {
-        triangleEdges = m_tMesh->getTriangle( i );
-        color = m_tMesh->getTriangleColor( i );
-        glColor4ub( color.Red(), color.Red(), color.Red(),255 );
-        for ( int j = 0; j < 3; ++j )
-        {
-            pointNormal = m_tMesh->getVertNormal( triangleEdges.pointID[j] );
-            glNormal3d( pointNormal.x * -1.0, pointNormal.y * -1.0, pointNormal.z * -1.0 );
             point = m_tMesh->getVertex( triangleEdges.pointID[j] );
             glVertex3d( point.x, point.y, point.z );
         }
