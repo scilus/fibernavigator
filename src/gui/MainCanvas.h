@@ -18,8 +18,6 @@
 #include <vector>
 #include <time.h>
 #include "stdlib.h"
-#define SWAP(a,b,t) t tempr=(a);(a)=(b);(b)=tempr
-#define SQR(a) ((a)*(a))
 
 class DatasetHelper;
 
@@ -57,6 +55,7 @@ public:
 	void renderRulerDisplay();
 	void drawOnAnatomy();
     void segment();
+    // TODO: Change definition and pass a reference to the vectors instead of pointers
     void KMeans(float i_means[2],float i_stddev[2],float i_apriori[2],std::vector<float>*,std::vector<float>*);
     void floodFill(std::vector<float>*, std::vector<float>*, Vector, float);
     void graphCut(std::vector<float>*, std::vector<float>*, float);
@@ -106,6 +105,10 @@ private:
      int m_orthoSizeNormal;
      int m_orthoModX;
      int m_orthoModY;
+
+     bool  m_isDragging;
+     bool  m_isrDragging;
+     bool  m_ismDragging;
 };
 
 #endif /*MAINCANVAS_H_*/

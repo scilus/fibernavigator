@@ -213,7 +213,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 				// Use Control (or Command on Mac) key for advanced left click actions
                 if( evt.CmdDown() )
 				{
-					if(!m_pDatasetHelper->m_isDragging)
+					if( !m_isDragging )
 					{
                         if( MyApp::frame->isDrawerToolActive() )
 						{
@@ -243,7 +243,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
                             }
 						}
 						m_lastPos = evt.GetPosition();
-						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
+						m_isDragging = true; // Prepare For Dragging
 					}
 					else
 					{
@@ -256,11 +256,11 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 				}
 				else
 				{
-					if ( !m_pDatasetHelper->m_isDragging ) // Not Dragging
+					if ( !m_isDragging ) // Not Dragging
 					{
 						m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
 						m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
-						m_pDatasetHelper->m_isDragging = true; // Prepare For Dragging
+						m_isDragging = true; // Prepare For Dragging
 					}
 					else if(!m_isSceneLocked)
 					{                    
@@ -276,14 +276,15 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
             }
             else
             {
-                m_pDatasetHelper->m_isDragging = false;
+                m_isDragging = false;
             }
+
             if ( evt.MiddleIsDown() )
             {               
-                if ( !m_pDatasetHelper->m_ismDragging)
+                if ( !m_ismDragging)
                 {
                     m_lastPos = evt.GetPosition();
-                    m_pDatasetHelper->m_ismDragging = true;
+                    m_ismDragging = true;
                 }
                 else  if (!m_isSceneLocked) //Move Scene
                 {
@@ -296,7 +297,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
             }
             else
             {
-                m_pDatasetHelper->m_ismDragging = false;
+                m_ismDragging = false;
             }
             
             if ( evt.GetWheelDelta() != 0 && !m_isSceneLocked)
@@ -307,7 +308,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 
             if ( evt.RightIsDown() )
             {
-                if ( !m_pDatasetHelper->m_isrDragging ) // Not Dragging
+                if ( !m_isrDragging ) // Not Dragging
                 {
                     if ( wxGetKeyState( WXK_CONTROL ) && wxGetKeyState( WXK_SHIFT ) )
                     {
@@ -324,7 +325,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 //                         printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[6], m_pDatasetHelper->m_transform.M[7],
 //                                 m_pDatasetHelper->m_transform.M[8] );
                     }
-                    m_pDatasetHelper->m_isrDragging = true; // Prepare For Dragging
+                    m_isrDragging = true; // Prepare For Dragging
                     m_lastPos = evt.GetPosition();
                     m_hr = pick( evt.GetPosition(), false);
 
@@ -414,7 +415,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
             }
             else
             {
-                m_pDatasetHelper->m_isrDragging = false;
+                m_isrDragging = false;
             }
 
         }
@@ -790,7 +791,7 @@ void MainCanvas::render()
 
                 //add the hit Point to ruler point list
                 
-                if ( m_pDatasetHelper->m_isRulerToolActive && !m_pDatasetHelper->m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
+                if ( m_pDatasetHelper->m_isRulerToolActive && !m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
                 {
                     if (m_pDatasetHelper->m_rulerPts.size()>0 )
                     {
@@ -1215,6 +1216,12 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
     int labelClass;
     int length( columns * rows * frames );
 
+    if( src->size() != length || label->size() != length )
+    {
+        Logger::getInstance()->print( wxT( "Vector size is wrong. Cannot segment using KMeans." ), LOGLEVEL_ERROR );
+        return;
+    }
+
     /* Step 0 : Take two random pixels */
     means[0] = 0.0f;
     means[1] = 1.0f;
@@ -1233,7 +1240,8 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
     }
     if (means[0] > means[1])
     {
-        SWAP(means[0], means[1], float);
+        std::swap( means[0], means[1] );
+        //SWAP(means[0], means[1], float);
     }
 
     lastMeans[0] = 0.0f; lastMeans[1] = 0.0f;
@@ -1243,38 +1251,38 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
         /* Step 1 : For each pixel, find its class */
         for (int x = 0; x < length; ++x)
         {
-            if(src->at(x) > 0.0f)
+            if( (*src)[x] > 0.0f)
             {
-                if (SQR((src->at(x)-means[0])) < SQR((src->at(x)-means[1])))
+                if( pow( (*src)[x] - means[0], 2.0f ) < pow( (*src)[x] - means[1], 2.0f ) ) //SQR((src->at(x) - means[0])) < SQR((src->at(x)-means[1])) )
                 {
-                    label->at(x) = 0.0f;
+                    (*label)[x] = 0.0f;
                 }
                 else
                 {
-                    label->at(x) = 1.0f;
+                    (*label)[x] = 1.0f;
                 }
             }
-            
         }
+
         /* Step 2 : Reinitialize means */
-        means[0] = 0;    means[1] = 0;
+        means[0] = 0;     means[1] = 0;
         nbPixel[0] = 0; nbPixel[1] = 0;
 
         /* Step 3 : Compute the new mean values */
         for (int x = 0; x < length; ++x)
         {
-            if(src->at(x) > 0.0f)
+            if( (*src)[x] > 0.0f )
             {
-                labelClass = label->at(x);
-                means[labelClass] = means[labelClass] + src->at(x);
+                labelClass = (*label)[x];
+                means[labelClass] = means[labelClass] + (*src)[x];
                 nbPixel[labelClass] += 1;
             }
             
         }
 
         /* Step 4 : Compute average value */
-        means[0] = means[0]/nbPixel[0];
-        means[1] = means[1]/nbPixel[1];
+        means[0] = means[0] / nbPixel[0];
+        means[1] = means[1] / nbPixel[1];
         /*
             End condition : We stop if the difference between last mean values and current
             mean values is less than 1%
@@ -1293,15 +1301,16 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
     {
         if(src->at(x) > 0.0f)
         {
-            labelClass = label->at(x);
+            labelClass = (*label)[x];
             /* Compute standard deviation */
-            stddev[labelClass] = stddev[labelClass] + SQR((src->at(x)-means[labelClass]));
+            stddev[labelClass] = stddev[labelClass] + pow( (*src)[x] - means[labelClass], 2.0f ); //SQR((src->at(x)-means[labelClass]));
         }
     }
-    stddev[0] = sqrt(stddev[0]/nbPixel[0]);
-    stddev[1] = sqrt(stddev[1]/nbPixel[1]);
-    apriori[0] = nbPixel[0]/ (length);
-    apriori[1] = nbPixel[1]/ (length);
+
+    stddev[0] = sqrt( stddev[0] / nbPixel[0] );
+    stddev[1] = sqrt( stddev[1] / nbPixel[1] );
+    apriori[0] = nbPixel[0] / length;
+    apriori[1] = nbPixel[1] / length;
 }
 
 //Floodfill method using a threshold range
