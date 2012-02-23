@@ -487,48 +487,52 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     // We currently only use it when loading Mrtrix fibers.
     if( pHeader->sform_code > 0 )
     {
-        m_dh->m_niftiTransform( 0, 0 ) = pHeader->sto_xyz.m[0][0];
-        m_dh->m_niftiTransform( 0, 1 ) = pHeader->sto_xyz.m[0][1];
-        m_dh->m_niftiTransform( 0, 2 ) = pHeader->sto_xyz.m[0][2];
-        m_dh->m_niftiTransform( 0, 3 ) = pHeader->sto_xyz.m[0][3];
-        m_dh->m_niftiTransform( 1, 0 ) = pHeader->sto_xyz.m[1][0];
-        m_dh->m_niftiTransform( 1, 1 ) = pHeader->sto_xyz.m[1][1];
-        m_dh->m_niftiTransform( 1, 2 ) = pHeader->sto_xyz.m[1][2];
-        m_dh->m_niftiTransform( 1, 3 ) = pHeader->sto_xyz.m[1][3];
-        m_dh->m_niftiTransform( 2, 0 ) = pHeader->sto_xyz.m[2][0];
-        m_dh->m_niftiTransform( 2, 1 ) = pHeader->sto_xyz.m[2][1];
-        m_dh->m_niftiTransform( 2, 2 ) = pHeader->sto_xyz.m[2][2];
-        m_dh->m_niftiTransform( 2, 3 ) = pHeader->sto_xyz.m[2][3];
-        m_dh->m_niftiTransform( 3, 0 ) = pHeader->sto_xyz.m[3][0];
-        m_dh->m_niftiTransform( 3, 1 ) = pHeader->sto_xyz.m[3][1];
-        m_dh->m_niftiTransform( 3, 2 ) = pHeader->sto_xyz.m[3][2];
-        m_dh->m_niftiTransform( 3, 3 ) = pHeader->sto_xyz.m[3][3];
+        FMatrix transform = DatasetManager::getInstance()->getNiftiTransform();
+
+        transform( 0, 0 ) = pHeader->sto_xyz.m[0][0];
+        transform( 0, 1 ) = pHeader->sto_xyz.m[0][1];
+        transform( 0, 2 ) = pHeader->sto_xyz.m[0][2];
+        transform( 0, 3 ) = pHeader->sto_xyz.m[0][3];
+        transform( 1, 0 ) = pHeader->sto_xyz.m[1][0];
+        transform( 1, 1 ) = pHeader->sto_xyz.m[1][1];
+        transform( 1, 2 ) = pHeader->sto_xyz.m[1][2];
+        transform( 1, 3 ) = pHeader->sto_xyz.m[1][3];
+        transform( 2, 0 ) = pHeader->sto_xyz.m[2][0];
+        transform( 2, 1 ) = pHeader->sto_xyz.m[2][1];
+        transform( 2, 2 ) = pHeader->sto_xyz.m[2][2];
+        transform( 2, 3 ) = pHeader->sto_xyz.m[2][3];
+        transform( 3, 0 ) = pHeader->sto_xyz.m[3][0];
+        transform( 3, 1 ) = pHeader->sto_xyz.m[3][1];
+        transform( 3, 2 ) = pHeader->sto_xyz.m[3][2];
+        transform( 3, 3 ) = pHeader->sto_xyz.m[3][3];
     }
     else if( pHeader->qform_code > 0 )
     {
-        m_dh->m_niftiTransform( 0, 0 ) = pHeader->qto_xyz.m[0][0];
-        m_dh->m_niftiTransform( 0, 1 ) = pHeader->qto_xyz.m[0][1];
-        m_dh->m_niftiTransform( 0, 2 ) = pHeader->qto_xyz.m[0][2];
-        m_dh->m_niftiTransform( 0, 3 ) = pHeader->qto_xyz.m[0][3];
-        m_dh->m_niftiTransform( 1, 0 ) = pHeader->qto_xyz.m[1][0];
-        m_dh->m_niftiTransform( 1, 1 ) = pHeader->qto_xyz.m[1][1];
-        m_dh->m_niftiTransform( 1, 2 ) = pHeader->qto_xyz.m[1][2];
-        m_dh->m_niftiTransform( 1, 3 ) = pHeader->qto_xyz.m[1][3];
-        m_dh->m_niftiTransform( 2, 0 ) = pHeader->qto_xyz.m[2][0];
-        m_dh->m_niftiTransform( 2, 1 ) = pHeader->qto_xyz.m[2][1];
-        m_dh->m_niftiTransform( 2, 2 ) = pHeader->qto_xyz.m[2][2];
-        m_dh->m_niftiTransform( 2, 3 ) = pHeader->qto_xyz.m[2][3];
-        m_dh->m_niftiTransform( 3, 0 ) = pHeader->qto_xyz.m[3][0];
-        m_dh->m_niftiTransform( 3, 1 ) = pHeader->qto_xyz.m[3][1];
-        m_dh->m_niftiTransform( 3, 2 ) = pHeader->qto_xyz.m[3][2];
-        m_dh->m_niftiTransform( 3, 3 ) = pHeader->qto_xyz.m[3][3];
+        FMatrix transform = DatasetManager::getInstance()->getNiftiTransform();
+
+        transform( 0, 0 ) = pHeader->qto_xyz.m[0][0];
+        transform( 0, 1 ) = pHeader->qto_xyz.m[0][1];
+        transform( 0, 2 ) = pHeader->qto_xyz.m[0][2];
+        transform( 0, 3 ) = pHeader->qto_xyz.m[0][3];
+        transform( 1, 0 ) = pHeader->qto_xyz.m[1][0];
+        transform( 1, 1 ) = pHeader->qto_xyz.m[1][1];
+        transform( 1, 2 ) = pHeader->qto_xyz.m[1][2];
+        transform( 1, 3 ) = pHeader->qto_xyz.m[1][3];
+        transform( 2, 0 ) = pHeader->qto_xyz.m[2][0];
+        transform( 2, 1 ) = pHeader->qto_xyz.m[2][1];
+        transform( 2, 2 ) = pHeader->qto_xyz.m[2][2];
+        transform( 2, 3 ) = pHeader->qto_xyz.m[2][3];
+        transform( 3, 0 ) = pHeader->qto_xyz.m[3][0];
+        transform( 3, 1 ) = pHeader->qto_xyz.m[3][1];
+        transform( 3, 2 ) = pHeader->qto_xyz.m[3][2];
+        transform( 3, 3 ) = pHeader->qto_xyz.m[3][3];
     }
     else
     {
         Logger::getInstance()->print( wxT( "No transformation encoded in the nifti file. Using identity transform." ), LOGLEVEL_WARNING );
 
         // This is not a typo, the method is called makeIdendity in FMatrix.
-        m_dh->m_niftiTransform.makeIdendity();
+        DatasetManager::getInstance()->getNiftiTransform().makeIdendity();
     }
     
     if( pHeader->datatype == 2 )

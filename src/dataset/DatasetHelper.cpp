@@ -40,7 +40,6 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() :
-    m_niftiTransform( 4, 4 ),
     m_countFibers( 0    ),
     m_scnFileLoaded      ( false ),
     m_surfaceIsDirty     ( true  ),

@@ -86,8 +86,6 @@ public:
     double                m_rulerFullLength;
     double                m_rulerPartialLength;
 
-    FMatrix m_niftiTransform;
-
     unsigned int m_countFibers;
 
     bool m_scnFileLoaded;

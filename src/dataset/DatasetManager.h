@@ -5,6 +5,7 @@
 #include "FibersGroup.h"
 #include "ODFs.h"
 #include "Surface.h"
+#include "../misc/Fantom/FMatrix.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
@@ -45,6 +46,7 @@ public:
     float                   getVoxelX() const;
     float                   getVoxelY() const;
     float                   getVoxelZ() const;
+    FMatrix &               getNiftiTransform()             { return m_niftiTransform; }
 
     bool                    isDatasetLoaded() const         { return !m_datasets.empty(); }
     bool                    isAnatomyLoaded() const         { return !m_anatomies.empty(); }
@@ -131,6 +133,8 @@ private:
     std::map<DatasetIndex, ODFs *> m_odfs;
     std::map<DatasetIndex, Surface *> m_surfaces;
     std::map<DatasetIndex, Tensors *> m_tensors;
+
+    FMatrix m_niftiTransform;
 };
 
 #endif DATASETMANAGER_H_

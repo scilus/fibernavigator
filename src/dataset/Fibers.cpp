@@ -836,7 +836,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     // scaling factor is encoded in the transformation matrix, but we do not,
     // for the moment, use this scaling. Therefore, we must remove it from the
     // the transformation matrix before computing its inverse.
-    FMatrix localToWorld = m_dh->m_niftiTransform;
+    FMatrix localToWorld = DatasetManager::getInstance()->getNiftiTransform();
 
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
