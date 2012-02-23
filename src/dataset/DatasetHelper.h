@@ -62,10 +62,6 @@ public:
      */
     void treeFinished();
 
-	bool getFibersGroupDataset( FibersGroup* &i_fiberGroup );
-	bool getSelectedFiberDataset ( Fibers* &i_fiber );
-    bool getSurfaceDataset( Surface* &i_surface );
-    bool getTextureDataset( std::vector< DatasetInfo* > &o_types ); 
     std::vector< float >* getVectorDataset();
     TensorField* getTensorField();
 
@@ -121,7 +117,6 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // pointers to often used objects
     /////////////////////////////////////////////////////////////////////////////////
-    //AnatomyHelper*   m_anatomyHelper;
     SelectionObject* m_boxAtCrosshair;
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;

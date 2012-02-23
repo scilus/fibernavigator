@@ -847,9 +847,8 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
     vector< bool > filteredFiber;
-    Fibers* l_fibers = NULL;
+    Fibers * l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
 
-    m_datasetHelper->getSelectedFiberDataset(l_fibers);
     filteredFiber = l_fibers->getFilteredFibers();
 
     for( unsigned int i = 0; i < m_inBranch.size(); ++i )
@@ -1012,8 +1011,7 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::getShowFibers()
 {
-    Fibers* l_fibers = NULL;
-    m_datasetHelper->getSelectedFiberDataset( l_fibers );
+    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
     if ( l_fibers == NULL )
         return false;
     return l_fibers->getShow();
@@ -1029,8 +1027,7 @@ bool SelectionObject::getShowFibers()
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
 {
-    Fibers* l_fibers = NULL;
-    m_datasetHelper->getSelectedFiberDataset( l_fibers );
+    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
 
     if( l_fibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
         return false;
@@ -1089,20 +1086,20 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &fiber
     
     Anatomy *pCurrentAnatomy( NULL );
 
-    vector< DatasetInfo* > datasets;
-    m_datasetHelper->getTextureDataset(datasets);
-
+    vector< Anatomy* > datasets = DatasetManager::getInstance()->getAnatomies();
+    
     if( m_pCBSelectDataSet == NULL && datasets.size() > 0 )
     {
         // Select the first dataset in the list
-        pCurrentAnatomy = (Anatomy*)datasets[0];
+        pCurrentAnatomy = datasets[0];
     }
     else if( m_pCBSelectDataSet != NULL && 
              m_pCBSelectDataSet->GetCount() > 0 && 
              m_pCBSelectDataSet->GetCurrentSelection() != -1 )
     {
+        // TODO: Verify if the selection is the right index
         // Get the currently selected dataset.
-        pCurrentAnatomy = (Anatomy*)datasets[ m_pCBSelectDataSet->GetSelection() ];
+        pCurrentAnatomy = datasets[ m_pCBSelectDataSet->GetSelection() ];
     }
     else
     {
@@ -1965,8 +1962,7 @@ void SelectionObject::setShowConvexHullOption( bool i_val )
 
 void SelectionObject::UpdateMeanValueTypeBox()
 {
-    vector< DatasetInfo* > dataSets;
-    m_datasetHelper->getTextureDataset( dataSets );
+    vector< Anatomy* > dataSets = DatasetManager::getInstance()->getAnatomies();
     
     if( dataSets.size() != m_pCBSelectDataSet->GetCount() )
     {

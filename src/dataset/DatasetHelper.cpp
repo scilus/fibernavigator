@@ -154,24 +154,6 @@ Vector DatasetHelper::mapMouse2WorldBack( const int i_x, const int i_y,GLdouble 
     return l_vector;
 }
 
-bool DatasetHelper::getSelectedFiberDataset( Fibers* &io_f )
-{
-    io_f = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
-    return NULL != io_f;
-}
-
-bool DatasetHelper::getFibersGroupDataset( FibersGroup* &io_fg )
-{
-    io_fg = DatasetManager::getInstance()->getFibersGroup();
-    return NULL != io_fg;
-}
-
-bool DatasetHelper::getSurfaceDataset( Surface *&io_s )
-{
-    io_s = DatasetManager::getInstance()->getSurface();
-    return NULL != io_s;
-}
-
 std::vector< float >* DatasetHelper::getVectorDataset()
 {
     if( !DatasetManager::getInstance()->isVectorsLoaded() )
@@ -189,14 +171,6 @@ std::vector< float >* DatasetHelper::getVectorDataset()
 
     return NULL;
 }
-
-bool DatasetHelper::getTextureDataset( vector< DatasetInfo* > &o_types )
-{
-    vector<Anatomy *> v = DatasetManager::getInstance()->getAnatomies();
-    o_types = vector<DatasetInfo *>(v.begin(), v.end());
-    return true;
-}
-
 
 TensorField* DatasetHelper::getTensorField()
 {

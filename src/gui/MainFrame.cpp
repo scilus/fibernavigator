@@ -486,8 +486,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 			
 			if( pDatasetInfo->getType() == FIBERS )
 			{
-				Fibers* l_fibers = NULL;
-				m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
+				Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
 				if( l_fibers )
 				{
 					if (dialog.GetFilterIndex()==1)
@@ -502,8 +501,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 			}
 			else if( pDatasetInfo->getType() == FIBERSGROUP )
 			{
-				FibersGroup* l_fibersGroup = NULL;
-				m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+                FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
 				
 				if (dialog.GetFilterIndex()==1)
 				{
@@ -1367,8 +1365,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
     }
 
     //Generate KdTree for Spline Surface
-    Fibers* pTmpFib = NULL;
-    m_pDatasetHelper->getSelectedFiberDataset(pTmpFib);
+    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
     if(pTmpFib != NULL)
     {
         pTmpFib->generateKdTree();
@@ -1388,7 +1385,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
 
     if( DatasetManager::getInstance()->isFibersLoaded() )
     {
-        m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
+        l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
     }
 
     float columns = DatasetManager::getInstance()->getColumns();
@@ -1545,17 +1542,15 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
 		{
-			Fibers* l_fibers = NULL;
-			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
-			if( l_fibers != NULL)
+			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
+			if( l_fibers != NULL )
 			{
 				l_fibers->invertFibers();
 			}
 		}
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
 		{
-			FibersGroup* l_fibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+			FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
 			if( l_fibersGroup != NULL )
 			{
 				l_fibersGroup->invertFibers();
@@ -1574,8 +1569,7 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
 		{
-			Fibers* l_fibers = NULL;
-			m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) ;
+			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
 			if(l_fibers != NULL)
 			{
 				l_fibers->useFakeTubes();
@@ -1583,8 +1577,7 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 		}
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
 		{
-			FibersGroup* l_fibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+			FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
 			if( l_fibersGroup != NULL )
 			{
 				l_fibersGroup->useFakeTubes();
@@ -1673,8 +1666,7 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
 		{
-			Fibers* l_fibers = NULL;
-			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
+			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
 			if( l_fibers != NULL)
 			{
 				l_fibers->useTransparency();
@@ -1683,8 +1675,7 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 		}
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
 		{
-			FibersGroup* l_fibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+			FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
 			if( l_fibersGroup != NULL )
 			{
 				l_fibersGroup->useTransparency();
@@ -1712,8 +1703,7 @@ void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 
         if( pDatasetInfo->getType() == FIBERS )
         {
-            Fibers* l_fibers = NULL;
-			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
+            Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
 			if( l_fibers  != NULL)
 			{
 				l_fibers->resetColorArray();
@@ -1721,8 +1711,7 @@ void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 		}
 		else if ( pDatasetInfo->getType() == FIBERSGROUP )
 		{
-			FibersGroup* l_fibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
+			FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
 			if( l_fibersGroup != NULL )
 			{
 				l_fibersGroup->resetFibersColor();
