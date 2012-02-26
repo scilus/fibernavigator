@@ -1,6 +1,8 @@
 #ifndef LISTCTRL_H_
 #define LISTCTRL_H_
 
+#include "../dataset/DatasetManager.h"
+
 #include <wx/listctrl.h>
 
 #define ID_LIST_CTRL2 292
@@ -25,7 +27,7 @@ public:
     void DeleteSelectedItem();
     long InsertColumn( long col, wxListItem& info );
     // TODO: Change for index in DatasetManager, once it is created
-    void InsertItem( unsigned int datasetIndex );
+    void InsertItem( DatasetIndex datasetIndex );
     void MoveItemDown();
     void MoveItemUp();
     void UnselectAll();

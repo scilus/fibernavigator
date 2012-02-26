@@ -27,7 +27,8 @@ DatasetManager * DatasetManager::m_pInstance = NULL;
 
 DatasetManager::DatasetManager(void)
 :   m_nextIndex( 0 ),
-    m_niftiTransform( 4, 4 )
+    m_niftiTransform( 4, 4 ),
+    m_countFibers( 0 )
 {
 }
 
@@ -491,12 +492,7 @@ int DatasetManager::loadFibers( const wxString &filename )
         {
             for( unsigned int j( 0 ); j < selectionObjects[i].size(); ++j )
             {
-                selectionObjects[i][j]->m_inBox.resize( m_pDatasetHelper->m_countFibers, sizeof(bool) );
-                for( unsigned int k( 0 ); k < m_pDatasetHelper->m_countFibers; ++k )
-                {
-                    selectionObjects[i][j]->m_inBox[k] = 0;
-                }
-
+                selectionObjects[i][j]->m_inBox.assign( m_countFibers, false );
                 selectionObjects[i][j]->setIsDirty( true );
             }
         }

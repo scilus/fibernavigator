@@ -33,8 +33,6 @@ public:
     double                m_rulerFullLength;
     double                m_rulerPartialLength;
 
-    unsigned int m_countFibers;  // TODO: Move to DatasetManager and remove me once selection is fixed
-
     bool m_scnFileLoaded;
     bool m_surfaceIsDirty;
 

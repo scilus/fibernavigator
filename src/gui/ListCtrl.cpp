@@ -73,13 +73,8 @@ long ListCtrl::InsertColumn( long col, wxListItem& info )
 }
 
 //////////////////////////////////////////////////////////////////////////
-void ListCtrl::InsertItem( unsigned int datasetIndex )
+void ListCtrl::InsertItem( DatasetIndex datasetIndex )
 {
-//     if( NULL == pDataset )
-//     {
-//         return;
-//     }
-
     // insert at zero is a well-known bug on OSX, so we append there...
     // http://trac.wxwidgets.org/ticket/4492
     // To have the same behavior on all platforms, we add to the end of the list

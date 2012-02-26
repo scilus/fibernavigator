@@ -436,7 +436,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ////
     Logger::getInstance()->print( wxT( "Setting data in right format for the navigator..." ), LOGLEVEL_MESSAGE );
     m_countLines = lines.size();
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_pointArray.max_size();
     m_colorArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
@@ -642,7 +642,7 @@ bool Fibers::loadCamino( const wxString &filename )
     delete[] pBuffer;
     pBuffer = NULL;
     
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
@@ -787,7 +787,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -1001,7 +1001,7 @@ bool Fibers::loadPTK( const wxString &filename )
     delete[] pBuffer;
     pBuffer = NULL;
     
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
@@ -1228,7 +1228,7 @@ bool Fibers::loadVTK( const wxString &filename )
 
     Logger::getInstance()->print( wxString::Format( wxT( "Loading %d points and %d lines" ), countPoints, countLines ), LOGLEVEL_MESSAGE );
     m_countLines        = countLines;
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_countPoints       = countPoints;
     
     m_linePointers.resize( m_countLines + 1 );
@@ -1383,7 +1383,7 @@ bool Fibers::loadDmri( const wxString &filename )
     
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
-    m_dh->m_countFibers = m_countLines + 1;
+    DatasetManager::getInstance()->setCountFibers( m_countLines + 1 );
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -1444,7 +1444,7 @@ void Fibers::loadTestFibers()
     m_countLines        = 2;  // The number of fibers you want to display.
     int lengthLines   = 10; // The number of points each fiber will have.
     int pos = 0;
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_countPoints       = m_countLines * lengthLines;
     
     m_linePointers.resize( m_countLines + 1 );

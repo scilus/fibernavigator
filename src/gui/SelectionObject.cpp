@@ -69,7 +69,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     //Distance coloring
     m_DistColoring          = false;
 
-    m_inBox.resize( m_datasetHelper->m_countFibers, false );
+    m_inBox.resize( DatasetManager::getInstance()->getFibersCount(), false );
 }
 
 SelectionObject::~SelectionObject( )
@@ -480,9 +480,7 @@ void SelectionObject::setIsMaster( bool i_isMaster )
 
     if( m_isMaster )
     {
-        m_inBranch.resize( m_datasetHelper->m_countFibers, sizeof(bool) );
-        for( unsigned int i = 0; i < m_datasetHelper->m_countFibers ; ++i )
-            m_inBranch[i] = false;
+        m_inBranch.assign( DatasetManager::getInstance()->getFibersCount(), false );
     }
 }
 

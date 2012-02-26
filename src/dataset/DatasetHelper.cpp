@@ -17,7 +17,6 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() :
-    m_countFibers( 0    ),
     m_scnFileLoaded      ( false ),
     m_surfaceIsDirty     ( true  ),
     m_scheduledReloadShaders( true  ),
