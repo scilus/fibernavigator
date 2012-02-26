@@ -187,20 +187,20 @@ void ToolBar::updateToolBar( MainFrame *mf )
 			}
 		}
 	}
-	ToggleTool(m_toggleFakeTubes->GetId(), isFiberSelected && isFiberUsingFakeTubes);
-	ToggleTool(m_toggleInverseSelection->GetId(), isFiberSelected && isFiberInverted);
-	ToggleTool(m_toggleClearToBlack->GetId(), mf->m_pDatasetHelper->m_clearToBlack);
-	ToggleTool(m_selectNormalPointer->GetId(), mf->m_pDatasetHelper->m_isRulerToolActive && mf->isDrawerToolActive() );
-	ToggleTool(m_selectRuler->GetId(), mf->m_pDatasetHelper->m_isRulerToolActive);
-	ToggleTool(m_selectDrawer->GetId(), mf->isDrawerToolActive() );
+	ToggleTool( m_toggleFakeTubes->GetId(), isFiberSelected && isFiberUsingFakeTubes);
+	ToggleTool( m_toggleInverseSelection->GetId(), isFiberSelected && isFiberInverted);
+	ToggleTool( m_toggleClearToBlack->GetId(), mf->m_pDatasetHelper->m_clearToBlack);
+    ToggleTool( m_selectNormalPointer->GetId(), SceneManager::getInstance()->isRulerActive() && mf->isDrawerToolActive() );
+	ToggleTool( m_selectRuler->GetId(), SceneManager::getInstance()->isRulerActive() );
+	ToggleTool( m_selectDrawer->GetId(), mf->isDrawerToolActive() );
     //SetToolNormalBitmap(m_selectColorPicker->GetId(), wxBitmap(mf->m_pDatasetHelper->m_drawColorIcon));
 
-	ToggleTool(m_toggleDrawRound->GetId(), mf->canDrawRound() );
-    ToggleTool(m_toggleDraw3d->GetId(), mf->canDraw3D() );
-    ToggleTool(m_selectPen->GetId(), DRAWMODE_PEN == mf->getDrawMode() );
-	ToggleTool(m_selectEraser->GetId(), DRAWMODE_ERASER == mf->getDrawMode() );
+	ToggleTool( m_toggleDrawRound->GetId(), mf->canDrawRound() );
+    ToggleTool( m_toggleDraw3d->GetId(), mf->canDraw3D() );
+    ToggleTool( m_selectPen->GetId(), DRAWMODE_PEN == mf->getDrawMode() );
+	ToggleTool( m_selectEraser->GetId(), DRAWMODE_ERASER == mf->getDrawMode() );
     
     // Check if the currently selected anatomy can use the Color Picker.
-    EnableTool(m_selectColorPicker->GetId(), DRAWMODE_PEN == mf->getDrawMode() && mf->canUseColorPicker() );
+    EnableTool( m_selectColorPicker->GetId(), DRAWMODE_PEN == mf->getDrawMode() && mf->canUseColorPicker() );
 
 }

@@ -28,11 +28,6 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // general info about the datasets
     /////////////////////////////////////////////////////////////////////////////////
-    std::vector<Vector>   m_rulerPts;
-    bool                  m_isRulerToolActive;
-    double                m_rulerFullLength;
-    double                m_rulerPartialLength;
-
     bool m_scnFileLoaded;
     bool m_surfaceIsDirty;
 

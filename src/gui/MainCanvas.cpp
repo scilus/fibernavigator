@@ -226,7 +226,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 							m_hr = pick(evt.GetPosition(), true);
 							drawOnAnatomy();
 						}
-						else if (m_pDatasetHelper->m_isRulerToolActive)
+                        else if( SceneManager::getInstance()->isRulerActive() )
 						{
 							m_hr = pick(evt.GetPosition(), true);
 						}
@@ -557,7 +557,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
         {
             tpicked = hr.tmin;
             picked = AXIAL;
-            if (m_pDatasetHelper->m_isRulerToolActive || SceneManager::getInstance()->isSegmentActive() )
+            if( SceneManager::getInstance()->isRulerActive() || SceneManager::getInstance()->isSegmentActive() )
             {
                 m_hitPts = bb->hitCoordinate(ray,CORONAL);
                 m_isRulerHit = isRulerOrDrawer;
@@ -585,7 +585,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
             {
                 picked = CORONAL;
                 tpicked = hr.tmin;
-                if (m_pDatasetHelper->m_isRulerToolActive || SceneManager::getInstance()->isSegmentActive() )
+                if( SceneManager::getInstance()->isRulerActive() || SceneManager::getInstance()->isSegmentActive() )
                 {
                     m_hitPts = bb->hitCoordinate(ray,AXIAL);
                     m_isRulerHit = isRulerOrDrawer;
@@ -613,7 +613,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
             {
                 picked = SAGITTAL;
                 tpicked = hr.tmin;
-                if (m_pDatasetHelper->m_isRulerToolActive || SceneManager::getInstance()->isSegmentActive() )
+                if( SceneManager::getInstance()->isRulerActive() || SceneManager::getInstance()->isSegmentActive() )
 				{
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
                     m_isRulerHit = isRulerOrDrawer;
@@ -796,19 +796,20 @@ void MainCanvas::render()
 
                 //add the hit Point to ruler point list
                 
-                if ( m_pDatasetHelper->m_isRulerToolActive && !m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
+                if( SceneManager::getInstance()->isRulerActive() && !m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
                 {
-                    if (m_pDatasetHelper->m_rulerPts.size()>0 )
+                    vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+                    if( !v.empty() )
                     {
-                        Vector lastPts = m_pDatasetHelper->m_rulerPts.back();
+                        Vector lastPts = v.back();
                         if( lastPts != m_hitPts)
                         {
-                            m_pDatasetHelper->m_rulerPts.push_back(m_hitPts);                            
+                            v.push_back( m_hitPts );                            
                         }
                     } 
                     else 
                     {
-                        m_pDatasetHelper->m_rulerPts.push_back(m_hitPts);
+                        v.push_back( m_hitPts );
                     }
                     m_isRulerHit = false;
                 }
@@ -823,7 +824,7 @@ void MainCanvas::render()
                     renderAxes();
                 }
 
-                if(m_pDatasetHelper->m_isRulerToolActive)
+                if( SceneManager::getInstance()->isRulerActive() )
                 {
                     renderRulerDisplay();
                 }
@@ -877,31 +878,57 @@ void::MainCanvas::renderRulerDisplay()
     glColor3f( 0.0f, 0.6f, 0.95f );
     glLineWidth (5);    
     float sphereSize = 0.35f;
-    if (m_pDatasetHelper->m_rulerPts.size() > 0){        
+    vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+    if( !v.empty() )
+    {        
         Vector pts;
-        Vector lastPts = m_pDatasetHelper->m_rulerPts[0];
-        m_pDatasetHelper->m_rulerFullLength = 0;
-        for (unsigned int i=0; i < m_pDatasetHelper->m_rulerPts.size();i++)
+        Vector lastPts = v[0];
+        SceneManager::getInstance()->setRulerFullLength( 0.0 );
+        for( vector<Vector>::const_iterator it = v.begin(); it != v.end(); ++it )
         {
-            if (i== m_pDatasetHelper->m_rulerPts.size()-1)
+            if( it == --v.end() )
             {
                 glColor3f( 0.0f, 1.0f, 1.0f );
                 sphereSize = 0.4f;
             }
-            pts = m_pDatasetHelper->m_rulerPts[i];
-            
-            glBegin (GL_LINES);          
-                glVertex3f (lastPts.x, lastPts.y, lastPts.z);
-                glVertex3f (pts.x, pts.y, pts.z);
-            glEnd ();    
 
-            
-            SceneManager::getInstance()->getScene()->drawSphere( pts.x, pts.y, pts.z, sphereSize);
-            
-            m_pDatasetHelper->m_rulerPartialLength = (lastPts - pts).getLength();
-            m_pDatasetHelper->m_rulerFullLength += m_pDatasetHelper->m_rulerPartialLength;
+            pts = *it;
+
+            glBegin( GL_LINES );
+                glVertex3f( lastPts.x, lastPts.y, lastPts.z );
+                glVertex3f( pts.x, pts.y, pts.z );
+            glEnd();
+
+            SceneManager::getInstance()->getScene()->drawSphere( pts.x, pts.y, pts.z, sphereSize );
+
+            double fullLength = SceneManager::getInstance()->getRulerFullLength();
+            Vector partialLength = lastPts - pts;
+
+            SceneManager::getInstance()->setRulerPartialLength( partialLength.getLength() );
+            SceneManager::getInstance()->setRulerFullLength( fullLength + partialLength.getLength() );
             lastPts = pts;
         }
+//         for( unsigned int i = 0; i < v.size(); ++i )
+//         {
+//             if (i== m_pDatasetHelper->m_rulerPts.size()-1)
+//             {
+//                 glColor3f( 0.0f, 1.0f, 1.0f );
+//                 sphereSize = 0.4f;
+//             }
+//             pts = m_pDatasetHelper->m_rulerPts[i];
+//             
+//             glBegin (GL_LINES);          
+//                 glVertex3f (lastPts.x, lastPts.y, lastPts.z);
+//                 glVertex3f (pts.x, pts.y, pts.z);
+//             glEnd ();    
+// 
+//             
+//             SceneManager::getInstance()->getScene()->drawSphere( pts.x, pts.y, pts.z, sphereSize);
+//             
+//             m_pDatasetHelper->m_rulerPartialLength = (lastPts - pts).getLength();
+//             m_pDatasetHelper->m_rulerFullLength += m_pDatasetHelper->m_rulerPartialLength;
+//             lastPts = pts;
+//         }
     }
     glLineWidth (1);
 }
@@ -1004,6 +1031,8 @@ void MainCanvas::OnChar( wxKeyEvent& event )
     switch ( event.GetKeyCode() )
     {
         case WXK_LEFT:
+        {
+            vector< Vector > v = SceneManager::getInstance()->getRulerPts();
             if ( wxGetKeyState( WXK_CONTROL ) )
             {
                 m_mousePt.s.X = w / 2 - 2;
@@ -1013,16 +1042,20 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
                 Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
             } 
-            else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+            else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
-                m_pDatasetHelper->m_rulerPts.back().x -= voxelX;
+                v.back().x -= voxelX;
             }
-            else 
+            else
             {
                 MyApp::frame->m_pXSlider->SetValue( std::max(0, MyApp::frame->m_pXSlider->GetValue() - 1) );
             }
             break;
+        }
         case WXK_RIGHT:
+        {
+            vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+
             if ( wxGetKeyState( WXK_CONTROL ) )
             {
                 m_mousePt.s.X = w / 2 + 2;
@@ -1032,17 +1065,20 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
                 Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
             }
-            else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+            else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
-                m_pDatasetHelper->m_rulerPts.back().x += voxelX;
+                v.back().x += voxelX;
             } 
             else
             {
-                MyApp::frame->m_pXSlider->SetValue(
-                    std::min( MyApp::frame->m_pXSlider->GetValue() + 1.0f, columns ) );
+                MyApp::frame->m_pXSlider->SetValue( std::min( MyApp::frame->m_pXSlider->GetValue() + 1.0f, columns ) );
             }
             break;
+        }
         case WXK_DOWN:
+        {
+            vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+
             if ( wxGetKeyState( WXK_CONTROL ) )
             {
                 m_mousePt.s.X = w / 2;
@@ -1052,20 +1088,24 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
                 Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
             }
-            else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+            else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
-                m_pDatasetHelper->m_rulerPts.back().y += voxelY;
+                v.back().y += voxelY;
             } 
-			else if( MyApp::frame->isDrawerToolActive() && MyApp::frame->getDrawSize() > 2)
+            else if( MyApp::frame->isDrawerToolActive() && MyApp::frame->getDrawSize() > 2)
             {
                 MyApp::frame->setDrawSize( MyApp::frame->getDrawSize() - 1 );
             }
             else 
             {
-                MyApp::frame->m_pYSlider->SetValue( std::max(0, MyApp::frame->m_pYSlider->GetValue() - 1) );
+                MyApp::frame->m_pYSlider->SetValue( std::max( 0, MyApp::frame->m_pYSlider->GetValue() - 1 ) );
             }
             break;
+        }
         case WXK_UP:
+        {
+            vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+
             if ( wxGetKeyState( WXK_CONTROL ) )
             {
                 m_mousePt.s.X = w / 2;
@@ -1075,11 +1115,11 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
                 Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
             }
-            else if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+            else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
-                m_pDatasetHelper->m_rulerPts.back().y -= voxelY;
+                v.back().y -= voxelY;
             } 
-			else if( MyApp::frame->isDrawerToolActive() )
+            else if( MyApp::frame->isDrawerToolActive() )
             {
                 MyApp::frame->setDrawSize( MyApp::frame->getDrawSize() + 1 );
             }
@@ -1088,59 +1128,74 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 MyApp::frame->m_pYSlider->SetValue( std::min( MyApp::frame->m_pYSlider->GetValue() + 1.0f, rows ) );
             }
             break;
+        }
         case WXK_PAGEDOWN:
-            if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+        {
+            vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+
+            if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
-                m_pDatasetHelper->m_rulerPts.back().z -= voxelZ;
+                v.back().z -= voxelZ;
             } 
             else 
             {
                 MyApp::frame->m_pZSlider->SetValue( std::max( 0, MyApp::frame->m_pZSlider->GetValue() - 1 ) );
             }
             break;
+        }
         case WXK_PAGEUP:
-            if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+        {
+            vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+
+            if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
-                m_pDatasetHelper->m_rulerPts.back().z += voxelZ;
+                v.back().z += voxelZ;
             } 
             else 
             {
                 MyApp::frame->m_pZSlider->SetValue( std::min( MyApp::frame->m_pZSlider->GetValue() + 1.0f, frames ) );
             }
             break;
+        }
         case WXK_HOME:
             MyApp::frame->m_pXSlider->SetValue( columns / 2 );
             MyApp::frame->m_pYSlider->SetValue( rows / 2 );
             MyApp::frame->m_pZSlider->SetValue( frames / 2 );
             break;
         case WXK_DELETE:
-            if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+        {
+            vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+
+            if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
-                m_pDatasetHelper->m_rulerPts.pop_back();
+                v.pop_back();
             }
             break;
+        }
         case WXK_INSERT:
-            if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+        {
+            vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+
+            if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
-                m_pDatasetHelper->m_rulerPts.push_back(m_pDatasetHelper->m_rulerPts.back());
+                v.push_back( v.back() );
             } 
             else 
             {
-                m_pDatasetHelper->m_rulerPts.push_back( Vector( columns * voxelX / 2, rows * voxelY / 2, frames * voxelZ / 2));
+                v.push_back( Vector( columns * voxelX / 2.0f, rows * voxelY / 2.0f, frames * voxelZ / 2.0f ) );
             }
             break;
+        }
         case WXK_END:
-            m_pDatasetHelper->m_rulerPts.clear();
+            SceneManager::getInstance()->getRulerPts().clear();
             break; 
-		case 'z': case 'Z': //ctrl-z
-			//if ( wxGetKeyState( WXK_CONTROL ) )
-            //{
-				if( MyApp::frame->isDrawerToolActive() )
-				{
-					popAnatomyHistory();
-					break; 
-				}
-			//}
+		case 'z':
+        case 'Z':
+			if( MyApp::frame->isDrawerToolActive() )
+			{
+				popAnatomyHistory();
+			}
+            break;
         default:
             event.Skip();
             return;

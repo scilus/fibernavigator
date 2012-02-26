@@ -253,7 +253,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     //m_itemSaveSelectedDataset->Enable(mf->m_currentListItem != -1 && (((DatasetInfo*)mf->m_currentFNObject)->getType()==HEAD_BYTE || ((DatasetInfo*)mf->m_currentFNObject)->getType()==HEAD_SHORT));
     
     m_itemToggleLighting->Check( SceneManager::getInstance()->isLightingActive() );
-    m_itemToggleRuler->Check(mf->m_pDatasetHelper->m_isRulerToolActive);
+    m_itemToggleRuler->Check( SceneManager::getInstance()->isRulerActive() );
     
 	bool isFiberSelected( false );
 	bool isFiberUsingFakeTubes( false );

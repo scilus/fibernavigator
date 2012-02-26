@@ -50,7 +50,10 @@ SceneManager::SceneManager(void)
     m_moveX( 0.0f ),
     m_moveY( 0.0f ),
     m_showObjects( true ),
-    m_activateObjects( true )
+    m_activateObjects( true ),
+    m_isRulerActive( false ),
+    m_rulerFullLength( 0.0 ),
+    m_rulerPartialLength( 0.0 )
 {
     m_pAnatomyHelper = new AnatomyHelper();
     Matrix4fSetIdentity( &m_transform );

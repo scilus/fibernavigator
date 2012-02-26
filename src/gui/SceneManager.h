@@ -131,6 +131,15 @@ public:
     bool  getShowAllSelObj() const      { return m_showObjects; }
     bool  getActivateAllSelObj() const  { return m_activateObjects;}
 
+    std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
+    bool   isRulerActive() const            { return m_isRulerActive; }
+    double getRulerFullLength() const       { return m_rulerFullLength; }
+    double getRulerPartialLenth() const     { return m_rulerPartialLength; }
+
+    void   setRulerActive( const bool active )          { m_isRulerActive = active; }
+    void   setRulerFullLength( const double length )    { m_rulerFullLength = length; }
+    void   setRulerPartialLength( const double length ) { m_rulerPartialLength = length; }
+
 protected:
     SceneManager(void);
 
@@ -184,6 +193,12 @@ private:
 
     bool  m_showObjects;
     bool  m_activateObjects;
+
+    // Ruler
+    std::vector< Vector >   m_rulerPts;
+    bool                    m_isRulerActive;
+    double                  m_rulerFullLength;
+    double                  m_rulerPartialLength;
 };
 
 #endif SCENEMANAGER_H_

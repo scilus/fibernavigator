@@ -797,7 +797,7 @@ void MainFrame::onSwitchDrawer( wxCommandEvent& event )
 
 void MainFrame::updateDrawerToolbar()
 {
-    m_pDatasetHelper->m_isRulerToolActive = false;
+    SceneManager::getInstance()->setRulerActive( false );
     
     m_pToolBar->m_txtRuler->Disable();
     
@@ -1607,7 +1607,7 @@ void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_isRulerToolActive = false;
+    SceneManager::getInstance()->setRulerActive( false );
     m_isDrawerToolActive = false;
 
     m_pToolBar->m_txtRuler->Disable();
@@ -1621,7 +1621,7 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_isRulerToolActive = true;
+    SceneManager::getInstance()->setRulerActive( true );
     m_isDrawerToolActive = false;
 
     m_pToolBar->m_txtRuler->Enable();
@@ -1635,26 +1635,28 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onRulerToolClear( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_rulerPts.clear();
-    m_pDatasetHelper->m_rulerFullLength = 0;
-    m_pDatasetHelper->m_rulerPartialLength = 0;
+    SceneManager::getInstance()->getRulerPts().clear();
+    SceneManager::getInstance()->setRulerFullLength( 0.0 );
+    SceneManager::getInstance()->setRulerPartialLength( 0.0 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onRulerToolAdd( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+    vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+    
+    if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
     {
-        m_pDatasetHelper->m_rulerPts.push_back(m_pDatasetHelper->m_rulerPts.back());
+        v.push_back( v.back() );
     }
     refreshAllGLWidgets();
 }
 
 void MainFrame::onRulerToolDel( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+    if( SceneManager::getInstance()->isRulerActive() && !SceneManager::getInstance()->getRulerPts().empty() )
     {
-        m_pDatasetHelper->m_rulerPts.pop_back();
+        SceneManager::getInstance()->getRulerPts().pop_back();
     }
     refreshAllGLWidgets();
 }
@@ -1889,8 +1891,9 @@ void MainFrame::refreshAllGLWidgets()
 {
     updateMenus();
     refreshViews();   
-    if (m_pDatasetHelper->m_isRulerToolActive){
-        wxString sbString1 = wxString::Format( wxT("%4.1fmm (%2.1fmm)" ), m_pDatasetHelper->m_rulerFullLength, m_pDatasetHelper->m_rulerPartialLength );
+    if( SceneManager::getInstance()->isRulerActive() )
+    {
+        wxString sbString1 = wxString::Format( wxT( "%4.1fmm (%2.1fmm) " ), SceneManager::getInstance()->getRulerFullLength(), SceneManager::getInstance()->getRulerPartialLenth() );
         m_pToolBar->m_txtRuler->SetValue(sbString1);    
     }     
 }
