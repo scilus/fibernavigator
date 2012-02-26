@@ -12,12 +12,12 @@
 #include "../../main.h"
 #include "../../dataset/Anatomy.h"
 #include "../../dataset/DatasetManager.h"
+#include "../../gui/SceneManager.h"
 
+#include <wx/math.h>
 #include <algorithm>
 #include <ctime>
 #include <fstream>
-#include <math.h>
-
 
 const unsigned int CIsoSurface::m_edgeTable[256] =
 { 0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
@@ -322,10 +322,12 @@ CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy )
     for ( int i = 0; i < size; ++i )
         m_ptScalarField[i] = anatomy->at( i );
 
-    if ( m_dh->m_filterIsoSurf )
+    if( SceneManager::getInstance()->isIsoSurfaceFiltered() )
     {
         for ( unsigned int z = 1; z < m_nCellsZ; ++z )
+        {
             for ( unsigned int y = 1; y < m_nCellsY; ++y )
+            {
                 for ( unsigned int x = 1; x < m_nCellsX; ++x )
                 {
                     std::vector< float > list;
@@ -344,6 +346,8 @@ CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy )
                     nth_element( list.begin(), list.begin() + 13, list.end() );
                     m_ptScalarField[x + columns * y + columns * rows * z] = list[13];
                 }
+            }
+        }
     }
     m_type = ISO_SURFACE;
     m_threshold = 0.40f;

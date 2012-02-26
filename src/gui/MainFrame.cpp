@@ -185,7 +185,8 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_draw3d ( false ),
     m_canUseColorPicker( false ),
     m_drawColor(255, 255, 255),
-    m_drawColorIcon(16, 16, true)
+    m_drawColorIcon(16, 16, true),
+    m_threadsActive( 0 )
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -1525,7 +1526,7 @@ void MainFrame::onToggleBlendTexOnMesh( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleFilterIso( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_filterIsoSurf =! m_pDatasetHelper->m_filterIsoSurf;
+    SceneManager::getInstance()->toggleIsoSurfaceFiltered();
     refreshAllGLWidgets();
 }
 
@@ -2399,7 +2400,16 @@ void MainFrame::doOnSize()
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onKdTreeThreadFinished( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->treeFinished();
+    m_threadsActive--;
+
+    if ( m_threadsActive > 0 )
+        return;
+
+    Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
+    SceneManager::getInstance()->updateAllSelectionObjects();
+    m_pDatasetHelper->m_selBoxChanged = true;
+    
+    refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -60,6 +60,7 @@ SceneManager::SceneManager(void)
     m_clearToBlack( false ),
     m_colorMap( 0 ),
     m_showColorMapLegend( false ),
+    m_filterIsoSurface( false ),
     m_isRulerActive( false ),
     m_rulerFullLength( 0.0 ),
     m_rulerPartialLength( 0.0 )

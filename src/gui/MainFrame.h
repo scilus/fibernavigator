@@ -71,6 +71,8 @@ public:
     void      setDrawColor( const wxColour &color )   { m_drawColor = color; }
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
+    void      setThreadsActive( const int nb )  { m_threadsActive = nb; }
+
 private:
     void initOpenGl();
     void initLayout();
@@ -200,6 +202,22 @@ private:
     // Utility
     void updateDrawerToolbar();
 
+public:
+    PropertiesWindow    *m_pPropertiesWindow;
+    MainCanvas          *m_pMainGL;
+    MainCanvas          *m_pGL0;
+    MainCanvas          *m_pGL1;
+    MainCanvas          *m_pGL2;
+    ListCtrl            *m_pListCtrl2;
+    MyTreeCtrl          *m_pTreeWidget;
+    wxSlider            *m_pXSlider;
+    wxSlider            *m_pYSlider;
+    wxSlider            *m_pZSlider;
+    DatasetHelper       *m_pDatasetHelper;
+    wxTreeItemId        m_tRootId;
+    wxTreeItemId        m_tPointId;
+    wxTreeItemId        m_tSelectionObjectsId;
+
 private:
     ToolBar             *m_pToolBar;
     MenuBar             *m_pMenuBar;       
@@ -228,21 +246,7 @@ private:
     wxColor  m_drawColor;
     wxImage  m_drawColorIcon;
 
-public:
-    PropertiesWindow    *m_pPropertiesWindow;
-    MainCanvas          *m_pMainGL;
-    MainCanvas          *m_pGL0;
-    MainCanvas          *m_pGL1;
-    MainCanvas          *m_pGL2;
-    ListCtrl            *m_pListCtrl2;
-    MyTreeCtrl          *m_pTreeWidget;
-    wxSlider            *m_pXSlider;
-    wxSlider            *m_pYSlider;
-    wxSlider            *m_pZSlider;
-    DatasetHelper       *m_pDatasetHelper;
-    wxTreeItemId        m_tRootId;
-    wxTreeItemId        m_tPointId;
-    wxTreeItemId        m_tSelectionObjectsId;
+    int  m_threadsActive;
 
 DECLARE_EVENT_TABLE()
 };

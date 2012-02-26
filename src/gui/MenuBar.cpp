@@ -326,7 +326,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleShowSagittal->Check( SceneManager::getInstance()->isSagittalDisplayed() );
     m_itemToggleClearToBlack->Check( SceneManager::getInstance()->getClearToBlack() );
     m_itemToggleBlendTextureOnMesh->Check( SceneManager::getInstance()->isTexBlendOnMesh() );
-    m_itemToggleFilterISO->Check(mf->m_pDatasetHelper->m_filterIsoSurf);
+    m_itemToggleFilterISO->Check( SceneManager::getInstance()->isIsoSurfaceFiltered() );
     m_itemToggleShowAxes->Check( SceneManager::getInstance()->areAxesDisplayed() );
     //m_itemToggleColorMapLegend->Check(mf->m_datasetHelper->m_colorMap);
     m_itemMoveBoundaryPointLeft->Enable( DatasetManager::getInstance()->isSurfaceLoaded() );

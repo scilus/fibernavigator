@@ -27,7 +27,7 @@ KdTree::KdTree(int size, float *pointArray, DatasetHelper* dh)
     int rootRight = (size + root) / 2;
     std::nth_element( m_tree.begin()+root+1, m_tree.begin()+rootRight, m_tree.end(), lessy( m_pointArray, 1 ) );
 
-    dh->m_threadsActive = 4;
+    MyApp::frame->setThreadsActive( 4 );
 
     KdTreeThread *thread1 = new KdTreeThread(m_pointArray, &m_tree, 0, rootLeft-1, 2, m_dh);
     thread1->Run();
@@ -86,8 +86,8 @@ void* KdTreeThread::Entry()
 {
     buildTree(m_left, m_right, m_axis);
 
-    wxCommandEvent event( wxEVT_COMMAND_MENU_SELECTED, KDTREE_EVENT );
-    wxPostEvent( MyApp::frame, event );
+    wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED, KDTREE_EVENT );
+    wxPostEvent( MyApp::frame, evt );
 
     return NULL;
 }

@@ -20,18 +20,10 @@ public:
     // Functions
     void   deleteAllPoints();
 
-    /*
-     * Called from MainFrame when a kdTree thread signals it's finished
-     */
-    void treeFinished();
-
     /////////////////////////////////////////////////////////////////////////////////
     // state variables for menu entries
     /////////////////////////////////////////////////////////////////////////////////
-    bool  m_filterIsoSurf;
-
     bool  m_boxLockIsOn;
-    int   m_threadsActive;
 
     bool  m_texAssigned;
     bool  m_selBoxChanged;
@@ -45,7 +37,5 @@ public:
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
 };
-
-#define ID_KDTREE_FINISHED    50
 
 #endif /* DATASETHELPER_H_ */

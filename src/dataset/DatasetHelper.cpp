@@ -16,10 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
-DatasetHelper::DatasetHelper() :
-    m_filterIsoSurf  ( false ),
-    m_boxLockIsOn  ( false ),
-    m_threadsActive( 0 ),
+DatasetHelper::DatasetHelper() 
+:   m_boxLockIsOn  ( false ),
     m_texAssigned  ( false ),
     m_selBoxChanged( true ),
     m_geforceLevel( 6 ),
@@ -34,19 +32,6 @@ DatasetHelper::~DatasetHelper()
     Logger::getInstance()->print( wxT( "Execute DatasetHelper destructor" ), LOGLEVEL_DEBUG );
 
     Logger::getInstance()->print( wxT( "DatasetHelper destructor done" ), LOGLEVEL_DEBUG );
-}
-
-void DatasetHelper::treeFinished()
-{
-    m_threadsActive--;
-
-    if ( m_threadsActive > 0 )
-        return;
-
-    Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
-    SceneManager::getInstance()->updateAllSelectionObjects();
-    m_selBoxChanged = true;
-    MyApp::frame->refreshAllGLWidgets();
 }
 
 void DatasetHelper::deleteAllPoints()
