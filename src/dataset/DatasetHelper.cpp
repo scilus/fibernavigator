@@ -17,7 +17,6 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() :
-    m_scheduledScreenshot   ( false ),
     m_clearToBlack   ( false ),
     m_filterIsoSurf  ( false ),
     m_colorMap( 0 ),
@@ -27,8 +26,6 @@ DatasetHelper::DatasetHelper() :
     m_texAssigned  ( false ),
     m_selBoxChanged( true ),
     m_geforceLevel( 6 ),
-    m_screenshotPath( _T( "" ) ),
-    m_screenshotName( _T( "" ) ),
     m_boxAtCrosshair    ( 0 ),
     m_lastSelectedPoint ( NULL ),
     m_lastSelectedObject( NULL )

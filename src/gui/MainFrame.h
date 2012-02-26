@@ -50,7 +50,7 @@ public:
     void refreshAllGLWidgets();
     void refreshViews();
     void renewAllGLWidgets();
-    void screenshot                         ( wxString      i_fileName    );
+    void screenshot                         ( const wxString &path, const wxString &filename );
     void onTreeChange();
     void onMouseEvent                       ( wxMouseEvent&   evt );
     void onLoad                             ( wxCommandEvent& evt );

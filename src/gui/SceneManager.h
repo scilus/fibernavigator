@@ -136,6 +136,13 @@ public:
     wxString getScenePath() const       { return m_scnPath; }
     void  setScenePath( const wxString &path )  { m_scnPath = path; }
 
+    bool isScreenshotScheduled() const  { return m_scheduledScreenshot; }
+    void setScreenshotScheduled( const bool b ) { m_scheduledScreenshot = b; }
+    wxString getScreenshotName() const { return m_screenshotName; }
+    wxString getScreenshotPath() const { return m_screenshotPath; }
+    void setScreenshotName( const wxString &name )  { m_screenshotName = name; }
+    void setScreenshotPath( const wxString &path )  { m_screenshotPath = path; }
+
     std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
     bool   isRulerActive() const            { return m_isRulerActive; }
     double getRulerFullLength() const       { return m_rulerFullLength; }
@@ -202,6 +209,10 @@ private:
     bool     m_scnFileLoaded;
     wxString m_scnFilename;
     wxString m_scnPath;
+
+    bool  m_scheduledScreenshot;
+    wxString m_screenshotName;
+    wxString m_screenshotPath;
 
     // Ruler
     std::vector< Vector >   m_rulerPts;

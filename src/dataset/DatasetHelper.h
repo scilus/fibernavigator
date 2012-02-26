@@ -28,8 +28,6 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // state variables for rendering
     /////////////////////////////////////////////////////////////////////////////////
-    // the screenshot button has been pressed, next render pass it will be executed
-    bool      m_scheduledScreenshot;
 
     float     m_frustum[6][4]; // Contains the information of the planes forming the frustum.
     /////////////////////////////////////////////////////////////////////////////////
@@ -47,9 +45,6 @@ public:
     bool  m_selBoxChanged;
 
     int   m_geforceLevel;
-
-    wxString m_screenshotPath;
-    wxString m_screenshotName;
 
     /////////////////////////////////////////////////////////////////////////////////
     // pointers to often used objects

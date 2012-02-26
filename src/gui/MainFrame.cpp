@@ -1825,30 +1825,24 @@ void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
     wxString l_defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxSAVE );
     dialog.SetFilterIndex( 0 );
-    dialog.SetDirectory( m_pDatasetHelper->m_screenshotPath );
+    dialog.SetDirectory( SceneManager::getInstance()->getScreenshotPath() );
     if( dialog.ShowModal() == wxID_OK )
     {
-        m_pDatasetHelper->m_screenshotPath = dialog.GetDirectory();
-        m_pDatasetHelper->m_screenshotName = dialog.GetPath();
-        if( m_pDatasetHelper->m_screenshotName.AfterLast('.') != _T( "ppm" ) )
-        {
-            m_pDatasetHelper->m_screenshotName += _T( ".ppm" );
-        }
-        m_pDatasetHelper->m_scheduledScreenshot = true;
-        m_pMainGL->render();
-        m_pMainGL->render();
+        screenshot( dialog.GetDirectory(), dialog.GetPath() );
     }
 }
 
-void MainFrame::screenshot( wxString i_fileName )
+void MainFrame::screenshot( const wxString &path, const wxString &filename )
 {
-    m_pDatasetHelper->m_screenshotPath = _( "" );
-    m_pDatasetHelper->m_screenshotName = i_fileName;
-    if ( m_pDatasetHelper->m_screenshotName.AfterLast( '.' ) != _T( "ppm" ) )
+    SceneManager::getInstance()->setScreenshotName( filename );
+    SceneManager::getInstance()->setScreenshotPath( path );
+
+    if ( filename.AfterLast( '.' ) != _T( "ppm" ) )
     {
-        m_pDatasetHelper->m_screenshotName += _T( ".ppm" );
+        SceneManager::getInstance()->setScreenshotName( filename + wxT( ".ppm" ) );
     }
-    m_pDatasetHelper->m_scheduledScreenshot = true;
+
+    SceneManager::getInstance()->setScreenshotScheduled( true );
     m_pMainGL->render();
     m_pMainGL->render();
 }

@@ -734,7 +734,7 @@ void MainCanvas::render()
 				SetCursor( wxCursor( wxCURSOR_ARROW ) );
 			}*/
 
-            if ( m_pDatasetHelper->m_scheduledScreenshot )
+            if( SceneManager::getInstance()->isScreenshotScheduled() )
             {
                 int size = 0;        
                 switch ( m_pDatasetHelper->m_geforceLevel )
@@ -778,9 +778,9 @@ void MainCanvas::render()
                 SceneManager::getInstance()->getScene()->renderScene();
                 glPopMatrix();
 
-                fbo.getTexObject( 1 )->saveImageToPPM( ( m_pDatasetHelper->m_screenshotName ).mb_str() );
+                fbo.getTexObject( 1 )->saveImageToPPM( SceneManager::getInstance()->getScreenshotName().mb_str() );
                 fbo.deactivate();
-                m_pDatasetHelper->m_scheduledScreenshot = false;
+                SceneManager::getInstance()->setScreenshotScheduled( false );
             }
             else
             {

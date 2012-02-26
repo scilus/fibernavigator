@@ -150,7 +150,7 @@ bool MyApp::OnInit( void )
                 }
                 else if ( cmdParser.Found( _T( "p" ) ) &&  ( i == cmdParser.GetParamCount() -1 ) )
                 {
-                    frame->screenshot( cmdFileName );
+                    frame->screenshot( wxT( "" ), cmdFileName );
                 }
                 else
                 {

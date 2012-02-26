@@ -54,6 +54,9 @@ SceneManager::SceneManager(void)
     m_scnFileLoaded( false ),
     m_scnFilename( wxT( "" ) ),
     m_scnPath( wxT( "" ) ),
+    m_scheduledScreenshot( false ),
+    m_screenshotName( wxT( "" ) ),
+    m_screenshotPath( wxT( "" ) ),
     m_isRulerActive( false ),
     m_rulerFullLength( 0.0 ),
     m_rulerPartialLength( 0.0 )
