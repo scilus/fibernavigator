@@ -78,7 +78,6 @@ private:
     // File menu
     void onNewAnatomyByte                   ( wxCommandEvent& evt );
     void onNewAnatomyRGB                    ( wxCommandEvent& evt );
-    void onReloadShaders                    ( wxCommandEvent& evt );
     void onSave                             ( wxCommandEvent& evt );
     void onSaveFibers                       ( wxCommandEvent& evt );
     void onSaveSurface                      ( wxCommandEvent& evt );

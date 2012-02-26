@@ -61,6 +61,8 @@ public:
     bool                    isVectorsLoaded() const         { return false; }
 
     void  setCountFibers( const unsigned int count )        { m_countFibers = count; }
+    bool  isSurfaceDirty() const                            { return m_surfaceIsDirty; }
+    void  setSurfaceDirty( const bool dirty )               { m_surfaceIsDirty = dirty; }
 
     // -1 if load unsuccessful, index of the dataset otherwise
     int load( const wxString &filename, const wxString &extension );
@@ -138,6 +140,7 @@ private:
 
     FMatrix m_niftiTransform;
     unsigned int m_countFibers; // TODO: Remove me once selection is fixed
+    bool m_surfaceIsDirty;
 };
 
 #endif DATASETMANAGER_H_

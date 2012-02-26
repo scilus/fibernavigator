@@ -17,8 +17,6 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() :
-    m_surfaceIsDirty     ( true  ),
-    m_scheduledReloadShaders( true  ),
     m_scheduledScreenshot   ( false ),
     m_clearToBlack   ( false ),
     m_filterIsoSurf  ( false ),

@@ -28,7 +28,8 @@ DatasetManager * DatasetManager::m_pInstance = NULL;
 DatasetManager::DatasetManager(void)
 :   m_nextIndex( 0 ),
     m_niftiTransform( 4, 4 ),
-    m_countFibers( 0 )
+    m_countFibers( 0 ),
+    m_surfaceIsDirty( true )
 {
 }
 

@@ -175,13 +175,16 @@ void Surface::execute()
 {
     std::vector< std::vector< double > > givenPoints;
     int countPoints = MyApp::frame->m_pTreeWidget->GetChildrenCount( MyApp::frame->m_tPointId, true );
+    
     if (countPoints == 0) return;
     if (m_tMesh) delete m_tMesh;
+    
     m_tMesh = new TriangleMesh(m_dh);
     wxTreeItemId id, childid;
     wxTreeItemIdValue cookie = 0;
     id = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
     givenPoints.reserve( MyApp::frame->m_pTreeWidget->GetChildrenCount( MyApp::frame->m_tPointId ) );
+    
     while ( id.IsOk() )
     {
         SplinePoint *point = (SplinePoint*)( MyApp::frame->m_pTreeWidget->GetItemData( id ) );
@@ -298,7 +301,7 @@ void Surface::execute()
         m_tMesh->doLoopSubD();
     subDCount = 3;
 
-    m_dh->m_surfaceIsDirty = false;
+    DatasetManager::getInstance()->setSurfaceDirty( false );
 
 #ifndef __WXMAC__
     // FIXME MAC !!!
@@ -313,7 +316,7 @@ void Surface::execute()
 
 void Surface::draw()
 {
-    if (m_dh->m_surfaceIsDirty)
+    if( DatasetManager::getInstance()->isSurfaceDirty() )
     {
         execute();
     }

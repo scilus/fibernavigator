@@ -428,12 +428,6 @@ void MainFrame::onNewAnatomyRGB( wxCommandEvent& WXUNUSED(event) )
 	createNewAnatomy( RGB );
 }
 
-void MainFrame::onReloadShaders( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->m_scheduledReloadShaders = true;
-    renewAllGLWidgets();
-}
-
 void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( _T("Event triggered - MainFrame::onSave"), LOGLEVEL_DEBUG );
@@ -986,7 +980,7 @@ void MainFrame::moveBoundaryPoints(int i_value)
         l_id = m_pTreeWidget->GetNextChild( m_tPointId, l_cookie );
     }
 
-    m_pDatasetHelper->m_surfaceIsDirty = true;
+    DatasetManager::getInstance()->setSurfaceDirty( true );
     refreshAllGLWidgets();
 }
 
