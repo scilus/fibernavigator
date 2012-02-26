@@ -6,6 +6,7 @@
 #include "../gui/MainFrame.h"
 
 #include <wx/datstrm.h>
+#include <wx/textfile.h>
 #include <wx/wfstream.h>
 
 

@@ -2,10 +2,12 @@
 
 #include "MainFrame.h"
 #include "MyListCtrl.h"
+#include "SceneHelper.h"
 #include "SceneManager.h"
 #include "../Logger.h"
 #include "../main.h"
 #include "../dataset/Anatomy.h"
+#include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/SplinePoint.h"
 #include "../misc/lic/FgeOffscreen.h"
@@ -489,8 +491,8 @@ void MainCanvas::updateView()
 
 float MainCanvas::getAxisParallelMovement( int x1, int y1, int x2, int y2, Vector n )
 {
-    Vector vs = m_pDatasetHelper->mapMouse2World( x1, y1, m_projection, m_viewport, m_modelview);
-    Vector ve = m_pDatasetHelper->mapMouse2World( x2, y2, m_projection, m_viewport, m_modelview);
+    Vector vs = mapMouse2World( x1, y1, m_projection, m_viewport, m_modelview);
+    Vector ve = mapMouse2World( x2, y2, m_projection, m_viewport, m_modelview);
     Vector dir( ve.x - vs.x, ve.y - vs.y, ve.z - vs.z );
     float bb = ( ( dir.x * dir.x ) + ( dir.y * dir.y ) + ( dir.z * dir.z ) );
     float nb = ( ( dir.x * n.x ) + ( dir.y * n.y ) + ( dir.z * n.z ) );

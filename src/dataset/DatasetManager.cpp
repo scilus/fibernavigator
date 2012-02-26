@@ -487,12 +487,12 @@ int DatasetManager::loadFibers( const wxString &filename )
     if( l_fibers->load( filename ) )
     {
         SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-        for( DatasetIndex i( 0 ); i < selectionObjects.size(); ++i )
+        for( unsigned int i( 0 ); i < selectionObjects.size(); ++i )
         {
-            for( DatasetIndex j( 0 ); j < selectionObjects[i].size(); ++j )
+            for( unsigned int j( 0 ); j < selectionObjects[i].size(); ++j )
             {
                 selectionObjects[i][j]->m_inBox.resize( m_pDatasetHelper->m_countFibers, sizeof(bool) );
-                for( DatasetIndex k( 0 ); k < m_pDatasetHelper->m_countFibers; ++k )
+                for( unsigned int k( 0 ); k < m_pDatasetHelper->m_countFibers; ++k )
                 {
                     selectionObjects[i][j]->m_inBox[k] = 0;
                 }

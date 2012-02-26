@@ -7,6 +7,7 @@
 #include "AnatomyHelper.h"
 
 #include "DatasetManager.h"
+#include "../gfx/ShaderHelper.h"
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 

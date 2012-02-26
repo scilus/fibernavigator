@@ -22,6 +22,7 @@
 #include "../dataset/ODFs.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
+#include "../gfx/ShaderHelper.h"
 #include "../gui/ArcBall.h"
 #include "../gui/MainFrame.h"
 #include "../gui/MyListCtrl.h"

@@ -11,6 +11,7 @@
 
 #include "SelectionObject.h"
 
+#include "SceneHelper.h"
 #include "SceneManager.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
@@ -500,12 +501,12 @@ void SelectionObject::setThreshold( float i_threshold )
 
 void SelectionObject::drag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
 {
-    Vector l_vs = m_datasetHelper->mapMouse2World( i_click.x, i_click.y, i_projection, i_viewport, i_modelview );
-    Vector l_ve = m_datasetHelper->mapMouse2WorldBack( i_click.x, i_click.y, i_projection, i_viewport, i_modelview );
+    Vector l_vs = mapMouse2World( i_click.x, i_click.y, i_projection, i_viewport, i_modelview );
+    Vector l_ve = mapMouse2WorldBack( i_click.x, i_click.y, i_projection, i_viewport, i_modelview );
     Vector l_dir( l_ve.x - l_vs.x, l_ve.y - l_vs.y, l_ve.z - l_vs.z );
 
-    Vector l_vs2 = m_datasetHelper->mapMouse2World( i_lastPos.x, i_lastPos.y, i_projection, i_viewport, i_modelview );
-    Vector l_ve2 = m_datasetHelper->mapMouse2WorldBack( i_lastPos.x, i_lastPos.y, i_projection, i_viewport, i_modelview );
+    Vector l_vs2 = mapMouse2World( i_lastPos.x, i_lastPos.y, i_projection, i_viewport, i_modelview );
+    Vector l_ve2 = mapMouse2WorldBack( i_lastPos.x, i_lastPos.y, i_projection, i_viewport, i_modelview );
     Vector l_dir2( l_ve2.x - l_vs2.x, l_ve2.y - l_vs2.y, l_ve2.z - l_vs2.z );
 
     Vector l_change( ( l_vs.x + l_dir.x * m_hitResult.tmin ) - ( l_vs2.x + l_dir2.x * m_hitResult.tmin ),
@@ -560,8 +561,8 @@ void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_pro
 
 float SelectionObject::getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
 {
-    Vector l_vs = m_datasetHelper->mapMouse2World( i_x1, i_y1, i_projection, i_viewport, i_modelview);
-    Vector l_ve = m_datasetHelper->mapMouse2World( i_x2, i_y2, i_projection, i_viewport, i_modelview );
+    Vector l_vs = mapMouse2World( i_x1, i_y1, i_projection, i_viewport, i_modelview);
+    Vector l_ve = mapMouse2World( i_x2, i_y2, i_projection, i_viewport, i_modelview );
     Vector l_dir( l_ve.x - l_vs.x, l_ve.y - l_vs.y, l_ve.z - l_vs.z );
 
     float l_bb = ( ( l_dir.x * l_dir.x ) + ( l_dir.y * l_dir.y ) + ( l_dir.z * l_dir.z ) );
@@ -576,8 +577,8 @@ float SelectionObject::getAxisParallelMovement( int i_x1, int i_y1, int i_x2, in
 // i_fiberPoints    : The points of the fiber that will be draw.
 // i_thickness      : The thickness of the fiber to draw.
 // i_nmTubeEdge     : This param will determine the number of edge the fake tube will have
-//                    ( exemple -> if i_nmTubeEdge =3, then the tube will be shaped like a
-//                    triangle, if i_nmTubeEdge = 4 then the tube will be shapped like a square.
+//                    ( example -> if i_nmTubeEdge =3, then the tube will be shaped like a
+//                    triangle, if i_nmTubeEdge = 4 then the tube will be shaped like a square.
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, float i_thickness, int i_nmTubeEdge )
 {
@@ -1709,7 +1710,7 @@ void SelectionObject::updateStatusBar()
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
     MyApp::frame->GetStatusBar()->SetStatusText( m_name, 1 );
-    MyApp::frame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "Position %.2f, %.2f, %.2f  Size: %.2f, %.2f, %.2f" ),
+    MyApp::frame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "Position: %.2f, %.2f, %.2f  Size: %.2f, %.2f, %.2f" ),
                                                                  m_center.x, m_center.y, m_center.z,
                                                                  m_size.x * voxelX, m_size.y * voxelY, m_size.z * voxelZ ),
                                                                  2 );

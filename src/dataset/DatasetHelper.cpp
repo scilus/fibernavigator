@@ -5,37 +5,14 @@
  *      Author: ralph
  */
 #include "DatasetHelper.h"
-#include "DatasetManager.h"
-#include "../gui/MainFrame.h"
 
-#include <memory>
-#include <exception>
-#include <stdexcept>
-#include <new>
-
-#include "Anatomy.h"
-#include "ODFs.h"
-#include "Fibers.h"
-#include "FibersGroup.h"
-
-#include "KdTree.h"
-#include "../main.h"
-#include "Mesh.h"
 #include "SplinePoint.h"
-#include "Surface.h"
-#include "Tensors.h"
+#include "../Logger.h"
+#include "../main.h"
+#include "../gui/MainFrame.h"
 #include "../gui/MyListCtrl.h"
 #include "../gui/SceneManager.h"
-#include "../gui/SelectionBox.h"
-#include "../gui/SelectionEllipsoid.h"
 
-#include "../misc/IsoSurface/CIsoSurface.h"
-#include "Surface.h"
-#include "../misc/nifti/nifti1_io.h"
-
-#include "../Logger.h"
-
-#include <algorithm>
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -120,72 +97,4 @@ void DatasetHelper::deleteAllPoints()
             MyApp::frame->m_pTreeWidget->Delete(l_points[i][j]->GetId());      
         }
     }
-}
-
-Vector DatasetHelper::mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16])
-{
-    glPushMatrix();
-    SceneManager::getInstance()->doMatrixManipulation();
- 
-    GLfloat l_winX, l_winY;
-
-    l_winX = (float) i_x;
-    l_winY = (float) i_viewport[3] - (float) i_y;
-
-    GLdouble l_posX, l_posY, l_posZ;
-    gluUnProject( l_winX, l_winY, 0, i_modelview, i_projection, i_viewport, &l_posX, &l_posY, &l_posZ );
-    glPopMatrix();
-
-    Vector l_vector( l_posX, l_posY, l_posZ );
-    return l_vector;
-}
-
-Vector DatasetHelper::mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
-{   
-    GLfloat l_winX, l_winY;
-
-    l_winX = (float) i_x;
-    l_winY = (float) i_viewport[3] - (float) i_y;
-
-    GLdouble l_posX, l_posY, l_posZ;
-    gluUnProject( l_winX, l_winY, 1, i_modelview, i_projection, i_viewport, &l_posX, &l_posY, &l_posZ );
-
-    Vector l_vector( l_posX, l_posY, l_posZ );
-    return l_vector;
-}
-
-std::vector< float >* DatasetHelper::getVectorDataset()
-{
-    if( !DatasetManager::getInstance()->isVectorsLoaded() )
-        return NULL;
-
-    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
-    {
-        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
-        if( l_datasetInfo->getType() == VECTORS )
-        {
-            Anatomy* l_anatomy = (Anatomy*)l_datasetInfo;
-            return l_anatomy->getFloatDataset();
-        }
-    }
-
-    return NULL;
-}
-
-TensorField* DatasetHelper::getTensorField()
-{
-    if( !DatasetManager::getInstance()->isTensorsFieldLoaded() )
-        return NULL;
-
-    for( unsigned int i( 0 ); i < static_cast<unsigned int>( MyApp::frame->m_pListCtrl2->GetItemCount() ); ++i )
-    {
-        DatasetInfo* l_datasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
-        if( l_datasetInfo->getType() == TENSOR_FIELD || l_datasetInfo->getType() == VECTORS )
-        {
-            Anatomy* l_anatomy = (Anatomy*) l_datasetInfo;
-            return l_anatomy->getTensorField();
-        }
-    }
-
-    return NULL;
 }

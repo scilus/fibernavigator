@@ -1,49 +1,14 @@
-/*
- * DatasetHelper.h
- *
- *  Created on: 27.07.2008
- *      Author: ralph
- */
 #ifndef DATASETHELPER_H_
 #define DATASETHELPER_H_
 
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
-
-#include "wx/textfile.h"
-#include "wx/file.h"
-#include "wx/image.h"
-#include "wx/wfstream.h"
-#include "wx/datstrm.h"
-#include "wx/txtstrm.h"
-#include "wx/xml/xml.h"
-
 #include <vector>
-
-#include "DatasetInfo.h"
 
 #include "../gui/SelectionObject.h"
 
 #include "SplinePoint.h"
 
-#include "AnatomyHelper.h"
-#include "../gfx/ShaderHelper.h"
-
-#include "../misc/lic/TensorField.h"
-#include "../misc/Fantom/FMatrix.h"
-
-class DatasetInfo;
-class AnatomyHelper;
-class ShaderHelper;
 class SplinePoint;
 class SelectionObject;
-class Fibers;
-class FibersGroup;
-class TensorField;
-class Surface;
 
 class DatasetHelper 
 {
@@ -54,16 +19,11 @@ public:
 
     // Functions
     void   deleteAllPoints();
-    Vector mapMouse2World( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);
-    Vector mapMouse2WorldBack( const int i_x, const int i_y,GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16]);   
 
     /*
      * Called from MainFrame when a kdTree thread signals it's finished
      */
     void treeFinished();
-
-    std::vector< float >* getVectorDataset();
-    TensorField* getTensorField();
 
     /////////////////////////////////////////////////////////////////////////////////
     // general info about the datasets
@@ -73,7 +33,7 @@ public:
     double                m_rulerFullLength;
     double                m_rulerPartialLength;
 
-    unsigned int m_countFibers;
+    unsigned int m_countFibers;  // TODO: Move to DatasetManager and remove me once selection is fixed
 
     bool m_scnFileLoaded;
     bool m_surfaceIsDirty;

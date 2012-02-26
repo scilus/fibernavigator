@@ -12,27 +12,34 @@
 #ifndef SELECTIONOBJECT_H_
 #define SELECTIONOBJECT_H_
 
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
-
 #include "BoundingBox.h"
 #include "SceneObject.h"
-#include <GL/glew.h>
-#include <vector>
-#include <list>
-#include <wx/grid.h>
-#include "../misc/Algorithms/Face3D.h"
+
 #include "../dataset/DatasetHelper.h"
+#include "../misc/Algorithms/Face3D.h"
 #include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/Vector.h"
+
+#include <GL/glew.h>
+
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
+#include <wx/grid.h>
+#include <wx/string.h>
+#include <wx/msw/button.h>
+#include <wx/msw/tglbtn.h>
+
+#include <list>
+#include <vector>
 
 class Anatomy;
 class CIsoSurface;
 class DatasetHelper;
 class MainCanvas;
+class PropertiesWindow;
+
 
 using namespace std;
 
@@ -183,8 +190,8 @@ public :
     vector< bool > m_inBox;
     vector< bool > m_inBranch;
     Anatomy*       m_sourceAnatomy;
-    bool          m_boxMoved;
-    bool          m_boxResized;
+    bool           m_boxMoved;
+    bool           m_boxResized;
 
 
 protected :
@@ -197,7 +204,7 @@ protected :
     
     Vector          m_center;
     
-    list< Face3D >  m_hullTriangles;
+    std::list< Face3D >  m_hullTriangles;
 
     wxColour        m_color;         // Used for coloring the isosurface.
     bool            m_colorChanged;
@@ -225,7 +232,7 @@ protected :
     bool            m_DistColoring;
 
     wxColour m_convexHullColor;
-    float    m_convexHullOpacity; //Betweem 0 and 1
+    float    m_convexHullOpacity; //Between 0 and 1
     
     //Mean fiber coloring variables
     wxColour m_meanFiberColor; //Custom color chose by the user

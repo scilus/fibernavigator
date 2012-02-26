@@ -5,6 +5,7 @@
 #include "SelectionObject.h"
 
 #include "../Logger.h"
+#include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"

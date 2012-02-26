@@ -13,6 +13,7 @@
 
 #include "DatasetManager.h"
 #include "../Logger.h"
+#include "../gfx/ShaderHelper.h"
 #include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/Fantom/FMatrix.h"

@@ -2,6 +2,7 @@
 
 #include "../main.h"
 #include "../gui/MainFrame.h"
+#include "../gui/SceneHelper.h"
 #include "../gui/SelectionObject.h"
 
 SplinePoint::SplinePoint( Vector center, DatasetHelper* dh )
@@ -60,8 +61,8 @@ void SplinePoint::drawSphere( float x, float y, float z, float r )
 
 void SplinePoint::drag( wxPoint click, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
 {
-    Vector vs = m_dh->mapMouse2World( click.x, click.y, i_projection, i_viewport, i_modelview );
-    Vector ve = m_dh->mapMouse2WorldBack( click.x, click.y, i_projection, i_viewport, i_modelview );
+    Vector vs = mapMouse2World( click.x, click.y, i_projection, i_viewport, i_modelview );
+    Vector ve = mapMouse2WorldBack( click.x, click.y, i_projection, i_viewport, i_modelview );
     Vector dir( ve.x - vs.x, ve.y - vs.y, ve.z - vs.z );
 
     m_center.x = vs.x + dir.x * m_hr.tmin;

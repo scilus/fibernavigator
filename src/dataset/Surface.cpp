@@ -392,7 +392,7 @@ float Surface::getXValue(int y, int z, int numPoints)
     m_boxMin[2] = z - 3;
     m_boxMax[2] = z + 3;
 
-    m_xValue = 0.0;
+    m_xValue = 0.0f;
     m_count = 0;
     boxTest(0, numPoints - 1, 0);
     if (m_count > 0)
