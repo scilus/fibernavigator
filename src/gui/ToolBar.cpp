@@ -189,7 +189,7 @@ void ToolBar::updateToolBar( MainFrame *mf )
 	}
 	ToggleTool( m_toggleFakeTubes->GetId(), isFiberSelected && isFiberUsingFakeTubes);
 	ToggleTool( m_toggleInverseSelection->GetId(), isFiberSelected && isFiberInverted);
-	ToggleTool( m_toggleClearToBlack->GetId(), mf->m_pDatasetHelper->m_clearToBlack);
+    ToggleTool( m_toggleClearToBlack->GetId(), SceneManager::getInstance()->getClearToBlack() );
     ToggleTool( m_selectNormalPointer->GetId(), SceneManager::getInstance()->isRulerActive() && mf->isDrawerToolActive() );
 	ToggleTool( m_selectRuler->GetId(), SceneManager::getInstance()->isRulerActive() );
 	ToggleTool( m_selectDrawer->GetId(), mf->isDrawerToolActive() );

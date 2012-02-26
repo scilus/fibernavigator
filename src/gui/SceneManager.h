@@ -143,6 +143,15 @@ public:
     void setScreenshotName( const wxString &name )  { m_screenshotName = name; }
     void setScreenshotPath( const wxString &path )  { m_screenshotPath = path; }
 
+    bool getClearToBlack() const { return m_clearToBlack; }
+    bool toggleClearToBlack()    { return m_clearToBlack = !m_clearToBlack; }
+
+    int  getColorMap() const                { return m_colorMap; }
+    void setColorMap( const int color )     { m_colorMap = color; }
+
+    bool isColorMapLegendDisplayed() const  { return m_showColorMapLegend; }
+    bool toggleColorMapLegendDisplay()      { return m_showColorMapLegend = !m_showColorMapLegend; }
+
     std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
     bool   isRulerActive() const            { return m_isRulerActive; }
     double getRulerFullLength() const       { return m_rulerFullLength; }
@@ -151,6 +160,9 @@ public:
     void   setRulerActive( const bool active )          { m_isRulerActive = active; }
     void   setRulerFullLength( const double length )    { m_rulerFullLength = length; }
     void   setRulerPartialLength( const double length ) { m_rulerPartialLength = length; }
+
+public:
+    float m_frustum[6][4];
 
 protected:
     SceneManager(void);
@@ -213,6 +225,11 @@ private:
     bool  m_scheduledScreenshot;
     wxString m_screenshotName;
     wxString m_screenshotPath;
+
+    bool  m_clearToBlack;
+    int   m_colorMap;
+    bool  m_showColorMapLegend;
+
 
     // Ruler
     std::vector< Vector >   m_rulerPts;

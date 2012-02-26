@@ -3844,7 +3844,7 @@ void Fibers::setShader()
         SceneManager::getInstance()->getShaderHelper()->m_fibersShader.bind();
         SceneManager::getInstance()->getShaderHelper()->setFiberShaderVars();
         SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useColorMap", m_dh->m_colorMap );
+        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
         SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
     }
 }

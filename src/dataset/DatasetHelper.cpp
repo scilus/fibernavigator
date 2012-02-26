@@ -17,10 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() :
-    m_clearToBlack   ( false ),
     m_filterIsoSurf  ( false ),
-    m_colorMap( 0 ),
-    m_showColorMapLegend( false ),
     m_boxLockIsOn  ( false ),
     m_threadsActive( 0 ),
     m_texAssigned  ( false ),

@@ -1586,9 +1586,7 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_clearToBlack = !m_pDatasetHelper->m_clearToBlack;
-    
-    if( m_pDatasetHelper->m_clearToBlack )
+    if( SceneManager::getInstance()->toggleClearToBlack() )
     {
         glClearColor( 0.0, 0.0, 0.0, 0.0 );
     }
@@ -1722,49 +1720,49 @@ void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::onToggleColorMapLegend( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_showColorMapLegend = !m_pDatasetHelper->m_showColorMapLegend;
+    SceneManager::getInstance()->toggleColorMapLegendDisplay();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap0( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 0;
+    SceneManager::getInstance()->setColorMap( 0 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap1( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 1;
+    SceneManager::getInstance()->setColorMap( 1 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap2( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 2;
+    SceneManager::getInstance()->setColorMap( 2 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap3( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 3;
+    SceneManager::getInstance()->setColorMap( 3 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap4( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 4;
+    SceneManager::getInstance()->setColorMap( 4 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap5( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 5;
+    SceneManager::getInstance()->setColorMap( 5 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMapNo( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = -1;
+    SceneManager::getInstance()->setColorMap( -1 );
     refreshAllGLWidgets();
 } 
 

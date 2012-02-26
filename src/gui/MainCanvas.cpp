@@ -757,7 +757,7 @@ void MainCanvas::render()
                 }
 
                 FgeOffscreen fbo( size, size, true );
-                if (m_pDatasetHelper->m_clearToBlack)
+                if( SceneManager::getInstance()->getClearToBlack() )
                 {
                     fbo.setClearColor( 0.0f, 0.0f, 0.0f);
                 } 

@@ -242,52 +242,52 @@ bool Glyph::boxInFrustum( Vector i_boxCenter, Vector i_boxSize )
 {
    for( int p = 0; p < 6; ++p )
    {
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
       return false;

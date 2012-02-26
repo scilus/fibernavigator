@@ -314,7 +314,7 @@ void TheScene::renderScene()
     if( DatasetManager::getInstance()->isVectorsLoaded() )
         drawVectors();
 
-    if( m_pDatasetHelper->m_showColorMapLegend )
+    if( SceneManager::getInstance()->isColorMapLegendDisplayed() )
         drawColorMapLegend();
 
     if( DatasetManager::getInstance()->isTensorsLoaded() )
@@ -384,90 +384,90 @@ void TheScene::extractFrustum()
    clipMat[15] = curModelview[12] * curProjection[ 3] + curModelview[13] * curProjection[ 7] + curModelview[14] * curProjection[11] + curModelview[15] * curProjection[15];
 
    // Extract the numbers for the RIGHT plane.
-   m_pDatasetHelper->m_frustum[0][0] = clipMat[ 3] - clipMat[ 0];
-   m_pDatasetHelper->m_frustum[0][1] = clipMat[ 7] - clipMat[ 4];
-   m_pDatasetHelper->m_frustum[0][2] = clipMat[11] - clipMat[ 8];
-   m_pDatasetHelper->m_frustum[0][3] = clipMat[15] - clipMat[12];
+   SceneManager::getInstance()->m_frustum[0][0] = clipMat[ 3] - clipMat[ 0];
+   SceneManager::getInstance()->m_frustum[0][1] = clipMat[ 7] - clipMat[ 4];
+   SceneManager::getInstance()->m_frustum[0][2] = clipMat[11] - clipMat[ 8];
+   SceneManager::getInstance()->m_frustum[0][3] = clipMat[15] - clipMat[12];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   float normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[0][0] * m_pDatasetHelper->m_frustum[0][0] + 
-                                   m_pDatasetHelper->m_frustum[0][1] * m_pDatasetHelper->m_frustum[0][1] + 
-                                   m_pDatasetHelper->m_frustum[0][2] * m_pDatasetHelper->m_frustum[0][2] );
-   m_pDatasetHelper->m_frustum[0][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[0][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[0][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[0][3] /= normalizationTerm;
+   float normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[0][0] * SceneManager::getInstance()->m_frustum[0][0] + 
+                                   SceneManager::getInstance()->m_frustum[0][1] * SceneManager::getInstance()->m_frustum[0][1] + 
+                                   SceneManager::getInstance()->m_frustum[0][2] * SceneManager::getInstance()->m_frustum[0][2] );
+   SceneManager::getInstance()->m_frustum[0][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[0][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[0][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[0][3] /= normalizationTerm;
 
    // Extract the numbers for the LEFT plane.
-   m_pDatasetHelper->m_frustum[1][0] = clipMat[ 3] + clipMat[ 0];
-   m_pDatasetHelper->m_frustum[1][1] = clipMat[ 7] + clipMat[ 4];
-   m_pDatasetHelper->m_frustum[1][2] = clipMat[11] + clipMat[ 8];
-   m_pDatasetHelper->m_frustum[1][3] = clipMat[15] + clipMat[12];
+   SceneManager::getInstance()->m_frustum[1][0] = clipMat[ 3] + clipMat[ 0];
+   SceneManager::getInstance()->m_frustum[1][1] = clipMat[ 7] + clipMat[ 4];
+   SceneManager::getInstance()->m_frustum[1][2] = clipMat[11] + clipMat[ 8];
+   SceneManager::getInstance()->m_frustum[1][3] = clipMat[15] + clipMat[12];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[1][0] * m_pDatasetHelper->m_frustum[1][0] + 
-                             m_pDatasetHelper->m_frustum[1][1] * m_pDatasetHelper->m_frustum[1][1] + 
-                             m_pDatasetHelper->m_frustum[1][2] * m_pDatasetHelper->m_frustum[1][2] );
-   m_pDatasetHelper->m_frustum[1][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[1][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[1][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[1][3] /= normalizationTerm;
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[1][0] * SceneManager::getInstance()->m_frustum[1][0] + 
+                             SceneManager::getInstance()->m_frustum[1][1] * SceneManager::getInstance()->m_frustum[1][1] + 
+                             SceneManager::getInstance()->m_frustum[1][2] * SceneManager::getInstance()->m_frustum[1][2] );
+   SceneManager::getInstance()->m_frustum[1][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[1][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[1][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[1][3] /= normalizationTerm;
 
    // Extract the BOTTOM plane.
-   m_pDatasetHelper->m_frustum[2][0] = clipMat[ 3] + clipMat[ 1];
-   m_pDatasetHelper->m_frustum[2][1] = clipMat[ 7] + clipMat[ 5];
-   m_pDatasetHelper->m_frustum[2][2] = clipMat[11] + clipMat[ 9];
-   m_pDatasetHelper->m_frustum[2][3] = clipMat[15] + clipMat[13];
+   SceneManager::getInstance()->m_frustum[2][0] = clipMat[ 3] + clipMat[ 1];
+   SceneManager::getInstance()->m_frustum[2][1] = clipMat[ 7] + clipMat[ 5];
+   SceneManager::getInstance()->m_frustum[2][2] = clipMat[11] + clipMat[ 9];
+   SceneManager::getInstance()->m_frustum[2][3] = clipMat[15] + clipMat[13];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[2][0] * m_pDatasetHelper->m_frustum[2][0] + 
-                             m_pDatasetHelper->m_frustum[2][1] * m_pDatasetHelper->m_frustum[2][1   ] + 
-                             m_pDatasetHelper->m_frustum[2][2] * m_pDatasetHelper->m_frustum[2][2] );
-   m_pDatasetHelper->m_frustum[2][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[2][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[2][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[2][3] /= normalizationTerm;
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[2][0] * SceneManager::getInstance()->m_frustum[2][0] + 
+                             SceneManager::getInstance()->m_frustum[2][1] * SceneManager::getInstance()->m_frustum[2][1   ] + 
+                             SceneManager::getInstance()->m_frustum[2][2] * SceneManager::getInstance()->m_frustum[2][2] );
+   SceneManager::getInstance()->m_frustum[2][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[2][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[2][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[2][3] /= normalizationTerm;
 
    // Extract the TOP plane.
-   m_pDatasetHelper->m_frustum[3][0] = clipMat[ 3] - clipMat[ 1];
-   m_pDatasetHelper->m_frustum[3][1] = clipMat[ 7] - clipMat[ 5];
-   m_pDatasetHelper->m_frustum[3][2] = clipMat[11] - clipMat[ 9];
-   m_pDatasetHelper->m_frustum[3][3] = clipMat[15] - clipMat[13];
+   SceneManager::getInstance()->m_frustum[3][0] = clipMat[ 3] - clipMat[ 1];
+   SceneManager::getInstance()->m_frustum[3][1] = clipMat[ 7] - clipMat[ 5];
+   SceneManager::getInstance()->m_frustum[3][2] = clipMat[11] - clipMat[ 9];
+   SceneManager::getInstance()->m_frustum[3][3] = clipMat[15] - clipMat[13];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[3][0] * m_pDatasetHelper->m_frustum[3][0] + 
-                             m_pDatasetHelper->m_frustum[3][1] * m_pDatasetHelper->m_frustum[3][1] + 
-                             m_pDatasetHelper->m_frustum[3][2] * m_pDatasetHelper->m_frustum[3][2] );
-   m_pDatasetHelper->m_frustum[3][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[3][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[3][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[3][3] /= normalizationTerm;
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[3][0] * SceneManager::getInstance()->m_frustum[3][0] + 
+                             SceneManager::getInstance()->m_frustum[3][1] * SceneManager::getInstance()->m_frustum[3][1] + 
+                             SceneManager::getInstance()->m_frustum[3][2] * SceneManager::getInstance()->m_frustum[3][2] );
+   SceneManager::getInstance()->m_frustum[3][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[3][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[3][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[3][3] /= normalizationTerm;
 
    // Extract the FAR plane.
-   m_pDatasetHelper->m_frustum[4][0] = clipMat[ 3] - clipMat[ 2];
-   m_pDatasetHelper->m_frustum[4][1] = clipMat[ 7] - clipMat[ 6];
-   m_pDatasetHelper->m_frustum[4][2] = clipMat[11] - clipMat[10];
-   m_pDatasetHelper->m_frustum[4][3] = clipMat[15] - clipMat[14];
+   SceneManager::getInstance()->m_frustum[4][0] = clipMat[ 3] - clipMat[ 2];
+   SceneManager::getInstance()->m_frustum[4][1] = clipMat[ 7] - clipMat[ 6];
+   SceneManager::getInstance()->m_frustum[4][2] = clipMat[11] - clipMat[10];
+   SceneManager::getInstance()->m_frustum[4][3] = clipMat[15] - clipMat[14];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[4][0] * m_pDatasetHelper->m_frustum[4][0] + 
-                             m_pDatasetHelper->m_frustum[4][1] * m_pDatasetHelper->m_frustum[4][1] + 
-                             m_pDatasetHelper->m_frustum[4][2] * m_pDatasetHelper->m_frustum[4][2] );
-   m_pDatasetHelper->m_frustum[4][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[4][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[4][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[4][3] /= normalizationTerm;
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[4][0] * SceneManager::getInstance()->m_frustum[4][0] + 
+                             SceneManager::getInstance()->m_frustum[4][1] * SceneManager::getInstance()->m_frustum[4][1] + 
+                             SceneManager::getInstance()->m_frustum[4][2] * SceneManager::getInstance()->m_frustum[4][2] );
+   SceneManager::getInstance()->m_frustum[4][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[4][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[4][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[4][3] /= normalizationTerm;
 
    // Extract the NEAR plane.
-   m_pDatasetHelper->m_frustum[5][0] = clipMat[ 3] + clipMat[ 2];
-   m_pDatasetHelper->m_frustum[5][1] = clipMat[ 7] + clipMat[ 6];
-   m_pDatasetHelper->m_frustum[5][2] = clipMat[11] + clipMat[10];
-   m_pDatasetHelper->m_frustum[5][3] = clipMat[15] + clipMat[14];
+   SceneManager::getInstance()->m_frustum[5][0] = clipMat[ 3] + clipMat[ 2];
+   SceneManager::getInstance()->m_frustum[5][1] = clipMat[ 7] + clipMat[ 6];
+   SceneManager::getInstance()->m_frustum[5][2] = clipMat[11] + clipMat[10];
+   SceneManager::getInstance()->m_frustum[5][3] = clipMat[15] + clipMat[14];
 }
 
 void TheScene::renderSlices()
@@ -488,7 +488,7 @@ void TheScene::renderSlices()
     bindTextures();
     SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.bind();
     SceneManager::getInstance()->getShaderHelper()->setTextureShaderVars();
-    SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+    SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
     SceneManager::getInstance()->getAnatomyHelper()->renderMain();
 
@@ -529,7 +529,7 @@ void TheScene::renderSplineSurface()
             wxColor color = pDsInfo->getColor();
             glColor3f( (float) color.Red() / 255.0, (float) color.Green() / 255.0, (float) color.Blue() / 255.0 );
             SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-            SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+            SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
             pDsInfo->draw();
 
@@ -879,7 +879,7 @@ void TheScene::drawColorMapLegend()
     glOrtho( 0, maxSize, 0, maxSize, -3000, 3000 );
 
     SceneManager::getInstance()->getShaderHelper()->m_legendShader.bind();
-    SceneManager::getInstance()->getShaderHelper()->m_legendShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+    SceneManager::getInstance()->getShaderHelper()->m_legendShader.setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
     glColor3f( 0.0f, 0.0f, 0.0f );
     glLineWidth( 5.0f );
