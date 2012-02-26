@@ -446,16 +446,16 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
-    if( m_pDatasetHelper->m_scnFileLoaded )
+    if( SceneManager::getInstance()->isSceneFileLoaded() )
     {
-        dialog.SetFilename( m_pDatasetHelper->m_scnFileName );
+        dialog.SetFilename( SceneManager::getInstance()->getSceneFilename() );
     }
 
-    dialog.SetDirectory( m_pDatasetHelper->m_scenePath );
+    dialog.SetDirectory( SceneManager::getInstance()->getScenePath() );
 
     if( dialog.ShowModal() == wxID_OK )
     {
-        m_pDatasetHelper->m_scenePath = dialog.GetDirectory();
+        SceneManager::getInstance()->setScenePath( dialog.GetDirectory() );
         SceneManager::getInstance()->save( dialog.GetPath() );
     }
 }

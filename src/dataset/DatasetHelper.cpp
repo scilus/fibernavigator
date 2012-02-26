@@ -17,7 +17,6 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() :
-    m_scnFileLoaded      ( false ),
     m_surfaceIsDirty     ( true  ),
     m_scheduledReloadShaders( true  ),
     m_scheduledScreenshot   ( false ),
@@ -30,8 +29,6 @@ DatasetHelper::DatasetHelper() :
     m_texAssigned  ( false ),
     m_selBoxChanged( true ),
     m_geforceLevel( 6 ),
-    m_scenePath     ( _T( "" ) ),
-    m_scnFileName   ( _T( "" ) ),
     m_screenshotPath( _T( "" ) ),
     m_screenshotName( _T( "" ) ),
     m_boxAtCrosshair    ( 0 ),

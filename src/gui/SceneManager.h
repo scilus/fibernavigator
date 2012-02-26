@@ -131,6 +131,11 @@ public:
     bool  getShowAllSelObj() const      { return m_showObjects; }
     bool  getActivateAllSelObj() const  { return m_activateObjects;}
 
+    bool  isSceneFileLoaded() const     { return m_scnFileLoaded; }
+    wxString getSceneFilename() const   { return m_scnFilename; }
+    wxString getScenePath() const       { return m_scnPath; }
+    void  setScenePath( const wxString &path )  { m_scnPath = path; }
+
     std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
     bool   isRulerActive() const            { return m_isRulerActive; }
     double getRulerFullLength() const       { return m_rulerFullLength; }
@@ -193,6 +198,10 @@ private:
 
     bool  m_showObjects;
     bool  m_activateObjects;
+
+    bool     m_scnFileLoaded;
+    wxString m_scnFilename;
+    wxString m_scnPath;
 
     // Ruler
     std::vector< Vector >   m_rulerPts;
