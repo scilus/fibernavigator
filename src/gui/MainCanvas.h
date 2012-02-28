@@ -38,7 +38,6 @@ public:
    ~MainCanvas();
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
-    void OnShow(wxShowEvent& event);
     void changeOrthoSize();
     void OnEraseBackground(wxEraseEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
@@ -49,7 +48,6 @@ public:
     void updateView();
     void init();
     void render();
-    void invalidate();
     void renderTestRay();
     void renderAxes();
 	void renderRulerDisplay();

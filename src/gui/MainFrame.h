@@ -49,7 +49,6 @@ public:
     void deleteTreeItem();
     void refreshAllGLWidgets();
     void refreshViews();
-    void renewAllGLWidgets();
     void screenshot                         ( const wxString &path, const wxString &filename );
     void onTreeChange();
     void onMouseEvent                       ( wxMouseEvent&   evt );

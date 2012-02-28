@@ -82,12 +82,12 @@ void SelectionObject::lockToCrosshair()
     if( m_isLockedToCrosshair )
     {
         m_isLockedToCrosshair          = false;
-        m_datasetHelper->m_boxLockIsOn = false;
+        SceneManager::getInstance()->setBoxLock( false );
     }
     else
     {
         m_isLockedToCrosshair             = true;
-        m_datasetHelper->m_boxLockIsOn    = true;
+        SceneManager::getInstance()->setBoxLock( true );
         m_datasetHelper->m_boxAtCrosshair = this;
         //m_datasetHelper->m_semaphore      = true;
         SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );

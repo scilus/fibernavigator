@@ -10,6 +10,7 @@
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/SplinePoint.h"
+#include "../gfx/ShaderHelper.h"
 #include "../misc/lic/FgeOffscreen.h"
 
 #include <wx/math.h>
@@ -31,7 +32,6 @@ EVT_PAINT(MainCanvas::OnPaint)
 EVT_MOUSE_EVENTS(MainCanvas::OnMouseEvent)
 EVT_ERASE_BACKGROUND(MainCanvas::OnEraseBackground)
 EVT_CHAR(MainCanvas::OnChar)
-EVT_SHOW(MainCanvas::OnShow)
 END_EVENT_TABLE()
 
 MainCanvas::MainCanvas(DatasetHelper* i_pDatasetHelper, int i_view, wxWindow *i_pParent, wxWindowID i_id,
@@ -89,6 +89,9 @@ MainCanvas::~MainCanvas()
 void MainCanvas::init()
 {
     SceneManager::getInstance()->getScene()->initGL( m_view );
+    // TODO: Load shaders in the ShaderHelper here once it is a Singleton
+    bool geomShaderSupported = SceneManager::getInstance()->areGeometryShadersSupported();
+    SceneManager::getInstance()->setShaderHelper( new ShaderHelper( geomShaderSupported ) );
     m_init = true;
 }
 
@@ -136,31 +139,6 @@ void MainCanvas::OnSize( wxSizeEvent& event )
     m_pArcBall->setBounds( (GLfloat) w, (GLfloat) h );
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
     //glViewport( 0, 0, (GLint) w, (GLint) h );    
-}
-
-void MainCanvas::OnShow(wxShowEvent& WXUNUSED(event) )
-{
-    Logger::getInstance()->print( wxT( "MainCanvas::OnShow is used!!" ), LOGLEVEL_MESSAGE );
-#if defined( __WXMAC__ )
-    SetCurrent();
-#elif defined ( __WXMSW__ )
-    SetCurrent();
-#else
-    if ( !m_pDatasetHelper->m_texAssigned )
-    {
-        wxGLCanvas::SetCurrent();
-    }
-    else
-    {
-        wxGLCanvas::SetCurrent( *SceneManager::getInstance()->getScene()->getMainGLContext() );
-    }
-#endif
-    
-    int w, h; 
-    GetClientSize( &w, &h );
-    glViewport( 0, 0, (GLint) w, (GLint) h );
-
-    m_pArcBall->setBounds( (GLfloat) w, (GLfloat) h );    
 }
 
 void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
@@ -855,22 +833,6 @@ void MainCanvas::render()
     }    
     //glFlush();
     SwapBuffers();  
-}
-
-void MainCanvas::invalidate()
-{
-    printf("invalidate\n");
-    if ( m_pDatasetHelper->m_texAssigned )
-    {
-#ifndef __WXMAC__
-        SetCurrent( *SceneManager::getInstance()->getScene()->getMainGLContext() );
-#else
-        SetCurrent();
-#endif
-        //SceneManager::getInstance()->getScene()->releaseTextures();
-        m_pDatasetHelper->m_texAssigned = false;
-    }
-    m_init = false;
 }
 
 void::MainCanvas::renderRulerDisplay()

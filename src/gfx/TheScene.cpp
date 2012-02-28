@@ -166,18 +166,13 @@ void TheScene::initGL( int whichView )
         }
         glEnable( GL_DEPTH_TEST );
 
-        if( !m_pDatasetHelper->m_texAssigned )
-        {
-            SceneManager::getInstance()->setShaderHelper( new ShaderHelper( m_pDatasetHelper, useGeometry ) );
-            m_pDatasetHelper->m_texAssigned  = true;
-        }
-
         float view1 = 200;
         glClearColor( 1.0, 1.0, 1.0, 0.0 );
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
         glOrtho( 0, view1, 0, view1, -3000, 3000 );
-    } catch ( ... )
+    }
+    catch ( ... )
     {
         Logger::getInstance()->printIfGLError( wxT( "Init" ) );
     }

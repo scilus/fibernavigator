@@ -1910,27 +1910,6 @@ void MainFrame::refreshViews()
     }    
 }
 
-void MainFrame::renewAllGLWidgets()
-{
-    if( m_pMainGL )
-    {
-        m_pMainGL->invalidate();
-    }
-    if( m_pGL0 )
-    {
-        m_pGL0->invalidate();
-    }
-    if( m_pGL1 )
-    {
-        m_pGL1->invalidate();
-    }
-    if( m_pGL2 )
-    {
-        m_pGL2->invalidate();
-    }
-    refreshAllGLWidgets();
-}
-
 //////////////////////////////////////////////////////////////////////////
 
 // TODO: Call this method when done loading

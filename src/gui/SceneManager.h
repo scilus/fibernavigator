@@ -155,6 +155,9 @@ public:
     bool isIsoSurfaceFiltered() const       { return m_filterIsoSurface; }
     bool toggleIsoSurfaceFiltered()         { return m_filterIsoSurface = !m_filterIsoSurface; }
 
+    bool isBoxLocked() const                { return m_isBoxLocked; }
+    void setBoxLock( const bool lock )      { m_isBoxLocked = lock; }
+
     std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
     bool   isRulerActive() const            { return m_isRulerActive; }
     double getRulerFullLength() const       { return m_rulerFullLength; }
@@ -234,6 +237,7 @@ private:
     bool  m_showColorMapLegend;
 
     bool  m_filterIsoSurface;
+    bool  m_isBoxLocked;
 
     // Ruler
     std::vector< Vector >   m_rulerPts;

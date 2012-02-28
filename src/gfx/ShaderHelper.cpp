@@ -17,8 +17,8 @@
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 
-ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) :
-    m_anatomyShader( wxT( "anatomy" )/*, geometryShadersSupported ? true : false*/ ),
+ShaderHelper::ShaderHelper( bool geometryShadersSupported )
+:   m_anatomyShader( wxT( "anatomy" )/*, geometryShadersSupported ? true : false*/ ),
     m_meshShader( wxT( "mesh" ) ),
     m_fibersShader( wxT( "fibers" ) ),
     m_fakeTubesShader( wxT( "fake-tubes") ),
@@ -28,8 +28,7 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) 
     m_legendShader( wxT( "legend" ) ),
     m_graphShader( wxT( "graph" ) ),
     m_tensorsShader( wxT( "tensors" ) ),
-    m_odfsShader( wxT( "odfs" ) ),
-    m_pDh( pDh )
+    m_odfsShader( wxT( "odfs" ) )
 {
     m_tex.resize( 10 );
     m_type.resize( 10 );

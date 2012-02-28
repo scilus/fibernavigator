@@ -15,7 +15,7 @@
 
 class ShaderHelper {
 public:
-    ShaderHelper( DatasetHelper* pDh, bool useGeometryShaders );
+    ShaderHelper( bool useGeometryShaders );
     virtual ~ShaderHelper();
 
     void initializeArrays();
@@ -38,8 +38,6 @@ public:
     ShaderProgram m_odfsShader;
 
 private:
-    DatasetHelper* m_pDh;
-
     int m_textureCount;
     GLuint m_cutTex;
     std::vector<GLint>   m_tex;

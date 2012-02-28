@@ -60,7 +60,7 @@ SelectionBox::~SelectionBox()
 {
     if( m_isLockedToCrosshair )
     {
-        m_datasetHelper->m_boxLockIsOn = false;
+        SceneManager::getInstance()->setBoxLock( false );
     }
     if( m_objectType == CISO_SURFACE_TYPE )
     {

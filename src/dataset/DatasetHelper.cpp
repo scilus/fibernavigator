@@ -17,9 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() 
-:   m_boxLockIsOn  ( false ),
-    m_texAssigned  ( false ),
-    m_selBoxChanged( true ),
+:   m_selBoxChanged( true ),
     m_geforceLevel( 6 ),
     m_boxAtCrosshair    ( 0 ),
     m_lastSelectedPoint ( NULL ),
