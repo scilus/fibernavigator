@@ -18,7 +18,6 @@
 // Constructor
 DatasetHelper::DatasetHelper() 
 :   m_selBoxChanged( true ),
-    m_geforceLevel( 6 ),
     m_boxAtCrosshair    ( 0 ),
     m_lastSelectedPoint ( NULL ),
     m_lastSelectedObject( NULL )

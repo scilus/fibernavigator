@@ -714,25 +714,9 @@ void MainCanvas::render()
 
             if( SceneManager::getInstance()->isScreenshotScheduled() )
             {
-                int size = 0;        
-                switch ( m_pDatasetHelper->m_geforceLevel )
-                {
-                    case 6:
-                        size = 2048;
-                        break;
-                    case 8:
-                        size = 4096;
-                        break;
-                    case 42:
-                        size = 8192;
-                        break;
-                    case 99:
-                        size = 1024;
-                        break;
-                    default:
-                        size = 1024;
-                        break;
-                }
+                // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
+                // FIXME: Screenshot crashes the GUI
+                int size = 2048;
 
                 FgeOffscreen fbo( size, size, true );
                 if( SceneManager::getInstance()->getClearToBlack() )

@@ -142,13 +142,6 @@ void TheScene::initGL( int whichView )
             vendorId   = wxString::FromAscii( (char*)glGetString( GL_VENDOR   ) );
             rendererId = wxString::FromAscii( (char*)glGetString( GL_RENDERER ) );
 
-            if ( rendererId.Contains( _T( "GeForce 6" ) ) )
-                m_pDatasetHelper->m_geforceLevel = 6;
-            else if ( rendererId.Contains( _T( "GeForce 7" ) ) )
-                m_pDatasetHelper->m_geforceLevel = 7;
-            else if ( rendererId.Contains( _T( "GeForce 8" ) ) || rendererId.Contains( _T( "GeForce GTX 2" ) ) )
-                m_pDatasetHelper->m_geforceLevel = 8;
-
             Logger::getInstance()->print( vendorId + _T( " " ) + rendererId, LOGLEVEL_MESSAGE );
 
             if( !glewIsSupported( "GL_ARB_shader_objects" ) )
