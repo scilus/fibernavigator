@@ -1849,7 +1849,7 @@ void MainFrame::screenshot( const wxString &path, const wxString &filename )
 void MainFrame::onSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
-    updateStatusBar();
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleShowAxial( wxCommandEvent& WXUNUSED(event) )

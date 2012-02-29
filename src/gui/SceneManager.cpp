@@ -648,18 +648,16 @@ void SceneManager::updateAllSelectionObjects()
 
 //////////////////////////////////////////////////////////////////////////
 
-void SceneManager::updateView( const float x, const float y, const float z )
+void SceneManager::updateView( const float x, const float y, const float z, bool semaphore )
 {
     m_sliceX = x;
     m_sliceY = y;
     m_sliceZ = z;
 
-    // TODO: Implement this
-    // Semaphore was removed from datasethelper. Don't know its use. If necessary,
-    // add a default bool at the end of this method to act as the semaphore.
-    // Should be sufficient
-//     if( m_boxLockIsOn && !m_semaphore )
-//         m_boxAtCrosshair->setCenter( i_x, i_y, i_z );
+    if( m_isBoxLocked && !semaphore )
+    {
+        m_pBoxAtCrosshair->setCenter( x, y, z );
+    }
 
     vector<ODFs *> odfs = DatasetManager::getInstance()->getOdfs();
     for( vector<ODFs *>::iterator it = odfs.begin(); it != odfs.end(); ++it )

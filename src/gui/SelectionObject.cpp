@@ -88,13 +88,11 @@ void SelectionObject::lockToCrosshair()
     {
         m_isLockedToCrosshair             = true;
         SceneManager::getInstance()->setBoxLock( true );
-        m_datasetHelper->m_boxAtCrosshair = this;
-        //m_datasetHelper->m_semaphore      = true;
-        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
+        SceneManager::getInstance()->setBoxAtCrosshair( this );
+        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z, true );
         MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
         MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
         MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
-        //m_datasetHelper->m_semaphore      = false;
         MyApp::frame->refreshAllGLWidgets();
     }
 }
@@ -339,12 +337,10 @@ void SelectionObject::update()
 {
     if( m_isLockedToCrosshair )
     {
-//        m_datasetHelper->m_semaphore = true;
-        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
+        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z, true );
         MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
         MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
         MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
-//        m_datasetHelper->m_semaphore = false;
     }
 
     updateStatusBar();
@@ -368,7 +364,7 @@ void SelectionObject::update()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Updates the object. If a daugther class of SelectionObject needs a specific update call, 
+// Updates the object. If a daughter class of SelectionObject needs a specific update call, 
 // then they should implement this virtual method (like SelectionEllipsoid is doing).
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::objectUpdate()

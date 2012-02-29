@@ -33,7 +33,7 @@ public:
     void    deleteAllSelectionObjects();
     void    updateAllSelectionObjects();
 
-    void    updateView( const float x, const float y, const float z );
+    void    updateView( const float x, const float y, const float z, bool semaphore = false );
     void    changeZoom( const int z );
     void    moveScene ( const int x, const int y );
     Vector  mapMouse2World(     const int x, 
@@ -158,6 +158,8 @@ public:
     bool isBoxLocked() const                { return m_isBoxLocked; }
     void setBoxLock( const bool lock )      { m_isBoxLocked = lock; }
 
+    void setBoxAtCrosshair( SelectionObject * pBox ) { m_pBoxAtCrosshair = pBox; }
+
     std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
     bool   isRulerActive() const            { return m_isRulerActive; }
     double getRulerFullLength() const       { return m_rulerFullLength; }
@@ -238,6 +240,8 @@ private:
 
     bool  m_filterIsoSurface;
     bool  m_isBoxLocked;
+
+    SelectionObject *m_pBoxAtCrosshair;
 
     // Ruler
     std::vector< Vector >   m_rulerPts;

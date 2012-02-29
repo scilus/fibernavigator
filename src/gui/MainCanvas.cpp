@@ -158,104 +158,12 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
         {
             if ( evt.LeftUp() )
             {
-                if ( wxGetKeyState( WXK_SHIFT ) && !SceneManager::getInstance()->isPointMode() )
-                {
-                    m_hr = pick( evt.GetPosition(), false );
-                    int newX = (int) ( getEventCenter().x + 0.5 );
-                    int newY = (int) ( getEventCenter().y + 0.5 );
-                    int newZ = (int) ( getEventCenter().z + 0.5 );
-                    SceneManager::getInstance()->updateView( newX, newY, newZ );
-                    MyApp::frame->m_pXSlider->SetValue( newX );
-                    MyApp::frame->m_pYSlider->SetValue( newY );
-                    MyApp::frame->m_pZSlider->SetValue( newZ );
-                    MyApp::frame->refreshAllGLWidgets();
-                }
-                else if ( wxGetKeyState( WXK_CONTROL ) && SceneManager::getInstance()->isPointMode() )
-                {
-					m_hr = pick( evt.GetPosition(),false );
-					if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
-					{
-						m_hr.picked = 20;
-						SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
-						wxTreeItemId pId = MyApp::frame->m_pTreeWidget->AppendItem(
-								MyApp::frame->m_tPointId, wxT("point"), -1, -1, point );
-						point->setTreeId( pId );
-
-						GetEventHandler()->ProcessEvent( evt1 );
-					}
-                }
-
+                processLeftMouseUp(evt, evt1);
             }
 
             if ( evt.LeftIsDown() )
             {
-                SetFocus();
-                m_mousePt.s.X = clickX;
-                m_mousePt.s.Y = clickY;
-                
-				// Use Control (or Command on Mac) key for advanced left click actions
-                if( evt.CmdDown() )
-				{
-					if( !m_isDragging )
-					{
-                        if( MyApp::frame->isDrawerToolActive() )
-						{
-							pushAnatomyHistory();
-							m_hr = pick(evt.GetPosition(), true);
-							drawOnAnatomy();
-						}
-                        else if( SceneManager::getInstance()->isRulerActive() )
-						{
-							m_hr = pick(evt.GetPosition(), true);
-						}
-						else
-						{
-                            long index = MyApp::frame->getCurrentListItem();
-                            if( -1 != index )
-                            {
-                                Anatomy *pAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
-
-                                if( pAnatomy->getType() < MESH && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
-                                {
-                                    SceneManager::getInstance()->setSegmentActive( true );
-                                    //m_pDatasetHelper->m_isSegmentActive = true;
-                                    m_hr = pick(evt.GetPosition(), false);
-                                    segment();
-                                    pAnatomy->toggleSegment();                        
-                                }
-                            }
-						}
-						m_lastPos = evt.GetPosition();
-						m_isDragging = true; // Prepare For Dragging
-					}
-					else
-					{
-						if( MyApp::frame->isDrawerToolActive() )
-						{
-							m_hr = pick(evt.GetPosition(), true);
-							drawOnAnatomy();
-						}
-					}
-				}
-				else
-				{
-					if ( !m_isDragging ) // Not Dragging
-					{
-						m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
-						m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
-						m_isDragging = true; // Prepare For Dragging
-					}
-					else if(!m_isSceneLocked)
-					{                    
-						Quat4fT ThisQuat;
-						m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
-						Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
-						Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                        Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
-					}
-				}
-				updateView();
-				Refresh( false );
+                processLeftMouseDown(clickX, clickY, evt);
             }
             else
             {
@@ -269,7 +177,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
                     m_lastPos = evt.GetPosition();
                     m_ismDragging = true;
                 }
-                else  if (!m_isSceneLocked) //Move Scene
+                else if (!m_isSceneLocked) //Move Scene
                 {
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -282,141 +190,250 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
             {
                 m_ismDragging = false;
             }
-            
-            if ( evt.GetWheelDelta() != 0 && !m_isSceneLocked)
-            {
-                SceneManager::getInstance()->changeZoom( evt.GetWheelRotation() );
-                Refresh( false );
-            }
 
             if ( evt.RightIsDown() )
             {
-                if ( !m_isrDragging ) // Not Dragging
-                {
-                    if ( wxGetKeyState( WXK_CONTROL ) && wxGetKeyState( WXK_SHIFT ) )
-                    {
-                        Matrix4fT transform = SceneManager::getInstance()->getTransform();
-                        Logger::getInstance()->print( wxString::Format( wxT( "Transform matrix:\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f" ), 
-                                transform.M[0], transform.M[1], transform.M[2],
-                                transform.M[3], transform.M[4], transform.M[5],
-                                transform.M[6], transform.M[7], transform.M[8]
-                            ), LOGLEVEL_DEBUG );
-//                         printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[0], m_pDatasetHelper->m_transform.M[1],
-//                                 m_pDatasetHelper->m_transform.M[2] );
-//                         printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[3], m_pDatasetHelper->m_transform.M[4],
-//                                 m_pDatasetHelper->m_transform.M[5] );
-//                         printf( "%2.8f : %2.8f : %2.8f \n", m_pDatasetHelper->m_transform.M[6], m_pDatasetHelper->m_transform.M[7],
-//                                 m_pDatasetHelper->m_transform.M[8] );
-                    }
-                    m_isrDragging = true; // Prepare For Dragging
-                    m_lastPos = evt.GetPosition();
-                    m_hr = pick( evt.GetPosition(), false);
+                processRightMouseDown(evt, clickX, clickY, voxelX, voxelY, voxelZ, evt1);
 
-                    SetFocus();
-
-                    if ( m_hr.picked == 20 )
-                    {
-                        if ( m_pDatasetHelper->m_lastSelectedPoint )
-                        {
-                            m_pDatasetHelper->m_lastSelectedPoint->unselect();
-                        }
-                        m_pDatasetHelper->m_lastSelectedPoint = ( (SplinePoint*) m_hr.object );
-                        ( (SplinePoint*) m_hr.object )->select( true );
-                    }
-                    else if ( m_hr.picked >= 10 && m_hr.picked < 20 )
-                    {
-                        if ( m_pDatasetHelper->m_lastSelectedPoint )
-                        {
-                            m_pDatasetHelper->m_lastSelectedPoint->unselect();
-                        }
-                        ( (SelectionObject*) m_hr.object )->select( true );
-                    }
-                }
-                else
-                {
-                    if ( evt.Dragging() && m_hr.picked < 10 && !m_isSlizesLocked)
-                    {
-                        int xDrag = m_lastPos.x - clickX;
-                        int yDrag = m_lastPos.y - clickY;
-
-                        m_delta = 0;
-                        if ( xDrag != 0 || yDrag != 0 )
-                        {
-                            Vector n( 0, 0, 0 );
-                            switch ( m_hr.picked )
-                            {
-                                case AXIAL:
-                                    n.z = 1.0;
-                                    break;
-                                case CORONAL:
-                                    n.y = 1.0;
-                                    break;
-                                case SAGITTAL:
-                                    n.x = 1.0;
-                                    break;
-                            }
-                            
-                            float delta = std::max( std::min( getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ), 10.0f ), -10.0f );
-                            float mult = std::min( voxelX, std::min( voxelY, voxelZ ) );
-                            if ( mult < 1.0 )
-                            {
-                                delta /= mult;
-                            }
-
-                            int d = delta;
-
-                            delta = delta-d;
-
-                            if ( delta < -0.5 )
-                            {
-                                m_delta = d - 1;
-                            }
-                            else if ( delta > 0.5 )
-                            {
-                                m_delta = d + 1;
-                            }
-                            else
-                            {
-                                m_delta = d;
-                            }
-                        }
-                        
-                        GetEventHandler()->ProcessEvent( evt1 );
-                    }
-                    else if ( evt.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20 )
-                    {
-                        ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
-                        m_pDatasetHelper->m_selBoxChanged = true;
-                    }
-                    else if ( evt.Dragging() && m_hr.picked == 20 )
-                    {
-                        ( (SplinePoint*) m_hr.object )->drag( evt.GetPosition(), m_projection, m_viewport, m_modelview );
-                    }
-                }
-                m_lastPos = evt.GetPosition();
-                Refresh( false );
             }
             else
             {
                 m_isrDragging = false;
             }
 
-        }
+            if ( evt.GetWheelDelta() != 0 && !m_isSceneLocked)
+            {
+                SceneManager::getInstance()->changeZoom( evt.GetWheelRotation() );
+                Refresh( false );
+            }
             break;
-
+        }
         case AXIAL:
         case CORONAL:
         case SAGITTAL:
+        {
             m_clicked = evt.GetPosition();
             if ( evt.LeftUp() || evt.Dragging() )
             {
                 GetEventHandler()->ProcessEvent( evt1 );
             }
             break;
+        }
         default:
             break;
     }
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt )
+{
+    SetFocus();
+    m_mousePt.s.X = clickX;
+    m_mousePt.s.Y = clickY;
+
+    // Use Control (or Command on Mac) key for advanced left click actions
+    if( evt.CmdDown() )
+    {
+        if( !m_isDragging )
+        {
+            if( MyApp::frame->isDrawerToolActive() )
+            {
+                pushAnatomyHistory();
+                m_hr = pick(evt.GetPosition(), true);
+                drawOnAnatomy();
+            }
+            else if( SceneManager::getInstance()->isRulerActive() )
+            {
+                m_hr = pick(evt.GetPosition(), true);
+            }
+            else
+            {
+                long index = MyApp::frame->getCurrentListItem();
+                if( -1 != index )
+                {
+                    Anatomy *pAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
+
+                    if( pAnatomy->getType() < MESH && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
+                    {
+                        SceneManager::getInstance()->setSegmentActive( true );
+                        //m_pDatasetHelper->m_isSegmentActive = true;
+                        m_hr = pick(evt.GetPosition(), false);
+                        segment();
+                        pAnatomy->toggleSegment();                        
+                    }
+                }
+            }
+            m_lastPos = evt.GetPosition();
+            m_isDragging = true; // Prepare For Dragging
+        }
+        else
+        {
+            if( MyApp::frame->isDrawerToolActive() )
+            {
+                m_hr = pick(evt.GetPosition(), true);
+                drawOnAnatomy();
+            }
+        }
+    }
+    else
+    {
+        if ( !m_isDragging ) // Not Dragging
+        {
+            m_lastRot = m_thisRot; // Set Last Static Rotation To Last Dynamic One
+            m_pArcBall->click( &m_mousePt ); // Update Start Vector And Prepare For Dragging
+            m_isDragging = true; // Prepare For Dragging
+        }
+        else if(!m_isSceneLocked)
+        {                    
+            Quat4fT ThisQuat;
+            m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
+            Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
+            Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
+            Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
+        }
+    }
+    updateView();
+    Refresh( false );
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainCanvas::processLeftMouseUp( wxMouseEvent &evt, wxCommandEvent evt1 )
+{
+    if ( wxGetKeyState( WXK_SHIFT ) && !SceneManager::getInstance()->isPointMode() )
+    {
+        m_hr = pick( evt.GetPosition(), false );
+        int newX = (int) ( getEventCenter().x + 0.5 );
+        int newY = (int) ( getEventCenter().y + 0.5 );
+        int newZ = (int) ( getEventCenter().z + 0.5 );
+        SceneManager::getInstance()->updateView( newX, newY, newZ );
+        MyApp::frame->m_pXSlider->SetValue( newX );
+        MyApp::frame->m_pYSlider->SetValue( newY );
+        MyApp::frame->m_pZSlider->SetValue( newZ );
+        MyApp::frame->refreshAllGLWidgets();
+    }
+    else if ( wxGetKeyState( WXK_CONTROL ) && SceneManager::getInstance()->isPointMode() )
+    {
+        m_hr = pick( evt.GetPosition(),false );
+        if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
+        {
+            m_hr.picked = 20;
+            SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
+            wxTreeItemId pId = MyApp::frame->m_pTreeWidget->AppendItem(
+                MyApp::frame->m_tPointId, wxT("point"), -1, -1, point );
+            point->setTreeId( pId );
+
+            GetEventHandler()->ProcessEvent( evt1 );
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int clickY, float voxelX, float voxelY, float voxelZ, wxCommandEvent evt1 )
+{
+    if ( !m_isrDragging ) // Not Dragging
+    {
+        if ( wxGetKeyState( WXK_CONTROL ) && wxGetKeyState( WXK_SHIFT ) )
+        {
+            Matrix4fT transform = SceneManager::getInstance()->getTransform();
+            Logger::getInstance()->print( wxString::Format( wxT( "Transform matrix:\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f" ), 
+                transform.M[0], transform.M[1], transform.M[2],
+                transform.M[3], transform.M[4], transform.M[5],
+                transform.M[6], transform.M[7], transform.M[8]
+            ), LOGLEVEL_DEBUG );
+        }
+        m_isrDragging = true; // Prepare For Dragging
+        m_lastPos = evt.GetPosition();
+        m_hr = pick( evt.GetPosition(), false);
+
+        SetFocus();
+
+        if ( m_hr.picked == 20 )
+        {
+            if ( m_pDatasetHelper->m_lastSelectedPoint )
+            {
+                m_pDatasetHelper->m_lastSelectedPoint->unselect();
+            }
+            m_pDatasetHelper->m_lastSelectedPoint = ( (SplinePoint*) m_hr.object );
+            ( (SplinePoint*) m_hr.object )->select( true );
+        }
+        else if ( m_hr.picked >= 10 && m_hr.picked < 20 )
+        {
+            if ( m_pDatasetHelper->m_lastSelectedPoint )
+            {
+                m_pDatasetHelper->m_lastSelectedPoint->unselect();
+            }
+            ( (SelectionObject*) m_hr.object )->select( true );
+        }
+    }
+    else
+    {
+        if ( evt.Dragging() && m_hr.picked < 10 && !m_isSlizesLocked)
+        {
+            int xDrag = m_lastPos.x - clickX;
+            int yDrag = m_lastPos.y - clickY;
+
+            m_delta = 0;
+            if ( xDrag != 0 || yDrag != 0 )
+            {
+                Vector n( 0, 0, 0 );
+                switch ( m_hr.picked )
+                {
+                case AXIAL:
+                    n.z = 1.0;
+                    break;
+                case CORONAL:
+                    n.y = 1.0;
+                    break;
+                case SAGITTAL:
+                    n.x = 1.0;
+                    break;
+                }
+
+                float delta = std::max( std::min( getAxisParallelMovement(m_lastPos.x, m_lastPos.y, clickX, clickY, n ), 10.0f ), -10.0f );
+                float mult = std::min( voxelX, std::min( voxelY, voxelZ ) );
+                if ( mult < 1.0 )
+                {
+                    delta /= mult;
+                }
+
+                int d = delta;
+
+                delta = delta-d;
+
+                if ( delta < -0.5 )
+                {
+                    m_delta = d - 1;
+                }
+                else if ( delta > 0.5 )
+                {
+                    m_delta = d + 1;
+                }
+                else
+                {
+                    m_delta = d;
+                }
+            }
+
+            GetEventHandler()->ProcessEvent( evt1 );
+        }
+        else if ( evt.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20 )
+        {
+            ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
+            m_pDatasetHelper->m_selBoxChanged = true;
+        }
+        else if ( evt.Dragging() && m_hr.picked == 20 )
+        {
+            ( (SplinePoint*) m_hr.object )->drag( evt.GetPosition(), m_projection, m_viewport, m_modelview );
+        }
+    }
+    m_lastPos = evt.GetPosition();
+    Refresh( false );
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void MainCanvas::updateView()
 {
@@ -596,7 +613,6 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
                     m_isRulerHit = isRulerOrDrawer;
                     SceneManager::getInstance()->setSegmentActive( false );
-                    //m_pDatasetHelper->m_isSegmentActive = false;
                 }
 				else if( MyApp::frame->isDrawerToolActive() )
 				{

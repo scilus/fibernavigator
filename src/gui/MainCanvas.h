@@ -41,8 +41,10 @@ public:
     void changeOrthoSize();
     void OnEraseBackground(wxEraseEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
-
-	wxPoint getMousePos() {return m_clicked;};
+    void processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt );
+    void processLeftMouseUp( wxMouseEvent &evt, wxCommandEvent evt1 );
+    void processRightMouseDown( wxMouseEvent &evt, int clickX, int clickY, float voxelX, float voxelY, float voxelZ, wxCommandEvent evt1 );
+    wxPoint getMousePos() {return m_clicked;};
     float getDelta() {return m_delta;};
     int getPicked() {return m_hr.picked;};
     void updateView();
