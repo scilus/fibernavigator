@@ -36,6 +36,7 @@ public:
     ShaderProgram m_graphShader;
     ShaderProgram m_tensorsShader;
     ShaderProgram m_odfsShader;
+	ShaderProgram m_RTTShader;
 
 private:
     DatasetHelper* m_pDh;

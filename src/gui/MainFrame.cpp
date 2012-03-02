@@ -14,6 +14,7 @@
 
 #include "MainFrame.h"
 #include "PropertiesWindow.h"
+#include "TrackingWindow.h"
 #include "ToolBar.h"
 #include "MenuBar.h"
 #include "MainCanvas.h"
@@ -202,7 +203,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pLeftMainSizer     = new wxBoxSizer( wxVERTICAL   ); // Contains the navSizer adn the objectsizer.
     m_pNavSizer          = new wxBoxSizer( wxHORIZONTAL ); // Contains the 3 navigation windows with there respectiv sliders.
     m_pListSizer         = new wxBoxSizer( wxVERTICAL   ); // Contains the list and the tree
-    m_pObjectSizer       = new wxBoxSizer( wxHORIZONTAL ); // Contains the listSizer and the propertiesSizer
+    m_pObjectSizer       = new wxBoxSizer( wxHORIZONTAL ); // Contains the listSizer and the prop sizer
 
     wxBoxSizer *l_xSizer= new wxBoxSizer( wxVERTICAL );
     wxBoxSizer *l_ySizer= new wxBoxSizer( wxVERTICAL );
@@ -210,10 +211,22 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 
     wxBoxSizer *l_propSizer = new wxBoxSizer( wxVERTICAL );
     
-    m_pPropertiesWindow = new PropertiesWindow(this, wxID_ANY, wxDefaultPosition, wxSize(220,350)); // Contains Scene Objects properties
+    //Notebook
+    m_tab = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxSize(220,350), 0);
+
+    m_pPropertiesWindow = new PropertiesWindow(m_tab, this, wxID_ANY, wxDefaultPosition, wxSize(220,350)); // Contains Scene Objects properties
+    m_pTrackingWindow = new TrackingWindow(m_tab, this, wxID_ANY, wxDefaultPosition, wxSize(220,350)); // Contains realtime tracking properties
+    
+    //Add RTT Panel
+    m_tab->AddPage(m_pPropertiesWindow,_T("Properties"));
+    m_tab->AddPage(m_pTrackingWindow,_T("Realtime tracking"));
+    l_propSizer->Add(m_tab,1, wxALL | wxEXPAND);
     
     m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
     m_pPropertiesWindow->EnableScrolling(false,true);
+
+    m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pTrackingWindow->EnableScrolling(false,true);
 
     l_zSizer->Add( m_pGL0,     1, wxALL | wxFIXED_MINSIZE, 2 );
     l_zSizer->Add( m_pZSlider, 0, wxALL,                   2 );
@@ -231,14 +244,19 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pListSizer->Add( m_pTreeWidget,   1, wxALL | wxEXPAND,  1 );
     
     l_propSizer->Add(m_pPropertiesWindow, 0, wxALL | wxEXPAND, 0);
-
+    l_propSizer->Add(m_pTrackingWindow, 0, wxALL | wxEXPAND, 0);
+    
     m_pObjectSizer->Add(m_pListSizer, 1, wxALL | wxEXPAND, 0);
-    m_pObjectSizer->Add(l_propSizer, 0, wxALL | wxEXPAND, 0);
+    m_pObjectSizer->Add(l_propSizer, 0, wxALL  | wxEXPAND, 0);
+
+    
+
     wxBoxSizer *l_spaceSizer = new wxBoxSizer(wxVERTICAL);
     l_spaceSizer->SetMinSize(wxSize(15,-1));
     m_pObjectSizer->Add(l_spaceSizer, 0, wxALL | wxFIXED_MINSIZE, 0);
 
     l_propSizer->Layout();
+
     
     m_pObjectSizer->SetMinSize( wxSize(520,15));
 
@@ -250,6 +268,7 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pMainSizer->Add( m_pMainGL, 1, wxEXPAND | wxALL, 2 );
 
     m_pPropertiesWindow->Fit();
+    m_pTrackingWindow->Fit();
     this->SetBackgroundColour(*wxLIGHT_GREY);
     this->SetSizer( m_pMainSizer );
     m_pMainSizer->SetSizeHints( this );
@@ -1076,7 +1095,6 @@ void MainFrame::displayPropertiesSheet()
 void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 {
     createNewSelectionObject( ELLIPSOID_TYPE );
-    m_pDatasetHelper->m_isBoxCreated = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1086,8 +1104,8 @@ void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
-    createNewSelectionObject( BOX_TYPE );    
-    m_pDatasetHelper->m_isBoxCreated = true;
+    createNewSelectionObject( BOX_TYPE );
+    m_pTrackingWindow->m_pBtnStart->Enable(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1796,10 +1814,18 @@ void MainFrame::refreshAllGLWidgets()
 
 void MainFrame::refreshViews()
 {
+    m_tab->Fit();
+    m_tab->Layout();
+
     m_pPropertiesWindow->Fit();
     m_pPropertiesWindow->AdjustScrollbars();
-
     m_pPropertiesWindow->Layout();
+
+    m_pTrackingWindow->Fit();
+    m_pTrackingWindow->AdjustScrollbars();
+    m_pTrackingWindow->Layout();
+
+
     displayPropertiesSheet();
     if ( m_pMainGL )
     {
@@ -2326,6 +2352,11 @@ void MainFrame::doOnSize()
     }
     m_pPropertiesWindow->SetMinSize(wxSize(220, l_clientSize.y - 236));
     m_pPropertiesWindow->GetSizer()->SetDimension(0,0,220, l_clientSize.y - 236);
+
+    m_pTrackingWindow->SetMinSize(wxSize(220, l_clientSize.y - 236));
+    m_pTrackingWindow->GetSizer()->SetDimension(0,0,220, l_clientSize.y - 236);
+
+
 }
 
 ///////////////////////////////////////////////////////////////////////////

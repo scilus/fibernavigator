@@ -106,6 +106,14 @@ DatasetHelper::DatasetHelper( MainFrame *mf ) :
 	m_showCoronal ( true ),
 	m_showAxial   ( true ),	
 	m_showCrosshair( false ),
+
+    m_isRTTReady ( false ),
+    m_isRTTDirty ( false ),
+    m_isRTTActive ( false ),
+    m_isRandomSeeds ( false ), 
+    m_interpolateTensors ( false ),
+    m_isFileSelected ( false ),
+
 	
 	m_drawSize(2),
 	m_drawRound ( true ),

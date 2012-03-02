@@ -129,6 +129,7 @@ public:
     void licMovieHelper();
 
     void increaseAnimationStep();
+    int  m_debugLevel;
 
     /////////////////////////////////////////////////////////////////////////////////
     // general info about the datasets
@@ -139,6 +140,7 @@ public:
     std::vector< float >* m_floatDataset;
     std::vector<Vector>   m_rulerPts;
     bool                  m_isRulerToolActive;
+    bool                  m_isDrawerToolActive;
     double                m_rulerFullLength;
     double                m_rulerPartialLength;
     int                   m_fibersSamplingFactor;
@@ -154,6 +156,18 @@ public:
     bool                  m_isBoxCreated;
     bool                  m_thresSliderMoved;
     bool graphcutReady()  { return (m_isObjfilled && m_isBckfilled && m_isBoxCreated); };
+    bool m_showCrosshair;
+        
+    /////////////////////////////////////////////////////////////////////////////////
+    //RTT vars
+    /////////////////////////////////////////////////////////////////////////////////
+    bool m_isRTTReady;
+    bool m_isRTTDirty;
+    
+	bool m_isRTTActive;
+    bool m_isRandomSeeds;
+	bool m_interpolateTensors;
+	bool m_isFileSelected;
 
 
     float m_xVoxel;
@@ -197,7 +211,7 @@ public:
 
     int       m_animationStep;
 
-    int       m_debugLevel;
+    
 
     float     m_frustum[6][4]; // Contains the information of the planes forming the frustum.
     /////////////////////////////////////////////////////////////////////////////////
@@ -207,8 +221,8 @@ public:
     bool m_showCoronal;
     bool m_showAxial;
 
-    bool m_showCrosshair;
-
+    
+    wxImage m_drawColorIcon;
     float m_xSlize;
     float m_ySlize;
     float m_zSlize;
@@ -227,7 +241,7 @@ public:
     bool  m_displayMinMaxCrossSection;
     bool  m_displayGlyphOptions;
 
-	bool  m_isDrawerToolActive;
+	
 	enum  DrawMode
 	{
 		DRAWMODE_PEN = 0,
@@ -240,7 +254,7 @@ public:
 	bool    m_draw3d;
     bool    m_canUseColorPicker;
 	wxColor m_drawColor;
-	wxImage m_drawColorIcon;
+	
 
     bool  m_morphing;
 
@@ -279,9 +293,10 @@ public:
     SplinePoint*     m_lastSelectedPoint;
     SelectionObject* m_lastSelectedObject;
     TheScene*        m_theScene;
+    MainFrame*       m_mainFrame;
     ShaderHelper*    m_shaderHelper;
     
-    MainFrame*       m_mainFrame;
+    
 };
 
 #define ID_KDTREE_FINISHED    50

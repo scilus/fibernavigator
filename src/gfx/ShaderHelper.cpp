@@ -26,6 +26,7 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) 
     m_graphShader( wxT( "graph" ) ),
     m_tensorsShader( wxT( "tensors" ) ),
     m_odfsShader( wxT( "odfs" ) ),
+    m_RTTShader( wxT( "RTT" ) ),
     m_pDh( pDh )
 {
     m_tex.resize( 10 );
@@ -166,7 +167,19 @@ ShaderHelper::ShaderHelper( DatasetHelper* pDh, bool geometryShadersSupported ) 
         Logger::getInstance()->print( _T( "Could not initialize odfs shader." ), LOGLEVEL_ERROR );
     }
 
+    Logger::getInstance()->print( _T( "Initializing RTT shader..." ), LOGLEVEL_MESSAGE );
+    if( m_RTTShader.load() && m_RTTShader.compileAndLink() )
+    {
+        m_RTTShader.bind();
+        Logger::getInstance()->print( _T( "RTT shader initialized." ), LOGLEVEL_MESSAGE );
+    }
+    else
+    {
+        Logger::getInstance()->print( _T( "Could not initialize RTT shader." ), LOGLEVEL_ERROR );
+    }
+
 }
+
 
 ShaderHelper::~ShaderHelper()
 {

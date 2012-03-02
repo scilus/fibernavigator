@@ -25,6 +25,10 @@ public:
     // Constructor/Destructor
     Tensors( DatasetHelper* i_datasetHelper );
     virtual ~Tensors();
+
+    vector< FMatrix > getTensorsMatrix()                       { return m_tensorsMatrix;           };
+    vector< float   > getTensorsFA()                           { return m_tensorsFA;               };
+    vector< F::FVector > getTensorsEV()                        { return m_tensorsEigenValues;      };
         
     void draw(); // From DatasetInfo
 
@@ -44,9 +48,8 @@ private:
     void setScalingFactor( float i_scalingFactor );
      
     void setTensorInfo( FTensor i_FTensor);
-    
+    vector< FMatrix >  m_tensorsMatrix;    // All the tensors's matrix.
     vector< float   >  m_tensorsFA;        // All the tensors's FA values.
-    vector< FMatrix >  m_tensorsMatrix;    // All the tensors's matrix.  
     vector< F::FVector >  m_tensorsEigenValues;// All the tensors's eigen values
     bool m_isNormalized;
     static const int VISUALIZATION_FACTOR = 600;

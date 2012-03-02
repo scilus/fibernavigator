@@ -15,6 +15,7 @@
 
 #include <wx/scrolwin.h>
 #include <wx/treectrl.h>
+#include <wx/notebook.h>
 
 #include "../misc/Algorithms/Helper.h"
 
@@ -23,7 +24,7 @@ class PropertiesWindow: public wxScrolledWindow
 {
 public:
     PropertiesWindow(){};
-    PropertiesWindow( MainFrame *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
+    PropertiesWindow( wxWindow *parent, MainFrame *mf, wxWindowID id, const wxPoint &pos, const wxSize &size );
     ~PropertiesWindow(){};
     void OnPaint( wxPaintEvent &event );
     void OnSize( wxSizeEvent &event ); 
@@ -163,6 +164,7 @@ public:
     void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );
 
     MainFrame *m_mainFrame;
+    wxWindow  *m_noteBook;
 
 private:
     wxSizer *propertiesSizer;

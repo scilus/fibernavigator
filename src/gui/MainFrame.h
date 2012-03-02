@@ -8,9 +8,11 @@
 #include <wx/checkbox.h>
 #include <wx/grid.h>
 #include <wx/treectrl.h>
+#include <wx/notebook.h>
 
 #include "MainCanvas.h"
 #include "MyListCtrl.h"
+
 
 #include "../misc/Algorithms/Helper.h"
 
@@ -20,12 +22,14 @@ class DatasetInfo;
 class ToolBar;
 class MenuBar;
 class SceneObject;
+class TrackingWindow;
 
 class MainFrame : public wxFrame
 {
     friend class ToolBar;
     friend class MenuBar;
     friend class PropertiesWindow;
+    friend class TrackingWindow;
 
 public:
     MainFrame( wxWindow *i_parent, const wxWindowID i_id, const wxString &i_title, const wxPoint &i_pos, const wxSize &i_size, const long i_style);
@@ -194,10 +198,12 @@ private:
     wxBoxSizer          *m_pLeftMainSizer;
     wxBoxSizer          *m_pNavSizer;
 
+
     wxTimer             *m_pTimer;
 
 public:
     PropertiesWindow    *m_pPropertiesWindow;
+    TrackingWindow      *m_pTrackingWindow;
     MainCanvas          *m_pMainGL;
     MainCanvas          *m_pGL0;
     MainCanvas          *m_pGL1;
@@ -211,6 +217,7 @@ public:
     wxTreeItemId        m_tRootId;
     wxTreeItemId        m_tPointId;
     wxTreeItemId        m_tSelectionObjectsId;
+    wxNotebook          *m_tab;
 
 DECLARE_EVENT_TABLE()
 };

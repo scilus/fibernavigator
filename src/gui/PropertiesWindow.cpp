@@ -3,6 +3,7 @@
 #include "PropertiesWindow.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
+#include "TrackingWindow.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/FibersGroup.h"
@@ -21,17 +22,19 @@ EVT_SIZE(       PropertiesWindow::OnSize)
 END_EVENT_TABLE()
 
 
-PropertiesWindow::PropertiesWindow( MainFrame *parent, wxWindowID id,
+PropertiesWindow::PropertiesWindow( wxWindow *parent, MainFrame *mf, wxWindowID id,
                     const wxPoint &pos, const wxSize &size )
         : wxScrolledWindow( parent, id, pos, size, wxBORDER_NONE, _T("test canvas") )
 {
-    m_mainFrame = parent;
+    m_noteBook = parent;
+    m_mainFrame = mf;
     SetBackgroundColour( *wxLIGHT_GREY );
     SetCursor( wxCursor( wxCURSOR_HAND ) );
     propertiesSizer = new wxBoxSizer( wxVERTICAL );
     SetSizer( propertiesSizer );
     SetAutoLayout(true);
 }
+
 
 void PropertiesWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
 {
@@ -1521,6 +1524,12 @@ void PropertiesWindow::OnVoiFlipNormals( wxCommandEvent& WXUNUSED(event) )
 void PropertiesWindow::OnDeleteTreeItem( wxTreeEvent&    event )
 {
     m_mainFrame->onDeleteTreeItem(event);
+    m_mainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
+    m_mainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
+    m_mainFrame->m_pDatasetHelper->m_isRTTDirty = false;
+    m_mainFrame->m_pDatasetHelper->m_isRTTReady = false;
+    m_mainFrame->m_pTrackingWindow->m_pBtnStart->Enable(false);
+
 }
 
 void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent&    event )
