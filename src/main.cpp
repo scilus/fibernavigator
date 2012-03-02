@@ -91,7 +91,7 @@ bool MyApp::OnInit( void )
 
         CFStringGetCString( str, path, FILENAME_MAX, kCFStringEncodingASCII );
         CFRelease( str );
-        fprintf( stderr, path );
+        fprintf( stderr, "%s", path );
 
         respath = wxString::FromAscii( path );
 
@@ -109,8 +109,8 @@ bool MyApp::OnInit( void )
 
         Logger::getInstance()->print( wxT( "Warning: This version of Fibernavigator is debug compiled." ), LOGLEVEL_DEBUG );
         Logger::getInstance()->print( wxT( "For better performance please compile a Release version."), LOGLEVEL_DEBUG );
-        Logger::getInstance()->print( wxString::Format( wxT( "respath: %s" ), respath ), LOGLEVEL_DEBUG );
-        Logger::getInstance()->print( wxString::Format( wxT( "shader: %s" ), shaderPath ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "respath: %s" ), respath.c_str() ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "shader: %s" ), shaderPath.c_str() ), LOGLEVEL_DEBUG );
 
         // Create the main frame window
         frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 1219"), wxPoint( 50, 50 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );

@@ -32,7 +32,7 @@ public:
         // check if i_fileName is valid
         if( !wxFile::Exists( filename ) )
         {
-            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), filename ), LOGLEVEL_ERROR );
+            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), filename.c_str() ), LOGLEVEL_ERROR );
         }
         else
         {

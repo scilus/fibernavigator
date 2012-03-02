@@ -32,6 +32,7 @@
 
 #include <wx/colordlg.h>
 #include <wx/filedlg.h>
+#include <wx/imaglist.h>
 #include <wx/statbmp.h>
 #include <wx/vscroll.h>
 

@@ -701,7 +701,7 @@ void MainCanvas::render()
 
     /* clear color and depth buffers */
 #ifdef __WXMAC__
-    if (m_pDatasetHelper->m_clearToBlack){
+    if(SceneManager::getInstance()->getClearToBlack()){
        glClearColor( 0.0f, 0.0f, 0.0f, 0.0f);
     } else {
        glClearColor( 1.0f, 1.0f, 1.0f, 0.0f);

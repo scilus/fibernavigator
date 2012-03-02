@@ -291,7 +291,7 @@ int DatasetManager::load( const wxString &filename, const wxString &extension )
     }
     else
     {
-        Logger::getInstance()->print( wxString::Format( wxT( "Unsupported file format \"%s\"" ), extension ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( wxString::Format( wxT( "Unsupported file format \"%s\"" ), extension.c_str() ), LOGLEVEL_ERROR );
     }
 
     return result;
