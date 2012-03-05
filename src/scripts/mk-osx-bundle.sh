@@ -2,9 +2,27 @@
 
 #
 # This script creates a max osx bundle and a disk image (.dmg) file
-# out of a compiled FAnToM version
+# out of a compiled Fibernavigator version.
 #
+# This script considers that you installed GLEW using MacPorts, and that it was put in "/opt/local/lib".
+#
+# $1 Path to the application executable.
+# $2 Path to the custom wxWidgets compilation, should point to the build directory
 
+echo
+
+if [[ $# < 2 ]]
+then
+    echo "Missing some arguments."
+    return 1
+fi
+
+verbose=false
+if [[ $# == 3 && $3 == "1" ]]
+then
+    verbose=true
+    echo "Verbose"
+fi
 
 #echo $1
 #
@@ -14,47 +32,50 @@ export BUNDLEDIR=$EXE.app
 export EXEC_DIR=$BUNDLEDIR/Contents/MacOS
 export FRAMEWORK_DIR=$BUNDLEDIR/Contents/Frameworks
 export RESOURCE_DIR=$BUNDLEDIR/Contents/Resources
-export SOURCE=../diplom/
+export SOURCE=../src/
 
 # make required directories
 mkdir -p $EXEC_DIR
 mkdir -p $FRAMEWORK_DIR
 
-# copy libraries into framework directory (raw files, we do not bundle them, yet)
-#cp -Rf lib/* $FRAMEWORK_DIR
+# Copy the executable to the EXEC_DIR
+echo "Copying $1 to the app directory..."
+cp $1 $EXEC_DIR/$EXE
 
-# all main libraries go here, we need to relink everything
-#LIBS="libcommon.dylib libmath.dylib libanalysis.dylib libalgo.dylib libvisKernel.dylib libnogui.dylib libgui.dylib libFge.dylib libdataSet.dylib libqtgui-qt4.dylib libFgeQT4.dylib libqtwidgets.dylib libvisualization.dylib"
-
-#EXTLIBS="/sw/lib/libboost_python.dylib"
-#EXTLIBS2="libboost_python.dylib"
-
-SYSROOT=/Developer/SDKs/MacOSX10.5.sdk
-SYSROOT2=/Developer/SDKs/MacOSX10.4u.sdk
+WXWIDGETSROOT=$2
 
 # copy additional libraries
-#EXTLIBS=("/usr/lib/libwx_macud-2.8.0.dylib" "/usr/lib/libwx_macud_gl-2.8.0.dylib" "/usr/lib/libGLEW.1.5.0.dylib")
-EXTLIBS=("${SYSROOT2}/opt//lib/libwx_mac-2.8.0.dylib" "${SYSROOT2}/opt//lib/libwx_mac_gl-2.8.0.dylib" "/Users/mario/glew/glew-10.5/lib/libGLEW.1.5.1.dylib")
-EXTLIBN=("libwx_mac-2.8.0.dylib" "libwx_mac_gl-2.8.0.dylib" "libGLEW.1.5.1.dylib")
+EXTLIBS=("${WXWIDGETSROOT}/lib/libwx_base_carbon-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_base_carbon_net-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_base_carbon_xml-2.8.0.dylib" 
+         "${WXWIDGETSROOT}/lib/libwx_mac_adv-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_mac_core-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_mac_gl-2.8.0.dylib" "/opt/local/lib/libGLEW.1.6.0.dylib")
 
-echo "==========================>> $EXTLIBS"
+EXTLIBN=("libwx_base_carbon-2.8.0.dylib" "libwx_base_carbon_net-2.8.0.dylib" "libwx_base_carbon_xml-2.8.0.dylib" "libwx_mac_adv-2.8.0.dylib" "libwx_mac_core-2.8.0.dylib" 
+        "libwx_mac_gl-2.8.0.dylib" "libGLEW.1.6.0.dylib")
+
+echo "Copying external libraries to the Frameworks folder..."
+    
 for i in ${EXTLIBS[@]}
 do
-  echo ===============================
-  echo ===============================
-  echo `basename $i`
-  cp $i $FRAMEWORK_DIR/
+    if [[ $verbose == true ]]
+    then
+        echo "  " `basename $i`
+    fi
+    
+    cp $i $FRAMEWORK_DIR/
 done
 
 # relink executable to its external libraries that we
 # ship with the bundle
-echo "+== relinking binary to external libs"
+echo "Relinking binary to external libs.."
 libcount=${#EXTLIBS[@]} 
 for (( j = 0 ; j < libcount ; j++ )) 
 do
   mlib=${EXTLIBS[$j]} 
   mbase=${EXTLIBN[$j]}
-  echo "  processing $mlib..."
+  
+  if [[ $verbose == true ]]
+  then
+    echo "  processing $mlib..."
+  fi
 
   install_name_tool \
   -id @executable_path/../Frameworks/$mbase \
@@ -65,8 +86,8 @@ do
   @executable_path/../Frameworks/$mbase \
   $EXEC_DIR/$EXE
 
-# some path still end up in /usr/lib don't know why,
-# but we circumvent this...
+  # some path still end up in /usr/lib don't know why,
+  # but we circumvent this...
   install_name_tool \
   -change /usr/lib/$mbase \
   @executable_path/../Frameworks/$mbase \
@@ -74,13 +95,14 @@ do
 
 done
 
-
-
 # relink libraries and binary
-echo "+== relinking all libraries"
+echo "Relinking all libraries..."
 for i in `ls -1 $FRAMEWORK_DIR`
 do
-  echo " == relinking library: $i"
+  if [[ $verbose == true ]]
+  then
+    echo "  relinking library: $i"
+  fi
   #set name=`basename $i`
   # echo "name: $name"
   #echo $EXEC_DIR/$EXE
@@ -100,7 +122,11 @@ do
   do
 	mlib=${EXTLIBS[$j]} 
 	mbase=${EXTLIBN[$j]}
-	echo "  processing $lib..."
+	
+	if [[ $verbose == true ]]
+    then
+        echo "    processing $mlib..."
+    fi
 	
 	install_name_tool \
 	-change $mlib \
@@ -116,19 +142,12 @@ do
   -change `pwd`/lib/$i \
   @executable_path/../Frameworks/$i \
   $EXEC_DIR/$EXE
-
-  # echo "app: $EXEC_DIR/$EXE"
 done
-
-# copy everything to a subfolder
-rm -Rf ${EXE}-img
-mkdir ${EXE}-img
-cp -R $EXE.app ${EXE}-img/
-
 
 
 # add a readme
 #cp $SOURCE/README ${EXE}-img/ReadMe.txt
+echo "Copying resources to the Resources folder..."
 path=`pwd`
 cd $SOURCE/icons/
 mkdir -p $path/${RESOURCE_DIR}/icons
@@ -140,12 +159,20 @@ mkdir -p ${RESOURCE_DIR}/GLSL
 cp -R $SOURCE/GLSL/*.vs $RESOURCE_DIR/GLSL/
 cp -R $SOURCE/GLSL/*.fs $RESOURCE_DIR/GLSL/
 
+# copy everything to a subfolder
+rm -Rf ${EXE}-img
+mkdir ${EXE}-img
+cp -R $EXE.app ${EXE}-img/
+
 cd $SOURCE;
-svn info > $path/$EXE-img/svn-info.txt
+#svn info > $path/$EXE-img/svn-info.txt
 cd $path
 
 
 # create a disk image from this directory
-rm ${EXE}.dmg
+echo "Creating a disk image for the application..."
+rm -f ${EXE}.dmg
 hdiutil create -srcfolder ${EXE}-img -format UDBZ -volname ${EXE} ${EXE}.dmg
 
+# Remove temporary files.
+rm -Rf ${EXE}-img

@@ -2,14 +2,15 @@ Hi!
 
 To create OSX bundles that can be shipped as disk images (.dmg), the script mk-osx-bundle.sh may help.
 
-The best way when you are in the source directory (called diplom) do:
+To use it, make sure you have a compiled version of the Fibernavigator, then go to your build directory, then call the script.
 
-# cd ..
-# mkdir build
-# ccmake ../diplom
-do the configuration you need
-# make
-edit some of the paths in mk-osx-bundle, such as where wx-widgets and GLEW is lying around, then:
-# . ../diplom/scripts/mk-osx-bundle.sh
+The script needs at least two parameters, which are:
+$1: the path to the Fibernavigator binary (typically: bin/fibernavigator)
+$2: the path to the wxWidgets build that was used to compile the Fibernavigator. It should be the same path as the one that was set in the CMake configuration.
 
-you should have a self-containing NAME.dmg lying around now that contains all the required frameworks.
+An example call on a developer system, when in the build directory, would look like
+# . ../src/scripts/mk-osx-bundle.sh bin/fibernavigator /path/to/wxWidgets/root/directory/build-release/
+
+There is an additional optional parameter that, when set to 1, tells to script to use a more verbose output.
+
+If all works, you should have a self-containing Fibernavigator.dmg disk image that contains all the required frameworks.
