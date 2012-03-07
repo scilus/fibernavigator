@@ -21,6 +21,8 @@ class DatasetInfo;
 class ToolBar;
 class MenuBar;
 class SceneObject;
+class SelectionObject;
+class SplinePoint;
 
 enum DrawMode
 {
@@ -70,7 +72,11 @@ public:
     void      setDrawColor( const wxColour &color )   { m_drawColor = color; }
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
-    void      setThreadsActive( const int nb )  { m_threadsActive = nb; }
+    void      setThreadsActive( const int nb )      { m_threadsActive = nb; }
+    SelectionObject * getLastSelectedObj() const    { return m_pLastSelectedObj; }
+    SplinePoint * getLastSelectedPoint() const      { return m_pLastSelectedPoint; }
+    void      setLastSelectedPoint( SplinePoint * pPoint ) { m_pLastSelectedPoint = pPoint; }
+
 
 private:
     void initOpenGl();
@@ -246,6 +252,8 @@ private:
     wxImage  m_drawColorIcon;
 
     int  m_threadsActive;
+    SplinePoint*     m_pLastSelectedPoint;
+    SelectionObject* m_pLastSelectedObj;
 
 DECLARE_EVENT_TABLE()
 };

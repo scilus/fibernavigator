@@ -106,11 +106,8 @@ TheScene::~TheScene()
 
 #ifndef __WXMAC__
     // On mac, this is just a pointer to the original object that is deleted with the widgets.
-    if ( m_pMainGLContext )
-    {
-        delete m_pMainGLContext;
-        m_pMainGLContext = NULL;
-    }
+    delete m_pMainGLContext;
+    m_pMainGLContext = NULL;
 #endif
     Logger::getInstance()->print( wxT( "TheScene destructor done" ), LOGLEVEL_DEBUG );
 }
@@ -156,6 +153,7 @@ void TheScene::initGL( int whichView )
                 SceneManager::getInstance()->setGeometryShaderSupported( false );
                 useGeometry = false;
             }
+            ShaderHelper::getInstance()->loadShaders( useGeometry );
         }
         glEnable( GL_DEPTH_TEST );
 
@@ -218,7 +216,7 @@ void TheScene::renderScene()
     if( MyApp::frame->m_pListCtrl2->GetItemCount() == 0 )
         return;
 
-    SceneManager::getInstance()->getShaderHelper()->initializeArrays();
+    ShaderHelper::getInstance()->initializeArrays();
 
     float columns = DatasetManager::getInstance()->getColumns();
     float rows    = DatasetManager::getInstance()->getRows();
@@ -474,15 +472,15 @@ void TheScene::renderSlices()
     glAlphaFunc( GL_GREATER, 0.001f ); // Adjust your preferred threshold here.
 
     bindTextures();
-    SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.bind();
-    SceneManager::getInstance()->getShaderHelper()->setTextureShaderVars();
-    SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
+    ShaderHelper::getInstance()->getAnatomyShader()->bind();
+    ShaderHelper::getInstance()->setTextureShaderVars();
+    ShaderHelper::getInstance()->getAnatomyShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
     SceneManager::getInstance()->getAnatomyHelper()->renderMain();
 
     glDisable( GL_BLEND );
 
-    SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.release();
+    ShaderHelper::getInstance()->getAnatomyShader()->release();
 
     if( SceneManager::getInstance()->isCrosshairDisplayed() )
     {
@@ -512,16 +510,16 @@ void TheScene::renderSplineSurface()
 
             lightsOn();
 
-            SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.bind();
-            SceneManager::getInstance()->getShaderHelper()->setSplineSurfaceShaderVars();
+            ShaderHelper::getInstance()->getSplineSurfShader()->bind();
+            ShaderHelper::getInstance()->setSplineSurfaceShaderVars();
             wxColor color = pDsInfo->getColor();
             glColor3f( (float) color.Red() / 255.0, (float) color.Green() / 255.0, (float) color.Blue() / 255.0 );
-            SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-            SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
+            ShaderHelper::getInstance()->getSplineSurfShader()->setUniInt( "useTex", !pDsInfo->getUseTex() );
+            ShaderHelper::getInstance()->getSplineSurfShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
             pDsInfo->draw();
 
-            SceneManager::getInstance()->getShaderHelper()->m_splineSurfShader.release();
+            ShaderHelper::getInstance()->getSplineSurfShader()->release();
 
             lightsOff();
 
@@ -545,8 +543,8 @@ void TheScene::renderMesh()
 
     bindTextures();
 
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.bind();
-    SceneManager::getInstance()->getShaderHelper()->setMeshShaderVars();
+    ShaderHelper::getInstance()->getMeshShader()->bind();
+    ShaderHelper::getInstance()->setMeshShaderVars();
 
     if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -560,10 +558,10 @@ void TheScene::renderMesh()
     glColor3f( 1.0f, 0.0f, 0.0f );
     SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "showFS", true );
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "useTex", false );
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniFloat( "alpha_", 1.0 );
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "useLic", false );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS", true );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex", false );
+    ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_", 1.0 );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useLic", false );
 
     for( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
@@ -587,10 +585,10 @@ void TheScene::renderMesh()
                 wxColor color = pDsInfo->getColor();
                 glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
 
-                SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "showFS",  pDsInfo->getShowFS() );
-                SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "useTex",  pDsInfo->getUseTex() );
-                SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniFloat( "alpha_",  pDsInfo->getAlpha() );
-                SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
+                ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS",  pDsInfo->getShowFS() );
+                ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex",  pDsInfo->getUseTex() );
+                ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_",  pDsInfo->getAlpha() );
+                ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
 
                 if(pDsInfo->getAlpha() < 0.99)
                 {
@@ -607,7 +605,7 @@ void TheScene::renderMesh()
         }
     }
     
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.release();
+    ShaderHelper::getInstance()->getMeshShader()->release();
 
     lightsOff();
 
@@ -825,12 +823,12 @@ void TheScene::drawPoints()
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
     lightsOn();
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.bind();
-    SceneManager::getInstance()->getShaderHelper()->setMeshShaderVars();
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt( "showFS", true );
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt( "useTex", false );
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt( "cutAtSurface", false );
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.setUniInt( "lightOn", true );
+    ShaderHelper::getInstance()->getMeshShader()->bind();
+    ShaderHelper::getInstance()->setMeshShaderVars();
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "showFS", true );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "useTex", false );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "cutAtSurface", false );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "lightOn", true );
 
     wxTreeItemId treeId;
     wxTreeItemIdValue cookie = 0;
@@ -844,7 +842,7 @@ void TheScene::drawPoints()
     }
 
     lightsOff();
-    SceneManager::getInstance()->getShaderHelper()->m_meshShader.release();
+    ShaderHelper::getInstance()->getMeshShader()->release();
     glPopAttrib();
 
     Logger::getInstance()->printIfGLError( wxT( "Draw points" ) );
@@ -866,8 +864,8 @@ void TheScene::drawColorMapLegend()
     int maxSize = std::max( std::max( rows, columns ), frames );
     glOrtho( 0, maxSize, 0, maxSize, -3000, 3000 );
 
-    SceneManager::getInstance()->getShaderHelper()->m_legendShader.bind();
-    SceneManager::getInstance()->getShaderHelper()->m_legendShader.setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
+    ShaderHelper::getInstance()->getLegendShader()->bind();
+    ShaderHelper::getInstance()->getLegendShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
     glColor3f( 0.0f, 0.0f, 0.0f );
     glLineWidth( 5.0f );
@@ -878,7 +876,7 @@ void TheScene::drawColorMapLegend()
     glVertex3i( maxSize - 20, 10, 2900 );
     glEnd();
 
-    SceneManager::getInstance()->getShaderHelper()->m_legendShader.release();
+    ShaderHelper::getInstance()->getLegendShader()->release();
 
     glLineWidth( 1.0f );
     glColor3f( 0.0f, 0.0f, 0.0f );
@@ -895,7 +893,7 @@ void TheScene::drawColorMapLegend()
     glVertex3i( maxSize - 20, 12, 2900 );
     glEnd();
 
-    SceneManager::getInstance()->getShaderHelper()->m_legendShader.release();
+    ShaderHelper::getInstance()->getLegendShader()->release();
 
     glPopMatrix();
     glPopAttrib();
@@ -1241,11 +1239,11 @@ void TheScene::drawGraph()
         treeId = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
     }
 
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.bind();
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniInt  ( "globalColor", false );
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "animation", (float)SceneManager::getInstance()->getAnimationStep() );
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
+    ShaderHelper::getInstance()->getGraphShader()->bind();
+    ShaderHelper::getInstance()->getGraphShader()->setUniInt  ( "globalColor", false );
+    ShaderHelper::getInstance()->getGraphShader()->setUniFloat( "animation", (float)SceneManager::getInstance()->getAnimationStep() );
+    ShaderHelper::getInstance()->getGraphShader()->setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
+    ShaderHelper::getInstance()->getGraphShader()->setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
 
     int countPoints = graphPoints.size() / 3;
     glColor3f( 1.0f, 0.0f, 0.0f );
@@ -1260,7 +1258,7 @@ void TheScene::drawGraph()
                                       ( graphPoints[i*3+1] - graphPoints[j*3+1] ) * ( graphPoints[i*3+1] - graphPoints[j*3+1] ) +
                                       ( graphPoints[i*3+2] - graphPoints[j*3+2] ) * ( graphPoints[i*3+2] - graphPoints[j*3+2] ) );
 
-                SceneManager::getInstance()->getShaderHelper()->m_graphShader.setUniFloat( "thickness", (float)( i+1 )*2 );
+                ShaderHelper::getInstance()->getGraphShader()->setUniFloat( "thickness", (float)( i+1 )*2 );
                 glColor3f( i/10.0f, j/10.0f, i+j/20.0f );
                 glBegin( GL_QUADS );
                     glTexCoord3f( -1.0f, 0, length );
@@ -1280,7 +1278,7 @@ void TheScene::drawGraph()
         }
     }
 
-    SceneManager::getInstance()->getShaderHelper()->m_graphShader.release();
+    ShaderHelper::getInstance()->getGraphShader()->release();
 
     glPopAttrib();
 }

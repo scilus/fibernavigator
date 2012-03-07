@@ -169,9 +169,7 @@ bool Shader::fileExists()
 
 Shader::~Shader()
 {
-    if( 0 != m_id )
-    {
-        glDeleteShader( m_id );
-        m_id = 0;
-    }
+    glDeleteShader( m_id );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Deleting Shader (%s) failed." ), m_filename.c_str() ) );
+    m_id = 0;
 }

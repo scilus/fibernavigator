@@ -34,7 +34,7 @@ SplinePoint::SplinePoint( double x, double y, double z, DatasetHelper* dh )
 SplinePoint::~SplinePoint()
 {
     DatasetManager::getInstance()->setSurfaceDirty( true );
-    m_dh->m_lastSelectedPoint = 0;
+    MyApp::frame->setLastSelectedPoint( NULL );
 }
 
 void SplinePoint::draw()

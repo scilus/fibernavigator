@@ -421,20 +421,35 @@ void ShaderProgram::printProgramLog( GLuint programId )
 
 ShaderProgram::~ShaderProgram()
 {
-    if( NULL != m_pVertex )
-    {
-        delete m_pVertex;
-    }
+    Logger::getInstance()->print( wxString::Format( wxT ( "Executing ShaderProgram (%s) destructor" ), m_name.c_str() ), LOGLEVEL_DEBUG );
+
+    release();
+
+    glDetachShader( m_id, m_pVertex->getId() );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Detaching Shader (%s) failed." ), m_pVertex->getFilename().c_str() ) );
 #if _COMPILE_GEO_SHADERS
-    if( NULL != m_pGeometry )
+    if( m_pGeometry )
     {
-        delete m_pGeometry;
-    } 
-#endif
-    if( NULL != m_pFragment )
-    {
-		delete m_pFragment;
+        glDetachShader( m_id, m_pGeometry->getId() );
+        Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Detaching Shader (%s) failed." ), m_pGeometry->getFilename().c_str() ) );
     }
+#endif
+    glDetachShader( m_id, m_pFragment->getId() );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Detaching Shader (%s) failed." ), m_pFragment->getFilename().c_str() ) );
+
+    glDeleteProgram( m_id );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Deleting ShaderProgram (%s) failed." ), m_name.c_str() ) );
+
+    delete m_pVertex;
+    m_pVertex = NULL;
+
+#if _COMPILE_GEO_SHADERS
+    delete m_pGeometry;
+    m_pGeometry = NULL;
+#endif
+
+    delete m_pFragment;
+    m_pFragment = NULL;
+
+    Logger::getInstance()->print( wxString::Format( wxT ( "ShaderProgram (%s) destructor done" ), m_name.c_str() ), LOGLEVEL_DEBUG );
 }
-
-

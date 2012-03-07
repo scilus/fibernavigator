@@ -80,16 +80,19 @@ bool Logger::printIfGLError( wxString str )
     GLenum error = glGetError();
     if( GL_NO_ERROR != error )
     {
-        //str.Append( wxT( "\n" ) );
-        m_oss << gluErrorString( error );
-
-        if( !m_oss.str().empty())
+        switch( error )
         {
-            str.Append( wxT( " - " ) );
-            str.Append( wxString( m_oss.str().c_str(), wxConvUTF8 ) );
+            case GL_INVALID_VALUE:
+                str.Append( wxT( " - GL_INVALID_VALUE" ) );
+                break;
+            case GL_INVALID_OPERATION:
+                str.Append( wxT( " - GL_INVALID_OPERATION" ) );
+                break;
+            default:
+                str.Append( wxString::Format( wxT( " - ADD ERROR MESSAGE HERE: ERROR CODE: %x" ), error ) );
+                break;
         }
 
-        m_oss.str( "" );
         print( str, LOGLEVEL_GLERROR );
         return true;
     }

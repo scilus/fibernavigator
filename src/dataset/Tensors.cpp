@@ -258,27 +258,27 @@ void Tensors::normalize()
 void Tensors::draw()
 {      
     // Enable the tensor shader.    
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.bind();
+    ShaderHelper::getInstance()->getTensorsShader()->bind();
     
     glBindTexture( GL_TEXTURE_1D, m_textureId );
 
     // This is the color look up table texture.
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniSampler( "clut",          0                         );
+    ShaderHelper::getInstance()->getTensorsShader()->setUniSampler( "clut",          0                         );
     // This is the alpha level of the tensors.
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniFloat  ( "alpha",         DatasetInfo::m_alpha      );
+    ShaderHelper::getInstance()->getTensorsShader()->setUniFloat  ( "alpha",         DatasetInfo::m_alpha      );
     // This is the value for the lighting attenuation.
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniFloat  ( "attenuation",   m_lighAttenuation         );
+    ShaderHelper::getInstance()->getTensorsShader()->setUniFloat  ( "attenuation",   m_lighAttenuation         );
     // This is the value for the light direction.
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUni3Float ( "lightPosition", m_lightPosition           );
+    ShaderHelper::getInstance()->getTensorsShader()->setUni3Float ( "lightPosition", m_lightPosition           );
     // This is the brightness level of the tensors.
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniFloat  ( "brightness",    DatasetInfo::m_brightness );
+    ShaderHelper::getInstance()->getTensorsShader()->setUniFloat  ( "brightness",    DatasetInfo::m_brightness );
     // If m_colorWithPosition is true then the glyph will be colored with the position of the vertex.
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniInt    ( "colorWithPos", (GLint)m_colorWithPosition );
+    ShaderHelper::getInstance()->getTensorsShader()->setUniInt    ( "colorWithPos", (GLint)m_colorWithPosition );
  
     Glyph::draw();
 
     // Disable the tensor color shader.
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.release();
+    ShaderHelper::getInstance()->getTensorsShader()->release();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -314,10 +314,10 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
     // Lets set the offset of this tensor.
     GLfloat l_offset[3];
     getVoxelOffset( i_zVoxel, i_yVoxel, i_xVoxel, l_offset );
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUni3Float( "offset", l_offset );
+    ShaderHelper::getInstance()->getTensorsShader()->setUni3Float( "offset", l_offset );
 
     // Lets set the color to draw this tensor.
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setAttribFloat( "color", l_tensorFA );
+    ShaderHelper::getInstance()->getTensorsShader()->setAttribFloat( "color", l_tensorFA );
 
     // Set axis flip.
     GLfloat l_flippedAxes[3];
@@ -325,7 +325,7 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
     m_flippedAxes[1] ? l_flippedAxes[1] = -1.0f : l_flippedAxes[1] = 1.0f;
     m_flippedAxes[2] ? l_flippedAxes[2] = -1.0f : l_flippedAxes[2] = 1.0f;
     
-    SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUni3Float("axisFlip", l_flippedAxes);
+    ShaderHelper::getInstance()->getTensorsShader()->setUni3Float("axisFlip", l_flippedAxes);
 
 
     if (getDisplayShape()== NORMAL || getDisplayShape()== SPHERE )
@@ -347,12 +347,12 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             l_noDeformMatrix( 2, 1 ) = 0.0f;
             l_noDeformMatrix( 2, 2 ) = factor;
             // Lets set the matrix of this tensor so the shader will be able to deform it properly.
-            SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniMatrix3f( "tensorMatrix", l_noDeformMatrix );
+            ShaderHelper::getInstance()->getTensorsShader()->setUniMatrix3f( "tensorMatrix", l_noDeformMatrix );
         } 
         else 
         {
             // Lets set the matrix of this tensor so the shader will be able to deform it properly.
-            SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
+            ShaderHelper::getInstance()->getTensorsShader()->setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
         }
 
         if( !SceneManager::getInstance()->isUsingVBO() )
@@ -366,14 +366,14 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
         }
 
         // Lets set the radius modifier.
-        SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniInt( "displayControl", 0 );
+        ShaderHelper::getInstance()->getTensorsShader()->setUniInt( "displayControl", 0 );
         // Depending on the orientation of the glyph we do a front or back face culling.
         m_axisFlippedToggled ? glCullFace( GL_FRONT ) : glCullFace( GL_BACK );
         // Draw the first half of the tensor.
         glDrawArrays( GL_TRIANGLE_STRIP, 0, m_nbPointsPerGlyph );
 
         // Lets set the radius modifier.
-        SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniInt( "displayControl", 1 );
+        ShaderHelper::getInstance()->getTensorsShader()->setUniInt( "displayControl", 1 );
         // Depending on the orientation of the glyph we do a front or back face culling.
         m_axisFlippedToggled ? glCullFace( GL_BACK ) : glCullFace( GL_FRONT );
         // Draw the other half of the tensor.
@@ -383,7 +383,7 @@ void Tensors::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
     {
         glDisable( GL_CULL_FACE );
         // Lets set the matrix of this tensor so the shader will be able to deform it properly.
-        SceneManager::getInstance()->getShaderHelper()->m_tensorsShader.setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
+        ShaderHelper::getInstance()->getTensorsShader()->setUniMatrix3f( "tensorMatrix", m_tensorsMatrix[l_tensorNumber] );
         
         float l_factor = m_scalingFactor/3;
         if( isDisplayShape( AXIS ) )

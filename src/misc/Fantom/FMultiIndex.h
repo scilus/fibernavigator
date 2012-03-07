@@ -12,10 +12,11 @@
 #ifndef __FMultiIndex_hh
 #define __FMultiIndex_hh
 
-#include <iosfwd>
-#include <iostream>
 #include "FException.h"
 
+#include <algorithm>
+#include <iosfwd>
+#include <iostream>
 #include <vector>
 
 //===========================================================================

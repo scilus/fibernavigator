@@ -10,6 +10,7 @@
 #include "Logger.h"
 #include "dataset/DatasetManager.h"
 #include "dataset/Loader.h"
+#include "gfx/ShaderHelper.h"
 #include "gui/MainFrame.h"
 #include "gui/MenuBar.h"
 #include "gui/SceneManager.h"
@@ -258,8 +259,11 @@ wxString MyApp::wxFindAppPath( const wxString& argv0, const wxString& cwd, const
 int MyApp::OnExit()
 {
     Logger::getInstance()->print( wxT( "Exiting..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Cleaning ressources..." ), LOGLEVEL_MESSAGE );
+    frame = NULL;
 
     // Deleting singletons
+    delete ShaderHelper::getInstance();
     delete DatasetManager::getInstance();
 	delete SceneManager::getInstance();
     delete Logger::getInstance();

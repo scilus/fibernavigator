@@ -610,12 +610,10 @@ int DatasetManager::loadTensors( const wxString &filename, nifti_image *pHeader,
 DatasetManager::~DatasetManager(void)
 {
     Logger::getInstance()->print( wxT( "DatasetManager destruction starting..." ), LOGLEVEL_DEBUG );
-    Logger::getInstance()->print( wxT( "Cleaning ressources..." ), LOGLEVEL_MESSAGE );
     for( map<unsigned int, DatasetInfo *>::iterator it = m_datasets.begin(); it != m_datasets.end(); ++it )
     {
         delete it->second;
     }
-    Logger::getInstance()->print( wxT( "Ressources cleaned." ), LOGLEVEL_MESSAGE );
     m_pInstance = NULL;
     Logger::getInstance()->print( wxT( "DatasetManager destruction done." ), LOGLEVEL_DEBUG );
 }

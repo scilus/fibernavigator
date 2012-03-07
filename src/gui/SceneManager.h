@@ -52,14 +52,12 @@ public:
     SelectionObjList getSelectionObjects();
 
     void    setMainFrame( MainFrame *pMainFrame )           { m_pMainFrame = pMainFrame; }
-    void    setShaderHelper( ShaderHelper *pShaderHelper )  { m_pShaderHelper = pShaderHelper; }
     void    setTreeCtrl ( MyTreeCtrl *pTreeCtrl )           { m_pTreeView  = pTreeCtrl; }
     // TODO: Remove this temporary getter/setter once TheScene is created directly in the constructor of the SceneManager
     void    setTheScene ( TheScene *pTheScene )             { m_pTheScene  = pTheScene; }
 
     AnatomyHelper* getAnatomyHelper() const { return m_pAnatomyHelper; }
     TheScene *     getScene() const         { return m_pTheScene; }
-    ShaderHelper * getShaderHelper() const  { return m_pShaderHelper; }
 
     bool areGeometryShadersSupported() const    { return m_geometryShadersSupported; }
     bool isFibersGeomShaderActive() const       { return m_useFibersGeometryShader; }
@@ -185,7 +183,6 @@ private:
     AnatomyHelper *m_pAnatomyHelper;
     MyTreeCtrl *m_pTreeView;
     MainFrame  *m_pMainFrame;
-    ShaderHelper *m_pShaderHelper;
     TheScene   *m_pTheScene;
 
     bool  m_geometryShadersSupported;

@@ -36,9 +36,9 @@ void AnatomyHelper::renderNav( int pView )
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
     SceneManager::getInstance()->getScene()->bindTextures();
-    SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.bind();
-    SceneManager::getInstance()->getShaderHelper()->initializeArrays();
-    SceneManager::getInstance()->getShaderHelper()->setTextureShaderVars();
+    ShaderHelper::getInstance()->getAnatomyShader()->bind();
+    ShaderHelper::getInstance()->initializeArrays();
+    ShaderHelper::getInstance()->setTextureShaderVars();
 
     glEnable( GL_ALPHA_TEST );
     glAlphaFunc( GL_GREATER, 0.0001f );
@@ -115,7 +115,7 @@ void AnatomyHelper::renderNav( int pView )
     }
 
     glDisable( GL_TEXTURE_3D );
-    SceneManager::getInstance()->getShaderHelper()->m_anatomyShader.release();
+    ShaderHelper::getInstance()->getAnatomyShader()->release();
     glPopAttrib();
 
     glLineWidth( 1.0f );

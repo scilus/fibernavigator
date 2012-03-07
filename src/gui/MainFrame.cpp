@@ -187,7 +187,9 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_canUseColorPicker( false ),
     m_drawColor(255, 255, 255),
     m_drawColorIcon(16, 16, true),
-    m_threadsActive( 0 )
+    m_threadsActive( 0 ),
+    m_pLastSelectedObj( NULL ),
+    m_pLastSelectedPoint( NULL )
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -995,7 +997,7 @@ void MainFrame::deleteSceneObject()
         m_pPropertiesWindow->GetSizer()->Detach(m_pCurrentSizer);        
         m_pCurrentSizer = NULL;
     }
-    //delete m_currentFNObject;
+    
     m_pCurrentSceneObject = NULL;
     m_pLastSelectedSceneObject = NULL;
     m_currentListItem = -1;
@@ -2078,32 +2080,28 @@ void MainFrame::onDeleteTreeItem( wxTreeEvent& WXUNUSED(event) )
 
 void MainFrame::deleteTreeItem()
 {
-    if (m_pCurrentSceneObject != NULL)
+    if( m_pCurrentSceneObject != NULL )
     {   
         wxTreeItemId l_treeId = m_pTreeWidget->GetSelection();
-        if (!l_treeId.IsOk())
+        if( !l_treeId.IsOk() )
         {
             return;
         }
         int l_selected = treeSelected( l_treeId );  
-        if (l_selected == CHILD_OBJECT)
+        if( l_selected == CHILD_OBJECT )
         {
             ((SelectionObject*) ((m_pTreeWidget->GetItemData(m_pTreeWidget->GetItemParent(l_treeId)))))->setIsDirty(true);
         }
-        if (l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT || l_selected == POINT_DATASET)
+        if( l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT || l_selected == POINT_DATASET )
         {  
             deleteSceneObject();
-            m_pTreeWidget->Delete(l_treeId);
-            if (m_pDatasetHelper->m_lastSelectedObject != NULL)
-            {
-                m_pDatasetHelper->m_selBoxChanged = true;
-            }
-            m_pDatasetHelper->m_lastSelectedObject = NULL;
-            m_pDatasetHelper->m_lastSelectedPoint = NULL;
+            m_pTreeWidget->Delete( l_treeId );
+            m_pLastSelectedObj = NULL;
+            m_pLastSelectedPoint = NULL;
         }   
         m_pDatasetHelper->m_selBoxChanged = true;
     }
-    refreshAllGLWidgets();
+    //refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2124,51 +2122,51 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     {
         case MASTER_OBJECT:
         case CHILD_OBJECT:
-            if ( m_pDatasetHelper->m_lastSelectedObject != NULL )
+            if ( m_pLastSelectedObj != NULL )
             {
-                m_pDatasetHelper->m_lastSelectedObject->unselect();
+                m_pLastSelectedObj->unselect();
             }
-            if ( m_pDatasetHelper->m_lastSelectedPoint != NULL )
+            if ( m_pLastSelectedPoint != NULL )
             {
-                m_pDatasetHelper->m_lastSelectedPoint->unselect();
-                m_pDatasetHelper->m_lastSelectedPoint = NULL;
+                m_pLastSelectedPoint->unselect();
+                m_pLastSelectedPoint = NULL;
             }
 
             l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_treeId ) );
-            m_pDatasetHelper->m_lastSelectedObject = l_selectionObject;
-            m_pDatasetHelper->m_lastSelectedObject->select( false );
+            m_pLastSelectedObj = l_selectionObject;
+            m_pLastSelectedObj->select( false );
             m_pLastSelectedSceneObject = l_selectionObject;
             m_lastSelectedListItem = -1;
             break;
 
         case POINT_DATASET:
-            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
+            if( m_pLastSelectedPoint != NULL )
             {
-                m_pDatasetHelper->m_lastSelectedPoint->unselect();
+                m_pLastSelectedPoint->unselect();
             }
-            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
+            if( m_pLastSelectedObj != NULL )
             {
-                m_pDatasetHelper->m_lastSelectedObject->unselect();
-                m_pDatasetHelper->m_lastSelectedObject = NULL;
+                m_pLastSelectedObj->unselect();
+                m_pLastSelectedObj = NULL;
             }
 
             l_selectedPoint = (SplinePoint*)( m_pTreeWidget->GetItemData( l_treeId ) );
-            m_pDatasetHelper->m_lastSelectedPoint = l_selectedPoint;
-            m_pDatasetHelper->m_lastSelectedPoint->select( false );
+            m_pLastSelectedPoint = l_selectedPoint;
+            m_pLastSelectedPoint->select( false );
             m_pLastSelectedSceneObject = l_selectedPoint;
             m_lastSelectedListItem = -1;
             break;
 
         default:
-            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
+            if( m_pLastSelectedPoint != NULL )
             {
-                m_pDatasetHelper->m_lastSelectedPoint->unselect();
-                m_pDatasetHelper->m_lastSelectedPoint = NULL;
+                m_pLastSelectedPoint->unselect();
+                m_pLastSelectedPoint = NULL;
             }
-            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
+            if( m_pLastSelectedObj != NULL )
             {
-                m_pDatasetHelper->m_lastSelectedObject->unselect();
-                m_pDatasetHelper->m_lastSelectedObject = NULL;
+                m_pLastSelectedObj->unselect();
+                m_pLastSelectedObj = NULL;
             }
             break;
     }    
@@ -2528,14 +2526,9 @@ MainFrame::~MainFrame()
     m_pTimer->Stop();
     Logger::getInstance()->print( wxT( "Timer stopped" ), LOGLEVEL_DEBUG );
 
-    if (m_pTimer != NULL)
-    {
-        delete m_pTimer;
-        m_pTimer = NULL;
-    }
-    if( m_pDatasetHelper != NULL)
-    {
-        delete m_pDatasetHelper;
-        m_pDatasetHelper = NULL;
-    }
+    delete m_pTimer;
+    m_pTimer = NULL;
+    
+    delete m_pDatasetHelper;
+    m_pDatasetHelper = NULL;
 }

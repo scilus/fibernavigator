@@ -89,9 +89,6 @@ MainCanvas::~MainCanvas()
 void MainCanvas::init()
 {
     SceneManager::getInstance()->getScene()->initGL( m_view );
-    // TODO: Load shaders in the ShaderHelper here once it is a Singleton
-    bool geomShaderSupported = SceneManager::getInstance()->areGeometryShadersSupported();
-    SceneManager::getInstance()->setShaderHelper( new ShaderHelper( geomShaderSupported ) );
     m_init = true;
 }
 
@@ -352,18 +349,18 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
 
         if ( m_hr.picked == 20 )
         {
-            if ( m_pDatasetHelper->m_lastSelectedPoint )
+            if ( MyApp::frame->getLastSelectedPoint() )
             {
-                m_pDatasetHelper->m_lastSelectedPoint->unselect();
+                MyApp::frame->getLastSelectedPoint()->unselect();
             }
-            m_pDatasetHelper->m_lastSelectedPoint = ( (SplinePoint*) m_hr.object );
+            MyApp::frame->setLastSelectedPoint( (SplinePoint*) m_hr.object );
             ( (SplinePoint*) m_hr.object )->select( true );
         }
         else if ( m_hr.picked >= 10 && m_hr.picked < 20 )
         {
-            if ( m_pDatasetHelper->m_lastSelectedPoint )
+            if ( MyApp::frame->getLastSelectedPoint() )
             {
-                m_pDatasetHelper->m_lastSelectedPoint->unselect();
+                MyApp::frame->getLastSelectedPoint()->unselect();
             }
             ( (SelectionObject*) m_hr.object )->select( true );
         }

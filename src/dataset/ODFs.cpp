@@ -599,33 +599,33 @@ void ODFs::draw()
         return;
 
     // Enable the shader.
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.bind();
+    ShaderHelper::getInstance()->getOdfsShader()->bind();
     glBindTexture( GL_TEXTURE_1D, m_textureId );
 
     // This is the color look up table texture.
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniSampler( "clut", 0 );
+    ShaderHelper::getInstance()->getOdfsShader()->setUniSampler( "clut", 0 );
     
     // This is the brightness level of the odf.
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniFloat( "brightness", DatasetInfo::m_brightness );
+    ShaderHelper::getInstance()->getOdfsShader()->setUniFloat( "brightness", DatasetInfo::m_brightness );
 
     // This is the alpha level of the odf.
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniFloat( "alpha", DatasetInfo::m_alpha );
+    ShaderHelper::getInstance()->getOdfsShader()->setUniFloat( "alpha", DatasetInfo::m_alpha );
 
     // If m_mapOnSphere is true then the color will be set on a sphere instead of a deformed mesh.
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniInt( "mapOnSphere", ( GLint ) isDisplayShape( SPHERE ) );
+    ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "mapOnSphere", ( GLint ) isDisplayShape( SPHERE ) );
 
     // If m_colorWithPosition is true then the glyph will be colored with the position of the vertex.
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniInt( "colorWithPos", ( GLint ) m_colorWithPosition );
+    ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "colorWithPos", ( GLint ) m_colorWithPosition );
  
     // Get the radius attribute location
-    m_radiusAttribLoc = glGetAttribLocation( SceneManager::getInstance()->getShaderHelper()->m_odfsShader.getId(), "radius" );
+    m_radiusAttribLoc = glGetAttribLocation( ShaderHelper::getInstance()->getOdfsShader()->getId(), "radius" );
     Glyph::draw();
 
     // Disable the attribute
     glDisableVertexAttribArray( m_radiusAttribLoc);
 
     // Disable the tensor color shader.
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.release();
+    ShaderHelper::getInstance()->getOdfsShader()->release();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -654,10 +654,10 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     // Odf offset.
     GLfloat l_offset[3];
     getVoxelOffset( i_zVoxel, i_yVoxel, i_xVoxel, l_offset );
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUni3Float( "offset", l_offset );
+    ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "offset", l_offset );
 
     // Lets set the min max radii for this odf.
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUni2Float( "radiusMinMax", m_radiiMinMaxMap[currentIdx] );    
+    ShaderHelper::getInstance()->getOdfsShader()->setUni2Float( "radiusMinMax", m_radiiMinMaxMap[currentIdx] );    
 
     // Enable attribute
     glEnableVertexAttribArray( m_radiusAttribLoc );
@@ -703,11 +703,11 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
 
     // Need a global flip in X on top of that, which is done above
 
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUni3Float(   "axisFlip",    l_flippedAxes               );
-    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniInt( "showAxis", 0 );
+    ShaderHelper::getInstance()->getOdfsShader()->setUni3Float(   "axisFlip",    l_flippedAxes               );
+    ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "showAxis", 0 );
     if (isDisplayShape(AXIS))
     {
-        SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniInt( "showAxis", 1 );
+        ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "showAxis", 1 );
         
         if(m_coefficients[currentIdx][0] != 0)
         {
@@ -720,7 +720,7 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
                     l_coloring[1] = m_mainDirections[currentIdx][i][1];
                     l_coloring[2] = m_mainDirections[currentIdx][i][2];
 
-                    SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUni3Float( "coloring", l_coloring );
+                    ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
                     glBegin(GL_LINES);  
                         glVertex3f(-m_mainDirections[currentIdx][i][0],-m_mainDirections[currentIdx][i][1],-m_mainDirections[currentIdx][i][2]);
                         glVertex3f(m_mainDirections[currentIdx][i][0],m_mainDirections[currentIdx][i][1],m_mainDirections[currentIdx][i][2]);       
@@ -731,12 +731,12 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
     }
     else
     {
-        SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniInt( "swapRadius", 0 );
+        ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "swapRadius", 0 );
         // Draw the first half of the odfs.
         glDrawArrays( GL_TRIANGLE_STRIP, 0, m_nbPointsPerGlyph );
 
         // Lets set the radius modifier.
-        SceneManager::getInstance()->getShaderHelper()->m_odfsShader.setUniInt( "swapRadius", 1 );
+        ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "swapRadius", 1 );
         // Draw the other half of the odfs.
         glDrawArrays( GL_TRIANGLE_STRIP, 0, m_nbPointsPerGlyph );
 

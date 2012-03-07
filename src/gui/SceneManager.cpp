@@ -23,7 +23,6 @@ SceneManager::SceneManager(void)
 :   m_pAnatomyHelper( NULL ),
     m_pTreeView ( NULL ),
     m_pMainFrame( NULL ),
-    m_pShaderHelper( NULL ),
     m_pTheScene( NULL ),
     m_geometryShadersSupported( true ),
     m_useFibersGeometryShader( false ),
@@ -763,24 +762,13 @@ SelectionObjList SceneManager::getSelectionObjects()
 SceneManager::~SceneManager(void)
 {
     Logger::getInstance()->print( wxT( "Executing SceneManager destructor" ), LOGLEVEL_DEBUG );
-    if( m_pAnatomyHelper )
-    {
-        delete m_pAnatomyHelper;
-        m_pAnatomyHelper = NULL;
-    }
 
-    if( m_pTheScene )
-    {
-        delete m_pTheScene;
-        m_pTheScene = NULL;
-    }
-
-    if( m_pShaderHelper )
-    {
-        delete m_pShaderHelper;
-        m_pShaderHelper = NULL;
-    }
-
+    delete m_pAnatomyHelper;
+    m_pAnatomyHelper = NULL;
+    
+    delete m_pTheScene;
+    m_pTheScene = NULL;
+    
     m_pInstance = NULL;
     Logger::getInstance()->print( wxT( "SceneManager destructor done" ), LOGLEVEL_DEBUG );
 }

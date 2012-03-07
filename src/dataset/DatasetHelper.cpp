@@ -17,9 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() 
-:   m_selBoxChanged( true ),
-    m_lastSelectedPoint ( NULL ),
-    m_lastSelectedObject( NULL )
+:   m_selBoxChanged( true )
 {
 }
 

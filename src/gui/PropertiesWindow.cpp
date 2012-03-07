@@ -496,9 +496,9 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     SelectionObject* l_selectionObject  = NULL;
     Anatomy*         l_anatomy          = NULL;
 
-    if (m_pMainFrame->m_pDatasetHelper->m_lastSelectedObject !=NULL)
+    if( m_pMainFrame->getLastSelectedObj() != NULL )
     {
-        l_treeObjectId = m_pMainFrame->m_pDatasetHelper->m_lastSelectedObject->GetId();
+        l_treeObjectId = m_pMainFrame->getLastSelectedObj()->GetId();
     }
 
     if(m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1)
@@ -864,9 +864,10 @@ void PropertiesWindow::OnDistanceAnchorSet( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDistanceAnchorSet" ), LOGLEVEL_DEBUG );
 
-    if (m_pMainFrame->m_pDatasetHelper->m_lastSelectedObject!=NULL)
+    SelectionObject * pLastSelObj = m_pMainFrame->getLastSelectedObj();
+    if( pLastSelObj != NULL )
     {
-        m_pMainFrame->m_pDatasetHelper->m_lastSelectedObject->UseForDistanceColoring(!m_pMainFrame->m_pDatasetHelper->m_lastSelectedObject->IsUsedForDistanceColoring());
+        pLastSelObj->UseForDistanceColoring( !pLastSelObj->IsUsedForDistanceColoring() );
         ColorFibers();
     }
 }
@@ -878,7 +879,7 @@ void PropertiesWindow::ColorFibers()
 {   
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::ColorFibers" ), LOGLEVEL_DEBUG );
 
-    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1)
+    if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
         ((Fibers*)m_pMainFrame->m_pCurrentSceneObject)->updateFibersColors();  
     }  
@@ -1626,13 +1627,13 @@ void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
             m_pListCtrl->UpdateSelected();
         }
     }
-    else if ( m_pMainFrame->m_pDatasetHelper->m_lastSelectedObject != NULL )
+    else if ( m_pMainFrame->getLastSelectedObj() != NULL )
     {
         SelectionObject *l_selObj = (SelectionObject*)m_pMainFrame->m_pCurrentSceneObject;
         if (!l_selObj->getIsMaster())
         {
-            wxTreeItemId l_parentId = m_pMainFrame->m_pTreeWidget->GetItemParent( m_pMainFrame->m_pDatasetHelper->m_lastSelectedObject->GetId());
-            l_selObj = (SelectionObject*)m_pMainFrame->m_pTreeWidget->GetItemData(l_parentId);
+            wxTreeItemId l_parentId = m_pMainFrame->m_pTreeWidget->GetItemParent( m_pMainFrame->getLastSelectedObj()->GetId() );
+            l_selObj = (SelectionObject*)m_pMainFrame->m_pTreeWidget->GetItemData( l_parentId );
         }
         l_selObj->setFiberColor( l_col);
         l_selObj->setIsDirty( true );

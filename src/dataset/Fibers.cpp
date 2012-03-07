@@ -1653,14 +1653,15 @@ void Fibers::colorWithTorsion( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            m_dh->m_lastSelectedObject->getProgressionTorsion( Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
+            MyApp::frame->getLastSelectedObj()->getProgressionTorsion( 
+                    Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
                     Vector( m_pointArray[index + 3], m_pointArray[index + 4], m_pointArray[index + 5] ),
                     Vector( m_pointArray[index + 6], m_pointArray[index + 7], m_pointArray[index + 8] ),
                     progression, color );
             
-            // Lets apply a specific harcoded coloration for the torsion.
+            // Lets apply a specific hard coded coloration for the torsion.
             float realColor;
 
             if( color <= 0.01f ) // Those points have no torsion so we simply but them pure blue.
@@ -1749,14 +1750,15 @@ void Fibers::colorWithCurvature( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            m_dh->m_lastSelectedObject->getProgressionCurvature( Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
+            MyApp::frame->getLastSelectedObj()->getProgressionCurvature(
+                    Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
                     Vector( m_pointArray[index + 3], m_pointArray[index + 4], m_pointArray[index + 5] ),
                     Vector( m_pointArray[index + 6], m_pointArray[index + 7], m_pointArray[index + 8] ),
                     progression, color );
             
-            // Lets apply a specific harcoded coloration for the curvature.
+            // Lets apply a specific hard coded coloration for the curvature.
             float realColor;
 
             if( color <= 0.01f ) // Those points have no curvature so we simply but them pure blue.
@@ -2647,12 +2649,14 @@ void Fibers::updateLinesShown()
         }
     }
 
+    SelectionObject * pLastSelObj = MyApp::frame->getLastSelectedObj();
+
     // This is to update the information display in the fiber grid info and the mean fiber
-    if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
+    if( boxWasUpdated && pLastSelObj != NULL )
     {
-        m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
-        m_dh->m_lastSelectedObject->computeMeanFiber();
-        m_dh->m_lastSelectedObject->computeConvexHull();
+        pLastSelObj->SetFiberInfoGridValues();
+        pLastSelObj->computeMeanFiber();
+        pLastSelObj->computeConvexHull();
     }
 }
 
@@ -3462,12 +3466,14 @@ void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsamplin
         m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
     
+    SelectionObject * pLastSelObj = MyApp::frame->getLastSelectedObj();
+
     //Update stats, mean fiber and convexhull only if an object is selected.
-    if( m_dh->m_lastSelectedObject != NULL )
+    if( pLastSelObj != NULL )
     {
-        m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
-        m_dh->m_lastSelectedObject->computeMeanFiber();
-        m_dh->m_lastSelectedObject->computeConvexHull();
+        pLastSelObj->SetFiberInfoGridValues();
+        pLastSelObj->computeMeanFiber();
+        pLastSelObj->computeConvexHull();
     }
 
 }
@@ -3812,11 +3818,11 @@ void Fibers::setShader()
 
     if( m_useFakeTubes )
     {
-        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.bind();
-        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniInt  ( "globalColor", getShowFS() );
-        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
-        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
-        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
+        ShaderHelper::getInstance()->getFakeTubesShader()->bind();
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniInt  ( "globalColor", getShowFS() );
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "thickness", GLfloat( 3.175 ) );
     }
     else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
     {
@@ -3828,24 +3834,24 @@ void Fibers::setShader()
         const float zMin( SceneManager::getInstance()->getSliceZ() + 0.5f - m_thickness );
         const float zMax( SceneManager::getInstance()->getSliceZ() + 0.5f + m_thickness );
 
-        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.bind();
+        ShaderHelper::getInstance()->getCrossingFibersShader()->bind();
 
-        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("xMin", SceneManager::getInstance()->isSagittalDisplayed() ? xMin : 0 );
-        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("xMax", SceneManager::getInstance()->isSagittalDisplayed() ? xMax : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("xMin", SceneManager::getInstance()->isSagittalDisplayed() ? xMin : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("xMax", SceneManager::getInstance()->isSagittalDisplayed() ? xMax : 0 );
 		
-        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("yMin", SceneManager::getInstance()->isCoronalDisplayed() ? yMin : 0 );
-        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("yMax", SceneManager::getInstance()->isCoronalDisplayed() ? yMax : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("yMin", SceneManager::getInstance()->isCoronalDisplayed() ? yMin : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("yMax", SceneManager::getInstance()->isCoronalDisplayed() ? yMax : 0 );
 
-        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("zMin", SceneManager::getInstance()->isAxialDisplayed() ? zMin : 0 );
-        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.setUniFloat("zMax", SceneManager::getInstance()->isAxialDisplayed() ? zMax : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("zMin", SceneManager::getInstance()->isAxialDisplayed() ? zMin : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("zMax", SceneManager::getInstance()->isAxialDisplayed() ? zMax : 0 );
     }
     else if ( !m_useTex )
     {
-        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.bind();
-        SceneManager::getInstance()->getShaderHelper()->setFiberShaderVars();
-        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
-        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
+        ShaderHelper::getInstance()->getFibersShader()->bind();
+        ShaderHelper::getInstance()->setFiberShaderVars();
+        ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useTex", !pDsInfo->getUseTex() );
+        ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
+        ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useOverlay", pDsInfo->getShowFS() );
     }
 }
 
@@ -3853,14 +3859,14 @@ void Fibers::releaseShader()
 {
     if( m_useFakeTubes )
     {
-        SceneManager::getInstance()->getShaderHelper()->m_fakeTubesShader.release();
+        ShaderHelper::getInstance()->getFakeTubesShader()->release();
     }
     else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
     {
-        SceneManager::getInstance()->getShaderHelper()->m_crossingFibersShader.release();
+        ShaderHelper::getInstance()->getCrossingFibersShader()->release();
     }
     else if( !m_useTex )
     {
-        SceneManager::getInstance()->getShaderHelper()->m_fibersShader.release();
+        ShaderHelper::getInstance()->getFibersShader()->release();
     }
 }
