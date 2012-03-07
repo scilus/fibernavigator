@@ -5,15 +5,15 @@
 #ifndef MAINFRAME_H_
 #define MAINFRAME_H_
 
-#include <wx/checkbox.h>
-#include <wx/grid.h>
-#include <wx/treectrl.h>
-
+#include "ListCtrl.h"
 #include "MainCanvas.h"
 #include "MyListCtrl.h"
-#include "ListCtrl.h"
-
 #include "../misc/Algorithms/Helper.h"
+
+#include <wx/checkbox.h>
+#include <wx/grid.h>
+#include <wx/notebook.h>
+#include <wx/treectrl.h>
 
 class DatasetHelper;
 class SelectionObject;
@@ -23,6 +23,7 @@ class MenuBar;
 class SceneObject;
 class SelectionObject;
 class SplinePoint;
+class TrackingWindow;
 
 enum DrawMode
 {
@@ -36,6 +37,7 @@ class MainFrame : public wxFrame
     friend class ToolBar;
     friend class MenuBar;
     friend class PropertiesWindow;
+    friend class TrackingWindow;
 
 public:
     MainFrame( wxWindow *i_parent, const wxWindowID i_id, const wxString &i_title, const wxPoint &i_pos, const wxSize &i_size, const long i_style);
@@ -209,6 +211,7 @@ private:
 
 public:
     PropertiesWindow    *m_pPropertiesWindow;
+    TrackingWindow      *m_pTrackingWindow;
     MainCanvas          *m_pMainGL;
     MainCanvas          *m_pGL0;
     MainCanvas          *m_pGL1;
@@ -222,6 +225,7 @@ public:
     wxTreeItemId        m_tRootId;
     wxTreeItemId        m_tPointId;
     wxTreeItemId        m_tSelectionObjectsId;
+    wxNotebook          *m_tab;
 
 private:
     ToolBar             *m_pToolBar;
@@ -233,10 +237,6 @@ private:
     long                m_lastSelectedListItem;
 
     wxBoxSizer          *m_pMainSizer;
-    wxBoxSizer          *m_pListSizer;
-    wxBoxSizer          *m_pObjectSizer;
-    wxBoxSizer          *m_pLeftMainSizer;
-    wxBoxSizer          *m_pNavSizer;
 
     wxString            m_lastPath;
 

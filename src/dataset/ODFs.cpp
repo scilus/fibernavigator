@@ -35,14 +35,14 @@
 ODFs::ODFs( DatasetHelper* i_datasetHelper )
 :   Glyph( i_datasetHelper ), 
 	m_isMaximasSet   ( false ),
-    m_axisThreshold  ( 0.5f ),
+    m_axisThreshold  ( 0.2f ),
 	m_order          ( 0 ),
     m_radiusAttribLoc( 0 ),
 	m_radiusBuffer   ( NULL ),    
     m_nbors          ( NULL ),
     m_sh_basis       ( 1 )
 {
-    m_scalingFactor = 0.0f;
+    m_scalingFactor = 5.0f;
 
     // Generating hemispheres
     generateSpherePoints( m_scalingFactor );
@@ -152,10 +152,10 @@ void ODFs::extractMaximas()
     float frames  = DatasetManager::getInstance()->getFrames();
 
     std::cout << "Extracting maximas ... please wait 30sec \n";
-    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_6].getDimensionY()]; // Set number of points to maximum details
+    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_3].getDimensionY()]; // Set number of points to maximum details
     m_angle_min = get_min_angle();
-    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to maximum details for C*B mult
-    set_nbors(m_phiThetaDirection[LOD_6]); // Create neighboring system
+    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_3 ); // Set number of points to maximum details for C*B mult
+    set_nbors(m_phiThetaDirection[LOD_3]); // Create neighboring system
     m_mainDirections.resize( frames * rows * columns );
     
     int currentIdx;
@@ -170,7 +170,7 @@ void ODFs::extractMaximas()
 
                 if( m_coefficients[currentIdx][0] != 0 )
                 {
-                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_6], m_phiThetaDirection[LOD_6], m_axisThreshold );
+                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_3], m_phiThetaDirection[LOD_3], m_axisThreshold );
                 }
             }
         }
@@ -328,20 +328,20 @@ float ODFs::get_min_angle()
     std::pair<float,float> res;
 	float angle_min = 90.0f;   
 
-	for(unsigned int i=0; i < m_phiThetaDirection[LOD_6].getDimensionY(); i++)
+	for(unsigned int i=0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++)
     {   // Remove all recurrent point of phiThetaDir in vectUnique
         bool isUnique = true;
         for(unsigned int j=0; j < vectUnique.size() && isUnique ; j++)
         {
-            if(m_phiThetaDirection[LOD_6](i,0) == vectUnique[j].first && m_phiThetaDirection[LOD_6](i,1) == vectUnique[j].second)
+            if(m_phiThetaDirection[LOD_3](i,0) == vectUnique[j].first && m_phiThetaDirection[LOD_3](i,1) == vectUnique[j].second)
             {
 				isUnique = false;
 			}
         }
         if(isUnique)
         {
-            res.first = m_phiThetaDirection[LOD_6](i,0);
-            res.second = m_phiThetaDirection[LOD_6](i,1);
+            res.first = m_phiThetaDirection[LOD_3](i,0);
+            res.second = m_phiThetaDirection[LOD_3](i,1);
             vectUnique.push_back(res); 
         }
     }
@@ -385,12 +385,12 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
     direction d,d2; /*current direction*/
 	const float max_allowed_angle = 90;
  
-    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_6].getDimensionY(); i++) 
+    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++) 
     {
     
-        d.x = std::cos(m_phiThetaDirection[LOD_6](i,0))*std::sin(m_phiThetaDirection[LOD_6](i,1));
-        d.y = std::sin(m_phiThetaDirection[LOD_6](i,0))*std::sin(m_phiThetaDirection[LOD_6](i,1));
-        d.z = std::cos(m_phiThetaDirection[LOD_6](i,1));
+        d.x = std::cos(m_phiThetaDirection[LOD_3](i,0))*std::sin(m_phiThetaDirection[LOD_3](i,1));
+        d.y = std::sin(m_phiThetaDirection[LOD_3](i,0))*std::sin(m_phiThetaDirection[LOD_3](i,1));
+        d.z = std::cos(m_phiThetaDirection[LOD_3](i,1));
         
         /* 
            look at other possible direction sampling neighbors
@@ -398,13 +398,13 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
            if a sampling directions is within +- 3 degrees from i,
            we consider it and check if i is bigger
         */
-        for(unsigned int j=0; j<m_phiThetaDirection[LOD_6].getDimensionY(); j++)
+        for(unsigned int j=0; j<m_phiThetaDirection[LOD_3].getDimensionY(); j++)
         {
             if(j != i ) 
             {
-                d2.x = std::cos(m_phiThetaDirection[LOD_6](j,0))*std::sin(m_phiThetaDirection[LOD_6](j,1));
-                d2.y = std::sin(m_phiThetaDirection[LOD_6](j,0))*std::sin(m_phiThetaDirection[LOD_6](j,1));
-                d2.z = std::cos(m_phiThetaDirection[LOD_6](j,1));
+                d2.x = std::cos(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
+                d2.y = std::sin(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
+                d2.z = std::cos(m_phiThetaDirection[LOD_3](j,1));
                         
                 float angle_found = 180*std::acos(d.x*d2.x + d.y*d2.y + d.z*d2.z)/M_PI;
                 if(angle_found > max_allowed_angle)
@@ -421,8 +421,8 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
                         {
                           for(unsigned int n=0; n< m_nbors[i].size() && isDiff ; n++)
                           {
-                              if(m_phiThetaDirection[LOD_6](j,0) == m_phiThetaDirection[LOD_6](m_nbors[i][n].second,0) && 
-                                  m_phiThetaDirection[LOD_6](j,1) == m_phiThetaDirection[LOD_6](m_nbors[i][n].second,1))
+                              if(m_phiThetaDirection[LOD_3](j,0) == m_phiThetaDirection[LOD_3](m_nbors[i][n].second,0) && 
+                                  m_phiThetaDirection[LOD_3](j,1) == m_phiThetaDirection[LOD_3](m_nbors[i][n].second,1))
 							  {
                                 isDiff = false;
 							  }
@@ -458,8 +458,8 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
 							bool isDiff = true;
 							for(unsigned int n=0; n< m_nbors[i].size() && isDiff ; n++)
 							{
-								if(m_phiThetaDirection[LOD_6](j,0) == m_phiThetaDirection[LOD_6](m_nbors[i][n].second,0) && 
-									m_phiThetaDirection[LOD_6](j,1) == m_phiThetaDirection[LOD_6](m_nbors[i][n].second,1))
+								if(m_phiThetaDirection[LOD_3](j,0) == m_phiThetaDirection[LOD_3](m_nbors[i][n].second,0) && 
+									m_phiThetaDirection[LOD_3](j,1) == m_phiThetaDirection[LOD_3](m_nbors[i][n].second,1))
 								{
 									isDiff = false;
 								}
@@ -532,7 +532,7 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 	bool isCandidate = false;
 
 	/* Find all potential candidate to be a main direction according to the max_threshold */
-    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_6].getDimensionY(); i++)
+    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++)
     {
       if(norm_hemisODF[i] > max_thresh)//max_thresh) 
       { 
@@ -554,8 +554,8 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 
       if(isCandidate)
       {
-          float phi   = m_phiThetaDirection[LOD_6](i,0);
-          float theta = m_phiThetaDirection[LOD_6](i,1);
+          float phi   = m_phiThetaDirection[LOD_3](i,0);
+          float theta = m_phiThetaDirection[LOD_3](i,1);
 
           bool isDiff = true;
 
@@ -719,11 +719,12 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
                     l_coloring[0] = m_mainDirections[currentIdx][i][0];
                     l_coloring[1] = m_mainDirections[currentIdx][i][1];
                     l_coloring[2] = m_mainDirections[currentIdx][i][2];
+                    float halfScale = m_scalingFactor / 5.0f;
 
                     ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
                     glBegin(GL_LINES);  
-                        glVertex3f(-m_mainDirections[currentIdx][i][0],-m_mainDirections[currentIdx][i][1],-m_mainDirections[currentIdx][i][2]);
-                        glVertex3f(m_mainDirections[currentIdx][i][0],m_mainDirections[currentIdx][i][1],m_mainDirections[currentIdx][i][2]);       
+                        glVertex3f(-halfScale*m_mainDirections[currentIdx][i][0],-halfScale*m_mainDirections[currentIdx][i][1],-halfScale*m_mainDirections[currentIdx][i][2]);
+                        glVertex3f(halfScale*m_mainDirections[currentIdx][i][0],halfScale*m_mainDirections[currentIdx][i][1],halfScale*m_mainDirections[currentIdx][i][2]);       
                     glEnd();
                 }
             }
@@ -1334,6 +1335,17 @@ void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
 //         m_data->finishLoading( l_dataset );
 //     }
 }
+///////////////////////////////////////////////////////////////////////////
+// This function will set a specific scaling factor for the glyph.
+//
+// i_scalingFactor      : The glyph scaling factor.
+///////////////////////////////////////////////////////////////////////////
+void ODFs::setScalingFactor( float i_scalingFactor )
+{
+    m_scalingFactor = i_scalingFactor;
+    generateSpherePoints( m_scalingFactor / 5 );   
+    loadBuffer();
+}
 
 void ODFs::createPropertiesSizer(PropertiesWindow *parent)
 {
@@ -1341,8 +1353,8 @@ void ODFs::createPropertiesSizer(PropertiesWindow *parent)
     wxSizer *l_sizer;
 
     m_pSliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_pSliderFlood->SetValue(5);
-    m_pTxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.5") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
+    m_pSliderFlood->SetValue(2);
+    m_pTxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.2") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pTextThres = new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
     l_sizer->Add(m_pTextThres,0,wxALIGN_CENTER);
@@ -1411,7 +1423,7 @@ void ODFs::updatePropertiesSizer()
     //m_psliderLightZPosition->SetValue(m_psliderLightZPosition->GetMin());
     m_psliderLightZPosition->Enable(false);
     //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
-    m_psliderScalingFactor->Enable (false);
+    //m_psliderScalingFactor->Enable (false);
     //m_pRadiobtnPTKBasis->Enable(false);
     m_pradiobtnMainAxis->Enable(true);
 

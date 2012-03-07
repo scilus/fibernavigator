@@ -1,12 +1,12 @@
 uniform float dimX, dimY;
-
+uniform float thickness;
 varying float tangent_dot_view;
 varying vec3 tangentR3;
 varying float s_param;
 varying float dist;
 varying float leng;
 varying vec4 myColor;
-uniform float thickness;
+
 
 void main()
 {
@@ -29,8 +29,8 @@ void main()
 
     vec4 pos = ftransform(); //< transform position to eye space
 
-    //offset.x *= thickness / dimX;
-    //offset.y *= thickness / dimY;
+    offset.x *= thickness / dimX;
+    offset.y *= thickness / dimY;
 
     offset.x *= 7. / dimX;
     offset.y *= 7. / dimY;

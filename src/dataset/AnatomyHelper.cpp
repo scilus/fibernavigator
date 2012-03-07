@@ -140,15 +140,18 @@ void AnatomyHelper::renderMain()
     float voxelX  = DatasetManager::getInstance()->getVoxelX();
     float voxelY  = DatasetManager::getInstance()->getVoxelY();
     float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+    float sliceX  = SceneManager::getInstance()->getSliceX();
+    float sliceY  = SceneManager::getInstance()->getSliceY();
+    float sliceZ  = SceneManager::getInstance()->getSliceZ();
 
-    m_x = ( SceneManager::getInstance()->getSliceX() + 0.5f ) * voxelX;
-    m_y = ( SceneManager::getInstance()->getSliceY() + 0.5f ) * voxelY;
-    m_z = ( SceneManager::getInstance()->getSliceZ() + 0.5f ) * voxelZ;
+    m_x = ( sliceX + 0.5f ) * voxelX;
+    m_y = ( sliceY + 0.5f ) * voxelY;
+    m_z = ( sliceZ + 0.5f ) * voxelZ;
 
     // m_xc, m_yc and m_zc will yield a number between 0 and 1.
-    m_xc = ( SceneManager::getInstance()->getSliceX() + 0.5f ) / columns;
-    m_yc = ( SceneManager::getInstance()->getSliceY() + 0.5f ) / rows;
-    m_zc = ( SceneManager::getInstance()->getSliceZ() + 0.5f ) / frames;
+    m_xc = ( sliceX + 0.5f ) / columns;
+    m_yc = ( sliceY + 0.5f ) / rows;
+    m_zc = ( sliceZ + 0.5f ) / frames;
 
     m_xb = columns * voxelX;
     m_yb = rows    * voxelY;

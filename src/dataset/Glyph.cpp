@@ -690,9 +690,10 @@ void Glyph::createPropertiesSizer(PropertiesWindow *parent)
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
     parent->Connect(m_psliderDisplayValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphDisplaySliderMoved));
 
-    m_psliderScalingFactor  = new wxSlider( parent, wxID_ANY,   0, 1, 20, wxDefaultPosition, wxSize( 140, -1 ));
+    m_psliderScalingFactor  = new wxSlider( parent, wxID_ANY,   0, 1, 200, wxDefaultPosition, wxSize( 140, -1 ));
     l_sizer = new wxBoxSizer(wxHORIZONTAL);
     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Scaling Factor" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+    m_psliderScalingFactor->SetValue(50);
     l_sizer->Add(m_psliderScalingFactor,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
     parent->Connect(m_psliderScalingFactor->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphScalingFactorSliderMoved));
@@ -768,7 +769,7 @@ void Glyph::updatePropertiesSizer()
     m_psliderLightYPosition->SetValue  (getLightPosition( Y_AXIS ) * 100);
     m_psliderLightZPosition->SetValue  (getLightPosition( Z_AXIS ) * 100 );
     m_psliderDisplayValue->SetValue    (getDisplayFactor());
-    m_psliderScalingFactor->SetValue   (getScalingFactor());
+    m_psliderScalingFactor->SetValue   (getScalingFactor()*10.0f);
     m_ptoggleAxisFlipX->SetValue       (isAxisFlipped( X_AXIS ));
     m_ptoggleAxisFlipY->SetValue       (isAxisFlipped( Y_AXIS ));
     m_ptoggleAxisFlipZ->SetValue       (isAxisFlipped( Z_AXIS ));

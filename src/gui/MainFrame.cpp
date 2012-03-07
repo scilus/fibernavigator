@@ -10,6 +10,7 @@
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
 #include "ToolBar.h"
+#include "TrackingWindow.h"
 #include "../main.h"
 #include "../Logger.h"
 #include "../dataset/Anatomy.h"
@@ -212,12 +213,24 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pListCtrl2 = new ListCtrl( this, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
     initListCtrl( m_pListCtrl2 );
 
+    // Notebook initialization
+    m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
 
     //////////////////////////////////////////////////////////////////////////
     // PropertiesWindow initialization
-    m_pPropertiesWindow = new PropertiesWindow( this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), m_pListCtrl2 ); // Contains Scene Objects properties
+    m_pPropertiesWindow = new PropertiesWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), m_pListCtrl2 ); // Contains Scene Objects properties
     m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
     m_pPropertiesWindow->EnableScrolling( false, true );
+
+    //////////////////////////////////////////////////////////////////////////
+    // TrackingWindow initialization
+    m_pTrackingWindow = new TrackingWindow(m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) ); // Contains realtime tracking properties
+    m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pTrackingWindow->EnableScrolling( false, true );
+
+    
+    m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
+    m_tab->AddPage( m_pTrackingWindow, wxT( "Realtime tracking" ) );
 
     //////////////////////////////////////////////////////////////////////////
     // OpenGL initialization
@@ -319,24 +332,33 @@ void MainFrame::initLayout()
     zSzr->Add( m_pZSlider, 0, wxALL | wxFIXED_MINSIZE, 2 );
     zSzr->SetMinSize( wxSize( SLIDER_AXI_WIDTH + 4, CANVAS_AXI_HEIGHT + 4 + 16 ) );
 
-    axesSzr->Add( xSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
-    axesSzr->Add( ySzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
     axesSzr->Add( zSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
+    axesSzr->Add( ySzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
+    axesSzr->Add( xSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
 
 //    lstSzr->Add( m_pListCtrl, 0, wxALL | wxFIXED_MINSIZE, 2 );
     lstSzr->Add( (wxWindow *)m_pListCtrl2, 0, wxALL | wxFIXED_MINSIZE, 2 );
     lstSzr->Add( m_pTreeWidget, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
 
-    propSzr->Add( m_pPropertiesWindow, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 4 );
+    propSzr->Add( m_tab, 1, wxALL | wxEXPAND, 4 );
+    propSzr->SetMinSize( wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) );
+    //l_propSizer->Add(m_pTrackingWindow, 0, wxALL | wxEXPAND, 0);
+    //propSzr->Add( m_pPropertiesWindow, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 4 );
 
     lwrLeftSzr->Add( lstSzr, 0, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
     lwrLeftSzr->Add( propSzr, 1, wxALL | wxEXPAND, 2 );
 
     leftSzr->Add( axesSzr, 0, wxALL | wxFIXED_MINSIZE, 2 );
     leftSzr->Add( lwrLeftSzr, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 0);
+    leftSzr->SetSizeHints( this );
 
     mainSzr->Add( leftSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
     mainSzr->Add( m_pMainGL, 1, wxALL | wxEXPAND, 2 );
+    mainSzr->SetSizeHints( this );
+
+    m_pPropertiesWindow->Fit();
+    m_pTrackingWindow->Fit();
+    //m_tab->Fit();
 
     SetSizer( mainSzr );
     SetBackgroundColour( *wxLIGHT_GREY );
@@ -1253,7 +1275,6 @@ void MainFrame::displayPropertiesSheet()
 void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 {
     createNewSelectionObject( ELLIPSOID_TYPE );
-//     m_pDatasetHelper->m_isBoxCreated = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1263,8 +1284,8 @@ void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
-    createNewSelectionObject( BOX_TYPE );    
-//     m_pDatasetHelper->m_isBoxCreated = true;
+    createNewSelectionObject( BOX_TYPE );
+    m_pTrackingWindow->m_pBtnStart->Enable(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1890,10 +1911,18 @@ void MainFrame::refreshAllGLWidgets()
 
 void MainFrame::refreshViews()
 {
+    m_tab->Fit();
+    m_tab->Layout();
+
     m_pPropertiesWindow->Fit();
     m_pPropertiesWindow->AdjustScrollbars();
-
     m_pPropertiesWindow->Layout();
+
+    m_pTrackingWindow->Fit();
+    m_pTrackingWindow->AdjustScrollbars();
+    m_pTrackingWindow->Layout();
+
+
     displayPropertiesSheet();
     if ( m_pMainGL )
     {
@@ -2368,8 +2397,12 @@ void MainFrame::doOnSize()
     {
         m_pMainGL->changeOrthoSize();
     }
+
     m_pPropertiesWindow->SetMinSize(wxSize(220, l_clientSize.y - 236));
     m_pPropertiesWindow->GetSizer()->SetDimension(0,0,220, l_clientSize.y - 236);
+
+    m_pTrackingWindow->SetMinSize(wxSize(220, l_clientSize.y - 236));
+    m_pTrackingWindow->GetSizer()->SetDimension(0,0,220, l_clientSize.y - 236);
 }
 
 ///////////////////////////////////////////////////////////////////////////

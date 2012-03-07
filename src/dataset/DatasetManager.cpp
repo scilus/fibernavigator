@@ -96,6 +96,18 @@ FibersGroup * DatasetManager::getFibersGroup() const
 
 //////////////////////////////////////////////////////////////////////////
 
+std::vector<Mesh *> DatasetManager::getMeshes() const
+{
+    vector<Mesh *> v;
+    for( map<unsigned int, Mesh *>::const_iterator it = m_meshes.begin(); it != m_meshes.end(); ++it )
+    {
+        v.push_back( it->second );
+    }
+    return v;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 std::vector<ODFs *> DatasetManager::getOdfs() const
 {
     vector<ODFs *> v;

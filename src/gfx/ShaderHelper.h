@@ -34,6 +34,7 @@ public:
     ShaderProgram * getGraphShader()          { return m_pGraphShader; }
     ShaderProgram * getTensorsShader()        { return m_pTensorsShader; }
     ShaderProgram * getOdfsShader()           { return m_pOdfsShader; }
+    ShaderProgram * getRTTShader()            { return m_pRTTShader; }
 
     void setTextureShaderVars();
     void setMeshShaderVars();
@@ -68,6 +69,7 @@ private:
     ShaderProgram *m_pGraphShader;
     ShaderProgram *m_pTensorsShader;
     ShaderProgram *m_pOdfsShader;
+    ShaderProgram *m_pRTTShader;
 };
 
 #endif /* SHADERHELPER_H_ */

@@ -19,6 +19,7 @@
 #include "../dataset/DatasetInfo.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
+#include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
@@ -494,9 +495,9 @@ void TheScene::renderSlices()
 
 void TheScene::renderSplineSurface()
 {
-    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    if( DatasetManager::getInstance()->isSurfaceLoaded() )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo * pDsInfo = DatasetManager::getInstance()->getSurface();
         if( pDsInfo->getType() == SURFACE && pDsInfo->getShow() )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
@@ -561,7 +562,6 @@ void TheScene::renderMesh()
     ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS", true );
     ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex", false );
     ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_", 1.0 );
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useLic", false );
 
     for( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
@@ -575,32 +575,29 @@ void TheScene::renderMesh()
     }
 
     //Render meshes
-    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    vector< Mesh * > v = DatasetManager::getInstance()->getMeshes();
+    for( vector<Mesh *>::iterator mesh = v.begin(); mesh != v.end(); ++mesh )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
-        if( pDsInfo->getType() == MESH || pDsInfo->getType() == ISO_SURFACE )
+        if( (*mesh)->getShow() )
         {
-            if( pDsInfo->getShow() )
+            wxColor color = (*mesh)->getColor();
+            glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
+
+            ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS",  (*mesh)->getShowFS() );
+            ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex",  (*mesh)->getUseTex() );
+            ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_",  (*mesh)->getAlpha() );
+            ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "isGlyph", (*mesh)->getIsGlyph());
+
+            if( (*mesh)->getAlpha() < 0.99 )
             {
-                wxColor color = pDsInfo->getColor();
-                glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
+                glDepthMask( GL_FALSE );
+            }
 
-                ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS",  pDsInfo->getShowFS() );
-                ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex",  pDsInfo->getUseTex() );
-                ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_",  pDsInfo->getAlpha() );
-                ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
+            (*mesh)->draw();
 
-                if(pDsInfo->getAlpha() < 0.99)
-                {
-                    glDepthMask(GL_FALSE);
-                }
-
-                pDsInfo->draw();
-
-                if(pDsInfo->getAlpha() < 0.99)
-                {
-                    glDepthMask(GL_TRUE);
-                }
+            if( (*mesh)->getAlpha() < 0.99 )
+            {
+                glDepthMask( GL_TRUE );
             }
         }
     }

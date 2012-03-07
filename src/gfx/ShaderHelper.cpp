@@ -31,6 +31,7 @@ ShaderHelper::ShaderHelper()
     m_pGraphShader( NULL ),
     m_pTensorsShader( NULL ),
     m_pOdfsShader( NULL ),
+    m_pRTTShader( NULL ),
     m_tex( 10 ),
     m_type( 10 ),
     m_threshold( 10 ),
@@ -72,6 +73,7 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
     m_pGraphShader = new ShaderProgram( wxT( "graph" ) );
     m_pTensorsShader = new ShaderProgram( wxT( "tensors" ) );
     m_pOdfsShader = new ShaderProgram( wxT( "odfs" ) );
+    m_pRTTShader = new ShaderProgram( wxT( "RTT" ) );
 
     Logger::getInstance()->print( _T( "Initializing anatomy shader..." ), LOGLEVEL_MESSAGE );
     if( m_pAnatomyShader->load() && m_pAnatomyShader->compileAndLink() )
@@ -205,9 +207,17 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
     {
         Logger::getInstance()->print( _T( "Could not initialize odfs shader." ), LOGLEVEL_ERROR );
     }
+    Logger::getInstance()->print( _T( "Initializing RTT shader..." ), LOGLEVEL_MESSAGE );
+    if( m_pRTTShader->load() && m_pRTTShader->compileAndLink() )
+    {
+        m_pRTTShader->bind();
+        Logger::getInstance()->print( _T( "RTT shader initialized." ), LOGLEVEL_MESSAGE );
+    }
+    else
+    {
+        Logger::getInstance()->print( _T( "Could not initialize RTT shader." ), LOGLEVEL_ERROR );
+    }
 }
-
-
 
 void ShaderHelper::initializeArrays()
 {

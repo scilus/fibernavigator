@@ -105,6 +105,7 @@ private:
 								  const float & max_thresh);
     void			    set_nbors(FMatrix i_phiThetaDirection);
     float               get_min_angle();
+    void setScalingFactor( float i_scalingFactor );
     
 
 

@@ -35,6 +35,7 @@ public:
     std::vector<Fibers *>   getFibers() const;
     FibersGroup *           getFibersGroup() const;
     size_t                  getFibersCount() const          { return m_fibers.size(); }
+    std::vector<Mesh *>     getMeshes() const;
     std::vector<ODFs *>     getOdfs() const;
     Fibers *                getSelectedFibers( DatasetIndex index ) const;
     Surface *               getSurface() const;

@@ -4,6 +4,7 @@
 #include "SceneManager.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
+#include "TrackingWindow.h"
 #include "../Logger.h"
 #include "../main.h"
 #include "../dataset/Anatomy.h"
@@ -17,12 +18,14 @@
 #include "../misc/IsoSurface/CIsoSurface.h"
 
 #include <wx/colordlg.h>
+#include <wx/notebook.h>
 
 IMPLEMENT_DYNAMIC_CLASS(PropertiesWindow, wxScrolledWindow)
 
-PropertiesWindow::PropertiesWindow( MainFrame *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, ListCtrl *lstCtrl )
+PropertiesWindow::PropertiesWindow( wxWindow *parent, MainFrame *mf, wxWindowID id, const wxPoint &pos, const wxSize &size, ListCtrl *lstCtrl )
 :   wxScrolledWindow( parent, id, pos, size, wxBORDER_NONE, _T( "test canvas" ) ),
-    m_pMainFrame( parent ),
+    m_pNotebook( parent ),
+    m_pMainFrame( mf ),
     m_pListCtrl( lstCtrl )
 {
     SetBackgroundColour( *wxLIGHT_GREY );
@@ -1103,7 +1106,7 @@ void PropertiesWindow::OnGlyphScalingFactorSliderMoved( wxCommandEvent& WXUNUSED
 
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
-        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setScalingFactor( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderScalingFactor->GetValue());
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setScalingFactor( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderScalingFactor->GetValue() / 10.0f );
     }
 }
 
@@ -1530,6 +1533,12 @@ void PropertiesWindow::OnDeleteTreeItem( wxTreeEvent&    event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDeleteTreeItem" ), LOGLEVEL_DEBUG );
 
     m_pMainFrame->onDeleteTreeItem(event);
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
+    m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = false;
+    m_pMainFrame->m_pDatasetHelper->m_isRTTReady = false;
+    m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable(false);
+
 }
 
 void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent&    event )

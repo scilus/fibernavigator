@@ -10,6 +10,7 @@
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/SplinePoint.h"
+#include "../dataset/Tensors.h"
 #include "../gfx/ShaderHelper.h"
 #include "../misc/lic/FgeOffscreen.h"
 
@@ -78,12 +79,16 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
 	m_isDrawerHit = false;
     m_isSlizesLocked = false;
     m_isSceneLocked = false;
+    m_pRealTimeFibers = new RTTFibers(i_pDatasetHelper);
 }
 
 MainCanvas::~MainCanvas()
 {
-	if (m_pArcBall)
-		delete m_pArcBall;
+	delete m_pArcBall;
+    m_pArcBall = NULL;
+
+    delete m_pRealTimeFibers;
+    m_pRealTimeFibers = NULL;
 }
 
 void MainCanvas::init()
@@ -171,10 +176,30 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
             {               
                 if ( !m_ismDragging)
                 {
+                    long l_item = MyApp::frame->getCurrentListItem();
+                    
+                    if( l_item != -1 && !SceneManager::getInstance()->isRulerActive() )
+                    {
+                        DatasetInfo* l_type = DatasetManager::getInstance()->getDataset( l_item );;
+                        Anatomy* l_info = (Anatomy*)l_type;
+
+                        if( l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
+                        {
+                            SceneManager::getInstance()->setSegmentActive( true );
+                            m_hr = pick( evt.GetPosition(), false );
+                            segment();
+                            l_info->toggleSegment();
+                        }
+                    }                    
+                    else if( SceneManager::getInstance()->isRulerActive() )
+                    {                        
+                        m_hr = pick( evt.GetPosition(), true );
+                    }
+                
                     m_lastPos = evt.GetPosition();
                     m_ismDragging = true;
                 }
-                else if (!m_isSceneLocked) //Move Scene
+                else if( !m_isSceneLocked ) //Move Scene
                 {
                     int xDrag = m_lastPos.x - clickX;
                     int yDrag = ( m_lastPos.y - clickY );
@@ -808,6 +833,17 @@ void MainCanvas::render()
 					//TODO, may be useful later
 					//renderDrawerDisplay();
 				}
+                if (m_pDatasetHelper->m_isRTTDirty && m_pDatasetHelper->m_isRTTReady)
+                {
+                    m_pRealTimeFibers->seed();
+                }
+                else
+                {
+                    if(m_pRealTimeFibers->getSize() > 0)
+                    {
+                        m_pRealTimeFibers->renderRTTFibers();
+                    }
+                }
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
                 glGetIntegerv( GL_VIEWPORT,m_viewport );
@@ -832,7 +868,7 @@ void MainCanvas::render()
     SwapBuffers();  
 }
 
-void::MainCanvas::renderRulerDisplay()
+void MainCanvas::renderRulerDisplay()
 {
     glColor3f( 0.0f, 0.6f, 0.95f );
     glLineWidth (5);    
@@ -1422,191 +1458,6 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
     }
 }
 
-//Graph Cut segmentation
-//Library Copyright 2007 Olga Veksler
-void MainCanvas::graphCut(std::vector<float>* src, std::vector<float>* result, float sigma)
-{
-    /*std::cout << "Graphcut" << endl;
-
-    int numLabels = 2;
-    int totalDimension, xDim, yDim, zDim;
-    int dataLength = m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_frames;
-    
-    //Estimate Gaussian parameters
-    //Means
-    float means[2],stddev[2];
-    
-    means[0] = 0;    
-    means[1] = 0;
-    for (unsigned int x = 0; x < object.size(); ++x)
-    {
-        int indice =(object.at(x)[0]+(object.at(x)[1]*(m_pDatasetHelper->m_columns))+(object.at(x)[2]*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns)));
-        means[0] += src->at(indice);
-    }
-
-    for (unsigned int x = 0; x < background.size(); ++x)
-    {
-        int indice =(background.at(x)[0]+(background.at(x)[1]*(m_pDatasetHelper->m_columns))+(background.at(x)[2]*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns)));
-        means[1] += src->at(indice);
-    }
-
-    means[0] = means[0]/object.size(); //Mean of the class 1
-    means[1] = means[1]/background.size(); //Mean of the class 2
-    
-    //Standard deviation
-    stddev[0] = 0;
-    stddev[1] = 0;
-    for (unsigned int x = 0; x < object.size(); ++x)
-    {
-        int indice =(object.at(x)[0]+(object.at(x)[1]*(m_pDatasetHelper->m_columns))+(object.at(x)[2]*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns)));
-        stddev[0] += SQR((src->at(indice)-means[0]));
-    }
-
-    for (unsigned int x = 0; x < background.size(); ++x)
-    {
-        int indice =(background.at(x)[0]+(background.at(x)[1]*(m_pDatasetHelper->m_columns))+(background.at(x)[2]*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns)));
-        stddev[1] += SQR((src->at(indice)-means[1]));
-    }
-
-    stddev[0] = sqrt(stddev[0]/object.size()); //stddev of the class 1
-    stddev[1] = sqrt(stddev[1]/background.size()); //stddev of the class 2 
-    
-
-    //Get the dimensions of the selection box (englobing the area of interest)
-    std::vector< std::vector< SelectionObject* > > l_selectionObjects = m_pDatasetHelper->getSelectionObjects();
-    int x1, x2, y1, y2, z1, z2;
-
-    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
-    {
-        for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
-        {
-            if( l_selectionObjects[i][j]->getIsVisible() )
-            {
-                x1 = (int)( l_selectionObjects[i][j]->getCenter().x / m_pDatasetHelper->m_xVoxel - l_selectionObjects[i][j]->getSize().x / 2 );
-                x2 = (int)( l_selectionObjects[i][j]->getCenter().x / m_pDatasetHelper->m_xVoxel + l_selectionObjects[i][j]->getSize().x / 2 );
-                y1 = (int)( l_selectionObjects[i][j]->getCenter().y / m_pDatasetHelper->m_yVoxel - l_selectionObjects[i][j]->getSize().y / 2 );
-                y2 = (int)( l_selectionObjects[i][j]->getCenter().y / m_pDatasetHelper->m_yVoxel + l_selectionObjects[i][j]->getSize().y / 2 );
-                z1 = (int)( l_selectionObjects[i][j]->getCenter().z / m_pDatasetHelper->m_zVoxel - l_selectionObjects[i][j]->getSize().z / 2 );
-                z2 = (int)( l_selectionObjects[i][j]->getCenter().z / m_pDatasetHelper->m_zVoxel + l_selectionObjects[i][j]->getSize().z / 2 );
-
-                x1 = wxMax(0, wxMin(x1, m_pDatasetHelper->m_columns));
-                x2 = wxMax(0, wxMin(x2, m_pDatasetHelper->m_columns));
-                y1 = wxMax(0, wxMin(y1 ,m_pDatasetHelper->m_rows));
-                y2 = wxMax(0, wxMin(y2, m_pDatasetHelper->m_rows));
-                z1 = wxMax(0, wxMin(z1, m_pDatasetHelper->m_frames));
-                z2 = wxMax(0, wxMin(z2, m_pDatasetHelper->m_frames));
-            }
-        }
-    }
-
-    xDim = (x2-x1); //X width
-    yDim = (y2-y1); //Y width
-    zDim = (z2-z1); //Z width
-    totalDimension = xDim * yDim * zDim;
-
-    //Generate Graph cut algorithm 
-    GCoptimizationGeneralGraph gc(totalDimension,numLabels);
-    
-    //Datacost with Gaussian parameters for all Obj/Bck - final nodes links
-    for(int x = 0; x < xDim; x++)
-    {
-        for(int y = 0; y < yDim; y++)
-        {
-            for(int z = 0; z < zDim; z++)
-            {
-                for(int label = 0; label < numLabels; label++)
-                {
-                    int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
-                    int current = (x+x1)+((y+y1)*(m_pDatasetHelper->m_columns))+((z+z1)*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns));
-                    int value = -logf(exp(-pow(current-means[label],2)/(2*stddev[label]*stddev[label]))/(sqrt(2*3.1416)*stddev[label]));
-                    gc.setDataCost(indice, label, value);
-                }
-            }
-        }
-    }
-
-    //Specify USER data cost between Obj/Back final nodes 
-    for(unsigned int i = 0; i < object.size(); i++)
-    {
-        int x = object.at(i)[0] - x1;
-        int y = object.at(i)[1] - y1;
-        int z = object.at(i)[2] - z1;
-
-        int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
-        gc.setDataCost(indice, 0, numeric_limits<float>::infinity());
-        gc.setDataCost(indice, 1, 0.0f);
-    }
-
-    for(unsigned int i = 0; i < background.size(); i++)
-    {
-        int x = background.at(i)[0] - x1;
-        int y = background.at(i)[1] - y1;
-        int z = background.at(i)[2] - z1;
-
-        int indice = (x+(y*(xDim))+(z*(yDim)*(xDim)));
-        gc.setDataCost(indice, 0, 0.0f);
-        gc.setDataCost(indice, 1, numeric_limits<float>::infinity());
-    }
-
-    //Set smooth cost 
-    for (int l1 = 0; l1 < numLabels; l1++)
-    {
-        for (int l2 = 0; l2 < numLabels; l2++)
-        {
-            gc.setSmoothCost(l1, l2, abs(l1-l2));
-        }
-    }
-
-    // Specify the Neighboring with the function to optimize
-    
-    //Neighbors in X
-    for (int z = 0; z < zDim; z++ )
-        for (int y = 0; y < yDim; y++ )
-            for (int  x = 1; x < xDim; x++ )
-            {
-                int current = (x+x1)+((y+y1)*(m_pDatasetHelper->m_columns))+((z+z1)*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns));
-                int prec = ((x+x1-1)+((y+y1)*(m_pDatasetHelper->m_columns))+((z+z1)*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns)));
-                float value = std::exp(-SQR(src->at(current) - src->at(prec))/2*sigma*sigma);
-                gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),(x-1)+(y*(xDim))+(z*(yDim)*(xDim)),value);
-            }
-
-    //Neighbors in Y
-    for (int z = 0; z < zDim; z++ )
-        for (int y = 1; y < yDim; y++ )
-            for (int  x = 0; x < xDim; x++ )
-            {
-                int current = (x+x1)+((y+y1)*(m_pDatasetHelper->m_columns))+((z+z1)*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns));
-                int prec = ((x+x1)+((y+y1-1)*(m_pDatasetHelper->m_columns))+((z+z1)*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns)));
-                float value = std::exp(-SQR(src->at(current) - src->at(prec))/2*sigma*sigma);
-                gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),x+((y-1)*(xDim))+(z*(yDim)*(xDim)),value);
-            }
-
-    //Neighbors in Z
-    for (int z = 1; z < zDim; z++ )
-        for (int y = 0; y < yDim; y++ )
-            for (int  x = 0; x < xDim; x++ )
-            {
-                int current = (x+x1)+((y+y1)*(m_pDatasetHelper->m_columns))+((z+z1)*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns));
-                int prec = ((x+x1)+((y+y1)*(m_pDatasetHelper->m_columns))+((z+z1-1)*(m_pDatasetHelper->m_rows)*(m_pDatasetHelper->m_columns)));
-                float value = std::exp(-SQR(src->at(current) - src->at(prec))/2.0f*sigma*sigma);
-                gc.setNeighbors(x+(y*(xDim))+(z*(yDim)*(xDim)),x+(y*(xDim))+((z-1)*(yDim)*(xDim)),value);
-            }
-
-    gc.expansion();
-
-    //Save results 
-    for(int x = 0; x < xDim; x++)
-    {
-        for(int y = 0; y < yDim; y++)
-        {
-            for(int z = 0; z < zDim; z++)
-            {
-                float value = gc.whatLabel((x+(y*(xDim))+(z*(yDim)*(xDim))));
-                result->at((x+x1)+((y+y1)*m_pDatasetHelper->m_columns)+((z+z1)*m_pDatasetHelper->m_rows*m_pDatasetHelper->m_columns)) = value;
-            }
-        }
-    }*/
-}
 //Segment selected area 
 void MainCanvas::segment()
 {
@@ -1635,10 +1486,12 @@ void MainCanvas::segment()
         case FLOODFILL:
         {
             float threshold = l_info->getFloodThreshold();
+            std::cout << m_hitPts[0] << " " << m_hitPts[1] << " " << m_hitPts[2] << "\n";
             floodFill(sourceData, resultData, m_hitPts, threshold);
             break;
         }
 
+/*
         case GRAPHCUT:
         {
             float sigma = l_info->getGraphSigma();
@@ -1652,6 +1505,7 @@ void MainCanvas::segment()
             KMeans(means,stddev,apriori,sourceData,resultData);
             break;
         }
+*/
     }
         
     //Create a new anatomy for the tumor
@@ -1664,4 +1518,9 @@ void MainCanvas::segment()
     pNewAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
     MyApp::frame->m_pListCtrl2->InsertItem( indx );
 }
+
+
+
+    
+    
 
