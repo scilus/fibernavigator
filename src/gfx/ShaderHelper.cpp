@@ -18,7 +18,11 @@
 ShaderHelper * ShaderHelper::m_pInstance = NULL;
 
 ShaderHelper::ShaderHelper()
-:   m_pAnatomyShader( NULL ),
+:   m_tex( 10 ),
+    m_threshold( 10 ),
+    m_alpha( 10 ),
+    m_type( 10 ),
+    m_pAnatomyShader( NULL ),
     m_pMeshShader( NULL ),
     m_pFibersShader( NULL ),
     m_pFakeTubesShader( NULL ),
@@ -30,10 +34,7 @@ ShaderHelper::ShaderHelper()
     m_pTensorsShader( NULL ),
     m_pOdfsShader( NULL ),
     m_pRTTShader( NULL ),
-    m_tex( 10 ),
-    m_type( 10 ),
-    m_threshold( 10 ),
-    m_alpha( 10 )
+    
 {
 }
 

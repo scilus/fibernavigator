@@ -1311,10 +1311,8 @@ bool Fibers::loadVTK( const wxString &filename )
 
     float columns = DatasetManager::getInstance()->getColumns();
     float rows    = DatasetManager::getInstance()->getRows();
-    float frames  = DatasetManager::getInstance()->getFrames();
     float voxelX  = DatasetManager::getInstance()->getVoxelX();
     float voxelY  = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
 
     for( int i = 0; i < countPoints * 3; ++i )
     {
@@ -2096,7 +2094,6 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
     float rows    = DatasetManager::getInstance()->getRows();
     float voxelX  = DatasetManager::getInstance()->getVoxelX();
     float voxelY  = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
 
     for( int l = 0; l < m_countLines; ++l )
     {

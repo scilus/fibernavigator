@@ -69,7 +69,7 @@ void Logger::print( const wxString &str, const LogLevel level )
         m_lastError = prefix + str;
     }
 
-    printf( m_oss.str().c_str() );
+    printf( "%s", m_oss.str().c_str() );
     m_oss.str( "" );
 }
 

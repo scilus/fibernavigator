@@ -65,8 +65,8 @@ private:
     int m_numDeBoorRows;
     int m_numDeBoorCols;
     int m_order;
-    double m_sampleRateT;
     double m_sampleRateU;
+    double m_sampleRateT;
     double m_xAverage;
     double m_yAverage;
     double m_zAverage;

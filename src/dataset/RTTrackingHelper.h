@@ -35,12 +35,12 @@ private:
 private:
     static RTTrackingHelper * m_pInstance;
 
-    bool m_isRTTReady;
-    bool m_isRTTDirty;
-    bool m_isRTTActive;
-    bool m_isRandomSeeds;
     bool m_interpolateTensors;
     bool m_isFileSelected;
+    bool m_isRandomSeeds;
+    bool m_isRTTActive;
+    bool m_isRTTDirty;
+    bool m_isRTTReady;
 };
 
 #endif //RTTRACKINGHELPER_H_

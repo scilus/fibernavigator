@@ -235,8 +235,6 @@ private:
     long                m_currentListItem;
     long                m_lastSelectedListItem;
 
-    wxBoxSizer          *m_pMainSizer;
-
     wxString            m_lastPath;
 
     wxTimer             *m_pTimer;

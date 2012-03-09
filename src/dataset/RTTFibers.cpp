@@ -589,7 +589,6 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
 
     int columns = DatasetManager::getInstance()->getColumns();
     int rows    = DatasetManager::getInstance()->getRows();
-    int frames  = DatasetManager::getInstance()->getFrames();
 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
     float yVoxel = DatasetManager::getInstance()->getVoxelY();

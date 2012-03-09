@@ -70,7 +70,7 @@ public:
     void transferToTexture(float* data, GLuint texID);
     void setupALL();
 
-       //GPGPU vars
+    //GPGPU vars
     // problem size, texture size, number of iterations (set from command line)
     int N;
     int texSize;

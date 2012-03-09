@@ -182,7 +182,6 @@ void TheScene::bindTextures()
         if( pDsInfo->getType() < MESH && pDsInfo->getShow() )
         {
             glActiveTexture( GL_TEXTURE0 + allocatedTextureCount );
-            GLuint name = pDsInfo->getGLuint();
             glBindTexture( GL_TEXTURE_3D, pDsInfo->getGLuint() );
             if( pDsInfo->getShowFS() )
             {
