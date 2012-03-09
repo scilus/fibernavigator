@@ -17,13 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 DatasetHelper::DatasetHelper() 
-:   m_selBoxChanged( true ),
-    m_isRTTReady ( false ),
-    m_isRTTDirty ( false ),
-    m_isRTTActive ( false ),
-    m_isRandomSeeds ( false ), 
-    m_interpolateTensors ( false ),
-    m_isFileSelected ( false )
+:   m_selBoxChanged( true )
 {
 }
 

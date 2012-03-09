@@ -12,6 +12,7 @@
 #include "../dataset/Fibers.h"
 #include "../dataset/FibersGroup.h"
 #include "../dataset/ODFs.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
@@ -1535,8 +1536,8 @@ void PropertiesWindow::OnDeleteTreeItem( wxTreeEvent&    event )
     m_pMainFrame->onDeleteTreeItem(event);
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
-    m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = false;
-    m_pMainFrame->m_pDatasetHelper->m_isRTTReady = false;
+    RTTrackingHelper::getInstance()->setRTTDirty( false );
+    RTTrackingHelper::getInstance()->setRTTReady( false );
     m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable(false);
 
 }

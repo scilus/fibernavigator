@@ -9,6 +9,7 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Tensors.h"
 #include "../gfx/ShaderHelper.h"
@@ -833,17 +834,16 @@ void MainCanvas::render()
 					//TODO, may be useful later
 					//renderDrawerDisplay();
 				}
-                if (m_pDatasetHelper->m_isRTTDirty && m_pDatasetHelper->m_isRTTReady)
+
+                if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
                 {
                     m_pRealTimeFibers->seed();
                 }
-                else
+                else if(m_pRealTimeFibers->getSize() > 0)
                 {
-                    if(m_pRealTimeFibers->getSize() > 0)
-                    {
-                        m_pRealTimeFibers->renderRTTFibers();
-                    }
+                    m_pRealTimeFibers->renderRTTFibers();
                 }
+
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
                 glGetIntegerv( GL_VIEWPORT,m_viewport );

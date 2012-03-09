@@ -3,14 +3,16 @@
 #include "MainFrame.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
+#include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/ODFs.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../dataset/SplinePoint.h"
 #include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
-#include "../main.h"
+
 
 IMPLEMENT_DYNAMIC_CLASS( TrackingWindow, wxScrolledWindow )
 
@@ -105,14 +107,14 @@ wxSizer* TrackingWindow::getWindowSizer()
 
 void TrackingWindow::OnStartTracking( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pMainFrame->m_pDatasetHelper->m_isRTTReady = !m_pMainFrame->m_pDatasetHelper->m_isRTTReady;
-    m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+    RTTrackingHelper::getInstance()->toggleRTTReady();
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 
-    if( !m_pMainFrame->m_pDatasetHelper->m_isRTTReady )
+    if( !RTTrackingHelper::getInstance()->isRTTReady() )
     {
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
-        m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = false;
+        RTTrackingHelper::getInstance()->setRTTDirty( false );
     }
 }
 
@@ -121,25 +123,25 @@ void TrackingWindow::OnClearBox( wxTreeEvent&    event )
     m_pMainFrame->onDeleteTreeItem( event );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
-    m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = false;
-    m_pMainFrame->m_pDatasetHelper->m_isRTTReady = false;
+    RTTrackingHelper::getInstance()->setRTTDirty( false );
+    RTTrackingHelper::getInstance()->setRTTReady( false );
     m_pBtnStart->SetValue( false );
 }
 
 void TrackingWindow::OnSliderFAMoved(wxCommandEvent& WXUNUSED(event))
 {
     float sliderValue = m_pSliderFA->GetValue() / 100.0f;
-    m_pTxtFABox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue) );
+    m_pTxtFABox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setFAThreshold( sliderValue );
-	m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSliderAngleMoved( wxCommandEvent& WXUNUSED(event) )
 {
     float sliderValue = m_pSliderAngle->GetValue();
-    m_pTxtAngleBox->SetValue(wxString::Format( wxT( "%.1f "), sliderValue) );
+    m_pTxtAngleBox->SetValue(wxString::Format( wxT( "%.1f "), sliderValue ) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setAngleThreshold( sliderValue );
-	m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+	RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSliderStepMoved( wxCommandEvent& WXUNUSED(event) )
@@ -147,7 +149,7 @@ void TrackingWindow::OnSliderStepMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderStep->GetValue() / 10.0f;
     m_pTxtStepBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( sliderValue );
-	m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSliderPunctureMoved( wxCommandEvent& WXUNUSED(event) )
@@ -155,7 +157,7 @@ void TrackingWindow::OnSliderPunctureMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderPuncture->GetValue() / 10.0f;
     m_pTxtPunctureBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setPuncture( sliderValue );
-	m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+	RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSliderMinLengthMoved( wxCommandEvent& WXUNUSED(event) )
@@ -163,7 +165,7 @@ void TrackingWindow::OnSliderMinLengthMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderMinLength->GetValue();
     m_pTxtMinLengthBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMinFiberLength( sliderValue );
-	m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+	RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )
@@ -171,7 +173,7 @@ void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderMaxLength->GetValue();
     m_pTxtMaxLengthBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMaxFiberLength( sliderValue );
-	m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+	RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
@@ -201,12 +203,12 @@ void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
 
 void TrackingWindow::OnRandomSeeding( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pMainFrame->m_pDatasetHelper->m_isRandomSeeds = !m_pMainFrame->m_pDatasetHelper->m_isRandomSeeds;
-    m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+    RTTrackingHelper::getInstance()->toggleRandomSeeds();
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnInterpolate( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pMainFrame->m_pDatasetHelper->m_interpolateTensors = !m_pMainFrame->m_pDatasetHelper->m_interpolateTensors;
-    m_pMainFrame->m_pDatasetHelper->m_isRTTDirty = true;
+    RTTrackingHelper::getInstance()->toggleInterpolateTensors();
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }

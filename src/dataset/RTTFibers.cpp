@@ -7,6 +7,7 @@
 
 #include "DatasetHelper.h"
 #include "DatasetManager.h"
+#include "RTTrackingHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gui/SceneManager.h"
@@ -86,7 +87,7 @@ void RTTFibers::seed()
         maxCorner.z = selectionObjects[b][0]->getCenter().z + selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
         
         //Evenly distanced seeds
-        if( !m_pDatasetHelper->m_isRandomSeeds ) 
+        if( !RTTrackingHelper::getInstance()->isRandomSeeds() )
         {
             float xstep =  selectionObjects[b][0]->getSize().x * xVoxel / float( texSize - 1.0f );
             float ystep =  selectionObjects[b][0]->getSize().y * yVoxel / float( texSize - 1.0f );
@@ -152,7 +153,7 @@ void RTTFibers::seed()
             //setupALL();
 
             renderRTTFibers();
-            m_pDatasetHelper->m_isRTTDirty = false;
+            RTTrackingHelper::getInstance()->setRTTDirty( false );
         }
         //Random seeds (spread within 8 quads inside voxel)
         else 
@@ -606,7 +607,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
     if( tensorNumber < m_tensorsMatrix.size() )
     {
         //Use Interpolation
-        if( m_pDatasetHelper->m_interpolateTensors )
+        if( RTTrackingHelper::getInstance()->isTensorsInterpolated() )
         {
             tensor = trilinearInterp( currPosition.x, currPosition.y, currPosition.z );
         }
@@ -648,9 +649,8 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
 
         if( tensorNumber < m_tensorsMatrix.size() )
         {
-        
             //Use interpolation
-            if( m_pDatasetHelper->m_interpolateTensors )
+            if( RTTrackingHelper::getInstance()->isTensorsInterpolated() )
             {
                 tensor = trilinearInterp( nextPosition.x, nextPosition.y, nextPosition.z );
             }
@@ -717,7 +717,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
                 }
 
                 //Use interpolation
-                if( m_pDatasetHelper->m_interpolateTensors )
+                if( RTTrackingHelper::getInstance()->isTensorsInterpolated() )
                 {
                     tensor = trilinearInterp( nextPosition.x, nextPosition.y, nextPosition.z );
                 }
