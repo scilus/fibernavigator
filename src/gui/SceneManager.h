@@ -251,4 +251,4 @@ private:
     double                  m_rulerPartialLength;
 };
 
-#endif SCENEMANAGER_H_
+#endif //SCENEMANAGER_H_

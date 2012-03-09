@@ -25,10 +25,10 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
+#include <wx/button.h>
 #include <wx/grid.h>
 #include <wx/string.h>
-#include <wx/msw/button.h>
-#include <wx/msw/tglbtn.h>
+#include <wx/tglbtn.h>
 
 #include <list>
 #include <vector>

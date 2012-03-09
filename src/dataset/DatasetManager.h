@@ -133,4 +133,4 @@ private:
     bool m_surfaceIsDirty;
 };
 
-#endif DATASETMANAGER_H_
+#endif //DATASETMANAGER_H_
