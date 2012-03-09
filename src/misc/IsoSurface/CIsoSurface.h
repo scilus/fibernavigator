@@ -10,18 +10,17 @@
 // CIsoSurface can be used to construct an isosurface from a scalar
 // field.
 
-#include <map>
-#include <vector>
 
 #include "../../dataset/DatasetInfo.h"
-#include "../../dataset/DatasetHelper.h"
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
+#include <map>
+#include <vector>
 
 struct POINT3DID {
     unsigned int newID;
@@ -36,11 +35,13 @@ struct TRIANGLE {
 
 typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
 
+class Anatomy;
+
 class CIsoSurface : public DatasetInfo
 {
 public:
     // Constructor and destructor.
-    CIsoSurface(DatasetHelper*, Anatomy* anatomy);
+    CIsoSurface( Anatomy* pAnatomy );
     virtual ~CIsoSurface();
 
     bool load(wxString filename) {return false;};
@@ -135,7 +136,6 @@ private:
     wxToggleButton *m_ptoggleUseColoring;
     wxBitmapButton *m_pbtnSelectColor;
     
-
     bool m_positionsCalculated;
     std::vector<Vector>m_svPositions;
 };

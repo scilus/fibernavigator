@@ -18,17 +18,19 @@
 #include "../misc/nifti/nifti1_io.h"
 
 #include <GL/glew.h>
+#include <wx/tglbtn.h>
 
+#include <vector>
+using std::vector;
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-Glyph::Glyph( DatasetHelper* i_datasetHelper,
-              float i_minHue     , 
+Glyph::Glyph( float i_minHue     , 
               float i_maxHue     , 
               float i_saturation , 
               float i_luminance )
-:   DatasetInfo             ( i_datasetHelper ),
+:   DatasetInfo             (),
     m_hemisphereBuffer      ( NULL ),
     m_textureId             ( 0 ),    
     m_nbPointsPerGlyph      ( 0 ),    

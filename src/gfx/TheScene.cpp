@@ -15,7 +15,6 @@
 #include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/AnatomyHelper.h"
-#include "../dataset/DatasetHelper.h"
 #include "../dataset/DatasetInfo.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
@@ -32,6 +31,8 @@
 #include "../misc/IsoSurface/CIsoSurface.h"
 
 #include <algorithm>
+#include <vector>
+using std::vector;
 
 namespace
 {
@@ -73,8 +74,8 @@ namespace
 //
 // i_datasetHelper          :
 //////////////////////////////////////////////////////////////////////////////////
-TheScene::TheScene( DatasetHelper* pDatasetHelper ) :
-    m_isRotateZ( false ),
+TheScene::TheScene()
+:   m_isRotateZ( false ),
     m_isRotateY( false ),
     m_isRotateX( false ),
     m_isNavSagital( false ),
@@ -86,7 +87,6 @@ TheScene::TheScene( DatasetHelper* pDatasetHelper ) :
     m_posSagital( 0.0f ),
     m_posCoronal( 0.0f ),
     m_posAxial( 0.0f ),
-    m_pDatasetHelper( pDatasetHelper ), 
     m_pMainGLContext( NULL )
 {
     // Initialize those to 0.0f to make sure that by some really odd chance, they cannot
@@ -742,7 +742,8 @@ void TheScene::lightsOn()
     GLfloat specRef[]       = { 0.5f, 0.5f, 0.5f, 0.5f };
     Vector3fT v1 = { { 0, 0, -1 } };
     Vector3fT l;
-    Vector3fMultMat4( &l, &v1, &SceneManager::getInstance()->getTransform() );
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Vector3fMultMat4( &l, &v1, &transform );
 
     GLfloat lightPosition0[] = { l.s.X, l.s.Y, l.s.Z, 0.0 };
 

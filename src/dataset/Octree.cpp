@@ -2,19 +2,20 @@
 
 #include "DatasetManager.h"
 #include "../Logger.h"
+#include "../gui/SelectionObject.h"
 
 #include <algorithm>
+#include <vector>
+using std::vector;
 
 //////////////////////////////////////////
 /*Constructor*/
 //////////////////////////////////////////
-Octree::Octree( int lvl, const std::vector< float > &pointArray, int nb, DatasetHelper* dh )
-:   m_dh(dh),
-    m_level(lvl),
+Octree::Octree( int lvl, const std::vector< float > &pointArray, int nb )
+:   m_level(lvl),
     m_countPoints(nb),
     m_pointArray(pointArray)    
 {
-
     Logger::getInstance()->print( wxT( "Building Octree..." ), LOGLEVEL_MESSAGE );
     
     findBoundingBox();
@@ -28,7 +29,6 @@ Octree::Octree( int lvl, const std::vector< float > &pointArray, int nb, Dataset
 //////////////////////////////////////////
 Octree::~Octree()
 {
-
 }
 
 //////////////////////////////////////////

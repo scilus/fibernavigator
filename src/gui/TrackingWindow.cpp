@@ -13,6 +13,12 @@
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
+#include <wx/checkbox.h>
+#include <wx/grid.h>
+#include <wx/notebook.h>
+#include <wx/tglbtn.h>
+#include <wx/treectrl.h>
+
 
 IMPLEMENT_DYNAMIC_CLASS( TrackingWindow, wxScrolledWindow )
 

@@ -12,14 +12,25 @@
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 #include "../gui/SelectionObject.h"
+#include "../misc/lic/TensorField.h"
 #include "../misc/nifti/nifti1_io.h"
 
-#include <wx/textfile.h>
 #include <GL/glew.h>
-#include <cassert>
+#include <wx/textfile.h>
+#include <wx/tglbtn.h>
 
 #include <algorithm>
 using std::fill;
+
+#include <cassert>
+#include <sstream>
+using std::ostringstream;
+
+#include <stack>
+using std::stack;
+
+#include <vector>
+using std::vector;
 
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
@@ -27,8 +38,8 @@ using std::fill;
 #define LOWER_EQ_THRES  20
 #define UPPER_EQ_THRES  255
 
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper ) 
-: DatasetInfo ( pDatasetHelper ),
+Anatomy::Anatomy( ) 
+: DatasetInfo(),
   m_isSegmentOn( false ),  
   m_pRoi( NULL ),
   m_dataType( 2 ),
@@ -42,8 +53,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper )
     m_bands = 1;
 }
 
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper, const wxString &filename ) 
-: DatasetInfo ( pDatasetHelper ),
+Anatomy::Anatomy( const wxString &filename ) 
+: DatasetInfo(),
   m_isSegmentOn( false ),  
   m_pRoi( NULL ),
   m_dataType( 2 ),
@@ -66,9 +77,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper, const wxString &filename )
 }
 
 // Seems to be used for the create a Distance Map
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
-                  const Anatomy * const pAnatomy )
-: DatasetInfo( pDatasetHelper ),
+Anatomy::Anatomy( const Anatomy * const pAnatomy )
+: DatasetInfo(),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
   m_dataType( 2 ),
@@ -89,10 +99,9 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     createOffset( pAnatomy );
 }
 
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
-                  std::vector< float >* pDataset, 
+Anatomy::Anatomy( std::vector< float >* pDataset, 
                   const int sample ) 
-: DatasetInfo( pDatasetHelper ),
+: DatasetInfo(),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
   m_dataType( 2 ),
@@ -117,9 +126,8 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     }
 }
 
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
-                  const int type )
-: DatasetInfo( pDatasetHelper ),
+Anatomy::Anatomy( const int type )
+: DatasetInfo(),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
   m_dataType( 2 ),
@@ -149,6 +157,7 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     }
     else
     {
+        // Only compiled and runned in debug
         assert(false);
     }
 }

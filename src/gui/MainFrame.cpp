@@ -37,6 +37,12 @@
 #include <wx/statbmp.h>
 #include <wx/vscroll.h>
 
+#include <algorithm>
+using std::for_each;
+
+#include <vector>
+using std::vector;
+
 extern const wxEventType wxEVT_NAVGL_EVENT;
 
 /****************************************************************************************************
@@ -194,11 +200,6 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 {
     wxImage::AddHandler(new wxPNGHandler);
 
-    m_pDatasetHelper = new DatasetHelper();
-    // TODO: Remove dependency to DatasetHelper
-    DatasetManager::getInstance()->setDatasetHelper( m_pDatasetHelper );
-    SceneManager::getInstance()->setTheScene( new TheScene( m_pDatasetHelper ) );
-
     //////////////////////////////////////////////////////////////////////////
     // MyTreeCtrl initialization
     m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT );
@@ -275,16 +276,16 @@ void MainFrame::initOpenGl()
     #endif
 #endif
 
-    m_pMainGL = new MainCanvas( m_pDatasetHelper, MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize,     0, _T( "MainGLCanvas" ), gl_attrib );
+    m_pMainGL = new MainCanvas( MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize, 0, _T( "MainGLCanvas" ), gl_attrib );
 
 #ifndef CTX
-    m_pGL0 = new MainCanvas( m_pDatasetHelper,       AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
-    m_pGL1 = new MainCanvas( m_pDatasetHelper,     CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );
-    m_pGL2 = new MainCanvas( m_pDatasetHelper,    SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
+    m_pGL0 = new MainCanvas(    AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
+    m_pGL1 = new MainCanvas(  CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );
+    m_pGL2 = new MainCanvas( SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
 #else
-    m_pGL0 = new MainCanvas( m_pDatasetHelper, axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGTH ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL->GetContext() );
-    m_pGL1 = new MainCanvas( m_pDatasetHelper, coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL->GetContext() );
-    m_pGL2 = new MainCanvas( m_pDatasetHelper, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL->GetContext() );
+    m_pGL0 = new MainCanvas( axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGTH ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL->GetContext() );
+    m_pGL1 = new MainCanvas( coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL->GetContext() );
+    m_pGL2 = new MainCanvas( sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL->GetContext() );
 #endif
 
     m_pGL0->SetMaxSize( wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ) );
@@ -620,13 +621,108 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuLock( wxCommandEvent& WXUNUSED(event) )
+{
+    m_pMainGL->m_isSlizesLocked = !m_pMainGL->m_isSlizesLocked;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
+{
+    SceneManager::getInstance()->toggleAxesDisplay();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewBack( wxCommandEvent& WXUNUSED(event) )
+{
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = -1.0f;
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M21 =  1.0f;
+    transform.s.M12 =  1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
+    m_pMainGL->setRotation();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewBottom( wxCommandEvent& WXUNUSED(event) )
+{
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = -1.0f;
+    transform.s.M22 = -1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
+    m_pMainGL->setRotation();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
+{
+    SceneManager::getInstance()->toggleCrosshairDisplay();
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewFront( wxCommandEvent& WXUNUSED(event) )
+{
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M12 =  1.0f;
+    transform.s.M21 = -1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
+    m_pMainGL->setRotation();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewLeft( wxCommandEvent& WXUNUSED(event) )
+{
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 =  0.0f;
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M20 = -1.0f;
+    transform.s.M01 = -1.0f;
+    transform.s.M12 =  1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
+    m_pMainGL->setRotation();
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 /****************************************************************************************************
  *
  * Menu View
  * Sets the main GL widget to some standard positions
  *
  ****************************************************************************************************/
-
 void MainFrame::onMenuViewReset( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->setZoom( 1.0f );
@@ -635,26 +731,7 @@ void MainFrame::onMenuViewReset( wxCommandEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
 }
 
-void MainFrame::onMenuViewLeft( wxCommandEvent& WXUNUSED(event) )
-{
-    Matrix4fT transform = SceneManager::getInstance()->getTransform();
-    Matrix4fSetIdentity( &transform );
-    transform.s.M00 = 0.0f;
-    transform.s.M11 =  0.0f;
-    transform.s.M22 =  0.0f;
-    transform.s.M20 = -1.0f;
-    transform.s.M01 = -1.0f;
-    transform.s.M12 =  1.0f;
-
-//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-//     m_pDatasetHelper->m_transform.s.M00 =  0.0f;
-//     m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-//     m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-//     m_pDatasetHelper->m_transform.s.M20 = -1.0f;
-//     m_pDatasetHelper->m_transform.s.M01 = -1.0f;
-//     m_pDatasetHelper->m_transform.s.M12 =  1.0f;
-    m_pMainGL->setRotation();
-}
+//////////////////////////////////////////////////////////////////////////
 
 void MainFrame::onMenuViewRight( wxCommandEvent& WXUNUSED(event) )
 {
@@ -666,89 +743,27 @@ void MainFrame::onMenuViewRight( wxCommandEvent& WXUNUSED(event) )
     transform.s.M20 = 1.0f;
     transform.s.M01 = 1.0f;
     transform.s.M12 = 1.0f;
+    SceneManager::getInstance()->setTransform( transform );
 
-//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-//     m_pDatasetHelper->m_transform.s.M00 = 0.0f;
-//     m_pDatasetHelper->m_transform.s.M11 = 0.0f;
-//     m_pDatasetHelper->m_transform.s.M22 = 0.0f;
-//     m_pDatasetHelper->m_transform.s.M20 = 1.0f;
-//     m_pDatasetHelper->m_transform.s.M01 = 1.0f;
-//     m_pDatasetHelper->m_transform.s.M12 = 1.0f;
     m_pMainGL->setRotation();
 }
+
+//////////////////////////////////////////////////////////////////////////
+
 
 void MainFrame::onMenuViewTop( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &SceneManager::getInstance()->getTransform() );
-    m_pMainGL->setRotation();
-}
-
-void MainFrame::onMenuViewBottom( wxCommandEvent& WXUNUSED(event) )
-{
     Matrix4fT transform = SceneManager::getInstance()->getTransform();
     Matrix4fSetIdentity( &transform );
-    transform.s.M00 = -1.0f;
-    transform.s.M22 = -1.0f;
-
-//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-//     m_pDatasetHelper->m_transform.s.M00 = -1.0f;
-//     m_pDatasetHelper->m_transform.s.M22 = -1.0f;
+    SceneManager::getInstance()->setTransform( transform );
     m_pMainGL->setRotation();
 }
 
-void MainFrame::onMenuViewFront( wxCommandEvent& WXUNUSED(event) )
-{
-    Matrix4fT transform = SceneManager::getInstance()->getTransform();
-    Matrix4fSetIdentity( &transform );
-    transform.s.M11 =  0.0f;
-    transform.s.M22 =  0.0f;
-    transform.s.M12 =  1.0f;
-    transform.s.M21 = -1.0f;
+//////////////////////////////////////////////////////////////////////////
 
-//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-//     m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-//     m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-//     m_pDatasetHelper->m_transform.s.M12 =  1.0f;
-//     m_pDatasetHelper->m_transform.s.M21 = -1.0f;
-    m_pMainGL->setRotation();
-}
-void MainFrame::onMenuLock( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pMainGL->m_isSlizesLocked = !m_pMainGL->m_isSlizesLocked;
-}
 void MainFrame::onSceneLock( wxCommandEvent& WXUNUSED(event) )
 {
     m_pMainGL->m_isSceneLocked = !m_pMainGL->m_isSceneLocked;
-}
-
-void MainFrame::onMenuViewBack( wxCommandEvent& WXUNUSED(event) )
-{
-    Matrix4fT transform = SceneManager::getInstance()->getTransform();
-    Matrix4fSetIdentity( &transform );
-    transform.s.M00 = -1.0f;
-    transform.s.M11 =  0.0f;
-    transform.s.M22 =  0.0f;
-    transform.s.M21 =  1.0f;
-    transform.s.M12 =  1.0f;
-
-//     Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-//     m_pDatasetHelper->m_transform.s.M00 = -1.0f;
-//     m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-//     m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-//     m_pDatasetHelper->m_transform.s.M21 =  1.0f;
-//     m_pDatasetHelper->m_transform.s.M12 =  1.0f;
-    m_pMainGL->setRotation();
-}
-
-void MainFrame::onMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
-{
-    SceneManager::getInstance()->toggleAxesDisplay();
-}
-
-void MainFrame::onMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
-{
-    SceneManager::getInstance()->toggleCrosshairDisplay();
-    refreshAllGLWidgets();
 }
 
 /****************************************************************************************************
@@ -1188,7 +1203,7 @@ void MainFrame::createDistanceMapAndIso()
 
     Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
-    Anatomy* l_tmpAnatomy = new Anatomy( m_pDatasetHelper, l_anatomy );
+    Anatomy* l_tmpAnatomy = new Anatomy( l_anatomy );
 
     Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
     Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
@@ -1342,11 +1357,11 @@ void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
     SelectionObject* l_newSelectionObject;
     if( i_newSelectionObjectType == ELLIPSOID_TYPE )
     {
-        l_newSelectionObject = new SelectionEllipsoid( l_center, l_size, m_pDatasetHelper );
+        l_newSelectionObject = new SelectionEllipsoid( l_center, l_size );
     }
     else if( i_newSelectionObjectType == BOX_TYPE )
     {
-        l_newSelectionObject = new SelectionBox( l_center, l_size, m_pDatasetHelper );
+        l_newSelectionObject = new SelectionBox( l_center, l_size );
     }
     else
     {
@@ -1451,7 +1466,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
                 int zz = (int)( frames * 0.1f * voxelZ * j );
 
                 // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xs, yy, zz, m_pDatasetHelper );
+                SplinePoint* l_point = new SplinePoint( l_xs, yy, zz );
 
                 if( i == 0 || i == 10 || j == 0 || j == 10 )
                 {
@@ -1485,7 +1500,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
                 int l_zz = (int)( frames  * 0.1f * voxelZ * j );
 
                 // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xx, l_ys, l_zz, m_pDatasetHelper );
+                SplinePoint* l_point = new SplinePoint( l_xx, l_ys, l_zz );
 
                 if( i == 0 || i == 10 || j == 0 || j == 10 )
                 {
@@ -1506,7 +1521,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
                 int l_yy = (int)( rows    * 0.1f * voxelY * j );
 
                 // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xx, l_yy, l_zs, m_pDatasetHelper );
+                SplinePoint* l_point = new SplinePoint( l_xx, l_yy, l_zs );
 
                 if (i == 0 || i == 10 || j == 0 || j == 10)
                 {
@@ -2537,13 +2552,14 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
 
 MainFrame::~MainFrame()
 {
-    Logger::getInstance()->print( wxT( "MainFrame destructor" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Executing MainFrame destructor" ), LOGLEVEL_DEBUG );
+
     m_pTimer->Stop();
     Logger::getInstance()->print( wxT( "Timer stopped" ), LOGLEVEL_DEBUG );
 
     delete m_pTimer;
     m_pTimer = NULL;
-    
-    delete m_pDatasetHelper;
-    m_pDatasetHelper = NULL;
+
+    Logger::getInstance()->print( wxT( "MainFrame destructor done"), LOGLEVEL_DEBUG );
 }
+

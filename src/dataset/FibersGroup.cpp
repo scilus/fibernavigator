@@ -11,19 +11,29 @@
 #include "../main.h"
 #include "../gui/MainFrame.h"
 
+#include <wx/tglbtn.h>
 #include <wx/tokenzr.h>
 
 #include <cmath>
 #include <cfloat>
 #include <fstream>
+using std::ofstream;
+
 #include <iostream>
 #include <list>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+using std::string;
 
-FibersGroup::FibersGroup( DatasetHelper *pDatasetHelper )
-	: DatasetInfo( pDatasetHelper ),
+#include <sstream>
+using std::stringstream;
+
+#include <vector>
+using std::vector;
+
+FibersGroup::FibersGroup()
+:   DatasetInfo(),
 	m_isIntensityToggled ( false ),
 	m_isOpacityToggled ( false ),
 	m_isMinMaxLengthToggled ( false ),
@@ -81,7 +91,7 @@ void FibersGroup::saveDMRI( wxString filename )
 
     pFn = ( char * ) malloc( filename.length() );
     strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
-    myfile.open( pFn, ios::out );
+    myfile.open( pFn, std::ios::out );
 
 	for(int i = 0; i < (int)m_fibersSets.size(); i++)
 	{
@@ -125,7 +135,7 @@ void FibersGroup::save( wxString filename )
 
     pFn = ( char * ) malloc( filename.length() );
     strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
-    myfile.open( pFn, ios::binary );
+    myfile.open( pFn, std::ios::binary );
 
 	for(int i = 0; i < (int)m_fibersSets.size(); i++)
 	{

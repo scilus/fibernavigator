@@ -53,8 +53,6 @@ public:
 
     void    setMainFrame( MainFrame *pMainFrame )           { m_pMainFrame = pMainFrame; }
     void    setTreeCtrl ( MyTreeCtrl *pTreeCtrl )           { m_pTreeView  = pTreeCtrl; }
-    // TODO: Remove this temporary getter/setter once TheScene is created directly in the constructor of the SceneManager
-    void    setTheScene ( TheScene *pTheScene )             { m_pTheScene  = pTheScene; }
 
     AnatomyHelper* getAnatomyHelper() const { return m_pAnatomyHelper; }
     TheScene *     getScene() const         { return m_pTheScene; }
@@ -115,7 +113,8 @@ public:
     float getNormalDirection() const    { return m_normalDirection; }
     void  setNormalDirection( float dir )   { m_normalDirection = dir; }
 
-    Matrix4fT & getTransform() { return m_transform; }
+    Matrix4fT getTransform() const { return m_transform; }
+    void  setTransform( Matrix4fT mat ) { m_transform = mat; }
     float getZoom() const   { return m_zoom; }
     float getMoveX() const  { return m_moveX; }
     float getMoveY() const  { return m_moveY; }

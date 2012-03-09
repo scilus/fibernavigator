@@ -9,7 +9,6 @@
 #define SHADERHELPER_H_
 
 #include "ShaderProgram.h"
-#include "../dataset/DatasetHelper.h"
 
 #include <vector>
 

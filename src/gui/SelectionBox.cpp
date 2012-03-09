@@ -22,8 +22,8 @@
 // i_size               : The size of the box.
 // i_dataHelper         : The datasetHekper associated with this box.
 ///////////////////////////////////////////////////////////////////////////
-SelectionBox::SelectionBox( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ) :
-    SelectionObject( i_center, i_size, i_datasetHelper )
+SelectionBox::SelectionBox( Vector i_center, Vector i_size )
+:   SelectionObject( i_center, i_size )
 {
     m_gfxDirty   = true;
     m_name       = wxT( "box" );
@@ -38,8 +38,8 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size, DatasetHelper* i_dat
 // i_datasetHelper          : The dataset Helper associated with this box.
 // i_anatomy                : The anatomy associated with this box.
 ///////////////////////////////////////////////////////////////////////////
-SelectionBox::SelectionBox( DatasetHelper* i_datasetHelper, Anatomy* i_anatomy ) :
-   SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ), i_datasetHelper )
+SelectionBox::SelectionBox( Anatomy* i_anatomy ) :
+   SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ) )
 {
    m_isMaster      = true;
 

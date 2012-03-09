@@ -1,23 +1,17 @@
-/*
- *  The FibersGroup class declaration.
- *
- */
-
 #ifndef FIBERSGROUP_H_
 #define FIBERSGROUP_H_
-
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
-
-#include <vector>
 
 #include "DatasetInfo.h"
 #include "Fibers.h"
 
-using namespace std;
+#include <wx/wxprec.h>
+
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
+
+#include <string>
+#include <vector>
 
 /**
  * This class represents a group container for sets of fibers.
@@ -27,7 +21,7 @@ using namespace std;
 class FibersGroup : public DatasetInfo
 {
 public:
-    FibersGroup( DatasetHelper *pDatasetHelper );
+    FibersGroup();
     // TODO copy constructors: should they be allowed?
     virtual ~FibersGroup();
     
@@ -105,7 +99,7 @@ private:
 	bool m_isNormalColoringStateChanged;
 	bool m_isLocalColoringStateChanged;
 
-	string intToString( const int number );
+	std::string intToString( const int number );
     
     // GUI members
 	wxToggleButton *m_ptoggleIntensity;

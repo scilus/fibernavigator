@@ -19,23 +19,27 @@
 #include "../misc/nifti/nifti1_io.h"
 
 #include <GL/glew.h>
+#include <wx/tglbtn.h>
 
+#include <vector>
+using std::vector;
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-Tensors::Tensors( DatasetHelper* i_datasetHelper )
-:   Glyph( i_datasetHelper )
+Tensors::Tensors()
+:   Glyph(),
+    m_isNormalized( false )
 {
-    m_isNormalized = false;
     m_scalingFactor = 5.0f;
     m_currentLOD = LOD_3;
     // Generating hemispheres
-    generateSpherePoints( m_scalingFactor/5 );
+    generateSpherePoints( m_scalingFactor / 5 );
 }
 
-Tensors::Tensors( DatasetHelper *i_datasetHelper, const wxString &filename )
-:   Glyph( i_datasetHelper )
+Tensors::Tensors( const wxString &filename )
+:   Glyph(),
+    m_isNormalized( false )
 {
     m_fullPath = filename;
 
@@ -45,11 +49,10 @@ Tensors::Tensors( DatasetHelper *i_datasetHelper, const wxString &filename )
     m_name = filename.AfterLast( '/' );
 #endif
 
-    m_isNormalized = false;
     m_scalingFactor = 5.0f;
     m_currentLOD = LOD_3;
     // Generating hemispheres
-    generateSpherePoints( m_scalingFactor/5 );
+    generateSpherePoints( m_scalingFactor / 5 );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -452,7 +455,7 @@ void Tensors::createPropertiesSizer(PropertiesWindow *parent)
 {
     Glyph::createPropertiesSizer(parent);
     m_pbtnNormalize = new wxToggleButton(parent, wxID_ANY, wxT("Normalize"), wxDefaultPosition, wxSize(140,-1));    
-    parent->Connect(m_pbtnNormalize->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED,wxCommandEventHandler(PropertiesWindow::OnNormalizeTensors));
+    parent->Connect( m_pbtnNormalize->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnNormalizeTensors ) );
     m_propertiesSizer->Add(m_pbtnNormalize,0,wxALIGN_CENTER);
 
     m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));    

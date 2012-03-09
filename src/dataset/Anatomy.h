@@ -1,22 +1,24 @@
-/*
- *  The Anatomy class declaration.
- *
- */
-
 #ifndef ANATOMY_H_
 #define ANATOMY_H_
 
 #include "DatasetInfo.h"
-#include "Surface.h"
-#include "../misc/lic/TensorField.h"
+#include "../misc/IsoSurface/Vector.h"
 #include "../misc/nifti/nifti1_io.h"
 
-#include <vector>
+#include <wx/tglbtn.h>
 #include <stack>
+#include <vector>
 
 class SelectionObject;
 class MainFrame;
+class MySlider;
 class PropertiesWindow;
+class TensorField;
+class wxButton;
+class wxRadioButton;
+class wxSlider;
+class wxStaticText;
+class wxTextCtrl;
 
 struct SubTextureBox {
     int x;
@@ -41,11 +43,11 @@ friend class PropertiesWindow;
 
 public:
     //constructor/destructor
-    Anatomy( DatasetHelper *pDatasetHelper );
-    Anatomy( DatasetHelper *pDatasetHelper, const wxString &filename );
-    Anatomy( DatasetHelper *pDatasetHelper, const Anatomy * const pAnatomy );
-    Anatomy( DatasetHelper *pDatasetHelper, std::vector<float> *pDataset, const int sample );
-    Anatomy( DatasetHelper *pDatasetHelper, const int type );
+    Anatomy();
+    Anatomy( const wxString &filename );
+    Anatomy( const Anatomy * const pAnatomy );
+    Anatomy( std::vector<float> *pDataset, const int sample );
+    Anatomy( const int type );
     virtual ~Anatomy();
    
 	void add( Anatomy* anatomy);
@@ -93,7 +95,6 @@ public:
     float getGraphSigma()               { return m_graphSigma; };
     void  setGraphSigma(float v)        { m_graphSigma = v; };
     
-    bool  m_isSegmentOn;
     void  toggleSegment()
     { 
         m_isSegmentOn = !m_isSegmentOn; 
@@ -107,6 +108,7 @@ public:
     void equalizationSliderChange();
    
 public:
+    bool  m_isSegmentOn;
     SelectionObject *m_pRoi;
 
 private:
@@ -149,7 +151,7 @@ private:
     void initializeBuffer() {};
     void smooth()           {};
 
-	stack< stack< SubTextureBox > >	m_drawHistory;
+    std::stack< std::stack< SubTextureBox > >	m_drawHistory;
 
     float                   m_floodThreshold;
     float                   m_graphSigma;
@@ -164,7 +166,6 @@ private:
     unsigned int            m_currentLowerEqThreshold;
     unsigned int            m_currentUpperEqThreshold;
     unsigned int            m_cdf[256];
-
 };
 
 #endif /* ANATOMY_H_ */

@@ -15,7 +15,6 @@
 #include <wx/notebook.h>
 #include <wx/treectrl.h>
 
-class DatasetHelper;
 class SelectionObject;
 class DatasetInfo;
 class ToolBar;
@@ -222,7 +221,6 @@ public:
     wxSlider            *m_pXSlider;
     wxSlider            *m_pYSlider;
     wxSlider            *m_pZSlider;
-    DatasetHelper       *m_pDatasetHelper;
     wxTreeItemId        m_tRootId;
     wxTreeItemId        m_tPointId;
     wxTreeItemId        m_tSelectionObjectsId;

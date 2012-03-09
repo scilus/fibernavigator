@@ -19,8 +19,8 @@
 // i_size               : The size of the ellipsoid.
 // i_dataHelper         : The datasetHelper associated with this ellipsoid.
 ///////////////////////////////////////////////////////////////////////////
-SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ) :
-    SelectionObject( i_center, i_size, i_datasetHelper )
+SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size )
+:   SelectionObject( i_center, i_size )
 {
     m_gfxDirty   = true;
     m_name       = wxT( "ellipsoid" );

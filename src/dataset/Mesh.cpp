@@ -7,19 +7,20 @@
 
 #include <wx/datstrm.h>
 #include <wx/textfile.h>
+#include <wx/tglbtn.h>
 #include <wx/wfstream.h>
 
 
-Mesh::Mesh(DatasetHelper* dh)
-:   DatasetInfo( dh )
+Mesh::Mesh()
+:   DatasetInfo()
 {
-    m_tMesh = new TriangleMesh(m_dh);
+    m_tMesh = new TriangleMesh();
 }
 
-Mesh::Mesh( DatasetHelper* dh, const wxString &filename )
-:   DatasetInfo( dh )
+Mesh::Mesh( const wxString &filename )
+:   DatasetInfo()
 {
-    m_tMesh = new TriangleMesh( m_dh );
+    m_tMesh = new TriangleMesh();
 
     m_fullPath = filename;
 

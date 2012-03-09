@@ -1,41 +1,43 @@
 #include "DatasetInfo.h"
-#include "../gui/MainFrame.h"
+
 #include "../main.h"
+#include "../gui/MainFrame.h"
 
-DatasetInfo::DatasetInfo( DatasetHelper* datasetHelper ) : 
-            m_dh              ( datasetHelper ),
-            m_length          ( 0 ),
-            m_bands           ( 0 ),
-            m_frames          ( 1 ),
-            m_rows            ( 1 ),
-            m_columns         ( 1 ),
-            m_type            ( BOT_INITIALIZED ),
-            m_repn            ( _T( "" ) ),
-            m_isLoaded        ( false ),
-            m_highest_value   ( 1.0 ),
+#include <wx/tglbtn.h>
 
-            m_name            ( _T( "" ) ),
-            m_fullPath        ( _T( "" ) ),
+DatasetInfo::DatasetInfo()
+:   m_length       ( 0 ),
+    m_bands        ( 0 ),
+    m_frames       ( 1 ),
+    m_rows         ( 1 ),
+    m_columns      ( 1 ),
+    m_type         ( BOT_INITIALIZED ),
+    m_repn         ( _T( "" ) ),
+    m_isLoaded     ( false ),
+    m_highest_value( 1.0 ),
 
-            m_threshold       ( 0.0f ),
-            m_alpha           ( 1.0f ),
-            m_brightness      ( 1.0f ),
-            m_oldMax          ( 1.0 ),
-            m_newMax          ( 1.0 ),
+    m_name         ( _T( "" ) ),
+    m_fullPath     ( _T( "" ) ),
 
-            m_color           ( wxColour( 128, 10, 10 ) ),
-            m_GLuint          ( 0 ),
+    m_threshold    ( 0.0f ),
+    m_alpha        ( 1.0f ),
+    m_brightness   ( 1.0f ),
+    m_oldMax       ( 1.0 ),
+    m_newMax       ( 1.0 ),
 
-            m_show            ( true ),
-            m_showFS          ( true ),
-            m_useTex          ( true ),
+    m_color        ( wxColour( 128, 10, 10 ) ),
+    m_GLuint       ( 0 ),
 
-            m_isGlyph         ( false ),
-            m_bufferObjects   ( 0 ),
+    m_show         ( true ),
+    m_showFS       ( true ),
+    m_useTex       ( true ),
 
-            m_voxelSizeX( 0.0f ),
-            m_voxelSizeY( 0.0f ),
-            m_voxelSizeZ( 0.0f )
+    m_isGlyph      ( false ),
+    m_bufferObjects( 0 ),
+
+    m_voxelSizeX( 0.0f ),
+    m_voxelSizeY( 0.0f ),
+    m_voxelSizeZ( 0.0f )
 {
 }
 
@@ -135,4 +137,8 @@ void DatasetInfo::updatePropertiesSizer()
     m_pToggleFiltering->SetValue(getShowFS());
     //m_ptoggleLIC->SetValue(getUseLIC());
     
+}
+
+DatasetInfo::~DatasetInfo()
+{
 }

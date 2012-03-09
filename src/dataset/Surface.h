@@ -3,40 +3,41 @@
 
 #include "DatasetInfo.h"
 
-#include <vector>
-#include "../misc/Fantom/FTensor.h"
 #include "../misc/Fantom/FBSplineSurface.h"
-#include "DatasetHelper.h"
-#include "KdTree.h"
+#include "../misc/Fantom/FTensor.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 
-class DatasetHelper;
-class MainFrame;
+#include <vector>
+
+class KdTree;
+class wxToggleButton;
+class wxBitmapButton;
+
 class Surface : public DatasetInfo
 {
 public:
-    Surface(DatasetHelper*);
+    Surface();
     virtual ~Surface();
 
     void execute();
 
-    bool load(wxString filename) {return false;};
+    bool load( wxString filename ) { return false; }
     void draw();
 
-    void clean() {};
+    void clean() {}
     void smooth();
-    void flipAxis( AxisType axe ){};
-    GLuint getCutTex() {return m_CutTex;};
+    void flipAxis( AxisType axe ){}
+    GLuint getCutTex() { return m_CutTex; }
 
     void movePoints();
     void flipNormals();
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void createPropertiesSizer( PropertiesWindow *parent );
     virtual void updatePropertiesSizer();
-    std::vector< std::vector< double > > getSplinePoints() {return m_splinePoints;};
-    void setSetSampleRate(float r) {m_sampleRateT = m_sampleRateU = r; execute();};
+    std::vector< std::vector< double > > getSplinePoints() { return m_splinePoints; }
+    void setSetSampleRate( float r ) { m_sampleRateT = m_sampleRateU = r; execute(); }
     std::vector<Vector> getSurfaceVoxelPositions();
 
-    bool save( wxString filename )const;
+    bool save( wxString filename ) const;
 
 
 private:
@@ -45,7 +46,7 @@ private:
     void generateLICGeometry();
     void initializeBuffer() {}
     void createCutTexture();
-    GLuint getGLuint() {return 0;}
+    GLuint getGLuint() { return 0; }
 
     FTensor getCovarianceMatrix(std::vector< std::vector< double > > points);
     void getSplineSurfaceDeBoorPoints(  std::vector< std::vector< double > > &givenPoints,
@@ -89,7 +90,6 @@ private:
     std::vector< std::vector<float> >m_testLines;
     bool m_positionsCalculated;
     std::vector<Vector>m_svPositions;
-
 };
 
 

@@ -1,7 +1,6 @@
 #include "DatasetManager.h"
 
 #include "Anatomy.h"
-#include "DatasetHelper.h"
 #include "Fibers.h"
 #include "Mesh.h"
 #include "ODFs.h"
@@ -10,6 +9,9 @@
 #include "../Logger.h"
 #include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
+
+#include <map>
+using std::map;
 
 #include <vector>
 using std::vector;
@@ -365,13 +367,6 @@ void DatasetManager::remove( const DatasetIndex index )
 
 //////////////////////////////////////////////////////////////////////////
 
-void DatasetManager::setDatasetHelper( DatasetHelper * dh )
-{
-    m_pDatasetHelper = dh;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
 DatasetIndex DatasetManager::insert( Anatomy * pAnatomy )
 {
     DatasetIndex index = getNextAvailableIndex();
@@ -472,7 +467,7 @@ DatasetIndex DatasetManager::insert( Tensors * pTensors )
 int DatasetManager::loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
 {
     Logger::getInstance()->print( wxT( "Loading anatomy" ), LOGLEVEL_MESSAGE );
-    Anatomy *pAnatomy = new Anatomy( m_pDatasetHelper, filename );
+    Anatomy *pAnatomy = new Anatomy( filename );
     if( pAnatomy->load( pHeader, pBody ) )
     {
         Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
@@ -496,7 +491,7 @@ int DatasetManager::loadAnatomy( const wxString &filename, nifti_image *pHeader,
 // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
 int DatasetManager::loadFibers( const wxString &filename )
 {
-    Fibers* l_fibers = new Fibers( m_pDatasetHelper );
+    Fibers* l_fibers = new Fibers();
 
     if( l_fibers->load( filename ) )
     {
@@ -533,7 +528,7 @@ int DatasetManager::loadFibers( const wxString &filename )
 // Loads a mesh. Extension supported: .mesh, .surf and .dip
 int DatasetManager::loadMesh( const wxString &filename, const wxString &extension )
 {
-    Mesh *pMesh = new Mesh( m_pDatasetHelper, filename );
+    Mesh *pMesh = new Mesh( filename );
 
     bool result;
 
@@ -573,7 +568,7 @@ int DatasetManager::loadODF( const wxString &filename, nifti_image *pHeader, nif
 {
     Logger::getInstance()->print( wxT( "Loading ODF" ), LOGLEVEL_MESSAGE );
 
-    ODFs *pOdfs = new ODFs( m_pDatasetHelper, filename );
+    ODFs *pOdfs = new ODFs( filename );
     if( pOdfs->load( pHeader, pBody ) )
     {
         Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
@@ -598,7 +593,7 @@ int DatasetManager::loadTensors( const wxString &filename, nifti_image *pHeader,
 {
     Logger::getInstance()->print( wxT( "Loading Tensors" ), LOGLEVEL_MESSAGE );
 
-    Tensors *pTensors = new Tensors( m_pDatasetHelper, filename );
+    Tensors *pTensors = new Tensors( filename );
     if( pTensors->load( pHeader, pBody ) )
     {
         Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );

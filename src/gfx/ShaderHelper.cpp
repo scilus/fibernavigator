@@ -8,10 +8,8 @@
 #include "ShaderHelper.h"
 
 #include "ShaderProgram.h"
-
 #include "../Logger.h"
 #include "../main.h"
-#include "../dataset/DatasetHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Surface.h"
 #include "../gui/MainFrame.h"

@@ -1,14 +1,13 @@
 #ifndef MAINCANVAS_H_
 #define MAINCANVAS_H_
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 #include "BoundingBox.h"
-#include "../dataset/DatasetHelper.h"
 #include "../dataset/RTTFibers.h"
 #include "../gfx/TheScene.h"
 #include "../misc/Fantom/FArray.h"
@@ -21,14 +20,13 @@
 #include <time.h>
 #include <vector>
 
-class DatasetHelper;
 class RTTFibers;
 
 class MainCanvas: public wxGLCanvas
 {
 public:
 
-    MainCanvas(DatasetHelper*, int,  wxWindow*, wxWindowID id = wxID_ANY,
+    MainCanvas(int,  wxWindow*, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = _T("GLCanvas"),
@@ -93,9 +91,6 @@ private:
      Vector      m_hitPts;
 	 bool        m_isRulerHit;
 	 bool        m_isDrawerHit;
-    
-     DatasetHelper *m_pDatasetHelper; 
-     
 
      GLdouble m_pos1X, m_pos1Y, m_pos1Z;    // point of origin for picking
      GLdouble m_pos2X, m_pos2Y, m_pos2Z;    // distant point for picking

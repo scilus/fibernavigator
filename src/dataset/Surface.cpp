@@ -12,44 +12,51 @@
 #include "../gui/SceneManager.h"
 #include "../misc/Fantom/FMatrix.h"
 
-#include <fstream>
-#include <math.h>
 #include <GL/glew.h>
+#include <wx/math.h>
+#include <wx/tglbtn.h>
 
+#include <fstream>
+#include <vector>
+using std::vector;
 
-Surface::Surface(DatasetHelper* dh) : DatasetInfo(dh)
+Surface::Surface() 
+:   DatasetInfo(),
+    m_radius( 30.0 ),
+    m_my( 8.0 ),
+    m_numDeBoorRows( 12 ),
+    m_numDeBoorCols( 12 ),
+    m_order( 4 ),
+    m_sampleRateU( 0.5 ),
+    m_sampleRateT( 0.5 ),
+    m_numPoints( 0 ),
+    m_CutTex( 0 ),
+    m_normalDirection( 1.0f ),
+    subDCount( 0 ),
+    m_positionsCalculated( false )
 {
-    m_radius = 30.0;
-    m_my = 8.0;
-    m_numDeBoorRows = 12;
-    m_numDeBoorCols = 12;
-    m_order = 4;
-
-    m_sampleRateT = m_sampleRateU = 0.5;
-
     m_type = SURFACE;
     m_threshold = 0.5;
     m_name = wxT("spline surface");
 
-    m_numPoints = 0;
     m_alpha = 0.2f;
     m_tMesh = NULL;
-    m_CutTex = 0;
-    m_normalDirection = 1.0;
-
-    subDCount = 0;
-    m_positionsCalculated = false;
 }
 
 Surface::~Surface()
 {
     MyApp::frame->m_pTreeWidget->DeleteChildren( MyApp::frame->m_tPointId );
     m_tMesh->clearMesh();
+    
     delete m_tMesh;
-    if (m_kdTree)
-        delete m_kdTree;
-    if (m_pointArray)
-        delete m_pointArray;
+    m_tMesh = NULL;
+
+    delete m_kdTree;
+    m_kdTree = NULL;
+
+    delete m_pointArray;
+    m_pointArray = NULL;
+
     if (m_GLuint)
         glDeleteLists(m_GLuint, 1);
     if (m_CutTex)
@@ -179,7 +186,7 @@ void Surface::execute()
     if (countPoints == 0) return;
     if (m_tMesh) delete m_tMesh;
     
-    m_tMesh = new TriangleMesh(m_dh);
+    m_tMesh = new TriangleMesh();
     wxTreeItemId id, childid;
     wxTreeItemIdValue cookie = 0;
     id = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
@@ -359,7 +366,7 @@ void Surface::createCutTexture()
         m_pointArray[3*i+1] = p[1];
         m_pointArray[3*i+2] = p[2];
     }
-    m_kdTree = new KdTree(numPoints, m_pointArray);
+    m_kdTree = new KdTree( numPoints, m_pointArray, false );
 
     float* cutTex;
     cutTex = new float[xDim*yDim];
@@ -703,9 +710,9 @@ void Surface::createPropertiesSizer(PropertiesWindow *parent)
     l_sizer->Add(m_pbtnMoveBoundaryLeft,0,wxALIGN_CENTER);
     l_sizer->Add(m_pbtnMoveBoundaryRight,0,wxALIGN_CENTER);
     m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleDrawPoints->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleDrawPointsMode));
-    parent->Connect(m_pbtnMoveBoundaryLeft->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMoveBoundaryPointsLeft));
-    parent->Connect(m_pbtnMoveBoundaryRight->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMoveBoundaryPointsRight));
+    parent->Connect(m_ptoggleDrawPoints->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleDrawPointsMode ) );
+    parent->Connect(m_pbtnMoveBoundaryLeft->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMoveBoundaryPointsLeft ) );
+    parent->Connect(m_pbtnMoveBoundaryRight->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMoveBoundaryPointsRight ) );
 }
 
 void Surface::updatePropertiesSizer()

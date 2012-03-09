@@ -16,43 +16,88 @@
 #include "../misc/Fantom/FMatrix.h"
 
 #include <wx/file.h>
+#include <wx/tglbtn.h>
 #include <wx/tokenzr.h>
 
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
 #include <fstream>
-#include <iostream>
+using std::ofstream;
+
 #include <limits>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+using std::string;
+
+#include <sstream>
+using std::stringstream;
+
+#include <vector>
+using std::vector;
 
 // TODO replace by const
 #define LINEAR_GRADIENT_THRESHOLD 0.085f
 #define MIN_ALPHA_VALUE 0.017f
 
-Fibers::Fibers( DatasetHelper *pDatasetHelper )
-    : DatasetInfo( pDatasetHelper ),
-      m_isSpecialFiberDisplay( false ),
-      m_isInitialized( false ),
-      m_normalsPositive( false ),
-      m_cachedThreshold( 0.0f ),
-	  m_fibersInverted( false ),
-	  m_useFakeTubes( false ),
-	  m_useTransparency( false ),
-	  m_isColorationUpdated( false ),
-	  m_fiberColorationMode( NORMAL_COLOR ),
-      m_pKdTree( NULL ),
-      m_pOctree( NULL ),
-      m_cfDrawDirty( true ),
-      m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
-      m_coronalShown(  SceneManager::getInstance()->isCoronalDisplayed() ),
-      m_sagittalShown( SceneManager::getInstance()->isSagittalDisplayed() ),
-      m_useCrossingFibers( false ),
-      m_thickness( 2.5f )
+Fibers::Fibers()
+:   DatasetInfo(),
+    m_isSpecialFiberDisplay( false ),
+    m_barycenter(),
+    m_boxMax(),
+    m_boxMin(),
+    m_colorArray(),
+    m_count( 0 ),
+    m_countLines( 0 ),
+    m_countPoints( 0 ),
+    m_isInitialized( false ),
+    m_lineArray(),
+    m_linePointers(),
+    m_pointArray(),
+    m_normalArray(),
+    m_normalsPositive( false ),
+    m_reverse(),
+    m_selected(),
+    m_filtered(),
+    m_length(),
+    m_maxLength( 0.0f ),
+    m_minLength( 0.0f ),
+    m_localizedAlpha(),
+    m_cachedThreshold( 0.0f ),
+	m_fibersInverted( false ),
+	m_useFakeTubes( false ),
+	m_useTransparency( false ),
+	m_isColorationUpdated( false ),
+	m_fiberColorationMode( NORMAL_COLOR ),
+    m_pKdTree( NULL ),
+    m_pOctree( NULL ),
+    m_cfDrawDirty( true ),
+    m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
+    m_coronalShown(  SceneManager::getInstance()->isCoronalDisplayed() ),
+    m_sagittalShown( SceneManager::getInstance()->isSagittalDisplayed() ),
+    m_useCrossingFibers( false ),
+    m_thickness( 2.5f ),
+    m_xDrawn( 0.0f ),
+    m_yDrawn( 0.0f ),
+    m_zDrawn( 0.0f ),
+    m_cfStartOfLine(),
+    m_cfPointsPerLine(),
+    m_pGeneratesFibersDensityVolume( NULL ),
+    m_pSliderFibersFilterMin( NULL ),
+    m_pSliderFibersFilterMax( NULL ),
+    m_pSliderFibersSampling( NULL ),
+    m_pSliderCrossingFibersThickness( NULL ),
+    m_pToggleLocalColoring( NULL ),
+    m_pToggleNormalColoring( NULL ),
+    m_pToggleCrossingFibers( NULL ),
+    m_pRadioNormalColoring( NULL ),
+    m_pRadioDistanceAnchoring( NULL ),
+    m_pRadioMinDistanceAnchoring( NULL ),
+    m_pRadioCurvature( NULL ),
+    m_pRadioTorsion( NULL )
 {
-    m_bufferObjects         = new GLuint[3];
+    m_bufferObjects = new GLuint[3];
 }
 
 Fibers::~Fibers()
@@ -118,7 +163,7 @@ bool Fibers::load( const wxString &filename )
     }
 
     /* OcTree points classification */
-    m_pOctree = new Octree( 2, m_pointArray, m_countPoints, m_dh );
+    m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
     return res;
 }
 
@@ -708,7 +753,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     dataFile.Read( pBuffer, nSize );
     dataFile.Close();
     
-    cout << " Read fibers:\n";
+    Logger::getInstance()->print( wxT( "Reading fibers" ), LOGLEVEL_DEBUG );
     pc = 0;
     m_countPoints = 0; // number of points
 
@@ -2140,7 +2185,7 @@ void Fibers::save( wxString filename )
 
     pFn = ( char * ) malloc( filename.length() );
     strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
-    myfile.open( pFn, ios::binary );
+    myfile.open( pFn, std::ios::binary );
 
 	getFibersInfoToSave( pointsToSave, linesToSave, colorsToSave, countLines );
 
@@ -2219,7 +2264,7 @@ void Fibers::saveDMRI( wxString filename )
 
     pFn = ( char * ) malloc( filename.length() );
     strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
-    myfile.open( pFn, ios::out );
+    myfile.open( pFn, std::ios::out );
    
 	getNbLines( nbrlines );
 
@@ -2747,7 +2792,7 @@ void Fibers::objectTest( SelectionObject *pSelectionObject )
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::generateKdTree()
 {
-    m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+    m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0] );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3514,8 +3559,8 @@ void Fibers::flipAxis( AxisType i_axe )
     float minVal = 9999999;
     for ( unsigned int j(i); j < m_pointArray.size(); j += 3 )
     {
-        minVal = min( m_pointArray[j], minVal );
-        maxVal = max( m_pointArray[j], maxVal );
+        minVal = std::min( m_pointArray[j], minVal );
+        maxVal = std::max( m_pointArray[j], maxVal );
     }
     center = ( minVal + maxVal ) / 2; 
 

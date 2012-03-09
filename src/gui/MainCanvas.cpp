@@ -21,6 +21,8 @@
 #include <algorithm>
 #include <limits>
 #include <list>
+#include <vector>
+using std::vector;
 
 typedef std::vector<float> image1D;
 typedef std::vector<image1D> image2D;
@@ -36,14 +38,14 @@ EVT_ERASE_BACKGROUND(MainCanvas::OnEraseBackground)
 EVT_CHAR(MainCanvas::OnChar)
 END_EVENT_TABLE()
 
-MainCanvas::MainCanvas(DatasetHelper* i_pDatasetHelper, int i_view, wxWindow *i_pParent, wxWindowID i_id,
+MainCanvas::MainCanvas( int i_view, wxWindow *i_pParent, wxWindowID i_id,
 #ifdef CTX
         const wxPoint& i_pos, const wxSize& i_size, long i_style, const wxString& i_name, int* i_gl_attrib, wxGLContext*i_pCtx)
 : wxGLCanvas(i_pParent, i_pCtx, i_id,
         wxDefaultPosition, wxDefaultSize, 0, i_name) // gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name ),
 #else
-const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name, int* i_gl_attrib, wxGLCanvas*shared )
-: wxGLCanvas(i_pParent, shared, i_id, i_pos, i_size, i_style|wxFULL_REPAINT_ON_RESIZE, i_name, i_gl_attrib ),
+const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name, int* i_gl_attrib, wxGLCanvas* shared )
+: wxGLCanvas( i_pParent, shared, i_id, i_pos, i_size, i_style | wxFULL_REPAINT_ON_RESIZE, i_name, i_gl_attrib ),
 #endif
     m_isDragging( false ),
     m_isrDragging( false ),
@@ -51,7 +53,7 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
 {
     m_init = false;
     m_view = i_view;
-    m_pDatasetHelper = i_pDatasetHelper;
+
     /*
      m_lastRot.M[0] = -0.67698019742965698242f; m_lastRot.M[1] =  0.48420974612236022949f; m_lastRot.M[2] = -0.55429106950759887695;
      m_lastRot.M[3] =  0.73480975627899169922f; m_lastRot.M[4] =  0.40184235572814941406f; m_lastRot.M[5] = -0.54642277956008911133f;
@@ -69,6 +71,8 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
     Matrix3fMulMatrix3f(&m_thisRot, &m_lastRot);
     Matrix4fSetRotationFromMatrix3f(&transform, &m_lastRot);
 
+    SceneManager::getInstance()->setTransform( transform );
+
     m_delta   = 0;
     m_pArcBall = new ArcBallT(640.0f, 480.0f);
 
@@ -80,7 +84,7 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
 	m_isDrawerHit = false;
     m_isSlizesLocked = false;
     m_isSceneLocked = false;
-    m_pRealTimeFibers = new RTTFibers(i_pDatasetHelper);
+    m_pRealTimeFibers = new RTTFibers();
 }
 
 MainCanvas::~MainCanvas()
@@ -177,19 +181,18 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
             {               
                 if ( !m_ismDragging)
                 {
-                    long l_item = MyApp::frame->getCurrentListItem();
+                    long item = MyApp::frame->getCurrentListItem();
                     
-                    if( l_item != -1 && !SceneManager::getInstance()->isRulerActive() )
+                    if( item != -1 && !SceneManager::getInstance()->isRulerActive() )
                     {
-                        DatasetInfo* l_type = DatasetManager::getInstance()->getDataset( l_item );;
-                        Anatomy* l_info = (Anatomy*)l_type;
+                        Anatomy* pAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( item );
 
-                        if( l_info->m_isSegmentOn && l_type->getType() < MESH ) //FloodFill Method (1click)
+                        if( NULL != pAnatomy && pAnatomy->m_isSegmentOn )
                         {
                             SceneManager::getInstance()->setSegmentActive( true );
                             m_hr = pick( evt.GetPosition(), false );
                             segment();
-                            l_info->toggleSegment();
+                            pAnatomy->toggleSegment();
                         }
                     }                    
                     else if( SceneManager::getInstance()->isRulerActive() )
@@ -277,7 +280,7 @@ void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt
                 {
                     Anatomy *pAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
 
-                    if( pAnatomy->getType() < MESH && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
+                    if( NULL != pAnatomy && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
                     {
                         SceneManager::getInstance()->setSegmentActive( true );
                         //m_pDatasetHelper->m_isSegmentActive = true;
@@ -310,10 +313,12 @@ void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt
         else if(!m_isSceneLocked)
         {                    
             Quat4fT ThisQuat;
+            Matrix4fT transform = SceneManager::getInstance()->getTransform();
             m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
             Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
             Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-            Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
+            Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+            SceneManager::getInstance()->setTransform( transform );
         }
     }
     updateView();
@@ -342,7 +347,7 @@ void MainCanvas::processLeftMouseUp( wxMouseEvent &evt, wxCommandEvent evt1 )
         if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
         {
             m_hr.picked = 20;
-            SplinePoint *point = new SplinePoint( getEventCenter(), m_pDatasetHelper );
+            SplinePoint *point = new SplinePoint( getEventCenter() );
             wxTreeItemId pId = MyApp::frame->m_pTreeWidget->AppendItem(
                 MyApp::frame->m_tPointId, wxT("point"), -1, -1, point );
             point->setTreeId( pId );
@@ -461,15 +466,12 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
 void MainCanvas::updateView()
 {
     float dots[8];
-    Vector3fT v1 =
-    {
-    { 0, 0, 1 } };
-    Vector3fT v2 =
-    {
-    { 1, 1, 1 } };
+    Vector3fT v1 = { { 0, 0, 1 } };
+    Vector3fT v2 = { { 1, 1, 1 } };
     Vector3fT view;
 
-    Vector3fMultMat4( &view, &v1, &SceneManager::getInstance()->getTransform() );
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Vector3fMultMat4( &view, &v1, &transform );
     dots[0] = Vector3fDot( &v2, &view );
 
     v2.s.Z = -1;
@@ -998,6 +1000,8 @@ void MainCanvas::setRotation()
     Matrix3fSetIdentity( &m_lastRot );
     Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot );
 
+    SceneManager::getInstance()->setTransform( transform );
+
     updateView();
     MyApp::frame->refreshAllGLWidgets();
 }
@@ -1032,10 +1036,12 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_mousePt.s.X = w / 2 - 2;
                 m_mousePt.s.Y = h / 2;
+                Matrix4fT transform = SceneManager::getInstance()->getTransform();
                 m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
                 Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                SceneManager::getInstance()->setTransform( transform );
             } 
             else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
@@ -1055,10 +1061,12 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_mousePt.s.X = w / 2 + 2;
                 m_mousePt.s.Y = h / 2;
+                Matrix4fT transform = SceneManager::getInstance()->getTransform();
                 m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
                 Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                SceneManager::getInstance()->setTransform( transform );
             }
             else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
@@ -1078,10 +1086,12 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_mousePt.s.X = w / 2;
                 m_mousePt.s.Y = h / 2 - 2;
+                Matrix4fT transform = SceneManager::getInstance()->getTransform();
                 m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
                 Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                SceneManager::getInstance()->setTransform( transform );
             }
             else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
@@ -1105,10 +1115,12 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             {
                 m_mousePt.s.X = w / 2;
                 m_mousePt.s.Y = h / 2 + 2;
+                Matrix4fT transform = SceneManager::getInstance()->getTransform();
                 m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
                 Matrix3fSetRotationFromQuat4f( &m_thisRot, &ThisQuat ); // Convert Quaternion Into Matrix3fT
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
-                Matrix4fSetRotationFromMatrix3f( &SceneManager::getInstance()->getTransform(), &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
+                SceneManager::getInstance()->setTransform( transform );
             }
             else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
@@ -1256,7 +1268,7 @@ void MainCanvas::popAnatomyHistory()
 //Kmeans Segmentation
 void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::vector<float>* src, std::vector<float>* label)
 {
-    std::cout << "KMeans" << endl;
+    Logger::getInstance()->print( wxT( "KMeans segmentation" ), LOGLEVEL_DEBUG );
     /* Segment current image with kmeans */
 
     /* Variables */
@@ -1380,7 +1392,7 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
     int rows    = DatasetManager::getInstance()->getRows();
     int frames  = DatasetManager::getInstance()->getFrames();
     
-    std::cout << "FloodFill" << endl;
+    Logger::getInstance()->print( wxT( "Floodfill" ), LOGLEVEL_DEBUG );
 
     //Intensity of the current voxel
     float value = getElement( xClick, yClick, zClick, src );

@@ -14,6 +14,7 @@
 #include "DatasetManager.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
+#include "../gui/MyListCtrl.h"
 #include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/Fantom/FMatrix.h"
@@ -22,7 +23,19 @@
 #include <wx/math.h>
 
 #include <algorithm>
+#include <complex>
+using std::complex;
+
 #include <fstream>
+#include <limits>
+using std::numeric_limits;
+
+#include <map>
+using std::map;
+using std::pair;
+
+#include <vector>
+using std::vector;
 
 // m_sh_basis
 // 0: Original Descoteaux et al RR 5768 basis 
@@ -32,8 +45,8 @@
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-ODFs::ODFs( DatasetHelper* i_datasetHelper )
-:   Glyph( i_datasetHelper ), 
+ODFs::ODFs()
+:   Glyph(),
 	m_isMaximasSet   ( false ),
     m_axisThreshold  ( 0.2f ),
 	m_order          ( 0 ),
@@ -49,8 +62,8 @@ ODFs::ODFs( DatasetHelper* i_datasetHelper )
 }
 
 
-ODFs::ODFs( DatasetHelper* i_datasetHelper, const wxString &filename )
-:   Glyph( i_datasetHelper ), 
+ODFs::ODFs( const wxString &filename )
+:   Glyph(), 
     m_isMaximasSet   ( false ),
     m_axisThreshold  ( 0.5f ),
     m_order          ( 0 ),
@@ -482,13 +495,13 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
 std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHmatrix, const FMatrix & grad, const float & max_thresh)
 {
 
-    std::vector<Vector> max_dir;
- 	const float                epsilon = 0.0f;  //for equality measurement
+    vector<Vector>       max_dir;
+ 	const float          epsilon = 0.0f;  //for equality measurement
 	float                max     = 0;
 	float                min     = numeric_limits<float>::infinity();
     vector< float >		 ODF;
     pair< float, float > l_minMax;
-	std::vector<float>   norm_hemisODF;
+	vector<float>        norm_hemisODF;
 
     computeRadiiArray( SHmatrix, coefs, ODF, l_minMax ); // Projection of spherical harmonics on the sphere
 
@@ -1300,9 +1313,9 @@ complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, fl
     return l_retval;
 }
 /*
-    Allows the users to switch between differents SH basis (ODFs)
+    Allows the users to switch between different SH basis (ODFs)
 */
-void ODFs::changeShBasis(ODFs* l_dataset, DatasetHelper* m_data, int basis)
+void ODFs::changeShBasis( ODFs* l_dataset, int basis )
 {
     // TODO: Review how to do this without using another ODF
 //     l_dataset->setShBasis( basis ); // Uses the current Spherical Harmonics basis selected

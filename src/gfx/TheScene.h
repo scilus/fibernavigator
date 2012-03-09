@@ -12,15 +12,17 @@
 #ifndef THESCENE_H_
 #define THESCENE_H_
 
-#include "wx/wxprec.h"
+#include "../gui/ArcBall.h"
+
+#include <GL/glew.h>
+#include <wx/glcanvas.h>
+#include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#include "../gui/ArcBall.h"
-#include "../dataset/DatasetHelper.h"
-#include "wx/glcanvas.h"
+
 
 //////////////////////////////////////////////////////////////////////////////////
 // COMMENT
@@ -33,13 +35,11 @@ enum
     MAIN_VIEW
 };
 
-class DatasetHelper;
-
 class TheScene
 {
 public:
     // Constructor/Destructor
-    TheScene( DatasetHelper* );
+    TheScene();
     ~TheScene();
 
     // Functions
@@ -89,7 +89,6 @@ private:
     void renderTensors          ();
 
     // Variables
-    DatasetHelper*  m_pDatasetHelper;
     wxGLContext*    m_pMainGLContext;
     float           m_modelview[16];  // Variable for the frustum calculation.
     float           m_projection[16]; // Variable for the frustum calculation.

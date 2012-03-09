@@ -1,14 +1,14 @@
 #ifndef KDTREE_H_
 #define KDTREE_H_
 
-#include "wx/wxprec.h"
-#include "DatasetHelper.h"
+#include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 #include <algorithm>
+#include <vector>
 
 struct lessy
 {
@@ -23,30 +23,27 @@ struct lessy
   }
 };
 
-class KdTreeThread : public wxThread {
-
+class KdTreeThread : public wxThread
+{
 public:
-    KdTreeThread(float*, std::vector<wxUint32>*, int, int, int, DatasetHelper* );
+    KdTreeThread(float*, std::vector<wxUint32>*, int, int, int );
 
     void buildTree(int, int, int);
     virtual void *Entry();
 
     std::vector<wxUint32>* m_tree;
     float *m_pointArray;
-    DatasetHelper* m_dh;
     int m_left;
     int m_right;
     int m_axis;
 };
 
-class KdTree {
+class KdTree
+{
 public:
-    KdTree(int, float*, DatasetHelper*);
-    KdTree(int, float*);
-    ~KdTree();
+    KdTree( int, float*, bool useThreads = true );
 
-    std::vector<wxUint32>m_tree;
-    DatasetHelper* m_dh;
+    std::vector<wxUint32> m_tree;
 
 private:
     void buildTree(int, int, int);

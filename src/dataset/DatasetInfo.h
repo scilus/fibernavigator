@@ -1,21 +1,16 @@
 #ifndef DATASETINFO_H_
 #define DATASETINFO_H_
 
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
-
-#include <wx/treectrl.h>
-#include <wx/tglbtn.h>
-#include "DatasetHelper.h"
-
-#include "../misc/IsoSurface/TriangleMesh.h"
 #include "../misc/Algorithms/Helper.h"
 #include "../gui/SceneObject.h"
-#include "../gui/MyListCtrl.h"
+
 #include <GL/glew.h>
+#include <wx/colour.h>
+#include <wx/wxprec.h>
+
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
 
 union converterByteINT16 
 {
@@ -35,15 +30,20 @@ union converterByteFloat
     float f;
 };
 
-class DatasetHelper;
+class MySlider;
+class PropertiesWindow;
 class TriangleMesh;
-class MainFrame;
+class wxBitmapButton;
+class wxButton;
+class wxStaticText;
+class wxTextCtrl;
+class wxToggleButton;
 
 class DatasetInfo : public SceneObject
 {
 public:
-    DatasetInfo( DatasetHelper* datasetHelper );
-    virtual ~DatasetInfo(){};
+    DatasetInfo();
+    virtual ~DatasetInfo();
 
     // Pure Virtual functions
     virtual void   draw()                       = 0;
@@ -129,8 +129,6 @@ protected:
     virtual void generateGeometry() = 0;
     virtual void initializeBuffer() = 0;
 
-    DatasetHelper* m_dh;
-
     int         m_length;
     int         m_bands;
     int         m_frames;
@@ -159,9 +157,9 @@ protected:
     bool        m_isGlyph;
     GLuint*     m_bufferObjects;
 
-    float m_voxelSizeX;
-    float m_voxelSizeY;
-    float m_voxelSizeZ;
+    float       m_voxelSizeX;
+    float       m_voxelSizeY;
+    float       m_voxelSizeZ;
 };
 
 #endif /*DATASETINFO_H_*/

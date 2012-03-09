@@ -1,24 +1,21 @@
 #ifndef POINT_H_
 #define POINT_H_
 
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
-
-#include <GL/glew.h>
 #include "../gui/BoundingBox.h"
 #include "../gui/SceneObject.h"
-#include "DatasetHelper.h"
 
-class DatasetHelper;
+#include <GL/glew.h>
+#include <wx/wxprec.h>
+
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
 
 class SplinePoint : public wxTreeItemData, public SceneObject
 {
 public:
-    SplinePoint( Vector, DatasetHelper* );
-    SplinePoint( double, double, double, DatasetHelper* );
+    SplinePoint( Vector );
+    SplinePoint( double, double, double );
     ~SplinePoint();
 
     void setCenter( Vector c ) { m_center = c; };
@@ -68,7 +65,7 @@ public:
 private:
     void drawSphere( float, float, float, float );
 
-    DatasetHelper*  m_dh;
+private:
     Vector          m_center;
     Vector          m_origin;
     Vector          m_offsetVector;

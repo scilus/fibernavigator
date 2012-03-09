@@ -2,13 +2,12 @@
 #define MESH_H_
 
 #include "DatasetInfo.h"
-#include "DatasetHelper.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 enum MeshFileType {
@@ -37,8 +36,8 @@ class Mesh : public DatasetInfo
 {
 
 public:
-    Mesh( DatasetHelper *datasetHelper );
-    Mesh( DatasetHelper *datasetHelper, const wxString &filename );
+    Mesh( );
+    Mesh( const wxString &filename );
     virtual ~Mesh();
 
     bool loadMesh( wxString filename );

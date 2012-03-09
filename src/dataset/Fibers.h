@@ -1,26 +1,23 @@
-/*
- *  The Fibers class declaration.
- *
- */
-
 #ifndef FIBERS_H_
 #define FIBERS_H_
 
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
-
-#include <vector>
-
 #include "DatasetInfo.h"
-#include <GL/glew.h>
 #include "KdTree.h"
+#include "Octree.h"
 #include "SplinePoint.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/Fantom/FVector.h"
-#include "Octree.h"
+
+#include <GL/glew.h>
+#include <wx/wxprec.h>
+
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
+
+#include <fstream>
+#include <string>
+#include <vector>
 
 enum FiberFileType
 {
@@ -28,8 +25,6 @@ enum FiberFileType
     ASCII_VTK   = 1,
     BINARY_VTK  = 2,
 };
-
-using namespace std;
 
 /**
  * This class represents a set of fibers.
@@ -40,7 +35,7 @@ using namespace std;
 class Fibers : public DatasetInfo
 {
 public:
-    Fibers( DatasetHelper *pDatasetHelper );
+    Fibers();
     // TODO copy constructors: should they be allowed?
     virtual ~Fibers();
 
@@ -51,9 +46,9 @@ public:
     
     Anatomy* generateFiberVolume();
     
-	void	getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines );
-	void	getNbLines( int& nbLines );
-	void	loadDMRIFibersInFile( ofstream& myfile );
+	void	getFibersInfoToSave( std::vector<float> &pointsToSave, std::vector<int> &linesToSave, std::vector<int> &colorsToSave, int &countLines );
+	void	getNbLines( int &nbLines );
+	void	loadDMRIFibersInFile( std::ofstream &myfile );
 
     void    save( wxString filename );
     void    saveDMRI( wxString filename );
@@ -86,7 +81,7 @@ public:
     
     void    updateFibersFilters();
 	void	updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
-    vector< bool >  getFilteredFibers();
+    std::vector< bool >  getFilteredFibers();
 
     void    flipAxis( AxisType i_axe );
     
@@ -110,7 +105,7 @@ public:
     GLuint  getGLuint( )
     {
         return 0;
-    };
+    }
     
     float   getMaxFibersLength()
     {
@@ -179,13 +174,13 @@ private:
     void            colorWithMinDistance( float *pColorData );
     
     void            toggleEndianess();
-	string			intToString( const int number );
+	std::string		intToString( const int number );
     
     void            calculateLinePointers();
     void            createColorArray( const bool colorsLoadedFromFile );
     
     void            resetLinesShown();
-    vector< bool >  getLinesShown( SelectionObject *pSelectionObject );
+    std::vector< bool >  getLinesShown( SelectionObject *pSelectionObject );
     void            objectTest(    SelectionObject *pSelectionObject );
     
     void            barycenterTest( int left, int right, int axis );
@@ -196,33 +191,34 @@ private:
 
     void            freeArrays();
 
-    bool            getFiberCoordValues( int fiberIndex, vector< Vector > &fiberPoints );
+    bool            getFiberCoordValues( int fiberIndex, std::vector< Vector > &fiberPoints );
     
     void            setShader();
     void            releaseShader();
 
+private:
     // Variables
     bool				 m_isSpecialFiberDisplay;
     Vector				 m_barycenter;
-    vector< float >		 m_boxMax;
-    vector< float >		 m_boxMin;
-    vector< float >		 m_colorArray;
+    std::vector< float > m_boxMax;
+    std::vector< float > m_boxMin;
+    std::vector< float > m_colorArray;
     int					 m_count;
     int					 m_countLines;
     int					 m_countPoints;
     bool				 m_isInitialized;
-    vector< int >		 m_lineArray;
-    vector< int >		 m_linePointers;
-    vector< float >		 m_pointArray;
-    vector< float >		 m_normalArray;
-    bool				 m_normalsPositive;
-    vector< int >		 m_reverse;
-    vector< bool >		 m_selected;
-    vector< bool >		 m_filtered;
-    vector< float >		 m_length;
+    std::vector< int >	 m_lineArray;
+    std::vector< int >	 m_linePointers;
+    std::vector< float > m_pointArray;
+    std::vector< float > m_normalArray;
+    bool                 m_normalsPositive;
+    std::vector< int >	 m_reverse;
+    std::vector< bool >	 m_selected;
+    std::vector< bool >	 m_filtered;
+    std::vector< float > m_length;
     float				 m_maxLength;
     float				 m_minLength;
-    vector<float  >		 m_localizedAlpha;
+    std::vector< float  > m_localizedAlpha;
     float				 m_cachedThreshold;
 	bool				 m_fibersInverted;
     bool				 m_useFakeTubes;
@@ -243,8 +239,8 @@ private:
     float           m_xDrawn;
     float           m_yDrawn;
     float           m_zDrawn;
-    vector<unsigned int> m_cfStartOfLine;
-    vector<unsigned int> m_cfPointsPerLine;
+    std::vector<unsigned int> m_cfStartOfLine;
+    std::vector<unsigned int> m_cfPointsPerLine;
 
 
     // GUI members

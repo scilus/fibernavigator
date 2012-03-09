@@ -17,6 +17,9 @@
 #include "../dataset/Fibers.h"
 #include "../dataset/FibersGroup.h"
 
+#include <vector>
+using std::vector;
+
 MenuBar::MenuBar()
 {
     m_menuFile = new wxMenu();

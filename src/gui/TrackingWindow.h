@@ -15,13 +15,10 @@
 
 #include "../misc/Algorithms/Helper.h"
 
-#include <wx/checkbox.h>
-#include <wx/grid.h>
 #include <wx/scrolwin.h>
-#include <wx/treectrl.h>
-#include <wx/notebook.h>
 
 class MainFrame;
+class wxToggleButton;
 
 class TrackingWindow: public wxScrolledWindow
 {

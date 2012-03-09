@@ -6,20 +6,17 @@
 #ifndef RTT_FIBERS_H_
 #define RTT_FIBERS_H_
 
-//#include "DatasetHelper.h"
-#include "../misc/Fantom/FMatrix.h"
 #include "../misc/Fantom/FArray.h"
+#include "../misc/Fantom/FMatrix.h"
 #include "../misc/IsoSurface/Vector.h"
 
 #include <GL/glew.h>
 #include <vector>
 
-class DatasetHelper;
-
 class RTTFibers 
 {
 public:
-    RTTFibers( DatasetHelper* pDatasetHelper ); //Constructor
+    RTTFibers(); //Constructor
     ~RTTFibers(); //Destructor
 
     //RTT functions
@@ -98,8 +95,6 @@ public:
     float* xValues;
 
 private:
-    DatasetHelper* m_pDatasetHelper;
-
     float       m_FAThreshold;
     float       m_angleThreshold;
     float       m_step;

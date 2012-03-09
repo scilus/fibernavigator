@@ -510,7 +510,7 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
         if ( ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getType() < RGB)
         {
             l_anatomy = (Anatomy*)m_pMainFrame->m_pCurrentSceneObject;
-            l_selectionObject = new SelectionBox( m_pMainFrame->m_pDatasetHelper, l_anatomy );
+            l_selectionObject = new SelectionBox( l_anatomy );
             float trs = l_anatomy->getThreshold();
             if( trs == 0.0 )
             {
@@ -594,14 +594,6 @@ void PropertiesWindow::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
     float l_sliderValue = ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderFlood->GetValue() / 200.0f;
     ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->setFloodThreshold(l_sliderValue);
     ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtThresBox->SetValue(wxString::Format( wxT( "%.2f"), l_sliderValue));
-}
-
-void PropertiesWindow::OnSliderGraphSigmaMoved( wxCommandEvent& WXUNUSED(event) )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSliderGraphSigmaMoved" ), LOGLEVEL_DEBUG );
-
-    ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->setGraphSigma(((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderGraphSigma->GetValue());
-    std::cout << (((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderGraphSigma->GetValue()) << endl;
 }
 
 void PropertiesWindow::OnKmeans( wxCommandEvent& WXUNUSED(event) )

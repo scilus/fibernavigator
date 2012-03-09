@@ -9,11 +9,9 @@
 #define ANATOMYHELPER_H_
 
 #include "../gfx/ShaderProgram.h"
-#include "DatasetHelper.h"
 
-class DatasetHelper;
-
-class AnatomyHelper {
+class AnatomyHelper
+{
 public:
     //constructor/destructor
     AnatomyHelper();

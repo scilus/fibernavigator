@@ -5,9 +5,8 @@
 #include "../gui/SceneHelper.h"
 #include "../gui/SelectionObject.h"
 
-SplinePoint::SplinePoint( Vector center, DatasetHelper* dh )
-:   m_dh( dh),
-    m_center( center ),
+SplinePoint::SplinePoint( Vector center )
+:   m_center( center ),
     m_origin( center ),
     m_offsetVector( Vector( 0.0, 0.0, 0.0 ) ),
     m_selected( false ),
@@ -18,15 +17,14 @@ SplinePoint::SplinePoint( Vector center, DatasetHelper* dh )
     DatasetManager::getInstance()->setSurfaceDirty( true );
 }
 
-SplinePoint::SplinePoint( double x, double y, double z, DatasetHelper* dh )
-:   m_dh( dh ),
-    m_center( Vector( x, y, z ) ),
+SplinePoint::SplinePoint( double x, double y, double z )
+:   m_center( Vector( x, y, z ) ),
     m_origin( Vector( x, y, z ) ),
     m_offsetVector( Vector( 0.0, 0.0, 0.0 ) ),
     m_selected( false ),
     m_isBoundary( false ),
     m_treeId( (long int)0 ),
-    m_name(wxT(""))
+    m_name( wxT( "" ) )
 {
     DatasetManager::getInstance()->setSurfaceDirty( true );
 }

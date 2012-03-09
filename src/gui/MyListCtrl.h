@@ -12,7 +12,8 @@
 
 class MainFrame;
 
-class MyTreeCtrl: public wxTreeCtrl {
+class MyTreeCtrl: public wxTreeCtrl 
+{
 public:
     MyTreeCtrl(MainFrame *parent, const wxWindowID id, const wxPoint& pos,
             const wxSize& size, long style);
@@ -28,7 +29,8 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-class MySlider: public wxSlider {
+class MySlider: public wxSlider 
+{
 public:
     MySlider( wxWindow *parent, const wxWindowID id, int value , int minValue, int maxValue, const wxPoint& pos, const wxSize& size, long style ) :
         wxSlider (parent, id, value, minValue, maxValue, pos, size, style)

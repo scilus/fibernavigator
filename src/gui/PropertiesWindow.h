@@ -71,7 +71,6 @@ public:
     void OnFloodFill                        ( wxCommandEvent& event );
     void OnSliderFloodMoved                 ( wxCommandEvent& event );
     void OnSelectBck                        ( wxCommandEvent& event );
-    void OnSliderGraphSigmaMoved            ( wxCommandEvent& event );
     void OnKmeans                           ( wxCommandEvent& event );
     void OnbtnGraphCut                      ( wxCommandEvent& event );
     void OnSelectObj                        ( wxCommandEvent& event );

@@ -13,23 +13,32 @@
 
 #include "SceneHelper.h"
 #include "SceneManager.h"
+#include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
-#include "../misc/Algorithms/BSpline.h"
-#include "../misc/Algorithms/ConvexHullIncremental.h"
-#include "../misc/Algorithms/ConvexGrahamHull.h"
-#include "../misc/IsoSurface/CIsoSurface.h"
-#include "../main.h"
 #include "../gui/MainFrame.h"
+#include "../misc/Algorithms/BSpline.h"
+#include "../misc/Algorithms/ConvexGrahamHull.h"
+#include "../misc/Algorithms/ConvexHullIncremental.h"
+#include "../misc/IsoSurface/CIsoSurface.h"
+
 #include <wx/textctrl.h>
+#include <wx/tglbtn.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <list>
+using std::list;
 
+#include <limits>
+using std::numeric_limits;
 
-SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ):
-    m_pLabelAnatomy   ( NULL ),
+#include <vector>
+using std::vector;
+
+SelectionObject::SelectionObject( Vector i_center, Vector i_size )
+:   m_pLabelAnatomy   ( NULL ),
     m_pCBSelectDataSet( NULL ),
     m_displayCrossSections ( CS_NOTHING   ),
     m_displayDispersionCone( DC_NOTHING   )
@@ -40,7 +49,6 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_center                = i_center;
     m_color                 = l_color;
     m_colorChanged          = false;
-    m_datasetHelper         = i_datasetHelper;
     m_fiberColor            = l_color;
     m_gfxDirty              = false;
     m_handleRadius          = 3.0f;

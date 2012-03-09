@@ -14,20 +14,18 @@
 #include "DatasetInfo.h"
 #include "../misc/Algorithms/Helper.h"
 
-using namespace std;
-
-#define TEXTURE_NB_OF_COLOR  64        // Must be a power of 2.
+#define TEXTURE_NB_OF_COLOR  64     // Must be a power of 2.
 #define HUE_MINIMUM_DISTANCE 0.01f  // The minimum distance between the min and max hue for the glyph color.
 
 enum DisplayShape { NORMAL, SPHERE, AXES, AXIS };
 
 class MainFrame;
+
 class Glyph : public DatasetInfo
 {
 public:
     // Constructor/Destructor
-    Glyph( DatasetHelper* datasetHelper, 
-           float i_minHue       = 0.65 , 
+    Glyph( float i_minHue       = 0.65 , 
            float i_maxHue       = 0.0f, 
            float i_saturation   = 0.75f, 
            float i_luminance    = 0.5f  );
@@ -104,7 +102,7 @@ protected:
     virtual void    generateTexture()  {};
 
     // Pure virtual functions
-    virtual bool    createStructure   ( vector< float >& i_fileFloatData ) = 0;
+    virtual bool    createStructure   ( std::vector< float >& i_fileFloatData ) = 0;
     virtual void    drawGlyph         ( int      i_zVoxel, 
                                         int      i_yVoxel, 
                                         int      i_xVoxel, 
@@ -152,9 +150,9 @@ protected:
     bool  m_flippedAxes[3];        // Are axes flipped or not, true if flipped, false otherwise [x, y, z].
     float m_lightPosition[3];      // Light's position [x, y, z]
 
-    vector< float >            m_floatColorDataset;
-    vector< float >            m_axesPoints;           //the 6 points describing the 3 axes
-    vector< vector < float > > m_LODspheres;           // Stores the hemispheres for all LODs.
+    std::vector< float >            m_floatColorDataset;
+    std::vector< float >            m_axesPoints;           //the 6 points describing the 3 axes
+    std::vector< std::vector < float > > m_LODspheres;      // Stores the hemispheres for all LODs.
     
 };
 

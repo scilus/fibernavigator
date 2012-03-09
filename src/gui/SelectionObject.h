@@ -15,7 +15,6 @@
 #include "BoundingBox.h"
 #include "SceneObject.h"
 
-#include "../dataset/DatasetHelper.h"
 #include "../misc/Algorithms/Face3D.h"
 #include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/Vector.h"
@@ -36,12 +35,8 @@
 
 class Anatomy;
 class CIsoSurface;
-class DatasetHelper;
 class MainCanvas;
 class PropertiesWindow;
-
-
-using namespace std;
 
 /****************************************************************************/
 // Description : This is the base class for any Selection Object.
@@ -82,7 +77,7 @@ struct FibersInfoGridParams
 class SelectionObject : public SceneObject, public wxTreeItemData
 {
 public :
-    SelectionObject ( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper );
+    SelectionObject ( Vector i_center, Vector i_size );
     virtual ~SelectionObject();
 
     virtual hitResult hitTest( Ray* i_ray ) = 0;
@@ -186,12 +181,11 @@ public :
     void        FlipNormals();
 
     // Variables
-    DatasetHelper* m_datasetHelper;
-    vector< bool > m_inBox;
-    vector< bool > m_inBranch;
-    Anatomy*       m_sourceAnatomy;
-    bool           m_boxMoved;
-    bool           m_boxResized;
+    std::vector< bool > m_inBox;
+    std::vector< bool > m_inBranch;
+    Anatomy *           m_sourceAnatomy;
+    bool                m_boxMoved;
+    bool                m_boxResized;
 
 
 protected :
@@ -236,7 +230,7 @@ protected :
     
     //Mean fiber coloring variables
     wxColour m_meanFiberColor; //Custom color chose by the user
-    vector< Vector > m_meanFiberColorVector; //Vector of colour compute by the program
+    std::vector< Vector > m_meanFiberColorVector; //Vector of colour compute by the program
     float m_meanFiberOpacity; //Between 0 and 1
     FibersColorationMode m_meanFiberColorationMode;
 
@@ -279,73 +273,73 @@ protected:
     void   drawCrossSectionsPolygons         ();
     void   drawDispersionCone                ();
     void   drawFibersInfo                    ();
-    void   setNormalColorArray               (const vector< Vector > &i_fiberPoints);
+    void   setNormalColorArray               ( const std::vector< Vector > &i_fiberPoints);
     void   setShowMeanFiberOption            ( bool i_val );
-    void   drawPolygon                       ( const vector< Vector >           &i_crossSectionPoints      );
-    void   drawSimpleCircles                 ( const vector< vector< Vector > > &i_allCirclesPoints        );
-    void   drawThickFiber                    ( const vector< Vector >           &i_fiberPoints,
-                                                     float                      i_thickness, 
-                                                     int                        i_nmTubeEdge               );
+    void   drawPolygon                       ( const std::vector< Vector >           &i_crossSectionPoints      );
+    void   drawSimpleCircles                 ( const std::vector< std::vector< Vector > > &i_allCirclesPoints        );
+    void   drawThickFiber                    ( const std::vector< Vector >           &i_fiberPoints,
+                                                     float                           i_thickness, 
+                                                     int                             i_nmTubeEdge               );
     void   drawConvexHull                    ();
     void   setShowConvexHullOption           (bool i_val);
-    void   drawTube                          ( const vector< vector< Vector > > &i_allCirclesPoints,
-                                                      GLenum                      i_tubeType               );
-    void   getCrossSectionAreaColor          (       unsigned int                i_index                   );
-    void   getDispersionCircle               ( const vector< Vector >           &i_crossSectionPoints, 
-                                               const Vector                     &i_crossSectionNormal, 
-                                                     vector< Vector >           &o_circlePoints            );
-    bool   getFiberCoordValues               (       int                         fiberIndex, 
-                                                     vector< Vector >           &o_fiberPoints             );
-    bool   getFiberLength                    ( const vector< Vector >           &i_fiberPoints,
-                                                     float                      &o_length                  );
-    bool   getFiberMeanCurvatureAndTorsion   ( const vector< Vector >           &i_fibersPoints, 
-                                                     float                      &o_curvature,
-                                                     float                      &o_torsion                 );
-    bool   getFiberPlaneIntersectionPoint    ( const vector< Vector >           &i_fiberPoints, 
-                                               const Vector                     &i_pointOnPlane,
-                                               const Vector                     &i_planeNormal,
-                                                     vector< Vector >           &o_intersectionPoints      );
-    bool   getFibersCount                    (       int                        &o_count                   );
-    bool   getFiberDispersion                (       float                      &o_dispersion              );
-    bool   getFibersMeanCurvatureAndTorsion  ( const vector< vector< Vector > > &i_fibersPoints, 
-                                                     float                      &o_meanCurvature, 
-                                                     float                      &o_meanTorsion             );  
-    float  getMaxDistanceBetweenPoints       ( const vector< Vector >           &i_points, 
-                                                     int*                        o_firstPointIndex = NULL, 
-                                                     int*                        o_secondPointIndex = NULL );
-    bool   getMeanFiber                      ( const vector< vector< Vector > > &i_fibersPoints,
-                                                     unsigned int                i_nbPoints,
-                                                     vector< Vector >           &o_meanFiber               );
-    bool   getMeanFiberValue                 ( const vector< vector< Vector > > &fibersPoints, 
-                                                     float                      &computedMeanValue               );
+    void   drawTube                          ( const std::vector< std::vector< Vector > > &i_allCirclesPoints,
+                                                     GLenum                          i_tubeType               );
+    void   getCrossSectionAreaColor          (       unsigned int                    i_index                   );
+    void   getDispersionCircle               ( const std::vector< Vector >           &i_crossSectionPoints, 
+                                               const Vector                          &i_crossSectionNormal, 
+                                                     std::vector< Vector >           &o_circlePoints            );
+    bool   getFiberCoordValues               (       int                             fiberIndex, 
+                                                     std::vector< Vector >           &o_fiberPoints             );
+    bool   getFiberLength                    ( const std::vector< Vector >           &i_fiberPoints,
+                                                     float                           &o_length                  );
+    bool   getFiberMeanCurvatureAndTorsion   ( const std::vector< Vector >           &i_fibersPoints, 
+                                                     float                           &o_curvature,
+                                                     float                           &o_torsion                 );
+    bool   getFiberPlaneIntersectionPoint    ( const std::vector< Vector >           &i_fiberPoints, 
+                                               const Vector                          &i_pointOnPlane,
+                                               const Vector                          &i_planeNormal,
+                                                     std::vector< Vector >           &o_intersectionPoints      );
+    bool   getFibersCount                    (       int                             &o_count                   );
+    bool   getFiberDispersion                (       float                           &o_dispersion              );
+    bool   getFibersMeanCurvatureAndTorsion  ( const std::vector< std::vector< Vector > > &i_fibersPoints, 
+                                                     float                           &o_meanCurvature, 
+                                                     float                           &o_meanTorsion             );  
+    float  getMaxDistanceBetweenPoints       ( const std::vector< Vector >           &i_points, 
+                                                     int*                            o_firstPointIndex = NULL, 
+                                                     int*                            o_secondPointIndex = NULL );
+    bool   getMeanFiber                      ( const std::vector< std::vector< Vector > > &i_fibersPoints,
+                                                     unsigned int                    i_nbPoints,
+                                                     std::vector< Vector >           &o_meanFiber               );
+    bool   getMeanFiberValue                 ( const std::vector< std::vector< Vector > > &fibersPoints, 
+                                                     float                           &computedMeanValue         );
     
-    bool   getMeanMaxMinFiberCrossSection    ( const vector< vector< Vector > > &i_fibersPoints,
-                                               const vector< Vector >           &i_meanFiberPoints,
-                                                     float                      &o_meanCrossSection,
-                                                     float                      &o_maxCrossSection,
-                                                     float                      &o_minCrossSection         );
-    bool   getMeanMaxMinFiberLength          ( const vector< vector< Vector > > &i_fibersPoints,
-                                                     float                      &o_meanLength,
-                                                     float                      &o_maxLength,
-                                                     float                      &o_minLength               );
-    void   getProgressionCurvatureAndTorsion ( const Vector                     &i_point0, 
-                                               const Vector                     &i_point1, 
-                                               const Vector                     &i_point2, 
-                                               const Vector                     &i_point3, 
-                                               const Vector                     &i_point4,
-                                                     double                      i_progression,
-                                                     double                     &o_curvature,
-                                                     double                     &o_torsion                 );
+    bool   getMeanMaxMinFiberCrossSection    ( const std::vector< std::vector< Vector > > &i_fibersPoints,
+                                               const std::vector< Vector >           &i_meanFiberPoints,
+                                                     float                           &o_meanCrossSection,
+                                                     float                           &o_maxCrossSection,
+                                                     float                           &o_minCrossSection         );
+    bool   getMeanMaxMinFiberLength          ( const std::vector< std::vector< Vector > > &i_fibersPoints,
+                                                     float                           &o_meanLength,
+                                                     float                           &o_maxLength,
+                                                     float                           &o_minLength               );
+    void   getProgressionCurvatureAndTorsion ( const Vector                          &i_point0, 
+                                               const Vector                          &i_point1, 
+                                               const Vector                          &i_point2, 
+                                               const Vector                          &i_point3, 
+                                               const Vector                          &i_point4,
+                                                     double                          i_progression,
+                                                     double                          &o_curvature,
+                                                     double                          &o_torsion                 );
 
     bool   getShowFibers                      ();
 
-    vector< vector< Vector > >   getSelectedFibersPoints ();
+    std::vector< std::vector< Vector > >   getSelectedFibersPoints ();
     
-    vector< float >             m_crossSectionsAreas;   // All the cross sections areas value.
-    vector< Vector >            m_crossSectionsNormals; // All the cross sections normals value.
-    vector< vector < Vector > > m_crossSectionsPoints;  // All the cross sections hull points in 3D.
+    std::vector< float >        m_crossSectionsAreas;   // All the cross sections areas value.
+    std::vector< Vector >       m_crossSectionsNormals; // All the cross sections normals value.
+    std::vector< std::vector < Vector > > m_crossSectionsPoints;  // All the cross sections hull points in 3D.
     unsigned int                m_maxCrossSectionIndex; // Index of the max cross section of m_crossSectionsPoints.
-    vector< Vector >            m_meanFiberPoints;      // The points representing the mean fiber.
+    std::vector< Vector >       m_meanFiberPoints;      // The points representing the mean fiber.
     unsigned int                m_minCrossSectionIndex; // Index of the min cross section of m_crossSectionsPoints.
     /******************************************************************************************
     * END of the functions/variables related to the fiber info calculation.
@@ -381,6 +375,7 @@ private:
     wxButton        *m_pbtnSelectColorFibers;
     wxStaticText    *m_pLabelAnatomy;
     wxChoice        *m_pCBSelectDataSet;
+
 public:
     wxTextCtrl      *m_ctrlBoxX;
     wxTextCtrl      *m_ctrlBoxY;
@@ -389,11 +384,11 @@ public:
     wxTextCtrl      *m_ctrlBoxSizeY;
     wxTextCtrl      *m_ctrlBoxSizeZ;
     
-
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.
     static const int    MEAN_FIBER_NB_POINTS=50;         // This value represent the number of points we want the mean fiber to have.
     static const int    THICK_FIBER_NB_TUBE_EDGE=10;     // This value represent the number of edge the tube of the thick fiber will have.
     static const int    THICK_FIBER_THICKNESS=33;        // This value represent the size of the tube the thick fiber will have (*1/100).
+
 public:
     CrossSectionsDisplay   m_displayCrossSections;
     DispersionConeDisplay  m_displayDispersionCone;   

@@ -5,7 +5,6 @@
 
 #include "RTTFibers.h"
 
-#include "DatasetHelper.h"
 #include "DatasetManager.h"
 #include "RTTrackingHelper.h"
 #include "../Logger.h"
@@ -14,13 +13,15 @@
 #include "../misc/lic/FgeOffscreen.h"
 
 #include <algorithm>
+using std::sort;
+#include <vector>
+using std::vector;
 
 //////////////////////////////////////////
 //Constructor
 //////////////////////////////////////////
-RTTFibers::RTTFibers( DatasetHelper* pDatasetHelper ) 
-:   m_pDatasetHelper( pDatasetHelper ),
-    m_FAThreshold( 0.10f ),
+RTTFibers::RTTFibers()
+:   m_FAThreshold( 0.10f ),
     m_angleThreshold( 60.0f ),
     m_step( 1.0f ),
     m_puncture( 0.2f ),

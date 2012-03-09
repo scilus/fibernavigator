@@ -14,7 +14,6 @@
 #include <map>
 #include <vector>
 
-class DatasetHelper;
 class DatasetInfo;
 class Fibers;
 class Mesh;
@@ -69,22 +68,16 @@ public:
     int load( const wxString &filename, const wxString &extension );
 
     // return index of the created dataset
-    DatasetIndex createAnatomy()                                                 { return insert( new Anatomy( m_pDatasetHelper ) ); }
-    DatasetIndex createAnatomy( DatasetType type )                               { return insert( new Anatomy( m_pDatasetHelper, type ) ); }
-    DatasetIndex createAnatomy( const Anatomy * const pAnatomy )                 { return insert( new Anatomy( m_pDatasetHelper, pAnatomy ) ); }
-    DatasetIndex createAnatomy( vector<float> *pDataset, DatasetType type )      { return insert( new Anatomy( m_pDatasetHelper, pDataset, type ) ); }
-    DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( m_pDatasetHelper, pAnatomy ) ); }
-    DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup( m_pDatasetHelper ) ); }
-    DatasetIndex createODFs()                                                    { return insert( new ODFs( m_pDatasetHelper ) ); }
-    DatasetIndex createSurface()                                                 { return insert( new Surface( m_pDatasetHelper ) ); }
+    DatasetIndex createAnatomy()                                                 { return insert( new Anatomy() ); }
+    DatasetIndex createAnatomy( DatasetType type )                               { return insert( new Anatomy( type ) ); }
+    DatasetIndex createAnatomy( const Anatomy * const pAnatomy )                 { return insert( new Anatomy( pAnatomy ) ); }
+    DatasetIndex createAnatomy( std::vector<float> *pDataset, DatasetType type ) { return insert( new Anatomy( pDataset, type ) ); }
+    DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( pAnatomy ) ); }
+    DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup() ); }
+    DatasetIndex createODFs()                                                    { return insert( new ODFs() ); }
+    DatasetIndex createSurface()                                                 { return insert( new Surface() ); }
 
     void remove( const DatasetIndex index );
-
-    // temporary
-    void setDatasetHelper( DatasetHelper * dh );
-
-    // Temp
-    void updateLoadStatus() { }
 
 protected:
     DatasetManager(void);
@@ -120,10 +113,6 @@ private:
 
     // Loads tensors. Extension supported: .nii and .nii.gz
     int loadTensors( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
-    
-public:
-    // temporary
-    DatasetHelper *m_pDatasetHelper;
 
 private:
     static DatasetManager *m_pInstance;
