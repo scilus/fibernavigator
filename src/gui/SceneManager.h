@@ -158,6 +158,9 @@ public:
 
     void setBoxAtCrosshair( SelectionObject * pBox ) { m_pBoxAtCrosshair = pBox; }
 
+    bool isSelBoxChanged() const            { return m_selBoxChanged; }
+    void setSelBoxChanged( bool changed )   { m_selBoxChanged = changed; }
+
     std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
     bool   isRulerActive() const            { return m_isRulerActive; }
     double getRulerFullLength() const       { return m_rulerFullLength; }
@@ -239,6 +242,8 @@ private:
     bool  m_isBoxLocked;
 
     SelectionObject *m_pBoxAtCrosshair;
+
+    bool  m_selBoxChanged;
 
     // Ruler
     std::vector< Vector >   m_rulerPts;

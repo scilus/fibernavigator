@@ -445,7 +445,7 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
         else if ( evt.Dragging() && m_hr.picked >= 10 && m_hr.picked < 20 )
         {
             ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
-            m_pDatasetHelper->m_selBoxChanged = true;
+            SceneManager::getInstance()->setSelBoxChanged( true );
         }
         else if ( evt.Dragging() && m_hr.picked == 20 )
         {

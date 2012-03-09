@@ -345,7 +345,7 @@ void SelectionObject::update()
 
     updateStatusBar();
     m_isDirty = true;
-    m_datasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     MyApp::frame->refreshAllGLWidgets();
 
     float voxelX = DatasetManager::getInstance()->getVoxelX();
@@ -377,8 +377,8 @@ void SelectionObject::objectUpdate()
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::toggleIsActive()
 {
-    m_datasetHelper->m_selBoxChanged = true;
-    return m_isActive = ! m_isActive;
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    return m_isActive = !m_isActive;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -436,7 +436,7 @@ bool SelectionObject::isSelectionObject()
 void SelectionObject::setIsDirty( bool i_isDirty ) 
 {
     m_isDirty = i_isDirty;
-    m_datasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -481,7 +481,7 @@ void SelectionObject::setIsMaster( bool i_isMaster )
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Sets the treshold of the object.
+// Sets the threshold of the object.
 //
 // i_threshold      : The new threshold value.
 ///////////////////////////////////////////////////////////////////////////
@@ -490,7 +490,7 @@ void SelectionObject::setThreshold( float i_threshold )
     m_threshold = i_threshold;
     m_isDirty   = true;
     m_gfxDirty  = true;
-    m_datasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
 void SelectionObject::drag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )

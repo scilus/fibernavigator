@@ -632,9 +632,6 @@ void MainFrame::onMenuViewReset( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setZoom( 1.0f );
     SceneManager::getInstance()->setMoveX( 0.0f );
     SceneManager::getInstance()->setMoveY( 0.0f );
-//     m_pDatasetHelper->m_zoom  = 1;
-//     m_pDatasetHelper->m_xMove = 0;
-//     m_pDatasetHelper->m_yMove = 0;
     refreshAllGLWidgets();
 }
 
@@ -751,7 +748,6 @@ void MainFrame::onMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->toggleCrosshairDisplay();
-    //m_pDatasetHelper->m_showCrosshair = !m_pDatasetHelper->m_showCrosshair;
     refreshAllGLWidgets();
 }
 
@@ -1010,6 +1006,40 @@ void MainFrame::moveBoundaryPoints(int i_value)
     refreshAllGLWidgets();
 }
 
+void MainFrame::deleteAllPoints()
+{
+    std::vector< std::vector< SplinePoint* > > points;
+
+    wxTreeItemId id, childId;
+    wxTreeItemIdValue cookie = 0;
+
+    id = m_pTreeWidget->GetFirstChild( m_tPointId, cookie );
+
+    while( id.IsOk() )
+    {
+        std::vector< SplinePoint* > b;
+        b.push_back( (SplinePoint*)( m_pTreeWidget->GetItemData( id ) ) );
+        wxTreeItemIdValue childcookie = 0;
+        childId = m_pTreeWidget->GetFirstChild( id, childcookie );
+
+        while( childId.IsOk() )
+        {
+            b.push_back( (SplinePoint*)( m_pTreeWidget->GetItemData( childId ) ) );
+            childId = m_pTreeWidget->GetNextChild( id, childcookie );
+        }
+
+        id = m_pTreeWidget->GetNextChild( m_tPointId, cookie );
+        points.push_back( b );
+    }
+
+    for( unsigned int i = 0; i < points.size(); ++i )
+    {
+        for( unsigned int j = 0; j < points[i].size(); ++j )
+        {
+            m_pTreeWidget->Delete( points[i][j]->GetId() );
+        }
+    }
+}
 
 void MainFrame::deleteSceneObject()
 {
@@ -1352,7 +1382,7 @@ void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
     m_pTreeWidget->EnsureVisible( l_newSelectionObjectId );
     m_pTreeWidget->SetItemImage( l_newSelectionObjectId, l_newSelectionObject->getIcon() );
     l_newSelectionObject->setTreeId( l_newSelectionObjectId );    
-    m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     m_pTreeWidget->SelectItem(l_newSelectionObjectId, true);    
     refreshAllGLWidgets();
 }
@@ -1577,7 +1607,7 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 		}
 	}
 
-    m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
 
@@ -1739,7 +1769,7 @@ void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 		}
 	}
     
-    m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
 
@@ -1984,62 +2014,14 @@ void MainFrame::deleteListItem()
 		
         if( SURFACE == pInfo->getType() )
         {
-            m_pDatasetHelper->deleteAllPoints();
+            deleteAllPoints();
         }
-
-//         if ( wxT( "(Object)" ) == pInfo->getName() )
-//         {            
-//             m_pDatasetHelper->m_isObjCreated = false;
-//             m_pDatasetHelper->m_isObjfilled = false;
-//     
-//         }
-//         else if( wxT( "(Background)" ) == pInfo->getName() )
-//         {            
-//             m_pDatasetHelper->m_isBckCreated = false;
-//             m_pDatasetHelper->m_isBckfilled = false;
-//         }
 
         deleteSceneObject();
         m_pListCtrl2->DeleteItem( tmp );
         refreshAllGLWidgets();
     }
 }
-
-// void MainFrame::onSelectListItem( wxListEvent& evt )
-// {
-//     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
-// 
-//     int l_item = evt.GetIndex();
-//     m_pTreeWidget->UnselectAll();
-//     DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
-//     int l_col = m_pListCtrl->getColClicked();
-//     if (l_col == 12 && l_info->getType() >= MESH)
-//     {
-//         m_pListCtrl->SetItem( l_item, 2, wxString::Format( l_info->toggleUseTex() ? wxT( "%.2f" ) : wxT( "(%.2f)" ), l_info->getThreshold() * l_info->getOldMax() ) );
-//     }
-// 	if( l_info->getType() == FIBERS )
-// 	{
-// 		Fibers* pFibers = (Fibers*)l_info;
-// 		if( pFibers )
-// 		{
-// 			pFibers->updateColorationMode();
-// 		}
-// 	}
-//     m_pLastSelectedSceneObject = l_info;
-//     m_lastSelectedListItem = l_item;
-//     
-//     // Check if it is RGB
-//     if( l_info->getType() == RGB )
-//     {
-//         m_pDatasetHelper->m_canUseColorPicker = true;
-//     }
-//     else
-//     {
-//         m_pDatasetHelper->m_canUseColorPicker = false;
-//     }
-//     
-//     refreshAllGLWidgets();
-// }
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -2128,7 +2110,7 @@ void MainFrame::deleteTreeItem()
             m_pLastSelectedObj = NULL;
             m_pLastSelectedPoint = NULL;
         }   
-        m_pDatasetHelper->m_selBoxChanged = true;
+        SceneManager::getInstance()->setSelBoxChanged( true );
     }
     //refreshAllGLWidgets();
 }
@@ -2262,7 +2244,7 @@ void MainFrame::onActivateTreeItem( wxTreeEvent& WXUNUSED(event) )
 
 void MainFrame::onTreeChange()
 {
-    m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
 
@@ -2418,7 +2400,7 @@ void MainFrame::onKdTreeThreadFinished( wxCommandEvent& WXUNUSED(event) )
 
     Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
     SceneManager::getInstance()->updateAllSelectionObjects();
-    m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     
     refreshAllGLWidgets();
 }

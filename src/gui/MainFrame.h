@@ -48,6 +48,7 @@ public:
     void createDistanceMapAndIso();
     void createIsoSurface();
     void displayPropertiesSheet();
+    void deleteAllPoints();
     void deleteSceneObject();
     void deleteListItem();
     void deleteTreeItem();

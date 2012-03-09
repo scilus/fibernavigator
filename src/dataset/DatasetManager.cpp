@@ -519,7 +519,7 @@ int DatasetManager::loadFibers( const wxString &filename )
 
         l_fibers->updateLinesShown();
 
-        m_pDatasetHelper->m_selBoxChanged = true;
+        SceneManager::getInstance()->setSelBoxChanged( true );
 
         return index;
     }

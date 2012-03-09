@@ -627,7 +627,7 @@ void TheScene::renderFibers()
 			Fibers* pFibers = (Fibers*)pDsInfo;
 			if( pFibers != NULL )
 			{
-                if( m_pDatasetHelper->m_selBoxChanged )
+                if( SceneManager::getInstance()->isSelBoxChanged() )
                 {
                     pFibers->updateLinesShown();
                 }
@@ -660,7 +660,7 @@ void TheScene::renderFibers()
 		}
 	}
 
-	m_pDatasetHelper->m_selBoxChanged = false;
+    SceneManager::getInstance()->setSelBoxChanged( false );
 
     SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
     for( SelectionObjList::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )

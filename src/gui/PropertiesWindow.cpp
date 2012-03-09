@@ -548,7 +548,7 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     }
     l_anatomy->m_pRoi = l_selectionObject;
 
-    m_pMainFrame->m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     m_pMainFrame->refreshAllGLWidgets();
 }
 
@@ -1585,7 +1585,7 @@ void PropertiesWindow::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(eve
         l_selectionObject->setIsDirty( true );
     }
 
-    m_pMainFrame->m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     m_pMainFrame->refreshAllGLWidgets();
 }
 
@@ -1647,7 +1647,7 @@ void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
         }
         l_selObj->setFiberColor( l_col);
         l_selObj->setIsDirty( true );
-        m_pMainFrame->m_pDatasetHelper->m_selBoxChanged = true;
+        SceneManager::getInstance()->setSelBoxChanged( true );
     }    
     m_pMainFrame->refreshAllGLWidgets();
 }
