@@ -59,7 +59,7 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
     delete m_pOdfsShader;
     delete m_pSplineSurfShader;
     delete m_pTensorsShader;
-    delete m_pVectorShader;
+    //delete m_pVectorShader;
 
     m_pAnatomyShader = new ShaderProgram( wxT( "anatomy" ) );
     m_pMeshShader = new ShaderProgram( wxT( "mesh" ) );
@@ -67,7 +67,7 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
     m_pFakeTubesShader = new ShaderProgram( wxT( "fake-tubes") );
     m_pCrossingFibersShader = new ShaderProgram( wxT( "crossing_fibers" ), true, geometryShadersSupported );
     m_pSplineSurfShader = new ShaderProgram( wxT( "splineSurf" ) );
-    m_pVectorShader = new ShaderProgram( wxT( "vectors" ) );
+    //m_pVectorShader = new ShaderProgram( wxT( "vectors" ) );
     m_pLegendShader = new ShaderProgram( wxT( "legend" ) );
     m_pGraphShader = new ShaderProgram( wxT( "graph" ) );
     m_pTensorsShader = new ShaderProgram( wxT( "tensors" ) );
@@ -153,9 +153,9 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
     }
 
     //Logger::getInstance()->print( _T( "Initializing vector shader..." ), LOGLEVEL_MESSAGE );
-    //if( m_vectorShader->load() && m_vectorShader->compileAndLink() )
+    //if( m_pVectorShader->load() && m_pVectorShader->compileAndLink() )
     //{
-    //    m_vectorShader->bind();
+    //    m_pVectorShader->bind();
     //    Logger::getInstance()->print( _T( "Vector shader initialized." ), LOGLEVEL_MESSAGE );
     //}
     //else
