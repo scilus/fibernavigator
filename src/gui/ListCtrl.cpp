@@ -11,6 +11,8 @@ using std::set;
 
 #include <wx/imaglist.h>
 #include <wx/string.h>
+#include <vector>
+using std::vector;
 
 BEGIN_EVENT_TABLE( ListCtrl, wxListCtrl )
     EVT_LEFT_DOWN( ListCtrl::onLeftClick )
@@ -100,6 +102,16 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
     SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
     Update( index );
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void ListCtrl::InsertItemRange( const vector<DatasetIndex> &items )
+{
+    for( vector<DatasetIndex>::const_iterator it = items.begin(); it != items.end(); ++it )
+    {
+        InsertItem( *it );
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////

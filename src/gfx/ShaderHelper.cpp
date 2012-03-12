@@ -33,8 +33,7 @@ ShaderHelper::ShaderHelper()
     m_pGraphShader( NULL ),
     m_pTensorsShader( NULL ),
     m_pOdfsShader( NULL ),
-    m_pRTTShader( NULL ),
-    
+    m_pRTTShader( NULL )    
 {
 }
 

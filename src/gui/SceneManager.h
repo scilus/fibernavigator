@@ -15,6 +15,7 @@ class MyTreeCtrl;
 class SelectionObject;
 class ShaderHelper;
 class TheScene;
+class wxXmlNode;
 
 typedef std::vector< std::vector< SelectionObject * > > SelectionObjList;
 
@@ -178,6 +179,8 @@ protected:
 private:
     SceneManager( const SceneManager & );
     SceneManager &operator=( const SceneManager & );
+
+    bool loadOldVersion( wxXmlNode * pRoot );
 
 private:
     static SceneManager *m_pInstance;

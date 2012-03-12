@@ -66,7 +66,7 @@ void Logger::print( const wxString &str, const LogLevel level )
     
     if( LOGLEVEL_ERROR == level || LOGLEVEL_GLERROR == level )
     {
-        m_lastError = prefix + str;
+        m_lastError = /*prefix +*/ str;
     }
 
     printf( "%s", m_oss.str().c_str() );

@@ -1283,7 +1283,7 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
     int labelClass;
     int length( columns * rows * frames );
 
-    if( src->size() != length || label->size() != length )
+    if( static_cast<int>( src->size() ) != length || static_cast<int>( label->size() ) != length )
     {
         Logger::getInstance()->print( wxT( "Vector size is wrong. Cannot segment using KMeans." ), LOGLEVEL_ERROR );
         return;

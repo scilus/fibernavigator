@@ -163,8 +163,8 @@ private:
     PropertiesWindow(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
 
 private:
-    MainFrame *m_pMainFrame;
     wxWindow  *m_pNotebook;
+    MainFrame *m_pMainFrame;
     ListCtrl  *m_pListCtrl;
     
     DECLARE_DYNAMIC_CLASS(PropertiesWindow)

@@ -16,28 +16,38 @@ class Loader
 private:
     MainFrame *m_pMainFrame;
     ListCtrl *m_pListCtrl;
-    bool m_error;
+    unsigned int m_error;
 public:
     Loader( MainFrame *pMainFrame, ListCtrl *pListCtrl ) 
     :   m_pMainFrame( pMainFrame ),
         m_pListCtrl( pListCtrl ),
-        m_error( false )
+        m_error( 0 )
     {
     }
 
-    bool getError() { return m_error; }
+    unsigned int getNbErrors() const { return m_error; }
 
     void operator()( const wxString &filename )
     {
         // check if i_fileName is valid
         if( !wxFile::Exists( filename ) )
         {
-            Logger::getInstance()->print( wxString::Format( wxT( "File %s doesn't exist!" ), filename.c_str() ), LOGLEVEL_ERROR );
+            Logger::getInstance()->print( wxString::Format( wxT( "File \"%s\" doesn't exist!" ), filename.c_str() ), LOGLEVEL_ERROR );
+            ++m_error;
         }
         else
         {
             // If the file is in compressed formed, we check what kind of file it is
             wxString extension = filename.AfterLast( '.' );
+
+            #ifdef __WXMSW__
+            char separator = '\\';
+            #else
+            char separator = '/';
+            #endif
+
+            wxString name = filename.AfterLast( separator );
+
             if( wxT( "gz" ) == extension )
             {
                 extension = filename.BeforeLast( '.' ).AfterLast( '.' );
@@ -47,8 +57,11 @@ public:
             {
                 if( !SceneManager::getInstance()->load( filename ) )
                 {
-                    m_error = true;
+                    ++m_error;
                 }
+
+                m_pMainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
+                m_pMainFrame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "%s loaded" ), name.c_str() ), 2 );
             }
             else
             {
@@ -84,10 +97,13 @@ public:
                     }
 
                     m_pListCtrl->InsertItem( result );
+
+                    m_pMainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
+                    m_pMainFrame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "%s loaded" ), name.c_str() ), 2 );
                 }
                 else
                 {
-                    m_error = true;
+                    ++m_error;
                 }
             }
         }

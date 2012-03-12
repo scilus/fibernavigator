@@ -39,7 +39,6 @@ public:
 
     bool save( wxString filename ) const;
 
-
 private:
     void generateTexture() {}
     void generateGeometry();
@@ -56,6 +55,7 @@ private:
     float getXValue(int y , int z, int numPoints);
     void boxTest(int left, int right, int axis);
 
+private:
     wxToggleButton *m_ptoggleDrawPoints;
     wxBitmapButton *m_pbtnMoveBoundaryLeft;
     wxBitmapButton *m_pbtnMoveBoundaryRight;

@@ -284,9 +284,9 @@ void MenuBar::updateMenuBar( MainFrame *mf )
 			FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
 			if( pFibersGroup )
 			{
-				int useFakeTubesNb = 0;
-				int useTransparencyNb = 0;
-				int isInvertedNb = 0;
+				unsigned int useFakeTubesNb = 0;
+				unsigned int useTransparencyNb = 0;
+				unsigned int isInvertedNb = 0;
                 
                 vector<Fibers *> v = DatasetManager::getInstance()->getFibers();
                 

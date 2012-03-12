@@ -4,6 +4,7 @@
 #include "../dataset/DatasetManager.h"
 
 #include <wx/listctrl.h>
+#include <vector>
 
 #define ID_LIST_CTRL2 292
 
@@ -23,11 +24,12 @@ public:
 
     // Methods
     void AssignImageList( wxImageList *pImageList, int which );
+    void Clear()                                    { wxListCtrl::DeleteAllItems(); }
     bool DeleteItem( long index );
     void DeleteSelectedItem();
     long InsertColumn( long col, wxListItem& info );
-    // TODO: Change for index in DatasetManager, once it is created
     void InsertItem( DatasetIndex datasetIndex );
+    void InsertItemRange( const std::vector<DatasetIndex> &items );
     void MoveItemDown();
     void MoveItemUp();
     void UnselectAll();
@@ -58,7 +60,6 @@ private:
 
 private:
     int m_column;
-    //bool m_isFiberGroupPresent;
 
     DECLARE_EVENT_TABLE()
 };

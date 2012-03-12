@@ -31,6 +31,7 @@ public:
     std::vector<Anatomy *>  getAnatomies() const;
     size_t                  getAnatomyCount() const         { return m_anatomies.size(); }
     DatasetInfo *           getDataset( DatasetIndex index ) const;
+    size_t                  getDatasetCount() const         { return m_datasets.size(); }
     std::vector<Fibers *>   getFibers() const;
     FibersGroup *           getFibersGroup() const;
     size_t                  getFibersCount() const          { return m_fibers.size(); }

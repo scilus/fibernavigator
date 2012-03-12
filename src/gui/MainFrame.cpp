@@ -388,9 +388,12 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
         dialog.GetPaths( l_fileNames );
     }
 
-    if ( for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl2 ) ).getError() )
+    unsigned int nbErrors = for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl2 ) ).getNbErrors();
+    if ( nbErrors )
     {
-        wxMessageBox( Logger::getInstance()->getLastError(), wxT( "Error while loading" ), wxOK | wxICON_INFORMATION, NULL );
+        wxString errorMsg = wxString::Format( ( nbErrors > 1 ? wxT( "Last error: %s\nFor a complete list of errors, please review the log" ) : wxT( "%s" ) ), Logger::getInstance()->getLastError().c_str() );
+
+        wxMessageBox( errorMsg, wxT( "Error while loading" ), wxOK | wxICON_ERROR, NULL );
         GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
         GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
         return;
@@ -1948,6 +1951,7 @@ void MainFrame::onToggleAlpha( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::refreshAllGLWidgets()
 {
+    updateStatusBar();
     updateMenus();
     refreshViews();   
     if( SceneManager::getInstance()->isRulerActive() )
@@ -1996,7 +2000,7 @@ void MainFrame::refreshViews()
 void MainFrame::updateStatusBar()
 {
     GetStatusBar()->SetStatusText( wxString::Format( 
-        wxT("Position: %d  %d  %d" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue() ) );
+        wxT("Position: %d  %d  %d" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue() ), 0 );
 }
 
 /****************************************************************************************************

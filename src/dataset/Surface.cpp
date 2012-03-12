@@ -22,6 +22,9 @@ using std::vector;
 
 Surface::Surface() 
 :   DatasetInfo(),
+    m_ptoggleDrawPoints( NULL ),
+    m_pbtnMoveBoundaryLeft( NULL ),
+    m_pbtnMoveBoundaryRight( NULL ),
     m_radius( 30.0 ),
     m_my( 8.0 ),
     m_numDeBoorRows( 12 ),
@@ -29,11 +32,25 @@ Surface::Surface()
     m_order( 4 ),
     m_sampleRateU( 0.5 ),
     m_sampleRateT( 0.5 ),
+    m_xAverage( 0.0 ),
+    m_yAverage( 0.0 ),
+    m_zAverage( 0.0 ),
+    m_splinePoints(),
+    m_renderpointsPerCol( 0 ),
+    m_renderpointsPerRow( 0 ),
     m_numPoints( 0 ),
-    m_CutTex( 0 ),
-    m_normalDirection( 1.0f ),
+    m_boxMin( NULL ),
+    m_boxMax( NULL ),
+    m_pointArray( NULL ),
+    m_xValue( 0.0f ),
+    m_count( 0 ),
     subDCount( 0 ),
-    m_positionsCalculated( false )
+    m_normalDirection( 1.0f ),
+    m_CutTex( 0 ),
+    m_kdTree( NULL ),
+    m_testLines(),
+    m_positionsCalculated( false ),
+    m_svPositions()
 {
     m_type = SURFACE;
     m_threshold = 0.5;
