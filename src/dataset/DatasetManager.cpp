@@ -61,7 +61,7 @@ std::vector<Anatomy *> DatasetManager::getAnatomies() const
 
 //////////////////////////////////////////////////////////////////////////
 
-DatasetInfo * DatasetManager::getDataset( unsigned int index ) const
+DatasetInfo * DatasetManager::getDataset( DatasetIndex index ) const
 {
     map<DatasetIndex, DatasetInfo *>::const_iterator it = m_datasets.find( index );
     if( it != m_datasets.end() )

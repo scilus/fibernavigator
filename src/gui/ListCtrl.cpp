@@ -19,7 +19,6 @@ BEGIN_EVENT_TABLE( ListCtrl, wxListCtrl )
     EVT_LIST_ITEM_ACTIVATED( ID_LIST_CTRL2, ListCtrl::onActivate )
 END_EVENT_TABLE()
 
-
 //////////////////////////////////////////////////////////////////////////
 // CONSTRUCTORS
 //////////////////////////////////////////////////////////////////////////
@@ -86,14 +85,19 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
 
     if( FIBERS == pDataset->getType() && DatasetManager::getInstance()->isFibersGroupLoaded() )
     {
-        for( long pos( 0 ); pos < GetItemCount(); ++pos )
+        long fiberGroupPos = FindFiberGroupPosition();
+        if( -1 != fiberGroupPos )
         {
-            DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( pos ) );
-            if ( FIBERSGROUP == pDataset->getType() )
+            long pos = fiberGroupPos + 1;
+            while( pos < GetItemCount() )
             {
-                index = pos + 1;
-                break;
+                DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( pos ) );
+                if ( FIBERS != pDataset->getType() )
+                    break;
+                
+                ++pos;
             }
+            index = pos;
         }
     }
 
@@ -118,68 +122,66 @@ void ListCtrl::InsertItemRange( const vector<DatasetIndex> &items )
 
 void ListCtrl::MoveItemDown()
 {
+    // NOTE: Important to use the swap to move items because the MainFrame catches DeleteItems events
+    // to delete the index from the DatasetManager.
+
     long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( index < GetItemCount() - 1 )
     {
         set<long> refreshNeeded;
 
-        DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
-
-        if( FIBERSGROUP == pDataset->getType() )
+        if( FIBERSGROUP == DatasetManager::getInstance()->getDataset( GetItem( index ) )->getType() )
         {
-            long from( index + 2 );
+            refreshNeeded.insert( index );
+            long from = index + 1;
             while( from < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( from ) )->getType() )
             {
+                refreshNeeded.insert( from );
                 ++from;
             }
-
-            if( from != GetItemCount() )
+            if( from < GetItemCount() )
             {
-                DatasetInfo *pDatasetToMove = DatasetManager::getInstance()->getDataset( GetItem( from ) );
-                wxListCtrl::InsertItem( index, pDatasetToMove->getShow() ? 0 : 1 );
-                SetItemData( index, (long)pDatasetToMove );
+                refreshNeeded.insert( from );
+                for( int i = from; i > index; --i )
+                {
+                    Swap( i, i - 1 );
+                }
+
                 SetItemState( index + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-
-                DeleteItem( from + 1 );
-
-                refreshNeeded.insert( index );
             }
         }
-        else if( FIBERS == pDataset->getType() )
+        else if( FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index ) )->getType() )
         {
             if( FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index + 1 ) )->getType() )
             {
                 Swap( index, index + 1 );
                 refreshNeeded.insert( index );
-                refreshNeeded.insert( index + 1);
+                refreshNeeded.insert( index + 1 );
+                SetItemState( index + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
             }
-
-            SetItemState( index + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
         }
         else
         {
             if( FIBERSGROUP == DatasetManager::getInstance()->getDataset( GetItem( index + 1 ) )->getType() )
             {
-                long to( index + 2 );
-                while( to < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( to ) )->getType() )
-                {
-                    ++to;
-                }
-            
-                wxListCtrl::InsertItem( to, pDataset->getShow() ? 0 : 1 );
-                SetItemData( to, (long)pDataset );
-                SetItemState( to, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-
-                DeleteItem( index );
-
-                refreshNeeded.insert( to - 1 );
-            }
-            else
-            {                
                 Swap( index, index + 1 );
                 refreshNeeded.insert( index );
-                refreshNeeded.insert( index + 1);
+                refreshNeeded.insert( index + 1 );
+                ++index;
 
+                while( index + 1 < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index + 1 ) )->getType() )
+                {
+                    Swap( index, index + 1 );
+                    refreshNeeded.insert( index + 1 );
+                    ++index;
+                }
+                SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+            }
+            else
+            {
+                Swap( index, index + 1 );
+                refreshNeeded.insert( index );
+                refreshNeeded.insert( index + 1 );
                 SetItemState( index + 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
             }
         }
@@ -196,6 +198,9 @@ void ListCtrl::MoveItemDown()
 
 void ListCtrl::MoveItemUp()
 {
+    // NOTE: Important to use the swap to move items because the MainFrame catches DeleteItems events
+    // to delete the index from the DatasetManager.
+
     long index = GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     if( 0 < index )
     {
@@ -237,19 +242,23 @@ void ListCtrl::MoveItemUp()
         {
             if( FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index - 1 ) )->getType() )
             {
-                long to( index - 2 );
-                while( FIBERSGROUP != DatasetManager::getInstance()->getDataset( GetItem( to ) )->getType() )
+                Swap( index, index - 1 );
+                refreshNeeded.insert( index );
+                refreshNeeded.insert( index - 1);
+
+                --index;
+
+                while( FIBERSGROUP != DatasetManager::getInstance()->getDataset( GetItem( index - 1 ) )->getType() )
                 {
-                    --to;
+                    Swap( index, index - 1 );
+                    refreshNeeded.insert( index - 1 );
+                    --index;
                 }
 
-                wxListCtrl::InsertItem( to, pDataset->getShow() ? 0 : 1 );
-                SetItemData( to, (long)pDataset );
-                SetItemState( to, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+                Swap( index, index - 1 );
+                refreshNeeded.insert( index - 1 );
 
-                DeleteItem( index + 1 );
-
-                refreshNeeded.insert( to );
+                SetItemState( index - 1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
             }
             else
             {                
@@ -373,6 +382,19 @@ void ListCtrl::onLeftClick( wxMouseEvent& evt )
 //////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 //////////////////////////////////////////////////////////////////////////
+
+long ListCtrl::FindFiberGroupPosition()
+{
+    for( long pos( 0 ); pos < GetItemCount(); ++pos )
+    {
+        DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( pos ) );
+        if ( FIBERSGROUP == pDataset->getType() )
+        {
+            return pos;
+        }
+    }
+    return -1;
+}
 
 void ListCtrl::Swap( long i, long j )
 {

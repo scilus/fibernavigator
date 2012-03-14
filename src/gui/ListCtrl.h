@@ -55,6 +55,7 @@ private:
     ListCtrl( const ListCtrl & );
     ListCtrl & operator= ( const ListCtrl & );
 
+    long FindFiberGroupPosition();
     void Swap( long i, long j );
     void Update( long index );
 
