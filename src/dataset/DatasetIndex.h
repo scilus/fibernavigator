@@ -3,36 +3,36 @@
 
 #include <algorithm>
 
-class DatasetIndex2
+class DatasetIndex
 {
 public:
-    DatasetIndex2() : m_index( BAD_INDEX ) {}
-    DatasetIndex2( unsigned int index ) : m_index( index ) {}
-    DatasetIndex2( const DatasetIndex2 &other ) : m_index( other.m_index ) {}
+    DatasetIndex() : m_index( BAD_INDEX ) {}
+    DatasetIndex( unsigned int index ) : m_index( index ) {}
+    DatasetIndex( const DatasetIndex &other ) : m_index( other.m_index ) {}
 
     // Functions
     bool isOk() const { return BAD_INDEX != m_index; }
 
     // Operators
-    DatasetIndex2 &operator=( const DatasetIndex2 &other )
+    DatasetIndex &operator=( const DatasetIndex &other )
     {
-        DatasetIndex2(other).swap(*this);
+        DatasetIndex(other).swap(*this);
         return *this;
     }
 
-    bool operator== ( const DatasetIndex2 &other ) const { return other.m_index == m_index; }
-    bool operator!= ( const DatasetIndex2 &other ) const { return !(other == *this); }
-    bool operator<  ( const DatasetIndex2 &other ) const { return m_index < other.m_index; }
-    bool operator>  ( const DatasetIndex2 &other ) const { return other < *this; }
-    bool operator<= ( const DatasetIndex2 &other ) const { return !(other < *this); }
-    bool operator>= ( const DatasetIndex2 &other ) const { return !(*this < other); }
+    bool operator== ( const DatasetIndex &other ) const { return other.m_index == m_index; }
+    bool operator!= ( const DatasetIndex &other ) const { return !(other == *this); }
+    bool operator<  ( const DatasetIndex &other ) const { return m_index < other.m_index; }
+    bool operator>  ( const DatasetIndex &other ) const { return other < *this; }
+    bool operator<= ( const DatasetIndex &other ) const { return !(other < *this); }
+    bool operator>= ( const DatasetIndex &other ) const { return !(*this < other); }
     
     // prefix ++
-    DatasetIndex2 &operator++() { ++m_index; return *this; }
+    DatasetIndex &operator++() { ++m_index; return *this; }
     // postfix ++
-    DatasetIndex2 operator++(int) 
+    DatasetIndex operator++(int) 
     {
-        DatasetIndex2 result(*this);    // make a copy for result
+        DatasetIndex result(*this);    // make a copy for result
         ++(*this);                      // Now use the prefix version to do the work
         return result;                  // return the copy (the old) value.
     }
@@ -42,7 +42,7 @@ public:
     operator unsigned int() const { return m_index; }
 
 private:
-    void swap( DatasetIndex2 &other )
+    void swap( DatasetIndex &other )
     {
         std::swap( m_index, other.m_index );
     }

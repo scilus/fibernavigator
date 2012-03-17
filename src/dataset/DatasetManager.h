@@ -21,8 +21,7 @@ class Fibers;
 class Mesh;
 class Tensors;
 
-typedef DatasetIndex2 /*unsigned int*/ DatasetIndex;
-const DatasetIndex BAD_INDEX /*= 0*/;
+const DatasetIndex BAD_INDEX;
 
 class DatasetManager
 {

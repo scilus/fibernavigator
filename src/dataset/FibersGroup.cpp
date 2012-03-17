@@ -655,7 +655,7 @@ void FibersGroup::generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies)
 
     pGlobalAnatomy->setName( wxT( "Global Fiber-Density Volume" ) );
 
-    MyApp::frame->m_pListCtrl2->InsertItem( index );
+    MyApp::frame->m_pListCtrl->InsertItem( index );
 
     MyApp::frame->refreshAllGLWidgets();
 

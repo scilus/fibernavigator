@@ -2043,7 +2043,7 @@ Anatomy* Fibers::generateFiberVolume()
     Anatomy *pTmpAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
     pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
     
-    MyApp::frame->m_pListCtrl2->InsertItem( index );
+    MyApp::frame->m_pListCtrl->InsertItem( index );
 
     MyApp::frame->refreshAllGLWidgets();
 
@@ -3726,7 +3726,7 @@ void Fibers::updatePropertiesSizer()
 
 	if( nextItemId >= 0)
 	{
-		pDatasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( nextItemId ) );
+		pDatasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( nextItemId ) );
 		if( pDatasetInfo != NULL)
 		{
 			if(pDatasetInfo->getType() != FIBERS)
@@ -3752,7 +3752,7 @@ void Fibers::updatePropertiesSizer()
 	
 	if( prevItemId != -1)
 	{
-		pDatasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( prevItemId ) );
+		pDatasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( prevItemId ) );
 		if( pDatasetInfo != NULL)
 		{
 			if(pDatasetInfo->getType() != FIBERS)

@@ -176,9 +176,9 @@ void TheScene::bindTextures()
 
     int allocatedTextureCount = 0;
 
-    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
         if( pDsInfo->getType() < MESH && pDsInfo->getShow() )
         {
             glActiveTexture( GL_TEXTURE0 + allocatedTextureCount );
@@ -213,7 +213,7 @@ void TheScene::renderScene()
     // This will put the frustum information up to date for any render that needs it. 
     extractFrustum();
     
-    if( MyApp::frame->m_pListCtrl2->GetItemCount() == 0 )
+    if( MyApp::frame->m_pListCtrl->GetItemCount() == 0 )
         return;
 
     ShaderHelper::getInstance()->initializeArrays();
@@ -617,9 +617,9 @@ void TheScene::renderFibers()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
 
         if( pDsInfo->getType() == FIBERS && pDsInfo->getShow())
         {
@@ -687,9 +687,9 @@ void TheScene::renderTensors()
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
 
         if( pDsInfo->getType() == TENSORS && pDsInfo->getShow() )
         {
@@ -909,9 +909,9 @@ void TheScene::drawVectors()
     glEnable( GL_LINE_SMOOTH );
     glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 
-    for( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
 
         if( pInfo->getType() == VECTORS && pInfo->getShow() )
         {
@@ -1189,9 +1189,9 @@ void TheScene::drawVectors()
                 }
             }
 
-            for( int j = 0; j < MyApp::frame->m_pListCtrl2->GetItemCount(); ++j )
+            for( int j = 0; j < MyApp::frame->m_pListCtrl->GetItemCount(); ++j )
             {
-                DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( j ) );
+                DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( j ) );
 
                 if ( pMesh->getType() == ISO_SURFACE && pMesh->getShow() )
                 {

@@ -278,7 +278,7 @@ void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt
                 long index = MyApp::frame->getCurrentListItem();
                 if( -1 != index )
                 {
-                    Anatomy *pAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
+                    Anatomy *pAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
 
                     if( NULL != pAnatomy && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
                     {
@@ -860,7 +860,7 @@ void MainCanvas::render()
             glLoadIdentity();
             glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
 
-            if ( MyApp::frame->m_pListCtrl2->GetItemCount() != 0 )
+            if ( MyApp::frame->m_pListCtrl->GetItemCount() != 0 )
             {
                 SceneManager::getInstance()->getAnatomyHelper()->renderNav( m_view );
                 Logger::getInstance()->printIfGLError( wxT( "Render nav view" ) );
@@ -1227,7 +1227,7 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 void MainCanvas::drawOnAnatomy() 
 {
     long index = MyApp::frame->getCurrentListItem();
- 	Anatomy* l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
+ 	Anatomy* l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
 
     int xClick = floor( m_hitPts[0] / DatasetManager::getInstance()->getVoxelX() );
     int yClick = floor( m_hitPts[1] / DatasetManager::getInstance()->getVoxelY() );
@@ -1254,14 +1254,14 @@ void MainCanvas::drawOnAnatomy()
 void MainCanvas::pushAnatomyHistory()
 {
     long index = MyApp::frame->getCurrentListItem();
-    Anatomy *l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
+    Anatomy *l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
 	l_currentAnatomy->pushHistory();
 }
 
 void MainCanvas::popAnatomyHistory()
 {
     long index = MyApp::frame->getCurrentListItem();
-    Anatomy *l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
+    Anatomy *l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
 	l_currentAnatomy->popHistory( RGB == l_currentAnatomy->getType() );
 }
 
@@ -1482,7 +1482,7 @@ void MainCanvas::segment()
     int dataLength( rows * columns * frames );
 
     long index = MyApp::frame->getCurrentListItem();
-    Anatomy *l_info = (Anatomy *)MyApp::frame->m_pListCtrl2->GetItem( index );
+    Anatomy *l_info = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
 
     //1D vector with the normalized brightness ( 0 to 1 )
     std::vector<float>* sourceData = l_info->getFloatDataset();
@@ -1528,7 +1528,7 @@ void MainCanvas::segment()
     pNewAnatomy->setType(2);
     pNewAnatomy->setDataType(4);
     pNewAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
-    MyApp::frame->m_pListCtrl2->InsertItem( indx );
+    MyApp::frame->m_pListCtrl->InsertItem( indx );
 }
 
 

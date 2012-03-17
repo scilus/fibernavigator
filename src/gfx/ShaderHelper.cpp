@@ -226,9 +226,9 @@ void ShaderHelper::initializeArrays()
     m_threshold.resize( 10, 0 );
     m_alpha.resize( 10, 0 );
 
-    for ( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    for ( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
         if ( pInfo->getType() < MESH && pInfo->getShow() )
         {
             m_threshold[m_textureCount] = pInfo->getThreshold();
@@ -308,9 +308,9 @@ void ShaderHelper::setMeshShaderVars()
     m_pMeshShader->setUniFloat( "cutY", SceneManager::getInstance()->getSliceY() + 0.5f );
     m_pMeshShader->setUniFloat( "cutZ", SceneManager::getInstance()->getSliceZ() + 0.5f );
 
-    for ( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    for ( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
 
         if ( pInfo->getType() == SURFACE )
         {
@@ -370,9 +370,9 @@ void ShaderHelper::setFiberShaderVars()
     int type = 0;
 
     int c = 0;
-    for ( int i = 0; i < MyApp::frame->m_pListCtrl2->GetItemCount(); ++i )
+    for ( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
         if ( pInfo->getType() < MESH )
         {
             if ( ( pInfo->getType() == OVERLAY ) && pInfo->getShow() )

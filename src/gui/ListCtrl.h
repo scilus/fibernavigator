@@ -6,7 +6,7 @@
 #include <wx/listctrl.h>
 #include <vector>
 
-#define ID_LIST_CTRL2 292
+#define ID_LIST_CTRL 292
 
 class DatasetInfo;
 class Anatomy;

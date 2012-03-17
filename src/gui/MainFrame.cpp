@@ -52,11 +52,11 @@ extern const wxEventType wxEVT_NAVGL_EVENT;
  ****************************************************************************************************/
 BEGIN_EVENT_TABLE( MainFrame, wxFrame )
 // List widget events
-EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL2,                   MainFrame::onActivateListItem2  )
-EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL2,                   MainFrame::onSelectListItem2    )
-EVT_LIST_ITEM_DESELECTED ( ID_LIST_CTRL2,                   MainFrame::onDeselectListItem2  )
-EVT_LIST_DELETE_ITEM     ( ID_LIST_CTRL2,                   MainFrame::onDeleteListItem2    )
-EVT_LIST_DELETE_ALL_ITEMS( ID_LIST_CTRL2,                   MainFrame::onDeleteAllListItems )
+EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL,                    MainFrame::onActivateListItem   )
+EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL,                    MainFrame::onSelectListItem     )
+EVT_LIST_ITEM_DESELECTED ( ID_LIST_CTRL,                    MainFrame::onDeselectListItem   )
+EVT_LIST_DELETE_ITEM     ( ID_LIST_CTRL,                    MainFrame::onDeleteListItem     )
+EVT_LIST_DELETE_ALL_ITEMS( ID_LIST_CTRL,                    MainFrame::onDeleteAllListItems )
 
 // Tree widget events
 EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
@@ -215,15 +215,15 @@ MainFrame::MainFrame(wxWindow           *i_parent,
 
     //////////////////////////////////////////////////////////////////////////
     // ListCtrl initialization
-    m_pListCtrl2 = new ListCtrl( this, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
-    initListCtrl( m_pListCtrl2 );
+    m_pListCtrl = new ListCtrl( this, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    initListCtrl( m_pListCtrl );
 
     // Notebook initialization
     m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
 
     //////////////////////////////////////////////////////////////////////////
     // PropertiesWindow initialization
-    m_pPropertiesWindow = new PropertiesWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), m_pListCtrl2 ); // Contains Scene Objects properties
+    m_pPropertiesWindow = new PropertiesWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), m_pListCtrl ); // Contains Scene Objects properties
     m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
     m_pPropertiesWindow->EnableScrolling( false, true );
 
@@ -342,7 +342,7 @@ void MainFrame::initLayout()
     axesSzr->Add( xSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
 
 //    lstSzr->Add( m_pListCtrl, 0, wxALL | wxFIXED_MINSIZE, 2 );
-    lstSzr->Add( (wxWindow *)m_pListCtrl2, 0, wxALL | wxFIXED_MINSIZE, 2 );
+    lstSzr->Add( (wxWindow *)m_pListCtrl, 0, wxALL | wxFIXED_MINSIZE, 2 );
     lstSzr->Add( m_pTreeWidget, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
 
     propSzr->Add( m_tab, 1, wxALL | wxEXPAND, 4 );
@@ -389,7 +389,7 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
         dialog.GetPaths( l_fileNames );
     }
 
-    unsigned int nbErrors = for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl2 ) ).getNbErrors();
+    unsigned int nbErrors = for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl ) ).getNbErrors();
     if ( nbErrors )
     {
         wxString errorMsg = wxString::Format( ( nbErrors > 1 ? wxT( "Last error: %s\nFor a complete list of errors, please review the log" ) : wxT( "%s" ) ), Logger::getInstance()->getLastError().c_str() );
@@ -422,7 +422,7 @@ void MainFrame::createNewAnatomy( DatasetType dataType )
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 	pNewAnatomy->setName( l_givenName );
 
-    m_pListCtrl2->InsertItem( index );
+    m_pListCtrl->InsertItem( index );
 
     refreshAllGLWidgets();
 }
@@ -1099,7 +1099,7 @@ void MainFrame::createCutDataset()
     if( l_item == -1 )
         return;
 
-    DatasetInfo* info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( l_item ) );
+    DatasetInfo* info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
     if ( info->getType() > OVERLAY )
         return;
 
@@ -1162,7 +1162,7 @@ void MainFrame::createCutDataset()
     pNewAnatomy->setDataType(l_anatomy->getDataType());
     pNewAnatomy->setNewMax(l_anatomy->getNewMax());
 
-    m_pListCtrl2->InsertItem( index );
+    m_pListCtrl->InsertItem( index );
 
     refreshAllGLWidgets();
 }
@@ -1178,7 +1178,7 @@ void MainFrame::createDistanceMap()
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( l_item ) );
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1193,7 +1193,7 @@ void MainFrame::createDistanceMap()
 
     pNewAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT(" (Distance Map)"));
 
-    m_pListCtrl2->InsertItem( index );
+    m_pListCtrl->InsertItem( index );
     refreshAllGLWidgets();
 }
 
@@ -1209,7 +1209,7 @@ void MainFrame::createDistanceMapAndIso()
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( l_item ) );
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1235,7 +1235,7 @@ void MainFrame::createDistanceMapAndIso()
         wxString anatomyName = l_anatomy->getName().BeforeFirst( '.' );
         pIsoSurf->setName( anatomyName + wxT( " (Offset)" ) );
 
-        m_pListCtrl2->InsertItem( index );
+        m_pListCtrl->InsertItem( index );
     }
     else
     {
@@ -1257,7 +1257,7 @@ void MainFrame::createIsoSurface()
     if( l_item == -1 )
         return;
 
-    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( l_item ) );
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
     if( l_info->getType() > OVERLAY )
         return;
 
@@ -1276,7 +1276,7 @@ void MainFrame::createIsoSurface()
         wxString l_anatomyName = l_anatomy->getName().BeforeFirst( '.' );
         pIsoSurf->setName( l_anatomyName + wxT( " (Iso Surface)" ) );
 
-        m_pListCtrl2->InsertItem( index );
+        m_pListCtrl->InsertItem( index );
     }
     else
     {
@@ -1551,7 +1551,7 @@ void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
     Surface *pSurface = (Surface *)DatasetManager::getInstance()->getDataset( index );
     pSurface->execute();
 
-    m_pListCtrl2->InsertItem( index );
+    m_pListCtrl->InsertItem( index );
 
     refreshAllGLWidgets();
 }
@@ -1570,9 +1570,9 @@ void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
     SceneManager::getInstance()->setNormalDirection( -normal );
     //m_pDatasetHelper->m_normalDirection *= -1.0;
 
-    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_pListCtrl2->GetItemCount() ); ++i )
+    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_pListCtrl->GetItemCount() ); ++i )
     {
-        DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( i ) );
+        DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( i ) );
         if( l_info->getType() == SURFACE )
         {
             ((Surface*)l_info)->flipNormals();
@@ -1589,7 +1589,7 @@ void MainFrame::onToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
         if( l_info->getType() < MESH )
         {
             l_info->toggleShowFS();
-            m_pListCtrl2->UpdateSelected();
+            m_pListCtrl->UpdateSelected();
         }
     }
     refreshAllGLWidgets();
@@ -2023,11 +2023,11 @@ void MainFrame::updateStatusBar()
  *
  ****************************************************************************************************/
 
-void MainFrame::onActivateListItem2( wxListEvent& evt )
+void MainFrame::onActivateListItem( wxListEvent& evt )
 {
-    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem2" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
 
-    if( 3 == m_pListCtrl2->GetColumnClicked() )
+    if( 3 == m_pListCtrl->GetColumnClicked() )
     {
         deleteListItem();
     }
@@ -2040,7 +2040,7 @@ void MainFrame::deleteListItem()
     if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {       
         long tmp = m_currentListItem;
-        DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( m_currentListItem ) );
+        DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( m_currentListItem ) );
 		
         if( SURFACE == pInfo->getType() )
         {
@@ -2048,7 +2048,7 @@ void MainFrame::deleteListItem()
         }
 
         deleteSceneObject();
-        m_pListCtrl2->DeleteItem( tmp );
+        m_pListCtrl->DeleteItem( tmp );
         refreshAllGLWidgets();
     }
 }
@@ -2064,9 +2064,9 @@ void MainFrame::onDeleteAllListItems( wxListEvent& evt )
 
 //////////////////////////////////////////////////////////////////////////
 
-void MainFrame::onDeleteListItem2( wxListEvent& evt )
+void MainFrame::onDeleteListItem( wxListEvent& evt )
 {
-    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteListItem2" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteListItem" ), LOGLEVEL_DEBUG );
 
     DatasetIndex index = (DatasetIndex)evt.GetData();
     DatasetManager::getInstance()->remove( index );
@@ -2074,9 +2074,9 @@ void MainFrame::onDeleteListItem2( wxListEvent& evt )
 
 //////////////////////////////////////////////////////////////////////////
 
-void MainFrame::onDeselectListItem2( wxListEvent& evt )
+void MainFrame::onDeselectListItem( wxListEvent& evt )
 {
-    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeselectListItem2" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeselectListItem" ), LOGLEVEL_DEBUG );
 
     m_pLastSelectedSceneObject = NULL;
     m_lastSelectedListItem = -1;
@@ -2084,13 +2084,13 @@ void MainFrame::onDeselectListItem2( wxListEvent& evt )
 
 //////////////////////////////////////////////////////////////////////////
 
-void MainFrame::onSelectListItem2( wxListEvent& evt )
+void MainFrame::onSelectListItem( wxListEvent& evt )
 {
-    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem2" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
 
     int index = evt.GetIndex();
     m_pTreeWidget->UnselectAll();
-    DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl2->GetItem( index ) );
+    DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( index ) );
 
     if( NULL == pInfo )
     {
@@ -2223,7 +2223,7 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
 #ifdef __WXMSW__
     if( m_currentListItem != -1 )
     {
-        m_pListCtrl2->UnselectAll();
+        m_pListCtrl->UnselectAll();
     }
 #endif
     refreshAllGLWidgets();

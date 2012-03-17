@@ -136,7 +136,7 @@ bool MyApp::OnInit( void )
         
         if ( cmdParser.GetParamCount() > 0 )
         {
-            Loader loader = Loader(frame, frame->m_pListCtrl2 );
+            Loader loader = Loader(frame, frame->m_pListCtrl );
             for ( size_t i = 0; i < cmdParser.GetParamCount(); ++i )
             {
                 cmd = cmdParser.GetParam( i );

@@ -122,7 +122,7 @@ bool SceneManager::load(const wxString &filename)
             return true;
         }
 
-        m_pMainFrame->m_pListCtrl2->Clear();
+        m_pMainFrame->m_pListCtrl->Clear();
         if( 0 != DatasetManager::getInstance()->getDatasetCount() )
         {
             Logger::getInstance()->print( wxT( "Some datasets haven't been deleted when clearing the list for some reason. LOOK INTO IT!" ), LOGLEVEL_DEBUG );
@@ -212,11 +212,11 @@ bool SceneManager::save( const wxString &filename )
     // PREPARE DATASETS NODES
     map< DatasetIndex, wxXmlNode * > datasets;
 
-    int count = m_pMainFrame->m_pListCtrl2->GetItemCount();
+    int count = m_pMainFrame->m_pListCtrl->GetItemCount();
     for( int i = 0; i < count; ++i )
     {
         wxXmlNode *pNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "" ) );
-        DatasetIndex index = m_pMainFrame->m_pListCtrl2->GetItem( i );
+        DatasetIndex index = m_pMainFrame->m_pListCtrl->GetItem( i );
         datasets[index] = pNode;
 
         DatasetManager::getInstance()->getDataset( index )->save( pNode );
@@ -668,7 +668,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
                 }
             }
 
-            m_pMainFrame->m_pListCtrl2->InsertItemRange( v );
+            m_pMainFrame->m_pListCtrl->InsertItemRange( v );
         }
         else if( wxT( "points" ) == nodeName )
         {
@@ -688,7 +688,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
             if( m_pMainFrame->m_pTreeWidget->GetChildrenCount( m_pMainFrame->m_tPointId ) > 0 )
             {
                 DatasetIndex index = DatasetManager::getInstance()->createSurface();
-                m_pMainFrame->m_pListCtrl2->InsertItem( index );
+                m_pMainFrame->m_pListCtrl->InsertItem( index );
             }
         }
         else if( wxT( "selection_objects" ) == nodeName )

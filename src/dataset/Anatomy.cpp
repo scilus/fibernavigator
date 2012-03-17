@@ -376,7 +376,7 @@ void Anatomy::minimize()
     pNewAnatomy->setType( HEAD_BYTE );
     pNewAnatomy->setDataType( 2 );
 
-    MyApp::frame->m_pListCtrl2->InsertItem( indx );
+    MyApp::frame->m_pListCtrl->InsertItem( indx );
 }
 
 //////////////////////////////////////////////////////////////////////////

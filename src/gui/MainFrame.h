@@ -165,11 +165,11 @@ private:
     // List widget event functions     
     void onActivateListItem                 ( wxListEvent&    evt );
     void onSelectListItem                   ( wxListEvent&    evt );
-    void onActivateListItem2                ( wxListEvent&    evt );
-    void onSelectListItem2                  ( wxListEvent&    evt );
+    void onActivateListItem                 ( wxListEvent&    evt );
+    void onSelectListItem                   ( wxListEvent&    evt );
     void onDeleteAllListItems               ( wxListEvent&    evt );
-    void onDeleteListItem2                  ( wxListEvent&    evt );
-    void onDeselectListItem2                ( wxListEvent&    evt );
+    void onDeleteListItem                   ( wxListEvent&    evt );
+    void onDeselectListItem                 ( wxListEvent&    evt );
 
     // Tree widget event functions
     void onDeleteTreeItem                   ( wxTreeEvent&    evt );
@@ -178,7 +178,7 @@ private:
     void onUnSelectTreeItem                 ( wxTreeEvent&    evt );
     void onActivateTreeItem                 ( wxTreeEvent&    evt );
     void onTreeLabelEdit                    ( wxTreeEvent&    evt );
-    int  treeSelected                       ( wxTreeItemId    i_id  ); 
+    int  treeSelected                       ( wxTreeItemId    id  ); 
     
     // System functions
     void onSize                             ( wxSizeEvent&    evt );
@@ -217,7 +217,7 @@ public:
     MainCanvas          *m_pGL0;
     MainCanvas          *m_pGL1;
     MainCanvas          *m_pGL2;
-    ListCtrl            *m_pListCtrl2;
+    ListCtrl            *m_pListCtrl;
     MyTreeCtrl          *m_pTreeWidget;
     wxSlider            *m_pXSlider;
     wxSlider            *m_pYSlider;

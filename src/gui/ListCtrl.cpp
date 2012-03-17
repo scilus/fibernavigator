@@ -16,7 +16,7 @@ using std::vector;
 
 BEGIN_EVENT_TABLE( ListCtrl, wxListCtrl )
     EVT_LEFT_DOWN( ListCtrl::onLeftClick )
-    EVT_LIST_ITEM_ACTIVATED( ID_LIST_CTRL2, ListCtrl::onActivate )
+    EVT_LIST_ITEM_ACTIVATED( ID_LIST_CTRL, ListCtrl::onActivate )
 END_EVENT_TABLE()
 
 //////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ END_EVENT_TABLE()
 //////////////////////////////////////////////////////////////////////////
 
 ListCtrl::ListCtrl( wxWindow *pParent, const wxPoint &point, const wxSize &size, const long style )
-: wxListCtrl( pParent, ID_LIST_CTRL2, point, size, style ),
+: wxListCtrl( pParent, ID_LIST_CTRL, point, size, style ),
   m_column( 0 )
 {
 }
