@@ -21,6 +21,7 @@
 
 #include <GL/glew.h>
 #include <wx/math.h>
+#include <wx/xml/xml.h>
 
 #include <algorithm>
 #include <complex>
@@ -157,6 +158,20 @@ bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
 
     return true;
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+bool ODFs::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void ODFs::extractMaximas()
 {

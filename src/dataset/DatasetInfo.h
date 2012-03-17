@@ -38,6 +38,8 @@ class wxButton;
 class wxStaticText;
 class wxTextCtrl;
 class wxToggleButton;
+class wxXmlNode;
+class wxXmlProperty;
 
 class DatasetInfo : public SceneObject
 {
@@ -56,6 +58,7 @@ public:
     virtual void createPropertiesSizer(PropertiesWindow *parent); 
     virtual void updatePropertiesSizer();
     virtual bool save( wxString filename ) const { return false; }
+    virtual bool save( wxXmlNode *node ) const;
 
     // Functions
     wxString getName() const                     { return m_name;               };
@@ -104,6 +107,7 @@ public:
     int getVoxelSizeY() const                    { return m_voxelSizeY; }
     int getVoxelSizeZ() const                    { return m_voxelSizeZ; }
 
+public:
     // Trianglemesh
     TriangleMesh    *m_tMesh;
 

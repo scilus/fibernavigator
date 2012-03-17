@@ -37,6 +37,8 @@ public:
 	}
 
 	void    save( wxString filename );
+    bool    save( wxXmlNode *pNode ) const;
+
     void    saveDMRI( wxString filename );
 
     void    updateGroupFilters();

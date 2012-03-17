@@ -32,6 +32,7 @@ struct polygon {
 };
 
 class MainFrame;
+
 class Mesh : public DatasetInfo
 {
 

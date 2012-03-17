@@ -228,6 +228,7 @@ private:
     bool  m_showObjects;
     bool  m_activateObjects;
 
+    bool     m_scnLoading;
     bool     m_scnFileLoaded;
     wxString m_scnFilename;
     wxString m_scnPath;

@@ -16,6 +16,8 @@
 
 #include <wx/math.h>
 #include <wx/tglbtn.h>
+#include <wx/xml/xml.h>
+
 #include <algorithm>
 #include <ctime>
 #include <fstream>
@@ -1109,6 +1111,20 @@ bool CIsoSurface::save( wxString filename ) const
 
 #endif
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+bool CIsoSurface::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void CIsoSurface::createPropertiesSizer(PropertiesWindow *parent)
 {

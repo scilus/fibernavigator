@@ -2,6 +2,7 @@
 #define DATASETMANAGER_H_
 
 #include "Anatomy.h"
+#include "DatasetIndex.h"
 #include "FibersGroup.h"
 #include "ODFs.h"
 #include "Surface.h"
@@ -11,6 +12,7 @@
 
 #include <wx/string.h>
 
+#include <algorithm>
 #include <map>
 #include <vector>
 
@@ -19,7 +21,8 @@ class Fibers;
 class Mesh;
 class Tensors;
 
-typedef unsigned int DatasetIndex;
+typedef DatasetIndex2 /*unsigned int*/ DatasetIndex;
+const DatasetIndex BAD_INDEX /*= 0*/;
 
 class DatasetManager
 {
@@ -32,6 +35,7 @@ public:
     size_t                  getAnatomyCount() const         { return m_anatomies.size(); }
     DatasetInfo *           getDataset( DatasetIndex index ) const;
     size_t                  getDatasetCount() const         { return m_datasets.size(); }
+    DatasetIndex            getDatasetIndex( DatasetInfo * pDatasetInfo ) const;
     std::vector<Fibers *>   getFibers() const;
     FibersGroup *           getFibersGroup() const;
     size_t                  getFibersCount() const          { return m_fibers.size(); }
@@ -65,8 +69,10 @@ public:
     bool  isSurfaceDirty() const                            { return m_surfaceIsDirty; }
     void  setSurfaceDirty( const bool dirty )               { m_surfaceIsDirty = dirty; }
 
-    // -1 if load unsuccessful, index of the dataset otherwise
-    int load( const wxString &filename, const wxString &extension );
+    void clear();
+
+    // Check with DatasetIndex::isOk() method to know if index is valid
+    DatasetIndex load( const wxString &filename, const wxString &extension );
 
     // return index of the created dataset
     DatasetIndex createAnatomy()                                                 { return insert( new Anatomy() ); }
@@ -101,20 +107,20 @@ private:
     DatasetIndex insert( Tensors * pTensors );
 
     // Loads an anatomy. Extension supported: .nii and .nii.gz
-    int loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+    DatasetIndex loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
 
     // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
-    int loadFibers( const wxString &filename );
+    DatasetIndex loadFibers( const wxString &filename );
 
     // Loads a mesh. Extension supported: .mesh, .surf and .dip
-    int loadMesh( const wxString &filename, const wxString &extension );
+    DatasetIndex loadMesh( const wxString &filename, const wxString &extension );
 
     // Loads an ODF. Extension supported: .nii and .nii.gz
-    int loadODF( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+    DatasetIndex loadODF( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
 
     // Loads tensors. Extension supported: .nii and .nii.gz
-    int loadTensors( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
-
+    DatasetIndex loadTensors( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+    
 private:
     static DatasetManager *m_pInstance;
 
@@ -128,6 +134,7 @@ private:
     std::map<DatasetIndex, ODFs *> m_odfs;
     std::map<DatasetIndex, Surface *> m_surfaces;
     std::map<DatasetIndex, Tensors *> m_tensors;
+    std::map<DatasetInfo *, DatasetIndex> m_reverseDatasets;
 
     FMatrix m_niftiTransform;
     unsigned int m_countFibers; // TODO: Remove me once selection is fixed

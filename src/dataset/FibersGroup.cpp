@@ -10,9 +10,11 @@
 #include "../Logger.h"
 #include "../main.h"
 #include "../gui/MainFrame.h"
+#include "../misc/XmlHelper.h"
 
 #include <wx/tglbtn.h>
 #include <wx/tokenzr.h>
+#include <wx/xml/xml.h>
 
 #include <cmath>
 #include <cfloat>
@@ -227,6 +229,31 @@ void FibersGroup::save( wxString filename )
     delete[] pBuffer;
     pBuffer = NULL;
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+bool FibersGroup::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+    wxXmlNode *pStatus = getXmlNodeByName( wxT( "status" ), pNode );
+
+    if( NULL != pStatus )
+    {
+        wxXmlProperty *pProp = getXmlPropertyByName( wxT( "isFiberGroup" ), pStatus );
+
+        if( NULL != pProp )
+        {
+            pProp->SetValue( wxT( "yes" ) );
+        }
+    }
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void FibersGroup::resetFibersColor()
 {

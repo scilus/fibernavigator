@@ -70,7 +70,8 @@ public:
     // valid.
     int GetVolumeLengths(float& fVolLengthX, float& fVolLengthY, float& fVolLengthZ);
 
-    bool save( wxString filename )const;
+    bool save( wxString filename ) const;
+    bool save( wxXmlNode *pNode ) const;
 
 protected:
     // The number of vertices which make up the isosurface.

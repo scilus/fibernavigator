@@ -4,6 +4,7 @@
 #include "../gui/MainFrame.h"
 
 #include <wx/tglbtn.h>
+#include <wx/xml/xml.h>
 
 DatasetInfo::DatasetInfo()
 :   m_length       ( 0 ),
@@ -138,6 +139,33 @@ void DatasetInfo::updatePropertiesSizer()
     //m_ptoggleLIC->SetValue(getUseLIC());
     
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+bool DatasetInfo::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    wxXmlNode *pStatus = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "status" ) );
+    wxXmlNode *pPath   = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "path" ) );
+
+    pNode->AddChild( pStatus );
+    pNode->AddChild( pPath );
+
+    pStatus->AddProperty( new wxXmlProperty( wxT( "name" ), m_name ) );
+    pStatus->AddProperty( new wxXmlProperty( wxT( "active" ), m_show ? wxT( "yes" ) : wxT( "no" ) ) );
+    pStatus->AddProperty( new wxXmlProperty( wxT( "showFS" ), m_showFS ? wxT( "yes" ) : wxT( "no" ) ) );
+    pStatus->AddProperty( new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), m_alpha ) ) );
+    pStatus->AddProperty( new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), m_threshold ) ) );
+    pStatus->AddProperty( new wxXmlProperty( wxT( "useTex" ), m_useTex ? wxT( "yes" ) : wxT( "no" ) ) );
+    pStatus->AddProperty( new wxXmlProperty( wxT( "isFiberGroup" ), wxT( "no" ) ) );
+
+    pPath->AddChild( new wxXmlNode( NULL, wxXML_TEXT_NODE, wxT( "path"), m_fullPath ) );
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 DatasetInfo::~DatasetInfo()
 {

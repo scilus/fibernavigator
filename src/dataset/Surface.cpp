@@ -15,6 +15,7 @@
 #include <GL/glew.h>
 #include <wx/math.h>
 #include <wx/tglbtn.h>
+#include <wx/xml/xml.h>
 
 #include <fstream>
 #include <vector>
@@ -594,6 +595,20 @@ bool Surface::save(wxString filename ) const
 
 #endif
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+bool Surface::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void Surface::generateLICGeometry()
 {

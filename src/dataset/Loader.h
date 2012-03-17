@@ -65,8 +65,8 @@ public:
             }
             else
             {
-                int result = DatasetManager::getInstance()->load( filename, extension );
-                if( -1 != result )
+                DatasetIndex result = DatasetManager::getInstance()->load( filename, extension );
+                if( result.isOk() )
                 {
                     DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );
 

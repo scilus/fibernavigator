@@ -32,6 +32,7 @@ public:
     // From DatasetInfo
     void draw       ();
     bool load       ( nifti_image *pHeader, nifti_image *pBody );
+    bool save( wxXmlNode *pNode ) const;
 
     // Functions
     virtual void createPropertiesSizer(PropertiesWindow *parent);

@@ -167,6 +167,7 @@ private:
     void onSelectListItem                   ( wxListEvent&    evt );
     void onActivateListItem2                ( wxListEvent&    evt );
     void onSelectListItem2                  ( wxListEvent&    evt );
+    void onDeleteAllListItems               ( wxListEvent&    evt );
     void onDeleteListItem2                  ( wxListEvent&    evt );
     void onDeselectListItem2                ( wxListEvent&    evt );
 

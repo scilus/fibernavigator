@@ -38,6 +38,7 @@ public:
     std::vector<Vector> getSurfaceVoxelPositions();
 
     bool save( wxString filename ) const;
+    bool save( wxXmlNode *pNode ) const;
 
 private:
     void generateTexture() {}

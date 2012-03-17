@@ -18,6 +18,7 @@
 #include <GL/glew.h>
 #include <wx/textfile.h>
 #include <wx/tglbtn.h>
+#include <wx/xml/xml.h>
 
 #include <algorithm>
 using std::fill;
@@ -732,6 +733,18 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     m_isLoaded = flag;
 
     return flag;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+bool Anatomy::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////

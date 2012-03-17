@@ -18,6 +18,7 @@
 #include <wx/file.h>
 #include <wx/tglbtn.h>
 #include <wx/tokenzr.h>
+#include <wx/xml/xml.h>
 
 #include <algorithm>
 #include <cfloat>
@@ -2246,6 +2247,20 @@ void Fibers::save( wxString filename )
     delete[] pBuffer;
     pBuffer = NULL;
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+bool Fibers::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void Fibers::saveDMRI( wxString filename )
 {

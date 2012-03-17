@@ -56,6 +56,7 @@ EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL2,                   MainFrame::onActivat
 EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL2,                   MainFrame::onSelectListItem2    )
 EVT_LIST_ITEM_DESELECTED ( ID_LIST_CTRL2,                   MainFrame::onDeselectListItem2  )
 EVT_LIST_DELETE_ITEM     ( ID_LIST_CTRL2,                   MainFrame::onDeleteListItem2    )
+EVT_LIST_DELETE_ALL_ITEMS( ID_LIST_CTRL2,                   MainFrame::onDeleteAllListItems )
 
 // Tree widget events
 EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
@@ -483,7 +484,14 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
     if( dialog.ShowModal() == wxID_OK )
     {
         SceneManager::getInstance()->setScenePath( dialog.GetDirectory() );
-        SceneManager::getInstance()->save( dialog.GetPath() );
+        if( !SceneManager::getInstance()->save( dialog.GetPath() ) )
+        {
+            wxString errorMsg = wxT( "Error occured while trying to save scene." );
+            Logger::getInstance()->print( errorMsg, LOGLEVEL_ERROR );
+            wxMessageBox( errorMsg, wxT( "Error while loading" ), wxOK | wxICON_ERROR, NULL );
+            GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
+            GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
+        }
     }
 }
 
@@ -2043,6 +2051,15 @@ void MainFrame::deleteListItem()
         m_pListCtrl2->DeleteItem( tmp );
         refreshAllGLWidgets();
     }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onDeleteAllListItems( wxListEvent& evt )
+{
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteAllListItems" ), LOGLEVEL_DEBUG );
+
+    DatasetManager::getInstance()->clear();
 }
 
 //////////////////////////////////////////////////////////////////////////
