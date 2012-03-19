@@ -13,8 +13,6 @@
 #include "../dataset/FibersGroup.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/RTTrackingHelper.h"
-#include "../dataset/SplinePoint.h"
-#include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
@@ -285,7 +283,7 @@ void PropertiesWindow::OnToggleVisibility( wxCommandEvent&  WXUNUSED(event) )
         return;
 
     
-    int index = m_pListCtrl->GetItem( m_pMainFrame->m_currentListItem );
+    DatasetIndex index = m_pListCtrl->GetItem( m_pMainFrame->m_currentListItem );
     DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( index );
     pInfo->toggleShow();
 
@@ -314,12 +312,7 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
         float l_threshold = (float)l_current->m_psliderThresholdIntensity->GetValue() / 100.0f;
         l_current->setThreshold( l_threshold );
 
-        if( l_current->getType() == SURFACE )
-        {
-            Surface* s = (Surface*)l_current;
-            s->movePoints();
-        }
-        else if( l_current->getType() == ISO_SURFACE && ! l_current->m_psliderThresholdIntensity->leftDown() )
+        if( l_current->getType() == ISO_SURFACE && ! l_current->m_psliderThresholdIntensity->leftDown() )
         {
             CIsoSurface* s = (CIsoSurface*)l_current;
             s->GenerateWithThreshold();
@@ -552,38 +545,12 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     m_pMainFrame->refreshAllGLWidgets();
 }
 
-
-void PropertiesWindow::OnSegment(wxCommandEvent& WXUNUSED(event))
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSegment" ), LOGLEVEL_DEBUG );
-
-    SceneManager::getInstance()->toggleSegmentActive();
-
-    if( !m_pMainFrame->m_pMainGL->object.empty() )
-    {
-        m_pMainFrame->m_pMainGL->object.clear();
-    }
-    if( !m_pMainFrame->m_pMainGL->background.empty() )
-    {
-        m_pMainFrame->m_pMainGL->background.clear();
-    }
-
-//     m_pMainFrame->m_pDatasetHelper->m_isObjfilled = false;
-//     m_pMainFrame->m_pDatasetHelper->m_isBckfilled = false;
-//     m_pMainFrame->m_pDatasetHelper->m_isObjCreated = false;
-//     m_pMainFrame->m_pDatasetHelper->m_isBckCreated = false;
-}
-
 void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFloodFill" ), LOGLEVEL_DEBUG );
 
     SceneManager::getInstance()->setSegmentMethod( FLOODFILL );
 
-//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 0;
-//     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = true;
-//     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
-//     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = false;
     ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->toggleSegment();
 }
 
@@ -594,91 +561,6 @@ void PropertiesWindow::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
     float l_sliderValue = ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderFlood->GetValue() / 200.0f;
     ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->setFloodThreshold(l_sliderValue);
     ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtThresBox->SetValue(wxString::Format( wxT( "%.2f"), l_sliderValue));
-}
-
-void PropertiesWindow::OnKmeans( wxCommandEvent& WXUNUSED(event) )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnKmeans" ), LOGLEVEL_DEBUG );
-
-    SceneManager::getInstance()->setSegmentMethod( KMEANS );
-//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 2;
-    m_pMainFrame->m_pMainGL->segment();
-}
-
-void PropertiesWindow::OnSelectObj(wxCommandEvent& WXUNUSED(event))
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSelectObj" ), LOGLEVEL_DEBUG );
-    SceneManager::getInstance()->setSegmentMethod( GRAPHCUT );
-//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
-//     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = false;
-//     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
-//     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = true;
-}
-
-void PropertiesWindow::OnSelectBck(wxCommandEvent& WXUNUSED(event))
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSelectBck" ), LOGLEVEL_DEBUG );
-    SceneManager::getInstance()->setSegmentMethod( GRAPHCUT );
-//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
-//     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
-//     m_pMainFrame->m_pDatasetHelper->m_isSelectBckActive = true;
-//     m_pMainFrame->m_pDatasetHelper->m_isSelectObjActive = false;    
-}
-
-void PropertiesWindow::OnbtnGraphCut(wxCommandEvent& WXUNUSED(event))
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnbtnGraphCut" ), LOGLEVEL_DEBUG );
-    SceneManager::getInstance()->setSegmentMethod( GRAPHCUT );
-
-//     m_pMainFrame->m_pDatasetHelper->m_SegmentMethod = 1;
-//     m_pMainFrame->m_pDatasetHelper->m_isFloodfillActive = false;
-    m_pMainFrame->m_pMainGL->segment();    
-}
-
-
-void PropertiesWindow::OnClean( wxCommandEvent& WXUNUSED(event) )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnClean" ), LOGLEVEL_DEBUG );
-
-    if(m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
-    {
-        DatasetInfo* l_info = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
-        if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE)
-            l_info->clean();
-    }
-    m_pMainFrame->refreshAllGLWidgets();
-}
-
-void PropertiesWindow::OnLoop( wxCommandEvent& WXUNUSED(event) )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnLoop" ), LOGLEVEL_DEBUG );
-
-    if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
-    {
-        ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->smooth();
-    }
-    m_pMainFrame->refreshAllGLWidgets();
-}
-
-void PropertiesWindow::OnToggleDrawPointsMode( wxCommandEvent& event )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleDrawPointsMode" ), LOGLEVEL_DEBUG );
-
-    m_pMainFrame->onToggleDrawPointsMode(event);
-}
-
-void PropertiesWindow::OnMoveBoundaryPointsLeft( wxCommandEvent& event )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMoveBoundaryPointsLeft" ), LOGLEVEL_DEBUG );
-
-    m_pMainFrame->onMoveBoundaryPointsLeft(event);
-}
-
-void PropertiesWindow::OnMoveBoundaryPointsRight(wxCommandEvent& event)
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMoveBoundaryPointsRight" ), LOGLEVEL_DEBUG );
-
-    m_pMainFrame->onMoveBoundaryPointsRight(event);
 }
 
 void PropertiesWindow::OnFibersFilter( wxCommandEvent& event)
@@ -1238,7 +1120,7 @@ void PropertiesWindow::OnNormalizeTensors( wxCommandEvent& event )
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the display fibers 
-// info after a right click in the tree on a selectio object.
+// info after a right click in the tree on a selection object.
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 {
@@ -1373,36 +1255,6 @@ void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setMeanFiberColor( l_col);
     
     m_pMainFrame->refreshAllGLWidgets();
-}
-
-///////////////////////////////////////////////////////////////////////////
-// This function will be triggered when the user click on the display cross sections
-// button that is located in the m_fibersInfoSizer.
-///////////////////////////////////////////////////////////////////////////
-void PropertiesWindow::OnDisplayCrossSections( wxCommandEvent& WXUNUSED(event) )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDisplayCrossSections" ), LOGLEVEL_DEBUG );
-
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_displayCrossSections = (CrossSectionsDisplay)( ( (int)((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_displayCrossSections ) + 1 );
-    if( ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_displayCrossSections == CS_NB_OF_CHOICES )
-	{
-        ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_displayCrossSections = CS_NOTHING;
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////
-// This function will be triggered when the user click on the display dispersion tube
-// button that is located in the m_fibersInfoSizer.
-///////////////////////////////////////////////////////////////////////////
-void PropertiesWindow::OnDisplayDispersionTube( wxCommandEvent& WXUNUSED(event) )
-{
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDisplayDispersionTube" ), LOGLEVEL_DEBUG );
-
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_displayDispersionCone = (DispersionConeDisplay)( ( (int)((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_displayDispersionCone ) + 1 );
-    if( ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_displayDispersionCone == DC_NB_OF_CHOICES )
-	{
-        ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_displayDispersionCone = DC_NOTHING;
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////

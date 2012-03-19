@@ -4,7 +4,6 @@
 #include "DatasetInfo.h"
 #include "KdTree.h"
 #include "Octree.h"
-#include "SplinePoint.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/Fantom/FVector.h"
 
@@ -64,7 +63,6 @@ public:
     void    updateLinesShown();
 
     void    generateKdTree();
-    bool    getBarycenter( SplinePoint *pPoint );
     
     void    initializeBuffer();
 
@@ -183,8 +181,6 @@ private:
     void            resetLinesShown();
     std::vector< bool >  getLinesShown( SelectionObject *pSelectionObject );
     void            objectTest(    SelectionObject *pSelectionObject );
-    
-    void            barycenterTest( int left, int right, int axis );
 
     void            drawFakeTubes();
     void            drawSortedLines();

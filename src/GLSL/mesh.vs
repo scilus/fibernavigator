@@ -9,9 +9,9 @@ void main()
     gl_BackColor = gl_Color;
 
     myColor = gl_Color;
-	VaryingTexCoord0 = gl_Vertex;
+    VaryingTexCoord0 = gl_Vertex;
 
-	prepareLight();
+    prepareLight();
 
-	gl_Position = ftransform();
+    gl_Position = ftransform();
 }

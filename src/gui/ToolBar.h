@@ -33,10 +33,6 @@ public:
     wxToolBarToolBase *m_toggleInverseSelection;
     wxToolBarToolBase *m_toggleShowAllSelectionObjects;
     wxToolBarToolBase *m_toggleActivateAllSelectionObjects;
-    //wxToolBarToolBase *m_btnNewSplineSurface;
-    //wxToolBarToolBase *m_toggleDrawPoints;
-    //wxToolBarToolBase *m_btnMoveBoundaryPointLeft;
-    //wxToolBarToolBase *m_btnMoveBoundaryPointRight;
     wxToolBarToolBase *m_toggleLighting;
     wxToolBarToolBase *m_toggleFakeTubes;
 	wxToolBarToolBase *m_toggleClearToBlack;

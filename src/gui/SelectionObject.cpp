@@ -22,6 +22,7 @@
 #include "../misc/Algorithms/ConvexGrahamHull.h"
 #include "../misc/Algorithms/ConvexHullIncremental.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
 
 #include <wx/textctrl.h>
 #include <wx/tglbtn.h>

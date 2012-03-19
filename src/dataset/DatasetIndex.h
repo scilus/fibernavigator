@@ -32,9 +32,9 @@ public:
     // postfix ++
     DatasetIndex operator++(int) 
     {
-        DatasetIndex result(*this);    // make a copy for result
-        ++(*this);                      // Now use the prefix version to do the work
-        return result;                  // return the copy (the old) value.
+        DatasetIndex result(*this); // make a copy for result
+        ++(*this);                  // Now use the prefix version to do the work
+        return result;              // return the copy (the old) value.
     }
 
     operator int()          const { return m_index; }

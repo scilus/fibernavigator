@@ -20,8 +20,6 @@
 #include "../dataset/Fibers.h"
 #include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
-#include "../dataset/SplinePoint.h"
-#include "../dataset/Surface.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gui/ArcBall.h"
 #include "../gui/MainFrame.h"
@@ -291,17 +289,9 @@ void TheScene::renderScene()
     // Opaque objects.
     renderSlices();
 
-    if( DatasetManager::getInstance()->isSurfaceLoaded() )
-        renderSplineSurface();
-
-    if( SceneManager::getInstance()->isPointMode() )
-        drawPoints();
 
     if( DatasetManager::getInstance()->isVectorsLoaded() )
         drawVectors();
-
-    if( SceneManager::getInstance()->isColorMapLegendDisplayed() )
-        drawColorMapLegend();
 
     if( DatasetManager::getInstance()->isTensorsLoaded() )
         renderTensors();
@@ -490,43 +480,6 @@ void TheScene::renderSlices()
     Logger::getInstance()->printIfGLError( wxT( "Render slices" ) );
 
     glPopAttrib();
-}
-
-void TheScene::renderSplineSurface()
-{
-    if( DatasetManager::getInstance()->isSurfaceLoaded() )
-    {
-        DatasetInfo * pDsInfo = DatasetManager::getInstance()->getSurface();
-        if( pDsInfo->getType() == SURFACE && pDsInfo->getShow() )
-        {
-            glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-            if ( SceneManager::getInstance()->isPointMode() )
-                glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            else
-                glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-            bindTextures();
-
-            lightsOn();
-
-            ShaderHelper::getInstance()->getSplineSurfShader()->bind();
-            ShaderHelper::getInstance()->setSplineSurfaceShaderVars();
-            wxColor color = pDsInfo->getColor();
-            glColor3f( (float) color.Red() / 255.0, (float) color.Green() / 255.0, (float) color.Blue() / 255.0 );
-            ShaderHelper::getInstance()->getSplineSurfShader()->setUniInt( "useTex", !pDsInfo->getUseTex() );
-            ShaderHelper::getInstance()->getSplineSurfShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
-
-            pDsInfo->draw();
-
-            ShaderHelper::getInstance()->getSplineSurfShader()->release();
-
-            lightsOff();
-
-            Logger::getInstance()->printIfGLError( wxT( "Draw surface" ) );
-            glPopAttrib();
-        }
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -810,39 +763,6 @@ void TheScene::drawSelectionObjects()
     }
 
     Logger::getInstance()->printIfGLError( wxT( "Draw selection objects" ) );
-}
-
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
-void TheScene::drawPoints()
-{
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    lightsOn();
-    ShaderHelper::getInstance()->getMeshShader()->bind();
-    ShaderHelper::getInstance()->setMeshShaderVars();
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "showFS", true );
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "useTex", false );
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "cutAtSurface", false );
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "lightOn", true );
-
-    wxTreeItemId treeId;
-    wxTreeItemIdValue cookie = 0;
-    treeId = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
-    while( treeId.IsOk() )
-    {
-        SplinePoint* pCurPoint = (SplinePoint*) ( MyApp::frame->m_pTreeWidget->GetItemData( treeId ) );
-        pCurPoint->draw();
-
-        treeId = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
-    }
-
-    lightsOff();
-    ShaderHelper::getInstance()->getMeshShader()->release();
-    glPopAttrib();
-
-    Logger::getInstance()->printIfGLError( wxT( "Draw points" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1198,11 +1118,6 @@ void TheScene::drawVectors()
                     CIsoSurface* pSurf = (CIsoSurface*) pMesh;
                     drawVectorsHelper( pSurf->getSurfaceVoxelPositions(), pVecs, bright );
                 }
-                else if( pMesh->getType() == SURFACE && pMesh->getShow() )
-                {
-                    Surface* pSurf = (Surface*) pMesh;
-                    drawVectorsHelper( pSurf->getSurfaceVoxelPositions(), pVecs, bright );
-                }
             }
             glEnd();
         }
@@ -1211,71 +1126,6 @@ void TheScene::drawVectors()
     Logger::getInstance()->printIfGLError( wxT( "Draw vectors" ) );
 
     glDisable( GL_BLEND );
-
-    glPopAttrib();
-}
-
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
-void TheScene::drawGraph()
-{
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    std::vector<float> graphPoints;
-
-    wxTreeItemId treeId;
-    wxTreeItemIdValue cookie = 0;
-    treeId = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
-    while ( treeId.IsOk() )
-    {
-        SplinePoint* pPoint = (SplinePoint*)( MyApp::frame->m_pTreeWidget->GetItemData( treeId ) );
-        graphPoints.push_back( pPoint->X() );
-        graphPoints.push_back( pPoint->Y() );
-        graphPoints.push_back( pPoint->Z() );
-        treeId = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
-    }
-
-    ShaderHelper::getInstance()->getGraphShader()->bind();
-    ShaderHelper::getInstance()->getGraphShader()->setUniInt  ( "globalColor", false );
-    ShaderHelper::getInstance()->getGraphShader()->setUniFloat( "animation", (float)SceneManager::getInstance()->getAnimationStep() );
-    ShaderHelper::getInstance()->getGraphShader()->setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
-    ShaderHelper::getInstance()->getGraphShader()->setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
-
-    int countPoints = graphPoints.size() / 3;
-    glColor3f( 1.0f, 0.0f, 0.0f );
-
-    for( int i = 0 ; i < countPoints ; ++i )
-    {
-        for( int j = 0 ; j < countPoints ; ++j )
-        {
-            if( j > i )
-            {
-                float length = sqrt ( ( graphPoints[i*3] - graphPoints[j*3] )     * ( graphPoints[i*3]   - graphPoints[j*3] ) +
-                                      ( graphPoints[i*3+1] - graphPoints[j*3+1] ) * ( graphPoints[i*3+1] - graphPoints[j*3+1] ) +
-                                      ( graphPoints[i*3+2] - graphPoints[j*3+2] ) * ( graphPoints[i*3+2] - graphPoints[j*3+2] ) );
-
-                ShaderHelper::getInstance()->getGraphShader()->setUniFloat( "thickness", (float)( i+1 )*2 );
-                glColor3f( i/10.0f, j/10.0f, i+j/20.0f );
-                glBegin( GL_QUADS );
-                    glTexCoord3f( -1.0f, 0, length );
-                    glNormal3f( graphPoints[i*3] - graphPoints[j*3], graphPoints[i*3+1] - graphPoints[j*3+1], graphPoints[i*3+2] - graphPoints[j*3+2] );
-                    glVertex3f( graphPoints[i*3], graphPoints[i*3+1], graphPoints[i*3+2] );
-                    glTexCoord3f( 1.0f, 0, length );
-                    glNormal3f( graphPoints[i*3] - graphPoints[j*3], graphPoints[i*3+1] - graphPoints[j*3+1], graphPoints[i*3+2] - graphPoints[j*3+2] );
-                    glVertex3f( graphPoints[i*3], graphPoints[i*3+1], graphPoints[i*3+2] );
-                    glTexCoord3f( 1.0f, 1.0, length );
-                    glNormal3f( graphPoints[i*3] - graphPoints[j*3], graphPoints[i*3+1] -  graphPoints[j*3+1], graphPoints[i*3+2] - graphPoints[j*3+2] );
-                    glVertex3f( graphPoints[j*3], graphPoints[j*3+1], graphPoints[j*3+2] );
-                    glTexCoord3f( -1.0f, 1.0, length );
-                    glNormal3f( graphPoints[i*3] - graphPoints[j*3], graphPoints[i*3+1] -  graphPoints[j*3+1], graphPoints[i*3+2] - graphPoints[j*3+2] );
-                    glVertex3f( graphPoints[j*3], graphPoints[j*3+1], graphPoints[j*3+2] );
-                glEnd();
-            }
-        }
-    }
-
-    ShaderHelper::getInstance()->getGraphShader()->release();
 
     glPopAttrib();
 }

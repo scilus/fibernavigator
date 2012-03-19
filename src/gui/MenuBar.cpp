@@ -28,7 +28,6 @@ MenuBar::MenuBar()
 	m_itemNewAnatomyByte = m_menuNewAnatomy->Append(wxID_ANY, wxT("New White"));
 	m_itemNewAnatomyRGB = m_menuNewAnatomy->Append(wxID_ANY, wxT("New RGB"));
     m_menuFile->AppendSubMenu(m_menuNewAnatomy, wxT("New Empty Anatomy"));
-	//m_itemReloadShader = m_menuFile->Append(wxID_ANY, wxT("Reload Shader"));
 	m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
 	m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));
 	m_itemSaveSelectedSurface = m_menuFile->Append(wxID_ANY, wxT("Save Selected Surface"));
@@ -75,8 +74,6 @@ MenuBar::MenuBar()
     m_menuVoi = new wxMenu();
     m_itemNewSelectionBox = m_menuVoi->Append(wxID_ANY, wxT("New Selection Box"));
     m_itemNewSelectionEllipsoid = m_menuVoi->Append(wxID_ANY, wxT("New Selection Ellipsoid"));
-    m_menuVoi->AppendSeparator();
-//    m_itemToggleUseMorphing = m_menuVoi->AppendCheckItem(wxID_ANY, wxT("Morphing"));
 
     m_menuFibers = new wxMenu();
     m_itemResetFibersColors = m_menuFibers->Append(wxID_ANY, wxT("Reset Color on Fibers"));
@@ -84,11 +81,6 @@ MenuBar::MenuBar()
     m_itemToggleUseFakeTubes = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Fake Tubes"));
     m_itemToggleUseTransparency = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Transparent Fibers"));
 	m_itemToggleUseGeometryShader = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Geometry Shader"));
- 
-    m_menuSurface = new wxMenu();
-    m_itemNewSplineSurface = m_menuSurface->Append(wxID_ANY, wxT("New Spline Surface"));
-    m_itemMoveBoundaryPointLeft = m_menuSurface->Append(wxID_ANY, wxT("Move Left"));
-    m_itemMoveBoundaryPointRight = m_menuSurface->Append(wxID_ANY, wxT("Move Right"));
     
     m_menuOptions = new wxMenu();
     m_menuRuler = new wxMenu();
@@ -133,19 +125,11 @@ MenuBar::MenuBar()
     m_itemToggleBlendTextureOnMesh = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Blend Tex. on Mesh"));
     m_itemToggleFilterISO = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Filter Iso"));
     m_itemToggleNormal = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Flip Normal"));
-    //m_itemToggleColorMapLegend = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Show Color Map"));
-  
-
 
     m_menuHelp = new wxMenu();
     m_itemKeyboardShortcuts = m_menuHelp->Append(wxID_ANY, wxT("Keyboard Shortcut"));
     m_itemScreenShot = m_menuHelp->Append(wxID_ANY, wxT("ScreenShot"));
 	m_itemWarningsInfo = m_menuHelp->Append(wxID_ANY, wxT("Warnings Informations"));
-    //m_menuMovie = new  wxMenu();
-    //m_itemAxialMovie = m_menuMovie->Append(wxID_ANY, wxT("Axial"));
-    //m_itemCoronalMovie = m_menuMovie->Append(wxID_ANY, wxT("Coronal"));
-    //m_itemSagittalMovie = m_menuMovie->Append(wxID_ANY, wxT("Sagittal"));
-    //m_menuHelp->AppendSubMenu(m_menuMovie, wxT("Movie"));
     m_menuHelp->AppendSeparator();
     m_itemAbout = m_menuHelp->Append(wxID_ABOUT, wxT("About"));
 
@@ -153,7 +137,6 @@ MenuBar::MenuBar()
     this->Append(m_menuView, wxT("&View"));
     this->Append(m_menuVoi, wxT("&VOI"));
     this->Append(m_menuFibers, wxT("&Fibers"));
-    this->Append(m_menuSurface, wxT("Surface"));
     this->Append(m_menuOptions, wxT("&Option"));
     this->Append(m_menuHelp, wxT("&Help"));
 
@@ -171,7 +154,6 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemLoad->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLoad));
 	mf->Connect(m_itemNewAnatomyByte->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyByte));
 	mf->Connect(m_itemNewAnatomyRGB->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyRGB));
-    //mf->Connect(m_itemReloadShader->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnReloadShaders));
     mf->Connect(m_itemSaveSCN->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSave));
     mf->Connect(m_itemSaveSelectedFibers->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSaveFibers));
     mf->Connect(m_itemSaveSelectedSurface->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSaveSurface));
@@ -198,7 +180,6 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemToggleShowAxes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuViewAxes));
     mf->Connect(m_itemNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionBox));
     mf->Connect(m_itemNewSelectionEllipsoid->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionEllipsoid));
-//    mf->Connect(m_itemToggleUseMorphing->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseMorph));
     mf->Connect(m_itemResetFibersColors->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResetColor));
     mf->Connect(m_itemToggleLighting->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleLighting));    
     mf->Connect(m_itemToogleInvertFibersSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertFibers));
@@ -207,16 +188,12 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemToggleBlendTextureOnMesh->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleBlendTexOnMesh));
     mf->Connect(m_itemToggleFilterISO->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleFilterIso));
     mf->Connect(m_itemToggleNormal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleNormal));
-    //mf->Connect(m_itemToggleColorMapLegend->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleColorMapLegend));
     mf->Connect(m_itemToggleRuler->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectRuler));
     mf->Connect(m_itemRulerClear->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRulerToolClear));
     mf->Connect(m_itemRulerAdd->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRulerToolAdd));
     mf->Connect(m_itemRulerRemove->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRulerToolDel));
-    mf->Connect(m_itemNewSplineSurface->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSplineSurface));
     mf->Connect(m_itemToggleDrawPoints->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawPointsMode));
     mf->Connect(m_itemToggleDrawVectors->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawVectors));
-    mf->Connect(m_itemMoveBoundaryPointLeft->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMoveBoundaryPointsLeft));
-    mf->Connect(m_itemMoveBoundaryPointRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMoveBoundaryPointsRight));
     mf->Connect(m_itemToggleUseTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseTransparency));
     mf->Connect(m_itemToggleUseGeometryShader->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseGeometryShader));
     mf->Connect(m_itemToggleDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSwitchDrawer));
@@ -242,9 +219,6 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemKeyboardShortcuts->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onShortcuts));
     mf->Connect(m_itemScreenShot->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshot));
 	mf->Connect(m_itemWarningsInfo->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onWarningsInformations));
-    //mf->Connect(m_itemAxialMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieAxi));
-    //mf->Connect(m_itemCoronalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieCor));
-    //mf->Connect(m_itemSagittalMovie->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnSlizeMovieSag));
     mf->Connect(m_itemRotateZ->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateZ));
     mf->Connect(m_itemRotateY->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateY));
     mf->Connect(m_itemRotateX->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateX));
@@ -253,8 +227,6 @@ void MenuBar::initMenuBar( MainFrame *mf )
 
 void MenuBar::updateMenuBar( MainFrame *mf )
 {
-    //m_itemSaveSelectedDataset->Enable(mf->m_currentListItem != -1 && (((DatasetInfo*)mf->m_currentFNObject)->getType()==HEAD_BYTE || ((DatasetInfo*)mf->m_currentFNObject)->getType()==HEAD_SHORT));
-    
     m_itemToggleLighting->Check( SceneManager::getInstance()->isLightingActive() );
     m_itemToggleRuler->Check( SceneManager::getInstance()->isRulerActive() );
     
@@ -314,15 +286,13 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleUseTransparency->Check(isFiberUsingTransparency);
     m_itemToggleUseFakeTubes->Enable(isFiberSelected);
 	m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
-    
-//   m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
+
     m_itemToggleUseGeometryShader->Check( SceneManager::getInstance()->isFibersGeomShaderActive() );
 #if _COMPILE_GEO_SHADERS
     m_itemToggleUseGeometryShader->Enable( SceneManager::getInstance()->areGeometryShadersSupported() );
 #else
     m_itemToggleUseGeometryShader->Enable(false);
 #endif
-//   m_itemToggleUseMorphing->Check(mf->m_pDatasetHelper->m_morphing);
     m_itemToggleShowCrosshair->Check( SceneManager::getInstance()->isCrosshairDisplayed() );
     m_itemToggleShowAxial->Check( SceneManager::getInstance()->isAxialDisplayed() );
     m_itemToggleShowCoronal->Check( SceneManager::getInstance()->isCoronalDisplayed() );
@@ -331,9 +301,6 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleBlendTextureOnMesh->Check( SceneManager::getInstance()->isTexBlendOnMesh() );
     m_itemToggleFilterISO->Check( SceneManager::getInstance()->isIsoSurfaceFiltered() );
     m_itemToggleShowAxes->Check( SceneManager::getInstance()->areAxesDisplayed() );
-    //m_itemToggleColorMapLegend->Check(mf->m_datasetHelper->m_colorMap);
-    m_itemMoveBoundaryPointLeft->Enable( DatasetManager::getInstance()->isSurfaceLoaded() );
-    m_itemMoveBoundaryPointRight->Enable( DatasetManager::getInstance()->isSurfaceLoaded() );
     m_itemToggleDrawPoints->Check( SceneManager::getInstance()->isPointMode() );
     m_itemToggleDrawVectors->Check( SceneManager::getInstance()->areVectorsDisplayed() );
 	
@@ -350,6 +317,4 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemDrawColorPicker->Enable( mf->isDrawerToolActive() &&
                                    mf->canUseColorPicker() &&
                                    DRAWMODE_PEN == mf->getDrawMode() );
-    
-    m_itemNewSplineSurface->Enable(DatasetManager::getInstance()->isAnatomyLoaded() && !DatasetManager::getInstance()->isSurfaceLoaded());
 }

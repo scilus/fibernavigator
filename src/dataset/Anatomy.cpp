@@ -717,7 +717,6 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
             }
 
             m_pTensorField = new TensorField( m_columns, m_rows, m_frames, &m_floatDataset, 1, 3 );
-            DatasetManager::getInstance()->setSurfaceDirty( true );
             flag = true;
             break;
         }

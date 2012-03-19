@@ -28,7 +28,7 @@ public:
 
     void OnListItemUp                       ( wxCommandEvent& event );
     void OnListItemDown                     ( wxCommandEvent& event );
-    void OnToggleVisibility                     ( wxCommandEvent& event );
+    void OnToggleVisibility                 ( wxCommandEvent& event );
     void OnListItemCutOut                   ( wxCommandEvent& event );
 
     void OnDeleteListItem                   ( wxEvent& event );
@@ -67,24 +67,12 @@ public:
     void OnNewVoiFromOverlay                ( wxCommandEvent& event );
     void OnNewIsoSurface                    ( wxCommandEvent& event ); 
 
-    void OnSegment                          ( wxCommandEvent& event );
     void OnFloodFill                        ( wxCommandEvent& event );
     void OnSliderFloodMoved                 ( wxCommandEvent& event );
-    void OnSelectBck                        ( wxCommandEvent& event );
-    void OnKmeans                           ( wxCommandEvent& event );
-    void OnbtnGraphCut                      ( wxCommandEvent& event );
-    void OnSelectObj                        ( wxCommandEvent& event );
-
-    void OnClean                            ( wxCommandEvent& event );
-    void OnLoop                             ( wxCommandEvent& event );
-
-    void OnToggleDrawPointsMode             ( wxCommandEvent& event );
-    void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );
-    void OnMoveBoundaryPointsRight          ( wxCommandEvent& event );
 
     void OnFibersFilter                     ( wxCommandEvent& event );
     void OnGenerateFiberVolume              ( wxCommandEvent& event );
-    void OnToggleUseTex                ( wxCommandEvent& event );
+    void OnToggleUseTex                     ( wxCommandEvent& event );
     void OnListMenuDistance                 ( wxCommandEvent& event );
     void OnListMenuMinDistance              ( wxCommandEvent& event );
     void OnColorWithCurvature               ( wxCommandEvent& event );
@@ -141,8 +129,6 @@ public:
     void OnConvexHullColorChange            ( wxCommandEvent& event );
     void OnConvexHullOpacityChange          ( wxCommandEvent& event );
     void OnMeanFiberColorChange             ( wxCommandEvent& event );
-    void OnDisplayCrossSections             ( wxCommandEvent& event );
-    void OnDisplayDispersionTube            ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );
     void OnCreateFibersDensityTexture       ( wxCommandEvent& event );
     void OnMeanComboBoxSelectionChange      ( wxCommandEvent& event );

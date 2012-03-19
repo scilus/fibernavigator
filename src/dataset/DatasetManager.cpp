@@ -30,8 +30,7 @@ DatasetManager * DatasetManager::m_pInstance = NULL;
 DatasetManager::DatasetManager(void)
 :   m_nextIndex( 1 ),
     m_niftiTransform( 4, 4 ),
-    m_countFibers( 0 ),
-    m_surfaceIsDirty( true )
+    m_countFibers( 0 )
 {
 }
 
@@ -139,18 +138,6 @@ Fibers * DatasetManager::getSelectedFibers( DatasetIndex index ) const
 {
     map<DatasetIndex, Fibers *>::const_iterator it = m_fibers.find( index );
     if( it != m_fibers.end() )
-    {
-        return it->second;
-    }
-    return NULL;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-Surface * DatasetManager::getSurface() const
-{
-    map<DatasetIndex, Surface *>::const_iterator it = m_surfaces.begin();
-    if( it != m_surfaces.end() )
     {
         return it->second;
     }
@@ -381,10 +368,10 @@ void DatasetManager::remove( const DatasetIndex index )
         Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Fibers" ) ), LOGLEVEL_DEBUG );
         m_fibers.erase( m_fibers.find( index ) );
         break;
-    case SURFACE:
-        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Surface" ) ), LOGLEVEL_DEBUG );
-        m_surfaces.erase( m_surfaces.find( index ) );
-        break;
+//     case SURFACE:
+//         Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Surface" ) ), LOGLEVEL_DEBUG );
+//         m_surfaces.erase( m_surfaces.find( index ) );
+//         break;
 //     case ISO_SURFACE:
 //         break;
     case FIBERSGROUP:
@@ -475,19 +462,6 @@ DatasetIndex DatasetManager::insert( ODFs * pOdfs )
     m_datasets[index]  = pOdfs;
     m_odfs[index]      = pOdfs;
     m_reverseDatasets[pOdfs] = index;
-
-    return index;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-DatasetIndex DatasetManager::insert( Surface * pSurface )
-{
-    DatasetIndex index = getNextAvailableIndex();
-
-    m_datasets[index]  = pSurface;
-    m_surfaces[index]  = pSurface;
-    m_reverseDatasets[pSurface] = index;
 
     return index;
 }

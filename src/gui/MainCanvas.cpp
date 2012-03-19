@@ -10,7 +10,6 @@
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/RTTrackingHelper.h"
-#include "../dataset/SplinePoint.h"
 #include "../dataset/Tensors.h"
 #include "../gfx/ShaderHelper.h"
 #include "../misc/lic/FgeOffscreen.h"
@@ -165,12 +164,12 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
         {
             if ( evt.LeftUp() )
             {
-                processLeftMouseUp(evt, evt1);
+                processLeftMouseUp( evt );
             }
 
             if ( evt.LeftIsDown() )
             {
-                processLeftMouseDown(clickX, clickY, evt);
+                processLeftMouseDown( clickX, clickY, evt );
             }
             else
             {
@@ -179,38 +178,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 
             if ( evt.MiddleIsDown() )
             {               
-                if ( !m_ismDragging)
-                {
-                    long item = MyApp::frame->getCurrentListItem();
-                    
-                    if( item != -1 && !SceneManager::getInstance()->isRulerActive() )
-                    {
-                        Anatomy* pAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( item );
-
-                        if( NULL != pAnatomy && pAnatomy->m_isSegmentOn )
-                        {
-                            SceneManager::getInstance()->setSegmentActive( true );
-                            m_hr = pick( evt.GetPosition(), false );
-                            segment();
-                            pAnatomy->toggleSegment();
-                        }
-                    }                    
-                    else if( SceneManager::getInstance()->isRulerActive() )
-                    {                        
-                        m_hr = pick( evt.GetPosition(), true );
-                    }
-                
-                    m_lastPos = evt.GetPosition();
-                    m_ismDragging = true;
-                }
-                else if( !m_isSceneLocked ) //Move Scene
-                {
-                    int xDrag = m_lastPos.x - clickX;
-                    int yDrag = ( m_lastPos.y - clickY );
-                    m_lastPos = evt.GetPosition();
-                    SceneManager::getInstance()->moveScene( xDrag, yDrag );
-                    Refresh( false );
-                }
+                processMiddleMouseDown( evt, clickX, clickY );
             }
             else
             {
@@ -219,8 +187,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 
             if ( evt.RightIsDown() )
             {
-                processRightMouseDown(evt, clickX, clickY, voxelX, voxelY, voxelZ, evt1);
-
+                processRightMouseDown( evt, clickX, clickY, voxelX, voxelY, voxelZ, evt1 );
             }
             else
             {
@@ -278,7 +245,7 @@ void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt
                 long index = MyApp::frame->getCurrentListItem();
                 if( -1 != index )
                 {
-                    Anatomy *pAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
+                    Anatomy *pAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
                     if( NULL != pAnatomy && pAnatomy->m_isSegmentOn ) //FloodFill Method (1click)
                     {
@@ -327,7 +294,7 @@ void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt
 
 //////////////////////////////////////////////////////////////////////////
 
-void MainCanvas::processLeftMouseUp( wxMouseEvent &evt, wxCommandEvent evt1 )
+void MainCanvas::processLeftMouseUp( wxMouseEvent &evt )
 {
     if ( wxGetKeyState( WXK_SHIFT ) && !SceneManager::getInstance()->isPointMode() )
     {
@@ -341,19 +308,43 @@ void MainCanvas::processLeftMouseUp( wxMouseEvent &evt, wxCommandEvent evt1 )
         MyApp::frame->m_pZSlider->SetValue( newZ );
         MyApp::frame->refreshAllGLWidgets();
     }
-    else if ( wxGetKeyState( WXK_CONTROL ) && SceneManager::getInstance()->isPointMode() )
-    {
-        m_hr = pick( evt.GetPosition(),false );
-        if ( m_hr.hit && ( m_hr.picked <= SAGITTAL ) )
-        {
-            m_hr.picked = 20;
-            SplinePoint *point = new SplinePoint( getEventCenter() );
-            wxTreeItemId pId = MyApp::frame->m_pTreeWidget->AppendItem(
-                MyApp::frame->m_tPointId, wxT("point"), -1, -1, point );
-            point->setTreeId( pId );
+}
 
-            GetEventHandler()->ProcessEvent( evt1 );
+//////////////////////////////////////////////////////////////////////////
+
+void MainCanvas::processMiddleMouseDown( wxMouseEvent &evt, int clickX, int clickY )
+{
+    if ( !m_ismDragging)
+    {
+        long item = MyApp::frame->getCurrentListItem();
+
+        if( item != -1 && !SceneManager::getInstance()->isRulerActive() )
+        {
+            Anatomy* pAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( item );
+
+            if( NULL != pAnatomy && pAnatomy->m_isSegmentOn )
+            {
+                SceneManager::getInstance()->setSegmentActive( true );
+                m_hr = pick( evt.GetPosition(), false );
+                segment();
+                pAnatomy->toggleSegment();
+            }
+        }                    
+        else if( SceneManager::getInstance()->isRulerActive() )
+        {                        
+            m_hr = pick( evt.GetPosition(), true );
         }
+
+        m_lastPos = evt.GetPosition();
+        m_ismDragging = true;
+    }
+    else if( !m_isSceneLocked ) //Move Scene
+    {
+        int xDrag = m_lastPos.x - clickX;
+        int yDrag = ( m_lastPos.y - clickY );
+        m_lastPos = evt.GetPosition();
+        SceneManager::getInstance()->moveScene( xDrag, yDrag );
+        Refresh( false );
     }
 }
 
@@ -378,21 +369,8 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
 
         SetFocus();
 
-        if ( m_hr.picked == 20 )
+        if ( m_hr.picked >= 10 && m_hr.picked < 20 )
         {
-            if ( MyApp::frame->getLastSelectedPoint() )
-            {
-                MyApp::frame->getLastSelectedPoint()->unselect();
-            }
-            MyApp::frame->setLastSelectedPoint( (SplinePoint*) m_hr.object );
-            ( (SplinePoint*) m_hr.object )->select( true );
-        }
-        else if ( m_hr.picked >= 10 && m_hr.picked < 20 )
-        {
-            if ( MyApp::frame->getLastSelectedPoint() )
-            {
-                MyApp::frame->getLastSelectedPoint()->unselect();
-            }
             ( (SelectionObject*) m_hr.object )->select( true );
         }
     }
@@ -451,10 +429,6 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
         {
             ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
             SceneManager::getInstance()->setSelBoxChanged( true );
-        }
-        else if ( evt.Dragging() && m_hr.picked == 20 )
-        {
-            ( (SplinePoint*) m_hr.object )->drag( evt.GetPosition(), m_projection, m_viewport, m_modelview );
         }
     }
     m_lastPos = evt.GetPosition();
@@ -676,26 +650,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
             }
         }
     }
-    /*
-     * check for hits with points for spline surface
-     */
-    if ( SceneManager::getInstance()->isPointMode() )
-    {
-        wxTreeItemId id, childid;
-        wxTreeItemIdValue cookie = 0;
-        id = MyApp::frame->m_pTreeWidget->GetFirstChild( MyApp::frame->m_tPointId, cookie );
-        while ( id.IsOk() )
-        {
-            SplinePoint *point = (SplinePoint*) ( MyApp::frame->m_pTreeWidget->GetItemData( id ) );
-            hitResult hr1 = point->hitTest( ray );
-            if ( hr1.hit && !hr.hit )
-                hr = hr1;
-            else if ( hr1.hit && hr.hit && ( hr1.tmin < hr.tmin ) )
-                hr = hr1;
-
-            id = MyApp::frame->m_pTreeWidget->GetNextChild( MyApp::frame->m_tPointId, cookie );
-        }
-    }
+ 
     return hr;
 }
 
@@ -1227,7 +1182,7 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 void MainCanvas::drawOnAnatomy() 
 {
     long index = MyApp::frame->getCurrentListItem();
- 	Anatomy* l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
+ 	Anatomy* l_currentAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
     int xClick = floor( m_hitPts[0] / DatasetManager::getInstance()->getVoxelX() );
     int yClick = floor( m_hitPts[1] / DatasetManager::getInstance()->getVoxelY() );
@@ -1254,14 +1209,14 @@ void MainCanvas::drawOnAnatomy()
 void MainCanvas::pushAnatomyHistory()
 {
     long index = MyApp::frame->getCurrentListItem();
-    Anatomy *l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
+    Anatomy *l_currentAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
 	l_currentAnatomy->pushHistory();
 }
 
 void MainCanvas::popAnatomyHistory()
 {
     long index = MyApp::frame->getCurrentListItem();
-    Anatomy *l_currentAnatomy = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
+    Anatomy *l_currentAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
 	l_currentAnatomy->popHistory( RGB == l_currentAnatomy->getType() );
 }
 
@@ -1482,13 +1437,13 @@ void MainCanvas::segment()
     int dataLength( rows * columns * frames );
 
     long index = MyApp::frame->getCurrentListItem();
-    Anatomy *l_info = (Anatomy *)MyApp::frame->m_pListCtrl->GetItem( index );
+    Anatomy *l_info = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
     //1D vector with the normalized brightness ( 0 to 1 )
     std::vector<float>* sourceData = l_info->getFloatDataset();
     std::vector<float>* resultData = new std::vector<float>;
     resultData->resize(dataLength);  
-    
+     
     //Segmentation methods
     //Case 0 : Floodfill
     //Case 1 : Graph Cut
@@ -1530,9 +1485,3 @@ void MainCanvas::segment()
     pNewAnatomy->setName( l_info->getName().BeforeFirst( '.' ) + _T( " (Segment)" ) );
     MyApp::frame->m_pListCtrl->InsertItem( indx );
 }
-
-
-
-    
-    
-

@@ -8,6 +8,7 @@
 
 #include "CIsoSurface.h"
 
+#include "TriangleMesh.h"
 #include "../../Logger.h"
 #include "../../main.h"
 #include "../../dataset/Anatomy.h"

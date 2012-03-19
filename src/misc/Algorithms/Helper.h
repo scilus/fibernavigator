@@ -41,7 +41,6 @@ enum DatasetType
     ISO_SURFACE,
     MASTER_OBJECT,
     CHILD_OBJECT,
-    POINT_DATASET, //POINT is already defined in WinDef.h so we cannot use this name in this enum.
     LABEL_POINTS,
     LABEL_SELECTION_OBJECTS,
     NOT_INITIALIZED,

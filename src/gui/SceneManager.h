@@ -37,16 +37,6 @@ public:
     void    updateView( const float x, const float y, const float z, bool semaphore = false );
     void    changeZoom( const int z );
     void    moveScene ( const int x, const int y );
-    Vector  mapMouse2World(     const int x, 
-                                const int y, 
-                                GLdouble projection[16], 
-                                GLint viewport[4], 
-                                GLdouble modelview[16] );
-    Vector  mapMouse2WorldBack( const int x, 
-                                const int y, 
-                                GLdouble projection[16], 
-                                GLint viewport[4], 
-                                GLdouble modelview[16] );
 
     void    doMatrixManipulation();
 
@@ -116,9 +106,6 @@ public:
 
     Matrix4fT getTransform() const { return m_transform; }
     void  setTransform( Matrix4fT mat ) { m_transform = mat; }
-    float getZoom() const   { return m_zoom; }
-    float getMoveX() const  { return m_moveX; }
-    float getMoveY() const  { return m_moveY; }
     void  setZoom( float zoom ) { m_zoom = zoom; } 
     void  setMoveX( float x )   { m_moveX = x; }
     void  setMoveY( float y )   { m_moveY = y; }
@@ -147,13 +134,9 @@ public:
     int  getColorMap() const                { return m_colorMap; }
     void setColorMap( const int color )     { m_colorMap = color; }
 
-    bool isColorMapLegendDisplayed() const  { return m_showColorMapLegend; }
-    bool toggleColorMapLegendDisplay()      { return m_showColorMapLegend = !m_showColorMapLegend; }
-
     bool isIsoSurfaceFiltered() const       { return m_filterIsoSurface; }
     bool toggleIsoSurfaceFiltered()         { return m_filterIsoSurface = !m_filterIsoSurface; }
 
-    bool isBoxLocked() const                { return m_isBoxLocked; }
     void setBoxLock( const bool lock )      { m_isBoxLocked = lock; }
 
     void setBoxAtCrosshair( SelectionObject * pBox ) { m_pBoxAtCrosshair = pBox; }
@@ -239,7 +222,6 @@ private:
 
     bool  m_clearToBlack;
     int   m_colorMap;
-    bool  m_showColorMapLegend;
 
     bool  m_filterIsoSurface;
     bool  m_isBoxLocked;

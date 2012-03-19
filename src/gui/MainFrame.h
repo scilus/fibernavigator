@@ -21,7 +21,6 @@ class ToolBar;
 class MenuBar;
 class SceneObject;
 class SelectionObject;
-class SplinePoint;
 class TrackingWindow;
 
 enum DrawMode
@@ -47,7 +46,6 @@ public:
     void createDistanceMapAndIso();
     void createIsoSurface();
     void displayPropertiesSheet();
-    void deleteAllPoints();
     void deleteSceneObject();
     void deleteListItem();
     void deleteTreeItem();
@@ -76,9 +74,6 @@ public:
 
     void      setThreadsActive( const int nb )      { m_threadsActive = nb; }
     SelectionObject * getLastSelectedObj() const    { return m_pLastSelectedObj; }
-    SplinePoint * getLastSelectedPoint() const      { return m_pLastSelectedPoint; }
-    void      setLastSelectedPoint( SplinePoint * pPoint ) { m_pLastSelectedPoint = pPoint; }
-
 
 private:
     void initOpenGl();
@@ -116,23 +111,18 @@ private:
     void onToggleShowSagittal               ( wxCommandEvent& evt );
 
     // Voi menu
-    void onToggleSelectionObjects           ( wxCommandEvent& evt );
     void onNewSelectionBox                  ( wxCommandEvent& evt );
     void onNewSelectionEllipsoid            ( wxCommandEvent& evt );
     void onHideSelectionObjects             ( wxCommandEvent& evt );
     void onActivateSelectionObjects         ( wxCommandEvent& evt );
-    void onUseMorph                         ( wxCommandEvent& evt );    
+
     // Fibers menu
     void onInvertFibers                     ( wxCommandEvent& evt );
     void onUseFakeTubes                     ( wxCommandEvent& evt );
     void onResetColor                       ( wxCommandEvent& evt );
     void onUseTransparency                  ( wxCommandEvent& evt );
     void onUseGeometryShader                ( wxCommandEvent& evt );
-    // surface menu
-    void onNewSplineSurface                 ( wxCommandEvent& evt );
-    void onMoveBoundaryPointsLeft           ( wxCommandEvent& evt );
-    void onMoveBoundaryPointsRight          ( wxCommandEvent& evt );
-    void moveBoundaryPoints( int i_value);
+
     // Options menu
     void onToggleLighting                   ( wxCommandEvent& evt );
 	void onClearToBlack                     ( wxCommandEvent& evt );
@@ -143,8 +133,7 @@ private:
     void onRulerToolDel                     ( wxCommandEvent& evt );
     void onToggleTextureFiltering           ( wxCommandEvent& evt );
     void onToggleBlendTexOnMesh             ( wxCommandEvent& evt );
-    void onToggleFilterIso                  ( wxCommandEvent& evt );
-    void onToggleColorMapLegend             ( wxCommandEvent& evt );    
+    void onToggleFilterIso                  ( wxCommandEvent& evt );    
     void onSetCMap0                         ( wxCommandEvent& evt );
     void onSetCMap1                         ( wxCommandEvent& evt );
     void onSetCMap2                         ( wxCommandEvent& evt );
@@ -163,8 +152,6 @@ private:
 	void onWarningsInformations				( wxCommandEvent& evt );
 
     // List widget event functions     
-    void onActivateListItem                 ( wxListEvent&    evt );
-    void onSelectListItem                   ( wxListEvent&    evt );
     void onActivateListItem                 ( wxListEvent&    evt );
     void onSelectListItem                   ( wxListEvent&    evt );
     void onDeleteAllListItems               ( wxListEvent&    evt );
@@ -223,7 +210,6 @@ public:
     wxSlider            *m_pYSlider;
     wxSlider            *m_pZSlider;
     wxTreeItemId        m_tRootId;
-    wxTreeItemId        m_tPointId;
     wxTreeItemId        m_tSelectionObjectsId;
     wxNotebook          *m_tab;
 
@@ -250,7 +236,6 @@ private:
     wxImage  m_drawColorIcon;
 
     int  m_threadsActive;
-    SplinePoint*     m_pLastSelectedPoint;
     SelectionObject* m_pLastSelectedObj;
 
 DECLARE_EVENT_TABLE()

@@ -82,7 +82,6 @@ SceneManager::SceneManager(void)
     m_screenshotPath( wxT( "" ) ),
     m_clearToBlack( false ),
     m_colorMap( 0 ),
-    m_showColorMapLegend( false ),
     m_filterIsoSurface( false ),
     m_isBoxLocked( false ),
     m_selBoxChanged( true ),
@@ -278,15 +277,6 @@ bool SceneManager::save( const wxString &filename )
         pData->AddChild( datasets[index] );
     }
 
-    // Surface
-    if( DatasetManager::getInstance()->isSurfaceLoaded() )
-    {
-        Surface *pSurface = DatasetManager::getInstance()->getSurface();
-        DatasetIndex index = DatasetManager::getInstance()->getDatasetIndex( pSurface );
-
-        pData->AddChild( datasets[index] );
-    }
-
     vector<Tensors *> tensors = DatasetManager::getInstance()->getTensors();
     for( vector<Tensors *>::const_iterator it = tensors.begin(); it != tensors.end(); ++it )
     {
@@ -294,25 +284,6 @@ bool SceneManager::save( const wxString &filename )
         DatasetIndex index = DatasetManager::getInstance()->getDatasetIndex( pTensors );
 
         pData->AddChild( datasets[index] );
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-    // POINTS
-    int ptsCount = m_pMainFrame->m_pTreeWidget->GetChildrenCount( m_pMainFrame->m_tPointId, true );
-    wxTreeItemId id;
-    wxTreeItemIdValue cookie = 0;
-
-    for( int i = 0; i < ptsCount; ++i )
-    {
-        id = m_pMainFrame->m_pTreeWidget->GetNextChild( m_pMainFrame->m_tPointId, cookie );
-        SplinePoint* point = (SplinePoint*)( m_pMainFrame->m_pTreeWidget->GetItemData( id ) );
-        wxXmlNode* pPointNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "point" ) );
-
-        pPoints->AddChild( pPointNode );
-
-        pPointNode->AddProperty( new wxXmlProperty( wxT( "x" ), wxStrFormat( point->getCenter().x ) ) );
-        pPointNode->AddProperty( new wxXmlProperty( wxT( "y" ), wxStrFormat( point->getCenter().y ) ) );
-        pPointNode->AddProperty( new wxXmlProperty( wxT( "z" ), wxStrFormat( point->getCenter().z ) ) );
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -669,27 +640,6 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
             }
 
             m_pMainFrame->m_pListCtrl->InsertItemRange( v );
-        }
-        else if( wxT( "points" ) == nodeName )
-        {
-            wxXmlNode *pPointsNode = pChild->GetChildren();
-            while( pPointsNode )
-            {
-                double x, y, z;
-                pPointsNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) ).ToDouble( &x );
-                pPointsNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) ).ToDouble( &y );
-                pPointsNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) ).ToDouble( &z );
-
-                SplinePoint *pPoint = new SplinePoint( x, y, z );
-                m_pMainFrame->m_pTreeWidget->AppendItem( m_pMainFrame->m_tPointId, wxT( "point" ), -1, -1, pPoint );
-                pPointsNode = pPointsNode->GetNext();
-            }
-
-            if( m_pMainFrame->m_pTreeWidget->GetChildrenCount( m_pMainFrame->m_tPointId ) > 0 )
-            {
-                DatasetIndex index = DatasetManager::getInstance()->createSurface();
-                m_pMainFrame->m_pListCtrl->InsertItem( index );
-            }
         }
         else if( wxT( "selection_objects" ) == nodeName )
         {

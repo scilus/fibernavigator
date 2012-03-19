@@ -1,12 +1,12 @@
 #include "MyListCtrl.h"
-#include "../dataset/DatasetInfo.h"
+
 #include "MainFrame.h"
 #include "SelectionObject.h"
+#include "../dataset/DatasetInfo.h"
 
 namespace
 {
     const wxString strSelectionObj = wxT( "Selection Objects" );
-    const wxString strPoints = wxT( "Points" );
 }
 
 BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
@@ -20,14 +20,14 @@ MyTreeCtrl::MyTreeCtrl(MainFrame *parent, const wxWindowID id, const wxPoint& po
             const wxSize& size, long style) : wxTreeCtrl(parent, id, pos, size, style)
 {
     m_mainFrame = parent;
-};
+}
 
 int MyTreeCtrl::getSelectedType()
 {
     wxTreeItemId treeid = GetSelection();
-    if( ! treeid.IsOk() ) 
+    if( !treeid.IsOk() ) 
         return 0;
-    if( GetItemText( treeid ) == strPoints || GetItemText(treeid) == strSelectionObj ) 
+    if( GetItemText(treeid) == strSelectionObj ) 
         return 0;
 
     wxTreeItemId pId = GetItemParent( treeid );
@@ -35,8 +35,6 @@ int MyTreeCtrl::getSelectedType()
 
     if( GetItemText(pId) == strSelectionObj )
         return MASTER_OBJECT;
-    else if( GetItemText(pId) == strPoints )
-            return POINT_DATASET;
     else if( GetItemText(ppId) == strSelectionObj )
         return CHILD_OBJECT;
 
@@ -99,54 +97,6 @@ void MyTreeCtrl::OnChar( wxKeyEvent& evt )
             break;
         case WXK_HOME:
             ((SelectionObject*) (GetItemData(treeid)))->lockToCrosshair();
-            break;
-        default:
-            evt.Skip();
-            return;
-        }
-    }
-    else if( selected == POINT_DATASET )
-    {
-        switch( evt.GetKeyCode() )
-        {
-        case WXK_LEFT:
-             if (wxGetKeyState(WXK_CONTROL))
-                 ((SplinePoint*) (GetItemData(treeid)))->moveLeft5();
-             else
-                 ((SplinePoint*) (GetItemData(treeid)))->moveLeft();
-             break;
-        case WXK_RIGHT:
-            if (wxGetKeyState(WXK_CONTROL))
-                ((SplinePoint*) (GetItemData(treeid)))->moveRight5();
-            else
-                ((SplinePoint*) (GetItemData(treeid)))->moveRight();
-            break;
-        case WXK_UP:
-            if (wxGetKeyState(WXK_CONTROL))
-                ((SplinePoint*) (GetItemData(treeid)))->moveForward5();
-            else
-                ((SplinePoint*) (GetItemData(treeid)))->moveForward();
-            break;
-        case WXK_DOWN:
-            if (wxGetKeyState(WXK_CONTROL))
-                ((SplinePoint*) (GetItemData(treeid)))->moveBack5();
-            else
-                ((SplinePoint*) (GetItemData(treeid)))->moveBack();
-            break;
-        case WXK_PAGEDOWN:
-            if (wxGetKeyState(WXK_CONTROL))
-                ((SplinePoint*) (GetItemData(treeid)))->moveDown5();
-            else
-                ((SplinePoint*) (GetItemData(treeid)))->moveDown();
-            break;
-        case WXK_PAGEUP:
-            if (wxGetKeyState(WXK_CONTROL))
-                ((SplinePoint*) (GetItemData(treeid)))->moveUp5();
-            else
-                ((SplinePoint*) (GetItemData(treeid)))->moveUp();
-            break;
-        case WXK_HOME:
-            //((SplinePoint*) (GetItemData(treeid)))->lockToCrosshair();
             break;
         default:
             evt.Skip();

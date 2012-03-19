@@ -53,12 +53,6 @@ ToolBar::ToolBar(wxWindow *parent)
     wxImage bmpGrid(MyApp::iconsPath+ wxT("grid.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpView1(MyApp::iconsPath+ wxT("view1.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpView3(MyApp::iconsPath+ wxT("view3.png"), wxBITMAP_TYPE_PNG);
-    
-    //m_toggleDrawPoints = this->AddCheckTool( wxID_ANY, wxT("Toggle drawing of points"), bmpGrid, wxNullBitmap, wxT("Toggle drawing of points"));
-    //m_btnNewSplineSurface = this->AddTool( wxID_ANY, bmpGridSpline, wxT("New Spline Surface"));   
-    //m_btnMoveBoundaryPointLeft = this->AddTool( wxID_ANY, bmpView1, wxT("Move Boundary Points of Spline Durface Left"));
-    //m_btnMoveBoundaryPointRight = this->AddTool( wxID_ANY, bmpView3, wxT("Move Boundary Points of Spline Surface Right"));
-    //this->AddSeparator();
 
     wxImage bmpLighting(MyApp::iconsPath+ wxT("lightbulb.png"), wxBITMAP_TYPE_PNG);
     
@@ -129,10 +123,6 @@ void ToolBar::initToolBar( MainFrame *mf )
     mf->Connect(m_toggleShowAllSelectionObjects->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onHideSelectionObjects));
     mf->Connect(m_toggleInverseSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertFibers));
     mf->Connect(m_toggleActivateAllSelectionObjects->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onActivateSelectionObjects));
-    //mf->Connect(m_btnNewSplineSurface->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnNewSplineSurface));
-    //mf->Connect(m_toggleDrawPoints->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnToggleDrawPointsMode));
-    //mf->Connect(m_btnMoveBoundaryPointLeft->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMoveBoundaryPointsLeft));
-    //mf->Connect(m_btnMoveBoundaryPointRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::OnMoveBoundaryPointsRight));
     mf->Connect(m_toggleLighting->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleLighting));
     mf->Connect(m_toggleFakeTubes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseFakeTubes));
 	mf->Connect(m_toggleClearToBlack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onClearToBlack));
@@ -156,9 +146,6 @@ void ToolBar::initToolBar( MainFrame *mf )
 
 void ToolBar::updateToolBar( MainFrame *mf )
 {
-    //EnableTool(m_btnNewSplineSurface->GetId(),mf->m_datasetHelper->m_anatomyLoaded && !mf->m_datasetHelper->m_surfaceLoaded);
-    //EnableTool(m_btnMoveBoundaryPointLeft->GetId(),mf->m_datasetHelper->m_surfaceLoaded);
-    //EnableTool(m_btnMoveBoundaryPointRight->GetId(),mf->m_datasetHelper->m_surfaceLoaded);
     ToggleTool( m_toggleShowAxial->GetId(),     SceneManager::getInstance()->isAxialDisplayed() );
     ToggleTool( m_toggleShowCoronal->GetId(),   SceneManager::getInstance()->isCoronalDisplayed() );
     ToggleTool( m_toggleShowSagittal->GetId(),  SceneManager::getInstance()->isSagittalDisplayed() );
@@ -166,8 +153,6 @@ void ToolBar::updateToolBar( MainFrame *mf )
     ToggleTool( m_toggleLighting->GetId(),      SceneManager::getInstance()->isLightingActive() );
     ToggleTool( m_toggleShowAllSelectionObjects->GetId(), SceneManager::getInstance()->getShowAllSelObj() );
     ToggleTool( m_toggleActivateAllSelectionObjects->GetId(), !SceneManager::getInstance()->getActivateAllSelObj() );
-    //ToggleTool(m_toggleDrawPoints->GetId(), mf->m_datasetHelper->m_pointMode);
-    //EnableTool(m_btnNewSelectionBox->GetId(), mf->m_datasetHelper->m_fibersLoaded);
 	
 	bool isFiberSelected = false;
 	bool isFiberUsingFakeTubes = false;

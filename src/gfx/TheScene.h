@@ -75,8 +75,6 @@ private:
     // Functions
     void extractFrustum         ();
     void drawColorMapLegend     ();
-    void drawGraph              ();
-    void drawPoints             ();
     void drawSelectionObjects   ();
     void drawVectors            ();
     void lightsOff              ();
@@ -85,7 +83,6 @@ private:
     void renderMesh             ();
     void renderODFs             ();
     void renderSlices           ();
-    void renderSplineSurface    ();
     void renderTensors          ();
 
     // Variables

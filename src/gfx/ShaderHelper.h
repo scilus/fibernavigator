@@ -38,7 +38,6 @@ public:
     void setTextureShaderVars();
     void setMeshShaderVars();
     void setFiberShaderVars();
-    void setSplineSurfaceShaderVars();
 
 protected:
     ShaderHelper(void);

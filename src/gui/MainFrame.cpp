@@ -19,8 +19,6 @@
 #include "../dataset/FibersGroup.h"
 #include "../dataset/Loader.h"
 #include "../dataset/ODFs.h"
-#include "../dataset/SplinePoint.h"
-#include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
@@ -199,7 +197,6 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_drawColor(255, 255, 255),
     m_drawColorIcon(16, 16, true),
     m_threadsActive( 0 ),
-    m_pLastSelectedPoint( NULL ),
     m_pLastSelectedObj( NULL )
 {
     wxImage::AddHandler(new wxPNGHandler);
@@ -209,9 +206,8 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT );
     initMyTreeCtrl( m_pTreeWidget );
 
-    m_tRootId             = m_pTreeWidget->AddRoot( wxT( "Scene" ), -1, -1, NULL );
-    m_tPointId            = m_pTreeWidget->AppendItem( m_tRootId, wxT( "Points" ), -1, -1, NULL );
-    m_tSelectionObjectsId = m_pTreeWidget->AppendItem( m_tRootId, wxT( "Selection Objects" ), -1, -1, NULL );
+    m_tRootId             = m_pTreeWidget->AddRoot( wxT( "Scene" ) );
+    m_tSelectionObjectsId = m_pTreeWidget->AppendItem( m_tRootId, wxT( "Selection Objects" ) );
 
     //////////////////////////////////////////////////////////////////////////
     // ListCtrl initialization
@@ -598,24 +594,7 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
 {
     if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
     {
-        if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == SURFACE )
-        {
-            Surface *l_surface = (Surface*)m_pCurrentSceneObject;
-
-            wxString caption         = wxT( "Choose a file" );
-            wxString wildcard        = wxT( "surface files (*.vtk)|*.vtk" );
-            wxString defaultDir      = wxEmptyString;
-            wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
-            dialog.SetFilterIndex( 0 );
-            dialog.SetDirectory( m_lastPath );
-            if( dialog.ShowModal() == wxID_OK )
-            {
-                m_lastPath = dialog.GetDirectory();
-                l_surface->save( dialog.GetPath() );
-            }
-        }
-        else if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == ISO_SURFACE )
+        if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == ISO_SURFACE )
         {
             CIsoSurface *l_surface = (CIsoSurface*)m_pCurrentSceneObject;
 
@@ -778,48 +757,6 @@ void MainFrame::onMenuViewTop( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onSceneLock( wxCommandEvent& WXUNUSED(event) )
 {
     m_pMainGL->m_isSceneLocked = !m_pMainGL->m_isSceneLocked;
-}
-
-/****************************************************************************************************
- *
- * Menu VOI
- *
- ****************************************************************************************************/
-
-void MainFrame::onToggleSelectionObjects( wxCommandEvent& WXUNUSED(event) )
-{
-    // Get the selection object is selected.
-    wxTreeItemId l_selectionObjectTreeId = m_pTreeWidget->GetSelection();
-
-    if( treeSelected( l_selectionObjectTreeId ) == MASTER_OBJECT )
-    {
-        SelectionObject* l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selectionObject->toggleIsActive();
-        m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selectionObject->getIcon());
-        l_selectionObject->setIsDirty( true );
-
-        int l_childSelectionObject = m_pTreeWidget->GetChildrenCount( l_selectionObjectTreeId );
-        wxTreeItemIdValue childcookie = 0;
-        for( int i = 0; i < l_childSelectionObject; ++i )
-        {
-            wxTreeItemId l_childId = m_pTreeWidget->GetNextChild( l_selectionObjectTreeId, childcookie );
-            if( l_childId.IsOk() )
-            {
-                SelectionObject* l_childSelectionObject = ( (SelectionObject*)( m_pTreeWidget->GetItemData( l_childId ) ) );
-                l_childSelectionObject->setIsActive( l_selectionObject->getIsActive() );
-                m_pTreeWidget->SetItemImage( l_childId, l_childSelectionObject->getIcon() );
-                l_childSelectionObject->setIsDirty( true );
-            }
-        }
-    }
-    else if( treeSelected( l_selectionObjectTreeId ) == CHILD_OBJECT )
-    {
-        SelectionObject* l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selectionObject->toggleIsActive();
-        m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selectionObject->getIcon() );
-        l_selectionObject->setIsDirty( true );
-    }
-    refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleDrawPointsMode( wxCommandEvent& event )
@@ -1002,73 +939,7 @@ void MainFrame::onSelectEraser( wxCommandEvent& event )
 	refreshAllGLWidgets();
 }
 
-void MainFrame::onMoveBoundaryPointsLeft( wxCommandEvent& WXUNUSED(event) )
-{
-    moveBoundaryPoints(5);
-}
-
-
-void MainFrame::onMoveBoundaryPointsRight(wxCommandEvent& WXUNUSED(event))
-{
-    moveBoundaryPoints(-5);
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Moves all boundary points left or right
-///////////////////////////////////////////////////////////////////////////
-void MainFrame::moveBoundaryPoints(int i_value)
-{
-    wxTreeItemId l_id, l_childid;
-    wxTreeItemIdValue l_cookie = 0;
-    l_id = m_pTreeWidget->GetFirstChild( m_tPointId, l_cookie );
-    while( l_id.IsOk() )
-    {
-        SplinePoint* l_point = (SplinePoint*)( m_pTreeWidget->GetItemData( l_id ) );
-        if( l_point->isBoundary())
-        {
-            l_point->setX( l_point->X() + i_value );
-        }
-        l_id = m_pTreeWidget->GetNextChild( m_tPointId, l_cookie );
-    }
-
-    DatasetManager::getInstance()->setSurfaceDirty( true );
-    refreshAllGLWidgets();
-}
-
-void MainFrame::deleteAllPoints()
-{
-    std::vector< std::vector< SplinePoint* > > points;
-
-    wxTreeItemId id, childId;
-    wxTreeItemIdValue cookie = 0;
-
-    id = m_pTreeWidget->GetFirstChild( m_tPointId, cookie );
-
-    while( id.IsOk() )
-    {
-        std::vector< SplinePoint* > b;
-        b.push_back( (SplinePoint*)( m_pTreeWidget->GetItemData( id ) ) );
-        wxTreeItemIdValue childcookie = 0;
-        childId = m_pTreeWidget->GetFirstChild( id, childcookie );
-
-        while( childId.IsOk() )
-        {
-            b.push_back( (SplinePoint*)( m_pTreeWidget->GetItemData( childId ) ) );
-            childId = m_pTreeWidget->GetNextChild( id, childcookie );
-        }
-
-        id = m_pTreeWidget->GetNextChild( m_tPointId, cookie );
-        points.push_back( b );
-    }
-
-    for( unsigned int i = 0; i < points.size(); ++i )
-    {
-        for( unsigned int j = 0; j < points[i].size(); ++j )
-        {
-            m_pTreeWidget->Delete( points[i][j]->GetId() );
-        }
-    }
-}
+//////////////////////////////////////////////////////////////////////////
 
 void MainFrame::deleteSceneObject()
 {
@@ -1429,133 +1300,6 @@ void MainFrame::onActivateSelectionObjects( wxCommandEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
 }
 
-/****************************************************************************************************
- *
- * Menu Spline Surface
- *
- ****************************************************************************************************/
-
-void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
-{
-    if( DatasetManager::getInstance()->isSurfaceLoaded() )
-    {
-        return;
-    }
-
-    //Generate KdTree for Spline Surface
-    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
-    if(pTmpFib != NULL)
-    {
-        pTmpFib->generateKdTree();
-    }
-
-    float voxelX = DatasetManager::getInstance()->getVoxelX();
-    float voxelY = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
-
-    int l_xs = (int)( m_pXSlider->GetValue() * voxelX );
-    int l_ys = (int)( m_pYSlider->GetValue() * voxelY );
-    int l_zs = (int)( m_pZSlider->GetValue() * voxelZ );
-
-    // Delete all existing points.
-    m_pTreeWidget->DeleteChildren( m_tPointId );
-    Fibers* l_fibers = NULL;
-
-    if( DatasetManager::getInstance()->isFibersLoaded() )
-    {
-        l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
-    }
-
-    float columns = DatasetManager::getInstance()->getColumns();
-    float rows    = DatasetManager::getInstance()->getRows();
-    float frames  = DatasetManager::getInstance()->getFrames();
-
-    if( SceneManager::getInstance()->isSagittalDisplayed() )
-    {
-        for( int i = 0; i < 11; ++i )
-        {
-            for( int j = 0; j < 11; ++j )
-            {
-                int yy = (int)( rows   * 0.1f * voxelY * i );
-                int zz = (int)( frames * 0.1f * voxelZ * j );
-
-                // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xs, yy, zz );
-
-                if( i == 0 || i == 10 || j == 0 || j == 10 )
-                {
-                    wxString l_name = wxT("boundary l_point");
-                    wxTreeItemId tId = m_pTreeWidget->AppendItem( m_tPointId, l_name, -1, -1, l_point );
-                    l_point->setTreeId( tId );
-                    l_point->setName(l_name);
-                    l_point->setIsBoundary( true );
-                }
-                else
-                {
-                    if( DatasetManager::getInstance()->isFibersLoaded() && l_fibers->getBarycenter( l_point ) )
-                    {
-                        wxString l_name = wxT( "l_point" );
-                        wxTreeItemId tId = m_pTreeWidget->AppendItem( m_tPointId, l_name, -1, -1, l_point );
-                        l_point->setTreeId( tId );
-                        l_point->setName(l_name);
-                        l_point->setIsBoundary( false );
-                    }
-                }
-            }
-        }
-    }
-    else if( SceneManager::getInstance()->isCoronalDisplayed() )
-    {
-        for( int i = 0; i < 11; ++i )
-        {
-            for( int j = 0; j < 11; ++j )
-            {
-                int l_xx = (int)( columns * 0.1f * voxelX * i );
-                int l_zz = (int)( frames  * 0.1f * voxelZ * j );
-
-                // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xx, l_ys, l_zz );
-
-                if( i == 0 || i == 10 || j == 0 || j == 10 )
-                {
-                    wxTreeItemId l_treeId = m_pTreeWidget->AppendItem( m_tPointId, wxT("boundary l_point"), -1, -1, l_point );
-                    l_point->setTreeId( l_treeId );
-                    l_point->setIsBoundary( true );
-                }
-            }
-        }
-    }
-    else
-    {
-        for( int i = 0; i < 11; ++i )
-        {
-            for( int j = 0; j < 11; ++j )
-            {
-                int l_xx = (int)( columns * 0.1f * voxelX * i );
-                int l_yy = (int)( rows    * 0.1f * voxelY * j );
-
-                // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xx, l_yy, l_zs );
-
-                if (i == 0 || i == 10 || j == 0 || j == 10)
-                {
-                    wxTreeItemId l_treeId = m_pTreeWidget->AppendItem( m_tPointId, wxT("boundary l_point"), -1, -1, l_point );
-                    l_point->setTreeId( l_treeId );
-                    l_point->setIsBoundary( true );
-                }
-            }
-        }
-    }
-
-    int index = DatasetManager::getInstance()->createSurface();
-    Surface *pSurface = (Surface *)DatasetManager::getInstance()->getDataset( index );
-    pSurface->execute();
-
-    m_pListCtrl->InsertItem( index );
-
-    refreshAllGLWidgets();
-}
-
 
 void MainFrame::onToggleDrawVectors( wxCommandEvent& WXUNUSED(event) )
 {
@@ -1568,16 +1312,6 @@ void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
 {
     float normal = SceneManager::getInstance()->getNormalDirection();
     SceneManager::getInstance()->setNormalDirection( -normal );
-    //m_pDatasetHelper->m_normalDirection *= -1.0;
-
-    for( unsigned int i( 0 ); i < static_cast<unsigned int>( m_pListCtrl->GetItemCount() ); ++i )
-    {
-        DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( i ) );
-        if( l_info->getType() == SURFACE )
-        {
-            ((Surface*)l_info)->flipNormals();
-        }
-    }
     refreshAllGLWidgets();
 }
 
@@ -1799,12 +1533,6 @@ void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 	}
     
     SceneManager::getInstance()->setSelBoxChanged( true );
-    refreshAllGLWidgets();
-}
-
-void MainFrame::onToggleColorMapLegend( wxCommandEvent& WXUNUSED(event) )
-{
-    SceneManager::getInstance()->toggleColorMapLegendDisplay();
     refreshAllGLWidgets();
 }
 
@@ -2040,12 +1768,6 @@ void MainFrame::deleteListItem()
     if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
     {       
         long tmp = m_currentListItem;
-        DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( m_currentListItem ) );
-		
-        if( SURFACE == pInfo->getType() )
-        {
-            deleteAllPoints();
-        }
 
         deleteSceneObject();
         m_pListCtrl->DeleteItem( tmp );
@@ -2142,12 +1864,11 @@ void MainFrame::deleteTreeItem()
         {
             ((SelectionObject*) ((m_pTreeWidget->GetItemData(m_pTreeWidget->GetItemParent(l_treeId)))))->setIsDirty(true);
         }
-        if( l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT || l_selected == POINT_DATASET )
+        if( l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT )
         {  
             deleteSceneObject();
             m_pTreeWidget->Delete( l_treeId );
             m_pLastSelectedObj = NULL;
-            m_pLastSelectedPoint = NULL;
         }   
         SceneManager::getInstance()->setSelBoxChanged( true );
     }
@@ -2166,7 +1887,6 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     }
     int l_selected = treeSelected( l_treeId );
     SelectionObject* l_selectionObject;
-    SplinePoint* l_selectedPoint;
 
     switch( l_selected )
     {
@@ -2176,11 +1896,6 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             {
                 m_pLastSelectedObj->unselect();
             }
-            if ( m_pLastSelectedPoint != NULL )
-            {
-                m_pLastSelectedPoint->unselect();
-                m_pLastSelectedPoint = NULL;
-            }
 
             l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_treeId ) );
             m_pLastSelectedObj = l_selectionObject;
@@ -2189,30 +1904,7 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
             m_lastSelectedListItem = -1;
             break;
 
-        case POINT_DATASET:
-            if( m_pLastSelectedPoint != NULL )
-            {
-                m_pLastSelectedPoint->unselect();
-            }
-            if( m_pLastSelectedObj != NULL )
-            {
-                m_pLastSelectedObj->unselect();
-                m_pLastSelectedObj = NULL;
-            }
-
-            l_selectedPoint = (SplinePoint*)( m_pTreeWidget->GetItemData( l_treeId ) );
-            m_pLastSelectedPoint = l_selectedPoint;
-            m_pLastSelectedPoint->select( false );
-            m_pLastSelectedSceneObject = l_selectedPoint;
-            m_lastSelectedListItem = -1;
-            break;
-
         default:
-            if( m_pLastSelectedPoint != NULL )
-            {
-                m_pLastSelectedPoint->unselect();
-                m_pLastSelectedPoint = NULL;
-            }
             if( m_pLastSelectedObj != NULL )
             {
                 m_pLastSelectedObj->unselect();
@@ -2329,10 +2021,6 @@ int MainFrame::treeSelected( wxTreeItemId i_id )
     else if ( l_ppId == m_tSelectionObjectsId )
     {
         return CHILD_OBJECT;
-    }
-    else if ( l_pId == m_tPointId )
-    {
-        return POINT_DATASET;
     }
     return 0;
 }

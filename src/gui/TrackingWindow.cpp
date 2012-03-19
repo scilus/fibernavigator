@@ -8,8 +8,6 @@
 #include "../dataset/Fibers.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/RTTrackingHelper.h"
-#include "../dataset/SplinePoint.h"
-#include "../dataset/Surface.h"
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 

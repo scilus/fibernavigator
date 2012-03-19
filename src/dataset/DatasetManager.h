@@ -5,7 +5,6 @@
 #include "DatasetIndex.h"
 #include "FibersGroup.h"
 #include "ODFs.h"
-#include "Surface.h"
 #include "../misc/Fantom/FMatrix.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
@@ -41,7 +40,6 @@ public:
     std::vector<Mesh *>     getMeshes() const;
     std::vector<ODFs *>     getOdfs() const;
     Fibers *                getSelectedFibers( DatasetIndex index ) const;
-    Surface *               getSurface() const;
     std::vector<Tensors *>  getTensors() const;
 
     int                     getColumns() const;
@@ -59,14 +57,11 @@ public:
     bool                    isFibersGroupLoaded() const     { return !m_fibersGroup.empty(); }
     bool                    isMeshLoaded() const            { return !m_meshes.empty(); }
     bool                    isOdfsLoaded() const            { return !m_odfs.empty(); }
-    bool                    isSurfaceLoaded() const         { return !m_surfaces.empty(); }
     bool                    isTensorsLoaded() const         { return !m_tensors.empty(); }
     bool                    isTensorsFieldLoaded() const    { return false; }
     bool                    isVectorsLoaded() const         { return false; }
 
     void  setCountFibers( const unsigned int count )        { m_countFibers = count; }
-    bool  isSurfaceDirty() const                            { return m_surfaceIsDirty; }
-    void  setSurfaceDirty( const bool dirty )               { m_surfaceIsDirty = dirty; }
 
     void clear();
 
@@ -81,7 +76,6 @@ public:
     DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( pAnatomy ) ); }
     DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup() ); }
     DatasetIndex createODFs()                                                    { return insert( new ODFs() ); }
-    DatasetIndex createSurface()                                                 { return insert( new Surface() ); }
 
     void remove( const DatasetIndex index );
 
@@ -102,7 +96,6 @@ private:
     DatasetIndex insert( FibersGroup * pFibersGroup );
     DatasetIndex insert( Mesh * pMesh );
     DatasetIndex insert( ODFs * pOdfs );
-    DatasetIndex insert( Surface * pSurface );
     DatasetIndex insert( Tensors * pTensors );
 
     // Loads an anatomy. Extension supported: .nii and .nii.gz
@@ -131,13 +124,11 @@ private:
     std::map<DatasetIndex, FibersGroup *> m_fibersGroup;
     std::map<DatasetIndex, Mesh *> m_meshes;
     std::map<DatasetIndex, ODFs *> m_odfs;
-    std::map<DatasetIndex, Surface *> m_surfaces;
     std::map<DatasetIndex, Tensors *> m_tensors;
     std::map<DatasetInfo *, DatasetIndex> m_reverseDatasets;
 
     FMatrix m_niftiTransform;
     unsigned int m_countFibers; // TODO: Remove me once selection is fixed
-    bool m_surfaceIsDirty;
 };
 
 #endif //DATASETMANAGER_H_

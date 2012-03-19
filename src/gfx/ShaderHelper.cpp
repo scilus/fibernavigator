@@ -11,7 +11,6 @@
 #include "../Logger.h"
 #include "../main.h"
 #include "../dataset/DatasetManager.h"
-#include "../dataset/Surface.h"
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 
@@ -56,7 +55,7 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
     delete m_pLegendShader;
     delete m_pMeshShader;
     delete m_pOdfsShader;
-    delete m_pSplineSurfShader;
+    //delete m_pSplineSurfShader;
     delete m_pTensorsShader;
     //delete m_pVectorShader;
 
@@ -65,7 +64,7 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
     m_pFibersShader = new ShaderProgram( wxT( "fibers" ) );
     m_pFakeTubesShader = new ShaderProgram( wxT( "fake-tubes") );
     m_pCrossingFibersShader = new ShaderProgram( wxT( "crossing_fibers" ), true, geometryShadersSupported );
-    m_pSplineSurfShader = new ShaderProgram( wxT( "splineSurf" ) );
+    //m_pSplineSurfShader = new ShaderProgram( wxT( "splineSurf" ) );
     //m_pVectorShader = new ShaderProgram( wxT( "vectors" ) );
     m_pLegendShader = new ShaderProgram( wxT( "legend" ) );
     m_pGraphShader = new ShaderProgram( wxT( "graph" ) );
@@ -140,27 +139,27 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
         Logger::getInstance()->print( _T( "Geometry shaders are not supported. Cannot load crossing fibers shader." ), LOGLEVEL_WARNING );
     }
 
-    Logger::getInstance()->print( _T( "Initializing spline surf shader..." ), LOGLEVEL_MESSAGE );
-    if( m_pSplineSurfShader->load() && m_pSplineSurfShader->compileAndLink() )
-    {
-        m_pSplineSurfShader->bind();
-        Logger::getInstance()->print( _T( "Spline surf shader initialized." ), LOGLEVEL_MESSAGE );
-    }
-    else
-    {
-        Logger::getInstance()->print( _T( "Could not initialize spline surf shader." ), LOGLEVEL_ERROR );
-    }
+//     Logger::getInstance()->print( _T( "Initializing spline surf shader..." ), LOGLEVEL_MESSAGE );
+//     if( m_pSplineSurfShader->load() && m_pSplineSurfShader->compileAndLink() )
+//     {
+//         m_pSplineSurfShader->bind();
+//         Logger::getInstance()->print( _T( "Spline surf shader initialized." ), LOGLEVEL_MESSAGE );
+//     }
+//     else
+//     {
+//         Logger::getInstance()->print( _T( "Could not initialize spline surf shader." ), LOGLEVEL_ERROR );
+//     }
 
-    //Logger::getInstance()->print( _T( "Initializing vector shader..." ), LOGLEVEL_MESSAGE );
-    //if( m_pVectorShader->load() && m_pVectorShader->compileAndLink() )
-    //{
-    //    m_pVectorShader->bind();
-    //    Logger::getInstance()->print( _T( "Vector shader initialized." ), LOGLEVEL_MESSAGE );
-    //}
-    //else
-    //{
-    //    Logger::getInstance()->print( _T( "Could not initialize vector shader." ), LOGLEVEL_ERROR );
-    //}
+//     Logger::getInstance()->print( _T( "Initializing vector shader..." ), LOGLEVEL_MESSAGE );
+//     if( m_pVectorShader->load() && m_pVectorShader->compileAndLink() )
+//     {
+//        m_pVectorShader->bind();
+//        Logger::getInstance()->print( _T( "Vector shader initialized." ), LOGLEVEL_MESSAGE );
+//     }
+//     else
+//     {
+//        Logger::getInstance()->print( _T( "Could not initialize vector shader." ), LOGLEVEL_ERROR );
+//     }
 
     Logger::getInstance()->print( _T( "Initializing legend shader..." ), LOGLEVEL_MESSAGE );
     if( m_pLegendShader->load() && m_pLegendShader->compileAndLink() )
@@ -292,7 +291,6 @@ void ShaderHelper::setMeshShaderVars()
 {
     m_pMeshShader->setUniInt( "blendTex", SceneManager::getInstance()->isTexBlendOnMesh() );
 
-    m_pMeshShader->setUniInt( "cutAtSurface", DatasetManager::getInstance()->isSurfaceLoaded() );
     m_pMeshShader->setUniInt( "lightOn",      SceneManager::getInstance()->isLightingActive() );
 
     m_pMeshShader->setUniInt( "dimX", DatasetManager::getInstance()->getColumns() );
@@ -308,22 +306,6 @@ void ShaderHelper::setMeshShaderVars()
     m_pMeshShader->setUniFloat( "cutY", SceneManager::getInstance()->getSliceY() + 0.5f );
     m_pMeshShader->setUniFloat( "cutZ", SceneManager::getInstance()->getSliceZ() + 0.5f );
 
-    for ( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
-    {
-        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
-
-        if ( pInfo->getType() == SURFACE )
-        {
-            Surface* pS = (Surface*) pInfo;
-            m_cutTex = pS->getCutTex();
-
-            glActiveTexture( GL_TEXTURE0 + 9 );
-            glBindTexture( GL_TEXTURE_2D, m_cutTex );
-            m_tex[9] = 9;
-            m_threshold[9] = 0;
-            m_type[9] = 5;
-        }
-    }
     m_pMeshShader->setUniInt( "cutTex", 9 );
 
     m_pMeshShader->setUniInt( "tex0", 0 );
@@ -392,45 +374,6 @@ void ShaderHelper::setFiberShaderVars()
     m_pFibersShader->setUniInt( "tex", tex );
     m_pFibersShader->setUniInt( "type", type );
     m_pFibersShader->setUniFloat( "threshold", threshold );
-}
-
-void ShaderHelper::setSplineSurfaceShaderVars()
-{
-    m_pSplineSurfShader->setUniInt( "dimX", DatasetManager::getInstance()->getColumns() );
-    m_pSplineSurfShader->setUniInt( "dimY", DatasetManager::getInstance()->getRows() );
-    m_pSplineSurfShader->setUniInt( "dimZ", DatasetManager::getInstance()->getFrames() );
-
-    m_pSplineSurfShader->setUniFloat( "voxX", DatasetManager::getInstance()->getVoxelX() );
-    m_pSplineSurfShader->setUniFloat( "voxY", DatasetManager::getInstance()->getVoxelY() );
-    m_pSplineSurfShader->setUniFloat( "voxZ", DatasetManager::getInstance()->getVoxelZ() );
-
-    m_pSplineSurfShader->setUniInt( "tex0", 0 );
-    m_pSplineSurfShader->setUniInt( "tex1", 1 );
-    m_pSplineSurfShader->setUniInt( "tex2", 2 );
-    m_pSplineSurfShader->setUniInt( "tex3", 3 );
-    m_pSplineSurfShader->setUniInt( "tex4", 4 );
-    m_pSplineSurfShader->setUniInt( "tex5", 5 );
-
-    m_pSplineSurfShader->setUniInt( "type0", m_type[0] );
-    m_pSplineSurfShader->setUniInt( "type1", m_type[1] );
-    m_pSplineSurfShader->setUniInt( "type2", m_type[2] );
-    m_pSplineSurfShader->setUniInt( "type3", m_type[3] );
-    m_pSplineSurfShader->setUniInt( "type4", m_type[4] );
-    m_pSplineSurfShader->setUniInt( "type5", m_type[5] );
-
-    m_pSplineSurfShader->setUniFloat( "threshold0", m_threshold[0] );
-    m_pSplineSurfShader->setUniFloat( "threshold1", m_threshold[1] );
-    m_pSplineSurfShader->setUniFloat( "threshold2", m_threshold[2] );
-    m_pSplineSurfShader->setUniFloat( "threshold3", m_threshold[3] );
-    m_pSplineSurfShader->setUniFloat( "threshold4", m_threshold[4] );
-    m_pSplineSurfShader->setUniFloat( "threshold5", m_threshold[5] );
-
-    m_pSplineSurfShader->setUniFloat( "alpha0", m_alpha[0] );
-    m_pSplineSurfShader->setUniFloat( "alpha1", m_alpha[1] );
-    m_pSplineSurfShader->setUniFloat( "alpha2", m_alpha[2] );
-    m_pSplineSurfShader->setUniFloat( "alpha3", m_alpha[3] );
-    m_pSplineSurfShader->setUniFloat( "alpha4", m_alpha[4] );
-    m_pSplineSurfShader->setUniFloat( "alpha5", m_alpha[5] );
 }
 
 ShaderHelper::~ShaderHelper()

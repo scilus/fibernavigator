@@ -15,7 +15,6 @@ uniform bool useTex;
 uniform bool blendTex;
 uniform bool isGlyph;
 
-uniform bool cutAtSurface;
 uniform sampler2D cutTex;
 
 uniform bool lightOn;
@@ -46,22 +45,10 @@ void cutFrontSector()
 		discard;
 }
 
-
-void cutAtSplineSurface()
-{
-    vec3 u = VaryingTexCoord0.xyz;
-	u.y /= float(dimY);
-	u.z /= float(dimZ);
-
-	if ( vertex.x < ( texture2D(cutTex, u.yz).r * float(dimX) ) ) discard;
-}
-
-
 void main()
 {
 
 	if (!showFS) cutFrontSector();
-	if ( (type9 == 5) && cutAtSurface ) cutAtSplineSurface();
 
 	vec4 ambient = vec4(0.0);
 	vec4 diffuse = vec4(0.0);

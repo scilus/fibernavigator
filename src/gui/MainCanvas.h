@@ -44,7 +44,8 @@ public:
     void OnEraseBackground(wxEraseEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
     void processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt );
-    void processLeftMouseUp( wxMouseEvent &evt, wxCommandEvent evt1 );
+    void processLeftMouseUp( wxMouseEvent &evt );
+    void processMiddleMouseDown( wxMouseEvent &evt, int clickX, int clickY );
     void processRightMouseDown( wxMouseEvent &evt, int clickX, int clickY, float voxelX, float voxelY, float voxelZ, wxCommandEvent evt1 );
     wxPoint getMousePos() {return m_clicked;};
     float getDelta() {return m_delta;};
