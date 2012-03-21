@@ -766,48 +766,48 @@ void PropertiesWindow::OnOriginalShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnOriginalShBasis" ), LOGLEVEL_DEBUG );
 
-    // TODO: Review this without making new ODF
-//     int index = DatasetManager::getInstance()->createODFs();
-//     ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
-//     
-//     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 0 );
-//     m_pMainFrame->m_pListCtrl2->InsertItem( index );
+    long index = m_pMainFrame->getCurrentListItem();
+    if( -1 != index )
+    {
+        ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pOdfs->changeShBasis( SH_BASIS_RR5768 );
+    }
 }
 
 void PropertiesWindow::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDescoteauxShBasis" ), LOGLEVEL_DEBUG );
 
-    // TODO: Review this without making new ODF
-//     int index = DatasetManager::getInstance()->createODFs();
-//     ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
-// 
-//     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 1 );
-//     m_pMainFrame->m_pListCtrl2->InsertItem( index );
+    long index = m_pMainFrame->getCurrentListItem();
+    if( -1 != index )
+    {
+        ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pOdfs->changeShBasis( SH_BASIS_DESCOTEAUX );
+    }
 }
 
 void PropertiesWindow::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnTournierShBasis" ), LOGLEVEL_DEBUG );
 
-    // TODO: Review this without making new ODF
-//     int index = DatasetManager::getInstance()->createODFs();
-//     ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
-// 
-//     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 2 );
-//     m_pMainFrame->m_pListCtrl2->InsertItem( index );
+    long index = m_pMainFrame->getCurrentListItem();
+    if( -1 != index )
+    {
+        ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pOdfs->changeShBasis( SH_BASIS_TOURNIER );
+    }
 }
 
 void PropertiesWindow::OnPTKShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnPTKShBasis" ), LOGLEVEL_DEBUG );
 
-    // TODO: Review this without making new ODF
-//     int index = DatasetManager::getInstance()->createODFs();
-//     ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( index );
-// 
-//     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->changeShBasis( pOdfs, m_pMainFrame->m_pDatasetHelper, 3 );
-//     m_pMainFrame->m_pListCtrl2->InsertItem( index );
+    long index = m_pMainFrame->getCurrentListItem();
+    if( -1 != index )
+    {
+        ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pOdfs->changeShBasis( SH_BASIS_PTK );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1708,9 +1708,9 @@ void PropertiesWindow::OnSliderAxisMoved( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSliderAxisMoved" ), LOGLEVEL_DEBUG );
 
-    float l_sliderValue = ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderFlood->GetValue() / 10.0f;
+    float l_sliderValue = ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->getSliderFlood()->GetValue() / 10.0f;
     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->m_axisThreshold = l_sliderValue;
-    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtThresBox->SetValue(wxString::Format( wxT( "%.1f"), l_sliderValue));
+    ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->getTxtThresBox()->SetValue(wxString::Format( wxT( "%.1f"), l_sliderValue));
 
     std::cout << ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->m_axisThreshold << std::endl;
 }

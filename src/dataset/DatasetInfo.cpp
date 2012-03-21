@@ -6,6 +6,8 @@
 #include <wx/tglbtn.h>
 #include <wx/xml/xml.h>
 
+#include <algorithm>
+
 DatasetInfo::DatasetInfo()
 :   m_length       ( 0 ),
     m_bands        ( 0 ),
@@ -163,6 +165,41 @@ bool DatasetInfo::save( wxXmlNode *pNode ) const
     pPath->AddChild( new wxXmlNode( NULL, wxXML_TEXT_NODE, wxT( "path"), m_fullPath ) );
 
     return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void DatasetInfo::swap( DatasetInfo &d )
+{
+    // Not swapping GUI elements
+    SceneObject::swap( d );
+    std::swap( m_tMesh, d.m_tMesh );
+    std::swap( m_length, d.m_length );
+    std::swap( m_bands, d.m_bands );
+    std::swap( m_frames, d.m_frames );
+    std::swap( m_rows, d.m_rows );
+    std::swap( m_columns, d.m_columns );
+    std::swap( m_type, d.m_type );
+    std::swap( m_repn, d.m_repn );
+    std::swap( m_isLoaded, d.m_isLoaded );
+    std::swap( m_highest_value, d.m_highest_value );
+    std::swap( m_name, d.m_name );
+    std::swap( m_fullPath, d.m_fullPath );
+    std::swap( m_threshold, d.m_threshold );
+    std::swap( m_alpha, d.m_alpha );
+    std::swap( m_brightness, d.m_brightness );
+    std::swap( m_oldMax, d.m_oldMax );
+    std::swap( m_newMax, d.m_newMax );
+    std::swap( m_color, d.m_color );
+    std::swap( m_GLuint, d.m_GLuint );
+    std::swap( m_show, d.m_show );
+    std::swap( m_showFS, d.m_showFS );
+    std::swap( m_useTex, d.m_useTex );
+    std::swap( m_isGlyph, d.m_isGlyph );
+    std::swap( m_bufferObjects, d.m_bufferObjects );
+    std::swap( m_voxelSizeX, d.m_voxelSizeX );
+    std::swap( m_voxelSizeY, d.m_voxelSizeY );
+    std::swap( m_voxelSizeZ, d.m_voxelSizeZ );
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -68,6 +68,9 @@ public:
     virtual void updatePropertiesSizer();
     int          getGlyphIndex       ( int i_zVoxel, int i_yVoxel, int i_xVoxel );
 
+    virtual void       flipAxis( AxisType i_axe ){};
+
+public:
     // Items related to the glyph options sizer.
     wxSlider           *m_psliderMinHueValue;
     wxSlider           *m_psliderMaxHueValue;
@@ -89,8 +92,6 @@ public:
     wxRadioButton      *m_pradiobtnMapOnSphere;
     wxRadioButton      *m_pradiobtnMainAxis;
 
-    virtual void       flipAxis( AxisType i_axe ){};
-    
 protected:
     // From DatasetInfo
     virtual void    activateLIC()      {};
@@ -125,7 +126,9 @@ protected:
     void            getVoxelOffset      ( int i_zVoxelIndex, int i_yVoxelIndex, int i_xVoxelIndex, float o_offset[3] );
     virtual void    loadBuffer          ();
     virtual void    sliderPosChanged    ( AxisType i_axis ) {};
-       
+    void            swap                ( Glyph &g );
+
+protected:
     // Variables
     GLuint*         m_hemisphereBuffer;     // For the buffer containing the points of a hemisphere (stored in video memory) 
     GLuint          m_textureId;

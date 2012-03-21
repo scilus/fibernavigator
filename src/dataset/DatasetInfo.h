@@ -132,7 +132,9 @@ protected:
     virtual void generateTexture()  = 0;
     virtual void generateGeometry() = 0;
     virtual void initializeBuffer() = 0;
+    void swap( DatasetInfo &d );
 
+protected:
     int         m_length;
     int         m_bands;
     int         m_frames;

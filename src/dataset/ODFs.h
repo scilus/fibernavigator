@@ -21,6 +21,8 @@
 
 class MySlider;
 
+enum SH_BASIS { SH_BASIS_RR5768, SH_BASIS_DESCOTEAUX, SH_BASIS_TOURNIER, SH_BASIS_PTK };
+
 class ODFs : public Glyph
 {
 public:
@@ -30,38 +32,36 @@ public:
     virtual ~ODFs();
 
     // From DatasetInfo
-    void draw       ();
-    bool load       ( nifti_image *pHeader, nifti_image *pBody );
+    void draw();
+    bool load( nifti_image *pHeader, nifti_image *pBody );
     bool save( wxXmlNode *pNode ) const;
 
     // Functions
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void createPropertiesSizer( PropertiesWindow *parent );
     virtual void updatePropertiesSizer();
     
-    bool isShBasis( int i_sh_basis )                    { return m_sh_basis == i_sh_basis; }
+    bool isShBasis( SH_BASIS i_sh_basis )               { return m_sh_basis == i_sh_basis; }
     std::vector< std::vector < float > > getCoeffs()    { return m_coefficients; }
     std::vector< FMatrix > getShMatrix()                { return m_shMatrix; }
     std::vector< FMatrix > getPhiTheta()                { return m_phiThetaDirection; }
 
-    void setShBasis( int value )                        { m_sh_basis = value; }
-    void changeShBasis( ODFs*, int );
+    void setShBasis( SH_BASIS value )                   { m_sh_basis = value; }
+    void changeShBasis( SH_BASIS );
     
 	void extractMaximas();
+
+    MySlider * getSliderFlood() const                   { return m_pSliderFlood; }
+    wxTextCtrl * getTxtThresBox() const                 { return m_pTxtThresBox; }
 
 public:
     //Vars
     wxString    m_lastODF_path;
 
-    struct direction_value { double x, y, z, v; };
-    struct direction { double x, y, z; };
-
 	bool   m_isMaximasSet;
 	float  m_axisThreshold;
 
-    MySlider        *m_pSliderFlood;
-    wxStaticText    *m_pTextThres;
-    wxTextCtrl      *m_pTxtThresBox;
-    wxButton        *m_pbtnMainDir;
+protected:
+    void swap( ODFs &o );
 
 private:
     // From Glyph
@@ -109,16 +109,26 @@ private:
     void			    set_nbors(FMatrix i_phiThetaDirection);
     float               get_min_angle();
     void setScalingFactor( float i_scalingFactor );
-    
+
 private:
+    struct direction_value { double x, y, z, v; };
+    struct direction { double x, y, z; };
+
     // Variables
     int     m_order;
     GLuint  m_radiusAttribLoc;
     GLuint* m_radiusBuffer; 
-    wxRadioButton *m_pRadiobtnOriginalBasis;
-    wxRadioButton *m_pRadiobtnDescoteauxBasis;
-    wxRadioButton *m_pRadiobtnTournierBasis;
-    wxRadioButton *m_pRadiobtnPTKBasis;
+
+    // GUI elements
+    wxRadioButton   *m_pRadiobtnOriginalBasis;
+    wxRadioButton   *m_pRadiobtnDescoteauxBasis;
+    wxRadioButton   *m_pRadiobtnTournierBasis;
+    wxRadioButton   *m_pRadiobtnPTKBasis;
+    MySlider        *m_pSliderFlood;
+    wxStaticText    *m_pTextThres;
+    wxTextCtrl      *m_pTxtThresBox;
+    wxButton        *m_pbtnMainDir;
+
 
     std::vector< std::vector < float > >    m_coefficients;
     std::vector< std::vector < float > >    m_radius;
@@ -131,7 +141,7 @@ private:
     std::vector<std::pair<float,int> >* m_nbors;
     std::vector<std::vector<Vector> >   m_mainDirections;
 
-	int                                 m_sh_basis;
+	SH_BASIS                                m_sh_basis;
 };
 
 #endif /* ODFS_H_ */

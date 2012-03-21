@@ -26,6 +26,13 @@ void SceneObject::createPropertiesSizer( PropertiesWindow *parent )
 
 //////////////////////////////////////////////////////////////////////////
 
+void SceneObject::swap( SceneObject &s )
+{
+    // Not swapping GUI elements
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 SceneObject::~SceneObject()
 {
     if( NULL != m_propertiesSizer )

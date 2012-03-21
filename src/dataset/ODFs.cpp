@@ -54,7 +54,7 @@ ODFs::ODFs()
     m_radiusAttribLoc( 0 ),
 	m_radiusBuffer   ( NULL ),    
     m_nbors          ( NULL ),
-    m_sh_basis       ( 1 )
+    m_sh_basis       ( SH_BASIS_DESCOTEAUX )
 {
     m_scalingFactor = 5.0f;
 
@@ -71,7 +71,7 @@ ODFs::ODFs( const wxString &filename )
     m_radiusAttribLoc( 0 ),
     m_radiusBuffer   ( NULL ),    
     m_nbors          ( NULL ),
-    m_sh_basis       ( 0 )
+    m_sh_basis       ( SH_BASIS_RR5768 )
 {
     m_scalingFactor = 0.0f;
     m_fullPath = filename;
@@ -232,7 +232,7 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
 	}
 
 	/*cout SH basis name */
-	switch( m_sh_basis )
+    switch( m_sh_basis )
 	{
 		case 0:
             Logger::getInstance()->print( wxT( "Using RR5768 SH basis (as in DMRI)" ), LOGLEVEL_MESSAGE );
@@ -1330,38 +1330,28 @@ complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, fl
 /*
     Allows the users to switch between different SH basis (ODFs)
 */
-void ODFs::changeShBasis( ODFs* l_dataset, int basis )
+void ODFs::changeShBasis( SH_BASIS basis )
 {
-    // TODO: Review how to do this without using another ODF
-//     l_dataset->setShBasis( basis ); // Uses the current Spherical Harmonics basis selected
-// 
-//     if( l_dataset->load(m_lastODF_path)) //Reloads the ODFs
-//     {
-//         //Copy all params modifications
-//         l_dataset->setThreshold        ( getThreshold() );
-//         l_dataset->setAlpha            ( getAlpha() );
-//         l_dataset->setShow             ( getShow() );
-//         l_dataset->setShowFS           ( getShowFS() );
-//         l_dataset->setUseTex           ( getUseTex() );
-//         l_dataset->setColor            ( MIN_HUE, getColor( MIN_HUE ) );
-//         l_dataset->setColor            ( MAX_HUE, getColor( MAX_HUE ) );
-//         l_dataset->setColor            ( SATURATION, getColor( SATURATION ) );
-//         l_dataset->setColor            ( LUMINANCE, getColor( LUMINANCE ) );
-//         l_dataset->setLOD              (getLOD());
-//         l_dataset->setLighAttenuation  (getLightAttenuation());
-//         l_dataset->setLightPosition    (X_AXIS, getLightPosition( X_AXIS ));
-//         l_dataset->setLightPosition    (Y_AXIS, getLightPosition( Y_AXIS ));
-//         l_dataset->setLightPosition    (Z_AXIS, getLightPosition( Z_AXIS ));
-//         l_dataset->setDisplayFactor    (getDisplayFactor());
-//         l_dataset->setScalingFactor    (getScalingFactor());
-//         l_dataset->flipAxis            (X_AXIS, isAxisFlipped( X_AXIS ));
-//         l_dataset->flipAxis            (Y_AXIS, isAxisFlipped( Y_AXIS ));
-//         l_dataset->flipAxis            (Z_AXIS, isAxisFlipped( Z_AXIS ));
-//         l_dataset->setColorWithPosition(getColorWithPosition());
-//         
-//         m_dh->m_mainFrame->deleteListItem();
-//         m_data->finishLoading( l_dataset );
-//     }
+    nifti_image *pHeader = nifti_image_read( m_lastODF_path.char_str(), 0 );
+    nifti_image *pBody   = nifti_image_read( m_lastODF_path.char_str(), 1 );
+
+    if( NULL == pHeader || NULL == pBody )
+    {
+        Logger::getInstance()->print( wxT( "nifti file corrupt, cannot create nifti image from header" ), LOGLEVEL_ERROR );
+        return;
+    }
+
+    ODFs tmp;
+    tmp.setShBasis( basis );
+
+    if( tmp.load( pHeader, pBody ) )
+    {
+        swap( tmp );
+        updatePropertiesSizer();
+    }
+
+    nifti_image_free( pHeader );
+    nifti_image_free( pBody );
 }
 ///////////////////////////////////////////////////////////////////////////
 // This function will set a specific scaling factor for the glyph.
@@ -1429,10 +1419,10 @@ void ODFs::createPropertiesSizer(PropertiesWindow *parent)
     // m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     // parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnPTKShBasis));
     
-    //m_pRadiobtnOriginalBasis->SetValue           (isShBasis(0));
-    m_pRadiobtnDescoteauxBasis->SetValue         (isShBasis(1));
-    m_pRadiobtnTournierBasis->SetValue           (isShBasis(2));
-    //m_pRadiobtnPTKBasis->SetValue                (isShBasis(3));
+    //m_pRadiobtnOriginalBasis->SetValue           (isShBasis( SH_BASIS_RR5768 ));
+    m_pRadiobtnDescoteauxBasis->SetValue( isShBasis( SH_BASIS_DESCOTEAUX ) );
+    m_pRadiobtnTournierBasis->SetValue( isShBasis( SH_BASIS_TOURNIER ) );
+    //m_pRadiobtnPTKBasis->SetValue                (isShBasis( SH_BASIS_PTK ));
     
 }
 
@@ -1476,5 +1466,24 @@ void ODFs::updatePropertiesSizer()
 //     m_pBtnFlipZ->Enable( false );
 }
 
-
-
+void ODFs::swap( ODFs &o )
+{
+    // Not swaping GUI elements
+    Glyph::swap( o );
+    std::swap( m_lastODF_path, o.m_lastODF_path );
+    std::swap( m_isMaximasSet, o.m_isMaximasSet );
+    std::swap( m_axisThreshold, o.m_axisThreshold );
+    std::swap( m_order, o.m_order );
+    std::swap( m_radiusAttribLoc, o.m_radiusAttribLoc );
+    std::swap( m_radiusBuffer, o.m_radiusBuffer );
+    std::swap( m_coefficients, o.m_coefficients );
+    std::swap( m_radius, o.m_radius );
+    std::swap( m_shMatrix, o.m_shMatrix );
+    std::swap( m_phiThetaDirection, o.m_phiThetaDirection );
+    std::swap( m_meshPts, o.m_meshPts );
+    std::swap( m_radiiMinMaxMap, o.m_radiiMinMaxMap );
+    std::swap( m_angle_min, o.m_angle_min );
+    std::swap( m_nbors, o.m_nbors );
+    std::swap( m_mainDirections, o.m_mainDirections );
+    std::swap( m_sh_basis, o.m_sh_basis );
+}

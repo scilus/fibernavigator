@@ -20,6 +20,7 @@
 #include <GL/glew.h>
 #include <wx/tglbtn.h>
 
+#include <algorithm>
 #include <vector>
 using std::vector;
 
@@ -618,6 +619,36 @@ void Glyph::loadBuffer()
     }
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+void Glyph::swap( Glyph &g )
+{
+    // Not swapping GUI elements
+    DatasetInfo::swap( g );
+    std::swap( m_hemisphereBuffer, g.m_hemisphereBuffer );
+    std::swap( m_textureId, g.m_textureId );
+    std::swap( m_nbPointsPerGlyph, g.m_nbPointsPerGlyph );
+    std::swap( m_nbGlyphs, g.m_nbGlyphs );
+    std::swap( m_displayFactor, g.m_displayFactor );
+    std::swap( m_axisFlippedToggled, g.m_axisFlippedToggled );
+    std::swap( m_displayShape, g.m_displayShape );
+    std::swap( m_colorWithPosition, g.m_colorWithPosition );
+    std::swap( m_colorMinHue, g.m_colorMinHue );
+    std::swap( m_colorMaxHue, g.m_colorMaxHue );
+    std::swap( m_colorSaturation, g.m_colorSaturation );
+    std::swap( m_colorLuminance, g.m_colorLuminance );
+    std::swap( m_lighAttenuation, g.m_lighAttenuation );
+    std::swap( m_scalingFactor, g.m_scalingFactor );
+    std::swap( m_currentLOD, g.m_currentLOD );
+    std::swap_ranges( m_currentSliderPos, m_currentSliderPos + 3, g.m_currentSliderPos );
+    std::swap_ranges( m_flippedAxes, m_flippedAxes + 3, g.m_flippedAxes );
+    std::swap_ranges( m_lightPosition, m_lightPosition + 3, g.m_lightPosition );
+    std::swap( m_floatColorDataset, g.m_floatColorDataset );
+    std::swap( m_axesPoints, g.m_axesPoints );
+    std::swap( m_LODspheres, g.m_LODspheres );
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void Glyph::setDisplayShape ( DisplayShape i_displayShape ) 
 {

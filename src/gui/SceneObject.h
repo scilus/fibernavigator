@@ -30,6 +30,9 @@ public:
 public:
     wxBoxSizer  *m_propertiesSizer;
 
+protected:
+    void swap( SceneObject &s );
+
 private:
     SceneObject( const SceneObject & );
     SceneObject & operator=( const SceneObject & );
