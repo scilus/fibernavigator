@@ -75,7 +75,7 @@ public:
     DatasetIndex createAnatomy( std::vector<float> *pDataset, DatasetType type ) { return insert( new Anatomy( pDataset, type ) ); }
     DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( pAnatomy ) ); }
     DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup() ); }
-    DatasetIndex createODFs()                                                    { return insert( new ODFs() ); }
+    DatasetIndex createODFs( const wxString &filename )                          { return insert( new ODFs( filename ) ); }
 
     void remove( const DatasetIndex index );
 

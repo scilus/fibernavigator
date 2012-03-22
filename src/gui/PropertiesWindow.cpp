@@ -574,7 +574,7 @@ void PropertiesWindow::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
 
     float l_sliderValue = ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderFlood->GetValue() / 200.0f;
     ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->setFloodThreshold(l_sliderValue);
-    ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtThresBox->SetValue(wxString::Format( wxT( "%.2f"), l_sliderValue));
+    ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtThres->SetValue(wxString::Format( wxT( "%.2f"), l_sliderValue));
 }
 
 void PropertiesWindow::OnFibersFilter( wxCommandEvent& event)
@@ -832,7 +832,7 @@ void PropertiesWindow::OnGlyphMinHueSliderMoved( wxCommandEvent& WXUNUSED(event)
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphMinHueSliderMoved" ), LOGLEVEL_DEBUG );
 
-    updateGlyphColoration( MIN_HUE, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderMinHueValue->GetValue() / 100.0f );
+    updateGlyphColoration( MIN_HUE, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderMinHue->GetValue() / 100.0f );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -843,7 +843,7 @@ void PropertiesWindow::OnGlyphMaxHueSliderMoved( wxCommandEvent& WXUNUSED(event)
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphMaxHueSliderMoved" ), LOGLEVEL_DEBUG );
 
-    updateGlyphColoration( MAX_HUE, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderMaxHueValue->GetValue() / 100.0f );
+    updateGlyphColoration( MAX_HUE, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderMaxHue->GetValue() / 100.0f );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -854,7 +854,7 @@ void PropertiesWindow::OnGlyphSaturationSliderMoved( wxCommandEvent& WXUNUSED(ev
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphSaturationSliderMoved" ), LOGLEVEL_DEBUG );
 
-    updateGlyphColoration( SATURATION,((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderSaturationValue->GetValue() / 100.0f );
+    updateGlyphColoration( SATURATION,((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderSaturation->GetValue() / 100.0f );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -865,7 +865,7 @@ void PropertiesWindow::OnGlyphLuminanceSliderMoved( wxCommandEvent& WXUNUSED(eve
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphLuminanceSliderMoved" ), LOGLEVEL_DEBUG );
 
-    updateGlyphColoration( LUMINANCE, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderLuminanceValue->GetValue() / 100.0f );
+    updateGlyphColoration( LUMINANCE, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderLuminance->GetValue() / 100.0f );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -898,7 +898,7 @@ void PropertiesWindow::OnGlyphLODSliderMoved( wxCommandEvent& WXUNUSED(event) )
         DatasetInfo* l_info = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
         if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
         {
-            ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderLODValue->GetValue() );
+            ( (Glyph*)l_info )->setLOD( (LODChoices)((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderLOD->GetValue() );
         }
     }
 }
@@ -914,7 +914,7 @@ void PropertiesWindow::OnGlyphLightAttenuationSliderMoved( wxCommandEvent& WXUNU
     {            
         DatasetInfo* l_info = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
         if( l_info->getType() == TENSORS || l_info->getType() == ODFS )
-            ( (Glyph*)l_info )->setLighAttenuation( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderLightAttenuation->GetValue() / 100.0f );
+            ( (Glyph*)l_info )->setLighAttenuation( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderLightAttenuation->GetValue() / 100.0f );
     }
 }
 
@@ -927,7 +927,7 @@ void PropertiesWindow::OnGlyphLightXDirectionSliderMoved( wxCommandEvent& WXUNUS
 
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
-        OnGlyphLightPositionChanged( X_AXIS, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderLightXPosition->GetValue() / 100.0f  );
+        OnGlyphLightPositionChanged( X_AXIS, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderLightXPosition->GetValue() / 100.0f  );
     }
 }
 
@@ -940,7 +940,7 @@ void PropertiesWindow::OnGlyphLightYDirectionSliderMoved( wxCommandEvent& WXUNUS
 
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
-        OnGlyphLightPositionChanged( Y_AXIS, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderLightYPosition->GetValue() / 100.0f  );
+        OnGlyphLightPositionChanged( Y_AXIS, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderLightYPosition->GetValue() / 100.0f  );
     }
 }
 
@@ -953,7 +953,7 @@ void PropertiesWindow::OnGlyphLightZDirectionSliderMoved( wxCommandEvent& WXUNUS
 
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
-        OnGlyphLightPositionChanged( Z_AXIS, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderLightZPosition->GetValue() / 100.0f  );
+        OnGlyphLightPositionChanged( Z_AXIS, ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderLightZPosition->GetValue() / 100.0f  );
     }
 }
 
@@ -982,7 +982,7 @@ void PropertiesWindow::OnGlyphDisplaySliderMoved( wxCommandEvent& WXUNUSED(event
 
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
-        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setDisplayFactor( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderDisplayValue->GetValue());
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setDisplayFactor( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderDisplay->GetValue());
     }
 }
 
@@ -995,7 +995,7 @@ void PropertiesWindow::OnGlyphScalingFactorSliderMoved( wxCommandEvent& WXUNUSED
 
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
-        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setScalingFactor( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_psliderScalingFactor->GetValue() / 10.0f );
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setScalingFactor( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderScalingFactor->GetValue() / 10.0f );
     }
 }
 

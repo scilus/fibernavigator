@@ -854,8 +854,8 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderFlood = new MySlider( pParent, wxID_ANY, 40, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     setFloodThreshold( 0.2f );
 
-    m_pTxtThresBox = new wxTextCtrl( pParent, wxID_ANY, wxT( "0.20" ), wxDefaultPosition, wxSize( 40, -1 ), wxTE_READONLY );
-    m_pTextThres = new wxStaticText( pParent, wxID_ANY, wxT( "Threshold" ) );
+    m_pTxtThres = new wxTextCtrl( pParent, wxID_ANY, wxT( "0.20" ), wxDefaultPosition, wxSize( 40, -1 ), wxTE_READONLY );
+    m_pLblThres = new wxStaticText( pParent, wxID_ANY, wxT( "Threshold" ) );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -886,9 +886,9 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     //////////////////////////////////////////////////////////////////////////
 
     wxBoxSizer *pBoxFlood = new wxBoxSizer( wxHORIZONTAL );
-    pBoxFlood->Add( m_pTextThres,   0, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxFlood->Add( m_pLblThres,   0, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pBoxFlood->Add( m_pSliderFlood, 1, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxFlood->Add( m_pTxtThresBox, 0, wxFIXED_MINSIZE | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxFlood->Add( m_pTxtThres, 0, wxFIXED_MINSIZE | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pBoxMain->Add( pBoxFlood, 0, wxEXPAND, 0 );
 
     //////////////////////////////////////////////////////////////////////////
@@ -983,15 +983,15 @@ void Anatomy::updatePropertiesSizer()
     
     if(!m_isSegmentOn)
     {
-        m_pTextThres->Hide();
+        m_pLblThres->Hide();
         m_pSliderFlood->Hide();
-        m_pTxtThresBox->Hide();
+        m_pTxtThres->Hide();
     }
     else
     {
-        m_pTextThres->Show();
+        m_pLblThres->Show();
         m_pSliderFlood->Show();
-        m_pTxtThresBox->Show();
+        m_pTxtThres->Show();
     }
 }
 

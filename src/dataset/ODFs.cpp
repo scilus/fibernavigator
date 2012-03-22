@@ -38,6 +38,9 @@ using std::pair;
 #include <vector>
 using std::vector;
 
+#define wxDefPosition  wxDefaultPosition
+#define wxDefSize      wxDefaultSize
+
 // m_sh_basis
 // 0: Original Descoteaux et al RR 5768 basis 
 // 1: Descoteaux PhD thesis basis definition (default in dmri)
@@ -46,34 +49,34 @@ using std::vector;
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-ODFs::ODFs()
-:   Glyph(),
-	m_isMaximasSet   ( false ),
-    m_axisThreshold  ( 0.2f ),
-	m_order          ( 0 ),
-    m_radiusAttribLoc( 0 ),
-	m_radiusBuffer   ( NULL ),    
-    m_nbors          ( NULL ),
-    m_sh_basis       ( SH_BASIS_DESCOTEAUX )
-{
-    m_scalingFactor = 5.0f;
-
-    // Generating hemispheres
-    generateSpherePoints( m_scalingFactor );
-}
+// ODFs::ODFs()
+// :   Glyph(),
+// 	m_isMaximasSet   ( false ),
+//     m_axisThreshold  ( 0.2f ),
+// 	m_order          ( 0 ),
+//     m_radiusAttribLoc( 0 ),
+// 	m_radiusBuffer   ( NULL ),    
+//     m_nbors          ( NULL ),
+//     m_sh_basis       ( SH_BASIS_DESCOTEAUX )
+// {
+//     m_scalingFactor = 5.0f;
+// 
+//     // Generating hemispheres
+//     generateSpherePoints( m_scalingFactor );
+// }
 
 
 ODFs::ODFs( const wxString &filename )
 :   Glyph(), 
     m_isMaximasSet   ( false ),
-    m_axisThreshold  ( 0.5f ),
+    m_axisThreshold  ( 0.2f ),
     m_order          ( 0 ),
     m_radiusAttribLoc( 0 ),
     m_radiusBuffer   ( NULL ),    
     m_nbors          ( NULL ),
-    m_sh_basis       ( SH_BASIS_RR5768 )
+    m_sh_basis       ( SH_BASIS_DESCOTEAUX )
 {
-    m_scalingFactor = 0.0f;
+    m_scalingFactor = 5.0f;
     m_fullPath = filename;
 
 #ifdef __WXMSW__
@@ -946,13 +949,13 @@ void ODFs::reloadRadiusBuffer( AxisType i_axis )
         return;
 
     float * l_bufferData = NULL;
-       
+
     glBindBuffer( GL_ARRAY_BUFFER, m_radiusBuffer[i_axis] );
     l_bufferData = (float*) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 
     if( l_bufferData == NULL )
         return;
-        
+
     memcpy( l_bufferData,
             &m_radius[i_axis][0],
             sizeof( float ) * m_radius[i_axis].size() );
@@ -982,7 +985,7 @@ void ODFs::getSphericalHarmonicMatrixRR5768( const vector< float > &i_meshPts,
     for( int i = 0; i < nbMeshPts; i++) 
     {
         int j = 0;   // Counter for the j dimension of o_shMatrix
-        
+
         if(std::abs(i_meshPts[ i * 3     ]) < 1e-5)
             l_cartesianDir[0] = 0;
         else
@@ -1000,7 +1003,7 @@ void ODFs::getSphericalHarmonicMatrixRR5768( const vector< float > &i_meshPts,
         else
             l_cartesianDir[2] = i_meshPts[ i * 3+2     ];
 
-        
+
         Helper::cartesianToSpherical( l_cartesianDir, l_sphericalDir );
 
         o_phiThetaDirection( i, 0 ) = l_sphericalDir[1]; // Phi
@@ -1010,13 +1013,13 @@ void ODFs::getSphericalHarmonicMatrixRR5768( const vector< float > &i_meshPts,
 
         for( int l = 0; l <= m_order; l+=2 )
             for( int m = 0; m <= l; ++m ) 
-            {                   
+            {
                 // Positive "m" spherical harmonic
-                if( m == 0 ) 
+                if( m == 0 )
                 {
                     cplx_1 = getSphericalHarmonic( l, m, l_sphericalDir[2], l_sphericalDir[1] );
 
-                    if( fabs( imag( cplx_1 ) ) > 0.0001 )                  
+                    if( fabs( imag( cplx_1 ) ) > 0.0001 )
                         return; // Modified spherical harmonic basis must be REAL !
 
                     o_shMatrix(i, j) = real( cplx_1 );
@@ -1032,7 +1035,7 @@ void ODFs::getSphericalHarmonicMatrixRR5768( const vector< float > &i_meshPts,
 
                     // (-1)^m
                     ( m % 2 == 1 ) ? sign = -1 : sign = 1;
-                    
+
                     {
                         complex< float > s( sign, 0.0 );
                         complex< float > n( sqrt( ( float )2 ) / 2, 0.0 );
@@ -1046,13 +1049,13 @@ void ODFs::getSphericalHarmonicMatrixRR5768( const vector< float > &i_meshPts,
                         complex< float > n(0.0, ( float )sqrt( ( float ) 2 ) / 2 );
                         complex< float > s(sign, 0.0);
                         cplx_2 = n*(s*cplx_1 + cplx_2);
-                    }                
+                    }
 
                     if( fabs(imag(cplx)) > 0.0001 || fabs(imag(cplx_2)) > 0.0001 ) 
                         return; // Modified spherical harmonic basis must be REAL!
 
                     o_shMatrix(i, j) = real( cplx_1 );
-                    
+
                     ++j;
 
                     o_shMatrix(i, j) = sign*real( cplx_2 );
@@ -1060,9 +1063,9 @@ void ODFs::getSphericalHarmonicMatrixRR5768( const vector< float > &i_meshPts,
                 } // else
 
                 ++j;
-            
+
             } // for
-    
+
     } // for
 
 }
@@ -1091,12 +1094,12 @@ void ODFs::getSphericalHarmonicMatrixDescoteauxThesis( const vector< float > &i_
     for( int i = 0; i < nbMeshPts; i++) 
     {
         int j = 0;   // Counter for the j dimension of o_shMatrix
-    
+
         if(std::abs(i_meshPts[ i * 3     ]) < 1e-5)
             l_cartesianDir[0] = 0;
         else
             l_cartesianDir[0] = i_meshPts[ i * 3     ];
-        
+
 
         if(std::abs(i_meshPts[ i * 3+1     ]) < 1e-5)
             l_cartesianDir[1] = 0;
@@ -1111,13 +1114,13 @@ void ODFs::getSphericalHarmonicMatrixDescoteauxThesis( const vector< float > &i_
 
 
         Helper::cartesianToSpherical( l_cartesianDir, l_sphericalDir );
-           
+
         o_phiThetaDirection( i, 0 ) = l_sphericalDir[1]; // Phi
         o_phiThetaDirection( i, 1 ) = l_sphericalDir[2]; // Theta
 
         for( int l = 0; l <= m_order; l+=2 )
             for( int m = -l; m <= l; ++m ) 
-            {                   
+            {
                cplx_1 = getSphericalHarmonic( l,  m, l_sphericalDir[2], l_sphericalDir[1] );
                cplx_2 = getSphericalHarmonic( l, abs(m), l_sphericalDir[2], l_sphericalDir[1] );
 
@@ -1129,7 +1132,7 @@ void ODFs::getSphericalHarmonicMatrixDescoteauxThesis( const vector< float > &i_
                   o_shMatrix(i,j) = std::sqrt(2.0)*real(cplx_2);
 
                ++j;
-               
+
             } // for
     } // for
 }
@@ -1188,7 +1191,7 @@ void ODFs::getSphericalHarmonicMatrixPTK( const vector< float > &i_meshPts,
 
         for( int l = 0; l <= m_order; l+=2 )
             for( int m = -l; m <= l; ++m ) 
-            {                   
+            {
                cplx_1 = getSphericalHarmonic( l,  m, l_sphericalDir[2], l_sphericalDir[1] );
                cplx_2 = getSphericalHarmonic( l, abs(m), l_sphericalDir[2], l_sphericalDir[1] );
 
@@ -1246,11 +1249,10 @@ void ODFs::getSphericalHarmonicMatrixTournier( const vector< float > &i_meshPts,
         for( int l = 0; l <= m_order; l+=2 )
         {
             for( int m = -l; m <= l; ++m ) 
-            {                   
-
+            {
                cplx_1 = getSphericalHarmonic( l,  m, l_sphericalDir[2], l_sphericalDir[1] );
 
-               if(m >= 0) {
+               if( m >= 0 ) {
                   o_shMatrix(i,j) = real(cplx_1);
                }
                else { // /* negative "m" SH  */
@@ -1299,7 +1301,7 @@ void ODFs::getSphericalHarmonicMatrix( const vector< float > &i_meshPts,
 //
 // Returns the spherical harmonic
 ///////////////////////////////////////////////////////////////////////////
-complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, float i_phi ) 
+complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, float i_phi )
 {
     int l_absm = std::abs( i_m );
     float l_sign = 0.0f;
@@ -1341,7 +1343,7 @@ void ODFs::changeShBasis( SH_BASIS basis )
         return;
     }
 
-    ODFs tmp;
+    ODFs tmp( m_lastODF_path );
     tmp.setShBasis( basis );
 
     if( tmp.load( pHeader, pBody ) )
@@ -1361,7 +1363,7 @@ void ODFs::changeShBasis( SH_BASIS basis )
 void ODFs::setScalingFactor( float i_scalingFactor )
 {
     m_scalingFactor = i_scalingFactor;
-    generateSpherePoints( m_scalingFactor / 5 );   
+    generateSpherePoints( m_scalingFactor / 5 );
     loadBuffer();
 }
 
@@ -1371,104 +1373,111 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 
     setColorWithPosition( true );
 
-    // FIXME: Sizer changes
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
-//     wxSizer *l_sizer;
-// 
-//     m_pSliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-//     m_pSliderFlood->SetValue(2);
-//     m_pTxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.2") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
-//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-//     m_pTextThres = new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
-//     l_sizer->Add(m_pTextThres,0,wxALIGN_CENTER);
-//     l_sizer->Add(m_pSliderFlood,0,wxALIGN_CENTER);
-//     l_sizer->Add(m_pTxtThresBox,0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
-//     parent->Connect(m_pSliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
-// 
-//     m_pbtnMainDir = new wxButton(parent, wxID_ANY,wxT("Recalculate"),wxDefaultPosition, wxSize(140,-1));
-//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-//     l_sizer->Add(m_pbtnMainDir,0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
-//     parent->Connect(m_pbtnMainDir->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnRecalcMainDir));
-// 
-// 
-//     m_propertiesPanel->AddSpacer(8);
-//     l_sizer = new wxBoxSizer(wxHORIZONTAL);    
-//     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Sh Basis "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_LEFT);
-// 
-//     // l_sizer = new wxBoxSizer(wxHORIZONTAL);
-//     // m_pRadiobtnOriginalBasis = new wxRadioButton(parent, wxID_ANY, _T( "RR5768" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
-//     // l_sizer->Add(m_pRadiobtnOriginalBasis);
-//     // m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
-//     // parent->Connect(m_pRadiobtnOriginalBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnOriginalShBasis));
-//     
-//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-//     m_pRadiobtnDescoteauxBasis = new wxRadioButton(parent, wxID_ANY, _T( "Descoteaux" ), \
-//                                                    wxDefaultPosition, wxSize(132,-1));
-//     l_sizer->Add(m_pRadiobtnDescoteauxBasis);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
-//     parent->Connect(m_pRadiobtnDescoteauxBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnDescoteauxShBasis));
-// 
-//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
-//     m_pRadiobtnTournierBasis = new wxRadioButton(parent, wxID_ANY, _T( "MRtrix" ), 
-//                                                  wxDefaultPosition, wxSize(132,-1));
-//     l_sizer->Add(m_pRadiobtnTournierBasis);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
-//     parent->Connect(m_pRadiobtnTournierBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnTournierShBasis));
-// 
-//     // l_sizer = new wxBoxSizer(wxHORIZONTAL);
-//     // m_pRadiobtnPTKBasis = new wxRadioButton(parent, wxID_ANY, _T( "PTK" ), wxDefaultPosition, wxSize(132,-1));
-//     // l_sizer->Add(m_pRadiobtnPTKBasis);
-//     // m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
-//     // parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnPTKShBasis));
-//     
-//     //m_pRadiobtnOriginalBasis->SetValue           (isShBasis( SH_BASIS_RR5768 ));
-//     m_pRadiobtnDescoteauxBasis->SetValue( isShBasis( SH_BASIS_DESCOTEAUX ) );
-//     m_pRadiobtnTournierBasis->SetValue( isShBasis( SH_BASIS_TOURNIER ) );
-//     //m_pRadiobtnPTKBasis->SetValue                (isShBasis( SH_BASIS_PTK ));
-//     
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pSliderFlood = new MySlider(     pParent, wxID_ANY, 2, 0, 10,    wxDefPosition, wxSize( 100, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    m_pTxtThres    = new wxTextCtrl(   pParent, wxID_ANY, wxT( "0.2"), wxDefPosition, wxSize(  40, -1 ), wxTE_READONLY);
+    m_pLblThres    = new wxStaticText( pParent, wxID_ANY, wxT( "Threshold" ) );
+    m_pBtnMainDir  = new wxButton(     pParent, wxID_ANY, wxT( "Recalculate" ), wxDefPosition, wxSize( 140, -1 ) );
+    wxRadioButton *pRadDescoteauxBasis = new wxRadioButton( pParent, wxID_ANY, wxT( "Descoteaux" ), wxDefPosition, wxDefSize, wxRB_GROUP );
+    wxRadioButton *pRadTournierBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "MRtrix" ) );
+//     wxRadioButton *pRadOriginalBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "RR5768" ) );
+//     wxRadioButton *pRadPTKBasis        = new wxRadioButton( pParent, wxID_ANY, wxT( "PTK" ) );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    wxBoxSizer *pBoxFlood = new wxBoxSizer( wxHORIZONTAL );
+    pBoxFlood->Add( m_pLblThres,   0, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxFlood->Add( m_pSliderFlood, 1, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxFlood->Add( m_pTxtThres, 0, wxFIXED_MINSIZE | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxMain->Add( pBoxFlood, 0, wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxMain->Add( m_pBtnMainDir, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+
+    wxBoxSizer *pBoxShBasis = new wxBoxSizer( wxVERTICAL );
+    pBoxShBasis->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Sh Basis:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+
+    wxBoxSizer *pBoxShBasisRadios = new wxBoxSizer( wxVERTICAL );
+//     pBoxShBasisRadios->Add( pRadOriginalBasis,   0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxShBasisRadios->Add( pRadDescoteauxBasis, 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxShBasisRadios->Add( pRadTournierBasis,   0, wxALIGN_LEFT | wxALL, 1 );
+//     pBoxShBasisRadios->Add( pRadPTKBasis,        0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxShBasis->Add( pBoxShBasisRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
+
+    pBoxMain->Add( pBoxShBasis, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pParent->Connect( m_pSliderFlood->GetId(),      wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderAxisMoved ) );
+    pParent->Connect( m_pBtnMainDir->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnRecalcMainDir ) );
+//     pParent->Connect( pRadOriginalBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnOriginalShBasis ) );
+    pParent->Connect( pRadDescoteauxBasis->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnDescoteauxShBasis ) );
+    pParent->Connect( pRadTournierBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnTournierShBasis ) );
+//     pParent->Connect( pRadPTKBasis->GetId(),        wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnPTKShBasis ) );
+
+    //////////////////////////////////////////////////////////////////////////
+
+//     pRadOriginalBasis->SetValue(   isShBasis( SH_BASIS_RR5768 ) );
+    pRadDescoteauxBasis->SetValue( isShBasis( SH_BASIS_DESCOTEAUX ) );
+    pRadTournierBasis->SetValue(   isShBasis( SH_BASIS_TOURNIER ) );
+//     pRadPTKBasis->SetValue(        isShBasis( SH_BASIS_PTK ) );
+
+    m_pSliderLightAttenuation->SetValue( m_pSliderLightAttenuation->GetMin() );
+    m_pSliderLightXPosition->SetValue( m_pSliderLightXPosition->GetMin() );
+    m_pSliderLightYPosition->SetValue( m_pSliderLightYPosition->GetMin() );
+    m_pSliderLightZPosition->SetValue( m_pSliderLightZPosition->GetMin() );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 }
 
 void ODFs::updatePropertiesSizer()
 {
-    Glyph::updatePropertiesSizer();
+//     Glyph::updatePropertiesSizer();
+    DatasetInfo::updatePropertiesSizer();
 
-    //set to min.
-    //m_pradiobtnMainAxis->Enable(false);
-    //m_psliderLightAttenuation->SetValue(m_psliderLightAttenuation->GetMin());
-    m_psliderLightAttenuation->Enable(false);
-    //m_psliderLightXPosition->SetValue(m_psliderLightXPosition->GetMin());
-    m_psliderLightXPosition->Enable(false);
-    //m_psliderLightYPosition->SetValue(m_psliderLightYPosition->GetMin());
-    m_psliderLightYPosition->Enable(false);
-    //m_psliderLightZPosition->SetValue(m_psliderLightZPosition->GetMin());
-    m_psliderLightZPosition->Enable(false);
+    m_pSliderLightAttenuation->Enable( false );
+    m_pSliderLightXPosition->Enable( false );
+    m_pSliderLightYPosition->Enable( false );
+    m_pSliderLightZPosition->Enable( false );
+    m_pBtnFlipX->Enable( false );
+    m_pBtnFlipY->Enable( false );
+    m_pBtnFlipZ->Enable( false );
+
+    m_pSliderMinHue->SetValue(     getColor( MIN_HUE )    * 100 );
+    m_pSliderMaxHue->SetValue(     getColor( MAX_HUE )    * 100 );
+    m_pSliderSaturation->SetValue( getColor( SATURATION ) * 100 );
+    m_pSliderLuminance->SetValue(  getColor( LUMINANCE )  * 100 );
+    m_pSliderLOD->SetValue(        (int)getLOD() );
+    m_pSliderDisplay->SetValue(    getDisplayFactor() );
+    m_pSliderScalingFactor->SetValue( getScalingFactor() * 10.0f );
+
+    m_pToggleAxisFlipX->SetValue( isAxisFlipped( X_AXIS ) );
+    m_pToggleAxisFlipY->SetValue( isAxisFlipped( Y_AXIS ) );
+    m_pToggleAxisFlipZ->SetValue( isAxisFlipped( Z_AXIS ) );
+    m_pToggleColorWithPosition->SetValue( getColorWithPosition() );
+
     //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
-    //m_psliderScalingFactor->Enable (false);
-    //m_pRadiobtnPTKBasis->Enable(false);
-    m_pradiobtnMainAxis->Enable(true);
 
-    if(!isDisplayShape(AXIS))
+    if( !isDisplayShape( AXIS ) )
     {
-        m_pTextThres->Hide();
+        m_pLblThres->Hide();
         m_pSliderFlood->Hide();
-        m_pTxtThresBox->Hide();
-        m_pbtnMainDir->Hide();
+        m_pTxtThres->Hide();
+        m_pBtnMainDir->Hide();
     }
     else
     {
-        m_pTextThres->Show();
+        m_pLblThres->Show();
         m_pSliderFlood->Show();
-        m_pTxtThresBox->Show();
-        m_pbtnMainDir->Show();
+        m_pTxtThres->Show();
+        m_pBtnMainDir->Show();
     }
-
-    // Disabled for the moment, not implemented.
-//     m_pBtnFlipX->Enable( false );
-//     m_pBtnFlipY->Enable( false );
-//     m_pBtnFlipZ->Enable( false );
 }
 
 void ODFs::swap( ODFs &o )

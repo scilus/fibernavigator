@@ -58,7 +58,7 @@ public:
 
     MySlider            *m_pSliderFlood;
     MySlider            *m_pSliderGraphSigma;
-    wxStaticText        *m_pTextThres;
+    wxStaticText        *m_pLblThres;
   
     GLuint getGLuint();
     
@@ -128,7 +128,7 @@ private:
     wxRadioButton   *m_pRadioBtnObj;
     wxButton        *m_pBtnGraphCut;
     wxButton        *m_pBtnKmeans;
-    wxTextCtrl      *m_pTxtThresBox;
+    wxTextCtrl      *m_pTxtThres;
     wxSlider        *m_pLowerEqSlider;
     wxSlider        *m_pUpperEqSlider;
 

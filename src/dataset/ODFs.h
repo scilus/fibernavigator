@@ -27,7 +27,7 @@ class ODFs : public Glyph
 {
 public:
     // Constructor/Destructor
-    ODFs();
+    //ODFs();
     ODFs( const wxString &filename );
     virtual ~ODFs();
 
@@ -51,7 +51,7 @@ public:
 	void extractMaximas();
 
     MySlider * getSliderFlood() const                   { return m_pSliderFlood; }
-    wxTextCtrl * getTxtThresBox() const                 { return m_pTxtThresBox; }
+    wxTextCtrl * getTxtThresBox() const                 { return m_pTxtThres; }
 
 public:
     //Vars
@@ -120,14 +120,10 @@ private:
     GLuint* m_radiusBuffer; 
 
     // GUI elements
-    wxRadioButton   *m_pRadiobtnOriginalBasis;
-    wxRadioButton   *m_pRadiobtnDescoteauxBasis;
-    wxRadioButton   *m_pRadiobtnTournierBasis;
-    wxRadioButton   *m_pRadiobtnPTKBasis;
     MySlider        *m_pSliderFlood;
-    wxStaticText    *m_pTextThres;
-    wxTextCtrl      *m_pTxtThresBox;
-    wxButton        *m_pbtnMainDir;
+    wxStaticText    *m_pLblThres;
+    wxTextCtrl      *m_pTxtThres;
+    wxButton        *m_pBtnMainDir;
 
 
     std::vector< std::vector < float > >    m_coefficients;

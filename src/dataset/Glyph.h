@@ -72,25 +72,24 @@ public:
 
 public:
     // Items related to the glyph options sizer.
-    wxSlider           *m_psliderMinHueValue;
-    wxSlider           *m_psliderMaxHueValue;
-    wxSlider           *m_psliderSaturationValue;
-    wxSlider           *m_psliderLuminanceValue;
-    wxSlider           *m_psliderLODValue;
-    wxSlider           *m_psliderLightAttenuation;
-    wxSlider           *m_psliderLightXPosition;
-    wxSlider           *m_psliderLightYPosition;
-    wxSlider           *m_psliderLightZPosition;
-    wxSlider           *m_psliderDisplayValue;
-    wxSlider           *m_psliderScalingFactor;
-    wxToggleButton     *m_ptoggleAxisFlipX;
-    wxToggleButton     *m_ptoggleAxisFlipY;
-    wxToggleButton     *m_ptoggleAxisFlipZ;
-    wxToggleButton     *m_ptoggleColorWithPosition; 
-    wxSizer            *m_psizerDisplay;
-    wxRadioButton      *m_pradiobtnNormal;
-    wxRadioButton      *m_pradiobtnMapOnSphere;
-    wxRadioButton      *m_pradiobtnMainAxis;
+    wxSlider           *m_pSliderMinHue;
+    wxSlider           *m_pSliderMaxHue;
+    wxSlider           *m_pSliderSaturation;
+    wxSlider           *m_pSliderLuminance;
+    wxSlider           *m_pSliderLOD;
+    wxSlider           *m_pSliderLightAttenuation;
+    wxSlider           *m_pSliderLightXPosition;
+    wxSlider           *m_pSliderLightYPosition;
+    wxSlider           *m_pSliderLightZPosition;
+    wxSlider           *m_pSliderDisplay;
+    wxSlider           *m_pSliderScalingFactor;
+    wxToggleButton     *m_pToggleAxisFlipX;
+    wxToggleButton     *m_pToggleAxisFlipY;
+    wxToggleButton     *m_pToggleAxisFlipZ;
+    wxToggleButton     *m_pToggleColorWithPosition; 
+    wxRadioButton      *m_pRadNormal;
+    wxRadioButton      *m_pRadMapOnSphere;
+    wxRadioButton      *m_pRadMainAxis;
 
 protected:
     // From DatasetInfo
