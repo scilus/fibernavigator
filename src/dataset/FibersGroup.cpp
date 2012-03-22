@@ -289,7 +289,7 @@ void FibersGroup::useTransparency()
 
 void FibersGroup::createPropertiesPanel( PropertiesWindow *pParent )
 {
-    DatasetInfo::createPropertiesPanel( pParent );
+    DatasetInfo::createPropertiesSizer( pParent );
 
     // FIXME: Sizer changes
 
@@ -785,7 +785,7 @@ void FibersGroup::resetAllValues()
 
 void FibersGroup::updatePropertiesPanel()
 {
-    DatasetInfo::updatePropertiesPanel();
+    DatasetInfo::updatePropertiesSizer();
 
 	DatasetInfo::m_pToggleFiltering->Hide();
 	DatasetInfo::m_pBtnFlipX->Hide();

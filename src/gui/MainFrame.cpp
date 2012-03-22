@@ -178,7 +178,7 @@ MainFrame::MainFrame( const wxString     &title,
 :   wxFrame( NULL, wxID_ANY, title, pos, size ),
     m_pToolBar( NULL ),
     m_pMenuBar( NULL ),
-    m_pCurrentPanel( NULL ),
+    m_pCurrentSizer( NULL ),
     m_pCurrentSceneObject( NULL ),
     m_pLastSelectedSceneObject( NULL ),
     m_currentListItem( -1 ),
@@ -930,11 +930,11 @@ void MainFrame::onSelectEraser( wxCommandEvent& event )
 
 void MainFrame::deleteSceneObject()
 {
-    if (m_pCurrentPanel != NULL)
+    if (m_pCurrentSizer != NULL)
     {
-        m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentPanel, true);
-        m_pPropertiesWindow->GetSizer()->Detach(m_pCurrentPanel);        
-        m_pCurrentPanel = NULL;
+        m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer, true);
+        m_pPropertiesWindow->GetSizer()->Detach(m_pCurrentSizer);        
+        m_pCurrentSizer = NULL;
     }
     
     m_pCurrentSceneObject = NULL;
@@ -1150,37 +1150,36 @@ void MainFrame::displayPropertiesSheet()
 {   
     if (m_pLastSelectedSceneObject == NULL && m_pCurrentSceneObject == NULL)
     {
-        if (m_pCurrentPanel != NULL)
+        if (m_pCurrentSizer != NULL)
         {
-           m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentPanel);
+           m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);
         }
     }
     else
     {
         if (m_pLastSelectedSceneObject != NULL)
         {       
-            if (m_pCurrentPanel != NULL )
+            if (m_pCurrentSizer != NULL )
             {
-                m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentPanel);                 
+                m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);                 
             }
-            if( NULL == m_pLastSelectedSceneObject->getPropertiesPanel() )
+            if( NULL == m_pLastSelectedSceneObject->getPropertiesSizer() )
             {
-                m_pLastSelectedSceneObject->createPropertiesPanel( m_pPropertiesWindow );
-                m_pPropertiesWindow->GetSizer()->Add( m_pLastSelectedSceneObject->getPropertiesPanel(), 1, wxFIXED_MINSIZE | wxEXPAND | wxALL, 0 );
-                m_pPropertiesWindow->Layout();
-                m_pPropertiesWindow->FitInside();
+                m_pLastSelectedSceneObject->createPropertiesSizer( m_pPropertiesWindow );
             }
-            m_pCurrentPanel = m_pLastSelectedSceneObject->getPropertiesPanel();
+            m_pCurrentSizer = m_pLastSelectedSceneObject->getPropertiesSizer();
             
             m_pCurrentSceneObject = m_pLastSelectedSceneObject;
             m_pLastSelectedSceneObject = NULL;
             m_currentListItem = m_lastSelectedListItem;
             m_lastSelectedListItem = -1;
             
-            m_pPropertiesWindow->GetSizer()->Show( m_pCurrentPanel, true, true );
+            m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
             //doOnSize();            
         }        
-        m_pCurrentSceneObject->updatePropertiesPanel();
+        m_pCurrentSceneObject->updatePropertiesSizer();
+        m_pPropertiesWindow->Layout();
+        m_pPropertiesWindow->FitInside();
         m_pLastSelectedSceneObject = NULL;
     }     
 }

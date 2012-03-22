@@ -2013,7 +2013,7 @@ void SelectionObject::updateMeanFiberOpacity()
 
 void SelectionObject::createPropertiesPanel(PropertiesWindow *parent)
 {
-    SceneObject::createPropertiesPanel(parent);
+    SceneObject::createPropertiesSizer(parent);
 
     // FIXME: Sizer changes
 
@@ -2270,7 +2270,7 @@ void SelectionObject::createPropertiesPanel(PropertiesWindow *parent)
 
 void SelectionObject::updatePropertiesPanel()
 {
-    SceneObject::updatePropertiesPanel();
+    SceneObject::updatePropertiesSizer();
     m_ptoggleVisibility->SetValue( getIsVisible() );
     m_ptoggleActivate->SetValue( getIsActive() );
     m_ptxtName->SetValue( getName() );

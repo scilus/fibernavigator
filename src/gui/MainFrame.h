@@ -214,7 +214,7 @@ public:
 private:
     ToolBar             *m_pToolBar;
     MenuBar             *m_pMenuBar;       
-    wxPanel             *m_pCurrentPanel;
+    wxSizer             *m_pCurrentSizer;
     SceneObject         *m_pCurrentSceneObject;
     SceneObject         *m_pLastSelectedSceneObject;
     long                m_currentListItem;

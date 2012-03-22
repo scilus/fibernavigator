@@ -829,82 +829,103 @@ void Anatomy::saveNifti( wxString fileName )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::createPropertiesPanel( PropertiesWindow *pParentWindow )
+void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    DatasetInfo::createPropertiesPanel( pParentWindow );
+    DatasetInfo::createPropertiesSizer( pParent );
 
-    wxPanel *pPanMain = new wxPanel( m_pPropertiesPanel );
-    pPanMain->SetBackgroundColour( wxColour( wxT( "LIGHT GREY" ) ) );
     wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
     //////////////////////////////////////////////////////////////////////////
 
     // Init widgets
-    m_pLowerEqSlider =       new wxSlider( pPanMain, wxID_ANY, m_lowerEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pUpperEqSlider =       new wxSlider( pPanMain, wxID_ANY, m_upperEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pEqualize      = new wxToggleButton( pPanMain, wxID_ANY, wxT( "Equalize" ),               wxDefaultPosition, wxSize( 140, -1 ) );
-    m_pBtnDilate =           new wxButton( pPanMain, wxID_ANY, wxT( "Dilate" ),                 wxDefaultPosition, wxSize( 85,  -1 ) );
-    m_pBtnErode  =           new wxButton( pPanMain, wxID_ANY, wxT( "Erode" ),                  wxDefaultPosition, wxSize( 85,  -1 ) );
-    m_pBtnCut =              new wxButton( pPanMain, wxID_ANY, wxT( "Cut (boxes)" ),            wxDefaultPosition, wxSize( 85,  -1 ) );
-    m_pBtnMinimize =         new wxButton( pPanMain, wxID_ANY, wxT( "Minimize (fibers)" ),      wxDefaultPosition, wxSize( 85,  -1 ) );
-    m_pBtnNewDistanceMap =   new wxButton( pPanMain, wxID_ANY, wxT( "New Distance Map" ),       wxDefaultPosition, wxSize( 140, -1 ) );
-    m_pBtnNewIsoSurface  =   new wxButton( pPanMain, wxID_ANY, wxT( "New Iso Surface" ),        wxDefaultPosition, wxSize( 140, -1 ) );
-    m_pBtnNewOffsetSurface = new wxButton( pPanMain, wxID_ANY, wxT( "New Offset Surface" ),     wxDefaultPosition, wxSize( 140, -1 ) );
-    m_pBtnNewVOI =           new wxButton( pPanMain, wxID_ANY, wxT( "New VOI" ),                wxDefaultPosition, wxSize( 140, -1 ) );
-    m_pToggleSegment = new wxToggleButton( pPanMain, wxID_ANY, wxT( "Floodfill" ),              wxDefaultPosition, wxSize( 140, -1 ) );  
+    m_pLowerEqSlider =       new wxSlider( pParent, wxID_ANY, m_lowerEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pUpperEqSlider =       new wxSlider( pParent, wxID_ANY, m_upperEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pEqualize      = new wxToggleButton( pParent, wxID_ANY, wxT( "Equalize" ),               wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnDilate =           new wxButton( pParent, wxID_ANY, wxT( "Dilate" ),                 wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnErode  =           new wxButton( pParent, wxID_ANY, wxT( "Erode" ),                  wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnCut =              new wxButton( pParent, wxID_ANY, wxT( "Cut (boxes)" ),            wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnMinimize =         new wxButton( pParent, wxID_ANY, wxT( "Minimize (fibers)" ),      wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnNewDistanceMap =   new wxButton( pParent, wxID_ANY, wxT( "New Distance Map" ),       wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnNewIsoSurface  =   new wxButton( pParent, wxID_ANY, wxT( "New Iso Surface" ),        wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnNewOffsetSurface = new wxButton( pParent, wxID_ANY, wxT( "New Offset Surface" ),     wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnNewVOI =           new wxButton( pParent, wxID_ANY, wxT( "New VOI" ),                wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pToggleSegment = new wxToggleButton( pParent, wxID_ANY, wxT( "Floodfill" ),              wxDefaultPosition, wxSize( 140, -1 ) );  
 
-    m_pSliderFlood = new MySlider( pPanMain, wxID_ANY, 40, 0, 100, wxDefaultPosition, wxSize( 100, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFlood = new MySlider( pParent, wxID_ANY, 40, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     setFloodThreshold( 0.2f );
 
-    m_pTxtThresBox = new wxTextCtrl( pPanMain, wxID_ANY, wxT( "0.20" ),      wxDefaultPosition, wxSize( 40, -1 ), wxTE_CENTRE | wxTE_READONLY );
-    m_pTextThres = new wxStaticText( pPanMain, wxID_ANY, wxT( "Threshold" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL );
+    m_pTxtThresBox = new wxTextCtrl( pParent, wxID_ANY, wxT( "0.20" ), wxDefaultPosition, wxSize( 40, -1 ), wxTE_READONLY );
+    m_pTextThres = new wxStaticText( pParent, wxID_ANY, wxT( "Threshold" ) );
 
     //////////////////////////////////////////////////////////////////////////
 
     wxFlexGridSizer *pGridSliders = new wxFlexGridSizer( 2 );
-    pGridSliders->Add( new wxStaticText( pPanMain, wxID_ANY, wxT( "Lower Threshold" ), wxDefaultPosition, wxSize( 80, -1 ), wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL ), 0, wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL );
-    pGridSliders->Add( m_pLowerEqSlider, 1, wxEXPAND | wxRIGHT | wxLEFT, 1 );
-    pGridSliders->Add( new wxStaticText( pPanMain, wxID_ANY, wxT( "Upper Threshold" ), wxDefaultPosition, wxSize( 80, -1 ), wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL ), 0, wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL );
-    pGridSliders->Add( m_pUpperEqSlider, 1, wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Lower Threshold" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pLowerEqSlider, 0, wxALIGN_CENTER_HORIZONTAL | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Upper Threshold" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pUpperEqSlider, 0, wxALIGN_CENTER_HORIZONTAL | wxEXPAND | wxALL, 1 );
     pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
 
     //////////////////////////////////////////////////////////////////////////
 
     pBoxMain->Add( m_pEqualize, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
 
-    pGridSliders = new wxFlexGridSizer( 2 );
-    pGridSliders->Add( m_pBtnDilate,   1, wxEXPAND | wxLEFT | wxRIGHT | wxALIGN_CENTER, 1 );
-    pGridSliders->Add( m_pBtnErode,    1, wxEXPAND | wxLEFT | wxRIGHT | wxALIGN_CENTER, 1 );
-    pGridSliders->Add( m_pBtnCut,      1, wxEXPAND | wxLEFT | wxRIGHT | wxALIGN_CENTER, 1 );
-    pGridSliders->Add( m_pBtnMinimize, 1, wxEXPAND | wxLEFT | wxRIGHT | wxALIGN_CENTER, 1 );
-    pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL | wxALIGN_CENTER, 2 );
+    wxGridSizer *pGridButtons = new wxGridSizer( 2 );
+    pGridButtons->Add( m_pBtnDilate,   0, wxEXPAND | wxALL, 1 );
+    pGridButtons->Add( m_pBtnErode,    0, wxEXPAND | wxALL, 1 );
+    pGridButtons->Add( m_pBtnCut,      0, wxEXPAND | wxALL, 1 );
+    pGridButtons->Add( m_pBtnMinimize, 0, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pGridButtons, 0, wxEXPAND | wxALL | wxALIGN_CENTER, 2 );
 
-    pBoxMain->Add( m_pBtnNewDistanceMap, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
-    pBoxMain->Add( m_pBtnNewIsoSurface, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
     pBoxMain->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
-    pBoxMain->Add( m_pBtnNewVOI, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
-    pBoxMain->Add( m_pToggleSegment, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnNewVOI,           0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pToggleSegment,       0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
 
     //////////////////////////////////////////////////////////////////////////
 
-    pPanMain->SetSizer( pBoxMain );
-    m_pPropertiesSizer->Add( pPanMain, 1, wxFIXED_MINSIZE | wxEXPAND | wxLEFT | wxRIGHT, 0 );
+    wxBoxSizer *pBoxFlood = new wxBoxSizer( wxHORIZONTAL );
+    pBoxFlood->Add( m_pTextThres,   0, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxFlood->Add( m_pSliderFlood, 1, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxFlood->Add( m_pTxtThresBox, 0, wxFIXED_MINSIZE | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxMain->Add( pBoxFlood, 0, wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 
     // Connect widgets with callback function
-    pParentWindow->Connect( m_pLowerEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
-    pParentWindow->Connect( m_pUpperEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
-    pParentWindow->Connect( m_pEqualize->GetId(),            wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler       ( PropertiesWindow::OnEqualizeDataset ) );
-    pParentWindow->Connect( m_pBtnDilate->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnDilateDataset ) );
-    pParentWindow->Connect( m_pBtnErode->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnErodeDataset ) );
-    pParentWindow->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
-    pParentWindow->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
-    pParentWindow->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
-    pParentWindow->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewIsoSurface ) );
-    pParentWindow->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
-    pParentWindow->Connect( m_pBtnNewVOI->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewVoiFromOverlay ) );
-    pParentWindow->Connect( m_pToggleSegment->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFloodFill ) );
-    pParentWindow->Connect( m_pSliderFlood->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderFloodMoved ) );
+    pParent->Connect( m_pLowerEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
+    pParent->Connect( m_pUpperEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
+    pParent->Connect( m_pEqualize->GetId(),            wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler       ( PropertiesWindow::OnEqualizeDataset ) );
+    pParent->Connect( m_pBtnDilate->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnDilateDataset ) );
+    pParent->Connect( m_pBtnErode->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnErodeDataset ) );
+    pParent->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
+    pParent->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
+    pParent->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
+    pParent->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewIsoSurface ) );
+    pParent->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
+    pParent->Connect( m_pBtnNewVOI->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewVoiFromOverlay ) );
+    pParent->Connect( m_pToggleSegment->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFloodFill ) );
+    pParent->Connect( m_pSliderFlood->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderFloodMoved ) );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //     // Init widgets
 //     m_pLowerEqSlider = new wxSlider( pParentWindow, wxID_ANY, m_lowerEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -1063,9 +1084,9 @@ void Anatomy::createPropertiesPanel( PropertiesWindow *pParentWindow )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::updatePropertiesPanel()
+void Anatomy::updatePropertiesSizer()
 {
-    DatasetInfo::updatePropertiesPanel();
+    DatasetInfo::updatePropertiesSizer();
     
     m_pLowerEqSlider->Enable( 1 == m_bands );
     m_pUpperEqSlider->Enable( 1 == m_bands );
@@ -1093,7 +1114,6 @@ void Anatomy::updatePropertiesPanel()
         m_pSliderFlood->Show();
         m_pTxtThresBox->Show();
     }
-    
 }
 
 void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, float color ) 

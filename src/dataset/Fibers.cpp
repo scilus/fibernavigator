@@ -3505,7 +3505,7 @@ void Fibers::flipAxis( AxisType i_axe )
 
 void Fibers::createPropertiesPanel( PropertiesWindow *pParent )
 {
-    DatasetInfo::createPropertiesPanel( pParent );
+    DatasetInfo::createPropertiesSizer( pParent );
 
     // FIXME: Sizer changes
 
@@ -3607,7 +3607,7 @@ void Fibers::createPropertiesPanel( PropertiesWindow *pParent )
 
 void Fibers::updatePropertiesPanel()
 {
-    DatasetInfo::updatePropertiesPanel();
+    DatasetInfo::updatePropertiesSizer();
     m_pToggleFiltering->Enable( false );
     m_pToggleFiltering->SetValue( false );
     m_pToggleCrossingFibers->Enable( true );

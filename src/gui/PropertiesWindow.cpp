@@ -22,8 +22,8 @@
 IMPLEMENT_DYNAMIC_CLASS(PropertiesWindow, wxScrolledWindow)
 
 BEGIN_EVENT_TABLE( PropertiesWindow, wxScrolledWindow )
-EVT_PAINT( PropertiesWindow::OnPaint )
-EVT_SIZE( PropertiesWindow::OnSize )
+// EVT_PAINT( PropertiesWindow::OnPaint )
+// EVT_SIZE( PropertiesWindow::OnSize )
 END_EVENT_TABLE()
 
 PropertiesWindow::PropertiesWindow( wxWindow *pParent, MainFrame *pMainFrame, wxWindowID id, const wxPoint &pos, const wxSize &size, ListCtrl *lstCtrl )
@@ -33,19 +33,19 @@ PropertiesWindow::PropertiesWindow( wxWindow *pParent, MainFrame *pMainFrame, wx
     m_pListCtrl( lstCtrl )
 {
     SetBackgroundColour( *wxLIGHT_GREY );
-    SetCursor( wxCursor( wxCURSOR_HAND ) );
+//     SetCursor( wxCursor( wxCURSOR_HAND ) );
     SetSizer( new wxBoxSizer( wxVERTICAL ) );
     SetAutoLayout( true );
 }
 
-void PropertiesWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
-{
-}
-
-void PropertiesWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
-{
-    wxPaintDC dc( this );
-}
+// void PropertiesWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
+// {
+// }
+// 
+// void PropertiesWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
+// {
+//     wxPaintDC dc( this );
+// }
 
 void PropertiesWindow::OnListItemDown( wxCommandEvent& WXUNUSED(event) )
 {

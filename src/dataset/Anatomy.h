@@ -88,8 +88,8 @@ public:
     void setDataType( const int type) { m_dataType = type; }
     int  getDataType()                { return m_dataType; }
     
-    virtual void createPropertiesPanel( PropertiesWindow *pParentWindow );
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer( PropertiesWindow *pParentWindow );
+    virtual void updatePropertiesSizer();
     
     float getFloodThreshold()           { return m_floodThreshold; };
     void  setFloodThreshold(float v)    { m_floodThreshold = v; };

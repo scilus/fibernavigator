@@ -457,9 +457,6 @@ void Tensors::createPropertiesPanel(PropertiesWindow *pParent)
 
     // FIXME: Sizer changes
 
-    wxPanel *pPanTensors = new wxPanel( m_pPropertiesPanel );
-    wxBoxSizer *pBoxTensors = new wxBoxSizer( wxVERTICAL );
-
 //     m_pbtnNormalize = new wxToggleButton( pPanTensors, wxID_ANY, wxT( "Normalize" ), wxDefaultPosition, wxSize( 140, -1 ) );    
 //     pParent->Connect( m_pbtnNormalize->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnNormalizeTensors ) );
 //     pBoxTensors->Add( m_pbtnNormalize, 0, wxALIGN_CENTER );
@@ -469,8 +466,6 @@ void Tensors::createPropertiesPanel(PropertiesWindow *pParent)
 //     parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphAxesSelected));
 //     m_pradiobtnAxes->SetValue          (isDisplayShape(AXES));
 //     
-    pPanTensors->SetSizer( pBoxTensors );
-    m_pPropertiesSizer->Add( pPanTensors );
 }
 
 void Tensors::updatePropertiesPanel()

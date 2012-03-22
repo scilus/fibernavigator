@@ -1129,7 +1129,7 @@ bool CIsoSurface::save( wxXmlNode *pNode ) const
 
 void CIsoSurface::createPropertiesPanel(PropertiesWindow *parent)
 {
-    DatasetInfo::createPropertiesPanel(parent);
+    DatasetInfo::createPropertiesSizer(parent);
 
     // FIXME: Sizer changes
 
@@ -1150,7 +1150,7 @@ void CIsoSurface::createPropertiesPanel(PropertiesWindow *parent)
 
 void CIsoSurface::updatePropertiesPanel()
 {
-    DatasetInfo::updatePropertiesPanel();
+    DatasetInfo::updatePropertiesSizer();
     m_pToggleFiltering->Enable(false);
     m_pToggleFiltering->SetValue(false);
     m_ptoggleUseColoring->SetValue(!getUseTex());

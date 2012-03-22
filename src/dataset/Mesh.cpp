@@ -443,7 +443,7 @@ void Mesh::draw()
 
 void Mesh::createPropertiesPanel(PropertiesWindow *parent)
 {
-    DatasetInfo::createPropertiesPanel(parent);
+    DatasetInfo::createPropertiesSizer(parent);
 
     // FIXME: Sizer changes
 
@@ -464,7 +464,7 @@ void Mesh::createPropertiesPanel(PropertiesWindow *parent)
 
 void Mesh::updatePropertiesPanel()
 {
-    DatasetInfo::updatePropertiesPanel();
+    DatasetInfo::updatePropertiesSizer();
 
     m_pToggleFiltering->Enable(false);
     m_pToggleFiltering->SetValue(false);

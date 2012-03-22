@@ -55,8 +55,8 @@ public:
     virtual GLuint getGLuint()                  = 0;
 
     // Virtual functions
-    virtual void createPropertiesPanel(PropertiesWindow *parent); 
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer(PropertiesWindow *parent); 
+    virtual void updatePropertiesSizer();
     virtual bool save( wxString filename ) const { return false; }
     virtual bool save( wxXmlNode *node ) const;
 

@@ -657,7 +657,7 @@ void Glyph::setDisplayShape ( DisplayShape i_displayShape )
 
 void Glyph::createPropertiesPanel(PropertiesWindow *parent)
 {
-    DatasetInfo::createPropertiesPanel(parent);
+    DatasetInfo::createPropertiesSizer(parent);
 
     // FIXME: Sizer changes
 
@@ -793,7 +793,7 @@ void Glyph::createPropertiesPanel(PropertiesWindow *parent)
 
 void Glyph::updatePropertiesPanel()
 {
-    DatasetInfo::updatePropertiesPanel();
+    DatasetInfo::updatePropertiesSizer();
 
     m_psliderMinHueValue->SetValue     (getColor( MIN_HUE ) * 100);
     m_psliderMaxHueValue->SetValue     (getColor( MAX_HUE ) * 100);
