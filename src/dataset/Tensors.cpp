@@ -451,22 +451,31 @@ void Tensors::setScalingFactor( float i_scalingFactor )
     loadBuffer();
 }
 
-void Tensors::createPropertiesSizer(PropertiesWindow *parent)
+void Tensors::createPropertiesPanel(PropertiesWindow *pParent)
 {
-    Glyph::createPropertiesSizer(parent);
-    m_pbtnNormalize = new wxToggleButton(parent, wxID_ANY, wxT("Normalize"), wxDefaultPosition, wxSize(140,-1));    
-    parent->Connect( m_pbtnNormalize->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnNormalizeTensors ) );
-    m_propertiesSizer->Add(m_pbtnNormalize,0,wxALIGN_CENTER);
+    Glyph::createPropertiesPanel( pParent );
 
-    m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));    
-    m_psizerDisplay->Add(m_pradiobtnAxes);
-    parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphAxesSelected));
-    m_pradiobtnAxes->SetValue          (isDisplayShape(AXES));
+    // FIXME: Sizer changes
+
+    wxPanel *pPanTensors = new wxPanel( m_pPropertiesPanel );
+    wxBoxSizer *pBoxTensors = new wxBoxSizer( wxVERTICAL );
+
+//     m_pbtnNormalize = new wxToggleButton( pPanTensors, wxID_ANY, wxT( "Normalize" ), wxDefaultPosition, wxSize( 140, -1 ) );    
+//     pParent->Connect( m_pbtnNormalize->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnNormalizeTensors ) );
+//     pBoxTensors->Add( m_pbtnNormalize, 0, wxALIGN_CENTER );
+// 
+//     m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));    
+//     m_psizerDisplay->Add(m_pradiobtnAxes);
+//     parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphAxesSelected));
+//     m_pradiobtnAxes->SetValue          (isDisplayShape(AXES));
+//     
+    pPanTensors->SetSizer( pBoxTensors );
+    m_pPropertiesSizer->Add( pPanTensors );
 }
 
-void Tensors::updatePropertiesSizer()
+void Tensors::updatePropertiesPanel()
 {
-    Glyph::updatePropertiesSizer();
+    Glyph::updatePropertiesPanel();
 
     m_pbtnNormalize->SetValue(m_isNormalized);
     

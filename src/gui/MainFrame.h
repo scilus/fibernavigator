@@ -38,7 +38,7 @@ class MainFrame : public wxFrame
     friend class TrackingWindow;
 
 public:
-    MainFrame( wxWindow *i_parent, const wxWindowID i_id, const wxString &i_title, const wxPoint &i_pos, const wxSize &i_size, const long i_style);
+    MainFrame( const wxString &title, const wxPoint &pos, const wxSize &size );
     ~MainFrame();
 
     void createCutDataset();
@@ -76,7 +76,6 @@ public:
     SelectionObject * getLastSelectedObj() const    { return m_pLastSelectedObj; }
 
 private:
-    void initOpenGl();
     void initLayout();
 
     // File menu
@@ -209,14 +208,13 @@ public:
     wxSlider            *m_pXSlider;
     wxSlider            *m_pYSlider;
     wxSlider            *m_pZSlider;
-    wxTreeItemId        m_tRootId;
     wxTreeItemId        m_tSelectionObjectsId;
     wxNotebook          *m_tab;
 
 private:
     ToolBar             *m_pToolBar;
     MenuBar             *m_pMenuBar;       
-    wxBoxSizer          *m_pCurrentSizer;
+    wxPanel             *m_pCurrentPanel;
     SceneObject         *m_pCurrentSceneObject;
     SceneObject         *m_pLastSelectedSceneObject;
     long                m_currentListItem;

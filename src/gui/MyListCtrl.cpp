@@ -16,10 +16,10 @@ BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
 END_EVENT_TABLE()
 
 
-MyTreeCtrl::MyTreeCtrl(MainFrame *parent, const wxWindowID id, const wxPoint& pos,
-            const wxSize& size, long style) : wxTreeCtrl(parent, id, pos, size, style)
+MyTreeCtrl::MyTreeCtrl( MainFrame *pMainFrame, wxWindow *pParent, const wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) 
+:   wxTreeCtrl( pParent, id, pos, size, style )
 {
-    m_mainFrame = parent;
+    m_mainFrame = pMainFrame;
 }
 
 int MyTreeCtrl::getSelectedType()

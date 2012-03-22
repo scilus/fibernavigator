@@ -15,9 +15,9 @@ class MainFrame;
 class MyTreeCtrl: public wxTreeCtrl 
 {
 public:
-    MyTreeCtrl(MainFrame *parent, const wxWindowID id, const wxPoint& pos,
-            const wxSize& size, long style);
+    MyTreeCtrl(MainFrame *pMainFrame, wxWindow *pParent, const wxWindowID id, const wxPoint& pos, const wxSize& size, long style );
     int getSelectedType();
+
 private:
     MainFrame *m_mainFrame;
     void OnChar(wxKeyEvent& event);

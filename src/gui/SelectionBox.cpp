@@ -360,12 +360,12 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
     return hr;
 }
 
-void SelectionBox::createPropertiesSizer(PropertiesWindow *parent)
+void SelectionBox::createPropertiesPanel(PropertiesWindow *parent)
 {
-    SelectionObject::createPropertiesSizer(parent);  
+    SelectionObject::createPropertiesPanel(parent);  
 }
 
-void SelectionBox::updatePropertiesSizer()
+void SelectionBox::updatePropertiesPanel()
 {
-    SelectionObject::updatePropertiesSizer();
+    SelectionObject::updatePropertiesPanel();
 }

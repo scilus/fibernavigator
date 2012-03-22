@@ -38,6 +38,103 @@ const wxString MyApp::APP_VENDOR = _T( "Ralph S. & Mario H." );
 
 IMPLEMENT_APP( MyApp )
 
+
+
+
+
+
+
+
+class Border : public wxFrame
+{
+public:
+    Border::Border(const wxString& title)
+        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(250, 200))
+    {
+        wxColour col1, col2;
+        col1.Set(wxT("#4f5049"));
+        col2.Set(wxT("#ededed"));
+
+        wxPanel *panel = new wxPanel(this);
+        panel->SetBackgroundColour(col1);
+        wxBoxSizer *vbox = new wxBoxSizer( wxHORIZONTAL );
+
+        //////////////////////////////////////////////////////////////////////////
+        // AXIAL PANEL
+        wxPanel *pAxialPane = new wxPanel(panel);
+        pAxialPane->SetBackgroundColour( col2 );
+        
+        wxButton *pAxialGL = new wxButton( pAxialPane, wxID_ANY, wxT( "AXIAL" ) );
+        pAxialGL->SetBackgroundColour( wxColour( wxT( "RED" ) ) );
+        
+        wxSlider *pAxialSlider = new wxSlider( pAxialPane, wxID_ANY, 3, 0, 10, wxDefaultPosition, wxSize( 100, 20 ) );
+        
+        wxBoxSizer *pBox = new wxBoxSizer( wxVERTICAL );
+        pBox->Add( pAxialGL, 1, wxEXPAND | wxALL, 2 );
+        pBox->Add( pAxialSlider, 0, wxEXPAND | wxLEFT | wxRIGHT | wxALIGN_BOTTOM, 2 );
+        pAxialPane->SetSizer( pBox );
+
+        //////////////////////////////////////////////////////////////////////////
+        // CORONAL PANEL
+        wxPanel *pCoronalPane = new wxPanel(panel);
+        pCoronalPane->SetBackgroundColour( col2 );
+
+        wxButton *pCoronalGL = new wxButton( pCoronalPane, wxID_ANY, wxT( "CORONAL" ) );
+        pCoronalGL->SetBackgroundColour( wxColour( wxT( "BLUE" ) ) );
+
+        wxSlider *pCoronalSlider = new wxSlider( pCoronalPane, wxID_ANY, 3, 0, 10, wxDefaultPosition, wxSize( 100, 20 ) );
+
+        pBox = new wxBoxSizer( wxVERTICAL );
+        pBox->Add( pCoronalGL, 1, wxEXPAND | wxALL, 2 );
+        pBox->Add( pCoronalSlider, 0, wxEXPAND | wxLEFT | wxRIGHT | wxALIGN_BOTTOM, 2 );
+        pCoronalPane->SetSizer( pBox );
+
+        //////////////////////////////////////////////////////////////////////////
+        // SAGITTAL PANEL
+        wxPanel *pSagittalPane = new wxPanel(panel);
+        pSagittalPane->SetBackgroundColour( col2 );
+
+        wxButton *pSagittalGL = new wxButton( pSagittalPane, wxID_ANY, wxT( "SAGITTAL" ) );
+        pSagittalGL->SetBackgroundColour( wxColour( wxT( "GREEN" ) ) );
+
+        wxSlider *pSagittalSlider = new wxSlider( pSagittalPane, wxID_ANY, 3, 0, 10, wxDefaultPosition, wxSize( 100, 20 ) );
+
+        pBox = new wxBoxSizer( wxVERTICAL );
+        pBox->Add( pSagittalGL, 1, wxEXPAND | wxALL, 2 );
+        pBox->Add( pSagittalSlider, 0, wxEXPAND | wxLEFT | wxRIGHT | wxALIGN_BOTTOM, 2 );
+        pSagittalPane->SetSizer( pBox );
+
+        //////////////////////////////////////////////////////////////////////////
+        // Add panels to sizer and set sizer to main panel
+        vbox->Add(pAxialPane,    1, wxEXPAND | wxALL, 5);
+        vbox->Add(pCoronalPane,  1, wxEXPAND | wxALL, 5);
+        vbox->Add(pSagittalPane, 1, wxEXPAND | wxALL, 5);
+        panel->SetSizer(vbox);
+
+        Centre();
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static const wxCmdLineEntryDesc desc[] =
 {
     { wxCMD_LINE_SWITCH, _T("h"), _T("help"), _T("help yourself") },
@@ -113,8 +210,11 @@ bool MyApp::OnInit( void )
         Logger::getInstance()->print( wxString::Format( wxT( "respath: %s" ), respath.c_str() ), LOGLEVEL_DEBUG );
         Logger::getInstance()->print( wxString::Format( wxT( "shader: %s" ), shaderPath.c_str() ), LOGLEVEL_DEBUG );
 
+//         Border *border = new Border( wxT( "TEST" ) );
+//         border->Show( true );
+
         // Create the main frame window
-        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 1219"), wxPoint( 50, 50 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
+        frame = new MainFrame( wxT("Fiber Navigator 1219"), wxPoint( 50, 50 ), wxSize( 800, 600 ) );
         SceneManager::getInstance()->setMainFrame( frame );
         SceneManager::getInstance()->setTreeCtrl( frame->m_pTreeWidget );
 

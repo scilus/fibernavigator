@@ -28,7 +28,7 @@ public:
    
     ~TrackingWindow(){};
     void OnPaint( wxPaintEvent &event );
-    void OnSize( wxSizeEvent &event ); 
+    void OnSize( wxSizeEvent &event );
     wxSizer* getWindowSizer();
 
 

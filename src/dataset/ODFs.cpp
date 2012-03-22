@@ -1347,7 +1347,7 @@ void ODFs::changeShBasis( SH_BASIS basis )
     if( tmp.load( pHeader, pBody ) )
     {
         swap( tmp );
-        updatePropertiesSizer();
+        updatePropertiesPanel();
     }
 
     nifti_image_free( pHeader );
@@ -1365,70 +1365,73 @@ void ODFs::setScalingFactor( float i_scalingFactor )
     loadBuffer();
 }
 
-void ODFs::createPropertiesSizer(PropertiesWindow *parent)
+void ODFs::createPropertiesPanel(PropertiesWindow *parent)
 {
-    Glyph::createPropertiesSizer(parent);
-    wxSizer *l_sizer;
+    Glyph::createPropertiesPanel(parent);
 
-    m_pSliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_pSliderFlood->SetValue(2);
-    m_pTxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.2") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pTextThres = new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
-    l_sizer->Add(m_pTextThres,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pSliderFlood,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pTxtThresBox,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pSliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
+    // FIXME: Sizer changes
 
-    m_pbtnMainDir = new wxButton(parent, wxID_ANY,wxT("Recalculate"),wxDefaultPosition, wxSize(140,-1));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(m_pbtnMainDir,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnMainDir->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnRecalcMainDir));
-
-
-    m_propertiesSizer->AddSpacer(8);
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);    
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Sh Basis "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_LEFT);
-
-    // l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    // m_pRadiobtnOriginalBasis = new wxRadioButton(parent, wxID_ANY, _T( "RR5768" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
-    // l_sizer->Add(m_pRadiobtnOriginalBasis);
-    // m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    // parent->Connect(m_pRadiobtnOriginalBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnOriginalShBasis));
-    
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadiobtnDescoteauxBasis = new wxRadioButton(parent, wxID_ANY, _T( "Descoteaux" ), \
-                                                   wxDefaultPosition, wxSize(132,-1));
-    l_sizer->Add(m_pRadiobtnDescoteauxBasis);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pRadiobtnDescoteauxBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnDescoteauxShBasis));
-
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadiobtnTournierBasis = new wxRadioButton(parent, wxID_ANY, _T( "MRtrix" ), 
-                                                 wxDefaultPosition, wxSize(132,-1));
-    l_sizer->Add(m_pRadiobtnTournierBasis);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pRadiobtnTournierBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnTournierShBasis));
-
-    // l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    // m_pRadiobtnPTKBasis = new wxRadioButton(parent, wxID_ANY, _T( "PTK" ), wxDefaultPosition, wxSize(132,-1));
-    // l_sizer->Add(m_pRadiobtnPTKBasis);
-    // m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    // parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnPTKShBasis));
-    
-    //m_pRadiobtnOriginalBasis->SetValue           (isShBasis( SH_BASIS_RR5768 ));
-    m_pRadiobtnDescoteauxBasis->SetValue( isShBasis( SH_BASIS_DESCOTEAUX ) );
-    m_pRadiobtnTournierBasis->SetValue( isShBasis( SH_BASIS_TOURNIER ) );
-    //m_pRadiobtnPTKBasis->SetValue                (isShBasis( SH_BASIS_PTK ));
-    
+//     wxSizer *l_sizer;
+// 
+//     m_pSliderFlood = new MySlider(parent, wxID_ANY,0,0,10, wxDefaultPosition, wxSize(100,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+//     m_pSliderFlood->SetValue(2);
+//     m_pTxtThresBox = new wxTextCtrl(parent, wxID_ANY, wxT("0.2") ,wxDefaultPosition, wxSize(40,-1), wxTE_CENTRE | wxTE_READONLY);
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pTextThres = new wxStaticText(parent, wxID_ANY, wxT("Threshold "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
+//     l_sizer->Add(m_pTextThres,0,wxALIGN_CENTER);
+//     l_sizer->Add(m_pSliderFlood,0,wxALIGN_CENTER);
+//     l_sizer->Add(m_pTxtThresBox,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     parent->Connect(m_pSliderFlood->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderAxisMoved));
+// 
+//     m_pbtnMainDir = new wxButton(parent, wxID_ANY,wxT("Recalculate"),wxDefaultPosition, wxSize(140,-1));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(m_pbtnMainDir,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     parent->Connect(m_pbtnMainDir->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnRecalcMainDir));
+// 
+// 
+//     m_propertiesPanel->AddSpacer(8);
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);    
+//     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Sh Basis "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_LEFT);
+// 
+//     // l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     // m_pRadiobtnOriginalBasis = new wxRadioButton(parent, wxID_ANY, _T( "RR5768" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
+//     // l_sizer->Add(m_pRadiobtnOriginalBasis);
+//     // m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     // parent->Connect(m_pRadiobtnOriginalBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnOriginalShBasis));
+//     
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pRadiobtnDescoteauxBasis = new wxRadioButton(parent, wxID_ANY, _T( "Descoteaux" ), \
+//                                                    wxDefaultPosition, wxSize(132,-1));
+//     l_sizer->Add(m_pRadiobtnDescoteauxBasis);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     parent->Connect(m_pRadiobtnDescoteauxBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnDescoteauxShBasis));
+// 
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pRadiobtnTournierBasis = new wxRadioButton(parent, wxID_ANY, _T( "MRtrix" ), 
+//                                                  wxDefaultPosition, wxSize(132,-1));
+//     l_sizer->Add(m_pRadiobtnTournierBasis);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     parent->Connect(m_pRadiobtnTournierBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnTournierShBasis));
+// 
+//     // l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     // m_pRadiobtnPTKBasis = new wxRadioButton(parent, wxID_ANY, _T( "PTK" ), wxDefaultPosition, wxSize(132,-1));
+//     // l_sizer->Add(m_pRadiobtnPTKBasis);
+//     // m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     // parent->Connect(m_pRadiobtnPTKBasis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnPTKShBasis));
+//     
+//     //m_pRadiobtnOriginalBasis->SetValue           (isShBasis( SH_BASIS_RR5768 ));
+//     m_pRadiobtnDescoteauxBasis->SetValue( isShBasis( SH_BASIS_DESCOTEAUX ) );
+//     m_pRadiobtnTournierBasis->SetValue( isShBasis( SH_BASIS_TOURNIER ) );
+//     //m_pRadiobtnPTKBasis->SetValue                (isShBasis( SH_BASIS_PTK ));
+//     
 }
 
-void ODFs::updatePropertiesSizer()
+void ODFs::updatePropertiesPanel()
 {
-    Glyph::updatePropertiesSizer();
+    Glyph::updatePropertiesPanel();
 
     //set to min.
     //m_pradiobtnMainAxis->Enable(false);

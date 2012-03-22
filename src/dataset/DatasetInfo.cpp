@@ -44,78 +44,97 @@ DatasetInfo::DatasetInfo()
 {
 }
 
-void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
+void DatasetInfo::createPropertiesPanel( PropertiesWindow *pParent )
 {
-    SceneObject::createPropertiesSizer(parent);
-    wxBoxSizer *l_sizer;
+    SceneObject::createPropertiesPanel( pParent );
 
-    m_ptxtName = new wxTextCtrl(parent, wxID_ANY, getName(),wxDefaultPosition, wxSize(180,-1), wxTE_CENTRE | wxTE_READONLY);    
-    m_ptxtName->SetBackgroundColour(*wxLIGHT_GREY);
-    wxFont l_font = m_ptxtName->GetFont();
-    l_font.SetPointSize(10);
-    l_font.SetWeight(wxFONTWEIGHT_BOLD);
-    m_ptxtName->SetFont(l_font);
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(m_ptxtName,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    wxPanel *pPanMain = new wxPanel( m_pPropertiesPanel );
+    pPanMain->SetBackgroundColour( wxColour( wxT( "WHITE" ) ) );
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pTxtName = new wxTextCtrl( pPanMain, wxID_ANY, getName(), wxDefaultPosition, wxSize( 180, -1 ), wxTE_CENTER | wxTE_READONLY );
+    m_pTxtName->SetBackgroundColour( *wxLIGHT_GREY );
+    wxFont font = m_pTxtName->GetFont();
+    font.SetPointSize( 10 );
+    font.SetWeight( wxFONTWEIGHT_BOLD );
+    m_pTxtName->SetFont( font );
+    pBoxMain->Add( m_pTxtName, 0, wxEXPAND | wxRIGHT | wxLEFT, 1 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    wxBoxSizer *pBoxMove = new wxBoxSizer( wxHORIZONTAL );
+    wxImage bmpUp    ( MyApp::iconsPath + wxT( "view4.png" ),  wxBITMAP_TYPE_PNG );
+    wxImage bmpDown  ( MyApp::iconsPath + wxT( "view2.png" ),  wxBITMAP_TYPE_PNG );
+    wxImage bmpDelete( MyApp::iconsPath + wxT( "delete.png" ), wxBITMAP_TYPE_PNG );
+    m_pBtnUp     = new wxBitmapButton( pPanMain, wxID_ANY, bmpUp,     wxDefaultPosition, wxSize( 60, -1 ) );
+    m_pBtnDown   = new wxBitmapButton( pPanMain, wxID_ANY, bmpDown,   wxDefaultPosition, wxSize( 60, -1 ) );
+    m_pBtnDelete = new wxBitmapButton( pPanMain, wxID_ANY, bmpDelete, wxDefaultPosition, wxSize( 60, -1 ) );
+    pBoxMove->Add( m_pBtnUp,     1, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pBoxMove->Add( m_pBtnDown,   1, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pBoxMove->Add( m_pBtnDelete, 1, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pBoxMain->Add( pBoxMove,     0, wxEXPAND | wxRIGHT | wxLEFT,                  1 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pBtnRename = new wxButton( pPanMain, wxID_ANY, wxT( "Rename" ), wxDefaultPosition, wxSize( 90, -1 ) );
+    pBoxMain->Add( m_pBtnRename, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    wxBoxSizer *pBoxFlips = new wxBoxSizer( wxHORIZONTAL );
+    m_pBtnFlipX = new wxToggleButton( pPanMain, wxID_ANY, wxT( "Flip X" ), wxDefaultPosition, wxSize( 60, -1 ) );
+    m_pBtnFlipY = new wxToggleButton( pPanMain, wxID_ANY, wxT( "Flip Y" ), wxDefaultPosition, wxSize( 60, -1 ) );
+    m_pBtnFlipZ = new wxToggleButton( pPanMain, wxID_ANY, wxT( "Flip Z" ), wxDefaultPosition, wxSize( 60, -1 ) );
+    pBoxFlips->Add( m_pBtnFlipX, 1, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pBoxFlips->Add( m_pBtnFlipY, 1, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pBoxFlips->Add( m_pBtnFlipZ, 1, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pBoxMain->Add(  pBoxFlips,   0, wxEXPAND | wxRIGHT | wxLEFT,                  1 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    wxBoxSizer *pBoxVisible = new wxBoxSizer( wxHORIZONTAL );
+    m_pToggleVisibility = new wxToggleButton( pPanMain, wxID_ANY, wxT( "Visible" ),       wxDefaultPosition, wxSize( 90, -1 ) );
+    m_pToggleFiltering  = new wxToggleButton( pPanMain, wxID_ANY, wxT( "Interpolation" ), wxDefaultPosition, wxSize( 90, -1 ) );
+    pBoxVisible->Add( m_pToggleVisibility, 1, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pBoxVisible->Add( m_pToggleFiltering,  1, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 1 );
+    pBoxMain->Add( pBoxVisible, 0, wxEXPAND | wxRIGHT | wxLEFT, 1 );
+
+    //////////////////////////////////////////////////////////////////////////
     
-    wxImage bmpDelete(MyApp::iconsPath+ wxT("delete.png" ), wxBITMAP_TYPE_PNG);
-    wxImage bmpDown(MyApp::iconsPath+ wxT("view2.png" ), wxBITMAP_TYPE_PNG);
-    wxImage bmpUp(MyApp::iconsPath+ wxT("view4.png" ), wxBITMAP_TYPE_PNG);
-    m_pbtnDelete = new wxBitmapButton(parent, wxID_ANY, bmpDelete, wxDefaultPosition, wxSize(60,-1));
-    m_pbtnUp = new wxBitmapButton(parent, wxID_ANY, bmpUp, wxDefaultPosition, wxSize(60,-1));
-    m_pbtnDown = new wxBitmapButton(parent, wxID_ANY, bmpDown, wxDefaultPosition, wxSize(60,-1));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);    
-    l_sizer->Add(m_pbtnUp,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pbtnDown,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pbtnDelete,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnDown->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemDown));
-    parent->Connect(m_pbtnUp->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListItemUp));
-    parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnDeleteListItem));
+    wxFlexGridSizer *pGridSliders = new wxFlexGridSizer( 2 );
+    m_pSliderThresholdIntensity = new MySlider( pPanMain, wxID_ANY,(int)( getThreshold() * 100 ), 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pIntensityText = new wxStaticText( pPanMain, wxID_ANY, wxT( "Intensity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL );
+    pGridSliders->Add( m_pIntensityText,            0, wxEXPAND | wxRIGHT | wxLEFT, 0 );
+    pGridSliders->Add( m_pSliderThresholdIntensity, 1, wxEXPAND | wxRIGHT | wxLEFT, 1 );
 
-    m_pBtnRename = new wxButton(parent, wxID_ANY, wxT("Rename"), wxDefaultPosition, wxSize(90,-1) );
-    m_propertiesSizer->Add( m_pBtnRename, 0, wxALIGN_CENTER );
-    parent->Connect( m_pBtnRename->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler ( PropertiesWindow::OnRename) );
+    m_pSliderOpacity = new MySlider( pPanMain, wxID_ANY, (int)( getAlpha() * 100 ), 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pOpacityText = new wxStaticText( pPanMain, wxID_ANY, wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL );
+    pGridSliders->Add( m_pOpacityText,   0, wxEXPAND | wxRIGHT | wxLEFT, 0 );
+    pGridSliders->Add( m_pSliderOpacity, 1, wxEXPAND | wxRIGHT | wxLEFT, 1 );
 
-    m_pBtnFlipX = new wxToggleButton(parent, wxID_ANY, wxT("Flip x"), wxDefaultPosition, wxSize(60, -1) );
-    m_pBtnFlipY = new wxToggleButton(parent, wxID_ANY, wxT("Flip y"), wxDefaultPosition, wxSize(60,-1) );
-    m_pBtnFlipZ = new wxToggleButton(parent, wxID_ANY, wxT("Flip z"), wxDefaultPosition, wxSize(60,-1) );
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add( m_pBtnFlipX, 0, wxALIGN_CENTER );
-    l_sizer->Add( m_pBtnFlipY, 0, wxALIGN_CENTER );
-    l_sizer->Add( m_pBtnFlipZ, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
-    parent->Connect(m_pBtnFlipX->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipX));
-    parent->Connect(m_pBtnFlipY->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipY));
-    parent->Connect(m_pBtnFlipZ->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnFlipZ));
+    pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
 
-    m_pToggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(90,-1));
-    m_pToggleFiltering = new wxToggleButton(parent, wxID_ANY, wxT("Interpolation"),wxDefaultPosition, wxSize(90,-1));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(m_pToggleVisibility,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pToggleFiltering,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pToggleVisibility->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleVisibility));   
-    parent->Connect(m_pToggleFiltering->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
-    
-    m_psliderThresholdIntensity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_psliderThresholdIntensity->SetValue((int)(getThreshold()*100));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_pIntensityText = new wxStaticText(parent, wxID_ANY, wxT("Intensity "), wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
-    l_sizer->Add(m_pIntensityText, 0, wxALIGN_CENTER);
-    l_sizer->Add(m_psliderThresholdIntensity,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderThresholdIntensity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderIntensityThresholdMoved));
+    //////////////////////////////////////////////////////////////////////////
 
-    m_psliderOpacity = new MySlider(parent, wxID_ANY,0,0,100, wxDefaultPosition, wxSize(140,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_psliderOpacity->SetValue((int)(getAlpha()*100));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_pOpacityText = new wxStaticText(parent, wxID_ANY, wxT("Opacity "), wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT);
-    l_sizer->Add(m_pOpacityText, 0, wxALIGN_CENTER);
-    l_sizer->Add(m_psliderOpacity,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderOpacity->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderOpacityThresholdMoved));
+    pPanMain->SetSizer( pBoxMain );
+    m_pPropertiesSizer->Add( pPanMain, 1, wxFIXED_MINSIZE | wxEXPAND | wxLEFT | wxRIGHT, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+    // Connect widgets to callback function
+    pParent->Connect( m_pBtnUp->GetId(),                    wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemUp ) );
+    pParent->Connect( m_pBtnDown->GetId(),                  wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemDown ) );
+    pParent->Connect( m_pBtnDelete->GetId(),                wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnDeleteListItem ) );
+    pParent->Connect( m_pBtnRename->GetId(),                wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnRename ) );
+    pParent->Connect( m_pBtnFlipX->GetId(),                 wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnFlipX ) );
+    pParent->Connect( m_pBtnFlipY->GetId(),                 wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnFlipY ) );
+    pParent->Connect( m_pBtnFlipZ->GetId(),                 wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnFlipZ ) );
+    pParent->Connect( m_pToggleVisibility->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleVisibility ) );
+    pParent->Connect( m_pToggleFiltering->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
+    pParent->Connect( m_pSliderThresholdIntensity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderIntensityThresholdMoved ) );
+    pParent->Connect( m_pSliderOpacity->GetId(),            wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderOpacityThresholdMoved ) );
+
 
     /*l_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_pbtnSmoothLoop = new wxButton(parent, wxID_ANY,wxT("Smooth"),wxDefaultPosition, wxSize(60,-1));
@@ -127,15 +146,15 @@ void DatasetInfo::createPropertiesSizer(PropertiesWindow *parent)
     m_ptoggleLIC = new wxToggleButton(parent, wxID_ANY,wxT("LIC"),wxDefaultPosition, wxSize(60,-1));
     l_sizer->Add(m_ptoggleLIC,0,wxALIGN_CENTER);
     m_ptoggleLIC->Enable(m_dh->m_vectorsLoaded && (getType() == SURFACE || getType() == ISO_SURFACE));
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
     //parent->Connect(m_pbtnSmoothLoop->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnLoop)); 
     //parent->Connect(m_pbtnClean->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnClean));  
     //parent->Connect(m_ptoggleLIC->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleLIC));*/     
 }
 
-void DatasetInfo::updatePropertiesSizer()
+void DatasetInfo::updatePropertiesPanel()
 {
-    SceneObject::updatePropertiesSizer();
+    SceneObject::updatePropertiesPanel();
     m_pToggleVisibility->SetValue(getShow());
     m_pToggleFiltering->SetValue(getShowFS());
     //m_ptoggleLIC->SetValue(getUseLIC());

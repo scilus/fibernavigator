@@ -63,18 +63,17 @@ EVT_TREE_ITEM_ACTIVATED  ( ID_TREE_CTRL,                    MainFrame::onActivat
 EVT_TREE_ITEM_RIGHT_CLICK( ID_TREE_CTRL,                    MainFrame::onRightClickTreeItem )
 EVT_TREE_END_LABEL_EDIT  ( ID_TREE_CTRL,                    MainFrame::onTreeLabelEdit      )
 
-//Interface events
-EVT_SIZE(                                                   MainFrame::onSize               )
+// Interface events
 EVT_MOUSE_EVENTS(                                           MainFrame::onMouseEvent         )
 EVT_CLOSE(                                                  MainFrame::onClose              )
 
-// mouse click in one of the three navigation windows
+// Mouse click in one of the four navigation windows
 EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 
-// slider events
+// Slider events
 EVT_SLIDER( ID_X_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
@@ -99,7 +98,7 @@ namespace
 #define CANVAS_SAG_HEIGHT   175
 
 #define LIST_WIDTH          268
-#define LIST_HEIGHT         125
+#define LIST_HEIGHT         200
 #define LIST_COL0_WIDTH     34
 #define LIST_COL1_WIDTH     160
 #define LIST_COL2_WIDTH     50
@@ -173,16 +172,13 @@ namespace
 #define FIBERS_INFO_GRID_TITLE_LABEL_SIZE      150
 
 
-MainFrame::MainFrame(wxWindow           *i_parent, 
-                     const wxWindowID   i_id, 
-                     const wxString     &i_title, 
-                     const wxPoint      &i_pos, 
-                     const wxSize       &i_size, 
-                     const long         i_style)
-:   wxFrame( i_parent, i_id, i_title, i_pos, i_size, i_style ),
+MainFrame::MainFrame( const wxString     &title, 
+                      const wxPoint      &pos, 
+                      const wxSize       &size )
+:   wxFrame( NULL, wxID_ANY, title, pos, size ),
     m_pToolBar( NULL ),
     m_pMenuBar( NULL ),
-    m_pCurrentSizer( NULL ),
+    m_pCurrentPanel( NULL ),
     m_pCurrentSceneObject( NULL ),
     m_pLastSelectedSceneObject( NULL ),
     m_currentListItem( -1 ),
@@ -200,43 +196,6 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     m_pLastSelectedObj( NULL )
 {
     wxImage::AddHandler(new wxPNGHandler);
-
-    //////////////////////////////////////////////////////////////////////////
-    // MyTreeCtrl initialization
-    m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT );
-    initMyTreeCtrl( m_pTreeWidget );
-
-    m_tRootId             = m_pTreeWidget->AddRoot( wxT( "Scene" ) );
-    m_tSelectionObjectsId = m_pTreeWidget->AppendItem( m_tRootId, wxT( "Selection Objects" ) );
-
-    //////////////////////////////////////////////////////////////////////////
-    // ListCtrl initialization
-    m_pListCtrl = new ListCtrl( this, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
-    initListCtrl( m_pListCtrl );
-
-    // Notebook initialization
-    m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
-
-    //////////////////////////////////////////////////////////////////////////
-    // PropertiesWindow initialization
-    m_pPropertiesWindow = new PropertiesWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), m_pListCtrl ); // Contains Scene Objects properties
-    m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
-    m_pPropertiesWindow->EnableScrolling( false, true );
-
-    //////////////////////////////////////////////////////////////////////////
-    // TrackingWindow initialization
-    m_pTrackingWindow = new TrackingWindow(m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) ); // Contains realtime tracking properties
-    m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
-    m_pTrackingWindow->EnableScrolling( false, true );
-
-    
-    m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
-    m_tab->AddPage( m_pTrackingWindow, wxT( "Realtime tracking" ) );
-
-    //////////////////////////////////////////////////////////////////////////
-    // OpenGL initialization
-    initOpenGl();
-
     //////////////////////////////////////////////////////////////////////////
     // initLayout
     initLayout();
@@ -259,9 +218,36 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     GetStatusBar()->Show(); 
 }
 
-
-void MainFrame::initOpenGl()
+void MainFrame::initLayout()
 {
+    //////////////////////////////////////////////////////////////////////////
+    // Panels & Boxes initialization
+    wxPanel *pPanMain  = new wxPanel( this );
+    pPanMain->SetBackgroundColour( wxColour( wxT( "BLACK" ) ) );
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *pBoxLeft = new wxBoxSizer( wxVERTICAL );
+
+    wxPanel *pPanSlices = new wxPanel( pPanMain );
+    pPanSlices->SetBackgroundColour( wxColour( wxT( "GREEN" ) ) );
+    wxBoxSizer *pBoxSlices = new wxBoxSizer( wxHORIZONTAL );
+    wxPanel *pPanAxial = new wxPanel( pPanSlices );
+    wxBoxSizer *pBoxAxial = new wxBoxSizer( wxVERTICAL );
+    wxPanel *pPanCor   = new wxPanel( pPanSlices );
+    wxBoxSizer *pBoxCor = new wxBoxSizer( wxVERTICAL );
+    wxPanel *pPanSag   = new wxPanel( pPanSlices );
+    wxBoxSizer *pBoxSag = new wxBoxSizer( wxVERTICAL );
+
+    wxBoxSizer *pBoxLowerLeft = new wxBoxSizer( wxHORIZONTAL );
+    wxPanel *pPanList  = new wxPanel( pPanMain );
+    pPanList->SetBackgroundColour( wxColour( wxT( "PINK" ) ) );
+    wxBoxSizer *pBoxList = new wxBoxSizer( wxVERTICAL );
+
+    wxPanel *pPanTab   = new wxPanel( pPanMain );
+    wxBoxSizer *pBoxTab = new wxBoxSizer( wxVERTICAL );
+
+    //////////////////////////////////////////////////////////////////////////
+    // OpenGL initialization
+
     Logger::getInstance()->print( wxT( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
 
 #ifdef __WXMSW__
@@ -276,12 +262,12 @@ void MainFrame::initOpenGl()
     #endif
 #endif
 
-    m_pMainGL = new MainCanvas( MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize, 0, _T( "MainGLCanvas" ), gl_attrib );
+    m_pMainGL = new MainCanvas( MAIN_VIEW, pPanMain, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize, 0, _T( "MainGLCanvas" ), gl_attrib );
 
 #ifndef CTX
-    m_pGL0 = new MainCanvas(    AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
-    m_pGL1 = new MainCanvas(  CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );
-    m_pGL2 = new MainCanvas( SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
+    m_pGL0 = new MainCanvas(    AXIAL, pPanAxial, ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
+    m_pGL1 = new MainCanvas(  CORONAL, pPanCor,   ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );
+    m_pGL2 = new MainCanvas( SAGITTAL, pPanSag,   ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
 #else
     m_pGL0 = new MainCanvas( axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGTH ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL->GetContext() );
     m_pGL1 = new MainCanvas( coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL->GetContext() );
@@ -299,73 +285,84 @@ void MainFrame::initOpenGl()
     SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
 #endif
 
-}
-
-void MainFrame::initLayout()
-{
     //////////////////////////////////////////////////////////////////////////
-    // Slider initialization
-    m_pXSlider  = new wxSlider( this, ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_SAG_WIDTH, SLIDER_SAG_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pYSlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_COR_WIDTH, SLIDER_COR_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pZSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_AXI_WIDTH, SLIDER_AXI_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    // 3 Nav Panels initialization
+    m_pXSlider  = new wxSlider( pPanSag,   ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_SAG_WIDTH, SLIDER_SAG_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pYSlider  = new wxSlider( pPanCor,   ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_COR_WIDTH, SLIDER_COR_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pZSlider  = new wxSlider( pPanAxial, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_AXI_WIDTH, SLIDER_AXI_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+    pBoxAxial->Add( m_pGL0,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
+    pBoxAxial->Add( m_pZSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
+    pPanAxial->SetSizer( pBoxAxial );
+
+    pBoxCor->Add( m_pGL1,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
+    pBoxCor->Add( m_pYSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
+    pPanCor->SetSizer( pBoxCor );
+
+    pBoxSag->Add( m_pGL2,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
+    pBoxSag->Add( m_pXSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
+    pPanSag->SetSizer( pBoxSag );
+
+    pBoxSlices->Add( pPanAxial, 0, wxALL, 0 );
+    pBoxSlices->Add( pPanCor,   0, wxALL, 0 );
+    pBoxSlices->Add( pPanSag,   0, wxALL, 0 );
+    pPanSlices->SetSizer( pBoxSlices );
+
+    pBoxLeft->Add( pPanSlices, 0, wxALL, 0 );
+    
+
+    ////////////////////////////////////////////////////////////////////////
+    // MyTreeCtrl initialization
+    m_pTreeWidget = new MyTreeCtrl( this, pPanList, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE );
+    initMyTreeCtrl( m_pTreeWidget );
+
+    m_tSelectionObjectsId = m_pTreeWidget->AddRoot( wxT( "Selection Objects" ) );
 
     //////////////////////////////////////////////////////////////////////////
-    // Sizer initialization
-    wxBoxSizer *xSzr       = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *ySzr       = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *zSzr       = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *axesSzr    = new wxBoxSizer( wxHORIZONTAL );
-    wxBoxSizer *lstSzr     = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *propSzr    = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *lwrLeftSzr = new wxBoxSizer( wxHORIZONTAL );
-    wxBoxSizer *leftSzr    = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *mainSzr    = new wxBoxSizer( wxHORIZONTAL );
+    // ListCtrl initialization
+    m_pListCtrl = new ListCtrl( pPanList, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    initListCtrl( m_pListCtrl );
 
-    xSzr->Add( m_pGL2,     0, wxALL | wxFIXED_MINSIZE, 2 );
-    xSzr->Add( m_pXSlider, 0, wxALL | wxFIXED_MINSIZE, 2 );
-    xSzr->SetMinSize( wxSize( SLIDER_SAG_WIDTH + 4, CANVAS_SAG_HEIGHT + 4 + 16 ) );
 
-    ySzr->Add( m_pGL1,     0, wxALL | wxFIXED_MINSIZE, 2 );
-    ySzr->Add( m_pYSlider, 0, wxALL | wxFIXED_MINSIZE, 2 );
-    ySzr->SetMinSize( wxSize( SLIDER_COR_WIDTH + 4, CANVAS_COR_HEIGHT + 4 + 16 ) );
+    //////////////////////////////////////////////////////////////////////////
+    // List Panel initialization
+    pBoxList->Add( (wxWindow *)m_pListCtrl, 0, wxFIXED_MINSIZE | wxALL, 2 );
+    pBoxList->Add( m_pTreeWidget, 1, wxEXPAND | wxALL, 2 );
+    pPanList->SetSizer( pBoxList );
 
-    zSzr->Add( m_pGL0,     0, wxALL | wxFIXED_MINSIZE, 2 );
-    zSzr->Add( m_pZSlider, 0, wxALL | wxFIXED_MINSIZE, 2 );
-    zSzr->SetMinSize( wxSize( SLIDER_AXI_WIDTH + 4, CANVAS_AXI_HEIGHT + 4 + 16 ) );
+    pBoxLowerLeft->Add( pPanList, 0, wxEXPAND | wxALL, 0 );
 
-    axesSzr->Add( zSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
-    axesSzr->Add( ySzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
-    axesSzr->Add( xSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
+    //////////////////////////////////////////////////////////////////////////
+    // Tab Control initialization
 
-//    lstSzr->Add( m_pListCtrl, 0, wxALL | wxFIXED_MINSIZE, 2 );
-    lstSzr->Add( (wxWindow *)m_pListCtrl, 0, wxALL | wxFIXED_MINSIZE, 2 );
-    lstSzr->Add( m_pTreeWidget, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
+    // Notebook initialization
+    m_tab = new wxNotebook( pPanTab, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
 
-    propSzr->Add( m_tab, 1, wxALL | wxEXPAND, 4 );
-    propSzr->SetMinSize( wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) );
-    //l_propSizer->Add(m_pTrackingWindow, 0, wxALL | wxEXPAND, 0);
-    //propSzr->Add( m_pPropertiesWindow, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 4 );
+    //////////////////////////////////////////////////////////////////////////
+    // PropertiesWindow initialization
+    m_pPropertiesWindow = new PropertiesWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), m_pListCtrl ); // Contains Scene Objects properties
+    m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pPropertiesWindow->EnableScrolling( false, true );
 
-    lwrLeftSzr->Add( lstSzr, 0, wxALL | wxFIXED_MINSIZE | wxEXPAND, 2 );
-    lwrLeftSzr->Add( propSzr, 1, wxALL | wxEXPAND, 2 );
+    //////////////////////////////////////////////////////////////////////////
+    // TrackingWindow initialization
+    m_pTrackingWindow = new TrackingWindow(m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) ); // Contains realtime tracking properties
+    m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pTrackingWindow->EnableScrolling( false, true );
 
-    leftSzr->Add( axesSzr, 0, wxALL | wxFIXED_MINSIZE, 2 );
-    leftSzr->Add( lwrLeftSzr, 1, wxALL | wxFIXED_MINSIZE | wxEXPAND, 0);
-    leftSzr->SetSizeHints( this );
+    m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
+    m_tab->AddPage( m_pTrackingWindow, wxT( "Realtime tracking" ) );
 
-    mainSzr->Add( leftSzr, 0, wxALL | wxFIXED_MINSIZE, 0 );
-    mainSzr->Add( m_pMainGL, 1, wxALL | wxEXPAND, 2 );
-    mainSzr->SetSizeHints( this );
+    pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
+    pPanTab->SetSizer( pBoxTab );
 
-    m_pPropertiesWindow->Fit();
-    m_pTrackingWindow->Fit();
-    //m_tab->Fit();
+    pBoxLowerLeft->Add( pPanTab, 1, wxEXPAND | wxALL, 0 );
 
-    SetSizer( mainSzr );
-    SetBackgroundColour( *wxLIGHT_GREY );
-    SetAutoLayout( true );
-    Layout();
-    Fit();
+    pBoxLeft->Add( pBoxLowerLeft, 1, wxEXPAND | wxBOTTOM, 0 );
+    
+    pBoxMain->Add( pBoxLeft, 0, wxEXPAND | wxBOTTOM, 0 );
+    pBoxMain->Add( m_pMainGL, 1, wxEXPAND | wxALL, 2 );
+    pPanMain->SetSizer( pBoxMain );
 }
 
 
@@ -613,16 +610,6 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -943,11 +930,11 @@ void MainFrame::onSelectEraser( wxCommandEvent& event )
 
 void MainFrame::deleteSceneObject()
 {
-    if (m_pCurrentSizer != NULL)
+    if (m_pCurrentPanel != NULL)
     {
-        m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer, true);
-        m_pPropertiesWindow->GetSizer()->Detach(m_pCurrentSizer);        
-        m_pCurrentSizer = NULL;
+        m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentPanel, true);
+        m_pPropertiesWindow->GetSizer()->Detach(m_pCurrentPanel);        
+        m_pCurrentPanel = NULL;
     }
     
     m_pCurrentSceneObject = NULL;
@@ -955,7 +942,7 @@ void MainFrame::deleteSceneObject()
     m_currentListItem = -1;
     m_lastSelectedListItem = -1;
     m_pPropertiesWindow->GetSizer()->Layout();
-    doOnSize();
+    //doOnSize();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1163,36 +1150,37 @@ void MainFrame::displayPropertiesSheet()
 {   
     if (m_pLastSelectedSceneObject == NULL && m_pCurrentSceneObject == NULL)
     {
-        if (m_pCurrentSizer != NULL)
+        if (m_pCurrentPanel != NULL)
         {
-           m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);
+           m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentPanel);
         }
     }
     else
     {
         if (m_pLastSelectedSceneObject != NULL)
         {       
-            if (m_pCurrentSizer != NULL )
+            if (m_pCurrentPanel != NULL )
             {
-                m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);                 
+                m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentPanel);                 
             }
-            if (!m_pLastSelectedSceneObject->getPropertiesSizer())
+            if( NULL == m_pLastSelectedSceneObject->getPropertiesPanel() )
             {
-                m_pLastSelectedSceneObject->createPropertiesSizer(m_pPropertiesWindow);
-            }   
-            m_pCurrentSizer = m_pLastSelectedSceneObject->getPropertiesSizer();
+                m_pLastSelectedSceneObject->createPropertiesPanel( m_pPropertiesWindow );
+                m_pPropertiesWindow->GetSizer()->Add( m_pLastSelectedSceneObject->getPropertiesPanel(), 1, wxFIXED_MINSIZE | wxEXPAND | wxALL, 0 );
+                m_pPropertiesWindow->Layout();
+                m_pPropertiesWindow->FitInside();
+            }
+            m_pCurrentPanel = m_pLastSelectedSceneObject->getPropertiesPanel();
             
             m_pCurrentSceneObject = m_pLastSelectedSceneObject;
+            m_pLastSelectedSceneObject = NULL;
             m_currentListItem = m_lastSelectedListItem;
-
-            if (!m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true ))
-            {
-                m_pPropertiesWindow->GetSizer()->Add(m_pCurrentSizer, 0, wxLeft | wxFIXED_MINSIZE, 0 );
-                m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );                
-            }             
-            doOnSize();            
+            m_lastSelectedListItem = -1;
+            
+            m_pPropertiesWindow->GetSizer()->Show( m_pCurrentPanel, true, true );
+            //doOnSize();            
         }        
-        m_pCurrentSceneObject->updatePropertiesSizer();
+        m_pCurrentSceneObject->updatePropertiesPanel();
         m_pLastSelectedSceneObject = NULL;
     }     
 }
@@ -1699,16 +1687,16 @@ void MainFrame::refreshAllGLWidgets()
 
 void MainFrame::refreshViews()
 {
-    m_tab->Fit();
-    m_tab->Layout();
-
-    m_pPropertiesWindow->Fit();
-    m_pPropertiesWindow->AdjustScrollbars();
-    m_pPropertiesWindow->Layout();
-
-    m_pTrackingWindow->Fit();
-    m_pTrackingWindow->AdjustScrollbars();
-    m_pTrackingWindow->Layout();
+//     m_tab->Fit();
+//     m_tab->Layout();
+// 
+//     m_pPropertiesWindow->Fit();
+//     m_pPropertiesWindow->AdjustScrollbars();
+//     m_pPropertiesWindow->Layout();
+// 
+//     m_pTrackingWindow->Fit();
+//     m_pTrackingWindow->AdjustScrollbars();
+//     m_pTrackingWindow->Layout();
 
 
     displayPropertiesSheet();
@@ -1732,7 +1720,6 @@ void MainFrame::refreshViews()
 
 //////////////////////////////////////////////////////////////////////////
 
-// TODO: Call this method when done loading
 void MainFrame::updateStatusBar()
 {
     GetStatusBar()->SetStatusText( wxString::Format( 
@@ -1762,6 +1749,8 @@ void MainFrame::onActivateListItem( wxListEvent& evt )
 
     refreshAllGLWidgets();
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 void MainFrame::deleteListItem()
 {
@@ -2092,7 +2081,7 @@ void MainFrame::setTimerSpeed()
 
 void MainFrame::onSize( wxSizeEvent& WXUNUSED(event) )
 {
-    doOnSize();
+    //doOnSize();
 }
 
 void MainFrame::doOnSize()

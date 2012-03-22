@@ -21,16 +21,30 @@
 
 IMPLEMENT_DYNAMIC_CLASS(PropertiesWindow, wxScrolledWindow)
 
-PropertiesWindow::PropertiesWindow( wxWindow *parent, MainFrame *mf, wxWindowID id, const wxPoint &pos, const wxSize &size, ListCtrl *lstCtrl )
-:   wxScrolledWindow( parent, id, pos, size, wxBORDER_NONE, _T( "test canvas" ) ),
-    m_pNotebook( parent ),
-    m_pMainFrame( mf ),
+BEGIN_EVENT_TABLE( PropertiesWindow, wxScrolledWindow )
+EVT_PAINT( PropertiesWindow::OnPaint )
+EVT_SIZE( PropertiesWindow::OnSize )
+END_EVENT_TABLE()
+
+PropertiesWindow::PropertiesWindow( wxWindow *pParent, MainFrame *pMainFrame, wxWindowID id, const wxPoint &pos, const wxSize &size, ListCtrl *lstCtrl )
+:   wxScrolledWindow( pParent, id, pos, size, wxBORDER_NONE, _T( "Properties Window" ) ),
+    m_pNotebook( pParent ),
+    m_pMainFrame( pMainFrame ),
     m_pListCtrl( lstCtrl )
 {
     SetBackgroundColour( *wxLIGHT_GREY );
     SetCursor( wxCursor( wxCURSOR_HAND ) );
     SetSizer( new wxBoxSizer( wxVERTICAL ) );
     SetAutoLayout( true );
+}
+
+void PropertiesWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
+{
+}
+
+void PropertiesWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
+{
+    wxPaintDC dc( this );
 }
 
 void PropertiesWindow::OnListItemDown( wxCommandEvent& WXUNUSED(event) )
@@ -309,10 +323,10 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
         DatasetInfo* l_current = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
-        float l_threshold = (float)l_current->m_psliderThresholdIntensity->GetValue() / 100.0f;
+        float l_threshold = (float)l_current->m_pSliderThresholdIntensity->GetValue() / 100.0f;
         l_current->setThreshold( l_threshold );
 
-        if( l_current->getType() == ISO_SURFACE && ! l_current->m_psliderThresholdIntensity->leftDown() )
+        if( l_current->getType() == ISO_SURFACE && ! l_current->m_pSliderThresholdIntensity->leftDown() )
         {
             CIsoSurface* s = (CIsoSurface*)l_current;
             s->GenerateWithThreshold();
@@ -340,7 +354,7 @@ void PropertiesWindow::OnSliderOpacityThresholdMoved( wxCommandEvent& WXUNUSED(e
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1 )
     {
         DatasetInfo* l_current = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
-        l_current->setAlpha( (float)l_current->m_psliderOpacity->GetValue() / 100.0f);
+        l_current->setAlpha( (float)l_current->m_pSliderOpacity->GetValue() / 100.0f);
         m_pMainFrame->refreshAllGLWidgets();
     }
 }
@@ -388,7 +402,7 @@ void PropertiesWindow::OnRename( wxCommandEvent& WXUNUSED(event) )
         if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
         {
             pInfo->setName( dialog.GetValue() + wxT( "." ) + ext );
-            pInfo->m_ptxtName->SetLabel( pInfo->getName() );
+            pInfo->m_pTxtName->SetLabel( pInfo->getName() );
 
             m_pListCtrl->UpdateSelected();
         }
@@ -1090,7 +1104,7 @@ void PropertiesWindow::OnGlyphMainAxisSelected( wxCommandEvent& event )
             ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->extractMaximas();
         }
         ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setDisplayShape( AXIS );
-        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->updatePropertiesSizer();
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->updatePropertiesPanel();
     }
 }
 

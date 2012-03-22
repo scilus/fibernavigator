@@ -26,6 +26,9 @@ class PropertiesWindow : public wxScrolledWindow
 public:
     PropertiesWindow( wxWindow *parent, MainFrame *mf, wxWindowID id, const wxPoint &pos, const wxSize &size, ListCtrl *lstCtrl );
 
+    void OnPaint( wxPaintEvent &event );
+    void OnSize( wxSizeEvent &event );
+
     void OnListItemUp                       ( wxCommandEvent& event );
     void OnListItemDown                     ( wxCommandEvent& event );
     void OnToggleVisibility                 ( wxCommandEvent& event );
@@ -154,6 +157,7 @@ private:
     ListCtrl  *m_pListCtrl;
     
     DECLARE_DYNAMIC_CLASS(PropertiesWindow)
+    DECLARE_EVENT_TABLE()
 };
 
 #endif // PROPERTIESWINDOW_H_

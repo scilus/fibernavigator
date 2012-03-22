@@ -441,35 +441,37 @@ void Mesh::draw()
     glCallList(m_GLuint);
 }
 
-void Mesh::createPropertiesSizer(PropertiesWindow *parent)
+void Mesh::createPropertiesPanel(PropertiesWindow *parent)
 {
-    DatasetInfo::createPropertiesSizer(parent);
+    DatasetInfo::createPropertiesPanel(parent);
 
-    m_pToggleCutFrontSector = new wxToggleButton(parent, wxID_ANY,wxT("Cut Front Sector"),wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->Add(m_pToggleCutFrontSector,0,wxALIGN_CENTER);
-    parent->Connect(m_pToggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
+    // FIXME: Sizer changes
 
-    wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pToggleUseColoring = new wxToggleButton(parent, wxID_ANY,wxT("Use Coloring"),wxDefaultPosition, wxSize(100,-1));
-    wxImage bmpColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
-    m_pBtnSelectColor = new wxBitmapButton(parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize(40,-1));
-    l_sizer->Add(m_pToggleUseColoring,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pBtnSelectColor,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pToggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleUseTex));
-    parent->Connect(m_pBtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
+//     m_pToggleCutFrontSector = new wxToggleButton(parent, wxID_ANY,wxT("Cut Front Sector"),wxDefaultPosition, wxSize(140,-1));
+//     m_propertiesPanel->Add(m_pToggleCutFrontSector,0,wxALIGN_CENTER);
+//     parent->Connect(m_pToggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
+// 
+//     wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pToggleUseColoring = new wxToggleButton(parent, wxID_ANY,wxT("Use Coloring"),wxDefaultPosition, wxSize(100,-1));
+//     wxImage bmpColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
+//     m_pBtnSelectColor = new wxBitmapButton(parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize(40,-1));
+//     l_sizer->Add(m_pToggleUseColoring,0,wxALIGN_CENTER);
+//     l_sizer->Add(m_pBtnSelectColor,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     parent->Connect(m_pToggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleUseTex));
+//     parent->Connect(m_pBtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
 }
 
-void Mesh::updatePropertiesSizer()
+void Mesh::updatePropertiesPanel()
 {
-    DatasetInfo::updatePropertiesSizer();
+    DatasetInfo::updatePropertiesPanel();
 
     m_pToggleFiltering->Enable(false);
     m_pToggleFiltering->SetValue(false);
     m_pToggleUseColoring->SetValue(!getUseTex());
     m_pToggleCutFrontSector->SetValue(!getShowFS());
-    m_psliderThresholdIntensity->SetValue(m_psliderThresholdIntensity->GetMin());
-    m_psliderThresholdIntensity->Enable(false);
+    m_pSliderThresholdIntensity->SetValue(m_pSliderThresholdIntensity->GetMin());
+    m_pSliderThresholdIntensity->Enable(false);
     
     // Disabled for the moment, not implemented.
     m_pBtnFlipX->Enable( false );

@@ -55,8 +55,8 @@ public:
     virtual GLuint getGLuint()                  = 0;
 
     // Virtual functions
-    virtual void createPropertiesSizer(PropertiesWindow *parent); 
-    virtual void updatePropertiesSizer();
+    virtual void createPropertiesPanel(PropertiesWindow *parent); 
+    virtual void updatePropertiesPanel();
     virtual bool save( wxString filename ) const { return false; }
     virtual bool save( wxXmlNode *node ) const;
 
@@ -111,14 +111,14 @@ public:
     // Trianglemesh
     TriangleMesh    *m_tMesh;
 
-    wxTextCtrl      *m_ptxtName;
-    MySlider        *m_psliderThresholdIntensity;
-    MySlider        *m_psliderOpacity;
+    wxTextCtrl      *m_pTxtName;
+    MySlider        *m_pSliderThresholdIntensity;
+    MySlider        *m_pSliderOpacity;
     wxToggleButton  *m_pToggleVisibility;
     wxToggleButton  *m_pToggleFiltering;
-    wxBitmapButton  *m_pbtnDelete;
-    wxBitmapButton  *m_pbtnUp;
-    wxBitmapButton  *m_pbtnDown;
+    wxBitmapButton  *m_pBtnDelete;
+    wxBitmapButton  *m_pBtnUp;
+    wxBitmapButton  *m_pBtnDown;
     wxButton        *m_pbtnSmoothLoop;
     wxButton        *m_pbtnClean;
     wxButton        *m_pBtnRename;

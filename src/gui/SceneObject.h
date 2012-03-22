@@ -22,13 +22,14 @@ public:
     SceneObject();
     virtual ~SceneObject();
     
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
-    virtual void updatePropertiesSizer() { }
+    virtual void createPropertiesPanel(PropertiesWindow *parent);
+    virtual void updatePropertiesPanel() { }
 
-    wxBoxSizer* getPropertiesSizer() { return m_propertiesSizer; }
+    wxPanel* getPropertiesPanel() const { return m_pPropertiesPanel; }
 
 public:
-    wxBoxSizer  *m_propertiesSizer;
+    wxPanel    *m_pPropertiesPanel;
+    wxBoxSizer *m_pPropertiesSizer;
 
 protected:
     void swap( SceneObject &s );

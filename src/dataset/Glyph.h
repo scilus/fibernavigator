@@ -64,8 +64,8 @@ public:
     float        getScalingFactor ()                        { return m_scalingFactor; };
 
     void         refreshSlidersValues();
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
-    virtual void updatePropertiesSizer();
+    virtual void createPropertiesPanel(PropertiesWindow *parent);
+    virtual void updatePropertiesPanel();
     int          getGlyphIndex       ( int i_zVoxel, int i_yVoxel, int i_xVoxel );
 
     virtual void       flipAxis( AxisType i_axe ){};

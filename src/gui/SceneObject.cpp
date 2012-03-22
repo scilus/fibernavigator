@@ -12,16 +12,20 @@
 #include "SceneObject.h"
 
 SceneObject::SceneObject()
-:   m_propertiesSizer( NULL )
+:   m_pPropertiesPanel( NULL ),
+    m_pPropertiesSizer( NULL )
 {
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void SceneObject::createPropertiesSizer( PropertiesWindow *parent )
+void SceneObject::createPropertiesPanel( PropertiesWindow *pParent )
 {
-    m_propertiesSizer = new wxBoxSizer( wxVERTICAL );
-    m_propertiesSizer->SetMinSize( wxSize(210,15));
+    m_pPropertiesPanel = new wxPanel( pParent );
+    wxBoxSizer *pPadding = new wxBoxSizer( wxHORIZONTAL );
+    m_pPropertiesSizer = new wxBoxSizer( wxVERTICAL );
+    pPadding->Add( m_pPropertiesSizer, 1, wxEXPAND | wxRIGHT | wxLEFT | wxALIGN_CENTER_HORIZONTAL, 16 );
+    m_pPropertiesPanel->SetSizer( pPadding );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -35,8 +39,4 @@ void SceneObject::swap( SceneObject &s )
 
 SceneObject::~SceneObject()
 {
-    if( NULL != m_propertiesSizer )
-    {
-        //delete m_propertiesSizer;
-    }
 }

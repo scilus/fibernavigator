@@ -655,142 +655,145 @@ void Glyph::setDisplayShape ( DisplayShape i_displayShape )
     m_displayShape = i_displayShape;    
 }
 
-void Glyph::createPropertiesSizer(PropertiesWindow *parent)
+void Glyph::createPropertiesPanel(PropertiesWindow *parent)
 {
-    DatasetInfo::createPropertiesSizer(parent);
-    wxSizer *l_sizer;
-    
-    m_psliderMinHueValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Min Hue" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderMinHueValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderMinHueValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphMinHueSliderMoved)); 
+    DatasetInfo::createPropertiesPanel(parent);
 
-    m_psliderMaxHueValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Max Hue" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderMaxHueValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);    
-    parent->Connect(m_psliderMaxHueValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphMaxHueSliderMoved)); 
+    // FIXME: Sizer changes
 
-    m_psliderSaturationValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Saturation" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderSaturationValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);  
-    parent->Connect(m_psliderSaturationValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphSaturationSliderMoved)); 
-
-    m_psliderLuminanceValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Luminance" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLuminanceValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLuminanceValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLuminanceSliderMoved)); 
-
-    m_psliderLightAttenuation  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light Attenuation" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLightAttenuation,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLightAttenuation->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightAttenuationSliderMoved)); 
-
-    m_psliderLightXPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light x Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLightXPosition,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLightXPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightXDirectionSliderMoved)); 
-
-    m_psliderLightYPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light y Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLightYPosition,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLightYPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightYDirectionSliderMoved));
-
-    m_psliderLightZPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light z Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLightZPosition,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLightZPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightZDirectionSliderMoved));
-
-    m_psliderDisplayValue  = new wxSlider( parent, wxID_ANY,   0, 1, 20, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Display" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderDisplayValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderDisplayValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphDisplaySliderMoved));
-
-    m_psliderScalingFactor  = new wxSlider( parent, wxID_ANY,   0, 1, 200, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Scaling Factor" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    m_psliderScalingFactor->SetValue(50);
-    l_sizer->Add(m_psliderScalingFactor,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderScalingFactor->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphScalingFactorSliderMoved));
-
-    m_psliderLODValue  = new wxSlider( parent, wxID_ANY, 0, 0, NB_OF_LOD - 1, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Details" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLODValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLODValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLODSliderMoved));
-
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Flips" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->AddSpacer(8);
-    m_ptoggleAxisFlipX = new wxToggleButton(parent, wxID_ANY, wxT("X"),wxDefaultPosition, wxSize(42,-1));    
-    l_sizer->Add(m_ptoggleAxisFlipX,0,wxALIGN_CENTER);
-    m_ptoggleAxisFlipY = new wxToggleButton(parent, wxID_ANY, wxT("Y"),wxDefaultPosition, wxSize(42,-1));
-    l_sizer->Add(m_ptoggleAxisFlipY,0,wxALIGN_CENTER);
-    m_ptoggleAxisFlipZ = new wxToggleButton(parent, wxID_ANY, wxT("Z"),wxDefaultPosition, wxSize(42,-1));
-    l_sizer->Add(m_ptoggleAxisFlipZ,0,wxALIGN_CENTER);
-    l_sizer->AddSpacer(8);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_ptoggleAxisFlipX->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphXAxisFlipChecked));
-    parent->Connect(m_ptoggleAxisFlipY->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphYAxisFlipChecked));
-    parent->Connect(m_ptoggleAxisFlipZ->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphZAxisFlipChecked));
-    m_ptoggleColorWithPosition = new wxToggleButton(parent, wxID_ANY, wxT("Color with Position"),wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->AddSpacer(8);
-    m_propertiesSizer->Add(m_ptoggleColorWithPosition,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleColorWithPosition->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphColorWithPosition));
-    
-    m_propertiesSizer->AddSpacer(8);
-    m_psizerDisplay = new wxBoxSizer(wxVERTICAL);    
-    m_psizerDisplay->Add(new wxStaticText( parent, wxID_ANY, _T( "Display" ), wxDefaultPosition, wxSize( 50, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(m_psizerDisplay,0,wxALIGN_LEFT);
-
-    m_psizerDisplay = new wxBoxSizer(wxVERTICAL);
-    m_pradiobtnNormal = new wxRadioButton(parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
-    m_psizerDisplay->Add(m_pradiobtnNormal);
-    m_pradiobtnMapOnSphere  = new wxRadioButton(parent, wxID_ANY, _T( "Map On Sphere" ), wxDefaultPosition, wxSize(132,-1));
-    m_psizerDisplay->Add(m_pradiobtnMapOnSphere);
-    m_pradiobtnMainAxis = new wxRadioButton(parent, wxID_ANY, _T( "Maximas" ), wxDefaultPosition, wxSize(132,-1));    
-    m_psizerDisplay->Add(m_pradiobtnMainAxis);
-    m_propertiesSizer->Add(m_psizerDisplay,0,wxALIGN_CENTER);
-
-
-    parent->Connect(m_pradiobtnNormal->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphNormalSelected));
-    parent->Connect(m_pradiobtnMapOnSphere->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphMapOnSphereSelected));
-    parent->Connect(m_pradiobtnMainAxis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphMainAxisSelected));
-    m_pradiobtnNormal->SetValue        (isDisplayShape(NORMAL));
-    m_pradiobtnMapOnSphere->SetValue   (isDisplayShape(SPHERE));
-    m_pradiobtnMainAxis->SetValue      (isDisplayShape(AXIS));
-
-    if(m_type == ODFS)
-        setColorWithPosition(true);
-
-
-
-    
+//     wxSizer *l_sizer;
+//     
+//     m_psliderMinHueValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Min Hue" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderMinHueValue,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     parent->Connect(m_psliderMinHueValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphMinHueSliderMoved)); 
+// 
+//     m_psliderMaxHueValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Max Hue" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderMaxHueValue,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);    
+//     parent->Connect(m_psliderMaxHueValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphMaxHueSliderMoved)); 
+// 
+//     m_psliderSaturationValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Saturation" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderSaturationValue,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);  
+//     parent->Connect(m_psliderSaturationValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphSaturationSliderMoved)); 
+// 
+//     m_psliderLuminanceValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Luminance" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderLuminanceValue,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_psliderLuminanceValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLuminanceSliderMoved)); 
+// 
+//     m_psliderLightAttenuation  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light Attenuation" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderLightAttenuation,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_psliderLightAttenuation->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightAttenuationSliderMoved)); 
+// 
+//     m_psliderLightXPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light x Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderLightXPosition,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_psliderLightXPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightXDirectionSliderMoved)); 
+// 
+//     m_psliderLightYPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light y Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderLightYPosition,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_psliderLightYPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightYDirectionSliderMoved));
+// 
+//     m_psliderLightZPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light z Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderLightZPosition,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_psliderLightZPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightZDirectionSliderMoved));
+// 
+//     m_psliderDisplayValue  = new wxSlider( parent, wxID_ANY,   0, 1, 20, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Display" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderDisplayValue,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_psliderDisplayValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphDisplaySliderMoved));
+// 
+//     m_psliderScalingFactor  = new wxSlider( parent, wxID_ANY,   0, 1, 200, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Scaling Factor" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     m_psliderScalingFactor->SetValue(50);
+//     l_sizer->Add(m_psliderScalingFactor,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_psliderScalingFactor->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphScalingFactorSliderMoved));
+// 
+//     m_psliderLODValue  = new wxSlider( parent, wxID_ANY, 0, 0, NB_OF_LOD - 1, wxDefaultPosition, wxSize( 140, -1 ));
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Details" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->Add(m_psliderLODValue,0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_psliderLODValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLODSliderMoved));
+// 
+//     l_sizer = new wxBoxSizer(wxHORIZONTAL);
+//     l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Flips" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     l_sizer->AddSpacer(8);
+//     m_ptoggleAxisFlipX = new wxToggleButton(parent, wxID_ANY, wxT("X"),wxDefaultPosition, wxSize(42,-1));    
+//     l_sizer->Add(m_ptoggleAxisFlipX,0,wxALIGN_CENTER);
+//     m_ptoggleAxisFlipY = new wxToggleButton(parent, wxID_ANY, wxT("Y"),wxDefaultPosition, wxSize(42,-1));
+//     l_sizer->Add(m_ptoggleAxisFlipY,0,wxALIGN_CENTER);
+//     m_ptoggleAxisFlipZ = new wxToggleButton(parent, wxID_ANY, wxT("Z"),wxDefaultPosition, wxSize(42,-1));
+//     l_sizer->Add(m_ptoggleAxisFlipZ,0,wxALIGN_CENTER);
+//     l_sizer->AddSpacer(8);
+//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER); 
+//     parent->Connect(m_ptoggleAxisFlipX->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphXAxisFlipChecked));
+//     parent->Connect(m_ptoggleAxisFlipY->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphYAxisFlipChecked));
+//     parent->Connect(m_ptoggleAxisFlipZ->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphZAxisFlipChecked));
+//     m_ptoggleColorWithPosition = new wxToggleButton(parent, wxID_ANY, wxT("Color with Position"),wxDefaultPosition, wxSize(140,-1));
+//     m_propertiesPanel->AddSpacer(8);
+//     m_propertiesPanel->Add(m_ptoggleColorWithPosition,0,wxALIGN_CENTER);
+//     parent->Connect(m_ptoggleColorWithPosition->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphColorWithPosition));
+//     
+//     m_propertiesPanel->AddSpacer(8);
+//     m_psizerDisplay = new wxBoxSizer(wxVERTICAL);    
+//     m_psizerDisplay->Add(new wxStaticText( parent, wxID_ANY, _T( "Display" ), wxDefaultPosition, wxSize( 50, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     m_propertiesPanel->Add(m_psizerDisplay,0,wxALIGN_LEFT);
+// 
+//     m_psizerDisplay = new wxBoxSizer(wxVERTICAL);
+//     m_pradiobtnNormal = new wxRadioButton(parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
+//     m_psizerDisplay->Add(m_pradiobtnNormal);
+//     m_pradiobtnMapOnSphere  = new wxRadioButton(parent, wxID_ANY, _T( "Map On Sphere" ), wxDefaultPosition, wxSize(132,-1));
+//     m_psizerDisplay->Add(m_pradiobtnMapOnSphere);
+//     m_pradiobtnMainAxis = new wxRadioButton(parent, wxID_ANY, _T( "Maximas" ), wxDefaultPosition, wxSize(132,-1));    
+//     m_psizerDisplay->Add(m_pradiobtnMainAxis);
+//     m_propertiesPanel->Add(m_psizerDisplay,0,wxALIGN_CENTER);
+// 
+// 
+//     parent->Connect(m_pradiobtnNormal->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphNormalSelected));
+//     parent->Connect(m_pradiobtnMapOnSphere->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphMapOnSphereSelected));
+//     parent->Connect(m_pradiobtnMainAxis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphMainAxisSelected));
+//     m_pradiobtnNormal->SetValue        (isDisplayShape(NORMAL));
+//     m_pradiobtnMapOnSphere->SetValue   (isDisplayShape(SPHERE));
+//     m_pradiobtnMainAxis->SetValue      (isDisplayShape(AXIS));
+// 
+//     if(m_type == ODFS)
+//         setColorWithPosition(true);
+// 
+// 
+// 
+//     
 
 }
 
-void Glyph::updatePropertiesSizer()
+void Glyph::updatePropertiesPanel()
 {
-    DatasetInfo::updatePropertiesSizer();
+    DatasetInfo::updatePropertiesPanel();
 
     m_psliderMinHueValue->SetValue     (getColor( MIN_HUE ) * 100);
     m_psliderMaxHueValue->SetValue     (getColor( MAX_HUE ) * 100);
