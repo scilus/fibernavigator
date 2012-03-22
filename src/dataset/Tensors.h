@@ -35,8 +35,8 @@ public:
 
     bool load     ( nifti_image *pHeader, nifti_image *pBody );
     void normalize();
-    virtual void createPropertiesPanel(PropertiesWindow *parent);
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void updatePropertiesSizer();
     
 private:
     wxRadioButton      *m_pradiobtnAxes;

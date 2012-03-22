@@ -441,7 +441,7 @@ void Mesh::draw()
     glCallList(m_GLuint);
 }
 
-void Mesh::createPropertiesPanel(PropertiesWindow *parent)
+void Mesh::createPropertiesSizer(PropertiesWindow *parent)
 {
     DatasetInfo::createPropertiesSizer(parent);
 
@@ -462,7 +462,7 @@ void Mesh::createPropertiesPanel(PropertiesWindow *parent)
 //     parent->Connect(m_pBtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
 }
 
-void Mesh::updatePropertiesPanel()
+void Mesh::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
 

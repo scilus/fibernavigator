@@ -942,7 +942,6 @@ void MainFrame::deleteSceneObject()
     m_currentListItem = -1;
     m_lastSelectedListItem = -1;
     m_pPropertiesWindow->GetSizer()->Layout();
-    //doOnSize();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1152,7 +1151,10 @@ void MainFrame::displayPropertiesSheet()
     {
         if (m_pCurrentSizer != NULL)
         {
-           m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);
+           if( !m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer ) )
+           {
+               Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+           }
         }
     }
     else
@@ -1161,11 +1163,16 @@ void MainFrame::displayPropertiesSheet()
         {       
             if (m_pCurrentSizer != NULL )
             {
-                m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);                 
+                if( !m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer ) )
+                {
+                    Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+                }
             }
             if( NULL == m_pLastSelectedSceneObject->getPropertiesSizer() )
             {
                 m_pLastSelectedSceneObject->createPropertiesSizer( m_pPropertiesWindow );
+                m_pPropertiesWindow->Layout();
+                m_pPropertiesWindow->FitInside();
             }
             m_pCurrentSizer = m_pLastSelectedSceneObject->getPropertiesSizer();
             
@@ -1175,7 +1182,6 @@ void MainFrame::displayPropertiesSheet()
             m_lastSelectedListItem = -1;
             
             m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
-            //doOnSize();            
         }        
         m_pCurrentSceneObject->updatePropertiesSizer();
         m_pPropertiesWindow->Layout();
@@ -2071,36 +2077,6 @@ void MainFrame::setTimerSpeed()
  *
  *
  ****************************************************************************************************/
-
-/****************************************************************************************************
- *
- * OnSize gets called when the size of the main window changes
- *
- ****************************************************************************************************/
-
-void MainFrame::onSize( wxSizeEvent& WXUNUSED(event) )
-{
-    //doOnSize();
-}
-
-void MainFrame::doOnSize()
-{
-    wxSize l_clientSize = this->GetClientSize();  
-    if( GetSizer() )
-    {
-        GetSizer()->SetDimension(0, 0, l_clientSize.x, l_clientSize.y );
-    }
-    if( m_pMainGL != NULL)
-    {
-        m_pMainGL->changeOrthoSize();
-    }
-
-    m_pPropertiesWindow->SetMinSize(wxSize(220, l_clientSize.y - 236));
-    m_pPropertiesWindow->GetSizer()->SetDimension(0,0,220, l_clientSize.y - 236);
-
-    m_pTrackingWindow->SetMinSize(wxSize(220, l_clientSize.y - 236));
-    m_pTrackingWindow->GetSizer()->SetDimension(0,0,220, l_clientSize.y - 236);
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // Gets called when a thread for the kdTree creation finishes this function

@@ -84,8 +84,8 @@ public:
 
     void    flipAxis( AxisType i_axe );
     
-    virtual void createPropertiesPanel( PropertiesWindow *pParent );
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer( PropertiesWindow *pParent );
+    virtual void updatePropertiesSizer();
 
 	bool isUsingFakeTubes()	const       { return m_useFakeTubes; };
 	bool isUsingTransparency() const    { return m_useTransparency; };

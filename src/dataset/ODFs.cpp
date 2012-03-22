@@ -118,11 +118,11 @@ bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
     float voxelY = DatasetManager::getInstance()->getVoxelY();
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
-    if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
-    {
-        Logger::getInstance()->print( wxT( "Voxel size different from anatomy." ), LOGLEVEL_ERROR );
-        return false;
-    }
+//     if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
+//     {
+//         Logger::getInstance()->print( wxT( "Voxel size different from anatomy." ), LOGLEVEL_ERROR );
+//         return false;
+//     }
 
     m_type = ODFS;
 
@@ -1347,7 +1347,7 @@ void ODFs::changeShBasis( SH_BASIS basis )
     if( tmp.load( pHeader, pBody ) )
     {
         swap( tmp );
-        updatePropertiesPanel();
+        updatePropertiesSizer();
     }
 
     nifti_image_free( pHeader );
@@ -1365,9 +1365,11 @@ void ODFs::setScalingFactor( float i_scalingFactor )
     loadBuffer();
 }
 
-void ODFs::createPropertiesPanel(PropertiesWindow *parent)
+void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    Glyph::createPropertiesPanel(parent);
+    Glyph::createPropertiesSizer( pParent );
+
+    setColorWithPosition( true );
 
     // FIXME: Sizer changes
 
@@ -1429,9 +1431,9 @@ void ODFs::createPropertiesPanel(PropertiesWindow *parent)
 //     
 }
 
-void ODFs::updatePropertiesPanel()
+void ODFs::updatePropertiesSizer()
 {
-    Glyph::updatePropertiesPanel();
+    Glyph::updatePropertiesSizer();
 
     //set to min.
     //m_pradiobtnMainAxis->Enable(false);

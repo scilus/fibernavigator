@@ -12,7 +12,8 @@
 #include "SceneObject.h"
 
 SceneObject::SceneObject()
-:   m_pPropertiesSizer( NULL )
+:   m_pPropertiesSizer( NULL ),
+    m_pBoxPadding( NULL )
 {
 }
 
@@ -20,10 +21,10 @@ SceneObject::SceneObject()
 
 void SceneObject::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    wxBoxSizer *pPadding = new wxBoxSizer( wxHORIZONTAL );
+    m_pBoxPadding = new wxBoxSizer( wxHORIZONTAL );
     m_pPropertiesSizer = new wxBoxSizer( wxVERTICAL );
-    pParent->GetSizer()->Add( pPadding, 0, wxEXPAND | wxALL, 1 );
-    pPadding->Add( m_pPropertiesSizer, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 16 );
+    pParent->GetSizer()->Add( m_pBoxPadding, 0, wxEXPAND | wxALL, 1 );
+    m_pBoxPadding->Add( m_pPropertiesSizer, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 16 );
 }
 
 //////////////////////////////////////////////////////////////////////////

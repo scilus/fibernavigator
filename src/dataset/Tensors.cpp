@@ -451,9 +451,9 @@ void Tensors::setScalingFactor( float i_scalingFactor )
     loadBuffer();
 }
 
-void Tensors::createPropertiesPanel(PropertiesWindow *pParent)
+void Tensors::createPropertiesSizer(PropertiesWindow *pParent)
 {
-    Glyph::createPropertiesPanel( pParent );
+    Glyph::createPropertiesSizer( pParent );
 
     // FIXME: Sizer changes
 
@@ -468,9 +468,9 @@ void Tensors::createPropertiesPanel(PropertiesWindow *pParent)
 //     
 }
 
-void Tensors::updatePropertiesPanel()
+void Tensors::updatePropertiesSizer()
 {
-    Glyph::updatePropertiesPanel();
+    Glyph::updatePropertiesSizer();
 
     m_pbtnNormalize->SetValue(m_isNormalized);
     

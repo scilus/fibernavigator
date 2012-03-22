@@ -84,8 +84,8 @@ public:
         return 0;
     };
 
-	virtual void createPropertiesPanel( PropertiesWindow *pParent );
-	virtual void updatePropertiesPanel();
+	virtual void createPropertiesSizer( PropertiesWindow *pParent );
+	virtual void updatePropertiesSizer();
 
 private: 
 	// Variables

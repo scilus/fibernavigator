@@ -102,8 +102,8 @@ public :
     void resizeUp();
     void select( bool i_flag );
     void update();
-    virtual void createPropertiesPanel(PropertiesWindow *parent);
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void updatePropertiesSizer();
     
     
     // Set/get and there affiliated functions

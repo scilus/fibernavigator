@@ -1127,7 +1127,7 @@ bool CIsoSurface::save( wxXmlNode *pNode ) const
 
 //////////////////////////////////////////////////////////////////////////
 
-void CIsoSurface::createPropertiesPanel(PropertiesWindow *parent)
+void CIsoSurface::createPropertiesSizer(PropertiesWindow *parent)
 {
     DatasetInfo::createPropertiesSizer(parent);
 
@@ -1148,7 +1148,7 @@ void CIsoSurface::createPropertiesPanel(PropertiesWindow *parent)
 //     parent->Connect( m_pbtnSelectColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
 }
 
-void CIsoSurface::updatePropertiesPanel()
+void CIsoSurface::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
     m_pToggleFiltering->Enable(false);

@@ -124,9 +124,9 @@ void DatasetInfo::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pBtnDown->GetId(),                  wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemDown ) );
     pParent->Connect( m_pBtnDelete->GetId(),                wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnDeleteListItem ) );
     pParent->Connect( m_pBtnRename->GetId(),                wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnRename ) );
-    pParent->Connect( m_pBtnFlipX->GetId(),                 wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnFlipX ) );
-    pParent->Connect( m_pBtnFlipY->GetId(),                 wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnFlipY ) );
-    pParent->Connect( m_pBtnFlipZ->GetId(),                 wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnFlipZ ) );
+    pParent->Connect( m_pBtnFlipX->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFlipX ) );
+    pParent->Connect( m_pBtnFlipY->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFlipY ) );
+    pParent->Connect( m_pBtnFlipZ->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFlipZ ) );
     pParent->Connect( m_pToggleVisibility->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleVisibility ) );
     pParent->Connect( m_pToggleFiltering->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
     pParent->Connect( m_pSliderThresholdIntensity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderIntensityThresholdMoved ) );

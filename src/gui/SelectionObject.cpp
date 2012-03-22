@@ -2011,7 +2011,7 @@ void SelectionObject::updateMeanFiberOpacity()
     setMeanFiberOpacity( ( m_psliderMeanFiberOpacity->GetValue() + (float)m_psliderMeanFiberOpacity->GetMin() ) / (float)m_psliderMeanFiberOpacity->GetMax() );
 }
 
-void SelectionObject::createPropertiesPanel(PropertiesWindow *parent)
+void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 {
     SceneObject::createPropertiesSizer(parent);
 
@@ -2268,7 +2268,7 @@ void SelectionObject::createPropertiesPanel(PropertiesWindow *parent)
 }
 
 
-void SelectionObject::updatePropertiesPanel()
+void SelectionObject::updatePropertiesSizer()
 {
     SceneObject::updatePropertiesSizer();
     m_ptoggleVisibility->SetValue( getIsVisible() );

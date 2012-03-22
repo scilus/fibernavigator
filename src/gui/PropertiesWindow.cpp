@@ -415,7 +415,7 @@ void PropertiesWindow::OnFlipX( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFlipX" ), LOGLEVEL_DEBUG );
 
-    ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->flipAxis(X_AXIS);
+    ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->flipAxis( X_AXIS );
 }
 
 void PropertiesWindow::OnFlipY( wxCommandEvent& WXUNUSED(event) )
@@ -1104,7 +1104,7 @@ void PropertiesWindow::OnGlyphMainAxisSelected( wxCommandEvent& event )
             ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->extractMaximas();
         }
         ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setDisplayShape( AXIS );
-        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->updatePropertiesPanel();
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->updatePropertiesSizer();
     }
 }
 

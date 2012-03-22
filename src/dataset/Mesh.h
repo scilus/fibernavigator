@@ -49,8 +49,8 @@ public:
     void smooth()                       { m_tMesh->doLoopSubD(); };
     virtual void flipAxis( AxisType i_axe ){};
     void activateLIC();
-    virtual void createPropertiesPanel(PropertiesWindow *parent);
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void updatePropertiesSizer();
 
     void setFiletype     ( int value )  { m_filetype      = value; };
     void setCountVerts   ( int value )  { m_countVerts    = value; };

@@ -287,7 +287,7 @@ void FibersGroup::useTransparency()
 	}
 }
 
-void FibersGroup::createPropertiesPanel( PropertiesWindow *pParent )
+void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 {
     DatasetInfo::createPropertiesSizer( pParent );
 
@@ -783,7 +783,7 @@ void FibersGroup::resetAllValues()
     m_pToggleNormalColoring->SetValue(false);
 }
 
-void FibersGroup::updatePropertiesPanel()
+void FibersGroup::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
 

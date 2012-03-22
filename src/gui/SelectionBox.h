@@ -27,8 +27,8 @@ public:
     // Function from SelectionObject (pure virtual)
     hitResult hitTest( Ray* i_ray );
 
-    virtual void createPropertiesPanel( PropertiesWindow *parent );
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer( PropertiesWindow *parent );
+    virtual void updatePropertiesSizer();
 
 private:
     // Function from SelectionObject (pure virtual)

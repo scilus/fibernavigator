@@ -167,8 +167,6 @@ private:
     int  treeSelected                       ( wxTreeItemId    id  ); 
     
     // System functions
-    void onSize                             ( wxSizeEvent&    evt );
-    void doOnSize();
     void onGLEvent                          ( wxCommandEvent& evt );    
     void onSliderMoved                      ( wxCommandEvent& evt );
     void onKdTreeThreadFinished             ( wxCommandEvent& evt );

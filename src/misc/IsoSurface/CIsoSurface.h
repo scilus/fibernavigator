@@ -45,8 +45,8 @@ public:
     virtual ~CIsoSurface();
 
     bool load(wxString filename) {return false;};
-    virtual void createPropertiesPanel(PropertiesWindow *parent);
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void updatePropertiesSizer();
     void draw();
     void clean();
     void smooth();

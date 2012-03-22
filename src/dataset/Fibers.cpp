@@ -3503,7 +3503,7 @@ void Fibers::flipAxis( AxisType i_axe )
     SceneManager::getInstance()->updateAllSelectionObjects();
 }
 
-void Fibers::createPropertiesPanel( PropertiesWindow *pParent )
+void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 {
     DatasetInfo::createPropertiesSizer( pParent );
 
@@ -3605,7 +3605,7 @@ void Fibers::createPropertiesPanel( PropertiesWindow *pParent )
 //     m_pRadioNormalColoring->SetValue( true );
 }
 
-void Fibers::updatePropertiesPanel()
+void Fibers::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
     m_pToggleFiltering->Enable( false );

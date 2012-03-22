@@ -37,8 +37,8 @@ public:
     bool save( wxXmlNode *pNode ) const;
 
     // Functions
-    virtual void createPropertiesPanel( PropertiesWindow *parent );
-    virtual void updatePropertiesPanel();
+    virtual void createPropertiesSizer( PropertiesWindow *parent );
+    virtual void updatePropertiesSizer();
     
     bool isShBasis( SH_BASIS i_sh_basis )               { return m_sh_basis == i_sh_basis; }
     std::vector< std::vector < float > > getCoeffs()    { return m_coefficients; }
