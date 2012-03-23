@@ -44,7 +44,7 @@ IMPLEMENT_APP( MyApp )
 
 
 
-
+/*
 class Border : public wxFrame
 {
 public:
@@ -114,7 +114,7 @@ public:
         Centre();
     }
 };
-
+*/
 
 
 
