@@ -53,7 +53,6 @@ public:
     void refreshViews();
     void screenshot                         ( const wxString &path, const wxString &filename );
     void onTreeChange();
-    void onMouseEvent                       ( wxMouseEvent&   evt );
     void onLoad                             ( wxCommandEvent& evt );
     long getCurrentListItem() const         { return m_currentListItem; }
 	void createNewAnatomy					( DatasetType dataType );
@@ -87,6 +86,7 @@ private:
     void onSaveDataset                      ( wxCommandEvent& evt );
     void onQuit                             ( wxCommandEvent& evt );
     void onClose                            ( wxCloseEvent&   evt );
+    void onSize                             ( wxSizeEvent& evt    );
     // View menu
     void onMenuViewReset                    ( wxCommandEvent& evt );
     void onMenuViewLeft                     ( wxCommandEvent& evt );

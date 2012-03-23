@@ -666,18 +666,18 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
-    m_pSliderMinHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100, wxDefPosition, wxSize( 120, -1 ) );
-    m_pSliderMaxHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderSaturation   = new wxSlider( pParent, wxID_ANY,  0,    0, 100, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderLuminance    = new wxSlider( pParent, wxID_ANY,  0,    0, 100, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderLightAttenuation  = new wxSlider( pParent, wxID_ANY,  0,    0, 100, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderLightXPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderLightYPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderLightZPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderDisplay      = new wxSlider( pParent, wxID_ANY,  0,    1,  20, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderScalingFactor     = new wxSlider( pParent, wxID_ANY, 50,    1, 200, wxDefPosition, wxSize( 80, -1 ) );
-    m_pSliderLOD          = new wxSlider( pParent, wxID_ANY,  0,    0, NB_OF_LOD - 1,      wxDefPosition, wxSize( 80, -1 ) );
-    m_pRadNormal          = new wxRadioButton( pParent,  wxID_ANY, wxT( "Normal" ),        wxDefPosition, wxDefSize, wxRB_GROUP );
+    m_pSliderMinHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100, wxDefPosition, wxSize( 150, -1 ) );
+    m_pSliderMaxHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
+    m_pSliderSaturation   = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
+    m_pSliderLuminance    = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
+    m_pSliderLightAttenuation  = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
+    m_pSliderLightXPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
+    m_pSliderLightYPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
+    m_pSliderLightZPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
+    m_pSliderDisplay      = new wxSlider( pParent, wxID_ANY,  0,    1,  20 );
+    m_pSliderScalingFactor     = new wxSlider( pParent, wxID_ANY, 50,    1, 200 );
+    m_pSliderLOD          = new wxSlider( pParent, wxID_ANY,  0,    0, NB_OF_LOD - 1 );
+    m_pRadNormal          = new wxRadioButton( pParent,  wxID_ANY, wxT( "Normal" ), wxDefPosition, wxDefSize, wxRB_GROUP );
     m_pRadMapOnSphere     = new wxRadioButton( pParent,  wxID_ANY, wxT( "Map On Sphere" ) );
     m_pRadMainAxis        = new wxRadioButton( pParent,  wxID_ANY, wxT( "Maximas" ) );
     m_pToggleAxisFlipX         = new wxToggleButton( pParent, wxID_ANY, wxT( "X" ), wxDefPosition, wxSize( 15, -1 ) );
@@ -705,22 +705,22 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Luminance" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderLuminance, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Attenuation" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Att." ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderLightAttenuation, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light X Position" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light X" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderLightXPosition, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Y Position" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Y" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderLightYPosition, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Z Position" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Z" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderLightZPosition, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Display" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderDisplay, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Scaling Factor" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Scaling" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderScalingFactor, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Details" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );

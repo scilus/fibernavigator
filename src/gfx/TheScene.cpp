@@ -89,11 +89,8 @@ TheScene::TheScene()
 {
     // Initialize those to 0.0f to make sure that by some really odd chance, they cannot
     // be initialized to the same values as the real projection and modelview matrix.
-    for( int i = 0; i < 16; ++i )
-    {
-        m_projection[i] = 0.0f;
-        m_modelview[i]  = 0.0f;
-    }
+    std::fill( m_projection, m_projection + 16, 0.0f );
+    std::fill( m_modelview, m_modelview + 16, 0.0f );
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -400,7 +397,7 @@ void TheScene::extractFrustum()
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
    normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[2][0] * SceneManager::getInstance()->m_frustum[2][0] + 
-                             SceneManager::getInstance()->m_frustum[2][1] * SceneManager::getInstance()->m_frustum[2][1   ] + 
+                             SceneManager::getInstance()->m_frustum[2][1] * SceneManager::getInstance()->m_frustum[2][1] + 
                              SceneManager::getInstance()->m_frustum[2][2] * SceneManager::getInstance()->m_frustum[2][2] );
    SceneManager::getInstance()->m_frustum[2][0] /= normalizationTerm;
    SceneManager::getInstance()->m_frustum[2][1] /= normalizationTerm;

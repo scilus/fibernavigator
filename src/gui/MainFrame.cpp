@@ -64,8 +64,8 @@ EVT_TREE_ITEM_RIGHT_CLICK( ID_TREE_CTRL,                    MainFrame::onRightCl
 EVT_TREE_END_LABEL_EDIT  ( ID_TREE_CTRL,                    MainFrame::onTreeLabelEdit      )
 
 // Interface events
-EVT_MOUSE_EVENTS(                                           MainFrame::onMouseEvent         )
 EVT_CLOSE(                                                  MainFrame::onClose              )
+EVT_SIZE(                                                   MainFrame::onSize               )
 
 // Mouse click in one of the four navigation windows
 EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
@@ -585,6 +585,15 @@ void MainFrame::onClose( wxCloseEvent& event )
 {
     this->m_pTimer->Stop();
     this->Destroy();
+}
+
+void MainFrame::onSize( wxSizeEvent& evt )
+{
+    if( NULL != m_pMainGL )
+    {
+        m_pMainGL->changeOrthoSize();
+    }
+    evt.Skip();
 }
 
 void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
@@ -2160,11 +2169,6 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
     }
     SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
     refreshAllGLWidgets();
-}
-
-void MainFrame::onMouseEvent( wxMouseEvent& WXUNUSED(event) )
-{
-    //this->Refresh();
 }
 
 void MainFrame::updateMenus()
