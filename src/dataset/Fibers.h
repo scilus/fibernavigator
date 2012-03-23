@@ -241,7 +241,6 @@ private:
 
 
     // GUI members
-    wxButton       *m_pGeneratesFibersDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
@@ -249,11 +248,11 @@ private:
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxToggleButton *m_pToggleCrossingFibers;
-    wxRadioButton  *m_pRadioNormalColoring;
-    wxRadioButton  *m_pRadioDistanceAnchoring;
-    wxRadioButton  *m_pRadioMinDistanceAnchoring;
-    wxRadioButton  *m_pRadioCurvature;
-    wxRadioButton  *m_pRadioTorsion;
+    wxRadioButton  *m_pRadNormalColoring;
+    wxRadioButton  *m_pRadDistanceAnchoring;
+    wxRadioButton  *m_pRadMinDistanceAnchoring;
+    wxRadioButton  *m_pRadCurvature;
+    wxRadioButton  *m_pRadTorsion;
 };
 
 #endif /* FIBERS_H_ */
