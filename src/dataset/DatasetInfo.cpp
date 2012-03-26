@@ -143,7 +143,7 @@ void DatasetInfo::createPropertiesSizer( PropertiesWindow *pParent )
     m_ptoggleLIC = new wxToggleButton(parent, wxID_ANY,wxT("LIC"),wxDefaultPosition, wxSize(60,-1));
     l_sizer->Add(m_ptoggleLIC,0,wxALIGN_CENTER);
     m_ptoggleLIC->Enable(m_dh->m_vectorsLoaded && (getType() == SURFACE || getType() == ISO_SURFACE));
-    m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+    m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
     //parent->Connect(m_pbtnSmoothLoop->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnLoop)); 
     //parent->Connect(m_pbtnClean->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnClean));  
     //parent->Connect(m_ptoggleLIC->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleLIC));*/     

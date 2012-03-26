@@ -2027,7 +2027,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     m_ptxtName->SetFont(l_font);
 //     l_sizer = new wxBoxSizer(wxHORIZONTAL);
 //     l_sizer->Add(m_ptxtName,0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 // 
 //     m_ptoggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(70,-1));
 //     m_ptoggleActivate = new wxToggleButton(parent, wxID_ANY, wxT("Activate"), wxDefaultPosition, wxSize(70, -1));
@@ -2037,7 +2037,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     l_sizer->Add(m_ptoggleVisibility,0,wxALIGN_CENTER);
 //     l_sizer->Add(m_ptoggleActivate,0,wxALIGN_CENTER);
 //     l_sizer->Add(m_pbtnDelete,0,wxALIGN_CENTER); 
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);   
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);   
 //     parent->Connect(m_ptoggleVisibility->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleShowSelectionObject));
 //     parent->Connect(m_ptoggleActivate->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxTreeEventHandler(PropertiesWindow::OnActivateTreeItem));
 //     parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(PropertiesWindow::OnDeleteTreeItem));
@@ -2047,7 +2047,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     m_ptoggleAndNot = new wxToggleButton(parent, wxID_ANY, wxT("And / Not"), wxDefaultPosition, wxSize(90,-1));
 //     l_sizer->Add(m_ptoggleAndNot,0,wxALIGN_CENTER);
 //     l_sizer->Add(m_pbtnChangeName,0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 //     parent->Connect(m_pbtnChangeName->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnRenameBox));
 //     parent->Connect(m_ptoggleAndNot->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleAndNot));
 // 
@@ -2057,32 +2057,32 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     wxImage bmpColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
 //     m_pbtnSelectColor = new wxBitmapButton(parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize(40,-1));
 //     l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 //     
 //     parent->Connect(m_pbtnFlipNormal->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnVoiFlipNormals));
 //     parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnColorRoi));
 // 
 //     m_pbtnSelectColorFibers = new wxButton(parent, wxID_ANY, wxT("Select Fibers Color"), wxDefaultPosition, wxSize(140,-1));
-//     m_propertiesPanel->Add(m_pbtnSelectColorFibers,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(m_pbtnSelectColorFibers,0,wxALIGN_CENTER);
 //     parent->Connect(m_pbtnSelectColorFibers->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
 //     
 //     m_pbtnNewFibersColorVolume = new wxButton(parent, wxID_ANY, wxT("New Color map"), wxDefaultPosition, wxSize(140,-1));
 //     m_pbtnNewFibersDensityVolume = new wxButton(parent, wxID_ANY, wxT("New Density map"), wxDefaultPosition, wxSize(140,-1));
-//     m_propertiesPanel->Add(m_pbtnNewFibersColorVolume,0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(m_pbtnNewFibersDensityVolume,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(m_pbtnNewFibersColorVolume,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(m_pbtnNewFibersDensityVolume,0,wxALIGN_CENTER);
 //     parent->Connect(m_pbtnNewFibersColorVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnCreateFibersColorTexture));
 //     parent->Connect(m_pbtnNewFibersDensityVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnCreateFibersDensityTexture));
 // 
 // 
 //     m_pbtnSetAsDistanceAnchor = new wxButton(parent, wxID_ANY, wxT("Set As Anchor"), wxDefaultPosition, wxSize(140,-1));
-//     m_propertiesPanel->Add(m_pbtnSetAsDistanceAnchor,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(m_pbtnSetAsDistanceAnchor,0,wxALIGN_CENTER);
 //     parent->Connect(m_pbtnSetAsDistanceAnchor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDistanceAnchorSet));
-//     m_propertiesPanel->AddSpacer(8);
+//     m_pPropertiesSizer->AddSpacer(8);
 //     
 //     m_ptoggleCalculatesFibersInfo = new wxToggleButton(parent, wxID_ANY, wxT("Calculate Fibers Stats"), wxDefaultPosition, wxSize(140,-1));
-//     m_propertiesPanel->Add(m_ptoggleCalculatesFibersInfo,0,wxALIGN_CENTER);      
+//     m_pPropertiesSizer->Add(m_ptoggleCalculatesFibersInfo,0,wxALIGN_CENTER);      
 //     parent->Connect(m_ptoggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayFibersInfo));
-//     m_propertiesPanel->AddSpacer(2);
+//     m_pPropertiesSizer->AddSpacer(2);
 // 
 //     // Initialize the grid.
 //     m_pgridfibersInfo = new wxGrid(parent, wxID_ANY );
@@ -2113,9 +2113,9 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     //m_pbtnDisplayCrossSections      = new wxButton(parent, wxID_ANY, wxT("Display Cross Section (C.S.)"), wxDefaultPosition, wxSize(140,-1));
 //     //m_pbtnDisplayDispersionTube     = new wxButton(parent, wxID_ANY, wxT("Display Dispersion Tube"), wxDefaultPosition, wxSize(140,-1));
 // 
-//     m_propertiesPanel->Add( m_pgridfibersInfo,0,wxALL,0);
+//     m_pPropertiesSizer->Add( m_pgridfibersInfo,0,wxALL,0);
 //     
-//     m_propertiesPanel->AddSpacer(2);
+//     m_pPropertiesSizer->AddSpacer(2);
 // 
 // // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // // Will have to be fixed.
@@ -2125,9 +2125,9 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     l_sizer = new wxBoxSizer(wxHORIZONTAL);
 //     l_sizer->Add( m_pLabelAnatomy, 0, wxALIGN_CENTER );
 //     l_sizer->Add( m_pCBSelectDataSet, 0, wxALIGN_CENTER );
-//     m_propertiesPanel->Add(l_sizer, 0, wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(l_sizer, 0, wxALIGN_CENTER);
 //     parent->Connect( m_pCBSelectDataSet->GetId(), wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMeanComboBoxSelectionChange ) );
-//     m_propertiesPanel->AddSpacer(2);
+//     m_pPropertiesSizer->AddSpacer(2);
 // #endif
 // 
 //     l_sizer = new wxBoxSizer( wxHORIZONTAL );
@@ -2135,10 +2135,10 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     wxImage bmpMeanFiberColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
 //     m_pbtnSelectMeanFiberColor = new wxBitmapButton(parent, wxID_ANY, bmpMeanFiberColor, wxDefaultPosition, wxSize(40,-1));
 //     l_sizer->Add(m_pbtnSelectMeanFiberColor,0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 // 
 //     //Mean fiber coloring option
-//     m_propertiesPanel->AddSpacer( 8 );
+//     m_pPropertiesSizer->AddSpacer( 8 );
 //     
 //     l_sizer = new wxBoxSizer( wxHORIZONTAL );
 //     m_plblColoring = new wxStaticText( parent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT );
@@ -2146,20 +2146,20 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     l_sizer->Add( 8, 1, 0 );
 //     m_pRadioCustomColoring = new wxRadioButton( parent, wxID_ANY, _T( "Custom" ), wxDefaultPosition, wxSize( 132, -1 ) );
 //     l_sizer->Add(m_pRadioCustomColoring);
-//     m_propertiesPanel->Add( l_sizer, 0, wxALIGN_CENTER );
+//     m_pPropertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
 // 
 //     m_pRadioNormalColoring = new wxRadioButton( parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
 //     l_sizer = new wxBoxSizer( wxHORIZONTAL );
 //     l_sizer->Add( 68, 1, 0 );
 //     l_sizer->Add( m_pRadioNormalColoring );
-//     m_propertiesPanel->Add( l_sizer, 0, wxALIGN_CENTER );
+//     m_pPropertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
 // 
 //     l_sizer = new wxBoxSizer( wxHORIZONTAL );
 //     m_pLblMeanFiberOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
 //     l_sizer->Add( m_pLblMeanFiberOpacity, 0, wxALIGN_CENTER );
 //     m_psliderMeanFiberOpacity = new wxSlider(parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 //     l_sizer->Add( m_psliderMeanFiberOpacity, 0, wxALIGN_CENTER );
-//     m_propertiesPanel->Add( l_sizer, 0, wxALIGN_CENTER );
+//     m_pPropertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
 //     m_meanFiberOpacity = 0.35f;
 // 
 //     parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
@@ -2172,8 +2172,8 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 // 
 // 
 // 
-//     //m_propertiesPanel->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
-//     //m_propertiesPanel->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
+//     //m_pPropertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
+//     //m_pPropertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
 // 
 //     //parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections));
 //     //parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
@@ -2187,7 +2187,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     m_pbtnSelectConvexHullColor = new wxBitmapButton( parent, wxID_ANY, bmpConvexHullColor, wxDefaultPosition, wxSize(40,-1) );
 //     l_sizer->Add(m_pbtnSelectConvexHullColor);
 // 
-//     m_propertiesPanel->Add(l_sizer);
+//     m_pPropertiesSizer->Add(l_sizer);
 //     parent->Connect( m_ptoggleDisplayConvexHull->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
 //     parent->Connect( m_pbtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
 // 
@@ -2196,7 +2196,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     l_sizer->Add( m_plblConvexHullOpacity, 0, wxALIGN_CENTER );
 //     m_pSliderConvexHullOpacity = new wxSlider( parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 //     l_sizer->Add( m_pSliderConvexHullOpacity, 0, wxALIGN_CENTER );
-//     m_propertiesPanel->Add( l_sizer, 0, wxALIGN_CENTER );
+//     m_pPropertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
 //     m_convexHullOpacity = 0.35f;
 //     parent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
 // 
@@ -2207,13 +2207,13 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     m_pbtnSelectColor->Enable(m_objectType == CISO_SURFACE_TYPE);
 //     m_pbtnSetAsDistanceAnchor->Enable(m_objectType == CISO_SURFACE_TYPE);
 // 
-//     m_propertiesPanel->Add(new wxStaticText( parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(200,15)));
+//     m_pPropertiesSizer->Add(new wxStaticText( parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(200,15)));
 // 
 //     l_sizer = new wxBoxSizer(wxHORIZONTAL);
 //     
 //     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Position"),wxDefaultPosition, wxSize(140,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
-//     m_propertiesPanel->AddSpacer(1);
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->AddSpacer(1);
 //     
 //     l_sizer = new wxBoxSizer(wxHORIZONTAL);
 //     m_ctrlBoxX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.x), wxDefaultPosition, wxSize(45,-1));
@@ -2230,16 +2230,16 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
 //     l_sizer->Add(m_ctrlBoxZ,0,wxALIGN_CENTER);
 // 
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 //     parent->Connect(m_ctrlBoxX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionX));
 //     parent->Connect(m_ctrlBoxY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionY));
 //     parent->Connect(m_ctrlBoxZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionZ));
 //     
-//     m_propertiesPanel->AddSpacer(8);
+//     m_pPropertiesSizer->AddSpacer(8);
 //     l_sizer = new wxBoxSizer(wxHORIZONTAL);
 //     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Size"),wxDefaultPosition, wxSize(140,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
-//     m_propertiesPanel->AddSpacer(1);
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->AddSpacer(1);
 // 
 //     float voxelX = DatasetManager::getInstance()->getVoxelX();
 //     float voxelY = DatasetManager::getInstance()->getVoxelY();
@@ -2260,7 +2260,7 @@ void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
 //     l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
 //     l_sizer->Add(m_ctrlBoxSizeZ,0,wxALIGN_CENTER);
 // 
-//     m_propertiesPanel->Add(l_sizer,0,wxALIGN_CENTER);
+//     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
 //     parent->Connect(m_ctrlBoxSizeX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeX));
 //     parent->Connect(m_ctrlBoxSizeY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeY));
 //     parent->Connect(m_ctrlBoxSizeZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeZ));
