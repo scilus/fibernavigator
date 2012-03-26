@@ -262,19 +262,19 @@ void PropertiesWindow::OnClickGenerateFiberVolumeBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnClickGenerateFiberVolumeBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListItem != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if(pFibersGroup)
-			{
-				pFibersGroup->OnClickGenerateFiberVolumeBtn();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if(pFibersGroup)
+            {
+                pFibersGroup->OnClickGenerateFiberVolumeBtn();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleShowFS( wxEvent& WXUNUSED(event) )

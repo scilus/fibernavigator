@@ -139,6 +139,10 @@ Anatomy::Anatomy( const int type )
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
+    m_columns = DatasetManager::getInstance()->getColumns();
+    m_rows    = DatasetManager::getInstance()->getRows();
+    m_frames  = DatasetManager::getInstance()->getFrames();
+
     if(type == RGB)
     {
         m_bands         = 3;
@@ -153,8 +157,7 @@ Anatomy::Anatomy( const int type )
         m_isLoaded      = true;   
         m_type          = type;
 
-        m_floatDataset.resize( m_columns * m_frames * m_rows );
-        fill( m_floatDataset.begin(), m_floatDataset.end(), 0.0f );
+        m_floatDataset.resize( m_columns * m_frames * m_rows, 0.0f );
     }
     else
     {

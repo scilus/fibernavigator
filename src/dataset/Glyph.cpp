@@ -674,7 +674,7 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderLightXPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
     m_pSliderLightYPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
     m_pSliderLightZPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
-    m_pSliderDisplay      = new wxSlider( pParent, wxID_ANY,  0,    1,  20 );
+    m_pSliderDisplay           = new wxSlider( pParent, wxID_ANY,  0,    1,  20 );
     m_pSliderScalingFactor     = new wxSlider( pParent, wxID_ANY, 50,    1, 200 );
     m_pSliderLOD          = new wxSlider( pParent, wxID_ANY,  0,    0, NB_OF_LOD - 1 );
     m_pRadNormal          = new wxRadioButton( pParent,  wxID_ANY, wxT( "Normal" ), wxDefPosition, wxDefSize, wxRB_GROUP );

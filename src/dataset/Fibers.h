@@ -143,7 +143,7 @@ public:
 	
 	void	updateSliderThickness( int value )
 	{
-		m_pSliderCrossingFibersThickness->SetValue( value );
+		m_pSliderInterFibersThickness->SetValue( value );
 	}
     
     // Empty derived methods
@@ -155,7 +155,7 @@ public:
     void    generateGeometry() {};
     void    smooth()           {};
 
-    void    toggleCrossingFibers() { m_useCrossingFibers = !m_useCrossingFibers; }
+    void    toggleCrossingFibers() { m_useIntersectedFibers = !m_useIntersectedFibers; }
     void    updateCrossingFibersThickness();
 
 private:
@@ -231,7 +231,7 @@ private:
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
-    bool            m_useCrossingFibers;
+    bool            m_useIntersectedFibers;
     float           m_thickness;
     float           m_xDrawn;
     float           m_yDrawn;
@@ -244,7 +244,7 @@ private:
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
-    wxSlider       *m_pSliderCrossingFibersThickness;
+    wxSlider       *m_pSliderInterFibersThickness;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxToggleButton *m_pToggleCrossingFibers;

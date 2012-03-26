@@ -24,115 +24,105 @@ public:
     FibersGroup();
     // TODO copy constructors: should they be allowed?
     virtual ~FibersGroup();
-    
-	void	addFibersSet(Fibers* pFibers);
-	Fibers* getFibersSet(int num);
 
-	int		getFibersCount() { return (int)m_fibersSets.size(); };
+    bool    isOneBtnToggled()
+    {
+        return m_isIntensityToggled && m_isOpacityToggled && m_isMinMaxLengthToggled 
+               && m_isSubsamplingToggled && m_isColorModeToggled;
+    }
 
-	bool	isOneBtnToggled()
-	{
-		return m_isIntensityToggled && m_isOpacityToggled && m_isMinMaxLengthToggled 
-			   && m_isSubsamplingToggled && m_isColorModeToggled;
-	}
-
-	void    save( wxString filename );
+    void    save( wxString filename );
     bool    save( wxXmlNode *pNode ) const;
 
     void    saveDMRI( wxString filename );
 
     void    updateGroupFilters();
-	void	resetFibersColor();
-	void	invertFibers();
-	void	useFakeTubes();
-	void	useTransparency();
+    void    resetFibersColor();
+    void    invertFibers();
+    void    useFakeTubes();
+    void    useTransparency();
     
     void    resetAllValues();
 
-	void	fibersLocalColoring();
-	void	fibersNormalColoring();
-	
-	void	generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies);
+    void    fibersLocalColoring();
+    void    fibersNormalColoring();
 
-	void	OnToggleVisibleBtn();
-	void	OnToggleIntensityBtn();
-	void	OnToggleOpacityBtn();
-	void	OnToggleMinMaxLengthBtn();
-	void	OnToggleSubsamplingBtn();
-	void	OnToggleCrossingFibersBtn();
-	void	OnToggleColorModeBtn();
-	void	OnToggleLocalColoring();
-	void	OnToggleNormalColoring();
-	void	OnClickGenerateFiberVolumeBtn();
-	void	OnClickApplyBtn();
-	void	OnClickCancelBtn();
-	
-	// Empty derived methods
-	bool    load( wxString  filename ) { return false; };
-	void    draw()						{};
-	void    smooth()					{};
-	void	flipAxis( AxisType i_axe )	{};
-    void    activateLIC()				{};
-    void    clean()						{};
-    void    drawVectors()				{};
-    void    generateTexture()			{};
-    void    generateGeometry()			{};
-	void    initializeBuffer()			{};
-	
-	GLuint  getGLuint( )
-    {
-        return 0;
-    };
+    void    generateGlobalFiberVolume(std::vector<Anatomy*> vAnatomies);
 
-	virtual void createPropertiesSizer( PropertiesWindow *pParent );
-	virtual void updatePropertiesSizer();
+    void    OnToggleVisibleBtn();
+    void    OnToggleIntensityBtn();
+    void    OnToggleOpacityBtn();
+    void    OnToggleMinMaxLengthBtn();
+    void    OnToggleSubsamplingBtn();
+    void    OnToggleCrossingFibersBtn();
+    void    OnToggleColorModeBtn();
+    void    OnToggleLocalColoring();
+    void    OnToggleNormalColoring();
+    void    OnClickGenerateFiberVolumeBtn();
+    void    OnClickApplyBtn();
+    void    OnClickCancelBtn();
+
+    // Empty derived methods
+    bool    load( wxString  filename ) { return false; };
+    void    draw()                      {};
+    void    smooth()                    {};
+    void    flipAxis( AxisType i_axe )  {};
+    void    activateLIC()               {};
+    void    clean()                     {};
+    void    drawVectors()               {};
+    void    generateTexture()           {};
+    void    generateGeometry()          {};
+    void    initializeBuffer()          {};
+
+    GLuint  getGLuint( ) { return 0; };
+
+    virtual void createPropertiesSizer( PropertiesWindow *pParent );
+    virtual void updatePropertiesSizer();
 
 private: 
-	// Variables
-	std::vector<Fibers*> m_fibersSets;
+    // Variables
+    bool m_isIntensityToggled;
+    bool m_isOpacityToggled;
+    bool m_isMinMaxLengthToggled;
+    bool m_isSubsamplingToggled;
+    bool m_isColorModeToggled;
+    bool m_isCrossingFibersToggled;
 
-	bool m_isIntensityToggled;
-	bool m_isOpacityToggled;
-	bool m_isMinMaxLengthToggled;
-	bool m_isSubsamplingToggled;
-	bool m_isColorModeToggled;
-	bool m_isCrossingFibersToggled;
+    bool m_isNormalColoringStateChanged;
+    bool m_isLocalColoringStateChanged;
 
-	bool m_isNormalColoringStateChanged;
-	bool m_isLocalColoringStateChanged;
+    std::string intToString( const int number );
 
-	std::string intToString( const int number );
-    
     // GUI members
-	wxToggleButton *m_ptoggleIntensity;
-	wxToggleButton *m_ptoggleOpacity;
-	wxToggleButton *m_ptoggleMinMaxLength;
-	wxToggleButton *m_ptoggleSubsampling;
-	wxToggleButton *m_ptoggleColorMode;
+    wxButton *m_pBtnIntensity;
+    wxButton *m_pBtnOpacity;
+    wxButton *m_pBtnMinMaxLength;
+    wxButton *m_pBtnSubsampling;
+    wxButton *m_pBtnColorMode;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
-	wxToggleButton *m_pToggleCrossingFibers;
+    wxToggleButton *m_pToggleInterFibers;
 
-	wxButton	   *m_pApplyBtn;
-	wxButton	   *m_pCancelBtn;
+    wxButton       *m_pApplyBtn;
+    wxButton       *m_pCancelBtn;
 
-	wxButton       *m_pGeneratesFibersDensityVolume;
+    wxButton       *m_pBtnGeneratesDensityVolume;
     wxSlider       *m_pSliderFibersFilterMin;
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
-	wxSlider	   *m_pSliderThickness;
-	wxRadioButton  *m_pRadioNormalColoring;
-    wxRadioButton  *m_pRadioDistanceAnchoring;
-    wxRadioButton  *m_pRadioMinDistanceAnchoring;
-    wxRadioButton  *m_pRadioCurvature;
-    wxRadioButton  *m_pRadioTorsion;
+    wxSlider       *m_pSliderInterFibersThickness;
+    wxRadioButton  *m_pRadNormalColoring;
+    wxRadioButton  *m_pRadDistanceAnchoring;
+    wxRadioButton  *m_pRadMinDistanceAnchoring;
+    wxRadioButton  *m_pRadCurvature;
+    wxRadioButton  *m_pRadTorsion;
 
-	wxStaticText	*m_pMinLengthText;
-	wxStaticText	*m_pMaxLengthText;
-	wxStaticText	*m_pSubsamplingText;
-	wxStaticText	*m_pColorModeText;
-	wxStaticText	*m_pColoringText;
-	wxStaticText    *m_pThicknessText;
+    wxStaticText    *m_pLblMinLength;
+    wxStaticText    *m_pLblMaxLength;
+    wxStaticText    *m_pLblSubsampling;
+    wxStaticText    *m_pColorModeText;
+    wxStaticText    *m_pLblColoring;
+    wxStaticText    *m_pLblThickness;
 };
 
 #endif /* FIBERSGROUP_H_ */

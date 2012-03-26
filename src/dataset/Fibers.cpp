@@ -80,7 +80,7 @@ Fibers::Fibers()
     m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
     m_coronalShown(  SceneManager::getInstance()->isCoronalDisplayed() ),
     m_sagittalShown( SceneManager::getInstance()->isSagittalDisplayed() ),
-    m_useCrossingFibers( false ),
+    m_useIntersectedFibers( false ),
     m_thickness( 2.5f ),
     m_xDrawn( 0.0f ),
     m_yDrawn( 0.0f ),
@@ -90,7 +90,7 @@ Fibers::Fibers()
     m_pSliderFibersFilterMin( NULL ),
     m_pSliderFibersFilterMax( NULL ),
     m_pSliderFibersSampling( NULL ),
-    m_pSliderCrossingFibersThickness( NULL ),
+    m_pSliderInterFibersThickness( NULL ),
     m_pToggleLocalColoring( NULL ),
     m_pToggleNormalColoring( NULL ),
     m_pToggleCrossingFibers( NULL ),
@@ -1606,13 +1606,13 @@ void Fibers::updateFibersColors()
     }
     else
     {
-		float *pColorData( NULL );
-		
-		if( SceneManager::getInstance()->isUsingVBO() )
-		{
-			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-		}
+        float *pColorData( NULL );
+
+        if( SceneManager::getInstance()->isUsingVBO() )
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        }
         else
         {
             pColorData  = &m_colorArray[0];
@@ -2041,7 +2041,7 @@ Anatomy* Fibers::generateFiberVolume()
         m_localizedAlpha = vector< float >( getPointCount(), 1 );
     }
 
-    int index = DatasetManager::getInstance()->createAnatomy( RGB );
+    DatasetIndex index = DatasetManager::getInstance()->createAnatomy( RGB );
     Anatomy *pTmpAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
     pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
     
@@ -2887,7 +2887,7 @@ void Fibers::draw()
 
     // If geometry shaders are supported, the shader will take care of the filtering
     // Otherwise, use the drawCrossingFibers
-    if ( !SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
+    if ( !SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
         drawCrossingFibers();
         return;
@@ -2993,7 +2993,7 @@ void Fibers::drawFakeTubes()
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     }
 
-    if ( m_useCrossingFibers )
+    if ( m_useIntersectedFibers )
     {
         findCrossingFibers();
 
@@ -3520,11 +3520,11 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, wxDefPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderCrossingFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    wxButton *pGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
-    m_pToggleLocalColoring  = new wxToggleButton(     pParent, wxID_ANY, wxT( "Local Coloring" ) );
-    m_pToggleNormalColoring = new wxToggleButton(     pParent, wxID_ANY, wxT( "Color With Overlay" ) );
-    m_pToggleCrossingFibers = new wxToggleButton(     pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
+    m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
+    m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
+    m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
+    m_pToggleCrossingFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
     m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), wxDefPosition, wxDefSize, wxRB_GROUP );
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
     m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
@@ -3545,13 +3545,13 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders->Add( m_pSliderFibersSampling, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Thickness" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderCrossingFibersThickness, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( m_pSliderInterFibersThickness, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
 
     //////////////////////////////////////////////////////////////////////////
 
-    pBoxMain->Add( pGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
     pBoxMain->Add( m_pToggleLocalColoring,  0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
     pBoxMain->Add( m_pToggleNormalColoring, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
     pBoxMain->Add( m_pToggleCrossingFibers, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
@@ -3580,8 +3580,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMin->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersFilterMax->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersSampling->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
-    pParent->Connect( m_pSliderCrossingFibersThickness->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
-    pParent->Connect( pGeneratesDensityVolume->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
+    pParent->Connect( m_pSliderInterFibersThickness->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
+    pParent->Connect( pBtnGeneratesDensityVolume->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),           wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
     pParent->Connect( m_pToggleCrossingFibers->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleCrossingFibers ) );
@@ -3599,7 +3599,7 @@ void Fibers::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
 
     m_pSliderOpacity->Enable( false );
-    m_pSliderCrossingFibersThickness->Enable( m_useCrossingFibers );
+    m_pSliderInterFibersThickness->Enable( m_useIntersectedFibers );
     m_pToggleFiltering->Enable( false );
     m_pToggleCrossingFibers->Enable( true );
     m_pRadNormalColoring->Enable(       getShowFS() );
@@ -3609,7 +3609,7 @@ void Fibers::updatePropertiesSizer()
     m_pRadTorsion->Enable(              getShowFS() );
 
     m_pToggleFiltering->SetValue( false );
-    m_pToggleCrossingFibers->SetValue( m_useCrossingFibers );
+    m_pToggleCrossingFibers->SetValue( m_useIntersectedFibers );
     m_pSliderOpacity->SetValue( m_pSliderOpacity->GetMin() );
     m_pToggleNormalColoring->SetValue( !getShowFS() );
     m_pSliderThresholdIntensity->SetValue( getThreshold() * 100 );
@@ -3684,9 +3684,9 @@ void Fibers::updatePropertiesSizer()
 
 void Fibers::updateCrossingFibersThickness() 
 {
-    if ( NULL != m_pSliderCrossingFibersThickness )
+    if ( NULL != m_pSliderInterFibersThickness )
     {
-        m_thickness = m_pSliderCrossingFibersThickness->GetValue() * 0.25f; 
+        m_thickness = m_pSliderInterFibersThickness->GetValue() * 0.25f; 
         m_cfDrawDirty = true;
     }
 }
@@ -3791,7 +3791,7 @@ void Fibers::setShader()
         ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
         ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "thickness", GLfloat( 3.175 ) );
     }
-    else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
+    else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
         // Determine X, Y and Z range
         const float xMin( SceneManager::getInstance()->getSliceX() + 0.5f - m_thickness );
@@ -3828,7 +3828,7 @@ void Fibers::releaseShader()
     {
         ShaderHelper::getInstance()->getFakeTubesShader()->release();
     }
-    else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useCrossingFibers )
+    else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
         ShaderHelper::getInstance()->getCrossingFibersShader()->release();
     }
