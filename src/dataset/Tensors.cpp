@@ -78,11 +78,11 @@ bool Tensors::load( nifti_image *pHeader, nifti_image *pBody )
     float voxelY = DatasetManager::getInstance()->getVoxelY();
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
-    if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
-    {
-        Logger::getInstance()->print( wxT( "Voxel size different from anatomy." ), LOGLEVEL_ERROR );
-        return false;
-    }
+//     if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
+//     {
+//         Logger::getInstance()->print( wxT( "Voxel size different from anatomy." ), LOGLEVEL_ERROR );
+//         return false;
+//     }
 
     m_type = TENSORS;
 
@@ -455,24 +455,34 @@ void Tensors::createPropertiesSizer(PropertiesWindow *pParent)
 {
     Glyph::createPropertiesSizer( pParent );
 
-    // FIXME: Sizer changes
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
-//     m_pbtnNormalize = new wxToggleButton( pPanTensors, wxID_ANY, wxT( "Normalize" ), wxDefaultPosition, wxSize( 140, -1 ) );    
-//     pParent->Connect( m_pbtnNormalize->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnNormalizeTensors ) );
-//     pBoxTensors->Add( m_pbtnNormalize, 0, wxALIGN_CENTER );
-// 
-//     m_pradiobtnAxes  = new wxRadioButton(parent, wxID_ANY, _T( "Tensors Axes" ), wxDefaultPosition, wxSize(132,-1));    
-//     m_psizerDisplay->Add(m_pradiobtnAxes);
-//     parent->Connect(m_pradiobtnAxes->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphAxesSelected));
-//     m_pradiobtnAxes->SetValue          (isDisplayShape(AXES));
-//     
+    //////////////////////////////////////////////////////////////////////////
+
+    wxRadioButton *pRadTensorAxes = new wxRadioButton( pParent, wxID_ANY, wxT( "Tensors Axes" ) );
+    m_pBtnNormalize = new wxToggleButton( pParent, wxID_ANY, wxT( "Normalize" ) );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pBoxDisplayRadios->Add( pRadTensorAxes, 0, wxALIGN_LEFT | wxALL, 1 );
+
+    pBoxMain->Add( m_pBtnNormalize, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL, 0 );
+
+    pRadTensorAxes->SetValue( isDisplayShape( AXES ) );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pParent->Connect( m_pBtnNormalize->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnNormalizeTensors ) );
+    pParent->Connect( pRadTensorAxes->GetId(),  wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnGlyphAxesSelected ) );
 }
 
 void Tensors::updatePropertiesSizer()
 {
     Glyph::updatePropertiesSizer();
 
-    m_pbtnNormalize->SetValue(m_isNormalized);
+    m_pBtnNormalize->SetValue(m_isNormalized);
     
     // Disabled for the moment, not implemented.
     m_pBtnFlipX->Enable( false );

@@ -497,6 +497,7 @@ void Glyph::generateSpherePoints( float i_scalingFactor )
     vector< float > l_spherePts;
 
     m_LODspheres.clear();
+    m_LODspheres.reserve( NB_OF_LOD );
 
     for( unsigned int i = 0; i < NB_OF_LOD; ++i )
     {
@@ -513,7 +514,7 @@ void Glyph::generateSpherePoints( float i_scalingFactor )
 // This function will fill up o_spherePoints with points representing a perfect
 // sphere at a certain LOD and with a certain scaling factor.
 //
-// i_LOD                : A LOD in wich we will generate our perfect sphere.
+// i_LOD                : A LOD in which we will generate our perfect sphere.
 //                        LOD_0 is the lowest LOD = less points, LOD_3 is the highest LOD = more points.
 // i_scalingFactor      : This values is a simple way to make our tensor a bit bigger that they would be by default.
 // o_spherePoints       : The output vector containing the sphere points. in this order [x1,y1,z1,x2,y2,z2,x3,y3,z3...]
@@ -655,7 +656,7 @@ void Glyph::swap( Glyph &g )
 
 void Glyph::setDisplayShape ( DisplayShape i_displayShape ) 
 {
-    m_displayShape = i_displayShape;    
+    m_displayShape = i_displayShape;
 }
 
 void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
@@ -745,11 +746,11 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     wxBoxSizer *pBoxDisplay = new wxBoxSizer( wxVERTICAL );
     pBoxDisplay->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Display:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
 
-    wxBoxSizer *pBoxDisplayRadios = new wxBoxSizer( wxVERTICAL );
-    pBoxDisplayRadios->Add( m_pRadNormal,      0, wxALIGN_LEFT | wxALL, 1 );
-    pBoxDisplayRadios->Add( m_pRadMapOnSphere, 0, wxALIGN_LEFT | wxALL, 1 );
-    pBoxDisplayRadios->Add( m_pRadMainAxis,    0, wxALIGN_LEFT | wxALL, 1 );
-    pBoxDisplay->Add( pBoxDisplayRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
+    m_pBoxDisplayRadios = new wxBoxSizer( wxVERTICAL );
+    m_pBoxDisplayRadios->Add( m_pRadNormal,      0, wxALIGN_LEFT | wxALL, 1 );
+    m_pBoxDisplayRadios->Add( m_pRadMapOnSphere, 0, wxALIGN_LEFT | wxALL, 1 );
+    m_pBoxDisplayRadios->Add( m_pRadMainAxis,    0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxDisplay->Add( m_pBoxDisplayRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
 
     pBoxMain->Add( pBoxDisplay, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
 

@@ -90,6 +90,7 @@ public:
     wxRadioButton      *m_pRadNormal;
     wxRadioButton      *m_pRadMapOnSphere;
     wxRadioButton      *m_pRadMainAxis;
+    wxBoxSizer         *m_pBoxDisplayRadios;
 
 protected:
     // From DatasetInfo

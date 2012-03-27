@@ -39,8 +39,7 @@ public:
     virtual void updatePropertiesSizer();
     
 private:
-    wxRadioButton      *m_pradiobtnAxes;
-    wxToggleButton     *m_pbtnNormalize;
+    wxToggleButton *m_pBtnNormalize;
     
     // From Glyph
     bool createStructure ( std::vector< float >& i_fileFloatData );
