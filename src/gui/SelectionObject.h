@@ -346,43 +346,34 @@ protected:
     *****************************************************************************************/
 
 private:
-    wxTextCtrl      *m_ptxtName;
-    wxButton        *m_pbtnChangeName;
-    wxToggleButton  *m_ptoggleAndNot;
-    wxToggleButton  *m_ptoggleVisibility;
-    wxToggleButton  *m_ptoggleActivate;
-    wxBitmapButton  *m_pbtnDelete;
-    wxToggleButton  *m_ptoggleCalculatesFibersInfo;
-    wxButton        *m_pbtnNewFibersDensityVolume;
-    wxButton        *m_pbtnNewFibersColorVolume;    
-    wxGrid          *m_pgridfibersInfo;
-    wxToggleButton  *m_ptoggleDisplayMeanFiber;
-    wxToggleButton  *m_ptoggleDisplayConvexHull;
-    wxBitmapButton  *m_pbtnSelectConvexHullColor;
-    wxStaticText    *m_plblConvexHullOpacity;
+    wxTextCtrl      *m_pTxtName;
+    wxToggleButton  *m_pToggleVisibility;
+    wxToggleButton  *m_pToggleActivate;
+    wxToggleButton  *m_pToggleCalculatesFibersInfo;
+    wxGrid          *m_pGridFibersInfo;
+    wxToggleButton  *m_pToggleDisplayMeanFiber;
+    wxToggleButton  *m_pToggleDisplayConvexHull;
+    wxBitmapButton  *m_pBtnSelectConvexHullColor;
+    wxStaticText    *m_pLblConvexHullOpacity;
     wxSlider        *m_pSliderConvexHullOpacity;
-    wxBitmapButton  *m_pbtnSelectMeanFiberColor;
-    wxStaticText    *m_plblColoring;
-    wxRadioButton   *m_pRadioCustomColoring;
-    wxRadioButton   *m_pRadioNormalColoring;
+    wxBitmapButton  *m_pBtnSelectMeanFiberColor;
+    wxStaticText    *m_pLblColoring;
+    wxRadioButton   *m_pRadCustomColoring;
+    wxRadioButton   *m_pRadNormalColoring;
     wxStaticText    *m_pLblMeanFiberOpacity;
-    wxSlider        *m_psliderMeanFiberOpacity;
+    wxSlider        *m_pSliderMeanFiberOpacity;
     wxButton        *m_pbtnDisplayCrossSections;
     wxButton        *m_pbtnDisplayDispersionTube;
-    wxButton        *m_pbtnSetAsDistanceAnchor;
-    wxButton        *m_pbtnFlipNormal;
-    wxBitmapButton  *m_pbtnSelectColor;
-    wxButton        *m_pbtnSelectColorFibers;
     wxStaticText    *m_pLabelAnatomy;
     wxChoice        *m_pCBSelectDataSet;
 
 public:
-    wxTextCtrl      *m_ctrlBoxX;
-    wxTextCtrl      *m_ctrlBoxY;
-    wxTextCtrl      *m_ctrlBoxZ;
-    wxTextCtrl      *m_ctrlBoxSizeX;
-    wxTextCtrl      *m_ctrlBoxSizeY;
-    wxTextCtrl      *m_ctrlBoxSizeZ;
+    wxTextCtrl      *m_pTxtBoxX;
+    wxTextCtrl      *m_pTxtBoxY;
+    wxTextCtrl      *m_pTxtBoxZ;
+    wxTextCtrl      *m_pTxtSizeX;
+    wxTextCtrl      *m_pTxtSizeY;
+    wxTextCtrl      *m_pTxtSizeZ;
     
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.
     static const int    MEAN_FIBER_NB_POINTS=50;         // This value represent the number of points we want the mean fiber to have.

@@ -209,7 +209,7 @@ void ShaderProgram::setUniInt( const GLchar* pName, const GLint value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -223,7 +223,7 @@ void ShaderProgram::setUniFloat( const GLchar* pName, const GLfloat value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -237,7 +237,7 @@ void ShaderProgram::setUniArrayInt( const GLchar* pName, GLint* pValue, const GL
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -251,7 +251,7 @@ void ShaderProgram::setUni3Int( const GLchar* pName, GLint values[3] )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -265,7 +265,7 @@ void ShaderProgram::setUniArray1Float( const GLchar* pName, GLfloat* pValue, con
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -279,7 +279,7 @@ void ShaderProgram::setUni2Float( const GLchar* pName, std::pair< GLfloat, GLflo
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -293,7 +293,7 @@ void ShaderProgram::setUni3Float( const GLchar* pName, GLfloat values[3] )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -333,7 +333,7 @@ void ShaderProgram::setUniMatrix3f( const GLchar* pName, const FMatrix &values )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -349,7 +349,7 @@ void ShaderProgram::setUniSampler( const GLchar* pName, const GLint value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }

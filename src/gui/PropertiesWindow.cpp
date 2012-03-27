@@ -1656,7 +1656,7 @@ void PropertiesWindow::OnBoxPositionX( wxCommandEvent &event )
 
     double posX = 0;
     Vector currPos;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxX->GetValue().ToDouble(&posX);  
+    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtBoxX->GetValue().ToDouble(&posX);  
     currPos = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getCenter();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setCenter(posX,currPos.y,currPos.z);
 }
@@ -1667,7 +1667,7 @@ void PropertiesWindow::OnBoxPositionY( wxCommandEvent &event )
 
     double posY = 0;
     Vector currPos;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxY->GetValue().ToDouble(&posY);  
+    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtBoxY->GetValue().ToDouble(&posY);  
     currPos = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getCenter();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setCenter(currPos.x,posY,currPos.z);
 }
@@ -1678,7 +1678,7 @@ void PropertiesWindow::OnBoxPositionZ( wxCommandEvent &event )
 
     double posZ = 0;
     Vector currPos;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxZ->GetValue().ToDouble(&posZ);  
+    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtBoxZ->GetValue().ToDouble(&posZ);  
     currPos = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getCenter();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setCenter(currPos.x,currPos.y,posZ);
 }
@@ -1688,7 +1688,7 @@ void PropertiesWindow::OnBoxSizeX( wxCommandEvent &event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnBoxSizeX" ), LOGLEVEL_DEBUG );
     double sizeX = 0;
     Vector currSize;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxSizeX->GetValue().ToDouble(&sizeX);  
+    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtSizeX->GetValue().ToDouble(&sizeX);  
     currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
     currSize.x = sizeX / DatasetManager::getInstance()->getVoxelX();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);
@@ -1700,7 +1700,7 @@ void PropertiesWindow::OnBoxSizeY( wxCommandEvent &event )
 
     double sizeY = 0;
     Vector currSize;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxSizeY->GetValue().ToDouble(&sizeY);  
+    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtSizeY->GetValue().ToDouble(&sizeY);  
     currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
     currSize.y = sizeY / DatasetManager::getInstance()->getVoxelY();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);
@@ -1712,7 +1712,7 @@ void PropertiesWindow::OnBoxSizeZ( wxCommandEvent &event )
 
     double sizeZ = 0;
     Vector currSize;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_ctrlBoxSizeZ->GetValue().ToDouble(&sizeZ);  
+    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtSizeZ->GetValue().ToDouble(&sizeZ);  
     currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
     currSize.z = sizeZ / DatasetManager::getInstance()->getVoxelZ();
     ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);

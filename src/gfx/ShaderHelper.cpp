@@ -306,8 +306,6 @@ void ShaderHelper::setMeshShaderVars()
     m_pMeshShader->setUniFloat( "cutY", SceneManager::getInstance()->getSliceY() + 0.5f );
     m_pMeshShader->setUniFloat( "cutZ", SceneManager::getInstance()->getSliceZ() + 0.5f );
 
-    m_pMeshShader->setUniInt( "cutTex", 9 );
-
     m_pMeshShader->setUniInt( "tex0", 0 );
     m_pMeshShader->setUniInt( "tex1", 1 );
     m_pMeshShader->setUniInt( "tex2", 2 );

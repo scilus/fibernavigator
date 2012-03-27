@@ -2010,18 +2010,12 @@ int MainFrame::treeSelected( wxTreeItemId i_id )
     {
         return 0;
     }
-    wxTreeItemId l_ppId = m_pTreeWidget->GetItemParent( l_pId );
 
-    if( !l_ppId.IsOk() )
-    {
-        return 0;
-    }
-
-    if( l_pId == m_tSelectionObjectsId )
+    if( i_id == m_tSelectionObjectsId )
     {
         return MASTER_OBJECT;
     }
-    else if ( l_ppId == m_tSelectionObjectsId )
+    else if ( l_pId == m_tSelectionObjectsId )
     {
         return CHILD_OBJECT;
     }
