@@ -2147,9 +2147,9 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.
 #ifndef __WXMSW__    
-    m_pCBSelectDataSet = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxSize(140,-1));
-    m_pLabelAnatomy = new wxStaticText(parent, wxID_ANY, wxT("Anatomy file : "));
-    pBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_pCBSelectDataSet = new wxChoice( pParent, wxID_ANY, wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pLabelAnatomy = new wxStaticText( pParent, wxID_ANY, wxT("Anatomy file : ") );
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
     pBoxSizer->Add( m_pLabelAnatomy, 0, wxEXPAND, 0 );
     pBoxSizer->Add( m_pCBSelectDataSet, 0, wxEXPAND, 0 );
 
