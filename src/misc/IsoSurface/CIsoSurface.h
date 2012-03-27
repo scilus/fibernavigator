@@ -133,10 +133,9 @@ private:
     void generateGeometry();
     void initializeBuffer() {};
 
-    wxToggleButton *m_ptoggleCutFrontSector;
-    wxToggleButton *m_ptoggleUseColoring;
-    wxBitmapButton *m_pbtnSelectColor;
-    
+    wxToggleButton *m_pToggleCutFrontSector;
+    wxToggleButton *m_pToggleUseColoring;
+
     bool m_positionsCalculated;
     std::vector<Vector>m_svPositions;
 };

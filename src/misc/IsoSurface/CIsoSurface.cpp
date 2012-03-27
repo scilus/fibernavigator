@@ -1127,25 +1127,36 @@ bool CIsoSurface::save( wxXmlNode *pNode ) const
 
 //////////////////////////////////////////////////////////////////////////
 
-void CIsoSurface::createPropertiesSizer(PropertiesWindow *parent)
+void CIsoSurface::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    DatasetInfo::createPropertiesSizer(parent);
+    DatasetInfo::createPropertiesSizer( pParent );
 
-    // FIXME: Sizer changes
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
-//     m_ptoggleCutFrontSector = new wxToggleButton( parent, wxID_ANY, wxT("Cut Front Sector"), wxDefaultPosition, wxSize( 140, -1 ) );
-//     m_pPropertiesSizer->Add( m_ptoggleCutFrontSector, 0, wxALIGN_CENTER );
-//     parent->Connect( m_ptoggleCutFrontSector->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );  
-//     
-//     wxSizer *l_sizer = new wxBoxSizer( wxHORIZONTAL );
-//     m_ptoggleUseColoring = new wxToggleButton( parent, wxID_ANY, wxT("Use Coloring"), wxDefaultPosition, wxSize( 100, -1 ) );
-//     wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
-//     m_pbtnSelectColor = new wxBitmapButton( parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize( 40, -1 ) );
-//     l_sizer->Add( m_ptoggleUseColoring, 0, wxALIGN_CENTER );
-//     l_sizer->Add( m_pbtnSelectColor, 0, wxALIGN_CENTER );
-//     m_pPropertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
-//     parent->Connect( m_ptoggleUseColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
-//     parent->Connect( m_pbtnSelectColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
+    //////////////////////////////////////////////////////////////////////////
+
+    wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+
+    wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
+    m_pToggleCutFrontSector = new wxToggleButton( pParent, wxID_ANY, wxT( "Cut Front Sector" ) );
+    m_pToggleUseColoring    = new wxToggleButton( pParent, wxID_ANY, wxT( "Use Coloring" ) );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxMain->Add( m_pToggleCutFrontSector, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    wxBoxSizer *pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( m_pToggleUseColoring, 3, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( pBtnSelectColor,      1, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
+
+    m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pParent->Connect( m_pToggleCutFrontSector->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
+    pParent->Connect( m_pToggleUseColoring->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
+    pParent->Connect( pBtnSelectColor->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
 }
 
 void CIsoSurface::updatePropertiesSizer()
@@ -1153,8 +1164,8 @@ void CIsoSurface::updatePropertiesSizer()
     DatasetInfo::updatePropertiesSizer();
     m_pToggleFiltering->Enable(false);
     m_pToggleFiltering->SetValue(false);
-    m_ptoggleUseColoring->SetValue(!getUseTex());
-    m_ptoggleCutFrontSector->SetValue(!getShowFS());
+    m_pToggleUseColoring->SetValue(!getUseTex());
+    m_pToggleCutFrontSector->SetValue(!getShowFS());
 
     // Disabled for the moment, not implemented.
     m_pBtnFlipX->Enable( false );
