@@ -82,7 +82,7 @@ public:
 	void draw(){};
 
     bool load( nifti_image *pHeader, nifti_image *pBody );
-    bool save( wxXmlNode *pNode ) const;
+    virtual bool save( wxXmlNode *pNode ) const;
     void saveNifti( wxString fileName );
 
     void setDataType( const int type) { m_dataType = type; }

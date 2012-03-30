@@ -223,12 +223,11 @@ void MainFrame::initLayout()
     //////////////////////////////////////////////////////////////////////////
     // Panels & Boxes initialization
     wxPanel *pPanMain  = new wxPanel( this );
-    pPanMain->SetBackgroundColour( wxColour( wxT( "BLACK" ) ) );
+    pPanMain->SetBackgroundColour( *wxLIGHT_GREY );
     wxBoxSizer *pBoxMain = new wxBoxSizer( wxHORIZONTAL );
     wxBoxSizer *pBoxLeft = new wxBoxSizer( wxVERTICAL );
 
     wxPanel *pPanSlices = new wxPanel( pPanMain );
-    pPanSlices->SetBackgroundColour( wxColour( wxT( "GREEN" ) ) );
     wxBoxSizer *pBoxSlices = new wxBoxSizer( wxHORIZONTAL );
     wxPanel *pPanAxial = new wxPanel( pPanSlices );
     wxBoxSizer *pBoxAxial = new wxBoxSizer( wxVERTICAL );
@@ -239,7 +238,6 @@ void MainFrame::initLayout()
 
     wxBoxSizer *pBoxLowerLeft = new wxBoxSizer( wxHORIZONTAL );
     wxPanel *pPanList  = new wxPanel( pPanMain );
-    pPanList->SetBackgroundColour( wxColour( wxT( "PINK" ) ) );
     wxBoxSizer *pBoxList = new wxBoxSizer( wxVERTICAL );
 
     wxPanel *pPanTab   = new wxPanel( pPanMain );

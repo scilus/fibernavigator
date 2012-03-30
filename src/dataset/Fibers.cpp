@@ -2168,17 +2168,17 @@ void Fibers::loadDMRIFibersInFile( ofstream& myfile )
  */
 void Fibers::save( wxString filename )
 {
-	ofstream myfile;
+    ofstream myfile;
     char *pFn;
-	vector<char> vBuffer;
-	converterByteINT32 c;
+    vector<char> vBuffer;
+    converterByteINT32 c;
     converterByteFloat f;
-	vector<float> pointsToSave;
-	vector<int> linesToSave;
-	vector<int> colorsToSave;
-	int countLines = 0;
+    vector<float> pointsToSave;
+    vector<int> linesToSave;
+    vector<int> colorsToSave;
+    int countLines = 0;
 
-	if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
     {
         filename += _T( ".fib" );
     }
@@ -2187,40 +2187,40 @@ void Fibers::save( wxString filename )
     strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
     myfile.open( pFn, std::ios::binary );
 
-	getFibersInfoToSave( pointsToSave, linesToSave, colorsToSave, countLines );
+    getFibersInfoToSave( pointsToSave, linesToSave, colorsToSave, countLines );
 
-	string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
-	header1 += intToString( pointsToSave.size() / 3 );
-	header1 += " float\n";
-	for( unsigned int i = 0; i < header1.size(); ++i )
-	{
-		vBuffer.push_back( header1[i] );
-	}
-	for( unsigned int i = 0; i < pointsToSave.size(); ++i )
-	{
-		f.f = pointsToSave[i];
-		vBuffer.push_back( f.b[3] );
-		vBuffer.push_back( f.b[2] );
-		vBuffer.push_back( f.b[1] );
-		vBuffer.push_back( f.b[0] );
-	}
-	
-	vBuffer.push_back( '\n' );
-	string header2 = "LINES " + intToString( countLines ) + " " + intToString( linesToSave.size() ) + "\n";
+    string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
+    header1 += intToString( pointsToSave.size() / 3 );
+    header1 += " float\n";
+    for( unsigned int i = 0; i < header1.size(); ++i )
+    {
+        vBuffer.push_back( header1[i] );
+    }
+    for( unsigned int i = 0; i < pointsToSave.size(); ++i )
+    {
+        f.f = pointsToSave[i];
+        vBuffer.push_back( f.b[3] );
+        vBuffer.push_back( f.b[2] );
+        vBuffer.push_back( f.b[1] );
+        vBuffer.push_back( f.b[0] );
+    }
+
+    vBuffer.push_back( '\n' );
+    string header2 = "LINES " + intToString( countLines ) + " " + intToString( linesToSave.size() ) + "\n";
     for( unsigned int i = 0; i < header2.size(); ++i )
     {
         vBuffer.push_back( header2[i] );
     }
-	for( unsigned int i = 0; i < linesToSave.size(); ++i )
-	{
-		c.i = linesToSave[i];
-		vBuffer.push_back( c.b[3] );
-		vBuffer.push_back( c.b[2] );
-		vBuffer.push_back( c.b[1] );
-		vBuffer.push_back( c.b[0] );
-	}
-    
-	vBuffer.push_back( '\n' );
+    for( unsigned int i = 0; i < linesToSave.size(); ++i )
+    {
+        c.i = linesToSave[i];
+        vBuffer.push_back( c.b[3] );
+        vBuffer.push_back( c.b[2] );
+        vBuffer.push_back( c.b[1] );
+        vBuffer.push_back( c.b[0] );
+    }
+
+    vBuffer.push_back( '\n' );
     string header3 = "POINT_DATA ";
     header3 += intToString( pointsToSave.size() / 3 );
     header3 += " float\n";
@@ -2229,23 +2229,23 @@ void Fibers::save( wxString filename )
     {
         vBuffer.push_back( header3[i] );
     }
-	for( unsigned int i = 0; i < colorsToSave.size(); ++i )
-	{
-		vBuffer.push_back( colorsToSave[i] );
-	}
-	vBuffer.push_back( '\n' );
+    for( unsigned int i = 0; i < colorsToSave.size(); ++i )
+    {
+        vBuffer.push_back( colorsToSave[i] );
+    }
+    vBuffer.push_back( '\n' );
 
-	// Put the buffer vector into a char* array.
+    // Put the buffer vector into a char* array.
     char* pBuffer = new char[vBuffer.size()];
 
     for( unsigned int i = 0; i < vBuffer.size(); ++i )
     {
         pBuffer[i] = vBuffer[i];
     }
-	
-	myfile.write( pBuffer, vBuffer.size() );
+
+    myfile.write( pBuffer, vBuffer.size() );
     myfile.close();
-    
+
     delete[] pBuffer;
     pBuffer = NULL;
 }
@@ -2267,11 +2267,11 @@ bool Fibers::save( wxXmlNode *pNode ) const
 void Fibers::saveDMRI( wxString filename )
 {
     ofstream myfile;
-	int nbrlines;
+    int nbrlines;
     char *pFn;
-	float dist = 0.5;
+    float dist = 0.5;
 
-	if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
     {
         filename += _T( ".fib" );
     }
@@ -2279,12 +2279,12 @@ void Fibers::saveDMRI( wxString filename )
     pFn = ( char * ) malloc( filename.length() );
     strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
     myfile.open( pFn, std::ios::out );
-   
-	getNbLines( nbrlines );
 
-	myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
-	myfile << nbrlines << " " << dist << "\n";
-	loadDMRIFibersInFile( myfile);
+    getNbLines( nbrlines );
+
+    myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
+    myfile << nbrlines << " " << dist << "\n";
+    loadDMRIFibersInFile( myfile);
 
     myfile.close();
 }

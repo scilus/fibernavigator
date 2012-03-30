@@ -193,7 +193,6 @@ bool SceneManager::save( const wxString &filename )
     pSlidersPosition->AddProperty( new wxXmlProperty( wxT( "y" ), wxStrFormat( m_pMainFrame->m_pYSlider->GetValue() ) ) );
     pSlidersPosition->AddProperty( new wxXmlProperty( wxT( "z" ), wxStrFormat( m_pMainFrame->m_pZSlider->GetValue() ) ) );
 
-
     //////////////////////////////////////////////////////////////////////////
     // ROTATION
     wxString rotPrecision = wxT( ".8" );
