@@ -1793,6 +1793,9 @@ void MainFrame::onDeleteListItem( wxListEvent& evt )
 
     DatasetIndex index = (DatasetIndex)evt.GetData();
     DatasetManager::getInstance()->remove( index );
+
+    m_pPropertiesWindow->Layout();
+    m_pPropertiesWindow->FitInside();
 }
 
 //////////////////////////////////////////////////////////////////////////

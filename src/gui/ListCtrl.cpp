@@ -322,7 +322,7 @@ void ListCtrl::UpdateSelected()
 // GETTERS/SETTERS
 //////////////////////////////////////////////////////////////////////////
 
-int ListCtrl::GetItem( long index ) const
+long ListCtrl::GetItem( long index ) const
 {
     if( 0 > index || index >= wxListCtrl::GetItemCount() )
     {

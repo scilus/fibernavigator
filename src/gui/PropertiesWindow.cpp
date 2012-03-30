@@ -577,11 +577,13 @@ void PropertiesWindow::OnSliderFloodMoved( wxCommandEvent& WXUNUSED(event) )
     ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtThres->SetValue(wxString::Format( wxT( "%.2f"), l_sliderValue));
 }
 
-void PropertiesWindow::OnFibersFilter( wxCommandEvent& event)
+void PropertiesWindow::OnFibersFilter( wxCommandEvent& WXUNUSED( event ) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFibersFilter" ), LOGLEVEL_DEBUG );
 
-    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( getCurrentListItem() );
+
+    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
     if( pTmpFib != NULL )
     {
         pTmpFib->updateFibersFilters();

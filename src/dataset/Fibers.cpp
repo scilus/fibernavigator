@@ -3580,8 +3580,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMin->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersFilterMax->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersSampling->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
-    pParent->Connect( m_pSliderInterFibersThickness->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
-    pParent->Connect( pBtnGeneratesDensityVolume->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
+    pParent->Connect( m_pSliderInterFibersThickness->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
+    pParent->Connect( pBtnGeneratesDensityVolume->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),           wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
     pParent->Connect( m_pToggleCrossingFibers->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleCrossingFibers ) );
