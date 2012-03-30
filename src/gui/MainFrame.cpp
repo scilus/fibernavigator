@@ -2001,25 +2001,45 @@ void MainFrame::onTreeLabelEdit( wxTreeEvent& event )
 //////////////////////////////////////////////////////////////////////////
 int MainFrame::treeSelected( wxTreeItemId i_id )
 {
-    if( !i_id.IsOk() )
+    if( i_id.IsOk() )
+    {
+        if( i_id == m_tSelectionObjectsId )
+        {
+            return 0;
+        }
+    }
+    else
     {
         return 0;
     }
     wxTreeItemId l_pId = m_pTreeWidget->GetItemParent( i_id );
 
-    if( !l_pId.IsOk() )
+    if( l_pId.IsOk() )
+    {
+        if( l_pId == m_tSelectionObjectsId )
+        {
+            return MASTER_OBJECT;
+        }
+    }
+    else
     {
         return 0;
     }
 
-    if( i_id == m_tSelectionObjectsId )
+    wxTreeItemId l_ppId = m_pTreeWidget->GetItemParent( l_pId );
+
+    if( l_ppId.IsOk() )
     {
-        return MASTER_OBJECT;
+        if( l_ppId == m_tSelectionObjectsId )
+        {
+            return CHILD_OBJECT;
+        }
     }
-    else if ( l_pId == m_tSelectionObjectsId )
+    else
     {
-        return CHILD_OBJECT;
+        return 0;
     }
+
     return 0;
 }
 void MainFrame::onRotateZ( wxCommandEvent& event )

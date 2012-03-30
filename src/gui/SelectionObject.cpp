@@ -2280,56 +2280,56 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 
 void SelectionObject::updatePropertiesSizer()
 {
-//     SceneObject::updatePropertiesSizer();
-//     m_pToggleVisibility->SetValue( getIsVisible() );
-//     m_pToggleActivate->SetValue( getIsActive() );
-//     m_pTxtName->SetValue( getName() );
-//     m_pToggleCalculatesFibersInfo->Enable( getShowFibers() );
-//     m_pGridFibersInfo->Enable( getShowFibers() && m_pToggleCalculatesFibersInfo->GetValue() );
-//     m_pToggleDisplayMeanFiber->Enable( getShowFibers() );
-//     m_pToggleDisplayConvexHull->Enable( getShowFibers() );
-//     setShowConvexHullOption( m_pToggleDisplayConvexHull->GetValue() );
-// 
-//     m_pBtnSelectMeanFiberColor->Enable( m_pToggleDisplayMeanFiber->GetValue() );
-//     setShowMeanFiberOption( m_pToggleDisplayMeanFiber->GetValue() );
-// 
-// // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
-// // Will have to be fixed.
-// #ifndef __WXMSW__
-//     m_pCBSelectDataSet->Show( m_pToggleCalculatesFibersInfo->GetValue() );
-//     m_pLabelAnatomy->Show( m_pToggleCalculatesFibersInfo->GetValue() );
-//     if( m_pToggleCalculatesFibersInfo->GetValue() )
-//     {
-//         UpdateMeanValueTypeBox();
-//     }
-// #endif
-// 
-//     if( !getShowFibers() && m_meanFiberPoints.size() > 0 )
-//     {
-//         //Hide the mean fiber if fibers are invisible and the box is moved
-//         computeMeanFiber();
-//     }
-// 
-//     //m_pbtnDisplayDispersionTube->Enable(m_pToggleCalculatesFibersInfo->GetValue());
-//     //m_pbtnDisplayCrossSections->Enable(m_pToggleCalculatesFibersInfo->GetValue());
-// 
-//     if( m_boxMoved )
-//     {
-//         m_pTxtBoxX->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.x));
-//         m_pTxtBoxY->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.y));
-//         m_pTxtBoxZ->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.z));
-//         m_boxMoved = false;
-//     }
-// 
-//     if( m_boxResized )
-//     {
-//         float voxelX = DatasetManager::getInstance()->getVoxelX();
-//         float voxelY = DatasetManager::getInstance()->getVoxelY();
-//         float voxelZ = DatasetManager::getInstance()->getVoxelZ();
-// 
-//         m_pTxtSizeX->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.x * voxelX ) );
-//         m_pTxtSizeY->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.y * voxelY ) );
-//         m_pTxtSizeZ->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.z * voxelZ ) );
-//         m_boxResized = false;
-//     }
+    SceneObject::updatePropertiesSizer();
+    m_pToggleVisibility->SetValue( getIsVisible() );
+    m_pToggleActivate->SetValue( getIsActive() );
+    m_pTxtName->SetValue( getName() );
+    m_pToggleCalculatesFibersInfo->Enable( getShowFibers() );
+    m_pGridFibersInfo->Enable( getShowFibers() && m_pToggleCalculatesFibersInfo->GetValue() );
+    m_pToggleDisplayMeanFiber->Enable( getShowFibers() );
+    m_pToggleDisplayConvexHull->Enable( getShowFibers() );
+    setShowConvexHullOption( m_pToggleDisplayConvexHull->GetValue() );
+
+    m_pBtnSelectMeanFiberColor->Enable( m_pToggleDisplayMeanFiber->GetValue() );
+    setShowMeanFiberOption( m_pToggleDisplayMeanFiber->GetValue() );
+
+// Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
+// Will have to be fixed.
+#ifndef __WXMSW__
+    m_pCBSelectDataSet->Show( m_pToggleCalculatesFibersInfo->GetValue() );
+    m_pLabelAnatomy->Show( m_pToggleCalculatesFibersInfo->GetValue() );
+    if( m_pToggleCalculatesFibersInfo->GetValue() )
+    {
+        UpdateMeanValueTypeBox();
+    }
+#endif
+
+    if( !getShowFibers() && m_meanFiberPoints.size() > 0 )
+    {
+        //Hide the mean fiber if fibers are invisible and the box is moved
+        computeMeanFiber();
+    }
+
+    //m_pbtnDisplayDispersionTube->Enable(m_pToggleCalculatesFibersInfo->GetValue());
+    //m_pbtnDisplayCrossSections->Enable(m_pToggleCalculatesFibersInfo->GetValue());
+
+    if( m_boxMoved )
+    {
+        m_pTxtBoxX->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.x));
+        m_pTxtBoxY->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.y));
+        m_pTxtBoxZ->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.z));
+        m_boxMoved = false;
+    }
+
+    if( m_boxResized )
+    {
+        float voxelX = DatasetManager::getInstance()->getVoxelX();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+        m_pTxtSizeX->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.x * voxelX ) );
+        m_pTxtSizeY->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.y * voxelY ) );
+        m_pTxtSizeZ->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.z * voxelZ ) );
+        m_boxResized = false;
+    }
 }
