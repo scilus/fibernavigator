@@ -221,65 +221,61 @@ void TheScene::renderScene()
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
     //Animate
-	if(m_isRotateZ)
+    if(m_isRotateZ)
     {
-	    if (m_rotAngleZ>360) 
-		    m_rotAngleZ=0;
+        if (m_rotAngleZ>360) 
+            m_rotAngleZ=0;
 
-    	glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
-	    glRotatef( m_rotAngleZ, 0, 0, 1 );
-	    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
+        glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+        glRotatef( m_rotAngleZ, 0, 0, 1 );
+        glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
     if(m_isRotateY)
     {
-	    if (m_rotAngleY>360) 
-		    m_rotAngleY=0;
+        if (m_rotAngleY>360) 
+            m_rotAngleY=0;
 
-    	glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
-	    glRotatef( m_rotAngleY, 0, 1, 0 );
-	    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
+        glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+        glRotatef( m_rotAngleY, 0, 1, 0 );
+        glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
     if(m_isRotateX)
     {
-	    if (m_rotAngleX>360) 
-		    m_rotAngleX=0;
+        if (m_rotAngleX>360) 
+            m_rotAngleX=0;
 
-    	glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
-	    glRotatef( m_rotAngleX, 1, 0, 0 );
-	    glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
+        glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+        glRotatef( m_rotAngleX, 1, 0, 0 );
+        glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
-
-    float sliceX = SceneManager::getInstance()->getSliceX();
-    float sliceY = SceneManager::getInstance()->getSliceY();
-    float sliceZ = SceneManager::getInstance()->getSliceZ();
 
     //Navigate through slices
     if(m_isNavSagital) 
     {
-	    if (m_posSagital > columns) 
-		    m_posSagital = 0;
+        if (m_posSagital > columns) 
+            m_posSagital = 0;
 
-        SceneManager::getInstance()->updateView( m_posSagital, sliceY, sliceZ );
+        SceneManager::getInstance()->updateView( m_posSagital, SceneManager::getInstance()->getSliceY(), SceneManager::getInstance()->getSliceZ() );
         MyApp::frame->m_pXSlider->SetValue( m_posSagital );
     }
 
     if(m_isNavCoronal)
     {
-	    if (m_posCoronal > rows) 
-		    m_posCoronal = 0;
+        if (m_posCoronal > rows) 
+            m_posCoronal = 0;
 
-        SceneManager::getInstance()->updateView( sliceX, m_posCoronal, sliceZ );
+        SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(), m_posCoronal, SceneManager::getInstance()->getSliceZ() );
         MyApp::frame->m_pYSlider->SetValue( m_posCoronal );
     }
 
     if(m_isNavAxial)
     {
-	    if (m_posAxial > frames) 
-		    m_posAxial = 0;
+        if (m_posAxial > frames) 
+            m_posAxial = 0;
 
-        SceneManager::getInstance()->updateView( sliceX, sliceY, m_posAxial );
+        SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(), SceneManager::getInstance()->getSliceY(), m_posAxial );
         MyApp::frame->m_pZSlider->SetValue( m_posAxial );
     }
 
