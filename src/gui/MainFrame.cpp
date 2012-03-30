@@ -100,7 +100,7 @@ namespace
 #define LIST_WIDTH          268
 #define LIST_HEIGHT         200
 #define LIST_COL0_WIDTH     34
-#define LIST_COL1_WIDTH     160
+#define LIST_COL1_WIDTH     144
 #define LIST_COL2_WIDTH     50
 #define LIST_COL3_WIDTH     20
 
