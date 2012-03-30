@@ -222,25 +222,17 @@ void MainFrame::initLayout()
 {
     //////////////////////////////////////////////////////////////////////////
     // Panels & Boxes initialization
-    wxPanel *pPanMain  = new wxPanel( this );
-    pPanMain->SetBackgroundColour( *wxLIGHT_GREY );
     wxBoxSizer *pBoxMain = new wxBoxSizer( wxHORIZONTAL );
     wxBoxSizer *pBoxLeft = new wxBoxSizer( wxVERTICAL );
 
-    wxPanel *pPanSlices = new wxPanel( pPanMain );
     wxBoxSizer *pBoxSlices = new wxBoxSizer( wxHORIZONTAL );
-    wxPanel *pPanAxial = new wxPanel( pPanSlices );
     wxBoxSizer *pBoxAxial = new wxBoxSizer( wxVERTICAL );
-    wxPanel *pPanCor   = new wxPanel( pPanSlices );
     wxBoxSizer *pBoxCor = new wxBoxSizer( wxVERTICAL );
-    wxPanel *pPanSag   = new wxPanel( pPanSlices );
     wxBoxSizer *pBoxSag = new wxBoxSizer( wxVERTICAL );
 
     wxBoxSizer *pBoxLowerLeft = new wxBoxSizer( wxHORIZONTAL );
-    wxPanel *pPanList  = new wxPanel( pPanMain );
     wxBoxSizer *pBoxList = new wxBoxSizer( wxVERTICAL );
 
-    wxPanel *pPanTab   = new wxPanel( pPanMain );
     wxBoxSizer *pBoxTab = new wxBoxSizer( wxVERTICAL );
 
     //////////////////////////////////////////////////////////////////////////
@@ -260,12 +252,12 @@ void MainFrame::initLayout()
     #endif
 #endif
 
-    m_pMainGL = new MainCanvas( MAIN_VIEW, pPanMain, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize, 0, _T( "MainGLCanvas" ), gl_attrib );
+    m_pMainGL = new MainCanvas( MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize, 0, _T( "MainGLCanvas" ), gl_attrib );
 
 #ifndef CTX
-    m_pGL0 = new MainCanvas(    AXIAL, pPanAxial, ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
-    m_pGL1 = new MainCanvas(  CORONAL, pPanCor,   ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );
-    m_pGL2 = new MainCanvas( SAGITTAL, pPanSag,   ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
+    m_pGL0 = new MainCanvas(    AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
+    m_pGL1 = new MainCanvas(  CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );
+    m_pGL2 = new MainCanvas( SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
 #else
     m_pGL0 = new MainCanvas( axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGTH ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL->GetContext() );
     m_pGL1 = new MainCanvas( coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL->GetContext() );
@@ -285,40 +277,35 @@ void MainFrame::initLayout()
 
     //////////////////////////////////////////////////////////////////////////
     // 3 Nav Panels initialization
-    m_pXSlider  = new wxSlider( pPanSag,   ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_SAG_WIDTH, SLIDER_SAG_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pYSlider  = new wxSlider( pPanCor,   ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_COR_WIDTH, SLIDER_COR_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pZSlider  = new wxSlider( pPanAxial, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_AXI_WIDTH, SLIDER_AXI_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pXSlider  = new wxSlider( this, ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_SAG_WIDTH, SLIDER_SAG_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pYSlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_COR_WIDTH, SLIDER_COR_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pZSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_AXI_WIDTH, SLIDER_AXI_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
     pBoxAxial->Add( m_pGL0,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
     pBoxAxial->Add( m_pZSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
-    pPanAxial->SetSizer( pBoxAxial );
 
     pBoxCor->Add( m_pGL1,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
     pBoxCor->Add( m_pYSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
-    pPanCor->SetSizer( pBoxCor );
 
     pBoxSag->Add( m_pGL2,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
     pBoxSag->Add( m_pXSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
-    pPanSag->SetSizer( pBoxSag );
 
-    pBoxSlices->Add( pPanAxial, 0, wxALL, 0 );
-    pBoxSlices->Add( pPanCor,   0, wxALL, 0 );
-    pBoxSlices->Add( pPanSag,   0, wxALL, 0 );
-    pPanSlices->SetSizer( pBoxSlices );
+    pBoxSlices->Add( pBoxAxial, 0, wxALL, 0 );
+    pBoxSlices->Add( pBoxCor,   0, wxALL, 0 );
+    pBoxSlices->Add( pBoxSag,   0, wxALL, 0 );
 
-    pBoxLeft->Add( pPanSlices, 0, wxALL, 0 );
-    
+    pBoxLeft->Add( pBoxSlices, 0, wxALL, 0 );
 
     ////////////////////////////////////////////////////////////////////////
     // MyTreeCtrl initialization
-    m_pTreeWidget = new MyTreeCtrl( this, pPanList, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE );
+    m_pTreeWidget = new MyTreeCtrl( this, this, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE );
     initMyTreeCtrl( m_pTreeWidget );
 
     m_tSelectionObjectsId = m_pTreeWidget->AddRoot( wxT( "Selection Objects" ) );
 
     //////////////////////////////////////////////////////////////////////////
     // ListCtrl initialization
-    m_pListCtrl = new ListCtrl( pPanList, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    m_pListCtrl = new ListCtrl( this, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
     initListCtrl( m_pListCtrl );
 
 
@@ -326,15 +313,14 @@ void MainFrame::initLayout()
     // List Panel initialization
     pBoxList->Add( (wxWindow *)m_pListCtrl, 0, wxFIXED_MINSIZE | wxALL, 2 );
     pBoxList->Add( m_pTreeWidget, 1, wxEXPAND | wxALL, 2 );
-    pPanList->SetSizer( pBoxList );
 
-    pBoxLowerLeft->Add( pPanList, 0, wxEXPAND | wxALL, 0 );
+    pBoxLowerLeft->Add( pBoxList, 0, wxEXPAND | wxALL, 0 );
 
     //////////////////////////////////////////////////////////////////////////
     // Tab Control initialization
 
     // Notebook initialization
-    m_tab = new wxNotebook( pPanTab, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
+    m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
 
     //////////////////////////////////////////////////////////////////////////
     // PropertiesWindow initialization
@@ -352,15 +338,14 @@ void MainFrame::initLayout()
     m_tab->AddPage( m_pTrackingWindow, wxT( "Realtime tracking" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
-    pPanTab->SetSizer( pBoxTab );
 
-    pBoxLowerLeft->Add( pPanTab, 1, wxEXPAND | wxALL, 0 );
+    pBoxLowerLeft->Add( pBoxTab, 1, wxEXPAND | wxALL, 0 );
 
     pBoxLeft->Add( pBoxLowerLeft, 1, wxEXPAND | wxBOTTOM, 0 );
     
     pBoxMain->Add( pBoxLeft, 0, wxEXPAND | wxBOTTOM, 0 );
     pBoxMain->Add( m_pMainGL, 1, wxEXPAND | wxALL, 2 );
-    pPanMain->SetSizer( pBoxMain );
+    this->SetSizer( pBoxMain );
 }
 
 
@@ -587,6 +572,8 @@ void MainFrame::onClose( wxCloseEvent& event )
 
 void MainFrame::onSize( wxSizeEvent& evt )
 {
+    Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onSize" ), LOGLEVEL_DEBUG );
+
     if( NULL != m_pMainGL )
     {
         m_pMainGL->changeOrthoSize();
@@ -1191,7 +1178,6 @@ void MainFrame::displayPropertiesSheet()
             m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
         }        
         m_pCurrentSceneObject->updatePropertiesSizer();
-        m_pPropertiesWindow->Layout();
         m_pPropertiesWindow->FitInside();
         m_pLastSelectedSceneObject = NULL;
     }     
@@ -1689,12 +1675,12 @@ void MainFrame::refreshAllGLWidgets()
 {
     updateStatusBar();
     updateMenus();
-    refreshViews();   
+    refreshViews();
     if( SceneManager::getInstance()->isRulerActive() )
     {
         wxString sbString1 = wxString::Format( wxT( "%4.1fmm (%2.1fmm) " ), SceneManager::getInstance()->getRulerFullLength(), SceneManager::getInstance()->getRulerPartialLenth() );
-        m_pToolBar->m_txtRuler->SetValue(sbString1);    
-    }     
+        m_pToolBar->m_txtRuler->SetValue(sbString1);
+    }
 }
 
 void MainFrame::refreshViews()
@@ -1727,7 +1713,7 @@ void MainFrame::refreshViews()
     if ( m_pGL2 )
     {
         m_pGL2->Refresh(true);
-    }    
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2116,7 +2102,7 @@ void MainFrame::onKdTreeThreadFinished( wxCommandEvent& WXUNUSED(event) )
     Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
     SceneManager::getInstance()->updateAllSelectionObjects();
     SceneManager::getInstance()->setSelBoxChanged( true );
-    
+
     refreshAllGLWidgets();
 }
 
@@ -2189,7 +2175,7 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
 void MainFrame::updateMenus()
 {
     m_pMenuBar->updateMenuBar(this);
-    m_pToolBar->updateToolBar(this); 
+    m_pToolBar->updateToolBar(this);
 }
 
 void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )

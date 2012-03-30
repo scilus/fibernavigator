@@ -195,7 +195,7 @@ void TheScene::bindTextures()
             }
         }
     }
-    
+
     Logger::getInstance()->printIfGLError( wxT( "Bind textures") );
 }
 

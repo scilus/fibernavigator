@@ -137,6 +137,7 @@ void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void MainCanvas::OnSize( wxSizeEvent& event )
 {
+    Logger::getInstance()->print( wxT( "Event triggered - MainCanvas::OnSize" ), LOGLEVEL_DEBUG );
     // this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize( event );
 
