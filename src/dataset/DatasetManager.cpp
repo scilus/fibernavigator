@@ -345,27 +345,27 @@ void DatasetManager::remove( const DatasetIndex index )
     case HEAD_SHORT:
     case OVERLAY:
     case RGB:
-        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Anatomy" ) ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "Anatomy" ) ), LOGLEVEL_DEBUG );
         m_anatomies.erase( m_anatomies.find( index ) );
         break;
 //     case TENSOR_FIELD:
 //         break;
     case MESH:
-        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Mesh" ) ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "Mesh" ) ), LOGLEVEL_DEBUG );
         m_meshes.erase( m_meshes.find( index ) );
         break;
 //     case VECTORS:
 //         break;
     case TENSORS:
-        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Tensors" ) ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "Tensors" ) ), LOGLEVEL_DEBUG );
         m_tensors.erase( m_tensors.find( index ) );
         break;
     case ODFS:
-        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "ODFs" ) ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "ODFs" ) ), LOGLEVEL_DEBUG );
         m_odfs.erase( m_odfs.find( index ) );
         break;
     case FIBERS:
-        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "Fibers" ) ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "Fibers" ) ), LOGLEVEL_DEBUG );
         m_fibers.erase( m_fibers.find( index ) );
         break;
 //     case SURFACE:
@@ -375,11 +375,11 @@ void DatasetManager::remove( const DatasetIndex index )
 //     case ISO_SURFACE:
 //         break;
     case FIBERSGROUP:
-        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "FibersGroup" ) ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "FibersGroup" ) ), LOGLEVEL_DEBUG );
         m_fibersGroup.erase( m_fibersGroup.find( index ) );
         break;
     default:
-        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), index, wxT( "DatasetInfo" ) ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "DatasetInfo" ) ), LOGLEVEL_DEBUG );
         break;
     }
 
