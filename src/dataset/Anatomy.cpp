@@ -278,7 +278,12 @@ void Anatomy::dilate()
         }
     }
 
-	for( int i(0); i < datasetSize; ++i )
+    if( m_equalizedDataset.size() != m_floatDataset.size() )
+    {
+        m_equalizedDataset.resize( m_floatDataset.size() );
+    }
+
+    for( int i(0); i < datasetSize; ++i )
     {
         if ( tmp[i] )
         {
@@ -313,6 +318,11 @@ void Anatomy::erode()
                 }
             }
         }
+    }
+
+    if( m_equalizedDataset.size() != m_floatDataset.size() )
+    {
+        m_equalizedDataset.resize( m_floatDataset.size() );
     }
 
     for( int i(0); i < datasetSize; ++i )
