@@ -308,7 +308,7 @@ void ListCtrl::UpdateSelected()
         DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
         if( FIBERSGROUP == pDataset->getType() )
         {
-            for( long i( index + 1); FIBERS == DatasetManager::getInstance()->getDataset( GetItem( i ) )->getType(); ++i )
+            for( long i( index + 1); i < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( i ) )->getType(); ++i )
             {
                 Update( i );
             }
