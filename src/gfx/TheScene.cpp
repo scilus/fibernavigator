@@ -257,7 +257,9 @@ void TheScene::renderScene()
         if (m_posSagital > columns) 
             m_posSagital = 0;
 
-        SceneManager::getInstance()->updateView( m_posSagital, SceneManager::getInstance()->getSliceY(), SceneManager::getInstance()->getSliceZ() );
+        SceneManager::getInstance()->updateView( m_posSagital, 
+                                                 SceneManager::getInstance()->getSliceY(), 
+                                                 SceneManager::getInstance()->getSliceZ() );
         MyApp::frame->m_pXSlider->SetValue( m_posSagital );
     }
 
@@ -266,7 +268,9 @@ void TheScene::renderScene()
         if (m_posCoronal > rows) 
             m_posCoronal = 0;
 
-        SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(), m_posCoronal, SceneManager::getInstance()->getSliceZ() );
+        SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(),
+                                                 m_posCoronal,
+                                                 SceneManager::getInstance()->getSliceZ() );
         MyApp::frame->m_pYSlider->SetValue( m_posCoronal );
     }
 
@@ -275,7 +279,9 @@ void TheScene::renderScene()
         if (m_posAxial > frames) 
             m_posAxial = 0;
 
-        SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(), SceneManager::getInstance()->getSliceY(), m_posAxial );
+        SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(),
+                                                 SceneManager::getInstance()->getSliceY(),
+                                                 m_posAxial );
         MyApp::frame->m_pZSlider->SetValue( m_posAxial );
     }
 
