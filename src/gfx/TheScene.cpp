@@ -531,28 +531,20 @@ void TheScene::renderMesh()
     {
         if( (*mesh)->getShow() )
         {
-            wxColor color = (*mesh)->getColor();
-            glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
-
-            ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS",  (*mesh)->getShowFS() );
-            ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex",  (*mesh)->getUseTex() );
-            ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_",  (*mesh)->getAlpha() );
-            ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "isGlyph", (*mesh)->getIsGlyph());
-
-            if( (*mesh)->getAlpha() < 0.99 )
-            {
-                glDepthMask( GL_FALSE );
-            }
-
-            (*mesh)->draw();
-
-            if( (*mesh)->getAlpha() < 0.99 )
-            {
-                glDepthMask( GL_TRUE );
-            }
+            renderMeshInternal( *mesh );
         }
     }
-    
+
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
+    {
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
+
+        if( ISO_SURFACE == pDsInfo->getType() && pDsInfo->getShow() )
+        {
+            renderMeshInternal( pDsInfo );
+        }
+    }
+
     ShaderHelper::getInstance()->getMeshShader()->release();
 
     lightsOff();
@@ -561,6 +553,33 @@ void TheScene::renderMesh()
 
     glPopAttrib();
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+void TheScene::renderMeshInternal(  DatasetInfo *pDsInfo )
+{
+    wxColor color = pDsInfo->getColor();
+    glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
+
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS",  pDsInfo->getShowFS() );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex",  pDsInfo->getUseTex() );
+    ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_",  pDsInfo->getAlpha() );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
+
+    if( pDsInfo->getAlpha() < 0.99 )
+    {
+        glDepthMask( GL_FALSE );
+    }
+
+    pDsInfo->draw();
+
+    if( pDsInfo->getAlpha() < 0.99 )
+    {
+        glDepthMask( GL_TRUE );
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will render the fibers in theScene.

@@ -35,6 +35,8 @@ enum
     MAIN_VIEW
 };
 
+class DatasetInfo;
+
 class TheScene
 {
 public:
@@ -79,8 +81,9 @@ private:
     void drawVectors            ();
     void lightsOff              ();
     void lightsOn               ();
-	void renderFibers           ();
+    void renderFibers           ();
     void renderMesh             ();
+    void renderMeshInternal( DatasetInfo *pDsInfo );
     void renderODFs             ();
     void renderSlices           ();
     void renderTensors          ();
