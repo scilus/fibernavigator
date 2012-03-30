@@ -581,7 +581,7 @@ void PropertiesWindow::OnFibersFilter( wxCommandEvent& WXUNUSED( event ) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFibersFilter" ), LOGLEVEL_DEBUG );
 
-    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( getCurrentListItem() );
+    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListItem() );
 
     Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
     if( pTmpFib != NULL )
