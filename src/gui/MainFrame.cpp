@@ -330,7 +330,7 @@ void MainFrame::initLayout()
 
     //////////////////////////////////////////////////////////////////////////
     // TrackingWindow initialization
-    m_pTrackingWindow = new TrackingWindow(m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) ); // Contains realtime tracking properties
+    m_pTrackingWindow = new TrackingWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) ); // Contains realtime tracking properties
     m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
     m_pTrackingWindow->EnableScrolling( false, true );
 

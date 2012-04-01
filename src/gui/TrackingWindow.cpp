@@ -13,7 +13,6 @@
 
 #include <wx/checkbox.h>
 #include <wx/grid.h>
-#include <wx/notebook.h>
 #include <wx/tglbtn.h>
 #include <wx/treectrl.h>
 
@@ -28,8 +27,7 @@ END_EVENT_TABLE()
 
 TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const wxPoint &pos, const wxSize &size )
 :   wxScrolledWindow( pParent, id, pos, size, wxBORDER_NONE, _T("RTT Canvas") ),
-    m_pMainFrame( pMf ),
-    m_pNoteBook( pParent )
+    m_pMainFrame( pMf )
 {
     SetBackgroundColour( *wxLIGHT_GREY );
     SetCursor( wxCursor( wxCURSOR_HAND ) );
@@ -37,12 +35,12 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     SetSizer( m_pTrackingSizer );
     SetAutoLayout( true );
 
-	//Content of RTT panel
+    //Content of RTT panel
     /********************************/
 
-	m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("Tensor not selected"), wxDefaultPosition, wxSize(200, -1) );
+    m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("Tensor not selected"), wxDefaultPosition, wxSize(200, -1) );
     Connect( m_pBtnSelectFile->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectFile) );
-	
+
     m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start tracking"), wxPoint(0,30), wxSize(140, -1) );
     Connect( m_pBtnStart->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnStartTracking) );
     m_pBtnStart->Enable(false);
@@ -75,13 +73,13 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     Connect( m_pSliderPuncture->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderPunctureMoved) );
     m_pTxtPunctureBox = new wxTextCtrl( this, wxID_ANY, wxT("0.2"), wxPoint(160,150), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
-	m_pTextMinLength = new wxStaticText( this, wxID_ANY, wxT("Min length"), wxPoint(0,180), wxSize(60, -1), wxALIGN_RIGHT );
+    m_pTextMinLength = new wxStaticText( this, wxID_ANY, wxT("Min length"), wxPoint(0,180), wxSize(60, -1), wxALIGN_RIGHT );
     m_pSliderMinLength = new MySlider( this, wxID_ANY, 0, 0, 400, wxPoint(60,180), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderMinLength->SetValue( 10 );
     Connect( m_pSliderMinLength->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderMinLengthMoved) );
     m_pTxtMinLengthBox = new wxTextCtrl( this, wxID_ANY, wxT("10 mm"), wxPoint(160,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
-	m_pTextMaxLength = new wxStaticText( this, wxID_ANY, wxT("Max length"), wxPoint(0,210), wxSize(60, -1), wxALIGN_RIGHT );
+    m_pTextMaxLength = new wxStaticText( this, wxID_ANY, wxT("Max length"), wxPoint(0,210), wxSize(60, -1), wxALIGN_RIGHT );
     m_pSliderMaxLength = new MySlider( this, wxID_ANY, 0, 0, 300, wxPoint(60,210), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderMaxLength->SetValue( 200 );
     Connect( m_pSliderMaxLength->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderMaxLengthMoved) );
@@ -145,7 +143,7 @@ void TrackingWindow::OnSliderAngleMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderAngle->GetValue();
     m_pTxtAngleBox->SetValue(wxString::Format( wxT( "%.1f "), sliderValue ) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setAngleThreshold( sliderValue );
-	RTTrackingHelper::getInstance()->setRTTDirty( true );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSliderStepMoved( wxCommandEvent& WXUNUSED(event) )
@@ -161,7 +159,7 @@ void TrackingWindow::OnSliderPunctureMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderPuncture->GetValue() / 10.0f;
     m_pTxtPunctureBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setPuncture( sliderValue );
-	RTTrackingHelper::getInstance()->setRTTDirty( true );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSliderMinLengthMoved( wxCommandEvent& WXUNUSED(event) )
@@ -169,7 +167,7 @@ void TrackingWindow::OnSliderMinLengthMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderMinLength->GetValue();
     m_pTxtMinLengthBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMinFiberLength( sliderValue );
-	RTTrackingHelper::getInstance()->setRTTDirty( true );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )
@@ -177,7 +175,7 @@ void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderMaxLength->GetValue();
     m_pTxtMaxLengthBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMaxFiberLength( sliderValue );
-	RTTrackingHelper::getInstance()->setRTTDirty( true );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
@@ -186,23 +184,23 @@ void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
     long item = m_pMainFrame->getCurrentListItem();
     //long item = m_pMainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     //Tensors* pTensorInfo = dynamic_cast<Tensors*>((DatasetInfo*)m_pMainFrame->m_pListCtrl->GetItemData( item ));
-    Tensors * pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( item );
-    
-	if( pTensorInfo != NULL )
-	{
-		m_pBtnSelectFile->SetLabel( pTensorInfo->getName() );
+    Tensors * pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
 
-		//Set Step
+    if( pTensorInfo != NULL )
+    {
+        m_pBtnSelectFile->SetLabel( pTensorInfo->getName() );
+
+        //Set Step
         float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
-		m_pSliderStep->SetValue( step * 10.0f );
-		m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
+        m_pSliderStep->SetValue( step * 10.0f );
+        m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
+        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
 
-		//Copy useful matrices
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsMatrix( pTensorInfo->getTensorsMatrix() );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsFA( pTensorInfo->getTensorsFA() );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsEV( pTensorInfo->getTensorsEV() );
-	}
+        //Copy useful matrices
+        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsMatrix( pTensorInfo->getTensorsMatrix() );
+        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsFA( pTensorInfo->getTensorsFA() );
+        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsEV( pTensorInfo->getTensorsEV() );
+    }
 }
 
 void TrackingWindow::OnRandomSeeding( wxCommandEvent& WXUNUSED(event) )
