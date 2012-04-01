@@ -16,15 +16,17 @@ class MyTreeCtrl: public wxTreeCtrl
 {
 public:
     MyTreeCtrl(MainFrame *pMainFrame, wxWindow *pParent, const wxWindowID id, const wxPoint& pos, const wxSize& size, long style );
-    int getSelectedType();
 
 private:
-    MainFrame *m_mainFrame;
+    int  getSelectedType();
+
     void OnChar(wxKeyEvent& event);
     void OnRightClick(wxMouseEvent& event);
     void OnToggleAndNot(wxCommandEvent& event);
     void OnDeleteBox(wxCommandEvent& event);
 
+private:
+    MainFrame *m_mainFrame;
 
     DECLARE_EVENT_TABLE()
 };

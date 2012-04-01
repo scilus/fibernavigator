@@ -24,18 +24,18 @@ MyTreeCtrl::MyTreeCtrl( MainFrame *pMainFrame, wxWindow *pParent, const wxWindow
 
 int MyTreeCtrl::getSelectedType()
 {
-    wxTreeItemId treeid = GetSelection();
-    if( !treeid.IsOk() ) 
+    wxTreeItemId treeId = GetSelection();
+    if( !treeId.IsOk() ) 
         return 0;
-    if( GetItemText(treeid) == strSelectionObj ) 
+    if( GetItemText( treeId ) == strSelectionObj ) 
         return 0;
 
-    wxTreeItemId pId = GetItemParent( treeid );
+    wxTreeItemId pId =  GetItemParent( treeId );
     wxTreeItemId ppId = GetItemParent( pId );
 
-    if( GetItemText(pId) == strSelectionObj )
+    if( GetItemText( pId ) == strSelectionObj )
         return MASTER_OBJECT;
-    else if( GetItemText(ppId) == strSelectionObj )
+    else if( GetItemText( ppId ) == strSelectionObj )
         return CHILD_OBJECT;
 
     else return 0;
@@ -45,58 +45,54 @@ void MyTreeCtrl::OnChar( wxKeyEvent& evt )
 {
     int selected = getSelectedType();
 
-    wxTreeItemId treeid = GetSelection();
-
-    wxTreeItemId pId  = GetItemParent( treeid );
-    wxTreeItemId ppId = GetItemParent( pId );
+    wxTreeItemId treeId = GetSelection();
 
     if( evt.GetKeyCode() == WXK_DELETE)
     {
         m_mainFrame->deleteTreeItem();
     }
-
-    else if (selected == MASTER_OBJECT || selected == CHILD_OBJECT)
+    else if( selected == MASTER_OBJECT || selected == CHILD_OBJECT )
     {
         switch( evt.GetKeyCode() )
         {
         case WXK_LEFT:
-             if (wxGetKeyState(WXK_CONTROL))
-                 ((SelectionObject*) (GetItemData(treeid)))->resizeLeft();
+             if( wxGetKeyState(WXK_CONTROL) )
+                 ((SelectionObject*) (GetItemData(treeId)))->resizeLeft();
              else
-                 ((SelectionObject*) (GetItemData(treeid)))->moveLeft();
+                 ((SelectionObject*) (GetItemData(treeId)))->moveLeft();
              break;
         case WXK_RIGHT:
             if (wxGetKeyState(WXK_CONTROL))
-                ((SelectionObject*) (GetItemData(treeid)))->resizeRight();
+                ((SelectionObject*) (GetItemData(treeId)))->resizeRight();
             else
-                ((SelectionObject*) (GetItemData(treeid)))->moveRight();
+                ((SelectionObject*) (GetItemData(treeId)))->moveRight();
             break;
         case WXK_UP:
             if (wxGetKeyState(WXK_CONTROL))
-                ((SelectionObject*) (GetItemData(treeid)))->resizeForward();
+                ((SelectionObject*) (GetItemData(treeId)))->resizeForward();
             else
-                ((SelectionObject*) (GetItemData(treeid)))->moveBack();
+                ((SelectionObject*) (GetItemData(treeId)))->moveBack();
             break;
         case WXK_DOWN:
             if (wxGetKeyState(WXK_CONTROL))
-                ((SelectionObject*) (GetItemData(treeid)))->resizeBack();
+                ((SelectionObject*) (GetItemData(treeId)))->resizeBack();
             else
-                ((SelectionObject*) (GetItemData(treeid)))->moveForward();
+                ((SelectionObject*) (GetItemData(treeId)))->moveForward();
             break;
         case WXK_PAGEDOWN:
             if (wxGetKeyState(WXK_CONTROL))
-                ((SelectionObject*) (GetItemData(treeid)))->resizeDown();
+                ((SelectionObject*) (GetItemData(treeId)))->resizeDown();
             else
-                ((SelectionObject*) (GetItemData(treeid)))->moveUp();
+                ((SelectionObject*) (GetItemData(treeId)))->moveUp();
             break;
         case WXK_PAGEUP:
             if (wxGetKeyState(WXK_CONTROL))
-                ((SelectionObject*) (GetItemData(treeid)))->resizeUp();
+                ((SelectionObject*) (GetItemData(treeId)))->resizeUp();
             else
-                ((SelectionObject*) (GetItemData(treeid)))->moveDown();
+                ((SelectionObject*) (GetItemData(treeId)))->moveDown();
             break;
         case WXK_HOME:
-            ((SelectionObject*) (GetItemData(treeid)))->lockToCrosshair();
+            ((SelectionObject*) (GetItemData(treeId)))->lockToCrosshair();
             break;
         default:
             evt.Skip();
@@ -108,7 +104,6 @@ void MyTreeCtrl::OnChar( wxKeyEvent& evt )
 
 void MyTreeCtrl::OnRightClick(wxMouseEvent& WXUNUSED(event) )
 {
-
 }
 
 void MyTreeCtrl::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))
@@ -119,11 +114,11 @@ void MyTreeCtrl::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))
 
 void MyTreeCtrl::OnDeleteBox(wxCommandEvent& WXUNUSED(event))
 {
-    if (getSelectedType() == CHILD_OBJECT)
+    if( getSelectedType() == CHILD_OBJECT )
     {
         ((SelectionObject*) ((GetItemData(GetItemParent(GetSelection())))))->setIsDirty(true);
     }
-    Delete(GetSelection());
+    Delete( GetSelection() );
     m_mainFrame->onTreeChange();
 }
 

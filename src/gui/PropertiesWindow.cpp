@@ -1385,28 +1385,27 @@ void PropertiesWindow::OnVoiFlipNormals( wxCommandEvent& WXUNUSED(event) )
 
     if(l_selectionObject->getSelectionType() == CISO_SURFACE_TYPE)
     {
-        l_selectionObject->FlipNormals();        
+        l_selectionObject->FlipNormals();
     }
 }
 
-void PropertiesWindow::OnDeleteTreeItem( wxTreeEvent&    event )
+void PropertiesWindow::OnDeleteTreeItem( wxTreeEvent& evt )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDeleteTreeItem" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->onDeleteTreeItem(event);
+    m_pMainFrame->onDeleteTreeItem( evt );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
     RTTrackingHelper::getInstance()->setRTTDirty( false );
     RTTrackingHelper::getInstance()->setRTTReady( false );
-    m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable(false);
-
+    m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( false );
 }
 
-void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent&    event )
+void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent& evt )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnActivateTreeItem" ), LOGLEVEL_DEBUG );
 
-    m_pMainFrame->onActivateTreeItem(event);
+    m_pMainFrame->onActivateTreeItem( evt );
 }
 
 void PropertiesWindow::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(event) )

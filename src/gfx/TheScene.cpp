@@ -207,7 +207,7 @@ void TheScene::renderScene()
     Logger::getInstance()->printIfGLError( wxT( "Error before renderScene" ) );
     // This will put the frustum information up to date for any render that needs it. 
     extractFrustum();
-    
+
     if( MyApp::frame->m_pListCtrl->GetItemCount() == 0 )
         return;
 

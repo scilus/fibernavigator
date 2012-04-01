@@ -38,4 +38,9 @@ void SceneObject::swap( SceneObject &s )
 
 SceneObject::~SceneObject()
 {
+    delete m_pBoxPadding;
+    m_pBoxPadding = NULL;
+
+    delete m_pPropertiesSizer;
+    m_pPropertiesSizer = NULL;
 }

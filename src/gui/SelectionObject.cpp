@@ -2247,36 +2247,37 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
-//     pParent->Connect( pBtnChangeName->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnRenameBox ) );
-//     pParent->Connect( pBtnFlipNormal->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnVoiFlipNormals ) );
-//     pParent->Connect( pBtnSelectColorFibers->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor ) );
-//     pParent->Connect( pBtnNewColorVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnCreateFibersColorTexture ) );
-//     pParent->Connect( pBtnNewDensityVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnCreateFibersDensityTexture ) );
-//     pParent->Connect( pBtnSetAsDistanceAnchor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDistanceAnchorSet ) );
-//     //pParent->Connect( m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections ) );
-//     //pParent->Connect( m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube ) );
-//     pParent->Connect( pBtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(PropertiesWindow::OnDeleteTreeItem ) );
-//     pParent->Connect( pBtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnColorRoi ) );
-//     pParent->Connect( m_pBtnSelectMeanFiberColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMeanFiberColorChange ) );
-//     pParent->Connect( m_pBtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
-//     pParent->Connect( m_pToggleVisibility->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleShowSelectionObject ) );
-//     pParent->Connect( m_pToggleActivate->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxTreeEventHandler(PropertiesWindow::OnActivateTreeItem ) );
-//     pParent->Connect( pToggleAndNot->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleAndNot ) );
-//     pParent->Connect( m_pToggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayFibersInfo ) );
-//     pParent->Connect( m_pToggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber ) );
-//     pParent->Connect( m_pToggleDisplayConvexHull->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
-//     pParent->Connect( m_pRadCustomColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnCustomMeanFiberColoring ) );
-//     pParent->Connect( m_pRadNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalMeanFiberColoring ) );
-//     pParent->Connect( m_pSliderMeanFiberOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberOpacityChange ) );
-//     pParent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
-//     pParent->Connect( m_pTxtBoxX->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionX ) );
-//     pParent->Connect( m_pTxtBoxY->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionY ) );
-//     pParent->Connect( m_pTxtBoxZ->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionZ ) );
-//     pParent->Connect( m_pTxtSizeX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeX ) );
-//     pParent->Connect( m_pTxtSizeY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeY ) );
-//     pParent->Connect( m_pTxtSizeZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeZ ) );
+    pParent->Connect( pBtnChangeName->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnRenameBox ) );
+    pParent->Connect( pBtnFlipNormal->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnVoiFlipNormals ) );
+    pParent->Connect( pBtnSelectColorFibers->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
+    pParent->Connect( pBtnNewColorVolume->GetId(),      wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnCreateFibersColorTexture ) );
+    pParent->Connect( pBtnNewDensityVolume->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnCreateFibersDensityTexture ) );
+    pParent->Connect( pBtnSetAsDistanceAnchor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDistanceAnchorSet ) );
+    pParent->Connect( pBtnDelete->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(    PropertiesWindow::OnDeleteTreeItem ) );
+    pParent->Connect( pBtnSelectColor->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnColorRoi ) );
+    pParent->Connect( m_pBtnSelectMeanFiberColor->GetId(),  wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberColorChange ) );
+    pParent->Connect( m_pBtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
+    //pParent->Connect( m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections ) );
+    //pParent->Connect( m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube ) );
+    pParent->Connect( m_pToggleVisibility->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleShowSelectionObject ) );
+    pParent->Connect( m_pToggleActivate->GetId(),   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxTreeEventHandler(    PropertiesWindow::OnActivateTreeItem ) );
+    pParent->Connect( pToggleAndNot->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleAndNot ) );
+    pParent->Connect( m_pToggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayFibersInfo ) );
+    pParent->Connect( m_pToggleDisplayMeanFiber->GetId(),     wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayMeanFiber ) );
+    pParent->Connect( m_pToggleDisplayConvexHull->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
+    pParent->Connect( m_pRadCustomColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnCustomMeanFiberColoring ) );
+    pParent->Connect( m_pRadNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalMeanFiberColoring ) );
+    pParent->Connect( m_pSliderMeanFiberOpacity->GetId(),  wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberOpacityChange ) );
+    pParent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
+    pParent->Connect( m_pTxtBoxX->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionX ) );
+    pParent->Connect( m_pTxtBoxY->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionY ) );
+    pParent->Connect( m_pTxtBoxZ->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionZ ) );
+    pParent->Connect( m_pTxtSizeX->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxSizeX ) );
+    pParent->Connect( m_pTxtSizeY->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxSizeY ) );
+    pParent->Connect( m_pTxtSizeZ->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxSizeZ ) );
 }
 
+//////////////////////////////////////////////////////////////////////////
 
 void SelectionObject::updatePropertiesSizer()
 {
