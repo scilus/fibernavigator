@@ -47,8 +47,8 @@ namespace
 
 // Construction
 TriangleMesh::TriangleMesh()
-:   m_numTris( 0 ),
-    m_numVerts( 0 ),
+:   m_numVerts( 0 ),
+    m_numTris( 0 ),
     m_isCleaned( false ),
     m_vertNormalsCalculated( false ),
     m_neighborsCalculated( false ),

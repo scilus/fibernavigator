@@ -1397,6 +1397,7 @@ void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
     {
         glClearColor( 1.0, 1.0, 1.0, 0.0 );
     }
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::onClearToBlack - glClearColor" ) );
     refreshAllGLWidgets();
 }
 

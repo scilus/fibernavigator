@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+#include "../Logger.h"
 #include "../misc/IsoSurface/Vector.h"
 
 #include <GL/glew.h>
@@ -21,6 +22,8 @@ static Vector mapMouse2World( const int x, const int y, GLdouble projection[16],
     gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX, &posY, &posZ );
     glPopMatrix();
 
+    Logger::getInstance()->printIfGLError( wxT( "mapMouse2World" ) );
+    
     return Vector( posX, posY, posZ );
 }
 
@@ -34,5 +37,7 @@ static Vector mapMouse2WorldBack( const int x, const int y, GLdouble projection[
     GLdouble posX, posY, posZ;
     gluUnProject( winX, winY, 1, modelview, projection, viewport, &posX, &posY, &posZ );
 
+    Logger::getInstance()->printIfGLError( wxT( "mapMouse2WorldBack" ) );
+    
     return Vector( posX, posY, posZ );
 }

@@ -167,8 +167,12 @@ void TheScene::initGL( int whichView )
 
 void TheScene::bindTextures()
 {
+    Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - Before") );
+
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
+    Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glTexEnvf") );
+    
     int allocatedTextureCount = 0;
 
     for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
@@ -177,7 +181,10 @@ void TheScene::bindTextures()
         if( pDsInfo->getType() < MESH && pDsInfo->getShow() )
         {
             glActiveTexture( GL_TEXTURE0 + allocatedTextureCount );
+            Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glActiveTexture") );
+
             glBindTexture( GL_TEXTURE_3D, pDsInfo->getGLuint() );
+            Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glBindTexture") );
             if( pDsInfo->getShowFS() )
             {
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -188,6 +195,9 @@ void TheScene::bindTextures()
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
             }
+            
+            Logger::getInstance()->printIfGLError( wxT( "TheScene::bindTextures - glTexParameteri") );
+            
             if ( ++allocatedTextureCount == 10 )
             {
                 Logger::getInstance()->print( wxT( "Reached 10 textures!" ), LOGLEVEL_WARNING );

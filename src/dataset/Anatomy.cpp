@@ -294,6 +294,8 @@ void Anatomy::dilate()
 
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::dilate - glDeleteTextures") );
+
     generateTexture();
 }
 
@@ -336,6 +338,7 @@ void Anatomy::erode()
 
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::erode - glDeleteTextures") );
     generateTexture();
 }
 
@@ -461,6 +464,7 @@ void Anatomy::flipAxis( AxisType axe )
 
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::flipAxis - glDeleteTextures") );
     generateTexture();
 }
 
@@ -1054,7 +1058,9 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, float c
 	}
 
 	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::updateTexture - glBindTexture") );
 	glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_LUMINANCE, GL_FLOAT, &subData[0] );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::updateTexture - glTexSubImage3D") );
 }
 
 void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB ) 
@@ -1111,7 +1117,9 @@ void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor
 	}
 
 	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::updateTexture - glBindTexture") );
 	glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_RGB, GL_FLOAT, &subData[0] );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::updateTexture - glTexSubImage3D") );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1127,6 +1135,7 @@ bool Anatomy::toggleEqualization()
 
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::toggleEqualization - glDeleteTextures") );
     generateTexture();
 
     return m_useEqualizedDataset;
@@ -1145,6 +1154,7 @@ void Anatomy::equalizationSliderChange()
 
         const GLuint* pTexId = &m_GLuint;
         glDeleteTextures( 1, pTexId );
+        Logger::getInstance()->printIfGLError( wxT( "Anatomy::equalizationSliderChange - glDeleteTextures") );
         generateTexture();
     }
 }
@@ -1697,13 +1707,17 @@ SubTextureBox Anatomy::getStrokeBox( const int x, const int y, const int z, cons
 void Anatomy::generateTexture()
 {
     glPixelStorei  ( GL_UNPACK_ALIGNMENT, 1 );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glPixelStorei") );
     glGenTextures  ( 1, &m_GLuint );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glGenTextures") );
     glBindTexture  ( GL_TEXTURE_3D, m_GLuint );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glBindTexture") );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glTexParameteri") );
 
     switch( m_type )
     {
@@ -1728,6 +1742,7 @@ void Anatomy::generateTexture()
         default:
             break;
     }
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glTexImage3D") );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1737,6 +1752,7 @@ Anatomy::~Anatomy()
     Logger::getInstance()->print( wxT( "Executing Anatomy destructor..." ), LOGLEVEL_DEBUG );
     const GLuint* tex = &m_GLuint;
     glDeleteTextures( 1, tex );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::~Anatomy - glDeleteTextures") );
 
     if( m_pRoi )
     {
@@ -1821,6 +1837,7 @@ void Anatomy::popHistory(bool isRGB)
 		}
 		//restore texture with the data
 		glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+        Logger::getInstance()->printIfGLError( wxT( "Anatomy::popHistory - glBindTexture") );
 		if(isRGB)
 		{
 			glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_RGB, GL_FLOAT, &(topPtr->data[0]) );
@@ -1829,6 +1846,7 @@ void Anatomy::popHistory(bool isRGB)
 		{
 			glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_LUMINANCE, GL_FLOAT, &(topPtr->data[0]) );
 		}
+        Logger::getInstance()->printIfGLError( wxT( "Anatomy::popHistory - glTexSubImage3D") );
 		//discard this subtexture
 		topPtr = NULL;
 		m_drawHistory.top().pop();

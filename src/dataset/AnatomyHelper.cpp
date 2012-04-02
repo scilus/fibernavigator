@@ -7,6 +7,7 @@
 #include "AnatomyHelper.h"
 
 #include "DatasetManager.h"
+#include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
@@ -34,6 +35,7 @@ AnatomyHelper::~AnatomyHelper()
 void AnatomyHelper::renderNav( int pView )
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - glPushAttrib") );
 
     SceneManager::getInstance()->getScene()->bindTextures();
     ShaderHelper::getInstance()->getAnatomyShader()->bind();
@@ -41,7 +43,9 @@ void AnatomyHelper::renderNav( int pView )
     ShaderHelper::getInstance()->setTextureShaderVars();
 
     glEnable( GL_ALPHA_TEST );
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - glEnable") );
     glAlphaFunc( GL_GREATER, 0.0001f );
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - glAlphaFunc") );
 
     float xLine( 0.0f );
     float yLine( 0.0f );
@@ -77,6 +81,7 @@ void AnatomyHelper::renderNav( int pView )
                 glTexCoord3f( 1.0f, 1.0f, ( sliceZ + 0.5f ) / frames ); glVertex3f( x + xo, y + yo, quadZ );
                 glTexCoord3f( 0.0f, 1.0f, ( sliceZ + 0.5f ) / frames ); glVertex3f( 0 + xo, y + yo, quadZ );
             glEnd();
+            Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - AXIAL: glBegin") );
 
             xLine = SceneManager::getInstance()->getSliceX() * voxelX + xo;
             yLine = SceneManager::getInstance()->getSliceY() * voxelY + yo;
@@ -92,6 +97,7 @@ void AnatomyHelper::renderNav( int pView )
                 glTexCoord3f( 1.0f, ( sliceY + 0.5f ) / rows, 1.0f ); glVertex3f( x + xo, z + zo, quadZ );
                 glTexCoord3f( 1.0f, ( sliceY + 0.5f ) / rows, 0.0f ); glVertex3f( x + xo, 0 + zo, quadZ );
             glEnd();
+            Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - CORONAL: glBegin") );
 
             xLine = SceneManager::getInstance()->getSliceX() * voxelX + xo;
             yLine = SceneManager::getInstance()->getSliceZ() * voxelZ + zo;
@@ -107,6 +113,7 @@ void AnatomyHelper::renderNav( int pView )
                 glTexCoord3f( ( sliceX + 0.5f ) / columns, 0.0f, 1.0f ); glVertex3f( y + yo, z + zo, quadZ );
                 glTexCoord3f( ( sliceX + 0.5f ) / columns, 0.0f, 0.0f ); glVertex3f( y + yo, 0 + zo, quadZ );
             glEnd();
+            Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - SAGITTAL: glBegin") );
 
             xLine = max - SceneManager::getInstance()->getSliceY() * voxelY;
             yLine = SceneManager::getInstance()->getSliceZ() * voxelZ + zo;
@@ -115,8 +122,10 @@ void AnatomyHelper::renderNav( int pView )
     }
 
     glDisable( GL_TEXTURE_3D );
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - glDisable") );
     ShaderHelper::getInstance()->getAnatomyShader()->release();
     glPopAttrib();
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - glPopAttrib") );
 
     glLineWidth( 1.0f );
     glColor3f( 1.0f, 0.0f, 0.0f );
@@ -128,6 +137,7 @@ void AnatomyHelper::renderNav( int pView )
     glEnd();
 
     glColor3f( 1.0f, 1.0f, 1.0f );
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - glBegin") );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -198,6 +208,7 @@ void AnatomyHelper::renderCrosshair()
         glVertex3f( m_xb, m_y + offset, m_z - offset );
 
     glEnd();
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderCrosshair") );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -213,6 +224,7 @@ void AnatomyHelper::renderAxial()
         glTexCoord3f( 1.0, 1.0, m_zc ); glVertex3f( m_xb, m_yb, m_z );
         glTexCoord3f( 1.0, 0.0, m_zc ); glVertex3f( m_xb, 0,    m_z );
     glEnd();
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderAxial") );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -228,6 +240,7 @@ void AnatomyHelper::renderCoronal()
         glTexCoord3f( 1.0, m_yc, 1.0 ); glVertex3f( m_xb, m_y, m_zb );
         glTexCoord3f( 1.0, m_yc, 0.0 ); glVertex3f( m_xb, m_y, 0    );
     glEnd();
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderCoronal") );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -243,4 +256,5 @@ void AnatomyHelper::renderSagittal()
         glTexCoord3f( m_xc, 1.0, 1.0); glVertex3f( m_x, m_yb, m_zb );
         glTexCoord3f( m_xc, 1.0, 0.0); glVertex3f( m_x, m_yb, 0    );
     glEnd();
+    Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderSagittal") );
 }
