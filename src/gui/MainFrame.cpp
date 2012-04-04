@@ -1765,7 +1765,7 @@ void MainFrame::deleteListItem()
 
 //////////////////////////////////////////////////////////////////////////
 
-void MainFrame::onDeleteAllListItems( wxListEvent& evt )
+void MainFrame::onDeleteAllListItems( wxListEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteAllListItems" ), LOGLEVEL_DEBUG );
 
@@ -1777,9 +1777,6 @@ void MainFrame::onDeleteAllListItems( wxListEvent& evt )
 void MainFrame::onDeleteListItem( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteListItem" ), LOGLEVEL_DEBUG );
-
-    DatasetIndex index = (DatasetIndex)evt.GetData();
-    DatasetManager::getInstance()->remove( index );
 
     m_pPropertiesWindow->Layout();
     m_pPropertiesWindow->FitInside();

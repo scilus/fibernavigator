@@ -42,15 +42,19 @@ void ListCtrl::AssignImageList( wxImageList *imageList, int which )
 
 bool ListCtrl::DeleteItem( long index )
 {
-    DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
+    DatasetIndex dsIndex  = GetItem( index );
+    DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( dsIndex );
 
     if( FIBERSGROUP == pDataset->getType() )
     {
-        while( index + 1 < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index + 1 ) )->getType() )
+        DatasetIndex dsIndex;
+        while( index + 1 < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( dsIndex = GetItem( index + 1 ) )->getType() )
         {
+            DatasetManager::getInstance()->remove( dsIndex );
             wxListCtrl::DeleteItem( index + 1 );
         }
     }
+    DatasetManager::getInstance()->remove( dsIndex );
     return wxListCtrl::DeleteItem( index );
 }
 
