@@ -47,10 +47,10 @@ bool ListCtrl::DeleteItem( long index )
 
     if( FIBERSGROUP == pDataset->getType() )
     {
-        DatasetIndex dsIndex;
-        while( index + 1 < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( dsIndex = GetItem( index + 1 ) )->getType() )
+        DatasetIndex dsFiberIndex;
+        while( index + 1 < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( dsFiberIndex = GetItem( index + 1 ) )->getType() )
         {
-            DatasetManager::getInstance()->remove( dsIndex );
+            DatasetManager::getInstance()->remove( dsFiberIndex );
             wxListCtrl::DeleteItem( index + 1 );
         }
     }
