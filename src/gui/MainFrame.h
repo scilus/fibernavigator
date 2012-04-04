@@ -55,7 +55,7 @@ public:
     void onTreeChange();
     void onLoad                             ( wxCommandEvent& evt );
     long getCurrentListItem() const         { return m_currentListItem; }
-	void createNewAnatomy					( DatasetType dataType );
+    void createNewAnatomy                   ( DatasetType dataType );
     void updateSliders();
 
     bool canDraw3D() const          { return m_draw3d; }
@@ -124,8 +124,8 @@ private:
 
     // Options menu
     void onToggleLighting                   ( wxCommandEvent& evt );
-	void onClearToBlack                     ( wxCommandEvent& evt );
-	void onSelectNormalPointer              ( wxCommandEvent& evt );
+    void onClearToBlack                     ( wxCommandEvent& evt );
+    void onSelectNormalPointer              ( wxCommandEvent& evt );
     void onSelectRuler                      ( wxCommandEvent& evt );
     void onRulerToolClear                   ( wxCommandEvent& evt );
     void onRulerToolAdd                     ( wxCommandEvent& evt );
@@ -148,7 +148,7 @@ private:
     void onAbout                            ( wxCommandEvent& evt );
     void onShortcuts                        ( wxCommandEvent& evt );
     void onScreenshot                       ( wxCommandEvent& evt );
-	void onWarningsInformations				( wxCommandEvent& evt );
+    void onWarningsInformations             ( wxCommandEvent& evt );
 
     // List widget event functions     
     void onActivateListItem                 ( wxListEvent&    evt );
@@ -165,7 +165,7 @@ private:
     void onActivateTreeItem                 ( wxTreeEvent&    evt );
     void onTreeLabelEdit                    ( wxTreeEvent&    evt );
     int  treeSelected                       ( wxTreeItemId    id  ); 
-    
+
     // System functions
     void onGLEvent                          ( wxCommandEvent& evt );    
     void onSliderMoved                      ( wxCommandEvent& evt );
@@ -176,21 +176,21 @@ private:
     void setTimerSpeed();
     void createNewSelectionObject( ObjectType i_newSelectionObjectType );
 
-	void onSelectDrawer                     ( wxCommandEvent& evt );
+    void onSelectDrawer                     ( wxCommandEvent& evt );
     void onSwitchDrawer                     ( wxCommandEvent& evt );
-	void onToggleDrawRound                  ( wxCommandEvent& evt );
-	void onToggleDraw3d                     ( wxCommandEvent& evt );
-	void onSelectColorPicker                ( wxCommandEvent& evt );
-	void onSelectStroke1                    ( wxCommandEvent& evt );
-	void onSelectStroke2                    ( wxCommandEvent& evt );
-	void onSelectStroke3                    ( wxCommandEvent& evt );
-	void onSelectStroke4                    ( wxCommandEvent& evt );
-	void onSelectStroke5                    ( wxCommandEvent& evt );
-	void onSelectStroke7                    ( wxCommandEvent& evt );
-	void onSelectStroke10                   ( wxCommandEvent& evt );
-	void onSelectPen                        ( wxCommandEvent& evt );
-	void onSelectEraser                     ( wxCommandEvent& evt );
-                        
+    void onToggleDrawRound                  ( wxCommandEvent& evt );
+    void onToggleDraw3d                     ( wxCommandEvent& evt );
+    void onSelectColorPicker                ( wxCommandEvent& evt );
+    void onSelectStroke1                    ( wxCommandEvent& evt );
+    void onSelectStroke2                    ( wxCommandEvent& evt );
+    void onSelectStroke3                    ( wxCommandEvent& evt );
+    void onSelectStroke4                    ( wxCommandEvent& evt );
+    void onSelectStroke5                    ( wxCommandEvent& evt );
+    void onSelectStroke7                    ( wxCommandEvent& evt );
+    void onSelectStroke10                   ( wxCommandEvent& evt );
+    void onSelectPen                        ( wxCommandEvent& evt );
+    void onSelectEraser                     ( wxCommandEvent& evt );
+
     // Utility
     void updateDrawerToolbar();
 

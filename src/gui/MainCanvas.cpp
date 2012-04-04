@@ -567,6 +567,7 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
         {
             ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
             SceneManager::getInstance()->setSelBoxChanged( true );
+            RTTrackingHelper::getInstance()->setRTTDirty( true );
         }
     }
     m_lastPos = evt.GetPosition();
@@ -909,10 +910,10 @@ void MainCanvas::render()
                     }
                     m_isRulerHit = false;
                 }
-				else if( MyApp::frame->isDrawerToolActive() && m_isDrawerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
-				{
-					m_isDrawerHit = false;
-				}
+                else if( MyApp::frame->isDrawerToolActive() && m_isDrawerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
+                {
+                    m_isDrawerHit = false;
+                }
 
                 //renderTestRay();
                 if( SceneManager::getInstance()->areAxesDisplayed() )
@@ -924,11 +925,11 @@ void MainCanvas::render()
                 {
                     renderRulerDisplay();
                 }
-				else if( MyApp::frame->isDrawerToolActive() )
-				{
-					//TODO, may be useful later
-					//renderDrawerDisplay();
-				}
+                else if( MyApp::frame->isDrawerToolActive() )
+                {
+                    //TODO, may be useful later
+                    //renderDrawerDisplay();
+                }
 
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
                 {

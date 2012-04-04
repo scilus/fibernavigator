@@ -196,8 +196,7 @@ MainFrame::MainFrame( const wxString     &title,
     m_pLastSelectedObj( NULL )
 {
     wxImage::AddHandler(new wxPNGHandler);
-    //////////////////////////////////////////////////////////////////////////
-    // initLayout
+
     initLayout();
 
     m_pTimer = new wxTimer( this );
@@ -936,7 +935,6 @@ void MainFrame::deleteSceneObject()
     m_pLastSelectedSceneObject = NULL;
     m_currentListItem = -1;
     m_lastSelectedListItem = -1;
-    m_pPropertiesWindow->GetSizer()->Layout();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1686,18 +1684,6 @@ void MainFrame::refreshAllGLWidgets()
 
 void MainFrame::refreshViews()
 {
-//     m_tab->Fit();
-//     m_tab->Layout();
-// 
-//     m_pPropertiesWindow->Fit();
-//     m_pPropertiesWindow->AdjustScrollbars();
-//     m_pPropertiesWindow->Layout();
-// 
-//     m_pTrackingWindow->Fit();
-//     m_pTrackingWindow->AdjustScrollbars();
-//     m_pTrackingWindow->Layout();
-
-
     displayPropertiesSheet();
     if ( m_pMainGL )
     {

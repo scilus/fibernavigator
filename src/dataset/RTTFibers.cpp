@@ -310,7 +310,7 @@ void RTTFibers::renderRTTFibers()
 {
     for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
     { 
-	    if( (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() > getMinFiberLength() && (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() < getMaxFiberLength() )
+        if( (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() > getMinFiberLength() && (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() < getMaxFiberLength() )
         {
             //POINTS
             if( SceneManager::getInstance()->isPointMode() )
