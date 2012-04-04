@@ -915,9 +915,9 @@ void MainFrame::onSelectPen( wxCommandEvent& event )
 
 void MainFrame::onSelectEraser( wxCommandEvent& event )
 {
-	m_drawMode = DRAWMODE_ERASER;
-	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
-	refreshAllGLWidgets();
+    m_drawMode = DRAWMODE_ERASER;
+    //glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
+    refreshAllGLWidgets();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -928,6 +928,7 @@ void MainFrame::deleteSceneObject()
     {
         m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer, true );
         m_pPropertiesWindow->GetSizer()->Detach( m_pCurrentSizer );
+        delete m_pCurrentSizer;
         m_pCurrentSizer = NULL;
     }
 

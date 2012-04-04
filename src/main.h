@@ -6,8 +6,6 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-//#include <vld.h> 
-
 #include <wx/app.h>
 
 class MainFrame;

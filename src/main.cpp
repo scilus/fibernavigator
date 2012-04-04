@@ -113,9 +113,6 @@ bool MyApp::OnInit( void )
         Logger::getInstance()->print( wxString::Format( wxT( "respath: %s" ), respath.c_str() ), LOGLEVEL_DEBUG );
         Logger::getInstance()->print( wxString::Format( wxT( "shader: %s" ), shaderPath.c_str() ), LOGLEVEL_DEBUG );
 
-//         Border *border = new Border( wxT( "TEST" ) );
-//         border->Show( true );
-
         // Create the main frame window
         frame = new MainFrame( wxT("Fiber Navigator 1219"), wxPoint( 50, 50 ), wxSize( 800, 600 ) );
         SceneManager::getInstance()->setMainFrame( frame );
@@ -125,10 +122,10 @@ bool MyApp::OnInit( void )
         // Give it an icon (this is ignored in MDI mode: uses resources)
         frame->SetIcon( wxIcon( _T( "sashtest_icn" ) ) );
 #endif
-        
+
         frame->SetMinSize( wxSize( 800, 600 ) );
         frame->SetSize( wxSize( 1024, 768 ) );
-                
+
         frame->Show( true );
         SetTopWindow( frame );
 
@@ -136,7 +133,7 @@ bool MyApp::OnInit( void )
         wxString cmdFileName;
         wxCmdLineParser cmdParser( desc, argc, argv );
         cmdParser.Parse( false );
-        
+
         if ( cmdParser.GetParamCount() > 0 )
         {
             Loader loader = Loader(frame, frame->m_pListCtrl );
@@ -169,7 +166,7 @@ bool MyApp::OnInit( void )
         }
         return true;
 
-    } 
+    }
     catch ( ... )
     {
         Logger::getInstance()->print( wxT( "Something went wrong, terribly wrong" ), LOGLEVEL_ERROR );
