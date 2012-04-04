@@ -871,7 +871,7 @@ void MainCanvas::render()
 
                 glPushMatrix();
                 SceneManager::getInstance()->doMatrixManipulation();
-				
+
                 SceneManager::getInstance()->getScene()->renderScene();
                 glPopMatrix();
 

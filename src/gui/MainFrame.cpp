@@ -573,7 +573,7 @@ void MainFrame::onSize( wxSizeEvent& evt )
 {
     Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onSize" ), LOGLEVEL_DEBUG );
 
-    if( NULL != m_pMainGL )
+    if( NULL != m_pMainGL && DatasetManager::getInstance()->getAnatomyCount() > 0 )
     {
         m_pMainGL->changeOrthoSize();
     }
