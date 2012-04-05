@@ -113,18 +113,17 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
+    m_columns = DatasetManager::getInstance()->getColumns();
+    m_rows    = DatasetManager::getInstance()->getRows();
+    m_frames  = DatasetManager::getInstance()->getFrames();
     m_bands   = 1;
-    
+
     m_type    = HEAD_BYTE;
 
-    m_isLoaded = true;   
-    
+    m_isLoaded = true;
+
     m_floatDataset.resize( m_columns * m_frames * m_rows );
-    
-    for( unsigned int i(0); i < m_floatDataset.size(); ++i )
-    {
-        m_floatDataset[i] = pDataset->at(i);
-    }
+    std::copy( pDataset->begin(), pDataset->end(), m_floatDataset.begin() );
 }
 
 Anatomy::Anatomy( const int type )

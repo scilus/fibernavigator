@@ -72,7 +72,7 @@ public:
     DatasetIndex createAnatomy()                                                 { return insert( new Anatomy() ); }
     DatasetIndex createAnatomy( DatasetType type )                               { return insert( new Anatomy( type ) ); }
     DatasetIndex createAnatomy( const Anatomy * const pAnatomy )                 { return insert( new Anatomy( pAnatomy ) ); }
-    DatasetIndex createAnatomy( std::vector<float> *pDataset, DatasetType type ) { return insert( new Anatomy( pDataset, type ) ); }
+    DatasetIndex createAnatomy( std::vector<float> *pDataset, int sample )       { return insert( new Anatomy( pDataset, sample ) ); }
     DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( pAnatomy ) ); }
     DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup() ); }
     DatasetIndex createODFs( const wxString &filename )                          { return insert( new ODFs( filename ) ); }

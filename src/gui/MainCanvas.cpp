@@ -1475,7 +1475,7 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
 }
 
 //Floodfill method using a threshold range
-void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, Vector click, float range)
+void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, Vector click, float threshold)
 {
     //Get the user clicked voxel
     int xClick = floor( click[0] / DatasetManager::getInstance()->getVoxelX() );
@@ -1489,9 +1489,9 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
     Logger::getInstance()->print( wxT( "Floodfill" ), LOGLEVEL_MESSAGE );
 
     //Intensity of the current voxel
-    float value = getElement( xClick, yClick, zClick, src );
-    float upBracket = value+range;
-    float downBracket = value-range;
+    float val = getElement( xClick, yClick, zClick, src );
+    float upBracket = val + threshold;
+    float downBracket = val - threshold;
 
     std::list<Vector> toVisit;
     int north, south, east, west, front, back, x, y, z;
@@ -1579,7 +1579,7 @@ void MainCanvas::segment()
     //1D vector with the normalized brightness ( 0 to 1 )
     std::vector<float>* sourceData = l_info->getFloatDataset();
     std::vector<float>* resultData = new std::vector<float>;
-    resultData->resize(dataLength);  
+    resultData->resize( dataLength );
 
     switch( SceneManager::getInstance()->getSegmentMethod() )
     {
@@ -1604,7 +1604,7 @@ void MainCanvas::segment()
     }
 
     //Create a new anatomy for the tumor
-    int indx = DatasetManager::getInstance()->createAnatomy( resultData, HEAD_SHORT );
+    int indx = DatasetManager::getInstance()->createAnatomy( resultData, 0 );
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
     pNewAnatomy->setShowFS(false);
     // TODO: Change hard coded value and use enum instead
