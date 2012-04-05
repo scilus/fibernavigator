@@ -166,8 +166,6 @@ void TheScene::initGL( int whichView )
 
 void TheScene::bindTextures()
 {
-    Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - Before") );
-
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
     Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glTexEnvf") );
@@ -296,7 +294,6 @@ void TheScene::renderScene()
 
     // Opaque objects.
     renderSlices();
-
 
     if( DatasetManager::getInstance()->isVectorsLoaded() )
         drawVectors();
@@ -603,41 +600,41 @@ void TheScene::renderFibers()
 
         if( pDsInfo->getType() == FIBERS && pDsInfo->getShow())
         {
-			Fibers* pFibers = (Fibers*)pDsInfo;
-			if( pFibers != NULL )
-			{
+            Fibers* pFibers = (Fibers*)pDsInfo;
+            if( pFibers != NULL )
+            {
                 if( SceneManager::getInstance()->isSelBoxChanged() )
                 {
                     pFibers->updateLinesShown();
                 }
 
-				if( pFibers->isUsingFakeTubes() )
-				{
-					pFibers->draw();
+                if( pFibers->isUsingFakeTubes() )
+                {
+                    pFibers->draw();
 
                     Logger::getInstance()->printIfGLError( wxT( "Draw fake tubes" ) );
-				}
-				else // render normally
-				{
-					if( SceneManager::getInstance()->isLightingActive() )
-					{
-						lightsOn();
-						GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-						glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
-					}
-					if( ! pFibers->getUseTex() )
-					{
-						bindTextures();
-					}
-					
-					pFibers->draw();
-					lightsOff();
+                }
+                else // render normally
+                {
+                    if( SceneManager::getInstance()->isLightingActive() )
+                    {
+                        lightsOn();
+                        GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+                glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
+                    }
+                    if( ! pFibers->getUseTex() )
+                    {
+                        bindTextures();
+                    }
+
+                    pFibers->draw();
+                    lightsOff();
 
                     Logger::getInstance()->printIfGLError( wxT( "Draw fibers" ) );
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 
     SceneManager::getInstance()->setSelBoxChanged( false );
 
@@ -650,7 +647,7 @@ void TheScene::renderFibers()
         }
     }
 
-	glPopAttrib();
+    glPopAttrib();
 }
 
 

@@ -472,11 +472,6 @@ void Anatomy::flipAxis( AxisType axe )
 
 bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
 {
-    
-// #if defined(DEBUG) || defined(_DEBUG)
-//     //nifti_1_header *l_tmphdr = nifti_read_header( l_hdrFile, 0, 0 );
-//     //disp_nifti_1_header( "", l_tmphdr );
-// #endif
     m_columns   = pHeader->dim[1]; 
     m_rows      = pHeader->dim[2]; 
     m_frames    = pHeader->dim[3]; 
@@ -660,7 +655,7 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
                 }
             }
 
-            m_floatDataset.resize ( datasetSize );
+            m_floatDataset.resize( datasetSize );
 
             for( int i(0); i < datasetSize; ++i )
             {

@@ -955,7 +955,7 @@ void MainFrame::createCutDataset()
 
     Anatomy* l_anatomy = (Anatomy*) info;
 
-    int index = DatasetManager::getInstance()->createAnatomy();
+    DatasetIndex index = DatasetManager::getInstance()->createAnatomy();
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 
     int   columns = DatasetManager::getInstance()->getColumns();
@@ -967,21 +967,21 @@ void MainFrame::createCutDataset()
 
     pNewAnatomy->setZero( columns, rows, frames );
 
-    SelectionObjList l_selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+    SelectionObjList selObjects = SceneManager::getInstance()->getSelectionObjects();
     int x1, x2, y1, y2, z1, z2;
 
-    for( unsigned int i = 0; i < l_selectionObjects.size(); ++i )
+    for( unsigned int i = 0; i < selObjects.size(); ++i )
     {
-        for( unsigned int j = 0; j < l_selectionObjects[i].size(); ++j )
+        for( unsigned int j = 0; j < selObjects[i].size(); ++j )
         {
-            if( l_selectionObjects[i][j]->getIsVisible() )
+            if( selObjects[i][j]->getIsVisible() )
             {
-                x1 = (int)( l_selectionObjects[i][j]->getCenter().x / voxelX - l_selectionObjects[i][j]->getSize().x / 2 );
-                x2 = (int)( l_selectionObjects[i][j]->getCenter().x / voxelX + l_selectionObjects[i][j]->getSize().x / 2 );
-                y1 = (int)( l_selectionObjects[i][j]->getCenter().y / voxelY - l_selectionObjects[i][j]->getSize().y / 2 );
-                y2 = (int)( l_selectionObjects[i][j]->getCenter().y / voxelY + l_selectionObjects[i][j]->getSize().y / 2 );
-                z1 = (int)( l_selectionObjects[i][j]->getCenter().z / voxelZ - l_selectionObjects[i][j]->getSize().z / 2 );
-                z2 = (int)( l_selectionObjects[i][j]->getCenter().z / voxelZ + l_selectionObjects[i][j]->getSize().z / 2 );
+                x1 = (int)( selObjects[i][j]->getCenter().x / voxelX - selObjects[i][j]->getSize().x / 2 );
+                x2 = (int)( selObjects[i][j]->getCenter().x / voxelX + selObjects[i][j]->getSize().x / 2 );
+                y1 = (int)( selObjects[i][j]->getCenter().y / voxelY - selObjects[i][j]->getSize().y / 2 );
+                y2 = (int)( selObjects[i][j]->getCenter().y / voxelY + selObjects[i][j]->getSize().y / 2 );
+                z1 = (int)( selObjects[i][j]->getCenter().z / voxelZ - selObjects[i][j]->getSize().z / 2 );
+                z2 = (int)( selObjects[i][j]->getCenter().z / voxelZ + selObjects[i][j]->getSize().z / 2 );
 
                 x1 = std::max( 0, std::min( x1, columns ) );
                 x2 = std::max( 0, std::min( x2, columns ) );

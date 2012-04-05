@@ -499,7 +499,7 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
 
         return index;
     }
-    
+
     delete pAnatomy;
     return BAD_INDEX;
 }

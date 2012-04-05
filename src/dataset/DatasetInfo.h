@@ -103,9 +103,9 @@ public:
     void     setColor ( wxColour color )         { m_color  = color; };
     wxColour getColor() const                    { return m_color;   };
 
-    int getVoxelSizeX() const                    { return m_voxelSizeX; }
-    int getVoxelSizeY() const                    { return m_voxelSizeY; }
-    int getVoxelSizeZ() const                    { return m_voxelSizeZ; }
+    float getVoxelSizeX() const                    { return m_voxelSizeX; }
+    float getVoxelSizeY() const                    { return m_voxelSizeY; }
+    float getVoxelSizeZ() const                    { return m_voxelSizeZ; }
 
 public:
     // Trianglemesh

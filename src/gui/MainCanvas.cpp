@@ -389,9 +389,9 @@ void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt
                     {
                         SceneManager::getInstance()->setSegmentActive( true );
                         //m_pDatasetHelper->m_isSegmentActive = true;
-                        m_hr = pick(evt.GetPosition(), false);
+                        m_hr = pick( evt.GetPosition(), false );
                         segment();
-                        pAnatomy->toggleSegment();                        
+                        pAnatomy->toggleSegment();
                     }
                 }
             }
@@ -1290,12 +1290,12 @@ void MainCanvas::OnChar( wxKeyEvent& event )
         case WXK_END:
             SceneManager::getInstance()->getRulerPts().clear();
             break; 
-		case 'z':
+        case 'z':
         case 'Z':
-			if( MyApp::frame->isDrawerToolActive() )
-			{
-				popAnatomyHistory();
-			}
+            if( MyApp::frame->isDrawerToolActive() )
+            {
+                popAnatomyHistory();
+            }
             break;
         default:
             event.Skip();
@@ -1314,49 +1314,49 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
 {
     float columns = DatasetManager::getInstance()->getColumns();
     float rows    = DatasetManager::getInstance()->getRows();
-    
+
     return (*vect)[ i + ( j * columns ) + ( k * rows * columns ) ];
 }
 
 void MainCanvas::drawOnAnatomy() 
 {
     long index = MyApp::frame->getCurrentListItem();
- 	Anatomy* l_currentAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
+    Anatomy* l_currentAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
     int xClick = floor( m_hitPts[0] / DatasetManager::getInstance()->getVoxelX() );
     int yClick = floor( m_hitPts[1] / DatasetManager::getInstance()->getVoxelY() );
     int zClick = floor( m_hitPts[2] / DatasetManager::getInstance()->getVoxelZ() );
-	int layer = m_hr.picked;
+    int layer = m_hr.picked;
 
-	//security check: hit detection can be a pixel offset, but negative positions crash
-	if( xClick < 0 || yClick < 0 || zClick < 0 )
-	{
-		return;
-	}
+    //security check: hit detection can be a pixel offset, but negative positions crash
+    if( xClick < 0 || yClick < 0 || zClick < 0 )
+    {
+        return;
+    }
 
-	if( DRAWMODE_PEN == MyApp::frame->getDrawMode() )
-	{
-		l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, MyApp::frame->getDrawSize(), MyApp::frame->canDrawRound(), MyApp::frame->canDraw3D(), MyApp::frame->getDrawColor() );
-	}
-	else if( DRAWMODE_ERASER == MyApp::frame->getDrawMode() )
-	{
-		wxColor transparent(0, 0, 0);
-		l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, MyApp::frame->getDrawSize(), MyApp::frame->canDrawRound(), MyApp::frame->canDraw3D(), transparent);
-	}
+    if( DRAWMODE_PEN == MyApp::frame->getDrawMode() )
+    {
+        l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, MyApp::frame->getDrawSize(), MyApp::frame->canDrawRound(), MyApp::frame->canDraw3D(), MyApp::frame->getDrawColor() );
+    }
+    else if( DRAWMODE_ERASER == MyApp::frame->getDrawMode() )
+    {
+        wxColor transparent(0, 0, 0);
+        l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, MyApp::frame->getDrawSize(), MyApp::frame->canDrawRound(), MyApp::frame->canDraw3D(), transparent);
+    }
 }
 
 void MainCanvas::pushAnatomyHistory()
 {
     long index = MyApp::frame->getCurrentListItem();
     Anatomy *l_currentAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
-	l_currentAnatomy->pushHistory();
+    l_currentAnatomy->pushHistory();
 }
 
 void MainCanvas::popAnatomyHistory()
 {
     long index = MyApp::frame->getCurrentListItem();
     Anatomy *l_currentAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
-	l_currentAnatomy->popHistory( RGB == l_currentAnatomy->getType() );
+    l_currentAnatomy->popHistory( RGB == l_currentAnatomy->getType() );
 }
 
 //Kmeans Segmentation
@@ -1386,7 +1386,7 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
     /* Step 0 : Take two random pixels */
     means[0] = 0.0f;
     means[1] = 1.0f;
-    
+
     /* 
     The two first means must not be equal.
     If using Graphcut, we want the means to be chosen from the obj/bck 
@@ -1485,8 +1485,8 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
     int columns = DatasetManager::getInstance()->getColumns();
     int rows    = DatasetManager::getInstance()->getRows();
     int frames  = DatasetManager::getInstance()->getFrames();
-    
-    Logger::getInstance()->print( wxT( "Floodfill" ), LOGLEVEL_DEBUG );
+
+    Logger::getInstance()->print( wxT( "Floodfill" ), LOGLEVEL_MESSAGE );
 
     //Intensity of the current voxel
     float value = getElement( xClick, yClick, zClick, src );
@@ -1531,7 +1531,7 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
         resultWest = getElement( west, y, z, result );
         resultFront = getElement( x, y, front, result );
         resultBack = getElement( x, y, back, result );
-        
+
         if(NorthV >= downBracket && NorthV <= upBracket && resultNorth != 1.0f) //North
         {
             toVisit.push_front(Vector(x,north,z));
@@ -1567,8 +1567,6 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
 //Segment selected area 
 void MainCanvas::segment()
 {
-    std::cout << "Segment method: ";
-    
     int columns = DatasetManager::getInstance()->getColumns();
     int rows    = DatasetManager::getInstance()->getRows();
     int frames  = DatasetManager::getInstance()->getFrames();
@@ -1582,38 +1580,29 @@ void MainCanvas::segment()
     std::vector<float>* sourceData = l_info->getFloatDataset();
     std::vector<float>* resultData = new std::vector<float>;
     resultData->resize(dataLength);  
-     
-    //Segmentation methods
-    //Case 0 : Floodfill
-    //Case 1 : Graph Cut
-    //Case 2 : KMeans
+
     switch( SceneManager::getInstance()->getSegmentMethod() )
     {
         case FLOODFILL:
         {
             float threshold = l_info->getFloodThreshold();
-            std::cout << m_hitPts[0] << " " << m_hitPts[1] << " " << m_hitPts[2] << "\n";
-            floodFill(sourceData, resultData, m_hitPts, threshold);
+            Logger::getInstance()->print( wxString::Format( wxT( "Segment method: Floodfill (%f, %f, %f)" ), m_hitPts[0], m_hitPts[1], m_hitPts[2] ), LOGLEVEL_DEBUG );
+            floodFill( sourceData, resultData, m_hitPts, threshold );
             break;
         }
-
-/*
         case GRAPHCUT:
-        {
-            float sigma = l_info->getGraphSigma();
-            graphCut(sourceData, resultData,sigma);
+            Logger::getInstance()->print( wxT( "Segment method: Graphcut" ), LOGLEVEL_DEBUG );
+//             graphCut( sourceData, resultData, l_info->getGraphSigma() );
             break;
-        }
-
         case KMEANS:
         {
-            float means[2], stddev[2], apriori[2];
-            KMeans(means,stddev,apriori,sourceData,resultData);
+            Logger::getInstance()->print( wxT( "Segment method: KMeans" ), LOGLEVEL_DEBUG );
+//             float means[2], stddev[2], apriori[2];
+//             KMeans( means, stddev, apriori, sourceData, resultData );
             break;
         }
-*/
     }
-        
+
     //Create a new anatomy for the tumor
     int indx = DatasetManager::getInstance()->createAnatomy( resultData, HEAD_SHORT );
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );

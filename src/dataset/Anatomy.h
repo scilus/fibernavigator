@@ -49,9 +49,9 @@ public:
     Anatomy( std::vector<float> *pDataset, const int sample );
     Anatomy( const int type );
     virtual ~Anatomy();
-   
-	void add( Anatomy* anatomy);
-   
+
+    void add( Anatomy* anatomy);
+
     float at( const int i ) const;
     std::vector<float>* getFloatDataset();
     std::vector<float>* getEqualizedDataset();
@@ -59,27 +59,27 @@ public:
     MySlider            *m_pSliderFlood;
     MySlider            *m_pSliderGraphSigma;
     wxStaticText        *m_pLblThres;
-  
+
     GLuint getGLuint();
-    
+
     void setZero(    const int sizeX, const int sizeY, const int sizeZ );
     void setRGBZero( const int sizeX, const int sizeY, const int sizeZ );
-    
+
     TensorField* getTensorField();
- 
+
     void dilate();
     void erode();
     void minimize();
 
-	void writeVoxel( Vector v, int layer, int ds, bool dr, bool d3d, wxColor colorRGB ) { writeVoxel(v.x, v.y, v.z, layer, ds, dr, d3d, colorRGB); };
-	//void eraseVoxel( Vector v, float ds, bool dr, bool d3d ) { eraseVoxel(v.x, v.y, v.z, ds, dr, d3d); };
-	void writeVoxel( const int x, const int y, const int z, const int layer, const int size, const bool isRound, const bool draw3d, wxColor colorRGB );
-	//void eraseVoxel( const int x, const int y, const int z, const int size, const bool isRound, const bool draw3d );
-	SubTextureBox getStrokeBox( const int x, const int y, const int z, const int layer, const int size, const bool draw3d );
+    void writeVoxel( Vector v, int layer, int ds, bool dr, bool d3d, wxColor colorRGB ) { writeVoxel(v.x, v.y, v.z, layer, ds, dr, d3d, colorRGB); };
+    //void eraseVoxel( Vector v, float ds, bool dr, bool d3d ) { eraseVoxel(v.x, v.y, v.z, ds, dr, d3d); };
+    void writeVoxel( const int x, const int y, const int z, const int layer, const int size, const bool isRound, const bool draw3d, wxColor colorRGB );
+    //void eraseVoxel( const int x, const int y, const int z, const int size, const bool isRound, const bool draw3d );
+    SubTextureBox getStrokeBox( const int x, const int y, const int z, const int layer, const int size, const bool draw3d );
 
     void flipAxis( AxisType axe );
 
-	void draw(){};
+    void draw(){};
 
     bool load( nifti_image *pHeader, nifti_image *pBody );
     virtual bool save( wxXmlNode *pNode ) const;
@@ -87,27 +87,27 @@ public:
 
     void setDataType( const int type) { m_dataType = type; }
     int  getDataType()                { return m_dataType; }
-    
+
     virtual void createPropertiesSizer( PropertiesWindow *pParentWindow );
     virtual void updatePropertiesSizer();
-    
+
     float getFloodThreshold()           { return m_floodThreshold; };
     void  setFloodThreshold(float v)    { m_floodThreshold = v; };
     float getGraphSigma()               { return m_graphSigma; };
     void  setGraphSigma(float v)        { m_graphSigma = v; };
-    
+
     void  toggleSegment()
-    { 
-        m_isSegmentOn = !m_isSegmentOn; 
-        m_pToggleSegment->SetValue(m_isSegmentOn); 
+    {
+        m_isSegmentOn = !m_isSegmentOn;
+        m_pToggleSegment->SetValue( m_isSegmentOn ); 
     }
 
-	void pushHistory();
-	void popHistory(bool isRGB);
+    void pushHistory();
+    void popHistory(bool isRGB);
 
     bool toggleEqualization();
     void equalizationSliderChange();
-   
+
 public:
     bool  m_isSegmentOn;
     SelectionObject *m_pRoi;
@@ -142,11 +142,11 @@ private:
     void erodeInternal(  std::vector<bool> &workData, int curIndex );
 
     void equalizeHistogram();
-    
-	void generateTexture();
-	void updateTexture( SubTextureBox drawZone, const bool isRound, float color );
-	void updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB );
-	void fillHistory(const SubTextureBox drawZone, bool isRGB);
+
+    void generateTexture();
+    void updateTexture( SubTextureBox drawZone, const bool isRound, float color );
+    void updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB );
+    void fillHistory(const SubTextureBox drawZone, bool isRGB);
 
     void generateGeometry() {};
     void initializeBuffer() {};
