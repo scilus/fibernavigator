@@ -895,7 +895,7 @@ void MainCanvas::render()
                 
                 if( SceneManager::getInstance()->isRulerActive() && !m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
                 {
-                    vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+                    vector< Vector > &v = SceneManager::getInstance()->getRulerPts();
                     if( !v.empty() )
                     {
                         Vector lastPts = v.back();
