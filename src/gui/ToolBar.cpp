@@ -157,7 +157,7 @@ void ToolBar::updateToolBar( MainFrame *mf )
 	bool isFiberSelected = false;
 	bool isFiberUsingFakeTubes = false;
 	bool isFiberInverted = false;
-	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListItem != -1)
+	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListIndex != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
 

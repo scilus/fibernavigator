@@ -326,14 +326,14 @@ void ListCtrl::UpdateSelected()
 // GETTERS/SETTERS
 //////////////////////////////////////////////////////////////////////////
 
-long ListCtrl::GetItem( long index ) const
+DatasetIndex ListCtrl::GetItem( long index ) const
 {
     if( 0 > index || index >= wxListCtrl::GetItemCount() )
     {
         return -1;
     }
 
-    return GetItemData( index );
+    return DatasetIndex( GetItemData( index ) );
 }
 
 //////////////////////////////////////////////////////////////////////////

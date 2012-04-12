@@ -65,6 +65,8 @@ SelectionBox::~SelectionBox()
     if( m_objectType == CISO_SURFACE_TYPE )
     {
         delete m_isosurface;
+        m_isosurface = NULL;
+
         if( m_sourceAnatomy && m_sourceAnatomy->m_pRoi == this)
         {
             m_sourceAnatomy->m_pRoi = NULL;
@@ -358,14 +360,4 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
     m_hitResult = hr;
 
     return hr;
-}
-
-void SelectionBox::createPropertiesSizer(PropertiesWindow *parent)
-{
-    SelectionObject::createPropertiesSizer(parent);  
-}
-
-void SelectionBox::updatePropertiesSizer()
-{
-    SelectionObject::updatePropertiesSizer();
 }

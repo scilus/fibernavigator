@@ -86,7 +86,6 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
 
 SelectionObject::~SelectionObject( )
 {
-
 }
 
 void SelectionObject::lockToCrosshair()
@@ -1642,7 +1641,7 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::draw()
 {
-    if( ! m_isActive || ! isSelectionObject())
+    if( !m_isActive || !isSelectionObject())
     {
         if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
             drawFibersInfo();
@@ -2060,7 +2059,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ) );
     m_pSliderMeanFiberOpacity  = new wxSlider( pParent, wxID_ANY, 35, 0, 100, wxDefPosition, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderConvexHullOpacity = new wxSlider( pParent, wxID_ANY, 35, 0, 100, wxDefPosition, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtName  = new wxTextCtrl( pParent, wxID_ANY, getName(), wxDefPosition, wxDefSize, wxTE_CENTRE | wxTE_READONLY);
+    m_pTxtName  = new wxTextCtrl( pParent, wxID_ANY, getName(), wxDefPosition, wxDefSize, wxTE_CENTRE | wxTE_READONLY );
     m_pTxtBoxX  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.x ), wxDefPosition, wxSize( 10, -1 ) );
     m_pTxtBoxY  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.y ), wxDefPosition, wxSize( 10, -1 ) );
     m_pTxtBoxZ  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.z ), wxDefPosition, wxSize( 10, -1 ) );

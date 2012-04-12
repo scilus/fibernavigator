@@ -23,34 +23,34 @@ using std::vector;
 MenuBar::MenuBar()
 {
     m_menuFile = new wxMenu();
-	m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Open\tCtrl-O"));
+    m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Open\tCtrl-O"));
     m_menuNewAnatomy = new wxMenu();
-	m_itemNewAnatomyByte = m_menuNewAnatomy->Append(wxID_ANY, wxT("New White"));
-	m_itemNewAnatomyRGB = m_menuNewAnatomy->Append(wxID_ANY, wxT("New RGB"));
+    m_itemNewAnatomyByte = m_menuNewAnatomy->Append(wxID_ANY, wxT("New White"));
+    m_itemNewAnatomyRGB = m_menuNewAnatomy->Append(wxID_ANY, wxT("New RGB"));
     m_menuFile->AppendSubMenu(m_menuNewAnatomy, wxT("New Empty Anatomy"));
-	m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
-	m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));
-	m_itemSaveSelectedSurface = m_menuFile->Append(wxID_ANY, wxT("Save Selected Surface"));
-	m_itemSaveSelectedDataset = m_menuFile->Append(wxID_ANY, wxT("Save Selected Dataset"));
-	m_menuFile->AppendSeparator();
-	m_itemQuit = m_menuFile->Append(wxID_EXIT, wxT("Quit\tCtrl-Q"));
+    m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
+    m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));
+    m_itemSaveSelectedSurface = m_menuFile->Append(wxID_ANY, wxT("Save Selected Surface"));
+    m_itemSaveSelectedDataset = m_menuFile->Append(wxID_ANY, wxT("Save Selected Dataset"));
+    m_menuFile->AppendSeparator();
+    m_itemQuit = m_menuFile->Append(wxID_EXIT, wxT("Quit\tCtrl-Q"));
 
     m_menuView = new wxMenu();
-	m_itemReset = m_menuView->Append(wxID_ANY, wxT("Reset"));
-	m_menuView->AppendSeparator();
-	m_itemLeft = m_menuView->Append(wxID_ANY, wxT("Left\tL"));
-	m_itemRight = m_menuView->Append(wxID_ANY, wxT("Right\tR"));
-	m_itemSuperior = m_menuView->Append(wxID_ANY, wxT("Superior\tS"));
-	m_itemInferior = m_menuView->Append(wxID_ANY, wxT("Inferior\tI"));
-	m_itemAnterior = m_menuView->Append(wxID_ANY, wxT("Anterior\tA"));
-	m_itemPosterior = m_menuView->Append(wxID_ANY, wxT("Posterior\tP"));
-	m_menuView->AppendSeparator();
-	m_menuShowSlices = new wxMenu();
-	m_menuView->AppendSubMenu(m_menuShowSlices, wxT("Show Slice"));
-	m_itemToggleShowAxial = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Axial Slice"));
-	m_itemToggleShowCoronal = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Coronal Slice"));
-	m_itemToggleShowSagittal = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Sagittal Slice"));
-	m_menuView->AppendSeparator();
+    m_itemReset = m_menuView->Append(wxID_ANY, wxT("Reset"));
+    m_menuView->AppendSeparator();
+    m_itemLeft = m_menuView->Append(wxID_ANY, wxT("Left\tL"));
+    m_itemRight = m_menuView->Append(wxID_ANY, wxT("Right\tR"));
+    m_itemSuperior = m_menuView->Append(wxID_ANY, wxT("Superior\tS"));
+    m_itemInferior = m_menuView->Append(wxID_ANY, wxT("Inferior\tI"));
+    m_itemAnterior = m_menuView->Append(wxID_ANY, wxT("Anterior\tA"));
+    m_itemPosterior = m_menuView->Append(wxID_ANY, wxT("Posterior\tP"));
+    m_menuView->AppendSeparator();
+    m_menuShowSlices = new wxMenu();
+    m_menuView->AppendSubMenu(m_menuShowSlices, wxT("Show Slice"));
+    m_itemToggleShowAxial = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Axial Slice"));
+    m_itemToggleShowCoronal = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Coronal Slice"));
+    m_itemToggleShowSagittal = m_menuShowSlices->AppendCheckItem(wxID_ANY, wxT("Show Sagittal Slice"));
+    m_menuView->AppendSeparator();
 
     m_menuNavigate = new wxMenu();
     m_menuView->AppendSubMenu(m_menuNavigate, wxT("Navigate"));
@@ -80,7 +80,7 @@ MenuBar::MenuBar()
     m_itemToogleInvertFibersSelection = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Inverse Fibers Selection"));
     m_itemToggleUseFakeTubes = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Fake Tubes"));
     m_itemToggleUseTransparency = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Transparent Fibers"));
-	m_itemToggleUseGeometryShader = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Geometry Shader"));
+    m_itemToggleUseGeometryShader = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Geometry Shader"));
     
     m_menuOptions = new wxMenu();
     m_menuRuler = new wxMenu();
@@ -90,24 +90,24 @@ MenuBar::MenuBar()
     m_itemRulerRemove = m_menuRuler->Append(wxID_ANY, wxT("Remove Last Point"));
     m_menuOptions->AppendSubMenu(m_menuRuler, wxT("Ruler"));
 
-	m_menuDrawer = new wxMenu();
-	m_itemToggleDrawer = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Drawer Activated"));
-	m_itemToggleDrawRound = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Round Shape"));
-	m_itemToggleDraw3d = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Draw 3d"));
-	m_itemDrawColorPicker = m_menuDrawer->Append(wxID_ANY, wxT("Color Picker"));
-	m_menuStrokeSize = new wxMenu();
-		m_itemDrawS1 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 1"));
-		m_itemDrawS2 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 2"));
-		m_itemDrawS3 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 3"));
-		m_itemDrawS4 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 4"));
-		m_itemDrawS5 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 5"));
-		m_itemDrawS7 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 7"));
-		m_itemDrawS10 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 10"));
-		m_itemDrawS2->Check();
-		m_menuOptions->AppendSubMenu(m_menuStrokeSize, wxT("Stroke Size"));
-	m_itemDrawPen = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Pen"));
-	m_itemDrawEraser = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Eraser"));
-	m_menuOptions->AppendSubMenu(m_menuDrawer,wxT("Drawer"));  
+    m_menuDrawer = new wxMenu();
+    m_itemToggleDrawer = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Drawer Activated"));
+    m_itemToggleDrawRound = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Round Shape"));
+    m_itemToggleDraw3d = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Draw 3d"));
+    m_itemDrawColorPicker = m_menuDrawer->Append(wxID_ANY, wxT("Color Picker"));
+    m_menuStrokeSize = new wxMenu();
+        m_itemDrawS1 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 1"));
+        m_itemDrawS2 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 2"));
+        m_itemDrawS3 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 3"));
+        m_itemDrawS4 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 4"));
+        m_itemDrawS5 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 5"));
+        m_itemDrawS7 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 7"));
+        m_itemDrawS10 = m_menuStrokeSize->AppendRadioItem(wxID_ANY, wxT("Size : 10"));
+        m_itemDrawS2->Check();
+        m_menuOptions->AppendSubMenu(m_menuStrokeSize, wxT("Stroke Size"));
+    m_itemDrawPen = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Pen"));
+    m_itemDrawEraser = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Use Eraser"));
+    m_menuOptions->AppendSubMenu(m_menuDrawer,wxT("Drawer"));  
 
     m_menuColorMaps = new wxMenu();
     m_itemGray = m_menuColorMaps->Append(wxID_ANY, wxT("Gray"));
@@ -118,8 +118,8 @@ MenuBar::MenuBar()
     m_itemBlueLightblue = m_menuColorMaps->Append(wxID_ANY, wxT("Blue-Lightblue"));
     m_menuOptions->AppendSubMenu(m_menuColorMaps,wxT("Color Maps"));  
 
-	m_itemToggleDrawPoints = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Draw Points"));
-	m_itemToggleDrawVectors = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Draw Vectors"));
+    m_itemToggleDrawPoints = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Draw Points"));
+    m_itemToggleDrawVectors = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Draw Vectors"));
     m_itemToggleLighting = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Lighting"));
     m_itemToggleClearToBlack = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Clear to Black"));
     m_itemToggleBlendTextureOnMesh = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Blend Tex. on Mesh"));
@@ -129,7 +129,7 @@ MenuBar::MenuBar()
     m_menuHelp = new wxMenu();
     m_itemKeyboardShortcuts = m_menuHelp->Append(wxID_ANY, wxT("Keyboard Shortcut"));
     m_itemScreenShot = m_menuHelp->Append(wxID_ANY, wxT("ScreenShot"));
-	m_itemWarningsInfo = m_menuHelp->Append(wxID_ANY, wxT("Warnings Informations"));
+    m_itemWarningsInfo = m_menuHelp->Append(wxID_ANY, wxT("Warnings Informations"));
     m_menuHelp->AppendSeparator();
     m_itemAbout = m_menuHelp->Append(wxID_ABOUT, wxT("About"));
 
@@ -152,8 +152,8 @@ MenuBar::MenuBar()
 void MenuBar::initMenuBar( MainFrame *mf )
 {
     mf->Connect(m_itemLoad->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLoad));
-	mf->Connect(m_itemNewAnatomyByte->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyByte));
-	mf->Connect(m_itemNewAnatomyRGB->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyRGB));
+    mf->Connect(m_itemNewAnatomyByte->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyByte));
+    mf->Connect(m_itemNewAnatomyRGB->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyRGB));
     mf->Connect(m_itemSaveSCN->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSave));
     mf->Connect(m_itemSaveSelectedFibers->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSaveFibers));
     mf->Connect(m_itemSaveSelectedSurface->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSaveSurface));
@@ -218,7 +218,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemAbout->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onAbout));
     mf->Connect(m_itemKeyboardShortcuts->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onShortcuts));
     mf->Connect(m_itemScreenShot->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshot));
-	mf->Connect(m_itemWarningsInfo->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onWarningsInformations));
+    mf->Connect(m_itemWarningsInfo->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onWarningsInformations));
     mf->Connect(m_itemRotateZ->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateZ));
     mf->Connect(m_itemRotateY->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateY));
     mf->Connect(m_itemRotateX->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateX));
@@ -229,36 +229,36 @@ void MenuBar::updateMenuBar( MainFrame *mf )
 {
     m_itemToggleLighting->Check( SceneManager::getInstance()->isLightingActive() );
     m_itemToggleRuler->Check( SceneManager::getInstance()->isRulerActive() );
-    
-	bool isFiberSelected( false );
-	bool isFiberUsingFakeTubes( false );
-	bool isFiberUsingTransparency( false );
-	bool isFiberInverted( false );
 
-	if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListItem != -1)
+    bool isFiberSelected( false );
+    bool isFiberUsingFakeTubes( false );
+    bool isFiberUsingTransparency( false );
+    bool isFiberInverted( false );
+
+    if (mf->m_pCurrentSceneObject != NULL && mf->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)mf->m_pCurrentSceneObject);
 
         if( pDatasetInfo->getType() == FIBERS )
         {
             isFiberSelected = true;
-			Fibers* pFibers = (Fibers*)pDatasetInfo;
-			if( pFibers )
-			{
-				isFiberUsingFakeTubes = pFibers->isUsingFakeTubes();
-				isFiberUsingTransparency = pFibers->isUsingTransparency();
-				isFiberInverted = pFibers->isFibersInverted();
-			}
-		}
-		else if( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			isFiberSelected = true;
-			FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
-			if( pFibersGroup )
-			{
-				unsigned int useFakeTubesNb = 0;
-				unsigned int useTransparencyNb = 0;
-				unsigned int isInvertedNb = 0;
+            Fibers* pFibers = (Fibers*)pDatasetInfo;
+            if( pFibers )
+            {
+                isFiberUsingFakeTubes = pFibers->isUsingFakeTubes();
+                isFiberUsingTransparency = pFibers->isUsingTransparency();
+                isFiberInverted = pFibers->isFibersInverted();
+            }
+        }
+        else if( pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            isFiberSelected = true;
+            FibersGroup* pFibersGroup = (FibersGroup*)pDatasetInfo;
+            if( pFibersGroup )
+            {
+                unsigned int useFakeTubesNb = 0;
+                unsigned int useTransparencyNb = 0;
+                unsigned int isInvertedNb = 0;
                 
                 vector<Fibers *> v = DatasetManager::getInstance()->getFibers();
                 
@@ -273,19 +273,19 @@ void MenuBar::updateMenuBar( MainFrame *mf )
                 }
 
                 isFiberUsingFakeTubes = ( useFakeTubesNb == v.size() );
-				isFiberUsingTransparency = ( useTransparencyNb == v.size() );
-				isFiberInverted = ( isInvertedNb == v.size() );
-			}
-		}
-	}
-	m_itemSaveSelectedFibers->Enable(isFiberSelected);
-	m_itemResetFibersColors->Enable(isFiberSelected);
-	m_itemToogleInvertFibersSelection->Enable(isFiberSelected);
-	m_itemToogleInvertFibersSelection->Check(isFiberInverted);
-	m_itemToggleUseTransparency->Enable(isFiberSelected);
+                isFiberUsingTransparency = ( useTransparencyNb == v.size() );
+                isFiberInverted = ( isInvertedNb == v.size() );
+            }
+        }
+    }
+    m_itemSaveSelectedFibers->Enable(isFiberSelected);
+    m_itemResetFibersColors->Enable(isFiberSelected);
+    m_itemToogleInvertFibersSelection->Enable(isFiberSelected);
+    m_itemToogleInvertFibersSelection->Check(isFiberInverted);
+    m_itemToggleUseTransparency->Enable(isFiberSelected);
     m_itemToggleUseTransparency->Check(isFiberUsingTransparency);
     m_itemToggleUseFakeTubes->Enable(isFiberSelected);
-	m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
+    m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
 
     m_itemToggleUseGeometryShader->Check( SceneManager::getInstance()->isFibersGeomShaderActive() );
 #if _COMPILE_GEO_SHADERS
@@ -303,13 +303,13 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemToggleShowAxes->Check( SceneManager::getInstance()->areAxesDisplayed() );
     m_itemToggleDrawPoints->Check( SceneManager::getInstance()->isPointMode() );
     m_itemToggleDrawVectors->Check( SceneManager::getInstance()->areVectorsDisplayed() );
-	
+    
     m_itemToggleDrawer->Check( mf->isDrawerToolActive() );
-	m_itemToggleDrawRound->Check( mf->canDrawRound() );
-	m_itemToggleDraw3d->Check( mf->canDraw3D() );
-	m_itemDrawPen->Check( DRAWMODE_PEN == mf->getDrawMode() );
-	m_itemDrawEraser->Check( DRAWMODE_ERASER == mf->getDrawMode() );
-	
+    m_itemToggleDrawRound->Check( mf->canDrawRound() );
+    m_itemToggleDraw3d->Check( mf->canDraw3D() );
+    m_itemDrawPen->Check( DRAWMODE_PEN == mf->getDrawMode() );
+    m_itemDrawEraser->Check( DRAWMODE_ERASER == mf->getDrawMode() );
+    
     m_itemToggleDrawRound->Enable( mf->isDrawerToolActive() );
     m_itemToggleDraw3d->Enable(    mf->isDrawerToolActive() );
     m_itemDrawPen->Enable(         mf->isDrawerToolActive() );

@@ -38,7 +38,7 @@ public:
     
     // Getters/Setters
     int  GetColumnClicked() const                   { return m_column; }
-    long GetItem( long index ) const;
+    DatasetIndex GetItem( long index ) const;
     int  GetItemCount() const                       { return wxListCtrl::GetItemCount(); }
     bool SetColumnWidth( int col, int width )       { return wxListCtrl::SetColumnWidth( col, width ); }
     void SetMaxSize( const wxSize &size )           { wxListCtrl::SetMaxSize( size ); }

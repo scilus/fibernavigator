@@ -9,10 +9,8 @@ namespace
     const wxString strSelectionObj = wxT( "Selection Objects" );
 }
 
-BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
-    EVT_CHAR(MyTreeCtrl::OnChar)
-    EVT_MENU(TREE_CTRL_TOGGLE_ANDNOT, MyTreeCtrl::OnToggleAndNot)
-    EVT_MENU(TREE_CTRL_DELETE_BOX, MyTreeCtrl::OnDeleteBox)
+BEGIN_EVENT_TABLE( MyTreeCtrl, wxTreeCtrl )
+    EVT_CHAR( MyTreeCtrl::OnChar )
 END_EVENT_TABLE()
 
 
@@ -102,25 +100,6 @@ void MyTreeCtrl::OnChar( wxKeyEvent& evt )
     Refresh(false);
 }
 
-void MyTreeCtrl::OnRightClick(wxMouseEvent& WXUNUSED(event) )
-{
-}
-
-void MyTreeCtrl::OnToggleAndNot(wxCommandEvent& WXUNUSED(event))
-{
-    wxTreeItemId treeid = GetSelection();
-    ((SelectionObject*) (GetItemData(treeid)))->toggleIsNOT();
-}
-
-void MyTreeCtrl::OnDeleteBox(wxCommandEvent& WXUNUSED(event))
-{
-    if( getSelectedType() == CHILD_OBJECT )
-    {
-        ((SelectionObject*) ((GetItemData(GetItemParent(GetSelection())))))->setIsDirty(true);
-    }
-    Delete( GetSelection() );
-    m_mainFrame->onTreeChange();
-}
 
 BEGIN_EVENT_TABLE(MySlider, wxSlider)
     EVT_MOUSE_EVENTS(MySlider::OnMouseEvent)

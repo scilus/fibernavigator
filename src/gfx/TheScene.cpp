@@ -258,6 +258,8 @@ void TheScene::renderScene()
         glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
+    Logger::getInstance()->printIfGLError( wxT( "TheScene::renderScene - Rotation" ) );
+
     //Navigate through slices
     if(m_isNavSagital) 
     {
@@ -291,6 +293,8 @@ void TheScene::renderScene()
                                                  m_posAxial );
         MyApp::frame->m_pZSlider->SetValue( m_posAxial );
     }
+
+    Logger::getInstance()->printIfGLError( wxT( "TheScene::renderScene - Navigation" ) );
 
     // Opaque objects.
     renderSlices();
@@ -482,9 +486,9 @@ void TheScene::renderSlices()
         SceneManager::getInstance()->getAnatomyHelper()->renderCrosshair();
     }
 
-    Logger::getInstance()->printIfGLError( wxT( "Render slices" ) );
-
     glPopAttrib();
+
+    Logger::getInstance()->printIfGLError( wxT( "Render slices" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -555,9 +559,9 @@ void TheScene::renderMesh()
 
     lightsOff();
 
-    Logger::getInstance()->printIfGLError( wxT( "Draw mesh " ) );
-
     glPopAttrib();
+
+    Logger::getInstance()->printIfGLError( wxT( "Draw mesh " ) );
 }
 
 //////////////////////////////////////////////////////////////////////////

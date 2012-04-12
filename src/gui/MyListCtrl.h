@@ -21,15 +21,14 @@ private:
     int  getSelectedType();
 
     void OnChar(wxKeyEvent& event);
-    void OnRightClick(wxMouseEvent& event);
-    void OnToggleAndNot(wxCommandEvent& event);
-    void OnDeleteBox(wxCommandEvent& event);
 
 private:
     MainFrame *m_mainFrame;
 
     DECLARE_EVENT_TABLE()
 };
+
+//////////////////////////////////////////////////////////////////////////
 
 class MySlider: public wxSlider 
 {

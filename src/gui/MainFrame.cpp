@@ -180,9 +180,9 @@ MainFrame::MainFrame( const wxString     &title,
     m_pMenuBar( NULL ),
     m_pCurrentSizer( NULL ),
     m_pCurrentSceneObject( NULL ),
-    m_pLastSelectedSceneObject( NULL ),
-    m_currentListItem( -1 ),
-    m_lastSelectedListItem( -1 ),
+//     m_pLastSelectedSceneObject( NULL ),
+    m_currentListIndex( -1 ),
+//     m_lastSelectedListItem( -1 ),
     m_lastPath( MyApp::respath + _T( "data" ) ),
     m_pTimer( NULL ),
     m_isDrawerToolActive( false ),
@@ -193,7 +193,7 @@ MainFrame::MainFrame( const wxString     &title,
     m_drawColor(255, 255, 255),
     m_drawColorIcon(16, 16, true),
     m_threadsActive( 0 ),
-    m_pLastSelectedObj( NULL )
+    m_pLastSelectionObj( NULL )
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -487,7 +487,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( dialog.ShowModal() == wxID_OK )
@@ -531,7 +531,7 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( _T("Event triggered - MainFrame::onSaveDataset"), LOGLEVEL_DEBUG );
 
-    if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
+    if( m_pCurrentSceneObject != NULL && m_currentListIndex != -1 )
     {
         if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() < MESH )
         {
@@ -582,7 +582,7 @@ void MainFrame::onSize( wxSizeEvent& evt )
 
 void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
+    if( m_pCurrentSceneObject != NULL && m_currentListIndex != -1 )
     {
         if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == ISO_SURFACE )
         {
@@ -760,13 +760,13 @@ void MainFrame::onSwitchDrawer( wxCommandEvent& event )
 void MainFrame::updateDrawerToolbar()
 {
     SceneManager::getInstance()->setRulerActive( false );
-    
+
     m_pToolBar->m_txtRuler->Disable();
-    
-	m_pToolBar->EnableTool( m_pToolBar->m_toggleDrawRound->GetId(), m_isDrawerToolActive );
-	m_pToolBar->EnableTool( m_pToolBar->m_toggleDraw3d->GetId(), m_isDrawerToolActive );
-	m_pToolBar->EnableTool( m_pToolBar->m_selectPen->GetId(), m_isDrawerToolActive );
-	m_pToolBar->EnableTool( m_pToolBar->m_selectEraser->GetId(), m_isDrawerToolActive );
+
+    m_pToolBar->EnableTool( m_pToolBar->m_toggleDrawRound->GetId(), m_isDrawerToolActive );
+    m_pToolBar->EnableTool( m_pToolBar->m_toggleDraw3d->GetId(), m_isDrawerToolActive );
+    m_pToolBar->EnableTool( m_pToolBar->m_selectPen->GetId(), m_isDrawerToolActive );
+    m_pToolBar->EnableTool( m_pToolBar->m_selectEraser->GetId(), m_isDrawerToolActive );
     m_pToolBar->EnableTool( m_pToolBar->m_selectColorPicker->GetId(), m_isDrawerToolActive );
     
     // Check if the current anatomy supports RGB
@@ -781,7 +781,23 @@ void MainFrame::updateDrawerToolbar()
         m_canUseColorPicker = false;
     }
     
-	refreshAllGLWidgets();
+    refreshAllGLWidgets();
+}
+
+void MainFrame::changePropertiesSizer( SceneObject * pSceneObj, int index )
+{
+    if( NULL == pSceneObj->getPropertiesSizer() )
+    {
+        pSceneObj->createPropertiesSizer( m_pPropertiesWindow );
+        m_pPropertiesWindow->Layout();
+        m_pPropertiesWindow->FitInside();
+    }
+
+    m_pCurrentSizer = pSceneObj->getPropertiesSizer();
+    m_pCurrentSceneObject = pSceneObj;
+    m_currentListIndex = index;
+
+    m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
 }
 
 void MainFrame::onToggleDrawRound( wxCommandEvent& event )
@@ -838,14 +854,14 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
     }
 
 /*
-    if( m_mainFrame->m_currentListItem != -1 )
+    if( m_mainFrame->m_currentListIndex != -1 )
     {
         DatasetInfo *l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
         if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
         {
             l_info->setColor( l_col );
             l_info->setuseTex( false );
-            m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListItem, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
+            m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListIndex, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
         }
     }
     else if ( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject != NULL )
@@ -865,51 +881,51 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 
 void MainFrame::onSelectStroke1( wxCommandEvent& event )
 {
-	m_drawSize = 1;
-	refreshAllGLWidgets();
+    m_drawSize = 1;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke2( wxCommandEvent& event )
 {
-	m_drawSize = 2;
-	refreshAllGLWidgets();
+    m_drawSize = 2;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke3( wxCommandEvent& event )
 {
-	m_drawSize = 3;
-	refreshAllGLWidgets();
+    m_drawSize = 3;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke4( wxCommandEvent& event )
 {
-	m_drawSize = 4;
-	refreshAllGLWidgets();
+    m_drawSize = 4;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke5( wxCommandEvent& event )
 {
-	m_drawSize = 5;
-	refreshAllGLWidgets();
+    m_drawSize = 5;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke7( wxCommandEvent& event )
 {
-	m_drawSize = 7;
-	refreshAllGLWidgets();
+    m_drawSize = 7;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke10( wxCommandEvent& event )
 {
-	m_drawSize = 10;
-	refreshAllGLWidgets();
+    m_drawSize = 10;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectPen( wxCommandEvent& event )
 {
-	m_drawMode = DRAWMODE_PEN;
-	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
-	refreshAllGLWidgets();
+    m_drawMode = DRAWMODE_PEN;
+    //glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectEraser( wxCommandEvent& event )
@@ -932,9 +948,9 @@ void MainFrame::deleteSceneObject()
     }
 
     m_pCurrentSceneObject = NULL;
-    m_pLastSelectedSceneObject = NULL;
-    m_currentListItem = -1;
-    m_lastSelectedListItem = -1;
+//     m_pLastSelectedSceneObject = NULL;
+    m_currentListIndex = -1;
+//     m_lastSelectedListItem = -1;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1140,46 +1156,55 @@ void MainFrame::createIsoSurface()
 
 void MainFrame::displayPropertiesSheet()
 {   
-    if (m_pLastSelectedSceneObject == NULL && m_pCurrentSceneObject == NULL)
-    {
-        if (m_pCurrentSizer != NULL)
-        {
-           if( !m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer ) )
-           {
-               Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
-           }
-        }
-    }
-    else
-    {
-        if (m_pLastSelectedSceneObject != NULL)
-        {
-            if (m_pCurrentSizer != NULL )
-            {
-                if( !m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer ) )
-                {
-                    Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
-                }
-            }
-            if( NULL == m_pLastSelectedSceneObject->getPropertiesSizer() )
-            {
-                m_pLastSelectedSceneObject->createPropertiesSizer( m_pPropertiesWindow );
-                m_pPropertiesWindow->Layout();
-                m_pPropertiesWindow->FitInside();
-            }
-            m_pCurrentSizer = m_pLastSelectedSceneObject->getPropertiesSizer();
+//     if (m_pLastSelectedSceneObject == NULL && m_pCurrentSceneObject == NULL)
+//     {
+//         if (m_pCurrentSizer != NULL)
+//         {
+//            if( !m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer ) )
+//            {
+//                Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+//            }
+//         }
+//     }
+//     else
+//     {
+//         if (m_pLastSelectedSceneObject != NULL)
+//         {
+//             if (m_pCurrentSizer != NULL )
+//             {
+//                 if( !m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer ) )
+//                 {
+//                     Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+//                 }
+//             }
+//             if( NULL == m_pLastSelectedSceneObject->getPropertiesSizer() )
+//             {
+//                 m_pLastSelectedSceneObject->createPropertiesSizer( m_pPropertiesWindow );
+//                 m_pPropertiesWindow->Layout();
+//                 m_pPropertiesWindow->FitInside();
+//             }
+//             m_pCurrentSizer = m_pLastSelectedSceneObject->getPropertiesSizer();
+// 
+//             m_pCurrentSceneObject = m_pLastSelectedSceneObject;
+//             m_pLastSelectedSceneObject = NULL;
+//             m_currentListIndex = m_lastSelectedListItem;
+//             m_lastSelectedListItem = -1;
+// 
+//             m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
+//         }
+//         m_pCurrentSceneObject->updatePropertiesSizer();
+//         m_pPropertiesWindow->FitInside();
+//         m_pLastSelectedSceneObject = NULL;
+//     }
+//     
 
-            m_pCurrentSceneObject = m_pLastSelectedSceneObject;
-            m_pLastSelectedSceneObject = NULL;
-            m_currentListItem = m_lastSelectedListItem;
-            m_lastSelectedListItem = -1;
-
-            m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
-        }
+    if( NULL != m_pCurrentSceneObject )
+    {
         m_pCurrentSceneObject->updatePropertiesSizer();
         m_pPropertiesWindow->FitInside();
-        m_pLastSelectedSceneObject = NULL;
     }
+
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::displayPropertiesSheet" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1223,52 +1248,48 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
                    l_sizeV / voxelY,
                    l_sizeV / voxelZ );
 
-    SelectionObject* selObj;
+    SelectionObject *pSelObj;
     switch( selObjType )
     {
     case ELLIPSOID_TYPE:
-        selObj = new SelectionEllipsoid( l_center, l_size );
+        pSelObj = new SelectionEllipsoid( l_center, l_size );
         break;
     case BOX_TYPE:
-        selObj = new SelectionBox( l_center, l_size );
+        pSelObj = new SelectionBox( l_center, l_size );
         break;
     default:
         return;
     }
 
     // Check what is selected in the tree to know where to put this new selection object.
-    wxTreeItemId l_treeSelectionId = m_pTreeWidget->GetSelection();
+    wxTreeItemId treeSelectionId = m_pTreeWidget->GetSelection();
 
-    wxTreeItemId l_newSelectionObjectId;
-    
-    if( treeSelected( l_treeSelectionId ) == MASTER_OBJECT )
-    {
-        // Our new selection object is under another master selection object.
-        l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_treeSelectionId, selObj->getName(), 0, -1, selObj );
-        m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxGREEN );
-    }
-    else if( treeSelected( l_treeSelectionId ) == CHILD_OBJECT )
-    {
-        wxTreeItemId l_parentId = m_pTreeWidget->GetItemParent( l_treeSelectionId );
+    wxTreeItemId parendId;
+    wxColor color = *wxGREEN;
 
-        // Our new selection object is under another child selection object.
-        l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_parentId, selObj->getName(), 0, -1, selObj );
-        m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxGREEN );
-    }
-    else
+    switch( treeSelected( treeSelectionId ) )
     {
-        // Our new selection object is on top.
-        selObj->setIsMaster( true );
-        l_newSelectionObjectId = m_pTreeWidget->AppendItem( m_tSelectionObjectsId, selObj->getName(), 0, -1, selObj );
-        m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxCYAN );
+    case MASTER_OBJECT:
+        parendId = treeSelectionId;
+        break;
+    case CHILD_OBJECT:
+        parendId = m_pTreeWidget->GetItemParent( treeSelectionId );
+        break;
+    default:
+        parendId = m_tSelectionObjectsId;
+        color = *wxCYAN;
+        pSelObj->setIsMaster( true );
     }
 
-    m_pTreeWidget->EnsureVisible( l_newSelectionObjectId );
-    m_pTreeWidget->SetItemImage( l_newSelectionObjectId, selObj->getIcon() );
-    selObj->setTreeId( l_newSelectionObjectId );    
+    wxTreeItemId newSelectionObjectId = m_pTreeWidget->AppendItem( parendId, pSelObj->getName(), 0, -1, pSelObj );
+    pSelObj->setTreeId( newSelectionObjectId );
+
+    m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, color );
+    m_pTreeWidget->SetItemImage( newSelectionObjectId, pSelObj->getIcon() );
+    m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+    m_pTreeWidget->SelectItem( newSelectionObjectId );
     SceneManager::getInstance()->setSelBoxChanged( true );
-    m_pTreeWidget->SelectItem(l_newSelectionObjectId, true);
-    refreshAllGLWidgets();
+//     refreshAllGLWidgets();
 }
 
 
@@ -1301,7 +1322,7 @@ void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
 
 void MainFrame::onToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
+    if( m_pCurrentSceneObject != NULL && m_currentListIndex != -1 )
     {
         DatasetInfo* l_info = (DatasetInfo*)m_pCurrentSceneObject;
         if( l_info->getType() < MESH )
@@ -1333,7 +1354,7 @@ void MainFrame::onToggleFilterIso( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
@@ -1360,7 +1381,7 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
@@ -1458,7 +1479,7 @@ void MainFrame::onRulerToolDel( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 {    
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
@@ -1494,7 +1515,7 @@ void MainFrame::onUseGeometryShader( wxCommandEvent& event )
 
 void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 
@@ -1672,6 +1693,7 @@ void MainFrame::onToggleAlpha( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::refreshAllGLWidgets()
 {
+    Logger::getInstance()->printIfGLError( wxT( "Before MainFrame::refreshAllGLWidgets") );
     updateStatusBar();
     updateMenus();
     refreshViews();
@@ -1701,6 +1723,7 @@ void MainFrame::refreshViews()
     {
         m_pGL2->Refresh(true);
     }
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::refreshViews" ) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1709,6 +1732,7 @@ void MainFrame::updateStatusBar()
 {
     GetStatusBar()->SetStatusText( wxString::Format( 
         wxT("Position: %d  %d  %d" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue() ), 0 );
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::updateStatusBar" ) );
 }
 
 /****************************************************************************************************
@@ -1739,9 +1763,9 @@ void MainFrame::onActivateListItem( wxListEvent& evt )
 
 void MainFrame::deleteListItem()
 {
-    if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {       
-        long tmp = m_currentListItem;
+        long tmp = m_currentListIndex;
 
         deleteSceneObject();
         m_pListCtrl->DeleteItem( tmp );
@@ -1762,7 +1786,7 @@ void MainFrame::onDeleteAllListItems( wxListEvent& WXUNUSED(event) )
 
 void MainFrame::onDeleteListItem( wxListEvent& evt )
 {
-    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteListItem" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onDeleteListItem" ), LOGLEVEL_DEBUG );
 
     m_pPropertiesWindow->Layout();
     m_pPropertiesWindow->FitInside();
@@ -1772,10 +1796,30 @@ void MainFrame::onDeleteListItem( wxListEvent& evt )
 
 void MainFrame::onDeselectListItem( wxListEvent& evt )
 {
-    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeselectListItem" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onDeselectListItem" ), LOGLEVEL_DEBUG );
 
-    m_pLastSelectedSceneObject = NULL;
-    m_lastSelectedListItem = -1;
+    long index = evt.GetIndex();
+    DatasetIndex dsIndex = m_pListCtrl->GetItem( index );
+    if( dsIndex.isOk() )
+    {
+        DatasetInfo *pDsInfo = DatasetManager::getInstance()->getDataset( dsIndex );
+
+        if( NULL != pDsInfo && NULL != pDsInfo->getPropertiesSizer() )
+        {
+            Logger::getInstance()->print( wxString::Format( wxT( "Hiding Index: %u DatasetInfo: %s" ), (unsigned int)dsIndex, pDsInfo->getName() ), LOGLEVEL_DEBUG );
+            if( !m_pPropertiesWindow->GetSizer()->Hide( pDsInfo->getPropertiesSizer() ) )
+            {
+                Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+            }
+            m_pPropertiesWindow->Layout();
+            m_pPropertiesWindow->FitInside();
+        }
+    }
+
+    m_currentListIndex = -1;
+//     m_pLastSelectedSceneObject = NULL;
+//     m_lastSelectedListItem = -1;
+    evt.Skip();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1784,8 +1828,15 @@ void MainFrame::onSelectListItem( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
 
+    if( NULL != m_pLastSelectionObj && NULL != m_pLastSelectionObj->getPropertiesSizer() )
+    {
+        m_pLastSelectionObj->unselect();
+        m_pPropertiesWindow->GetSizer()->Hide( m_pLastSelectionObj->getPropertiesSizer() );
+        m_pLastSelectionObj = NULL;
+    }
+
     int index = evt.GetIndex();
-    m_pTreeWidget->UnselectAll();
+    //m_pTreeWidget->UnselectAll();
     DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( index ) );
 
     if( NULL == pInfo )
@@ -1794,8 +1845,10 @@ void MainFrame::onSelectListItem( wxListEvent& evt )
         return;
     }
 
-    m_pLastSelectedSceneObject = pInfo;
-    m_lastSelectedListItem = index;
+    changePropertiesSizer( pInfo, index );
+
+//     m_pLastSelectedSceneObject = pInfo;
+//     m_lastSelectedListItem = index;
 
     // Check if it is RGB
     if( RGB == pInfo->getType() )
@@ -1808,6 +1861,8 @@ void MainFrame::onSelectListItem( wxListEvent& evt )
     }
 
     refreshAllGLWidgets();
+
+    evt.Skip();
 }
 
 /****************************************************************************************************
@@ -1836,13 +1891,13 @@ void MainFrame::deleteTreeItem()
         int l_selected = treeSelected( l_treeId );
         if( l_selected == CHILD_OBJECT )
         {
-            ((SelectionObject*) ((m_pTreeWidget->GetItemData(m_pTreeWidget->GetItemParent(l_treeId)))))->setIsDirty(true);
+            ((SelectionObject *) (m_pTreeWidget->GetItemData( m_pTreeWidget->GetItemParent( l_treeId ) )))->setIsDirty( true );
         }
         if( l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT )
         {  
             deleteSceneObject();
             m_pTreeWidget->Delete( l_treeId );
-            m_pLastSelectedObj = NULL;
+            m_pLastSelectionObj = NULL;
         }
         SceneManager::getInstance()->setSelBoxChanged( true );
     }
@@ -1854,45 +1909,53 @@ void MainFrame::deleteTreeItem()
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
 {
-    wxTreeItemId l_treeId = m_pTreeWidget->GetSelection();
-    if (!l_treeId.IsOk())
+    Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onSelectTreeItem" ), LOGLEVEL_DEBUG );
+
+    if( NULL != m_pLastSelectionObj && NULL != m_pLastSelectionObj->getPropertiesSizer() )
     {
-        return;
+        m_pLastSelectionObj->unselect();
+        m_pPropertiesWindow->GetSizer()->Hide( m_pLastSelectionObj->getPropertiesSizer() );
+        m_pLastSelectionObj = NULL;
     }
-    int l_selected = treeSelected( l_treeId );
-    SelectionObject* l_selectionObject;
 
-    switch( l_selected )
-    {
-        case MASTER_OBJECT:
-        case CHILD_OBJECT:
-            if ( m_pLastSelectedObj != NULL )
-            {
-                m_pLastSelectedObj->unselect();
-            }
-
-            l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_treeId ) );
-            m_pLastSelectedObj = l_selectionObject;
-            m_pLastSelectedObj->select( false );
-            m_pLastSelectedSceneObject = l_selectionObject;
-            m_lastSelectedListItem = -1;
-            break;
-
-        default:
-            if( m_pLastSelectedObj != NULL )
-            {
-                m_pLastSelectedObj->unselect();
-                m_pLastSelectedObj = NULL;
-            }
-            break;
-    }    
-#ifdef __WXMSW__
-    if( m_currentListItem != -1 )
-    {
+//     if( evt.IsSelection() )
+//     {
         m_pListCtrl->UnselectAll();
-    }
-#endif
-    refreshAllGLWidgets();
+
+        wxTreeItemId selectedId = m_pTreeWidget->GetSelection();
+        if( !selectedId.IsOk() )
+        {
+            return;
+        }
+
+        int type = treeSelected( selectedId );
+        SelectionObject * pSelectionObj;
+
+        switch( type )
+        {
+            case MASTER_OBJECT:
+            case CHILD_OBJECT:
+                pSelectionObj = (SelectionObject *)( m_pTreeWidget->GetItemData( selectedId ) );
+                m_pLastSelectionObj = pSelectionObj;
+                m_pLastSelectionObj->select( false );
+//               m_pLastSelectedSceneObject = pSelectionObj;
+                changePropertiesSizer( pSelectionObj, -1 );
+        }
+//     }
+//     else
+//     {
+//         wxTreeItemId id = evt.GetItem();
+//         if( id.IsOk() )
+//         {
+//             SelectionObject *pSelectionObj = (SelectionObject *)( m_pTreeWidget->GetItemData( id ) );
+//             if( NULL != pSelectionObj && NULL != pSelectionObj->getPropertiesSizer() )
+//             {
+//                 m_pPropertiesWindow->GetSizer()->Hide( pSelectionObj->getPropertiesSizer() );
+//             }
+//         }
+//     }
+
+//     refreshAllGLWidgets();
 }
 
 void MainFrame::onRightClickTreeItem( wxTreeEvent& event )
@@ -2158,12 +2221,13 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
 
 void MainFrame::updateMenus()
 {
-    m_pMenuBar->updateMenuBar(this);
-    m_pToolBar->updateToolBar(this);
+    m_pMenuBar->updateMenuBar( this );
+    m_pToolBar->updateToolBar( this );
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::updateMenus" ) );
 }
 
 void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
-{    
+{
     //Rotate animation
     if( SceneManager::getInstance()->getScene()->m_isRotateZ )
     {
@@ -2176,7 +2240,7 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
     if( SceneManager::getInstance()->getScene()->m_isRotateX )
     {
         SceneManager::getInstance()->getScene()->m_rotAngleX++;
-    } 
+    }
 
     //Navigate through slices sagittal
     if( SceneManager::getInstance()->getScene()->m_isNavSagital )
@@ -2227,4 +2291,3 @@ MainFrame::~MainFrame()
 
     Logger::getInstance()->print( wxT( "MainFrame destructor done"), LOGLEVEL_DEBUG );
 }
-

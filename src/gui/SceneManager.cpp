@@ -435,6 +435,8 @@ void SceneManager::moveScene ( const int x, const int y )
 
 void SceneManager::doMatrixManipulation()
 {
+    Logger::getInstance()->printIfGLError( wxT( "Before SceneManager::doMatrixManipulation" ) );
+
     float columns = DatasetManager::getInstance()->getColumns();
     float frames  = DatasetManager::getInstance()->getFrames();
     float rows    = DatasetManager::getInstance()->getRows();
@@ -447,6 +449,7 @@ void SceneManager::doMatrixManipulation()
     glScalef( m_zoom, m_zoom, m_zoom );
     glMultMatrixf( m_transform.M );
     glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
+
     Logger::getInstance()->printIfGLError( wxT( "SceneManager::doMatrixManipulation" ) );
 }
 

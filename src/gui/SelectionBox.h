@@ -22,17 +22,14 @@ public:
     // Constructor / Destructor
     SelectionBox( Vector i_center, Vector i_size );
     SelectionBox( Anatomy* i_anatomy );
-    ~SelectionBox();
+    virtual ~SelectionBox();
 
     // Function from SelectionObject (pure virtual)
     hitResult hitTest( Ray* i_ray );
 
-    virtual void createPropertiesSizer( PropertiesWindow *parent );
-    virtual void updatePropertiesSizer();
-
 private:
     // Function from SelectionObject (pure virtual)
-    void      drawObject( GLfloat* i_color );
+    void     drawObject( GLfloat* i_color );
 
     // Functions
     void     draw1();

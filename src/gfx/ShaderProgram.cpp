@@ -186,6 +186,7 @@ bool ShaderProgram::compileAndLink()
 void ShaderProgram::bind()
 {
     glUseProgram( m_id );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "ShaderProgram::bind - Binding %s" ), m_name.wx_str() ) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -193,6 +194,7 @@ void ShaderProgram::bind()
 void ShaderProgram::release()
 {
     glUseProgram( 0 );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "ShaderProgram::release - Releasing %s" ), m_name.wx_str() ) );
 }
 
 //////////////////////////////////////////////////////////////////////////

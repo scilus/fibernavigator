@@ -54,7 +54,7 @@ public:
     void screenshot                         ( const wxString &path, const wxString &filename );
     void onTreeChange();
     void onLoad                             ( wxCommandEvent& evt );
-    long getCurrentListItem() const         { return m_currentListItem; }
+    long getCurrentListItem() const         { return m_currentListIndex; }
     void createNewAnatomy                   ( DatasetType dataType );
     void updateSliders();
 
@@ -72,7 +72,23 @@ public:
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
     void      setThreadsActive( const int nb )      { m_threadsActive = nb; }
-    SelectionObject * getLastSelectedObj() const    { return m_pLastSelectedObj; }
+    SelectionObject * getLastSelectedObj() const    { return m_pLastSelectionObj; }
+
+
+public:
+    PropertiesWindow    *m_pPropertiesWindow;
+    TrackingWindow      *m_pTrackingWindow;
+    MainCanvas          *m_pMainGL;
+    MainCanvas          *m_pGL0;
+    MainCanvas          *m_pGL1;
+    MainCanvas          *m_pGL2;
+    ListCtrl            *m_pListCtrl;
+    MyTreeCtrl          *m_pTreeWidget;
+    wxSlider            *m_pXSlider;
+    wxSlider            *m_pYSlider;
+    wxSlider            *m_pZSlider;
+    wxTreeItemId        m_tSelectionObjectsId;
+    wxNotebook          *m_tab;
 
 private:
     void initLayout();
@@ -86,7 +102,7 @@ private:
     void onSaveDataset                      ( wxCommandEvent& evt );
     void onQuit                             ( wxCommandEvent& evt );
     void onClose                            ( wxCloseEvent&   evt );
-    void onSize                             ( wxSizeEvent& evt    );
+    void onSize                             ( wxSizeEvent&    evt );
     // View menu
     void onMenuViewReset                    ( wxCommandEvent& evt );
     void onMenuViewLeft                     ( wxCommandEvent& evt );
@@ -153,6 +169,7 @@ private:
     // List widget event functions     
     void onActivateListItem                 ( wxListEvent&    evt );
     void onSelectListItem                   ( wxListEvent&    evt );
+
     void onDeleteAllListItems               ( wxListEvent&    evt );
     void onDeleteListItem                   ( wxListEvent&    evt );
     void onDeselectListItem                 ( wxListEvent&    evt );
@@ -194,29 +211,16 @@ private:
     // Utility
     void updateDrawerToolbar();
 
-public:
-    PropertiesWindow    *m_pPropertiesWindow;
-    TrackingWindow      *m_pTrackingWindow;
-    MainCanvas          *m_pMainGL;
-    MainCanvas          *m_pGL0;
-    MainCanvas          *m_pGL1;
-    MainCanvas          *m_pGL2;
-    ListCtrl            *m_pListCtrl;
-    MyTreeCtrl          *m_pTreeWidget;
-    wxSlider            *m_pXSlider;
-    wxSlider            *m_pYSlider;
-    wxSlider            *m_pZSlider;
-    wxTreeItemId        m_tSelectionObjectsId;
-    wxNotebook          *m_tab;
+    void changePropertiesSizer( SceneObject * pSceneObj, int index );
 
 private:
     ToolBar             *m_pToolBar;
     MenuBar             *m_pMenuBar;       
     wxSizer             *m_pCurrentSizer;
     SceneObject         *m_pCurrentSceneObject;
-    SceneObject         *m_pLastSelectedSceneObject;
-    long                m_currentListItem;
-    long                m_lastSelectedListItem;
+//     SceneObject         *m_pLastSelectedSceneObject;
+    long                m_currentListIndex;
+//     long                m_lastSelectedListItem;
 
     wxString            m_lastPath;
 
@@ -232,7 +236,7 @@ private:
     wxImage  m_drawColorIcon;
 
     int  m_threadsActive;
-    SelectionObject* m_pLastSelectedObj;
+    SelectionObject* m_pLastSelectionObj;
 
 DECLARE_EVENT_TABLE()
 };
@@ -253,10 +257,5 @@ DECLARE_EVENT_TABLE()
 #define ID_X_SLIDER                                 301
 #define ID_Y_SLIDER                                 302
 #define ID_Z_SLIDER                                 303
- 
-#define TREE_CTRL_TOGGLE_ANDNOT                     351
-#define TREE_CTRL_DELETE_BOX                        352
-#define TREE_CTRL_TOGGLE_BOX_ACTIVE                 353
-#define TREE_CTRL_TOGGLE_BOX_SHOW                   370
 
 #endif /*MAINFRAME_H_*/

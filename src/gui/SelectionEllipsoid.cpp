@@ -34,7 +34,6 @@ SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size )
 ///////////////////////////////////////////////////////////////////////////
 SelectionEllipsoid::~SelectionEllipsoid()
 {
-
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -68,7 +67,7 @@ void SelectionEllipsoid::drawObject( GLfloat* i_color )
 // i_ray        :
 ///////////////////////////////////////////////////////////////////////////
 hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
-{    
+{
     hitResult hr = { false, 0.0f, 0, NULL };
 
     if( m_isVisible && m_isActive && m_objectType == ELLIPSOID_TYPE ) 

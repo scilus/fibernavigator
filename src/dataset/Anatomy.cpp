@@ -165,12 +165,12 @@ Anatomy::Anatomy( const int type )
     }
 }
 
-void Anatomy::add( Anatomy* pAnatomy)
+void Anatomy::add( Anatomy* pAnatomy )
 {
-	for(int i = 0; i < (int)m_floatDataset.size(); i++)
-	{
-		m_floatDataset[i] += pAnatomy->m_floatDataset[i];
-	}
+    for( unsigned int i = 0; i < m_floatDataset.size(); ++i )
+    {
+        m_floatDataset[i] += pAnatomy->m_floatDataset[i];
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -363,9 +363,9 @@ void Anatomy::minimize()
                      j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); j += 3 )
             {
                 // TODO: Verify that changing from dh to current obj m_rows & al. is ok
-                curX = std::min( m_columns - 1, std::max( 0, (int)(pFibers->getPointValue( j * 3 )    / m_voxelSizeX) ) ); // m_dh->m_xVoxel ) );
-                curY = std::min( m_rows    - 1, std::max( 0, (int)(pFibers->getPointValue( j * 3 + 1) / m_voxelSizeY) ) ); // m_dh->m_yVoxel ) );
-                curZ = std::min( m_frames  - 1, std::max( 0, (int)(pFibers->getPointValue( j * 3 + 2) / m_voxelSizeZ) ) ); // m_dh->m_zVoxel ) );
+                curX = std::min( m_columns - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 )    / m_voxelSizeX ) ) ); // m_dh->m_xVoxel ) );
+                curY = std::min( m_rows    - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 + 1) / m_voxelSizeY ) ) ); // m_dh->m_yVoxel ) );
+                curZ = std::min( m_frames  - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 + 2) / m_voxelSizeZ ) ) ); // m_dh->m_zVoxel ) );
 
                 index = curX + curY * m_columns + curZ * m_rows * m_columns;
                 workData[index] = true;

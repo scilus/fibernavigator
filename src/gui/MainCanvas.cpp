@@ -507,10 +507,10 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
 
         SetFocus();
 
-        if ( m_hr.picked >= 10 && m_hr.picked < 20 )
-        {
-            ( (SelectionObject*) m_hr.object )->select( true );
-        }
+//         if ( m_hr.picked >= 10 && m_hr.picked < 20 )
+//         {
+//             ( (SelectionObject*) m_hr.object )->select( true );
+//         }
     }
     else
     {
@@ -799,7 +799,8 @@ void MainCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event)  )
 }
 
 void MainCanvas::render()
-{   
+{
+    glGetError();
     wxPaintDC dc( this );
 
 #ifndef __WXMAC__
@@ -884,7 +885,7 @@ void MainCanvas::render()
                 glMatrixMode( GL_PROJECTION );
                 glLoadIdentity();
                 glOrtho( -m_orthoModX, m_orthoSizeNormal + m_orthoModX, -m_orthoModY, m_orthoSizeNormal + m_orthoModY, -500, 500 );
-                glGetError(); // Removes the error when m_orthoModX, m_orthoSizeNormal and the rest are not yet initialized
+                Logger::getInstance()->printIfGLError( wxT( "MainCanvas::render - glOrtho" ) );
 
                 glPushMatrix();
                 SceneManager::getInstance()->doMatrixManipulation();
@@ -901,10 +902,10 @@ void MainCanvas::render()
                         Vector lastPts = v.back();
                         if( lastPts != m_hitPts)
                         {
-                            v.push_back( m_hitPts );                            
+                            v.push_back( m_hitPts );
                         }
-                    } 
-                    else 
+                    }
+                    else
                     {
                         v.push_back( m_hitPts );
                     }

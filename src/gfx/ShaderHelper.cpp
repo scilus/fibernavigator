@@ -333,6 +333,8 @@ void ShaderHelper::setMeshShaderVars()
     m_pMeshShader->setUniFloat( "alpha3", m_alpha[3] );
     m_pMeshShader->setUniFloat( "alpha4", m_alpha[4] );
     m_pMeshShader->setUniFloat( "alpha5", m_alpha[5] );
+
+    Logger::getInstance()->printIfGLError( wxT( "ShaderHelper::setMeshShaderVars" ) );
 }
 
 void ShaderHelper::setFiberShaderVars()

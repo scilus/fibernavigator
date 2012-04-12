@@ -77,7 +77,7 @@ struct FibersInfoGridParams
 class SelectionObject : public SceneObject, public wxTreeItemData
 {
 public :
-    SelectionObject ( Vector i_center, Vector i_size );
+    SelectionObject( Vector i_center, Vector i_size );
     virtual ~SelectionObject();
 
     virtual hitResult hitTest( Ray* i_ray ) = 0;
@@ -102,7 +102,7 @@ public :
     void resizeUp();
     void select( bool i_flag );
     void update();
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
     
     
@@ -382,7 +382,7 @@ public:
 
 public:
     CrossSectionsDisplay   m_displayCrossSections;
-    DispersionConeDisplay  m_displayDispersionCone;   
+    DispersionConeDisplay  m_displayDispersionCone;
 };
 
 //////////////////////////////////////////////////////////////////////////
