@@ -40,6 +40,7 @@ public:
     int  GetColumnClicked() const                   { return m_column; }
     DatasetIndex GetItem( long index ) const;
     int  GetItemCount() const                       { return wxListCtrl::GetItemCount(); }
+    long GetSelectedIndex() const                   { return GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED ); }
     bool SetColumnWidth( int col, int width )       { return wxListCtrl::SetColumnWidth( col, width ); }
     void SetMaxSize( const wxSize &size )           { wxListCtrl::SetMaxSize( size ); }
     void SetMinSize( const wxSize &size )           { wxListCtrl::SetMinSize( size ); }

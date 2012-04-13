@@ -298,17 +298,21 @@ void PropertiesWindow::OnToggleVisibility( wxCommandEvent&  WXUNUSED(event) )
 
     
     DatasetIndex index = m_pListCtrl->GetItem( m_pMainFrame->m_currentListIndex );
-    DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( index );
-    pInfo->toggleShow();
+    
+    if( index.isOk() )
+    {
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( index );
+        pInfo->toggleShow();
 
-    if( FIBERSGROUP == pInfo->getType() )
-	{
-		FibersGroup* pFibersGroup = (FibersGroup*)pInfo;
-		if( NULL != pFibersGroup )
-		{
-			pFibersGroup->OnToggleVisibleBtn();
-		}
-	}
+        if( FIBERSGROUP == pInfo->getType() )
+        {
+            FibersGroup* pFibersGroup = (FibersGroup*)pInfo;
+            if( NULL != pFibersGroup )
+            {
+                pFibersGroup->OnToggleVisibleBtn();
+            }
+        }
+    }
 
     m_pListCtrl->UpdateSelected();
 

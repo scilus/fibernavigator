@@ -1816,7 +1816,7 @@ void MainFrame::onDeselectListItem( wxListEvent& evt )
         }
     }
 
-    m_currentListIndex = -1;
+    m_currentListIndex = m_pListCtrl->GetSelectedIndex();
 //     m_pLastSelectedSceneObject = NULL;
 //     m_lastSelectedListItem = -1;
     evt.Skip();
@@ -1849,6 +1849,7 @@ void MainFrame::onSelectListItem( wxListEvent& evt )
 
 //     m_pLastSelectedSceneObject = pInfo;
 //     m_lastSelectedListItem = index;
+    m_currentListIndex = index;
 
     // Check if it is RGB
     if( RGB == pInfo->getType() )

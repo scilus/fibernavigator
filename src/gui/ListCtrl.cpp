@@ -330,7 +330,7 @@ DatasetIndex ListCtrl::GetItem( long index ) const
 {
     if( 0 > index || index >= wxListCtrl::GetItemCount() )
     {
-        return -1;
+        return DatasetIndex();
     }
 
     return DatasetIndex( GetItemData( index ) );
