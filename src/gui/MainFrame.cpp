@@ -1806,7 +1806,7 @@ void MainFrame::onDeselectListItem( wxListEvent& evt )
 
         if( NULL != pDsInfo && NULL != pDsInfo->getPropertiesSizer() )
         {
-            Logger::getInstance()->print( wxString::Format( wxT( "Hiding Index: %u DatasetInfo: %s" ), (unsigned int)dsIndex, pDsInfo->getName() ), LOGLEVEL_DEBUG );
+            Logger::getInstance()->print( wxString::Format( wxT( "Hiding Index: %u DatasetInfo: %s" ), (unsigned int)dsIndex, pDsInfo->getName().c_str() ), LOGLEVEL_DEBUG );
             if( !m_pPropertiesWindow->GetSizer()->Hide( pDsInfo->getPropertiesSizer() ) )
             {
                 Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
