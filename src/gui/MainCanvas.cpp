@@ -135,17 +135,18 @@ void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
     render();
 }
 
-void MainCanvas::OnSize( wxSizeEvent& event )
+void MainCanvas::OnSize( wxSizeEvent& evt )
 {
     Logger::getInstance()->print( wxT( "Event triggered - MainCanvas::OnSize" ), LOGLEVEL_DEBUG );
     // this is also necessary to update the context on some platforms
-    wxGLCanvas::OnSize( event );
 
     int w, h; 
     GetClientSize( &w, &h );
     m_pArcBall->setBounds( (GLfloat) w, (GLfloat) h );
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
-    //glViewport( 0, 0, (GLint) w, (GLint) h );    
+    //glViewport( 0, 0, (GLint) w, (GLint) h );
+
+    evt.Skip();
 }
 
 void MainCanvas::OnMouseEvent( wxMouseEvent& evt )

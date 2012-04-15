@@ -2224,7 +2224,6 @@ void MainFrame::updateMenus()
 {
     m_pMenuBar->updateMenuBar( this );
     m_pToolBar->updateToolBar( this );
-    Logger::getInstance()->printIfGLError( wxT( "MainFrame::updateMenus" ) );
 }
 
 void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
