@@ -43,8 +43,7 @@ SelectionBox::SelectionBox( Anatomy* i_anatomy ) :
 {
    m_isMaster      = true;
 
-   int index = DatasetManager::getInstance()->createCIsoSurface( i_anatomy );
-   m_isosurface = (CIsoSurface *)DatasetManager::getInstance()->getDataset( index );
+   m_isosurface = new CIsoSurface( i_anatomy );    
    
    wxString mystring(wxT("[VOI] - ") + i_anatomy->getName());
    m_name          =  mystring;
