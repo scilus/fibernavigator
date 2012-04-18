@@ -54,7 +54,7 @@ public:
     void screenshot                         ( const wxString &path, const wxString &filename );
     void onTreeChange();
     void onLoad                             ( wxCommandEvent& evt );
-    long getCurrentListItem() const         { return m_currentListIndex; }
+    long getCurrentListIndex() const         { return m_currentListIndex; }
     void createNewAnatomy                   ( DatasetType dataType );
     void updateSliders();
 

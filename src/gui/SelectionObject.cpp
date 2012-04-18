@@ -853,7 +853,7 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
     vector< bool > filteredFiber;
-    Fibers * l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+    Fibers * l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
 
     filteredFiber = l_fibers->getFilteredFibers();
 
@@ -1017,10 +1017,14 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::getShowFibers()
 {
-    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
-    if ( l_fibers == NULL )
-        return false;
-    return l_fibers->getShow();
+    Fibers* pFibers = NULL;
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+    }
+
+    return NULL == pFibers ? false : pFibers->getShow();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1033,7 +1037,7 @@ bool SelectionObject::getShowFibers()
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
 {
-    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
 
     if( l_fibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
         return false;
@@ -2281,6 +2285,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 void SelectionObject::updatePropertiesSizer()
 {
     SceneObject::updatePropertiesSizer();
+
     m_pToggleVisibility->SetValue( getIsVisible() );
     m_pToggleActivate->SetValue( getIsActive() );
     m_pTxtName->SetValue( getName() );

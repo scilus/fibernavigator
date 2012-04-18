@@ -181,7 +181,7 @@ void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )
 void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
 {
     //Tensor data
-    long item = m_pMainFrame->getCurrentListItem();
+    long item = m_pMainFrame->getCurrentListIndex();
     //long item = m_pMainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     //Tensors* pTensorInfo = dynamic_cast<Tensors*>((DatasetInfo*)m_pMainFrame->m_pListCtrl->GetItemData( item ));
     Tensors * pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );

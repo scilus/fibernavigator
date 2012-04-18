@@ -496,7 +496,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 			
 			if( pDatasetInfo->getType() == FIBERS )
 			{
-				Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
+				Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
 				if( l_fibers )
 				{
 					if (dialog.GetFilterIndex()==1)
@@ -961,7 +961,7 @@ void MainFrame::createCutDataset()
     if( !DatasetManager::getInstance()->isAnatomyLoaded() )
         return;
 
-    long l_item = getCurrentListItem();
+    long l_item = getCurrentListIndex();
     if( l_item == -1 )
         return;
 
@@ -1040,7 +1040,7 @@ void MainFrame::createDistanceMap()
     if( !DatasetManager::getInstance()->isAnatomyLoaded() )
         return;
 
-    long l_item = getCurrentListItem();
+    long l_item = getCurrentListIndex();
     if( l_item == -1 )
         return;
 
@@ -1071,7 +1071,7 @@ void MainFrame::createDistanceMapAndIso()
     if( !DatasetManager::getInstance()->isAnatomyLoaded() )
         return;
 
-    long l_item = getCurrentListItem();
+    long l_item = getCurrentListIndex();
     if( l_item == -1 )
         return;
 
@@ -1119,7 +1119,7 @@ void MainFrame::createIsoSurface()
     if( !DatasetManager::getInstance()->isAnatomyLoaded() )
         return;
 
-    long l_item = getCurrentListItem();
+    long l_item = getCurrentListIndex();
     if( l_item == -1 )
         return;
 
@@ -1359,7 +1359,7 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
 		{
-			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
+			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
 			if( l_fibers != NULL )
 			{
 				l_fibers->invertFibers();
@@ -1386,7 +1386,7 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
 		{
-			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
+			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
 			if(l_fibers != NULL)
 			{
 				l_fibers->useFakeTubes();
@@ -1484,7 +1484,7 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 		if( pDatasetInfo->getType() == FIBERS )
 		{
-			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
+			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
 			if( l_fibers != NULL)
 			{
 				l_fibers->useTransparency();
@@ -1521,7 +1521,7 @@ void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 
         if( pDatasetInfo->getType() == FIBERS )
         {
-            Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListItem() );
+            Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
 			if( l_fibers  != NULL)
 			{
 				l_fibers->resetColorArray();
@@ -1919,42 +1919,44 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
         m_pLastSelectionObj = NULL;
     }
 
-//     if( evt.IsSelection() )
-//     {
-        m_pListCtrl->UnselectAll();
+//     m_pListCtrl->UnselectAll();
+    long index = m_pListCtrl->GetSelectedIndex();
+    DatasetIndex dsIndex = m_pListCtrl->GetItem( index );
+    if( dsIndex.isOk() )
+    {
+        DatasetInfo *pDsInfo = DatasetManager::getInstance()->getDataset( dsIndex );
 
-        wxTreeItemId selectedId = m_pTreeWidget->GetSelection();
-        if( !selectedId.IsOk() )
+        if( NULL != pDsInfo && NULL != pDsInfo->getPropertiesSizer() )
         {
-            return;
+            Logger::getInstance()->print( wxString::Format( wxT( "Hiding Index: %u DatasetInfo: %s" ), (unsigned int)dsIndex, pDsInfo->getName().c_str() ), LOGLEVEL_DEBUG );
+            if( !m_pPropertiesWindow->GetSizer()->Hide( pDsInfo->getPropertiesSizer() ) )
+            {
+                Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+            }
+            m_pPropertiesWindow->Layout();
+            m_pPropertiesWindow->FitInside();
         }
+    }
 
-        int type = treeSelected( selectedId );
-        SelectionObject * pSelectionObj;
+    wxTreeItemId selectedId = m_pTreeWidget->GetSelection();
+    if( !selectedId.IsOk() )
+    {
+        return;
+    }
 
-        switch( type )
-        {
-            case MASTER_OBJECT:
-            case CHILD_OBJECT:
-                pSelectionObj = (SelectionObject *)( m_pTreeWidget->GetItemData( selectedId ) );
-                m_pLastSelectionObj = pSelectionObj;
-                m_pLastSelectionObj->select( false );
-//               m_pLastSelectedSceneObject = pSelectionObj;
-                changePropertiesSizer( pSelectionObj, -1 );
-        }
-//     }
-//     else
-//     {
-//         wxTreeItemId id = evt.GetItem();
-//         if( id.IsOk() )
-//         {
-//             SelectionObject *pSelectionObj = (SelectionObject *)( m_pTreeWidget->GetItemData( id ) );
-//             if( NULL != pSelectionObj && NULL != pSelectionObj->getPropertiesSizer() )
-//             {
-//                 m_pPropertiesWindow->GetSizer()->Hide( pSelectionObj->getPropertiesSizer() );
-//             }
-//         }
-//     }
+    int type = treeSelected( selectedId );
+    SelectionObject * pSelectionObj;
+
+    switch( type )
+    {
+        case MASTER_OBJECT:
+        case CHILD_OBJECT:
+            pSelectionObj = (SelectionObject *)( m_pTreeWidget->GetItemData( selectedId ) );
+            m_pLastSelectionObj = pSelectionObj;
+            m_pLastSelectionObj->select( false );
+//           m_pLastSelectedSceneObject = pSelectionObj;
+            changePropertiesSizer( pSelectionObj, m_currentListIndex );
+    }
 
 //     refreshAllGLWidgets();
 }

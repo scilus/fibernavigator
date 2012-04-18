@@ -3631,7 +3631,7 @@ void Fibers::updatePropertiesSizer()
 
     DatasetInfo* pDatasetInfo = NULL;
 
-    long nextItemId = MyApp::frame->getCurrentListItem();
+    long nextItemId = MyApp::frame->getCurrentListIndex();
 
     if( nextItemId >= 0)
     {
@@ -3657,7 +3657,7 @@ void Fibers::updatePropertiesSizer()
         DatasetInfo::m_pBtnDown->Disable();
     }
 
-    long prevItemId = MyApp::frame->getCurrentListItem() - 1;
+    long prevItemId = MyApp::frame->getCurrentListIndex() - 1;
 
     if( prevItemId != -1)
     {

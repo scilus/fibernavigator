@@ -351,7 +351,7 @@ void Anatomy::minimize()
     }
 
     std::vector<bool> workData( m_columns * m_rows * m_frames, false );
-    Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListItem() ) );
+    Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListIndex() ) );
 
     int curX, curY, curZ, index;
 

@@ -587,7 +587,7 @@ void PropertiesWindow::OnFibersFilter( wxCommandEvent& WXUNUSED( event ) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFibersFilter" ), LOGLEVEL_DEBUG );
 
-    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListItem() );
+    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListIndex() );
 
     Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
     if( pTmpFib != NULL )
@@ -600,7 +600,7 @@ void PropertiesWindow::OnGenerateFiberVolume( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGenerateFiberVolume" ), LOGLEVEL_DEBUG );
 
-    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
     if( pTmpFib != NULL )
     {
         pTmpFib->generateFiberVolume();
@@ -632,7 +632,7 @@ void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
     if( pFibers != NULL )
 	{
 		Logger::getInstance()->print( _T( "Event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
@@ -654,7 +654,7 @@ void PropertiesWindow::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnListMenuMinDistance" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
     if( pFibers != NULL )
 	{
 		if(pFibers->getColorationMode() != MINDISTANCE_COLOR)
@@ -675,7 +675,7 @@ void PropertiesWindow::OnColorWithCurvature( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithCurvature" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
     if( pFibers != NULL )
     {
 		if(pFibers->getColorationMode() != CURVATURE_COLOR)
@@ -695,7 +695,7 @@ void PropertiesWindow::OnColorWithTorsion( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithTorsion" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
     if( pFibers != NULL )
     {
 		if(pFibers->getColorationMode() != TORSION_COLOR)
@@ -711,7 +711,7 @@ void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNormalColoring" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
     if( pFibers != NULL )
     {
 		if(pFibers->getColorationMode() != NORMAL_COLOR)
@@ -788,7 +788,7 @@ void PropertiesWindow::OnOriginalShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnOriginalShBasis" ), LOGLEVEL_DEBUG );
 
-    long index = m_pMainFrame->getCurrentListItem();
+    long index = m_pMainFrame->getCurrentListIndex();
     if( -1 != index )
     {
         ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
@@ -800,7 +800,7 @@ void PropertiesWindow::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDescoteauxShBasis" ), LOGLEVEL_DEBUG );
 
-    long index = m_pMainFrame->getCurrentListItem();
+    long index = m_pMainFrame->getCurrentListIndex();
     if( -1 != index )
     {
         ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
@@ -812,7 +812,7 @@ void PropertiesWindow::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnTournierShBasis" ), LOGLEVEL_DEBUG );
 
-    long index = m_pMainFrame->getCurrentListItem();
+    long index = m_pMainFrame->getCurrentListIndex();
     if( -1 != index )
     {
         ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
@@ -824,7 +824,7 @@ void PropertiesWindow::OnPTKShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnPTKShBasis" ), LOGLEVEL_DEBUG );
 
-    long index = m_pMainFrame->getCurrentListItem();
+    long index = m_pMainFrame->getCurrentListIndex();
     if( -1 != index )
     {
         ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
@@ -1521,7 +1521,7 @@ void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(ev
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCreateFibersDensityTexture" ), LOGLEVEL_DEBUG );
 
-    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
 
     if( l_fibers == NULL )
         return ;
@@ -1590,7 +1590,7 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCreateFibersColorTexture" ), LOGLEVEL_DEBUG );
 
-    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListItem() );
+    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
 
     if( NULL == l_fibers )
         return ;

@@ -136,10 +136,13 @@ std::vector<ODFs *> DatasetManager::getOdfs() const
 
 Fibers * DatasetManager::getSelectedFibers( DatasetIndex index ) const
 {
-    map<DatasetIndex, Fibers *>::const_iterator it = m_fibers.find( index );
-    if( it != m_fibers.end() )
+    if( index.isOk() )
     {
-        return it->second;
+        map<DatasetIndex, Fibers *>::const_iterator it = m_fibers.find( index );
+        if( it != m_fibers.end() )
+        {
+            return it->second;
+        }
     }
     return NULL;
 }
