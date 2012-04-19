@@ -28,7 +28,7 @@ public:
     bool    isOneBtnToggled()
     {
         return m_isIntensityToggled && m_isOpacityToggled && m_isMinMaxLengthToggled 
-               && m_isSubsamplingToggled && m_isColorModeToggled;
+            && m_isSubsamplingToggled && m_isColorModeToggled;
     }
 
     void    save( wxString filename );

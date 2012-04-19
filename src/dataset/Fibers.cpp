@@ -69,11 +69,11 @@ Fibers::Fibers()
     m_minLength( 0.0f ),
     m_localizedAlpha(),
     m_cachedThreshold( 0.0f ),
-	m_fibersInverted( false ),
-	m_useFakeTubes( false ),
-	m_useTransparency( false ),
-	m_isColorationUpdated( false ),
-	m_fiberColorationMode( NORMAL_COLOR ),
+    m_fibersInverted( false ),
+    m_useFakeTubes( false ),
+    m_useTransparency( false ),
+    m_isColorationUpdated( false ),
+    m_fiberColorationMode( NORMAL_COLOR ),
     m_pKdTree( NULL ),
     m_pOctree( NULL ),
     m_cfDrawDirty( true ),
@@ -418,14 +418,14 @@ bool Fibers::loadTRK( const wxString &filename )
     m_countPoints = 0;
     vector< float > colors;
 
-	 //if( nbCount == 0 )
+    //if( nbCount == 0 )
     //{
     //   return false; //TODO: handle it. (0 means the number was NOT stored.)
     //}
 
     for( unsigned int i = 0; i < nbCount || remainingBytes > 0; ++i )
     //for( unsigned int i = 0; i != nbCount ; ++i )
-	 {
+    {
         //Number of points in this track. [4 bytes]
         wxUint32 nbPoints;
         dataFile.Read( cbi32.b, ( size_t )4 );
@@ -474,7 +474,7 @@ bool Fibers::loadTRK( const wxString &filename )
        remainingBytes -= 3*nbPoints * 4; //Coordinates (4 bytes)
        remainingBytes -= nbScalars*nbPoints * 4; //Scalars (4 bytes)
        remainingBytes -= nbProperties * 4; //Properties (4 bytes)
-		 //cout <<  "i : " << i << ", remainingBytes : " << remainingBytes << "\n";
+       //cout <<  "i : " << i << ", remainingBytes : " << remainingBytes << "\n";
     }
 
     dataFile.Close();
@@ -528,10 +528,10 @@ bool Fibers::loadTRK( const wxString &filename )
 
         for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
         {   
-				if (colors.size() > 0)
-				{
-	            m_colorArray[pos] = colors[pos] / 255.;
-				}
+            if (colors.size() > 0)
+            {
+                m_colorArray[pos] = colors[pos] / 255.;
+            }
             m_pointArray[pos++] = *it2;
         }
     }
@@ -1599,7 +1599,7 @@ void Fibers::loadTestFibers()
 // This function will call the proper coloring function for the fibers.
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::updateFibersColors()
-{	
+{
     if( m_fiberColorationMode == NORMAL_COLOR )
     {
         resetColorArray();
@@ -1844,11 +1844,11 @@ void Fibers::colorWithCurvature( float *pColorData )
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::colorWithDistance( float *pColorData )
 {
-	if( pColorData == NULL )
+    if( pColorData == NULL )
     {
         return;
     }
-	
+
     SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
     vector< SelectionObject* > simplifiedList;
 
@@ -1918,11 +1918,11 @@ void Fibers::colorWithDistance( float *pColorData )
 
 void Fibers::colorWithMinDistance( float *pColorData )
 {
-	if( pColorData == NULL )
+    if( pColorData == NULL )
     {
         return;
     }
-	
+
     SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
     vector< SelectionObject* > simplifiedList;
 
@@ -2021,15 +2021,15 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
 Anatomy* Fibers::generateFiberVolume()
 {
-	float* pColorData( NULL );
-	if( SceneManager::getInstance()->isUsingVBO() )
+    float* pColorData( NULL );
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
-		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			
-		#ifdef __WXMAC__
-			//glBufferData(GL_ARRAY_BUFFER, getPointCount()*3 + 2, NULL, GL_STREAM_DRAW);
-		#endif
-		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+
+        #ifdef __WXMAC__
+            //glBufferData(GL_ARRAY_BUFFER, getPointCount()*3 + 2, NULL, GL_STREAM_DRAW);
+        #endif
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
@@ -2072,8 +2072,8 @@ Anatomy* Fibers::generateFiberVolume()
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
-	
-	return pTmpAnatomy;
+
+    return pTmpAnatomy;
 }
 
 void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines )
@@ -2081,12 +2081,12 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
     int pointIndex( 0 );
     countLines = 0;
 
-	float *pColorData( NULL );
-	
-	if( SceneManager::getInstance()->isUsingVBO() )
+    float *pColorData( NULL );
+    
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
-		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
@@ -2131,7 +2131,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
 
 void Fibers::getNbLines( int& nbLines )
 {
-	nbLines = 0;
+    nbLines = 0;
 
     for( int l = 0; l < m_countLines; ++l )
     {
@@ -2144,7 +2144,7 @@ void Fibers::getNbLines( int& nbLines )
 
 void Fibers::loadDMRIFibersInFile( ofstream& myfile )
 {
-	for( int l = 0; l < m_countLines; ++l )
+    for( int l = 0; l < m_countLines; ++l )
     {
         if( m_selected[l] && !m_filtered[l] )
         {
@@ -2472,22 +2472,20 @@ void Fibers::resetColorArray()
 {
     Logger::getInstance()->print( wxT( "Reset color arrays" ), LOGLEVEL_MESSAGE );
     float *pColorData( NULL );
-    float *pColorData2( NULL );
-	
-	if( SceneManager::getInstance()->isUsingVBO() )
+    float *pColorData2( &m_colorArray[0] );
+
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
-		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-		pColorData2 = &m_colorArray[0];
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
         pColorData  = &m_colorArray[0];
-        pColorData2 = &m_colorArray[0];
     }
 
     int pc = 0;
-    float r, g, b, x1, x2, y1, y2, z1, z2, lastX, lastY, lastZ = 0.0f;
+    float r, g, b, x1, x2, y1, y2, z1, z2, lastX, lastY, lastZ;
 
     for( int i = 0; i < getLineCount(); ++i )
     {
@@ -2641,15 +2639,15 @@ void Fibers::updateLinesShown()
 
         if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->isColorChanged() )
         {
-			float *pColorData( NULL );
-			float *pColorData2( NULL );
-			
-			if( SceneManager::getInstance()->isUsingVBO() )
-			{
-				glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-				pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-				pColorData2 = &m_colorArray[0];
-			}
+            float *pColorData( NULL );
+            float *pColorData2( NULL );
+            
+            if( SceneManager::getInstance()->isUsingVBO() )
+            {
+                glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+                pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+                pColorData2 = &m_colorArray[0];
+            }
             else
             {
                 pColorData  = &m_colorArray[0];
@@ -3181,13 +3179,13 @@ void Fibers::drawSortedLines()
 
 void Fibers::useFakeTubes()
 {
-	m_useFakeTubes = ! m_useFakeTubes;
-	switchNormals( m_useFakeTubes );
+    m_useFakeTubes = ! m_useFakeTubes;
+    switchNormals( m_useFakeTubes );
 }
 
 void Fibers::useTransparency()
 {
-	m_useTransparency = ! m_useTransparency;
+    m_useTransparency = ! m_useTransparency;
 }
 
 void Fibers::drawCrossingFibers()
@@ -3358,7 +3356,7 @@ bool Fibers::isSelected( int fiberId )
 
 float Fibers::getLocalizedAlpha( int index )
 {
-	return m_localizedAlpha[index];
+    return m_localizedAlpha[index];
 }
 
 void Fibers::setFibersLength()
@@ -3432,12 +3430,12 @@ void Fibers::updateFibersFilters()
     int subSampling = m_pSliderFibersSampling->GetValue();
     int maxSubSampling = m_pSliderFibersSampling->GetMax() + 1;
 
-	updateFibersFilters(min, max, subSampling, maxSubSampling);
+    updateFibersFilters(min, max, subSampling, maxSubSampling);
 }
 
 void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling)
 {
-	for( int i = 0; i < m_countLines; ++i )
+    for( int i = 0; i < m_countLines; ++i )
     {
         m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
@@ -3551,10 +3549,10 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
+    pBoxMain->Add( m_pToggleCrossingFibers,    0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
     pBoxMain->Add( pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
-    pBoxMain->Add( m_pToggleLocalColoring,  0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
-    pBoxMain->Add( m_pToggleNormalColoring, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
-    pBoxMain->Add( m_pToggleCrossingFibers, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( m_pToggleLocalColoring,     0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( m_pToggleNormalColoring,    0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -3805,7 +3803,7 @@ void Fibers::setShader()
 
         ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("xMin", SceneManager::getInstance()->isSagittalDisplayed() ? xMin : 0 );
         ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("xMax", SceneManager::getInstance()->isSagittalDisplayed() ? xMax : 0 );
-		
+
         ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("yMin", SceneManager::getInstance()->isCoronalDisplayed() ? yMin : 0 );
         ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("yMax", SceneManager::getInstance()->isCoronalDisplayed() ? yMax : 0 );
 
@@ -3817,7 +3815,7 @@ void Fibers::setShader()
         ShaderHelper::getInstance()->getFibersShader()->bind();
         ShaderHelper::getInstance()->setFiberShaderVars();
         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useTex", !pDsInfo->getUseTex() );
-        ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
+//         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useOverlay", pDsInfo->getShowFS() );
     }
 }

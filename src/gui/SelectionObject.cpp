@@ -853,45 +853,50 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
     vector< bool > filteredFiber;
-    Fibers * l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
 
-    filteredFiber = l_fibers->getFilteredFibers();
-
-    for( unsigned int i = 0; i < m_inBranch.size(); ++i )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        if( m_inBranch[i] && !filteredFiber[i] )
+        Fibers * pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+
+        filteredFiber = pFibers->getFilteredFibers();
+
+        for( unsigned int i = 0; i < m_inBranch.size(); ++i )
         {
-            getFiberCoordValues( i, l_currentFiberPoints );
-
-            // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
-            // could have there coordinated in the data completly inversed ( first fiber 0,0,0 - 1,1,1 ),  
-            // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
-            // verification and if the order of the fiber points are wrong we switch them.
-            if( l_selectedFibersPoints.size() > 0 )
+            if( m_inBranch[i] && !filteredFiber[i] )
             {
-                l_meanStart.zero();
-                for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
-                    l_meanStart += l_selectedFibersPoints[j][0];
-                l_meanStart /= l_selectedFibersPoints.size();
-            }
+                getFiberCoordValues( i, l_currentFiberPoints );
 
-            // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
-            // then the order of the points of this fiber are ok, otherwise we need to flip them.
-            if( ( l_meanStart - l_currentFiberPoints[0] ).getLength() <
-                ( l_meanStart - l_currentFiberPoints[l_currentFiberPoints.size() - 1] ).getLength() )
-            {
-                l_selectedFibersPoints.push_back( l_currentFiberPoints );
-            }
-            else
-            {
-                for( int k = (int)l_currentFiberPoints.size() - 1; k >= 0; --k )
-                    l_currentSwappedFiberPoints.push_back( l_currentFiberPoints[k] );
+                // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
+                // could have there coordinated in the data completely inversed ( first fiber 0,0,0 - 1,1,1 ),  
+                // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
+                // verification and if the order of the fiber points are wrong we switch them.
+                if( l_selectedFibersPoints.size() > 0 )
+                {
+                    l_meanStart.zero();
+                    for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
+                        l_meanStart += l_selectedFibersPoints[j][0];
+                    l_meanStart /= l_selectedFibersPoints.size();
+                }
 
-                l_selectedFibersPoints.push_back( l_currentSwappedFiberPoints );
-                l_currentSwappedFiberPoints.clear();
-            }
+                // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
+                // then the order of the points of this fiber are ok, otherwise we need to flip them.
+                if( ( l_meanStart - l_currentFiberPoints[0] ).getLength() <
+                    ( l_meanStart - l_currentFiberPoints[l_currentFiberPoints.size() - 1] ).getLength() )
+                {
+                    l_selectedFibersPoints.push_back( l_currentFiberPoints );
+                }
+                else
+                {
+                    for( int k = (int)l_currentFiberPoints.size() - 1; k >= 0; --k )
+                        l_currentSwappedFiberPoints.push_back( l_currentFiberPoints[k] );
 
-            l_currentFiberPoints.clear();
+                    l_selectedFibersPoints.push_back( l_currentSwappedFiberPoints );
+                    l_currentSwappedFiberPoints.clear();
+                }
+
+                l_currentFiberPoints.clear();
+            }
         }
     }
 
@@ -1037,25 +1042,31 @@ bool SelectionObject::getShowFibers()
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
 {
-    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-
-    if( l_fibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
-        return false;
-
-    int l_index = l_fibers->getStartIndexForLine( i_fiberIndex ) * 3;
-    Vector l_point3D;
-       
-    for( int i = 0; i < l_fibers->getPointsPerLine( i_fiberIndex ); ++i )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        l_point3D.x = l_fibers->getPointValue( l_index );
-        l_point3D.y = l_fibers->getPointValue( l_index + 1);
-        l_point3D.z = l_fibers->getPointValue( l_index + 2 );
-        o_fiberPoints.push_back( l_point3D );
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
-        l_index += 3;                
+        if( pFibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
+            return false;
+
+        int l_index = pFibers->getStartIndexForLine( i_fiberIndex ) * 3;
+        Vector l_point3D;
+
+        for( int i = 0; i < pFibers->getPointsPerLine( i_fiberIndex ); ++i )
+        {
+            l_point3D.x = pFibers->getPointValue( l_index );
+            l_point3D.y = pFibers->getPointValue( l_index + 1);
+            l_point3D.z = pFibers->getPointValue( l_index + 2 );
+            o_fiberPoints.push_back( l_point3D );
+
+            l_index += 3;
+        }
+
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1941,14 +1952,14 @@ void SelectionObject::FlipNormals()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::SetFiberInfoGridValues()
 {
-    if( ! m_isMaster )
+    if( !m_isMaster )
     {
         wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
-        SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );        
+        SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
         l_masterObject->SetFiberInfoGridValues();
         return;
     }
-    if (m_pToggleCalculatesFibersInfo->GetValue())
+    if( m_pToggleCalculatesFibersInfo->GetValue() )
     {
         FibersInfoGridParams l_params;
         calculateGridParams( l_params );

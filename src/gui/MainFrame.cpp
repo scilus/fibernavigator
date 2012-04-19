@@ -383,19 +383,19 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 //
 void MainFrame::createNewAnatomy( DatasetType dataType )
 {
-	// ask user for a name
-	wxString l_givenName = wxT("Anatomy");
+    // ask user for a name
+    wxString l_givenName = wxT("Anatomy");
     wxTextEntryDialog dialog(this, _T( "Please enter a new name" ) );
     dialog.SetValue( l_givenName );
     if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
-	{
+    {
         l_givenName = dialog.GetValue();
-	}
+    }
 
-	//create the anatomy
+    //create the anatomy
     int index = DatasetManager::getInstance()->createAnatomy( dataType );
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
-	pNewAnatomy->setName( l_givenName );
+    pNewAnatomy->setName( l_givenName );
 
     m_pListCtrl->InsertItem( index );
 
@@ -429,12 +429,12 @@ void MainFrame::updateSliders()
 
 void MainFrame::onNewAnatomyByte( wxCommandEvent& WXUNUSED(event) )
 {
-	createNewAnatomy( HEAD_BYTE );
+    createNewAnatomy( HEAD_BYTE );
 }
 
 void MainFrame::onNewAnatomyRGB( wxCommandEvent& WXUNUSED(event) )
 {
-	createNewAnatomy( RGB );
+    createNewAnatomy( RGB );
 }
 
 void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
@@ -487,44 +487,48 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
-	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-		if( dialog.ShowModal() == wxID_OK )
-		{
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        if( dialog.ShowModal() == wxID_OK )
+        {
             m_lastPath = dialog.GetDirectory();
-			
-			if( pDatasetInfo->getType() == FIBERS )
-			{
-				Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
-				if( l_fibers )
-				{
-					if (dialog.GetFilterIndex()==1)
-					{
-						l_fibers->saveDMRI( dialog.GetPath() );	
-					}
-					else
-					{
-						l_fibers->save( dialog.GetPath() );
-					}
-				}
-			}
-			else if( pDatasetInfo->getType() == FIBERSGROUP )
-			{
+            
+            if( pDatasetInfo->getType() == FIBERS )
+            {
+                long index = getCurrentListIndex();
+                if( -1 != index )
+                {
+                    Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                    if( pFibers )
+                    {
+                        if (dialog.GetFilterIndex()==1)
+                        {
+                            pFibers->saveDMRI( dialog.GetPath() );
+                        }
+                        else
+                        {
+                            pFibers->save( dialog.GetPath() );
+                        }
+                    }
+                }
+            }
+            else if( pDatasetInfo->getType() == FIBERSGROUP )
+            {
                 FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
-				
-				if (dialog.GetFilterIndex()==1)
-				{
-					l_fibersGroup->saveDMRI( dialog.GetPath() );	
-				}
-				else
-				{
-					l_fibersGroup->save( dialog.GetPath() );
-				}
-			}
-			
-		}
-	}
+                
+                if (dialog.GetFilterIndex()==1)
+                {
+                    l_fibersGroup->saveDMRI( dialog.GetPath() );
+                }
+                else
+                {
+                    l_fibersGroup->save( dialog.GetPath() );
+                }
+            }
+            
+        }
+    }
 }
 
 void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
@@ -747,7 +751,7 @@ void MainFrame::onToggleDrawPointsMode( wxCommandEvent& event )
 
 void MainFrame::onSelectDrawer( wxCommandEvent& event )
 {
-	m_isDrawerToolActive = true;
+    m_isDrawerToolActive = true;
     updateDrawerToolbar();
 }
 
@@ -1354,26 +1358,30 @@ void MainFrame::onToggleFilterIso( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-		if( pDatasetInfo->getType() == FIBERS )
-		{
-			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
-			if( l_fibers != NULL )
-			{
-				l_fibers->invertFibers();
-			}
-		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( l_fibersGroup != NULL )
-			{
-				l_fibersGroup->invertFibers();
-			}			
-		}
-	}
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        if( pDatasetInfo->getType() == FIBERS )
+        {
+            long index = getCurrentListIndex();
+            if( -1 != index )
+            {
+                Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                if( NULL != pFibers )
+                {
+                    pFibers->invertFibers();
+                }
+            }
+        }
+        else if ( pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( l_fibersGroup != NULL )
+            {
+                l_fibersGroup->invertFibers();
+            }            
+        }
+    }
 
     SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
@@ -1381,26 +1389,30 @@ void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-		if( pDatasetInfo->getType() == FIBERS )
-		{
-			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
-			if(l_fibers != NULL)
-			{
-				l_fibers->useFakeTubes();
-			}
-		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( l_fibersGroup != NULL )
-			{
-				l_fibersGroup->useFakeTubes();
-			}			
-		}
-	}
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        if( pDatasetInfo->getType() == FIBERS )
+        {
+            long index = getCurrentListIndex();
+            if( -1 != index )
+            {
+                Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                if( pFibers != NULL )
+                {
+                    pFibers->useFakeTubes();
+                }
+            }
+        }
+        else if ( pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( l_fibersGroup != NULL )
+            {
+                l_fibersGroup->useFakeTubes();
+            }            
+        }
+    }
     refreshAllGLWidgets();
 }
 
@@ -1479,27 +1491,30 @@ void MainFrame::onRulerToolDel( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 {    
-	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-		if( pDatasetInfo->getType() == FIBERS )
-		{
-			Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
-			if( l_fibers != NULL)
-			{
-				l_fibers->useTransparency();
-
-			}
-		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( l_fibersGroup != NULL )
-			{
-				l_fibersGroup->useTransparency();
-			}			
-		}
-	}
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        if( pDatasetInfo->getType() == FIBERS )
+        {
+            long index = getCurrentListIndex();
+            if( -1 != index )
+            {
+                Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                if( pFibers != NULL)
+                {
+                    pFibers->useTransparency();
+                }
+            }
+        }
+        else if ( pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( l_fibersGroup != NULL )
+            {
+                l_fibersGroup->useTransparency();
+            }
+        }
+    }
     refreshAllGLWidgets();
 }
 
@@ -1515,28 +1530,31 @@ void MainFrame::onUseGeometryShader( wxCommandEvent& event )
 
 void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 
         if( pDatasetInfo->getType() == FIBERS )
         {
-            Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( getCurrentListIndex() );
-			if( l_fibers  != NULL)
-			{
-				l_fibers->resetColorArray();
-			}
-		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( l_fibersGroup != NULL )
-			{
-				l_fibersGroup->resetFibersColor();
-			}
-
-		}
-	}
+            long index = getCurrentListIndex();
+            if( -1 != index )
+            {
+                Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                if( pFibers != NULL)
+                {
+                    pFibers->resetColorArray();
+                }
+            }
+        }
+        else if ( pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( l_fibersGroup != NULL )
+            {
+                l_fibersGroup->resetFibersColor();
+            }
+        }
+    }
     
     SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
@@ -1623,14 +1641,14 @@ void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onWarningsInformations( wxCommandEvent& WXUNUSED(event) )
 {
-	wxString nl = _T( "\n" );
+    wxString nl = _T( "\n" );
     (void)wxMessageBox(
-		_T("Please take note that the values of the settings used when using the fibers group may not reflect the current value of the settings of all fibers.") 
-		+ nl + nl
-		+ _T("Since it is possible to modify a setting globally, then to modify it locally to a fiber bundle, it is impossible to have only one value reflecting the different values of each bundle.") 
-		+ nl + nl
-		+ _T("Therefore, when using the fibers group, all settings are set to their default values. For example, if you want to set the minimal length of the displayed fibers to the lowest possible value, even if the slider is displayed as being to the lowest value, you have to click the Apply button to make sure that it is applied."),
-		wxT("Warnings Informations about Fibers Group functionalities"));
+        _T("Please take note that the values of the settings used when using the fibers group may not reflect the current value of the settings of all fibers.") 
+        + nl + nl
+        + _T("Since it is possible to modify a setting globally, then to modify it locally to a fiber bundle, it is impossible to have only one value reflecting the different values of each bundle.") 
+        + nl + nl
+        + _T("Therefore, when using the fibers group, all settings are set to their default values. For example, if you want to set the minimal length of the displayed fibers to the lowest possible value, even if the slider is displayed as being to the lowest value, you have to click the Apply button to make sure that it is applied."),
+        wxT("Warnings Informations about Fibers Group functionalities"));
 }
 
 void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )

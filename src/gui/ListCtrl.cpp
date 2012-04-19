@@ -351,6 +351,16 @@ void ListCtrl::onActivate( wxListEvent& evt )
     {        
     case 0:
         pDataset->toggleShow();
+        if( FIBERSGROUP == pDataset->getType() )
+        {
+            FibersGroup *pFibersGroup = (FibersGroup *)pDataset;
+            pFibersGroup->OnToggleVisibleBtn();
+            unsigned int count = DatasetManager::getInstance()->getFibersCount();
+            for( unsigned int i = 1; i <= count; ++i )
+            {
+                Update( i + index );
+            }
+        }
         Update( index );
         break;
     case 1:

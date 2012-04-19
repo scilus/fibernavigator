@@ -72,190 +72,190 @@ void PropertiesWindow::OnToggleIntensityBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleIntensityBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( pFibersGroup )
-			{
-				pFibersGroup->OnToggleIntensityBtn();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( pFibersGroup )
+            {
+                pFibersGroup->OnToggleIntensityBtn();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleOpacityBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleOpacityBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( pFibersGroup )
-			{
-				pFibersGroup->OnToggleOpacityBtn();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( pFibersGroup )
+            {
+                pFibersGroup->OnToggleOpacityBtn();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleMinMaxLengthBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleMinMaxLengthBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( pFibersGroup )
-			{
-				pFibersGroup->OnToggleMinMaxLengthBtn();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( pFibersGroup )
+            {
+                pFibersGroup->OnToggleMinMaxLengthBtn();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleSubsamplingBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleSubsamplingBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
+        {
             FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( pFibersGroup )
-			{
-				pFibersGroup->OnToggleSubsamplingBtn();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+            if( pFibersGroup )
+            {
+                pFibersGroup->OnToggleSubsamplingBtn();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleCrossingFibersBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleCrossingFibersBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if(pFibersGroup)
-			{
-				pFibersGroup->OnToggleCrossingFibersBtn();
-			}
-		}
-	}
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if(pFibersGroup)
+            {
+                pFibersGroup->OnToggleCrossingFibersBtn();
+            }
+        }
+    }
 }
 
 void PropertiesWindow::OnToggleColorModeBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleColorModeBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if(pFibersGroup)
-			{
-				pFibersGroup->OnToggleColorModeBtn();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if(pFibersGroup)
+            {
+                pFibersGroup->OnToggleColorModeBtn();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleLocalColoringBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleLocalColoringBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if( pFibersGroup )
-			{
-				pFibersGroup->OnToggleLocalColoring();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( pFibersGroup )
+            {
+                pFibersGroup->OnToggleLocalColoring();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleNormalColoringBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleNormalColoringBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if(pFibersGroup)
-			{
-				pFibersGroup->OnToggleNormalColoring();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if(pFibersGroup)
+            {
+                pFibersGroup->OnToggleNormalColoring();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnClickApplyBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnClickApplyBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if(pFibersGroup)
-			{
-				pFibersGroup->OnClickApplyBtn();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if(pFibersGroup)
+            {
+                pFibersGroup->OnClickApplyBtn();
                 m_pListCtrl->UpdateFibers();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnClickCancelBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnClickCancelBtn" ), LOGLEVEL_DEBUG );
 
-	if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
         if( pDatasetInfo != NULL)
-		{
-			FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
-			if(pFibersGroup)
-			{
-				pFibersGroup->OnClickCancelBtn();
-			}
-		}
-	}
-	m_pMainFrame->refreshAllGLWidgets();
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if(pFibersGroup)
+            {
+                pFibersGroup->OnClickCancelBtn();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnClickGenerateFiberVolumeBtn( wxEvent& WXUNUSED(event) )
@@ -369,12 +369,12 @@ void PropertiesWindow::OnEqualizeDataset( wxEvent& WXUNUSED(event) )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnEqualizeDataset" ), LOGLEVEL_DEBUG );
 
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1 )
-	{
+    {
         if( ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getType() < MESH )
         {
             ((Anatomy*)m_pMainFrame->m_pCurrentSceneObject)->toggleEqualization();
         }
-	}
+    }
 }
 
 void PropertiesWindow::OnEqualizationSliderChange( wxCommandEvent& WXUNUSED(event) )
@@ -600,10 +600,14 @@ void PropertiesWindow::OnGenerateFiberVolume( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGenerateFiberVolume" ), LOGLEVEL_DEBUG );
 
-    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-    if( pTmpFib != NULL )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        pTmpFib->generateFiberVolume();
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            pFibers->generateFiberVolume();
+        }
     }
 }
 
@@ -632,18 +636,22 @@ void PropertiesWindow::OnListMenuDistance( wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-    if( pFibers != NULL )
-	{
-		Logger::getInstance()->print( _T( "Event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            Logger::getInstance()->print( _T( "Event triggered - PropertiesWindow::OnListMenuDistance" ), LOGLEVEL_DEBUG );
 
-		if( pFibers->getColorationMode() != DISTANCE_COLOR )
-		{
-			pFibers->setColorationMode( DISTANCE_COLOR );
-			pFibers->updateFibersColors();  
-			pFibers->updateColorationMode();
-		}
-	}
+            if( pFibers->getColorationMode() != DISTANCE_COLOR )
+            {
+                pFibers->setColorationMode( DISTANCE_COLOR );
+                pFibers->updateFibersColors();  
+                pFibers->updateColorationMode();
+            }
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -654,15 +662,23 @@ void PropertiesWindow::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnListMenuMinDistance" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-    if( pFibers != NULL )
-	{
-		if(pFibers->getColorationMode() != MINDISTANCE_COLOR)
-		{
-			pFibers->setColorationMode( MINDISTANCE_COLOR );
-			pFibers->updateFibersColors();
-			pFibers->updateColorationMode();
-		}
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        if( pFibers != NULL )
+        {
+            if( pFibers->getColorationMode() != MINDISTANCE_COLOR )
+            {
+                pFibers->setColorationMode( MINDISTANCE_COLOR );
+                pFibers->updateFibersColors();
+                pFibers->updateColorationMode();
+            }
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnListMenuMinDistance - Current index is -1" ), LOGLEVEL_ERROR );
     }
 }
 
@@ -675,15 +691,23 @@ void PropertiesWindow::OnColorWithCurvature( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithCurvature" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-    if( pFibers != NULL )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-		if(pFibers->getColorationMode() != CURVATURE_COLOR)
-		{
-			pFibers->setColorationMode( CURVATURE_COLOR );
-			pFibers->updateFibersColors();
-			pFibers->updateColorationMode();
-		}
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        if( pFibers != NULL )
+        {
+            if( pFibers->getColorationMode() != CURVATURE_COLOR )
+            {
+                pFibers->setColorationMode( CURVATURE_COLOR );
+                pFibers->updateFibersColors();
+                pFibers->updateColorationMode();
+            }
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnColorWithCurvature - Current index is -1" ), LOGLEVEL_ERROR );
     }
 }
 
@@ -695,15 +719,23 @@ void PropertiesWindow::OnColorWithTorsion( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithTorsion" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-    if( pFibers != NULL )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-		if(pFibers->getColorationMode() != TORSION_COLOR)
-		{
-			pFibers->setColorationMode( TORSION_COLOR );
-			pFibers->updateFibersColors();
-			pFibers->updateColorationMode();
-		}
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        if( pFibers != NULL )
+        {
+            if( pFibers->getColorationMode() != TORSION_COLOR )
+            {
+                pFibers->setColorationMode( TORSION_COLOR );
+                pFibers->updateFibersColors();
+                pFibers->updateColorationMode();
+            }
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnColorWithTorsion - Current index is -1" ), LOGLEVEL_ERROR );
     }
 }
 
@@ -711,15 +743,23 @@ void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNormalColoring" ), LOGLEVEL_DEBUG );
 
-	Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-    if( pFibers != NULL )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-		if(pFibers->getColorationMode() != NORMAL_COLOR)
-		{
-			pFibers->setColorationMode( NORMAL_COLOR );
-			pFibers->updateFibersColors();
-			pFibers->updateColorationMode();
-		}
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        if( pFibers != NULL )
+        {
+            if( pFibers->getColorationMode() != NORMAL_COLOR )
+            {
+                pFibers->setColorationMode( NORMAL_COLOR );
+                pFibers->updateFibersColors();
+                pFibers->updateColorationMode();
+            }
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnNormalColoring - Current index is -1" ), LOGLEVEL_ERROR );
     }
 }
 
@@ -1296,9 +1336,9 @@ void PropertiesWindow::OnRenameBox( wxCommandEvent& WXUNUSED(event) )
         dialog.SetValue( l_box->getName() );
 
         if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
-		{
+        {
             l_box->setName( dialog.GetValue() );
-		}
+        }
 
         m_pMainFrame->m_pTreeWidget->SetItemText( l_treeBoxId, l_box->getName() );
     }
@@ -1521,132 +1561,140 @@ void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(ev
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCreateFibersDensityTexture" ), LOGLEVEL_DEBUG );
 
-    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-
-    if( l_fibers == NULL )
-        return ;
-
-    int l_x,l_y,l_z;
-
-    int index = DatasetManager::getInstance()->createAnatomy();
-    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
-
-    int columns = DatasetManager::getInstance()->getColumns();
-    int rows    = DatasetManager::getInstance()->getRows();
-    int frames  = DatasetManager::getInstance()->getFrames();
-
-    pNewAnatomy->setZero( columns, rows, frames );
-    pNewAnatomy->setDataType( 16 );
-    pNewAnatomy->setType( OVERLAY );
-    float l_max = 0.0f;
-    wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
-
-    if( m_pMainFrame->treeSelected( l_treeObjectId ) == MASTER_OBJECT )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        float voxelX = DatasetManager::getInstance()->getVoxelX();
-        float voxelY = DatasetManager::getInstance()->getVoxelY();
-        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
-        SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
+        if( pFibers == NULL )
+            return ;
 
-        std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
+        int l_x, l_y, l_z;
 
-        for( int l = 0; l < l_fibers->getLineCount(); ++l )
+        int index = DatasetManager::getInstance()->createAnatomy();
+        Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+        int columns = DatasetManager::getInstance()->getColumns();
+        int rows    = DatasetManager::getInstance()->getRows();
+        int frames  = DatasetManager::getInstance()->getFrames();
+
+        pNewAnatomy->setZero( columns, rows, frames );
+        pNewAnatomy->setDataType( 16 );
+        pNewAnatomy->setType( OVERLAY );
+        float l_max = 0.0f;
+        wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
+
+        if( m_pMainFrame->treeSelected( l_treeObjectId ) == MASTER_OBJECT )
         {
-            if( l_object->m_inBranch[l] )
+            float voxelX = DatasetManager::getInstance()->getVoxelX();
+            float voxelY = DatasetManager::getInstance()->getVoxelY();
+            float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+            SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
+
+            std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
+
+            for( int l = 0; l < pFibers->getLineCount(); ++l )
             {
-                unsigned int pc = l_fibers->getStartIndexForLine(l)*3;
-
-                for( int j = 0; j < l_fibers->getPointsPerLine(l) ; ++j )
+                if( l_object->m_inBranch[l] )
                 {
-                    l_x = (int)( l_fibers->getPointValue(pc) / voxelX );
-                    ++pc;
-                    l_y = (int)( l_fibers->getPointValue(pc) / voxelY );
-                    ++pc;
-                    l_z = (int)( l_fibers->getPointValue(pc) / voxelZ );
-                    ++pc;
+                    unsigned int pc = pFibers->getStartIndexForLine(l) * 3;
 
-                    int index = l_x + l_y * columns + l_z * columns * rows;
-                    l_dataset->at(index) += 1.0;
-                    l_max = wxMax( l_max,l_dataset->at(index) );
+                    for( int j = 0; j < pFibers->getPointsPerLine(l); ++j )
+                    {
+                        l_x = (int)( pFibers->getPointValue(pc) / voxelX );
+                        ++pc;
+                        l_y = (int)( pFibers->getPointValue(pc) / voxelY );
+                        ++pc;
+                        l_z = (int)( pFibers->getPointValue(pc) / voxelZ );
+                        ++pc;
+
+                        int index = l_x + l_y * columns + l_z * columns * rows;
+                        l_dataset->at(index) += 1.0;
+                        l_max = wxMax( l_max,l_dataset->at(index) );
+                    }
                 }
             }
+            for( int i( 0 ); i < columns * rows * frames; ++i )
+            {
+                l_dataset->at(i) /= l_max;
+            }
         }
-        for( int i( 0 ); i < columns * rows * frames; ++i )
-        {
-            l_dataset->at(i) /= l_max;
-        }
+
+        pNewAnatomy->setName( wxT(" (fiber_density)" ) );
+        pNewAnatomy->setOldMax( l_max );
+
+        m_pListCtrl->InsertItem( index );
+
+        m_pMainFrame->refreshAllGLWidgets();
     }
-
-    pNewAnatomy->setName( wxT(" (fiber_density)" ) );
-    pNewAnatomy->setOldMax( l_max );
-    
-    m_pListCtrl->InsertItem( index );
-
-    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCreateFibersColorTexture" ), LOGLEVEL_DEBUG );
 
-    Fibers* l_fibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->getCurrentListIndex() );
-
-    if( NULL == l_fibers )
-        return ;
-
-    int l_x,l_y,l_z;
-    
-    int index = DatasetManager::getInstance()->createAnatomy();
-    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
-
-    int columns = DatasetManager::getInstance()->getColumns();
-    int rows    = DatasetManager::getInstance()->getRows();
-    int frames  = DatasetManager::getInstance()->getFrames();
-
-    pNewAnatomy->setRGBZero( columns, rows, frames );
-
-    wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
-    if(m_pMainFrame-> treeSelected( l_treeObjectId ) == MASTER_OBJECT )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        float voxelX = DatasetManager::getInstance()->getVoxelX();
-        float voxelY = DatasetManager::getInstance()->getVoxelY();
-        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
-        SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
-        wxColour l_color = l_object->getFiberColor();
+        if( NULL == pFibers )
+            return ;
 
-        std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
+        int l_x, l_y, l_z;
+        
+        DatasetIndex dsIndex = DatasetManager::getInstance()->createAnatomy();
+        Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( dsIndex );
 
-        for( int l = 0; l < l_fibers->getLineCount(); ++l )
+        int columns = DatasetManager::getInstance()->getColumns();
+        int rows    = DatasetManager::getInstance()->getRows();
+        int frames  = DatasetManager::getInstance()->getFrames();
+
+        pNewAnatomy->setRGBZero( columns, rows, frames );
+
+        wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
+        if(m_pMainFrame-> treeSelected( l_treeObjectId ) == MASTER_OBJECT )
         {
-            if( l_object->m_inBranch[l] )
+            float voxelX = DatasetManager::getInstance()->getVoxelX();
+            float voxelY = DatasetManager::getInstance()->getVoxelY();
+            float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+            SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
+            wxColour l_color = l_object->getFiberColor();
+
+            std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
+
+            for( int l = 0; l < pFibers->getLineCount(); ++l )
             {
-                unsigned int pc = l_fibers->getStartIndexForLine( l ) * 3;
-
-                for( int j = 0; j < l_fibers->getPointsPerLine( l ) ; ++j )
+                if( l_object->m_inBranch[l] )
                 {
-                    l_x = (int)( l_fibers->getPointValue( pc ) / voxelX );
-                    ++pc;
-                    l_y = (int)( l_fibers->getPointValue( pc ) / voxelY );
-                    ++pc;
-                    l_z = (int)( l_fibers->getPointValue( pc ) / voxelZ );
-                    ++pc;
+                    unsigned int pc = pFibers->getStartIndexForLine( l ) * 3;
 
-                    int index = 3 * ( l_x + l_y * columns + l_z * columns * rows );
-                    l_dataset->at( index )     = l_color.Red()   / 255.0f;
-                    l_dataset->at( index + 1 ) = l_color.Green() / 255.0f;
-                    l_dataset->at( index + 2 ) = l_color.Blue()  / 255.0f;
+                    for( int j = 0; j < pFibers->getPointsPerLine( l ) ; ++j )
+                    {
+                        l_x = (int)( pFibers->getPointValue( pc ) / voxelX );
+                        ++pc;
+                        l_y = (int)( pFibers->getPointValue( pc ) / voxelY );
+                        ++pc;
+                        l_z = (int)( pFibers->getPointValue( pc ) / voxelZ );
+                        ++pc;
+
+                        int index = 3 * ( l_x + l_y * columns + l_z * columns * rows );
+                        l_dataset->at( index )     = l_color.Red()   / 255.0f;
+                        l_dataset->at( index + 1 ) = l_color.Green() / 255.0f;
+                        l_dataset->at( index + 2 ) = l_color.Blue()  / 255.0f;
+                    }
                 }
             }
         }
-    }
 
-    pNewAnatomy->setName( wxT( " (fiber_colors)" ) );
-    
-    m_pListCtrl->InsertItem( index );
-    
-    m_pMainFrame->refreshAllGLWidgets();
+        pNewAnatomy->setName( wxT( " (fiber_colors)" ) );
+        
+        m_pListCtrl->InsertItem( dsIndex );
+        
+        m_pMainFrame->refreshAllGLWidgets();
+    }
 }
 
 void PropertiesWindow::OnMeanComboBoxSelectionChange( wxCommandEvent& event)

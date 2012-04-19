@@ -351,47 +351,52 @@ void Anatomy::minimize()
     }
 
     std::vector<bool> workData( m_columns * m_rows * m_frames, false );
-    Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListIndex() ) );
 
-    int curX, curY, curZ, index;
-
-    for( int i(0); i < pFibers->getLineCount(); ++i )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        if( pFibers->isSelected( i ) )
-        {
-            for( int j = pFibers->getStartIndexForLine( i ); 
-                     j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); j += 3 )
-            {
-                // TODO: Verify that changing from dh to current obj m_rows & al. is ok
-                curX = std::min( m_columns - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 )    / m_voxelSizeX ) ) ); // m_dh->m_xVoxel ) );
-                curY = std::min( m_rows    - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 + 1) / m_voxelSizeY ) ) ); // m_dh->m_yVoxel ) );
-                curZ = std::min( m_frames  - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 + 2) / m_voxelSizeZ ) ) ); // m_dh->m_zVoxel ) );
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
-                index = curX + curY * m_columns + curZ * m_rows * m_columns;
-                workData[index] = true;
+        int curX, curY, curZ, index;
+
+        for( int i(0); i < pFibers->getLineCount(); ++i )
+        {
+            if( pFibers->isSelected( i ) )
+            {
+                for( int j = pFibers->getStartIndexForLine( i ); 
+                    j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); j += 3 )
+                {
+                    // TODO: Verify that changing from dh to current obj m_rows & al. is ok
+                    curX = std::min( m_columns - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 )    / m_voxelSizeX ) ) ); // m_dh->m_xVoxel ) );
+                    curY = std::min( m_rows    - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 + 1) / m_voxelSizeY ) ) ); // m_dh->m_yVoxel ) );
+                    curZ = std::min( m_frames  - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 + 2) / m_voxelSizeZ ) ) ); // m_dh->m_zVoxel ) );
+
+                    index = curX + curY * m_columns + curZ * m_rows * m_columns;
+                    workData[index] = true;
+                }
             }
         }
-    }
 
-    int indx = DatasetManager::getInstance()->createAnatomy();
-    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
-    pNewAnatomy->setZero( m_columns, m_rows, m_frames );
+        int indx = DatasetManager::getInstance()->createAnatomy();
+        Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
+        pNewAnatomy->setZero( m_columns, m_rows, m_frames );
 
-    std::vector<float> *pNewAnatDataset = pNewAnatomy->getFloatDataset();
+        std::vector<float> *pNewAnatDataset = pNewAnatomy->getFloatDataset();
 
-    for( int i(0); i < m_columns * m_rows * m_frames; ++i )
-    {
-        if( workData[i] && m_floatDataset[i] > 0.0f )
+        for( int i(0); i < m_columns * m_rows * m_frames; ++i )
         {
-            pNewAnatDataset->at( i ) = 1.0;
+            if( workData[i] && m_floatDataset[i] > 0.0f )
+            {
+                pNewAnatDataset->at( i ) = 1.0;
+            }
         }
+
+        pNewAnatomy->setName( getName() + _T( "(minimal)" ) );
+        pNewAnatomy->setType( HEAD_BYTE );
+        pNewAnatomy->setDataType( 2 );
+
+        MyApp::frame->m_pListCtrl->InsertItem( indx );
     }
-
-    pNewAnatomy->setName( getName() + _T( "(minimal)" ) );
-    pNewAnatomy->setType( HEAD_BYTE );
-    pNewAnatomy->setDataType( 2 );
-
-    MyApp::frame->m_pListCtrl->InsertItem( indx );
 }
 
 //////////////////////////////////////////////////////////////////////////

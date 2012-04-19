@@ -42,20 +42,20 @@ using std::vector;
 
 FibersGroup::FibersGroup()
 :   DatasetInfo(),
-	m_isIntensityToggled ( false ),
-	m_isOpacityToggled ( false ),
-	m_isMinMaxLengthToggled ( false ),
-	m_isSubsamplingToggled ( false ),
-	m_isColorModeToggled ( false ),
-	m_isCrossingFibersToggled( false ),
-	m_isNormalColoringStateChanged ( false ),
-	m_isLocalColoringStateChanged ( false )
+    m_isIntensityToggled ( false ),
+    m_isOpacityToggled ( false ),
+    m_isMinMaxLengthToggled ( false ),
+    m_isSubsamplingToggled ( false ),
+    m_isColorModeToggled ( false ),
+    m_isCrossingFibersToggled( false ),
+    m_isNormalColoringStateChanged ( false ),
+    m_isLocalColoringStateChanged ( false )
 {
     m_name = wxT( "Fibers Group" );
     m_show = true ;
     m_type = FIBERSGROUP;
 
-	m_bufferObjects = new GLuint[3];
+    m_bufferObjects = new GLuint[3];
 }
 
 FibersGroup::~FibersGroup()
@@ -73,12 +73,12 @@ string FibersGroup::intToString( const int number )
 
 void FibersGroup::saveDMRI( wxString filename )
 {
-	ofstream myfile;
-	int totalLines = 0;
+    ofstream myfile;
+    int totalLines = 0;
     char *pFn = NULL;
-	float dist = 0.5;
+    float dist = 0.5;
 
-	if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
     {
         filename += _T( ".fib" );
     }
@@ -488,7 +488,7 @@ void FibersGroup::OnToggleMinMaxLengthBtn()
     m_pBtnOpacity->Disable();
     m_pBtnSubsampling->Disable();
     m_pBtnGeneratesDensityVolume->Disable();
-    m_pBtnColorMode->Disable();	
+    m_pBtnColorMode->Disable();
 }
 
 void FibersGroup::OnToggleSubsamplingBtn()
@@ -507,7 +507,7 @@ void FibersGroup::OnToggleSubsamplingBtn()
     m_pBtnIntensity->Disable();
     m_pBtnMinMaxLength->Disable();
     m_pBtnGeneratesDensityVolume->Disable();
-    m_pBtnColorMode->Disable();	
+    m_pBtnColorMode->Disable();
 }
 
 void FibersGroup::OnToggleCrossingFibersBtn()
@@ -527,7 +527,7 @@ void FibersGroup::OnToggleCrossingFibersBtn()
     m_pBtnIntensity->Disable();
     m_pBtnMinMaxLength->Disable();
     m_pBtnGeneratesDensityVolume->Disable();
-    m_pBtnColorMode->Disable();	
+    m_pBtnColorMode->Disable();
 }
 
 void FibersGroup::OnToggleColorModeBtn()
@@ -573,7 +573,7 @@ void FibersGroup::OnToggleColorModeBtn()
     m_pBtnMinMaxLength->Disable();
     m_pBtnSubsampling->Disable();
     m_pBtnGeneratesDensityVolume->Disable();
-    m_pBtnColorMode->Hide();	
+    m_pBtnColorMode->Hide();
 }
 
 void FibersGroup::updateGroupFilters()
