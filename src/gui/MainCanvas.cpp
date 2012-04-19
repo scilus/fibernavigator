@@ -147,6 +147,11 @@ void MainCanvas::OnSize( wxSizeEvent& evt )
     //glViewport( 0, 0, (GLint) w, (GLint) h );
 
     evt.Skip();
+
+    if( DatasetManager::getInstance()->getAnatomyCount() > 0 )
+    {
+        changeOrthoSize();
+    }
 }
 
 void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
