@@ -3179,7 +3179,7 @@ void Fibers::drawSortedLines()
 
 void Fibers::useFakeTubes()
 {
-    m_useFakeTubes = ! m_useFakeTubes;
+    m_useFakeTubes = !m_useFakeTubes;
     switchNormals( m_useFakeTubes );
 }
 

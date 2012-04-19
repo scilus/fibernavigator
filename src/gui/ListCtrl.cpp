@@ -84,6 +84,7 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
     // http://trac.wxwidgets.org/ticket/4492
     // To have the same behavior on all platforms, we add to the end of the list
     long index( GetItemCount() );
+    long pos = index;
 
     DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( datasetIndex );
 
@@ -92,7 +93,7 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
         long fiberGroupPos = FindFiberGroupPosition();
         if( -1 != fiberGroupPos )
         {
-            long pos = fiberGroupPos + 1;
+            pos = fiberGroupPos + 1;
             while( pos < GetItemCount() )
             {
                 DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( pos ) );
@@ -101,15 +102,20 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
                 
                 ++pos;
             }
-            index = pos;
         }
     }
 
     wxListCtrl::InsertItem( index, pDataset->getShow() ? 0 : 1 );
     SetItemData( index, datasetIndex );
-    SetItemState( index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 
-    Update( index );
+    for( long i = index; i != pos; --i )
+    {
+        Swap( i, i - 1);
+        Update( i );
+    }
+
+    SetItemState( pos, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    Update( pos );
 }
 
 //////////////////////////////////////////////////////////////////////////

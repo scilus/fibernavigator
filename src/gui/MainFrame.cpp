@@ -1391,26 +1391,29 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 {
     if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-        if( pDatasetInfo->getType() == FIBERS )
+        DatasetInfo *pDatasetInfo = (DatasetInfo *)m_pCurrentSceneObject;
+        if( NULL != pDatasetInfo )
         {
-            long index = getCurrentListIndex();
-            if( -1 != index )
+            if( pDatasetInfo->getType() == FIBERS )
             {
-                Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
-                if( pFibers != NULL )
+                long index = getCurrentListIndex();
+                if( -1 != index )
                 {
-                    pFibers->useFakeTubes();
+                    Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                    if( pFibers != NULL )
+                    {
+                        pFibers->useFakeTubes();
+                    }
                 }
             }
-        }
-        else if ( pDatasetInfo->getType() == FIBERSGROUP )
-        {
-            FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
-            if( l_fibersGroup != NULL )
+            else if ( pDatasetInfo->getType() == FIBERSGROUP )
             {
-                l_fibersGroup->useFakeTubes();
-            }            
+                FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+                if( pFibersGroup != NULL )
+                {
+                    pFibersGroup->useFakeTubes();
+                }
+            }
         }
     }
     refreshAllGLWidgets();
