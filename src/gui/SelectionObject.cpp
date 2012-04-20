@@ -858,6 +858,11 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     if( -1 != index )
     {
         Fibers * pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        
+        if( pFibers == NULL )
+        {
+            return l_selectedFibersPoints;
+        }
 
         filteredFiber = pFibers->getFilteredFibers();
 
