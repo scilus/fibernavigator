@@ -10,6 +10,8 @@
 #include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
 
+#include <wx/filename.h>
+
 #include <map>
 using std::map;
 
@@ -259,6 +261,12 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
 {
     DatasetIndex result( BAD_INDEX );
 
+    if( !wxFileName::FileExists( filename ) )
+    {
+        Logger::getInstance()->print( wxString::Format( wxT( "File \"%s\" does not exist!" ), filename ), LOGLEVEL_ERROR );
+        return result;
+    }
+
     if( wxT( "nii" ) == extension )
     {
         nifti_image *pHeader = nifti_image_read( filename.char_str(), 0 );
@@ -268,8 +276,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
         {
             Logger::getInstance()->print( wxT( "nifti file corrupt, cannot create nifti image from header" ), LOGLEVEL_ERROR );
         }
-
-        if( 16 == pHeader->datatype && 4 == pHeader->ndim && 6 == pHeader->dim[4] )
+        else if( 16 == pHeader->datatype && 4 == pHeader->ndim && 6 == pHeader->dim[4] )
         {
             if ( m_anatomies.empty() )
             {

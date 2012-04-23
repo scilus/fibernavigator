@@ -99,7 +99,7 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
                 DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( pos ) );
                 if ( FIBERS != pDataset->getType() )
                     break;
-                
+
                 ++pos;
             }
         }

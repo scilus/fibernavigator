@@ -23,7 +23,8 @@ public:
 private:
     bool loadFromFile( wxString *code, const wxString &filename );
     bool fileExists();
-    
+
+private:
     GLuint m_id;
     wxString m_filename;
     wxString m_code;

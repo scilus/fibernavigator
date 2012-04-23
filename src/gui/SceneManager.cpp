@@ -110,6 +110,8 @@ SceneManager * SceneManager::getInstance()
 
 bool SceneManager::load(const wxString &filename)
 {
+    Logger::getInstance()->print( wxT( "Loading scene" ), LOGLEVEL_MESSAGE );
+
     if( 0 != DatasetManager::getInstance()->getDatasetCount() )
     {
         int answer = wxMessageBox( wxT("Are you sure you want to open a new scene? All objects loaded in the current scene will be deleted." ), 
@@ -145,6 +147,7 @@ bool SceneManager::load(const wxString &filename)
             // Support of the old version
             if( !loadOldVersion( pRoot ) )
             {
+                Logger::getInstance()->print( wxString::Format( wxT( "An error occured while trying to load the scene: \"%s\"" ), filename ), LOGLEVEL_ERROR );
                 result = false;
             }
         }
@@ -498,11 +501,12 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
 {
     Logger::getInstance()->print( wxT( "Loading format 1.0" ), LOGLEVEL_DEBUG );
 
+    unsigned int errors( 0 );
+
     double rotationMatrix[16] = { 1, 0, 0, 0, 
         0, 1, 0, 0, 
         0, 0, 1, 0, 
         0, 0, 0, 1 };
-
 
     long sliceX  = 0;
     long sliceY  = 0;
@@ -623,7 +627,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
                 }
                 else
                 {
-                    return false;
+                    ++errors;
                 }
 
                 pDatasetNode = pDatasetNode->GetNext();
@@ -759,7 +763,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
 //     m_transform.s.M22 = rotationMatrix[10];
 //     m_pMainFrame->m_pMainGL->setRotation();
 
-    return true;
+    return 0 == errors;
 }
 
 
