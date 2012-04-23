@@ -481,6 +481,14 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     m_frames    = pHeader->dim[3]; 
     m_bands     = pHeader->dim[4];
     m_dataType  = pHeader->datatype;
+    
+    // Fix the case where some nifti files have a value of 0 for the fourth
+    // dimension. It is a valid case, but some of the code use the number of bands
+    // to process the data indenpendantly from its dimension.
+    if( m_bands == 0 )
+    {
+        m_bands = 1;
+    }
 
     m_voxelSizeX = pHeader->dx;
     m_voxelSizeY = pHeader->dy;
