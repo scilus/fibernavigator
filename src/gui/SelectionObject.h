@@ -352,10 +352,10 @@ private:
     wxToggleButton  *m_pToggleCalculatesFibersInfo;
     wxGrid          *m_pGridFibersInfo;
     wxToggleButton  *m_pToggleDisplayMeanFiber;
-    wxToggleButton  *m_pToggleDisplayConvexHull;
-    wxBitmapButton  *m_pBtnSelectConvexHullColor;
-    wxStaticText    *m_pLblConvexHullOpacity;
-    wxSlider        *m_pSliderConvexHullOpacity;
+//     wxToggleButton  *m_pToggleDisplayConvexHull;
+//     wxBitmapButton  *m_pBtnSelectConvexHullColor;
+//     wxStaticText    *m_pLblConvexHullOpacity;
+//     wxSlider        *m_pSliderConvexHullOpacity;
     wxBitmapButton  *m_pBtnSelectMeanFiberColor;
     wxStaticText    *m_pLblColoring;
     wxRadioButton   *m_pRadCustomColoring;

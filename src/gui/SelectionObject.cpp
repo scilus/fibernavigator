@@ -650,63 +650,63 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
 void SelectionObject::computeConvexHull()
 {
     m_mustUpdateConvexHull = true;
-    if ( m_pToggleDisplayConvexHull->GetValue() && m_convexHullOpacity != 0)
-    {
-            vector< Vector > pts;
-            vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
-            for (unsigned int i(0); i< l_selectedFibersPoints.size(); i++)
-                pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());
-
-            m_hullTriangles.clear();
-            ConvexHullIncremental hull(pts);
-            hull.buildHull();
-            hull.getHullTriangles( m_hullTriangles );
-            m_mustUpdateConvexHull = false;
-    }
+//     if ( m_pToggleDisplayConvexHull->GetValue() && m_convexHullOpacity != 0)
+//     {
+//             vector< Vector > pts;
+//             vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+//             for (unsigned int i(0); i< l_selectedFibersPoints.size(); i++)
+//                 pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());
+// 
+//             m_hullTriangles.clear();
+//             ConvexHullIncremental hull(pts);
+//             hull.buildHull();
+//             hull.getHullTriangles( m_hullTriangles );
+//             m_mustUpdateConvexHull = false;
+//     }
 }
 
 void SelectionObject::drawConvexHull()
 {
-    if ( m_pToggleDisplayConvexHull->GetValue() && m_pToggleDisplayConvexHull->IsEnabled() && m_convexHullOpacity != 0)
-    {
-        if (m_mustUpdateConvexHull)
-            computeConvexHull();
-
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        glEnable( GL_BLEND );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glColor4f( (float)m_convexHullColor.Red() / 255.0f, (float)m_convexHullColor.Green() / 255.0f, (float)m_convexHullColor.Blue() / 255.0f, m_convexHullOpacity );
-
-        Vector normal;
-        glBegin( GL_TRIANGLES );
-        list< Face3D >::iterator it;
-            for( it = m_hullTriangles.begin(); it != m_hullTriangles.end(); it++ )
-            {
-                //Vector normal;
-                //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
-                //normal.normalize();
-                //glNormal3f(normal[0], normal[1], normal[2]);
-                glVertex3f( it->getPt1().x, it->getPt1().y, it->getPt1().z );
-
-                //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
-                //normal.normalize();
-                //glNormal3f(normal[0], normal[1], normal[2]);
-                glVertex3f( it->getPt2().x, it->getPt2().y, it->getPt2().z );
-
-                //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
-                //normal.normalize();
-                //glNormal3f(normal[0], normal[1], normal[2]);
-                glVertex3f( it->getPt3().x, it->getPt3().y, it->getPt3().z );
-            }
-        glEnd();
-
-        glDisable( GL_BLEND );
-    }
+//     if ( m_pToggleDisplayConvexHull->GetValue() && m_pToggleDisplayConvexHull->IsEnabled() && m_convexHullOpacity != 0)
+//     {
+//         if (m_mustUpdateConvexHull)
+//             computeConvexHull();
+// 
+//         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+//         glEnable( GL_BLEND );
+//         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+//         glColor4f( (float)m_convexHullColor.Red() / 255.0f, (float)m_convexHullColor.Green() / 255.0f, (float)m_convexHullColor.Blue() / 255.0f, m_convexHullOpacity );
+// 
+//         Vector normal;
+//         glBegin( GL_TRIANGLES );
+//         list< Face3D >::iterator it;
+//             for( it = m_hullTriangles.begin(); it != m_hullTriangles.end(); it++ )
+//             {
+//                 //Vector normal;
+//                 //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
+//                 //normal.normalize();
+//                 //glNormal3f(normal[0], normal[1], normal[2]);
+//                 glVertex3f( it->getPt1().x, it->getPt1().y, it->getPt1().z );
+// 
+//                 //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
+//                 //normal.normalize();
+//                 //glNormal3f(normal[0], normal[1], normal[2]);
+//                 glVertex3f( it->getPt2().x, it->getPt2().y, it->getPt2().z );
+// 
+//                 //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
+//                 //normal.normalize();
+//                 //glNormal3f(normal[0], normal[1], normal[2]);
+//                 glVertex3f( it->getPt3().x, it->getPt3().y, it->getPt3().z );
+//             }
+//         glEnd();
+// 
+//         glDisable( GL_BLEND );
+//     }
 }
 
 void SelectionObject::updateConvexHullOpacity()
 {
-    setConvexHullOpacity( ( m_pSliderConvexHullOpacity->GetValue() + (float)m_pSliderConvexHullOpacity->GetMin() ) / (float)m_pSliderConvexHullOpacity->GetMax() );
+//     setConvexHullOpacity( ( m_pSliderConvexHullOpacity->GetValue() + (float)m_pSliderConvexHullOpacity->GetMin() ) / (float)m_pSliderConvexHullOpacity->GetMax() );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1981,9 +1981,9 @@ void SelectionObject::SetFiberInfoGridValues()
 
 void SelectionObject::setShowConvexHullOption( bool i_val )
 {
-    m_pLblConvexHullOpacity->Show( i_val );
-    m_pSliderConvexHullOpacity->Show( i_val);
-    m_pBtnSelectConvexHullColor->Enable( i_val );
+//     m_pLblConvexHullOpacity->Show( i_val );
+//     m_pSliderConvexHullOpacity->Show( i_val);
+//     m_pBtnSelectConvexHullColor->Enable( i_val );
 }
 
 void SelectionObject::UpdateMeanValueTypeBox()
@@ -2065,20 +2065,20 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     wxBitmapButton *pBtnDelete      = new wxBitmapButton( pParent, wxID_ANY, bmpDelete, wxDefPosition, wxSize( 20, -1 ) );
     wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
     m_pBtnSelectMeanFiberColor      = new wxBitmapButton( pParent, wxID_ANY, bmpMeanFiberColor );
-    m_pBtnSelectConvexHullColor     = new wxBitmapButton( pParent, wxID_ANY, bmpConvexHullColor );
+//     m_pBtnSelectConvexHullColor     = new wxBitmapButton( pParent, wxID_ANY, bmpConvexHullColor );
     m_pToggleVisibility           = new wxToggleButton( pParent, wxID_ANY, wxT( "Visible" ), wxDefPosition, wxSize( 20, -1 ) );
     m_pToggleActivate             = new wxToggleButton( pParent, wxID_ANY, wxT( "Activate" ), wxDefPosition, wxSize( 20, -1 ) );
     wxToggleButton *pToggleAndNot = new wxToggleButton( pParent, wxID_ANY, wxT( "And / Not" ) );
     m_pToggleCalculatesFibersInfo = new wxToggleButton( pParent, wxID_ANY, wxT( "Calculate Fibers Stats" ) );
     m_pToggleDisplayMeanFiber     = new wxToggleButton( pParent, wxID_ANY, wxT( "Display Mean Fiber" ) );
-    m_pToggleDisplayConvexHull    = new wxToggleButton( pParent, wxID_ANY, wxT( "Display convex hull" ) );
+//     m_pToggleDisplayConvexHull    = new wxToggleButton( pParent, wxID_ANY, wxT( "Display convex hull" ) );
     m_pLblColoring          = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
     m_pLblMeanFiberOpacity  = new wxStaticText( pParent, wxID_ANY, wxT( "Opacity" ) );
-    m_pLblConvexHullOpacity = new wxStaticText( pParent, wxID_ANY, wxT( "Opacity" ) );
+//     m_pLblConvexHullOpacity = new wxStaticText( pParent, wxID_ANY, wxT( "Opacity" ) );
     m_pRadCustomColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Custom" ), wxDefPosition, wxDefSize, wxRB_GROUP );
     m_pRadNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ) );
     m_pSliderMeanFiberOpacity  = new wxSlider( pParent, wxID_ANY, 35, 0, 100, wxDefPosition, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderConvexHullOpacity = new wxSlider( pParent, wxID_ANY, 35, 0, 100, wxDefPosition, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+//     m_pSliderConvexHullOpacity = new wxSlider( pParent, wxID_ANY, 35, 0, 100, wxDefPosition, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pTxtName  = new wxTextCtrl( pParent, wxID_ANY, getName(), wxDefPosition, wxDefSize, wxTE_CENTRE | wxTE_READONLY );
     m_pTxtBoxX  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.x ), wxDefPosition, wxSize( 10, -1 ) );
     m_pTxtBoxY  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.y ), wxDefPosition, wxSize( 10, -1 ) );
@@ -2214,17 +2214,17 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 
     m_pToggleCalculatesFibersInfo->Enable( getIsMaster() ); //bug with some fibers dataset sets
 
-    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
-    pBoxSizer->Add( m_pToggleDisplayConvexHull,  3, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
-    pBoxSizer->Add( m_pBtnSelectConvexHullColor, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
-    pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALL, 1 );
+//     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+//     pBoxSizer->Add( m_pToggleDisplayConvexHull,  3, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
+//     pBoxSizer->Add( m_pBtnSelectConvexHullColor, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
+//     pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALL, 1 );
 
     //////////////////////////////////////////////////////////////////////////
 
-    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
-    pBoxSizer->Add( m_pLblConvexHullOpacity, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxSizer->Add( m_pSliderConvexHullOpacity, 1, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-    pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALL, 1 );
+//     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+//     pBoxSizer->Add( m_pLblConvexHullOpacity, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+//     pBoxSizer->Add( m_pSliderConvexHullOpacity, 1, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+//     pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALL, 1 );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -2275,7 +2275,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( pBtnDelete->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(    PropertiesWindow::OnDeleteTreeItem ) );
     pParent->Connect( pBtnSelectColor->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnColorRoi ) );
     pParent->Connect( m_pBtnSelectMeanFiberColor->GetId(),  wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberColorChange ) );
-    pParent->Connect( m_pBtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
+//     pParent->Connect( m_pBtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
     //pParent->Connect( m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections ) );
     //pParent->Connect( m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube ) );
     pParent->Connect( m_pToggleVisibility->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleShowSelectionObject ) );
@@ -2283,11 +2283,11 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( pToggleAndNot->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleAndNot ) );
     pParent->Connect( m_pToggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayFibersInfo ) );
     pParent->Connect( m_pToggleDisplayMeanFiber->GetId(),     wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayMeanFiber ) );
-    pParent->Connect( m_pToggleDisplayConvexHull->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
+//     pParent->Connect( m_pToggleDisplayConvexHull->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
     pParent->Connect( m_pRadCustomColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnCustomMeanFiberColoring ) );
     pParent->Connect( m_pRadNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalMeanFiberColoring ) );
     pParent->Connect( m_pSliderMeanFiberOpacity->GetId(),  wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberOpacityChange ) );
-    pParent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
+//     pParent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
     pParent->Connect( m_pTxtBoxX->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionX ) );
     pParent->Connect( m_pTxtBoxY->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionY ) );
     pParent->Connect( m_pTxtBoxZ->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionZ ) );
@@ -2308,8 +2308,8 @@ void SelectionObject::updatePropertiesSizer()
     m_pToggleCalculatesFibersInfo->Enable( getShowFibers() );
     m_pGridFibersInfo->Enable( getShowFibers() && m_pToggleCalculatesFibersInfo->GetValue() );
     m_pToggleDisplayMeanFiber->Enable( getShowFibers() );
-    m_pToggleDisplayConvexHull->Enable( getShowFibers() );
-    setShowConvexHullOption( m_pToggleDisplayConvexHull->GetValue() );
+//     m_pToggleDisplayConvexHull->Enable( getShowFibers() );
+//     setShowConvexHullOption( m_pToggleDisplayConvexHull->GetValue() );
 
     m_pBtnSelectMeanFiberColor->Enable( m_pToggleDisplayMeanFiber->GetValue() );
     setShowMeanFiberOption( m_pToggleDisplayMeanFiber->GetValue() );
