@@ -147,7 +147,7 @@ bool SceneManager::load(const wxString &filename)
             // Support of the old version
             if( !loadOldVersion( pRoot ) )
             {
-                Logger::getInstance()->print( wxString::Format( wxT( "An error occured while trying to load the scene: \"%s\"" ), filename ), LOGLEVEL_ERROR );
+                Logger::getInstance()->print( wxString::Format( wxT( "An error occured while trying to load the scene: \"%s\"" ), filename.c_str() ), LOGLEVEL_ERROR );
                 result = false;
             }
         }

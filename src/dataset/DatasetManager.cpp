@@ -263,7 +263,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
 
     if( !wxFileName::FileExists( filename ) )
     {
-        Logger::getInstance()->print( wxString::Format( wxT( "File \"%s\" does not exist!" ), filename ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( wxString::Format( wxT( "File \"%s\" does not exist!" ), filename.c_str() ), LOGLEVEL_ERROR );
         return result;
     }
 
