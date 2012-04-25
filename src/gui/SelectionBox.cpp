@@ -80,7 +80,7 @@ SelectionBox::~SelectionBox()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionBox::drawObject( GLfloat* i_color )
 {
-    glDepthMask(GL_FALSE);
+    glDepthMask( GL_FALSE );
     glColor4f( i_color[0], i_color[1], i_color[2], i_color[3] );
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     glBegin( GL_QUADS );
@@ -119,21 +119,21 @@ void SelectionBox::drawObject( GLfloat* i_color )
 
     glBegin( GL_QUADS );
     switch( SceneManager::getInstance()->getQuadrant() )
-        {
-            case 1: draw2(); draw4(); draw6(); draw1(); draw3(); draw5(); break;    
-            case 2: draw2(); draw4(); draw5(); draw1(); draw3(); draw6(); break;
-            case 3: draw2(); draw3(); draw5(); draw1(); draw4(); draw6(); break;
-            case 4: draw2(); draw3(); draw6(); draw1(); draw4(); draw5(); break;
-            case 5: draw1(); draw3(); draw6(); draw2(); draw4(); draw5(); break;
-            case 6: draw1(); draw3(); draw5(); draw2(); draw4(); draw6(); break;
-            case 7: draw1(); draw4(); draw5(); draw2(); draw3(); draw6(); break;
-            case 8: draw1(); draw4(); draw6(); draw2(); draw3(); draw5(); break;
-        }
+    {
+        case 1: draw2(); draw4(); draw6(); draw1(); draw3(); draw5(); break;
+        case 2: draw2(); draw4(); draw5(); draw1(); draw3(); draw6(); break;
+        case 3: draw2(); draw3(); draw5(); draw1(); draw4(); draw6(); break;
+        case 4: draw2(); draw3(); draw6(); draw1(); draw4(); draw5(); break;
+        case 5: draw1(); draw3(); draw6(); draw2(); draw4(); draw5(); break;
+        case 6: draw1(); draw3(); draw5(); draw2(); draw4(); draw6(); break;
+        case 7: draw1(); draw4(); draw5(); draw2(); draw3(); draw6(); break;
+        case 8: draw1(); draw4(); draw6(); draw2(); draw3(); draw5(); break;
+    }
 
     glEnd();
 
     glDisable( GL_BLEND );
-    glDepthMask(GL_TRUE);
+    glDepthMask( GL_TRUE );
 }
 
 void SelectionBox::draw1()

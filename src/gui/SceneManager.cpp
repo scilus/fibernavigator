@@ -746,11 +746,14 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
         pChild = pChild->GetNext();
     }
 
-    m_pMainFrame->updateSliders();
-    m_pMainFrame->m_pXSlider->SetValue( sliceX );
-    m_pMainFrame->m_pYSlider->SetValue( sliceY );
-    m_pMainFrame->m_pZSlider->SetValue( sliceZ );
-    updateView( sliceX, sliceY, sliceZ );
+    if( DatasetManager::getInstance()->isAnatomyLoaded() )
+    {
+        m_pMainFrame->updateSliders();
+        m_pMainFrame->m_pXSlider->SetValue( sliceX );
+        m_pMainFrame->m_pYSlider->SetValue( sliceY );
+        m_pMainFrame->m_pZSlider->SetValue( sliceZ );
+        updateView( sliceX, sliceY, sliceZ );
+    }
 
 //     m_transform.s.M00 = rotationMatrix[0];
 //     m_transform.s.M10 = rotationMatrix[4];

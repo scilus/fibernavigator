@@ -507,6 +507,15 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
 
         DatasetIndex index = insert( pAnatomy );
 
+        SelectionObjList objs = SceneManager::getInstance()->getSelectionObjects();
+        for( SelectionObjList::iterator masterIt = objs.begin(); masterIt != objs.end(); ++masterIt )
+        {
+            for( vector< SelectionObject *>::iterator childIt = masterIt->begin(); childIt != masterIt->end(); ++childIt )
+            {
+                (*childIt)->update();
+            }
+        }
+
         return index;
     }
 

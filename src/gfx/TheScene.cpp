@@ -228,30 +228,30 @@ void TheScene::renderScene()
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
     //Animate
-    if(m_isRotateZ)
+    if( m_isRotateZ )
     {
-        if (m_rotAngleZ>360) 
-            m_rotAngleZ=0;
+        if( m_rotAngleZ > 360 )
+            m_rotAngleZ = 0;
 
         glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
         glRotatef( m_rotAngleZ, 0, 0, 1 );
         glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
-    if(m_isRotateY)
+    if( m_isRotateY )
     {
-        if (m_rotAngleY>360) 
-            m_rotAngleY=0;
+        if( m_rotAngleY > 360 )
+            m_rotAngleY = 0;
 
         glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
         glRotatef( m_rotAngleY, 0, 1, 0 );
         glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
-    if(m_isRotateX)
+    if( m_isRotateX )
     {
-        if (m_rotAngleX>360) 
-            m_rotAngleX=0;
+        if( m_rotAngleX > 360 )
+            m_rotAngleX = 0;
 
         glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
         glRotatef( m_rotAngleX, 1, 0, 0 );
@@ -261,9 +261,9 @@ void TheScene::renderScene()
     Logger::getInstance()->printIfGLError( wxT( "TheScene::renderScene - Rotation" ) );
 
     //Navigate through slices
-    if(m_isNavSagital) 
+    if( m_isNavSagital )
     {
-        if (m_posSagital > columns) 
+        if( m_posSagital > columns )
             m_posSagital = 0;
 
         SceneManager::getInstance()->updateView( m_posSagital, 
@@ -272,9 +272,9 @@ void TheScene::renderScene()
         MyApp::frame->m_pXSlider->SetValue( m_posSagital );
     }
 
-    if(m_isNavCoronal)
+    if( m_isNavCoronal )
     {
-        if (m_posCoronal > rows) 
+        if( m_posCoronal > rows )
             m_posCoronal = 0;
 
         SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(),
@@ -283,9 +283,9 @@ void TheScene::renderScene()
         MyApp::frame->m_pYSlider->SetValue( m_posCoronal );
     }
 
-    if(m_isNavAxial)
+    if( m_isNavAxial )
     {
-        if (m_posAxial > frames) 
+        if( m_posAxial > frames )
             m_posAxial = 0;
 
         SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(),
@@ -304,13 +304,13 @@ void TheScene::renderScene()
 
     if( DatasetManager::getInstance()->isTensorsLoaded() )
         renderTensors();
-    
+
     if( DatasetManager::getInstance()->isOdfsLoaded() )
         renderODFs();
-    
+
     renderMesh();
-	renderFibers();
-    
+    renderFibers();
+
     if( SceneManager::getInstance()->getShowAllSelObj() )
     {
         drawSelectionObjects();
