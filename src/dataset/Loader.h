@@ -87,7 +87,7 @@ public:
                         {
                             if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
                             {
-                                int result = DatasetManager::getInstance()->createFibersGroup();
+                                DatasetIndex result = DatasetManager::getInstance()->createFibersGroup();
                                 m_pListCtrl->InsertItem( result );
                             }
                             break;

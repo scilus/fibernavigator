@@ -55,8 +55,8 @@ public:
     void render();
     void renderTestRay();
     void renderAxes();
-	void renderRulerDisplay();
-	void drawOnAnatomy();
+    void renderRulerDisplay();
+    void drawOnAnatomy();
     void segment();
     // TODO: Change definition and pass a reference to the vectors instead of pointers
     void KMeans(float i_means[2],float i_stddev[2],float i_apriori[2],std::vector<float>*,std::vector<float>*);
@@ -64,8 +64,8 @@ public:
     void graphCut(std::vector<float>*, std::vector<float>*, float);
     float getElement(int,int,int,std::vector<float>*);
 
-	void pushAnatomyHistory();
-	void popAnatomyHistory();
+    void pushAnatomyHistory();
+    void popAnatomyHistory();
 
     hitResult pick(wxPoint, bool i_isRulerOrDrawer);
     float getAxisParallelMovement(int, int, int, int, Vector);

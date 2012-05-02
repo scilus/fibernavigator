@@ -49,7 +49,6 @@ public:
 
     // Pure Virtual functions
     virtual void   draw()                       = 0;
-    virtual void   clean()                      = 0;
     virtual void   smooth()                     = 0;
     virtual void   flipAxis( AxisType i_axe )   = 0;
     virtual GLuint getGLuint()                  = 0;
@@ -125,8 +124,8 @@ public:
     wxToggleButton  *m_pBtnFlipX;
     wxToggleButton  *m_pBtnFlipY;
     wxToggleButton  *m_pBtnFlipZ;
-	wxStaticText	*m_pIntensityText;
-	wxStaticText	*m_pOpacityText;
+    wxStaticText    *m_pIntensityText;
+    wxStaticText    *m_pOpacityText;
 
 protected:
     virtual void generateTexture()  = 0;

@@ -39,15 +39,15 @@ public:
     void setAngleThreshold( float angleThreshold )              { m_angleThreshold = angleThreshold; }
     void setPuncture( float puncture )                          { m_puncture = puncture; }
     void setStep( float step )                                  { m_step = step; }
-	void setMinFiberLength( float minLength )				    { m_minFiberLength = minLength; }
-	void setMaxFiberLength( float maxLength )				    { m_maxFiberLength = maxLength; }
-    
+    void setMinFiberLength( float minLength )                   { m_minFiberLength = minLength; }
+    void setMaxFiberLength( float maxLength )                   { m_maxFiberLength = maxLength; }
+
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
     float getStep()                              { return m_step; }
     float getPuncture()                          { return m_puncture; }
-	float getMinFiberLength()					 { return m_minFiberLength; } 
-	float getMaxFiberLength()					 { return m_maxFiberLength; }
+    float getMinFiberLength()                    { return m_minFiberLength; } 
+    float getMaxFiberLength()                    { return m_maxFiberLength; }
     size_t getSize()                             { return m_fibersRTT.size(); }
 
     //GPGPU functions
@@ -99,8 +99,8 @@ private:
     float       m_angleThreshold;
     float       m_step;
     float       m_puncture;
-	float		m_minFiberLength;
-	float		m_maxFiberLength;
+    float       m_minFiberLength;
+    float       m_maxFiberLength;
 
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;

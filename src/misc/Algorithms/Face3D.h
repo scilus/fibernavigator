@@ -15,9 +15,9 @@ struct Plane{
     void computePlane(Vector pt1, Vector pt2, Vector pt3)
     {
         a = pt1.y * ( pt2.z - pt3.z ) + pt2.y * ( pt3.z - pt1.z ) + pt3.y * ( pt1.z - pt2.z );
-		b = pt1.z * ( pt2.x - pt3.x ) + pt2.z * ( pt3.x - pt1.x ) + pt3.z * ( pt1.x - pt2.x );
-		c = pt1.x * ( pt2.y - pt3.y ) + pt2.x * ( pt3.y - pt1.y ) + pt3.x * ( pt1.y - pt2.y );
-		d = -( pt1.x * ( pt2.y * pt3.z - pt3.y * pt2.z ) + pt2.x * (pt3.y * pt1.z - pt1.y * pt3.z) + pt3.x * (pt1.y * pt2.z - pt2.y * pt1.z) );
+        b = pt1.z * ( pt2.x - pt3.x ) + pt2.z * ( pt3.x - pt1.x ) + pt3.z * ( pt1.x - pt2.x );
+        c = pt1.x * ( pt2.y - pt3.y ) + pt2.x * ( pt3.y - pt1.y ) + pt3.x * ( pt1.y - pt2.y );
+        d = -( pt1.x * ( pt2.y * pt3.z - pt3.y * pt2.z ) + pt2.x * (pt3.y * pt1.z - pt1.y * pt3.z) + pt3.x * (pt1.y * pt2.z - pt2.y * pt1.z) );
     }
 
     bool isOnPlane(Vector pt)

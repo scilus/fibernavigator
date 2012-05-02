@@ -47,8 +47,8 @@ public:
 
     void setShBasis( SH_BASIS value )                   { m_sh_basis = value; }
     void changeShBasis( SH_BASIS );
-    
-	void extractMaximas();
+
+    void extractMaximas();
 
     MySlider * getSliderFlood() const                   { return m_pSliderFlood; }
     wxTextCtrl * getTxtThresBox() const                 { return m_pTxtThres; }
@@ -57,8 +57,8 @@ public:
     //Vars
     wxString    m_lastODF_path;
 
-	bool   m_isMaximasSet;
-	float  m_axisThreshold;
+    bool   m_isMaximasSet;
+    float  m_axisThreshold;
 
 protected:
     void swap( ODFs &o );
@@ -101,12 +101,12 @@ private:
     void             loadRadiusBuffer           ( AxisType i_axis );
     void             reloadRadiusBuffer         ( AxisType i_axis );
 
-    
-	
+
+
     std::vector<Vector> getODFmax(std::vector < float >  coefs,const FMatrix & SHmatrix, 
                                   const FMatrix & grad,
-								  const float & max_thresh);
-    void			    set_nbors(FMatrix i_phiThetaDirection);
+                                  const float & max_thresh);
+    void                set_nbors(FMatrix i_phiThetaDirection);
     float               get_min_angle();
     void setScalingFactor( float i_scalingFactor );
 
@@ -129,15 +129,15 @@ private:
     std::vector< std::vector < float > >    m_coefficients;
     std::vector< std::vector < float > >    m_radius;
     std::vector< FMatrix >                  m_shMatrix;
-    std::vector< FMatrix >                  m_phiThetaDirection;    
-    std::vector< float >                    m_meshPts;    
+    std::vector< FMatrix >                  m_phiThetaDirection;
+    std::vector< float >                    m_meshPts;
     std::map< int, std::pair< float, float > > m_radiiMinMaxMap;
-  
-    float								m_angle_min;
+
+    float                               m_angle_min;
     std::vector<std::pair<float,int> >* m_nbors;
     std::vector<std::vector<Vector> >   m_mainDirections;
 
-	SH_BASIS                                m_sh_basis;
+    SH_BASIS                            m_sh_basis;
 };
 
 #endif /* ODFS_H_ */

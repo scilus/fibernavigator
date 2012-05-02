@@ -44,7 +44,7 @@ enum DatasetType
     LABEL_POINTS,
     LABEL_SELECTION_OBJECTS,
     NOT_INITIALIZED,
-	FIBERSGROUP
+    FIBERSGROUP
 };
 
 ///////////////////////////////////////////////////////////////////////////

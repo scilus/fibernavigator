@@ -24,8 +24,8 @@
 #include <vector>
 using std::vector;
 
-#define wxDefPosition wxDefaultPosition
-#define wxDefSize     wxDefaultSize
+#define DEF_POS wxDefaultPosition
+#define DEF_SIZE     wxDefaultSize
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -667,7 +667,7 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
-    m_pSliderMinHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100, wxDefPosition, wxSize( 150, -1 ) );
+    m_pSliderMinHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100, DEF_POS, wxSize( 150, -1 ) );
     m_pSliderMaxHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
     m_pSliderSaturation   = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
     m_pSliderLuminance    = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
@@ -678,13 +678,13 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderDisplay           = new wxSlider( pParent, wxID_ANY,  0,    1,  20 );
     m_pSliderScalingFactor     = new wxSlider( pParent, wxID_ANY, 50,    1, 200 );
     m_pSliderLOD          = new wxSlider( pParent, wxID_ANY,  0,    0, NB_OF_LOD - 1 );
-    m_pRadNormal          = new wxRadioButton( pParent,  wxID_ANY, wxT( "Normal" ), wxDefPosition, wxDefSize, wxRB_GROUP );
+    m_pRadNormal          = new wxRadioButton( pParent,  wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     m_pRadMapOnSphere     = new wxRadioButton( pParent,  wxID_ANY, wxT( "Map On Sphere" ) );
     m_pRadMainAxis        = new wxRadioButton( pParent,  wxID_ANY, wxT( "Maximas" ) );
-    m_pToggleAxisFlipX         = new wxToggleButton( pParent, wxID_ANY, wxT( "X" ), wxDefPosition, wxSize( 15, -1 ) );
-    m_pToggleAxisFlipY         = new wxToggleButton( pParent, wxID_ANY, wxT( "Y" ), wxDefPosition, wxSize( 15, -1 ) );
-    m_pToggleAxisFlipZ         = new wxToggleButton( pParent, wxID_ANY, wxT( "Z" ), wxDefPosition, wxSize( 15, -1 ) );
-    m_pToggleColorWithPosition = new wxToggleButton( pParent, wxID_ANY, wxT( "Color with Position" ), wxDefPosition, wxSize( 80, -1 ) );
+    m_pToggleAxisFlipX         = new wxToggleButton( pParent, wxID_ANY, wxT( "X" ), DEF_POS, wxSize( 15, -1 ) );
+    m_pToggleAxisFlipY         = new wxToggleButton( pParent, wxID_ANY, wxT( "Y" ), DEF_POS, wxSize( 15, -1 ) );
+    m_pToggleAxisFlipZ         = new wxToggleButton( pParent, wxID_ANY, wxT( "Z" ), DEF_POS, wxSize( 15, -1 ) );
+    m_pToggleColorWithPosition = new wxToggleButton( pParent, wxID_ANY, wxT( "Color with Position" ), DEF_POS, wxSize( 80, -1 ) );
 
     m_pRadNormal->SetValue(      isDisplayShape( NORMAL ) );
     m_pRadMapOnSphere->SetValue( isDisplayShape( SPHERE ) );

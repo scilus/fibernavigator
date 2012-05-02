@@ -59,7 +59,7 @@ public:
     bool toggleIsNavCoronal()   { return m_isNavCoronal = !m_isNavCoronal; }
     bool toggleIsNavSagittal()  { return m_isNavSagital = !m_isNavSagital; }
 
-	bool         m_isRotateZ;
+    bool         m_isRotateZ;
     bool         m_isRotateY;
     bool         m_isRotateX;
     bool         m_isNavSagital;

@@ -10,9 +10,6 @@
 #include <wx/tglbtn.h>
 #include <wx/wfstream.h>
 
-#define wxDefPosition wxDefaultPosition
-#define wxDefSize     wxDefaultSize
-
 Mesh::Mesh()
 :   DatasetInfo()
 {
@@ -421,11 +418,6 @@ void Mesh::generateGeometry()
 
     glEndList();
     m_GLuint = dl;
-
-}
-
-void Mesh::activateLIC()
-{
 
 }
 

@@ -38,8 +38,8 @@ using std::numeric_limits;
 #include <vector>
 using std::vector;
 
-#define wxDefPosition wxDefaultPosition
-#define wxDefSize     wxDefaultSize
+#define DEF_POS   wxDefaultPosition
+#define DEF_SIZE  wxDefaultSize
 
 SelectionObject::SelectionObject( Vector i_center, Vector i_size )
 :   m_pLabelAnatomy   ( NULL ),
@@ -1398,13 +1398,13 @@ bool SelectionObject::getFibersMeanCurvatureAndTorsion( const vector< vector< Ve
    if( i_fiberVector.size() == 0 )
     return false;
 
-	//Curvature and torsion are now calculated from mean fiber
+    //Curvature and torsion are now calculated from mean fiber
    vector< Vector > meanFiberPoint;
-	getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, meanFiberPoint);
-	getFiberMeanCurvatureAndTorsion(meanFiberPoint, o_meanCurvature, o_meanTorsion );
+    getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, meanFiberPoint);
+    getFiberMeanCurvatureAndTorsion(meanFiberPoint, o_meanCurvature, o_meanTorsion );
 
 
-	//Curvature and torsion are now calculated from mean fiber
+    //Curvature and torsion are now calculated from mean fiber
    //float l_currentFiberCurvature, l_currentFiberTorsion;
    //for( unsigned int i = 0; i < i_fiberVector.size(); ++i )
    //{
@@ -2062,12 +2062,12 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     wxButton *pBtnSetAsDistanceAnchor = new wxButton( pParent, wxID_ANY, wxT( "Set As Anchor" ) );
     //m_pbtnDisplayCrossSections      = new wxButton( pParent, wxID_ANY, wxT( "Display Cross Section (C.S.)" ) );
     //m_pbtnDisplayDispersionTube     = new wxButton( pParent, wxID_ANY, wxT( "Display Dispersion Tube" ) );
-    wxBitmapButton *pBtnDelete      = new wxBitmapButton( pParent, wxID_ANY, bmpDelete, wxDefPosition, wxSize( 20, -1 ) );
+    wxBitmapButton *pBtnDelete      = new wxBitmapButton( pParent, wxID_ANY, bmpDelete, DEF_POS, wxSize( 20, -1 ) );
     wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
     m_pBtnSelectMeanFiberColor      = new wxBitmapButton( pParent, wxID_ANY, bmpMeanFiberColor );
 //     m_pBtnSelectConvexHullColor     = new wxBitmapButton( pParent, wxID_ANY, bmpConvexHullColor );
-    m_pToggleVisibility           = new wxToggleButton( pParent, wxID_ANY, wxT( "Visible" ), wxDefPosition, wxSize( 20, -1 ) );
-    m_pToggleActivate             = new wxToggleButton( pParent, wxID_ANY, wxT( "Activate" ), wxDefPosition, wxSize( 20, -1 ) );
+    m_pToggleVisibility           = new wxToggleButton( pParent, wxID_ANY, wxT( "Visible" ), DEF_POS, wxSize( 20, -1 ) );
+    m_pToggleActivate             = new wxToggleButton( pParent, wxID_ANY, wxT( "Activate" ), DEF_POS, wxSize( 20, -1 ) );
     wxToggleButton *pToggleAndNot = new wxToggleButton( pParent, wxID_ANY, wxT( "And / Not" ) );
     m_pToggleCalculatesFibersInfo = new wxToggleButton( pParent, wxID_ANY, wxT( "Calculate Fibers Stats" ) );
     m_pToggleDisplayMeanFiber     = new wxToggleButton( pParent, wxID_ANY, wxT( "Display Mean Fiber" ) );
@@ -2075,17 +2075,17 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     m_pLblColoring          = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
     m_pLblMeanFiberOpacity  = new wxStaticText( pParent, wxID_ANY, wxT( "Opacity" ) );
 //     m_pLblConvexHullOpacity = new wxStaticText( pParent, wxID_ANY, wxT( "Opacity" ) );
-    m_pRadCustomColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Custom" ), wxDefPosition, wxDefSize, wxRB_GROUP );
+    m_pRadCustomColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Custom" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     m_pRadNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ) );
-    m_pSliderMeanFiberOpacity  = new wxSlider( pParent, wxID_ANY, 35, 0, 100, wxDefPosition, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-//     m_pSliderConvexHullOpacity = new wxSlider( pParent, wxID_ANY, 35, 0, 100, wxDefPosition, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtName  = new wxTextCtrl( pParent, wxID_ANY, getName(), wxDefPosition, wxDefSize, wxTE_CENTRE | wxTE_READONLY );
-    m_pTxtBoxX  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.x ), wxDefPosition, wxSize( 10, -1 ) );
-    m_pTxtBoxY  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.y ), wxDefPosition, wxSize( 10, -1 ) );
-    m_pTxtBoxZ  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.z ), wxDefPosition, wxSize( 10, -1 ) );
-    m_pTxtSizeX = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.x * voxelX ), wxDefPosition, wxSize( 10, -1 ) );
-    m_pTxtSizeY = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.y * voxelY ), wxDefPosition, wxSize( 10, -1 ) );
-    m_pTxtSizeZ = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.z * voxelZ ), wxDefPosition, wxSize( 10, -1 ) );
+    m_pSliderMeanFiberOpacity  = new wxSlider( pParent, wxID_ANY, 35, 0, 100, DEF_POS, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+//     m_pSliderConvexHullOpacity = new wxSlider( pParent, wxID_ANY, 35, 0, 100, DEF_POS, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtName  = new wxTextCtrl( pParent, wxID_ANY, getName(), DEF_POS, DEF_SIZE, wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtBoxX  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.x ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtBoxY  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.y ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtBoxZ  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.z ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtSizeX = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.x * voxelX ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtSizeY = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.y * voxelY ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtSizeZ = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.z * voxelZ ), DEF_POS, wxSize( 10, -1 ) );
 
     //////////////////////////////////////////////////////////////////////////
 

@@ -22,14 +22,14 @@ class wxTextCtrl;
 
 struct SubTextureBox {
     int x;
-	int y;
-	int z;
-	int width;
-	int height;
-	int depth;
+    int y;
+    int z;
+    int width;
+    int height;
+    int depth;
 
-	int datasize;
-	std::vector<float> data;
+    int datasize;
+    std::vector<float> data;
 };
 
 /**
@@ -132,9 +132,6 @@ private:
     wxSlider        *m_pLowerEqSlider;
     wxSlider        *m_pUpperEqSlider;
 
-    void activateLIC() {};
-    void clean()       {};
-
     void createOffset( const Anatomy * const pAnatomy );
     double xxgauss( const double x, const double sigma );   
     
@@ -152,7 +149,7 @@ private:
     void initializeBuffer() {};
     void smooth()           {};
 
-    std::stack< std::stack< SubTextureBox > >	m_drawHistory;
+    std::stack< std::stack< SubTextureBox > >    m_drawHistory;
 
     float                   m_floodThreshold;
     float                   m_graphSigma;

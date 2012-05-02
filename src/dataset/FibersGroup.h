@@ -22,7 +22,6 @@ class FibersGroup : public DatasetInfo
 {
 public:
     FibersGroup();
-    // TODO copy constructors: should they be allowed?
     virtual ~FibersGroup();
 
     bool    isOneBtnToggled()
@@ -41,7 +40,7 @@ public:
     void    invertFibers();
     void    useFakeTubes();
     void    useTransparency();
-    
+
     void    resetAllValues();
 
     void    fibersLocalColoring();
@@ -67,8 +66,6 @@ public:
     void    draw()                      {};
     void    smooth()                    {};
     void    flipAxis( AxisType i_axe )  {};
-    void    activateLIC()               {};
-    void    clean()                     {};
     void    drawVectors()               {};
     void    generateTexture()           {};
     void    generateGeometry()          {};
@@ -78,6 +75,10 @@ public:
 
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
+
+private:
+    FibersGroup(const FibersGroup &);
+    FibersGroup &operator=(const FibersGroup &);
 
 private: 
     // Variables

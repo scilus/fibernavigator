@@ -45,10 +45,8 @@ public:
     bool loadSurf( wxString filename );
     bool loadDip ( wxString filename );
     void draw();
-    void clean()                        { m_tMesh->cleanUp(); };
     void smooth()                       { m_tMesh->doLoopSubD(); };
     virtual void flipAxis( AxisType i_axe ){};
-    void activateLIC();
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
 

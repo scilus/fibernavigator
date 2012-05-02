@@ -38,8 +38,8 @@ using std::stringstream;
 #include <vector>
 using std::vector;
 
-#define wxDefPosition wxDefaultPosition
-#define wxDefSize     wxDefaultSize
+#define DEF_POS   wxDefaultPosition
+#define DEF_SIZE  wxDefaultSize
 
 // TODO replace by const
 #define LINEAR_GRADIENT_THRESHOLD 0.085f
@@ -689,7 +689,7 @@ bool Fibers::loadCamino( const wxString &filename )
     Logger::getInstance()->print( wxT( "Read all" ), LOGLEVEL_MESSAGE );
     delete[] pBuffer;
     pBuffer = NULL;
-    
+
     DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_type = FIBERS;
     m_fullPath = filename;
@@ -3515,15 +3515,15 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     float minLength = getMinFibersLength();
     float maxLength = getMaxFibersLength();
 
-    m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, wxDefPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
     m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
     m_pToggleCrossingFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
-    m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), wxDefPosition, wxDefSize, wxRB_GROUP );
+    m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
     m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
     m_pRadCurvature            = new wxRadioButton( pParent, wxID_ANY, wxT( "Curvature" ) );

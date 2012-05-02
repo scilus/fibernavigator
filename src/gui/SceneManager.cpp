@@ -405,15 +405,15 @@ void SceneManager::updateView( const float x, const float y, const float z, bool
 
 void SceneManager::changeZoom( const int z )
 {
-        float delta = (int)m_zoom * 0.1f;
-        if( 0 <= z )
-        {
-            m_zoom = std::min( 50.0f, m_zoom + delta );
-        }
-        else
-        {
-            m_zoom = std::max( 1.0f, m_zoom - delta );
-        }
+    float delta = (int)m_zoom * 0.1f;
+    if( 0 <= z )
+    {
+        m_zoom = std::min( 50.0f, m_zoom + delta );
+    }
+    else
+    {
+        m_zoom = std::max( 1.0f, m_zoom - delta );
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////

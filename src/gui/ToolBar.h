@@ -35,16 +35,16 @@ public:
     wxToolBarToolBase *m_toggleActivateAllSelectionObjects;
     wxToolBarToolBase *m_toggleLighting;
     wxToolBarToolBase *m_toggleFakeTubes;
-	wxToolBarToolBase *m_toggleClearToBlack;
-	wxToolBarToolBase *m_selectNormalPointer;
-	wxToolBarToolBase *m_selectRuler;
-	wxToolBarToolBase *m_selectDrawer;
-	wxTextCtrl        *m_txtRuler;
-	wxToolBarToolBase *m_selectColorPicker;
+    wxToolBarToolBase *m_toggleClearToBlack;
+    wxToolBarToolBase *m_selectNormalPointer;
+    wxToolBarToolBase *m_selectRuler;
+    wxToolBarToolBase *m_selectDrawer;
+    wxTextCtrl        *m_txtRuler;
+    wxToolBarToolBase *m_selectColorPicker;
     wxToolBarToolBase *m_toggleDrawRound;
     wxToolBarToolBase *m_toggleDraw3d;
-	wxToolBarToolBase *m_selectPen;
-	wxToolBarToolBase *m_selectEraser;
+    wxToolBarToolBase *m_selectPen;
+    wxToolBarToolBase *m_selectEraser;
 };
 
 

@@ -94,8 +94,6 @@ public:
 
 protected:
     // From DatasetInfo
-    virtual void    activateLIC()      {};
-    virtual void    clean()            {};
     virtual void    smooth()           {};
     virtual void    generateGeometry() {};
     virtual GLuint  getGLuint()        { return 0; };

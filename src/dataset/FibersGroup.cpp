@@ -37,8 +37,8 @@ using std::stringstream;
 #include <vector>
 using std::vector;
 
-#define wxDefPosition wxDefaultPosition
-#define wxDefSize     wxDefaultSize
+#define DEF_POS wxDefaultPosition
+#define DEF_SIZE     wxDefaultSize
 
 FibersGroup::FibersGroup()
 :   DatasetInfo(),
@@ -298,14 +298,14 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pLblSubsampling = new wxStaticText( pParent, wxID_ANY, wxT( "Subsampling" ) );
     m_pLblThickness   = new wxStaticText( pParent, wxID_ANY, wxT( "Thickness" ) );
     m_pLblColoring    = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
-    m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, 0,       0, INT_MAX, wxDefPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, INT_MAX, 0, INT_MAX, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 0,       0,     100, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, wxDefPosition, wxDefSize,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, 0,       0, INT_MAX, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, INT_MAX, 0, INT_MAX, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 0,       0,     100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
     m_pToggleInterFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
-    m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), wxDefPosition, wxDefSize, wxRB_GROUP );
+    m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
     m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
     m_pRadCurvature            = new wxRadioButton( pParent, wxID_ANY, wxT( "Curvature" ) );
@@ -382,7 +382,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
-    pBoxMain->Add( new wxStaticText( pParent, wxID_ANY , wxT( "\n Warning: initial state of \n settings may not represent \n the current state of all fibers bundles."), wxDefPosition, wxSize( 100, -1 ), wxALIGN_CENTER ),
+    pBoxMain->Add( new wxStaticText( pParent, wxID_ANY , wxT( "\n Warning: initial state of \n settings may not represent \n the current state of all fibers bundles."), DEF_POS, wxSize( 100, -1 ), wxALIGN_CENTER ),
         0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     //////////////////////////////////////////////////////////////////////////

@@ -79,8 +79,8 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
     m_orthoModX = 0;
     m_orthoModY = 0;
     m_hitPts =Vector(0,0,0);
-	m_isRulerHit = false;
-	m_isDrawerHit = false;
+    m_isRulerHit = false;
+    m_isDrawerHit = false;
     m_isSlizesLocked = false;
     m_isSceneLocked = false;
     m_pRealTimeFibers = new RTTFibers();
@@ -88,7 +88,7 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
 
 MainCanvas::~MainCanvas()
 {
-	delete m_pArcBall;
+    delete m_pArcBall;
     m_pArcBall = NULL;
 
     delete m_pRealTimeFibers;
@@ -225,143 +225,6 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
 }
 
 //////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt )
 {
@@ -703,11 +566,11 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
                 SceneManager::getInstance()->setSegmentActive( false );
                 //m_pDatasetHelper->m_isSegmentActive = false;
             }
-			else if( MyApp::frame->isDrawerToolActive() )
-			{
-				m_hitPts = bb->hitCoordinate(ray,CORONAL);
-				m_isDrawerHit = isRulerOrDrawer;
-			}
+            else if( MyApp::frame->isDrawerToolActive() )
+            {
+                m_hitPts = bb->hitCoordinate(ray,CORONAL);
+                m_isDrawerHit = isRulerOrDrawer;
+            }
         }
         bb->setSizeZ( zSize );
         bb->setCenterZ( zPos );
@@ -730,11 +593,11 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
                     m_isRulerHit = isRulerOrDrawer;
                     SceneManager::getInstance()->setSegmentActive( false );
                 }
-				else if( MyApp::frame->isDrawerToolActive() )
-				{
-					m_hitPts = bb->hitCoordinate(ray,AXIAL);
-					m_isDrawerHit = isRulerOrDrawer;
-				}
+                else if( MyApp::frame->isDrawerToolActive() )
+                {
+                    m_hitPts = bb->hitCoordinate(ray,AXIAL);
+                    m_isDrawerHit = isRulerOrDrawer;
+                }
             }            
         }
         bb->setSizeY( ySize );
@@ -753,16 +616,16 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
                 picked = SAGITTAL;
                 tpicked = hr.tmin;
                 if( SceneManager::getInstance()->isRulerActive() || SceneManager::getInstance()->isSegmentActive() )
-				{
+                {
                     m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
                     m_isRulerHit = isRulerOrDrawer;
                     SceneManager::getInstance()->setSegmentActive( false );
                 }
-				else if( MyApp::frame->isDrawerToolActive() )
-				{
-					m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
-					m_isDrawerHit = isRulerOrDrawer;
-				}
+                else if( MyApp::frame->isDrawerToolActive() )
+                {
+                    m_hitPts = bb->hitCoordinate(ray,SAGITTAL);
+                    m_isDrawerHit = isRulerOrDrawer;
+                }
             }
         }
     }
@@ -841,18 +704,18 @@ void MainCanvas::render()
     {
         case MAIN_VIEW:
         {
-			/*if (m_pDatasetHelper->m_isRulerToolActive)
-			{
-				SetCursor( wxCursor( wxCURSOR_CROSS ) );
-			}
-			else if (m_pDatasetHelper->m_isDrawerToolActive)
-			{
-				SetCursor( wxCursor( wxCURSOR_PENCIL ) );
-			}
-			else
-			{
-				SetCursor( wxCursor( wxCURSOR_ARROW ) );
-			}*/
+            /*if (m_pDatasetHelper->m_isRulerToolActive)
+            {
+                SetCursor( wxCursor( wxCURSOR_CROSS ) );
+            }
+            else if (m_pDatasetHelper->m_isDrawerToolActive)
+            {
+                SetCursor( wxCursor( wxCURSOR_PENCIL ) );
+            }
+            else
+            {
+                SetCursor( wxCursor( wxCURSOR_ARROW ) );
+            }*/
 
             if( SceneManager::getInstance()->isScreenshotScheduled() )
             {

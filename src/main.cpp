@@ -265,7 +265,7 @@ int MyApp::OnExit()
     // Deleting singletons
     delete ShaderHelper::getInstance();
     delete DatasetManager::getInstance();
-	delete SceneManager::getInstance();
+    delete SceneManager::getInstance();
     delete Logger::getInstance();
     return 0;
 }
