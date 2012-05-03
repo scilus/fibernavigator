@@ -12,25 +12,68 @@
 #include "TheScene.h"
 
 #include "../Logger.h"
+#include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/AnatomyHelper.h"
-#include "../dataset/DatasetHelper.h"
 #include "../dataset/DatasetInfo.h"
+#include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
-#include "../dataset/SplinePoint.h"
-#include "../dataset/Surface.h"
+#include "../dataset/Mesh.h"
+#include "../dataset/ODFs.h"
+#include "../gfx/ShaderHelper.h"
 #include "../gui/ArcBall.h"
+#include "../gui/MainFrame.h"
 #include "../gui/MyListCtrl.h"
+#include "../gui/SceneManager.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+
+#include <algorithm>
+#include <vector>
+using std::vector;
+
+namespace
+{
+    void drawVectorsHelper( const vector< Vector > &positions, const Anatomy * const pVecs, const float bright )
+    {
+        float columns = DatasetManager::getInstance()->getColumns();
+        float rows    = DatasetManager::getInstance()->getRows();
+
+        for( vector< Vector >::const_iterator it = positions.begin(); it != positions.end(); ++it )
+        {
+            float r, g, b, a;
+            int index = 3 * ((int)it->x + (int)( it->y * columns ) + (int)( it->z * rows * columns ) );
+
+            float x = pVecs->at( index );
+            float y = pVecs->at( index + 1 );
+            float z = pVecs->at( index + 2 );
+
+            if( pVecs->getUseTex() )
+            {
+                r = wxMin(1.0, fabs(x)* bright);
+                g = wxMin(1.0, fabs(y)* bright);
+                b = wxMin(1.0, fabs(z)* bright);
+                a = sqrt( r * r + g * g + b * b );
+                r /= a;
+                g /= a;
+                b /= a;
+            }
+
+            glColor4f( r, g, b, 1.0 );
+            glVertex3f( it->x - x / 2., it->y - y / 2., it->z - z / 2. );
+            glVertex3f( it->x + x / 2., it->y + y / 2., it->z + z / 2. );
+        }
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 // Constructor
 //
 // i_datasetHelper          :
 //////////////////////////////////////////////////////////////////////////////////
-TheScene::TheScene( DatasetHelper* pDatasetHelper ) :
-    m_isRotateZ( false ),
+TheScene::TheScene()
+:   m_isRotateZ( false ),
     m_isRotateY( false ),
     m_isRotateX( false ),
     m_isNavSagital( false ),
@@ -42,18 +85,12 @@ TheScene::TheScene( DatasetHelper* pDatasetHelper ) :
     m_posSagital( 0.0f ),
     m_posCoronal( 0.0f ),
     m_posAxial( 0.0f ),
-    m_pDatasetHelper( pDatasetHelper ), 
     m_pMainGLContext( NULL )
 {
-    m_pDatasetHelper->m_anatomyHelper = new AnatomyHelper( m_pDatasetHelper );
-
     // Initialize those to 0.0f to make sure that by some really odd chance, they cannot
     // be initialized to the same values as the real projection and modelview matrix.
-    for( int i = 0; i < 16; ++i )
-    {
-        m_projection[i] = 0.0f;
-        m_modelview[i]  = 0.0f;
-    }
+    std::fill( m_projection, m_projection + 16, 0.0f );
+    std::fill( m_modelview, m_modelview + 16, 0.0f );
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -65,11 +102,8 @@ TheScene::~TheScene()
 
 #ifndef __WXMAC__
     // On mac, this is just a pointer to the original object that is deleted with the widgets.
-    if ( m_pMainGLContext )
-    {
-        delete m_pMainGLContext;
-        m_pMainGLContext = NULL;
-    }
+    delete m_pMainGLContext;
+    m_pMainGLContext = NULL;
 #endif
     Logger::getInstance()->print( wxT( "TheScene destructor done" ), LOGLEVEL_DEBUG );
 }
@@ -84,7 +118,6 @@ void TheScene::initGL( int whichView )
     try
     {
         GLenum errorCode = glewInit();
-
         bool useGeometry( true );
 
         if( GLEW_OK != errorCode )
@@ -102,16 +135,9 @@ void TheScene::initGL( int whichView )
             vendorId   = wxString::FromAscii( (char*)glGetString( GL_VENDOR   ) );
             rendererId = wxString::FromAscii( (char*)glGetString( GL_RENDERER ) );
 
-            if ( rendererId.Contains( _T( "GeForce 6" ) ) )
-                m_pDatasetHelper->m_geforceLevel = 6;
-            else if ( rendererId.Contains( _T( "GeForce 7" ) ) )
-                m_pDatasetHelper->m_geforceLevel = 7;
-            else if ( rendererId.Contains( _T( "GeForce 8" ) ) || rendererId.Contains( _T( "GeForce GTX 2" ) ) )
-                m_pDatasetHelper->m_geforceLevel = 8;
-
             Logger::getInstance()->print( vendorId + _T( " " ) + rendererId, LOGLEVEL_MESSAGE );
 
-            if( ! glewIsSupported( "GL_ARB_shader_objects" ) )
+            if( !glewIsSupported( "GL_ARB_shader_objects" ) )
             {
                 printf( "*** ERROR no support for shader objects found.\n" );
                 printf( "*** Please check your OpenGL installation...exiting.\n" );
@@ -120,25 +146,19 @@ void TheScene::initGL( int whichView )
             else if ( !glewIsSupported( "GL_VERSION_3_2" ) && !glewIsSupported( "GL_ARB_geometry_shader4" ) && !glewIsExtensionSupported( "GL_EXT_geometry_shader4" ) )
             {
                 Logger::getInstance()->print( wxT( "Geometry shaders not supported. Some operations may run slower and use more CPU." ), LOGLEVEL_WARNING );
-                m_pDatasetHelper->m_geometryShadersSupported = false;
+                SceneManager::getInstance()->setGeometryShaderSupported( false );
                 useGeometry = false;
-                // TODO: Set some sort of global variable to indicate geometry shaders are not supported
             }
+            ShaderHelper::getInstance()->loadShaders( useGeometry );
         }
         glEnable( GL_DEPTH_TEST );
 
-        if( ! m_pDatasetHelper->m_texAssigned )
-        {
-            m_pDatasetHelper->m_shaderHelper = new ShaderHelper( m_pDatasetHelper, useGeometry );
-            m_pDatasetHelper->m_texAssigned  = true;
-        }
-
-        float view1 = 200;
         glClearColor( 1.0, 1.0, 1.0, 0.0 );
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
-        glOrtho( 0, view1, 0, view1, -3000, 3000 );
-    } catch ( ... )
+        glOrtho( 0, 200, 0, 200, -3000, 3000 );
+    }
+    catch ( ... )
     {
         Logger::getInstance()->printIfGLError( wxT( "Init" ) );
     }
@@ -148,15 +168,20 @@ void TheScene::bindTextures()
 {
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
+    Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glTexEnvf") );
+    
     int allocatedTextureCount = 0;
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
         if( pDsInfo->getType() < MESH && pDsInfo->getShow() )
         {
             glActiveTexture( GL_TEXTURE0 + allocatedTextureCount );
+            Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glActiveTexture") );
+
             glBindTexture( GL_TEXTURE_3D, pDsInfo->getGLuint() );
+            Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glBindTexture") );
             if( pDsInfo->getShowFS() )
             {
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -167,15 +192,17 @@ void TheScene::bindTextures()
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
             }
+            
+            Logger::getInstance()->printIfGLError( wxT( "TheScene::bindTextures - glTexParameteri") );
+            
             if ( ++allocatedTextureCount == 10 )
             {
-                printf( "reached 10 textures\n" );
+                Logger::getInstance()->print( wxT( "Reached 10 textures!" ), LOGLEVEL_WARNING );
                 break;
             }
         }
-
     }
-    
+
     Logger::getInstance()->printIfGLError( wxT( "Bind textures") );
 }
 
@@ -184,106 +211,112 @@ void TheScene::bindTextures()
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::renderScene()
 {
+    Logger::getInstance()->printIfGLError( wxT( "Error before renderScene" ) );
     // This will put the frustum information up to date for any render that needs it. 
     extractFrustum();
-    
-    if( m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount() == 0 )
+
+    if( MyApp::frame->m_pListCtrl->GetItemCount() == 0 )
         return;
 
-    m_pDatasetHelper->m_shaderHelper->initializeArrays();
+    ShaderHelper::getInstance()->initializeArrays();
+
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
     //Animate
-	if(m_isRotateZ)
+    if( m_isRotateZ )
     {
-	    if (m_rotAngleZ>360) 
-		    m_rotAngleZ=0;
+        if( m_rotAngleZ > 360 )
+            m_rotAngleZ = 0;
 
-    	glTranslatef(m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
-	    glRotatef(m_rotAngleZ,0,0,1);
-	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
+        glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+        glRotatef( m_rotAngleZ, 0, 0, 1 );
+        glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
-    if(m_isRotateY)
+    if( m_isRotateY )
     {
-	    if (m_rotAngleY>360) 
-		    m_rotAngleY=0;
+        if( m_rotAngleY > 360 )
+            m_rotAngleY = 0;
 
-    	glTranslatef(m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
-	    glRotatef(m_rotAngleY,0,1,0);
-	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
+        glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+        glRotatef( m_rotAngleY, 0, 1, 0 );
+        glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
 
-    if(m_isRotateX)
+    if( m_isRotateX )
     {
-	    if (m_rotAngleX>360) 
-		    m_rotAngleX=0;
+        if( m_rotAngleX > 360 )
+            m_rotAngleX = 0;
 
-    	glTranslatef(m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
-	    glRotatef(m_rotAngleX,1,0,0);
-	    glTranslatef(-m_pDatasetHelper->m_columns / 2 * m_pDatasetHelper->m_xVoxel,-m_pDatasetHelper->m_rows / 2 * m_pDatasetHelper->m_yVoxel,-m_pDatasetHelper->m_frames / 2 * m_pDatasetHelper->m_zVoxel);
+        glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
+        glRotatef( m_rotAngleX, 1, 0, 0 );
+        glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
     }
+
+    Logger::getInstance()->printIfGLError( wxT( "TheScene::renderScene - Rotation" ) );
 
     //Navigate through slices
-    if(m_isNavSagital) 
+    if( m_isNavSagital )
     {
-	    if (m_posSagital > m_pDatasetHelper->m_columns) 
-		    m_posSagital=0;
+        if( m_posSagital > columns )
+            m_posSagital = 0;
 
-        m_pDatasetHelper->updateView(m_posSagital,m_pDatasetHelper->m_ySlize,m_pDatasetHelper->m_zSlize);
-        m_pDatasetHelper->m_mainFrame->m_pXSlider->SetValue(m_posSagital);
+        SceneManager::getInstance()->updateView( m_posSagital, 
+                                                 SceneManager::getInstance()->getSliceY(), 
+                                                 SceneManager::getInstance()->getSliceZ() );
+        MyApp::frame->m_pXSlider->SetValue( m_posSagital );
     }
 
-    if(m_isNavCoronal)
+    if( m_isNavCoronal )
     {
-	    if (m_posCoronal > m_pDatasetHelper->m_rows) 
-		    m_posCoronal=0;
+        if( m_posCoronal > rows )
+            m_posCoronal = 0;
 
-        m_pDatasetHelper->updateView(m_pDatasetHelper->m_xSlize,m_posCoronal,m_pDatasetHelper->m_zSlize);
-        m_pDatasetHelper->m_mainFrame->m_pYSlider->SetValue(m_posCoronal);
+        SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(),
+                                                 m_posCoronal,
+                                                 SceneManager::getInstance()->getSliceZ() );
+        MyApp::frame->m_pYSlider->SetValue( m_posCoronal );
     }
 
-    if(m_isNavAxial)
+    if( m_isNavAxial )
     {
-	    if (m_posAxial > m_pDatasetHelper->m_frames) 
-		    m_posAxial=0;
+        if( m_posAxial > frames )
+            m_posAxial = 0;
 
-        m_pDatasetHelper->updateView(m_pDatasetHelper->m_xSlize,m_pDatasetHelper->m_ySlize,m_posAxial);
-        m_pDatasetHelper->m_mainFrame->m_pZSlider->SetValue(m_posAxial);
+        SceneManager::getInstance()->updateView( SceneManager::getInstance()->getSliceX(),
+                                                 SceneManager::getInstance()->getSliceY(),
+                                                 m_posAxial );
+        MyApp::frame->m_pZSlider->SetValue( m_posAxial );
     }
 
+    Logger::getInstance()->printIfGLError( wxT( "TheScene::renderScene - Navigation" ) );
 
-	
-	
     // Opaque objects.
     renderSlices();
 
-    if( m_pDatasetHelper->m_surfaceLoaded )
-        renderSplineSurface();
-
-    if( m_pDatasetHelper->m_pointMode )
-        drawPoints();
-
-    if( m_pDatasetHelper->m_vectorsLoaded )
+    if( DatasetManager::getInstance()->isVectorsLoaded() )
         drawVectors();
 
-    if( m_pDatasetHelper->m_showColorMapLegend )
-        drawColorMapLegend();
-
-    if( m_pDatasetHelper->m_tensorsLoaded )
+    if( DatasetManager::getInstance()->isTensorsLoaded() )
         renderTensors();
-    
-    if( m_pDatasetHelper->m_ODFsLoaded )
+
+    if( DatasetManager::getInstance()->isOdfsLoaded() )
         renderODFs();
-    
+
     renderMesh();
-	renderFibers();
-    
-    if( m_pDatasetHelper->m_showObjects )
+    renderFibers();
+
+    if( SceneManager::getInstance()->getShowAllSelObj() )
     {
         drawSelectionObjects();
     }
 
-    Logger::getInstance()->printIfGLError( wxT( "Render theScene" ) );
+    Logger::getInstance()->printIfGLError( wxT( "Rendering Scene" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -336,97 +369,97 @@ void TheScene::extractFrustum()
    clipMat[15] = curModelview[12] * curProjection[ 3] + curModelview[13] * curProjection[ 7] + curModelview[14] * curProjection[11] + curModelview[15] * curProjection[15];
 
    // Extract the numbers for the RIGHT plane.
-   m_pDatasetHelper->m_frustum[0][0] = clipMat[ 3] - clipMat[ 0];
-   m_pDatasetHelper->m_frustum[0][1] = clipMat[ 7] - clipMat[ 4];
-   m_pDatasetHelper->m_frustum[0][2] = clipMat[11] - clipMat[ 8];
-   m_pDatasetHelper->m_frustum[0][3] = clipMat[15] - clipMat[12];
+   SceneManager::getInstance()->m_frustum[0][0] = clipMat[ 3] - clipMat[ 0];
+   SceneManager::getInstance()->m_frustum[0][1] = clipMat[ 7] - clipMat[ 4];
+   SceneManager::getInstance()->m_frustum[0][2] = clipMat[11] - clipMat[ 8];
+   SceneManager::getInstance()->m_frustum[0][3] = clipMat[15] - clipMat[12];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   float normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[0][0] * m_pDatasetHelper->m_frustum[0][0] + 
-                                   m_pDatasetHelper->m_frustum[0][1] * m_pDatasetHelper->m_frustum[0][1] + 
-                                   m_pDatasetHelper->m_frustum[0][2] * m_pDatasetHelper->m_frustum[0][2] );
-   m_pDatasetHelper->m_frustum[0][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[0][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[0][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[0][3] /= normalizationTerm;
+   float normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[0][0] * SceneManager::getInstance()->m_frustum[0][0] + 
+                                   SceneManager::getInstance()->m_frustum[0][1] * SceneManager::getInstance()->m_frustum[0][1] + 
+                                   SceneManager::getInstance()->m_frustum[0][2] * SceneManager::getInstance()->m_frustum[0][2] );
+   SceneManager::getInstance()->m_frustum[0][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[0][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[0][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[0][3] /= normalizationTerm;
 
    // Extract the numbers for the LEFT plane.
-   m_pDatasetHelper->m_frustum[1][0] = clipMat[ 3] + clipMat[ 0];
-   m_pDatasetHelper->m_frustum[1][1] = clipMat[ 7] + clipMat[ 4];
-   m_pDatasetHelper->m_frustum[1][2] = clipMat[11] + clipMat[ 8];
-   m_pDatasetHelper->m_frustum[1][3] = clipMat[15] + clipMat[12];
+   SceneManager::getInstance()->m_frustum[1][0] = clipMat[ 3] + clipMat[ 0];
+   SceneManager::getInstance()->m_frustum[1][1] = clipMat[ 7] + clipMat[ 4];
+   SceneManager::getInstance()->m_frustum[1][2] = clipMat[11] + clipMat[ 8];
+   SceneManager::getInstance()->m_frustum[1][3] = clipMat[15] + clipMat[12];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[1][0] * m_pDatasetHelper->m_frustum[1][0] + 
-                             m_pDatasetHelper->m_frustum[1][1] * m_pDatasetHelper->m_frustum[1][1] + 
-                             m_pDatasetHelper->m_frustum[1][2] * m_pDatasetHelper->m_frustum[1][2] );
-   m_pDatasetHelper->m_frustum[1][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[1][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[1][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[1][3] /= normalizationTerm;
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[1][0] * SceneManager::getInstance()->m_frustum[1][0] + 
+                             SceneManager::getInstance()->m_frustum[1][1] * SceneManager::getInstance()->m_frustum[1][1] + 
+                             SceneManager::getInstance()->m_frustum[1][2] * SceneManager::getInstance()->m_frustum[1][2] );
+   SceneManager::getInstance()->m_frustum[1][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[1][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[1][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[1][3] /= normalizationTerm;
 
    // Extract the BOTTOM plane.
-   m_pDatasetHelper->m_frustum[2][0] = clipMat[ 3] + clipMat[ 1];
-   m_pDatasetHelper->m_frustum[2][1] = clipMat[ 7] + clipMat[ 5];
-   m_pDatasetHelper->m_frustum[2][2] = clipMat[11] + clipMat[ 9];
-   m_pDatasetHelper->m_frustum[2][3] = clipMat[15] + clipMat[13];
+   SceneManager::getInstance()->m_frustum[2][0] = clipMat[ 3] + clipMat[ 1];
+   SceneManager::getInstance()->m_frustum[2][1] = clipMat[ 7] + clipMat[ 5];
+   SceneManager::getInstance()->m_frustum[2][2] = clipMat[11] + clipMat[ 9];
+   SceneManager::getInstance()->m_frustum[2][3] = clipMat[15] + clipMat[13];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[2][0] * m_pDatasetHelper->m_frustum[2][0] + 
-                             m_pDatasetHelper->m_frustum[2][1] * m_pDatasetHelper->m_frustum[2][1   ] + 
-                             m_pDatasetHelper->m_frustum[2][2] * m_pDatasetHelper->m_frustum[2][2] );
-   m_pDatasetHelper->m_frustum[2][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[2][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[2][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[2][3] /= normalizationTerm;
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[2][0] * SceneManager::getInstance()->m_frustum[2][0] + 
+                             SceneManager::getInstance()->m_frustum[2][1] * SceneManager::getInstance()->m_frustum[2][1] + 
+                             SceneManager::getInstance()->m_frustum[2][2] * SceneManager::getInstance()->m_frustum[2][2] );
+   SceneManager::getInstance()->m_frustum[2][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[2][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[2][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[2][3] /= normalizationTerm;
 
    // Extract the TOP plane.
-   m_pDatasetHelper->m_frustum[3][0] = clipMat[ 3] - clipMat[ 1];
-   m_pDatasetHelper->m_frustum[3][1] = clipMat[ 7] - clipMat[ 5];
-   m_pDatasetHelper->m_frustum[3][2] = clipMat[11] - clipMat[ 9];
-   m_pDatasetHelper->m_frustum[3][3] = clipMat[15] - clipMat[13];
+   SceneManager::getInstance()->m_frustum[3][0] = clipMat[ 3] - clipMat[ 1];
+   SceneManager::getInstance()->m_frustum[3][1] = clipMat[ 7] - clipMat[ 5];
+   SceneManager::getInstance()->m_frustum[3][2] = clipMat[11] - clipMat[ 9];
+   SceneManager::getInstance()->m_frustum[3][3] = clipMat[15] - clipMat[13];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[3][0] * m_pDatasetHelper->m_frustum[3][0] + 
-                             m_pDatasetHelper->m_frustum[3][1] * m_pDatasetHelper->m_frustum[3][1] + 
-                             m_pDatasetHelper->m_frustum[3][2] * m_pDatasetHelper->m_frustum[3][2] );
-   m_pDatasetHelper->m_frustum[3][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[3][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[3][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[3][3] /= normalizationTerm;
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[3][0] * SceneManager::getInstance()->m_frustum[3][0] + 
+                             SceneManager::getInstance()->m_frustum[3][1] * SceneManager::getInstance()->m_frustum[3][1] + 
+                             SceneManager::getInstance()->m_frustum[3][2] * SceneManager::getInstance()->m_frustum[3][2] );
+   SceneManager::getInstance()->m_frustum[3][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[3][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[3][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[3][3] /= normalizationTerm;
 
    // Extract the FAR plane.
-   m_pDatasetHelper->m_frustum[4][0] = clipMat[ 3] - clipMat[ 2];
-   m_pDatasetHelper->m_frustum[4][1] = clipMat[ 7] - clipMat[ 6];
-   m_pDatasetHelper->m_frustum[4][2] = clipMat[11] - clipMat[10];
-   m_pDatasetHelper->m_frustum[4][3] = clipMat[15] - clipMat[14];
+   SceneManager::getInstance()->m_frustum[4][0] = clipMat[ 3] - clipMat[ 2];
+   SceneManager::getInstance()->m_frustum[4][1] = clipMat[ 7] - clipMat[ 6];
+   SceneManager::getInstance()->m_frustum[4][2] = clipMat[11] - clipMat[10];
+   SceneManager::getInstance()->m_frustum[4][3] = clipMat[15] - clipMat[14];
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( m_pDatasetHelper->m_frustum[4][0] * m_pDatasetHelper->m_frustum[4][0] + 
-                             m_pDatasetHelper->m_frustum[4][1] * m_pDatasetHelper->m_frustum[4][1] + 
-                             m_pDatasetHelper->m_frustum[4][2] * m_pDatasetHelper->m_frustum[4][2] );
-   m_pDatasetHelper->m_frustum[4][0] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[4][1] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[4][2] /= normalizationTerm;
-   m_pDatasetHelper->m_frustum[4][3] /= normalizationTerm;
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[4][0] * SceneManager::getInstance()->m_frustum[4][0] + 
+                             SceneManager::getInstance()->m_frustum[4][1] * SceneManager::getInstance()->m_frustum[4][1] + 
+                             SceneManager::getInstance()->m_frustum[4][2] * SceneManager::getInstance()->m_frustum[4][2] );
+   SceneManager::getInstance()->m_frustum[4][0] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[4][1] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[4][2] /= normalizationTerm;
+   SceneManager::getInstance()->m_frustum[4][3] /= normalizationTerm;
 
    // Extract the NEAR plane.
-   m_pDatasetHelper->m_frustum[5][0] = clipMat[ 3] + clipMat[ 2];
-   m_pDatasetHelper->m_frustum[5][1] = clipMat[ 7] + clipMat[ 6];
-   m_pDatasetHelper->m_frustum[5][2] = clipMat[11] + clipMat[10];
-   m_pDatasetHelper->m_frustum[5][3] = clipMat[15] + clipMat[14];
+   SceneManager::getInstance()->m_frustum[5][0] = clipMat[ 3] + clipMat[ 2];
+   SceneManager::getInstance()->m_frustum[5][1] = clipMat[ 7] + clipMat[ 6];
+   SceneManager::getInstance()->m_frustum[5][2] = clipMat[11] + clipMat[10];
+   SceneManager::getInstance()->m_frustum[5][3] = clipMat[15] + clipMat[14];
 }
 
 void TheScene::renderSlices()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    if( m_pDatasetHelper->m_blendAlpha )
+    if( SceneManager::getInstance()->isAlphaBlend() )
     {
         glDisable( GL_ALPHA_TEST );
     }
@@ -435,63 +468,27 @@ void TheScene::renderSlices()
         glEnable( GL_ALPHA_TEST );
     }
 
-    glAlphaFunc( GL_GREATER, 0.001f ); // Adjust your prefered threshold here.
+    glAlphaFunc( GL_GREATER, 0.001f ); // Adjust your preferred threshold here.
 
     bindTextures();
-    m_pDatasetHelper->m_shaderHelper->m_anatomyShader.bind();
-    m_pDatasetHelper->m_shaderHelper->setTextureShaderVars();
-    m_pDatasetHelper->m_shaderHelper->m_anatomyShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+    ShaderHelper::getInstance()->getAnatomyShader()->bind();
+    ShaderHelper::getInstance()->setTextureShaderVars();
+    ShaderHelper::getInstance()->getAnatomyShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
-    m_pDatasetHelper->m_anatomyHelper->renderMain();
+    SceneManager::getInstance()->getAnatomyHelper()->renderMain();
 
     glDisable( GL_BLEND );
 
-    m_pDatasetHelper->m_shaderHelper->m_anatomyShader.release();
+    ShaderHelper::getInstance()->getAnatomyShader()->release();
 
-    if( m_pDatasetHelper->m_showCrosshair )
-        m_pDatasetHelper->m_anatomyHelper->renderCrosshair();
-
-    Logger::getInstance()->printIfGLError( wxT( "Render slices" ) );
+    if( SceneManager::getInstance()->isCrosshairDisplayed() )
+    {
+        SceneManager::getInstance()->getAnatomyHelper()->renderCrosshair();
+    }
 
     glPopAttrib();
-}
 
-void TheScene::renderSplineSurface()
-{
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
-    {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
-        if( pDsInfo->getType() == SURFACE && pDsInfo->getShow() )
-        {
-            glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-            if ( m_pDatasetHelper->m_pointMode )
-                glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            else
-                glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-            bindTextures();
-
-            lightsOn();
-
-            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.bind();
-            m_pDatasetHelper->m_shaderHelper->setSplineSurfaceShaderVars();
-            wxColor color = pDsInfo->getColor();
-            glColor3f( (float) color.Red() / 255.0, (float) color.Green() / 255.0, (float) color.Blue() / 255.0 );
-            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.setUniInt( "useLic", pDsInfo->getUseLIC() );
-            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
-
-            pDsInfo->draw();
-
-            m_pDatasetHelper->m_shaderHelper->m_splineSurfShader.release();
-
-            lightsOff();
-
-            Logger::getInstance()->printIfGLError( wxT( "Draw surface" ) );
-            glPopAttrib();
-        }
-    }
+    Logger::getInstance()->printIfGLError( wxT( "Render slices" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -501,17 +498,17 @@ void TheScene::renderMesh()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    if( m_pDatasetHelper->m_lighting )
+    if( SceneManager::getInstance()->isLightingActive() )
     {
         lightsOn();
     }
 
     bindTextures();
 
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.bind();
-    m_pDatasetHelper->m_shaderHelper->setMeshShaderVars();
+    ShaderHelper::getInstance()->getMeshShader()->bind();
+    ShaderHelper::getInstance()->setMeshShaderVars();
 
-    if( m_pDatasetHelper->m_pointMode )
+    if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -521,64 +518,78 @@ void TheScene::renderMesh()
 
     //Render selection objects
     glColor3f( 1.0f, 0.0f, 0.0f );
-    std::vector< std::vector< SelectionObject* > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "showFS", true );
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useTex", false );
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniFloat( "alpha_", 1.0 );
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useLic", false );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS", true );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex", false );
+    ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_", 1.0 );
 
     for( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
         for( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
-            if( ! selectionObjects[i][j]->isSelectionObject() && m_pDatasetHelper->m_showObjects)
+            if( SceneManager::getInstance()->getShowAllSelObj() && !selectionObjects[i][j]->isSelectionObject() )
                 selectionObjects[i][j]->drawIsoSurface();
             glPopAttrib();
         }
     }
 
     //Render meshes
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    vector< Mesh * > v = DatasetManager::getInstance()->getMeshes();
+    for( vector<Mesh *>::iterator mesh = v.begin(); mesh != v.end(); ++mesh )
     {
-        DatasetInfo* pDsInfo = (DatasetInfo*) m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
-        if( pDsInfo->getType() == MESH || pDsInfo->getType() == ISO_SURFACE )
+        if( (*mesh)->getShow() )
         {
-            if( pDsInfo->getShow() )
-            {
-                wxColor color = pDsInfo->getColor();
-                glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
-
-                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "showFS",  pDsInfo->getShowFS() );
-                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useTex",  pDsInfo->getUseTex() );
-                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniFloat( "alpha_",  pDsInfo->getAlpha() );
-                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "useLic",  pDsInfo->getUseLIC() );
-                m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
-
-                if(pDsInfo->getAlpha() < 0.99)
-                {
-                    glDepthMask(GL_FALSE);
-                }
-
-                pDsInfo->draw();
-
-                if(pDsInfo->getAlpha() < 0.99)
-                {
-                    glDepthMask(GL_TRUE);
-                }
-            }
+            renderMeshInternal( *mesh );
         }
     }
-    
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.release();
+
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
+    {
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
+
+        if( ISO_SURFACE == pDsInfo->getType() && pDsInfo->getShow() )
+        {
+            renderMeshInternal( pDsInfo );
+        }
+    }
+
+    ShaderHelper::getInstance()->getMeshShader()->release();
 
     lightsOff();
 
-    Logger::getInstance()->printIfGLError( wxT( "Draw mesh " ) );
-
     glPopAttrib();
+
+    Logger::getInstance()->printIfGLError( wxT( "Draw mesh " ) );
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+void TheScene::renderMeshInternal(  DatasetInfo *pDsInfo )
+{
+    wxColor color = pDsInfo->getColor();
+    glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
+
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS",  pDsInfo->getShowFS() );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex",  pDsInfo->getUseTex() );
+    ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_",  pDsInfo->getAlpha() );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
+
+    if( pDsInfo->getAlpha() < 0.99 )
+    {
+        glDepthMask( GL_FALSE );
+    }
+
+    pDsInfo->draw();
+
+    if( pDsInfo->getAlpha() < 0.99 )
+    {
+        glDepthMask( GL_TRUE );
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will render the fibers in theScene.
@@ -587,52 +598,52 @@ void TheScene::renderFibers()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
 
         if( pDsInfo->getType() == FIBERS && pDsInfo->getShow())
         {
-			Fibers* pFibers = (Fibers*)pDsInfo;
-			if( pFibers != NULL )
-			{
-                if( m_pDatasetHelper->m_selBoxChanged )
+            Fibers* pFibers = (Fibers*)pDsInfo;
+            if( pFibers != NULL )
+            {
+                if( SceneManager::getInstance()->isSelBoxChanged() )
                 {
                     pFibers->updateLinesShown();
                 }
 
-				if( pFibers->isUsingFakeTubes() )
-				{
-					pFibers->draw();
+                if( pFibers->isUsingFakeTubes() )
+                {
+                    pFibers->draw();
 
                     Logger::getInstance()->printIfGLError( wxT( "Draw fake tubes" ) );
-				}
-				else // render normally
-				{
-					if( m_pDatasetHelper->m_lighting )
-					{
-						lightsOn();
-						GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-						glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
-					}
-					if( ! pFibers->getUseTex() )
-					{
-						bindTextures();
-					}
-					
-					pFibers->draw();
-					lightsOff();
+                }
+                else // render normally
+                {
+                    if( SceneManager::getInstance()->isLightingActive() )
+                    {
+                        lightsOn();
+                        GLfloat light_position0[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+                glLightfv( GL_LIGHT0, GL_POSITION, light_position0 );
+                    }
+                    if( ! pFibers->getUseTex() )
+                    {
+                        bindTextures();
+                    }
+
+                    pFibers->draw();
+                    lightsOff();
 
                     Logger::getInstance()->printIfGLError( wxT( "Draw fibers" ) );
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 
-	m_pDatasetHelper->m_selBoxChanged = false;
+    SceneManager::getInstance()->setSelBoxChanged( false );
 
-    vector< vector< SelectionObject * > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
-    for( vector< vector< SelectionObject *> >::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+    for( SelectionObjList::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )
     {
         for( vector< SelectionObject *>::iterator itChild = itMaster->begin(); itChild != itMaster->end(); ++itChild )
         {
@@ -640,7 +651,7 @@ void TheScene::renderFibers()
         }
     }
 
-	glPopAttrib();
+    glPopAttrib();
 }
 
 
@@ -652,14 +663,14 @@ void TheScene::renderTensors()
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
     // This will check if we are suppose to draw the tensor using GL_LINE or GL_FILL.
-    if( m_pDatasetHelper->m_pointMode )
+    if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* pDsInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
 
         if( pDsInfo->getType() == TENSORS && pDsInfo->getShow() )
         {
@@ -679,20 +690,20 @@ void TheScene::renderODFs()
 {
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-    // This will check if we are suppose to draw the odfs usung GL_LINE or GL_FILL.
-    if( m_pDatasetHelper->m_pointMode )
+    // This will check if we are suppose to draw the odfs using GL_LINE or GL_FILL.
+    if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    vector<ODFs *> v = DatasetManager::getInstance()->getOdfs();
+    for(vector<ODFs *>::iterator it = v.begin(); it != v.end(); ++it )
     {
-        DatasetInfo* pDsInfo = (DatasetInfo*)m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
-
-        if( pDsInfo->getType() == ODFS && pDsInfo->getShow() )
+        ODFs *pOdfs = *it;
+        if( pOdfs->getShow() )
         {
             lightsOff();
-            pDsInfo->draw();
+            pOdfs->draw();
         }
     }
 
@@ -711,7 +722,8 @@ void TheScene::lightsOn()
     GLfloat specRef[]       = { 0.5f, 0.5f, 0.5f, 0.5f };
     Vector3fT v1 = { { 0, 0, -1 } };
     Vector3fT l;
-    Vector3fMultMat4( &l, &v1, &m_pDatasetHelper->m_transform );
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Vector3fMultMat4( &l, &v1, &transform );
 
     GLfloat lightPosition0[] = { l.s.X, l.s.Y, l.s.Z, 0.0 };
 
@@ -767,15 +779,13 @@ void TheScene::drawSphere( float xPos, float yPos, float zPos, float ray )
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::drawSelectionObjects()
 {
-    std::vector< std::vector< SelectionObject* > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
     for ( unsigned int i = 0; i < selectionObjects.size(); ++i )
     {
         for ( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
-
             selectionObjects[i][j]->draw();
-
             glPopAttrib();
         }
     }
@@ -786,50 +796,21 @@ void TheScene::drawSelectionObjects()
 ///////////////////////////////////////////////////////////////////////////
 // COMMENT
 ///////////////////////////////////////////////////////////////////////////
-void TheScene::drawPoints()
-{
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    lightsOn();
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.bind();
-    m_pDatasetHelper->m_shaderHelper->setMeshShaderVars();
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt( "showFS", true );
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt( "useTex", false );
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt( "cutAtSurface", false );
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.setUniInt( "lightOn", true );
-
-    wxTreeItemId treeId;
-    wxTreeItemIdValue cookie = 0;
-    treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetFirstChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
-    while( treeId.IsOk() )
-    {
-        SplinePoint* pCurPoint = (SplinePoint*) ( m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetItemData( treeId ) );
-        pCurPoint->draw();
-
-        treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetNextChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
-    }
-
-    lightsOff();
-    m_pDatasetHelper->m_shaderHelper->m_meshShader.release();
-    glPopAttrib();
-
-    Logger::getInstance()->printIfGLError( wxT( "Draw points" ) );
-}
-
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
 void TheScene::drawColorMapLegend()
 {
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
     glPushAttrib( GL_ALL_ATTRIB_BITS );
     glPushMatrix();
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    int maxSize = wxMax(wxMax(m_pDatasetHelper->m_rows, m_pDatasetHelper->m_columns), m_pDatasetHelper->m_frames );
+    int maxSize = std::max( std::max( rows, columns ), frames );
     glOrtho( 0, maxSize, 0, maxSize, -3000, 3000 );
 
-    m_pDatasetHelper->m_shaderHelper->m_legendShader.bind();
-    m_pDatasetHelper->m_shaderHelper->m_legendShader.setUniInt( "useColorMap", m_pDatasetHelper->m_colorMap );
+    ShaderHelper::getInstance()->getLegendShader()->bind();
+    ShaderHelper::getInstance()->getLegendShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
     glColor3f( 0.0f, 0.0f, 0.0f );
     glLineWidth( 5.0f );
@@ -840,7 +821,7 @@ void TheScene::drawColorMapLegend()
     glVertex3i( maxSize - 20, 10, 2900 );
     glEnd();
 
-    m_pDatasetHelper->m_shaderHelper->m_legendShader.release();
+    ShaderHelper::getInstance()->getLegendShader()->release();
 
     glLineWidth( 1.0f );
     glColor3f( 0.0f, 0.0f, 0.0f );
@@ -857,7 +838,7 @@ void TheScene::drawColorMapLegend()
     glVertex3i( maxSize - 20, 12, 2900 );
     glEnd();
 
-    m_pDatasetHelper->m_shaderHelper->m_legendShader.release();
+    ShaderHelper::getInstance()->getLegendShader()->release();
 
     glPopMatrix();
     glPopAttrib();
@@ -876,9 +857,9 @@ void TheScene::drawVectors()
     glEnable( GL_LINE_SMOOTH );
     glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 
-    for( int i = 0; i < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++i )
+    for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
-        DatasetInfo* pInfo = (DatasetInfo*) m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( i );
+        DatasetInfo* pInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( i ) );
 
         if( pInfo->getType() == VECTORS && pInfo->getShow() )
         {
@@ -893,32 +874,40 @@ void TheScene::drawVectors()
             b = pVecs->getColor().Blue()  / 255.;
             a = 1.0;
 
-            float bright = 1.2f;
-            float dull = 0.7f;
+            float bright( 1.2f );
+            float dull( 0.7f );
 
-            bool topview = m_pDatasetHelper->m_quadrant == 2 || 
-                           m_pDatasetHelper->m_quadrant == 3 || 
-                           m_pDatasetHelper->m_quadrant == 6 || 
-                           m_pDatasetHelper->m_quadrant == 7;
+            int quadrant = SceneManager::getInstance()->getQuadrant();
 
-            bool leftview = m_pDatasetHelper->m_quadrant == 5 || 
-                            m_pDatasetHelper->m_quadrant == 6 ||
-                            m_pDatasetHelper->m_quadrant == 7 || 
-                            m_pDatasetHelper->m_quadrant == 8;
+            bool topview = quadrant == 2 || 
+                           quadrant == 3 || 
+                           quadrant == 6 || 
+                           quadrant == 7;
 
-            bool frontview = m_pDatasetHelper->m_quadrant == 3 || 
-                             m_pDatasetHelper->m_quadrant == 4 || 
-                             m_pDatasetHelper->m_quadrant == 5 || 
-                             m_pDatasetHelper->m_quadrant == 6;
+            bool leftview = quadrant == 5 || 
+                            quadrant == 6 ||
+                            quadrant == 7 || 
+                            quadrant == 8;
 
-            if( m_pDatasetHelper->m_showAxial )
+            bool frontview = quadrant == 3 || 
+                             quadrant == 4 || 
+                             quadrant == 5 || 
+                             quadrant == 6;
+
+            float columns = DatasetManager::getInstance()->getColumns();
+            float rows    = DatasetManager::getInstance()->getRows();
+            float frames  = DatasetManager::getInstance()->getFrames();
+
+            if( SceneManager::getInstance()->isAxialDisplayed() )
             {
-                for( int i = 0; i < m_pDatasetHelper->m_columns; ++i )
+                float sliceZ = SceneManager::getInstance()->getSliceZ();
+
+                for( int i = 0; i < columns; ++i )
                 {
-                    for( int j = 0; j < m_pDatasetHelper->m_rows; ++j )
+                    for( int j = 0; j < rows; ++j )
                     {
-                        int slice = (int) ( m_pDatasetHelper->m_zSlize * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_rows * 3 );
-                        int index = i * 3 + j * m_pDatasetHelper->m_columns * 3 + slice;
+                        int slice = (int) ( sliceZ * columns * rows * 3 );
+                        int index = i * 3 + j * columns * 3 + slice;
 
                         float x = pVecs->at( index );
                         float y = pVecs->at( index + 1 );
@@ -938,8 +927,8 @@ void TheScene::drawVectors()
                         if( ! pVecs->getShowFS() )
                         {
                             glColor4f( r, g, b, a );
-                            glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .5 + z / 2. );
-                            glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .5 - z / 2. );
+                            glVertex3f( (GLfloat) i + .5f + x / 2.f, (GLfloat) j + .5f + y / 2.f, (GLfloat) sliceZ + .5f + z / 2.f );
+                            glVertex3f( (GLfloat) i + .5f - x / 2.f, (GLfloat) j + .5f - y / 2.f, (GLfloat) sliceZ + .5f - z / 2.f );
                         }
                         else
                         {
@@ -948,19 +937,19 @@ void TheScene::drawVectors()
                                 glColor4f( r, g, b, a );
                                 if( topview )
                                 {
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) sliceZ + .4 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .4 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) sliceZ + .4 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .4 );
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) sliceZ + .6 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .6 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) sliceZ + .6 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .6 );
                                 }
                             }
                             else
@@ -968,33 +957,36 @@ void TheScene::drawVectors()
                                 glColor4f( r * dull, g * dull, b * dull, a );
                                 if ( topview )
                                 {
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) sliceZ + .4 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .4 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .4 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) sliceZ + .4 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .4 );
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) j + .5 - y / 2., (GLfloat) sliceZ + .6 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .6 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) m_pDatasetHelper->m_zSlize + .6 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) j + .5 + y / 2., (GLfloat) sliceZ + .6 );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) j + .5, (GLfloat) sliceZ + .6 );
                                 }
                             }
                         }
                     }
                 }
             }
-            if( m_pDatasetHelper->m_showCoronal )
+
+            if( SceneManager::getInstance()->isCoronalDisplayed() )
             {
-                for( int i = 0; i < m_pDatasetHelper->m_columns; ++i )
+                float sliceY = SceneManager::getInstance()->getSliceY();
+
+                for( int i = 0; i < columns; ++i )
                 {
-                    for( int j = 0; j < m_pDatasetHelper->m_frames; ++j )
+                    for( int j = 0; j < frames; ++j )
                     {
-                        int slice = (int) ( m_pDatasetHelper->m_ySlize * m_pDatasetHelper->m_columns * 3 );
-                        int index = i * 3 + slice + j * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_rows * 3;
+                        int slice = (int) ( sliceY * columns * 3 );
+                        int index = i * 3 + slice + j * columns * rows * 3;
 
                         float x = pVecs->at( index );
                         float y = pVecs->at( index + 1 );
@@ -1013,8 +1005,8 @@ void TheScene::drawVectors()
                         if( ! pVecs->getShowFS() )
                         {
                             glColor4f( r, g, b, a );
-                            glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                            glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                            glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                            glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
                         }
                         else
                         {
@@ -1023,19 +1015,19 @@ void TheScene::drawVectors()
                                 glColor4f( r, g, b, a );
                                 if( frontview )
                                 {
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .4, (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .4, (GLfloat) j + .5 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .4, (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .4, (GLfloat) j + .5 );
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .6, (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .6, (GLfloat) j + .5 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .6, (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .6, (GLfloat) j + .5 );
                                 }
                             }
 
@@ -1044,34 +1036,37 @@ void TheScene::drawVectors()
                                 glColor4f( r * dull, g * dull, b * dull, a );
                                 if ( frontview )
                                 {
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .4, (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .4, (GLfloat) j + .5 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .4, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .4, (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .4, (GLfloat) j + .5 );
 
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 - x / 2., (GLfloat) sliceY + .6, (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .6, (GLfloat) j + .5 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) i + .5, (GLfloat) m_pDatasetHelper->m_ySlize + .6, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) i + .5 + x / 2., (GLfloat) sliceY + .6, (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) i + .5, (GLfloat) sliceY + .6, (GLfloat) j + .5 );
                                 }
                             }
                         }
                     }
                 }
             }
-            if( m_pDatasetHelper->m_showSagittal )
+
+            if( SceneManager::getInstance()->isSagittalDisplayed() )
             {
-                for( int i = 0; i < m_pDatasetHelper->m_rows; ++i )
+                float sliceX = SceneManager::getInstance()->getSliceX();
+
+                for( int i = 0; i < rows; ++i )
                 {
-                    for( int j = 0; j < m_pDatasetHelper->m_frames; ++j )
+                    for( int j = 0; j < frames; ++j )
                     {
-                        int slice = (int) ( m_pDatasetHelper->m_xSlize * 3 );
-                        int index = slice + i * m_pDatasetHelper->m_columns * 3 + j * m_pDatasetHelper->m_columns * m_pDatasetHelper->m_rows * 3;
+                        int slice = (int) ( sliceX * 3 );
+                        int index = slice + i * columns * 3 + j * columns * rows * 3;
 
                         float x = pVecs->at( index );
                         float y = pVecs->at( index + 1 );
@@ -1090,8 +1085,8 @@ void TheScene::drawVectors()
                         if( ! pVecs->getShowFS() )
                         {
                             glColor4f( r, g, b, a );
-                            glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .5 + x / 2., (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                            glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .5 - x / 2., (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                            glVertex3f( (GLfloat) sliceX + .5 + x / 2., (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                            glVertex3f( (GLfloat) sliceX + .5 - x / 2., (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
                         }
                         else
                         {
@@ -1100,20 +1095,20 @@ void TheScene::drawVectors()
                                 glColor4f( r, g, b, a );
                                 if ( leftview )
                                 {
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
 
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
                                     glColor4f( r * dull, g * dull, b * dull, a );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
                                 }
                             }
                             else
@@ -1121,20 +1116,20 @@ void TheScene::drawVectors()
                                 glColor4f( r * dull, g * dull, b * dull, a );
                                 if( leftview )
                                 {
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .4, (GLfloat) i + .5, (GLfloat) j + .5 );
 
                                 }
                                 else
                                 {
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5 - y / 2., (GLfloat) j + .5 - z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
                                     glColor4f( r, g, b, a );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
-                                    glVertex3f( (GLfloat) m_pDatasetHelper->m_xSlize + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5 + y / 2., (GLfloat) j + .5 + z / 2. );
+                                    glVertex3f( (GLfloat) sliceX + .6, (GLfloat) i + .5, (GLfloat) j + .5 );
                                 }
                             }
                         }
@@ -1142,70 +1137,14 @@ void TheScene::drawVectors()
                 }
             }
 
-            for( int j = 0; j < m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount(); ++j )
+            for( int j = 0; j < MyApp::frame->m_pListCtrl->GetItemCount(); ++j )
             {
-                DatasetInfo* pMesh = (DatasetInfo*) m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemData( j );
+                DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( j ) );
 
                 if ( pMesh->getType() == ISO_SURFACE && pMesh->getShow() )
                 {
                     CIsoSurface* pSurf = (CIsoSurface*) pMesh;
-                    std::vector< Vector > positions = pSurf->getSurfaceVoxelPositions();
-                    for ( size_t k = 0; k < positions.size(); ++k )
-                    {
-                        int index = (int) positions[k].x * 3 + (int) positions[k].y * m_pDatasetHelper->m_columns * 3
-                                + (int) positions[k].z * m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * 3;
-
-                        float x = pVecs->at( index );
-                        float y = pVecs->at( index + 1 );
-                        float z = pVecs->at( index + 2 );
-
-                        if ( pVecs->getUseTex() )
-                        {
-                            r = wxMin(1.0, fabs(x)* bright);
-                            g = wxMin(1.0, fabs(y)* bright);
-                            b = wxMin(1.0, fabs(z)* bright);
-                            a = sqrt( r * r + g * g + b * b );
-                            r /= a;
-                            g /= a;
-                            b /= a;
-                        }
-
-                        glColor4f( r, g, b, 1.0 );
-                        glVertex3f( positions[k].x - x / 2., positions[k].y - y / 2., positions[k].z - z / 2. );
-                        glVertex3f( positions[k].x + x / 2., positions[k].y + y / 2., positions[k].z + z / 2. );
-                    }
-                }
-
-                else if( pMesh->getType() == SURFACE && pMesh->getShow() )
-                {
-                    Surface* pSurf = (Surface*) pMesh;
-                    std::vector< Vector > positions = pSurf->getSurfaceVoxelPositions();
-
-                    for( size_t k = 0; k < positions.size(); ++k )
-                    {
-                        int index = (int)positions[k].x * 3 + 
-                                    (int) positions[k].y * m_pDatasetHelper->m_columns * 3 +
-                                    (int) positions[k].z * m_pDatasetHelper->m_rows * m_pDatasetHelper->m_columns * 3;
-
-                        float x = pVecs->at( index );
-                        float y = pVecs->at( index + 1 );
-                        float z = pVecs->at( index + 2 );
-
-                        if( pVecs->getUseTex() )
-                        {
-                            r = wxMin(1.0, fabs(x)* bright);
-                            g = wxMin(1.0, fabs(y)* bright);
-                            b = wxMin(1.0, fabs(z)* bright);
-                            a = sqrt( r * r + g * g + b * b );
-                            r /= a;
-                            g /= a;
-                            b /= a;
-                        }
-
-                        glColor4f( r, g, b, 1.0 );
-                        glVertex3f( positions[k].x - x / 2., positions[k].y - y / 2., positions[k].z - z / 2. );
-                        glVertex3f( positions[k].x + x / 2., positions[k].y + y / 2., positions[k].z + z / 2. );
-                    }
+                    drawVectorsHelper( pSurf->getSurfaceVoxelPositions(), pVecs, bright );
                 }
             }
             glEnd();
@@ -1215,71 +1154,6 @@ void TheScene::drawVectors()
     Logger::getInstance()->printIfGLError( wxT( "Draw vectors" ) );
 
     glDisable( GL_BLEND );
-
-    glPopAttrib();
-}
-
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-///////////////////////////////////////////////////////////////////////////
-void TheScene::drawGraph()
-{
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    std::vector<float> graphPoints;
-
-    wxTreeItemId treeId;
-    wxTreeItemIdValue cookie = 0;
-    treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetFirstChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
-    while ( treeId.IsOk() )
-    {
-        SplinePoint* pPoint = (SplinePoint*)( m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetItemData( treeId ) );
-        graphPoints.push_back( pPoint->X() );
-        graphPoints.push_back( pPoint->Y() );
-        graphPoints.push_back( pPoint->Z() );
-        treeId = m_pDatasetHelper->m_mainFrame->m_pTreeWidget->GetNextChild( m_pDatasetHelper->m_mainFrame->m_tPointId, cookie );
-    }
-
-    m_pDatasetHelper->m_shaderHelper->m_graphShader.bind();
-    m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniInt  ( "globalColor", false );
-    m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniFloat( "animation", (float)m_pDatasetHelper->m_animationStep );
-    m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniFloat( "dimX", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().x );
-    m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniFloat( "dimY", (float) m_pDatasetHelper->m_mainFrame->m_pMainGL->GetSize().y );
-
-    int countPoints = graphPoints.size() / 3;
-    glColor3f( 1.0f, 0.0f, 0.0f );
-
-    for( int i = 0 ; i < countPoints ; ++i )
-    {
-        for( int j = 0 ; j < countPoints ; ++j )
-        {
-            if( j > i )
-            {
-                float length = sqrt ( ( graphPoints[i*3] - graphPoints[j*3] )     * ( graphPoints[i*3]   - graphPoints[j*3] ) +
-                                      ( graphPoints[i*3+1] - graphPoints[j*3+1] ) * ( graphPoints[i*3+1] - graphPoints[j*3+1] ) +
-                                      ( graphPoints[i*3+2] - graphPoints[j*3+2] ) * ( graphPoints[i*3+2] - graphPoints[j*3+2] ) );
-
-                m_pDatasetHelper->m_shaderHelper->m_graphShader.setUniFloat( "thickness", (float)( i+1 )*2 );
-                glColor3f( i/10.0f, j/10.0f, i+j/20.0f );
-                glBegin( GL_QUADS );
-                    glTexCoord3f( -1.0f, 0, length );
-                    glNormal3f( graphPoints[i*3] - graphPoints[j*3], graphPoints[i*3+1] - graphPoints[j*3+1], graphPoints[i*3+2] - graphPoints[j*3+2] );
-                    glVertex3f( graphPoints[i*3], graphPoints[i*3+1], graphPoints[i*3+2] );
-                    glTexCoord3f( 1.0f, 0, length );
-                    glNormal3f( graphPoints[i*3] - graphPoints[j*3], graphPoints[i*3+1] - graphPoints[j*3+1], graphPoints[i*3+2] - graphPoints[j*3+2] );
-                    glVertex3f( graphPoints[i*3], graphPoints[i*3+1], graphPoints[i*3+2] );
-                    glTexCoord3f( 1.0f, 1.0, length );
-                    glNormal3f( graphPoints[i*3] - graphPoints[j*3], graphPoints[i*3+1] -  graphPoints[j*3+1], graphPoints[i*3+2] - graphPoints[j*3+2] );
-                    glVertex3f( graphPoints[j*3], graphPoints[j*3+1], graphPoints[j*3+2] );
-                    glTexCoord3f( -1.0f, 1.0, length );
-                    glNormal3f( graphPoints[i*3] - graphPoints[j*3], graphPoints[i*3+1] -  graphPoints[j*3+1], graphPoints[i*3+2] - graphPoints[j*3+2] );
-                    glVertex3f( graphPoints[j*3], graphPoints[j*3+1], graphPoints[j*3+2] );
-                glEnd();
-            }
-        }
-    }
-
-    m_pDatasetHelper->m_shaderHelper->m_graphShader.release();
 
     glPopAttrib();
 }

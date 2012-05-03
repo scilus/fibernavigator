@@ -4,32 +4,34 @@
  */
 
 #include "RTTFibers.h"
-#include "../misc/lic/FgeOffscreen.h"
-#include <algorithm>
 
+#include "DatasetManager.h"
+#include "RTTrackingHelper.h"
+#include "../Logger.h"
+#include "../gfx/ShaderHelper.h"
+#include "../gui/SceneManager.h"
+#include "../misc/lic/FgeOffscreen.h"
+
+#include <algorithm>
+using std::sort;
+
+#include <vector>
+using std::vector;
 
 //////////////////////////////////////////
 //Constructor
 //////////////////////////////////////////
-RTTFibers::RTTFibers( DatasetHelper* pDatasetHelper ) 
-: m_pDatasetHelper(pDatasetHelper),
-m_FAThreshold( 0.10f ),
-m_angleThreshold( 60.0f ),
-m_step( 1.0f ),
-m_puncture( 0.2f ),
-m_minFiberLength( 10 ),
-m_maxFiberLength( 200 )
+RTTFibers::RTTFibers()
+:   m_FAThreshold( 0.10f ),
+    m_angleThreshold( 60.0f ),
+    m_step( 1.0f ),
+    m_puncture( 0.2f ),
+    m_minFiberLength( 10 ),
+    m_maxFiberLength( 200 )
 {
     //GPGPU
     writeTex = 0;
     readTex = 1;
-}
-//////////////////////////////////////////
-/*Destructor*/
-//////////////////////////////////////////
-RTTFibers::~RTTFibers()
-{
-
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -60,13 +62,12 @@ void RTTFibers::seed()
     m_fibersRTT.clear();
     m_colorsRTT.clear();
 
-    float xVoxel = m_pDatasetHelper->m_xVoxel;
-    float yVoxel = m_pDatasetHelper->m_yVoxel;
-    float zVoxel = m_pDatasetHelper->m_zVoxel;
+    float xVoxel = DatasetManager::getInstance()->getVoxelX();
+    float yVoxel = DatasetManager::getInstance()->getVoxelY();
+    float zVoxel = DatasetManager::getInstance()->getVoxelZ();
 
     Vector minCorner, maxCorner, middle;
-    vector< vector< SelectionObject* > > selectionObjects = m_pDatasetHelper->getSelectionObjects();
-    
+    vector< vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
     //N = 16; //Number of seeds
     texSize = 10;//(int)sqrt((double)N);
@@ -79,16 +80,15 @@ void RTTFibers::seed()
 
     for( unsigned int b = 0; b < selectionObjects.size(); b++ )
     {
-
         minCorner.x = selectionObjects[b][0]->getCenter().x - selectionObjects[b][0]->getSize().x * xVoxel / 2.0f;
         minCorner.y = selectionObjects[b][0]->getCenter().y - selectionObjects[b][0]->getSize().y * yVoxel / 2.0f;
         minCorner.z = selectionObjects[b][0]->getCenter().z - selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
         maxCorner.x = selectionObjects[b][0]->getCenter().x + selectionObjects[b][0]->getSize().x * xVoxel / 2.0f;
         maxCorner.y = selectionObjects[b][0]->getCenter().y + selectionObjects[b][0]->getSize().y * yVoxel / 2.0f;
         maxCorner.z = selectionObjects[b][0]->getCenter().z + selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
-        
+
         //Evenly distanced seeds
-        if( !m_pDatasetHelper->m_isRandomSeeds ) 
+        if( !RTTrackingHelper::getInstance()->isRandomSeeds() )
         {
             float xstep =  selectionObjects[b][0]->getSize().x * xVoxel / float( texSize - 1.0f );
             float ystep =  selectionObjects[b][0]->getSize().y * yVoxel / float( texSize - 1.0f );
@@ -102,14 +102,14 @@ void RTTFibers::seed()
                     {
                         vector<Vector> points; // Points to be rendered
                         vector<Vector> color; //Color (local directions)
-                        
+
                         //Track both sides
                         performRTT( Vector(x,y,z),  1, points, color); //First pass
                         m_fibersRTT.push_back( points );
                         m_colorsRTT.push_back( color );
                         points.clear();
                         color.clear();
-        
+
                         performRTT( Vector(x,y,z), -1, points, color); //Second pass
                         m_fibersRTT.push_back( points ); 
                         m_colorsRTT.push_back( color );
@@ -154,7 +154,7 @@ void RTTFibers::seed()
             //setupALL();
 
             renderRTTFibers();
-            m_pDatasetHelper->m_isRTTDirty = false;
+            RTTrackingHelper::getInstance()->setRTTDirty( false );
         }
         //Random seeds (spread within 8 quads inside voxel)
         else 
@@ -192,13 +192,13 @@ void RTTFibers::seed()
                 Vector quad1 = generateRandomSeed( minCorner, middle );
                 performRTT( quad1, 1, points, color ); //First pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );  
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
                 performRTT( quad1, -1, points, color ); //Second pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
@@ -206,13 +206,13 @@ void RTTFibers::seed()
                 Vector quad2 = generateRandomSeed( minLFR, maxLFR );
                 performRTT( quad2, 1, points, color ); //First pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
                 performRTT( quad2, -1, points, color ); //Second pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
@@ -220,13 +220,13 @@ void RTTFibers::seed()
                 Vector quad3 = generateRandomSeed( minUFL, maxUFL  );
                 performRTT( quad3, 1, points, color ); //First pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
                 performRTT( quad3, -1, points, color ); //Second pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
@@ -234,13 +234,13 @@ void RTTFibers::seed()
                 Vector quad4 = generateRandomSeed( minUFR, maxUFR );
                 performRTT( quad4, 1, points, color ); //First pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
                 performRTT( quad4, -1, points, color ); //Second pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
@@ -248,13 +248,13 @@ void RTTFibers::seed()
                 Vector quad5 = generateRandomSeed( minLBL, maxLBL );
                 performRTT( quad5, 1, points, color ); //First pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
                 performRTT( quad5, -1, points, color ); //Second pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
@@ -262,13 +262,13 @@ void RTTFibers::seed()
                 Vector quad6 = generateRandomSeed( minLBR, maxLBR );
                 performRTT( quad6, 1, points, color ); //First pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
                 performRTT( quad6, -1, points, color ); //Second pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
@@ -276,27 +276,27 @@ void RTTFibers::seed()
                 Vector quad7 = generateRandomSeed( minUBL, maxUBL );
                 performRTT( quad7, 1, points, color ); //First pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
                 performRTT( quad7, -1, points, color ); //Second pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
-            
+
                 //Upper Back Right******
                 Vector quad8 = generateRandomSeed( middle, maxCorner );
                 performRTT( quad8, 1, points, color ); //First pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
                 points.clear();
                 color.clear();
 
                 performRTT( quad8, -1, points, color ); //Second pass
                 m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );        
+                m_colorsRTT.push_back( color );
             }
             renderRTTFibers();
         }
@@ -310,19 +310,19 @@ void RTTFibers::renderRTTFibers()
 {
     for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
     { 
-	    if( (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() > getMinFiberLength() && (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() < getMaxFiberLength() )
+        if( (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() > getMinFiberLength() && (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() < getMaxFiberLength() )
         {
             //POINTS
-            if( m_pDatasetHelper->m_pointMode )
+            if( SceneManager::getInstance()->isPointMode() )
             {
-                //Foward
-                if(m_fibersRTT[j].size() > 0)
+                //Forward
+                if( m_fibersRTT[j].size() > 0 )
                 {
                     for( unsigned int i = 0; i < m_fibersRTT[j].size(); i++ )
                     {  
                         glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
                         glBegin( GL_POINTS );
-                            glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );        
+                            glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
                         glEnd();
                     }
                 }
@@ -333,7 +333,7 @@ void RTTFibers::renderRTTFibers()
                     {  
                         glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
                         glBegin( GL_POINTS );
-                            glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );        
+                            glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
                         glEnd();
                     }
                 }
@@ -341,7 +341,7 @@ void RTTFibers::renderRTTFibers()
             //LINES
             else
             {
-                //Foward
+                //Forward
                 if( m_fibersRTT[j].size() > 2)
                 {
                     for( unsigned int i = 0; i < m_fibersRTT[j].size() - 1; i++ )
@@ -349,7 +349,7 @@ void RTTFibers::renderRTTFibers()
                         glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
                         glBegin( GL_LINES );
                             glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-                            glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );        
+                            glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
                         glEnd();
                     }
                 }
@@ -361,7 +361,7 @@ void RTTFibers::renderRTTFibers()
                         glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
                         glBegin( GL_LINES );
                             glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-                            glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );        
+                            glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
                         glEnd();
                     }
                 }
@@ -378,17 +378,17 @@ FMatrix RTTFibers::trilinearInterp( float fx, float fy, float fz )
     using std::min;
     using std::max;
 
-    int columns = m_pDatasetHelper->m_columns;
-    int rows = m_pDatasetHelper->m_rows;
-    int frames = m_pDatasetHelper->m_frames;
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
 
-    const int x = (unsigned int) min( (int)std::floor(fx / m_pDatasetHelper->m_xVoxel), columns-1 );
-    const int y = (unsigned int) min( (int)std::floor(fy / m_pDatasetHelper->m_yVoxel), rows-1 );
-    const int z = (unsigned int) min( (int)std::floor(fz / m_pDatasetHelper->m_zVoxel), frames-1 );
+    const int x = (unsigned int) min( (int)std::floor(fx / DatasetManager::getInstance()->getVoxelX() ), columns-1 );
+    const int y = (unsigned int) min( (int)std::floor(fy / DatasetManager::getInstance()->getVoxelY() ), rows-1 );
+    const int z = (unsigned int) min( (int)std::floor(fz / DatasetManager::getInstance()->getVoxelZ() ), frames-1 );
 
-    const float dx = ( fx / m_pDatasetHelper->m_xVoxel )-x;
-    const float dy = ( fy / m_pDatasetHelper->m_yVoxel )-y;
-    const float dz = ( fz / m_pDatasetHelper->m_zVoxel )-z;
+    const float dx = ( fx / DatasetManager::getInstance()->getVoxelX() )-x;
+    const float dy = ( fy / DatasetManager::getInstance()->getVoxelY() )-y;
+    const float dz = ( fz / DatasetManager::getInstance()->getVoxelZ() )-z;
 
     const int nx = dx > 0.0 ? min( max(x+1,0), columns-1 ) : min( max(x,0), columns-1 );
     const int ny = dy > 0.0 ? min( max(y+1,0), rows-1 ) : min( max(y,0), rows-1 );
@@ -411,10 +411,10 @@ FMatrix RTTFibers::trilinearInterp( float fx, float fy, float fz )
     int tensor_xnynz = nz * columns * rows + ny * columns + x;
 
     int tensor_nxnynz = nz * columns * rows + ny * columns + nx;
-    
+
     FMatrix valx0 = (1-dx) * m_tensorsMatrix[tensor_xyz]  + (dx) * m_tensorsMatrix[tensor_nxyz];
     FMatrix valx1 = (1-dx) * m_tensorsMatrix[tensor_xnyz] + (dx) * m_tensorsMatrix[tensor_nxnyz];
-	
+
     const FMatrix valy0 = (1-dy) * valx0 + (dy) * valx1;
     valx0 = (1-dx) * m_tensorsMatrix[tensor_xynz]  + (dx) * m_tensorsMatrix[tensor_nxynz];
     valx1 = (1-dx) * m_tensorsMatrix[tensor_xnynz] + (dx) * m_tensorsMatrix[tensor_nxnynz];
@@ -434,7 +434,7 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
     float dp1, dp2, dp3;
     float cl = m_tensorsFA[t_number];
     float puncture = getPuncture();
-    
+
     // Unit vectors of local basis (e1 > e2 > e3)
     ee1.x = tensor(0,0) * e1.x + 
             tensor(0,1) * e1.y + 
@@ -472,7 +472,7 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
             tensor(2,1) * e3.y + 
             tensor(2,2) * e3.z;
 
-    if (vin.Dot(ee1) < 0.0)
+    if( vin.Dot(ee1) < 0.0 )
     {
       ee1 *= -1;
     }
@@ -489,7 +489,7 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
     //Sort eigen values
     float eValues[] = { m_tensorsEV[t_number][0], m_tensorsEV[t_number][1], m_tensorsEV[t_number][2] };
     sort( eValues, eValues+3 );
-    
+
     // Compute vout
     vout = dp1 * eValues[0] * ee1 + dp2 * eValues[1] * ee2 + dp3 * eValues[2] * ee3;
 
@@ -497,7 +497,7 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
     vout.normalize();
     ee1.normalize();
     vin.normalize();
-    
+
     vprop = cl * ee1 + (1.0 - cl) * ( (1.0 - puncture) * vin + puncture * vout );
     return vprop;
 }
@@ -521,7 +521,7 @@ void RTTFibers::setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2,
     lvz = tensor(0,2) * tensor(0,2)
         + tensor(1,2) * tensor(1,2) 
         + tensor(2,2) * tensor(2,2);
-	
+
 
     if ( lvx > lvy && lvx > lvz ) 
     {
@@ -536,9 +536,9 @@ void RTTFibers::setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2,
             e2.z = 1;
             e3.y = 1;
         }
-    } 
+    }
     else if ( lvy > lvx && lvy > lvz ) 
-    { 
+    {
         e1.y = 1;
         if( lvx > lvz )
         {
@@ -550,9 +550,9 @@ void RTTFibers::setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2,
             e2.z = 1;
             e3.x = 1;
         }
-    } 
+    }
     else 
-    {  
+    {
         e1.z = 1;
         if( lvx > lvy )
         {
@@ -587,13 +587,12 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
     float angleThreshold = getAngleThreshold();
     float step = getStep();
 
-    int columns = m_pDatasetHelper->m_columns;
-    int rows =  m_pDatasetHelper->m_rows;
-    int frames = m_pDatasetHelper->m_frames;
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
 
-    float xVoxel = m_pDatasetHelper->m_xVoxel;
-    float yVoxel = m_pDatasetHelper->m_yVoxel;
-    float zVoxel = m_pDatasetHelper->m_zVoxel;
+    float xVoxel = DatasetManager::getInstance()->getVoxelX();
+    float yVoxel = DatasetManager::getInstance()->getVoxelY();
+    float zVoxel = DatasetManager::getInstance()->getVoxelZ();
 
     FMatrix tensor;
 
@@ -601,14 +600,14 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
     currVoxelx = (int)( floor(currPosition.x / xVoxel) );
     currVoxely = (int)( floor(currPosition.y / yVoxel) );
     currVoxelz = (int)( floor(currPosition.z / zVoxel) );
-    
+
     //Corresponding tensor number
     tensorNumber = currVoxelz * columns * rows + currVoxely *columns + currVoxelx;
 
     if( tensorNumber < m_tensorsMatrix.size() )
     {
         //Use Interpolation
-        if( m_pDatasetHelper->m_interpolateTensors )
+        if( RTTrackingHelper::getInstance()->isTensorsInterpolated() )
         {
             tensor = trilinearInterp( currPosition.x, currPosition.y, currPosition.z );
         }
@@ -619,7 +618,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
 
         //Find the MAIN axis
         setDiffusionAxis( tensor, e1, e2, e3 );
-        
+
         //Align the main direction my mult AxisAlign * tensorMatrix
         currDirection.x = tensor(0,0) * e1.x + 
                           tensor(0,1) * e1.y + 
@@ -632,11 +631,11 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
         currDirection.z = tensor(2,0) * e1.x +
                           tensor(2,1) * e1.y + 
                           tensor(2,2) * e1.z;
-       
+
         //Direction for seeding (forward or backward)
         currDirection.normalize();
         currDirection *= bwdfwd;
-        
+
         //Next position
         nextPosition = currPosition + ( step * currDirection );
 
@@ -644,15 +643,14 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
         currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
         currVoxely = (int)( floor(nextPosition.y / yVoxel) );
         currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
-        
+
         //Corresponding tensor number
         tensorNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
 
         if( tensorNumber < m_tensorsMatrix.size() )
         {
-        
             //Use interpolation
-            if( m_pDatasetHelper->m_interpolateTensors )
+            if( RTTrackingHelper::getInstance()->isTensorsInterpolated() )
             {
                 tensor = trilinearInterp( nextPosition.x, nextPosition.y, nextPosition.z );
             }
@@ -660,16 +658,16 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
             {
                 tensor = m_tensorsMatrix[tensorNumber];
             }
-            
+
             //Find the main diffusion axis
-			e1.zero();
-			e2.zero();
-			e3.zero();
+            e1.zero();
+            e2.zero();
+            e3.zero();
             setDiffusionAxis( tensor, e1, e2, e3 );
 
             //Advection next direction
             nextDirection = advecIntegrate( currDirection, tensor, e1, e2, e3, tensorNumber );
-            
+
             //Direction of seeding
             nextDirection.normalize();
             nextDirection *= bwdfwd;
@@ -681,23 +679,23 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
 
             //FA value
             FAvalue = m_tensorsFA[tensorNumber];
-            
+
             //Angle value
             angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
             if( angle > 90 )
             {
                 angle = 180 - angle; //Ensures that we have the smallest angle
             }
-            
+
             ///////////////////////////
             //Tracking along the fiber
             //////////////////////////
             while( FAvalue >= FAthreshold && angle <= angleThreshold )
             {
                 //Insert point to be rendered
-				points.push_back( currPosition );
-				color.push_back( currDirection );
-               
+                points.push_back( currPosition );
+                color.push_back( currDirection );
+
                 //Advance
                 currPosition = nextPosition;
                 currDirection = nextDirection;
@@ -709,17 +707,17 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
                 currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
                 currVoxely = (int)( floor(nextPosition.y / yVoxel) );
                 currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
-                
+
                 //Corresponding tensor number
                 tensorNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
-                
+
                 if( tensorNumber > m_tensorsMatrix.size() ) //Out of anatomy
                 {
                     break;
                 }
 
                 //Use interpolation
-                if( m_pDatasetHelper->m_interpolateTensors )
+                if( RTTrackingHelper::getInstance()->isTensorsInterpolated() )
                 {
                     tensor = trilinearInterp( nextPosition.x, nextPosition.y, nextPosition.z );
                 }
@@ -727,11 +725,11 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
                 {
                     tensor = m_tensorsMatrix[tensorNumber];
                 }
-                
+
                 //Find the MAIN axis
-				e1.zero();
-				e2.zero();
-				e3.zero();
+                e1.zero();
+                e2.zero();
+                e3.zero();
                 setDiffusionAxis( tensor, e1, e2, e3 );
 
                 //Advection next direction
@@ -747,14 +745,13 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
 
                 //FA value
                 FAvalue = m_tensorsFA[tensorNumber];
-                
+
                 //Angle value
                 angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
                 if( angle > 90 )
                 {
                     angle = 180 - angle; //Ensures we have the minimal angle
                 }
-
             }
         }
     }
@@ -765,15 +762,13 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
 ///////////////////////////////////////////////////////////////////////////
 void RTTFibers::initFBO()
 {
-
     // create FBO (off-screen framebuffer)
     glGenFramebuffersEXT(1, &fb); 
     // bind offscreen framebuffer (that is, skip the window-specific render target)
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-   
 
     //BUG IS HERE
-    
+
     //glGetIntegerv( GL_VIEWPORT,m_pDatasetHelper->m_mainFrame->m_pMainGL->m_viewport );
     //viewport for 1:1 pixel=texture mapping
     glMatrixMode(GL_PROJECTION);
@@ -814,45 +809,44 @@ void RTTFibers::createTextures(void)
 ///////////////////////////////////////////////////////////////////////////
 void RTTFibers::performComputation(void) 
 {
- 
     // attach two textures to FBO
     glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachmentpoints[writeTex], GL_TEXTURE_RECTANGLE_ARB, yTexID[writeTex], 0);
     glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachmentpoints[readTex], GL_TEXTURE_RECTANGLE_ARB, yTexID[readTex], 0);
     // check if that worked
-    if (!checkFramebufferStatus()) {
-	printf("glFramebufferTexture2DEXT():\t [FAIL]\n");
-	exit (-5);
+    if (!checkFramebufferStatus())
+    {
+        printf("glFramebufferTexture2DEXT():\t [FAIL]\n");
+        exit (-5);
     }
 
     // enable GLSL program
-    m_pDatasetHelper->m_shaderHelper->m_RTTShader.bind();
+    ShaderHelper::getInstance()->getRTTShader()->bind();
 
-    glActiveTexture(GL_TEXTURE1);	
+    glActiveTexture(GL_TEXTURE1);    
     glBindTexture(GL_TEXTURE_RECTANGLE_ARB,xTexID);
-    m_pDatasetHelper->m_shaderHelper->m_RTTShader.setUniSampler("xValues", 1);
+    ShaderHelper::getInstance()->getRTTShader()->setUniSampler("xValues", 1);
     glFinish();
 
     for (int i=0; i<1; i++) 
     {
-	    // set render destination
-	    glDrawBuffer (attachmentpoints[writeTex]);
-	    // enable texture y_old (read-only)
-	    glActiveTexture(GL_TEXTURE0);
-	    glBindTexture(GL_TEXTURE_RECTANGLE_ARB,yTexID[readTex]);
+        // set render destination
+        glDrawBuffer (attachmentpoints[writeTex]);
+        // enable texture y_old (read-only)
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,yTexID[readTex]);
 
 
-        m_pDatasetHelper->m_shaderHelper->m_RTTShader.setUniSampler("inSeed", 0);
-        m_pDatasetHelper->m_shaderHelper->m_RTTShader.setUniInt("color", 1);
-	    // and render multitextured viewport-sized quad
-	    // depending on the texture target, switch between 
-	    // normalised ([0,1]^2) and unnormalised ([0,w]x[0,h])
-	    // texture coordinates
-    	
+        ShaderHelper::getInstance()->getRTTShader()->setUniSampler("inSeed", 0);
+        ShaderHelper::getInstance()->getRTTShader()->setUniInt("color", 1);
+        // and render multitextured viewport-sized quad
+        // depending on the texture target, switch between 
+        // normalised ([0,1]^2) and unnormalised ([0,w]x[0,h])
+        // texture coordinates
 
-	    // make quad filled to hit every pixel/texel 
-	    // (should be default but we never know)
-	    glPolygonMode(GL_FRONT,GL_FILL);
-       
+        // make quad filled to hit every pixel/texel 
+        // (should be default but we never know)
+        glPolygonMode(GL_FRONT,GL_FILL);
+
         // render with unnormalized texcoords
         glBegin(GL_QUADS);
         glTexCoord2f(0.0, 0.0); 
@@ -865,13 +859,13 @@ void RTTFibers::performComputation(void)
         glVertex2f(-1, 1);
         glEnd();
 
-	    // swap role of the two textures (read-only source becomes 
-	    // write-only target and the other way round):
+        // swap role of the two textures (read-only source becomes 
+        // write-only target and the other way round):
         //compareResults();
-	    swap(); 
+        swap();
     }
     // done, stop timer, calc MFLOP/s if neccessary
- 
+
     // done, just do some checks if everything went smoothly.
     checkFramebufferStatus();
     checkGLErrors("render()");
@@ -899,9 +893,9 @@ void RTTFibers::transferFromTexture(float* data)
     // recommended on both NVIDIA and ATI
     glReadBuffer(attachmentpoints[readTex]);
     glReadPixels(0, 0, texSize, texSize,GL_RGBA,GL_FLOAT,data);
-    // version b: texture is not neccessarily attached
-	//glBindTexture(GL_TEXTURE_RECTANGLE_ARB,yTexID[readTex]);
-	//glGetTexImage(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGBA,GL_FLOAT,data);
+    // version b: texture is not necessarily attached
+    //glBindTexture(GL_TEXTURE_RECTANGLE_ARB,yTexID[readTex]);
+    //glGetTexImage(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGBA,GL_FLOAT,data);
 }
 
 void RTTFibers::transferToTexture (float* data, GLuint texID) {
@@ -909,11 +903,11 @@ void RTTFibers::transferToTexture (float* data, GLuint texID) {
     glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texID);
     glTexSubImage2D(GL_TEXTURE_RECTANGLE_ARB,0,0,0,texSize,texSize,GL_RGBA,GL_FLOAT,data);
     // version (b): HW-accelerated on ATI 
-	//glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, texID, 0);
-	//glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-	//glRasterPos2i(0,0);
-	//glDrawPixels(texSize,texSize*texSize,GL_RGBA,GL_FLOAT,data);
-	//glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+    //glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, texID, 0);
+    //glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    //glRasterPos2i(0,0);
+    //glDrawPixels(texSize,texSize*texSize,GL_RGBA,GL_FLOAT,data);
+    //glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
 }
 
 void RTTFibers::setupTexture (const GLuint texID) 
@@ -928,9 +922,10 @@ void RTTFibers::setupTexture (const GLuint texID)
     // define texture with floating point format
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGBA32F_ARB,texSize,texSize,0,GL_RGBA,GL_FLOAT,0);
     // check if that worked
-    if (glGetError() != GL_NO_ERROR) {
-	printf("glTexImage2D():\t\t\t [FAIL]\n");
-	exit (-3);
+    if (glGetError() != GL_NO_ERROR)
+    {
+        printf("glTexImage2D():\t\t\t [FAIL]\n");
+        exit (-3);
     }
 }
 
@@ -956,11 +951,11 @@ void RTTFibers::setupALL()
 
 
     glViewport( 0, 0, texSize, texSize );*/
-        
+
 
     // create textures for vectors
     createTextures();
-    
+
     // init shader runtime
     // and start computation
     performComputation();
@@ -969,8 +964,8 @@ void RTTFibers::setupALL()
     compareResults();
 
     // and clean up
-    m_pDatasetHelper->m_shaderHelper->m_RTTShader.release();
-    
+    ShaderHelper::getInstance()->getRTTShader()->release();
+
     //fbo.deactivate();
     glDeleteFramebuffersEXT(1,&fb);
 
@@ -983,7 +978,7 @@ void RTTFibers::setupALL()
     //     m_pDatasetHelper->m_theScene->drawSphere( result[j], result[j+1], result[j+2], 0.2);
     //    // glBegin( GL_LINES );
     //    //    glVertex3f( seeds[j], seeds[j+1],seeds[j+2]);
-    //    //    glVertex3f( result[j], result[j+1], result[j+2]);        
+    //    //    glVertex3f( result[j], result[j+1], result[j+2]);
     //    //glEnd();
     //}
 
@@ -993,8 +988,8 @@ void RTTFibers::setupALL()
     free(xValues);
     glDeleteTextures(2,yTexID);
     glDeleteTextures (1,&xTexID);
-    
-    
+
+
     //Restore Matrix parameters
     //glMatrixMode( GL_PROJECTION );
     //glLoadIdentity();
@@ -1015,44 +1010,46 @@ bool RTTFibers::checkFramebufferStatus() {
         case GL_FRAMEBUFFER_COMPLETE_EXT:
             return true;
         case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-	    printf("Framebuffer incomplete, incomplete attachment\n");
+        printf("Framebuffer incomplete, incomplete attachment\n");
             return false;
         case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-	    printf("Unsupported framebuffer format\n");
+        printf("Unsupported framebuffer format\n");
             return false;
         case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-	    printf("Framebuffer incomplete, missing attachment\n");
+        printf("Framebuffer incomplete, missing attachment\n");
             return false;
         case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-	    printf("Framebuffer incomplete, attached images must have same dimensions\n");
+        printf("Framebuffer incomplete, attached images must have same dimensions\n");
             return false;
         case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-	    printf("Framebuffer incomplete, attached images must have same format\n");
+        printf("Framebuffer incomplete, attached images must have same format\n");
             return false;
         case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-	    printf("Framebuffer incomplete, missing draw buffer\n");
+        printf("Framebuffer incomplete, missing draw buffer\n");
             return false;
         case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-	    printf("Framebuffer incomplete, missing read buffer\n");
+        printf("Framebuffer incomplete, missing read buffer\n");
             return false;
     }
     return false;
 }
 
 
-void RTTFibers::checkGLErrors (const char *label) 
+void RTTFibers::checkGLErrors( const char *label )
 {
-    GLenum errCode;
-    const GLubyte *errStr;
-    
-    if ((errCode = glGetError()) != GL_NO_ERROR) {
-	errStr = gluErrorString(errCode);
-	printf("OpenGL ERROR: ");
-	printf((char*)errStr);
-	printf("(Label: ");
-	printf(label);
-	printf(")\n.");
-    }
+    Logger::getInstance()->printIfGLError( wxString( label, wxConvUTF8 ) );
+//     GLenum errCode;
+//     const GLubyte *errStr;
+//     
+//     if ((errCode = glGetError()) != GL_NO_ERROR) 
+//     {
+//  errStr = gluErrorString(errCode);
+//     printf("OpenGL ERROR: ");
+//     printf((char*)errStr);
+//     printf("(Label: ");
+//     printf(label);
+//     printf(")\n.");
+//     }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1062,12 +1059,19 @@ void RTTFibers::swap(void)
 {
     if (writeTex == 0)
     {
-	    writeTex = 1;
-	    readTex = 0;
+        writeTex = 1;
+        readTex = 0;
     } 
     else 
     {
-	    writeTex = 0;
-	    readTex = 1;
+        writeTex = 0;
+        readTex = 1;
     }
+}
+
+//////////////////////////////////////////
+/*Destructor*/
+//////////////////////////////////////////
+RTTFibers::~RTTFibers()
+{
 }

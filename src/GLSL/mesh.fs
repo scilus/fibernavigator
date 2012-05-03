@@ -15,9 +15,7 @@ uniform bool useTex;
 uniform bool blendTex;
 uniform bool isGlyph;
 
-uniform bool cutAtSurface;
 uniform sampler2D cutTex;
-uniform bool useLic;
 
 uniform bool lightOn;
 
@@ -47,22 +45,10 @@ void cutFrontSector()
 		discard;
 }
 
-
-void cutAtSplineSurface()
-{
-    vec3 u = VaryingTexCoord0.xyz;
-	u.y /= float(dimY);
-	u.z /= float(dimZ);
-
-	if ( vertex.x < ( texture2D(cutTex, u.yz).r * float(dimX) ) ) discard;
-}
-
-
 void main()
 {
 
 	if (!showFS) cutFrontSector();
-	if ( (type9 == 5) && cutAtSurface ) cutAtSplineSurface();
 
 	vec4 ambient = vec4(0.0);
 	vec4 diffuse = vec4(0.0);
@@ -121,8 +107,5 @@ void main()
 	color.a = alpha_;
 	color = clamp(color, 0.0, 1.0);
 
-	if (useLic)
-	    gl_FragColor = (0.7  * gl_Color) + (0.3 * color);
-    else
-        gl_FragColor = color;
+    gl_FragColor = color;
 }

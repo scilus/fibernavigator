@@ -11,14 +11,16 @@
 
 #include "SelectionEllipsoid.h"
 
+#include "../dataset/DatasetManager.h"
+
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 // i_center             : The center of the ellipsoid.
 // i_size               : The size of the ellipsoid.
 // i_dataHelper         : The datasetHelper associated with this ellipsoid.
 ///////////////////////////////////////////////////////////////////////////
-SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ) :
-    SelectionObject( i_center, i_size, i_datasetHelper )
+SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size )
+:   SelectionObject( i_center, i_size )
 {
     m_gfxDirty   = true;
     m_name       = wxT( "ellipsoid" );
@@ -32,7 +34,6 @@ SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size, DatasetH
 ///////////////////////////////////////////////////////////////////////////
 SelectionEllipsoid::~SelectionEllipsoid()
 {
-
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -66,27 +67,31 @@ void SelectionEllipsoid::drawObject( GLfloat* i_color )
 // i_ray        :
 ///////////////////////////////////////////////////////////////////////////
 hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
-{    
+{
     hitResult hr = { false, 0.0f, 0, NULL };
 
     if( m_isVisible && m_isActive && m_objectType == ELLIPSOID_TYPE ) 
     {
+        float voxelX = DatasetManager::getInstance()->getVoxelX();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
         int   picked  = 0;
         float tpicked = 0;
         float cx = m_center.x;
         float cy = m_center.y;
         float cz = m_center.z;
-        float sx = m_size.x * m_datasetHelper->m_xVoxel;
-        float sy = m_size.y * m_datasetHelper->m_yVoxel;
-        float sz = m_size.z * m_datasetHelper->m_zVoxel;
+        float sx = m_size.x * voxelX;
+        float sy = m_size.y * voxelY;
+        float sz = m_size.z * voxelZ;
 
-           if( wxGetKeyState( WXK_CONTROL ) )
+        if( wxGetKeyState( WXK_CONTROL ) )
         {
                BoundingBox *bb = new BoundingBox( cx, cy, cz, sx, sy, sz );
 
             bb->setCenter( m_minX , cy, cz );
             bb->setSize( sx, sy, sz );
-            bb->setSizeX( m_datasetHelper->m_xVoxel );
+            bb->setSizeX( voxelX );
             hr = bb->hitTest( i_ray );
             if( hr.hit )
             {
@@ -125,7 +130,7 @@ hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
             }
             bb->setCenter( cx, m_minY, cz );
             bb->setSize( sx, sy, sz);
-            bb->setSizeY( m_datasetHelper->m_yVoxel );
+            bb->setSizeY( voxelY );
             hr = bb->hitTest( i_ray );
             if( hr.hit )
             {
@@ -163,7 +168,7 @@ hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
             }
             bb->setCenter( cx, cy, m_minZ );
             bb->setSize( sx, sy, sz );
-            bb->setSizeZ( m_datasetHelper->m_zVoxel );
+            bb->setSizeZ( voxelZ );
             hr = bb->hitTest( i_ray );
             if( hr.hit ) 
             {
@@ -223,6 +228,7 @@ hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
                 }
             }
         }
+
         if( picked != 0 )
         {
             hr.hit = true;
@@ -230,7 +236,6 @@ hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
             hr.picked = picked;
             hr.object = this;
         }
-
     }
 
     m_hitResult = hr;

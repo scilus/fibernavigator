@@ -15,22 +15,20 @@
 
 #include "../misc/Algorithms/Helper.h"
 
-#include <wx/checkbox.h>
-#include <wx/grid.h>
 #include <wx/scrolwin.h>
-#include <wx/treectrl.h>
-#include <wx/notebook.h>
 
 class MainFrame;
+class wxToggleButton;
+
 class TrackingWindow: public wxScrolledWindow
 {
 public:
     TrackingWindow(){};
     TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const wxPoint &pos, const wxSize &size );
-   
+
     ~TrackingWindow(){};
     void OnPaint( wxPaintEvent &event );
-    void OnSize( wxSizeEvent &event ); 
+    void OnSize( wxSizeEvent &event );
     wxSizer* getWindowSizer();
 
 
@@ -43,31 +41,33 @@ public:
     void OnRandomSeeding                       ( wxCommandEvent& event );
     void OnInterpolate                         ( wxCommandEvent& event );
     void OnSliderPunctureMoved                 ( wxCommandEvent& event );
-	void OnSliderMinLengthMoved				   ( wxCommandEvent& event );
-	void OnSliderMaxLengthMoved				   ( wxCommandEvent& event );
+    void OnSliderMinLengthMoved                ( wxCommandEvent& event );
+    void OnSliderMaxLengthMoved                ( wxCommandEvent& event );
 
-    MainFrame           *m_pMainFrame;
-    wxWindow            *m_pNoteBook;
+public:
     wxToggleButton      *m_pBtnStart;
+
+private:
+    MainFrame           *m_pMainFrame;
     wxSlider            *m_pSliderFA;
     wxTextCtrl          *m_pTxtFABox;
-	wxStaticText		*m_pTextFA;
+    wxStaticText        *m_pTextFA;
     wxSlider            *m_pSliderAngle;
-	wxStaticText		*m_pTextAngle;
+    wxStaticText        *m_pTextAngle;
     wxTextCtrl          *m_pTxtAngleBox;
     wxSlider            *m_pSliderStep;
-	wxStaticText		*m_pTextStep;
+    wxStaticText        *m_pTextStep;
     wxTextCtrl          *m_pTxtStepBox;
     wxSlider            *m_pSliderPuncture;
-	wxStaticText		*m_pTextPuncture;
+    wxStaticText        *m_pTextPuncture;
     wxTextCtrl          *m_pTxtPunctureBox;
     wxButton            *m_pBtnSelectFile;
-	wxStaticText        *m_pTextMinLength;
-	wxSlider			*m_pSliderMinLength;
-	wxTextCtrl			*m_pTxtMinLengthBox;
-	wxSlider			*m_pSliderMaxLength;
-	wxStaticText        *m_pTextMaxLength;
-	wxTextCtrl			*m_pTxtMaxLengthBox;
+    wxStaticText        *m_pTextMinLength;
+    wxSlider            *m_pSliderMinLength;
+    wxTextCtrl          *m_pTxtMinLengthBox;
+    wxSlider            *m_pSliderMaxLength;
+    wxStaticText        *m_pTextMaxLength;
+    wxTextCtrl          *m_pTxtMaxLengthBox;
 
 private:
     wxSizer *m_pTrackingSizer;

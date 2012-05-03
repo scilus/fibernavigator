@@ -18,17 +18,17 @@ class SelectionEllipsoid : public SelectionObject
 {
 public:
     // Constructor / Destructor
-    SelectionEllipsoid( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper );
-    ~SelectionEllipsoid();
- 
-    // Fonctions from SelectionObject (virtual pure)
+    SelectionEllipsoid( Vector i_center, Vector i_size );
+    virtual ~SelectionEllipsoid();
+
+    // Function from SelectionObject (virtual pure)
     hitResult hitTest( Ray* i_ray );
 
-    // Fonctions from SelectionObject (virtual)
+    // Function from SelectionObject (virtual)
     void objectUpdate();
 
 private:
-    // Fonction from SelectionObject (virtual pure)
+    // Function from SelectionObject (virtual pure)
     void drawObject( GLfloat* i_color );
 
     float m_xRadius;

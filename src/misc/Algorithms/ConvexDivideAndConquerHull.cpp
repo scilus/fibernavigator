@@ -126,12 +126,11 @@ void convexDivideAndConquerHull::deleteTriangles( std::vector< std::vector< Vect
 {
     for ( unsigned int i(0); i < triangles.size(); i++ )
     {
-	    if (isValidTriangle(triangles[i], first, last)) 
+        if (isValidTriangle(triangles[i], first, last)) 
         {
-	        //Remove the triangle
+            //Remove the triangle
             triangles.erase(triangles.begin() + i);
-	    }
-	        
+        }
     } 
 }
 

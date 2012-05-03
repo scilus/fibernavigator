@@ -23,13 +23,12 @@ public:
     void initMenuBar(MainFrame *mf);
     void updateMenuBar(MainFrame *mf);    
 
-//private:
+public:
     wxMenu      *m_menuFile;
         wxMenuItem  *m_itemLoad;
-		wxMenu      *m_menuNewAnatomy;
-			wxMenuItem  *m_itemNewAnatomyByte;
-			wxMenuItem  *m_itemNewAnatomyRGB;
-        wxMenuItem  *m_itemReloadShader;
+        wxMenu      *m_menuNewAnatomy;
+            wxMenuItem  *m_itemNewAnatomyByte;
+            wxMenuItem  *m_itemNewAnatomyRGB;
         wxMenuItem  *m_itemSaveSCN;
         wxMenuItem  *m_itemSaveSelectedFibers;
         wxMenuItem  *m_itemSaveSelectedSurface;
@@ -37,7 +36,6 @@ public:
         wxMenuItem  *m_itemQuit; 
 
     wxMenu      *m_menuView;
-        wxMenuItem  *m_itemToggleShowProperties;
         wxMenu      *m_menuShowSlices;
             wxMenuItem  *m_itemToggleShowAxial;
             wxMenuItem  *m_itemToggleShowCoronal;
@@ -65,7 +63,6 @@ public:
     wxMenu      *m_menuVoi;
         wxMenuItem  *m_itemNewSelectionBox;
         wxMenuItem  *m_itemNewSelectionEllipsoid;
-        wxMenuItem  *m_itemToggleUseMorphing;
 
     wxMenu      *m_menuFibers;
         wxMenuItem  *m_itemResetFibersColors;
@@ -74,32 +71,27 @@ public:
         wxMenuItem  *m_itemToggleUseFakeTubes;
         wxMenuItem  *m_itemToggleUseGeometryShader;
 
-    wxMenu      *m_menuSurface;
-        wxMenuItem  *m_itemNewSplineSurface;
-        wxMenuItem  *m_itemMoveBoundaryPointLeft;
-        wxMenuItem  *m_itemMoveBoundaryPointRight;
-
     wxMenu      *m_menuOptions; 
         wxMenu      *m_menuRuler;
             wxMenuItem  *m_itemToggleRuler;
             wxMenuItem  *m_itemRulerClear;
             wxMenuItem  *m_itemRulerAdd;
-			wxMenuItem  *m_itemRulerRemove;
-		wxMenu      *m_menuDrawer;
-			wxMenuItem  *m_itemToggleDrawer;
-			wxMenuItem  *m_itemToggleDrawRound;
-			wxMenuItem  *m_itemToggleDraw3d;
-			wxMenuItem  *m_itemDrawColorPicker;
-			wxMenu  *m_menuStrokeSize;
-				wxMenuItem  *m_itemDrawS1;
-				wxMenuItem  *m_itemDrawS2;
-				wxMenuItem  *m_itemDrawS3;
-				wxMenuItem  *m_itemDrawS4;
-				wxMenuItem  *m_itemDrawS5;
-				wxMenuItem  *m_itemDrawS7;
-				wxMenuItem  *m_itemDrawS10;
-			wxMenuItem  *m_itemDrawPen;
-			wxMenuItem  *m_itemDrawEraser;
+            wxMenuItem  *m_itemRulerRemove;
+        wxMenu      *m_menuDrawer;
+            wxMenuItem  *m_itemToggleDrawer;
+            wxMenuItem  *m_itemToggleDrawRound;
+            wxMenuItem  *m_itemToggleDraw3d;
+            wxMenuItem  *m_itemDrawColorPicker;
+            wxMenu  *m_menuStrokeSize;
+                wxMenuItem  *m_itemDrawS1;
+                wxMenuItem  *m_itemDrawS2;
+                wxMenuItem  *m_itemDrawS3;
+                wxMenuItem  *m_itemDrawS4;
+                wxMenuItem  *m_itemDrawS5;
+                wxMenuItem  *m_itemDrawS7;
+                wxMenuItem  *m_itemDrawS10;
+            wxMenuItem  *m_itemDrawPen;
+            wxMenuItem  *m_itemDrawEraser;
         wxMenu      *m_menuColorMaps;
             wxMenuItem  *m_itemGray;
             wxMenuItem  *m_itemBlueGreenPurple;
@@ -107,28 +99,20 @@ public:
             wxMenuItem  *m_itemHotIron;
             wxMenuItem  *m_itemRedYellow;
             wxMenuItem  *m_itemBlueLightblue;
-		
-		wxMenuItem  *m_itemToggleDrawPoints;
-		wxMenuItem  *m_itemToggleDrawVectors;
+
+        wxMenuItem  *m_itemToggleDrawPoints;
+        wxMenuItem  *m_itemToggleDrawVectors;
         wxMenuItem  *m_itemToggleLighting;
         wxMenuItem  *m_itemToggleClearToBlack;
         wxMenuItem  *m_itemToggleBlendTextureOnMesh;
         wxMenuItem  *m_itemToggleFilterISO;
         wxMenuItem  *m_itemToggleNormal;
-        
-
-        //wxMenuItem  *m_itemToggleColorMapLegend;
-
 
      wxMenu         *m_menuHelp;
         wxMenuItem  *m_itemAbout;
         wxMenuItem  *m_itemKeyboardShortcuts;
         wxMenuItem  *m_itemScreenShot;
-		wxMenuItem	*m_itemWarningsInfo;
-        wxMenu      *m_menuMovie;
-            wxMenuItem  *m_itemAxialMovie;
-            wxMenuItem  *m_itemCoronalMovie;
-            wxMenuItem  *m_itemSagittalMovie;
+        wxMenuItem  *m_itemWarningsInfo;
 };
 
 #endif

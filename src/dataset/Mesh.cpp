@@ -1,33 +1,38 @@
 #include "Mesh.h"
 
+#include "DatasetManager.h"
 #include "../main.h"
 #include "../Logger.h"
 #include "../gui/MainFrame.h"
 
 #include <wx/datstrm.h>
+#include <wx/textfile.h>
+#include <wx/tglbtn.h>
 #include <wx/wfstream.h>
 
-
-Mesh::Mesh(DatasetHelper* dh) : DatasetInfo(dh)
+Mesh::Mesh()
+:   DatasetInfo()
 {
-    m_tMesh = new TriangleMesh(m_dh);
+    m_tMesh = new TriangleMesh();
+}
+
+Mesh::Mesh( const wxString &filename )
+:   DatasetInfo()
+{
+    m_tMesh = new TriangleMesh();
+
+    m_fullPath = filename;
+
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
 }
 
 Mesh::~Mesh()
 {
     delete m_tMesh;
-}
-
-bool Mesh::load( wxString i_filename )
-{
-    if( i_filename.AfterLast( '.' )      == _T( "mesh" ) )
-        return loadMesh( i_filename );
-    else if( i_filename.AfterLast( '.' ) == _T( "surf" ) )
-        return loadSurf( i_filename );
-    else if( i_filename.AfterLast( '.' ) == _T( "dip" ) )
-        return loadDip( i_filename) ;
-
-    return true;
 }
 
 bool Mesh::loadDip( wxString filename )
@@ -41,8 +46,12 @@ bool Mesh::loadDip( wxString filename )
     float minMagnitude = 100000;
     float maxMagnitude = 0;
 
-
-    if( file.Open(filename) )
+    float rows   = DatasetManager::getInstance()->getRows();
+    float frames = DatasetManager::getInstance()->getFrames();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+    
+    if( file.Open( filename ) )
     {
         line = file.GetFirstLine();
         while( ! file.Eof() )
@@ -65,10 +74,10 @@ bool Mesh::loadDip( wxString filename )
                     xString.ToDouble( &x );
                     yString.ToDouble( &y );
                     zString.ToDouble( &z );
-                    m_tMesh->addVert( x, m_dh->m_rows * m_dh->m_yVoxel - y, m_dh->m_frames * m_dh->m_zVoxel - z );
+                    m_tMesh->addVert(   x, rows * voxelY - y, frames * voxelZ - z );
                 }
             }
-            if( line == _T( "Magnitudes" ) )
+            else if( line == _T( "Magnitudes" ) )
             {
                 std::vector<float>tmpMagnitudes( m_countVerts, 0 );
                 for( size_t i = 0 ; i < m_countVerts ; ++i )
@@ -113,12 +122,6 @@ bool Mesh::loadDip( wxString filename )
         }
     }
 
-    m_fullPath = filename;
-    #ifdef __WXMSW__
-    m_name = filename.AfterLast( '\\' );
-    #else
-    m_name = filename.AfterLast( '/' );
-    #endif
     m_type = MESH;
     m_isGlyph = true;
 
@@ -165,23 +168,30 @@ bool Mesh::loadSurf(wxString filename)
     cbi.b[0] = buffer[pc++];
     setCountPolygons(cbi.i);
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for (unsigned int i = 0 ; i < m_countVerts ; ++i)
     {
         cbf.b[3] = buffer[pc++];
         cbf.b[2] = buffer[pc++];
         cbf.b[1] = buffer[pc++];
         cbf.b[0] = buffer[pc++];
-        float x = cbf.f + 0.5  * m_dh->m_xVoxel + m_dh->m_columns/2 * m_dh->m_xVoxel;
+        float x = cbf.f + 0.5f * voxelX + columns * 0.5f * voxelX;
         cbf.b[3] = buffer[pc++];
         cbf.b[2] = buffer[pc++];
         cbf.b[1] = buffer[pc++];
         cbf.b[0] = buffer[pc++];
-        float y = cbf.f + 0.5 * m_dh->m_yVoxel + m_dh->m_rows/2  * m_dh->m_yVoxel;
+        float y = cbf.f + 0.5f * voxelY + rows * 0.5f * voxelY;
         cbf.b[3] = buffer[pc++];
         cbf.b[2] = buffer[pc++];
         cbf.b[1] = buffer[pc++];
         cbf.b[0] = buffer[pc++];
-        float z = cbf.f + 0.5 * m_dh->m_zVoxel + m_dh->m_frames/2  * m_dh->m_zVoxel;
+        float z = cbf.f + 0.5f * voxelZ + frames * 0.5f * voxelZ;
         m_tMesh->addVert(x, y, z);
     }
 
@@ -275,6 +285,11 @@ bool Mesh::loadMesh( wxString filename )
         // number of vertices
         setCountVerts(c.i);
 
+        float rows   = DatasetManager::getInstance()->getRows();
+        float frames = DatasetManager::getInstance()->getFrames();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
         fp += 4;
         for (unsigned int i = 0 ; i < c.i ; ++i)
         {
@@ -288,13 +303,13 @@ bool Mesh::loadMesh( wxString filename )
             f.b[1] = buffer[fp+1];
             f.b[2] = buffer[fp+2];
             f.b[3] = buffer[fp+3];
-            float y = m_dh->m_rows * m_dh->m_yVoxel - f.f;
+            float y = rows * voxelY - f.f;
             fp += 4;
             f.b[0] = buffer[fp];
             f.b[1] = buffer[fp+1];
             f.b[2] = buffer[fp+2];
             f.b[3] = buffer[fp+3];
-            float z = m_dh->m_frames * m_dh->m_zVoxel - f.f;
+            float z = frames * voxelZ - f.f;
             fp += 4;
             m_tMesh->addVert(x, y, z);
         }
@@ -406,11 +421,6 @@ void Mesh::generateGeometry()
 
 }
 
-void Mesh::activateLIC()
-{
-
-}
-
 GLuint Mesh::getGLuint()
 {
     if (!m_GLuint)
@@ -425,35 +435,48 @@ void Mesh::draw()
     glCallList(m_GLuint);
 }
 
-void Mesh::createPropertiesSizer(PropertiesWindow *parent)
+void Mesh::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    DatasetInfo::createPropertiesSizer(parent);
+    DatasetInfo::createPropertiesSizer( pParent );
 
-    m_ptoggleCutFrontSector = new wxToggleButton(parent, wxID_ANY,wxT("Cut Front Sector"),wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->Add(m_ptoggleCutFrontSector,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
-    wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_ptoggleUseColoring = new wxToggleButton(parent, wxID_ANY,wxT("Use Coloring"),wxDefaultPosition, wxSize(100,-1));
-    wxImage bmpColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
-    m_pbtnSelectColor = new wxBitmapButton(parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize(40,-1));
-    l_sizer->Add(m_ptoggleUseColoring,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListMenuThreshold));
-    parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
+    wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pToggleCutFrontSector = new wxToggleButton( pParent, wxID_ANY, wxT( "Cut Front Sector" ) );
+    m_pToggleUseColoring    = new wxToggleButton( pParent, wxID_ANY, wxT( "Use Coloring" ) );
+    m_pBtnSelectColor       = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxMain->Add( m_pToggleCutFrontSector, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    wxBoxSizer *pBoxColoring = new wxBoxSizer( wxHORIZONTAL );
+    pBoxColoring->Add( m_pToggleUseColoring, 3, wxEXPAND | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxColoring->Add( m_pBtnSelectColor,    1, wxEXPAND | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxMain->Add( pBoxColoring, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pParent->Connect( m_pToggleCutFrontSector->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
+    pParent->Connect( m_pToggleUseColoring->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
+    pParent->Connect( m_pBtnSelectColor->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
 }
 
 void Mesh::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
 
-    m_ptoggleFiltering->Enable(false);
-    m_ptoggleFiltering->SetValue(false);
-    m_ptoggleUseColoring->SetValue(!getUseTex());
-    m_ptoggleCutFrontSector->SetValue(!getShowFS());
-    m_psliderThresholdIntensity->SetValue(m_psliderThresholdIntensity->GetMin());
-    m_psliderThresholdIntensity->Enable(false);
+    m_pToggleFiltering->Enable(false);
+    m_pToggleFiltering->SetValue(false);
+    m_pToggleUseColoring->SetValue(!getUseTex());
+    m_pToggleCutFrontSector->SetValue(!getShowFS());
+    m_pSliderThresholdIntensity->SetValue(m_pSliderThresholdIntensity->GetMin());
+    m_pSliderThresholdIntensity->Enable(false);
     
     // Disabled for the moment, not implemented.
     m_pBtnFlipX->Enable( false );

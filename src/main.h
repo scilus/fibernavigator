@@ -6,11 +6,14 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include "wx/app.h"
+#include <wx/app.h>
+
+class MainFrame;
 
 class MyApp : public wxApp
 {
 public:
+    MyApp();
     bool OnInit(void);
     int  OnExit();
 
@@ -24,6 +27,7 @@ public:
     static wxString respath;
     static wxString shaderPath;
     static wxString iconsPath;
+    static MainFrame * frame;
 };
 
 #endif // MAIN_H_

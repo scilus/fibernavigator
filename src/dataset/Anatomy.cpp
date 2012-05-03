@@ -7,106 +7,143 @@
 #include "Fibers.h"
 
 #include "../Logger.h"
+#include "../main.h"
+#include "../dataset/DatasetManager.h"
 #include "../gui/MainFrame.h"
+#include "../gui/SceneManager.h"
 #include "../gui/SelectionObject.h"
+#include "../misc/lic/TensorField.h"
 #include "../misc/nifti/nifti1_io.h"
 
-#include <wx/textfile.h>
 #include <GL/glew.h>
-#include <cassert>
+#include <wx/textfile.h>
+#include <wx/tglbtn.h>
+#include <wx/xml/xml.h>
 
 #include <algorithm>
+using std::fill;
+
+#include <cassert>
+#include <sstream>
+using std::ostringstream;
+
+#include <stack>
+using std::stack;
+
+#include <vector>
+using std::vector;
 
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper ) 
-: DatasetInfo ( pDatasetHelper ),
+#define LOWER_EQ_THRES  20
+#define UPPER_EQ_THRES  255
+
+Anatomy::Anatomy( ) 
+: DatasetInfo(),
   m_isSegmentOn( false ),  
   m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
     m_bands = 1;
 }
 
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
-                 std::vector< float >* pDataset)
-: DatasetInfo( pDatasetHelper ),
+Anatomy::Anatomy( const wxString &filename ) 
+: DatasetInfo(),
+  m_isSegmentOn( false ),  
+  m_pRoi( NULL ),
+  m_dataType( 2 ),
+  m_pTensorField( NULL ),
+  m_useEqualizedDataset( false ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
+  m_currentLowerEqThreshold( -1 ),
+  m_currentUpperEqThreshold( -1 )
+{
+    m_bands = 1;
+
+    m_fullPath = filename;
+
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
+}
+
+// Seems to be used for the create a Distance Map
+Anatomy::Anatomy( const Anatomy * const pAnatomy )
+: DatasetInfo(),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
-    m_columns       = m_dh->m_columns;
-    m_frames        = m_dh->m_frames;
-    m_rows          = m_dh->m_rows;
+    m_columns = pAnatomy->m_columns;
+    m_rows    = pAnatomy->m_rows;
+    m_frames  = pAnatomy->m_frames;
     m_bands         = 1;
     m_isLoaded      = true;
     m_type          = HEAD_BYTE;
 
-    createOffset( *pDataset );
+    createOffset( pAnatomy );
 }
 
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
-                  std::vector< float >* pDataset, 
+Anatomy::Anatomy( std::vector< float >* pDataset, 
                   const int sample ) 
-: DatasetInfo( pDatasetHelper ),
+: DatasetInfo(),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
-    m_columns = m_dh->m_columns;
-    m_frames  = m_dh->m_frames;
-    m_rows    = m_dh->m_rows;
+    m_columns = DatasetManager::getInstance()->getColumns();
+    m_rows    = DatasetManager::getInstance()->getRows();
+    m_frames  = DatasetManager::getInstance()->getFrames();
     m_bands   = 1;
-    
+
     m_type    = HEAD_BYTE;
 
-    m_isLoaded = true;   
-    
+    m_isLoaded = true;
+
     m_floatDataset.resize( m_columns * m_frames * m_rows );
-    
-    for( unsigned int i(0); i < m_floatDataset.size(); ++i )
-    {
-        m_floatDataset[i] = pDataset->at(i);
-    }
+    std::copy( pDataset->begin(), pDataset->end(), m_floatDataset.begin() );
 }
 
-Anatomy::Anatomy( DatasetHelper* pDatasetHelper, 
-                  const int type )
-: DatasetInfo( pDatasetHelper ),
+Anatomy::Anatomy( const int type )
+: DatasetInfo(),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
-  m_lowerEqThreshold( 20 ),
-  m_upperEqThreshold( 255 ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
   m_currentUpperEqThreshold( -1 )
 {
+    m_columns = DatasetManager::getInstance()->getColumns();
+    m_rows    = DatasetManager::getInstance()->getRows();
+    m_frames  = DatasetManager::getInstance()->getFrames();
+
     if(type == RGB)
     {
-        m_columns       = m_dh->m_columns;
-        m_frames        = m_dh->m_frames;
-        m_rows          = m_dh->m_rows;
         m_bands         = 3;
         m_isLoaded      = true;   
         m_type          = type;
@@ -115,37 +152,30 @@ Anatomy::Anatomy( DatasetHelper* pDatasetHelper,
     }
     else if(type == HEAD_BYTE)
     {
-        m_columns       = m_dh->m_columns;
-        m_frames        = m_dh->m_frames;
-        m_rows          = m_dh->m_rows;
         m_bands         = 1;
         m_isLoaded      = true;   
         m_type          = type;
 
-        m_floatDataset.resize( m_columns * m_frames * m_rows );
-
-        for(unsigned int i = 0; i < m_floatDataset.size(); ++i )
-        {
-            m_floatDataset[i] = 0;
-        }
+        m_floatDataset.resize( m_columns * m_frames * m_rows, 0.0f );
     }
     else
     {
+        // Only compiled and runned in debug
         assert(false);
     }
 }
 
-void Anatomy::add( Anatomy* pAnatomy)
+void Anatomy::add( Anatomy* pAnatomy )
 {
-	for(int i = 0; i < (int)m_floatDataset.size(); i++)
-	{
-		m_floatDataset[i] += pAnatomy->m_floatDataset[i];
-	}
+    for( unsigned int i = 0; i < m_floatDataset.size(); ++i )
+    {
+        m_floatDataset[i] += pAnatomy->m_floatDataset[i];
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-float Anatomy::at( const int pos )
+float Anatomy::at( const int pos ) const
 {
     return m_floatDataset[pos];
 }
@@ -247,7 +277,12 @@ void Anatomy::dilate()
         }
     }
 
-	for( int i(0); i < datasetSize; ++i )
+    if( m_equalizedDataset.size() != m_floatDataset.size() )
+    {
+        m_equalizedDataset.resize( m_floatDataset.size() );
+    }
+
+    for( int i(0); i < datasetSize; ++i )
     {
         if ( tmp[i] )
         {
@@ -258,6 +293,8 @@ void Anatomy::dilate()
 
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::dilate - glDeleteTextures") );
+
     generateTexture();
 }
 
@@ -284,6 +321,11 @@ void Anatomy::erode()
         }
     }
 
+    if( m_equalizedDataset.size() != m_floatDataset.size() )
+    {
+        m_equalizedDataset.resize( m_floatDataset.size() );
+    }
+
     for( int i(0); i < datasetSize; ++i )
     {
         if( !tmp[i] )
@@ -295,6 +337,7 @@ void Anatomy::erode()
 
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::erode - glDeleteTextures") );
     generateTexture();
 }
 
@@ -302,58 +345,58 @@ void Anatomy::erode()
 
 void Anatomy::minimize()
 {
-    if( ! m_dh->m_fibersLoaded )
+    if( !DatasetManager::getInstance()->isFibersLoaded() )
     {
         return;
     }
 
     std::vector<bool> workData( m_columns * m_rows * m_frames, false );
-    Fibers* pFibers( NULL );
-    m_dh->getSelectedFiberDataset( pFibers );
 
-    int curX, curY, curZ, index;
-
-    for( int i(0); i < pFibers->getLineCount(); ++i )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        if( pFibers->isSelected( i ) )
-        {
-            for( int j = pFibers->getStartIndexForLine( i ); 
-                     j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); )
-            {
-                curX = wxMin( m_dh->m_columns - 1, wxMax( 0, (int) pFibers->getPointValue( j * 3 ) / m_dh->m_xVoxel ) );
-                curY = wxMin( m_dh->m_rows    - 1, wxMax( 0, (int) pFibers->getPointValue( j * 3 + 1) / m_dh->m_yVoxel ) );
-                curZ = wxMin( m_dh->m_frames  - 1, wxMax( 0, (int) pFibers->getPointValue( j * 3 + 2) / m_dh->m_zVoxel) );
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
-                index = curX + curY * m_dh->m_columns + curZ * m_dh->m_rows * m_dh->m_columns;
-                workData[index] = true;
-                j += 3;
+        int curX, curY, curZ, index;
+
+        for( int i(0); i < pFibers->getLineCount(); ++i )
+        {
+            if( pFibers->isSelected( i ) )
+            {
+                for( int j = pFibers->getStartIndexForLine( i ); 
+                    j < ( pFibers->getStartIndexForLine( i ) + ( pFibers->getPointsPerLine( i )) ); j += 3 )
+                {
+                    // TODO: Verify that changing from dh to current obj m_rows & al. is ok
+                    curX = std::min( m_columns - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 )    / m_voxelSizeX ) ) ); // m_dh->m_xVoxel ) );
+                    curY = std::min( m_rows    - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 + 1) / m_voxelSizeY ) ) ); // m_dh->m_yVoxel ) );
+                    curZ = std::min( m_frames  - 1, std::max( 0, (int)( pFibers->getPointValue( j * 3 + 2) / m_voxelSizeZ ) ) ); // m_dh->m_zVoxel ) );
+
+                    index = curX + curY * m_columns + curZ * m_rows * m_columns;
+                    workData[index] = true;
+                }
             }
         }
-    }
 
-    Anatomy* pNewAnatomy = new Anatomy( m_dh );
-    pNewAnatomy->setZero( m_columns, m_rows, m_frames );
+        int indx = DatasetManager::getInstance()->createAnatomy();
+        Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
+        pNewAnatomy->setZero( m_columns, m_rows, m_frames );
 
-    std::vector<float> *pNewAnatDataset = pNewAnatomy->getFloatDataset();
+        std::vector<float> *pNewAnatDataset = pNewAnatomy->getFloatDataset();
 
-    for( int i(0); i < m_columns * m_rows * m_frames; ++i )
-    {
-        if( workData[i] && m_floatDataset[i] > 0.0f )
+        for( int i(0); i < m_columns * m_rows * m_frames; ++i )
         {
-            pNewAnatDataset->at( i ) = 1.0;
+            if( workData[i] && m_floatDataset[i] > 0.0f )
+            {
+                pNewAnatDataset->at( i ) = 1.0;
+            }
         }
+
+        pNewAnatomy->setName( getName() + _T( "(minimal)" ) );
+        pNewAnatomy->setType( HEAD_BYTE );
+        pNewAnatomy->setDataType( 2 );
+
+        MyApp::frame->m_pListCtrl->InsertItem( indx );
     }
-
-    pNewAnatomy->setName( getName() + _T( "(minimal)" ) );
-    pNewAnatomy->setType( HEAD_BYTE );
-    pNewAnatomy->setDataType( 2 );
-
-    m_dh->m_mainFrame->m_pListCtrl->InsertItem( 0, wxT( "" ), 0 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 1, pNewAnatomy->getName() );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 2, wxT( "0.00") );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( 0, 3, wxT( ""), 1 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemData( 0, (long)pNewAnatomy );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemState( 0, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -425,69 +468,49 @@ void Anatomy::flipAxis( AxisType axe )
 
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::flipAxis - glDeleteTextures") );
     generateTexture();
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Anatomy::load( wxString fileName )
+bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
 {
-    m_fullPath = fileName;
-#ifdef __WXMSW__
-    m_name = fileName.AfterLast( '\\' );
-#else
-    m_name = fileName.AfterLast( '/' );
-#endif
+    m_columns   = pHeader->dim[1]; 
+    m_rows      = pHeader->dim[2]; 
+    m_frames    = pHeader->dim[3]; 
+    m_bands     = pHeader->dim[4];
+    m_dataType  = pHeader->datatype;
     
-    // test for nifti
-    if ( m_name.AfterLast( '.' ) == _T( "nii" ) )
+    // Fix the case where some nifti files have a value of 0 for the fourth
+    // dimension. It is a valid case, but some of the code use the number of bands
+    // to process the data indenpendantly from its dimension.
+    if( m_bands == 0 )
     {
-        //printf( "detected nifti file\n" );
-        return loadNifti( fileName );
+        m_bands = 1;
     }
-    else if ( m_name.AfterLast( '.' ) == _T( "gz" ) )
+
+    m_voxelSizeX = pHeader->dx;
+    m_voxelSizeY = pHeader->dy;
+    m_voxelSizeZ = pHeader->dz;
+
+    if( DatasetManager::getInstance()->isAnatomyLoaded() )
     {
-        //printf( "checking for compressed nifti file\n" );
-        wxString tmpName = m_name.BeforeLast( '.' );
-        if ( tmpName.AfterLast( '.' ) == _T( "nii" ) )
+        int   columns = DatasetManager::getInstance()->getColumns();
+        int   rows    = DatasetManager::getInstance()->getRows();
+        int   frames  = DatasetManager::getInstance()->getFrames();
+        float voxelX  = DatasetManager::getInstance()->getVoxelX();
+        float voxelY  = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+        if( m_rows != rows || m_columns != columns || m_frames != frames )
         {
-            //printf( "found compressed nifti file\n" );
-            return loadNifti( fileName );
+            Logger::getInstance()->print( wxT( "Dimensions of loaded files must be the same" ), LOGLEVEL_ERROR );
+            return false;
         }
-    }
-
-    return false;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-bool Anatomy::loadNifti( wxString fileName )
-{
-    char *pHdrFile;
-    pHdrFile = (char*)malloc( fileName.length() + 1 );
-    strcpy( pHdrFile, (const char*)fileName.mb_str( wxConvUTF8 ) );
-
-    nifti_image *pImage = nifti_image_read( pHdrFile, 0 );
-    if( ! pImage )
-    {
-        m_dh->m_lastError = wxT( "nifti file corrupt, cannot create nifti image from header" );
-        return false;
-    }
-#if defined(DEBUG) || defined(_DEBUG)
-    //nifti_1_header *l_tmphdr = nifti_read_header( l_hdrFile, 0, 0 );
-    //disp_nifti_1_header( "", l_tmphdr );
-#endif
-    m_columns   = pImage->dim[1]; 
-    m_rows      = pImage->dim[2]; 
-    m_frames    = pImage->dim[3]; 
-    m_bands     = pImage->dim[4];
-    m_dataType  = pImage->datatype;
-
-    if( m_dh->m_anatomyLoaded )
-    {
-        if( m_rows != m_dh->m_rows || m_columns != m_dh->m_columns || m_frames != m_dh->m_frames )
+        else if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
         {
-            m_dh->m_lastError = wxT( "dimensions of loaded files must be the same" );
+            Logger::getInstance()->print( wxT( "Voxel size different from anatomy" ), LOGLEVEL_ERROR );
             return false;
         }
     }
@@ -495,64 +518,63 @@ bool Anatomy::loadNifti( wxString fileName )
     // Get the transformation to put the anatomy file in world space.
     // The transformation used depends on the one used in the nifti image.
     // We currently only use it when loading Mrtrix fibers.
-    if( pImage->sform_code > 0 )
+    if( pHeader->sform_code > 0 )
     {
-        m_dh->m_niftiTransform( 0, 0 ) = pImage->sto_xyz.m[0][0];
-        m_dh->m_niftiTransform( 0, 1 ) = pImage->sto_xyz.m[0][1];
-        m_dh->m_niftiTransform( 0, 2 ) = pImage->sto_xyz.m[0][2];
-        m_dh->m_niftiTransform( 0, 3 ) = pImage->sto_xyz.m[0][3];
-        m_dh->m_niftiTransform( 1, 0 ) = pImage->sto_xyz.m[1][0];
-        m_dh->m_niftiTransform( 1, 1 ) = pImage->sto_xyz.m[1][1];
-        m_dh->m_niftiTransform( 1, 2 ) = pImage->sto_xyz.m[1][2];
-        m_dh->m_niftiTransform( 1, 3 ) = pImage->sto_xyz.m[1][3];
-        m_dh->m_niftiTransform( 2, 0 ) = pImage->sto_xyz.m[2][0];
-        m_dh->m_niftiTransform( 2, 1 ) = pImage->sto_xyz.m[2][1];
-        m_dh->m_niftiTransform( 2, 2 ) = pImage->sto_xyz.m[2][2];
-        m_dh->m_niftiTransform( 2, 3 ) = pImage->sto_xyz.m[2][3];
-        m_dh->m_niftiTransform( 3, 0 ) = pImage->sto_xyz.m[3][0];
-        m_dh->m_niftiTransform( 3, 1 ) = pImage->sto_xyz.m[3][1];
-        m_dh->m_niftiTransform( 3, 2 ) = pImage->sto_xyz.m[3][2];
-        m_dh->m_niftiTransform( 3, 3 ) = pImage->sto_xyz.m[3][3];
+        FMatrix transform = DatasetManager::getInstance()->getNiftiTransform();
+
+        transform( 0, 0 ) = pHeader->sto_xyz.m[0][0];
+        transform( 0, 1 ) = pHeader->sto_xyz.m[0][1];
+        transform( 0, 2 ) = pHeader->sto_xyz.m[0][2];
+        transform( 0, 3 ) = pHeader->sto_xyz.m[0][3];
+        transform( 1, 0 ) = pHeader->sto_xyz.m[1][0];
+        transform( 1, 1 ) = pHeader->sto_xyz.m[1][1];
+        transform( 1, 2 ) = pHeader->sto_xyz.m[1][2];
+        transform( 1, 3 ) = pHeader->sto_xyz.m[1][3];
+        transform( 2, 0 ) = pHeader->sto_xyz.m[2][0];
+        transform( 2, 1 ) = pHeader->sto_xyz.m[2][1];
+        transform( 2, 2 ) = pHeader->sto_xyz.m[2][2];
+        transform( 2, 3 ) = pHeader->sto_xyz.m[2][3];
+        transform( 3, 0 ) = pHeader->sto_xyz.m[3][0];
+        transform( 3, 1 ) = pHeader->sto_xyz.m[3][1];
+        transform( 3, 2 ) = pHeader->sto_xyz.m[3][2];
+        transform( 3, 3 ) = pHeader->sto_xyz.m[3][3];
     }
-    else if( pImage->qform_code > 0 )
+    else if( pHeader->qform_code > 0 )
     {
-        m_dh->m_niftiTransform( 0, 0 ) = pImage->qto_xyz.m[0][0];
-        m_dh->m_niftiTransform( 0, 1 ) = pImage->qto_xyz.m[0][1];
-        m_dh->m_niftiTransform( 0, 2 ) = pImage->qto_xyz.m[0][2];
-        m_dh->m_niftiTransform( 0, 3 ) = pImage->qto_xyz.m[0][3];
-        m_dh->m_niftiTransform( 1, 0 ) = pImage->qto_xyz.m[1][0];
-        m_dh->m_niftiTransform( 1, 1 ) = pImage->qto_xyz.m[1][1];
-        m_dh->m_niftiTransform( 1, 2 ) = pImage->qto_xyz.m[1][2];
-        m_dh->m_niftiTransform( 1, 3 ) = pImage->qto_xyz.m[1][3];
-        m_dh->m_niftiTransform( 2, 0 ) = pImage->qto_xyz.m[2][0];
-        m_dh->m_niftiTransform( 2, 1 ) = pImage->qto_xyz.m[2][1];
-        m_dh->m_niftiTransform( 2, 2 ) = pImage->qto_xyz.m[2][2];
-        m_dh->m_niftiTransform( 2, 3 ) = pImage->qto_xyz.m[2][3];
-        m_dh->m_niftiTransform( 3, 0 ) = pImage->qto_xyz.m[3][0];
-        m_dh->m_niftiTransform( 3, 1 ) = pImage->qto_xyz.m[3][1];
-        m_dh->m_niftiTransform( 3, 2 ) = pImage->qto_xyz.m[3][2];
-        m_dh->m_niftiTransform( 3, 3 ) = pImage->qto_xyz.m[3][3];
+        FMatrix transform = DatasetManager::getInstance()->getNiftiTransform();
+
+        transform( 0, 0 ) = pHeader->qto_xyz.m[0][0];
+        transform( 0, 1 ) = pHeader->qto_xyz.m[0][1];
+        transform( 0, 2 ) = pHeader->qto_xyz.m[0][2];
+        transform( 0, 3 ) = pHeader->qto_xyz.m[0][3];
+        transform( 1, 0 ) = pHeader->qto_xyz.m[1][0];
+        transform( 1, 1 ) = pHeader->qto_xyz.m[1][1];
+        transform( 1, 2 ) = pHeader->qto_xyz.m[1][2];
+        transform( 1, 3 ) = pHeader->qto_xyz.m[1][3];
+        transform( 2, 0 ) = pHeader->qto_xyz.m[2][0];
+        transform( 2, 1 ) = pHeader->qto_xyz.m[2][1];
+        transform( 2, 2 ) = pHeader->qto_xyz.m[2][2];
+        transform( 2, 3 ) = pHeader->qto_xyz.m[2][3];
+        transform( 3, 0 ) = pHeader->qto_xyz.m[3][0];
+        transform( 3, 1 ) = pHeader->qto_xyz.m[3][1];
+        transform( 3, 2 ) = pHeader->qto_xyz.m[3][2];
+        transform( 3, 3 ) = pHeader->qto_xyz.m[3][3];
     }
     else
     {
         Logger::getInstance()->print( wxT( "No transformation encoded in the nifti file. Using identity transform." ), LOGLEVEL_WARNING );
 
         // This is not a typo, the method is called makeIdendity in FMatrix.
-        m_dh->m_niftiTransform.makeIdendity();
+        DatasetManager::getInstance()->getNiftiTransform().makeIdendity();
     }
     
-
-    m_dh->m_xVoxel = pImage->dx;
-    m_dh->m_yVoxel = pImage->dy;
-    m_dh->m_zVoxel = pImage->dz;
-    
-    if( pImage->datatype == 2 )
+    if( pHeader->datatype == 2 )
     {
-        if( pImage->dim[4] == 1 )
+        if( pHeader->dim[4] == 1 )
         {
             m_type = HEAD_BYTE;
         }
-        else if( pImage->dim[4] == 3 )
+        else if( pHeader->dim[4] == 3 )
         {
             m_type = RGB;
         }
@@ -561,14 +583,14 @@ bool Anatomy::loadNifti( wxString fileName )
             m_type = BOT_INITIALIZED;
         }
     }
-    else if( pImage->datatype == 4 )
+    else if( pHeader->datatype == 4 )
     {
         m_type = HEAD_SHORT;
     }
 
-    else if( pImage->datatype == 16 )
+    else if( pHeader->datatype == 16 )
     {
-        if( pImage->dim[4] == 3 )
+        if( pHeader->dim[4] == 3 )
         {
             m_type = VECTORS;
         }
@@ -582,14 +604,14 @@ bool Anatomy::loadNifti( wxString fileName )
         m_type = BOT_INITIALIZED;
     }
 
-    nifti_image *pFileData = nifti_image_read( pHdrFile, 1 );
-    if( !pFileData )
-    {
-        m_dh->m_lastError = wxT( "nifti file corrupt" );
-        return false;
-    }
+//     nifti_image *pFileData = nifti_image_read( pHdrFile, 1 );
+//     if( !pFileData )
+//     {
+//         m_dh->m_lastError = wxT( "nifti file corrupt" );
+//         return false;
+//     }
     
-    int datasetSize = pImage->dim[1] * pImage->dim[2] * pImage->dim[3];
+    int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
 
     bool flag = false;
 
@@ -597,7 +619,7 @@ bool Anatomy::loadNifti( wxString fileName )
     {
         case HEAD_BYTE:
         {
-            unsigned char* pData = (unsigned char*)pFileData->data;
+            unsigned char* pData = (unsigned char*)pBody->data;
             m_floatDataset.resize( datasetSize );
 
             for( int i(0); i < datasetSize; ++i )
@@ -607,12 +629,12 @@ bool Anatomy::loadNifti( wxString fileName )
 
             flag = true;
             m_oldMax = 255;
+            break;
         }
-        break;
 
         case HEAD_SHORT:
         {
-            short int* pData = (short int*)pFileData->data;
+            short int* pData = (short int*)pBody->data;
             int dataMax = 0;
             std::vector<int> histo( 65536, 0 );
 
@@ -645,7 +667,7 @@ bool Anatomy::loadNifti( wxString fileName )
                 }
             }
 
-            m_floatDataset.resize ( datasetSize );
+            m_floatDataset.resize( datasetSize );
 
             for( int i(0); i < datasetSize; ++i )
             {
@@ -655,12 +677,12 @@ bool Anatomy::loadNifti( wxString fileName )
             m_oldMax    = dataMax;
             m_newMax    = newMax;
             flag        = true;
+            break;
         }
-        break;
 
         case OVERLAY:
         {
-            float* pData = (float*)pFileData->data;
+            float* pData = (float*)pBody->data;
 
             m_floatDataset.resize( datasetSize );
             
@@ -686,12 +708,12 @@ bool Anatomy::loadNifti( wxString fileName )
             m_oldMax    = dataMax;
             m_newMax    = 1.0;
             flag        = true;
+            break;
         }
-        break;
 
         case RGB:
         {
-            unsigned char* pData = (unsigned char*)pFileData->data;
+            unsigned char* pData = (unsigned char*)pBody->data;
 
             m_floatDataset.resize( datasetSize * 3 );
 
@@ -703,51 +725,49 @@ bool Anatomy::loadNifti( wxString fileName )
             }
 
             flag = true;
+            break;
         }
-        break;
 
         case VECTORS:
         {
-            float* pData = (float*)pFileData->data;
+            float* pData = (float*)pBody->data;
             m_floatDataset.resize( datasetSize * 3 );
 
             for( int i(0); i < datasetSize; ++i )
             {
                 m_floatDataset[i * 3]       = pData[i];
                 m_floatDataset[i * 3 + 1]   = pData[datasetSize + i];
-                m_floatDataset[i * 3 + 2]   = pData[(2 * datasetSize) + i];
+                m_floatDataset[i * 3 + 2]   = pData[2 * datasetSize + i];
             }
 
-            m_pTensorField             = new TensorField( m_dh, &m_floatDataset, 1, 3 );
-            m_dh->m_tensorsFieldLoaded = true;
-            m_dh->m_vectorsLoaded      = true;
-            m_dh->m_surfaceIsDirty     = true;
-            flag                       = true;
+            m_pTensorField = new TensorField( m_columns, m_rows, m_frames, &m_floatDataset, 1, 3 );
+            flag = true;
+            break;
         }
-        break;
 
         default:
         {
-            m_dh->m_lastError = wxT( "unsuported file format" );
+            Logger::getInstance()->print( wxT( "Unsupported file format" ), LOGLEVEL_ERROR );
             flag = false;
             // Will not return now to make sure the pHdrFile pointer is freed.
         }
     }
 
-    if( flag )
-    {
-        m_dh->m_rows            = m_rows;
-        m_dh->m_columns         = m_columns;
-        m_dh->m_frames          = m_frames;
-        m_dh->m_anatomyLoaded   = true;
-    }
-    
-    free(pHdrFile);
-    pHdrFile = NULL;
-
     m_isLoaded = flag;
 
     return flag;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+bool Anatomy::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -772,9 +792,9 @@ void Anatomy::saveNifti( wxString fileName )
     pImage->qform_code = 1;    
     pImage->datatype   = m_dataType;
     pImage->fname = fn;
-    pImage->dx = m_dh->m_xVoxel;
-    pImage->dy = m_dh->m_yVoxel;
-    pImage->dz = m_dh->m_zVoxel;
+    pImage->dx = m_voxelSizeX;
+    pImage->dy = m_voxelSizeY;
+    pImage->dz = m_voxelSizeZ;
 
     if( m_type == HEAD_BYTE )
     {
@@ -833,130 +853,136 @@ void Anatomy::saveNifti( wxString fileName )
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::createPropertiesSizer( PropertiesWindow *pParentWindow )
+void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    DatasetInfo::createPropertiesSizer( pParentWindow );
+    DatasetInfo::createPropertiesSizer( pParent );
+
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
+
+    //////////////////////////////////////////////////////////////////////////
 
     // Init widgets
-    m_pLowerEqSlider = new wxSlider( pParentWindow, wxID_ANY, m_lowerEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pUpperEqSlider = new wxSlider( pParentWindow, wxID_ANY, m_upperEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pEqualize      = new wxToggleButton( pParentWindow, wxID_ANY, wxT("Equalize"),           wxDefaultPosition, wxSize(140, -1) );
-    m_pBtnDilate = new wxButton( pParentWindow, wxID_ANY, wxT( "Dilate" ),wxDefaultPosition, wxSize( 85, -1 ) );
-    m_pBtnErode  = new wxButton( pParentWindow, wxID_ANY, wxT( "Erode" ),wxDefaultPosition, wxSize( 85, -1 ) );
-    m_pBtnCut =      new wxButton( pParentWindow, wxID_ANY, wxT("Cut (boxes)"), wxDefaultPosition, wxSize(85, -1) );
-    m_pBtnMinimize = new wxButton( pParentWindow, wxID_ANY, wxT("Minimize (fibers)"), wxDefaultPosition, wxSize(85, -1) );
-    m_pBtnNewDistanceMap =   new wxButton( pParentWindow, wxID_ANY, wxT("New Distance Map"),   wxDefaultPosition, wxSize(140, -1) );
-    m_pBtnNewIsoSurface  =   new wxButton( pParentWindow, wxID_ANY, wxT("New Iso Surface"),    wxDefaultPosition, wxSize(140, -1) );
-    m_pBtnNewOffsetSurface = new wxButton( pParentWindow, wxID_ANY, wxT("New Offset Surface"), wxDefaultPosition, wxSize(140, -1) );
-    m_pBtnNewVOI =           new wxButton( pParentWindow, wxID_ANY, wxT("New VOI"),            wxDefaultPosition, wxSize(140, -1) );
-    m_pToggleSegment = new wxToggleButton( pParentWindow, wxID_ANY,wxT("Floodfill"), wxDefaultPosition, wxSize(140, -1) );  
-    
-    m_pSliderFlood = new MySlider( pParentWindow, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFlood->SetValue( 40 );
+    m_pLowerEqSlider =       new wxSlider( pParent, wxID_ANY, m_lowerEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pUpperEqSlider =       new wxSlider( pParent, wxID_ANY, m_upperEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pEqualize      = new wxToggleButton( pParent, wxID_ANY, wxT( "Equalize" ),               wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnDilate =           new wxButton( pParent, wxID_ANY, wxT( "Dilate" ),                 wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnErode  =           new wxButton( pParent, wxID_ANY, wxT( "Erode" ),                  wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnCut =              new wxButton( pParent, wxID_ANY, wxT( "Cut (boxes)" ),            wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnMinimize =         new wxButton( pParent, wxID_ANY, wxT( "Minimize (fibers)" ),      wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnNewDistanceMap =   new wxButton( pParent, wxID_ANY, wxT( "New Distance Map" ),       wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnNewIsoSurface  =   new wxButton( pParent, wxID_ANY, wxT( "New Iso Surface" ),        wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnNewOffsetSurface = new wxButton( pParent, wxID_ANY, wxT( "New Offset Surface" ),     wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnNewVOI =           new wxButton( pParent, wxID_ANY, wxT( "New VOI" ),                wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pToggleSegment = new wxToggleButton( pParent, wxID_ANY, wxT( "Floodfill" ),              wxDefaultPosition, wxSize( 140, -1 ) );  
+
+    m_pSliderFlood = new MySlider( pParent, wxID_ANY, 40, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     setFloodThreshold( 0.2f );
 
-    m_pTxtThresBox = new wxTextCtrl( pParentWindow, wxID_ANY, wxT("0.20"),       wxDefaultPosition, wxSize(40, -1), wxTE_CENTRE | wxTE_READONLY );
-    m_pTextThres = new wxStaticText( pParentWindow, wxID_ANY, wxT("Threshold "), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
+    m_pTxtThres = new wxTextCtrl( pParent, wxID_ANY, wxT( "0.20" ), wxDefaultPosition, wxSize( 40, -1 ), wxTE_READONLY );
+    m_pLblThres = new wxStaticText( pParent, wxID_ANY, wxT( "Threshold" ) );
 
-    // Position widgets in sizer
+    //////////////////////////////////////////////////////////////////////////
 
-    wxSizer *pSizer;
+    wxFlexGridSizer *pGridSliders = new wxFlexGridSizer( 2 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Lower Threshold" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pLowerEqSlider, 0, wxALIGN_CENTER_HORIZONTAL | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Upper Threshold" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pUpperEqSlider, 0, wxALIGN_CENTER_HORIZONTAL | wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
 
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( new wxStaticText( pParentWindow, wxID_ANY, wxT( "Lower Threshold" ), wxDefaultPosition, wxSize( 80, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
-    pSizer->Add( m_pLowerEqSlider, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    //////////////////////////////////////////////////////////////////////////
 
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( new wxStaticText( pParentWindow, wxID_ANY, wxT( "Upper Threshold" ), wxDefaultPosition, wxSize( 80, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
-    pSizer->Add( m_pUpperEqSlider, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pBoxMain->Add( m_pEqualize, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
 
-    m_propertiesSizer->Add( m_pEqualize,            0, wxALIGN_CENTER );
+    wxGridSizer *pGridButtons = new wxGridSizer( 2 );
+    pGridButtons->Add( m_pBtnDilate,   0, wxEXPAND | wxALL, 1 );
+    pGridButtons->Add( m_pBtnErode,    0, wxEXPAND | wxALL, 1 );
+    pGridButtons->Add( m_pBtnCut,      0, wxEXPAND | wxALL, 1 );
+    pGridButtons->Add( m_pBtnMinimize, 0, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pGridButtons, 0, wxEXPAND | wxALL | wxALIGN_CENTER, 2 );
 
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( m_pBtnDilate, 0, wxALIGN_CENTER );
-    pSizer->Add( m_pBtnErode,  0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    pBoxMain->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnNewVOI,           0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pToggleSegment,       0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
 
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( m_pBtnCut,      0, wxALIGN_CENTER );
-    pSizer->Add( m_pBtnMinimize, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    //////////////////////////////////////////////////////////////////////////
 
-    m_propertiesSizer->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( m_pBtnNewVOI,           0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( m_pToggleSegment,       0, wxALIGN_CENTER );
+    wxBoxSizer *pBoxFlood = new wxBoxSizer( wxHORIZONTAL );
+    pBoxFlood->Add( m_pLblThres,   0, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxFlood->Add( m_pSliderFlood, 1, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxFlood->Add( m_pTxtThres, 0, wxFIXED_MINSIZE | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxMain->Add( pBoxFlood, 0, wxEXPAND, 0 );
 
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( m_pTextThres,   0, wxALIGN_CENTER );
-    pSizer->Add( m_pSliderFlood, 0, wxALIGN_CENTER );
-    pSizer->Add( m_pTxtThresBox, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
 
     // Connect widgets with callback function
-    pParentWindow->Connect( m_pLowerEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
-    pParentWindow->Connect( m_pUpperEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
-    pParentWindow->Connect( m_pEqualize->GetId(),            wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler       ( PropertiesWindow::OnEqualizeDataset) );
-    pParentWindow->Connect( m_pBtnDilate->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnDilateDataset ) );
-    pParentWindow->Connect( m_pBtnErode->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnErodeDataset ) );
-    pParentWindow->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
-    pParentWindow->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
-    pParentWindow->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
-    pParentWindow->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewIsoSurface ) );
-    pParentWindow->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
-    pParentWindow->Connect( m_pBtnNewVOI->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewVoiFromOverlay ) );
-    pParentWindow->Connect( m_pToggleSegment->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFloodFill ) );
-    pParentWindow->Connect( m_pSliderFlood->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderFloodMoved ) );
-    
+    pParent->Connect( m_pLowerEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
+    pParent->Connect( m_pUpperEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
+    pParent->Connect( m_pEqualize->GetId(),            wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler       ( PropertiesWindow::OnEqualizeDataset ) );
+    pParent->Connect( m_pBtnDilate->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnDilateDataset ) );
+    pParent->Connect( m_pBtnErode->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnErodeDataset ) );
+    pParent->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
+    pParent->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
+    pParent->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
+    pParent->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewIsoSurface ) );
+    pParent->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
+    pParent->Connect( m_pBtnNewVOI->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewVoiFromOverlay ) );
+    pParent->Connect( m_pToggleSegment->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFloodFill ) );
+    pParent->Connect( m_pSliderFlood->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderFloodMoved ) );
+
+
+
     // The following interface objects are related to flood fill and graph cuts.
-    // They are kept here temporiraly, but will need to be implemented or removed.
+    // They are kept here temporarily, but will need to be implemented or removed.
     // Please also note that the coding standard has not been applied to these lines, 
     // so please apply it if you re enable them.
-    /*pSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadioBtnFlood = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Click region" ), wxDefaultPosition, wxSize(80,-1));
-    pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Floodfill   "),wxDefaultPosition, wxSize(50,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    pSizer->Add(m_pRadioBtnFlood);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pRadioBtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnFloodFill));*/
-
-    /*pSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadioBtnObj = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Select Class 1" ), wxDefaultPosition, wxSize(85,-1));
-    pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    pSizer->Add(m_pRadioBtnObj);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pRadioBtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectObj));
-    
-    pSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pRadioBtnBck = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Select Class 2" ), wxDefaultPosition, wxSize(85,-1));
-    pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    pSizer->Add(m_pRadioBtnBck);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pRadioBtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectBck));
-
-    m_pSliderGraphSigma = new MySlider(pParentWindow, wxID_ANY,0,0,500, wxDefaultPosition, wxSize(80,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_pSliderGraphSigma->SetValue(200);
-    setGraphSigma(200.0f);
-    pSizer = new wxBoxSizer(wxHORIZONTAL);
-    pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Sigma "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    pSizer->Add(m_pSliderGraphSigma,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pSliderGraphSigma->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderGraphSigmaMoved));
-
-    m_pBtnGraphCut = new wxButton(pParentWindow, wxID_ANY, wxT("Generate Graphcut"), wxDefaultPosition, wxSize(120,-1));
-    pSizer = new wxBoxSizer(wxHORIZONTAL);
-    pSizer->Add(m_pBtnGraphCut,0,wxALIGN_CENTER);
-    m_pBtnGraphCut->Enable(m_dh->graphcutReady());
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pBtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnbtnGraphCut));*/
-
-    /*m_pBtnKmeans = new wxButton(pParentWindow, wxID_ANY, wxT("K-Means"), wxDefaultPosition, wxSize(132,-1));
-    pSizer = new wxBoxSizer(wxHORIZONTAL);
-    pSizer->Add(m_pBtnKmeans,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
-    pParentWindow->Connect(m_pBtnKmeans->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnKmeans));*/
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pRadioBtnFlood = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Click region" ), wxDefaultPosition, wxSize(80,-1));
+//     pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Floodfill   "),wxDefaultPosition, wxSize(50,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     pSizer->Add(m_pRadioBtnFlood);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pRadioBtnFlood->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnFloodFill));
+// 
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pRadioBtnObj = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Select Class 1" ), wxDefaultPosition, wxSize(85,-1));
+//     pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     pSizer->Add(m_pRadioBtnObj);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pRadioBtnObj->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectObj));
+//     
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     m_pRadioBtnBck = new wxRadioButton(pParentWindow, wxID_ANY, _T( "Select Class 2" ), wxDefaultPosition, wxSize(85,-1));
+//     pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Graphcut   "),wxDefaultPosition, wxSize(55,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     pSizer->Add(m_pRadioBtnBck);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pRadioBtnBck->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnSelectBck));
+// 
+//     m_pSliderGraphSigma = new MySlider(pParentWindow, wxID_ANY,0,0,500, wxDefaultPosition, wxSize(80,-1), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+//     m_pSliderGraphSigma->SetValue(200);
+//     setGraphSigma(200.0f);
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     pSizer->Add(new wxStaticText(pParentWindow, wxID_ANY, wxT("Sigma "),wxDefaultPosition, wxSize(60,-1), wxALIGN_RIGHT),0,wxALIGN_CENTER);
+//     pSizer->Add(m_pSliderGraphSigma,0,wxALIGN_CENTER);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pSliderGraphSigma->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderGraphSigmaMoved));
+// 
+//     m_pBtnGraphCut = new wxButton(pParentWindow, wxID_ANY, wxT("Generate Graphcut"), wxDefaultPosition, wxSize(120,-1));
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     pSizer->Add(m_pBtnGraphCut,0,wxALIGN_CENTER);
+//     m_pBtnGraphCut->Enable(m_dh->graphcutReady());
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pBtnGraphCut->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnbtnGraphCut));
+// 
+//     m_pBtnKmeans = new wxButton(pParentWindow, wxID_ANY, wxT("K-Means"), wxDefaultPosition, wxSize(132,-1));
+//     pSizer = new wxBoxSizer(wxHORIZONTAL);
+//     pSizer->Add(m_pBtnKmeans,0,wxALIGN_CENTER);
+//     m_propertiesSizer->Add(pSizer,0,wxALIGN_CENTER);
+//     pParentWindow->Connect(m_pBtnKmeans->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnKmeans));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -968,8 +994,8 @@ void Anatomy::updatePropertiesSizer()
     m_pLowerEqSlider->Enable( 1 == m_bands );
     m_pUpperEqSlider->Enable( 1 == m_bands );
     m_pEqualize->Enable(      1 == m_bands );
-    m_pBtnMinimize->Enable( m_dh->m_fibersLoaded );
-    m_pBtnCut->Enable(      m_dh->getSelectionObjects().size() > 0 );
+    m_pBtnMinimize->Enable( DatasetManager::getInstance()->isFibersLoaded() );
+    m_pBtnCut->Enable(      SceneManager::getInstance()->getSelectionObjects().size() > 0 );
 
     m_pBtnNewIsoSurface->Enable(    getType() <= OVERLAY );
     m_pBtnNewDistanceMap->Enable(   getType() <= OVERLAY );
@@ -981,123 +1007,126 @@ void Anatomy::updatePropertiesSizer()
     
     if(!m_isSegmentOn)
     {
-        m_pTextThres->Hide();
+        m_pLblThres->Hide();
         m_pSliderFlood->Hide();
-        m_pTxtThresBox->Hide();
+        m_pTxtThres->Hide();
     }
     else
     {
-        m_pTextThres->Show();
+        m_pLblThres->Show();
         m_pSliderFlood->Show();
-        m_pTxtThresBox->Show();
+        m_pTxtThres->Show();
     }
-    
 }
 
 void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, float color ) 
 {
-	drawZone.datasize = drawZone.width * drawZone.height * drawZone.depth;
-	//save this zone on top of history before we change anything
-	fillHistory(drawZone, false);
+    drawZone.datasize = drawZone.width * drawZone.height * drawZone.depth;
+    //save this zone on top of history before we change anything
+    fillHistory(drawZone, false);
 
-	//create the modified region's vector in the right color
-	std::vector<float> subData( drawZone.datasize, color );
+    //create the modified region's vector in the right color
+    std::vector<float> subData( drawZone.datasize, color );
 
     for( int f = 0; f < drawZone.depth; ++f )
     {
         for( int r = 0; r < drawZone.height; ++r )
         {
-			for( int c = 0; c < drawZone.width; ++c )
-			{
-				int sourceIndex = (c+drawZone.x) + (r+drawZone.y) * m_columns + (f+drawZone.z) * m_columns * m_rows;
-				int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
+            for( int c = 0; c < drawZone.width; ++c )
+            {
+                int sourceIndex = (c+drawZone.x) + (r+drawZone.y) * m_columns + (f+drawZone.z) * m_columns * m_rows;
+                int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
 
-				//save a backup in the history data
-				//drawZone.data[subIndex] = m_floatDataset[sourceIndex];
+                //save a backup in the history data
+                //drawZone.data[subIndex] = m_floatDataset[sourceIndex];
 
-				//update values
-				if(isRound)
-				{
-					//we might have one direction without proper size (flat), but never 2
-					double radius = (double)(max(drawZone.width, drawZone.height) - 1) / 2.0;
+                //update values
+                if(isRound)
+                {
+                    //we might have one direction without proper size (flat), but never 2
+                    double radius = (double)( std::max(drawZone.width, drawZone.height) - 1 ) / 2.0;
 
-					//inside sphere: put color in the source
-					if(( Vector(double(drawZone.width)/2.0, double(drawZone.height)/2.0, double(drawZone.depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
-					{
-						m_floatDataset[sourceIndex] = color;
-					}
-					else //outside sphere: copy source values in the subImage
-					{
-						subData[subIndex] = m_floatDataset[sourceIndex];
-					}
-				}
-				else
-				{
-					m_floatDataset[sourceIndex] = color;
-				}
-			}
-		}
-	}
+                    //inside sphere: put color in the source
+                    if(( Vector(double(drawZone.width)/2.0, double(drawZone.height)/2.0, double(drawZone.depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
+                    {
+                        m_floatDataset[sourceIndex] = color;
+                    }
+                    else //outside sphere: copy source values in the subImage
+                    {
+                        subData[subIndex] = m_floatDataset[sourceIndex];
+                    }
+                }
+                else
+                {
+                    m_floatDataset[sourceIndex] = color;
+                }
+            }
+        }
+    }
 
-	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
-	glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_LUMINANCE, GL_FLOAT, &subData[0] );
+    glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::updateTexture - glBindTexture") );
+    glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_LUMINANCE, GL_FLOAT, &subData[0] );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::updateTexture - glTexSubImage3D") );
 }
 
 void Anatomy::updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB ) 
 {
-	drawZone.datasize = drawZone.width * drawZone.height * drawZone.depth * 3;
-	//save this zone on top of history before we change anything
-	fillHistory(drawZone, true);
-	
-	//create the modified region's vector and put the right color
-	std::vector<float> subData( drawZone.datasize, colorRGB.Red() );
-	for( int i=0; i < drawZone.datasize; i+=3 )
+    drawZone.datasize = drawZone.width * drawZone.height * drawZone.depth * 3;
+    //save this zone on top of history before we change anything
+    fillHistory(drawZone, true);
+    
+    //create the modified region's vector and put the right color
+    std::vector<float> subData( drawZone.datasize, colorRGB.Red() );
+    for( int i=0; i < drawZone.datasize; i+=3 )
     {
         //subData[i] = colorRGB.Red(); //done at declaration
         subData[i+1] = colorRGB.Green();
         subData[i+2] = colorRGB.Blue();
     }
-	
+    
     for( int f = 0; f < drawZone.depth; ++f )
     {
         for( int r = 0; r < drawZone.height; ++r )
         {
-			for( int c = 0; c < drawZone.width; ++c )
-			{
-				int sourceIndex = (c+drawZone.x) + (r+drawZone.y) * m_columns + (f+drawZone.z) * m_columns * m_rows;
-				int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
+            for( int c = 0; c < drawZone.width; ++c )
+            {
+                int sourceIndex = (c+drawZone.x) + (r+drawZone.y) * m_columns + (f+drawZone.z) * m_columns * m_rows;
+                int subIndex = c + r * drawZone.width + f * drawZone.width * drawZone.height;
 
-				if(isRound)
-				{
-					//we might have one direction without proper size (flat), but never 2
-					double radius = (double)(max(drawZone.width, drawZone.height) - 1) / 2.0;
+                if(isRound)
+                {
+                    //we might have one direction without proper size (flat), but never 2
+                    double radius = (double)(std::max( drawZone.width, drawZone.height ) - 1) / 2.0;
 
-					//inside sphere: put color in the source
-					if(( Vector(double(drawZone.width)/2.0, double(drawZone.height)/2.0, double(drawZone.depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
-					{
-						m_floatDataset[sourceIndex*3] = colorRGB.Red();
-						m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
-						m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
-					}
-					else //outside sphere: copy source values in the subImage
-					{
-						subData[subIndex*3] = m_floatDataset[sourceIndex*3];
-						subData[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
-						subData[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
-					}
-				}
-				else 
-				{
-					m_floatDataset[sourceIndex*3] = colorRGB.Red();
-					m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
-					m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
-				}
-			}
-		}
-	}
+                    //inside sphere: put color in the source
+                    if(( Vector(double(drawZone.width)/2.0, double(drawZone.height)/2.0, double(drawZone.depth)/2.0) - Vector(double(c), double(r), double(f)) ).getLength() <= radius)
+                    {
+                        m_floatDataset[sourceIndex*3] = colorRGB.Red();
+                        m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
+                        m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
+                    }
+                    else //outside sphere: copy source values in the subImage
+                    {
+                        subData[subIndex*3] = m_floatDataset[sourceIndex*3];
+                        subData[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
+                        subData[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
+                    }
+                }
+                else 
+                {
+                    m_floatDataset[sourceIndex*3] = colorRGB.Red();
+                    m_floatDataset[sourceIndex*3 + 1] = colorRGB.Green();
+                    m_floatDataset[sourceIndex*3 + 2] = colorRGB.Blue();
+                }
+            }
+        }
+    }
 
-	glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
-	glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_RGB, GL_FLOAT, &subData[0] );
+    glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::updateTexture - glBindTexture") );
+    glTexSubImage3D( GL_TEXTURE_3D, 0, drawZone.x, drawZone.y, drawZone.z, drawZone.width, drawZone.height, drawZone.depth, GL_RGB, GL_FLOAT, &subData[0] );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::updateTexture - glTexSubImage3D") );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1113,6 +1142,7 @@ bool Anatomy::toggleEqualization()
 
     const GLuint* pTexId = &m_GLuint;
     glDeleteTextures( 1, pTexId );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::toggleEqualization - glDeleteTextures") );
     generateTexture();
 
     return m_useEqualizedDataset;
@@ -1131,13 +1161,14 @@ void Anatomy::equalizationSliderChange()
 
         const GLuint* pTexId = &m_GLuint;
         glDeleteTextures( 1, pTexId );
+        Logger::getInstance()->printIfGLError( wxT( "Anatomy::equalizationSliderChange - glDeleteTextures") );
         generateTexture();
     }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Anatomy::createOffset( const std::vector<float> &sourceDataset )
+void Anatomy::createOffset( const Anatomy * const pAnatomy )
 {
     int b, r, c, bb, rr, r0, b0, c0;
     int i, istart, iend;
@@ -1161,7 +1192,7 @@ void Anatomy::createOffset( const std::vector<float> &sourceDataset )
     bool *pBitMask = new bool[nbPixels];
     for( int i(0); i < nbPixels; ++i )
     {
-        if( sourceDataset.at(i) < 0.01 )
+        if( pAnatomy->at(i) < 0.01 )
         {
             pBitMask[i] = true;
         }
@@ -1613,83 +1644,87 @@ void Anatomy::equalizeHistogram()
 //////////////////////////////////////////////////////////////////////////
 void Anatomy::writeVoxel( const int x, const int y, const int z, const int layer, const int size, const bool isRound, const bool draw3d, wxColor colorRGB )
 {
-	SubTextureBox l_stb = getStrokeBox(x, y, z, layer, size, draw3d);
+    SubTextureBox l_stb = getStrokeBox(x, y, z, layer, size, draw3d);
 
     switch( m_type )
     {
-		case HEAD_BYTE:
-		case HEAD_SHORT:
+        case HEAD_BYTE:
+        case HEAD_SHORT:
         case OVERLAY:
-		{
-			if(colorRGB == wxColor(0,0,0)) // erase
-			{
-				float transparent = 0.0f;
-				updateTexture(l_stb, isRound, transparent);
-			}
-			else // draw, always white (or always purple for an overlay)
-			{
-				float white = 1.0f;
-				updateTexture(l_stb, isRound, white);
-			}
-			break;
-		}
-		case RGB: //draw in color
-		{
-			updateTexture(l_stb, isRound, colorRGB);
-			break;
-		}
-		case VECTORS:
-		{
-			break;
-		}
-	}
+        {
+            if(colorRGB == wxColor(0,0,0)) // erase
+            {
+                float transparent = 0.0f;
+                updateTexture(l_stb, isRound, transparent);
+            }
+            else // draw, always white (or always purple for an overlay)
+            {
+                float white = 1.0f;
+                updateTexture(l_stb, isRound, white);
+            }
+            break;
+        }
+        case RGB: //draw in color
+        {
+            updateTexture(l_stb, isRound, colorRGB);
+            break;
+        }
+        case VECTORS:
+        {
+            break;
+        }
+    }
 }
 
 
 SubTextureBox Anatomy::getStrokeBox( const int x, const int y, const int z, const int layer, const int size, const bool draw3d )
 {
-	SubTextureBox box;
+    SubTextureBox box;
 
-	//set dimensions of the box
-	box.width = size+1;
-	box.height = size+1;
-	box.depth = size+1;
-	if(!draw3d)
-	{
-		switch(layer)
-		{
-		case AXIAL:
-			box.depth = 1;
-			break;
-		case CORONAL:
-			box.height = 1;
-			break;
-		case SAGITTAL:
-			box.width = 1;
-			break;
-		default:
-			break;
-		}
-	}
+    //set dimensions of the box
+    box.width = size+1;
+    box.height = size+1;
+    box.depth = size+1;
+    if(!draw3d)
+    {
+        switch(layer)
+        {
+        case AXIAL:
+            box.depth = 1;
+            break;
+        case CORONAL:
+            box.height = 1;
+            break;
+        case SAGITTAL:
+            box.width = 1;
+            break;
+        default:
+            break;
+        }
+    }
 
-	//set position of the box
-	box.x = std::min( std::max( x-box.width / 2, 0 ),  m_columns-box.width );
-	box.y = std::min( std::max( y-box.height / 2, 0 ), m_rows-box.height );
-	box.z = std::min( std::max( z-box.depth / 2, 0 ),  m_frames-box.depth );
+    //set position of the box
+    box.x = std::min( std::max( x-box.width / 2, 0 ),  m_columns-box.width );
+    box.y = std::min( std::max( y-box.height / 2, 0 ), m_rows-box.height );
+    box.z = std::min( std::max( z-box.depth / 2, 0 ),  m_frames-box.depth );
 
-	return box;
+    return box;
 }
 
 void Anatomy::generateTexture()
 {
     glPixelStorei  ( GL_UNPACK_ALIGNMENT, 1 );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glPixelStorei") );
     glGenTextures  ( 1, &m_GLuint );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glGenTextures") );
     glBindTexture  ( GL_TEXTURE_3D, m_GLuint );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glBindTexture") );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glTexParameteri") );
 
     switch( m_type )
     {
@@ -1714,111 +1749,116 @@ void Anatomy::generateTexture()
         default:
             break;
     }
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::generateTexture - glTexImage3D") );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 Anatomy::~Anatomy()
 {
+    Logger::getInstance()->print( wxT( "Executing Anatomy destructor..." ), LOGLEVEL_DEBUG );
     const GLuint* tex = &m_GLuint;
     glDeleteTextures( 1, tex );
+    Logger::getInstance()->printIfGLError( wxT( "Anatomy::~Anatomy - glDeleteTextures") );
 
     if( m_pRoi )
     {
         m_pRoi->m_sourceAnatomy = NULL;
     }
 
-    m_dh->updateLoadStatus();
+    Logger::getInstance()->print( wxT( "Anatomy destructor done." ), LOGLEVEL_DEBUG );
 }
 
 void Anatomy::pushHistory()
 {
-	m_drawHistory.push(stack<SubTextureBox>());
+    m_drawHistory.push(stack<SubTextureBox>());
 }
 
 void Anatomy::fillHistory( const SubTextureBox drawZone, bool isRGB) 
 {
-	//push current subtexture's properties
-	m_drawHistory.top().push(drawZone);
-	//init buffer size
-	m_drawHistory.top().top().data.resize(drawZone.datasize);
+    //push current subtexture's properties
+    m_drawHistory.top().push(drawZone);
+    //init buffer size
+    m_drawHistory.top().top().data.resize(drawZone.datasize);
 
-	//fill with texture values
-	for( int z = 0; z < drawZone.depth; ++z )
-	{
-		for( int y = 0; y < drawZone.height; ++y )
-		{
-			for( int x = 0; x < drawZone.width; ++x )
-			{
-				int sourceIndex = (x +drawZone.x) + (y + drawZone.y) * m_columns + (z + drawZone.z) * m_columns * m_rows;
-				int subIndex = x + y * drawZone.width + z * drawZone.width * drawZone.height;
+    //fill with texture values
+    for( int z = 0; z < drawZone.depth; ++z )
+    {
+        for( int y = 0; y < drawZone.height; ++y )
+        {
+            for( int x = 0; x < drawZone.width; ++x )
+            {
+                int sourceIndex = (x +drawZone.x) + (y + drawZone.y) * m_columns + (z + drawZone.z) * m_columns * m_rows;
+                int subIndex = x + y * drawZone.width + z * drawZone.width * drawZone.height;
 
-				if(isRGB)
-				{
-					m_drawHistory.top().top().data[subIndex*3] = m_floatDataset[sourceIndex*3];
-					m_drawHistory.top().top().data[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
-					m_drawHistory.top().top().data[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
-				}
-				else
-				{
-					m_drawHistory.top().top().data[subIndex] = m_floatDataset[sourceIndex];
-				}
-			}
-		}
-	}
+                if(isRGB)
+                {
+                    m_drawHistory.top().top().data[subIndex*3] = m_floatDataset[sourceIndex*3];
+                    m_drawHistory.top().top().data[subIndex*3 + 1] = m_floatDataset[sourceIndex*3 + 1];
+                    m_drawHistory.top().top().data[subIndex*3 + 2] = m_floatDataset[sourceIndex*3 + 2];
+                }
+                else
+                {
+                    m_drawHistory.top().top().data[subIndex] = m_floatDataset[sourceIndex];
+                }
+            }
+        }
+    }
 }
 
 void Anatomy::popHistory(bool isRGB)
 {
-	if(m_drawHistory.empty())
-	{
-		return;
-	}
+    if(m_drawHistory.empty())
+    {
+        return;
+    }
 
-	//restore the data from top of history
+    //restore the data from top of history
     while( !m_drawHistory.top().empty() )
     {
-		//the top contains a list of every subtextures made in one click,
-		//we need to get them back from top to bottom
-		SubTextureBox* topPtr = &(m_drawHistory.top().top());
+        //the top contains a list of every subtextures made in one click,
+        //we need to get them back from top to bottom
+        SubTextureBox* topPtr = &(m_drawHistory.top().top());
 
-		for( int z = 0; z < topPtr->depth; ++z )
-		{
-			for( int y = 0; y < topPtr->height; ++y )
-			{
-				for( int x = 0; x < topPtr->width; ++x )
-				{
-					int sourceIndex = (x+topPtr->x) + (y+topPtr->y) * m_columns + (z+topPtr->z) * m_columns * m_rows;
-					int subIndex = x + y * topPtr->width + z * topPtr->width * topPtr->height;
+        for( int z = 0; z < topPtr->depth; ++z )
+        {
+            for( int y = 0; y < topPtr->height; ++y )
+            {
+                for( int x = 0; x < topPtr->width; ++x )
+                {
+                    int sourceIndex = (x+topPtr->x) + (y+topPtr->y) * m_columns + (z+topPtr->z) * m_columns * m_rows;
+                    int subIndex = x + y * topPtr->width + z * topPtr->width * topPtr->height;
 
-					if(isRGB)
-					{
-						m_floatDataset[sourceIndex*3] = topPtr->data[subIndex*3];
-						m_floatDataset[sourceIndex*3 + 1] = topPtr->data[subIndex*3 + 1];
-						m_floatDataset[sourceIndex*3 + 2] = topPtr->data[subIndex*3 + 2];
-					}
-					else
-					{
-						m_floatDataset[sourceIndex] = topPtr->data[subIndex];
-					}
-				}
-			}
-		}
-		//restore texture with the data
-		glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
-		if(isRGB)
-		{
-			glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_RGB, GL_FLOAT, &(topPtr->data[0]) );
-		}
-		else
-		{
-			glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_LUMINANCE, GL_FLOAT, &(topPtr->data[0]) );
-		}
-		//discard this subtexture
-		topPtr = NULL;
-		m_drawHistory.top().pop();
-	}
+                    if(isRGB)
+                    {
+                        m_floatDataset[sourceIndex*3] = topPtr->data[subIndex*3];
+                        m_floatDataset[sourceIndex*3 + 1] = topPtr->data[subIndex*3 + 1];
+                        m_floatDataset[sourceIndex*3 + 2] = topPtr->data[subIndex*3 + 2];
+                    }
+                    else
+                    {
+                        m_floatDataset[sourceIndex] = topPtr->data[subIndex];
+                    }
+                }
+            }
+        }
+        //restore texture with the data
+        glBindTexture(GL_TEXTURE_3D, m_GLuint);    //The texture we created already
+        Logger::getInstance()->printIfGLError( wxT( "Anatomy::popHistory - glBindTexture") );
+        if(isRGB)
+        {
+            glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_RGB, GL_FLOAT, &(topPtr->data[0]) );
+        }
+        else
+        {
+            glTexSubImage3D( GL_TEXTURE_3D, 0, topPtr->x, topPtr->y, topPtr->z, topPtr->width, topPtr->height, topPtr->depth, GL_LUMINANCE, GL_FLOAT, &(topPtr->data[0]) );
+        }
+        Logger::getInstance()->printIfGLError( wxT( "Anatomy::popHistory - glTexSubImage3D") );
+        //discard this subtexture
+        topPtr = NULL;
+        m_drawHistory.top().pop();
+    }
 
-	//discard top of history
-	m_drawHistory.pop();
+    //discard top of history
+    m_drawHistory.pop();
 }

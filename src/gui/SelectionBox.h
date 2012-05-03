@@ -20,19 +20,16 @@ class SelectionBox : public SelectionObject
 {
 public:
     // Constructor / Destructor
-    SelectionBox( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper );
-    SelectionBox( DatasetHelper* i_datasetHelper, Anatomy* i_anatomy );
-    ~SelectionBox();
+    SelectionBox( Vector i_center, Vector i_size );
+    SelectionBox( Anatomy* i_anatomy );
+    virtual ~SelectionBox();
 
-    // Fonction from SelectionObject (virtual pure)
+    // Function from SelectionObject (pure virtual)
     hitResult hitTest( Ray* i_ray );
 
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
-    virtual void updatePropertiesSizer();
-
 private:
-    // Fonction from SelectionObject (virtual pure)
-    void      drawObject( GLfloat* i_color );
+    // Function from SelectionObject (pure virtual)
+    void     drawObject( GLfloat* i_color );
 
     // Functions
     void     draw1();

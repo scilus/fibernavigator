@@ -1,17 +1,19 @@
 #include "Shader.h"
 
+#include "../main.h"
+#include "../Logger.h"
+
+#include <GL/glew.h>
+#include <wx/filename.h>
+#include <wx/string.h>
+#include <wx/textfile.h>
+
 #include <fstream>
 using std::ifstream;
 
 #include <sstream>
 using std::ostringstream;
 
-#include <GL/glew.h>
-#include <wx/string.h>
-#include <wx/textfile.h>
-
-#include "../main.h"
-#include "../Logger.h"
 
 Shader::Shader( wxString filename, SHADERTYPE type )
 : m_id( NULL ),
@@ -155,23 +157,14 @@ bool Shader::loadFromFile( wxString *pCode, const wxString &filename )
 
 bool Shader::fileExists()
 {
-    bool result;
-    ifstream file;
-    m_oss << MyApp::shaderPath.char_str() << m_filename.char_str();
-    file.open( m_oss.str().c_str() );
-    m_oss.str("");
-    result = file.fail() ? false : true;
-    file.close();
-    return result;
+    return wxFileName::FileExists( MyApp::shaderPath + m_filename );
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 Shader::~Shader()
 {
-    if( 0 != m_id )
-    {
-        glDeleteShader( m_id );
-        m_id = 0;
-    }
+    glDeleteShader( m_id );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Deleting Shader (%s) failed." ), m_filename.c_str() ) );
+    m_id = 0;
 }

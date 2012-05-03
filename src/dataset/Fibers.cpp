@@ -5,55 +5,109 @@
 
 #include "Fibers.h"
 
-#include <iostream>
-#include <fstream>
-#include <cfloat>
-#include <limits>
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cmath>
-#include <wx/tokenzr.h>
-
 #include "Anatomy.h"
+#include "DatasetManager.h"
+
 #include "../main.h"
 #include "../Logger.h"
-
+#include "../gfx/ShaderHelper.h"
+#include "../gui/MainFrame.h"
+#include "../gui/SceneManager.h"
 #include "../misc/Fantom/FMatrix.h"
+
+#include <wx/file.h>
+#include <wx/tglbtn.h>
+#include <wx/tokenzr.h>
+#include <wx/xml/xml.h>
+
+#include <algorithm>
+#include <cfloat>
+#include <cmath>
+#include <fstream>
+using std::ofstream;
+
+#include <limits>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+using std::string;
+
+#include <sstream>
+using std::stringstream;
+
+#include <vector>
+using std::vector;
+
+#define DEF_POS   wxDefaultPosition
+#define DEF_SIZE  wxDefaultSize
 
 // TODO replace by const
 #define LINEAR_GRADIENT_THRESHOLD 0.085f
 #define MIN_ALPHA_VALUE 0.017f
 
-Fibers::Fibers( DatasetHelper *pDatasetHelper )
-    : DatasetInfo( pDatasetHelper ),
-      m_isSpecialFiberDisplay( false ),
-      m_isInitialized( false ),
-      m_normalsPositive( false ),
-      m_cachedThreshold( 0.0f ),
-	  m_fibersInverted( false ),
-	  m_useFakeTubes( false ),
-	  m_useTransparency( false ),
-	  m_isColorationUpdated( false ),
-	  m_fiberColorationMode( NORMAL_COLOR ),
-      m_pKdTree( NULL ),
-      m_pOctree( NULL ),
-      m_cfDrawDirty( true ),
-      m_axialShown( pDatasetHelper->m_showAxial ),
-      m_coronalShown( pDatasetHelper->m_showCoronal ),
-      m_sagittalShown( pDatasetHelper->m_showSagittal ),
-      m_useCrossingFibers( false ),
-      m_thickness( 2.5f )
+Fibers::Fibers()
+:   DatasetInfo(),
+    m_isSpecialFiberDisplay( false ),
+    m_barycenter(),
+    m_boxMax(),
+    m_boxMin(),
+    m_colorArray(),
+    m_count( 0 ),
+    m_countLines( 0 ),
+    m_countPoints( 0 ),
+    m_isInitialized( false ),
+    m_lineArray(),
+    m_linePointers(),
+    m_pointArray(),
+    m_normalArray(),
+    m_normalsPositive( false ),
+    m_reverse(),
+    m_selected(),
+    m_filtered(),
+    m_length(),
+    m_maxLength( 0.0f ),
+    m_minLength( 0.0f ),
+    m_localizedAlpha(),
+    m_cachedThreshold( 0.0f ),
+    m_fibersInverted( false ),
+    m_useFakeTubes( false ),
+    m_useTransparency( false ),
+    m_isColorationUpdated( false ),
+    m_fiberColorationMode( NORMAL_COLOR ),
+    m_pKdTree( NULL ),
+    m_pOctree( NULL ),
+    m_cfDrawDirty( true ),
+    m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
+    m_coronalShown(  SceneManager::getInstance()->isCoronalDisplayed() ),
+    m_sagittalShown( SceneManager::getInstance()->isSagittalDisplayed() ),
+    m_useIntersectedFibers( false ),
+    m_thickness( 2.5f ),
+    m_xDrawn( 0.0f ),
+    m_yDrawn( 0.0f ),
+    m_zDrawn( 0.0f ),
+    m_cfStartOfLine(),
+    m_cfPointsPerLine(),
+    m_pSliderFibersFilterMin( NULL ),
+    m_pSliderFibersFilterMax( NULL ),
+    m_pSliderFibersSampling( NULL ),
+    m_pSliderInterFibersThickness( NULL ),
+    m_pToggleLocalColoring( NULL ),
+    m_pToggleNormalColoring( NULL ),
+    m_pToggleCrossingFibers( NULL ),
+    m_pRadNormalColoring( NULL ),
+    m_pRadDistanceAnchoring( NULL ),
+    m_pRadMinDistanceAnchoring( NULL ),
+    m_pRadCurvature( NULL ),
+    m_pRadTorsion( NULL )
 {
-    m_bufferObjects         = new GLuint[3];
+    m_bufferObjects = new GLuint[3];
 }
 
 Fibers::~Fibers()
 {
-    Logger::getInstance()->print( wxT( "executing fibers destructor" ), LOGLEVEL_MESSAGE );
-    m_dh->m_fibersLoaded = false;
+    Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
 
-    if( m_dh->m_useVBO )
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glDeleteBuffers( 3, m_bufferObjects );
     }
@@ -78,11 +132,12 @@ Fibers::~Fibers()
     m_colorArray.clear();
 }
 
-bool Fibers::load( wxString filename )
+bool Fibers::load( const wxString &filename )
 {
-    bool res = false;
+    bool res( false );
 
-    if( filename.AfterLast( '.' ) == _T( "fib" ) )
+    wxString extension = filename.AfterLast( '.' );
+    if( wxT( "fib" ) == extension )
     {
         if( loadVTK( filename ) )
         {
@@ -93,29 +148,25 @@ bool Fibers::load( wxString filename )
             res = loadDmri( filename );
         }
     }
-
-    if( filename.AfterLast( '.' ) == _T( "bundlesdata" ) )
+    else if( wxT( "bundlesdata" ) == extension )
     {
         res = loadPTK( filename );
     }
-
-    if( filename.AfterLast( '.' ) == _T( "Bfloat" ) )
+    else if( wxT( "Bfloat" ) == extension )
     {
         res = loadCamino( filename );
     }
-
-    if( filename.AfterLast( '.' ) == _T( "trk" ) )
+    else if( wxT( "trk" ) == extension )
     {
         res = loadTRK( filename );
     }
-
-    if( filename.AfterLast( '.' ) == _T( "tck" ) )
+    else if( wxT( "tck" ) == extension )
     {
         res = loadMRtrix( filename );
     }
 
     /* OcTree points classification */
-    m_pOctree = new Octree( 2, m_pointArray, m_countPoints, m_dh );
+    m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
     return res;
 }
 
@@ -367,14 +418,14 @@ bool Fibers::loadTRK( const wxString &filename )
     m_countPoints = 0;
     vector< float > colors;
 
-	 //if( nbCount == 0 )
+    //if( nbCount == 0 )
     //{
     //   return false; //TODO: handle it. (0 means the number was NOT stored.)
     //}
 
     for( unsigned int i = 0; i < nbCount || remainingBytes > 0; ++i )
     //for( unsigned int i = 0; i != nbCount ; ++i )
-	 {
+    {
         //Number of points in this track. [4 bytes]
         wxUint32 nbPoints;
         dataFile.Read( cbi32.b, ( size_t )4 );
@@ -409,8 +460,9 @@ bool Fibers::loadTRK( const wxString &filename )
             }
         }
 
-        for( unsigned int j = 0; j != nbProperties; ++j ) 
-        {} //TODO: incorporate properties in the navigator.
+        //TODO: incorporate properties in the navigator.
+//         for( unsigned int j = 0; j != nbProperties; ++j ) 
+//         {}
 
         m_countPoints += curLine.size() / 3;
         lines.push_back( curLine );
@@ -422,7 +474,7 @@ bool Fibers::loadTRK( const wxString &filename )
        remainingBytes -= 3*nbPoints * 4; //Coordinates (4 bytes)
        remainingBytes -= nbScalars*nbPoints * 4; //Scalars (4 bytes)
        remainingBytes -= nbProperties * 4; //Properties (4 bytes)
-		 //cout <<  "i : " << i << ", remainingBytes : " << remainingBytes << "\n";
+       //cout <<  "i : " << i << ", remainingBytes : " << remainingBytes << "\n";
     }
 
     dataFile.Close();
@@ -432,7 +484,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ////
     Logger::getInstance()->print( wxT( "Setting data in right format for the navigator..." ), LOGLEVEL_MESSAGE );
     m_countLines = lines.size();
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_pointArray.max_size();
     m_colorArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
@@ -476,45 +528,52 @@ bool Fibers::loadTRK( const wxString &filename )
 
         for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
         {   
-				if (colors.size() > 0)
-				{
-	            m_colorArray[pos] = colors[pos] / 255.;
-				}
+            if (colors.size() > 0)
+            {
+                m_colorArray[pos] = colors[pos] / 255.;
+            }
             m_pointArray[pos++] = *it2;
         }
     }
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     if( voxelSize[0] == 0 && voxelSize[1] == 0 && voxelSize[2] == 0 )
     {
         ss.str( "" );
-        ss << "Using anatomy's voxel size: [" << m_dh->m_xVoxel << "," << m_dh->m_yVoxel << "," << m_dh->m_zVoxel << "]";
+        ss << "Using anatomy's voxel size: [" << voxelX << ", " << voxelY << ", " << voxelZ << "]";
         Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-        voxelSize[0] = m_dh->m_xVoxel;
-        voxelSize[1] = m_dh->m_yVoxel;
-        voxelSize[2] = m_dh->m_zVoxel;
+        voxelSize[0] = voxelX;
+        voxelSize[1] = voxelY;
+        voxelSize[2] = voxelZ;
         ss.str( "" );
-        ss << "Centering with respect to the anatomy: [" << m_dh->m_columns / 2 << "," << m_dh->m_rows / 2 << "," << m_dh->m_frames / 2 << "]";
+        ss << "Centering with respect to the anatomy: [" << columns / 2 << "," << rows / 2 << "," << frames / 2 << "]";
         Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-        origin[0] = m_dh->m_columns / 2;
-        origin[1] = m_dh->m_rows / 2;
-        origin[2] = m_dh->m_frames / 2;
+        origin[0] = columns / 2;
+        origin[1] = rows / 2;
+        origin[2] = frames / 2;
     }
 
     float flipX = ( invertX ) ? -1. : 1.;
     float flipY = ( invertY ) ? -1. : 1.;
     float flipZ = ( invertZ ) ? -1. : 1.;
     float anatomy[3];
-    anatomy[0] = ( ( flipX - 1. ) * m_dh->m_columns * m_dh->m_xVoxel ) / -2.;
-    anatomy[1] = ( ( flipY - 1. ) * m_dh->m_rows * m_dh->m_yVoxel ) / -2.;
-    anatomy[2] = ( ( flipZ - 1. ) * m_dh->m_frames * m_dh->m_zVoxel ) / -2.;
+    anatomy[0] = ( flipX - 1. ) * columns * voxelX / -2.;
+    anatomy[1] = ( flipY - 1. ) * rows    * voxelY / -2.;
+    anatomy[2] = ( flipZ - 1. ) * frames  * voxelZ / -2.;
 
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = flipX * ( m_pointArray[i] - origin[0] ) * ( m_dh->m_xVoxel / voxelSize[0] ) + anatomy[0];
+        m_pointArray[i] = flipX * ( m_pointArray[i] - origin[0] ) * voxelX / voxelSize[0] + anatomy[0];
         ++i;
-        m_pointArray[i] = flipY * ( m_pointArray[i] - origin[1] ) * ( m_dh->m_yVoxel / voxelSize[1] ) + anatomy[1];
+        m_pointArray[i] = flipY * ( m_pointArray[i] - origin[1] ) * voxelY / voxelSize[1] + anatomy[1];
         ++i;
-        m_pointArray[i] = flipZ * ( m_pointArray[i] - origin[2] ) * ( m_dh->m_zVoxel / voxelSize[2] ) + anatomy[2];
+        m_pointArray[i] = flipZ * ( m_pointArray[i] - origin[2] ) * voxelZ / voxelSize[2] + anatomy[2];
     }
 
     Logger::getInstance()->print( wxT( "TRK file loaded" ), LOGLEVEL_MESSAGE );
@@ -609,13 +668,20 @@ bool Fibers::loadCamino( const wxString &filename )
     printf( "%d lines and %d points \n", m_countLines, m_countPoints );
     Logger::getInstance()->print( wxT( "Move vertices" ), LOGLEVEL_MESSAGE );
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
+        m_pointArray[i] = columns * voxelX - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_rows * m_dh->m_yVoxel - m_pointArray[i];
+        m_pointArray[i] = rows    * voxelY - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_frames * m_dh->m_zVoxel - m_pointArray[i];
+        m_pointArray[i] = frames  * voxelZ - m_pointArray[i];
     }
 
     calculateLinePointers();
@@ -623,8 +689,8 @@ bool Fibers::loadCamino( const wxString &filename )
     Logger::getInstance()->print( wxT( "Read all" ), LOGLEVEL_MESSAGE );
     delete[] pBuffer;
     pBuffer = NULL;
-    
-    m_dh->m_countFibers = m_countLines;
+
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
@@ -690,7 +756,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     dataFile.Read( pBuffer, nSize );
     dataFile.Close();
     
-    cout << " Read fibers:\n";
+    Logger::getInstance()->print( wxT( "Reading fibers" ), LOGLEVEL_DEBUG );
     pc = 0;
     m_countPoints = 0; // number of points
 
@@ -771,7 +837,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -822,19 +888,21 @@ bool Fibers::loadMRtrix( const wxString &filename )
     // scaling factor is encoded in the transformation matrix, but we do not,
     // for the moment, use this scaling. Therefore, we must remove it from the
     // the transformation matrix before computing its inverse.
-    FMatrix localToWorld = m_dh->m_niftiTransform;
-    
-    if( m_dh->m_xVoxel != 1.0 ||
-        m_dh->m_yVoxel != 1.0 ||
-        m_dh->m_zVoxel != 1.0 )
+    FMatrix localToWorld = FMatrix( DatasetManager::getInstance()->getNiftiTransform() );
+
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    if( voxelX != 1.0 || voxelY != 1.0 || voxelZ != 1.0 )
     {
         FMatrix rotMat( 3, 3 );
         localToWorld.getSubMatrix( rotMat, 0, 0 );
         
         FMatrix scaleInversion( 3, 3 );
-        scaleInversion( 0, 0 ) = 1.0 / m_dh->m_xVoxel;
-        scaleInversion( 1, 1 ) = 1.0 / m_dh->m_yVoxel;
-        scaleInversion( 2, 2 ) = 1.0 / m_dh->m_zVoxel;
+        scaleInversion( 0, 0 ) = 1.0 / voxelX;
+        scaleInversion( 1, 1 ) = 1.0 / voxelY;
+        scaleInversion( 2, 2 ) = 1.0 / voxelZ;
         
         rotMat = scaleInversion * rotMat;
         
@@ -960,13 +1028,20 @@ bool Fibers::loadPTK( const wxString &filename )
     * already in the space of the dataset. Good voxel size and origin
     *
     ********************************************************************/
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+    
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
+        m_pointArray[i] = columns * voxelX - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_rows    * m_dh->m_yVoxel - m_pointArray[i];
+        m_pointArray[i] = rows    * voxelY - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_frames  * m_dh->m_zVoxel - m_pointArray[i];
+        m_pointArray[i] = frames  * voxelZ - m_pointArray[i];
     }
 
     calculateLinePointers();
@@ -976,7 +1051,7 @@ bool Fibers::loadPTK( const wxString &filename )
     delete[] pBuffer;
     pBuffer = NULL;
     
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
@@ -1203,7 +1278,7 @@ bool Fibers::loadVTK( const wxString &filename )
 
     Logger::getInstance()->print( wxString::Format( wxT( "Loading %d points and %d lines" ), countPoints, countLines ), LOGLEVEL_MESSAGE );
     m_countLines        = countLines;
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_countPoints       = countPoints;
     
     m_linePointers.resize( m_countLines + 1 );
@@ -1237,13 +1312,18 @@ bool Fibers::loadVTK( const wxString &filename )
     toggleEndianess();
     Logger::getInstance()->print( wxT( "Move vertices" ), LOGLEVEL_MESSAGE );
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+
     for( int i = 0; i < countPoints * 3; ++i )
     {
-        m_pointArray[i] = m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[i];
+        m_pointArray[i] = columns * voxelX - m_pointArray[i];
         ++i;
-        m_pointArray[i] = m_dh->m_rows    * m_dh->m_yVoxel - m_pointArray[i];
+        m_pointArray[i] = rows    * voxelY - m_pointArray[i];
         ++i;
-        //m_pointArray[i] = m_dh->m_frames - m_pointArray[i];
+        //m_pointArray[i] = frames - m_pointArray[i];
     }
 
     calculateLinePointers();
@@ -1351,7 +1431,7 @@ bool Fibers::loadDmri( const wxString &filename )
     
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
-    m_dh->m_countFibers = m_countLines + 1;
+    DatasetManager::getInstance()->setCountFibers( m_countLines + 1 );
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -1412,7 +1492,7 @@ void Fibers::loadTestFibers()
     m_countLines        = 2;  // The number of fibers you want to display.
     int lengthLines   = 10; // The number of points each fiber will have.
     int pos = 0;
-    m_dh->m_countFibers = m_countLines;
+    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_countPoints       = m_countLines * lengthLines;
     
     m_linePointers.resize( m_countLines + 1 );
@@ -1519,20 +1599,20 @@ void Fibers::loadTestFibers()
 // This function will call the proper coloring function for the fibers.
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::updateFibersColors()
-{	
+{
     if( m_fiberColorationMode == NORMAL_COLOR )
     {
         resetColorArray();
     }
     else
     {
-		float *pColorData( NULL );
-		
-		if( m_dh->m_useVBO )
-		{
-			glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-		}
+        float *pColorData( NULL );
+
+        if( SceneManager::getInstance()->isUsingVBO() )
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        }
         else
         {
             pColorData  = &m_colorArray[0];
@@ -1555,7 +1635,7 @@ void Fibers::updateFibersColors()
             colorWithMinDistance( pColorData );
         }
 
-        if( m_dh->m_useVBO)
+        if( SceneManager::getInstance()->isUsingVBO() )
         {
             glUnmapBuffer( GL_ARRAY_BUFFER );
         }
@@ -1621,14 +1701,15 @@ void Fibers::colorWithTorsion( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            m_dh->m_lastSelectedObject->getProgressionTorsion( Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
+            MyApp::frame->getLastSelectedObj()->getProgressionTorsion( 
+                    Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
                     Vector( m_pointArray[index + 3], m_pointArray[index + 4], m_pointArray[index + 5] ),
                     Vector( m_pointArray[index + 6], m_pointArray[index + 7], m_pointArray[index + 8] ),
                     progression, color );
             
-            // Lets apply a specific harcoded coloration for the torsion.
+            // Lets apply a specific hard coded coloration for the torsion.
             float realColor;
 
             if( color <= 0.01f ) // Those points have no torsion so we simply but them pure blue.
@@ -1717,14 +1798,15 @@ void Fibers::colorWithCurvature( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            m_dh->m_lastSelectedObject->getProgressionCurvature( Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
+            MyApp::frame->getLastSelectedObj()->getProgressionCurvature(
+                    Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
                     Vector( m_pointArray[index + 3], m_pointArray[index + 4], m_pointArray[index + 5] ),
                     Vector( m_pointArray[index + 6], m_pointArray[index + 7], m_pointArray[index + 8] ),
                     progression, color );
             
-            // Lets apply a specific harcoded coloration for the curvature.
+            // Lets apply a specific hard coded coloration for the curvature.
             float realColor;
 
             if( color <= 0.01f ) // Those points have no curvature so we simply but them pure blue.
@@ -1762,12 +1844,12 @@ void Fibers::colorWithCurvature( float *pColorData )
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::colorWithDistance( float *pColorData )
 {
-	if( pColorData == NULL )
+    if( pColorData == NULL )
     {
         return;
     }
-	
-    SelectionObjectList selObjs =  m_dh->getSelectionObjects();
+
+    SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
     vector< SelectionObject* > simplifiedList;
 
     for( unsigned int i = 0; i < selObjs.size(); ++i )
@@ -1781,13 +1863,20 @@ void Fibers::colorWithDistance( float *pColorData )
         }
     }
 
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int i = 0; i < getPointCount(); ++i )
     {
         float minDistance = FLT_MAX;
-        int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
-        int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
-        int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
-        int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+        int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[i * 3 ]    / voxelX ) ) );
+        int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) );
+        int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) );
+        int index = x + y * columns + z * rows * columns;
 
         for( unsigned int j = 0; j < simplifiedList.size(); ++j )
         {
@@ -1829,12 +1918,12 @@ void Fibers::colorWithDistance( float *pColorData )
 
 void Fibers::colorWithMinDistance( float *pColorData )
 {
-	if( pColorData == NULL )
+    if( pColorData == NULL )
     {
         return;
     }
-	
-    SelectionObjectList selObjs =  m_dh->getSelectionObjects();
+
+    SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
     vector< SelectionObject* > simplifiedList;
 
     for( unsigned int i = 0; i < selObjs.size(); ++i )
@@ -1848,6 +1937,13 @@ void Fibers::colorWithMinDistance( float *pColorData )
         }
     }
 
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
     for( int i = 0; i < getLineCount(); ++i )
     {
         int nbPointsInLine = getPointsPerLine( i );
@@ -1856,10 +1952,10 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
         for( int j = 0; j < nbPointsInLine; ++j )
         {
-            int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[( index + j ) * 3 ] / m_dh->m_xVoxel ) ) ;
-            int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[( index + j ) * 3 + 1] / m_dh->m_yVoxel ) ) ;
-            int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[( index + j ) * 3 + 2] / m_dh->m_zVoxel ) ) ;
-            int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+            int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[( index + j ) * 3 ]    / voxelX ) ) ) ;
+            int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[( index + j ) * 3 + 1] / voxelY ) ) ) ;
+            int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[( index + j ) * 3 + 2] / voxelZ ) ) ) ;
+            int index = x + y * columns + z * rows * columns;
 
             for( unsigned int k = 0; k < simplifiedList.size(); ++k )
             {
@@ -1925,15 +2021,15 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
 Anatomy* Fibers::generateFiberVolume()
 {
-	float* pColorData( NULL );
-	if( m_dh->m_useVBO )
+    float* pColorData( NULL );
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
-		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-			
-		#ifdef __WXMAC__
-			//glBufferData(GL_ARRAY_BUFFER, getPointCount()*3 + 2, NULL, GL_STREAM_DRAW);
-		#endif
-		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+
+        #ifdef __WXMAC__
+            //glBufferData(GL_ARRAY_BUFFER, getPointCount()*3 + 2, NULL, GL_STREAM_DRAW);
+        #endif
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
@@ -1945,45 +2041,39 @@ Anatomy* Fibers::generateFiberVolume()
         m_localizedAlpha = vector< float >( getPointCount(), 1 );
     }
 
-    Anatomy *pTmpAnatomy = new Anatomy( m_dh, RGB );
+    DatasetIndex index = DatasetManager::getInstance()->createAnatomy( RGB );
+    Anatomy *pTmpAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
     pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
     
-	#ifdef __WXMAC__
-		// insert at zero is a well-known bug on OSX, so we append there...
-		// http://trac.wxwidgets.org/ticket/4492
-		long l_id = m_dh->m_mainFrame->m_pListCtrl->GetItemCount();
-	#else
-		long l_id = 0;
-	#endif 
-	
-    m_dh->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, pTmpAnatomy->getName() );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "1.0" ) );
-    m_dh->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemData( l_id, ( long ) pTmpAnatomy );
-    m_dh->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-	
-    m_dh->updateLoadStatus();
-    m_dh->m_mainFrame->refreshAllGLWidgets();
+    MyApp::frame->m_pListCtrl->InsertItem( index );
+
+    MyApp::frame->refreshAllGLWidgets();
+
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
 
     for( int i = 0; i < getPointCount(); ++i )
     {
-        int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
-        int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
-        int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
-        int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+        int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[i * 3 ]    / voxelX ) ) ) ;
+        int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) ) ;
+        int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) ) ;
+        int index = x + y * columns + z * rows * columns;
         
-        ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3] * m_localizedAlpha[i];
+        ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3]     * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 1] += pColorData[i * 3 + 1] * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
     }
 
-    if( m_dh->m_useVBO )
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
-	
-	return pTmpAnatomy;
+
+    return pTmpAnatomy;
 }
 
 void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& linesToSave, vector<int>& colorsToSave, int& countLines )
@@ -1991,17 +2081,22 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
     int pointIndex( 0 );
     countLines = 0;
 
-	float *pColorData( NULL );
-	
-	if( m_dh->m_useVBO )
+    float *pColorData( NULL );
+    
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
-		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
         pColorData = &m_colorArray[0];
     }
+
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
 
     for( int l = 0; l < m_countLines; ++l )
     {
@@ -2012,10 +2107,10 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
 
             for( int j = 0; j < getPointsPerLine( l ); ++j )
             {
-                pointsToSave.push_back( m_dh->m_columns * m_dh->m_xVoxel - m_pointArray[pc] );
+                pointsToSave.push_back( columns * voxelX - m_pointArray[pc] );
                 colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
-                pointsToSave.push_back( m_dh->m_rows * m_dh->m_yVoxel - m_pointArray[pc] );
+                pointsToSave.push_back( rows * voxelY - m_pointArray[pc] );
                 colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
                 pointsToSave.push_back( m_pointArray[pc] );
@@ -2028,7 +2123,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
         }
     }
 
-    if( m_dh->m_useVBO)
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2036,7 +2131,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
 
 void Fibers::getNbLines( int& nbLines )
 {
-	nbLines = 0;
+    nbLines = 0;
 
     for( int l = 0; l < m_countLines; ++l )
     {
@@ -2049,7 +2144,7 @@ void Fibers::getNbLines( int& nbLines )
 
 void Fibers::loadDMRIFibersInFile( ofstream& myfile )
 {
-	for( int l = 0; l < m_countLines; ++l )
+    for( int l = 0; l < m_countLines; ++l )
     {
         if( m_selected[l] && !m_filtered[l] )
         {
@@ -2073,59 +2168,59 @@ void Fibers::loadDMRIFibersInFile( ofstream& myfile )
  */
 void Fibers::save( wxString filename )
 {
-	ofstream myfile;
+    ofstream myfile;
     char *pFn;
-	vector<char> vBuffer;
-	converterByteINT32 c;
+    vector<char> vBuffer;
+    converterByteINT32 c;
     converterByteFloat f;
-	vector<float> pointsToSave;
-	vector<int> linesToSave;
-	vector<int> colorsToSave;
-	int countLines = 0;
+    vector<float> pointsToSave;
+    vector<int> linesToSave;
+    vector<int> colorsToSave;
+    int countLines = 0;
 
-	if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
     {
         filename += _T( ".fib" );
     }
 
     pFn = ( char * ) malloc( filename.length() );
     strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
-    myfile.open( pFn, ios::binary );
+    myfile.open( pFn, std::ios::binary );
 
-	getFibersInfoToSave( pointsToSave, linesToSave, colorsToSave, countLines );
+    getFibersInfoToSave( pointsToSave, linesToSave, colorsToSave, countLines );
 
-	string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
-	header1 += intToString( pointsToSave.size() / 3 );
-	header1 += " float\n";
-	for( unsigned int i = 0; i < header1.size(); ++i )
-	{
-		vBuffer.push_back( header1[i] );
-	}
-	for( unsigned int i = 0; i < pointsToSave.size(); ++i )
-	{
-		f.f = pointsToSave[i];
-		vBuffer.push_back( f.b[3] );
-		vBuffer.push_back( f.b[2] );
-		vBuffer.push_back( f.b[1] );
-		vBuffer.push_back( f.b[0] );
-	}
-	
-	vBuffer.push_back( '\n' );
-	string header2 = "LINES " + intToString( countLines ) + " " + intToString( linesToSave.size() ) + "\n";
+    string header1 = "# vtk DataFile Version 3.0\nvtk output\nBINARY\nDATASET POLYDATA\nPOINTS ";
+    header1 += intToString( pointsToSave.size() / 3 );
+    header1 += " float\n";
+    for( unsigned int i = 0; i < header1.size(); ++i )
+    {
+        vBuffer.push_back( header1[i] );
+    }
+    for( unsigned int i = 0; i < pointsToSave.size(); ++i )
+    {
+        f.f = pointsToSave[i];
+        vBuffer.push_back( f.b[3] );
+        vBuffer.push_back( f.b[2] );
+        vBuffer.push_back( f.b[1] );
+        vBuffer.push_back( f.b[0] );
+    }
+
+    vBuffer.push_back( '\n' );
+    string header2 = "LINES " + intToString( countLines ) + " " + intToString( linesToSave.size() ) + "\n";
     for( unsigned int i = 0; i < header2.size(); ++i )
     {
         vBuffer.push_back( header2[i] );
     }
-	for( unsigned int i = 0; i < linesToSave.size(); ++i )
-	{
-		c.i = linesToSave[i];
-		vBuffer.push_back( c.b[3] );
-		vBuffer.push_back( c.b[2] );
-		vBuffer.push_back( c.b[1] );
-		vBuffer.push_back( c.b[0] );
-	}
-    
-	vBuffer.push_back( '\n' );
+    for( unsigned int i = 0; i < linesToSave.size(); ++i )
+    {
+        c.i = linesToSave[i];
+        vBuffer.push_back( c.b[3] );
+        vBuffer.push_back( c.b[2] );
+        vBuffer.push_back( c.b[1] );
+        vBuffer.push_back( c.b[0] );
+    }
+
+    vBuffer.push_back( '\n' );
     string header3 = "POINT_DATA ";
     header3 += intToString( pointsToSave.size() / 3 );
     header3 += " float\n";
@@ -2134,48 +2229,62 @@ void Fibers::save( wxString filename )
     {
         vBuffer.push_back( header3[i] );
     }
-	for( unsigned int i = 0; i < colorsToSave.size(); ++i )
-	{
-		vBuffer.push_back( colorsToSave[i] );
-	}
-	vBuffer.push_back( '\n' );
+    for( unsigned int i = 0; i < colorsToSave.size(); ++i )
+    {
+        vBuffer.push_back( colorsToSave[i] );
+    }
+    vBuffer.push_back( '\n' );
 
-	// Put the buffer vector into a char* array.
+    // Put the buffer vector into a char* array.
     char* pBuffer = new char[vBuffer.size()];
 
     for( unsigned int i = 0; i < vBuffer.size(); ++i )
     {
         pBuffer[i] = vBuffer[i];
     }
-	
-	myfile.write( pBuffer, vBuffer.size() );
+
+    myfile.write( pBuffer, vBuffer.size() );
     myfile.close();
-    
+
     delete[] pBuffer;
     pBuffer = NULL;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+bool Fibers::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void Fibers::saveDMRI( wxString filename )
 {
     ofstream myfile;
-	int nbrlines;
+    int nbrlines;
     char *pFn;
-	float dist = 0.5;
+    float dist = 0.5;
 
-	if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    if( filename.AfterLast( '.' ) != _T( "fib" ) )
     {
         filename += _T( ".fib" );
     }
 
     pFn = ( char * ) malloc( filename.length() );
     strcpy( pFn, ( const char * ) filename.mb_str( wxConvUTF8 ) );
-    myfile.open( pFn, ios::out );
-   
-	getNbLines( nbrlines );
+    myfile.open( pFn, std::ios::out );
 
-	myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
-	myfile << nbrlines << " " << dist << "\n";
-	loadDMRIFibersInFile( myfile);
+    getNbLines( nbrlines );
+
+    myfile << "1 FA\n4 min max mean var\n1\n4 0 0 0 0\n4 0 0 0 0\n4 0 0 0 0\n";
+    myfile << nbrlines << " " << dist << "\n";
+    loadDMRIFibersInFile( myfile);
 
     myfile.close();
 }
@@ -2363,22 +2472,20 @@ void Fibers::resetColorArray()
 {
     Logger::getInstance()->print( wxT( "Reset color arrays" ), LOGLEVEL_MESSAGE );
     float *pColorData( NULL );
-    float *pColorData2( NULL );
-	
-	if( m_dh->m_useVBO )
+    float *pColorData2( &m_colorArray[0] );
+
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
-		glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-		pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-		pColorData2 = &m_colorArray[0];
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
         pColorData  = &m_colorArray[0];
-        pColorData2 = &m_colorArray[0];
     }
 
     int pc = 0;
-    float r, g, b, x1, x2, y1, y2, z1, z2, lastX, lastY, lastZ = 0.0f;
+    float r, g, b, x1, x2, y1, y2, z1, z2, lastX, lastY, lastZ;
 
     for( int i = 0; i < getLineCount(); ++i )
     {
@@ -2428,7 +2535,7 @@ void Fibers::resetColorArray()
         }
     }
 
-    if( m_dh->m_useVBO)
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
@@ -2444,7 +2551,7 @@ void Fibers::resetLinesShown()
 
 void Fibers::updateLinesShown()
 {
-    vector< vector< SelectionObject * > > selectionObjects = m_dh->getSelectionObjects();
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
     m_selected.assign( m_countLines, true );
 
@@ -2532,15 +2639,15 @@ void Fibers::updateLinesShown()
 
         if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->isColorChanged() )
         {
-			float *pColorData( NULL );
-			float *pColorData2( NULL );
-			
-			if( m_dh->m_useVBO )
-			{
-				glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-				pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-				pColorData2 = &m_colorArray[0];
-			}
+            float *pColorData( NULL );
+            float *pColorData2( NULL );
+            
+            if( SceneManager::getInstance()->isUsingVBO() )
+            {
+                glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+                pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+                pColorData2 = &m_colorArray[0];
+            }
             else
             {
                 pColorData  = &m_colorArray[0];
@@ -2568,7 +2675,7 @@ void Fibers::updateLinesShown()
                 }
             }
 
-            if( m_dh->m_useVBO )
+            if( SceneManager::getInstance()->isUsingVBO() )
             {
                 glUnmapBuffer( GL_ARRAY_BUFFER );
             }
@@ -2601,12 +2708,14 @@ void Fibers::updateLinesShown()
         }
     }
 
+    SelectionObject * pLastSelObj = MyApp::frame->getLastSelectedObj();
+
     // This is to update the information display in the fiber grid info and the mean fiber
-    if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
+    if( boxWasUpdated && pLastSelObj != NULL )
     {
-        m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
-        m_dh->m_lastSelectedObject->computeMeanFiber();
-        m_dh->m_lastSelectedObject->computeConvexHull();
+        pLastSelObj->SetFiberInfoGridValues();
+        pLastSelObj->computeMeanFiber();
+        pLastSelObj->computeConvexHull();
     }
 }
 
@@ -2627,32 +2736,40 @@ vector< bool > Fibers::getLinesShown( SelectionObject *pSelectionObject )
 
     resetLinesShown();
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     if( pSelectionObject->getSelectionType() == BOX_TYPE || pSelectionObject->getSelectionType() == ELLIPSOID_TYPE )
     {
         Vector center = pSelectionObject->getCenter();
         Vector size   = pSelectionObject->getSize();
         m_boxMin.resize( 3 );
         m_boxMax.resize( 3 );
-        m_boxMin[0] = center.x - size.x / 2 * m_dh->m_xVoxel;
-        m_boxMax[0] = center.x + size.x / 2 * m_dh->m_xVoxel;
-        m_boxMin[1] = center.y - size.y / 2 * m_dh->m_yVoxel;
-        m_boxMax[1] = center.y + size.y / 2 * m_dh->m_yVoxel;
-        m_boxMin[2] = center.z - size.z / 2 * m_dh->m_zVoxel;
-        m_boxMax[2] = center.z + size.z / 2 * m_dh->m_zVoxel;
+        m_boxMin[0] = center.x - size.x * 0.5 * voxelX;
+        m_boxMax[0] = center.x + size.x * 0.5 * voxelX;
+        m_boxMin[1] = center.y - size.y * 0.5 * voxelY;
+        m_boxMax[1] = center.y + size.y * 0.5 * voxelY;
+        m_boxMin[2] = center.z - size.z * 0.5 * voxelZ;
+        m_boxMax[2] = center.z + size.z * 0.5 * voxelZ;
 
         //Get and Set selected lines to visible
         objectTest( pSelectionObject );
     }
     else
     {
+        int columns = DatasetManager::getInstance()->getColumns();
+        int rows    = DatasetManager::getInstance()->getRows();
+        int frames  = DatasetManager::getInstance()->getFrames();
+
         for( int i = 0; i < m_countPoints; ++i )
         {
             if( m_selected[getLineForPoint( i )] != 1 )
             {
-                int x     = ( int )wxMin( m_dh->m_columns - 1, wxMax( 0, m_pointArray[i * 3 ] / m_dh->m_xVoxel ) ) ;
-                int y     = ( int )wxMin( m_dh->m_rows    - 1, wxMax( 0, m_pointArray[i * 3 + 1] / m_dh->m_yVoxel ) ) ;
-                int z     = ( int )wxMin( m_dh->m_frames  - 1, wxMax( 0, m_pointArray[i * 3 + 2] / m_dh->m_zVoxel ) ) ;
-                int index = x + y * m_dh->m_columns + z * m_dh->m_rows * m_dh->m_columns;
+                int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[i * 3 ]    / voxelX ) ) );
+                int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) );
+                int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) );
+                int index = x + y * columns + z * rows * columns;
 
                 if( ( pSelectionObject->m_sourceAnatomy->at( index ) > pSelectionObject->getThreshold() ) )
                 {
@@ -2687,97 +2804,12 @@ void Fibers::objectTest( SelectionObject *pSelectionObject )
 ///////////////////////////////////////////////////////////////////////////
 void Fibers::generateKdTree()
 {
-    m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
-}
-
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-//
-// i_point      :
-///////////////////////////////////////////////////////////////////////////
-bool Fibers::getBarycenter( SplinePoint *pPoint )
-{
-    // Number of fibers needed to keep a i_point.
-    int threshold = 20;
-    
-    // Multiplier for moving the i_point towards the barycenter.
-    m_boxMin.resize( 3 );
-    m_boxMax.resize( 3 );
-    m_boxMin[0] = pPoint->X() - 25.0 / 2;
-    m_boxMax[0] = pPoint->X() + 25.0 / 2;
-    m_boxMin[1] = pPoint->Y() - 5.0 / 2;
-    m_boxMax[1] = pPoint->Y() + 5.0 / 2;
-    m_boxMin[2] = pPoint->Z() - 5.0 / 2;
-    m_boxMax[2] = pPoint->Z() + 5.0 / 2;
-    m_barycenter.x = m_barycenter.y = m_barycenter.z = m_count = 0;
-    barycenterTest( 0, m_countPoints - 1, 0 );
-
-    if( m_count > threshold )
-    {
-        m_barycenter.x /= m_count;
-        m_barycenter.y /= m_count;
-        m_barycenter.z /= m_count;
-        float x1 = ( m_barycenter.x - pPoint->X() );
-        float y1 = ( m_barycenter.y - pPoint->Y() );
-        float z1 = ( m_barycenter.z - pPoint->Z() );
-
-        Vector vector( x1, y1, z1 );
-        pPoint->setOffsetVector( vector );
-        pPoint->setX( pPoint->X() + x1 );
-        pPoint->setY( pPoint->Y() + y1 );
-        pPoint->setZ( pPoint->Z() + z1 );
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void Fibers::barycenterTest( int left, int right, int axis )
-{
-    // Abort condition.
-    if( left > right )
-    {
-        return;
-    }
-
-    int root  = left + ( ( right - left ) / 2 );
-    int axis1 = ( axis + 1 ) % 3;
-    int pointIndex = m_pKdTree->m_tree[root] * 3;
-
-    if( m_pointArray[pointIndex + axis] < m_boxMin[axis] )
-    {
-        barycenterTest( root + 1, right, axis1 );
-    }
-    else if( m_pointArray[pointIndex + axis] > m_boxMax[axis] )
-    {
-        barycenterTest( left, root - 1, axis1 );
-    }
-    else
-    {
-        int axis2 = ( axis + 2 ) % 3;
-
-        if( m_selected[getLineForPoint( m_pKdTree->m_tree[root] )] == 1 &&
-            m_pointArray[pointIndex + axis1] <= m_boxMax[axis1]    &&
-            m_pointArray[pointIndex + axis1] >= m_boxMin[axis1]    &&
-            m_pointArray[pointIndex + axis2] <= m_boxMax[axis2]    &&
-            m_pointArray[pointIndex + axis2] >= m_boxMin[axis2] )
-        {
-            m_barycenter[0] += m_pointArray[m_pKdTree->m_tree[root] * 3];
-            m_barycenter[1] += m_pointArray[m_pKdTree->m_tree[root] * 3 + 1];
-            m_barycenter[2] += m_pointArray[m_pKdTree->m_tree[root] * 3 + 2];
-            m_count++;
-        }
-
-        barycenterTest( left, root - 1, axis1 );
-        barycenterTest( root + 1, right, axis1 );
-    }
+    m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0] );
 }
 
 void Fibers::initializeBuffer()
 {
-    if( m_isInitialized || ! m_dh->m_useVBO )
+    if( m_isInitialized || !SceneManager::getInstance()->isUsingVBO()  )
     {
         return;
     }
@@ -2807,7 +2839,7 @@ void Fibers::initializeBuffer()
         isOK = !Logger::getInstance()->printIfGLError( wxT( "initialize vbo normals" ) );
     }
 
-    m_dh->m_useVBO = isOK;
+    SceneManager::getInstance()->setUsingVBO( isOK );
 
     if( isOK )
     {
@@ -2853,7 +2885,7 @@ void Fibers::draw()
 
     // If geometry shaders are supported, the shader will take care of the filtering
     // Otherwise, use the drawCrossingFibers
-    if ( !m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    if ( !SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
         drawCrossingFibers();
         return;
@@ -2863,7 +2895,7 @@ void Fibers::draw()
     glEnableClientState( GL_COLOR_ARRAY );
     glEnableClientState( GL_NORMAL_ARRAY );
 
-    if( ! m_dh->m_useVBO )
+    if( !SceneManager::getInstance()->isUsingVBO() )
     {
         glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
 
@@ -2900,7 +2932,7 @@ void Fibers::draw()
 
     for( int i = 0; i < m_countLines; ++i )
     {
-        if( ( m_selected[i] || !m_dh->m_activateObjects ) && !m_filtered[i] )
+        if( ( m_selected[i] || !SceneManager::getInstance()->getActivateAllSelObj() ) && !m_filtered[i] )
         {
             glDrawArrays( GL_LINE_STRIP, getStartIndexForLine( i ), getPointsPerLine( i ) );
         }
@@ -2950,7 +2982,7 @@ void Fibers::drawFakeTubes()
     pColors  = &m_colorArray[0];
     pNormals = &m_normalArray[0];
 
-    if( m_dh->getPointMode() )
+    if( SceneManager::getInstance()->isPointMode() )
     {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     }
@@ -2959,7 +2991,7 @@ void Fibers::drawFakeTubes()
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     }
 
-    if ( m_useCrossingFibers )
+    if ( m_useIntersectedFibers )
     {
         findCrossingFibers();
 
@@ -3070,7 +3102,7 @@ void Fibers::drawSortedLines()
     float *pColors  = NULL;
     float *pNormals = NULL;
 
-    if( m_dh->m_useVBO )
+    if( SceneManager::getInstance()->isUsingVBO() )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
         pColors = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_ONLY );
@@ -3085,7 +3117,7 @@ void Fibers::drawSortedLines()
         pNormals = &m_normalArray[0];
     }
 
-    if( m_dh->getPointMode() )
+    if( SceneManager::getInstance()->isPointMode() )
     {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     }
@@ -3147,13 +3179,13 @@ void Fibers::drawSortedLines()
 
 void Fibers::useFakeTubes()
 {
-	m_useFakeTubes = ! m_useFakeTubes;
-	switchNormals( m_useFakeTubes );
+    m_useFakeTubes = !m_useFakeTubes;
+    switchNormals( m_useFakeTubes );
 }
 
 void Fibers::useTransparency()
 {
-	m_useTransparency = ! m_useTransparency;
+    m_useTransparency = ! m_useTransparency;
 }
 
 void Fibers::drawCrossingFibers()
@@ -3164,7 +3196,7 @@ void Fibers::drawCrossingFibers()
     glEnableClientState( GL_COLOR_ARRAY );
     glEnableClientState( GL_NORMAL_ARRAY );
 
-    if( ! m_dh->m_useVBO )
+    if( !SceneManager::getInstance()->isUsingVBO() )
     {
         glVertexPointer( 3, GL_FLOAT, 0, &m_pointArray[0] );
 
@@ -3324,7 +3356,7 @@ bool Fibers::isSelected( int fiberId )
 
 float Fibers::getLocalizedAlpha( int index )
 {
-	return m_localizedAlpha[index];
+    return m_localizedAlpha[index];
 }
 
 void Fibers::setFibersLength()
@@ -3347,6 +3379,10 @@ void Fibers::setFibersLength()
     m_maxLength = 0;
     m_minLength = 1000000;
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     for( unsigned int j = 0 ; j < fibersPoints.size(); j++ )
     {
         currentFiberPoints = fibersPoints[j];
@@ -3356,9 +3392,9 @@ void Fibers::setFibersLength()
         {
             // The values are in pixel, we need to set them in millimeters using the spacing
             // specified in the anatomy file ( m_datasetHelper->xVoxel... ).
-            dx = ( currentFiberPoints[i].x - currentFiberPoints[i - 1].x ) * m_dh->m_xVoxel;
-            dy = ( currentFiberPoints[i].y - currentFiberPoints[i - 1].y ) * m_dh->m_yVoxel;
-            dz = ( currentFiberPoints[i].z - currentFiberPoints[i - 1].z ) * m_dh->m_zVoxel;
+            dx = ( currentFiberPoints[i].x - currentFiberPoints[i - 1].x ) * voxelX;
+            dy = ( currentFiberPoints[i].y - currentFiberPoints[i - 1].y ) * voxelY;
+            dz = ( currentFiberPoints[i].z - currentFiberPoints[i - 1].z ) * voxelZ;
             FArray currentVector( dx, dy, dz );
             m_length[j] += ( float )currentVector.norm();
         }
@@ -3394,22 +3430,24 @@ void Fibers::updateFibersFilters()
     int subSampling = m_pSliderFibersSampling->GetValue();
     int maxSubSampling = m_pSliderFibersSampling->GetMax() + 1;
 
-	updateFibersFilters(min, max, subSampling, maxSubSampling);
+    updateFibersFilters(min, max, subSampling, maxSubSampling);
 }
 
 void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling)
 {
-	for( int i = 0; i < m_countLines; ++i )
+    for( int i = 0; i < m_countLines; ++i )
     {
         m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
     
+    SelectionObject * pLastSelObj = MyApp::frame->getLastSelectedObj();
+
     //Update stats, mean fiber and convexhull only if an object is selected.
-    if( m_dh->m_lastSelectedObject != NULL )
+    if( pLastSelObj != NULL )
     {
-        m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
-        m_dh->m_lastSelectedObject->computeMeanFiber();
-        m_dh->m_lastSelectedObject->computeConvexHull();
+        pLastSelObj->SetFiberInfoGridValues();
+        pLastSelObj->computeMeanFiber();
+        pLastSelObj->computeConvexHull();
     }
 
 }
@@ -3448,8 +3486,8 @@ void Fibers::flipAxis( AxisType i_axe )
     float minVal = 9999999;
     for ( unsigned int j(i); j < m_pointArray.size(); j += 3 )
     {
-        minVal = min( m_pointArray[j], minVal );
-        maxVal = max( m_pointArray[j], maxVal );
+        minVal = std::min( m_pointArray[j], minVal );
+        maxVal = std::max( m_pointArray[j], maxVal );
     }
     center = ( minVal + maxVal ) / 2; 
 
@@ -3462,200 +3500,191 @@ void Fibers::flipAxis( AxisType i_axe )
     glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
     glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
 
-    m_dh->updateAllSelectionObjects();
+    SceneManager::getInstance()->updateAllSelectionObjects();
 }
 
 void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    setFibersLength();
     DatasetInfo::createPropertiesSizer( pParent );
-    
-    wxSizer *pSizer;
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Min Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
-    
-    m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, getMinFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    pSizer->Add( m_pSliderFibersFilterMin, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pSliderFibersFilterMin->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Max Length" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
-    m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, getMaxFibersLength(), getMinFibersLength(), getMaxFibersLength(), wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    pSizer->Add( m_pSliderFibersFilterMax, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pSliderFibersFilterMax->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Subsampling" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
-    m_pSliderFibersSampling = new wxSlider( pParent, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    pSizer->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pSliderFibersSampling->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
 
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( new wxStaticText( pParent, wxID_ANY , wxT( "Thickness" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE ), 0, wxALIGN_CENTER );
-    m_pSliderCrossingFibersThickness = new wxSlider( pParent, wxID_ANY, m_thickness * 4, 1, 20, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    pSizer->Add( m_pSliderCrossingFibersThickness, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pSliderCrossingFibersThickness->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pGeneratesFibersDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    pSizer->Add( m_pGeneratesFibersDensityVolume, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pGeneratesFibersDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleLocalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Local Coloring" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    pSizer->Add( m_pToggleLocalColoring, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pToggleLocalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnListMenuThreshold ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleNormalColoring = new wxToggleButton( pParent, wxID_ANY, wxT( "Color With Overlay" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    pSizer->Add( m_pToggleNormalColoring, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pToggleNormalColoring->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
+    setFibersLength();
 
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pToggleCrossingFibers = new wxToggleButton( pParent, wxID_ANY, wxT( "Intersected Fibers" ), wxDefaultPosition, wxSize( 140, -1 ) );
-    pSizer->Add( m_pToggleCrossingFibers, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pToggleCrossingFibers->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleCrossingFibers ) );
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
-    m_propertiesSizer->AddSpacer( 8 );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( new wxStaticText( pParent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT ), 0, wxALIGN_CENTER );
-    pSizer->Add( 8, 1, 0 );
-    m_pRadioNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    pSizer->Add( m_pRadioNormalColoring );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Dist. Anchoring" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( 68, 1, 0 );
-    pSizer->Add( m_pRadioDistanceAnchoring );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioMinDistanceAnchoring  = new wxRadioButton( pParent, wxID_ANY, _T( "Min Dist. Anchoring" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( 68, 1, 0 );
-    pSizer->Add( m_pRadioMinDistanceAnchoring );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioCurvature  = new wxRadioButton( pParent, wxID_ANY, _T( "Curvature" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( 68, 1, 0 );
-    pSizer->Add( m_pRadioCurvature );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    m_pRadioTorsion  = new wxRadioButton( pParent, wxID_ANY, _T( "Torsion" ), wxDefaultPosition, wxSize( 145, -1 ) );
-    
-    pSizer = new wxBoxSizer( wxHORIZONTAL );
-    pSizer->Add( 68, 1, 0 );
-    pSizer->Add( m_pRadioTorsion );
-    m_propertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
-    pParent->Connect( m_pRadioNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalColoring ) );
-    pParent->Connect( m_pRadioDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuDistance ) );
-    pParent->Connect( m_pRadioMinDistanceAnchoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuMinDistance ) );
-    pParent->Connect( m_pRadioTorsion->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithTorsion ) );
-    pParent->Connect( m_pRadioCurvature->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithCurvature ) );
-    m_pRadioNormalColoring->SetValue( true );
+    //////////////////////////////////////////////////////////////////////////
+    float minLength = getMinFibersLength();
+    float maxLength = getMaxFibersLength();
+
+    m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
+    m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
+    m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
+    m_pToggleCrossingFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
+    m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+    m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
+    m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
+    m_pRadCurvature            = new wxRadioButton( pParent, wxID_ANY, wxT( "Curvature" ) );
+    m_pRadTorsion              = new wxRadioButton( pParent, wxID_ANY, wxT( "Torsion" ) );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    wxFlexGridSizer *pGridSliders = new wxFlexGridSizer( 2 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Min Length" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersFilterMin, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Max Length" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersFilterMax, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Subsampling" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersSampling, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Thickness" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderInterFibersThickness, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxMain->Add( m_pToggleCrossingFibers,    0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( m_pToggleLocalColoring,     0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( m_pToggleNormalColoring,    0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    wxBoxSizer *pBoxColoring = new wxBoxSizer( wxVERTICAL );
+    pBoxColoring->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Coloring:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+
+    wxBoxSizer *pBoxColoringRadios = new wxBoxSizer( wxVERTICAL );
+    pBoxColoringRadios->Add( m_pRadNormalColoring,       0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoringRadios->Add( m_pRadDistanceAnchoring,    0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoringRadios->Add( m_pRadMinDistanceAnchoring, 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoringRadios->Add( m_pRadCurvature,            0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoringRadios->Add( m_pRadTorsion,              0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoring->Add( pBoxColoringRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
+
+    pBoxMain->Add( pBoxColoring, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+    // Connect widgets with callback function
+    pParent->Connect( m_pSliderFibersFilterMin->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+    pParent->Connect( m_pSliderFibersFilterMax->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+    pParent->Connect( m_pSliderFibersSampling->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+    pParent->Connect( m_pSliderInterFibersThickness->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
+    pParent->Connect( pBtnGeneratesDensityVolume->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
+    pParent->Connect( m_pToggleLocalColoring->GetId(),           wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
+    pParent->Connect( m_pToggleNormalColoring->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
+    pParent->Connect( m_pToggleCrossingFibers->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleCrossingFibers ) );
+    pParent->Connect( m_pRadNormalColoring->GetId(),             wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalColoring ) );
+    pParent->Connect( m_pRadDistanceAnchoring->GetId(),          wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuDistance ) );
+    pParent->Connect( m_pRadMinDistanceAnchoring->GetId(),       wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuMinDistance ) );
+    pParent->Connect( m_pRadTorsion->GetId(),                    wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithTorsion ) );
+    pParent->Connect( m_pRadCurvature->GetId(),                  wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithCurvature ) );
+
+    m_pRadNormalColoring->SetValue( true );
 }
 
 void Fibers::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
-    m_ptoggleFiltering->Enable( false );
-    m_ptoggleFiltering->SetValue( false );
+
+    m_pSliderOpacity->Enable( false );
+    m_pSliderInterFibersThickness->Enable( m_useIntersectedFibers );
+    m_pToggleFiltering->Enable( false );
     m_pToggleCrossingFibers->Enable( true );
-	m_pToggleCrossingFibers->SetValue( m_useCrossingFibers );
-    m_psliderOpacity->SetValue( m_psliderOpacity->GetMin() );
-    m_psliderOpacity->Enable( false );
-    m_pSliderCrossingFibersThickness->Enable( m_useCrossingFibers );
+    m_pRadNormalColoring->Enable(       getShowFS() );
+    m_pRadCurvature->Enable(            getShowFS() );
+    m_pRadDistanceAnchoring->Enable(    getShowFS() );
+    m_pRadMinDistanceAnchoring->Enable( getShowFS() );
+    m_pRadTorsion->Enable(              getShowFS() );
+
+    m_pToggleFiltering->SetValue( false );
+    m_pToggleCrossingFibers->SetValue( m_useIntersectedFibers );
+    m_pSliderOpacity->SetValue( m_pSliderOpacity->GetMin() );
     m_pToggleNormalColoring->SetValue( !getShowFS() );
-    m_pRadioNormalColoring->Enable( getShowFS() );
-    m_pRadioCurvature->Enable( getShowFS() );
-    m_pRadioDistanceAnchoring->Enable( getShowFS() );
-    m_pRadioMinDistanceAnchoring->Enable( getShowFS() );
-    m_pRadioTorsion->Enable( getShowFS() );
-	m_psliderThresholdIntensity->SetValue( getThreshold()*100 );
-	m_psliderOpacity->SetValue( getAlpha()*100 );
+    m_pSliderThresholdIntensity->SetValue( getThreshold() * 100 );
+    m_pSliderOpacity->SetValue( getAlpha() * 100 );
 
-	// Hide temporarily opacity functionality
-	m_psliderOpacity->Hide();
-	m_pOpacityText->Hide();
-	
-	if(m_isColorationUpdated)
-	{
-		m_pRadioNormalColoring->SetValue( m_fiberColorationMode == NORMAL_COLOR );
-		m_pRadioCurvature->SetValue( m_fiberColorationMode == CURVATURE_COLOR );
-		m_pRadioDistanceAnchoring->SetValue( m_fiberColorationMode == DISTANCE_COLOR );
-		m_pRadioMinDistanceAnchoring->SetValue( m_fiberColorationMode == MINDISTANCE_COLOR );
-		m_pRadioTorsion->SetValue( m_fiberColorationMode == TORSION_COLOR );
-		m_isColorationUpdated = false;
-	}
-	
-	DatasetInfo* pDatasetInfo = NULL;
-	
-	long nextItemId = m_dh->m_mainFrame->m_pListCtrl->GetNextItem(m_dh->m_mainFrame->getCurrentListItem());
+    // Hide temporarily opacity functionality
+    m_pSliderOpacity->Hide();
+    m_pOpacityText->Hide();
 
-	if( nextItemId >= 0)
-	{
-		pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( nextItemId ));
-		if( pDatasetInfo != NULL)
-		{
-			if(pDatasetInfo->getType() != FIBERS)
-			{
-				DatasetInfo::m_pbtnDown->Disable();
-			}
-			else
-			{
-				DatasetInfo::m_pbtnDown->Enable();
-			}
-		}
-		else
-		{
-			DatasetInfo::m_pbtnDown->Disable();
-		}
-	}
-	else
-	{
-		DatasetInfo::m_pbtnDown->Disable();
-	}
-	
-	long prevItemId = m_dh->m_mainFrame->getCurrentListItem() - 1;
-	
-	if( prevItemId != -1)
-	{
-		pDatasetInfo = ((DatasetInfo*) m_dh->m_mainFrame->m_pListCtrl->GetItemData( prevItemId ));
-		if( pDatasetInfo != NULL)
-		{
-			if(pDatasetInfo->getType() != FIBERS)
-			{
-				DatasetInfo::m_pbtnUp->Disable();
-			}
-			else
-			{
-				DatasetInfo::m_pbtnUp->Enable();
-			}
-		}
-		else
-		{
-			DatasetInfo::m_pbtnUp->Disable();
-		}
-	}
-	
+    if( m_isColorationUpdated )
+    {
+        m_pRadNormalColoring->SetValue( m_fiberColorationMode == NORMAL_COLOR );
+        m_pRadCurvature->SetValue( m_fiberColorationMode == CURVATURE_COLOR );
+        m_pRadDistanceAnchoring->SetValue( m_fiberColorationMode == DISTANCE_COLOR );
+        m_pRadMinDistanceAnchoring->SetValue( m_fiberColorationMode == MINDISTANCE_COLOR );
+        m_pRadTorsion->SetValue( m_fiberColorationMode == TORSION_COLOR );
+        m_isColorationUpdated = false;
+    }
+
+    DatasetInfo* pDatasetInfo = NULL;
+
+    long nextItemId = MyApp::frame->getCurrentListIndex();
+
+    if( nextItemId >= 0)
+    {
+        pDatasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( nextItemId ) );
+        if( pDatasetInfo != NULL)
+        {
+            if(pDatasetInfo->getType() != FIBERS)
+            {
+                DatasetInfo::m_pBtnDown->Disable();
+            }
+            else
+            {
+                DatasetInfo::m_pBtnDown->Enable();
+            }
+        }
+        else
+        {
+            DatasetInfo::m_pBtnDown->Disable();
+        }
+    }
+    else
+    {
+        DatasetInfo::m_pBtnDown->Disable();
+    }
+
+    long prevItemId = MyApp::frame->getCurrentListIndex() - 1;
+
+    if( prevItemId != -1)
+    {
+        pDatasetInfo = DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( prevItemId ) );
+        if( pDatasetInfo != NULL)
+        {
+            if(pDatasetInfo->getType() != FIBERS)
+            {
+                DatasetInfo::m_pBtnUp->Disable();
+            }
+            else
+            {
+                DatasetInfo::m_pBtnUp->Enable();
+            }
+        }
+        else
+        {
+            DatasetInfo::m_pBtnUp->Disable();
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 void Fibers::updateCrossingFibersThickness() 
 {
-    if ( NULL != m_pSliderCrossingFibersThickness )
+    if ( NULL != m_pSliderInterFibersThickness )
     {
-        m_thickness = m_pSliderCrossingFibersThickness->GetValue() * 0.25f; 
+        m_thickness = m_pSliderInterFibersThickness->GetValue() * 0.25f; 
         m_cfDrawDirty = true;
     }
 }
@@ -3665,29 +3694,29 @@ void Fibers::updateCrossingFibersThickness()
 void Fibers::findCrossingFibers() 
 {
     if (   m_cfDrawDirty
-        || m_xDrawn != m_dh->m_xSlize
-        || m_yDrawn != m_dh->m_ySlize
-        || m_zDrawn != m_dh->m_zSlize
-        || m_axialShown != m_dh->m_showAxial
-        || m_coronalShown != m_dh->m_showCoronal
-        || m_sagittalShown != m_dh->m_showSagittal )
+        || m_xDrawn != SceneManager::getInstance()->getSliceX()
+        || m_yDrawn != SceneManager::getInstance()->getSliceY()
+        || m_zDrawn != SceneManager::getInstance()->getSliceZ()
+        || m_axialShown    != SceneManager::getInstance()->isAxialDisplayed()
+        || m_coronalShown  != SceneManager::getInstance()->isCoronalDisplayed()
+        || m_sagittalShown != SceneManager::getInstance()->isSagittalDisplayed() )
     {
-        m_xDrawn = m_dh->m_xSlize;
-        m_yDrawn = m_dh->m_ySlize;
-        m_zDrawn = m_dh->m_zSlize;
-        m_axialShown = m_dh->m_showAxial;
-        m_coronalShown = m_dh->m_showCoronal;
-        m_sagittalShown = m_dh->m_showSagittal;
+        m_xDrawn = SceneManager::getInstance()->getSliceX();
+        m_yDrawn = SceneManager::getInstance()->getSliceY();
+        m_zDrawn = SceneManager::getInstance()->getSliceZ();
+        m_axialShown    = SceneManager::getInstance()->isAxialDisplayed();
+        m_coronalShown  = SceneManager::getInstance()->isCoronalDisplayed();
+        m_sagittalShown = SceneManager::getInstance()->isSagittalDisplayed();
 
         m_cfDrawDirty = true;
 
         // Determine X, Y and Z range
-        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
-        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
-        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
-        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
-        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
-        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+        const float xMin( m_xDrawn + 0.5f - m_thickness );
+        const float xMax( m_xDrawn + 0.5f + m_thickness );
+        const float yMin( m_yDrawn + 0.5f - m_thickness );
+        const float yMax( m_yDrawn + 0.5f + m_thickness );
+        const float zMin( m_zDrawn + 0.5f - m_thickness );
+        const float zMax( m_zDrawn + 0.5f + m_thickness );
 
         bool lineStarted(false);
 
@@ -3754,64 +3783,40 @@ void Fibers::setShader()
 
     if( m_useFakeTubes )
     {
-        m_dh->m_shaderHelper->m_fakeTubesShader.bind();
-        m_dh->m_shaderHelper->m_fakeTubesShader.setUniInt  ( "globalColor", getShowFS() );
-        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimX", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().x );
-        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "dimY", (float) m_dh->m_mainFrame->m_pMainGL->GetSize().y );
-        m_dh->m_shaderHelper->m_fakeTubesShader.setUniFloat( "thickness", GLfloat( 3.175 ) );
+        ShaderHelper::getInstance()->getFakeTubesShader()->bind();
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniInt  ( "globalColor", getShowFS() );
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "thickness", GLfloat( 3.175 ) );
     }
-    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
         // Determine X, Y and Z range
-        const float xMin( m_dh->m_xSlize + 0.5f - m_thickness );
-        const float xMax( m_dh->m_xSlize + 0.5f + m_thickness );
-        const float yMin( m_dh->m_ySlize + 0.5f - m_thickness );
-        const float yMax( m_dh->m_ySlize + 0.5f + m_thickness );
-        const float zMin( m_dh->m_zSlize + 0.5f - m_thickness );
-        const float zMax( m_dh->m_zSlize + 0.5f + m_thickness );
+        const float xMin( SceneManager::getInstance()->getSliceX() + 0.5f - m_thickness );
+        const float xMax( SceneManager::getInstance()->getSliceX() + 0.5f + m_thickness );
+        const float yMin( SceneManager::getInstance()->getSliceY() + 0.5f - m_thickness );
+        const float yMax( SceneManager::getInstance()->getSliceY() + 0.5f + m_thickness );
+        const float zMin( SceneManager::getInstance()->getSliceZ() + 0.5f - m_thickness );
+        const float zMax( SceneManager::getInstance()->getSliceZ() + 0.5f + m_thickness );
 
-        m_dh->m_shaderHelper->m_crossingFibersShader.bind();
+        ShaderHelper::getInstance()->getCrossingFibersShader()->bind();
 
-		if (m_dh->m_showSagittal)
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", xMin);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", xMax);
-		}
-		else
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMin", 0);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("xMax", 0);
-		}
-		
-		if (m_dh->m_showCoronal)
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", yMin);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", yMax);
-        }
-		else
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMin", 0);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("yMax", 0);
-        }
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("xMin", SceneManager::getInstance()->isSagittalDisplayed() ? xMin : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("xMax", SceneManager::getInstance()->isSagittalDisplayed() ? xMax : 0 );
 
-		if (m_dh->m_showAxial)
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", zMin);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", zMax);
-		}
-		else
-		{
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMin", 0);
-			m_dh->m_shaderHelper->m_crossingFibersShader.setUniFloat("zMax", 0);
-        }
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("yMin", SceneManager::getInstance()->isCoronalDisplayed() ? yMin : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("yMax", SceneManager::getInstance()->isCoronalDisplayed() ? yMax : 0 );
+
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("zMin", SceneManager::getInstance()->isAxialDisplayed() ? zMin : 0 );
+        ShaderHelper::getInstance()->getCrossingFibersShader()->setUniFloat("zMax", SceneManager::getInstance()->isAxialDisplayed() ? zMax : 0 );
     }
     else if ( !m_useTex )
     {
-        m_dh->m_shaderHelper->m_fibersShader.bind();
-        m_dh->m_shaderHelper->setFiberShaderVars();
-        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useTex", !pDsInfo->getUseTex() );
-        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useColorMap", m_dh->m_colorMap );
-        m_dh->m_shaderHelper->m_fibersShader.setUniInt( "useOverlay", pDsInfo->getShowFS() );
+        ShaderHelper::getInstance()->getFibersShader()->bind();
+        ShaderHelper::getInstance()->setFiberShaderVars();
+        ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useTex", !pDsInfo->getUseTex() );
+//         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
+        ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useOverlay", pDsInfo->getShowFS() );
     }
 }
 
@@ -3819,14 +3824,14 @@ void Fibers::releaseShader()
 {
     if( m_useFakeTubes )
     {
-        m_dh->m_shaderHelper->m_fakeTubesShader.release();
+        ShaderHelper::getInstance()->getFakeTubesShader()->release();
     }
-    else if( m_dh->m_useFibersGeometryShader && m_useCrossingFibers )
+    else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
-        m_dh->m_shaderHelper->m_crossingFibersShader.release();
+        ShaderHelper::getInstance()->getCrossingFibersShader()->release();
     }
     else if( !m_useTex )
     {
-        m_dh->m_shaderHelper->m_fibersShader.release();
+        ShaderHelper::getInstance()->getFibersShader()->release();
     }
 }

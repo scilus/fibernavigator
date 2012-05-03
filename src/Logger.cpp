@@ -5,18 +5,20 @@
 #include <iomanip>
 using std::setw;
 using std::setfill;
+#include <string>
+using std::string;
 
 Logger * Logger::m_pInstance = NULL;
 
 Logger::Logger()
-:  
+:
 #if defined( DEBUG ) || defined( _DEBUG )
     m_level( 0 )
 #else
     m_level( 1 )
 #endif
 {
-
+    m_lastError = wxT( "No error to report" );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,7 +42,7 @@ void Logger::print( const wxString &str, const LogLevel level )
         return;
 
     wxString prefix;
-    switch (level)
+    switch( level )
     {
     case LOGLEVEL_DEBUG:
         prefix = _T( "DEBUG: " );
@@ -61,7 +63,13 @@ void Logger::print( const wxString &str, const LogLevel level )
 
     wxDateTime time = wxDateTime::Now();
     m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.char_str() << str.char_str() << "\n";
-    printf( m_oss.str().c_str() );
+    
+    if( LOGLEVEL_ERROR == level || LOGLEVEL_GLERROR == level )
+    {
+        m_lastError = str;
+    }
+
+    printf( "%s", m_oss.str().c_str() );
     m_oss.str( "" );
 }
 
@@ -72,10 +80,19 @@ bool Logger::printIfGLError( wxString str )
     GLenum error = glGetError();
     if( GL_NO_ERROR != error )
     {
-        str.Append( wxT( "\n" ) );
-        m_oss << gluErrorString( error );
-        str.Append( wxString( m_oss.str().c_str(), wxConvUTF8 ) );
-        m_oss.str( "" );
+        switch( error )
+        {
+            case GL_INVALID_VALUE:
+                str.Append( wxT( " - GL_INVALID_VALUE" ) );
+                break;
+            case GL_INVALID_OPERATION:
+                str.Append( wxT( " - GL_INVALID_OPERATION" ) );
+                break;
+            default:
+                str.Append( wxString::Format( wxT( " - ADD ERROR MESSAGE HERE: ERROR CODE: %x" ), error ) );
+                break;
+        }
+
         print( str, LOGLEVEL_GLERROR );
         return true;
     }
@@ -93,6 +110,6 @@ void Logger::setMessageLevel( int level )
 
 Logger::~Logger()
 {
-
+    m_pInstance = NULL;
 }
 

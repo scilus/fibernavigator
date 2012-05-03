@@ -2,6 +2,28 @@
 // Description: mainFrame class. Contains every elements of the GUI, and frame events
 /////////////////////////////////////////////////////////////////////////////
 
+#include "MainFrame.h"
+
+#include "MainCanvas.h"
+#include "MenuBar.h"
+#include "PropertiesWindow.h"
+#include "SelectionBox.h"
+#include "SelectionEllipsoid.h"
+#include "ToolBar.h"
+#include "TrackingWindow.h"
+#include "../main.h"
+#include "../Logger.h"
+#include "../dataset/Anatomy.h"
+#include "../dataset/DatasetManager.h"
+#include "../dataset/Fibers.h"
+#include "../dataset/FibersGroup.h"
+#include "../dataset/Loader.h"
+#include "../dataset/ODFs.h"
+#include "../dataset/Tensors.h"
+#include "../gfx/TheScene.h"
+#include "../gui/SceneManager.h"
+#include "../misc/IsoSurface/CIsoSurface.h"
+
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
@@ -9,32 +31,15 @@
 
 #include <wx/colordlg.h>
 #include <wx/filedlg.h>
+#include <wx/imaglist.h>
 #include <wx/statbmp.h>
 #include <wx/vscroll.h>
 
-#include "MainFrame.h"
-#include "PropertiesWindow.h"
-#include "TrackingWindow.h"
-#include "ToolBar.h"
-#include "MenuBar.h"
-#include "MainCanvas.h"
-#include "SelectionBox.h"
-#include "SelectionEllipsoid.h"
-#include "../dataset/Anatomy.h"
-#include "../dataset/Fibers.h"
-#include "../dataset/FibersGroup.h"
-#include "../dataset/ODFs.h"
-#include "../dataset/SplinePoint.h"
-#include "../dataset/Surface.h"
-#include "../dataset/Tensors.h"
-#include "../gfx/TheScene.h"
-#include "../main.h"
-#include "../Logger.h"
-#include "../misc/IsoSurface/CIsoSurface.h"
+#include <algorithm>
+using std::for_each;
 
-#define FIBERS_INFO_GRID_COL_SIZE              1
-#define FIBERS_INFO_GRID_ROW_SIZE              11
-#define FIBERS_INFO_GRID_TITLE_LABEL_SIZE      150
+#include <vector>
+using std::vector;
 
 extern const wxEventType wxEVT_NAVGL_EVENT;
 
@@ -47,6 +52,9 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
 // List widget events
 EVT_LIST_ITEM_ACTIVATED  ( ID_LIST_CTRL,                    MainFrame::onActivateListItem   )
 EVT_LIST_ITEM_SELECTED   ( ID_LIST_CTRL,                    MainFrame::onSelectListItem     )
+EVT_LIST_ITEM_DESELECTED ( ID_LIST_CTRL,                    MainFrame::onDeselectListItem   )
+EVT_LIST_DELETE_ITEM     ( ID_LIST_CTRL,                    MainFrame::onDeleteListItem     )
+EVT_LIST_DELETE_ALL_ITEMS( ID_LIST_CTRL,                    MainFrame::onDeleteAllListItems )
 
 // Tree widget events
 EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
@@ -55,27 +63,20 @@ EVT_TREE_ITEM_ACTIVATED  ( ID_TREE_CTRL,                    MainFrame::onActivat
 EVT_TREE_ITEM_RIGHT_CLICK( ID_TREE_CTRL,                    MainFrame::onRightClickTreeItem )
 EVT_TREE_END_LABEL_EDIT  ( ID_TREE_CTRL,                    MainFrame::onTreeLabelEdit      )
 
-//Interface events
-EVT_SIZE(                                                   MainFrame::onSize               )
-EVT_MOUSE_EVENTS(                                           MainFrame::onMouseEvent         )
+// Interface events
 EVT_CLOSE(                                                  MainFrame::onClose              )
+EVT_SIZE(                                                   MainFrame::onSize               )
 
-// mouse click in one of the three navigation windows
+// Mouse click in one of the four navigation windows
 EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 
-// slider events
+// Slider events
 EVT_SLIDER( ID_X_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
-
-// mouse click in one of the three navigation windows
-EVT_COMMAND( ID_GL_NAV_X, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_NAV_Y, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_NAV_Z, wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
-EVT_COMMAND( ID_GL_MAIN,  wxEVT_NAVGL_EVENT,                MainFrame::onGLEvent            )
 
 // KDTREE thread finished
 EVT_MENU( KDTREE_EVENT,                                     MainFrame::onKdTreeThreadFinished )
@@ -84,195 +85,119 @@ EVT_TIMER( -1,                                              MainFrame::onTimerEv
 
 END_EVENT_TABLE()
 
-MainFrame::MainFrame(wxWindow           *i_parent, 
-                     const wxWindowID   i_id, 
-                     const wxString     &i_title, 
-                     const wxPoint      &i_pos, 
-                     const wxSize       &i_size, 
-                     const long         i_style) :
-    wxFrame( i_parent, i_id, i_title, i_pos, i_size, i_style )
+namespace
+{
+// Properties to define GUI elements
+#define NOT_DEFINED         -1
+
+#define CANVAS_AXI_WIDTH    175
+#define CANVAS_AXI_HEIGHT   175
+#define CANVAS_COR_WIDTH    175
+#define CANVAS_COR_HEIGHT   175
+#define CANVAS_SAG_WIDTH    175
+#define CANVAS_SAG_HEIGHT   175
+
+#define LIST_WIDTH          268
+#define LIST_HEIGHT         200
+#define LIST_COL0_WIDTH     34
+#define LIST_COL1_WIDTH     144
+#define LIST_COL2_WIDTH     50
+#define LIST_COL3_WIDTH     20
+
+#define PROP_WND_WIDTH      260
+#define PROP_WND_HEIGHT     350
+
+#define SLIDER_AXI_WIDTH    CANVAS_AXI_WIDTH
+#define SLIDER_AXI_HEIGHT   NOT_DEFINED
+#define SLIDER_COR_WIDTH    CANVAS_COR_WIDTH
+#define SLIDER_COR_HEIGHT   NOT_DEFINED
+#define SLIDER_SAG_WIDTH    CANVAS_SAG_WIDTH
+#define SLIDER_SAG_HEIGHT   NOT_DEFINED
+
+#define TREE_WIDTH          268
+#define TREE_HEIGHT         NOT_DEFINED
+
+    void initMyTreeCtrl( MyTreeCtrl * &myTreeCtrl )
+    {
+        myTreeCtrl->SetMaxSize( wxSize( TREE_WIDTH, TREE_HEIGHT ) );
+        myTreeCtrl->SetMinSize( wxSize( TREE_WIDTH, 100 ) );
+
+        wxImageList* tImageList = new wxImageList( 16, 16 );
+
+        tImageList->Add( wxImage( MyApp::respath + _T( "icons/delete.png" ), wxBITMAP_TYPE_PNG ) );
+        tImageList->Add( wxImage( MyApp::respath + _T( "icons/eyes.png" ),   wxBITMAP_TYPE_PNG ) );
+
+        myTreeCtrl->AssignImageList( tImageList );
+    }
+
+    void initListCtrl( ListCtrl * &lstCtrl )
+    {
+        lstCtrl->SetMaxSize( wxSize( LIST_WIDTH, LIST_HEIGHT ) );
+        lstCtrl->SetMinSize( wxSize( LIST_WIDTH, LIST_HEIGHT ) );
+
+        wxImageList* pImageList = new wxImageList( 16, 16 );
+
+        pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/eyes.png"   ),      wxBITMAP_TYPE_PNG ) ) );
+        pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/eyes_hidden.png" ), wxBITMAP_TYPE_PNG ) ) );
+        pImageList->Add( ( wxImage( MyApp::respath + _T( "icons/delete.png" ),      wxBITMAP_TYPE_PNG ) ) );
+
+        lstCtrl->AssignImageList(pImageList, wxIMAGE_LIST_SMALL);
+
+        wxListItem displayCol, nameCol, thresholdCol, deleteCol;
+
+        displayCol.SetText( wxT( "Display" ) );
+
+        nameCol.SetText( wxT( "Name" ) );
+        nameCol.SetAlign( wxLIST_FORMAT_LEFT );
+
+        thresholdCol.SetText( wxT( "Threshold" ) );
+        thresholdCol.SetAlign( wxLIST_FORMAT_RIGHT );
+
+        deleteCol.SetText( wxT( "Delete" ) );
+
+        lstCtrl->InsertColumn( 0, displayCol );
+        lstCtrl->InsertColumn( 1, nameCol );
+        lstCtrl->InsertColumn( 2, thresholdCol ) ;
+        lstCtrl->InsertColumn( 3, deleteCol );
+
+        lstCtrl->SetColumnWidth( 0, LIST_COL0_WIDTH );
+        lstCtrl->SetColumnWidth( 1, LIST_COL1_WIDTH );
+        lstCtrl->SetColumnWidth( 2, LIST_COL2_WIDTH );
+        lstCtrl->SetColumnWidth( 3, LIST_COL3_WIDTH );
+    }
+}
+
+#define FIBERS_INFO_GRID_COL_SIZE              1
+#define FIBERS_INFO_GRID_ROW_SIZE              11
+#define FIBERS_INFO_GRID_TITLE_LABEL_SIZE      150
+
+
+MainFrame::MainFrame( const wxString     &title, 
+                      const wxPoint      &pos, 
+                      const wxSize       &size )
+:   wxFrame( NULL, wxID_ANY, title, pos, size ),
+    m_pToolBar( NULL ),
+    m_pMenuBar( NULL ),
+    m_pCurrentSizer( NULL ),
+    m_pCurrentSceneObject( NULL ),
+//     m_pLastSelectedSceneObject( NULL ),
+    m_currentListIndex( -1 ),
+//     m_lastSelectedListItem( -1 ),
+    m_lastPath( MyApp::respath + _T( "data" ) ),
+    m_pTimer( NULL ),
+    m_isDrawerToolActive( false ),
+    m_drawSize( 2 ),
+    m_drawRound( true ),
+    m_draw3d( false ),
+    m_canUseColorPicker( false ),
+    m_drawColor(255, 255, 255),
+    m_drawColorIcon(16, 16, true),
+    m_threadsActive( 0 ),
+    m_pLastSelectionObj( NULL )
 {
     wxImage::AddHandler(new wxPNGHandler);
-    m_pLastSelectedSceneObject = NULL;
-    m_lastSelectedListItem = -1;
-    m_pCurrentSceneObject = NULL;
-    m_currentListItem = -1;   
-    m_pCurrentSizer = NULL;
-    m_pXSlider  = new wxSlider( this, ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 175, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pYSlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 175, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pZSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( 175, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-      
-    m_pListCtrl   = new MyListCtrl( this, ID_LIST_CTRL, wxDefaultPosition, wxSize( 308, 250 ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
-    m_pListCtrl->SetMaxSize( wxSize( 308, 250 ) );
-    m_pListCtrl->SetMinSize( wxSize( 308, 250 ) );
 
-    m_pTreeWidget = new MyTreeCtrl( this, ID_TREE_CTRL, wxDefaultPosition,wxSize( 308, -1 ), wxTR_HAS_BUTTONS | wxTR_SINGLE | wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS );
-    m_pTreeWidget->SetMaxSize( wxSize( 308, -1 ) );
-    m_pTreeWidget->SetMinSize( wxSize( 308, 100 ) );
-
-    wxImageList* imageList = new wxImageList( 16, 16 );
-
-    imageList->Add( ( wxImage( MyApp::respath +_T( "icons/eyes.png"   ), wxBITMAP_TYPE_PNG ) ) );
-    imageList->Add( ( wxImage( MyApp::respath +_T( "icons/delete.png" ), wxBITMAP_TYPE_PNG ) ) );
-
-    m_pListCtrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
-
-    wxListItem itemCol;
-    itemCol.SetText( wxT( "" ) );
-    m_pListCtrl->InsertColumn( 0, itemCol );
-
-    itemCol.SetText( wxT( "Name" ) );
-    itemCol.SetAlign( wxLIST_FORMAT_CENTRE );
-    m_pListCtrl->InsertColumn( 1, itemCol );
-
-    itemCol.SetText( wxT( "Threshold" ) );
-    itemCol.SetAlign( wxLIST_FORMAT_RIGHT );
-    m_pListCtrl->InsertColumn( 2, itemCol) ;
-
-    itemCol.SetText( wxT( "" ) );
-    m_pListCtrl->InsertColumn( 3, itemCol );
-
-    m_pListCtrl->SetColumnWidth( 0, 20  );
-    m_pListCtrl->SetColumnWidth( 1, 194 );
-    m_pListCtrl->SetColumnWidth( 2, 70  );
-    m_pListCtrl->SetColumnWidth( 3, 20  );
-
-    wxImageList* tImageList = new wxImageList( 16, 16 );
-
-    tImageList->Add( wxImage( MyApp::respath + _T( "icons/delete.png" ), wxBITMAP_TYPE_PNG ) );
-    tImageList->Add( wxImage( MyApp::respath + _T( "icons/eyes.png" ),   wxBITMAP_TYPE_PNG ) );
-
-    m_pTreeWidget->AssignImageList( tImageList );
-
-    m_tRootId  = m_pTreeWidget->AddRoot( wxT( "Scene" ), -1, -1, NULL );
-    m_tPointId = m_pTreeWidget->AppendItem( m_tRootId, wxT( "points" ), -1, -1, NULL );
-    m_tSelectionObjectsId = m_pTreeWidget->AppendItem( m_tRootId, wxT( "selection objects" ), -1, -1, NULL );
-
-    m_pDatasetHelper = new DatasetHelper( this );
-
-    /*
-     * Set OpenGL attributes
-     */
-    Logger::getInstance()->print( wxT( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
-    GLboolean doubleBuffer = GL_TRUE;
-#ifdef __WXMSW__
-    int *gl_attrib = NULL;
-#else
-    int gl_attrib[20] =
-    { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1, WX_GL_MIN_BLUE, 1,
-            WX_GL_DEPTH_SIZE, 1, WX_GL_DOUBLEBUFFER,
-#if defined(__WXMAC__) || defined(__WXCOCOA__)
-            GL_NONE};
-#else
-            None };
-#endif
-#endif
-    if( ! doubleBuffer )
-    {
-        Logger::getInstance()->print( wxT( "Do not have double buffer, disabling" ), LOGLEVEL_MESSAGE );
-#ifdef __WXGTK__
-        gl_attrib[9] = None;
-#endif
-        doubleBuffer = GL_FALSE;
-    }
-    m_pDatasetHelper->m_theScene = new TheScene( m_pDatasetHelper );
-
-    m_pMainGL = new MainCanvas( m_pDatasetHelper, MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize,      0, _T( "MainGLCanvas" ), gl_attrib );
-
-#ifndef CTX
-    m_pGL0 = new MainCanvas( m_pDatasetHelper,       AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
-    m_pGL1 = new MainCanvas( m_pDatasetHelper,     CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );    
-    m_pGL2 = new MainCanvas( m_pDatasetHelper,    SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
-#else
-    m_pGL0 = new MainCanvas( m_pDatasetHelper, axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL->GetContext() );
-    m_pGL1 = new MainCanvas( m_pDatasetHelper, coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL->GetContext() );
-    m_pGL2 = new MainCanvas( m_pDatasetHelper, sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition, wxSize( 175, 175 ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL->GetContext() );
-#endif
-
-    m_pGL0->SetMaxSize( wxSize( 175, 175 ) );
-    m_pGL1->SetMaxSize( wxSize( 175, 175 ) );
-    m_pGL2->SetMaxSize( wxSize( 175, 175 ) );
-
-#ifndef __WXMAC__
-    m_pDatasetHelper->m_theScene->setMainGLContext( new wxGLContext( m_pMainGL ) );
-#else
-    m_pDatasetHelper->m_theScene->setMainGLContext( m_pMainGL->GetContext() );
-#endif
-
-    m_pMainSizer         = new wxBoxSizer( wxHORIZONTAL ); // Contains everything in the UI.
-    m_pLeftMainSizer     = new wxBoxSizer( wxVERTICAL   ); // Contains the navSizer adn the objectsizer.
-    m_pNavSizer          = new wxBoxSizer( wxHORIZONTAL ); // Contains the 3 navigation windows with there respectiv sliders.
-    m_pListSizer         = new wxBoxSizer( wxVERTICAL   ); // Contains the list and the tree
-    m_pObjectSizer       = new wxBoxSizer( wxHORIZONTAL ); // Contains the listSizer and the prop sizer
-
-    wxBoxSizer *l_xSizer= new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *l_ySizer= new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *l_zSizer= new wxBoxSizer( wxVERTICAL );
-
-    wxBoxSizer *l_propSizer = new wxBoxSizer( wxVERTICAL );
-    
-    //Notebook
-    m_tab = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxSize(220,350), 0);
-
-    m_pPropertiesWindow = new PropertiesWindow(m_tab, this, wxID_ANY, wxDefaultPosition, wxSize(220,350)); // Contains Scene Objects properties
-    m_pTrackingWindow = new TrackingWindow(m_tab, this, wxID_ANY, wxDefaultPosition, wxSize(220,350)); // Contains realtime tracking properties
-    
-    //Add RTT Panel
-    m_tab->AddPage(m_pPropertiesWindow,_T("Properties"));
-    m_tab->AddPage(m_pTrackingWindow,_T("Realtime tracking"));
-    l_propSizer->Add(m_tab,1, wxALL | wxEXPAND);
-    
-    m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
-    m_pPropertiesWindow->EnableScrolling(false,true);
-
-    m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
-    m_pTrackingWindow->EnableScrolling(false,true);
-
-    l_zSizer->Add( m_pGL0,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_zSizer->Add( m_pZSlider, 0, wxALL,                   2 );
-    l_ySizer->Add( m_pGL1,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_ySizer->Add( m_pYSlider, 0, wxALL,                   2 );
-    l_xSizer->Add( m_pGL2,     1, wxALL | wxFIXED_MINSIZE, 2 );
-    l_xSizer->Add( m_pXSlider, 0, wxALL ,                  2 );
-
-    m_pNavSizer->Add( l_zSizer, 0, wxALL | wxFIXED_MINSIZE, 1);
-    m_pNavSizer->Add( l_ySizer, 0, wxALL | wxFIXED_MINSIZE, 1);
-    m_pNavSizer->Add( l_xSizer, 0, wxALL | wxFIXED_MINSIZE, 1);
-    m_pNavSizer->SetMinSize( wxSize(520,15));
-    
-    m_pListSizer->Add( m_pListCtrl,    0, wxALL | wxEXPAND,  1 );
-    m_pListSizer->Add( m_pTreeWidget,   1, wxALL | wxEXPAND,  1 );
-    
-    l_propSizer->Add(m_pPropertiesWindow, 0, wxALL | wxEXPAND, 0);
-    l_propSizer->Add(m_pTrackingWindow, 0, wxALL | wxEXPAND, 0);
-    
-    m_pObjectSizer->Add(m_pListSizer, 1, wxALL | wxEXPAND, 0);
-    m_pObjectSizer->Add(l_propSizer, 0, wxALL  | wxEXPAND, 0);
-
-    
-
-    wxBoxSizer *l_spaceSizer = new wxBoxSizer(wxVERTICAL);
-    l_spaceSizer->SetMinSize(wxSize(15,-1));
-    m_pObjectSizer->Add(l_spaceSizer, 0, wxALL | wxFIXED_MINSIZE, 0);
-
-    l_propSizer->Layout();
-
-    
-    m_pObjectSizer->SetMinSize( wxSize(520,15));
-
-    m_pLeftMainSizer->Add( m_pNavSizer,  0, wxALL | wxFIXED_MINSIZE, 0 );
-    m_pLeftMainSizer->Add( m_pObjectSizer,  1, wxALL | wxEXPAND, 0 );
-    m_pLeftMainSizer->SetMinSize( wxSize(520,15));
-    
-    m_pMainSizer->Add( m_pLeftMainSizer,  0,  wxALL | wxEXPAND, 0 );
-    m_pMainSizer->Add( m_pMainGL, 1, wxEXPAND | wxALL, 2 );
-
-    m_pPropertiesWindow->Fit();
-    m_pTrackingWindow->Fit();
-    this->SetBackgroundColour(*wxLIGHT_GREY);
-    this->SetSizer( m_pMainSizer );
-    m_pMainSizer->SetSizeHints( this );
-    SetAutoLayout(true);
+    initLayout();
 
     m_pTimer = new wxTimer( this );
     m_pTimer->Start( 100 );
@@ -292,148 +217,224 @@ MainFrame::MainFrame(wxWindow           *i_parent,
     GetStatusBar()->Show(); 
 }
 
-MainFrame::~MainFrame()
+void MainFrame::initLayout()
 {
-    m_pTimer->Stop();
-    Logger::getInstance()->print( wxT( "MainFrame destructor" ), LOGLEVEL_DEBUG );
-    Logger::getInstance()->print( wxT( "Timer stopped" ), LOGLEVEL_DEBUG );
-	if (m_pTimer != NULL)
-    {
-        delete m_pTimer;
-    }
-    if( m_pDatasetHelper != NULL)
-    {
-        delete m_pDatasetHelper;
-    }
+    //////////////////////////////////////////////////////////////////////////
+    // Panels & Boxes initialization
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *pBoxLeft = new wxBoxSizer( wxVERTICAL );
+
+    wxBoxSizer *pBoxSlices = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *pBoxAxial = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *pBoxCor = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *pBoxSag = new wxBoxSizer( wxVERTICAL );
+
+    wxBoxSizer *pBoxLowerLeft = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *pBoxList = new wxBoxSizer( wxVERTICAL );
+
+    wxBoxSizer *pBoxTab = new wxBoxSizer( wxVERTICAL );
+
+    //////////////////////////////////////////////////////////////////////////
+    // OpenGL initialization
+
+    Logger::getInstance()->print( wxT( "Initializing OpenGL" ), LOGLEVEL_MESSAGE );
+
+#ifdef __WXMSW__
+    int *gl_attrib = NULL;
+#else
+    int gl_attrib[20] = 
+    { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1, WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1, WX_GL_DOUBLEBUFFER,
+    #if defined(__WXMAC__) || defined(__WXCOCOA__)
+        GL_NONE };
+    #else
+        None };
+    #endif
+#endif
+
+    m_pMainGL = new MainCanvas( MAIN_VIEW, this, ID_GL_MAIN,  wxDefaultPosition, wxDefaultSize, 0, _T( "MainGLCanvas" ), gl_attrib );
+
+#ifndef CTX
+    m_pGL0 = new MainCanvas(    AXIAL, this, ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL );
+    m_pGL1 = new MainCanvas(  CORONAL, this, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL );
+    m_pGL2 = new MainCanvas( SAGITTAL, this, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL );
+#else
+    m_pGL0 = new MainCanvas( axial,    m_topNavWindow,    ID_GL_NAV_X, wxDefaultPosition, wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGTH ), 0, _T( "NavGLCanvasX" ), gl_attrib, m_pMainGL->GetContext() );
+    m_pGL1 = new MainCanvas( coronal,  m_middleNavWindow, ID_GL_NAV_Y, wxDefaultPosition, wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ), 0, _T( "NavGLCanvasY" ), gl_attrib, m_pMainGL->GetContext() );
+    m_pGL2 = new MainCanvas( sagittal, m_bottomNavWindow, ID_GL_NAV_Z, wxDefaultPosition, wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ), 0, _T( "NavGLCanvasZ" ), gl_attrib, m_pMainGL->GetContext() );
+#endif
+
+    m_pGL0->SetMaxSize( wxSize( CANVAS_AXI_WIDTH, CANVAS_AXI_HEIGHT ) );
+    m_pGL1->SetMaxSize( wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ) );
+    m_pGL2->SetMaxSize( wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ) );
+
+#ifndef __WXMAC__
+    SceneManager::getInstance()->getScene()->setMainGLContext( new wxGLContext( m_pMainGL ) );
+    glGetError(); // Removes the error code so we don't have an error message the first time we check it
+#else
+    SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
+#endif
+
+    //////////////////////////////////////////////////////////////////////////
+    // 3 Nav Panels initialization
+    m_pXSlider  = new wxSlider( this, ID_X_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_SAG_WIDTH, SLIDER_SAG_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pYSlider  = new wxSlider( this, ID_Y_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_COR_WIDTH, SLIDER_COR_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pZSlider  = new wxSlider( this, ID_Z_SLIDER,  50, 0, 100, wxDefaultPosition, wxSize( SLIDER_AXI_WIDTH, SLIDER_AXI_HEIGHT ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+    pBoxAxial->Add( m_pGL0,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
+    pBoxAxial->Add( m_pZSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
+
+    pBoxCor->Add( m_pGL1,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
+    pBoxCor->Add( m_pYSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
+
+    pBoxSag->Add( m_pGL2,     0, wxALIGN_TOP | wxFIXED_MINSIZE | wxALL, 2 );
+    pBoxSag->Add( m_pXSlider, 0, wxALIGN_BOTTOM | wxFIXED_MINSIZE | wxALL, 2 );
+
+    pBoxSlices->Add( pBoxAxial, 0, wxALL, 0 );
+    pBoxSlices->Add( pBoxCor,   0, wxALL, 0 );
+    pBoxSlices->Add( pBoxSag,   0, wxALL, 0 );
+
+    pBoxLeft->Add( pBoxSlices, 0, wxALL, 0 );
+
+    ////////////////////////////////////////////////////////////////////////
+    // MyTreeCtrl initialization
+    m_pTreeWidget = new MyTreeCtrl( this, this, ID_TREE_CTRL, wxDefaultPosition, wxSize( TREE_WIDTH, TREE_HEIGHT ), wxTR_HAS_BUTTONS | wxTR_SINGLE );
+    initMyTreeCtrl( m_pTreeWidget );
+
+    m_tSelectionObjectsId = m_pTreeWidget->AddRoot( wxT( "Selection Objects" ) );
+
+    //////////////////////////////////////////////////////////////////////////
+    // ListCtrl initialization
+    m_pListCtrl = new ListCtrl( this, wxDefaultPosition, wxSize( LIST_WIDTH, LIST_HEIGHT ), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER );
+    initListCtrl( m_pListCtrl );
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // List Panel initialization
+    pBoxList->Add( (wxWindow *)m_pListCtrl, 0, wxFIXED_MINSIZE | wxALL, 2 );
+    pBoxList->Add( m_pTreeWidget, 1, wxEXPAND | wxALL, 2 );
+
+    pBoxLowerLeft->Add( pBoxList, 0, wxEXPAND | wxALL, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+    // Tab Control initialization
+
+    // Notebook initialization
+    m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+    // PropertiesWindow initialization
+    m_pPropertiesWindow = new PropertiesWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), m_pListCtrl ); // Contains Scene Objects properties
+    m_pPropertiesWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pPropertiesWindow->EnableScrolling( false, true );
+
+    //////////////////////////////////////////////////////////////////////////
+    // TrackingWindow initialization
+    m_pTrackingWindow = new TrackingWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) ); // Contains realtime tracking properties
+    m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pTrackingWindow->EnableScrolling( false, true );
+
+    m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
+    m_tab->AddPage( m_pTrackingWindow, wxT( "Realtime tracking" ) );
+
+    pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
+
+    pBoxLowerLeft->Add( pBoxTab, 1, wxEXPAND | wxALL, 0 );
+
+    pBoxLeft->Add( pBoxLowerLeft, 1, wxEXPAND | wxBOTTOM, 0 );
+    
+    pBoxMain->Add( pBoxLeft, 0, wxEXPAND | wxBOTTOM, 0 );
+    pBoxMain->Add( m_pMainGL, 1, wxEXPAND | wxALL, 2 );
+    this->SetSizer( pBoxMain );
 }
 
-long MainFrame::getCurrentListItem()
-{
-	return m_currentListItem;
-}
 
 void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
-    if( ! m_pDatasetHelper->load( 0 ) )
+    wxArrayString l_fileNames;
+    wxString l_caption          = wxT( "Choose a file" );
+    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
+    wxString l_defaultDir       = wxEmptyString;
+    wxString l_defaultFileName  = wxEmptyString;
+    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
+    dialog.SetFilterIndex( 0 );
+    dialog.SetDirectory( m_lastPath );
+    if( dialog.ShowModal() == wxID_OK )
     {
-        wxMessageBox( wxT( "ERROR\n" ) + m_pDatasetHelper->m_lastError, wxT( "" ), wxOK | wxICON_INFORMATION, NULL );
+        m_lastPath = dialog.GetDirectory();
+        dialog.GetPaths( l_fileNames );
+    }
+
+    unsigned int nbErrors = for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl ) ).getNbErrors();
+    if ( nbErrors )
+    {
+        wxString errorMsg = wxString::Format( ( nbErrors > 1 ? wxT( "Last error: %s\nFor a complete list of errors, please review the log" ) : wxT( "%s" ) ), Logger::getInstance()->getLastError().c_str() );
+
+        wxMessageBox( errorMsg, wxT( "Error while loading" ), wxOK | wxICON_ERROR, NULL );
         GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
-        GetStatusBar()->SetStatusText( m_pDatasetHelper->m_lastError, 2 );
+        GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
         return;
     }
-     refreshAllGLWidgets();
-}
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load Datasets button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadDatasets( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 1 );
-}
 
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load Meshes button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadMeshes( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 2 );
-}
-
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load Fibers button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadFibers( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 5 );
-}
-
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load Tensors button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadTensors( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 8 );
-}
-
-//////////////////////////////////////////////////////////////////////////
-// This function will be called when someone click on the Load ODFs button.
-//////////////////////////////////////////////////////////////////////////
-void MainFrame::onLoadODFs( wxCommandEvent& WXUNUSED(event) )
-{
-    loadIndex( 9 );
-}
-//////////////////////////////////////////////////////////////////////////
-// This function will load a specific type specified by the index in argument.
-//
-// i_index          : The index we are trying to load.
-//
-// Returns true if there was no errors, false otherwise.
-//////////////////////////////////////////////////////////////////////////
-bool MainFrame::loadIndex( int i_index )
-{
-    if( ! m_pDatasetHelper->load( i_index ) )
-    {
-        wxMessageBox( wxT( "ERROR\n" ) + m_pDatasetHelper->m_lastError, wxT( "" ), wxOK | wxICON_INFORMATION, NULL );
-        GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
-        GetStatusBar()->SetStatusText( m_pDatasetHelper->m_lastError, 2 );
-        return false;
-    }
-    else
-    {
-        m_pDatasetHelper->m_selBoxChanged = true;
-    } 
-    return true;
+    refreshAllGLWidgets();
 }
 
 //
 //This function creates an Anatomy from scratch
 //
-void MainFrame::createNewAnatomy( int dataType )
+void MainFrame::createNewAnatomy( DatasetType dataType )
 {
-	// ask user for a name
-	wxString l_givenName = wxT("Anatomy");
+    // ask user for a name
+    wxString l_givenName = wxT("Anatomy");
     wxTextEntryDialog dialog(this, _T( "Please enter a new name" ) );
     dialog.SetValue( l_givenName );
     if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
-	{
+    {
         l_givenName = dialog.GetValue();
-	}
+    }
 
-	//create the anatomy
-	Anatomy* l_newAnatomy = new Anatomy( m_pDatasetHelper, dataType );
-	l_newAnatomy->setName( l_givenName );
+    //create the anatomy
+    int index = DatasetManager::getInstance()->createAnatomy( dataType );
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+    pNewAnatomy->setName( l_givenName );
 
-#ifdef __WXMAC__
-    // insert at zero is a well-known bug on OSX, so we append there...
-    // http://trac.wxwidgets.org/ticket/4492
-    long l_id = m_pDatasetHelper->m_mainFrame->m_pListCtrl->GetItemCount();
-#else
-    long l_id = 0;
-#endif
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->InsertItem( l_id, wxT( "" ), 0 );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 1, l_newAnatomy->getName() );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 2, wxT( "0.00" ) );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItem( l_id, 3, wxT( "" ), 1 );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemData( l_id, (long) l_newAnatomy );
-	m_pDatasetHelper->m_mainFrame->m_pListCtrl->SetItemState( l_id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    m_pListCtrl->InsertItem( index );
 
     refreshAllGLWidgets();
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::updateSliders()
+{
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
+    m_pXSlider->SetMax( wxMax( 2, columns - 1 ) );
+    m_pXSlider->SetValue( columns / 2 );
+    m_pYSlider->SetMax( wxMax( 2, rows - 1 ) );
+    m_pYSlider->SetValue( rows / 2 );
+    m_pZSlider->SetMax( wxMax( 2, frames - 1 ) );
+    m_pZSlider->SetValue( frames / 2 );
+
+    SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
+
+    m_pMainGL->changeOrthoSize();
+    m_pGL0->changeOrthoSize();
+    m_pGL1->changeOrthoSize();
+    m_pGL2->changeOrthoSize();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void MainFrame::onNewAnatomyByte( wxCommandEvent& WXUNUSED(event) )
 {
-	createNewAnatomy( HEAD_BYTE );
+    createNewAnatomy( HEAD_BYTE );
 }
 
 void MainFrame::onNewAnatomyRGB( wxCommandEvent& WXUNUSED(event) )
 {
-	createNewAnatomy( RGB );
-}
-
-void MainFrame::onReloadShaders( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->m_scheduledReloadShaders = true;
-    renewAllGLWidgets();
+    createNewAnatomy( RGB );
 }
 
 void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
@@ -446,19 +447,26 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
     dialog.SetFilterIndex( 0 );
-    dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+    dialog.SetDirectory( m_lastPath );
 
-    if( m_pDatasetHelper->m_scnFileLoaded )
+    if( SceneManager::getInstance()->isSceneFileLoaded() )
     {
-        dialog.SetFilename( m_pDatasetHelper->m_scnFileName );
+        dialog.SetFilename( SceneManager::getInstance()->getSceneFilename() );
     }
 
-    dialog.SetDirectory( m_pDatasetHelper->m_scenePath );
+    dialog.SetDirectory( SceneManager::getInstance()->getScenePath() );
 
     if( dialog.ShowModal() == wxID_OK )
     {
-        m_pDatasetHelper->m_scenePath = dialog.GetDirectory();
-        m_pDatasetHelper->save(dialog.GetPath());
+        SceneManager::getInstance()->setScenePath( dialog.GetDirectory() );
+        if( !SceneManager::getInstance()->save( dialog.GetPath() ) )
+        {
+            wxString errorMsg = wxT( "Error occured while trying to save scene." );
+            Logger::getInstance()->print( errorMsg, LOGLEVEL_ERROR );
+            wxMessageBox( errorMsg, wxT( "Error while loading" ), wxOK | wxICON_ERROR, NULL );
+            GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
+            GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
+        }
     }
 }
 
@@ -466,7 +474,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( _T("Event triggered - MainFrame::onSaveFibers"), LOGLEVEL_DEBUG );
 
-    if( !m_pDatasetHelper->m_fibersLoaded )
+    if( !DatasetManager::getInstance()->isFibersLoaded() )
     {
         return;
     }
@@ -477,72 +485,73 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
     dialog.SetFilterIndex( 0 );
-    dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+    dialog.SetDirectory( m_lastPath );
 
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-		if( dialog.ShowModal() == wxID_OK )
-		{
-			m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
-			printf("%d\n",dialog.GetFilterIndex());
-			
-			if( pDatasetInfo->getType() == FIBERS )
-			{
-				Fibers* l_fibers = NULL;
-				m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
-				if( l_fibers )
-				{
-					if (dialog.GetFilterIndex()==1)
-					{
-						l_fibers->saveDMRI( dialog.GetPath() );	
-					}
-					else
-					{
-						l_fibers->save( dialog.GetPath() );
-					}
-				}
-			}
-			else if( pDatasetInfo->getType() == FIBERSGROUP )
-			{
-				FibersGroup* l_fibersGroup = NULL;
-				m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
-				
-				if (dialog.GetFilterIndex()==1)
-				{
-					l_fibersGroup->saveDMRI( dialog.GetPath() );	
-				}
-				else
-				{
-					l_fibersGroup->save( dialog.GetPath() );
-				}
-			}
-			
-		}
-	}
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        if( dialog.ShowModal() == wxID_OK )
+        {
+            m_lastPath = dialog.GetDirectory();
+            
+            if( pDatasetInfo->getType() == FIBERS )
+            {
+                long index = getCurrentListIndex();
+                if( -1 != index )
+                {
+                    Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                    if( pFibers )
+                    {
+                        if (dialog.GetFilterIndex()==1)
+                        {
+                            pFibers->saveDMRI( dialog.GetPath() );
+                        }
+                        else
+                        {
+                            pFibers->save( dialog.GetPath() );
+                        }
+                    }
+                }
+            }
+            else if( pDatasetInfo->getType() == FIBERSGROUP )
+            {
+                FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
+                
+                if (dialog.GetFilterIndex()==1)
+                {
+                    l_fibersGroup->saveDMRI( dialog.GetPath() );
+                }
+                else
+                {
+                    l_fibersGroup->save( dialog.GetPath() );
+                }
+            }
+            
+        }
+    }
 }
 
 void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( _T("Event triggered - MainFrame::onSaveDataset"), LOGLEVEL_DEBUG );
 
-    if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
+    if( m_pCurrentSceneObject != NULL && m_currentListIndex != -1 )
     {
         if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() < MESH )
         {
             Anatomy* l_anatomy = (Anatomy*)m_pCurrentSceneObject;
 
-            wxString caption         = wxT( "Choose l_anatomy file" );
-            wxString wildcard        = wxT( "nifti files (*.nii)|*.nii*|*.*|*.*" );
+            wxString caption         = wxT( "Choose a file" );
+            wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
             dialog.SetFilterIndex( 0 );
-            dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+            dialog.SetDirectory( m_lastPath );
 
             if( dialog.ShowModal() == wxID_OK )
             {
-                m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
+                m_lastPath = dialog.GetDirectory();
                 l_anatomy->saveNifti( dialog.GetPath() );
             }
         }
@@ -564,46 +573,126 @@ void MainFrame::onClose( wxCloseEvent& event )
     this->Destroy();
 }
 
+void MainFrame::onSize( wxSizeEvent& evt )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onSize" ), LOGLEVEL_DEBUG );
+
+    if( NULL != m_pMainGL && DatasetManager::getInstance()->getAnatomyCount() > 0 )
+    {
+        m_pMainGL->changeOrthoSize();
+    }
+    evt.Skip();
+}
+
 void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
+    if( m_pCurrentSceneObject != NULL && m_currentListIndex != -1 )
     {
-        if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == SURFACE )
-        {
-            Surface *l_surface = (Surface*)m_pCurrentSceneObject;
-
-            wxString caption         = wxT( "Choose a file" );
-            wxString wildcard        = wxT( "surfae files (*.vtk)|*.vtk" );
-            wxString defaultDir      = wxEmptyString;
-            wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
-            dialog.SetFilterIndex( 0 );
-            dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
-            if( dialog.ShowModal() == wxID_OK )
-            {
-                m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
-                l_surface->save( dialog.GetPath() );
-            }
-        }
-        else if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == ISO_SURFACE )
+        if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == ISO_SURFACE )
         {
             CIsoSurface *l_surface = (CIsoSurface*)m_pCurrentSceneObject;
 
             wxString caption         = wxT( "Choose a file" );
-            wxString wildcard        = wxT( "surfae files (*.vtk)|*.vtk" );
+            wxString wildcard        = wxT( "surface files (*.vtk)|*.vtk" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
             wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
             dialog.SetFilterIndex( 0 );
-            dialog.SetDirectory( m_pDatasetHelper->m_lastPath );
+            dialog.SetDirectory( m_lastPath );
             if( dialog.ShowModal() == wxID_OK )
             {
-                m_pDatasetHelper->m_lastPath = dialog.GetDirectory();
+                m_lastPath = dialog.GetDirectory();
                 l_surface->save( dialog.GetPath() );
             }
         }
     }
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuLock( wxCommandEvent& WXUNUSED(event) )
+{
+    m_pMainGL->m_isSlizesLocked = !m_pMainGL->m_isSlizesLocked;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
+{
+    SceneManager::getInstance()->toggleAxesDisplay();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewBack( wxCommandEvent& WXUNUSED(event) )
+{
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = -1.0f;
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M21 =  1.0f;
+    transform.s.M12 =  1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
+    m_pMainGL->setRotation();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewBottom( wxCommandEvent& WXUNUSED(event) )
+{
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = -1.0f;
+    transform.s.M22 = -1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
+    m_pMainGL->setRotation();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
+{
+    SceneManager::getInstance()->toggleCrosshairDisplay();
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewFront( wxCommandEvent& WXUNUSED(event) )
+{
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M12 =  1.0f;
+    transform.s.M21 = -1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
+    m_pMainGL->setRotation();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onMenuViewLeft( wxCommandEvent& WXUNUSED(event) )
+{
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 =  0.0f;
+    transform.s.M11 =  0.0f;
+    transform.s.M22 =  0.0f;
+    transform.s.M20 = -1.0f;
+    transform.s.M01 = -1.0f;
+    transform.s.M12 =  1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
+    m_pMainGL->setRotation();
+
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 /****************************************************************************************************
  *
@@ -611,228 +700,124 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
  * Sets the main GL widget to some standard positions
  *
  ****************************************************************************************************/
-
 void MainFrame::onMenuViewReset( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_zoom  = 1;
-    m_pDatasetHelper->m_xMove = 0;
-    m_pDatasetHelper->m_yMove = 0;
+    SceneManager::getInstance()->setZoom( 1.0f );
+    SceneManager::getInstance()->setMoveX( 0.0f );
+    SceneManager::getInstance()->setMoveY( 0.0f );
     refreshAllGLWidgets();
 }
 
-void MainFrame::onMenuViewLeft( wxCommandEvent& WXUNUSED(event) )
-{
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M00 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M20 = -1.0f;
-    m_pDatasetHelper->m_transform.s.M01 = -1.0f;
-    m_pDatasetHelper->m_transform.s.M12 =  1.0f;
-    m_pMainGL->setRotation();
-}
+//////////////////////////////////////////////////////////////////////////
 
 void MainFrame::onMenuViewRight( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M00 = 0.0f;
-    m_pDatasetHelper->m_transform.s.M11 = 0.0f;
-    m_pDatasetHelper->m_transform.s.M22 = 0.0f;
-    m_pDatasetHelper->m_transform.s.M20 = 1.0f;
-    m_pDatasetHelper->m_transform.s.M01 = 1.0f;
-    m_pDatasetHelper->m_transform.s.M12 = 1.0f;
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    transform.s.M00 = 0.0f;
+    transform.s.M11 = 0.0f;
+    transform.s.M22 = 0.0f;
+    transform.s.M20 = 1.0f;
+    transform.s.M01 = 1.0f;
+    transform.s.M12 = 1.0f;
+    SceneManager::getInstance()->setTransform( transform );
+
     m_pMainGL->setRotation();
 }
+
+//////////////////////////////////////////////////////////////////////////
+
 
 void MainFrame::onMenuViewTop( wxCommandEvent& WXUNUSED(event) )
 {
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
+    Matrix4fT transform = SceneManager::getInstance()->getTransform();
+    Matrix4fSetIdentity( &transform );
+    SceneManager::getInstance()->setTransform( transform );
     m_pMainGL->setRotation();
 }
 
-void MainFrame::onMenuViewBottom( wxCommandEvent& WXUNUSED(event) )
-{
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M00 = -1.0f;
-    m_pDatasetHelper->m_transform.s.M22 = -1.0f;
-    m_pMainGL->setRotation();
-}
+//////////////////////////////////////////////////////////////////////////
 
-void MainFrame::onMenuViewFront( wxCommandEvent& WXUNUSED(event) )
-{
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M12 =  1.0f;
-    m_pDatasetHelper->m_transform.s.M21 = -1.0f;
-    m_pMainGL->setRotation();
-}
-void MainFrame::onMenuLock( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pMainGL->m_isSlizesLocked = !m_pMainGL->m_isSlizesLocked;
-}
 void MainFrame::onSceneLock( wxCommandEvent& WXUNUSED(event) )
 {
     m_pMainGL->m_isSceneLocked = !m_pMainGL->m_isSceneLocked;
 }
 
-void MainFrame::onMenuViewBack( wxCommandEvent& WXUNUSED(event) )
-{
-    Matrix4fSetIdentity( &m_pDatasetHelper->m_transform );
-    m_pDatasetHelper->m_transform.s.M00 = -1.0f;
-    m_pDatasetHelper->m_transform.s.M11 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M22 =  0.0f;
-    m_pDatasetHelper->m_transform.s.M21 =  1.0f;
-    m_pDatasetHelper->m_transform.s.M12 =  1.0f;
-    m_pMainGL->setRotation();
-}
-
-void MainFrame::onMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->m_isShowAxes = !m_pDatasetHelper->m_isShowAxes;
-}
-
-void MainFrame::onMenuViewCrosshair( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->m_showCrosshair = !m_pDatasetHelper->m_showCrosshair;
-    refreshAllGLWidgets();
-}
-
-/****************************************************************************************************
- *
- * Menu VOI
- *
- ****************************************************************************************************/
-
-void MainFrame::onToggleSelectionObjects( wxCommandEvent& WXUNUSED(event) )
-{
-    if( m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-
-    // Get the selection object is selected.
-    wxTreeItemId l_selectionObjectTreeId = m_pTreeWidget->GetSelection();
-
-    if( treeSelected( l_selectionObjectTreeId ) == MASTER_OBJECT )
-    {
-        SelectionObject* l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selectionObject->toggleIsActive();
-        m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selectionObject->getIcon());
-        l_selectionObject->setIsDirty( true );
-
-        int l_childSelectionObject = m_pTreeWidget->GetChildrenCount( l_selectionObjectTreeId );
-        wxTreeItemIdValue childcookie = 0;
-        for( int i = 0; i < l_childSelectionObject; ++i )
-        {
-            wxTreeItemId l_childId = m_pTreeWidget->GetNextChild( l_selectionObjectTreeId, childcookie );
-            if( l_childId.IsOk() )
-            {
-                SelectionObject* l_childSelectionObject = ( (SelectionObject*)( m_pTreeWidget->GetItemData( l_childId ) ) );
-                l_childSelectionObject->setIsActive( l_selectionObject->getIsActive() );
-                m_pTreeWidget->SetItemImage( l_childId, l_childSelectionObject->getIcon() );
-                l_childSelectionObject->setIsDirty( true );
-            }
-        }
-    }
-    else if( treeSelected( l_selectionObjectTreeId ) == CHILD_OBJECT )
-    {
-        SelectionObject* l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selectionObject->toggleIsActive();
-        m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selectionObject->getIcon() );
-        l_selectionObject->setIsDirty( true );
-    }
-    refreshAllGLWidgets();
-}
-
 void MainFrame::onToggleDrawPointsMode( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-    {
-        return;
-    }
-    m_pDatasetHelper->togglePointMode();
+    SceneManager::getInstance()->togglePointMode();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectDrawer( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-
-	m_pDatasetHelper->m_isDrawerToolActive = true;
-
+    m_isDrawerToolActive = true;
     updateDrawerToolbar();
 }
 
 void MainFrame::onSwitchDrawer( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-    
-    m_pDatasetHelper->m_isDrawerToolActive = !m_pDatasetHelper->m_isDrawerToolActive;
-    
+    m_isDrawerToolActive = !m_isDrawerToolActive;
     updateDrawerToolbar();
 }
 
 void MainFrame::updateDrawerToolbar()
 {
-    m_pDatasetHelper->m_isRulerToolActive = false;
-    
+    SceneManager::getInstance()->setRulerActive( false );
+
     m_pToolBar->m_txtRuler->Disable();
-    
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), m_pDatasetHelper->m_isDrawerToolActive);
+
+    m_pToolBar->EnableTool( m_pToolBar->m_toggleDrawRound->GetId(), m_isDrawerToolActive );
+    m_pToolBar->EnableTool( m_pToolBar->m_toggleDraw3d->GetId(), m_isDrawerToolActive );
+    m_pToolBar->EnableTool( m_pToolBar->m_selectPen->GetId(), m_isDrawerToolActive );
+    m_pToolBar->EnableTool( m_pToolBar->m_selectEraser->GetId(), m_isDrawerToolActive );
+    m_pToolBar->EnableTool( m_pToolBar->m_selectColorPicker->GetId(), m_isDrawerToolActive );
     
     // Check if the current anatomy supports RGB
     Anatomy *pTempAnat = (Anatomy*) m_pCurrentSceneObject;
     
     if( pTempAnat != NULL && pTempAnat->getType() == RGB )
     {
-        m_pDatasetHelper->m_canUseColorPicker = true;
+        m_canUseColorPicker = true;
     }
     else
     {
-        m_pDatasetHelper->m_canUseColorPicker = false;
+        m_canUseColorPicker = false;
     }
     
-	refreshAllGLWidgets();
+    refreshAllGLWidgets();
+}
+
+void MainFrame::changePropertiesSizer( SceneObject * pSceneObj, int index )
+{
+    if( NULL == pSceneObj->getPropertiesSizer() )
+    {
+        pSceneObj->createPropertiesSizer( m_pPropertiesWindow );
+        m_pPropertiesWindow->Layout();
+        m_pPropertiesWindow->FitInside();
+    }
+
+    m_pCurrentSizer = pSceneObj->getPropertiesSizer();
+    m_pCurrentSceneObject = pSceneObj;
+    m_currentListIndex = index;
+
+    m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
 }
 
 void MainFrame::onToggleDrawRound( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-    {
-        return;
-    }
-    m_pDatasetHelper->m_drawRound = !m_pDatasetHelper->m_drawRound;
+    m_drawRound = !m_drawRound;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleDraw3d( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-    {
-        return;
-    }
-    m_pDatasetHelper->m_draw3d = !m_pDatasetHelper->m_draw3d;
+    m_draw3d = !m_draw3d;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-	{
-        return;
-	}
-
     wxColourData l_colorData;
 
     for( int i = 0; i < 10; ++i )
@@ -859,13 +844,13 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
     if( dialog.ShowModal() == wxID_OK )
     {
         wxColourData l_retData = dialog.GetColourData();
-        m_pDatasetHelper->m_drawColor = l_retData.GetColour();
-		wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
-		m_pDatasetHelper->m_drawColorIcon.SetRGB(fullImage, 
-											     m_pDatasetHelper->m_drawColor.Red(), 
-											     m_pDatasetHelper->m_drawColor.Green(), 
-											     m_pDatasetHelper->m_drawColor.Blue() );
-		m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap(m_pDatasetHelper->m_drawColorIcon));
+        m_drawColor = l_retData.GetColour();
+        wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
+        m_drawColorIcon.SetRGB( fullImage, 
+                                m_drawColor.Red(), 
+                                m_drawColor.Green(), 
+                                m_drawColor.Blue() );
+        m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap( m_drawColorIcon ) );
     }
     else
     {
@@ -873,14 +858,14 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
     }
 
 /*
-    if( m_mainFrame->m_currentListItem != -1 )
+    if( m_mainFrame->m_currentListIndex != -1 )
     {
         DatasetInfo *l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
         if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
         {
             l_info->setColor( l_col );
             l_info->setuseTex( false );
-            m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListItem, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
+            m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListIndex, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
         }
     }
     else if ( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject != NULL )
@@ -900,191 +885,330 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 
 void MainFrame::onSelectStroke1( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawSize = 1;
-	
-	refreshAllGLWidgets();
+    m_drawSize = 1;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke2( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawSize = 2;
-	
-	refreshAllGLWidgets();
+    m_drawSize = 2;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke3( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawSize = 3;
-	
-	refreshAllGLWidgets();
+    m_drawSize = 3;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke4( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawSize = 4;
-	
-	refreshAllGLWidgets();
+    m_drawSize = 4;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke5( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawSize = 5;
-	
-	refreshAllGLWidgets();
+    m_drawSize = 5;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke7( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawSize = 7;
-	
-	refreshAllGLWidgets();
+    m_drawSize = 7;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectStroke10( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawSize = 10;
-	
-	refreshAllGLWidgets();
+    m_drawSize = 10;
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectPen( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_PEN;
-	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
-	
-	refreshAllGLWidgets();
+    m_drawMode = DRAWMODE_PEN;
+    //glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectEraser( wxCommandEvent& event )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-	m_pDatasetHelper->m_drawMode = m_pDatasetHelper->DRAWMODE_ERASER;
-	//glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
-
-	refreshAllGLWidgets();
-}
-
-void MainFrame::onMoveBoundaryPointsLeft( wxCommandEvent& WXUNUSED(event) )
-{
-    moveBoundaryPoints(5);
-}
-
-
-void MainFrame::onMoveBoundaryPointsRight(wxCommandEvent& WXUNUSED(event))
-{
-    moveBoundaryPoints(-5);
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Moves all boundary points left or right
-///////////////////////////////////////////////////////////////////////////
-void MainFrame::moveBoundaryPoints(int i_value)
-{
-    wxTreeItemId l_id, l_childid;
-    wxTreeItemIdValue l_cookie = 0;
-    l_id = m_pTreeWidget->GetFirstChild( m_tPointId, l_cookie );
-    while( l_id.IsOk() )
-    {
-        SplinePoint* l_point = (SplinePoint*)( m_pTreeWidget->GetItemData( l_id ) );
-        if( l_point->isBoundary())
-        {
-            l_point->setX( l_point->X() + i_value );
-        }
-        l_id = m_pTreeWidget->GetNextChild( m_tPointId, l_cookie );
-    }
-
-    m_pDatasetHelper->m_surfaceIsDirty = true;
+    m_drawMode = DRAWMODE_ERASER;
+    //glBindTexture(GL_TEXTURE_3D, 1);    //Prepare the existing texture for updates
     refreshAllGLWidgets();
 }
 
+//////////////////////////////////////////////////////////////////////////
 
 void MainFrame::deleteSceneObject()
 {
     if (m_pCurrentSizer != NULL)
     {
-        m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer, true);
-        m_pPropertiesWindow->GetSizer()->Detach(m_pCurrentSizer);        
+        m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer, true );
+        m_pPropertiesWindow->GetSizer()->Detach( m_pCurrentSizer );
+        delete m_pCurrentSizer;
         m_pCurrentSizer = NULL;
     }
-    //delete m_currentFNObject;
+
     m_pCurrentSceneObject = NULL;
-    m_pLastSelectedSceneObject = NULL;
-    m_currentListItem = -1;
-    m_lastSelectedListItem = -1;
-    m_pPropertiesWindow->GetSizer()->Layout();
-    doOnSize();
+//     m_pLastSelectedSceneObject = NULL;
+    m_currentListIndex = -1;
+//     m_lastSelectedListItem = -1;
 }
 
-void MainFrame::displayPropertiesSheet()
-{   
-    if (m_pLastSelectedSceneObject == NULL && m_pCurrentSceneObject == NULL)
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::createCutDataset()
+{
+    // check l_anatomy - quit if not present
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListIndex();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
+    if ( info->getType() > OVERLAY )
+        return;
+
+    Anatomy* l_anatomy = (Anatomy*) info;
+
+    DatasetIndex index = DatasetManager::getInstance()->createAnatomy();
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+
+    pNewAnatomy->setZero( columns, rows, frames );
+
+    SelectionObjList selObjects = SceneManager::getInstance()->getSelectionObjects();
+    int x1, x2, y1, y2, z1, z2;
+
+    for( unsigned int i = 0; i < selObjects.size(); ++i )
     {
-        if (m_pCurrentSizer != NULL)
+        for( unsigned int j = 0; j < selObjects[i].size(); ++j )
         {
-           m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);
+            if( selObjects[i][j]->getIsVisible() )
+            {
+                x1 = (int)( selObjects[i][j]->getCenter().x / voxelX - selObjects[i][j]->getSize().x / 2 );
+                x2 = (int)( selObjects[i][j]->getCenter().x / voxelX + selObjects[i][j]->getSize().x / 2 );
+                y1 = (int)( selObjects[i][j]->getCenter().y / voxelY - selObjects[i][j]->getSize().y / 2 );
+                y2 = (int)( selObjects[i][j]->getCenter().y / voxelY + selObjects[i][j]->getSize().y / 2 );
+                z1 = (int)( selObjects[i][j]->getCenter().z / voxelZ - selObjects[i][j]->getSize().z / 2 );
+                z2 = (int)( selObjects[i][j]->getCenter().z / voxelZ + selObjects[i][j]->getSize().z / 2 );
+
+                x1 = std::max( 0, std::min( x1, columns ) );
+                x2 = std::max( 0, std::min( x2, columns ) );
+                y1 = std::max( 0, std::min( y1, rows ) );
+                y2 = std::max( 0, std::min( y2, rows ) );
+                z1 = std::max( 0, std::min( z1, frames ) );
+                z2 = std::max( 0, std::min( z2, frames ) );
+
+                std::vector< float >* l_src = l_anatomy->getFloatDataset();
+                std::vector< float >* l_dst = pNewAnatomy->getFloatDataset();
+
+                for( int b = z1; b < z2; ++b )
+                {
+                    for( int r = y1; r < y2; ++r )
+                    {
+                        for( int c = x1; c < x2; ++c )
+                        {
+                            l_dst->at( b * rows * columns + r * columns + c ) = l_src->at( b * rows * columns + r * columns + c );
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    pNewAnatomy->setName( l_anatomy->getName().BeforeFirst( '.' ) + wxT( " (cut)" ) );
+    pNewAnatomy->setType( l_anatomy->getType() );
+    pNewAnatomy->setDataType(l_anatomy->getDataType());
+    pNewAnatomy->setNewMax(l_anatomy->getNewMax());
+
+    m_pListCtrl->InsertItem( index );
+
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::createDistanceMap()
+{
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListIndex();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
+    if( l_info->getType() > OVERLAY )
+        return;
+
+    Anatomy* l_anatomy = (Anatomy*)l_info;
+
+    Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
+
+    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy );
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
+
+    pNewAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT(" (Distance Map)"));
+
+    m_pListCtrl->InsertItem( index );
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::createDistanceMapAndIso()
+{
+    // check l_anatomy - quit if not present
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListIndex();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
+    if( l_info->getType() > OVERLAY )
+        return;
+
+    Anatomy* l_anatomy = (Anatomy*)l_info;
+
+    Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
+
+    Anatomy* l_tmpAnatomy = new Anatomy( l_anatomy );
+
+    Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
+
+    int index = DatasetManager::getInstance()->createCIsoSurface( l_tmpAnatomy );
+    CIsoSurface *pIsoSurf = (CIsoSurface *)DatasetManager::getInstance()->getDataset( index );
+    delete l_tmpAnatomy;
+
+    pIsoSurf->GenerateSurface( 0.2f );
+
+    Logger::getInstance()->print( wxT( "Iso surface done" ), LOGLEVEL_MESSAGE );
+
+    if( pIsoSurf->IsSurfaceValid() )
+    {
+        wxString anatomyName = l_anatomy->getName().BeforeFirst( '.' );
+        pIsoSurf->setName( anatomyName + wxT( " (Offset)" ) );
+
+        m_pListCtrl->InsertItem( index );
     }
     else
     {
-        if (m_pLastSelectedSceneObject != NULL)
-        {       
-            if (m_pCurrentSizer != NULL )
-            {
-                m_pPropertiesWindow->GetSizer()->Hide(m_pCurrentSizer);                 
-            }
-            if (!m_pLastSelectedSceneObject->getProprietiesSizer())
-            {
-                m_pLastSelectedSceneObject->createPropertiesSizer(m_pPropertiesWindow);
-            }   
-            m_pCurrentSizer = m_pLastSelectedSceneObject->getProprietiesSizer();
-            
-            m_pCurrentSceneObject = m_pLastSelectedSceneObject;
-            m_currentListItem = m_lastSelectedListItem;
-            if (!m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true ))
-            {
-                m_pPropertiesWindow->GetSizer()->Add(m_pCurrentSizer, 0, wxLeft | wxFIXED_MINSIZE, 0 );
-                m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );                
-            }             
-            doOnSize();            
-        }        
+        Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
+    }
+
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::createIsoSurface()
+{
+    // check l_anatomy - quit if not present
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListIndex();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
+    if( l_info->getType() > OVERLAY )
+        return;
+
+    Anatomy *l_anatomy = (Anatomy *)l_info;
+
+    Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
+
+    int index = DatasetManager::getInstance()->createCIsoSurface( l_anatomy );
+    CIsoSurface *pIsoSurf = (CIsoSurface *)DatasetManager::getInstance()->getDataset( index );
+    pIsoSurf->GenerateSurface( 0.4f );
+
+    Logger::getInstance()->print( wxT( "Iso surface done" ), LOGLEVEL_MESSAGE );
+
+    if( pIsoSurf->IsSurfaceValid() )
+    {
+        wxString l_anatomyName = l_anatomy->getName().BeforeFirst( '.' );
+        pIsoSurf->setName( l_anatomyName + wxT( " (Iso Surface)" ) );
+
+        m_pListCtrl->InsertItem( index );
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "Surface is not valid" ), LOGLEVEL_ERROR );
+    }
+
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::displayPropertiesSheet()
+{   
+//     if (m_pLastSelectedSceneObject == NULL && m_pCurrentSceneObject == NULL)
+//     {
+//         if (m_pCurrentSizer != NULL)
+//         {
+//            if( !m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer ) )
+//            {
+//                Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+//            }
+//         }
+//     }
+//     else
+//     {
+//         if (m_pLastSelectedSceneObject != NULL)
+//         {
+//             if (m_pCurrentSizer != NULL )
+//             {
+//                 if( !m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer ) )
+//                 {
+//                     Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+//                 }
+//             }
+//             if( NULL == m_pLastSelectedSceneObject->getPropertiesSizer() )
+//             {
+//                 m_pLastSelectedSceneObject->createPropertiesSizer( m_pPropertiesWindow );
+//                 m_pPropertiesWindow->Layout();
+//                 m_pPropertiesWindow->FitInside();
+//             }
+//             m_pCurrentSizer = m_pLastSelectedSceneObject->getPropertiesSizer();
+// 
+//             m_pCurrentSceneObject = m_pLastSelectedSceneObject;
+//             m_pLastSelectedSceneObject = NULL;
+//             m_currentListIndex = m_lastSelectedListItem;
+//             m_lastSelectedListItem = -1;
+// 
+//             m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
+//         }
+//         m_pCurrentSceneObject->updatePropertiesSizer();
+//         m_pPropertiesWindow->FitInside();
+//         m_pLastSelectedSceneObject = NULL;
+//     }
+//     
+
+    if( NULL != m_pCurrentSceneObject )
+    {
         m_pCurrentSceneObject->updatePropertiesSizer();
-        m_pLastSelectedSceneObject = NULL;
-    }     
+        m_pPropertiesWindow->FitInside();
+    }
+
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::displayPropertiesSheet" ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1105,281 +1229,110 @@ void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
     createNewSelectionObject( BOX_TYPE );
-    m_pTrackingWindow->m_pBtnStart->Enable(true);
+    m_pTrackingWindow->m_pBtnStart->Enable( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will create a new selection object of type depending of the argument.
 //
-// i_newSelectionObjectType         : The type of the new selection object we wat to create.
+// selObjType         : The type of the new selection object we wat to create.
 ///////////////////////////////////////////////////////////////////////////
-void MainFrame::createNewSelectionObject( ObjectType i_newSelectionObjectType )
+void MainFrame::createNewSelectionObject( ObjectType selObjType )
 {
-    if( m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    Vector l_center( m_pXSlider->GetValue() * m_pDatasetHelper->m_xVoxel, 
-                     m_pYSlider->GetValue() * m_pDatasetHelper->m_yVoxel, 
-                     m_pZSlider->GetValue() * m_pDatasetHelper->m_zVoxel );
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    Vector l_center( m_pXSlider->GetValue() * voxelX, 
+                     m_pYSlider->GetValue() * voxelY, 
+                     m_pZSlider->GetValue() * voxelZ );
     float l_sizeV = 10;
 
-    Vector l_size( l_sizeV / m_pDatasetHelper->m_xVoxel, 
-                   l_sizeV / m_pDatasetHelper->m_yVoxel,
-                   l_sizeV / m_pDatasetHelper->m_zVoxel );
-    
+    Vector l_size( l_sizeV / voxelX, 
+                   l_sizeV / voxelY,
+                   l_sizeV / voxelZ );
 
-    SelectionObject* l_newSelectionObject;
-    if( i_newSelectionObjectType == ELLIPSOID_TYPE )
+    SelectionObject *pSelObj;
+    switch( selObjType )
     {
-        l_newSelectionObject = new SelectionEllipsoid( l_center, l_size, m_pDatasetHelper );
-    }
-    else if( i_newSelectionObjectType == BOX_TYPE )
-    {
-        l_newSelectionObject = new SelectionBox( l_center, l_size, m_pDatasetHelper );
-    }
-    else
-    {
+    case ELLIPSOID_TYPE:
+        pSelObj = new SelectionEllipsoid( l_center, l_size );
+        break;
+    case BOX_TYPE:
+        pSelObj = new SelectionBox( l_center, l_size );
+        break;
+    default:
         return;
     }
+
     // Check what is selected in the tree to know where to put this new selection object.
-    wxTreeItemId l_treeSelectionId = m_pTreeWidget->GetSelection();
+    wxTreeItemId treeSelectionId = m_pTreeWidget->GetSelection();
 
-    wxTreeItemId l_newSelectionObjectId;
-    
-    if( treeSelected( l_treeSelectionId ) == MASTER_OBJECT )
-    {
-        // Our new seleciton object is under another master selection object.
-        l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_treeSelectionId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
-        m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxGREEN );
-    }
-    else if( treeSelected( l_treeSelectionId ) == CHILD_OBJECT )
-    {
-        wxTreeItemId l_parentId = m_pTreeWidget->GetItemParent( l_treeSelectionId );
+    wxTreeItemId parendId;
+    wxColor color = *wxGREEN;
 
-        // Our new seleciton object is under another child selection object.
-        l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_parentId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
-        m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxGREEN );
-    }
-    else
+    switch( treeSelected( treeSelectionId ) )
     {
-        // Our new seleciton object is on top.
-        l_newSelectionObject->setIsMaster( true );
-        l_newSelectionObjectId = m_pTreeWidget->AppendItem( m_tSelectionObjectsId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
-        m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxCYAN );
+    case MASTER_OBJECT:
+        parendId = treeSelectionId;
+        break;
+    case CHILD_OBJECT:
+        parendId = m_pTreeWidget->GetItemParent( treeSelectionId );
+        break;
+    default:
+        parendId = m_tSelectionObjectsId;
+        color = *wxCYAN;
+        pSelObj->setIsMaster( true );
     }
 
-    m_pTreeWidget->EnsureVisible( l_newSelectionObjectId );
-    m_pTreeWidget->SetItemImage( l_newSelectionObjectId, l_newSelectionObject->getIcon() );
-    l_newSelectionObject->setTreeId( l_newSelectionObjectId );    
-    m_pDatasetHelper->m_selBoxChanged = true;
-    m_pTreeWidget->SelectItem(l_newSelectionObjectId, true);    
-    refreshAllGLWidgets();
+    wxTreeItemId newSelectionObjectId = m_pTreeWidget->AppendItem( parendId, pSelObj->getName(), 0, -1, pSelObj );
+    pSelObj->setTreeId( newSelectionObjectId );
+
+    m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, color );
+    m_pTreeWidget->SetItemImage( newSelectionObjectId, pSelObj->getIcon() );
+    m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+    m_pTreeWidget->SelectItem( newSelectionObjectId );
+    SceneManager::getInstance()->setSelBoxChanged( true );
+//     refreshAllGLWidgets();
 }
 
 
 void MainFrame::onHideSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pDatasetHelper->m_theScene == NULL )
-    {
-        return;
-    }
-    m_pDatasetHelper->toggleShowAllSelectionObjects();
+    SceneManager::getInstance()->toggleShowAllSelObj();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onActivateSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->toggleActivateAllSelectionObjects();
-    refreshAllGLWidgets();
-}
-
-void MainFrame::onUseMorph( wxCommandEvent& WXUNUSED(event) )
-{
-    if( m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->m_morphing = ! m_pDatasetHelper->m_morphing;
-}
-
-/****************************************************************************************************
- *
- * Menu Spline Surface
- *
- ****************************************************************************************************/
-
-void MainFrame::onNewSplineSurface( wxCommandEvent& WXUNUSED(event) )
-{
-    //Generate KdTree for Spline Surface
-    Fibers* pTmpFib = NULL;
-    m_pDatasetHelper->getSelectedFiberDataset(pTmpFib);
-    if(pTmpFib != NULL)
-    {
-        pTmpFib->generateKdTree();
-    }
-
-    if( ! m_pDatasetHelper->m_theScene || m_pDatasetHelper->m_surfaceLoaded )
-    {
-        return;
-    }
-    int l_xs = (int)( m_pXSlider->GetValue() * m_pDatasetHelper->m_xVoxel );
-    int l_ys = (int)( m_pYSlider->GetValue() * m_pDatasetHelper->m_yVoxel );
-    int l_zs = (int)( m_pZSlider->GetValue() * m_pDatasetHelper->m_zVoxel );
-
-    // Delete all existing points.
-    m_pTreeWidget->DeleteChildren( m_tPointId );
-    Fibers* l_fibers = NULL;
-
-    if( m_pDatasetHelper->m_fibersLoaded )
-    {
-        m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
-    }
-    if( m_pDatasetHelper->m_showSagittal )
-    {
-        for( int i = 0; i < 11; ++i )
-        {
-            for( int j = 0; j < 11; ++j )
-            {
-                int yy = (int)( ( m_pDatasetHelper->m_rows   / 10 * m_pDatasetHelper->m_yVoxel ) * i );
-                int zz = (int)( ( m_pDatasetHelper->m_frames / 10 * m_pDatasetHelper->m_zVoxel ) * j );
-
-                // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xs, yy, zz, m_pDatasetHelper );
-
-                if( i == 0 || i == 10 || j == 0 || j == 10 )
-                {
-                    wxString l_name = wxT("boundary l_point");
-                    wxTreeItemId tId = m_pTreeWidget->AppendItem( m_tPointId, l_name, -1, -1, l_point );
-                    l_point->setTreeId( tId );
-                    l_point->setName(l_name);
-                    l_point->setIsBoundary( true );
-                }
-                else
-                {
-                    if( m_pDatasetHelper->m_fibersLoaded && l_fibers->getBarycenter( l_point ) )
-                    {
-                        wxString l_name = wxT( "l_point" );
-                        wxTreeItemId tId = m_pTreeWidget->AppendItem( m_tPointId, l_name, -1, -1, l_point );
-                        l_point->setTreeId( tId );
-                        l_point->setName(l_name);
-                        l_point->setIsBoundary( false );
-                    }
-                }
-            }
-        }
-    }
-    else if( m_pDatasetHelper->m_showCoronal )
-    {
-        for( int i = 0; i < 11; ++i )
-        {
-            for( int j = 0; j < 11; ++j )
-            {
-                int l_xx = (int)( ( m_pDatasetHelper->m_columns / 10 * m_pDatasetHelper->m_xVoxel ) * i );
-                int l_zz = (int)( ( m_pDatasetHelper->m_frames  / 10 * m_pDatasetHelper->m_zVoxel ) * j );
-
-                // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xx, l_ys, l_zz, m_pDatasetHelper );
-
-                if( i == 0 || i == 10 || j == 0 || j == 10 )
-                {
-                    wxTreeItemId l_treeId = m_pTreeWidget->AppendItem( m_tPointId, wxT("boundary l_point"), -1, -1, l_point );
-                    l_point->setTreeId( l_treeId );
-                    l_point->setIsBoundary( true );
-                }
-            }
-        }
-    }
-    else
-    {
-        for( int i = 0; i < 11; ++i )
-        {
-            for( int j = 0; j < 11; ++j )
-            {
-                int l_xx = (int)( ( m_pDatasetHelper->m_columns / 10 * m_pDatasetHelper->m_xVoxel ) * i );
-                int l_yy = (int)( ( m_pDatasetHelper->m_rows    / 10 * m_pDatasetHelper->m_yVoxel ) * j );
-
-                // Create the point.
-                SplinePoint* l_point = new SplinePoint( l_xx, l_yy, l_zs, m_pDatasetHelper );
-
-                if (i == 0 || i == 10 || j == 0 || j == 10)
-                {
-                    wxTreeItemId l_treeId = m_pTreeWidget->AppendItem( m_tPointId, wxT("boundary l_point"), -1, -1, l_point );
-                    l_point->setTreeId( l_treeId );
-                    l_point->setIsBoundary( true );
-                }
-            }
-        }
-    }
-
-#ifdef __WXMAC__
-    // insert at zero is a well-known bug on OSX, so we append there...
-    // http://trac.wxwidgets.org/ticket/4492
-    long id = m_pListCtrl->GetItemCount();
-#else
-    long id = 0;
-#endif
-
-    Surface* l_surface = new Surface(m_pDatasetHelper);
-    l_surface->execute();
-
-    m_pListCtrl->InsertItem( id, wxT( "" ), 0 );
-    m_pListCtrl->SetItem( id, 1, l_surface->getName() );
-    m_pListCtrl->SetItem( id, 2, wxT( "0.50" ) );
-    m_pListCtrl->SetItem( id, 3, wxT( "" ), 1 );
-    m_pListCtrl->SetItemData( id, (long)l_surface );
-    m_pListCtrl->SetItemState( id, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-
-    m_pDatasetHelper->m_surfaceLoaded = true;
+    SceneManager::getInstance()->toggleActivateAllSelObj();
     refreshAllGLWidgets();
 }
 
 
 void MainFrame::onToggleDrawVectors( wxCommandEvent& WXUNUSED(event) )
 {
-    if(m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->m_drawVectors = !m_pDatasetHelper->m_drawVectors;
+    SceneManager::getInstance()->toggleVectorsDisplay();
+    //m_pDatasetHelper->m_drawVectors = !m_pDatasetHelper->m_drawVectors;
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleNormal( wxCommandEvent& WXUNUSED(event ))
 {
-    m_pDatasetHelper->m_normalDirection *= -1.0;
-
-    for( int i = 0; i < m_pListCtrl->GetItemCount(); ++i )
-    {
-        DatasetInfo* l_info = (DatasetInfo*) m_pListCtrl->GetItemData( i );
-        if( l_info->getType() == SURFACE )
-        {
-            Surface* l_surf = (Surface*)m_pListCtrl->GetItemData( i );
-            l_surf->flipNormals();
-        }
-    }
+    float normal = SceneManager::getInstance()->getNormalDirection();
+    SceneManager::getInstance()->setNormalDirection( -normal );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
 {
-    if( m_pCurrentSceneObject != NULL && m_currentListItem != -1 )
+    if( m_pCurrentSceneObject != NULL && m_currentListIndex != -1 )
     {
         DatasetInfo* l_info = (DatasetInfo*)m_pCurrentSceneObject;
         if( l_info->getType() < MESH )
         {
-            if ( !l_info->toggleShowFS() )
-            {
-                m_pListCtrl->SetItem( m_currentListItem, 1, l_info->getName() + wxT( "*" ) );
-            }
-            else
-            {
-                m_pListCtrl->SetItem( m_currentListItem, 1, l_info->getName() );
-            }
+            l_info->toggleShowFS();
+            m_pListCtrl->UpdateSelected();
         }
     }
     refreshAllGLWidgets();
@@ -1387,75 +1340,82 @@ void MainFrame::onToggleTextureFiltering( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onToggleLighting( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_lighting =! m_pDatasetHelper->m_lighting;
+    SceneManager::getInstance()->toggleLightingDisplay();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleBlendTexOnMesh( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_blendTexOnMesh =! m_pDatasetHelper->m_blendTexOnMesh;
+    SceneManager::getInstance()->toggleTexBlendOnMesh();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleFilterIso( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_filterIsoSurf =! m_pDatasetHelper->m_filterIsoSurf;
+    SceneManager::getInstance()->toggleIsoSurfaceFiltered();
     refreshAllGLWidgets();
 }
 
 void MainFrame::onInvertFibers( wxCommandEvent& WXUNUSED(event) )
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-		if( pDatasetInfo->getType() == FIBERS )
-		{
-			Fibers* l_fibers = NULL;
-			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
-			if( l_fibers != NULL)
-			{
-				l_fibers->invertFibers();
-			}
-		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			FibersGroup* l_fibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
-			if( l_fibersGroup != NULL )
-			{
-				l_fibersGroup->invertFibers();
-			}			
-		}
-	}
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        if( pDatasetInfo->getType() == FIBERS )
+        {
+            long index = getCurrentListIndex();
+            if( -1 != index )
+            {
+                Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                if( NULL != pFibers )
+                {
+                    pFibers->invertFibers();
+                }
+            }
+        }
+        else if ( pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( l_fibersGroup != NULL )
+            {
+                l_fibersGroup->invertFibers();
+            }            
+        }
+    }
 
-    m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-		if( pDatasetInfo->getType() == FIBERS )
-		{
-			Fibers* l_fibers = NULL;
-			m_pDatasetHelper->getSelectedFiberDataset( l_fibers ) ;
-			if(l_fibers != NULL)
-			{
-				l_fibers->useFakeTubes();
-			}
-		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			FibersGroup* l_fibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
-			if( l_fibersGroup != NULL )
-			{
-				l_fibersGroup->useFakeTubes();
-			}			
-		}
-	}
+        DatasetInfo *pDatasetInfo = (DatasetInfo *)m_pCurrentSceneObject;
+        if( NULL != pDatasetInfo )
+        {
+            if( pDatasetInfo->getType() == FIBERS )
+            {
+                long index = getCurrentListIndex();
+                if( -1 != index )
+                {
+                    Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                    if( pFibers != NULL )
+                    {
+                        pFibers->useFakeTubes();
+                    }
+                }
+            }
+            else if ( pDatasetInfo->getType() == FIBERSGROUP )
+            {
+                FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+                if( pFibersGroup != NULL )
+                {
+                    pFibersGroup->useFakeTubes();
+                }
+            }
+        }
+    }
     refreshAllGLWidgets();
 }
 
@@ -1464,9 +1424,7 @@ void MainFrame::onUseFakeTubes( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_clearToBlack = !m_pDatasetHelper->m_clearToBlack;
-    
-    if( m_pDatasetHelper->m_clearToBlack )
+    if( SceneManager::getInstance()->toggleClearToBlack() )
     {
         glClearColor( 0.0, 0.0, 0.0, 0.0 );
     }
@@ -1474,98 +1432,92 @@ void MainFrame::onClearToBlack( wxCommandEvent& WXUNUSED(event) )
     {
         glClearColor( 1.0, 1.0, 1.0, 0.0 );
     }
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::onClearToBlack - glClearColor" ) );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
+    SceneManager::getInstance()->setRulerActive( false );
+    m_isDrawerToolActive = false;
 
-	m_pDatasetHelper->m_isRulerToolActive = false;
-	m_pDatasetHelper->m_isDrawerToolActive = false;
-
-	m_pToolBar->m_txtRuler->Disable();
-	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
-	refreshAllGLWidgets();
+    m_pToolBar->m_txtRuler->Disable();
+    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    refreshAllGLWidgets();
 }
 
 void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
 {
-	if( m_pDatasetHelper->m_theScene == NULL )
-	{
-		return;
-	}
-
-	m_pDatasetHelper->m_isRulerToolActive = true;
-	m_pDatasetHelper->m_isDrawerToolActive = false;
+    SceneManager::getInstance()->setRulerActive( true );
+    m_isDrawerToolActive = false;
 
     m_pToolBar->m_txtRuler->Enable();
-	m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-	m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
+    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
     refreshAllGLWidgets();
 }
 
 void MainFrame::onRulerToolClear( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_rulerPts.clear();
-    m_pDatasetHelper->m_rulerFullLength = 0;
-    m_pDatasetHelper->m_rulerPartialLength = 0;
+    SceneManager::getInstance()->getRulerPts().clear();
+    SceneManager::getInstance()->setRulerFullLength( 0.0 );
+    SceneManager::getInstance()->setRulerPartialLength( 0.0 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onRulerToolAdd( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+    vector< Vector > v = SceneManager::getInstance()->getRulerPts();
+    
+    if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
     {
-        m_pDatasetHelper->m_rulerPts.push_back(m_pDatasetHelper->m_rulerPts.back());
+        v.push_back( v.back() );
     }
     refreshAllGLWidgets();
 }
 
 void MainFrame::onRulerToolDel( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_isRulerToolActive && m_pDatasetHelper->m_rulerPts.size()>0)
+    if( SceneManager::getInstance()->isRulerActive() && !SceneManager::getInstance()->getRulerPts().empty() )
     {
-        m_pDatasetHelper->m_rulerPts.pop_back();
+        SceneManager::getInstance()->getRulerPts().pop_back();
     }
     refreshAllGLWidgets();
 }
 
 void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 {    
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
-		if( pDatasetInfo->getType() == FIBERS )
-		{
-			Fibers* l_fibers = NULL;
-			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
-			if( l_fibers != NULL)
-			{
-				l_fibers->useTransparency();
-
-			}
-		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			FibersGroup* l_fibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
-			if( l_fibersGroup != NULL )
-			{
-				l_fibersGroup->useTransparency();
-			}			
-		}
-	}
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        if( pDatasetInfo->getType() == FIBERS )
+        {
+            long index = getCurrentListIndex();
+            if( -1 != index )
+            {
+                Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                if( pFibers != NULL)
+                {
+                    pFibers->useTransparency();
+                }
+            }
+        }
+        else if ( pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( l_fibersGroup != NULL )
+            {
+                l_fibersGroup->useTransparency();
+            }
+        }
+    }
     refreshAllGLWidgets();
 }
 
@@ -1573,7 +1525,7 @@ void MainFrame::onUseTransparency( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onUseGeometryShader( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_useFibersGeometryShader = !m_pDatasetHelper->m_useFibersGeometryShader;
+    SceneManager::getInstance()->toggleFibersGeomShaderActive();
     refreshAllGLWidgets();
 }
 
@@ -1581,80 +1533,75 @@ void MainFrame::onUseGeometryShader( wxCommandEvent& event )
 
 void MainFrame::onResetColor(wxCommandEvent& WXUNUSED(event))
 {
-	if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {
-		DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pCurrentSceneObject);
 
         if( pDatasetInfo->getType() == FIBERS )
         {
-            Fibers* l_fibers = NULL;
-			m_pDatasetHelper->getSelectedFiberDataset( l_fibers );
-			if( l_fibers  != NULL)
-			{
-				l_fibers->resetColorArray();
-			}
-		}
-		else if ( pDatasetInfo->getType() == FIBERSGROUP )
-		{
-			FibersGroup* l_fibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset( l_fibersGroup );
-			if( l_fibersGroup != NULL )
-			{
-				l_fibersGroup->resetFibersColor();
-			}
-
-		}
-	}
+            long index = getCurrentListIndex();
+            if( -1 != index )
+            {
+                Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
+                if( pFibers != NULL)
+                {
+                    pFibers->resetColorArray();
+                }
+            }
+        }
+        else if ( pDatasetInfo->getType() == FIBERSGROUP )
+        {
+            FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if( l_fibersGroup != NULL )
+            {
+                l_fibersGroup->resetFibersColor();
+            }
+        }
+    }
     
-    m_pDatasetHelper->m_selBoxChanged = true;
-    refreshAllGLWidgets();
-}
-
-void MainFrame::onToggleColorMapLegend( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->m_showColorMapLegend = !m_pDatasetHelper->m_showColorMapLegend;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap0( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 0;
+    SceneManager::getInstance()->setColorMap( 0 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap1( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 1;
+    SceneManager::getInstance()->setColorMap( 1 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap2( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 2;
+    SceneManager::getInstance()->setColorMap( 2 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap3( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 3;
+    SceneManager::getInstance()->setColorMap( 3 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap4( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 4;
+    SceneManager::getInstance()->setColorMap( 4 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMap5( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = 5;
+    SceneManager::getInstance()->setColorMap( 5 );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onSetCMapNo( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_colorMap = -1;
+    SceneManager::getInstance()->setColorMap( -1 );
     refreshAllGLWidgets();
 } 
 
@@ -1697,14 +1644,14 @@ void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onWarningsInformations( wxCommandEvent& WXUNUSED(event) )
 {
-	wxString nl = _T( "\n" );
+    wxString nl = _T( "\n" );
     (void)wxMessageBox(
-		_T("Please take note that the values of the settings used when using the fibers group may not reflect the current value of the settings of all fibers.") 
-		+ nl + nl
-		+ _T("Since it is possible to modify a setting globally, then to modify it locally to a fiber bundle, it is impossible to have only one value reflecting the different values of each bundle.") 
-		+ nl + nl
-		+ _T("Therefore, when using the fibers group, all settings are set to their default values. For example, if you want to set the minimal length of the displayed fibers to the lowest possible value, even if the slider is displayed as being to the lowest value, you have to click the Apply button to make sure that it is applied."),
-		wxT("Warnings Informations about Fibers Group functionalities"));
+        _T("Please take note that the values of the settings used when using the fibers group may not reflect the current value of the settings of all fibers.") 
+        + nl + nl
+        + _T("Since it is possible to modify a setting globally, then to modify it locally to a fiber bundle, it is impossible to have only one value reflecting the different values of each bundle.") 
+        + nl + nl
+        + _T("Therefore, when using the fibers group, all settings are set to their default values. For example, if you want to set the minimal length of the displayed fibers to the lowest possible value, even if the slider is displayed as being to the lowest value, you have to click the Apply button to make sure that it is applied."),
+        wxT("Warnings Informations about Fibers Group functionalities"));
 }
 
 void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
@@ -1715,117 +1662,71 @@ void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
     wxString l_defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxSAVE );
     dialog.SetFilterIndex( 0 );
-    dialog.SetDirectory( m_pDatasetHelper->m_screenshotPath );
+    dialog.SetDirectory( SceneManager::getInstance()->getScreenshotPath() );
     if( dialog.ShowModal() == wxID_OK )
     {
-        m_pDatasetHelper->m_screenshotPath = dialog.GetDirectory();
-        m_pDatasetHelper->m_screenshotName = dialog.GetPath();
-        if( m_pDatasetHelper->m_screenshotName.AfterLast('.') != _T( "ppm" ) )
-        {
-            m_pDatasetHelper->m_screenshotName += _T( ".ppm" );
-        }
-        m_pDatasetHelper->m_scheduledScreenshot = true;
-        m_pMainGL->render();
-        m_pMainGL->render();
+        screenshot( dialog.GetDirectory(), dialog.GetPath() );
     }
 }
 
-void MainFrame::screenshot( wxString i_fileName )
+void MainFrame::screenshot( const wxString &path, const wxString &filename )
 {
-    m_pDatasetHelper->m_screenshotPath = _( "" );
-    m_pDatasetHelper->m_screenshotName = i_fileName;
-    if ( m_pDatasetHelper->m_screenshotName.AfterLast( '.' ) != _T( "ppm" ) )
+    SceneManager::getInstance()->setScreenshotName( filename );
+    SceneManager::getInstance()->setScreenshotPath( path );
+
+    if ( filename.AfterLast( '.' ) != _T( "ppm" ) )
     {
-        m_pDatasetHelper->m_screenshotName += _T( ".ppm" );
+        SceneManager::getInstance()->setScreenshotName( filename + wxT( ".ppm" ) );
     }
-    m_pDatasetHelper->m_scheduledScreenshot = true;
+
+    SceneManager::getInstance()->setScreenshotScheduled( true );
     m_pMainGL->render();
     m_pMainGL->render();
-}
-
-void MainFrame::onSlizeMovieSag( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->doLicMovie( 0 );
-}
-
-void MainFrame::onSlizeMovieCor( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->doLicMovie(1);
-}
-
-void MainFrame::onSlizeMovieAxi( wxCommandEvent& WXUNUSED(event) )
-{
-    m_pDatasetHelper->doLicMovie( 2 );
 }
 
 void MainFrame::onSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
+    SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
     refreshAllGLWidgets();
 }
 
 void MainFrame::onToggleShowAxial( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->m_showAxial = ! m_pDatasetHelper->m_showAxial;
-    m_pMainGL->Refresh();
+    SceneManager::getInstance()->toggleAxialDisplay();
 }
 
 void MainFrame::onToggleShowCoronal( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->m_showCoronal = ! m_pDatasetHelper->m_showCoronal;
-    m_pMainGL->Refresh();
+    SceneManager::getInstance()->toggleCoronalDisplay();
 }
 
 void MainFrame::onToggleShowSagittal( wxCommandEvent& WXUNUSED(event) )
 {
-    if (m_pDatasetHelper->m_theScene == NULL)
-    {
-        return;
-    }
-    m_pDatasetHelper->m_showSagittal = ! m_pDatasetHelper->m_showSagittal;
-    m_pMainGL->Refresh();
+    SceneManager::getInstance()->toggleSagittalDisplay();
 }
 
 void MainFrame::onToggleAlpha( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->m_blendAlpha = !m_pDatasetHelper->m_blendAlpha;
-    refreshAllGLWidgets();
-    this->Update(); 
+    SceneManager::getInstance()->toggleAlphaBlend();
+//    refreshAllGLWidgets();
+//    this->Update(); 
 }
 
 void MainFrame::refreshAllGLWidgets()
 {
+    Logger::getInstance()->printIfGLError( wxT( "Before MainFrame::refreshAllGLWidgets") );
     updateStatusBar();
     updateMenus();
-    refreshViews();   
-    if (m_pDatasetHelper->m_isRulerToolActive){
-        wxString sbString1 = wxString::Format( wxT("%4.1fmm (%2.1fmm)" ), m_pDatasetHelper->m_rulerFullLength, m_pDatasetHelper->m_rulerPartialLength );
-        m_pToolBar->m_txtRuler->SetValue(sbString1);    
-    }     
+    refreshViews();
+    if( SceneManager::getInstance()->isRulerActive() )
+    {
+        wxString sbString1 = wxString::Format( wxT( "%4.1fmm (%2.1fmm) " ), SceneManager::getInstance()->getRulerFullLength(), SceneManager::getInstance()->getRulerPartialLenth() );
+        m_pToolBar->m_txtRuler->SetValue(sbString1);
+    }
 }
 
 void MainFrame::refreshViews()
 {
-    m_tab->Fit();
-    m_tab->Layout();
-
-    m_pPropertiesWindow->Fit();
-    m_pPropertiesWindow->AdjustScrollbars();
-    m_pPropertiesWindow->Layout();
-
-    m_pTrackingWindow->Fit();
-    m_pTrackingWindow->AdjustScrollbars();
-    m_pTrackingWindow->Layout();
-
-
     displayPropertiesSheet();
     if ( m_pMainGL )
     {
@@ -1842,40 +1743,17 @@ void MainFrame::refreshViews()
     if ( m_pGL2 )
     {
         m_pGL2->Refresh(true);
-    }    
+    }
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::refreshViews" ) );
 }
 
-void MainFrame::renewAllGLWidgets()
-{
-    if( m_pMainGL )
-    {
-        m_pMainGL->invalidate();
-    }
-    if( m_pGL0 )
-    {
-        m_pGL0->invalidate();
-    }
-    if( m_pGL1 )
-    {
-        m_pGL1->invalidate();
-    }
-    if( m_pGL2 )
-    {
-        m_pGL2->invalidate();
-    }
-    refreshAllGLWidgets();
-}
+//////////////////////////////////////////////////////////////////////////
 
 void MainFrame::updateStatusBar()
 {
-    wxString sbString0 = wxT( "" );
-    sbString0 = wxString::Format( wxT("Position: %d  %d  %d" ),
-                                  m_pXSlider->GetValue(),
-                                  m_pYSlider->GetValue(),
-                                  m_pZSlider->GetValue() );
-    GetStatusBar()->SetStatusText( sbString0, 0 );
-
-
+    GetStatusBar()->SetStatusText( wxString::Format( 
+        wxT("Position: %d  %d  %d" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue() ), 0 );
+    Logger::getInstance()->printIfGLError( wxT( "MainFrame::updateStatusBar" ) );
 }
 
 /****************************************************************************************************
@@ -1890,160 +1768,123 @@ void MainFrame::updateStatusBar()
  *
  ****************************************************************************************************/
 
-void MainFrame::onActivateListItem( wxListEvent& event )
+void MainFrame::onActivateListItem( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onActivateListItem" ), LOGLEVEL_DEBUG );
 
-    int l_item = event.GetIndex();
-    m_pTreeWidget->UnselectAll();
-    DatasetInfo* l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item );
-    m_pLastSelectedSceneObject = l_info;
-    m_lastSelectedListItem = l_item;
-    int l_col = m_pListCtrl->getColActivated();
-    switch( l_col )
-    {        
-        case 10:
-            if (l_info->toggleShow())
-            {
-                m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 0 );
-            }
-            else
-            {
-                m_pListCtrl->SetItem( l_item, 0, wxT( "" ), 1 );
-            }
-            break;
-        case 11:
-            if( ! l_info->toggleShowFS())
-            {
-                m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
-            }
-            else
-            {
-                m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
-            }
-            break;
-        case 13:
-             deleteListItem();
-            break;
-        default:
-            return;
-            break;
+    if( 3 == m_pListCtrl->GetColumnClicked() )
+    {
+        deleteListItem();
     }
+
     refreshAllGLWidgets();
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 void MainFrame::deleteListItem()
 {
-    if (m_pCurrentSceneObject != NULL && m_currentListItem != -1)
+    if (m_pCurrentSceneObject != NULL && m_currentListIndex != -1)
     {       
-        long tmp = m_currentListItem;
-		if ((((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERSGROUP))
-		{
-			FibersGroup* pFibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
-			if(pFibersGroup != NULL)
-			{
-				if(!pFibersGroup->OnDeleteFibers())
-					return;
-			}
-		}
-        if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == FIBERS)
-        {            
-			FibersGroup* pFibersGroup = NULL;
-			m_pDatasetHelper->getFibersGroupDataset(pFibersGroup);
-			if(pFibersGroup != NULL)
-			{
-				Fibers* pFibers = NULL;
-				m_pDatasetHelper->getSelectedFiberDataset(pFibers);
-				if(pFibers != NULL)
-				{
-					pFibersGroup->removeFibersSet(pFibers);
-				}
-			}
-			m_pDatasetHelper->m_selBoxChanged = true;
-        }
-        else if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getType() == SURFACE)
-        {
-            m_pDatasetHelper->deleteAllPoints();
-        }
-        if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getName() == _T( "(Object)" ))
-        {            
-            m_pDatasetHelper->m_isObjCreated = false;
-            m_pDatasetHelper->m_isObjfilled = false;
-    
-        }
-        if (((DatasetInfo*)m_pListCtrl->GetItemData( m_currentListItem))->getName() == _T( "(Background)" ))
-        {            
-            m_pDatasetHelper->m_isBckCreated = false;
-            m_pDatasetHelper->m_isBckfilled = false;
-        }
+        long tmp = m_currentListIndex;
+
         deleteSceneObject();
         m_pListCtrl->DeleteItem( tmp );
-        m_pDatasetHelper->updateLoadStatus();
         refreshAllGLWidgets();
     }
 }
 
-void MainFrame::onSelectListItem( wxListEvent& event )
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onDeleteAllListItems( wxListEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( _T( "Event triggered - MainFrame::onDeleteAllListItems" ), LOGLEVEL_DEBUG );
+
+    DatasetManager::getInstance()->clear();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onDeleteListItem( wxListEvent& evt )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onDeleteListItem" ), LOGLEVEL_DEBUG );
+
+    m_pPropertiesWindow->Layout();
+    m_pPropertiesWindow->FitInside();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onDeselectListItem( wxListEvent& evt )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onDeselectListItem" ), LOGLEVEL_DEBUG );
+
+    long index = evt.GetIndex();
+    DatasetIndex dsIndex = m_pListCtrl->GetItem( index );
+    if( dsIndex.isOk() )
+    {
+        DatasetInfo *pDsInfo = DatasetManager::getInstance()->getDataset( dsIndex );
+
+        if( NULL != pDsInfo && NULL != pDsInfo->getPropertiesSizer() )
+        {
+            Logger::getInstance()->print( wxString::Format( wxT( "Hiding Index: %u DatasetInfo: %s" ), (unsigned int)dsIndex, pDsInfo->getName().c_str() ), LOGLEVEL_DEBUG );
+            if( !m_pPropertiesWindow->GetSizer()->Hide( pDsInfo->getPropertiesSizer() ) )
+            {
+                Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+            }
+            m_pPropertiesWindow->Layout();
+            m_pPropertiesWindow->FitInside();
+        }
+    }
+
+    m_currentListIndex = m_pListCtrl->GetSelectedIndex();
+//     m_pLastSelectedSceneObject = NULL;
+//     m_lastSelectedListItem = -1;
+    evt.Skip();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::onSelectListItem( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
 
-    int l_item = event.GetIndex();
-    m_pTreeWidget->UnselectAll();
-    DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
-    int l_col = m_pListCtrl->getColClicked();
-    if (l_col == 12 && l_info->getType() >= MESH)
-    {        
-        if( ! l_info->toggleUseTex())
-        {
-            m_pListCtrl->SetItem( l_item, 2, wxT( "(" ) + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() * l_info->getOldMax() ) + wxT( ")" ) );
-        }
-        else
-        {
-            m_pListCtrl->SetItem( l_item,2,wxString::Format( wxT( "%.2f" ), l_info->getThreshold() * l_info->getOldMax() ) );
-        }            
-    }
-	if( l_info->getType() == FIBERS )
-	{
-		Fibers* pFibers = (Fibers*)l_info;
-		if( pFibers )
-		{
-			pFibers->updateColorationMode();
-		}
-	}
-    m_pLastSelectedSceneObject = l_info;
-    m_lastSelectedListItem = l_item;
-    
-    // Check if it is RGB
-    if( l_info->getType() == RGB )
+    if( NULL != m_pLastSelectionObj && NULL != m_pLastSelectionObj->getPropertiesSizer() )
     {
-        m_pDatasetHelper->m_canUseColorPicker = true;
+        m_pLastSelectionObj->unselect();
+        m_pPropertiesWindow->GetSizer()->Hide( m_pLastSelectionObj->getPropertiesSizer() );
+        m_pLastSelectionObj = NULL;
     }
-    else
-    {
-        m_pDatasetHelper->m_canUseColorPicker = false;
-    }
-    
-    refreshAllGLWidgets();
-}
 
-void MainFrame::onListMenuName( wxCommandEvent&  WXUNUSED(event) )
-{
-    long l_item = m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    if( l_item == -1 )
+    int index = evt.GetIndex();
+    //m_pTreeWidget->UnselectAll();
+    DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( index ) );
+
+    if( NULL == pInfo )
     {
+        Logger::getInstance()->print( wxT( "Null pointer" ), LOGLEVEL_DEBUG );
         return;
     }
-    DatasetInfo *l_info = (DatasetInfo*)m_pListCtrl->GetItemData( l_item) ;
 
-    if( ! l_info->toggleShowFS() )
+    changePropertiesSizer( pInfo, index );
+
+//     m_pLastSelectedSceneObject = pInfo;
+//     m_lastSelectedListItem = index;
+    m_currentListIndex = index;
+
+    // Check if it is RGB
+    if( RGB == pInfo->getType() )
     {
-        m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) + wxT( "*" ) );
+        m_canUseColorPicker = true;
     }
     else
     {
-        m_pListCtrl->SetItem( l_item, 1, l_info->getName().BeforeFirst( '.' ) );
+        m_canUseColorPicker = false;
     }
+
+    refreshAllGLWidgets();
+
+    evt.Skip();
 }
 
 /****************************************************************************************************
@@ -2056,38 +1897,33 @@ void MainFrame::onListMenuName( wxCommandEvent&  WXUNUSED(event) )
 // This function will be called when the delete tree item event is triggered.
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onDeleteTreeItem( wxTreeEvent& WXUNUSED(event) )
-{    
+{
     deleteTreeItem();
 }
 
 void MainFrame::deleteTreeItem()
 {
-    if (m_pCurrentSceneObject != NULL)
-    {   
+    if( m_pCurrentSceneObject != NULL )
+    {
         wxTreeItemId l_treeId = m_pTreeWidget->GetSelection();
-        if (!l_treeId.IsOk())
+        if( !l_treeId.IsOk() )
         {
             return;
         }
-        int l_selected = treeSelected( l_treeId );  
-        if (l_selected == CHILD_OBJECT)
+        int l_selected = treeSelected( l_treeId );
+        if( l_selected == CHILD_OBJECT )
         {
-            ((SelectionObject*) ((m_pTreeWidget->GetItemData(m_pTreeWidget->GetItemParent(l_treeId)))))->setIsDirty(true);
+            ((SelectionObject *) (m_pTreeWidget->GetItemData( m_pTreeWidget->GetItemParent( l_treeId ) )))->setIsDirty( true );
         }
-        if (l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT || l_selected == POINT_DATASET)
+        if( l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT )
         {  
             deleteSceneObject();
-            m_pTreeWidget->Delete(l_treeId);
-            if (m_pDatasetHelper->m_lastSelectedObject != NULL)
-            {
-                m_pDatasetHelper->m_selBoxChanged = true;
-            }
-            m_pDatasetHelper->m_lastSelectedObject = NULL;
-            m_pDatasetHelper->m_lastSelectedPoint = NULL;
-        }   
-        m_pDatasetHelper->m_selBoxChanged = true;
+            m_pTreeWidget->Delete( l_treeId );
+            m_pLastSelectionObj = NULL;
+        }
+        SceneManager::getInstance()->setSelBoxChanged( true );
     }
-    refreshAllGLWidgets();
+    //refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2095,74 +1931,55 @@ void MainFrame::deleteTreeItem()
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
 {
-    wxTreeItemId l_treeId = m_pTreeWidget->GetSelection();
-    if (!l_treeId.IsOk())
+    Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onSelectTreeItem" ), LOGLEVEL_DEBUG );
+
+    if( NULL != m_pLastSelectionObj && NULL != m_pLastSelectionObj->getPropertiesSizer() )
+    {
+        m_pLastSelectionObj->unselect();
+        m_pPropertiesWindow->GetSizer()->Hide( m_pLastSelectionObj->getPropertiesSizer() );
+        m_pLastSelectionObj = NULL;
+    }
+
+//     m_pListCtrl->UnselectAll();
+    long index = m_pListCtrl->GetSelectedIndex();
+    DatasetIndex dsIndex = m_pListCtrl->GetItem( index );
+    if( dsIndex.isOk() )
+    {
+        DatasetInfo *pDsInfo = DatasetManager::getInstance()->getDataset( dsIndex );
+
+        if( NULL != pDsInfo && NULL != pDsInfo->getPropertiesSizer() )
+        {
+            Logger::getInstance()->print( wxString::Format( wxT( "Hiding Index: %u DatasetInfo: %s" ), (unsigned int)dsIndex, pDsInfo->getName().c_str() ), LOGLEVEL_DEBUG );
+            if( !m_pPropertiesWindow->GetSizer()->Hide( pDsInfo->getPropertiesSizer() ) )
+            {
+                Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
+            }
+            m_pPropertiesWindow->Layout();
+            m_pPropertiesWindow->FitInside();
+        }
+    }
+
+    wxTreeItemId selectedId = m_pTreeWidget->GetSelection();
+    if( !selectedId.IsOk() )
     {
         return;
     }
-    int l_selected = treeSelected( l_treeId );
-    SelectionObject* l_selectionObject;
-    SplinePoint* l_selectedPoint;
 
-    switch( l_selected )
+    int type = treeSelected( selectedId );
+    SelectionObject * pSelectionObj;
+
+    switch( type )
     {
         case MASTER_OBJECT:
         case CHILD_OBJECT:
-            if ( m_pDatasetHelper->m_lastSelectedObject != NULL )
-            {
-                m_pDatasetHelper->m_lastSelectedObject->unselect();
-            }
-            if ( m_pDatasetHelper->m_lastSelectedPoint != NULL )
-            {
-                m_pDatasetHelper->m_lastSelectedPoint->unselect();
-                m_pDatasetHelper->m_lastSelectedPoint = NULL;
-            }
-
-            l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_treeId ) );
-            m_pDatasetHelper->m_lastSelectedObject = l_selectionObject;
-            m_pDatasetHelper->m_lastSelectedObject->select( false );
-            m_pLastSelectedSceneObject = l_selectionObject;
-            m_lastSelectedListItem = -1;
-            break;
-
-        case POINT_DATASET:
-            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
-            {
-                m_pDatasetHelper->m_lastSelectedPoint->unselect();
-            }
-            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
-            {
-                m_pDatasetHelper->m_lastSelectedObject->unselect();
-                m_pDatasetHelper->m_lastSelectedObject = NULL;
-            }
-
-            l_selectedPoint = (SplinePoint*)( m_pTreeWidget->GetItemData( l_treeId ) );
-            m_pDatasetHelper->m_lastSelectedPoint = l_selectedPoint;
-            m_pDatasetHelper->m_lastSelectedPoint->select( false );
-            m_pLastSelectedSceneObject = l_selectedPoint;
-            m_lastSelectedListItem = -1;
-            break;
-
-        default:
-            if( m_pDatasetHelper->m_lastSelectedPoint != NULL )
-            {
-                m_pDatasetHelper->m_lastSelectedPoint->unselect();
-                m_pDatasetHelper->m_lastSelectedPoint = NULL;
-            }
-            if( m_pDatasetHelper->m_lastSelectedObject != NULL )
-            {
-                m_pDatasetHelper->m_lastSelectedObject->unselect();
-                m_pDatasetHelper->m_lastSelectedObject = NULL;
-            }
-            break;
-    }    
-#ifdef __WXMSW__
-    if (m_currentListItem != -1)
-    {       
-        m_pListCtrl->SetItemState(m_currentListItem,0,wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED);  
+            pSelectionObj = (SelectionObject *)( m_pTreeWidget->GetItemData( selectedId ) );
+            m_pLastSelectionObj = pSelectionObj;
+            m_pLastSelectionObj->select( false );
+//           m_pLastSelectedSceneObject = pSelectionObj;
+            changePropertiesSizer( pSelectionObj, m_currentListIndex );
     }
-#endif
-    refreshAllGLWidgets();
+
+//     refreshAllGLWidgets();
 }
 
 void MainFrame::onRightClickTreeItem( wxTreeEvent& event )
@@ -2219,7 +2036,7 @@ void MainFrame::onActivateTreeItem( wxTreeEvent& WXUNUSED(event) )
 
 void MainFrame::onTreeChange()
 {
-    m_pDatasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
 
@@ -2241,78 +2058,92 @@ void MainFrame::onTreeLabelEdit( wxTreeEvent& event )
 //////////////////////////////////////////////////////////////////////////
 int MainFrame::treeSelected( wxTreeItemId i_id )
 {
-    if( !i_id.IsOk() )
+    if( i_id.IsOk() )
+    {
+        if( i_id == m_tSelectionObjectsId )
+        {
+            return 0;
+        }
+    }
+    else
     {
         return 0;
     }
     wxTreeItemId l_pId = m_pTreeWidget->GetItemParent( i_id );
 
-    if( !l_pId.IsOk() )
+    if( l_pId.IsOk() )
+    {
+        if( l_pId == m_tSelectionObjectsId )
+        {
+            return MASTER_OBJECT;
+        }
+    }
+    else
     {
         return 0;
     }
+
     wxTreeItemId l_ppId = m_pTreeWidget->GetItemParent( l_pId );
 
-    if( !l_ppId.IsOk() )
+    if( l_ppId.IsOk() )
+    {
+        if( l_ppId == m_tSelectionObjectsId )
+        {
+            return CHILD_OBJECT;
+        }
+    }
+    else
     {
         return 0;
     }
 
-    if( l_pId == m_tSelectionObjectsId )
-    {
-        return MASTER_OBJECT;
-    }
-    else if ( l_ppId == m_tSelectionObjectsId )
-    {
-        return CHILD_OBJECT;
-    }
-    else if ( l_pId == m_tPointId )
-    {
-        return POINT_DATASET;
-    }
     return 0;
 }
 void MainFrame::onRotateZ( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isRotateZ = !m_pDatasetHelper->m_theScene->m_isRotateZ; 
+    SceneManager::getInstance()->getScene()->toggleIsRotateZ();
     setTimerSpeed();
 }
 
 void MainFrame::onRotateY( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isRotateY = !m_pDatasetHelper->m_theScene->m_isRotateY; 
+    SceneManager::getInstance()->getScene()->toggleIsRotateY();
     setTimerSpeed();
 }
 
 void MainFrame::onRotateX( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isRotateX = !m_pDatasetHelper->m_theScene->m_isRotateX; 
+    SceneManager::getInstance()->getScene()->toggleIsRotateX();
     setTimerSpeed();
 }
 
 void MainFrame::onNavigateAxial( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isNavAxial = !m_pDatasetHelper->m_theScene->m_isNavAxial;
+    SceneManager::getInstance()->getScene()->toggleIsNavAxial();
     setTimerSpeed();
 }
 
 void MainFrame::onNavigateSagital( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isNavSagital = !m_pDatasetHelper->m_theScene->m_isNavSagital;    
+    SceneManager::getInstance()->getScene()->toggleIsNavSagittal();
     setTimerSpeed();  
 }
 
 void MainFrame::onNavigateCoronal( wxCommandEvent& event )
 {
-    m_pDatasetHelper->m_theScene->m_isNavCoronal = !m_pDatasetHelper->m_theScene->m_isNavCoronal;
+    SceneManager::getInstance()->getScene()->toggleIsNavCoronal();
     setTimerSpeed();
 }
 
 void MainFrame::setTimerSpeed()
 {
     m_pTimer->Stop();
-    if(m_pDatasetHelper->m_theScene->m_isNavCoronal || m_pDatasetHelper->m_theScene->m_isNavAxial || m_pDatasetHelper->m_theScene->m_isNavSagital || m_pDatasetHelper->m_theScene->m_isRotateZ
-        || m_pDatasetHelper->m_theScene->m_isRotateY || m_pDatasetHelper->m_theScene->m_isRotateX)
+    if(    SceneManager::getInstance()->getScene()->m_isNavAxial 
+        || SceneManager::getInstance()->getScene()->m_isNavCoronal
+        || SceneManager::getInstance()->getScene()->m_isNavSagital 
+        || SceneManager::getInstance()->getScene()->m_isRotateX
+        || SceneManager::getInstance()->getScene()->m_isRotateY 
+        || SceneManager::getInstance()->getScene()->m_isRotateZ )
     {        
         m_pTimer->Start( 50 );
     }
@@ -2323,41 +2154,10 @@ void MainFrame::setTimerSpeed()
 }
 /****************************************************************************************************
  *
- * System event funtions
+ * System event functions
  *
  *
  ****************************************************************************************************/
-
-/****************************************************************************************************
- *
- * OnSize gets called when the size of the main window changes
- *
- ****************************************************************************************************/
-
-void MainFrame::onSize( wxSizeEvent& WXUNUSED(event) )
-{
-    doOnSize();
-}
-
-void MainFrame::doOnSize()
-{
-    wxSize l_clientSize = this->GetClientSize();  
-    if( GetSizer() )
-    {
-        GetSizer()->SetDimension(0, 0, l_clientSize.x, l_clientSize.y );
-    }
-    if( m_pMainGL != NULL)
-    {
-        m_pMainGL->changeOrthoSize();
-    }
-    m_pPropertiesWindow->SetMinSize(wxSize(220, l_clientSize.y - 236));
-    m_pPropertiesWindow->GetSizer()->SetDimension(0,0,220, l_clientSize.y - 236);
-
-    m_pTrackingWindow->SetMinSize(wxSize(220, l_clientSize.y - 236));
-    m_pTrackingWindow->GetSizer()->SetDimension(0,0,220, l_clientSize.y - 236);
-
-
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // Gets called when a thread for the kdTree creation finishes this function
@@ -2365,7 +2165,16 @@ void MainFrame::doOnSize()
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onKdTreeThreadFinished( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pDatasetHelper->treeFinished();
+    m_threadsActive--;
+
+    if ( m_threadsActive > 0 )
+        return;
+
+    Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
+    SceneManager::getInstance()->updateAllSelectionObjects();
+    SceneManager::getInstance()->setSelBoxChanged( true );
+
+    refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2376,13 +2185,17 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
     wxPoint l_pos, l_newPos;
     int NAV_GL_SIZE = m_pGL0->GetSize().x;
 
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+    float frames  = DatasetManager::getInstance()->getFrames();
+
     switch( event.GetInt() )
     {
         case AXIAL:
         {
             l_pos = m_pGL0->getMousePos();
-            float x = ( (float)l_pos.x / NAV_GL_SIZE * m_pDatasetHelper->m_columns );
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_pDatasetHelper->m_rows );
+            float x = ( (float)l_pos.x / NAV_GL_SIZE * columns );
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * rows );
 
             m_pXSlider->SetValue( (int)( x ) );
             m_pYSlider->SetValue( (int)( y ) );
@@ -2391,8 +2204,8 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
         case CORONAL:
         {
             l_pos = m_pGL1->getMousePos();
-            float x = ( (float)l_pos.x / NAV_GL_SIZE ) * m_pDatasetHelper->m_columns;
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_pDatasetHelper->m_frames );
+            float x = ( (float)l_pos.x / NAV_GL_SIZE ) * columns;
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * frames );
 
             m_pXSlider->SetValue( (int)( x ) );
             m_pZSlider->SetValue( (int)( y ) );
@@ -2401,87 +2214,103 @@ void MainFrame::onGLEvent( wxCommandEvent &event )
         case SAGITTAL:
         {
             l_pos = m_pGL2->getMousePos();
-            float x = ( (float)( NAV_GL_SIZE - l_pos.x ) / NAV_GL_SIZE ) * m_pDatasetHelper->m_rows;
-            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * m_pDatasetHelper->m_frames );
+            float x = ( (float)( NAV_GL_SIZE - l_pos.x ) / NAV_GL_SIZE ) * rows;
+            float y = ( (float)( NAV_GL_SIZE - l_pos.y ) / NAV_GL_SIZE * frames );
 
             m_pYSlider->SetValue( (int)( x ) );
             m_pZSlider->SetValue( (int)( y ) );
             break;
         }
         case MAIN_VIEW:
-            int delta = (int) m_pMainGL->getDelta();
-                switch( m_pMainGL->getPicked() )
-                {
-                    case AXIAL:
-                        m_pZSlider->SetValue( (int) wxMin( wxMax( m_pZSlider->GetValue() + delta, 0 ), m_pZSlider->GetMax() ) );
-                        break;
-                    case CORONAL:
-                        m_pYSlider->SetValue( (int) wxMin( wxMax( m_pYSlider->GetValue() + delta, 0 ), m_pYSlider->GetMax() ) );
-                        break;
-                    case SAGITTAL:
-                        m_pXSlider->SetValue( (int) wxMin( wxMax( m_pXSlider->GetValue() + delta, 0 ), m_pXSlider->GetMax() ) );
-                        break;
-                }                
+        {
+            int delta = (int)m_pMainGL->getDelta();
+            switch( m_pMainGL->getPicked() )
+            {
+            case AXIAL:
+                m_pZSlider->SetValue( (int) wxMin( wxMax( m_pZSlider->GetValue() + delta, 0 ), m_pZSlider->GetMax() ) );
+                break;
+            case CORONAL:
+                m_pYSlider->SetValue( (int) wxMin( wxMax( m_pYSlider->GetValue() + delta, 0 ), m_pYSlider->GetMax() ) );
+                break;
+            case SAGITTAL:
+                m_pXSlider->SetValue( (int) wxMin( wxMax( m_pXSlider->GetValue() + delta, 0 ), m_pXSlider->GetMax() ) );
+                break;
+            }
+            break;
+        }
     }
-    m_pDatasetHelper->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
-    updateStatusBar();
+    SceneManager::getInstance()->updateView( m_pXSlider->GetValue(), m_pYSlider->GetValue(), m_pZSlider->GetValue() );
     refreshAllGLWidgets();
-}
-
-void MainFrame::onMouseEvent( wxMouseEvent& WXUNUSED(event) )
-{
-    //this->Refresh();
 }
 
 void MainFrame::updateMenus()
 {
-    m_pMenuBar->updateMenuBar(this);
-    m_pToolBar->updateToolBar(this); 
+    m_pMenuBar->updateMenuBar( this );
+    m_pToolBar->updateToolBar( this );
 }
 
 void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
-{    
+{
     //Rotate animation
-    if(m_pDatasetHelper->m_theScene->m_isRotateZ)
+    if( SceneManager::getInstance()->getScene()->m_isRotateZ )
     {
-        m_pDatasetHelper->m_theScene->m_rotAngleZ++;
+        SceneManager::getInstance()->getScene()->m_rotAngleZ++;
     }
-    if(m_pDatasetHelper->m_theScene->m_isRotateY)
+    if( SceneManager::getInstance()->getScene()->m_isRotateY )
     {
-        m_pDatasetHelper->m_theScene->m_rotAngleY++;
+        SceneManager::getInstance()->getScene()->m_rotAngleY++;
     }
-    if(m_pDatasetHelper->m_theScene->m_isRotateX)
+    if( SceneManager::getInstance()->getScene()->m_isRotateX )
     {
-        m_pDatasetHelper->m_theScene->m_rotAngleX++;
-    }    
-    //Navigate through slizes sagital
-    if(m_pDatasetHelper->m_theScene->m_isNavSagital)
-    {
-        m_pDatasetHelper->m_theScene->m_posSagital++;
+        SceneManager::getInstance()->getScene()->m_rotAngleX++;
     }
-    else
+
+    //Navigate through slices sagittal
+    if( SceneManager::getInstance()->getScene()->m_isNavSagital )
     {
-        m_pDatasetHelper->m_theScene->m_posSagital = m_pDatasetHelper->m_xSlize;
-    }
-    //Navigate through slizes axial
-    if(m_pDatasetHelper->m_theScene->m_isNavAxial)
-    {
-        m_pDatasetHelper->m_theScene->m_posAxial++;
+        SceneManager::getInstance()->getScene()->m_posSagital++;
     }
     else
     {
-        m_pDatasetHelper->m_theScene->m_posAxial = m_pDatasetHelper->m_zSlize;
+        SceneManager::getInstance()->getScene()->m_posSagital = SceneManager::getInstance()->getSliceX();
     }
-    //Navigate through slizes coronal
-    if(m_pDatasetHelper->m_theScene->m_isNavCoronal)
+
+    //Navigate through slices axial
+    if( SceneManager::getInstance()->getScene()->m_isNavAxial )
     {
-        m_pDatasetHelper->m_theScene->m_posCoronal++;
+        SceneManager::getInstance()->getScene()->m_posAxial++;
     }
     else
     {
-        m_pDatasetHelper->m_theScene->m_posCoronal = m_pDatasetHelper->m_ySlize;
+        SceneManager::getInstance()->getScene()->m_posAxial = SceneManager::getInstance()->getSliceZ();
     }
+
+    //Navigate through slices coronal
+    if( SceneManager::getInstance()->getScene()->m_isNavCoronal )
+    {
+        SceneManager::getInstance()->getScene()->m_posCoronal++;
+    }
+    else
+    {
+        SceneManager::getInstance()->getScene()->m_posCoronal = SceneManager::getInstance()->getSliceY();
+    }
+
     refreshAllGLWidgets();
     refreshViews();
-    m_pDatasetHelper->increaseAnimationStep();    
+    SceneManager::getInstance()->increaseAnimStep();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+MainFrame::~MainFrame()
+{
+    Logger::getInstance()->print( wxT( "Executing MainFrame destructor" ), LOGLEVEL_DEBUG );
+
+    m_pTimer->Stop();
+    Logger::getInstance()->print( wxT( "Timer stopped" ), LOGLEVEL_DEBUG );
+
+    delete m_pTimer;
+    m_pTimer = NULL;
+
+    Logger::getInstance()->print( wxT( "MainFrame destructor done"), LOGLEVEL_DEBUG );
 }

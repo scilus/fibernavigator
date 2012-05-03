@@ -89,17 +89,17 @@ bool ConvexHullIncremental::buildHull()
     //Create all three remaining face and make sure all four face are in the good direction
     if ( face.isVisible( thethaCenter ) )
         face.FlipFace();
-			
+
     Face3D face0( fourPoint[3], face.getPt1(), face.getPt2() );
-	if ( face0.isVisible( thethaCenter ) )
+    if ( face0.isVisible( thethaCenter ) )
         face0.FlipFace();
-			
+
     Face3D face1( fourPoint[3], face.getPt2(), face.getPt3() );
-	if ( face1.isVisible( thethaCenter ) ) 
+    if ( face1.isVisible( thethaCenter ) ) 
         face1.FlipFace();
-			
+
     Face3D face2( fourPoint[3], face.getPt3(), face.getPt1() );
-	if ( face2.isVisible( thethaCenter ) ) 
+    if ( face2.isVisible( thethaCenter ) ) 
         face2.FlipFace();
 
     m_hullTriangles.clear();
@@ -137,47 +137,47 @@ bool ConvexHullIncremental::buildHull()
 
         //Create new faces to include the new point in the hull
         //Only one face see the points. We can directly create the 3 faces as they won't enclose any other point
-		if ( visiblesFaces.size() == 1 )
-		{
-			face = visiblesFaces[ 0 ];
+        if ( visiblesFaces.size() == 1 )
+        {
+            face = visiblesFaces[ 0 ];
             m_hullTriangles.push_back( Face3D( m_allPoints[i], face.getPt1(), face.getPt2() ) );
             m_hullTriangles.push_back( Face3D( m_allPoints[i], face.getPt2(), face.getPt3() ) );
             m_hullTriangles.push_back( Face3D( m_allPoints[i], face.getPt3(), face.getPt1() ) );
-			continue;
-		}
+            continue;
+        }
 
         //creates all possible new faces from the visibleFaces
-		tempFaces.clear();
-		for ( unsigned int j(0); j < visiblesFaces.size(); j++ )
-		{
+        tempFaces.clear();
+        for ( unsigned int j(0); j < visiblesFaces.size(); j++ )
+        {
             tempFaces.push_back( Face3D( m_allPoints[i], visiblesFaces[j].getPt1(), visiblesFaces[j].getPt2() ) );
             tempFaces.push_back( Face3D( m_allPoints[i], visiblesFaces[j].getPt2(), visiblesFaces[j].getPt3() ) );
             tempFaces.push_back( Face3D( m_allPoints[i], visiblesFaces[j].getPt3(), visiblesFaces[j].getPt1() ) );
-		}
-				
-		Face3D ot, cur;
+        }
+
+        Face3D ot, cur;
         bool isValid = true;
         for ( unsigned int j(0); j < tempFaces.size(); j++ )
-		{
+        {
             cur = tempFaces[j];
-			//search if there is a point in front of the face : 
-			//this means the face doesn't belong to the convex hull
-			for ( unsigned int k(0); k < tempFaces.size(); k++ )
-			{
+            //search if there is a point in front of the face : 
+            //this means the face doesn't belong to the convex hull
+            for ( unsigned int k(0); k < tempFaces.size(); k++ )
+            {
                 if (k != j){
                     ot = tempFaces[k];
-					if ( cur.isVisible( ot.getCentroid() ) )
-					{
-						isValid = false;
-						break;
-					}
+                    if ( cur.isVisible( ot.getCentroid() ) )
+                    {
+                        isValid = false;
+                        break;
+                    }
                 }
-			}
-			//the face has no point in front of it
-			if ( isValid ) 
+            }
+            //the face has no point in front of it
+            if ( isValid ) 
                 m_hullTriangles.push_back( cur );
             isValid = true;
-		}
+        }
     }
 
     return true;
@@ -192,7 +192,7 @@ bool ConvexHullIncremental::buildHull()
 //////////////////////////////////////////////////////////////////////////////////
 Vector ConvexHullIncremental::getCentroid( Vector fourthPoint, Face3D face )
 {
-    return Vector( ( fourthPoint.x + face.getPt1().x + face.getPt2().x + face.getPt3().x ) / 4,	( fourthPoint.y + face.getPt1().y + face.getPt2().y + face.getPt3().y ) / 4, ( fourthPoint.z + face.getPt1().z +  face.getPt2().z + face.getPt3().z ) / 4 );			
+    return Vector( ( fourthPoint.x + face.getPt1().x + face.getPt2().x + face.getPt3().x ) / 4, ( fourthPoint.y + face.getPt1().y + face.getPt2().y + face.getPt3().y ) / 4, ( fourthPoint.z + face.getPt1().z +  face.getPt2().z + face.getPt3().z ) / 4 );
 }
 
 

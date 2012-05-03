@@ -6,16 +6,22 @@
 //
 // Description: This is the implementation file for the CIsoSurface class.
 
-#include <math.h>
 #include "CIsoSurface.h"
-#include <algorithm>
-#include "../lic/SurfaceLIC.h"
-#include "../../dataset/Anatomy.h"
-#include "../../main.h"
-#include "../../Logger.h"
 
-#include <fstream>
+#include "TriangleMesh.h"
+#include "../../Logger.h"
+#include "../../main.h"
+#include "../../dataset/Anatomy.h"
+#include "../../dataset/DatasetManager.h"
+#include "../../gui/SceneManager.h"
+
+#include <wx/math.h>
+#include <wx/tglbtn.h>
+#include <wx/xml/xml.h>
+
+#include <algorithm>
 #include <ctime>
+#include <fstream>
 
 const unsigned int CIsoSurface::m_edgeTable[256] =
 { 0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
@@ -297,51 +303,54 @@ const int CIsoSurface::m_triTable[256][16] =
 { 0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } };
 
-CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy ) :
-    DatasetInfo( dh )
+CIsoSurface::CIsoSurface( Anatomy* anatomy )
 {
-    m_nCellsX = m_dh->m_columns - 1;
-    m_nCellsY = m_dh->m_rows - 1;
-    m_nCellsZ = m_dh->m_frames - 1;
-    m_fCellLengthX = m_dh->m_xVoxel;
-    m_fCellLengthY = m_dh->m_yVoxel;
-    m_fCellLengthZ = m_dh->m_zVoxel;
+    int   columns = DatasetManager::getInstance()->getColumns();
+    int   rows    = DatasetManager::getInstance()->getRows();
+    int   frames  = DatasetManager::getInstance()->getFrames();
+    float voxelX  = DatasetManager::getInstance()->getVoxelX();
+    float voxelY  = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
 
-    int size = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
+
+    m_nCellsX = columns - 1;
+    m_nCellsY = rows - 1;
+    m_nCellsZ = frames - 1;
+    m_fCellLengthX = voxelX;
+    m_fCellLengthY = voxelY;
+    m_fCellLengthZ = voxelZ;
+
+    int size = columns * rows * frames;
     m_ptScalarField.resize( size );
     for ( int i = 0; i < size; ++i )
         m_ptScalarField[i] = anatomy->at( i );
 
-    if ( m_dh->m_filterIsoSurf )
+    if( SceneManager::getInstance()->isIsoSurfaceFiltered() )
     {
         for ( unsigned int z = 1; z < m_nCellsZ; ++z )
+        {
             for ( unsigned int y = 1; y < m_nCellsY; ++y )
+            {
                 for ( unsigned int x = 1; x < m_nCellsX; ++x )
                 {
                     std::vector< float > list;
                     for ( unsigned int zz = z - 1; zz < z + 2; ++zz )
                     {
-                        list.push_back( anatomy->at( x + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows
-                                * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows
-                                * zz ) );
-                        list.push_back( anatomy->at( x + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * ( y - 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + m_dh->m_columns * ( y + 1 ) + m_dh->m_columns
-                                * m_dh->m_rows * zz ) );
+                        list.push_back( anatomy->at( x + columns * y + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + columns * y + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + 1 + columns * y + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + columns * ( y - 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + columns * ( y - 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + 1 + columns * ( y - 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + columns * ( y + 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x - 1 + columns * ( y + 1 ) + columns * rows * zz ) );
+                        list.push_back( anatomy->at( x + 1 + columns * ( y + 1 ) + columns * rows * zz ) );
                     }
                     nth_element( list.begin(), list.begin() + 13, list.end() );
-                    m_ptScalarField[x + m_dh->m_columns * y + m_dh->m_columns * m_dh->m_rows * z] = list[13];
+                    m_ptScalarField[x + columns * y + columns * rows * z] = list[13];
                 }
+            }
+        }
     }
     m_type = ISO_SURFACE;
     m_threshold = 0.40f;
@@ -354,7 +363,7 @@ CIsoSurface::CIsoSurface( DatasetHelper* dh, Anatomy* anatomy ) :
     m_bValidSurface = false;
     m_positionsCalculated = false;
 
-    m_tMesh = new TriangleMesh( m_dh );
+    m_tMesh = new TriangleMesh();
 }
 
 CIsoSurface::~CIsoSurface()
@@ -838,9 +847,9 @@ void CIsoSurface::RenameVerticesAndTriangles()
     m_tMesh->resizeVerts( m_i2pt3idVertices.size() );
     m_tMesh->resizeTriangles( m_trivecTriangles.size() );
 
-    float xOff = m_dh->m_xVoxel/2;
-    float yOff = m_dh->m_yVoxel/2;
-    float zOff = m_dh->m_zVoxel/2;
+    float xOff = DatasetManager::getInstance()->getVoxelX() * 0.5f;
+    float yOff = DatasetManager::getInstance()->getVoxelY() * 0.5f;
+    float zOff = DatasetManager::getInstance()->getVoxelZ() * 0.5f;
 
     // Rename vertices.
     while ( mapIterator != m_i2pt3idVertices.end() )
@@ -867,8 +876,6 @@ void CIsoSurface::RenameVerticesAndTriangles()
 
     m_i2pt3idVertices.clear();
     m_trivecTriangles.clear();
-    licCalculated = false;
-    m_useLIC = false;
 }
 
 void CIsoSurface::GenerateWithThreshold()
@@ -878,28 +885,6 @@ void CIsoSurface::GenerateWithThreshold()
         glDeleteLists( m_GLuint, 1 );
     m_GLuint = 0;
     m_positionsCalculated = false;
-}
-
-void CIsoSurface::activateLIC()
-{
-    m_useLIC = !m_useLIC;
-    if ( !m_useLIC )
-    {
-        generateGeometry();
-        return;
-    }
-    if ( !licCalculated )
-    {
-        for ( int i = 0; i < 0; ++i )
-            m_tMesh->doLoopSubD();
-
-        SurfaceLIC lic( m_dh, m_tMesh );
-        lic.execute();
-        licCalculated = true;
-    }
-    if ( m_GLuint )
-        glDeleteLists( m_GLuint, 1 );
-    m_GLuint = 0;
 }
 
 void CIsoSurface::clean()
@@ -922,14 +907,9 @@ void CIsoSurface::smooth()
 
 void CIsoSurface::generateGeometry()
 {
-    if ( m_useLIC )
-    {
-        generateLICGeometry();
-        return;
-    }
-
     if ( m_GLuint )
         glDeleteLists( m_GLuint, 1 );
+
     GLuint dl = glGenLists( 1 );
     glNewList( dl, GL_COMPILE );
 
@@ -946,38 +926,6 @@ void CIsoSurface::generateGeometry()
             pointNormal = m_tMesh->getVertNormal( triangleEdges.pointID[j] );
             //Flip the normals by default since most isosurface loaded need their normals flipped.
             glNormal3d( -pointNormal.x, -pointNormal.y, -pointNormal.z); 
-            point = m_tMesh->getVertex( triangleEdges.pointID[j] );
-            glVertex3d( point.x, point.y, point.z );
-        }
-    }
-    glEnd();
-
-    glEndList();
-    m_GLuint = dl;
-}
-
-void CIsoSurface::generateLICGeometry()
-{
-    if ( m_GLuint )
-        glDeleteLists( m_GLuint, 1 );
-    GLuint dl = glGenLists( 1 );
-    glNewList( dl, GL_COMPILE );
-
-    Triangle triangleEdges;
-    Vector point;
-    Vector pointNormal;
-    wxColour color;
-
-    glBegin( GL_TRIANGLES );
-    for ( int i = 0; i < m_tMesh->getNumTriangles(); ++i )
-    {
-        triangleEdges = m_tMesh->getTriangle( i );
-        color = m_tMesh->getTriangleColor( i );
-        glColor4ub( color.Red(), color.Red(), color.Red(),255 );
-        for ( int j = 0; j < 3; ++j )
-        {
-            pointNormal = m_tMesh->getVertNormal( triangleEdges.pointID[j] );
-            glNormal3d( pointNormal.x * -1.0, pointNormal.y * -1.0, pointNormal.z * -1.0 );
             point = m_tMesh->getVertex( triangleEdges.pointID[j] );
             glVertex3d( point.x, point.y, point.z );
         }
@@ -1008,8 +956,12 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
 
     if ( !m_positionsCalculated )
     {
+        float columns = DatasetManager::getInstance()->getColumns();
+        float rows    = DatasetManager::getInstance()->getRows();
+        float frames  = DatasetManager::getInstance()->getFrames();
+
         Vector v( 0, 0, 0 );
-        size_t nSize = m_dh->m_columns * m_dh->m_rows * m_dh->m_frames;
+        size_t nSize = columns * rows * frames;
         std::vector< Vector > accu( nSize, v );
         std::vector< int > hits( nSize, 0 );
         std::vector< Vector > vertices = m_tMesh->getVerts();
@@ -1018,8 +970,8 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
         for ( size_t i = 0; i < vertices.size(); ++i )
         {
             v = vertices[i];
-            int index = (int) v.x + (int) v.y * m_dh->m_columns + (int) v.z * m_dh->m_columns * m_dh->m_rows;
-            if ( !( index < 0 || index > m_dh->m_columns * m_dh->m_rows * m_dh->m_frames ) )
+            int index = (int) v.x + (int) v.y * columns + (int) v.z * columns * rows;
+            if ( !( index < 0 || index > columns * rows * frames ) )
             {
                 accu[index].x += v.x;
                 accu[index].y += v.y;
@@ -1052,9 +1004,9 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
                 accu[i].z /= hits[i];
                 if ( (int) accu[i].x )
                 {
-                    accu[i].x = wxMin( m_dh->m_columns, wxMax ( accu[i].x, 0 ) );
-                    accu[i].y = wxMin( m_dh->m_rows, wxMax ( accu[i].y, 0 ) );
-                    accu[i].z = wxMin( m_dh->m_frames, wxMax ( accu[i].z, 0 ) );
+                    accu[i].x = wxMin( columns, wxMax ( accu[i].x, 0 ) );
+                    accu[i].y = wxMin( rows, wxMax ( accu[i].y, 0 ) );
+                    accu[i].z = wxMin( frames, wxMax ( accu[i].z, 0 ) );
 
                     Vector v( accu[i].x, accu[i].y, accu[i].z );
                     m_svPositions.push_back( v );
@@ -1161,32 +1113,59 @@ bool CIsoSurface::save( wxString filename ) const
 #endif
 }
 
-void CIsoSurface::createPropertiesSizer(PropertiesWindow *parent)
-{
-    DatasetInfo::createPropertiesSizer(parent);
+//////////////////////////////////////////////////////////////////////////
 
-    m_ptoggleCutFrontSector = new wxToggleButton(parent, wxID_ANY,wxT("Cut Front Sector"),wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->Add(m_ptoggleCutFrontSector,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
-    
-    wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_ptoggleUseColoring = new wxToggleButton(parent, wxID_ANY,wxT("Use Coloring"),wxDefaultPosition, wxSize(100,-1));
-    wxImage bmpColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
-    m_pbtnSelectColor = new wxBitmapButton(parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize(40,-1));
-    l_sizer->Add(m_ptoggleUseColoring,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListMenuThreshold));
-    parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
+bool CIsoSurface::save( wxXmlNode *pNode ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode );
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void CIsoSurface::createPropertiesSizer( PropertiesWindow *pParent )
+{
+    DatasetInfo::createPropertiesSizer( pParent );
+
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+
+    wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
+    m_pToggleCutFrontSector = new wxToggleButton( pParent, wxID_ANY, wxT( "Cut Front Sector" ) );
+    m_pToggleUseColoring    = new wxToggleButton( pParent, wxID_ANY, wxT( "Use Coloring" ) );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxMain->Add( m_pToggleCutFrontSector, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    wxBoxSizer *pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( m_pToggleUseColoring, 3, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( pBtnSelectColor,      1, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
+
+    m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pParent->Connect( m_pToggleCutFrontSector->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
+    pParent->Connect( m_pToggleUseColoring->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
+    pParent->Connect( pBtnSelectColor->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
 }
 
 void CIsoSurface::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
-    m_ptoggleFiltering->Enable(false);
-    m_ptoggleFiltering->SetValue(false);
-    m_ptoggleUseColoring->SetValue(!getUseTex());
-    m_ptoggleCutFrontSector->SetValue(!getShowFS());
+    m_pToggleFiltering->Enable(false);
+    m_pToggleFiltering->SetValue(false);
+    m_pToggleUseColoring->SetValue(!getUseTex());
+    m_pToggleCutFrontSector->SetValue(!getShowFS());
 
     // Disabled for the moment, not implemented.
     m_pBtnFlipX->Enable( false );

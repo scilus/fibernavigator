@@ -18,14 +18,27 @@
 
 class SceneObject
 {
-
 public:
     SceneObject();
-    wxBoxSizer  *m_propertiesSizer;
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
-    virtual void updatePropertiesSizer();
-    wxBoxSizer* getProprietiesSizer();   
+    virtual ~SceneObject();
     
+    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void updatePropertiesSizer() { }
+
+    wxSizer* getPropertiesSizer() const { return m_pBoxPadding; }
+
+protected:
+    void swap( SceneObject &s );
+
+protected:
+    wxBoxSizer *m_pPropertiesSizer;
+
+private:
+    SceneObject( const SceneObject & );
+    SceneObject & operator=( const SceneObject & );
+
+private:
+    wxBoxSizer *m_pBoxPadding;
 };
 
 #endif

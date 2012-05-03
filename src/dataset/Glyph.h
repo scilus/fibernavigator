@@ -14,20 +14,18 @@
 #include "DatasetInfo.h"
 #include "../misc/Algorithms/Helper.h"
 
-using namespace std;
-
-#define TEXTURE_NB_OF_COLOR  64        // Must be a power of 2.
+#define TEXTURE_NB_OF_COLOR  64     // Must be a power of 2.
 #define HUE_MINIMUM_DISTANCE 0.01f  // The minimum distance between the min and max hue for the glyph color.
 
 enum DisplayShape { NORMAL, SPHERE, AXES, AXIS };
 
 class MainFrame;
-class Glyph : public DatasetInfo , public wxTreeItemData
+
+class Glyph : public DatasetInfo
 {
 public:
     // Constructor/Destructor
-    Glyph( DatasetHelper* datasetHelper, 
-           float i_minHue       = 0.65 , 
+    Glyph( float i_minHue       = 0.65 , 
            float i_maxHue       = 0.0f, 
            float i_saturation   = 0.75f, 
            float i_luminance    = 0.5f  );
@@ -35,9 +33,6 @@ public:
 
     // From DatasetInfo
     virtual void draw();
-
-    // Pure virtual functions
-    virtual bool loadNifti( wxString i_fileName ) = 0;
 
     // Functions
     void         flipAxis     ( AxisType i_axisType, bool i_isFlipped );
@@ -69,37 +64,36 @@ public:
     float        getScalingFactor ()                        { return m_scalingFactor; };
 
     void         refreshSlidersValues();
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual void createPropertiesSizer(PropertiesWindow *pParent);
     virtual void updatePropertiesSizer();
     int          getGlyphIndex       ( int i_zVoxel, int i_yVoxel, int i_xVoxel );
 
-    // Items related to the glyph options sizer.
-    wxSlider           *m_psliderMinHueValue;
-    wxSlider           *m_psliderMaxHueValue;
-    wxSlider           *m_psliderSaturationValue;
-    wxSlider           *m_psliderLuminanceValue;
-    wxSlider           *m_psliderLODValue;
-    wxSlider           *m_psliderLightAttenuation;
-    wxSlider           *m_psliderLightXPosition;
-    wxSlider           *m_psliderLightYPosition;
-    wxSlider           *m_psliderLightZPosition;
-    wxSlider           *m_psliderDisplayValue;
-    wxSlider           *m_psliderScalingFactor;
-    wxToggleButton     *m_ptoggleAxisFlipX;
-    wxToggleButton     *m_ptoggleAxisFlipY;
-    wxToggleButton     *m_ptoggleAxisFlipZ;
-    wxToggleButton     *m_ptoggleColorWithPosition; 
-    wxSizer            *m_psizerDisplay;
-    wxRadioButton      *m_pradiobtnNormal;
-    wxRadioButton      *m_pradiobtnMapOnSphere;
-    wxRadioButton      *m_pradiobtnMainAxis;
-
     virtual void       flipAxis( AxisType i_axe ){};
-    
+
+public:
+    // Items related to the glyph options sizer.
+    wxSlider           *m_pSliderMinHue;
+    wxSlider           *m_pSliderMaxHue;
+    wxSlider           *m_pSliderSaturation;
+    wxSlider           *m_pSliderLuminance;
+    wxSlider           *m_pSliderLOD;
+    wxSlider           *m_pSliderLightAttenuation;
+    wxSlider           *m_pSliderLightXPosition;
+    wxSlider           *m_pSliderLightYPosition;
+    wxSlider           *m_pSliderLightZPosition;
+    wxSlider           *m_pSliderDisplay;
+    wxSlider           *m_pSliderScalingFactor;
+    wxToggleButton     *m_pToggleAxisFlipX;
+    wxToggleButton     *m_pToggleAxisFlipY;
+    wxToggleButton     *m_pToggleAxisFlipZ;
+    wxToggleButton     *m_pToggleColorWithPosition; 
+    wxRadioButton      *m_pRadNormal;
+    wxRadioButton      *m_pRadMapOnSphere;
+    wxRadioButton      *m_pRadMainAxis;
+    wxBoxSizer         *m_pBoxDisplayRadios;
+
 protected:
     // From DatasetInfo
-    virtual void    activateLIC()      {};
-    virtual void    clean()            {};
     virtual void    smooth()           {};
     virtual void    generateGeometry() {};
     virtual GLuint  getGLuint()        { return 0; };
@@ -107,7 +101,7 @@ protected:
     virtual void    generateTexture()  {};
 
     // Pure virtual functions
-    virtual bool    createStructure   ( vector< float >& i_fileFloatData ) = 0;
+    virtual bool    createStructure   ( std::vector< float >& i_fileFloatData ) = 0;
     virtual void    drawGlyph         ( int      i_zVoxel, 
                                         int      i_yVoxel, 
                                         int      i_xVoxel, 
@@ -130,9 +124,10 @@ protected:
     void            getVoxelOffset      ( int i_zVoxelIndex, int i_yVoxelIndex, int i_xVoxelIndex, float o_offset[3] );
     virtual void    loadBuffer          ();
     virtual void    sliderPosChanged    ( AxisType i_axis ) {};
-       
+    void            swap                ( Glyph &g );
+
+protected:
     // Variables
-    DatasetHelper   m_datasetHelper;
     GLuint*         m_hemisphereBuffer;     // For the buffer containing the points of a hemisphere (stored in video memory) 
     GLuint          m_textureId;
     int             m_nbPointsPerGlyph;      // Nb of points per glyph    
@@ -156,9 +151,9 @@ protected:
     bool  m_flippedAxes[3];        // Are axes flipped or not, true if flipped, false otherwise [x, y, z].
     float m_lightPosition[3];      // Light's position [x, y, z]
 
-    vector< float >            m_floatColorDataset;
-    vector< float >             m_axesPoints;       //the 6 points describing the 3 axes
-    vector< vector < float > > m_LODspheres;           // Stores the hemispheres for all LODs.
+    std::vector< float >            m_floatColorDataset;
+    std::vector< float >            m_axesPoints;           //the 6 points describing the 3 axes
+    std::vector< std::vector < float > > m_LODspheres;      // Stores the hemispheres for all LODs.
     
 };
 

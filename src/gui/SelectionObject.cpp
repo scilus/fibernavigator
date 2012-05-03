@@ -11,22 +11,38 @@
 
 #include "SelectionObject.h"
 
-#include "../dataset/Anatomy.h"
-#include "../dataset/Fibers.h"
-#include "../misc/Algorithms/BSpline.h"
-#include "../misc/Algorithms/ConvexHullIncremental.h"
-#include "../misc/Algorithms/ConvexGrahamHull.h"
-#include "../misc/IsoSurface/CIsoSurface.h"
+#include "SceneHelper.h"
+#include "SceneManager.h"
 #include "../main.h"
+#include "../dataset/Anatomy.h"
+#include "../dataset/DatasetManager.h"
+#include "../dataset/Fibers.h"
 #include "../gui/MainFrame.h"
+#include "../misc/Algorithms/BSpline.h"
+#include "../misc/Algorithms/ConvexGrahamHull.h"
+#include "../misc/Algorithms/ConvexHullIncremental.h"
+#include "../misc/IsoSurface/CIsoSurface.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
+
 #include <wx/textctrl.h>
+#include <wx/tglbtn.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <list>
+using std::list;
 
+#include <limits>
+using std::numeric_limits;
 
-SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ):
-    m_pLabelAnatomy   ( NULL ),
+#include <vector>
+using std::vector;
+
+#define DEF_POS   wxDefaultPosition
+#define DEF_SIZE  wxDefaultSize
+
+SelectionObject::SelectionObject( Vector i_center, Vector i_size )
+:   m_pLabelAnatomy   ( NULL ),
     m_pCBSelectDataSet( NULL ),
     m_displayCrossSections ( CS_NOTHING   ),
     m_displayDispersionCone( DC_NOTHING   )
@@ -37,7 +53,6 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     m_center                = i_center;
     m_color                 = l_color;
     m_colorChanged          = false;
-    m_datasetHelper         = i_datasetHelper;
     m_fiberColor            = l_color;
     m_gfxDirty              = false;
     m_handleRadius          = 3.0f;
@@ -66,12 +81,11 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size, DatasetHelper*
     //Distance coloring
     m_DistColoring          = false;
 
-    m_inBox.resize( m_datasetHelper->m_countFibers, false );
+    m_inBox.resize( DatasetManager::getInstance()->getFibersCount(), false );
 }
 
 SelectionObject::~SelectionObject( )
 {
-
 }
 
 void SelectionObject::lockToCrosshair()
@@ -79,20 +93,18 @@ void SelectionObject::lockToCrosshair()
     if( m_isLockedToCrosshair )
     {
         m_isLockedToCrosshair          = false;
-        m_datasetHelper->m_boxLockIsOn = false;
+        SceneManager::getInstance()->setBoxLock( false );
     }
     else
     {
         m_isLockedToCrosshair             = true;
-        m_datasetHelper->m_boxLockIsOn    = true;
-        m_datasetHelper->m_boxAtCrosshair = this;
-        m_datasetHelper->m_semaphore      = true;
-        m_datasetHelper->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
-        m_datasetHelper->m_mainFrame->m_pXSlider->SetValue( (int)m_center.x );
-        m_datasetHelper->m_mainFrame->m_pYSlider->SetValue( (int)m_center.y );
-        m_datasetHelper->m_mainFrame->m_pZSlider->SetValue( (int)m_center.z );
-        m_datasetHelper->m_semaphore      = false;
-        m_datasetHelper->m_mainFrame->refreshAllGLWidgets();
+        SceneManager::getInstance()->setBoxLock( true );
+        SceneManager::getInstance()->setBoxAtCrosshair( this );
+        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z, true );
+        MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
+        MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
+        MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
+        MyApp::frame->refreshAllGLWidgets();
     }
 }
 
@@ -101,7 +113,7 @@ void SelectionObject::lockToCrosshair()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::moveBack()
 {
-    if( m_center.y > m_datasetHelper->m_rows * m_datasetHelper->m_yVoxel ) 
+    if( m_center.y > DatasetManager::getInstance()->getRows() * DatasetManager::getInstance()->getVoxelY() ) 
         return;
 
     m_center.y = (int)m_center.y + 1.0;
@@ -118,7 +130,7 @@ void SelectionObject::moveBack()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::moveDown()
 {
-    if( m_center.z > m_datasetHelper->m_frames * m_datasetHelper->m_zVoxel )
+    if( m_center.z > DatasetManager::getInstance()->getFrames() * DatasetManager::getInstance()->getVoxelZ() )
         return;
 
     m_center.z = (int)m_center.z + 1.0;
@@ -169,7 +181,7 @@ void SelectionObject::moveLeft()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::moveRight()
 {
-    if( m_center.x > m_datasetHelper->m_columns * m_datasetHelper->m_xVoxel ) 
+    if( m_center.x > DatasetManager::getInstance()->getColumns() * DatasetManager::getInstance()->getVoxelX() ) 
         return;
 
     m_center.x = (int)m_center.x + 1.0;
@@ -245,7 +257,7 @@ void SelectionObject::resizeDown()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::resizeForward()
 {
-    if( m_size.y > m_datasetHelper->m_rows ) 
+    if( m_size.y > DatasetManager::getInstance()->getRows() ) 
         return;
 
     m_size.y += 1.0;
@@ -279,7 +291,7 @@ void SelectionObject::resizeLeft()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::resizeRight()
 {
-    if( m_size.x > m_datasetHelper->m_columns )
+    if( m_size.x > DatasetManager::getInstance()->getColumns() )
         return;
 
     m_size.x += 1.0;
@@ -296,7 +308,7 @@ void SelectionObject::resizeRight()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::resizeUp()
 {
-    if( m_size.z > m_datasetHelper->m_frames )
+    if( m_size.z > DatasetManager::getInstance()->getFrames() )
         return;
 
     m_size.z += 1.0;
@@ -319,9 +331,9 @@ void SelectionObject::select( bool i_flag )
     {
         if( i_flag )
         {
-            m_datasetHelper->m_mainFrame->m_pTreeWidget->SelectItem( m_treeId );
-            m_datasetHelper->m_mainFrame->m_pTreeWidget->EnsureVisible( m_treeId );
-            m_datasetHelper->m_mainFrame->m_pTreeWidget->SetFocus();
+            MyApp::frame->m_pTreeWidget->SelectItem( m_treeId );
+            MyApp::frame->m_pTreeWidget->EnsureVisible( m_treeId );
+            MyApp::frame->m_pTreeWidget->SetFocus();
         }
 
         m_isSelected = true;
@@ -336,32 +348,34 @@ void SelectionObject::update()
 {
     if( m_isLockedToCrosshair )
     {
-        m_datasetHelper->m_semaphore = true;
-        m_datasetHelper->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z );
-        m_datasetHelper->m_mainFrame->m_pXSlider->SetValue( (int)m_center.x );
-        m_datasetHelper->m_mainFrame->m_pYSlider->SetValue( (int)m_center.y );
-        m_datasetHelper->m_mainFrame->m_pZSlider->SetValue( (int)m_center.z );
-        m_datasetHelper->m_semaphore = false;
+        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z, true );
+        MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
+        MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
+        MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
     }
 
     updateStatusBar();
     m_isDirty = true;
-    m_datasetHelper->m_selBoxChanged = true;
-    m_datasetHelper->m_mainFrame->refreshAllGLWidgets();
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    MyApp::frame->refreshAllGLWidgets();
 
-    // Update the min/max position in x,y and z of the object.
-    m_minX = m_center.x - ( m_size.x / 2.0f * m_datasetHelper->m_xVoxel );
-    m_maxX = m_center.x + ( m_size.x / 2.0f * m_datasetHelper->m_xVoxel );
-    m_minY = m_center.y - ( m_size.y / 2.0f * m_datasetHelper->m_yVoxel );
-    m_maxY = m_center.y + ( m_size.y / 2.0f * m_datasetHelper->m_yVoxel );
-    m_minZ = m_center.z - ( m_size.z / 2.0f * m_datasetHelper->m_zVoxel );
-    m_maxZ = m_center.z + ( m_size.z / 2.0f * m_datasetHelper->m_zVoxel );
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    // Update the min/max position in x, y and z of the object.
+    m_minX = m_center.x - ( m_size.x * 0.5f * voxelX );
+    m_maxX = m_center.x + ( m_size.x * 0.5f * voxelX );
+    m_minY = m_center.y - ( m_size.y * 0.5f * voxelY );
+    m_maxY = m_center.y + ( m_size.y * 0.5f * voxelY );
+    m_minZ = m_center.z - ( m_size.z * 0.5f * voxelZ );
+    m_maxZ = m_center.z + ( m_size.z * 0.5f * voxelZ );
 
     objectUpdate();
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Updates the object. If a daugther class of SelectionObject needs a specific update call, 
+// Updates the object. If a daughter class of SelectionObject needs a specific update call, 
 // then they should implement this virtual method (like SelectionEllipsoid is doing).
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::objectUpdate()
@@ -374,8 +388,8 @@ void SelectionObject::objectUpdate()
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::toggleIsActive()
 {
-    m_datasetHelper->m_selBoxChanged = true;
-    return m_isActive = ! m_isActive;
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    return m_isActive = !m_isActive;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -433,7 +447,7 @@ bool SelectionObject::isSelectionObject()
 void SelectionObject::setIsDirty( bool i_isDirty ) 
 {
     m_isDirty = i_isDirty;
-    m_datasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -473,14 +487,12 @@ void SelectionObject::setIsMaster( bool i_isMaster )
 
     if( m_isMaster )
     {
-        m_inBranch.resize( m_datasetHelper->m_countFibers, sizeof(bool) );
-        for( unsigned int i = 0; i < m_datasetHelper->m_countFibers ; ++i )
-            m_inBranch[i] = false;
+        m_inBranch.assign( DatasetManager::getInstance()->getFibersCount(), false );
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Sets the treshold of the object.
+// Sets the threshold of the object.
 //
 // i_threshold      : The new threshold value.
 ///////////////////////////////////////////////////////////////////////////
@@ -489,17 +501,17 @@ void SelectionObject::setThreshold( float i_threshold )
     m_threshold = i_threshold;
     m_isDirty   = true;
     m_gfxDirty  = true;
-    m_datasetHelper->m_selBoxChanged = true;
+    SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
 void SelectionObject::drag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
 {
-    Vector l_vs = m_datasetHelper->mapMouse2World( i_click.x, i_click.y, i_projection, i_viewport, i_modelview );
-    Vector l_ve = m_datasetHelper->mapMouse2WorldBack( i_click.x, i_click.y, i_projection, i_viewport, i_modelview );
+    Vector l_vs = mapMouse2World( i_click.x, i_click.y, i_projection, i_viewport, i_modelview );
+    Vector l_ve = mapMouse2WorldBack( i_click.x, i_click.y, i_projection, i_viewport, i_modelview );
     Vector l_dir( l_ve.x - l_vs.x, l_ve.y - l_vs.y, l_ve.z - l_vs.z );
 
-    Vector l_vs2 = m_datasetHelper->mapMouse2World( i_lastPos.x, i_lastPos.y, i_projection, i_viewport, i_modelview );
-    Vector l_ve2 = m_datasetHelper->mapMouse2WorldBack( i_lastPos.x, i_lastPos.y, i_projection, i_viewport, i_modelview );
+    Vector l_vs2 = mapMouse2World( i_lastPos.x, i_lastPos.y, i_projection, i_viewport, i_modelview );
+    Vector l_ve2 = mapMouse2WorldBack( i_lastPos.x, i_lastPos.y, i_projection, i_viewport, i_modelview );
     Vector l_dir2( l_ve2.x - l_vs2.x, l_ve2.y - l_vs2.y, l_ve2.z - l_vs2.z );
 
     Vector l_change( ( l_vs.x + l_dir.x * m_hitResult.tmin ) - ( l_vs2.x + l_dir2.x * m_hitResult.tmin ),
@@ -535,17 +547,17 @@ void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_pro
     if( m_hitResult.picked == 11 || m_hitResult.picked == 12 ) 
     {
         float newX = m_size.x + l_delta;
-        m_size.x = wxMin( wxMax( newX, 1 ), m_datasetHelper->m_columns );
+        m_size.x = wxMin( wxMax( newX, 1 ), DatasetManager::getInstance()->getColumns() );
     }
     if( m_hitResult.picked == 13 || m_hitResult.picked == 14 ) 
     {
         float newY = m_size.y + l_delta;
-        m_size.y = wxMin(wxMax(newY, 1), m_datasetHelper->m_rows);
+        m_size.y = wxMin(wxMax(newY, 1), DatasetManager::getInstance()->getRows() );
     }
     if( m_hitResult.picked == 15 || m_hitResult.picked == 16 ) 
     {
         float newZ = m_size.z + l_delta;
-        m_size.z = wxMin( wxMax( newZ, 1 ), m_datasetHelper->m_frames );
+        m_size.z = wxMin( wxMax( newZ, 1 ), DatasetManager::getInstance()->getFrames() );
     }
     
     m_boxResized = true;
@@ -554,8 +566,8 @@ void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_pro
 
 float SelectionObject::getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
 {
-    Vector l_vs = m_datasetHelper->mapMouse2World( i_x1, i_y1, i_projection, i_viewport, i_modelview);
-    Vector l_ve = m_datasetHelper->mapMouse2World( i_x2, i_y2, i_projection, i_viewport, i_modelview );
+    Vector l_vs = mapMouse2World( i_x1, i_y1, i_projection, i_viewport, i_modelview);
+    Vector l_ve = mapMouse2World( i_x2, i_y2, i_projection, i_viewport, i_modelview );
     Vector l_dir( l_ve.x - l_vs.x, l_ve.y - l_vs.y, l_ve.z - l_vs.z );
 
     float l_bb = ( ( l_dir.x * l_dir.x ) + ( l_dir.y * l_dir.y ) + ( l_dir.z * l_dir.z ) );
@@ -570,12 +582,12 @@ float SelectionObject::getAxisParallelMovement( int i_x1, int i_y1, int i_x2, in
 // i_fiberPoints    : The points of the fiber that will be draw.
 // i_thickness      : The thickness of the fiber to draw.
 // i_nmTubeEdge     : This param will determine the number of edge the fake tube will have
-//                    ( exemple -> if i_nmTubeEdge =3, then the tube will be shaped like a
-//                    triangle, if i_nmTubeEdge = 4 then the tube will be shapped like a square.
+//                    ( example -> if i_nmTubeEdge =3, then the tube will be shaped like a
+//                    triangle, if i_nmTubeEdge = 4 then the tube will be shaped like a square.
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, float i_thickness, int i_nmTubeEdge )
 {
-    if( i_fiberPoints.size() < 2 || !m_ptoggleDisplayMeanFiber->GetValue() )
+    if( i_fiberPoints.size() < 2 || !m_pToggleDisplayMeanFiber->GetValue() )
         return;
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -638,63 +650,63 @@ void SelectionObject::drawThickFiber( const vector< Vector > &i_fiberPoints, flo
 void SelectionObject::computeConvexHull()
 {
     m_mustUpdateConvexHull = true;
-    if ( m_ptoggleDisplayConvexHull->GetValue() && m_convexHullOpacity != 0)
-    {
-            vector< Vector > pts;
-            vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
-            for (unsigned int i(0); i< l_selectedFibersPoints.size(); i++)
-                pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());
-
-            m_hullTriangles.clear();
-            ConvexHullIncremental hull(pts);
-            hull.buildHull();
-            hull.getHullTriangles( m_hullTriangles );
-            m_mustUpdateConvexHull = false;
-    }
+//     if ( m_pToggleDisplayConvexHull->GetValue() && m_convexHullOpacity != 0)
+//     {
+//             vector< Vector > pts;
+//             vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+//             for (unsigned int i(0); i< l_selectedFibersPoints.size(); i++)
+//                 pts.insert(pts.end(), l_selectedFibersPoints[i].begin(), l_selectedFibersPoints[i].end());
+// 
+//             m_hullTriangles.clear();
+//             ConvexHullIncremental hull(pts);
+//             hull.buildHull();
+//             hull.getHullTriangles( m_hullTriangles );
+//             m_mustUpdateConvexHull = false;
+//     }
 }
 
 void SelectionObject::drawConvexHull()
 {
-    if ( m_ptoggleDisplayConvexHull->GetValue() && m_ptoggleDisplayConvexHull->IsEnabled() && m_convexHullOpacity != 0)
-    {
-        if (m_mustUpdateConvexHull)
-            computeConvexHull();
-
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        glEnable( GL_BLEND );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glColor4f( (float)m_convexHullColor.Red() / 255.0f, (float)m_convexHullColor.Green() / 255.0f, (float)m_convexHullColor.Blue() / 255.0f, m_convexHullOpacity );
-
-        Vector normal;
-        glBegin( GL_TRIANGLES );
-        list< Face3D >::iterator it;
-            for( it = m_hullTriangles.begin(); it != m_hullTriangles.end(); it++ )
-            {
-                //Vector normal;
-                //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
-                //normal.normalize();
-                //glNormal3f(normal[0], normal[1], normal[2]);
-                glVertex3f( it->getPt1().x, it->getPt1().y, it->getPt1().z );
-
-                //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
-                //normal.normalize();
-                //glNormal3f(normal[0], normal[1], normal[2]);
-                glVertex3f( it->getPt2().x, it->getPt2().y, it->getPt2().z );
-
-                //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
-                //normal.normalize();
-                //glNormal3f(normal[0], normal[1], normal[2]);
-                glVertex3f( it->getPt3().x, it->getPt3().y, it->getPt3().z );
-            }
-        glEnd();
-
-        glDisable( GL_BLEND );
-    }
+//     if ( m_pToggleDisplayConvexHull->GetValue() && m_pToggleDisplayConvexHull->IsEnabled() && m_convexHullOpacity != 0)
+//     {
+//         if (m_mustUpdateConvexHull)
+//             computeConvexHull();
+// 
+//         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+//         glEnable( GL_BLEND );
+//         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+//         glColor4f( (float)m_convexHullColor.Red() / 255.0f, (float)m_convexHullColor.Green() / 255.0f, (float)m_convexHullColor.Blue() / 255.0f, m_convexHullOpacity );
+// 
+//         Vector normal;
+//         glBegin( GL_TRIANGLES );
+//         list< Face3D >::iterator it;
+//             for( it = m_hullTriangles.begin(); it != m_hullTriangles.end(); it++ )
+//             {
+//                 //Vector normal;
+//                 //normal = (p[i+1] - p[i]).Cross(p[i+2]-p[i]);
+//                 //normal.normalize();
+//                 //glNormal3f(normal[0], normal[1], normal[2]);
+//                 glVertex3f( it->getPt1().x, it->getPt1().y, it->getPt1().z );
+// 
+//                 //normal = (p[i] - p[i+1]).Cross(p[i+2]-p[i+1]);
+//                 //normal.normalize();
+//                 //glNormal3f(normal[0], normal[1], normal[2]);
+//                 glVertex3f( it->getPt2().x, it->getPt2().y, it->getPt2().z );
+// 
+//                 //normal = (p[i] - p[i+2]).Cross(p[i+1]-p[i+2]);
+//                 //normal.normalize();
+//                 //glNormal3f(normal[0], normal[1], normal[2]);
+//                 glVertex3f( it->getPt3().x, it->getPt3().y, it->getPt3().z );
+//             }
+//         glEnd();
+// 
+//         glDisable( GL_BLEND );
+//     }
 }
 
 void SelectionObject::updateConvexHullOpacity()
 {
-    setConvexHullOpacity( ( m_pSliderConvexHullOpacity->GetValue() + (float)m_pSliderConvexHullOpacity->GetMin() ) / (float)m_pSliderConvexHullOpacity->GetMax() );
+//     setConvexHullOpacity( ( m_pSliderConvexHullOpacity->GetValue() + (float)m_pSliderConvexHullOpacity->GetMin() ) / (float)m_pSliderConvexHullOpacity->GetMax() );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -819,7 +831,7 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::computeMeanFiber()
 {
-    if ( getShowFibers() && m_ptoggleDisplayMeanFiber->GetValue() )
+    if ( getShowFibers() && m_pToggleDisplayMeanFiber->GetValue() )
     {
         // We calculate the mean fiber of the selected fibers.
         m_meanFiberPoints.clear();
@@ -841,46 +853,55 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
     vector< bool > filteredFiber;
-    Fibers* l_fibers = NULL;
 
-    m_datasetHelper->getSelectedFiberDataset(l_fibers);
-    filteredFiber = l_fibers->getFilteredFibers();
-
-    for( unsigned int i = 0; i < m_inBranch.size(); ++i )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        if( m_inBranch[i] && !filteredFiber[i] )
+        Fibers * pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        
+        if( pFibers == NULL )
         {
-            getFiberCoordValues( i, l_currentFiberPoints );
+            return l_selectedFibersPoints;
+        }
 
-            // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
-            // could have there coordinated in the data completly inversed ( first fiber 0,0,0 - 1,1,1 ),  
-            // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
-            // verification and if the order of the fiber points are wrong we switch them.
-            if( l_selectedFibersPoints.size() > 0 )
+        filteredFiber = pFibers->getFilteredFibers();
+
+        for( unsigned int i = 0; i < m_inBranch.size(); ++i )
+        {
+            if( m_inBranch[i] && !filteredFiber[i] )
             {
-                l_meanStart.zero();
-                for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
-                    l_meanStart += l_selectedFibersPoints[j][0];
-                l_meanStart /= l_selectedFibersPoints.size();
-            }
+                getFiberCoordValues( i, l_currentFiberPoints );
 
-            // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
-            // then the order of the points of this fiber are ok, otherwise we need to flip them.
-            if( ( l_meanStart - l_currentFiberPoints[0] ).getLength() <
-                ( l_meanStart - l_currentFiberPoints[l_currentFiberPoints.size() - 1] ).getLength() )
-            {
-                l_selectedFibersPoints.push_back( l_currentFiberPoints );
-            }
-            else
-            {
-                for( int k = (int)l_currentFiberPoints.size() - 1; k >= 0; --k )
-                    l_currentSwappedFiberPoints.push_back( l_currentFiberPoints[k] );
+                // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
+                // could have there coordinated in the data completely inversed ( first fiber 0,0,0 - 1,1,1 ),  
+                // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
+                // verification and if the order of the fiber points are wrong we switch them.
+                if( l_selectedFibersPoints.size() > 0 )
+                {
+                    l_meanStart.zero();
+                    for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
+                        l_meanStart += l_selectedFibersPoints[j][0];
+                    l_meanStart /= l_selectedFibersPoints.size();
+                }
 
-                l_selectedFibersPoints.push_back( l_currentSwappedFiberPoints );
-                l_currentSwappedFiberPoints.clear();
-            }
+                // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
+                // then the order of the points of this fiber are ok, otherwise we need to flip them.
+                if( ( l_meanStart - l_currentFiberPoints[0] ).getLength() <
+                    ( l_meanStart - l_currentFiberPoints[l_currentFiberPoints.size() - 1] ).getLength() )
+                {
+                    l_selectedFibersPoints.push_back( l_currentFiberPoints );
+                }
+                else
+                {
+                    for( int k = (int)l_currentFiberPoints.size() - 1; k >= 0; --k )
+                        l_currentSwappedFiberPoints.push_back( l_currentFiberPoints[k] );
 
-            l_currentFiberPoints.clear();
+                    l_selectedFibersPoints.push_back( l_currentSwappedFiberPoints );
+                    l_currentSwappedFiberPoints.clear();
+                }
+
+                l_currentFiberPoints.clear();
+            }
         }
     }
 
@@ -903,13 +924,17 @@ bool SelectionObject::getFiberLength( const vector< Vector > &i_fiberPoints, flo
     float l_dx,l_dy, l_dz;
     o_length = 0.0;
     
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     for( unsigned int i = 1; i < i_fiberPoints.size(); ++i )
     {
         // The values are in pixel, we need to set them in millimeters using the spacing 
         // specified in the anatomy file ( m_datasetHelper->xVoxel... ).
-        l_dx = ( i_fiberPoints[i].x - i_fiberPoints[i-1].x ) * m_datasetHelper->m_xVoxel;
-        l_dy = ( i_fiberPoints[i].y - i_fiberPoints[i-1].y ) * m_datasetHelper->m_yVoxel;
-        l_dz = ( i_fiberPoints[i].z - i_fiberPoints[i-1].z ) * m_datasetHelper->m_zVoxel;
+        l_dx = ( i_fiberPoints[i].x - i_fiberPoints[i-1].x ) * voxelX;
+        l_dy = ( i_fiberPoints[i].y - i_fiberPoints[i-1].y ) * voxelY;
+        l_dz = ( i_fiberPoints[i].z - i_fiberPoints[i-1].z ) * voxelZ;
 
         FArray currentVector( l_dx, l_dy, l_dz );
         o_length += (float)currentVector.norm();
@@ -1002,11 +1027,14 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::getShowFibers()
 {
-    Fibers* l_fibers = NULL;
-    m_datasetHelper->getSelectedFiberDataset( l_fibers );
-    if ( l_fibers == NULL )
-        return false;
-    return l_fibers->getShow();
+    Fibers* pFibers = NULL;
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+    }
+
+    return NULL == pFibers ? false : pFibers->getShow();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1019,26 +1047,31 @@ bool SelectionObject::getShowFibers()
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
 {
-    Fibers* l_fibers = NULL;
-    m_datasetHelper->getSelectedFiberDataset( l_fibers );
-
-    if( l_fibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
-        return false;
-
-    int l_index = l_fibers->getStartIndexForLine( i_fiberIndex ) * 3;
-    Vector l_point3D;
-       
-    for( int i = 0; i < l_fibers->getPointsPerLine( i_fiberIndex ); ++i )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        l_point3D.x = l_fibers->getPointValue( l_index );
-        l_point3D.y = l_fibers->getPointValue( l_index + 1);
-        l_point3D.z = l_fibers->getPointValue( l_index + 2 );
-        o_fiberPoints.push_back( l_point3D );
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
-        l_index += 3;                
+        if( pFibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
+            return false;
+
+        int l_index = pFibers->getStartIndexForLine( i_fiberIndex ) * 3;
+        Vector l_point3D;
+
+        for( int i = 0; i < pFibers->getPointsPerLine( i_fiberIndex ); ++i )
+        {
+            l_point3D.x = pFibers->getPointValue( l_index );
+            l_point3D.y = pFibers->getPointValue( l_index + 1);
+            l_point3D.z = pFibers->getPointValue( l_index + 2 );
+            o_fiberPoints.push_back( l_point3D );
+
+            l_index += 3;
+        }
+
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1079,20 +1112,20 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &fiber
     
     Anatomy *pCurrentAnatomy( NULL );
 
-    vector< DatasetInfo* > datasets;
-    m_datasetHelper->getTextureDataset(datasets);
-
+    vector< Anatomy* > datasets = DatasetManager::getInstance()->getAnatomies();
+    
     if( m_pCBSelectDataSet == NULL && datasets.size() > 0 )
     {
         // Select the first dataset in the list
-        pCurrentAnatomy = (Anatomy*)datasets[0];
+        pCurrentAnatomy = datasets[0];
     }
     else if( m_pCBSelectDataSet != NULL && 
              m_pCBSelectDataSet->GetCount() > 0 && 
              m_pCBSelectDataSet->GetCurrentSelection() != -1 )
     {
+        // TODO: Verify if the selection is the right index
         // Get the currently selected dataset.
-        pCurrentAnatomy = (Anatomy*)datasets[ m_pCBSelectDataSet->GetSelection() ];
+        pCurrentAnatomy = datasets[ m_pCBSelectDataSet->GetSelection() ];
     }
     else
     {
@@ -1102,13 +1135,17 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &fiber
     unsigned int pointsCount( 0 );
     unsigned int datasetPos ( 0 );
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     for( unsigned int i = 0; i < fibersPoints.size(); ++i )
     {
         for( unsigned int j = 0; j < fibersPoints[i].size(); ++j )
         {
-            datasetPos = ( static_cast<int>( fibersPoints[i][j].x / m_datasetHelper->m_xVoxel ) +
-                           static_cast<int>( fibersPoints[i][j].y / m_datasetHelper->m_yVoxel ) * pCurrentAnatomy->getColumns() +
-                           static_cast<int>( fibersPoints[i][j].z / m_datasetHelper->m_zVoxel ) * pCurrentAnatomy->getColumns() * pCurrentAnatomy->getRows() ) * pCurrentAnatomy->getBands();
+            datasetPos = ( static_cast<int>( fibersPoints[i][j].x / voxelX ) +
+                           static_cast<int>( fibersPoints[i][j].y / voxelY ) * pCurrentAnatomy->getColumns() +
+                           static_cast<int>( fibersPoints[i][j].z / voxelZ ) * pCurrentAnatomy->getColumns() * pCurrentAnatomy->getRows() ) * pCurrentAnatomy->getBands();
             
             for (int i(0); i < pCurrentAnatomy->getBands(); i++)
             {
@@ -1281,8 +1318,12 @@ bool SelectionObject::getMeanMaxMinFiberCrossSection( const vector< vector< Vect
      
     o_meanCrossSection /= i_meanFiberPoints.size();
 
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
     // We want to return the values in millimeters so we need to multiply them by the spacing in the anatomy file.
-    float l_spacing = m_datasetHelper->m_xVoxel * m_datasetHelper->m_yVoxel * m_datasetHelper->m_zVoxel;
+    float l_spacing = voxelX * voxelY * voxelZ;
 
     o_maxCrossSection  *= l_spacing;
     o_minCrossSection  *= l_spacing;
@@ -1357,13 +1398,13 @@ bool SelectionObject::getFibersMeanCurvatureAndTorsion( const vector< vector< Ve
    if( i_fiberVector.size() == 0 )
     return false;
 
-	//Curvature and torsion are now calculated from mean fiber
+    //Curvature and torsion are now calculated from mean fiber
    vector< Vector > meanFiberPoint;
-	getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, meanFiberPoint);
-	getFiberMeanCurvatureAndTorsion(meanFiberPoint, o_meanCurvature, o_meanTorsion );
+    getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, meanFiberPoint);
+    getFiberMeanCurvatureAndTorsion(meanFiberPoint, o_meanCurvature, o_meanTorsion );
 
 
-	//Curvature and torsion are now calculated from mean fiber
+    //Curvature and torsion are now calculated from mean fiber
    //float l_currentFiberCurvature, l_currentFiberTorsion;
    //for( unsigned int i = 0; i < i_fiberVector.size(); ++i )
    //{
@@ -1620,7 +1661,7 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::draw()
 {
-    if( ! m_isActive || ! isSelectionObject())
+    if( !m_isActive || !isSelectionObject())
     {
         if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
             drawFibersInfo();
@@ -1689,14 +1730,14 @@ void SelectionObject::drawIsoSurface()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::updateStatusBar()
 {
-    m_datasetHelper->m_mainFrame->GetStatusBar()->SetStatusText( m_name, 1 );
-    m_datasetHelper->m_mainFrame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "Position %.2f, %.2f, %.2f  Size: %.2f, %.2f, %.2f" ),
-                                                                 m_center.x, 
-                                                                 m_center.y,
-                                                                 m_center.z,
-                                                                 m_size.x * m_datasetHelper->m_xVoxel,
-                                                                 m_size.y * m_datasetHelper->m_yVoxel,
-                                                                 m_size.z * m_datasetHelper->m_zVoxel ),
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    MyApp::frame->GetStatusBar()->SetStatusText( m_name, 1 );
+    MyApp::frame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "Position: %.2f, %.2f, %.2f  Size: %.2f, %.2f, %.2f" ),
+                                                                 m_center.x, m_center.y, m_center.z,
+                                                                 m_size.x * voxelX, m_size.y * voxelY, m_size.z * voxelZ ),
                                                                  2 );
 }
 
@@ -1710,7 +1751,7 @@ void SelectionObject::drawFibersInfo()
 {
     if( ! m_isMaster )
     {
-        wxTreeCtrl*      l_treeWidget   = m_datasetHelper->m_mainFrame->m_pTreeWidget;
+        wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
 
         l_masterObject->drawFibersInfo();
@@ -1916,46 +1957,38 @@ void SelectionObject::FlipNormals()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::SetFiberInfoGridValues()
 {
-    if( ! m_isMaster )
+    if( !m_isMaster )
     {
-        wxTreeCtrl*      l_treeWidget   = m_datasetHelper->m_mainFrame->m_pTreeWidget;
-        SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );        
+        wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
+        SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
         l_masterObject->SetFiberInfoGridValues();
         return;
     }
-   if (m_ptoggleCalculatesFibersInfo->GetValue())
+    if( m_pToggleCalculatesFibersInfo->GetValue() )
     {
         FibersInfoGridParams l_params;
         calculateGridParams( l_params );
 
-        m_pgridfibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ), l_params.m_count              ) );
-        m_pgridfibersInfo->SetCellValue( 1,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanValue        ) );
-        m_pgridfibersInfo->SetCellValue( 2,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanLength       ) );
-        m_pgridfibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minLength        ) );
-        m_pgridfibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxLength        ) );
-        //m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanCrossSection ) );
-        //if ( l_params.m_minCrossSection > l_params.m_count )
-        //    m_pgridfibersInfo->SetCellValue( 6,  0, wxT( "INF") );
-        //else    
-        //    m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minCrossSection  ) );
-		  //    m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxCrossSection  ) );
-        m_pgridfibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
-        m_pgridfibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
-        //m_pgridfibersInfo->SetCellValue( 10, 0, wxString::Format( wxT( "%.2f" ), l_params.m_dispersion       ) );
+        m_pGridFibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ),   l_params.m_count            ) );
+        m_pGridFibersInfo->SetCellValue( 1,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanValue        ) );
+        m_pGridFibersInfo->SetCellValue( 2,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanLength       ) );
+        m_pGridFibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minLength        ) );
+        m_pGridFibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxLength        ) );
+        m_pGridFibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
+        m_pGridFibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
     }
 }
 
 void SelectionObject::setShowConvexHullOption( bool i_val )
 {
-    m_plblConvexHullOpacity->Show( i_val );
-    m_pSliderConvexHullOpacity->Show( i_val);
-    m_pbtnSelectConvexHullColor->Enable( i_val );
+//     m_pLblConvexHullOpacity->Show( i_val );
+//     m_pSliderConvexHullOpacity->Show( i_val);
+//     m_pBtnSelectConvexHullColor->Enable( i_val );
 }
 
 void SelectionObject::UpdateMeanValueTypeBox()
 {
-    vector< DatasetInfo* > dataSets;
-    m_datasetHelper->getTextureDataset( dataSets );
+    vector< Anatomy* > dataSets = DatasetManager::getInstance()->getAnatomies();
     
     if( dataSets.size() != m_pCBSelectDataSet->GetCount() )
     {
@@ -1988,289 +2021,305 @@ void SelectionObject::UpdateMeanValueTypeBox()
 
 void SelectionObject::setShowMeanFiberOption( bool i_val )
 {
-    m_plblColoring->Show( i_val );
-    m_pRadioCustomColoring->Show( i_val );
-    m_pRadioNormalColoring->Show( i_val );
+    m_pLblColoring->Show( i_val );
+    m_pRadCustomColoring->Show( i_val );
+    m_pRadNormalColoring->Show( i_val );
     m_pLblMeanFiberOpacity->Show( i_val );
-    m_psliderMeanFiberOpacity->Show( i_val );
+    m_pSliderMeanFiberOpacity->Show( i_val );
 }
 
 void SelectionObject::updateMeanFiberOpacity()
 {
-    setMeanFiberOpacity( ( m_psliderMeanFiberOpacity->GetValue() + (float)m_psliderMeanFiberOpacity->GetMin() ) / (float)m_psliderMeanFiberOpacity->GetMax() );
+    setMeanFiberOpacity( ( m_pSliderMeanFiberOpacity->GetValue() + (float)m_pSliderMeanFiberOpacity->GetMin() ) / (float)m_pSliderMeanFiberOpacity->GetMax() );
 }
 
-void SelectionObject::createPropertiesSizer(PropertiesWindow *parent)
+void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    SceneObject::createPropertiesSizer(parent);  
-    wxSizer *l_sizer;
+    SceneObject::createPropertiesSizer( pParent );
 
-    m_ptxtName = new wxTextCtrl(parent, wxID_ANY, getName(),wxDefaultPosition, wxSize(180,-1), wxTE_CENTRE | wxTE_READONLY);    
-    m_ptxtName->SetBackgroundColour(*wxLIGHT_GREY);
-    wxFont l_font = m_ptxtName->GetFont();
-    l_font.SetPointSize(10);
-    l_font.SetWeight(wxFONTWEIGHT_BOLD);
-    m_ptxtName->SetFont(l_font);
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(m_ptxtName,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
-    m_ptoggleVisibility = new wxToggleButton(parent, wxID_ANY, wxT("Visible"),wxDefaultPosition, wxSize(70,-1));
-    m_ptoggleActivate = new wxToggleButton(parent, wxID_ANY, wxT("Activate"), wxDefaultPosition, wxSize(70, -1));
-    wxImage bmpDelete(MyApp::iconsPath+ wxT("delete.png" ), wxBITMAP_TYPE_PNG);
-    m_pbtnDelete = new wxBitmapButton(parent, wxID_ANY, bmpDelete, wxDefaultPosition, wxSize(40,-1));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(m_ptoggleVisibility,0,wxALIGN_CENTER);
-    l_sizer->Add(m_ptoggleActivate,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pbtnDelete,0,wxALIGN_CENTER); 
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);   
-    parent->Connect(m_ptoggleVisibility->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleShowSelectionObject));
-    parent->Connect(m_ptoggleActivate->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxTreeEventHandler(PropertiesWindow::OnActivateTreeItem));
-    parent->Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(PropertiesWindow::OnDeleteTreeItem));
+    m_meanFiberOpacity = 0.35f;
+    m_convexHullOpacity = 0.35f;
+    m_meanFiberColorationMode = NORMAL_COLOR;
 
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pbtnChangeName = new wxButton(parent, wxID_ANY,wxT("Rename"), wxDefaultPosition,wxSize(90,-1));
-    m_ptoggleAndNot = new wxToggleButton(parent, wxID_ANY, wxT("And / Not"), wxDefaultPosition, wxSize(90,-1));
-    l_sizer->Add(m_ptoggleAndNot,0,wxALIGN_CENTER);
-    l_sizer->Add(m_pbtnChangeName,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnChangeName->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnRenameBox));
-    parent->Connect(m_ptoggleAndNot->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnToggleAndNot));
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_pbtnFlipNormal = new wxButton(parent, wxID_ANY, wxT("Flip Normal"), wxDefaultPosition, wxSize(100,-1));
-    l_sizer->Add(m_pbtnFlipNormal,0,wxALIGN_CENTER);
-    wxImage bmpColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
-    m_pbtnSelectColor = new wxBitmapButton(parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize(40,-1));
-    l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    
-    parent->Connect(m_pbtnFlipNormal->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnVoiFlipNormals));
-    parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnColorRoi));
+    //////////////////////////////////////////////////////////////////////////
 
-    m_pbtnSelectColorFibers = new wxButton(parent, wxID_ANY, wxT("Select Fibers Color"), wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->Add(m_pbtnSelectColorFibers,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnSelectColorFibers->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnAssignColor));
-    
-    m_pbtnNewFibersColorVolume = new wxButton(parent, wxID_ANY, wxT("New Color map"), wxDefaultPosition, wxSize(140,-1));
-    m_pbtnNewFibersDensityVolume = new wxButton(parent, wxID_ANY, wxT("New Density map"), wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->Add(m_pbtnNewFibersColorVolume,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(m_pbtnNewFibersDensityVolume,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnNewFibersColorVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnCreateFibersColorTexture));
-    parent->Connect(m_pbtnNewFibersDensityVolume->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnCreateFibersDensityTexture));
+    wxImage bmpDelete(          MyApp::iconsPath + wxT( "delete.png" ),      wxBITMAP_TYPE_PNG );
+    wxImage bmpColor(           MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+    wxImage bmpMeanFiberColor(  MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+    wxImage bmpConvexHullColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
 
+    wxButton *pBtnChangeName          = new wxButton( pParent, wxID_ANY, wxT( "Rename" ) );
+    wxButton *pBtnFlipNormal          = new wxButton( pParent, wxID_ANY, wxT( "Flip Normal" ) );
+    wxButton *pBtnSelectColorFibers   = new wxButton( pParent, wxID_ANY, wxT( "Select Fibers Color" ) );
+    wxButton *pBtnNewColorVolume      = new wxButton( pParent, wxID_ANY, wxT( "New Color map" ) );
+    wxButton *pBtnNewDensityVolume    = new wxButton( pParent, wxID_ANY, wxT( "New Density map" ) );
+    wxButton *pBtnSetAsDistanceAnchor = new wxButton( pParent, wxID_ANY, wxT( "Set As Anchor" ) );
+    //m_pbtnDisplayCrossSections      = new wxButton( pParent, wxID_ANY, wxT( "Display Cross Section (C.S.)" ) );
+    //m_pbtnDisplayDispersionTube     = new wxButton( pParent, wxID_ANY, wxT( "Display Dispersion Tube" ) );
+    wxBitmapButton *pBtnDelete      = new wxBitmapButton( pParent, wxID_ANY, bmpDelete, DEF_POS, wxSize( 20, -1 ) );
+    wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
+    m_pBtnSelectMeanFiberColor      = new wxBitmapButton( pParent, wxID_ANY, bmpMeanFiberColor );
+//     m_pBtnSelectConvexHullColor     = new wxBitmapButton( pParent, wxID_ANY, bmpConvexHullColor );
+    m_pToggleVisibility           = new wxToggleButton( pParent, wxID_ANY, wxT( "Visible" ), DEF_POS, wxSize( 20, -1 ) );
+    m_pToggleActivate             = new wxToggleButton( pParent, wxID_ANY, wxT( "Activate" ), DEF_POS, wxSize( 20, -1 ) );
+    wxToggleButton *pToggleAndNot = new wxToggleButton( pParent, wxID_ANY, wxT( "And / Not" ) );
+    m_pToggleCalculatesFibersInfo = new wxToggleButton( pParent, wxID_ANY, wxT( "Calculate Fibers Stats" ) );
+    m_pToggleDisplayMeanFiber     = new wxToggleButton( pParent, wxID_ANY, wxT( "Display Mean Fiber" ) );
+//     m_pToggleDisplayConvexHull    = new wxToggleButton( pParent, wxID_ANY, wxT( "Display convex hull" ) );
+    m_pLblColoring          = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
+    m_pLblMeanFiberOpacity  = new wxStaticText( pParent, wxID_ANY, wxT( "Opacity" ) );
+//     m_pLblConvexHullOpacity = new wxStaticText( pParent, wxID_ANY, wxT( "Opacity" ) );
+    m_pRadCustomColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Custom" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+    m_pRadNormalColoring = new wxRadioButton( pParent, wxID_ANY, _T( "Normal" ) );
+    m_pSliderMeanFiberOpacity  = new wxSlider( pParent, wxID_ANY, 35, 0, 100, DEF_POS, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+//     m_pSliderConvexHullOpacity = new wxSlider( pParent, wxID_ANY, 35, 0, 100, DEF_POS, wxSize( 40, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtName  = new wxTextCtrl( pParent, wxID_ANY, getName(), DEF_POS, DEF_SIZE, wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtBoxX  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.x ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtBoxY  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.y ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtBoxZ  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_center.z ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtSizeX = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.x * voxelX ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtSizeY = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.y * voxelY ), DEF_POS, wxSize( 10, -1 ) );
+    m_pTxtSizeZ = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.2f" ), m_size.z * voxelZ ), DEF_POS, wxSize( 10, -1 ) );
 
-    m_pbtnSetAsDistanceAnchor = new wxButton(parent, wxID_ANY, wxT("Set As Anchor"), wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->Add(m_pbtnSetAsDistanceAnchor,0,wxALIGN_CENTER);
-    parent->Connect(m_pbtnSetAsDistanceAnchor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDistanceAnchorSet));
-    m_propertiesSizer->AddSpacer(8);
-    
-    m_ptoggleCalculatesFibersInfo = new wxToggleButton(parent, wxID_ANY, wxT("Calculate Fibers Stats"), wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->Add(m_ptoggleCalculatesFibersInfo,0,wxALIGN_CENTER);      
-    parent->Connect(m_ptoggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayFibersInfo));
-    m_propertiesSizer->AddSpacer(2);
+    //////////////////////////////////////////////////////////////////////////
 
-    // Initialize the grid.
-    m_pgridfibersInfo = new wxGrid(parent, wxID_ANY );
+    wxFont font = m_pTxtName->GetFont();
+    font.SetPointSize(10);
+    font.SetWeight( wxFONTWEIGHT_BOLD );
+    m_pTxtName->SetFont( font );
+    m_pTxtName->SetBackgroundColour( *wxLIGHT_GREY );
 
-    m_pgridfibersInfo->SetRowLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
-    wxFont l_font2 = m_pgridfibersInfo->GetFont();
-    l_font2.SetPointSize(8);
-    l_font2.SetWeight(wxFONTWEIGHT_BOLD);
-    m_pgridfibersInfo->SetFont(l_font2);
-    m_pgridfibersInfo->SetColLabelSize(2);
-    m_pgridfibersInfo->CreateGrid( 7, 1, wxGrid::wxGridSelectCells );
-    m_pgridfibersInfo->SetColLabelValue( 0, wxT("") );
-    m_pgridfibersInfo->SetRowLabelValue( 0,  wxT( "Count"                   ) );
-    m_pgridfibersInfo->SetRowLabelValue( 1,  wxT( "Mean Value"              ) );
-    m_pgridfibersInfo->SetRowLabelValue( 2,  wxT( "Mean Length(mm)"         ) );
-    m_pgridfibersInfo->SetRowLabelValue( 3,  wxT( "Min Length(mm)"          ) );
-    m_pgridfibersInfo->SetRowLabelValue( 4,  wxT( "Max Length(mm)"          ) );
-    //m_pgridfibersInfo->SetRowLabelValue( 5,  wxT( "Mean C. S.(mm)"          ) );
-    //m_pgridfibersInfo->SetRowLabelValue( 6,  wxT( "Min C. S.(mm)"           ) );
-    //m_pgridfibersInfo->SetRowLabelValue( 7,  wxT( "Max C. S.(mm)"           ) );
-    m_pgridfibersInfo->SetRowLabelValue( 5,  wxT( "Mean Curvature"          ) );
-    m_pgridfibersInfo->SetRowLabelValue( 6,  wxT( "Mean Torsion"            ) );
-    //m_pgridfibersInfo->SetRowLabelValue( 10, wxT( "Dispersion"              ) );
+    //////////////////////////////////////////////////////////////////////////
 
-    m_pgridfibersInfo->SetRowLabelSize( 110 );
-    
-    m_ptoggleDisplayMeanFiber       = new wxToggleButton(parent, wxID_ANY, wxT("Display Mean Fiber"), wxDefaultPosition, wxSize(140,-1));
-    //m_pbtnDisplayCrossSections      = new wxButton(parent, wxID_ANY, wxT("Display Cross Section (C.S.)"), wxDefaultPosition, wxSize(140,-1));
-    //m_pbtnDisplayDispersionTube     = new wxButton(parent, wxID_ANY, wxT("Display Dispersion Tube"), wxDefaultPosition, wxSize(140,-1));
+    pBoxMain->Add( m_pTxtName, 0, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
 
-    m_propertiesSizer->Add( m_pgridfibersInfo,0,wxALL,0);
-    
-    m_propertiesSizer->AddSpacer(2);
+    wxBoxSizer *pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( m_pToggleVisibility, 1, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( m_pToggleActivate,   1, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( pBtnDelete,          1, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( pToggleAndNot,  1, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( pBtnChangeName, 1, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( pBtnFlipNormal,  3, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( pBtnSelectColor, 1, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxMain->Add( pBtnSelectColorFibers,   0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( pBtnNewColorVolume,      0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( pBtnNewDensityVolume,    0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( pBtnSetAsDistanceAnchor, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    pBoxMain->AddSpacer( 8 );
+
+    pBoxMain->Add( m_pToggleCalculatesFibersInfo, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    pBoxMain->AddSpacer( 2 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pGridFibersInfo = new wxGrid( pParent, wxID_ANY );
+    m_pGridFibersInfo->SetRowLabelAlignment( wxALIGN_LEFT, wxALIGN_CENTER );
+    font = m_pGridFibersInfo->GetFont();
+    font.SetPointSize( 8 );
+    font.SetWeight( wxFONTWEIGHT_BOLD );
+    m_pGridFibersInfo->SetFont( font );
+    m_pGridFibersInfo->SetColLabelSize( 2 );
+    m_pGridFibersInfo->CreateGrid( 7, 1, wxGrid::wxGridSelectCells );
+    m_pGridFibersInfo->SetColLabelValue( 0, wxT( "" ) );
+    m_pGridFibersInfo->SetRowLabelValue( 0, wxT( "Count" ) );
+    m_pGridFibersInfo->SetRowLabelValue( 1, wxT( "Mean Value" ) );
+    m_pGridFibersInfo->SetRowLabelValue( 2, wxT( "Mean Length (mm)" ) );
+    m_pGridFibersInfo->SetRowLabelValue( 3, wxT( "Min Length (mm)" ) );
+    m_pGridFibersInfo->SetRowLabelValue( 4, wxT( "Max Length (mm)" ) );
+//     m_pGridFibersInfo->SetRowLabelValue( 5, wxT( "Mean C. S. (mm)" ) );
+//     m_pGridFibersInfo->SetRowLabelValue( 6, wxT( "Min C. S. (mm)" ) );
+//     m_pGridFibersInfo->SetRowLabelValue( 7, wxT( "Max C. S. (mm)" ) );
+    m_pGridFibersInfo->SetRowLabelValue( 5, wxT( "Mean Curvature" ) );
+    m_pGridFibersInfo->SetRowLabelValue( 6, wxT( "Mean Torsion" ) );
+//     m_pGridFibersInfo->SetRowLabelValue( 10, wxT( "Dispersion" ) );
+
+    m_pGridFibersInfo->SetRowLabelSize( 120 );
+
+    pBoxMain->Add( m_pGridFibersInfo, 0, wxALIGN_CENTER | wxALL, 0 );
+
+    pBoxMain->AddSpacer( 2 );
+
+    //////////////////////////////////////////////////////////////////////////
 
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.
 #ifndef __WXMSW__    
-    m_pCBSelectDataSet = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxSize(140,-1));
-    m_pLabelAnatomy = new wxStaticText(parent, wxID_ANY, wxT("Anatomy file : "));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add( m_pLabelAnatomy, 0, wxALIGN_CENTER );
-    l_sizer->Add( m_pCBSelectDataSet, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add(l_sizer, 0, wxALIGN_CENTER);
-    parent->Connect( m_pCBSelectDataSet->GetId(), wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMeanComboBoxSelectionChange ) );
-    m_propertiesSizer->AddSpacer(2);
+    m_pCBSelectDataSet = new wxChoice( pParent, wxID_ANY, wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pLabelAnatomy = new wxStaticText( pParent, wxID_ANY, wxT("Anatomy file : ") );
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( m_pLabelAnatomy, 0, wxEXPAND, 0 );
+    pBoxSizer->Add( m_pCBSelectDataSet, 0, wxEXPAND, 0 );
+
+    pBoxMain->Add( pBoxSizer, 0, wxEXPAND, 0 );
+    pParent->Connect( m_pCBSelectDataSet->GetId(), wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMeanComboBoxSelectionChange ) );
+    pBoxMain->AddSpacer( 2 );
 #endif
 
-    l_sizer = new wxBoxSizer( wxHORIZONTAL );
-    l_sizer->Add( m_ptoggleDisplayMeanFiber,0,wxALIGN_CENTER);
-    wxImage bmpMeanFiberColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
-    m_pbtnSelectMeanFiberColor = new wxBitmapButton(parent, wxID_ANY, bmpMeanFiberColor, wxDefaultPosition, wxSize(40,-1));
-    l_sizer->Add(m_pbtnSelectMeanFiberColor,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    //////////////////////////////////////////////////////////////////////////
 
-    //Mean fiber coloring option
-    m_propertiesSizer->AddSpacer( 8 );
-    
-    l_sizer = new wxBoxSizer( wxHORIZONTAL );
-    m_plblColoring = new wxStaticText( parent, wxID_ANY, _T( "Coloring" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT );
-    l_sizer->Add( m_plblColoring, 0, wxALIGN_CENTER );
-    l_sizer->Add( 8, 1, 0 );
-    m_pRadioCustomColoring = new wxRadioButton( parent, wxID_ANY, _T( "Custom" ), wxDefaultPosition, wxSize( 132, -1 ) );
-    l_sizer->Add(m_pRadioCustomColoring);
-    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( m_pToggleDisplayMeanFiber,  3, wxEXPAND, 0 );
+    pBoxSizer->Add( m_pBtnSelectMeanFiberColor, 1, wxEXPAND, 0 );
+    pBoxMain->Add( pBoxSizer, 0, wxEXPAND, 0 );
 
-    m_pRadioNormalColoring = new wxRadioButton( parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize( 132, -1 ) );
-    l_sizer = new wxBoxSizer( wxHORIZONTAL );
-    l_sizer->Add( 68, 1, 0 );
-    l_sizer->Add( m_pRadioNormalColoring );
-    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
+    pBoxMain->AddSpacer( 8 );
 
-    l_sizer = new wxBoxSizer( wxHORIZONTAL );
-    m_pLblMeanFiberOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
-    l_sizer->Add( m_pLblMeanFiberOpacity, 0, wxALIGN_CENTER );
-    m_psliderMeanFiberOpacity = new wxSlider(parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    l_sizer->Add( m_psliderMeanFiberOpacity, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
-    m_meanFiberOpacity = 0.35f;
+    //////////////////////////////////////////////////////////////////////////
 
-    parent->Connect(m_ptoggleDisplayMeanFiber->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayMeanFiber));
-    parent->Connect(m_pbtnSelectMeanFiberColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnMeanFiberColorChange));
-    parent->Connect( m_pRadioCustomColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnCustomMeanFiberColoring ) );
-    parent->Connect( m_pRadioNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalMeanFiberColoring ) );
-    parent->Connect( m_psliderMeanFiberOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberOpacityChange ) );
-    m_meanFiberColorationMode = NORMAL_COLOR;
-    m_pRadioNormalColoring->SetValue( true );
+    wxBoxSizer *pBoxColoring = new wxBoxSizer( wxVERTICAL );
+    pBoxColoring->Add( m_pLblColoring, 0, wxALIGN_LEFT | wxALL, 1 );
 
+    wxBoxSizer *pBoxColoringRadios = new wxBoxSizer( wxVERTICAL );
+    pBoxColoringRadios->Add( m_pRadCustomColoring, 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoringRadios->Add( m_pRadNormalColoring, 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoring->Add( pBoxColoringRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
 
+    pBoxMain->Add( pBoxColoring, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
 
-    //m_propertiesSizer->Add( m_pbtnDisplayCrossSections,0,wxALIGN_CENTER);
-    //m_propertiesSizer->Add( m_pbtnDisplayDispersionTube,0,wxALIGN_CENTER);
+    //////////////////////////////////////////////////////////////////////////
 
-    //parent->Connect(m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections));
-    //parent->Connect(m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube));
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( m_pLblMeanFiberOpacity,    0, wxEXPAND, 0 );
+    pBoxSizer->Add( m_pSliderMeanFiberOpacity, 1, wxEXPAND, 0 );
+    pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALL, 1 );
 
-    m_ptoggleCalculatesFibersInfo->Enable(getIsMaster()); //bug with some fibers dataset sets
-    
-    l_sizer = new wxBoxSizer( wxHORIZONTAL );
-    m_ptoggleDisplayConvexHull = new wxToggleButton( parent, wxID_ANY, wxT("Display convex hull"), wxDefaultPosition, wxSize(140,-1) );
-    l_sizer->Add( m_ptoggleDisplayConvexHull, 0, wxALIGN_CENTER );
-    wxImage bmpConvexHullColor(MyApp::iconsPath+ wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
-    m_pbtnSelectConvexHullColor = new wxBitmapButton( parent, wxID_ANY, bmpConvexHullColor, wxDefaultPosition, wxSize(40,-1) );
-    l_sizer->Add(m_pbtnSelectConvexHullColor);
+    //////////////////////////////////////////////////////////////////////////
 
-    m_propertiesSizer->Add(l_sizer);
-    parent->Connect( m_ptoggleDisplayConvexHull->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
-    parent->Connect( m_pbtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
+    //m_pPropertiesSizer->Add( m_pbtnDisplayCrossSections,  0,wxALIGN_CENTER );
+    //m_pPropertiesSizer->Add( m_pbtnDisplayDispersionTube, 0,wxALIGN_CENTER );
 
-    l_sizer = new wxBoxSizer( wxHORIZONTAL );
-    m_plblConvexHullOpacity = new wxStaticText( parent, wxID_ANY , wxT( "Opacity" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_CENTRE );
-    l_sizer->Add( m_plblConvexHullOpacity, 0, wxALIGN_CENTER );
-    m_pSliderConvexHullOpacity = new wxSlider( parent, wxID_ANY, 35, 0, 100, wxDefaultPosition, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    l_sizer->Add( m_pSliderConvexHullOpacity, 0, wxALIGN_CENTER );
-    m_propertiesSizer->Add( l_sizer, 0, wxALIGN_CENTER );
-    m_convexHullOpacity = 0.35f;
-    parent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
+    //////////////////////////////////////////////////////////////////////////
 
-    m_pbtnNewFibersColorVolume->Enable(getIsMaster());
-    m_pbtnNewFibersDensityVolume->Enable(getIsMaster());
-    m_ptoggleAndNot->Enable(!getIsMaster() && m_objectType != CISO_SURFACE_TYPE);
-    m_pbtnFlipNormal->Enable(m_objectType == CISO_SURFACE_TYPE);
-    m_pbtnSelectColor->Enable(m_objectType == CISO_SURFACE_TYPE);
-    m_pbtnSetAsDistanceAnchor->Enable(m_objectType == CISO_SURFACE_TYPE);
+    m_pToggleCalculatesFibersInfo->Enable( getIsMaster() ); //bug with some fibers dataset sets
 
-    m_propertiesSizer->Add(new wxStaticText( parent, wxID_ANY, wxT(""),wxDefaultPosition, wxSize(200,15)));
+//     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+//     pBoxSizer->Add( m_pToggleDisplayConvexHull,  3, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
+//     pBoxSizer->Add( m_pBtnSelectConvexHullColor, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
+//     pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALL, 1 );
 
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Position"),wxDefaultPosition, wxSize(140,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    m_propertiesSizer->AddSpacer(1);
-    
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_ctrlBoxX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.x), wxDefaultPosition, wxSize(45,-1));
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-    l_sizer->Add(m_ctrlBoxX,0,wxALIGN_CENTER);
-    
-    
-    m_ctrlBoxY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.y), wxDefaultPosition, wxSize(45,-1));
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-    l_sizer->Add(m_ctrlBoxY,0,wxALIGN_CENTER);
+    //////////////////////////////////////////////////////////////////////////
 
+//     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+//     pBoxSizer->Add( m_pLblConvexHullOpacity, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+//     pBoxSizer->Add( m_pSliderConvexHullOpacity, 1, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+//     pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALL, 1 );
 
-    m_ctrlBoxZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_center.z), wxDefaultPosition, wxSize(45,-1));
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-    l_sizer->Add(m_ctrlBoxZ,0,wxALIGN_CENTER);
+    //////////////////////////////////////////////////////////////////////////
 
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ctrlBoxX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionX));
-    parent->Connect(m_ctrlBoxY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionY));
-    parent->Connect(m_ctrlBoxZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxPositionZ));
-    
-    m_propertiesSizer->AddSpacer(8);
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("Size"),wxDefaultPosition, wxSize(140,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    m_propertiesSizer->AddSpacer(1);
+    pBoxMain->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Position" ) ), 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "x:" ) ), 0, wxALL, 1 );
+    pBoxSizer->Add( m_pTxtBoxX, 1, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "y:" ) ), 0, wxALL, 1 );
+    pBoxSizer->Add( m_pTxtBoxY, 1, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "z:" ) ), 0, wxALL, 1 );
+    pBoxSizer->Add( m_pTxtBoxZ, 1, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pBoxSizer, 0, wxEXPAND, 0 );
 
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_ctrlBoxSizeX = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel), wxDefaultPosition, wxSize(45,-1));
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("x: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-    l_sizer->Add(m_ctrlBoxSizeX,0,wxALIGN_CENTER);
-    
-    
-    m_ctrlBoxSizeY = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel), wxDefaultPosition, wxSize(45,-1));
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("y: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-    l_sizer->Add(m_ctrlBoxSizeY,0,wxALIGN_CENTER);
+    pBoxMain->AddSpacer( 8 );
 
+    //////////////////////////////////////////////////////////////////////////
 
-    m_ctrlBoxSizeZ = new wxTextCtrl( parent, wxID_ANY, wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel), wxDefaultPosition, wxSize(45,-1));
-    l_sizer->Add(new wxStaticText(parent, wxID_ANY, wxT("z: "),wxDefaultPosition, wxSize(15,-1), wxALIGN_CENTER),0,wxALIGN_CENTER);
-    l_sizer->Add(m_ctrlBoxSizeZ,0,wxALIGN_CENTER);
+    pBoxMain->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Size" ) ), 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "x:" ) ), 0, wxALL, 1 );
+    pBoxSizer->Add( m_pTxtSizeX, 1, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "y:" ) ), 0, wxALL, 1 );
+    pBoxSizer->Add( m_pTxtSizeY, 1, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "z:" ) ), 0, wxALL, 1 );
+    pBoxSizer->Add( m_pTxtSizeZ, 1, wxEXPAND | wxALL, 1 );
+    pBoxMain->Add( pBoxSizer, 0, wxEXPAND, 0 );
 
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_ctrlBoxSizeX->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeX));
-    parent->Connect(m_ctrlBoxSizeY->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeY));
-    parent->Connect(m_ctrlBoxSizeZ->GetId(),wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(PropertiesWindow::OnBoxSizeZ));
+    //////////////////////////////////////////////////////////////////////////
 
+    m_pRadNormalColoring->SetValue( true );
+    pBtnNewColorVolume->Enable( getIsMaster() );
+    pBtnNewDensityVolume->Enable( getIsMaster() );
+    pToggleAndNot->Enable( !getIsMaster() && m_objectType != CISO_SURFACE_TYPE );
+    pBtnFlipNormal->Enable( m_objectType == CISO_SURFACE_TYPE );
+    pBtnSelectColor->Enable( m_objectType == CISO_SURFACE_TYPE );
+    pBtnSetAsDistanceAnchor->Enable( m_objectType == CISO_SURFACE_TYPE );
+
+    m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pParent->Connect( pBtnChangeName->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnRenameBox ) );
+    pParent->Connect( pBtnFlipNormal->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnVoiFlipNormals ) );
+    pParent->Connect( pBtnSelectColorFibers->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
+    pParent->Connect( pBtnNewColorVolume->GetId(),      wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnCreateFibersColorTexture ) );
+    pParent->Connect( pBtnNewDensityVolume->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnCreateFibersDensityTexture ) );
+    pParent->Connect( pBtnSetAsDistanceAnchor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDistanceAnchorSet ) );
+    pParent->Connect( pBtnDelete->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(    PropertiesWindow::OnDeleteTreeItem ) );
+    pParent->Connect( pBtnSelectColor->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnColorRoi ) );
+    pParent->Connect( m_pBtnSelectMeanFiberColor->GetId(),  wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberColorChange ) );
+//     pParent->Connect( m_pBtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
+    //pParent->Connect( m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections ) );
+    //pParent->Connect( m_pbtnDisplayDispersionTube->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayDispersionTube ) );
+    pParent->Connect( m_pToggleVisibility->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleShowSelectionObject ) );
+    pParent->Connect( m_pToggleActivate->GetId(),   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxTreeEventHandler(    PropertiesWindow::OnActivateTreeItem ) );
+    pParent->Connect( pToggleAndNot->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleAndNot ) );
+    pParent->Connect( m_pToggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayFibersInfo ) );
+    pParent->Connect( m_pToggleDisplayMeanFiber->GetId(),     wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayMeanFiber ) );
+//     pParent->Connect( m_pToggleDisplayConvexHull->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );
+    pParent->Connect( m_pRadCustomColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnCustomMeanFiberColoring ) );
+    pParent->Connect( m_pRadNormalColoring->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalMeanFiberColoring ) );
+    pParent->Connect( m_pSliderMeanFiberOpacity->GetId(),  wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberOpacityChange ) );
+//     pParent->Connect( m_pSliderConvexHullOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler( PropertiesWindow::OnConvexHullOpacityChange ) );
+    pParent->Connect( m_pTxtBoxX->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionX ) );
+    pParent->Connect( m_pTxtBoxY->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionY ) );
+    pParent->Connect( m_pTxtBoxZ->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxPositionZ ) );
+    pParent->Connect( m_pTxtSizeX->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxSizeX ) );
+    pParent->Connect( m_pTxtSizeY->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxSizeY ) );
+    pParent->Connect( m_pTxtSizeZ->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxSizeZ ) );
 }
 
+//////////////////////////////////////////////////////////////////////////
 
 void SelectionObject::updatePropertiesSizer()
 {
     SceneObject::updatePropertiesSizer();
-    m_ptoggleVisibility->SetValue( getIsVisible() );
-    m_ptoggleActivate->SetValue( getIsActive() );
-    m_ptxtName->SetValue( getName() );
-    m_ptoggleCalculatesFibersInfo->Enable( getShowFibers() );
-    m_pgridfibersInfo->Enable( getShowFibers() && m_ptoggleCalculatesFibersInfo->GetValue() );
-    m_ptoggleDisplayMeanFiber->Enable( getShowFibers() );
-    m_ptoggleDisplayConvexHull->Enable( getShowFibers() );
-    setShowConvexHullOption( m_ptoggleDisplayConvexHull->GetValue() );
 
-    m_pbtnSelectMeanFiberColor->Enable( m_ptoggleDisplayMeanFiber->GetValue() );
-    setShowMeanFiberOption( m_ptoggleDisplayMeanFiber->GetValue() );
+    m_pToggleVisibility->SetValue( getIsVisible() );
+    m_pToggleActivate->SetValue( getIsActive() );
+    m_pTxtName->SetValue( getName() );
+    m_pToggleCalculatesFibersInfo->Enable( getShowFibers() );
+    m_pGridFibersInfo->Enable( getShowFibers() && m_pToggleCalculatesFibersInfo->GetValue() );
+    m_pToggleDisplayMeanFiber->Enable( getShowFibers() );
+//     m_pToggleDisplayConvexHull->Enable( getShowFibers() );
+//     setShowConvexHullOption( m_pToggleDisplayConvexHull->GetValue() );
+
+    m_pBtnSelectMeanFiberColor->Enable( m_pToggleDisplayMeanFiber->GetValue() );
+    setShowMeanFiberOption( m_pToggleDisplayMeanFiber->GetValue() );
 
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.
 #ifndef __WXMSW__
-    m_pCBSelectDataSet->Show( m_ptoggleCalculatesFibersInfo->GetValue() );
-    m_pLabelAnatomy->Show( m_ptoggleCalculatesFibersInfo->GetValue() );
-    if( m_ptoggleCalculatesFibersInfo->GetValue() )
+    m_pCBSelectDataSet->Show( m_pToggleCalculatesFibersInfo->GetValue() );
+    m_pLabelAnatomy->Show( m_pToggleCalculatesFibersInfo->GetValue() );
+    if( m_pToggleCalculatesFibersInfo->GetValue() )
     {
         UpdateMeanValueTypeBox();
     }
@@ -2282,22 +2331,26 @@ void SelectionObject::updatePropertiesSizer()
         computeMeanFiber();
     }
 
-    //m_pbtnDisplayDispersionTube->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
-    //m_pbtnDisplayCrossSections->Enable(m_ptoggleCalculatesFibersInfo->GetValue());
+    //m_pbtnDisplayDispersionTube->Enable(m_pToggleCalculatesFibersInfo->GetValue());
+    //m_pbtnDisplayCrossSections->Enable(m_pToggleCalculatesFibersInfo->GetValue());
 
     if( m_boxMoved )
     {
-        m_ctrlBoxX->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.x));
-        m_ctrlBoxY->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.y));
-        m_ctrlBoxZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_center.z));
+        m_pTxtBoxX->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.x));
+        m_pTxtBoxY->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.y));
+        m_pTxtBoxZ->ChangeValue(wxString::Format( wxT( "%.2f" ), m_center.z));
         m_boxMoved = false;
     }
 
     if( m_boxResized )
     {
-        m_ctrlBoxSizeX->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.x*m_datasetHelper->m_xVoxel));
-        m_ctrlBoxSizeY->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.y*m_datasetHelper->m_yVoxel));
-        m_ctrlBoxSizeZ->ChangeValue(wxString::Format( wxT( "%.2f"), m_size.z*m_datasetHelper->m_zVoxel));
+        float voxelX = DatasetManager::getInstance()->getVoxelX();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+        m_pTxtSizeX->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.x * voxelX ) );
+        m_pTxtSizeY->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.y * voxelY ) );
+        m_pTxtSizeZ->ChangeValue( wxString::Format( wxT( "%.2f"), m_size.z * voxelZ ) );
         m_boxResized = false;
     }
 }

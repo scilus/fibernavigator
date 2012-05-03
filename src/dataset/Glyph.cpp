@@ -11,23 +11,30 @@
 
 #include "Glyph.h"
 
+#include "DatasetManager.h"
 #include "../Logger.h"
 #include "../gui/MainFrame.h"
+#include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
 
 #include <GL/glew.h>
+#include <wx/tglbtn.h>
 
+#include <algorithm>
+#include <vector>
+using std::vector;
+
+#define DEF_POS wxDefaultPosition
+#define DEF_SIZE     wxDefaultSize
 
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
-Glyph::Glyph( DatasetHelper* i_datasetHelper,
-              float i_minHue     , 
+Glyph::Glyph( float i_minHue     , 
               float i_maxHue     , 
               float i_saturation , 
-              float i_luminance ) :
-    DatasetInfo             ( i_datasetHelper ),
-    m_datasetHelper         ( NULL ),
+              float i_luminance )
+:   DatasetInfo             (),
     m_hemisphereBuffer      ( NULL ),
     m_textureId             ( 0 ),    
     m_nbPointsPerGlyph      ( 0 ),    
@@ -56,11 +63,13 @@ Glyph::Glyph( DatasetHelper* i_datasetHelper,
 ///////////////////////////////////////////////////////////////////////////
 Glyph::~Glyph()
 {
-    if( m_datasetHelper.m_useVBO && m_hemisphereBuffer )
+    Logger::getInstance()->print( wxT( "Executing Glyph destructor..." ), LOGLEVEL_DEBUG );
+    if( SceneManager::getInstance()->isUsingVBO() && m_hemisphereBuffer )
     {
         glDeleteBuffers( 1, m_hemisphereBuffer );
         delete m_hemisphereBuffer;
     }
+    Logger::getInstance()->print( wxT( "Glyph destructor done." ), LOGLEVEL_DEBUG );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -74,13 +83,13 @@ void Glyph::draw()
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    if( DatasetInfo::m_dh-> m_showAxial )
+    if( SceneManager::getInstance()->isAxialDisplayed() )
         drawAxial();
 
-    if( DatasetInfo::m_dh-> m_showCoronal )
+    if( SceneManager::getInstance()->isCoronalDisplayed() )
         drawCoronal();
 
-    if( DatasetInfo::m_dh-> m_showSagittal )
+    if( SceneManager::getInstance()->isSagittalDisplayed() )
         drawSagittal();
 
     glDisableClientState( GL_VERTEX_ARRAY );
@@ -94,23 +103,35 @@ void Glyph::draw()
 ///////////////////////////////////////////////////////////////////////////
 void Glyph::drawAxial()
 {
-    for( int y = 0; y < m_datasetHelper.m_rows; y++ )
-        for( int x = 0; x < m_datasetHelper.m_columns; x++ )
-            // We only draw the glyphs if the test for our display factor is succesfull.
-            if ((x+y)%m_displayFactor==0)
+    for( int y( 0 ); y < m_rows; ++y )
+    {
+        for( int x( 0 ); x < m_columns; ++x )
+        {
+            // We only draw the glyphs if the test for our display factor is successful.
+            if( ( x + y ) % m_displayFactor == 0 )
+            {
                 drawGlyph( m_currentSliderPos[2], y, x, Z_AXIS );
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will display the Coronal slice of the loaded glyphs.
 ///////////////////////////////////////////////////////////////////////////
 void Glyph::drawCoronal()
-{  
-    for( int z = 0; z < m_datasetHelper.m_frames; z++ )
-        for( int x = 0; x < m_datasetHelper.m_columns; x++ )
-            // We only draw the glyphs if the test for our display factor is succesfull.
-            if ((x+z)%m_displayFactor==0)
+{
+    for( int z( 0 ); z < m_frames; ++z )
+    {
+        for( int x( 0 ); x < m_columns; ++x )
+        {
+            // We only draw the glyphs if the test for our display factor is successful.
+            if( ( x + z ) % m_displayFactor == 0 )
+            {
                 drawGlyph( z, m_currentSliderPos[1], x, Y_AXIS );
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -118,11 +139,17 @@ void Glyph::drawCoronal()
 ///////////////////////////////////////////////////////////////////////////
 void Glyph::drawSagittal()
 {
-    for( int z = 0; z < m_datasetHelper.m_frames; z++ )
-        for( int y = 0; y < m_datasetHelper.m_rows; y++ )
-            // We only draw the glyphs if the test for our display factor is succesfull.
-            if ((y+z)%m_displayFactor==0)
+    for( int z( 0 ); z < m_frames; ++z )
+    {
+        for( int y( 0 ); y < m_rows; ++y )
+        {
+            // We only draw the glyphs if the test for our display factor is successful.
+            if( ( y + z ) % m_displayFactor == 0 )
+            {
                 drawGlyph( z, y, m_currentSliderPos[0], X_AXIS );
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -137,7 +164,7 @@ void Glyph::refreshSlidersValues()
     // For all 3 axes
     for( int i = 0; i < 3; ++i )
     {        
-        if( m_currentSliderPos[i] !=  l_currentPos[i] )
+        if( m_currentSliderPos[i] != l_currentPos[i] )
         {
             m_currentSliderPos[i] = l_currentPos[i];
             sliderPosChanged( (AxisType)i );
@@ -146,21 +173,21 @@ void Glyph::refreshSlidersValues()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This function computes the current sliders postionss (all 3 axes)
+// This function computes the current sliders positions (all 3 axes)
 ///////////////////////////////////////////////////////////////////////////
 void Glyph::getSlidersPositions( int o_slidersPos[3] )
 {
     // For the X axis.
-    float l_xSliderRatio  = (float)DatasetInfo::m_dh->m_xSlize / ( (float)DatasetInfo::m_dh->m_columns - 1 );
-    o_slidersPos[0]       = ( l_xSliderRatio * ( (float)m_datasetHelper.m_columns - 1 ) );
+    float l_xSliderRatio  = SceneManager::getInstance()->getSliceX() / ( DatasetManager::getInstance()->getColumns() - 1 );
+    o_slidersPos[0]       = l_xSliderRatio * ( m_columns - 1 );
 
     // For the Y axis.
-    float l_ySliderRatio  = (float)DatasetInfo::m_dh->m_ySlize / ( (float)DatasetInfo::m_dh->m_rows - 1 );
-    o_slidersPos[1]       = ( l_ySliderRatio * ( (float)m_datasetHelper.m_rows - 1 ) );
+    float l_ySliderRatio  = SceneManager::getInstance()->getSliceY() / ( DatasetManager::getInstance()->getRows() - 1 );
+    o_slidersPos[1]       = l_ySliderRatio * ( m_rows - 1 );
 
     // For the Z axis.
-    float l_zSliderRatio  = (float)DatasetInfo::m_dh->m_zSlize / ( (float)DatasetInfo::m_dh->m_frames - 1 );    
-    o_slidersPos[2]       = ( l_zSliderRatio * ( (float)m_datasetHelper.m_frames - 1 ) );
+    float l_zSliderRatio  = SceneManager::getInstance()->getSliceZ() / ( DatasetManager::getInstance()->getFrames() - 1 );    
+    o_slidersPos[2]       = l_zSliderRatio * ( m_frames - 1 );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -172,10 +199,11 @@ void Glyph::getSlidersPositions( int o_slidersPos[3] )
 ///////////////////////////////////////////////////////////////////////////
 int Glyph::getGlyphIndex( int i_zVoxel, int i_yVoxel, int i_xVoxel )
 {
+    float columns = DatasetManager::getInstance()->getColumns();
+    float rows    = DatasetManager::getInstance()->getRows();
+
     // Get the current tensors index in the coeffs's buffer
-    return( i_zVoxel * m_datasetHelper.m_columns * m_datasetHelper.m_rows + 
-            i_yVoxel * m_datasetHelper.m_columns +
-            i_xVoxel );    
+    return i_zVoxel * columns * rows + i_yVoxel * columns + i_xVoxel;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -220,52 +248,52 @@ bool Glyph::boxInFrustum( Vector i_boxCenter, Vector i_boxSize )
 {
    for( int p = 0; p < 6; ++p )
    {
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z - i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y - i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x - i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
-      if( DatasetInfo::m_dh->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
-          DatasetInfo::m_dh->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
-          DatasetInfo::m_dh->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
-          DatasetInfo::m_dh->m_frustum[p][3] > 0 )
+      if( SceneManager::getInstance()->m_frustum[p][0] * ( i_boxCenter.x + i_boxSize.x ) + 
+          SceneManager::getInstance()->m_frustum[p][1] * ( i_boxCenter.y + i_boxSize.y ) + 
+          SceneManager::getInstance()->m_frustum[p][2] * ( i_boxCenter.z + i_boxSize.z ) + 
+          SceneManager::getInstance()->m_frustum[p][3] > 0 )
          continue;
 
       return false;
@@ -327,9 +355,9 @@ void Glyph::getVoxelOffset( int i_zVoxelIndex, int i_yVoxelIndex, int i_xVoxelIn
 {
     // The offset values is to return the points in the pixel world and not in the voxel world.
     // The + 0.5f is because we want to place the glyph in the middle of its voxel.
-    o_offset[2] = ( i_zVoxelIndex + 0.5f ) * m_datasetHelper.m_zVoxel;
-    o_offset[1] = ( i_yVoxelIndex + 0.5f ) * m_datasetHelper.m_yVoxel;
-    o_offset[0] = ( i_xVoxelIndex + 0.5f ) * m_datasetHelper.m_xVoxel;
+    o_offset[2] = ( i_zVoxelIndex + 0.5f ) * m_voxelSizeZ;
+    o_offset[1] = ( i_yVoxelIndex + 0.5f ) * m_voxelSizeY;
+    o_offset[0] = ( i_xVoxelIndex + 0.5f ) * m_voxelSizeX;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -346,7 +374,7 @@ void Glyph::fillColorDataset( float i_minHue, float i_maxHue, float i_saturation
 {  
     // This is to make sure that we will generate a texture no matter
     // how messed up the i_minHue and i_maxHue values are.
-    // Make sure that there is enought distance between the i_minHue and the i_maxHue.
+    // Make sure that there is enough distance between the i_minHue and the i_maxHue.
     if( fabs( i_maxHue - i_minHue ) < HUE_MINIMUM_DISTANCE )
     {
         if( i_maxHue >= i_minHue )
@@ -469,6 +497,7 @@ void Glyph::generateSpherePoints( float i_scalingFactor )
     vector< float > l_spherePts;
 
     m_LODspheres.clear();
+    m_LODspheres.reserve( NB_OF_LOD );
 
     for( unsigned int i = 0; i < NB_OF_LOD; ++i )
     {
@@ -485,7 +514,7 @@ void Glyph::generateSpherePoints( float i_scalingFactor )
 // This function will fill up o_spherePoints with points representing a perfect
 // sphere at a certain LOD and with a certain scaling factor.
 //
-// i_LOD                : A LOD in wich we will generate our perfect sphere.
+// i_LOD                : A LOD in which we will generate our perfect sphere.
 //                        LOD_0 is the lowest LOD = less points, LOD_3 is the highest LOD = more points.
 // i_scalingFactor      : This values is a simple way to make our tensor a bit bigger that they would be by default.
 // o_spherePoints       : The output vector containing the sphere points. in this order [x1,y1,z1,x2,y2,z2,x3,y3,z3...]
@@ -568,7 +597,7 @@ void Glyph::setLOD( LODChoices i_LOD )
 void Glyph::loadBuffer()
 {
     // We need to (re)load the buffer in video memory only if we are using VBO.
-    if( !m_datasetHelper.m_useVBO )
+    if( !SceneManager::getInstance()->isUsingVBO() )
         return;        
 
     // Sphere buffers
@@ -589,169 +618,188 @@ void Glyph::loadBuffer()
     // There was a problem loading this buffer into video memory!
     if( Logger::getInstance()->printIfGLError( wxT( "Initialize vbo points for tensors" ) ) )
     {
-        m_datasetHelper.m_useVBO = false;
+        SceneManager::getInstance()->setUsingVBO( false );
         delete m_hemisphereBuffer;
     }
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+void Glyph::swap( Glyph &g )
+{
+    // Not swapping GUI elements
+    DatasetInfo::swap( g );
+    std::swap( m_hemisphereBuffer, g.m_hemisphereBuffer );
+    std::swap( m_textureId, g.m_textureId );
+    std::swap( m_nbPointsPerGlyph, g.m_nbPointsPerGlyph );
+    std::swap( m_nbGlyphs, g.m_nbGlyphs );
+    std::swap( m_displayFactor, g.m_displayFactor );
+    std::swap( m_axisFlippedToggled, g.m_axisFlippedToggled );
+    std::swap( m_displayShape, g.m_displayShape );
+    std::swap( m_colorWithPosition, g.m_colorWithPosition );
+    std::swap( m_colorMinHue, g.m_colorMinHue );
+    std::swap( m_colorMaxHue, g.m_colorMaxHue );
+    std::swap( m_colorSaturation, g.m_colorSaturation );
+    std::swap( m_colorLuminance, g.m_colorLuminance );
+    std::swap( m_lighAttenuation, g.m_lighAttenuation );
+    std::swap( m_scalingFactor, g.m_scalingFactor );
+    std::swap( m_currentLOD, g.m_currentLOD );
+    std::swap_ranges( m_currentSliderPos, m_currentSliderPos + 3, g.m_currentSliderPos );
+    std::swap_ranges( m_flippedAxes, m_flippedAxes + 3, g.m_flippedAxes );
+    std::swap_ranges( m_lightPosition, m_lightPosition + 3, g.m_lightPosition );
+    std::swap( m_floatColorDataset, g.m_floatColorDataset );
+    std::swap( m_axesPoints, g.m_axesPoints );
+    std::swap( m_LODspheres, g.m_LODspheres );
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void Glyph::setDisplayShape ( DisplayShape i_displayShape ) 
 {
-    m_displayShape = i_displayShape;    
+    m_displayShape = i_displayShape;
 }
 
-void Glyph::createPropertiesSizer(PropertiesWindow *parent)
+void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    DatasetInfo::createPropertiesSizer(parent);
-    wxSizer *l_sizer;
-    
-    m_psliderMinHueValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Min Hue" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderMinHueValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    parent->Connect(m_psliderMinHueValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphMinHueSliderMoved)); 
+    DatasetInfo::createPropertiesSizer( pParent );
 
-    m_psliderMaxHueValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Max Hue" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderMaxHueValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);    
-    parent->Connect(m_psliderMaxHueValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphMaxHueSliderMoved)); 
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
-    m_psliderSaturationValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Saturation" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderSaturationValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);  
-    parent->Connect(m_psliderSaturationValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphSaturationSliderMoved)); 
+    //////////////////////////////////////////////////////////////////////////
 
-    m_psliderLuminanceValue  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Luminace" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLuminanceValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLuminanceValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLuminanceSliderMoved)); 
+    m_pSliderMinHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100, DEF_POS, wxSize( 150, -1 ) );
+    m_pSliderMaxHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
+    m_pSliderSaturation   = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
+    m_pSliderLuminance    = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
+    m_pSliderLightAttenuation  = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
+    m_pSliderLightXPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
+    m_pSliderLightYPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
+    m_pSliderLightZPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
+    m_pSliderDisplay           = new wxSlider( pParent, wxID_ANY,  0,    1,  20 );
+    m_pSliderScalingFactor     = new wxSlider( pParent, wxID_ANY, 50,    1, 200 );
+    m_pSliderLOD          = new wxSlider( pParent, wxID_ANY,  0,    0, NB_OF_LOD - 1 );
+    m_pRadNormal          = new wxRadioButton( pParent,  wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+    m_pRadMapOnSphere     = new wxRadioButton( pParent,  wxID_ANY, wxT( "Map On Sphere" ) );
+    m_pRadMainAxis        = new wxRadioButton( pParent,  wxID_ANY, wxT( "Maximas" ) );
+    m_pToggleAxisFlipX         = new wxToggleButton( pParent, wxID_ANY, wxT( "X" ), DEF_POS, wxSize( 15, -1 ) );
+    m_pToggleAxisFlipY         = new wxToggleButton( pParent, wxID_ANY, wxT( "Y" ), DEF_POS, wxSize( 15, -1 ) );
+    m_pToggleAxisFlipZ         = new wxToggleButton( pParent, wxID_ANY, wxT( "Z" ), DEF_POS, wxSize( 15, -1 ) );
+    m_pToggleColorWithPosition = new wxToggleButton( pParent, wxID_ANY, wxT( "Color with Position" ), DEF_POS, wxSize( 80, -1 ) );
 
-    m_psliderLightAttenuation  = new wxSlider( parent, wxID_ANY,   0, 0, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light Attenuation" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLightAttenuation,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLightAttenuation->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightAttenuationSliderMoved)); 
+    m_pRadNormal->SetValue(      isDisplayShape( NORMAL ) );
+    m_pRadMapOnSphere->SetValue( isDisplayShape( SPHERE ) );
+    m_pRadMainAxis->SetValue(    isDisplayShape( AXIS ) );
 
-    m_psliderLightXPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light x Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLightXPosition,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLightXPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightXDirectionSliderMoved)); 
+    //////////////////////////////////////////////////////////////////////////
 
-    m_psliderLightYPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light y Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLightYPosition,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLightYPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightYDirectionSliderMoved));
+    wxFlexGridSizer *pGridSliders = new wxFlexGridSizer( 2 );
 
-    m_psliderLightZPosition  = new wxSlider( parent, wxID_ANY,   0, -100, 100, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Light z Position" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLightZPosition,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLightZPosition->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLightZDirectionSliderMoved));
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Min Hue" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderMinHue, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    m_psliderDisplayValue  = new wxSlider( parent, wxID_ANY,   0, 1, 20, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Display" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderDisplayValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderDisplayValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphDisplaySliderMoved));
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Max Hue" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderMaxHue, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    m_psliderScalingFactor  = new wxSlider( parent, wxID_ANY,   0, 1, 200, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Scaling Factor" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    m_psliderScalingFactor->SetValue(50);
-    l_sizer->Add(m_psliderScalingFactor,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderScalingFactor->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphScalingFactorSliderMoved));
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Saturation" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderSaturation, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    m_psliderLODValue  = new wxSlider( parent, wxID_ANY, 0, 0, NB_OF_LOD - 1, wxDefaultPosition, wxSize( 140, -1 ));
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Details" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->Add(m_psliderLODValue,0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_psliderLODValue->GetId(),wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnGlyphLODSliderMoved));
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Luminance" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderLuminance, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    l_sizer = new wxBoxSizer(wxHORIZONTAL);
-    l_sizer->Add(new wxStaticText( parent, wxID_ANY, _T( "Flips" ), wxDefaultPosition, wxSize( 60, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    l_sizer->AddSpacer(8);
-    m_ptoggleAxisFlipX = new wxToggleButton(parent, wxID_ANY, wxT("X"),wxDefaultPosition, wxSize(42,-1));    
-    l_sizer->Add(m_ptoggleAxisFlipX,0,wxALIGN_CENTER);
-    m_ptoggleAxisFlipY = new wxToggleButton(parent, wxID_ANY, wxT("Y"),wxDefaultPosition, wxSize(42,-1));
-    l_sizer->Add(m_ptoggleAxisFlipY,0,wxALIGN_CENTER);
-    m_ptoggleAxisFlipZ = new wxToggleButton(parent, wxID_ANY, wxT("Z"),wxDefaultPosition, wxSize(42,-1));
-    l_sizer->Add(m_ptoggleAxisFlipZ,0,wxALIGN_CENTER);
-    l_sizer->AddSpacer(8);
-    m_propertiesSizer->Add(l_sizer,0,wxALIGN_CENTER); 
-    parent->Connect(m_ptoggleAxisFlipX->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphXAxisFlipChecked));
-    parent->Connect(m_ptoggleAxisFlipY->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphYAxisFlipChecked));
-    parent->Connect(m_ptoggleAxisFlipZ->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphZAxisFlipChecked));
-    m_ptoggleColorWithPosition = new wxToggleButton(parent, wxID_ANY, wxT("Color with Position"),wxDefaultPosition, wxSize(140,-1));
-    m_propertiesSizer->AddSpacer(8);
-    m_propertiesSizer->Add(m_ptoggleColorWithPosition,0,wxALIGN_CENTER);
-    parent->Connect(m_ptoggleColorWithPosition->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnGlyphColorWithPosition));
-    
-    m_propertiesSizer->AddSpacer(8);
-    m_psizerDisplay = new wxBoxSizer(wxVERTICAL);    
-    m_psizerDisplay->Add(new wxStaticText( parent, wxID_ANY, _T( "Display" ), wxDefaultPosition, wxSize( 50, -1 ), wxALIGN_RIGHT),0,wxALIGN_CENTER);
-    m_propertiesSizer->Add(m_psizerDisplay,0,wxALIGN_LEFT);
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Att." ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderLightAttenuation, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    m_psizerDisplay = new wxBoxSizer(wxVERTICAL);
-    m_pradiobtnNormal = new wxRadioButton(parent, wxID_ANY, _T( "Normal" ), wxDefaultPosition, wxSize(132,-1),wxRB_GROUP);
-    m_psizerDisplay->Add(m_pradiobtnNormal);
-    m_pradiobtnMapOnSphere  = new wxRadioButton(parent, wxID_ANY, _T( "Map On Sphere" ), wxDefaultPosition, wxSize(132,-1));
-    m_psizerDisplay->Add(m_pradiobtnMapOnSphere);
-    m_pradiobtnMainAxis = new wxRadioButton(parent, wxID_ANY, _T( "Maximas" ), wxDefaultPosition, wxSize(132,-1));    
-    m_psizerDisplay->Add(m_pradiobtnMainAxis);
-    m_propertiesSizer->Add(m_psizerDisplay,0,wxALIGN_CENTER);
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light X" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderLightXPosition, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Y" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderLightYPosition, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    parent->Connect(m_pradiobtnNormal->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphNormalSelected));
-    parent->Connect(m_pradiobtnMapOnSphere->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphMapOnSphereSelected));
-    parent->Connect(m_pradiobtnMainAxis->GetId(),wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler(PropertiesWindow::OnGlyphMainAxisSelected));
-    m_pradiobtnNormal->SetValue        (isDisplayShape(NORMAL));
-    m_pradiobtnMapOnSphere->SetValue   (isDisplayShape(SPHERE));
-    m_pradiobtnMainAxis->SetValue      (isDisplayShape(AXIS));
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Z" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderLightZPosition, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    if(m_type == ODFS)
-        setColorWithPosition(true);
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Display" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderDisplay, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Scaling" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderScalingFactor, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Details" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderLOD, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    
+    wxBoxSizer *pBoxFlips = new wxBoxSizer( wxHORIZONTAL );
+    pBoxFlips->Add( m_pToggleAxisFlipX, 1, wxALIGN_CENTER | wxALL, 1 );
+    pBoxFlips->Add( m_pToggleAxisFlipY, 1, wxALIGN_CENTER | wxALL, 1 );
+    pBoxFlips->Add( m_pToggleAxisFlipZ, 1, wxALIGN_CENTER | wxALL, 1 );
 
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Flips" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( pBoxFlips, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    pBoxMain->Add( m_pToggleColorWithPosition, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    wxBoxSizer *pBoxDisplay = new wxBoxSizer( wxVERTICAL );
+    pBoxDisplay->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Display:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+
+    m_pBoxDisplayRadios = new wxBoxSizer( wxVERTICAL );
+    m_pBoxDisplayRadios->Add( m_pRadNormal,      0, wxALIGN_LEFT | wxALL, 1 );
+    m_pBoxDisplayRadios->Add( m_pRadMapOnSphere, 0, wxALIGN_LEFT | wxALL, 1 );
+    m_pBoxDisplayRadios->Add( m_pRadMainAxis,    0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxDisplay->Add( m_pBoxDisplayRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
+
+    pBoxMain->Add( pBoxDisplay, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
+
+    //////////////////////////////////////////////////////////////////////////
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+    // Connect widgets with callback function
+    pParent->Connect( m_pToggleAxisFlipX->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGlyphXAxisFlipChecked ) );
+    pParent->Connect( m_pToggleAxisFlipY->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGlyphYAxisFlipChecked ) );
+    pParent->Connect( m_pToggleAxisFlipZ->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGlyphZAxisFlipChecked ) );
+    pParent->Connect( m_pRadNormal->GetId(),          wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnGlyphNormalSelected ) );
+    pParent->Connect( m_pRadMapOnSphere->GetId(),     wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnGlyphMapOnSphereSelected ) );
+    pParent->Connect( m_pRadMainAxis->GetId(),        wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnGlyphMainAxisSelected ) );
+    pParent->Connect( m_pSliderMinHue->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphMinHueSliderMoved ) ); 
+    pParent->Connect( m_pSliderMaxHue->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphMaxHueSliderMoved ) ); 
+    pParent->Connect( m_pSliderSaturation->GetId(),   wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphSaturationSliderMoved ) ); 
+    pParent->Connect( m_pSliderLuminance->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLuminanceSliderMoved ) ); 
+    pParent->Connect( m_pSliderLightAttenuation->GetId(),  wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLightAttenuationSliderMoved ) ); 
+    pParent->Connect( m_pSliderLightXPosition->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLightXDirectionSliderMoved ) ); 
+    pParent->Connect( m_pSliderLightYPosition->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLightYDirectionSliderMoved ) );
+    pParent->Connect( m_pSliderLightZPosition->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLightZDirectionSliderMoved ) );
+    pParent->Connect( m_pSliderDisplay->GetId(),      wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphDisplaySliderMoved ) );
+    pParent->Connect( m_pSliderScalingFactor->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphScalingFactorSliderMoved ) );
+    pParent->Connect( m_pSliderLOD->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLODSliderMoved ) );
+    pParent->Connect( m_pToggleColorWithPosition->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGlyphColorWithPosition ) );
 }
 
 void Glyph::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
 
-    m_psliderMinHueValue->SetValue     (getColor( MIN_HUE ) * 100);
-    m_psliderMaxHueValue->SetValue     (getColor( MAX_HUE ) * 100);
-    m_psliderSaturationValue->SetValue (getColor( SATURATION ) * 100);
-    m_psliderLuminanceValue->SetValue  (getColor( LUMINANCE ) * 100);
-    m_psliderLODValue->SetValue        ((int)getLOD());
-    m_psliderLightAttenuation->SetValue(getLightAttenuation() * 100);
-    m_psliderLightXPosition->SetValue  (getLightPosition( X_AXIS ) * 100);
-    m_psliderLightYPosition->SetValue  (getLightPosition( Y_AXIS ) * 100);
-    m_psliderLightZPosition->SetValue  (getLightPosition( Z_AXIS ) * 100 );
-    m_psliderDisplayValue->SetValue    (getDisplayFactor());
-    m_psliderScalingFactor->SetValue   (getScalingFactor()*10.0f);
-    m_ptoggleAxisFlipX->SetValue       (isAxisFlipped( X_AXIS ));
-    m_ptoggleAxisFlipY->SetValue       (isAxisFlipped( Y_AXIS ));
-    m_ptoggleAxisFlipZ->SetValue       (isAxisFlipped( Z_AXIS ));
-    m_ptoggleColorWithPosition->SetValue(getColorWithPosition());
+    m_pSliderMinHue->SetValue    ( getColor( MIN_HUE )    * 100 );
+    m_pSliderMaxHue->SetValue    ( getColor( MAX_HUE )    * 100 );
+    m_pSliderSaturation->SetValue( getColor( SATURATION ) * 100 );
+    m_pSliderLuminance->SetValue ( getColor( LUMINANCE )  * 100 );
+    m_pSliderLOD->SetValue       ( (int)getLOD() );
+    m_pSliderLightAttenuation->SetValue( getLightAttenuation()      * 100 );
+    m_pSliderLightXPosition->SetValue  ( getLightPosition( X_AXIS ) * 100 );
+    m_pSliderLightYPosition->SetValue  ( getLightPosition( Y_AXIS ) * 100 );
+    m_pSliderLightZPosition->SetValue  ( getLightPosition( Z_AXIS ) * 100 );
+    m_pSliderDisplay->SetValue( getDisplayFactor() );
+    m_pSliderScalingFactor->SetValue( getScalingFactor() * 10.0f );
+
+    m_pToggleAxisFlipX->SetValue    ( isAxisFlipped( X_AXIS ) );
+    m_pToggleAxisFlipY->SetValue    ( isAxisFlipped( Y_AXIS ) );
+    m_pToggleAxisFlipZ->SetValue    ( isAxisFlipped( Z_AXIS ) );
+    m_pToggleColorWithPosition->SetValue( getColorWithPosition() );
     
     // Disabled for the moment, not implemented.
     m_pBtnFlipX->Enable( false );

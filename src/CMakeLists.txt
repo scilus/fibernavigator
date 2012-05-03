@@ -135,6 +135,7 @@ SET( target "fibernavigator")
 file( GLOB GUI_HDR "gui/*.h" )
 file( GLOB GFX_HDR "gfx/*.h" )
 file( GLOB DS_HDR "dataset/*.h" )
+file( GLOB MISC_HDR "misc/*.h" )
 file( GLOB ALGORITHMS_HDR "misc/Algorithms/*.h" )
 file( GLOB FANTOM_HDR "misc/Fantom/*.h" )
 file( GLOB ISO_HDR "misc/IsoSurface/*.h" )
@@ -144,6 +145,7 @@ file( GLOB NIFTI_HDR "misc/nifti/*.h" )
 file( GLOB GUI_SRC "gui/*.cpp" )
 file( GLOB GFX_SRC "gfx/*.cpp" )
 file( GLOB DS_SRC "dataset/*.cpp" )
+file( GLOB MISC_SRC "misc/*.cpp" )
 file( GLOB ALGORITHMS_SRC "misc/Algorithms/*.cpp" )
 file( GLOB FANTOM_SRC "misc/Fantom/*.cpp" )
 file( GLOB ISO_SRC "misc/IsoSurface/*.cpp" )
@@ -151,11 +153,11 @@ file( GLOB LIC_SRC "misc/lic/*.cpp" )
 file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 
 IF( WIN32 )
- ADD_EXECUTABLE( ${target} WIN32 main.h main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC} 
-                                          ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${NIFTI_HDR} )
+ ADD_EXECUTABLE( ${target} WIN32 main.h main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${MISC_SRC} ${NIFTI_SRC} 
+                                          ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${MISC_HDR} ${NIFTI_HDR} )
 ELSE( WIN32 )
- ADD_EXECUTABLE( ${target} main.h main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${NIFTI_SRC}
-                                    ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${NIFTI_HDR} )
+ ADD_EXECUTABLE( ${target} main.h main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${MISC_SRC} ${NIFTI_SRC}
+                                    ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR}  ${MISC_HDR}  ${NIFTI_HDR} )
 ENDIF( WIN32 )
 
 IF( WIN32 )

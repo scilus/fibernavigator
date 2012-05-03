@@ -186,6 +186,7 @@ bool ShaderProgram::compileAndLink()
 void ShaderProgram::bind()
 {
     glUseProgram( m_id );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "ShaderProgram::bind - Binding %s" ), m_name.wx_str() ) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -193,6 +194,7 @@ void ShaderProgram::bind()
 void ShaderProgram::release()
 {
     glUseProgram( 0 );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "ShaderProgram::release - Releasing %s" ), m_name.wx_str() ) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -209,7 +211,7 @@ void ShaderProgram::setUniInt( const GLchar* pName, const GLint value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -223,7 +225,7 @@ void ShaderProgram::setUniFloat( const GLchar* pName, const GLfloat value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -237,7 +239,7 @@ void ShaderProgram::setUniArrayInt( const GLchar* pName, GLint* pValue, const GL
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -251,7 +253,7 @@ void ShaderProgram::setUni3Int( const GLchar* pName, GLint values[3] )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -265,7 +267,7 @@ void ShaderProgram::setUniArray1Float( const GLchar* pName, GLfloat* pValue, con
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -279,7 +281,7 @@ void ShaderProgram::setUni2Float( const GLchar* pName, std::pair< GLfloat, GLflo
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -293,7 +295,7 @@ void ShaderProgram::setUni3Float( const GLchar* pName, GLfloat values[3] )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -333,7 +335,7 @@ void ShaderProgram::setUniMatrix3f( const GLchar* pName, const FMatrix &values )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -349,7 +351,7 @@ void ShaderProgram::setUniSampler( const GLchar* pName, const GLint value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -421,20 +423,35 @@ void ShaderProgram::printProgramLog( GLuint programId )
 
 ShaderProgram::~ShaderProgram()
 {
-    if( NULL != m_pVertex )
-    {
-        delete m_pVertex;
-    }
+    Logger::getInstance()->print( wxString::Format( wxT ( "Executing ShaderProgram (%s) destructor" ), m_name.c_str() ), LOGLEVEL_DEBUG );
+
+    release();
+
+    glDetachShader( m_id, m_pVertex->getId() );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Detaching Shader (%s) failed." ), m_pVertex->getFilename().c_str() ) );
 #if _COMPILE_GEO_SHADERS
-    if( NULL != m_pGeometry )
+    if( m_pGeometry )
     {
-        delete m_pGeometry;
-    } 
-#endif
-    if( NULL != m_pFragment )
-    {
-		delete m_pFragment;
+        glDetachShader( m_id, m_pGeometry->getId() );
+        Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Detaching Shader (%s) failed." ), m_pGeometry->getFilename().c_str() ) );
     }
+#endif
+    glDetachShader( m_id, m_pFragment->getId() );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Detaching Shader (%s) failed." ), m_pFragment->getFilename().c_str() ) );
+
+    glDeleteProgram( m_id );
+    Logger::getInstance()->printIfGLError( wxString::Format( wxT( "Deleting ShaderProgram (%s) failed." ), m_name.c_str() ) );
+
+    delete m_pVertex;
+    m_pVertex = NULL;
+
+#if _COMPILE_GEO_SHADERS
+    delete m_pGeometry;
+    m_pGeometry = NULL;
+#endif
+
+    delete m_pFragment;
+    m_pFragment = NULL;
+
+    Logger::getInstance()->print( wxString::Format( wxT ( "ShaderProgram (%s) destructor done" ), m_name.c_str() ), LOGLEVEL_DEBUG );
 }
-
-

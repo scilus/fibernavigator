@@ -1,0 +1,134 @@
+#ifndef DATASETMANAGER_H_
+#define DATASETMANAGER_H_
+
+#include "Anatomy.h"
+#include "DatasetIndex.h"
+#include "FibersGroup.h"
+#include "ODFs.h"
+#include "../misc/Fantom/FMatrix.h"
+#include "../misc/nifti/nifti1_io.h"
+#include "../misc/IsoSurface/CIsoSurface.h"
+
+#include <wx/string.h>
+
+#include <algorithm>
+#include <map>
+#include <vector>
+
+class DatasetInfo;
+class Fibers;
+class Mesh;
+class Tensors;
+
+const DatasetIndex BAD_INDEX;
+
+class DatasetManager
+{
+public:
+    ~DatasetManager(void);
+
+    static DatasetManager * getInstance();
+
+    std::vector<Anatomy *>  getAnatomies() const;
+    size_t                  getAnatomyCount() const         { return m_anatomies.size(); }
+    DatasetInfo *           getDataset( DatasetIndex index ) const;
+    size_t                  getDatasetCount() const         { return m_datasets.size(); }
+    DatasetIndex            getDatasetIndex( DatasetInfo * pDatasetInfo ) const;
+    std::vector<Fibers *>   getFibers() const;
+    FibersGroup *           getFibersGroup() const;
+    size_t                  getFibersCount() const          { return m_fibers.size(); }
+    std::vector<Mesh *>     getMeshes() const;
+    std::vector<ODFs *>     getOdfs() const;
+    Fibers *                getSelectedFibers( DatasetIndex index ) const;
+    std::vector<Tensors *>  getTensors() const;
+
+    int                     getColumns() const;
+    int                     getFrames() const;
+    int                     getRows() const;
+    float                   getVoxelX() const;
+    float                   getVoxelY() const;
+    float                   getVoxelZ() const;
+    FMatrix &               getNiftiTransform()             { return m_niftiTransform; }
+    unsigned int            getCountFibers() const          { return m_countFibers; }
+
+    bool                    isDatasetLoaded() const         { return !m_datasets.empty(); }
+    bool                    isAnatomyLoaded() const         { return !m_anatomies.empty(); }
+    bool                    isFibersLoaded() const          { return !m_fibers.empty(); }
+    bool                    isFibersGroupLoaded() const     { return !m_fibersGroup.empty(); }
+    bool                    isMeshLoaded() const            { return !m_meshes.empty(); }
+    bool                    isOdfsLoaded() const            { return !m_odfs.empty(); }
+    bool                    isTensorsLoaded() const         { return !m_tensors.empty(); }
+    bool                    isTensorsFieldLoaded() const    { return false; }
+    bool                    isVectorsLoaded() const         { return false; }
+
+    void  setCountFibers( const unsigned int count )        { m_countFibers = count; }
+
+    void clear();
+
+    // Check with DatasetIndex::isOk() method to know if index is valid
+    DatasetIndex load( const wxString &filename, const wxString &extension );
+
+    // return index of the created dataset
+    DatasetIndex createAnatomy()                                                 { return insert( new Anatomy() ); }
+    DatasetIndex createAnatomy( DatasetType type )                               { return insert( new Anatomy( type ) ); }
+    DatasetIndex createAnatomy( const Anatomy * const pAnatomy )                 { return insert( new Anatomy( pAnatomy ) ); }
+    DatasetIndex createAnatomy( std::vector<float> *pDataset, int sample )       { return insert( new Anatomy( pDataset, sample ) ); }
+    DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( pAnatomy ) ); }
+    DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup() ); }
+    DatasetIndex createODFs( const wxString &filename )                          { return insert( new ODFs( filename ) ); }
+
+    void remove( const DatasetIndex index );
+
+protected:
+    DatasetManager(void);
+
+private:
+    DatasetManager(const DatasetManager &);
+    DatasetManager &operator=(const DatasetManager &);
+
+    // Gets the next available index when loading new datasets
+    DatasetIndex getNextAvailableIndex() { return m_nextIndex++; }
+
+    // Inserts the datasets in their corresponding maps
+    DatasetIndex insert( Anatomy * pAnatomy );
+    DatasetIndex insert( CIsoSurface * pCIsoSurface );
+    DatasetIndex insert( Fibers * pFibers );
+    DatasetIndex insert( FibersGroup * pFibersGroup );
+    DatasetIndex insert( Mesh * pMesh );
+    DatasetIndex insert( ODFs * pOdfs );
+    DatasetIndex insert( Tensors * pTensors );
+
+    // Loads an anatomy. Extension supported: .nii and .nii.gz
+    DatasetIndex loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+
+    // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
+    DatasetIndex loadFibers( const wxString &filename );
+
+    // Loads a mesh. Extension supported: .mesh, .surf and .dip
+    DatasetIndex loadMesh( const wxString &filename, const wxString &extension );
+
+    // Loads an ODF. Extension supported: .nii and .nii.gz
+    DatasetIndex loadODF( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+
+    // Loads tensors. Extension supported: .nii and .nii.gz
+    DatasetIndex loadTensors( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+    
+private:
+    static DatasetManager *m_pInstance;
+
+    DatasetIndex m_nextIndex;
+
+    std::map<DatasetIndex, DatasetInfo *> m_datasets;
+    std::map<DatasetIndex, Anatomy *> m_anatomies;
+    std::map<DatasetIndex, Fibers *> m_fibers;
+    std::map<DatasetIndex, FibersGroup *> m_fibersGroup;
+    std::map<DatasetIndex, Mesh *> m_meshes;
+    std::map<DatasetIndex, ODFs *> m_odfs;
+    std::map<DatasetIndex, Tensors *> m_tensors;
+    std::map<DatasetInfo *, DatasetIndex> m_reverseDatasets;
+
+    FMatrix m_niftiTransform;
+    unsigned int m_countFibers; // TODO: Remove me once selection is fixed
+};
+
+#endif //DATASETMANAGER_H_

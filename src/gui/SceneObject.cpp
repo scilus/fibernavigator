@@ -10,28 +10,33 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "SceneObject.h"
+
 SceneObject::SceneObject()
+:   m_pPropertiesSizer( NULL ),
+    m_pBoxPadding( NULL )
 {
-    m_propertiesSizer = NULL;
 }
 
-wxBoxSizer* SceneObject::getProprietiesSizer()
+//////////////////////////////////////////////////////////////////////////
+
+void SceneObject::createPropertiesSizer( PropertiesWindow *pParent )
 {
-    return m_propertiesSizer;
+    m_pBoxPadding = new wxBoxSizer( wxHORIZONTAL );
+    m_pPropertiesSizer = new wxBoxSizer( wxVERTICAL );
+    pParent->GetSizer()->Add( m_pBoxPadding, 0, wxEXPAND | wxALL, 1 );
+    m_pBoxPadding->Add( m_pPropertiesSizer, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 16 );
 }
 
-void SceneObject::createPropertiesSizer( PropertiesWindow *parent )
+//////////////////////////////////////////////////////////////////////////
+
+void SceneObject::swap( SceneObject &s )
 {
-    m_propertiesSizer = new wxBoxSizer( wxVERTICAL );
-    m_propertiesSizer->SetMinSize( wxSize(210,15));
-    
+    // Not swapping GUI elements
 }
 
-void SceneObject::updatePropertiesSizer()
+//////////////////////////////////////////////////////////////////////////
+
+SceneObject::~SceneObject()
 {
-
+    // Don't delete sizers, they are deleted automatically by the parent
 }
-
-
-
-

@@ -13,48 +13,48 @@
 #ifndef PROPERTIESWINDOW_H_
 #define PROPERTIESWINDOW_H_
 
-#include <wx/scrolwin.h>
-#include <wx/treectrl.h>
-#include <wx/notebook.h>
-
 #include "../misc/Algorithms/Helper.h"
 
+#include <wx/scrolwin.h>
+#include <wx/treectrl.h>
+
 class MainFrame;
-class PropertiesWindow: public wxScrolledWindow
+class ListCtrl;
+
+class PropertiesWindow : public wxScrolledWindow
 {
 public:
-    PropertiesWindow(){};
-    PropertiesWindow( wxWindow *parent, MainFrame *mf, wxWindowID id, const wxPoint &pos, const wxSize &size );
-    ~PropertiesWindow(){};
+    PropertiesWindow( wxWindow *parent, MainFrame *mf, wxWindowID id, const wxPoint &pos, const wxSize &size, ListCtrl *lstCtrl );
+
     void OnPaint( wxPaintEvent &event );
-    void OnSize( wxSizeEvent &event ); 
+    void OnSize( wxSizeEvent &event );
 
     void OnListItemUp                       ( wxCommandEvent& event );
     void OnListItemDown                     ( wxCommandEvent& event );
-    void OnListItemShow                     ( wxCommandEvent& event );
+    void OnToggleVisibility                 ( wxCommandEvent& event );
     void OnListItemCutOut                   ( wxCommandEvent& event );
 
     void OnDeleteListItem                   ( wxEvent& event );
 
     void OnToggleShowFS                     ( wxEvent& event );
 
-	void OnToggleIntensityBtn				( wxEvent& event );
-	void OnToggleOpacityBtn					( wxEvent& event );
-	void OnToggleMinMaxLengthBtn			( wxEvent& event );
-	void OnToggleSubsamplingBtn				( wxEvent& event );
-	void OnToggleCrossingFibersBtn          ( wxEvent& event );
-	void OnToggleColorModeBtn				( wxEvent& event );
-	void OnToggleLocalColoringBtn			( wxEvent& event );
-	void OnToggleNormalColoringBtn			( wxEvent& event );
-	
-	void OnClickGenerateFiberVolumeBtn		( wxEvent& event );
-	void OnClickApplyBtn					( wxEvent& event );
-	void OnClickCancelBtn					( wxEvent& event );
+    void OnToggleIntensityBtn               ( wxEvent& event );
+    void OnToggleOpacityBtn                 ( wxEvent& event );
+    void OnToggleMinMaxLengthBtn            ( wxEvent& event );
+    void OnToggleSubsamplingBtn             ( wxEvent& event );
+    void OnToggleCrossingFibersBtn          ( wxEvent& event );
+    void OnToggleColorModeBtn               ( wxEvent& event );
+    void OnToggleLocalColoringBtn           ( wxEvent& event );
+    void OnToggleNormalColoringBtn          ( wxEvent& event );
+
+    void OnClickGenerateFiberVolumeBtn      ( wxEvent& event );
+    void OnClickApplyBtn                    ( wxEvent& event );
+    void OnClickCancelBtn                   ( wxEvent& event );
 
     void OnSliderIntensityThresholdMoved    ( wxCommandEvent& event );
     void OnSliderOpacityThresholdMoved      ( wxCommandEvent& event );
 
-	void OnEqualizeDataset					( wxEvent& event );
+    void OnEqualizeDataset                  ( wxEvent& event );
     void OnEqualizationSliderChange         ( wxCommandEvent& event );
     void OnRename                           ( wxCommandEvent& event );
     void OnFlipX                            ( wxCommandEvent& event );
@@ -70,26 +70,12 @@ public:
     void OnNewVoiFromOverlay                ( wxCommandEvent& event );
     void OnNewIsoSurface                    ( wxCommandEvent& event ); 
 
-    void OnSegment                          ( wxCommandEvent& event );
     void OnFloodFill                        ( wxCommandEvent& event );
     void OnSliderFloodMoved                 ( wxCommandEvent& event );
-    void OnSelectBck                        ( wxCommandEvent& event );
-    void OnSliderGraphSigmaMoved            ( wxCommandEvent& event );
-    void OnKmeans                           ( wxCommandEvent& event );
-    void OnbtnGraphCut                      ( wxCommandEvent& event );
-    void OnSelectObj                        ( wxCommandEvent& event );
 
-    void OnClean                            ( wxCommandEvent& event );
-    void OnLoop                             ( wxCommandEvent& event );
-    void OnToggleLIC                        ( wxCommandEvent& event );
-
-    void OnToggleDrawPointsMode             ( wxCommandEvent& event );
-    void OnMoveBoundaryPointsLeft           ( wxCommandEvent& event );
-    void OnMoveBoundaryPointsRight          ( wxCommandEvent& event );
-    
     void OnFibersFilter                     ( wxCommandEvent& event );
     void OnGenerateFiberVolume              ( wxCommandEvent& event );
-    void OnListMenuThreshold                ( wxCommandEvent& event );
+    void OnToggleUseTex                     ( wxCommandEvent& event );
     void OnListMenuDistance                 ( wxCommandEvent& event );
     void OnListMenuMinDistance              ( wxCommandEvent& event );
     void OnColorWithCurvature               ( wxCommandEvent& event );
@@ -123,7 +109,7 @@ public:
     void OnGlyphAxesSelected                ( wxCommandEvent& event ); // The display the 3 vector representing the ellipsoid.    
     void OnGlyphMainAxisSelected            ( wxCommandEvent& event ); // The display of the main vector of the ellipsoid.    
     void OnGlyphColorWithPosition           ( wxCommandEvent& event ); // The color with position.
-    
+
     void OnNormalizeTensors                 ( wxCommandEvent& event ); //normalise tensors values;
 
     void OnOriginalShBasis                  ( wxCommandEvent& event );
@@ -146,8 +132,6 @@ public:
     void OnConvexHullColorChange            ( wxCommandEvent& event );
     void OnConvexHullOpacityChange          ( wxCommandEvent& event );
     void OnMeanFiberColorChange             ( wxCommandEvent& event );
-    void OnDisplayCrossSections             ( wxCommandEvent& event );
-    void OnDisplayDispersionTube            ( wxCommandEvent& event );
     void OnCreateFibersColorTexture         ( wxCommandEvent& event );
     void OnCreateFibersDensityTexture       ( wxCommandEvent& event );
     void OnMeanComboBoxSelectionChange      ( wxCommandEvent& event );
@@ -163,14 +147,17 @@ public:
     void OnToggleCrossingFibers             ( wxEvent& event );
     void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );
 
-    MainFrame *m_mainFrame;
-    wxWindow  *m_noteBook;
+private:
+    PropertiesWindow() { }
+    PropertiesWindow(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
 
 private:
-    wxSizer *propertiesSizer;
-    PropertiesWindow(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
+    wxWindow  *m_pNotebook;
+    MainFrame *m_pMainFrame;
+    ListCtrl  *m_pListCtrl;
+    
     DECLARE_DYNAMIC_CLASS(PropertiesWindow)
     DECLARE_EVENT_TABLE()
 };
 
-#endif /*PROPERTUIESWINDOW*/
+#endif // PROPERTIESWINDOW_H_

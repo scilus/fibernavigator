@@ -5,34 +5,38 @@
 // Created:     03/27/08
 /////////////////////////////////////////////////////////////////////////////
 
+#include "main.h"
+
+#include "Logger.h"
+#include "dataset/DatasetManager.h"
+#include "dataset/Loader.h"
+#include "gfx/ShaderHelper.h"
+#include "gui/MainFrame.h"
+#include "gui/MenuBar.h"
+#include "gui/SceneManager.h"
+#include "gui/ToolBar.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#include "wx/wxprec.h"
-#include "wx/mdi.h"
-#include "wx/filefn.h"
-#include "wx/cmdline.h"
-#include "wx/filename.h"
-
-#include "main.h"
-#include "gui/MainFrame.h"
-#include "gui/ToolBar.h"
-#include "gui/MenuBar.h"
+#include <wx/cmdline.h>
+#include <wx/filefn.h>
+#include <wx/filename.h>
+#include <wx/mdi.h>
+#include <wx/wxprec.h>
 
 #include <exception>
 
-wxString MyApp::respath;
-wxString MyApp::shaderPath;
-wxString MyApp::iconsPath;
-
-MainFrame* frame = NULL;
+wxString    MyApp::respath;
+wxString    MyApp::shaderPath;
+wxString    MyApp::iconsPath;
+MainFrame * MyApp::frame = NULL;
 
 const wxString MyApp::APP_NAME   = _T( "main" );
 const wxString MyApp::APP_VENDOR = _T( "Ralph S. & Mario H." );
 
-IMPLEMENT_APP(MyApp)
+IMPLEMENT_APP( MyApp )
 
 static const wxCmdLineEntryDesc desc[] =
 {
@@ -44,32 +48,12 @@ static const wxCmdLineEntryDesc desc[] =
     { wxCMD_LINE_NONE } 
 };
 
-namespace
+MyApp::MyApp()
 {
-
-/////////////////////////////////////////////////////////////////////////////
-
-void printwx( const wxString& str )
-{
-    char* cstring = NULL;
-    cstring = (char*) malloc( str.length() + 1 );
-    strcpy( cstring, (const char*) str.mb_str( wxConvUTF8 ) );
-    printf( "%s\n", cstring );
-    free( cstring );
 }
 
 /////////////////////////////////////////////////////////////////////////////
-
-void printwx( const wxString& str1, const wxString& str2 )
-{
-    printwx( str1 );
-    printwx( str2 );
-}
-
-} // namespace
-
-/////////////////////////////////////////////////////////////////////////////
-// Initialise this in OnInit, not statically
+// Initialize this in OnInit, not statically
 
 bool MyApp::OnInit( void )
 {
@@ -108,7 +92,7 @@ bool MyApp::OnInit( void )
 
         CFStringGetCString( str, path, FILENAME_MAX, kCFStringEncodingASCII );
         CFRelease( str );
-        fprintf( stderr, path );
+        fprintf( stderr, "%s", path );
 
         respath = wxString::FromAscii( path );
 
@@ -124,30 +108,24 @@ bool MyApp::OnInit( void )
 
 #endif
 
-#if defined(DEBUG) || defined(_DEBUG)
-
-        // this crashes on windows
-        printwx( _T( "Warning: This version of Fibernavigator is debug compiled."), _T( "For better performance please compile a Release version.") );
-        printwx( _T( "respath:" ), respath );
-        printwx( _T( "shader:" ), shaderPath );
-
-
-#endif
+        Logger::getInstance()->print( wxT( "Warning: This version of Fibernavigator is debug compiled." ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxT( "For better performance please compile a Release version."), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "respath: %s" ), respath.c_str() ), LOGLEVEL_DEBUG );
+        Logger::getInstance()->print( wxString::Format( wxT( "shader: %s" ), shaderPath.c_str() ), LOGLEVEL_DEBUG );
 
         // Create the main frame window
-        frame = new MainFrame( NULL, wxID_ANY, _T("Fiber Navigator 1219"), wxPoint( 0, 0 ), wxSize( 800, 600 ), wxDEFAULT_FRAME_STYLE );
-        // Give it an icon (this is ignored in MDI mode: uses resources)
+        frame = new MainFrame( wxT("Fiber Navigator 1219"), wxPoint( 50, 50 ), wxSize( 800, 600 ) );
+        SceneManager::getInstance()->setMainFrame( frame );
+        SceneManager::getInstance()->setTreeCtrl( frame->m_pTreeWidget );
 
 #ifdef __WXMSW__
-
+        // Give it an icon (this is ignored in MDI mode: uses resources)
         frame->SetIcon( wxIcon( _T( "sashtest_icn" ) ) );
-
 #endif
-        
+
         frame->SetMinSize( wxSize( 800, 600 ) );
         frame->SetSize( wxSize( 1024, 768 ) );
-        
-       // frame->init();            
+
         frame->Show( true );
         SetTopWindow( frame );
 
@@ -155,10 +133,10 @@ bool MyApp::OnInit( void )
         wxString cmdFileName;
         wxCmdLineParser cmdParser( desc, argc, argv );
         cmdParser.Parse( false );
-        
+
         if ( cmdParser.GetParamCount() > 0 )
         {
-            
+            Loader loader = Loader(frame, frame->m_pListCtrl );
             for ( size_t i = 0; i < cmdParser.GetParamCount(); ++i )
             {
                 cmd = cmdParser.GetParam( i );
@@ -168,20 +146,16 @@ bool MyApp::OnInit( void )
 
                 if ( cmdParser.Found(_T("d")) &&  ( i == 0 ) )
                 {
-                    // We pass -1 in the load function because there is no index because this is call from the cmd line.
-                    frame->m_pDatasetHelper->load( cmdFileName, -1 );
-                    frame->m_pListCtrl->SetItemState(0,wxLIST_STATE_SELECTED, wxALL);
-                    frame->m_pDatasetHelper->updateLoadStatus();
-                    frame->m_pDatasetHelper->createDistanceMapAndIso();
+                    loader( cmdFileName );
+                    frame->createDistanceMapAndIso();
                 }
                 else if ( cmdParser.Found( _T( "p" ) ) &&  ( i == cmdParser.GetParamCount() -1 ) )
                 {
-                    frame->screenshot( cmdFileName );
+                    frame->screenshot( wxT( "" ), cmdFileName );
                 }
                 else
                 {
-                    // We pass -1 in the load function because there is no index because this is call from the cmd line.
-                    frame->m_pDatasetHelper->load( cmdFileName, -1 );
+                    loader( cmdFileName );
                 }
             }
         }
@@ -192,13 +166,13 @@ bool MyApp::OnInit( void )
         }
         return true;
 
-    } 
+    }
     catch ( ... )
     {
-        printf( "something went wrong, terribly wrong\n" );
+        Logger::getInstance()->print( wxT( "Something went wrong, terribly wrong" ), LOGLEVEL_ERROR );
         return false;
     }
-    printf( "end on init main\n" );
+    Logger::getInstance()->print( wxT( "End on init main" ), LOGLEVEL_DEBUG );
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -284,6 +258,14 @@ wxString MyApp::wxFindAppPath( const wxString& argv0, const wxString& cwd, const
 
 int MyApp::OnExit()
 {
-    cout << "exiting" << endl;
+    Logger::getInstance()->print( wxT( "Exiting..." ), LOGLEVEL_MESSAGE );
+    Logger::getInstance()->print( wxT( "Cleaning ressources..." ), LOGLEVEL_MESSAGE );
+    frame = NULL;
+
+    // Deleting singletons
+    delete ShaderHelper::getInstance();
+    delete DatasetManager::getInstance();
+    delete SceneManager::getInstance();
+    delete Logger::getInstance();
     return 0;
 }

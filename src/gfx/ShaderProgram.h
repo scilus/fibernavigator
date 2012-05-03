@@ -42,6 +42,9 @@ public:
     void setUniBool       ( const GLchar* pName, const bool value );
     
 private:
+    ShaderProgram(const ShaderProgram &);
+    ShaderProgram &operator=(const ShaderProgram &);
+
     void printCompilerLog( GLuint shaderId );
     void printProgramLog( GLuint programId );
 

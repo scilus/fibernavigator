@@ -2,13 +2,12 @@
 #define MESH_H_
 
 #include "DatasetInfo.h"
-#include "DatasetHelper.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 enum MeshFileType {
@@ -33,22 +32,21 @@ struct polygon {
 };
 
 class MainFrame;
-class Mesh : public DatasetInfo , public wxTreeItemData
+
+class Mesh : public DatasetInfo
 {
 
 public:
-    Mesh( DatasetHelper* );
+    Mesh( );
+    Mesh( const wxString &filename );
     virtual ~Mesh();
 
-    bool load    ( wxString filename );
     bool loadMesh( wxString filename );
     bool loadSurf( wxString filename );
     bool loadDip ( wxString filename );
     void draw();
-    void clean()                        { m_tMesh->cleanUp(); };
     void smooth()                       { m_tMesh->doLoopSubD(); };
     virtual void flipAxis( AxisType i_axe ){};
-    void activateLIC();
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
 
@@ -66,15 +64,14 @@ public:
 
 
 private:
-    
     void    generateTexture()  {};
     void    generateGeometry();
     void    initializeBuffer() {};
     GLuint  getGLuint();
 
-    wxToggleButton *m_ptoggleCutFrontSector;
-    wxToggleButton *m_ptoggleUseColoring;
-    wxBitmapButton *m_pbtnSelectColor;
+    wxToggleButton *m_pToggleCutFrontSector;
+    wxToggleButton *m_pToggleUseColoring;
+    wxBitmapButton *m_pBtnSelectColor;
     
     unsigned int m_filetype;
     unsigned int m_countVerts;

@@ -11,7 +11,9 @@
 
 #include "SelectionBox.h"
 
+#include "SceneManager.h"
 #include "../dataset/Anatomy.h"
+#include "../dataset/DatasetManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -20,8 +22,8 @@
 // i_size               : The size of the box.
 // i_dataHelper         : The datasetHekper associated with this box.
 ///////////////////////////////////////////////////////////////////////////
-SelectionBox::SelectionBox( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ) :
-    SelectionObject( i_center, i_size, i_datasetHelper )
+SelectionBox::SelectionBox( Vector i_center, Vector i_size )
+:   SelectionObject( i_center, i_size )
 {
     m_gfxDirty   = true;
     m_name       = wxT( "box" );
@@ -36,12 +38,12 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size, DatasetHelper* i_dat
 // i_datasetHelper          : The dataset Helper associated with this box.
 // i_anatomy                : The anatomy associated with this box.
 ///////////////////////////////////////////////////////////////////////////
-SelectionBox::SelectionBox( DatasetHelper* i_datasetHelper, Anatomy* i_anatomy ) :
-   SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ), i_datasetHelper )
+SelectionBox::SelectionBox( Anatomy* i_anatomy ) :
+   SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ) )
 {
-    
    m_isMaster      = true;
-   m_isosurface    = new CIsoSurface( m_datasetHelper, i_anatomy );
+
+   m_isosurface = new CIsoSurface( i_anatomy );    
    
    wxString mystring(wxT("[VOI] - ") + i_anatomy->getName());
    m_name          =  mystring;
@@ -57,11 +59,13 @@ SelectionBox::~SelectionBox()
 {
     if( m_isLockedToCrosshair )
     {
-        m_datasetHelper->m_boxLockIsOn = false;
+        SceneManager::getInstance()->setBoxLock( false );
     }
     if( m_objectType == CISO_SURFACE_TYPE )
     {
         delete m_isosurface;
+        m_isosurface = NULL;
+
         if( m_sourceAnatomy && m_sourceAnatomy->m_pRoi == this)
         {
             m_sourceAnatomy->m_pRoi = NULL;
@@ -76,7 +80,7 @@ SelectionBox::~SelectionBox()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionBox::drawObject( GLfloat* i_color )
 {
-    glDepthMask(GL_FALSE);
+    glDepthMask( GL_FALSE );
     glColor4f( i_color[0], i_color[1], i_color[2], i_color[3] );
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     glBegin( GL_QUADS );
@@ -114,22 +118,22 @@ void SelectionBox::drawObject( GLfloat* i_color )
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     glBegin( GL_QUADS );
-        switch( m_datasetHelper->m_quadrant )
-        {
-            case 1: draw2(); draw4(); draw6(); draw1(); draw3(); draw5(); break;    
-            case 2: draw2(); draw4(); draw5(); draw1();    draw3(); draw6(); break;
-            case 3: draw2(); draw3(); draw5(); draw1(); draw4(); draw6(); break;
-            case 4: draw2(); draw3(); draw6(); draw1(); draw4(); draw5(); break;
-            case 5: draw1(); draw3(); draw6(); draw2(); draw4(); draw5(); break;
-            case 6:    draw1(); draw3(); draw5(); draw2(); draw4(); draw6(); break;
-            case 7:    draw1(); draw4(); draw5(); draw2(); draw3(); draw6(); break;
-            case 8: draw1(); draw4(); draw6(); draw2(); draw3(); draw5(); break;
-        }
+    switch( SceneManager::getInstance()->getQuadrant() )
+    {
+        case 1: draw2(); draw4(); draw6(); draw1(); draw3(); draw5(); break;
+        case 2: draw2(); draw4(); draw5(); draw1(); draw3(); draw6(); break;
+        case 3: draw2(); draw3(); draw5(); draw1(); draw4(); draw6(); break;
+        case 4: draw2(); draw3(); draw6(); draw1(); draw4(); draw5(); break;
+        case 5: draw1(); draw3(); draw6(); draw2(); draw4(); draw5(); break;
+        case 6: draw1(); draw3(); draw5(); draw2(); draw4(); draw6(); break;
+        case 7: draw1(); draw4(); draw5(); draw2(); draw3(); draw6(); break;
+        case 8: draw1(); draw4(); draw6(); draw2(); draw3(); draw5(); break;
+    }
 
     glEnd();
 
     glDisable( GL_BLEND );
-    glDepthMask(GL_TRUE);
+    glDepthMask( GL_TRUE );
 }
 
 void SelectionBox::draw1()
@@ -186,14 +190,18 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
 
     if( m_isVisible && m_isActive && m_objectType == BOX_TYPE ) 
     {
+        float voxelX = DatasetManager::getInstance()->getVoxelX();
+        float voxelY = DatasetManager::getInstance()->getVoxelY();
+        float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
         int   picked  = 0;
         float tpicked = 0;
         float cx = m_center.x;
         float cy = m_center.y;
         float cz = m_center.z;
-        float sx = m_size.x * m_datasetHelper->m_xVoxel;
-        float sy = m_size.y * m_datasetHelper->m_yVoxel;
-        float sz = m_size.z * m_datasetHelper->m_zVoxel;
+        float sx = m_size.x * voxelX;
+        float sy = m_size.y * voxelY;
+        float sz = m_size.z * voxelZ;
 
            if( wxGetKeyState( WXK_CONTROL ) )
         {
@@ -201,7 +209,7 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
 
             bb->setCenter( m_minX , cy, cz );
             bb->setSize( sx, sy, sz );
-            bb->setSizeX( m_datasetHelper->m_xVoxel );
+            bb->setSizeX( voxelX );
             hr = bb->hitTest( i_ray );
             if( hr.hit )
             {
@@ -240,7 +248,7 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
             }
             bb->setCenter( cx, m_minY, cz );
             bb->setSize( sx, sy, sz);
-            bb->setSizeY( m_datasetHelper->m_yVoxel );
+            bb->setSizeY( voxelY );
             hr = bb->hitTest( i_ray );
             if( hr.hit )
             {
@@ -278,7 +286,7 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
             }
             bb->setCenter( cx, cy, m_minZ );
             bb->setSize( sx, sy, sz );
-            bb->setSizeZ( m_datasetHelper->m_zVoxel );
+            bb->setSizeZ( voxelZ );
             hr = bb->hitTest( i_ray );
             if( hr.hit ) 
             {
@@ -351,14 +359,4 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
     m_hitResult = hr;
 
     return hr;
-}
-
-void SelectionBox::createPropertiesSizer(PropertiesWindow *parent)
-{
-    SelectionObject::createPropertiesSizer(parent);  
-}
-
-void SelectionBox::updatePropertiesSizer()
-{
-    SelectionObject::updatePropertiesSizer();
 }

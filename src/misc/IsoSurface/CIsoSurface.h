@@ -10,18 +10,17 @@
 // CIsoSurface can be used to construct an isosurface from a scalar
 // field.
 
-#include <map>
-#include <vector>
 
 #include "../../dataset/DatasetInfo.h"
-#include "../../dataset/DatasetHelper.h"
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
+#include <map>
+#include <vector>
 
 struct POINT3DID {
     unsigned int newID;
@@ -36,10 +35,13 @@ struct TRIANGLE {
 
 typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
 
-class CIsoSurface  : public DatasetInfo {
+class Anatomy;
+
+class CIsoSurface : public DatasetInfo
+{
 public:
     // Constructor and destructor.
-    CIsoSurface(DatasetHelper*, Anatomy* anatomy);
+    CIsoSurface( Anatomy* pAnatomy );
     virtual ~CIsoSurface();
 
     bool load(wxString filename) {return false;};
@@ -49,7 +51,6 @@ public:
     void clean();
     void smooth();
     void flipAxis( AxisType i_axe ){};
-    void activateLIC();
     std::vector<Vector> getSurfaceVoxelPositions();
 
     void GenerateWithThreshold();
@@ -69,7 +70,8 @@ public:
     // valid.
     int GetVolumeLengths(float& fVolLengthX, float& fVolLengthY, float& fVolLengthZ);
 
-    bool save( wxString filename )const;
+    bool save( wxString filename ) const;
+    bool save( wxXmlNode *pNode ) const;
 
 protected:
     // The number of vertices which make up the isosurface.
@@ -128,18 +130,14 @@ protected:
 private:
     GLuint getGLuint() {return 0;};
     void generateTexture() {};
-    void generateGeometry() ;
-    void generateLICGeometry() ;
+    void generateGeometry();
     void initializeBuffer() {};
 
-    wxToggleButton *m_ptoggleCutFrontSector;
-    wxToggleButton *m_ptoggleUseColoring;
-    wxBitmapButton *m_pbtnSelectColor;
-    
+    wxToggleButton *m_pToggleCutFrontSector;
+    wxToggleButton *m_pToggleUseColoring;
 
     bool m_positionsCalculated;
     std::vector<Vector>m_svPositions;
-
 };
 #endif // CISOSURFACE_H
 
