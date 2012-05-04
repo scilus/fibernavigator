@@ -9,6 +9,7 @@
 #include "../misc/Fantom/FArray.h"
 #include "../misc/Fantom/FMatrix.h"
 #include "../misc/IsoSurface/Vector.h"
+#include "Tensors.h"
 
 #include <GL/glew.h>
 #include <vector>
@@ -18,6 +19,8 @@ class RTTFibers
 public:
     RTTFibers(); //Constructor
     ~RTTFibers(); //Destructor
+
+    //long index;
 
     //RTT functions
     void seed();
@@ -33,14 +36,16 @@ public:
     void clearColorsRTT()                           { m_colorsRTT.clear(); }
 
     void setFAThreshold( float FAThreshold )                    { m_FAThreshold = FAThreshold; }
-    void setTensorsMatrix( const std::vector<FMatrix> &tensorsMatrix ) { m_tensorsMatrix = tensorsMatrix; }
-    void setTensorsEV( const std::vector< F::FVector > &tensorsEV )    { m_tensorsEV = tensorsEV; }
-    void setTensorsFA( const std::vector<float> &tensorsFA )           { m_tensorsFA = tensorsFA; }
+    void setTensorsMatrix( const std::vector<FMatrix> tensorsMatrix ) { m_tensorsMatrix = tensorsMatrix; }
+    void setTensorsEV( const std::vector< F::FVector > tensorsEV )    { m_tensorsEV = tensorsEV; }
+    void setTensorsFA( const std::vector<float> tensorsFA )           { m_tensorsFA = tensorsFA; }
     void setAngleThreshold( float angleThreshold )              { m_angleThreshold = angleThreshold; }
     void setPuncture( float puncture )                          { m_puncture = puncture; }
     void setStep( float step )                                  { m_step = step; }
     void setMinFiberLength( float minLength )                   { m_minFiberLength = minLength; }
     void setMaxFiberLength( float maxLength )                   { m_maxFiberLength = maxLength; }
+    void setTensorsInfo( Tensors* info )                        { m_pTensorsInfo = info; }
+
 
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
@@ -48,7 +53,9 @@ public:
     float getPuncture()                          { return m_puncture; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
+
     size_t getSize()                             { return m_fibersRTT.size(); }
+    
 
     //GPGPU functions
     bool checkFramebufferStatus(void);
@@ -101,6 +108,8 @@ private:
     float       m_puncture;
     float       m_minFiberLength;
     float       m_maxFiberLength;
+    Tensors     *m_pTensorsInfo;
+
 
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;

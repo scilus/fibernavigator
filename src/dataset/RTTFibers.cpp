@@ -69,6 +69,8 @@ void RTTFibers::seed()
     Vector minCorner, maxCorner, middle;
     vector< vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
+    
+
     //N = 16; //Number of seeds
     texSize = 10;//(int)sqrt((double)N);
 
@@ -375,6 +377,7 @@ void RTTFibers::renderRTTFibers()
 ///////////////////////////////////////////////////////////////////////////
 FMatrix RTTFibers::trilinearInterp( float fx, float fy, float fz )
 {
+
     using std::min;
     using std::max;
 
@@ -412,12 +415,12 @@ FMatrix RTTFibers::trilinearInterp( float fx, float fy, float fz )
 
     int tensor_nxnynz = nz * columns * rows + ny * columns + nx;
 
-    FMatrix valx0 = (1-dx) * m_tensorsMatrix[tensor_xyz]  + (dx) * m_tensorsMatrix[tensor_nxyz];
-    FMatrix valx1 = (1-dx) * m_tensorsMatrix[tensor_xnyz] + (dx) * m_tensorsMatrix[tensor_nxnyz];
+    FMatrix valx0 = (1-dx) * m_pTensorsInfo->getTensorsMatrix()->at(tensor_xyz)  + (dx) * m_pTensorsInfo->getTensorsMatrix()->at(tensor_nxyz);
+    FMatrix valx1 = (1-dx) * m_pTensorsInfo->getTensorsMatrix()->at(tensor_xnyz) + (dx) * m_pTensorsInfo->getTensorsMatrix()->at(tensor_nxnyz);
 
     const FMatrix valy0 = (1-dy) * valx0 + (dy) * valx1;
-    valx0 = (1-dx) * m_tensorsMatrix[tensor_xynz]  + (dx) * m_tensorsMatrix[tensor_nxynz];
-    valx1 = (1-dx) * m_tensorsMatrix[tensor_xnynz] + (dx) * m_tensorsMatrix[tensor_nxnynz];
+    valx0 = (1-dx) * m_pTensorsInfo->getTensorsMatrix()->at(tensor_xynz)  + (dx) * m_pTensorsInfo->getTensorsMatrix()->at(tensor_nxynz);
+    valx1 = (1-dx) * m_pTensorsInfo->getTensorsMatrix()->at(tensor_xnynz) + (dx) * m_pTensorsInfo->getTensorsMatrix()->at(tensor_nxnynz);
 
     const FMatrix valy1 = (1-dy) * valx0 + (dy) * valx1;
 
@@ -432,7 +435,7 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
 {
     Vector vout, vprop, ee1, ee2, ee3;
     float dp1, dp2, dp3;
-    float cl = m_tensorsFA[t_number];
+    float cl = m_pTensorsInfo->getTensorsFA()->at(t_number);
     float puncture = getPuncture();
 
     // Unit vectors of local basis (e1 > e2 > e3)
@@ -487,7 +490,7 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
     dp3 = vin.Dot(ee3);
 
     //Sort eigen values
-    float eValues[] = { m_tensorsEV[t_number][0], m_tensorsEV[t_number][1], m_tensorsEV[t_number][2] };
+    float eValues[] = { m_pTensorsInfo->getTensorsEV()->at(t_number)[0], m_pTensorsInfo->getTensorsEV()->at(t_number)[1], m_pTensorsInfo->getTensorsEV()->at(t_number)[2] };
     sort( eValues, eValues+3 );
 
     // Compute vout
@@ -604,7 +607,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
     //Corresponding tensor number
     tensorNumber = currVoxelz * columns * rows + currVoxely *columns + currVoxelx;
 
-    if( tensorNumber < m_tensorsMatrix.size() )
+    if( tensorNumber < m_pTensorsInfo->getTensorsMatrix()->size() )
     {
         //Use Interpolation
         if( RTTrackingHelper::getInstance()->isTensorsInterpolated() )
@@ -613,7 +616,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
         }
         else
         {
-            tensor = m_tensorsMatrix[tensorNumber];
+            tensor = m_pTensorsInfo->getTensorsMatrix()->at(tensorNumber);
         }
 
         //Find the MAIN axis
@@ -647,7 +650,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
         //Corresponding tensor number
         tensorNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
 
-        if( tensorNumber < m_tensorsMatrix.size() )
+        if( tensorNumber < m_pTensorsInfo->getTensorsMatrix()->size() )
         {
             //Use interpolation
             if( RTTrackingHelper::getInstance()->isTensorsInterpolated() )
@@ -656,7 +659,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
             }
             else
             {
-                tensor = m_tensorsMatrix[tensorNumber];
+                tensor = m_pTensorsInfo->getTensorsMatrix()->at(tensorNumber);
             }
 
             //Find the main diffusion axis
@@ -678,7 +681,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
             }
 
             //FA value
-            FAvalue = m_tensorsFA[tensorNumber];
+            FAvalue = m_pTensorsInfo->getTensorsFA()->at(tensorNumber);
 
             //Angle value
             angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
@@ -711,7 +714,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
                 //Corresponding tensor number
                 tensorNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
 
-                if( tensorNumber > m_tensorsMatrix.size() ) //Out of anatomy
+                if( tensorNumber > m_pTensorsInfo->getTensorsMatrix()->size() ) //Out of anatomy
                 {
                     break;
                 }
@@ -723,7 +726,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
                 }
                 else
                 {
-                    tensor = m_tensorsMatrix[tensorNumber];
+                    tensor = m_pTensorsInfo->getTensorsMatrix()->at(tensorNumber);
                 }
 
                 //Find the MAIN axis
@@ -744,7 +747,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
                 }
 
                 //FA value
-                FAvalue = m_tensorsFA[tensorNumber];
+                FAvalue = m_pTensorsInfo->getTensorsFA()->at(tensorNumber);
 
                 //Angle value
                 angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
