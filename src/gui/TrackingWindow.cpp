@@ -185,8 +185,6 @@ void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
     //long item = m_pMainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     //Tensors* pTensorInfo = dynamic_cast<Tensors*>((DatasetInfo*)m_pMainFrame->m_pListCtrl->GetItemData( item ));
     Tensors * pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
-    //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->index = item;
 
     if( pTensorInfo != NULL )
     {
@@ -197,6 +195,8 @@ void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
         m_pSliderStep->SetValue( step * 10.0f );
         m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
+
+        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 
         ////Copy useful matrices
         //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsMatrix( pTensorInfo->getTensorsMatrix() );

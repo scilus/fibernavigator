@@ -1056,6 +1056,7 @@ void PropertiesWindow::OnGlyphXAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphXAxisFlipChecked" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( X_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1067,6 +1068,7 @@ void PropertiesWindow::OnGlyphYAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphYAxisFlipChecked" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( Y_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1078,6 +1080,7 @@ void PropertiesWindow::OnGlyphZAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( Z_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////

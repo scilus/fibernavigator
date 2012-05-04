@@ -438,42 +438,47 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
     float cl = m_pTensorsInfo->getTensorsFA()->at(t_number);
     float puncture = getPuncture();
 
+    GLfloat flippedAxes[3];
+    m_pTensorsInfo->isAxisFlipped(X_AXIS) ? flippedAxes[0] = -1.0f : flippedAxes[0] = 1.0f;
+    m_pTensorsInfo->isAxisFlipped(Y_AXIS) ? flippedAxes[1] = -1.0f : flippedAxes[1] = 1.0f;
+    m_pTensorsInfo->isAxisFlipped(Z_AXIS) ? flippedAxes[2] = -1.0f : flippedAxes[2] = 1.0f;
+
     // Unit vectors of local basis (e1 > e2 > e3)
-    ee1.x = tensor(0,0) * e1.x + 
+    ee1.x = flippedAxes[0] * (tensor(0,0) * e1.x + 
             tensor(0,1) * e1.y + 
-            tensor(0,2) * e1.z;
+            tensor(0,2) * e1.z);
 
-    ee1.y = tensor(1,0) * e1.x + 
+    ee1.y = flippedAxes[1] * (tensor(1,0) * e1.x + 
             tensor(1,1) * e1.y + 
-            tensor(1,2) * e1.z;
+            tensor(1,2) * e1.z);
 
-    ee1.z = tensor(2,0) * e1.x +
+    ee1.z = flippedAxes[2] * (tensor(2,0) * e1.x +
             tensor(2,1) * e1.y + 
-            tensor(2,2) * e1.z;
+            tensor(2,2) * e1.z);
     //e2
-    ee2.x = tensor(0,0) * e2.x + 
+    ee2.x = flippedAxes[0] * (tensor(0,0) * e2.x + 
             tensor(0,1) * e2.y + 
-            tensor(0,2) * e2.z;
+            tensor(0,2) * e2.z);
 
-    ee2.y = tensor(1,0) * e2.x + 
+    ee2.y = flippedAxes[1] * (tensor(1,0) * e2.x + 
             tensor(1,1) * e2.y + 
-            tensor(1,2) * e2.z;
+            tensor(1,2) * e2.z);
 
-    ee2.z = tensor(2,0) * e2.x +
+    ee2.z = flippedAxes[2] * (tensor(2,0) * e2.x +
             tensor(2,1) * e2.y + 
-            tensor(2,2) * e2.z;
+            tensor(2,2) * e2.z);
     //e3
-    ee3.x = tensor(0,0) * e3.x + 
+    ee3.x = flippedAxes[0] * (tensor(0,0) * e3.x + 
             tensor(0,1) * e3.y + 
-            tensor(0,2) * e3.z;
+            tensor(0,2) * e3.z);
 
-    ee3.y = tensor(1,0) * e3.x + 
+    ee3.y = flippedAxes[1] * (tensor(1,0) * e3.x + 
             tensor(1,1) * e3.y + 
-            tensor(1,2) * e3.z;
+            tensor(1,2) * e3.z);
 
-    ee3.z = tensor(2,0) * e3.x +
+    ee3.z = flippedAxes[2] * (tensor(2,0) * e3.x +
             tensor(2,1) * e3.y + 
-            tensor(2,2) * e3.z;
+            tensor(2,2) * e3.z);
 
     if( vin.Dot(ee1) < 0.0 )
     {
@@ -512,18 +517,23 @@ void RTTFibers::setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2,
 {
     float lvx,lvy,lvz;
 
+    GLfloat flippedAxes[3];
+    m_pTensorsInfo->isAxisFlipped(X_AXIS) ? flippedAxes[0] = -1.0f : flippedAxes[0] = 1.0f;
+    m_pTensorsInfo->isAxisFlipped(Y_AXIS) ? flippedAxes[1] = -1.0f : flippedAxes[1] = 1.0f;
+    m_pTensorsInfo->isAxisFlipped(Z_AXIS) ? flippedAxes[2] = -1.0f : flippedAxes[2] = 1.0f;
+
     //Find the 3 axes
-    lvx = tensor(0,0) * tensor(0,0)
+    lvx = flippedAxes[0] * (tensor(0,0) * tensor(0,0)
         + tensor(1,0) * tensor(1,0) 
-        + tensor(2,0) * tensor(2,0);
+        + tensor(2,0) * tensor(2,0));
 
-    lvy = tensor(0,1) * tensor(0,1)
+    lvy = flippedAxes[1] * (tensor(0,1) * tensor(0,1)
         + tensor(1,1) * tensor(1,1) 
-        + tensor(2,1) * tensor(2,1);
+        + tensor(2,1) * tensor(2,1));
 
-    lvz = tensor(0,2) * tensor(0,2)
+    lvz = flippedAxes[2] * (tensor(0,2) * tensor(0,2)
         + tensor(1,2) * tensor(1,2) 
-        + tensor(2,2) * tensor(2,2);
+        + tensor(2,2) * tensor(2,2));
 
 
     if ( lvx > lvy && lvx > lvz ) 
@@ -583,6 +593,11 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
     Vector e3(0,0,0); //Direction of the tensor (axis aligned)
     Vector currDirection, nextDirection; //Directions re-aligned 
 
+    GLfloat flippedAxes[3];
+    m_pTensorsInfo->isAxisFlipped(X_AXIS) ? flippedAxes[0] = -1.0f : flippedAxes[0] = 1.0f;
+    m_pTensorsInfo->isAxisFlipped(Y_AXIS) ? flippedAxes[1] = -1.0f : flippedAxes[1] = 1.0f;
+    m_pTensorsInfo->isAxisFlipped(Z_AXIS) ? flippedAxes[2] = -1.0f : flippedAxes[2] = 1.0f;
+
     unsigned int tensorNumber; 
     int currVoxelx, currVoxely, currVoxelz;
     float FAvalue, angle; 
@@ -623,17 +638,17 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
         setDiffusionAxis( tensor, e1, e2, e3 );
 
         //Align the main direction my mult AxisAlign * tensorMatrix
-        currDirection.x = tensor(0,0) * e1.x + 
+        currDirection.x = flippedAxes[0] * (tensor(0,0) * e1.x + 
                           tensor(0,1) * e1.y + 
-                          tensor(0,2) * e1.z;
+                          tensor(0,2) * e1.z);
 
-        currDirection.y = tensor(1,0) * e1.x + 
+        currDirection.y = flippedAxes[1] * (tensor(1,0) * e1.x + 
                           tensor(1,1) * e1.y + 
-                          tensor(1,2) * e1.z;
+                          tensor(1,2) * e1.z);
 
-        currDirection.z = tensor(2,0) * e1.x +
+        currDirection.z = flippedAxes[2] * (tensor(2,0) * e1.x +
                           tensor(2,1) * e1.y + 
-                          tensor(2,2) * e1.z;
+                          tensor(2,2) * e1.z);
 
         //Direction for seeding (forward or backward)
         currDirection.normalize();
