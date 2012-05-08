@@ -1334,8 +1334,8 @@ complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, fl
 */
 void ODFs::changeShBasis( SH_BASIS basis )
 {
-    nifti_image *pHeader = nifti_image_read( m_lastODF_path.char_str(), 0 );
-    nifti_image *pBody   = nifti_image_read( m_lastODF_path.char_str(), 1 );
+    nifti_image *pHeader = nifti_image_read( m_fullPath.char_str(), 0 );
+    nifti_image *pBody   = nifti_image_read( m_fullPath.char_str(), 1 );
 
     if( NULL == pHeader || NULL == pBody )
     {
@@ -1343,7 +1343,7 @@ void ODFs::changeShBasis( SH_BASIS basis )
         return;
     }
 
-    ODFs tmp( m_lastODF_path );
+    ODFs tmp( m_fullPath );
     tmp.setShBasis( basis );
 
     if( tmp.load( pHeader, pBody ) )
@@ -1482,9 +1482,8 @@ void ODFs::updatePropertiesSizer()
 
 void ODFs::swap( ODFs &o )
 {
-    // Not swaping GUI elements
+    // Not swapping GUI elements
     Glyph::swap( o );
-    std::swap( m_lastODF_path, o.m_lastODF_path );
     std::swap( m_isMaximasSet, o.m_isMaximasSet );
     std::swap( m_axisThreshold, o.m_axisThreshold );
     std::swap( m_order, o.m_order );
