@@ -720,6 +720,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     ////
     char lineBuffer[200];
     std::string readLine("");
+    bool countFieldFound( false );
 
     while(readLine.find( "END" ) == std::string::npos)
     {
@@ -732,9 +733,10 @@ bool Fibers::loadMRtrix( const wxString &filename )
             sscanf( lineBuffer, "file: . %ld", &pc );
         }
 
-        if( readLine.find( "count" ) != std::string::npos )
+        if( readLine.find( "count" ) != std::string::npos && !countFieldFound )
         {
             sscanf( lineBuffer, "count: %i", &m_countLines );
+            countFieldFound = true;
         }
     }
 

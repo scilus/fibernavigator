@@ -520,7 +520,7 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     // We currently only use it when loading Mrtrix fibers.
     if( pHeader->sform_code > 0 )
     {
-        FMatrix transform = DatasetManager::getInstance()->getNiftiTransform();
+        FMatrix &transform = DatasetManager::getInstance()->getNiftiTransform();
 
         transform( 0, 0 ) = pHeader->sto_xyz.m[0][0];
         transform( 0, 1 ) = pHeader->sto_xyz.m[0][1];
@@ -541,7 +541,7 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     }
     else if( pHeader->qform_code > 0 )
     {
-        FMatrix transform = DatasetManager::getInstance()->getNiftiTransform();
+        FMatrix &transform = DatasetManager::getInstance()->getNiftiTransform();
 
         transform( 0, 0 ) = pHeader->qto_xyz.m[0][0];
         transform( 0, 1 ) = pHeader->qto_xyz.m[0][1];
