@@ -102,19 +102,27 @@ void RTTFibers::seed()
                 {
                     for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
                     {
-                        vector<Vector> points; // Points to be rendered
-                        vector<Vector> color; //Color (local directions)
-
+                        vector<Vector> pointsF; // Points to be rendered Forward
+                        vector<Vector> colorF; //Color (local directions)Forward
+						vector<Vector> pointsB; // Points to be rendered Backward
+                        vector<Vector> colorB; //Color (local directions) Backward
+ 
                         //Track both sides
-                        performRTT( Vector(x,y,z),  1, points, color); //First pass
-                        m_fibersRTT.push_back( points );
-                        m_colorsRTT.push_back( color );
-                        points.clear();
-                        color.clear();
+                        performRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+                        //m_fibersRTT.push_back( points );
+                        //m_colorsRTT.push_back( color );
+                        //points.clear();
+                        //color.clear();
 
-                        performRTT( Vector(x,y,z), -1, points, color); //Second pass
-                        m_fibersRTT.push_back( points ); 
-                        m_colorsRTT.push_back( color );
+                        performRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+                        
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						{
+							m_fibersRTT.push_back( pointsF ); 
+							m_colorsRTT.push_back( colorF );
+							m_fibersRTT.push_back( pointsB ); 
+							m_colorsRTT.push_back( colorB );
+						}
 
                        //glColor3f(1,0,0);
                         //m_pDatasetHelper->m_theScene->drawSphere( x, y, z, 0.2);
@@ -312,8 +320,9 @@ void RTTFibers::renderRTTFibers()
 {
     for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
     { 
-        if( (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() > getMinFiberLength() && (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() < getMaxFiberLength() )
-        {
+        //if( (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() > getMinFiberLength() && (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() < getMaxFiberLength() )
+		if( m_fibersRTT.size() > 0 )
+		{
             //POINTS
             if( SceneManager::getInstance()->isPointMode() )
             {
@@ -774,6 +783,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
         }
     }
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 // GPGPU: Init FBO

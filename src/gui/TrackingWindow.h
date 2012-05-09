@@ -43,6 +43,7 @@ public:
     void OnSliderPunctureMoved                 ( wxCommandEvent& event );
     void OnSliderMinLengthMoved                ( wxCommandEvent& event );
     void OnSliderMaxLengthMoved                ( wxCommandEvent& event );
+	void OnConvertToFibers					   ( wxCommandEvent& event );
 
 public:
     wxToggleButton      *m_pBtnStart;
@@ -68,6 +69,7 @@ private:
     wxSlider            *m_pSliderMaxLength;
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
+	wxButton			*m_pBtnConvert;
 
 private:
     wxSizer *m_pTrackingSizer;

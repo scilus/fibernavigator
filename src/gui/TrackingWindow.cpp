@@ -88,6 +88,9 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     wxToggleButton *m_pToggleRandom = new wxToggleButton( this, wxID_ANY,wxT("Use random seeds"), wxPoint(50,240), wxSize(140, -1) );
     Connect( m_pToggleRandom->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnRandomSeeding) );
 
+	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert"), wxPoint(50,270), wxSize(140, -1) );
+	Connect( m_pBtnConvert->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnConvertToFibers) );
+
     //wxToggleButton *m_pToggleInterp = new wxToggleButton( m_pTrackingWindow, wxID_ANY,wxT("Interpolation"), wxPoint(0,270), wxSize(140, -1) );
     //m_pTrackingWindow->Connect( m_pToggleInterp->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnInterpolate) );
 
@@ -184,7 +187,7 @@ void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
     long item = m_pMainFrame->getCurrentListIndex();
     //long item = m_pMainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
     //Tensors* pTensorInfo = dynamic_cast<Tensors*>((DatasetInfo*)m_pMainFrame->m_pListCtrl->GetItemData( item ));
-    Tensors * pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
+    Tensors* pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
 
     if( pTensorInfo != NULL )
     {
@@ -215,4 +218,20 @@ void TrackingWindow::OnInterpolate( wxCommandEvent& WXUNUSED(event) )
 {
     RTTrackingHelper::getInstance()->toggleInterpolateTensors();
     RTTrackingHelper::getInstance()->setRTTDirty( true );
+}
+
+void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
+{
+	//Fibers* l_fibers = new Fibers();
+	//l_fibers->convertFromRTT( m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getRTTFibers() );
+	//delete l_fibers;
+
+	if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
+    {
+        DatasetIndex result = DatasetManager::getInstance()->createFibersGroup();
+        m_pMainFrame->m_pListCtrl->InsertItem( result );
+    }
+
+	DatasetIndex index = DatasetManager::getInstance()->createFibers( m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getRTTFibers() );
+	m_pMainFrame->m_pListCtrl->InsertItem( index );
 }

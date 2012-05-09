@@ -55,6 +55,8 @@ public:
     float getMaxFiberLength()                    { return m_maxFiberLength; }
 
     size_t getSize()                             { return m_fibersRTT.size(); }
+
+	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
     
 
     //GPGPU functions

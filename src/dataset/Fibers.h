@@ -120,6 +120,8 @@ public:
     void    toggleCrossingFibers() { m_useIntersectedFibers = !m_useIntersectedFibers; }
     void    updateCrossingFibersThickness();
 
+	void  convertFromRTT( std::vector<std::vector<Vector> >* RTT );
+
 private:
     Fibers( const Fibers & );
     Fibers &operator=( const Fibers & );

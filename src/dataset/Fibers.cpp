@@ -3835,3 +3835,119 @@ void Fibers::releaseShader()
         ShaderHelper::getInstance()->getFibersShader()->release();
     }
 }
+
+void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
+{
+	//std::cout << RTT->size();
+	
+
+    
+    // the list of points
+    vector< vector< float > > lines;
+    m_countPoints = 0;
+    float back, front;
+
+    for( int i = 0; i < RTT->size() - 1; i+=2 )
+    {
+		if( RTT->size() > 0 )
+		{
+			back = RTT->at(i).size();
+			front = RTT->at(i+1).size();
+			int nbpoints = back + front;
+
+			/*if( back != 0 && front != 0 )
+			{
+				nbpoints--;
+			}*/
+			//std::cout << "i" << i << "\n";
+			//std::cout << "nbPoints" << nbpoints << "\n";
+			//std::cout << "back" << back << "\n";
+			//std::cout << "front" << front << "----\n";
+			if( nbpoints > 0 )
+			{
+				vector< float > curLine;
+				curLine.resize( nbpoints * 3 );
+
+				//back
+				for( int j = back - 1; j >= 0; j-- )
+				{
+					curLine[j * 3]  = RTT->at(i)[j].x;
+					curLine[j * 3 + 1] = RTT->at(i)[j].y;
+					curLine[j * 3 + 2] = RTT->at(i)[j].z;
+					//std::cout << "Jback" << j << "\n";
+
+				}
+
+				//front
+				for( int j = back, k = 0; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
+				{
+					curLine[j * 3]  = RTT->at(i+1)[k].x;
+					curLine[j * 3 + 1] = RTT->at(i+1)[k].y;
+					curLine[j * 3 + 2] = RTT->at(i+1)[k].z;	
+					//std::cout << "Jfront" << j << "\n";
+					//std::cout << "kFront" << k << "\n";
+				}
+
+				m_countPoints += curLine.size() / 3;
+				lines.push_back( curLine );
+			}
+		}
+    }
+
+    std::cout << "Set data" << "\n";
+    //set all the data in the right format for the navigator
+    m_countLines = lines.size();
+    DatasetManager::getInstance()->setCountFibers( m_countLines + 1 );
+    m_pointArray.max_size();
+    m_linePointers.resize( m_countLines + 1 );
+    m_pointArray.resize( m_countPoints * 3 );
+    m_linePointers[m_countLines] = m_countPoints;
+    m_reverse.resize( m_countPoints );
+    m_selected.resize( m_countLines, false );
+    m_filtered.resize( m_countLines, false );
+    m_linePointers[0] = 0;
+
+    for( int i = 0; i < m_countLines; ++i )
+    {
+        m_linePointers[i + 1] = m_linePointers[i] + lines[i].size() / 3;
+    }
+
+    int lineCounter = 0;
+
+    for( int i = 0; i < m_countPoints; ++i )
+    {
+        if( i == m_linePointers[lineCounter + 1] )
+        {
+            ++lineCounter;
+        }
+
+        m_reverse[i] = lineCounter;
+    }
+
+    unsigned int pos = 0;
+    vector< vector< float > >::iterator it;
+
+    for( it = lines.begin(); it < lines.end(); it++ )
+    {
+        vector< float >::iterator it2;
+
+        for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
+        {
+            m_pointArray[pos++] = *it2;
+        }
+    }
+
+    createColorArray( false );
+    m_type = FIBERS;
+    m_fullPath = wxT( "No path" );
+    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+#ifdef __WXMSW__
+    m_name = wxT( "RTTFibers" );
+#else
+    m_name = wxT( "RTTFibers" );
+#endif
+
+	m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+
+	std::cout << "Done" << "\n";
+}
