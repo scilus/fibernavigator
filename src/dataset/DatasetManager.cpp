@@ -587,7 +587,6 @@ DatasetIndex DatasetManager::createFibers( std::vector<std::vector<Vector> >* RT
 
     SceneManager::getInstance()->setSelBoxChanged( true );
 
-    delete l_fibers;
 	return index;
 }
 

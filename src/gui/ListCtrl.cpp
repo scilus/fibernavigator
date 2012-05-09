@@ -104,7 +104,7 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
             }
         }
     }
-
+	
     wxListCtrl::InsertItem( index, pDataset->getShow() ? 0 : 1 );
     SetItemData( index, datasetIndex );
 
