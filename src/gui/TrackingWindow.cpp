@@ -222,25 +222,13 @@ void TrackingWindow::OnInterpolate( wxCommandEvent& WXUNUSED(event) )
 
 void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 {
-	//Fibers* l_fibers = new Fibers();
-	//l_fibers->convertFromRTT( m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getRTTFibers() );
-	//delete l_fibers;
-
-
+	//Convert fibers
 	DatasetIndex index = DatasetManager::getInstance()->createFibers( m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getRTTFibers() );
-
 	DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( index );
-	std::cout << pDataset->getType();
 
-	
 	if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
     {
         DatasetIndex result = DatasetManager::getInstance()->createFibersGroup();
         m_pMainFrame->m_pListCtrl->InsertItem( result );
     }
-	
-
-	m_pMainFrame->m_pListCtrl->InsertItem( index );
-	
-
 }

@@ -3871,9 +3871,9 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 				//back
 				for( int j = back - 1; j >= 0; j-- )
 				{
-					curLine[j * 3]  = RTT->at(i)[j].x;
-					curLine[j * 3 + 1] = RTT->at(i)[j].y;
-					curLine[j * 3 + 2] = RTT->at(i)[j].z;
+					curLine[j * 3]  = RTT->at(i)[back - 1 - j].x;
+					curLine[j * 3 + 1] = RTT->at(i)[back - 1 - j].y;
+					curLine[j * 3 + 2] = RTT->at(i)[back - 1 - j].z;
 					//std::cout << "Jback" << j << "\n";
 
 				}
