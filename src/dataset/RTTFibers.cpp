@@ -9,6 +9,7 @@
 #include "RTTrackingHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
+#include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
 #include "../misc/lic/FgeOffscreen.h"
 
@@ -69,16 +70,7 @@ void RTTFibers::seed()
     Vector minCorner, maxCorner, middle;
     vector< vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
-    
-
-    //N = 16; //Number of seeds
-    texSize = 10;//(int)sqrt((double)N);
-
-    //seeds = (float*)malloc(4*N*sizeof(float));
-    //result = (float*)malloc(4*N*sizeof(float));
-    //xValues = (float*)malloc(4*N*sizeof(float));
-
-    //int i =0;
+    texSize = 10;
 
     for( unsigned int b = 0; b < selectionObjects.size(); b++ )
     {
@@ -125,43 +117,11 @@ void RTTFibers::seed()
 						}
 
                        //glColor3f(1,0,0);
-                        //m_pDatasetHelper->m_theScene->drawSphere( x, y, z, 0.2);
+                       //SceneManager::getInstance()->getScene()->drawSphere( x, y ,z, 0.2 );
 
-                       //if(i < 4*texSize*texSize*texSize)
-                       // {
-                       //     seeds[i] = x;
-                       //     seeds[i+1] = y;
-                       //     seeds[i+2] = z;
-                       //     seeds[i+3] = 0.0f;
-
-                       //     xValues[i] = 2.0f;
-                       //     xValues[i+1] = 2.0f;
-                       //     xValues[i+2] = 2.0f;
-                       //     xValues[i+3] = 0.0f;
-
-                       //     i+=4;
-                       // }
                     }
                 }
             }
-
-            //for(int k=0; k<4*N; k+=4)
-            //{
-            //    seeds[k] = k+1;
-            //    seeds[k+1] = k+1;
-            //    seeds[k+2] = k+1;
-            //    seeds[k+3] = 0;
-
-            //    xValues[k] = 100.0f;
-            //    xValues[k+1] = 100.0f;
-            //    xValues[k+2] = 100.0f;
-            //    xValues[k+3] = 0.0f;
-
-            //    std::cout << "BEFORESEED: " << seeds[k] << " " << seeds[k+1] << " " << seeds[k+2] << " " << seeds[k+3] << "\n";
-
-            //}
-            // std::cout << "BEFORE: " << seeds[0] << " " << seeds[1] << " " << seeds[2] << " " << seeds[3] << "\n";
-            //setupALL();
 
             renderRTTFibers();
             RTTrackingHelper::getInstance()->setRTTDirty( false );
@@ -642,7 +602,7 @@ void RTTFibers::performRTT(Vector seed, int bwdfwd, vector<Vector>& points, vect
         }
         else
         {
-            tensor = m_pTensorsInfo->getTensorsMatrix()->at(tensorNumber);
+            tensor = m_pTensorsInfo->getTensorsMatrix()->at(tensorNumber); 
         }
 
         //Find the MAIN axis

@@ -20,8 +20,6 @@ public:
     RTTFibers(); //Constructor
     ~RTTFibers(); //Destructor
 
-    //long index;
-
     //RTT functions
     void seed();
     void renderRTTFibers();
@@ -53,9 +51,9 @@ public:
     float getPuncture()                          { return m_puncture; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
-
-    size_t getSize()                             { return m_fibersRTT.size(); }
-
+    
+    wxString getTensorsFileName()                     { return m_pTensorsInfo->getPath();}
+    size_t getSize()                                  { return m_fibersRTT.size(); }
 	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
     
 
