@@ -3838,10 +3838,6 @@ void Fibers::releaseShader()
 
 void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 {
-	//std::cout << RTT->size();
-	
-
-    
     // the list of points
     vector< vector< float > > lines;
     m_countPoints = 0;
@@ -3855,14 +3851,6 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 			front = RTT->at(i+1).size();
 			int nbpoints = back + front;
 
-			/*if( back != 0 && front != 0 )
-			{
-				nbpoints--;
-			}*/
-			//std::cout << "i" << i << "\n";
-			//std::cout << "nbPoints" << nbpoints << "\n";
-			//std::cout << "back" << back << "\n";
-			//std::cout << "front" << front << "----\n";
 			if( nbpoints > 0 )
 			{
 				vector< float > curLine;
@@ -3874,8 +3862,6 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 					curLine[j * 3]  = RTT->at(i)[back - 1 - j].x;
 					curLine[j * 3 + 1] = RTT->at(i)[back - 1 - j].y;
 					curLine[j * 3 + 2] = RTT->at(i)[back - 1 - j].z;
-					//std::cout << "Jback" << j << "\n";
-
 				}
 
 				//front
@@ -3884,8 +3870,6 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 					curLine[j * 3]  = RTT->at(i+1)[k].x;
 					curLine[j * 3 + 1] = RTT->at(i+1)[k].y;
 					curLine[j * 3 + 2] = RTT->at(i+1)[k].z;	
-					//std::cout << "Jfront" << j << "\n";
-					//std::cout << "kFront" << k << "\n";
 				}
 
 				m_countPoints += curLine.size() / 3;
@@ -3894,7 +3878,6 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 		}
     }
 
-    std::cout << "Set data" << "\n";
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
     DatasetManager::getInstance()->setCountFibers( m_countLines + 1 );
@@ -3940,7 +3923,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = wxT( "No path" );
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
 #ifdef __WXMSW__
     m_name = wxT( "RTTFibers" );
 #else
@@ -3948,6 +3931,4 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 #endif
 
 	m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
-
-	std::cout << "Done" << "\n";
 }

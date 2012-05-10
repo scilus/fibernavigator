@@ -231,4 +231,6 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
         DatasetIndex result = DatasetManager::getInstance()->createFibersGroup();
         m_pMainFrame->m_pListCtrl->InsertItem( result );
     }
+
+	m_pMainFrame->m_pListCtrl->InsertItem( index );
 }
