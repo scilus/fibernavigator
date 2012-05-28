@@ -4,7 +4,7 @@
  */
 
 #include "RTTFibers.h"
-
+#include "../main.h"
 #include "DatasetManager.h"
 #include "RTTrackingHelper.h"
 #include "../Logger.h"
@@ -12,6 +12,10 @@
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
 #include "../misc/lic/FgeOffscreen.h"
+#include "../gui/MainFrame.h"
+#include "../misc/IsoSurface/CIsoSurface.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
+
 
 #include <algorithm>
 using std::sort;
@@ -129,149 +133,179 @@ void RTTFibers::seed()
         //Random seeds (spread within 8 quads inside voxel)
         else 
         {
-            middle.x = selectionObjects[0][0]->getCenter().x;
-            middle.y = selectionObjects[0][0]->getCenter().y;
-            middle.z = selectionObjects[0][0]->getCenter().z;
-
-            //L: Lower corner (min y)
-            //U: Upper corner (max y)
-            //F: Front corner (min z)
-            //B: Back  corner (max z) 
-            //R: Right corner (max x)
-            //L: Left  corner (min x)
-
-            Vector minLFR( selectionObjects[0][0]->getCenter().x, minCorner.y, minCorner.z );
-            Vector maxLFR( maxCorner.x, selectionObjects[0][0]->getCenter().y, selectionObjects[0][0]->getCenter().z );
-            Vector minUFL( minCorner.x, selectionObjects[0][0]->getCenter().y, minCorner.z );
-            Vector maxUFL( selectionObjects[0][0]->getCenter().x, maxCorner.y, selectionObjects[0][0]->getCenter().z );
-            Vector minUFR( selectionObjects[0][0]->getCenter().x, selectionObjects[0][0]->getCenter().y, minCorner.z );
-            Vector maxUFR( maxCorner.x, maxCorner.y, selectionObjects[0][0]->getCenter().z );
-            Vector minLBL( minCorner.x, minCorner.y, selectionObjects[0][0]->getCenter().z );
-            Vector maxLBL( selectionObjects[0][0]->getCenter().x, selectionObjects[0][0]->getCenter().y, maxCorner.z );
-            Vector minLBR( selectionObjects[0][0]->getCenter().x, minCorner.y, selectionObjects[0][0]->getCenter().z );
-            Vector maxLBR( maxCorner.x, selectionObjects[0][0]->getCenter().y, maxCorner.z );
-            Vector minUBL( minCorner.x, selectionObjects[0][0]->getCenter().y, selectionObjects[0][0]->getCenter().z );
-            Vector maxUBL( selectionObjects[0][0]->getCenter().x, maxCorner.y, maxCorner.z );
-         
-            for( int i = 0; i < 125; i++ ) //125 seeds * 8 quads = 1000seeds
+            for( int j = 0; j < MyApp::frame->m_pListCtrl->GetItemCount(); ++j )
             {
-                vector<Vector> points; // Points to be rendered
-                vector<Vector> color; //Color (local directions)
+                DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( j )); 
 
-                //Lower Front Left********
-                Vector quad1 = generateRandomSeed( minCorner, middle );
-                performRTT( quad1, 1, points, color ); //First pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+                if ( pMesh->getType() == ISO_SURFACE && pMesh->getShow() )
+                {
+                    CIsoSurface* pSurf = (CIsoSurface*) pMesh;
+                    std::vector< Vector > positions = pSurf->m_tMesh->getVerts();
 
-                performRTT( quad1, -1, points, color ); //Second pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+                    for ( size_t k = 0; k < positions.size(); ++k )
+                    {
+                        vector<Vector> points; // Points to be rendered
+                        vector<Vector> color; //Color (local directions)
+                        
+                        //Track both sides
+                        performRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, points, color); //First pass
+                        m_fibersRTT.push_back( points );
+                        m_colorsRTT.push_back( color );
+                        points.clear();
+                        color.clear();
+        
+                        performRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, points, color); //Second pass
+                        m_fibersRTT.push_back( points ); 
+                        m_colorsRTT.push_back( color );
 
-                //Lower Front Right*******
-                Vector quad2 = generateRandomSeed( minLFR, maxLFR );
-                performRTT( quad2, 1, points, color ); //First pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+                    }
+                }
+            }
 
-                performRTT( quad2, -1, points, color ); //Second pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
 
-                //Upper Front Left*******
-                Vector quad3 = generateRandomSeed( minUFL, maxUFL  );
-                performRTT( quad3, 1, points, color ); //First pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //middle.x = selectionObjects[0][0]->getCenter().x;
+            //middle.y = selectionObjects[0][0]->getCenter().y;
+            //middle.z = selectionObjects[0][0]->getCenter().z;
 
-                performRTT( quad3, -1, points, color ); //Second pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            ////L: Lower corner (min y)
+            ////U: Upper corner (max y)
+            ////F: Front corner (min z)
+            ////B: Back  corner (max z) 
+            ////R: Right corner (max x)
+            ////L: Left  corner (min x)
 
-                //Upper Front Right******
-                Vector quad4 = generateRandomSeed( minUFR, maxUFR );
-                performRTT( quad4, 1, points, color ); //First pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //Vector minLFR( selectionObjects[0][0]->getCenter().x, minCorner.y, minCorner.z );
+            //Vector maxLFR( maxCorner.x, selectionObjects[0][0]->getCenter().y, selectionObjects[0][0]->getCenter().z );
+            //Vector minUFL( minCorner.x, selectionObjects[0][0]->getCenter().y, minCorner.z );
+            //Vector maxUFL( selectionObjects[0][0]->getCenter().x, maxCorner.y, selectionObjects[0][0]->getCenter().z );
+            //Vector minUFR( selectionObjects[0][0]->getCenter().x, selectionObjects[0][0]->getCenter().y, minCorner.z );
+            //Vector maxUFR( maxCorner.x, maxCorner.y, selectionObjects[0][0]->getCenter().z );
+            //Vector minLBL( minCorner.x, minCorner.y, selectionObjects[0][0]->getCenter().z );
+            //Vector maxLBL( selectionObjects[0][0]->getCenter().x, selectionObjects[0][0]->getCenter().y, maxCorner.z );
+            //Vector minLBR( selectionObjects[0][0]->getCenter().x, minCorner.y, selectionObjects[0][0]->getCenter().z );
+            //Vector maxLBR( maxCorner.x, selectionObjects[0][0]->getCenter().y, maxCorner.z );
+            //Vector minUBL( minCorner.x, selectionObjects[0][0]->getCenter().y, selectionObjects[0][0]->getCenter().z );
+            //Vector maxUBL( selectionObjects[0][0]->getCenter().x, maxCorner.y, maxCorner.z );
+         
+            //for( int i = 0; i < 125; i++ ) //125 seeds * 8 quads = 1000seeds
+            //{
+            //    vector<Vector> points; // Points to be rendered
+            //    vector<Vector> color; //Color (local directions)
 
-                performRTT( quad4, -1, points, color ); //Second pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //    //Lower Front Left********
+            //    Vector quad1 = generateRandomSeed( minCorner, middle );
+            //    performRTT( quad1, 1, points, color ); //First pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
 
-                //Lower Back Left********
-                Vector quad5 = generateRandomSeed( minLBL, maxLBL );
-                performRTT( quad5, 1, points, color ); //First pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //    performRTT( quad1, -1, points, color ); //Second pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
 
-                performRTT( quad5, -1, points, color ); //Second pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //    //Lower Front Right*******
+            //    Vector quad2 = generateRandomSeed( minLFR, maxLFR );
+            //    performRTT( quad2, 1, points, color ); //First pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
 
-                //Lower Back Right*********
-                Vector quad6 = generateRandomSeed( minLBR, maxLBR );
-                performRTT( quad6, 1, points, color ); //First pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //    performRTT( quad2, -1, points, color ); //Second pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
 
-                performRTT( quad6, -1, points, color ); //Second pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //    //Upper Front Left*******
+            //    Vector quad3 = generateRandomSeed( minUFL, maxUFL  );
+            //    performRTT( quad3, 1, points, color ); //First pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
 
-                //Upper Back Left******
-                Vector quad7 = generateRandomSeed( minUBL, maxUBL );
-                performRTT( quad7, 1, points, color ); //First pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //    performRTT( quad3, -1, points, color ); //Second pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
 
-                performRTT( quad7, -1, points, color ); //Second pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //    //Upper Front Right******
+            //    Vector quad4 = generateRandomSeed( minUFR, maxUFR );
+            //    performRTT( quad4, 1, points, color ); //First pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
 
-                //Upper Back Right******
-                Vector quad8 = generateRandomSeed( middle, maxCorner );
-                performRTT( quad8, 1, points, color ); //First pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
-                points.clear();
-                color.clear();
+            //    performRTT( quad4, -1, points, color ); //Second pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
 
-                performRTT( quad8, -1, points, color ); //Second pass
-                m_fibersRTT.push_back( points );
-                m_colorsRTT.push_back( color );
+            //    //Lower Back Left********
+            //    Vector quad5 = generateRandomSeed( minLBL, maxLBL );
+            //    performRTT( quad5, 1, points, color ); //First pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
+
+            //    performRTT( quad5, -1, points, color ); //Second pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
+
+            //    //Lower Back Right*********
+            //    Vector quad6 = generateRandomSeed( minLBR, maxLBR );
+            //    performRTT( quad6, 1, points, color ); //First pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
+
+            //    performRTT( quad6, -1, points, color ); //Second pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
+
+            //    //Upper Back Left******
+            //    Vector quad7 = generateRandomSeed( minUBL, maxUBL );
+            //    performRTT( quad7, 1, points, color ); //First pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
+
+            //    performRTT( quad7, -1, points, color ); //Second pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
+
+            //    //Upper Back Right******
+            //    Vector quad8 = generateRandomSeed( middle, maxCorner );
+            //    performRTT( quad8, 1, points, color ); //First pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
+            //    points.clear();
+            //    color.clear();
+
+            //    performRTT( quad8, -1, points, color ); //Second pass
+            //    m_fibersRTT.push_back( points );
+            //    m_colorsRTT.push_back( color );
             }
             renderRTTFibers();
         }
-    }
 }
+    
 
 ///////////////////////////////////////////////////////////////////////////
 //Rendering stage
