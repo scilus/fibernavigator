@@ -303,7 +303,8 @@ void RTTFibers::seed()
             //    m_colorsRTT.push_back( color );
             }
             renderRTTFibers();
-        }
+			RTTrackingHelper::getInstance()->setRTTDirty( false );
+		}
 }
     
 

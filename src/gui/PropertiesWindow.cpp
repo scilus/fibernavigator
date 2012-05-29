@@ -334,12 +334,15 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
         {
             CIsoSurface* s = (CIsoSurface*)l_current;
             s->GenerateWithThreshold();
+			RTTrackingHelper::getInstance()->setRTTDirty( true );
+
         }
         else if( l_current->getType() < RGB )
         {
             Anatomy* a = (Anatomy*)l_current;
             if( a->m_pRoi )
                 a->m_pRoi->setThreshold( l_threshold );
+			
         }
 
         // This slider will set the Brightness level. Currently only the glyphs uses this value.
