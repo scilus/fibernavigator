@@ -65,7 +65,7 @@ void Logger::print( const wxString &str, const LogLevel level )
 
 #ifdef __WXMSW__
     m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.char_str() << str.char_str() << "\n";
-#elif
+#else
     m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.c_str() << str.c_str() << "\n";
 #endif
     
