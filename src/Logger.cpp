@@ -62,7 +62,7 @@ void Logger::print( const wxString &str, const LogLevel level )
     }
 
     wxDateTime time = wxDateTime::Now();
-    m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.char_str() << str.char_str() << "\n";
+    m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.c_str() << str.c_str() << "\n";
     
     if( LOGLEVEL_ERROR == level || LOGLEVEL_GLERROR == level )
     {

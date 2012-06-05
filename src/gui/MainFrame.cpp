@@ -1610,7 +1610,7 @@ void MainFrame::onSetCMapNo( wxCommandEvent& WXUNUSED(event) )
  * Menu Help
  *
  ****************************************************************************************************/
-
+/**/
 void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
 {
     wxString rev = _T( "$Revision$" );
