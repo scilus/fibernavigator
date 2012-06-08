@@ -40,6 +40,13 @@ struct SubTextureBox {
 class Anatomy : public DatasetInfo
 {
 friend class PropertiesWindow;
+    
+    enum AxialOrientation
+    {
+        ORIENTATION_LEFT_TO_RIGHT,
+        ORIENTATION_RIGHT_TO_LEFT,
+        ORIENTATION_UNDEFINED
+    };
 
 public:
     //constructor/destructor
@@ -148,6 +155,9 @@ private:
     void generateGeometry() {};
     void initializeBuffer() {};
     void smooth()           {};
+    
+    // Created to work around the virtual qualifier of flipAxis(...)
+    void flipAxisInternal( AxisType axe, const bool regenerateDisplayObjects );
 
     std::stack< std::stack< SubTextureBox > >    m_drawHistory;
 
@@ -164,6 +174,8 @@ private:
     unsigned int            m_currentLowerEqThreshold;
     unsigned int            m_currentUpperEqThreshold;
     unsigned int            m_cdf[256];
+    
+    AxialOrientation        m_originalAxialOrientation;
 };
 
 #endif /* ANATOMY_H_ */
