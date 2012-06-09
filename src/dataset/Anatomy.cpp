@@ -49,7 +49,8 @@ Anatomy::Anatomy( )
   m_lowerEqThreshold( LOWER_EQ_THRES ),
   m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
-  m_currentUpperEqThreshold( -1 )
+  m_currentUpperEqThreshold( -1 ),
+  m_originalAxialOrientation( ORIENTATION_UNDEFINED )
 {
     m_bands = 1;
 }
@@ -64,7 +65,8 @@ Anatomy::Anatomy( const wxString &filename )
   m_lowerEqThreshold( LOWER_EQ_THRES ),
   m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
-  m_currentUpperEqThreshold( -1 )
+  m_currentUpperEqThreshold( -1 ),
+  m_originalAxialOrientation( ORIENTATION_UNDEFINED )
 {
     m_bands = 1;
 
@@ -88,7 +90,8 @@ Anatomy::Anatomy( const Anatomy * const pAnatomy )
   m_lowerEqThreshold( LOWER_EQ_THRES ),
   m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
-  m_currentUpperEqThreshold( -1 )
+  m_currentUpperEqThreshold( -1 ),
+  m_originalAxialOrientation( ORIENTATION_UNDEFINED )
 {
     m_columns = pAnatomy->m_columns;
     m_rows    = pAnatomy->m_rows;
@@ -111,7 +114,8 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
   m_lowerEqThreshold( LOWER_EQ_THRES ),
   m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
-  m_currentUpperEqThreshold( -1 )
+  m_currentUpperEqThreshold( -1 ),
+  m_originalAxialOrientation( ORIENTATION_UNDEFINED )
 {
     m_columns = DatasetManager::getInstance()->getColumns();
     m_rows    = DatasetManager::getInstance()->getRows();
@@ -136,7 +140,8 @@ Anatomy::Anatomy( const int type )
   m_lowerEqThreshold( LOWER_EQ_THRES ),
   m_upperEqThreshold( UPPER_EQ_THRES ),
   m_currentLowerEqThreshold( -1 ),
-  m_currentUpperEqThreshold( -1 )
+  m_currentUpperEqThreshold( -1 ),
+  m_originalAxialOrientation( ORIENTATION_UNDEFINED )
 {
     m_columns = DatasetManager::getInstance()->getColumns();
     m_rows    = DatasetManager::getInstance()->getRows();
@@ -403,6 +408,11 @@ void Anatomy::minimize()
 
 void Anatomy::flipAxis( AxisType axe )
 {
+    flipAxisInternal( axe, true );
+}
+
+void Anatomy::flipAxisInternal( AxisType axe, const bool regenerateDisplayObjects )
+{
     float tmp;
     int curIndex;
     int flipIndex;
@@ -466,10 +476,13 @@ void Anatomy::flipAxis( AxisType axe )
         equalizeHistogram();
     }
 
-    const GLuint* pTexId = &m_GLuint;
-    glDeleteTextures( 1, pTexId );
-    Logger::getInstance()->printIfGLError( wxT( "Anatomy::flipAxis - glDeleteTextures") );
-    generateTexture();
+    if( regenerateDisplayObjects )
+    {
+        const GLuint* pTexId = &m_GLuint;
+        glDeleteTextures( 1, pTexId );
+        Logger::getInstance()->printIfGLError( wxT( "Anatomy::flipAxis - glDeleteTextures") );
+        generateTexture();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -568,6 +581,31 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
         DatasetManager::getInstance()->getNiftiTransform().makeIdendity();
     }
     
+    // Guess the original data orientation from the transformation matrix.
+    if( pHeader->sform_code > 0 )
+    {
+        if( pHeader->sto_xyz.m[0][0] < 0.0 )
+        {
+            m_originalAxialOrientation = ORIENTATION_RIGHT_TO_LEFT;
+        }
+        else
+        {
+            m_originalAxialOrientation = ORIENTATION_LEFT_TO_RIGHT;
+        }
+    }
+    else if( pHeader->qform_code > 0 )
+    {
+        if( pHeader->qto_xyz.m[0][0] < 0.0 )
+        {
+            m_originalAxialOrientation = ORIENTATION_RIGHT_TO_LEFT;
+        }
+        else
+        {
+            m_originalAxialOrientation = ORIENTATION_LEFT_TO_RIGHT;
+        }
+    }
+    
+    // Check the data type.
     if( pHeader->datatype == 2 )
     {
         if( pHeader->dim[4] == 1 )
@@ -740,7 +778,6 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
                 m_floatDataset[i * 3 + 2]   = pData[2 * datasetSize + i];
             }
 
-            m_pTensorField = new TensorField( m_columns, m_rows, m_frames, &m_floatDataset, 1, 3 );
             flag = true;
             break;
         }
@@ -754,6 +791,17 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     }
 
     m_isLoaded = flag;
+    
+    // Flip the data if needed.
+    if( m_originalAxialOrientation == ORIENTATION_RIGHT_TO_LEFT )
+    {
+        flipAxisInternal( X_AXIS, false );
+    }
+    
+    if( m_isLoaded && m_type == VECTORS )
+    {
+        m_pTensorField = new TensorField( m_columns, m_rows, m_frames, &m_floatDataset, 1, 3 );
+    }
 
     return flag;
 }
