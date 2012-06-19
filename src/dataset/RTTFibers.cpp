@@ -30,6 +30,8 @@ RTTFibers::RTTFibers()
 :   m_FAThreshold( 0.10f ),
     m_angleThreshold( 60.0f ),
     m_step( 1.0f ),
+    m_nbSeed ( 10.0f ),
+    m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
     m_minFiberLength( 10 ),
     m_maxFiberLength( 200 )
@@ -74,7 +76,7 @@ void RTTFibers::seed()
     Vector minCorner, maxCorner, middle;
     vector< vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
-    texSize = 10;
+    //texSize = 10;
 
     for( unsigned int b = 0; b < selectionObjects.size(); b++ )
     {
@@ -86,11 +88,11 @@ void RTTFibers::seed()
         maxCorner.z = selectionObjects[b][0]->getCenter().z + selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
 
         //Evenly distanced seeds
-        if( !RTTrackingHelper::getInstance()->isRandomSeeds() )
+        if( !RTTrackingHelper::getInstance()->isShellSeeds() )
         {
-            float xstep =  selectionObjects[b][0]->getSize().x * xVoxel / float( texSize - 1.0f );
-            float ystep =  selectionObjects[b][0]->getSize().y * yVoxel / float( texSize - 1.0f );
-            float zstep =  selectionObjects[b][0]->getSize().z * zVoxel / float( texSize - 1.0f );
+            float xstep =  selectionObjects[b][0]->getSize().x * xVoxel / float( m_nbSeed - 1.0f );
+            float ystep =  selectionObjects[b][0]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
+            float zstep =  selectionObjects[b][0]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
 
             for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
             {
@@ -130,7 +132,7 @@ void RTTFibers::seed()
             renderRTTFibers();
             RTTrackingHelper::getInstance()->setRTTDirty( false );
         }
-        //Random seeds (spread within 8 quads inside voxel)
+        //Mesh ShellSeeding
         else 
         {
             for( int j = 0; j < MyApp::frame->m_pListCtrl->GetItemCount(); ++j )
@@ -141,6 +143,8 @@ void RTTFibers::seed()
                 {
                     CIsoSurface* pSurf = (CIsoSurface*) pMesh;
                     std::vector< Vector > positions = pSurf->m_tMesh->getVerts();
+
+                    m_nbMeshPt = positions.size();
 
                     for ( size_t k = 0; k < positions.size(); ++k )
                     {

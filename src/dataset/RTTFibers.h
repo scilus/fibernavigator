@@ -40,6 +40,7 @@ public:
     void setAngleThreshold( float angleThreshold )              { m_angleThreshold = angleThreshold; }
     void setPuncture( float puncture )                          { m_puncture = puncture; }
     void setStep( float step )                                  { m_step = step; }
+    void setNbSeed ( float nbSeed )                             { m_nbSeed = nbSeed; }
     void setMinFiberLength( float minLength )                   { m_minFiberLength = minLength; }
     void setMaxFiberLength( float maxLength )                   { m_maxFiberLength = maxLength; }
     void setTensorsInfo( Tensors* info )                        { m_pTensorsInfo = info; }
@@ -48,6 +49,8 @@ public:
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
     float getStep()                              { return m_step; }
+    float getNbMeshPoint()                       { return m_nbMeshPt; }
+
     float getPuncture()                          { return m_puncture; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
@@ -105,6 +108,8 @@ private:
     float       m_FAThreshold;
     float       m_angleThreshold;
     float       m_step;
+    float       m_nbSeed;
+    float       m_nbMeshPt;
     float       m_puncture;
     float       m_minFiberLength;
     float       m_maxFiberLength;

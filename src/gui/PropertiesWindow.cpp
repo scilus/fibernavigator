@@ -15,6 +15,7 @@
 #include "../dataset/RTTrackingHelper.h"
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
 
 #include <wx/colordlg.h>
 #include <wx/notebook.h>
@@ -335,6 +336,11 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
             CIsoSurface* s = (CIsoSurface*)l_current;
             s->GenerateWithThreshold();
 			RTTrackingHelper::getInstance()->setRTTDirty( true );
+            
+            std::vector< Vector > positions = s->m_tMesh->getVerts();
+            float shellSeedNb = positions.size();
+            m_pMainFrame->m_pTrackingWindow->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );
+            
 
         }
         else if( l_current->getType() < RGB )
