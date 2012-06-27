@@ -367,13 +367,10 @@ void SceneManager::updateAllSelectionObjects()
 {
     Logger::getInstance()->print( wxT( "SceneManager::updateAllSelectionObjects" ), LOGLEVEL_DEBUG );
 
-    SelectionObjList selectionObjs = getSelectionObjects();
-    for( SelectionObjList::iterator it = selectionObjs.begin(); it != selectionObjs.end(); ++it)
+    SelectionTree::SelectionObjectVector selectionObjects = getSelectionTree().getAllObjects();
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
-        for( vector<SelectionObject *>::iterator childIt = it->begin(); childIt != it->end(); ++childIt )
-        {
-            (*childIt)->setIsDirty( true );
-        }
+        selectionObjects[objIdx]->setIsDirty( true );
     }
 }
 

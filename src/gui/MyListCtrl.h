@@ -28,6 +28,31 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+class CustomTreeItem : public wxTreeItemData
+{
+public:
+    CustomTreeItem()
+    : wxTreeItemData(),
+    m_itemId( -1 )
+    {}
+    
+    CustomTreeItem( const int itemId )
+    : wxTreeItemData(),
+    m_itemId( itemId )
+    {}
+    
+    virtual ~CustomTreeItem(){}
+    
+    int getId() const
+    {
+        return m_itemId;
+    }
+    
+private:
+    int m_itemId;
+};
+
+
 //////////////////////////////////////////////////////////////////////////
 
 class MySlider: public wxSlider 

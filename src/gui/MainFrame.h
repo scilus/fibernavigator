@@ -49,6 +49,7 @@ public:
     void deleteSceneObject();
     void deleteListItem();
     void deleteTreeItem();
+    void toggleTreeItemActivation();
     void refreshAllGLWidgets();
     void refreshViews();
     void screenshot                         ( const wxString &path, const wxString &filename );
@@ -181,7 +182,9 @@ private:
     void onUnSelectTreeItem                 ( wxTreeEvent&    evt );
     void onActivateTreeItem                 ( wxTreeEvent&    evt );
     void onTreeLabelEdit                    ( wxTreeEvent&    evt );
-    int  treeSelected                       ( wxTreeItemId    id  ); 
+    int  treeSelected                       ( wxTreeItemId    id  );
+    
+    TreeObjectType treeSelectedNew          ( const wxTreeItemId itemId );
 
     // System functions
     void onGLEvent                          ( wxCommandEvent& evt );    

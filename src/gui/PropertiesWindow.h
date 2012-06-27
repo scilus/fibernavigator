@@ -20,6 +20,7 @@
 
 class MainFrame;
 class ListCtrl;
+class SelectionObject;
 
 class PropertiesWindow : public wxScrolledWindow
 {
@@ -150,6 +151,10 @@ public:
 private:
     PropertiesWindow() { }
     PropertiesWindow(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
+    
+    void AddSelectionObjectToSelectionTree( SelectionObject *pSelObj, const wxTreeItemId & parentTreeId );
+    //void AddSelectionObjectsToSelectionTree( const std::vector< SelectionObject* > &selObjects, 
+    //                                        bool addAsChildOfFirst = false );
 
 private:
     wxWindow  *m_pNotebook;

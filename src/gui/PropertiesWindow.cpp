@@ -508,31 +508,20 @@ void PropertiesWindow::OnNewDistanceMap (wxCommandEvent& WXUNUSED(event))
 void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNewVoiFromOverlay" ), LOGLEVEL_DEBUG );
-
-    // TODO selection tree
-    /*wxTreeItemId     treeObjectId  = m_pMainFrame->m_tSelectionObjectsId;
-    SelectionObject* selectionObj  = NULL;
-    Anatomy*         anatomy       = NULL;
-    wxColor          color;
-    bool             isMaster;
-
-    if( m_pMainFrame->getLastSelectedObj() != NULL )
-    {
-        treeObjectId = m_pMainFrame->getLastSelectedObj()->GetId();
-    }
-
+    
+    SelectionObject *pSelectionObject  = NULL;
+    Anatomy         *pAnatomy          = NULL;
+    
     if(m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
         if ( ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getType() < RGB)
         {
-            anatomy = (Anatomy*)m_pMainFrame->m_pCurrentSceneObject;
-            selectionObj = new SelectionBox( anatomy );
-            float trs = anatomy->getThreshold();
+            pAnatomy = (Anatomy*)m_pMainFrame->m_pCurrentSceneObject;
+            float trs = pAnatomy->getThreshold();
             if( trs == 0.0 )
-            {
                 trs = 0.01f;
-            }
-            selectionObj->setThreshold( trs );
+            
+            pSelectionObject = new SelectionVOI( pAnatomy, trs, THRESHOLD_GREATER_EQUAL );
         }
         else
         {
@@ -543,29 +532,12 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     {
         return;
     }
-
-    if( m_pMainFrame->treeSelected( treeObjectId ) == MASTER_OBJECT)
-    {
-        color = *wxGREEN;
-        isMaster = false;
-    }
-    else
-    {
-        treeObjectId = m_pMainFrame->m_tSelectionObjectsId;
-        color = *wxCYAN;
-        isMaster = true;
-    }
-
-    wxTreeItemId l_treeNewObjectId = m_pMainFrame->m_pTreeWidget->AppendItem( treeObjectId, selectionObj->getName(), 0, -1, selectionObj );
-    m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( l_treeNewObjectId, color );
-    m_pMainFrame->m_pTreeWidget->EnsureVisible( l_treeNewObjectId );
-    m_pMainFrame->m_pTreeWidget->SetItemImage( l_treeNewObjectId, selectionObj->getIcon() );
-    selectionObj->setTreeId( l_treeNewObjectId );
-    selectionObj->setIsMaster( isMaster );
-    anatomy->m_pRoi = selectionObj;
-
-    SceneManager::getInstance()->setSelBoxChanged( true );
-    m_pMainFrame->refreshAllGLWidgets();*/
+    
+    wxTreeItemId parentSelectionId = m_pMainFrame->m_pTreeWidget->GetSelection();
+    
+    AddSelectionObjectToSelectionTree( pSelectionObject, parentSelectionId );
+    
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
@@ -1328,75 +1300,88 @@ void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnRenameBox( wxCommandEvent& WXUNUSED(event) )
 {
-    //Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnRenameBox" ), LOGLEVEL_DEBUG );
-    Logger::getInstance()->print( wxT( "TODO implement selection tree - PropertiesWindow::OnRenameBox" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnRenameBox" ), LOGLEVEL_DEBUG );
     
-    // TODO selection tree
+    wxTreeItemId treeBoxId = m_pMainFrame->m_pTreeWidget->GetSelection();
     
-    /*wxTreeItemId l_treeBoxId = m_pMainFrame->m_pTreeWidget->GetSelection();
-    if( m_pMainFrame->treeSelected( l_treeBoxId ) == MASTER_OBJECT || m_pMainFrame->treeSelected( l_treeBoxId ) == CHILD_OBJECT )
+    TreeObjectType objectType = m_pMainFrame->treeSelectedNew( treeBoxId );
+    
+    if( objectType == TYPE_SELECTION_OBJECT )
     {
-        SelectionObject* l_box = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeBoxId ) );
-
+        CustomTreeItem *pTreeItem = (CustomTreeItem*)m_pMainFrame->m_pTreeWidget->GetItemData( treeBoxId );
+        SelectionObject *pSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pTreeItem->getId() );
+        
         wxTextEntryDialog dialog(this, _T( "Please enter a new name" ) );
-        dialog.SetValue( l_box->getName() );
-
+        dialog.SetValue( pSelObject->getName() );
+        
         if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
-        {
-            l_box->setName( dialog.GetValue() );
-        }
-
-        m_pMainFrame->m_pTreeWidget->SetItemText( l_treeBoxId, l_box->getName() );
+		{
+            pSelObject->setName( dialog.GetValue() );
+		}
+        
+        m_pMainFrame->m_pTreeWidget->SetItemText( treeBoxId, pSelObject->getName() );
     }
-    m_pMainFrame->refreshAllGLWidgets();*/
+    
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 {
-    //Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
-    Logger::getInstance()->print( wxT( "TODO implement selection tree - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
-
-    // Get what selection object is selected.
-    // TODO selection tree
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
     
-    /*wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-
-    if( m_pMainFrame->treeSelected(l_selectionObjectTreeId) == CHILD_OBJECT)
+    // TODO selection tree do we still need this
+    //if( !m_mainFrame->m_pDatasetHelper->m_theScene)
+    //    return;
+    
+    // Get what selection object is selected.
+    wxTreeItemId selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
+    
+    if( m_pMainFrame->treeSelectedNew( selectionObjectTreeId ) == TYPE_SELECTION_OBJECT )
     {
-        SelectionObject* l_box = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_box->toggleIsNOT();
-
-        wxTreeItemId l_parentId = m_pMainFrame->m_pTreeWidget->GetItemParent( l_selectionObjectTreeId );
-        ((SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_parentId ) ) )->setIsDirty( true );
-
-        if( ( (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) ) )->getIsNOT() )
-            m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( l_selectionObjectTreeId, *wxRED   );
+        CustomTreeItem *pTreeItem = (CustomTreeItem*)m_pMainFrame->m_pTreeWidget->GetItemData( selectionObjectTreeId );
+        SelectionObject *pSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pTreeItem->getId() );
+        
+        pSelObject->toggleIsNOT();
+        
+        if( pSelObject->getIsNOT() )
+        {
+            m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( selectionObjectTreeId, *wxRED   );
+        }
         else
-            m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( l_selectionObjectTreeId, *wxGREEN );
-
-        m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_box->getIcon() );
-        l_box->setIsDirty( true );
+        {
+            m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( selectionObjectTreeId, *wxGREEN );
+        }
+        
+        wxTreeItemId parentId = m_pMainFrame->m_pTreeWidget->GetItemParent( selectionObjectTreeId );
+        
+        if( m_pMainFrame->treeSelectedNew( parentId ) == TYPE_SELECTION_OBJECT )
+        {
+            CustomTreeItem *pParentTreeItem = (CustomTreeItem*)m_pMainFrame->m_pTreeWidget->GetItemData( parentId );
+            SelectionObject *pParentSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pParentTreeItem->getId() );
+            
+            pParentSelObject->setIsDirty( true );
+        }
     }
-    m_pMainFrame->refreshAllGLWidgets();*/
+    
+    m_pMainFrame->refreshAllGLWidgets();
 }
-
 
 void PropertiesWindow::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorRoi" ), LOGLEVEL_DEBUG );
 
-    // Get the currently selected object.
-    wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-    SelectionObject* l_selectionObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-
-    wxColourData l_colorData;
-
+    /////
+    //if( ! m_mainFrame->m_pDatasetHelper->m_theScene )
+    //    return;
+    
+    wxColourData colorData;
+    
     for( int i = 0; i < 10; ++i )
     {
         wxColour l_color( i * 28, i * 28, i * 28 );
-        l_colorData.SetCustomColour( i, l_color );
+        colorData.SetCustomColour( i, l_color );
     }
-
+    
     int i = 10;
     wxColour color ( 255, 0,   0   );
     wxColour color1( 0,   255, 0   );
@@ -1404,20 +1389,21 @@ void PropertiesWindow::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
     wxColour color3( 255, 255, 0   );
     wxColour color4( 255, 0,   255 );
     wxColour color5( 0,   255, 255 );
-
-    l_colorData.SetCustomColour( i++, color  );
-    l_colorData.SetCustomColour( i++, color1 );
-    l_colorData.SetCustomColour( i++, color2 );
-    l_colorData.SetCustomColour( i++, color3 );
-    l_colorData.SetCustomColour( i++, color4 );
-    l_colorData.SetCustomColour( i++, color5 );
+    
+    colorData.SetCustomColour( i++, color  );
+    colorData.SetCustomColour( i++, color1 );
+    colorData.SetCustomColour( i++, color2 );
+    colorData.SetCustomColour( i++, color3 );
+    colorData.SetCustomColour( i++, color4 );
+    colorData.SetCustomColour( i++, color5 );
 #ifdef __WXMAC__
     wxColourDialog dialog( this);
 #else
-    wxColourDialog dialog( this, &l_colorData );
+    wxColourDialog dialog( this, &colorData );
 #endif
-    wxColour l_color;
 
+    wxColour l_color;
+    
     if( dialog.ShowModal() == wxID_OK )
     {
         wxColourData retData = dialog.GetColourData();
@@ -1425,9 +1411,15 @@ void PropertiesWindow::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
     }
     else
         return;
-
-    l_selectionObject->setColor( l_color );
-
+    
+    wxTreeItemId treeBoxId = m_pMainFrame->m_pTreeWidget->GetSelection();
+    
+    CustomTreeItem *pTreeItem = reinterpret_cast< CustomTreeItem* >( m_pMainFrame->m_pTreeWidget->GetItemData( treeBoxId ) );
+    
+    SelectionObject *pSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pTreeItem->getId() );
+    
+    pSelObject->setColor( l_color );
+    
     m_pMainFrame->refreshAllGLWidgets();
 }
 
@@ -1825,3 +1817,74 @@ void PropertiesWindow::OnCrossingFibersThicknessChange( wxCommandEvent& WXUNUSED
         }
     }
 }
+
+void PropertiesWindow::AddSelectionObjectToSelectionTree( SelectionObject *pSelObj,
+                                                         const wxTreeItemId &parentTreeId )
+{
+    wxTreeItemId newSelectionObjectId;
+    
+    if( m_pMainFrame->treeSelectedNew( parentTreeId ) == TYPE_SELECTION_MASTER ||
+        m_pMainFrame->treeSelectedNew( parentTreeId ) == TYPE_INVALID )
+    {
+        pSelObj->setIsMaster( true );
+        
+        int itemId = SceneManager::getInstance()->getSelectionTree().addChildrenObject( -1, pSelObj );
+        
+        CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
+        newSelectionObjectId = m_pMainFrame->m_pTreeWidget->AppendItem( m_pMainFrame->m_tSelectionObjectsId, pSelObj->getName(), 0, -1, pTreeItem );
+        
+        m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxCYAN );
+    }
+    else if( m_pMainFrame->treeSelectedNew( parentTreeId ) == TYPE_SELECTION_OBJECT )
+    {
+        CustomTreeItem *pItem = (CustomTreeItem*) m_pMainFrame->m_pTreeWidget->GetItemData( parentTreeId );
+        
+        int parentId = pItem->getId();
+        
+        int childId = SceneManager::getInstance()->getSelectionTree().addChildrenObject( parentId,  pSelObj );
+        
+        CustomTreeItem *pTreeItem = new CustomTreeItem( childId );
+        newSelectionObjectId = m_pMainFrame->m_pTreeWidget->AppendItem( parentTreeId, pSelObj->getName(), 0, -1, pTreeItem );
+        
+        m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "Tried to add a selection object under the points part. Something in the code isn't right." ), LOGLEVEL_DEBUG );
+        return;
+    }
+    
+    pSelObj->setTreeId( newSelectionObjectId );
+    m_pMainFrame->m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+    m_pMainFrame->m_pTreeWidget->SetItemImage( newSelectionObjectId, pSelObj->getIcon() );
+    m_pMainFrame->m_pTreeWidget->SelectItem( newSelectionObjectId, true );
+    
+    SceneManager::getInstance()->setSelBoxChanged( true );
+}
+
+// TODO selection tree check if we keep
+/*void PropertiesWindow::AddSelectionObjectsToSelectionTree( const vector< SelectionObject* > &selObjects, bool addAsChildOfFirst /* = false */ //)
+/*{
+    if( selObjects.empty() )
+    {
+        return;
+    }
+    
+    wxTreeItemId baseSelectionId = m_mainFrame->m_pTreeWidget->GetSelection();
+    
+    AddSelectionObjectToSelectionTree( selObjects[0], baseSelectionId );
+    
+    wxTreeItemId parentSelectionId = m_mainFrame->m_pTreeWidget->GetSelection();
+    
+    for( unsigned int selObjIdx( 1 ); selObjIdx < selObjects.size(); ++selObjIdx )
+    {
+        AddSelectionObjectToSelectionTree( selObjects[ selObjIdx ], parentSelectionId );
+        
+        if( !addAsChildOfFirst )
+        {
+            parentSelectionId = m_mainFrame->m_pTreeWidget->GetSelection();
+        }
+    }
+    
+    return;
+}*/

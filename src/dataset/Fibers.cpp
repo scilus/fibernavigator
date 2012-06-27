@@ -1850,18 +1850,16 @@ void Fibers::colorWithDistance( float *pColorData )
     {
         return;
     }
-
-    SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
+    
+    SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    
     vector< SelectionObject* > simplifiedList;
-
-    for( unsigned int i = 0; i < selObjs.size(); ++i )
+    
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
-        for( unsigned int j = 0; j < selObjs[i].size(); ++j )
+        if( selectionObjects[objIdx]->IsUsedForDistanceColoring() )
         {
-            if( selObjs[i][j]->IsUsedForDistanceColoring() )
-            {
-                simplifiedList.push_back( selObjs[i][j] );
-            }
+            simplifiedList.push_back( selectionObjects[objIdx] );
         }
     }
 
@@ -1924,18 +1922,16 @@ void Fibers::colorWithMinDistance( float *pColorData )
     {
         return;
     }
-
-    SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
+    
+    SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    
     vector< SelectionObject* > simplifiedList;
-
-    for( unsigned int i = 0; i < selObjs.size(); ++i )
+    
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
-        for( unsigned int j = 0; j < selObjs[i].size(); ++j )
+        if( selectionObjects[objIdx]->IsUsedForDistanceColoring() )
         {
-            if( selObjs[i][j]->IsUsedForDistanceColoring() )
-            {
-                simplifiedList.push_back( selObjs[i][j] );
-            }
+            simplifiedList.push_back( selectionObjects[objIdx] );
         }
     }
 
@@ -2553,7 +2549,7 @@ void Fibers::resetLinesShown()
 
 void Fibers::updateLinesShown()
 {
-    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+    /*SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
     m_selected.assign( m_countLines, true );
 
@@ -2719,6 +2715,180 @@ void Fibers::updateLinesShown()
         pLastSelObj->computeMeanFiber();
         pLastSelObj->computeConvexHull();
     }
+     
+     */
+    
+    SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    
+    m_selected.assign( m_countLines, true );
+    
+    //int activeCount = 0;
+    
+    //First pass to make sure there is at least one intersection volume active;
+    /*for( unsigned int i = 0; i < selectionObjects.size(); ++i )
+     {
+     if( selectionObjects[i][0]->getIsActive() )
+     {
+     activeCount++;
+     
+     for( unsigned int j = 1; j < selectionObjects[i].size(); ++j )
+     {
+     if( selectionObjects[i][j]->getIsActive() )
+     {
+     activeCount++;
+     }
+     }
+     }
+     }*/
+    int activeCount( 0 );
+    
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx)
+    {
+        if( selectionObjects[objIdx]->getIsActive() )
+        {
+            ++activeCount;
+        }
+    }
+    
+    if( activeCount == 0 )
+    {
+        return;
+    }
+    
+    // For all the master selection objects.
+    /*for( unsigned int i = 0; i < selectionObjects.size(); ++i )
+     {
+     if( selectionObjects[i][0]->getIsActive() )
+     {
+     // NOTE: this is currently commented while waiting for JF's
+     // refactoring and JC's selection branch.
+     //if( selectionObjects[i][0]->getIsDirty() )
+     {
+     selectionObjects[i][0]->m_inBox.clear();
+     selectionObjects[i][0]->m_inBox.resize( m_countLines );
+     selectionObjects[i][0]->m_inBranch.clear();
+     selectionObjects[i][0]->m_inBranch.resize( m_countLines );
+     
+     // Sets the fibers that are inside this object to true in the m_inBox vector.
+     selectionObjects[i][0]->m_inBox = getLinesShown( selectionObjects[i][0] );
+     }
+     
+     selectionObjects[i][0]->m_inBranch = selectionObjects[i][0]->m_inBox;
+     
+     // For all its child box.
+     for( unsigned int j = 1; j < selectionObjects[i].size(); ++j )
+     {
+     if( selectionObjects[i][j]->getIsActive() )
+     {
+     // NOTE: this is currently commented while waiting for JF's
+     // refactoring and JC's selection branch.                  
+     //if( selectionObjects[i][j]->getIsDirty() )
+     {
+     selectionObjects[i][j]->m_inBox.clear();
+     selectionObjects[i][j]->m_inBox.resize( m_countLines );
+     
+     // Sets the fibers that are inside this object to true in the m_inBox vector.
+     selectionObjects[i][j]->m_inBox = getLinesShown( selectionObjects[i][j] );
+     }
+     
+     // Sets the fibers that are INSIDE this child object and INSIDE its master to be in branch.
+     if( ! selectionObjects[i][j]->getIsNOT() )
+     {
+     for( int k = 0; k < m_countLines; ++k )
+     {
+     selectionObjects[i][0]->m_inBranch[k] = selectionObjects[i][0]->m_inBranch[k] & selectionObjects[i][j]->m_inBox[k];
+     }
+     }
+     else // Sets the fibers that are NOT INSIDE this child object and INSIDE its master to be in branch.
+     {
+     for( int k = 0; k < m_countLines; ++k )
+     {
+     selectionObjects[i][0]->m_inBranch[k] = selectionObjects[i][0]->m_inBranch[k] & !selectionObjects[i][j]->m_inBox[k];
+     }
+     }
+     }
+     }
+     }
+     
+     if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->isColorChanged() )
+     {
+     float *pColorData( NULL );
+     float *pColorData2( NULL );
+     
+     if( m_dh->m_useVBO )
+     {
+     glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+     pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+     pColorData2 = &m_colorArray[0];
+     }
+     else
+     {
+     pColorData  = &m_colorArray[0];
+     pColorData2 = &m_colorArray[0];
+     }
+     
+     wxColour col = selectionObjects[i][0]->getFiberColor();
+     
+     for( int l = 0; l < m_countLines; ++l )
+     {
+     if( selectionObjects[i][0]->m_inBranch[l] )
+     {
+     unsigned int pc = getStartIndexForLine( l ) * 3;
+     
+     for( int j = 0; j < getPointsPerLine( l ); ++j )
+     {
+     pColorData[pc]      = ( ( float ) col.Red() )   / 255.0f;
+     pColorData[pc + 1]  = ( ( float ) col.Green() ) / 255.0f;
+     pColorData[pc + 2]  = ( ( float ) col.Blue() )  / 255.0f;
+     pColorData2[pc]     = ( ( float ) col.Red() )   / 255.0f;
+     pColorData2[pc + 1] = ( ( float ) col.Green() ) / 255.0f;
+     pColorData2[pc + 2] = ( ( float ) col.Blue() )  / 255.0f;
+     pc += 3;
+     }
+     }
+     }
+     
+     if( m_dh->m_useVBO )
+     {
+     glUnmapBuffer( GL_ARRAY_BUFFER );
+     }
+     
+     selectionObjects[i][0]->setColorChanged( false );
+     }
+     }*/
+    
+    /*resetLinesShown();
+     bool boxWasUpdated( false );
+     
+     for( unsigned int i = 0; i < selectionObjects.size(); ++i )
+     {
+     if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->getIsActive() )
+     {
+     for( int k = 0; k < m_countLines; ++k )
+     {
+     m_selected[k] = m_selected[k] | selectionObjects[i][0]->m_inBranch[k];
+     }
+     }
+     
+     boxWasUpdated = true;
+     }*/
+    m_selected = SceneManager::getInstance()->getSelectionTree().getSelectedFibers( this );
+    
+    if( m_fibersInverted )
+    {
+        for( int k = 0; k < m_countLines; ++k )
+        {
+            m_selected[k] = !m_selected[k];
+        }
+    }
+    
+    // This is to update the information display in the fiber grid info and the mean fiber
+    /*if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
+     {
+     m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
+     m_dh->m_lastSelectedObject->computeMeanFiber();
+     m_dh->m_lastSelectedObject->computeConvexHull();
+     }*/
 }
 
 ///////////////////////////////////////////////////////////////////////////

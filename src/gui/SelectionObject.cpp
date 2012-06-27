@@ -1928,7 +1928,7 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::draw()
 {
-    // TODO selection check if there are some fibers loaded.
+    // TODO selection tree check all this method check if there are some fibers loaded.
     if( !m_isActive || !isSelectionObject())
     {
         if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
@@ -2017,7 +2017,8 @@ void SelectionObject::updateStatusBar()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::drawFibersInfo()
 {
-    if( ! m_isMaster )
+    // TODO selection tree what to do with this, currently commented in old branch
+    /*if( ! m_isMaster )
     {
         wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
@@ -2034,7 +2035,7 @@ void SelectionObject::drawFibersInfo()
     drawCrossSections();
     drawDispersionCone();
 
-    glEnable( GL_DEPTH_TEST);
+    glEnable( GL_DEPTH_TEST);*/
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2263,7 +2264,8 @@ void SelectionObject::FlipNormals()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::SetFiberInfoGridValues()
 {
-    if( !m_isMaster )
+    Logger::getInstance()->print( wxT("SelectionObject::SetFiberInfoGridValues() not implemented"), LOGLEVEL_ERROR );
+    /*if( !m_isMaster )
     {
         wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
@@ -2282,7 +2284,7 @@ void SelectionObject::SetFiberInfoGridValues()
         m_pGridFibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxLength        ) );
         m_pGridFibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
         m_pGridFibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
-    }
+    }*/
 }
 
 void SelectionObject::setShowConvexHullOption( bool i_val )
