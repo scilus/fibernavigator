@@ -80,7 +80,7 @@ SceneManager::SceneManager(void)
     m_scheduledScreenshot( false ),
     m_screenshotName( wxT( "" ) ),
     m_screenshotPath( wxT( "" ) ),
-    m_clearToBlack( false ),
+    m_clearToBlack( true ),
     m_colorMap( 0 ),
     m_filterIsoSurface( false ),
     m_isBoxLocked( false ),
