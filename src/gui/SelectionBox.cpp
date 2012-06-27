@@ -38,6 +38,7 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size )
 // i_datasetHelper          : The dataset Helper associated with this box.
 // i_anatomy                : The anatomy associated with this box.
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection tree this should probably be removed.
 SelectionBox::SelectionBox( Anatomy* i_anatomy ) :
    SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ) )
 {

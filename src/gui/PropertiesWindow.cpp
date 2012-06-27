@@ -4,6 +4,7 @@
 #include "SceneManager.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
+#include "SelectionTree.h"
 #include "TrackingWindow.h"
 #include "../Logger.h"
 #include "../main.h"
@@ -14,6 +15,7 @@
 #include "../dataset/ODFs.h"
 #include "../dataset/RTTrackingHelper.h"
 #include "../dataset/Tensors.h"
+#include "../gui/SelectionVOI.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
 #include <wx/colordlg.h>
@@ -507,7 +509,8 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNewVoiFromOverlay" ), LOGLEVEL_DEBUG );
 
-    wxTreeItemId     treeObjectId  = m_pMainFrame->m_tSelectionObjectsId;
+    // TODO selection tree
+    /*wxTreeItemId     treeObjectId  = m_pMainFrame->m_tSelectionObjectsId;
     SelectionObject* selectionObj  = NULL;
     Anatomy*         anatomy       = NULL;
     wxColor          color;
@@ -562,7 +565,7 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     anatomy->m_pRoi = selectionObj;
 
     SceneManager::getInstance()->setSelBoxChanged( true );
-    m_pMainFrame->refreshAllGLWidgets();
+    m_pMainFrame->refreshAllGLWidgets();*/
 }
 
 void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
@@ -1325,9 +1328,12 @@ void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void PropertiesWindow::OnRenameBox( wxCommandEvent& WXUNUSED(event) )
 {
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnRenameBox" ), LOGLEVEL_DEBUG );
-
-    wxTreeItemId l_treeBoxId = m_pMainFrame->m_pTreeWidget->GetSelection();
+    //Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnRenameBox" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "TODO implement selection tree - PropertiesWindow::OnRenameBox" ), LOGLEVEL_DEBUG );
+    
+    // TODO selection tree
+    
+    /*wxTreeItemId l_treeBoxId = m_pMainFrame->m_pTreeWidget->GetSelection();
     if( m_pMainFrame->treeSelected( l_treeBoxId ) == MASTER_OBJECT || m_pMainFrame->treeSelected( l_treeBoxId ) == CHILD_OBJECT )
     {
         SelectionObject* l_box = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeBoxId ) );
@@ -1342,15 +1348,18 @@ void PropertiesWindow::OnRenameBox( wxCommandEvent& WXUNUSED(event) )
 
         m_pMainFrame->m_pTreeWidget->SetItemText( l_treeBoxId, l_box->getName() );
     }
-    m_pMainFrame->refreshAllGLWidgets();
+    m_pMainFrame->refreshAllGLWidgets();*/
 }
 
 void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 {
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
+    //Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "TODO implement selection tree - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
 
     // Get what selection object is selected.
-    wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
+    // TODO selection tree
+    
+    /*wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
 
     if( m_pMainFrame->treeSelected(l_selectionObjectTreeId) == CHILD_OBJECT)
     {
@@ -1368,7 +1377,7 @@ void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
         m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_box->getIcon() );
         l_box->setIsDirty( true );
     }
-    m_pMainFrame->refreshAllGLWidgets();
+    m_pMainFrame->refreshAllGLWidgets();*/
 }
 
 

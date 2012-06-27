@@ -59,6 +59,33 @@ enum ObjectType
 };
 
 ///////////////////////////////////////////////////////////////////////////
+// Enum representing the different types of items that can be present in the 
+// tree control.
+///////////////////////////////////////////////////////////////////////////
+enum TreeObjectType
+{
+    TYPE_SELECTION_MASTER = 1,  // The master object grouping all selection objects.
+    TYPE_SELECTION_OBJECT = 2,  // Any real selection object.
+    TYPE_POINTS_MASTER    = 3,  // The master object grouping all points objects.
+    TYPE_POINTS_OBJECT    = 4,  // Any real points dataset object.
+    TYPE_INVALID                // An invalid or unknown object.
+};
+
+///////////////////////////////////////////////////////////////////////////
+// Enum representing the thresholding operations that can be used when 
+// building a VOI from an anatomy.
+///////////////////////////////////////////////////////////////////////////
+enum ThresholdingOperationType
+{
+    THRESHOLD_EQUAL = 1,
+    THRESHOLD_SMALLER,
+    THRESHOLD_SMALLER_EQUAL,
+    THRESHOLD_GREATER,
+    THRESHOLD_GREATER_EQUAL,
+    THRESHOLD_INVALID
+};
+
+///////////////////////////////////////////////////////////////////////////
 // Enum representing the different LOD level available to draw a glyph.
 ///////////////////////////////////////////////////////////////////////////
 enum LODChoices

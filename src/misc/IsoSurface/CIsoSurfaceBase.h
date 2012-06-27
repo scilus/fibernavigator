@@ -1,80 +1,75 @@
-#ifndef CISOSURFACE_H
-#define CISOSURFACE_H
-// File Name: CIsoSurface.h
-// Last Modified: 5/8/2000
-// Author: Raghavendra Chandrashekara (basesd on source code
-// provided by Paul Bourke and Cory Gene Bloyd)
-// Email: rc99@doc.ic.ac.uk, rchandrashekara@hotmail.com
-//
-// Description: This is the interface file for the CIsoSurface class.
-// CIsoSurface can be used to construct an isosurface from a scalar
-// field.
+// TODO header syntax
 
+#ifndef CISOSURFACEBASE_H
+#define CISOSURFACEBASE_H
 
-#include "CIsoSurfaceBase.h"
-//#include "../../dataset/DatasetInfo.h"
-
-#include <wx/wxprec.h>
-
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif
+// This class is used to group methods and data common to all iso surfaces types.
+// Based on the work Raghavendra Chandrashekara, which was based on source code
+// provided by Paul Bourke and Cory Gene Bloyd.
+// Original email: rc99@doc.ic.ac.uk, rchandrashekara@hotmail.com
 
 #include <map>
 #include <vector>
 
-// TODO TBR selection tree
-/*struct POINT3DID {
+#include "../../dataset/DatasetInfo.h"
+
+#include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
+
+struct POINT3DID {
     unsigned int newID;
     float x, y, z;
-};*/
+};
 
 typedef std::map<unsigned int, POINT3DID> ID2POINT3DID;
 
-/*struct TRIANGLE {
+struct TRIANGLE {
     unsigned int pointID[3];
-};*/
+};
 
-// TODO TBR selection tree
-//typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
+typedef std::vector<TRIANGLE> TRIANGLEVECTOR;
 
-class Anatomy;
-
-class CIsoSurface : public CIsoSurfaceBase
-{
+class CIsoSurfaceBase  : public DatasetInfo {
 public:
     // Constructor and destructor.
-    CIsoSurface( Anatomy* pAnatomy );
-    virtual ~CIsoSurface();
+    CIsoSurfaceBase();
+    virtual ~CIsoSurfaceBase();
 
-    virtual bool load(wxString filename) {return false;};
-    virtual void createPropertiesSizer(PropertiesWindow *parent);
+    virtual bool load(wxString filename) { return false; }
+    
+    virtual void createPropertiesSizer( PropertiesWindow *parent );
     virtual void updatePropertiesSizer();
+    
     void draw();
     void clean();
     void smooth();
     void flipAxis( AxisType i_axe ){};
-    std::vector<Vector> getSurfaceVoxelPositions();
+    void activateLIC(){};
+    
+    virtual std::vector< Vector > getSurfaceVoxelPositions();
 
-    void GenerateWithThreshold();
+    //virtual void GenerateWithThreshold() = 0;
 
     // Generates the isosurface from the scalar field contained in the
     // buffer ptScalarField[].
-    void GenerateSurface(float tIsoLevel);
+    //void GenerateSurface(float tIsoLevel);
 
     // Returns true if a valid surface has been generated.
-    bool IsSurfaceValid();
+    virtual bool IsSurfaceValid();
 
     // Deletes the isosurface.
-    void DeleteSurface();
+    virtual void DeleteSurface();
 
     // Returns the length, width, and height of the volume in which the
     // isosurface in enclosed in.  Returns -1 if the surface is not
     // valid.
     int GetVolumeLengths(float& fVolLengthX, float& fVolLengthY, float& fVolLengthZ);
 
-    bool save( wxString filename ) const;
-    bool save( wxXmlNode *pNode ) const;
+    virtual bool save( wxString filename ) const;
 
 protected:
     // The number of vertices which make up the isosurface.
@@ -117,14 +112,16 @@ protected:
     float m_fCellLengthX, m_fCellLengthY, m_fCellLengthZ;
 
     // The buffer holding the scalar field.
-    std::vector<float> m_ptScalarField;
+    //std::vector<float> m_ptScalarField;
 
     // The isosurface value.
-    float m_tIsoLevel;
+    //float m_tIsoLevel;
 
     // Indicates whether a valid surface is present.
     bool m_bValidSurface;
 
+    void generateGeometry();
+    
     // Lookup tables used in the construction of the isosurface.
     static const unsigned int m_edgeTable[256];
     static const int m_triTable[256][16];
@@ -132,15 +129,19 @@ protected:
 
 private:
     GLuint getGLuint() {return 0;};
+    
     void generateTexture() {};
-    void generateGeometry();
+
+    void generateLICGeometry() ;
     void initializeBuffer() {};
 
-    wxToggleButton *m_pToggleCutFrontSector;
-    wxToggleButton *m_pToggleUseColoring;
-
+    wxToggleButton *m_ptoggleCutFrontSector;
+    wxToggleButton *m_ptoggleUseColoring;
+    wxBitmapButton *m_pbtnSelectColor;
+    
     bool m_positionsCalculated;
-    std::vector<Vector>m_svPositions;
+    std::vector< Vector > m_svPositions;
+
 };
 #endif // CISOSURFACE_H
 

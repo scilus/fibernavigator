@@ -85,12 +85,14 @@ SceneManager::SceneManager(void)
     m_filterIsoSurface( false ),
     m_isBoxLocked( false ),
     m_selBoxChanged( true ),
+    m_pSelTree( NULL ),
     m_isRulerActive( false ),
     m_rulerFullLength( 0.0 ),
     m_rulerPartialLength( 0.0 )
 {
     m_pAnatomyHelper = new AnatomyHelper();
     m_pTheScene = new TheScene();
+    m_pSelTree = new SelectionTree;
     Matrix4fSetIdentity( &m_transform );
 }
 
@@ -778,6 +780,9 @@ SceneManager::~SceneManager(void)
 
     delete m_pAnatomyHelper;
     m_pAnatomyHelper = NULL;
+    
+    delete m_pSelTree;
+    m_pSelTree = NULL;
     
     delete m_pTheScene;
     m_pTheScene = NULL;

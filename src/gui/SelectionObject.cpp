@@ -13,6 +13,7 @@
 
 #include "SceneHelper.h"
 #include "SceneManager.h"
+#include "SelectionTree.h"
 #include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
@@ -431,12 +432,13 @@ void SelectionObject::setColor( wxColour i_color )
 // To avoid to much complication by inserting the SelectionObject class, this 
 // will simply return true if this selection object is of box type or ellipsoid type
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection remove this should never have existed
 bool SelectionObject::isSelectionObject()
 {
-    if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE )
+    //if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE )
         return true;
 
-    return false;
+    //return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -825,6 +827,118 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
 
 
 ///////////////////////////////////////////////////////////////////////////
+// TODO this comment does not reflect reality.
+// This will push back the coords values in the vectors for all the fibers
+// flagged as m_inBranch and then we will calculate the grid params with this vector.
+//
+///////////////////////////////////////////////////////////////////////////
+void SelectionObject::updateStats()
+{
+    m_stats.m_count = 0;
+    m_stats.m_meanLength = 0.0f;
+    m_stats.m_maxLength  = 0.0f;
+    m_stats.m_minLength  = std::numeric_limits< float >::max();
+    m_stats.m_meanValue  = 0.0f;
+    m_stats.m_meanCurvature = 0.0f;
+    m_stats.m_meanTorsion   = 0.0f;
+    
+    FibersGroup *pFiberGroup = DatasetManager::getInstance()->getFibersGroup();
+    
+    //if( pFibersGroup == NULL )
+    //{
+        // TODO log debug that this should never happen.
+    //    return;
+    //}
+    
+    int activeFiberSetCount( 0 );
+    
+    vector< Fibers * > pFibersSet = DatasetManager::getInstance()->getFibers();
+    
+    for( size_t fiberSetIdx(0); fiberSetIdx < pFibersSet.size(); ++fiberSetIdx )
+    {
+        Fibers *pCurFibers = pFibersSet[ fiberSetIdx ];
+        if( pCurFibers->getShow() )
+        {
+            vector< int > selectedFibersIdx = getSelectedFibersIndexes( pCurFibers );
+            
+            if( selectedFibersIdx.empty() )
+            {
+                // Do not want to do any processing in this case.
+                continue;
+            }
+            
+            m_stats.m_count += selectedFibersIdx.size();
+            
+            float localMeanLength( 0.0f );
+            float localMaxLength(  0.0f );
+            float localMinLength(  0.0f );
+            
+            getMeanMaxMinFiberLengthNew( selectedFibersIdx, pCurFibers, 
+                                        localMeanLength, 
+                                        localMaxLength, 
+                                        localMinLength );
+            
+            m_stats.m_meanLength += localMeanLength;
+            ++activeFiberSetCount;
+            
+            m_stats.m_maxLength = std::max( m_stats.m_maxLength, localMaxLength );
+            m_stats.m_minLength = std::min( m_stats.m_minLength, localMinLength );
+            
+            // Compute mean value
+            vector< int > nbPointsBySelectedFiber;
+            vector< vector < Vector > > pointsBySelectedFiber;
+            
+            getSelectedFibersInfo( selectedFibersIdx, pCurFibers, 
+                                  nbPointsBySelectedFiber, pointsBySelectedFiber );
+            
+            float localMeanValue( 0.0f );
+            
+            getMeanFiberValue( pointsBySelectedFiber, localMeanValue );
+            
+            m_stats.m_meanValue += localMeanValue;
+            
+            // Compute curvature and torsion
+            float localCurvature( 0.0f );
+            float localTorsion(   0.0f );
+            
+            getFibersMeanCurvatureAndTorsion( pointsBySelectedFiber, localCurvature, localTorsion );
+            
+            m_stats.m_meanTorsion += localTorsion;
+            m_stats.m_meanCurvature += localCurvature;
+        }
+    }
+    
+    if( activeFiberSetCount > 0 )
+    {
+        m_stats.m_meanLength    /= activeFiberSetCount;
+        m_stats.m_meanValue     /= activeFiberSetCount;
+        m_stats.m_meanCurvature /= activeFiberSetCount;
+        m_stats.m_meanTorsion   /= activeFiberSetCount;
+    }
+    
+    if( m_stats.m_minLength == std::numeric_limits< float >::max() )
+    {
+        m_stats.m_minLength = 0.0f;
+    }
+    
+    //vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+    
+    /*//getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
+     //                                  m_meanFiberPoints,
+     //                                  o_gridInfo.m_meanCrossSection, 
+     //                                  o_gridInfo.m_maxCrossSection,
+     //                                  o_gridInfo.m_minCrossSection   );*/
+    ////getFiberDispersion              ( o_gridInfo.m_dispersion        );
+    
+    
+}
+
+void SelectionObject::notifyStatsNeedUpdating()
+{
+    m_statsNeedUpdating = true;
+}
+
+///////////////////////////////////////////////////////////////////////////
 // Computes the mean fiber
 // Point that make the mean fiber will be in the vector m_meanFiberPoints
 //
@@ -841,6 +955,92 @@ void SelectionObject::computeMeanFiber()
         m_meanFiberPoints.clear();
 }
 
+// TODO after JF's branch: make the param const
+vector< int > SelectionObject::getSelectedFibersIndexes( Fibers *pFibers )
+{
+    vector< bool > filteredFiber = pFibers->getFilteredFibers();
+    
+    SelectionState &curState = getState( pFibers->getName() );
+    
+    vector< bool > branchToUse;
+    SelectionTree &selTree( SceneManager::getInstance()->getSelectionTree() );
+    
+    if( selTree.getActiveChildrenObjectsCount( this ) > 0 )
+    {
+        branchToUse = curState.m_inBranch;
+    }
+    else // No child.
+    {
+        // If it has a parent
+        SelectionObject *pParentObj = selTree.getParentObject( this );
+        
+        if( pParentObj != NULL )
+        {
+            // TODO this could be optimized
+            SelectionState &parentState = pParentObj->getState( pFibers->getName() );
+            branchToUse.assign( curState.m_inBranch.size(), false );
+            
+            bool parentIsNot( pParentObj->getIsNOT() );
+            bool currentIsNot( getIsNOT() );
+            
+            for( unsigned int fiberIdx( 0 ); fiberIdx < curState.m_inBox.size(); ++fiberIdx )
+            {
+                if( !parentIsNot && !currentIsNot )
+                {
+                    branchToUse[ fiberIdx ] = parentState.m_inBox[ fiberIdx ] & curState.m_inBox[ fiberIdx ];
+                }
+                else if( !parentIsNot && currentIsNot )
+                {
+                    branchToUse[ fiberIdx ] = parentState.m_inBox[ fiberIdx ] & !curState.m_inBox[ fiberIdx ];
+                }
+                else if( parentIsNot && !currentIsNot )
+                {
+                    branchToUse[ fiberIdx ] = !parentState.m_inBox[ fiberIdx ] & curState.m_inBox[ fiberIdx ];
+                }
+                else // parentIsNot && currentIsNot
+                {
+                    branchToUse[ fiberIdx ] = !parentState.m_inBox[ fiberIdx ] & !curState.m_inBox[ fiberIdx ];
+                }
+            }
+        }
+        else // No parent, so this is a root object with no child.
+        {
+            branchToUse = curState.m_inBox;
+        }
+    }
+    
+    vector< int > selectedIndexes;
+    
+    for( unsigned int fiberIdx = 0; fiberIdx < branchToUse.size(); ++fiberIdx )
+    {
+        if( branchToUse[fiberIdx] && !filteredFiber[fiberIdx] )
+        {
+            selectedIndexes.push_back( fiberIdx );
+        }
+    }
+    
+    return selectedIndexes;
+}
+
+bool SelectionObject::getSelectedFibersInfo( const vector< int > &selectedFibersIdx, 
+                                            Fibers *pFibers, 
+                                            vector< int > &pointsCount, 
+                                            vector< vector< Vector > > &fibersPoints )
+
+{
+    pointsCount.assign( selectedFibersIdx.size(), 0 );
+    fibersPoints.assign( selectedFibersIdx.size(), vector< Vector >() );
+    
+    int curItem( 0 );
+    
+    for( vector< int >::const_iterator idxIt( selectedFibersIdx.begin() ); idxIt != selectedFibersIdx.end(); ++idxIt, ++curItem )
+    {
+        pointsCount[ curItem ] = pFibers->getPointsPerLine( *idxIt );
+        pFibers->getFiberCoordValues( *idxIt, fibersPoints[ curItem ] );
+    }
+    
+    return true;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 //Return all the visible fibers that pass through the selection object
@@ -853,58 +1053,90 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
     vector< bool > filteredFiber;
-
-    long index = MyApp::frame->getCurrentListIndex();
-    if( -1 != index )
+    Fibers* l_fibers = NULL;
+    
+    // TODO selection tree
+    //DatasetManager::getInstance()->getSelectedFibers(l_fibers);
+    //filteredFiber = l_fibers->getFilteredFibers();
+    
+    vector< bool > branchToUse;
+    // TODO modify this
+    if( SceneManager::getInstance()->getSelectionTree().getActiveChildrenObjectsCount( this ) > 0 
+       /*|| m_datasetHelper->m_pSelectionTree->isRootObject( this )*/ )
     {
-        Fibers * pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        branchToUse = m_inBranch;
+    }
+    else
+    {
+        // Combine the parent's inBox with this one's to obtain the sub branch.
+        SelectionObject *pParentObj = SceneManager::getInstance()->getSelectionTree().getParentObject( this );
         
-        if( pFibers == NULL )
+        if( pParentObj != NULL )
         {
-            return l_selectedFibersPoints;
-        }
-
-        filteredFiber = pFibers->getFilteredFibers();
-
-        for( unsigned int i = 0; i < m_inBranch.size(); ++i )
-        {
-            if( m_inBranch[i] && !filteredFiber[i] )
+            branchToUse.assign( m_inBranch.size(), false );
+            bool parentIsNot( pParentObj->getIsNOT() );
+            bool currentIsNot( getIsNOT() );
+            
+            for( unsigned int fiberIdx( 0 ); fiberIdx < m_inBox.size(); ++fiberIdx )
             {
-                getFiberCoordValues( i, l_currentFiberPoints );
-
-                // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
-                // could have there coordinated in the data completely inversed ( first fiber 0,0,0 - 1,1,1 ),  
-                // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
-                // verification and if the order of the fiber points are wrong we switch them.
-                if( l_selectedFibersPoints.size() > 0 )
+                if( !parentIsNot && !currentIsNot )
                 {
-                    l_meanStart.zero();
-                    for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
-                        l_meanStart += l_selectedFibersPoints[j][0];
-                    l_meanStart /= l_selectedFibersPoints.size();
+                    branchToUse[ fiberIdx ] = pParentObj->m_inBox[ fiberIdx ] & m_inBox[ fiberIdx ];
                 }
-
-                // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
-                // then the order of the points of this fiber are ok, otherwise we need to flip them.
-                if( ( l_meanStart - l_currentFiberPoints[0] ).getLength() <
-                    ( l_meanStart - l_currentFiberPoints[l_currentFiberPoints.size() - 1] ).getLength() )
+                else if( !parentIsNot && currentIsNot )
                 {
-                    l_selectedFibersPoints.push_back( l_currentFiberPoints );
+                    branchToUse[ fiberIdx ] = pParentObj->m_inBox[ fiberIdx ] & !m_inBox[ fiberIdx ];
                 }
-                else
+                else if( parentIsNot && !currentIsNot )
                 {
-                    for( int k = (int)l_currentFiberPoints.size() - 1; k >= 0; --k )
-                        l_currentSwappedFiberPoints.push_back( l_currentFiberPoints[k] );
-
-                    l_selectedFibersPoints.push_back( l_currentSwappedFiberPoints );
-                    l_currentSwappedFiberPoints.clear();
+                    branchToUse[ fiberIdx ] = !pParentObj->m_inBox[ fiberIdx ] & m_inBox[ fiberIdx ];
                 }
-
-                l_currentFiberPoints.clear();
+                else // parentIsNot && currentIsNot
+                {
+                    branchToUse[ fiberIdx ] = !pParentObj->m_inBox[ fiberIdx ] & !m_inBox[ fiberIdx ];
+                }
             }
         }
     }
-
+    
+    for( unsigned int i = 0; i < branchToUse.size(); ++i )
+    {
+        if( branchToUse[i] && !filteredFiber[i] )
+        {
+            getFiberCoordValues( i, l_currentFiberPoints );
+            
+            // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
+            // could have there coordinated in the data completly inversed ( first fiber 0,0,0 - 1,1,1 ),  
+            // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
+            // verification and if the order of the fiber points are wrong we switch them.
+            if( l_selectedFibersPoints.size() > 0 )
+            {
+                l_meanStart.zero();
+                for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
+                    l_meanStart += l_selectedFibersPoints[j][0];
+                l_meanStart /= l_selectedFibersPoints.size();
+            }
+            
+            // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
+            // then the order of the points of this fiber are ok, otherwise we need to flip them.
+            if( ( l_meanStart - l_currentFiberPoints[0] ).getLength() <
+               ( l_meanStart - l_currentFiberPoints[l_currentFiberPoints.size() - 1] ).getLength() )
+            {
+                l_selectedFibersPoints.push_back( l_currentFiberPoints );
+            }
+            else
+            {
+                for( int k = (int)l_currentFiberPoints.size() - 1; k >= 0; --k )
+                    l_currentSwappedFiberPoints.push_back( l_currentFiberPoints[k] );
+                
+                l_selectedFibersPoints.push_back( l_currentSwappedFiberPoints );
+                l_currentSwappedFiberPoints.clear();
+            }
+            
+            l_currentFiberPoints.clear();
+        }
+    }
+    
     return l_selectedFibersPoints;
 }
 
@@ -1208,6 +1440,41 @@ bool SelectionObject::getMeanMaxMinFiberLength( const vector< vector< Vector > >
 
     return true;
 }
+
+bool SelectionObject::getMeanMaxMinFiberLengthNew( const vector< int > &selectedFibersIndexes,
+                                                  Fibers        *pCurFibers,
+                                                  float         &meanLength,
+                                                  float         &maxLength,
+                                                  float         &minLength )
+{
+    meanLength = 0.0f;
+    maxLength  = 0.0f;
+    minLength  = numeric_limits<float>::max();
+    
+    if( selectedFibersIndexes.empty() )
+    {
+        minLength = 0.0f;
+        return false;
+    }
+    
+    float curFiberLength( 0.0f );
+    
+    for( vector< int >::const_iterator idxIt( selectedFibersIndexes.begin() );
+        idxIt != selectedFibersIndexes.end(); ++idxIt )
+    {
+        curFiberLength = pCurFibers->getFiberLength( *idxIt );
+        
+        meanLength += curFiberLength;
+        
+        maxLength = std::max( maxLength, curFiberLength );
+        minLength = std::min( minLength, curFiberLength );
+    }
+    
+    meanLength /= selectedFibersIndexes.size();
+    
+    return true;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Computes the mean, max and the min cross section for a given set of fibers.
@@ -1661,6 +1928,7 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::draw()
 {
+    // TODO selection check if there are some fibers loaded.
     if( !m_isActive || !isSelectionObject())
     {
         if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
@@ -1941,6 +2209,44 @@ void SelectionObject::getCrossSectionAreaColor( unsigned int i_index )
 
     glColor4f( 1.0f - l_u, 0.0f, l_u, 0.35f );
 }
+
+bool SelectionObject::addFiberDataset( const FiberIdType &fiberId )
+{
+    using std::map;
+    using std::pair;
+    
+    pair< map< FiberIdType, SelectionState >::iterator, bool > insertResult = m_selectionStates.insert( pair< FiberIdType, SelectionState >( fiberId, SelectionState() ) );
+    
+    return insertResult.second;
+}
+
+void SelectionObject::removeFiberDataset( const FiberIdType &fiberId )
+{
+    m_selectionStates.erase( fiberId );
+}
+
+SelectionObject::SelectionState& SelectionObject::getState( const FiberIdType &fiberId )
+{
+    return m_selectionStates[ fiberId ];
+}
+
+
+wxString SelectionObject::getTypeTag() const
+{
+    return wxT( "base" );
+}
+
+void SelectionObject::notifyInBoxNeedsUpdating()
+{
+    for( map< FiberIdType, SelectionState >::iterator stateIt( m_selectionStates.begin() );
+        stateIt != m_selectionStates.end(); ++stateIt )
+    {
+        stateIt->second.m_inBoxNeedsUpdating = true;
+    }
+    
+    notifyStatsNeedUpdating();
+}
+
 
 void SelectionObject::FlipNormals()
 {

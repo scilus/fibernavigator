@@ -2,6 +2,7 @@
 #define SCENEMANAGER_H_
 
 #include "ArcBall.h"
+#include "SelectionTree.h"
 #include "../misc/IsoSurface/Vector.h"
 
 #include <GL/glew.h>
@@ -143,6 +144,9 @@ public:
 
     bool isSelBoxChanged() const            { return m_selBoxChanged; }
     void setSelBoxChanged( bool changed )   { m_selBoxChanged = changed; }
+    
+    // TODO selection move all methods related to selection under this line
+    SelectionTree& getSelectionTree()       { return *m_pSelTree; }
 
     std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
     bool   isRulerActive() const            { return m_isRulerActive; }
@@ -227,6 +231,7 @@ private:
     bool  m_isBoxLocked;
 
     SelectionObject *m_pBoxAtCrosshair;
+    SelectionTree   *m_pSelTree;
 
     bool  m_selBoxChanged;
 
