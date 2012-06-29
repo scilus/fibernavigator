@@ -1040,10 +1040,25 @@ void PropertiesWindow::OnGlyphDisplaySliderMoved( wxCommandEvent& WXUNUSED(event
 void PropertiesWindow::OnGlyphScalingFactorSliderMoved( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphScalingFactorSliderMoved" ), LOGLEVEL_DEBUG );
+   
+    if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1 )
+    {
+        float sliderValue = ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderScalingFactor->GetValue();
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtBoxScalingFactor->SetValue( wxString::Format( wxT( "%.2f"), sliderValue / 10.0f ));
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setScalingFactor( sliderValue / 10.0f );
+    }
+}
+
+void PropertiesWindow::OnBoxScalingFactor( wxCommandEvent &event )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnBoxScalingFactor" ), LOGLEVEL_DEBUG );
 
     if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1 )
     {
-        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setScalingFactor( ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderScalingFactor->GetValue() / 10.0f );
+        double boxValue = 0;
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtBoxScalingFactor->GetValue().ToDouble(&boxValue);
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->m_pSliderScalingFactor->SetValue( boxValue * 10.0f );
+        ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setScalingFactor( boxValue );
     }
 }
 
