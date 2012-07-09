@@ -128,7 +128,9 @@ protected:
     // Lookup tables used in the construction of the isosurface.
     static const unsigned int m_edgeTable[256];
     static const int m_triTable[256][16];
-
+    
+    bool m_positionsCalculated;
+    std::vector<Vector>m_svPositions;
 
 private:
     GLuint getGLuint() {return 0;};
@@ -138,9 +140,6 @@ private:
 
     wxToggleButton *m_pToggleCutFrontSector;
     wxToggleButton *m_pToggleUseColoring;
-
-    bool m_positionsCalculated;
-    std::vector<Vector>m_svPositions;
 };
 #endif // CISOSURFACE_H
 

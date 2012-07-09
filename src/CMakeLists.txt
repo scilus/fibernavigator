@@ -128,6 +128,11 @@ SET( CMAKE_CXX_FLAGS_RELEASE "-O3" )
 SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DDEBUG -O2" )
 ENDIF(UNIX)
 
+# Add this define for every platform. Used by nifti_io to try to read .nii.gz files.
+ADD_DEFINITIONS(
+    -DHAVE_ZLIB
+)
+
 SET( target "fibernavigator")
 
 
