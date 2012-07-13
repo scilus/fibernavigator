@@ -532,7 +532,7 @@ DatasetIndex DatasetManager::loadFibers( const wxString &filename )
 
     if( l_fibers->load( filename ) )
     {
-        SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+        /*SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
         for( unsigned int i( 0 ); i < selectionObjects.size(); ++i )
         {
             for( unsigned int j( 0 ); j < selectionObjects[i].size(); ++j )
@@ -540,7 +540,8 @@ DatasetIndex DatasetManager::loadFibers( const wxString &filename )
                 selectionObjects[i][j]->m_inBox.assign( m_countFibers, false );
                 selectionObjects[i][j]->setIsDirty( true );
             }
-        }
+        }*/
+        SceneManager::getInstance()->getSelectionTree().addFiberDataset( l_fibers->getName(), l_fibers->getLineCount() );
 
         l_fibers->setThreshold( THRESHOLD );
         l_fibers->setShow     ( SHOW );

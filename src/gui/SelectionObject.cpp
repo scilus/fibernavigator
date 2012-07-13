@@ -124,6 +124,7 @@ void SelectionObject::moveBack()
     
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -141,6 +142,7 @@ void SelectionObject::moveDown()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -158,6 +160,7 @@ void SelectionObject::moveForward()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -175,6 +178,7 @@ void SelectionObject::moveLeft()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -192,6 +196,7 @@ void SelectionObject::moveRight()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -209,6 +214,7 @@ void SelectionObject::moveUp()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 void SelectionObject::processDrag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
@@ -234,6 +240,7 @@ void SelectionObject::resizeBack()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -251,6 +258,7 @@ void SelectionObject::resizeDown()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -268,6 +276,7 @@ void SelectionObject::resizeForward()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -285,6 +294,7 @@ void SelectionObject::resizeLeft()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -302,6 +312,7 @@ void SelectionObject::resizeRight()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -319,6 +330,7 @@ void SelectionObject::resizeUp()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -412,9 +424,10 @@ void SelectionObject::setCenter( float i_x, float i_y, float i_z )
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::setCenter( Vector i_center )
 {
-     m_center  = i_center; 
-     m_isDirty = true; 
-     update();
+    m_center  = i_center; 
+    m_isDirty = true; 
+    update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -526,6 +539,7 @@ void SelectionObject::drag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_proje
     
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
@@ -564,6 +578,7 @@ void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_pro
     
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 float SelectionObject::getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
@@ -2231,7 +2246,7 @@ SelectionObject::SelectionState& SelectionObject::getState( const FiberIdType &f
     return m_selectionStates[ fiberId ];
 }
 
-
+// TODO selection tree saving
 wxString SelectionObject::getTypeTag() const
 {
     return wxT( "base" );
