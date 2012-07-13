@@ -50,6 +50,7 @@ public:
     void deleteListItem();
     void deleteTreeItem();
     void toggleTreeItemActivation();
+    void toggleTreeItemVisibility();
     void refreshAllGLWidgets();
     void refreshViews();
     void screenshot                         ( const wxString &path, const wxString &filename );

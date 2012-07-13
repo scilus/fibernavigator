@@ -2202,7 +2202,39 @@ void MainFrame::toggleTreeItemActivation()
     refreshAllGLWidgets();
 }
 
-// TODO selection tree add toggleTreeItemVisibility
+///////////////////////////////////////////////////////////////////////////
+// Main method called to toggle a tree item visibility.
+///////////////////////////////////////////////////////////////////////////
+void MainFrame::toggleTreeItemVisibility()
+{
+    wxTreeItemId treeId = m_pTreeWidget->GetSelection();
+    
+    TreeObjectType objectType = treeSelectedNew( treeId );
+    
+    if( objectType == TYPE_SELECTION_OBJECT )
+    {
+        CustomTreeItem *pTreeItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( treeId );
+        
+        SelectionObject *pSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pTreeItem->getId() );
+        
+        pSelObject->toggleIsVisible();
+        m_pTreeWidget->SetItemImage( treeId, pSelObject->getIcon() );
+        pSelObject->setIsDirty( true );
+        
+        SelectionTree::SelectionObjectVector childObjects = SceneManager::getInstance()->getSelectionTree().getChildrenObjects( pTreeItem->getId() );
+        
+        for( unsigned int objIdx( 0 ); objIdx < childObjects.size(); ++objIdx )
+        {
+            childObjects[objIdx]->setIsVisible( pSelObject->getIsVisible() );
+            childObjects[objIdx]->setIsDirty( true );
+            
+            m_pTreeWidget->SetItemImage( childObjects[objIdx]->getTreeId(), childObjects[objIdx]->getIcon() );
+        }
+    }
+    
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    refreshAllGLWidgets();
+}
 
 void MainFrame::onTreeChange()
 {

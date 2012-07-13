@@ -1458,41 +1458,8 @@ void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent& evt )
 void PropertiesWindow::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleShowSelectionObject" ), LOGLEVEL_DEBUG );
-
-    // Get the selected selection object.
-    wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-
-    if( m_pMainFrame->treeSelected( l_selectionObjectTreeId ) == MASTER_OBJECT )
-    {
-        SelectionObject* l_selecitonObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selecitonObject->toggleIsVisible();
-        m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selecitonObject->getIcon() );
-        l_selecitonObject->setIsDirty( true );
-
-        int l_childSelectionObjects = m_pMainFrame->m_pTreeWidget->GetChildrenCount( l_selectionObjectTreeId );
-        wxTreeItemIdValue childcookie = 0;
-        for( int i = 0; i < l_childSelectionObjects; ++i )
-        {
-            wxTreeItemId l_childId = m_pMainFrame->m_pTreeWidget->GetNextChild( l_selectionObjectTreeId, childcookie );
-            if( l_childId.IsOk() )
-            {
-                SelectionObject* childBox = ( (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_childId ) ) );
-                childBox->setIsVisible( l_selecitonObject->getIsVisible() );
-                m_pMainFrame->m_pTreeWidget->SetItemImage( l_childId, childBox->getIcon() );
-                childBox->setIsDirty( true );
-            }
-        }
-    }
-    else if( m_pMainFrame->treeSelected( l_selectionObjectTreeId ) == CHILD_OBJECT )
-    {
-        SelectionObject *l_selectionObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selectionObject->toggleIsVisible();
-        m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selectionObject->getIcon() );
-        l_selectionObject->setIsDirty( true );
-    }
-
-    SceneManager::getInstance()->setSelBoxChanged( true );
-    m_pMainFrame->refreshAllGLWidgets();
+    
+    m_pMainFrame->toggleTreeItemVisibility();
 }
 
 void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
