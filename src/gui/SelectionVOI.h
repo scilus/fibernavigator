@@ -35,6 +35,8 @@ public:
     // Methods related to loading and saving.
     virtual wxString getTypeTag() const;
     
+    virtual void flipNormals();
+    
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
     

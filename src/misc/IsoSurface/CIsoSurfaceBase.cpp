@@ -323,14 +323,14 @@ CIsoSurfaceBase::CIsoSurfaceBase()
     m_positionsCalculated = false;
     
     // TODO check this
-    //m_tMesh = new TriangleMesh();
+    m_tMesh = new TriangleMesh();
 }
 
 CIsoSurfaceBase::~CIsoSurfaceBase()
 {
     DeleteSurface();
     // TODO check this
-    //delete m_tMesh;
+    delete m_tMesh;
 }
 
 /*void CIsoSurfaceBase::GenerateSurface( float tIsoLevel )

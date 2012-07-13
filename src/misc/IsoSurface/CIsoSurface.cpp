@@ -887,15 +887,6 @@ void CIsoSurface::GenerateWithThreshold()
     m_positionsCalculated = false;
 }
 
-void CIsoSurface::clean()
-{
-    m_tMesh->cleanUp();
-    if ( m_GLuint )
-        glDeleteLists( m_GLuint, 1 );
-    m_GLuint = 0;
-    m_positionsCalculated = false;
-}
-
 void CIsoSurface::smooth()
 {
     m_tMesh->doLoopSubD();

@@ -2263,17 +2263,6 @@ void SelectionObject::notifyInBoxNeedsUpdating()
     notifyStatsNeedUpdating();
 }
 
-
-void SelectionObject::FlipNormals()
-{
-    if( m_isosurface != NULL && 
-        m_isosurface->m_tMesh != NULL)
-    {
-        m_isosurface->m_tMesh->flipNormals();
-        m_isosurface->clean();
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////////
 // This function will set the correct information in the fiber info grid.
 ///////////////////////////////////////////////////////////////////////////
@@ -2373,12 +2362,10 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //////////////////////////////////////////////////////////////////////////
 
     wxImage bmpDelete(          MyApp::iconsPath + wxT( "delete.png" ),      wxBITMAP_TYPE_PNG );
-    wxImage bmpColor(           MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
     wxImage bmpMeanFiberColor(  MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
     wxImage bmpConvexHullColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
 
     wxButton *pBtnChangeName          = new wxButton( pParent, wxID_ANY, wxT( "Rename" ) );
-    wxButton *pBtnFlipNormal          = new wxButton( pParent, wxID_ANY, wxT( "Flip Normal" ) );
     wxButton *pBtnSelectColorFibers   = new wxButton( pParent, wxID_ANY, wxT( "Select Fibers Color" ) );
     wxButton *pBtnNewColorVolume      = new wxButton( pParent, wxID_ANY, wxT( "New Color map" ) );
     wxButton *pBtnNewDensityVolume    = new wxButton( pParent, wxID_ANY, wxT( "New Density map" ) );
@@ -2386,7 +2373,6 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //m_pbtnDisplayCrossSections      = new wxButton( pParent, wxID_ANY, wxT( "Display Cross Section (C.S.)" ) );
     //m_pbtnDisplayDispersionTube     = new wxButton( pParent, wxID_ANY, wxT( "Display Dispersion Tube" ) );
     wxBitmapButton *pBtnDelete      = new wxBitmapButton( pParent, wxID_ANY, bmpDelete, DEF_POS, wxSize( 20, -1 ) );
-    wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
     m_pBtnSelectMeanFiberColor      = new wxBitmapButton( pParent, wxID_ANY, bmpMeanFiberColor );
 //     m_pBtnSelectConvexHullColor     = new wxBitmapButton( pParent, wxID_ANY, bmpConvexHullColor );
     m_pToggleVisibility           = new wxToggleButton( pParent, wxID_ANY, wxT( "Visible" ), DEF_POS, wxSize( 20, -1 ) );
@@ -2433,13 +2419,6 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
     pBoxSizer->Add( pToggleAndNot,  1, wxEXPAND | wxALL, 1 );
     pBoxSizer->Add( pBtnChangeName, 1, wxEXPAND | wxALL, 1 );
-    pBoxMain->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
-
-    //////////////////////////////////////////////////////////////////////////
-
-    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
-    pBoxSizer->Add( pBtnFlipNormal,  3, wxEXPAND | wxALL, 1 );
-    pBoxSizer->Add( pBtnSelectColor, 1, wxEXPAND | wxALL, 1 );
     pBoxMain->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
     //////////////////////////////////////////////////////////////////////////
@@ -2581,8 +2560,6 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     pBtnNewColorVolume->Enable( getIsMaster() );
     pBtnNewDensityVolume->Enable( getIsMaster() );
     pToggleAndNot->Enable( !getIsMaster() && m_objectType != CISO_SURFACE_TYPE );
-    pBtnFlipNormal->Enable( m_objectType == CISO_SURFACE_TYPE );
-    pBtnSelectColor->Enable( m_objectType == CISO_SURFACE_TYPE );
     pBtnSetAsDistanceAnchor->Enable( m_objectType == CISO_SURFACE_TYPE );
 
     m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
@@ -2590,13 +2567,11 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //////////////////////////////////////////////////////////////////////////
 
     pParent->Connect( pBtnChangeName->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnRenameBox ) );
-    pParent->Connect( pBtnFlipNormal->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnVoiFlipNormals ) );
     pParent->Connect( pBtnSelectColorFibers->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
     pParent->Connect( pBtnNewColorVolume->GetId(),      wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnCreateFibersColorTexture ) );
     pParent->Connect( pBtnNewDensityVolume->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnCreateFibersDensityTexture ) );
     pParent->Connect( pBtnSetAsDistanceAnchor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDistanceAnchorSet ) );
     pParent->Connect( pBtnDelete->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(    PropertiesWindow::OnDeleteTreeItem ) );
-    pParent->Connect( pBtnSelectColor->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnColorRoi ) );
     pParent->Connect( m_pBtnSelectMeanFiberColor->GetId(),  wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberColorChange ) );
 //     pParent->Connect( m_pBtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
     //pParent->Connect( m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections ) );

@@ -2,9 +2,11 @@
 
 #include "SelectionVOI.h"
 
+#include "../main.h"
 #include "../dataset/DatasetManager.h"
 
 #include "../misc/IsoSurface/CBoolIsoSurface.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
 
 #include <algorithm>
 #include <functional>
@@ -383,23 +385,46 @@ wxString SelectionVOI::getTypeTag() const
     return wxT( "selectionVOI" );
 }
 
+void SelectionVOI::flipNormals()
+{
+    if( m_pIsoSurface != NULL && m_pIsoSurface->m_tMesh != NULL)
+    {
+        m_pIsoSurface->m_tMesh->flipNormals();
+        m_pIsoSurface->clean();
+    }
+}
+
 void SelectionVOI::createPropertiesSizer( PropertiesWindow *pParent )
 {
     SelectionObject::createPropertiesSizer( pParent );
     
-    m_pbtnSelectColor->Enable( true );
-    
     m_pPropertiesSizer->AddSpacer( 8 );
-    
-    wxSizer *pSizer = new wxBoxSizer( wxHORIZONTAL );
-    
+    m_pPropertiesSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "VOI specific: " ),wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER ), 0, wxALIGN_CENTER );
+
     m_pVOISize = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT("%d"), m_voiSize ), wxDefaultPosition, wxDefaultSize , wxTE_CENTRE | wxTE_READONLY);    
     m_pVOISize->SetBackgroundColour( *wxLIGHT_GREY );
     
-    pSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Nb. of voxels: " ),wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER ), 0, wxALIGN_CENTER );
-    pSizer->Add( m_pVOISize, 0, wxALIGN_CENTER );
+    wxBoxSizer *pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Nb. of voxels: " ),wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER ), 0, wxALIGN_CENTER );
+    pBoxSizer->Add( m_pVOISize, 0, wxALIGN_CENTER );
     
-    m_pPropertiesSizer->Add( pSizer, 0, wxALIGN_CENTER );
+    m_pPropertiesSizer->Add( pBoxSizer, 0, wxALIGN_CENTER );
+
+    //// 
+    
+    wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
+    
+    wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
+    wxButton       *pBtnFlipNormal  = new wxButton( pParent, wxID_ANY, wxT( "Flip Normal" ) );
+    
+    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+    pBoxSizer->Add( pBtnFlipNormal,  3, wxEXPAND | wxALL, 1 );
+    pBoxSizer->Add( pBtnSelectColor, 1, wxEXPAND | wxALL, 1 );
+    m_pPropertiesSizer->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );    
+    
+    // Establish connections
+    pParent->Connect( pBtnSelectColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnColorRoi ) );
+    pParent->Connect( pBtnFlipNormal->GetId(),  wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnVoiFlipNormals ) );
 }
 
 void SelectionVOI::updatePropertiesSizer()

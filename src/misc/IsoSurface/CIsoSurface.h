@@ -51,7 +51,7 @@ public:
     virtual void createPropertiesSizer(PropertiesWindow *parent);
     virtual void updatePropertiesSizer();
     void draw();
-    void clean();
+
     void smooth();
     void flipAxis( AxisType i_axe ){};
     std::vector<Vector> getSurfaceVoxelPositions();

@@ -209,7 +209,8 @@ public :
     void        UseForDistanceColoring(bool aUse);
 
     //Normal flips
-    void        FlipNormals();
+    // Do not flip for generic selection objects.
+    virtual void flipNormals() {};
 
     // Variables
     std::vector< bool > m_inBox;

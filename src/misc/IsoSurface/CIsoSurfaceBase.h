@@ -45,7 +45,7 @@ public:
     virtual void updatePropertiesSizer();
     
     void draw();
-    void clean();
+    virtual void clean();
     void smooth();
     void flipAxis( AxisType i_axe ){};
     void activateLIC(){};

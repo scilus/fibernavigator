@@ -1427,12 +1427,15 @@ void PropertiesWindow::OnVoiFlipNormals( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnVoiFlipNormals" ), LOGLEVEL_DEBUG );
 
-    wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-    SelectionObject* l_selectionObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-
-    if(l_selectionObject->getSelectionType() == CISO_SURFACE_TYPE)
+    wxTreeItemId treeBoxId = m_pMainFrame->m_pTreeWidget->GetSelection();
+    
+    TreeObjectType objectType = m_pMainFrame->treeSelectedNew( treeBoxId );
+    
+    if( objectType == TYPE_SELECTION_OBJECT )
     {
-        l_selectionObject->FlipNormals();
+        CustomTreeItem *pTreeItem = (CustomTreeItem*)m_pMainFrame->m_pTreeWidget->GetItemData( treeBoxId );
+        SelectionObject *pSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pTreeItem->getId() );
+        pSelObject->flipNormals();
     }
 }
 
