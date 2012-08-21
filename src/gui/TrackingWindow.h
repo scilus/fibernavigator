@@ -33,19 +33,25 @@ public:
 
 
     void OnStartTracking                       ( wxCommandEvent& event );
+	void OnSelectShell						   ( wxCommandEvent& event );
     void OnClearBox                            ( wxTreeEvent&    event );
     void OnSliderFAMoved                       ( wxCommandEvent& event );
     void OnSliderAngleMoved                    ( wxCommandEvent& event );
     void OnSliderStepMoved                     ( wxCommandEvent& event );
     void OnSelectFile                          ( wxCommandEvent& event );
     void OnRandomSeeding                       ( wxCommandEvent& event );
+    void OnShellSeeding                        ( wxCommandEvent& event );
     void OnInterpolate                         ( wxCommandEvent& event );
     void OnSliderPunctureMoved                 ( wxCommandEvent& event );
     void OnSliderMinLengthMoved                ( wxCommandEvent& event );
     void OnSliderMaxLengthMoved                ( wxCommandEvent& event );
+	void OnConvertToFibers					   ( wxCommandEvent& event );
+    void OnSliderAxisSeedNbMoved               ( wxCommandEvent& event );
 
 public:
     wxToggleButton      *m_pBtnStart;
+    wxTextCtrl          *m_pTxtTotalSeedNbBox;
+
 
 private:
     MainFrame           *m_pMainFrame;
@@ -62,12 +68,21 @@ private:
     wxStaticText        *m_pTextPuncture;
     wxTextCtrl          *m_pTxtPunctureBox;
     wxButton            *m_pBtnSelectFile;
+	wxButton			*m_pBtnSelectShell;
+	wxToggleButton		*m_pToggleShell;
     wxStaticText        *m_pTextMinLength;
     wxSlider            *m_pSliderMinLength;
     wxTextCtrl          *m_pTxtMinLengthBox;
     wxSlider            *m_pSliderMaxLength;
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
+	wxButton			*m_pBtnConvert;
+    wxSlider            *m_pSliderAxisSeedNb;
+    wxTextCtrl          *m_pTxtAxisSeedNbBox;
+    wxStaticText        *m_pTextAxisSeedNb;
+    wxStaticText        *m_pTextTotalSeedNb;
+    
+
 
 private:
     wxSizer *m_pTrackingSizer;

@@ -15,6 +15,7 @@
 #include "../dataset/RTTrackingHelper.h"
 #include "../dataset/Tensors.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
 
 #include <wx/colordlg.h>
 #include <wx/notebook.h>
@@ -334,12 +335,20 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
         {
             CIsoSurface* s = (CIsoSurface*)l_current;
             s->GenerateWithThreshold();
+			RTTrackingHelper::getInstance()->setRTTDirty( true );
+            
+            std::vector< Vector > positions = s->m_tMesh->getVerts();
+            float shellSeedNb = positions.size();
+            m_pMainFrame->m_pTrackingWindow->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );
+            
+
         }
         else if( l_current->getType() < RGB )
         {
             Anatomy* a = (Anatomy*)l_current;
             if( a->m_pRoi )
                 a->m_pRoi->setThreshold( l_threshold );
+			
         }
 
         // This slider will set the Brightness level. Currently only the glyphs uses this value.
@@ -1071,6 +1080,7 @@ void PropertiesWindow::OnGlyphXAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphXAxisFlipChecked" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( X_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1082,6 +1092,7 @@ void PropertiesWindow::OnGlyphYAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphYAxisFlipChecked" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( Y_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1093,6 +1104,7 @@ void PropertiesWindow::OnGlyphZAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( Z_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////

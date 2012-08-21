@@ -78,6 +78,7 @@ public:
     DatasetIndex createODFs( const wxString &filename )                          { return insert( new ODFs( filename ) ); }
 
     void remove( const DatasetIndex index );
+	DatasetIndex createFibers( std::vector<std::vector<Vector> >* RTT );
 
 protected:
     DatasetManager(void);
@@ -103,6 +104,7 @@ private:
 
     // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
     DatasetIndex loadFibers( const wxString &filename );
+
 
     // Loads a mesh. Extension supported: .mesh, .surf and .dip
     DatasetIndex loadMesh( const wxString &filename, const wxString &extension );

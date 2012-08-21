@@ -27,9 +27,9 @@ public:
     Tensors( const wxString &filename );
     virtual ~Tensors();
 
-    std::vector< FMatrix > getTensorsMatrix()                       { return m_tensorsMatrix;           };
-    std::vector< float   > getTensorsFA()                           { return m_tensorsFA;               };
-    std::vector< F::FVector > getTensorsEV()                        { return m_tensorsEigenValues;      };
+    std::vector< FMatrix > *getTensorsMatrix()                       { return &m_tensorsMatrix;           };
+    std::vector< float   > *getTensorsFA()                           { return &m_tensorsFA;               };
+    std::vector< F::FVector > *getTensorsEV()                        { return &m_tensorsEigenValues;      };
         
     void draw(); // From DatasetInfo
 

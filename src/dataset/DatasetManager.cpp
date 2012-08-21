@@ -560,6 +560,36 @@ DatasetIndex DatasetManager::loadFibers( const wxString &filename )
     return BAD_INDEX;
 }
 
+DatasetIndex DatasetManager::createFibers( std::vector<std::vector<Vector> >* RTT )
+{
+    Fibers* l_fibers = new Fibers();
+
+    l_fibers->convertFromRTT( RTT );
+   
+    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+    for( unsigned int i( 0 ); i < selectionObjects.size(); ++i )
+    {
+        for( unsigned int j( 0 ); j < selectionObjects[i].size(); ++j )
+        {
+            selectionObjects[i][j]->m_inBox.assign( m_countFibers, false );
+            selectionObjects[i][j]->setIsDirty( true );
+        }
+    }
+
+    l_fibers->setThreshold( THRESHOLD );
+    l_fibers->setShow     ( SHOW );
+    l_fibers->setShowFS   ( SHOW_FS );
+    l_fibers->setUseTex   ( USE_TEX );
+
+    DatasetIndex index = insert( l_fibers );
+
+    l_fibers->updateLinesShown();
+
+    SceneManager::getInstance()->setSelBoxChanged( true );
+
+	return index;
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 // Loads a mesh. Extension supported: .mesh, .surf and .dip
