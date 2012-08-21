@@ -685,6 +685,7 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     m_pToggleAxisFlipY         = new wxToggleButton( pParent, wxID_ANY, wxT( "Y" ), DEF_POS, wxSize( 15, -1 ) );
     m_pToggleAxisFlipZ         = new wxToggleButton( pParent, wxID_ANY, wxT( "Z" ), DEF_POS, wxSize( 15, -1 ) );
     m_pToggleColorWithPosition = new wxToggleButton( pParent, wxID_ANY, wxT( "Color with Position" ), DEF_POS, wxSize( 80, -1 ) );
+    m_pTxtBoxScalingFactor  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.1f" ), 5.0f ), DEF_POS, wxSize( 50, -1 ) );
 
     m_pRadNormal->SetValue(      isDisplayShape( NORMAL ) );
     m_pRadMapOnSphere->SetValue( isDisplayShape( SPHERE ) );
@@ -721,8 +722,8 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Display" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderDisplay, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Scaling" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderScalingFactor, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Details" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderLOD, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
@@ -754,6 +755,10 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
 
     pBoxMain->Add( pBoxDisplay, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
 
+       pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Scaling" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderScalingFactor, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( m_pTxtBoxScalingFactor, 0, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
+
     //////////////////////////////////////////////////////////////////////////
 
     m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
@@ -778,6 +783,7 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderScalingFactor->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphScalingFactorSliderMoved ) );
     pParent->Connect( m_pSliderLOD->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLODSliderMoved ) );
     pParent->Connect( m_pToggleColorWithPosition->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGlyphColorWithPosition ) );
+    pParent->Connect( m_pTxtBoxScalingFactor->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxScalingFactor ) );
 }
 
 void Glyph::updatePropertiesSizer()

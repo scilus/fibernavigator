@@ -55,8 +55,6 @@ public:
 
 public:
     //Vars
-    wxString    m_lastODF_path;
-
     bool   m_isMaximasSet;
     float  m_axisThreshold;
 
