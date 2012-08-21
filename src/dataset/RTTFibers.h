@@ -33,23 +33,24 @@ public:
     void clearFibersRTT()                           { m_fibersRTT.clear(); }
     void clearColorsRTT()                           { m_colorsRTT.clear(); }
 
-    void setFAThreshold( float FAThreshold )                    { m_FAThreshold = FAThreshold; }
+    void setFAThreshold( float FAThreshold )						  { m_FAThreshold = FAThreshold; }
     void setTensorsMatrix( const std::vector<FMatrix> tensorsMatrix ) { m_tensorsMatrix = tensorsMatrix; }
     void setTensorsEV( const std::vector< F::FVector > tensorsEV )    { m_tensorsEV = tensorsEV; }
     void setTensorsFA( const std::vector<float> tensorsFA )           { m_tensorsFA = tensorsFA; }
-    void setAngleThreshold( float angleThreshold )              { m_angleThreshold = angleThreshold; }
-    void setPuncture( float puncture )                          { m_puncture = puncture; }
-    void setStep( float step )                                  { m_step = step; }
-    void setNbSeed ( float nbSeed )                             { m_nbSeed = nbSeed; }
-    void setMinFiberLength( float minLength )                   { m_minFiberLength = minLength; }
-    void setMaxFiberLength( float maxLength )                   { m_maxFiberLength = maxLength; }
-    void setTensorsInfo( Tensors* info )                        { m_pTensorsInfo = info; }
-
+    void setAngleThreshold( float angleThreshold )					  { m_angleThreshold = angleThreshold; }
+    void setPuncture( float puncture )								  { m_puncture = puncture; }
+    void setStep( float step )										  { m_step = step; }
+    void setNbSeed ( float nbSeed )									  { m_nbSeed = nbSeed; }
+    void setMinFiberLength( float minLength )						  { m_minFiberLength = minLength; }
+    void setMaxFiberLength( float maxLength )						  { m_maxFiberLength = maxLength; }
+    void setTensorsInfo( Tensors* info )							  { m_pTensorsInfo = info; }
+	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
 
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
     float getStep()                              { return m_step; }
     float getNbMeshPoint()                       { return m_nbMeshPt; }
+	float getShellSeedNb();						 
 
     float getPuncture()                          { return m_puncture; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
@@ -114,6 +115,7 @@ private:
     float       m_minFiberLength;
     float       m_maxFiberLength;
     Tensors     *m_pTensorsInfo;
+	DatasetInfo *m_pShellInfo;
 
 
     std::vector< FMatrix > m_tensorsMatrix;

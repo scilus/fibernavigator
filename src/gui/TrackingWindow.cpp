@@ -39,10 +39,10 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     //Content of RTT panel
     /********************************/
 
-    m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("Tensor not selected"), wxPoint(30,0), wxSize(200, -1) );
+    m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("DTI not selected"), wxPoint(30,0), wxSize(100, -1) );
     Connect( m_pBtnSelectFile->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectFile) );
 
-    m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start tracking"), wxPoint(30,30), wxSize(120, -1) );
+    m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start tracking"), wxPoint(130,0), wxSize(100, -1) );
     Connect( m_pBtnStart->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnStartTracking) );
     m_pBtnStart->Enable(false);
 
@@ -50,8 +50,12 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     //wxBitmapButton *m_pbtnDelete = new wxBitmapButton(this, wxID_ANY, bmpDelete, wxPoint(170,30), wxSize(60,-1));
     //Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(TrackingWindow::OnClearBox));
 
-    wxToggleButton *m_pToggleRandom = new wxToggleButton( this, wxID_ANY,wxT("Shell seeding"), wxPoint(150,30), wxSize(80, -1) );
-    Connect( m_pToggleRandom->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnShellSeeding) );
+	m_pBtnSelectShell = new wxButton( this, wxID_ANY,wxT("Shell not selected"), wxPoint(30,30), wxSize(100, -1) );
+    Connect( m_pBtnSelectShell->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectShell) );
+
+    m_pToggleShell = new wxToggleButton( this, wxID_ANY,wxT("Shell seeding"), wxPoint(130,30), wxSize(100, -1) );
+    Connect( m_pToggleShell->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnShellSeeding) );
+	m_pToggleShell->Enable(false);
 
     m_pTextFA = new wxStaticText( this, wxID_ANY, wxT("Min FA"), wxPoint(0,60), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderFA = new MySlider( this, wxID_ANY, 0, 1, 50, wxPoint(60,60), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -203,9 +207,12 @@ void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
 {
     //Tensor data
     long item = m_pMainFrame->getCurrentListIndex();
-    //long item = m_pMainFrame->m_pListCtrl->GetNextItem( -1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED );
-    //Tensors* pTensorInfo = dynamic_cast<Tensors*>((DatasetInfo*)m_pMainFrame->m_pListCtrl->GetItemData( item ));
     Tensors* pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
+	
+	//Hide tensor data
+	pTensorInfo->setShow(false);
+	m_pMainFrame->m_pListCtrl->UpdateSelected();
+    m_pMainFrame->refreshAllGLWidgets();
 
     if( pTensorInfo != NULL )
     {
@@ -218,12 +225,21 @@ void TrackingWindow::OnSelectFile( wxCommandEvent& WXUNUSED(event) )
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
 
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
-
-        ////Copy useful matrices
-        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsMatrix( pTensorInfo->getTensorsMatrix() );
-        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsFA( pTensorInfo->getTensorsFA() );
-        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsEV( pTensorInfo->getTensorsEV() );
     }
+}
+
+void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
+{
+	//Select surface for seeding
+    long item = m_pMainFrame->getCurrentListIndex();
+	DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
+
+	if( pMesh != NULL )
+    {
+		m_pBtnSelectShell->SetLabel( pMesh->getName() );
+		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setShellInfo( (DatasetInfo *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+		m_pToggleShell->Enable(true);
+	}
 }
 
 void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
@@ -231,27 +247,17 @@ void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
     RTTrackingHelper::getInstance()->toggleShellSeeds();
     RTTrackingHelper::getInstance()->setRTTDirty( true );
     float sliderValue = m_pSliderAxisSeedNb->GetValue();
-    if( !RTTrackingHelper::getInstance()->isShellSeeds() )
+	m_pBtnStart->Enable( true );
+    
+	//Set nb of seeds depending on the seeding mode
+	if( !RTTrackingHelper::getInstance()->isShellSeeds() )
     {
         m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue*sliderValue*sliderValue) );
     }
     else
     {
-        for( int j = 0; j < MyApp::frame->m_pListCtrl->GetItemCount(); ++j )
-        {
-            DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( j )); 
-
-            if ( pMesh->getType() == ISO_SURFACE && pMesh->getShow() )
-            {
-                CIsoSurface* pSurf = (CIsoSurface*) pMesh;
-                std::vector< Vector > positions = pSurf->m_tMesh->getVerts();
-
-                float shellSeedNb = positions.size();
-
-                //float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getNbMeshPoint();
-                m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );
-            }
-        }
+        float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getShellSeedNb();
+        m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) ); 
     }
 }
 

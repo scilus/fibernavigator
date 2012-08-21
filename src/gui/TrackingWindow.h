@@ -33,6 +33,7 @@ public:
 
 
     void OnStartTracking                       ( wxCommandEvent& event );
+	void OnSelectShell						   ( wxCommandEvent& event );
     void OnClearBox                            ( wxTreeEvent&    event );
     void OnSliderFAMoved                       ( wxCommandEvent& event );
     void OnSliderAngleMoved                    ( wxCommandEvent& event );
@@ -67,6 +68,8 @@ private:
     wxStaticText        *m_pTextPuncture;
     wxTextCtrl          *m_pTxtPunctureBox;
     wxButton            *m_pBtnSelectFile;
+	wxButton			*m_pBtnSelectShell;
+	wxToggleButton		*m_pToggleShell;
     wxStaticText        *m_pTextMinLength;
     wxSlider            *m_pSliderMinLength;
     wxTextCtrl          *m_pTxtMinLengthBox;

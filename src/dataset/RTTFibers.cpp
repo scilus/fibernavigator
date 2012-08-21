@@ -60,7 +60,20 @@ Vector RTTFibers::generateRandomSeed( const Vector &min, const Vector &max )
 
     return Vector( seedX, seedY, seedZ );
 }
-
+///////////////////////////////////////////////////////////////////////////
+// Returns the nb of vertices for shell seeding
+///////////////////////////////////////////////////////////////////////////
+float RTTFibers::getShellSeedNb()
+{
+	float pts = m_nbSeed*m_nbSeed*m_nbSeed;
+	if( m_pShellInfo != NULL )
+	{
+		CIsoSurface* pSurf = (CIsoSurface*) m_pShellInfo;
+		std::vector< Vector > positions = pSurf->m_tMesh->getVerts();
+		pts = positions.size();
+	}
+    return pts;
+}
 ///////////////////////////////////////////////////////////////////////////
 // Generate seeds and tracks
 ///////////////////////////////////////////////////////////////////////////
@@ -75,44 +88,37 @@ void RTTFibers::seed()
 
     Vector minCorner, maxCorner, middle;
     vector< vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+	 
+	//Evenly distanced seeds
+    if( !RTTrackingHelper::getInstance()->isShellSeeds() )
+	{
+		for( unsigned int b = 0; b < selectionObjects.size(); b++ )
+		{
+			minCorner.x = selectionObjects[b][0]->getCenter().x - selectionObjects[b][0]->getSize().x * xVoxel / 2.0f;
+			minCorner.y = selectionObjects[b][0]->getCenter().y - selectionObjects[b][0]->getSize().y * yVoxel / 2.0f;
+			minCorner.z = selectionObjects[b][0]->getCenter().z - selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
+			maxCorner.x = selectionObjects[b][0]->getCenter().x + selectionObjects[b][0]->getSize().x * xVoxel / 2.0f;
+			maxCorner.y = selectionObjects[b][0]->getCenter().y + selectionObjects[b][0]->getSize().y * yVoxel / 2.0f;
+			maxCorner.z = selectionObjects[b][0]->getCenter().z + selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
 
-    //texSize = 10;
+			float xstep =  selectionObjects[b][0]->getSize().x * xVoxel / float( m_nbSeed - 1.0f );
+			float ystep =  selectionObjects[b][0]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
+			float zstep =  selectionObjects[b][0]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
 
-    for( unsigned int b = 0; b < selectionObjects.size(); b++ )
-    {
-        minCorner.x = selectionObjects[b][0]->getCenter().x - selectionObjects[b][0]->getSize().x * xVoxel / 2.0f;
-        minCorner.y = selectionObjects[b][0]->getCenter().y - selectionObjects[b][0]->getSize().y * yVoxel / 2.0f;
-        minCorner.z = selectionObjects[b][0]->getCenter().z - selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
-        maxCorner.x = selectionObjects[b][0]->getCenter().x + selectionObjects[b][0]->getSize().x * xVoxel / 2.0f;
-        maxCorner.y = selectionObjects[b][0]->getCenter().y + selectionObjects[b][0]->getSize().y * yVoxel / 2.0f;
-        maxCorner.z = selectionObjects[b][0]->getCenter().z + selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
-
-        //Evenly distanced seeds
-        if( !RTTrackingHelper::getInstance()->isShellSeeds() )
-        {
-            float xstep =  selectionObjects[b][0]->getSize().x * xVoxel / float( m_nbSeed - 1.0f );
-            float ystep =  selectionObjects[b][0]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
-            float zstep =  selectionObjects[b][0]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
-
-            for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
-            {
-                for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )
-                {
-                    for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
-                    {
-                        vector<Vector> pointsF; // Points to be rendered Forward
-                        vector<Vector> colorF; //Color (local directions)Forward
+			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
+			{
+				for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )
+				{
+					for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
+					{
+						vector<Vector> pointsF; // Points to be rendered Forward
+						vector<Vector> colorF; //Color (local directions)Forward
 						vector<Vector> pointsB; // Points to be rendered Backward
-                        vector<Vector> colorB; //Color (local directions) Backward
+						vector<Vector> colorB; //Color (local directions) Backward
  
-                        //Track both sides
-                        performRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-                        //m_fibersRTT.push_back( points );
-                        //m_colorsRTT.push_back( color );
-                        //points.clear();
-                        //color.clear();
-
-                        performRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+						//Track both sides
+						performRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+						performRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         
 						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
 						{
@@ -122,194 +128,186 @@ void RTTFibers::seed()
 							m_colorsRTT.push_back( colorB );
 						}
 
-                       //glColor3f(1,0,0);
-                       //SceneManager::getInstance()->getScene()->drawSphere( x, y ,z, 0.2 );
+						//glColor3f(1,0,0);
+						//SceneManager::getInstance()->getScene()->drawSphere( x, y ,z, 0.2 );
 
-                    }
-                }
-            }
-
-            renderRTTFibers();
-            RTTrackingHelper::getInstance()->setRTTDirty( false );
-        }
-        //Mesh ShellSeeding
-        else 
-        {
-            for( int j = 0; j < MyApp::frame->m_pListCtrl->GetItemCount(); ++j )
-            {
-                DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( j )); 
-
-                if ( pMesh->getType() == ISO_SURFACE && pMesh->getShow() )
-                {
-                    CIsoSurface* pSurf = (CIsoSurface*) pMesh;
-                    std::vector< Vector > positions = pSurf->m_tMesh->getVerts();
-
-                    m_nbMeshPt = positions.size();
-
-                    for ( size_t k = 0; k < positions.size(); ++k )
-                    {
-                        vector<Vector> points; // Points to be rendered
-                        vector<Vector> color; //Color (local directions)
-                        
-                        //Track both sides
-                        performRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, points, color); //First pass
-                        m_fibersRTT.push_back( points );
-                        m_colorsRTT.push_back( color );
-                        points.clear();
-                        color.clear();
-        
-                        performRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, points, color); //Second pass
-                        m_fibersRTT.push_back( points ); 
-                        m_colorsRTT.push_back( color );
-
-                    }
-                }
-            }
-
-
-            //middle.x = selectionObjects[0][0]->getCenter().x;
-            //middle.y = selectionObjects[0][0]->getCenter().y;
-            //middle.z = selectionObjects[0][0]->getCenter().z;
-
-            ////L: Lower corner (min y)
-            ////U: Upper corner (max y)
-            ////F: Front corner (min z)
-            ////B: Back  corner (max z) 
-            ////R: Right corner (max x)
-            ////L: Left  corner (min x)
-
-            //Vector minLFR( selectionObjects[0][0]->getCenter().x, minCorner.y, minCorner.z );
-            //Vector maxLFR( maxCorner.x, selectionObjects[0][0]->getCenter().y, selectionObjects[0][0]->getCenter().z );
-            //Vector minUFL( minCorner.x, selectionObjects[0][0]->getCenter().y, minCorner.z );
-            //Vector maxUFL( selectionObjects[0][0]->getCenter().x, maxCorner.y, selectionObjects[0][0]->getCenter().z );
-            //Vector minUFR( selectionObjects[0][0]->getCenter().x, selectionObjects[0][0]->getCenter().y, minCorner.z );
-            //Vector maxUFR( maxCorner.x, maxCorner.y, selectionObjects[0][0]->getCenter().z );
-            //Vector minLBL( minCorner.x, minCorner.y, selectionObjects[0][0]->getCenter().z );
-            //Vector maxLBL( selectionObjects[0][0]->getCenter().x, selectionObjects[0][0]->getCenter().y, maxCorner.z );
-            //Vector minLBR( selectionObjects[0][0]->getCenter().x, minCorner.y, selectionObjects[0][0]->getCenter().z );
-            //Vector maxLBR( maxCorner.x, selectionObjects[0][0]->getCenter().y, maxCorner.z );
-            //Vector minUBL( minCorner.x, selectionObjects[0][0]->getCenter().y, selectionObjects[0][0]->getCenter().z );
-            //Vector maxUBL( selectionObjects[0][0]->getCenter().x, maxCorner.y, maxCorner.z );
-         
-            //for( int i = 0; i < 125; i++ ) //125 seeds * 8 quads = 1000seeds
-            //{
-            //    vector<Vector> points; // Points to be rendered
-            //    vector<Vector> color; //Color (local directions)
-
-            //    //Lower Front Left********
-            //    Vector quad1 = generateRandomSeed( minCorner, middle );
-            //    performRTT( quad1, 1, points, color ); //First pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    performRTT( quad1, -1, points, color ); //Second pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    //Lower Front Right*******
-            //    Vector quad2 = generateRandomSeed( minLFR, maxLFR );
-            //    performRTT( quad2, 1, points, color ); //First pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    performRTT( quad2, -1, points, color ); //Second pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    //Upper Front Left*******
-            //    Vector quad3 = generateRandomSeed( minUFL, maxUFL  );
-            //    performRTT( quad3, 1, points, color ); //First pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    performRTT( quad3, -1, points, color ); //Second pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    //Upper Front Right******
-            //    Vector quad4 = generateRandomSeed( minUFR, maxUFR );
-            //    performRTT( quad4, 1, points, color ); //First pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    performRTT( quad4, -1, points, color ); //Second pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    //Lower Back Left********
-            //    Vector quad5 = generateRandomSeed( minLBL, maxLBL );
-            //    performRTT( quad5, 1, points, color ); //First pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    performRTT( quad5, -1, points, color ); //Second pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    //Lower Back Right*********
-            //    Vector quad6 = generateRandomSeed( minLBR, maxLBR );
-            //    performRTT( quad6, 1, points, color ); //First pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    performRTT( quad6, -1, points, color ); //Second pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    //Upper Back Left******
-            //    Vector quad7 = generateRandomSeed( minUBL, maxUBL );
-            //    performRTT( quad7, 1, points, color ); //First pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    performRTT( quad7, -1, points, color ); //Second pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    //Upper Back Right******
-            //    Vector quad8 = generateRandomSeed( middle, maxCorner );
-            //    performRTT( quad8, 1, points, color ); //First pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            //    points.clear();
-            //    color.clear();
-
-            //    performRTT( quad8, -1, points, color ); //Second pass
-            //    m_fibersRTT.push_back( points );
-            //    m_colorsRTT.push_back( color );
-            }
-            renderRTTFibers();
-			RTTrackingHelper::getInstance()->setRTTDirty( false );
+					}
+				}
+			}
 		}
+	}
+    //Mesh ShellSeeding
+    else 
+    {
+        if ( m_pShellInfo->getType() == ISO_SURFACE && m_pShellInfo->getShow() )
+        {
+            CIsoSurface* pSurf = (CIsoSurface*) m_pShellInfo;
+            std::vector< Vector > positions = pSurf->m_tMesh->getVerts();
+
+            m_nbMeshPt = positions.size();
+
+            for ( size_t k = 0; k < positions.size(); ++k )
+            {
+                vector<Vector> points; // Points to be rendered
+                vector<Vector> color; //Color (local directions)
+                        
+                //Track both sides
+                performRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, points, color); //First pass
+                m_fibersRTT.push_back( points );
+                m_colorsRTT.push_back( color );
+                points.clear();
+                color.clear();
+        
+                performRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, points, color); //Second pass
+                m_fibersRTT.push_back( points ); 
+                m_colorsRTT.push_back( color );
+
+            }
+        }
+
+        //middle.x = selectionObjects[0][0]->getCenter().x;
+        //middle.y = selectionObjects[0][0]->getCenter().y;
+        //middle.z = selectionObjects[0][0]->getCenter().z;
+
+        ////L: Lower corner (min y)
+        ////U: Upper corner (max y)
+        ////F: Front corner (min z)
+        ////B: Back  corner (max z) 
+        ////R: Right corner (max x)
+        ////L: Left  corner (min x)
+
+        //Vector minLFR( selectionObjects[0][0]->getCenter().x, minCorner.y, minCorner.z );
+        //Vector maxLFR( maxCorner.x, selectionObjects[0][0]->getCenter().y, selectionObjects[0][0]->getCenter().z );
+        //Vector minUFL( minCorner.x, selectionObjects[0][0]->getCenter().y, minCorner.z );
+        //Vector maxUFL( selectionObjects[0][0]->getCenter().x, maxCorner.y, selectionObjects[0][0]->getCenter().z );
+        //Vector minUFR( selectionObjects[0][0]->getCenter().x, selectionObjects[0][0]->getCenter().y, minCorner.z );
+        //Vector maxUFR( maxCorner.x, maxCorner.y, selectionObjects[0][0]->getCenter().z );
+        //Vector minLBL( minCorner.x, minCorner.y, selectionObjects[0][0]->getCenter().z );
+        //Vector maxLBL( selectionObjects[0][0]->getCenter().x, selectionObjects[0][0]->getCenter().y, maxCorner.z );
+        //Vector minLBR( selectionObjects[0][0]->getCenter().x, minCorner.y, selectionObjects[0][0]->getCenter().z );
+        //Vector maxLBR( maxCorner.x, selectionObjects[0][0]->getCenter().y, maxCorner.z );
+        //Vector minUBL( minCorner.x, selectionObjects[0][0]->getCenter().y, selectionObjects[0][0]->getCenter().z );
+        //Vector maxUBL( selectionObjects[0][0]->getCenter().x, maxCorner.y, maxCorner.z );
+         
+        //for( int i = 0; i < 125; i++ ) //125 seeds * 8 quads = 1000seeds
+        //{
+        //    vector<Vector> points; // Points to be rendered
+        //    vector<Vector> color; //Color (local directions)
+
+        //    //Lower Front Left********
+        //    Vector quad1 = generateRandomSeed( minCorner, middle );
+        //    performRTT( quad1, 1, points, color ); //First pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    performRTT( quad1, -1, points, color ); //Second pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    //Lower Front Right*******
+        //    Vector quad2 = generateRandomSeed( minLFR, maxLFR );
+        //    performRTT( quad2, 1, points, color ); //First pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    performRTT( quad2, -1, points, color ); //Second pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    //Upper Front Left*******
+        //    Vector quad3 = generateRandomSeed( minUFL, maxUFL  );
+        //    performRTT( quad3, 1, points, color ); //First pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    performRTT( quad3, -1, points, color ); //Second pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    //Upper Front Right******
+        //    Vector quad4 = generateRandomSeed( minUFR, maxUFR );
+        //    performRTT( quad4, 1, points, color ); //First pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    performRTT( quad4, -1, points, color ); //Second pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    //Lower Back Left********
+        //    Vector quad5 = generateRandomSeed( minLBL, maxLBL );
+        //    performRTT( quad5, 1, points, color ); //First pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    performRTT( quad5, -1, points, color ); //Second pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    //Lower Back Right*********
+        //    Vector quad6 = generateRandomSeed( minLBR, maxLBR );
+        //    performRTT( quad6, 1, points, color ); //First pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    performRTT( quad6, -1, points, color ); //Second pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    //Upper Back Left******
+        //    Vector quad7 = generateRandomSeed( minUBL, maxUBL );
+        //    performRTT( quad7, 1, points, color ); //First pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    performRTT( quad7, -1, points, color ); //Second pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    //Upper Back Right******
+        //    Vector quad8 = generateRandomSeed( middle, maxCorner );
+        //    performRTT( quad8, 1, points, color ); //First pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+        //    points.clear();
+        //    color.clear();
+
+        //    performRTT( quad8, -1, points, color ); //Second pass
+        //    m_fibersRTT.push_back( points );
+        //    m_colorsRTT.push_back( color );
+	}
+    renderRTTFibers();
+	RTTrackingHelper::getInstance()->setRTTDirty( false );
 }
+
     
 
 ///////////////////////////////////////////////////////////////////////////
@@ -321,63 +319,60 @@ void RTTFibers::renderRTTFibers()
 	{
 		for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
 		{ 
-			//if( (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() > getMinFiberLength() && (m_fibersRTT[j].size() + m_fibersRTT[j+1].size()) * getStep() < getMaxFiberLength() )
-			
-				//POINTS
-				if( SceneManager::getInstance()->isPointMode() )
+			//POINTS
+			if( SceneManager::getInstance()->isPointMode() )
+			{
+				//Forward
+				if( m_fibersRTT[j].size() > 0 )
 				{
-					//Forward
-					if( m_fibersRTT[j].size() > 0 )
-					{
-						for( unsigned int i = 0; i < m_fibersRTT[j].size(); i++ )
-						{  
-							glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
-							glBegin( GL_POINTS );
-								glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-							glEnd();
-						}
-					}
-					//Backward
-					if(m_fibersRTT[j+1].size() > 0)
-					{
-						for( unsigned int i = 0; i < m_fibersRTT[j+1].size(); i++ )
-						{  
-							glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
-							glBegin( GL_POINTS );
-								glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-							glEnd();
-						}
+					for( unsigned int i = 0; i < m_fibersRTT[j].size(); i++ )
+					{  
+						glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
+						glBegin( GL_POINTS );
+							glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
+						glEnd();
 					}
 				}
-				//LINES
-				else
+				//Backward
+				if(m_fibersRTT[j+1].size() > 0)
 				{
-					//Forward
-					if( m_fibersRTT[j].size() > 2)
-					{
-						for( unsigned int i = 0; i < m_fibersRTT[j].size() - 1; i++ )
-						{
-							glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
-							glBegin( GL_LINES );
-								glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-								glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
-							glEnd();
-						}
-					}
-					//Backward
-					if ( m_fibersRTT[j+1].size() > 2)
-					{
-						for( unsigned int i = 0; i < m_fibersRTT[j+1].size() - 1; i++ )
-						{
-							glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
-							glBegin( GL_LINES );
-								glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-								glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
-							glEnd();
-						}
+					for( unsigned int i = 0; i < m_fibersRTT[j+1].size(); i++ )
+					{  
+						glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
+						glBegin( GL_POINTS );
+							glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
+						glEnd();
 					}
 				}
-	        
+			}
+			//LINES
+			else
+			{
+				//Forward
+				if( m_fibersRTT[j].size() > 2)
+				{
+					for( unsigned int i = 0; i < m_fibersRTT[j].size() - 1; i++ )
+					{
+						glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
+						glBegin( GL_LINES );
+							glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
+							glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
+						glEnd();
+					}
+				}
+				//Backward
+				if ( m_fibersRTT[j+1].size() > 2)
+				{
+					for( unsigned int i = 0; i < m_fibersRTT[j+1].size() - 1; i++ )
+					{
+						glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
+						glBegin( GL_LINES );
+							glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
+							glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
+						glEnd();
+					}
+				}
+			}   
 		}
 	}
 }
