@@ -93,6 +93,8 @@ public:
     void updateColorationMode()              { m_isColorationUpdated = true; }
     FibersColorationMode getColorationMode() { return m_fiberColorationMode; }
     void setColorationMode(FibersColorationMode val) { m_fiberColorationMode = val; }
+    
+    void setConstantColor( const wxColor &col ) { m_constantColor = col; }
 
     void useFakeTubes();
     void useTransparency();
@@ -217,6 +219,7 @@ private:
     wxSlider       *m_pSliderInterFibersThickness;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
+    wxButton       *m_pSelectConstantFibersColor;
     wxToggleButton *m_pToggleCrossingFibers;
     wxRadioButton  *m_pRadNormalColoring;
     wxRadioButton  *m_pRadDistanceAnchoring;
