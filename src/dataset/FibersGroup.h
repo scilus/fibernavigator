@@ -57,6 +57,7 @@ public:
     void    OnToggleColorModeBtn();
     void    OnToggleLocalColoring();
     void    OnToggleNormalColoring();
+    void    OnApplyDifferentColors();
     void    OnClickGenerateFiberVolumeBtn();
     void    OnClickApplyBtn();
     void    OnClickCancelBtn();
@@ -102,6 +103,7 @@ private:
     wxButton *m_pBtnColorMode;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
+    wxButton       *m_pApplyDifferentColors;
     wxToggleButton *m_pToggleInterFibers;
 
     wxButton       *m_pApplyBtn;

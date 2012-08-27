@@ -220,6 +220,25 @@ void PropertiesWindow::OnToggleNormalColoringBtn( wxEvent& WXUNUSED(event) )
     m_pMainFrame->refreshAllGLWidgets();
 }
 
+void PropertiesWindow::OnApplyDifferentColors( wxEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnApplyDifferentColors" ), LOGLEVEL_DEBUG );
+    
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    {
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if(pFibersGroup)
+            {
+                pFibersGroup->OnApplyDifferentColors();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
+}
+
 void PropertiesWindow::OnClickApplyBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnClickApplyBtn" ), LOGLEVEL_DEBUG );

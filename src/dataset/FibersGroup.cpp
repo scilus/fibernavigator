@@ -304,6 +304,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
+    m_pApplyDifferentColors = new wxButton(         pParent, wxID_ANY, wxT( "Color bundles differently" ) );
     m_pToggleInterFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
     m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
@@ -359,7 +360,8 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxColoringRadios->Add( m_pRadTorsion,              0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadConstantColor,        0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoring->Add( pBoxColoringRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
-
+    pBoxColoring->Add( m_pApplyDifferentColors, 0, wxALIGN_CENTER | wxCENTER );
+    
     pBoxMain->Add( pBoxColoring, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
 
     //////////////////////////////////////////////////////////////////////////
@@ -398,6 +400,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersSampling->GetId(),      wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleLocalColoringBtn ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),      wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleNormalColoringBtn ) );
+    pParent->Connect( m_pApplyDifferentColors->GetId(),      wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnApplyDifferentColors ) );
     pParent->Connect( m_pApplyBtn->GetId(),                  wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnClickApplyBtn ) );
     pParent->Connect( m_pCancelBtn->GetId(),                 wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnClickCancelBtn ) );
     pParent->Connect( m_pBtnIntensity->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleIntensityBtn ) );
@@ -539,6 +542,7 @@ void FibersGroup::OnToggleColorModeBtn()
     // Show ColorMode controls
     m_pToggleLocalColoring->Show();
     m_pToggleNormalColoring->Show();
+    m_pApplyDifferentColors->Show();
     m_pLblColoring->Show();
     m_pRadNormalColoring->Show();
     m_pRadDistanceAnchoring->Show();
@@ -755,6 +759,43 @@ void FibersGroup::OnToggleNormalColoring()
     m_isNormalColoringStateChanged = true;
 }
 
+void FibersGroup::OnApplyDifferentColors()
+{
+    vector<Fibers *> fibers = DatasetManager::getInstance()->getFibers();
+    
+    if( fibers.empty() )
+    {
+        return;
+    }
+    
+    int totalColorsNb( fibers.size() );
+    int nbColorIntervals( totalColorsNb / 6 + 1 );
+    
+    int curColorInterval( 0 );
+    int curColorIncrement( 255 );
+    
+    for( int colorIdx( 0 ); colorIdx < totalColorsNb; ++colorIdx )
+    {
+        int remain( colorIdx % 6 );
+        int r, g, b;
+        
+        if( remain == 0 )     { r = curColorIncrement; g = 0; b = 0; }
+        else if( remain == 1 ){ r = 0; g = curColorIncrement; b = 0; }
+        else if( remain == 2 ){ r = 0; g = 0; b = curColorIncrement; }
+        else if( remain == 3 ){ r = curColorIncrement; g = curColorIncrement; b = 0; }
+        else if( remain == 4 ){ r = curColorIncrement; g = 0; b = curColorIncrement; }
+        else                  { r = 0; g = curColorIncrement; b = curColorIncrement; }
+        
+        fibers[ colorIdx ]->setConstantColor( wxColor( r, g, b) );
+        
+        if( colorIdx % 6 == 5 )
+        {
+            ++curColorInterval;
+            curColorIncrement = ( 255 / nbColorIntervals) * (nbColorIntervals - curColorInterval );
+        }
+    }    
+}
+
 void FibersGroup::OnClickCancelBtn()
 {
     m_pApplyBtn->Hide();
@@ -928,6 +969,7 @@ void FibersGroup::updatePropertiesSizer()
     {
         m_pToggleLocalColoring->Show();
         m_pToggleNormalColoring->Show();
+        m_pApplyDifferentColors->Show();
         m_pLblColoring->Show();
         m_pRadNormalColoring->Show();
         m_pRadDistanceAnchoring->Show();
@@ -947,6 +989,7 @@ void FibersGroup::updatePropertiesSizer()
     {
         m_pToggleLocalColoring->Hide();
         m_pToggleNormalColoring->Hide();
+        m_pApplyDifferentColors->Hide();
         m_pLblColoring->Hide();
         m_pRadNormalColoring->Hide();
         m_pRadDistanceAnchoring->Hide();
