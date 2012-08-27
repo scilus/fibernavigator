@@ -87,6 +87,7 @@ Fibers::Fibers()
     m_zDrawn( 0.0f ),
     m_cfStartOfLine(),
     m_cfPointsPerLine(),
+    m_constantColor( 0, 0, 0 ),
     m_pSliderFibersFilterMin( NULL ),
     m_pSliderFibersFilterMax( NULL ),
     m_pSliderFibersSampling( NULL ),
@@ -98,7 +99,8 @@ Fibers::Fibers()
     m_pRadDistanceAnchoring( NULL ),
     m_pRadMinDistanceAnchoring( NULL ),
     m_pRadCurvature( NULL ),
-    m_pRadTorsion( NULL )
+    m_pRadTorsion( NULL ),
+    m_pRadConstant( NULL )
 {
     m_bufferObjects = new GLuint[3];
 }
@@ -1636,6 +1638,10 @@ void Fibers::updateFibersColors()
         {
             colorWithMinDistance( pColorData );
         }
+        else if( m_fiberColorationMode == CONSTANT_COLOR )
+        {
+            colorWithConstantColor( pColorData );
+        }
 
         if( SceneManager::getInstance()->isUsingVBO() )
         {
@@ -2018,6 +2024,25 @@ void Fibers::colorWithMinDistance( float *pColorData )
             pColorData[( index + j ) * 3 + 2] = theColor.z;
             m_localizedAlpha[index + j] = theAlpha;
         }
+    }
+}
+
+void Fibers::colorWithConstantColor( float *pColorData )
+{
+    if( pColorData == NULL )
+    {
+        return;
+    }
+    
+    float r = m_constantColor.Red() / 255.f;
+    float g = m_constantColor.Green() / 255.f;
+    float b = m_constantColor.Blue() / 255.f;
+    
+    for( int ptColorIdx = 0; ptColorIdx < m_countPoints * 3; ptColorIdx += 3 )
+    {
+        pColorData[ptColorIdx] = r;
+        pColorData[ptColorIdx + 1] = g;
+        pColorData[ptColorIdx + 2] = b;
     }
 }
 
@@ -3530,6 +3555,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
     m_pRadCurvature            = new wxRadioButton( pParent, wxID_ANY, wxT( "Curvature" ) );
     m_pRadTorsion              = new wxRadioButton( pParent, wxID_ANY, wxT( "Torsion" ) );
+    m_pRadConstant             = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant" ) );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -3567,6 +3593,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxColoringRadios->Add( m_pRadMinDistanceAnchoring, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadCurvature,            0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadTorsion,              0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoringRadios->Add( m_pRadConstant,             0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoring->Add( pBoxColoringRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
 
     pBoxMain->Add( pBoxColoring, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
@@ -3590,6 +3617,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pRadMinDistanceAnchoring->GetId(),       wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuMinDistance ) );
     pParent->Connect( m_pRadTorsion->GetId(),                    wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithTorsion ) );
     pParent->Connect( m_pRadCurvature->GetId(),                  wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithCurvature ) );
+    pParent->Connect( m_pRadConstant->GetId(),                   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithConstantColor ) );
 
     m_pRadNormalColoring->SetValue( true );
 }
@@ -3607,6 +3635,7 @@ void Fibers::updatePropertiesSizer()
     m_pRadDistanceAnchoring->Enable(    getShowFS() );
     m_pRadMinDistanceAnchoring->Enable( getShowFS() );
     m_pRadTorsion->Enable(              getShowFS() );
+    m_pRadConstant->Enable(             getShowFS() );
 
     m_pToggleFiltering->SetValue( false );
     m_pToggleCrossingFibers->SetValue( m_useIntersectedFibers );
@@ -3626,6 +3655,7 @@ void Fibers::updatePropertiesSizer()
         m_pRadDistanceAnchoring->SetValue( m_fiberColorationMode == DISTANCE_COLOR );
         m_pRadMinDistanceAnchoring->SetValue( m_fiberColorationMode == MINDISTANCE_COLOR );
         m_pRadTorsion->SetValue( m_fiberColorationMode == TORSION_COLOR );
+        m_pRadConstant->SetValue( m_fiberColorationMode == CONSTANT_COLOR );
         m_isColorationUpdated = false;
     }
 

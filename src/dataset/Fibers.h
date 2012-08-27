@@ -135,10 +135,11 @@ private:
     bool            loadDmri(   const wxString &filename );
     void            loadTestFibers();
 
-    void            colorWithTorsion(     float *pColorData );
-    void            colorWithCurvature(   float *pColorData );
-    void            colorWithDistance(    float *pColorData );
-    void            colorWithMinDistance( float *pColorData );
+    void            colorWithTorsion(       float *pColorData );
+    void            colorWithCurvature(     float *pColorData );
+    void            colorWithDistance(      float *pColorData );
+    void            colorWithMinDistance(   float *pColorData );
+    void            colorWithConstantColor( float *pColorData );
 
     void            toggleEndianess();
     std::string     intToString( const int number );
@@ -206,6 +207,8 @@ private:
     float           m_zDrawn;
     std::vector< unsigned int > m_cfStartOfLine;
     std::vector< unsigned int > m_cfPointsPerLine;
+    
+    wxColor         m_constantColor;
 
     // GUI members
     wxSlider       *m_pSliderFibersFilterMin;
@@ -220,6 +223,7 @@ private:
     wxRadioButton  *m_pRadMinDistanceAnchoring;
     wxRadioButton  *m_pRadCurvature;
     wxRadioButton  *m_pRadTorsion;
+    wxRadioButton  *m_pRadConstant;
 };
 
 #endif /* FIBERS_H_ */

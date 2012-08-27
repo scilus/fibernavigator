@@ -772,6 +772,30 @@ void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void PropertiesWindow::OnColorWithConstantColor( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithConstantColor" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        if( pFibers != NULL )
+        {
+            if( pFibers->getColorationMode() != CONSTANT_COLOR )
+            {
+                pFibers->setColorationMode( CONSTANT_COLOR );
+                pFibers->updateFibersColors();
+                pFibers->updateColorationMode();
+            }
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnColorWithConstantColor - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the normal coloring radio
 // button located in the mean fiber coloring option
