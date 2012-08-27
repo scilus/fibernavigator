@@ -69,7 +69,7 @@ using std::vector;
 ODFs::ODFs( const wxString &filename )
 :   Glyph(), 
     m_isMaximasSet   ( false ),
-    m_axisThreshold  ( 0.2f ),
+    m_axisThreshold  ( 0.5f ),
     m_order          ( 0 ),
     m_radiusAttribLoc( 0 ),
     m_radiusBuffer   ( NULL ),    
@@ -183,10 +183,10 @@ void ODFs::extractMaximas()
     float frames  = DatasetManager::getInstance()->getFrames();
 
     std::cout << "Extracting maximas ... please wait 30sec \n";
-    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_3].getDimensionY()]; // Set number of points to maximum details
-    m_angle_min = get_min_angle();
-    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_3 ); // Set number of points to maximum details for C*B mult
-    set_nbors(m_phiThetaDirection[LOD_3]); // Create neighboring system
+    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_4].getDimensionY()]; // Set number of points to maximum details
+    //m_angle_min = get_min_angle();
+    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_4 ); // Set number of points to maximum details for C*B mult
+    set_nbors(m_phiThetaDirection[LOD_4]); // Create neighboring system
     m_mainDirections.resize( frames * rows * columns );
     
     int currentIdx;
@@ -199,16 +199,16 @@ void ODFs::extractMaximas()
             {
                 currentIdx = getGlyphIndex( z, y, x );
 
-                if( m_coefficients[currentIdx][0] != 0 )
+                if( m_coefficients[currentIdx][0] != 0 )//&& currentIdx == 50 )
                 {
-                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_3], m_phiThetaDirection[LOD_3], m_axisThreshold );
+                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_4], m_phiThetaDirection[LOD_4], m_axisThreshold );
                 }
             }
         }
     }
 
     m_nbPointsPerGlyph = getLODNbOfPoints( m_currentLOD ); //Set nb point back to currentLOD
-     
+  
 }
 ///////////////////////////////////////////////////////////////////////////
 // This function fills up a vector (m_Points) that contains all the point 
@@ -359,20 +359,20 @@ float ODFs::get_min_angle()
     std::pair<float,float> res;
     float angle_min = 90.0f;   
 
-    for(unsigned int i=0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++)
+    for(unsigned int i=0; i < m_phiThetaDirection[LOD_4].getDimensionY(); i++)
     {   // Remove all recurrent point of phiThetaDir in vectUnique
         bool isUnique = true;
         for(unsigned int j=0; j < vectUnique.size() && isUnique ; j++)
         {
-            if(m_phiThetaDirection[LOD_3](i,0) == vectUnique[j].first && m_phiThetaDirection[LOD_3](i,1) == vectUnique[j].second)
+            if(m_phiThetaDirection[LOD_4](i,0) == vectUnique[j].first && m_phiThetaDirection[LOD_4](i,1) == vectUnique[j].second)
             {
                 isUnique = false;
             }
         }
         if(isUnique)
         {
-            res.first = m_phiThetaDirection[LOD_3](i,0);
-            res.second = m_phiThetaDirection[LOD_3](i,1);
+            res.first = m_phiThetaDirection[LOD_4](i,0);
+            res.second = m_phiThetaDirection[LOD_4](i,1);
             vectUnique.push_back(res); 
         }
     }
@@ -414,14 +414,14 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
 {
     // find neighbors to all mesh points 
     direction d,d2; /*current direction*/
-    const float max_allowed_angle = 90;
+    const float max_allowed_angle = 45;
  
-    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++) 
+    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_4].getDimensionY(); i++) 
     {
     
-        d.x = std::cos(m_phiThetaDirection[LOD_3](i,0))*std::sin(m_phiThetaDirection[LOD_3](i,1));
-        d.y = std::sin(m_phiThetaDirection[LOD_3](i,0))*std::sin(m_phiThetaDirection[LOD_3](i,1));
-        d.z = std::cos(m_phiThetaDirection[LOD_3](i,1));
+        d.x = std::cos(m_phiThetaDirection[LOD_4](i,0))*std::sin(m_phiThetaDirection[LOD_4](i,1));
+        d.y = std::sin(m_phiThetaDirection[LOD_4](i,0))*std::sin(m_phiThetaDirection[LOD_4](i,1));
+        d.z = std::cos(m_phiThetaDirection[LOD_4](i,1));
         
         /* 
            look at other possible direction sampling neighbors
@@ -429,82 +429,23 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
            if a sampling directions is within +- 3 degrees from i,
            we consider it and check if i is bigger
         */
-        for(unsigned int j=0; j<m_phiThetaDirection[LOD_3].getDimensionY(); j++)
+        for(unsigned int j=0; j<m_phiThetaDirection[LOD_4].getDimensionY(); j++)
         {
             if(j != i ) 
             {
-                d2.x = std::cos(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
-                d2.y = std::sin(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
-                d2.z = std::cos(m_phiThetaDirection[LOD_3](j,1));
+                d2.x = std::cos(m_phiThetaDirection[LOD_4](j,0))*std::sin(m_phiThetaDirection[LOD_4](j,1));
+                d2.y = std::sin(m_phiThetaDirection[LOD_4](j,0))*std::sin(m_phiThetaDirection[LOD_4](j,1));
+                d2.z = std::cos(m_phiThetaDirection[LOD_4](j,1));
                         
                 float angle_found = 180*std::acos(d.x*d2.x + d.y*d2.y + d.z*d2.z)/M_PI;
-                if(angle_found > max_allowed_angle)
-                {
-                    angle_found = 180 - angle_found;
-                }
-                if(angle_found >= m_angle_min)
-                {
-                    /* If not full capacity add another neighbors*/
-                    if(m_nbors[i].size() < 15) //Change this value for +/- #directions
-                    {
-                        bool isDiff = true;
-                        if(m_nbors[i].size() !=0)
-                        {
-                          for(unsigned int n=0; n< m_nbors[i].size() && isDiff ; n++)
-                          {
-                              if(m_phiThetaDirection[LOD_3](j,0) == m_phiThetaDirection[LOD_3](m_nbors[i][n].second,0) && 
-                                  m_phiThetaDirection[LOD_3](j,1) == m_phiThetaDirection[LOD_3](m_nbors[i][n].second,1))
-                              {
-                                isDiff = false;
-                              }
-                          }
-                          if(isDiff)
-                          {
-                            std::pair<float,int> element(angle_found,j);
-                            m_nbors[i].push_back(element);
-                          }
-                        }
-                        else
-                        {
-                            std::pair<float,int> element(angle_found,j);
-                            m_nbors[i].push_back(element);
-                        }
-                    }
-                    else
-                    {   /* If full capacity add another closer neighbors*/
-                        float max = -1;
-                        int indice = 0;
 
-                        for(unsigned int k=0; k < m_nbors[i].size() ; k++)
-                        {
-                            if(m_nbors[i][k].first > max)
-                            {
-                                max = m_nbors[i][k].first;
-                                indice = k;
-                            }
-                        }
-
-                        if(max>=0 && max > angle_found)
-                        {
-                            bool isDiff = true;
-                            for(unsigned int n=0; n< m_nbors[i].size() && isDiff ; n++)
-                            {
-                                if(m_phiThetaDirection[LOD_3](j,0) == m_phiThetaDirection[LOD_3](m_nbors[i][n].second,0) && 
-                                    m_phiThetaDirection[LOD_3](j,1) == m_phiThetaDirection[LOD_3](m_nbors[i][n].second,1))
-                                {
-                                    isDiff = false;
-                                }
-                            }
-                            if(isDiff)
-                            {
-                                std::pair<float,int> element(angle_found,j);
-                                m_nbors[i][indice] = element;
-                            }
-                        }
-                    }
+                if(angle_found <= max_allowed_angle && angle_found > 1)
+                {
+                    std::pair<float,int> element(angle_found,j);
+                    m_nbors[i].push_back(element);
                 }
             }
-        } 
+        }
     }
 }
 /*
@@ -560,12 +501,13 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
         }
     }
     
-    bool isCandidate = false;
+    
 
     /* Find all potential candidate to be a main direction according to the max_threshold */
-    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++)
+    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_4].getDimensionY(); i++)
     {
-      if(norm_hemisODF[i] > max_thresh)//max_thresh) 
+      bool isCandidate = false;
+      if(norm_hemisODF[i] > max_thresh)
       { 
           //potential maximum
           /* look at other possible direction sampling neighbors
@@ -585,8 +527,8 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 
       if(isCandidate)
       {
-          float phi   = m_phiThetaDirection[LOD_3](i,0);
-          float theta = m_phiThetaDirection[LOD_3](i,1);
+          float phi   = m_phiThetaDirection[LOD_4](i,0);
+          float theta = m_phiThetaDirection[LOD_4](i,1);
 
           bool isDiff = true;
 
@@ -606,12 +548,12 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
               }
               if(isDiff)
               {
-                max_dir.push_back(dd);
+                max_dir.push_back(dd*norm_hemisODF[i]);
               }
           }
           else
           {
-                max_dir.push_back(dd);
+                max_dir.push_back(dd*norm_hemisODF[i]);
           }
       }
     }
@@ -761,8 +703,8 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
             }
         }
     }
-    else
-    {
+    else //if (currentIdx == 50)
+    {    
         ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "swapRadius", 0 );
         // Draw the first half of the odfs.
         glDrawArrays( GL_TRIANGLE_STRIP, 0, m_nbPointsPerGlyph );
@@ -771,6 +713,30 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
         ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "swapRadius", 1 );
         // Draw the other half of the odfs.
         glDrawArrays( GL_TRIANGLE_STRIP, 0, m_nbPointsPerGlyph );
+        
+        // find neighbors to all mesh points 
+        //direction d,d2; /*current direction*/
+     
+        //for(unsigned int i = 0; i < m_phiThetaDirection[LOD_0].getDimensionY(); i++) 
+        //{
+        //
+        //    d.x = std::cos(m_phiThetaDirection[LOD_0](i,0))*std::sin(m_phiThetaDirection[LOD_0](i,1));
+        //    d.y = std::sin(m_phiThetaDirection[LOD_0](i,0))*std::sin(m_phiThetaDirection[LOD_0](i,1));
+        //    d.z = std::cos(m_phiThetaDirection[LOD_0](i,1));
+        //    glBegin(GL_POINTS);
+        //        glVertex3f(d.x,d.y,d.z);
+        //    glEnd();
+
+        //           d2.x = m_LODspheres[LOD_0].at( i * 3 );
+        //    d2.y = m_LODspheres[LOD_0].at( i * 3 + 1 );
+        //    d2.z = m_LODspheres[LOD_0].at( i * 3 + 2 );
+
+        //    glBegin(GL_POINTS);
+        //        glVertex3f(-1*d2.x,-1*d2.y,-1*d2.z);
+        //    glEnd();
+        //}
+
+        
 
     }
 }
@@ -1377,8 +1343,8 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
-    m_pSliderFlood = new MySlider(     pParent, wxID_ANY, 2, 0, 10,    DEF_POS, wxSize( 100, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
-    m_pTxtThres    = new wxTextCtrl(   pParent, wxID_ANY, wxT( "0.2"), DEF_POS, wxSize(  40, -1 ), wxTE_READONLY);
+    m_pSliderFlood = new MySlider(     pParent, wxID_ANY, 5, 0, 10,    DEF_POS, wxSize( 100, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+    m_pTxtThres    = new wxTextCtrl(   pParent, wxID_ANY, wxT( "0.5"), DEF_POS, wxSize(  40, -1 ), wxTE_READONLY);
     m_pLblThres    = new wxStaticText( pParent, wxID_ANY, wxT( "Threshold" ) );
     m_pBtnMainDir  = new wxButton(     pParent, wxID_ANY, wxT( "Recalculate" ), DEF_POS, wxSize( 140, -1 ) );
     wxRadioButton *pRadDescoteauxBasis = new wxRadioButton( pParent, wxID_ANY, wxT( "Descoteaux" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
