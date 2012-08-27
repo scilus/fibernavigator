@@ -310,6 +310,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
     m_pRadCurvature            = new wxRadioButton( pParent, wxID_ANY, wxT( "Curvature" ) );
     m_pRadTorsion              = new wxRadioButton( pParent, wxID_ANY, wxT( "Torsion" ) );
+    m_pRadConstantColor        = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant color" ) );
     m_pApplyBtn  = new wxButton( pParent, wxID_ANY, wxT( "Apply" ) );
     m_pCancelBtn = new wxButton( pParent, wxID_ANY, wxT( "Cancel" ) );
     m_pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
@@ -356,6 +357,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxColoringRadios->Add( m_pRadMinDistanceAnchoring, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadCurvature,            0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadTorsion,              0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxColoringRadios->Add( m_pRadConstantColor,        0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoring->Add( pBoxColoringRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
 
     pBoxMain->Add( pBoxColoring, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
@@ -543,6 +545,7 @@ void FibersGroup::OnToggleColorModeBtn()
     m_pRadMinDistanceAnchoring->Show();
     m_pRadCurvature->Show();
     m_pRadTorsion->Show();
+    m_pRadConstantColor->Show();
     m_pApplyBtn->Show();
     m_pCancelBtn->Show();
 
@@ -566,6 +569,7 @@ void FibersGroup::OnToggleColorModeBtn()
     m_pRadMinDistanceAnchoring->SetValue( colorationMode == MINDISTANCE_COLOR );
     m_pRadCurvature->SetValue( colorationMode == CURVATURE_COLOR );
     m_pRadTorsion->SetValue( colorationMode == TORSION_COLOR );
+    m_pRadConstantColor->SetValue( colorationMode == CONSTANT_COLOR );
 
     // Disable other toggleButtons
     m_pBtnIntensity->Disable();
@@ -708,6 +712,10 @@ void FibersGroup::OnClickApplyBtn()
         {
             colorationMode = TORSION_COLOR;
         }
+        else if( m_pRadConstantColor->GetValue() )
+        {
+            colorationMode = CONSTANT_COLOR;
+        }
 
         for( vector<Fibers *>::const_iterator it = fibers.begin(); it != fibers.end(); ++it )
         {
@@ -812,6 +820,7 @@ void FibersGroup::updatePropertiesSizer()
     m_pRadDistanceAnchoring->Enable( DatasetInfo::getShowFS() );
     m_pRadMinDistanceAnchoring->Enable( DatasetInfo::getShowFS() );
     m_pRadTorsion->Enable( DatasetInfo::getShowFS() );
+    m_pRadConstantColor->Enable( DatasetInfo::getShowFS() );
 
     if( m_isIntensityToggled )
     {
@@ -925,6 +934,7 @@ void FibersGroup::updatePropertiesSizer()
         m_pRadMinDistanceAnchoring->Show();
         m_pRadCurvature->Show();
         m_pRadTorsion->Show();
+        m_pRadConstantColor->Show();
         m_pBtnColorMode->Hide();
         m_pBtnIntensity->Disable();
         m_pBtnOpacity->Disable();
@@ -943,6 +953,7 @@ void FibersGroup::updatePropertiesSizer()
         m_pRadMinDistanceAnchoring->Hide();
         m_pRadCurvature->Hide();
         m_pRadTorsion->Hide();
+        m_pRadConstantColor->Hide();
         m_pBtnColorMode->Show();
     }
 

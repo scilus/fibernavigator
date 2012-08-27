@@ -117,6 +117,7 @@ private:
     wxRadioButton  *m_pRadMinDistanceAnchoring;
     wxRadioButton  *m_pRadCurvature;
     wxRadioButton  *m_pRadTorsion;
+    wxRadioButton  *m_pRadConstantColor;
 
     wxStaticText    *m_pLblMinLength;
     wxStaticText    *m_pLblMaxLength;
