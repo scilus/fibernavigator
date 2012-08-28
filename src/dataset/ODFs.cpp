@@ -183,10 +183,10 @@ void ODFs::extractMaximas()
     float frames  = DatasetManager::getInstance()->getFrames();
 
     std::cout << "Extracting maximas ... please wait 30sec \n";
-    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_4].getDimensionY()]; // Set number of points to maximum details
+    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_3].getDimensionY()]; // Set number of points to maximum details
     //m_angle_min = get_min_angle();
-    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_4 ); // Set number of points to maximum details for C*B mult
-    set_nbors(m_phiThetaDirection[LOD_4]); // Create neighboring system
+    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_3 ); // Set number of points to maximum details for C*B mult
+    set_nbors(m_phiThetaDirection[LOD_3]); // Create neighboring system
     m_mainDirections.resize( frames * rows * columns );
     
     int currentIdx;
@@ -201,7 +201,7 @@ void ODFs::extractMaximas()
 
                 if( m_coefficients[currentIdx][0] != 0 )//&& currentIdx == 50 )
                 {
-                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_4], m_phiThetaDirection[LOD_4], m_axisThreshold );
+                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_3], m_phiThetaDirection[LOD_3], m_axisThreshold );
                 }
             }
         }
@@ -409,19 +409,20 @@ float ODFs::get_min_angle()
 
 /*
     Set m_nbors for Max Dir
+    TODO SET ONLY UNIQUE
 */
 void ODFs::set_nbors(FMatrix o_phiThetaDirection)
 {
     // find neighbors to all mesh points 
     direction d,d2; /*current direction*/
-    const float max_allowed_angle = 45;
+    const float max_allowed_angle = 30;
  
-    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_4].getDimensionY(); i++) 
+    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++) 
     {
     
-        d.x = std::cos(m_phiThetaDirection[LOD_4](i,0))*std::sin(m_phiThetaDirection[LOD_4](i,1));
-        d.y = std::sin(m_phiThetaDirection[LOD_4](i,0))*std::sin(m_phiThetaDirection[LOD_4](i,1));
-        d.z = std::cos(m_phiThetaDirection[LOD_4](i,1));
+        d.x = std::cos(m_phiThetaDirection[LOD_3](i,0))*std::sin(m_phiThetaDirection[LOD_3](i,1));
+        d.y = std::sin(m_phiThetaDirection[LOD_3](i,0))*std::sin(m_phiThetaDirection[LOD_3](i,1));
+        d.z = std::cos(m_phiThetaDirection[LOD_3](i,1));
         
         /* 
            look at other possible direction sampling neighbors
@@ -429,13 +430,13 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
            if a sampling directions is within +- 3 degrees from i,
            we consider it and check if i is bigger
         */
-        for(unsigned int j=0; j<m_phiThetaDirection[LOD_4].getDimensionY(); j++)
+        for(unsigned int j=0; j<m_phiThetaDirection[LOD_3].getDimensionY(); j++)
         {
             if(j != i ) 
             {
-                d2.x = std::cos(m_phiThetaDirection[LOD_4](j,0))*std::sin(m_phiThetaDirection[LOD_4](j,1));
-                d2.y = std::sin(m_phiThetaDirection[LOD_4](j,0))*std::sin(m_phiThetaDirection[LOD_4](j,1));
-                d2.z = std::cos(m_phiThetaDirection[LOD_4](j,1));
+                d2.x = std::cos(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
+                d2.y = std::sin(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
+                d2.z = std::cos(m_phiThetaDirection[LOD_3](j,1));
                         
                 float angle_found = 180*std::acos(d.x*d2.x + d.y*d2.y + d.z*d2.z)/M_PI;
 
@@ -464,47 +465,18 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 
     computeRadiiArray( SHmatrix, coefs, ODF, l_minMax ); // Projection of spherical harmonics on the sphere
 
-    if(l_minMax.first < 0)
-    {   // Eliminate negative values on the sphere if min < 0
-        for(unsigned int i = 0; i < ODF.size(); i++) 
-        {
-            if(ODF[i] < 0) 
-            {
-                ODF[i]=0;
-            }
-            if(ODF[i] > max)
-            {
-                max = ODF[i];
-            }
-            if(ODF[i] < min)
-            {
-                min = ODF[i];
-            }
-        }
-    }
-    else
-    {
-        min = l_minMax.first;
-        max = l_minMax.second;
-    }
+    min = l_minMax.first;
+    max = l_minMax.second;
     
     /* Min-max normalisation of ODF */
     for(unsigned int i = 0; i < ODF.size(); i++)
     {
-        if((max) != 0)
-        {
-            norm_hemisODF.push_back((ODF[i] - min) /(max - min));
-        }
-        else
-        {
-            norm_hemisODF.push_back(0);
-        }
+        norm_hemisODF.push_back((ODF[i] - min) /(max - min));
     }
     
     
-
     /* Find all potential candidate to be a main direction according to the max_threshold */
-    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_4].getDimensionY(); i++)
+    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++)
     {
       bool isCandidate = false;
       if(norm_hemisODF[i] > max_thresh)
@@ -527,8 +499,8 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 
       if(isCandidate)
       {
-          float phi   = m_phiThetaDirection[LOD_4](i,0);
-          float theta = m_phiThetaDirection[LOD_4](i,1);
+          float phi   = m_phiThetaDirection[LOD_3](i,0);
+          float theta = m_phiThetaDirection[LOD_3](i,1);
 
           bool isDiff = true;
 
@@ -678,6 +650,7 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
 
     ShaderHelper::getInstance()->getOdfsShader()->setUni3Float(   "axisFlip",    l_flippedAxes               );
     ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "showAxis", 0 );
+
     if (isDisplayShape(AXIS))
     {
         ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "showAxis", 1 );
@@ -720,24 +693,22 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
         //for(unsigned int i = 0; i < m_phiThetaDirection[LOD_0].getDimensionY(); i++) 
         //{
         //
-        //    d.x = std::cos(m_phiThetaDirection[LOD_0](i,0))*std::sin(m_phiThetaDirection[LOD_0](i,1));
-        //    d.y = std::sin(m_phiThetaDirection[LOD_0](i,0))*std::sin(m_phiThetaDirection[LOD_0](i,1));
-        //    d.z = std::cos(m_phiThetaDirection[LOD_0](i,1));
-        //    glBegin(GL_POINTS);
-        //        glVertex3f(d.x,d.y,d.z);
-        //    glEnd();
+        //    //d.x = std::cos(m_phiThetaDirection[LOD_0](i,0))*std::sin(m_phiThetaDirection[LOD_0](i,1));
+        //    //d.y = std::sin(m_phiThetaDirection[LOD_0](i,0))*std::sin(m_phiThetaDirection[LOD_0](i,1));
+        //    //d.z = std::cos(m_phiThetaDirection[LOD_0](i,1));
+        //    //glBegin(GL_POINTS);
+        //    //    glVertex3f(d.x,d.y,d.z);
+        //    //glEnd();
+        //    //std::cout << "(" << d.x << ", " << d.y <<", " << d.z << ")\n";
 
-        //           d2.x = m_LODspheres[LOD_0].at( i * 3 );
-        //    d2.y = m_LODspheres[LOD_0].at( i * 3 + 1 );
-        //    d2.z = m_LODspheres[LOD_0].at( i * 3 + 2 );
+        //    //d2.x = m_LODspheres[LOD_0].at( i * 3 );
+        //    //d2.y = m_LODspheres[LOD_0].at( i * 3 + 1 );
+        //    //d2.z = m_LODspheres[LOD_0].at( i * 3 + 2 );
 
-        //    glBegin(GL_POINTS);
-        //        glVertex3f(-1*d2.x,-1*d2.y,-1*d2.z);
-        //    glEnd();
+        //    //glBegin(GL_POINTS);
+        //    //    glVertex3f(-1*d2.x,-1*d2.y,-1*d2.z);
+        //    //glEnd();
         //}
-
-        
-
     }
 }
 
