@@ -182,11 +182,8 @@ void ODFs::extractMaximas()
     float rows    = DatasetManager::getInstance()->getRows();
     float frames  = DatasetManager::getInstance()->getFrames();
 
-    std::cout << "Extracting maximas ... please wait 30sec \n";
-    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_3].getDimensionY()]; // Set number of points to maximum details
-    //m_angle_min = get_min_angle();
-    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_3 ); // Set number of points to maximum details for C*B mult
-    set_nbors(m_phiThetaDirection[LOD_3]); // Create neighboring system
+    std::cout << "Extracting maximas ... please wait 10 sec \n";
+    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_3 ); // Set number of points to LOD_X for C*B mult
     m_mainDirections.resize( frames * rows * columns );
     
     int currentIdx;
@@ -199,7 +196,7 @@ void ODFs::extractMaximas()
             {
                 currentIdx = getGlyphIndex( z, y, x );
 
-                if( m_coefficients[currentIdx][0] != 0 )//&& currentIdx == 50 )
+                if( m_coefficients[currentIdx][0] != 0 )
                 {
                     m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_3], m_phiThetaDirection[LOD_3], m_axisThreshold );
                 }
@@ -208,7 +205,7 @@ void ODFs::extractMaximas()
     }
 
     m_nbPointsPerGlyph = getLODNbOfPoints( m_currentLOD ); //Set nb point back to currentLOD
-  
+    std::cout << "Done.\n";
 }
 ///////////////////////////////////////////////////////////////////////////
 // This function fills up a vector (m_Points) that contains all the point 
@@ -276,6 +273,10 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
 
     // Set the number of points per glyph.
     m_nbPointsPerGlyph = getLODNbOfPoints( m_currentLOD );
+
+    //Create neighboring system once for maximas extraction
+    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_3].getDimensionY()]; 
+    set_nbors(m_phiThetaDirection[LOD_3]); 
     
     // We need to reload the buffer in video memory.
     loadBuffer();
@@ -353,69 +354,15 @@ void ODFs::computeRadiiArray( const FMatrix &i_B, vector< float > &i_C, vector< 
     o_minMax.second = *max_element( o_radius.begin(), o_radius.end() ); 
 }
 
-float ODFs::get_min_angle()
-{ 
-    std::vector<std::pair<float,float> > vectUnique;
-    std::pair<float,float> res;
-    float angle_min = 90.0f;   
-
-    for(unsigned int i=0; i < m_phiThetaDirection[LOD_4].getDimensionY(); i++)
-    {   // Remove all recurrent point of phiThetaDir in vectUnique
-        bool isUnique = true;
-        for(unsigned int j=0; j < vectUnique.size() && isUnique ; j++)
-        {
-            if(m_phiThetaDirection[LOD_4](i,0) == vectUnique[j].first && m_phiThetaDirection[LOD_4](i,1) == vectUnique[j].second)
-            {
-                isUnique = false;
-            }
-        }
-        if(isUnique)
-        {
-            res.first = m_phiThetaDirection[LOD_4](i,0);
-            res.second = m_phiThetaDirection[LOD_4](i,1);
-            vectUnique.push_back(res); 
-        }
-    }
-    
-    //find min angle in mesh
-    /* approx angle between two discrete samplings on the sphere */    
-    direction d1;
-          
-    d1.x = std::cos(vectUnique[2].first)*std::sin(vectUnique[2].second);
-    d1.y = std::sin(vectUnique[2].first)*std::sin(vectUnique[2].second);
-    d1.z = std::cos(vectUnique[2].second);
-      
-    /* finding minimum angle between samplings */
-    for(unsigned int i = 0; i < vectUnique.size(); i++) 
-    {
-        if(i != 2) 
-        {
-            direction d2;
-            d2.x = std::cos(vectUnique[i].first)*std::sin(vectUnique[i].second);
-            d2.y = std::sin(vectUnique[i].first)*std::sin(vectUnique[i].second);
-            d2.z = std::cos(vectUnique[i].second);
-                   
-            float dot = d1.x*d2.x + d1.y*d2.y + d1.z*d2.z;
-            dot = 180*std::acos(dot)/M_PI;
-              
-            if(dot < angle_min)
-            {
-                angle_min = dot;
-            }
-        }
-    }
-    return angle_min;
-}
-
 /*
     Set m_nbors for Max Dir
-    TODO SET ONLY UNIQUE
 */
 void ODFs::set_nbors(FMatrix o_phiThetaDirection)
 {
     // find neighbors to all mesh points 
     direction d,d2; /*current direction*/
-    const float max_allowed_angle = 30;
+    const float max_allowed_angle = 30.0f;
+    const float min_allowed_angle = 1.0f;
  
     for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++) 
     {
@@ -440,7 +387,7 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
                         
                 float angle_found = 180*std::acos(d.x*d2.x + d.y*d2.y + d.z*d2.z)/M_PI;
 
-                if(angle_found <= max_allowed_angle && angle_found > 1)
+                if(angle_found <= max_allowed_angle && angle_found > min_allowed_angle)
                 {
                     std::pair<float,int> element(angle_found,j);
                     m_nbors[i].push_back(element);
@@ -457,8 +404,8 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 
     vector<Vector>       max_dir;
     const float          epsilon = 0.0f;  //for equality measurement
-    float                max     = 0;
-    float                min     = numeric_limits<float>::infinity();
+    float                max;
+    float                min;
     vector< float >      ODF;
     pair< float, float > l_minMax;
     vector<float>        norm_hemisODF;
@@ -478,59 +425,58 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
     /* Find all potential candidate to be a main direction according to the max_threshold */
     for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++)
     {
-      bool isCandidate = false;
-      if(norm_hemisODF[i] > max_thresh)
-      { 
+        bool isCandidate = false;
+        if(norm_hemisODF[i] > max_thresh)
+        { 
           //potential maximum
           /* look at other possible direction sampling neighbors
-             if a sampling directions is within +- 3 degrees from i,
+             if a sampling directions is within +- 30 degrees from i,
              we consider it and check if i is bigger */
-
-        isCandidate = true;
-        for(unsigned int j=0; j<m_nbors[i].size() && isCandidate ; j++)
-        {
-            if(norm_hemisODF[i] - norm_hemisODF[m_nbors[i][j].second] < epsilon)
+            isCandidate = true;
+            for(unsigned int j=0; j<m_nbors[i].size() && isCandidate; j++)
             {
-                /* wrong candidate */
-                isCandidate = false;
+                if(norm_hemisODF[i] - norm_hemisODF[m_nbors[i][j].second] < epsilon)
+                {
+                    /* wrong candidate */
+                    isCandidate = false;
+                }
             }
         }
-     }
+        //Verify if same direction is not instered multiple times
+        if(isCandidate)
+        {
+            float phi   = m_phiThetaDirection[LOD_3](i,0);
+            float theta = m_phiThetaDirection[LOD_3](i,1);
 
-      if(isCandidate)
-      {
-          float phi   = m_phiThetaDirection[LOD_3](i,0);
-          float theta = m_phiThetaDirection[LOD_3](i,1);
+            bool isDiff = true;
 
-          bool isDiff = true;
+            Vector dd;
+            dd[0] = std::cos(phi)*std::sin(theta);
+            dd[1] = std::sin(phi)*std::sin(theta);
+            dd[2] = std::cos(theta);
 
-          Vector dd;
-          dd[0] = std::cos(phi)*std::sin(theta);
-          dd[1] = std::sin(phi)*std::sin(theta);
-          dd[2] = std::cos(theta);
-          
-          if( max_dir.size() != 0)
-          {
-              for(unsigned int n=0; n< max_dir.size() && isDiff ; n++)
-              {
-                  if(dd.x == max_dir[n].x && dd.y == max_dir[n].y && dd.z == max_dir[n].z)
-                  {
+            if( max_dir.size() != 0)
+            {
+                for(unsigned int n=0; n< max_dir.size() && isDiff ; n++)
+                {
+                    if(dd.x == max_dir[n].x && dd.y == max_dir[n].y && dd.z == max_dir[n].z)
+                    {
                       isDiff = false;
-                  }
-              }
-              if(isDiff)
-              {
+                    }
+                }
+                if(isDiff)
+                {
+                    max_dir.push_back(dd*norm_hemisODF[i]);
+                }
+            }
+            else
+            {
                 max_dir.push_back(dd*norm_hemisODF[i]);
-              }
-          }
-          else
-          {
-                max_dir.push_back(dd*norm_hemisODF[i]);
-          }
-      }
+            }
+        }
     }
+
     m_isMaximasSet = true;
-   
     return max_dir;
 }
 
