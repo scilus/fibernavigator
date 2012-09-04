@@ -20,6 +20,7 @@
 #include "../dataset/Loader.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
+#include "../dataset/Maximas.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"

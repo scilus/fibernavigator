@@ -8,7 +8,7 @@
 #include "DatasetInfo.h"
 #include "../misc/nifti/nifti1_io.h"
 
-class Maximas
+class Maximas : public DatasetInfo
 {
 public:
     // Constructor/Destructor
@@ -17,13 +17,23 @@ public:
     virtual ~Maximas();
 
     // From DatasetInfo
-    void draw();
     bool load( nifti_image *pHeader, nifti_image *pBody );
 
-    // Functions
+    // PropertiesSizer
     virtual void createPropertiesSizer( PropertiesWindow *parent );
     virtual void updatePropertiesSizer();
     
+    //Empty
+    void    draw()                      {};
+    void    smooth()                    {};
+    void    flipAxis( AxisType i_axe )  {};
+    void    drawVectors()               {};
+    void    generateTexture()           {};
+    void    generateGeometry()          {};
+    void    initializeBuffer()          {};
+    GLuint  getGLuint() { return 0; }
+
+private:
     std::vector<std::vector<Vector> >   m_mainDirections;
 
 };

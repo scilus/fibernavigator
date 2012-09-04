@@ -13,6 +13,7 @@
 #include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
+#include "../dataset/Maximas.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
 #include "../misc/XmlHelper.h"
@@ -275,6 +276,16 @@ bool SceneManager::save( const wxString &filename )
     {
         ODFs *pODFs = *it;
         DatasetIndex index = DatasetManager::getInstance()->getDatasetIndex( pODFs );
+
+        pData->AddChild( datasets[index] );
+    }
+
+    // Maximas
+    vector<Maximas *> maximas = DatasetManager::getInstance()->getMaximas();
+    for( vector<Maximas *>::const_iterator it = maximas.begin(); it != maximas.end(); ++it )
+    {
+        Maximas *pMaximas = *it;
+        DatasetIndex index = DatasetManager::getInstance()->getDatasetIndex( pMaximas );
 
         pData->AddChild( datasets[index] );
     }

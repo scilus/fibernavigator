@@ -87,6 +87,7 @@ private:
     void renderODFs             ();
     void renderSlices           ();
     void renderTensors          ();
+    void drawMaximas            ();
 
     // Variables
     wxGLContext*    m_pMainGLContext;
