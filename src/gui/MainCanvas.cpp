@@ -322,22 +322,8 @@ void MainCanvas::processLeftMouseUp( wxMouseEvent &evt )
 void MainCanvas::processMiddleMouseDown( wxMouseEvent &evt, int clickX, int clickY )
 {
     if ( !m_ismDragging)
-    {
-        long item = MyApp::frame->getCurrentListIndex();
-
-        if( item != -1 && !SceneManager::getInstance()->isRulerActive() )
-        {
-            Anatomy* pAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( item );
-
-            if( NULL != pAnatomy && pAnatomy->m_isSegmentOn )
-            {
-                SceneManager::getInstance()->setSegmentActive( true );
-                m_hr = pick( evt.GetPosition(), false );
-                segment();
-                pAnatomy->toggleSegment();
-            }
-        }                    
-        else if( SceneManager::getInstance()->isRulerActive() )
+    {             
+        if( SceneManager::getInstance()->isRulerActive() )
         {                        
             m_hr = pick( evt.GetPosition(), true );
         }

@@ -105,8 +105,7 @@ private:
                                   const FMatrix & grad,
                                   const float & max_thresh);
     void                set_nbors(FMatrix i_phiThetaDirection);
-    float               get_min_angle();
-    void setScalingFactor( float i_scalingFactor );
+    void                setScalingFactor( float i_scalingFactor );
 
 private:
     struct direction_value { double x, y, z, v; };
