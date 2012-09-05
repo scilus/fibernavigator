@@ -6,9 +6,10 @@
 #define MAXIMAS_H_
 
 #include "DatasetInfo.h"
+#include "Glyph.h"
 #include "../misc/nifti/nifti1_io.h"
 
-class Maximas : public DatasetInfo
+class Maximas : public Glyph
 {
 public:
     // Constructor/Destructor
@@ -24,17 +25,12 @@ public:
     virtual void updatePropertiesSizer();
     
     //Empty
-    void    draw()                      {};
-    void    smooth()                    {};
-    void    flipAxis( AxisType i_axe )  {};
-    void    drawVectors()               {};
-    void    generateTexture()           {};
-    void    generateGeometry()          {};
-    void    initializeBuffer()          {};
-    GLuint  getGLuint() { return 0; }
+    void    draw();
 
 private:
-    std::vector<std::vector<Vector> >   m_mainDirections;
+    bool createStructure  ( std::vector< float > &i_fileFloatData );
+    void drawGlyph        ( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis );
+    std::vector<std::vector<float> >   m_mainDirections;
 
 };
 
