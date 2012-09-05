@@ -41,6 +41,7 @@ using std::vector;
 #define DEF_POS   wxDefaultPosition
 #define DEF_SIZE  wxDefaultSize
 
+
 // m_sh_basis
 // 0: Original Descoteaux et al RR 5768 basis 
 // 1: Descoteaux PhD thesis basis definition (default in dmri)

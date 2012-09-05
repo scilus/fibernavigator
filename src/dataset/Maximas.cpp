@@ -25,6 +25,13 @@
 #include <vector>
 using std::vector;
 
+#ifndef isnan
+inline bool isnan(double x) {
+    return x != x;
+}
+#endif
+
+
 ///////////////////////////////////////////
 Maximas::Maximas( const wxString &filename )
 : Glyph()
@@ -79,7 +86,8 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
     {
         for( int j( 0 ); j < m_bands; ++j )
         {
-            l_fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
+            if(!isnan(pData[j * datasetSize + i]))
+                l_fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
         }
     }
     
@@ -101,7 +109,8 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
     //Fetching the directions
     for( it = i_fileFloatData.begin(), i = 0; it != i_fileFloatData.end(); it += m_bands, ++i )
     { 
-        m_mainDirections[i].insert( m_mainDirections[i].end(), it, it + m_bands );
+        if(*it != NULL)
+            m_mainDirections[i].insert( m_mainDirections[i].end(), it, it + m_bands );
     }
 
     return true;
@@ -131,7 +140,7 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
     GLfloat l_offset[3];
     getVoxelOffset( i_zVoxel, i_yVoxel, i_xVoxel, l_offset );
 
-    for(unsigned int i =0; i < m_mainDirections[currentIdx].size(); i+=3)
+    for(unsigned int i =0; i < m_mainDirections[currentIdx].size()-2; i+=3)
     {
         if(m_mainDirections[currentIdx].size() != 0)
         {  
