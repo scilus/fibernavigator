@@ -3845,13 +3845,13 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
     m_countPoints = 0;
     float back, front;
 
-    for( int i = 0; i < RTT->size() - 1; i+=2 )
+    for( unsigned int i = 0; i < RTT->size() - 1; i+=2 )
     {
 		if( RTT->size() > 0 )
 		{
 			back = RTT->at(i).size();
 			front = RTT->at(i+1).size();
-			int nbpoints = back + front;
+			unsigned int nbpoints = back + front;
 
 			if( nbpoints > 0 )
 			{
@@ -3867,7 +3867,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 				}
 
 				//front
-				for( int j = back, k = 0; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
+				for( unsigned int j = back, k = 0; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
 				{
 					curLine[j * 3]  = RTT->at(i+1)[k].x;
 					curLine[j * 3 + 1] = RTT->at(i+1)[k].y;

@@ -21,10 +21,12 @@
 #include <vector>
 using std::vector;
 
+#ifdef __WXMSW__
 #ifndef isnan
 inline bool isnan(double x) {
     return x != x;
 }
+#endif
 #endif
 
 
