@@ -30,6 +30,7 @@ public:
 private:
     bool createStructure  ( std::vector< float > &i_fileFloatData );
     void drawGlyph        ( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis );
+    void setScalingFactor( float i_scalingFactor );
     std::vector<std::vector<float> >   m_mainDirections;
 
 };

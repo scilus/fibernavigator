@@ -79,7 +79,7 @@ public:
     DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( pAnatomy ) ); }
     DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup() ); }
     DatasetIndex createODFs( const wxString &filename )                          { return insert( new ODFs( filename ) ); }
-    //DatasetIndex createMaximas( const wxString &filename )                       { return insert( new Maximas( filename ) ); }
+    DatasetIndex createMaximas( const wxString &filename )                       { return insert( new Maximas( filename ) ); }
 
     void remove( const DatasetIndex index );
 	DatasetIndex createFibers( std::vector<std::vector<Vector> >* RTT );

@@ -410,6 +410,12 @@ void SceneManager::updateView( const float x, const float y, const float z, bool
     {
         (*it)->refreshSlidersValues();
     }
+
+    vector<Maximas *> maximas = DatasetManager::getInstance()->getMaximas();
+    for( vector<Maximas *>::iterator it = maximas.begin(); it != maximas.end(); ++it )
+    {
+        (*it)->refreshSlidersValues();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
