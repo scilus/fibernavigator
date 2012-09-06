@@ -17,11 +17,7 @@
 #include <wx/xml/xml.h>
 
 #include <algorithm>
-
-
 #include <fstream>
-
-
 #include <vector>
 using std::vector;
 
@@ -189,7 +185,6 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             l_coloring[1] = m_mainDirections[currentIdx][i*3+1];
             l_coloring[2] = m_mainDirections[currentIdx][i*3+2];
             ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
-            //glColor3f(l_coloring[0],l_coloring[1],l_coloring[2]);
             
             float halfScale = m_scalingFactor / 5.0f;
             GLfloat stickPos[3];
