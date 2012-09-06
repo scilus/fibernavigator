@@ -147,7 +147,7 @@ void Maximas::setScalingFactor( float i_scalingFactor )
 {
     m_scalingFactor = i_scalingFactor;
     generateSpherePoints( m_scalingFactor/5 );   
-    loadBuffer();
+    //loadBuffer();
 }
 
 //////////////////////////////////////////////////////////////////////////
