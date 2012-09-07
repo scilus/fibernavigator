@@ -13,6 +13,7 @@
 #include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
+#include "../dataset/Maximas.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
 #include "../misc/XmlHelper.h"
@@ -279,6 +280,16 @@ bool SceneManager::save( const wxString &filename )
         pData->AddChild( datasets[index] );
     }
 
+    // Maximas
+    vector<Maximas *> maximas = DatasetManager::getInstance()->getMaximas();
+    for( vector<Maximas *>::const_iterator it = maximas.begin(); it != maximas.end(); ++it )
+    {
+        Maximas *pMaximas = *it;
+        DatasetIndex index = DatasetManager::getInstance()->getDatasetIndex( pMaximas );
+
+        pData->AddChild( datasets[index] );
+    }
+
     vector<Tensors *> tensors = DatasetManager::getInstance()->getTensors();
     for( vector<Tensors *>::const_iterator it = tensors.begin(); it != tensors.end(); ++it )
     {
@@ -396,6 +407,12 @@ void SceneManager::updateView( const float x, const float y, const float z, bool
 
     vector<Tensors *> tensors = DatasetManager::getInstance()->getTensors();
     for( vector<Tensors *>::iterator it = tensors.begin(); it != tensors.end(); ++it )
+    {
+        (*it)->refreshSlidersValues();
+    }
+
+    vector<Maximas *> maximas = DatasetManager::getInstance()->getMaximas();
+    for( vector<Maximas *>::iterator it = maximas.begin(); it != maximas.end(); ++it )
     {
         (*it)->refreshSlidersValues();
     }

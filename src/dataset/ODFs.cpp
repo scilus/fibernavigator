@@ -41,6 +41,7 @@ using std::vector;
 #define DEF_POS   wxDefaultPosition
 #define DEF_SIZE  wxDefaultSize
 
+
 // m_sh_basis
 // 0: Original Descoteaux et al RR 5768 basis 
 // 1: Descoteaux PhD thesis basis definition (default in dmri)
@@ -645,9 +646,9 @@ void ODFs::sliderPosChanged( AxisType i_axis )
 {
     switch( i_axis )
     {
-        case X_AXIS : computeXRadiusSlice(); break;
-        case Y_AXIS : computeYRadiusSlice(); break;
-        case Z_AXIS : computeZRadiusSlice(); break;
+        case X_AXIS : if( !isDisplayShape( AXIS ) ) computeXRadiusSlice(); break;
+        case Y_AXIS : if( !isDisplayShape( AXIS ) ) computeYRadiusSlice(); break;
+        case Z_AXIS : if( !isDisplayShape( AXIS ) ) computeZRadiusSlice(); break;
         default     :  return;
     }   
     

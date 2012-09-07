@@ -15,6 +15,7 @@ class FibersGroup;
 class Mesh;
 class ODFs;
 class Tensors;
+class Maximas;
 
 class ListCtrl : protected wxListCtrl
 {

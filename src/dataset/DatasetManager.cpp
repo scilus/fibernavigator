@@ -5,6 +5,7 @@
 #include "Mesh.h"
 #include "ODFs.h"
 #include "Tensors.h"
+#include "Maximas.h"
 
 #include "../Logger.h"
 #include "../gui/SceneManager.h"
@@ -134,6 +135,17 @@ std::vector<ODFs *> DatasetManager::getOdfs() const
     return v;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+std::vector<Maximas *> DatasetManager::getMaximas() const
+{
+    vector<Maximas *> v;
+    for( map<DatasetIndex, Maximas *>::const_iterator it = m_maximas.begin(); it != m_maximas.end(); ++it )
+    {
+        v.push_back( it->second );
+    }
+    return v;
+}
 //////////////////////////////////////////////////////////////////////////
 
 Fibers * DatasetManager::getSelectedFibers( DatasetIndex index ) const
@@ -304,6 +316,17 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                 result = loadODF( filename, pHeader, pBody );
             }
         }
+        else if( 16 == pHeader->datatype && 4 == pHeader->ndim && 9 == pHeader->dim[4] )
+        {
+            if ( m_anatomies.empty() )
+            {
+                Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
+            }
+            else
+            {
+                result = loadMaximas( filename, pHeader, pBody );
+            }
+        }
         else
         {
             result = loadAnatomy( filename, pHeader, pBody );
@@ -387,6 +410,10 @@ void DatasetManager::remove( const DatasetIndex index )
     case FIBERSGROUP:
         Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "FibersGroup" ) ), LOGLEVEL_DEBUG );
         m_fibersGroup.erase( m_fibersGroup.find( index ) );
+        break;
+    case MAXIMAS:
+        Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "Maximas" ) ), LOGLEVEL_DEBUG );
+        m_maximas.erase( m_maximas.find( index ) );
         break;
     default:
         Logger::getInstance()->print( wxString::Format( wxT( "Removing index: %u type: %s" ), static_cast<unsigned int>( index ), wxT( "DatasetInfo" ) ), LOGLEVEL_DEBUG );
@@ -472,6 +499,19 @@ DatasetIndex DatasetManager::insert( ODFs * pOdfs )
     m_datasets[index]  = pOdfs;
     m_odfs[index]      = pOdfs;
     m_reverseDatasets[pOdfs] = index;
+
+    return index;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+DatasetIndex DatasetManager::insert( Maximas * pMaximas )
+{
+    DatasetIndex index = getNextAvailableIndex();
+
+    m_datasets[index]  = pMaximas;
+    m_maximas[index]      = pMaximas;
+    m_reverseDatasets[pMaximas] = index;
 
     return index;
 }
@@ -651,6 +691,31 @@ DatasetIndex DatasetManager::loadODF( const wxString &filename, nifti_image *pHe
     }
 
     delete pOdfs;
+    return BAD_INDEX;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+DatasetIndex DatasetManager::loadMaximas( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
+{
+    Logger::getInstance()->print( wxT( "Loading Maximas" ), LOGLEVEL_MESSAGE );
+
+    Maximas *pMaximas = new Maximas( filename );
+    if( pMaximas->load( pHeader, pBody ) )
+    {
+        Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
+        pMaximas->setThreshold( THRESHOLD );
+        pMaximas->setAlpha( ALPHA );
+        pMaximas->setShow( SHOW );
+        pMaximas->setShowFS( SHOW_FS );
+        pMaximas->setUseTex( USE_TEX );
+
+        DatasetIndex index = insert( pMaximas );
+
+        return index;
+    }
+
+    delete pMaximas;
     return BAD_INDEX;
 }
 

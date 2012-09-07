@@ -20,6 +20,7 @@
 #include "../dataset/Fibers.h"
 #include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
+#include "../dataset/Maximas.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gui/ArcBall.h"
 #include "../gui/MainFrame.h"
@@ -314,6 +315,9 @@ void TheScene::renderScene()
 
     if( DatasetManager::getInstance()->isOdfsLoaded() )
         renderODFs();
+
+    if( DatasetManager::getInstance()->isMaximasLoaded() )
+        drawMaximas();
 
     renderMesh();
     renderFibers();
@@ -1162,5 +1166,25 @@ void TheScene::drawVectors()
 
     glDisable( GL_BLEND );
 
+    glPopAttrib();
+}
+
+
+void TheScene::drawMaximas()
+{
+    glPushAttrib( GL_ALL_ATTRIB_BITS );
+
+    vector<Maximas *> v = DatasetManager::getInstance()->getMaximas();
+    for(vector<Maximas *>::iterator it = v.begin(); it != v.end(); ++it )
+    {
+        Maximas *pMaximas = *it;
+        if( pMaximas->getShow() )
+        {
+            lightsOff();
+            pMaximas->draw();
+        }
+    }
+
+    Logger::getInstance()->printIfGLError( wxT( "Draw Maximas" ) );
     glPopAttrib();
 }

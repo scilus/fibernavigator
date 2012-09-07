@@ -36,6 +36,7 @@ enum DatasetType
     VECTORS,
     TENSORS,
     ODFS,
+    MAXIMAS,
     FIBERS,
     SURFACE,
     ISO_SURFACE,

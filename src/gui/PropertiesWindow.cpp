@@ -14,6 +14,7 @@
 #include "../dataset/ODFs.h"
 #include "../dataset/RTTrackingHelper.h"
 #include "../dataset/Tensors.h"
+#include "../dataset/Maximas.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 

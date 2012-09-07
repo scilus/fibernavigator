@@ -297,7 +297,7 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 {
 	//Convert fibers
 	DatasetIndex index = DatasetManager::getInstance()->createFibers( m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getRTTFibers() );
-	DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( index );
+	//DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( index );
 
 	if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
     {
