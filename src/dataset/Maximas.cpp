@@ -18,10 +18,11 @@
 
 #include <algorithm>
 #include <fstream>
+#include <limits>
 #include <vector>
 using std::vector;
 
-#ifdef __WXMSW__
+#if defined(__WXMAC__) || defined(__WXMSW__)
 #ifndef isnan
 inline bool isnan(double x) {
     return x != x;
@@ -77,7 +78,8 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
     m_type = MAXIMAS;
 
     int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
-    std::vector< float > l_fileFloatData( datasetSize * m_bands );
+    
+    std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
 
     float* pData = (float*)pBody->data;
 
@@ -108,7 +110,7 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
     //Fetching the directions
     for( it = i_fileFloatData.begin(), i = 0; it != i_fileFloatData.end(); it += m_bands, ++i )
     { 
-        if(*it != NULL)
+        if(*it < std::numeric_limits<float>::max())
             m_mainDirections[i].insert( m_mainDirections[i].end(), it, it + m_bands );
     }
 
