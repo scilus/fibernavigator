@@ -403,8 +403,44 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
 
 Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float s_number ) 
 {
-    Vector vOut(sticks[0],sticks[1], sticks[2]);
-    return vOut;
+    //Vector vOut(sticks[0],sticks[1],sticks[2]);
+    Vector vOut(0,0,0);
+    float angleMin = 360.0f;
+    float angle = 0.0f;
+    float puncture = getPuncture();
+
+    for(unsigned int i=0; i < sticks.size()/3; i++)
+    {
+        Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+        v1.normalize();
+        
+        if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+        {
+            v1 *= -1;
+        }
+
+        //Angle value
+        float dot = vin.Dot(v1);
+        float acos = std::acos( dot );
+        angle = 180 * acos / M_PI;
+
+        if( angle > 90 )
+        {
+            angle = 180 - angle; //Ensures we have the minimal angle
+        }
+        
+        //Direction most probable
+        if( angle < angleMin )
+        {
+            angleMin = angle;
+            vOut = v1;
+        }     
+    }
+
+    Vector res = (puncture)*vin + (1-puncture)*vOut; 
+    res.normalize();
+
+    return res;
 }
 
 /////////////////////////////////////////////////////////////////////
