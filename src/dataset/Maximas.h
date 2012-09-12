@@ -17,6 +17,9 @@ public:
     Maximas( const wxString &filename );
     virtual ~Maximas();
 
+
+    std::vector< std::vector<float> > *getMainDirData()                       { return &m_mainDirections;           };
+
     // From DatasetInfo
     bool load( nifti_image *pHeader, nifti_image *pBody );
 

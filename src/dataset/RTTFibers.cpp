@@ -401,6 +401,12 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
     return vprop;
 }
 
+Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float s_number ) 
+{
+    Vector vOut(sticks[0],sticks[1], sticks[2]);
+    return vOut;
+}
+
 /////////////////////////////////////////////////////////////////////
 // Classify (1 or 0) the 3 eigenVecs within Axis-Aligned vecs e1 > e2 > e3
 ////////////////////////////////////////////////////////////////////
@@ -671,7 +677,140 @@ void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, v
 ///////////////////////////////////////////////////////////////////////////
 void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points, vector<Vector>& color)
 { 
+    //Vars
+    Vector currPosition(seed); //Current PIXEL position
+    Vector nextPosition; //Next Pixel position
+    Vector currDirection, nextDirection; //Directions re-aligned 
+    Vector pickedDir(0,0,0); //Direction picked 
 
+    GLfloat flippedAxes[3];
+    m_pMaximasInfo->isAxisFlipped(X_AXIS) ? flippedAxes[0] = -1.0f : flippedAxes[0] = 1.0f;
+    m_pMaximasInfo->isAxisFlipped(Y_AXIS) ? flippedAxes[1] = -1.0f : flippedAxes[1] = 1.0f;
+    m_pMaximasInfo->isAxisFlipped(Z_AXIS) ? flippedAxes[2] = -1.0f : flippedAxes[2] = 1.0f;
+
+    unsigned int sticksNumber; 
+    int currVoxelx, currVoxely, currVoxelz;
+    float angle; 
+    float angleThreshold = getAngleThreshold();
+    float step = getStep();
+
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+
+    float xVoxel = DatasetManager::getInstance()->getVoxelX();
+    float yVoxel = DatasetManager::getInstance()->getVoxelY();
+    float zVoxel = DatasetManager::getInstance()->getVoxelZ();
+
+    //Get the seed voxel
+    currVoxelx = (int)( floor(currPosition.x / xVoxel) );
+    currVoxely = (int)( floor(currPosition.y / yVoxel) );
+    currVoxelz = (int)( floor(currPosition.z / zVoxel) );
+
+    //Corresponding stick number
+    sticksNumber = currVoxelz * columns * rows + currVoxely *columns + currVoxelx;
+    std::vector<float> sticks;
+
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() )
+    {
+        sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
+
+        //TODO Align 
+        currDirection.x = flippedAxes[0] * sticks[0];
+
+        currDirection.y = flippedAxes[1] * sticks[1];
+
+        currDirection.z = flippedAxes[2] * sticks[2];
+
+        //Direction for seeding (forward or backward)
+        currDirection.normalize();
+        currDirection *= bwdfwd;
+
+        //Next position
+        nextPosition = currPosition + ( step * currDirection );
+
+        //Get the voxel stepped into
+        currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
+        currVoxely = (int)( floor(nextPosition.y / yVoxel) );
+        currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
+
+        //Corresponding stick number
+        sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
+
+        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty())
+        {
+
+            sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
+
+            //Advection next direction
+            nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber );
+
+            //Direction of seeding
+            nextDirection.normalize();
+            nextDirection *= bwdfwd;
+
+            if( currDirection.Dot(nextDirection) < 0 ) //Ensures the two vectors have the same directions
+            {
+                nextDirection *= -1;
+            }
+
+            //Angle value
+            angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
+            if( angle > 90 )
+            {
+                angle = 180 - angle; //Ensures that we have the smallest angle
+            }
+
+            ///////////////////////////
+            //Tracking along the fiber
+            //////////////////////////
+            while( angle <= angleThreshold )
+            {
+                //Insert point to be rendered
+                points.push_back( currPosition );
+                color.push_back( currDirection );
+
+                //Advance
+                currPosition = nextPosition;
+                currDirection = nextDirection;
+
+                //Next position
+                nextPosition = currPosition + ( step * currDirection );
+
+                //Stepped voxels
+                currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
+                currVoxely = (int)( floor(nextPosition.y / yVoxel) );
+                currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
+
+                //Corresponding tensor number
+                sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
+
+                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty()) //Out of anatomy
+                {
+                    break;
+                }
+                
+                sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber);
+
+                //Advection next direction
+                nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber );
+
+                //Direction of seeding (backward of forward)
+                nextDirection.normalize();
+                nextDirection *= bwdfwd;
+                if( currDirection.Dot(nextDirection) < 0 ) //Ensures both vectors points in the same direction
+                {
+                    nextDirection *= -1;
+                }
+
+                //Angle value
+                angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
+                if( angle > 90 )
+                {
+                    angle = 180 - angle; //Ensures we have the minimal angle
+                }
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////

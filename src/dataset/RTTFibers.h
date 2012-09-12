@@ -31,6 +31,7 @@ public:
     Vector generateRandomSeed( const Vector &min, const Vector &max );
     FMatrix trilinearInterp( float fx, float fy, float fz );
     Vector advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, Vector e2, Vector e3, float tensorNumber );
+    Vector advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float tensorNumber );
     
     void clearFibersRTT()                           { m_fibersRTT.clear(); }
     void clearColorsRTT()                           { m_colorsRTT.clear(); }
