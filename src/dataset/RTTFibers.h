@@ -10,6 +10,7 @@
 #include "../misc/Fantom/FMatrix.h"
 #include "../misc/IsoSurface/Vector.h"
 #include "Tensors.h"
+#include "Maximas.h"
 
 #include <GL/glew.h>
 #include <vector>
@@ -23,7 +24,8 @@ public:
     //RTT functions
     void seed();
     void renderRTTFibers();
-    void performRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
+    void performDTIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
+    void performHARDIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
 
     Vector generateRandomSeed( const Vector &min, const Vector &max );
@@ -40,10 +42,12 @@ public:
     void setAngleThreshold( float angleThreshold )					  { m_angleThreshold = angleThreshold; }
     void setPuncture( float puncture )								  { m_puncture = puncture; }
     void setStep( float step )										  { m_step = step; }
+    void setIsHardi( bool method )								      { m_isHARDI = method; }
     void setNbSeed ( float nbSeed )									  { m_nbSeed = nbSeed; }
     void setMinFiberLength( float minLength )						  { m_minFiberLength = minLength; }
     void setMaxFiberLength( float maxLength )						  { m_maxFiberLength = maxLength; }
     void setTensorsInfo( Tensors* info )							  { m_pTensorsInfo = info; }
+    void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
 
     float getFAThreshold()                       { return m_FAThreshold; }
@@ -56,7 +60,11 @@ public:
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
     
-    wxString getTensorsFileName()                     { return m_pTensorsInfo->getPath();}
+    wxString getRTTFileName()                    { if(m_pTensorsInfo != NULL) 
+                                                        return m_pTensorsInfo->getPath(); 
+                                                   else
+                                                        return m_pMaximasInfo->getPath(); }
+
     size_t getSize()                                  { return m_fibersRTT.size(); }
 	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
     
@@ -114,7 +122,9 @@ private:
     float       m_puncture;
     float       m_minFiberLength;
     float       m_maxFiberLength;
+    bool        m_isHARDI;
     Tensors     *m_pTensorsInfo;
+    Maximas     *m_pMaximasInfo;
 	DatasetInfo *m_pShellInfo;
 
 

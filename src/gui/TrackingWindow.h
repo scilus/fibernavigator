@@ -25,6 +25,7 @@ class TrackingWindow: public wxScrolledWindow
 public:
     TrackingWindow(){};
     TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const wxPoint &pos, const wxSize &size );
+    TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const wxPoint &pos, const wxSize &size, int hardi);
 
     ~TrackingWindow(){};
     void OnPaint( wxPaintEvent &event );
@@ -38,7 +39,8 @@ public:
     void OnSliderFAMoved                       ( wxCommandEvent& event );
     void OnSliderAngleMoved                    ( wxCommandEvent& event );
     void OnSliderStepMoved                     ( wxCommandEvent& event );
-    void OnSelectFile                          ( wxCommandEvent& event );
+    void OnSelectFileDTI                       ( wxCommandEvent& event );
+    void OnSelectFileHARDI                     ( wxCommandEvent& event );
     void OnRandomSeeding                       ( wxCommandEvent& event );
     void OnShellSeeding                        ( wxCommandEvent& event );
     void OnInterpolate                         ( wxCommandEvent& event );

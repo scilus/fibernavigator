@@ -329,13 +329,18 @@ void MainFrame::initLayout()
     m_pPropertiesWindow->EnableScrolling( false, true );
 
     //////////////////////////////////////////////////////////////////////////
-    // TrackingWindow initialization
+    // TrackingWindow initialization for RTT
     m_pTrackingWindow = new TrackingWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) ); // Contains realtime tracking properties
     m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
     m_pTrackingWindow->EnableScrolling( false, true );
 
+    m_pTrackingWindowHardi = new TrackingWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), 1 ); // Contains realtime tracking properties
+    m_pTrackingWindowHardi->SetScrollbars( 10, 10, 50, 50 );
+    m_pTrackingWindowHardi->EnableScrolling( false, true );
+
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
-    m_tab->AddPage( m_pTrackingWindow, wxT( "Realtime tracking" ) );
+    m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
+    m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
 
@@ -1231,6 +1236,7 @@ void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
     createNewSelectionObject( BOX_TYPE );
     m_pTrackingWindow->m_pBtnStart->Enable( true );
+    m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
