@@ -437,7 +437,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
         }     
     }
 
-    Vector res = (puncture)*vin + (1-puncture)*vOut; 
+    Vector res = ((1-puncture)*vin + (puncture)*vOut); 
     res.normalize();
 
     return res;

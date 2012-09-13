@@ -63,6 +63,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pSliderFA->SetValue( 10 );
     Connect( m_pSliderFA->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderFAMoved) );
     m_pTxtFABox = new wxTextCtrl( this, wxID_ANY, wxT("0.10"), wxPoint(190,60), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    
 
     m_pTextAngle = new wxStaticText( this, wxID_ANY, wxT("Max angle"), wxPoint(0,90), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderAngle = new MySlider( this, wxID_ANY, 0, 1, 90, wxPoint(60,90), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -76,7 +77,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     Connect( m_pSliderStep->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderStepMoved) );
     m_pTxtStepBox = new wxTextCtrl( this, wxID_ANY, wxT("1.0 mm"), wxPoint(190,120), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
-    m_pTextPuncture = new wxStaticText( this, wxID_ANY, wxT("Puncture"), wxPoint(0,150), wxSize(60, -1), wxALIGN_CENTER );
+    m_pTextPuncture = new wxStaticText( this, wxID_ANY, wxT("Vin-Vout"), wxPoint(0,150), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderPuncture = new MySlider( this, wxID_ANY, 0, 0, 10, wxPoint(60,150), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderPuncture->SetValue( 2 );
     Connect( m_pSliderPuncture->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderPunctureMoved) );
@@ -150,6 +151,9 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pSliderFA->SetValue( 10 );
     Connect( m_pSliderFA->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderFAMoved) );
     m_pTxtFABox = new wxTextCtrl( this, wxID_ANY, wxT("0.10"), wxPoint(190,60), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTextFA->Enable(false);
+    m_pSliderFA->Enable(false);
+    m_pTxtFABox->Enable(false);
 
     m_pTextAngle = new wxStaticText( this, wxID_ANY, wxT("Max angle"), wxPoint(0,90), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderAngle = new MySlider( this, wxID_ANY, 0, 1, 90, wxPoint(60,90), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -163,7 +167,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     Connect( m_pSliderStep->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderStepMoved) );
     m_pTxtStepBox = new wxTextCtrl( this, wxID_ANY, wxT("1.0 mm"), wxPoint(190,120), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
-    m_pTextPuncture = new wxStaticText( this, wxID_ANY, wxT("Puncture"), wxPoint(0,150), wxSize(60, -1), wxALIGN_CENTER );
+    m_pTextPuncture = new wxStaticText( this, wxID_ANY, wxT("Vin-Vout"), wxPoint(0,150), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderPuncture = new MySlider( this, wxID_ANY, 0, 0, 10, wxPoint(60,150), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderPuncture->SetValue( 2 );
     Connect( m_pSliderPuncture->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderPunctureMoved) );
