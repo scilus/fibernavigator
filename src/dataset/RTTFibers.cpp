@@ -28,11 +28,12 @@ using std::vector;
 //////////////////////////////////////////
 RTTFibers::RTTFibers()
 :   m_FAThreshold( 0.10f ),
-    m_angleThreshold( 60.0f ),
+    m_angleThreshold( 35.0f ),
     m_step( 1.0f ),
     m_nbSeed ( 10.0f ),
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
+    m_vinvout( 0.8f ),
     m_minFiberLength( 10 ),
     m_maxFiberLength( 200 ),
     m_isHARDI( false )
@@ -407,7 +408,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     Vector vOut(0,0,0);
     float angleMin = 360.0f;
     float angle = 0.0f;
-    float puncture = getPuncture();
+    float puncture = getVinVout();
 
     for(unsigned int i=0; i < sticks.size()/3; i++)
     {

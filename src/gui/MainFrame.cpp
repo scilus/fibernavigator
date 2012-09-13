@@ -1235,8 +1235,6 @@ void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
     createNewSelectionObject( BOX_TYPE );
-    m_pTrackingWindow->m_pBtnStart->Enable( true );
-    m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////

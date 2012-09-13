@@ -42,6 +42,7 @@ public:
     void setTensorsFA( const std::vector<float> tensorsFA )           { m_tensorsFA = tensorsFA; }
     void setAngleThreshold( float angleThreshold )					  { m_angleThreshold = angleThreshold; }
     void setPuncture( float puncture )								  { m_puncture = puncture; }
+    void setVinVout( float vinvout )								  { m_vinvout = vinvout; }
     void setStep( float step )										  { m_step = step; }
     void setIsHardi( bool method )								      { m_isHARDI = method; }
     void setNbSeed ( float nbSeed )									  { m_nbSeed = nbSeed; }
@@ -58,6 +59,7 @@ public:
 	float getShellSeedNb();						 
 
     float getPuncture()                          { return m_puncture; }
+    float getVinVout()                           { return m_vinvout; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
     
@@ -121,6 +123,7 @@ private:
     float       m_nbSeed;
     float       m_nbMeshPt;
     float       m_puncture;
+    float       m_vinvout;
     float       m_minFiberLength;
     float       m_maxFiberLength;
     bool        m_isHARDI;
