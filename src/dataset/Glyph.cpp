@@ -152,6 +152,31 @@ void Glyph::drawSagittal()
     }
 }
 
+void Glyph::drawSemiAll()
+{
+    glEnableClientState( GL_VERTEX_ARRAY );
+    glEnable( GL_LINE_SMOOTH );
+    glEnable( GL_CULL_FACE );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    for( int z( 0 ); z < m_frames; z+=4 )
+    {
+        for( int y( 0 ); y < m_rows; y+=4 )
+        {
+            for( int x( 0 ); x < m_columns; x+=4 )
+            {
+                drawGlyph( z, y, x, X_AXIS );
+            }
+        }
+    }
+
+    glDisableClientState( GL_VERTEX_ARRAY );
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_CULL_FACE );
+    glDisable( GL_BLEND );
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // This function will set the current sliders values.
 ///////////////////////////////////////////////////////////////////////////

@@ -9,6 +9,8 @@
 #include "Glyph.h"
 #include "../misc/nifti/nifti1_io.h"
 
+enum DISPLAY { SLICES, WHOLE };
+
 class Maximas : public Glyph
 {
 public:
@@ -17,11 +19,13 @@ public:
     Maximas( const wxString &filename );
     virtual ~Maximas();
 
-
     std::vector< std::vector<float> > *getMainDirData()                       { return &m_mainDirections;           };
 
     // From DatasetInfo
     bool load( nifti_image *pHeader, nifti_image *pBody );
+    
+    void changeDisplay( DISPLAY value )                   { m_displayType = value; }
+    bool isDisplay( DISPLAY disp )                        { return m_displayType == disp; }
 
     // PropertiesSizer
     virtual void createPropertiesSizer( PropertiesWindow *parent );
@@ -37,6 +41,7 @@ private:
     void setScalingFactor( float i_scalingFactor );
     
     std::vector<std::vector<float> >   m_mainDirections;
+    DISPLAY m_displayType;
 
 };
 

@@ -858,6 +858,31 @@ void PropertiesWindow::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void PropertiesWindow::OnMaximasDisplaySlice( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMaximasDisplaySlice" ), LOGLEVEL_DEBUG );
+
+    long index = m_pMainFrame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Maximas *pMaximas = (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pMaximas->changeDisplay( SLICES );
+    }
+}
+
+
+void PropertiesWindow::OnMaximasDisplayWhole( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMaximasDisplaySlice" ), LOGLEVEL_DEBUG );
+
+    long index = m_pMainFrame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Maximas *pMaximas = (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pMaximas->changeDisplay( WHOLE );
+    }
+}
+
 void PropertiesWindow::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnTournierShBasis" ), LOGLEVEL_DEBUG );

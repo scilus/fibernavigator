@@ -113,6 +113,7 @@ protected:
     void            drawAxial           ();
     void            drawCoronal         ();
     void            drawSagittal         ();
+    void            drawSemiAll          ();
     void            fillColorDataset    ( float i_minHueAngle, float i_maxHueAngle, float i_saturationValue, float i_luminanceValue );
     void            generateColorTexture( float i_minHue, float i_maxHue, float i_saturation, float i_luminance );
     void            generateSpherePoints( float i_scalingFactor );

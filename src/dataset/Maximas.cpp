@@ -33,7 +33,8 @@ inline bool isnan(double x) {
 
 ///////////////////////////////////////////
 Maximas::Maximas( const wxString &filename )
-: Glyph()
+: Glyph(),
+m_displayType( SLICES )
 {
     m_fullPath = filename;
     m_scalingFactor = 5.0f;
@@ -137,8 +138,11 @@ void Maximas::draw()
 
     // If m_colorWithPosition is true then the glyph will be colored with the position of the vertex.
     ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "colorWithPos", ( GLint ) m_colorWithPosition );
- 
-    Glyph::draw();
+    
+    if(isDisplay(SLICES))
+        Glyph::draw();
+    else
+        Glyph::drawSemiAll();
 
     // Disable the tensor color shader.
     ShaderHelper::getInstance()->getOdfsShader()->release();
@@ -188,6 +192,7 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             l_coloring[0] = m_mainDirections[currentIdx][i*3];
             l_coloring[1] = m_mainDirections[currentIdx][i*3+1];
             l_coloring[2] = m_mainDirections[currentIdx][i*3+2];
+
             ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
             
             float halfScale = m_scalingFactor / 5.0f;
@@ -208,6 +213,31 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
 void Maximas::createPropertiesSizer( PropertiesWindow *pParent )
 {
     Glyph::createPropertiesSizer( pParent );
+
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
+
+    wxRadioButton *pRadSlices = new wxRadioButton( pParent, wxID_ANY, wxT( "Slices" ), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+    wxRadioButton *pRadWhole   = new wxRadioButton( pParent, wxID_ANY, wxT( "Whole" ) );
+
+    wxBoxSizer *pBoxDisplay = new wxBoxSizer( wxVERTICAL );
+    pBoxDisplay->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Sticks display:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+
+    wxBoxSizer *pBoxButton = new wxBoxSizer( wxVERTICAL );
+    pBoxButton->Add( pRadSlices, 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxButton->Add( pRadWhole,   0, wxALIGN_LEFT | wxALL, 1 );
+
+    pBoxDisplay->Add( pBoxButton, 0, wxALIGN_LEFT | wxLEFT, 32 );
+    pBoxMain->Add( pBoxDisplay, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+    pParent->Connect( pRadSlices->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMaximasDisplaySlice ) );
+    pParent->Connect( pRadWhole->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMaximasDisplayWhole ) );
+
+    pRadSlices->SetValue( isDisplay(SLICES) );
+    pRadWhole->SetValue(  isDisplay(WHOLE) );
+
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 }
 
 //////////////////////////////////////////////////////////////////////////
