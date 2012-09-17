@@ -63,10 +63,10 @@ public:
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
     
-    wxString getRTTFileName()                    { if(m_pTensorsInfo != NULL) 
-                                                        return m_pTensorsInfo->getPath(); 
+    wxString getRTTFileName()                    { if(m_isHARDI) 
+                                                        return m_pMaximasInfo->getPath(); 
                                                    else
-                                                        return m_pMaximasInfo->getPath(); }
+                                                        return m_pTensorsInfo->getPath(); }
 
     size_t getSize()                                  { return m_fibersRTT.size(); }
 	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
