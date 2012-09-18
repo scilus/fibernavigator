@@ -23,6 +23,7 @@ public:
 
     // From DatasetInfo
     bool load( nifti_image *pHeader, nifti_image *pBody );
+    bool createMaximas( std::vector<std::vector<Vector> > &mainDirections);
     
     void changeDisplay( DISPLAY value )                   { m_displayType = value; }
     bool isDisplay( DISPLAY disp )                        { return m_displayType == disp; }

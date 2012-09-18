@@ -1203,6 +1203,22 @@ void PropertiesWindow::OnGlyphMainAxisSelected( wxCommandEvent& event )
         if(((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getType() == ODFS && !((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->m_isMaximasSet)
         {
             ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->extractMaximas();
+            ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setDisplayShape( AXIS );
+            ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->updatePropertiesSizer();
+            
+            int indx = DatasetManager::getInstance()->createMaximas( wxT( "Extracted Maximas" ) );
+            Maximas* pMaximas = (Maximas *)DatasetManager::getInstance()->getDataset( indx );
+            if( pMaximas->createMaximas( *(((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->getMainDirs())) )
+            {
+                Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
+                pMaximas->setThreshold( 0.0f );
+                pMaximas->setAlpha( 1.0f );
+                pMaximas->setShow( true );
+                pMaximas->setShowFS( true );
+                pMaximas->setUseTex( true );
+
+                m_pListCtrl->InsertItem( indx );             
+            }
         }
         ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setDisplayShape( AXIS );
         ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->updatePropertiesSizer();

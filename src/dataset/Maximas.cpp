@@ -121,6 +121,37 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
     return true;
 }
 
+bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
+{
+    m_columns = DatasetManager::getInstance()->getColumns(); //XSlice
+    m_rows    = DatasetManager::getInstance()->getRows(); //YSlice
+    m_frames  = DatasetManager::getInstance()->getFrames(); //ZSlice
+    m_bands = 9;
+
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    m_type = MAXIMAS;
+
+    int datasetSize = m_columns * m_rows * m_frames;
+    
+    std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
+
+    for( int i( 0 ); i < datasetSize; ++i )
+    {
+        for( int j( 0 ); j < m_bands; ++j )
+        {
+                l_fileFloatData[i * m_bands + j] = 1.0f;
+        }
+    }
+    
+    createStructure( l_fileFloatData );
+
+    m_isLoaded = true;
+    return true;
+}
+
 //////////////////////////////////////////////////////////////////////////
 void Maximas::draw()
 {
