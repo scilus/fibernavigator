@@ -128,9 +128,9 @@ bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
     m_frames  = DatasetManager::getInstance()->getFrames(); //ZSlice
     m_bands = 9;
 
-    float voxelX = DatasetManager::getInstance()->getVoxelX();
-    float voxelY = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
 
     m_type = MAXIMAS;
 
@@ -140,9 +140,11 @@ bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
 
     for( int i( 0 ); i < datasetSize; ++i )
     {
-        for( int j( 0 ); j < m_bands; ++j )
+        for( unsigned int j( 0 ); j < mainDirections[i].size(); ++j )
         {
-                l_fileFloatData[i * m_bands + j] = 1.0f;
+                l_fileFloatData[i * m_bands + j*3] = mainDirections[i][j].x;
+                l_fileFloatData[i * m_bands + j*3+1] = mainDirections[i][j].y;
+                l_fileFloatData[i * m_bands + j*3+2] = mainDirections[i][j].z;
         }
     }
     
