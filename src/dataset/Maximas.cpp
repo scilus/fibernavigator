@@ -30,6 +30,7 @@ inline bool isnan(double x) {
 #endif
 #endif
 
+/*TODO: When extractMax from ODFs, create a Maximas dataset for RTTHARDI*/
 
 ///////////////////////////////////////////
 Maximas::Maximas( const wxString &filename )
@@ -140,10 +141,13 @@ void Maximas::draw()
     ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "colorWithPos", ( GLint ) m_colorWithPosition );
     
     if(isDisplay(SLICES))
+    {
         Glyph::draw();
+    }
     else
+    {
         Glyph::drawSemiAll();
-
+    }
     // Disable the tensor color shader.
     ShaderHelper::getInstance()->getOdfsShader()->release();
 }

@@ -456,7 +456,7 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
             dd[1] = std::sin(phi)*std::sin(theta);
             dd[2] = std::cos(theta);
 
-            if( max_dir.size() != 0)
+            if( max_dir.size() < 3 && max_dir.size() != 0)
             {
                 for(unsigned int n=0; n< max_dir.size() && isDiff ; n++)
                 {
@@ -470,7 +470,7 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
                     max_dir.push_back(dd*norm_hemisODF[i]);
                 }
             }
-            else
+            else if( max_dir.size() == 0 )
             {
                 max_dir.push_back(dd*norm_hemisODF[i]);
             }
