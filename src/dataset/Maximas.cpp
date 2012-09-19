@@ -121,6 +121,7 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
     return true;
 }
 
+//////////////////////////////////////////////////////////////////////////
 bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
 {
     m_columns = DatasetManager::getInstance()->getColumns(); //XSlice

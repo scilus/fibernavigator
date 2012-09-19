@@ -1,6 +1,7 @@
 #include "TrackingWindow.h"
 
 #include "MainFrame.h"
+#include "SceneManager.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
 #include "../main.h"
@@ -318,11 +319,16 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
 
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+        
+        std::vector< std::vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
-        m_pMainFrame->createNewSelectionObject( BOX_TYPE );
-        m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
-        Vector boxSize(4,4,4);
-        ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
+        if(selectionObjects.empty())
+        {
+            m_pMainFrame->createNewSelectionObject( BOX_TYPE );
+            m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
+            Vector boxSize(2/step,2/step,2/step);
+            ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
+        }
     }
 }
 
@@ -332,10 +338,10 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
     long item = m_pMainFrame->getCurrentListIndex();
     Maximas* pMaximasInfo = (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
 	
-	//Hide tensor data
-	pMaximasInfo->setShow(false);
-	m_pMainFrame->m_pListCtrl->UpdateSelected();
-    m_pMainFrame->refreshAllGLWidgets();
+	////Hide tensor data
+	//pMaximasInfo->setShow(false);
+	//m_pMainFrame->m_pListCtrl->UpdateSelected();
+ //   m_pMainFrame->refreshAllGLWidgets();
 
     if( pMaximasInfo != NULL )
     {
@@ -350,10 +356,15 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setIsHardi( true );
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setHARDIInfo( (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
         
-        m_pMainFrame->createNewSelectionObject( BOX_TYPE );
-        m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
-        Vector boxSize(4,4,4);
-        ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
+        std::vector< std::vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+
+        if(selectionObjects.empty())
+        {
+            m_pMainFrame->createNewSelectionObject( BOX_TYPE );
+            m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
+            Vector boxSize(2/step,2/step,2/step);
+            ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
+        }
     }
 }
 
