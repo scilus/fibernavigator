@@ -184,7 +184,7 @@ bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
 
     int datasetSize = m_columns * m_rows * m_frames;
     
-    std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
+    l_fileFloatData.assign( datasetSize * m_bands, std::numeric_limits<float>::max() );
 
     for( int i( 0 ); i < datasetSize; ++i )
     {
