@@ -127,7 +127,7 @@ void Maximas::saveNifti( wxString fileName )
     pImage->dy = m_voxelSizeY;
     pImage->dz = m_voxelSizeZ;
 
-    vector<unsigned char> tmp( pDataset->size() );
+    vector<float> tmp( pDataset->size() );
     int datasetSize = m_columns * m_rows * m_frames;
     
     for( int i( 0 ); i < datasetSize; ++i )
@@ -174,6 +174,7 @@ bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
     m_rows    = DatasetManager::getInstance()->getRows(); //YSlice
     m_frames  = DatasetManager::getInstance()->getFrames(); //ZSlice
     m_bands = 9;
+    m_dataType = 16;
 
     m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
     m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
