@@ -561,6 +561,24 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
                 l_anatomy->saveNifti( dialog.GetPath() );
             }
         }
+        else if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == MAXIMAS )
+        {
+            Maximas* l_maximas = (Maximas*)m_pCurrentSceneObject;
+
+            wxString caption         = wxT( "Choose a file" );
+            wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
+            wxString defaultDir      = wxEmptyString;
+            wxString defaultFilename = wxEmptyString;
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            dialog.SetFilterIndex( 0 );
+            dialog.SetDirectory( m_lastPath );
+
+            if( dialog.ShowModal() == wxID_OK )
+            {
+                m_lastPath = dialog.GetDirectory();
+                l_maximas->saveNifti( dialog.GetPath() );
+            }
+        }
     }
 }
 

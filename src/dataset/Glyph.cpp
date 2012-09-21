@@ -160,11 +160,13 @@ void Glyph::drawSemiAll()
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    for( int z( 0 ); z < m_frames; z+=4 )
+    int disp = 4/m_voxelSizeX;
+
+    for( int z( 0 ); z < m_frames; z+=disp )
     {
-        for( int y( 0 ); y < m_rows; y+=4 )
+        for( int y( 0 ); y < m_rows; y+=disp )
         {
-            for( int x( 0 ); x < m_columns; x+=4 )
+            for( int x( 0 ); x < m_columns; x+=disp )
             {
                 drawGlyph( z, y, x, X_AXIS );
             }

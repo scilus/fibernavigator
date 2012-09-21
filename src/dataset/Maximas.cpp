@@ -35,7 +35,8 @@ inline bool isnan(double x) {
 ///////////////////////////////////////////
 Maximas::Maximas( const wxString &filename )
 : Glyph(),
-m_displayType( SLICES )
+m_displayType( SLICES ),
+m_dataType( 16 )
 {
     m_fullPath = filename;
     m_scalingFactor = 5.0f;
@@ -58,10 +59,11 @@ Maximas::~Maximas()
 //////////////////////////////////////////////////////////////////////////
 bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
 {
-    m_columns = pHeader->dim[1]; //XSlice
-    m_rows    = pHeader->dim[2]; //YSlice
-    m_frames  = pHeader->dim[3]; //ZSlice
-    m_bands   = pHeader->dim[4]; //9
+    m_columns  = pHeader->dim[1]; //XSlice
+    m_rows     = pHeader->dim[2]; //YSlice
+    m_frames   = pHeader->dim[3]; //ZSlice
+    m_bands    = pHeader->dim[4]; //9
+    m_dataType = pHeader->datatype;//16
 
     m_voxelSizeX = pHeader->dx;
     m_voxelSizeY = pHeader->dy;
@@ -81,8 +83,8 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
 
     int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
     
-    std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
-
+    //std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
+    l_fileFloatData.assign( datasetSize * m_bands, std::numeric_limits<float>::max() );
     float* pData = (float*)pBody->data;
 
     for( int i( 0 ); i < datasetSize; ++i )
@@ -98,6 +100,50 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
 
     m_isLoaded = true;
     return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void Maximas::saveNifti( wxString fileName )
+{
+    // Prevents copying the whole vector
+    vector<float> *pDataset = &l_fileFloatData;
+
+    int dims[] = { 4, m_columns, m_rows, m_frames, m_bands, 0, 0, 0 };
+    nifti_image* pImage(NULL);
+    pImage = nifti_make_new_nim( dims, m_dataType, 1 );
+    
+    if( !fileName.EndsWith( _T( ".nii" ) ) && !fileName.EndsWith( _T( ".nii.gz" ) ) )
+    {
+        fileName += _T( ".nii.gz" );
+    }   
+
+    char fn[1024];
+    strcpy( fn, (const char*)fileName.mb_str( wxConvUTF8 ) );
+
+    pImage->qform_code = 1;    
+    pImage->datatype   = m_dataType;
+    pImage->fname = fn;
+    pImage->dx = m_voxelSizeX;
+    pImage->dy = m_voxelSizeY;
+    pImage->dz = m_voxelSizeZ;
+
+    vector<unsigned char> tmp( pDataset->size() );
+    int datasetSize = m_columns * m_rows * m_frames;
+    
+    for( int i( 0 ); i < datasetSize; ++i )
+    {
+        for( int j( 0 ); j < m_bands; ++j )
+        {
+            tmp[j * datasetSize + i] = l_fileFloatData[i * m_bands + j];
+        }
+    }
+    
+    // Do not move the call to nifti_image_write out of the 
+    // if, because it will crash, since the temp vector will
+    // not exist anymore, and pImage->data will point to garbage.
+    pImage->data = &tmp[0];
+    nifti_image_write( pImage );
+
 }
 
 //////////////////////////////////////////////////////////////////////////
