@@ -408,6 +408,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     float angleMin = 360.0f;
     float angle = 0.0f;
     float puncture = getVinVout();
+	vin.normalize();
 
     for(unsigned int i=0; i < sticks.size()/3; i++)
     {

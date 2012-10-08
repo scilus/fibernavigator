@@ -196,7 +196,25 @@ bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
         }
     }
     
-    createStructure( l_fileFloatData );
+    //createStructure( l_fileFloatData );
+	m_nbGlyphs         = DatasetManager::getInstance()->getColumns() * DatasetManager::getInstance()->getRows() * DatasetManager::getInstance()->getFrames();
+    m_mainDirections.resize( m_nbGlyphs );
+
+    vector< float >::iterator it;
+    int i = 0;
+
+    //Fetching the directions
+    for( int i( 0 ); i < datasetSize; ++i )
+    {
+        for( unsigned int j( 0 ); j < mainDirections[i].size(); ++j )
+		{
+			m_mainDirections[i].push_back(mainDirections[i][j].x);
+			m_mainDirections[i].push_back(mainDirections[i][j].y);
+			m_mainDirections[i].push_back(mainDirections[i][j].z);
+		}
+	}
+
+    getSlidersPositions( m_currentSliderPos );
 
     m_isLoaded = true;
     return true;
