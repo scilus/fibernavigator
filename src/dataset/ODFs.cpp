@@ -75,7 +75,7 @@ ODFs::ODFs( const wxString &filename )
     m_radiusAttribLoc( 0 ),
     m_radiusBuffer   ( NULL ),    
     m_nbors          ( NULL ),
-    m_sh_basis       ( SH_BASIS_DESCOTEAUX )
+	m_sh_basis       ( SH_BASIS_TOURNIER )
 {
     m_scalingFactor = 5.0f;
     m_fullPath = filename;
@@ -467,12 +467,12 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
                 }
                 if(isDiff)
                 {
-                    max_dir.push_back(dd*norm_hemisODF[i]);
+                    max_dir.push_back(dd*ODF[i]);
                 }
             }
             else if( max_dir.size() == 0 )
             {
-                max_dir.push_back(dd*norm_hemisODF[i]);
+                max_dir.push_back(dd*ODF[i]);
             }
         }
     }

@@ -404,7 +404,6 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
 
 Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float s_number ) 
 {
-    //Vector vOut(sticks[0],sticks[1],sticks[2]);
     Vector vOut(0,0,0);
     float angleMin = 360.0f;
     float angle = 0.0f;
@@ -424,11 +423,6 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
         float dot = vin.Dot(v1);
         float acos = std::acos( dot );
         angle = 180 * acos / M_PI;
-
-        if( angle > 90 )
-        {
-            angle = 180 - angle; //Ensures we have the minimal angle
-        }
         
         //Direction most probable
         if( angle < angleMin )
@@ -710,6 +704,48 @@ void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, v
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// Draft a direction to start the tracking process using a probabilistic random
+// [0 --- |v1| --- |v2| --- |v3|]
+///////////////////////////////////////////////////////////////////////////
+std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks)
+{
+	std::vector<float> draftedPeak;
+	float norms[3];
+	float sum = 0.0f;
+
+	for(unsigned int i=0; i < initialPeaks.size()/3; i++)
+    {
+        Vector v1(initialPeaks[i*3],initialPeaks[i*3+1], initialPeaks[i*3+2]);
+		norms[i] = v1.getLength();
+		sum += norms[i];
+	}
+
+	float random = ( (float) rand() ) / (float) RAND_MAX;
+    float weight = ( random * sum );
+
+	if(weight < norms[0])
+	{
+		draftedPeak.push_back(initialPeaks[0]);
+		draftedPeak.push_back(initialPeaks[1]);
+		draftedPeak.push_back(initialPeaks[2]);
+	}
+	else if(weight < norms[0] + norms[1])
+	{
+		draftedPeak.push_back(initialPeaks[3]);
+		draftedPeak.push_back(initialPeaks[4]);
+		draftedPeak.push_back(initialPeaks[5]);
+	}
+	else
+	{
+		draftedPeak.push_back(initialPeaks[6]);
+		draftedPeak.push_back(initialPeaks[7]);
+		draftedPeak.push_back(initialPeaks[8]);
+	}
+		
+	return draftedPeak;
+}
+
+///////////////////////////////////////////////////////////////////////////
 // Performs realtime HARDI fiber tracking along direction bwdfwd (backward, forward)
 ///////////////////////////////////////////////////////////////////////////
 void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points, vector<Vector>& color)
@@ -718,7 +754,6 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     Vector currPosition(seed); //Current PIXEL position
     Vector nextPosition; //Next Pixel position
     Vector currDirection, nextDirection; //Directions re-aligned 
-    Vector pickedDir(0,0,0); //Direction picked 
 
     GLfloat flippedAxes[3];
     m_pMaximasInfo->isAxisFlipped(X_AXIS) ? flippedAxes[0] = -1.0f : flippedAxes[0] = 1.0f;
@@ -728,8 +763,6 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     unsigned int sticksNumber; 
     int currVoxelx, currVoxely, currVoxelz;
     float angle; 
-    float angleThreshold = getAngleThreshold();
-    float step = getStep();
 
     int columns = DatasetManager::getInstance()->getColumns();
     int rows    = DatasetManager::getInstance()->getRows();
@@ -749,13 +782,10 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
 
     if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() )
     {
-        sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
+        sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber)); 
 
-        //TODO Align 
         currDirection.x = flippedAxes[0] * sticks[0];
-
         currDirection.y = flippedAxes[1] * sticks[1];
-
         currDirection.z = flippedAxes[2] * sticks[2];
 
         //Direction for seeding (forward or backward)
@@ -763,7 +793,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
         currDirection *= bwdfwd;
 
         //Next position
-        nextPosition = currPosition + ( step * currDirection );
+        nextPosition = currPosition + ( m_step * currDirection );
 
         //Get the voxel stepped into
         currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
@@ -782,7 +812,6 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber );
 
             //Direction of seeding
-            nextDirection.normalize();
             nextDirection *= bwdfwd;
 
             if( currDirection.Dot(nextDirection) < 0 ) //Ensures the two vectors have the same directions
@@ -792,15 +821,11 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
 
             //Angle value
             angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
-            if( angle > 90 )
-            {
-                angle = 180 - angle; //Ensures that we have the smallest angle
-            }
 
             ///////////////////////////
             //Tracking along the fiber
             //////////////////////////
-            while( angle <= angleThreshold )
+            while( angle <= m_angleThreshold )
             {
                 //Insert point to be rendered
                 points.push_back( currPosition );
@@ -811,7 +836,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 currDirection = nextDirection;
 
                 //Next position
-                nextPosition = currPosition + ( step * currDirection );
+                nextPosition = currPosition + ( m_step * currDirection );
 
                 //Stepped voxels
                 currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
@@ -832,7 +857,6 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber );
 
                 //Direction of seeding (backward of forward)
-                nextDirection.normalize();
                 nextDirection *= bwdfwd;
                 if( currDirection.Dot(nextDirection) < 0 ) //Ensures both vectors points in the same direction
                 {
@@ -841,10 +865,6 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
 
                 //Angle value
                 angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
-                if( angle > 90 )
-                {
-                    angle = 180 - angle; //Ensures we have the minimal angle
-                }
             }
         }
     }
