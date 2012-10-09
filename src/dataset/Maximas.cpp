@@ -190,31 +190,13 @@ bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
     {
         for( unsigned int j( 0 ); j < mainDirections[i].size(); ++j )
         {
-                l_fileFloatData[i * m_bands + j*3] = mainDirections[i][j].x;
-                l_fileFloatData[i * m_bands + j*3+1] = mainDirections[i][j].y;
-                l_fileFloatData[i * m_bands + j*3+2] = mainDirections[i][j].z;
+			l_fileFloatData[i * m_bands + j*3] = mainDirections[i][j].x;
+            l_fileFloatData[i * m_bands + j*3+1] = mainDirections[i][j].y;
+            l_fileFloatData[i * m_bands + j*3+2] = mainDirections[i][j].z;
         }
     }
     
-    //createStructure( l_fileFloatData );
-	m_nbGlyphs         = DatasetManager::getInstance()->getColumns() * DatasetManager::getInstance()->getRows() * DatasetManager::getInstance()->getFrames();
-    m_mainDirections.resize( m_nbGlyphs );
-
-    vector< float >::iterator it;
-    int i = 0;
-
-    //Fetching the directions
-    for( int i( 0 ); i < datasetSize; ++i )
-    {
-        for( unsigned int j( 0 ); j < mainDirections[i].size(); ++j )
-		{
-			m_mainDirections[i].push_back(mainDirections[i][j].x);
-			m_mainDirections[i].push_back(mainDirections[i][j].y);
-			m_mainDirections[i].push_back(mainDirections[i][j].z);
-		}
-	}
-
-    getSlidersPositions( m_currentSliderPos );
+    createStructure( l_fileFloatData );
 
     m_isLoaded = true;
     return true;

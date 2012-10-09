@@ -457,9 +457,9 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
             dd[2] = std::cos(theta);
 			dd.normalize();
 
-            if( max_dir.size() < 3 && max_dir.size() != 0)
+            if( max_dir.size() < 3 && max_dir.size() != 0) //Once one is added
             {
-                for(unsigned int n=0; n< max_dir.size() && isDiff ; n++)
+                for(unsigned int n=0; n< max_dir.size() && isDiff ; n++) //Verify if already present or near
                 {
 					Vector peak(max_dir[n].x,max_dir[n].y,max_dir[n].z);
 					peak.normalize();
@@ -469,22 +469,31 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 
 					float angle = 180*std::acos(dd.Dot(peak))/M_PI;
 					
-					if(angle < 20)
+					if(angle < 20) //Arbitrairy angle
 					{
 						isDiff = false;
 					}
                 }
-                if(isDiff)
+                if(isDiff) //Add it
                 {
                     max_dir.push_back(dd*ODF[i]);
                 }
             }
-            else if( max_dir.size() == 0 )
+            else if( max_dir.size() == 0 ) //Add the first
             {
                 max_dir.push_back(dd*ODF[i]);
             }
         }
     }
+
+	//Fill remaining peaks with zeros ( up to 3 peaks ) 
+	if(max_dir.size() < 3 && !max_dir.empty())
+	{
+		for(unsigned int k = max_dir.size(); k < 3; k++)
+		{
+			max_dir.push_back(Vector(0,0,0));
+		}
+	}
 
     m_isMaximasSet = true;
     return max_dir;
