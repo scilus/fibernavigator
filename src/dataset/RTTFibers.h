@@ -11,6 +11,7 @@
 #include "../misc/IsoSurface/Vector.h"
 #include "Tensors.h"
 #include "Maximas.h"
+#include "Anatomy.h"
 
 #include <GL/glew.h>
 #include <vector>
@@ -28,6 +29,7 @@ public:
     void performHARDIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
 	std::vector<float> pickDirection(std::vector<float> initialPeaks);
+    bool withinMapThreshold(unsigned int sticksNumber);
 
     Vector generateRandomSeed( const Vector &min, const Vector &max );
     FMatrix trilinearInterp( float fx, float fy, float fz );
@@ -52,6 +54,7 @@ public:
     void setTensorsInfo( Tensors* info )							  { m_pTensorsInfo = info; }
     void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
+    void setMapInfo( Anatomy* info )                                  { m_pMapInfo = info; m_usingMap = true; }
 
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
@@ -128,9 +131,11 @@ private:
     float       m_minFiberLength;
     float       m_maxFiberLength;
     bool        m_isHARDI;
+    bool        m_usingMap;
     Tensors     *m_pTensorsInfo;
     Maximas     *m_pMaximasInfo;
 	DatasetInfo *m_pShellInfo;
+    Anatomy     *m_pMapInfo;
 
 
     std::vector< FMatrix > m_tensorsMatrix;

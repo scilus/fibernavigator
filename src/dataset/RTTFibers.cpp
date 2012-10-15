@@ -36,7 +36,8 @@ RTTFibers::RTTFibers()
     m_vinvout( 0.8f ),
     m_minFiberLength( 10 ),
     m_maxFiberLength( 200 ),
-    m_isHARDI( false )
+    m_isHARDI( false ),
+    m_usingMap( false )
 {
     //GPGPU
     writeTex = 0;
@@ -745,6 +746,24 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks)
 		
 	return draftedPeak;
 }
+///////////////////////////////////////////////////////////////////////////
+// Returns true if no anatomy is loaded for thresholding or if above the threshold
+///////////////////////////////////////////////////////////////////////////
+bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
+{
+    bool isOk = true;
+
+    if(m_usingMap)
+    {
+        isOk = false;
+        if(m_pMapInfo->at(sticksNumber) > m_FAThreshold)
+        {
+            isOk = true;
+        }
+    }
+
+    return isOk;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Performs realtime HARDI fiber tracking along direction bwdfwd (backward, forward)
@@ -755,6 +774,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     Vector currPosition(seed); //Current PIXEL position
     Vector nextPosition; //Next Pixel position
     Vector currDirection, nextDirection; //Directions re-aligned 
+    
 
     GLfloat flippedAxes[3];
     m_pMaximasInfo->isAxisFlipped(X_AXIS) ? flippedAxes[0] = -1.0f : flippedAxes[0] = 1.0f;
@@ -781,7 +801,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     sticksNumber = currVoxelz * columns * rows + currVoxely *columns + currVoxelx;
     std::vector<float> sticks;
 
-    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() )
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() && withinMapThreshold(sticksNumber))
     {
         sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber)); 
 
@@ -826,7 +846,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             ///////////////////////////
             //Tracking along the fiber
             //////////////////////////
-            while( angle <= m_angleThreshold )
+            while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber))
             {
                 //Insert point to be rendered
                 points.push_back( currPosition );
