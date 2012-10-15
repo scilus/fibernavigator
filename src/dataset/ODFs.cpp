@@ -476,12 +476,16 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
                 }
                 if(isDiff) //Add it
                 {
-                    max_dir.push_back(dd*ODF[i]);
+                    dd*=norm_hemisODF[i];
+                    dd.normalize();
+                    max_dir.push_back(dd);
                 }
             }
             else if( max_dir.size() == 0 ) //Add the first
             {
-                max_dir.push_back(dd*ODF[i]);
+                dd*=norm_hemisODF[i];
+                dd.normalize();
+                max_dir.push_back(dd);   
             }
         }
     }
@@ -496,6 +500,7 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
 	}
 
     m_isMaximasSet = true;
+    
     return max_dir;
 }
 
