@@ -73,7 +73,7 @@ private:
     wxButton            *m_pBtnSelectFile;
 	wxButton			*m_pBtnSelectShell;
 	wxToggleButton		*m_pToggleShell;
-    wxToggleButton      *m_pBtnSelectMap;
+    wxButton            *m_pBtnSelectMap;
     wxStaticText        *m_pTextMinLength;
     wxSlider            *m_pSliderMinLength;
     wxTextCtrl          *m_pTxtMinLengthBox;

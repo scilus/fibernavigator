@@ -147,8 +147,8 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     Connect( m_pToggleShell->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnShellSeeding) );
 	m_pToggleShell->Enable(false);
 
-    m_pBtnSelectMap = new wxToggleButton( this, wxID_ANY,wxT("Map not selected"), wxPoint(30,60), wxSize(200, -1) );
-    Connect( m_pBtnSelectMap->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectMap) );
+    m_pBtnSelectMap = new wxButton( this, wxID_ANY,wxT("Map not selected"), wxPoint(30,60), wxSize(200, -1) );
+    Connect( m_pBtnSelectMap->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectMap) );
 
     m_pTextFA = new wxStaticText( this, wxID_ANY, wxT("Min FA"), wxPoint(0,90), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderFA = new MySlider( this, wxID_ANY, 0, 1, 50, wxPoint(60,90), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -172,8 +172,8 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pTxtStepBox = new wxTextCtrl( this, wxID_ANY, wxT("1.0 mm"), wxPoint(190,150), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     m_pTextPuncture = new wxStaticText( this, wxID_ANY, wxT("Vin-Vout"), wxPoint(0,180), wxSize(60, -1), wxALIGN_CENTER );
-    m_pSliderPuncture = new MySlider( this, wxID_ANY, 0, 0, 10, wxPoint(60,180), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderPuncture->SetValue( 8 );
+    m_pSliderPuncture = new MySlider( this, wxID_ANY, 1, 0, 99, wxPoint(60,180), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderPuncture->SetValue( 80 );
     Connect( m_pSliderPuncture->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderPunctureMoved) );
     m_pTxtPunctureBox = new wxTextCtrl( this, wxID_ANY, wxT("0.8"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
@@ -277,8 +277,8 @@ void TrackingWindow::OnSliderStepMoved( wxCommandEvent& WXUNUSED(event) )
 
 void TrackingWindow::OnSliderPunctureMoved( wxCommandEvent& WXUNUSED(event) )
 {
-    float sliderValue = m_pSliderPuncture->GetValue() / 10.0f;
-    m_pTxtPunctureBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue) );
+    float sliderValue = m_pSliderPuncture->GetValue() / 100.0f;
+    m_pTxtPunctureBox->SetValue(wxString::Format( wxT( "%.2f"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setPuncture( sliderValue );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setVinVout( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
