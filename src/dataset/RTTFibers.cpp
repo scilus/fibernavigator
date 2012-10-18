@@ -151,7 +151,7 @@ void RTTFibers::seed()
     //Mesh ShellSeeding
     else 
     {
-        if ( m_pShellInfo->getType() == ISO_SURFACE && m_pShellInfo->getShow() )
+        if ( m_pShellInfo->getType() == ISO_SURFACE )
         {
             CIsoSurface* pSurf = (CIsoSurface*) m_pShellInfo;
             std::vector< Vector > positions = pSurf->m_tMesh->getVerts();
@@ -408,7 +408,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     Vector vOut(0,0,0);
     float angleMin = 360.0f;
     float angle = 0.0f;
-    float puncture = getVinVout();
+    float puncture = m_vinvout;
     float fa = m_pMapInfo->at(s_number);
 	vin.normalize();
 
@@ -722,7 +722,7 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks)
 		norms[i] = v1.getLength();
 		sum += norms[i];
 	}
-
+    
 	float random = ( (float) rand() ) / (float) RAND_MAX;
     float weight = ( random * sum );
 
@@ -835,6 +835,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
 
             //Direction of seeding
             nextDirection *= bwdfwd;
+            nextDirection.normalize();
 
             if( currDirection.Dot(nextDirection) < 0 ) //Ensures the two vectors have the same directions
             {
@@ -880,6 +881,8 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
 
                 //Direction of seeding (backward of forward)
                 nextDirection *= bwdfwd;
+                nextDirection.normalize();
+
                 if( currDirection.Dot(nextDirection) < 0 ) //Ensures both vectors points in the same direction
                 {
                     nextDirection *= -1;

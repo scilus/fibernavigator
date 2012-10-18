@@ -55,7 +55,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	m_pBtnSelectShell = new wxButton( this, wxID_ANY,wxT("Shell not selected"), wxPoint(30,30), wxSize(100, -1) );
     Connect( m_pBtnSelectShell->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectShell) );
 
-    m_pToggleShell = new wxToggleButton( this, wxID_ANY,wxT("Shell seeding"), wxPoint(130,30), wxSize(100, -1) );
+    m_pToggleShell = new wxToggleButton( this, wxID_ANY,wxT("Shell seed OFF"), wxPoint(130,30), wxSize(100, -1) );
     Connect( m_pToggleShell->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnShellSeeding) );
 	m_pToggleShell->Enable(false);
 
@@ -143,7 +143,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	m_pBtnSelectShell = new wxButton( this, wxID_ANY,wxT("Shell not selected"), wxPoint(30,30), wxSize(100, -1) );
     Connect( m_pBtnSelectShell->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectShell) );
 
-    m_pToggleShell = new wxToggleButton( this, wxID_ANY,wxT("Shell seeding"), wxPoint(130,30), wxSize(100, -1) );
+    m_pToggleShell = new wxToggleButton( this, wxID_ANY,wxT("Shell seed OFF"), wxPoint(130,30), wxSize(100, -1) );
     Connect( m_pToggleShell->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnShellSeeding) );
 	m_pToggleShell->Enable(false);
 
@@ -388,17 +388,18 @@ void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
         RTTrackingHelper::getInstance()->toggleShellSeeds();
         RTTrackingHelper::getInstance()->setRTTDirty( true );
         float sliderValue = m_pSliderAxisSeedNb->GetValue();
-        m_pBtnStart->Enable( true );
 
         //Set nb of seeds depending on the seeding mode
         if( !RTTrackingHelper::getInstance()->isShellSeeds() )
         {
             m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue*sliderValue*sliderValue) );
+            m_pToggleShell->SetLabel(wxT("Shell seed OFF"));
         }
         else
         {
             float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getShellSeedNb();
             m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) ); 
+            m_pToggleShell->SetLabel(wxT( "Shell seed ON"));
         } 
 	}
 }
@@ -432,11 +433,13 @@ void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
 	if( !RTTrackingHelper::getInstance()->isShellSeeds() )
     {
         m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue*sliderValue*sliderValue) );
+        m_pToggleShell->SetLabel(wxT( "Shell seed OFF"));
     }
     else
     {
         float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getShellSeedNb();
         m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) ); 
+        m_pToggleShell->SetLabel(wxT( "Shell seed ON"));
     }
 }
 
@@ -485,4 +488,13 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
     }
 
 	m_pMainFrame->m_pListCtrl->InsertItem( index );
+
+    RTTrackingHelper::getInstance()->setRTTReady(false);
+
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
+    RTTrackingHelper::getInstance()->setRTTDirty( false );
+    m_pBtnStart->SetLabel(wxT("Start tracking"));
+    m_pBtnStart->SetValue(false);
+
 }
