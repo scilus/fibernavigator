@@ -66,6 +66,8 @@ public:
     float getVinVout()                           { return m_vinvout; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
+
+    bool isHardiSelected()                       { return m_isHARDI;}
     
     wxString getRTTFileName()                    { if(m_isHARDI) 
                                                         return m_pMaximasInfo->getPath(); 

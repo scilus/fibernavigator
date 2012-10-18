@@ -328,10 +328,10 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
         if(selectionObjects.empty())
         {
             m_pMainFrame->createNewSelectionObject( BOX_TYPE );
-            m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
             Vector boxSize(2/step,2/step,2/step);
             ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
         }
+        m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
     }
 }
 
@@ -363,11 +363,12 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
 
         if(selectionObjects.empty())
         {
-            m_pMainFrame->createNewSelectionObject( BOX_TYPE );
-            m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
+            m_pMainFrame->createNewSelectionObject( BOX_TYPE ); 
             Vector boxSize(2/step,2/step,2/step);
             ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
         }
+        if(m_pTextFA->IsEnabled())
+            m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
     }
 }
 
@@ -416,6 +417,8 @@ void TrackingWindow::OnSelectMap( wxCommandEvent& WXUNUSED(event) )
         m_pSliderFA->Enable(true);
         m_pTxtFABox->Enable(true);
 	}
+    if(m_pMainFrame->m_pMainGL->m_pRealTimeFibers->isHardiSelected())
+        m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
 }
 
 void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
