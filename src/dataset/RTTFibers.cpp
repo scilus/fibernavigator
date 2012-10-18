@@ -409,6 +409,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     float angleMin = 360.0f;
     float angle = 0.0f;
     float puncture = getVinVout();
+    float fa = m_pMapInfo->at(s_number);
 	vin.normalize();
 
     for(unsigned int i=0; i < sticks.size()/3; i++)
@@ -434,7 +435,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
         }     
     }
 
-    Vector res = ((1.0f-puncture)*vin + (puncture)*vOut); 
+    Vector res = fa * vOut + (1.0 - fa) * ( (1.0 - puncture ) * vin + puncture * vOut); 
     res.normalize();
 
     return res;
