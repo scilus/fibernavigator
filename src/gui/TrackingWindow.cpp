@@ -383,6 +383,22 @@ void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
 		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setShellInfo( (DatasetInfo *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 		m_pToggleShell->Enable(true);
         m_pToggleShell->SetValue(true);
+
+        RTTrackingHelper::getInstance()->toggleShellSeeds();
+        RTTrackingHelper::getInstance()->setRTTDirty( true );
+        float sliderValue = m_pSliderAxisSeedNb->GetValue();
+        m_pBtnStart->Enable( true );
+
+        //Set nb of seeds depending on the seeding mode
+        if( !RTTrackingHelper::getInstance()->isShellSeeds() )
+        {
+            m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue*sliderValue*sliderValue) );
+        }
+        else
+        {
+            float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getShellSeedNb();
+            m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) ); 
+        } 
 	}
 }
 
