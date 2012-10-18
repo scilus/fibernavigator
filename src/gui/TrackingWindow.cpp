@@ -43,6 +43,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("DTI not selected"), wxPoint(30,0), wxSize(100, -1) );
     Connect( m_pBtnSelectFile->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectFileDTI) );
+    m_pBtnSelectFile->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
     m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start tracking"), wxPoint(130,0), wxSize(100, -1) );
     Connect( m_pBtnStart->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnStartTracking) );
@@ -111,7 +112,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pTextTotalSeedNb = new wxStaticText( this, wxID_ANY, wxT("Number of current seeds"), wxPoint(7,270), wxSize(150, -1), wxALIGN_LEFT );
     m_pTxtTotalSeedNbBox = new wxTextCtrl( this, wxID_ANY, wxT("1000"), wxPoint(190,270), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
-	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,300), wxSize(140, -1) );
+	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,300), wxSize(140, 30) );
 	Connect( m_pBtnConvert->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnConvertToFibers) );
 
 }
@@ -131,6 +132,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("HARDI not selected"), wxPoint(30,0), wxSize(100, -1) );
     Connect( m_pBtnSelectFile->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectFileHARDI) );
+    m_pBtnSelectFile->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
     m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start tracking"), wxPoint(130,0), wxSize(100, -1) );
     Connect( m_pBtnStart->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnStartTracking) );
@@ -149,6 +151,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     m_pBtnSelectMap = new wxButton( this, wxID_ANY,wxT("Map not selected"), wxPoint(30,60), wxSize(200, -1) );
     Connect( m_pBtnSelectMap->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectMap) );
+    m_pBtnSelectMap->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
     m_pTextFA = new wxStaticText( this, wxID_ANY, wxT("Min FA"), wxPoint(0,90), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderFA = new MySlider( this, wxID_ANY, 0, 1, 50, wxPoint(60,90), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -204,9 +207,8 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pTextTotalSeedNb = new wxStaticText( this, wxID_ANY, wxT("Number of current seeds"), wxPoint(7,300), wxSize(150, -1), wxALIGN_LEFT );
     m_pTxtTotalSeedNbBox = new wxTextCtrl( this, wxID_ANY, wxT("1000"), wxPoint(190,300), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
-	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,330), wxSize(140, -1) );
+	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,330), wxSize(140, 30) );
 	Connect( m_pBtnConvert->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnConvertToFibers) );
-
 }
 
 void TrackingWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -314,6 +316,7 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
     if( pTensorInfo != NULL )
     {
         m_pBtnSelectFile->SetLabel( pTensorInfo->getName() );
+        m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
         //Set Step
         float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
@@ -331,6 +334,7 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
             Vector boxSize(2/step,2/step,2/step);
             ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
         }
+        m_pMainFrame->m_pTrackingWindow->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
     }
 }
@@ -349,6 +353,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
     if( pMaximasInfo != NULL )
     {
         m_pBtnSelectFile->SetLabel( pMaximasInfo->getName() );
+        m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
         //Set Step
         float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
@@ -368,7 +373,10 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
             ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
         }
         if(m_pTextFA->IsEnabled())
-            m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
+        {
+            m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
+            m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );   
+        }
     }
 }
 
@@ -413,13 +421,17 @@ void TrackingWindow::OnSelectMap( wxCommandEvent& WXUNUSED(event) )
 	if( pMap != NULL )
     {
 		m_pBtnSelectMap->SetLabel( pMap->getName() );
+        m_pBtnSelectMap->SetBackgroundColour(wxNullColour);
 		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMapInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
         m_pTextFA->Enable(true);
         m_pSliderFA->Enable(true);
         m_pTxtFABox->Enable(true);
 	}
     if(m_pMainFrame->m_pMainGL->m_pRealTimeFibers->isHardiSelected())
+    {
         m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
+        m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
+    }
 }
 
 void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
