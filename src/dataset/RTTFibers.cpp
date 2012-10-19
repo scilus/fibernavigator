@@ -843,7 +843,9 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             }
 
             //Angle value
-            angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
+            float dot = currDirection.Dot(nextDirection);
+            float acos = std::acos( dot );
+            angle = 180 * acos / M_PI;
 
             ///////////////////////////
             //Tracking along the fiber
@@ -889,7 +891,9 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 }
 
                 //Angle value
-                angle = 180 * std::acos( currDirection.Dot(nextDirection) ) / M_PI;
+                float dot = currDirection.Dot(nextDirection);
+                float acos = std::acos( dot );
+                angle = 180 * acos / M_PI;
             }
         }
     }
