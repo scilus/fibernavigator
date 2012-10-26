@@ -319,7 +319,7 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
         m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
         //Set Step
-        //float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
+        float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
         //m_pSliderStep->SetValue( step * 10.0f );
         //m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
         //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
@@ -333,6 +333,7 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
             m_pMainFrame->createNewSelectionObject( BOX_TYPE );
             Vector boxSize(2/step,2/step,2/step);
             ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
+            ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_boxResized = true;
         }
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
@@ -356,7 +357,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
         m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
         //Set Step
-        //float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
+        float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
         //m_pSliderStep->SetValue( step * 10.0f );
         //m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
         //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
@@ -371,6 +372,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
             m_pMainFrame->createNewSelectionObject( BOX_TYPE ); 
             Vector boxSize(2/step,2/step,2/step);
             ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
+            ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_boxResized = true;
         }
         if(m_pTextFA->IsEnabled())
         {
