@@ -176,9 +176,9 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     m_pTextPuncture = new wxStaticText( this, wxID_ANY, wxT("Vin-Vout"), wxPoint(0,180), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderPuncture = new MySlider( this, wxID_ANY, 0, 1, 99, wxPoint(60,180), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderPuncture->SetValue( 80 );
+    m_pSliderPuncture->SetValue( 20 );
     Connect( m_pSliderPuncture->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderPunctureMoved) );
-    m_pTxtPunctureBox = new wxTextCtrl( this, wxID_ANY, wxT("0.8"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtPunctureBox = new wxTextCtrl( this, wxID_ANY, wxT("0.20"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     m_pTextMinLength = new wxStaticText( this, wxID_ANY, wxT("Min length"), wxPoint(0,210), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderMinLength = new MySlider( this, wxID_ANY, 0, 0, 400, wxPoint(60,210), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -319,10 +319,10 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
         m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
         //Set Step
-        float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
-        m_pSliderStep->SetValue( step * 10.0f );
-        m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
-        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
+        //float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
+        //m_pSliderStep->SetValue( step * 10.0f );
+        //m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
+        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
 
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
         
@@ -356,10 +356,10 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
         m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
         //Set Step
-        float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
-        m_pSliderStep->SetValue( step * 10.0f );
-        m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
-        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
+        //float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
+        //m_pSliderStep->SetValue( step * 10.0f );
+        //m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
+        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
 
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setIsHardi( true );
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setHARDIInfo( (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
