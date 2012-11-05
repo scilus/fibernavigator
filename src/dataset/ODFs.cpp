@@ -101,7 +101,7 @@ ODFs::~ODFs()
 
     if( m_nbors != NULL )
     {
-        delete m_nbors;
+        delete [] m_nbors;
         m_nbors = NULL;
     }
     Logger::getInstance()->print( wxT( "ODFs destructor done." ), LOGLEVEL_DEBUG );
