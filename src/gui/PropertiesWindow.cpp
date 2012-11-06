@@ -1601,17 +1601,7 @@ void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
         return;
     }
 
-    if( m_pMainFrame->m_currentListIndex != -1 )
-    {
-        DatasetInfo *l_info = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
-        if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
-        {
-            l_info->setColor( l_col );
-            l_info->setUseTex( false );
-            m_pListCtrl->UpdateSelected();
-        }
-    }
-    else if ( m_pMainFrame->getLastSelectedObj() != NULL )
+    if ( m_pMainFrame->getLastSelectedObj() != NULL )
     {
         SelectionObject *l_selObj = (SelectionObject*)m_pMainFrame->m_pCurrentSceneObject;
         if (!l_selObj->getIsMaster())
@@ -1623,6 +1613,17 @@ void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
         l_selObj->setIsDirty( true );
         SceneManager::getInstance()->setSelBoxChanged( true );
     }    
+    else if( m_pMainFrame->m_currentListIndex != -1 )
+    {
+        DatasetInfo *l_info = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
+        if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
+        {
+            l_info->setColor( l_col );
+            l_info->setUseTex( false );
+            m_pListCtrl->UpdateSelected();
+        }
+    }
+    
     m_pMainFrame->refreshAllGLWidgets();
 }
 
