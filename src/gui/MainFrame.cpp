@@ -39,6 +39,8 @@
 #include <algorithm>
 using std::for_each;
 
+#include <cmath>
+
 #include <vector>
 using std::vector;
 
@@ -1020,12 +1022,12 @@ void MainFrame::createCutDataset()
         {
             if( selObjects[i][j]->getIsVisible() )
             {
-                x1 = (int)( selObjects[i][j]->getCenter().x / voxelX - selObjects[i][j]->getSize().x / 2 );
-                x2 = (int)( selObjects[i][j]->getCenter().x / voxelX + selObjects[i][j]->getSize().x / 2 );
-                y1 = (int)( selObjects[i][j]->getCenter().y / voxelY - selObjects[i][j]->getSize().y / 2 );
-                y2 = (int)( selObjects[i][j]->getCenter().y / voxelY + selObjects[i][j]->getSize().y / 2 );
-                z1 = (int)( selObjects[i][j]->getCenter().z / voxelZ - selObjects[i][j]->getSize().z / 2 );
-                z2 = (int)( selObjects[i][j]->getCenter().z / voxelZ + selObjects[i][j]->getSize().z / 2 );
+                x1 = static_cast<int>( std::floor( selObjects[i][j]->getCenter().x / voxelX - selObjects[i][j]->getSize().x / 2.0 ) );
+                x2 = static_cast<int>( std::ceil(  selObjects[i][j]->getCenter().x / voxelX + selObjects[i][j]->getSize().x / 2.0 ) );
+                y1 = static_cast<int>( std::floor( selObjects[i][j]->getCenter().y / voxelY - selObjects[i][j]->getSize().y / 2.0 ) );
+                y2 = static_cast<int>( std::ceil(  selObjects[i][j]->getCenter().y / voxelY + selObjects[i][j]->getSize().y / 2.0 ) );
+                z1 = static_cast<int>( std::floor( selObjects[i][j]->getCenter().z / voxelZ - selObjects[i][j]->getSize().z / 2.0 ) );
+                z2 = static_cast<int>( std::ceil(  selObjects[i][j]->getCenter().z / voxelZ + selObjects[i][j]->getSize().z / 2.0 ) );
 
                 x1 = std::max( 0, std::min( x1, columns ) );
                 x2 = std::max( 0, std::min( x2, columns ) );
