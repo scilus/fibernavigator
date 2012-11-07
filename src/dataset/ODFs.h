@@ -49,6 +49,7 @@ public:
     void changeShBasis( SH_BASIS );
 
     void extractMaximas();
+    std::vector< std::vector<Vector> > *getMainDirs()   { return &m_mainDirections;           };
 
     MySlider * getSliderFlood() const                   { return m_pSliderFlood; }
     wxTextCtrl * getTxtThresBox() const                 { return m_pTxtThres; }

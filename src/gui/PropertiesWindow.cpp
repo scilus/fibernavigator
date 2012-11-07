@@ -858,6 +858,31 @@ void PropertiesWindow::OnDescoteauxShBasis( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void PropertiesWindow::OnMaximasDisplaySlice( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMaximasDisplaySlice" ), LOGLEVEL_DEBUG );
+
+    long index = m_pMainFrame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Maximas *pMaximas = (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pMaximas->changeDisplay( SLICES );
+    }
+}
+
+
+void PropertiesWindow::OnMaximasDisplayWhole( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMaximasDisplaySlice" ), LOGLEVEL_DEBUG );
+
+    long index = m_pMainFrame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Maximas *pMaximas = (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pMaximas->changeDisplay( WHOLE );
+    }
+}
+
 void PropertiesWindow::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnTournierShBasis" ), LOGLEVEL_DEBUG );
@@ -1178,6 +1203,22 @@ void PropertiesWindow::OnGlyphMainAxisSelected( wxCommandEvent& event )
         if(((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getType() == ODFS && !((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->m_isMaximasSet)
         {
             ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->extractMaximas();
+            ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setDisplayShape( AXIS );
+            ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->updatePropertiesSizer();
+            
+            int indx = DatasetManager::getInstance()->createMaximas( wxT( "Extracted Maximas" ) );
+            Maximas* pMaximas = (Maximas *)DatasetManager::getInstance()->getDataset( indx );
+            if( pMaximas->createMaximas( *(((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->getMainDirs())) )
+            {
+                Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
+                pMaximas->setThreshold( 0.0f );
+                pMaximas->setAlpha( 1.0f );
+                pMaximas->setShow( true );
+                pMaximas->setShowFS( true );
+                pMaximas->setUseTex( true );
+
+                m_pListCtrl->InsertItem( indx );             
+            }
         }
         ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->setDisplayShape( AXIS );
         ((Glyph*)m_pMainFrame->m_pCurrentSceneObject)->updatePropertiesSizer();

@@ -75,7 +75,7 @@ ODFs::ODFs( const wxString &filename )
     m_radiusAttribLoc( 0 ),
     m_radiusBuffer   ( NULL ),    
     m_nbors          ( NULL ),
-    m_sh_basis       ( SH_BASIS_DESCOTEAUX )
+	m_sh_basis       ( SH_BASIS_DESCOTEAUX )
 {
     m_scalingFactor = 5.0f;
     m_fullPath = filename;
@@ -183,7 +183,7 @@ void ODFs::extractMaximas()
     float rows    = DatasetManager::getInstance()->getRows();
     float frames  = DatasetManager::getInstance()->getFrames();
 
-    std::cout << "Extracting maximas ... please wait 10 sec \n";
+    std::cout << "Extracting maximas ... please wait \n";
     m_nbPointsPerGlyph = getLODNbOfPoints( LOD_3 ); // Set number of points to LOD_X for C*B mult
     m_mainDirections.resize( frames * rows * columns );
     
@@ -361,7 +361,7 @@ void ODFs::computeRadiiArray( const FMatrix &i_B, vector< float > &i_C, vector< 
 void ODFs::set_nbors(FMatrix o_phiThetaDirection)
 {
     // find neighbors to all mesh points 
-    direction d,d2; /*current direction*/
+    Vector d,d2; /*current direction*/
     const float max_allowed_angle = 30.0f;
     const float min_allowed_angle = 1.0f;
  
@@ -386,7 +386,7 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
                 d2.y = std::sin(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
                 d2.z = std::cos(m_phiThetaDirection[LOD_3](j,1));
                         
-                float angle_found = 180*std::acos(d.x*d2.x + d.y*d2.y + d.z*d2.z)/M_PI;
+				float angle_found = 180*std::acos(d.Dot(d2))/M_PI;
 
                 if(angle_found <= max_allowed_angle && angle_found > min_allowed_angle)
                 {
@@ -455,29 +455,52 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
             dd[0] = std::cos(phi)*std::sin(theta);
             dd[1] = std::sin(phi)*std::sin(theta);
             dd[2] = std::cos(theta);
+			dd.normalize();
 
-            if( max_dir.size() != 0)
+            if( max_dir.size() < 3 && max_dir.size() != 0) //Once one is added
             {
-                for(unsigned int n=0; n< max_dir.size() && isDiff ; n++)
+                for(unsigned int n=0; n< max_dir.size() && isDiff ; n++) //Verify if already present or near
                 {
-                    if(dd.x == max_dir[n].x && dd.y == max_dir[n].y && dd.z == max_dir[n].z)
-                    {
-                      isDiff = false;
-                    }
+					Vector peak(max_dir[n].x,max_dir[n].y,max_dir[n].z);
+					peak.normalize();
+
+					if(dd.Dot(peak) < 0)
+						peak *= -1;
+
+					float angle = 180*std::acos(dd.Dot(peak))/M_PI;
+					
+					if(angle < 20) //Arbitrairy angle
+					{
+						isDiff = false;
+					}
                 }
-                if(isDiff)
+                if(isDiff) //Add it
                 {
-                    max_dir.push_back(dd*norm_hemisODF[i]);
+                    dd*=norm_hemisODF[i];
+                    dd.normalize();
+                    max_dir.push_back(dd);
                 }
             }
-            else
+            else if( max_dir.size() == 0 ) //Add the first
             {
-                max_dir.push_back(dd*norm_hemisODF[i]);
+                dd*=norm_hemisODF[i];
+                dd.normalize();
+                max_dir.push_back(dd);   
             }
         }
     }
 
+	//Fill remaining peaks with zeros ( up to 3 peaks ) 
+	if(max_dir.size() < 3 && !max_dir.empty())
+	{
+		for(unsigned int k = max_dir.size(); k < 3; k++)
+		{
+			max_dir.push_back(Vector(0,0,0));
+		}
+	}
+
     m_isMaximasSet = true;
+    
     return max_dir;
 }
 

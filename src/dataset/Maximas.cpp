@@ -30,10 +30,11 @@ inline bool isnan(double x) {
 #endif
 #endif
 
-
 ///////////////////////////////////////////
 Maximas::Maximas( const wxString &filename )
-: Glyph()
+: Glyph(),
+m_displayType( SLICES ),
+m_dataType( 16 )
 {
     m_fullPath = filename;
     m_scalingFactor = 5.0f;
@@ -56,10 +57,11 @@ Maximas::~Maximas()
 //////////////////////////////////////////////////////////////////////////
 bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
 {
-    m_columns = pHeader->dim[1]; //XSlice
-    m_rows    = pHeader->dim[2]; //YSlice
-    m_frames  = pHeader->dim[3]; //ZSlice
-    m_bands   = pHeader->dim[4]; //9
+    m_columns  = pHeader->dim[1]; //XSlice
+    m_rows     = pHeader->dim[2]; //YSlice
+    m_frames   = pHeader->dim[3]; //ZSlice
+    m_bands    = pHeader->dim[4]; //9
+    m_dataType = pHeader->datatype;//16
 
     m_voxelSizeX = pHeader->dx;
     m_voxelSizeY = pHeader->dy;
@@ -79,8 +81,8 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
 
     int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
     
-    std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
-
+    //std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
+    l_fileFloatData.assign( datasetSize * m_bands, std::numeric_limits<float>::max() );
     float* pData = (float*)pBody->data;
 
     for( int i( 0 ); i < datasetSize; ++i )
@@ -96,6 +98,50 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
 
     m_isLoaded = true;
     return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void Maximas::saveNifti( wxString fileName )
+{
+    // Prevents copying the whole vector
+    vector<float> *pDataset = &l_fileFloatData;
+
+    int dims[] = { 4, m_columns, m_rows, m_frames, m_bands, 0, 0, 0 };
+    nifti_image* pImage(NULL);
+    pImage = nifti_make_new_nim( dims, m_dataType, 1 );
+    
+    if( !fileName.EndsWith( _T( ".nii" ) ) && !fileName.EndsWith( _T( ".nii.gz" ) ) )
+    {
+        fileName += _T( ".nii.gz" );
+    }   
+
+    char fn[1024];
+    strcpy( fn, (const char*)fileName.mb_str( wxConvUTF8 ) );
+
+    pImage->qform_code = 1;    
+    pImage->datatype   = m_dataType;
+    pImage->fname = fn;
+    pImage->dx = m_voxelSizeX;
+    pImage->dy = m_voxelSizeY;
+    pImage->dz = m_voxelSizeZ;
+
+    vector<float> tmp( pDataset->size() );
+    int datasetSize = m_columns * m_rows * m_frames;
+    
+    for( int i( 0 ); i < datasetSize; ++i )
+    {
+        for( int j( 0 ); j < m_bands; ++j )
+        {
+            tmp[j * datasetSize + i] = l_fileFloatData[i * m_bands + j];
+        }
+    }
+    
+    // Do not move the call to nifti_image_write out of the 
+    // if, because it will crash, since the temp vector will
+    // not exist anymore, and pImage->data will point to garbage.
+    pImage->data = &tmp[0];
+    nifti_image_write( pImage );
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -120,6 +166,41 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
 }
 
 //////////////////////////////////////////////////////////////////////////
+bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
+{
+    m_columns = DatasetManager::getInstance()->getColumns(); //XSlice
+    m_rows    = DatasetManager::getInstance()->getRows(); //YSlice
+    m_frames  = DatasetManager::getInstance()->getFrames(); //ZSlice
+    m_bands = 9;
+    m_dataType = 16;
+
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
+
+    m_type = MAXIMAS;
+
+    int datasetSize = m_columns * m_rows * m_frames;
+    
+    l_fileFloatData.assign( datasetSize * m_bands, std::numeric_limits<float>::max() );
+
+    for( int i( 0 ); i < datasetSize; ++i )
+    {
+        for( unsigned int j( 0 ); j < mainDirections[i].size(); ++j )
+        {
+			l_fileFloatData[i * m_bands + j*3] = mainDirections[i][j].x;
+            l_fileFloatData[i * m_bands + j*3+1] = mainDirections[i][j].y;
+            l_fileFloatData[i * m_bands + j*3+2] = mainDirections[i][j].z;
+        }
+    }
+    
+    createStructure( l_fileFloatData );
+
+    m_isLoaded = true;
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 void Maximas::draw()
 {
     // Enable the shader.
@@ -137,9 +218,15 @@ void Maximas::draw()
 
     // If m_colorWithPosition is true then the glyph will be colored with the position of the vertex.
     ShaderHelper::getInstance()->getOdfsShader()->setUniInt( "colorWithPos", ( GLint ) m_colorWithPosition );
- 
-    Glyph::draw();
-
+    
+    if(isDisplay(SLICES))
+    {
+        Glyph::draw();
+    }
+    else
+    {
+        Glyph::drawSemiAll();
+    }
     // Disable the tensor color shader.
     ShaderHelper::getInstance()->getOdfsShader()->release();
 }
@@ -188,6 +275,7 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             l_coloring[0] = m_mainDirections[currentIdx][i*3];
             l_coloring[1] = m_mainDirections[currentIdx][i*3+1];
             l_coloring[2] = m_mainDirections[currentIdx][i*3+2];
+
             ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
             
             float halfScale = m_scalingFactor / 5.0f;
@@ -208,6 +296,31 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
 void Maximas::createPropertiesSizer( PropertiesWindow *pParent )
 {
     Glyph::createPropertiesSizer( pParent );
+
+    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
+
+    wxRadioButton *pRadSlices = new wxRadioButton( pParent, wxID_ANY, wxT( "Slices" ), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+    wxRadioButton *pRadWhole   = new wxRadioButton( pParent, wxID_ANY, wxT( "Whole" ) );
+
+    wxBoxSizer *pBoxDisplay = new wxBoxSizer( wxVERTICAL );
+    pBoxDisplay->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Sticks display:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+
+    wxBoxSizer *pBoxButton = new wxBoxSizer( wxVERTICAL );
+    pBoxButton->Add( pRadSlices, 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxButton->Add( pRadWhole,   0, wxALIGN_LEFT | wxALL, 1 );
+
+    pBoxDisplay->Add( pBoxButton, 0, wxALIGN_LEFT | wxLEFT, 32 );
+    pBoxMain->Add( pBoxDisplay, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    //////////////////////////////////////////////////////////////////////////
+    pParent->Connect( pRadSlices->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMaximasDisplaySlice ) );
+    pParent->Connect( pRadWhole->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnMaximasDisplayWhole ) );
+
+    pRadSlices->SetValue( isDisplay(SLICES) );
+    pRadWhole->SetValue(  isDisplay(WHOLE) );
+
+
+    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 }
 
 //////////////////////////////////////////////////////////////////////////
