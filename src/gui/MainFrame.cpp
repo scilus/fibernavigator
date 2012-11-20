@@ -2325,6 +2325,11 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
         SceneManager::getInstance()->getScene()->m_posCoronal = SceneManager::getInstance()->getSliceY();
     }
 
+    if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() )
+    {
+        RTTrackingHelper::getInstance()->trackActionStep++;
+    }
+
     refreshAllGLWidgets();
     refreshViews();
     SceneManager::getInstance()->increaseAnimStep();

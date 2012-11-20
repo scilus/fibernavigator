@@ -29,6 +29,8 @@ public:
     bool isTrackActionPlaying() const { return m_isTrackActionPlaying; }
     void setTrackAction(bool action) {m_isTrackActionPlaying = action; }
 
+    int getTrackActionStep() const { return m_trackActionStep;}
+
 protected:
     RTTrackingHelper(void);
 
@@ -46,6 +48,7 @@ private:
     bool m_isRTTDirty;
     bool m_isRTTReady;
     bool m_isTrackActionPlaying;
+    int  m_trackActionStep;
 };
 
 #endif //RTTRACKINGHELPER_H_

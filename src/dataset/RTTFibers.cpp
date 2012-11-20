@@ -910,7 +910,34 @@ void RTTFibers::trackAction(bool isPlaying)
         if(RTTrackingHelper::getInstance()->isTrackActionPlaying())
         {
             std::cout << "Playing \n";
-            renderRTTFibers();
+
+            for(int j=0; j < RTTrackingHelper::getInstance()->getTrackActionStep())
+            {
+            //Forward
+			    if( m_fibersRTT[j].size() > 2)
+			    {
+				    for( unsigned int i = 0; i < m_fibersRTT[j].size() - 1; i++ )
+				    {
+					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
+					    glBegin( GL_LINES );
+						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
+						    glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
+					    glEnd();
+				    }
+			    }
+			    //Backward
+			    if ( m_fibersRTT[j+1].size() > 2)
+			    {
+				    for( unsigned int i = 0; i < m_fibersRTT[j+1].size() - 1; i++ )
+				    {
+					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
+					    glBegin( GL_LINES );
+						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
+						    glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
+					    glEnd();
+				    }
+			    }
+            }
         }
         else
         {
