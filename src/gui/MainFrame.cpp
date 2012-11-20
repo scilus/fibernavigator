@@ -20,6 +20,7 @@
 #include "../dataset/Loader.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../dataset/Maximas.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
@@ -2168,9 +2169,13 @@ void MainFrame::setTimerSpeed()
         || SceneManager::getInstance()->getScene()->m_isNavSagital 
         || SceneManager::getInstance()->getScene()->m_isRotateX
         || SceneManager::getInstance()->getScene()->m_isRotateY 
-        || SceneManager::getInstance()->getScene()->m_isRotateZ )
+        || SceneManager::getInstance()->getScene()->m_isRotateZ)
     {        
         m_pTimer->Start( 50 );
+    }
+    else if(RTTrackingHelper::getInstance()->isTrackActionPlaying())
+    {
+        m_pTimer->Start( 150 );
     }
     else
     {

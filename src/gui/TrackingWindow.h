@@ -53,6 +53,7 @@ public:
     void OnSliderAxisSeedNbMoved               ( wxCommandEvent& event );
 
     void OnPlay                                ( wxCommandEvent& event );
+    void OnStop                                ( wxCommandEvent& event );
     void OnForward                             ( wxCommandEvent& event );
     void OnBackward                            ( wxCommandEvent& event );
 
@@ -91,9 +92,12 @@ private:
     wxStaticText        *m_pTextAxisSeedNb;
     wxStaticText        *m_pTextTotalSeedNb;
     wxStaticLine        *m_pLineSeparator;
-    wxBitmapButton      *m_pPlayStop;
+    wxBitmapButton      *m_pPlayPause;
     wxBitmapButton      *m_pBtnForward;
     wxBitmapButton      *m_pBtnBackward;
+    wxBitmapButton      *m_pBtnStop;
+    wxImage             m_bmpPause;
+    wxImage             m_bmpPlay;
     
 
 

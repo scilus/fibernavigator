@@ -76,6 +76,9 @@ public:
 
     size_t getSize()                                  { return m_fibersRTT.size(); }
 	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
+
+    //Animation section
+    void trackAction(bool isPlaying);
     
 
     //GPGPU functions

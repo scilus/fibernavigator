@@ -221,19 +221,24 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     font.SetWeight( wxFONTWEIGHT_BOLD );
     animationZone->SetFont( font );
     
-    wxImage bmpPlay(MyApp::iconsPath+ wxT("play.png"), wxBITMAP_TYPE_PNG);
+    m_bmpPlay = wxImage(MyApp::iconsPath+ wxT("play.png"), wxBITMAP_TYPE_PNG);
+    m_bmpPause = wxImage(MyApp::iconsPath+ wxT("pause.png"), wxBITMAP_TYPE_PNG);
+
     wxImage bmpStop(MyApp::iconsPath+ wxT("stop.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpForward(MyApp::iconsPath+ wxT("forward.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpBackward(MyApp::iconsPath+ wxT("backward.png"), wxBITMAP_TYPE_PNG);
 
-    m_pPlayStop = new wxBitmapButton( this, wxID_ANY,bmpPlay, wxPoint(50,410), wxSize(50, -1) );
-    Connect( m_pPlayStop->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnPlay) );
+    m_pPlayPause = new wxBitmapButton( this, wxID_ANY,m_bmpPlay, wxPoint(50,410), wxSize(50, -1) );
+    Connect( m_pPlayPause->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnPlay) );
 
     m_pBtnForward = new wxBitmapButton( this, wxID_ANY, bmpForward, wxPoint(100,410), wxSize(50, -1) );
     Connect( m_pBtnForward->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnForward) );
 
     m_pBtnBackward = new wxBitmapButton( this, wxID_ANY, bmpBackward, wxPoint(150,410), wxSize(50, -1) );
     Connect( m_pBtnBackward->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnForward) );
+
+    m_pBtnStop = new wxBitmapButton( this, wxID_ANY, bmpStop, wxPoint(50,440), wxSize(50, -1) );
+    Connect( m_pBtnStop->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnStop) );
 
 
 }
@@ -542,7 +547,19 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 
 void TrackingWindow::OnPlay( wxCommandEvent& WXUNUSED(event) )
 {
-
+    RTTrackingHelper::getInstance()->togglePlayStop();
+    
+    if(RTTrackingHelper::getInstance()->isTrackActionPlaying())
+    {
+        m_pPlayPause->SetBitmapLabel(m_bmpPause);
+        m_pMainFrame->setTimerSpeed();
+        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->trackAction(true);
+    }
+    else
+    {
+        m_pPlayPause->SetBitmapLabel(m_bmpPlay);
+        m_pMainFrame->setTimerSpeed();
+    }
 }
 
 void TrackingWindow::OnForward( wxCommandEvent& WXUNUSED(event) )
@@ -553,4 +570,12 @@ void TrackingWindow::OnForward( wxCommandEvent& WXUNUSED(event) )
 void TrackingWindow::OnBackward( wxCommandEvent& WXUNUSED(event) )
 {
 
+}
+
+void TrackingWindow::OnStop( wxCommandEvent& WXUNUSED(event) )
+{
+    RTTrackingHelper::getInstance()->setTrackAction(false);
+    m_pPlayPause->SetBitmapLabel(m_bmpPlay);
+    m_pMainFrame->setTimerSpeed();
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->trackAction(false);
 }
