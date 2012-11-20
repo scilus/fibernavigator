@@ -207,8 +207,35 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pTextTotalSeedNb = new wxStaticText( this, wxID_ANY, wxT("Number of current seeds"), wxPoint(7,300), wxSize(150, -1), wxALIGN_LEFT );
     m_pTxtTotalSeedNbBox = new wxTextCtrl( this, wxID_ANY, wxT("1000"), wxPoint(190,300), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
-	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,330), wxSize(140, 30) );
+	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,330), wxSize(150, 30) );
 	Connect( m_pBtnConvert->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnConvertToFibers) );
+
+    /*-----------------------ANIMATION SECTION -----------------------------------*/
+
+    m_pLineSeparator = new wxStaticLine( this, wxID_ANY, wxPoint(0,370), wxSize(300,-1),wxHORIZONTAL,wxT("Separator"));
+
+    wxTextCtrl *animationZone = new wxTextCtrl( this, wxID_ANY, wxT("Animation"), wxPoint(50,380), wxSize(150, -1), wxTE_CENTER | wxTE_READONLY );
+    animationZone->SetBackgroundColour( *wxLIGHT_GREY );
+    wxFont font = animationZone->GetFont();
+    font.SetPointSize( 10 );
+    font.SetWeight( wxFONTWEIGHT_BOLD );
+    animationZone->SetFont( font );
+    
+    wxImage bmpPlay(MyApp::iconsPath+ wxT("play.png"), wxBITMAP_TYPE_PNG);
+    wxImage bmpStop(MyApp::iconsPath+ wxT("stop.png"), wxBITMAP_TYPE_PNG);
+    wxImage bmpForward(MyApp::iconsPath+ wxT("forward.png"), wxBITMAP_TYPE_PNG);
+    wxImage bmpBackward(MyApp::iconsPath+ wxT("backward.png"), wxBITMAP_TYPE_PNG);
+
+    m_pPlayStop = new wxBitmapButton( this, wxID_ANY,bmpPlay, wxPoint(50,410), wxSize(50, -1) );
+    Connect( m_pPlayStop->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnPlay) );
+
+    m_pBtnForward = new wxBitmapButton( this, wxID_ANY, bmpForward, wxPoint(100,410), wxSize(50, -1) );
+    Connect( m_pBtnForward->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnForward) );
+
+    m_pBtnBackward = new wxBitmapButton( this, wxID_ANY, bmpBackward, wxPoint(150,410), wxSize(50, -1) );
+    Connect( m_pBtnBackward->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnForward) );
+
+
 }
 
 void TrackingWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -510,5 +537,20 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
     RTTrackingHelper::getInstance()->setRTTDirty( false );
     m_pBtnStart->SetLabel(wxT("Start tracking"));
     m_pBtnStart->SetValue(false);
+
+}
+
+void TrackingWindow::OnPlay( wxCommandEvent& WXUNUSED(event) )
+{
+
+}
+
+void TrackingWindow::OnForward( wxCommandEvent& WXUNUSED(event) )
+{
+
+}
+
+void TrackingWindow::OnBackward( wxCommandEvent& WXUNUSED(event) )
+{
 
 }
