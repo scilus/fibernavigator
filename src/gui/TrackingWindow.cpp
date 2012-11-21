@@ -547,9 +547,9 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 
 void TrackingWindow::OnPlay( wxCommandEvent& WXUNUSED(event) )
 {
+    RTTrackingHelper::getInstance()->setTrackAction(true);
     RTTrackingHelper::getInstance()->togglePlayStop();
-    
-    if(RTTrackingHelper::getInstance()->isTrackActionPlaying())
+    if(!RTTrackingHelper::getInstance()->isTrackActionPaused())
     {
         m_pPlayPause->SetBitmapLabel(m_bmpPause);
         m_pMainFrame->setTimerSpeed();
@@ -575,6 +575,7 @@ void TrackingWindow::OnStop( wxCommandEvent& WXUNUSED(event) )
 {
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
     RTTrackingHelper::getInstance()->setTrackAction(false);
+    RTTrackingHelper::getInstance()->setTrackActionPause(true);
     m_pPlayPause->SetBitmapLabel(m_bmpPlay);
     m_pMainFrame->setTimerSpeed();
 }

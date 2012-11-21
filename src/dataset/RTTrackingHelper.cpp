@@ -11,7 +11,8 @@ RTTrackingHelper::RTTrackingHelper()
     m_isRTTActive( false ),
     m_isRTTDirty( false ),
     m_isRTTReady( false ),
-    m_isTrackActionPlaying( false )
+    m_isTrackActionPlaying( false ),
+    m_isPaused( true )
 {
 }
 

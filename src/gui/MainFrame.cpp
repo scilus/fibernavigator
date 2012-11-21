@@ -2173,7 +2173,7 @@ void MainFrame::setTimerSpeed()
     {        
         m_pTimer->Start( 50 );
     }
-    else if(RTTrackingHelper::getInstance()->isTrackActionPlaying())
+    else if(!RTTrackingHelper::getInstance()->isTrackActionPaused() )
     {
         m_pTimer->Start( 50 );
     }
@@ -2325,10 +2325,13 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
         SceneManager::getInstance()->getScene()->m_posCoronal = SceneManager::getInstance()->getSliceY();
     }
 
-    if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() )
+    if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() && !RTTrackingHelper::getInstance()->isTrackActionPaused())
     {
 		m_pMainGL->m_pRealTimeFibers->m_trackActionStep++;
+        if(m_pMainGL->m_pRealTimeFibers->m_trackActionStep > m_pMainGL->m_pRealTimeFibers->getMaxFiberLength())
+            m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
     }
+
 
     refreshAllGLWidgets();
     refreshViews();

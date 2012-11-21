@@ -25,9 +25,11 @@ public:
     bool toggleShellSeeds()        { return m_isShellSeeds = !m_isShellSeeds; }
     bool toggleRTTReady()           { return m_isRTTReady = !m_isRTTReady; }
     
-    bool togglePlayStop()             { return m_isTrackActionPlaying = !m_isTrackActionPlaying; }
+    bool togglePlayStop()             { return m_isPaused = !m_isPaused; }
     bool isTrackActionPlaying() const { return m_isTrackActionPlaying; }
-    void setTrackAction(bool action) {m_isTrackActionPlaying = action; }
+    bool isTrackActionPaused() const { return m_isPaused;}
+    void setTrackAction(bool enabled) {m_isTrackActionPlaying = enabled;}
+    void setTrackActionPause(bool paused) {m_isPaused = paused;}
 	
 
 protected:
@@ -47,6 +49,7 @@ private:
     bool m_isRTTDirty;
     bool m_isRTTReady;
     bool m_isTrackActionPlaying;
+    bool m_isPaused;
 
 };
 
