@@ -553,7 +553,6 @@ void TrackingWindow::OnPlay( wxCommandEvent& WXUNUSED(event) )
     {
         m_pPlayPause->SetBitmapLabel(m_bmpPause);
         m_pMainFrame->setTimerSpeed();
-        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->trackAction(true);
     }
     else
     {
@@ -574,8 +573,8 @@ void TrackingWindow::OnBackward( wxCommandEvent& WXUNUSED(event) )
 
 void TrackingWindow::OnStop( wxCommandEvent& WXUNUSED(event) )
 {
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
     RTTrackingHelper::getInstance()->setTrackAction(false);
     m_pPlayPause->SetBitmapLabel(m_bmpPlay);
     m_pMainFrame->setTimerSpeed();
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->trackAction(false);
 }

@@ -793,7 +793,10 @@ void MainCanvas::render()
                 }
                 else if(m_pRealTimeFibers->getSize() > 0)
                 {
-                    m_pRealTimeFibers->renderRTTFibers();
+                    if(!RTTrackingHelper::getInstance()->isTrackActionPlaying())
+                        m_pRealTimeFibers->renderRTTFibers();
+                    else
+                        m_pRealTimeFibers->trackAction(true);
                 }
 
                 //save context for picking
