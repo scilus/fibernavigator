@@ -2175,7 +2175,7 @@ void MainFrame::setTimerSpeed()
     }
     else if(RTTrackingHelper::getInstance()->isTrackActionPlaying())
     {
-        m_pTimer->Start( 150 );
+        m_pTimer->Start( 50 );
     }
     else
     {
@@ -2327,7 +2327,8 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
 
     if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() )
     {
-        RTTrackingHelper::getInstance()->trackActionStep++;
+		m_pMainGL->m_pRealTimeFibers->m_trackActionStep++;
+		std::cout << m_pMainGL->m_pRealTimeFibers->m_trackActionStep;
     }
 
     refreshAllGLWidgets();

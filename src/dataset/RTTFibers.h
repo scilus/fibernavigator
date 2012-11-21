@@ -79,6 +79,7 @@ public:
 
     //Animation section
     void trackAction(bool isPlaying);
+	unsigned int  m_trackActionStep;
     
 
     //GPGPU functions

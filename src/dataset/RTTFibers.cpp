@@ -37,7 +37,8 @@ RTTFibers::RTTFibers()
     m_minFiberLength( 10 ),
     m_maxFiberLength( 200 ),
     m_isHARDI( false ),
-    m_usingMap( false )
+    m_usingMap( false ),
+	m_trackActionStep(0)
 {
     //GPGPU
     writeTex = 0;
@@ -203,6 +204,7 @@ void RTTFibers::seed()
 ///////////////////////////////////////////////////////////////////////////
 void RTTFibers::renderRTTFibers()
 {
+	if(!RTTrackingHelper::getInstance()->isTrackActionPlaying()){
     if( m_fibersRTT.size() > 0 )
     {
 	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
@@ -262,7 +264,7 @@ void RTTFibers::renderRTTFibers()
 			    }
 		    }   
 	    }
-    }
+	}}
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -910,14 +912,14 @@ void RTTFibers::trackAction(bool isPlaying)
         if(RTTrackingHelper::getInstance()->isTrackActionPlaying())
         {
             std::cout << "Playing \n";
-
-            for(int j=0; j < RTTrackingHelper::getInstance()->getTrackActionStep())
-            {
+            for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
+			{ 
             //Forward
 			    if( m_fibersRTT[j].size() > 2)
 			    {
-				    for( unsigned int i = 0; i < m_fibersRTT[j].size() - 1; i++ )
+				    for( unsigned int i = 0; i < m_fibersRTT[j].size() - 1; i+=m_trackActionStep+1 )
 				    {
+						//std::cout << m_trackActionStep;
 					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
 					    glBegin( GL_LINES );
 						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
@@ -928,7 +930,7 @@ void RTTFibers::trackAction(bool isPlaying)
 			    //Backward
 			    if ( m_fibersRTT[j+1].size() > 2)
 			    {
-				    for( unsigned int i = 0; i < m_fibersRTT[j+1].size() - 1; i++ )
+				    for( unsigned int i = 0; i < m_fibersRTT[j+1].size() - 1; i+=m_trackActionStep+1 )
 				    {
 					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
 					    glBegin( GL_LINES );
@@ -947,6 +949,7 @@ void RTTFibers::trackAction(bool isPlaying)
     else
     {
         std::cout << "Not Playing \n";
+		//m_trackActionStep = 0;
     }
 }
 
