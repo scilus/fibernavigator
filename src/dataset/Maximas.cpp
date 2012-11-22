@@ -82,7 +82,7 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
     int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
     
     //std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
-    l_fileFloatData.assign( datasetSize * m_bands, std::numeric_limits<float>::max() );
+    l_fileFloatData.assign( datasetSize * m_bands, 0.0f );
     float* pData = (float*)pBody->data;
 
     for( int i( 0 ); i < datasetSize; ++i )
@@ -156,8 +156,7 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
     //Fetching the directions
     for( it = i_fileFloatData.begin(), i = 0; it != i_fileFloatData.end(); it += m_bands, ++i )
     { 
-        if(*it < std::numeric_limits<float>::max())
-            m_mainDirections[i].insert( m_mainDirections[i].end(), it, it + m_bands );
+		m_mainDirections[i].insert( m_mainDirections[i].end(), it, it + m_bands );
     }
 
     getSlidersPositions( m_currentSliderPos );
