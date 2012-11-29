@@ -38,7 +38,7 @@ RTTFibers::RTTFibers()
     m_maxFiberLength( 200 ),
     m_isHARDI( false ),
     m_usingMap( false ),
-	m_trackActionStep(0)
+	m_trackActionStep(std::numeric_limits<unsigned int>::max())
 {
     //GPGPU
     writeTex = 0;
@@ -193,7 +193,7 @@ void RTTFibers::seed()
             }
         }
 	}
-    renderRTTFibers();
+    renderRTTFibers(false);
 	RTTrackingHelper::getInstance()->setRTTDirty( false );
 }
 
@@ -202,8 +202,11 @@ void RTTFibers::seed()
 ///////////////////////////////////////////////////////////////////////////
 //Rendering stage
 ///////////////////////////////////////////////////////////////////////////
-void RTTFibers::renderRTTFibers()
+void RTTFibers::renderRTTFibers(bool isPlaying)
 {
+    if(!isPlaying)
+		m_trackActionStep = std::numeric_limits<unsigned int>::max();
+
     if( m_fibersRTT.size() > 0 )
     {
 	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
@@ -214,7 +217,7 @@ void RTTFibers::renderRTTFibers()
 			    //Forward
 			    if( m_fibersRTT[j].size() > 0 )
 			    {
-				    for( unsigned int i = 0; i < m_fibersRTT[j].size(); i++ )
+					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size(), m_trackActionStep); i++ )
 				    {  
 					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
 					    glBegin( GL_POINTS );
@@ -225,7 +228,7 @@ void RTTFibers::renderRTTFibers()
 			    //Backward
 			    if(m_fibersRTT[j+1].size() > 0)
 			    {
-				    for( unsigned int i = 0; i < m_fibersRTT[j+1].size(); i++ )
+					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size(), m_trackActionStep); i++ )
 				    {  
 					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
 					    glBegin( GL_POINTS );
@@ -240,7 +243,7 @@ void RTTFibers::renderRTTFibers()
 			    //Forward
 			    if( m_fibersRTT[j].size() > 2)
 			    {
-				    for( unsigned int i = 0; i < m_fibersRTT[j].size() - 1; i++ )
+                    for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size() - 1,m_trackActionStep); i++ )
 				    {
 					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
 					    glBegin( GL_LINES );
@@ -252,7 +255,7 @@ void RTTFibers::renderRTTFibers()
 			    //Backward
 			    if ( m_fibersRTT[j+1].size() > 2)
 			    {
-				    for( unsigned int i = 0; i < m_fibersRTT[j+1].size() - 1; i++ )
+                    for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size() - 1, m_trackActionStep); i++ )
 				    {
 					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
 					    glBegin( GL_LINES );
@@ -899,76 +902,6 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
         }
     }
 }
-
-///////////////////////////////////////////////////////////////////////////
-//////////////  Animation Section   ///////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-
-void RTTFibers::trackAction(bool isPlaying)
-{
-   if( m_fibersRTT.size() > 0 )
-    {
-	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
-	    { 
-		    //POINTS
-		    if( SceneManager::getInstance()->isPointMode() )
-		    {
-			    //Forward
-			    if( m_fibersRTT[j].size() > 0 )
-			    {
-				    for( unsigned int i = 0; i < m_fibersRTT[j].size(); i++ )
-				    {  
-					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
-					    glBegin( GL_POINTS );
-						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-					    glEnd();
-				    }
-			    }
-			    //Backward
-			    if(m_fibersRTT[j+1].size() > 0)
-			    {
-				    for( unsigned int i = 0; i < m_fibersRTT[j+1].size(); i++ )
-				    {  
-					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
-					    glBegin( GL_POINTS );
-						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-					    glEnd();
-				    }
-			    }
-		    }
-		    //LINES
-		    else
-		    {
-			    //Forward
-			    if( m_fibersRTT[j].size() > 2)
-			    {
-                    for( unsigned int i = 0; i < std::min(m_fibersRTT[j].size() - 1,m_trackActionStep); i++ )
-				    {
-					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
-					    glBegin( GL_LINES );
-						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-						    glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
-					    glEnd();
-				    }
-			    }
-			    //Backward
-			    if ( m_fibersRTT[j+1].size() > 2)
-			    {
-                    for( unsigned int i = 0; i < std::min(m_fibersRTT[j+1].size() - 1, m_trackActionStep); i++ )
-				    {
-					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
-					    glBegin( GL_LINES );
-						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-						    glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
-					    glEnd();
-				    }
-			    }
-		    }   
-	    }
-	}
-}
-
-
 
 ///////////////////////////////////////////////////////////////////////////
 //////////////  GPU-GPU SECTION - NOT IMPLEMENTED   ///////////////////////
