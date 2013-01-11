@@ -21,6 +21,7 @@
 #include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Maximas.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gui/ArcBall.h"
 #include "../gui/MainFrame.h"
@@ -328,6 +329,8 @@ void TheScene::renderScene()
     }
 
     Logger::getInstance()->printIfGLError( wxT( "Rendering Scene" ) );
+
+
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -795,9 +798,9 @@ void TheScene::drawSelectionObjects()
     {
         for ( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
         {
-            glPushAttrib( GL_ALL_ATTRIB_BITS );
-            selectionObjects[i][j]->draw();
-            glPopAttrib();
+			glPushAttrib( GL_ALL_ATTRIB_BITS );
+			selectionObjects[i][j]->draw();
+			glPopAttrib();
         }
     }
 

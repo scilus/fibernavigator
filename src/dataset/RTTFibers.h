@@ -79,6 +79,8 @@ public:
 
 
 	unsigned int  m_trackActionStep;
+	unsigned int m_timerStep;
+	
     
 
     //GPGPU functions

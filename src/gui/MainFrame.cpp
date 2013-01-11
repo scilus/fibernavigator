@@ -2329,8 +2329,15 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
     {
 		m_pMainGL->m_pRealTimeFibers->m_trackActionStep++;
         if(m_pMainGL->m_pRealTimeFibers->m_trackActionStep > m_pMainGL->m_pRealTimeFibers->getMaxFiberLength())
-            m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
+           m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
+
+		m_pMainGL->m_pRealTimeFibers->m_timerStep++;
+        if(m_pMainGL->m_pRealTimeFibers->m_timerStep > DatasetManager::getInstance()->getRows())
+            m_pMainGL->m_pRealTimeFibers->m_timerStep = 0;
     }
+
+
+		
 
 
     refreshAllGLWidgets();

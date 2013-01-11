@@ -38,7 +38,8 @@ RTTFibers::RTTFibers()
     m_maxFiberLength( 200 ),
     m_isHARDI( false ),
     m_usingMap( false ),
-	m_trackActionStep(std::numeric_limits<unsigned int>::max())
+	m_trackActionStep(std::numeric_limits<unsigned int>::max()),
+	m_timerStep( 0 )
 {
     //GPGPU
     writeTex = 0;
@@ -85,14 +86,15 @@ void RTTFibers::seed()
 {
     m_fibersRTT.clear();
     m_colorsRTT.clear();
-
+	 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
     float yVoxel = DatasetManager::getInstance()->getVoxelY();
     float zVoxel = DatasetManager::getInstance()->getVoxelZ();
 
     Vector minCorner, maxCorner, middle;
     vector< vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-	 
+
+	std::cout << "SEED: "<< m_timerStep << "\n";
 	//Evenly distanced seeds
     if( !RTTrackingHelper::getInstance()->isShellSeeds() )
 	{
@@ -108,7 +110,8 @@ void RTTFibers::seed()
 			float xstep =  selectionObjects[b][0]->getSize().x * xVoxel / float( m_nbSeed - 1.0f );
 			float ystep =  selectionObjects[b][0]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
 			float zstep =  selectionObjects[b][0]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
-
+			
+			
 			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
 			{
 				for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )
@@ -123,14 +126,14 @@ void RTTFibers::seed()
                         if(m_isHARDI)
                         {
 						    //Track both sides
-						    performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-						    performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+							performHARDIRTT( Vector(x+m_timerStep,y,z),  1, pointsF, colorF); //First pass
+						    performHARDIRTT( Vector(x+m_timerStep,y,z), -1, pointsB, colorB); //Second pass
                         }
                         else
                         {
 						    //Track both sides
-						    performDTIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+						    performDTIRTT( Vector(x+m_timerStep,y,z),  1, pointsF, colorF); //First pass
+						    performDTIRTT( Vector(x+m_timerStep,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
 						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
@@ -194,7 +197,7 @@ void RTTFibers::seed()
         }
 	}
     renderRTTFibers(false);
-	RTTrackingHelper::getInstance()->setRTTDirty( false );
+	//RTTrackingHelper::getInstance()->setRTTDirty( false );
 }
 
     
@@ -266,7 +269,7 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    }
 		    }   
 	    }
-	}
+	}   
 }
 
 ///////////////////////////////////////////////////////////////////////////

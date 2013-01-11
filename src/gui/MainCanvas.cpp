@@ -789,7 +789,7 @@ void MainCanvas::render()
 
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
                 {
-                    m_pRealTimeFibers->seed();
+					m_pRealTimeFibers->seed();
                 }
                 else if(m_pRealTimeFibers->getSize() > 0)
                 {
@@ -820,7 +820,18 @@ void MainCanvas::render()
             }
     }    
     //glFlush();
-    SwapBuffers();  
+    SwapBuffers(); 
+
+		//static float framesPerSecond    = 0.0f;       // This will store our fps
+  //      static float lastTime   = 0.0f;       // This will hold the time from the last frame
+  //      float currentTime = GetTickCount() * 0.001f;    
+  //      ++framesPerSecond;
+  //      if( currentTime - lastTime > 1.0f )
+  //      {
+  //          lastTime = currentTime;
+		//	std::cout << "\nCurrent Frames Per Second: %d\n\n" << (int)framesPerSecond << "\n";
+  //          framesPerSecond = 0;
+  //      }
 }
 
 void MainCanvas::renderRulerDisplay()
