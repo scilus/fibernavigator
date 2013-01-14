@@ -347,6 +347,19 @@ void TrackingWindow::OnStartTracking( wxCommandEvent& WXUNUSED(event) )
     {
         m_pBtnStart->SetLabel(wxT("Stop tracking"));
     }
+
+	//RTTrackingHelper::getInstance()->setTrackAction(true);
+ //   RTTrackingHelper::getInstance()->togglePlayStop();
+ //   if(!RTTrackingHelper::getInstance()->isTrackActionPaused())
+ //   {
+ //       m_pPlayPause->SetBitmapLabel(m_bmpPause);
+ //       m_pMainFrame->setTimerSpeed();
+ //   }
+ //   else
+ //   {
+ //       m_pPlayPause->SetBitmapLabel(m_bmpPlay);
+ //       m_pMainFrame->setTimerSpeed();
+ //   }
 }
 
 void TrackingWindow::OnClearBox( wxTreeEvent&    event )

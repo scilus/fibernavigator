@@ -667,7 +667,7 @@ void MainCanvas::render()
     int w, h;
     GetClientSize( &w, &h );
     glViewport( 0, 0, (GLint) w, (GLint) h );
-
+	
     // Init OpenGL once, but after SetCurrent
     if ( !m_init )
     {
@@ -685,6 +685,12 @@ void MainCanvas::render()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glColor3f( 1.0, 1.0, 1.0 );
+
+	static float framesPerSecond    = 0.0f;
+		static bool cal = true;
+	static float currentTime = 0;
+	
+	static bool in = false;
 
     switch ( m_view )
     {
@@ -788,11 +794,24 @@ void MainCanvas::render()
                 }
 
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
-                {
+                {	
+					in = true;
+					 if(cal)
+					 {
+					currentTime = GetTickCount() * 0.001f;
+					cal = false;
+					 }
 					m_pRealTimeFibers->seed();
                 }
                 else if(m_pRealTimeFibers->getSize() > 0)
                 {
+					in = false;
+					float last = GetTickCount() * 0.001f;
+					float fin = last - currentTime;
+					std::cout << "\nCurrent Frames: " <<  framesPerSecond <<"\n";
+					std::cout << "\nCurrent Time: " <<  fin <<"\n";
+					std::cout << "\nCurrent Frames per Sec: " <<  framesPerSecond / fin <<"\n";
+
                     if(!RTTrackingHelper::getInstance()->isTrackActionPlaying())
                         m_pRealTimeFibers->renderRTTFibers(false);
                     else
@@ -821,17 +840,29 @@ void MainCanvas::render()
     }    
     //glFlush();
     SwapBuffers(); 
+	
 
-		//static float framesPerSecond    = 0.0f;       // This will store our fps
-  //      static float lastTime   = 0.0f;       // This will hold the time from the last frame
-  //      float currentTime = GetTickCount() * 0.001f;    
-  //      ++framesPerSecond;
+	if(in)
+	{
+		       // This will store our fps
+  //             // This will hold the time from the last frame
+	m_pRealTimeFibers->m_timerStep+= DatasetManager::getInstance()->getFrames()/100.0f;
+	RTTrackingHelper::getInstance()->setRTTDirty( true );
+	if(m_pRealTimeFibers->m_timerStep > DatasetManager::getInstance()->getFrames())
+	{
+		RTTrackingHelper::getInstance()->setRTTDirty( false );
+		m_pRealTimeFibers->m_timerStep=0;
+	}
+		++framesPerSecond;
+		
   //      if( currentTime - lastTime > 1.0f )
   //      {
   //          lastTime = currentTime;
 		//	std::cout << "\nCurrent Frames Per Second: %d\n\n" << (int)framesPerSecond << "\n";
   //          framesPerSecond = 0;
-  //      }
+  //      }	
+	}
+	
 }
 
 void MainCanvas::renderRulerDisplay()
