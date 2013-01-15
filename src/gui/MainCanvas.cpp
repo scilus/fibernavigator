@@ -687,11 +687,12 @@ void MainCanvas::render()
     glColor3f( 1.0, 1.0, 1.0 );
 
 	static float framesPerSecond    = 0.0f;
-		static bool cal = true;
+	static bool cal = true;
 	static float currentTime = 0;
-	
+	static float lastTime = 0;
 	static bool in = false;
-
+	static std::vector<float> vec;
+	static float acc = 0;
     switch ( m_view )
     {
         case MAIN_VIEW:
@@ -796,28 +797,41 @@ void MainCanvas::render()
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
                 {	
 					in = true;
-					 if(cal)
-					 {
-					currentTime = GetTickCount() * 0.001f;
-					cal = false;
-					 }
+					framesPerSecond++;
+					//if(cal)
+					 //{
+					lastTime = GetTickCount() * 0.001f;
+					//cal = false;
+					// }
 					m_pRealTimeFibers->seed();
+					currentTime = GetTickCount() * 0.001f;
+					float diff = currentTime - lastTime;
+					vec.push_back(diff);
+					acc+=diff;
+
                 }
                 else if(m_pRealTimeFibers->getSize() > 0)
                 {
-					in = false;
-					float last = GetTickCount() * 0.001f;
-					float fin = last - currentTime;
-					std::cout << "\nCurrent Frames: " <<  framesPerSecond <<"\n";
-					std::cout << "\nCurrent Time: " <<  fin <<"\n";
-					std::cout << "\nCurrent Frames per Sec: " <<  framesPerSecond / fin <<"\n";
+
 
                     if(!RTTrackingHelper::getInstance()->isTrackActionPlaying())
                         m_pRealTimeFibers->renderRTTFibers(false);
                     else
                         m_pRealTimeFibers->renderRTTFibers(true);
                 }
+				else if(m_pRealTimeFibers->m_timerStep == -1)
+				{
+										in = false;
+					//float last = GetTickCount() * 0.001f;
+					//float fin = last - currentTime;
+					//std::cout << "\nCurrent Frames: " <<  framesPerSecond <<"\n";
+					//std::cout << "\nCurrent Time: " <<  fin <<"\n";
+					//std::cout << "\nCurrent Frames per Sec: " <<  framesPerSecond / fin <<"\n";
 
+					std::cout << "Time: " << acc << "\n";
+					std::cout << "FPS: " << 100 / acc << "\n";
+					m_pRealTimeFibers->m_timerStep = 0;
+				}
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
                 glGetIntegerv( GL_VIEWPORT,m_viewport );
@@ -846,14 +860,14 @@ void MainCanvas::render()
 	{
 		       // This will store our fps
   //             // This will hold the time from the last frame
-	m_pRealTimeFibers->m_timerStep+= DatasetManager::getInstance()->getFrames()/100.0f;
-	RTTrackingHelper::getInstance()->setRTTDirty( true );
-	if(m_pRealTimeFibers->m_timerStep > DatasetManager::getInstance()->getFrames())
-	{
-		RTTrackingHelper::getInstance()->setRTTDirty( false );
-		m_pRealTimeFibers->m_timerStep=0;
-	}
-		++framesPerSecond;
+	//m_pRealTimeFibers->m_timerStep+= DatasetManager::getInstance()->getFrames()/100.0f;
+	//RTTrackingHelper::getInstance()->setRTTDirty( true );
+	//if(m_pRealTimeFibers->m_timerStep > DatasetManager::getInstance()->getFrames())
+	//{
+		//RTTrackingHelper::getInstance()->setRTTDirty( false );
+		//m_pRealTimeFibers->m_timerStep=0;
+	//}
+	//	++framesPerSecond;
 		
   //      if( currentTime - lastTime > 1.0f )
   //      {
