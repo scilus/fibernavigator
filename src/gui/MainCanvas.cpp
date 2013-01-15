@@ -827,10 +827,11 @@ void MainCanvas::render()
 					//std::cout << "\nCurrent Frames: " <<  framesPerSecond <<"\n";
 					//std::cout << "\nCurrent Time: " <<  fin <<"\n";
 					//std::cout << "\nCurrent Frames per Sec: " <<  framesPerSecond / fin <<"\n";
-
+										
 					std::cout << "Time: " << acc << "\n";
-					std::cout << "FPS: " << 100 / acc << "\n";
+					std::cout << "FPS: " << 100 / acc << "\n\n";
 					m_pRealTimeFibers->m_timerStep = 0;
+					acc = 0;
 				}
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
@@ -860,6 +861,7 @@ void MainCanvas::render()
 	{
 		       // This will store our fps
   //             // This will hold the time from the last frame
+
 	//m_pRealTimeFibers->m_timerStep+= DatasetManager::getInstance()->getFrames()/100.0f;
 	//RTTrackingHelper::getInstance()->setRTTDirty( true );
 	//if(m_pRealTimeFibers->m_timerStep > DatasetManager::getInstance()->getFrames())

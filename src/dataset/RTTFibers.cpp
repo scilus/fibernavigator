@@ -196,6 +196,15 @@ void RTTFibers::seed()
         }
 	}
     renderRTTFibers(false);
+
+	/*RTTrackingHelper::getInstance()->setRTTDirty( false );
+	m_timerStep++;
+	if(m_timerStep > DatasetManager::getInstance()->getFrames())
+	{
+		RTTrackingHelper::getInstance()->setRTTDirty( false );
+		m_timerStep=0;
+	}*/
+
 	//RTTrackingHelper::getInstance()->setRTTDirty( false );
 	m_timerStep+= DatasetManager::getInstance()->getFrames() / 100.0f;
 	if(m_timerStep > DatasetManager::getInstance()->getFrames())
@@ -203,6 +212,7 @@ void RTTFibers::seed()
 		RTTrackingHelper::getInstance()->setRTTDirty( false );
 		m_timerStep=-1;
 	}
+
 
 }
 
