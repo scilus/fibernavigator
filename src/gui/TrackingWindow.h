@@ -54,8 +54,6 @@ public:
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
-    void OnForward                             ( wxCommandEvent& event );
-    void OnBackward                            ( wxCommandEvent& event );
 
 public:
     wxToggleButton      *m_pBtnStart;
@@ -93,8 +91,6 @@ private:
     wxStaticText        *m_pTextTotalSeedNb;
     wxStaticLine        *m_pLineSeparator;
     wxBitmapButton      *m_pPlayPause;
-    wxBitmapButton      *m_pBtnForward;
-    wxBitmapButton      *m_pBtnBackward;
     wxBitmapButton      *m_pBtnStop;
     wxImage             m_bmpPause;
     wxImage             m_bmpPlay;

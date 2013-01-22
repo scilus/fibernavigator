@@ -125,14 +125,14 @@ void RTTFibers::seed()
                         if(m_isHARDI)
                         {
 						    //Track both sides
-							performHARDIRTT( Vector(x,y,z+m_timerStep),  1, pointsF, colorF); //First pass
-						    performHARDIRTT( Vector(x,y,z+m_timerStep), -1, pointsB, colorB); //Second pass
+							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+						    performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         else
                         {
 						    //Track both sides
-						    performDTIRTT( Vector(x,y,z+m_timerStep),  1, pointsF, colorF); //First pass
-						    performDTIRTT( Vector(x,y,z+m_timerStep), -1, pointsB, colorB); //Second pass
+						    performDTIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
 						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
@@ -196,24 +196,7 @@ void RTTFibers::seed()
         }
 	}
     renderRTTFibers(false);
-
-	/*RTTrackingHelper::getInstance()->setRTTDirty( false );
-	m_timerStep++;
-	if(m_timerStep > DatasetManager::getInstance()->getFrames())
-	{
-		RTTrackingHelper::getInstance()->setRTTDirty( false );
-		m_timerStep=0;
-	}*/
-
-	//RTTrackingHelper::getInstance()->setRTTDirty( false );
-	m_timerStep+= DatasetManager::getInstance()->getFrames() / 100.0f;
-	if(m_timerStep > DatasetManager::getInstance()->getFrames())
-	{
-		RTTrackingHelper::getInstance()->setRTTDirty( false );
-		m_timerStep=-1;
-	}
-
-
+	RTTrackingHelper::getInstance()->setRTTDirty( false );
 }
 
     

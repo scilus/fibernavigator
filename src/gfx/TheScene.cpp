@@ -21,7 +21,6 @@
 #include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Maximas.h"
-#include "../dataset/RTTrackingHelper.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gui/ArcBall.h"
 #include "../gui/MainFrame.h"

@@ -2327,31 +2327,10 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
 
     if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() && !RTTrackingHelper::getInstance()->isTrackActionPaused())
     {
-		//RTTrackingHelper::getInstance()->setRTTDirty(true);
-		
-		
-		//static float lastTime = GetTickCount() * 0.001f;
-
 		m_pMainGL->m_pRealTimeFibers->m_trackActionStep++;
         if(m_pMainGL->m_pRealTimeFibers->m_trackActionStep > m_pMainGL->m_pRealTimeFibers->getMaxFiberLength())
            m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
-
-		//m_pMainGL->m_pRealTimeFibers->m_timerStep+= DatasetManager::getInstance()->getFrames() / 100.0f;
-  //      if(m_pMainGL->m_pRealTimeFibers->m_timerStep > DatasetManager::getInstance()->getFrames())
-		//{
-  //          m_pMainGL->m_pRealTimeFibers->m_timerStep = 0;
-		//	RTTrackingHelper::getInstance()->setTrackAction(false);
-		//	RTTrackingHelper::getInstance()->setTrackActionPause(true);
-		//	RTTrackingHelper::getInstance()->setRTTDirty(false);
-		//	setTimerSpeed();
-		//	float currentTime = GetTickCount() * 0.001f;
-		//	std::cout << "Time: " << currentTime - lastTime;
-		//}
     }
-
-
-		
-
 
     refreshAllGLWidgets();
     refreshViews();

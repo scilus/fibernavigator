@@ -293,26 +293,16 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_bmpPause = wxImage(MyApp::iconsPath+ wxT("pause.png"), wxBITMAP_TYPE_PNG);
 
     wxImage bmpStop(MyApp::iconsPath+ wxT("stop.png"), wxBITMAP_TYPE_PNG);
-    wxImage bmpForward(MyApp::iconsPath+ wxT("forward.png"), wxBITMAP_TYPE_PNG);
-    wxImage bmpBackward(MyApp::iconsPath+ wxT("backward.png"), wxBITMAP_TYPE_PNG);
 
     m_pPlayPause = new wxBitmapButton( this, wxID_ANY,m_bmpPlay, wxPoint(50,410), wxSize(50, -1) );
     Connect( m_pPlayPause->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnPlay) );
 
-    m_pBtnForward = new wxBitmapButton( this, wxID_ANY, bmpForward, wxPoint(100,410), wxSize(50, -1) );
-    Connect( m_pBtnForward->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnForward) );
-
-    m_pBtnBackward = new wxBitmapButton( this, wxID_ANY, bmpBackward, wxPoint(150,410), wxSize(50, -1) );
-    Connect( m_pBtnBackward->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnForward) );
-
-    m_pBtnStop = new wxBitmapButton( this, wxID_ANY, bmpStop, wxPoint(200,410), wxSize(50, -1) );
+    m_pBtnStop = new wxBitmapButton( this, wxID_ANY, bmpStop, wxPoint(100,410), wxSize(50, -1) );
     Connect( m_pBtnStop->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnStop) );
 
-		wxBoxSizer *pBoxRowAnim = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRowAnim->Add( m_pPlayPause, 0,  wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
-	pBoxRowAnim->Add( m_pBtnStop, 0,  wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
-    pBoxRowAnim->Add( m_pBtnForward,   0,  wxALIGN_CENTER_HORIZONTAL | wxALL, 1);
-	pBoxRowAnim->Add( m_pBtnBackward,   0,  wxALIGN_CENTER_HORIZONTAL | wxALL, 1);
+	wxBoxSizer *pBoxRowAnim = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRowAnim->Add( m_pPlayPause, 0,  wxALIGN_CENTER , 1 );
+	pBoxRowAnim->Add( m_pBtnStop, 0,  wxALIGN_CENTER, 1 );
 	m_pTrackingSizer->Add( pBoxRowAnim, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
 }
@@ -646,16 +636,6 @@ void TrackingWindow::OnPlay( wxCommandEvent& WXUNUSED(event) )
         m_pPlayPause->SetBitmapLabel(m_bmpPlay);
         m_pMainFrame->setTimerSpeed();
     }
-}
-
-void TrackingWindow::OnForward( wxCommandEvent& WXUNUSED(event) )
-{
-
-}
-
-void TrackingWindow::OnBackward( wxCommandEvent& WXUNUSED(event) )
-{
-
 }
 
 void TrackingWindow::OnStop( wxCommandEvent& WXUNUSED(event) )
