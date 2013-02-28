@@ -221,6 +221,25 @@ void PropertiesWindow::OnToggleNormalColoringBtn( wxEvent& WXUNUSED(event) )
     m_pMainFrame->refreshAllGLWidgets();
 }
 
+void PropertiesWindow::OnApplyDifferentColors( wxEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnApplyDifferentColors" ), LOGLEVEL_DEBUG );
+    
+    if (m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
+    {
+        DatasetInfo* pDatasetInfo = ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject);
+        if( pDatasetInfo != NULL)
+        {
+            FibersGroup* pFibersGroup = DatasetManager::getInstance()->getFibersGroup();
+            if(pFibersGroup)
+            {
+                pFibersGroup->OnApplyDifferentColors();
+            }
+        }
+    }
+    m_pMainFrame->refreshAllGLWidgets();
+}
+
 void PropertiesWindow::OnClickApplyBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnClickApplyBtn" ), LOGLEVEL_DEBUG );
@@ -675,7 +694,7 @@ void PropertiesWindow::OnListMenuMinDistance( wxCommandEvent& WXUNUSED(event))
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 != index )
     {
-        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
         if( pFibers != NULL )
         {
             if( pFibers->getColorationMode() != MINDISTANCE_COLOR )
@@ -704,7 +723,7 @@ void PropertiesWindow::OnColorWithCurvature( wxCommandEvent& WXUNUSED(event) )
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 != index )
     {
-        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
         if( pFibers != NULL )
         {
             if( pFibers->getColorationMode() != CURVATURE_COLOR )
@@ -732,7 +751,7 @@ void PropertiesWindow::OnColorWithTorsion( wxCommandEvent& WXUNUSED(event) )
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 != index )
     {
-        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
         if( pFibers != NULL )
         {
             if( pFibers->getColorationMode() != TORSION_COLOR )
@@ -756,7 +775,7 @@ void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 != index )
     {
-        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( index );
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
         if( pFibers != NULL )
         {
             if( pFibers->getColorationMode() != NORMAL_COLOR )
@@ -770,6 +789,83 @@ void PropertiesWindow::OnNormalColoring( wxCommandEvent& WXUNUSED(event) )
     else
     {
         Logger::getInstance()->print( wxT( "PropertiesWindow::OnNormalColoring - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
+void PropertiesWindow::OnColorWithConstantColor( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithConstantColor" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            if( pFibers->getColorationMode() != CONSTANT_COLOR )
+            {
+                pFibers->setColorationMode( CONSTANT_COLOR );
+                pFibers->updateFibersColors();
+                pFibers->updateColorationMode();
+            }
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnColorWithConstantColor - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
+void PropertiesWindow::OnSelectConstantColor( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnAssignColor" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 == index )
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnSelectConstantColor - Current index is -1" ), LOGLEVEL_ERROR );
+        return;
+    }
+    
+    wxColourData colorData;
+    
+    for( int i = 0; i < 10; ++i )
+    {
+        wxColour color( i * 28, i * 28, i * 28 );
+        colorData.SetCustomColour( i, color );
+    }
+    
+    int i( 10 );
+    wxColour color( 255, 0, 0 );
+    colorData.SetCustomColour( i++, color );
+    wxColour color1( 0, 255, 0 );
+    colorData.SetCustomColour( i++, color1 );
+    wxColour color2( 0, 0, 255 );
+    colorData.SetCustomColour( i++, color2 );
+    wxColour color3( 255, 255, 0 );
+    colorData.SetCustomColour( i++, color3 );
+    wxColour color4( 255, 0, 255 );
+    colorData.SetCustomColour( i++, color4 );
+    wxColour color5( 0, 255, 255 );
+    colorData.SetCustomColour( i++, color5 );
+    
+    wxColourDialog dialog( this, &colorData );
+    wxColour selCol;
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        wxColourData retData = dialog.GetColourData();
+        selCol = retData.GetColour();
+        
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            pFibers->setConstantColor( selCol );
+            pFibers->updateFibersColors();
+        }
+    }
+    else
+    {
+        return;
     }
 }
 
