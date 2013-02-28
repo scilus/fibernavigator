@@ -277,7 +277,10 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
 
             ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
             
-            float halfScale = m_scalingFactor / 5.0f;
+            float scale = m_scalingFactor / 5.0f;
+			float norm = sqrt(l_coloring[0] * l_coloring[0] + l_coloring[1] * l_coloring[1] + l_coloring[2] * l_coloring[2]);
+			float halfScale = norm * scale;
+
             GLfloat stickPos[3];
             stickPos[0] = halfScale*m_mainDirections[currentIdx][i*3];
             stickPos[1] = halfScale*m_mainDirections[currentIdx][i*3+1];
