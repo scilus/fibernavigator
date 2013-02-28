@@ -20,6 +20,7 @@
 #include "../dataset/Loader.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../dataset/Maximas.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
@@ -322,7 +323,7 @@ void MainFrame::initLayout()
     // Tab Control initialization
 
     // Notebook initialization
-    m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
+    m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), 0 );
 
     //////////////////////////////////////////////////////////////////////////
     // PropertiesWindow initialization
@@ -338,7 +339,7 @@ void MainFrame::initLayout()
 
     m_pTrackingWindowHardi = new TrackingWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), 1 ); // Contains realtime tracking properties
     m_pTrackingWindowHardi->SetScrollbars( 10, 10, 50, 50 );
-    m_pTrackingWindowHardi->EnableScrolling( false, true );
+    m_pTrackingWindowHardi->EnableScrolling( true, true );
 
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
     m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
@@ -2168,8 +2169,12 @@ void MainFrame::setTimerSpeed()
         || SceneManager::getInstance()->getScene()->m_isNavSagital 
         || SceneManager::getInstance()->getScene()->m_isRotateX
         || SceneManager::getInstance()->getScene()->m_isRotateY 
-        || SceneManager::getInstance()->getScene()->m_isRotateZ )
+        || SceneManager::getInstance()->getScene()->m_isRotateZ)
     {        
+        m_pTimer->Start( 50 );
+    }
+    else if(!RTTrackingHelper::getInstance()->isTrackActionPaused() )
+    {
         m_pTimer->Start( 50 );
     }
     else
@@ -2318,6 +2323,13 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
     else
     {
         SceneManager::getInstance()->getScene()->m_posCoronal = SceneManager::getInstance()->getSliceY();
+    }
+
+    if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() && !RTTrackingHelper::getInstance()->isTrackActionPaused())
+    {
+		m_pMainGL->m_pRealTimeFibers->m_trackActionStep++;
+        if(m_pMainGL->m_pRealTimeFibers->m_trackActionStep > m_pMainGL->m_pRealTimeFibers->getMaxFiberLength())
+           m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
     }
 
     refreshAllGLWidgets();

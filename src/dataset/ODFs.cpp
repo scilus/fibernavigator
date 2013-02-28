@@ -477,14 +477,14 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
                 if(isDiff) //Add it
                 {
                     dd*=norm_hemisODF[i];
-                    dd.normalize();
+                    //dd.normalize();
                     max_dir.push_back(dd);
                 }
             }
             else if( max_dir.size() == 0 ) //Add the first
             {
                 dd*=norm_hemisODF[i];
-                dd.normalize();
+                //dd.normalize();
                 max_dir.push_back(dd);   
             }
         }
@@ -635,7 +635,9 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
                     l_coloring[0] = m_mainDirections[currentIdx][i][0];
                     l_coloring[1] = m_mainDirections[currentIdx][i][1];
                     l_coloring[2] = m_mainDirections[currentIdx][i][2];
-                    float halfScale = m_scalingFactor / 5.0f;
+                    float scale = m_scalingFactor / 5.0f;
+					float norm = m_mainDirections[currentIdx][i].getLength();
+					float halfScale = norm * scale;
 
                     ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
                     glBegin(GL_LINES);  
