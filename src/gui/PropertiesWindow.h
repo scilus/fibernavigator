@@ -119,6 +119,7 @@ public:
     void OnOriginalShBasis                  ( wxCommandEvent& event );
     void OnDescoteauxShBasis                ( wxCommandEvent& event );
     void OnTournierShBasis                  ( wxCommandEvent& event );
+    void OnDipyShBasis                      ( wxCommandEvent& event );
     void OnPTKShBasis                       ( wxCommandEvent& event );
 
     void OnMaximasDisplaySlice              ( wxCommandEvent& event );

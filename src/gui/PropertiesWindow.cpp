@@ -991,6 +991,18 @@ void PropertiesWindow::OnTournierShBasis( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void PropertiesWindow::OnDipyShBasis( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDipyShBasis" ), LOGLEVEL_DEBUG );
+
+    long index = m_pMainFrame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        ODFs *pOdfs = (ODFs *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        pOdfs->changeShBasis( SH_BASIS_DIPY );
+    }
+}
+
 void PropertiesWindow::OnPTKShBasis( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnPTKShBasis" ), LOGLEVEL_DEBUG );
