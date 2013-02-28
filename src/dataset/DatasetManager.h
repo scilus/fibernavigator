@@ -5,6 +5,7 @@
 #include "DatasetIndex.h"
 #include "FibersGroup.h"
 #include "ODFs.h"
+#include "Maximas.h"
 #include "../misc/Fantom/FMatrix.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
@@ -39,6 +40,7 @@ public:
     size_t                  getFibersCount() const          { return m_fibers.size(); }
     std::vector<Mesh *>     getMeshes() const;
     std::vector<ODFs *>     getOdfs() const;
+    std::vector<Maximas *>  getMaximas() const;
     Fibers *                getSelectedFibers( DatasetIndex index ) const;
     std::vector<Tensors *>  getTensors() const;
 
@@ -58,6 +60,7 @@ public:
     bool                    isMeshLoaded() const            { return !m_meshes.empty(); }
     bool                    isOdfsLoaded() const            { return !m_odfs.empty(); }
     bool                    isTensorsLoaded() const         { return !m_tensors.empty(); }
+    bool                    isMaximasLoaded() const         { return !m_maximas.empty(); }
     bool                    isTensorsFieldLoaded() const    { return false; }
     bool                    isVectorsLoaded() const         { return false; }
 
@@ -76,6 +79,7 @@ public:
     DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( pAnatomy ) ); }
     DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup() ); }
     DatasetIndex createODFs( const wxString &filename )                          { return insert( new ODFs( filename ) ); }
+    DatasetIndex createMaximas( const wxString &filename )                       { return insert( new Maximas( filename ) ); }
 
     void remove( const DatasetIndex index );
 	DatasetIndex createFibers( std::vector<std::vector<Vector> >* RTT );
@@ -98,6 +102,7 @@ private:
     DatasetIndex insert( Mesh * pMesh );
     DatasetIndex insert( ODFs * pOdfs );
     DatasetIndex insert( Tensors * pTensors );
+    DatasetIndex insert( Maximas * pMaximas );
 
     // Loads an anatomy. Extension supported: .nii and .nii.gz
     DatasetIndex loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
@@ -114,6 +119,9 @@ private:
 
     // Loads tensors. Extension supported: .nii and .nii.gz
     DatasetIndex loadTensors( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+
+    // Loads Maximas. Extension supported: .nii and .nii.gz
+    DatasetIndex loadMaximas( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
     
 private:
     static DatasetManager *m_pInstance;
@@ -127,6 +135,7 @@ private:
     std::map<DatasetIndex, Mesh *> m_meshes;
     std::map<DatasetIndex, ODFs *> m_odfs;
     std::map<DatasetIndex, Tensors *> m_tensors;
+    std::map<DatasetIndex, Maximas *> m_maximas;
     std::map<DatasetInfo *, DatasetIndex> m_reverseDatasets;
 
     FMatrix m_niftiTransform;

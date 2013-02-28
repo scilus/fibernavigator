@@ -73,6 +73,7 @@ public:
     float        m_posAxial;
 
 
+
 private:
     // Functions
     void extractFrustum         ();
@@ -87,6 +88,7 @@ private:
     void renderODFs             ();
     void renderSlices           ();
     void renderTensors          ();
+    void drawMaximas            ();
 
     // Variables
     wxGLContext*    m_pMainGLContext;

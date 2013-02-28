@@ -1317,20 +1317,6 @@ bool Fibers::loadVTK( const wxString &filename )
     toggleEndianess();
     Logger::getInstance()->print( wxT( "Move vertices" ), LOGLEVEL_MESSAGE );
 
-    float columns = DatasetManager::getInstance()->getColumns();
-    float rows    = DatasetManager::getInstance()->getRows();
-    float voxelX  = DatasetManager::getInstance()->getVoxelX();
-    float voxelY  = DatasetManager::getInstance()->getVoxelY();
-
-    for( int i = 0; i < countPoints * 3; ++i )
-    {
-        m_pointArray[i] = columns * voxelX - m_pointArray[i];
-        ++i;
-        m_pointArray[i] = rows    * voxelY - m_pointArray[i];
-        ++i;
-        //m_pointArray[i] = frames - m_pointArray[i];
-    }
-
     calculateLinePointers();
     createColorArray( colorsLoadedFromFile );
     Logger::getInstance()->print( wxT( "Read all" ), LOGLEVEL_MESSAGE );
@@ -2121,11 +2107,6 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
         pColorData = &m_colorArray[0];
     }
 
-    float columns = DatasetManager::getInstance()->getColumns();
-    float rows    = DatasetManager::getInstance()->getRows();
-    float voxelX  = DatasetManager::getInstance()->getVoxelX();
-    float voxelY  = DatasetManager::getInstance()->getVoxelY();
-
     for( int l = 0; l < m_countLines; ++l )
     {
         if( m_selected[l] && !m_filtered[l] )
@@ -2135,10 +2116,10 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
 
             for( int j = 0; j < getPointsPerLine( l ); ++j )
             {
-                pointsToSave.push_back( columns * voxelX - m_pointArray[pc] );
+                pointsToSave.push_back( m_pointArray[pc] );
                 colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
-                pointsToSave.push_back( rows * voxelY - m_pointArray[pc] );
+                pointsToSave.push_back( m_pointArray[pc] );
                 colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
                 pointsToSave.push_back( m_pointArray[pc] );
@@ -3879,13 +3860,13 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
     m_countPoints = 0;
     float back, front;
 
-    for( int i = 0; i < RTT->size() - 1; i+=2 )
+    for( unsigned int i = 0; i < RTT->size() - 1; i+=2 )
     {
 		if( RTT->size() > 0 )
 		{
 			back = RTT->at(i).size();
 			front = RTT->at(i+1).size();
-			int nbpoints = back + front;
+			unsigned int nbpoints = back + front;
 
 			if( nbpoints > 0 )
 			{
@@ -3901,7 +3882,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 				}
 
 				//front
-				for( int j = back, k = 0; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
+				for( unsigned int j = back, k = 0; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
 				{
 					curLine[j * 3]  = RTT->at(i+1)[k].x;
 					curLine[j * 3 + 1] = RTT->at(i+1)[k].y;
@@ -3958,7 +3939,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 
     createColorArray( false );
     m_type = FIBERS;
-    m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getTensorsFileName();
+    m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getRTTFileName();
 
 #ifdef __WXMSW__
     m_name = wxT( "RTTFibers" );

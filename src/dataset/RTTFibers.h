@@ -10,6 +10,8 @@
 #include "../misc/Fantom/FMatrix.h"
 #include "../misc/IsoSurface/Vector.h"
 #include "Tensors.h"
+#include "Maximas.h"
+#include "Anatomy.h"
 
 #include <GL/glew.h>
 #include <vector>
@@ -22,13 +24,17 @@ public:
 
     //RTT functions
     void seed();
-    void renderRTTFibers();
-    void performRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
+    void renderRTTFibers(bool isPlaying);
+    void performDTIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
+    void performHARDIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
+	std::vector<float> pickDirection(std::vector<float> initialPeaks);
+    bool withinMapThreshold(unsigned int sticksNumber);
 
     Vector generateRandomSeed( const Vector &min, const Vector &max );
     FMatrix trilinearInterp( float fx, float fy, float fz );
     Vector advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, Vector e2, Vector e3, float tensorNumber );
+    Vector advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float tensorNumber );
     
     void clearFibersRTT()                           { m_fibersRTT.clear(); }
     void clearColorsRTT()                           { m_colorsRTT.clear(); }
@@ -39,12 +45,16 @@ public:
     void setTensorsFA( const std::vector<float> tensorsFA )           { m_tensorsFA = tensorsFA; }
     void setAngleThreshold( float angleThreshold )					  { m_angleThreshold = angleThreshold; }
     void setPuncture( float puncture )								  { m_puncture = puncture; }
+    void setVinVout( float vinvout )								  { m_vinvout = vinvout; }
     void setStep( float step )										  { m_step = step; }
+    void setIsHardi( bool method )								      { m_isHARDI = method; }
     void setNbSeed ( float nbSeed )									  { m_nbSeed = nbSeed; }
     void setMinFiberLength( float minLength )						  { m_minFiberLength = minLength; }
     void setMaxFiberLength( float maxLength )						  { m_maxFiberLength = maxLength; }
     void setTensorsInfo( Tensors* info )							  { m_pTensorsInfo = info; }
+    void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
+    void setMapInfo( Anatomy* info )                                  { m_pMapInfo = info; m_usingMap = true; }
 
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
@@ -53,12 +63,24 @@ public:
 	float getShellSeedNb();						 
 
     float getPuncture()                          { return m_puncture; }
+    float getVinVout()                           { return m_vinvout; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
+
+    bool isHardiSelected()                       { return m_isHARDI;}
     
-    wxString getTensorsFileName()                     { return m_pTensorsInfo->getPath();}
+    wxString getRTTFileName()                    { if(m_isHARDI) 
+                                                        return m_pMaximasInfo->getPath(); 
+                                                   else
+                                                        return m_pTensorsInfo->getPath(); }
+
     size_t getSize()                                  { return m_fibersRTT.size(); }
 	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
+
+
+	unsigned int  m_trackActionStep;
+	float m_timerStep;
+	
     
 
     //GPGPU functions
@@ -112,10 +134,15 @@ private:
     float       m_nbSeed;
     float       m_nbMeshPt;
     float       m_puncture;
+    float       m_vinvout;
     float       m_minFiberLength;
     float       m_maxFiberLength;
+    bool        m_isHARDI;
+    bool        m_usingMap;
     Tensors     *m_pTensorsInfo;
+    Maximas     *m_pMaximasInfo;
 	DatasetInfo *m_pShellInfo;
+    Anatomy     *m_pMapInfo;
 
 
     std::vector< FMatrix > m_tensorsMatrix;

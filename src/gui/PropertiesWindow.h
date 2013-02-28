@@ -120,6 +120,9 @@ public:
     void OnDescoteauxShBasis                ( wxCommandEvent& event );
     void OnTournierShBasis                  ( wxCommandEvent& event );
     void OnPTKShBasis                       ( wxCommandEvent& event );
+
+    void OnMaximasDisplaySlice              ( wxCommandEvent& event );
+    void OnMaximasDisplayWhole              ( wxCommandEvent& event );
     
     void OnToggleShowSelectionObject        ( wxCommandEvent& event );
     void OnDeleteTreeItem                   ( wxTreeEvent&    event );

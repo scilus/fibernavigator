@@ -20,6 +20,8 @@
 #include "../dataset/Loader.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
+#include "../dataset/RTTrackingHelper.h"
+#include "../dataset/Maximas.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
@@ -37,6 +39,8 @@
 
 #include <algorithm>
 using std::for_each;
+
+#include <cmath>
 
 #include <vector>
 using std::vector;
@@ -319,7 +323,7 @@ void MainFrame::initLayout()
     // Tab Control initialization
 
     // Notebook initialization
-    m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( 220, 350 ), 0 );
+    m_tab = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), 0 );
 
     //////////////////////////////////////////////////////////////////////////
     // PropertiesWindow initialization
@@ -328,13 +332,18 @@ void MainFrame::initLayout()
     m_pPropertiesWindow->EnableScrolling( false, true );
 
     //////////////////////////////////////////////////////////////////////////
-    // TrackingWindow initialization
+    // TrackingWindow initialization for RTT
     m_pTrackingWindow = new TrackingWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ) ); // Contains realtime tracking properties
     m_pTrackingWindow->SetScrollbars( 10, 10, 50, 50 );
     m_pTrackingWindow->EnableScrolling( false, true );
 
+    m_pTrackingWindowHardi = new TrackingWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT ), 1 ); // Contains realtime tracking properties
+    m_pTrackingWindowHardi->SetScrollbars( 10, 10, 50, 50 );
+    m_pTrackingWindowHardi->EnableScrolling( true, true );
+
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
-    m_tab->AddPage( m_pTrackingWindow, wxT( "Realtime tracking" ) );
+    m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
+    m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
 
@@ -553,6 +562,24 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             {
                 m_lastPath = dialog.GetDirectory();
                 l_anatomy->saveNifti( dialog.GetPath() );
+            }
+        }
+        else if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == MAXIMAS )
+        {
+            Maximas* l_maximas = (Maximas*)m_pCurrentSceneObject;
+
+            wxString caption         = wxT( "Choose a file" );
+            wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
+            wxString defaultDir      = wxEmptyString;
+            wxString defaultFilename = wxEmptyString;
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            dialog.SetFilterIndex( 0 );
+            dialog.SetDirectory( m_lastPath );
+
+            if( dialog.ShowModal() == wxID_OK )
+            {
+                m_lastPath = dialog.GetDirectory();
+                l_maximas->saveNifti( dialog.GetPath() );
             }
         }
     }
@@ -996,12 +1023,12 @@ void MainFrame::createCutDataset()
         {
             if( selObjects[i][j]->getIsVisible() )
             {
-                x1 = (int)( selObjects[i][j]->getCenter().x / voxelX - selObjects[i][j]->getSize().x / 2 );
-                x2 = (int)( selObjects[i][j]->getCenter().x / voxelX + selObjects[i][j]->getSize().x / 2 );
-                y1 = (int)( selObjects[i][j]->getCenter().y / voxelY - selObjects[i][j]->getSize().y / 2 );
-                y2 = (int)( selObjects[i][j]->getCenter().y / voxelY + selObjects[i][j]->getSize().y / 2 );
-                z1 = (int)( selObjects[i][j]->getCenter().z / voxelZ - selObjects[i][j]->getSize().z / 2 );
-                z2 = (int)( selObjects[i][j]->getCenter().z / voxelZ + selObjects[i][j]->getSize().z / 2 );
+                x1 = static_cast<int>( std::floor( selObjects[i][j]->getCenter().x / voxelX - selObjects[i][j]->getSize().x / 2.0 ) );
+                x2 = static_cast<int>( std::ceil(  selObjects[i][j]->getCenter().x / voxelX + selObjects[i][j]->getSize().x / 2.0 ) );
+                y1 = static_cast<int>( std::floor( selObjects[i][j]->getCenter().y / voxelY - selObjects[i][j]->getSize().y / 2.0 ) );
+                y2 = static_cast<int>( std::ceil(  selObjects[i][j]->getCenter().y / voxelY + selObjects[i][j]->getSize().y / 2.0 ) );
+                z1 = static_cast<int>( std::floor( selObjects[i][j]->getCenter().z / voxelZ - selObjects[i][j]->getSize().z / 2.0 ) );
+                z2 = static_cast<int>( std::ceil(  selObjects[i][j]->getCenter().z / voxelZ + selObjects[i][j]->getSize().z / 2.0 ) );
 
                 x1 = std::max( 0, std::min( x1, columns ) );
                 x2 = std::max( 0, std::min( x2, columns ) );
@@ -1229,7 +1256,6 @@ void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
     createNewSelectionObject( BOX_TYPE );
-    m_pTrackingWindow->m_pBtnStart->Enable( true );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1626,7 +1652,7 @@ void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
 {
-    wxString nl = _T( "\n" );
+    wxString nl = _T( "\n" ); 
     (void)wxMessageBox(
             _T( "Keyboard Shortcuts" ) + nl
                     + _T( "_________________________________________________________")
@@ -2143,8 +2169,12 @@ void MainFrame::setTimerSpeed()
         || SceneManager::getInstance()->getScene()->m_isNavSagital 
         || SceneManager::getInstance()->getScene()->m_isRotateX
         || SceneManager::getInstance()->getScene()->m_isRotateY 
-        || SceneManager::getInstance()->getScene()->m_isRotateZ )
+        || SceneManager::getInstance()->getScene()->m_isRotateZ)
     {        
+        m_pTimer->Start( 50 );
+    }
+    else if(!RTTrackingHelper::getInstance()->isTrackActionPaused() )
+    {
         m_pTimer->Start( 50 );
     }
     else
@@ -2293,6 +2323,13 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
     else
     {
         SceneManager::getInstance()->getScene()->m_posCoronal = SceneManager::getInstance()->getSliceY();
+    }
+
+    if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() && !RTTrackingHelper::getInstance()->isTrackActionPaused())
+    {
+		m_pMainGL->m_pRealTimeFibers->m_trackActionStep++;
+        if(m_pMainGL->m_pRealTimeFibers->m_trackActionStep > m_pMainGL->m_pRealTimeFibers->getMaxFiberLength())
+           m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
     }
 
     refreshAllGLWidgets();

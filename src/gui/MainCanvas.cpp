@@ -322,22 +322,8 @@ void MainCanvas::processLeftMouseUp( wxMouseEvent &evt )
 void MainCanvas::processMiddleMouseDown( wxMouseEvent &evt, int clickX, int clickY )
 {
     if ( !m_ismDragging)
-    {
-        long item = MyApp::frame->getCurrentListIndex();
-
-        if( item != -1 && !SceneManager::getInstance()->isRulerActive() )
-        {
-            Anatomy* pAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( item );
-
-            if( NULL != pAnatomy && pAnatomy->m_isSegmentOn )
-            {
-                SceneManager::getInstance()->setSegmentActive( true );
-                m_hr = pick( evt.GetPosition(), false );
-                segment();
-                pAnatomy->toggleSegment();
-            }
-        }                    
-        else if( SceneManager::getInstance()->isRulerActive() )
+    {             
+        if( SceneManager::getInstance()->isRulerActive() )
         {                        
             m_hr = pick( evt.GetPosition(), true );
         }
@@ -681,7 +667,7 @@ void MainCanvas::render()
     int w, h;
     GetClientSize( &w, &h );
     glViewport( 0, 0, (GLint) w, (GLint) h );
-
+	
     // Init OpenGL once, but after SetCurrent
     if ( !m_init )
     {
@@ -802,12 +788,15 @@ void MainCanvas::render()
                 }
 
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
-                {
-                    m_pRealTimeFibers->seed();
+                {	
+					m_pRealTimeFibers->seed();
                 }
                 else if(m_pRealTimeFibers->getSize() > 0)
                 {
-                    m_pRealTimeFibers->renderRTTFibers();
+                    if(!RTTrackingHelper::getInstance()->isTrackActionPlaying())
+                        m_pRealTimeFibers->renderRTTFibers(false);
+                    else
+                        m_pRealTimeFibers->renderRTTFibers(true);
                 }
 
                 //save context for picking
@@ -831,7 +820,7 @@ void MainCanvas::render()
             }
     }    
     //glFlush();
-    SwapBuffers();  
+    SwapBuffers(); 
 }
 
 void MainCanvas::renderRulerDisplay()

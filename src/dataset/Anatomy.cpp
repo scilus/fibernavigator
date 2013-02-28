@@ -515,16 +515,38 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
         float voxelX  = DatasetManager::getInstance()->getVoxelX();
         float voxelY  = DatasetManager::getInstance()->getVoxelY();
         float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
+        
+        const float VOXEL_SIZE_EPSILON(0.0001f);
 
         if( m_rows != rows || m_columns != columns || m_frames != frames )
         {
             Logger::getInstance()->print( wxT( "Dimensions of loaded files must be the same" ), LOGLEVEL_ERROR );
             return false;
         }
-        else if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
+        
+        if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
         {
-            Logger::getInstance()->print( wxT( "Voxel size different from anatomy" ), LOGLEVEL_ERROR );
-            return false;
+            // NOTE TO THE TEAM: THIS IS NOT A VERY GOOD THING TO DO. We do it to support
+            // different software that save the metadata with incorrect rounding / conversion.
+            if( std::abs(m_voxelSizeX - voxelX) < VOXEL_SIZE_EPSILON &&
+                std::abs(m_voxelSizeY - voxelY) < VOXEL_SIZE_EPSILON &&
+                std::abs(m_voxelSizeZ - voxelZ) < VOXEL_SIZE_EPSILON )
+            {
+                // In this case, we are in the expected error range between something coming from an integer
+                // and something coming from a float. We accept it, make sure thesizes fit for the new anatomy, 
+                // and still display a debug message for developers.
+                m_voxelSizeX = voxelX;
+                m_voxelSizeY = voxelY;
+                m_voxelSizeZ = voxelZ;
+                
+                Logger::getInstance()->print( wxT( "Voxel sizes did not exactly fit. In expected float range error. Using the already loaded voxel sizes." ),
+                                              LOGLEVEL_DEBUG );
+            }
+            else
+            {
+                Logger::getInstance()->print( wxT( "Voxel size different from anatomy" ), LOGLEVEL_ERROR );
+                return false;
+            }
         }
     }
 

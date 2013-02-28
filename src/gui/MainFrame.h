@@ -78,6 +78,7 @@ public:
 public:
     PropertiesWindow    *m_pPropertiesWindow;
     TrackingWindow      *m_pTrackingWindow;
+    TrackingWindow      *m_pTrackingWindowHardi;
     MainCanvas          *m_pMainGL;
     MainCanvas          *m_pGL0;
     MainCanvas          *m_pGL1;

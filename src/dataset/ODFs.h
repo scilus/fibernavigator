@@ -49,6 +49,7 @@ public:
     void changeShBasis( SH_BASIS );
 
     void extractMaximas();
+    std::vector< std::vector<Vector> > *getMainDirs()   { return &m_mainDirections;           };
 
     MySlider * getSliderFlood() const                   { return m_pSliderFlood; }
     wxTextCtrl * getTxtThresBox() const                 { return m_pTxtThres; }
@@ -105,8 +106,7 @@ private:
                                   const FMatrix & grad,
                                   const float & max_thresh);
     void                set_nbors(FMatrix i_phiThetaDirection);
-    float               get_min_angle();
-    void setScalingFactor( float i_scalingFactor );
+    void                setScalingFactor( float i_scalingFactor );
 
 private:
     struct direction_value { double x, y, z, v; };
