@@ -114,7 +114,7 @@ bool MyApp::OnInit( void )
         Logger::getInstance()->print( wxString::Format( wxT( "shader: %s" ), shaderPath.c_str() ), LOGLEVEL_DEBUG );
 
         // Create the main frame window
-        frame = new MainFrame( wxT("Fiber Navigator 1725"), wxPoint( 50, 50 ), wxSize( 800, 600 ) );
+        frame = new MainFrame( wxT("Fiber Navigator 1749"), wxPoint( 50, 50 ), wxSize( 800, 600 ) );
         SceneManager::getInstance()->setMainFrame( frame );
         SceneManager::getInstance()->setTreeCtrl( frame->m_pTreeWidget );
 

@@ -1314,20 +1314,6 @@ bool Fibers::loadVTK( const wxString &filename )
     toggleEndianess();
     Logger::getInstance()->print( wxT( "Move vertices" ), LOGLEVEL_MESSAGE );
 
-    float columns = DatasetManager::getInstance()->getColumns();
-    float rows    = DatasetManager::getInstance()->getRows();
-    float voxelX  = DatasetManager::getInstance()->getVoxelX();
-    float voxelY  = DatasetManager::getInstance()->getVoxelY();
-
-    for( int i = 0; i < countPoints * 3; ++i )
-    {
-        m_pointArray[i] = columns * voxelX - m_pointArray[i];
-        ++i;
-        m_pointArray[i] = rows    * voxelY - m_pointArray[i];
-        ++i;
-        //m_pointArray[i] = frames - m_pointArray[i];
-    }
-
     calculateLinePointers();
     createColorArray( colorsLoadedFromFile );
     Logger::getInstance()->print( wxT( "Read all" ), LOGLEVEL_MESSAGE );
@@ -2095,11 +2081,6 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
         pColorData = &m_colorArray[0];
     }
 
-    float columns = DatasetManager::getInstance()->getColumns();
-    float rows    = DatasetManager::getInstance()->getRows();
-    float voxelX  = DatasetManager::getInstance()->getVoxelX();
-    float voxelY  = DatasetManager::getInstance()->getVoxelY();
-
     for( int l = 0; l < m_countLines; ++l )
     {
         if( m_selected[l] && !m_filtered[l] )
@@ -2109,10 +2090,10 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
 
             for( int j = 0; j < getPointsPerLine( l ); ++j )
             {
-                pointsToSave.push_back( columns * voxelX - m_pointArray[pc] );
+                pointsToSave.push_back( m_pointArray[pc] );
                 colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
-                pointsToSave.push_back( rows * voxelY - m_pointArray[pc] );
+                pointsToSave.push_back( m_pointArray[pc] );
                 colorsToSave.push_back( ( wxUint8 )( pColorData[pc] * 255 ) );
                 ++pc;
                 pointsToSave.push_back( m_pointArray[pc] );

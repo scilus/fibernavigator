@@ -1652,7 +1652,7 @@ void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
 {
-    wxString nl = _T( "\n" );
+    wxString nl = _T( "\n" ); 
     (void)wxMessageBox(
             _T( "Keyboard Shortcuts" ) + nl
                     + _T( "_________________________________________________________")
