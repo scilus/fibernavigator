@@ -33,7 +33,8 @@ DatasetManager * DatasetManager::m_pInstance = NULL;
 DatasetManager::DatasetManager(void)
 :   m_nextIndex( 1 ),
     m_niftiTransform( 4, 4 ),
-    m_countFibers( 0 )
+    m_countFibers( 0 ),
+    m_forceLoadingAsMaximas( false )
 {
 }
 
@@ -303,9 +304,15 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                 result = loadTensors( filename, pHeader, pBody );
             }
         }
-        else if( 16 == pHeader->datatype && 4 == pHeader->ndim && ( 
-            0 == pHeader->dim[4] || 15 == pHeader->dim[4] || 28 == pHeader->dim[4] || 45 == pHeader->dim[4] || 
-            66 == pHeader->dim[4] || 91 == pHeader->dim[4] || 120 == pHeader->dim[4] || 153 == pHeader->dim[4] ) )
+        else if( 16 == pHeader->datatype && 4 == pHeader->ndim && 
+                 (0 == pHeader->dim[4] 
+                  || ( 15 == pHeader->dim[4] && !m_forceLoadingAsMaximas )
+                  || 28 == pHeader->dim[4] 
+                  || 45 == pHeader->dim[4] 
+                  || 66 == pHeader->dim[4] 
+                  || 91 == pHeader->dim[4] 
+                  || 120 == pHeader->dim[4] 
+                  || 153 == pHeader->dim[4] ) )
         {
             if ( m_anatomies.empty() )
             {
@@ -316,7 +323,10 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                 result = loadODF( filename, pHeader, pBody );
             }
         }
-        else if( 16 == pHeader->datatype && 4 == pHeader->ndim && 9 == pHeader->dim[4] )
+        else if( 16 == pHeader->datatype && 4 == pHeader->ndim 
+                && ( 9 == pHeader->dim[4] 
+                    || ( 15 == pHeader->dim[4] && m_forceLoadingAsMaximas )
+                    || 12 == pHeader->dim[4] ) )
         {
             if ( m_anatomies.empty() )
             {
