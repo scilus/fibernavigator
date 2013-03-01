@@ -24,6 +24,7 @@ MenuBar::MenuBar()
 {
     m_menuFile = new wxMenu();
     m_itemLoad = m_menuFile->Append(wxID_ANY, wxT("Open\tCtrl-O"));
+    m_itemLoadAsPeaks = m_menuFile->Append(wxID_ANY, wxT("Open Anatomy As Peaks"));
     m_menuNewAnatomy = new wxMenu();
     m_itemNewAnatomyByte = m_menuNewAnatomy->Append(wxID_ANY, wxT("New White"));
     m_itemNewAnatomyRGB = m_menuNewAnatomy->Append(wxID_ANY, wxT("New RGB"));
@@ -152,6 +153,7 @@ MenuBar::MenuBar()
 void MenuBar::initMenuBar( MainFrame *mf )
 {
     mf->Connect(m_itemLoad->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLoad));
+    mf->Connect(m_itemLoadAsPeaks->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLoadAsPeaks));
     mf->Connect(m_itemNewAnatomyByte->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyByte));
     mf->Connect(m_itemNewAnatomyRGB->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewAnatomyRGB));
     mf->Connect(m_itemSaveSCN->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSave));

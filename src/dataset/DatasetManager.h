@@ -63,6 +63,8 @@ public:
     bool                    isMaximasLoaded() const         { return !m_maximas.empty(); }
     bool                    isTensorsFieldLoaded() const    { return false; }
     bool                    isVectorsLoaded() const         { return false; }
+    
+    void                    forceLoadingAsMaximas(bool force) { m_forceLoadingAsMaximas = force; }
 
     void  setCountFibers( const unsigned int count )        { m_countFibers = count; }
 
@@ -140,6 +142,8 @@ private:
 
     FMatrix m_niftiTransform;
     unsigned int m_countFibers; // TODO: Remove me once selection is fixed
+    
+    bool m_forceLoadingAsMaximas;
 };
 
 #endif //DATASETMANAGER_H_

@@ -17,11 +17,16 @@ private:
     MainFrame *m_pMainFrame;
     ListCtrl *m_pListCtrl;
     unsigned int m_error;
+    
+    // Set this to true to force the loader to load
+    // anats looking as r4 ODFs as a file with 5 peaks per voxel instead.
+    bool m_loadAsPeaks;
 public:
-    Loader( MainFrame *pMainFrame, ListCtrl *pListCtrl ) 
+    Loader( MainFrame *pMainFrame, ListCtrl *pListCtrl, const bool loadAsPeaks = false ) 
     :   m_pMainFrame( pMainFrame ),
         m_pListCtrl( pListCtrl ),
-        m_error( 0 )
+        m_error( 0 ),
+        m_loadAsPeaks( loadAsPeaks )
     {
     }
 
@@ -65,7 +70,12 @@ public:
             }
             else
             {
+                DatasetManager::getInstance()->forceLoadingAsMaximas( m_loadAsPeaks );
+                
                 DatasetIndex result = DatasetManager::getInstance()->load( filename, extension );
+                
+                DatasetManager::getInstance()->forceLoadingAsMaximas( false );
+                
                 if( result.isOk() )
                 {
                     DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( result );

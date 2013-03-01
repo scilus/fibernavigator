@@ -60,7 +60,7 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
     m_columns  = pHeader->dim[1]; //XSlice
     m_rows     = pHeader->dim[2]; //YSlice
     m_frames   = pHeader->dim[3]; //ZSlice
-    m_bands    = pHeader->dim[4]; //9
+    m_bands    = pHeader->dim[4]; // 3 * Number of sticks.
     m_dataType = pHeader->datatype;//16
 
     m_voxelSizeX = pHeader->dx;
@@ -81,7 +81,6 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
 
     int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
     
-    //std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
     l_fileFloatData.assign( datasetSize * m_bands, 0.0f);
     float* pData = (float*)pBody->data;
 
@@ -165,6 +164,8 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
 }
 
 //////////////////////////////////////////////////////////////////////////
+// NOTE: This currently only supports 3 maximas, because when we extract 
+// Maximas from ODFs, only 3 are extracted.
 bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
 {
     m_columns = DatasetManager::getInstance()->getColumns(); //XSlice
