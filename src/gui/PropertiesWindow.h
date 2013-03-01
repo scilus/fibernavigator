@@ -46,6 +46,7 @@ public:
     void OnToggleColorModeBtn               ( wxEvent& event );
     void OnToggleLocalColoringBtn           ( wxEvent& event );
     void OnToggleNormalColoringBtn          ( wxEvent& event );
+    void OnApplyDifferentColors             ( wxEvent& event );
 
     void OnClickGenerateFiberVolumeBtn      ( wxEvent& event );
     void OnClickApplyBtn                    ( wxEvent& event );
@@ -81,6 +82,8 @@ public:
     void OnColorWithCurvature               ( wxCommandEvent& event );
     void OnNormalColoring                   ( wxCommandEvent& event );
     void OnColorWithTorsion                 ( wxCommandEvent& event );
+    void OnColorWithConstantColor           ( wxCommandEvent& event );
+    void OnSelectConstantColor              ( wxCommandEvent& event );
     void ColorFibers();
 
     void OnNormalMeanFiberColoring          ( wxCommandEvent& event );
@@ -116,6 +119,7 @@ public:
     void OnOriginalShBasis                  ( wxCommandEvent& event );
     void OnDescoteauxShBasis                ( wxCommandEvent& event );
     void OnTournierShBasis                  ( wxCommandEvent& event );
+    void OnDipyShBasis                      ( wxCommandEvent& event );
     void OnPTKShBasis                       ( wxCommandEvent& event );
 
     void OnMaximasDisplaySlice              ( wxCommandEvent& event );

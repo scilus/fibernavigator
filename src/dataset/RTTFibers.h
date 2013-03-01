@@ -24,7 +24,7 @@ public:
 
     //RTT functions
     void seed();
-    void renderRTTFibers();
+    void renderRTTFibers(bool isPlaying);
     void performDTIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void performHARDIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
@@ -76,6 +76,11 @@ public:
 
     size_t getSize()                                  { return m_fibersRTT.size(); }
 	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
+
+
+	unsigned int  m_trackActionStep;
+	float m_timerStep;
+	
     
 
     //GPGPU functions

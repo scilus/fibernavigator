@@ -73,6 +73,7 @@ public:
     float        m_posAxial;
 
 
+
 private:
     // Functions
     void extractFrustum         ();

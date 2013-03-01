@@ -247,6 +247,9 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
         case 3:
             Logger::getInstance()->print( wxT( "Using PTK SH basis" ), LOGLEVEL_MESSAGE );
             break;
+        case 4:
+            Logger::getInstance()->print( wxT( "Using DIPY SH basis" ), LOGLEVEL_MESSAGE );
+            break;
         default:
             return false; // We do nothing incase the param was not good.
     }
@@ -477,14 +480,14 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
                 if(isDiff) //Add it
                 {
                     dd*=norm_hemisODF[i];
-                    dd.normalize();
+                    //dd.normalize();
                     max_dir.push_back(dd);
                 }
             }
             else if( max_dir.size() == 0 ) //Add the first
             {
                 dd*=norm_hemisODF[i];
-                dd.normalize();
+                //dd.normalize();
                 max_dir.push_back(dd);   
             }
         }
@@ -635,7 +638,9 @@ void ODFs::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_axis 
                     l_coloring[0] = m_mainDirections[currentIdx][i][0];
                     l_coloring[1] = m_mainDirections[currentIdx][i][1];
                     l_coloring[2] = m_mainDirections[currentIdx][i][2];
-                    float halfScale = m_scalingFactor / 5.0f;
+                    float scale = m_scalingFactor / 5.0f;
+					float norm = m_mainDirections[currentIdx][i].getLength();
+					float halfScale = norm * scale;
 
                     ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
                     glBegin(GL_LINES);  
@@ -1021,6 +1026,71 @@ void ODFs::getSphericalHarmonicMatrixDescoteauxThesis( const vector< float > &i_
     } // for
 }
 
+///////////////////////////////////////////////////////////////////////////
+// This functions computes the Spherical harmonics matrix as well as the
+// matrix containing the phi and theta directions. The basis implementation
+// corresponds to dipy
+//
+// i_meshPts            : Points of the undeformed mesh.
+// o_phiThetaDirection  : Matrix containing the phi and theta directions
+// o_shMatrix           : Spherical harmonics matrix
+///////////////////////////////////////////////////////////////////////////
+void ODFs::getSphericalHarmonicMatrixDipy( const vector< float > &i_meshPts, 
+                                           FMatrix &o_phiThetaDirection, 
+                                           FMatrix &o_shMatrix )
+{
+    int nbMeshPts = i_meshPts.size() / 3;
+
+    complex< float > cplx;
+
+    float l_cartesianDir[3]; // Stored in x, y z
+    float l_sphericalDir[3]; // Stored in radius, phi, theta
+
+    for( int i = 0; i < nbMeshPts; i++) 
+    {
+        int j = 0;   // Counter for the j dimension of o_shMatrix
+
+        if(std::abs(i_meshPts[ i * 3     ]) < 1e-5)
+            l_cartesianDir[0] = 0;
+        else
+            l_cartesianDir[0] = i_meshPts[ i * 3     ];
+
+
+        if(std::abs(i_meshPts[ i * 3+1     ]) < 1e-5)
+            l_cartesianDir[1] = 0;
+        else
+            l_cartesianDir[1] = i_meshPts[ i * 3+1     ];
+
+
+        if(std::abs(i_meshPts[ i * 3+2 ]) < 1e-5)
+            l_cartesianDir[2] = 0;
+        else
+            l_cartesianDir[2] = i_meshPts[ i * 3+2     ];
+
+
+        Helper::cartesianToSpherical( l_cartesianDir, l_sphericalDir );
+
+        o_phiThetaDirection( i, 0 ) = l_sphericalDir[1]; // Phi
+        o_phiThetaDirection( i, 1 ) = l_sphericalDir[2]; // Theta
+
+        for( int l = 0; l <= m_order; l+=2 )
+            for( int m = -l; m <= l; ++m ) 
+            {
+               cplx = getSphericalHarmonic( l,  m, l_sphericalDir[2], l_sphericalDir[1] );
+
+               if(m > 0)
+                  o_shMatrix(i,j) = std::sqrt(2.0)*real(cplx);
+               else if( m == 0 )
+                  o_shMatrix(i,j) = real(cplx);
+               else
+                  o_shMatrix(i,j) = std::sqrt(2.0)*imag(cplx);
+
+               ++j;
+
+            } // for
+    } // for
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // This functions computes the Spherical harmonics matrix as well as the
@@ -1168,6 +1238,10 @@ void ODFs::getSphericalHarmonicMatrix( const vector< float > &i_meshPts,
       
       getSphericalHarmonicMatrixPTK(i_meshPts, o_phiThetaDirection, o_shMatrix );
    }
+   else if( m_sh_basis == 4 ) {
+      
+      getSphericalHarmonicMatrixDipy(i_meshPts, o_phiThetaDirection, o_shMatrix );
+   }
    else
       getSphericalHarmonicMatrixRR5768(i_meshPts, o_phiThetaDirection, o_shMatrix );
 
@@ -1267,6 +1341,7 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
     m_pBtnMainDir  = new wxButton(     pParent, wxID_ANY, wxT( "Recalculate" ), DEF_POS, wxSize( 140, -1 ) );
     wxRadioButton *pRadDescoteauxBasis = new wxRadioButton( pParent, wxID_ANY, wxT( "Descoteaux" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     wxRadioButton *pRadTournierBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "MRtrix" ) );
+    wxRadioButton *pRadDipyBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "Dipy" ) );
 //     wxRadioButton *pRadOriginalBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "RR5768" ) );
 //     wxRadioButton *pRadPTKBasis        = new wxRadioButton( pParent, wxID_ANY, wxT( "PTK" ) );
 
@@ -1289,6 +1364,7 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 //     pBoxShBasisRadios->Add( pRadOriginalBasis,   0, wxALIGN_LEFT | wxALL, 1 );
     pBoxShBasisRadios->Add( pRadDescoteauxBasis, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxShBasisRadios->Add( pRadTournierBasis,   0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxShBasisRadios->Add( pRadDipyBasis,   0, wxALIGN_LEFT | wxALL, 1 );
 //     pBoxShBasisRadios->Add( pRadPTKBasis,        0, wxALIGN_LEFT | wxALL, 1 );
     pBoxShBasis->Add( pBoxShBasisRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
 
@@ -1301,6 +1377,7 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 //     pParent->Connect( pRadOriginalBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnOriginalShBasis ) );
     pParent->Connect( pRadDescoteauxBasis->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnDescoteauxShBasis ) );
     pParent->Connect( pRadTournierBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnTournierShBasis ) );
+    pParent->Connect( pRadDipyBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnDipyShBasis ) );
 //     pParent->Connect( pRadPTKBasis->GetId(),        wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnPTKShBasis ) );
 
     //////////////////////////////////////////////////////////////////////////
@@ -1308,6 +1385,7 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 //     pRadOriginalBasis->SetValue(   isShBasis( SH_BASIS_RR5768 ) );
     pRadDescoteauxBasis->SetValue( isShBasis( SH_BASIS_DESCOTEAUX ) );
     pRadTournierBasis->SetValue(   isShBasis( SH_BASIS_TOURNIER ) );
+    pRadDipyBasis->SetValue(   isShBasis( SH_BASIS_DIPY ) );
 //     pRadPTKBasis->SetValue(        isShBasis( SH_BASIS_PTK ) );
 
     m_pSliderLightAttenuation->SetValue( m_pSliderLightAttenuation->GetMin() );

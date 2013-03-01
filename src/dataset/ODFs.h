@@ -21,7 +21,7 @@
 
 class MySlider;
 
-enum SH_BASIS { SH_BASIS_RR5768, SH_BASIS_DESCOTEAUX, SH_BASIS_TOURNIER, SH_BASIS_PTK };
+enum SH_BASIS { SH_BASIS_RR5768, SH_BASIS_DESCOTEAUX, SH_BASIS_TOURNIER, SH_BASIS_PTK, SH_BASIS_DIPY };
 
 class ODFs : public Glyph
 {
@@ -91,6 +91,9 @@ private:
     void getSphericalHarmonicMatrixDescoteauxThesis ( const std::vector< float > &i_meshPts, 
                                                       FMatrix &o_phiThetaDirection, 
                                                       FMatrix &o_shMatrix );
+    void getSphericalHarmonicMatrixDipy ( const std::vector< float > &i_meshPts, 
+                                          FMatrix &o_phiThetaDirection, 
+                                          FMatrix &o_shMatrix );
     void       getSphericalHarmonicMatrixPTK ( const std::vector< float > &i_meshPts, 
                                                FMatrix &o_phiThetaDirection, 
                                                FMatrix &o_shMatrix );

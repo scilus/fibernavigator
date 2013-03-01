@@ -82,7 +82,7 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
     int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
     
     //std::vector< float > l_fileFloatData( datasetSize * m_bands, std::numeric_limits<float>::max() );
-    l_fileFloatData.assign( datasetSize * m_bands, 0.0f );
+    l_fileFloatData.assign( datasetSize * m_bands, 0.0f);
     float* pData = (float*)pBody->data;
 
     for( int i( 0 ); i < datasetSize; ++i )
@@ -156,7 +156,7 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
     //Fetching the directions
     for( it = i_fileFloatData.begin(), i = 0; it != i_fileFloatData.end(); it += m_bands, ++i )
     { 
-		m_mainDirections[i].insert( m_mainDirections[i].end(), it, it + m_bands );
+        m_mainDirections[i].insert( m_mainDirections[i].end(), it, it + m_bands );
     }
 
     getSlidersPositions( m_currentSliderPos );
@@ -277,7 +277,10 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
 
             ShaderHelper::getInstance()->getOdfsShader()->setUni3Float( "coloring", l_coloring );
             
-            float halfScale = m_scalingFactor / 5.0f;
+            float scale = m_scalingFactor / 5.0f;
+			float norm = sqrt(l_coloring[0] * l_coloring[0] + l_coloring[1] * l_coloring[1] + l_coloring[2] * l_coloring[2]);
+			float halfScale = norm * scale;
+
             GLfloat stickPos[3];
             stickPos[0] = halfScale*m_mainDirections[currentIdx][i*3];
             stickPos[1] = halfScale*m_mainDirections[currentIdx][i*3+1];

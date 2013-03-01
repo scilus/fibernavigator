@@ -24,6 +24,13 @@ public:
     bool toggleInterpolateTensors() { return m_interpolateTensors = !m_interpolateTensors; }
     bool toggleShellSeeds()        { return m_isShellSeeds = !m_isShellSeeds; }
     bool toggleRTTReady()           { return m_isRTTReady = !m_isRTTReady; }
+    
+    bool togglePlayStop()             { return m_isPaused = !m_isPaused; }
+    bool isTrackActionPlaying() const { return m_isTrackActionPlaying; }
+    bool isTrackActionPaused() const { return m_isPaused;}
+    void setTrackAction(bool enabled) {m_isTrackActionPlaying = enabled;}
+    void setTrackActionPause(bool paused) {m_isPaused = paused;}
+	
 
 protected:
     RTTrackingHelper(void);
@@ -41,6 +48,9 @@ private:
     bool m_isRTTActive;
     bool m_isRTTDirty;
     bool m_isRTTReady;
+    bool m_isTrackActionPlaying;
+    bool m_isPaused;
+
 };
 
 #endif //RTTRACKINGHELPER_H_

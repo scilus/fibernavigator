@@ -328,6 +328,8 @@ void TheScene::renderScene()
     }
 
     Logger::getInstance()->printIfGLError( wxT( "Rendering Scene" ) );
+
+
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -795,9 +797,9 @@ void TheScene::drawSelectionObjects()
     {
         for ( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
         {
-            glPushAttrib( GL_ALL_ATTRIB_BITS );
-            selectionObjects[i][j]->draw();
-            glPopAttrib();
+			glPushAttrib( GL_ALL_ATTRIB_BITS );
+			selectionObjects[i][j]->draw();
+			glPopAttrib();
         }
     }
 

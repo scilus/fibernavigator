@@ -16,6 +16,7 @@
 #include "../misc/Algorithms/Helper.h"
 
 #include <wx/scrolwin.h>
+#include <wx/statline.h>
 
 class MainFrame;
 class wxToggleButton;
@@ -51,6 +52,9 @@ public:
 	void OnConvertToFibers					   ( wxCommandEvent& event );
     void OnSliderAxisSeedNbMoved               ( wxCommandEvent& event );
 
+    void OnPlay                                ( wxCommandEvent& event );
+    void OnStop                                ( wxCommandEvent& event );
+
 public:
     wxToggleButton      *m_pBtnStart;
     wxTextCtrl          *m_pTxtTotalSeedNbBox;
@@ -85,6 +89,11 @@ private:
     wxTextCtrl          *m_pTxtAxisSeedNbBox;
     wxStaticText        *m_pTextAxisSeedNb;
     wxStaticText        *m_pTextTotalSeedNb;
+    wxStaticLine        *m_pLineSeparator;
+    wxBitmapButton      *m_pPlayPause;
+    wxBitmapButton      *m_pBtnStop;
+    wxImage             m_bmpPause;
+    wxImage             m_bmpPlay;
     
 
 
