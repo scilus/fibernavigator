@@ -22,6 +22,6 @@ How to get the application
 
 .. _Fibernavigator: http://code.google.com/p/fibernavigator/
 .. _issues: http://code.google.com/p/fibernavigator/issues/list
-.. _Build instructions for Ubuntu: wiki/Ubuntu-build-instructions
+.. _Build instructions for Ubuntu: https://github.com/jchoude/fibernavigator/wiki/Ubuntu-build-instructions
 .. _Windows build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator-build1771.zip
-.. _Max OSX build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator-r1771.dmg
+.. _Mac OSX build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator-r1771.dmg
