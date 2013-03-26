@@ -58,6 +58,9 @@ public:
     int     getLineForPoint( const int pointIdx );
 
     void    resetColorArray();
+    
+    void     setFiberColor( const int fiberIdx, const wxColour& col );
+    wxColour getFiberPointColor( const int fiberIdx, const int ptIdx );
 
     void    updateLinesShown();
 
@@ -76,12 +79,31 @@ public:
     float    getLocalizedAlpha( int index );
 
     void    setFibersLength();
+    
+    float   getFiberLength( const int fiberId ) const
+    {
+        if( fiberId < 0 || static_cast< unsigned int >( fiberId ) >= m_length.size() )
+        {
+            return 0.0f;
+        }
+        
+        return m_length[ fiberId ];
+    }
+    
+    bool    getFiberCoordValues( int fiberIndex, std::vector< Vector > &fiberPoints );
 
     void    updateFibersFilters();
     void    updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
     std::vector< bool >  getFilteredFibers();
 
     void    flipAxis( AxisType i_axe );
+    
+    int     getFibersCount() const { return m_countLines; }
+    
+    // TODO check if we can set const
+    Octree* getOctree() const { return m_pOctree; }
+    
+    vector< int > getReverseIdx() const { return m_reverse; }
 
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
@@ -122,7 +144,10 @@ public:
     void    toggleCrossingFibers() { m_useIntersectedFibers = !m_useIntersectedFibers; }
     void    updateCrossingFibersThickness();
 
-	void  convertFromRTT( std::vector<std::vector<Vector> >* RTT );
+	void    convertFromRTT( std::vector<std::vector<Vector> >* RTT );
+
+    // Inherited from DatasetInfo
+    bool    toggleShow();
 
 private:
     Fibers( const Fibers & );
@@ -150,6 +175,7 @@ private:
     void            createColorArray( const bool colorsLoadedFromFile );
 
     void            resetLinesShown();
+    // TODO remove
     std::vector< bool >  getLinesShown( SelectionObject *pSelectionObject );
     void            objectTest(    SelectionObject *pSelectionObject );
 
@@ -158,8 +184,6 @@ private:
     void            drawCrossingFibers();
 
     void            freeArrays();
-
-    bool            getFiberCoordValues( int fiberIndex, std::vector< Vector > &fiberPoints );
 
     void            setShader();
     void            releaseShader();

@@ -49,6 +49,8 @@ public:
     void deleteSceneObject();
     void deleteListItem();
     void deleteTreeItem();
+    void toggleTreeItemActivation();
+    void toggleTreeItemVisibility();
     void refreshAllGLWidgets();
     void refreshViews();
     void screenshot                         ( const wxString &path, const wxString &filename );
@@ -74,6 +76,8 @@ public:
 
     void      setThreadsActive( const int nb )      { m_threadsActive = nb; }
     SelectionObject * getLastSelectedObj() const    { return m_pLastSelectionObj; }
+
+    SelectionObject* getCurrentSelectionObject();
 
 
 public:
@@ -183,12 +187,17 @@ private:
     void onUnSelectTreeItem                 ( wxTreeEvent&    evt );
     void onActivateTreeItem                 ( wxTreeEvent&    evt );
     void onTreeLabelEdit                    ( wxTreeEvent&    evt );
-    int  treeSelected                       ( wxTreeItemId    id  ); 
+    int  treeSelected                       ( wxTreeItemId    id  );
+    
+    TreeObjectType treeSelectedNew          ( const wxTreeItemId itemId );
+    
+    int getCurrentTreeIndex();
 
     // System functions
     void onGLEvent                          ( wxCommandEvent& evt );    
     void onSliderMoved                      ( wxCommandEvent& evt );
-    void onKdTreeThreadFinished             ( wxCommandEvent& evt );
+    // TODO selection remove
+    //void onKdTreeThreadFinished             ( wxCommandEvent& evt );
     void updateStatusBar();
     void updateMenus();
     void onTimerEvent                       ( wxTimerEvent&   evt );

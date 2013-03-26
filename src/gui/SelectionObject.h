@@ -31,9 +31,12 @@
 #include <wx/tglbtn.h>
 
 #include <list>
+#include <map>
 #include <vector>
+using std::vector;
 
 class Anatomy;
+class Fibers;
 class CIsoSurface;
 class MainCanvas;
 class PropertiesWindow;
@@ -108,7 +111,7 @@ public :
     
     // Set/get and there affiliated functions
     bool       toggleIsActive();
-    void       setIsActive( bool i_isActive )         { m_isActive = i_isActive;               };
+    void       setIsActive( bool isActive );
     bool       getIsActive()                          { return m_isActive;                     };
 
     ObjectType getSelectionType()                     { return m_objectType;                   };    
@@ -121,15 +124,6 @@ public :
     void       setColor( wxColour i_color );
     wxColour   getColor()                             { return m_color;                        };
 
-    void       setColorChanged( bool i_colorChanged ) { m_colorChanged = i_colorChanged;       };
-    bool       isColorChanged()                       { return m_colorChanged;                 };
-
-    void       setIsDirty( bool i_isDirty );
-    bool       getIsDirty()                           { return m_isDirty;                      };
-
-    void       setFiberColor( wxColour i_color );
-    wxColour   getFiberColor()                        { return m_fiberColor;                   };
-
     int        getIcon();
 
     void       setName( wxString i_name )             { m_name = i_name;                       };
@@ -138,23 +132,26 @@ public :
     void       setIsMaster( bool i_isMaster );
     bool       getIsMaster()                          { return m_isMaster;                     };
     
-    bool       toggleIsNOT()                          { return m_isNOT = ! m_isNOT;            };
-    void       setIsNOT( bool i_isNOT )               { m_isNOT = i_isNOT;                     };
+    bool       toggleIsNOT();
+    void       setIsNOT( bool i_isNOT );
     bool       getIsNOT()                             { return m_isNOT;                        };
 
     void       setPicked( int i_picked )              { m_hitResult.picked = i_picked;         };
 
-    void       setSize( Vector i_size )               { m_size = i_size; m_isDirty = true; update();  };
+    void       setSize( float sizeX, float sizeY, float sizeZ ) 
+                                                      { setSize( Vector( sizeX, sizeY, sizeZ ) ); }
+    void       setSize( Vector i_size )               { m_size = i_size; update(); notifyInBoxNeedsUpdating(); };
     Vector     getSize()                              { return m_size;};
 
     void       setThreshold( float i_threshold );
     float      getThreshold()                         { return m_threshold;                    };
 
     void       setTreeId( wxTreeItemId i_treeId )     { m_treeId = i_treeId;                   };
+    wxTreeItemId getTreeId()                          { return m_treeId;                       };
     
     void       unselect()                             { m_isSelected = false;                  };
     
-    bool       toggleIsVisible()                      { return m_isVisible = ! m_isVisible;    };
+    bool       toggleIsVisible()                      { setIsVisible( !getIsVisible() ); return getIsVisible(); };
     void       setIsVisible( bool i_isVisible )       { m_isVisible = i_isVisible;             };
     bool       getIsVisible()                         { return m_isVisible;                    };
 
@@ -172,13 +169,42 @@ public :
 
     void       setMeanFiberColorMode( FibersColorationMode i_mode ) { m_meanFiberColorationMode = i_mode; };
     FibersColorationMode getMeanFiberColorMode()     { return m_meanFiberColorationMode;        };
+    
+    // Methods related to the different fiber bundles selection.
+    typedef    wxString FiberIdType;
+    struct SelectionState
+    {
+        public: 
+            SelectionState()
+            : m_inBoxNeedsUpdating( true )
+            , m_inBranchNeedsUpdating( true )
+            {};
+            
+            vector< bool > m_inBranch;
+            vector< bool > m_inBox;
+            bool           m_inBoxNeedsUpdating;
+            // TODO selection don't think we need this.
+            bool           m_inBranchNeedsUpdating;
+    };
+    
+    bool            addFiberDataset(    const FiberIdType &fiberId, const int fiberCount );
+    void            removeFiberDataset( const FiberIdType &fiberId );
+    SelectionState& getState(           const FiberIdType &fiberId );
+    
+    // Methods related to saving and loading.
+    // TODO selection tree
+    //bool populateXMLNode( wxXmlNode *pCurNode );
+    //virtual bool loadFromXMLNode( wxXmlNode *pSelObjNode );
+    
+    virtual wxString getTypeTag() const;
 
     //Distance coloring setup
     bool        IsUsedForDistanceColoring() const;
     void        UseForDistanceColoring(bool aUse);
 
     //Normal flips
-    void        FlipNormals();
+    // Do not flip for generic selection objects.
+    virtual void flipNormals() {};
 
     // Variables
     std::vector< bool > m_inBox;
@@ -201,14 +227,12 @@ protected :
     std::list< Face3D >  m_hullTriangles;
 
     wxColour        m_color;         // Used for coloring the isosurface.
-    bool            m_colorChanged;
-    wxColour        m_fiberColor;    // Used for the selected fibers.
+
     bool            m_mustUpdateConvexHull;
     bool            m_gfxDirty;
     float           m_handleRadius;
     hitResult       m_hitResult;
     bool            m_isActive;
-    bool            m_isDirty;
     bool            m_isLockedToCrosshair;
     bool            m_isMaster;
     bool            m_isNOT;
@@ -221,6 +245,8 @@ protected :
     int             m_stepSize;
     float           m_threshold;
     wxTreeItemId    m_treeId;
+    
+    bool            m_statsAreBeingComputed;
 
     //Distance coloring switch
     bool            m_DistColoring;
@@ -241,12 +267,23 @@ protected :
     float m_maxX;
     float m_maxY;
     float m_maxZ;
+    
+
+    std::map< FiberIdType, SelectionState > m_selectionStates;
+    
+    void notifyInBoxNeedsUpdating();
+    void notifyInBranchNeedsUpdating();
 
     /******************************************************************************************
     * Functions/variables related to the fiber info calculation.
     ******************************************************************************************/
 public:
     // Functions
+    void   updateStats                       ();
+    // TODO selection make private?
+    void   notifyStatsNeedUpdating           ();
+    bool   statsAreBeingComputed             () { return m_statsAreBeingComputed; };
+
     void   calculateGridParams               (       FibersInfoGridParams       &io_gridInfo               );
     void   computeMeanFiber                  ();
     void   computeConvexHull                 ();
@@ -318,10 +355,17 @@ protected:
                                                      float                           &o_meanCrossSection,
                                                      float                           &o_maxCrossSection,
                                                      float                           &o_minCrossSection         );
+    // TODO TBR selection tree
     bool   getMeanMaxMinFiberLength          ( const std::vector< std::vector< Vector > > &i_fibersPoints,
                                                      float                           &o_meanLength,
                                                      float                           &o_maxLength,
                                                      float                           &o_minLength               );
+    bool   getMeanMaxMinFiberLengthNew(       const vector< int > &selectedFibersIndexes,
+                                       Fibers        *pCurFibers,
+                                       float                      &o_meanLength,
+                                       float                      &o_maxLength,
+                                       float                      &o_minLength                );
+
     void   getProgressionCurvatureAndTorsion ( const Vector                          &i_point0, 
                                                const Vector                          &i_point1, 
                                                const Vector                          &i_point2, 
@@ -335,15 +379,28 @@ protected:
 
     std::vector< std::vector< Vector > >   getSelectedFibersPoints ();
     
+    vector< int > getSelectedFibersIndexes( Fibers *pFibers );
+    bool          getSelectedFibersInfo( const vector< int > &selectedFibersIdx, 
+                                        Fibers *pFibers,
+                                        vector< int > &pointsCount, 
+                                        vector< vector< Vector > > &fibersPoints );
+
+    
     std::vector< float >        m_crossSectionsAreas;   // All the cross sections areas value.
     std::vector< Vector >       m_crossSectionsNormals; // All the cross sections normals value.
     std::vector< std::vector < Vector > > m_crossSectionsPoints;  // All the cross sections hull points in 3D.
     unsigned int                m_maxCrossSectionIndex; // Index of the max cross section of m_crossSectionsPoints.
     std::vector< Vector >       m_meanFiberPoints;      // The points representing the mean fiber.
     unsigned int                m_minCrossSectionIndex; // Index of the min cross section of m_crossSectionsPoints.
+    
+    FibersInfoGridParams        m_stats;                // The stats for this box.
+    bool                        m_statsNeedUpdating;    // Will be used to check if the stats
     /******************************************************************************************
     * END of the functions/variables related to the fiber info calculation.
     *****************************************************************************************/
+
+protected:
+    wxBitmapButton  *m_pbtnSelectColor;
 
 private:
     wxTextCtrl      *m_pTxtName;

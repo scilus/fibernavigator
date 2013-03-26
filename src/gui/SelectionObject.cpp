@@ -13,6 +13,7 @@
 
 #include "SceneHelper.h"
 #include "SceneManager.h"
+#include "SelectionTree.h"
 #include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
@@ -52,14 +53,11 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
 
     m_center                = i_center;
     m_color                 = l_color;
-    m_colorChanged          = false;
-    m_fiberColor            = l_color;
     m_gfxDirty              = false;
     m_handleRadius          = 3.0f;
     m_hitResult             = l_hr;
     m_isActive              = true;
     m_objectType            = DEFAULT_TYPE;
-    m_isDirty               = true;
     m_isLockedToCrosshair   = false;
     m_isMaster              = false;
     m_isNOT                 = false;
@@ -74,6 +72,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
     m_stepSize              = 9;
     m_threshold             = 0.0f;
     m_treeId                = NULL;
+    m_statsAreBeingComputed = false;
     m_boxMoved                = false;
     m_boxResized            = false;
     m_mustUpdateConvexHull  = true;
@@ -123,6 +122,7 @@ void SelectionObject::moveBack()
     
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -140,6 +140,7 @@ void SelectionObject::moveDown()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -157,6 +158,7 @@ void SelectionObject::moveForward()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -174,6 +176,7 @@ void SelectionObject::moveLeft()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -191,6 +194,7 @@ void SelectionObject::moveRight()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -208,6 +212,7 @@ void SelectionObject::moveUp()
 
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 void SelectionObject::processDrag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
@@ -233,6 +238,7 @@ void SelectionObject::resizeBack()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -250,6 +256,7 @@ void SelectionObject::resizeDown()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -267,6 +274,7 @@ void SelectionObject::resizeForward()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -284,6 +292,7 @@ void SelectionObject::resizeLeft()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -301,6 +310,7 @@ void SelectionObject::resizeRight()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -318,6 +328,7 @@ void SelectionObject::resizeUp()
 
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -355,7 +366,6 @@ void SelectionObject::update()
     }
 
     updateStatusBar();
-    m_isDirty = true;
     SceneManager::getInstance()->setSelBoxChanged( true );
     MyApp::frame->refreshAllGLWidgets();
 
@@ -388,8 +398,15 @@ void SelectionObject::objectUpdate()
 ///////////////////////////////////////////////////////////////////////////
 bool SelectionObject::toggleIsActive()
 {
+    setIsActive( !getIsActive() );
+    return getIsActive();
+}
+
+void SelectionObject::setIsActive( bool isActive )
+{
     SceneManager::getInstance()->setSelBoxChanged( true );
-    return m_isActive = !m_isActive;
+    m_isActive = isActive;
+    notifyInBranchNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -411,9 +428,10 @@ void SelectionObject::setCenter( float i_x, float i_y, float i_z )
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::setCenter( Vector i_center )
 {
-     m_center  = i_center; 
-     m_isDirty = true; 
-     update();
+    m_center  = i_center; 
+    update();
+    notifyInBoxNeedsUpdating();
+    // TODO selection do we need the setSelBoxChanged?
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -431,39 +449,13 @@ void SelectionObject::setColor( wxColour i_color )
 // To avoid to much complication by inserting the SelectionObject class, this 
 // will simply return true if this selection object is of box type or ellipsoid type
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection remove this should never have existed
 bool SelectionObject::isSelectionObject()
 {
-    if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE )
+    //if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE )
         return true;
 
-    return false;
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Sets the dirtinest of the object.
-//
-// i_isDirty        : The new dirtinest of the the object.
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::setIsDirty( bool i_isDirty ) 
-{
-    m_isDirty = i_isDirty;
-    SceneManager::getInstance()->setSelBoxChanged( true );
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Sets the fiber color of the object.
-//
-// i_color          : The new color of the fiber.
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::setFiberColor( wxColour i_color )
-{
-    m_fiberColor = i_color;
-
-    if( ! m_isMaster ) 
-        return;
-
-    m_colorChanged = true;
-    update();
+    //return false;
 }
 
 int SelectionObject::getIcon()
@@ -481,6 +473,7 @@ int SelectionObject::getIcon()
 //
 // i_isMaster       : Indicates if we want to set this object as a master or not.
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection do we need this?
 void SelectionObject::setIsMaster( bool i_isMaster )
 {
     m_isMaster = i_isMaster;
@@ -491,15 +484,28 @@ void SelectionObject::setIsMaster( bool i_isMaster )
     }
 }
 
+bool SelectionObject::toggleIsNOT()
+{
+    setIsNOT( !getIsNOT() ); 
+    return getIsNOT();
+}
+
+void SelectionObject::setIsNOT( bool i_isNOT )
+{
+    m_isNOT = i_isNOT; 
+    notifyInBranchNeedsUpdating(); 
+    SceneManager::getInstance()->setSelBoxChanged( true );
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Sets the threshold of the object.
 //
 // i_threshold      : The new threshold value.
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection
 void SelectionObject::setThreshold( float i_threshold )
 {
     m_threshold = i_threshold;
-    m_isDirty   = true;
     m_gfxDirty  = true;
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
@@ -524,6 +530,7 @@ void SelectionObject::drag( wxPoint i_click, wxPoint i_lastPos, GLdouble i_proje
     
     m_boxMoved = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
@@ -562,6 +569,7 @@ void SelectionObject::resize( wxPoint i_click, wxPoint i_lastPos, GLdouble i_pro
     
     m_boxResized = true;
     update();
+    notifyInBoxNeedsUpdating();
 }
 
 float SelectionObject::getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] )
@@ -825,6 +833,129 @@ void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
 
 
 ///////////////////////////////////////////////////////////////////////////
+// TODO this comment does not reflect reality.
+// This will push back the coords values in the vectors for all the fibers
+// flagged as m_inBranch and then we will calculate the grid params with this vector.
+//
+///////////////////////////////////////////////////////////////////////////
+void SelectionObject::updateStats()
+{
+    // TODO selection test this
+    if( !m_statsNeedUpdating )
+    {
+        return;
+    }
+    
+    m_stats.m_count = 0;
+    m_stats.m_meanLength = 0.0f;
+    m_stats.m_maxLength  = 0.0f;
+    m_stats.m_minLength  = std::numeric_limits< float >::max();
+    m_stats.m_meanValue  = 0.0f;
+    m_stats.m_meanCurvature = 0.0f;
+    m_stats.m_meanTorsion   = 0.0f;
+    
+    // TODO selection
+    FibersGroup *pFiberGroup = DatasetManager::getInstance()->getFibersGroup();
+    
+    if( pFiberGroup == NULL )
+    {
+        // TODO log debug that this should never happen.
+        return;
+    }
+    
+    int activeFiberSetCount( 0 );
+    
+    vector< Fibers * > pFibersSet = DatasetManager::getInstance()->getFibers();
+    
+    for( size_t fiberSetIdx(0); fiberSetIdx < pFibersSet.size(); ++fiberSetIdx )
+    {
+        Fibers *pCurFibers = pFibersSet[ fiberSetIdx ];
+        if( pCurFibers->getShow() )
+        {
+            vector< int > selectedFibersIdx = getSelectedFibersIndexes( pCurFibers );
+            
+            if( selectedFibersIdx.empty() )
+            {
+                // Do not want to do any processing in this case.
+                continue;
+            }
+            
+            m_stats.m_count += selectedFibersIdx.size();
+            
+            float localMeanLength( 0.0f );
+            float localMaxLength(  0.0f );
+            float localMinLength(  0.0f );
+            
+            getMeanMaxMinFiberLengthNew( selectedFibersIdx, pCurFibers, 
+                                        localMeanLength, 
+                                        localMaxLength, 
+                                        localMinLength );
+            
+            m_stats.m_meanLength += localMeanLength;
+            ++activeFiberSetCount;
+            
+            m_stats.m_maxLength = std::max( m_stats.m_maxLength, localMaxLength );
+            m_stats.m_minLength = std::min( m_stats.m_minLength, localMinLength );
+            
+            // Compute mean value
+            vector< int > nbPointsBySelectedFiber;
+            vector< vector < Vector > > pointsBySelectedFiber;
+            
+            getSelectedFibersInfo( selectedFibersIdx, pCurFibers, 
+                                  nbPointsBySelectedFiber, pointsBySelectedFiber );
+            
+            float localMeanValue( 0.0f );
+            
+            getMeanFiberValue( pointsBySelectedFiber, localMeanValue );
+            
+            m_stats.m_meanValue += localMeanValue;
+            
+            // Compute curvature and torsion
+            float localCurvature( 0.0f );
+            float localTorsion(   0.0f );
+            
+            getFibersMeanCurvatureAndTorsion( pointsBySelectedFiber, localCurvature, localTorsion );
+            
+            m_stats.m_meanTorsion += localTorsion;
+            m_stats.m_meanCurvature += localCurvature;
+        }
+    }
+    
+    if( activeFiberSetCount > 0 )
+    {
+        m_stats.m_meanLength    /= activeFiberSetCount;
+        m_stats.m_meanValue     /= activeFiberSetCount;
+        m_stats.m_meanCurvature /= activeFiberSetCount;
+        m_stats.m_meanTorsion   /= activeFiberSetCount;
+    }
+    
+    if( m_stats.m_minLength == std::numeric_limits< float >::max() )
+    {
+        m_stats.m_minLength = 0.0f;
+    }
+    
+    m_statsNeedUpdating = false;
+    
+    SetFiberInfoGridValues();
+    
+    //vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
+    
+    /*//getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
+     //                                  m_meanFiberPoints,
+     //                                  o_gridInfo.m_meanCrossSection, 
+     //                                  o_gridInfo.m_maxCrossSection,
+     //                                  o_gridInfo.m_minCrossSection   );*/
+    ////getFiberDispersion              ( o_gridInfo.m_dispersion        );
+    
+    
+}
+
+void SelectionObject::notifyStatsNeedUpdating()
+{
+    m_statsNeedUpdating = true;
+}
+
+///////////////////////////////////////////////////////////////////////////
 // Computes the mean fiber
 // Point that make the mean fiber will be in the vector m_meanFiberPoints
 //
@@ -841,6 +972,93 @@ void SelectionObject::computeMeanFiber()
         m_meanFiberPoints.clear();
 }
 
+// TODO after JF's branch: make the param const
+// TODO selection validate this.
+vector< int > SelectionObject::getSelectedFibersIndexes( Fibers *pFibers )
+{
+    vector< bool > filteredFiber = pFibers->getFilteredFibers();
+    
+    SelectionState &curState = getState( pFibers->getName() );
+    
+    vector< bool > branchToUse;
+    SelectionTree &selTree( SceneManager::getInstance()->getSelectionTree() );
+    
+    if( selTree.getActiveChildrenObjectsCount( this ) > 0 )
+    {
+        branchToUse = curState.m_inBranch;
+    }
+    else // No child.
+    {
+        // If it has a parent
+        SelectionObject *pParentObj = selTree.getParentObject( this );
+        
+        if( pParentObj != NULL )
+        {
+            // TODO this could be optimized
+            SelectionState &parentState = pParentObj->getState( pFibers->getName() );
+            branchToUse.assign( curState.m_inBranch.size(), false );
+            
+            bool parentIsNot( pParentObj->getIsNOT() );
+            bool currentIsNot( getIsNOT() );
+            
+            for( unsigned int fiberIdx( 0 ); fiberIdx < curState.m_inBox.size(); ++fiberIdx )
+            {
+                if( !parentIsNot && !currentIsNot )
+                {
+                    branchToUse[ fiberIdx ] = parentState.m_inBox[ fiberIdx ] & curState.m_inBox[ fiberIdx ];
+                }
+                else if( !parentIsNot && currentIsNot )
+                {
+                    branchToUse[ fiberIdx ] = parentState.m_inBox[ fiberIdx ] & !curState.m_inBox[ fiberIdx ];
+                }
+                else if( parentIsNot && !currentIsNot )
+                {
+                    branchToUse[ fiberIdx ] = !parentState.m_inBox[ fiberIdx ] & curState.m_inBox[ fiberIdx ];
+                }
+                else // parentIsNot && currentIsNot
+                {
+                    branchToUse[ fiberIdx ] = !parentState.m_inBox[ fiberIdx ] & !curState.m_inBox[ fiberIdx ];
+                }
+            }
+        }
+        else // No parent, so this is a root object with no child.
+        {
+            branchToUse = curState.m_inBox;
+        }
+    }
+    
+    vector< int > selectedIndexes;
+    
+    for( unsigned int fiberIdx = 0; fiberIdx < branchToUse.size(); ++fiberIdx )
+    {
+        if( branchToUse[fiberIdx] && !filteredFiber[fiberIdx] )
+        {
+            selectedIndexes.push_back( fiberIdx );
+        }
+    }
+    
+    return selectedIndexes;
+}
+
+bool SelectionObject::getSelectedFibersInfo( const vector< int > &selectedFibersIdx, 
+                                            Fibers *pFibers, 
+                                            vector< int > &pointsCount, 
+                                            vector< vector< Vector > > &fibersPoints )
+
+{
+    pointsCount.assign( selectedFibersIdx.size(), 0 );
+    fibersPoints.assign( selectedFibersIdx.size(), vector< Vector >() );
+    
+    int curItem( 0 );
+    
+    for( vector< int >::const_iterator idxIt( selectedFibersIdx.begin() ); idxIt != selectedFibersIdx.end(); ++idxIt, ++curItem )
+    {
+        pointsCount[ curItem ] = pFibers->getPointsPerLine( *idxIt );
+        pFibers->getFiberCoordValues( *idxIt, fibersPoints[ curItem ] );
+    }
+    
+    return true;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 //Return all the visible fibers that pass through the selection object
@@ -853,58 +1071,90 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
     vector< bool > filteredFiber;
-
-    long index = MyApp::frame->getCurrentListIndex();
-    if( -1 != index )
+    Fibers* l_fibers = NULL;
+    
+    // TODO selection tree
+    //DatasetManager::getInstance()->getSelectedFibers(l_fibers);
+    //filteredFiber = l_fibers->getFilteredFibers();
+    
+    vector< bool > branchToUse;
+    // TODO modify this
+    if( SceneManager::getInstance()->getSelectionTree().getActiveChildrenObjectsCount( this ) > 0 
+       /*|| m_datasetHelper->m_pSelectionTree->isRootObject( this )*/ )
     {
-        Fibers * pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        branchToUse = m_inBranch;
+    }
+    else
+    {
+        // Combine the parent's inBox with this one's to obtain the sub branch.
+        SelectionObject *pParentObj = SceneManager::getInstance()->getSelectionTree().getParentObject( this );
         
-        if( pFibers == NULL )
+        if( pParentObj != NULL )
         {
-            return l_selectedFibersPoints;
-        }
-
-        filteredFiber = pFibers->getFilteredFibers();
-
-        for( unsigned int i = 0; i < m_inBranch.size(); ++i )
-        {
-            if( m_inBranch[i] && !filteredFiber[i] )
+            branchToUse.assign( m_inBranch.size(), false );
+            bool parentIsNot( pParentObj->getIsNOT() );
+            bool currentIsNot( getIsNOT() );
+            
+            for( unsigned int fiberIdx( 0 ); fiberIdx < m_inBox.size(); ++fiberIdx )
             {
-                getFiberCoordValues( i, l_currentFiberPoints );
-
-                // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
-                // could have there coordinated in the data completely inversed ( first fiber 0,0,0 - 1,1,1 ),  
-                // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
-                // verification and if the order of the fiber points are wrong we switch them.
-                if( l_selectedFibersPoints.size() > 0 )
+                if( !parentIsNot && !currentIsNot )
                 {
-                    l_meanStart.zero();
-                    for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
-                        l_meanStart += l_selectedFibersPoints[j][0];
-                    l_meanStart /= l_selectedFibersPoints.size();
+                    branchToUse[ fiberIdx ] = pParentObj->m_inBox[ fiberIdx ] & m_inBox[ fiberIdx ];
                 }
-
-                // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
-                // then the order of the points of this fiber are ok, otherwise we need to flip them.
-                if( ( l_meanStart - l_currentFiberPoints[0] ).getLength() <
-                    ( l_meanStart - l_currentFiberPoints[l_currentFiberPoints.size() - 1] ).getLength() )
+                else if( !parentIsNot && currentIsNot )
                 {
-                    l_selectedFibersPoints.push_back( l_currentFiberPoints );
+                    branchToUse[ fiberIdx ] = pParentObj->m_inBox[ fiberIdx ] & !m_inBox[ fiberIdx ];
                 }
-                else
+                else if( parentIsNot && !currentIsNot )
                 {
-                    for( int k = (int)l_currentFiberPoints.size() - 1; k >= 0; --k )
-                        l_currentSwappedFiberPoints.push_back( l_currentFiberPoints[k] );
-
-                    l_selectedFibersPoints.push_back( l_currentSwappedFiberPoints );
-                    l_currentSwappedFiberPoints.clear();
+                    branchToUse[ fiberIdx ] = !pParentObj->m_inBox[ fiberIdx ] & m_inBox[ fiberIdx ];
                 }
-
-                l_currentFiberPoints.clear();
+                else // parentIsNot && currentIsNot
+                {
+                    branchToUse[ fiberIdx ] = !pParentObj->m_inBox[ fiberIdx ] & !m_inBox[ fiberIdx ];
+                }
             }
         }
     }
-
+    
+    for( unsigned int i = 0; i < branchToUse.size(); ++i )
+    {
+        if( branchToUse[i] && !filteredFiber[i] )
+        {
+            getFiberCoordValues( i, l_currentFiberPoints );
+            
+            // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
+            // could have there coordinated in the data completly inversed ( first fiber 0,0,0 - 1,1,1 ),  
+            // second fiber 1,1,1 - 0,0,0) we need to make sure that all the fibers are in the same order so we do a
+            // verification and if the order of the fiber points are wrong we switch them.
+            if( l_selectedFibersPoints.size() > 0 )
+            {
+                l_meanStart.zero();
+                for( unsigned int j = 0; j < l_selectedFibersPoints.size(); ++j )
+                    l_meanStart += l_selectedFibersPoints[j][0];
+                l_meanStart /= l_selectedFibersPoints.size();
+            }
+            
+            // If the starting point of the current fiber is closer to the mean starting point of the rest of the fibers
+            // then the order of the points of this fiber are ok, otherwise we need to flip them.
+            if( ( l_meanStart - l_currentFiberPoints[0] ).getLength() <
+               ( l_meanStart - l_currentFiberPoints[l_currentFiberPoints.size() - 1] ).getLength() )
+            {
+                l_selectedFibersPoints.push_back( l_currentFiberPoints );
+            }
+            else
+            {
+                for( int k = (int)l_currentFiberPoints.size() - 1; k >= 0; --k )
+                    l_currentSwappedFiberPoints.push_back( l_currentFiberPoints[k] );
+                
+                l_selectedFibersPoints.push_back( l_currentSwappedFiberPoints );
+                l_currentSwappedFiberPoints.clear();
+            }
+            
+            l_currentFiberPoints.clear();
+        }
+    }
+    
     return l_selectedFibersPoints;
 }
 
@@ -1208,6 +1458,41 @@ bool SelectionObject::getMeanMaxMinFiberLength( const vector< vector< Vector > >
 
     return true;
 }
+
+bool SelectionObject::getMeanMaxMinFiberLengthNew( const vector< int > &selectedFibersIndexes,
+                                                  Fibers        *pCurFibers,
+                                                  float         &meanLength,
+                                                  float         &maxLength,
+                                                  float         &minLength )
+{
+    meanLength = 0.0f;
+    maxLength  = 0.0f;
+    minLength  = numeric_limits<float>::max();
+    
+    if( selectedFibersIndexes.empty() )
+    {
+        minLength = 0.0f;
+        return false;
+    }
+    
+    float curFiberLength( 0.0f );
+    
+    for( vector< int >::const_iterator idxIt( selectedFibersIndexes.begin() );
+        idxIt != selectedFibersIndexes.end(); ++idxIt )
+    {
+        curFiberLength = pCurFibers->getFiberLength( *idxIt );
+        
+        meanLength += curFiberLength;
+        
+        maxLength = std::max( maxLength, curFiberLength );
+        minLength = std::min( minLength, curFiberLength );
+    }
+    
+    meanLength /= selectedFibersIndexes.size();
+    
+    return true;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Computes the mean, max and the min cross section for a given set of fibers.
@@ -1661,6 +1946,7 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::draw()
 {
+    // TODO selection tree check all this method check if there are some fibers loaded.
     if( !m_isActive || !isSelectionObject())
     {
         if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
@@ -1749,7 +2035,8 @@ void SelectionObject::updateStatusBar()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::drawFibersInfo()
 {
-    if( ! m_isMaster )
+    // TODO selection tree what to do with this, currently commented in old branch
+    /*if( ! m_isMaster )
     {
         wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
@@ -1766,7 +2053,7 @@ void SelectionObject::drawFibersInfo()
     drawCrossSections();
     drawDispersionCone();
 
-    glEnable( GL_DEPTH_TEST);
+    glEnable( GL_DEPTH_TEST);*/
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1942,14 +2229,58 @@ void SelectionObject::getCrossSectionAreaColor( unsigned int i_index )
     glColor4f( 1.0f - l_u, 0.0f, l_u, 0.35f );
 }
 
-void SelectionObject::FlipNormals()
+bool SelectionObject::addFiberDataset( const FiberIdType &fiberId, const int fiberCount )
 {
-    if( m_isosurface != NULL && 
-        m_isosurface->m_tMesh != NULL)
+    using std::map;
+    using std::pair;
+    
+    pair< map< FiberIdType, SelectionState >::iterator, bool > insertResult = m_selectionStates.insert( pair< FiberIdType, SelectionState >( fiberId, SelectionState( ) ) );
+    
+    return insertResult.second;
+}
+
+void SelectionObject::removeFiberDataset( const FiberIdType &fiberId )
+{
+    m_selectionStates.erase( fiberId );
+}
+
+SelectionObject::SelectionState& SelectionObject::getState( const FiberIdType &fiberId )
+{
+    return m_selectionStates[ fiberId ];
+}
+
+// TODO selection tree saving
+wxString SelectionObject::getTypeTag() const
+{
+    return wxT( "base" );
+}
+
+void SelectionObject::notifyInBoxNeedsUpdating()
+{
+    for( map< FiberIdType, SelectionState >::iterator stateIt( m_selectionStates.begin() );
+        stateIt != m_selectionStates.end(); ++stateIt )
     {
-        m_isosurface->m_tMesh->flipNormals();
-        m_isosurface->clean();
+        // Always update in branch at the same time, since an
+        // update to the inBox will always influence the inBranch.
+        stateIt->second.m_inBoxNeedsUpdating = true;
     }
+
+    SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );    
+}
+
+void SelectionObject::notifyInBranchNeedsUpdating()
+{
+    for( map< FiberIdType, SelectionState >::iterator stateIt( m_selectionStates.begin() );
+        stateIt != m_selectionStates.end(); ++stateIt )
+    {
+        // Do not update inBox at the same time, since this can triggered
+        // for a change that does not change the in box.
+        stateIt->second.m_inBranchNeedsUpdating = true;
+    }
+    
+    //notifyStatsNeedUpdating();
+    // TODO selection tree 
+    //SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );    
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1957,25 +2288,30 @@ void SelectionObject::FlipNormals()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::SetFiberInfoGridValues()
 {
-    if( !m_isMaster )
+    Logger::getInstance()->print( wxT("SelectionObject::SetFiberInfoGridValues() not implemented"), LOGLEVEL_ERROR );
+    
+    if( m_statsNeedUpdating )
+    {
+        updateStats();
+    }
+    
+    
+    /*if( !m_isMaster )
     {
         wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
         SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
         l_masterObject->SetFiberInfoGridValues();
         return;
-    }
+    }*/
     if( m_pToggleCalculatesFibersInfo->GetValue() )
     {
-        FibersInfoGridParams l_params;
-        calculateGridParams( l_params );
-
-        m_pGridFibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ),   l_params.m_count            ) );
-        m_pGridFibersInfo->SetCellValue( 1,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanValue        ) );
-        m_pGridFibersInfo->SetCellValue( 2,  0, wxString::Format( wxT( "%.2f" ), l_params.m_meanLength       ) );
-        m_pGridFibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), l_params.m_minLength        ) );
-        m_pGridFibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), l_params.m_maxLength        ) );
-        m_pGridFibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanCurvature    ) );
-        m_pGridFibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), l_params.m_meanTorsion      ) );
+        m_pGridFibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ),   m_stats.m_count            ) );
+        m_pGridFibersInfo->SetCellValue( 1,  0, wxString::Format( wxT( "%.2f" ), m_stats.m_meanValue        ) );
+        m_pGridFibersInfo->SetCellValue( 2,  0, wxString::Format( wxT( "%.2f" ), m_stats.m_meanLength       ) );
+        m_pGridFibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), m_stats.m_minLength        ) );
+        m_pGridFibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), m_stats.m_maxLength        ) );
+        m_pGridFibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), m_stats.m_meanCurvature    ) );
+        m_pGridFibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), m_stats.m_meanTorsion      ) );
     }
 }
 
@@ -2050,12 +2386,10 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //////////////////////////////////////////////////////////////////////////
 
     wxImage bmpDelete(          MyApp::iconsPath + wxT( "delete.png" ),      wxBITMAP_TYPE_PNG );
-    wxImage bmpColor(           MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
     wxImage bmpMeanFiberColor(  MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
     wxImage bmpConvexHullColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
 
     wxButton *pBtnChangeName          = new wxButton( pParent, wxID_ANY, wxT( "Rename" ) );
-    wxButton *pBtnFlipNormal          = new wxButton( pParent, wxID_ANY, wxT( "Flip Normal" ) );
     wxButton *pBtnSelectColorFibers   = new wxButton( pParent, wxID_ANY, wxT( "Select Fibers Color" ) );
     wxButton *pBtnNewColorVolume      = new wxButton( pParent, wxID_ANY, wxT( "New Color map" ) );
     wxButton *pBtnNewDensityVolume    = new wxButton( pParent, wxID_ANY, wxT( "New Density map" ) );
@@ -2063,7 +2397,6 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //m_pbtnDisplayCrossSections      = new wxButton( pParent, wxID_ANY, wxT( "Display Cross Section (C.S.)" ) );
     //m_pbtnDisplayDispersionTube     = new wxButton( pParent, wxID_ANY, wxT( "Display Dispersion Tube" ) );
     wxBitmapButton *pBtnDelete      = new wxBitmapButton( pParent, wxID_ANY, bmpDelete, DEF_POS, wxSize( 20, -1 ) );
-    wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
     m_pBtnSelectMeanFiberColor      = new wxBitmapButton( pParent, wxID_ANY, bmpMeanFiberColor );
 //     m_pBtnSelectConvexHullColor     = new wxBitmapButton( pParent, wxID_ANY, bmpConvexHullColor );
     m_pToggleVisibility           = new wxToggleButton( pParent, wxID_ANY, wxT( "Visible" ), DEF_POS, wxSize( 20, -1 ) );
@@ -2110,13 +2443,6 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
     pBoxSizer->Add( pToggleAndNot,  1, wxEXPAND | wxALL, 1 );
     pBoxSizer->Add( pBtnChangeName, 1, wxEXPAND | wxALL, 1 );
-    pBoxMain->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
-
-    //////////////////////////////////////////////////////////////////////////
-
-    pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
-    pBoxSizer->Add( pBtnFlipNormal,  3, wxEXPAND | wxALL, 1 );
-    pBoxSizer->Add( pBtnSelectColor, 1, wxEXPAND | wxALL, 1 );
     pBoxMain->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
     //////////////////////////////////////////////////////////////////////////
@@ -2255,11 +2581,10 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //////////////////////////////////////////////////////////////////////////
 
     m_pRadNormalColoring->SetValue( true );
+    // TODO selection check those two
     pBtnNewColorVolume->Enable( getIsMaster() );
     pBtnNewDensityVolume->Enable( getIsMaster() );
     pToggleAndNot->Enable( !getIsMaster() && m_objectType != CISO_SURFACE_TYPE );
-    pBtnFlipNormal->Enable( m_objectType == CISO_SURFACE_TYPE );
-    pBtnSelectColor->Enable( m_objectType == CISO_SURFACE_TYPE );
     pBtnSetAsDistanceAnchor->Enable( m_objectType == CISO_SURFACE_TYPE );
 
     m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
@@ -2267,13 +2592,11 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //////////////////////////////////////////////////////////////////////////
 
     pParent->Connect( pBtnChangeName->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnRenameBox ) );
-    pParent->Connect( pBtnFlipNormal->GetId(),          wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnVoiFlipNormals ) );
     pParent->Connect( pBtnSelectColorFibers->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
     pParent->Connect( pBtnNewColorVolume->GetId(),      wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnCreateFibersColorTexture ) );
     pParent->Connect( pBtnNewDensityVolume->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnCreateFibersDensityTexture ) );
     pParent->Connect( pBtnSetAsDistanceAnchor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDistanceAnchorSet ) );
     pParent->Connect( pBtnDelete->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(    PropertiesWindow::OnDeleteTreeItem ) );
-    pParent->Connect( pBtnSelectColor->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnColorRoi ) );
     pParent->Connect( m_pBtnSelectMeanFiberColor->GetId(),  wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnMeanFiberColorChange ) );
 //     pParent->Connect( m_pBtnSelectConvexHullColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnConvexHullColorChange ) );
     //pParent->Connect( m_pbtnDisplayCrossSections->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnDisplayCrossSections ) );
@@ -2306,6 +2629,14 @@ void SelectionObject::updatePropertiesSizer()
     m_pToggleActivate->SetValue( getIsActive() );
     m_pTxtName->SetValue( getName() );
     m_pToggleCalculatesFibersInfo->Enable( getShowFibers() );
+    m_statsAreBeingComputed = m_pToggleCalculatesFibersInfo->GetValue();
+    
+    // TODO Selection
+    if( m_statsAreBeingComputed )
+    {
+        updateStats();
+    }
+    
     m_pGridFibersInfo->Enable( getShowFibers() && m_pToggleCalculatesFibersInfo->GetValue() );
     m_pToggleDisplayMeanFiber->Enable( getShowFibers() );
 //     m_pToggleDisplayConvexHull->Enable( getShowFibers() );

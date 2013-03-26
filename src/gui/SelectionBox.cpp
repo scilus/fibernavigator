@@ -33,26 +33,6 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size )
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Constructor
-// 
-// i_datasetHelper          : The dataset Helper associated with this box.
-// i_anatomy                : The anatomy associated with this box.
-///////////////////////////////////////////////////////////////////////////
-SelectionBox::SelectionBox( Anatomy* i_anatomy ) :
-   SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ) )
-{
-   m_isMaster      = true;
-
-   m_isosurface = new CIsoSurface( i_anatomy );    
-   
-   wxString mystring(wxT("[VOI] - ") + i_anatomy->getName());
-   m_name          =  mystring;
-   
-   m_objectType    = CISO_SURFACE_TYPE;
-   m_sourceAnatomy = i_anatomy;
-}
-
-///////////////////////////////////////////////////////////////////////////
 // Destructor
 ///////////////////////////////////////////////////////////////////////////
 SelectionBox::~SelectionBox()

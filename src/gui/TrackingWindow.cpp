@@ -434,15 +434,18 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
         //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
 
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
-        
-        std::vector< std::vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
-        if(selectionObjects.empty())
+        if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
             m_pMainFrame->createNewSelectionObject( BOX_TYPE );
+            
+            SelectionObject* pNewSelObj(m_pMainFrame->getCurrentSelectionObject());
+            
             Vector boxSize(2/step,2/step,2/step);
-            ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
-            ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_boxResized = true;
+            
+            pNewSelObj->setSize(boxSize);
+            // TODO selection m_boxResized should be set by setSize
+            pNewSelObj->m_boxResized = true;
         }
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
@@ -474,14 +477,16 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setIsHardi( true );
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setHARDIInfo( (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
         
-        std::vector< std::vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-
-        if(selectionObjects.empty())
+        if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
-            m_pMainFrame->createNewSelectionObject( BOX_TYPE ); 
+            m_pMainFrame->createNewSelectionObject( BOX_TYPE );
+            
+            SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();
+            
             Vector boxSize(2/step,2/step,2/step);
-            ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(boxSize);
-            ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_boxResized = true;
+            pNewSelObj->setSize(boxSize);
+            // TODO selection this should be in setsize
+            pNewSelObj->m_boxResized = true;
         }
         if(m_pTextFA->IsEnabled())
         {

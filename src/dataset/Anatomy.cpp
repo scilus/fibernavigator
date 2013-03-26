@@ -1065,7 +1065,7 @@ void Anatomy::updatePropertiesSizer()
     m_pUpperEqSlider->Enable( 1 == m_bands );
     m_pEqualize->Enable(      1 == m_bands );
     m_pBtnMinimize->Enable( DatasetManager::getInstance()->isFibersLoaded() );
-    m_pBtnCut->Enable(      SceneManager::getInstance()->getSelectionObjects().size() > 0 );
+    m_pBtnCut->Enable(      !SceneManager::getInstance()->getSelectionTree().isEmpty() );
 
     m_pBtnNewIsoSurface->Enable(    getType() <= OVERLAY );
     m_pBtnNewDistanceMap->Enable(   getType() <= OVERLAY );

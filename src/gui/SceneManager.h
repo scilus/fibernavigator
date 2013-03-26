@@ -2,6 +2,7 @@
 #define SCENEMANAGER_H_
 
 #include "ArcBall.h"
+#include "SelectionTree.h"
 #include "../misc/IsoSurface/Vector.h"
 
 #include <GL/glew.h>
@@ -17,6 +18,7 @@ class ShaderHelper;
 class TheScene;
 class wxXmlNode;
 
+// TODO remove selection
 typedef std::vector< std::vector< SelectionObject * > > SelectionObjList;
 
 enum SEGMETHOD { FLOODFILL = 0, GRAPHCUT, KMEANS };
@@ -31,16 +33,11 @@ public:
     bool    load( const wxString &filename );
     bool    save( const wxString &filename );
 
-    void    deleteAllSelectionObjects();
-    void    updateAllSelectionObjects();
-
     void    updateView( const float x, const float y, const float z, bool semaphore = false );
     void    changeZoom( const int z );
     void    moveScene ( const int x, const int y );
 
     void    doMatrixManipulation();
-
-    SelectionObjList getSelectionObjects();
 
     void    setMainFrame( MainFrame *pMainFrame )           { m_pMainFrame = pMainFrame; }
     void    setTreeCtrl ( MyTreeCtrl *pTreeCtrl )           { m_pTreeView  = pTreeCtrl; }
@@ -142,7 +139,11 @@ public:
     void setBoxAtCrosshair( SelectionObject * pBox ) { m_pBoxAtCrosshair = pBox; }
 
     bool isSelBoxChanged() const            { return m_selBoxChanged; }
+    // TODO selection do we need to update on this?
     void setSelBoxChanged( bool changed )   { m_selBoxChanged = changed; }
+    
+    // TODO selection move all methods related to selection under this line
+    SelectionTree& getSelectionTree()       { return *m_pSelTree; }
 
     std::vector< Vector > & getRulerPts()   { return m_rulerPts; }
     bool   isRulerActive() const            { return m_isRulerActive; }
@@ -227,6 +228,7 @@ private:
     bool  m_isBoxLocked;
 
     SelectionObject *m_pBoxAtCrosshair;
+    SelectionTree   *m_pSelTree;
 
     bool  m_selBoxChanged;
 
