@@ -2288,7 +2288,8 @@ void SelectionObject::notifyInBranchNeedsUpdating()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::SetFiberInfoGridValues()
 {
-    Logger::getInstance()->print( wxT("SelectionObject::SetFiberInfoGridValues() not implemented"), LOGLEVEL_ERROR );
+    // TODO selection to be removed.    
+    //Logger::getInstance()->print( wxT("SelectionObject::SetFiberInfoGridValues() not implemented"), LOGLEVEL_ERROR );
     
     if( m_statsNeedUpdating )
     {
@@ -2403,6 +2404,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     m_pToggleActivate             = new wxToggleButton( pParent, wxID_ANY, wxT( "Activate" ), DEF_POS, wxSize( 20, -1 ) );
     wxToggleButton *pToggleAndNot = new wxToggleButton( pParent, wxID_ANY, wxT( "And / Not" ) );
     m_pToggleCalculatesFibersInfo = new wxToggleButton( pParent, wxID_ANY, wxT( "Calculate Fibers Stats" ) );
+
     m_pToggleDisplayMeanFiber     = new wxToggleButton( pParent, wxID_ANY, wxT( "Display Mean Fiber" ) );
 //     m_pToggleDisplayConvexHull    = new wxToggleButton( pParent, wxID_ANY, wxT( "Display convex hull" ) );
     m_pLblColoring          = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
