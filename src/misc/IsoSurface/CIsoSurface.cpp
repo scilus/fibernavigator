@@ -366,12 +366,6 @@ CIsoSurface::CIsoSurface( Anatomy* anatomy )
     m_tMesh = new TriangleMesh();
 }
 
-CIsoSurface::~CIsoSurface()
-{
-    DeleteSurface();
-    delete m_tMesh;
-}
-
 void CIsoSurface::GenerateSurface( float tIsoLevel )
 {
     if ( m_bValidSurface )

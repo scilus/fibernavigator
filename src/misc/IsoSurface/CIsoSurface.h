@@ -32,7 +32,7 @@ class CIsoSurface : public CIsoSurfaceBase
 public:
     // Constructor and destructor.
     CIsoSurface( Anatomy* pAnatomy );
-    virtual ~CIsoSurface();
+    virtual ~CIsoSurface() {};
 
     virtual bool load(wxString filename) {return false;};
     virtual void createPropertiesSizer(PropertiesWindow *parent);
