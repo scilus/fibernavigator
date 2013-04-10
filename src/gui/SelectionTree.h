@@ -53,6 +53,7 @@ public:
     // Methods related to fiber selection.
     // TODO manage with DatasetManager?
     vector< bool > getSelectedFibers( const Fibers* const pFibers );
+    vector< bool > getSelectedFibersInBranch( const Fibers* const pFibers, SelectionObject* pSelObj );
     
     // Methods related to multiple fibers dataset management.
     bool addFiberDataset(    const SelectionObject::FiberIdType &fiberId, const int fibersCount );
@@ -140,6 +141,8 @@ private:
     int m_nextNodeId;
     
     map< SelectionObject::FiberIdType, int > m_fibersIdAndCount;
+    
+    map< SelectionObject::FiberIdType, vector< bool > > m_rootSelectionStatus;
 };
 
 

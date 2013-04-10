@@ -688,9 +688,48 @@ vector< bool > SelectionTree::getSelectedFibers( const Fibers* const pFibers )
     
     // Since the root does not have a selection object, we need to combine each of its
     // children to get the selected fibers.
-    vector< bool > combinedChildrenStates = m_pRootNode->combineChildrenFiberStates( fiberId );
+    m_rootSelectionStatus[ fiberId ] = m_pRootNode->combineChildrenFiberStates( fiberId );
     
-    return combinedChildrenStates;
+    return m_rootSelectionStatus[ fiberId ];
+}
+
+vector< bool > SelectionTree::getSelectedFibersInBranch( const Fibers *const pFibers, SelectionObject *pSelObj )
+{
+    if( pFibers == NULL )
+    {
+        // TODO determine what we do
+    }
+    
+    if( pSelObj == NULL || !pSelObj->getIsActive() )
+    {
+        // TODO determine what to do.
+    }
+    
+    SelectionObject::FiberIdType fiberId = const_cast< Fibers* >(pFibers)->getName();
+    
+    // Find the intersection of the root selection and the selection object's
+    // inBranch.
+    SelectionObject::SelectionState &childState = pSelObj->getState( fiberId );
+    vector< bool > &rootSel = m_rootSelectionStatus[ fiberId ];
+    
+    vector< bool > selInter( pFibers->getFibersCount(), false );
+    
+    if( !pSelObj->getIsNOT() )
+    {
+        for( int fibIdx( 0 ); fibIdx < pFibers->getFibersCount(); ++fibIdx )
+        {
+            selInter[ fibIdx ] = rootSel[ fibIdx ] & childState.m_inBranch[ fibIdx ];
+        }
+    }
+    else
+    {
+        for( int fibIdx( 0 ); fibIdx < pFibers->getFibersCount(); ++fibIdx )
+        {
+            selInter[ fibIdx ] = rootSel[ fibIdx ] & !childState.m_inBranch[ fibIdx ];
+        }
+    }
+    
+    return selInter;
 }
 
 bool SelectionTree::addFiberDataset( const SelectionObject::FiberIdType &fiberId, const int fibersCount )
@@ -701,6 +740,8 @@ bool SelectionTree::addFiberDataset( const SelectionObject::FiberIdType &fiberId
     {
         (*objIt)->addFiberDataset( fiberId, fibersCount );
     }
+    
+    m_rootSelectionStatus.insert( pair< SelectionObject::FiberIdType, vector< bool > >( fiberId, vector< bool >( fibersCount, false ) ) );
     
     return ( m_fibersIdAndCount.insert( pair< SelectionObject::FiberIdType, int >( fiberId, fibersCount ) ) ).second;
 }
@@ -718,6 +759,7 @@ void SelectionTree::removeFiberDataset( const SelectionObject::FiberIdType &fibe
     }
     
     m_fibersIdAndCount.erase( fiberId );
+    m_rootSelectionStatus.erase( fiberId );
 }
 
 void SelectionTree::notifyStatsNeedUpdating( SelectionObject *pSelObject )

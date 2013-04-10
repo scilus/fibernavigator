@@ -2784,8 +2784,6 @@ void Fibers::updateLinesShown()
     // This is to update the information display in the fiber grid info and the mean fiber
     if( boxWasUpdated && pLastSelObj != NULL )
     {
-        pLastSelObj->SetFiberInfoGridValues();
-        pLastSelObj->computeMeanFiber();
         pLastSelObj->computeConvexHull();
     }
      */
@@ -2956,8 +2954,6 @@ void Fibers::updateLinesShown()
     // This is to update the information display in the fiber grid info and the mean fiber
     /*if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
      {
-     m_dh->m_lastSelectedObject->SetFiberInfoGridValues();
-     m_dh->m_lastSelectedObject->computeMeanFiber();
      m_dh->m_lastSelectedObject->computeConvexHull();
      }*/
 }
@@ -3684,17 +3680,12 @@ void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsamplin
         m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
     
-    // TODO remove
-    //SelectionObject * pLastSelObj = MyApp::frame->getLastSelectedObj();
-    // TODO selection
-    //SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating();
+    SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
 
     //Update stats, mean fiber and convexhull only if an object is selected.
     //if( pLastSelObj != NULL )
     // TODO selection this
     {
-        //pLastSelObj->SetFiberInfoGridValues();
-        //pLastSelObj->computeMeanFiber();
         //pLastSelObj->computeConvexHull();
     }
 

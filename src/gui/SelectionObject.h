@@ -112,7 +112,7 @@ public :
     // Set/get and there affiliated functions
     bool       toggleIsActive();
     void       setIsActive( bool isActive );
-    bool       getIsActive()                          { return m_isActive;                     };
+    bool       getIsActive() const                    { return m_isActive;                     };
 
     ObjectType getSelectionType()                     { return m_objectType;                   };    
     bool       isSelectionObject();
@@ -247,6 +247,7 @@ protected :
     wxTreeItemId    m_treeId;
     
     bool            m_statsAreBeingComputed;
+    bool            m_meanFiberIsBeingDisplayed;
 
     //Distance coloring switch
     bool            m_DistColoring;
@@ -282,10 +283,9 @@ public:
     void   updateStats                       ();
     // TODO selection make private?
     void   notifyStatsNeedUpdating           ();
+    // TODO selection probably don't need this.
     bool   statsAreBeingComputed             () { return m_statsAreBeingComputed; };
 
-    void   calculateGridParams               (       FibersInfoGridParams       &io_gridInfo               );
-    void   computeMeanFiber                  ();
     void   computeConvexHull                 ();
     void   getProgressionCurvature           ( const Vector                     &i_point0, 
                                                const Vector                     &i_point1, 
@@ -301,7 +301,6 @@ public:
                                                const Vector                     &i_point4,
                                                      double                      i_progression,
                                                      double                     &o_torsion                 );
-    void   SetFiberInfoGridValues             ();
     void   updateMeanFiberOpacity             ();
     void   UpdateMeanValueTypeBox             ();
     void   updateConvexHullOpacity            ();
@@ -325,6 +324,8 @@ protected:
     void   getDispersionCircle               ( const std::vector< Vector >           &i_crossSectionPoints, 
                                                const Vector                          &i_crossSectionNormal, 
                                                      std::vector< Vector >           &o_circlePoints            );
+    
+    void   updateStatsGrid                   ();
     bool   getFiberCoordValues               (       int                             fiberIndex, 
                                                      std::vector< Vector >           &o_fiberPoints             );
     bool   getFiberLength                    ( const std::vector< Vector >           &i_fiberPoints,

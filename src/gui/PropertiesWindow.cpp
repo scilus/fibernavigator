@@ -830,31 +830,44 @@ void PropertiesWindow::OnNormalMeanFiberColoring( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNormalMeanFiberColoring" ), LOGLEVEL_DEBUG );
 
-   ( (SelectionObject*) m_pMainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(NORMAL_COLOR); 
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->setMeanFiberColorMode( NORMAL_COLOR );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the custom coloring radio
 // button located in the mean fiber coloring option
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection
+// TODO selection can we remove m_pCurrentSceneObject
 void PropertiesWindow::OnCustomMeanFiberColoring( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCustomMeanFiberColoring" ), LOGLEVEL_DEBUG );
 
-    ( (SelectionObject*) m_pMainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(CUSTOM_COLOR);
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->setMeanFiberColorMode( CUSTOM_COLOR );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user move the slider
 // button located in the mean fiber coloring option
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection
 void PropertiesWindow::OnMeanFiberOpacityChange( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMeanFiberOpacityChange" ), LOGLEVEL_DEBUG );
 
     ( (SelectionObject*) m_pMainFrame->m_pCurrentSceneObject )->updateMeanFiberOpacity();
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->updateMeanFiberOpacity();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1317,41 +1330,40 @@ void PropertiesWindow::OnNormalizeTensors( wxCommandEvent& event )
 // This function will be triggered when the user click on the display fibers 
 // info after a right click in the tree on a selection object.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection
 void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDisplayFibersInfo" ), LOGLEVEL_DEBUG );
 
-// TODO remove when the bug with the wxChoice in Windows is fixed.
-#ifndef __WXMSW__
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->UpdateMeanValueTypeBox();
-#endif
+    // TODO remove when the bug with the wxChoice in Windows is fixed.
     SelectionObject* pSelObj = m_pMainFrame->getCurrentSelectionObject();
     if( pSelObj != NULL )
     {
-        pSelObj->SetFiberInfoGridValues();
+        pSelObj->notifyStatsNeedUpdating();
+#ifndef __WXMSW__
+        // TODO selection check if we need
+        pSelObj->UpdateMeanValueTypeBox();
+#endif
     }
-    m_pMainFrame->refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the display mean fiber 
 // button that is located in the m_fibersInfoSizer.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection
 void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDisplayMeanFiber" ), LOGLEVEL_DEBUG );
 
-    ( (SelectionObject*)m_pMainFrame->m_pCurrentSceneObject )->computeMeanFiber();
-    m_pMainFrame->refreshAllGLWidgets();
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    pSelObj->notifyStatsNeedUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the display convex hull
 // button that is located in the m_fibersInfoSizer.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection
+// TODO selection convex hull
 void PropertiesWindow::OnDisplayConvexHull( wxCommandEvent& WXUNUSED(event) )
 {
     ( (SelectionObject*)m_pMainFrame->m_pCurrentSceneObject )->computeConvexHull();
@@ -1393,8 +1405,6 @@ void PropertiesWindow::OnConvexHullOpacityChange( wxCommandEvent& WXUNUSED(event
 // This function will be triggered when the user click on the color palette
 // button that is located aside of the Show mean fiber button
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection test
-// TODO selection modify getter
 void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMeanFiberColorChange" ), LOGLEVEL_DEBUG );
@@ -1408,9 +1418,11 @@ void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
         return;
     }
 
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setMeanFiberColor( newCol );
-    
-    m_pMainFrame->refreshAllGLWidgets();
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->setMeanFiberColor( newCol );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1868,10 +1880,10 @@ void PropertiesWindow::OnMeanComboBoxSelectionChange( wxCommandEvent& event)
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMeanComboBoxSelectionChange" ), LOGLEVEL_DEBUG );
 
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->SetFiberInfoGridValues();
-    m_pMainFrame->refreshAllGLWidgets();
+    SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
 }
 
+// TODO selection getter
 void PropertiesWindow::OnBoxPositionX( wxCommandEvent &event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnBoxPositionX" ), LOGLEVEL_DEBUG );

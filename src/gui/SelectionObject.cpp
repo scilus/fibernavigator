@@ -72,8 +72,10 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
     m_stepSize              = 9;
     m_threshold             = 0.0f;
     m_treeId                = NULL;
+    m_statsNeedUpdating     = true;
     m_statsAreBeingComputed = false;
-    m_boxMoved                = false;
+    m_meanFiberIsBeingDisplayed = false;
+    m_boxMoved              = false;
     m_boxResized            = false;
     m_mustUpdateConvexHull  = true;
 
@@ -801,38 +803,6 @@ void SelectionObject::drawPolygon( const vector< Vector > &i_polygonPoints )
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This will push back the coords values in the vectors for all the fibers
-// flagged as m_inBranch and then we will calculate the grid params with this vector.
-//
-// o_gridInfo           : The structure containing the information that we need to calculate.
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::calculateGridParams( FibersInfoGridParams &o_gridInfo )
-{
-    vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
-   
-    // Once the vector is filled up with the points data we can calculate the fibers info grid items.
-    o_gridInfo.m_count = l_selectedFibersPoints.size();
-    getMeanFiberValue               ( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanValue         );
-    getMeanMaxMinFiberLength        ( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanLength, 
-                                      o_gridInfo.m_maxLength, 
-                                      o_gridInfo.m_minLength         );
-    //getMeanMaxMinFiberCrossSection  ( l_selectedFibersPoints,
-    //                                  m_meanFiberPoints,
-    //                                  o_gridInfo.m_meanCrossSection, 
-    //                                  o_gridInfo.m_maxCrossSection,
-    //                                  o_gridInfo.m_minCrossSection   );
-    getFibersMeanCurvatureAndTorsion( l_selectedFibersPoints, 
-                                      o_gridInfo.m_meanCurvature, 
-                                      o_gridInfo.m_meanTorsion       );
-    //getFiberDispersion              ( o_gridInfo.m_dispersion        );
-
-
-}
-
-
-///////////////////////////////////////////////////////////////////////////
 // TODO this comment does not reflect reality.
 // This will push back the coords values in the vectors for all the fibers
 // flagged as m_inBranch and then we will calculate the grid params with this vector.
@@ -861,6 +831,12 @@ void SelectionObject::updateStats()
     {
         // TODO log debug that this should never happen.
         return;
+    }
+    
+    if( m_meanFiberIsBeingDisplayed )
+    {
+        // We calculate the mean fiber of the selected fibers.
+        m_meanFiberPoints.assign(MEAN_FIBER_NB_POINTS, Vector( 0.0, 0.0, 0.0 ));
     }
     
     int activeFiberSetCount( 0 );
@@ -910,10 +886,25 @@ void SelectionObject::updateStats()
             
             m_stats.m_meanValue += localMeanValue;
             
+            // Get the mean fiber. It is always needed, either to display,
+            // or to compute the curvature and torsion.
+            // TODO selection should test
+            if( m_meanFiberIsBeingDisplayed )
+            {
+                vector< Vector > meanFiberPoint;
+                getMeanFiber(pointsBySelectedFiber, MEAN_FIBER_NB_POINTS, meanFiberPoint);
+                
+                for( int meanPtIdx( 0 ); meanPtIdx < MEAN_FIBER_NB_POINTS; ++meanPtIdx )
+                {
+                    m_meanFiberPoints[ meanPtIdx ] += meanFiberPoint[ meanPtIdx ];
+                }
+            }
+            
             // Compute curvature and torsion
             float localCurvature( 0.0f );
             float localTorsion(   0.0f );
             
+            // TODO selection should use precomputed mean fiber
             getFibersMeanCurvatureAndTorsion( pointsBySelectedFiber, localCurvature, localTorsion );
             
             m_stats.m_meanTorsion += localTorsion;
@@ -927,6 +918,18 @@ void SelectionObject::updateStats()
         m_stats.m_meanValue     /= activeFiberSetCount;
         m_stats.m_meanCurvature /= activeFiberSetCount;
         m_stats.m_meanTorsion   /= activeFiberSetCount;
+        
+        if( m_meanFiberIsBeingDisplayed )
+        {
+            for( int meanPtIdx( 0 ); meanPtIdx < MEAN_FIBER_NB_POINTS; ++meanPtIdx )
+            {
+                m_meanFiberPoints[ meanPtIdx ] /= activeFiberSetCount;
+            }
+        }
+    }
+    else
+    {
+        m_meanFiberPoints.clear();
     }
     
     if( m_stats.m_minLength == std::numeric_limits< float >::max() )
@@ -936,7 +939,7 @@ void SelectionObject::updateStats()
     
     m_statsNeedUpdating = false;
     
-    SetFiberInfoGridValues();
+    updateStatsGrid();
     
     //vector< vector< Vector > > l_selectedFibersPoints = getSelectedFibersPoints();
     
@@ -953,23 +956,6 @@ void SelectionObject::updateStats()
 void SelectionObject::notifyStatsNeedUpdating()
 {
     m_statsNeedUpdating = true;
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Computes the mean fiber
-// Point that make the mean fiber will be in the vector m_meanFiberPoints
-//
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::computeMeanFiber()
-{
-    if ( getShowFibers() && m_pToggleDisplayMeanFiber->GetValue() )
-    {
-        // We calculate the mean fiber of the selected fibers.
-        m_meanFiberPoints.clear();
-        getMeanFiber( getSelectedFibersPoints(), MEAN_FIBER_NB_POINTS, m_meanFiberPoints );
-    }
-    else
-        m_meanFiberPoints.clear();
 }
 
 // TODO after JF's branch: make the param const
@@ -1070,57 +1056,24 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     vector< Vector >           l_currentSwappedFiberPoints;
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
-    vector< bool > filteredFiber;
-    Fibers* l_fibers = NULL;
+    
+    Fibers* pFibers( NULL );
     
     // TODO selection tree
-    //DatasetManager::getInstance()->getSelectedFibers(l_fibers);
-    //filteredFiber = l_fibers->getFilteredFibers();
-    
-    vector< bool > branchToUse;
-    // TODO modify this
-    if( SceneManager::getInstance()->getSelectionTree().getActiveChildrenObjectsCount( this ) > 0 
-       /*|| m_datasetHelper->m_pSelectionTree->isRootObject( this )*/ )
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
     {
-        branchToUse = m_inBranch;
+        pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
     }
-    else
-    {
-        // Combine the parent's inBox with this one's to obtain the sub branch.
-        SelectionObject *pParentObj = SceneManager::getInstance()->getSelectionTree().getParentObject( this );
-        
-        if( pParentObj != NULL )
-        {
-            branchToUse.assign( m_inBranch.size(), false );
-            bool parentIsNot( pParentObj->getIsNOT() );
-            bool currentIsNot( getIsNOT() );
-            
-            for( unsigned int fiberIdx( 0 ); fiberIdx < m_inBox.size(); ++fiberIdx )
-            {
-                if( !parentIsNot && !currentIsNot )
-                {
-                    branchToUse[ fiberIdx ] = pParentObj->m_inBox[ fiberIdx ] & m_inBox[ fiberIdx ];
-                }
-                else if( !parentIsNot && currentIsNot )
-                {
-                    branchToUse[ fiberIdx ] = pParentObj->m_inBox[ fiberIdx ] & !m_inBox[ fiberIdx ];
-                }
-                else if( parentIsNot && !currentIsNot )
-                {
-                    branchToUse[ fiberIdx ] = !pParentObj->m_inBox[ fiberIdx ] & m_inBox[ fiberIdx ];
-                }
-                else // parentIsNot && currentIsNot
-                {
-                    branchToUse[ fiberIdx ] = !pParentObj->m_inBox[ fiberIdx ] & !m_inBox[ fiberIdx ];
-                }
-            }
-        }
-    }
+    vector< bool > filteredFiber = pFibers->getFilteredFibers();
     
-    for( unsigned int i = 0; i < branchToUse.size(); ++i )
+    vector< bool > selectedInBranch = SceneManager::getInstance()->getSelectionTree().getSelectedFibersInBranch( pFibers, this);
+    
+    for( unsigned int i = 0; i < selectedInBranch.size(); ++i )
     {
-        if( branchToUse[i] && !filteredFiber[i] )
+        if( selectedInBranch[i] && !filteredFiber[i] )
         {
+            // TODO selection in this method avoid always searching for fiber
             getFiberCoordValues( i, l_currentFiberPoints );
             
             // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
@@ -1155,6 +1108,7 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
         }
     }
     
+    std::cout << l_selectedFibersPoints.size() << std::endl;
     return l_selectedFibersPoints;
 }
 
@@ -1295,6 +1249,7 @@ bool SelectionObject::getShowFibers()
 //
 // Returns true if successful, false otherwise.
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection is this needed.
 bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
 {
     long index = MyApp::frame->getCurrentListIndex();
@@ -1954,9 +1909,10 @@ void SelectionObject::draw()
         return;
     }
 
-    // We only display those if the current box is the selected one and if we are supposed to display them.
-    if( m_isSelected )
+    if( m_meanFiberIsBeingDisplayed )
+    {
         drawFibersInfo();
+    }
     
     if( ! m_isVisible )
         return;
@@ -2035,25 +1991,18 @@ void SelectionObject::updateStatusBar()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::drawFibersInfo()
 {
-    // TODO selection tree what to do with this, currently commented in old branch
-    /*if( ! m_isMaster )
-    {
-        wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
-        SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
-
-        l_masterObject->drawFibersInfo();
-        return;
-    }
+    updateStats();
 
     glDisable( GL_DEPTH_TEST);
     
     // Draw the mean fiber.
     drawThickFiber( m_meanFiberPoints, (float)THICK_FIBER_THICKNESS/100.0f, THICK_FIBER_NB_TUBE_EDGE );
-    drawConvexHull();
+    // TODO selection convex hull
+    /*drawConvexHull();
     drawCrossSections();
-    drawDispersionCone();
+    drawDispersionCone();*/
 
-    glEnable( GL_DEPTH_TEST);*/
+    glEnable( GL_DEPTH_TEST);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2286,24 +2235,8 @@ void SelectionObject::notifyInBranchNeedsUpdating()
 ///////////////////////////////////////////////////////////////////////////
 // This function will set the correct information in the fiber info grid.
 ///////////////////////////////////////////////////////////////////////////
-void SelectionObject::SetFiberInfoGridValues()
+void SelectionObject::updateStatsGrid()
 {
-    // TODO selection to be removed.    
-    //Logger::getInstance()->print( wxT("SelectionObject::SetFiberInfoGridValues() not implemented"), LOGLEVEL_ERROR );
-    
-    if( m_statsNeedUpdating )
-    {
-        updateStats();
-    }
-    
-    
-    /*if( !m_isMaster )
-    {
-        wxTreeCtrl*      l_treeWidget   = MyApp::frame->m_pTreeWidget;
-        SelectionObject* l_masterObject = (SelectionObject*)( l_treeWidget->GetItemData( l_treeWidget->GetItemParent( m_treeId ) ) );
-        l_masterObject->SetFiberInfoGridValues();
-        return;
-    }*/
     if( m_pToggleCalculatesFibersInfo->GetValue() )
     {
         m_pGridFibersInfo->SetCellValue( 0,  0, wxString::Format( wxT( "%d" ),   m_stats.m_count            ) );
@@ -2632,9 +2565,9 @@ void SelectionObject::updatePropertiesSizer()
     m_pTxtName->SetValue( getName() );
     m_pToggleCalculatesFibersInfo->Enable( getShowFibers() );
     m_statsAreBeingComputed = m_pToggleCalculatesFibersInfo->GetValue();
+    m_meanFiberIsBeingDisplayed = m_pToggleDisplayMeanFiber->GetValue();
     
-    // TODO Selection
-    if( m_statsAreBeingComputed )
+    if( m_statsAreBeingComputed || m_meanFiberIsBeingDisplayed )
     {
         updateStats();
     }
@@ -2657,12 +2590,6 @@ void SelectionObject::updatePropertiesSizer()
         UpdateMeanValueTypeBox();
     }
 #endif
-
-    if( !getShowFibers() && m_meanFiberPoints.size() > 0 )
-    {
-        //Hide the mean fiber if fibers are invisible and the box is moved
-        computeMeanFiber();
-    }
 
     //m_pbtnDisplayDispersionTube->Enable(m_pToggleCalculatesFibersInfo->GetValue());
     //m_pbtnDisplayCrossSections->Enable(m_pToggleCalculatesFibersInfo->GetValue());
