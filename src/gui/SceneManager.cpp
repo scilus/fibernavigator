@@ -303,7 +303,7 @@ bool SceneManager::save( const wxString &filename )
 
     //////////////////////////////////////////////////////////////////////////
     // SELECTION OBJECTS
-    // TODO selection
+    // TODO selection saving
     /*SelectionObjList selObjs = getSelectionObjects();
     for( SelectionObjList::const_iterator it = selObjs.begin(); it != selObjs.end(); ++it )
     {
@@ -656,7 +656,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
                 MyTreeCtrl *pTreeView = m_pMainFrame->m_pTreeWidget;
                 if( wxT( "MASTER" ) == type )
                 {
-                    pSelObj->setIsMaster( true );
+                    pSelObj->setIsFirstLevel( true );
                     currentMasterId = pTreeView->AppendItem( m_pMainFrame->m_tSelectionObjectsId, name, 0, -1, pSelObj );
                     pTreeView->EnsureVisible( currentMasterId );
                     pTreeView->SetItemImage( currentMasterId, pSelObj->getIcon() );

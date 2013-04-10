@@ -624,7 +624,6 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
     /*
      * check for hits with the selection object sizers
      */
-    // TODO selection tree get selection objects
     if( SceneManager::getInstance()->getShowAllSelObj() )
     {        
         SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();

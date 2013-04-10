@@ -183,10 +183,8 @@ private:
     // Tree widget event functions
     void onDeleteTreeItem                   ( wxTreeEvent&    evt );
     void onSelectTreeItem                   ( wxTreeEvent&    evt );
-    void onRightClickTreeItem               ( wxTreeEvent&    evt );
     void onUnSelectTreeItem                 ( wxTreeEvent&    evt );
     void onActivateTreeItem                 ( wxTreeEvent&    evt );
-    void onTreeLabelEdit                    ( wxTreeEvent&    evt );
     int  treeSelected                       ( wxTreeItemId    id  );
     
     TreeObjectType treeSelectedNew          ( const wxTreeItemId itemId );
@@ -196,7 +194,7 @@ private:
     // System functions
     void onGLEvent                          ( wxCommandEvent& evt );    
     void onSliderMoved                      ( wxCommandEvent& evt );
-    // TODO selection remove
+    // TODO selection KD Tree remove
     //void onKdTreeThreadFinished             ( wxCommandEvent& evt );
     void updateStatusBar();
     void updateMenus();

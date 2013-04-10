@@ -773,7 +773,7 @@ void SelectionTree::notifyStatsNeedUpdating( SelectionObject *pSelObject )
     }
 }
 
-// TODO selection tree
+// TODO selection saving
 /*bool SelectionTree::populateXMLNode( wxXmlNode *pRootSelObjNode )
 {
     if( !m_pRootNode->hasChildren() )

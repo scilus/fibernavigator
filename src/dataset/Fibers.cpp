@@ -110,6 +110,8 @@ Fibers::Fibers()
 Fibers::~Fibers()
 {
     Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
+    
+    SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getName() );
 
     if( SceneManager::getInstance()->isUsingVBO() )
     {
@@ -134,9 +136,6 @@ Fibers::~Fibers()
     m_pointArray.clear();
     m_normalArray.clear();
     m_colorArray.clear();
-    
-    // TODO selection
-    //SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating();
 }
 
 bool Fibers::load( const wxString &filename )
@@ -174,12 +173,6 @@ bool Fibers::load( const wxString &filename )
 
     /* OcTree points classification */
     m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
-    
-    if( res )
-    {
-        // TODO selection?
-        //SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating();
-    }
     
     return res;
 }
@@ -2959,70 +2952,6 @@ void Fibers::updateLinesShown()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Will return the fibers that are inside the selection object passed in argument.
-//
-// pSelectionObject        : The selection object to test with.
-//
-// Return a vector of bool, a value of TRUE indicates that this fiber is inside the selection object passed in argument.
-// A value of false, indicate that this fiber is not inside the selection object.
-///////////////////////////////////////////////////////////////////////////
-// TODO remove
-vector< bool > Fibers::getLinesShown( SelectionObject *pSelectionObject )
-{
-    if( ! pSelectionObject->isSelectionObject() && ! pSelectionObject->m_sourceAnatomy )
-    {
-        return pSelectionObject->m_inBox;
-    }
-
-    resetLinesShown();
-
-    float voxelX = DatasetManager::getInstance()->getVoxelX();
-    float voxelY = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
-
-    if( pSelectionObject->getSelectionType() == BOX_TYPE || pSelectionObject->getSelectionType() == ELLIPSOID_TYPE )
-    {
-        Vector center = pSelectionObject->getCenter();
-        Vector size   = pSelectionObject->getSize();
-        m_boxMin.resize( 3 );
-        m_boxMax.resize( 3 );
-        m_boxMin[0] = center.x - size.x * 0.5 * voxelX;
-        m_boxMax[0] = center.x + size.x * 0.5 * voxelX;
-        m_boxMin[1] = center.y - size.y * 0.5 * voxelY;
-        m_boxMax[1] = center.y + size.y * 0.5 * voxelY;
-        m_boxMin[2] = center.z - size.z * 0.5 * voxelZ;
-        m_boxMax[2] = center.z + size.z * 0.5 * voxelZ;
-
-        //Get and Set selected lines to visible
-        objectTest( pSelectionObject );
-    }
-    else
-    {
-        int columns = DatasetManager::getInstance()->getColumns();
-        int rows    = DatasetManager::getInstance()->getRows();
-        int frames  = DatasetManager::getInstance()->getFrames();
-
-        for( int i = 0; i < m_countPoints; ++i )
-        {
-            if( m_selected[getLineForPoint( i )] != 1 )
-            {
-                int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[i * 3 ]    / voxelX ) ) );
-                int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) );
-                int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) );
-                int index = x + y * columns + z * rows * columns;
-
-                if( ( pSelectionObject->m_sourceAnatomy->at( index ) > pSelectionObject->getThreshold() ) )
-                {
-                    m_selected[getLineForPoint( i )] = 1;
-                }
-            }
-        }
-    }
-
-    return m_selected;
-}
-
-///////////////////////////////////////////////////////////////////////////
 // Get points that are inside the selection object and
 // set selected fibers according to those points.
 ///////////////////////////////////////////////////////////////////////////
@@ -3684,7 +3613,7 @@ void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsamplin
 
     //Update stats, mean fiber and convexhull only if an object is selected.
     //if( pLastSelObj != NULL )
-    // TODO selection this
+    // TODO selection convex hull
     {
         //pLastSelObj->computeConvexHull();
     }
@@ -3927,8 +3856,7 @@ void Fibers::updatePropertiesSizer()
 
 bool Fibers::toggleShow()
 {
-    // TODO selection
-    //SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating();
+    SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
     return DatasetInfo::toggleShow();
 }
 

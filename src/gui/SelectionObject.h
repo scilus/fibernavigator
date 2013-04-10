@@ -114,8 +114,7 @@ public :
     void       setIsActive( bool isActive );
     bool       getIsActive() const                    { return m_isActive;                     };
 
-    ObjectType getSelectionType()                     { return m_objectType;                   };    
-    bool       isSelectionObject();
+    ObjectType getSelectionType()                     { return m_objectType;                   };
 
     void       setCenter( float i_x, float i_y, float i_z );
     void       setCenter( Vector i_center );
@@ -129,8 +128,8 @@ public :
     void       setName( wxString i_name )             { m_name = i_name;                       };
     wxString   getName()                              { return m_name;                         };
 
-    void       setIsMaster( bool i_isMaster );
-    bool       getIsMaster()                          { return m_isMaster;                     };
+    void       setIsFirstLevel( bool i_isFirstLevel );
+    bool       getIsFirstLevel()                          { return m_isFirstLevel;                     };
     
     bool       toggleIsNOT();
     void       setIsNOT( bool i_isNOT );
@@ -192,7 +191,7 @@ public :
     SelectionState& getState(           const FiberIdType &fiberId );
     
     // Methods related to saving and loading.
-    // TODO selection tree
+    // TODO selection saving
     //bool populateXMLNode( wxXmlNode *pCurNode );
     //virtual bool loadFromXMLNode( wxXmlNode *pSelObjNode );
     
@@ -234,7 +233,7 @@ protected :
     hitResult       m_hitResult;
     bool            m_isActive;
     bool            m_isLockedToCrosshair;
-    bool            m_isMaster;
+    bool            m_isFirstLevel;
     bool            m_isNOT;
     CIsoSurface*    m_isosurface;
     bool            m_isSelected;
@@ -281,10 +280,7 @@ protected :
 public:
     // Functions
     void   updateStats                       ();
-    // TODO selection make private?
     void   notifyStatsNeedUpdating           ();
-    // TODO selection probably don't need this.
-    bool   statsAreBeingComputed             () { return m_statsAreBeingComputed; };
 
     void   computeConvexHull                 ();
     void   getProgressionCurvature           ( const Vector                     &i_point0, 

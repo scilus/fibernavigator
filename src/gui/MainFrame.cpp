@@ -65,8 +65,6 @@ EVT_LIST_DELETE_ALL_ITEMS( ID_LIST_CTRL,                    MainFrame::onDeleteA
 EVT_TREE_DELETE_ITEM     ( ID_TREE_CTRL,                    MainFrame::onDeleteTreeItem     )
 EVT_TREE_SEL_CHANGED     ( ID_TREE_CTRL,                    MainFrame::onSelectTreeItem     )
 EVT_TREE_ITEM_ACTIVATED  ( ID_TREE_CTRL,                    MainFrame::onActivateTreeItem   )
-EVT_TREE_ITEM_RIGHT_CLICK( ID_TREE_CTRL,                    MainFrame::onRightClickTreeItem )
-EVT_TREE_END_LABEL_EDIT  ( ID_TREE_CTRL,                    MainFrame::onTreeLabelEdit      )
 
 // Interface events
 EVT_CLOSE(                                                  MainFrame::onClose              )
@@ -84,7 +82,7 @@ EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderM
 EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
 
 // KDTREE thread finished
-// TODO selection remove
+// TODO selection KD Tree remove
 //EVT_MENU( KDTREE_EVENT,                                     MainFrame::onKdTreeThreadFinished )
 
 EVT_TIMER( -1,                                              MainFrame::onTimerEvent )
@@ -1294,20 +1292,6 @@ void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::createNewSelectionObject( ObjectType selObjType )
 {
-    // TODO selection tree check coloring
-    
-    /*wxTreeItemId parendId;
-     wxColor color = *wxGREEN;*/
-    
-    //color = *wxCYAN;
-    
-    //m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, color );
-    
-    /*if( m_pDatasetHelper->m_theScene == NULL)
-     {
-     return;
-     }*/
-    
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
@@ -1342,7 +1326,7 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     
     if( treeSelectedNew( treeSelectionId ) == TYPE_SELECTION_MASTER || selTree.isEmpty() )
     {
-        pSelObj->setIsMaster( true );
+        pSelObj->setIsFirstLevel( true );
         int itemId = selTree.addChildrenObject( -1, pSelObj );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
@@ -1351,6 +1335,8 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     }
     else
     {
+        pSelObj->setIsFirstLevel( false );
+        
         CustomTreeItem *pItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( treeSelectionId );
         
         int parentId = pItem->getId();
@@ -1361,54 +1347,15 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
         newSelectionObjectId = m_pTreeWidget->AppendItem( treeSelectionId, pSelObj->getName(), 0, -1, pTreeItem );
     }
     
-    /*if( l_treeSelectionId.IsOk() )
-     {
-     CustomTreeItem *pItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( l_treeSelectionId );
-     
-     int parentId = pItem->getId();
-     
-     int childId = m_pDatasetHelper->m_pSelectionTree->addChildrenObject( parentId,  l_newSelectionObject );
-     
-     CustomTreeItem *pTreeItem = new CustomTreeItem( childId );
-     l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_treeSelectionId, l_newSelectionObject->getName(), 0, -1, pTreeItem );
-     }*/
-    
-    /*if( treeSelected( l_treeSelectionId ) == MASTER_OBJECT )
-     {
-     // Our new seleciton object is under another master selection object.
-     l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_treeSelectionId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
-     m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxGREEN );
-     }
-     else if( treeSelected( l_treeSelectionId ) == CHILD_OBJECT )
-     {
-     wxTreeItemId l_parentId = m_pTreeWidget->GetItemParent( l_treeSelectionId );
-     
-     // Our new seleciton object is under another child selection object.
-     l_newSelectionObjectId = m_pTreeWidget->AppendItem( l_parentId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
-     m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxGREEN );
-     }
-     else
-     {
-     // Our new seleciton object is on top.
-     l_newSelectionObject->setIsMaster( true );
-     //l_newSelectionObjectId = m_pTreeWidget->AppendItem( m_tSelectionObjectsId, l_newSelectionObject->getName(), 0, -1, l_newSelectionObject );
-     //m_pTreeWidget->SetItemBackgroundColour( l_newSelectionObjectId, *wxCYAN );
-     int rootId = m_pDatasetHelper->m_pSelectionTree->setRoot( l_newSelectionObject );
-     CustomTreeItem *pTreeItem = new CustomTreeItem( rootId );
-     l_newSelectionObjectId = m_pTreeWidget->AppendItem( m_tSelectionObjectsId, l_newSelectionObject->getName(), 0, -1, pTreeItem );
-     
-     // TODO selection tree
-     }*/
-    
     m_pTreeWidget->EnsureVisible( newSelectionObjectId );
     m_pTreeWidget->SetItemImage( newSelectionObjectId, pSelObj->getIcon() );
+
+    // New items are always set to green.
+    m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+    m_pTreeWidget->SelectItem(newSelectionObjectId, true);
+    
     pSelObj->setTreeId( newSelectionObjectId );    
     SceneManager::getInstance()->setSelBoxChanged( true );
-    m_pTreeWidget->SelectItem(newSelectionObjectId, true);    
-    // TODO check, in JF's branch, was commented
-    //refreshAllGLWidgets();
-    
-
 }
 
 
@@ -2203,15 +2150,10 @@ int MainFrame::getCurrentTreeIndex()
     return curTreeIndex;
 }
 
-void MainFrame::onRightClickTreeItem( wxTreeEvent& event )
-{
-    
-}
-
 void MainFrame::onActivateTreeItem( wxTreeEvent& WXUNUSED(event) )
 {
     toggleTreeItemActivation();
-    ///// TODO TBR selection tree
+    ///// TODO selection TBR
     /*if( l_selected == MASTER_OBJECT )
      {
      SelectionObject* l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_treeId ) );
@@ -2322,20 +2264,6 @@ void MainFrame::onTreeChange()
     SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
-
-// TODO selection tree check what happened
-void MainFrame::onTreeLabelEdit( wxTreeEvent& event )
-{
-    Logger::getInstance()->print( wxT("onTreeLabelEdit not implemented"), LOGLEVEL_DEBUG);
-    wxTreeItemId l_treeId = event.GetItem();
-    /*int l_selected = treeSelected( l_treeId );
-     
-     if( l_selected == CHILD_OBJECT || l_selected == MASTER_OBJECT )
-     {
-     ( (SelectionObject*)m_pTreeWidget->GetItemData( l_treeId ) )->setName( event.GetLabel() );
-     }*/
-}
-
 
 //////////////////////////////////////////////////////////////////////////
 // Helper function to determine what kind of item is selected in the tree widget.
@@ -2479,7 +2407,7 @@ void MainFrame::setTimerSpeed()
 // Gets called when a thread for the kdTree creation finishes this function
 // is here because of some limitations in the event handling system.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection remove
+// TODO selection KD TRee emove
 /*void MainFrame::onKdTreeThreadFinished( wxCommandEvent& WXUNUSED(event) )
 {
     m_threadsActive--;

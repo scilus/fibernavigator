@@ -59,7 +59,7 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
     m_isActive              = true;
     m_objectType            = DEFAULT_TYPE;
     m_isLockedToCrosshair   = false;
-    m_isMaster              = false;
+    m_isFirstLevel          = false;
     m_isNOT                 = false;
     m_isosurface            = NULL;
     m_isSelected            = false;
@@ -447,19 +447,6 @@ void SelectionObject::setColor( wxColour i_color )
     update();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// To avoid to much complication by inserting the SelectionObject class, this 
-// will simply return true if this selection object is of box type or ellipsoid type
-///////////////////////////////////////////////////////////////////////////
-// TODO selection remove this should never have existed
-bool SelectionObject::isSelectionObject()
-{
-    //if( m_objectType == BOX_TYPE || m_objectType == ELLIPSOID_TYPE )
-        return true;
-
-    //return false;
-}
-
 int SelectionObject::getIcon()
 {
     if( m_isActive && m_isVisible ) 
@@ -476,11 +463,11 @@ int SelectionObject::getIcon()
 // i_isMaster       : Indicates if we want to set this object as a master or not.
 ///////////////////////////////////////////////////////////////////////////
 // TODO selection do we need this?
-void SelectionObject::setIsMaster( bool i_isMaster )
+void SelectionObject::setIsFirstLevel( bool i_isFirstLevel )
 {
-    m_isMaster = i_isMaster;
+    m_isFirstLevel = i_isFirstLevel;
 
-    if( m_isMaster )
+    if( m_isFirstLevel )
     {
         m_inBranch.assign( DatasetManager::getInstance()->getFibersCount(), false );
     }
@@ -1902,7 +1889,8 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 void SelectionObject::draw()
 {
     // TODO selection tree check all this method check if there are some fibers loaded.
-    if( !m_isActive || !isSelectionObject())
+    // TODO selection this is prob not needed.
+    if( !m_isActive )
     {
         if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
             drawFibersInfo();
@@ -1919,7 +1907,8 @@ void SelectionObject::draw()
 
     GLfloat l_color[] = { 0.5f, 0.5f, 0.5f, 0.5f };
 
-    if( m_isMaster )
+    // TODO do we really need a different color?
+    if( m_isFirstLevel )
     {
         l_color[0] = 0.0f; // Red
         l_color[1] = 1.0f; // Green
@@ -2185,12 +2174,17 @@ bool SelectionObject::addFiberDataset( const FiberIdType &fiberId, const int fib
     
     pair< map< FiberIdType, SelectionState >::iterator, bool > insertResult = m_selectionStates.insert( pair< FiberIdType, SelectionState >( fiberId, SelectionState( ) ) );
     
+    notifyInBoxNeedsUpdating();
+    notifyStatsNeedUpdating();
+    
     return insertResult.second;
 }
 
 void SelectionObject::removeFiberDataset( const FiberIdType &fiberId )
 {
     m_selectionStates.erase( fiberId );
+    notifyInBoxNeedsUpdating();
+    notifyStatsNeedUpdating();
 }
 
 SelectionObject::SelectionState& SelectionObject::getState( const FiberIdType &fiberId )
@@ -2473,7 +2467,8 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
-    m_pToggleCalculatesFibersInfo->Enable( getIsMaster() ); //bug with some fibers dataset sets
+    // TODO selection do we always set to true?
+    //m_pToggleCalculatesFibersInfo->Enable( getIsMaster() ); //bug with some fibers dataset sets
 
 //     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
 //     pBoxSizer->Add( m_pToggleDisplayConvexHull,  3, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
@@ -2517,9 +2512,9 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 
     m_pRadNormalColoring->SetValue( true );
     // TODO selection check those two
-    pBtnNewColorVolume->Enable( getIsMaster() );
-    pBtnNewDensityVolume->Enable( getIsMaster() );
-    pToggleAndNot->Enable( !getIsMaster() && m_objectType != CISO_SURFACE_TYPE );
+    pBtnNewColorVolume->Enable( getIsFirstLevel() );
+    pBtnNewDensityVolume->Enable( getIsFirstLevel() );
+    pToggleAndNot->Enable( !getIsFirstLevel() && m_objectType != CISO_SURFACE_TYPE );
     pBtnSetAsDistanceAnchor->Enable( m_objectType == CISO_SURFACE_TYPE );
 
     m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );

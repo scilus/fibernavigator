@@ -825,7 +825,6 @@ void PropertiesWindow::OnSelectConstantColor( wxCommandEvent& WXUNUSED(event) )
 // This function will be triggered when the user click on the normal coloring radio
 // button located in the mean fiber coloring option
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection
 void PropertiesWindow::OnNormalMeanFiberColoring( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNormalMeanFiberColoring" ), LOGLEVEL_DEBUG );
@@ -1461,10 +1460,6 @@ void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
     
-    // TODO selection tree do we still need this
-    //if( !m_mainFrame->m_pDatasetHelper->m_theScene)
-    //    return;
-    
     // Get what selection object is selected.
     wxTreeItemId selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
     
@@ -2068,10 +2063,11 @@ void PropertiesWindow::AddSelectionObjectToSelectionTree( SelectionObject *pSelO
 {
     wxTreeItemId newSelectionObjectId;
     
+    // TODO selection can we really have type invalid?
     if( m_pMainFrame->treeSelectedNew( parentTreeId ) == TYPE_SELECTION_MASTER ||
        m_pMainFrame->treeSelectedNew( parentTreeId ) == TYPE_INVALID )
     {
-        pSelObj->setIsMaster( true );
+        pSelObj->setIsFirstLevel( true );
         
         int itemId = SceneManager::getInstance()->getSelectionTree().addChildrenObject( -1, pSelObj );
         

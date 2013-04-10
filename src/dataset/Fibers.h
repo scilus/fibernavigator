@@ -175,8 +175,8 @@ private:
     void            createColorArray( const bool colorsLoadedFromFile );
 
     void            resetLinesShown();
-    // TODO remove
-    std::vector< bool >  getLinesShown( SelectionObject *pSelectionObject );
+    
+    // TODO selection do we need?
     void            objectTest(    SelectionObject *pSelectionObject );
 
     void            drawFakeTubes();

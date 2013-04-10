@@ -63,7 +63,7 @@ public:
     void notifyStatsNeedUpdating( SelectionObject *pSelObject );
     
     // Methods related to saving and loading.
-    // TODO selection tree
+    // TODO selection saving
     //bool populateXMLNode( wxXmlNode *pRootSelObjNode );
     //bool loadFromXMLNode( wxXmlNode *pRootSelObjNode, DatasetHelper *pDH );
     
@@ -103,7 +103,7 @@ private:
         
         int getId() const;
         
-        // TODO selection tree
+        // TODO selection saving
         //bool populateXMLNode( wxXmlNode *pParentNode );
         
     private:
