@@ -81,10 +81,6 @@ EVT_SLIDER( ID_X_SLIDER,                                    MainFrame::onSliderM
 EVT_SLIDER( ID_Y_SLIDER,                                    MainFrame::onSliderMoved        )
 EVT_SLIDER( ID_Z_SLIDER,                                    MainFrame::onSliderMoved        )
 
-// KDTREE thread finished
-// TODO selection KD Tree remove
-//EVT_MENU( KDTREE_EVENT,                                     MainFrame::onKdTreeThreadFinished )
-
 EVT_TIMER( -1,                                              MainFrame::onTimerEvent )
 
 END_EVENT_TABLE()
@@ -195,8 +191,7 @@ MainFrame::MainFrame( const wxString     &title,
     m_draw3d( false ),
     m_canUseColorPicker( false ),
     m_drawColor(255, 255, 255),
-    m_drawColorIcon(16, 16, true),
-    m_threadsActive( 0 )
+    m_drawColorIcon(16, 16, true)
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -2279,25 +2274,6 @@ void MainFrame::setTimerSpeed()
  *
  *
  ****************************************************************************************************/
-
-///////////////////////////////////////////////////////////////////////////
-// Gets called when a thread for the kdTree creation finishes this function
-// is here because of some limitations in the event handling system.
-///////////////////////////////////////////////////////////////////////////
-// TODO selection KD TRee emove
-/*void MainFrame::onKdTreeThreadFinished( wxCommandEvent& WXUNUSED(event) )
-{
-    m_threadsActive--;
-
-    if ( m_threadsActive > 0 )
-        return;
-
-    Logger::getInstance()->print( wxT( "Tree finished" ), LOGLEVEL_MESSAGE );
-    SceneManager::getInstance()->updateAllSelectionObjects();
-    SceneManager::getInstance()->setSelBoxChanged( true );
-
-    refreshAllGLWidgets();
-}*/
 
 ///////////////////////////////////////////////////////////////////////////
 // OnGLEvent handles mouse events in the GL Refreshing widgets.

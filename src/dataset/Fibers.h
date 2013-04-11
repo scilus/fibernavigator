@@ -2,7 +2,6 @@
 #define FIBERS_H_
 
 #include "DatasetInfo.h"
-#include "KdTree.h"
 #include "Octree.h"
 #include "../gui/SelectionObject.h"
 #include "../misc/Fantom/FVector.h"
@@ -63,8 +62,6 @@ public:
     wxColour getFiberPointColor( const int fiberIdx, const int ptIdx );
 
     void    updateLinesShown();
-
-    void    generateKdTree();
 
     void    initializeBuffer();
 
@@ -216,7 +213,6 @@ private:
     bool                  m_isColorationUpdated;
     FibersColorationMode  m_fiberColorationMode;
 
-    KdTree                *m_pKdTree;
     Octree                *m_pOctree;
 
     bool            m_cfDrawDirty;

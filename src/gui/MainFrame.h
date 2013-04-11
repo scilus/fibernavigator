@@ -74,8 +74,6 @@ public:
     void      setDrawColor( const wxColour &color )   { m_drawColor = color; }
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
-    void      setThreadsActive( const int nb )      { m_threadsActive = nb; }
-
     SelectionObject* getCurrentSelectionObject();
 
 
@@ -193,8 +191,7 @@ private:
     // System functions
     void onGLEvent                          ( wxCommandEvent& evt );    
     void onSliderMoved                      ( wxCommandEvent& evt );
-    // TODO selection KD Tree remove
-    //void onKdTreeThreadFinished             ( wxCommandEvent& evt );
+
     void updateStatusBar();
     void updateMenus();
     void onTimerEvent                       ( wxTimerEvent&   evt );
@@ -244,16 +241,12 @@ private:
     wxColor  m_drawColor;
     wxImage  m_drawColorIcon;
 
-    // TODO selection kd remove
-    int  m_threadsActive;
-
 DECLARE_EVENT_TABLE()
 };
 
 /*
  * Defines for interface items and other events
  */
-#define KDTREE_EVENT                                270
 
 #define ID_GL_NAV_X                                 271
 #define ID_GL_NAV_Y                                 272

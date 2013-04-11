@@ -75,7 +75,6 @@ Fibers::Fibers()
     m_useTransparency( false ),
     m_isColorationUpdated( false ),
     m_fiberColorationMode( NORMAL_COLOR ),
-    m_pKdTree( NULL ),
     m_pOctree( NULL ),
     m_cfDrawDirty( true ),
     m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
@@ -116,12 +115,6 @@ Fibers::~Fibers()
     if( SceneManager::getInstance()->isUsingVBO() )
     {
         glDeleteBuffers( 3, m_bufferObjects );
-    }
-
-    if( m_pKdTree )
-    {
-        delete m_pKdTree;
-        m_pKdTree = NULL;
     }
 
     if( m_pOctree )
@@ -586,7 +579,7 @@ bool Fibers::loadTRK( const wxString &filename )
     createColorArray( colors.size() > 0 );
     m_type = FIBERS;
     m_fullPath = filename;
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
 #ifdef __WXMSW__
     m_name = wxT( "-" ) + filename.AfterLast( '\\' );
 #else
@@ -703,7 +696,7 @@ bool Fibers::loadCamino( const wxString &filename )
 #else
     m_name = wxT( "-" ) + filename.AfterLast( '/' );
 #endif
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
     return true;
 }
 
@@ -939,7 +932,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = filename;
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
 #ifdef __WXMSW__
     m_name = wxT( "-" ) + filename.AfterLast( '\\' );
 #else
@@ -1064,7 +1057,7 @@ bool Fibers::loadPTK( const wxString &filename )
 #else
     m_name = wxT( "-" ) + filename.AfterLast( '/' );
 #endif
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
     return true;
 }
 
@@ -1326,7 +1319,7 @@ bool Fibers::loadVTK( const wxString &filename )
 #else
     m_name = wxT( "-" ) + filename.AfterLast( '/' );
 #endif
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
     delete[] pBuffer;
     delete[] pTemp;
     return true;
@@ -1463,7 +1456,7 @@ bool Fibers::loadDmri( const wxString &filename )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = filename;
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
 #ifdef __WXMSW__
     m_name = /*"-"+*/ filename.AfterLast( '\\' );
 #else
@@ -1580,7 +1573,6 @@ void Fibers::loadTestFibers()
     m_pointArray.resize( m_countPoints * 3 );
     createColorArray( false );
     m_type = FIBERS;
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2950,14 +2942,6 @@ void Fibers::updateLinesShown()
      {
      m_dh->m_lastSelectedObject->computeConvexHull();
      }*/
-}
-
-///////////////////////////////////////////////////////////////////////////
-//Fill KdTree
-///////////////////////////////////////////////////////////////////////////
-void Fibers::generateKdTree()
-{
-    m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0] );
 }
 
 void Fibers::initializeBuffer()
