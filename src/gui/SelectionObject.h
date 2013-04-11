@@ -58,8 +58,6 @@ struct FibersInfoGridParams
                              m_meanCrossSection ( 0.0f ),
                              m_minCrossSection  ( 0.0f ),
                              m_maxCrossSection  ( 0.0f ),
-                             m_meanCurvature    ( 0.0f ),
-                             m_meanTorsion      ( 0.0f ),
                              m_dispersion       ( 0.0f )
     {
     }
@@ -72,8 +70,6 @@ struct FibersInfoGridParams
     float m_meanCrossSection;
     float m_minCrossSection;
     float m_maxCrossSection;
-    float m_meanCurvature;
-    float m_meanTorsion;
     float m_dispersion;
 };
 
@@ -206,6 +202,7 @@ public :
     virtual void flipNormals() {};
 
     // Variables
+    // TODO selection remove
     std::vector< bool > m_inBox;
     std::vector< bool > m_inBranch;
     Anatomy *           m_sourceAnatomy;
@@ -283,20 +280,7 @@ public:
     void   notifyStatsNeedUpdating           ();
 
     void   computeConvexHull                 ();
-    void   getProgressionCurvature           ( const Vector                     &i_point0, 
-                                               const Vector                     &i_point1, 
-                                               const Vector                     &i_point2, 
-                                               const Vector                     &i_point3, 
-                                               const Vector                     &i_point4,
-                                                     double                      i_progression,
-                                                     double                     &o_curvature               );
-    void   getProgressionTorsion             ( const Vector                     &i_point0, 
-                                               const Vector                     &i_point1, 
-                                               const Vector                     &i_point2, 
-                                               const Vector                     &i_point3, 
-                                               const Vector                     &i_point4,
-                                                     double                      i_progression,
-                                                     double                     &o_torsion                 );
+    
     void   updateMeanFiberOpacity             ();
     void   UpdateMeanValueTypeBox             ();
     void   updateConvexHullOpacity            ();
@@ -326,18 +310,14 @@ protected:
                                                      std::vector< Vector >           &o_fiberPoints             );
     bool   getFiberLength                    ( const std::vector< Vector >           &i_fiberPoints,
                                                      float                           &o_length                  );
-    bool   getFiberMeanCurvatureAndTorsion   ( const std::vector< Vector >           &i_fibersPoints, 
-                                                     float                           &o_curvature,
-                                                     float                           &o_torsion                 );
+   
     bool   getFiberPlaneIntersectionPoint    ( const std::vector< Vector >           &i_fiberPoints, 
                                                const Vector                          &i_pointOnPlane,
                                                const Vector                          &i_planeNormal,
                                                      std::vector< Vector >           &o_intersectionPoints      );
     bool   getFibersCount                    (       int                             &o_count                   );
     bool   getFiberDispersion                (       float                           &o_dispersion              );
-    bool   getFibersMeanCurvatureAndTorsion  ( const std::vector< std::vector< Vector > > &i_fibersPoints, 
-                                                     float                           &o_meanCurvature, 
-                                                     float                           &o_meanTorsion             );  
+    
     float  getMaxDistanceBetweenPoints       ( const std::vector< Vector >           &i_points, 
                                                      int*                            o_firstPointIndex = NULL, 
                                                      int*                            o_secondPointIndex = NULL );
@@ -352,7 +332,7 @@ protected:
                                                      float                           &o_meanCrossSection,
                                                      float                           &o_maxCrossSection,
                                                      float                           &o_minCrossSection         );
-    // TODO TBR selection tree
+    // TODO selection TBR
     bool   getMeanMaxMinFiberLength          ( const std::vector< std::vector< Vector > > &i_fibersPoints,
                                                      float                           &o_meanLength,
                                                      float                           &o_maxLength,
@@ -362,15 +342,6 @@ protected:
                                        float                      &o_meanLength,
                                        float                      &o_maxLength,
                                        float                      &o_minLength                );
-
-    void   getProgressionCurvatureAndTorsion ( const Vector                          &i_point0, 
-                                               const Vector                          &i_point1, 
-                                               const Vector                          &i_point2, 
-                                               const Vector                          &i_point3, 
-                                               const Vector                          &i_point4,
-                                                     double                          i_progression,
-                                                     double                          &o_curvature,
-                                                     double                          &o_torsion                 );
 
     bool   getShowFibers                      ();
 

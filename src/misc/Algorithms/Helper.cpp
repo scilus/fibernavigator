@@ -11,6 +11,8 @@
 
 #include "Helper.h"
 
+#include "misc/Algorithms/BSpline.h"
+
 #include <math.h>
 #include <cassert>
 
@@ -306,52 +308,88 @@ void Helper::createSphere( int                   i_latsFullSphere,
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Calculate the result of the curvature with 2 points.
+// Computes the torsion for a given set of 5 points.
 //
-// i_d1             : The point representing the first order derivative.
-// i_d2             : The point representing the second order derivative.
+// The formula for the torsion calculation was taken here : http://en.wikipedia.org/wiki/Torsion_of_a_curve
 //
-// Returns the curvature result.
-//
-// The formula for the curvature calculation was taken here : http://en.wikipedia.org/wiki/Curvature
+// i_point0                 : The first point of the set.
+// i_point1                 : The second point of the set.
+// i_point2                 : The third point of the set.
+// i_point3                 : The fourth point of the set.
+// i_point4                 : The fifth point of the set.
+// i_progression            : The progression on the spline we want to have the curvature and torsion calculated for.
+// o_torsion                : The calculated torsion.
 ///////////////////////////////////////////////////////////////////////////
- double Helper::calculateCurvature( Vector &i_d1, Vector &i_d2 )
+void Helper::getProgressionTorsion( const Vector &i_point0, 
+                                    const Vector &i_point1, 
+                                    const Vector &i_point2, 
+                                    const Vector &i_point3, 
+                                    const Vector &i_point4,
+                                    double i_progression,
+                                    double &o_torsion )
 {
-    double l_numerator = sqrt( pow( i_d2.z*i_d1.y - i_d2.y*i_d1.z , 2 ) +
-                               pow( i_d2.x*i_d1.z - i_d2.z*i_d1.x , 2 ) +
-                               pow( i_d2.y*i_d1.x - i_d2.x*i_d1.y , 2 ) );
-
-    double l_denominator = pow( float(i_d1.x*i_d1.x + i_d1.y*i_d1.y + i_d1.z*i_d1.z), 3.0f/2.0f );
-
-    if( fabs( l_denominator ) < EPSILON )
-        return 0.0f;
-
-    return l_numerator / l_denominator;
+    // We have to use 5 points for the BSpline because the torsion required derivative or the third order.
+    BSpline l_BSpline( INTERPOLATION_ON_5_POINTS );
+    Vector deriv1, deriv2, deriv3;
+    
+    l_BSpline.getDerivativeOrder1( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, deriv1 );
+    l_BSpline.getDerivativeOrder2( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, deriv2 );
+    l_BSpline.getDerivativeOrder3( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, deriv3  );
+        
+    double denominator = ( deriv1.x * deriv1.x + deriv1.y * deriv1.y + deriv1.z * deriv1.z ) * ( deriv2.x * deriv2.x + deriv2.y * deriv2.y + deriv2.z * deriv2.z );
+    
+    if( fabs( denominator ) < EPSILON )
+    {
+        o_torsion = 0.0f;
+        return;
+    }
+    
+    double numerator = ( deriv3.z * ( deriv1.x * deriv2.y - deriv1.y * deriv2.x ) ) +
+    ( deriv2.z * ( deriv3.x * deriv1.y - deriv1.x * deriv3.y ) ) +
+    ( deriv1.z * ( deriv2.x * deriv3.y - deriv3.x * deriv2.y ) );
+    
+    o_torsion = numerator / denominator;
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Calculate the result of the torsion with 3 points.
+// Computes the curvature for a given set of 5 points. 
 //
-// i_d1             : The point representing the first order derivative.
-// i_d2             : The point representing the second order derivative.
-// i_d3             : The point representing the third order derivative.
+// The formula for the curvature calculation was taken here : http://en.wikipedia.org/wiki/Curvature
 //
-// Returns the torsion result.
-//
-// The formula for the torsion calculation was taken here : http://en.wikipedia.org/wiki/Torsion_of_a_curve
+// i_point0                 : The first point of the set.
+// i_point1                 : The second point of the set.
+// i_point2                 : The third point of the set.
+// i_point3                 : The fourth point of the set.
+// i_point4                 : The fifth point of the set.
+// i_progression            : The progression on the spline we want to have the curvature calculated for.
+// o_curvature              : The calculated curvature.
 ///////////////////////////////////////////////////////////////////////////
-double Helper::calculateTorsion( Vector &i_d1, Vector &i_d2, Vector &i_d3 )
+void Helper::getProgressionCurvature( const Vector &i_point0, 
+                                      const Vector &i_point1, 
+                                      const Vector &i_point2, 
+                                      const Vector &i_point3, 
+                                      const Vector &i_point4,
+                                      double  i_progression,
+                                      double &o_curvature )
 {
-    double l_numerator = ( i_d3.z * ( i_d1.x*i_d2.y - i_d1.y*i_d2.x ) ) +
-                         ( i_d2.z * ( i_d3.x*i_d1.y - i_d1.x*i_d3.y ) ) +
-                         ( i_d1.z * ( i_d2.x*i_d3.y - i_d3.x*i_d2.y ) );
-
-    double l_denominator = ( i_d1.x*i_d1.x + i_d1.y*i_d1.y + i_d1.z*i_d1.z ) * ( i_d2.x*i_d2.x + i_d2.y*i_d2.y + i_d2.z*i_d2.z );
-
-    if( fabs( l_denominator ) < EPSILON )
-        return 0.0f;
-
-    return l_numerator / l_denominator;
+    // The calculation of the curvature could be done with INTERPOLATION_ON_4_POINTS since
+    // we do not need the derivative or the third order, but its easier to use 5 points.
+    BSpline l_BSpline( INTERPOLATION_ON_5_POINTS );
+    Vector deriv1, deriv2;
+    
+    l_BSpline.getDerivativeOrder1( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, deriv1  );
+    l_BSpline.getDerivativeOrder2( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, deriv2 );
+    
+    double numerator = sqrt( pow( deriv2.z * deriv1.y - deriv2.y * deriv1.z, 2 ) +
+                             pow( deriv2.x * deriv1.z - deriv2.z * deriv1.x, 2 ) +
+                             pow( deriv2.y * deriv1.x - deriv2.x * deriv1.y, 2 ) );
+    
+    double denominator = pow( float(deriv1.x * deriv1.x + deriv1.y * deriv1.y + deriv1.z * deriv1.z), 3.0f / 2.0f );
+    
+    if( fabs( denominator ) < EPSILON )
+        o_curvature = 0.0f;
+    
+    o_curvature = numerator / denominator;
 }
 
 ///////////////////////////////////////////////////////////////////////////

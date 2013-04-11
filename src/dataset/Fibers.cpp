@@ -1693,7 +1693,7 @@ void Fibers::colorWithTorsion( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            MyApp::frame->getLastSelectedObj()->getProgressionTorsion( 
+            Helper::getProgressionTorsion( 
                     Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
@@ -1790,7 +1790,7 @@ void Fibers::colorWithCurvature( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            MyApp::frame->getLastSelectedObj()->getProgressionCurvature(
+            Helper::getProgressionCurvature(
                     Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),

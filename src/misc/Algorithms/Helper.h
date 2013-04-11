@@ -177,8 +177,22 @@ public:
                                                float &o_b );
 
     // Math functions
-    static double   calculateCurvature       ( Vector &i_d1, Vector &i_d2 );
-    static double   calculateTorsion         ( Vector &i_d1, Vector &i_d2, Vector &i_d3 );
+    static void getProgressionTorsion( const Vector &i_point0, 
+                                       const Vector &i_point1, 
+                                       const Vector &i_point2, 
+                                       const Vector &i_point3, 
+                                       const Vector &i_point4,
+                                       double  i_progression,
+                                       double &o_torsion );
+    
+    static void getProgressionCurvature( const Vector &i_point0, 
+                                         const Vector &i_point1, 
+                                         const Vector &i_point2, 
+                                         const Vector &i_point3, 
+                                         const Vector &i_point4,
+                                         double        i_progression,
+                                         double       &o_curvature );
+    
     static void     cartesianToSpherical     ( float i_catesianDir[3], float o_sphericalDir[3] );
     static bool     convert2DPlanePointsTo3D ( const std::vector< Vector > &i_original3Dpoints, 
                                                const std::vector< Vector > &i_2Dpoints, 

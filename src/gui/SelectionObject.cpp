@@ -19,7 +19,6 @@
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
 #include "../gui/MainFrame.h"
-#include "../misc/Algorithms/BSpline.h"
 #include "../misc/Algorithms/ConvexGrahamHull.h"
 #include "../misc/Algorithms/ConvexHullIncremental.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
@@ -802,27 +801,26 @@ void SelectionObject::updateStats()
     {
         return;
     }
-    
-    m_stats.m_count = 0;
-    m_stats.m_meanLength = 0.0f;
-    m_stats.m_maxLength  = 0.0f;
-    m_stats.m_minLength  = std::numeric_limits< float >::max();
-    m_stats.m_meanValue  = 0.0f;
-    m_stats.m_meanCurvature = 0.0f;
-    m_stats.m_meanTorsion   = 0.0f;
-    
-    // TODO selection
+
     FibersGroup *pFiberGroup = DatasetManager::getInstance()->getFibersGroup();
     
     if( pFiberGroup == NULL )
     {
-        // TODO log debug that this should never happen.
+        Logger::getInstance()->print( wxT( "In SelectionObject::updateStats, pFiberGroup is NULL" ), LOGLEVEL_DEBUG );
         return;
+    }
+    
+    if( m_statsAreBeingComputed )
+    {
+        m_stats.m_count = 0;
+        m_stats.m_meanLength = 0.0f;
+        m_stats.m_maxLength  = 0.0f;
+        m_stats.m_minLength  = std::numeric_limits< float >::max();
+        m_stats.m_meanValue  = 0.0f;
     }
     
     if( m_meanFiberIsBeingDisplayed )
     {
-        // We calculate the mean fiber of the selected fibers.
         m_meanFiberPoints.assign(MEAN_FIBER_NB_POINTS, Vector( 0.0, 0.0, 0.0 ));
     }
     
@@ -843,39 +841,40 @@ void SelectionObject::updateStats()
                 continue;
             }
             
-            m_stats.m_count += selectedFibersIdx.size();
-            
-            float localMeanLength( 0.0f );
-            float localMaxLength(  0.0f );
-            float localMinLength(  0.0f );
-            
-            getMeanMaxMinFiberLengthNew( selectedFibersIdx, pCurFibers, 
-                                        localMeanLength, 
-                                        localMaxLength, 
-                                        localMinLength );
-            
-            m_stats.m_meanLength += localMeanLength;
-            ++activeFiberSetCount;
-            
-            m_stats.m_maxLength = std::max( m_stats.m_maxLength, localMaxLength );
-            m_stats.m_minLength = std::min( m_stats.m_minLength, localMinLength );
-            
-            // Compute mean value
             vector< int > nbPointsBySelectedFiber;
             vector< vector < Vector > > pointsBySelectedFiber;
             
             getSelectedFibersInfo( selectedFibersIdx, pCurFibers, 
                                   nbPointsBySelectedFiber, pointsBySelectedFiber );
             
-            float localMeanValue( 0.0f );
+            ++activeFiberSetCount;
             
-            getMeanFiberValue( pointsBySelectedFiber, localMeanValue );
-            
-            m_stats.m_meanValue += localMeanValue;
-            
-            // Get the mean fiber. It is always needed, either to display,
-            // or to compute the curvature and torsion.
-            // TODO selection should test
+            if( m_statsAreBeingComputed )
+            {
+                m_stats.m_count += selectedFibersIdx.size();
+                
+                float localMeanLength( 0.0f );
+                float localMaxLength(  0.0f );
+                float localMinLength(  0.0f );
+                
+                getMeanMaxMinFiberLengthNew( selectedFibersIdx, pCurFibers, 
+                                            localMeanLength, 
+                                            localMaxLength, 
+                                            localMinLength );
+                
+                m_stats.m_meanLength += localMeanLength;
+                
+                m_stats.m_maxLength = std::max( m_stats.m_maxLength, localMaxLength );
+                m_stats.m_minLength = std::min( m_stats.m_minLength, localMinLength );
+                
+                float localMeanValue( 0.0f );
+                
+                getMeanFiberValue( pointsBySelectedFiber, localMeanValue );
+                
+                m_stats.m_meanValue += localMeanValue;
+            }
+
+            // Get the mean fiber.
             if( m_meanFiberIsBeingDisplayed )
             {
                 vector< Vector > meanFiberPoint;
@@ -886,25 +885,21 @@ void SelectionObject::updateStats()
                     m_meanFiberPoints[ meanPtIdx ] += meanFiberPoint[ meanPtIdx ];
                 }
             }
-            
-            // Compute curvature and torsion
-            float localCurvature( 0.0f );
-            float localTorsion(   0.0f );
-            
-            // TODO selection should use precomputed mean fiber
-            getFibersMeanCurvatureAndTorsion( pointsBySelectedFiber, localCurvature, localTorsion );
-            
-            m_stats.m_meanTorsion += localTorsion;
-            m_stats.m_meanCurvature += localCurvature;
         }
     }
     
     if( activeFiberSetCount > 0 )
     {
-        m_stats.m_meanLength    /= activeFiberSetCount;
-        m_stats.m_meanValue     /= activeFiberSetCount;
-        m_stats.m_meanCurvature /= activeFiberSetCount;
-        m_stats.m_meanTorsion   /= activeFiberSetCount;
+        if( m_statsAreBeingComputed )
+        {
+            m_stats.m_meanLength    /= activeFiberSetCount;
+            m_stats.m_meanValue     /= activeFiberSetCount;
+            
+            if( m_stats.m_minLength == std::numeric_limits< float >::max() )
+            {
+                m_stats.m_minLength = 0.0f;
+            }
+        }
         
         if( m_meanFiberIsBeingDisplayed )
         {
@@ -913,15 +908,6 @@ void SelectionObject::updateStats()
                 m_meanFiberPoints[ meanPtIdx ] /= activeFiberSetCount;
             }
         }
-    }
-    else
-    {
-        m_meanFiberPoints.clear();
-    }
-    
-    if( m_stats.m_minLength == std::numeric_limits< float >::max() )
-    {
-        m_stats.m_minLength = 0.0f;
     }
     
     m_statsNeedUpdating = false;
@@ -1606,194 +1592,6 @@ bool SelectionObject::getFiberPlaneIntersectionPoint( const vector< Vector > &i_
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Computes the mean curvature and mean torsion for a given set of fibers.
-//
-// i_fibersVector           : The vector containing the fibers points.
-// o_meanCurvature          : The output mean curvature of the fibers.
-// o_meanTorsion            : The output mean torsion of the fibers.
-//
-// Returns true if successful, false otherwise.
-///////////////////////////////////////////////////////////////////////////
-bool SelectionObject::getFibersMeanCurvatureAndTorsion( const vector< vector< Vector > > &i_fiberVector, 
-                                                              float                      &o_meanCurvature, 
-                                                              float                      &o_meanTorsion )
-{
-
-   o_meanCurvature = 0.0f;
-   o_meanTorsion   = 0.0f;
-
-   if( i_fiberVector.size() == 0 )
-    return false;
-
-    //Curvature and torsion are now calculated from mean fiber
-   vector< Vector > meanFiberPoint;
-    getMeanFiber(i_fiberVector, MEAN_FIBER_NB_POINTS, meanFiberPoint);
-    getFiberMeanCurvatureAndTorsion(meanFiberPoint, o_meanCurvature, o_meanTorsion );
-
-
-    //Curvature and torsion are now calculated from mean fiber
-   //float l_currentFiberCurvature, l_currentFiberTorsion;
-   //for( unsigned int i = 0; i < i_fiberVector.size(); ++i )
-   //{
-   //    l_currentFiberCurvature = 0.0f;
-   //    l_currentFiberTorsion   = 0.0f;
-   //    getFiberMeanCurvatureAndTorsion( i_fiberVector[i], l_currentFiberCurvature, l_currentFiberTorsion );
-   //    o_meanCurvature += l_currentFiberCurvature;
-   //    o_meanTorsion   += l_currentFiberTorsion;
-   //}
-
-   //o_meanCurvature /= i_fiberVector.size();
-   //o_meanTorsion   /= i_fiberVector.size();
-
-   return true;
-}
-
-
-///////////////////////////////////////////////////////////////////////////
-// Computes the curvature and torsion for a given fiber. The reason there is only one
-// function to calculate these 2 params,  is because they both use the derivative 
-// calculated with the BSpline class. It would have been a waste of calculation time
-// to calculate those derivative twice.
-//
-// i_fiberPoints        : The fiber points vector.
-// o_curvature          : The output curvature of the fiber.
-// o_torsion            : The output torsion of the fiber.
-//
-// Returns true if successful, false otherwise.
-///////////////////////////////////////////////////////////////////////////
-bool SelectionObject::getFiberMeanCurvatureAndTorsion( const vector< Vector > &i_fiberPoints, float &o_curvature, float &o_torsion )
-{
-    // If we do not have at least 5 points, we cannot do the B-Spline algorithm.
-    if( i_fiberPoints.size() < 5 )
-        return false;
-
-    Vector l_firstDerivative, l_secondDerivative, l_thirdDerivative;
-    double l_currentCurvature, l_currentTorsion;
-    double l_progression     = 0.0f;
-    int    l_index           = 0;
-
-    for( unsigned int i = 0; i < i_fiberPoints.size(); ++i )
-    {
-        if     ( i == 0 )                        { l_progression = 0.0f;  l_index = 2;                        } // The first point of the fiber.
-        else if( i == 1 )                        { l_progression = 0.25f; l_index = 2;                        } // The second point of the fiber.
-        else if( i == i_fiberPoints.size() - 2 ) { l_progression = 0.75f; l_index = i_fiberPoints.size() - 3; } // The before last point of the fiber.
-        else if( i == i_fiberPoints.size() - 1 ) { l_progression = 1.0f;  l_index = i_fiberPoints.size() - 3; } // The last point of the fiber.
-        else                                     { l_progression = 0.5f;  l_index = i;                        } // For every other points of the fiber.
-
-        getProgressionCurvatureAndTorsion( i_fiberPoints[l_index - 2], 
-                                           i_fiberPoints[l_index - 1], 
-                                           i_fiberPoints[l_index], 
-                                           i_fiberPoints[l_index + 1], 
-                                           i_fiberPoints[l_index + 2],
-                                           l_progression, 
-                                           l_currentCurvature, 
-                                           l_currentTorsion );
-
-        o_curvature += l_currentCurvature;
-        o_torsion   += l_currentTorsion;
-     }
-
-    o_curvature /= i_fiberPoints.size();
-    o_torsion   /= i_fiberPoints.size();
-
-    return true;
-}
-    
-///////////////////////////////////////////////////////////////////////////
-// Computes the curvature and the torsion for a given set of 5 points. Calculating both
-// at the same time saves some computation time since they both use the same derivatives. 
-//
-// i_point0                 : The first point of the set.
-// i_point1                 : The second point of the set.
-// i_point2                 : The third point of the set.
-// i_point3                 : The fourth point of the set.
-// i_point4                 : The fifth point of the set.
-// i_progression            : The progression on the spline we want to have the curvature and torsion calculated for.
-// o_curvature              : The calculated curvature.
-// o_torsion                : The calculated torsion.
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::getProgressionCurvatureAndTorsion( const Vector &i_point0, 
-                                                         const Vector &i_point1, 
-                                                         const Vector &i_point2, 
-                                                         const Vector &i_point3, 
-                                                         const Vector &i_point4,
-                                                               double  i_progression,
-                                                               double &o_curvature,
-                                                               double &o_torsion )
-{
-    // We have to use 5 points for the BSpline because the torsion required derivative or the third order.
-    BSpline l_BSpline( INTERPOLATION_ON_5_POINTS );
-    Vector l_firstDerivative, l_secondDerivative, l_thirdDerivative;
-    
-    l_BSpline.getDerivativeOrder1( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, l_firstDerivative  );
-    l_BSpline.getDerivativeOrder2( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, l_secondDerivative );
-    l_BSpline.getDerivativeOrder3( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, l_thirdDerivative  );
-
-    o_curvature = Helper::calculateCurvature( l_firstDerivative, l_secondDerivative );
-    o_torsion   = Helper::calculateTorsion( l_firstDerivative, l_secondDerivative, l_thirdDerivative );
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Computes the curvature for a given set of 5 points. 
-//
-// i_point0                 : The first point of the set.
-// i_point1                 : The second point of the set.
-// i_point2                 : The third point of the set.
-// i_point3                 : The fourth point of the set.
-// i_point4                 : The fifth point of the set.
-// i_progression            : The progression on the spline we want to have the curvature calculated for.
-// o_curvature              : The calculated curvature.
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::getProgressionCurvature( const Vector &i_point0, 
-                                               const Vector &i_point1, 
-                                               const Vector &i_point2, 
-                                               const Vector &i_point3, 
-                                               const Vector &i_point4,
-                                                     double  i_progression,
-                                                     double &o_curvature )
-{
-    // The calculation of the curvature could be done with INTERPOLATION_ON_4_POINTS since
-    // we do not need the derivative or the third order, but its easier to use 5 points.
-    BSpline l_BSpline( INTERPOLATION_ON_5_POINTS );
-    Vector l_firstDerivative, l_secondDerivative;
-    
-    l_BSpline.getDerivativeOrder1( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, l_firstDerivative  );
-    l_BSpline.getDerivativeOrder2( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, l_secondDerivative );
-
-    o_curvature = Helper::calculateCurvature( l_firstDerivative, l_secondDerivative );
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Computes the torsion for a given set of 5 points.
-//
-// i_point0                 : The first point of the set.
-// i_point1                 : The second point of the set.
-// i_point2                 : The third point of the set.
-// i_point3                 : The fourth point of the set.
-// i_point4                 : The fifth point of the set.
-// i_progression            : The progression on the spline we want to have the curvature and torsion calculated for.
-// o_torsion                : The calculated torsion.
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::getProgressionTorsion( const Vector &i_point0, 
-                                             const Vector &i_point1, 
-                                             const Vector &i_point2, 
-                                             const Vector &i_point3, 
-                                             const Vector &i_point4,
-                                                   double  i_progression,
-                                                   double &o_torsion )
-{
-    // We have to use 5 points for the BSpline because the torsion required derivative or the third order.
-    BSpline l_BSpline( INTERPOLATION_ON_5_POINTS );
-    Vector l_firstDerivative, l_secondDerivative, l_thirdDerivative;
-    
-    l_BSpline.getDerivativeOrder1( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, l_firstDerivative  );
-    l_BSpline.getDerivativeOrder2( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, l_secondDerivative );
-    l_BSpline.getDerivativeOrder3( i_progression, i_point0, i_point1, i_point2, i_point3, i_point4, l_thirdDerivative  );
-
-    o_torsion = Helper::calculateTorsion( l_firstDerivative, l_secondDerivative, l_thirdDerivative );
-}
-
-///////////////////////////////////////////////////////////////////////////
 // We compute the dispersion in the following manner:
 // We create the two tightest circles we can fit around the min and max cross sections.
 // ( m_crossSectionsPoints[m_minCrossSectionIndex], m_crossSectionsPoints[m_maxCrossSectionIndex] ).
@@ -2238,8 +2036,6 @@ void SelectionObject::updateStatsGrid()
         m_pGridFibersInfo->SetCellValue( 2,  0, wxString::Format( wxT( "%.2f" ), m_stats.m_meanLength       ) );
         m_pGridFibersInfo->SetCellValue( 3,  0, wxString::Format( wxT( "%.2f" ), m_stats.m_minLength        ) );
         m_pGridFibersInfo->SetCellValue( 4,  0, wxString::Format( wxT( "%.2f" ), m_stats.m_maxLength        ) );
-        m_pGridFibersInfo->SetCellValue( 5,  0, wxString::Format( wxT( "%.5f" ), m_stats.m_meanCurvature    ) );
-        m_pGridFibersInfo->SetCellValue( 6,  0, wxString::Format( wxT( "%.5f" ), m_stats.m_meanTorsion      ) );
     }
 }
 
@@ -2396,7 +2192,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     font.SetWeight( wxFONTWEIGHT_BOLD );
     m_pGridFibersInfo->SetFont( font );
     m_pGridFibersInfo->SetColLabelSize( 2 );
-    m_pGridFibersInfo->CreateGrid( 7, 1, wxGrid::wxGridSelectCells );
+    m_pGridFibersInfo->CreateGrid( 5, 1, wxGrid::wxGridSelectCells );
     m_pGridFibersInfo->SetColLabelValue( 0, wxT( "" ) );
     m_pGridFibersInfo->SetRowLabelValue( 0, wxT( "Count" ) );
     m_pGridFibersInfo->SetRowLabelValue( 1, wxT( "Mean Value" ) );
@@ -2406,8 +2202,6 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 //     m_pGridFibersInfo->SetRowLabelValue( 5, wxT( "Mean C. S. (mm)" ) );
 //     m_pGridFibersInfo->SetRowLabelValue( 6, wxT( "Min C. S. (mm)" ) );
 //     m_pGridFibersInfo->SetRowLabelValue( 7, wxT( "Max C. S. (mm)" ) );
-    m_pGridFibersInfo->SetRowLabelValue( 5, wxT( "Mean Curvature" ) );
-    m_pGridFibersInfo->SetRowLabelValue( 6, wxT( "Mean Torsion" ) );
 //     m_pGridFibersInfo->SetRowLabelValue( 10, wxT( "Dispersion" ) );
 
     m_pGridFibersInfo->SetRowLabelSize( 120 );
