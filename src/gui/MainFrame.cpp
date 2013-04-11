@@ -196,8 +196,7 @@ MainFrame::MainFrame( const wxString     &title,
     m_canUseColorPicker( false ),
     m_drawColor(255, 255, 255),
     m_drawColorIcon(16, 16, true),
-    m_threadsActive( 0 ),
-    m_pLastSelectionObj( NULL )
+    m_threadsActive( 0 )
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -847,18 +846,38 @@ void MainFrame::updateDrawerToolbar()
 
 void MainFrame::changePropertiesSizer( SceneObject * pSceneObj, int index )
 {
+    if( m_pCurrentSizer != NULL )
+    {
+        m_pPropertiesWindow->GetSizer()->Hide( m_pCurrentSizer, true );
+        m_pPropertiesWindow->Layout();
+        m_pPropertiesWindow->FitInside();
+    }
+    
     if( NULL == pSceneObj->getPropertiesSizer() )
     {
         pSceneObj->createPropertiesSizer( m_pPropertiesWindow );
         m_pPropertiesWindow->Layout();
         m_pPropertiesWindow->FitInside();
-    }
+    }    
 
     m_pCurrentSizer = pSceneObj->getPropertiesSizer();
     m_pCurrentSceneObject = pSceneObj;
     m_currentListIndex = index;
 
     m_pPropertiesWindow->GetSizer()->Show( m_pCurrentSizer, true, true );
+}
+
+void MainFrame::hideAllInPropSizer()
+{
+    wxSizerItemList children = m_pPropertiesWindow->GetSizer()->GetChildren();
+    
+    for( size_t sizerIdx( 0 ); sizerIdx < children.GetCount(); ++sizerIdx )
+    {
+        m_pPropertiesWindow->GetSizer()->Hide( sizerIdx );
+    }
+    
+    m_pPropertiesWindow->Layout();
+    m_pPropertiesWindow->FitInside();
 }
 
 void MainFrame::onToggleDrawRound( wxCommandEvent& event )
@@ -1911,15 +1930,8 @@ void MainFrame::onSelectListItem( wxListEvent& evt )
 {
     Logger::getInstance()->print( _T( "Event triggered - MainFrame::onSelectListItem" ), LOGLEVEL_DEBUG );
 
-    if( NULL != m_pLastSelectionObj && NULL != m_pLastSelectionObj->getPropertiesSizer() )
-    {
-        m_pLastSelectionObj->unselect();
-        m_pPropertiesWindow->GetSizer()->Hide( m_pLastSelectionObj->getPropertiesSizer() );
-        m_pLastSelectionObj = NULL;
-    }
-
     int index = evt.GetIndex();
-    //m_pTreeWidget->UnselectAll();
+
     DatasetInfo * pInfo = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( index ) );
 
     if( NULL == pInfo )
@@ -1976,19 +1988,7 @@ void MainFrame::deleteTreeItem()
         CustomTreeItem *pTreeItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( l_treeId );
         
         SelectionTree &selTree = SceneManager::getInstance()->getSelectionTree();
-        
-        if( objectType == TYPE_SELECTION_OBJECT )
-        {
-            SelectionObject *pCurObj = selTree.getObject( pTreeItem->getId() );
-            SelectionObject *pParObj = selTree.getParentObject( pCurObj );
-            
-            if( pParObj != NULL )
-            {
-                // TODO selection what to do
-                //pParObj->setIsDirty( true );
-            }
-        }
-        
+
         if( objectType == TYPE_SELECTION_OBJECT && selTree.containsId( pTreeItem->getId() ) )
         {  
             deleteSceneObject();  // TODO check
@@ -1997,14 +1997,6 @@ void MainFrame::deleteTreeItem()
             selTree.removeObject( pTreeItem->getId() );
             
             m_pTreeWidget->Delete( l_treeId );
-            
-            // TODO check all the lastSelectedObject calls vs JF's version.
-            if (m_pLastSelectionObj != NULL)
-            {
-                SceneManager::getInstance()->setSelBoxChanged( true );
-            }
-            
-            m_pLastSelectionObj = NULL;
         }
         
         SceneManager::getInstance()->setSelBoxChanged( true );
@@ -2021,100 +2013,25 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - MainFrame::onSelectTreeItem" ), LOGLEVEL_DEBUG );
     
-    if( NULL != m_pLastSelectionObj && NULL != m_pLastSelectionObj->getPropertiesSizer() )
+    hideAllInPropSizer();
+    
+    SceneManager::getInstance()->getSelectionTree().unselectAll();
+    
+    SelectionObject* pSelectionObject = getCurrentSelectionObject();
+    
+    if( pSelectionObject != NULL )
     {
-        m_pLastSelectionObj->unselect();
-        m_pPropertiesWindow->GetSizer()->Hide( m_pLastSelectionObj->getPropertiesSizer() );
-        m_pLastSelectionObj = NULL;
-    }
-    
-    //     m_pListCtrl->UnselectAll();
-    long index = m_pListCtrl->GetSelectedIndex();
-    DatasetIndex dsIndex = m_pListCtrl->GetItem( index );
-    if( dsIndex.isOk() )
-    {
-        DatasetInfo *pDsInfo = DatasetManager::getInstance()->getDataset( dsIndex );
-        
-        if( NULL != pDsInfo && NULL != pDsInfo->getPropertiesSizer() )
-        {
-            Logger::getInstance()->print( wxString::Format( wxT( "Hiding Index: %u DatasetInfo: %s" ), (unsigned int)dsIndex, pDsInfo->getName().c_str() ), LOGLEVEL_DEBUG );
-            if( !m_pPropertiesWindow->GetSizer()->Hide( pDsInfo->getPropertiesSizer() ) )
-            {
-                Logger::getInstance()->print( wxT( "Couldn't hide Sizer." ), LOGLEVEL_DEBUG );
-            }
-            m_pPropertiesWindow->Layout();
-            m_pPropertiesWindow->FitInside();
-        }
-    }
-    
-    wxTreeItemId selectedId = m_pTreeWidget->GetSelection();
-    if( !selectedId.IsOk() )
-    {
-        return;
-    }
-    
-    TreeObjectType objectType = treeSelectedNew( selectedId );
-    
-    SelectionObject* pSelectionObject;
-    
-    CustomTreeItem *pTreeItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( selectedId );
-    
-    int treeItemId( -1 );
-    if( pTreeItem != NULL )
-    {
-        treeItemId = pTreeItem->getId();
-    }
-    
-    // TODO selection tree
-    
-    
-    // When NULL, could not be cast. It is probably the "selection object" item.
-    //if( pTreeItem != NULL )
-    {
-        //switch( l_selected )
-        if( objectType == TYPE_SELECTION_OBJECT )
-        {
-            //case MASTER_OBJECT:
-            //case CHILD_OBJECT:
-            //            case TYPE_SELECTION_OBJECT:
-            if ( m_pLastSelectionObj != NULL )
-            {
-                m_pLastSelectionObj->unselect();
-            }
-            
-            /*if ( m_pDatasetHelper->m_lastSelectedPoint )
-             {
-             m_pDatasetHelper->m_lastSelectedPoint->unselect();
-             m_pDatasetHelper->m_lastSelectedPoint = NULL;
-             }*/
-            
-            //if( pTreeItem != NULL )
-            //{
-            pSelectionObject = SceneManager::getInstance()->getSelectionTree().getObject( treeItemId );
-            //}
-            //else
-            //{
-            //    l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_treeId ) );
-            //}
-            
-            m_pLastSelectionObj = pSelectionObject;
-            changePropertiesSizer( pSelectionObject, m_currentListIndex );
-            // TODO check not sure of this
-            //m_pLastSelectionObj->select( false );
-            //m_pLastSelectedSceneObject = l_selectionObject;
-            //m_lastSelectedListItem = -1;
-            //                break;
-        }    
-        
+        pSelectionObject->select( true );
+        changePropertiesSizer( pSelectionObject, m_currentListIndex );        
+    }    
+
+    // TODO selection what do i do with this?
 #ifdef __WXMSW__
         if (m_currentListItem != -1)
         {       
             m_pListCtrl->SetItemState(m_currentListItem,0,wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED);  
         }
 #endif
-    }    
-    
-    //refreshAllGLWidgets();
 }
 
 SelectionObject* MainFrame::getCurrentSelectionObject()
@@ -2153,46 +2070,6 @@ int MainFrame::getCurrentTreeIndex()
 void MainFrame::onActivateTreeItem( wxTreeEvent& WXUNUSED(event) )
 {
     toggleTreeItemActivation();
-    ///// TODO selection TBR
-    /*if( l_selected == MASTER_OBJECT )
-     {
-     SelectionObject* l_selectionObject = (SelectionObject*)( m_pTreeWidget->GetItemData( l_treeId ) );
-     l_selectionObject->toggleIsActive();
-     m_pTreeWidget->SetItemImage(l_treeId, l_selectionObject->getIcon());
-     l_selectionObject->setIsDirty(true);
-     
-     int l_childSelectionObjects = m_pTreeWidget->GetChildrenCount( l_treeId );
-     wxTreeItemIdValue l_childCookie = 0;
-     
-     for( int i = 0; i < l_childSelectionObjects; ++i )
-     {
-     wxTreeItemId l_childId = m_pTreeWidget->GetNextChild( l_treeId, l_childCookie );
-     if( l_childId.IsOk() )
-     {
-     SelectionObject* l_childSelectionBox = ( (SelectionObject*)( m_pTreeWidget->GetItemData( l_childId ) ) );
-     l_childSelectionBox->setIsActive( l_selectionObject->getIsActive() );
-     m_pTreeWidget->SetItemImage( l_childId, l_childSelectionBox->getIcon() );
-     l_childSelectionBox->setIsDirty( true );
-     }
-     }
-     }
-     else if( l_selected == CHILD_OBJECT )
-     {
-     SelectionObject* l_box = (SelectionObject*)( m_pTreeWidget->GetItemData( l_treeId ) );
-     
-     l_box->toggleIsNOT();
-     wxTreeItemId l_parentId = m_pTreeWidget->GetItemParent( l_treeId );
-     ((SelectionObject*)( m_pTreeWidget->GetItemData( l_parentId ) ) )->setIsDirty( true );
-     
-     if( l_box->getIsNOT() )
-     {
-     m_pTreeWidget->SetItemBackgroundColour( l_treeId, *wxRED );
-     }
-     else
-     {
-     m_pTreeWidget->SetItemBackgroundColour( l_treeId, *wxGREEN );
-     }
-     }*/
     refreshAllGLWidgets();
 }
 

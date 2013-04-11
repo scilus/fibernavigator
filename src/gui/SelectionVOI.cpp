@@ -84,11 +84,11 @@ SelectionVOI::SelectionVOI( /*DatasetHelper *pDH, */Anatomy *pSourceAnatomy, con
     m_pIsoSurface->GenerateSurface();
     
     wxString mystring(wxT("[VOI] - ") + pSourceAnatomy->getName());
-    m_name          =  mystring;
-    
-    /*m_objectType    = CISO_SURFACE_TYPE;
-    m_sourceAnatomy = i_anatomy;*/
-    // TODO HERE was going to compute the value of the 
+    m_name          = mystring;
+    m_objectType    = VOI_TYPE;
+
+    //m_sourceAnatomy = i_anatomy;*/
+    // TODO selection HERE was going to compute the value of the 
     // m_center and m_size params.
     unsigned int xIdxMin( m_nbCols );
     unsigned int yIdxMin( m_nbRows );

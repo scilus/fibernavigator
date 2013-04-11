@@ -46,6 +46,8 @@ public:
     
     bool containsId( const int itemId ) const;
     
+    void unselectAll();
+    
     // TODO selection remove if not needed
     //void removeAllObjects();
     void notifyAllObjectsNeedUpdating();

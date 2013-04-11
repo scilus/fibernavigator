@@ -16,6 +16,8 @@
 #include "../dataset/DatasetManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
+#include "Logger.h"
+
 ///////////////////////////////////////////////////////////////////////////
 // Constructor
 // i_center             : The center of the box.
@@ -40,16 +42,6 @@ SelectionBox::~SelectionBox()
     if( m_isLockedToCrosshair )
     {
         SceneManager::getInstance()->setBoxLock( false );
-    }
-    if( m_objectType == CISO_SURFACE_TYPE )
-    {
-        delete m_isosurface;
-        m_isosurface = NULL;
-
-        if( m_sourceAnatomy && m_sourceAnatomy->m_pRoi == this)
-        {
-            m_sourceAnatomy->m_pRoi = NULL;
-        }
     }
 }
 

@@ -18,8 +18,6 @@ public:
     MyTreeCtrl(MainFrame *pMainFrame, wxWindow *pParent, const wxWindowID id, const wxPoint& pos, const wxSize& size, long style );
 
 private:
-    int  getSelectedType();
-
     void OnChar(wxKeyEvent& event);
 
 private:

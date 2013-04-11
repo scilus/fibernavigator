@@ -75,7 +75,6 @@ public:
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
     void      setThreadsActive( const int nb )      { m_threadsActive = nb; }
-    SelectionObject * getLastSelectedObj() const    { return m_pLastSelectionObj; }
 
     SelectionObject* getCurrentSelectionObject();
 
@@ -221,6 +220,7 @@ private:
     void updateDrawerToolbar();
 
     void changePropertiesSizer( SceneObject * pSceneObj, int index );
+    void hideAllInPropSizer();
 
 private:
     ToolBar             *m_pToolBar;
@@ -244,8 +244,8 @@ private:
     wxColor  m_drawColor;
     wxImage  m_drawColorIcon;
 
+    // TODO selection kd remove
     int  m_threadsActive;
-    SelectionObject* m_pLastSelectionObj;
 
 DECLARE_EVENT_TABLE()
 };

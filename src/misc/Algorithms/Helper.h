@@ -40,10 +40,10 @@ enum DatasetType
     FIBERS,
     SURFACE,
     ISO_SURFACE,
-    MASTER_OBJECT,
-    CHILD_OBJECT,
-    LABEL_POINTS,
-    LABEL_SELECTION_OBJECTS,
+    MASTER_OBJECT,      // TODO selection probably not needed anymore, but not sure should remove
+    CHILD_OBJECT,       // TODO selection probably not needed anymore, but not sure should remove
+    LABEL_POINTS,       // TODO selection probably not needed anymore, but not sure should remove
+    LABEL_SELECTION_OBJECTS,    // TODO selection probably not needed anymore, but not sure should remove
     NOT_INITIALIZED,
     FIBERSGROUP
 };
@@ -55,8 +55,9 @@ enum ObjectType
 {
     ELLIPSOID_TYPE    = 0,
     BOX_TYPE          = 1,
-    CISO_SURFACE_TYPE = 2,
-    DEFAULT_TYPE      = 3
+    CISO_SURFACE_TYPE = 2, // TODO should probably not exist
+    DEFAULT_TYPE      = 3, // TODO should probably not exist
+    VOI_TYPE          = 4
 };
 
 ///////////////////////////////////////////////////////////////////////////

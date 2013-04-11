@@ -1947,6 +1947,7 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
             for( unsigned int k = 0; k < simplifiedList.size(); ++k )
             {
+                // TODO selection m_sourceanat
                 float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
 
                 if( curValue < minDistance )
@@ -2949,23 +2950,6 @@ void Fibers::updateLinesShown()
      {
      m_dh->m_lastSelectedObject->computeConvexHull();
      }*/
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Get points that are inside the selection object and
-// set selected fibers according to those points.
-///////////////////////////////////////////////////////////////////////////
-void Fibers::objectTest( SelectionObject *pSelectionObject )
-{
-    vector<int> pointsInside = m_pOctree->getPointsInside( pSelectionObject ); //Get points inside the selection object
-    int indice, id;
-
-    for( unsigned int i = 0; i < pointsInside.size(); i++ )
-    {
-        indice = pointsInside[i];
-        id = m_reverse[indice];//Fiber ID according to current point
-        m_selected[id] = 1; //Fiber to be in bundle (TRUE)
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////

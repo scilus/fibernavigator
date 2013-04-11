@@ -175,9 +175,6 @@ private:
     void            createColorArray( const bool colorsLoadedFromFile );
 
     void            resetLinesShown();
-    
-    // TODO selection do we need?
-    void            objectTest(    SelectionObject *pSelectionObject );
 
     void            drawFakeTubes();
     void            drawSortedLines();

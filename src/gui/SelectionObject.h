@@ -202,9 +202,6 @@ public :
     virtual void flipNormals() {};
 
     // Variables
-    // TODO selection remove
-    std::vector< bool > m_inBox;
-    std::vector< bool > m_inBranch;
     Anatomy *           m_sourceAnatomy;
     bool                m_boxMoved;
     bool                m_boxResized;
@@ -315,7 +312,7 @@ protected:
                                                const Vector                          &i_pointOnPlane,
                                                const Vector                          &i_planeNormal,
                                                      std::vector< Vector >           &o_intersectionPoints      );
-    bool   getFibersCount                    (       int                             &o_count                   );
+    
     bool   getFiberDispersion                (       float                           &o_dispersion              );
     
     float  getMaxDistanceBetweenPoints       ( const std::vector< Vector >           &i_points, 
@@ -332,16 +329,12 @@ protected:
                                                      float                           &o_meanCrossSection,
                                                      float                           &o_maxCrossSection,
                                                      float                           &o_minCrossSection         );
-    // TODO selection TBR
-    bool   getMeanMaxMinFiberLength          ( const std::vector< std::vector< Vector > > &i_fibersPoints,
-                                                     float                           &o_meanLength,
-                                                     float                           &o_maxLength,
-                                                     float                           &o_minLength               );
-    bool   getMeanMaxMinFiberLengthNew(       const vector< int > &selectedFibersIndexes,
-                                       Fibers        *pCurFibers,
-                                       float                      &o_meanLength,
-                                       float                      &o_maxLength,
-                                       float                      &o_minLength                );
+    
+    bool   getMeanMaxMinFiberLength( const vector< int > &selectedFibersIndexes,
+                                           Fibers        *pCurFibers,
+                                           float         &o_meanLength,
+                                           float         &o_maxLength,
+                                           float         &o_minLength );
 
     bool   getShowFibers                      ();
 

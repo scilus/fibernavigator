@@ -873,15 +873,14 @@ void PropertiesWindow::OnMeanFiberOpacityChange( wxCommandEvent& event )
 // This function will be triggered when the user clicks on the "Set as distance
 // anchor" option.
 //////////////////////////////////////////////////////////////////////////
-// TODO selection
 void PropertiesWindow::OnDistanceAnchorSet( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDistanceAnchorSet" ), LOGLEVEL_DEBUG );
 
-    SelectionObject * pLastSelObj = m_pMainFrame->getLastSelectedObj();
-    if( pLastSelObj != NULL )
+    SelectionObject *pCurSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pCurSelObj != NULL )
     {
-        pLastSelObj->UseForDistanceColoring( !pLastSelObj->IsUsedForDistanceColoring() );
+        pCurSelObj->UseForDistanceColoring( !pCurSelObj->IsUsedForDistanceColoring() );
         ColorFibers();
     }
 }
@@ -1488,56 +1487,18 @@ void PropertiesWindow::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorRoi" ), LOGLEVEL_DEBUG );
     
-    /////
-    //if( ! m_mainFrame->m_pDatasetHelper->m_theScene )
-    //    return;
+    wxColour newCol;
     
-    // TODO selection color
-    wxColourData colorData;
+    bool success = SelectColor( newCol );
     
-    for( int i = 0; i < 10; ++i )
+    if( !success )
     {
-        wxColour l_color( i * 28, i * 28, i * 28 );
-        colorData.SetCustomColour( i, l_color );
-    }
-    
-    int i = 10;
-    wxColour color ( 255, 0,   0   );
-    wxColour color1( 0,   255, 0   );
-    wxColour color2( 0,   0,   255 );
-    wxColour color3( 255, 255, 0   );
-    wxColour color4( 255, 0,   255 );
-    wxColour color5( 0,   255, 255 );
-    
-    colorData.SetCustomColour( i++, color  );
-    colorData.SetCustomColour( i++, color1 );
-    colorData.SetCustomColour( i++, color2 );
-    colorData.SetCustomColour( i++, color3 );
-    colorData.SetCustomColour( i++, color4 );
-    colorData.SetCustomColour( i++, color5 );
-#ifdef __WXMAC__
-    wxColourDialog dialog( this);
-#else
-    wxColourDialog dialog( this, &colorData );
-#endif
-    
-    wxColour l_color;
-    
-    if( dialog.ShowModal() == wxID_OK )
-    {
-        wxColourData retData = dialog.GetColourData();
-        l_color = retData.GetColour();
-    }
-    else
         return;
+    }
     
-    wxTreeItemId treeBoxId = m_pMainFrame->m_pTreeWidget->GetSelection();
+    SelectionObject *pSelObject = m_pMainFrame->getCurrentSelectionObject();
     
-    CustomTreeItem *pTreeItem = reinterpret_cast< CustomTreeItem* >( m_pMainFrame->m_pTreeWidget->GetItemData( treeBoxId ) );
-    
-    SelectionObject *pSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pTreeItem->getId() );
-    
-    pSelObject->setColor( l_color );
+    pSelObject->setColor( newCol );
     
     m_pMainFrame->refreshAllGLWidgets();
 }
@@ -1582,42 +1543,6 @@ void PropertiesWindow::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(eve
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleShowSelectionObject" ), LOGLEVEL_DEBUG );
     
     m_pMainFrame->toggleTreeItemVisibility();
-
-    // Get the selected selection object.
-    // TODO selection tree
-    /*wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-
-    if( m_pMainFrame->treeSelected( l_selectionObjectTreeId ) == MASTER_OBJECT )
-    {
-        SelectionObject* l_selecitonObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selecitonObject->toggleIsVisible();
-        m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selecitonObject->getIcon() );
-        l_selecitonObject->setIsDirty( true );
-
-        int l_childSelectionObjects = m_pMainFrame->m_pTreeWidget->GetChildrenCount( l_selectionObjectTreeId );
-        wxTreeItemIdValue childcookie = 0;
-        for( int i = 0; i < l_childSelectionObjects; ++i )
-        {
-            wxTreeItemId l_childId = m_pMainFrame->m_pTreeWidget->GetNextChild( l_selectionObjectTreeId, childcookie );
-            if( l_childId.IsOk() )
-            {
-                SelectionObject* childBox = ( (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_childId ) ) );
-                childBox->setIsVisible( l_selecitonObject->getIsVisible() );
-                m_pMainFrame->m_pTreeWidget->SetItemImage( l_childId, childBox->getIcon() );
-                childBox->setIsDirty( true );
-            }
-        }
-    }
-    else if( m_pMainFrame->treeSelected( l_selectionObjectTreeId ) == CHILD_OBJECT )
-    {
-        SelectionObject *l_selectionObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selectionObject->toggleIsVisible();
-        m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selectionObject->getIcon() );
-        l_selectionObject->setIsDirty( true );
-    }
-
-    SceneManager::getInstance()->setSelBoxChanged( true );
-    m_pMainFrame->refreshAllGLWidgets();*/
 }
 
 void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )

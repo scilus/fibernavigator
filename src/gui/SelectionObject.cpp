@@ -80,14 +80,13 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
 
     //Distance coloring
     m_DistColoring          = false;
-
-    m_inBox.resize( DatasetManager::getInstance()->getFibersCount(), false );
 }
 
 SelectionObject::~SelectionObject( )
 {
 }
 
+// TODO check this and all relations to crosshair
 void SelectionObject::lockToCrosshair()
 {
     if( m_isLockedToCrosshair )
@@ -465,11 +464,6 @@ int SelectionObject::getIcon()
 void SelectionObject::setIsFirstLevel( bool i_isFirstLevel )
 {
     m_isFirstLevel = i_isFirstLevel;
-
-    if( m_isFirstLevel )
-    {
-        m_inBranch.assign( DatasetManager::getInstance()->getFibersCount(), false );
-    }
 }
 
 bool SelectionObject::toggleIsNOT()
@@ -857,7 +851,7 @@ void SelectionObject::updateStats()
                 float localMaxLength(  0.0f );
                 float localMinLength(  0.0f );
                 
-                getMeanMaxMinFiberLengthNew( selectedFibersIdx, pCurFibers, 
+                getMeanMaxMinFiberLength( selectedFibersIdx, pCurFibers, 
                                             localMeanLength, 
                                             localMaxLength, 
                                             localMinLength );
@@ -1230,7 +1224,7 @@ bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o
     {
         Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
 
-        if( pFibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= (int)m_inBranch.size() )
+        if( pFibers == NULL || i_fiberIndex < 0 || i_fiberIndex >= pFibers->getFibersCount() )
             return false;
 
         int l_index = pFibers->getStartIndexForLine( i_fiberIndex ) * 3;
@@ -1250,24 +1244,6 @@ bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o
     }
 
     return false;
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Will set o_count with the number of fibers that are flagged as being inBranch.
-//
-// o_count          : The output count.
-//
-// Returns true if successful, false otherwise.
-///////////////////////////////////////////////////////////////////////////
-bool SelectionObject::getFibersCount( int &o_count )
-{
-    o_count = 0;
-
-    for( unsigned int i = 0; i < m_inBranch.size() ; ++i )
-        if( m_inBranch[i] ) 
-            ++o_count;
-
-    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1341,53 +1317,15 @@ bool SelectionObject::getMeanFiberValue( const vector< vector< Vector > > &fiber
 ///////////////////////////////////////////////////////////////////////////
 // Computes the mean, max and min length for a given set of fibers.
 //
-// i_selectedFibersPoints       : The given set of fibers.
-// o_meanLength                 : The output mean length.
-// o_maxLength                  : The output max length.
-// o_minLength                  : The output min length.
+// selectedFibersIndexes : The indexes of the selected fibers.
+// pCurFibers            : A pointer to the current fiber dataset.
+// meanLength            : The output mean length.
+// maxLength             : The output max length.
+// minLength             : The output min length.
 //
 // Returns true if successful, false otherwise.
 ///////////////////////////////////////////////////////////////////////////
-bool SelectionObject::getMeanMaxMinFiberLength( const vector< vector< Vector > > &i_fibersPoints, 
-                                                      float                      &o_meanLength,
-                                                      float                      &o_maxLength,
-                                                      float                      &o_minLength )
-{
-    if( i_fibersPoints.size() <= 0 )
-    {
-        o_meanLength = 0.0f;
-        o_maxLength  = 0.0f;
-        o_minLength  = 0.0f;
-        return false;
-    }
-
-    float currentFiberLength;
-
-    o_meanLength = 0.0f;
-    o_maxLength  = 0.0f;
-    o_minLength  = numeric_limits<float>::max();
-    
-    for( unsigned int i = 0; i < i_fibersPoints.size(); i++ )
-    {
-        currentFiberLength = 0.0f;
-
-        getFiberLength( i_fibersPoints[i], currentFiberLength );
-
-        o_meanLength += currentFiberLength;
-
-        if( currentFiberLength > o_maxLength )
-            o_maxLength = currentFiberLength;
-
-        if( currentFiberLength < o_minLength )
-            o_minLength = currentFiberLength;
-    }
-    
-    o_meanLength /= i_fibersPoints.size();    
-
-    return true;
-}
-
-bool SelectionObject::getMeanMaxMinFiberLengthNew( const vector< int > &selectedFibersIndexes,
+bool SelectionObject::getMeanMaxMinFiberLength( const vector< int > &selectedFibersIndexes,
                                                   Fibers        *pCurFibers,
                                                   float         &meanLength,
                                                   float         &maxLength,
@@ -1690,7 +1628,7 @@ void SelectionObject::draw()
     // TODO selection this is prob not needed.
     if( !m_isActive )
     {
-        if ( m_objectType == CISO_SURFACE_TYPE && m_isSelected)
+        if ( m_objectType == VOI_TYPE && m_isSelected)
             drawFibersInfo();
         return;
     }
@@ -2308,8 +2246,8 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     // TODO selection check those two
     pBtnNewColorVolume->Enable( getIsFirstLevel() );
     pBtnNewDensityVolume->Enable( getIsFirstLevel() );
-    pToggleAndNot->Enable( !getIsFirstLevel() && m_objectType != CISO_SURFACE_TYPE );
-    pBtnSetAsDistanceAnchor->Enable( m_objectType == CISO_SURFACE_TYPE );
+    pToggleAndNot->Enable( !getIsFirstLevel() );
+    pBtnSetAsDistanceAnchor->Enable( m_objectType == VOI_TYPE );
 
     m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
 

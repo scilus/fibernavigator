@@ -484,13 +484,18 @@ bool SelectionTree::loadFromXMLNode( wxXmlNode *pRootSelObjNode, DatasetHelper *
 
 SelectionTree::SelectionTreeNode::~SelectionTreeNode()
 {
-    // TODO delete selection object. Ownership should be transferred to the selection tree.
     for( vector< SelectionTreeNode* >::iterator nodeIt( m_children.begin() );
         nodeIt != m_children.end(); 
         ++nodeIt )
     {
         delete *nodeIt;
         *nodeIt = NULL;
+    }
+    
+    if( m_pSelObject != NULL )
+    {
+        delete m_pSelObject;
+        m_pSelObject = NULL;
     }
 }
 
@@ -556,7 +561,7 @@ bool SelectionTree::removeObject( const int nodeId )
 
     // If found, remove it
     if( pParentNode != NULL )
-    {
+    {        
         pParentNode->removeChildren( nodeId );
         
         // TODO Update selection
@@ -638,6 +643,16 @@ bool SelectionTree::containsId( const int itemId ) const
     SelectionTreeNode *pFoundNode = m_pRootNode->findNode( itemId );
     
     return pFoundNode != NULL;
+}
+
+void SelectionTree::unselectAll()
+{
+    SelectionObjectVector allObjs = getAllObjects();
+    
+    for( unsigned int objIdx( 0 ); objIdx < allObjs.size(); ++objIdx )
+    {
+        allObjs[ objIdx ]->unselect();
+    }
 }
 
 /* TODO remove if not needed
