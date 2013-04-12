@@ -1,4 +1,3 @@
-// TODO header syntax
 
 #ifndef SELECTIONVOI_H_
 #define SELECTIONVOI_H_

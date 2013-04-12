@@ -1,12 +1,9 @@
-// TODO header syntax
-
 #ifndef CISOSURFACEBASE_H
 #define CISOSURFACEBASE_H
 
 // This class is used to group methods and data common to all iso surfaces types.
 // Based on the work Raghavendra Chandrashekara, which was based on source code
 // provided by Paul Bourke and Cory Gene Bloyd.
-// Original email: rc99@doc.ic.ac.uk, rchandrashekara@hotmail.com
 
 #include <map>
 #include <vector>

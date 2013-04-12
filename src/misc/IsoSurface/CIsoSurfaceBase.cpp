@@ -1,9 +1,6 @@
-// TODO header syntax
-
 // This class is used to group methods and data common to all iso surfaces types.
 // Based on the work Raghavendra Chandrashekara, which was based on source code
 // provided by Paul Bourke and Cory Gene Bloyd.
-// Original email: rc99@doc.ic.ac.uk, rchandrashekara@hotmail.com
 
 #include "CIsoSurfaceBase.h"
 
@@ -14,12 +11,9 @@
 #include <math.h>
 
 #include <algorithm>
-//#include "../lic/SurfaceLIC.h"
-//#include "../../dataset/Anatomy.h"
 #include "../../main.h"
 
 #include <fstream>
-//#include <ctime>
 
 const unsigned int CIsoSurfaceBase::m_edgeTable[256] =
 { 0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
@@ -322,17 +316,18 @@ CIsoSurfaceBase::CIsoSurfaceBase()
     m_bValidSurface = false;
     m_positionsCalculated = false;
     
-    // TODO check this
+    // TODO selection iso check this
     m_tMesh = new TriangleMesh();
 }
 
 CIsoSurfaceBase::~CIsoSurfaceBase()
 {
     DeleteSurface();
-    // TODO check this
+    // TODO  selection iso check this
     delete m_tMesh;
 }
 
+// TODO  selection iso 
 /*void CIsoSurfaceBase::GenerateSurface( float tIsoLevel )
 {
     if ( m_bValidSurface )
@@ -981,7 +976,7 @@ void CIsoSurfaceBase::draw()
 
 std::vector< Vector > CIsoSurfaceBase::getSurfaceVoxelPositions()
 {
-    // TODO check this out
+    // TODO selection iso check this out
     if ( m_threshold == 0.0 || m_threshold == 1.0 )
     {
         m_svPositions.clear();
@@ -1112,7 +1107,7 @@ bool CIsoSurfaceBase::save( wxString filename ) const
         return false;
     }
 
-    // TODO use good version
+    // TODO selection iso use good version
     //m_dh->printDebug( _T("start writing file)"), 1 );
     dataFile << ( "# vtk DataFile Version 2.0\n" );
     dataFile << ( "generated using FiberNavigator\n" );
@@ -1160,7 +1155,7 @@ void CIsoSurfaceBase::createPropertiesSizer(PropertiesWindow *parent)
     l_sizer->Add(m_ptoggleUseColoring,0,wxALIGN_CENTER);
     l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
     m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
-    // TODO check selection tree
+    // TODO  selection iso anat
     /*parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListMenuThreshold));*/
     parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAssignColorDataset ));
 }

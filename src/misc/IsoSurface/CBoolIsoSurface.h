@@ -1,15 +1,7 @@
 #ifndef CBOOLISOSURFACE_H
 #define CBOOLISOSURFACE_H
-// File Name: CBoolIsoSurface.h
-// TODO change those comments
-// Last Modified: 5/8/2000
-// Author: Raghavendra Chandrashekara (basesd on source code
-// provided by Paul Bourke and Cory Gene Bloyd)
-// Email: rc99@doc.ic.ac.uk, rchandrashekara@hotmail.com
-//
-// Description: This is the interface file for the CIsoSurface class.
-// CIsoSurface can be used to construct an isosurface from a scalar
-// field.
+
+// Based on code from: Raghavendra Chandrashekara, Paul Bourke and Cory Gene Bloyd
 
 #include "CIsoSurfaceBase.h"
 
@@ -46,6 +38,7 @@ private:
     // the isosurface intersects an edge.
     POINT3DID Interpolate(float fX1, float fY1, float fZ1, float fX2, float fY2, float fZ2, float tVal1, float tVal2);
     
+    // TODO selection iso clean
     //GLuint getGLuint() {return 0;};
     //void generateTexture() {};
     //void generateGeometry();

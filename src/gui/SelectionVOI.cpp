@@ -1,4 +1,3 @@
-// TODO header syntax
 
 #include "SelectionVOI.h"
 

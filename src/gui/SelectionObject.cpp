@@ -780,12 +780,6 @@ void SelectionObject::drawPolygon( const vector< Vector > &i_polygonPoints )
     glEnd();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// TODO this comment does not reflect reality.
-// This will push back the coords values in the vectors for all the fibers
-// flagged as m_inBranch and then we will calculate the grid params with this vector.
-//
-///////////////////////////////////////////////////////////////////////////
 void SelectionObject::updateStats()
 {
     if( !m_statsNeedUpdating )

@@ -18,9 +18,6 @@ class ShaderHelper;
 class TheScene;
 class wxXmlNode;
 
-// TODO remove selection
-typedef std::vector< std::vector< SelectionObject * > > SelectionObjList;
-
 enum SEGMETHOD { FLOODFILL = 0, GRAPHCUT, KMEANS };
 
 class SceneManager

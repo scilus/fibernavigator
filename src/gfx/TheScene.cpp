@@ -533,24 +533,10 @@ void TheScene::renderMesh()
 
     //Render selection objects
     glColor3f( 1.0f, 0.0f, 0.0f );
-    // TODO remove selection
-    //SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
     ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS", true );
     ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex", false );
     ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_", 1.0 );
-
-    // TODO remove selection
-    /*for( unsigned int i = 0; i < selectionObjects.size(); ++i )
-    {
-        for( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
-        {
-            glPushAttrib( GL_ALL_ATTRIB_BITS );
-            if( SceneManager::getInstance()->getShowAllSelObj() && !selectionObjects[i][j]->isSelectionObject() )
-                selectionObjects[i][j]->drawIsoSurface();
-            glPopAttrib();
-        }
-    }*/
 
     //Render meshes
     vector< Mesh * > v = DatasetManager::getInstance()->getMeshes();

@@ -927,31 +927,6 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
     {
         return;
     }
-// TODO remove
-/*
-    if( m_mainFrame->m_currentListIndex != -1 )
-    {
-        DatasetInfo *l_info = (DatasetInfo*)m_mainFrame->m_pCurrentSceneObject;
-        if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
-        {
-            l_info->setColor( l_col );
-            l_info->setuseTex( false );
-            m_mainFrame->m_pListCtrl->SetItem( m_mainFrame->m_currentListIndex, 2, wxT( "(") + wxString::Format( wxT( "%.2f" ), l_info->getThreshold() ) + wxT( ")" ) );           
-        }
-    }
-    else if ( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject != NULL )
-    {
-        SelectionObject *l_selObj = (SelectionObject*)m_mainFrame->m_pCurrentSceneObject;
-        if (!l_selObj->getIsMaster())
-        {
-            wxTreeItemId l_parentId = m_mainFrame->m_pTreeWidget->GetItemParent( m_mainFrame->m_pDatasetHelper->m_lastSelectedObject->GetId());
-            l_selObj = (SelectionObject*)m_mainFrame->m_pTreeWidget->GetItemData(l_parentId);
-        }
-        l_selObj->setFiberColor( l_col);
-        l_selObj->setIsDirty( true );
-        m_mainFrame->m_pDatasetHelper->m_selBoxChanged = true;
-    }    
-    m_mainFrame->refreshAllGLWidgets();*/
 }
 
 void MainFrame::onSelectStroke1( wxCommandEvent& event )
@@ -1974,7 +1949,7 @@ void MainFrame::deleteTreeItem()
     {
         SelectionTree &selTree = SceneManager::getInstance()->getSelectionTree();
         
-        deleteSceneObject();    // TODO check
+        deleteSceneObject();
         
         wxTreeItemId curObjId = pSelObj->getTreeId();
         
@@ -2003,15 +1978,7 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     {
         pSelectionObject->select( true );
         changePropertiesSizer( pSelectionObject, m_currentListIndex );        
-    }    
-
-    // TODO selection what do i do with this?
-#ifdef __WXMSW__
-        if (m_currentListItem != -1)
-        {       
-            m_pListCtrl->SetItemState(m_currentListItem,0,wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED);  
-        }
-#endif
+    }
 }
 
 SelectionObject* MainFrame::getCurrentSelectionObject()
