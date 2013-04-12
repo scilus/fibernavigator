@@ -444,8 +444,6 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
             Vector boxSize(2/step,2/step,2/step);
             
             pNewSelObj->setSize(boxSize);
-            // TODO selection m_boxResized should be set by setSize
-            pNewSelObj->m_boxResized = true;
         }
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
@@ -485,8 +483,6 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
             
             Vector boxSize(2/step,2/step,2/step);
             pNewSelObj->setSize(boxSize);
-            // TODO selection this should be in setsize
-            pNewSelObj->m_boxResized = true;
         }
         if(m_pTextFA->IsEnabled())
         {

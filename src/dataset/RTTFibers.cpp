@@ -100,6 +100,11 @@ void RTTFibers::seed()
 	{
 		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
+            if( selObjs[ b ]->getSelectionType() != BOX_TYPE )
+            {
+                continue;
+            }
+            
 			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
 			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
 			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
@@ -111,7 +116,6 @@ void RTTFibers::seed()
 			float ystep =  selObjs[b]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
 			float zstep =  selObjs[b]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
 			
-			// TODO selection check if not selection voi
 			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
 			{
 				for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )

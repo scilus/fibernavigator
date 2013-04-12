@@ -182,9 +182,6 @@ private:
     void onSelectTreeItem                   ( wxTreeEvent&    evt );
     void onUnSelectTreeItem                 ( wxTreeEvent&    evt );
     void onActivateTreeItem                 ( wxTreeEvent&    evt );
-    int  treeSelected                       ( wxTreeItemId    id  );
-    
-    TreeObjectType treeSelectedNew          ( const wxTreeItemId itemId );
     
     int getCurrentTreeIndex();
 

@@ -405,8 +405,8 @@ bool SelectionObject::toggleIsActive()
 void SelectionObject::setIsActive( bool isActive )
 {
     SceneManager::getInstance()->setSelBoxChanged( true );
+    SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );
     m_isActive = isActive;
-    notifyInBranchNeedsUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -431,7 +431,6 @@ void SelectionObject::setCenter( Vector i_center )
     m_center  = i_center; 
     update();
     notifyInBoxNeedsUpdating();
-    // TODO selection do we need the setSelBoxChanged?
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -460,7 +459,6 @@ int SelectionObject::getIcon()
 //
 // i_isMaster       : Indicates if we want to set this object as a master or not.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection do we need this?
 void SelectionObject::setIsFirstLevel( bool i_isFirstLevel )
 {
     m_isFirstLevel = i_isFirstLevel;
@@ -474,8 +472,8 @@ bool SelectionObject::toggleIsNOT()
 
 void SelectionObject::setIsNOT( bool i_isNOT )
 {
-    m_isNOT = i_isNOT; 
-    notifyInBranchNeedsUpdating(); 
+    m_isNOT = i_isNOT;
+    SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
@@ -484,7 +482,7 @@ void SelectionObject::setIsNOT( bool i_isNOT )
 //
 // i_threshold      : The new threshold value.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection
+// TODO selection anat threshold
 void SelectionObject::setThreshold( float i_threshold )
 {
     m_threshold = i_threshold;
@@ -790,7 +788,6 @@ void SelectionObject::drawPolygon( const vector< Vector > &i_polygonPoints )
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::updateStats()
 {
-    // TODO selection test this
     if( !m_statsNeedUpdating )
     {
         return;
@@ -888,11 +885,6 @@ void SelectionObject::updateStats()
         {
             m_stats.m_meanLength    /= activeFiberSetCount;
             m_stats.m_meanValue     /= activeFiberSetCount;
-            
-            if( m_stats.m_minLength == std::numeric_limits< float >::max() )
-            {
-                m_stats.m_minLength = 0.0f;
-            }
         }
         
         if( m_meanFiberIsBeingDisplayed )
@@ -902,6 +894,11 @@ void SelectionObject::updateStats()
                 m_meanFiberPoints[ meanPtIdx ] /= activeFiberSetCount;
             }
         }
+    }
+    
+    if( m_stats.m_minLength == std::numeric_limits< float >::max() )
+    {
+        m_stats.m_minLength = 0.0f;
     }
     
     m_statsNeedUpdating = false;
@@ -925,8 +922,6 @@ void SelectionObject::notifyStatsNeedUpdating()
     m_statsNeedUpdating = true;
 }
 
-// TODO after JF's branch: make the param const
-// TODO selection validate this.
 vector< int > SelectionObject::getSelectedFibersIndexes( Fibers *pFibers )
 {
     vector< bool > filteredFiber = pFibers->getFilteredFibers();
@@ -947,7 +942,7 @@ vector< int > SelectionObject::getSelectedFibersIndexes( Fibers *pFibers )
         
         if( pParentObj != NULL )
         {
-            // TODO this could be optimized
+            // OPTIM: this could be optimized
             SelectionState &parentState = pParentObj->getState( pFibers->getName() );
             branchToUse.assign( curState.m_inBranch.size(), false );
             
@@ -1017,16 +1012,15 @@ bool SelectionObject::getSelectedFibersInfo( const vector< int > &selectedFibers
 //Return all the visible fibers that pass through the selection object
 //
 ///////////////////////////////////////////////////////////////////////////
-vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
-
+vector< vector< Vector > > SelectionObject::getSelectedFibersPoints()
+{
     vector< Vector >           l_currentFiberPoints;
     vector< Vector >           l_currentSwappedFiberPoints;
     vector< vector< Vector > > l_selectedFibersPoints;
     Vector l_meanStart( 0.0f, 0.0f, 0.0f );
     
     Fibers* pFibers( NULL );
-    
-    // TODO selection tree
+
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 != index )
     {
@@ -1040,7 +1034,7 @@ vector< vector< Vector > > SelectionObject::getSelectedFibersPoints(){
     {
         if( selectedInBranch[i] && !filteredFiber[i] )
         {
-            // TODO selection in this method avoid always searching for fiber
+            // OPTIM: could avoid searching for the fiber every time.
             getFiberCoordValues( i, l_currentFiberPoints );
             
             // Because the direction of the fibers is not all the same, for example 2 fibers side to side on the screen
@@ -1193,22 +1187,6 @@ bool SelectionObject::getMeanFiber( const vector< vector< Vector > > &i_fibersPo
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Check if fibers are show
-//return true if they are, false otherwise
-///////////////////////////////////////////////////////////////////////////
-bool SelectionObject::getShowFibers()
-{
-    Fibers* pFibers = NULL;
-    long index = MyApp::frame->getCurrentListIndex();
-    if( -1 != index )
-    {
-        pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
-    }
-
-    return NULL == pFibers ? false : pFibers->getShow();
-}
-
-///////////////////////////////////////////////////////////////////////////
 // Fills the o_fiberPoints vector with the points that compose a given fiber.
 //
 // i_fiberIndex             : The index of the given fiber.
@@ -1216,7 +1194,6 @@ bool SelectionObject::getShowFibers()
 //
 // Returns true if successful, false otherwise.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection is this needed.
 bool SelectionObject::getFiberCoordValues( int i_fiberIndex, vector< Vector > &o_fiberPoints )
 {
     long index = MyApp::frame->getCurrentListIndex();
@@ -1624,12 +1601,8 @@ float SelectionObject::getMaxDistanceBetweenPoints( const vector< Vector > &i_po
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::draw()
 {
-    // TODO selection tree check all this method check if there are some fibers loaded.
-    // TODO selection this is prob not needed.
     if( !m_isActive )
     {
-        if ( m_objectType == VOI_TYPE && m_isSelected)
-            drawFibersInfo();
         return;
     }
 
@@ -1643,7 +1616,7 @@ void SelectionObject::draw()
 
     GLfloat l_color[] = { 0.5f, 0.5f, 0.5f, 0.5f };
 
-    // TODO do we really need a different color?
+    // TODO not now do we really need a different color?
     if( m_isFirstLevel )
     {
         l_color[0] = 0.0f; // Red
@@ -1949,17 +1922,6 @@ void SelectionObject::notifyInBoxNeedsUpdating()
 
 void SelectionObject::notifyInBranchNeedsUpdating()
 {
-    for( map< FiberIdType, SelectionState >::iterator stateIt( m_selectionStates.begin() );
-        stateIt != m_selectionStates.end(); ++stateIt )
-    {
-        // Do not update inBox at the same time, since this can triggered
-        // for a change that does not change the in box.
-        stateIt->second.m_inBranchNeedsUpdating = true;
-    }
-    
-    //notifyStatsNeedUpdating();
-    // TODO selection tree 
-    //SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );    
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2199,9 +2161,6 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
-    // TODO selection do we always set to true?
-    //m_pToggleCalculatesFibersInfo->Enable( getIsMaster() ); //bug with some fibers dataset sets
-
 //     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
 //     pBoxSizer->Add( m_pToggleDisplayConvexHull,  3, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
 //     pBoxSizer->Add( m_pBtnSelectConvexHullColor, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
@@ -2243,7 +2202,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //////////////////////////////////////////////////////////////////////////
 
     m_pRadNormalColoring->SetValue( true );
-    // TODO selection check those two
+
     pBtnNewColorVolume->Enable( getIsFirstLevel() );
     pBtnNewDensityVolume->Enable( getIsFirstLevel() );
     pToggleAndNot->Enable( !getIsFirstLevel() );
@@ -2290,7 +2249,16 @@ void SelectionObject::updatePropertiesSizer()
     m_pToggleVisibility->SetValue( getIsVisible() );
     m_pToggleActivate->SetValue( getIsActive() );
     m_pTxtName->SetValue( getName() );
-    m_pToggleCalculatesFibersInfo->Enable( getShowFibers() );
+    
+    bool fibersLoaded( DatasetManager::getInstance()->getFibersCount() > 0 );
+
+    m_pToggleCalculatesFibersInfo->Enable( fibersLoaded );
+    m_pGridFibersInfo->Enable( fibersLoaded && m_pToggleCalculatesFibersInfo->GetValue() );
+    
+    m_pToggleDisplayMeanFiber->Enable( fibersLoaded );
+    m_pBtnSelectMeanFiberColor->Enable( m_pToggleDisplayMeanFiber->GetValue() );
+    setShowMeanFiberOption( m_pToggleDisplayMeanFiber->GetValue() );
+    
     m_statsAreBeingComputed = m_pToggleCalculatesFibersInfo->GetValue();
     m_meanFiberIsBeingDisplayed = m_pToggleDisplayMeanFiber->GetValue();
     
@@ -2299,13 +2267,9 @@ void SelectionObject::updatePropertiesSizer()
         updateStats();
     }
     
-    m_pGridFibersInfo->Enable( getShowFibers() && m_pToggleCalculatesFibersInfo->GetValue() );
-    m_pToggleDisplayMeanFiber->Enable( getShowFibers() );
-//     m_pToggleDisplayConvexHull->Enable( getShowFibers() );
-//     setShowConvexHullOption( m_pToggleDisplayConvexHull->GetValue() );
-
-    m_pBtnSelectMeanFiberColor->Enable( m_pToggleDisplayMeanFiber->GetValue() );
-    setShowMeanFiberOption( m_pToggleDisplayMeanFiber->GetValue() );
+    // TODO selection convex hull
+    // m_pToggleDisplayConvexHull->Enable( fibersLoaded );
+    // setShowConvexHullOption( m_pToggleDisplayConvexHull->GetValue() );
 
 // Because of a bug on the Windows version of this, we currently do not use this wxChoice on Windows.
 // Will have to be fixed.

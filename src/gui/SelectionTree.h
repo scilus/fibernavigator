@@ -28,14 +28,18 @@ public:
     int addChildrenObject( const int parentId, SelectionObject *pSelObject );
     
     bool removeObject( const int nodeId );
+    bool removeObject( SelectionObject *pSelObj );
     
     SelectionObject* getObject( const int itemId ) const;
+
+    int getId( SelectionObject *pSelObj ) const;
     
     SelectionObject* getParentObject( SelectionObject *pSelObj ) const;
     
     SelectionObjectVector getAllObjects() const;
     
     SelectionObjectVector getChildrenObjects( const int itemId ) const;
+    SelectionObjectVector getChildrenObjects( SelectionObject *pSelObj ) const;
     
     int getActiveChildrenObjectsCount( SelectionObject *pSelObject ) const;
     
@@ -106,6 +110,7 @@ private:
         int getId() const;
         
         // TODO selection saving
+        // TODO selection set pos, size sur voi
         //bool populateXMLNode( wxXmlNode *pParentNode );
         
     private:

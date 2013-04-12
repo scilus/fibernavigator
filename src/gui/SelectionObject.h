@@ -135,7 +135,7 @@ public :
 
     void       setSize( float sizeX, float sizeY, float sizeZ ) 
                                                       { setSize( Vector( sizeX, sizeY, sizeZ ) ); }
-    void       setSize( Vector i_size )               { m_size = i_size; update(); notifyInBoxNeedsUpdating(); };
+    void       setSize( Vector i_size )               { m_size = i_size; update(); notifyInBoxNeedsUpdating(); m_boxResized = true; };
     Vector     getSize()                              { return m_size;};
 
     void       setThreshold( float i_threshold );
@@ -172,14 +172,11 @@ public :
         public: 
             SelectionState()
             : m_inBoxNeedsUpdating( true )
-            , m_inBranchNeedsUpdating( true )
             {};
             
             vector< bool > m_inBranch;
             vector< bool > m_inBox;
             bool           m_inBoxNeedsUpdating;
-            // TODO selection don't think we need this.
-            bool           m_inBranchNeedsUpdating;
     };
     
     bool            addFiberDataset(    const FiberIdType &fiberId, const int fiberCount );
@@ -335,8 +332,6 @@ protected:
                                            float         &o_meanLength,
                                            float         &o_maxLength,
                                            float         &o_minLength );
-
-    bool   getShowFibers                      ();
 
     std::vector< std::vector< Vector > >   getSelectedFibersPoints ();
     

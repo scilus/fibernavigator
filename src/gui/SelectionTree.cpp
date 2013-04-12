@@ -252,7 +252,7 @@ void SelectionTree::SelectionTreeNode::updateInObjectRecur( const int fibersCoun
 void SelectionTree::SelectionTreeNode::updateInBranchRecur( const int fibersCount,
                                                             const SelectionObject::FiberIdType &fiberId )
 {
-    // TODO: If we ever encounter a case / dataset where selection is really, really 
+    // OPTIM: If we ever encounter a case / dataset where selection is really, really 
     // slow, this should be the first method to be optimized, using a 
     // m_inBranchNeedsUpdating mecanism on the SelectionStates.
 
@@ -572,6 +572,13 @@ bool SelectionTree::removeObject( const int nodeId )
     return false;
 }
 
+bool SelectionTree::removeObject( SelectionObject *pSelObj )
+{
+    SelectionTreeNode * const pNode = m_pRootNode->findNode( pSelObj );
+    
+    return removeObject( pNode->getId() );
+}
+
 SelectionObject* SelectionTree::getObject( const int itemId ) const
 {
     SelectionTreeNode *pNode = m_pRootNode->findNode( itemId );
@@ -582,6 +589,18 @@ SelectionObject* SelectionTree::getObject( const int itemId ) const
     }
     
     return NULL;
+}
+
+int SelectionTree::getId( SelectionObject *pSelObj ) const
+{
+    SelectionTreeNode *pNode = m_pRootNode->findNode( pSelObj );
+    
+    if( pNode != NULL )
+    {
+        return pNode->getId();
+    }
+    
+    return -1;
 }
 
 SelectionObject* SelectionTree::getParentObject( SelectionObject *pSelObj ) const
@@ -616,6 +635,20 @@ SelectionTree::SelectionObjectVector SelectionTree::getChildrenObjects( const in
     
     SelectionTreeNode *pNode = m_pRootNode->findNode( itemId );
         
+    if( pNode != NULL )
+    {
+        selObjs = pNode->getAllChildrenSelectionObjects();
+    }
+    
+    return selObjs;
+}
+
+SelectionTree::SelectionObjectVector SelectionTree::getChildrenObjects( SelectionObject *pSelObj ) const
+{
+    SelectionObjectVector selObjs;
+    
+    SelectionTreeNode *pNode = m_pRootNode->findNode( pSelObj );
+    
     if( pNode != NULL )
     {
         selObjs = pNode->getAllChildrenSelectionObjects();

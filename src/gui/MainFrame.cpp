@@ -1333,12 +1333,13 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     }
     
     // Check what is selected in the tree to know where to put this new selection object.
-    wxTreeItemId treeSelectionId = m_pTreeWidget->GetSelection();
     wxTreeItemId newSelectionObjectId;
     
     SelectionTree &selTree = SceneManager::getInstance()->getSelectionTree();
     
-    if( treeSelectedNew( treeSelectionId ) == TYPE_SELECTION_MASTER || selTree.isEmpty() )
+    SelectionObject *pCurObj = getCurrentSelectionObject();
+    
+    if( selTree.isEmpty() || pCurObj == NULL )
     {
         pSelObj->setIsFirstLevel( true );
         int itemId = selTree.addChildrenObject( -1, pSelObj );
@@ -1350,15 +1351,11 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     else
     {
         pSelObj->setIsFirstLevel( false );
-        
-        CustomTreeItem *pItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( treeSelectionId );
-        
-        int parentId = pItem->getId();
-        
-        int childId = selTree.addChildrenObject( parentId,  pSelObj );
+
+        int childId = selTree.addChildrenObject( selTree.getId( pCurObj ),  pSelObj );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( childId );
-        newSelectionObjectId = m_pTreeWidget->AppendItem( treeSelectionId, pSelObj->getName(), 0, -1, pTreeItem );
+        newSelectionObjectId = m_pTreeWidget->AppendItem( pCurObj->getTreeId(), pSelObj->getName(), 0, -1, pTreeItem );
     }
     
     m_pTreeWidget->EnsureVisible( newSelectionObjectId );
@@ -1972,33 +1969,21 @@ void MainFrame::onDeleteTreeItem( wxTreeEvent& WXUNUSED(event) )
 
 void MainFrame::deleteTreeItem()
 {
-    if (m_pCurrentSceneObject != NULL)
-    {   
-        wxTreeItemId l_treeId = m_pTreeWidget->GetSelection();
-        if (!l_treeId.IsOk())
-        {
-            return;
-        }
-        TreeObjectType objectType = treeSelectedNew( l_treeId );
-        CustomTreeItem *pTreeItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( l_treeId );
-        
+    SelectionObject *pSelObj = getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
         SelectionTree &selTree = SceneManager::getInstance()->getSelectionTree();
-
-        if( objectType == TYPE_SELECTION_OBJECT && selTree.containsId( pTreeItem->getId() ) )
-        {  
-            deleteSceneObject();  // TODO check
-            
-            // Remove from the SelectionTree
-            selTree.removeObject( pTreeItem->getId() );
-            
-            m_pTreeWidget->Delete( l_treeId );
-        }
+        
+        deleteSceneObject();    // TODO check
+        
+        wxTreeItemId curObjId = pSelObj->getTreeId();
+        
+        selTree.removeObject( pSelObj );
+        
+        m_pTreeWidget->Delete( curObjId );
         
         SceneManager::getInstance()->setSelBoxChanged( true );
-        
     }
-    // TODO check was commented in JF's version
-    //refreshAllGLWidgets();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2073,30 +2058,22 @@ void MainFrame::onActivateTreeItem( wxTreeEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::toggleTreeItemActivation()
 {
-    wxTreeItemId treeId = m_pTreeWidget->GetSelection();
+    SelectionObject *pSelObj = getCurrentSelectionObject();
     
-    TreeObjectType objectType = treeSelectedNew( treeId );
-    
-    if( objectType == TYPE_SELECTION_OBJECT )
+    if( pSelObj != NULL )
     {
-        CustomTreeItem *pTreeItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( treeId );
+        pSelObj->toggleIsActive();
+        m_pTreeWidget->SetItemImage( pSelObj->getTreeId(), pSelObj->getIcon() );
         
-        SelectionObject *pSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pTreeItem->getId() );
-        
-        pSelObject->toggleIsActive();
-        m_pTreeWidget->SetItemImage( treeId, pSelObject->getIcon() );
-        
-        SelectionTree::SelectionObjectVector childObjects = SceneManager::getInstance()->getSelectionTree().getChildrenObjects( pTreeItem->getId() );
+        SelectionTree::SelectionObjectVector childObjects = SceneManager::getInstance()->getSelectionTree().getChildrenObjects( pSelObj );
         
         for( unsigned int objIdx( 0 ); objIdx < childObjects.size(); ++objIdx )
         {
-            childObjects[objIdx]->setIsActive( pSelObject->getIsActive() );
+            childObjects[objIdx]->setIsActive( pSelObj->getIsActive() );
             
             m_pTreeWidget->SetItemImage( childObjects[objIdx]->getTreeId(), childObjects[objIdx]->getIcon() );
         }
     }
-    
-    refreshAllGLWidgets();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2104,31 +2081,23 @@ void MainFrame::toggleTreeItemActivation()
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::toggleTreeItemVisibility()
 {
-    wxTreeItemId treeId = m_pTreeWidget->GetSelection();
-    
-    TreeObjectType objectType = treeSelectedNew( treeId );
-    
-    if( objectType == TYPE_SELECTION_OBJECT )
+    SelectionObject *pSelObj = getCurrentSelectionObject();
+    if( pSelObj != NULL )
     {
-        CustomTreeItem *pTreeItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( treeId );
+        pSelObj->toggleIsVisible();
+        m_pTreeWidget->SetItemImage( pSelObj->getTreeId(), pSelObj->getIcon() );
         
-        SelectionObject *pSelObject = SceneManager::getInstance()->getSelectionTree().getObject( pTreeItem->getId() );
-        
-        pSelObject->toggleIsVisible();
-        m_pTreeWidget->SetItemImage( treeId, pSelObject->getIcon() );
-        
-        SelectionTree::SelectionObjectVector childObjects = SceneManager::getInstance()->getSelectionTree().getChildrenObjects( pTreeItem->getId() );
+        SelectionTree::SelectionObjectVector childObjects = SceneManager::getInstance()->getSelectionTree().getChildrenObjects( pSelObj );
         
         for( unsigned int objIdx( 0 ); objIdx < childObjects.size(); ++objIdx )
         {
-            childObjects[objIdx]->setIsVisible( pSelObject->getIsVisible() );
+            childObjects[objIdx]->setIsVisible( pSelObj->getIsVisible() );
             
             m_pTreeWidget->SetItemImage( childObjects[objIdx]->getTreeId(), childObjects[objIdx]->getIcon() );
         }
+        
+        SceneManager::getInstance()->setSelBoxChanged( true );
     }
-    
-    SceneManager::getInstance()->setSelBoxChanged( true );
-    refreshAllGLWidgets();
 }
 
 void MainFrame::onTreeChange()
@@ -2137,79 +2106,8 @@ void MainFrame::onTreeChange()
     refreshAllGLWidgets();
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Helper function to determine what kind of item is selected in the tree widget.
-//
-// i_id         : The selected item id.
-//////////////////////////////////////////////////////////////////////////
-// TODO remove
-int MainFrame::treeSelected( wxTreeItemId i_id )
-{
-    if( i_id.IsOk() )
-    {
-        if( i_id == m_tSelectionObjectsId )
-        {
-            return 0;
-        }
-    }
-    else
-    {
-        return 0;
-    }
-    wxTreeItemId l_pId = m_pTreeWidget->GetItemParent( i_id );
+// TODO selection ICI still needed? Les types still requis?
 
-    if( l_pId.IsOk() )
-    {
-        if( l_pId == m_tSelectionObjectsId )
-        {
-            return MASTER_OBJECT;
-        }
-    }
-    else
-    {
-        return 0;
-    }
-
-    wxTreeItemId l_ppId = m_pTreeWidget->GetItemParent( l_pId );
-
-    if( l_ppId.IsOk() )
-    {
-        if( l_ppId == m_tSelectionObjectsId )
-        {
-            return CHILD_OBJECT;
-        }
-    }
-    else
-    {
-        return 0;
-    }
-
-    return 0;
-}
-
-TreeObjectType MainFrame::treeSelectedNew( const wxTreeItemId itemId )
-{
-    if( !itemId.IsOk() )
-    {
-        return TYPE_INVALID;
-    }
-    
-    if( itemId == m_tSelectionObjectsId )
-    {
-        return TYPE_SELECTION_MASTER;
-    }
-
-    wxTreeItemId parentId( m_pTreeWidget->GetItemParent( itemId ) );
-
-    CustomTreeItem *pTreeItem = (CustomTreeItem*) m_pTreeWidget->GetItemData( itemId );
-    
-    if( pTreeItem != NULL && SceneManager::getInstance()->getSelectionTree().containsId( pTreeItem->getId() ) )
-    {
-        return TYPE_SELECTION_OBJECT;
-    }
-    
-    return TYPE_INVALID;
-}
 
 void MainFrame::onRotateZ( wxCommandEvent& event )
 {
