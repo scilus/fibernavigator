@@ -130,8 +130,6 @@ bool SelectionTree::SelectionTreeNode::removeChildren( const int nodeId )
         
         m_children.erase( foundPos );
         
-        // TODO update selection
-        
         return true;
     }
     
@@ -537,12 +535,10 @@ int SelectionTree::addChildrenObject( const int parentId, SelectionObject *pSelO
         SelectionTreeNode *pChildrenNode = new SelectionTreeNode( m_nextNodeId, pSelObject );
         pParentNode->addChildren( pChildrenNode );
         
-        // TODO update selection
-        
         // Increment the nextId.
         ++m_nextNodeId;
         
-        // Notufy the Selection Object of all existing fiber sets.
+        // Notify the Selection Object of all existing fiber sets.
         for( map< SelectionObject::FiberIdType, int >::iterator fibIt( m_fibersIdAndCount.begin() ); 
             fibIt != m_fibersIdAndCount.end(); ++fibIt )
         {
@@ -563,8 +559,6 @@ bool SelectionTree::removeObject( const int nodeId )
     if( pParentNode != NULL )
     {        
         pParentNode->removeChildren( nodeId );
-        
-        // TODO Update selection
         
         return true;
     }

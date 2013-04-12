@@ -57,7 +57,6 @@ public:
     void notifyAllObjectsNeedUpdating();
     
     // Methods related to fiber selection.
-    // TODO manage with DatasetManager?
     vector< bool > getSelectedFibers( const Fibers* const pFibers );
     vector< bool > getSelectedFibersInBranch( const Fibers* const pFibers, SelectionObject* pSelObj );
     
