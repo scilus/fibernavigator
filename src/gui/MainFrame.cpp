@@ -1976,7 +1976,6 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     
     if( pSelectionObject != NULL )
     {
-        pSelectionObject->select( true );
         changePropertiesSizer( pSelectionObject, m_currentListIndex );        
     }
 }
