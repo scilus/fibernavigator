@@ -40,10 +40,10 @@ enum DatasetType
     FIBERS,
     SURFACE,
     ISO_SURFACE,
-    MASTER_OBJECT,
-    CHILD_OBJECT,
-    LABEL_POINTS,
-    LABEL_SELECTION_OBJECTS,
+    MASTER_OBJECT,      // TODO selection probably not needed anymore, but not sure should remove
+    CHILD_OBJECT,       // TODO selection probably not needed anymore, but not sure should remove
+    LABEL_POINTS,       // TODO selection probably not needed anymore, but not sure should remove
+    LABEL_SELECTION_OBJECTS,    // TODO selection probably not needed anymore, but not sure should remove
     NOT_INITIALIZED,
     FIBERSGROUP
 };
@@ -55,8 +55,34 @@ enum ObjectType
 {
     ELLIPSOID_TYPE    = 0,
     BOX_TYPE          = 1,
-    CISO_SURFACE_TYPE = 2,
-    DEFAULT_TYPE      = 3
+    CISO_SURFACE_TYPE = 2, // TODO should probably not exist
+    DEFAULT_TYPE      = 3, // TODO should probably not exist
+    VOI_TYPE          = 4
+};
+
+///////////////////////////////////////////////////////////////////////////
+// Enum representing the different types of items that can be present in the 
+// tree control.
+///////////////////////////////////////////////////////////////////////////
+enum TreeObjectType
+{
+    TYPE_SELECTION_MASTER = 1,  // The master object grouping all selection objects.
+    TYPE_SELECTION_OBJECT = 2,  // Any real selection object.
+    TYPE_INVALID                // An invalid or unknown object.
+};
+
+///////////////////////////////////////////////////////////////////////////
+// Enum representing the thresholding operations that can be used when 
+// building a VOI from an anatomy.
+///////////////////////////////////////////////////////////////////////////
+enum ThresholdingOperationType
+{
+    THRESHOLD_EQUAL = 1,
+    THRESHOLD_SMALLER,
+    THRESHOLD_SMALLER_EQUAL,
+    THRESHOLD_GREATER,
+    THRESHOLD_GREATER_EQUAL,
+    THRESHOLD_INVALID
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -152,8 +178,22 @@ public:
                                                float &o_b );
 
     // Math functions
-    static double   calculateCurvature       ( Vector &i_d1, Vector &i_d2 );
-    static double   calculateTorsion         ( Vector &i_d1, Vector &i_d2, Vector &i_d3 );
+    static void getProgressionTorsion( const Vector &i_point0, 
+                                       const Vector &i_point1, 
+                                       const Vector &i_point2, 
+                                       const Vector &i_point3, 
+                                       const Vector &i_point4,
+                                       double  i_progression,
+                                       double &o_torsion );
+    
+    static void getProgressionCurvature( const Vector &i_point0, 
+                                         const Vector &i_point1, 
+                                         const Vector &i_point2, 
+                                         const Vector &i_point3, 
+                                         const Vector &i_point4,
+                                         double        i_progression,
+                                         double       &o_curvature );
+    
     static void     cartesianToSpherical     ( float i_catesianDir[3], float o_sphericalDir[3] );
     static bool     convert2DPlanePointsTo3D ( const std::vector< Vector > &i_original3Dpoints, 
                                                const std::vector< Vector > &i_2Dpoints, 

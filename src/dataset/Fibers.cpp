@@ -13,6 +13,7 @@
 #include "../gfx/ShaderHelper.h"
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
+#include "../gui/SelectionTree.h"
 #include "../misc/Fantom/FMatrix.h"
 
 #include <wx/file.h>
@@ -74,7 +75,6 @@ Fibers::Fibers()
     m_useTransparency( false ),
     m_isColorationUpdated( false ),
     m_fiberColorationMode( NORMAL_COLOR ),
-    m_pKdTree( NULL ),
     m_pOctree( NULL ),
     m_cfDrawDirty( true ),
     m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
@@ -109,16 +109,12 @@ Fibers::Fibers()
 Fibers::~Fibers()
 {
     Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
+    
+    SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getName() );
 
     if( SceneManager::getInstance()->isUsingVBO() )
     {
         glDeleteBuffers( 3, m_bufferObjects );
-    }
-
-    if( m_pKdTree )
-    {
-        delete m_pKdTree;
-        m_pKdTree = NULL;
     }
 
     if( m_pOctree )
@@ -170,6 +166,7 @@ bool Fibers::load( const wxString &filename )
 
     /* OcTree points classification */
     m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+    
     return res;
 }
 
@@ -487,7 +484,6 @@ bool Fibers::loadTRK( const wxString &filename )
     ////
     Logger::getInstance()->print( wxT( "Setting data in right format for the navigator..." ), LOGLEVEL_MESSAGE );
     m_countLines = lines.size();
-    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_pointArray.max_size();
     m_colorArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
@@ -583,7 +579,7 @@ bool Fibers::loadTRK( const wxString &filename )
     createColorArray( colors.size() > 0 );
     m_type = FIBERS;
     m_fullPath = filename;
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
 #ifdef __WXMSW__
     m_name = wxT( "-" ) + filename.AfterLast( '\\' );
 #else
@@ -693,7 +689,6 @@ bool Fibers::loadCamino( const wxString &filename )
     delete[] pBuffer;
     pBuffer = NULL;
 
-    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
@@ -701,7 +696,7 @@ bool Fibers::loadCamino( const wxString &filename )
 #else
     m_name = wxT( "-" ) + filename.AfterLast( '/' );
 #endif
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
     return true;
 }
 
@@ -842,7 +837,6 @@ bool Fibers::loadMRtrix( const wxString &filename )
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
-    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -938,7 +932,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = filename;
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
 #ifdef __WXMSW__
     m_name = wxT( "-" ) + filename.AfterLast( '\\' );
 #else
@@ -1056,7 +1050,6 @@ bool Fibers::loadPTK( const wxString &filename )
     delete[] pBuffer;
     pBuffer = NULL;
     
-    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
@@ -1064,7 +1057,7 @@ bool Fibers::loadPTK( const wxString &filename )
 #else
     m_name = wxT( "-" ) + filename.AfterLast( '/' );
 #endif
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
     return true;
 }
 
@@ -1283,7 +1276,6 @@ bool Fibers::loadVTK( const wxString &filename )
 
     Logger::getInstance()->print( wxString::Format( wxT( "Loading %d points and %d lines" ), countPoints, countLines ), LOGLEVEL_MESSAGE );
     m_countLines        = countLines;
-    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_countPoints       = countPoints;
     
     m_linePointers.resize( m_countLines + 1 );
@@ -1327,7 +1319,7 @@ bool Fibers::loadVTK( const wxString &filename )
 #else
     m_name = wxT( "-" ) + filename.AfterLast( '/' );
 #endif
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
     delete[] pBuffer;
     delete[] pTemp;
     return true;
@@ -1422,7 +1414,6 @@ bool Fibers::loadDmri( const wxString &filename )
     
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
-    DatasetManager::getInstance()->setCountFibers( m_countLines + 1 );
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -1465,7 +1456,7 @@ bool Fibers::loadDmri( const wxString &filename )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = filename;
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
+
 #ifdef __WXMSW__
     m_name = /*"-"+*/ filename.AfterLast( '\\' );
 #else
@@ -1483,7 +1474,6 @@ void Fibers::loadTestFibers()
     m_countLines        = 2;  // The number of fibers you want to display.
     int lengthLines   = 10; // The number of points each fiber will have.
     int pos = 0;
-    DatasetManager::getInstance()->setCountFibers( m_countLines );
     m_countPoints       = m_countLines * lengthLines;
     
     m_linePointers.resize( m_countLines + 1 );
@@ -1583,7 +1573,6 @@ void Fibers::loadTestFibers()
     m_pointArray.resize( m_countPoints * 3 );
     createColorArray( false );
     m_type = FIBERS;
-    //m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0], m_dh );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1696,7 +1685,7 @@ void Fibers::colorWithTorsion( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            MyApp::frame->getLastSelectedObj()->getProgressionTorsion( 
+            Helper::getProgressionTorsion( 
                     Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
@@ -1793,7 +1782,7 @@ void Fibers::colorWithCurvature( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            MyApp::frame->getLastSelectedObj()->getProgressionCurvature(
+            Helper::getProgressionCurvature(
                     Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
@@ -1843,18 +1832,16 @@ void Fibers::colorWithDistance( float *pColorData )
     {
         return;
     }
-
-    SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
+    
+    SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    
     vector< SelectionObject* > simplifiedList;
-
-    for( unsigned int i = 0; i < selObjs.size(); ++i )
+    
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
-        for( unsigned int j = 0; j < selObjs[i].size(); ++j )
+        if( selectionObjects[objIdx]->IsUsedForDistanceColoring() )
         {
-            if( selObjs[i][j]->IsUsedForDistanceColoring() )
-            {
-                simplifiedList.push_back( selObjs[i][j] );
-            }
+            simplifiedList.push_back( selectionObjects[objIdx] );
         }
     }
 
@@ -1917,18 +1904,16 @@ void Fibers::colorWithMinDistance( float *pColorData )
     {
         return;
     }
-
-    SelectionObjList selObjs = SceneManager::getInstance()->getSelectionObjects();
+    
+    SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    
     vector< SelectionObject* > simplifiedList;
-
-    for( unsigned int i = 0; i < selObjs.size(); ++i )
+    
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
-        for( unsigned int j = 0; j < selObjs[i].size(); ++j )
+        if( selectionObjects[objIdx]->IsUsedForDistanceColoring() )
         {
-            if( selObjs[i][j]->IsUsedForDistanceColoring() )
-            {
-                simplifiedList.push_back( selObjs[i][j] );
-            }
+            simplifiedList.push_back( selectionObjects[objIdx] );
         }
     }
 
@@ -1954,6 +1939,7 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
             for( unsigned int k = 0; k < simplifiedList.size(); ++k )
             {
+                // TODO selection m_sourceanat
                 float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
 
                 if( curValue < minDistance )
@@ -2041,6 +2027,7 @@ Anatomy* Fibers::generateFiberVolume()
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
 
         #ifdef __WXMAC__
+            // TODO check this
             //glBufferData(GL_ARRAY_BUFFER, getPointCount()*3 + 2, NULL, GL_STREAM_DRAW);
         #endif
         pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
@@ -2552,6 +2539,67 @@ void Fibers::resetColorArray()
     m_fiberColorationMode = NORMAL_COLOR;
 }
 
+void Fibers::setFiberColor( const int fiberIdx, const wxColour &col )
+{
+    assert(fiberIdx < m_countLines );
+
+    float *pColorData( NULL );
+
+    if( SceneManager::getInstance()->isUsingVBO() )
+    {
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+    }
+    else
+    {
+        pColorData  = &m_colorArray[0];
+    }
+    
+    int curPointStart( getStartIndexForLine( fiberIdx ) * 3);
+    
+    for( int i = 0; i < getPointsPerLine( fiberIdx ); ++i, curPointStart += 3 )
+    {
+        pColorData[curPointStart] = col.Red() / 255.0f;
+        pColorData[curPointStart + 1] = col.Green() / 255.0f;
+        pColorData[curPointStart + 2] = col.Blue() / 255.0f;
+    }
+    
+    if( SceneManager::getInstance()->isUsingVBO() )
+    {
+        glUnmapBuffer( GL_ARRAY_BUFFER );
+    }
+}
+
+wxColour Fibers::getFiberPointColor( const int fiberIdx, const int ptIdx )
+{
+    assert(fiberIdx < m_countLines );
+    
+    float *pColorData( NULL );
+    
+    if( SceneManager::getInstance()->isUsingVBO() )
+    {
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+    }
+    else
+    {
+        pColorData  = &m_colorArray[0];
+    }
+    
+    int curPointStart( getStartIndexForLine( fiberIdx ) * 3 + ptIdx * 3);
+    
+    wxColour ptCol;
+    ptCol.Set( static_cast<unsigned char>(pColorData[curPointStart] * 255.0f),
+               static_cast<unsigned char>(pColorData[curPointStart + 1] * 255.0f), 
+               static_cast<unsigned char>(pColorData[curPointStart + 2] * 255.0f));
+    
+    if( SceneManager::getInstance()->isUsingVBO() )
+    {
+        glUnmapBuffer( GL_ARRAY_BUFFER );
+    }
+    
+    return ptCol;
+}
 
 void Fibers::resetLinesShown()
 {
@@ -2560,260 +2608,41 @@ void Fibers::resetLinesShown()
 
 void Fibers::updateLinesShown()
 {
-    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-
+    SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    
     m_selected.assign( m_countLines, true );
 
-    int activeCount = 0;
-
-    //First pass to make sure there is at least one intersection volume active;
-    for( unsigned int i = 0; i < selectionObjects.size(); ++i )
+    int activeCount( 0 );
+    
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx)
     {
-        if( selectionObjects[i][0]->getIsActive() )
+        if( selectionObjects[objIdx]->getIsActive() )
         {
-            activeCount++;
-
-            for( unsigned int j = 1; j < selectionObjects[i].size(); ++j )
-            {
-                if( selectionObjects[i][j]->getIsActive() )
-                {
-                    activeCount++;
-                }
-            }
+            ++activeCount;
         }
     }
-
+    
     if( activeCount == 0 )
     {
         return;
     }
 
-    // For all the master selection objects.
-    for( unsigned int i = 0; i < selectionObjects.size(); ++i )
-    {
-        if( selectionObjects[i][0]->getIsActive() )
-        {
-            // NOTE: this is currently commented while waiting for JF's
-            // refactoring and JC's selection branch.
-            //if( selectionObjects[i][0]->getIsDirty() )
-            {
-                selectionObjects[i][0]->m_inBox.clear();
-                selectionObjects[i][0]->m_inBox.resize( m_countLines );
-                selectionObjects[i][0]->m_inBranch.clear();
-                selectionObjects[i][0]->m_inBranch.resize( m_countLines );
-
-                // Sets the fibers that are inside this object to true in the m_inBox vector.
-                selectionObjects[i][0]->m_inBox = getLinesShown( selectionObjects[i][0] );
-            }
-
-            for( int k = 0; k < m_countLines; ++k )
-            {
-                selectionObjects[i][0]->m_inBranch[k] = selectionObjects[i][0]->m_inBox[k];
-            }
-
-            // For all its child box.
-            for( unsigned int j = 1; j < selectionObjects[i].size(); ++j )
-            {
-                if( selectionObjects[i][j]->getIsActive() )
-                {
-                    // NOTE: this is currently commented while waiting for JF's
-                    // refactoring and JC's selection branch.                  
-                    //if( selectionObjects[i][j]->getIsDirty() )
-                    {
-                        selectionObjects[i][j]->m_inBox.clear();
-                        selectionObjects[i][j]->m_inBox.resize( m_countLines );
-                        
-                        // Sets the fibers that are inside this object to true in the m_inBox vector.
-                        selectionObjects[i][j]->m_inBox = getLinesShown( selectionObjects[i][j] );
-                    }
-
-                    // Sets the fibers that are INSIDE this child object and INSIDE its master to be in branch.
-                    if( ! selectionObjects[i][j]->getIsNOT() )
-                    {
-                        for( int k = 0; k < m_countLines; ++k )
-                        {
-                            selectionObjects[i][0]->m_inBranch[k] = selectionObjects[i][0]->m_inBranch[k] & selectionObjects[i][j]->m_inBox[k];
-                        }
-                    }
-                    else // Sets the fibers that are NOT INSIDE this child object and INSIDE its master to be in branch.
-                    {
-                        for( int k = 0; k < m_countLines; ++k )
-                        {
-                            selectionObjects[i][0]->m_inBranch[k] = selectionObjects[i][0]->m_inBranch[k] & !selectionObjects[i][j]->m_inBox[k];
-                        }
-                    }
-                }
-            }
-        }
-
-        if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->isColorChanged() )
-        {
-            float *pColorData( NULL );
-            float *pColorData2( NULL );
-            
-            if( SceneManager::getInstance()->isUsingVBO() )
-            {
-                glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-                pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
-                pColorData2 = &m_colorArray[0];
-            }
-            else
-            {
-                pColorData  = &m_colorArray[0];
-                pColorData2 = &m_colorArray[0];
-            }
-
-            wxColour col = selectionObjects[i][0]->getFiberColor();
-
-            for( int l = 0; l < m_countLines; ++l )
-            {
-                if( selectionObjects[i][0]->m_inBranch[l] )
-                {
-                    unsigned int pc = getStartIndexForLine( l ) * 3;
-
-                    for( int j = 0; j < getPointsPerLine( l ); ++j )
-                    {
-                        pColorData[pc]      = ( ( float ) col.Red() )   / 255.0f;
-                        pColorData[pc + 1]  = ( ( float ) col.Green() ) / 255.0f;
-                        pColorData[pc + 2]  = ( ( float ) col.Blue() )  / 255.0f;
-                        pColorData2[pc]     = ( ( float ) col.Red() )   / 255.0f;
-                        pColorData2[pc + 1] = ( ( float ) col.Green() ) / 255.0f;
-                        pColorData2[pc + 2] = ( ( float ) col.Blue() )  / 255.0f;
-                        pc += 3;
-                    }
-                }
-            }
-
-            if( SceneManager::getInstance()->isUsingVBO() )
-            {
-                glUnmapBuffer( GL_ARRAY_BUFFER );
-            }
-
-            selectionObjects[i][0]->setColorChanged( false );
-        }
-    }
-
-    resetLinesShown();
-    bool boxWasUpdated( false );
-
-    for( unsigned int i = 0; i < selectionObjects.size(); ++i )
-    {
-        if( selectionObjects[i].size() > 0 && selectionObjects[i][0]->getIsActive() )
-        {
-            for( int k = 0; k < m_countLines; ++k )
-            {
-                m_selected[k] = m_selected[k] | selectionObjects[i][0]->m_inBranch[k];
-            }
-        }
-
-        boxWasUpdated = true;
-    }
-
+    m_selected = SceneManager::getInstance()->getSelectionTree().getSelectedFibers( this );
+    
     if( m_fibersInverted )
     {
         for( int k = 0; k < m_countLines; ++k )
         {
-            m_selected[k] = ! m_selected[k];
+            m_selected[k] = !m_selected[k];
         }
     }
-
-    SelectionObject * pLastSelObj = MyApp::frame->getLastSelectedObj();
-
+    
+    // TODO selection convex hull
     // This is to update the information display in the fiber grid info and the mean fiber
-    if( boxWasUpdated && pLastSelObj != NULL )
-    {
-        pLastSelObj->SetFiberInfoGridValues();
-        pLastSelObj->computeMeanFiber();
-        pLastSelObj->computeConvexHull();
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Will return the fibers that are inside the selection object passed in argument.
-//
-// pSelectionObject        : The selection object to test with.
-//
-// Return a vector of bool, a value of TRUE indicates that this fiber is inside the selection object passed in argument.
-// A value of false, indicate that this fiber is not inside the selection object.
-///////////////////////////////////////////////////////////////////////////
-vector< bool > Fibers::getLinesShown( SelectionObject *pSelectionObject )
-{
-    if( ! pSelectionObject->isSelectionObject() && ! pSelectionObject->m_sourceAnatomy )
-    {
-        return pSelectionObject->m_inBox;
-    }
-
-    resetLinesShown();
-
-    float voxelX = DatasetManager::getInstance()->getVoxelX();
-    float voxelY = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
-
-    if( pSelectionObject->getSelectionType() == BOX_TYPE || pSelectionObject->getSelectionType() == ELLIPSOID_TYPE )
-    {
-        Vector center = pSelectionObject->getCenter();
-        Vector size   = pSelectionObject->getSize();
-        m_boxMin.resize( 3 );
-        m_boxMax.resize( 3 );
-        m_boxMin[0] = center.x - size.x * 0.5 * voxelX;
-        m_boxMax[0] = center.x + size.x * 0.5 * voxelX;
-        m_boxMin[1] = center.y - size.y * 0.5 * voxelY;
-        m_boxMax[1] = center.y + size.y * 0.5 * voxelY;
-        m_boxMin[2] = center.z - size.z * 0.5 * voxelZ;
-        m_boxMax[2] = center.z + size.z * 0.5 * voxelZ;
-
-        //Get and Set selected lines to visible
-        objectTest( pSelectionObject );
-    }
-    else
-    {
-        int columns = DatasetManager::getInstance()->getColumns();
-        int rows    = DatasetManager::getInstance()->getRows();
-        int frames  = DatasetManager::getInstance()->getFrames();
-
-        for( int i = 0; i < m_countPoints; ++i )
-        {
-            if( m_selected[getLineForPoint( i )] != 1 )
-            {
-                int x     = std::min( columns - 1, std::max( 0, (int)( m_pointArray[i * 3 ]    / voxelX ) ) );
-                int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) );
-                int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) );
-                int index = x + y * columns + z * rows * columns;
-
-                if( ( pSelectionObject->m_sourceAnatomy->at( index ) > pSelectionObject->getThreshold() ) )
-                {
-                    m_selected[getLineForPoint( i )] = 1;
-                }
-            }
-        }
-    }
-
-    return m_selected;
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Get points that are inside the selection object and
-// set selected fibers according to those points.
-///////////////////////////////////////////////////////////////////////////
-void Fibers::objectTest( SelectionObject *pSelectionObject )
-{
-    vector<int> pointsInside = m_pOctree->getPointsInside( pSelectionObject ); //Get points inside the selection object
-    int indice, id;
-
-    for( unsigned int i = 0; i < pointsInside.size(); i++ )
-    {
-        indice = pointsInside[i];
-        id = m_reverse[indice];//Fiber ID according to current point
-        m_selected[id] = 1; //Fiber to be in bundle (TRUE)
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////
-//Fill KdTree
-///////////////////////////////////////////////////////////////////////////
-void Fibers::generateKdTree()
-{
-    m_pKdTree = new KdTree( m_countPoints, &m_pointArray[0] );
+    /*if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
+     {
+     m_dh->m_lastSelectedObject->computeConvexHull();
+     }*/
 }
 
 void Fibers::initializeBuffer()
@@ -3449,14 +3278,13 @@ void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsamplin
         m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
     
-    SelectionObject * pLastSelObj = MyApp::frame->getLastSelectedObj();
+    SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
 
     //Update stats, mean fiber and convexhull only if an object is selected.
-    if( pLastSelObj != NULL )
+    //if( pLastSelObj != NULL )
+    // TODO selection convex hull
     {
-        pLastSelObj->SetFiberInfoGridValues();
-        pLastSelObj->computeMeanFiber();
-        pLastSelObj->computeConvexHull();
+        //pLastSelObj->computeConvexHull();
     }
 
 }
@@ -3509,7 +3337,7 @@ void Fibers::flipAxis( AxisType i_axe )
     glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
     glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
 
-    SceneManager::getInstance()->updateAllSelectionObjects();
+    SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
 }
 
 void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
@@ -3693,6 +3521,12 @@ void Fibers::updatePropertiesSizer()
             DatasetInfo::m_pBtnUp->Disable();
         }
     }
+}
+
+bool Fibers::toggleShow()
+{
+    SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
+    return DatasetInfo::toggleShow();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -3897,7 +3731,6 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
-    DatasetManager::getInstance()->setCountFibers( m_countLines + 1 );
     m_pointArray.max_size();
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
@@ -3941,6 +3774,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
     m_type = FIBERS;
     m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getRTTFileName();
 
+    // TODO what is the use of this?
 #ifdef __WXMSW__
     m_name = wxT( "RTTFibers" );
 #else

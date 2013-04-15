@@ -27,6 +27,8 @@
 #include "../gui/MyListCtrl.h"
 #include "../gui/SceneManager.h"
 #include "../gui/SelectionObject.h"
+#include "../gui/SelectionTree.h"
+#include "../gui/SelectionVOI.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 
 #include <algorithm>
@@ -531,22 +533,10 @@ void TheScene::renderMesh()
 
     //Render selection objects
     glColor3f( 1.0f, 0.0f, 0.0f );
-    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
 
     ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS", true );
     ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex", false );
     ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_", 1.0 );
-
-    for( unsigned int i = 0; i < selectionObjects.size(); ++i )
-    {
-        for( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
-        {
-            glPushAttrib( GL_ALL_ATTRIB_BITS );
-            if( SceneManager::getInstance()->getShowAllSelObj() && !selectionObjects[i][j]->isSelectionObject() )
-                selectionObjects[i][j]->drawIsoSurface();
-            glPopAttrib();
-        }
-    }
 
     //Render meshes
     vector< Mesh * > v = DatasetManager::getInstance()->getMeshes();
@@ -654,15 +644,6 @@ void TheScene::renderFibers()
     }
 
     SceneManager::getInstance()->setSelBoxChanged( false );
-
-    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-    for( SelectionObjList::iterator itMaster = selectionObjects.begin(); itMaster != selectionObjects.end(); ++itMaster )
-    {
-        for( vector< SelectionObject *>::iterator itChild = itMaster->begin(); itChild != itMaster->end(); ++itChild )
-        {
-            (*itChild)->setIsDirty( false );
-        }
-    }
 
     glPopAttrib();
 }
@@ -792,16 +773,66 @@ void TheScene::drawSphere( float xPos, float yPos, float zPos, float ray )
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::drawSelectionObjects()
 {
-    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-    for ( unsigned int i = 0; i < selectionObjects.size(); ++i )
+    SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    
+    // TODO do all the processing only if there is at least one selection object
+    
+    // Draw selection objects that are not VOIs.
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
-        for ( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
+        SelectionVOI *pObjAsVOI = dynamic_cast<SelectionVOI*>( selectionObjects[objIdx] );
+        
+        if( pObjAsVOI == NULL )
         {
-			glPushAttrib( GL_ALL_ATTRIB_BITS );
-			selectionObjects[i][j]->draw();
-			glPopAttrib();
+            glPushAttrib( GL_ALL_ATTRIB_BITS );
+            
+            selectionObjects[objIdx]->draw();
+            
+            glPopAttrib();
         }
     }
+    
+    // Setup to draw VOIs.
+    glPushAttrib( GL_ALL_ATTRIB_BITS );
+    
+    if( SceneManager::getInstance()->isLightingActive() )
+    {
+        lightsOn();
+    }
+    
+    bindTextures();
+    
+    ShaderProgram *pMeshShader = ShaderHelper::getInstance()->getMeshShader();
+    pMeshShader->bind();
+    ShaderHelper::getInstance()->setMeshShaderVars();
+    
+    if( SceneManager::getInstance()->isPointMode() )
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    else
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    
+    pMeshShader->setUniInt  ( "showFS", true );
+    pMeshShader->setUniInt  ( "useTex", false );
+    pMeshShader->setUniFloat( "alpha_", 1.0 );
+    
+    for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
+    {
+        SelectionVOI *pObjAsVOI = dynamic_cast<SelectionVOI*>( selectionObjects[objIdx] );
+        
+        if( pObjAsVOI != NULL )
+        {
+            selectionObjects[objIdx]->draw();
+        }
+    }
+    
+    pMeshShader->release();
+    
+    lightsOff();
+    
+    glPopAttrib();
 
     Logger::getInstance()->printIfGLError( wxT( "Draw selection objects" ) );
 }

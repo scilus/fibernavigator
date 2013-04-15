@@ -49,6 +49,8 @@ public:
     void deleteSceneObject();
     void deleteListItem();
     void deleteTreeItem();
+    void toggleTreeItemActivation();
+    void toggleTreeItemVisibility();
     void refreshAllGLWidgets();
     void refreshViews();
     void screenshot                         ( const wxString &path, const wxString &filename );
@@ -72,8 +74,7 @@ public:
     void      setDrawColor( const wxColour &color )   { m_drawColor = color; }
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
-    void      setThreadsActive( const int nb )      { m_threadsActive = nb; }
-    SelectionObject * getLastSelectedObj() const    { return m_pLastSelectionObj; }
+    SelectionObject* getCurrentSelectionObject();
 
 
 public:
@@ -179,16 +180,15 @@ private:
     // Tree widget event functions
     void onDeleteTreeItem                   ( wxTreeEvent&    evt );
     void onSelectTreeItem                   ( wxTreeEvent&    evt );
-    void onRightClickTreeItem               ( wxTreeEvent&    evt );
     void onUnSelectTreeItem                 ( wxTreeEvent&    evt );
     void onActivateTreeItem                 ( wxTreeEvent&    evt );
-    void onTreeLabelEdit                    ( wxTreeEvent&    evt );
-    int  treeSelected                       ( wxTreeItemId    id  ); 
+    
+    int getCurrentTreeIndex();
 
     // System functions
     void onGLEvent                          ( wxCommandEvent& evt );    
     void onSliderMoved                      ( wxCommandEvent& evt );
-    void onKdTreeThreadFinished             ( wxCommandEvent& evt );
+
     void updateStatusBar();
     void updateMenus();
     void onTimerEvent                       ( wxTimerEvent&   evt );
@@ -214,6 +214,7 @@ private:
     void updateDrawerToolbar();
 
     void changePropertiesSizer( SceneObject * pSceneObj, int index );
+    void hideAllInPropSizer();
 
 private:
     ToolBar             *m_pToolBar;
@@ -237,16 +238,12 @@ private:
     wxColor  m_drawColor;
     wxImage  m_drawColorIcon;
 
-    int  m_threadsActive;
-    SelectionObject* m_pLastSelectionObj;
-
 DECLARE_EVENT_TABLE()
 };
 
 /*
  * Defines for interface items and other events
  */
-#define KDTREE_EVENT                                270
 
 #define ID_GL_NAV_X                                 271
 #define ID_GL_NAV_Y                                 272

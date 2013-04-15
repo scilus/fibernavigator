@@ -21,7 +21,6 @@ class SelectionBox : public SelectionObject
 public:
     // Constructor / Destructor
     SelectionBox( Vector i_center, Vector i_size );
-    SelectionBox( Anatomy* i_anatomy );
     virtual ~SelectionBox();
 
     // Function from SelectionObject (pure virtual)

@@ -86,7 +86,7 @@ public:
 
     wxString getRpn() const                      { return m_repn; };
 
-    bool     toggleShow()                        { m_show        = !m_show;          return m_show;        };
+    virtual bool     toggleShow()                        { m_show        = !m_show;          return m_show;        };
     bool     toggleShowFS()                      { m_showFS      = !m_showFS;        return m_showFS;      };
     bool     toggleUseTex()                      { m_useTex      = !m_useTex;        return m_useTex;      };
 

@@ -85,6 +85,7 @@ SceneManager::SceneManager(void)
     m_colorMap( 0 ),
     m_filterIsoSurface( false ),
     m_isBoxLocked( false ),
+    m_pSelTree( NULL ),
     m_selBoxChanged( true ),
     m_isRulerActive( false ),
     m_rulerFullLength( 0.0 ),
@@ -92,6 +93,7 @@ SceneManager::SceneManager(void)
 {
     m_pAnatomyHelper = new AnatomyHelper();
     m_pTheScene = new TheScene();
+    m_pSelTree = new SelectionTree();
     Matrix4fSetIdentity( &m_transform );
 }
 
@@ -301,7 +303,8 @@ bool SceneManager::save( const wxString &filename )
 
     //////////////////////////////////////////////////////////////////////////
     // SELECTION OBJECTS
-    SelectionObjList selObjs = getSelectionObjects();
+    // TODO selection saving
+    /*SelectionObjList selObjs = getSelectionObjects();
     for( SelectionObjList::const_iterator it = selObjs.begin(); it != selObjs.end(); ++it )
     {
         for( vector<SelectionObject *>::const_iterator childIt = it->begin(); childIt != it->end(); ++childIt )
@@ -342,7 +345,7 @@ bool SceneManager::save( const wxString &filename )
 
             pSelObjs->AddChild( pObjectNode );
         }
-    }
+    }*/
 
     //////////////////////////////////////////////////////////////////////////
     // SAVE DOCUMENT
@@ -350,40 +353,6 @@ bool SceneManager::save( const wxString &filename )
     doc.SetRoot( pRoot );
 
     return doc.Save( filename + ( wxT( "scn" ) != filename.AfterLast( '.' ) ? wxT( ".scn" ) : wxT( "" ) ), 2 );
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-void SceneManager::deleteAllSelectionObjects()
-{
-    Logger::getInstance()->print( wxT( "SceneManager::deleteAllSelectionObjects" ), LOGLEVEL_DEBUG );
-
-    assert( m_pTreeView != NULL );
-
-    SelectionObjList selectionObjs = getSelectionObjects();
-    for( SelectionObjList::iterator it = selectionObjs.begin(); it != selectionObjs.end(); ++it)
-    {
-        for( vector<SelectionObject *>::iterator childIt = it->begin(); childIt != it->end(); ++childIt )
-        {
-            m_pTreeView->Delete( (*childIt)->GetId() );
-        }
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-void SceneManager::updateAllSelectionObjects()
-{
-    Logger::getInstance()->print( wxT( "SceneManager::updateAllSelectionObjects" ), LOGLEVEL_DEBUG );
-
-    SelectionObjList selectionObjs = getSelectionObjects();
-    for( SelectionObjList::iterator it = selectionObjs.begin(); it != selectionObjs.end(); ++it)
-    {
-        for( vector<SelectionObject *>::iterator childIt = it->begin(); childIt != it->end(); ++childIt )
-        {
-            (*childIt)->setIsDirty( true );
-        }
-    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -471,45 +440,6 @@ void SceneManager::doMatrixManipulation()
     glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
 
     Logger::getInstance()->printIfGLError( wxT( "SceneManager::doMatrixManipulation" ) );
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-SelectionObjList SceneManager::getSelectionObjects()
-{
-    assert( m_pMainFrame != NULL );
-    assert( m_pTreeView  != NULL );
-
-    SelectionObjList selectionObjects;
-
-    if( m_scnLoading )
-    {
-        return selectionObjects;
-    }
-
-    wxTreeItemId id, childId;
-    wxTreeItemIdValue cookie = 0;
-
-    id = m_pTreeView->GetFirstChild( m_pMainFrame->m_tSelectionObjectsId, cookie );
-
-    while( id.IsOk() )
-    {
-        std::vector< SelectionObject * > vect;
-        vect.push_back( (SelectionObject *)m_pTreeView->GetItemData( id ) );
-        
-        childId = m_pTreeView->GetFirstChild( id, cookie );
-
-        while( childId.IsOk() )
-        {
-            vect.push_back( (SelectionObject*) m_pTreeView->GetItemData( childId ) );
-            childId = m_pTreeView->GetNextSibling( childId );
-        }
-
-        id = m_pTreeView->GetNextSibling( id );
-        selectionObjects.push_back( vect );
-    }
-
-    return selectionObjects;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -726,7 +656,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
                 MyTreeCtrl *pTreeView = m_pMainFrame->m_pTreeWidget;
                 if( wxT( "MASTER" ) == type )
                 {
-                    pSelObj->setIsMaster( true );
+                    pSelObj->setIsFirstLevel( true );
                     currentMasterId = pTreeView->AppendItem( m_pMainFrame->m_tSelectionObjectsId, name, 0, -1, pSelObj );
                     pTreeView->EnsureVisible( currentMasterId );
                     pTreeView->SetItemImage( currentMasterId, pSelObj->getIcon() );
@@ -795,6 +725,9 @@ SceneManager::~SceneManager(void)
 
     delete m_pAnatomyHelper;
     m_pAnatomyHelper = NULL;
+    
+    delete m_pSelTree;
+    m_pSelTree = NULL;
     
     delete m_pTheScene;
     m_pTheScene = NULL;

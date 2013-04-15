@@ -15,7 +15,6 @@
 #include "../misc/lic/FgeOffscreen.h"
 
 #include <wx/math.h>
-#include <wx/utils.h>
 
 #include <algorithm>
 #include <limits>
@@ -626,21 +625,19 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
      * check for hits with the selection object sizers
      */
     if( SceneManager::getInstance()->getShowAllSelObj() )
-    {
-        SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-        for ( unsigned int i = 0; i < selectionObjects.size(); ++i )
+    {        
+        SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+        
+        for ( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
         {
-            for ( unsigned int j = 0; j < selectionObjects[i].size(); ++j )
+            hitResult hr1 = selectionObjects[objIdx]->hitTest( ray );
+            if ( hr1.hit && !hr.hit )
             {
-                hitResult hr1 = selectionObjects[i][j]->hitTest( ray );
-                if ( hr1.hit && !hr.hit )
-                {
-                    hr = hr1;
-                }
-                else if ( hr1.hit && hr.hit && ( hr1.tmin < hr.tmin ) )
-                {
-                    hr = hr1;
-                }
+                hr = hr1;
+            }
+            else if ( hr1.hit && hr.hit && ( hr1.tmin < hr.tmin ) )
+            {
+                hr = hr1;
             }
         }
     }

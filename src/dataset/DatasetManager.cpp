@@ -9,6 +9,7 @@
 
 #include "../Logger.h"
 #include "../gui/SceneManager.h"
+#include "../gui/SelectionTree.h"
 #include "../misc/nifti/nifti1_io.h"
 
 #include <wx/filename.h>
@@ -33,7 +34,6 @@ DatasetManager * DatasetManager::m_pInstance = NULL;
 DatasetManager::DatasetManager(void)
 :   m_nextIndex( 1 ),
     m_niftiTransform( 4, 4 ),
-    m_countFibers( 0 ),
     m_forceLoadingAsMaximas( false )
 {
 }
@@ -557,13 +557,11 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
 
         DatasetIndex index = insert( pAnatomy );
 
-        SelectionObjList objs = SceneManager::getInstance()->getSelectionObjects();
-        for( SelectionObjList::iterator masterIt = objs.begin(); masterIt != objs.end(); ++masterIt )
+        SelectionTree::SelectionObjectVector objs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+        
+        for( SelectionTree::SelectionObjectVector::iterator objsIt = objs.begin(); objsIt != objs.end(); ++objsIt )
         {
-            for( vector< SelectionObject *>::iterator childIt = masterIt->begin(); childIt != masterIt->end(); ++childIt )
-            {
-                (*childIt)->update();
-            }
+            (*objsIt)->update();
         }
 
         return index;
@@ -582,15 +580,7 @@ DatasetIndex DatasetManager::loadFibers( const wxString &filename )
 
     if( l_fibers->load( filename ) )
     {
-        SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-        for( unsigned int i( 0 ); i < selectionObjects.size(); ++i )
-        {
-            for( unsigned int j( 0 ); j < selectionObjects[i].size(); ++j )
-            {
-                selectionObjects[i][j]->m_inBox.assign( m_countFibers, false );
-                selectionObjects[i][j]->setIsDirty( true );
-            }
-        }
+        SceneManager::getInstance()->getSelectionTree().addFiberDataset( l_fibers->getName(), l_fibers->getLineCount() );
 
         l_fibers->setThreshold( THRESHOLD );
         l_fibers->setShow     ( SHOW );
@@ -616,15 +606,7 @@ DatasetIndex DatasetManager::createFibers( std::vector<std::vector<Vector> >* RT
 
     l_fibers->convertFromRTT( RTT );
    
-    SelectionObjList selectionObjects = SceneManager::getInstance()->getSelectionObjects();
-    for( unsigned int i( 0 ); i < selectionObjects.size(); ++i )
-    {
-        for( unsigned int j( 0 ); j < selectionObjects[i].size(); ++j )
-        {
-            selectionObjects[i][j]->m_inBox.assign( m_countFibers, false );
-            selectionObjects[i][j]->setIsDirty( true );
-        }
-    }
+    SceneManager::getInstance()->getSelectionTree().addFiberDataset( l_fibers->getName(), l_fibers->getLineCount() );
 
     l_fibers->setThreshold( THRESHOLD );
     l_fibers->setShow     ( SHOW );

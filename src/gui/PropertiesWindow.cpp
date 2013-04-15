@@ -4,6 +4,7 @@
 #include "SceneManager.h"
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
+#include "SelectionTree.h"
 #include "TrackingWindow.h"
 #include "../Logger.h"
 #include "../main.h"
@@ -15,11 +16,14 @@
 #include "../dataset/RTTrackingHelper.h"
 #include "../dataset/Tensors.h"
 #include "../dataset/Maximas.h"
+#include "../gui/SelectionVOI.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 
 #include <wx/colordlg.h>
 #include <wx/notebook.h>
+
+#include <algorithm>
 
 IMPLEMENT_DYNAMIC_CLASS(PropertiesWindow, wxScrolledWindow)
 
@@ -535,30 +539,20 @@ void PropertiesWindow::OnNewDistanceMap (wxCommandEvent& WXUNUSED(event))
 void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNewVoiFromOverlay" ), LOGLEVEL_DEBUG );
-
-    wxTreeItemId     treeObjectId  = m_pMainFrame->m_tSelectionObjectsId;
-    SelectionObject* selectionObj  = NULL;
-    Anatomy*         anatomy       = NULL;
-    wxColor          color;
-    bool             isMaster;
-
-    if( m_pMainFrame->getLastSelectedObj() != NULL )
-    {
-        treeObjectId = m_pMainFrame->getLastSelectedObj()->GetId();
-    }
-
+    
+    SelectionObject *pSelectionObject  = NULL;
+    Anatomy         *pAnatomy          = NULL;
+    
     if(m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1)
     {
         if ( ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getType() < RGB)
         {
-            anatomy = (Anatomy*)m_pMainFrame->m_pCurrentSceneObject;
-            selectionObj = new SelectionBox( anatomy );
-            float trs = anatomy->getThreshold();
+            pAnatomy = (Anatomy*)m_pMainFrame->m_pCurrentSceneObject;
+            float trs = pAnatomy->getThreshold();
             if( trs == 0.0 )
-            {
                 trs = 0.01f;
-            }
-            selectionObj->setThreshold( trs );
+            
+            pSelectionObject = new SelectionVOI( pAnatomy, trs, THRESHOLD_GREATER_EQUAL );
         }
         else
         {
@@ -569,29 +563,41 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     {
         return;
     }
-
-    if( m_pMainFrame->treeSelected( treeObjectId ) == MASTER_OBJECT)
+        
+    wxTreeItemId newSelectionObjectId;
+    
+    SelectionTree &selTree = SceneManager::getInstance()->getSelectionTree();
+    
+    SelectionObject *pCurObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( selTree.isEmpty() || pCurObj == NULL )
     {
-        color = *wxGREEN;
-        isMaster = false;
+        pSelectionObject->setIsFirstLevel( true );
+        int itemId = selTree.addChildrenObject( -1, pSelectionObject );
+        
+        CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
+        newSelectionObjectId = m_pMainFrame->m_pTreeWidget->AppendItem( m_pMainFrame->m_tSelectionObjectsId, pSelectionObject->getName(), 0, -1, pTreeItem );
+        
     }
     else
     {
-        treeObjectId = m_pMainFrame->m_tSelectionObjectsId;
-        color = *wxCYAN;
-        isMaster = true;
+        pSelectionObject->setIsFirstLevel( false );
+        
+        int childId = selTree.addChildrenObject( selTree.getId( pCurObj ),  pSelectionObject );
+        
+        CustomTreeItem *pTreeItem = new CustomTreeItem( childId );
+        newSelectionObjectId = m_pMainFrame->m_pTreeWidget->AppendItem( pCurObj->getTreeId(), pSelectionObject->getName(), 0, -1, pTreeItem );
     }
-
-    wxTreeItemId l_treeNewObjectId = m_pMainFrame->m_pTreeWidget->AppendItem( treeObjectId, selectionObj->getName(), 0, -1, selectionObj );
-    m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( l_treeNewObjectId, color );
-    m_pMainFrame->m_pTreeWidget->EnsureVisible( l_treeNewObjectId );
-    m_pMainFrame->m_pTreeWidget->SetItemImage( l_treeNewObjectId, selectionObj->getIcon() );
-    selectionObj->setTreeId( l_treeNewObjectId );
-    selectionObj->setIsMaster( isMaster );
-    anatomy->m_pRoi = selectionObj;
-
+    
+    m_pMainFrame->m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+    m_pMainFrame->m_pTreeWidget->SetItemImage( newSelectionObjectId, pSelectionObject->getIcon() );
+    
+    // New items are always set to green.
+    m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+    m_pMainFrame->m_pTreeWidget->SelectItem(newSelectionObjectId, true);
+    
+    pSelectionObject->setTreeId( newSelectionObjectId );    
     SceneManager::getInstance()->setSelBoxChanged( true );
-    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnFloodFill(wxCommandEvent& WXUNUSED(event))
@@ -818,7 +824,7 @@ void PropertiesWindow::OnColorWithConstantColor( wxCommandEvent& WXUNUSED(event)
 
 void PropertiesWindow::OnSelectConstantColor( wxCommandEvent& WXUNUSED(event) )
 {
-    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnAssignColor" ), LOGLEVEL_DEBUG );
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSelectConstantColor" ), LOGLEVEL_DEBUG );
     
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 == index )
@@ -827,45 +833,20 @@ void PropertiesWindow::OnSelectConstantColor( wxCommandEvent& WXUNUSED(event) )
         return;
     }
     
-    wxColourData colorData;
+    wxColour newCol;
     
-    for( int i = 0; i < 10; ++i )
-    {
-        wxColour color( i * 28, i * 28, i * 28 );
-        colorData.SetCustomColour( i, color );
-    }
+    bool success = SelectColor( newCol );
     
-    int i( 10 );
-    wxColour color( 255, 0, 0 );
-    colorData.SetCustomColour( i++, color );
-    wxColour color1( 0, 255, 0 );
-    colorData.SetCustomColour( i++, color1 );
-    wxColour color2( 0, 0, 255 );
-    colorData.SetCustomColour( i++, color2 );
-    wxColour color3( 255, 255, 0 );
-    colorData.SetCustomColour( i++, color3 );
-    wxColour color4( 255, 0, 255 );
-    colorData.SetCustomColour( i++, color4 );
-    wxColour color5( 0, 255, 255 );
-    colorData.SetCustomColour( i++, color5 );
-    
-    wxColourDialog dialog( this, &colorData );
-    wxColour selCol;
-    if( dialog.ShowModal() == wxID_OK )
-    {
-        wxColourData retData = dialog.GetColourData();
-        selCol = retData.GetColour();
-        
-        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
-        if( pFibers != NULL )
-        {
-            pFibers->setConstantColor( selCol );
-            pFibers->updateFibersColors();
-        }
-    }
-    else
+    if( !success )
     {
         return;
+    }
+    
+    Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+    if( pFibers != NULL )
+    {
+        pFibers->setConstantColor( newCol );
+        pFibers->updateFibersColors();
     }
 }
 
@@ -877,18 +858,27 @@ void PropertiesWindow::OnNormalMeanFiberColoring( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNormalMeanFiberColoring" ), LOGLEVEL_DEBUG );
 
-   ( (SelectionObject*) m_pMainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(NORMAL_COLOR); 
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->setMeanFiberColorMode( NORMAL_COLOR );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the custom coloring radio
 // button located in the mean fiber coloring option
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection can we remove m_pCurrentSceneObject
 void PropertiesWindow::OnCustomMeanFiberColoring( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCustomMeanFiberColoring" ), LOGLEVEL_DEBUG );
 
-    ( (SelectionObject*) m_pMainFrame->m_pCurrentSceneObject )->setMeanFiberColorMode(CUSTOM_COLOR);
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->setMeanFiberColorMode( CUSTOM_COLOR );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -898,8 +888,12 @@ void PropertiesWindow::OnCustomMeanFiberColoring( wxCommandEvent& event )
 void PropertiesWindow::OnMeanFiberOpacityChange( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMeanFiberOpacityChange" ), LOGLEVEL_DEBUG );
-
-    ( (SelectionObject*) m_pMainFrame->m_pCurrentSceneObject )->updateMeanFiberOpacity();
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->updateMeanFiberOpacity();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -910,10 +904,10 @@ void PropertiesWindow::OnDistanceAnchorSet( wxCommandEvent& event )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDistanceAnchorSet" ), LOGLEVEL_DEBUG );
 
-    SelectionObject * pLastSelObj = m_pMainFrame->getLastSelectedObj();
-    if( pLastSelObj != NULL )
+    SelectionObject *pCurSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pCurSelObj != NULL )
     {
-        pLastSelObj->UseForDistanceColoring( !pLastSelObj->IsUsedForDistanceColoring() );
+        pCurSelObj->UseForDistanceColoring( !pCurSelObj->IsUsedForDistanceColoring() );
         ColorFibers();
     }
 }
@@ -1365,12 +1359,15 @@ void PropertiesWindow::OnDisplayFibersInfo( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDisplayFibersInfo" ), LOGLEVEL_DEBUG );
 
-// TODO remove when the bug with the wxChoice in Windows is fixed.
+    // TODO remove when the bug with the wxChoice in Windows is fixed.
+    SelectionObject* pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->notifyStatsNeedUpdating();
 #ifndef __WXMSW__
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->UpdateMeanValueTypeBox();
+        pSelObj->UpdateMeanValueTypeBox();
 #endif
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->SetFiberInfoGridValues();
-    m_pMainFrame->refreshAllGLWidgets();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1381,72 +1378,65 @@ void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDisplayMeanFiber" ), LOGLEVEL_DEBUG );
 
-    ( (SelectionObject*)m_pMainFrame->m_pCurrentSceneObject )->computeMeanFiber();
-    m_pMainFrame->refreshAllGLWidgets();
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    pSelObj->notifyStatsNeedUpdating();
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the display convex hull
 // button that is located in the m_fibersInfoSizer.
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection convex hull test
 void PropertiesWindow::OnDisplayConvexHull( wxCommandEvent& WXUNUSED(event) )
 {
-    ( (SelectionObject*)m_pMainFrame->m_pCurrentSceneObject )->computeConvexHull();
-    m_pMainFrame->refreshAllGLWidgets();
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->computeConvexHull();
+        m_pMainFrame->refreshAllGLWidgets();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // This function will be triggered when the user click on the color button
 // beside the display convex hull button that is located in the m_fibersInfoSizer.
 ///////////////////////////////////////////////////////////////////////////
+// TODO selection convex hull test
 void PropertiesWindow::OnConvexHullColorChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnConvexHullColorChange" ), LOGLEVEL_DEBUG );
 
-    wxColourData l_colorData;
-
-    for( int i = 0; i < 10; ++i )
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
     {
-        wxColour l_color(i * 28, i * 28, i * 28);
-        l_colorData.SetCustomColour(i, l_color);
-    }
+        wxColour newCol;
+        
+        bool success = SelectColor( newCol );
+        
+        if( !success )
+        {
+            return;
+        }
 
-    int i = 10;
-    wxColour l_color ( 255, 0, 0 );
-    l_colorData.SetCustomColour( i++, l_color );
-    wxColour l_color1( 0, 255, 0 );
-    l_colorData.SetCustomColour( i++, l_color1 );
-    wxColour l_color2( 0, 0, 255 );
-    l_colorData.SetCustomColour( i++, l_color2 );
-    wxColour l_color3( 255, 255, 0 );
-    l_colorData.SetCustomColour( i++, l_color3 );
-    wxColour l_color4( 255, 0, 255 );
-    l_colorData.SetCustomColour( i++, l_color4 );
-    wxColour l_color5( 0, 255, 255 );
-    l_colorData.SetCustomColour( i++, l_color5 );
-
-    wxColourDialog dialog( this, &l_colorData );
-    wxColour l_col;
-    if( dialog.ShowModal() == wxID_OK )
-    {
-        wxColourData l_retData = dialog.GetColourData();
-        l_col = l_retData.GetColour();
+        pSelObj->setConvexHullColor( newCol );
+        
+        // TODO is this mandatory
+        m_pMainFrame->refreshAllGLWidgets();
     }
-    else
-    {
-        return;
-    }
-
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setConvexHullColor( l_col );
-  
-    m_pMainFrame->refreshAllGLWidgets();
 }
 
+// TODO selection convex hull test
 void PropertiesWindow::OnConvexHullOpacityChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnConvexHullOpacityChange" ), LOGLEVEL_DEBUG );
 
-    ( (SelectionObject*) m_pMainFrame->m_pCurrentSceneObject )->updateConvexHullOpacity();
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->updateConvexHullOpacity();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1457,43 +1447,20 @@ void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMeanFiberColorChange" ), LOGLEVEL_DEBUG );
 
-    wxColourData l_colorData;
-
-    for( int i = 0; i < 10; ++i )
-    {
-        wxColour l_color(i * 28, i * 28, i * 28);
-        l_colorData.SetCustomColour(i, l_color);
-    }
-
-    int i = 10;
-    wxColour l_color ( 255, 0, 0 );
-    l_colorData.SetCustomColour( i++, l_color );
-    wxColour l_color1( 0, 255, 0 );
-    l_colorData.SetCustomColour( i++, l_color1 );
-    wxColour l_color2( 0, 0, 255 );
-    l_colorData.SetCustomColour( i++, l_color2 );
-    wxColour l_color3( 255, 255, 0 );
-    l_colorData.SetCustomColour( i++, l_color3 );
-    wxColour l_color4( 255, 0, 255 );
-    l_colorData.SetCustomColour( i++, l_color4 );
-    wxColour l_color5( 0, 255, 255 );
-    l_colorData.SetCustomColour( i++, l_color5 );
-
-    wxColourDialog dialog( this, &l_colorData );
-    wxColour l_col;
-    if( dialog.ShowModal() == wxID_OK )
-    {
-        wxColourData l_retData = dialog.GetColourData();
-        l_col = l_retData.GetColour();
-    }
-    else
+    wxColour newCol;
+    
+    bool success = SelectColor( newCol );
+    
+    if( !success )
     {
         return;
     }
 
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setMeanFiberColor( l_col);
-    
-    m_pMainFrame->refreshAllGLWidgets();
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->setMeanFiberColor( newCol );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1503,99 +1470,62 @@ void PropertiesWindow::OnMeanFiberColorChange( wxCommandEvent& WXUNUSED(event) )
 void PropertiesWindow::OnRenameBox( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnRenameBox" ), LOGLEVEL_DEBUG );
-
-    wxTreeItemId l_treeBoxId = m_pMainFrame->m_pTreeWidget->GetSelection();
-    if( m_pMainFrame->treeSelected( l_treeBoxId ) == MASTER_OBJECT || m_pMainFrame->treeSelected( l_treeBoxId ) == CHILD_OBJECT )
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
     {
-        SelectionObject* l_box = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeBoxId ) );
-
         wxTextEntryDialog dialog(this, _T( "Please enter a new name" ) );
-        dialog.SetValue( l_box->getName() );
-
+        dialog.SetValue( pSelObj->getName() );
+        
         if( ( dialog.ShowModal() == wxID_OK ) && ( dialog.GetValue() != _T( "" ) ) )
-        {
-            l_box->setName( dialog.GetValue() );
-        }
+		{
+            pSelObj->setName( dialog.GetValue() );
+		}
 
-        m_pMainFrame->m_pTreeWidget->SetItemText( l_treeBoxId, l_box->getName() );
+        m_pMainFrame->m_pTreeWidget->SetItemText( pSelObj->getTreeId(), pSelObj->getName() );
     }
-    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleAndNot" ), LOGLEVEL_DEBUG );
-
-    // Get what selection object is selected.
-    wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-
-    if( m_pMainFrame->treeSelected(l_selectionObjectTreeId) == CHILD_OBJECT)
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
     {
-        SelectionObject* l_box = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_box->toggleIsNOT();
-
-        wxTreeItemId l_parentId = m_pMainFrame->m_pTreeWidget->GetItemParent( l_selectionObjectTreeId );
-        ((SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_parentId ) ) )->setIsDirty( true );
-
-        if( ( (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) ) )->getIsNOT() )
-            m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( l_selectionObjectTreeId, *wxRED   );
+        pSelObj->toggleIsNOT();
+        
+        if( pSelObj->getIsNOT() )
+        {
+            m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( pSelObj->getTreeId(), *wxRED   );
+        }
         else
-            m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( l_selectionObjectTreeId, *wxGREEN );
-
-        m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_box->getIcon() );
-        l_box->setIsDirty( true );
+        {
+            m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( pSelObj->getTreeId(), *wxGREEN   );
+        }
     }
-    m_pMainFrame->refreshAllGLWidgets();
 }
 
 
 void PropertiesWindow::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorRoi" ), LOGLEVEL_DEBUG );
-
-    // Get the currently selected object.
-    wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-    SelectionObject* l_selectionObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-
-    wxColourData l_colorData;
-
-    for( int i = 0; i < 10; ++i )
+    
+    wxColour newCol;
+    
+    bool success = SelectColor( newCol );
+    
+    if( !success )
     {
-        wxColour l_color( i * 28, i * 28, i * 28 );
-        l_colorData.SetCustomColour( i, l_color );
-    }
-
-    int i = 10;
-    wxColour color ( 255, 0,   0   );
-    wxColour color1( 0,   255, 0   );
-    wxColour color2( 0,   0,   255 );
-    wxColour color3( 255, 255, 0   );
-    wxColour color4( 255, 0,   255 );
-    wxColour color5( 0,   255, 255 );
-
-    l_colorData.SetCustomColour( i++, color  );
-    l_colorData.SetCustomColour( i++, color1 );
-    l_colorData.SetCustomColour( i++, color2 );
-    l_colorData.SetCustomColour( i++, color3 );
-    l_colorData.SetCustomColour( i++, color4 );
-    l_colorData.SetCustomColour( i++, color5 );
-#ifdef __WXMAC__
-    wxColourDialog dialog( this);
-#else
-    wxColourDialog dialog( this, &l_colorData );
-#endif
-    wxColour l_color;
-
-    if( dialog.ShowModal() == wxID_OK )
-    {
-        wxColourData retData = dialog.GetColourData();
-        l_color = retData.GetColour();
-    }
-    else
         return;
-
-    l_selectionObject->setColor( l_color );
-
+    }
+    
+    SelectionObject *pSelObject = m_pMainFrame->getCurrentSelectionObject();
+    
+    pSelObject->setColor( newCol );
+    
     m_pMainFrame->refreshAllGLWidgets();
 }
 
@@ -1603,12 +1533,10 @@ void PropertiesWindow::OnVoiFlipNormals( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnVoiFlipNormals" ), LOGLEVEL_DEBUG );
 
-    wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-    SelectionObject* l_selectionObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-
-    if(l_selectionObject->getSelectionType() == CISO_SURFACE_TYPE)
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
     {
-        l_selectionObject->FlipNormals();
+        pSelObj->flipNormals();
     }
 }
 
@@ -1634,100 +1562,75 @@ void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent& evt )
 void PropertiesWindow::OnToggleShowSelectionObject( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleShowSelectionObject" ), LOGLEVEL_DEBUG );
-
-    // Get the selected selection object.
-    wxTreeItemId l_selectionObjectTreeId = m_pMainFrame->m_pTreeWidget->GetSelection();
-
-    if( m_pMainFrame->treeSelected( l_selectionObjectTreeId ) == MASTER_OBJECT )
-    {
-        SelectionObject* l_selecitonObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selecitonObject->toggleIsVisible();
-        m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selecitonObject->getIcon() );
-        l_selecitonObject->setIsDirty( true );
-
-        int l_childSelectionObjects = m_pMainFrame->m_pTreeWidget->GetChildrenCount( l_selectionObjectTreeId );
-        wxTreeItemIdValue childcookie = 0;
-        for( int i = 0; i < l_childSelectionObjects; ++i )
-        {
-            wxTreeItemId l_childId = m_pMainFrame->m_pTreeWidget->GetNextChild( l_selectionObjectTreeId, childcookie );
-            if( l_childId.IsOk() )
-            {
-                SelectionObject* childBox = ( (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_childId ) ) );
-                childBox->setIsVisible( l_selecitonObject->getIsVisible() );
-                m_pMainFrame->m_pTreeWidget->SetItemImage( l_childId, childBox->getIcon() );
-                childBox->setIsDirty( true );
-            }
-        }
-    }
-    else if( m_pMainFrame->treeSelected( l_selectionObjectTreeId ) == CHILD_OBJECT )
-    {
-        SelectionObject *l_selectionObject = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_selectionObjectTreeId ) );
-        l_selectionObject->toggleIsVisible();
-        m_pMainFrame->m_pTreeWidget->SetItemImage( l_selectionObjectTreeId, l_selectionObject->getIcon() );
-        l_selectionObject->setIsDirty( true );
-    }
-
-    SceneManager::getInstance()->setSelBoxChanged( true );
-    m_pMainFrame->refreshAllGLWidgets();
+    
+    m_pMainFrame->toggleTreeItemVisibility();
 }
 
 void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnAssignColor" ), LOGLEVEL_DEBUG );
 
-    wxColourData l_colorData;
-
-    for( int i = 0; i < 10; ++i )
-    {
-        wxColour l_color(i * 28, i * 28, i * 28);
-        l_colorData.SetCustomColour(i, l_color);
-    }
-
-    int i = 10;
-    wxColour l_color ( 255, 0, 0 );
-    l_colorData.SetCustomColour( i++, l_color );
-    wxColour l_color1( 0, 255, 0 );
-    l_colorData.SetCustomColour( i++, l_color1 );
-    wxColour l_color2( 0, 0, 255 );
-    l_colorData.SetCustomColour( i++, l_color2 );
-    wxColour l_color3( 255, 255, 0 );
-    l_colorData.SetCustomColour( i++, l_color3 );
-    wxColour l_color4( 255, 0, 255 );
-    l_colorData.SetCustomColour( i++, l_color4 );
-    wxColour l_color5( 0, 255, 255 );
-    l_colorData.SetCustomColour( i++, l_color5 );
-
-    wxColourDialog dialog( this, &l_colorData );
-    wxColour l_col;
-    if( dialog.ShowModal() == wxID_OK )
-    {
-        wxColourData l_retData = dialog.GetColourData();
-        l_col = l_retData.GetColour();
-    }
-    else
+    wxColour newCol;
+    
+    bool success = SelectColor( newCol );
+    
+    if( !success )
     {
         return;
     }
+    
+    SelectionObject* pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
+    {
+        // Iterate over all fibers.
+        vector<Fibers*> allFibs(DatasetManager::getInstance()->getFibers());
+        
+        for (vector<Fibers*>::iterator curFib(allFibs.begin()); curFib < allFibs.end(); ++curFib)
+        {
+            vector<bool> selFibers = SceneManager::getInstance()->getSelectionTree().getSelectedFibers( *curFib );
+            
+            vector<bool> filteredFibs = (*curFib)->getFilteredFibers();
 
-    if ( m_pMainFrame->getLastSelectedObj() != NULL )
-    {
-        SelectionObject *l_selObj = (SelectionObject*)m_pMainFrame->m_pCurrentSceneObject;
-        if (!l_selObj->getIsMaster())
-        {
-            wxTreeItemId l_parentId = m_pMainFrame->m_pTreeWidget->GetItemParent( m_pMainFrame->getLastSelectedObj()->GetId() );
-            l_selObj = (SelectionObject*)m_pMainFrame->m_pTreeWidget->GetItemData( l_parentId );
+            vector<bool>::iterator filteredIt(filteredFibs.begin());
+
+            int fibItIdx(0);
+            
+            for( vector<bool>::iterator fibIt(selFibers.begin()); fibIt != selFibers.end(); ++fibIt, ++filteredIt, ++fibItIdx )
+            {
+                if( *fibIt && !*filteredIt)
+                {
+                    (*curFib)->setFiberColor( fibItIdx, newCol );
+                }
+            }
         }
-        l_selObj->setFiberColor( l_col);
-        l_selObj->setIsDirty( true );
+        // TODO is this mandatory
         SceneManager::getInstance()->setSelBoxChanged( true );
-    }    
-    else if( m_pMainFrame->m_currentListIndex != -1 )
+    }
+    
+    m_pMainFrame->refreshAllGLWidgets();
+}
+
+void PropertiesWindow::OnAssignColorDataset( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnAssignColorDataset" ), LOGLEVEL_DEBUG );
+    
+    wxColour newCol;
+    
+    bool success = SelectColor( newCol );
+    
+    if( !success )
     {
-        DatasetInfo *l_info = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
-        if( l_info->getType() == MESH || l_info->getType() == ISO_SURFACE || l_info->getType() == SURFACE || l_info->getType() == VECTORS)
+        return;
+    }
+    
+    if( m_pMainFrame->m_currentListIndex != -1 )
+    {
+        DatasetInfo *pInfo = (DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject;
+        if( pInfo->getType() == MESH || pInfo->getType() == ISO_SURFACE || pInfo->getType() == SURFACE || pInfo->getType() == VECTORS)
         {
-            l_info->setColor( l_col );
-            l_info->setUseTex( false );
+            pInfo->setColor( newCol );
+            pInfo->setUseTex( false );
             m_pListCtrl->UpdateSelected();
         }
     }
@@ -1735,152 +1638,190 @@ void PropertiesWindow::OnAssignColor( wxCommandEvent& WXUNUSED(event) )
     m_pMainFrame->refreshAllGLWidgets();
 }
 
+// TODO error management: add error messages, disable button when no fibers loaded.
 void PropertiesWindow::OnCreateFibersDensityTexture( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCreateFibersDensityTexture" ), LOGLEVEL_DEBUG );
-
-    long index = MyApp::frame->getCurrentListIndex();
-    if( -1 != index )
+    
+    SelectionObject* pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj == NULL )
     {
-        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
-
-        if( pFibers == NULL )
-            return ;
-
-        int l_x, l_y, l_z;
-
-        int index = DatasetManager::getInstance()->createAnatomy();
-        Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
-
-        int columns = DatasetManager::getInstance()->getColumns();
-        int rows    = DatasetManager::getInstance()->getRows();
-        int frames  = DatasetManager::getInstance()->getFrames();
-
-        pNewAnatomy->setZero( columns, rows, frames );
-        pNewAnatomy->setDataType( 16 );
-        pNewAnatomy->setType( OVERLAY );
-        float l_max = 0.0f;
-        wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
-
-        if( m_pMainFrame->treeSelected( l_treeObjectId ) == MASTER_OBJECT )
+        return;
+    }
+    
+    if( DatasetManager::getInstance()->getFibersCount() == 0 )
+    {
+        return;
+    }
+    
+    DatasetIndex dsIndex = DatasetManager::getInstance()->createAnatomy();
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( dsIndex );
+    
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
+    
+    pNewAnatomy->setZero( columns, rows, frames );
+    pNewAnatomy->setDataType( 16 );
+    pNewAnatomy->setType( OVERLAY );
+    
+    std::vector<float>* pDataset = pNewAnatomy->getFloatDataset();
+    
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+    
+    // Iterate over all fibers.
+    vector<Fibers*> allFibs(DatasetManager::getInstance()->getFibers());
+    
+    for (vector<Fibers*>::iterator curFib(allFibs.begin()); curFib < allFibs.end(); ++curFib)
+    {
+        vector<bool> selFibers = SceneManager::getInstance()->getSelectionTree().getSelectedFibers( *curFib );
+        
+        vector<bool> filteredFibs = (*curFib)->getFilteredFibers();
+        
+        vector<bool>::iterator filteredIt(filteredFibs.begin());
+        
+        int fibItIdx(0);
+        
+        for( vector<bool>::iterator fibIt(selFibers.begin()); fibIt != selFibers.end(); ++fibIt, ++filteredIt, ++fibItIdx )
         {
-            float voxelX = DatasetManager::getInstance()->getVoxelX();
-            float voxelY = DatasetManager::getInstance()->getVoxelY();
-            float voxelZ = DatasetManager::getInstance()->getVoxelZ();
-
-            SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
-
-            std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
-
-            for( int l = 0; l < pFibers->getLineCount(); ++l )
+            if( *fibIt && !*filteredIt)
             {
-                if( l_object->m_inBranch[l] )
+                unsigned int pc = (*curFib)->getStartIndexForLine( fibItIdx ) * 3;
+                
+                for( int j = 0; j < (*curFib)->getPointsPerLine( fibItIdx ) ; ++j, pc += 3 )
                 {
-                    unsigned int pc = pFibers->getStartIndexForLine(l) * 3;
-
-                    for( int j = 0; j < pFibers->getPointsPerLine(l); ++j )
-                    {
-                        l_x = (int)( pFibers->getPointValue(pc) / voxelX );
-                        ++pc;
-                        l_y = (int)( pFibers->getPointValue(pc) / voxelY );
-                        ++pc;
-                        l_z = (int)( pFibers->getPointValue(pc) / voxelZ );
-                        ++pc;
-
-                        int index = l_x + l_y * columns + l_z * columns * rows;
-                        l_dataset->at(index) += 1.0;
-                        l_max = wxMax( l_max,l_dataset->at(index) );
-                    }
+                    int curX = static_cast<int>( (*curFib)->getPointValue( pc ) / voxelX );
+                    int curY = static_cast<int>( (*curFib)->getPointValue( pc + 1 ) / voxelY );
+                    int curZ = static_cast<int>( (*curFib)->getPointValue( pc + 2 ) / voxelZ );
+                    
+                    int index = curX + curY * columns + curZ * columns * rows;
+                    
+                    pDataset->at( index )     += 1.0f;
                 }
             }
-            for( int i( 0 ); i < columns * rows * frames; ++i )
-            {
-                l_dataset->at(i) /= l_max;
-            }
         }
-
-        pNewAnatomy->setName( wxT(" (fiber_density)" ) );
-        pNewAnatomy->setOldMax( l_max );
-
-        m_pListCtrl->InsertItem( index );
-
-        m_pMainFrame->refreshAllGLWidgets();
     }
+    
+    // Normalize all values.
+    float largestCount(*std::max_element( pDataset->begin(), pDataset->end() ) );
+    
+    if( largestCount > 0 )
+    {
+        for( vector<float>::iterator voxIt(pDataset->begin()); voxIt != pDataset->end();
+            ++voxIt )
+        {
+            (*voxIt) /= largestCount;
+        }
+    }
+    
+    pNewAnatomy->setName( wxT(" (fiber_density)" ) );
+    pNewAnatomy->setOldMax( largestCount );
+    
+    m_pListCtrl->InsertItem( dsIndex );
+    
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
+// TODO error management: add error messages, disable button when no fibers loaded.
 void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCreateFibersColorTexture" ), LOGLEVEL_DEBUG );
 
-    long index = MyApp::frame->getCurrentListIndex();
-    if( -1 != index )
+    SelectionObject* pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj == NULL )
     {
-        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
-
-        if( NULL == pFibers )
-            return ;
-
-        int l_x, l_y, l_z;
+        return;
+    }
+    
+    if( DatasetManager::getInstance()->getFibersCount() == 0 )
+    {
+        return;
+    }
+    
         
-        DatasetIndex dsIndex = DatasetManager::getInstance()->createAnatomy();
-        Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( dsIndex );
+    DatasetIndex dsIndex = DatasetManager::getInstance()->createAnatomy();
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( dsIndex );
 
-        int columns = DatasetManager::getInstance()->getColumns();
-        int rows    = DatasetManager::getInstance()->getRows();
-        int frames  = DatasetManager::getInstance()->getFrames();
+    int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+    int frames  = DatasetManager::getInstance()->getFrames();
 
-        pNewAnatomy->setRGBZero( columns, rows, frames );
+    pNewAnatomy->setRGBZero( columns, rows, frames );
+    std::vector<float>* pDataset = pNewAnatomy->getFloatDataset();
+    
+    std::vector<int> voxHitCount( pDataset->size() / 3, 0 );
 
-        wxTreeItemId l_treeObjectId = m_pMainFrame->m_pTreeWidget->GetSelection();
-        if(m_pMainFrame-> treeSelected( l_treeObjectId ) == MASTER_OBJECT )
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+    
+    // Iterate over all fibers.
+    vector<Fibers*> allFibs(DatasetManager::getInstance()->getFibers());
+    
+    for (vector<Fibers*>::iterator curFib(allFibs.begin()); curFib < allFibs.end(); ++curFib)
+    {
+        vector<bool> selFibers = SceneManager::getInstance()->getSelectionTree().getSelectedFibers( *curFib );
+        
+        vector<bool> filteredFibs = (*curFib)->getFilteredFibers();
+        
+        vector<bool>::iterator filteredIt(filteredFibs.begin());
+        
+        int fibItIdx(0);
+        
+        for( vector<bool>::iterator fibIt(selFibers.begin()); fibIt != selFibers.end(); ++fibIt, ++filteredIt, ++fibItIdx )
         {
-            float voxelX = DatasetManager::getInstance()->getVoxelX();
-            float voxelY = DatasetManager::getInstance()->getVoxelY();
-            float voxelZ = DatasetManager::getInstance()->getVoxelZ();
-
-            SelectionObject* l_object = (SelectionObject*)( m_pMainFrame->m_pTreeWidget->GetItemData( l_treeObjectId ) );
-            wxColour l_color = l_object->getFiberColor();
-
-            std::vector<float>* l_dataset = pNewAnatomy->getFloatDataset();
-
-            for( int l = 0; l < pFibers->getLineCount(); ++l )
+            if( *fibIt && !*filteredIt)
             {
-                if( l_object->m_inBranch[l] )
+                unsigned int pc = (*curFib)->getStartIndexForLine( fibItIdx ) * 3;
+                
+                for( int j = 0; j < (*curFib)->getPointsPerLine( fibItIdx ) ; ++j, pc += 3 )
                 {
-                    unsigned int pc = pFibers->getStartIndexForLine( l ) * 3;
-
-                    for( int j = 0; j < pFibers->getPointsPerLine( l ) ; ++j )
-                    {
-                        l_x = (int)( pFibers->getPointValue( pc ) / voxelX );
-                        ++pc;
-                        l_y = (int)( pFibers->getPointValue( pc ) / voxelY );
-                        ++pc;
-                        l_z = (int)( pFibers->getPointValue( pc ) / voxelZ );
-                        ++pc;
-
-                        int index = 3 * ( l_x + l_y * columns + l_z * columns * rows );
-                        l_dataset->at( index )     = l_color.Red()   / 255.0f;
-                        l_dataset->at( index + 1 ) = l_color.Green() / 255.0f;
-                        l_dataset->at( index + 2 ) = l_color.Blue()  / 255.0f;
-                    }
+                    wxColour ptCol = (*curFib)->getFiberPointColor( fibItIdx, j );
+                    
+                    int curX = static_cast<int>( (*curFib)->getPointValue( pc ) / voxelX );
+                    int curY = static_cast<int>( (*curFib)->getPointValue( pc + 1 ) / voxelY );
+                    int curZ = static_cast<int>( (*curFib)->getPointValue( pc + 2 ) / voxelZ );
+                    
+                    int index = 3 * ( curX + curY * columns + curZ * columns * rows );
+                    
+                    pDataset->at( index )     += ptCol.Red()   / 255.0f;
+                    pDataset->at( index + 1 ) += ptCol.Green() / 255.0f;
+                    pDataset->at( index + 2 ) += ptCol.Blue()  / 255.0f;
+                    
+                    voxHitCount.at( index / 3 ) += 1;
                 }
             }
         }
-
-        pNewAnatomy->setName( wxT( " (fiber_colors)" ) );
-        
-        m_pListCtrl->InsertItem( dsIndex );
-        
-        m_pMainFrame->refreshAllGLWidgets();
     }
+    
+    // Normalize all values.
+    int largestCount(*std::max_element( voxHitCount.begin(), voxHitCount.end() ) );
+    
+    if( largestCount > 0 )
+    {
+        for( vector<float>::iterator voxIt(pDataset->begin()); voxIt != pDataset->end();
+             ++voxIt )
+        {
+            (*voxIt) /= largestCount;
+        }
+    }
+
+    pNewAnatomy->setName( wxT( " (fiber_colors)" ) );
+    
+    m_pListCtrl->InsertItem( dsIndex );
+    
+    m_pMainFrame->refreshAllGLWidgets();
 }
 
 void PropertiesWindow::OnMeanComboBoxSelectionChange( wxCommandEvent& event)
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMeanComboBoxSelectionChange" ), LOGLEVEL_DEBUG );
 
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->SetFiberInfoGridValues();
-    m_pMainFrame->refreshAllGLWidgets();
+    SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
 }
 
 void PropertiesWindow::OnBoxPositionX( wxCommandEvent &event )
@@ -1889,9 +1830,14 @@ void PropertiesWindow::OnBoxPositionX( wxCommandEvent &event )
 
     double posX = 0;
     Vector currPos;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtBoxX->GetValue().ToDouble(&posX);  
-    currPos = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getCenter();
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setCenter(posX,currPos.y,currPos.z);
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->m_pTxtBoxX->GetValue().ToDouble(&posX);  
+        currPos = pSelObj->getCenter();
+        pSelObj->setCenter(posX,currPos.y,currPos.z);
+    }
 }
 
 void PropertiesWindow::OnBoxPositionY( wxCommandEvent &event )
@@ -1900,9 +1846,14 @@ void PropertiesWindow::OnBoxPositionY( wxCommandEvent &event )
 
     double posY = 0;
     Vector currPos;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtBoxY->GetValue().ToDouble(&posY);  
-    currPos = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getCenter();
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setCenter(currPos.x,posY,currPos.z);
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->m_pTxtBoxY->GetValue().ToDouble(&posY);  
+        currPos = pSelObj->getCenter();
+        pSelObj->setCenter(currPos.x,posY,currPos.z);
+    }
 }
 
 void PropertiesWindow::OnBoxPositionZ( wxCommandEvent &event )
@@ -1911,9 +1862,14 @@ void PropertiesWindow::OnBoxPositionZ( wxCommandEvent &event )
 
     double posZ = 0;
     Vector currPos;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtBoxZ->GetValue().ToDouble(&posZ);  
-    currPos = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getCenter();
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setCenter(currPos.x,currPos.y,posZ);
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        pSelObj->m_pTxtBoxZ->GetValue().ToDouble(&posZ);  
+        currPos = pSelObj->getCenter();
+        pSelObj->setCenter(currPos.x,currPos.y,posZ);
+    }
 }
 
 void PropertiesWindow::OnBoxSizeX( wxCommandEvent &event )
@@ -1921,10 +1877,16 @@ void PropertiesWindow::OnBoxSizeX( wxCommandEvent &event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnBoxSizeX" ), LOGLEVEL_DEBUG );
     double sizeX = 0;
     Vector currSize;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtSizeX->GetValue().ToDouble(&sizeX);  
-    currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
-    currSize.x = sizeX / DatasetManager::getInstance()->getVoxelX();
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);
+    
+    SelectionObject* pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
+    {
+        pSelObj->m_pTxtSizeX->GetValue().ToDouble( &sizeX );
+        currSize = pSelObj->getSize();
+        currSize.x = sizeX / DatasetManager::getInstance()->getVoxelX();
+        pSelObj->setSize( currSize );
+    }
 }
 
 void PropertiesWindow::OnBoxSizeY( wxCommandEvent &event )
@@ -1933,10 +1895,16 @@ void PropertiesWindow::OnBoxSizeY( wxCommandEvent &event )
 
     double sizeY = 0;
     Vector currSize;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtSizeY->GetValue().ToDouble(&sizeY);  
-    currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
-    currSize.y = sizeY / DatasetManager::getInstance()->getVoxelY();
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);
+    
+    SelectionObject* pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
+    {
+        pSelObj->m_pTxtSizeY->GetValue().ToDouble( &sizeY );
+        currSize = pSelObj->getSize();
+        currSize.y = sizeY / DatasetManager::getInstance()->getVoxelY();
+        pSelObj->setSize( currSize );
+    }
 }
 
 void PropertiesWindow::OnBoxSizeZ( wxCommandEvent &event )
@@ -1945,10 +1913,16 @@ void PropertiesWindow::OnBoxSizeZ( wxCommandEvent &event )
 
     double sizeZ = 0;
     Vector currSize;
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->m_pTxtSizeZ->GetValue().ToDouble(&sizeZ);  
-    currSize = ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->getSize();
-    currSize.z = sizeZ / DatasetManager::getInstance()->getVoxelZ();
-    ((SelectionObject*)m_pMainFrame->m_pCurrentSceneObject)->setSize(currSize);
+    
+    SelectionObject* pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
+    {
+        pSelObj->m_pTxtSizeZ->GetValue().ToDouble( &sizeZ );
+        currSize = pSelObj->getSize();
+        currSize.z = sizeZ / DatasetManager::getInstance()->getVoxelZ();
+        pSelObj->setSize( currSize );
+    }
 }
 
 void PropertiesWindow::OnSliderAxisMoved( wxCommandEvent& WXUNUSED(event) )
@@ -1993,4 +1967,40 @@ void PropertiesWindow::OnCrossingFibersThicknessChange( wxCommandEvent& WXUNUSED
             ((Fibers*)m_pMainFrame->m_pCurrentSceneObject)->updateCrossingFibersThickness();
         }
     }
+}
+
+bool PropertiesWindow::SelectColor( wxColour &col )
+{
+    wxColourData colorData;
+    
+    for( int i = 0; i < 10; ++i )
+    {
+        wxColour colorTemp(i * 28, i * 28, i * 28);
+        colorData.SetCustomColour(i, colorTemp);
+    }
+    
+    int i = 10;
+    wxColour colorTemp ( 255, 0, 0 );
+    colorData.SetCustomColour( i++, colorTemp );
+    wxColour colorTemp1( 0, 255, 0 );
+    colorData.SetCustomColour( i++, colorTemp1 );
+    wxColour colorTemp2( 0, 0, 255 );
+    colorData.SetCustomColour( i++, colorTemp2 );
+    wxColour colorTemp3( 255, 255, 0 );
+    colorData.SetCustomColour( i++, colorTemp3 );
+    wxColour colorTemp4( 255, 0, 255 );
+    colorData.SetCustomColour( i++, colorTemp4 );
+    wxColour colorTemp5( 0, 255, 255 );
+    colorData.SetCustomColour( i++, colorTemp5 );
+    
+    wxColourDialog dialog( this, &colorData );
+
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        wxColourData retData = dialog.GetColourData();
+        col = retData.GetColour();
+        return true;
+    }
+
+    return false;
 }

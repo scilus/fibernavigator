@@ -40,7 +40,7 @@ void FgeGLTexture::saveImageToPPM(const char* filename)
         
         for ( unsigned int i = 1 ; i <= height ; ++i )
         {
-            for ( unsigned int j = 0 ; j < width * 4 ; ++j )
+            for ( unsigned int j = 0 ; j < width * 4 ; j += 4 )
             {
                 imageData[(i-1) * width * 4 + j     ] = tmpImageData[(height - i) * width * 4 + j   ];
                 imageData[(i-1) * width * 4 + j + 1 ] = tmpImageData[(height - i) * width * 4 + j + 1 ];

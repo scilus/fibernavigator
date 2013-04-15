@@ -13,6 +13,8 @@
 
 #include <vector>
 
+using std::vector;
+
 class SelectionObject;
 
 class Octree 
@@ -65,6 +67,11 @@ private:
     
     void boxTest( int i_minx, int i_miny, int i_minz, int i_maxx, int i_maxy, int i_maxz, int lvl, const std::vector< std::vector<int > > &currSub);
     void ellipsoidTest( int i_minx, int i_miny, int i_minz, int i_maxx, int i_maxy, int i_maxz, int lvl, const std::vector< std::vector<int > > &currSub);
+
+    void VOITest( int i_minx, int i_miny, int i_minz, 
+                 int i_maxx, int i_maxy, int i_maxz,
+                 int lvl, const vector< vector< int > > &currSub, 
+                 SelectionObject *pSelObj );
     
 };
 
