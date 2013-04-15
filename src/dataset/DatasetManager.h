@@ -51,7 +51,6 @@ public:
     float                   getVoxelY() const;
     float                   getVoxelZ() const;
     FMatrix &               getNiftiTransform()             { return m_niftiTransform; }
-    unsigned int            getCountFibers() const          { return m_countFibers; }
 
     bool                    isDatasetLoaded() const         { return !m_datasets.empty(); }
     bool                    isAnatomyLoaded() const         { return !m_anatomies.empty(); }
@@ -65,8 +64,6 @@ public:
     bool                    isVectorsLoaded() const         { return false; }
     
     void                    forceLoadingAsMaximas(bool force) { m_forceLoadingAsMaximas = force; }
-
-    void  setCountFibers( const unsigned int count )        { m_countFibers = count; }
 
     void clear();
 
@@ -141,7 +138,6 @@ private:
     std::map<DatasetInfo *, DatasetIndex> m_reverseDatasets;
 
     FMatrix m_niftiTransform;
-    unsigned int m_countFibers; // TODO: Remove me once selection is fixed
     
     bool m_forceLoadingAsMaximas;
 };

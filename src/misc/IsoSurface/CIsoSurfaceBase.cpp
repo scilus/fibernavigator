@@ -1,29 +1,21 @@
-// File Name: CIsoSurface.cpp
-// Last Modified: 5/8/2000
-// Author: Raghavendra Chandrashekara (based on source code provided
-// by Paul Bourke and Cory Gene Bloyd)
-// Email: rc99@doc.ic.ac.uk, rchandrashekara@hotmail.com
-//
-// Description: This is the implementation file for the CIsoSurface class.
+// This class is used to group methods and data common to all iso surfaces types.
+// Based on the work Raghavendra Chandrashekara, which was based on source code
+// provided by Paul Bourke and Cory Gene Bloyd.
 
-#include "CIsoSurface.h"
+#include "CIsoSurfaceBase.h"
+
+#include "../../dataset/DatasetManager.h"
 
 #include "TriangleMesh.h"
-#include "../../Logger.h"
-#include "../../main.h"
-#include "../../dataset/Anatomy.h"
-#include "../../dataset/DatasetManager.h"
-#include "../../gui/SceneManager.h"
 
-#include <wx/math.h>
-#include <wx/tglbtn.h>
-#include <wx/xml/xml.h>
+#include <math.h>
 
 #include <algorithm>
-#include <ctime>
+#include "../../main.h"
+
 #include <fstream>
 
-const unsigned int CIsoSurface::m_edgeTable[256] =
+const unsigned int CIsoSurfaceBase::m_edgeTable[256] =
 { 0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
         0xf00, 0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c, 0x99c, 0x895, 0xb9f, 0xa96, 0xd9a,
         0xc93, 0xf99, 0xe90, 0x230, 0x339, 0x33, 0x13a, 0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f,
@@ -44,7 +36,7 @@ const unsigned int CIsoSurface::m_edgeTable[256] =
         0x190, 0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a,
         0x203, 0x109, 0x0 };
 
-const int CIsoSurface::m_triTable[256][16] =
+const int CIsoSurfaceBase::m_triTable[256][16] =
 {
 { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 { 0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -303,70 +295,40 @@ const int CIsoSurface::m_triTable[256][16] =
 { 0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } };
 
-CIsoSurface::CIsoSurface( Anatomy* anatomy )
+CIsoSurfaceBase::CIsoSurfaceBase()
+    : DatasetInfo()
 {
-    int   columns = DatasetManager::getInstance()->getColumns();
-    int   rows    = DatasetManager::getInstance()->getRows();
-    int   frames  = DatasetManager::getInstance()->getFrames();
-    float voxelX  = DatasetManager::getInstance()->getVoxelX();
-    float voxelY  = DatasetManager::getInstance()->getVoxelY();
-    float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
-
-
-    m_nCellsX = columns - 1;
-    m_nCellsY = rows - 1;
-    m_nCellsZ = frames - 1;
-    m_fCellLengthX = voxelX;
-    m_fCellLengthY = voxelY;
-    m_fCellLengthZ = voxelZ;
-
-    int size = columns * rows * frames;
-    m_ptScalarField.resize( size );
-    for ( int i = 0; i < size; ++i )
-        m_ptScalarField[i] = anatomy->at( i );
-
-    if( SceneManager::getInstance()->isIsoSurfaceFiltered() )
-    {
-        for ( unsigned int z = 1; z < m_nCellsZ; ++z )
-        {
-            for ( unsigned int y = 1; y < m_nCellsY; ++y )
-            {
-                for ( unsigned int x = 1; x < m_nCellsX; ++x )
-                {
-                    std::vector< float > list;
-                    for ( unsigned int zz = z - 1; zz < z + 2; ++zz )
-                    {
-                        list.push_back( anatomy->at( x + columns * y + columns * rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + columns * y + columns * rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + columns * y + columns * rows * zz ) );
-                        list.push_back( anatomy->at( x + columns * ( y - 1 ) + columns * rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + columns * ( y - 1 ) + columns * rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + columns * ( y - 1 ) + columns * rows * zz ) );
-                        list.push_back( anatomy->at( x + columns * ( y + 1 ) + columns * rows * zz ) );
-                        list.push_back( anatomy->at( x - 1 + columns * ( y + 1 ) + columns * rows * zz ) );
-                        list.push_back( anatomy->at( x + 1 + columns * ( y + 1 ) + columns * rows * zz ) );
-                    }
-                    nth_element( list.begin(), list.begin() + 13, list.end() );
-                    m_ptScalarField[x + columns * y + columns * rows * z] = list[13];
-                }
-            }
-        }
-    }
+    m_nCellsX = DatasetManager::getInstance()->getColumns() - 1;
+    m_nCellsY = DatasetManager::getInstance()->getRows() - 1;
+    m_nCellsZ = DatasetManager::getInstance()->getFrames() - 1;
+    m_fCellLengthX = DatasetManager::getInstance()->getVoxelX();
+    m_fCellLengthY = DatasetManager::getInstance()->getVoxelY();
+    m_fCellLengthZ = DatasetManager::getInstance()->getVoxelZ();
+    
     m_type = ISO_SURFACE;
     m_threshold = 0.40f;
-    m_oldMax = anatomy->getOldMax();
-
+    m_oldMax = 0.40f;
+    
     m_nTriangles = 0;
     m_nNormals = 0;
     m_nVertices = 0;
-    m_tIsoLevel = 0.40f;
+    //m_tIsoLevel = 0.40f;
     m_bValidSurface = false;
     m_positionsCalculated = false;
-
+    
+    // TODO selection iso check this
     m_tMesh = new TriangleMesh();
 }
 
-void CIsoSurface::GenerateSurface( float tIsoLevel )
+CIsoSurfaceBase::~CIsoSurfaceBase()
+{
+    DeleteSurface();
+    // TODO  selection iso check this
+    delete m_tMesh;
+}
+
+// TODO  selection iso 
+/*void CIsoSurfaceBase::GenerateSurface( float tIsoLevel )
 {
     if ( m_bValidSurface )
         DeleteSurface();
@@ -659,14 +621,14 @@ void CIsoSurface::GenerateSurface( float tIsoLevel )
 
     RenameVerticesAndTriangles();
     m_bValidSurface = true;
-}
+}*/
 
-bool CIsoSurface::IsSurfaceValid()
+bool CIsoSurfaceBase::IsSurfaceValid()
 {
     return m_bValidSurface;
 }
 
-void CIsoSurface::DeleteSurface()
+void CIsoSurfaceBase::DeleteSurface()
 {
     m_nTriangles = 0;
     m_nNormals = 0;
@@ -674,11 +636,10 @@ void CIsoSurface::DeleteSurface()
 
     m_tMesh->clearMesh();
 
-    m_tIsoLevel = 0;
     m_bValidSurface = false;
 }
 
-int CIsoSurface::GetVolumeLengths( float& fVolLengthX, float& fVolLengthY, float& fVolLengthZ )
+int CIsoSurfaceBase::GetVolumeLengths( float& fVolLengthX, float& fVolLengthY, float& fVolLengthZ )
 {
     if ( IsSurfaceValid() )
     {
@@ -688,10 +649,12 @@ int CIsoSurface::GetVolumeLengths( float& fVolLengthX, float& fVolLengthY, float
         return 1;
     }
     else
+    {
         return -1;
+    }
 }
 
-int CIsoSurface::GetEdgeID( unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo )
+int CIsoSurfaceBase::GetEdgeID( unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo )
 {
     switch ( nEdgeNo )
     {
@@ -725,12 +688,12 @@ int CIsoSurface::GetEdgeID( unsigned int nX, unsigned int nY, unsigned int nZ, u
     }
 }
 
-unsigned int CIsoSurface::GetVertexID( unsigned int nX, unsigned int nY, unsigned int nZ )
+unsigned int CIsoSurfaceBase::GetVertexID( unsigned int nX, unsigned int nY, unsigned int nZ )
 {
-    return 3* (nZ *(m_nCellsY + 1)*(m_nCellsX + 1) + nY*(m_nCellsX + 1) + nX);
+    return 3 * ( nZ * ( m_nCellsY + 1 ) * ( m_nCellsX + 1 ) + nY * ( m_nCellsX + 1 ) + nX );
 }
 
-POINT3DID CIsoSurface::CalculateIntersection( unsigned int nX, unsigned int nY, unsigned int nZ,
+/*POINT3DID CIsoSurface::CalculateIntersection( unsigned int nX, unsigned int nY, unsigned int nZ,
         unsigned int nEdgeNo )
 {
     float x1, y1, z1, x2, y2, z2;
@@ -810,8 +773,10 @@ POINT3DID CIsoSurface::CalculateIntersection( unsigned int nX, unsigned int nY, 
 
     unsigned int nPointsInXDirection = ( m_nCellsX + 1 );
     unsigned int nPointsInSlice = nPointsInXDirection * ( m_nCellsY + 1 );
+    
     float val1 = m_ptScalarField[v1z * nPointsInSlice + v1y * nPointsInXDirection + v1x];
     float val2 = m_ptScalarField[v2z * nPointsInSlice + v2y * nPointsInXDirection + v2x];
+    
     POINT3DID intersection = Interpolate( x1, y1, z1, x2, y2, z2, val1, val2 );
     intersection.newID = 0;
     return intersection;
@@ -829,9 +794,9 @@ POINT3DID CIsoSurface::Interpolate( float fX1, float fY1, float fZ1, float fX2, 
     interpolation.z = fZ1 + mu * ( fZ2 - fZ1 );
     interpolation.newID = 0;
     return interpolation;
-}
+}*/
 
-void CIsoSurface::RenameVerticesAndTriangles()
+void CIsoSurfaceBase::RenameVerticesAndTriangles()
 {
     unsigned int nextID = 0;
     ID2POINT3DID::iterator mapIterator = m_i2pt3idVertices.begin();
@@ -841,9 +806,9 @@ void CIsoSurface::RenameVerticesAndTriangles()
     m_tMesh->resizeVerts( m_i2pt3idVertices.size() );
     m_tMesh->resizeTriangles( m_trivecTriangles.size() );
 
-    float xOff = DatasetManager::getInstance()->getVoxelX() * 0.5f;
-    float yOff = DatasetManager::getInstance()->getVoxelY() * 0.5f;
-    float zOff = DatasetManager::getInstance()->getVoxelZ() * 0.5f;
+    float xOff = DatasetManager::getInstance()->getVoxelX() / 2;
+    float yOff = DatasetManager::getInstance()->getVoxelY() / 2;
+    float zOff = DatasetManager::getInstance()->getVoxelZ() / 2;
 
     // Rename vertices.
     while ( mapIterator != m_i2pt3idVertices.end() )
@@ -870,31 +835,77 @@ void CIsoSurface::RenameVerticesAndTriangles()
 
     m_i2pt3idVertices.clear();
     m_trivecTriangles.clear();
+    //licCalculated = false;
+    //m_useLIC = false;
 }
 
-void CIsoSurface::GenerateWithThreshold()
+/*void CIsoSurface::GenerateWithThreshold()
 {
     GenerateSurface( m_threshold );
     if ( m_GLuint )
         glDeleteLists( m_GLuint, 1 );
     m_GLuint = 0;
     m_positionsCalculated = false;
-}
+}*/
 
-void CIsoSurface::smooth()
+/*void CIsoSurface::activateLIC()
 {
-    m_tMesh->doLoopSubD();
+    m_useLIC = !m_useLIC;
+    if ( !m_useLIC )
+    {
+        generateGeometry();
+        return;
+    }
+    if ( !licCalculated )
+    {
+        for ( int i = 0; i < 0; ++i )
+            m_tMesh->doLoopSubD();
+
+        SurfaceLIC lic( m_dh, m_tMesh );
+        lic.execute();
+        licCalculated = true;
+    }
     if ( m_GLuint )
         glDeleteLists( m_GLuint, 1 );
+    m_GLuint = 0;
+}*/
+
+void CIsoSurfaceBase::clean()
+{
+    m_tMesh->cleanUp();
+    
+    if ( m_GLuint )
+    {
+        glDeleteLists( m_GLuint, 1 );
+    }
+    
     m_GLuint = 0;
     m_positionsCalculated = false;
 }
 
-void CIsoSurface::generateGeometry()
+void CIsoSurfaceBase::smooth()
 {
+    m_tMesh->doLoopSubD();
+    
+    if ( m_GLuint )
+    {
+        glDeleteLists( m_GLuint, 1 );
+    }
+    
+    m_GLuint = 0;
+    m_positionsCalculated = false;
+}
+
+void CIsoSurfaceBase::generateGeometry()
+{
+    /*if ( m_useLIC )
+    {
+        generateLICGeometry();
+        return;
+    }*/
+
     if ( m_GLuint )
         glDeleteLists( m_GLuint, 1 );
-
     GLuint dl = glGenLists( 1 );
     glNewList( dl, GL_COMPILE );
 
@@ -921,7 +932,39 @@ void CIsoSurface::generateGeometry()
     m_GLuint = dl;
 }
 
-void CIsoSurface::draw()
+/*void CIsoSurface::generateLICGeometry()
+{
+    if ( m_GLuint )
+        glDeleteLists( m_GLuint, 1 );
+    GLuint dl = glGenLists( 1 );
+    glNewList( dl, GL_COMPILE );
+
+    Triangle triangleEdges;
+    Vector point;
+    Vector pointNormal;
+    wxColour color;
+
+    glBegin( GL_TRIANGLES );
+    for ( int i = 0; i < m_tMesh->getNumTriangles(); ++i )
+    {
+        triangleEdges = m_tMesh->getTriangle( i );
+        color = m_tMesh->getTriangleColor( i );
+        glColor4ub( color.Red(), color.Red(), color.Red(),255 );
+        for ( int j = 0; j < 3; ++j )
+        {
+            pointNormal = m_tMesh->getVertNormal( triangleEdges.pointID[j] );
+            glNormal3d( pointNormal.x * -1.0, pointNormal.y * -1.0, pointNormal.z * -1.0 );
+            point = m_tMesh->getVertex( triangleEdges.pointID[j] );
+            glVertex3d( point.x, point.y, point.z );
+        }
+    }
+    glEnd();
+
+    glEndList();
+    m_GLuint = dl;
+}*/
+
+void CIsoSurfaceBase::draw()
 {
     if ( !m_GLuint )
     {
@@ -931,8 +974,9 @@ void CIsoSurface::draw()
     glCallList( m_GLuint );
 }
 
-std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
+std::vector< Vector > CIsoSurfaceBase::getSurfaceVoxelPositions()
 {
+    // TODO selection iso check this out
     if ( m_threshold == 0.0 || m_threshold == 1.0 )
     {
         m_svPositions.clear();
@@ -941,12 +985,9 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
 
     if ( !m_positionsCalculated )
     {
-        float columns = DatasetManager::getInstance()->getColumns();
-        float rows    = DatasetManager::getInstance()->getRows();
-        float frames  = DatasetManager::getInstance()->getFrames();
-
+        DatasetManager *pDM( DatasetManager::getInstance() );
         Vector v( 0, 0, 0 );
-        size_t nSize = columns * rows * frames;
+        size_t nSize = pDM->getColumns() * pDM->getRows() * pDM->getFrames();
         std::vector< Vector > accu( nSize, v );
         std::vector< int > hits( nSize, 0 );
         std::vector< Vector > vertices = m_tMesh->getVerts();
@@ -955,8 +996,8 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
         for ( size_t i = 0; i < vertices.size(); ++i )
         {
             v = vertices[i];
-            int index = (int) v.x + (int) v.y * columns + (int) v.z * columns * rows;
-            if ( !( index < 0 || index > columns * rows * frames ) )
+            int index = (int) v.x + (int) v.y * pDM->getColumns() + (int) v.z * pDM->getColumns() * pDM->getRows();
+            if ( !( index < 0 || index > pDM->getColumns() * pDM->getRows() * pDM->getFrames()) )
             {
                 accu[index].x += v.x;
                 accu[index].y += v.y;
@@ -989,9 +1030,9 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
                 accu[i].z /= hits[i];
                 if ( (int) accu[i].x )
                 {
-                    accu[i].x = wxMin( columns, wxMax ( accu[i].x, 0 ) );
-                    accu[i].y = wxMin( rows, wxMax ( accu[i].y, 0 ) );
-                    accu[i].z = wxMin( frames, wxMax ( accu[i].z, 0 ) );
+                    accu[i].x = wxMin( pDM->getColumns(), wxMax ( accu[i].x, 0 ) );
+                    accu[i].y = wxMin( pDM->getRows(), wxMax ( accu[i].y, 0 ) );
+                    accu[i].z = wxMin( pDM->getFrames(), wxMax ( accu[i].z, 0 ) );
 
                     Vector v( accu[i].x, accu[i].y, accu[i].z );
                     m_svPositions.push_back( v );
@@ -1004,7 +1045,7 @@ std::vector< Vector > CIsoSurface::getSurfaceVoxelPositions()
     return m_svPositions;
 }
 
-bool CIsoSurface::save( wxString filename ) const
+bool CIsoSurfaceBase::save( wxString filename ) const
 {
 #if 0
     m_dh->printDebug(_T("start saving vtk file"), 1);
@@ -1066,7 +1107,8 @@ bool CIsoSurface::save( wxString filename ) const
         return false;
     }
 
-    Logger::getInstance()->print( wxT( "Writing file" ), LOGLEVEL_MESSAGE );
+    // TODO selection iso use good version
+    //m_dh->printDebug( _T("start writing file)"), 1 );
     dataFile << ( "# vtk DataFile Version 2.0\n" );
     dataFile << ( "generated using FiberNavigator\n" );
     dataFile << ( "ASCII\n" );
@@ -1098,59 +1140,33 @@ bool CIsoSurface::save( wxString filename ) const
 #endif
 }
 
-//////////////////////////////////////////////////////////////////////////
-
-bool CIsoSurface::save( wxXmlNode *pNode ) const
+void CIsoSurfaceBase::createPropertiesSizer(PropertiesWindow *parent)
 {
-    assert( pNode != NULL );
+    DatasetInfo::createPropertiesSizer(parent);
 
-    pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
-
-    return true;
+    m_ptoggleCutFrontSector = new wxToggleButton(parent, wxID_ANY,wxT("Cut Front Sector"),wxDefaultPosition, wxSize(140,-1));
+    m_pPropertiesSizer->Add(m_ptoggleCutFrontSector,0,wxALIGN_CENTER);
+    parent->Connect(m_ptoggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
+    
+    wxSizer *l_sizer = new wxBoxSizer(wxHORIZONTAL);
+    m_ptoggleUseColoring = new wxToggleButton(parent, wxID_ANY,wxT("Use Coloring"),wxDefaultPosition, wxSize(100,-1));
+    wxImage bmpColor(MyApp::iconsPath+ wxT("colorSelect.png" ), wxBITMAP_TYPE_PNG);
+    m_pbtnSelectColor = new wxBitmapButton(parent, wxID_ANY, bmpColor, wxDefaultPosition, wxSize(40,-1));
+    l_sizer->Add(m_ptoggleUseColoring,0,wxALIGN_CENTER);
+    l_sizer->Add(m_pbtnSelectColor,0,wxALIGN_CENTER);
+    m_pPropertiesSizer->Add(l_sizer,0,wxALIGN_CENTER);
+    // TODO  selection iso anat
+    /*parent->Connect(m_ptoggleUseColoring->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(PropertiesWindow::OnListMenuThreshold));*/
+    parent->Connect(m_pbtnSelectColor->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAssignColorDataset ));
 }
 
-//////////////////////////////////////////////////////////////////////////
-
-void CIsoSurface::createPropertiesSizer( PropertiesWindow *pParent )
-{
-    DatasetInfo::createPropertiesSizer( pParent );
-
-    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
-
-    //////////////////////////////////////////////////////////////////////////
-
-    wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
-
-    wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
-    m_pToggleCutFrontSector = new wxToggleButton( pParent, wxID_ANY, wxT( "Cut Front Sector" ) );
-    m_pToggleUseColoring    = new wxToggleButton( pParent, wxID_ANY, wxT( "Use Coloring" ) );
-
-    //////////////////////////////////////////////////////////////////////////
-
-    pBoxMain->Add( m_pToggleCutFrontSector, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
-
-    wxBoxSizer *pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
-    pBoxSizer->Add( m_pToggleUseColoring, 3, wxEXPAND | wxALL, 1 );
-    pBoxSizer->Add( pBtnSelectColor,      1, wxEXPAND | wxALL, 1 );
-    pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
-
-    m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
-
-    //////////////////////////////////////////////////////////////////////////
-
-    pParent->Connect( m_pToggleCutFrontSector->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler( PropertiesWindow::OnToggleShowFS ) );
-    pParent->Connect( m_pToggleUseColoring->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
-    pParent->Connect( pBtnSelectColor->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnAssignColorDataset ) );
-}
-
-void CIsoSurface::updatePropertiesSizer()
+void CIsoSurfaceBase::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
     m_pToggleFiltering->Enable(false);
     m_pToggleFiltering->SetValue(false);
-    m_pToggleUseColoring->SetValue(!getUseTex());
-    m_pToggleCutFrontSector->SetValue(!getShowFS());
+    m_ptoggleUseColoring->SetValue(!getUseTex());
+    m_ptoggleCutFrontSector->SetValue(!getShowFS());
 
     // Disabled for the moment, not implemented.
     m_pBtnFlipX->Enable( false );

@@ -464,7 +464,7 @@ void Mesh::createPropertiesSizer( PropertiesWindow *pParent )
 
     pParent->Connect( m_pToggleCutFrontSector->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
     pParent->Connect( m_pToggleUseColoring->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
-    pParent->Connect( m_pBtnSelectColor->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnAssignColor ) );
+    pParent->Connect( m_pBtnSelectColor->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnAssignColorDataset ) );
 }
 
 void Mesh::updatePropertiesSizer()

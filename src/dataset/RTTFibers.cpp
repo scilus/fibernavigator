@@ -11,6 +11,7 @@
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
+#include "../gui/SelectionTree.h"
 #include "../misc/lic/FgeOffscreen.h"
 #include "../gui/MainFrame.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
@@ -92,24 +93,28 @@ void RTTFibers::seed()
     float zVoxel = DatasetManager::getInstance()->getVoxelZ();
 
     Vector minCorner, maxCorner, middle;
-    vector< vector< SelectionObject* > > selectionObjects = SceneManager::getInstance()->getSelectionObjects();
+    SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
 	//Evenly distanced seeds
     if( !RTTrackingHelper::getInstance()->isShellSeeds() )
 	{
-		for( unsigned int b = 0; b < selectionObjects.size(); b++ )
+		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
-			minCorner.x = selectionObjects[b][0]->getCenter().x - selectionObjects[b][0]->getSize().x * xVoxel / 2.0f;
-			minCorner.y = selectionObjects[b][0]->getCenter().y - selectionObjects[b][0]->getSize().y * yVoxel / 2.0f;
-			minCorner.z = selectionObjects[b][0]->getCenter().z - selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
-			maxCorner.x = selectionObjects[b][0]->getCenter().x + selectionObjects[b][0]->getSize().x * xVoxel / 2.0f;
-			maxCorner.y = selectionObjects[b][0]->getCenter().y + selectionObjects[b][0]->getSize().y * yVoxel / 2.0f;
-			maxCorner.z = selectionObjects[b][0]->getCenter().z + selectionObjects[b][0]->getSize().z * zVoxel / 2.0f;
+            if( selObjs[ b ]->getSelectionType() != BOX_TYPE )
+            {
+                continue;
+            }
+            
+			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
+			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
+			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
+			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel / 2.0f;
+			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
+			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
 
-			float xstep =  selectionObjects[b][0]->getSize().x * xVoxel / float( m_nbSeed - 1.0f );
-			float ystep =  selectionObjects[b][0]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
-			float zstep =  selectionObjects[b][0]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
-			
+			float xstep =  selObjs[b]->getSize().x * xVoxel / float( m_nbSeed - 1.0f );
+			float ystep =  selObjs[b]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
+			float zstep =  selObjs[b]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
 			
 			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
 			{

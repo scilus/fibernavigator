@@ -20,6 +20,7 @@
 
 class MainFrame;
 class ListCtrl;
+class SelectionObject;
 
 class PropertiesWindow : public wxScrolledWindow
 {
@@ -133,6 +134,7 @@ public:
     void OnColorRoi                         ( wxCommandEvent& event );
     void OnVoiFlipNormals                   ( wxCommandEvent& event );
     void OnAssignColor                      ( wxCommandEvent& event );
+    void OnAssignColorDataset               ( wxCommandEvent& event );
     void OnDistanceAnchorSet                ( wxCommandEvent& event );
     void OnDisplayFibersInfo                ( wxCommandEvent& event );
     void OnDisplayMeanFiber                 ( wxCommandEvent& event );
@@ -154,10 +156,17 @@ public:
 
     void OnToggleCrossingFibers             ( wxEvent& event );
     void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );
+    
+    bool SelectColor                        ( wxColour &col );
 
 private:
     PropertiesWindow() { }
     PropertiesWindow(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size );
+    
+    // TODO check
+    void AddSelectionObjectToSelectionTree( SelectionObject *pSelObj, const wxTreeItemId & parentTreeId );
+    //void AddSelectionObjectsToSelectionTree( const std::vector< SelectionObject* > &selObjects, 
+    //                                        bool addAsChildOfFirst = false );
 
 private:
     wxWindow  *m_pNotebook;

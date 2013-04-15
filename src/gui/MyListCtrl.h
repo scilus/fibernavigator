@@ -18,14 +18,36 @@ public:
     MyTreeCtrl(MainFrame *pMainFrame, wxWindow *pParent, const wxWindowID id, const wxPoint& pos, const wxSize& size, long style );
 
 private:
-    int  getSelectedType();
-
     void OnChar(wxKeyEvent& event);
 
 private:
     MainFrame *m_mainFrame;
 
     DECLARE_EVENT_TABLE()
+};
+
+class CustomTreeItem : public wxTreeItemData
+{
+public:
+    CustomTreeItem()
+    : wxTreeItemData(),
+    m_itemId( -1 )
+    {}
+    
+    CustomTreeItem( const int itemId )
+    : wxTreeItemData(),
+    m_itemId( itemId )
+    {}
+    
+    virtual ~CustomTreeItem(){}
+    
+    int getId() const
+    {
+        return m_itemId;
+    }
+    
+private:
+    int m_itemId;
 };
 
 //////////////////////////////////////////////////////////////////////////
