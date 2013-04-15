@@ -1661,10 +1661,10 @@ void MainFrame::onSetCMapNo( wxCommandEvent& WXUNUSED(event) )
 /**/
 void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
 {
-    wxString rev = _T( "$Revision$" );
+    wxString rev = _T( "ea8312dd52" );
     rev = rev.AfterFirst('$');
     rev = rev.BeforeLast('$');
-    wxString date = _T( "$Date$" );
+    wxString date = _T( "2013-04-15" );
     date = date.AfterFirst( '$' );
     date = date.BeforeLast( '$' );
     (void)wxMessageBox( _T("Fiber Navigator\nAuthors:http://code.google.com/p/fibernavigator/people/list \n\n" )
