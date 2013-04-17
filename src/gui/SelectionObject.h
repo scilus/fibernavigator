@@ -99,7 +99,6 @@ public :
     void resizeLeft();
     void resizeRight();    
     void resizeUp();
-    void select( bool i_flag );
     void update();
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
@@ -144,6 +143,7 @@ public :
     void       setTreeId( wxTreeItemId i_treeId )     { m_treeId = i_treeId;                   };
     wxTreeItemId getTreeId()                          { return m_treeId;                       };
     
+    void       select();
     void       unselect()                             { m_isSelected = false;                  };
     
     bool       toggleIsVisible()                      { setIsVisible( !getIsVisible() ); return getIsVisible(); };

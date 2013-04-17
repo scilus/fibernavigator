@@ -336,20 +336,10 @@ void SelectionObject::resizeUp()
 //
 // i_flag       : Indicate if we want to select or unselect the object.
 ///////////////////////////////////////////////////////////////////////////
-void SelectionObject::select( bool i_flag )
+void SelectionObject::select()
 {
-    if( m_treeId )
-    {
-        if( i_flag )
-        {
-            MyApp::frame->m_pTreeWidget->SelectItem( m_treeId );
-            MyApp::frame->m_pTreeWidget->EnsureVisible( m_treeId );
-            MyApp::frame->m_pTreeWidget->SetFocus();
-        }
-
-        m_isSelected = true;
-        updateStatusBar();
-    }
+    m_isSelected = true;
+    updateStatusBar();
 }
 
 ///////////////////////////////////////////////////////////////////////////
