@@ -12,7 +12,9 @@ Highlights:
 
 This is the new source for the code and documentation of the original Fibernavigator_.
 
-Old issues are still tracked on the Google code issues_ list. New issues will be tracked here.
+All issues have been moved to the new issue tracker_. New issues will also be tracked here.
+
+**NEW!** A `video tutorial`_ of the Fibernavigator is now available.
 
 How to get the application
 --------------------------
@@ -21,7 +23,8 @@ How to get the application
 - A `Windows build`_ and a `Mac OSX build`_ are provided on the old site.
 
 .. _Fibernavigator: http://code.google.com/p/fibernavigator/
-.. _issues: http://code.google.com/p/fibernavigator/issues/list
-.. _Build instructions for Ubuntu: https://github.com/jchoude/fibernavigator/wiki/Ubuntu-build-instructions
-.. _Windows build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator-build1771.zip
-.. _Mac OSX build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator-r1771.dmg
+.. _tracker: https://github.com/scilus/fibernavigator/issues
+.. _video tutorial: https://github.com/scilus/fibernavigator/wiki/Video-tutorial
+.. _Build instructions for Ubuntu: https://github.com/scilus/fibernavigator/wiki/Ubuntu-build-instructions
+.. _Windows build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator-f4a102c420.zip
+.. _Mac OSX build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator_f4a102c420.dmg
