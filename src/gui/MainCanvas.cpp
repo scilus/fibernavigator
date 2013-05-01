@@ -726,6 +726,7 @@ void MainCanvas::render()
                 SceneManager::getInstance()->doMatrixManipulation();
 
                 SceneManager::getInstance()->getScene()->renderScene();
+				m_pRealTimeFibers->renderRTTFibers(false);
                 glPopMatrix();
 
                 fbo.getTexObject( 1 )->saveImageToPPM( SceneManager::getInstance()->getScreenshotName().mb_str() );
