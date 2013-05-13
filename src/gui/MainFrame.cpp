@@ -1976,6 +1976,11 @@ void MainFrame::onSelectTreeItem( wxTreeEvent& WXUNUSED(event) )
     
     if( pSelectionObject != NULL )
     {
+        pSelectionObject->select();
+        
+        m_pTreeWidget->EnsureVisible( pSelectionObject->getTreeId() );
+        m_pTreeWidget->SetFocus();
+        
         changePropertiesSizer( pSelectionObject, m_currentListIndex );        
     }
 }

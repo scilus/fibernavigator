@@ -361,10 +361,10 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
 
         SetFocus();
 
-//         if ( m_hr.picked >= 10 && m_hr.picked < 20 )
-//         {
-//             ( (SelectionObject*) m_hr.object )->select( true );
-//         }
+        if ( m_hr.picked >= 10 && m_hr.picked < 20 )
+        {
+            MyApp::frame->m_pTreeWidget->SelectItem( ( (SelectionObject*) m_hr.object )->getTreeId() );
+        }
     }
     else
     {
