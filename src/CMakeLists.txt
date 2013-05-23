@@ -113,6 +113,20 @@ ENDIF(USE_GEOMETRY_SHADERS)
 
 MARK_AS_ADVANCED( USE_GEOMETRY_SHADERS )
 
+# Option to enable building a lightweight version of the 
+# GUI, without features that are not used by lots
+# of users.
+
+OPTION(BUILD_LIGHTWEIGHT_GUI "Build lightweight GUI" OFF)
+
+IF(BUILD_LIGHTWEIGHT_GUI)
+    ADD_DEFINITIONS( -D_USE_LIGHT_GUI=1 )
+ELSE(BUILD_LIGHTWEIGHT_GUI)
+    ADD_DEFINITIONS( -D_USE_LIGHT_GUI=0 )
+ENDIF(BUILD_LIGHTWEIGHT_GUI)
+
+MARK_AS_ADVANCED( BUILD_LIGHTWEIGHT_GUI )
+
 #hiding this for now
 MARK_AS_ADVANCED( wxWidgets_wxrc_EXECUTABLE )
 MARK_AS_ADVANCED( wxWidgets_USE_DEBUG )
