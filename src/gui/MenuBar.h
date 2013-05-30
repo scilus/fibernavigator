@@ -68,7 +68,7 @@ public:
     wxMenu      *m_menuFibers;
         wxMenuItem  *m_itemResetFibersColors;
         wxMenuItem  *m_itemToggleUseTransparency;
-        wxMenuItem  *m_itemToogleInvertFibersSelection;
+        wxMenuItem  *m_itemToggleInvertFibersSelection;
         wxMenuItem  *m_itemToggleUseFakeTubes;
         wxMenuItem  *m_itemToggleUseGeometryShader;
 

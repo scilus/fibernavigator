@@ -79,11 +79,11 @@ MenuBar::MenuBar()
     m_itemNewSelectionBox = m_menuVoi->Append(wxID_ANY, wxT("New Selection Box"));
     m_itemNewSelectionEllipsoid = m_menuVoi->Append(wxID_ANY, wxT("New Selection Ellipsoid"));
 
-    m_menuFibers = new wxMenu();
-    m_itemResetFibersColors = m_menuFibers->Append(wxID_ANY, wxT("Reset Color on Fibers"));
-    m_itemToogleInvertFibersSelection = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Inverse Fibers Selection"));
-
 #if !_USE_LIGHT_GUI
+    m_menuFibers = new wxMenu();
+    
+    m_itemResetFibersColors = m_menuFibers->Append(wxID_ANY, wxT("Reset Color on Fibers"));
+    m_itemToggleInvertFibersSelection = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Invert Fibers Selection"));
     m_itemToggleUseFakeTubes = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Fake Tubes"));    
     m_itemToggleUseTransparency = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Transparent Fibers"));
     m_itemToggleUseGeometryShader = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Geometry Shader"));
@@ -149,7 +149,11 @@ MenuBar::MenuBar()
     this->Append(m_menuFile, wxT("&File"));
     this->Append(m_menuView, wxT("&View"));
     this->Append(m_menuVoi, wxT("&VOI"));
+
+#if !_USE_LIGHT_GUI
     this->Append(m_menuFibers, wxT("&Fibers"));
+#endif
+    
     this->Append(m_menuOptions, wxT("&Option"));
     this->Append(m_menuHelp, wxT("&Help"));
 
@@ -198,12 +202,13 @@ void MenuBar::initMenuBar( MainFrame *mf )
     
     mf->Connect(m_itemNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionBox));
     mf->Connect(m_itemNewSelectionEllipsoid->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionEllipsoid));
-    mf->Connect(m_itemResetFibersColors->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResetColor));
+    
     // TODO light
     mf->Connect(m_itemToggleLighting->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleLighting));    
-    mf->Connect(m_itemToogleInvertFibersSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertFibers));
     
 #if !_USE_LIGHT_GUI    
+    mf->Connect(m_itemResetFibersColors->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResetColor));
+    mf->Connect(m_itemToggleInvertFibersSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertFibers));
     mf->Connect(m_itemToggleUseFakeTubes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseFakeTubes));
 #endif
     
@@ -311,11 +316,11 @@ void MenuBar::updateMenuBar( MainFrame *mf )
         }
     }
     m_itemSaveSelectedFibers->Enable(isFiberSelected);
-    m_itemResetFibersColors->Enable(isFiberSelected);
-    m_itemToogleInvertFibersSelection->Enable(isFiberSelected);
-    m_itemToogleInvertFibersSelection->Check(isFiberInverted);
 
-#if !_USE_LIGHT_GUI    
+#if !_USE_LIGHT_GUI
+    m_itemResetFibersColors->Enable(isFiberSelected);
+    m_itemToggleInvertFibersSelection->Enable(isFiberSelected);
+    m_itemToggleInvertFibersSelection->Check(isFiberInverted);
     m_itemToggleUseTransparency->Enable(isFiberSelected);
     m_itemToggleUseTransparency->Check(isFiberUsingTransparency);
     m_itemToggleUseFakeTubes->Enable(isFiberSelected);

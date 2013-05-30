@@ -314,7 +314,10 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadConstantColor        = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant color" ) );
     m_pApplyBtn  = new wxButton( pParent, wxID_ANY, wxT( "Apply" ) );
     m_pCancelBtn = new wxButton( pParent, wxID_ANY, wxT( "Cancel" ) );
+
+#if !_USE_LIGHT_GUI
     m_pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
+#endif
 
     m_pBtnOpacity      = new wxButton( pParent, wxID_ANY, wxT( "Opacity" ) );
     m_pBtnIntensity    = new wxButton( pParent, wxID_ANY, wxT( "Intensity" ) );
@@ -381,7 +384,10 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
+#if !_USE_LIGHT_GUI
     pBoxMain->Add( m_pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+#endif
+    
     pBoxMain->Add( m_pToggleInterFibers, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     //////////////////////////////////////////////////////////////////////////
@@ -408,8 +414,12 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pBtnMinMaxLength->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleMinMaxLengthBtn ) );
     pParent->Connect( m_pBtnSubsampling->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleSubsamplingBtn ) );
     pParent->Connect( m_pToggleInterFibers->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleCrossingFibersBtn ) );
-    pParent->Connect( m_pBtnGeneratesDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnClickGenerateFiberVolumeBtn ) );
     pParent->Connect( m_pBtnColorMode->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleColorModeBtn ) );
+    
+#if !_USE_LIGHT_GUI
+    pParent->Connect( m_pBtnGeneratesDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnClickGenerateFiberVolumeBtn ) );
+#endif
+
 }
 
 void FibersGroup::OnToggleVisibleBtn()
@@ -437,9 +447,12 @@ void FibersGroup::OnToggleIntensityBtn()
     m_pBtnIntensity->Hide();
     m_pBtnOpacity->Disable();
     m_pBtnMinMaxLength->Disable();
-    m_pBtnSubsampling->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
+    m_pBtnSubsampling->Disable();    
     m_pBtnColorMode->Disable();
+
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleOpacityBtn()
@@ -457,8 +470,11 @@ void FibersGroup::OnToggleOpacityBtn()
     m_pBtnIntensity->Disable();
     m_pBtnMinMaxLength->Disable();
     m_pBtnSubsampling->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Disable();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleMinMaxLengthBtn()
@@ -492,8 +508,11 @@ void FibersGroup::OnToggleMinMaxLengthBtn()
     m_pBtnIntensity->Disable();
     m_pBtnOpacity->Disable();
     m_pBtnSubsampling->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Disable();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleSubsamplingBtn()
@@ -511,8 +530,11 @@ void FibersGroup::OnToggleSubsamplingBtn()
     m_pBtnOpacity->Disable();
     m_pBtnIntensity->Disable();
     m_pBtnMinMaxLength->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Disable();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleCrossingFibersBtn()
@@ -531,8 +553,11 @@ void FibersGroup::OnToggleCrossingFibersBtn()
     m_pBtnOpacity->Disable();
     m_pBtnIntensity->Disable();
     m_pBtnMinMaxLength->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Disable();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleColorModeBtn()
@@ -580,8 +605,11 @@ void FibersGroup::OnToggleColorModeBtn()
     m_pBtnOpacity->Disable();
     m_pBtnMinMaxLength->Disable();
     m_pBtnSubsampling->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Hide();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::updateGroupFilters()
@@ -830,8 +858,9 @@ void FibersGroup::updatePropertiesSizer()
     DatasetInfo::m_pBtnFlipY->Hide();
     DatasetInfo::m_pBtnFlipZ->Hide();
 
-    // Hide temporarily opacity functionality
+    // Hide temporarily opacity and intensity functionalities.
     m_pBtnOpacity->Hide();
+    m_pBtnIntensity->Hide();
 
     vector<Fibers *> fibers = DatasetManager::getInstance()->getFibers();
     if( fibers.size() > 0 )
@@ -841,8 +870,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Enable();
         m_pBtnSubsampling->Enable();
         m_pToggleInterFibers->Enable();
-        m_pBtnGeneratesDensityVolume->Enable();
         m_pBtnColorMode->Enable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Enable();
+#endif
     }
     else
     {
@@ -851,8 +883,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
 
     m_pSliderOpacity->Enable( false );
@@ -872,14 +907,19 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
         DatasetInfo::m_pIntensityText->Hide();
         DatasetInfo::m_pSliderThresholdIntensity->Hide();
-        m_pBtnIntensity->Show();
+        // TODO: clean this.
+        // Hide temporarily intensity functionality
+        // m_pBtnIntensity->Show();
     }
 
     if( m_isOpacityToggled )
@@ -891,14 +931,18 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
         m_pSliderOpacity->SetValue( getAlpha()*100 );
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
         DatasetInfo::m_pOpacityText->Hide();
         DatasetInfo::m_pSliderOpacity->Hide();
+        // TODO: clean this.
         // Hide temporarily opacity functionality
         //m_pBtnOpacity->Show();
     }
@@ -914,8 +958,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnOpacity->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
@@ -935,8 +982,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnOpacity->Disable();
         m_pBtnMinMaxLength->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
@@ -954,8 +1004,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnOpacity->Disable();
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
@@ -983,7 +1036,10 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
+
+#if !_USE_LIGHT_GUI
         m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {

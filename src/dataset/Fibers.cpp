@@ -3356,7 +3356,11 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+#if !_USE_LIGHT_GUI
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
+#endif
+    
     m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
     m_pSelectConstantFibersColor = new wxButton(    pParent, wxID_ANY, wxT( "Select Constant Color..." ) );
@@ -3389,7 +3393,11 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     //////////////////////////////////////////////////////////////////////////
 
     pBoxMain->Add( m_pToggleCrossingFibers,    0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+
+#if !_USE_LIGHT_GUI
     pBoxMain->Add( pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+#endif
+    
     pBoxMain->Add( m_pToggleLocalColoring,     0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
     pBoxMain->Add( m_pToggleNormalColoring,    0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
     pBoxMain->Add( m_pSelectConstantFibersColor, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
@@ -3420,7 +3428,6 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMax->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersSampling->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderInterFibersThickness->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
-    pParent->Connect( pBtnGeneratesDensityVolume->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),           wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
     pParent->Connect( m_pSelectConstantFibersColor->GetId(),     wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnSelectConstantColor ) );
@@ -3431,6 +3438,12 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pRadTorsion->GetId(),                    wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithTorsion ) );
     pParent->Connect( m_pRadCurvature->GetId(),                  wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithCurvature ) );
     pParent->Connect( m_pRadConstant->GetId(),                   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithConstantColor ) );
+    
+#if !_USE_LIGHT_GUI
+    pParent->Connect( pBtnGeneratesDensityVolume->GetId(),
+                      wxEVT_COMMAND_BUTTON_CLICKED,
+                      wxCommandEventHandler( PropertiesWindow::OnGenerateFiberVolume ) );
+#endif
 
     m_pRadNormalColoring->SetValue( true );
 }
@@ -3457,9 +3470,11 @@ void Fibers::updatePropertiesSizer()
     m_pSliderThresholdIntensity->SetValue( getThreshold() * 100 );
     m_pSliderOpacity->SetValue( getAlpha() * 100 );
 
-    // Hide temporarily opacity functionality
+    // Hide temporarily opacity and intensity functionalities.
     m_pSliderOpacity->Hide();
     m_pOpacityText->Hide();
+    m_pIntensityText->Hide();
+    m_pSliderThresholdIntensity->Hide();
 
     if( m_isColorationUpdated )
     {
