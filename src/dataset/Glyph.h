@@ -92,6 +92,9 @@ public:
     wxRadioButton      *m_pRadMainAxis;
     wxBoxSizer         *m_pBoxDisplayRadios;
     wxTextCtrl         *m_pTxtBoxScalingFactor;
+    wxStaticText       *m_pLabelDisplay;
+    wxStaticText       *m_pLabelLOD;
+    wxStaticText       *m_pLabelDisplayRadioType;
 
 protected:
     // From DatasetInfo

@@ -1388,10 +1388,12 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
     pRadDipyBasis->SetValue(   isShBasis( SH_BASIS_DIPY ) );
 //     pRadPTKBasis->SetValue(        isShBasis( SH_BASIS_PTK ) );
 
+#if !_USE_LIGHT_GUI
     m_pSliderLightAttenuation->SetValue( m_pSliderLightAttenuation->GetMin() );
     m_pSliderLightXPosition->SetValue( m_pSliderLightXPosition->GetMin() );
     m_pSliderLightYPosition->SetValue( m_pSliderLightYPosition->GetMin() );
     m_pSliderLightZPosition->SetValue( m_pSliderLightZPosition->GetMin() );
+#endif
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -1400,32 +1402,15 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 
 void ODFs::updatePropertiesSizer()
 {
-//     Glyph::updatePropertiesSizer();
-    DatasetInfo::updatePropertiesSizer();
+    Glyph::updatePropertiesSizer();
 
+#if !_USE_LIGHT_GUI
     m_pSliderLightAttenuation->Enable( false );
     m_pSliderLightXPosition->Enable( false );
     m_pSliderLightYPosition->Enable( false );
-    m_pSliderLightZPosition->Enable( false );
-    m_pBtnFlipX->Enable( false );
-    m_pBtnFlipY->Enable( false );
-    m_pBtnFlipZ->Enable( false );
-
-    m_pSliderMinHue->SetValue(     getColor( MIN_HUE )    * 100 );
-    m_pSliderMaxHue->SetValue(     getColor( MAX_HUE )    * 100 );
-    m_pSliderSaturation->SetValue( getColor( SATURATION ) * 100 );
-    m_pSliderLuminance->SetValue(  getColor( LUMINANCE )  * 100 );
-    m_pSliderLOD->SetValue(        (int)getLOD() );
-    m_pSliderDisplay->SetValue(    getDisplayFactor() );
-    m_pSliderScalingFactor->SetValue( getScalingFactor() * 10.0f );
-
-    m_pToggleAxisFlipX->SetValue( isAxisFlipped( X_AXIS ) );
-    m_pToggleAxisFlipY->SetValue( isAxisFlipped( Y_AXIS ) );
-    m_pToggleAxisFlipZ->SetValue( isAxisFlipped( Z_AXIS ) );
-    m_pToggleColorWithPosition->SetValue( getColorWithPosition() );
-
-    //m_psliderScalingFactor->SetValue(m_psliderScalingFactor->GetMin());
-
+    m_pSliderLightZPosition->Enable( false );    
+#endif
+    
     if( !isDisplayShape( AXIS ) )
     {
         m_pLblThres->Hide();
