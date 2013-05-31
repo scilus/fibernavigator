@@ -117,7 +117,7 @@ MARK_AS_ADVANCED( USE_GEOMETRY_SHADERS )
 # GUI, without features that are not used by lots
 # of users.
 
-OPTION(BUILD_LIGHTWEIGHT_GUI "Build lightweight GUI" OFF)
+OPTION(BUILD_LIGHTWEIGHT_GUI "Build lightweight GUI" ON)
 
 IF(BUILD_LIGHTWEIGHT_GUI)
     ADD_DEFINITIONS( -D_USE_LIGHT_GUI=1 )
