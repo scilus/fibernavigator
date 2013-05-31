@@ -1116,8 +1116,6 @@ void CIsoSurface::createPropertiesSizer( PropertiesWindow *pParent )
 {
     DatasetInfo::createPropertiesSizer( pParent );
 
-    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
-
     //////////////////////////////////////////////////////////////////////////
 
     wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
@@ -1128,14 +1126,14 @@ void CIsoSurface::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
-    pBoxMain->Add( m_pToggleCutFrontSector, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    wxFlexGridSizer *pGridSizer = new wxFlexGridSizer( 2 );
+    pGridSizer->Add( m_pToggleCutFrontSector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( " " ) ), 0, wxALIGN_LEFT | wxALL );
 
-    wxBoxSizer *pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
-    pBoxSizer->Add( m_pToggleUseColoring, 3, wxEXPAND | wxALL, 1 );
-    pBoxSizer->Add( pBtnSelectColor,      1, wxEXPAND | wxALL, 1 );
-    pBoxMain->Add( pBoxSizer, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
+    pGridSizer->Add( m_pToggleUseColoring, 0, wxEXPAND | wxALL, 1 );
+    pGridSizer->Add( pBtnSelectColor,      0, wxEXPAND | wxALL, 1 );
 
-    m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
+    m_pPropertiesSizer->Add( pGridSizer, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -1146,14 +1144,14 @@ void CIsoSurface::createPropertiesSizer( PropertiesWindow *pParent )
 
 void CIsoSurface::updatePropertiesSizer()
 {
+    // TODO this should have base iso surface as a parent.
     DatasetInfo::updatePropertiesSizer();
-    m_pToggleFiltering->Enable(false);
-    m_pToggleFiltering->SetValue(false);
+    m_pToggleFiltering->Hide();
     m_pToggleUseColoring->SetValue(!getUseTex());
     m_pToggleCutFrontSector->SetValue(!getShowFS());
 
     // Disabled for the moment, not implemented.
-    m_pBtnFlipX->Enable( false );
-    m_pBtnFlipY->Enable( false );
-    m_pBtnFlipZ->Enable( false );
+    m_pBtnFlipX->Hide();
+    m_pBtnFlipY->Hide();
+    m_pBtnFlipZ->Hide();
 }
