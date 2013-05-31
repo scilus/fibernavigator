@@ -716,9 +716,9 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadNormal          = new wxRadioButton( pParent,  wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     m_pRadMapOnSphere     = new wxRadioButton( pParent,  wxID_ANY, wxT( "Map On Sphere" ) );
     m_pRadMainAxis        = new wxRadioButton( pParent,  wxID_ANY, wxT( "Maximas" ) );
-    m_pToggleAxisFlipX    = new wxToggleButton( pParent, wxID_ANY, wxT( "X" ), DEF_POS, wxSize( 15, -1 ) );
-    m_pToggleAxisFlipY    = new wxToggleButton( pParent, wxID_ANY, wxT( "Y" ), DEF_POS, wxSize( 15, -1 ) );
-    m_pToggleAxisFlipZ    = new wxToggleButton( pParent, wxID_ANY, wxT( "Z" ), DEF_POS, wxSize( 15, -1 ) );
+    m_pToggleAxisFlipX    = new wxToggleButton( pParent, wxID_ANY, wxT( "X" ), DEF_POS, wxSize( 45, -1 ) );
+    m_pToggleAxisFlipY    = new wxToggleButton( pParent, wxID_ANY, wxT( "Y" ), DEF_POS, wxSize( 45, -1 ) );
+    m_pToggleAxisFlipZ    = new wxToggleButton( pParent, wxID_ANY, wxT( "Z" ), DEF_POS, wxSize( 45, -1 ) );
     
 #if !_USE_LIGHT_GUI
     m_pToggleColorWithPosition = new wxToggleButton( pParent, wxID_ANY, wxT( "Color with Position" ), DEF_POS, wxSize( 80, -1 ) );
