@@ -3573,16 +3573,20 @@ void Fibers::findCrossingFibers()
         m_axialShown    = SceneManager::getInstance()->isAxialDisplayed();
         m_coronalShown  = SceneManager::getInstance()->isCoronalDisplayed();
         m_sagittalShown = SceneManager::getInstance()->isSagittalDisplayed();
+        
+        float xVoxSize = DatasetManager::getInstance()->getVoxelX();
+        float yVoxSize = DatasetManager::getInstance()->getVoxelY();
+        float zVoxSize = DatasetManager::getInstance()->getVoxelZ();
 
         m_cfDrawDirty = true;
 
         // Determine X, Y and Z range
-        const float xMin( m_xDrawn + 0.5f - m_thickness );
-        const float xMax( m_xDrawn + 0.5f + m_thickness );
-        const float yMin( m_yDrawn + 0.5f - m_thickness );
-        const float yMax( m_yDrawn + 0.5f + m_thickness );
-        const float zMin( m_zDrawn + 0.5f - m_thickness );
-        const float zMax( m_zDrawn + 0.5f + m_thickness );
+        const float xMin( (m_xDrawn + 0.5f) * xVoxSize - m_thickness );
+        const float xMax( (m_xDrawn + 0.5f) * xVoxSize + m_thickness );
+        const float yMin( (m_yDrawn + 0.5f) * yVoxSize - m_thickness );
+        const float yMax( (m_yDrawn + 0.5f) * yVoxSize + m_thickness );
+        const float zMin( (m_zDrawn + 0.5f) * zVoxSize - m_thickness );
+        const float zMax( (m_zDrawn + 0.5f) * zVoxSize + m_thickness );
 
         bool lineStarted(false);
 
@@ -3658,12 +3662,20 @@ void Fibers::setShader()
     else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
         // Determine X, Y and Z range
-        const float xMin( SceneManager::getInstance()->getSliceX() + 0.5f - m_thickness );
-        const float xMax( SceneManager::getInstance()->getSliceX() + 0.5f + m_thickness );
-        const float yMin( SceneManager::getInstance()->getSliceY() + 0.5f - m_thickness );
-        const float yMax( SceneManager::getInstance()->getSliceY() + 0.5f + m_thickness );
-        const float zMin( SceneManager::getInstance()->getSliceZ() + 0.5f - m_thickness );
-        const float zMax( SceneManager::getInstance()->getSliceZ() + 0.5f + m_thickness );
+        int curSliceX = SceneManager::getInstance()->getSliceX();
+        int curSliceY = SceneManager::getInstance()->getSliceY();
+        int curSliceZ = SceneManager::getInstance()->getSliceZ();
+
+        float xVoxSize = DatasetManager::getInstance()->getVoxelX();
+        float yVoxSize = DatasetManager::getInstance()->getVoxelY();
+        float zVoxSize = DatasetManager::getInstance()->getVoxelZ();
+        
+        const float xMin( ( curSliceX + 0.5f ) * xVoxSize - m_thickness );
+        const float xMax( ( curSliceX + 0.5f ) * xVoxSize + m_thickness );
+        const float yMin( ( curSliceY + 0.5f ) * yVoxSize - m_thickness );
+        const float yMax( ( curSliceY + 0.5f ) * yVoxSize + m_thickness );
+        const float zMin( ( curSliceZ + 0.5f ) * zVoxSize - m_thickness );
+        const float zMax( ( curSliceZ + 0.5f ) * zVoxSize + m_thickness );
 
         ShaderHelper::getInstance()->getCrossingFibersShader()->bind();
 
