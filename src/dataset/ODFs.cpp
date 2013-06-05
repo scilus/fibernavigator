@@ -1339,9 +1339,19 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
     m_pTxtThres    = new wxTextCtrl(   pParent, wxID_ANY, wxT( "0.5"), DEF_POS, wxSize(  40, -1 ), wxTE_READONLY);
     m_pLblThres    = new wxStaticText( pParent, wxID_ANY, wxT( "Threshold" ) );
     m_pBtnMainDir  = new wxButton(     pParent, wxID_ANY, wxT( "Recalculate" ), DEF_POS, wxSize( 140, -1 ) );
-    wxRadioButton *pRadDescoteauxBasis = new wxRadioButton( pParent, wxID_ANY, wxT( "Descoteaux" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+    
+    // WARNING: the caption on this button is currently set to Dipy instead of Descoteaux
+    //          since Dipy is currently using Descoteaux's basis as the default one.
+    // TODO: update following the decisions made by the Dipy group.
+    //wxRadioButton *pRadDescoteauxBasis = new wxRadioButton( pParent, wxID_ANY, wxT( "Descoteaux" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+    wxRadioButton *pRadDescoteauxBasis = new wxRadioButton( pParent, wxID_ANY, wxT( "Dipy (same as Descoteaux)" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     wxRadioButton *pRadTournierBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "MRtrix" ) );
-    wxRadioButton *pRadDipyBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "Dipy" ) );
+    
+    // WARNING: not adding the dipy button for the moment. See comment higher up to 
+    //          know why.
+    // TODO: correct once Dipy has made a decision.
+    //wxRadioButton *pRadDipyBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "Dipy" ) );
+    
 //     wxRadioButton *pRadOriginalBasis   = new wxRadioButton( pParent, wxID_ANY, wxT( "RR5768" ) );
 //     wxRadioButton *pRadPTKBasis        = new wxRadioButton( pParent, wxID_ANY, wxT( "PTK" ) );
 
@@ -1364,7 +1374,10 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 //     pBoxShBasisRadios->Add( pRadOriginalBasis,   0, wxALIGN_LEFT | wxALL, 1 );
     pBoxShBasisRadios->Add( pRadDescoteauxBasis, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxShBasisRadios->Add( pRadTournierBasis,   0, wxALIGN_LEFT | wxALL, 1 );
-    pBoxShBasisRadios->Add( pRadDipyBasis,   0, wxALIGN_LEFT | wxALL, 1 );
+
+    // WARNING: currently not adding the button.
+    //pBoxShBasisRadios->Add( pRadDipyBasis,   0, wxALIGN_LEFT | wxALL, 1 );
+
 //     pBoxShBasisRadios->Add( pRadPTKBasis,        0, wxALIGN_LEFT | wxALL, 1 );
     pBoxShBasis->Add( pBoxShBasisRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
 
@@ -1377,7 +1390,10 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 //     pParent->Connect( pRadOriginalBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnOriginalShBasis ) );
     pParent->Connect( pRadDescoteauxBasis->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnDescoteauxShBasis ) );
     pParent->Connect( pRadTournierBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnTournierShBasis ) );
-    pParent->Connect( pRadDipyBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnDipyShBasis ) );
+    
+    // WARNING: Currently not connecting the button.
+    //pParent->Connect( pRadDipyBasis->GetId(),   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnDipyShBasis ) );
+
 //     pParent->Connect( pRadPTKBasis->GetId(),        wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnPTKShBasis ) );
 
     //////////////////////////////////////////////////////////////////////////
@@ -1385,7 +1401,9 @@ void ODFs::createPropertiesSizer( PropertiesWindow *pParent )
 //     pRadOriginalBasis->SetValue(   isShBasis( SH_BASIS_RR5768 ) );
     pRadDescoteauxBasis->SetValue( isShBasis( SH_BASIS_DESCOTEAUX ) );
     pRadTournierBasis->SetValue(   isShBasis( SH_BASIS_TOURNIER ) );
-    pRadDipyBasis->SetValue(   isShBasis( SH_BASIS_DIPY ) );
+
+    // WARNING: currently, this option does not exist.
+    //pRadDipyBasis->SetValue(   isShBasis( SH_BASIS_DIPY ) );
 //     pRadPTKBasis->SetValue(        isShBasis( SH_BASIS_PTK ) );
 
 #if !_USE_LIGHT_GUI
