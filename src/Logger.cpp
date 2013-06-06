@@ -63,11 +63,12 @@ void Logger::print( const wxString &str, const LogLevel level )
 
     wxDateTime time = wxDateTime::Now();
 
-#ifdef __WXMAC__
-    m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.c_str() << str.c_str() << "\n";
-#else
-    m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix.char_str() << str.char_str() << "\n";
-#endif
+    // Get std::string from wxString.
+    // This avoids problems between different compiler versions.
+    std::string message_string = std::string(str.mb_str());
+    std::string prefix_string = std::string(prefix.mb_str());
+    
+    m_oss << "[" << setw(2) << time.GetHour() << ":" << setw(2) << time.GetMinute() << ":" << setw(2) << time.GetSecond() << "]" << " " << prefix_string << message_string << "\n";
     
     if( LOGLEVEL_ERROR == level || LOGLEVEL_GLERROR == level )
     {
