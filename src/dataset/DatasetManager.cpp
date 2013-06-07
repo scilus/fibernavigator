@@ -282,8 +282,12 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
 
     if( wxT( "nii" ) == extension )
     {
-        nifti_image *pHeader = nifti_image_read( filename.char_str(), 0 );
-        nifti_image *pBody   = nifti_image_read( filename.char_str(), 1 );
+        // Get std::string from wxString.
+        // This avoids problems between different compiler versions.
+        std::string filename_str = std::string(filename.mb_str());
+
+        nifti_image *pHeader = nifti_image_read( filename_str.c_str(), 0 );
+        nifti_image *pBody   = nifti_image_read( filename_str.c_str(), 1 );
 
         if( NULL == pHeader || NULL == pBody )
         {

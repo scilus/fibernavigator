@@ -2,6 +2,7 @@
 #define SHADERPROGRAM_H_
 
 #include <sstream>
+#include <string>
 
 #include <GL/glew.h>
 #include <wx/string.h>
@@ -47,6 +48,8 @@ private:
 
     void printCompilerLog( GLuint shaderId );
     void printProgramLog( GLuint programId );
+    
+    std::string getStdStringName();
 
     GLuint m_id;
     wxString  m_name;
