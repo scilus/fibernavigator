@@ -2,6 +2,7 @@
 #define SHADER_H_
 
 #include <sstream>
+#include <string>
 
 #include <GL/glew.h>
 #include <wx/string.h>
@@ -19,6 +20,8 @@ public:
 
     const wxString & getFilename();
     const GLuint & getId();
+    
+    std::string getStdStringFilename();
 
 private:
     bool loadFromFile( wxString *code, const wxString &filename );

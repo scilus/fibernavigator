@@ -36,7 +36,7 @@ ShaderProgram::ShaderProgram( wxString filename, bool useGeometryShader, bool ge
     }
     else
     {
-        m_oss << "Shader " << m_name.char_str() << " cannot be created since geometry shaders are not supported.";
+        m_oss << "Shader " << getStdStringName() << " cannot be created since geometry shaders are not supported.";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
     }
@@ -49,13 +49,13 @@ bool ShaderProgram::load()
 {
     if( !m_useGeometry || m_geometrySupported )
     {
-        m_oss << "Shader " << m_name.char_str() << " starting to load...";
+        m_oss << "Shader " << getStdStringName() << " starting to load...";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
 
         if( !m_pVertex->load() )
         {
-            m_oss << "ShaderProgram::load() could not load vertex shader " << m_pVertex->getFilename().char_str();
+            m_oss << "ShaderProgram::load() could not load vertex shader " << m_pVertex->getStdStringFilename();
             Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
             m_oss.str( "" );
             return false;
@@ -63,7 +63,7 @@ bool ShaderProgram::load()
 #if _COMPILE_GEO_SHADERS
         if( m_useGeometry && !m_pGeometry->load() )
         {
-            m_oss << "ShaderProgram::load() could not load geometry shader " << m_pGeometry->getFilename().char_str();
+            m_oss << "ShaderProgram::load() could not load geometry shader " << m_pGeometry->getStdStringFilename();
             Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
             m_oss.str( "" );
             return false;
@@ -71,20 +71,20 @@ bool ShaderProgram::load()
 #endif
         if( !m_pFragment->load() )
         {
-            m_oss << "ShaderProgram::load() could not load fragment shader " << m_pFragment->getFilename().char_str();
+            m_oss << "ShaderProgram::load() could not load fragment shader " << m_pFragment->getStdStringFilename();
             Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
             m_oss.str( "" );
             return false;
         }
 
-        m_oss << "Shader " << m_name.char_str() << " successfully loaded.";
+        m_oss << "Shader " << getStdStringName() << " successfully loaded.";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
         return true;
     }
     else
     {
-        m_oss << "Shader " << m_name.char_str() << " cannot be loaded since geometry shaders are not supported.";
+        m_oss << "Shader " << getStdStringName() << " cannot be loaded since geometry shaders are not supported.";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
         return false;
@@ -98,13 +98,13 @@ bool ShaderProgram::compileAndLink()
 {
     if( !m_useGeometry || m_geometrySupported )
     {
-        m_oss << "Shader " << m_name.char_str() << " starting to compile...";
+        m_oss << "Shader " << getStdStringName() << " starting to compile...";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
 
         if( !m_pVertex->compile() )
         {
-            m_oss << "ShaderProgram::compile() could not compile vertex shader " << m_pVertex->getFilename().char_str();
+            m_oss << "ShaderProgram::compile() could not compile vertex shader " << m_pVertex->getStdStringFilename();
             Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
             m_oss.str( "" );
 
@@ -114,7 +114,7 @@ bool ShaderProgram::compileAndLink()
 #if _COMPILE_GEO_SHADERS
         if( m_useGeometry && !m_pGeometry->compile() )
         {
-            m_oss << "ShaderProgram::compile() could not compile geometry shader " << m_pGeometry->getFilename().char_str();
+            m_oss << "ShaderProgram::compile() could not compile geometry shader " << m_pGeometry->getStdStringFilename();
             Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
             m_oss.str( "" );
 
@@ -124,7 +124,7 @@ bool ShaderProgram::compileAndLink()
 #endif
         if( !m_pFragment->compile() )
         {
-            m_oss << "ShaderProgram::compile() could not compile fragment shader " << m_pFragment->getFilename().char_str();
+            m_oss << "ShaderProgram::compile() could not compile fragment shader " << m_pFragment->getStdStringFilename();
             Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
             m_oss.str( "" );
 
@@ -132,11 +132,11 @@ bool ShaderProgram::compileAndLink()
             return false;
         }
 
-        m_oss << "Shader " << m_name.char_str() << " successfully compiled.";
+        m_oss << "Shader " << getStdStringName() << " successfully compiled.";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
 
-        m_oss << "Shader " << m_name.char_str() << " starting to link...";
+        m_oss << "Shader " << getStdStringName() << " starting to link...";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
 
@@ -159,21 +159,21 @@ bool ShaderProgram::compileAndLink()
 
         if( linked )
         {
-            m_oss << "ShaderProgram " << m_name.char_str() << " successfully linked.";
+            m_oss << "ShaderProgram " << getStdStringName() << " successfully linked.";
             Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
             m_oss.str( "" );
             
             return true;
         }
         
-        m_oss << "ShaderProgram " << m_name.char_str() << " could not link.";
+        m_oss << "ShaderProgram " << getStdStringName() << " could not link.";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
         return false;
     }
     else
     {
-        m_oss << "Shader " << m_name.char_str() << " cannot be compiled nor linked since geometry shaders are not supported.";
+        m_oss << "Shader " << getStdStringName() << " cannot be compiled nor linked since geometry shaders are not supported.";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
         m_oss.str( "" );
         return false;
@@ -211,7 +211,7 @@ void ShaderProgram::setUniInt( const GLchar* pName, const GLint value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -225,7 +225,7 @@ void ShaderProgram::setUniFloat( const GLchar* pName, const GLfloat value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -239,7 +239,7 @@ void ShaderProgram::setUniArrayInt( const GLchar* pName, GLint* pValue, const GL
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -253,7 +253,7 @@ void ShaderProgram::setUni3Int( const GLchar* pName, GLint values[3] )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -267,7 +267,7 @@ void ShaderProgram::setUniArray1Float( const GLchar* pName, GLfloat* pValue, con
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -281,7 +281,7 @@ void ShaderProgram::setUni2Float( const GLchar* pName, std::pair< GLfloat, GLflo
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -295,7 +295,7 @@ void ShaderProgram::setUni3Float( const GLchar* pName, GLfloat values[3] )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -335,7 +335,7 @@ void ShaderProgram::setUniMatrix3f( const GLchar* pName, const FMatrix &values )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -351,7 +351,7 @@ void ShaderProgram::setUniSampler( const GLchar* pName, const GLint value )
     GLint loc = glGetUniformLocation( m_id, pName );
     if( -1 == loc )
     {
-        m_oss << "No such uniform named \"" << pName << "\" in \"" << m_name.char_str() << "\"";
+        m_oss << "No such uniform named \"" << pName << "\" in \"" << getStdStringName() << "\"";
         Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_ERROR );
         m_oss.str( "" );
     }
@@ -417,6 +417,13 @@ void ShaderProgram::printProgramLog( GLuint programId )
 
         free( pInfoLog );
     }
+}
+
+std::string ShaderProgram::getStdStringName()
+{
+    // Get std::string from wxString.
+    // This avoids problems between different compiler versions.
+    return std::string(m_name.mb_str());
 }
 
 //////////////////////////////////////////////////////////////////////////
