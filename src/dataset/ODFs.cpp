@@ -1292,8 +1292,12 @@ complex< float > ODFs::getSphericalHarmonic( int i_l, int i_m, float i_theta, fl
 */
 void ODFs::changeShBasis( SH_BASIS basis )
 {
-    nifti_image *pHeader = nifti_image_read( m_fullPath.char_str(), 0 );
-    nifti_image *pBody   = nifti_image_read( m_fullPath.char_str(), 1 );
+    // Get std::string from wxString.
+    // This avoids problems between different compiler versions.
+    std::string fullpath_str = std::string(m_fullPath.mb_str());
+
+    nifti_image *pHeader = nifti_image_read( fullpath_str.c_str(), 0 );
+    nifti_image *pBody   = nifti_image_read( fullpath_str.c_str(), 1 );
 
     if( NULL == pHeader || NULL == pBody )
     {
