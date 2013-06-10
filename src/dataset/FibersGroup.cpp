@@ -307,10 +307,14 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pApplyDifferentColors = new wxButton(         pParent, wxID_ANY, wxT( "Color bundles differently" ) );
     m_pToggleInterFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
     m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
     m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
     m_pRadCurvature            = new wxRadioButton( pParent, wxID_ANY, wxT( "Curvature" ) );
     m_pRadTorsion              = new wxRadioButton( pParent, wxID_ANY, wxT( "Torsion" ) );
+#endif
+    
     m_pRadConstantColor        = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant color" ) );
     m_pApplyBtn  = new wxButton( pParent, wxID_ANY, wxT( "Apply" ) );
     m_pCancelBtn = new wxButton( pParent, wxID_ANY, wxT( "Cancel" ) );
@@ -357,10 +361,14 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 
     wxBoxSizer *pBoxColoringRadios = new wxBoxSizer( wxVERTICAL );
     pBoxColoringRadios->Add( m_pRadNormalColoring,       0, wxALIGN_LEFT | wxALL, 1 );
+
+#if !_USE_LIGHT_GUI
     pBoxColoringRadios->Add( m_pRadDistanceAnchoring,    0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadMinDistanceAnchoring, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadCurvature,            0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadTorsion,              0, wxALIGN_LEFT | wxALL, 1 );
+#endif
+    
     pBoxColoringRadios->Add( m_pRadConstantColor,        0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoring->Add( pBoxColoringRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
     pBoxColoring->Add( m_pApplyDifferentColors, 0, wxALIGN_CENTER | wxCENTER );
@@ -570,10 +578,14 @@ void FibersGroup::OnToggleColorModeBtn()
     m_pApplyDifferentColors->Show();
     m_pLblColoring->Show();
     m_pRadNormalColoring->Show();
+    
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring->Show();
     m_pRadMinDistanceAnchoring->Show();
     m_pRadCurvature->Show();
     m_pRadTorsion->Show();
+#endif
+    
     m_pRadConstantColor->Show();
     m_pApplyBtn->Show();
     m_pCancelBtn->Show();
@@ -594,10 +606,14 @@ void FibersGroup::OnToggleColorModeBtn()
     }
 
     m_pRadNormalColoring->SetValue( colorationMode == NORMAL_COLOR );
+    
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring->SetValue( colorationMode == DISTANCE_COLOR );
     m_pRadMinDistanceAnchoring->SetValue( colorationMode == MINDISTANCE_COLOR );
     m_pRadCurvature->SetValue( colorationMode == CURVATURE_COLOR );
     m_pRadTorsion->SetValue( colorationMode == TORSION_COLOR );
+#endif
+    
     m_pRadConstantColor->SetValue( colorationMode == CONSTANT_COLOR );
 
     // Disable other toggleButtons
@@ -728,6 +744,7 @@ void FibersGroup::OnClickApplyBtn()
         {
             colorationMode = NORMAL_COLOR;
         }
+#if !_USE_LIGHT_GUI
         else if( m_pRadDistanceAnchoring->GetValue() )
         {
             colorationMode  = DISTANCE_COLOR;
@@ -744,6 +761,7 @@ void FibersGroup::OnClickApplyBtn()
         {
             colorationMode = TORSION_COLOR;
         }
+#endif
         else if( m_pRadConstantColor->GetValue() )
         {
             colorationMode = CONSTANT_COLOR;
@@ -892,10 +910,14 @@ void FibersGroup::updatePropertiesSizer()
 
     m_pSliderOpacity->Enable( false );
     m_pRadNormalColoring->Enable( DatasetInfo::getShowFS() );
-    m_pRadCurvature->Enable( DatasetInfo::getShowFS() );
+
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring->Enable( DatasetInfo::getShowFS() );
     m_pRadMinDistanceAnchoring->Enable( DatasetInfo::getShowFS() );
     m_pRadTorsion->Enable( DatasetInfo::getShowFS() );
+    m_pRadCurvature->Enable( DatasetInfo::getShowFS() );
+#endif
+    
     m_pRadConstantColor->Enable( DatasetInfo::getShowFS() );
 
     if( m_isIntensityToggled )
@@ -1025,10 +1047,14 @@ void FibersGroup::updatePropertiesSizer()
         m_pApplyDifferentColors->Show();
         m_pLblColoring->Show();
         m_pRadNormalColoring->Show();
+        
+#if !_USE_LIGHT_GUI
         m_pRadDistanceAnchoring->Show();
         m_pRadMinDistanceAnchoring->Show();
         m_pRadCurvature->Show();
         m_pRadTorsion->Show();
+#endif
+        
         m_pRadConstantColor->Show();
         m_pBtnColorMode->Hide();
         m_pBtnIntensity->Disable();
@@ -1048,10 +1074,14 @@ void FibersGroup::updatePropertiesSizer()
         m_pApplyDifferentColors->Hide();
         m_pLblColoring->Hide();
         m_pRadNormalColoring->Hide();
+        
+#if !_USE_LIGHT_GUI
         m_pRadDistanceAnchoring->Hide();
         m_pRadMinDistanceAnchoring->Hide();
         m_pRadCurvature->Hide();
         m_pRadTorsion->Hide();
+#endif
+        
         m_pRadConstantColor->Hide();
         m_pBtnColorMode->Show();
     }
