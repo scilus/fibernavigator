@@ -130,7 +130,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     //Content of RTT panel
     /********************************/
 
-    m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("HARDI not selected"), wxPoint(30,0), wxSize(115, -1) );
+    m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("Peaks not selected"), wxPoint(30,0), wxSize(115, -1) );
     Connect( m_pBtnSelectFile->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectFileHARDI) );
     m_pBtnSelectFile->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
@@ -168,7 +168,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     pBoxRow3->Add( m_pBtnSelectMap, 0, wxALIGN_CENTER | wxALL, 1 );
 	m_pTrackingSizer->Add( pBoxRow3, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
-    m_pTextFA = new wxStaticText( this, wxID_ANY, wxT("Min FA"), wxPoint(0,90), wxSize(70, -1), wxALIGN_CENTER );
+    m_pTextFA = new wxStaticText( this, wxID_ANY, wxT("Min Map"), wxPoint(0,90), wxSize(70, -1), wxALIGN_CENTER );
     m_pSliderFA = new MySlider( this, wxID_ANY, 0, 1, 50, wxPoint(60,90), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFA->SetValue( 10 );
     Connect( m_pSliderFA->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderFAMoved) );
@@ -417,13 +417,12 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
     long item = m_pMainFrame->getCurrentListIndex();
     Tensors* pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
 	
-	//Hide tensor data
-	pTensorInfo->setShow(false);
-	m_pMainFrame->m_pListCtrl->UpdateSelected();
-    m_pMainFrame->refreshAllGLWidgets();
-
-    if( pTensorInfo != NULL )
+	if( pTensorInfo != NULL && TENSORS == pTensorInfo->getType() && 6 == pTensorInfo->getBands()  )
     {
+		//Hide tensor data
+		pTensorInfo->setShow(false);
+		m_pMainFrame->m_pListCtrl->UpdateSelected();
+		m_pMainFrame->refreshAllGLWidgets();
         m_pBtnSelectFile->SetLabel( pTensorInfo->getName() );
         m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
@@ -456,13 +455,13 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
     long item = m_pMainFrame->getCurrentListIndex();
     Maximas* pMaximasInfo = (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
 	
-	////Hide tensor data
-	//pMaximasInfo->setShow(false);
-	//m_pMainFrame->m_pListCtrl->UpdateSelected();
- //   m_pMainFrame->refreshAllGLWidgets();
-
-    if( pMaximasInfo != NULL )
+	if( pMaximasInfo != NULL && pMaximasInfo->getType() == MAXIMAS )
     {
+		//Hide hardi data
+		pMaximasInfo->setShow(false);
+		m_pMainFrame->m_pListCtrl->UpdateSelected();
+		m_pMainFrame->refreshAllGLWidgets();
+
         m_pBtnSelectFile->SetLabel( pMaximasInfo->getName() );
         m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
@@ -498,7 +497,7 @@ void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
     long item = m_pMainFrame->getCurrentListIndex();
 	DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
 
-	if( pMesh != NULL )
+	if( pMesh != NULL && pMesh->getType() == ISO_SURFACE )
     {
 		m_pBtnSelectShell->SetLabel( pMesh->getName() );
 		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setShellInfo( (DatasetInfo *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
@@ -530,7 +529,7 @@ void TrackingWindow::OnSelectMap( wxCommandEvent& WXUNUSED(event) )
     long item = m_pMainFrame->getCurrentListIndex();
 	Anatomy* pMap = (Anatomy*)DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
 
-	if( pMap != NULL )
+	if( pMap != NULL && pMap->getBands() == 1 )
     {
 		m_pBtnSelectMap->SetLabel( pMap->getName() );
         m_pBtnSelectMap->SetBackgroundColour(wxNullColour);
