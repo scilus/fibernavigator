@@ -30,6 +30,7 @@ public:
     wxToolBarToolBase *m_toggleShowSagittal;
     wxToolBarToolBase *m_toggleAlphaBlending;
     wxToolBarToolBase *m_btnNewSelectionBox;
+    wxToolBarToolBase *m_btnNewSelectionEllipsoid;
     wxToolBarToolBase *m_toggleInverseSelection;
     wxToolBarToolBase *m_toggleShowAllSelectionObjects;
     wxToolBarToolBase *m_toggleActivateAllSelectionObjects;

@@ -351,28 +351,35 @@ void Maximas::updatePropertiesSizer()
 {
     Glyph::updatePropertiesSizer();
     
-    m_pSliderLightAttenuation->Enable( false );
+    /*m_pSliderLightAttenuation->Enable( false );
     m_pSliderLightXPosition->Enable( false );
     m_pSliderLightYPosition->Enable( false );
     m_pSliderLightZPosition->Enable( false );
-    m_pBtnFlipX->Enable( false );
-    m_pBtnFlipY->Enable( false );
-    m_pBtnFlipZ->Enable( false );
 
     m_pSliderMinHue->Enable( false );
     m_pSliderMaxHue->Enable( false );
     m_pSliderSaturation->Enable( false );
-    m_pSliderLuminance->Enable( false );
-    m_pSliderLOD->Enable( false );
-    m_pSliderDisplay->Enable( false );
+    m_pSliderLuminance->Enable( false );*/
+
+    m_pLabelLOD->Hide();
+    m_pSliderLOD->Hide();
+    m_pLabelDisplay->Hide();
+    m_pSliderDisplay->Hide();
+    
+#if !_USE_LIGHT_GUI
+    m_pToggleColorWithPosition->Hide();
+    m_pToggleColorWithPosition->Enable( false );
+#endif
+    
     m_pSliderScalingFactor->SetValue( getScalingFactor() * 10.0f );
 
     m_pToggleAxisFlipX->SetValue( isAxisFlipped( X_AXIS ) );
     m_pToggleAxisFlipY->SetValue( isAxisFlipped( Y_AXIS ) );
     m_pToggleAxisFlipZ->SetValue( isAxisFlipped( Z_AXIS ) );
-    m_pToggleColorWithPosition->Enable( false );
 
-    m_pRadNormal->Enable( false );
-    m_pRadMapOnSphere->Enable( false );
-    m_pRadMainAxis->Enable( false );
+    // Hiding, since it is not supported.
+    m_pLabelDisplayRadioType->Hide();
+    m_pRadNormal->Hide();
+    m_pRadMapOnSphere->Hide();
+    m_pRadMainAxis->Hide();
 }

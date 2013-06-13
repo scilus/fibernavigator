@@ -935,15 +935,22 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     m_pLowerEqSlider =       new wxSlider( pParent, wxID_ANY, m_lowerEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pUpperEqSlider =       new wxSlider( pParent, wxID_ANY, m_upperEqThreshold * .2f, 0, 51, wxDefaultPosition, wxSize( 120, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pEqualize      = new wxToggleButton( pParent, wxID_ANY, wxT( "Equalize" ),               wxDefaultPosition, wxSize( 140, -1 ) );
+
+#if !_USE_LIGHT_GUI
     m_pBtnDilate =           new wxButton( pParent, wxID_ANY, wxT( "Dilate" ),                 wxDefaultPosition, wxSize( 85,  -1 ) );
     m_pBtnErode  =           new wxButton( pParent, wxID_ANY, wxT( "Erode" ),                  wxDefaultPosition, wxSize( 85,  -1 ) );
     m_pBtnCut =              new wxButton( pParent, wxID_ANY, wxT( "Cut (boxes)" ),            wxDefaultPosition, wxSize( 85,  -1 ) );
-    m_pBtnMinimize =         new wxButton( pParent, wxID_ANY, wxT( "Minimize (fibers)" ),      wxDefaultPosition, wxSize( 85,  -1 ) );
+    m_pBtnMinimize =         new wxButton( pParent, wxID_ANY, wxT( "Minimize (fibers)" ),      wxDefaultPosition, wxSize( 85,  -1 ) );    
     m_pBtnNewDistanceMap =   new wxButton( pParent, wxID_ANY, wxT( "New Distance Map" ),       wxDefaultPosition, wxSize( 140, -1 ) );
-    m_pBtnNewIsoSurface  =   new wxButton( pParent, wxID_ANY, wxT( "New Iso Surface" ),        wxDefaultPosition, wxSize( 140, -1 ) );
+#endif
+    
     m_pBtnNewOffsetSurface = new wxButton( pParent, wxID_ANY, wxT( "New Offset Surface" ),     wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnNewIsoSurface  =   new wxButton( pParent, wxID_ANY, wxT( "New Iso Surface" ),        wxDefaultPosition, wxSize( 140, -1 ) );
     m_pBtnNewVOI =           new wxButton( pParent, wxID_ANY, wxT( "New VOI" ),                wxDefaultPosition, wxSize( 140, -1 ) );
+
+#if !_USE_LIGHT_GUI
     m_pToggleSegment = new wxToggleButton( pParent, wxID_ANY, wxT( "Floodfill" ),              wxDefaultPosition, wxSize( 140, -1 ) );  
+#endif
 
     m_pSliderFlood = new MySlider( pParent, wxID_ANY, 40, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     setFloodThreshold( 0.2f );
@@ -964,7 +971,9 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
 
     pBoxMain->Add( m_pEqualize, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
 
+#if !_USE_LIGHT_GUI
     wxGridSizer *pGridButtons = new wxGridSizer( 2 );
+
     pGridButtons->Add( m_pBtnDilate,   0, wxEXPAND | wxALL, 1 );
     pGridButtons->Add( m_pBtnErode,    0, wxEXPAND | wxALL, 1 );
     pGridButtons->Add( m_pBtnCut,      0, wxEXPAND | wxALL, 1 );
@@ -972,10 +981,15 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxMain->Add( pGridButtons, 0, wxEXPAND | wxALL | wxALIGN_CENTER, 2 );
 
     pBoxMain->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
-    pBoxMain->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+#endif
+    
     pBoxMain->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnNewIsoSurface,    0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
     pBoxMain->Add( m_pBtnNewVOI,           0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    
+#if !_USE_LIGHT_GUI
     pBoxMain->Add( m_pToggleSegment,       0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+#endif
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -994,20 +1008,27 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pLowerEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
     pParent->Connect( m_pUpperEqSlider->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnEqualizationSliderChange ) );
     pParent->Connect( m_pEqualize->GetId(),            wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler       ( PropertiesWindow::OnEqualizeDataset ) );
+
+#if !_USE_LIGHT_GUI
     pParent->Connect( m_pBtnDilate->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnDilateDataset ) );
     pParent->Connect( m_pBtnErode->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnErodeDataset ) );
     pParent->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
-    pParent->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );
+    pParent->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );    
     pParent->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
-    pParent->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewIsoSurface ) );
+#endif
+    
     pParent->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
+    pParent->Connect( m_pBtnNewIsoSurface->GetId(),    wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewIsoSurface ) );
     pParent->Connect( m_pBtnNewVOI->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewVoiFromOverlay ) );
+    
+#if !_USE_LIGHT_GUI
     pParent->Connect( m_pToggleSegment->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFloodFill ) );
     pParent->Connect( m_pSliderFlood->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnSliderFloodMoved ) );
+#endif
 
 
 
-    // The following interface objects are related to flood fill and graph cuts.
+    // TODO: The following interface objects are related to flood fill and graph cuts.
     // They are kept here temporarily, but will need to be implemented or removed.
     // Please also note that the coding standard has not been applied to these lines, 
     // so please apply it if you re enable them.
@@ -1064,14 +1085,18 @@ void Anatomy::updatePropertiesSizer()
     m_pLowerEqSlider->Enable( 1 == m_bands );
     m_pUpperEqSlider->Enable( 1 == m_bands );
     m_pEqualize->Enable(      1 == m_bands );
+
+#if !_USE_LIGHT_GUI
     m_pBtnMinimize->Enable( DatasetManager::getInstance()->isFibersLoaded() );
     m_pBtnCut->Enable(      !SceneManager::getInstance()->getSelectionTree().isEmpty() );
 
-    m_pBtnNewIsoSurface->Enable(    getType() <= OVERLAY );
-    m_pBtnNewDistanceMap->Enable(   getType() <= OVERLAY );
-    m_pBtnNewOffsetSurface->Enable( getType() <= OVERLAY );
+    m_pBtnNewDistanceMap->Enable( getType() <= OVERLAY );
+#endif
 
-    m_pBtnNewVOI->Enable(   getType() <= OVERLAY );
+    // TODO validate the types here, this kind of test is really bad.
+    m_pBtnNewOffsetSurface->Enable( getType() <= OVERLAY );
+    m_pBtnNewIsoSurface->Enable(    getType() <= OVERLAY );
+    m_pBtnNewVOI->Enable(           getType() <= OVERLAY );
  
     //m_pBtnGraphCut->Enable( m_dh->graphcutReady() );
     

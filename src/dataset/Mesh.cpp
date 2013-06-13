@@ -439,8 +439,6 @@ void Mesh::createPropertiesSizer( PropertiesWindow *pParent )
 {
     DatasetInfo::createPropertiesSizer( pParent );
 
-    wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
-
     wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
 
     //////////////////////////////////////////////////////////////////////////
@@ -450,15 +448,15 @@ void Mesh::createPropertiesSizer( PropertiesWindow *pParent )
     m_pBtnSelectColor       = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
 
     //////////////////////////////////////////////////////////////////////////
-
-    pBoxMain->Add( m_pToggleCutFrontSector, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
-
-    wxBoxSizer *pBoxColoring = new wxBoxSizer( wxHORIZONTAL );
-    pBoxColoring->Add( m_pToggleUseColoring, 3, wxEXPAND | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxColoring->Add( m_pBtnSelectColor,    1, wxEXPAND | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxMain->Add( pBoxColoring, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
-
-    m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+    
+    wxFlexGridSizer *pGridSizer = new wxFlexGridSizer( 2 );
+    pGridSizer->Add( m_pToggleCutFrontSector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSizer->Add( new wxStaticText( pParent, wxID_ANY, wxT( " " ) ), 0, wxALIGN_LEFT | wxALL );
+    
+    pGridSizer->Add( m_pToggleUseColoring, 0, wxEXPAND | wxALL, 1 );
+    pGridSizer->Add( m_pBtnSelectColor,    0, wxEXPAND | wxALL, 1 );
+    
+    m_pPropertiesSizer->Add( pGridSizer, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -471,15 +469,16 @@ void Mesh::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
 
-    m_pToggleFiltering->Enable(false);
-    m_pToggleFiltering->SetValue(false);
+    m_pToggleFiltering->Hide();
     m_pToggleUseColoring->SetValue(!getUseTex());
     m_pToggleCutFrontSector->SetValue(!getShowFS());
+
     m_pSliderThresholdIntensity->SetValue(m_pSliderThresholdIntensity->GetMin());
-    m_pSliderThresholdIntensity->Enable(false);
+    m_pSliderThresholdIntensity->Hide();
+    m_pIntensityText->Hide();
     
-    // Disabled for the moment, not implemented.
-    m_pBtnFlipX->Enable( false );
-    m_pBtnFlipY->Enable( false );
-    m_pBtnFlipZ->Enable( false );
+    // Hidden for the moment, not implemented.
+    m_pBtnFlipX->Hide();
+    m_pBtnFlipY->Hide();
+    m_pBtnFlipZ->Hide();
 }
